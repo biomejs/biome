@@ -4,7 +4,7 @@ use biome_rowan::Text;
 
 use crate::{
     DestructureField, GenericTypeParameter, ResolvedTypeData, ResolvedTypeMember, TypeData,
-    TypeInstance, TypeMember, TypeReference, TypeResolver, TypeofExpression,
+    TypeInstance, TypeMemberKind, TypeReference, TypeResolver, TypeofExpression,
     TypeofStaticMemberExpression,
 };
 
@@ -131,15 +131,14 @@ fn flattened(mut ty: TypeData, resolver: &mut dyn TypeResolver, depth: usize) ->
                                 None => ty,
                             },
                             TypeData::Object(_) => {
-                                let member = resolved
+                                let member_ty = resolved
                                     .all_members(resolver)
                                     .find(|member| member.has_name("constructor"))
-                                    .map(ResolvedTypeMember::to_member);
-                                match member {
-                                    Some(member) => {
-                                        ty = resolver
-                                            .type_from_member(resolved.to_data(), member)
-                                            .to_data();
+                                    .map(ResolvedTypeMember::to_member)
+                                    .and_then(|member| resolver.resolve_and_get(&member.ty));
+                                match member_ty {
+                                    Some(member_ty) => {
+                                        ty = member_ty.to_data();
                                         continue;
                                     }
                                     None => TypeData::unknown(),
@@ -160,15 +159,12 @@ fn flattened(mut ty: TypeData, resolver: &mut dyn TypeResolver, depth: usize) ->
                                     Some(member) => {
                                         ty = flattened(
                                             resolver
-                                                .type_from_member(
-                                                    resolved.to_data(),
-                                                    ResolvedTypeMember::from((
-                                                        resolved.resolver_id(),
-                                                        member,
-                                                    ))
-                                                    .to_member(),
+                                                .resolve_and_get(
+                                                    &resolved
+                                                        .apply_module_id_to_reference(&member.ty),
                                                 )
-                                                .to_data(),
+                                                .map(ResolvedTypeData::to_data)
+                                                .unwrap_or_default(),
                                             resolver,
                                             depth,
                                         );
@@ -225,8 +221,9 @@ fn flattened(mut ty: TypeData, resolver: &mut dyn TypeResolver, depth: usize) ->
                                 });
                                 return match member {
                                     Some(member) => resolver
-                                        .type_from_member(resolved.to_data(), member.to_member())
-                                        .to_data(),
+                                        .resolve_and_get(&member.ty())
+                                        .map(ResolvedTypeData::to_data)
+                                        .unwrap_or_default(),
                                     None => TypeData::Unknown,
                                 };
                             }
@@ -270,13 +267,19 @@ fn flattened(mut ty: TypeData, resolver: &mut dyn TypeResolver, depth: usize) ->
                             let constructed_ty = class
                                 .members
                                 .iter()
-                                .find_map(|member| match member {
-                                    TypeMember::Constructor(constructor) => {
-                                        // TODO: We might need to make an attempt to match
-                                        //       type signatures too.
-                                        (constructor.parameters.len() == num_args)
-                                            .then(|| constructor.return_type.clone())
-                                            .flatten()
+                                .find_map(|member| match member.kind {
+                                    TypeMemberKind::Constructor => {
+                                        let constructor = resolver.resolve_and_get(&member.ty)?;
+                                        match constructor.as_raw_data() {
+                                            TypeData::Constructor(constructor) => {
+                                                // TODO: We might need to make an attempt to match
+                                                //       type signatures too.
+                                                (constructor.parameters.len() == num_args)
+                                                    .then(|| constructor.return_type.clone())
+                                                    .flatten()
+                                            }
+                                            _ => None,
+                                        }
                                     }
                                     _ => None,
                                 })
@@ -386,10 +389,7 @@ fn flattened(mut ty: TypeData, resolver: &mut dyn TypeResolver, depth: usize) ->
                         });
                         match member {
                             Some(member) => {
-                                let member = member.to_member();
-                                ty = TypeData::reference(
-                                    resolver.register_type_from_member(object.to_data(), member),
-                                );
+                                ty = TypeData::reference(member.ty().into_owned());
                             }
                             None => return TypeData::Unknown,
                         }

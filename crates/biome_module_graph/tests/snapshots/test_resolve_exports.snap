@@ -177,7 +177,7 @@ Module TypeId(1) => sync Function "bar" {
 
 Module TypeId(2) => Object {
   prototype: No prototype
-  members: {}
+  members: []
 }
 
 Module TypeId(3) => instanceof Promise
@@ -194,11 +194,11 @@ Module TypeId(5) => value: 1
 
 Module TypeId(6) => Object {
   prototype: No prototype
-  members: {TypeMembers(
-    required property "a": Module(0) TypeId(12)
-    required property "b": Module(0) TypeId(14)
-    required property "c": Module(0) TypeId(18)
-  )}
+  members: [
+    "a": Module(0) TypeId(12),
+    "b": Module(0) TypeId(14),
+    "c": Module(0) TypeId(18)
+  ]
 }
 
 Module TypeId(7) => string
@@ -281,20 +281,20 @@ Module TypeId(18) => Tuple(
 
 Module TypeId(19) => Object {
   prototype: No prototype
-  members: {TypeMembers(
-    required property "a": Module(0) TypeId(12)
-    required property "b": Module(0) TypeId(14)
-    required property "c": Module(0) TypeId(18)
-  )}
+  members: [
+    "a": Module(0) TypeId(12),
+    "b": Module(0) TypeId(14),
+    "c": Module(0) TypeId(18)
+  ]
 }
 
 Module TypeId(20) => Object {
   prototype: No prototype
-  members: {TypeMembers(
-    required property "a": Module(0) TypeId(12)
-    required property "b": Module(0) TypeId(14)
-    required property "c": Module(0) TypeId(18)
-  )}
+  members: [
+    "a": Module(0) TypeId(12),
+    "b": Module(0) TypeId(14),
+    "c": Module(0) TypeId(18)
+  ]
 }
 
 Module TypeId(21) => sync Function "getObject" {
