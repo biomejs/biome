@@ -21,19 +21,17 @@ pub fn parse_markdown(source: &str) -> MarkdownParse {
 }
 
 pub fn parse_markdown_with_cache(source: &str, cache: &mut NodeCache) -> MarkdownParse {
-    tracing::debug_span!("Parsing phase").in_scope(move || {
-        let mut parser = MarkdownParser::new(source);
+    let mut parser = MarkdownParser::new(source);
 
-        parse_document(&mut parser);
+    parse_document(&mut parser);
 
-        let (events, diagnostics, trivia) = parser.finish();
+    let (events, diagnostics, trivia) = parser.finish();
 
-        let mut tree_sink = MarkdownLosslessTreeSink::with_cache(source, &trivia, cache);
-        biome_parser::event::process(&mut tree_sink, events, diagnostics);
-        let (green, diagnostics) = tree_sink.finish();
+    let mut tree_sink = MarkdownLosslessTreeSink::with_cache(source, &trivia, cache);
+    biome_parser::event::process(&mut tree_sink, events, diagnostics);
+    let (green, diagnostics) = tree_sink.finish();
 
-        MarkdownParse::new(green, diagnostics)
-    })
+    MarkdownParse::new(green, diagnostics)
 }
 
 /// A utility struct for managing the result of a parser job

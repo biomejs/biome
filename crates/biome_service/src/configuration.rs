@@ -1,6 +1,10 @@
 use crate::WorkspaceError;
 use crate::settings::Settings;
-use biome_analyze::AnalyzerRules;
+use crate::workspace::ScanKind;
+use biome_analyze::{
+    AnalyzerRules, Queryable, RegistryVisitor, Rule, RuleDomain, RuleFilter, RuleGroup,
+};
+use biome_configuration::analyzer::{RuleDomainValue, RuleSelector};
 use biome_configuration::diagnostics::{
     CantLoadExtendFile, CantResolve, EditorConfigDiagnostic, ParseFailedDiagnostic,
 };
@@ -11,17 +15,23 @@ use biome_configuration::{
 use biome_configuration::{Configuration, VERSION, push_to_analyzer_assist};
 use biome_console::markup;
 use biome_css_analyze::METADATA as css_lint_metadata;
+use biome_css_syntax::CssLanguage;
 use biome_deserialize::json::deserialize_from_json_str;
 use biome_deserialize::{Deserialized, Merge};
 use biome_diagnostics::{DiagnosticExt, Error, Severity};
 use biome_fs::{AutoSearchResult, ConfigName, FileSystem, OpenOptions};
 use biome_graphql_analyze::METADATA as graphql_lint_metadata;
+use biome_graphql_syntax::GraphqlLanguage;
 use biome_js_analyze::METADATA as js_lint_metadata;
+use biome_js_syntax::JsLanguage;
 use biome_json_analyze::METADATA as json_lint_metadata;
 use biome_json_formatter::context::JsonFormatOptions;
 use biome_json_parser::{JsonParserOptions, parse_json};
+use biome_json_syntax::JsonLanguage;
 use biome_resolver::{FsWithResolverProxy, ResolveOptions, resolve};
+use biome_rowan::Language;
 use camino::{Utf8Path, Utf8PathBuf};
+use rustc_hash::FxHashSet;
 use std::fmt::Debug;
 use std::io::ErrorKind;
 use std::iter::FusedIterator;
@@ -650,5 +660,248 @@ mod test {
                 ));
             }
         }
+    }
+}
+
+/// Use this type to determine what kind of [ScanKind] needs to be used based
+/// on the current configuration
+pub struct ProjectScanComputer<'a> {
+    requires_project_scan: bool,
+    enabled_rules: FxHashSet<RuleFilter<'a>>,
+    configuration: &'a Configuration,
+    skip: &'a [RuleSelector],
+    only: &'a [RuleSelector],
+}
+
+impl<'a> ProjectScanComputer<'a> {
+    pub fn new(
+        configuration: &'a Configuration,
+        skip: &'a [RuleSelector],
+        only: &'a [RuleSelector],
+    ) -> Self {
+        let enabled_rules = configuration.get_linter_rules().as_enabled_rules();
+        Self {
+            enabled_rules,
+            requires_project_scan: false,
+            skip,
+            only,
+            configuration,
+        }
+    }
+
+    /// Computes and return the [ScanKind] required by this project
+    pub fn compute(mut self) -> ScanKind {
+        let domains = self.configuration.get_linter_domains();
+
+        if let Some(domains) = domains {
+            for (domain, value) in domains.iter() {
+                if domain == &RuleDomain::Project && value != &RuleDomainValue::None {
+                    self.requires_project_scan = true;
+                    break;
+                }
+            }
+        }
+
+        biome_graphql_analyze::visit_registry(&mut self);
+        biome_css_analyze::visit_registry(&mut self);
+        biome_json_analyze::visit_registry(&mut self);
+        biome_js_analyze::visit_registry(&mut self);
+
+        if self.requires_project_scan {
+            ScanKind::Project
+        } else {
+            // There's no need to scan further known files if the VCS isn't enabled
+            if !self.configuration.use_ignore_file() {
+                ScanKind::None
+            } else {
+                ScanKind::KnownFiles
+            }
+        }
+    }
+
+    fn check_rule<R, L>(&mut self)
+    where
+        L: Language,
+        R: Rule<Options: Default, Query: Queryable<Language = L, Output: Clone>> + 'static,
+    {
+        let filter = RuleFilter::Rule(<R::Group as RuleGroup>::NAME, R::METADATA.name);
+        let selector = RuleSelector::Rule(<R::Group as RuleGroup>::NAME, R::METADATA.name);
+        if !self.only.is_empty() {
+            if self.only.contains(&selector) {
+                let domains = R::METADATA.domains;
+                self.requires_project_scan |= domains.contains(&RuleDomain::Project);
+            }
+        } else if !self.skip.contains(&selector) && self.enabled_rules.contains(&filter) {
+            let domains = R::METADATA.domains;
+            self.requires_project_scan |= domains.contains(&RuleDomain::Project);
+        }
+    }
+}
+
+impl RegistryVisitor<JsLanguage> for ProjectScanComputer<'_> {
+    fn record_rule<R>(&mut self)
+    where
+        R: Rule<Options: Default, Query: Queryable<Language = JsLanguage, Output: Clone>> + 'static,
+    {
+        self.check_rule::<R, JsLanguage>();
+    }
+}
+
+impl RegistryVisitor<JsonLanguage> for ProjectScanComputer<'_> {
+    fn record_rule<R>(&mut self)
+    where
+        R: Rule<Options: Default, Query: Queryable<Language = JsonLanguage, Output: Clone>>
+            + 'static,
+    {
+        self.check_rule::<R, JsonLanguage>();
+    }
+}
+
+impl RegistryVisitor<CssLanguage> for ProjectScanComputer<'_> {
+    fn record_rule<R>(&mut self)
+    where
+        R: Rule<Options: Default, Query: Queryable<Language = CssLanguage, Output: Clone>>
+            + 'static,
+    {
+        self.check_rule::<R, CssLanguage>();
+    }
+}
+
+impl RegistryVisitor<GraphqlLanguage> for ProjectScanComputer<'_> {
+    fn record_rule<R>(&mut self)
+    where
+        R: Rule<Options: Default, Query: Queryable<Language = GraphqlLanguage, Output: Clone>>
+            + 'static,
+    {
+        self.check_rule::<R, GraphqlLanguage>();
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use biome_configuration::analyzer::{
+        Correctness, RuleDomainValue, RuleDomains, SeverityOrGroup,
+    };
+    use biome_configuration::{
+        LinterConfiguration, RuleConfiguration, RulePlainConfiguration, Rules,
+    };
+    use rustc_hash::FxHashMap;
+
+    #[test]
+    fn should_return_none_if_the_linter_is_disabled() {
+        let configuration = Configuration {
+            linter: Some(LinterConfiguration {
+                enabled: Some(false.into()),
+                ..Default::default()
+            }),
+            ..Default::default()
+        };
+
+        assert_eq!(
+            ProjectScanComputer::new(&configuration, &[], &[]).compute(),
+            ScanKind::None
+        );
+    }
+
+    #[test]
+    fn should_scan_project_project_domain_is_enabled() {
+        let mut domains = FxHashMap::default();
+        domains.insert(RuleDomain::Project, RuleDomainValue::Recommended);
+
+        let configuration = Configuration {
+            linter: Some(LinterConfiguration {
+                domains: Some(RuleDomains(domains)),
+                ..Default::default()
+            }),
+            ..Default::default()
+        };
+
+        assert_eq!(
+            ProjectScanComputer::new(&configuration, &[], &[]).compute(),
+            ScanKind::Project
+        );
+    }
+
+    #[test]
+    fn should_scan_project_project_rule_is_enabled() {
+        let configuration = Configuration {
+            linter: Some(LinterConfiguration {
+                rules: Some(Rules {
+                    correctness: Some(SeverityOrGroup::Group(Correctness {
+                        no_private_imports: Some(RuleConfiguration::Plain(
+                            RulePlainConfiguration::Error,
+                        )),
+                        ..Default::default()
+                    })),
+                    ..Default::default()
+                }),
+                ..Default::default()
+            }),
+            ..Default::default()
+        };
+
+        assert_eq!(
+            ProjectScanComputer::new(&configuration, &[], &[]).compute(),
+            ScanKind::Project
+        );
+    }
+
+    #[test]
+    fn should_skip_project_rule_is_skipped() {
+        let configuration = Configuration {
+            linter: Some(LinterConfiguration {
+                rules: Some(Rules {
+                    correctness: Some(SeverityOrGroup::Group(Correctness {
+                        no_private_imports: Some(RuleConfiguration::Plain(
+                            RulePlainConfiguration::Error,
+                        )),
+                        ..Default::default()
+                    })),
+                    ..Default::default()
+                }),
+                ..Default::default()
+            }),
+            ..Default::default()
+        };
+
+        assert_eq!(
+            ProjectScanComputer::new(
+                &configuration,
+                &[RuleSelector::Rule("correctness", "noPrivateImports")],
+                &[]
+            )
+            .compute(),
+            ScanKind::None
+        );
+    }
+
+    #[test]
+    fn should_return_project_if_project_rule_is_only() {
+        let configuration = Configuration {
+            linter: Some(LinterConfiguration {
+                rules: Some(Rules {
+                    correctness: Some(SeverityOrGroup::Group(Correctness {
+                        no_private_imports: Some(RuleConfiguration::Plain(
+                            RulePlainConfiguration::Off,
+                        )),
+                        ..Default::default()
+                    })),
+                    ..Default::default()
+                }),
+                ..Default::default()
+            }),
+            ..Default::default()
+        };
+
+        assert_eq!(
+            ProjectScanComputer::new(
+                &configuration,
+                &[],
+                &[RuleSelector::Rule("correctness", "noPrivateImports")]
+            )
+            .compute(),
+            ScanKind::Project
+        );
     }
 }

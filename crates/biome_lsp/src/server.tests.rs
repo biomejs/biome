@@ -14,8 +14,8 @@ use biome_fs::{BiomePath, MemoryFileSystem, TemporaryFs};
 use biome_service::WorkspaceWatcher;
 use biome_service::workspace::{
     GetFileContentParams, GetSyntaxTreeParams, GetSyntaxTreeResult, OpenProjectParams,
-    PullDiagnosticsParams, PullDiagnosticsResult, ScanKind, ScanProjectFolderParams,
-    ScanProjectFolderResult,
+    OpenProjectResult, PullDiagnosticsParams, PullDiagnosticsResult, ScanKind,
+    ScanProjectFolderParams, ScanProjectFolderResult,
 };
 use camino::Utf8PathBuf;
 use futures::channel::mpsc::{Sender, channel};
@@ -585,13 +585,15 @@ async fn document_lifecycle() -> Result<()> {
 
     // `open_project()` will return an existing key if called with a path
     // for an existing project.
-    let project_key = server
+    let OpenProjectResult { project_key, .. } = server
         .request(
             "biome/open_project",
             "open_project",
             OpenProjectParams {
                 path: BiomePath::new(""),
                 open_uninitialized: true,
+                only_rules: None,
+                skip_rules: None,
             },
         )
         .await?
@@ -645,13 +647,15 @@ async fn lifecycle_with_multiple_connections() -> Result<()> {
 
         // `open_project()` will return an existing key if called with a path
         // for an existing project.
-        let project_key = server
+        let OpenProjectResult { project_key, .. } = server
             .request(
                 "biome/open_project",
                 "open_project",
                 OpenProjectParams {
                     path: BiomePath::new(""),
                     open_uninitialized: true,
+                    only_rules: None,
+                    skip_rules: None,
                 },
             )
             .await?
@@ -689,13 +693,15 @@ async fn lifecycle_with_multiple_connections() -> Result<()> {
 
         // `open_project()` will return an existing key if called with a path
         // for an existing project.
-        let project_key = server
+        let OpenProjectResult { project_key, .. } = server
             .request(
                 "biome/open_project",
                 "open_project",
                 OpenProjectParams {
                     path: BiomePath::new(""),
                     open_uninitialized: true,
+                    only_rules: None,
+                    skip_rules: None,
                 },
             )
             .await?
@@ -2631,13 +2637,15 @@ isSpreadAssignment;
 
     // `open_project()` will return an existing key if called with a path
     // for an existing project.
-    let project_key = server
+    let OpenProjectResult { project_key, .. } = server
         .request(
             "biome/open_project",
             "open_project",
             OpenProjectParams {
                 path: BiomePath::new(""),
                 open_uninitialized: true,
+                skip_rules: None,
+                only_rules: None,
             },
         )
         .await?
@@ -3269,7 +3277,7 @@ async fn pull_source_assist_action() -> Result<()> {
 }
 
 #[tokio::test]
-async fn watcher_updates_module_graph() -> Result<()> {
+async fn watcher_updates_module_graph_simple() -> Result<()> {
     const FOO_CONTENT: &str = r#"import { bar } from "./bar.ts";
 
 export function foo() {
@@ -3327,13 +3335,18 @@ export function bar() {
 
     server.initialize().await?;
 
-    let project_key = server
+    let OpenProjectResult {
+        project_key,
+        scan_kind,
+    } = server
         .request(
             "biome/open_project",
             "open_project",
             OpenProjectParams {
                 path: fs.working_directory.clone().into(),
                 open_uninitialized: true,
+                skip_rules: None,
+                only_rules: None,
             },
         )
         .await?
@@ -3349,7 +3362,7 @@ export function bar() {
                 path: None,
                 watch: true,
                 force: false,
-                scan_kind: ScanKind::Project,
+                scan_kind,
             },
         )
         .await?
@@ -3544,13 +3557,15 @@ export function bar() {
 
     server.initialize().await?;
 
-    let project_key = server
+    let OpenProjectResult { project_key, .. } = server
         .request(
             "biome/open_project",
             "open_project",
             OpenProjectParams {
                 path: fs.working_directory.clone().into(),
                 open_uninitialized: true,
+                only_rules: None,
+                skip_rules: None,
             },
         )
         .await?

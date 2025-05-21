@@ -10,7 +10,6 @@ use biome_console::Console;
 use biome_deserialize::Merge;
 use biome_fs::FileSystem;
 use biome_service::configuration::LoadedConfiguration;
-use biome_service::projects::ProjectKey;
 use biome_service::{Workspace, WorkspaceError};
 use std::ffi::OsString;
 
@@ -114,10 +113,8 @@ impl CommandRunner for CiCommandPayload {
         cli_options: &CliOptions,
         _console: &mut dyn Console,
         _workspace: &dyn Workspace,
-        project_key: ProjectKey,
     ) -> Result<Execution, CliDiagnostic> {
         Ok(Execution::new_ci(
-            project_key,
             (false, self.changed).into(),
             self.enforce_assist,
             cli_options.skip_parse_errors,

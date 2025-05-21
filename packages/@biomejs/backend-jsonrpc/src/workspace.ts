@@ -3807,6 +3807,10 @@ export interface BacktraceSymbol {
 }
 export interface OpenProjectParams {
 	/**
+	 * Whether the client wants to run only certain rules. This is needed to compute the kind of [ScanKind].
+	 */
+	onlyRules?: RuleCode[];
+	/**
 	 * Whether the folder should be opened as a project, even if no `biome.json` can be found.
 	 */
 	openUninitialized: boolean;
@@ -3814,7 +3818,23 @@ export interface OpenProjectParams {
 	 * The path to open
 	 */
 	path: BiomePath;
+	/**
+	 * Whether the client wants to skip some lint rule. This is needed to compute the kind of [ScanKind].
+	 */
+	skipRules?: RuleCode[];
 }
+export type RuleCode = string;
+export interface OpenProjectResult {
+	/**
+	 * A unique identifier for this project
+	 */
+	projectKey: ProjectKey;
+	/**
+	 * How to scan this project
+	 */
+	scanKind: ScanKind;
+}
+export type ScanKind = "none" | "knownFiles" | "project";
 export interface OpenFileParams {
 	content: FileContent;
 	documentFileSource?: DocumentFileSource;
@@ -3964,7 +3984,6 @@ export interface PullDiagnosticsParams {
 	skip?: RuleCode[];
 }
 export type RuleCategories = RuleCategory[];
-export type RuleCode = string;
 export type RuleCategory = "syntax" | "lint" | "action" | "transformation";
 export interface PullDiagnosticsResult {
 	diagnostics: Diagnostic[];
@@ -4157,7 +4176,7 @@ export interface DropPatternParams {
 export interface Workspace {
 	fileFeatures(params: SupportsFeatureParams): Promise<FileFeaturesResult>;
 	updateSettings(params: UpdateSettingsParams): Promise<UpdateSettingsResult>;
-	openProject(params: OpenProjectParams): Promise<ProjectKey>;
+	openProject(params: OpenProjectParams): Promise<OpenProjectResult>;
 	openFile(params: OpenFileParams): Promise<void>;
 	changeFile(params: ChangeFileParams): Promise<void>;
 	closeFile(params: CloseFileParams): Promise<void>;

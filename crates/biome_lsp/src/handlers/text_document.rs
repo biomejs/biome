@@ -39,12 +39,14 @@ pub(crate) async fn did_open(
                     .map(|parent| parent.to_path_buf())
                     .unwrap_or_default(),
             );
-            let project_key = session.workspace.open_project(OpenProjectParams {
+            let result = session.workspace.open_project(OpenProjectParams {
                 path: parent_path.clone(),
                 open_uninitialized: true,
+                skip_rules: None,
+                only_rules: None,
             })?;
-            session.insert_and_scan_project(project_key, parent_path);
-            project_key
+            session.insert_and_scan_project(result.project_key, parent_path, result.scan_kind);
+            result.project_key
         }
     };
 

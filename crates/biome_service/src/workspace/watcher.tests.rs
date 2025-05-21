@@ -3,6 +3,8 @@ use camino::Utf8PathBuf;
 use crossbeam::channel::unbounded;
 use tokio::sync::watch;
 
+use super::*;
+use crate::workspace::OpenProjectResult;
 use crate::{
     WatcherInstruction,
     workspace::{
@@ -10,8 +12,6 @@ use crate::{
         OpenProjectParams, ServiceDataNotification,
     },
 };
-
-use super::*;
 
 #[test]
 fn close_file_through_watcher_before_client() {
@@ -23,10 +23,12 @@ fn close_file_through_watcher_before_client() {
     let (watcher_tx, _) = unbounded();
     let (service_data_tx, _) = watch::channel(ServiceDataNotification::Updated);
     let workspace = WorkspaceServer::new(Box::new(fs), watcher_tx, service_data_tx, None);
-    let project_key = workspace
+    let OpenProjectResult { project_key, .. } = workspace
         .open_project(OpenProjectParams {
             path: BiomePath::new("/project"),
             open_uninitialized: true,
+            skip_rules: None,
+            only_rules: None,
         })
         .expect("can open project");
 
@@ -87,10 +89,12 @@ fn close_file_from_client_before_watcher() {
     let (watcher_tx, _) = unbounded();
     let (service_data_tx, _) = watch::channel(ServiceDataNotification::Updated);
     let workspace = WorkspaceServer::new(Box::new(fs), watcher_tx, service_data_tx, None);
-    let project_key = workspace
+    let OpenProjectResult { project_key, .. } = workspace
         .open_project(OpenProjectParams {
             path: BiomePath::new("/project"),
             open_uninitialized: true,
+            skip_rules: None,
+            only_rules: None,
         })
         .expect("can open project");
 
@@ -152,10 +156,12 @@ fn close_modified_file_from_client_before_watcher() {
     let (watcher_tx, rx) = unbounded();
     let (service_data_tx, _) = watch::channel(ServiceDataNotification::Updated);
     let workspace = WorkspaceServer::new(Box::new(fs), watcher_tx, service_data_tx, None);
-    let project_key = workspace
+    let OpenProjectResult { project_key, .. } = workspace
         .open_project(OpenProjectParams {
             path: BiomePath::new("/project"),
             open_uninitialized: true,
+            skip_rules: None,
+            only_rules: None,
         })
         .expect("can open project");
 

@@ -1,7 +1,7 @@
 use crate::workspace::{
     CheckFileSizeParams, CheckFileSizeResult, CloseProjectParams, FileFeaturesResult,
     GetFileContentParams, GetRegisteredTypesParams, GetTypeInfoParams, IsPathIgnoredParams,
-    OpenProjectParams, ProjectKey, RageParams, RageResult, ServerInfo,
+    OpenProjectParams, OpenProjectResult, RageParams, RageResult, ServerInfo,
 };
 use crate::{TransportError, Workspace, WorkspaceError};
 use biome_formatter::Printed;
@@ -106,7 +106,7 @@ impl<T> Workspace for WorkspaceClient<T>
 where
     T: WorkspaceTransport + RefUnwindSafe + Send + Sync,
 {
-    fn open_project(&self, params: OpenProjectParams) -> Result<ProjectKey, WorkspaceError> {
+    fn open_project(&self, params: OpenProjectParams) -> Result<OpenProjectResult, WorkspaceError> {
         self.request("biome/open_project", params)
     }
 
