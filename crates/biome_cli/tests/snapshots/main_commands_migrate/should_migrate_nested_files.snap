@@ -65,7 +65,7 @@ expression: redactor(content)
 ```
 
 ```block
-<TEMP_DIR>/missing_configuration_file/biome.json migrate ━━━━━━━━━━━━━━━━━━━━
+<TEMP_DIR>/missing_configuration_file/lorem/biome.json migrate ━━━━━━━━━━━━━━━━━━━━
 
   i Configuration file can be updated.
   
@@ -125,7 +125,7 @@ expression: redactor(content)
 ```
 
 ```block
-<TEMP_DIR>/missing_configuration_file/lorem/biome.json migrate ━━━━━━━━━━━━━━━━━━━━
+<TEMP_DIR>/missing_configuration_file/biome.json migrate ━━━━━━━━━━━━━━━━━━━━
 
   i Configuration file can be updated.
   

@@ -103,7 +103,10 @@ fn scan_folder(folder: &Utf8Path, ctx: ScanContext) -> (Duration, Vec<BiomePath>
     let mut manifests = Vec::new();
     let mut handleable_paths = Vec::new();
     let mut ignore_paths = Vec::new();
-    for path in evaluated_paths {
+    // We want to process files that closest to the project root first. For example, we must process
+    // first the `.gitignore` at the root of the project.
+    let iter = evaluated_paths.into_iter().rev();
+    for path in iter {
         if path.is_config() {
             configs.push(path);
         } else if path.is_manifest() {

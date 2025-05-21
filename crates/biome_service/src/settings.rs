@@ -700,7 +700,6 @@ impl VcsIgnoredPatterns {
                         } else {
                             false
                         };
-                        tracing::Span::current().record("result", result);
                         result
                     })
             }
