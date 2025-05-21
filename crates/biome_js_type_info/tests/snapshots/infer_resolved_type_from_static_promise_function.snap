@@ -12,13 +12,13 @@ Promise.resolve("value");
 ## Result
 
 ```
-Call Global TypeId(7)(Global TypeId(8))
+Call Global TypeId(17)(Global TypeId(18))
 ```
 
 ## Registered types
 
 ```
-Global TypeId(7) => Promise.resolve
+Global TypeId(17) => Promise.resolve
 
-Global TypeId(8) => value: value
+Global TypeId(18) => value: value
 ```

@@ -7,8 +7,8 @@ use std::sync::LazyLock;
 use biome_rowan::Text;
 
 use crate::{
-    Class, GenericTypeParameter, MethodTypeMember, PropertyTypeMember, Resolvable,
-    ResolvedTypeData, ResolvedTypeId, ScopeId, TypeData, TypeId, TypeMember, TypeReference,
+    Class, Function, GenericTypeParameter, Resolvable, ResolvedTypeData, ResolvedTypeId,
+    ReturnType, ScopeId, TypeData, TypeId, TypeMember, TypeMemberKind, TypeReference,
     TypeReferenceQualifier, TypeResolver, TypeResolverLevel,
 };
 
@@ -19,45 +19,62 @@ pub static GLOBAL_RESOLVER: LazyLock<GlobalsResolver> = LazyLock::new(GlobalsRes
 pub static GLOBAL_TYPE_MEMBERS: LazyLock<Vec<TypeMember>> = LazyLock::new(|| {
     (0..NUM_PREDEFINED_TYPES)
         .map(TypeId::new)
-        .map(|id| {
-            TypeMember::Property(PropertyTypeMember {
-                name: Text::Static(global_type_name(id)),
-                ty: ResolvedTypeId::new(GLOBAL_LEVEL, id).into(),
-                is_optional: false,
-                is_static: false,
-            })
+        .map(|id| TypeMember {
+            kind: TypeMemberKind::Named(Text::Static(global_type_name(id))),
+            is_static: false,
+            ty: ResolvedTypeId::new(GLOBAL_LEVEL, id).into(),
         })
         .collect()
 });
 
 pub const UNKNOWN_ID: TypeId = TypeId::new(0);
-pub const ARRAY_ID: TypeId = TypeId::new(1);
-pub const GLOBAL_ID: TypeId = TypeId::new(2);
-pub const INSTANCEOF_PROMISE_ID: TypeId = TypeId::new(3);
-pub const NUMBER_ID: TypeId = TypeId::new(4);
-pub const PROMISE_ID: TypeId = TypeId::new(5);
-pub const UNDEFINED_ID: TypeId = TypeId::new(6);
-pub const NUM_PREDEFINED_TYPES: usize = 7; // Most be one more than the highest `TypeId` above.
+pub const UNDEFINED_ID: TypeId = TypeId::new(1);
+pub const ARRAY_ID: TypeId = TypeId::new(2);
+pub const GLOBAL_ID: TypeId = TypeId::new(3);
+pub const INSTANCEOF_PROMISE_ID: TypeId = TypeId::new(4);
+pub const NUMBER_ID: TypeId = TypeId::new(5);
+pub const PROMISE_ID: TypeId = TypeId::new(6);
+pub const PROMISE_CATCH_ID: TypeId = TypeId::new(7);
+pub const PROMISE_FINALLY_ID: TypeId = TypeId::new(8);
+pub const PROMISE_THEN_ID: TypeId = TypeId::new(9);
+pub const PROMISE_ALL_ID: TypeId = TypeId::new(10);
+pub const PROMISE_ALL_SETTLED_ID: TypeId = TypeId::new(11);
+pub const PROMISE_ANY_ID: TypeId = TypeId::new(12);
+pub const PROMISE_RACE_ID: TypeId = TypeId::new(13);
+pub const PROMISE_REJECT_ID: TypeId = TypeId::new(14);
+pub const PROMISE_RESOLVE_ID: TypeId = TypeId::new(15);
+pub const PROMISE_TRY_ID: TypeId = TypeId::new(16);
+pub const NUM_PREDEFINED_TYPES: usize = 17; // Most be one more than the highest `TypeId` above.
 
 pub const GLOBAL_UNKNOWN_ID: ResolvedTypeId = ResolvedTypeId::new(GLOBAL_LEVEL, UNKNOWN_ID);
+pub const GLOBAL_UNDEFINED_ID: ResolvedTypeId = ResolvedTypeId::new(GLOBAL_LEVEL, UNDEFINED_ID);
 pub const GLOBAL_ARRAY_ID: ResolvedTypeId = ResolvedTypeId::new(GLOBAL_LEVEL, ARRAY_ID);
 pub const GLOBAL_GLOBAL_ID /* :smirk: */: ResolvedTypeId = ResolvedTypeId::new(GLOBAL_LEVEL, GLOBAL_ID);
 pub const GLOBAL_INSTANCEOF_PROMISE_ID: ResolvedTypeId =
     ResolvedTypeId::new(GLOBAL_LEVEL, INSTANCEOF_PROMISE_ID);
 pub const GLOBAL_NUMBER_ID: ResolvedTypeId = ResolvedTypeId::new(GLOBAL_LEVEL, NUMBER_ID);
 pub const GLOBAL_PROMISE_ID: ResolvedTypeId = ResolvedTypeId::new(GLOBAL_LEVEL, PROMISE_ID);
-pub const GLOBAL_UNDEFINED_ID: ResolvedTypeId = ResolvedTypeId::new(GLOBAL_LEVEL, UNDEFINED_ID);
 
 /// Returns a string for formatting global IDs in test snapshots.
 pub fn global_type_name(id: TypeId) -> &'static str {
     match id.index() {
         0 => "unknown",
-        1 => "Array",
-        2 => "globalThis",
-        3 => "instanceof Promise",
-        4 => "number",
-        5 => "Promise",
-        6 => "undefined",
+        1 => "undefined",
+        2 => "Array",
+        3 => "globalThis",
+        4 => "instanceof Promise",
+        5 => "number",
+        6 => "Promise",
+        7 => "Promise.prototype.catch",
+        8 => "Promise.prototype.finally",
+        9 => "Promise.prototype.then",
+        10 => "Promise.all",
+        11 => "Promise.allSettled",
+        12 => "Promise.any",
+        13 => "Promise.race",
+        14 => "Promise.reject",
+        15 => "Promise.resolve",
+        16 => "Promise.try",
         _ => "inferred type",
     }
 }
@@ -74,25 +91,31 @@ pub struct GlobalsResolver {
 
 impl Default for GlobalsResolver {
     fn default() -> Self {
-        let promise_method = |name: &'static str| {
-            TypeMember::Method(
-                MethodTypeMember::default()
-                    .with_name(Text::Static(name))
-                    .with_return_type(GLOBAL_INSTANCEOF_PROMISE_ID.into()),
-            )
+        let promise_method = |name: &'static str, id: TypeId| TypeMember {
+            kind: TypeMemberKind::Named(Text::Static(name)),
+            is_static: false,
+            ty: ResolvedTypeId::new(TypeResolverLevel::Global, id).into(),
         };
 
-        let static_promise_method = |name: &'static str| {
-            TypeMember::Method(
-                MethodTypeMember::default()
-                    .with_name(Text::Static(name))
-                    .with_static()
-                    .with_return_type(GLOBAL_INSTANCEOF_PROMISE_ID.into()),
-            )
+        let static_promise_method = |name: &'static str, id: TypeId| TypeMember {
+            kind: TypeMemberKind::Named(Text::Static(name)),
+            is_static: true,
+            ty: ResolvedTypeId::new(TypeResolverLevel::Global, id).into(),
+        };
+
+        let promise_method_definition = |id: TypeId| {
+            TypeData::from(Function {
+                is_async: false,
+                type_parameters: Default::default(),
+                name: Some(Text::Static(global_type_name(id))),
+                parameters: Default::default(),
+                return_type: ReturnType::Type(GLOBAL_INSTANCEOF_PROMISE_ID.into()),
+            })
         };
 
         let types = vec![
             TypeData::Unknown,
+            TypeData::Undefined,
             TypeData::Class(Box::new(Class {
                 name: Some(Text::Static("Array")),
                 type_parameters: Box::new([GenericTypeParameter {
@@ -100,11 +123,11 @@ impl Default for GlobalsResolver {
                     ty: TypeReference::Unknown,
                 }]),
                 extends: None,
-                members: Box::new([TypeMember::Property(
-                    PropertyTypeMember::default()
-                        .with_name(Text::Static("length"))
-                        .with_type(GLOBAL_NUMBER_ID.into()),
-                )]),
+                members: Box::new([TypeMember {
+                    kind: TypeMemberKind::Named(Text::Static("length")),
+                    is_static: false,
+                    ty: GLOBAL_NUMBER_ID.into(),
+                }]),
             })),
             TypeData::Global,
             TypeData::instance_of(TypeReference::from(GLOBAL_PROMISE_ID)),
@@ -117,19 +140,28 @@ impl Default for GlobalsResolver {
                 }]),
                 extends: None,
                 members: Box::new([
-                    promise_method("catch"),
-                    promise_method("finally"),
-                    promise_method("then"),
-                    static_promise_method("all"),
-                    static_promise_method("allSettled"),
-                    static_promise_method("any"),
-                    static_promise_method("race"),
-                    static_promise_method("reject"),
-                    static_promise_method("resolve"),
-                    static_promise_method("try"),
+                    promise_method("catch", PROMISE_CATCH_ID),
+                    promise_method("finally", PROMISE_FINALLY_ID),
+                    promise_method("then", PROMISE_THEN_ID),
+                    static_promise_method("all", PROMISE_ALL_ID),
+                    static_promise_method("allSettled", PROMISE_ALL_SETTLED_ID),
+                    static_promise_method("any", PROMISE_ANY_ID),
+                    static_promise_method("race", PROMISE_RACE_ID),
+                    static_promise_method("reject", PROMISE_REJECT_ID),
+                    static_promise_method("resolve", PROMISE_RESOLVE_ID),
+                    static_promise_method("try", PROMISE_TRY_ID),
                 ]),
             })),
-            TypeData::Undefined,
+            promise_method_definition(PROMISE_CATCH_ID),
+            promise_method_definition(PROMISE_FINALLY_ID),
+            promise_method_definition(PROMISE_THEN_ID),
+            promise_method_definition(PROMISE_ALL_ID),
+            promise_method_definition(PROMISE_ALL_SETTLED_ID),
+            promise_method_definition(PROMISE_ANY_ID),
+            promise_method_definition(PROMISE_RACE_ID),
+            promise_method_definition(PROMISE_REJECT_ID),
+            promise_method_definition(PROMISE_RESOLVE_ID),
+            promise_method_definition(PROMISE_TRY_ID),
         ];
 
         Self { types }

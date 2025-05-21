@@ -18,10 +18,10 @@ function destruct(
 sync Function "destruct" {
   accepts: {
     params: [
-      required (unnamed): Global TypeId(8) (bindings: a:Global TypeId(8).a,
-      b:Global TypeId(8).b)
-      required (unnamed): Global TypeId(12) (bindings: first:Global TypeId(12)[0],
-      rest:[(1 others)...Global TypeId(12)])
+      required (unnamed): Global TypeId(18) (bindings: a:Global TypeId(18).a,
+      b:Global TypeId(18).b)
+      required (unnamed): Global TypeId(22) (bindings: first:Global TypeId(22)[0],
+      rest:[(1 others)...Global TypeId(22)])
     ]
     type_args: []
   }
@@ -32,25 +32,22 @@ sync Function "destruct" {
 ## Registered types
 
 ```
-Global TypeId(7) => string
+Global TypeId(17) => string
 
-Global TypeId(8) => Object {
+Global TypeId(18) => Object {
   prototype: No prototype
-  members: {TypeMembers(
-    required property "a": number
-    required property "b": Global TypeId(7)
-  )}
+  members: ["a": number, "b": Global TypeId(17)]
 }
 
-Global TypeId(9) => Global TypeId(8).a
+Global TypeId(19) => Global TypeId(18).a
 
-Global TypeId(10) => Global TypeId(8).b
+Global TypeId(20) => Global TypeId(18).b
 
-Global TypeId(11) => boolean
+Global TypeId(21) => boolean
 
-Global TypeId(12) => instanceof unresolved reference "Array"<Global TypeId(11)>
+Global TypeId(22) => instanceof unresolved reference "Array"<Global TypeId(21)>
 
-Global TypeId(13) => Global TypeId(12)[0]
+Global TypeId(23) => Global TypeId(22)[0]
 
-Global TypeId(14) => [(1 others)...Global TypeId(12)]
+Global TypeId(24) => [(1 others)...Global TypeId(22)]
 ```

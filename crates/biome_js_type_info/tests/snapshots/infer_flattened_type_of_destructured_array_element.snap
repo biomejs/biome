@@ -12,20 +12,20 @@ const [a]: Array<string> = [];
 ## Result
 
 ```
-a => Global TypeId(7) | undefined
+a => Global TypeId(17) | undefined
 
 ```
 
 ## Registered types
 
 ```
-Global TypeId(7) => string
+Global TypeId(17) => string
 
-Global TypeId(8) => instanceof Array<T = Global TypeId(7)>
+Global TypeId(18) => instanceof Array<T = Global TypeId(17)>
 
-Global TypeId(9) => Global TypeId(7) | undefined
+Global TypeId(19) => Global TypeId(17) | undefined
 
-Global TypeId(10) => instanceof Array<T = Global TypeId(7)>
+Global TypeId(20) => instanceof Array<T = Global TypeId(17)>
 
-Global TypeId(11) => Global TypeId(7) | undefined
+Global TypeId(21) => Global TypeId(17) | undefined
 ```

@@ -98,7 +98,7 @@ Module TypeId(2) => Module(0) TypeId(0) | Module(0) TypeId(1)
 
 Module TypeId(3) => Object {
   prototype: No prototype
-  members: {TypeMembers(required property "result": Module(0) TypeId(2))}
+  members: ["result": Module(0) TypeId(2)]
 }
 
 Module TypeId(4) => instanceof Promise<T = Module(0) TypeId(3)>

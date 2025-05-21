@@ -3,10 +3,9 @@ use std::{borrow::Cow, fmt::Debug};
 use biome_rowan::Text;
 
 use crate::{
-    Class, DestructureField, Function, GenericTypeParameter, ScopeId, TypeData, TypeId,
-    TypeImportQualifier, TypeInstance, TypeMember, TypeReference, TypeReferenceQualifier,
-    TypeofDestructureExpression, TypeofExpression, TypeofValue, Union,
-    globals::GLOBAL_UNDEFINED_ID,
+    Class, DestructureField, GenericTypeParameter, ScopeId, TypeData, TypeId, TypeImportQualifier,
+    TypeInstance, TypeMember, TypeReference, TypeReferenceQualifier, TypeofDestructureExpression,
+    TypeofExpression, TypeofValue, Union, globals::GLOBAL_UNDEFINED_ID,
 };
 
 const NUM_MODULE_ID_BITS: i32 = 30;
@@ -375,7 +374,7 @@ impl<'a> ResolvedTypeMember<'a> {
     /// data, it may not be aware of the context in which the member was
     /// resolved, and further references may be resolved from the wrong context.
     /// If you wish to call the resolver on the member's data, use
-    /// [`TypeResolver::type_from_member()`] or [`Self::to_member()`] instead.
+    /// [`Self::to_member()`] instead.
     pub fn as_raw_member(self) -> &'a TypeMember {
         self.member
     }
@@ -395,13 +394,18 @@ impl<'a> ResolvedTypeMember<'a> {
         self.member.name()
     }
 
-    /// Converts the resolved type membmer to an owned [`TypeMember`] with the
+    /// Converts the resolved type member to an owned [`TypeMember`] with the
     /// module ID from the [`ResolverId`] applied to all its references.
     pub fn to_member(self) -> TypeMember {
         match self.id.level() {
             TypeResolverLevel::Module => self.member.clone().with_module_id(self.id.module_id()),
             _ => self.member.clone(),
         }
+    }
+
+    /// Returns a reference to the type of the member.
+    pub fn ty(&self) -> Cow<TypeReference> {
+        self.apply_module_id_to_reference(&self.member.ty)
     }
 }
 
@@ -584,56 +588,6 @@ pub trait TypeResolver {
             ty,
             GLOBAL_UNDEFINED_ID.into(),
         ])))))
-    }
-
-    fn register_type_from_member(
-        &mut self,
-        object: TypeData,
-        member: TypeMember,
-    ) -> ResolvedTypeId {
-        match member {
-            TypeMember::CallSignature(member) => {
-                self.register_and_resolve(TypeData::Function(Box::new(Function {
-                    is_async: false,
-                    type_parameters: member.type_parameters.clone(),
-                    name: None,
-                    parameters: member.parameters.clone(),
-                    return_type: member.return_type.clone(),
-                })))
-            }
-            TypeMember::Constructor(member) => match &member.return_type {
-                Some(reference) => self.resolve_or_register(reference),
-                None => self.register_and_resolve(object),
-            },
-            TypeMember::Method(member) => {
-                let id = self.register_type(TypeData::Function(Box::new(Function {
-                    is_async: member.is_async,
-                    type_parameters: member.type_parameters.clone(),
-                    name: Some(member.name.clone()),
-                    parameters: member.parameters.clone(),
-                    return_type: member.return_type.clone(),
-                })));
-                let id = if member.is_optional {
-                    self.optional(self.reference_to_id(id))
-                } else {
-                    id
-                };
-                ResolvedTypeId::new(self.level(), id)
-            }
-            TypeMember::Property(member) => {
-                if member.is_optional {
-                    ResolvedTypeId::new(self.level(), self.optional(member.ty))
-                } else {
-                    self.resolve_or_register(&member.ty)
-                }
-            }
-        }
-    }
-
-    fn type_from_member(&mut self, object: TypeData, member: TypeMember) -> ResolvedTypeData {
-        let resolved_id = self.register_type_from_member(object, member);
-        self.get_by_resolved_id(resolved_id)
-            .expect("resolved ID must be registered")
     }
 
     fn undefined(&mut self) -> TypeId {
