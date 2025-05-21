@@ -9,7 +9,8 @@ describe("Biome WebAssembly formatContent", () => {
 		biome = await Biome.create({
 			distribution: Distribution.NODE,
 		});
-		projectKey = await biome.openProject();
+		const result = biome.openProject();
+		projectKey = result.projectKey;
 	});
 
 	afterEach(() => {
