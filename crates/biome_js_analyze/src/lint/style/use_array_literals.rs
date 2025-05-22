@@ -3,9 +3,11 @@ use biome_analyze::{
 };
 use biome_console::markup;
 use biome_diagnostics::Severity;
-use biome_js_factory::make;
+use biome_js_factory::make::{self};
 use biome_js_syntax::{
-    AnyJsCallArgument, AnyJsExpression, JsNewOrCallExpression, JsSyntaxKind, T, global_identifier,
+    AnyJsCallArgument, AnyJsExpression, AnyTsType, AnyTsVariableAnnotation, JsInitializerClause,
+    JsNewOrCallExpression, JsSyntaxKind, JsVariableDeclarator, T, TsTypeArgumentList,
+    TsTypeArguments, global_identifier,
 };
 use biome_rowan::{AstNode, AstSeparatedList, BatchMutationExt};
 
@@ -147,7 +149,82 @@ impl Rule for UseArrayLiterals {
                 make::token(T![']']),
             )
         };
-        mutation.replace_node::<AnyJsExpression>(node.clone().into(), new_node.into());
+
+        let array_is_empty = new_node.elements().len() == 0;
+        let type_param = get_type_param_if_safe(node);
+
+        if let Some(type_param) = type_param {
+            // type param needs to be preserved
+
+            // make the type into an array i.e. (T)[]
+            let type_param_arr = AnyTsType::TsArrayType(make::ts_array_type(
+                make::parenthesized_ts(
+                    type_param
+                        .clone()
+                        .with_leading_trivia_pieces([])?
+                        .with_trailing_trivia_pieces([])?,
+                )
+                .into(),
+                make::token(T!['[']),
+                make::token(T![']']),
+            ));
+
+            let type_args = type_param
+                .parent::<TsTypeArgumentList>()
+                .and_then(|initializer| initializer.parent::<TsTypeArguments>())?;
+            let l_angle_trivia = type_args.l_angle_token().ok()?.trailing_trivia().pieces();
+            let r_angle_trivia = type_args.r_angle_token().ok()?.trailing_trivia().pieces();
+            let type_param_arr = type_param_arr
+                .prepend_trivia_pieces(
+                    type_param.syntax().first_token()?.leading_trivia().pieces(),
+                )?
+                .prepend_trivia_pieces(l_angle_trivia)?
+                .append_trivia_pieces(type_param.syntax().last_token()?.trailing_trivia().pieces())?
+                .append_trivia_pieces(r_angle_trivia)?;
+
+            let parent_declarator = get_untyped_parent_declarator(node);
+            if let Some(parent_declarator) = parent_declarator {
+                // move the array type arg to the declarator type annotation and replace the initializer with the new array literal
+                // e.g. `const a = Array<T>()` -> `const a: (T)[] = []`
+                let new_parent_declarator = parent_declarator
+                    .clone()
+                    .with_variable_annotation(Some(AnyTsVariableAnnotation::TsTypeAnnotation(
+                        make::ts_type_annotation(make::token(T![:]), type_param_arr),
+                    )))
+                    .with_initializer(Some(
+                        parent_declarator
+                            .initializer()?
+                            .with_expression(new_node.into()),
+                    ));
+
+                // replace the entire declarator, having new type and new initializer
+                mutation.replace_node(parent_declarator, new_parent_declarator.clone());
+            } else {
+                // the parent node is not a declarator - we need to wrap the array in an "as" type (and a "satisfies" type if the array is not empty)
+                // "satisfies" preserves the type checking behavior and "as" preserves the resulting expression type
+                let mut new_node_with_type: AnyJsExpression = new_node.clone().into();
+                if !array_is_empty {
+                    new_node_with_type = make::ts_satisfies_expression(
+                        new_node_with_type,
+                        make::token_decorated_with_space(T![satisfies]),
+                        type_param_arr.clone(),
+                    )
+                    .into();
+                }
+                new_node_with_type = make::ts_as_expression(
+                    new_node_with_type,
+                    make::token_decorated_with_space(T![as]),
+                    type_param_arr.clone(),
+                )
+                .into();
+
+                // replace array with as+satisfies expression
+                mutation.replace_node::<AnyJsExpression>(node.clone().into(), new_node_with_type);
+            }
+        } else {
+            // type param does not need to be preserved, only replace array
+            mutation.replace_node::<AnyJsExpression>(node.clone().into(), new_node.into());
+        }
         Some(JsRuleAction::new(
             ctx.metadata().action_category(ctx.category(), ctx.group()),
             ctx.metadata().applicability(),
@@ -155,4 +232,36 @@ impl Rule for UseArrayLiterals {
             mutation,
         ))
     }
+}
+
+/// If the node's parent is a [JsVariableDeclarator] with no type annotation, return it, otherwise [None]
+fn get_untyped_parent_declarator(node: &JsNewOrCallExpression) -> Option<JsVariableDeclarator> {
+    let parent_declarator = node
+        .parent::<JsInitializerClause>()
+        .and_then(|initializer| initializer.parent::<JsVariableDeclarator>());
+    let Some(parent_declarator) = parent_declarator else {
+        return None;
+    };
+    if parent_declarator.variable_annotation().is_some() {
+        return None;
+    }
+    Some(parent_declarator)
+}
+
+/// Return the type param from the constructor call only if there's exactly one type param
+fn get_type_param_if_safe(node: &JsNewOrCallExpression) -> Option<AnyTsType> {
+    let type_arguments = match node {
+        JsNewOrCallExpression::JsNewExpression(expr) => expr.type_arguments(),
+        JsNewOrCallExpression::JsCallExpression(expr) => expr.type_arguments(),
+    };
+    // check there's exactly one type arg
+    if let Some(type_arguments) = type_arguments {
+        if type_arguments.ts_type_argument_list().len() == 1 {
+            return type_arguments
+                .ts_type_argument_list()
+                .first()
+                .and_then(Result::ok);
+        }
+    }
+    None
 }

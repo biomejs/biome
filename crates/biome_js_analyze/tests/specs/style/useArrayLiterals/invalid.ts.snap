@@ -1,0 +1,198 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.ts
+---
+# Input
+```ts
+var xs = new Array<string>();
+
+var xs = new Array<number>(0, 1, 2);
+
+var xs /* A */ = /* B */ new /* C */ Array /* D */ < /* E */ number /* F */ > /* G */ ( /* H */ 1 /* I */ , /* J */ 2 /* K */ , /* L */) /* M */;
+
+void new Array<number>();
+
+void new Array<number>(1, 2, 3);
+
+void new Array<1 | 2 | 3 | 4>(1, 2, 3);
+
+// it already has a type annotation, it should still trigger a diagnostic but should not change the existing type
+var xs: string[] = new Array<number>();
+
+```
+
+# Diagnostics
+```
+invalid.ts:1:10 lint/style/useArrayLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use an array literal instead of the Array constructor.
+  
+  > 1 │ var xs = new Array<string>();
+      │          ^^^^^^^^^^^^^^^^^^^
+    2 │ 
+    3 │ var xs = new Array<number>(0, 1, 2);
+  
+  i The Array constructor is misleading because it can be used to preallocate an array of a given length or to create an array with a given list of elements.
+  
+  i Safe fix: Use an array literal.
+  
+     1    │ - var·xs·=·new·Array<string>();
+        1 │ + var·xs·:(string)[]=·[];
+     2  2 │   
+     3  3 │   var xs = new Array<number>(0, 1, 2);
+  
+
+```
+
+```
+invalid.ts:3:10 lint/style/useArrayLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use an array literal instead of the Array constructor.
+  
+    1 │ var xs = new Array<string>();
+    2 │ 
+  > 3 │ var xs = new Array<number>(0, 1, 2);
+      │          ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    4 │ 
+    5 │ var xs /* A */ = /* B */ new /* C */ Array /* D */ < /* E */ number /* F */ > /* G */ ( /* H */ 1 /* I */ , /* J */ 2 /* K */ , /* L */) /* M */;
+  
+  i The Array constructor is misleading because it can be used to preallocate an array of a given length or to create an array with a given list of elements.
+  
+  i Safe fix: Use an array literal.
+  
+     1  1 │   var xs = new Array<string>();
+     2  2 │   
+     3    │ - var·xs·=·new·Array<number>(0,·1,·2);
+        3 │ + var·xs·:(number)[]=·[0,·1,·2];
+     4  4 │   
+     5  5 │   var xs /* A */ = /* B */ new /* C */ Array /* D */ < /* E */ number /* F */ > /* G */ ( /* H */ 1 /* I */ , /* J */ 2 /* K */ , /* L */) /* M */;
+  
+
+```
+
+```
+invalid.ts:5:26 lint/style/useArrayLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use an array literal instead of the Array constructor.
+  
+    3 │ var xs = new Array<number>(0, 1, 2);
+    4 │ 
+  > 5 │ var xs /* A */ = /* B */ new /* C */ Array /* D */ < /* E */ number /* F */ > /* G */ ( /* H */ 1 /* I */ , /* J */ 2 /* K */ , /* L */) /* M */;
+      │                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    6 │ 
+    7 │ void new Array<number>();
+  
+  i The Array constructor is misleading because it can be used to preallocate an array of a given length or to create an array with a given list of elements.
+  
+  i Safe fix: Use an array literal.
+  
+     3  3 │   var xs = new Array<number>(0, 1, 2);
+     4  4 │   
+     5    │ - var·xs·/*·A·*/·=·/*·B·*/·new·/*·C·*/·Array·/*·D·*/·<·/*·E·*/·number·/*·F·*/·>·/*·G·*/·(·/*·H·*/·1·/*·I·*/·,·/*·J·*/·2·/*·K·*/·,·/*·L·*/)·/*·M·*/;
+        5 │ + var·xs·/*·A·*/·:·/*·E·*/·(number)[]·/*·F·*/··/*·G·*/·=·/*·B·*/·[·/*·H·*/·1·/*·I·*/·,·/*·J·*/·2·/*·K·*/·,·/*·L·*/]·/*·M·*/;
+     6  6 │   
+     7  7 │   void new Array<number>();
+  
+
+```
+
+```
+invalid.ts:7:6 lint/style/useArrayLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use an array literal instead of the Array constructor.
+  
+    5 │ var xs /* A */ = /* B */ new /* C */ Array /* D */ < /* E */ number /* F */ > /* G */ ( /* H */ 1 /* I */ , /* J */ 2 /* K */ , /* L */) /* M */;
+    6 │ 
+  > 7 │ void new Array<number>();
+      │      ^^^^^^^^^^^^^^^^^^^
+    8 │ 
+    9 │ void new Array<number>(1, 2, 3);
+  
+  i The Array constructor is misleading because it can be used to preallocate an array of a given length or to create an array with a given list of elements.
+  
+  i Safe fix: Use an array literal.
+  
+     5  5 │   var xs /* A */ = /* B */ new /* C */ Array /* D */ < /* E */ number /* F */ > /* G */ ( /* H */ 1 /* I */ , /* J */ 2 /* K */ , /* L */) /* M */;
+     6  6 │   
+     7    │ - void·new·Array<number>();
+        7 │ + void·[]·as·(number)[];
+     8  8 │   
+     9  9 │   void new Array<number>(1, 2, 3);
+  
+
+```
+
+```
+invalid.ts:9:6 lint/style/useArrayLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use an array literal instead of the Array constructor.
+  
+     7 │ void new Array<number>();
+     8 │ 
+   > 9 │ void new Array<number>(1, 2, 3);
+       │      ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    10 │ 
+    11 │ void new Array<1 | 2 | 3 | 4>(1, 2, 3);
+  
+  i The Array constructor is misleading because it can be used to preallocate an array of a given length or to create an array with a given list of elements.
+  
+  i Safe fix: Use an array literal.
+  
+     7  7 │   void new Array<number>();
+     8  8 │   
+     9    │ - void·new·Array<number>(1,·2,·3);
+        9 │ + void·[1,·2,·3]·satisfies·(number)[]·as·(number)[];
+    10 10 │   
+    11 11 │   void new Array<1 | 2 | 3 | 4>(1, 2, 3);
+  
+
+```
+
+```
+invalid.ts:11:6 lint/style/useArrayLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use an array literal instead of the Array constructor.
+  
+     9 │ void new Array<number>(1, 2, 3);
+    10 │ 
+  > 11 │ void new Array<1 | 2 | 3 | 4>(1, 2, 3);
+       │      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    12 │ 
+    13 │ // it already has a type annotation, it should still trigger a diagnostic but should not change the existing type
+  
+  i The Array constructor is misleading because it can be used to preallocate an array of a given length or to create an array with a given list of elements.
+  
+  i Safe fix: Use an array literal.
+  
+     9  9 │   void new Array<number>(1, 2, 3);
+    10 10 │   
+    11    │ - void·new·Array<1·|·2·|·3·|·4>(1,·2,·3);
+       11 │ + void·[1,·2,·3]·satisfies·(1·|·2·|·3·|·4)[]·as·(1·|·2·|·3·|·4)[];
+    12 12 │   
+    13 13 │   // it already has a type annotation, it should still trigger a diagnostic but should not change the existing type
+  
+
+```
+
+```
+invalid.ts:14:20 lint/style/useArrayLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use an array literal instead of the Array constructor.
+  
+    13 │ // it already has a type annotation, it should still trigger a diagnostic but should not change the existing type
+  > 14 │ var xs: string[] = new Array<number>();
+       │                    ^^^^^^^^^^^^^^^^^^^
+    15 │ 
+  
+  i The Array constructor is misleading because it can be used to preallocate an array of a given length or to create an array with a given list of elements.
+  
+  i Safe fix: Use an array literal.
+  
+    12 12 │   
+    13 13 │   // it already has a type annotation, it should still trigger a diagnostic but should not change the existing type
+    14    │ - var·xs:·string[]·=·new·Array<number>();
+       14 │ + var·xs:·string[]·=·[]·as·(number)[];
+    15 15 │   
+  
+
+```
