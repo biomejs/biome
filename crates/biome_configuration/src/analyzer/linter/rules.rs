@@ -1685,7 +1685,7 @@ impl Rules {
 #[serde(rename_all = "camelCase", default, deny_unknown_fields)]
 #[doc = r" A list of rules that belong to this group"]
 pub struct A11y {
-    #[doc = r" It enables the recommended rules for this group"]
+    #[doc = r"Enables the recommended rules for this group"]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub recommended: Option<bool>,
     #[doc = "Enforce that the accessKey attribute is not used on any HTML element."]
@@ -2541,7 +2541,7 @@ impl From<GroupPlainConfiguration> for A11y {
 #[serde(rename_all = "camelCase", default, deny_unknown_fields)]
 #[doc = r" A list of rules that belong to this group"]
 pub struct Complexity {
-    #[doc = r" It enables the recommended rules for this group"]
+    #[doc = r"Enables the recommended rules for this group"]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub recommended: Option<bool>,
     #[doc = "Disallow unclear usage of consecutive space characters in regular expression literals"]
@@ -3451,7 +3451,7 @@ impl From<GroupPlainConfiguration> for Complexity {
 #[serde(rename_all = "camelCase", default, deny_unknown_fields)]
 #[doc = r" A list of rules that belong to this group"]
 pub struct Correctness {
-    #[doc = r" It enables the recommended rules for this group"]
+    #[doc = r"Enables the recommended rules for this group"]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub recommended: Option<bool>,
     #[doc = "Prevent passing of children as props."]
@@ -4685,7 +4685,7 @@ impl From<GroupPlainConfiguration> for Correctness {
 #[serde(rename_all = "camelCase", default, deny_unknown_fields)]
 #[doc = r" A list of rules that belong to this group"]
 pub struct Nursery {
-    #[doc = r" It enables the recommended rules for this group"]
+    #[doc = r"Enables the recommended rules for this group"]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub recommended: Option<bool>,
     #[doc = "Disallow await inside loops."]
@@ -5511,7 +5511,7 @@ impl From<GroupPlainConfiguration> for Nursery {
 #[serde(rename_all = "camelCase", default, deny_unknown_fields)]
 #[doc = r" A list of rules that belong to this group"]
 pub struct Performance {
-    #[doc = r" It enables the recommended rules for this group"]
+    #[doc = r"Enables the recommended rules for this group"]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub recommended: Option<bool>,
     #[doc = "Disallow the use of spread (...) syntax on accumulators."]
@@ -5748,7 +5748,7 @@ impl From<GroupPlainConfiguration> for Performance {
 #[serde(rename_all = "camelCase", default, deny_unknown_fields)]
 #[doc = r" A list of rules that belong to this group"]
 pub struct Security {
-    #[doc = r" It enables the recommended rules for this group"]
+    #[doc = r"Enables the recommended rules for this group"]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub recommended: Option<bool>,
     #[doc = "Disallow target=\"_blank\" attribute without rel=\"noopener\"."]
@@ -5906,7 +5906,7 @@ impl From<GroupPlainConfiguration> for Security {
 #[serde(rename_all = "camelCase", default, deny_unknown_fields)]
 #[doc = r" A list of rules that belong to this group"]
 pub struct Style {
-    #[doc = r" It enables the recommended rules for this group"]
+    #[doc = r"Enables the recommended rules for this group"]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub recommended: Option<bool>,
     #[doc = "Disallow use of CommonJs module system in favor of ESM style imports."]
@@ -7252,7 +7252,7 @@ impl From<GroupPlainConfiguration> for Style {
 #[serde(rename_all = "camelCase", default, deny_unknown_fields)]
 #[doc = r" A list of rules that belong to this group"]
 pub struct Suspicious {
-    #[doc = r" It enables the recommended rules for this group"]
+    #[doc = r"Enables the recommended rules for this group"]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub recommended: Option<bool>,
     #[doc = "Use standard constants instead of approximated literals."]

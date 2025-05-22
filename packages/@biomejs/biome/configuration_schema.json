@@ -212,7 +212,7 @@
 					]
 				},
 				"recommended": {
-					"description": "It enables the recommended rules for this group",
+					"description": "Enables the recommended rules for this group",
 					"type": ["boolean", "null"]
 				},
 				"useAltText": {
@@ -617,7 +617,7 @@
 					]
 				},
 				"recommended": {
-					"description": "It enables the recommended rules for this group",
+					"description": "Enables the recommended rules for this group",
 					"type": ["boolean", "null"]
 				},
 				"useArrowFunction": {
@@ -1104,7 +1104,7 @@
 					]
 				},
 				"recommended": {
-					"description": "It enables the recommended rules for this group",
+					"description": "Enables the recommended rules for this group",
 					"type": ["boolean", "null"]
 				},
 				"useExhaustiveDependencies": {
@@ -2843,7 +2843,7 @@
 					]
 				},
 				"recommended": {
-					"description": "It enables the recommended rules for this group",
+					"description": "Enables the recommended rules for this group",
 					"type": ["boolean", "null"]
 				},
 				"useAdjacentGetterSetter": {
@@ -3221,7 +3221,7 @@
 					]
 				},
 				"recommended": {
-					"description": "It enables the recommended rules for this group",
+					"description": "Enables the recommended rules for this group",
 					"type": ["boolean", "null"]
 				},
 				"useTopLevelRegex": {
@@ -3369,7 +3369,7 @@
 					"enum": ["none"]
 				},
 				{
-					"description": "It enables only the recommended rules for this domain",
+					"description": "Enables only the recommended rules for this domain",
 					"type": "string",
 					"enum": ["recommended"]
 				}
@@ -4074,7 +4074,7 @@
 					]
 				},
 				"recommended": {
-					"description": "It enables the recommended rules for this group",
+					"description": "Enables the recommended rules for this group",
 					"type": ["boolean", "null"]
 				}
 			},
@@ -4167,14 +4167,14 @@
 			"type": "object",
 			"properties": {
 				"organizeImports": {
-					"description": "Provides a code action to sort the imports and exports in the file using a built-in or custom order.",
+					"description": "Sort the imports and exports in the file using a built-in or custom order.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleAssistConfiguration_for_Options" },
 						{ "type": "null" }
 					]
 				},
 				"recommended": {
-					"description": "It enables the recommended rules for this group",
+					"description": "Enables the recommended rules for this group",
 					"type": ["boolean", "null"]
 				},
 				"useSortedAttributes": {
@@ -4185,7 +4185,7 @@
 					]
 				},
 				"useSortedKeys": {
-					"description": "Sorts the keys of a JSON object in natural order",
+					"description": "Sort the keys of a JS or JSON object in natural order.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleAssistConfiguration_for_Null" },
 						{ "type": "null" }
@@ -4412,7 +4412,7 @@
 					]
 				},
 				"recommended": {
-					"description": "It enables the recommended rules for this group",
+					"description": "Enables the recommended rules for this group",
 					"type": ["boolean", "null"]
 				},
 				"useArrayLiterals": {
@@ -5189,7 +5189,7 @@
 					]
 				},
 				"recommended": {
-					"description": "It enables the recommended rules for this group",
+					"description": "Enables the recommended rules for this group",
 					"type": ["boolean", "null"]
 				},
 				"useAdjacentOverloadSignatures": {
