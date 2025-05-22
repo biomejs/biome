@@ -324,7 +324,7 @@ where
     let file_source = &test.document_file_source();
     let supression_reason = None;
 
-    let settings = workspace_settings.get_settings(project_key);
+    let settings = workspace_settings.get_root_settings(project_key);
     let language_settings = settings
         .as_ref()
         .map(|s| L::lookup_settings(&s.languages))
@@ -374,9 +374,9 @@ fn assert_lint(
             );
         };
 
-        if let Some(mut settings) = workspace_settings.get_settings(project_key) {
+        if let Some(mut settings) = workspace_settings.get_root_settings(project_key) {
             settings.merge_with_configuration(partial_config.clone(), None)?;
-            workspace_settings.set_settings(project_key, settings);
+            workspace_settings.set_root_settings(project_key, settings);
         }
     }
 

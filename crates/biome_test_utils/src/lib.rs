@@ -154,7 +154,7 @@ where
         Default::default()
     } else {
         let configuration = deserialized.into_deserialized().unwrap_or_default();
-        let mut settings = projects.get_settings(key).unwrap_or_default();
+        let mut settings = projects.get_root_settings(key).unwrap_or_default();
         settings
             .merge_with_configuration(configuration, None)
             .unwrap();

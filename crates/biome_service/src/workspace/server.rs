@@ -17,7 +17,7 @@ use crate::file_handlers::{
     ParseResult,
 };
 use crate::projects::Projects;
-use crate::settings::WorkspaceSettingsHandle;
+use crate::settings::{Settings, WorkspaceSettingsHandle};
 use crate::workspace::{
     FileFeaturesResult, GetFileContentParams, GetRegisteredTypesParams, GetTypeInfoParams,
     IsPathIgnoredParams, OpenProjectResult, RageEntry, RageParams, RageResult, ScanKind,
@@ -489,7 +489,7 @@ impl WorkspaceServer {
 
         let settings = self
             .projects
-            .get_settings(project_key)
+            .get_settings_based_on_path(project_key, path)
             .ok_or_else(WorkspaceError::no_project)?;
         let parsed = parse(
             &BiomePath::new(path),
@@ -595,7 +595,7 @@ impl WorkspaceServer {
         let project_path = self.projects.get_project_path(project_key);
         let mut settings = self
             .projects
-            .get_settings(project_key)
+            .get_root_settings(project_key)
             .ok_or_else(WorkspaceError::no_project)?;
 
         let vcs_settings = &mut settings.vcs_settings;
@@ -617,7 +617,7 @@ impl WorkspaceServer {
             }
         }
 
-        self.projects.set_settings(project_key, settings);
+        self.projects.set_root_settings(project_key, settings);
 
         Ok(())
     }
@@ -759,7 +759,7 @@ impl Workspace for WorkspaceServer {
         let capabilities = self.features.get_capabilities(language);
         let handle = WorkspaceSettingsHandle::from(
             self.projects
-                .get_settings(project_key)
+                .get_settings_based_on_path(project_key, &params.path)
                 .ok_or_else(WorkspaceError::no_project)?,
         );
         let mut file_features = FileFeaturesResult::new();
@@ -815,18 +815,39 @@ impl Workspace for WorkspaceServer {
         &self,
         params: UpdateSettingsParams,
     ) -> Result<UpdateSettingsResult, WorkspaceError> {
-        let mut settings = self
-            .projects
-            .get_settings(params.project_key)
-            .ok_or_else(WorkspaceError::no_project)?;
-
         let workspace_directory = params.workspace_directory.map(|p| p.to_path_buf());
+
+        let mut settings = if params.is_nested {
+            if !self.projects.is_project_registered(params.project_key) {
+                return Err(WorkspaceError::no_project());
+            }
+
+            if let Some(workspace_directory) = &workspace_directory {
+                self.projects
+                    .get_nested_settings(params.project_key, workspace_directory.as_path())
+                    .unwrap_or_else(|| {
+                        if params.configuration.needs_to_extend_from_root() {
+                            self.projects
+                                .get_root_settings(params.project_key)
+                                .unwrap_or_default()
+                        } else {
+                            Settings::default()
+                        }
+                    })
+            } else {
+                return Err(WorkspaceError::no_workspace_directory());
+            }
+        } else {
+            self.projects
+                .get_root_settings(params.project_key)
+                .ok_or_else(WorkspaceError::no_project)?
+        };
 
         settings.merge_with_configuration(params.configuration, workspace_directory.clone())?;
 
         let diagnostics = self.load_plugins(
             params.project_key,
-            &workspace_directory.unwrap_or_default(),
+            &workspace_directory.clone().unwrap_or_default(),
             &settings.plugins,
         );
         let has_errors = diagnostics
@@ -839,7 +860,16 @@ impl Workspace for WorkspaceServer {
             return Err(WorkspaceError::plugin_errors(diagnostics));
         }
 
-        self.projects.set_settings(params.project_key, settings);
+        if params.is_nested {
+            self.projects.set_nested_settings(
+                params.project_key,
+                workspace_directory.unwrap_or_default(),
+                settings,
+            );
+        } else {
+            self.projects
+                .set_root_settings(params.project_key, settings);
+        }
 
         Ok(UpdateSettingsResult {
             diagnostics: diagnostics.into_iter().map(Into::into).collect(),
@@ -1014,7 +1044,7 @@ impl Workspace for WorkspaceServer {
             .ok_or_else(self.build_capability_error(&params.path))?;
         let handle = WorkspaceSettingsHandle::from(
             self.projects
-                .get_settings(params.project_key)
+                .get_settings_based_on_path(params.project_key, &params.path)
                 .ok_or_else(WorkspaceError::no_project)?,
         );
         let parse = self.get_parse(&params.path)?;
@@ -1215,8 +1245,9 @@ impl Workspace for WorkspaceServer {
             if let Some(lint) = capabilities.analyzer.lint {
                 let settings = self
                     .projects
-                    .get_settings(project_key)
+                    .get_settings_based_on_path(project_key, &path)
                     .ok_or_else(WorkspaceError::no_project)?;
+
                 let results = lint(LintParams {
                     parse,
                     workspace: &settings.into(),
@@ -1302,7 +1333,7 @@ impl Workspace for WorkspaceServer {
         let language = self.get_file_source(&path);
         let settings = self
             .projects
-            .get_settings(project_key)
+            .get_settings_based_on_path(project_key, &path)
             .ok_or_else(WorkspaceError::no_project)?;
         Ok(code_actions(CodeActionsParams {
             parse,
@@ -1338,7 +1369,7 @@ impl Workspace for WorkspaceServer {
             .ok_or_else(self.build_capability_error(&params.path))?;
         let handle = WorkspaceSettingsHandle::from(
             self.projects
-                .get_settings(params.project_key)
+                .get_settings_based_on_path(params.project_key, &params.path)
                 .ok_or_else(WorkspaceError::no_project)?,
         );
 
@@ -1361,7 +1392,7 @@ impl Workspace for WorkspaceServer {
             .ok_or_else(self.build_capability_error(&params.path))?;
         let settings = WorkspaceSettingsHandle::from(
             self.projects
-                .get_settings(params.project_key)
+                .get_settings_based_on_path(params.project_key, &params.path)
                 .ok_or_else(WorkspaceError::no_project)?,
         );
         let parse = self.get_parse(&params.path)?;
@@ -1390,7 +1421,7 @@ impl Workspace for WorkspaceServer {
 
         let handle = WorkspaceSettingsHandle::from(
             self.projects
-                .get_settings(params.project_key)
+                .get_settings_based_on_path(params.project_key, &params.path)
                 .ok_or_else(WorkspaceError::no_project)?,
         );
         let parse = self.get_parse(&params.path)?;
@@ -1441,7 +1472,7 @@ impl Workspace for WorkspaceServer {
 
         let settings = self
             .projects
-            .get_settings(project_key)
+            .get_settings_based_on_path(project_key, &path)
             .ok_or_else(WorkspaceError::no_project)?;
         let language = self.get_file_source(&path);
         fix_all(FixAllParams {
@@ -1521,7 +1552,7 @@ impl Workspace for WorkspaceServer {
             .ok_or_else(self.build_capability_error(&path))?;
         let settings = self
             .projects
-            .get_settings(project_key)
+            .get_settings_based_on_path(project_key, &path)
             .ok_or_else(WorkspaceError::no_project)?;
         let parse = self.get_parse(&path)?;
 

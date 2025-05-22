@@ -43,6 +43,7 @@ fn test_scanner_only_loads_type_definitions_from_node_modules() {
             project_key,
             configuration: Default::default(),
             workspace_directory: Some(fixtures_path.clone().into()),
+            is_nested: false,
         })
         .unwrap();
 
@@ -119,6 +120,7 @@ fn test_scanner_ignored_files_are_not_loaded() {
             project_key,
             configuration,
             workspace_directory: Some(fixtures_path.clone().into()),
+            is_nested: false,
         })
         .unwrap();
 
@@ -187,6 +189,7 @@ fn test_scanner_required_files_are_only_ignored_in_ignored_directories() {
             project_key,
             configuration,
             workspace_directory: Some(fixtures_path.clone().into()),
+            is_nested: false,
         })
         .unwrap();
 

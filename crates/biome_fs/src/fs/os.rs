@@ -406,6 +406,7 @@ pub struct TemporaryFs {
     /// name passed in the [TemporaryFs::new] function
     pub working_directory: Utf8PathBuf,
     files: Vec<(Utf8PathBuf, String)>,
+    former_working_directory: Option<Utf8PathBuf>,
 }
 
 impl TemporaryFs {
@@ -425,6 +426,7 @@ impl TemporaryFs {
         Self {
             working_directory: Utf8PathBuf::from_path_buf(path).unwrap(),
             files: Vec::new(),
+            former_working_directory: None,
         }
     }
 
@@ -444,6 +446,11 @@ impl TemporaryFs {
             .expect("Temporary directory to exist and being writable");
     }
 
+    pub fn append_to_working_directory(&mut self, path: &str) {
+        self.former_working_directory = Some(self.working_directory.clone());
+        self.working_directory = self.working_directory.join(path);
+    }
+
     /// Returns the path to use when running the CLI
     pub fn cli_path(&self) -> &str {
         self.working_directory.as_str()
@@ -458,10 +465,15 @@ impl TemporaryFs {
     /// will be stripped of the working directory path, making snapshots predictable.
     pub fn create_mem(&self) -> MemoryFileSystem {
         let mut fs = MemoryFileSystem::default();
+        let working_directory = if let Some(working_directory) = &self.former_working_directory {
+            working_directory.clone()
+        } else {
+            self.working_directory.clone()
+        };
         for (path, content) in self.files.iter() {
             fs.insert(
                 path.clone()
-                    .strip_prefix(self.working_directory.as_str())
+                    .strip_prefix(working_directory.as_str())
                     .expect("Working directory")
                     .to_path_buf(),
                 content.as_bytes(),

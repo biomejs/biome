@@ -10,6 +10,7 @@ pub mod bool;
 pub mod css;
 pub mod diagnostics;
 pub mod editorconfig;
+mod extends;
 pub mod formatter;
 pub mod generated;
 pub mod graphql;
@@ -28,6 +29,7 @@ use crate::bool::Bool;
 use crate::css::{CssFormatterConfiguration, CssLinterConfiguration, CssParserConfiguration};
 pub use crate::diagnostics::BiomeDiagnostic;
 pub use crate::diagnostics::CantLoadExtendFile;
+use crate::extends::Extends;
 pub use crate::generated::{push_to_analyzer_assist, push_to_analyzer_rules};
 use crate::graphql::{GraphqlFormatterConfiguration, GraphqlLinterConfiguration};
 pub use crate::grit::{GritConfiguration, grit_configuration};
@@ -102,7 +104,7 @@ pub struct Configuration {
     /// A list of paths to other JSON files, used to extends the current configuration.
     #[bpaf(hide, pure(Default::default()))]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub extends: Option<Vec<Box<str>>>,
+    pub extends: Option<Extends>,
 
     /// The configuration of the VCS integration
     #[bpaf(external(vcs_configuration), optional, hide_usage)]
@@ -220,6 +222,18 @@ impl Configuration {
             }),
             ..Default::default()
         }
+    }
+
+    pub fn is_root(&self) -> bool {
+        self.root.is_some_and(|root| root.value())
+    }
+
+    pub fn needs_to_extend_from_root(&self) -> bool {
+        !self.is_root()
+            && self
+                .extends
+                .as_ref()
+                .is_some_and(|extends| extends.extends_root())
     }
 
     pub fn get_formatter_configuration(&self) -> FormatterConfiguration {

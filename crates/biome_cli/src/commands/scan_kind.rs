@@ -15,7 +15,7 @@ pub(crate) fn compute_scan_kind(
 ) -> Option<ScanKind> {
     if execution.is_stdin() {
         Some(ScanKind::None)
-    } else if execution.is_migrate() {
+    } else if execution.is_migrate() || configuration.is_root() {
         Some(ScanKind::KnownFiles)
     } else if execution.is_format() {
         // There's no need to scan further known files if the VCS isn't enabled

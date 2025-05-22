@@ -20,7 +20,11 @@ struct ProjectData {
     ///
     /// Usually inferred from the **top-level** configuration file,
     /// e.g. `biome.json`.
-    settings: Settings,
+    root_settings: Settings,
+
+    /// Optional nested settings, usually populated in monorepo
+    /// projects.
+    nested_settings: HashMap<Utf8PathBuf, Settings, FxBuildHasher>,
 }
 
 /// Type that holds all the settings and information for different projects
@@ -56,7 +60,8 @@ impl Projects {
             key,
             ProjectData {
                 path,
-                settings: Settings::default(),
+                root_settings: Settings::default(),
+                nested_settings: HashMap::default(),
             },
         );
         key
@@ -67,16 +72,58 @@ impl Projects {
         self.0.pin().remove(&project_key);
     }
 
-    /// Retrieves the settings for the given project.
-    ///
-    /// ## Error
-    ///
-    /// If the project doesn't contain any [Settings]
-    pub fn get_settings(&self, project_key: ProjectKey) -> Option<Settings> {
+    /// Retrieves the correct settings for the given project.
+    pub fn get_settings_based_on_path(
+        &self,
+        project_key: ProjectKey,
+        file_path: &Utf8Path,
+    ) -> Option<Settings> {
+        self.0.pin().get(&project_key).map(|data| {
+            debug!(
+                "Get settings for {} {}",
+                file_path.as_str(),
+                data.nested_settings.len()
+            );
+            let nested_settings = data.nested_settings.pin();
+            for (project_path, settings) in nested_settings.iter() {
+                if file_path.starts_with(project_path) {
+                    return settings.clone();
+                }
+            }
+
+            data.root_settings.clone()
+        })
+    }
+
+    /// Retrieves the correct settings for the given project.
+    pub fn get_nested_settings(
+        &self,
+        project_key: ProjectKey,
+        file_path: &Utf8Path,
+    ) -> Option<Settings> {
+        self.0.pin().get(&project_key).and_then(|data| {
+            let nested_settings = data.nested_settings.pin();
+
+            nested_settings.iter().find_map(|(project_path, settings)| {
+                if file_path.starts_with(project_path) {
+                    Some(settings.clone())
+                } else {
+                    None
+                }
+            })
+        })
+    }
+
+    /// Whether the project has been registered
+    pub fn is_project_registered(&self, project_key: ProjectKey) -> bool {
+        self.0.pin().get(&project_key).is_some()
+    }
+
+    pub fn get_root_settings(&self, project_key: ProjectKey) -> Option<Settings> {
         self.0
             .pin()
             .get(&project_key)
-            .map(|data| data.settings.clone())
+            .map(|data| data.root_settings.clone())
     }
 
     /// Retrieves the `files` settings for the given project.
@@ -84,7 +131,7 @@ impl Projects {
         self.0
             .pin()
             .get(&project_key)
-            .map(|data| data.settings.files.clone())
+            .map(|data| data.root_settings.files.clone())
     }
 
     /// Retrieves the ignore matches that have been stored inside the settings of the current project
@@ -92,11 +139,11 @@ impl Projects {
         self.0
             .pin()
             .get(&project_key)
-            .and_then(|data| data.settings.vcs_settings.ignore_matches.clone())
+            .and_then(|data| data.root_settings.vcs_settings.ignore_matches.clone())
     }
 
-    /// Sets the settings for the given project.
-    pub fn set_settings(&self, project_key: ProjectKey, settings: Settings) {
+    /// Sets the root settings for the given project.
+    pub fn set_root_settings(&self, project_key: ProjectKey, settings: Settings) {
         let data = self.0.pin();
         let Some(project_data) = data.get(&project_key) else {
             return;
@@ -104,10 +151,28 @@ impl Projects {
 
         let project_data = ProjectData {
             path: project_data.path.clone(),
-            settings,
+            root_settings: settings,
+            nested_settings: project_data.nested_settings.clone(),
         };
 
         data.insert(project_key, project_data);
+    }
+
+    /// Inserts a nested setting
+    #[instrument(level = "debug", skip_all)]
+    pub fn set_nested_settings(
+        &self,
+        project_key: ProjectKey,
+        path: Utf8PathBuf,
+        settings: Settings,
+    ) {
+        let data = self.0.pin();
+        let Some(project_data) = data.get(&project_key) else {
+            return;
+        };
+
+        debug!("Set nested settings for {}", path.as_str());
+        project_data.nested_settings.pin().insert(path, settings);
     }
 
     pub fn get_project_path(&self, project_key: ProjectKey) -> Option<Utf8PathBuf> {
@@ -152,7 +217,7 @@ impl Projects {
             .pin()
             .get(&project_key)
             .and_then(|data| {
-                data.settings
+                data.root_settings
                     .override_settings
                     .patterns
                     .first()
@@ -163,7 +228,7 @@ impl Projects {
                             None
                         }
                     })
-                    .or(data.settings.files.max_size)
+                    .or(data.root_settings.files.max_size)
             })
             .unwrap_or_default();
 
@@ -183,7 +248,7 @@ impl Projects {
             return false;
         };
 
-        let settings = &project_data.settings;
+        let settings = &project_data.root_settings;
         let feature_includes_files = match feature {
             FeatureKind::Format => {
                 let formatter = &settings.formatter;

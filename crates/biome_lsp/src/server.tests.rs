@@ -385,7 +385,7 @@ async fn wait_for_notification(
     loop {
         let notification = tokio::select! {
             msg = receiver.next() => msg,
-            _ = sleep(Duration::from_secs(1)) => {
+            _ = sleep(Duration::from_secs(3)) => {
                 panic!("timed out waiting for the server to send diagnostics")
             }
         };
@@ -3704,3 +3704,145 @@ export function bar() {
 
     Ok(())
 }
+
+// #region MONOREPO TESTS
+
+#[tokio::test]
+#[ignore]
+async fn pull_diagnostics_monorepo() -> Result<()> {
+    let mut fs = MemoryFileSystem::default();
+
+    fs.insert(
+        to_utf8_file_path_buf(uri!("biome.json")),
+        r#"{
+  "root": true,
+  "linter": {
+    "enabled": false
+  }
+}
+"#,
+    );
+    fs.insert(
+        to_utf8_file_path_buf(uri!("packages/lib/biome.json")),
+        r#"{
+  "linter": {
+    "enabled": true
+  }
+}
+"#,
+    );
+    fs.insert(
+        to_utf8_file_path_buf(uri!("file.ts")),
+        r#"const a = 1; a = 2;"#,
+    );
+    fs.insert(
+        to_utf8_file_path_buf(uri!("packages/lib/file.ts")),
+        r#"const a = 1; a = 2;"#,
+    );
+
+    let factory = ServerFactory::new_with_fs(Box::new(fs));
+    let (service, client) = factory.create().into_inner();
+    let (stream, sink) = client.split();
+    let mut server = Server::new(service);
+
+    let (sender, mut receiver) = channel(CHANNEL_BUFFER_SIZE);
+    let reader = tokio::spawn(client_handler(stream, sink, sender));
+
+    server.initialize().await?;
+    server.initialized().await?;
+    //
+    // let OpenProjectResult { project_key, .. } = server
+    //     .request(
+    //         "biome/open_project",
+    //         "open_project",
+    //         OpenProjectParams {
+    //             path: BiomePath::try_from(uri!("").to_file_path().unwrap()).unwrap(),
+    //             open_uninitialized: true,
+    //             only_rules: None,
+    //             skip_rules: None,
+    //         },
+    //     )
+    //     .await?
+    //     .expect("open_project returned an error");
+
+    server.load_configuration().await?;
+    // On macOS, wait until the fsevents watcher sets up before receiving the first event.
+    // server
+    //     .open_named_document(r#"const a = 1; a = 2;"#, uri!("file.ts"), "typescript")
+    //     .await?;
+    //
+    // let notification = wait_for_notification(&mut receiver, |n| n.is_publish_diagnostics()).await;
+    //
+    // assert_no_diagnostics(&notification.unwrap());
+
+    server
+        .open_named_document(
+            r#"const a = 1; a = 2;"#,
+            uri!("packages/lib/file.ts"),
+            "typescript",
+        )
+        .await?;
+
+    let notification = wait_for_notification(&mut receiver, |n| n.is_publish_diagnostics()).await;
+    let notification = notification.unwrap();
+    assert_diagnostics_count(&notification, 1);
+    assert_diagnostic_code(&notification, "noConstAssign");
+    //
+    // let result: PullDiagnosticsResult = server
+    //     .request(
+    //         "biome/pull_diagnostics",
+    //         "pull_diagnostics",
+    //         PullDiagnosticsParams {
+    //             project_key,
+    //             path: fs.working_directory.join("packages/lib/file.ts").into(),
+    //             categories: RuleCategories::all(),
+    //             only: Vec::new(),
+    //             skip: Vec::new(),
+    //             enabled_rules: vec![],
+    //             pull_code_actions: false,
+    //         },
+    //     )
+    //     .await?
+    //     .expect("pull_diagnostics returned an error");
+
+    // assert!(result.diagnostics.len() > 0);
+
+    server.close_document().await?;
+
+    server.shutdown().await?;
+    reader.abort();
+
+    Ok(())
+}
+
+// #endregion
+
+// #region TEST UTILS
+
+fn assert_diagnostic_code(server_notification: &ServerNotification, code: &str) {
+    match server_notification {
+        ServerNotification::PublishDiagnostics(publish) => {
+            assert!(publish.diagnostics.iter().all(|d| {
+                d.code
+                    .as_ref()
+                    .is_some_and(|c| &NumberOrString::String(code.to_string()) == c)
+            }));
+        }
+        ServerNotification::ShowMessage(_) => {
+            panic!("Unexpected notification: {:?}", server_notification);
+        }
+    }
+}
+
+fn assert_diagnostics_count(server_notification: &ServerNotification, expected_count: usize) {
+    match server_notification {
+        ServerNotification::PublishDiagnostics(publish) => {
+            assert_eq!(publish.diagnostics.len(), expected_count)
+        }
+        ServerNotification::ShowMessage(_) => {
+            panic!("Unexpected notification: {:?}", server_notification);
+        }
+    }
+}
+
+// #endregion

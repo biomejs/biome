@@ -50,6 +50,8 @@ use tracing::instrument;
 /// These can be either root settings, or settings for a section of the project.
 #[derive(Clone, Debug, Default)]
 pub struct Settings {
+    /// Whether this belongs to a root configuration file
+    pub root: bool,
     /// Formatter settings applied to all files in the project.
     pub formatter: FormatSettings,
     /// Linter settings applied to all files in the project.
@@ -76,6 +78,9 @@ impl Settings {
         configuration: Configuration,
         working_directory: Option<Utf8PathBuf>,
     ) -> Result<(), WorkspaceError> {
+        // Set root value
+        self.root = configuration.root.is_some_and(|root| root.into());
+
         // formatter part
         if let Some(formatter) = configuration.formatter {
             self.formatter = to_format_settings(working_directory.clone(), formatter)?;
