@@ -1194,7 +1194,10 @@ pub trait Rule: RuleMeta + Sized {
         Self: 'static,
     {
         let category = <Self::Group as RuleGroup>::Category::CATEGORY;
-        if matches!(category, RuleCategory::Lint | RuleCategory::Action) {
+        if matches!(
+            category,
+            RuleCategory::Lint | RuleCategory::Action | RuleCategory::Syntax
+        ) {
             let rule_category = format!(
                 "{}/{}/{}",
                 category.as_suppression_category(),
@@ -1242,7 +1245,10 @@ pub trait Rule: RuleMeta + Sized {
     {
         // if the rule belongs to `Lint`, we auto generate an action to suppress the rule
         let category = <Self::Group as RuleGroup>::Category::CATEGORY;
-        if matches!(category, RuleCategory::Lint | RuleCategory::Action) {
+        if matches!(
+            category,
+            RuleCategory::Lint | RuleCategory::Action | RuleCategory::Syntax
+        ) {
             let rule_category = format!(
                 "{}/{}/{}",
                 category.as_suppression_category(),
