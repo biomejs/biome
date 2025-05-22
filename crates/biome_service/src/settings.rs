@@ -220,6 +220,37 @@ impl Settings {
         result
     }
 
+    /// Return plugins taking overrides into account
+    pub fn as_plugins(&self, path: &Utf8Path) -> Cow<Plugins> {
+        let mut result = Cow::Borrowed(&self.plugins);
+
+        for pattern in &self.override_settings.patterns {
+            if pattern.is_file_included(path) {
+                result.to_mut().0.extend_from_slice(&pattern.plugins.0);
+            }
+        }
+
+        result
+    }
+
+    /// Return all plugins configured in setting
+    pub fn as_all_plugins(&self) -> Cow<Plugins> {
+        let mut result = Cow::Borrowed(&self.plugins);
+
+        let all_override_plugins = self
+            .override_settings
+            .patterns
+            .iter()
+            .flat_map(|pattern| pattern.plugins.0.iter().cloned())
+            .collect::<Vec<_>>();
+
+        if !all_override_plugins.is_empty() {
+            result.to_mut().0.extend(all_override_plugins);
+        }
+
+        result
+    }
+
     pub fn is_formatter_enabled(&self) -> bool {
         self.formatter.is_enabled()
     }
@@ -1240,6 +1271,8 @@ pub struct OverrideSettingPattern {
     pub languages: LanguageListSettings,
     /// Files specific settings
     pub files: OverrideFilesSettings,
+    /// Additional plugins to be applied
+    pub plugins: Plugins,
 }
 
 impl OverrideSettingPattern {
@@ -1516,6 +1549,7 @@ pub fn to_override_settings(
                 actions: assist.actions,
             })
             .unwrap_or_default();
+        let plugins = pattern.plugins.unwrap_or_default();
 
         let files = pattern
             .files
@@ -1549,6 +1583,7 @@ pub fn to_override_settings(
             assist,
             languages,
             files,
+            plugins,
         };
 
         override_settings.patterns.push(pattern_setting);
