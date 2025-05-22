@@ -2276,7 +2276,7 @@
 					"enum": ["namespaceLike"]
 				},
 				{
-					"description": "TypeScript mamespaces",
+					"description": "TypeScript namespaces",
 					"type": "string",
 					"enum": ["namespace"]
 				},
