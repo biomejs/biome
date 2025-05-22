@@ -4167,7 +4167,7 @@
 			"type": "object",
 			"properties": {
 				"organizeImports": {
-					"description": "Sort the imports and exports in the file using a built-in or custom order.",
+					"description": "Provides a code action to sort the imports and exports in the file using a built-in or custom order.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleAssistConfiguration_for_Options" },
 						{ "type": "null" }
@@ -4185,7 +4185,7 @@
 					]
 				},
 				"useSortedKeys": {
-					"description": "Sort the keys of a JS or JSON object in natural order.",
+					"description": "Sort the keys of a JSON object in natural order.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleAssistConfiguration_for_Null" },
 						{ "type": "null" }

@@ -808,7 +808,7 @@ export type VcsClientKind = "git";
  */
 export interface Source {
 	/**
-	 * Sort the imports and exports in the file using a built-in or custom order.
+	 * Provides a code action to sort the imports and exports in the file using a built-in or custom order.
 	 */
 	organizeImports?: RuleAssistConfiguration_for_Options;
 	/**
@@ -820,7 +820,7 @@ export interface Source {
 	 */
 	useSortedAttributes?: RuleAssistConfiguration_for_Null;
 	/**
-	 * Sort the keys of a JS or JSON object in natural order.
+	 * Sort the keys of a JSON object in natural order.
 	 */
 	useSortedKeys?: RuleAssistConfiguration_for_Null;
 	/**
