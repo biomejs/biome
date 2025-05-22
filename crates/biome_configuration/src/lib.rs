@@ -222,6 +222,10 @@ impl Configuration {
         }
     }
 
+    pub fn is_root(&self) -> bool {
+        self.root.is_some_and(|root| root.value() == true)
+    }
+
     pub fn get_formatter_configuration(&self) -> FormatterConfiguration {
         self.formatter.clone().unwrap_or_default()
     }
@@ -525,6 +529,9 @@ pub enum ConfigurationPathHint {
     #[default]
     None,
 
+    /// Usually
+    FromRoot(Utf8PathBuf),
+
     /// Very similar to [ConfigurationPathHint::None]. However, the path provided by this variant
     /// will be used as **working directory**, which means that all globs defined in the configuration
     /// will use **this path** as base path.
@@ -554,6 +561,11 @@ impl Display for ConfigurationPathHint {
             Self::FromUser(path) => {
                 write!(fmt, "Configuration path provided by the user: {}", path,)
             }
+            ConfigurationPathHint::FromRoot(path) => write!(
+                fmt,
+                "Configuration path provided from the root of the workspace: {}",
+                path,
+            ),
         }
     }
 }

@@ -716,6 +716,7 @@ impl Session {
                 .map(Utf8PathBuf::as_path)
                 .map(BiomePath::from),
             configuration,
+            is_nested: true,
         });
 
         self.insert_and_scan_project(

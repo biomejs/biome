@@ -45,6 +45,8 @@ pub enum WorkspaceError {
     Configuration(ConfigurationDiagnostic),
     /// An operation is attempted on the registered project, but there is no registered project.
     NoProject(NoProject),
+    /// Thrown when the workspace attempts to register a nested project, but no working directory was provided
+    NoWorkspaceDirectory(NoWorkspaceDirectory),
     /// Error thrown when Biome cannot rename a symbol.
     RenameError(RenameError),
     /// Error emitted by the underlying transport layer for a remote Workspace
@@ -84,6 +86,10 @@ impl WorkspaceError {
 
     pub fn no_project() -> Self {
         Self::NoProject(NoProject)
+    }
+
+    pub fn no_workspace_directory() -> Self {
+        Self::NoWorkspaceDirectory(NoWorkspaceDirectory)
     }
 
     pub fn file_ignored(path: String) -> Self {
@@ -320,6 +326,10 @@ Use the `files.maxSize` configuration to change the maximum size of files proces
     )
 )]
 pub struct NoProject;
+
+#[derive(Debug, Serialize, Deserialize, Diagnostic)]
+#[diagnostic(category = "project")]
+pub struct NoWorkspaceDirectory;
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct SourceFileNotSupported {
