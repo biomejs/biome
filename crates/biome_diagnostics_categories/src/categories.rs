@@ -206,6 +206,7 @@ define_categories! {
     "lint/nursery/useSortedClasses": "https://biomejs.dev/linter/rules/use-sorted-classes",
     "lint/nursery/useSortedProperties": "https://biomejs.dev/linter/rules/use-sorted-properties",
     "lint/nursery/useSymbolDescription": "https://biomejs.dev/linter/rules/use-symbol-description",
+    "lint/nursery/useUniqueElementIds": "https://biomejs.dev/linter/rules/use-unique-element-ids",
     "lint/performance/noAccumulatingSpread": "https://biomejs.dev/linter/rules/no-accumulating-spread",
     "lint/performance/noBarrelFile": "https://biomejs.dev/linter/rules/no-barrel-file",
     "lint/performance/noDelete": "https://biomejs.dev/linter/rules/no-delete",

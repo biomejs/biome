@@ -1659,6 +1659,10 @@ export interface Nursery {
 	 * Require a description parameter for the Symbol().
 	 */
 	useSymbolDescription?: RuleConfiguration_for_Null;
+	/**
+	 * Prevent the usage of static string literal id attribute on elements.
+	 */
+	useUniqueElementIds?: RuleConfiguration_for_Null;
 }
 /**
  * A list of rules that belong to this group
@@ -3512,6 +3516,7 @@ export type Category =
 	| "lint/nursery/useSortedClasses"
 	| "lint/nursery/useSortedProperties"
 	| "lint/nursery/useSymbolDescription"
+	| "lint/nursery/useUniqueElementIds"
 	| "lint/performance/noAccumulatingSpread"
 	| "lint/performance/noBarrelFile"
 	| "lint/performance/noDelete"
