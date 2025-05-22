@@ -123,7 +123,7 @@ impl JsBinding {
     }
 }
 
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Copy, Debug, Default)]
 pub enum JsDeclarationKind {
     /// A `class` declaration.
     Class,
@@ -164,6 +164,38 @@ pub enum JsDeclarationKind {
 }
 
 impl JsDeclarationKind {
+    /// Returns whether this declaration declares a type.
+    #[expect(unused)] // TODO: We need to handle value/type duality better.
+    pub fn declares_type(&self) -> bool {
+        matches!(
+            self,
+            Self::Class
+                | Self::Enum
+                | Self::Import
+                | Self::ImportType
+                | Self::Interface
+                | Self::Namespace
+                | Self::Type
+                | Self::Unknown
+        )
+    }
+
+    /// Returns whether this declaration declares a runtime value.
+    #[expect(unused)] // TODO: We need to handle value/type duality better.
+    pub fn declares_value(&self) -> bool {
+        matches!(
+            self,
+            Self::Class
+                | Self::Enum
+                | Self::HoistedValue
+                | Self::Import
+                | Self::Namespace
+                | Self::Unknown
+                | Self::Using
+                | Self::Value
+        )
+    }
+
     pub fn from_node(node: &JsSyntaxNode) -> Self {
         let Some(declaration) = node.ancestors().find_map(AnyJsDeclaration::cast) else {
             return match node.ancestors().find_map(JsImport::cast) {
