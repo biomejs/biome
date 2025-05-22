@@ -397,6 +397,7 @@ pub enum RuleName {
     UseThrowOnlyError,
     UseTopLevelRegex,
     UseTrimStartEnd,
+    UseUniqueElementIds,
     UseValidAnchor,
     UseValidAriaProps,
     UseValidAriaRole,
@@ -723,6 +724,7 @@ impl RuleName {
             Self::UseThrowOnlyError => "useThrowOnlyError",
             Self::UseTopLevelRegex => "useTopLevelRegex",
             Self::UseTrimStartEnd => "useTrimStartEnd",
+            Self::UseUniqueElementIds => "useUniqueElementIds",
             Self::UseValidAnchor => "useValidAnchor",
             Self::UseValidAriaProps => "useValidAriaProps",
             Self::UseValidAriaRole => "useValidAriaRole",
@@ -1019,7 +1021,7 @@ impl RuleName {
             Self::UseMediaCaption => RuleGroup::A11y,
             Self::UseNamedOperation => RuleGroup::Nursery,
             Self::UseNamespaceKeyword => RuleGroup::Suspicious,
-            Self::UseNamingConvention => RuleGroup::Nursery,
+            Self::UseNamingConvention => RuleGroup::Style,
             Self::UseNodeAssertStrict => RuleGroup::Style,
             Self::UseNodejsImportProtocol => RuleGroup::Style,
             Self::UseNumberNamespace => RuleGroup::Style,
@@ -1045,6 +1047,7 @@ impl RuleName {
             Self::UseThrowOnlyError => RuleGroup::Style,
             Self::UseTopLevelRegex => RuleGroup::Performance,
             Self::UseTrimStartEnd => RuleGroup::Style,
+            Self::UseUniqueElementIds => RuleGroup::Nursery,
             Self::UseValidAnchor => RuleGroup::A11y,
             Self::UseValidAriaProps => RuleGroup::A11y,
             Self::UseValidAriaRole => RuleGroup::A11y,
@@ -1376,6 +1379,7 @@ impl std::str::FromStr for RuleName {
             "useThrowOnlyError" => Ok(Self::UseThrowOnlyError),
             "useTopLevelRegex" => Ok(Self::UseTopLevelRegex),
             "useTrimStartEnd" => Ok(Self::UseTrimStartEnd),
+            "useUniqueElementIds" => Ok(Self::UseUniqueElementIds),
             "useValidAnchor" => Ok(Self::UseValidAnchor),
             "useValidAriaProps" => Ok(Self::UseValidAriaProps),
             "useValidAriaRole" => Ok(Self::UseValidAriaRole),
@@ -4822,6 +4826,10 @@ pub struct Nursery {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub use_symbol_description:
         Option<RuleConfiguration<biome_js_analyze::options::UseSymbolDescription>>,
+    #[doc = "Prevent the usage of static string literal id attribute on elements."]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub use_unique_element_ids:
+        Option<RuleConfiguration<biome_js_analyze::options::UseUniqueElementIds>>,
 }
 impl Nursery {
     const GROUP_NAME: &'static str = "nursery";
@@ -4862,6 +4870,7 @@ impl Nursery {
         "useSingleJsDocAsterisk",
         "useSortedClasses",
         "useSymbolDescription",
+        "useUniqueElementIds",
     ];
     const RECOMMENDED_RULES_AS_FILTERS: &'static [RuleFilter<'static>] = &[
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[7]),
@@ -4910,6 +4919,7 @@ impl Nursery {
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[33]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[34]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[35]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[36]),
     ];
 }
 impl RuleGroupExt for Nursery {
@@ -5101,6 +5111,11 @@ impl RuleGroupExt for Nursery {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[35]));
             }
         }
+        if let Some(rule) = self.use_unique_element_ids.as_ref() {
+            if rule.is_enabled() {
+                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[36]));
+            }
+        }
         index_set
     }
     fn get_disabled_rules(&self) -> FxHashSet<RuleFilter<'static>> {
@@ -5285,6 +5300,11 @@ impl RuleGroupExt for Nursery {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[35]));
             }
         }
+        if let Some(rule) = self.use_unique_element_ids.as_ref() {
+            if rule.is_disabled() {
+                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[36]));
+            }
+        }
         index_set
     }
     #[doc = r" Checks if, given a rule name, matches one of the rules contained in this category"]
@@ -5459,6 +5479,10 @@ impl RuleGroupExt for Nursery {
                 .use_symbol_description
                 .as_ref()
                 .map(|conf| (conf.level(), conf.get_options())),
+            "useUniqueElementIds" => self
+                .use_unique_element_ids
+                .as_ref()
+                .map(|conf| (conf.level(), conf.get_options())),
             _ => None,
         }
     }
@@ -5503,6 +5527,7 @@ impl From<GroupPlainConfiguration> for Nursery {
             use_single_js_doc_asterisk: Some(value.into()),
             use_sorted_classes: Some(value.into()),
             use_symbol_description: Some(value.into()),
+            use_unique_element_ids: Some(value.into()),
         }
     }
 }
