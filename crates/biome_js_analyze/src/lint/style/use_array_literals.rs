@@ -238,10 +238,7 @@ impl Rule for UseArrayLiterals {
 fn get_untyped_parent_declarator(node: &JsNewOrCallExpression) -> Option<JsVariableDeclarator> {
     let parent_declarator = node
         .parent::<JsInitializerClause>()
-        .and_then(|initializer| initializer.parent::<JsVariableDeclarator>());
-    let Some(parent_declarator) = parent_declarator else {
-        return None;
-    };
+        .and_then(|initializer| initializer.parent::<JsVariableDeclarator>())?;
     if parent_declarator.variable_annotation().is_some() {
         return None;
     }
