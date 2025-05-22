@@ -812,7 +812,7 @@ export interface Source {
 	 */
 	organizeImports?: RuleAssistConfiguration_for_Options;
 	/**
-	 * Enable the recommended rules for this group
+	 * Enables the recommended rules for this group
 	 */
 	recommended?: boolean;
 	/**
@@ -1029,7 +1029,7 @@ export interface A11y {
 	 */
 	noSvgWithoutTitle?: RuleConfiguration_for_Null;
 	/**
-	 * Enable the recommended rules for this group
+	 * Enables the recommended rules for this group
 	 */
 	recommended?: boolean;
 	/**
@@ -1238,7 +1238,7 @@ export interface Complexity {
 	 */
 	noVoid?: RuleConfiguration_for_Null;
 	/**
-	 * Enable the recommended rules for this group
+	 * Enables the recommended rules for this group
 	 */
 	recommended?: boolean;
 	/**
@@ -1471,7 +1471,7 @@ export interface Correctness {
 	 */
 	noVoidTypeReturn?: RuleConfiguration_for_Null;
 	/**
-	 * Enable the recommended rules for this group
+	 * Enables the recommended rules for this group
 	 */
 	recommended?: boolean;
 	/**
@@ -1596,7 +1596,7 @@ export interface Nursery {
 	 */
 	noUselessUndefined?: RuleFixConfiguration_for_Null;
 	/**
-	 * Enable the recommended rules for this group
+	 * Enables the recommended rules for this group
 	 */
 	recommended?: boolean;
 	/**
@@ -1693,7 +1693,7 @@ export interface Performance {
 	 */
 	noReExportAll?: RuleConfiguration_for_Null;
 	/**
-	 * Enable the recommended rules for this group
+	 * Enables the recommended rules for this group
 	 */
 	recommended?: boolean;
 	/**
@@ -1722,7 +1722,7 @@ export interface Security {
 	 */
 	noGlobalEval?: RuleConfiguration_for_Null;
 	/**
-	 * Enable the recommended rules for this group
+	 * Enables the recommended rules for this group
 	 */
 	recommended?: boolean;
 }
@@ -1831,7 +1831,7 @@ export interface Style {
 	 */
 	noYodaExpression?: RuleFixConfiguration_for_Null;
 	/**
-	 * Enable the recommended rules for this group
+	 * Enables the recommended rules for this group
 	 */
 	recommended?: boolean;
 	/**
@@ -2264,7 +2264,7 @@ export interface Suspicious {
 	 */
 	noWith?: RuleConfiguration_for_Null;
 	/**
-	 * Enable the recommended rules for this group
+	 * Enables the recommended rules for this group
 	 */
 	recommended?: boolean;
 	/**
