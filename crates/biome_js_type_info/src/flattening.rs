@@ -420,10 +420,12 @@ fn flattened(mut ty: TypeData, resolver: &mut dyn TypeResolver, depth: usize) ->
                     None => return ty,
                 },
             },
-            TypeData::TypeofValue(value) => match resolver.resolve_reference(&value.ty) {
-                Some(type_id) => ty = TypeData::reference(type_id),
-                None => return ty,
-            },
+            TypeData::TypeofValue(value) if value.ty.is_known() => {
+                match resolver.resolve_reference(&value.ty) {
+                    Some(type_id) => ty = TypeData::reference(type_id),
+                    None => return ty,
+                }
+            }
             _ => return ty,
         }
     }

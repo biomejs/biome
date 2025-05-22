@@ -1,0 +1,76 @@
+---
+source: crates/biome_module_graph/tests/snap/mod.rs
+expression: content
+---
+# `/src/index.d.ts`
+
+## Source
+
+```ts
+declare namespace shared {
+	type Result = string;
+}
+
+declare const shared: {
+	// FIXME: This return type is not properly resolved
+	foo(): shared.Result;
+};
+
+export = shared;
+```
+
+## Module Info
+
+```
+Exports {
+  "default" => {
+    ExportOwnExport => JsOwnExport(
+      Module(0) TypeId(0)
+      Local name: None
+    )
+  }
+}
+Imports {
+  No imports
+}
+```
+
+## Registered types
+
+```
+Module TypeId(0) => Object {
+  prototype: No prototype
+  members: ["foo": Module(0) TypeId(4)]
+}
+
+Module TypeId(1) => Namespace {
+    path: [
+        Borrowed(
+            "shared",
+        ),
+    ],
+    members: [],
+}
+
+Module TypeId(2) => string
+
+Module TypeId(3) => instanceof unresolved reference "shared.Result"
+
+Module TypeId(4) => sync Function "foo" {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: Module(0) TypeId(3)
+}
+
+Module TypeId(5) => Object {
+  prototype: No prototype
+  members: ["foo": Module(0) TypeId(4)]
+}
+
+Module TypeId(6) => Object {
+  prototype: No prototype
+  members: ["foo": Module(0) TypeId(4)]
+}
+```

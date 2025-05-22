@@ -260,6 +260,18 @@ impl From<Literal> for TypeData {
     }
 }
 
+impl From<Module> for TypeData {
+    fn from(value: Module) -> Self {
+        Self::Module(Box::new(value))
+    }
+}
+
+impl From<Namespace> for TypeData {
+    fn from(value: Namespace) -> Self {
+        Self::Namespace(Box::new(value))
+    }
+}
+
 impl From<TypeofValue> for TypeData {
     fn from(value: TypeofValue) -> Self {
         Self::TypeofValue(Box::new(value))
@@ -267,6 +279,14 @@ impl From<TypeofValue> for TypeData {
 }
 
 impl TypeData {
+    pub fn array_of(ty: TypeReference) -> Self {
+        Self::instance_of(TypeReference::Qualifier(TypeReferenceQualifier {
+            path: [Text::Static("Array")].into(),
+            type_parameters: [ty].into(),
+            scope_id: None,
+        }))
+    }
+
     pub fn as_class(&self) -> Option<&Class> {
         match self {
             Self::Class(class) => Some(class.as_ref()),
@@ -505,18 +525,14 @@ pub enum Literal {
 #[derive(Clone, Debug, PartialEq, Resolvable)]
 pub struct Module {
     pub name: Text,
-
     pub members: Box<[TypeMember]>,
 }
 
 /// A namespace definition.
 #[derive(Clone, Debug, PartialEq, Resolvable)]
-pub struct Namespace(pub(super) Box<[TypeMember]>);
-
-impl Namespace {
-    pub fn from_type_members(members: Box<[TypeMember]>) -> Self {
-        Self(members)
-    }
+pub struct Namespace {
+    pub path: Box<[Text]>,
+    pub members: Box<[TypeMember]>,
 }
 
 /// An object definition.
@@ -870,6 +886,7 @@ impl From<TypeImportQualifier> for TypeReference {
 }
 
 impl TypeReference {
+    #[inline]
     pub fn is_known(&self) -> bool {
         *self != Self::Unknown
     }
