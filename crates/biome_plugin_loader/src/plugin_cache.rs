@@ -1,7 +1,8 @@
 use biome_analyze::AnalyzerPluginVec;
+use biome_configuration::plugins::{PluginConfiguration, Plugins};
 use camino::Utf8PathBuf;
 use papaya::HashMap;
-use rustc_hash::FxBuildHasher;
+use rustc_hash::{FxBuildHasher, FxHashSet};
 
 use crate::BiomePlugin;
 
@@ -18,12 +19,30 @@ impl PluginCache {
         self.0.pin().insert(path, plugin);
     }
 
-    /// Returns the loaded analyzer plugins.
-    pub fn get_analyzer_plugins(&self) -> AnalyzerPluginVec {
-        let mut plugins = AnalyzerPluginVec::new();
-        for plugin in self.0.pin().values() {
-            plugins.extend_from_slice(&plugin.analyzer_plugins);
+    /// Returns the loaded and matched analyzer plugins, deduped
+    pub fn get_analyzer_plugins(&self, plugin_configs: &Plugins) -> AnalyzerPluginVec {
+        let mut result = AnalyzerPluginVec::new();
+        let mut seen = FxHashSet::default();
+
+        let map = self.0.pin();
+        for plugin_config in plugin_configs.iter() {
+            match plugin_config {
+                PluginConfiguration::Path(plugin_path) => {
+                    if seen.insert(plugin_path) {
+                        let path_buf = Utf8PathBuf::from(plugin_path);
+                        match map.get(path_buf.as_path()) {
+                            Some(plugin) => {
+                                result.extend_from_slice(&plugin.analyzer_plugins);
+                            }
+                            None => {
+                                panic!("plugin not loaded: {plugin_path}")
+                            }
+                        }
+                    }
+                }
+            }
         }
-        plugins
+
+        result
     }
 }
