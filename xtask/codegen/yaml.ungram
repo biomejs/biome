@@ -35,7 +35,11 @@ YamlRoot =
 	documents: YamlDocumentList
 	eof: 'EOF'
 
-YamlDocumentList = YamlDocument*
+YamlDocumentList = AnyYamlDocument*
+
+AnyYamlDocument =
+	YamlDocument
+	| YamlBogus
 
 // https://yaml.org/spec/1.2.2/#91-documents
 YamlDocument =
@@ -43,6 +47,7 @@ YamlDocument =
 	// but documents are allowed to re-specify the encoding
 	// https://yaml.org/spec/1.2.2/#rule-l-document-prefix
 	bom: 'UNICODE_BOM'?
+	'newline'?
 	// https://yaml.org/spec/1.2.2/#rule-l-directive-document
 	directives: YamlDirectiveList
 	// https://yaml.org/spec/1.2.2/#rule-c-directives-end
@@ -66,8 +71,9 @@ AnyYamlBlockNode =
 
 // https://yaml.org/spec/1.2.2/#rule-s-l+flow-in-block
 YamlFlowInBlockNode =
+	'indent'?
 	flow: AnyYamlFlowNode
-	newline: 'NEWLINE'?
+	'newline'?
 
 // https://yaml.org/spec/1.2.2/#rule-ns-flow-node
 AnyYamlFlowNode =
@@ -155,8 +161,12 @@ AnyYamlBlockInBlockNode =
 
 // https://yaml.org/spec/1.2.2/#rule-s-l+block-collection
 YamlBlockCollection =
+	// Indent block
+	'indent'?
 	properties: AnyYamlPropertiesCombination?
 	content: AnyYamlBlockCollectionContent
+	// Dedent block, that is, go back to parent block's scope
+	'dedent'?
 
 // https://yaml.org/spec/1.2.2/#rule-s-l+block-scalar
 YamlBlockScalar =
@@ -177,11 +187,7 @@ AnyYamlBlockScalarContent =
 //  - d
 // https://yaml.org/spec/1.2.2/#rule-l+block-sequence
 YamlBlockSequence =
-	// Indent block
-	'indent'?
 	entries: YamlBlockSequenceEntryList
-	// Dedent block, that is, go back to parent block's scope
-	'dedent'?
 
 YamlBlockSequenceEntryList = YamlBlockSequenceEntry*
 
@@ -195,11 +201,7 @@ YamlBlockSequenceEntry =
 //  d: e
 // https://yaml.org/spec/1.2.2/#rule-l+block-mapping
 YamlBlockMapping =
-	// Indent block
-	'indent'?
 	entries: YamlBlockMapEntryList
-	// Dedent block, that is, go back to parent block's scope
-	'dedent'?
 
 YamlBlockMapEntryList = AnyYamlBlockMapEntry*
 
@@ -237,13 +239,41 @@ AnyYamlBlockIndented =
 	| YamlCompactMapping
 	| AnyYamlBlockNode
 
+// a: - b <-
+//    - c <-
+//    - d <-
+//    ^^^
 // https://yaml.org/spec/1.2.2/#rule-ns-l-compact-sequence
 YamlCompactSequence =
-	entries: YamlBlockSequenceEntryList
+	inline_entry: YamlBlockSequenceEntry
+	indented_entries: YamlCompactSequenceIndented?
 
+// a: - b
+//    - c <-
+//    - d <-
+//    ^^^
+YamlCompactSequenceIndented =
+	'indent'
+	entries: YamlBlockSequenceEntryList
+	'dedent'
+
+// a: b: x <-
+//    c: y <-
+//    d: z <-
+//    ^^^
 // https://yaml.org/spec/1.2.2/#rule-ns-l-compact-mapping
 YamlCompactMapping =
-	entries: YamlBlockSequenceEntryList
+	inline_entry: AnyYamlBlockMapEntry
+	indented_entries: YamlCompactMappingIndented?
+
+// a: b: x
+//    c: y <-
+//    d: z <-
+//    ^^^
+YamlCompactMappingIndented =
+	'indent'
+	entries: YamlBlockMapEntryList
+	'dedent'
 
 // https://yaml.org/spec/1.2.2/#rule-ns-l-block-map-implicit-entry
 YamlBlockMapImplicitEntry =

@@ -128,7 +128,7 @@ fn lex_comment() {
 #[test]
 fn lex_simple_mapping_key() {
     assert_lex!(
-        YamlLexContext::BlockKey,
+        YamlLexContext::Regular,
         "abc:",
         PLAIN_LITERAL:3,
         COLON:1,
@@ -138,7 +138,7 @@ fn lex_simple_mapping_key() {
 #[test]
 fn lex_plain_with_special_char() {
     assert_lex!(
-        YamlLexContext::BlockKey,
+        YamlLexContext::Regular,
         "ab,c:d e-[f:#gh: ",
         PLAIN_LITERAL:15,
         COLON:1,
@@ -149,7 +149,7 @@ fn lex_plain_with_special_char() {
 #[test]
 fn lex_unambigous_mapping_and_comment() {
     assert_lex!(
-        YamlLexContext::BlockKey,
+        YamlLexContext::Regular,
         "abc: #abc",
         PLAIN_LITERAL:3,
         COLON:1,
@@ -161,10 +161,87 @@ fn lex_unambigous_mapping_and_comment() {
 #[test]
 fn lex_incorrect_flow_key() {
     assert_lex!(
-        YamlLexContext::FlowKey,
+        YamlLexContext::FlowIn,
         "a bc[xyz",
         PLAIN_LITERAL:4,
         L_BRACK:1,
         PLAIN_LITERAL:3,
+    );
+}
+
+#[test]
+fn lex_indent_in_flow() {
+    assert_lex!(
+        YamlLexContext::FlowIn,
+        r#"1,
+    2, 3, 5,
+        [8, 9],
+    10"#,
+        PLAIN_LITERAL:1,
+        COMMA:1,
+        INDENT:5,
+        PLAIN_LITERAL:1,
+        COMMA:1,
+        WHITESPACE:1,
+        PLAIN_LITERAL:1,
+        COMMA:1,
+        WHITESPACE:1,
+        PLAIN_LITERAL:1,
+        COMMA:1,
+        INDENT:9,
+        L_BRACK:1,
+        PLAIN_LITERAL:1,
+        COMMA:1,
+        WHITESPACE:1,
+        PLAIN_LITERAL:1,
+        R_BRACK:1,
+        COMMA:1,
+        INDENT:5,
+        PLAIN_LITERAL:2,
+    );
+}
+
+#[test]
+fn lex_indent_in_block_sequence() {
+    assert_lex!(
+        YamlLexContext::BlockIn,
+        r#"
+-
+    -
+    -
+        -
+        -
+    -
+        -
+            -
+-
+    -
+        -"#,
+        NEWLINE:1,
+        DASH:1,
+        INDENT:5,
+        DASH:1,
+        NEWLINE:5,
+        DASH:1,
+        INDENT:9,
+        DASH:1,
+        NEWLINE:9,
+        DASH:1,
+        DEDENT:5,
+        DASH:1,
+        INDENT:9,
+        DASH:1,
+        INDENT:13,
+        DASH:1,
+        DEDENT:1,
+        DEDENT:0,
+        DEDENT:0,
+        DASH:1,
+        INDENT:5,
+        DASH:1,
+        INDENT:9,
+        DASH:1,
+        DEDENT:0,
+        DEDENT:0,
     );
 }

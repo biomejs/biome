@@ -1,0 +1,171 @@
+---
+source: crates/biome_yaml_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+```yaml
+g: h: 70
+d: e: 50
+   f: 60
+
+```
+
+## AST
+
+```
+YamlRoot {
+    documents: YamlDocumentList [
+        YamlDocument {
+            bom_token: missing (optional),
+            newline_token: missing (optional),
+            directives: YamlDirectiveList [],
+            dashdashdash_token: missing (optional),
+            node: YamlBlockCollection {
+                indent_token: missing (optional),
+                properties: missing (optional),
+                content: YamlBlockMapping {
+                    entries: YamlBlockMapEntryList [
+                        YamlBlockMapImplicitEntry {
+                            key: YamlFlowYamlNode {
+                                properties: missing (optional),
+                                content: YamlPlainScalar {
+                                    value_token: PLAIN_LITERAL@0..1 "g" [] [],
+                                },
+                            },
+                            value: YamlBlockMapImplicitValue {
+                                colon_token: COLON@1..3 ":" [] [Whitespace(" ")],
+                                value: YamlBogusBlockNode {
+                                    items: [
+                                        YamlFlowYamlNode {
+                                            properties: missing (optional),
+                                            content: YamlPlainScalar {
+                                                value_token: PLAIN_LITERAL@3..4 "h" [] [],
+                                            },
+                                        },
+                                        COLON@4..6 ":" [] [Whitespace(" ")],
+                                        PLAIN_LITERAL@6..8 "70" [] [],
+                                    ],
+                                },
+                                newline_token: missing (optional),
+                            },
+                        },
+                        YamlBlockMapImplicitEntry {
+                            key: YamlFlowYamlNode {
+                                properties: missing (optional),
+                                content: YamlPlainScalar {
+                                    value_token: PLAIN_LITERAL@8..10 "d" [Skipped("\n")] [],
+                                },
+                            },
+                            value: YamlBlockMapImplicitValue {
+                                colon_token: COLON@10..12 ":" [] [Whitespace(" ")],
+                                value: YamlBogusBlockNode {
+                                    items: [
+                                        YamlFlowYamlNode {
+                                            properties: missing (optional),
+                                            content: YamlPlainScalar {
+                                                value_token: PLAIN_LITERAL@12..13 "e" [] [],
+                                            },
+                                        },
+                                        COLON@13..15 ":" [] [Whitespace(" ")],
+                                        PLAIN_LITERAL@15..17 "50" [] [],
+                                        INDENT@17..21 "\n   " [] [],
+                                        PLAIN_LITERAL@21..22 "f" [] [],
+                                        COLON@22..24 ":" [] [Whitespace(" ")],
+                                        PLAIN_LITERAL@24..26 "60" [] [],
+                                        DEDENT@26..27 "\n" [] [],
+                                    ],
+                                },
+                                newline_token: missing (optional),
+                            },
+                        },
+                    ],
+                },
+                dedent_token: missing (optional),
+            },
+            dotdotdot_token: missing (optional),
+        },
+    ],
+    eof_token: EOF@27..27 "" [] [],
+}
+```
+
+## CST
+
+```
+0: YAML_ROOT@0..27
+  0: YAML_DOCUMENT_LIST@0..27
+    0: YAML_DOCUMENT@0..27
+      0: (empty)
+      1: (empty)
+      2: YAML_DIRECTIVE_LIST@0..0
+      3: (empty)
+      4: YAML_BLOCK_COLLECTION@0..27
+        0: (empty)
+        1: (empty)
+        2: YAML_BLOCK_MAPPING@0..27
+          0: YAML_BLOCK_MAP_ENTRY_LIST@0..27
+            0: YAML_BLOCK_MAP_IMPLICIT_ENTRY@0..8
+              0: YAML_FLOW_YAML_NODE@0..1
+                0: (empty)
+                1: YAML_PLAIN_SCALAR@0..1
+                  0: PLAIN_LITERAL@0..1 "g" [] []
+              1: YAML_BLOCK_MAP_IMPLICIT_VALUE@1..8
+                0: COLON@1..3 ":" [] [Whitespace(" ")]
+                1: YAML_BOGUS_BLOCK_NODE@3..8
+                  0: YAML_FLOW_YAML_NODE@3..4
+                    0: (empty)
+                    1: YAML_PLAIN_SCALAR@3..4
+                      0: PLAIN_LITERAL@3..4 "h" [] []
+                  1: COLON@4..6 ":" [] [Whitespace(" ")]
+                  2: PLAIN_LITERAL@6..8 "70" [] []
+                2: (empty)
+            1: YAML_BLOCK_MAP_IMPLICIT_ENTRY@8..27
+              0: YAML_FLOW_YAML_NODE@8..10
+                0: (empty)
+                1: YAML_PLAIN_SCALAR@8..10
+                  0: PLAIN_LITERAL@8..10 "d" [Skipped("\n")] []
+              1: YAML_BLOCK_MAP_IMPLICIT_VALUE@10..27
+                0: COLON@10..12 ":" [] [Whitespace(" ")]
+                1: YAML_BOGUS_BLOCK_NODE@12..27
+                  0: YAML_FLOW_YAML_NODE@12..13
+                    0: (empty)
+                    1: YAML_PLAIN_SCALAR@12..13
+                      0: PLAIN_LITERAL@12..13 "e" [] []
+                  1: COLON@13..15 ":" [] [Whitespace(" ")]
+                  2: PLAIN_LITERAL@15..17 "50" [] []
+                  3: INDENT@17..21 "\n   " [] []
+                  4: PLAIN_LITERAL@21..22 "f" [] []
+                  5: COLON@22..24 ":" [] [Whitespace(" ")]
+                  6: PLAIN_LITERAL@24..26 "60" [] []
+                  7: DEDENT@26..27 "\n" [] []
+                2: (empty)
+        3: (empty)
+      5: (empty)
+  1: EOF@27..27 "" [] []
+
+```
+
+## Diagnostics
+
+```
+nested_implicit_block_mapping_without_indent.yaml:1:4 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Nested nodes are not allowed in compact mapping
+  
+  > 1 │ g: h: 70
+      │    ^^^^^
+    2 │ d: e: 50
+    3 │    f: 60
+  
+nested_implicit_block_mapping_without_indent.yaml:2:4 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Nested nodes are not allowed in compact mapping
+  
+    1 │ g: h: 70
+  > 2 │ d: e: 50
+      │    ^^^^^
+  > 3 │    f: 60
+      │    ^^^^^
+    4 │ 
+  
+```

@@ -44,7 +44,7 @@ fn parse_document(p: &mut YamlParser) -> CompletedMarker {
     p.eat(NEWLINE);
     DirectiveList.parse_list(p);
     p.eat(T![---]);
-    parse_any_block_node(p).ok();
+    parse_any_block_node(p, false).ok();
     p.eat(T![...]);
     m.complete(p, YAML_DOCUMENT)
 }
