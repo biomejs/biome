@@ -49,7 +49,19 @@ Module TypeId(1) => Namespace {
             "shared",
         ),
     ],
-    members: [],
+    members: [
+        TypeMember {
+            kind: Named(
+                Borrowed(
+                    "Result",
+                ),
+            ),
+            is_static: true,
+            ty: Resolved(
+                Module(0) TypeId(2),
+            ),
+        },
+    ],
 }
 
 Module TypeId(2) => string
