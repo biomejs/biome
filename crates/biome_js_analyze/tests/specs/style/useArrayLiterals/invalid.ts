@@ -2,11 +2,29 @@ var xs = new Array<string>();
 
 var xs = new Array<number>(0, 1, 2);
 
-var xs /* A */ = /* B */ new /* C */ Array /* D */ < /* E */ number /* F */ > /* G */ ( /* H */ 1 /* I */ , /* J */ 2 /* K */ , /* L */) /* M */;
+var xs
+/* A */ = /* B */
+/* C */ new /* D */
+/* E */ Array /* F */
+/* G */ < /* H */
+/* I */ number /* J */
+/* K */ > /* L */
+/* M */ () /* N */
+;
 
 void new Array<number>();
 
 void new Array<number>(1, 2, 3);
+
+void new Array<ReferenceType>(1, 2, 3);
+
+void new Array<GenericReferenceType<T>>(1, 2, 3);
+
+const xs = new Array<GenericReferenceType<T>>(1, 2, 3);
+
+const xs = new Array<import("a")>(1, 2, 3);
+
+const xs = new Array<typeof xs>(1, 2, 3);
 
 void new Array<1 | 2 | 3 | 4>(1, 2, 3);
 

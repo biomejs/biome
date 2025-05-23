@@ -6,8 +6,7 @@ use biome_diagnostics::Severity;
 use biome_js_factory::make::{self};
 use biome_js_syntax::{
     AnyJsCallArgument, AnyJsExpression, AnyTsType, AnyTsVariableAnnotation, JsInitializerClause,
-    JsNewOrCallExpression, JsSyntaxKind, JsVariableDeclarator, T, TsTypeArgumentList,
-    TsTypeArguments, global_identifier,
+    JsNewOrCallExpression, JsSyntaxKind, JsVariableDeclarator, T, global_identifier,
 };
 use biome_rowan::{AstNode, AstSeparatedList, BatchMutationExt};
 
@@ -37,6 +36,10 @@ declare_lint_rule! {
     ///
     /// ```js,expect_diagnostic
     /// const xs = Array(...args);
+    /// ```
+    ///
+    /// ```ts,expect_diagnostic
+    /// const xs = new Array<number>()
     /// ```
     ///
     /// ### Valid
@@ -151,45 +154,53 @@ impl Rule for UseArrayLiterals {
         };
 
         let array_is_empty = new_node.elements().len() == 0;
-        let type_param = get_type_param_if_safe(node);
+        let type_arg = get_type_arg_if_safe(node);
+        let whitespace = make::token_decorated_with_space(T![.])
+            .trailing_trivia()
+            .pieces();
 
-        if let Some(type_param) = type_param {
+        if let Some(type_arg) = type_arg {
             // type param needs to be preserved
 
             // make the type into an array i.e. (T)[]
-            let type_param_arr = AnyTsType::TsArrayType(make::ts_array_type(
-                make::parenthesized_ts(
-                    type_param
-                        .clone()
-                        .with_leading_trivia_pieces([])?
-                        .with_trailing_trivia_pieces([])?,
-                )
-                .into(),
+            let type_arg_without_trivia = type_arg
+                .clone()
+                .with_leading_trivia_pieces([])?
+                .with_trailing_trivia_pieces([])?;
+            let type_arg_with_maybe_parens: AnyTsType = if !type_arg.is_literal_type()
+                && !type_arg.is_primitive_type()
+                && !matches!(type_arg, AnyTsType::TsReferenceType(_))
+            {
+                make::parenthesized_ts(type_arg_without_trivia).into()
+            } else {
+                type_arg_without_trivia
+            };
+            let type_arg_arr = AnyTsType::TsArrayType(make::ts_array_type(
+                type_arg_with_maybe_parens,
                 make::token(T!['[']),
                 make::token(T![']']),
             ));
 
-            let type_args = type_param
-                .parent::<TsTypeArgumentList>()
-                .and_then(|initializer| initializer.parent::<TsTypeArguments>())?;
-            let l_angle_trivia = type_args.l_angle_token().ok()?.trailing_trivia().pieces();
-            let r_angle_trivia = type_args.r_angle_token().ok()?.trailing_trivia().pieces();
-            let type_param_arr = type_param_arr
-                .prepend_trivia_pieces(
-                    type_param.syntax().first_token()?.leading_trivia().pieces(),
+            let type_arg_arr = type_arg_arr
+                .with_leading_trivia_pieces(
+                    type_arg.syntax().first_token()?.leading_trivia().pieces(),
                 )?
-                .prepend_trivia_pieces(l_angle_trivia)?
-                .append_trivia_pieces(type_param.syntax().last_token()?.trailing_trivia().pieces())?
-                .append_trivia_pieces(r_angle_trivia)?;
+                .with_trailing_trivia_pieces(
+                    type_arg.syntax().last_token()?.trailing_trivia().pieces(),
+                )?;
 
             let parent_declarator = get_untyped_parent_declarator(node);
             if let Some(parent_declarator) = parent_declarator {
                 // move the array type arg to the declarator type annotation and replace the initializer with the new array literal
-                // e.g. `const a = Array<T>()` -> `const a: (T)[] = []`
+                // e.g. `const a = Array<T>()` -> `const a: T[] = []`
                 let new_parent_declarator = parent_declarator
                     .clone()
+                    .with_id(parent_declarator.id().ok()?.trim_trailing_trivia()?)
                     .with_variable_annotation(Some(AnyTsVariableAnnotation::TsTypeAnnotation(
-                        make::ts_type_annotation(make::token(T![:]), type_param_arr),
+                        make::ts_type_annotation(
+                            make::token(T![:]).with_trailing_trivia_pieces(whitespace.clone()),
+                            type_arg_arr.append_trivia_pieces(whitespace)?,
+                        ),
                     )))
                     .with_initializer(Some(
                         parent_declarator
@@ -207,14 +218,14 @@ impl Rule for UseArrayLiterals {
                     new_node_with_type = make::ts_satisfies_expression(
                         new_node_with_type,
                         make::token_decorated_with_space(T![satisfies]),
-                        type_param_arr.clone(),
+                        type_arg_arr.clone(),
                     )
                     .into();
                 }
                 new_node_with_type = make::ts_as_expression(
                     new_node_with_type,
                     make::token_decorated_with_space(T![as]),
-                    type_param_arr.clone(),
+                    type_arg_arr.clone(),
                 )
                 .into();
 
@@ -246,7 +257,7 @@ fn get_untyped_parent_declarator(node: &JsNewOrCallExpression) -> Option<JsVaria
 }
 
 /// Return the type param from the constructor call only if there's exactly one type param
-fn get_type_param_if_safe(node: &JsNewOrCallExpression) -> Option<AnyTsType> {
+fn get_type_arg_if_safe(node: &JsNewOrCallExpression) -> Option<AnyTsType> {
     let type_arguments = match node {
         JsNewOrCallExpression::JsNewExpression(expr) => expr.type_arguments(),
         JsNewOrCallExpression::JsCallExpression(expr) => expr.type_arguments(),
@@ -254,10 +265,8 @@ fn get_type_param_if_safe(node: &JsNewOrCallExpression) -> Option<AnyTsType> {
     // check there's exactly one type arg
     if let Some(type_arguments) = type_arguments {
         if type_arguments.ts_type_argument_list().len() == 1 {
-            return type_arguments
-                .ts_type_argument_list()
-                .first()
-                .and_then(Result::ok);
+            let list = type_arguments.ts_type_argument_list();
+            return list.first()?.ok();
         }
     }
     None
