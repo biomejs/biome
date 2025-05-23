@@ -441,7 +441,7 @@ declare_lint_rule! {
     ///   - `global`: the global scope (also includes the namespace scopes)
     ///
     /// For each declaration,
-    /// the `conventions` array is traversed until a selector selects the declaration.
+    /// the `conventions` array is traversed in-order until a selector selects the declaration.
     /// The requirements of the convention are so verified on the declaration.
     ///
     /// A convention must set at least one requirement among:
@@ -450,15 +450,82 @@ declare_lint_rule! {
     /// - `formats`: the string [case] that the name must follow.
     ///   The supported cases are: [`PascalCase`], [`CONSTANT_CASE`], [`camelCase`], and [`snake_case`].
     ///
+    /// If only `formats` is set,
+    /// then `formats` is checked against the name of the declaration directly.
+    /// In the following configuration, we require `static readonly` class properties to be in [`CONSTANT_CASE`].
+    ///
+    /// ```json,options
+    /// {
+    ///     "options": {
+    ///         "conventions": [
+    ///             {
+    ///                 "selector": {
+    ///                     "kind": "classProperty",
+    ///                     "modifiers": ["static", "readonly"]
+    ///                 },
+    ///                 "formats": ["CONSTANT_CASE"]
+    ///             }
+    ///         ]
+    ///     }
+    /// }
+    /// ```
+    ///
+    /// The following code is then reported by the rule:
+    /// 
+    /// ```ts,use_options
+    /// class C {
+    ///     static readonly prop = 0;
+    /// }
+    /// ```
+    ///
+    /// A convention can shadow another one.
+    /// In the following configuration, the second convention is useless because it is always ignored.
+    ///
+    /// ```json,options
+    /// {
+    ///     "options": {
+    ///         "conventions": [
+    ///             {
+    ///                 "selector": { "kind": "classProperty" },
+    ///                 "formats": ["camelCase"]
+    ///             }, {
+    ///                 "selector": { "kind": "classProperty" },
+    ///                 "formats": ["camelCase", "CONSTANT_CASE"]
+    ///             }
+    ///         ]
+    ///     }
+    /// }
+    /// ```
+    ///
+    /// If only `match` is set and the regular expression has no capturing groups,
+    /// then `match` is checked against the name of the declaration directly.
+    /// In the following configuration, we require that all variable names be a minimum of 3 characters and a maximum of 20 characters.
+    ///
+    /// ```json,options
+    /// {
+    ///     "options": {
+    ///         "conventions": [
+    ///             {
+    ///                 "selector": {
+    ///                     "kind": "variable"
+    ///                 },
+    ///                 "match": ".{3,20}"
+    ///             },
+    ///         ]
+    ///     }
+    /// }
+    /// ```
+    ///
+    /// Things become a bit more complex when regular expressions have capturing groups.
+    ///
     /// If both `match` and `formats` are set, then `formats` is checked against the first capture of the regular expression.
     /// Only the first capture is tested. Other captures are ignored.
     /// If nothing is captured, then `formats` is ignored.
     ///
-    /// In the following example, we check the following conventions:
+    /// In the following example, we require that:
     ///
     /// - A private property starts with `_` and consists of at least two characters.
     /// - The captured name (the name without the leading `_`) is in [`camelCase`].
-    /// - An enum member is in [`PascalCase`] or [`CONSTANT_CASE`].
     ///
     /// ```json,options
     /// {
@@ -471,12 +538,6 @@ declare_lint_rule! {
     ///                 },
     ///                 "match": "_(.+)",
     ///                 "formats": ["camelCase"]
-    ///             },
-    ///             {
-    ///                 "selector": {
-    ///                     "kind": "enumMember"
-    ///                 },
-    ///                 "formats": ["PascalCase", "CONSTANT_CASE"]
     ///             }
     ///         ]
     ///     }
@@ -484,8 +545,8 @@ declare_lint_rule! {
     /// ```
     ///
     /// If `match` is set and `formats` is unset,
-    /// then the part of the name captured by the regular expression is forwarded to the next conventions of the array.
-    /// In the following example, we require that private class members start with `_` and all class members are in ["camelCase"].
+    /// then the part of the name captured by the regular expression is forwarded to the next conventions of the array that selects the declaration.
+    /// The following configuration has exactly the same effect as the previous one.
     ///
     /// ```jsonc,options
     /// {
@@ -535,7 +596,7 @@ declare_lint_rule! {
     ///
     /// If the capture is identical to the initial name (it is not a part of the initial name),
     /// then, leading and trailing underscore and dollar signs are trimmed before being checked against default conventions.
-    /// In the previous example, the capture is a part of the name because `_` is not included in the capture.
+    /// In the previous example, the capture is a part of the name because `_` is not included in the capture, thus, no trimming is performed.
     ///
     /// You can reset all default conventions by adding a convention at the end of the array that accepts anything:
     ///
@@ -557,16 +618,13 @@ declare_lint_rule! {
     ///
     /// Let's take a more complex example with the following conventions:
     ///
-    /// - Accept variable names `i`, `j`, and check all other names against the next conventions.
-    /// - All identifiers must contain at least two characters.
-    /// - We require `private` class members to start with an underscore `_`.
-    /// - We require `static readonly` class properties to be in [`CONSTANT_CASE`].
-    ///   A `private static readonly` property must also start with an underscore as dictated by the previous convention.
-    /// - We require global constants to be in [`CONSTANT_CASE`] and
-    ///   we allow these constants to be enclosed by double underscores or to be named `_SPECIAL_`.
-    /// - We require interfaces to start with `I`, except for interfaces ending with `Error`,
-    ///   and to be in [`PascalCase`].
-    /// - All other names follow the default conventions
+    /// 1. A variable name is `i`, `j`, or follows the next selected convention (convention (2)).
+    /// 2. An identifier contains at least two characters and follow the next selected convention (the default convention).
+    /// 3. A `private` class member name starts with an underscore `_` and the name without the underscore follows the next selected convention (convention (4) for some of them, and the default convention for others).
+    /// 4. A `static readonly` class property name is in [`CONSTANT_CASE`].
+    /// 5. A global constant is in [`CONSTANT_CASE`] and can be enclosed by double underscores or to be named `_SPECIAL_`.
+    /// 6. An interface name starts with `I`, except for interfaces ending with `Error`, and is in [`PascalCase`].
+    /// 7. All other names follow the default conventions
     ///
     /// ```jsonc,options
     /// {
@@ -586,7 +644,7 @@ declare_lint_rule! {
     ///                     "kind": "classMember",
     ///                     "modifiers": ["private"]
     ///                 },
-    ///                 "match": "_(.+)"
+    ///                 "match": "_(.*)"
     ///             }, {
     ///                 "selector": {
     ///                     "kind": "classProperty",
@@ -612,6 +670,16 @@ declare_lint_rule! {
     ///     }
     /// }
     /// ```
+    ///
+    /// Hers some examples:
+    /// 
+    /// - A private class property named `_` is reported by the rule because it contains a single character.
+    ///   According to the second convention, the name should contain at least two characters.
+    /// - A variable named `a_variable` is reported by the rule because the name doesn't respect the default convention that forbid variable names in [`snake_case`].
+    ///   The variable name is first verified against the first convention.
+    ///   Because it is neither `i` nor `j`, it is forwarded to the second convention, which is also respected.
+    ///   The name is captured and is forwarded to the next convention.
+    ///   Since no convention selects a variable name, the default convention is checked.
     ///
     /// ### Regular expression syntax
     ///
