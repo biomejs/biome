@@ -53,6 +53,7 @@ use camino::{Utf8Path, Utf8PathBuf};
 use crossbeam::channel::Sender;
 use papaya::{Compute, HashMap, HashSet, Operation};
 use rustc_hash::{FxBuildHasher, FxHashMap};
+use std::borrow::Cow;
 use std::panic::RefUnwindSafe;
 use std::sync::atomic::{AtomicUsize, Ordering};
 use std::sync::{Arc, Mutex};
@@ -571,11 +572,15 @@ impl WorkspaceServer {
         diagnostics
     }
 
-    fn get_analyzer_plugins_for_project(&self, project_key: ProjectKey) -> AnalyzerPluginVec {
+    fn get_analyzer_plugins_for_project(
+        &self,
+        project_key: ProjectKey,
+        plugins: Cow<Plugins>,
+    ) -> AnalyzerPluginVec {
         self.plugin_caches
             .pin()
             .get(&project_key)
-            .map(|cache| cache.get_analyzer_plugins())
+            .map(|cache| cache.get_analyzer_plugins(&plugins))
             .unwrap_or_default()
     }
 
@@ -827,7 +832,7 @@ impl Workspace for WorkspaceServer {
         let diagnostics = self.load_plugins(
             params.project_key,
             &workspace_directory.unwrap_or_default(),
-            &settings.plugins,
+            &settings.as_all_plugins(),
         );
         let has_errors = diagnostics
             .iter()
@@ -1217,6 +1222,8 @@ impl Workspace for WorkspaceServer {
                     .projects
                     .get_settings(project_key)
                     .ok_or_else(WorkspaceError::no_project)?;
+                let plugins =
+                    self.get_analyzer_plugins_for_project(project_key, settings.as_plugins(&path));
                 let results = lint(LintParams {
                     parse,
                     workspace: &settings.into(),
@@ -1231,7 +1238,7 @@ impl Workspace for WorkspaceServer {
                     enabled_rules,
                     pull_code_actions,
                     plugins: if categories.contains(RuleCategory::Lint) {
-                        self.get_analyzer_plugins_for_project(project_key)
+                        plugins
                     } else {
                         Vec::new()
                     },
@@ -1443,6 +1450,8 @@ impl Workspace for WorkspaceServer {
             .projects
             .get_settings(project_key)
             .ok_or_else(WorkspaceError::no_project)?;
+        let plugins =
+            self.get_analyzer_plugins_for_project(project_key, settings.as_plugins(&path));
         let language = self.get_file_source(&path);
         fix_all(FixAllParams {
             parse,
@@ -1459,7 +1468,7 @@ impl Workspace for WorkspaceServer {
             suppression_reason,
             enabled_rules,
             plugins: if rule_categories.contains(RuleCategory::Lint) {
-                self.get_analyzer_plugins_for_project(project_key)
+                plugins
             } else {
                 Vec::new()
             },

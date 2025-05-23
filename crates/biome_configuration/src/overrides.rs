@@ -3,6 +3,7 @@ use crate::analyzer::{LinterEnabled, RuleDomains};
 use crate::formatter::{FormatWithErrorsEnabled, FormatterEnabled};
 use crate::html::HtmlConfiguration;
 use crate::max_size::MaxSize;
+use crate::plugins::Plugins;
 use crate::{
     CssConfiguration, GraphqlConfiguration, GritConfiguration, JsConfiguration, JsonConfiguration,
     Rules,
@@ -68,6 +69,10 @@ pub struct OverridePattern {
     /// Specific configuration for the filesystem
     #[serde(skip_serializing_if = "Option::is_none")]
     pub files: Option<OverrideFilesConfiguration>,
+
+    /// Specific configuration for additional plugins
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub plugins: Option<Plugins>,
 }
 
 #[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
