@@ -138,7 +138,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub UseIndexOf {
-        version: "next",
+        version: "2.0.0",
         name: "useIndexOf",
         language: "js",
         recommended: true,
