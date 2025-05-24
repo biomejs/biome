@@ -165,17 +165,15 @@ impl Rule for UseIndexOf {
 
         let member_name_token = member_expression.syntax().last_token()?;
         let callback_function = call.arguments().ok()?.args().first()?.ok()?;
-        let callback_function_syntax = callback_function.syntax().clone();
-
-        if let Some(function) = JsFunctionExpression::cast(callback_function_syntax.clone()) {
-            return callback_function_match(&function, &member_name_token);
+        match callback_function {
+            AnyJsCallArgument::AnyJsExpression(AnyJsExpression::JsFunctionExpression(function)) => {
+                callback_function_match(function, member_name_token)
+            }
+            AnyJsCallArgument::AnyJsExpression(AnyJsExpression::JsArrowFunctionExpression(function)) => {
+                callback_arrow_function_match(function, member_name_token)
+            }
+            _ => None,
         }
-
-        if let Some(function) = JsArrowFunctionExpression::cast(callback_function_syntax) {
-            return callback_arrow_function_match(&function, &member_name_token);
-        }
-
-        None
     }
 
     fn diagnostic(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<RuleDiagnostic> {
