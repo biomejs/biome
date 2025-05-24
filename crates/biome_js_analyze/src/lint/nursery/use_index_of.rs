@@ -15,8 +15,7 @@ use biome_analyze::{
 use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_syntax::{
-    AnyJsCallArgument, AnyJsExpression, AnyJsMemberExpression,
-    JsCallExpression,
+    AnyJsCallArgument, AnyJsExpression, AnyJsMemberExpression, JsCallExpression,
 };
 use biome_rowan::{AstNode, AstSeparatedList, BatchMutationExt, SyntaxToken};
 
