@@ -30,7 +30,7 @@ fn extract_simple_compare_match(
         return None;
     }
 
-    Some(matching_side.syntax().clone())
+    Some(matching_side.into_syntax())
 }
 
 pub fn find_index_comparable_expression(
