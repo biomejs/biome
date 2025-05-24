@@ -1,0 +1,16 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 134
+expression: valid.js
+---
+# Input
+```js
+/* should not generate diagnostics */
+({ ...foo });
+({ ...baz, foo: 'bar' });
+Object.assign(foo, { bar: baz });
+Object.assign(foo, bar);
+Object.assign(foo, { bar, baz });
+Object.assign(foo, { ...baz });
+
+```

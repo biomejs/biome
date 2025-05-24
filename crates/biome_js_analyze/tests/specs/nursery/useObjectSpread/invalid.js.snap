@@ -1,0 +1,132 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 134
+expression: invalid.js
+---
+# Input
+```js
+Object.assign({}, foo);
+Object.assign({}, {foo: 'bar'});
+Object.assign({ foo: 'bar'}, baz);
+Object.assign({}, baz, { foo: 'bar' });
+Object.assign({}, { ...baz });
+Object.assign({});
+Object.assign({ foo: bar });
+
+```
+
+# Diagnostics
+```
+invalid.js:1:1 lint/nursery/useObjectSpread ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Object spread should be used instead of Object.assign when constructing new objects.
+  
+  > 1 │ Object.assign({}, foo);
+      │ ^^^^^^^^^^^^^
+    2 │ Object.assign({}, {foo: 'bar'});
+    3 │ Object.assign({ foo: 'bar'}, baz);
+  
+  i Replace Object.assign({...}, <object>) with { ...<object> }.
+  
+
+```
+
+```
+invalid.js:2:1 lint/nursery/useObjectSpread ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Object spread should be used instead of Object.assign when constructing new objects.
+  
+    1 │ Object.assign({}, foo);
+  > 2 │ Object.assign({}, {foo: 'bar'});
+      │ ^^^^^^^^^^^^^
+    3 │ Object.assign({ foo: 'bar'}, baz);
+    4 │ Object.assign({}, baz, { foo: 'bar' });
+  
+  i Replace Object.assign({...}, <object>) with { ...<object> }.
+  
+
+```
+
+```
+invalid.js:3:1 lint/nursery/useObjectSpread ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Object spread should be used instead of Object.assign when constructing new objects.
+  
+    1 │ Object.assign({}, foo);
+    2 │ Object.assign({}, {foo: 'bar'});
+  > 3 │ Object.assign({ foo: 'bar'}, baz);
+      │ ^^^^^^^^^^^^^
+    4 │ Object.assign({}, baz, { foo: 'bar' });
+    5 │ Object.assign({}, { ...baz });
+  
+  i Replace Object.assign({...}, <object>) with { ...<object> }.
+  
+
+```
+
+```
+invalid.js:4:1 lint/nursery/useObjectSpread ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Object spread should be used instead of Object.assign when constructing new objects.
+  
+    2 │ Object.assign({}, {foo: 'bar'});
+    3 │ Object.assign({ foo: 'bar'}, baz);
+  > 4 │ Object.assign({}, baz, { foo: 'bar' });
+      │ ^^^^^^^^^^^^^
+    5 │ Object.assign({}, { ...baz });
+    6 │ Object.assign({});
+  
+  i Replace Object.assign({...}, <object>) with { ...<object> }.
+  
+
+```
+
+```
+invalid.js:5:1 lint/nursery/useObjectSpread ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Object spread should be used instead of Object.assign when constructing new objects.
+  
+    3 │ Object.assign({ foo: 'bar'}, baz);
+    4 │ Object.assign({}, baz, { foo: 'bar' });
+  > 5 │ Object.assign({}, { ...baz });
+      │ ^^^^^^^^^^^^^
+    6 │ Object.assign({});
+    7 │ Object.assign({ foo: bar });
+  
+  i Replace Object.assign({...}, <object>) with { ...<object> }.
+  
+
+```
+
+```
+invalid.js:6:1 lint/nursery/useObjectSpread ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Object spread should be used instead of Object.assign when constructing new objects.
+  
+    4 │ Object.assign({}, baz, { foo: 'bar' });
+    5 │ Object.assign({}, { ...baz });
+  > 6 │ Object.assign({});
+      │ ^^^^^^^^^^^^^
+    7 │ Object.assign({ foo: bar });
+    8 │ 
+  
+  i Replace Object.assign({...}, <object>) with { ...<object> }.
+  
+
+```
+
+```
+invalid.js:7:1 lint/nursery/useObjectSpread ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Object spread should be used instead of Object.assign when constructing new objects.
+  
+    5 │ Object.assign({}, { ...baz });
+    6 │ Object.assign({});
+  > 7 │ Object.assign({ foo: bar });
+      │ ^^^^^^^^^^^^^
+    8 │ 
+  
+  i Replace Object.assign({...}, <object>) with { ...<object> }.
+  
+
+```

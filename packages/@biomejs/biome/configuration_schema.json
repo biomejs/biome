@@ -2939,6 +2939,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useObjectSpread": {
+					"description": "Prefer object spread over Object.assign() when constructing new objects.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useParseIntRadix": {
 					"description": "Enforce the consistent use of the radix argument when using parseInt().",
 					"anyOf": [
