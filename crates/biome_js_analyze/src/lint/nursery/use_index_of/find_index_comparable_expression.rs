@@ -12,7 +12,7 @@ fn extract_simple_compare_match(
     expression: &JsBinaryExpression,
     parameter_name: &String,
 ) -> Option<JsSyntaxNode> {
-    if expression.operator_token().ok()?.text_trimmed() != "===" {
+    if expression.operator_token().ok()?.kind() != T![===] {
         return None;
     }
 
