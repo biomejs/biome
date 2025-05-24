@@ -14,8 +14,8 @@ fn extract_function_parameter_name(parameters: &JsParameterList) -> Option<Strin
 }
 
 pub fn callback_function_match(
-    function: &JsFunctionExpression,
-    member_name_token: &JsSyntaxToken,
+    function: JsFunctionExpression,
+    member_name_token: JsSyntaxToken,
 ) -> Option<JsSyntaxMatchPair> {
     if function.async_token().is_some() || function.star_token().is_some() {
         return None;
@@ -32,7 +32,7 @@ pub fn callback_function_match(
     let matched = find_index_comparable_expression(&body, &parameter_name, true);
 
     matched.as_ref().map(|token_match| JsSyntaxMatchPair {
-        matching_array_element: token_match.clone(),
-        member_name: member_name_token.clone(),
+        matching_array_element: token_match,
+        member_name: member_name_token,
     })
 }
