@@ -76,9 +76,10 @@ impl ExtensionSettings {
     }
 
     pub(crate) fn configuration_path(&self) -> Option<Utf8PathBuf> {
-        self.settings
-            .configuration_path
-            .as_deref()
-            .map(|config_path| Utf8PathBuf::from_str(config_path).unwrap()) // infallible
+        match self.settings.configuration_path.as_deref() {
+            // Ignore if empty as VS Code responses an empty string even if it's not set.
+            Some(config_path) if !config_path.is_empty() => Utf8PathBuf::from_str(config_path).ok(),
+            _ => None,
+        }
     }
 }
