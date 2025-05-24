@@ -1,0 +1,241 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 134
+expression: invalid.js
+---
+# Input
+```js
+const list = ['foo', 'bar', 'baz'];
+list.findIndex(bar => bar === 'foo');
+list.findIndex((x) => x === 'foo');
+list.findIndex(x => 'foo' === x);
+list.findIndex(x => {
+	return x === 'foo';
+});
+list.findIndex((x, y) => x === 'foo');
+
+list.findLastIndex(bar => bar === 'foo');
+list.findLastIndex((x) => x === 'foo');
+list.findLastIndex(x => 'foo' === x);
+list.findLastIndex(x => {
+	return x === 'foo';
+});
+list.findLastIndex((x, y) => x === 'foo');
+
+```
+
+# Diagnostics
+```
+invalid.js:2:1 lint/nursery/useIndexOf  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer `Array#{indexOf,lastIndexOf}()` over `Array#{findIndex,findLastIndex}()` when looking for the index of an item.
+  
+    1 │ const list = ['foo', 'bar', 'baz'];
+  > 2 │ list.findIndex(bar => bar === 'foo');
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    3 │ list.findIndex((x) => x === 'foo');
+    4 │ list.findIndex(x => 'foo' === x);
+  
+  i If the expression you are looking for relies on an item related to the function (its arguments, the function self, etc.), the case is still valid. This rule is fixable, unless the search expression has side effects.
+  
+  i Safe fix: Replace `Array.findIndex()` with `Array.indexOf()`
+  
+     1  1 │   const list = ['foo', 'bar', 'baz'];
+     2    │ - list.findIndex(bar·=>·bar·===·'foo');
+        2 │ + list.indexOf('foo');
+     3  3 │   list.findIndex((x) => x === 'foo');
+     4  4 │   list.findIndex(x => 'foo' === x);
+  
+
+```
+
+```
+invalid.js:3:1 lint/nursery/useIndexOf  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer `Array#{indexOf,lastIndexOf}()` over `Array#{findIndex,findLastIndex}()` when looking for the index of an item.
+  
+    1 │ const list = ['foo', 'bar', 'baz'];
+    2 │ list.findIndex(bar => bar === 'foo');
+  > 3 │ list.findIndex((x) => x === 'foo');
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    4 │ list.findIndex(x => 'foo' === x);
+    5 │ list.findIndex(x => {
+  
+  i If the expression you are looking for relies on an item related to the function (its arguments, the function self, etc.), the case is still valid. This rule is fixable, unless the search expression has side effects.
+  
+  i Safe fix: Replace `Array.findIndex()` with `Array.indexOf()`
+  
+     1  1 │   const list = ['foo', 'bar', 'baz'];
+     2  2 │   list.findIndex(bar => bar === 'foo');
+     3    │ - list.findIndex((x)·=>·x·===·'foo');
+        3 │ + list.indexOf('foo');
+     4  4 │   list.findIndex(x => 'foo' === x);
+     5  5 │   list.findIndex(x => {
+  
+
+```
+
+```
+invalid.js:4:1 lint/nursery/useIndexOf  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer `Array#{indexOf,lastIndexOf}()` over `Array#{findIndex,findLastIndex}()` when looking for the index of an item.
+  
+    2 │ list.findIndex(bar => bar === 'foo');
+    3 │ list.findIndex((x) => x === 'foo');
+  > 4 │ list.findIndex(x => 'foo' === x);
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    5 │ list.findIndex(x => {
+    6 │ 	return x === 'foo';
+  
+  i If the expression you are looking for relies on an item related to the function (its arguments, the function self, etc.), the case is still valid. This rule is fixable, unless the search expression has side effects.
+  
+  i Safe fix: Replace `Array.findIndex()` with `Array.indexOf()`
+  
+     2  2 │   list.findIndex(bar => bar === 'foo');
+     3  3 │   list.findIndex((x) => x === 'foo');
+     4    │ - list.findIndex(x·=>·'foo'·===·x);
+        4 │ + list.indexOf('foo'·);
+     5  5 │   list.findIndex(x => {
+     6  6 │   	return x === 'foo';
+  
+
+```
+
+```
+invalid.js:5:1 lint/nursery/useIndexOf  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer `Array#{indexOf,lastIndexOf}()` over `Array#{findIndex,findLastIndex}()` when looking for the index of an item.
+  
+    3 │ list.findIndex((x) => x === 'foo');
+    4 │ list.findIndex(x => 'foo' === x);
+  > 5 │ list.findIndex(x => {
+      │ ^^^^^^^^^^^^^^^^^^^^^
+  > 6 │ 	return x === 'foo';
+  > 7 │ });
+      │ ^^
+    8 │ list.findIndex((x, y) => x === 'foo');
+    9 │ 
+  
+  i If the expression you are looking for relies on an item related to the function (its arguments, the function self, etc.), the case is still valid. This rule is fixable, unless the search expression has side effects.
+  
+  i Safe fix: Replace `Array.findIndex()` with `Array.indexOf()`
+  
+     3  3 │   list.findIndex((x) => x === 'foo');
+     4  4 │   list.findIndex(x => 'foo' === x);
+     5    │ - list.findIndex(x·=>·{
+     6    │ - → return·x·===·'foo';
+     7    │ - });
+        5 │ + list.indexOf('foo');
+     8  6 │   list.findIndex((x, y) => x === 'foo');
+     9  7 │   
+  
+
+```
+
+```
+invalid.js:10:1 lint/nursery/useIndexOf  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer `Array#{indexOf,lastIndexOf}()` over `Array#{findIndex,findLastIndex}()` when looking for the index of an item.
+  
+     8 │ list.findIndex((x, y) => x === 'foo');
+     9 │ 
+  > 10 │ list.findLastIndex(bar => bar === 'foo');
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    11 │ list.findLastIndex((x) => x === 'foo');
+    12 │ list.findLastIndex(x => 'foo' === x);
+  
+  i If the expression you are looking for relies on an item related to the function (its arguments, the function self, etc.), the case is still valid. This rule is fixable, unless the search expression has side effects.
+  
+  i Safe fix: Replace `Array.findLastIndex()` with `Array.lastIndexOf()`
+  
+     8  8 │   list.findIndex((x, y) => x === 'foo');
+     9  9 │   
+    10    │ - list.findLastIndex(bar·=>·bar·===·'foo');
+       10 │ + list.lastIndexOf('foo');
+    11 11 │   list.findLastIndex((x) => x === 'foo');
+    12 12 │   list.findLastIndex(x => 'foo' === x);
+  
+
+```
+
+```
+invalid.js:11:1 lint/nursery/useIndexOf  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer `Array#{indexOf,lastIndexOf}()` over `Array#{findIndex,findLastIndex}()` when looking for the index of an item.
+  
+    10 │ list.findLastIndex(bar => bar === 'foo');
+  > 11 │ list.findLastIndex((x) => x === 'foo');
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    12 │ list.findLastIndex(x => 'foo' === x);
+    13 │ list.findLastIndex(x => {
+  
+  i If the expression you are looking for relies on an item related to the function (its arguments, the function self, etc.), the case is still valid. This rule is fixable, unless the search expression has side effects.
+  
+  i Safe fix: Replace `Array.findLastIndex()` with `Array.lastIndexOf()`
+  
+     9  9 │   
+    10 10 │   list.findLastIndex(bar => bar === 'foo');
+    11    │ - list.findLastIndex((x)·=>·x·===·'foo');
+       11 │ + list.lastIndexOf('foo');
+    12 12 │   list.findLastIndex(x => 'foo' === x);
+    13 13 │   list.findLastIndex(x => {
+  
+
+```
+
+```
+invalid.js:12:1 lint/nursery/useIndexOf  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer `Array#{indexOf,lastIndexOf}()` over `Array#{findIndex,findLastIndex}()` when looking for the index of an item.
+  
+    10 │ list.findLastIndex(bar => bar === 'foo');
+    11 │ list.findLastIndex((x) => x === 'foo');
+  > 12 │ list.findLastIndex(x => 'foo' === x);
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    13 │ list.findLastIndex(x => {
+    14 │ 	return x === 'foo';
+  
+  i If the expression you are looking for relies on an item related to the function (its arguments, the function self, etc.), the case is still valid. This rule is fixable, unless the search expression has side effects.
+  
+  i Safe fix: Replace `Array.findLastIndex()` with `Array.lastIndexOf()`
+  
+    10 10 │   list.findLastIndex(bar => bar === 'foo');
+    11 11 │   list.findLastIndex((x) => x === 'foo');
+    12    │ - list.findLastIndex(x·=>·'foo'·===·x);
+       12 │ + list.lastIndexOf('foo'·);
+    13 13 │   list.findLastIndex(x => {
+    14 14 │   	return x === 'foo';
+  
+
+```
+
+```
+invalid.js:13:1 lint/nursery/useIndexOf  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer `Array#{indexOf,lastIndexOf}()` over `Array#{findIndex,findLastIndex}()` when looking for the index of an item.
+  
+    11 │ list.findLastIndex((x) => x === 'foo');
+    12 │ list.findLastIndex(x => 'foo' === x);
+  > 13 │ list.findLastIndex(x => {
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 14 │ 	return x === 'foo';
+  > 15 │ });
+       │ ^^
+    16 │ list.findLastIndex((x, y) => x === 'foo');
+    17 │ 
+  
+  i If the expression you are looking for relies on an item related to the function (its arguments, the function self, etc.), the case is still valid. This rule is fixable, unless the search expression has side effects.
+  
+  i Safe fix: Replace `Array.findLastIndex()` with `Array.lastIndexOf()`
+  
+    11 11 │   list.findLastIndex((x) => x === 'foo');
+    12 12 │   list.findLastIndex(x => 'foo' === x);
+    13    │ - list.findLastIndex(x·=>·{
+    14    │ - → return·x·===·'foo';
+    15    │ - });
+       13 │ + list.lastIndexOf('foo');
+    16 14 │   list.findLastIndex((x, y) => x === 'foo');
+    17 15 │   
+  
+
+```
