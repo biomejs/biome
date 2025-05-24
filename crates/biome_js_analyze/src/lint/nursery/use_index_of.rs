@@ -157,9 +157,9 @@ impl Rule for UseIndexOf {
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let call = ctx.query();
         let member_expression = AnyJsMemberExpression::cast(call.callee().ok()?.into_syntax())?;
-        let member_name = member_expression.member_name()?.text().to_string();
+        let member_name = member_expression.member_name()?;
 
-        if !matches!(member_name.as_str(), "findIndex" | "findLastIndex") {
+        if !matches!(member_name.text(), "findIndex" | "findLastIndex") {
             return None;
         }
 
