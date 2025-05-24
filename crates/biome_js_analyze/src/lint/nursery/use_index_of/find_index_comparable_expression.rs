@@ -1,4 +1,7 @@
-use biome_js_syntax::{AnyJsExpression, AnyJsFunctionBody, JsAssignmentExpression, JsBinaryExpression, JsLogicalExpression, JsReturnStatement, JsSyntaxNode, JsVariableDeclaration, T};
+use biome_js_syntax::{
+    AnyJsExpression, AnyJsFunctionBody, JsAssignmentExpression, JsBinaryExpression,
+    JsLogicalExpression, JsReturnStatement, JsSyntaxNode, JsVariableDeclaration, T,
+};
 use biome_rowan::AstNode;
 
 fn node_is_undefined(node: &AnyJsExpression) -> bool {
