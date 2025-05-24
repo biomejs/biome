@@ -20,7 +20,7 @@ use biome_js_syntax::{
 use biome_rowan::{AstNode, AstSeparatedList, BatchMutationExt, SyntaxToken};
 
 declare_lint_rule! {
-    /// Prefer Array#{indexOf,lastIndexOf}() over Array#{findIndex,findLastIndex}() when looking for the index of an item.
+    /// Prefer `Array#{indexOf,lastIndexOf}()` over `Array#{findIndex,findLastIndex}()` when looking for the index of an item.
     ///
     /// Array#findIndex() and Array#findLastIndex() are intended for more complex needs.
     /// If you are just looking for the index where the given item is present, then the code can be simplified to use Array#indexOf() or Array#lastIndexOf().
