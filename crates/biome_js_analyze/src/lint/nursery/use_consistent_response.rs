@@ -218,12 +218,12 @@ fn check_for_json_simplification(
     let second_arg = second_arg.and_then(|arg| AnyJsExpression::cast_ref(arg.syntax()));
 
     if let Some(second_arg) = second_arg {
-        loop_object(&second_arg, &mut |name, property| {
+        for_each_object_member(&second_arg, &mut |name, property| {
             if name != "headers" {
                 return None;
             }
 
-            loop_object(&property.value().ok()?, &mut |name, property| {
+            for_each_object_member(&property.value().ok()?, &mut |name, property| {
                 if name != "content-type" {
                     return None;
                 }
@@ -267,7 +267,7 @@ fn check_for_redirect_simplification(args: &JsCallArguments) -> Option<ResponseS
     let mut status: Option<u16> = None;
     let mut location: Option<Box<str>> = None;
 
-    loop_object(
+    for_each_object_member(
         second_arg.as_any_js_expression()?,
         &mut |name, property| match name {
             "status" => {
@@ -286,7 +286,7 @@ fn check_for_redirect_simplification(args: &JsCallArguments) -> Option<ResponseS
             "headers" => {
                 let object = property.value().ok()?;
 
-                loop_object(&object, &mut |name, property| {
+                for_each_object_member(&object, &mut |name, property| {
                     if name != "location" {
                         return None;
                     }
@@ -338,24 +338,19 @@ fn extract_json_stringify_arg(
     args.first()?.ok()
 }
 
-fn loop_object(
+fn for_each_object_member(
     expr: &AnyJsExpression,
-    loop_fn: &mut impl FnMut(&str, &JsPropertyObjectMember) -> Option<()>,
+    each_member: &mut impl FnMut(&str, &JsPropertyObjectMember) -> Option<()>,
 ) -> Option<()> {
     let object_expr = expr.as_js_object_expression()?;
-    let members = object_expr.members();
 
-    if members.is_empty() {
-        return Some(());
-    }
-
-    for member in members {
+    for member in object_expr.members() {
         let member = member.ok()?;
         let property_member = member.as_js_property_object_member()?;
         let name = property_member.name().ok()?.name()?;
         let text = name.to_ascii_lowercase_cow();
 
-        loop_fn(&text, property_member)?;
+        each_member(&text, property_member)?;
     }
 
     Some(())
