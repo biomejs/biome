@@ -106,6 +106,7 @@ fn scan_folder(folder: &Utf8Path, ctx: ScanContext) -> (Duration, Vec<BiomePath>
     // We want to process files that closest to the project root first. For example, we must process
     // first the `.gitignore` at the root of the project.
     let iter = evaluated_paths.into_iter().rev();
+
     for path in iter {
         if path.is_config() {
             configs.push(path);

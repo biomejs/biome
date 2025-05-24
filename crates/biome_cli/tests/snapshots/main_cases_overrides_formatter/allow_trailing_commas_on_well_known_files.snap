@@ -1,7 +1,6 @@
 ---
 source: crates/biome_cli/tests/snap_test.rs
 expression: redactor(content)
-snapshot_kind: text
 ---
 ## `biome.json`
 
@@ -66,22 +65,6 @@ check ━━━━━━━━━━━━━━━━━━━━━━━━�
 # Emitted Messages
 
 ```block
-tsconfig.json format ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Formatter would have printed the following content:
-  
-    1 1 │   {
-    2 2 │       // This is a comment
-    3   │ - ····"compilerOptions":·{},
-    4   │ - }
-      3 │ + ····"compilerOptions":·{}
-      4 │ + }
-      5 │ + 
-  
-
-```
-
-```block
 .vscode/settings.json format ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Formatter would have printed the following content:
@@ -108,6 +91,22 @@ other.json format ━━━━━━━━━━━━━━━━━━━━�
       2 │ + ····"asta":·["lorem",·"ipsum",·"first",·"second"]
       3 │ + }
       4 │ + 
+  
+
+```
+
+```block
+tsconfig.json format ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Formatter would have printed the following content:
+  
+    1 1 │   {
+    2 2 │       // This is a comment
+    3   │ - ····"compilerOptions":·{},
+    4   │ - }
+      3 │ + ····"compilerOptions":·{}
+      4 │ + }
+      5 │ + 
   
 
 ```

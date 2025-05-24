@@ -2,7 +2,10 @@ use crate::editorconfig::EditorConfigErrorKind;
 use biome_console::fmt::Display;
 use biome_console::{MarkupBuf, markup};
 use biome_deserialize::DeserializationDiagnostic;
-use biome_diagnostics::{Advices, Diagnostic, Error, LogCategory, MessageAndDescription, Visit};
+use biome_diagnostics::{
+    Advices, Category, Diagnostic, Error, Location, LogCategory, MessageAndDescription, Severity,
+    Visit, category,
+};
 use biome_resolver::{ResolveError, ResolveErrorDiagnostic};
 use biome_rowan::{SyntaxError, TextRange};
 use camino::{Utf8Path, Utf8PathBuf};
@@ -63,6 +66,17 @@ pub enum BiomeDiagnostic {
 
     /// Thrown when a configuration file can't be resolved from `node_modules`
     CantResolve(CantResolve),
+
+    /// Thrown when there's a nested root configuration inside a root configuration
+    ///
+    /// ## Example
+    /// ```text
+    /// - biome.json
+    /// - packages/lib/
+    ///   - biome.json // this has root: true
+    /// ```
+    ///
+    RootInRoot(RootInRoot),
 }
 
 impl From<SyntaxError> for BiomeDiagnostic {
@@ -123,6 +137,13 @@ impl BiomeDiagnostic {
     pub fn invalid_configuration_file(path: &Utf8Path) -> Self {
         Self::InvalidConfigurationFile(InvalidConfigurationFile {
             path: path.to_string(),
+        })
+    }
+
+    pub fn root_in_root(nested_path: String, root_path: Option<String>) -> Self {
+        Self::RootInRoot(RootInRoot {
+            path: nested_path.to_string(),
+            other_path: root_path,
         })
     }
 
@@ -321,6 +342,43 @@ impl CantResolve {
             .messages
             .push(markup! {{messsage}}.to_owned());
         self
+    }
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct RootInRoot {
+    path: String,
+    other_path: Option<String>,
+}
+
+impl Diagnostic for RootInRoot {
+    fn message(&self, fmt: &mut biome_console::fmt::Formatter<'_>) -> std::io::Result<()> {
+        fmt.write_markup(markup! {
+            "Found a nested root configuration, but there's already a root configuration."
+        })
+    }
+
+    fn severity(&self) -> Severity {
+        Severity::Error
+    }
+    fn category(&self) -> Option<&'static Category> {
+        Some(category!("configuration"))
+    }
+
+    fn location(&self) -> Location<'_> {
+        Location::builder().resource(&self.path).build()
+    }
+
+    fn advices(&self, visitor: &mut dyn Visit) -> std::io::Result<()> {
+        if let Some(other_path) = self.other_path.as_ref() {
+            visitor.record_log(
+                LogCategory::Info,
+                &markup! {
+                    "The other configuration was found in "<Emphasis>{other_path}</Emphasis>"."
+                },
+            )?;
+        }
+        Ok(())
     }
 }
 

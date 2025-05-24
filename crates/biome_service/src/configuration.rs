@@ -113,7 +113,8 @@ impl<'a> Iterator for ConfigurationDiagnosticsIter<'a> {
 impl FusedIterator for ConfigurationDiagnosticsIter<'_> {}
 
 impl LoadedConfiguration {
-    fn try_from_payload(
+    /// It consumes the payload, applies and extends and returns the final, extended configuration.
+    pub fn try_from_payload(
         value: Option<ConfigurationPayload>,
         fs: &dyn FsWithResolverProxy,
     ) -> Result<Self, WorkspaceError> {
@@ -153,13 +154,47 @@ impl LoadedConfiguration {
 }
 
 /// Load the partial configuration for this session of the CLI.
+///
+/// When `root` is passed, it returns the first configuration that has `root: true`.
 #[instrument(level = "debug", skip(fs))]
 pub fn load_configuration(
     fs: &dyn FsWithResolverProxy,
     config_path: ConfigurationPathHint,
 ) -> Result<LoadedConfiguration, WorkspaceError> {
-    let config = load_config(fs, config_path)?;
-    LoadedConfiguration::try_from_payload(config, fs)
+    let config = load_config(fs, config_path, false)?;
+    let mut loaded_configuration = LoadedConfiguration::try_from_payload(config, fs);
+
+    // We loaded the configuration, now we must check this configuration is inside a monorepo.
+    // We start looking upwards
+    if let Ok(loaded_configuration) = &mut loaded_configuration {
+        if let Some(directory_path) = loaded_configuration.directory_path.as_ref() {
+            let root_config = load_config(
+                fs,
+                ConfigurationPathHint::FromWorkspace(directory_path.clone()),
+                true,
+            )?;
+
+            // We call possible extends from the root configuration
+            let mut result = LoadedConfiguration::try_from_payload(root_config, fs)?;
+            // The configuration we found at the beginning now must "extend" from the root, and
+            // to do so we merge the root with the original configuration, so the original
+            // configuration takes precedence...
+            result
+                .configuration
+                .merge_with(loaded_configuration.configuration.clone());
+
+            // ...and how we swap the values to `loaded_configuration` configuration takes the correct
+            // configuration has the correct final values
+            std::mem::swap(
+                &mut loaded_configuration.configuration,
+                &mut result.configuration,
+            );
+            // We add possible diagnostics coming from the root configuration
+            loaded_configuration.diagnostics.extend(result.diagnostics);
+        }
+    }
+
+    loaded_configuration
 }
 
 /// - [Result]: if an error occurred while loading the configuration file.
@@ -181,8 +216,15 @@ type LoadConfig = Result<Option<ConfigurationPayload>, WorkspaceError>;
 /// - Otherwise, the function will try to traverse upwards the file system until it finds a `biome.json` or `biome.jsonc`
 ///     file, or there aren't directories anymore. In this case, the function will not error but return an `Ok(None)`, which
 ///     means Biome will use the default configuration.
+///
+/// When `seek_root` is `true`, the function will stop at the first configuration file with `"root": true`, and it skips it
+/// otherwise
 #[instrument(level = "debug", skip(fs))]
-fn load_config(fs: &dyn FileSystem, base_path: ConfigurationPathHint) -> LoadConfig {
+pub fn load_config(
+    fs: &dyn FileSystem,
+    base_path: ConfigurationPathHint,
+    seek_root: bool,
+) -> LoadConfig {
     // This path is used for configuration resolution from external packages.
     let external_resolution_base_path = match &base_path {
         // Path hint from LSP is always the workspace root
@@ -190,6 +232,7 @@ fn load_config(fs: &dyn FileSystem, base_path: ConfigurationPathHint) -> LoadCon
         ConfigurationPathHint::FromLsp(path) => path.clone(),
         ConfigurationPathHint::FromWorkspace(path) => path.clone(),
         ConfigurationPathHint::FromUser(path) => path.clone(),
+        ConfigurationPathHint::FromRoot(path) => path.clone(),
         ConfigurationPathHint::None => fs
             .working_directory()
             .map_or(Utf8PathBuf::new(), |working_directory| working_directory),
@@ -200,6 +243,7 @@ fn load_config(fs: &dyn FileSystem, base_path: ConfigurationPathHint) -> LoadCon
     let configuration_directory = match base_path {
         ConfigurationPathHint::FromLsp(path) => path,
         ConfigurationPathHint::FromWorkspace(path) => path,
+        ConfigurationPathHint::FromRoot(path) => path,
         ConfigurationPathHint::None => fs.working_directory().unwrap_or_default(),
         ConfigurationPathHint::FromUser(ref config_file_path) => {
             // If the configuration path hint is from user and is a file path, we'll load it directly
@@ -222,7 +266,13 @@ fn load_config(fs: &dyn FileSystem, base_path: ConfigurationPathHint) -> LoadCon
         let is_root = deserialized_content
             .deserialized
             .as_ref()
-            .is_some_and(|config| config.root.is_none_or(|root| root.value()));
+            .is_some_and(|config| {
+                if seek_root {
+                    config.root.is_some_and(|root| root.value() == true)
+                } else {
+                    config.root.is_none_or(|root| root.value())
+                }
+            });
         if is_root {
             deserialized = Some(deserialized_content);
         }

@@ -16,7 +16,7 @@ use biome_configuration::html::{HtmlFormatterConfiguration, html_formatter_confi
 use biome_configuration::javascript::{JsFormatterConfiguration, JsLinterConfiguration};
 use biome_configuration::json::{JsonFormatterConfiguration, JsonLinterConfiguration};
 use biome_configuration::vcs::VcsConfiguration;
-use biome_configuration::{BiomeDiagnostic, Configuration};
+use biome_configuration::{BiomeDiagnostic, Configuration, ConfigurationPathHint};
 use biome_configuration::{
     FilesConfiguration, FormatterConfiguration, LinterConfiguration, configuration,
     css::css_formatter_configuration, css::css_linter_configuration, files_configuration,
@@ -31,7 +31,9 @@ use biome_diagnostics::{Diagnostic, PrintDiagnostic, Severity};
 use biome_fs::{BiomePath, FileSystem};
 use biome_grit_patterns::GritTargetLanguage;
 use biome_resolver::FsWithResolverProxy;
-use biome_service::configuration::{LoadedConfiguration, load_configuration, load_editorconfig};
+use biome_service::configuration::{
+    LoadedConfiguration, load_config, load_configuration, load_editorconfig,
+};
 use biome_service::documentation::Doc;
 use biome_service::projects::ProjectKey;
 use biome_service::workspace::{
@@ -869,6 +871,7 @@ pub(crate) trait CommandRunner: Sized {
             }
         });
 
+        let is_root = configuration.is_root();
         let result = workspace.update_settings(UpdateSettingsParams {
             project_key: open_project_result.project_key,
             // When the user provides the path to the configuration, we can't use its directory because
@@ -879,6 +882,7 @@ pub(crate) trait CommandRunner: Sized {
                 configuration_path.map(BiomePath::from)
             },
             configuration,
+            is_nested: false,
         })?;
         for diagnostic in &result.diagnostics {
             if diagnostic.tags().is_verbose() && cli_options.verbose {
@@ -895,14 +899,83 @@ pub(crate) trait CommandRunner: Sized {
             force: false, // TODO: Maybe we'll want a CLI flag for this.
             scan_kind,
         })?;
+        let mut has_errors = false;
         for diagnostic in result.diagnostics {
             if diagnostic.severity() >= Severity::Error {
+                has_errors = true;
                 if diagnostic.tags().is_verbose() && cli_options.verbose {
                     console.error(markup! {{PrintDiagnostic::verbose(&diagnostic)}})
                 } else {
                     console.error(markup! {{PrintDiagnostic::simple(&diagnostic)}})
                 }
             }
+        }
+
+        if has_errors && is_root {
+            return Err(CliDiagnostic::workspace_error(
+                BiomeDiagnostic::invalid_configuration(
+                    "Biome exited because the configuration resulted in errors. Please fix them.",
+                )
+                .into(),
+            ));
+        }
+
+        for config_path in result.configuration_files.as_slice() {
+            let is_root_configuration = config_path
+                .parent()
+                .map(|parent| {
+                    project_path
+                        .as_path()
+                        .strip_prefix(parent)
+                        .ok()
+                        .is_some_and(|value| value.as_str() == "")
+                })
+                .unwrap_or_default();
+
+            dbg!(is_root_configuration);
+            if is_root_configuration {
+                continue;
+            }
+
+            let config = load_config(
+                fs,
+                ConfigurationPathHint::FromRoot(config_path.as_path().to_path_buf()),
+                false,
+            )?;
+            let configuration = LoadedConfiguration::try_from_payload(config, fs)?;
+
+            if configuration.has_errors() {
+                // return Ok(configuration.diagnostics);
+            }
+
+            let LoadedConfiguration {
+                directory_path,
+                configuration,
+                ..
+            } = configuration;
+
+            if configuration.is_root() {
+                return Err(CliDiagnostic::workspace_error(
+                    BiomeDiagnostic::root_in_root(
+                        config_path.to_string(),
+                        Some(project_path.to_string()),
+                    )
+                    .into(),
+                ));
+            }
+
+            // FIXME
+            // Not probably a fix, but we should probably agree if nested configurations inherit from the root or not.
+            // Some tools do that, but others don't.
+            // Not settings. Let's stick to one or another.
+            let result = workspace.update_settings(UpdateSettingsParams {
+                project_key: open_project_result.project_key,
+                workspace_directory: directory_path.map(BiomePath::from),
+                configuration,
+                is_nested: true,
+            })?;
+
+            // TODO print diagnostics
         }
 
         Ok(ConfiguredWorkspace {
