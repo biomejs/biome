@@ -15,11 +15,14 @@ use biome_fs::{FileSystemDiagnostic, PathKind};
 use camino::Utf8Path;
 use papaya::{Compute, Operation};
 
-use crate::{IGNORE_ENTRIES, WorkspaceError, workspace_watcher::WatcherSignalKind};
+use crate::{
+    IGNORE_ENTRIES, WorkspaceError,
+    workspace_watcher::{OpenFileReason, WatcherSignalKind},
+};
 
 use super::{
-    FileContent, OpenFileParams, ScanKind, ScanProjectFolderParams, ServiceDataNotification,
-    Workspace, WorkspaceServer, document::Document,
+    ScanKind, ScanProjectFolderParams, ServiceDataNotification, Workspace, WorkspaceServer,
+    document::Document,
 };
 
 impl WorkspaceServer {
@@ -72,15 +75,12 @@ impl WorkspaceServer {
             return Ok(()); // file events outside our projects can be safely ignored.
         };
 
-        self.open_file_by_scanner(OpenFileParams {
-            project_key,
-            path: path.into(),
-            content: FileContent::FromServer,
-            document_file_source: None,
-            persist_node_cache: false,
-        })?;
+        self.open_file_by_watcher(project_key, path)?;
 
-        self.update_service_data(WatcherSignalKind::AddedOrChanged, path)
+        self.update_service_data(
+            WatcherSignalKind::AddedOrChanged(OpenFileReason::WatcherUpdate),
+            path,
+        )
     }
 
     /// Used indirectly by the watcher to open an individual folder.

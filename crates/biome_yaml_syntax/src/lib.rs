@@ -6,7 +6,7 @@ mod file_source;
 mod syntax_node;
 
 pub use self::generated::*;
-use biome_rowan::RawSyntaxKind;
+use biome_rowan::{AstNode, RawSyntaxKind};
 pub use biome_rowan::{TextLen, TextRange, TextSize, TokenAtOffset, TriviaPieceKind, WalkEvent};
 pub use syntax_node::*;
 
@@ -28,12 +28,16 @@ impl biome_rowan::SyntaxKind for YamlSyntaxKind {
     const EOF: Self = Self::EOF;
 
     fn is_bogus(&self) -> bool {
-        matches!(self, Self::YAML_BOGUS | Self::YAML_BOGUS_NODE)
+        matches!(
+            self,
+            Self::YAML_BOGUS | Self::YAML_BOGUS_BLOCK_NODE | Self::YAML_BOGUS_BLOCK_MAP_ENTRY
+        )
     }
 
     fn to_bogus(&self) -> Self {
         match self {
-            Self::YAML_BOGUS_NODE => Self::YAML_BOGUS_NODE,
+            kind if AnyYamlBlockMapEntry::can_cast(*kind) => Self::YAML_BOGUS_BLOCK_MAP_ENTRY,
+            kind if AnyYamlBlockNode::can_cast(*kind) => Self::YAML_BOGUS_BLOCK_NODE,
             _ => Self::YAML_BOGUS,
         }
     }
@@ -57,7 +61,7 @@ impl biome_rowan::SyntaxKind for YamlSyntaxKind {
     }
 
     fn is_trivia(self) -> bool {
-        matches!(self, Self::NEWLINE | Self::WHITESPACE | Self::COMMENT)
+        matches!(self, Self::WHITESPACE | Self::COMMENT)
     }
 
     fn to_string(&self) -> Option<&'static str> {
@@ -67,7 +71,7 @@ impl biome_rowan::SyntaxKind for YamlSyntaxKind {
 
 impl YamlSyntaxKind {
     pub fn is_trivia(self) -> bool {
-        matches!(self, Self::NEWLINE | Self::WHITESPACE)
+        matches!(self, Self::WHITESPACE)
     }
 
     pub fn is_comments(self) -> bool {
@@ -79,19 +83,10 @@ impl TryFrom<YamlSyntaxKind> for TriviaPieceKind {
     type Error = ();
 
     fn try_from(value: YamlSyntaxKind) -> Result<Self, Self::Error> {
-        if value.is_trivia() {
-            match value {
-                YamlSyntaxKind::NEWLINE => Ok(Self::Newline),
-                YamlSyntaxKind::WHITESPACE => Ok(Self::Whitespace),
-                _ => unreachable!("Not Trivia"),
-            }
-        } else if value.is_comments() {
-            match value {
-                YamlSyntaxKind::COMMENT => Ok(Self::SingleLineComment),
-                _ => unreachable!("Not Comment"),
-            }
-        } else {
-            Err(())
+        match value {
+            YamlSyntaxKind::WHITESPACE => Ok(Self::Whitespace),
+            YamlSyntaxKind::COMMENT => Ok(Self::SingleLineComment),
+            _ => Err(()),
         }
     }
 }

@@ -58,19 +58,22 @@ pub struct AnalyzerConfiguration {
     /// A list of rules and their options
     pub(crate) rules: AnalyzerRules,
 
-    /// A collections of bindings that the analyzers should consider as "external".
+    /// A collection of bindings that the analyzers should consider as "external".
     ///
     /// For example, lint rules should ignore them.
     globals: Vec<Box<str>>,
 
-    /// Allows to choose a different quote when applying fixes inside the lint rules
+    /// Allows choosing a different quote when applying fixes inside the lint rules
     preferred_quote: PreferredQuote,
 
-    /// Allows to choose a different JSX quote when applying fixes inside the lint rules
+    /// Allows choosing a different JSX quote when applying fixes inside the lint rules
     pub preferred_jsx_quote: PreferredQuote,
 
     /// Indicates the type of runtime or transformation used for interpreting JSX.
     jsx_runtime: Option<JsxRuntime>,
+
+    /// Whether the CSS files contain CSS Modules
+    css_modules: bool,
 }
 
 impl AnalyzerConfiguration {
@@ -96,6 +99,11 @@ impl AnalyzerConfiguration {
 
     pub fn with_preferred_jsx_quote(mut self, preferred_jsx_quote: PreferredQuote) -> Self {
         self.preferred_jsx_quote = preferred_jsx_quote;
+        self
+    }
+
+    pub fn with_css_modules(mut self, css_modules: bool) -> Self {
+        self.css_modules = css_modules;
         self
     }
 }
@@ -170,6 +178,10 @@ impl AnalyzerOptions {
 
     pub fn preferred_jsx_quote(&self) -> &PreferredQuote {
         &self.configuration.preferred_jsx_quote
+    }
+
+    pub fn css_modules(&self) -> bool {
+        self.configuration.css_modules
     }
 }
 

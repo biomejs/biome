@@ -58,7 +58,18 @@ pub struct GritExecContext<'a> {
 
 impl GritExecContext<'_> {
     pub fn add_diagnostic(&self, diagnostic: RuleDiagnostic) {
-        self.diagnostics.lock().unwrap().push(diagnostic);
+        let mut diagnostics = self.diagnostics.lock().unwrap();
+        // Make sure we don't add multiple messages for the same span.
+        // I think this happens when a node and its child(ren) both match the
+        // same predicate, and this seems like the easiest way to avoid the
+        // problem. Alternatively we may need to hack something deep into the
+        // Grit pattern matcher.
+        if diagnostics
+            .last()
+            .is_none_or(|last| last.span() != diagnostic.span())
+        {
+            diagnostics.push(diagnostic);
+        }
     }
 
     pub fn into_diagnostics(self) -> Vec<RuleDiagnostic> {

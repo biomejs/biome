@@ -7,6 +7,7 @@ use biome_js_syntax::{
     AnyJsImportClause, AnyJsImportLike, AnyJsNamedImportSpecifier, JsModuleSource, JsSyntaxToken,
 };
 use biome_module_graph::{JsModuleInfo, ModuleGraph, SUPPORTED_EXTENSIONS};
+use biome_resolver::ResolveError;
 use biome_rowan::{AstNode, SyntaxResult, Text, TextRange, TokenText};
 use camino::{Utf8Path, Utf8PathBuf};
 
@@ -49,7 +50,7 @@ declare_lint_rule! {
     /// import { foo } from "./foo.js";
     /// ```
     pub NoUnresolvedImports {
-        version: "next",
+        version: "2.0.0",
         name: "noUnresolvedImports",
         language: "js",
         sources: &[
@@ -64,7 +65,7 @@ pub enum NoUnresolvedImportsState {
     UnresolvedPath {
         range: TextRange,
         specifier: Box<str>,
-        resolve_error: Box<str>,
+        resolve_error: ResolveError,
     },
     UnresolvedSymbol {
         range: TextRange,
@@ -122,7 +123,7 @@ impl Rule for NoUnresolvedImports {
                 return vec![NoUnresolvedImportsState::UnresolvedPath {
                     range: node.syntax().text_trimmed_range(),
                     specifier: specifier.as_ref().into(),
-                    resolve_error: resolve_error.as_str().into(),
+                    resolve_error: *resolve_error,
                 }];
             }
         };
@@ -176,7 +177,7 @@ impl Rule for NoUnresolvedImports {
                     range,
                     markup! {
                         "The "{specifier_kind}" "<Emphasis>{specifier}</Emphasis>
-                        " cannot be resolved: "<Emphasis>{resolve_error}</Emphasis>
+                        " cannot be resolved: "<Emphasis>{resolve_error.to_string()}</Emphasis>
                     },
                 )
                 .note(if specifier_kind == "path" {

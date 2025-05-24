@@ -33,7 +33,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub UseExportsLast {
-        version: "next",
+        version: "2.0.0",
         name: "useExportsLast",
         language: "js",
         recommended: false,

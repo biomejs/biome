@@ -70,9 +70,10 @@ use biome_console::{Markup, MarkupBuf, markup};
 use biome_diagnostics::CodeSuggestion;
 use biome_diagnostics::serde::Diagnostic;
 use biome_formatter::Printed;
-use biome_fs::{BiomePath, FileSystem};
+use biome_fs::BiomePath;
 use biome_grit_patterns::GritTargetLanguage;
 use biome_js_syntax::{TextRange, TextSize};
+use biome_resolver::FsWithResolverProxy;
 use biome_text_edit::TextEdit;
 use camino::Utf8Path;
 pub use client::{TransportRequest, WorkspaceClient, WorkspaceTransport};
@@ -84,6 +85,7 @@ use schemars::{r#gen::SchemaGenerator, schema::Schema};
 pub use server::WorkspaceServer;
 use smallvec::SmallVec;
 use std::collections::HashMap;
+use std::fmt::{Debug, Display, Formatter};
 use std::time::Duration;
 use std::{borrow::Cow, panic::RefUnwindSafe};
 use tokio::sync::watch;
@@ -453,7 +455,7 @@ impl std::fmt::Display for FeatureKind {
     }
 }
 
-#[derive(Debug, Copy, Clone, Hash, serde::Serialize, serde::Deserialize, Eq, PartialEq)]
+#[derive(Copy, Clone, Hash, serde::Serialize, serde::Deserialize, Eq, PartialEq)]
 #[serde(
     from = "smallvec::SmallVec<[FeatureKind; 6]>",
     into = "smallvec::SmallVec<[FeatureKind; 6]>",
@@ -461,16 +463,25 @@ impl std::fmt::Display for FeatureKind {
 )]
 pub struct FeatureName(BitFlags<FeatureKind>);
 
-impl std::fmt::Display for FeatureName {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let mut iter = self.0.iter();
-        if let Some(first) = iter.next() {
-            write!(f, "{}", first)?;
-            for kind in iter {
-                write!(f, ", {}", kind)?;
-            }
+impl Display for FeatureName {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        Debug::fmt(self, f)
+    }
+}
+
+impl Debug for FeatureName {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        let mut list = f.debug_list();
+        for kind in self.iter() {
+            match kind {
+                FeatureKind::Format => list.entry(&"Format"),
+                FeatureKind::Lint => list.entry(&"Lint"),
+                FeatureKind::Search => list.entry(&"Search"),
+                FeatureKind::Assist => list.entry(&"Assist"),
+                FeatureKind::Debug => list.entry(&"Debug"),
+            };
         }
-        Ok(())
+        list.finish()
     }
 }
 
@@ -482,8 +493,16 @@ impl FeatureName {
         Self(BitFlags::empty())
     }
 
+    pub fn all() -> Self {
+        Self(BitFlags::all())
+    }
+
     pub fn insert(&mut self, kind: FeatureKind) {
         self.0.insert(kind);
+    }
+
+    pub fn is_empty(&self) -> bool {
+        self.0.is_empty()
     }
 }
 
@@ -513,12 +532,18 @@ impl schemars::JsonSchema for FeatureName {
     }
 }
 
-#[derive(Debug, Default)]
+#[derive(Debug)]
 pub struct FeaturesBuilder(BitFlags<FeatureKind>);
+
+impl Default for FeaturesBuilder {
+    fn default() -> Self {
+        Self::new()
+    }
+}
 
 impl FeaturesBuilder {
     pub fn new() -> Self {
-        Self::default()
+        Self(BitFlags::empty())
     }
 
     pub fn with_formatter(mut self) -> Self {
@@ -537,6 +562,14 @@ impl FeaturesBuilder {
     }
 
     pub fn with_assist(mut self) -> Self {
+        self.0.insert(FeatureKind::Assist);
+        self
+    }
+
+    pub fn with_all(mut self) -> Self {
+        self.0.insert(FeatureKind::Format);
+        self.0.insert(FeatureKind::Lint);
+        self.0.insert(FeatureKind::Search);
         self.0.insert(FeatureKind::Assist);
         self
     }
@@ -888,6 +921,9 @@ pub struct ScanProjectFolderResult {
 
     /// Duration of the scan.
     pub duration: Duration,
+
+    /// A list of child configuration files found inside the project
+    pub configuration_files: Vec<BiomePath>,
 }
 
 #[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]
@@ -1031,6 +1067,24 @@ pub struct OpenProjectParams {
     /// Whether the folder should be opened as a project, even if no
     /// `biome.json` can be found.
     pub open_uninitialized: bool,
+
+    /// Whether the client wants to run only certain rules. This is needed to compute the kind of [ScanKind].
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub only_rules: Option<Vec<RuleSelector>>,
+    /// Whether the client wants to skip some lint rule. This is needed to compute the kind of [ScanKind].
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub skip_rules: Option<Vec<RuleSelector>>,
+}
+
+#[derive(Debug, serde::Serialize, serde::Deserialize)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[serde(rename_all = "camelCase")]
+pub struct OpenProjectResult {
+    /// A unique identifier for this project
+    pub project_key: ProjectKey,
+
+    /// How to scan this project
+    pub scan_kind: ScanKind,
 }
 
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
@@ -1086,10 +1140,13 @@ pub trait Workspace: Send + Sync + RefUnwindSafe {
     /// probably want to follow it up with a call to `scan_project_folder()` or
     /// explicitly load settings into the project using `update_settings()`.
     ///
-    /// Returns the key of the opened project. This key can be used with
-    /// follow-up methods to perform actions related to the project, such as
-    /// opening files or querying them.
-    fn open_project(&self, params: OpenProjectParams) -> Result<ProjectKey, WorkspaceError>;
+    /// Returns the key of the opened project and the [ScanKind] of this project.
+    ///
+    /// The key can be used with follow-up methods to perform actions related to the project,
+    /// such as opening files or querying them.
+    ///
+    /// The `scan_kind` can be used to tell the scanner how it should scan the project.
+    fn open_project(&self, params: OpenProjectParams) -> Result<OpenProjectResult, WorkspaceError>;
 
     /// Scans the given project from a given path, and initializes all settings
     /// and service data.
@@ -1241,7 +1298,7 @@ pub trait Workspace: Send + Sync + RefUnwindSafe {
     /// Returns the filesystem implementation to open files with.
     ///
     /// This may be an in-memory file system.
-    fn fs(&self) -> &dyn FileSystem;
+    fn fs(&self) -> &dyn FsWithResolverProxy;
 
     // #endregion
 
@@ -1278,7 +1335,7 @@ pub trait Workspace: Send + Sync + RefUnwindSafe {
 }
 
 /// Convenience function for constructing a server instance of [Workspace]
-pub fn server(fs: Box<dyn FileSystem>, threads: Option<usize>) -> Box<dyn Workspace> {
+pub fn server(fs: Box<dyn FsWithResolverProxy>, threads: Option<usize>) -> Box<dyn Workspace> {
     let (watcher_tx, _) = bounded(0);
     let (service_data_tx, _) = watch::channel(ServiceDataNotification::Updated);
     Box::new(WorkspaceServer::new(
@@ -1292,7 +1349,7 @@ pub fn server(fs: Box<dyn FileSystem>, threads: Option<usize>) -> Box<dyn Worksp
 /// Convenience function for constructing a client instance of [Workspace]
 pub fn client<T>(
     transport: T,
-    fs: Box<dyn FileSystem>,
+    fs: Box<dyn FsWithResolverProxy>,
 ) -> Result<Box<dyn Workspace>, WorkspaceError>
 where
     T: WorkspaceTransport + RefUnwindSafe + Send + Sync + 'static,

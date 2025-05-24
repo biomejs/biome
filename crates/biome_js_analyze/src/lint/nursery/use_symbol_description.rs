@@ -32,7 +32,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub UseSymbolDescription {
-        version: "next",
+        version: "2.0.0",
         name: "useSymbolDescription",
         language: "js",
         sources: &[

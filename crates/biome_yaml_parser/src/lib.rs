@@ -17,19 +17,17 @@ pub fn parse_yaml(source: &str) -> YamlParse {
 }
 
 pub fn parse_yaml_with_cache(source: &str, cache: &mut NodeCache) -> YamlParse {
-    tracing::debug_span!("Parsing phase").in_scope(move || {
-        let mut parser = YamlParser::new(source);
+    let mut parser = YamlParser::new(source);
 
-        parse_root(&mut parser);
+    parse_root(&mut parser);
 
-        let (events, diagnostics, trivia) = parser.finish();
+    let (events, diagnostics, trivia) = parser.finish();
 
-        let mut tree_sink = YamlLosslessTreeSink::with_cache(source, &trivia, cache);
-        biome_parser::event::process(&mut tree_sink, events, diagnostics);
-        let (green, diagnostics) = tree_sink.finish();
+    let mut tree_sink = YamlLosslessTreeSink::with_cache(source, &trivia, cache);
+    biome_parser::event::process(&mut tree_sink, events, diagnostics);
+    let (green, diagnostics) = tree_sink.finish();
 
-        YamlParse::new(green, diagnostics)
-    })
+    YamlParse::new(green, diagnostics)
 }
 
 /// A utility struct for managing the result of a parser job

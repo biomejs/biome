@@ -47,7 +47,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoDestructuredProps {
-        version: "next",
+        version: "2.0.0",
         name: "noDestructuredProps",
         language: "js",
         domains: &[RuleDomain::Solid],

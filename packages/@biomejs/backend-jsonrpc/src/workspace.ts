@@ -765,6 +765,10 @@ export interface OverridePattern {
 	 */
 	css?: CssConfiguration;
 	/**
+	 * Specific configuration for the filesystem
+	 */
+	files?: OverrideFilesConfiguration;
+	/**
 	 * Specific configuration for the Json language
 	 */
 	formatter?: OverrideFormatterConfiguration;
@@ -888,6 +892,12 @@ export interface OverrideAssistConfiguration {
 	 * if `false`, it disables the feature and the assist won't be executed. `true` by default
 	 */
 	enabled?: Bool;
+}
+export interface OverrideFilesConfiguration {
+	/**
+	 * File size limit in bytes
+	 */
+	maxSize?: MaxSize;
 }
 export interface OverrideFormatterConfiguration {
 	/**
@@ -1116,9 +1126,17 @@ export interface Complexity {
 	 */
 	noAdjacentSpacesInRegex?: RuleFixConfiguration_for_Null;
 	/**
+	 * Disallow the use of arguments.
+	 */
+	noArguments?: RuleConfiguration_for_Null;
+	/**
 	 * Disallow primitive type aliases and misleading types.
 	 */
 	noBannedTypes?: RuleFixConfiguration_for_Null;
+	/**
+	 * Disallow comma operator.
+	 */
+	noCommaOperator?: RuleConfiguration_for_Null;
 	/**
 	 * Disallow empty type parameters in type aliases and interfaces.
 	 */
@@ -1135,6 +1153,10 @@ export interface Complexity {
 	 * Disallow unnecessary boolean casts
 	 */
 	noExtraBooleanCast?: RuleFixConfiguration_for_Null;
+	/**
+	 * Disallow to use unnecessary callback on flatMap.
+	 */
+	noFlatMapIdentity?: RuleFixConfiguration_for_Null;
 	/**
 	 * Prefer for...of statement instead of Array.forEach.
 	 */
@@ -1155,6 +1177,10 @@ export interface Complexity {
 	 * Disallow unnecessary constructors.
 	 */
 	noUselessConstructor?: RuleFixConfiguration_for_Null;
+	/**
+	 * Avoid using unnecessary continue.
+	 */
+	noUselessContinue?: RuleFixConfiguration_for_Null;
 	/**
 	 * Disallow empty exports that don't change anything in a module file.
 	 */
@@ -1212,10 +1238,6 @@ export interface Complexity {
 	 */
 	noVoid?: RuleConfiguration_for_Null;
 	/**
-	 * Disallow with statements in non-strict contexts.
-	 */
-	noWith?: RuleConfiguration_for_Null;
-	/**
 	 * It enables the recommended rules for this group
 	 */
 	recommended?: boolean;
@@ -1235,6 +1257,10 @@ export interface Complexity {
 	 * Enforce the usage of a literal access to properties over computed property access.
 	 */
 	useLiteralKeys?: RuleFixConfiguration_for_Null;
+	/**
+	 * Disallow parseInt() and Number.parseInt() in favor of binary, octal, and hexadecimal literals
+	 */
+	useNumericLiterals?: RuleFixConfiguration_for_Null;
 	/**
 	 * Enforce using concise optional chain instead of chained logical expressions.
 	 */
@@ -1288,10 +1314,6 @@ export interface Correctness {
 	 * Disallows empty destructuring patterns.
 	 */
 	noEmptyPattern?: RuleConfiguration_for_Null;
-	/**
-	 * Disallow to use unnecessary callback on flatMap.
-	 */
-	noFlatMapIdentity?: RuleFixConfiguration_for_Null;
 	/**
 	 * Disallow calling global object properties as functions
 	 */
@@ -1441,10 +1463,6 @@ export interface Correctness {
 	 */
 	noUnusedVariables?: RuleFixConfiguration_for_NoUnusedVariablesOptions;
 	/**
-	 * Avoid using unnecessary continue.
-	 */
-	noUselessContinue?: RuleFixConfiguration_for_Null;
-	/**
 	 * This rules prevents void elements (AKA self-closing elements) from having children.
 	 */
 	noVoidElementsWithChildren?: RuleFixConfiguration_for_Null;
@@ -1456,10 +1474,6 @@ export interface Correctness {
 	 * It enables the recommended rules for this group
 	 */
 	recommended?: boolean;
-	/**
-	 * Disallow Array constructors.
-	 */
-	useArrayLiterals?: RuleFixConfiguration_for_Null;
 	/**
 	 * Enforce all dependencies are correctly specified in a React hook.
 	 */
@@ -1484,6 +1498,10 @@ export interface Correctness {
 	 * Enforce "for" loop update clause moving the counter in the right direction.
 	 */
 	useValidForDirection?: RuleConfiguration_for_Null;
+	/**
+	 * This rule checks that the result of a typeof expression is compared to a valid value.
+	 */
+	useValidTypeof?: RuleFixConfiguration_for_Null;
 	/**
 	 * Require generator functions to contain yield.
 	 */
@@ -1525,6 +1543,10 @@ export interface Nursery {
 	 * Disallow the use of the !important style.
 	 */
 	noImportantStyles?: RuleFixConfiguration_for_Null;
+	/**
+	 * Disallows defining React components inside other components.
+	 */
+	noNestedComponentDefinitions?: RuleConfiguration_for_Null;
 	/**
 	 * Disallow use event handlers on non-interactive elements.
 	 */
@@ -1577,6 +1599,10 @@ export interface Nursery {
 	 * It enables the recommended rules for this group
 	 */
 	recommended?: boolean;
+	/**
+	 * Enforce that getters and setters for the same property are adjacent in class and object definitions.
+	 */
+	useAdjacentGetterSetter?: RuleConfiguration_for_Null;
 	/**
 	 * Require the consistent declaration of object literals. Defaults to explicit definitions.
 	 */
@@ -1637,6 +1663,10 @@ export interface Nursery {
 	 * Require a description parameter for the Symbol().
 	 */
 	useSymbolDescription?: RuleConfiguration_for_Null;
+	/**
+	 * Prevent the usage of static string literal id attribute on elements.
+	 */
+	useUniqueElementIds?: RuleConfiguration_for_Null;
 }
 /**
  * A list of rules that belong to this group
@@ -1662,6 +1692,10 @@ export interface Performance {
 	 * Prevent usage of \<img> element in a Next.js project.
 	 */
 	noImgElement?: RuleConfiguration_for_Null;
+	/**
+	 * Disallow the use of namespace imports.
+	 */
+	noNamespaceImport?: RuleConfiguration_for_Null;
 	/**
 	 * Avoid re-export all.
 	 */
@@ -1705,14 +1739,6 @@ export interface Security {
  */
 export interface Style {
 	/**
-	 * Disallow the use of arguments.
-	 */
-	noArguments?: RuleConfiguration_for_Null;
-	/**
-	 * Disallow comma operator.
-	 */
-	noCommaOperator?: RuleConfiguration_for_Null;
-	/**
 	 * Disallow use of CommonJs module system in favor of ESM style imports.
 	 */
 	noCommonJs?: RuleConfiguration_for_Null;
@@ -1752,10 +1778,6 @@ export interface Style {
 	 * Disallow the use of TypeScript's namespaces.
 	 */
 	noNamespace?: RuleConfiguration_for_Null;
-	/**
-	 * Disallow the use of namespace imports.
-	 */
-	noNamespaceImport?: RuleConfiguration_for_Null;
 	/**
 	 * Disallow negation in the condition of an if statement if it has an else clause.
 	 */
@@ -1820,6 +1842,10 @@ export interface Style {
 	 * It enables the recommended rules for this group
 	 */
 	recommended?: boolean;
+	/**
+	 * Disallow Array constructors.
+	 */
+	useArrayLiterals?: RuleFixConfiguration_for_Null;
 	/**
 	 * Enforce the use of as const over literal type and type annotation.
 	 */
@@ -1928,10 +1954,6 @@ export interface Style {
 	 * Use the Number properties instead of global ones.
 	 */
 	useNumberNamespace?: RuleFixConfiguration_for_Null;
-	/**
-	 * Disallow parseInt() and Number.parseInt() in favor of binary, octal, and hexadecimal literals
-	 */
-	useNumericLiterals?: RuleFixConfiguration_for_Null;
 	/**
 	 * Prevent extra closing tags for components without children.
 	 */
@@ -2246,6 +2268,10 @@ export interface Suspicious {
 	 */
 	noVar?: RuleFixConfiguration_for_Null;
 	/**
+	 * Disallow with statements in non-strict contexts.
+	 */
+	noWith?: RuleConfiguration_for_Null;
+	/**
 	 * It enables the recommended rules for this group
 	 */
 	recommended?: boolean;
@@ -2293,10 +2319,6 @@ export interface Suspicious {
 	 * Enforce the use of the directive "use strict" in script files.
 	 */
 	useStrictMode?: RuleFixConfiguration_for_Null;
-	/**
-	 * This rule checks that the result of a typeof expression is compared to a valid value.
-	 */
-	useValidTypeof?: RuleFixConfiguration_for_Null;
 }
 export type RuleAssistPlainConfiguration = "off" | "on";
 export interface RuleAssistWithOptions_for_Options {
@@ -3342,16 +3364,20 @@ export type Category =
 	| "lint/a11y/useValidAutocomplete"
 	| "lint/a11y/useValidLang"
 	| "lint/complexity/noAdjacentSpacesInRegex"
+	| "lint/complexity/noArguments"
 	| "lint/complexity/noBannedTypes"
+	| "lint/complexity/noCommaOperator"
 	| "lint/complexity/noEmptyTypeParameters"
 	| "lint/complexity/noExcessiveCognitiveComplexity"
 	| "lint/complexity/noExcessiveNestedTestSuites"
 	| "lint/complexity/noExtraBooleanCast"
+	| "lint/complexity/noFlatMapIdentity"
 	| "lint/complexity/noForEach"
 	| "lint/complexity/noStaticOnlyClass"
 	| "lint/complexity/noThisInStatic"
 	| "lint/complexity/noUselessCatch"
 	| "lint/complexity/noUselessConstructor"
+	| "lint/complexity/noUselessContinue"
 	| "lint/complexity/noUselessEmptyExport"
 	| "lint/complexity/noUselessEscapeInRegex"
 	| "lint/complexity/noUselessFragments"
@@ -3366,11 +3392,11 @@ export type Category =
 	| "lint/complexity/noUselessTypeConstraint"
 	| "lint/complexity/noUselessUndefinedInitialization"
 	| "lint/complexity/noVoid"
-	| "lint/complexity/noWith"
 	| "lint/complexity/useArrowFunction"
 	| "lint/complexity/useDateNow"
 	| "lint/complexity/useFlatMap"
 	| "lint/complexity/useLiteralKeys"
+	| "lint/complexity/useNumericLiterals"
 	| "lint/complexity/useOptionalChain"
 	| "lint/complexity/useRegexLiterals"
 	| "lint/complexity/useSimpleNumberKeys"
@@ -3383,7 +3409,6 @@ export type Category =
 	| "lint/correctness/noConstructorReturn"
 	| "lint/correctness/noEmptyCharacterClassInRegex"
 	| "lint/correctness/noEmptyPattern"
-	| "lint/correctness/noFlatMapIdentity"
 	| "lint/correctness/noGlobalObjectCalls"
 	| "lint/correctness/noInnerDeclarations"
 	| "lint/correctness/noInvalidBuiltinInstantiation"
@@ -3424,16 +3449,15 @@ export type Category =
 	| "lint/correctness/noUnusedLabels"
 	| "lint/correctness/noUnusedPrivateClassMembers"
 	| "lint/correctness/noUnusedVariables"
-	| "lint/correctness/noUselessContinue"
 	| "lint/correctness/noVoidElementsWithChildren"
 	| "lint/correctness/noVoidTypeReturn"
-	| "lint/correctness/useArrayLiterals"
 	| "lint/correctness/useExhaustiveDependencies"
 	| "lint/correctness/useHookAtTopLevel"
 	| "lint/correctness/useImportExtensions"
 	| "lint/correctness/useIsNan"
 	| "lint/correctness/useJsxKeyInIterable"
 	| "lint/correctness/useValidForDirection"
+	| "lint/correctness/useValidTypeof"
 	| "lint/correctness/useYield"
 	| "lint/nursery/colorNoInvalidHex"
 	| "lint/nursery/noAwaitInLoop"
@@ -3453,6 +3477,7 @@ export type Category =
 	| "lint/nursery/noInvalidGridAreas"
 	| "lint/nursery/noInvalidPositionAtImportRule"
 	| "lint/nursery/noMissingGenericFamilyKeyword"
+	| "lint/nursery/noNestedComponentDefinitions"
 	| "lint/nursery/noNoninteractiveElementInteractions"
 	| "lint/nursery/noProcessGlobal"
 	| "lint/nursery/noReactSpecificProps"
@@ -3475,6 +3500,7 @@ export type Category =
 	| "lint/nursery/noUselessBackrefInRegex"
 	| "lint/nursery/noUselessEscapeInString"
 	| "lint/nursery/noUselessUndefined"
+	| "lint/nursery/useAdjacentGetterSetter"
 	| "lint/nursery/useBiomeSuppressionComment"
 	| "lint/nursery/useConsistentObjectDefinition"
 	| "lint/nursery/useConsistentResponse"
@@ -3495,19 +3521,19 @@ export type Category =
 	| "lint/nursery/useSortedClasses"
 	| "lint/nursery/useSortedProperties"
 	| "lint/nursery/useSymbolDescription"
+	| "lint/nursery/useUniqueElementIds"
 	| "lint/performance/noAccumulatingSpread"
 	| "lint/performance/noBarrelFile"
 	| "lint/performance/noDelete"
 	| "lint/performance/noDynamicNamespaceImportAccess"
 	| "lint/performance/noImgElement"
+	| "lint/performance/noNamespaceImport"
 	| "lint/performance/noReExportAll"
 	| "lint/performance/useTopLevelRegex"
 	| "lint/security/noBlankTarget"
 	| "lint/security/noDangerouslySetInnerHtml"
 	| "lint/security/noDangerouslySetInnerHtmlWithChildren"
 	| "lint/security/noGlobalEval"
-	| "lint/style/noArguments"
-	| "lint/style/noCommaOperator"
 	| "lint/style/noCommonJs"
 	| "lint/style/noDefaultExport"
 	| "lint/style/noDescendingSpecificity"
@@ -3518,7 +3544,6 @@ export type Category =
 	| "lint/style/noImplicitBoolean"
 	| "lint/style/noInferrableTypes"
 	| "lint/style/noNamespace"
-	| "lint/style/noNamespaceImport"
 	| "lint/style/noNegationElse"
 	| "lint/style/noNestedTernary"
 	| "lint/style/noNonNullAssertion"
@@ -3534,6 +3559,7 @@ export type Category =
 	| "lint/style/noUselessElse"
 	| "lint/style/noValueAtRule"
 	| "lint/style/noYodaExpression"
+	| "lint/style/useArrayLiterals"
 	| "lint/style/useAsConstAssertion"
 	| "lint/style/useAtIndex"
 	| "lint/style/useBlockStatements"
@@ -3561,7 +3587,6 @@ export type Category =
 	| "lint/style/useNodeAssertStrict"
 	| "lint/style/useNodejsImportProtocol"
 	| "lint/style/useNumberNamespace"
-	| "lint/style/useNumericLiterals"
 	| "lint/style/useSelfClosingElements"
 	| "lint/style/useShorthandArrayType"
 	| "lint/style/useShorthandAssign"
@@ -3641,6 +3666,7 @@ export type Category =
 	| "lint/suspicious/noUnsafeDeclarationMerging"
 	| "lint/suspicious/noUnsafeNegation"
 	| "lint/suspicious/noVar"
+	| "lint/suspicious/noWith"
 	| "lint/suspicious/useAdjacentOverloadSignatures"
 	| "lint/suspicious/useAwait"
 	| "lint/suspicious/useDefaultSwitchClauseLast"
@@ -3652,7 +3678,6 @@ export type Category =
 	| "lint/suspicious/useNamespaceKeyword"
 	| "lint/suspicious/useNumberToFixedDigitsArgument"
 	| "lint/suspicious/useStrictMode"
-	| "lint/suspicious/useValidTypeof"
 	| "assist/source/useSortedKeys"
 	| "assist/source/useSortedProperties"
 	| "assist/source/useSortedAttributes"
@@ -3792,6 +3817,10 @@ export interface BacktraceSymbol {
 }
 export interface OpenProjectParams {
 	/**
+	 * Whether the client wants to run only certain rules. This is needed to compute the kind of [ScanKind].
+	 */
+	onlyRules?: RuleCode[];
+	/**
 	 * Whether the folder should be opened as a project, even if no `biome.json` can be found.
 	 */
 	openUninitialized: boolean;
@@ -3799,7 +3828,23 @@ export interface OpenProjectParams {
 	 * The path to open
 	 */
 	path: BiomePath;
+	/**
+	 * Whether the client wants to skip some lint rule. This is needed to compute the kind of [ScanKind].
+	 */
+	skipRules?: RuleCode[];
 }
+export type RuleCode = string;
+export interface OpenProjectResult {
+	/**
+	 * A unique identifier for this project
+	 */
+	projectKey: ProjectKey;
+	/**
+	 * How to scan this project
+	 */
+	scanKind: ScanKind;
+}
+export type ScanKind = "none" | "knownFiles" | "project";
 export interface OpenFileParams {
 	content: FileContent;
 	documentFileSource?: DocumentFileSource;
@@ -3949,7 +3994,6 @@ export interface PullDiagnosticsParams {
 	skip?: RuleCode[];
 }
 export type RuleCategories = RuleCategory[];
-export type RuleCode = string;
 export type RuleCategory = "syntax" | "lint" | "action" | "transformation";
 export interface PullDiagnosticsResult {
 	diagnostics: Diagnostic[];
@@ -4142,7 +4186,7 @@ export interface DropPatternParams {
 export interface Workspace {
 	fileFeatures(params: SupportsFeatureParams): Promise<FileFeaturesResult>;
 	updateSettings(params: UpdateSettingsParams): Promise<UpdateSettingsResult>;
-	openProject(params: OpenProjectParams): Promise<ProjectKey>;
+	openProject(params: OpenProjectParams): Promise<OpenProjectResult>;
 	openFile(params: OpenFileParams): Promise<void>;
 	changeFile(params: ChangeFileParams): Promise<void>;
 	closeFile(params: CloseFileParams): Promise<void>;

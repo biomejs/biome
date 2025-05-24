@@ -1413,6 +1413,9 @@ impl Selector {
             | AnyJsBindingDeclaration::TsMappedType(_)
             | AnyJsBindingDeclaration::TsTypeParameter(_)
             | AnyJsBindingDeclaration::TsEnumMember(_) => None,
+            // External modules are identified by source specifiers and are out
+            // of scope of this rule.
+            AnyJsBindingDeclaration::TsExternalModuleDeclaration(_) => None
         }
     }
 
@@ -1608,7 +1611,7 @@ pub enum Kind {
     EnumMember,
     /// TypeScript namespaces, import and export namespaces
     NamespaceLike,
-    /// TypeScript mamespaces
+    /// TypeScript namespaces
     Namespace,
     ImportNamespace,
     ExportNamespace,

@@ -6,6 +6,7 @@ use crate::configs::{
 use crate::snap_test::{SnapshotPayload, assert_file_contents, markup_to_string};
 use crate::{
     FORMATTED, LINT_ERROR, PARSE_ERROR, assert_cli_snapshot, run_cli, run_cli_with_dyn_fs,
+    run_cli_with_server_workspace,
 };
 use biome_console::{BufferConsole, LogLevel, MarkupBuf, markup};
 use biome_fs::{ErrorEntry, FileSystemExt, MemoryFileSystem, OsFileSystem};
@@ -46,7 +47,7 @@ debugger;
 console.log(a);
 ";
 
-const APPLY_SUGGESTED_AFTER: &str = "let a = 4;\nconsole.log(a);\n";
+const APPLY_SUGGESTED_AFTER: &str = "const a = 4;\nconsole.log(a);\n";
 
 const NO_DEBUGGER_BEFORE: &str = "debugger;\n";
 const NO_DEBUGGER_AFTER: &str = "debugger;\n";
@@ -330,7 +331,7 @@ console.log(a);
 function _f() { arguments; }
 ";
 
-    let expected = "let a = 4;
+    let expected = "const a = 4;
 console.log(a);
 function _f() {\n\targuments;\n}
 ";
@@ -891,14 +892,24 @@ fn fs_error_infinite_symlink_expansion_to_files() {
             .out_buffer
             .iter()
             .flat_map(|msg| msg.content.0.iter())
-            .any(|node| node.content.contains(&symlink1_path.to_string()))
+            .any(|node| node.content.contains(
+                &symlink1_path
+                    .strip_prefix(subdir1_path.as_path())
+                    .unwrap()
+                    .to_string()
+            ))
     );
     assert!(
         console
             .out_buffer
             .iter()
             .flat_map(|msg| msg.content.0.iter())
-            .any(|node| node.content.contains(&symlink2_path.to_string()))
+            .any(|node| node.content.contains(
+                &symlink2_path
+                    .strip_prefix(subdir2_path.as_path())
+                    .unwrap()
+                    .to_string()
+            ))
     );
 }
 
@@ -2622,7 +2633,7 @@ console.log(a);
 function _f() { arguments; }
 ";
 
-    let expected = "let a = 4;
+    let expected = "const a = 4;
 console.log(a);
 function _f() {\n\targuments;\n}
 ";
@@ -2767,7 +2778,7 @@ console.log(a);
 function _f() { arguments; }
 ";
 
-    let expected = "let a = 4;
+    let expected = "const a = 4;
 console.log(a);
 function _f() {\n\targuments;\n}
 ";
@@ -2918,6 +2929,63 @@ fn check_skip_parse_errors() {
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
         "check_skip_parse_errors",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn check_plugin_suppressions() {
+    let mut fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    fs.insert(
+        Utf8PathBuf::from("biome.json"),
+        br#"{
+    "plugins": ["noManualZIndex.grit"],
+    "formatter": {
+        "indentStyle": "space",
+        "indentWidth": 4
+    }
+}
+"#,
+    );
+
+    fs.insert(
+        Utf8PathBuf::from("noManualZIndex.grit"),
+        br#"language css
+
+`z-index: $zIndexValue;` where {
+    not $zIndexValue <: r"^var\(--dt-z-index-\S+\)$",
+    register_diagnostic(span=$zIndexValue, message="company/plugin/noManualZIndex :: z-index values should be set using the design library.", severity="error")
+}
+"#,
+    );
+
+    let file_path = "style.css";
+    fs.insert(
+        file_path.into(),
+        br#".report-this-error {
+    z-index: 1;
+}
+
+.dont-report-this-error-please {
+    /* biome-ignore lint/plugin/noManualZIndex: Should not report */
+    z-index: 2;
+}
+"#,
+    );
+
+    let (fs, result) = run_cli_with_server_workspace(
+        fs,
+        &mut console,
+        Args::from(["check", file_path].as_slice()),
+    );
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "check_plugin_suppressions",
         fs,
         console,
         result,

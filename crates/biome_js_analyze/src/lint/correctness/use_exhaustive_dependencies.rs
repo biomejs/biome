@@ -515,6 +515,7 @@ fn capture_needs_to_be_in_the_dependency_list(
         | AnyJsBindingDeclaration::TsEnumDeclaration(_)
         | AnyJsBindingDeclaration::TsTypeAliasDeclaration(_)
         | AnyJsBindingDeclaration::TsInterfaceDeclaration(_)
+        | AnyJsBindingDeclaration::TsExternalModuleDeclaration(_)
         | AnyJsBindingDeclaration::TsModuleDeclaration(_)
         | AnyJsBindingDeclaration::TsInferType(_)
         | AnyJsBindingDeclaration::TsMappedType(_)

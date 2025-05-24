@@ -1,0 +1,631 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 134
+expression: invalid.js
+---
+# Input
+```js
+import React, {memo} from 'react';
+const CustomLib = {
+    memo: (Component) => Component,
+    forwardRef: (Component) => Component,
+}
+
+let ComponentVar;
+
+function ParentComponentAsFunctionDeclaration() {
+    function ComponentAsFunctionDeclaration() {}
+    function ComponentAsFunctionDeclarationWithParam(param) {}
+    const ComponentAsAnonymousFunctionExpression = function () {};
+    const ComponentAsAnonymousFunctionExpressionWithParam = function (param) {};
+    const ComponentAsNamedFunctionExpression = function unusedName() {};
+    const ComponentAsNamedFunctionExpressionWithParam = function unusedName(param) {};
+    const ComponentAsArrowFunctionExpression = () => {};
+    const ComponentAsArrowFunctionExpressionWithParam = (param) => {};
+    ComponentVar = () => {};
+    ComponentVar = (param) => {};
+    const ComponentAsArrowFunctionExpressionMemo = memo(() => {});
+    const ComponentAsArrowFunctionExpressionMemoWithParam = memo((param) => {});
+    const ComponentAsArrowFunctionExpressionReactMemo = React.memo(function unusedName() {});
+    const ComponentAsArrowFunctionExpressionCustomLibMemo = CustomLib.memo(() => {});
+    const ComponentAsArrowFunctionExpressionCustomLibForwardRef = CustomLib.forwardRef((param1, param2) => {});
+}
+
+export default function ParentComponentAsDefaultFunctionDeclaration() {
+    function ComponentAsFunctionDeclaration() {}
+};
+
+const ComponentAsAnonymousFunctionExpression = function (param) {
+    function ComponentAsFunctionDeclaration() {}
+};
+
+const ComponentAsNamedFunctionExpression = function unusedName() {
+    function ComponentAsFunctionDeclaration() {}
+};
+
+const ComponentAsArrowFunctionExpression = () => {
+    function ComponentAsFunctionDeclaration() {}
+};
+
+const ComponentAsArrowFunctionExpressionMemo = memo(() => {
+    function ComponentAsFunctionDeclaration() {}
+});
+
+const ComponentAsArrowFunctionExpressionReactMemo = React.memo(function unusedName() {
+    function ComponentAsFunctionDeclaration() {}
+});
+
+const ComponentAsArrowFunctionExpressionReactForwardRef = React.forwardRef(function unusedName(
+    param1,
+    param2
+) {
+    function ComponentAsFunctionDeclaration() {}
+});
+
+```
+
+# Diagnostics
+```
+invalid.js:10:14 lint/nursery/noNestedComponentDefinitions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Components should not be defined inside other components.
+  
+     9 │ function ParentComponentAsFunctionDeclaration() {
+  > 10 │     function ComponentAsFunctionDeclaration() {}
+       │              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    11 │     function ComponentAsFunctionDeclarationWithParam(param) {}
+    12 │     const ComponentAsAnonymousFunctionExpression = function () {};
+  
+  i Move it outside of the parent component or pass it as a prop.
+  
+     7 │ let ComponentVar;
+     8 │ 
+   > 9 │ function ParentComponentAsFunctionDeclaration() {
+       │          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    10 │     function ComponentAsFunctionDeclaration() {}
+    11 │     function ComponentAsFunctionDeclarationWithParam(param) {}
+  
+  i Component definitions inside other components cause them to be recreated on every render, which can lead to performance issues and unexpected behavior.
+  
+
+```
+
+```
+invalid.js:11:14 lint/nursery/noNestedComponentDefinitions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Components should not be defined inside other components.
+  
+     9 │ function ParentComponentAsFunctionDeclaration() {
+    10 │     function ComponentAsFunctionDeclaration() {}
+  > 11 │     function ComponentAsFunctionDeclarationWithParam(param) {}
+       │              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    12 │     const ComponentAsAnonymousFunctionExpression = function () {};
+    13 │     const ComponentAsAnonymousFunctionExpressionWithParam = function (param) {};
+  
+  i Move it outside of the parent component or pass it as a prop.
+  
+     7 │ let ComponentVar;
+     8 │ 
+   > 9 │ function ParentComponentAsFunctionDeclaration() {
+       │          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    10 │     function ComponentAsFunctionDeclaration() {}
+    11 │     function ComponentAsFunctionDeclarationWithParam(param) {}
+  
+  i Component definitions inside other components cause them to be recreated on every render, which can lead to performance issues and unexpected behavior.
+  
+
+```
+
+```
+invalid.js:12:11 lint/nursery/noNestedComponentDefinitions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Components should not be defined inside other components.
+  
+    10 │     function ComponentAsFunctionDeclaration() {}
+    11 │     function ComponentAsFunctionDeclarationWithParam(param) {}
+  > 12 │     const ComponentAsAnonymousFunctionExpression = function () {};
+       │           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    13 │     const ComponentAsAnonymousFunctionExpressionWithParam = function (param) {};
+    14 │     const ComponentAsNamedFunctionExpression = function unusedName() {};
+  
+  i Move it outside of the parent component or pass it as a prop.
+  
+     7 │ let ComponentVar;
+     8 │ 
+   > 9 │ function ParentComponentAsFunctionDeclaration() {
+       │          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    10 │     function ComponentAsFunctionDeclaration() {}
+    11 │     function ComponentAsFunctionDeclarationWithParam(param) {}
+  
+  i Component definitions inside other components cause them to be recreated on every render, which can lead to performance issues and unexpected behavior.
+  
+
+```
+
+```
+invalid.js:13:11 lint/nursery/noNestedComponentDefinitions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Components should not be defined inside other components.
+  
+    11 │     function ComponentAsFunctionDeclarationWithParam(param) {}
+    12 │     const ComponentAsAnonymousFunctionExpression = function () {};
+  > 13 │     const ComponentAsAnonymousFunctionExpressionWithParam = function (param) {};
+       │           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    14 │     const ComponentAsNamedFunctionExpression = function unusedName() {};
+    15 │     const ComponentAsNamedFunctionExpressionWithParam = function unusedName(param) {};
+  
+  i Move it outside of the parent component or pass it as a prop.
+  
+     7 │ let ComponentVar;
+     8 │ 
+   > 9 │ function ParentComponentAsFunctionDeclaration() {
+       │          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    10 │     function ComponentAsFunctionDeclaration() {}
+    11 │     function ComponentAsFunctionDeclarationWithParam(param) {}
+  
+  i Component definitions inside other components cause them to be recreated on every render, which can lead to performance issues and unexpected behavior.
+  
+
+```
+
+```
+invalid.js:14:11 lint/nursery/noNestedComponentDefinitions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Components should not be defined inside other components.
+  
+    12 │     const ComponentAsAnonymousFunctionExpression = function () {};
+    13 │     const ComponentAsAnonymousFunctionExpressionWithParam = function (param) {};
+  > 14 │     const ComponentAsNamedFunctionExpression = function unusedName() {};
+       │           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    15 │     const ComponentAsNamedFunctionExpressionWithParam = function unusedName(param) {};
+    16 │     const ComponentAsArrowFunctionExpression = () => {};
+  
+  i Move it outside of the parent component or pass it as a prop.
+  
+     7 │ let ComponentVar;
+     8 │ 
+   > 9 │ function ParentComponentAsFunctionDeclaration() {
+       │          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    10 │     function ComponentAsFunctionDeclaration() {}
+    11 │     function ComponentAsFunctionDeclarationWithParam(param) {}
+  
+  i Component definitions inside other components cause them to be recreated on every render, which can lead to performance issues and unexpected behavior.
+  
+
+```
+
+```
+invalid.js:15:11 lint/nursery/noNestedComponentDefinitions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Components should not be defined inside other components.
+  
+    13 │     const ComponentAsAnonymousFunctionExpressionWithParam = function (param) {};
+    14 │     const ComponentAsNamedFunctionExpression = function unusedName() {};
+  > 15 │     const ComponentAsNamedFunctionExpressionWithParam = function unusedName(param) {};
+       │           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    16 │     const ComponentAsArrowFunctionExpression = () => {};
+    17 │     const ComponentAsArrowFunctionExpressionWithParam = (param) => {};
+  
+  i Move it outside of the parent component or pass it as a prop.
+  
+     7 │ let ComponentVar;
+     8 │ 
+   > 9 │ function ParentComponentAsFunctionDeclaration() {
+       │          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    10 │     function ComponentAsFunctionDeclaration() {}
+    11 │     function ComponentAsFunctionDeclarationWithParam(param) {}
+  
+  i Component definitions inside other components cause them to be recreated on every render, which can lead to performance issues and unexpected behavior.
+  
+
+```
+
+```
+invalid.js:16:11 lint/nursery/noNestedComponentDefinitions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Components should not be defined inside other components.
+  
+    14 │     const ComponentAsNamedFunctionExpression = function unusedName() {};
+    15 │     const ComponentAsNamedFunctionExpressionWithParam = function unusedName(param) {};
+  > 16 │     const ComponentAsArrowFunctionExpression = () => {};
+       │           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    17 │     const ComponentAsArrowFunctionExpressionWithParam = (param) => {};
+    18 │     ComponentVar = () => {};
+  
+  i Move it outside of the parent component or pass it as a prop.
+  
+     7 │ let ComponentVar;
+     8 │ 
+   > 9 │ function ParentComponentAsFunctionDeclaration() {
+       │          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    10 │     function ComponentAsFunctionDeclaration() {}
+    11 │     function ComponentAsFunctionDeclarationWithParam(param) {}
+  
+  i Component definitions inside other components cause them to be recreated on every render, which can lead to performance issues and unexpected behavior.
+  
+
+```
+
+```
+invalid.js:17:11 lint/nursery/noNestedComponentDefinitions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Components should not be defined inside other components.
+  
+    15 │     const ComponentAsNamedFunctionExpressionWithParam = function unusedName(param) {};
+    16 │     const ComponentAsArrowFunctionExpression = () => {};
+  > 17 │     const ComponentAsArrowFunctionExpressionWithParam = (param) => {};
+       │           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    18 │     ComponentVar = () => {};
+    19 │     ComponentVar = (param) => {};
+  
+  i Move it outside of the parent component or pass it as a prop.
+  
+     7 │ let ComponentVar;
+     8 │ 
+   > 9 │ function ParentComponentAsFunctionDeclaration() {
+       │          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    10 │     function ComponentAsFunctionDeclaration() {}
+    11 │     function ComponentAsFunctionDeclarationWithParam(param) {}
+  
+  i Component definitions inside other components cause them to be recreated on every render, which can lead to performance issues and unexpected behavior.
+  
+
+```
+
+```
+invalid.js:18:5 lint/nursery/noNestedComponentDefinitions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Components should not be defined inside other components.
+  
+    16 │     const ComponentAsArrowFunctionExpression = () => {};
+    17 │     const ComponentAsArrowFunctionExpressionWithParam = (param) => {};
+  > 18 │     ComponentVar = () => {};
+       │     ^^^^^^^^^^^^
+    19 │     ComponentVar = (param) => {};
+    20 │     const ComponentAsArrowFunctionExpressionMemo = memo(() => {});
+  
+  i Move it outside of the parent component or pass it as a prop.
+  
+     7 │ let ComponentVar;
+     8 │ 
+   > 9 │ function ParentComponentAsFunctionDeclaration() {
+       │          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    10 │     function ComponentAsFunctionDeclaration() {}
+    11 │     function ComponentAsFunctionDeclarationWithParam(param) {}
+  
+  i Component definitions inside other components cause them to be recreated on every render, which can lead to performance issues and unexpected behavior.
+  
+
+```
+
+```
+invalid.js:19:5 lint/nursery/noNestedComponentDefinitions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Components should not be defined inside other components.
+  
+    17 │     const ComponentAsArrowFunctionExpressionWithParam = (param) => {};
+    18 │     ComponentVar = () => {};
+  > 19 │     ComponentVar = (param) => {};
+       │     ^^^^^^^^^^^^
+    20 │     const ComponentAsArrowFunctionExpressionMemo = memo(() => {});
+    21 │     const ComponentAsArrowFunctionExpressionMemoWithParam = memo((param) => {});
+  
+  i Move it outside of the parent component or pass it as a prop.
+  
+     7 │ let ComponentVar;
+     8 │ 
+   > 9 │ function ParentComponentAsFunctionDeclaration() {
+       │          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    10 │     function ComponentAsFunctionDeclaration() {}
+    11 │     function ComponentAsFunctionDeclarationWithParam(param) {}
+  
+  i Component definitions inside other components cause them to be recreated on every render, which can lead to performance issues and unexpected behavior.
+  
+
+```
+
+```
+invalid.js:20:11 lint/nursery/noNestedComponentDefinitions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Components should not be defined inside other components.
+  
+    18 │     ComponentVar = () => {};
+    19 │     ComponentVar = (param) => {};
+  > 20 │     const ComponentAsArrowFunctionExpressionMemo = memo(() => {});
+       │           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    21 │     const ComponentAsArrowFunctionExpressionMemoWithParam = memo((param) => {});
+    22 │     const ComponentAsArrowFunctionExpressionReactMemo = React.memo(function unusedName() {});
+  
+  i Move it outside of the parent component or pass it as a prop.
+  
+     7 │ let ComponentVar;
+     8 │ 
+   > 9 │ function ParentComponentAsFunctionDeclaration() {
+       │          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    10 │     function ComponentAsFunctionDeclaration() {}
+    11 │     function ComponentAsFunctionDeclarationWithParam(param) {}
+  
+  i Component definitions inside other components cause them to be recreated on every render, which can lead to performance issues and unexpected behavior.
+  
+
+```
+
+```
+invalid.js:21:11 lint/nursery/noNestedComponentDefinitions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Components should not be defined inside other components.
+  
+    19 │     ComponentVar = (param) => {};
+    20 │     const ComponentAsArrowFunctionExpressionMemo = memo(() => {});
+  > 21 │     const ComponentAsArrowFunctionExpressionMemoWithParam = memo((param) => {});
+       │           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    22 │     const ComponentAsArrowFunctionExpressionReactMemo = React.memo(function unusedName() {});
+    23 │     const ComponentAsArrowFunctionExpressionCustomLibMemo = CustomLib.memo(() => {});
+  
+  i Move it outside of the parent component or pass it as a prop.
+  
+     7 │ let ComponentVar;
+     8 │ 
+   > 9 │ function ParentComponentAsFunctionDeclaration() {
+       │          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    10 │     function ComponentAsFunctionDeclaration() {}
+    11 │     function ComponentAsFunctionDeclarationWithParam(param) {}
+  
+  i Component definitions inside other components cause them to be recreated on every render, which can lead to performance issues and unexpected behavior.
+  
+
+```
+
+```
+invalid.js:22:11 lint/nursery/noNestedComponentDefinitions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Components should not be defined inside other components.
+  
+    20 │     const ComponentAsArrowFunctionExpressionMemo = memo(() => {});
+    21 │     const ComponentAsArrowFunctionExpressionMemoWithParam = memo((param) => {});
+  > 22 │     const ComponentAsArrowFunctionExpressionReactMemo = React.memo(function unusedName() {});
+       │           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    23 │     const ComponentAsArrowFunctionExpressionCustomLibMemo = CustomLib.memo(() => {});
+    24 │     const ComponentAsArrowFunctionExpressionCustomLibForwardRef = CustomLib.forwardRef((param1, param2) => {});
+  
+  i Move it outside of the parent component or pass it as a prop.
+  
+     7 │ let ComponentVar;
+     8 │ 
+   > 9 │ function ParentComponentAsFunctionDeclaration() {
+       │          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    10 │     function ComponentAsFunctionDeclaration() {}
+    11 │     function ComponentAsFunctionDeclarationWithParam(param) {}
+  
+  i Component definitions inside other components cause them to be recreated on every render, which can lead to performance issues and unexpected behavior.
+  
+
+```
+
+```
+invalid.js:23:11 lint/nursery/noNestedComponentDefinitions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Components should not be defined inside other components.
+  
+    21 │     const ComponentAsArrowFunctionExpressionMemoWithParam = memo((param) => {});
+    22 │     const ComponentAsArrowFunctionExpressionReactMemo = React.memo(function unusedName() {});
+  > 23 │     const ComponentAsArrowFunctionExpressionCustomLibMemo = CustomLib.memo(() => {});
+       │           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    24 │     const ComponentAsArrowFunctionExpressionCustomLibForwardRef = CustomLib.forwardRef((param1, param2) => {});
+    25 │ }
+  
+  i Move it outside of the parent component or pass it as a prop.
+  
+     7 │ let ComponentVar;
+     8 │ 
+   > 9 │ function ParentComponentAsFunctionDeclaration() {
+       │          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    10 │     function ComponentAsFunctionDeclaration() {}
+    11 │     function ComponentAsFunctionDeclarationWithParam(param) {}
+  
+  i Component definitions inside other components cause them to be recreated on every render, which can lead to performance issues and unexpected behavior.
+  
+
+```
+
+```
+invalid.js:24:11 lint/nursery/noNestedComponentDefinitions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Components should not be defined inside other components.
+  
+    22 │     const ComponentAsArrowFunctionExpressionReactMemo = React.memo(function unusedName() {});
+    23 │     const ComponentAsArrowFunctionExpressionCustomLibMemo = CustomLib.memo(() => {});
+  > 24 │     const ComponentAsArrowFunctionExpressionCustomLibForwardRef = CustomLib.forwardRef((param1, param2) => {});
+       │           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    25 │ }
+    26 │ 
+  
+  i Move it outside of the parent component or pass it as a prop.
+  
+     7 │ let ComponentVar;
+     8 │ 
+   > 9 │ function ParentComponentAsFunctionDeclaration() {
+       │          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    10 │     function ComponentAsFunctionDeclaration() {}
+    11 │     function ComponentAsFunctionDeclarationWithParam(param) {}
+  
+  i Component definitions inside other components cause them to be recreated on every render, which can lead to performance issues and unexpected behavior.
+  
+
+```
+
+```
+invalid.js:28:14 lint/nursery/noNestedComponentDefinitions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Components should not be defined inside other components.
+  
+    27 │ export default function ParentComponentAsDefaultFunctionDeclaration() {
+  > 28 │     function ComponentAsFunctionDeclaration() {}
+       │              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    29 │ };
+    30 │ 
+  
+  i Move it outside of the parent component or pass it as a prop.
+  
+    25 │ }
+    26 │ 
+  > 27 │ export default function ParentComponentAsDefaultFunctionDeclaration() {
+       │                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    28 │     function ComponentAsFunctionDeclaration() {}
+    29 │ };
+  
+  i Component definitions inside other components cause them to be recreated on every render, which can lead to performance issues and unexpected behavior.
+  
+
+```
+
+```
+invalid.js:32:14 lint/nursery/noNestedComponentDefinitions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Components should not be defined inside other components.
+  
+    31 │ const ComponentAsAnonymousFunctionExpression = function (param) {
+  > 32 │     function ComponentAsFunctionDeclaration() {}
+       │              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    33 │ };
+    34 │ 
+  
+  i Move it outside of the parent component or pass it as a prop.
+  
+    29 │ };
+    30 │ 
+  > 31 │ const ComponentAsAnonymousFunctionExpression = function (param) {
+       │       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    32 │     function ComponentAsFunctionDeclaration() {}
+    33 │ };
+  
+  i Component definitions inside other components cause them to be recreated on every render, which can lead to performance issues and unexpected behavior.
+  
+
+```
+
+```
+invalid.js:36:14 lint/nursery/noNestedComponentDefinitions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Components should not be defined inside other components.
+  
+    35 │ const ComponentAsNamedFunctionExpression = function unusedName() {
+  > 36 │     function ComponentAsFunctionDeclaration() {}
+       │              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    37 │ };
+    38 │ 
+  
+  i Move it outside of the parent component or pass it as a prop.
+  
+    33 │ };
+    34 │ 
+  > 35 │ const ComponentAsNamedFunctionExpression = function unusedName() {
+       │       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    36 │     function ComponentAsFunctionDeclaration() {}
+    37 │ };
+  
+  i Component definitions inside other components cause them to be recreated on every render, which can lead to performance issues and unexpected behavior.
+  
+
+```
+
+```
+invalid.js:40:14 lint/nursery/noNestedComponentDefinitions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Components should not be defined inside other components.
+  
+    39 │ const ComponentAsArrowFunctionExpression = () => {
+  > 40 │     function ComponentAsFunctionDeclaration() {}
+       │              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    41 │ };
+    42 │ 
+  
+  i Move it outside of the parent component or pass it as a prop.
+  
+    37 │ };
+    38 │ 
+  > 39 │ const ComponentAsArrowFunctionExpression = () => {
+       │       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    40 │     function ComponentAsFunctionDeclaration() {}
+    41 │ };
+  
+  i Component definitions inside other components cause them to be recreated on every render, which can lead to performance issues and unexpected behavior.
+  
+
+```
+
+```
+invalid.js:44:14 lint/nursery/noNestedComponentDefinitions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Components should not be defined inside other components.
+  
+    43 │ const ComponentAsArrowFunctionExpressionMemo = memo(() => {
+  > 44 │     function ComponentAsFunctionDeclaration() {}
+       │              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    45 │ });
+    46 │ 
+  
+  i Move it outside of the parent component or pass it as a prop.
+  
+    41 │ };
+    42 │ 
+  > 43 │ const ComponentAsArrowFunctionExpressionMemo = memo(() => {
+       │       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    44 │     function ComponentAsFunctionDeclaration() {}
+    45 │ });
+  
+  i Component definitions inside other components cause them to be recreated on every render, which can lead to performance issues and unexpected behavior.
+  
+
+```
+
+```
+invalid.js:48:14 lint/nursery/noNestedComponentDefinitions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Components should not be defined inside other components.
+  
+    47 │ const ComponentAsArrowFunctionExpressionReactMemo = React.memo(function unusedName() {
+  > 48 │     function ComponentAsFunctionDeclaration() {}
+       │              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    49 │ });
+    50 │ 
+  
+  i Move it outside of the parent component or pass it as a prop.
+  
+    45 │ });
+    46 │ 
+  > 47 │ const ComponentAsArrowFunctionExpressionReactMemo = React.memo(function unusedName() {
+       │       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    48 │     function ComponentAsFunctionDeclaration() {}
+    49 │ });
+  
+  i Component definitions inside other components cause them to be recreated on every render, which can lead to performance issues and unexpected behavior.
+  
+
+```
+
+```
+invalid.js:55:14 lint/nursery/noNestedComponentDefinitions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Components should not be defined inside other components.
+  
+    53 │     param2
+    54 │ ) {
+  > 55 │     function ComponentAsFunctionDeclaration() {}
+       │              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    56 │ });
+    57 │ 
+  
+  i Move it outside of the parent component or pass it as a prop.
+  
+    49 │ });
+    50 │ 
+  > 51 │ const ComponentAsArrowFunctionExpressionReactForwardRef = React.forwardRef(function unusedName(
+       │       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    52 │     param1,
+    53 │     param2
+  
+  i Component definitions inside other components cause them to be recreated on every render, which can lead to performance issues and unexpected behavior.
+  
+
+```

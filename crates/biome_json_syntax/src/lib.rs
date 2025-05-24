@@ -4,6 +4,7 @@
 mod generated;
 mod file_source;
 pub mod member_ext;
+pub mod object_ext;
 pub mod string_ext;
 mod syntax_node;
 

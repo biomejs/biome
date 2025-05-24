@@ -55,7 +55,6 @@ biome.json:6:13 deserialize ━━━━━━━━━━━━━━━━━�
   - noConstructorReturn
   - noEmptyCharacterClassInRegex
   - noEmptyPattern
-  - noFlatMapIdentity
   - noGlobalObjectCalls
   - noInnerDeclarations
   - noInvalidBuiltinInstantiation
@@ -93,16 +92,15 @@ biome.json:6:13 deserialize ━━━━━━━━━━━━━━━━━�
   - noUnusedLabels
   - noUnusedPrivateClassMembers
   - noUnusedVariables
-  - noUselessContinue
   - noVoidElementsWithChildren
   - noVoidTypeReturn
-  - useArrayLiterals
   - useExhaustiveDependencies
   - useHookAtTopLevel
   - useImportExtensions
   - useIsNan
   - useJsxKeyInIterable
   - useValidForDirection
+  - useValidTypeof
   - useYield
   
 
@@ -123,8 +121,6 @@ biome.json:9:13 deserialize ━━━━━━━━━━━━━━━━━�
   i Known keys:
   
   - recommended
-  - noArguments
-  - noCommaOperator
   - noCommonJs
   - noDefaultExport
   - noDescendingSpecificity
@@ -135,7 +131,6 @@ biome.json:9:13 deserialize ━━━━━━━━━━━━━━━━━�
   - noImplicitBoolean
   - noInferrableTypes
   - noNamespace
-  - noNamespaceImport
   - noNegationElse
   - noNestedTernary
   - noNonNullAssertion
@@ -151,6 +146,7 @@ biome.json:9:13 deserialize ━━━━━━━━━━━━━━━━━�
   - noUselessElse
   - noValueAtRule
   - noYodaExpression
+  - useArrayLiterals
   - useAsConstAssertion
   - useAtIndex
   - useBlockStatements
@@ -178,7 +174,6 @@ biome.json:9:13 deserialize ━━━━━━━━━━━━━━━━━�
   - useNodeAssertStrict
   - useNodejsImportProtocol
   - useNumberNamespace
-  - useNumericLiterals
   - useSelfClosingElements
   - useShorthandAssign
   - useShorthandFunctionType

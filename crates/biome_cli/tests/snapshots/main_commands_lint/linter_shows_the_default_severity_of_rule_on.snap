@@ -50,8 +50,6 @@ biome.json:5:17 deserialize ━━━━━━━━━━━━━━━━━�
   i Known keys:
   
   - recommended
-  - noArguments
-  - noCommaOperator
   - noCommonJs
   - noDefaultExport
   - noDescendingSpecificity
@@ -62,7 +60,6 @@ biome.json:5:17 deserialize ━━━━━━━━━━━━━━━━━�
   - noImplicitBoolean
   - noInferrableTypes
   - noNamespace
-  - noNamespaceImport
   - noNegationElse
   - noNestedTernary
   - noNonNullAssertion
@@ -78,6 +75,7 @@ biome.json:5:17 deserialize ━━━━━━━━━━━━━━━━━�
   - noUselessElse
   - noValueAtRule
   - noYodaExpression
+  - useArrayLiterals
   - useAsConstAssertion
   - useAtIndex
   - useBlockStatements
@@ -105,7 +103,6 @@ biome.json:5:17 deserialize ━━━━━━━━━━━━━━━━━�
   - useNodeAssertStrict
   - useNodejsImportProtocol
   - useNumberNamespace
-  - useNumericLiterals
   - useSelfClosingElements
   - useShorthandAssign
   - useShorthandFunctionType

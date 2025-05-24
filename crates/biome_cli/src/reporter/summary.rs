@@ -1,11 +1,15 @@
 use crate::reporter::terminal::ConsoleTraversalSummary;
+use crate::reporter::{EvaluatedPathsDiagnostic, FixedPathsDiagnostic};
 use crate::{DiagnosticsPayload, Execution, Reporter, ReporterVisitor, TraversalSummary};
 use biome_console::fmt::{Display, Formatter};
 use biome_console::{Console, ConsoleExt, markup};
+use biome_diagnostics::advice::ListAdvice;
 use biome_diagnostics::{
     Advices, Category, Diagnostic, MessageAndDescription, PrintDiagnostic, Resource, Severity,
     Visit, category,
 };
+use biome_fs::BiomePath;
+use camino::Utf8PathBuf;
 use std::cmp::Ordering;
 use std::collections::{BTreeMap, BTreeSet};
 use std::fmt::Debug;
@@ -15,12 +19,17 @@ pub(crate) struct SummaryReporter {
     pub(crate) summary: TraversalSummary,
     pub(crate) diagnostics_payload: DiagnosticsPayload,
     pub(crate) execution: Execution,
+    pub(crate) evaluated_paths: BTreeSet<BiomePath>,
+    pub(crate) working_directory: Option<Utf8PathBuf>,
     pub(crate) verbose: bool,
 }
 
 impl Reporter for SummaryReporter {
     fn write(self, visitor: &mut dyn ReporterVisitor) -> io::Result<()> {
         visitor.report_diagnostics(&self.execution, self.diagnostics_payload, self.verbose)?;
+        if self.verbose {
+            visitor.report_handled_paths(self.evaluated_paths, self.working_directory)?;
+        }
         visitor.report_summary(&self.execution, self.summary, self.verbose)?;
         Ok(())
     }
@@ -64,12 +73,8 @@ impl ReporterVisitor for SummaryReporterVisitor<'_> {
     ) -> io::Result<()> {
         let mut files_to_diagnostics = FileToDiagnostics::default();
 
-        let iter = diagnostics_payload.diagnostics.iter().rev().enumerate();
-        for (index, diagnostic) in iter {
-            if diagnostics_payload.max_diagnostics.exceeded(index + 1) {
-                break;
-            }
-
+        let iter = diagnostics_payload.diagnostics.iter().rev();
+        for diagnostic in iter {
             let location = diagnostic.location().resource.and_then(|r| match r {
                 Resource::File(p) => Some(p),
                 _ => None,
@@ -124,6 +129,58 @@ impl ReporterVisitor for SummaryReporterVisitor<'_> {
         }
 
         self.0.log(markup! {{files_to_diagnostics}});
+
+        Ok(())
+    }
+
+    fn report_handled_paths(
+        &mut self,
+        evaluated_paths: BTreeSet<BiomePath>,
+        working_directory: Option<Utf8PathBuf>,
+    ) -> io::Result<()> {
+        let evaluated_paths_diagnostic = EvaluatedPathsDiagnostic {
+            advice: ListAdvice {
+                list: evaluated_paths
+                    .iter()
+                    .map(|p| {
+                        working_directory
+                            .as_ref()
+                            .and_then(|wd| {
+                                p.strip_prefix(wd.as_str())
+                                    .map(|path| path.to_string())
+                                    .ok()
+                            })
+                            .unwrap_or(p.to_string())
+                    })
+                    .collect(),
+            },
+        };
+
+        let fixed_paths_diagnostic = FixedPathsDiagnostic {
+            advice: ListAdvice {
+                list: evaluated_paths
+                    .iter()
+                    .filter(|p| p.was_written())
+                    .map(|p| {
+                        working_directory
+                            .as_ref()
+                            .and_then(|wd| {
+                                p.strip_prefix(wd.as_str())
+                                    .map(|path| path.to_string())
+                                    .ok()
+                            })
+                            .unwrap_or(p.to_string())
+                    })
+                    .collect(),
+            },
+        };
+
+        self.0.log(markup! {
+            {PrintDiagnostic::verbose(&evaluated_paths_diagnostic)}
+        });
+        self.0.log(markup! {
+            {PrintDiagnostic::verbose(&fixed_paths_diagnostic)}
+        });
 
         Ok(())
     }

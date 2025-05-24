@@ -29,9 +29,9 @@ biome.json migrate ━━━━━━━━━━━━━━━━━━━━�
 ```
 
 ```block
-Run the command with the option --write to apply the changes.
+Run the command with the option --include-inspired to also migrate inspired rules.
 ```
 
 ```block
-Run the command with the option --include-inspired to also migrate inspired rules.
+Run the command with the option --write to apply the changes.
 ```

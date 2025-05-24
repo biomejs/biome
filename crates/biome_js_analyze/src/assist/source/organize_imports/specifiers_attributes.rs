@@ -79,7 +79,7 @@ pub fn sort_import_specifiers(
     handle_trvia(
         sorted.iter_mut().map(|(_, a, b)| (a, b)),
         last_has_separator,
-        || make::token(T![,]),
+        || make::token(T![,]).with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")]),
     );
     let separators: Vec<_> = sorted
         .iter_mut()
@@ -172,7 +172,7 @@ pub fn sort_export_specifiers(
     handle_trvia(
         sorted.iter_mut().map(|(_, a, b)| (a, b)),
         last_has_separator,
-        || make::token(T![,]),
+        || make::token(T![,]).with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")]),
     );
     let separators: Vec<_> = sorted
         .iter_mut()
@@ -266,7 +266,7 @@ pub fn sort_attributes(attributes: JsImportAssertion) -> Option<JsImportAssertio
     handle_trvia(
         sorted.iter_mut().map(|(_, a, b)| (a, b)),
         last_has_separator,
-        || make::token(T![,]),
+        || make::token(T![,]).with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")]),
     );
     let separators: Vec<_> = sorted
         .iter_mut()
@@ -281,7 +281,7 @@ pub fn sort_attributes(attributes: JsImportAssertion) -> Option<JsImportAssertio
 fn handle_trvia<'a, L: Language + 'a, N: AstNode<Language = L> + 'a>(
     // Mutable iterator of a list of nodes and their optional separators
     iter: impl std::iter::ExactSizeIterator<Item = (&'a mut N, &'a mut Option<SyntaxToken<L>>)>,
-    keep_last_separator: bool,
+    needs_last_separator: bool,
     make_separator: fn() -> SyntaxToken<L>,
 ) {
     let last_index = iter.len().saturating_sub(1);
@@ -289,7 +289,7 @@ fn handle_trvia<'a, L: Language + 'a, N: AstNode<Language = L> + 'a>(
         if let Some(separator) = optional_separator {
             // Remove the last separator at the separator has no attached comments
             if i == last_index
-                && !(keep_last_separator
+                && !(needs_last_separator
                     || separator.has_leading_comments()
                     || separator.has_trailing_comments())
             {
@@ -302,14 +302,13 @@ fn handle_trvia<'a, L: Language + 'a, N: AstNode<Language = L> + 'a>(
                 }
                 *optional_separator = None;
             }
-        } else if i != last_index {
+        } else if i != last_index || needs_last_separator {
             // The last node is moved and has no trailing separator.
             // Thus we build a new separator and remove its trailing whitespaces.
             if let Some(new_node) = node.clone().trim_trailing_trivia() {
                 *node = new_node;
             }
-            *optional_separator =
-                Some(make_separator().with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")]));
+            *optional_separator = Some(make_separator());
         }
     }
 }

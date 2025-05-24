@@ -154,6 +154,7 @@ biome_markdown_syntax        = { version = "0.0.1", path = "./crates/biome_markd
 biome_module_graph           = { version = "0.0.1", path = "./crates/biome_module_graph" }
 biome_plugin_loader          = { version = "0.0.1", path = "./crates/biome_plugin_loader" }
 biome_project_layout         = { version = "0.0.1", path = "./crates/biome_project_layout" }
+biome_resolver               = { version = "0.1.0", path = "./crates/biome_resolver" }
 biome_ungrammar              = { version = "0.3.1", path = "./crates/biome_ungrammar" }
 biome_yaml_factory           = { version = "0.0.1", path = "./crates/biome_yaml_factory" }
 biome_yaml_parser            = { version = "0.0.1", path = "./crates/biome_yaml_parser" }
@@ -196,13 +197,12 @@ grit-util            = "0.5.1"
 ignore               = "0.4.23"
 indexmap             = { version = "2.9.0" }
 insta                = "1.43.1"
-oxc_resolver         = "=8.0.0"
 papaya               = "0.2"
 path-absolutize      = { version = "3.1.1", optional = false, features = ["use_unix_paths_on_wasm"] }
 proc-macro-error2    = { version = "2.0.1", default-features = false }
 proc-macro2          = "1.0.95"
 quickcheck           = "1.0.3"
-quickcheck_macros    = "1.0.0"
+quickcheck_macros    = "1.1.0"
 quote                = "1.0.40"
 rayon                = "1.10.0"
 regex                = "1.11.1"
@@ -217,7 +217,7 @@ static_assertions    = "1.1"
 syn                  = "1.0.109"
 termcolor            = "1.4.1"
 terminal_size        = "0.4.2"
-tokio                = "1.44.2"
+tokio                = "1.45.0"
 tower                = "0.5.2"
 tower-lsp-server     = "0.21.1"
 tracing              = { version = "0.1.41", default-features = false, features = ["std", "attributes"] }

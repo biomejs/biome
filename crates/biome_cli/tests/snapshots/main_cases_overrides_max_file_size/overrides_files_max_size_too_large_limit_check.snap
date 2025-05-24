@@ -1,0 +1,59 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+assertion_line: 432
+expression: redactor(content)
+---
+## `biome.json`
+
+```json
+{
+  "files": {
+    "maxSize": 1024
+  },
+  "overrides": [
+    {
+      "includes": ["test.js"],
+      "files": { "maxSize": 1 }
+    }
+  ]
+}
+```
+
+## `test.js`
+
+```js
+statement();
+
+```
+
+# Termination Message
+
+```block
+check ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × No files were processed in the specified paths.
+  
+  i Check your biome.json or biome.jsonc to ensure the paths are not ignored by the configuration.
+  
+  i These paths were provided but ignored:
+  
+  - test.js
+  
+
+
+```
+
+# Emitted Messages
+
+```block
+test.js check ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The size of the file is 13 B, which exceeds the configured maximum of 1 B for this project.
+    Use the `files.maxSize` configuration to change the maximum size of files processed, or `files.ignore` to ignore the file.
+  
+
+```
+
+```block
+Checked 0 files in <TIME>. No fixes applied.
+```

@@ -13,20 +13,12 @@ expression: redactor(content)
     "useIgnoreFile": true,
     "defaultBranch": "master"
   },
-  "assist": {
-    "actions": {
-      "source": {
-        "organizeImports": "off"
-      }
-    }
-  },
+  "assist": { "actions": { "source": { "organizeImports": "off" } } },
   "linter": {
     "enabled": true,
     "rules": {
       "recommended": false,
-      "a11y": {
-        "noBlankTarget": "error"
-      },
+      "a11y": {},
       "correctness": {
         "noGlobalObjectCalls": "error",
         "noUnreachable": "error",
@@ -43,14 +35,16 @@ expression: redactor(content)
         "noUselessEmptyExport": "error",
         "noUselessConstructor": "error",
         "noUselessTypeConstraint": "error",
-        "noExcessiveNestedTestSuites": "error"
+        "noExcessiveNestedTestSuites": "error",
+        "noCommaOperator": "error"
       },
       "nursery": {},
       "performance": {
         "noBarrelFile": "error"
       },
       "security": {
-        "noDangerouslySetInnerHtmlWithChildren": "error"
+        "noDangerouslySetInnerHtmlWithChildren": "error",
+        "noBlankTarget": "error"
       },
       "suspicious": {
         "noDebugger": "error",
@@ -74,7 +68,6 @@ expression: redactor(content)
         "noVar": "error"
       },
       "style": {
-        "noCommaOperator": "error",
         "noShoutyConstants": "error",
         "noParameterProperties": "error",
         "useConst": "error",
@@ -172,10 +165,10 @@ expression: redactor(content)
       "includes": ["**/src/sentry/templates/sentry/error-page-embed.js"],
       "linter": {
         "rules": {
+          "style": {},
           "suspicious": {
             "noVar": "off"
-          },
-          "style": {}
+          }
         }
       }
     },
@@ -206,5 +199,5 @@ expression: redactor(content)
 # Emitted Messages
 
 ```block
-The configuration biome.json has been successfully migrated.
+Your configuration file(s) have been successfully migrated.
 ```

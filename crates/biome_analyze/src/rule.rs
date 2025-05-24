@@ -5,7 +5,7 @@ use crate::{
     Phase, Phases, Queryable, SourceActionKind, SuppressionAction, SuppressionCommentEmitterPayload,
 };
 use biome_console::fmt::{Display, Formatter};
-use biome_console::{MarkupBuf, Padding, markup};
+use biome_console::{MarkupBuf, markup};
 use biome_diagnostics::location::AsSpan;
 use biome_diagnostics::{
     Advices, Category, Diagnostic, DiagnosticTags, Location, LogCategory, MessageAndDescription,
@@ -44,155 +44,6 @@ pub struct RuleMetadata {
     pub severity: Severity,
     /// Domains applied by this rule
     pub domains: &'static [RuleDomain],
-}
-
-impl biome_console::fmt::Display for RuleMetadata {
-    fn fmt(&self, fmt: &mut Formatter) -> std::io::Result<()> {
-        fmt.write_markup(markup! {
-            <Emphasis>"Summary"</Emphasis>
-        })?;
-        fmt.write_str("\n")?;
-        fmt.write_str("\n")?;
-
-        fmt.write_markup(markup! {
-            "- Name: "<Emphasis>{self.name}</Emphasis>
-        })?;
-        fmt.write_str("\n")?;
-        match self.fix_kind {
-            FixKind::None => {
-                fmt.write_markup(markup! {
-                    "- No fix available."
-                })?;
-            }
-            kind => {
-                fmt.write_markup(markup! {
-                    "- Fix: "<Emphasis>{kind}</Emphasis>
-                })?;
-            }
-        }
-        fmt.write_str("\n")?;
-
-        fmt.write_markup(markup! {
-            "- Default severity: "<Emphasis>{self.severity}</Emphasis>
-        })?;
-        fmt.write_str("\n")?;
-
-        fmt.write_markup(markup! {
-            "- Available from version: "<Emphasis>{self.version}</Emphasis>
-        })?;
-        fmt.write_str("\n")?;
-
-        if self.domains.is_empty() && self.recommended {
-            fmt.write_markup(markup! {
-                "- This rule is recommended"
-            })?;
-        }
-
-        let domains = DisplayDomains(self.domains, self.recommended);
-
-        fmt.write_str("\n")?;
-
-        fmt.write_markup(markup!({ domains }))?;
-
-        fmt.write_str("\n")?;
-
-        fmt.write_markup(markup! {
-            <Emphasis>"Description"</Emphasis>
-        })?;
-        fmt.write_str("\n")?;
-        fmt.write_str("\n")?;
-
-        for line in self.docs.lines() {
-            if let Some((_, remainder)) = line.split_once("## ") {
-                fmt.write_markup(markup! {
-                    <Emphasis>{remainder.trim_start()}</Emphasis>
-                })?;
-            } else if let Some((_, remainder)) = line.split_once("### ") {
-                fmt.write_markup(markup! {
-                    <Emphasis>{remainder.trim_start()}</Emphasis>
-                })?;
-            } else {
-                fmt.write_str(line)?;
-            }
-
-            fmt.write_str("\n")?;
-        }
-
-        Ok(())
-    }
-}
-
-struct DisplayDomains(&'static [RuleDomain], bool);
-
-impl Display for DisplayDomains {
-    fn fmt(&self, fmt: &mut Formatter) -> std::io::Result<()> {
-        let domains = self.0;
-        let recommended = self.1;
-
-        if domains.is_empty() {
-            return Ok(());
-        }
-
-        fmt.write_markup(markup!(
-            <Emphasis>"Domains"</Emphasis>
-        ))?;
-        fmt.write_str("\n")?;
-        fmt.write_str("\n")?;
-
-        for domain in domains {
-            let dependencies = domain.manifest_dependencies();
-
-            fmt.write_markup(markup! {
-                "- Name: "<Emphasis>{domain}</Emphasis>
-            })?;
-            fmt.write_str("\n")?;
-
-            if recommended {
-                fmt.write_markup(markup! {
-                    "- The rule is recommended for this domain"
-                })?;
-                fmt.write_str("\n")?;
-            }
-
-            if !dependencies.is_empty() {
-                fmt.write_markup(markup! {
-                    "- The rule is enabled when one of these dependencies are detected:"
-                })?;
-                fmt.write_str("\n")?;
-                let padding = Padding::new(2);
-                for (index, (dep, range)) in dependencies.iter().enumerate() {
-                    fmt.write_markup(
-                        markup! { {padding}"- "<Emphasis>{dep}"@"{range}</Emphasis> },
-                    )?;
-                    if index + 1 < dependencies.len() {
-                        fmt.write_str("\n")?;
-                    }
-                }
-                fmt.write_str("\n")?;
-            }
-
-            let globals = domain.globals();
-
-            if !globals.is_empty() {
-                fmt.write_markup(markup! {
-                    "- The rule adds the following globals: "
-                })?;
-                fmt.write_str("\n")?;
-
-                let padding = Padding::new(2);
-                for (index, global) in globals.iter().enumerate() {
-                    fmt.write_markup(markup! { {padding}"- "<Emphasis>{global}</Emphasis> })?;
-                    if index + 1 < globals.len() {
-                        fmt.write_str("\n")?;
-                    }
-                }
-                fmt.write_str("\n")?;
-            }
-            fmt.write_str("\n")?;
-        }
-
-        Ok(())
-    }
 }
 
 #[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
@@ -268,6 +119,8 @@ pub enum RuleSource {
     EslintReactHooks(&'static str),
     /// Rules from [Eslint Plugin React Refresh](https://github.com/ArnaudBarre/eslint-plugin-react-refresh)
     EslintReactRefresh(&'static str),
+    /// Rules from [eslint-react.xyz](https://eslint-react.xyz/)
+    EslintReactXyz(&'static str),
     /// Rules from [Eslint Plugin Solid](https://github.com/solidjs-community/eslint-plugin-solid)
     EslintSolid(&'static str),
     /// Rules from [Eslint Plugin Sonar](https://github.com/SonarSource/eslint-plugin-sonarjs)
@@ -321,6 +174,7 @@ impl std::fmt::Display for RuleSource {
             Self::EslintReact(_) => write!(f, "eslint-plugin-react"),
             Self::EslintReactHooks(_) => write!(f, "eslint-plugin-react-hooks"),
             Self::EslintReactRefresh(_) => write!(f, "eslint-plugin-react-refresh"),
+            Self::EslintReactXyz(_) => write!(f, "@eslint-react/eslint-plugin"),
             Self::EslintSolid(_) => write!(f, "eslint-plugin-solid"),
             Self::EslintSonarJs(_) => write!(f, "eslint-plugin-sonarjs"),
             Self::EslintStylistic(_) => write!(f, "eslint-plugin-stylistic"),
@@ -377,6 +231,7 @@ impl RuleSource {
             | Self::EslintReact(rule_name)
             | Self::EslintReactHooks(rule_name)
             | Self::EslintReactRefresh(rule_name)
+            | Self::EslintReactXyz(rule_name)
             | Self::EslintTypeScript(rule_name)
             | Self::EslintSolid(rule_name)
             | Self::EslintSonarJs(rule_name)
@@ -408,6 +263,7 @@ impl RuleSource {
             Self::EslintReact(rule_name) => format!("react/{rule_name}"),
             Self::EslintReactHooks(rule_name) => format!("react-hooks/{rule_name}"),
             Self::EslintReactRefresh(rule_name) => format!("react-refresh/{rule_name}"),
+            Self::EslintReactXyz(rule_name) => format!("@eslint-react/{rule_name}"),
             Self::EslintTypeScript(rule_name) => format!("@typescript-eslint/{rule_name}"),
             Self::EslintSolid(rule_name) => format!("solidjs/{rule_name}"),
             Self::EslintSonarJs(rule_name) => format!("sonarjs/{rule_name}"),
@@ -440,6 +296,7 @@ impl RuleSource {
             Self::EslintReact(rule_name) => format!("https://github.com/jsx-eslint/eslint-plugin-react/blob/master/docs/rules/{rule_name}.md"),
             Self::EslintReactHooks(_) =>  "https://github.com/facebook/react/blob/main/packages/eslint-plugin-react-hooks/README.md".to_string(),
             Self::EslintReactRefresh(_) => "https://github.com/ArnaudBarre/eslint-plugin-react-refresh".to_string(),
+            Self::EslintReactXyz(rule_name) => format!("https://eslint-react.xyz/docs/rules/{rule_name}"),
             Self::EslintTypeScript(rule_name) => format!("https://typescript-eslint.io/rules/{rule_name}"),
             Self::EslintSolid(rule_name) => format!("https://github.com/solidjs-community/eslint-plugin-solid/blob/main/packages/eslint-plugin-solid/docs/{rule_name}.md"),
             Self::EslintSonarJs(rule_name) => format!("https://github.com/SonarSource/eslint-plugin-sonarjs/blob/HEAD/docs/rules/{rule_name}.md"),
@@ -1188,7 +1045,10 @@ pub trait Rule: RuleMeta + Sized {
         Self: 'static,
     {
         let category = <Self::Group as RuleGroup>::Category::CATEGORY;
-        if matches!(category, RuleCategory::Lint | RuleCategory::Action) {
+        if matches!(
+            category,
+            RuleCategory::Lint | RuleCategory::Action | RuleCategory::Syntax
+        ) {
             let rule_category = format!(
                 "{}/{}/{}",
                 category.as_suppression_category(),
@@ -1236,7 +1096,10 @@ pub trait Rule: RuleMeta + Sized {
     {
         // if the rule belongs to `Lint`, we auto generate an action to suppress the rule
         let category = <Self::Group as RuleGroup>::Category::CATEGORY;
-        if matches!(category, RuleCategory::Lint | RuleCategory::Action) {
+        if matches!(
+            category,
+            RuleCategory::Lint | RuleCategory::Action | RuleCategory::Syntax
+        ) {
             let rule_category = format!(
                 "{}/{}/{}",
                 category.as_suppression_category(),

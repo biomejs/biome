@@ -1,11 +1,11 @@
 use crate::workspace::{
     CheckFileSizeParams, CheckFileSizeResult, CloseProjectParams, FileFeaturesResult,
     GetFileContentParams, GetRegisteredTypesParams, GetTypeInfoParams, IsPathIgnoredParams,
-    OpenProjectParams, ProjectKey, RageParams, RageResult, ServerInfo,
+    OpenProjectParams, OpenProjectResult, RageParams, RageResult, ServerInfo,
 };
 use crate::{TransportError, Workspace, WorkspaceError};
 use biome_formatter::Printed;
-use biome_fs::FileSystem;
+use biome_resolver::FsWithResolverProxy;
 use serde::{Deserialize, Serialize, de::DeserializeOwned};
 use serde_json::json;
 use std::{
@@ -27,7 +27,7 @@ pub struct WorkspaceClient<T> {
     transport: T,
     request_id: AtomicU64,
     server_info: Option<ServerInfo>,
-    fs: Box<dyn FileSystem>,
+    fs: Box<dyn FsWithResolverProxy>,
 }
 
 pub trait WorkspaceTransport {
@@ -56,7 +56,7 @@ impl<T> WorkspaceClient<T>
 where
     T: WorkspaceTransport + RefUnwindSafe + Send + Sync,
 {
-    pub fn new(transport: T, fs: Box<dyn FileSystem>) -> Result<Self, WorkspaceError> {
+    pub fn new(transport: T, fs: Box<dyn FsWithResolverProxy>) -> Result<Self, WorkspaceError> {
         let mut client = Self {
             transport,
             request_id: AtomicU64::new(0),
@@ -106,7 +106,7 @@ impl<T> Workspace for WorkspaceClient<T>
 where
     T: WorkspaceTransport + RefUnwindSafe + Send + Sync,
 {
-    fn open_project(&self, params: OpenProjectParams) -> Result<ProjectKey, WorkspaceError> {
+    fn open_project(&self, params: OpenProjectParams) -> Result<OpenProjectResult, WorkspaceError> {
         self.request("biome/open_project", params)
     }
 
@@ -226,7 +226,7 @@ where
         self.request("biome/close_file", params)
     }
 
-    fn fs(&self) -> &dyn FileSystem {
+    fn fs(&self) -> &dyn FsWithResolverProxy {
         self.fs.as_ref()
     }
 

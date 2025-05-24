@@ -1,2 +1,3 @@
+/* should not generate diagnostics */
 @layer default;
 @import url(theme.css) layer(theme);

@@ -53,7 +53,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub UseNumericSeparators {
-        version: "next",
+        version: "2.0.0",
         name: "useNumericSeparators",
         language: "js",
         sources: &[RuleSource::EslintUnicorn("numeric-separators-style"), RuleSource::Clippy("unreadable_literal")],

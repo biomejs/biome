@@ -50,7 +50,7 @@ declare_lint_rule! {
     ///
     /// - [MDN](https://developer.mozilla.org/en-US/docs/Web/CSS/important)
     pub NoImportantStyles {
-        version: "next",
+        version: "2.0.0",
         name: "noImportantStyles",
         language: "css",
         recommended: true,

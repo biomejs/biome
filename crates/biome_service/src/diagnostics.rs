@@ -1,6 +1,8 @@
 use crate::workspace::{CheckFileSizeResult, DocumentFileSource};
 use biome_analyze::RuleError;
-use biome_configuration::diagnostics::{ConfigurationDiagnostic, EditorConfigDiagnostic};
+use biome_configuration::diagnostics::{
+    CantResolve, ConfigurationDiagnostic, EditorConfigDiagnostic,
+};
 use biome_configuration::{BiomeDiagnostic, CantLoadExtendFile};
 use biome_console::fmt::Bytes;
 use biome_console::markup;
@@ -182,6 +184,12 @@ impl From<EditorConfigDiagnostic> for WorkspaceError {
 impl From<CantLoadExtendFile> for WorkspaceError {
     fn from(value: CantLoadExtendFile) -> Self {
         Self::Configuration(BiomeDiagnostic::CantLoadExtendFile(value).into())
+    }
+}
+
+impl From<CantResolve> for WorkspaceError {
+    fn from(value: CantResolve) -> Self {
+        Self::Configuration(BiomeDiagnostic::CantResolve(value).into())
     }
 }
 

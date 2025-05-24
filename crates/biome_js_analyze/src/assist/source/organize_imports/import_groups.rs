@@ -1,8 +1,7 @@
 use biome_deserialize::{Deserializable, DeserializationContext, Text};
 use biome_deserialize_macros::Deserializable;
 use biome_glob::{CandidatePath, Glob};
-
-use crate::globals::is_node_builtin_module;
+use biome_resolver::is_builtin_node_module;
 
 use super::{
     comparable_token::ComparableToken,
@@ -362,7 +361,7 @@ impl PredefinedSourceMatcher {
             }
             Self::Node => {
                 (source_kind == ImportSourceKind::ProtocolPackage && source.starts_with("node:"))
-                    || (source_kind == ImportSourceKind::Package && is_node_builtin_module(source))
+                    || (source_kind == ImportSourceKind::Package && is_builtin_node_module(source))
             }
             Self::Package => source_kind == ImportSourceKind::Package,
             Self::Path => source_kind == ImportSourceKind::Path,

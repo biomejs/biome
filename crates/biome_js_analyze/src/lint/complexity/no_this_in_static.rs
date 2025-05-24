@@ -84,7 +84,7 @@ declare_lint_rule! {
         sources: &[RuleSource::EslintMysticatea("no-this-in-static")],
         recommended: true,
         severity: Severity::Warning,
-        fix_kind: FixKind::Unsafe,
+        fix_kind: FixKind::Safe,
     }
 }
 

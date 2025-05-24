@@ -6956,6 +6956,44 @@ impl IntoFormat<CssFormatContext> for biome_css_syntax::CssBogusSubSelector {
         )
     }
 }
+impl FormatRule<biome_css_syntax::CssBogusSupportsCondition>
+    for crate::css::bogus::bogus_supports_condition::FormatCssBogusSupportsCondition
+{
+    type Context = CssFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_css_syntax::CssBogusSupportsCondition,
+        f: &mut CssFormatter,
+    ) -> FormatResult<()> {
+        FormatBogusNodeRule::<biome_css_syntax::CssBogusSupportsCondition>::fmt(self, node, f)
+    }
+}
+impl AsFormat<CssFormatContext> for biome_css_syntax::CssBogusSupportsCondition {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_css_syntax::CssBogusSupportsCondition,
+        crate::css::bogus::bogus_supports_condition::FormatCssBogusSupportsCondition,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::css::bogus::bogus_supports_condition::FormatCssBogusSupportsCondition::default(),
+        )
+    }
+}
+impl IntoFormat<CssFormatContext> for biome_css_syntax::CssBogusSupportsCondition {
+    type Format = FormatOwnedWithRule<
+        biome_css_syntax::CssBogusSupportsCondition,
+        crate::css::bogus::bogus_supports_condition::FormatCssBogusSupportsCondition,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(
+            self,
+            crate::css::bogus::bogus_supports_condition::FormatCssBogusSupportsCondition::default(),
+        )
+    }
+}
 impl FormatRule<biome_css_syntax::CssBogusUnicodeRangeValue>
     for crate::css::bogus::bogus_unicode_range_value::FormatCssBogusUnicodeRangeValue
 {

@@ -1,0 +1,69 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.cjs
+---
+# Input
+```cjs
+function f() {
+    console.log(arguments);
+
+    for(let i = 0;i < arguments.length; ++i) {
+        console.log(arguments[i]);
+    }
+}
+
+function f() {
+    let arguments = 1;
+    console.log(arguments);
+}
+```
+
+# Diagnostics
+```
+invalid.cjs:2:17 lint/complexity/noArguments ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use the rest parameters instead of arguments.
+  
+    1 │ function f() {
+  > 2 │     console.log(arguments);
+      │                 ^^^^^^^^^
+    3 │ 
+    4 │     for(let i = 0;i < arguments.length; ++i) {
+  
+  i arguments does not have Array.prototype methods and can be inconvenient to use.
+  
+
+```
+
+```
+invalid.cjs:4:23 lint/complexity/noArguments ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use the rest parameters instead of arguments.
+  
+    2 │     console.log(arguments);
+    3 │ 
+  > 4 │     for(let i = 0;i < arguments.length; ++i) {
+      │                       ^^^^^^^^^
+    5 │         console.log(arguments[i]);
+    6 │     }
+  
+  i arguments does not have Array.prototype methods and can be inconvenient to use.
+  
+
+```
+
+```
+invalid.cjs:5:21 lint/complexity/noArguments ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use the rest parameters instead of arguments.
+  
+    4 │     for(let i = 0;i < arguments.length; ++i) {
+  > 5 │         console.log(arguments[i]);
+      │                     ^^^^^^^^^
+    6 │     }
+    7 │ }
+  
+  i arguments does not have Array.prototype methods and can be inconvenient to use.
+  
+
+```

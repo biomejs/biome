@@ -231,6 +231,7 @@ fn suggested_fix_if_unused(
         | AnyJsBindingDeclaration::JsClassDeclaration(_)
         | AnyJsBindingDeclaration::TsInterfaceDeclaration(_)
         | AnyJsBindingDeclaration::TsEnumDeclaration(_)
+        | AnyJsBindingDeclaration::TsExternalModuleDeclaration(_)
         | AnyJsBindingDeclaration::TsModuleDeclaration(_)) => {
             if is_in_ambient_context(node.syntax()) {
                 None

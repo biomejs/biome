@@ -68,7 +68,7 @@ fn enables_all_rules_when_group_is_error() {
     let test1 = Utf8Path::new("test1.js");
     fs.insert(
         test1.into(),
-        r#"function f() { console.log(arguments); }
+        r#"export default function f() {}
 "#
         .as_bytes(),
     );

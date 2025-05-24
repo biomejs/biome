@@ -22,7 +22,7 @@ check ━━━━━━━━━━━━━━━━━━━━━━━━�
 # Emitted Messages
 
 ```block
-<TEMP_DIR>/check_rome_test_broken_symlink/broken_symlink internalError/fs ━━━━━━━━━━━━━━━━━━━━
+broken_symlink internalError/fs ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Dereferenced symlink.
   

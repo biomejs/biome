@@ -4,7 +4,7 @@ pub mod linter;
 use crate::analyzer::assist::Actions;
 pub use crate::analyzer::linter::*;
 use biome_analyze::options::RuleOptions;
-use biome_analyze::{FixKind, RuleFilter};
+use biome_analyze::{FixKind, RuleCategory, RuleFilter};
 use biome_deserialize::{
     Deserializable, DeserializableType, DeserializableValue, DeserializationContext, Merge,
 };
@@ -493,35 +493,94 @@ impl<'a> From<&'a RuleSelector> for RuleFilter<'static> {
 impl FromStr for RuleSelector {
     type Err = &'static str;
     fn from_str(selector: &str) -> Result<Self, Self::Err> {
-        let selector = selector
-            .strip_prefix("lint/")
-            .or_else(|| selector.strip_prefix("assist/"))
-            .unwrap_or(selector);
+        let (selector_kind, selector) = if let Some(lint_selector) = selector.strip_prefix("lint/")
+        {
+            (Some(RuleCategory::Lint), lint_selector)
+        } else if let Some(assist_selector) = selector.strip_prefix("assist/") {
+            (Some(RuleCategory::Action), assist_selector)
+        } else {
+            (None, selector)
+        };
 
-        if let Some((group_name, rule_name)) = selector.split_once('/') {
-            if let Ok(group) = linter::RuleGroup::from_str(group_name) {
-                if let Some(rule_name) = Rules::has_rule(group, rule_name) {
-                    Ok(Self::Rule(group.as_str(), rule_name))
+        // If `optional_group_name` is set, then `rule_or_group_name` is a group.
+        // Otherwise it is either a rule or a group.
+        let (optional_group_name, rule_or_group_name) =
+            if let Some((group_name, rule_name)) = selector.split_once('/') {
+                (Some(group_name), rule_name)
+            } else {
+                (None, selector)
+            };
+
+        if let Ok(rule_name) = linter::RuleName::from_str(rule_or_group_name) {
+            let static_group_name = rule_name.group().as_str();
+            // TODO: remove the `style/useNamingConvention` exception,
+            // once we have promoted the GraphQL `useNamingConvention` rule.
+            //
+            // See https://github.com/biomejs/biome/issues/6018
+            if optional_group_name.is_none_or(|name| name == static_group_name)
+                || (rule_or_group_name == "useNamingConvention"
+                    && optional_group_name == Some("style"))
+            {
+                if matches!(selector_kind, None | Some(RuleCategory::Lint)) {
+                    // TODO: remove the `style/useNamingConvention` exception,
+                    // once we have promoted the GraphQL `useNamingConvention` rule.
+                    let static_group_name = if rule_or_group_name == "useNamingConvention"
+                        && optional_group_name == Some("style")
+                    {
+                        "style"
+                    } else {
+                        static_group_name
+                    };
+                    Ok(Self::Rule(static_group_name, rule_name.as_str()))
                 } else {
-                    Err("This rule doesn't exist.")
-                }
-            } else if let Ok(group) = assist::RuleGroup::from_str(group_name) {
-                if let Some(rule_name) = Actions::has_rule(group, rule_name) {
-                    Ok(Self::Rule(group.as_str(), rule_name))
-                } else {
-                    Err("This rule doesn't exist.")
+                    Err(
+                        "This is a lint rule and not an assist rule. Use the `lint/` prefix or remove the prefix.",
+                    )
                 }
             } else {
-                Err("This rule doesn't exist.")
+                Err("This rule is under a different group.")
             }
+        } else if let Ok(rule_name) = assist::ActionName::from_str(rule_or_group_name) {
+            let static_group_name = rule_name.group().as_str();
+            if optional_group_name.is_none_or(|name| name == static_group_name) {
+                if matches!(selector_kind, None | Some(RuleCategory::Action)) {
+                    Ok(Self::Rule(static_group_name, rule_name.as_str()))
+                } else {
+                    Err(
+                        "This is an assist rule and not a lint rule. Use the `assist/` prefix or remove the prefix.",
+                    )
+                }
+            } else {
+                Err("This action is under a different group.")
+            }
+        } else if let Some(group_name) = optional_group_name {
+            Err(if linter::RuleGroup::from_str(group_name).is_ok() {
+                "This rule doesn't exist."
+            } else if assist::RuleGroup::from_str(group_name).is_ok() {
+                "This action doesn't exist."
+            } else {
+                "This rule or action doesn't exist."
+            })
+        } else if let Ok(group) = linter::RuleGroup::from_str(rule_or_group_name) {
+            if matches!(selector_kind, None | Some(RuleCategory::Lint)) {
+                Ok(Self::Group(group.as_str()))
+            } else {
+                Err(
+                    "This is a lint group and not an assist group. Use the `lint/` prefix or remove the prefix.",
+                )
+            }
+        } else if let Ok(group) = assist::RuleGroup::from_str(rule_or_group_name) {
+            if matches!(selector_kind, None | Some(RuleCategory::Action)) {
+                Ok(Self::Group(group.as_str()))
+            } else {
+                Err(
+                    "This is an assist group and not a lint group. Use the `assist/` prefix or remove the prefix.",
+                )
+            }
+        } else if rule_or_group_name.bytes().all(|c| c.is_ascii_lowercase()) {
+            Err("This group doesn't exist.")
         } else {
-            if let Ok(group) = linter::RuleGroup::from_str(selector) {
-                return Ok(Self::Group(group.as_str()));
-            }
-            if let Ok(group) = assist::RuleGroup::from_str(selector) {
-                return Ok(Self::Group(group.as_str()));
-            }
-            Err("This group doesn't exist. Use the syntax `<group>/<rule>` to specify a rule.")
+            Err("This rule name or action name doesn't exist.")
         }
     }
 }

@@ -14,7 +14,8 @@ describe("Biome WebAssembly lintContent", () => {
 		biome = await Biome.create({
 			distribution: Distribution.NODE,
 		});
-		projectKey = biome.openProject();
+		const result = biome.openProject();
+		projectKey = result.projectKey;
 	});
 
 	afterEach(() => {

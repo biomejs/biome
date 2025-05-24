@@ -4,6 +4,7 @@ expression: validCharset.css
 ---
 # Input
 ```css
+/* should not generate diagnostics */
 @charset "utf-8";
 @import 'foo.css';
 

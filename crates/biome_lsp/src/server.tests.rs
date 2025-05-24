@@ -14,8 +14,8 @@ use biome_fs::{BiomePath, MemoryFileSystem, TemporaryFs};
 use biome_service::WorkspaceWatcher;
 use biome_service::workspace::{
     GetFileContentParams, GetSyntaxTreeParams, GetSyntaxTreeResult, OpenProjectParams,
-    PullDiagnosticsParams, PullDiagnosticsResult, ScanKind, ScanProjectFolderParams,
-    ScanProjectFolderResult,
+    OpenProjectResult, PullDiagnosticsParams, PullDiagnosticsResult, ScanKind,
+    ScanProjectFolderParams, ScanProjectFolderResult,
 };
 use camino::Utf8PathBuf;
 use futures::channel::mpsc::{Sender, channel};
@@ -585,13 +585,15 @@ async fn document_lifecycle() -> Result<()> {
 
     // `open_project()` will return an existing key if called with a path
     // for an existing project.
-    let project_key = server
+    let OpenProjectResult { project_key, .. } = server
         .request(
             "biome/open_project",
             "open_project",
             OpenProjectParams {
                 path: BiomePath::new(""),
                 open_uninitialized: true,
+                only_rules: None,
+                skip_rules: None,
             },
         )
         .await?
@@ -645,13 +647,15 @@ async fn lifecycle_with_multiple_connections() -> Result<()> {
 
         // `open_project()` will return an existing key if called with a path
         // for an existing project.
-        let project_key = server
+        let OpenProjectResult { project_key, .. } = server
             .request(
                 "biome/open_project",
                 "open_project",
                 OpenProjectParams {
                     path: BiomePath::new(""),
                     open_uninitialized: true,
+                    only_rules: None,
+                    skip_rules: None,
                 },
             )
             .await?
@@ -689,13 +693,15 @@ async fn lifecycle_with_multiple_connections() -> Result<()> {
 
         // `open_project()` will return an existing key if called with a path
         // for an existing project.
-        let project_key = server
+        let OpenProjectResult { project_key, .. } = server
             .request(
                 "biome/open_project",
                 "open_project",
                 OpenProjectParams {
                     path: BiomePath::new(""),
                     open_uninitialized: true,
+                    only_rules: None,
+                    skip_rules: None,
                 },
             )
             .await?
@@ -786,6 +792,72 @@ async fn document_no_extension() -> Result<()> {
             },
         )
         .await?;
+
+    server.shutdown().await?;
+    reader.abort();
+
+    Ok(())
+}
+
+#[tokio::test]
+async fn document_range_formatting() -> Result<()> {
+    let factory = ServerFactory::default();
+    let (service, client) = factory.create().into_inner();
+    let (stream, sink) = client.split();
+    let mut server = Server::new(service);
+
+    let (sender, _) = channel(CHANNEL_BUFFER_SIZE);
+    let reader = tokio::spawn(client_handler(stream, sink, sender));
+
+    server.initialize().await?;
+    server.initialized().await?;
+
+    server
+        .notify(
+            "textDocument/didOpen",
+            DidOpenTextDocumentParams {
+                text_document: TextDocumentItem {
+                    uri: uri!("document.js"),
+                    language_id: String::from("javascript"),
+                    version: 0,
+                    text: String::from("doNotFormatHere()\nformatHere()\ndoNotFormatHere()\n"),
+                },
+            },
+        )
+        .await?;
+
+    let res: Option<Vec<TextEdit>> = server
+        .request(
+            "textDocument/rangeFormatting",
+            "formatting",
+            DocumentRangeFormattingParams {
+                text_document: TextDocumentIdentifier {
+                    uri: uri!("document.js"),
+                },
+                range: Range::new(Position::new(1, 0), Position::new(2, 0)),
+                options: FormattingOptions {
+                    tab_size: 4,
+                    insert_spaces: false,
+                    properties: HashMap::default(),
+                    trim_trailing_whitespace: None,
+                    insert_final_newline: None,
+                    trim_final_newlines: None,
+                },
+                work_done_progress_params: WorkDoneProgressParams {
+                    work_done_token: None,
+                },
+            },
+        )
+        .await?
+        .context("formatting returned None")?;
+
+    assert_eq!(
+        res.context("formatting did not return an edit list")?,
+        vec![TextEdit::new(
+            Range::new(Position::new(1, 12), Position::new(1, 12)),
+            ";".to_string()
+        )]
+    );
 
     server.shutdown().await?;
     reader.abort();
@@ -2565,13 +2637,15 @@ isSpreadAssignment;
 
     // `open_project()` will return an existing key if called with a path
     // for an existing project.
-    let project_key = server
+    let OpenProjectResult { project_key, .. } = server
         .request(
             "biome/open_project",
             "open_project",
             OpenProjectParams {
                 path: BiomePath::new(""),
                 open_uninitialized: true,
+                skip_rules: None,
+                only_rules: None,
             },
         )
         .await?
@@ -3203,7 +3277,7 @@ async fn pull_source_assist_action() -> Result<()> {
 }
 
 #[tokio::test]
-async fn watcher_updates_module_graph() -> Result<()> {
+async fn watcher_updates_module_graph_simple() -> Result<()> {
     const FOO_CONTENT: &str = r#"import { bar } from "./bar.ts";
 
 export function foo() {
@@ -3261,13 +3335,18 @@ export function bar() {
 
     server.initialize().await?;
 
-    let project_key = server
+    let OpenProjectResult {
+        project_key,
+        scan_kind,
+    } = server
         .request(
             "biome/open_project",
             "open_project",
             OpenProjectParams {
                 path: fs.working_directory.clone().into(),
                 open_uninitialized: true,
+                skip_rules: None,
+                only_rules: None,
             },
         )
         .await?
@@ -3283,7 +3362,7 @@ export function bar() {
                 path: None,
                 watch: true,
                 force: false,
-                scan_kind: ScanKind::Project,
+                scan_kind,
             },
         )
         .await?
@@ -3478,13 +3557,15 @@ export function bar() {
 
     server.initialize().await?;
 
-    let project_key = server
+    let OpenProjectResult { project_key, .. } = server
         .request(
             "biome/open_project",
             "open_project",
             OpenProjectParams {
                 path: fs.working_directory.clone().into(),
                 open_uninitialized: true,
+                only_rules: None,
+                skip_rules: None,
             },
         )
         .await?

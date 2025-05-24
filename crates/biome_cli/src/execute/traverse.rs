@@ -10,7 +10,6 @@ use biome_diagnostics::DiagnosticTags;
 use biome_diagnostics::{DiagnosticExt, Error, Resource, Severity, category};
 use biome_fs::{BiomePath, FileSystem, PathInterner};
 use biome_fs::{TraversalContext, TraversalScope};
-use biome_service::dome::Dome;
 use biome_service::projects::ProjectKey;
 use biome_service::workspace::{DocumentFileSource, DropPatternParams, IsPathIgnoredParams};
 use biome_service::{Workspace, WorkspaceError, extension_error, workspace::SupportsFeatureParams};
@@ -28,7 +27,7 @@ use std::{
     thread,
     time::{Duration, Instant},
 };
-use tracing::{Span, instrument};
+use tracing::instrument;
 
 pub(crate) struct TraverseResult {
     pub(crate) summary: TraversalSummary,
@@ -170,18 +169,8 @@ fn traverse_inputs(
     }));
 
     let paths = ctx.evaluated_paths();
-    let dome = Dome::new(paths);
-    let mut iter = dome.iter();
     fs.traversal(Box::new(|scope: &dyn TraversalScope| {
-        while let Some(path) = iter.next_config() {
-            scope.handle(ctx, path.to_path_buf());
-        }
-
-        while let Some(path) = iter.next_manifest() {
-            scope.handle(ctx, path.to_path_buf());
-        }
-
-        for path in iter {
+        for path in paths {
             scope.handle(ctx, path.to_path_buf());
         }
     }));
@@ -346,6 +335,7 @@ impl<'ctx> DiagnosticsPrinter<'ctx> {
                         };
 
                         if let Some(path) = file_name {
+                            let path = self.to_relative_file_path(path);
                             err = err.with_file_path(path.as_str());
                         }
                     }
@@ -365,58 +355,28 @@ impl<'ctx> DiagnosticsPrinter<'ctx> {
                 } => {
                     // we transform the file string into a path object so we can correctly strip
                     // the working directory without having leading slash in the file name
-                    let file_path = Utf8Path::new(&file_path);
-                    let file_path = self
-                        .working_directory
-                        .as_ref()
-                        .and_then(|wd| file_path.strip_prefix(wd.as_str()).ok())
-                        .map(|path| path.to_string())
-                        .unwrap_or(file_path.to_string());
-
+                    let file_path = self.to_relative_file_path(&file_path);
                     self.not_printed_diagnostics
                         .fetch_add(skipped_diagnostics, Ordering::Relaxed);
-
-                    // is CI mode we want to print all the diagnostics
-                    if self.execution.is_ci() {
-                        for diag in diagnostics {
-                            let severity = diag.severity();
-                            if self.should_skip_diagnostic(severity, diag.tags()) {
-                                continue;
-                            }
-
-                            if severity == Severity::Error {
-                                self.errors.fetch_add(1, Ordering::Relaxed);
-                            }
-                            if severity == Severity::Warning {
-                                self.warnings.fetch_add(1, Ordering::Relaxed);
-                            }
-
-                            let diag = diag
-                                .with_file_path(file_path.as_str())
-                                .with_file_source_code(&content);
-                            diagnostics_to_print.push(diag);
+                    for diag in diagnostics {
+                        let severity = diag.severity();
+                        if self.should_skip_diagnostic(severity, diag.tags()) {
+                            continue;
                         }
-                    } else {
-                        for diag in diagnostics {
-                            let severity = diag.severity();
-                            if self.should_skip_diagnostic(severity, diag.tags()) {
-                                continue;
-                            }
-                            if severity == Severity::Error {
-                                self.errors.fetch_add(1, Ordering::Relaxed);
-                            }
-                            if severity == Severity::Warning {
-                                self.warnings.fetch_add(1, Ordering::Relaxed);
-                            }
+                        if severity == Severity::Error {
+                            self.errors.fetch_add(1, Ordering::Relaxed);
+                        }
+                        if severity == Severity::Warning {
+                            self.warnings.fetch_add(1, Ordering::Relaxed);
+                        }
 
-                            let should_print = self.should_print();
+                        let should_print = self.should_print();
 
-                            if should_print {
-                                let diag = diag
-                                    .with_file_path(file_path.as_str())
-                                    .with_file_source_code(&content);
-                                diagnostics_to_print.push(diag)
-                            }
+                        let diag = diag
+                            .with_file_path(file_path.as_str())
+                            .with_file_source_code(&content);
+                        if should_print || self.execution.is_ci() {
+                            diagnostics_to_print.push(diag)
                         }
                     }
                 }
@@ -426,13 +386,7 @@ impl<'ctx> DiagnosticsPrinter<'ctx> {
                     new,
                     diff_kind,
                 } => {
-                    let file_path = Utf8Path::new(&file_name);
-                    let file_path = self
-                        .working_directory
-                        .as_ref()
-                        .and_then(|wd| file_path.strip_prefix(wd.as_str()).ok())
-                        .map(|path| path.to_string())
-                        .unwrap_or(file_path.to_string());
+                    let file_path = self.to_relative_file_path(&file_name);
                     // A diff is an error in CI mode and in format check mode
                     let is_error = self.execution.is_ci() || !self.execution.is_format_write();
                     if is_error {
@@ -453,44 +407,48 @@ impl<'ctx> DiagnosticsPrinter<'ctx> {
                     let should_print = self.should_print();
 
                     if should_print {
-                        if self.execution.is_ci() {
-                            match diff_kind {
-                                DiffKind::Format => {
-                                    let diag = CIFormatDiffDiagnostic {
+                        match diff_kind {
+                            DiffKind::Format => {
+                                let diag = if self.execution.is_ci() {
+                                    CIFormatDiffDiagnostic {
                                         diff: ContentDiffAdvice {
                                             old: old.clone(),
                                             new: new.clone(),
                                         },
-                                    };
-                                    diagnostics_to_print.push(
-                                        diag.with_severity(severity)
-                                            .with_file_source_code(old.clone())
-                                            .with_file_path(file_path.to_string()),
-                                    );
-                                }
-                            };
-                        } else {
-                            match diff_kind {
-                                DiffKind::Format => {
-                                    let diag = FormatDiffDiagnostic {
+                                    }
+                                    .with_severity(severity)
+                                    .with_file_source_code(old.clone())
+                                    .with_file_path(file_path.to_string())
+                                } else {
+                                    FormatDiffDiagnostic {
                                         diff: ContentDiffAdvice {
                                             old: old.clone(),
                                             new: new.clone(),
                                         },
-                                    };
-                                    diagnostics_to_print.push(
-                                        diag.with_severity(severity)
-                                            .with_file_source_code(old.clone())
-                                            .with_file_path(file_path.to_string()),
-                                    )
+                                    }
+                                    .with_severity(severity)
+                                    .with_file_source_code(old.clone())
+                                    .with_file_path(file_path.to_string())
+                                };
+                                if should_print || self.execution.is_ci() {
+                                    diagnostics_to_print.push(diag);
                                 }
-                            };
+                            }
                         }
                     }
                 }
             }
         }
         diagnostics_to_print
+    }
+
+    fn to_relative_file_path(&self, path: &str) -> String {
+        let file_path = Utf8Path::new(&path);
+        self.working_directory
+            .as_ref()
+            .and_then(|wd| file_path.strip_prefix(wd.as_str()).ok())
+            .map(|path| path.to_string())
+            .unwrap_or(file_path.to_string())
     }
 }
 
@@ -589,7 +547,7 @@ impl TraversalContext for TraversalOptions<'_, '_> {
         self.push_message(error);
     }
 
-    #[instrument(level = "trace", skip(self, biome_path), fields(can_handle))]
+    #[instrument(level = "debug", skip(self, biome_path))]
     fn can_handle(&self, biome_path: &BiomePath) -> bool {
         if biome_path
             .file_name()
@@ -597,6 +555,7 @@ impl TraversalContext for TraversalOptions<'_, '_> {
         {
             return false;
         }
+
         let path = biome_path.as_path();
         if self.fs.path_is_dir(path) || self.fs.path_is_symlink(path) {
             // handle:
@@ -616,14 +575,12 @@ impl TraversalContext for TraversalOptions<'_, '_> {
                     self.push_diagnostic(err.into());
                     false
                 });
-            Span::current().record("can_handle", can_handle);
 
             return can_handle;
         }
 
         // bail on fifo and socket files
         if !self.fs.path_is_file(path) {
-            Span::current().record("can_handle", false);
             return false;
         }
 
@@ -639,21 +596,18 @@ impl TraversalContext for TraversalOptions<'_, '_> {
             Ok(file_features) => {
                 if file_features.is_protected() {
                     self.protected_file(biome_path);
-                    Span::current().record("can_handle", false);
                     return false;
                 }
 
                 if file_features.is_not_supported() && !file_features.is_ignored() && !can_read {
                     // we should throw a diagnostic if we can't handle a file that isn't ignored
                     self.miss_handler_err(extension_error(biome_path), biome_path);
-                    Span::current().record("can_handle", false);
                     return false;
                 }
                 file_features
             }
             Err(err) => {
                 self.miss_handler_err(err, biome_path);
-                Span::current().record("can_handle", false);
                 return false;
             }
         };
@@ -669,7 +623,6 @@ impl TraversalContext for TraversalOptions<'_, '_> {
             TraversalMode::Migrate { .. } => true,
             TraversalMode::Search { .. } => file_features.supports_search(),
         };
-        Span::current().record("can_handle", result);
         result
     }
 

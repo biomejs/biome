@@ -420,10 +420,24 @@
 						{ "type": "null" }
 					]
 				},
+				"noArguments": {
+					"description": "Disallow the use of arguments.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noBannedTypes": {
 					"description": "Disallow primitive type aliases and misleading types.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleFixConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noCommaOperator": {
+					"description": "Disallow comma operator.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -450,6 +464,13 @@
 				},
 				"noExtraBooleanCast": {
 					"description": "Disallow unnecessary boolean casts",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleFixConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noFlatMapIdentity": {
+					"description": "Disallow to use unnecessary callback on flatMap.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleFixConfiguration" },
 						{ "type": "null" }
@@ -485,6 +506,13 @@
 				},
 				"noUselessConstructor": {
 					"description": "Disallow unnecessary constructors.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleFixConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noUselessContinue": {
+					"description": "Avoid using unnecessary continue.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleFixConfiguration" },
 						{ "type": "null" }
@@ -588,13 +616,6 @@
 						{ "type": "null" }
 					]
 				},
-				"noWith": {
-					"description": "Disallow with statements in non-strict contexts.",
-					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
-						{ "type": "null" }
-					]
-				},
 				"recommended": {
 					"description": "It enables the recommended rules for this group",
 					"type": ["boolean", "null"]
@@ -622,6 +643,13 @@
 				},
 				"useLiteralKeys": {
 					"description": "Enforce the usage of a literal access to properties over computed property access.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleFixConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"useNumericLiterals": {
+					"description": "Disallow parseInt() and Number.parseInt() in favor of binary, octal, and hexadecimal literals",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleFixConfiguration" },
 						{ "type": "null" }
@@ -799,13 +827,6 @@
 					"description": "Disallows empty destructuring patterns.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"noFlatMapIdentity": {
-					"description": "Disallow to use unnecessary callback on flatMap.",
-					"anyOf": [
-						{ "$ref": "#/definitions/RuleFixConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -1068,13 +1089,6 @@
 						{ "type": "null" }
 					]
 				},
-				"noUselessContinue": {
-					"description": "Avoid using unnecessary continue.",
-					"anyOf": [
-						{ "$ref": "#/definitions/RuleFixConfiguration" },
-						{ "type": "null" }
-					]
-				},
 				"noVoidElementsWithChildren": {
 					"description": "This rules prevents void elements (AKA self-closing elements) from having children.",
 					"anyOf": [
@@ -1092,13 +1106,6 @@
 				"recommended": {
 					"description": "It enables the recommended rules for this group",
 					"type": ["boolean", "null"]
-				},
-				"useArrayLiterals": {
-					"description": "Disallow Array constructors.",
-					"anyOf": [
-						{ "$ref": "#/definitions/RuleFixConfiguration" },
-						{ "type": "null" }
-					]
 				},
 				"useExhaustiveDependencies": {
 					"description": "Enforce all dependencies are correctly specified in a React hook.",
@@ -1139,6 +1146,13 @@
 					"description": "Enforce \"for\" loop update clause moving the counter in the right direction.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"useValidTypeof": {
+					"description": "This rule checks that the result of a typeof expression is compared to a valid value.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleFixConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -2262,7 +2276,7 @@
 					"enum": ["namespaceLike"]
 				},
 				{
-					"description": "TypeScript mamespaces",
+					"description": "TypeScript namespaces",
 					"type": "string",
 					"enum": ["namespace"]
 				},
@@ -2737,6 +2751,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noNestedComponentDefinitions": {
+					"description": "Disallows defining React components inside other components.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noNoninteractiveElementInteractions": {
 					"description": "Disallow use event handlers on non-interactive elements.",
 					"anyOf": [
@@ -2824,6 +2845,13 @@
 				"recommended": {
 					"description": "It enables the recommended rules for this group",
 					"type": ["boolean", "null"]
+				},
+				"useAdjacentGetterSetter": {
+					"description": "Enforce that getters and setters for the same property are adjacent in class and object definitions.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
 				},
 				"useConsistentObjectDefinition": {
 					"description": "Require the consistent declaration of object literals. Defaults to explicit definitions.",
@@ -2931,6 +2959,13 @@
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }
 					]
+				},
+				"useUniqueElementIds": {
+					"description": "Prevent the usage of static string literal id attribute on elements.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
 				}
 			},
 			"additionalProperties": false
@@ -2965,6 +3000,16 @@
 				"enabled": {
 					"description": "if `false`, it disables the feature and the assist won't be executed. `true` by default",
 					"anyOf": [{ "$ref": "#/definitions/Bool" }, { "type": "null" }]
+				}
+			},
+			"additionalProperties": false
+		},
+		"OverrideFilesConfiguration": {
+			"type": "object",
+			"properties": {
+				"maxSize": {
+					"description": "File size limit in bytes",
+					"anyOf": [{ "$ref": "#/definitions/MaxSize" }, { "type": "null" }]
 				}
 			},
 			"additionalProperties": false
@@ -3066,6 +3111,13 @@
 						{ "type": "null" }
 					]
 				},
+				"files": {
+					"description": "Specific configuration for the filesystem",
+					"anyOf": [
+						{ "$ref": "#/definitions/OverrideFilesConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"formatter": {
 					"description": "Specific configuration for the Json language",
 					"anyOf": [
@@ -3163,6 +3215,13 @@
 				},
 				"noImgElement": {
 					"description": "Prevent usage of \\<img> element in a Next.js project.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noNamespaceImport": {
+					"description": "Disallow the use of namespace imports.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }
@@ -4191,20 +4250,6 @@
 			"description": "A list of rules that belong to this group",
 			"type": "object",
 			"properties": {
-				"noArguments": {
-					"description": "Disallow the use of arguments.",
-					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"noCommaOperator": {
-					"description": "Disallow comma operator.",
-					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
-						{ "type": "null" }
-					]
-				},
 				"noCommonJs": {
 					"description": "Disallow use of CommonJs module system in favor of ESM style imports.",
 					"anyOf": [
@@ -4270,13 +4315,6 @@
 				},
 				"noNamespace": {
 					"description": "Disallow the use of TypeScript's namespaces.",
-					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"noNamespaceImport": {
-					"description": "Disallow the use of namespace imports.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }
@@ -4390,6 +4428,13 @@
 				"recommended": {
 					"description": "It enables the recommended rules for this group",
 					"type": ["boolean", "null"]
+				},
+				"useArrayLiterals": {
+					"description": "Disallow Array constructors.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleFixConfiguration" },
+						{ "type": "null" }
+					]
 				},
 				"useAsConstAssertion": {
 					"description": "Enforce the use of as const over literal type and type annotation.",
@@ -4579,13 +4624,6 @@
 				},
 				"useNumberNamespace": {
 					"description": "Use the Number properties instead of global ones.",
-					"anyOf": [
-						{ "$ref": "#/definitions/RuleFixConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"useNumericLiterals": {
-					"description": "Disallow parseInt() and Number.parseInt() in favor of binary, octal, and hexadecimal literals",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleFixConfiguration" },
 						{ "type": "null" }
@@ -5157,6 +5195,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noWith": {
+					"description": "Disallow with statements in non-strict contexts.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"recommended": {
 					"description": "It enables the recommended rules for this group",
 					"type": ["boolean", "null"]
@@ -5233,13 +5278,6 @@
 				},
 				"useStrictMode": {
 					"description": "Enforce the use of the directive \"use strict\" in script files.",
-					"anyOf": [
-						{ "$ref": "#/definitions/RuleFixConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"useValidTypeof": {
-					"description": "This rule checks that the result of a typeof expression is compared to a valid value.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleFixConfiguration" },
 						{ "type": "null" }

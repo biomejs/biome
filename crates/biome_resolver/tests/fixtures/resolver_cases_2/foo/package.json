@@ -1,0 +1,6 @@
+{
+    "name": "foo",
+    "imports": {
+        "#components/*": "./src/components/*.tsx"
+    }
+}

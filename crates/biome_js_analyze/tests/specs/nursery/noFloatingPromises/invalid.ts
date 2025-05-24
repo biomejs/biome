@@ -335,3 +335,13 @@ async function testDestructuringAndCallingReturnsPromiseFromRest({
 import("some-module").then(() => {});
 
 returnPromiseResult();
+
+function returnMaybePromise(): Promise<void> | undefined {
+	if (!false) {
+		return;
+	}
+
+	return Promise.resolve();
+}
+
+returnMaybePromise();

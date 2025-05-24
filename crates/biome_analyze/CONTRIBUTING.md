@@ -8,44 +8,57 @@ The analyzer allows implementors to create **four different** types of rules:
 - **Syntax**: This rule checks the syntax according to the language specification and emits error diagnostics accordingly.
 - **Lint**: This rule performs static analysis of the source code to detect invalid or error-prone patterns, and emits diagnostics along with proposed fixes.
 - **Assist**: This rule detects refactoring opportunities and emits code action signals.
-- **Transformation**: This rule detects transformations that should be applied to the code.
 
-### Table of Contents
 
-- [Creating a Rule](#creating-a-rule)
-  - [Guidelines](#guidelines)
-    - [Naming Conventions for Rules](#naming-conventions-for-rules)
-    - [What a Rule should say to the User](#what-a-rule-should-say-to-the-user)
-    - [Placement of New Rules](#placement-of-new-rules)
-  - [Creating and Implementing the Rule](#creating-and-implementing-the-rule)
-  - [Coding Tips for Rules](#coding-tips-for-rules)
-    - [`declare_lint_rule!` macro](#declare_lint_rule-macro)
-    - [`rule_category!` macro](#rule_category-macro)
-    - [Rule Options](#rule-options)
-    - [Navigating the CST (Concrete Syntax Tree)](#navigating-the-cst-concrete-syntax-tree)
-    - [Querying multiple node types via `declare_node_union!`](#querying-multiple-node-types-via-declare_node_union)
-    - [Semantic Model](#semantic-model)
-    - [Multiple Signals](#multiple-signals)
-    - [Code Actions](#code-actions)
-    - [Custom Syntax Tree Visitors](#custom-syntax-tree-visitors)
-    - [Common Logic Mistakes](#common-logic-mistakes)
-  - [Testing the Rule](#testing-the-rule)
-    - [Quick Test](#quick-test)
-    - [Snapshot Tests](#snapshot-tests)
-    - [Run the Snapshot Tests](#run-the-snapshot-tests)
-  - [Documenting the Rule](#documenting-the-rule)
-    - [General Structure](#general-structure)
-    - [Associated Language(s)](#associated-languages)
-    - [Code Blocks](#code-blocks)
-    - [Using Rule Options](#using-rule-options)
-    - [Full Documentation Example](#full-documentation-example)
-  - [Code generation](#code-generation)
-  - [Commiting your work](#commiting-your-work)
-  - [Sidenote: Deprecating a rule](#sidenote-deprecating-a-rule)
+## Table of Contents
+
+- [Analyzer](#analyzer)
+  * [Table of Contents](#table-of-contents)
+  * [Creating a Rule](#creating-a-rule)
+    + [Guidelines](#guidelines)
+      - [Naming Conventions for Rules](#naming-conventions-for-rules)
+      - [What a Rule should say to the User](#what-a-rule-should-say-to-the-user)
+      - [Placement of New Rules](#placement-of-new-rules)
+    + [Creating and Implementing the Rule](#creating-and-implementing-the-rule)
+    + [Coding Tips for Rules](#coding-tips-for-rules)
+      - [`declare_lint_rule!` macro](#declare_lint_rule-macro)
+        * [Biome lint rules inspired by other lint rules](#biome-lint-rules-inspired-by-other-lint-rules)
+      - [`rule_category!` macro](#rule_category-macro)
+      - [Rule severity](#rule-severity)
+      - [Rule domains](#rule-domains)
+      - [Rule Options](#rule-options)
+        * [Options for our example rule](#options-for-our-example-rule)
+        * [Representing the rule options in Rust](#representing-the-rule-options-in-rust)
+        * [Retrieving the rule options within a Rule](#retrieving-the-rule-options-within-a-rule)
+        * [Implementing JSON deserialization/serialization support](#implementing-json-deserializationserialization-support)
+        * [Testing & Documenting Rule Options](#testing-documenting-rule-options)
+      - [Navigating the CST (Concrete Syntax Tree)](#navigating-the-cst-concrete-syntax-tree)
+      - [Querying multiple node types via `declare_node_union!`](#querying-multiple-node-types-via-declare_node_union)
+      - [Semantic Model](#semantic-model)
+        * [How to use the query `Semantic<>` in a lint rule](#how-to-use-the-query-semantic-in-a-lint-rule)
+      - [Multiple Signals](#multiple-signals)
+      - [Code Actions](#code-actions)
+      - [Custom Syntax Tree Visitors](#custom-syntax-tree-visitors)
+      - [Common Logic Mistakes](#common-logic-mistakes)
+        * [Not checking if a variable is global](#not-checking-if-a-variable-is-global)
+    + [Testing the Rule](#testing-the-rule)
+      - [Quick Test](#quick-test)
+      - [Snapshot Tests](#snapshot-tests)
+        * [`.jsonc` files](#jsonc-files)
+      - [Run the Snapshot Tests](#run-the-snapshot-tests)
+    + [Documenting the Rule](#documenting-the-rule)
+      - [General Structure](#general-structure)
+      - [Associated Language(s)](#associated-languages)
+      - [Code Blocks](#code-blocks)
+      - [Using Rule Options](#using-rule-options)
+      - [Full Documentation Example](#full-documentation-example)
+    + [Code generation](#code-generation)
+    + [Committing your work](#committing-your-work)
+    + [Sidenote: Deprecating a rule](#sidenote-deprecating-a-rule)
 
 ## Creating a Rule
 
-When creating or updating a lint rule, you need to be aware that there's a lot of generated code inside our toolchain.
+When creating or updating a rule, you need to be aware that there's a lot of generated code inside our toolchain.
 Our CI ensures that this code is not out of sync and fails otherwise.
 See the [code generation section](#code-generation) for more details.
 
@@ -131,7 +144,7 @@ Here is a non-exhaustive list of common names:
 
   These rules report errors which are the result of mistyping and led to runtime errors or ignored code.
   This naming convention is used for CSS rules.
-  For example, `noUnknownUnit` reports CSS units that are not standarized.
+  For example, `noUnknownUnit` reports CSS units that are not standardized.
 
 - `noMisleading<Concept>`
 
@@ -155,8 +168,8 @@ Here is a non-exhaustive list of common names:
 
 - `useConsistent<Concept>`
 
-  These rules ensure consistency across the entire code base.
-  For example, `useConsistentArrayType` ensures that developers use either `Arra<T>` or `T[]`.
+  These rules ensure consistency across the entire codebase.
+  For example, `useConsistentArrayType` ensures that developers use either `Array<T>` or `T[]`.
 
 - `useShorthand<Concept>`
 
@@ -210,7 +223,7 @@ Let's say we want to create a new **lint** rule called `useMyRuleName`, follow t
    The script `just new-js-lintrule` script will generate a bunch of files for the _JavaScript_ language inside the `biome_js_analyze` crate.
    Among the other files, you'll find a file called `use_my_rule_name.rs` inside the `biome_js_analyze/lib/src/lint/nursery` folder. You'll implement your rule in this file.
 
-2. Let's have a look at the generated code in  `use_my_rule_name.rs`:
+2. Let's have a look at the generated code in `use_my_rule_name.rs`:
 
    ```rust
    ...
@@ -388,7 +401,7 @@ declare_lint_rule! {
 
 If a **lint** rule is inspired by an existing rule from other ecosystems (ESLint, ESLint plugins, clippy, etc.), you can add a new metadata to the macro called `source`. Its value is `&'static [RuleSource]`, which is a reference to a slice of `RuleSource` elements, each representing a different source.
 
-If you're implementing a lint rule that matches the behaviour of the ESLint rule `no-debugger`, you'll use the variant `::ESLint` and pass the name of the rule:
+If you're implementing a lint rule that matches the behavior of the ESLint rule `no-debugger`, you'll use the variant `::ESLint` and pass the name of the rule:
 
 ```rust
 use biome_analyze::{declare_lint_rule, RuleSource};
@@ -405,7 +418,7 @@ declare_lint_rule! {
 }
 ```
 
-If the rule you're implementing has a different behaviour or option, you can add the `source_kind` metadata and use the `RuleSourceKind::Inspired` type. If there are multiple sources, we assume that each source has the same `source_kind`.
+If the rule you're implementing has a different behavior or option, you can add the `source_kind` metadata and use the `RuleSourceKind::Inspired` type. If there are multiple sources, we assume that each source has the same `source_kind`.
 
 ```rust
 use biome_analyze::{declare_lint_rule, RuleSource, RuleSourceKind};
@@ -621,7 +634,7 @@ and do not need to be handled by the rule itself.
 > We instead provide a ***`serde`-inspired*** implementation in `biome_deserialize` and `biome_deserialize_macros` that [differs in some aspects](../biome_deserialize/README.md), like being fault-tolerant.
 
 The compiler should warn you that `MyRuleOptions` does not implement some required types.
-We currently require implementing _serde_'s traits `Deserialize`/`Serialize`.
+We currently require implementing _serde_'s `Deserialize`/`Serialize` traits.
 
 Also, we use other `serde` macros to adjust the JSON configuration:
 - `rename_all = "camelCase"`: it renames all fields in camel-case, so they are in line with the naming style of the `biome.json`.
@@ -708,7 +721,7 @@ The semantic model provides information about the references of a binding (decla
 
 ##### How to use the query `Semantic<>` in a lint rule
 
-We have a for loop that creates an index i, and we need to identify where this index is used inside the body of the loop
+We have a for loop that creates an index `i`, and we need to identify where this index is used inside the body of the loop
 
 ```js
 for (let i = 0; i < array.length; i++) {
@@ -951,7 +964,7 @@ There are some common mistakes that can lead to bugs or false positives in lint 
 
 ##### Not checking if a variable is global
 
-Some rules aim to ban certain functions or variables (eg. `noConsoleLog` bans `console.log`). A common mistake make this check without considering if the variable is global or not. This can lead to false positives if the variable is declared in a local scope.
+Some rules aim to ban certain functions or variables (e.g. `noConsoleLog` bans `console.log`). A common mistake make this check without considering if the variable is global or not. This can lead to false positives if the variable is declared in a local scope.
 
 ```js
 console.log(); // <-- This should be reported because `console` is a global variable
@@ -1030,7 +1043,7 @@ Run the command:
 just test-lintrule myRuleName
 ```
 
-and if you've done everything correctly, you should see some snapshots emitted with diagnostics and code actions.
+And if you've done everything correctly, you should see some snapshots emitted with diagnostics and code actions.
 
 Check our main [contribution document](https://github.com/biomejs/biome/blob/main/CONTRIBUTING.md#testing) to know how to deal with the snapshot tests.
 
@@ -1285,7 +1298,7 @@ For simplicity, use `just` to run all the commands with:
 just gen-analyzer
 ```
 
-### Commiting your work
+### Committing your work
 
 Once the rule is implemented, tested and documented, you are ready to open a pull request!
 

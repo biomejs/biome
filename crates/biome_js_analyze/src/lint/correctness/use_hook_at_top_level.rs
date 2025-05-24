@@ -1,4 +1,4 @@
-use crate::react::hooks::{is_react_component, is_react_hook, is_react_hook_call};
+use crate::react::hooks::{is_react_hook_call, is_react_hook_name};
 use crate::services::semantic::{SemanticModelBuilderVisitor, SemanticServices};
 use biome_analyze::{
     AddVisitor, FromServices, Phase, Phases, QueryMatch, Queryable, Rule, RuleDiagnostic, RuleKey,
@@ -24,6 +24,7 @@ use rustc_hash::FxHashMap;
 use serde::{Deserialize, Serialize};
 use std::ops::{Deref, DerefMut};
 
+use crate::react::components::is_react_component_name;
 use biome_diagnostics::Severity;
 #[cfg(feature = "schemars")]
 use schemars::JsonSchema;
@@ -83,7 +84,7 @@ declare_node_union! {
 impl AnyJsFunctionOrMethod {
     fn is_react_component_or_hook(&self) -> bool {
         if let Some(name) = self.name() {
-            if is_react_component(&name) || is_react_hook(&name) {
+            if is_react_component_name(&name) || is_react_hook_name(&name) {
                 return true;
             }
         }
@@ -91,22 +92,22 @@ impl AnyJsFunctionOrMethod {
         false
     }
 
-    fn name(&self) -> Option<String> {
+    fn name(&self) -> Option<Text> {
         match self {
             Self::AnyJsFunction(function) => function
                 .binding()
                 .as_ref()
-                .map(AnyJsBinding::to_trimmed_string),
+                .map(AnyJsBinding::to_trimmed_text),
             Self::JsMethodClassMember(method) => method
                 .name()
                 .ok()
                 .as_ref()
-                .map(AnyJsClassMemberName::to_trimmed_string),
+                .map(AnyJsClassMemberName::to_trimmed_text),
             Self::JsMethodObjectMember(method) => method
                 .name()
                 .ok()
                 .as_ref()
-                .map(AnyJsObjectMemberName::to_trimmed_string),
+                .map(AnyJsObjectMemberName::to_trimmed_text),
         }
     }
 }

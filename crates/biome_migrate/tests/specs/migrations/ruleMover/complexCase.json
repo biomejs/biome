@@ -1,0 +1,35 @@
+{
+  "linter": {
+    "rules": {
+      "correctness": {
+        "noInvalidBuiltinInstantiation": "on"
+      },
+      "nursery": {
+        "noConsole": "off",
+        "noDoneCallback": "off",
+        "useImportRestrictions": "off",
+        "useTopLevelRegex": "off"
+      },
+      "style": {
+        "noVar": "off"
+      }
+    }
+  },
+  "overrides": [
+    {
+      "linter": {
+        "rules": {
+          "nursery": {
+            "noConsole": "off",
+            "noDoneCallback": "off",
+            "useImportRestrictions": "off",
+            "useTopLevelRegex": "off"
+          },
+          "style": {
+            "useForOf": "off"
+          }
+        }
+      }
+    }
+  ]
+}

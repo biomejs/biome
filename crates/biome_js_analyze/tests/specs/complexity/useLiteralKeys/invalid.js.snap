@@ -52,6 +52,9 @@ a = {
 a = {
   [`line1\nline2`]: true,
 };
+a = {
+  [0]: 0,
+};
 ```
 
 # Diagnostics
@@ -710,6 +713,7 @@ invalid.js:47:4 lint/complexity/useLiteralKeys  FIXABLE  ━━━━━━━�
   > 47 │   [`line1\nline2`]: true,
        │    ^^^^^^^^^^^^^^
     48 │ };
+    49 │ a = {
   
   i Unsafe fix: Use a literal key instead.
   
@@ -718,6 +722,25 @@ invalid.js:47:4 lint/complexity/useLiteralKeys  FIXABLE  ━━━━━━━�
     47    │ - ··[`line1\nline2`]:·true,
        47 │ + ··"line1\nline2":·true,
     48 48 │   };
+    49 49 │   a = {
   
+
+```
+
+```
+invalid.js:50:4 lint/complexity/useLiteralKeys  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The computed expression can be simplified to a string literal.
+  
+    48 │ };
+    49 │ a = {
+  > 50 │   [0]: 0,
+       │    ^
+    51 │ };
+  
+  i Unsafe fix: Use a literal key instead.
+  
+    50 │ ··[0]:·0,
+       │   - -    
 
 ```

@@ -1,7 +1,6 @@
 ---
 source: crates/biome_cli/tests/snap_test.rs
 expression: redactor(content)
-snapshot_kind: text
 ---
 ## `biome.json`
 
@@ -52,4 +51,8 @@ snapshot_kind: text
 
 ```block
 package.json has been successfully migrated.
+```
+
+```block
+Your configuration file(s) have been successfully migrated.
 ```

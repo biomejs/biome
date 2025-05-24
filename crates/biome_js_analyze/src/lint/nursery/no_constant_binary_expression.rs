@@ -90,7 +90,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoConstantBinaryExpression {
-        version: "next",
+        version: "2.0.0",
         name: "noConstantBinaryExpression",
         language: "js",
         recommended: false,

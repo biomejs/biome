@@ -1,3 +1,4 @@
+/* should not generate diagnostics */
 a:hover { }
 a:Hover { }
 a:hOvEr { }

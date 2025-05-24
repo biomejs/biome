@@ -58,7 +58,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoShadow {
-        version: "next",
+        version: "2.0.0",
         name: "noShadow",
         language: "js",
         recommended: false,

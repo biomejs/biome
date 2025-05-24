@@ -16,8 +16,8 @@ use std::fmt::Debug;
 use std::{ops::Deref, str::FromStr, sync::Arc};
 
 use biome_js_type_info_macros::Resolvable;
+use biome_resolver::ResolvedPath;
 use biome_rowan::Text;
-use camino::{Utf8Path, Utf8PathBuf};
 
 use crate::globals::{GLOBAL_PROMISE_ID, GLOBAL_UNKNOWN_ID, PROMISE_ID};
 use crate::type_info::literal::{BooleanLiteral, NumberLiteral, StringLiteral};
@@ -95,6 +95,21 @@ impl Type {
         self.id.id()
     }
 
+    /// Returns `true` if this type represents a **union type** that has a
+    /// variant for which the given `predicate` returns `true`.
+    ///
+    /// Returns `false` otherwise.
+    pub fn has_variant(&self, predicate: impl Fn(Self) -> bool) -> bool {
+        match self.deref() {
+            TypeData::Union(union) => union
+                .types()
+                .iter()
+                .filter_map(|ty| self.resolve(ty))
+                .any(predicate),
+            _ => false,
+        }
+    }
+
     /// Returns whether this type is the `Promise` class.
     pub fn is_promise(&self) -> bool {
         self.id.is_global() && self.id() == PROMISE_ID
@@ -164,6 +179,7 @@ pub enum TypeData {
     Class(Box<Class>),
     Constructor(Box<Constructor>),
     Function(Box<Function>),
+    Module(Box<Module>),
     Namespace(Box<Namespace>),
     Object(Box<Object>),
     Tuple(Box<Tuple>),
@@ -226,7 +242,51 @@ pub enum TypeData {
     VoidKeyword,
 }
 
+impl From<Constructor> for TypeData {
+    fn from(value: Constructor) -> Self {
+        Self::Constructor(Box::new(value))
+    }
+}
+
+impl From<Function> for TypeData {
+    fn from(value: Function) -> Self {
+        Self::Function(Box::new(value))
+    }
+}
+
+impl From<Literal> for TypeData {
+    fn from(value: Literal) -> Self {
+        Self::Literal(Box::new(value))
+    }
+}
+
+impl From<Module> for TypeData {
+    fn from(value: Module) -> Self {
+        Self::Module(Box::new(value))
+    }
+}
+
+impl From<Namespace> for TypeData {
+    fn from(value: Namespace) -> Self {
+        Self::Namespace(Box::new(value))
+    }
+}
+
+impl From<TypeofValue> for TypeData {
+    fn from(value: TypeofValue) -> Self {
+        Self::TypeofValue(Box::new(value))
+    }
+}
+
 impl TypeData {
+    pub fn array_of(ty: TypeReference) -> Self {
+        Self::instance_of(TypeReference::Qualifier(TypeReferenceQualifier {
+            path: [Text::Static("Array")].into(),
+            type_parameters: [ty].into(),
+            scope_id: None,
+        }))
+    }
+
     pub fn as_class(&self) -> Option<&Class> {
         match self {
             Self::Class(class) => Some(class.as_ref()),
@@ -461,20 +521,18 @@ pub enum Literal {
     Template(Text), // TODO: Custom impl of PartialEq for template literals
 }
 
-impl From<Literal> for TypeData {
-    fn from(value: Literal) -> Self {
-        Self::Literal(Box::new(value))
-    }
+/// A module definition.
+#[derive(Clone, Debug, PartialEq, Resolvable)]
+pub struct Module {
+    pub name: Text,
+    pub members: Box<[TypeMember]>,
 }
 
 /// A namespace definition.
 #[derive(Clone, Debug, PartialEq, Resolvable)]
-pub struct Namespace(pub(super) Box<[TypeMember]>);
-
-impl Namespace {
-    pub fn from_type_members(members: Box<[TypeMember]>) -> Self {
-        Self(members)
-    }
+pub struct Namespace {
+    pub path: Box<[Text]>,
+    pub members: Box<[TypeMember]>,
 }
 
 /// An object definition.
@@ -498,6 +556,48 @@ impl ObjectLiteral {
     pub fn members(&self) -> &[TypeMember] {
         &self.0
     }
+}
+
+#[derive(Clone, Debug, PartialEq, Resolvable)]
+pub enum ReturnType {
+    Type(TypeReference),
+    Predicate(PredicateReturnType),
+    Asserts(AssertsReturnType),
+}
+
+impl Default for ReturnType {
+    fn default() -> Self {
+        Self::Type(TypeReference::Unknown)
+    }
+}
+
+impl ReturnType {
+    pub fn as_type(&self) -> Option<&TypeReference> {
+        match self {
+            Self::Type(ty) => Some(ty),
+            _ => None,
+        }
+    }
+}
+
+/// Defines the function to which it applies to be a predicate that tests
+/// whether one of its arguments is of a given type.
+///
+/// Predicate functions return `boolean` at runtime.
+#[derive(Clone, Debug, PartialEq, Resolvable)]
+pub struct PredicateReturnType {
+    pub parameter_name: Text,
+    pub ty: TypeReference,
+}
+
+/// Defines the function to which it applies to be an assertion that asserts
+/// one of its arguments to be of a given type.
+///
+/// Assertion functions throw at runtime if the type assertion fails.
+#[derive(Clone, Debug, PartialEq, Resolvable)]
+pub struct AssertsReturnType {
+    pub parameter_name: Text,
+    pub ty: TypeReference,
 }
 
 /// Tuple type.
@@ -562,180 +662,53 @@ pub struct TupleElementType {
     pub is_rest: bool,
 }
 
-/// Members of an object definition.
-// TODO: Include getters, setters and index signatures.
+/// Members of a definition, such as an object, namespace or module.
 #[derive(Clone, Debug, PartialEq, Resolvable)]
-pub enum TypeMember {
-    CallSignature(CallSignatureTypeMember),
-    Constructor(ConstructorTypeMember),
-    Method(MethodTypeMember),
-    Property(PropertyTypeMember),
+pub struct TypeMember {
+    pub kind: TypeMemberKind,
+    pub is_static: bool,
+    pub ty: TypeReference,
 }
 
 impl TypeMember {
     pub fn has_name(&self, name: &str) -> bool {
-        match self {
-            Self::CallSignature(_) => false,
-            Self::Constructor(_) => name == "constructor",
-            Self::Method(member) => member.name == name,
-            Self::Property(member) => member.name == name,
-        }
+        self.kind.has_name(name)
     }
 
     pub fn is_static(&self) -> bool {
+        self.is_static
+    }
+
+    pub fn name(&self) -> Option<Text> {
+        self.kind.name()
+    }
+}
+
+/// Kind of a [`TypeMember`], with an optional name.
+// TODO: Include getters, setters and index signatures.
+#[derive(Clone, Debug, PartialEq, Resolvable)]
+pub enum TypeMemberKind {
+    CallSignature,
+    Constructor,
+    Named(Text),
+}
+
+impl TypeMemberKind {
+    pub fn has_name(&self, name: &str) -> bool {
         match self {
-            Self::CallSignature(_) | Self::Constructor(_) => false,
-            Self::Method(member) => member.is_static,
-            Self::Property(member) => member.is_static,
+            Self::CallSignature => false,
+            Self::Constructor => name == "constructor",
+            Self::Named(own_name) => *own_name == name,
         }
     }
 
     pub fn name(&self) -> Option<Text> {
         match self {
-            Self::CallSignature(_) => None,
-            Self::Constructor(_) => Some(Text::Static("constructor")),
-            Self::Method(member) => Some(member.name.clone()),
-            Self::Property(member) => Some(member.name.clone()),
+            Self::CallSignature => None,
+            Self::Constructor => Some(Text::Static("constructor")),
+            Self::Named(name) => Some(name.clone()),
         }
     }
-}
-
-/// Defines a call signature on an object definition.
-#[derive(Clone, Debug, PartialEq, Resolvable)]
-pub struct CallSignatureTypeMember {
-    /// Generic type parameters defined in the call signature.
-    pub type_parameters: Box<[GenericTypeParameter]>,
-
-    /// Call parameters of the signature.
-    pub parameters: Box<[FunctionParameter]>,
-
-    /// Return type when the object is called.
-    pub return_type: ReturnType,
-}
-
-/// Defines a call signature for an object's constructor.
-#[derive(Clone, Debug, PartialEq, Resolvable)]
-pub struct ConstructorTypeMember {
-    /// Generic type parameters defined in the constructor.
-    pub type_parameters: Box<[GenericTypeParameter]>,
-
-    /// Call parameters of the constructor.
-    pub parameters: Box<[FunctionParameter]>,
-
-    /// Return type when the constructor is called.
-    pub return_type: Option<TypeReference>,
-}
-
-/// Defines a method on an object.
-#[derive(Clone, Debug, Default, PartialEq, Resolvable)]
-pub struct MethodTypeMember {
-    /// Whether the function has an `async` specifier or not.
-    pub is_async: bool,
-
-    /// Generic type parameters defined in the method.
-    pub type_parameters: Box<[GenericTypeParameter]>,
-
-    /// Name of the method.
-    pub name: Text,
-
-    /// Call parameters of the method.
-    pub parameters: Box<[FunctionParameter]>,
-
-    /// Return type of the method.
-    pub return_type: ReturnType,
-
-    /// Whether the method is optional.
-    pub is_optional: bool,
-
-    /// Whether the method is static.
-    pub is_static: bool,
-}
-
-impl MethodTypeMember {
-    pub fn with_name(mut self, name: Text) -> Self {
-        self.name = name;
-        self
-    }
-
-    pub fn with_return_type(mut self, ty: TypeReference) -> Self {
-        self.return_type = ReturnType::Type(ty);
-        self
-    }
-
-    pub fn with_static(mut self) -> Self {
-        self.is_static = true;
-        self
-    }
-}
-
-/// Defines an object property and its type.
-#[derive(Clone, Debug, Default, PartialEq, Resolvable)]
-pub struct PropertyTypeMember {
-    /// Name of the property.
-    pub name: Text,
-
-    /// Type of the property.
-    pub ty: TypeReference,
-
-    /// Whether the property is optional.
-    pub is_optional: bool,
-
-    /// Whether the property is static.
-    pub is_static: bool,
-}
-
-impl PropertyTypeMember {
-    pub fn with_name(mut self, name: Text) -> Self {
-        self.name = name;
-        self
-    }
-
-    pub fn with_type(mut self, ty: TypeReference) -> Self {
-        self.ty = ty;
-        self
-    }
-}
-
-#[derive(Clone, Debug, PartialEq, Resolvable)]
-pub enum ReturnType {
-    Type(TypeReference),
-    Predicate(PredicateReturnType),
-    Asserts(AssertsReturnType),
-}
-
-impl Default for ReturnType {
-    fn default() -> Self {
-        Self::Type(TypeReference::Unknown)
-    }
-}
-
-impl ReturnType {
-    pub fn as_type(&self) -> Option<&TypeReference> {
-        match self {
-            Self::Type(ty) => Some(ty),
-            _ => None,
-        }
-    }
-}
-
-/// Defines the function to which it applies to be a predicate that tests
-/// whether one of its arguments is of a given type.
-///
-/// Predicate functions return `boolean` at runtime.
-#[derive(Clone, Debug, PartialEq, Resolvable)]
-pub struct PredicateReturnType {
-    pub parameter_name: Text,
-    pub ty: TypeReference,
-}
-
-/// Defines the function to which it applies to be an assertion that asserts
-/// one of its arguments to be of a given type.
-///
-/// Assertion functions throw at runtime if the type assertion fails.
-#[derive(Clone, Debug, PartialEq, Resolvable)]
-pub struct AssertsReturnType {
-    pub parameter_name: Text,
-    pub ty: TypeReference,
 }
 
 /// Instance of another type.
@@ -913,6 +886,7 @@ impl From<TypeImportQualifier> for TypeReference {
 }
 
 impl TypeReference {
+    #[inline]
     pub fn is_known(&self) -> bool {
         *self != Self::Unknown
     }
@@ -937,33 +911,6 @@ pub struct TypeImportQualifier {
 
     /// Resolved path of the module to import the type from.
     pub resolved_path: ResolvedPath,
-}
-
-/// Reference-counted resolved path wrapped in a [Result] that contains a string
-/// message if resolution failed.
-#[derive(Clone, Debug, Eq, Ord, PartialEq, PartialOrd)]
-pub struct ResolvedPath(Arc<Result<Utf8PathBuf, String>>);
-
-impl Deref for ResolvedPath {
-    type Target = Result<Utf8PathBuf, String>;
-
-    fn deref(&self) -> &Self::Target {
-        self.0.as_ref()
-    }
-}
-
-impl ResolvedPath {
-    pub fn new(resolved_path: Result<Utf8PathBuf, String>) -> Self {
-        Self(Arc::new(resolved_path))
-    }
-
-    pub fn as_path(&self) -> Option<&Utf8Path> {
-        self.as_deref().ok()
-    }
-
-    pub fn from_path(path: impl Into<Utf8PathBuf>) -> Self {
-        Self::new(Ok(path.into()))
-    }
 }
 
 #[derive(Clone, Debug, PartialEq)]

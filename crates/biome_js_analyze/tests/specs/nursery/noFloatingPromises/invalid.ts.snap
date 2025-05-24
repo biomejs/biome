@@ -342,6 +342,16 @@ import("some-module").then(() => {});
 
 returnPromiseResult();
 
+function returnMaybePromise(): Promise<void> | undefined {
+	if (!false) {
+		return;
+	}
+
+	return Promise.resolve();
+}
+
+returnMaybePromise();
+
 ```
 
 # Diagnostics
@@ -1604,6 +1614,23 @@ invalid.ts:337:1 lint/nursery/noFloatingPromises ━━━━━━━━━━�
   > 337 │ returnPromiseResult();
         │ ^^^^^^^^^^^^^^^^^^^^^^
     338 │ 
+    339 │ function returnMaybePromise(): Promise<void> | undefined {
+  
+  i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
+  
+
+```
+
+```
+invalid.ts:347:1 lint/nursery/noFloatingPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i A "floating" Promise was found, meaning it is not properly handled and could lead to ignored errors or unexpected behavior.
+  
+    345 │ }
+    346 │ 
+  > 347 │ returnMaybePromise();
+        │ ^^^^^^^^^^^^^^^^^^^^^
+    348 │ 
   
   i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
   

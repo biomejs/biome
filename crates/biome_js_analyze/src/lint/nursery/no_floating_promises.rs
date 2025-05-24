@@ -157,7 +157,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoFloatingPromises {
-        version: "next",
+        version: "2.0.0",
         name: "noFloatingPromises",
         language: "ts",
         recommended: true,
@@ -180,7 +180,9 @@ impl Rule for NoFloatingPromises {
 
         // Uncomment the following line for debugging convenience:
         //let printed = format!("type of {expression:?} = {ty:?}");
-        if !ty.is_promise_instance() {
+        let is_maybe_promise =
+            ty.is_promise_instance() || ty.has_variant(|ty| ty.is_promise_instance());
+        if !is_maybe_promise {
             return None;
         }
 
