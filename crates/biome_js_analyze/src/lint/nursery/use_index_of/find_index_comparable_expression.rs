@@ -15,9 +15,9 @@ fn extract_simple_compare_match(
 
     let (left, right) = (expression.left().unwrap(), expression.right().ok()?);
 
-    let matching_side = if left.to_trimmed_string() == *parameter_name {
+    let matching_side = if left.syntax().to_string() == *parameter_name {
         right
-    } else if right.to_trimmed_string() == *parameter_name {
+    } else if right.syntax().to_string() == *parameter_name {
         left
     } else {
         return None;
