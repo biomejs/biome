@@ -15,7 +15,8 @@ use biome_analyze::{
 use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_syntax::{
-    AnyJsMemberExpression, JsArrowFunctionExpression, JsCallExpression, JsFunctionExpression,
+    AnyJsCallArgument, AnyJsExpression, AnyJsMemberExpression,
+    JsCallExpression,
 };
 use biome_rowan::{AstNode, AstSeparatedList, BatchMutationExt, SyntaxToken};
 
@@ -167,11 +168,11 @@ impl Rule for UseIndexOf {
         let callback_function = call.arguments().ok()?.args().first()?.ok()?;
         match callback_function {
             AnyJsCallArgument::AnyJsExpression(AnyJsExpression::JsFunctionExpression(function)) => {
-                callback_function_match(function, member_name_token)
+                callback_function_match(&function, member_name_token)
             }
-            AnyJsCallArgument::AnyJsExpression(AnyJsExpression::JsArrowFunctionExpression(function)) => {
-                callback_arrow_function_match(function, member_name_token)
-            }
+            AnyJsCallArgument::AnyJsExpression(AnyJsExpression::JsArrowFunctionExpression(
+                function,
+            )) => callback_arrow_function_match(&function, member_name_token),
             _ => None,
         }
     }

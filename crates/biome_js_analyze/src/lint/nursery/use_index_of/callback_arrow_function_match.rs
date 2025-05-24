@@ -5,7 +5,7 @@ use crate::lint::nursery::use_index_of::{
 use biome_js_syntax::{JsArrowFunctionExpression, JsSyntaxToken};
 
 pub fn callback_arrow_function_match(
-    function: JsArrowFunctionExpression,
+    function: &JsArrowFunctionExpression,
     member_name_token: JsSyntaxToken,
 ) -> Option<JsSyntaxMatchPair> {
     if function.async_token().is_some() {
@@ -19,7 +19,7 @@ pub fn callback_arrow_function_match(
     let matched = find_index_comparable_expression(&body, &parameter_name, false);
 
     matched.as_ref().map(|token_match| JsSyntaxMatchPair {
-        matching_array_element: token_match,
+        matching_array_element: token_match.clone(),
         member_name: member_name_token,
     })
 }
