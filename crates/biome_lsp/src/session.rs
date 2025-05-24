@@ -541,7 +541,7 @@ impl Session {
             self.set_configuration_status(ConfigurationStatus::Loading);
 
             let status = self
-                .load_biome_configuration_file(ConfigurationPathHint::FromWorkspace(config_path))
+                .load_biome_configuration_file(ConfigurationPathHint::FromUser(config_path))
                 .await;
 
             self.set_configuration_status(status);
@@ -686,16 +686,20 @@ impl Session {
 
         configuration.merge_with(fs_configuration);
 
-        let path = match (&configuration_path, &base_path) {
-            (Some(configuration_path), _) => configuration_path.as_path(),
-            (
-                None,
-                ConfigurationPathHint::FromLsp(path) | ConfigurationPathHint::FromWorkspace(path),
-            ) => path,
-            (None, _) => &fs.working_directory().unwrap_or_default(),
+        // If the configuration from the LSP or the workspace, the directory path is used as
+        // the working directory. Otherwise, the base path of the session is used, then the current
+        // working directory is used as the last resort.
+        let path = match &base_path {
+            ConfigurationPathHint::FromLsp(path) | ConfigurationPathHint::FromWorkspace(path) => {
+                path.to_path_buf()
+            }
+            _ => self
+                .base_path()
+                .or_else(|| fs.working_directory())
+                .unwrap_or_default(),
         };
         let register_result = self.workspace.open_project(OpenProjectParams {
-            path: path.into(),
+            path: path.as_path().into(),
             open_uninitialized: true,
             skip_rules: None,
             only_rules: None,
