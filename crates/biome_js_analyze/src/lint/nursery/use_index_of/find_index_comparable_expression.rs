@@ -16,7 +16,7 @@ fn extract_simple_compare_match(
         return None;
     }
 
-    let (left, right) = (expression.left().unwrap(), expression.right().unwrap());
+    let (left, right) = (expression.left().unwrap(), expression.right()?);
 
     let matching_side = if left.to_trimmed_string() == *parameter_name {
         right
