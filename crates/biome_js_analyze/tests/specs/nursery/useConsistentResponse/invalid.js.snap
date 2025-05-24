@@ -1,0 +1,308 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```js
+// Missing the `Content-Type` header in the response,
+// very often this is a mistake so we catch it anyway.
+new Response(JSON.stringify({ value: 0 }))
+
+new Response(JSON.stringify({ value: 0 }), {})
+
+new Response(JSON.stringify({ value: 0 }), {
+    headers: {}
+})
+
+new Response(JSON.stringify({ value: 0 }), {
+    headers: {
+        'Content-Type': 'application/json',
+    }
+})
+
+new Response(JSON.stringify({ value: 0 }), {
+    headers: {
+        'content-type': 'application/json',
+    }
+})
+
+new Response(null, {
+    headers: {
+        Location: 'http://example.com',
+    },
+    status: 301,
+})
+
+
+new Response(undefined, {
+    headers: {
+        location: 'https://example.com',
+    },
+    status: 302,
+})
+
+new Response('', {
+    headers: {
+        location: 'https://example.com',
+    },
+    status: 303,
+})
+```
+
+# Diagnostics
+```
+invalid.js:3:1 lint/nursery/useConsistentResponse  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use Response.json() instead of new Response(JSON.stringify()).
+  
+    1 │ // Missing the `Content-Type` header in the response,
+    2 │ // very often this is a mistake so we catch it anyway.
+  > 3 │ new Response(JSON.stringify({ value: 0 }))
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    4 │ 
+    5 │ new Response(JSON.stringify({ value: 0 }), {})
+  
+  i Response.json() is more concise and emphasizes the intent of the code better.
+  
+  i Unsafe fix: Replace with Response.json().
+  
+     1  1 │   // Missing the `Content-Type` header in the response,
+     2  2 │   // very often this is a mistake so we catch it anyway.
+     3    │ - new·Response(JSON.stringify({·value:·0·}))
+        3 │ + Response.json({·value:·0·})
+     4  4 │   
+     5  5 │   new Response(JSON.stringify({ value: 0 }), {})
+  
+
+```
+
+```
+invalid.js:5:1 lint/nursery/useConsistentResponse  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use Response.json() instead of new Response(JSON.stringify()).
+  
+    3 │ new Response(JSON.stringify({ value: 0 }))
+    4 │ 
+  > 5 │ new Response(JSON.stringify({ value: 0 }), {})
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    6 │ 
+    7 │ new Response(JSON.stringify({ value: 0 }), {
+  
+  i Response.json() is more concise and emphasizes the intent of the code better.
+  
+  i Unsafe fix: Replace with Response.json().
+  
+     3  3 │   new Response(JSON.stringify({ value: 0 }))
+     4  4 │   
+     5    │ - new·Response(JSON.stringify({·value:·0·}),·{})
+        5 │ + Response.json({·value:·0·})
+     6  6 │   
+     7  7 │   new Response(JSON.stringify({ value: 0 }), {
+  
+
+```
+
+```
+invalid.js:7:1 lint/nursery/useConsistentResponse  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use Response.json() instead of new Response(JSON.stringify()).
+  
+     5 │ new Response(JSON.stringify({ value: 0 }), {})
+     6 │ 
+   > 7 │ new Response(JSON.stringify({ value: 0 }), {
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   > 8 │     headers: {}
+   > 9 │ })
+       │ ^^
+    10 │ 
+    11 │ new Response(JSON.stringify({ value: 0 }), {
+  
+  i Response.json() is more concise and emphasizes the intent of the code better.
+  
+  i Unsafe fix: Replace with Response.json().
+  
+     5  5 │   new Response(JSON.stringify({ value: 0 }), {})
+     6  6 │   
+     7    │ - new·Response(JSON.stringify({·value:·0·}),·{
+     8    │ - ····headers:·{}
+     9    │ - })
+        7 │ + Response.json({·value:·0·})
+    10  8 │   
+    11  9 │   new Response(JSON.stringify({ value: 0 }), {
+  
+
+```
+
+```
+invalid.js:11:1 lint/nursery/useConsistentResponse  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use Response.json() instead of new Response(JSON.stringify()).
+  
+     9 │ })
+    10 │ 
+  > 11 │ new Response(JSON.stringify({ value: 0 }), {
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 12 │     headers: {
+  > 13 │         'Content-Type': 'application/json',
+  > 14 │     }
+  > 15 │ })
+       │ ^^
+    16 │ 
+    17 │ new Response(JSON.stringify({ value: 0 }), {
+  
+  i Response.json() is more concise and emphasizes the intent of the code better.
+  
+  i Unsafe fix: Replace with Response.json().
+  
+     9  9 │   })
+    10 10 │   
+    11    │ - new·Response(JSON.stringify({·value:·0·}),·{
+    12    │ - ····headers:·{
+    13    │ - ········'Content-Type':·'application/json',
+    14    │ - ····}
+    15    │ - })
+       11 │ + Response.json({·value:·0·})
+    16 12 │   
+    17 13 │   new Response(JSON.stringify({ value: 0 }), {
+  
+
+```
+
+```
+invalid.js:17:1 lint/nursery/useConsistentResponse  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use Response.json() instead of new Response(JSON.stringify()).
+  
+    15 │ })
+    16 │ 
+  > 17 │ new Response(JSON.stringify({ value: 0 }), {
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 18 │     headers: {
+  > 19 │         'content-type': 'application/json',
+  > 20 │     }
+  > 21 │ })
+       │ ^^
+    22 │ 
+    23 │ new Response(null, {
+  
+  i Response.json() is more concise and emphasizes the intent of the code better.
+  
+  i Unsafe fix: Replace with Response.json().
+  
+    15 15 │   })
+    16 16 │   
+    17    │ - new·Response(JSON.stringify({·value:·0·}),·{
+    18    │ - ····headers:·{
+    19    │ - ········'content-type':·'application/json',
+    20    │ - ····}
+    21    │ - })
+       17 │ + Response.json({·value:·0·})
+    22 18 │   
+    23 19 │   new Response(null, {
+  
+
+```
+
+```
+invalid.js:23:1 lint/nursery/useConsistentResponse  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use Response.redirect() instead of new Response().
+  
+    21 │ })
+    22 │ 
+  > 23 │ new Response(null, {
+       │ ^^^^^^^^^^^^^^^^^^^^
+  > 24 │     headers: {
+  > 25 │         Location: 'http://example.com',
+  > 26 │     },
+  > 27 │     status: 301,
+  > 28 │ })
+       │ ^^
+    29 │ 
+  
+  i Response.redirect() is more concise and emphasizes the intent of the code better.
+  
+  i Unsafe fix: Replace with Response.redirect().
+  
+    21 21 │   })
+    22 22 │   
+    23    │ - new·Response(null,·{
+    24    │ - ····headers:·{
+    25    │ - ········Location:·'http://example.com',
+    26    │ - ····},
+    27    │ - ····status:·301,
+    28    │ - })
+       23 │ + Response.json("http://example.com",·301)
+    29 24 │   
+    30 25 │   
+  
+
+```
+
+```
+invalid.js:31:1 lint/nursery/useConsistentResponse  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use Response.redirect() instead of new Response().
+  
+  > 31 │ new Response(undefined, {
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 32 │     headers: {
+  > 33 │         location: 'https://example.com',
+  > 34 │     },
+  > 35 │     status: 302,
+  > 36 │ })
+       │ ^^
+    37 │ 
+    38 │ new Response('', {
+  
+  i Response.redirect() is more concise and emphasizes the intent of the code better.
+  
+  i Unsafe fix: Replace with Response.redirect().
+  
+    29 29 │   
+    30 30 │   
+    31    │ - new·Response(undefined,·{
+    32    │ - ····headers:·{
+    33    │ - ········location:·'https://example.com',
+    34    │ - ····},
+    35    │ - ····status:·302,
+    36    │ - })
+       31 │ + Response.json("https://example.com",·302)
+    37 32 │   
+    38 33 │   new Response('', {
+  
+
+```
+
+```
+invalid.js:38:1 lint/nursery/useConsistentResponse  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use Response.redirect() instead of new Response().
+  
+    36 │ })
+    37 │ 
+  > 38 │ new Response('', {
+       │ ^^^^^^^^^^^^^^^^^^
+  > 39 │     headers: {
+  > 40 │         location: 'https://example.com',
+  > 41 │     },
+  > 42 │     status: 303,
+  > 43 │ })
+       │ ^^
+  
+  i Response.redirect() is more concise and emphasizes the intent of the code better.
+  
+  i Unsafe fix: Replace with Response.redirect().
+  
+    36 36 │   })
+    37 37 │   
+    38    │ - new·Response('',·{
+    39    │ - ····headers:·{
+    40    │ - ········location:·'https://example.com',
+    41    │ - ····},
+    42    │ - ····status:·303,
+    43    │ - })
+       38 │ + Response.json("https://example.com",·303)
+  
+
+```

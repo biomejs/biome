@@ -1608,6 +1608,10 @@ export interface Nursery {
 	 */
 	useConsistentObjectDefinition?: RuleFixConfiguration_for_UseConsistentObjectDefinitionOptions;
 	/**
+	 * Use static Response methods instead of new Response() constructor when possible.
+	 */
+	useConsistentResponse?: RuleFixConfiguration_for_Null;
+	/**
 	 * Require switch-case statements to be exhaustive.
 	 */
 	useExhaustiveSwitchCases?: RuleFixConfiguration_for_Null;
@@ -3499,6 +3503,7 @@ export type Category =
 	| "lint/nursery/useAdjacentGetterSetter"
 	| "lint/nursery/useBiomeSuppressionComment"
 	| "lint/nursery/useConsistentObjectDefinition"
+	| "lint/nursery/useConsistentResponse"
 	| "lint/nursery/useExhaustiveSwitchCases"
 	| "lint/nursery/useExplicitFunctionReturnType"
 	| "lint/nursery/useExplicitType"
