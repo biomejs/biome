@@ -5362,7 +5362,7 @@
 			"properties": {
 				"syntax": {
 					"description": "The preferred syntax to enforce.",
-					"default": "explicit",
+					"default": "shorthand",
 					"allOf": [{ "$ref": "#/definitions/ObjectPropertySyntax" }]
 				}
 			},
