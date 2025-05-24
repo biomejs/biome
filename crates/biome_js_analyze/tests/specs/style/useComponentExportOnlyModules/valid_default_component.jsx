@@ -1,3 +1,4 @@
 /* should not generate diagnostics */
-const Component = () => <></>
-export default Component;
+const Component1 = () => <></>
+export default Component1;
+export const Component2 = () => <></>;
