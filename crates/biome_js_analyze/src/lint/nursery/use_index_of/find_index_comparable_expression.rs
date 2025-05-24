@@ -48,13 +48,17 @@ pub fn find_index_comparable_expression(
         })
         .collect();
 
+    if !invalid_expressions.is_empty() {
+        return None;
+    }
+
     let binary_expressions: Vec<_> = body
         .syntax()
         .descendants()
         .filter_map(JsBinaryExpression::cast)
         .collect();
 
-    if binary_expressions.len() != 1 || !invalid_expressions.is_empty() {
+    if binary_expressions.len() != 1 {
         return None;
     }
 
