@@ -3,7 +3,7 @@ use biome_analyze::{
     context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
-use biome_js_syntax::{AnyJsExpression, AnyJsStatement, JsCallExpression, JsFunctionBody};
+use biome_js_syntax::{AnyJsExpression, AnyJsStatement, JsCallExpression, JsStatementList};
 use biome_rowan::{AstNode, AstNodeList};
 
 declare_lint_rule! {
@@ -41,6 +41,8 @@ declare_lint_rule! {
     }
 }
 
+const ASSERTION_FUNCTION_NAMES: [&str; 3] = ["assert", "assertEquals", "expect"];
+
 impl Rule for UseExplicitTestAssertions {
     type Query = Ast<JsCallExpression>;
     type State = ();
@@ -54,22 +56,15 @@ impl Rule for UseExplicitTestAssertions {
             return None;
         }
 
-        let [Some(second)] = node.arguments().ok()?.get_arguments_by_index([1]) else {
-            return None;
-        };
-        let second_expr = second.as_any_js_expression()?;
-        let try_function_body = match second_expr {
-            AnyJsExpression::JsArrowFunctionExpression(function) => function.body().ok(),
-            _ => None,
-        };
-        if let Some(function_body) = try_function_body {
-            if let Some(js_function_body) = function_body.as_js_function_body() {
-                if fn_body_contains_expect(js_function_body) {
-                    return None;
+        if let Ok(args) = node.arguments() {
+            if let [Some(second)] = args.get_arguments_by_index([1]) {
+                if let Some(test_body) = second.as_any_js_expression() {
+                    if expression_contains_expect(test_body) {
+                        return None;
+                    }
                 }
             }
         }
-
         Some(())
     }
 
@@ -94,29 +89,143 @@ impl Rule for UseExplicitTestAssertions {
 }
 
 /// Is this an expect() or assert() call?
-fn is_test_assertion_expression(node: &JsCallExpression) -> Option<bool> {
-    let member_name = node.callee().ok()?.get_callee_member_name()?;
-    let member_trimmed = member_name.text_trimmed();
-    match member_trimmed == "expect" || member_trimmed == "assert" {
-        true => Some(true),
-        _ => None,
-    }
-}
-
-/// Detect if a function body has a call expression in given names list
-fn fn_body_contains_expect(node: &JsFunctionBody) -> bool {
-    node.statements().iter().any(|statement| match statement {
-        AnyJsStatement::JsExpressionStatement(try_expression) => {
-            if let Ok(expression) = try_expression.expression() {
-                if let Some(call_expression) = expression.as_js_call_expression() {
-                    match is_test_assertion_expression(call_expression) {
-                        Some(true) => return true,
+fn is_test_assertion_expression(node: &JsCallExpression) -> bool {
+    if let Ok(callee) = node.callee() {
+        match callee {
+            AnyJsExpression::JsStaticMemberExpression(static_member) => {
+                if let Ok(object) = static_member.object() {
+                    match object {
+                        AnyJsExpression::JsCallExpression(call_expression) => {
+                            is_test_assertion_expression(&call_expression);
+                        }
                         _ => return false,
                     }
                 }
+                return false;
+            }
+            AnyJsExpression::JsIdentifierExpression(identifier) => {
+                if let Ok(name) = identifier.name() {
+                    if let Ok(value) = name.value_token() {
+                        return ASSERTION_FUNCTION_NAMES.contains(&value.text_trimmed());
+                    }
+                }
+                return false;
+            }
+            _ => return false,
+        }
+    }
+    false
+}
+
+/// Recursively crawl statements
+fn expression_contains_expect(node: &AnyJsExpression) -> bool {
+    match node {
+        AnyJsExpression::JsArrowFunctionExpression(arrow_function) => {
+            if let Ok(body) = arrow_function.body() {
+                // Handle immediate return, e.g. test('name', () => expect(true));
+                if let Some(body_return) = body.as_any_js_expression() {
+                    if let Some(callee) = body_return.as_js_call_expression() {
+                        return is_test_assertion_expression(callee);
+                    }
+                }
+                // Handle arrow function block, e.g. test('name', () => { … });
+                if let Some(body_block) = body.as_js_function_body() {
+                    return statements_contain_expect(&body_block.statements());
+                }
+            }
+            false
+        }
+        AnyJsExpression::JsCallExpression(call_expression) => {
+            return is_test_assertion_expression(call_expression);
+        }
+        AnyJsExpression::JsConditionalExpression(conditional_expression) => {
+            if let Ok(left) = conditional_expression.test() {
+                return expression_contains_expect(&left);
+            }
+            if let Ok(right) = conditional_expression.alternate() {
+                return expression_contains_expect(&right);
+            }
+            return false;
+        }
+        AnyJsExpression::JsFunctionExpression(function) => {
+            if let Ok(body) = function.body() {
+                return statements_contain_expect(&body.statements());
+            }
+            false
+        }
+        _ => false,
+    }
+}
+
+/// Detect if statements contain expect() or assert()
+fn statements_contain_expect(statements: &JsStatementList) -> bool {
+    statements.iter().any(|statement| match statement {
+        AnyJsStatement::JsExpressionStatement(try_expression) => {
+            if let Ok(expression) = try_expression.expression() {
+                return expression_contains_expect(&expression);
+            };
+            false
+        }
+        AnyJsStatement::JsIfStatement(if_statement) => {
+            if let Ok(body) = if_statement.consequent() {
+                if maybe_block_contains_expect(&body) {
+                    return true;
+                }
+            }
+            if let Some(else_clause) = if_statement.else_clause() {
+                if let Ok(else_alternate) = else_clause.alternate() {
+                    match else_alternate {
+                        AnyJsStatement::JsBlockStatement(else_block) => {
+                            return statements_contain_expect(&else_block.statements());
+                        }
+                        AnyJsStatement::JsIfStatement(else_if_statement) => {
+                            if let Ok(else_if_consequent) = else_if_statement.consequent() {
+                                return maybe_block_contains_expect(&else_if_consequent);
+                            }
+                            if let Some(else_final_clause) = else_if_statement.else_clause() {
+                                if let Ok(else_final_alternate) = else_final_clause.alternate() {
+                                    return maybe_block_contains_expect(&else_final_alternate);
+                                }
+                            }
+                        }
+                        _ => {}
+                    }
+                }
+            }
+            return false;
+        }
+        AnyJsStatement::JsForStatement(for_statement) => {
+            if let Ok(body) = for_statement.body() {
+                return maybe_block_contains_expect(&body);
+            }
+            false
+        }
+        AnyJsStatement::JsForOfStatement(for_of_statement) => {
+            if let Ok(body) = for_of_statement.body() {
+                return maybe_block_contains_expect(&body);
+            }
+            false
+        }
+        AnyJsStatement::JsForInStatement(for_in_statement) => {
+            if let Ok(body) = for_in_statement.body() {
+                return maybe_block_contains_expect(&body);
+            }
+            false
+        }
+        AnyJsStatement::JsWhileStatement(while_statement) => {
+            if let Ok(body) = while_statement.body() {
+                return maybe_block_contains_expect(&body);
             }
             false
         }
         _ => false,
     })
+}
+
+/// Reduce code for any curly statement
+fn maybe_block_contains_expect(node: &AnyJsStatement) -> bool {
+    if let Some(try_block_statement) = node.as_js_block_statement() {
+        return statements_contain_expect(&try_block_statement.statements());
+    }
+    false
 }

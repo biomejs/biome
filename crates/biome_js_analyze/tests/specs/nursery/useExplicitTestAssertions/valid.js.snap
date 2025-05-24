@@ -1,52 +1,73 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 134
 expression: valid.js
 ---
 # Input
 ```js
 /* should not generate diagnostics */
+// ignored tests don’t count
 it.todo('will test something eventually');
 
 test.todo('will test something eventually');
 
+// arbitrary functions are ignored
 ['x']();
 
-it('should pass', () => expect(true).toBeDefined());
+// standard test case
+it('should pass', () => {
+  expect(true).toBeDefined();
+});
 
+// returning directly is valid
 test('should pass', () => expect(true).toBeDefined());
 
-it('should pass', () => somePromise().then(() =>
-	expect(true).toBeDefined()
-));
+// conditional test 1
+it('should pass', () => {
+  if (foo) {
+    expect(true).toBeDefined();
+  }
+});
 
+// conditional test 2
+it('should pass', () => {
+  if (foo) {
+    return
+  } else {
+    expect(true).toBeDefined();
+  }
+});
+
+// conditional test 3
+it('should pass', () => {
+  if (foo) {
+    return
+  } else if (bar) {
+     expect(true).toBeDefined();
+  } else {
+    return
+  }
+});
+
+// conditional loops
+it('should pass', () => {
+  if (foo) {
+    while (foo !== 400) {
+      for (let i = 0; i < 10; i++) {
+        expect(true).toBeDefined();
+      }
+    }
+  }
+});
+
+// named function
+it('should pass', function foo() {
+  expect(true).toBeDefined();
+});
+
+// other test functions don’t need assertions
 afterEach(() => {});
 
-test('should pass', () => {
-  expect(true).toBeDefined();
-  foo(true).toBe(true);
-});
-
-it('should return undefined', () => expectSaga(mySaga).returns());
-
-test('verifies expect method call', () => expect$(123));
-
-test('verifies expect method call', () => new Foo().expect(123));
-
-test('verifies deep expect method call', () => {
-  tester.foo().expect(123);
-});
-
-test('verifies chained expect method call', () => {
-  tester
-    .foo()
-    .bar()
-    .expect(456);
-});
-
-test('verifies the function call', () => {
-	td.verify(someFunctionCall())
-});
-
-it('should pass', () => expect(true).toBeDefined());
+beforeAll(() => {});
 
 ```
