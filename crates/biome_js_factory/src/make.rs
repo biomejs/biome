@@ -1,6 +1,9 @@
 use std::fmt::Display;
 
-use biome_js_syntax::{AnyJsExpression, JsParenthesizedExpression, JsSyntaxKind, JsSyntaxToken};
+use biome_js_syntax::{
+    AnyJsExpression, AnyTsType, JsParenthesizedExpression, JsSyntaxKind, JsSyntaxToken,
+    TsParenthesizedType,
+};
 use biome_rowan::TriviaPiece;
 
 pub use crate::generated::node_factory::*;
@@ -108,6 +111,15 @@ pub fn parenthesized(expr: impl Into<AnyJsExpression>) -> JsParenthesizedExpress
     js_parenthesized_expression(
         token(JsSyntaxKind::L_PAREN),
         expr.into(),
+        token(JsSyntaxKind::R_PAREN),
+    )
+}
+
+/// Wrap `ts_type` in a new parenthesized type
+pub fn parenthesized_ts(ts_type: impl Into<AnyTsType>) -> TsParenthesizedType {
+    ts_parenthesized_type(
+        token(JsSyntaxKind::L_PAREN),
+        ts_type.into(),
         token(JsSyntaxKind::R_PAREN),
     )
 }
