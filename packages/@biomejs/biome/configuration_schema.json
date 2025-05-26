@@ -2534,6 +2534,26 @@
 			},
 			"additionalProperties": false
 		},
+		"NoExcessiveLinesPerFunctionConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{ "$ref": "#/definitions/RuleWithNoExcessiveLinesPerFunctionOptions" }
+			]
+		},
+		"NoExcessiveLinesPerFunctionOptions": {
+			"type": "object",
+			"properties": {
+				"iifes": { "default": false, "type": "boolean" },
+				"max": {
+					"default": 50,
+					"type": "integer",
+					"format": "uint8",
+					"minimum": 1.0
+				},
+				"skipBlankLines": { "default": false, "type": "boolean" }
+			},
+			"additionalProperties": false
+		},
 		"NoForEachConfiguration": {
 			"anyOf": [
 				{ "$ref": "#/definitions/RulePlainConfiguration" },
@@ -2730,6 +2750,15 @@
 					"description": "Disallow destructuring props inside JSX components in Solid projects.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noExcessiveLinesPerFunction": {
+					"description": "Restrict a maximum number of lines of code in a function.",
+					"anyOf": [
+						{
+							"$ref": "#/definitions/NoExcessiveLinesPerFunctionConfiguration"
+						},
 						{ "type": "null" }
 					]
 				},
@@ -3684,6 +3713,23 @@
 				"options": {
 					"description": "Rule's options",
 					"allOf": [{ "$ref": "#/definitions/NoDoubleEqualsOptions" }]
+				}
+			},
+			"additionalProperties": false
+		},
+		"RuleWithNoExcessiveLinesPerFunctionOptions": {
+			"type": "object",
+			"required": ["level"],
+			"properties": {
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [
+						{ "$ref": "#/definitions/NoExcessiveLinesPerFunctionOptions" }
+					]
 				}
 			},
 			"additionalProperties": false

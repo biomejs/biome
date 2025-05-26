@@ -1553,6 +1553,10 @@ export interface Nursery {
 	 */
 	noDestructuredProps?: RuleConfiguration_for_Null;
 	/**
+	 * Restrict a maximum number of lines of code in a function.
+	 */
+	noExcessiveLinesPerFunction?: RuleConfiguration_for_NoExcessiveLinesPerFunctionOptions;
+	/**
 	 * Require Promise-like statements to be handled appropriately.
 	 */
 	noFloatingPromises?: RuleFixConfiguration_for_Null;
@@ -2430,6 +2434,9 @@ export type RuleConfiguration_for_UseJsxKeyInIterableOptions =
 export type RuleConfiguration_for_NoBitwiseOperatorsOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_NoBitwiseOperatorsOptions;
+export type RuleConfiguration_for_NoExcessiveLinesPerFunctionOptions =
+	| RulePlainConfiguration
+	| RuleWithOptions_for_NoExcessiveLinesPerFunctionOptions;
 export type RuleConfiguration_for_NoRestrictedElementsOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_NoRestrictedElementsOptions;
@@ -2667,6 +2674,16 @@ export interface RuleWithOptions_for_NoBitwiseOperatorsOptions {
 	 * Rule's options
 	 */
 	options: NoBitwiseOperatorsOptions;
+}
+export interface RuleWithOptions_for_NoExcessiveLinesPerFunctionOptions {
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: NoExcessiveLinesPerFunctionOptions;
 }
 export interface RuleWithOptions_for_NoRestrictedElementsOptions {
 	/**
@@ -3013,6 +3030,11 @@ export interface NoBitwiseOperatorsOptions {
 	 * Allows a list of bitwise operators to be used as exceptions.
 	 */
 	allow: string[];
+}
+export interface NoExcessiveLinesPerFunctionOptions {
+	iifes?: boolean;
+	max?: number;
+	skipBlankLines?: boolean;
 }
 export interface NoRestrictedElementsOptions {
 	/**
@@ -3509,6 +3531,7 @@ export type Category =
 	| "lint/nursery/noDestructuredProps"
 	| "lint/nursery/noDoneCallback"
 	| "lint/nursery/noDuplicateAtImportRules"
+	| "lint/nursery/noExcessiveLinesPerFunction"
 	| "lint/nursery/noFloatingPromises"
 	| "lint/nursery/noGlobalDirnameFilename"
 	| "lint/nursery/noImportCycles"
