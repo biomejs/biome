@@ -18,7 +18,7 @@ use biome_rowan::{Text, TextRange, TokenText};
 use crate::ModuleGraph;
 
 use binding::{BindingId, JsBindingData};
-use scope::{JsScope, JsScopeData};
+use scope::{JsScope, JsScopeData, TsBindingReference};
 
 pub use scoped_resolver::ScopedResolver;
 pub(crate) use visitor::JsModuleVisitor;
@@ -193,11 +193,11 @@ impl JsModuleInfoInner {
     ///
     /// Traverses upwards in scope if the binding is not found in the given
     /// scope.
-    fn find_binding_in_scope(&self, name: &str, scope_id: ScopeId) -> Option<&JsBindingData> {
+    fn find_binding_in_scope(&self, name: &str, scope_id: ScopeId) -> Option<TsBindingReference> {
         let mut scope = &self.scopes[scope_id.index()];
         loop {
-            if let Some(binding_id) = scope.bindings_by_name.get(name) {
-                return Some(self.binding(*binding_id));
+            if let Some(binding_ref) = scope.bindings_by_name.get(name) {
+                return Some(*binding_ref);
             }
 
             match &scope.parent {
@@ -259,15 +259,16 @@ impl TypeResolver for JsModuleInfoInner {
     }
 
     fn resolve_qualifier(&self, qualifier: &TypeReferenceQualifier) -> Option<ResolvedTypeId> {
-        if qualifier.path.len() == 1 {
-            self.resolve_type_of(
-                &qualifier.path[0],
-                qualifier.scope_id.unwrap_or(ScopeId::GLOBAL),
-            )
-            .or_else(|| GLOBAL_RESOLVER.resolve_qualifier(qualifier))
+        if qualifier.path.len() != 1 {
+            return None;
+        }
+
+        if let Some(export) = self.exports.get(&qualifier.path[0]) {
+            export
+                .as_own_export()
+                .and_then(|own_export| self.resolve_reference(&own_export.ty))
         } else {
-            // TODO: Resolve nested qualifiers
-            None
+            GLOBAL_RESOLVER.resolve_qualifier(qualifier)
         }
     }
 

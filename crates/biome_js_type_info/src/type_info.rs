@@ -200,6 +200,15 @@ pub enum TypeData {
     /// Reference to another type.
     Reference(TypeReference),
 
+    /// This one is nasty: TypeScript allows types and values to exist with
+    /// the same name within the same scope. Such duality can even be tracked
+    /// across modules, because a single imported symbol can import both the
+    /// value and the type meaning associated with a single name.
+    ///
+    /// Therefore, the dual reference can track both a type as well as the type
+    /// of the value with the same name.
+    DualReference(Box<DualReference>),
+
     /// Reference to the type of a JavaScript expression.
     TypeofExpression(Box<TypeofExpression>),
 
@@ -280,11 +289,12 @@ impl From<TypeofValue> for TypeData {
 
 impl TypeData {
     pub fn array_of(ty: TypeReference) -> Self {
-        Self::instance_of(TypeReference::Qualifier(Box::new(TypeReferenceQualifier {
+        Self::instance_of(TypeReference::from(TypeReferenceQualifier {
             path: [Text::Static("Array")].into(),
             type_parameters: [ty].into(),
             scope_id: None,
-        })))
+            type_only: false,
+        }))
     }
 
     pub fn as_class(&self) -> Option<&Class> {
@@ -303,6 +313,16 @@ impl TypeData {
 
     pub fn boolean() -> Self {
         Self::Boolean
+    }
+
+    pub fn dual_reference(
+        ty: impl Into<TypeReference>,
+        value_ty: impl Into<TypeReference>,
+    ) -> Self {
+        Self::DualReference(Box::new(DualReference {
+            ty: ty.into(),
+            value_ty: value_ty.into(),
+        }))
     }
 
     /// Returns the type with inference up to the level supported by the given `resolver`.
@@ -402,6 +422,25 @@ pub struct Constructor {
 
     /// Return type when the constructor is called.
     pub return_type: Option<TypeReference>,
+}
+
+/// Tracks two types that are associated with the same name.
+///
+/// TypeScript allows types and values to exist with the same name within the
+/// same scope. Such duality can even be tracked across modules, because a
+/// single imported symbol can import both the value and the type meaning
+/// associated with a single name.
+///
+/// Ultimately, both references are _types_, since those are what's being
+/// tracked by the type system. But one is the type associated with a given
+/// name, while the other is the type of the value associated with the same
+/// name.
+///
+/// With a dual reference, which type gets used depends entirely on context.
+#[derive(Clone, Debug, PartialEq, Resolvable)]
+pub struct DualReference {
+    pub ty: TypeReference,
+    pub value_ty: TypeReference,
 }
 
 /// A function definition.
@@ -951,6 +990,9 @@ pub struct TypeReferenceQualifier {
 
     /// ID of the scope from which the qualifier is being referenced.
     pub scope_id: Option<ScopeId>,
+
+    /// If `true`, this qualifier can reference types only.
+    pub type_only: bool,
 }
 
 impl TypeReferenceQualifier {
@@ -996,6 +1038,7 @@ impl TypeReferenceQualifier {
             path: self.path.clone(),
             type_parameters: [].into(),
             scope_id: self.scope_id,
+            type_only: self.type_only,
         }
     }
 }

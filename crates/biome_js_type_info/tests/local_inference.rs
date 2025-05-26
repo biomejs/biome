@@ -1,11 +1,38 @@
 mod utils;
 
-use biome_js_type_info::GlobalsResolver;
-use biome_js_type_info::TypeData;
+use biome_js_type_info::{GlobalsResolver, TypeData};
 
-use utils::assert_typed_bindings_snapshot;
-use utils::get_variable_declaration;
-use utils::{assert_type_data_snapshot, get_function_declaration, parse_ts};
+use utils::{
+    assert_type_data_snapshot, assert_typed_bindings_snapshot, get_expression,
+    get_function_declaration, get_variable_declaration, parse_ts,
+};
+
+#[test]
+fn infer_type_of_identifier() {
+    const CODE: &str = r#"foo"#;
+
+    let root = parse_ts(CODE);
+    let expr = get_expression(&root);
+    let mut resolver = GlobalsResolver::default();
+    let ty = TypeData::from_any_js_expression(&mut resolver, &expr);
+    assert_type_data_snapshot(CODE, ty, &resolver, "infer_type_of_identifier");
+}
+
+#[test]
+fn infer_type_of_object_member_expression() {
+    const CODE: &str = r#"foo.bar"#;
+
+    let root = parse_ts(CODE);
+    let expr = get_expression(&root);
+    let mut resolver = GlobalsResolver::default();
+    let ty = TypeData::from_any_js_expression(&mut resolver, &expr);
+    assert_type_data_snapshot(
+        CODE,
+        ty,
+        &resolver,
+        "infer_type_of_object_member_expression",
+    );
+}
 
 #[test]
 fn infer_type_of_promise_returning_function() {

@@ -7,7 +7,7 @@ use rustc_hash::FxHashMap;
 
 use super::{
     JsModuleInfoInner,
-    binding::{BindingId, JsBinding},
+    binding::{BindingId, JsBinding, JsDeclarationKind},
 };
 
 #[derive(Debug)]
@@ -21,7 +21,101 @@ pub struct JsScopeData {
     // All bindings of this scope (points to SemanticModelData::bindings)
     pub bindings: Vec<BindingId>,
     // Map pointing to the [bindings] vec of each bindings by its name
-    pub bindings_by_name: FxHashMap<TokenText, BindingId>,
+    pub bindings_by_name: FxHashMap<TokenText, TsBindingReference>,
+}
+
+/// Reference to one or two bindings.
+///
+/// Tracks whether the bindings refer to a type or the type of a value.
+/// See [`biome_js_type_info::DualReference`] for why this is necessary.
+#[derive(Clone, Copy, Debug)]
+pub enum TsBindingReference {
+    Type(BindingId),
+    ValueType(BindingId),
+    Both(BindingId),
+    Dual { ty: BindingId, value_ty: BindingId },
+}
+
+impl TsBindingReference {
+    pub fn from_binding_and_declaration_kind(
+        binding_id: BindingId,
+        declaration_id: JsDeclarationKind,
+    ) -> Self {
+        match (
+            declaration_id.declares_type(),
+            declaration_id.declares_value(),
+        ) {
+            (true, true) => Self::Both(binding_id),
+            (true, false) => Self::Type(binding_id),
+            (false, _) => Self::ValueType(binding_id),
+        }
+    }
+
+    /// Returns the type binding, if specified.
+    pub fn ty(self) -> Option<BindingId> {
+        match self {
+            Self::Type(binding_id) | Self::Both(binding_id) | Self::Dual { ty: binding_id, .. } => {
+                Some(binding_id)
+            }
+            _ => None,
+        }
+    }
+
+    /// Creates a union from this binding reference with another.
+    ///
+    /// If both bindings refer to the same kind of type, the binding ID(s) from
+    /// `other` takes precedence.
+    pub fn union_with(self, other: Self) -> Self {
+        match (self, other) {
+            (Self::Type(own_binding_id), Self::ValueType(other_binding_id))
+                if own_binding_id != other_binding_id =>
+            {
+                Self::Dual {
+                    ty: own_binding_id,
+                    value_ty: other_binding_id,
+                }
+            }
+            (Self::ValueType(own_binding_id), Self::Type(other_binding_id))
+                if own_binding_id != other_binding_id =>
+            {
+                Self::Dual {
+                    ty: other_binding_id,
+                    value_ty: own_binding_id,
+                }
+            }
+            (Self::Both(own_binding_id), Self::Type(other_binding_id))
+                if own_binding_id != other_binding_id =>
+            {
+                Self::Dual {
+                    ty: other_binding_id,
+                    value_ty: own_binding_id,
+                }
+            }
+            (Self::Both(own_binding_id), Self::ValueType(other_binding_id))
+                if own_binding_id != other_binding_id =>
+            {
+                Self::Dual {
+                    ty: own_binding_id,
+                    value_ty: other_binding_id,
+                }
+            }
+            (_, other) => other,
+        }
+    }
+
+    /// Returns the value type binding, or the type binding if the value type
+    /// binding is unknown.
+    pub fn value_ty_or_ty(self) -> BindingId {
+        match self {
+            Self::ValueType(binding_id)
+            | Self::Both(binding_id)
+            | Self::Dual {
+                value_ty: binding_id,
+                ..
+            } => binding_id,
+            Self::Type(binding_id) => binding_id,
+        }
+    }
 }
 
 /// Provides all information regarding a specific scope.
@@ -83,21 +177,6 @@ impl JsScope {
             scope_id: self.id,
             binding_index: 0,
         }
-    }
-
-    /// Returns a binding by its name, like it appears on code.
-    ///
-    /// It **does not** return bindings of parent scopes.
-    pub fn get_binding(&self, name: impl AsRef<str>) -> Option<JsBinding> {
-        let data = &self.info.scopes[self.id.index()];
-
-        let name = name.as_ref();
-        let id = *data.bindings_by_name.get(name)?;
-
-        Some(JsBinding {
-            data: self.info.clone(),
-            id,
-        })
     }
 
     /// Checks if the current scope is an ancestor of `other`.

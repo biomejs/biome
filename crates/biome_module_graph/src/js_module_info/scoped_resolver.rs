@@ -357,10 +357,17 @@ impl TypeResolver for ScopedResolver {
         let scope_id = qualifier.scope_id.unwrap_or(ScopeId::GLOBAL);
 
         let identifier = qualifier.path.first()?;
-        let Some(binding) = module.find_binding_in_scope(identifier, scope_id) else {
+        let Some(binding_ref) = module.find_binding_in_scope(identifier, scope_id) else {
             return GLOBAL_RESOLVER.resolve_qualifier(qualifier);
         };
 
+        let binding_id = if qualifier.type_only {
+            binding_ref.ty()?
+        } else {
+            binding_ref.value_ty_or_ty()
+        };
+
+        let binding = module.binding(binding_id);
         let mut ty = if binding.declaration_kind.is_import_declaration() {
             let resolved_id = module
                 .static_imports
@@ -394,10 +401,11 @@ impl TypeResolver for ScopedResolver {
 
     fn resolve_type_of(&self, identifier: &Text, scope_id: ScopeId) -> Option<ResolvedTypeId> {
         let module = &self.modules[0];
-        let Some(binding) = module.find_binding_in_scope(identifier, scope_id) else {
+        let Some(binding_ref) = module.find_binding_in_scope(identifier, scope_id) else {
             return GLOBAL_RESOLVER.resolve_type_of(identifier, scope_id);
         };
 
+        let binding = module.binding(binding_ref.value_ty_or_ty());
         if binding.declaration_kind.is_import_declaration() {
             module.static_imports.get(&binding.name).and_then(|import| {
                 self.resolve_import_reference(&TypeImportQualifier {

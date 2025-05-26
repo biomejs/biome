@@ -989,6 +989,7 @@ impl TypeData {
             path: Box::new([Text::Static("Promise")]),
             type_parameters: Box::new([ty]),
             scope_id: None,
+            type_only: false,
         }))
     }
 
@@ -1670,7 +1671,8 @@ impl TypeReferenceQualifier {
     pub fn from_any_ts_name(name: &AnyTsName) -> Option<Self> {
         match name {
             AnyTsName::JsReferenceIdentifier(identifier) => {
-                text_from_token(identifier.value_token()).map(Self::from_name)
+                text_from_token(identifier.value_token())
+                    .map(|name| Self::from_name(name).with_type_only())
             }
             AnyTsName::TsQualifiedName(name) => {
                 let mut fields = name.as_fields();
@@ -1692,6 +1694,7 @@ impl TypeReferenceQualifier {
                     path: identifiers.into(),
                     type_parameters: [].into(),
                     scope_id: None,
+                    type_only: true,
                 })
             }
         }
@@ -1702,7 +1705,13 @@ impl TypeReferenceQualifier {
             path: Box::new([name]),
             type_parameters: [].into(),
             scope_id: None,
+            type_only: false,
         }
+    }
+
+    pub fn with_type_only(mut self) -> Self {
+        self.type_only = true;
+        self
     }
 
     pub fn with_type_parameters(mut self, params: Box<[TypeReference]>) -> Self {

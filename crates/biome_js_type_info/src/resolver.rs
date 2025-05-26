@@ -684,6 +684,7 @@ impl Resolvable for TypeReference {
                                     path: qualifier.path.clone(),
                                     type_parameters: self.resolved_params(resolver),
                                     scope_id: qualifier.scope_id,
+                                    type_only: qualifier.type_only,
                                 })
                             })
                     }

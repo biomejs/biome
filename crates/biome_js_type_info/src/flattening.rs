@@ -59,6 +59,13 @@ fn flattened(mut ty: TypeData, resolver: &mut dyn TypeResolver, depth: usize) ->
 
     for depth in depth + 1..=MAX_FLATTEN_DEPTH {
         match &ty {
+            TypeData::DualReference(duality) => {
+                if duality.ty == duality.value_ty {
+                    ty = TypeData::Reference(duality.ty.clone());
+                } else {
+                    return ty;
+                }
+            }
             TypeData::InstanceOf(instance_of) => match resolver.resolve_and_get(&instance_of.ty) {
                 Some(resolved) => match resolved.as_raw_data() {
                     TypeData::InstanceOf(resolved_instance) => {

@@ -12,7 +12,6 @@ declare namespace shared {
 }
 
 declare const shared: {
-	// FIXME: This return type is not properly resolved
 	foo(): shared.Result;
 };
 
@@ -66,7 +65,7 @@ Module TypeId(1) => Namespace {
 
 Module TypeId(2) => string
 
-Module TypeId(3) => instanceof unresolved reference "shared.Result"
+Module TypeId(3) => instanceof Module(0) TypeId(2)
 
 Module TypeId(4) => sync Function "foo" {
   accepts: {

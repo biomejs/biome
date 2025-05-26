@@ -341,7 +341,6 @@ fn test_export_const_type_declaration_with_namespace() {
             }
 
             declare const shared: {
-                // FIXME: This return type is not properly resolved
                 foo(): shared.Result;
             }
 

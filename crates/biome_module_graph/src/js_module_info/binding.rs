@@ -165,7 +165,6 @@ pub enum JsDeclarationKind {
 
 impl JsDeclarationKind {
     /// Returns whether this declaration declares a type.
-    #[expect(unused)] // TODO: We need to handle value/type duality better.
     pub fn declares_type(&self) -> bool {
         matches!(
             self,
@@ -181,7 +180,6 @@ impl JsDeclarationKind {
     }
 
     /// Returns whether this declaration declares a runtime value.
-    #[expect(unused)] // TODO: We need to handle value/type duality better.
     pub fn declares_value(&self) -> bool {
         matches!(
             self,

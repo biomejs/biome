@@ -1,6 +1,6 @@
 use crate::globals::global_type_name;
 use crate::{
-    CallArgumentType, Class, DestructureField, Function, FunctionParameter,
+    CallArgumentType, Class, DestructureField, DualReference, Function, FunctionParameter,
     FunctionParameterBinding, GenericTypeParameter, ImportSymbol, Literal, NUM_PREDEFINED_TYPES,
     Object, ObjectLiteral, ReturnType, Type, TypeData, TypeImportQualifier, TypeInstance,
     TypeMember, TypeMemberKind, TypeReference, TypeReferenceQualifier, TypeResolverLevel,
@@ -108,6 +108,7 @@ impl Format<FormatTypeContext> for TypeData {
                 [&format_args![text("instanceof"), space(), &ty.as_ref()]]
             ),
             Self::Reference(reference) => write!(f, [reference]),
+            Self::DualReference(reference) => write!(f, [reference.as_ref()]),
             Self::TypeofExpression(expression) => write!(f, [&expression.as_ref()]),
             Self::TypeofType(ty) => write!(f, [FmtVerbatim(&ty.as_ref())]),
             Self::TypeofValue(ty) => write!(f, [FmtVerbatim(&ty.as_ref())]),
@@ -508,6 +509,26 @@ impl Format<FormatTypeContext> for TypeImportQualifier {
                 space(),
                 self.resolved_path
             ]
+        )
+    }
+}
+
+impl Format<FormatTypeContext> for DualReference {
+    fn fmt(&self, f: &mut Formatter<FormatTypeContext>) -> FormatResult<()> {
+        write!(
+            f,
+            [&format_args![
+                text("("),
+                text("type:"),
+                space(),
+                &self.ty,
+                text(","),
+                space(),
+                text("value:"),
+                space(),
+                &self.value_ty,
+                text(")")
+            ]]
         )
     }
 }
