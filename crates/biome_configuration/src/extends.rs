@@ -12,14 +12,14 @@ use serde::{Deserialize, Serialize};
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(deny_unknown_fields, rename_all = "camelCase", untagged)]
 pub enum Extends {
-    List(Vec<Box<str>>),
+    List(Box<[Box<str>]>),
     ExtendsRoot,
 }
 
 impl Extends {
     pub fn as_list(&self) -> Option<&[Box<str>]> {
         match self {
-            Self::List(list) => Some(list.as_slice()),
+            Self::List(list) => Some(list),
             Self::ExtendsRoot => None,
         }
     }
@@ -31,7 +31,7 @@ impl Extends {
 
 impl Default for Extends {
     fn default() -> Self {
-        Self::List(vec![])
+        Self::List(Box::new([]))
     }
 }
 
@@ -46,9 +46,13 @@ impl Deserializable for Extends {
             if &deserialized_value == "//" {
                 Self::ExtendsRoot
             } else {
-                ctx.report(DeserializationDiagnostic::new(markup!{
-                    "The only value accepted for the `extends` field is `//` or an array of paths."
-                }).with_custom_severity(Severity::Error).with_range(value.range()));
+                ctx.report(
+                    DeserializationDiagnostic::new(markup! {
+                        "The `extends` field must be either `//` or an array of paths."
+                    })
+                    .with_custom_severity(Severity::Error)
+                    .with_range(value.range()),
+                );
                 return None;
             }
         } else {

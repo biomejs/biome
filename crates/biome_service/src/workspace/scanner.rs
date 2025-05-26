@@ -132,6 +132,21 @@ fn scan_folder(folder: &Utf8Path, ctx: ScanContext) -> (Duration, Vec<BiomePath>
 
     let result = ctx
         .workspace
+        .update_project_config_files(ctx.project_key, &configs);
+
+    match result {
+        Ok(diagnostics) => {
+            for diagnostic in diagnostics {
+                ctx.send_diagnostic(diagnostic)
+            }
+        }
+        Err(error) => {
+            ctx.send_diagnostic(error);
+        }
+    }
+
+    let result = ctx
+        .workspace
         .update_project_ignore_files(ctx.project_key, &ignore_paths);
 
     if let Err(error) = result {

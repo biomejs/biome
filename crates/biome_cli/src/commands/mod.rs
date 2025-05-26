@@ -16,7 +16,7 @@ use biome_configuration::html::{HtmlFormatterConfiguration, html_formatter_confi
 use biome_configuration::javascript::{JsFormatterConfiguration, JsLinterConfiguration};
 use biome_configuration::json::{JsonFormatterConfiguration, JsonLinterConfiguration};
 use biome_configuration::vcs::VcsConfiguration;
-use biome_configuration::{BiomeDiagnostic, Configuration, ConfigurationPathHint};
+use biome_configuration::{BiomeDiagnostic, Configuration};
 use biome_configuration::{
     FilesConfiguration, FormatterConfiguration, LinterConfiguration, configuration,
     css::css_formatter_configuration, css::css_linter_configuration, files_configuration,
@@ -31,9 +31,7 @@ use biome_diagnostics::{Diagnostic, PrintDiagnostic, Severity};
 use biome_fs::{BiomePath, FileSystem};
 use biome_grit_patterns::GritTargetLanguage;
 use biome_resolver::FsWithResolverProxy;
-use biome_service::configuration::{
-    LoadedConfiguration, load_configuration, load_editorconfig, read_config,
-};
+use biome_service::configuration::{LoadedConfiguration, load_configuration, load_editorconfig};
 use biome_service::documentation::Doc;
 use biome_service::projects::ProjectKey;
 use biome_service::workspace::{
@@ -865,7 +863,6 @@ pub(crate) trait CommandRunner: Sized {
             loaded_configuration.diagnostics.len(),
         );
         let configuration_dir_path = loaded_configuration.directory_path.clone();
-        let configuration_file_path = loaded_configuration.file_path.clone();
         let configuration = self.merge_configuration(loaded_configuration, fs, console)?;
         let paths = self.get_files_to_process(fs, &configuration)?;
         let project_path = fs
@@ -901,7 +898,6 @@ pub(crate) trait CommandRunner: Sized {
             }
         });
 
-        let is_root = configuration.is_root();
         let result = workspace.update_settings(UpdateSettingsParams {
             project_key: open_project_result.project_key,
             // When the user provides the path to the configuration, we can't use its directory because
@@ -914,11 +910,13 @@ pub(crate) trait CommandRunner: Sized {
             configuration,
             is_nested: false,
         })?;
-        print_diagnostics_from_workspace_result(
-            result.diagnostics.as_slice(),
-            console,
-            cli_options.verbose,
-        )?;
+        if self.should_validate_configuration_diagnostics() {
+            print_diagnostics_from_workspace_result(
+                result.diagnostics.as_slice(),
+                console,
+                cli_options.verbose,
+            )?;
+        }
 
         let result = workspace.scan_project_folder(ScanProjectFolderParams {
             project_key: open_project_result.project_key,
@@ -927,68 +925,13 @@ pub(crate) trait CommandRunner: Sized {
             force: false, // TODO: Maybe we'll want a CLI flag for this.
             scan_kind,
         })?;
-        print_diagnostics_from_workspace_result(
-            result.diagnostics.as_slice(),
-            console,
-            cli_options.verbose,
-        )?;
 
-        // we remove the configuration file that belongs to the project root
-        let filtered_paths = result
-            .configuration_files
-            .as_slice()
-            .iter()
-            .filter(|config_path| {
-                configuration_file_path
-                    .as_ref()
-                    .is_some_and(|config_file_path| config_file_path != config_path.as_path())
-            });
-
-        if is_root {
-            for config_path in filtered_paths {
-                let config = read_config(
-                    fs,
-                    ConfigurationPathHint::FromWorkspace(config_path.as_path().to_path_buf()),
-                    false,
-                )?;
-                let configuration = LoadedConfiguration::try_from_payload(config, fs)?;
-
-                if self.should_validate_configuration_diagnostics() {
-                    validate_configuration_diagnostics(
-                        &configuration,
-                        console,
-                        cli_options.verbose,
-                    )?;
-                }
-
-                let LoadedConfiguration {
-                    directory_path,
-                    configuration,
-                    ..
-                } = configuration;
-
-                if configuration.is_root() {
-                    return Err(CliDiagnostic::workspace_error(
-                        BiomeDiagnostic::root_in_root(
-                            config_path.to_string(),
-                            Some(project_path.to_string()),
-                        )
-                        .into(),
-                    ));
-                }
-
-                let result = workspace.update_settings(UpdateSettingsParams {
-                    project_key: open_project_result.project_key,
-                    workspace_directory: directory_path.map(BiomePath::from),
-                    configuration,
-                    is_nested: true,
-                })?;
-                print_diagnostics_from_workspace_result(
-                    result.diagnostics.as_slice(),
-                    console,
-                    cli_options.verbose,
-                )?;
-            }
+        if self.should_validate_configuration_diagnostics() {
+            print_diagnostics_from_workspace_result(
+                result.diagnostics.as_slice(),
+                console,
+                cli_options.verbose,
+            )?;
         }
 
         Ok(ConfiguredWorkspace {

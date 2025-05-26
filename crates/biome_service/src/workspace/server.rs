@@ -10,7 +10,7 @@ use super::{
     SearchResults, ServiceDataNotification, SupportsFeatureParams, UpdateSettingsParams,
     UpdateSettingsResult,
 };
-use crate::configuration::ProjectScanComputer;
+use crate::configuration::{LoadedConfiguration, ProjectScanComputer, read_config};
 use crate::diagnostics::FileTooLarge;
 use crate::file_handlers::{
     Capabilities, CodeActionsParams, DocumentFileSource, Features, FixAllParams, LintParams,
@@ -29,9 +29,9 @@ use append_only_vec::AppendOnlyVec;
 use biome_analyze::{AnalyzerPluginVec, RuleCategory};
 use biome_configuration::analyzer::RuleSelector;
 use biome_configuration::plugins::{PluginConfiguration, Plugins};
-use biome_configuration::{BiomeDiagnostic, Configuration};
-use biome_deserialize::Deserialized;
+use biome_configuration::{BiomeDiagnostic, Configuration, ConfigurationPathHint};
 use biome_deserialize::json::deserialize_from_json_str;
+use biome_deserialize::{Deserialized, Merge};
 use biome_diagnostics::print_diagnostic_to_string;
 use biome_diagnostics::{
     Diagnostic, DiagnosticExt, Severity, serde::Diagnostic as SerdeDiagnostic,
@@ -577,6 +577,96 @@ impl WorkspaceServer {
             .get(&project_key)
             .map(|cache| cache.get_analyzer_plugins())
             .unwrap_or_default()
+    }
+
+    /// It updates the nested settings of the project assigned to the `project_key`.
+    ///
+    /// If a configuration file contains errors, it's not processed and the project isn't updated.
+    ///
+    /// It's the responsibility of the client to process the diagnostics and handle the errors emitted by the configuration.
+    ///
+    /// ## Errors
+    ///
+    /// - A nested configuration file si a root
+    /// - Biome can't read the file
+    pub(super) fn update_project_config_files(
+        &self,
+        project_key: ProjectKey,
+        paths: &[BiomePath],
+    ) -> Result<Vec<biome_diagnostics::serde::Diagnostic>, WorkspaceError> {
+        let project_path = self
+            .projects
+            .get_project_path(project_key)
+            .ok_or_else(WorkspaceError::no_project)?;
+
+        let mut returned_diagnostics = Vec::new();
+
+        let filtered_paths = paths
+            .iter()
+            // SAFETY: the paths received are files, so it's safe to assume they have a parent folder
+            .filter(|config_path| project_path != config_path.parent().unwrap().as_std_path());
+
+        for filtered_path in filtered_paths {
+            let config = read_config(
+                self.fs(),
+                ConfigurationPathHint::FromWorkspace(filtered_path.as_path().to_path_buf()),
+                false,
+            )?;
+            let loaded_nested_configuration =
+                LoadedConfiguration::try_from_payload(config, self.fs())?;
+
+            let LoadedConfiguration {
+                directory_path: nested_directory_path,
+                configuration: nested_configuration,
+                diagnostics,
+                ..
+            } = loaded_nested_configuration;
+            let has_errors = diagnostics.iter().any(|d| d.severity() >= Severity::Error);
+            returned_diagnostics.extend(
+                diagnostics
+                    .into_iter()
+                    .map(biome_diagnostics::serde::Diagnostic::new),
+            );
+
+            if has_errors {
+                continue;
+            }
+
+            if nested_configuration.is_root() {
+                return Err(WorkspaceError::Configuration(
+                    BiomeDiagnostic::root_in_root(
+                        filtered_path.to_string(),
+                        Some(project_path.to_string()),
+                    )
+                    .into(),
+                ));
+            }
+
+            let nested_configuration = if nested_configuration.needs_to_extend_from_root() {
+                let root_settings = self
+                    .projects
+                    .get_root_settings(project_key)
+                    .ok_or_else(WorkspaceError::no_project)?;
+                let mut root_configuration = root_settings
+                    .source()
+                    .ok_or_else(WorkspaceError::no_project)?;
+
+                root_configuration.merge_with(nested_configuration);
+                root_configuration
+            } else {
+                nested_configuration
+            };
+
+            let result = self.update_settings(UpdateSettingsParams {
+                project_key,
+                workspace_directory: nested_directory_path.map(BiomePath::from),
+                configuration: nested_configuration,
+                is_nested: true,
+            })?;
+
+            returned_diagnostics.extend(result.diagnostics)
+        }
+        Ok(returned_diagnostics)
     }
 
     /// It accepts a list of ignore files. If the VCS integration is enabled, the files
