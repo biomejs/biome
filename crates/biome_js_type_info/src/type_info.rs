@@ -198,7 +198,7 @@ pub enum TypeData {
     InstanceOf(Box<TypeInstance>),
 
     /// Reference to another type.
-    Reference(Box<TypeReference>),
+    Reference(TypeReference),
 
     /// Reference to the type of a JavaScript expression.
     TypeofExpression(Box<TypeofExpression>),
@@ -280,11 +280,11 @@ impl From<TypeofValue> for TypeData {
 
 impl TypeData {
     pub fn array_of(ty: TypeReference) -> Self {
-        Self::instance_of(TypeReference::Qualifier(TypeReferenceQualifier {
+        Self::instance_of(TypeReference::Qualifier(Box::new(TypeReferenceQualifier {
             path: [Text::Static("Array")].into(),
             type_parameters: [ty].into(),
             scope_id: None,
-        }))
+        })))
     }
 
     pub fn as_class(&self) -> Option<&Class> {
@@ -334,7 +334,7 @@ impl TypeData {
     }
 
     pub fn reference(reference: impl Into<TypeReference>) -> Self {
-        Self::Reference(Box::new(reference.into()))
+        Self::Reference(reference.into())
     }
 
     pub fn type_parameters(&self) -> Option<&[GenericTypeParameter]> {
@@ -860,16 +860,16 @@ impl FromStr for TypeOperator {
 /// This definition may require importing from another module.
 #[derive(Clone, Debug, Default, PartialEq)]
 pub enum TypeReference {
-    Qualifier(TypeReferenceQualifier),
+    Qualifier(Box<TypeReferenceQualifier>),
     Resolved(ResolvedTypeId),
-    Import(TypeImportQualifier),
+    Import(Box<TypeImportQualifier>),
     #[default]
     Unknown,
 }
 
 impl From<TypeReferenceQualifier> for TypeReference {
     fn from(qualifier: TypeReferenceQualifier) -> Self {
-        Self::Qualifier(qualifier)
+        Self::Qualifier(Box::new(qualifier))
     }
 }
 
@@ -881,7 +881,7 @@ impl From<ResolvedTypeId> for TypeReference {
 
 impl From<TypeImportQualifier> for TypeReference {
     fn from(qualifier: TypeImportQualifier) -> Self {
-        Self::Import(qualifier)
+        Self::Import(Box::new(qualifier))
     }
 }
 
@@ -911,6 +911,9 @@ pub struct TypeImportQualifier {
 
     /// Resolved path of the module to import the type from.
     pub resolved_path: ResolvedPath,
+
+    /// If `true`, this qualifier imports the type only.
+    pub type_only: bool,
 }
 
 #[derive(Clone, Debug, PartialEq)]

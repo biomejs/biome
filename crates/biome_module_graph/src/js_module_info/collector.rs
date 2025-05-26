@@ -386,6 +386,7 @@ impl JsModuleInfoCollector {
                     TypeImportQualifier {
                         symbol: import.symbol.clone(),
                         resolved_path: import.resolved_path.clone(),
+                        type_only: binding.declaration_kind.is_import_type_declaration(),
                     }
                     .into()
                 })

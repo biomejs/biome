@@ -936,7 +936,7 @@ impl TypeData {
             .ok()
             .and_then(|name| TypeReferenceQualifier::from_any_ts_name(&name))
             .map(|qualifier| {
-                Self::instance_of(TypeReference::Qualifier(qualifier.with_type_parameters(
+                Self::instance_of(TypeReference::from(qualifier.with_type_parameters(
                     TypeReference::types_from_ts_type_arguments(resolver, ty.type_arguments()),
                 )))
             })
@@ -963,7 +963,7 @@ impl TypeData {
             .ok()
             .and_then(|name| TypeReferenceQualifier::from_any_ts_name(&name))
             .map(|qualifier| {
-                Self::TypeofType(Box::new(TypeReference::Qualifier(
+                Self::TypeofType(Box::new(TypeReference::from(
                     qualifier.with_type_parameters(TypeReference::types_from_ts_type_arguments(
                         resolver,
                         ty.type_arguments(),
@@ -985,7 +985,7 @@ impl TypeData {
     }
 
     pub fn promise_of(ty: TypeReference) -> Self {
-        Self::instance_of(TypeReference::Qualifier(TypeReferenceQualifier {
+        Self::instance_of(TypeReference::from(TypeReferenceQualifier {
             path: Box::new([Text::Static("Promise")]),
             type_parameters: Box::new([ty]),
             scope_id: None,
@@ -1648,7 +1648,7 @@ impl TypeReference {
     }
 
     pub fn from_name(name: TokenText) -> Self {
-        Self::Qualifier(TypeReferenceQualifier::from_name(name.into()))
+        Self::from(TypeReferenceQualifier::from_name(name.into()))
     }
 
     pub fn types_from_ts_type_arguments(

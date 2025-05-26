@@ -195,10 +195,19 @@ impl ScopedResolver {
 
             let export = match module.exports.get(name) {
                 Some(JsExport::Own(export) | JsExport::OwnType(export)) => export,
-                Some(JsExport::Reexport(reexport) | JsExport::ReexportType(reexport)) => {
+                Some(JsExport::Reexport(reexport)) => {
                     qualifier = Cow::Owned(TypeImportQualifier {
                         symbol: reexport.import.symbol.clone(),
                         resolved_path: reexport.import.resolved_path.clone(),
+                        type_only: false,
+                    });
+                    continue;
+                }
+                Some(JsExport::ReexportType(reexport)) => {
+                    qualifier = Cow::Owned(TypeImportQualifier {
+                        symbol: reexport.import.symbol.clone(),
+                        resolved_path: reexport.import.resolved_path.clone(),
+                        type_only: true,
                     });
                     continue;
                 }
@@ -303,10 +312,19 @@ impl TypeResolver for ScopedResolver {
 
             let export = match module.exports.get(name) {
                 Some(JsExport::Own(export) | JsExport::OwnType(export)) => export,
-                Some(JsExport::Reexport(reexport) | JsExport::ReexportType(reexport)) => {
+                Some(JsExport::Reexport(reexport)) => {
                     qualifier = Cow::Owned(TypeImportQualifier {
                         symbol: reexport.import.symbol.clone(),
                         resolved_path: reexport.import.resolved_path.clone(),
+                        type_only: false,
+                    });
+                    continue;
+                }
+                Some(JsExport::ReexportType(reexport)) => {
+                    qualifier = Cow::Owned(TypeImportQualifier {
+                        symbol: reexport.import.symbol.clone(),
+                        resolved_path: reexport.import.resolved_path.clone(),
+                        type_only: true,
                     });
                     continue;
                 }
@@ -324,7 +342,7 @@ impl TypeResolver for ScopedResolver {
                 }
                 TypeReference::Resolved(resolved) => Some(resolved.with_module_id(module_id)),
                 TypeReference::Import(import) => {
-                    qualifier = Cow::Owned(import.clone());
+                    qualifier = Cow::Owned(import.as_ref().clone());
                     continue;
                 }
                 TypeReference::Unknown => None,
@@ -351,6 +369,7 @@ impl TypeResolver for ScopedResolver {
                     self.resolve_import_reference(&TypeImportQualifier {
                         symbol: import.symbol.clone(),
                         resolved_path: import.resolved_path.clone(),
+                        type_only: binding.declaration_kind.is_import_type_declaration(),
                     })
                 })?;
             if qualifier.path.len() == 1 {
@@ -384,6 +403,7 @@ impl TypeResolver for ScopedResolver {
                 self.resolve_import_reference(&TypeImportQualifier {
                     symbol: import.symbol.clone(),
                     resolved_path: import.resolved_path.clone(),
+                    type_only: binding.declaration_kind.is_import_type_declaration(),
                 })
             })
         } else {

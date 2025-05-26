@@ -242,7 +242,13 @@ impl JsDeclarationKind {
         }
     }
 
+    #[inline]
     pub fn is_import_declaration(&self) -> bool {
         matches!(self, Self::Import | Self::ImportType)
+    }
+
+    #[inline]
+    pub fn is_import_type_declaration(&self) -> bool {
+        matches!(self, Self::ImportType)
     }
 }

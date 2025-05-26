@@ -447,7 +447,7 @@ pub trait TypeResolver {
     /// Returns a reference to the given type data, if possible.
     fn reference_to_data(&self, type_data: &TypeData) -> Option<TypeReference> {
         match type_data {
-            TypeData::Reference(reference) => Some(reference.as_ref().clone()),
+            TypeData::Reference(reference) => Some(reference.clone()),
             other => self.find_type(other).map(|id| self.reference_to_id(id)),
         }
     }
@@ -494,7 +494,7 @@ pub trait TypeResolver {
             Some(ResolvedTypeData {
                 data: TypeData::Reference(reference),
                 id,
-            }) if reference.as_ref() != ty => {
+            }) if reference != ty => {
                 self.resolve_and_get(&id.apply_module_id_to_reference(reference))
             }
             other => other,
@@ -680,7 +680,7 @@ impl Resolvable for TypeReference {
                                 Some(resolved_id.into())
                             })
                             .unwrap_or_else(|| {
-                                Self::Qualifier(TypeReferenceQualifier {
+                                Self::from(TypeReferenceQualifier {
                                     path: qualifier.path.clone(),
                                     type_parameters: self.resolved_params(resolver),
                                     scope_id: qualifier.scope_id,
@@ -719,7 +719,7 @@ impl Resolvable for TypeReference {
 
     fn with_scope_id(self, scope_id: ScopeId) -> Self {
         match self {
-            Self::Qualifier(qualifier) => Self::Qualifier(qualifier.with_scope_id(scope_id)),
+            Self::Qualifier(qualifier) => Self::from(qualifier.with_scope_id(scope_id)),
             other => other,
         }
     }

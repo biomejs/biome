@@ -107,7 +107,7 @@ impl Format<FormatTypeContext> for TypeData {
                 f,
                 [&format_args![text("instanceof"), space(), &ty.as_ref()]]
             ),
-            Self::Reference(reference) => write!(f, [&reference.as_ref()]),
+            Self::Reference(reference) => write!(f, [reference]),
             Self::TypeofExpression(expression) => write!(f, [&expression.as_ref()]),
             Self::TypeofType(ty) => write!(f, [FmtVerbatim(&ty.as_ref())]),
             Self::TypeofValue(ty) => write!(f, [FmtVerbatim(&ty.as_ref())]),
@@ -432,7 +432,7 @@ impl Format<FormatTypeContext> for TypeReference {
                     [&format_args![
                         text("unresolved reference"),
                         space(),
-                        qualifier
+                        qualifier.as_ref()
                     ]]
                 )
             }
@@ -462,7 +462,7 @@ impl Format<FormatTypeContext> for TypeReference {
                     )
                 }
             }
-            Self::Import(import) => write!(f, [import]),
+            Self::Import(import) => write!(f, [import.as_ref()]),
             Self::Unknown => write!(f, [text("unknown reference")]),
         }
     }
