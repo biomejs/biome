@@ -398,7 +398,7 @@ impl Diagnostic for RootInRoot {
     category = "configuration",
     severity = Error,
     message(
-        message("Biome couldn't find a root configuration to extends from. Remove the "<Emphasis>"extends"</Emphasis>" field or make sure the parent configuration has "<Emphasis>"root: true"</Emphasis>".")
+        message("Biome couldn't find a root configuration to extend from. Remove the "<Emphasis>"extends"</Emphasis>" field or make sure the parent configuration has "<Emphasis>"root: true"</Emphasis>".")
     )
 )]
 pub struct NoRootFromNestedExtend;
