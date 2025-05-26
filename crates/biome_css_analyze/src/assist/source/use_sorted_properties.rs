@@ -116,15 +116,17 @@ impl Rule for UseSortedProperties {
             .into_iter()
             .collect::<Vec<AnyCssDeclarationOrRule>>();
 
-        if contains_shorthand_after_longhand(&original_properties)
-            || contains_unknown_property(&original_properties)
-        {
+        if contains_shorthand_after_longhand(&original_properties) {
             // This would be unsafe to sort
             return Some(UseSortedPropertiesState {
                 block: node.clone(),
                 original_properties,
                 sorted_properties: None,
             });
+        }
+
+        if contains_unknown_property(&original_properties) {
+            return None;
         }
 
         let sorted_properties = Some(RecessOrderProperties::new(&original_properties));
