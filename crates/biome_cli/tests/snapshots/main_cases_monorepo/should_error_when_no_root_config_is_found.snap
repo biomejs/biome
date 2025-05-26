@@ -43,7 +43,7 @@ function f() { const lorem_and_ipsum = 'lorem ipsum'; }
 ```block
 configuration ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Biome couldn't find a root configuration to extends from. Remove the extends field or make sure the parent configuration has root: true.
+  × Biome couldn't find a root configuration to extend from. Remove the extends field or make sure the parent configuration has root: true.
   
 
 
