@@ -20,6 +20,7 @@ export type SupportKind =
 	| "fileNotSupported";
 export interface UpdateSettingsParams {
 	configuration: Configuration;
+	isNested: boolean;
 	projectKey: ProjectKey;
 	workspaceDirectory?: BiomePath;
 }
@@ -42,7 +43,7 @@ export interface Configuration {
 	/**
 	 * A list of paths to other JSON files, used to extends the current configuration.
 	 */
-	extends?: string[];
+	extends?: Extends;
 	/**
 	 * The configuration of the filesystem
 	 */
@@ -132,6 +133,10 @@ export interface CssConfiguration {
 	 */
 	parser?: CssParserConfiguration;
 }
+/**
+ * A list of paths to other JSON files, used to extends the current configuration.
+ */
+export type Extends = string[] | null;
 /**
  * The configuration of the filesystem
  */
