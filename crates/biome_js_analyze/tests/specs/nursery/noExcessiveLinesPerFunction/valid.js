@@ -1,0 +1,34 @@
+/* should not generate diagnostics */
+
+const bar = () => {
+	const x = 2 + 1;
+	return x;
+};
+
+function name() {
+	var x = 5;
+	var x = 2;
+}
+
+class foo {
+	method() {
+		let y = 10;
+		let x = 20;
+		return y + x;
+	}
+}
+
+function baz(
+	aaa = 1
+) {
+	return aaa;
+}
+
+// valid because iifes: false
+(() => {
+	let x = 0;
+	let y = 0;
+	let z = x + y;
+	let foo = {};
+	return bar;
+})();
