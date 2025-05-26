@@ -94,13 +94,10 @@ fn is_test_assertion_expression(node: &JsCallExpression) -> bool {
     if let Ok(callee) = node.callee() {
         match callee {
             AnyJsExpression::JsStaticMemberExpression(static_member) => {
-                if let Ok(object) = static_member.object() {
-                    match object {
-                        AnyJsExpression::JsCallExpression(call_expression) => {
-                            is_test_assertion_expression(&call_expression);
-                        }
-                        _ => return false,
-                    }
+                if let Ok(AnyJsExpression::JsCallExpression(call_expression)) =
+                    static_member.object()
+                {
+                    return is_test_assertion_expression(&call_expression);
                 }
                 return false;
             }
@@ -112,7 +109,7 @@ fn is_test_assertion_expression(node: &JsCallExpression) -> bool {
                 }
                 return false;
             }
-            _ => return false,
+            _ => {}
         }
     }
     false
@@ -137,7 +134,7 @@ fn expression_contains_expect(node: &AnyJsExpression) -> bool {
             false
         }
         AnyJsExpression::JsCallExpression(call_expression) => {
-            return is_test_assertion_expression(call_expression);
+            is_test_assertion_expression(call_expression)
         }
         AnyJsExpression::JsConditionalExpression(conditional_expression) => {
             if let Ok(left) = conditional_expression.test() {
@@ -146,7 +143,7 @@ fn expression_contains_expect(node: &AnyJsExpression) -> bool {
             if let Ok(right) = conditional_expression.alternate() {
                 return expression_contains_expect(&right);
             }
-            return false;
+            false
         }
         AnyJsExpression::JsFunctionExpression(function) => {
             if let Ok(body) = function.body() {
@@ -193,7 +190,7 @@ fn statements_contain_expect(statements: &JsStatementList) -> bool {
                     }
                 }
             }
-            return false;
+            false
         }
         AnyJsStatement::JsForStatement(for_statement) => {
             if let Ok(body) = for_statement.body() {
