@@ -4,3 +4,13 @@ let xs = Array<number>(500);
 let xs = new Array<number>(500);
 
 let xs = Array<number>(n);
+
+let xs = <number>[1, 2, 3];
+
+let xs: number[] = new Array(5);
+
+let xs: number[] = new Array<number>(5);
+
+let xs = <number[]>Array(5);
+
+let xs = window.Array<number>(5);

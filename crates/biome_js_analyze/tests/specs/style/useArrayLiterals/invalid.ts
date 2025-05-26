@@ -2,6 +2,7 @@ var xs = new Array<string>();
 
 var xs = new Array<number>(0, 1, 2);
 
+// comments kept after fix should be: I J A B N
 var xs
 /* A */ = /* B */
 /* C */ new /* D */
@@ -28,5 +29,11 @@ const xs = new Array<typeof xs>(1, 2, 3);
 
 void new Array<1 | 2 | 3 | 4>(1, 2, 3);
 
-// it already has a type annotation, it should still trigger a diagnostic but should not change the existing type
+// it already has a type annotation, it should still trigger a diagnostic but the fix should not change the existing type
 var xs: string[] = new Array<number>();
+
+var xs = new Array<Base>(new Concrete(), new Concrete());
+
+var xs = new Array<HTMLElement>(document.createElement("div"), document.createElement("span"));
+
+var xs, ys, zs = new Array<string>("a", "b", "c");

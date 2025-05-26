@@ -160,33 +160,43 @@ impl Rule for UseArrayLiterals {
             .pieces();
 
         if let Some(type_arg) = type_arg {
-            // type param needs to be preserved
-
-            // make the type into an array i.e. (T)[]
-            let type_arg_without_trivia = type_arg
-                .clone()
+            // type param to be preserved
+            let original_type_arg = type_arg.clone();
+            let type_arg = type_arg
                 .with_leading_trivia_pieces([])?
                 .with_trailing_trivia_pieces([])?;
-            let type_arg_with_maybe_parens: AnyTsType = if !type_arg.is_literal_type()
+
+            // make the type into an array (with parens if required) i.e. (T)[]
+            let type_arg: AnyTsType = if !type_arg.is_literal_type()
                 && !type_arg.is_primitive_type()
                 && !matches!(type_arg, AnyTsType::TsReferenceType(_))
             {
-                make::parenthesized_ts(type_arg_without_trivia).into()
+                // only wrap the type in parens if its not a literal, primative, or reference
+                make::parenthesized_ts(type_arg).into()
             } else {
-                type_arg_without_trivia
+                type_arg
             };
-            let type_arg_arr = AnyTsType::TsArrayType(make::ts_array_type(
-                type_arg_with_maybe_parens,
+            let type_arg = AnyTsType::TsArrayType(make::ts_array_type(
+                type_arg,
                 make::token(T!['[']),
                 make::token(T![']']),
             ));
 
-            let type_arg_arr = type_arg_arr
+            // copy trivia around type arg
+            let type_arg = type_arg
                 .with_leading_trivia_pieces(
-                    type_arg.syntax().first_token()?.leading_trivia().pieces(),
+                    original_type_arg
+                        .syntax()
+                        .first_token()?
+                        .leading_trivia()
+                        .pieces(),
                 )?
                 .with_trailing_trivia_pieces(
-                    type_arg.syntax().last_token()?.trailing_trivia().pieces(),
+                    original_type_arg
+                        .syntax()
+                        .last_token()?
+                        .trailing_trivia()
+                        .pieces(),
                 )?;
 
             let parent_declarator = get_untyped_parent_declarator(node);
@@ -199,7 +209,7 @@ impl Rule for UseArrayLiterals {
                     .with_variable_annotation(Some(AnyTsVariableAnnotation::TsTypeAnnotation(
                         make::ts_type_annotation(
                             make::token(T![:]).with_trailing_trivia_pieces(whitespace.clone()),
-                            type_arg_arr.append_trivia_pieces(whitespace)?,
+                            type_arg.append_trivia_pieces(whitespace)?,
                         ),
                     )))
                     .with_initializer(Some(
@@ -213,24 +223,24 @@ impl Rule for UseArrayLiterals {
             } else {
                 // the parent node is not a declarator - we need to wrap the array in an "as" type (and a "satisfies" type if the array is not empty)
                 // "satisfies" preserves the type checking behavior and "as" preserves the resulting expression type
-                let mut new_node_with_type: AnyJsExpression = new_node.clone().into();
+                let mut new_node_with_cast: AnyJsExpression = new_node.clone().into();
                 if !array_is_empty {
-                    new_node_with_type = make::ts_satisfies_expression(
-                        new_node_with_type,
+                    new_node_with_cast = make::ts_satisfies_expression(
+                        new_node_with_cast,
                         make::token_decorated_with_space(T![satisfies]),
-                        type_arg_arr.clone(),
+                        type_arg.clone(),
                     )
                     .into();
                 }
-                new_node_with_type = make::ts_as_expression(
-                    new_node_with_type,
+                new_node_with_cast = make::ts_as_expression(
+                    new_node_with_cast,
                     make::token_decorated_with_space(T![as]),
-                    type_arg_arr.clone(),
+                    type_arg.clone(),
                 )
                 .into();
 
                 // replace array with as+satisfies expression
-                mutation.replace_node::<AnyJsExpression>(node.clone().into(), new_node_with_type);
+                mutation.replace_node::<AnyJsExpression>(node.clone().into(), new_node_with_cast);
             }
         } else {
             // type param does not need to be preserved, only replace array
