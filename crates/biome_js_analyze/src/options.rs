@@ -95,6 +95,7 @@ pub type NoEnum = <lint::style::no_enum::NoEnum as biome_analyze::Rule>::Options
 pub type NoEvolvingTypes =
     <lint::suspicious::no_evolving_types::NoEvolvingTypes as biome_analyze::Rule>::Options;
 pub type NoExcessiveCognitiveComplexity = < lint :: complexity :: no_excessive_cognitive_complexity :: NoExcessiveCognitiveComplexity as biome_analyze :: Rule > :: Options ;
+pub type NoExcessiveLinesPerFunction = < lint :: nursery :: no_excessive_lines_per_function :: NoExcessiveLinesPerFunction as biome_analyze :: Rule > :: Options ;
 pub type NoExcessiveNestedTestSuites = < lint :: complexity :: no_excessive_nested_test_suites :: NoExcessiveNestedTestSuites as biome_analyze :: Rule > :: Options ;
 pub type NoExplicitAny =
     <lint::suspicious::no_explicit_any::NoExplicitAny as biome_analyze::Rule>::Options;
