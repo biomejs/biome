@@ -45,9 +45,7 @@ pub(crate) async fn did_open(
                 skip_rules: None,
                 only_rules: None,
             })?;
-            session
-                .insert_and_scan_project(result.project_key, parent_path, result.scan_kind)
-                .await;
+            session.insert_and_scan_project(result.project_key, parent_path, result.scan_kind);
             result.project_key
         }
     };

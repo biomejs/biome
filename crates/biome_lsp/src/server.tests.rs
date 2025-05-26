@@ -3750,30 +3750,8 @@ async fn pull_diagnostics_monorepo() -> Result<()> {
 
     server.initialize().await?;
     server.initialized().await?;
-    //
-    // let OpenProjectResult { project_key, .. } = server
-    //     .request(
-    //         "biome/open_project",
-    //         "open_project",
-    //         OpenProjectParams {
-    //             path: BiomePath::try_from(uri!("").to_file_path().unwrap()).unwrap(),
-    //             open_uninitialized: true,
-    //             only_rules: None,
-    //             skip_rules: None,
-    //         },
-    //     )
-    //     .await?
-    //     .expect("open_project returned an error");
 
     server.load_configuration().await?;
-    // On macOS, wait until the fsevents watcher sets up before receiving the first event.
-    // server
-    //     .open_named_document(r#"const a = 1; a = 2;"#, uri!("file.ts"), "typescript")
-    //     .await?;
-    //
-    // let notification = wait_for_notification(&mut receiver, |n| n.is_publish_diagnostics()).await;
-    //
-    // assert_no_diagnostics(&notification.unwrap());
 
     server
         .open_named_document(
@@ -3787,25 +3765,6 @@ async fn pull_diagnostics_monorepo() -> Result<()> {
     let notification = notification.unwrap();
     assert_diagnostics_count(&notification, 1);
     assert_diagnostic_code(&notification, "noConstAssign");
-    //
-    // let result: PullDiagnosticsResult = server
-    //     .request(
-    //         "biome/pull_diagnostics",
-    //         "pull_diagnostics",
-    //         PullDiagnosticsParams {
-    //             project_key,
-    //             path: fs.working_directory.join("packages/lib/file.ts").into(),
-    //             categories: RuleCategories::all(),
-    //             only: Vec::new(),
-    //             skip: Vec::new(),
-    //             enabled_rules: vec![],
-    //             pull_code_actions: false,
-    //         },
-    //     )
-    //     .await?
-    //     .expect("pull_diagnostics returned an error");
-
-    // assert!(result.diagnostics.len() > 0);
 
     server.close_document().await?;
 

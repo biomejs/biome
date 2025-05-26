@@ -176,7 +176,7 @@ impl LSPServer {
         };
 
         capabilities.add_capability(
-            "workspace/didChangeWatchedFiles",
+            "biome_did_change_watched_files",
             "workspace/didChangeWatchedFiles",
             watched_files_capability,
         );
@@ -409,13 +409,11 @@ impl LanguageServer for LSPServer {
 
                 match result {
                     Ok(result) => {
-                        self.session
-                            .insert_and_scan_project(
-                                result.project_key,
-                                project_path.clone(),
-                                result.scan_kind,
-                            )
-                            .await;
+                        self.session.insert_and_scan_project(
+                            result.project_key,
+                            project_path.clone(),
+                            result.scan_kind,
+                        );
 
                         self.session.update_all_diagnostics().await;
                     }

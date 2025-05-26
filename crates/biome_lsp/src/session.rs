@@ -12,9 +12,7 @@ use biome_fs::BiomePath;
 use biome_lsp_converters::{PositionEncoding, WideEncoding, negotiated_encoding};
 use biome_service::Workspace;
 use biome_service::WorkspaceError;
-use biome_service::configuration::{
-    LoadedConfiguration, load_configuration, load_editorconfig, read_config,
-};
+use biome_service::configuration::{LoadedConfiguration, load_configuration, load_editorconfig};
 use biome_service::file_handlers::{AstroFileHandler, SvelteFileHandler, VueFileHandler};
 use biome_service::projects::ProjectKey;
 use biome_service::workspace::ServiceDataNotification;
@@ -45,7 +43,7 @@ use tower_lsp_server::lsp_types::{ClientCapabilities, Diagnostic, Uri};
 use tower_lsp_server::lsp_types::{MessageType, Registration};
 use tower_lsp_server::lsp_types::{Unregistration, WorkspaceFolder};
 use tower_lsp_server::{Client, UriExt, lsp_types};
-use tracing::{debug, error, info, instrument, warn};
+use tracing::{error, info, instrument, warn};
 
 pub(crate) struct ClientInformation {
     /// The name of the client
@@ -309,7 +307,7 @@ impl Session {
 
     /// Registers an open project with its root path and scans the folder.
     #[tracing::instrument(level = "debug", skip(self))]
-    pub(crate) async fn insert_and_scan_project(
+    pub(crate) fn insert_and_scan_project(
         self: &Arc<Self>,
         project_key: ProjectKey,
         path: BiomePath,
@@ -736,92 +734,17 @@ impl Session {
             }
         };
 
-        self.projects.pin().insert(path.into(), project_key);
-
-        let workspace_directory = configuration_path
-            .as_ref()
-            .map(Utf8PathBuf::as_path)
-            .map(BiomePath::from);
-
         let result = self.workspace.update_settings(UpdateSettingsParams {
             project_key,
-            workspace_directory: workspace_directory.clone(),
+            workspace_directory: configuration_path
+                .as_ref()
+                .map(Utf8PathBuf::as_path)
+                .map(BiomePath::from),
             configuration,
             is_nested: false,
         });
 
-        debug!(
-            "Scanning project folder {:?} {:?}",
-            path.as_str(),
-            scan_kind
-        );
-        let project_scan_result = self.workspace.scan_project_folder(ScanProjectFolderParams {
-            project_key,
-            path: Some(path.into()),
-            watch: false,
-            force: true,
-            scan_kind: ScanKind::Project,
-        });
-
-        let project_scan_result = match project_scan_result {
-            Ok(result) => result,
-            Err(error) => {
-                error!("Failed to scan the project folder: {error}");
-                self.client.log_message(MessageType::ERROR, &error).await;
-                return ConfigurationStatus::Error;
-            }
-        };
-
-        debug!("scanned and pulled config files {:?}", &project_scan_result);
-        for configuration_path in project_scan_result.configuration_files {
-            let is_same = configuration_path
-                .parent()
-                .as_ref()
-                .is_some_and(|parent| *parent == path);
-            if !is_same {
-                let directory = configuration_path.parent().unwrap();
-                let config = read_config(
-                    self.workspace.fs(),
-                    ConfigurationPathHint::FromWorkspace(directory.to_path_buf()),
-                    false,
-                );
-
-                let Ok(config) = config else {
-                    // TODO log error
-                    continue;
-                };
-                let loaded_configuration =
-                    LoadedConfiguration::try_from_payload(config, self.workspace.fs());
-
-                let Ok(loaded_configuration) = loaded_configuration else {
-                    // TODO log error
-                    continue;
-                };
-                // TODO log diagnostics
-
-                if loaded_configuration.has_errors() {
-                    continue;
-                }
-
-                debug!("{:?}", &loaded_configuration.configuration);
-
-                let result = self.workspace.update_settings(UpdateSettingsParams {
-                    project_key,
-                    workspace_directory: loaded_configuration.directory_path.map(BiomePath::new),
-                    configuration: loaded_configuration.configuration,
-                    is_nested: true,
-                });
-
-                match result {
-                    Ok(_diagnostics) => {
-                        //     TODO log diagnostics
-                    }
-                    Err(_err) => {
-                        //     TODO LOG ERROR
-                    }
-                }
-            }
-        }
+        self.insert_and_scan_project(project_key, path.into(), scan_kind);
 
         if let Err(WorkspaceError::PluginErrors(error)) = result {
             error!("Failed to load plugins: {error:?}");
