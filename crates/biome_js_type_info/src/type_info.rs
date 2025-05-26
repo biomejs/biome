@@ -23,7 +23,7 @@ use crate::globals::{GLOBAL_PROMISE_ID, GLOBAL_UNKNOWN_ID, PROMISE_ID};
 use crate::type_info::literal::{BooleanLiteral, NumberLiteral, StringLiteral};
 use crate::{GLOBAL_RESOLVER, Resolvable, ResolvedTypeData, ResolvedTypeId, TypeResolver};
 
-const UNKNOWN: TypeData = TypeData::Unknown;
+const UNKNOWN: TypeData = TypeData::Reference(TypeReference::Resolved(GLOBAL_UNKNOWN_ID));
 
 /// Type identifier referencing the type in a resolver's `types` vector.
 ///
@@ -281,6 +281,12 @@ impl From<Namespace> for TypeData {
     }
 }
 
+impl From<TypeofExpression> for TypeData {
+    fn from(value: TypeofExpression) -> Self {
+        Self::TypeofExpression(Box::new(value))
+    }
+}
+
 impl From<TypeofValue> for TypeData {
     fn from(value: TypeofValue) -> Self {
         Self::TypeofValue(Box::new(value))
@@ -341,16 +347,20 @@ impl TypeData {
         match types.len().cmp(&1) {
             Ordering::Greater => Self::Intersection(Box::new(Intersection(types.into()))),
             Ordering::Equal => Self::reference(types.remove(0)),
-            Ordering::Less => Self::Unknown,
+            Ordering::Less => Self::unknown(),
         }
     }
 
     /// Returns whether the given type has been inferred.
     ///
-    /// A type is considered inferred if it is anything except `Self::Unknown`,
-    /// including an unexplicit `unknown` keyword.
+    /// A type is considered inferred if it is anything except `Self::Unknown`
+    /// or an unknown reference, including an unexplicit `unknown` keyword.
     pub fn is_inferred(&self) -> bool {
-        !matches!(self, Self::Unknown)
+        match self {
+            Self::Reference(TypeReference::Resolved(resolved)) => *resolved != GLOBAL_UNKNOWN_ID,
+            Self::Reference(TypeReference::Unknown) | Self::Unknown => false,
+            _ => true,
+        }
     }
 
     pub fn reference(reference: impl Into<TypeReference>) -> Self {
@@ -376,12 +386,13 @@ impl TypeData {
         match types.len().cmp(&1) {
             Ordering::Greater => Self::Union(Box::new(Union(types.into()))),
             Ordering::Equal => Self::reference(types.remove(0)),
-            Ordering::Less => Self::Unknown,
+            Ordering::Less => Self::unknown(),
         }
     }
 
+    #[inline]
     pub fn unknown() -> Self {
-        Self::Unknown
+        Self::reference(GLOBAL_UNKNOWN_ID)
     }
 }
 
@@ -785,12 +796,15 @@ impl TypeInstance {
 pub enum TypeofExpression {
     Addition(TypeofAdditionExpression),
     Await(TypeofAwaitExpression),
+    BitwiseNot(TypeofBitwiseNotExpression),
     Call(TypeofCallExpression),
     Destructure(TypeofDestructureExpression),
     New(TypeofNewExpression),
     StaticMember(TypeofStaticMemberExpression),
     Super(TypeofThisOrSuperExpression),
     This(TypeofThisOrSuperExpression),
+    Typeof(TypeofTypeofExpression),
+    UnaryMinus(TypeofUnaryMinusExpression),
 }
 
 #[derive(Clone, Debug, PartialEq, Resolvable)]
@@ -801,6 +815,11 @@ pub struct TypeofAdditionExpression {
 
 #[derive(Clone, Debug, PartialEq, Resolvable)]
 pub struct TypeofAwaitExpression {
+    pub argument: TypeReference,
+}
+
+#[derive(Clone, Debug, PartialEq, Resolvable)]
+pub struct TypeofBitwiseNotExpression {
     pub argument: TypeReference,
 }
 
@@ -849,6 +868,19 @@ pub struct TypeofStaticMemberExpression {
 pub struct TypeofThisOrSuperExpression {
     /// Type from which the `this` or `super` expression should be resolved.
     pub parent: TypeReference,
+}
+
+/// Type of expressions using the `typeof` operator.
+#[derive(Clone, Debug, PartialEq, Resolvable)]
+pub struct TypeofTypeofExpression {
+    /// Reference to the type of the expression from which a string
+    /// representation should be created.
+    pub argument: TypeReference,
+}
+
+#[derive(Clone, Debug, PartialEq, Resolvable)]
+pub struct TypeofUnaryMinusExpression {
+    pub argument: TypeReference,
 }
 
 /// Reference to the type of a named JavaScript value.

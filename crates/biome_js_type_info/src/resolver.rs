@@ -3,9 +3,10 @@ use std::{borrow::Cow, fmt::Debug};
 use biome_rowan::Text;
 
 use crate::{
-    Class, DestructureField, GenericTypeParameter, ScopeId, TypeData, TypeId, TypeImportQualifier,
-    TypeInstance, TypeMember, TypeReference, TypeReferenceQualifier, TypeofDestructureExpression,
-    TypeofExpression, TypeofValue, Union, globals::GLOBAL_UNDEFINED_ID,
+    Class, DestructureField, GenericTypeParameter, NUM_PREDEFINED_TYPES, ScopeId, TypeData, TypeId,
+    TypeImportQualifier, TypeInstance, TypeMember, TypeReference, TypeReferenceQualifier,
+    TypeofDestructureExpression, TypeofExpression, TypeofValue, Union,
+    globals::{GLOBAL_UNDEFINED_ID, global_type_name},
 };
 
 const NUM_MODULE_ID_BITS: i32 = 30;
@@ -22,7 +23,16 @@ pub struct ResolvedTypeId(ResolverId, TypeId);
 
 impl Debug for ResolvedTypeId {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.write_fmt(format_args!("{:?} {:?}", self.0, self.1))
+        if self.0.level() == TypeResolverLevel::Global {
+            if self.1.index() < NUM_PREDEFINED_TYPES {
+                f.write_str(global_type_name(self.1))
+            } else {
+                let id = self.1.index() - NUM_PREDEFINED_TYPES;
+                f.write_fmt(format_args!("Global TypeId({id})"))
+            }
+        } else {
+            f.write_fmt(format_args!("{:?} {:?}", self.0, self.1))
+        }
     }
 }
 
@@ -480,8 +490,13 @@ pub trait TypeResolver {
     /// Registers a type within the level handled by this resolver, and returns
     /// a [`ResolvedTypeId`].
     fn register_and_resolve(&mut self, type_data: TypeData) -> ResolvedTypeId {
-        let type_id = self.register_type(type_data);
-        ResolvedTypeId::new(self.level(), type_id)
+        match type_data {
+            TypeData::Reference(TypeReference::Resolved(resolved)) => resolved,
+            type_data => {
+                let type_id = self.register_type(type_data);
+                ResolvedTypeId::new(self.level(), type_id)
+            }
+        }
     }
 
     /// Resolves a type reference and immediately returns the associated

@@ -2,7 +2,7 @@ use crate::globals::global_type_name;
 use crate::{
     CallArgumentType, Class, DestructureField, DualReference, Function, FunctionParameter,
     FunctionParameterBinding, GenericTypeParameter, ImportSymbol, Literal, NUM_PREDEFINED_TYPES,
-    Object, ObjectLiteral, ReturnType, Type, TypeData, TypeImportQualifier, TypeInstance,
+    Object, ObjectLiteral, ReturnType, Type, TypeData, TypeId, TypeImportQualifier, TypeInstance,
     TypeMember, TypeMemberKind, TypeReference, TypeReferenceQualifier, TypeResolverLevel,
     TypeofAwaitExpression, TypeofExpression, Union,
 };
@@ -110,8 +110,15 @@ impl Format<FormatTypeContext> for TypeData {
             Self::Reference(reference) => write!(f, [reference]),
             Self::DualReference(reference) => write!(f, [reference.as_ref()]),
             Self::TypeofExpression(expression) => write!(f, [&expression.as_ref()]),
-            Self::TypeofType(ty) => write!(f, [FmtVerbatim(&ty.as_ref())]),
-            Self::TypeofValue(ty) => write!(f, [FmtVerbatim(&ty.as_ref())]),
+            Self::TypeofType(reference) => {
+                write!(
+                    f,
+                    [&format_args![text("typeof"), space(), reference.as_ref()]]
+                )
+            }
+            Self::TypeofValue(ty) => {
+                write!(f, [&format_args![text("typeof"), space(), &ty.identifier]])
+            }
             Self::AnyKeyword => write!(f, [text("any")]),
             Self::NeverKeyword => write!(f, [text("never")]),
             Self::ObjectKeyword => write!(f, [text("object")]),
@@ -344,6 +351,9 @@ impl Format<FormatTypeContext> for TypeofExpression {
                     ]]
                 )
             }
+            Self::BitwiseNot(expr) => {
+                write!(f, [&format_args![text("~"), &expr.argument]])
+            }
             Self::Call(call) => {
                 write!(
                     f,
@@ -405,6 +415,12 @@ impl Format<FormatTypeContext> for TypeofExpression {
             }
             Self::Super(_) => write!(f, [&format_args![text("super")]]),
             Self::This(_) => write!(f, [&format_args![text("this")]]),
+            Self::Typeof(expr) => {
+                write!(f, [&format_args![text("typeof"), space(), &expr.argument]])
+            }
+            Self::UnaryMinus(expr) => {
+                write!(f, [&format_args![text("-"), &expr.argument]])
+            }
         }
     }
 }
@@ -440,8 +456,23 @@ impl Format<FormatTypeContext> for TypeReference {
             Self::Resolved(resolved) => {
                 let level = resolved.level();
                 let id = resolved.id();
-                if level == TypeResolverLevel::Global && resolved.index() < NUM_PREDEFINED_TYPES {
-                    write!(f, [text(global_type_name(id))])
+                if level == TypeResolverLevel::Global {
+                    if resolved.index() < NUM_PREDEFINED_TYPES {
+                        write!(f, [text(global_type_name(id))])
+                    } else {
+                        // Start counting from `NUM_PREDEFINED_TYPES` so
+                        // snapshots remain stable even if we add new predefined
+                        // types.
+                        let id = TypeId::new(id.index() - NUM_PREDEFINED_TYPES);
+                        write!(
+                            f,
+                            [&format_args![
+                                text("Global"),
+                                space(),
+                                dynamic_text(&std::format!("{id:?}"), TextSize::default()),
+                            ]]
+                        )
+                    }
                 } else if level == TypeResolverLevel::Module {
                     let module_id = resolved.module_id().index();
                     write!(

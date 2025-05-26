@@ -35,6 +35,17 @@ fn infer_type_of_object_member_expression() {
 }
 
 #[test]
+fn infer_type_of_typeof_expression() {
+    const CODE: &str = r#"typeof foo"#;
+
+    let root = parse_ts(CODE);
+    let expr = get_expression(&root);
+    let mut resolver = GlobalsResolver::default();
+    let ty = TypeData::from_any_js_expression(&mut resolver, &expr);
+    assert_type_data_snapshot(CODE, ty, &resolver, "infer_type_of_typeof_expression");
+}
+
+#[test]
 fn infer_type_of_promise_returning_function() {
     const CODE: &str = r#"function returnsPromise(): Promise<number> {
     return Promise.resolved(true);

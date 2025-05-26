@@ -51,7 +51,7 @@ use biome_js_syntax::{
     JsLanguage, JsSyntaxNode, JsVariableDeclarator, LanguageVariant, TextRange, TextSize,
     TokenAtOffset,
 };
-use biome_js_type_info::{GlobalsResolver, NUM_PREDEFINED_TYPES, TypeData, TypeResolver};
+use biome_js_type_info::{GlobalsResolver, TypeData, TypeResolver};
 use biome_parser::AnyParse;
 use biome_rowan::{AstNode, BatchMutationExt, Direction, NodeCache, WalkEvent};
 use camino::Utf8Path;
@@ -699,9 +699,7 @@ fn debug_registered_types(_path: &BiomePath, parse: AnyParse) -> Result<String, 
     }
 
     for (i, ty) in resolver.registered_types().iter().enumerate() {
-        // TODO: Should we include the predefined types in debug info too?
-        let id = i + NUM_PREDEFINED_TYPES;
-        result.push_str(&format!("\nTypeId({id}) => {ty}\n"));
+        result.push_str(&format!("\nTypeId({i}) => {ty}\n"));
     }
 
     Ok(result)

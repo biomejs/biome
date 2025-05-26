@@ -39,7 +39,7 @@ Imports {
 ```
 Module TypeId(0) => Object {
   prototype: No prototype
-  members: ["foo": Module(0) TypeId(4)]
+  members: ["foo": Module(0) TypeId(3)]
 }
 
 Module TypeId(1) => Namespace {
@@ -57,31 +57,29 @@ Module TypeId(1) => Namespace {
             ),
             is_static: true,
             ty: Resolved(
-                Module(0) TypeId(2),
+                string,
             ),
         },
     ],
 }
 
-Module TypeId(2) => string
+Module TypeId(2) => instanceof string
 
-Module TypeId(3) => instanceof Module(0) TypeId(2)
-
-Module TypeId(4) => sync Function "foo" {
+Module TypeId(3) => sync Function "foo" {
   accepts: {
     params: []
     type_args: []
   }
-  returns: Module(0) TypeId(3)
+  returns: Module(0) TypeId(2)
+}
+
+Module TypeId(4) => Object {
+  prototype: No prototype
+  members: ["foo": Module(0) TypeId(3)]
 }
 
 Module TypeId(5) => Object {
   prototype: No prototype
-  members: ["foo": Module(0) TypeId(4)]
-}
-
-Module TypeId(6) => Object {
-  prototype: No prototype
-  members: ["foo": Module(0) TypeId(4)]
+  members: ["foo": Module(0) TypeId(3)]
 }
 ```

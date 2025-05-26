@@ -11,23 +11,24 @@ use biome_js_syntax::{
     JsBinaryOperator, JsCallArguments, JsClassDeclaration, JsClassExportDefaultDeclaration,
     JsClassExpression, JsFormalParameter, JsFunctionDeclaration, JsFunctionExpression,
     JsNewExpression, JsObjectBindingPattern, JsObjectExpression, JsParameters,
-    JsReferenceIdentifier, JsSyntaxToken, JsVariableDeclaration, JsVariableDeclarator,
-    TsDeclareFunctionDeclaration, TsExternalModuleDeclaration, TsModuleDeclaration,
-    TsReferenceType, TsReturnTypeAnnotation, TsTypeAliasDeclaration, TsTypeAnnotation,
-    TsTypeArguments, TsTypeParameter, TsTypeParameters, TsTypeofType, inner_string_text,
-    unescape_js_string,
+    JsReferenceIdentifier, JsSyntaxToken, JsUnaryExpression, JsUnaryOperator,
+    JsVariableDeclaration, JsVariableDeclarator, TsDeclareFunctionDeclaration,
+    TsExternalModuleDeclaration, TsModuleDeclaration, TsReferenceType, TsReturnTypeAnnotation,
+    TsTypeAliasDeclaration, TsTypeAnnotation, TsTypeArguments, TsTypeParameter, TsTypeParameters,
+    TsTypeofType, inner_string_text, unescape_js_string,
 };
 use biome_rowan::{AstNode, SyntaxResult, Text, TokenText};
 
-use crate::globals::GLOBAL_INSTANCEOF_PROMISE_ID;
+use crate::globals::{GLOBAL_INSTANCEOF_PROMISE_ID, GLOBAL_NUMBER_ID, GLOBAL_STRING_ID};
 use crate::literal::{BooleanLiteral, NumberLiteral, StringLiteral};
 use crate::{
     AssertsReturnType, CallArgumentType, Class, Constructor, DestructureField, Function,
     FunctionParameter, FunctionParameterBinding, GenericTypeParameter, Literal, Module, Namespace,
     Object, PredicateReturnType, ResolvedTypeId, ReturnType, Tuple, TupleElementType, TypeData,
     TypeInstance, TypeMember, TypeMemberKind, TypeOperator, TypeOperatorType, TypeReference,
-    TypeReferenceQualifier, TypeResolver, TypeofCallExpression, TypeofExpression,
-    TypeofNewExpression, TypeofStaticMemberExpression, TypeofThisOrSuperExpression, TypeofValue,
+    TypeReferenceQualifier, TypeResolver, TypeofBitwiseNotExpression, TypeofCallExpression,
+    TypeofExpression, TypeofNewExpression, TypeofStaticMemberExpression,
+    TypeofThisOrSuperExpression, TypeofTypeofExpression, TypeofUnaryMinusExpression, TypeofValue,
 };
 
 impl TypeData {
@@ -397,15 +398,13 @@ impl TypeData {
                 Self::from_js_binary_expression(resolver, expr)
             }
             AnyJsExpression::JsCallExpression(expr) => match expr.callee() {
-                Ok(callee) => {
-                    Self::TypeofExpression(Box::new(TypeofExpression::Call(TypeofCallExpression {
-                        callee: TypeReference::from_any_js_expression(resolver, &callee),
-                        arguments: CallArgumentType::types_from_js_call_arguments(
-                            resolver,
-                            expr.arguments().ok(),
-                        ),
-                    })))
-                }
+                Ok(callee) => Self::from(TypeofExpression::Call(TypeofCallExpression {
+                    callee: TypeReference::from_any_js_expression(resolver, &callee),
+                    arguments: CallArgumentType::types_from_js_call_arguments(
+                        resolver,
+                        expr.arguments().ok(),
+                    ),
+                })),
                 Err(_) => Self::unknown(),
             },
             AnyJsExpression::JsClassExpression(expr) => {
@@ -420,14 +419,14 @@ impl TypeData {
                         )),
                     ) => unescaped_text_from_token(member.value_token())
                         .map(|member| {
-                            Self::TypeofExpression(Box::new(TypeofExpression::StaticMember(
+                            Self::from(TypeofExpression::StaticMember(
                                 TypeofStaticMemberExpression {
                                     object: TypeReference::from_any_js_expression(
                                         resolver, &object,
                                     ),
                                     member,
                                 },
-                            )))
+                            ))
                         })
                         .unwrap_or_default(),
                     _ => Self::unknown(),
@@ -462,22 +461,25 @@ impl TypeData {
             {
                 (Ok(object), Ok(member)) => text_from_any_js_name(member)
                     .map(|member| {
-                        Self::TypeofExpression(Box::new(TypeofExpression::StaticMember(
+                        Self::from(TypeofExpression::StaticMember(
                             TypeofStaticMemberExpression {
                                 object: TypeReference::from_any_js_expression(resolver, &object),
                                 member,
                             },
-                        )))
+                        ))
                     })
                     .unwrap_or_default(),
                 _ => Self::unknown(),
             },
-            AnyJsExpression::JsSuperExpression(_) => Self::TypeofExpression(Box::new(
-                TypeofExpression::Super(TypeofThisOrSuperExpression::from_any_js_expression(expr)),
+            AnyJsExpression::JsSuperExpression(_) => Self::from(TypeofExpression::Super(
+                TypeofThisOrSuperExpression::from_any_js_expression(expr),
             )),
-            AnyJsExpression::JsThisExpression(_) => Self::TypeofExpression(Box::new(
-                TypeofExpression::This(TypeofThisOrSuperExpression::from_any_js_expression(expr)),
+            AnyJsExpression::JsThisExpression(_) => Self::from(TypeofExpression::This(
+                TypeofThisOrSuperExpression::from_any_js_expression(expr),
             )),
+            AnyJsExpression::JsUnaryExpression(expr) => {
+                Self::from_js_unary_expression(resolver, expr)
+            }
             _ => {
                 // TODO: Much
                 Self::unknown()
@@ -599,7 +601,7 @@ impl TypeData {
                 })
                 .into()
             }
-            AnyTsType::TsNumberType(_) => Self::Number,
+            AnyTsType::TsNumberType(_) => Self::reference(GLOBAL_NUMBER_ID),
             AnyTsType::TsObjectType(ty) => Self::object_with_members(
                 ty.members()
                     .into_iter()
@@ -615,7 +617,7 @@ impl TypeData {
                 Ok(token) => Literal::String(token.text().into()).into(),
                 Err(_) => Self::Unknown,
             },
-            AnyTsType::TsStringType(_) => Self::String,
+            AnyTsType::TsStringType(_) => Self::reference(GLOBAL_STRING_ID),
             AnyTsType::TsSymbolType(_) => Self::Symbol,
             AnyTsType::TsTemplateLiteralType(ty) => {
                 Self::Literal(Box::new(Literal::Template(Text::Owned(ty.to_string()))))
@@ -834,15 +836,10 @@ impl TypeData {
         resolver: &mut dyn TypeResolver,
         expr: &JsNewExpression,
     ) -> Option<Self> {
-        Some(Self::TypeofExpression(Box::new(TypeofExpression::New(
-            TypeofNewExpression {
-                callee: TypeReference::from_any_js_expression(resolver, &expr.callee().ok()?),
-                arguments: CallArgumentType::types_from_js_call_arguments(
-                    resolver,
-                    expr.arguments(),
-                ),
-            },
-        ))))
+        Some(Self::from(TypeofExpression::New(TypeofNewExpression {
+            callee: TypeReference::from_any_js_expression(resolver, &expr.callee().ok()?),
+            arguments: CallArgumentType::types_from_js_call_arguments(resolver, expr.arguments()),
+        })))
     }
 
     pub fn from_js_object_expression(
@@ -865,6 +862,44 @@ impl TypeData {
                 .map(|name| Self::reference(TypeReference::from_name(name)))
                 .unwrap_or_default()
         }
+    }
+
+    pub fn from_js_unary_expression(
+        resolver: &mut dyn TypeResolver,
+        expr: &JsUnaryExpression,
+    ) -> Self {
+        expr.operator()
+            .map(|operator| match operator {
+                JsUnaryOperator::BitwiseNot => {
+                    Self::from(TypeofExpression::BitwiseNot(TypeofBitwiseNotExpression {
+                        argument: expr
+                            .argument()
+                            .map(|arg| TypeReference::from_any_js_expression(resolver, &arg))
+                            .unwrap_or_default(),
+                    }))
+                }
+                JsUnaryOperator::Delete => Self::Boolean,
+                JsUnaryOperator::Minus => {
+                    Self::from(TypeofExpression::UnaryMinus(TypeofUnaryMinusExpression {
+                        argument: expr
+                            .argument()
+                            .map(|arg| TypeReference::from_any_js_expression(resolver, &arg))
+                            .unwrap_or_default(),
+                    }))
+                }
+                JsUnaryOperator::LogicalNot => Self::Boolean,
+                JsUnaryOperator::Plus => Self::Number,
+                JsUnaryOperator::Typeof => {
+                    Self::from(TypeofExpression::Typeof(TypeofTypeofExpression {
+                        argument: expr
+                            .argument()
+                            .map(|arg| TypeReference::from_any_js_expression(resolver, &arg))
+                            .unwrap_or_default(),
+                    }))
+                }
+                JsUnaryOperator::Void => Self::VoidKeyword,
+            })
+            .unwrap_or_default()
     }
 
     pub fn from_js_variable_declarator(
@@ -963,12 +998,15 @@ impl TypeData {
             .ok()
             .and_then(|name| TypeReferenceQualifier::from_any_ts_name(&name))
             .map(|qualifier| {
-                Self::TypeofType(Box::new(TypeReference::from(
-                    qualifier.with_type_parameters(TypeReference::types_from_ts_type_arguments(
-                        resolver,
-                        ty.type_arguments(),
-                    )),
-                )))
+                let type_arguments = ty.type_arguments();
+                let qualifier = if type_arguments.is_some() {
+                    qualifier.without_type_only().with_type_parameters(
+                        TypeReference::types_from_ts_type_arguments(resolver, type_arguments),
+                    )
+                } else {
+                    qualifier.without_type_only()
+                };
+                Self::TypeofType(Box::new(TypeReference::from(qualifier)))
             })
             .unwrap_or_default()
     }
@@ -1493,14 +1531,11 @@ impl TypeMember {
                 .map(|name| Self {
                     kind: TypeMemberKind::Named(name.clone()),
                     is_static: false,
-                    ty: resolver.reference_to_registered_data(
-                        TypeofValue {
-                            identifier: name,
-                            ty: TypeReference::Unknown,
-                            scope_id: None,
-                        }
-                        .into(),
-                    ),
+                    ty: resolver.reference_to_registered_data(TypeData::from(TypeofValue {
+                        identifier: name,
+                        ty: TypeReference::Unknown,
+                        scope_id: None,
+                    })),
                 }),
             AnyJsObjectMember::JsSpread(_) => {
                 // TODO: Handle spread operator
@@ -1716,6 +1751,11 @@ impl TypeReferenceQualifier {
 
     pub fn with_type_parameters(mut self, params: Box<[TypeReference]>) -> Self {
         self.type_parameters = params;
+        self
+    }
+
+    pub fn without_type_only(mut self) -> Self {
+        self.type_only = false;
         self
     }
 }
