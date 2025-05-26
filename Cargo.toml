@@ -183,7 +183,7 @@ tests_macros         = { path = "./crates/tests_macros" }
 
 # Crates needed in the workspace
 anyhow               = "1.0.98"
-bpaf                 = { version = "0.9.19", features = ["derive"] }
+bpaf                 = { version = "0.9.20", features = ["derive"] }
 camino               = "1.1.9"
 cfg-if               = "1"
 countme              = "3.0.1"
@@ -217,7 +217,7 @@ static_assertions    = "1.1"
 syn                  = "1.0.109"
 termcolor            = "1.4.1"
 terminal_size        = "0.4.2"
-tokio                = "1.45.0"
+tokio                = "1.45.1"
 tower                = "0.5.2"
 tower-lsp-server     = "0.21.1"
 tracing              = { version = "0.1.41", default-features = false, features = ["std", "attributes"] }

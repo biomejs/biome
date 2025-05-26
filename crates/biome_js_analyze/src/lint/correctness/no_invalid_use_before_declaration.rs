@@ -232,6 +232,7 @@ impl TryFrom<&AnyJsBindingDeclaration> for DeclarationKind {
             | AnyJsBindingDeclaration::TsInterfaceDeclaration(_)
             | AnyJsBindingDeclaration::TsTypeAliasDeclaration(_)
             | AnyJsBindingDeclaration::TsEnumDeclaration(_)
+            | AnyJsBindingDeclaration::TsExternalModuleDeclaration(_)
             | AnyJsBindingDeclaration::TsModuleDeclaration(_)
             | AnyJsBindingDeclaration::JsShorthandNamedImportSpecifier(_)
             | AnyJsBindingDeclaration::JsNamedImportSpecifier(_)

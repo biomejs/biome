@@ -335,6 +335,8 @@ pub type UseConsistentBuiltinInstantiation = < lint :: style :: use_consistent_b
 pub type UseConsistentCurlyBraces = < lint :: style :: use_consistent_curly_braces :: UseConsistentCurlyBraces as biome_analyze :: Rule > :: Options ;
 pub type UseConsistentMemberAccessibility = < lint :: style :: use_consistent_member_accessibility :: UseConsistentMemberAccessibility as biome_analyze :: Rule > :: Options ;
 pub type UseConsistentObjectDefinition = < lint :: nursery :: use_consistent_object_definition :: UseConsistentObjectDefinition as biome_analyze :: Rule > :: Options ;
+pub type UseConsistentResponse =
+    <lint::nursery::use_consistent_response::UseConsistentResponse as biome_analyze::Rule>::Options;
 pub type UseConst = <lint::style::use_const::UseConst as biome_analyze::Rule>::Options;
 pub type UseDateNow = <lint::complexity::use_date_now::UseDateNow as biome_analyze::Rule>::Options;
 pub type UseDefaultParameterLast = < lint :: style :: use_default_parameter_last :: UseDefaultParameterLast as biome_analyze :: Rule > :: Options ;
@@ -443,6 +445,8 @@ pub type UseTopLevelRegex =
     <lint::performance::use_top_level_regex::UseTopLevelRegex as biome_analyze::Rule>::Options;
 pub type UseTrimStartEnd =
     <lint::style::use_trim_start_end::UseTrimStartEnd as biome_analyze::Rule>::Options;
+pub type UseUniqueElementIds =
+    <lint::nursery::use_unique_element_ids::UseUniqueElementIds as biome_analyze::Rule>::Options;
 pub type UseValidAnchor =
     <lint::a11y::use_valid_anchor::UseValidAnchor as biome_analyze::Rule>::Options;
 pub type UseValidAriaProps =

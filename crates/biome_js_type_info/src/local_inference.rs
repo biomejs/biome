@@ -5,15 +5,17 @@ use biome_js_syntax::{
     AnyJsBindingPattern, AnyJsCallArgument, AnyJsClassMember, AnyJsDeclaration,
     AnyJsDeclarationClause, AnyJsExportDefaultDeclaration, AnyJsExpression, AnyJsFormalParameter,
     AnyJsLiteralExpression, AnyJsName, AnyJsObjectBindingPatternMember, AnyJsObjectMember,
-    AnyJsObjectMemberName, AnyJsParameter, AnyTsName, AnyTsReturnType, AnyTsTupleTypeElement,
-    AnyTsType, AnyTsTypeMember, AnyTsTypePredicateParameterName, ClassMemberName,
-    JsArrayBindingPattern, JsArrowFunctionExpression, JsBinaryExpression, JsBinaryOperator,
-    JsCallArguments, JsClassDeclaration, JsClassExportDefaultDeclaration, JsClassExpression,
-    JsFormalParameter, JsFunctionDeclaration, JsFunctionExpression, JsNewExpression,
-    JsObjectBindingPattern, JsObjectExpression, JsParameters, JsReferenceIdentifier, JsSyntaxToken,
-    JsVariableDeclaration, JsVariableDeclarator, TsReferenceType, TsReturnTypeAnnotation,
-    TsTypeAliasDeclaration, TsTypeAnnotation, TsTypeArguments, TsTypeParameter, TsTypeParameters,
-    TsTypeofType, inner_string_text, unescape_js_string,
+    AnyJsObjectMemberName, AnyJsParameter, AnyTsModuleName, AnyTsName, AnyTsReturnType,
+    AnyTsTupleTypeElement, AnyTsType, AnyTsTypeMember, AnyTsTypePredicateParameterName,
+    ClassMemberName, JsArrayBindingPattern, JsArrowFunctionExpression, JsBinaryExpression,
+    JsBinaryOperator, JsCallArguments, JsClassDeclaration, JsClassExportDefaultDeclaration,
+    JsClassExpression, JsFormalParameter, JsFunctionDeclaration, JsFunctionExpression,
+    JsNewExpression, JsObjectBindingPattern, JsObjectExpression, JsParameters,
+    JsReferenceIdentifier, JsSyntaxToken, JsVariableDeclaration, JsVariableDeclarator,
+    TsDeclareFunctionDeclaration, TsExternalModuleDeclaration, TsModuleDeclaration,
+    TsReferenceType, TsReturnTypeAnnotation, TsTypeAliasDeclaration, TsTypeAnnotation,
+    TsTypeArguments, TsTypeParameter, TsTypeParameters, TsTypeofType, inner_string_text,
+    unescape_js_string,
 };
 use biome_rowan::{AstNode, SyntaxResult, Text, TokenText};
 
@@ -21,8 +23,8 @@ use crate::globals::GLOBAL_INSTANCEOF_PROMISE_ID;
 use crate::literal::{BooleanLiteral, NumberLiteral, StringLiteral};
 use crate::{
     AssertsReturnType, CallArgumentType, Class, Constructor, DestructureField, Function,
-    FunctionParameter, FunctionParameterBinding, GenericTypeParameter, Literal, Object,
-    PredicateReturnType, ResolvedTypeId, ReturnType, Tuple, TupleElementType, TypeData,
+    FunctionParameter, FunctionParameterBinding, GenericTypeParameter, Literal, Module, Namespace,
+    Object, PredicateReturnType, ResolvedTypeId, ReturnType, Tuple, TupleElementType, TypeData,
     TypeInstance, TypeMember, TypeMemberKind, TypeOperator, TypeOperatorType, TypeReference,
     TypeReferenceQualifier, TypeResolver, TypeofCallExpression, TypeofExpression,
     TypeofNewExpression, TypeofStaticMemberExpression, TypeofThisOrSuperExpression, TypeofValue,
@@ -215,14 +217,6 @@ impl TypeData {
         }
     }
 
-    pub fn array_of(ty: TypeReference) -> Self {
-        Self::instance_of(TypeReference::Qualifier(TypeReferenceQualifier {
-            path: [Text::Static("Array")].into(),
-            type_parameters: [ty].into(),
-            scope_id: None,
-        }))
-    }
-
     pub fn from_any_js_declaration(
         resolver: &mut dyn TypeResolver,
         decl: &AnyJsDeclaration,
@@ -239,17 +233,15 @@ impl TypeData {
                 // only their inner declarators have.
                 Self::unknown()
             }
-            AnyJsDeclaration::TsDeclareFunctionDeclaration(_decl) => {
-                // TODO: Handle module declarations.
-                Self::unknown()
+            AnyJsDeclaration::TsDeclareFunctionDeclaration(decl) => {
+                Self::from_ts_declare_function_declaration(resolver, decl)
             }
             AnyJsDeclaration::TsEnumDeclaration(_decl) => {
                 // TODO: Handle enum declarations.
                 Self::unknown()
             }
-            AnyJsDeclaration::TsExternalModuleDeclaration(_decl) => {
-                // TODO: Handle external module declarations.
-                Self::unknown()
+            AnyJsDeclaration::TsExternalModuleDeclaration(decl) => {
+                Self::from_ts_external_module_declaration(decl).unwrap_or_default()
             }
             AnyJsDeclaration::TsGlobalDeclaration(_decl) => {
                 // TODO: Handle global declarations.
@@ -263,9 +255,8 @@ impl TypeData {
                 // TODO: Handle interface declarations.
                 Self::unknown()
             }
-            AnyJsDeclaration::TsModuleDeclaration(_decl) => {
-                // TODO: Handle module declarations.
-                Self::unknown()
+            AnyJsDeclaration::TsModuleDeclaration(decl) => {
+                Self::from_ts_module_declaration(decl).unwrap_or_default()
             }
             AnyJsDeclaration::TsTypeAliasDeclaration(decl) => {
                 Self::from_ts_type_alias_declaration(resolver, decl).unwrap_or_default()
@@ -895,6 +886,49 @@ impl TypeData {
         };
 
         Some(ty)
+    }
+
+    pub fn from_ts_declare_function_declaration(
+        resolver: &mut dyn TypeResolver,
+        decl: &TsDeclareFunctionDeclaration,
+    ) -> Self {
+        Self::Function(Box::new(Function {
+            is_async: decl.async_token().is_some(),
+            type_parameters: generic_params_from_ts_type_params(resolver, decl.type_parameters()),
+            name: decl
+                .id()
+                .ok()
+                .as_ref()
+                .and_then(|binding| binding.as_js_identifier_binding())
+                .and_then(|binding| text_from_token(binding.name_token())),
+            parameters: function_params_from_js_params(resolver, decl.parameters()),
+            return_type: return_type_from_annotation(resolver, decl.return_type_annotation())
+                .unwrap_or_else(|| return_type_from_async_token(resolver, decl.async_token())),
+        }))
+    }
+
+    pub fn from_ts_external_module_declaration(decl: &TsExternalModuleDeclaration) -> Option<Self> {
+        let module = Module {
+            name: text_from_token(decl.source().ok()?.as_js_module_source()?.value_token())?,
+            // We don't initialise members of modules during local inference.
+            // This is because our semantic model will pick them up during
+            // module-level inference, so we add references for them at that
+            // time.
+            members: Box::new([]),
+        };
+        Some(module.into())
+    }
+
+    pub fn from_ts_module_declaration(decl: &TsModuleDeclaration) -> Option<Self> {
+        let namespace = Namespace {
+            path: path_from_any_ts_module_name(decl.name().ok()?)?,
+            // We don't initialise members of namespaces during local inference.
+            // This is because our semantic model will pick them up during
+            // module-level inference, so we add references for them at that
+            // time.
+            members: Box::new([]),
+        };
+        Some(namespace.into())
     }
 
     pub fn from_ts_reference_type(resolver: &mut dyn TypeResolver, ty: &TsReferenceType) -> Self {
@@ -1752,6 +1786,30 @@ fn generic_params_from_ts_type_params(
     params
         .map(|params| GenericTypeParameter::params_from_ts_type_parameters(resolver, &params))
         .unwrap_or_default()
+}
+
+#[inline]
+fn path_from_any_ts_module_name(module_name: AnyTsModuleName) -> Option<Box<[Text]>> {
+    let mut path = Vec::new();
+    let mut module_name = module_name;
+    loop {
+        match module_name {
+            AnyTsModuleName::AnyTsIdentifierBinding(binding) => {
+                let binding = binding.as_ts_identifier_binding()?;
+                let name = text_from_token(binding.name_token())?;
+                path.insert(0, name);
+                break;
+            }
+            AnyTsModuleName::TsQualifiedModuleName(qualified) => {
+                let right = qualified.right().ok()?;
+                path.insert(0, text_from_token(right.value_token())?);
+
+                module_name = qualified.left().ok()?;
+            }
+        }
+    }
+
+    Some(path.into())
 }
 
 #[inline]

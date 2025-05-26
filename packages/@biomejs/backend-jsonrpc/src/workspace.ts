@@ -1608,6 +1608,10 @@ export interface Nursery {
 	 */
 	useConsistentObjectDefinition?: RuleFixConfiguration_for_UseConsistentObjectDefinitionOptions;
 	/**
+	 * Use static Response methods instead of new Response() constructor when possible.
+	 */
+	useConsistentResponse?: RuleFixConfiguration_for_Null;
+	/**
 	 * Require switch-case statements to be exhaustive.
 	 */
 	useExhaustiveSwitchCases?: RuleFixConfiguration_for_Null;
@@ -1659,6 +1663,10 @@ export interface Nursery {
 	 * Require a description parameter for the Symbol().
 	 */
 	useSymbolDescription?: RuleConfiguration_for_Null;
+	/**
+	 * Prevent the usage of static string literal id attribute on elements.
+	 */
+	useUniqueElementIds?: RuleConfiguration_for_Null;
 }
 /**
  * A list of rules that belong to this group
@@ -3495,6 +3503,7 @@ export type Category =
 	| "lint/nursery/useAdjacentGetterSetter"
 	| "lint/nursery/useBiomeSuppressionComment"
 	| "lint/nursery/useConsistentObjectDefinition"
+	| "lint/nursery/useConsistentResponse"
 	| "lint/nursery/useExhaustiveSwitchCases"
 	| "lint/nursery/useExplicitFunctionReturnType"
 	| "lint/nursery/useExplicitType"
@@ -3512,6 +3521,7 @@ export type Category =
 	| "lint/nursery/useSortedClasses"
 	| "lint/nursery/useSortedProperties"
 	| "lint/nursery/useSymbolDescription"
+	| "lint/nursery/useUniqueElementIds"
 	| "lint/performance/noAccumulatingSpread"
 	| "lint/performance/noBarrelFile"
 	| "lint/performance/noDelete"

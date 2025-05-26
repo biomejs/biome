@@ -124,7 +124,7 @@ invalid.js:12:11 lint/nursery/noNestedComponentDefinitions ━━━━━━━
     10 │     function ComponentAsFunctionDeclaration() {}
     11 │     function ComponentAsFunctionDeclarationWithParam(param) {}
   > 12 │     const ComponentAsAnonymousFunctionExpression = function () {};
-       │           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+       │           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     13 │     const ComponentAsAnonymousFunctionExpressionWithParam = function (param) {};
     14 │     const ComponentAsNamedFunctionExpression = function unusedName() {};
   
@@ -150,7 +150,7 @@ invalid.js:13:11 lint/nursery/noNestedComponentDefinitions ━━━━━━━
     11 │     function ComponentAsFunctionDeclarationWithParam(param) {}
     12 │     const ComponentAsAnonymousFunctionExpression = function () {};
   > 13 │     const ComponentAsAnonymousFunctionExpressionWithParam = function (param) {};
-       │           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+       │           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     14 │     const ComponentAsNamedFunctionExpression = function unusedName() {};
     15 │     const ComponentAsNamedFunctionExpressionWithParam = function unusedName(param) {};
   
@@ -176,7 +176,7 @@ invalid.js:14:11 lint/nursery/noNestedComponentDefinitions ━━━━━━━
     12 │     const ComponentAsAnonymousFunctionExpression = function () {};
     13 │     const ComponentAsAnonymousFunctionExpressionWithParam = function (param) {};
   > 14 │     const ComponentAsNamedFunctionExpression = function unusedName() {};
-       │           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+       │           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     15 │     const ComponentAsNamedFunctionExpressionWithParam = function unusedName(param) {};
     16 │     const ComponentAsArrowFunctionExpression = () => {};
   
@@ -202,7 +202,7 @@ invalid.js:15:11 lint/nursery/noNestedComponentDefinitions ━━━━━━━
     13 │     const ComponentAsAnonymousFunctionExpressionWithParam = function (param) {};
     14 │     const ComponentAsNamedFunctionExpression = function unusedName() {};
   > 15 │     const ComponentAsNamedFunctionExpressionWithParam = function unusedName(param) {};
-       │           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+       │           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     16 │     const ComponentAsArrowFunctionExpression = () => {};
     17 │     const ComponentAsArrowFunctionExpressionWithParam = (param) => {};
   
@@ -228,7 +228,7 @@ invalid.js:16:11 lint/nursery/noNestedComponentDefinitions ━━━━━━━
     14 │     const ComponentAsNamedFunctionExpression = function unusedName() {};
     15 │     const ComponentAsNamedFunctionExpressionWithParam = function unusedName(param) {};
   > 16 │     const ComponentAsArrowFunctionExpression = () => {};
-       │           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+       │           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     17 │     const ComponentAsArrowFunctionExpressionWithParam = (param) => {};
     18 │     ComponentVar = () => {};
   
@@ -254,7 +254,7 @@ invalid.js:17:11 lint/nursery/noNestedComponentDefinitions ━━━━━━━
     15 │     const ComponentAsNamedFunctionExpressionWithParam = function unusedName(param) {};
     16 │     const ComponentAsArrowFunctionExpression = () => {};
   > 17 │     const ComponentAsArrowFunctionExpressionWithParam = (param) => {};
-       │           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+       │           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     18 │     ComponentVar = () => {};
     19 │     ComponentVar = (param) => {};
   
@@ -273,16 +273,14 @@ invalid.js:17:11 lint/nursery/noNestedComponentDefinitions ━━━━━━━
 ```
 
 ```
-invalid.js:17:71 lint/nursery/noNestedComponentDefinitions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:18:5 lint/nursery/noNestedComponentDefinitions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Components should not be defined inside other components.
   
-    15 │     const ComponentAsNamedFunctionExpressionWithParam = function unusedName(param) {};
     16 │     const ComponentAsArrowFunctionExpression = () => {};
-  > 17 │     const ComponentAsArrowFunctionExpressionWithParam = (param) => {};
-       │                                                                       
+    17 │     const ComponentAsArrowFunctionExpressionWithParam = (param) => {};
   > 18 │     ComponentVar = () => {};
-       │     ^^^^^^^^^^^^^
+       │     ^^^^^^^^^^^^
     19 │     ComponentVar = (param) => {};
     20 │     const ComponentAsArrowFunctionExpressionMemo = memo(() => {});
   
@@ -301,16 +299,14 @@ invalid.js:17:71 lint/nursery/noNestedComponentDefinitions ━━━━━━━
 ```
 
 ```
-invalid.js:18:29 lint/nursery/noNestedComponentDefinitions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:19:5 lint/nursery/noNestedComponentDefinitions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Components should not be defined inside other components.
   
-    16 │     const ComponentAsArrowFunctionExpression = () => {};
     17 │     const ComponentAsArrowFunctionExpressionWithParam = (param) => {};
-  > 18 │     ComponentVar = () => {};
-       │                             
+    18 │     ComponentVar = () => {};
   > 19 │     ComponentVar = (param) => {};
-       │     ^^^^^^^^^^^^^
+       │     ^^^^^^^^^^^^
     20 │     const ComponentAsArrowFunctionExpressionMemo = memo(() => {});
     21 │     const ComponentAsArrowFunctionExpressionMemoWithParam = memo((param) => {});
   
@@ -336,7 +332,7 @@ invalid.js:20:11 lint/nursery/noNestedComponentDefinitions ━━━━━━━
     18 │     ComponentVar = () => {};
     19 │     ComponentVar = (param) => {};
   > 20 │     const ComponentAsArrowFunctionExpressionMemo = memo(() => {});
-       │           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+       │           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     21 │     const ComponentAsArrowFunctionExpressionMemoWithParam = memo((param) => {});
     22 │     const ComponentAsArrowFunctionExpressionReactMemo = React.memo(function unusedName() {});
   
@@ -362,7 +358,7 @@ invalid.js:21:11 lint/nursery/noNestedComponentDefinitions ━━━━━━━
     19 │     ComponentVar = (param) => {};
     20 │     const ComponentAsArrowFunctionExpressionMemo = memo(() => {});
   > 21 │     const ComponentAsArrowFunctionExpressionMemoWithParam = memo((param) => {});
-       │           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+       │           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     22 │     const ComponentAsArrowFunctionExpressionReactMemo = React.memo(function unusedName() {});
     23 │     const ComponentAsArrowFunctionExpressionCustomLibMemo = CustomLib.memo(() => {});
   
@@ -388,7 +384,7 @@ invalid.js:22:11 lint/nursery/noNestedComponentDefinitions ━━━━━━━
     20 │     const ComponentAsArrowFunctionExpressionMemo = memo(() => {});
     21 │     const ComponentAsArrowFunctionExpressionMemoWithParam = memo((param) => {});
   > 22 │     const ComponentAsArrowFunctionExpressionReactMemo = React.memo(function unusedName() {});
-       │           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+       │           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     23 │     const ComponentAsArrowFunctionExpressionCustomLibMemo = CustomLib.memo(() => {});
     24 │     const ComponentAsArrowFunctionExpressionCustomLibForwardRef = CustomLib.forwardRef((param1, param2) => {});
   
@@ -414,7 +410,7 @@ invalid.js:23:11 lint/nursery/noNestedComponentDefinitions ━━━━━━━
     21 │     const ComponentAsArrowFunctionExpressionMemoWithParam = memo((param) => {});
     22 │     const ComponentAsArrowFunctionExpressionReactMemo = React.memo(function unusedName() {});
   > 23 │     const ComponentAsArrowFunctionExpressionCustomLibMemo = CustomLib.memo(() => {});
-       │           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+       │           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     24 │     const ComponentAsArrowFunctionExpressionCustomLibForwardRef = CustomLib.forwardRef((param1, param2) => {});
     25 │ }
   
@@ -440,7 +436,7 @@ invalid.js:24:11 lint/nursery/noNestedComponentDefinitions ━━━━━━━
     22 │     const ComponentAsArrowFunctionExpressionReactMemo = React.memo(function unusedName() {});
     23 │     const ComponentAsArrowFunctionExpressionCustomLibMemo = CustomLib.memo(() => {});
   > 24 │     const ComponentAsArrowFunctionExpressionCustomLibForwardRef = CustomLib.forwardRef((param1, param2) => {});
-       │           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+       │           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     25 │ }
     26 │ 
   
@@ -499,7 +495,7 @@ invalid.js:32:14 lint/nursery/noNestedComponentDefinitions ━━━━━━━
     29 │ };
     30 │ 
   > 31 │ const ComponentAsAnonymousFunctionExpression = function (param) {
-       │       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+       │       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     32 │     function ComponentAsFunctionDeclaration() {}
     33 │ };
   
@@ -524,7 +520,7 @@ invalid.js:36:14 lint/nursery/noNestedComponentDefinitions ━━━━━━━
     33 │ };
     34 │ 
   > 35 │ const ComponentAsNamedFunctionExpression = function unusedName() {
-       │       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+       │       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     36 │     function ComponentAsFunctionDeclaration() {}
     37 │ };
   
@@ -549,7 +545,7 @@ invalid.js:40:14 lint/nursery/noNestedComponentDefinitions ━━━━━━━
     37 │ };
     38 │ 
   > 39 │ const ComponentAsArrowFunctionExpression = () => {
-       │       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+       │       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     40 │     function ComponentAsFunctionDeclaration() {}
     41 │ };
   
@@ -574,7 +570,7 @@ invalid.js:44:14 lint/nursery/noNestedComponentDefinitions ━━━━━━━
     41 │ };
     42 │ 
   > 43 │ const ComponentAsArrowFunctionExpressionMemo = memo(() => {
-       │       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+       │       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     44 │     function ComponentAsFunctionDeclaration() {}
     45 │ });
   
@@ -599,7 +595,7 @@ invalid.js:48:14 lint/nursery/noNestedComponentDefinitions ━━━━━━━
     45 │ });
     46 │ 
   > 47 │ const ComponentAsArrowFunctionExpressionReactMemo = React.memo(function unusedName() {
-       │       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+       │       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     48 │     function ComponentAsFunctionDeclaration() {}
     49 │ });
   
@@ -625,7 +621,7 @@ invalid.js:55:14 lint/nursery/noNestedComponentDefinitions ━━━━━━━
     49 │ });
     50 │ 
   > 51 │ const ComponentAsArrowFunctionExpressionReactForwardRef = React.forwardRef(function unusedName(
-       │       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+       │       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     52 │     param1,
     53 │     param2
   

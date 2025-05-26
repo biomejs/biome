@@ -328,6 +328,7 @@ pub enum RuleName {
     UseConsistentCurlyBraces,
     UseConsistentMemberAccessibility,
     UseConsistentObjectDefinition,
+    UseConsistentResponse,
     UseConst,
     UseDateNow,
     UseDefaultParameterLast,
@@ -397,6 +398,7 @@ pub enum RuleName {
     UseThrowOnlyError,
     UseTopLevelRegex,
     UseTrimStartEnd,
+    UseUniqueElementIds,
     UseValidAnchor,
     UseValidAriaProps,
     UseValidAriaRole,
@@ -654,6 +656,7 @@ impl RuleName {
             Self::UseConsistentCurlyBraces => "useConsistentCurlyBraces",
             Self::UseConsistentMemberAccessibility => "useConsistentMemberAccessibility",
             Self::UseConsistentObjectDefinition => "useConsistentObjectDefinition",
+            Self::UseConsistentResponse => "useConsistentResponse",
             Self::UseConst => "useConst",
             Self::UseDateNow => "useDateNow",
             Self::UseDefaultParameterLast => "useDefaultParameterLast",
@@ -723,6 +726,7 @@ impl RuleName {
             Self::UseThrowOnlyError => "useThrowOnlyError",
             Self::UseTopLevelRegex => "useTopLevelRegex",
             Self::UseTrimStartEnd => "useTrimStartEnd",
+            Self::UseUniqueElementIds => "useUniqueElementIds",
             Self::UseValidAnchor => "useValidAnchor",
             Self::UseValidAriaProps => "useValidAriaProps",
             Self::UseValidAriaRole => "useValidAriaRole",
@@ -976,6 +980,7 @@ impl RuleName {
             Self::UseConsistentCurlyBraces => RuleGroup::Style,
             Self::UseConsistentMemberAccessibility => RuleGroup::Style,
             Self::UseConsistentObjectDefinition => RuleGroup::Nursery,
+            Self::UseConsistentResponse => RuleGroup::Nursery,
             Self::UseConst => RuleGroup::Style,
             Self::UseDateNow => RuleGroup::Complexity,
             Self::UseDefaultParameterLast => RuleGroup::Style,
@@ -1045,6 +1050,7 @@ impl RuleName {
             Self::UseThrowOnlyError => RuleGroup::Style,
             Self::UseTopLevelRegex => RuleGroup::Performance,
             Self::UseTrimStartEnd => RuleGroup::Style,
+            Self::UseUniqueElementIds => RuleGroup::Nursery,
             Self::UseValidAnchor => RuleGroup::A11y,
             Self::UseValidAriaProps => RuleGroup::A11y,
             Self::UseValidAriaRole => RuleGroup::A11y,
@@ -1307,6 +1313,7 @@ impl std::str::FromStr for RuleName {
             "useConsistentCurlyBraces" => Ok(Self::UseConsistentCurlyBraces),
             "useConsistentMemberAccessibility" => Ok(Self::UseConsistentMemberAccessibility),
             "useConsistentObjectDefinition" => Ok(Self::UseConsistentObjectDefinition),
+            "useConsistentResponse" => Ok(Self::UseConsistentResponse),
             "useConst" => Ok(Self::UseConst),
             "useDateNow" => Ok(Self::UseDateNow),
             "useDefaultParameterLast" => Ok(Self::UseDefaultParameterLast),
@@ -1376,6 +1383,7 @@ impl std::str::FromStr for RuleName {
             "useThrowOnlyError" => Ok(Self::UseThrowOnlyError),
             "useTopLevelRegex" => Ok(Self::UseTopLevelRegex),
             "useTrimStartEnd" => Ok(Self::UseTrimStartEnd),
+            "useUniqueElementIds" => Ok(Self::UseUniqueElementIds),
             "useValidAnchor" => Ok(Self::UseValidAnchor),
             "useValidAriaProps" => Ok(Self::UseValidAriaProps),
             "useValidAriaRole" => Ok(Self::UseValidAriaRole),
@@ -4773,6 +4781,10 @@ pub struct Nursery {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub use_consistent_object_definition:
         Option<RuleFixConfiguration<biome_js_analyze::options::UseConsistentObjectDefinition>>,
+    #[doc = "Use static Response methods instead of new Response() constructor when possible."]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub use_consistent_response:
+        Option<RuleFixConfiguration<biome_js_analyze::options::UseConsistentResponse>>,
     #[doc = "Require switch-case statements to be exhaustive."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub use_exhaustive_switch_cases:
@@ -4822,6 +4834,10 @@ pub struct Nursery {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub use_symbol_description:
         Option<RuleConfiguration<biome_js_analyze::options::UseSymbolDescription>>,
+    #[doc = "Prevent the usage of static string literal id attribute on elements."]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub use_unique_element_ids:
+        Option<RuleConfiguration<biome_js_analyze::options::UseUniqueElementIds>>,
 }
 impl Nursery {
     const GROUP_NAME: &'static str = "nursery";
@@ -4849,6 +4865,7 @@ impl Nursery {
         "noUselessUndefined",
         "useAdjacentGetterSetter",
         "useConsistentObjectDefinition",
+        "useConsistentResponse",
         "useExhaustiveSwitchCases",
         "useExplicitType",
         "useExportsLast",
@@ -4862,6 +4879,7 @@ impl Nursery {
         "useSingleJsDocAsterisk",
         "useSortedClasses",
         "useSymbolDescription",
+        "useUniqueElementIds",
     ];
     const RECOMMENDED_RULES_AS_FILTERS: &'static [RuleFilter<'static>] = &[
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[7]),
@@ -4869,9 +4887,9 @@ impl Nursery {
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[15]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[18]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[19]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[28]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[29]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[32]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[30]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[33]),
     ];
     const ALL_RULES_AS_FILTERS: &'static [RuleFilter<'static>] = &[
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[0]),
@@ -4910,6 +4928,8 @@ impl Nursery {
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[33]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[34]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[35]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[36]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[37]),
     ];
 }
 impl RuleGroupExt for Nursery {
@@ -5036,69 +5056,79 @@ impl RuleGroupExt for Nursery {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[22]));
             }
         }
-        if let Some(rule) = self.use_exhaustive_switch_cases.as_ref() {
+        if let Some(rule) = self.use_consistent_response.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[23]));
             }
         }
-        if let Some(rule) = self.use_explicit_type.as_ref() {
+        if let Some(rule) = self.use_exhaustive_switch_cases.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[24]));
             }
         }
-        if let Some(rule) = self.use_exports_last.as_ref() {
+        if let Some(rule) = self.use_explicit_type.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[25]));
             }
         }
-        if let Some(rule) = self.use_for_component.as_ref() {
+        if let Some(rule) = self.use_exports_last.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[26]));
             }
         }
-        if let Some(rule) = self.use_google_font_preconnect.as_ref() {
+        if let Some(rule) = self.use_for_component.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[27]));
             }
         }
-        if let Some(rule) = self.use_iterable_callback_return.as_ref() {
+        if let Some(rule) = self.use_google_font_preconnect.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[28]));
             }
         }
-        if let Some(rule) = self.use_named_operation.as_ref() {
+        if let Some(rule) = self.use_iterable_callback_return.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[29]));
             }
         }
-        if let Some(rule) = self.use_naming_convention.as_ref() {
+        if let Some(rule) = self.use_named_operation.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[30]));
             }
         }
-        if let Some(rule) = self.use_numeric_separators.as_ref() {
+        if let Some(rule) = self.use_naming_convention.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[31]));
             }
         }
-        if let Some(rule) = self.use_parse_int_radix.as_ref() {
+        if let Some(rule) = self.use_numeric_separators.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[32]));
             }
         }
-        if let Some(rule) = self.use_single_js_doc_asterisk.as_ref() {
+        if let Some(rule) = self.use_parse_int_radix.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[33]));
             }
         }
-        if let Some(rule) = self.use_sorted_classes.as_ref() {
+        if let Some(rule) = self.use_single_js_doc_asterisk.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[34]));
             }
         }
-        if let Some(rule) = self.use_symbol_description.as_ref() {
+        if let Some(rule) = self.use_sorted_classes.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[35]));
+            }
+        }
+        if let Some(rule) = self.use_symbol_description.as_ref() {
+            if rule.is_enabled() {
+                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[36]));
+            }
+        }
+        if let Some(rule) = self.use_unique_element_ids.as_ref() {
+            if rule.is_enabled() {
+                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[37]));
             }
         }
         index_set
@@ -5220,69 +5250,79 @@ impl RuleGroupExt for Nursery {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[22]));
             }
         }
-        if let Some(rule) = self.use_exhaustive_switch_cases.as_ref() {
+        if let Some(rule) = self.use_consistent_response.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[23]));
             }
         }
-        if let Some(rule) = self.use_explicit_type.as_ref() {
+        if let Some(rule) = self.use_exhaustive_switch_cases.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[24]));
             }
         }
-        if let Some(rule) = self.use_exports_last.as_ref() {
+        if let Some(rule) = self.use_explicit_type.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[25]));
             }
         }
-        if let Some(rule) = self.use_for_component.as_ref() {
+        if let Some(rule) = self.use_exports_last.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[26]));
             }
         }
-        if let Some(rule) = self.use_google_font_preconnect.as_ref() {
+        if let Some(rule) = self.use_for_component.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[27]));
             }
         }
-        if let Some(rule) = self.use_iterable_callback_return.as_ref() {
+        if let Some(rule) = self.use_google_font_preconnect.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[28]));
             }
         }
-        if let Some(rule) = self.use_named_operation.as_ref() {
+        if let Some(rule) = self.use_iterable_callback_return.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[29]));
             }
         }
-        if let Some(rule) = self.use_naming_convention.as_ref() {
+        if let Some(rule) = self.use_named_operation.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[30]));
             }
         }
-        if let Some(rule) = self.use_numeric_separators.as_ref() {
+        if let Some(rule) = self.use_naming_convention.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[31]));
             }
         }
-        if let Some(rule) = self.use_parse_int_radix.as_ref() {
+        if let Some(rule) = self.use_numeric_separators.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[32]));
             }
         }
-        if let Some(rule) = self.use_single_js_doc_asterisk.as_ref() {
+        if let Some(rule) = self.use_parse_int_radix.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[33]));
             }
         }
-        if let Some(rule) = self.use_sorted_classes.as_ref() {
+        if let Some(rule) = self.use_single_js_doc_asterisk.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[34]));
             }
         }
-        if let Some(rule) = self.use_symbol_description.as_ref() {
+        if let Some(rule) = self.use_sorted_classes.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[35]));
+            }
+        }
+        if let Some(rule) = self.use_symbol_description.as_ref() {
+            if rule.is_disabled() {
+                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[36]));
+            }
+        }
+        if let Some(rule) = self.use_unique_element_ids.as_ref() {
+            if rule.is_disabled() {
+                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[37]));
             }
         }
         index_set
@@ -5407,6 +5447,10 @@ impl RuleGroupExt for Nursery {
                 .use_consistent_object_definition
                 .as_ref()
                 .map(|conf| (conf.level(), conf.get_options())),
+            "useConsistentResponse" => self
+                .use_consistent_response
+                .as_ref()
+                .map(|conf| (conf.level(), conf.get_options())),
             "useExhaustiveSwitchCases" => self
                 .use_exhaustive_switch_cases
                 .as_ref()
@@ -5459,6 +5503,10 @@ impl RuleGroupExt for Nursery {
                 .use_symbol_description
                 .as_ref()
                 .map(|conf| (conf.level(), conf.get_options())),
+            "useUniqueElementIds" => self
+                .use_unique_element_ids
+                .as_ref()
+                .map(|conf| (conf.level(), conf.get_options())),
             _ => None,
         }
     }
@@ -5490,6 +5538,7 @@ impl From<GroupPlainConfiguration> for Nursery {
             no_useless_undefined: Some(value.into()),
             use_adjacent_getter_setter: Some(value.into()),
             use_consistent_object_definition: Some(value.into()),
+            use_consistent_response: Some(value.into()),
             use_exhaustive_switch_cases: Some(value.into()),
             use_explicit_type: Some(value.into()),
             use_exports_last: Some(value.into()),
@@ -5503,6 +5552,7 @@ impl From<GroupPlainConfiguration> for Nursery {
             use_single_js_doc_asterisk: Some(value.into()),
             use_sorted_classes: Some(value.into()),
             use_symbol_description: Some(value.into()),
+            use_unique_element_ids: Some(value.into()),
         }
     }
 }

@@ -331,6 +331,36 @@ fn test_export_default_function_declaration() {
 }
 
 #[test]
+fn test_export_const_type_declaration_with_namespace() {
+    let mut fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/index.d.ts".into(),
+        r#"
+            declare namespace shared {
+                type Result = string;
+            }
+
+            declare const shared: {
+                // FIXME: This return type is not properly resolved
+                foo(): shared.Result;
+            }
+
+            export = shared;
+        "#,
+    );
+
+    let added_paths = [BiomePath::new("/src/index.d.ts")];
+    let added_paths = get_added_paths(&fs, &added_paths);
+
+    let module_graph = ModuleGraph::default();
+    module_graph.update_graph_for_js_paths(&fs, &ProjectLayout::default(), &added_paths, &[]);
+
+    let snapshot = ModuleGraphSnapshot::new(&module_graph, &fs);
+
+    snapshot.assert_snapshot("test_export_const_type_declaration_with_namespace");
+}
+
+#[test]
 fn test_resolve_exports() {
     let mut fs = MemoryFileSystem::default();
     fs.insert(
