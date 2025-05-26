@@ -1,4 +1,5 @@
 use std::{
+    borrow::Cow,
     collections::{BTreeMap, BTreeSet},
     sync::Arc,
 };
@@ -436,6 +437,22 @@ impl JsModuleInfoCollector {
         })
     }
 
+    fn find_binding_in_scope(&self, name: &str, scope_id: ScopeId) -> Option<BindingId> {
+        let mut scope = &self.scopes[scope_id.index()];
+        loop {
+            if let Some(binding_id) = scope.bindings_by_name.get(name) {
+                return Some(*binding_id);
+            }
+
+            match &scope.parent {
+                Some(parent_id) => scope = &self.scopes[parent_id.index()],
+                None => break,
+            }
+        }
+
+        None
+    }
+
     fn find_type_members_in_scope(&self, scope_id: ScopeId) -> Box<[TypeMember]> {
         self.bindings
             .iter()
@@ -511,28 +528,39 @@ impl TypeResolver for JsModuleInfoCollector {
     }
 
     fn resolve_qualifier(&self, qualifier: &TypeReferenceQualifier) -> Option<ResolvedTypeId> {
-        if qualifier.path.len() == 1 {
-            self.resolve_type_of(
-                &qualifier.path[0],
-                qualifier.scope_id.unwrap_or(ScopeId::GLOBAL),
-            )
-            .or_else(|| GLOBAL_RESOLVER.resolve_qualifier(qualifier))
-        } else {
-            // TODO: Resolve nested qualifiers
-            None
+        let identifier = qualifier.path.first()?;
+        let scope_id = qualifier.scope_id.unwrap_or(ScopeId::GLOBAL);
+        let Some(binding_id) = self.find_binding_in_scope(identifier, scope_id) else {
+            return GLOBAL_RESOLVER.resolve_qualifier(qualifier);
+        };
+
+        let binding = &self.bindings[binding_id.index()];
+        if binding.declaration_kind.is_import_declaration() {
+            return Some(ResolvedTypeId::new(
+                TypeResolverLevel::Import,
+                binding_id.into(),
+            ));
         }
+
+        let mut ty = Cow::Borrowed(&binding.ty);
+        for identifier in &qualifier.path[1..] {
+            let resolved = self.resolve_and_get(&ty)?;
+            let member = resolved
+                .all_members(self)
+                .find(|member| member.is_static() && member.has_name(identifier))?;
+            ty = Cow::Owned(member.ty().into_owned());
+        }
+
+        self.resolve_reference(&ty)
     }
 
     fn resolve_type_of(&self, identifier: &Text, scope_id: ScopeId) -> Option<ResolvedTypeId> {
-        if let Some(binding_id) = self.scopes[scope_id.index()]
-            .bindings_by_name
-            .get(identifier.text())
-        {
+        if let Some(binding_id) = self.find_binding_in_scope(identifier, scope_id) {
             let binding = &self.bindings[binding_id.index()];
             return if binding.declaration_kind.is_import_declaration() {
                 Some(ResolvedTypeId::new(
                     TypeResolverLevel::Import,
-                    (*binding_id).into(),
+                    binding_id.into(),
                 ))
             } else {
                 self.resolve_reference(&binding.ty)
