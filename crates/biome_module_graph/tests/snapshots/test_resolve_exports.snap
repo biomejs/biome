@@ -95,7 +95,7 @@ Exports {
   }
   "default" => {
     ExportOwnExport => JsOwnExport(
-      Module(0) TypeId(23)
+      Module(0) TypeId(21)
       Local name: Component
       JsDoc(
         @public
@@ -194,22 +194,18 @@ Module TypeId(5) => value: 1
 
 Module TypeId(6) => Object {
   prototype: No prototype
-  members: [
-    "a": Module(0) TypeId(12),
-    "b": Module(0) TypeId(14),
-    "c": Module(0) TypeId(18)
-  ]
+  members: ["a": string, "b": Module(0) TypeId(12), "c": Module(0) TypeId(16)]
 }
 
 Module TypeId(7) => string
 
-Module TypeId(8) => instanceof Module(0) TypeId(24)
+Module TypeId(8) => instanceof Module(0) TypeId(22)
 
 Module TypeId(9) => Tuple(
     [
         TupleElementType {
             ty: Resolved(
-                Module(0) TypeId(15),
+                Module(0) TypeId(13),
             ),
             name: Some(
                 Borrowed(
@@ -221,7 +217,7 @@ Module TypeId(9) => Tuple(
         },
         TupleElementType {
             ty: Resolved(
-                Module(0) TypeId(17),
+                Module(0) TypeId(15),
             ),
             name: Some(
                 Borrowed(
@@ -234,27 +230,23 @@ Module TypeId(9) => Tuple(
     ],
 )
 
-Module TypeId(10) => Module(0) TypeId(15)
+Module TypeId(10) => Module(0) TypeId(13)
 
-Module TypeId(11) => Module(0) TypeId(17)
+Module TypeId(11) => Module(0) TypeId(15)
 
-Module TypeId(12) => string
+Module TypeId(12) => instanceof Array<T = number>
 
-Module TypeId(13) => number
+Module TypeId(13) => boolean
 
-Module TypeId(14) => instanceof Array<T = Module(0) TypeId(13)>
+Module TypeId(14) => undefined
 
-Module TypeId(15) => boolean
+Module TypeId(15) => Module(0) TypeId(13) | Module(0) TypeId(14)
 
-Module TypeId(16) => undefined
-
-Module TypeId(17) => Module(0) TypeId(15) | Module(0) TypeId(16)
-
-Module TypeId(18) => Tuple(
+Module TypeId(16) => Tuple(
     [
         TupleElementType {
             ty: Resolved(
-                Module(0) TypeId(15),
+                Module(0) TypeId(13),
             ),
             name: Some(
                 Borrowed(
@@ -266,7 +258,7 @@ Module TypeId(18) => Tuple(
         },
         TupleElementType {
             ty: Resolved(
-                Module(0) TypeId(17),
+                Module(0) TypeId(15),
             ),
             name: Some(
                 Borrowed(
@@ -279,25 +271,27 @@ Module TypeId(18) => Tuple(
     ],
 )
 
-Module TypeId(19) => Object {
+Module TypeId(17) => Object {
   prototype: No prototype
-  members: [
-    "a": Module(0) TypeId(12),
-    "b": Module(0) TypeId(14),
-    "c": Module(0) TypeId(18)
-  ]
+  members: ["a": string, "b": Module(0) TypeId(12), "c": Module(0) TypeId(16)]
 }
 
-Module TypeId(20) => Object {
+Module TypeId(18) => Object {
   prototype: No prototype
-  members: [
-    "a": Module(0) TypeId(12),
-    "b": Module(0) TypeId(14),
-    "c": Module(0) TypeId(18)
-  ]
+  members: ["a": string, "b": Module(0) TypeId(12), "c": Module(0) TypeId(16)]
 }
 
-Module TypeId(21) => sync Function "getObject" {
+Module TypeId(19) => sync Function "getObject" {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: Module(0) TypeId(18)
+}
+
+Module TypeId(20) => instanceof unresolved reference "JSX.Element"
+
+Module TypeId(21) => sync Function "Component" {
   accepts: {
     params: []
     type_args: []
@@ -305,21 +299,11 @@ Module TypeId(21) => sync Function "getObject" {
   returns: Module(0) TypeId(20)
 }
 
-Module TypeId(22) => instanceof unresolved reference "JSX.Element"
+Module TypeId(22) => instanceof Array<T = number>
 
-Module TypeId(23) => sync Function "Component" {
-  accepts: {
-    params: []
-    type_args: []
-  }
-  returns: Module(0) TypeId(22)
-}
+Module TypeId(23) => boolean
 
-Module TypeId(24) => instanceof Array<T = Module(0) TypeId(13)>
-
-Module TypeId(25) => boolean
-
-Module TypeId(26) => Module(0) TypeId(15) | Module(0) TypeId(16)
+Module TypeId(24) => Module(0) TypeId(13) | Module(0) TypeId(14)
 ```
 
 # `/src/renamed-reexports.ts`

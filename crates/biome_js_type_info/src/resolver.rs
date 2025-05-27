@@ -3,9 +3,10 @@ use std::{borrow::Cow, fmt::Debug};
 use biome_rowan::Text;
 
 use crate::{
-    Class, DestructureField, GenericTypeParameter, ScopeId, TypeData, TypeId, TypeImportQualifier,
-    TypeInstance, TypeMember, TypeReference, TypeReferenceQualifier, TypeofDestructureExpression,
-    TypeofExpression, TypeofValue, Union, globals::GLOBAL_UNDEFINED_ID,
+    Class, DestructureField, GenericTypeParameter, NUM_PREDEFINED_TYPES, ScopeId, TypeData, TypeId,
+    TypeImportQualifier, TypeInstance, TypeMember, TypeReference, TypeReferenceQualifier,
+    TypeofDestructureExpression, TypeofExpression, TypeofValue, Union,
+    globals::{GLOBAL_UNDEFINED_ID, global_type_name},
 };
 
 const NUM_MODULE_ID_BITS: i32 = 30;
@@ -22,7 +23,16 @@ pub struct ResolvedTypeId(ResolverId, TypeId);
 
 impl Debug for ResolvedTypeId {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.write_fmt(format_args!("{:?} {:?}", self.0, self.1))
+        if self.0.level() == TypeResolverLevel::Global {
+            if self.1.index() < NUM_PREDEFINED_TYPES {
+                f.write_str(global_type_name(self.1))
+            } else {
+                let id = self.1.index() - NUM_PREDEFINED_TYPES;
+                f.write_fmt(format_args!("Global TypeId({id})"))
+            }
+        } else {
+            f.write_fmt(format_args!("{:?} {:?}", self.0, self.1))
+        }
     }
 }
 
@@ -447,7 +457,7 @@ pub trait TypeResolver {
     /// Returns a reference to the given type data, if possible.
     fn reference_to_data(&self, type_data: &TypeData) -> Option<TypeReference> {
         match type_data {
-            TypeData::Reference(reference) => Some(reference.as_ref().clone()),
+            TypeData::Reference(reference) => Some(reference.clone()),
             other => self.find_type(other).map(|id| self.reference_to_id(id)),
         }
     }
@@ -480,8 +490,13 @@ pub trait TypeResolver {
     /// Registers a type within the level handled by this resolver, and returns
     /// a [`ResolvedTypeId`].
     fn register_and_resolve(&mut self, type_data: TypeData) -> ResolvedTypeId {
-        let type_id = self.register_type(type_data);
-        ResolvedTypeId::new(self.level(), type_id)
+        match type_data {
+            TypeData::Reference(TypeReference::Resolved(resolved)) => resolved,
+            type_data => {
+                let type_id = self.register_type(type_data);
+                ResolvedTypeId::new(self.level(), type_id)
+            }
+        }
     }
 
     /// Resolves a type reference and immediately returns the associated
@@ -494,7 +509,7 @@ pub trait TypeResolver {
             Some(ResolvedTypeData {
                 data: TypeData::Reference(reference),
                 id,
-            }) if reference.as_ref() != ty => {
+            }) if reference != ty => {
                 self.resolve_and_get(&id.apply_module_id_to_reference(reference))
             }
             other => other,
@@ -669,21 +684,23 @@ impl Resolvable for TypeReference {
                                 let parameters =
                                     resolved.as_ref().and_then(|data| data.type_parameters())?;
                                 let resolved_id: ResolvedTypeId = resolver.register_and_resolve(
-                                    TypeData::InstanceOf(Box::new(TypeInstance {
+                                    TypeData::instance_of(TypeInstance {
                                         ty: resolved_id.into(),
                                         type_parameters: GenericTypeParameter::merge_types(
                                             parameters,
                                             &qualifier.type_parameters,
                                         ),
-                                    })),
+                                    }),
                                 );
                                 Some(resolved_id.into())
                             })
                             .unwrap_or_else(|| {
-                                Self::Qualifier(TypeReferenceQualifier {
+                                Self::from(TypeReferenceQualifier {
                                     path: qualifier.path.clone(),
                                     type_parameters: self.resolved_params(resolver),
                                     scope_id: qualifier.scope_id,
+                                    type_only: qualifier.type_only,
+                                    excluded_binding_id: qualifier.excluded_binding_id,
                                 })
                             })
                     }
@@ -719,7 +736,7 @@ impl Resolvable for TypeReference {
 
     fn with_scope_id(self, scope_id: ScopeId) -> Self {
         match self {
-            Self::Qualifier(qualifier) => Self::Qualifier(qualifier.with_scope_id(scope_id)),
+            Self::Qualifier(qualifier) => Self::from(qualifier.with_scope_id(scope_id)),
             other => other,
         }
     }

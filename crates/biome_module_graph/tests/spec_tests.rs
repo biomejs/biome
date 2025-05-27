@@ -341,7 +341,6 @@ fn test_export_const_type_declaration_with_namespace() {
             }
 
             declare const shared: {
-                // FIXME: This return type is not properly resolved
                 foo(): shared.Result;
             }
 
@@ -583,6 +582,286 @@ fn test_resolve_promise_export() {
     let snapshot = ModuleGraphSnapshot::new(&module_graph, &fs);
 
     snapshot.assert_snapshot("test_resolve_promise_export");
+}
+
+#[test]
+fn test_resolve_dual_types() {
+    let mut fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"type A = 'a';
+type B = 'b';
+type C = 'c';
+export type Union = A | B | C;
+
+const A = 'a';
+const B = 1;
+const C = true;
+
+export type Union2 = typeof A | typeof B | typeof C;
+
+export { A, B };
+"#,
+    );
+
+    let added_paths = [BiomePath::new("/src/index.ts")];
+    let added_paths = get_added_paths(&fs, &added_paths);
+
+    let module_graph = ModuleGraph::default();
+    module_graph.update_graph_for_js_paths(&fs, &ProjectLayout::default(), &added_paths, &[]);
+
+    let snapshot = ModuleGraphSnapshot::new(&module_graph, &fs);
+
+    snapshot.assert_snapshot("test_resolve_dual_types");
+}
+
+#[test]
+fn test_resolve_recursive_looking_country_info() {
+    let mut fs = MemoryFileSystem::default();
+    fs.insert(
+        "/node_modules/@types/iso-3166-2/index.d.ts".into(),
+        r#"// Type definitions for iso-3166-2 1.0
+// Project: https://github.com/olahol/iso-3166-2.js
+// Definitions by: Matt Rollins <https://github.com/sicilica>, Emily Klassen <https://github.com/forivall>
+// Definitions: https://github.com/DefinitelyTyped/DefinitelyTyped
+
+export namespace CountryInfo {
+    interface Partial {
+        name: string;
+        sub: SubdivisionInfo.Map;
+    }
+    interface Full extends Partial {
+        code: string;
+    }
+
+    interface Map {
+        // full data if this country has been retrieved with country() at least once
+        [code: string]: Full | Partial;
+    }
+}
+export type CountryInfo = CountryInfo.Full;
+
+export namespace SubdivisionInfo {
+    interface Partial {
+        type: string;
+        name: string;
+    }
+    interface Full extends Partial {
+        countryName: string;
+        countryCode: string;
+        code: string;
+        regionCode: string;
+    }
+
+    interface Map {
+        // full data if this subdivision has been retrieved with subdivision() at least once
+        [code: string]: Full | Partial;
+    }
+}
+export type SubdivisionInfo = SubdivisionInfo.Full;
+
+export function subdivision(countryCodeOrFullSubdivisionCode: string, subdivisionCodeOrName?: string): SubdivisionInfo | null;
+
+export function country(countryCodeOrName: string): CountryInfo | null;
+
+export const data: CountryInfo.Map;
+
+// map of alpha 3 codes to alpha 3 codes
+export const codes: {
+    [alpha3: string]: string
+};
+"#,
+    );
+
+    let added_paths = [BiomePath::new("/node_modules/@types/iso-3166-2/index.d.ts")];
+    let added_paths = get_added_paths(&fs, &added_paths);
+
+    let module_graph = ModuleGraph::default();
+    module_graph.update_graph_for_js_paths(&fs, &ProjectLayout::default(), &added_paths, &[]);
+
+    let snapshot = ModuleGraphSnapshot::new(&module_graph, &fs);
+
+    snapshot.assert_snapshot("test_resolve_recursive_looking_country_info");
+}
+
+#[test]
+fn test_resolve_recursive_looking_vfile() {
+    let mut fs = MemoryFileSystem::default();
+    fs.insert(
+        "/node_modules/vfile/types/index.d.ts".into(),
+        r#"// TypeScript Version: 3.0
+
+import * as Unist from 'unist'
+import * as vfileMessage from 'vfile-message'
+
+declare namespace vfile {
+  /**
+   * Encodings supported by the buffer class
+   *
+   * @remarks
+   * This is a copy of the typing from Node, copied to prevent Node globals from being needed.
+   * Copied from https://github.com/DefinitelyTyped/DefinitelyTyped/blob/a2bc1d868d81733a8969236655fa600bd3651a7b/types/node/globals.d.ts#L174
+   */
+  type BufferEncoding =
+    | 'ascii'
+    | 'utf8'
+    | 'utf-8'
+    | 'utf16le'
+    | 'ucs2'
+    | 'ucs-2'
+    | 'base64'
+    | 'latin1'
+    | 'binary'
+    | 'hex'
+
+  /**
+   * VFileContents can either be text, or a Buffer like structure
+   * @remarks
+   * This does not directly use type `Buffer, because it can also be used in a browser context.
+   * Instead this leverages `Uint8Array` which is the base type for `Buffer`, and a native JavaScript construct.
+   */
+  type VFileContents = string | Uint8Array
+  type VFileCompatible = VFile | VFileOptions | VFileContents
+  interface Settings {
+    [key: string]: unknown
+  }
+  type VFileReporter<T = Settings> = (files: VFile[], options: T) => string
+
+  interface VFileOptions {
+    contents?: VFileContents
+    path?: string
+    basename?: string
+    stem?: string
+    extname?: string
+    dirname?: string
+    cwd?: string
+    data?: any
+    [key: string]: any
+  }
+
+  interface VFile {
+    /**
+     * Create a new virtual file. If `options` is `string` or `Buffer`, treats it as `{contents: options}`.
+     * If `options` is a `VFile`, returns it. All other options are set on the newly created `vfile`.
+     *
+     * Path related properties are set in the following order (least specific to most specific): `history`, `path`, `basename`, `stem`, `extname`, `dirname`.
+     *
+     * It’s not possible to set either `dirname` or `extname` without setting either `history`, `path`, `basename`, or `stem` as well.
+     *
+     * @param options If `options` is `string` or `Buffer`, treats it as `{contents: options}`. If `options` is a `VFile`, returns it. All other options are set on the newly created `vfile`.
+     */
+    <F extends VFile>(input?: VFileContents | F | VFileOptions): F
+    /**
+     * List of file-paths the file moved between.
+     */
+    history: string[]
+    /**
+     * Place to store custom information.
+     * It's OK to store custom data directly on the `vfile`, moving it to `data` gives a little more privacy.
+     */
+    data: unknown
+    /**
+     * List of messages associated with the file.
+     */
+    messages: vfileMessage.VFileMessage[]
+    /**
+     * Raw value.
+     */
+    contents: VFileContents
+    /**
+     * Path of `vfile`.
+     * Cannot be nullified.
+     */
+    path?: string
+    /**
+     * Path to parent directory of `vfile`.
+     * Cannot be set if there's no `path` yet.
+     */
+    dirname?: string
+    /**
+     * Current name (including extension) of `vfile`.
+     * Cannot contain path separators.
+     * Cannot be nullified either (use `file.path = file.dirname` instead).
+     */
+    basename?: string
+    /**
+     * Name (without extension) of `vfile`.
+     * Cannot be nullified, and cannot contain path separators.
+     */
+    stem?: string
+    /**
+     * Extension (with dot) of `vfile`.
+     * Cannot be set if there's no `path` yet and cannot contain path separators.
+     */
+    extname?: string
+    /**
+     * Base of `path`.
+     * Defaults to `process.cwd()`.
+     */
+    cwd: string
+    /**
+     * Convert contents of `vfile` to string.
+     * @param encoding If `contents` is a buffer, `encoding` is used to stringify buffers (default: `'utf8'`).
+     */
+    toString: (encoding?: BufferEncoding) => string
+    /**
+     * Associates a message with the file for `reason` at `position`.
+     * When an error is passed in as `reason`, copies the stack.
+     * Each message has a `fatal` property which by default is set to `false` (ie. `warning`).
+     * @param reason Reason for message. Uses the stack and message of the error if given.
+     * @param position Place at which the message occurred in `vfile`.
+     * @param ruleId Category of message.
+     */
+    message: (
+      reason: string,
+      position?: Unist.Point | Unist.Position | Unist.Node,
+      ruleId?: string
+    ) => vfileMessage.VFileMessage
+    /**
+     * Associates a fatal message with the file, then immediately throws it.
+     * Note: fatal errors mean a file is no longer processable.
+     * Calls `message()` internally.
+     * @param reason Reason for message. Uses the stack and message of the error if given.
+     * @param position Place at which the message occurred in `vfile`.
+     * @param ruleId Category of message.
+     */
+    fail: (
+      reason: string,
+      position?: Unist.Point | Unist.Position | Unist.Node,
+      ruleId?: string
+    ) => never
+    /**
+     * Associates an informational message with the file, where `fatal` is set to `null`.
+     * Calls `message()` internally.
+     * @param reason Reason for message. Uses the stack and message of the error if given.
+     * @param position Place at which the message occurred in `vfile`.
+     * @param ruleId Category of message.
+     */
+    info: (
+      reason: string,
+      position?: Unist.Point | Unist.Position | Unist.Node,
+      ruleId?: string
+    ) => vfileMessage.VFileMessage
+
+    [key: string]: unknown
+  }
+}
+
+declare const vfile: vfile.VFile
+
+export = vfile
+"#,
+    );
+
+    let added_paths = [BiomePath::new("/node_modules/vfile/types/index.d.ts")];
+    let added_paths = get_added_paths(&fs, &added_paths);
+
+    let module_graph = ModuleGraph::default();
+    module_graph.update_graph_for_js_paths(&fs, &ProjectLayout::default(), &added_paths, &[]);
+
+    let snapshot = ModuleGraphSnapshot::new(&module_graph, &fs);
+
+    snapshot.assert_snapshot("test_resolve_recursive_looking_vfile");
 }
 
 #[test]

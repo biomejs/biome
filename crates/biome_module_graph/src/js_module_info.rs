@@ -8,8 +8,9 @@ use std::{collections::BTreeMap, ops::Deref, sync::Arc};
 
 use biome_js_syntax::AnyJsImportLike;
 use biome_js_type_info::{
-    GLOBAL_RESOLVER, GLOBAL_UNKNOWN_ID, ImportSymbol, ResolvedTypeData, ResolvedTypeId, ScopeId,
-    TypeData, TypeId, TypeReference, TypeReferenceQualifier, TypeResolver, TypeResolverLevel,
+    BindingId, GLOBAL_RESOLVER, GLOBAL_UNKNOWN_ID, ImportSymbol, ResolvedTypeData, ResolvedTypeId,
+    ScopeId, TypeData, TypeId, TypeReference, TypeReferenceQualifier, TypeResolver,
+    TypeResolverLevel,
 };
 use biome_jsdoc_comment::JsdocComment;
 use biome_resolver::ResolvedPath;
@@ -17,8 +18,8 @@ use biome_rowan::{Text, TextRange, TokenText};
 
 use crate::ModuleGraph;
 
-use binding::{BindingId, JsBindingData};
-use scope::{JsScope, JsScopeData};
+use binding::JsBindingData;
+use scope::{JsScope, JsScopeData, TsBindingReference};
 
 pub use scoped_resolver::ScopedResolver;
 pub(crate) use visitor::JsModuleVisitor;
@@ -188,6 +189,27 @@ impl JsModuleInfoInner {
         &self.bindings[binding_id.index()]
     }
 
+    /// Attempts to find a binding by `name` in the scope with the given
+    /// `scope_id`.
+    ///
+    /// Traverses upwards in scope if the binding is not found in the given
+    /// scope.
+    fn find_binding_in_scope(&self, name: &str, scope_id: ScopeId) -> Option<TsBindingReference> {
+        let mut scope = &self.scopes[scope_id.index()];
+        loop {
+            if let Some(binding_ref) = scope.bindings_by_name.get(name) {
+                return Some(*binding_ref);
+            }
+
+            match &scope.parent {
+                Some(parent_id) => scope = &self.scopes[parent_id.index()],
+                None => break,
+            }
+        }
+
+        None
+    }
+
     /// Returns the information about a given import by its syntax node.
     pub fn get_import_path_by_js_node(&self, node: &AnyJsImportLike) -> Option<&ResolvedPath> {
         let specifier_text = node.inner_string_text()?;
@@ -238,15 +260,16 @@ impl TypeResolver for JsModuleInfoInner {
     }
 
     fn resolve_qualifier(&self, qualifier: &TypeReferenceQualifier) -> Option<ResolvedTypeId> {
-        if qualifier.path.len() == 1 {
-            self.resolve_type_of(
-                &qualifier.path[0],
-                qualifier.scope_id.unwrap_or(ScopeId::GLOBAL),
-            )
-            .or_else(|| GLOBAL_RESOLVER.resolve_qualifier(qualifier))
+        if qualifier.path.len() != 1 {
+            return None;
+        }
+
+        if let Some(export) = self.exports.get(&qualifier.path[0]) {
+            export
+                .as_own_export()
+                .and_then(|own_export| self.resolve_reference(&own_export.ty))
         } else {
-            // TODO: Resolve nested qualifiers
-            None
+            GLOBAL_RESOLVER.resolve_qualifier(qualifier)
         }
     }
 

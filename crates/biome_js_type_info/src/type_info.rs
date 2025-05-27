@@ -23,7 +23,7 @@ use crate::globals::{GLOBAL_PROMISE_ID, GLOBAL_UNKNOWN_ID, PROMISE_ID};
 use crate::type_info::literal::{BooleanLiteral, NumberLiteral, StringLiteral};
 use crate::{GLOBAL_RESOLVER, Resolvable, ResolvedTypeData, ResolvedTypeId, TypeResolver};
 
-const UNKNOWN: TypeData = TypeData::Unknown;
+const UNKNOWN: TypeData = TypeData::Reference(TypeReference::Resolved(GLOBAL_UNKNOWN_ID));
 
 /// Type identifier referencing the type in a resolver's `types` vector.
 ///
@@ -198,7 +198,16 @@ pub enum TypeData {
     InstanceOf(Box<TypeInstance>),
 
     /// Reference to another type.
-    Reference(Box<TypeReference>),
+    Reference(TypeReference),
+
+    /// This one is nasty: TypeScript allows types and values to exist with
+    /// the same name within the same scope. Such duality can even be tracked
+    /// across modules, because a single imported symbol can import both the
+    /// value and the type meaning associated with a single name.
+    ///
+    /// Therefore, the dual reference can track both a type as well as the type
+    /// of the value with the same name.
+    DualReference(Box<DualReference>),
 
     /// Reference to the type of a JavaScript expression.
     TypeofExpression(Box<TypeofExpression>),
@@ -272,6 +281,12 @@ impl From<Namespace> for TypeData {
     }
 }
 
+impl From<TypeofExpression> for TypeData {
+    fn from(value: TypeofExpression) -> Self {
+        Self::TypeofExpression(Box::new(value))
+    }
+}
+
 impl From<TypeofValue> for TypeData {
     fn from(value: TypeofValue) -> Self {
         Self::TypeofValue(Box::new(value))
@@ -280,11 +295,9 @@ impl From<TypeofValue> for TypeData {
 
 impl TypeData {
     pub fn array_of(ty: TypeReference) -> Self {
-        Self::instance_of(TypeReference::Qualifier(TypeReferenceQualifier {
-            path: [Text::Static("Array")].into(),
-            type_parameters: [ty].into(),
-            scope_id: None,
-        }))
+        Self::instance_of(TypeReference::from(
+            TypeReferenceQualifier::from_name(Text::Static("Array")).with_type_parameters([ty]),
+        ))
     }
 
     pub fn as_class(&self) -> Option<&Class> {
@@ -305,10 +318,25 @@ impl TypeData {
         Self::Boolean
     }
 
+    pub fn dual_reference(
+        ty: impl Into<TypeReference>,
+        value_ty: impl Into<TypeReference>,
+    ) -> Self {
+        Self::DualReference(Box::new(DualReference {
+            ty: ty.into(),
+            value_ty: value_ty.into(),
+        }))
+    }
+
     /// Returns the type with inference up to the level supported by the given `resolver`.
     #[inline]
     pub fn inferred(&self, resolver: &mut dyn TypeResolver) -> Self {
         self.resolved(resolver).flattened(resolver)
+    }
+
+    #[inline]
+    pub fn instance_of(instance: impl Into<TypeInstance>) -> Self {
+        Self::InstanceOf(Box::new(instance.into()))
     }
 
     /// Creates an intersection of type references.
@@ -321,20 +349,24 @@ impl TypeData {
         match types.len().cmp(&1) {
             Ordering::Greater => Self::Intersection(Box::new(Intersection(types.into()))),
             Ordering::Equal => Self::reference(types.remove(0)),
-            Ordering::Less => Self::Unknown,
+            Ordering::Less => Self::unknown(),
         }
     }
 
     /// Returns whether the given type has been inferred.
     ///
-    /// A type is considered inferred if it is anything except `Self::Unknown`,
-    /// including an unexplicit `unknown` keyword.
+    /// A type is considered inferred if it is anything except `Self::Unknown`
+    /// or an unknown reference, including an unexplicit `unknown` keyword.
     pub fn is_inferred(&self) -> bool {
-        !matches!(self, Self::Unknown)
+        match self {
+            Self::Reference(TypeReference::Resolved(resolved)) => *resolved != GLOBAL_UNKNOWN_ID,
+            Self::Reference(TypeReference::Unknown) | Self::Unknown => false,
+            _ => true,
+        }
     }
 
     pub fn reference(reference: impl Into<TypeReference>) -> Self {
-        Self::Reference(Box::new(reference.into()))
+        Self::Reference(reference.into())
     }
 
     pub fn type_parameters(&self) -> Option<&[GenericTypeParameter]> {
@@ -356,12 +388,13 @@ impl TypeData {
         match types.len().cmp(&1) {
             Ordering::Greater => Self::Union(Box::new(Union(types.into()))),
             Ordering::Equal => Self::reference(types.remove(0)),
-            Ordering::Less => Self::Unknown,
+            Ordering::Less => Self::unknown(),
         }
     }
 
+    #[inline]
     pub fn unknown() -> Self {
-        Self::Unknown
+        Self::reference(GLOBAL_UNKNOWN_ID)
     }
 }
 
@@ -402,6 +435,25 @@ pub struct Constructor {
 
     /// Return type when the constructor is called.
     pub return_type: Option<TypeReference>,
+}
+
+/// Tracks two types that are associated with the same name.
+///
+/// TypeScript allows types and values to exist with the same name within the
+/// same scope. Such duality can even be tracked across modules, because a
+/// single imported symbol can import both the value and the type meaning
+/// associated with a single name.
+///
+/// Ultimately, both references are _types_, since those are what's being
+/// tracked by the type system. But one is the type associated with a given
+/// name, while the other is the type of the value associated with the same
+/// name.
+///
+/// With a dual reference, which type gets used depends entirely on context.
+#[derive(Clone, Debug, PartialEq, Resolvable)]
+pub struct DualReference {
+    pub ty: TypeReference,
+    pub value_ty: TypeReference,
 }
 
 /// A function definition.
@@ -746,12 +798,15 @@ impl TypeInstance {
 pub enum TypeofExpression {
     Addition(TypeofAdditionExpression),
     Await(TypeofAwaitExpression),
+    BitwiseNot(TypeofBitwiseNotExpression),
     Call(TypeofCallExpression),
     Destructure(TypeofDestructureExpression),
     New(TypeofNewExpression),
     StaticMember(TypeofStaticMemberExpression),
     Super(TypeofThisOrSuperExpression),
     This(TypeofThisOrSuperExpression),
+    Typeof(TypeofTypeofExpression),
+    UnaryMinus(TypeofUnaryMinusExpression),
 }
 
 #[derive(Clone, Debug, PartialEq, Resolvable)]
@@ -762,6 +817,11 @@ pub struct TypeofAdditionExpression {
 
 #[derive(Clone, Debug, PartialEq, Resolvable)]
 pub struct TypeofAwaitExpression {
+    pub argument: TypeReference,
+}
+
+#[derive(Clone, Debug, PartialEq, Resolvable)]
+pub struct TypeofBitwiseNotExpression {
     pub argument: TypeReference,
 }
 
@@ -812,6 +872,19 @@ pub struct TypeofThisOrSuperExpression {
     pub parent: TypeReference,
 }
 
+/// Type of expressions using the `typeof` operator.
+#[derive(Clone, Debug, PartialEq, Resolvable)]
+pub struct TypeofTypeofExpression {
+    /// Reference to the type of the expression from which a string
+    /// representation should be created.
+    pub argument: TypeReference,
+}
+
+#[derive(Clone, Debug, PartialEq, Resolvable)]
+pub struct TypeofUnaryMinusExpression {
+    pub argument: TypeReference,
+}
+
 /// Reference to the type of a named JavaScript value.
 #[derive(Clone, Debug, PartialEq)]
 pub struct TypeofValue {
@@ -860,16 +933,16 @@ impl FromStr for TypeOperator {
 /// This definition may require importing from another module.
 #[derive(Clone, Debug, Default, PartialEq)]
 pub enum TypeReference {
-    Qualifier(TypeReferenceQualifier),
+    Qualifier(Box<TypeReferenceQualifier>),
     Resolved(ResolvedTypeId),
-    Import(TypeImportQualifier),
+    Import(Box<TypeImportQualifier>),
     #[default]
     Unknown,
 }
 
 impl From<TypeReferenceQualifier> for TypeReference {
     fn from(qualifier: TypeReferenceQualifier) -> Self {
-        Self::Qualifier(qualifier)
+        Self::Qualifier(Box::new(qualifier))
     }
 }
 
@@ -881,7 +954,7 @@ impl From<ResolvedTypeId> for TypeReference {
 
 impl From<TypeImportQualifier> for TypeReference {
     fn from(qualifier: TypeImportQualifier) -> Self {
-        Self::Import(qualifier)
+        Self::Import(Box::new(qualifier))
     }
 }
 
@@ -901,6 +974,15 @@ impl TypeReference {
             _ => [].into(),
         }
     }
+
+    pub fn with_excluded_binding_id(self, binding_id: BindingId) -> Self {
+        match self {
+            Self::Qualifier(qualifier) => {
+                Self::Qualifier(Box::new(qualifier.with_excluded_binding_id(binding_id)))
+            }
+            other => other,
+        }
+    }
 }
 
 /// Qualifier for a type that should be imported from another module.
@@ -911,6 +993,9 @@ pub struct TypeImportQualifier {
 
     /// Resolved path of the module to import the type from.
     pub resolved_path: ResolvedPath,
+
+    /// If `true`, this qualifier imports the type only.
+    pub type_only: bool,
 }
 
 #[derive(Clone, Debug, PartialEq)]
@@ -948,6 +1033,14 @@ pub struct TypeReferenceQualifier {
 
     /// ID of the scope from which the qualifier is being referenced.
     pub scope_id: Option<ScopeId>,
+
+    /// If `true`, this qualifier can reference types only.
+    pub type_only: bool,
+
+    /// Optional [`BindingId`] this qualifier may not reference.
+    ///
+    /// This is used to prevent self-references.
+    pub excluded_binding_id: Option<BindingId>,
 }
 
 impl TypeReferenceQualifier {
@@ -981,11 +1074,14 @@ impl TypeReferenceQualifier {
         self.path.len() == 1 && self.path[0] == "Promise"
     }
 
-    pub fn with_scope_id(self, scope_id: ScopeId) -> Self {
-        Self {
-            scope_id: Some(scope_id),
-            ..self
-        }
+    pub fn with_excluded_binding_id(mut self, binding_id: BindingId) -> Self {
+        self.excluded_binding_id = Some(binding_id);
+        self
+    }
+
+    pub fn with_scope_id(mut self, scope_id: ScopeId) -> Self {
+        self.scope_id = Some(scope_id);
+        self
     }
 
     pub fn without_type_parameters(&self) -> Self {
@@ -993,7 +1089,39 @@ impl TypeReferenceQualifier {
             path: self.path.clone(),
             type_parameters: [].into(),
             scope_id: self.scope_id,
+            type_only: self.type_only,
+            excluded_binding_id: self.excluded_binding_id,
         }
+    }
+}
+
+#[derive(Copy, Clone, Debug, Eq, Hash, PartialEq)]
+pub struct BindingId(u32);
+
+impl BindingId {
+    pub const fn new(index: usize) -> Self {
+        // SAFETY: We don't handle files exceeding `u32::MAX` bytes.
+        // Thus, it isn't possible to exceed `u32::MAX` bindings.
+        Self(index as u32)
+    }
+
+    pub const fn index(self) -> usize {
+        self.0 as usize
+    }
+}
+
+// We allow conversion from `BindingId` into `TypeId`, and vice versa, because
+// for project-level `ResolvedTypeId` instances, the `TypeId` is an indirection
+// that is resolved through a binding.
+impl From<BindingId> for TypeId {
+    fn from(id: BindingId) -> Self {
+        Self::new(id.0 as usize)
+    }
+}
+
+impl From<TypeId> for BindingId {
+    fn from(id: TypeId) -> Self {
+        Self::new(id.index())
     }
 }
 

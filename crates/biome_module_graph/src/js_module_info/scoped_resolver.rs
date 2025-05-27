@@ -195,10 +195,19 @@ impl ScopedResolver {
 
             let export = match module.exports.get(name) {
                 Some(JsExport::Own(export) | JsExport::OwnType(export)) => export,
-                Some(JsExport::Reexport(reexport) | JsExport::ReexportType(reexport)) => {
+                Some(JsExport::Reexport(reexport)) => {
                     qualifier = Cow::Owned(TypeImportQualifier {
                         symbol: reexport.import.symbol.clone(),
                         resolved_path: reexport.import.resolved_path.clone(),
+                        type_only: false,
+                    });
+                    continue;
+                }
+                Some(JsExport::ReexportType(reexport)) => {
+                    qualifier = Cow::Owned(TypeImportQualifier {
+                        symbol: reexport.import.symbol.clone(),
+                        resolved_path: reexport.import.resolved_path.clone(),
+                        type_only: true,
                     });
                     continue;
                 }
@@ -303,10 +312,19 @@ impl TypeResolver for ScopedResolver {
 
             let export = match module.exports.get(name) {
                 Some(JsExport::Own(export) | JsExport::OwnType(export)) => export,
-                Some(JsExport::Reexport(reexport) | JsExport::ReexportType(reexport)) => {
+                Some(JsExport::Reexport(reexport)) => {
                     qualifier = Cow::Owned(TypeImportQualifier {
                         symbol: reexport.import.symbol.clone(),
                         resolved_path: reexport.import.resolved_path.clone(),
+                        type_only: false,
+                    });
+                    continue;
+                }
+                Some(JsExport::ReexportType(reexport)) => {
+                    qualifier = Cow::Owned(TypeImportQualifier {
+                        symbol: reexport.import.symbol.clone(),
+                        resolved_path: reexport.import.resolved_path.clone(),
+                        type_only: true,
                     });
                     continue;
                 }
@@ -324,7 +342,7 @@ impl TypeResolver for ScopedResolver {
                 }
                 TypeReference::Resolved(resolved) => Some(resolved.with_module_id(module_id)),
                 TypeReference::Import(import) => {
-                    qualifier = Cow::Owned(import.clone());
+                    qualifier = Cow::Owned(import.as_ref().clone());
                     continue;
                 }
                 TypeReference::Unknown => None,
@@ -335,46 +353,67 @@ impl TypeResolver for ScopedResolver {
     }
 
     fn resolve_qualifier(&self, qualifier: &TypeReferenceQualifier) -> Option<ResolvedTypeId> {
-        if qualifier.path.len() == 1 {
-            self.resolve_type_of(
-                &qualifier.path[0],
-                qualifier.scope_id.unwrap_or(ScopeId::GLOBAL),
-            )
-            .or_else(|| GLOBAL_RESOLVER.resolve_qualifier(qualifier))
+        let module = &self.modules[0];
+        let scope_id = qualifier.scope_id.unwrap_or(ScopeId::GLOBAL);
+
+        let identifier = qualifier.path.first()?;
+        let Some(binding_ref) = module.find_binding_in_scope(identifier, scope_id) else {
+            return GLOBAL_RESOLVER.resolve_qualifier(qualifier);
+        };
+
+        let binding_id = binding_ref.get_binding_id_for_qualifier(qualifier)?;
+
+        let binding = module.binding(binding_id);
+        let mut ty = if binding.declaration_kind.is_import_declaration() {
+            let resolved_id = module
+                .static_imports
+                .get(&binding.name)
+                .and_then(|import| {
+                    self.resolve_import_reference(&TypeImportQualifier {
+                        symbol: import.symbol.clone(),
+                        resolved_path: import.resolved_path.clone(),
+                        type_only: binding.declaration_kind.is_import_type_declaration(),
+                    })
+                })?;
+            if qualifier.path.len() == 1 {
+                return Some(resolved_id);
+            }
+
+            Cow::Owned(resolved_id.into())
         } else {
-            // TODO: Resolve nested qualifiers
-            None
+            Cow::Borrowed(&binding.ty)
+        };
+
+        for identifier in &qualifier.path[1..] {
+            let resolved = self.resolve_and_get(&ty)?;
+            let member = resolved
+                .all_members(self)
+                .with_excluded_binding_id(binding_id)
+                .find(|member| member.is_static() && member.has_name(identifier))?;
+            ty = Cow::Owned(member.ty().into_owned());
         }
+
+        self.resolve_reference(&ty)
     }
 
     fn resolve_type_of(&self, identifier: &Text, scope_id: ScopeId) -> Option<ResolvedTypeId> {
         let module = &self.modules[0];
-        let mut scope = &module.scopes[scope_id.index()];
-        loop {
-            if let Some(binding) = scope
-                .bindings_by_name
-                .get(identifier.text())
-                .map(|id| &module.bindings[id.index()])
-            {
-                return if binding.declaration_kind.is_import_declaration() {
-                    module.static_imports.get(&binding.name).and_then(|import| {
-                        self.resolve_import_reference(&TypeImportQualifier {
-                            symbol: import.symbol.clone(),
-                            resolved_path: import.resolved_path.clone(),
-                        })
-                    })
-                } else {
-                    self.resolve_reference(&binding.ty)
-                };
-            }
+        let Some(binding_ref) = module.find_binding_in_scope(identifier, scope_id) else {
+            return GLOBAL_RESOLVER.resolve_type_of(identifier, scope_id);
+        };
 
-            match &scope.parent {
-                Some(parent_id) => scope = &module.scopes[parent_id.index()],
-                None => break,
-            }
+        let binding = module.binding(binding_ref.value_ty_or_ty());
+        if binding.declaration_kind.is_import_declaration() {
+            module.static_imports.get(&binding.name).and_then(|import| {
+                self.resolve_import_reference(&TypeImportQualifier {
+                    symbol: import.symbol.clone(),
+                    resolved_path: import.resolved_path.clone(),
+                    type_only: binding.declaration_kind.is_import_type_declaration(),
+                })
+            })
+        } else {
+            self.resolve_reference(&binding.ty)
         }
-
-        GLOBAL_RESOLVER.resolve_type_of(identifier, scope_id)
     }
 
     fn fallback_resolver(&self) -> Option<&dyn TypeResolver> {
