@@ -17,6 +17,15 @@ pub struct JsSyntaxMatchPair {
     pub matching_array_element: JsSyntaxNode,
 }
 
+fn member_name_remap(old_member_name: &str) -> Option<&str> {
+    let new_member_name = match old_member_name {
+        "findIndex" => "indexOf",
+        "findLastIndex" => "lastIndexOf",
+        _ => return None,
+    };
+    Some(new_member_name)
+}
+
 fn extract_simple_compare_match(
     expression: &JsBinaryExpression,
     parameter_name: &String,
@@ -43,13 +52,13 @@ pub fn find_index_comparable_expression(
     parameter_name: &String,
     return_statement_required: bool,
 ) -> Option<JsSyntaxNode> {
-    let has_invalid_expression = body.syntax().descendants().filter(|node| {
+    let has_invalid_expression = body.syntax().descendants().find(|node| {
         JsAssignmentExpression::can_cast(node.kind())
             || JsVariableDeclaration::can_cast(node.kind())
             || JsLogicalExpression::can_cast(node.kind())
     });
 
-    if has_invalid_expression {
+    if has_invalid_expression.is_some() {
         return None;
     }
 
@@ -67,12 +76,15 @@ pub fn find_index_comparable_expression(
         .syntax()
         .descendants()
         .filter_map(JsReturnStatement::cast);
+    let has_one_or_more_return_statements = return_statements.next().is_some();
+    let has_two_or_more_return_statements = return_statements.next().is_some();
 
-    if return_statement_required {
-        return_statements.next()?;
+    if has_two_or_more_return_statements {
+        return None;
     }
 
-    if return_statements.next().is_some() {
+    if return_statement_required && !has_one_or_more_return_statements
+    {
         return None;
     }
 
@@ -274,9 +286,7 @@ impl Rule for UseIndexOf {
         let member_expression = AnyJsMemberExpression::cast(call.callee().ok()?.into_syntax())?;
         let member_name = member_expression.member_name()?;
 
-        if !matches!(member_name.text(), "findIndex" | "findLastIndex") {
-            return None;
-        }
+        member_name_remap(member_name.text())?;
 
         let member_name_token = member_expression.syntax().last_token()?;
         let callback_function = call.arguments().ok()?.args().first()?.ok()?;
@@ -291,22 +301,29 @@ impl Rule for UseIndexOf {
         }
     }
 
-    fn diagnostic(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<RuleDiagnostic> {
+    fn diagnostic(
+        ctx: &RuleContext<Self>,
+        matched_expression: &Self::State,
+    ) -> Option<RuleDiagnostic> {
         let node = ctx.query();
+
+        let JsSyntaxMatchPair {
+            matching_array_element: _,
+            member_name,
+        } = matched_expression;
+
+        let old_member_name = member_name.text_trimmed();
+        let new_member_name = member_name_remap(old_member_name)?;
 
         Some(
             RuleDiagnostic::new(
                 rule_category!(),
                 node.range(),
                 markup! {
-                    "Prefer `Array#{indexOf,lastIndexOf}()` over `Array#{findIndex,findLastIndex}()` when looking for the index of an item."
+                    "Prefer "<Emphasis>"Array#"{old_member_name}"()"</Emphasis>" over "<Emphasis>"Array#"{new_member_name}"()"</Emphasis>" when looking for the index of an item.`"
                 },
-            )
-                .note(markup! {
-            .detail(
-                callback_range,
-                "This callback only tests for equality against a single value. This value can be passed directly to "<Emphasis>"Array#indexOf()"</Emphasis>" instead."
-            )
+            ).note(markup! {
+                "This callback only tests for equality against a single value. This value can be passed directly to "<Emphasis>""{new_member_name}"()"</Emphasis>" instead."
             }),
         )
     }
@@ -320,11 +337,7 @@ impl Rule for UseIndexOf {
         } = matched_expression;
 
         let old_member_name = member_name.text_trimmed();
-        let new_member_name = match old_member_name {
-            "findIndex" => "indexOf",
-            "findLastIndex" => "lastIndexOf",
-            _ => return None,
-        };
+        let new_member_name = member_name_remap(old_member_name)?;
 
         mutation.replace_token_discard_trivia(
             member_name.clone(),
@@ -343,7 +356,7 @@ impl Rule for UseIndexOf {
             ctx.metadata().action_category(ctx.category(), ctx.group()),
             ctx.metadata().applicability(),
             markup! {
-              "Replace `Array#"{old_member_name} "()` with `Array#" {new_member_name}"()`"
+              "Replace "<Emphasis>"Array#"{old_member_name}"()"</Emphasis>" with "<Emphasis>"Array#"{new_member_name}"()"</Emphasis>""
             },
             mutation,
         ))

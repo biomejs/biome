@@ -3,7 +3,7 @@ const list = ['foo', 'bar', 'baz'];
 const isValid = () => true;
 const getBar = () => 'bar';
 const a = 'foo';
-const y = { a };
+const y = {a};
 
 list.findIndex((x, index) => x === index);
 list.findIndex(x => (x === 'foo') && isValid());
@@ -11,6 +11,14 @@ list.findIndex(x => a === 'foo');
 list.findIndex(x => y.a === 'foo');
 list.findIndex(x => {
 	const bar = getBar();
+	return x === bar;
+});
+list.findIndex(x => {
+	const bar = getBar();
+	if (x === 'foo') {
+		return true;
+	}
+	
 	return x === bar;
 });
 list.lastIndexOf('foo');
