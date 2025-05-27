@@ -20,8 +20,8 @@ use crate::{
 };
 use biome_configuration::analyzer::RuleSelector;
 use biome_console::{ConsoleExt, markup};
-use biome_diagnostics::SerdeJsonError;
 use biome_diagnostics::{Category, category};
+use biome_diagnostics::{Resource, SerdeJsonError};
 use biome_fs::BiomePath;
 use biome_grit_patterns::GritTargetLanguage;
 use biome_service::projects::ProjectKey;
@@ -30,6 +30,7 @@ use biome_service::workspace::{
     OpenFileParams, PatternId, ScanKind,
 };
 use camino::{Utf8Path, Utf8PathBuf};
+use std::cmp::Ordering;
 use std::ffi::OsString;
 use std::fmt::{Display, Formatter};
 use std::time::Duration;
@@ -591,7 +592,19 @@ pub fn execute_mode(
         cli_options,
         paths.clone(),
     )?;
-    diagnostics.sort_by_key(|diagnostic| diagnostic.severity());
+    diagnostics.sort_unstable_by(|a, b| match a.severity().cmp(&b.severity()) {
+        Ordering::Equal => {
+            let a = a.location();
+            let b = b.location();
+            match (a.resource, b.resource) {
+                (Some(Resource::File(a)), Some(Resource::File(b))) => a.cmp(b),
+                (Some(Resource::File(_)), None) => Ordering::Greater,
+                (None, Some(Resource::File(_))) => Ordering::Less,
+                _ => Ordering::Equal,
+            }
+        }
+        result => result,
+    });
     // We join the duration of the scanning with the duration of the traverse.
     summary.scanner_duration = scanner_duration;
     let console = session.app.console;

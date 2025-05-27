@@ -29,7 +29,7 @@ use tokio::task::spawn_blocking;
 use tower_lsp_server::jsonrpc::Result as LspResult;
 use tower_lsp_server::{ClientSocket, UriExt, lsp_types::*};
 use tower_lsp_server::{LanguageServer, LspService, Server};
-use tracing::{error, info, instrument, warn};
+use tracing::{debug, error, info, instrument, warn};
 
 pub struct LSPServer {
     pub(crate) session: SessionHandle,
@@ -116,6 +116,7 @@ impl LSPServer {
         Ok(RageResult { entries })
     }
 
+    #[instrument(level = "info", skip(self))]
     async fn setup_capabilities(&self) {
         let mut capabilities = CapabilitySet::default();
 
@@ -129,36 +130,28 @@ impl LSPServer {
             },
         );
 
-        capabilities.add_capability(
-            "biome_did_change_workspace_settings",
-            "workspace/didChangeWatchedFiles",
+        let watched_files_capability = if self.session.can_register_did_change_watched_files() {
             if let Some(folders) = self.session.get_workspace_folders() {
                 let watchers = folders
                     .iter()
                     .map(|folder| FileSystemWatcher {
                         glob_pattern: GlobPattern::String(format!(
-                            "{}/biome.json",
+                            "{}/**/biome.{{json,jsonc}}",
                             folder.uri.as_str()
                         )),
                         kind: Some(WatchKind::all()),
                     })
                     .collect();
+                debug!("Watchers: {:?}", &watchers);
                 CapabilityStatus::Enable(Some(json!(DidChangeWatchedFilesRegistrationOptions {
                     watchers
                 })))
             } else if let Some(base_path) = self.session.base_path() {
-                CapabilityStatus::Enable(Some(json!(DidChangeWatchedFilesRegistrationOptions {
+                let value = DidChangeWatchedFilesRegistrationOptions {
                     watchers: vec![
                         FileSystemWatcher {
                             glob_pattern: GlobPattern::String(format!(
-                                "{}/biome.json",
-                                base_path.as_str()
-                            )),
-                            kind: Some(WatchKind::all()),
-                        },
-                        FileSystemWatcher {
-                            glob_pattern: GlobPattern::String(format!(
-                                "{}/biome.jsonc",
+                                "{}/**/biome.{{json,jsonc}}",
                                 base_path.as_str()
                             )),
                             kind: Some(WatchKind::all()),
@@ -169,12 +162,23 @@ impl LSPServer {
                                 base_path.as_str()
                             )),
                             kind: Some(WatchKind::all()),
-                        }
+                        },
                     ],
-                })))
+                };
+                debug!("Watchers: {:?}", &value);
+                CapabilityStatus::Enable(Some(json!(value)))
             } else {
+                debug!("No workspace folders, no watchers");
                 CapabilityStatus::Disable
-            },
+            }
+        } else {
+            CapabilityStatus::Disable
+        };
+
+        capabilities.add_capability(
+            "biome_did_change_watched_files",
+            "workspace/didChangeWatchedFiles",
+            watched_files_capability,
         );
 
         capabilities.add_capability(
@@ -245,16 +249,7 @@ impl LSPServer {
 impl LanguageServer for LSPServer {
     // The `root_path` field is deprecated, but we still read it so we can print a warning about it
     #[expect(deprecated)]
-    #[tracing::instrument(
-        level = "debug",
-        skip_all,
-        fields(
-            capabilities = debug(&params.capabilities),
-            client_info = params.client_info.as_ref().map(debug),
-            root_path = params.root_path,
-            workspace_folders = params.workspace_folders.as_ref().map(debug),
-        )
-    )]
+    #[tracing::instrument(level = "debug", skip_all)]
     async fn initialize(&self, params: InitializeParams) -> LspResult<InitializeResult> {
         info!("Starting Biome Language Server...");
         self.is_initialized.store(true, Ordering::Relaxed);
@@ -316,12 +311,11 @@ impl LanguageServer for LSPServer {
     async fn did_change_configuration(&self, params: DidChangeConfigurationParams) {
         let _ = params;
         self.session.load_extension_settings().await;
-        self.session.load_workspace_settings().await;
         self.setup_capabilities().await;
         self.session.update_all_diagnostics().await;
     }
 
-    #[tracing::instrument(level = "debug", skip(self))]
+    #[tracing::instrument(level = "debug", skip_all)]
     async fn did_change_watched_files(&self, params: DidChangeWatchedFilesParams) {
         let file_paths = params
             .changes

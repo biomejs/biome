@@ -1,0 +1,52 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `biome.json`
+
+```json
+{
+  "root": true,
+  "javascript": {
+    "formatter": {
+      "quoteStyle": "double"
+    }
+  }
+}
+```
+
+## `packages/lib/biome.json`
+
+```json
+{
+  "root": true,
+  "javascript": {
+    "formatter": {
+      "quoteStyle": "double"
+    }
+  }
+}
+```
+
+# Termination Message
+
+```block
+configuration ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Biome exited because the configuration resulted in errors. Please fix them.
+  
+
+
+```
+
+# Emitted Messages
+
+```block
+<TEMP_DIR>/should_fail_for_nested_roots/packages/lib/biome.json configuration ━━━━━━━━━━━━━━━━━━━━
+
+  × Found a nested root configuration, but there's already a root configuration.
+  
+  i The other configuration was found in <TEMP_DIR>/should_fail_for_nested_roots.
+  
+
+```
