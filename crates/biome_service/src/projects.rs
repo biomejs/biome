@@ -5,6 +5,7 @@ use camino::{Utf8Path, Utf8PathBuf};
 use papaya::HashMap;
 use rustc_hash::FxBuildHasher;
 use serde::{Deserialize, Serialize};
+use std::collections::BTreeMap;
 use std::fmt::Display;
 use std::num::NonZeroUsize;
 use std::sync::atomic::{AtomicUsize, Ordering};
@@ -24,7 +25,7 @@ struct ProjectData {
 
     /// Optional nested settings, usually populated in monorepo
     /// projects.
-    nested_settings: HashMap<Utf8PathBuf, Settings, FxBuildHasher>,
+    nested_settings: BTreeMap<Utf8PathBuf, Settings>,
 }
 
 /// Type that holds all the settings and information for different projects
@@ -61,7 +62,7 @@ impl Projects {
             ProjectData {
                 path,
                 root_settings: Settings::default(),
-                nested_settings: HashMap::default(),
+                nested_settings: Default::default(),
             },
         );
         key
@@ -78,21 +79,21 @@ impl Projects {
         project_key: ProjectKey,
         file_path: &Utf8Path,
     ) -> Option<Settings> {
-        self.0.pin().get(&project_key).map(|data| {
-            debug!(
-                "Get settings for {} {}",
-                file_path.as_str(),
-                data.nested_settings.len()
-            );
-            let nested_settings = data.nested_settings.pin();
-            for (project_path, settings) in nested_settings.iter() {
-                if file_path.starts_with(project_path) {
-                    return settings.clone();
-                }
-            }
+        let projects = self.0.pin();
+        let data = projects.get(&project_key)?;
 
-            data.root_settings.clone()
-        })
+        debug!(
+            "Get settings for {} {}",
+            file_path.as_str(),
+            data.nested_settings.len()
+        );
+        for (project_path, settings) in &data.nested_settings {
+            if file_path.starts_with(project_path) {
+                return Some(settings.clone());
+            }
+        }
+
+        Some(data.root_settings.clone())
     }
 
     /// Retrieves the correct settings for the given project.
@@ -101,17 +102,16 @@ impl Projects {
         project_key: ProjectKey,
         file_path: &Utf8Path,
     ) -> Option<Settings> {
-        self.0.pin().get(&project_key).and_then(|data| {
-            let nested_settings = data.nested_settings.pin();
+        let projects = self.0.pin();
+        let data = projects.get(&project_key)?;
 
-            nested_settings.iter().find_map(|(project_path, settings)| {
-                if file_path.starts_with(project_path) {
-                    Some(settings.clone())
-                } else {
-                    None
-                }
+        data.nested_settings
+            .iter()
+            .find_map(|(project_path, settings)| {
+                file_path
+                    .starts_with(project_path)
+                    .then(|| settings.clone())
             })
-        })
     }
 
     /// Whether the project has been registered
@@ -143,22 +143,19 @@ impl Projects {
     }
 
     /// Sets the root settings for the given project.
+    ///
+    /// Does nothing if the project doesn't exist.
     pub fn set_root_settings(&self, project_key: ProjectKey, settings: Settings) {
-        let data = self.0.pin();
-        let Some(project_data) = data.get(&project_key) else {
-            return;
-        };
-
-        let project_data = ProjectData {
-            path: project_data.path.clone(),
-            root_settings: settings,
-            nested_settings: project_data.nested_settings.clone(),
-        };
-
-        data.insert(project_key, project_data);
+        self.0.pin().update(project_key, |data| ProjectData {
+            path: data.path.clone(),
+            root_settings: settings.clone(),
+            nested_settings: data.nested_settings.clone(),
+        });
     }
 
-    /// Inserts a nested setting
+    /// Inserts a nested setting.
+    ///
+    /// Does nothing if the project doesn't exist.
     #[instrument(level = "debug", skip_all)]
     pub fn set_nested_settings(
         &self,
@@ -166,13 +163,17 @@ impl Projects {
         path: Utf8PathBuf,
         settings: Settings,
     ) {
-        let data = self.0.pin();
-        let Some(project_data) = data.get(&project_key) else {
-            return;
-        };
-
         debug!("Set nested settings for {}", path.as_str());
-        project_data.nested_settings.pin().insert(path, settings);
+        self.0.pin().update(project_key, |data| {
+            let mut nested_settings = data.nested_settings.clone();
+            nested_settings.insert(path.clone(), settings.clone());
+
+            ProjectData {
+                path: data.path.clone(),
+                root_settings: settings.clone(),
+                nested_settings: data.nested_settings.clone(),
+            }
+        });
     }
 
     pub fn get_project_path(&self, project_key: ProjectKey) -> Option<Utf8PathBuf> {

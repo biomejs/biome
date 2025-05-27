@@ -17,7 +17,7 @@ use crate::file_handlers::{
     ParseResult,
 };
 use crate::projects::Projects;
-use crate::settings::{Settings, WorkspaceSettingsHandle};
+use crate::settings::WorkspaceSettingsHandle;
 use crate::workspace::{
     FileFeaturesResult, GetFileContentParams, GetRegisteredTypesParams, GetTypeInfoParams,
     IsPathIgnoredParams, OpenProjectResult, RageEntry, RageParams, RageResult, ScanKind,
@@ -674,7 +674,7 @@ impl WorkspaceServer {
                 continue;
             }
 
-            let nested_configuration = if nested_configuration.needs_to_extend_from_root() {
+            let nested_configuration = if nested_configuration.extends_root() {
                 let root_settings = self
                     .projects
                     .get_root_settings(project_key)
@@ -697,6 +697,7 @@ impl WorkspaceServer {
 
             returned_diagnostics.extend(result.diagnostics)
         }
+
         Ok(returned_diagnostics)
     }
 
@@ -938,15 +939,7 @@ impl Workspace for WorkspaceServer {
             if let Some(workspace_directory) = &workspace_directory {
                 self.projects
                     .get_nested_settings(params.project_key, workspace_directory.as_path())
-                    .unwrap_or_else(|| {
-                        if params.configuration.needs_to_extend_from_root() {
-                            self.projects
-                                .get_root_settings(params.project_key)
-                                .unwrap_or_default()
-                        } else {
-                            Settings::default()
-                        }
-                    })
+                    .unwrap_or_default()
             } else {
                 return Err(WorkspaceError::no_workspace_directory());
             }

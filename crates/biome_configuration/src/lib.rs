@@ -255,15 +255,19 @@ impl Configuration {
     }
 
     /// Whether these settings belong to a root.
-    /// It's returns `true` when it's `None` or `Some(true)`, `false` otherwise.
+    ///
+    /// If [`Self::root`] is `None`, this uses the result of
+    /// [`Self::extends_root()`] to determine an implicit default (a config that
+    /// extends the root cannot be a root itself).
     pub fn is_root(&self) -> bool {
-        self.root.unwrap_or_default().into()
+        match self.root {
+            Some(root) => root.into(),
+            None => !self.extends_root(),
+        }
     }
 
-    pub fn needs_to_extend_from_root(&self) -> bool {
-        self.extends
-            .as_ref()
-            .is_some_and(|extends| extends.extends_root())
+    pub fn extends_root(&self) -> bool {
+        self.extends.as_ref().is_some_and(Extends::extends_root)
     }
 
     pub fn get_formatter_configuration(&self) -> FormatterConfiguration {
