@@ -344,7 +344,7 @@ impl Rule for UseIndexOf {
             ctx.metadata().action_category(ctx.category(), ctx.group()),
             ctx.metadata().applicability(),
             markup! {
-              "Replace `Array."{old_member_name} "()` with `Array." {new_member_name}"()`"
+              "Replace `Array#"{old_member_name} "()` with `Array#" {new_member_name}"()`"
             },
             mutation,
         ))
