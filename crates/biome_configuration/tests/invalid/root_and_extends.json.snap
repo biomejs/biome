@@ -1,0 +1,15 @@
+---
+source: crates/biome_configuration/tests/spec_tests.rs
+expression: root_and_extends.json
+---
+root_and_extends.json:1:1 deserialize ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The configuration file cannot be both a root of a Biome project and extended from a root configuration.
+  
+  > 1 │ {
+      │ ^
+  > 2 │   "root":  true,
+  > 3 │   "extends": "//"
+  > 4 │ }
+      │ ^
+    5 │

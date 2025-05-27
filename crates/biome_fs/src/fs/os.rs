@@ -406,6 +406,7 @@ pub struct TemporaryFs {
     /// name passed in the [TemporaryFs::new] function
     pub working_directory: Utf8PathBuf,
     files: Vec<(Utf8PathBuf, String)>,
+    project_directory: Utf8PathBuf,
 }
 
 impl TemporaryFs {
@@ -423,8 +424,9 @@ impl TemporaryFs {
         let path = fs::canonicalize(path).unwrap();
 
         Self {
-            working_directory: Utf8PathBuf::from_path_buf(path).unwrap(),
+            working_directory: Utf8PathBuf::from_path_buf(path.clone()).unwrap(),
             files: Vec::new(),
+            project_directory: Utf8PathBuf::from_path_buf(path).unwrap(),
         }
     }
 
@@ -444,6 +446,10 @@ impl TemporaryFs {
             .expect("Temporary directory to exist and being writable");
     }
 
+    pub fn append_to_working_directory(&mut self, path: &str) {
+        self.working_directory = self.project_directory.join(path);
+    }
+
     /// Returns the path to use when running the CLI
     pub fn cli_path(&self) -> &str {
         self.working_directory.as_str()
@@ -461,7 +467,7 @@ impl TemporaryFs {
         for (path, content) in self.files.iter() {
             fs.insert(
                 path.clone()
-                    .strip_prefix(self.working_directory.as_str())
+                    .strip_prefix(self.project_directory.as_str())
                     .expect("Working directory")
                     .to_path_buf(),
                 content.as_bytes(),

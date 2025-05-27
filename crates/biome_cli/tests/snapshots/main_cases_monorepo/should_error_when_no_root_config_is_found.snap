@@ -1,0 +1,50 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `packages/lib/biome.json`
+
+```json
+{
+  "extends": "//",
+  "javascript": {
+    "formatter": {
+      "quoteStyle": "double"
+    }
+  }
+}
+```
+
+## `biome.json`
+
+```json
+{
+  "formatter": {
+    "indentStyle": "space",
+    "indentWidth": 2
+  }
+}
+```
+
+## `file.js`
+
+```js
+function f() { const lorem_and_ipsum = 'lorem ipsum'; }
+```
+
+## `packages/lib/file.js`
+
+```js
+function f() { const lorem_and_ipsum = 'lorem ipsum'; }
+```
+
+# Termination Message
+
+```block
+configuration ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Biome couldn't find a root configuration to extend from. Remove the extends field or make sure the parent configuration has root: true.
+  
+
+
+```

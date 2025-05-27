@@ -113,7 +113,8 @@ impl<'a> Iterator for ConfigurationDiagnosticsIter<'a> {
 impl FusedIterator for ConfigurationDiagnosticsIter<'_> {}
 
 impl LoadedConfiguration {
-    fn try_from_payload(
+    /// It consumes the payload, applies and extends and returns the final, extended configuration.
+    pub fn try_from_payload(
         value: Option<ConfigurationPayload>,
         fs: &dyn FsWithResolverProxy,
     ) -> Result<Self, WorkspaceError> {
@@ -153,13 +154,57 @@ impl LoadedConfiguration {
 }
 
 /// Load the partial configuration for this session of the CLI.
+///
+/// When `root` is passed, it returns the first configuration that has `root: true`.
 #[instrument(level = "debug", skip(fs))]
 pub fn load_configuration(
     fs: &dyn FsWithResolverProxy,
     config_path: ConfigurationPathHint,
 ) -> Result<LoadedConfiguration, WorkspaceError> {
-    let config = load_config(fs, config_path)?;
-    LoadedConfiguration::try_from_payload(config, fs)
+    let config = read_config(fs, config_path, false)?;
+    let mut loaded_configuration = LoadedConfiguration::try_from_payload(config, fs);
+
+    // We loaded the configuration, now we must check if this configuration is inside a monorepo.
+    if let Ok(loaded_configuration) = &mut loaded_configuration {
+        // First, we check if the configuration found uses the syntax `"extends": "//"`
+        if loaded_configuration
+            .configuration
+            .needs_to_extend_from_root()
+        {
+            // We start looking upwards and find a `biome.json` that has `root: true`
+            if let Some(directory_path) = loaded_configuration.directory_path.as_ref() {
+                let root_config = read_config(
+                    fs,
+                    ConfigurationPathHint::FromWorkspace(directory_path.clone()),
+                    true,
+                )?;
+
+                if root_config.is_none() {
+                    return Err(BiomeDiagnostic::no_root_from_nested_extend().into());
+                }
+
+                // We call possible extends from the root configuration
+                let mut result = LoadedConfiguration::try_from_payload(root_config, fs)?;
+                // The configuration we found at the beginning now must "extend" from the root, and
+                // to do so we merge the root with the original configuration, so the original
+                // configuration takes precedence...
+                result
+                    .configuration
+                    .merge_with(loaded_configuration.configuration.clone());
+
+                // ...and how we swap the values to `loaded_configuration` configuration takes the correct
+                // configuration has the correct final values
+                std::mem::swap(
+                    &mut loaded_configuration.configuration,
+                    &mut result.configuration,
+                );
+                // We add possible diagnostics coming from the root configuration
+                loaded_configuration.diagnostics.extend(result.diagnostics);
+            }
+        }
+    }
+
+    loaded_configuration
 }
 
 /// - [Result]: if an error occurred while loading the configuration file.
@@ -181,8 +226,15 @@ type LoadConfig = Result<Option<ConfigurationPayload>, WorkspaceError>;
 /// - Otherwise, the function will try to traverse upwards the file system until it finds a `biome.json` or `biome.jsonc`
 ///     file, or there aren't directories anymore. In this case, the function will not error but return an `Ok(None)`, which
 ///     means Biome will use the default configuration.
+///
+/// When `seek_root` is `true`, the function will stop at the first configuration file with `"root": true`, and it skips it
+/// otherwise
 #[instrument(level = "debug", skip(fs))]
-fn load_config(fs: &dyn FileSystem, base_path: ConfigurationPathHint) -> LoadConfig {
+pub fn read_config(
+    fs: &dyn FileSystem,
+    base_path: ConfigurationPathHint,
+    seek_root: bool,
+) -> LoadConfig {
     // This path is used for configuration resolution from external packages.
     let external_resolution_base_path = match &base_path {
         // Path hint from LSP is always the workspace root
@@ -222,7 +274,13 @@ fn load_config(fs: &dyn FileSystem, base_path: ConfigurationPathHint) -> LoadCon
         let is_root = deserialized_content
             .deserialized
             .as_ref()
-            .is_some_and(|config| config.root.is_none_or(|root| root.value()));
+            .is_some_and(|config| {
+                if seek_root {
+                    config.root.is_some_and(|root| root.value())
+                } else {
+                    config.root.is_none_or(|root| root.value())
+                }
+            });
         if is_root {
             deserialized = Some(deserialized_content);
         }
@@ -516,69 +574,70 @@ impl ConfigurationExt for Configuration {
         };
 
         let mut deserialized_configurations = vec![];
-        for extend_entry in extends.iter() {
-            let extend_entry_as_path = Path::new(extend_entry.as_ref());
+        if let Some(extends) = extends.as_list() {
+            for extend_entry in extends.iter() {
+                let extend_entry_as_path = Path::new(extend_entry.as_ref());
 
-            let extend_configuration_file_path = if extend_entry_as_path.starts_with(".") {
-                relative_resolution_base_path.join(extend_entry.as_ref())
-            } else {
-                resolve(
-                    extend_entry.as_ref(),
-                    external_resolution_base_path,
-                    fs,
-                    &ResolveOptions::default().with_assume_relative(),
-                )
-                .map_err(|error| {
-                    CantResolve::new(Utf8PathBuf::from(extend_entry), error).with_verbose_advice(
-                        markup! {
-                            "Biome tried to resolve the configuration file \""<Emphasis>{
-                                extend_entry
+                let extend_configuration_file_path = if extend_entry_as_path.starts_with(".") {
+                    relative_resolution_base_path.join(extend_entry.as_ref())
+                } else {
+                    resolve(
+                        extend_entry.as_ref(),
+                        external_resolution_base_path,
+                        fs,
+                        &ResolveOptions::default().with_assume_relative(),
+                    )
+                    .map_err(|error| {
+                        CantResolve::new(Utf8PathBuf::from(extend_entry), error)
+                            .with_verbose_advice(markup! {
+                                "Biome tried to resolve the configuration file \""<Emphasis>{
+                                    extend_entry
+                                }</Emphasis>"\" in \"extends\" using \""<Emphasis>{
+                                    external_resolution_base_path.to_string()
+                                }</Emphasis>"\" as the base path."
+                            })
+                    })?
+                };
+
+                let mut file = fs
+                    .open_with_options(
+                        extend_configuration_file_path.as_path(),
+                        OpenOptions::default().read(true),
+                    )
+                    .map_err(|err| {
+                        CantLoadExtendFile::new(
+                            extend_configuration_file_path.to_string(),
+                            err.to_string(),
+                        )
+                        .with_verbose_advice(markup! {
+                            "Biome tried to load the configuration file \""<Emphasis>{
+                                extend_configuration_file_path.to_string()
                             }</Emphasis>"\" in \"extends\" using \""<Emphasis>{
                                 external_resolution_base_path.to_string()
                             }</Emphasis>"\" as the base path."
-                        },
-                    )
-                })?
-            };
+                        })
+                    })?;
 
-            let mut file = fs
-                .open_with_options(
-                    extend_configuration_file_path.as_path(),
-                    OpenOptions::default().read(true),
-                )
-                .map_err(|err| {
-                    CantLoadExtendFile::new(
-                        extend_configuration_file_path.to_string(),
-                        err.to_string(),
-                    )
-                    .with_verbose_advice(markup! {
-                        "Biome tried to load the configuration file \""<Emphasis>{
-                            extend_configuration_file_path.to_string()
-                        }</Emphasis>"\" in \"extends\" using \""<Emphasis>{
-                            external_resolution_base_path.to_string()
-                        }</Emphasis>"\" as the base path."
-                    })
-                })?;
-
-            let mut content = String::new();
-            file.read_to_string(&mut content).map_err(|err| {
+                let mut content = String::new();
+                file.read_to_string(&mut content).map_err(|err| {
                 CantLoadExtendFile::new(extend_configuration_file_path.to_string(), err.to_string()).with_verbose_advice(
                     markup! {
                         "It's possible that the file was created with a different user/group. Make sure you have the rights to read the file."
                     }
                 )
             })?;
-            let deserialized = deserialize_from_json_str::<Self>(
-                content.as_str(),
-                match extend_configuration_file_path.extension() {
-                    Some("json") => JsonParserOptions::default(),
-                    _ => JsonParserOptions::default()
-                        .with_allow_comments()
-                        .with_allow_trailing_commas(),
-                },
-                "",
-            );
-            deserialized_configurations.push(deserialized)
+                let deserialized = deserialize_from_json_str::<Self>(
+                    content.as_str(),
+                    match extend_configuration_file_path.extension() {
+                        Some("json") => JsonParserOptions::default(),
+                        _ => JsonParserOptions::default()
+                            .with_allow_comments()
+                            .with_allow_trailing_commas(),
+                    },
+                    "",
+                );
+                deserialized_configurations.push(deserialized)
+            }
         }
         Ok(deserialized_configurations)
     }
