@@ -1,5 +1,5 @@
 use crate::comments::CssComments;
-use biome_css_syntax::{CssGenericDelimiter, CssGenericProperty, CssLanguage, CssSyntaxKind};
+use biome_css_syntax::{CssGenericDelimiter, CssGenericProperty, CssLanguage, CssSyntaxKind, CssParenthesizedExpression, CssValueAtRule, CssDeclaration};
 use biome_formatter::{CstFormatContext, write};
 use biome_formatter::{FormatOptions, FormatResult};
 use biome_string_case::StrLikeExtension;
@@ -184,7 +184,6 @@ where
         })
         .is_some_and(|name| {
             let name = name.to_ascii_lowercase_cow();
-
             name.starts_with("grid-template") || name == "grid"
         });
 
