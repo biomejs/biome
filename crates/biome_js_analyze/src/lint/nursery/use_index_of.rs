@@ -307,7 +307,10 @@ impl Rule for UseIndexOf {
                 },
             )
                 .note(markup! {
-                "If the expression you are looking for relies on an item related to the function (its arguments, the function self, etc.), the case is still valid. This rule is fixable, unless the search expression has side effects."
+            .detail(
+                callback_range,
+                "This callback only tests for equality against a single value. This value can be passed directly to "<Emphasis>"Array#indexOf()"</Emphasis>" instead."
+            )
             }),
         )
     }
