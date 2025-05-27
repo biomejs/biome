@@ -4,7 +4,7 @@ use camino::Utf8PathBuf;
 use papaya::HashMap;
 use rustc_hash::{FxBuildHasher, FxHashSet};
 
-use crate::BiomePlugin;
+use crate::{BiomePlugin, PluginDiagnostic};
 
 /// Cache for storing loaded plugins in memory.
 ///
@@ -20,9 +20,13 @@ impl PluginCache {
     }
 
     /// Returns the loaded and matched analyzer plugins, deduped
-    pub fn get_analyzer_plugins(&self, plugin_configs: &Plugins) -> AnalyzerPluginVec {
+    pub fn get_analyzer_plugins(
+        &self,
+        plugin_configs: &Plugins,
+    ) -> Result<AnalyzerPluginVec, Vec<PluginDiagnostic>> {
         let mut result = AnalyzerPluginVec::new();
         let mut seen = FxHashSet::default();
+        let mut diagnostics: Vec<PluginDiagnostic> = Vec::new();
 
         let map = self.0.pin();
         for plugin_config in plugin_configs.iter() {
@@ -35,7 +39,8 @@ impl PluginCache {
                                 result.extend_from_slice(&plugin.analyzer_plugins);
                             }
                             None => {
-                                panic!("plugin not loaded: {plugin_path}")
+                                diagnostics
+                                    .push(PluginDiagnostic::not_loaded_for_single_plugin(path_buf));
                             }
                         }
                     }
@@ -43,6 +48,10 @@ impl PluginCache {
             }
         }
 
-        result
+        if !diagnostics.is_empty() {
+            return Err(diagnostics);
+        }
+
+        Ok(result)
     }
 }

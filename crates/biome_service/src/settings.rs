@@ -220,13 +220,13 @@ impl Settings {
         result
     }
 
-    /// Return plugins taking overrides into account
-    pub fn as_plugins(&self, path: &Utf8Path) -> Cow<Plugins> {
+    /// Returns the plugins that should be enabled for the given `path`, taking overrides into account.
+    pub fn get_plugins_for_path(&self, path: &Utf8Path) -> Cow<Plugins> {
         let mut result = Cow::Borrowed(&self.plugins);
 
         for pattern in &self.override_settings.patterns {
             if pattern.is_file_included(path) {
-                result.to_mut().0.extend_from_slice(&pattern.plugins.0);
+                result.to_mut().extend_from_slice(&pattern.plugins);
             }
         }
 
@@ -241,7 +241,7 @@ impl Settings {
             .override_settings
             .patterns
             .iter()
-            .flat_map(|pattern| pattern.plugins.0.iter().cloned())
+            .flat_map(|pattern| pattern.plugins.iter().cloned())
             .collect::<Vec<_>>();
 
         if !all_override_plugins.is_empty() {
