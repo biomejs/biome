@@ -533,6 +533,7 @@ pub enum ConfigurationPathHint {
     /// The configuration path provided by the LSP, not having a configuration file is not an error.
     /// The path will always be a directory path.
     FromLsp(Utf8PathBuf),
+
     /// The configuration path provided by the user, not having a configuration file is an error.
     /// The path can either be a directory path or a file path.
     /// Throws any kind of I/O errors.
