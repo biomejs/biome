@@ -865,6 +865,25 @@ export = vfile
 }
 
 #[test]
+fn test_resolve_react_types() {
+    let mut fs = MemoryFileSystem::default();
+    fs.insert(
+        "/node_modules/@types/react/index.d.ts".into(),
+        include_bytes!("../../biome_resolver/tests/fixtures/resolver_cases_5/node_modules/@types/react/index.d.ts")
+    );
+
+    let added_paths = [BiomePath::new("/node_modules/@types/react/index.d.ts")];
+    let added_paths = get_added_paths(&fs, &added_paths);
+
+    let module_graph = ModuleGraph::default();
+    module_graph.update_graph_for_js_paths(&fs, &ProjectLayout::default(), &added_paths, &[]);
+
+    let snapshot = ModuleGraphSnapshot::new(&module_graph, &fs);
+
+    snapshot.assert_snapshot("test_resolve_react_types");
+}
+
+#[test]
 fn test_resolve_export_type_referencing_imported_type() {
     let mut fs = MemoryFileSystem::default();
     fs.insert(
