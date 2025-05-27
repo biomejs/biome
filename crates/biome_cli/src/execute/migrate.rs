@@ -21,7 +21,6 @@ use biome_service::workspace::{
 };
 use camino::Utf8PathBuf;
 use std::borrow::Cow;
-use std::collections::HashMap;
 
 mod eslint;
 mod eslint_any_rule_to_biome;
@@ -73,7 +72,7 @@ pub(crate) fn run(migrate_payload: MigratePayload) -> Result<(), CliDiagnostic> 
         let result = migrate_file(migrate_file_payload)?;
         diagnostic_result
             .outcomes
-            .insert(configuration_file_path, result);
+            .push((configuration_file_path, result));
     }
 
     console.log(markup! {{PrintDiagnostic::simple(&diagnostic_result)}});
@@ -92,7 +91,7 @@ struct MigrateFile<'a> {
 
 #[derive(Debug, Default)]
 struct MigrationResultDiagnostic {
-    outcomes: HashMap<BiomePath, MigrationFileResult>,
+    outcomes: Vec<(BiomePath, MigrationFileResult)>,
 }
 
 impl Diagnostic for MigrationResultDiagnostic {
@@ -136,16 +135,16 @@ enum MigrationFileResult {
 impl biome_console::fmt::Display for MigrationFileResult {
     fn fmt(&self, fmt: &mut Formatter) -> std::io::Result<()> {
         match self {
-            MigrationFileResult::Migrated => {
+            Self::Migrated => {
                 fmt.write_markup(markup! { "configuration successfully migrated." })
             }
-            MigrationFileResult::NeedsMigration => {
+            Self::NeedsMigration => {
                 fmt.write_markup(markup! { "configuration needs migration. Use "<Emphasis>"--write"</Emphasis>" to apply the changes." })
             }
-            MigrationFileResult::NoMigrationNeeded => {
+            Self::NoMigrationNeeded => {
                 fmt.write_markup(markup! { "no migration needed." })
             }
-            MigrationFileResult::HasErrors => {
+            Self::HasErrors => {
                 fmt.write_markup(markup! { "migration failed due to errors." })
             }
         }
@@ -349,14 +348,12 @@ fn migrate_file(payload: MigrateFile) -> Result<MigrationFileResult, CliDiagnost
         None => {
             let mut tree = parsed.tree();
             let mut actions = Vec::new();
-            dbg!(&configuration_file_path);
             let is_root = workspace.fs().working_directory().is_some_and(|wd| {
                 configuration_file_path.strip_prefix(wd).is_ok_and(|path| {
                     path.starts_with(ConfigName::biome_json())
                         || path.starts_with(ConfigName::biome_jsonc())
                 })
             });
-            dbg!(&is_root);
             loop {
                 let (action, _) = migrate_configuration(
                     &tree,

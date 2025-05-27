@@ -44,7 +44,6 @@ pub fn run(spec_input_file: &str, _expected_file: &str, test_directory: &str, _f
             },
             project_key,
             workspace_directory: Some(BiomePath::new(test_directory)),
-            is_nested: false,
         })
     }) else {
         panic!("Failed to set up snapshot test");

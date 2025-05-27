@@ -6,6 +6,7 @@ expression: redactor(content)
 
 ```json
 {
+  "root": false,
   "linter": {
     "enabled": true,
     "rules": {

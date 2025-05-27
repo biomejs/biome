@@ -5,8 +5,7 @@ use biome_analyze::{Ast, Rule, RuleAction, RuleDiagnostic};
 use biome_console::markup;
 use biome_diagnostics::{Applicability, category};
 use biome_json_factory::make::{
-    ident, json_boolean_value, json_member, json_member_list, json_member_name,
-    json_string_literal, token,
+    json_boolean_value, json_member, json_member_list, json_member_name, json_string_literal, token,
 };
 use biome_json_syntax::{AnyJsonValue, JsonLanguage, JsonRoot, T};
 use biome_rowan::{AstNode, AstSeparatedList, BatchMutationExt, TriviaPieceKind};
@@ -30,7 +29,6 @@ impl Rule for Monorepo {
             .get_service::<IsRoot>()
             .expect("IsRoot service not found.");
 
-        dbg!(&is_root_service);
         let root = ctx.root();
         let root = root.value().ok()?;
         let root = root.as_json_object_value()?;
@@ -40,9 +38,7 @@ impl Rule for Monorepo {
             .and_then(|value| value.as_json_boolean_value().cloned())
             .and_then(|value| value.value_token().ok());
 
-        if is_root_service.is_root() {
-            None
-        } else if value.is_some_and(|value| value.text_trimmed() == "false") {
+        if is_root_service.is_root() || value.is_some_and(|value| value.text_trimmed() == "false") {
             None
         } else {
             Some(())
@@ -70,7 +66,7 @@ impl Rule for Monorepo {
         let mut separators: Vec<_> = member_list.separators().flatten().collect();
         let mut list: VecDeque<_> = member_list.iter().flatten().collect();
 
-        list.push_back(json_member(
+        list.push_front(json_member(
             json_member_name(json_string_literal("root")),
             token(T![:]).with_trailing_trivia(vec![(TriviaPieceKind::Whitespace, " ")]),
             AnyJsonValue::JsonBooleanValue(json_boolean_value(token(T![false]))),

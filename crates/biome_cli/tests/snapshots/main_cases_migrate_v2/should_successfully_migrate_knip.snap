@@ -6,6 +6,7 @@ expression: redactor(content)
 
 ```json
 {
+  "root": false,
   "$schema": "https://biomejs.dev/schemas/0.0.0/schema.json",
   "files": {
     "includes": [

@@ -16,7 +16,7 @@ biome.json migrate ━━━━━━━━━━━━━━━━━━━━�
   i Configuration file can be updated.
   
     1    │ - {·"linter":·{·"enabled":·true·}·}
-       1 │ + {·"linter":·{"enabled":·true·,
+       1 │ + {·"root":·false,"linter":·{"enabled":·true·,
        2 │ + ····"rules":·{
        3 │ + ······"style":·{
        4 │ + ········"noParameterAssign":·"error",

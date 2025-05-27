@@ -664,7 +664,6 @@ pub(crate) fn validate_configuration_diagnostics(
             }
         }
 
-        dbg!("validate_configuration_diagnostics");
         return Err(CliDiagnostic::workspace_error(
             BiomeDiagnostic::invalid_configuration(
                 "Biome exited because the configuration resulted in errors. Please fix them.",

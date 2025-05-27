@@ -183,6 +183,7 @@ mod test {
             &parsed.tree(),
             AnalysisFilter::default(),
             Utf8Path::new(""),
+            true,
             |signal| {
                 if let Some(diag) = signal.diagnostic() {
                     let error = diag

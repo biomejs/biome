@@ -42,7 +42,6 @@ pub fn run(spec_input_file: &str, _expected_file: &str, test_directory: &str, _f
                 ..Default::default()
             },
             workspace_directory: None,
-            is_nested: false,
         })
     };
 
