@@ -83,8 +83,7 @@ pub fn find_index_comparable_expression(
         return None;
     }
 
-    if return_statement_required && !has_one_or_more_return_statements
-    {
+    if return_statement_required && !has_one_or_more_return_statements {
         return None;
     }
 
