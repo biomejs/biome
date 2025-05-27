@@ -56,9 +56,9 @@ declare_lint_rule! {
         version: "1.6.0",
         name: "noExcessiveNestedTestSuites",
         language: "js",
-        recommended: true,
-        severity: Severity::Error,
-        sources: &[RuleSource::EslintJest("max-nested-describe")],
+        recommended: false,
+        severity: Severity::Information,
+        sources: &[RuleSource::EslintJest("max-nested-describe"), RuleSource::EslintVitest("max-nested-describe")],
         source_kind: RuleSourceKind::SameLogic,
         domains: &[RuleDomain::Test],
     }

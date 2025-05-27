@@ -1,7 +1,6 @@
 ---
 source: crates/biome_cli/tests/snap_test.rs
 expression: redactor(content)
-snapshot_kind: text
 ---
 ## `biome.json`
 
@@ -14,20 +13,12 @@ snapshot_kind: text
     "useIgnoreFile": true,
     "defaultBranch": "master"
   },
-  "assist": {
-    "actions": {
-      "source": {
-        "organizeImports": "on"
-      }
-    }
-  },
+  "assist": { "actions": { "source": { "organizeImports": "off" } } },
   "linter": {
     "enabled": true,
     "rules": {
       "recommended": false,
-      "a11y": {
-        "noBlankTarget": "error"
-      },
+      "a11y": {},
       "correctness": {
         "noGlobalObjectCalls": "error",
         "noUnreachable": "error",
@@ -44,21 +35,16 @@ snapshot_kind: text
         "noUselessEmptyExport": "error",
         "noUselessConstructor": "error",
         "noUselessTypeConstraint": "error",
-        "noExcessiveNestedTestSuites": "error"
+        "noExcessiveNestedTestSuites": "error",
+        "noCommaOperator": "error"
       },
-      "nursery": {
-        "noRestrictedImports": {
-          "level": "warn",
-          "options": {
-            "paths": {}
-          }
-        }
-      },
+      "nursery": {},
       "performance": {
         "noBarrelFile": "error"
       },
       "security": {
-        "noDangerouslySetInnerHtmlWithChildren": "error"
+        "noDangerouslySetInnerHtmlWithChildren": "error",
+        "noBlankTarget": "error"
       },
       "suspicious": {
         "noDebugger": "error",
@@ -82,7 +68,6 @@ snapshot_kind: text
         "noVar": "error"
       },
       "style": {
-        "noCommaOperator": "error",
         "noShoutyConstants": "error",
         "noParameterProperties": "error",
         "useConst": "error",
@@ -93,7 +78,13 @@ snapshot_kind: text
         "useLiteralEnumMembers": "error",
         "useEnumInitializers": "error",
         "useAsConstAssertion": "error",
-        "useBlockStatements": "error"
+        "useBlockStatements": "error",
+        "noRestrictedImports": {
+          "level": "warn",
+          "options": {
+            "paths": {}
+          }
+        }
       }
     }
   },
@@ -174,10 +165,10 @@ snapshot_kind: text
       "includes": ["**/src/sentry/templates/sentry/error-page-embed.js"],
       "linter": {
         "rules": {
+          "style": {},
           "suspicious": {
             "noVar": "off"
-          },
-          "style": {}
+          }
         }
       }
     },
@@ -208,5 +199,5 @@ snapshot_kind: text
 # Emitted Messages
 
 ```block
-The configuration biome.json has been successfully migrated.
+Your configuration file(s) have been successfully migrated.
 ```

@@ -1,15 +1,14 @@
 ---
 source: crates/biome_cli/tests/snap_test.rs
 expression: redactor(content)
-snapshot_kind: text
 ---
 # Emitted Messages
 
 ```block
 Runs formatter, linter and import sorting to the requested files.
 
-Usage: check [--write] [--unsafe] [--assist-enabled=<true|false>] [--staged] [--changed] [--since=
-REF] [PATH]...
+Usage: check [--write] [--unsafe] [--assist-enabled=<true|false>] [--enforce-assist=<true|false>] [
+--staged] [--changed] [--since=REF] [PATH]...
 
 The configuration that is contained inside the file `biome.json`
         --vcs-enabled=<true|false>  Whether Biome should integrate itself with the VCS client
@@ -177,7 +176,9 @@ The configuration that is contained inside the file `biome.json`
                               Defaults to "css".
         --html-formatter-indent-script-and-style=<true|false>  Whether to indent the `<script>` and
                               `<style>` tags for HTML (and its super languages). Defaults to false.
-        --assist-enabled=<true|false>  Whether Biome should enable assist via LSP.
+        --html-formatter-self-close-void-elements=<always|never>  Whether void elements should be
+                              self-closed. Defaults to never.
+        --assist-enabled=<true|false>  Whether Biome should enable assist via LSP and CLI.
 
 Global options applied to all commands
         --colors=<off|force>  Set the formatting mode for markup: "off" prints everything as plain
@@ -193,7 +194,7 @@ Global options applied to all commands
         --max-diagnostics=<none|<NUMBER>>  Cap the amount of diagnostics displayed. When `none` is
                               provided, the limit is lifted.
                               [default: 20]
-        --skip-errors         Skip over files containing syntax errors instead of emitting an error
+        --skip-parse-errors   Skip over files containing syntax errors instead of emitting an error
                               diagnostic.
         --no-errors-on-unmatched  Silence errors that would be emitted in case no files were
                               processed during the execution of the command.
@@ -217,18 +218,21 @@ Available positional items:
     PATH                      Single file, single path or list of paths
 
 Available options:
-        --write               Writes safe fixes, formatting and import sorting
-        --unsafe              Allow to do unsafe fixes, should be used with `--write` or `--fix`
+        --write               Apply safe fixes, formatting and import sorting
+        --unsafe              Apply unsafe fixes. Should be used with `--write` or `--fix`
         --fix                 Alias for `--write`, writes safe fixes, formatting and import sorting
-        --formatter-enabled=<true|false>  Allow to enable or disable the formatter check.
-        --linter-enabled=<true|false>  Allow to enable or disable the linter check.
-        --assist-enabled=<true|false>  Allow to enable or disable the assist.
+        --formatter-enabled=<true|false>  Allow enabling or disabling the formatter check.
+        --linter-enabled=<true|false>  Allow enabling or disabling the linter check.
+        --assist-enabled=<true|false>  Allow enabling or disabling the assist.
+        --enforce-assist=<true|false>  Allows enforcing assist, and make the CLI fail if some
+                              actions aren't applied. Defaults to `true`.
         --stdin-file-path=PATH  Use this option when you want to format code piped from `stdin`, and
                               print the output to `stdout`.
                               The file doesn't need to exist on disk, what matters is the extension
                               of the file. Based on the extension, Biome knows how to check the
                               code.
-                              Example: `echo 'let a;' | biome check --stdin-file-path=file.js`
+                              Example: ```shell echo 'let a;' | biome check
+                              --stdin-file-path=file.js --write ```
         --staged              When set to true, only the files that have been staged (the ones
                               prepared to be committed) will be linted. This option should be used
                               when working locally.

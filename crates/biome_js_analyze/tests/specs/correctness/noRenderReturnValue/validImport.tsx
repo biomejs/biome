@@ -1,3 +1,4 @@
+/* should not generate diagnostics */
 import ReactDom, { render } from "react-dom";
 
 ReactDom.render(<div />, document.body);

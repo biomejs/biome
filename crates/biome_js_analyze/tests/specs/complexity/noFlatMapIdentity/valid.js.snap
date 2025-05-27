@@ -1,0 +1,17 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid.js
+---
+# Input
+```js
+/* should not generate diagnostics */
+array.flatMap((arr) => arr * 2);
+
+array.flatMap(arr => arr * 2);
+
+flatMap((x) => x);
+
+flatMap(x => x);
+
+arr.flatMap((x, y) => (x, y))
+```

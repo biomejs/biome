@@ -1,0 +1,3019 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```js
+import eslint from 'eslint';
+const l = require('lodash');
+
+import 'bare-forbidden';
+import 'namespace-allowed';
+import 'default-allowed';
+import 'default-and-member-allowed';
+
+export * from 'namespace-forbidden';
+import * as n1 from 'namespace-forbidden';
+const n2 = await import('namespace-forbidden');
+const n2b = ((await (import('namespace-forbidden'))));
+const n3 = import('namespace-forbidden');
+const n3b = (import('namespace-forbidden'));
+import('namespace-forbidden').then(n4 => { });
+import('namespace-forbidden').then((n5) => { });
+import('namespace-forbidden').then(function (n6) { });
+((import('namespace-forbidden'))).then(((n6 => { })));
+((import('namespace-forbidden'))).then((((n7) => { })));
+((import('namespace-forbidden'))).then(((function (n8) { })));
+
+import d0 from 'default-forbidden';
+export { default as d1 } from 'default-forbidden';
+import { default as d1 } from 'default-forbidden';
+const { "default": d2 } = await import('default-forbidden');
+const { default: d3 } = await import('default-forbidden');
+import { default as d4, allowed1 } from 'default-forbidden';
+const { allowed2, default: d5 } = await import('default-forbidden');
+const { allowed3, default: d6 } = import('default-forbidden');
+const { "allowed4": a1, "default": d7 } = import('default-forbidden');
+
+export { allowed5, forbidden1 } from 'member-forbidden';
+import { allowed5, forbidden1 } from 'member-forbidden';
+const { allowed6, forbidden2, forbidden3: f1, "forbidden4": f2 } = await import('member-forbidden');
+import('member-forbidden').then(({ allowed6, forbidden2, forbidden3: f1, "forbidden4": f2 }) => { })
+import('member-forbidden').then(function ({ allowed6, forbidden2, forbidden3: f1, "forbidden4": f2 }) { })
+
+// require() returns the default import, not a namespace object,
+// so this import corresponds to default.allowed1 (and not namespace.allowed1)
+// and is therefore *NOT* allowed.
+const { allowed1 } = require('default-forbidden');
+const { allowed2 } = require('namespace-allowed');
+const { allowed3 } = require('member-allowed');
+
+export * from 'default-allowed';
+import * as n1 from 'default-allowed';
+const n2 = await import('default-allowed');
+const n2b = ((await (import('default-allowed'))));
+const n3 = import('default-allowed');
+const n3b = (import('default-allowed'));
+import('default-allowed').then(n4 => { });
+import('default-allowed').then((n5) => { });
+import('default-allowed').then(function (n6) { });
+((import('default-allowed'))).then(((n6 => { })));
+((import('default-allowed'))).then((((n7) => { })));
+((import('default-allowed'))).then(((function (n8) { })));
+
+export * from 'member-allowed';
+import * as n1 from 'member-allowed';
+const n2 = await import('member-allowed');
+const n2b = ((await (import('member-allowed'))));
+const n3 = import('member-allowed');
+const n3b = (import('member-allowed'));
+import('member-allowed').then(n4 => { });
+import('member-allowed').then((n5) => { });
+import('member-allowed').then(function (n6) { });
+((import('member-allowed'))).then(((n6 => { })));
+((import('member-allowed'))).then((((n7) => { })));
+((import('member-allowed'))).then(((function (n8) { })));
+
+export * from 'bare-allowed';
+import * as n1 from 'bare-allowed';
+const n2 = await import('bare-allowed');
+const n2b = ((await (import('bare-allowed'))));
+const n3 = import('bare-allowed');
+const n3b = (import('bare-allowed'));
+import('bare-allowed').then(n4 => { });
+import('bare-allowed').then((n5) => { });
+import('bare-allowed').then(function (n6) { });
+((import('bare-allowed'))).then(((n6 => { })));
+((import('bare-allowed'))).then((((n7) => { })));
+((import('bare-allowed'))).then(((function (n8) { })));
+
+import d0 from 'namespace-allowed';
+export { default as d1 } from 'namespace-allowed';
+import { default as d1 } from 'namespace-allowed';
+const { "default": d2 } = await import('namespace-allowed');
+const { default: d3 } = await import('namespace-allowed');
+import { default as d4, forbidden1 } from 'namespace-allowed';
+const { forbidden2, default: d5 } = await import('namespace-allowed');
+const { forbidden3, default: d6 } = import('namespace-allowed');
+const { "forbidden4": f4, "default": d7 } = import('namespace-allowed');
+
+import d0 from 'member-allowed';
+export { default as d1 } from 'member-allowed';
+import { default as d1 } from 'member-allowed';
+const { "default": d2 } = await import('member-allowed');
+const { default: d3 } = await import('member-allowed');
+import { default as d4, forbidden1 } from 'member-allowed';
+const { forbidden2, default: d5 } = await import('member-allowed');
+const { forbidden3, default: d6 } = import('member-allowed');
+const { "forbidden4": f4, "default": d7 } = import('member-allowed');
+
+import d0 from 'bare-allowed';
+export { default as d1 } from 'bare-allowed';
+import { default as d1 } from 'bare-allowed';
+const { "default": d2 } = await import('bare-allowed');
+const { default: d3 } = await import('bare-allowed');
+export { default as d4, forbidden1 } from 'bare-allowed';
+import { default as d4, forbidden1 } from 'bare-allowed';
+const { forbidden2, default: d5 } = await import('bare-allowed');
+const { forbidden3, default: d6 } = import('bare-allowed');
+const { "forbidden4": f4, "default": d7 } = import('bare-allowed');
+
+export { forbidden1 } from 'default-allowed';
+import { forbidden1 } from 'default-allowed';
+const { forbidden2, forbidden3: f1, "forbidden4": f2 } = await import('default-allowed');
+import('default-allowed').then(({ forbidden2, forbidden3: f1, "forbidden4": f2 }) => { })
+import('default-allowed').then(function ({ forbidden2, forbidden3: f1, "forbidden4": f2 }) { })
+
+export { forbidden1 } from 'namespace-allowed';
+import { forbidden1 } from 'namespace-allowed';
+const { forbidden2, forbidden3: f1, "forbidden4": f2 } = await import('namespace-allowed');
+import('namespace-allowed').then(({ forbidden2, forbidden3: f1, "forbidden4": f2 }) => { })
+import('namespace-allowed').then(function ({ forbidden2, forbidden3: f1, "forbidden4": f2 }) { })
+
+export { forbidden1 } from 'bare-allowed';
+import { forbidden1 } from 'bare-allowed';
+const { forbidden2, forbidden3: f1, "forbidden4": f2 } = await import('bare-allowed');
+import('bare-allowed').then(({ forbidden2, forbidden3: f1, "forbidden4": f2 }) => { })
+import('bare-allowed').then(function ({ forbidden2, forbidden3: f1, "forbidden4": f2 }) { })
+
+```
+
+# Diagnostics
+```
+invalid.js:1:20 lint/style/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Importing Eslint is forbidden
+  
+  > 1 │ import eslint from 'eslint';
+      │                    ^^^^^^^^
+    2 │ const l = require('lodash');
+    3 │ 
+  
+
+```
+
+```
+invalid.js:2:19 lint/style/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! It's not recommended to use lodash
+  
+    1 │ import eslint from 'eslint';
+  > 2 │ const l = require('lodash');
+      │                   ^^^^^^^^
+    3 │ 
+    4 │ import 'bare-forbidden';
+  
+
+```
+
+```
+invalid.js:4:8 lint/style/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not import 'bare-forbidden' through a side-effect import.
+  
+    2 │ const l = require('lodash');
+    3 │ 
+  > 4 │ import 'bare-forbidden';
+      │        ^^^^^^^^^^^^^^^^
+    5 │ import 'namespace-allowed';
+    6 │ import 'default-allowed';
+  
+
+```
+
+```
+invalid.js:5:8 lint/style/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not import 'namespace-allowed' through a side-effect import.
+  
+    4 │ import 'bare-forbidden';
+  > 5 │ import 'namespace-allowed';
+      │        ^^^^^^^^^^^^^^^^^^^
+    6 │ import 'default-allowed';
+    7 │ import 'default-and-member-allowed';
+  
+  i Only the following imports from 'namespace-allowed' are allowed:
+  
+  - *
+  
+
+```
+
+```
+invalid.js:6:8 lint/style/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not import 'default-allowed' through a side-effect import.
+  
+    4 │ import 'bare-forbidden';
+    5 │ import 'namespace-allowed';
+  > 6 │ import 'default-allowed';
+      │        ^^^^^^^^^^^^^^^^^
+    7 │ import 'default-and-member-allowed';
+    8 │ 
+  
+  i Only the following imports from 'default-allowed' are allowed:
+  
+  - default
+  
+
+```
+
+```
+invalid.js:9:8 lint/style/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not import '*' from 'namespace-forbidden'.
+  
+     7 │ import 'default-and-member-allowed';
+     8 │ 
+   > 9 │ export * from 'namespace-forbidden';
+       │        ^
+    10 │ import * as n1 from 'namespace-forbidden';
+    11 │ const n2 = await import('namespace-forbidden');
+  
+
+```
+
+```
+invalid.js:10:8 lint/style/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not import '*' from 'namespace-forbidden'.
+  
+     9 │ export * from 'namespace-forbidden';
+  > 10 │ import * as n1 from 'namespace-forbidden';
+       │        ^
+    11 │ const n2 = await import('namespace-forbidden');
+    12 │ const n2b = ((await (import('namespace-forbidden'))));
+  
+
+```
+
+```
+invalid.js:11:7 lint/style/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not import '*' from 'namespace-forbidden'.
+  
+     9 │ export * from 'namespace-forbidden';
+    10 │ import * as n1 from 'namespace-forbidden';
+  > 11 │ const n2 = await import('namespace-forbidden');
+       │       ^^
+    12 │ const n2b = ((await (import('namespace-forbidden'))));
+    13 │ const n3 = import('namespace-forbidden');
+  
+
+```
+
+```
+invalid.js:12:7 lint/style/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not import '*' from 'namespace-forbidden'.
+  
+    10 │ import * as n1 from 'namespace-forbidden';
+    11 │ const n2 = await import('namespace-forbidden');
+  > 12 │ const n2b = ((await (import('namespace-forbidden'))));
+       │       ^^^
+    13 │ const n3 = import('namespace-forbidden');
+    14 │ const n3b = (import('namespace-forbidden'));
+  
+
+```
+
+```
+invalid.js:13:7 lint/style/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not import '*' from 'namespace-forbidden'.
+  
+    11 │ const n2 = await import('namespace-forbidden');
+    12 │ const n2b = ((await (import('namespace-forbidden'))));
+  > 13 │ const n3 = import('namespace-forbidden');
+       │       ^^
+    14 │ const n3b = (import('namespace-forbidden'));
+    15 │ import('namespace-forbidden').then(n4 => { });
+  
+
+```
+
+```
+invalid.js:14:7 lint/style/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not import '*' from 'namespace-forbidden'.
+  
+    12 │ const n2b = ((await (import('namespace-forbidden'))));
+    13 │ const n3 = import('namespace-forbidden');
+  > 14 │ const n3b = (import('namespace-forbidden'));
+       │       ^^^
+    15 │ import('namespace-forbidden').then(n4 => { });
+    16 │ import('namespace-forbidden').then((n5) => { });
+  
+
+```
+
+```
+invalid.js:15:36 lint/style/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not import '*' from 'namespace-forbidden'.
+  
+    13 │ const n3 = import('namespace-forbidden');
+    14 │ const n3b = (import('namespace-forbidden'));
+  > 15 │ import('namespace-forbidden').then(n4 => { });
+       │                                    ^^
+    16 │ import('namespace-forbidden').then((n5) => { });
+    17 │ import('namespace-forbidden').then(function (n6) { });
+  
+
+```
+
+```
+invalid.js:16:37 lint/style/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not import '*' from 'namespace-forbidden'.
+  
+    14 │ const n3b = (import('namespace-forbidden'));
+    15 │ import('namespace-forbidden').then(n4 => { });
+  > 16 │ import('namespace-forbidden').then((n5) => { });
+       │                                     ^^
+    17 │ import('namespace-forbidden').then(function (n6) { });
+    18 │ ((import('namespace-forbidden'))).then(((n6 => { })));
+  
+
+```
+
+```
+invalid.js:17:46 lint/style/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not import '*' from 'namespace-forbidden'.
+  
+    15 │ import('namespace-forbidden').then(n4 => { });
+    16 │ import('namespace-forbidden').then((n5) => { });
+  > 17 │ import('namespace-forbidden').then(function (n6) { });
+       │                                              ^^
+    18 │ ((import('namespace-forbidden'))).then(((n6 => { })));
+    19 │ ((import('namespace-forbidden'))).then((((n7) => { })));
+  
+
+```
+
+```
+invalid.js:18:42 lint/style/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not import '*' from 'namespace-forbidden'.
+  
+    16 │ import('namespace-forbidden').then((n5) => { });
+    17 │ import('namespace-forbidden').then(function (n6) { });
+  > 18 │ ((import('namespace-forbidden'))).then(((n6 => { })));
+       │                                          ^^
+    19 │ ((import('namespace-forbidden'))).then((((n7) => { })));
+    20 │ ((import('namespace-forbidden'))).then(((function (n8) { })));
+  
+
+```
+
+```
+invalid.js:19:43 lint/style/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not import '*' from 'namespace-forbidden'.
+  
+    17 │ import('namespace-forbidden').then(function (n6) { });
+    18 │ ((import('namespace-forbidden'))).then(((n6 => { })));
+  > 19 │ ((import('namespace-forbidden'))).then((((n7) => { })));
+       │                                           ^^
+    20 │ ((import('namespace-forbidden'))).then(((function (n8) { })));
+    21 │ 
+  
+
+```
+
+```
+invalid.js:20:52 lint/style/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not import '*' from 'namespace-forbidden'.
+  
+    18 │ ((import('namespace-forbidden'))).then(((n6 => { })));
+    19 │ ((import('namespace-forbidden'))).then((((n7) => { })));
+  > 20 │ ((import('namespace-forbidden'))).then(((function (n8) { })));
+       │                                                    ^^
+    21 │ 
+    22 │ import d0 from 'default-forbidden';
+  
+
+```
+
+```
+invalid.js:22:8 lint/style/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not import 'default' from 'default-forbidden'.
+  
+    20 │ ((import('namespace-forbidden'))).then(((function (n8) { })));
+    21 │ 
+  > 22 │ import d0 from 'default-forbidden';
+       │        ^^
+    23 │ export { default as d1 } from 'default-forbidden';
+    24 │ import { default as d1 } from 'default-forbidden';
+  
+
+```
+
+```
+invalid.js:23:10 lint/style/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not import 'default' from 'default-forbidden'.
+  
+    22 │ import d0 from 'default-forbidden';
+  > 23 │ export { default as d1 } from 'default-forbidden';
+       │          ^^^^^^^
+    24 │ import { default as d1 } from 'default-forbidden';
+    25 │ const { "default": d2 } = await import('default-forbidden');
+  
+
+```
+
+```
+invalid.js:24:10 lint/style/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not import 'default' from 'default-forbidden'.
+  
+    22 │ import d0 from 'default-forbidden';
+    23 │ export { default as d1 } from 'default-forbidden';
+  > 24 │ import { default as d1 } from 'default-forbidden';
+       │          ^^^^^^^
+    25 │ const { "default": d2 } = await import('default-forbidden');
+    26 │ const { default: d3 } = await import('default-forbidden');
+  
+
+```
+
+```
+invalid.js:25:9 lint/style/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not import 'default' from 'default-forbidden'.
+  
+    23 │ export { default as d1 } from 'default-forbidden';
+    24 │ import { default as d1 } from 'default-forbidden';
+  > 25 │ const { "default": d2 } = await import('default-forbidden');
+       │         ^^^^^^^^^
+    26 │ const { default: d3 } = await import('default-forbidden');
+    27 │ import { default as d4, allowed1 } from 'default-forbidden';
+  
+
+```
+
+```
+invalid.js:26:9 lint/style/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not import 'default' from 'default-forbidden'.
+  
+    24 │ import { default as d1 } from 'default-forbidden';
+    25 │ const { "default": d2 } = await import('default-forbidden');
+  > 26 │ const { default: d3 } = await import('default-forbidden');
+       │         ^^^^^^^
+    27 │ import { default as d4, allowed1 } from 'default-forbidden';
+    28 │ const { allowed2, default: d5 } = await import('default-forbidden');
+  
+
+```
+
+```
+invalid.js:27:10 lint/style/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not import 'default' from 'default-forbidden'.
+  
+    25 │ const { "default": d2 } = await import('default-forbidden');
+    26 │ const { default: d3 } = await import('default-forbidden');
+  > 27 │ import { default as d4, allowed1 } from 'default-forbidden';
+       │          ^^^^^^^
+    28 │ const { allowed2, default: d5 } = await import('default-forbidden');
+    29 │ const { allowed3, default: d6 } = import('default-forbidden');
+  
+
+```
+
+```
+invalid.js:28:19 lint/style/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not import 'default' from 'default-forbidden'.
+  
+    26 │ const { default: d3 } = await import('default-forbidden');
+    27 │ import { default as d4, allowed1 } from 'default-forbidden';
+  > 28 │ const { allowed2, default: d5 } = await import('default-forbidden');
+       │                   ^^^^^^^
+    29 │ const { allowed3, default: d6 } = import('default-forbidden');
+    30 │ const { "allowed4": a1, "default": d7 } = import('default-forbidden');
+  
+
+```
+
+```
+invalid.js:29:19 lint/style/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not import 'default' from 'default-forbidden'.
+  
+    27 │ import { default as d4, allowed1 } from 'default-forbidden';
+    28 │ const { allowed2, default: d5 } = await import('default-forbidden');
+  > 29 │ const { allowed3, default: d6 } = import('default-forbidden');
+       │                   ^^^^^^^
+    30 │ const { "allowed4": a1, "default": d7 } = import('default-forbidden');
+    31 │ 
+  
+
+```
+
+```
+invalid.js:30:25 lint/style/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not import 'default' from 'default-forbidden'.
+  
+    28 │ const { allowed2, default: d5 } = await import('default-forbidden');
+    29 │ const { allowed3, default: d6 } = import('default-forbidden');
+  > 30 │ const { "allowed4": a1, "default": d7 } = import('default-forbidden');
+       │                         ^^^^^^^^^
+    31 │ 
+    32 │ export { allowed5, forbidden1 } from 'member-forbidden';
+  
+
+```
+
+```
+invalid.js:32:20 lint/style/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not import 'forbidden1' from 'member-forbidden'.
+  
+    30 │ const { "allowed4": a1, "default": d7 } = import('default-forbidden');
+    31 │ 
+  > 32 │ export { allowed5, forbidden1 } from 'member-forbidden';
+       │                    ^^^^^^^^^^
+    33 │ import { allowed5, forbidden1 } from 'member-forbidden';
+    34 │ const { allowed6, forbidden2, forbidden3: f1, "forbidden4": f2 } = await import('member-forbidden');
+  
+
+```
+
+```
+invalid.js:33:20 lint/style/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not import 'forbidden1' from 'member-forbidden'.
+  
+    32 │ export { allowed5, forbidden1 } from 'member-forbidden';
+  > 33 │ import { allowed5, forbidden1 } from 'member-forbidden';
+       │                    ^^^^^^^^^^
+    34 │ const { allowed6, forbidden2, forbidden3: f1, "forbidden4": f2 } = await import('member-forbidden');
+    35 │ import('member-forbidden').then(({ allowed6, forbidden2, forbidden3: f1, "forbidden4": f2 }) => { })
+  
+
+```
+
+```
+invalid.js:34:19 lint/style/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not import 'forbidden2' from 'member-forbidden'.
+  
+    32 │ export { allowed5, forbidden1 } from 'member-forbidden';
+    33 │ import { allowed5, forbidden1 } from 'member-forbidden';
+  > 34 │ const { allowed6, forbidden2, forbidden3: f1, "forbidden4": f2 } = await import('member-forbidden');
+       │                   ^^^^^^^^^^
+    35 │ import('member-forbidden').then(({ allowed6, forbidden2, forbidden3: f1, "forbidden4": f2 }) => { })
+    36 │ import('member-forbidden').then(function ({ allowed6, forbidden2, forbidden3: f1, "forbidden4": f2 }) { })
+  
+
+```
+
+```
+invalid.js:34:31 lint/style/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not import 'forbidden3' from 'member-forbidden'.
+  
+    32 │ export { allowed5, forbidden1 } from 'member-forbidden';
+    33 │ import { allowed5, forbidden1 } from 'member-forbidden';
+  > 34 │ const { allowed6, forbidden2, forbidden3: f1, "forbidden4": f2 } = await import('member-forbidden');
+       │                               ^^^^^^^^^^
+    35 │ import('member-forbidden').then(({ allowed6, forbidden2, forbidden3: f1, "forbidden4": f2 }) => { })
+    36 │ import('member-forbidden').then(function ({ allowed6, forbidden2, forbidden3: f1, "forbidden4": f2 }) { })
+  
+
+```
+
+```
+invalid.js:34:47 lint/style/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not import 'forbidden4' from 'member-forbidden'.
+  
+    32 │ export { allowed5, forbidden1 } from 'member-forbidden';
+    33 │ import { allowed5, forbidden1 } from 'member-forbidden';
+  > 34 │ const { allowed6, forbidden2, forbidden3: f1, "forbidden4": f2 } = await import('member-forbidden');
+       │                                               ^^^^^^^^^^^^
+    35 │ import('member-forbidden').then(({ allowed6, forbidden2, forbidden3: f1, "forbidden4": f2 }) => { })
+    36 │ import('member-forbidden').then(function ({ allowed6, forbidden2, forbidden3: f1, "forbidden4": f2 }) { })
+  
+
+```
+
+```
+invalid.js:35:46 lint/style/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not import 'forbidden2' from 'member-forbidden'.
+  
+    33 │ import { allowed5, forbidden1 } from 'member-forbidden';
+    34 │ const { allowed6, forbidden2, forbidden3: f1, "forbidden4": f2 } = await import('member-forbidden');
+  > 35 │ import('member-forbidden').then(({ allowed6, forbidden2, forbidden3: f1, "forbidden4": f2 }) => { })
+       │                                              ^^^^^^^^^^
+    36 │ import('member-forbidden').then(function ({ allowed6, forbidden2, forbidden3: f1, "forbidden4": f2 }) { })
+    37 │ 
+  
+
+```
+
+```
+invalid.js:35:58 lint/style/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not import 'forbidden3' from 'member-forbidden'.
+  
+    33 │ import { allowed5, forbidden1 } from 'member-forbidden';
+    34 │ const { allowed6, forbidden2, forbidden3: f1, "forbidden4": f2 } = await import('member-forbidden');
+  > 35 │ import('member-forbidden').then(({ allowed6, forbidden2, forbidden3: f1, "forbidden4": f2 }) => { })
+       │                                                          ^^^^^^^^^^
+    36 │ import('member-forbidden').then(function ({ allowed6, forbidden2, forbidden3: f1, "forbidden4": f2 }) { })
+    37 │ 
+  
+
+```
+
+```
+invalid.js:35:74 lint/style/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not import 'forbidden4' from 'member-forbidden'.
+  
+    33 │ import { allowed5, forbidden1 } from 'member-forbidden';
+    34 │ const { allowed6, forbidden2, forbidden3: f1, "forbidden4": f2 } = await import('member-forbidden');
+  > 35 │ import('member-forbidden').then(({ allowed6, forbidden2, forbidden3: f1, "forbidden4": f2 }) => { })
+       │                                                                          ^^^^^^^^^^^^
+    36 │ import('member-forbidden').then(function ({ allowed6, forbidden2, forbidden3: f1, "forbidden4": f2 }) { })
+    37 │ 
+  
+
+```
+
+```
+invalid.js:36:55 lint/style/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not import 'forbidden2' from 'member-forbidden'.
+  
+    34 │ const { allowed6, forbidden2, forbidden3: f1, "forbidden4": f2 } = await import('member-forbidden');
+    35 │ import('member-forbidden').then(({ allowed6, forbidden2, forbidden3: f1, "forbidden4": f2 }) => { })
+  > 36 │ import('member-forbidden').then(function ({ allowed6, forbidden2, forbidden3: f1, "forbidden4": f2 }) { })
+       │                                                       ^^^^^^^^^^
+    37 │ 
+    38 │ // require() returns the default import, not a namespace object,
+  
+
+```
+
+```
+invalid.js:36:67 lint/style/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not import 'forbidden3' from 'member-forbidden'.
+  
+    34 │ const { allowed6, forbidden2, forbidden3: f1, "forbidden4": f2 } = await import('member-forbidden');
+    35 │ import('member-forbidden').then(({ allowed6, forbidden2, forbidden3: f1, "forbidden4": f2 }) => { })
+  > 36 │ import('member-forbidden').then(function ({ allowed6, forbidden2, forbidden3: f1, "forbidden4": f2 }) { })
+       │                                                                   ^^^^^^^^^^
+    37 │ 
+    38 │ // require() returns the default import, not a namespace object,
+  
+
+```
+
+```
+invalid.js:36:83 lint/style/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not import 'forbidden4' from 'member-forbidden'.
+  
+    34 │ const { allowed6, forbidden2, forbidden3: f1, "forbidden4": f2 } = await import('member-forbidden');
+    35 │ import('member-forbidden').then(({ allowed6, forbidden2, forbidden3: f1, "forbidden4": f2 }) => { })
+  > 36 │ import('member-forbidden').then(function ({ allowed6, forbidden2, forbidden3: f1, "forbidden4": f2 }) { })
+       │                                                                                   ^^^^^^^^^^^^
+    37 │ 
+    38 │ // require() returns the default import, not a namespace object,
+  
+
+```
+
+```
+invalid.js:41:30 lint/style/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not import 'default-forbidden'.
+  
+    39 │ // so this import corresponds to default.allowed1 (and not namespace.allowed1)
+    40 │ // and is therefore *NOT* allowed.
+  > 41 │ const { allowed1 } = require('default-forbidden');
+       │                              ^^^^^^^^^^^^^^^^^^^
+    42 │ const { allowed2 } = require('namespace-allowed');
+    43 │ const { allowed3 } = require('member-allowed');
+  
+
+```
+
+```
+invalid.js:42:30 lint/style/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not import 'namespace-allowed'.
+  
+    40 │ // and is therefore *NOT* allowed.
+    41 │ const { allowed1 } = require('default-forbidden');
+  > 42 │ const { allowed2 } = require('namespace-allowed');
+       │                              ^^^^^^^^^^^^^^^^^^^
+    43 │ const { allowed3 } = require('member-allowed');
+    44 │ 
+  
+
+```
+
+```
+invalid.js:43:30 lint/style/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not import 'member-allowed'.
+  
+    41 │ const { allowed1 } = require('default-forbidden');
+    42 │ const { allowed2 } = require('namespace-allowed');
+  > 43 │ const { allowed3 } = require('member-allowed');
+       │                              ^^^^^^^^^^^^^^^^
+    44 │ 
+    45 │ export * from 'default-allowed';
+  
+
+```
+
+```
+invalid.js:45:8 lint/style/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not import '*' from 'default-allowed'.
+  
+    43 │ const { allowed3 } = require('member-allowed');
+    44 │ 
+  > 45 │ export * from 'default-allowed';
+       │        ^
+    46 │ import * as n1 from 'default-allowed';
+    47 │ const n2 = await import('default-allowed');
+  
+  i Only the following imports from 'default-allowed' are allowed:
+  
+  - default
+  
+
+```
+
+```
+invalid.js:46:8 lint/style/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not import '*' from 'default-allowed'.
+  
+    45 │ export * from 'default-allowed';
+  > 46 │ import * as n1 from 'default-allowed';
+       │        ^
+    47 │ const n2 = await import('default-allowed');
+    48 │ const n2b = ((await (import('default-allowed'))));
+  
+  i Only the following imports from 'default-allowed' are allowed:
+  
+  - default
+  
+
+```
+
+```
+invalid.js:47:7 lint/style/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not import '*' from 'default-allowed'.
+  
+    45 │ export * from 'default-allowed';
+    46 │ import * as n1 from 'default-allowed';
+  > 47 │ const n2 = await import('default-allowed');
+       │       ^^
+    48 │ const n2b = ((await (import('default-allowed'))));
+    49 │ const n3 = import('default-allowed');
+  
+  i Only the following imports from 'default-allowed' are allowed:
+  
+  - default
+  
+
+```
+
+```
+invalid.js:48:7 lint/style/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not import '*' from 'default-allowed'.
+  
+    46 │ import * as n1 from 'default-allowed';
+    47 │ const n2 = await import('default-allowed');
+  > 48 │ const n2b = ((await (import('default-allowed'))));
+       │       ^^^
+    49 │ const n3 = import('default-allowed');
+    50 │ const n3b = (import('default-allowed'));
+  
+  i Only the following imports from 'default-allowed' are allowed:
+  
+  - default
+  
+
+```
+
+```
+invalid.js:49:7 lint/style/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not import '*' from 'default-allowed'.
+  
+    47 │ const n2 = await import('default-allowed');
+    48 │ const n2b = ((await (import('default-allowed'))));
+  > 49 │ const n3 = import('default-allowed');
+       │       ^^
+    50 │ const n3b = (import('default-allowed'));
+    51 │ import('default-allowed').then(n4 => { });
+  
+  i Only the following imports from 'default-allowed' are allowed:
+  
+  - default
+  
+
+```
+
+```
+invalid.js:50:7 lint/style/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not import '*' from 'default-allowed'.
+  
+    48 │ const n2b = ((await (import('default-allowed'))));
+    49 │ const n3 = import('default-allowed');
+  > 50 │ const n3b = (import('default-allowed'));
+       │       ^^^
+    51 │ import('default-allowed').then(n4 => { });
+    52 │ import('default-allowed').then((n5) => { });
+  
+  i Only the following imports from 'default-allowed' are allowed:
+  
+  - default
+  
+
+```
+
+```
+invalid.js:51:32 lint/style/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not import '*' from 'default-allowed'.
+  
+    49 │ const n3 = import('default-allowed');
+    50 │ const n3b = (import('default-allowed'));
+  > 51 │ import('default-allowed').then(n4 => { });
+       │                                ^^
+    52 │ import('default-allowed').then((n5) => { });
+    53 │ import('default-allowed').then(function (n6) { });
+  
+  i Only the following imports from 'default-allowed' are allowed:
+  
+  - default
+  
+
+```
+
+```
+invalid.js:52:33 lint/style/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not import '*' from 'default-allowed'.
+  
+    50 │ const n3b = (import('default-allowed'));
+    51 │ import('default-allowed').then(n4 => { });
+  > 52 │ import('default-allowed').then((n5) => { });
+       │                                 ^^
+    53 │ import('default-allowed').then(function (n6) { });
+    54 │ ((import('default-allowed'))).then(((n6 => { })));
+  
+  i Only the following imports from 'default-allowed' are allowed:
+  
+  - default
+  
+
+```
+
+```
+invalid.js:53:42 lint/style/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not import '*' from 'default-allowed'.
+  
+    51 │ import('default-allowed').then(n4 => { });
+    52 │ import('default-allowed').then((n5) => { });
+  > 53 │ import('default-allowed').then(function (n6) { });
+       │                                          ^^
+    54 │ ((import('default-allowed'))).then(((n6 => { })));
+    55 │ ((import('default-allowed'))).then((((n7) => { })));
+  
+  i Only the following imports from 'default-allowed' are allowed:
+  
+  - default
+  
+
+```
+
+```
+invalid.js:54:38 lint/style/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not import '*' from 'default-allowed'.
+  
+    52 │ import('default-allowed').then((n5) => { });
+    53 │ import('default-allowed').then(function (n6) { });
+  > 54 │ ((import('default-allowed'))).then(((n6 => { })));
+       │                                      ^^
+    55 │ ((import('default-allowed'))).then((((n7) => { })));
+    56 │ ((import('default-allowed'))).then(((function (n8) { })));
+  
+  i Only the following imports from 'default-allowed' are allowed:
+  
+  - default
+  
+
+```
+
+```
+invalid.js:55:39 lint/style/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not import '*' from 'default-allowed'.
+  
+    53 │ import('default-allowed').then(function (n6) { });
+    54 │ ((import('default-allowed'))).then(((n6 => { })));
+  > 55 │ ((import('default-allowed'))).then((((n7) => { })));
+       │                                       ^^
+    56 │ ((import('default-allowed'))).then(((function (n8) { })));
+    57 │ 
+  
+  i Only the following imports from 'default-allowed' are allowed:
+  
+  - default
+  
+
+```
+
+```
+invalid.js:56:48 lint/style/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not import '*' from 'default-allowed'.
+  
+    54 │ ((import('default-allowed'))).then(((n6 => { })));
+    55 │ ((import('default-allowed'))).then((((n7) => { })));
+  > 56 │ ((import('default-allowed'))).then(((function (n8) { })));
+       │                                                ^^
+    57 │ 
+    58 │ export * from 'member-allowed';
+  
+  i Only the following imports from 'default-allowed' are allowed:
+  
+  - default
+  
+
+```
+
+```
+invalid.js:58:8 lint/style/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not import '*' from 'member-allowed'.
+  
+    56 │ ((import('default-allowed'))).then(((function (n8) { })));
+    57 │ 
+  > 58 │ export * from 'member-allowed';
+       │        ^
+    59 │ import * as n1 from 'member-allowed';
+    60 │ const n2 = await import('member-allowed');
+  
+  i Only the following imports from 'member-allowed' are allowed:
+  
+  - allowed1
+  - allowed2
+  - allowed3
+  - allowed4
+  - allowed5
+  - allowed6
+  - allowed7
+  - allowed8
+  - allowed9
+  
+
+```
+
+```
+invalid.js:59:8 lint/style/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not import '*' from 'member-allowed'.
+  
+    58 │ export * from 'member-allowed';
+  > 59 │ import * as n1 from 'member-allowed';
+       │        ^
+    60 │ const n2 = await import('member-allowed');
+    61 │ const n2b = ((await (import('member-allowed'))));
+  
+  i Only the following imports from 'member-allowed' are allowed:
+  
+  - allowed1
+  - allowed2
+  - allowed3
+  - allowed4
+  - allowed5
+  - allowed6
+  - allowed7
+  - allowed8
+  - allowed9
+  
+
+```
+
+```
+invalid.js:60:7 lint/style/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not import '*' from 'member-allowed'.
+  
+    58 │ export * from 'member-allowed';
+    59 │ import * as n1 from 'member-allowed';
+  > 60 │ const n2 = await import('member-allowed');
+       │       ^^
+    61 │ const n2b = ((await (import('member-allowed'))));
+    62 │ const n3 = import('member-allowed');
+  
+  i Only the following imports from 'member-allowed' are allowed:
+  
+  - allowed1
+  - allowed2
+  - allowed3
+  - allowed4
+  - allowed5
+  - allowed6
+  - allowed7
+  - allowed8
+  - allowed9
+  
+
+```
+
+```
+invalid.js:61:7 lint/style/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not import '*' from 'member-allowed'.
+  
+    59 │ import * as n1 from 'member-allowed';
+    60 │ const n2 = await import('member-allowed');
+  > 61 │ const n2b = ((await (import('member-allowed'))));
+       │       ^^^
+    62 │ const n3 = import('member-allowed');
+    63 │ const n3b = (import('member-allowed'));
+  
+  i Only the following imports from 'member-allowed' are allowed:
+  
+  - allowed1
+  - allowed2
+  - allowed3
+  - allowed4
+  - allowed5
+  - allowed6
+  - allowed7
+  - allowed8
+  - allowed9
+  
+
+```
+
+```
+invalid.js:62:7 lint/style/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not import '*' from 'member-allowed'.
+  
+    60 │ const n2 = await import('member-allowed');
+    61 │ const n2b = ((await (import('member-allowed'))));
+  > 62 │ const n3 = import('member-allowed');
+       │       ^^
+    63 │ const n3b = (import('member-allowed'));
+    64 │ import('member-allowed').then(n4 => { });
+  
+  i Only the following imports from 'member-allowed' are allowed:
+  
+  - allowed1
+  - allowed2
+  - allowed3
+  - allowed4
+  - allowed5
+  - allowed6
+  - allowed7
+  - allowed8
+  - allowed9
+  
+
+```
+
+```
+invalid.js:63:7 lint/style/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not import '*' from 'member-allowed'.
+  
+    61 │ const n2b = ((await (import('member-allowed'))));
+    62 │ const n3 = import('member-allowed');
+  > 63 │ const n3b = (import('member-allowed'));
+       │       ^^^
+    64 │ import('member-allowed').then(n4 => { });
+    65 │ import('member-allowed').then((n5) => { });
+  
+  i Only the following imports from 'member-allowed' are allowed:
+  
+  - allowed1
+  - allowed2
+  - allowed3
+  - allowed4
+  - allowed5
+  - allowed6
+  - allowed7
+  - allowed8
+  - allowed9
+  
+
+```
+
+```
+invalid.js:64:31 lint/style/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not import '*' from 'member-allowed'.
+  
+    62 │ const n3 = import('member-allowed');
+    63 │ const n3b = (import('member-allowed'));
+  > 64 │ import('member-allowed').then(n4 => { });
+       │                               ^^
+    65 │ import('member-allowed').then((n5) => { });
+    66 │ import('member-allowed').then(function (n6) { });
+  
+  i Only the following imports from 'member-allowed' are allowed:
+  
+  - allowed1
+  - allowed2
+  - allowed3
+  - allowed4
+  - allowed5
+  - allowed6
+  - allowed7
+  - allowed8
+  - allowed9
+  
+
+```
+
+```
+invalid.js:65:32 lint/style/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not import '*' from 'member-allowed'.
+  
+    63 │ const n3b = (import('member-allowed'));
+    64 │ import('member-allowed').then(n4 => { });
+  > 65 │ import('member-allowed').then((n5) => { });
+       │                                ^^
+    66 │ import('member-allowed').then(function (n6) { });
+    67 │ ((import('member-allowed'))).then(((n6 => { })));
+  
+  i Only the following imports from 'member-allowed' are allowed:
+  
+  - allowed1
+  - allowed2
+  - allowed3
+  - allowed4
+  - allowed5
+  - allowed6
+  - allowed7
+  - allowed8
+  - allowed9
+  
+
+```
+
+```
+invalid.js:66:41 lint/style/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not import '*' from 'member-allowed'.
+  
+    64 │ import('member-allowed').then(n4 => { });
+    65 │ import('member-allowed').then((n5) => { });
+  > 66 │ import('member-allowed').then(function (n6) { });
+       │                                         ^^
+    67 │ ((import('member-allowed'))).then(((n6 => { })));
+    68 │ ((import('member-allowed'))).then((((n7) => { })));
+  
+  i Only the following imports from 'member-allowed' are allowed:
+  
+  - allowed1
+  - allowed2
+  - allowed3
+  - allowed4
+  - allowed5
+  - allowed6
+  - allowed7
+  - allowed8
+  - allowed9
+  
+
+```
+
+```
+invalid.js:67:37 lint/style/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not import '*' from 'member-allowed'.
+  
+    65 │ import('member-allowed').then((n5) => { });
+    66 │ import('member-allowed').then(function (n6) { });
+  > 67 │ ((import('member-allowed'))).then(((n6 => { })));
+       │                                     ^^
+    68 │ ((import('member-allowed'))).then((((n7) => { })));
+    69 │ ((import('member-allowed'))).then(((function (n8) { })));
+  
+  i Only the following imports from 'member-allowed' are allowed:
+  
+  - allowed1
+  - allowed2
+  - allowed3
+  - allowed4
+  - allowed5
+  - allowed6
+  - allowed7
+  - allowed8
+  - allowed9
+  
+
+```
+
+```
+invalid.js:68:38 lint/style/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not import '*' from 'member-allowed'.
+  
+    66 │ import('member-allowed').then(function (n6) { });
+    67 │ ((import('member-allowed'))).then(((n6 => { })));
+  > 68 │ ((import('member-allowed'))).then((((n7) => { })));
+       │                                      ^^
+    69 │ ((import('member-allowed'))).then(((function (n8) { })));
+    70 │ 
+  
+  i Only the following imports from 'member-allowed' are allowed:
+  
+  - allowed1
+  - allowed2
+  - allowed3
+  - allowed4
+  - allowed5
+  - allowed6
+  - allowed7
+  - allowed8
+  - allowed9
+  
+
+```
+
+```
+invalid.js:69:47 lint/style/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not import '*' from 'member-allowed'.
+  
+    67 │ ((import('member-allowed'))).then(((n6 => { })));
+    68 │ ((import('member-allowed'))).then((((n7) => { })));
+  > 69 │ ((import('member-allowed'))).then(((function (n8) { })));
+       │                                               ^^
+    70 │ 
+    71 │ export * from 'bare-allowed';
+  
+  i Only the following imports from 'member-allowed' are allowed:
+  
+  - allowed1
+  - allowed2
+  - allowed3
+  - allowed4
+  - allowed5
+  - allowed6
+  - allowed7
+  - allowed8
+  - allowed9
+  
+
+```
+
+```
+invalid.js:71:8 lint/style/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not import '*' from 'bare-allowed'.
+  
+    69 │ ((import('member-allowed'))).then(((function (n8) { })));
+    70 │ 
+  > 71 │ export * from 'bare-allowed';
+       │        ^
+    72 │ import * as n1 from 'bare-allowed';
+    73 │ const n2 = await import('bare-allowed');
+  
+  i Only the following imports from 'bare-allowed' are allowed:
+  
+  - Side-effect only import
+  
+
+```
+
+```
+invalid.js:72:8 lint/style/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not import '*' from 'bare-allowed'.
+  
+    71 │ export * from 'bare-allowed';
+  > 72 │ import * as n1 from 'bare-allowed';
+       │        ^
+    73 │ const n2 = await import('bare-allowed');
+    74 │ const n2b = ((await (import('bare-allowed'))));
+  
+  i Only the following imports from 'bare-allowed' are allowed:
+  
+  - Side-effect only import
+  
+
+```
+
+```
+invalid.js:73:7 lint/style/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not import '*' from 'bare-allowed'.
+  
+    71 │ export * from 'bare-allowed';
+    72 │ import * as n1 from 'bare-allowed';
+  > 73 │ const n2 = await import('bare-allowed');
+       │       ^^
+    74 │ const n2b = ((await (import('bare-allowed'))));
+    75 │ const n3 = import('bare-allowed');
+  
+  i Only the following imports from 'bare-allowed' are allowed:
+  
+  - Side-effect only import
+  
+
+```
+
+```
+invalid.js:74:7 lint/style/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not import '*' from 'bare-allowed'.
+  
+    72 │ import * as n1 from 'bare-allowed';
+    73 │ const n2 = await import('bare-allowed');
+  > 74 │ const n2b = ((await (import('bare-allowed'))));
+       │       ^^^
+    75 │ const n3 = import('bare-allowed');
+    76 │ const n3b = (import('bare-allowed'));
+  
+  i Only the following imports from 'bare-allowed' are allowed:
+  
+  - Side-effect only import
+  
+
+```
+
+```
+invalid.js:75:7 lint/style/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not import '*' from 'bare-allowed'.
+  
+    73 │ const n2 = await import('bare-allowed');
+    74 │ const n2b = ((await (import('bare-allowed'))));
+  > 75 │ const n3 = import('bare-allowed');
+       │       ^^
+    76 │ const n3b = (import('bare-allowed'));
+    77 │ import('bare-allowed').then(n4 => { });
+  
+  i Only the following imports from 'bare-allowed' are allowed:
+  
+  - Side-effect only import
+  
+
+```
+
+```
+invalid.js:76:7 lint/style/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not import '*' from 'bare-allowed'.
+  
+    74 │ const n2b = ((await (import('bare-allowed'))));
+    75 │ const n3 = import('bare-allowed');
+  > 76 │ const n3b = (import('bare-allowed'));
+       │       ^^^
+    77 │ import('bare-allowed').then(n4 => { });
+    78 │ import('bare-allowed').then((n5) => { });
+  
+  i Only the following imports from 'bare-allowed' are allowed:
+  
+  - Side-effect only import
+  
+
+```
+
+```
+invalid.js:77:29 lint/style/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not import '*' from 'bare-allowed'.
+  
+    75 │ const n3 = import('bare-allowed');
+    76 │ const n3b = (import('bare-allowed'));
+  > 77 │ import('bare-allowed').then(n4 => { });
+       │                             ^^
+    78 │ import('bare-allowed').then((n5) => { });
+    79 │ import('bare-allowed').then(function (n6) { });
+  
+  i Only the following imports from 'bare-allowed' are allowed:
+  
+  - Side-effect only import
+  
+
+```
+
+```
+invalid.js:78:30 lint/style/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not import '*' from 'bare-allowed'.
+  
+    76 │ const n3b = (import('bare-allowed'));
+    77 │ import('bare-allowed').then(n4 => { });
+  > 78 │ import('bare-allowed').then((n5) => { });
+       │                              ^^
+    79 │ import('bare-allowed').then(function (n6) { });
+    80 │ ((import('bare-allowed'))).then(((n6 => { })));
+  
+  i Only the following imports from 'bare-allowed' are allowed:
+  
+  - Side-effect only import
+  
+
+```
+
+```
+invalid.js:79:39 lint/style/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not import '*' from 'bare-allowed'.
+  
+    77 │ import('bare-allowed').then(n4 => { });
+    78 │ import('bare-allowed').then((n5) => { });
+  > 79 │ import('bare-allowed').then(function (n6) { });
+       │                                       ^^
+    80 │ ((import('bare-allowed'))).then(((n6 => { })));
+    81 │ ((import('bare-allowed'))).then((((n7) => { })));
+  
+  i Only the following imports from 'bare-allowed' are allowed:
+  
+  - Side-effect only import
+  
+
+```
+
+```
+invalid.js:80:35 lint/style/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not import '*' from 'bare-allowed'.
+  
+    78 │ import('bare-allowed').then((n5) => { });
+    79 │ import('bare-allowed').then(function (n6) { });
+  > 80 │ ((import('bare-allowed'))).then(((n6 => { })));
+       │                                   ^^
+    81 │ ((import('bare-allowed'))).then((((n7) => { })));
+    82 │ ((import('bare-allowed'))).then(((function (n8) { })));
+  
+  i Only the following imports from 'bare-allowed' are allowed:
+  
+  - Side-effect only import
+  
+
+```
+
+```
+invalid.js:81:36 lint/style/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not import '*' from 'bare-allowed'.
+  
+    79 │ import('bare-allowed').then(function (n6) { });
+    80 │ ((import('bare-allowed'))).then(((n6 => { })));
+  > 81 │ ((import('bare-allowed'))).then((((n7) => { })));
+       │                                    ^^
+    82 │ ((import('bare-allowed'))).then(((function (n8) { })));
+    83 │ 
+  
+  i Only the following imports from 'bare-allowed' are allowed:
+  
+  - Side-effect only import
+  
+
+```
+
+```
+invalid.js:82:45 lint/style/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not import '*' from 'bare-allowed'.
+  
+    80 │ ((import('bare-allowed'))).then(((n6 => { })));
+    81 │ ((import('bare-allowed'))).then((((n7) => { })));
+  > 82 │ ((import('bare-allowed'))).then(((function (n8) { })));
+       │                                             ^^
+    83 │ 
+    84 │ import d0 from 'namespace-allowed';
+  
+  i Only the following imports from 'bare-allowed' are allowed:
+  
+  - Side-effect only import
+  
+
+```
+
+```
+invalid.js:84:8 lint/style/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not import 'default' from 'namespace-allowed'.
+  
+    82 │ ((import('bare-allowed'))).then(((function (n8) { })));
+    83 │ 
+  > 84 │ import d0 from 'namespace-allowed';
+       │        ^^
+    85 │ export { default as d1 } from 'namespace-allowed';
+    86 │ import { default as d1 } from 'namespace-allowed';
+  
+  i Only the following imports from 'namespace-allowed' are allowed:
+  
+  - *
+  
+
+```
+
+```
+invalid.js:85:10 lint/style/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not import 'default' from 'namespace-allowed'.
+  
+    84 │ import d0 from 'namespace-allowed';
+  > 85 │ export { default as d1 } from 'namespace-allowed';
+       │          ^^^^^^^
+    86 │ import { default as d1 } from 'namespace-allowed';
+    87 │ const { "default": d2 } = await import('namespace-allowed');
+  
+  i Only the following imports from 'namespace-allowed' are allowed:
+  
+  - *
+  
+
+```
+
+```
+invalid.js:86:10 lint/style/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not import 'default' from 'namespace-allowed'.
+  
+    84 │ import d0 from 'namespace-allowed';
+    85 │ export { default as d1 } from 'namespace-allowed';
+  > 86 │ import { default as d1 } from 'namespace-allowed';
+       │          ^^^^^^^
+    87 │ const { "default": d2 } = await import('namespace-allowed');
+    88 │ const { default: d3 } = await import('namespace-allowed');
+  
+  i Only the following imports from 'namespace-allowed' are allowed:
+  
+  - *
+  
+
+```
+
+```
+invalid.js:87:9 lint/style/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not import 'default' from 'namespace-allowed'.
+  
+    85 │ export { default as d1 } from 'namespace-allowed';
+    86 │ import { default as d1 } from 'namespace-allowed';
+  > 87 │ const { "default": d2 } = await import('namespace-allowed');
+       │         ^^^^^^^^^
+    88 │ const { default: d3 } = await import('namespace-allowed');
+    89 │ import { default as d4, forbidden1 } from 'namespace-allowed';
+  
+  i Only the following imports from 'namespace-allowed' are allowed:
+  
+  - *
+  
+
+```
+
+```
+invalid.js:88:9 lint/style/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not import 'default' from 'namespace-allowed'.
+  
+    86 │ import { default as d1 } from 'namespace-allowed';
+    87 │ const { "default": d2 } = await import('namespace-allowed');
+  > 88 │ const { default: d3 } = await import('namespace-allowed');
+       │         ^^^^^^^
+    89 │ import { default as d4, forbidden1 } from 'namespace-allowed';
+    90 │ const { forbidden2, default: d5 } = await import('namespace-allowed');
+  
+  i Only the following imports from 'namespace-allowed' are allowed:
+  
+  - *
+  
+
+```
+
+```
+invalid.js:89:10 lint/style/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not import 'default' from 'namespace-allowed'.
+  
+    87 │ const { "default": d2 } = await import('namespace-allowed');
+    88 │ const { default: d3 } = await import('namespace-allowed');
+  > 89 │ import { default as d4, forbidden1 } from 'namespace-allowed';
+       │          ^^^^^^^
+    90 │ const { forbidden2, default: d5 } = await import('namespace-allowed');
+    91 │ const { forbidden3, default: d6 } = import('namespace-allowed');
+  
+  i Only the following imports from 'namespace-allowed' are allowed:
+  
+  - *
+  
+
+```
+
+```
+invalid.js:89:25 lint/style/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not import 'forbidden1' from 'namespace-allowed'.
+  
+    87 │ const { "default": d2 } = await import('namespace-allowed');
+    88 │ const { default: d3 } = await import('namespace-allowed');
+  > 89 │ import { default as d4, forbidden1 } from 'namespace-allowed';
+       │                         ^^^^^^^^^^
+    90 │ const { forbidden2, default: d5 } = await import('namespace-allowed');
+    91 │ const { forbidden3, default: d6 } = import('namespace-allowed');
+  
+  i Only the following imports from 'namespace-allowed' are allowed:
+  
+  - *
+  
+
+```
+
+```
+invalid.js:90:9 lint/style/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not import 'forbidden2' from 'namespace-allowed'.
+  
+    88 │ const { default: d3 } = await import('namespace-allowed');
+    89 │ import { default as d4, forbidden1 } from 'namespace-allowed';
+  > 90 │ const { forbidden2, default: d5 } = await import('namespace-allowed');
+       │         ^^^^^^^^^^
+    91 │ const { forbidden3, default: d6 } = import('namespace-allowed');
+    92 │ const { "forbidden4": f4, "default": d7 } = import('namespace-allowed');
+  
+  i Only the following imports from 'namespace-allowed' are allowed:
+  
+  - *
+  
+
+```
+
+```
+invalid.js:90:21 lint/style/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not import 'default' from 'namespace-allowed'.
+  
+    88 │ const { default: d3 } = await import('namespace-allowed');
+    89 │ import { default as d4, forbidden1 } from 'namespace-allowed';
+  > 90 │ const { forbidden2, default: d5 } = await import('namespace-allowed');
+       │                     ^^^^^^^
+    91 │ const { forbidden3, default: d6 } = import('namespace-allowed');
+    92 │ const { "forbidden4": f4, "default": d7 } = import('namespace-allowed');
+  
+  i Only the following imports from 'namespace-allowed' are allowed:
+  
+  - *
+  
+
+```
+
+```
+invalid.js:91:9 lint/style/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not import 'forbidden3' from 'namespace-allowed'.
+  
+    89 │ import { default as d4, forbidden1 } from 'namespace-allowed';
+    90 │ const { forbidden2, default: d5 } = await import('namespace-allowed');
+  > 91 │ const { forbidden3, default: d6 } = import('namespace-allowed');
+       │         ^^^^^^^^^^
+    92 │ const { "forbidden4": f4, "default": d7 } = import('namespace-allowed');
+    93 │ 
+  
+  i Only the following imports from 'namespace-allowed' are allowed:
+  
+  - *
+  
+
+```
+
+```
+invalid.js:91:21 lint/style/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not import 'default' from 'namespace-allowed'.
+  
+    89 │ import { default as d4, forbidden1 } from 'namespace-allowed';
+    90 │ const { forbidden2, default: d5 } = await import('namespace-allowed');
+  > 91 │ const { forbidden3, default: d6 } = import('namespace-allowed');
+       │                     ^^^^^^^
+    92 │ const { "forbidden4": f4, "default": d7 } = import('namespace-allowed');
+    93 │ 
+  
+  i Only the following imports from 'namespace-allowed' are allowed:
+  
+  - *
+  
+
+```
+
+```
+invalid.js:92:9 lint/style/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not import 'forbidden4' from 'namespace-allowed'.
+  
+    90 │ const { forbidden2, default: d5 } = await import('namespace-allowed');
+    91 │ const { forbidden3, default: d6 } = import('namespace-allowed');
+  > 92 │ const { "forbidden4": f4, "default": d7 } = import('namespace-allowed');
+       │         ^^^^^^^^^^^^
+    93 │ 
+    94 │ import d0 from 'member-allowed';
+  
+  i Only the following imports from 'namespace-allowed' are allowed:
+  
+  - *
+  
+
+```
+
+```
+invalid.js:92:27 lint/style/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not import 'default' from 'namespace-allowed'.
+  
+    90 │ const { forbidden2, default: d5 } = await import('namespace-allowed');
+    91 │ const { forbidden3, default: d6 } = import('namespace-allowed');
+  > 92 │ const { "forbidden4": f4, "default": d7 } = import('namespace-allowed');
+       │                           ^^^^^^^^^
+    93 │ 
+    94 │ import d0 from 'member-allowed';
+  
+  i Only the following imports from 'namespace-allowed' are allowed:
+  
+  - *
+  
+
+```
+
+```
+invalid.js:94:8 lint/style/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not import 'default' from 'member-allowed'.
+  
+    92 │ const { "forbidden4": f4, "default": d7 } = import('namespace-allowed');
+    93 │ 
+  > 94 │ import d0 from 'member-allowed';
+       │        ^^
+    95 │ export { default as d1 } from 'member-allowed';
+    96 │ import { default as d1 } from 'member-allowed';
+  
+  i Only the following imports from 'member-allowed' are allowed:
+  
+  - allowed1
+  - allowed2
+  - allowed3
+  - allowed4
+  - allowed5
+  - allowed6
+  - allowed7
+  - allowed8
+  - allowed9
+  
+
+```
+
+```
+invalid.js:95:10 lint/style/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not import 'default' from 'member-allowed'.
+  
+    94 │ import d0 from 'member-allowed';
+  > 95 │ export { default as d1 } from 'member-allowed';
+       │          ^^^^^^^
+    96 │ import { default as d1 } from 'member-allowed';
+    97 │ const { "default": d2 } = await import('member-allowed');
+  
+  i Only the following imports from 'member-allowed' are allowed:
+  
+  - allowed1
+  - allowed2
+  - allowed3
+  - allowed4
+  - allowed5
+  - allowed6
+  - allowed7
+  - allowed8
+  - allowed9
+  
+
+```
+
+```
+invalid.js:96:10 lint/style/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not import 'default' from 'member-allowed'.
+  
+    94 │ import d0 from 'member-allowed';
+    95 │ export { default as d1 } from 'member-allowed';
+  > 96 │ import { default as d1 } from 'member-allowed';
+       │          ^^^^^^^
+    97 │ const { "default": d2 } = await import('member-allowed');
+    98 │ const { default: d3 } = await import('member-allowed');
+  
+  i Only the following imports from 'member-allowed' are allowed:
+  
+  - allowed1
+  - allowed2
+  - allowed3
+  - allowed4
+  - allowed5
+  - allowed6
+  - allowed7
+  - allowed8
+  - allowed9
+  
+
+```
+
+```
+invalid.js:97:9 lint/style/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not import 'default' from 'member-allowed'.
+  
+    95 │ export { default as d1 } from 'member-allowed';
+    96 │ import { default as d1 } from 'member-allowed';
+  > 97 │ const { "default": d2 } = await import('member-allowed');
+       │         ^^^^^^^^^
+    98 │ const { default: d3 } = await import('member-allowed');
+    99 │ import { default as d4, forbidden1 } from 'member-allowed';
+  
+  i Only the following imports from 'member-allowed' are allowed:
+  
+  - allowed1
+  - allowed2
+  - allowed3
+  - allowed4
+  - allowed5
+  - allowed6
+  - allowed7
+  - allowed8
+  - allowed9
+  
+
+```
+
+```
+invalid.js:98:9 lint/style/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not import 'default' from 'member-allowed'.
+  
+     96 │ import { default as d1 } from 'member-allowed';
+     97 │ const { "default": d2 } = await import('member-allowed');
+   > 98 │ const { default: d3 } = await import('member-allowed');
+        │         ^^^^^^^
+     99 │ import { default as d4, forbidden1 } from 'member-allowed';
+    100 │ const { forbidden2, default: d5 } = await import('member-allowed');
+  
+  i Only the following imports from 'member-allowed' are allowed:
+  
+  - allowed1
+  - allowed2
+  - allowed3
+  - allowed4
+  - allowed5
+  - allowed6
+  - allowed7
+  - allowed8
+  - allowed9
+  
+
+```
+
+```
+invalid.js:99:10 lint/style/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not import 'default' from 'member-allowed'.
+  
+     97 │ const { "default": d2 } = await import('member-allowed');
+     98 │ const { default: d3 } = await import('member-allowed');
+   > 99 │ import { default as d4, forbidden1 } from 'member-allowed';
+        │          ^^^^^^^
+    100 │ const { forbidden2, default: d5 } = await import('member-allowed');
+    101 │ const { forbidden3, default: d6 } = import('member-allowed');
+  
+  i Only the following imports from 'member-allowed' are allowed:
+  
+  - allowed1
+  - allowed2
+  - allowed3
+  - allowed4
+  - allowed5
+  - allowed6
+  - allowed7
+  - allowed8
+  - allowed9
+  
+
+```
+
+```
+invalid.js:99:25 lint/style/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not import 'forbidden1' from 'member-allowed'.
+  
+     97 │ const { "default": d2 } = await import('member-allowed');
+     98 │ const { default: d3 } = await import('member-allowed');
+   > 99 │ import { default as d4, forbidden1 } from 'member-allowed';
+        │                         ^^^^^^^^^^
+    100 │ const { forbidden2, default: d5 } = await import('member-allowed');
+    101 │ const { forbidden3, default: d6 } = import('member-allowed');
+  
+  i Only the following imports from 'member-allowed' are allowed:
+  
+  - allowed1
+  - allowed2
+  - allowed3
+  - allowed4
+  - allowed5
+  - allowed6
+  - allowed7
+  - allowed8
+  - allowed9
+  
+
+```
+
+```
+invalid.js:100:9 lint/style/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not import 'forbidden2' from 'member-allowed'.
+  
+     98 │ const { default: d3 } = await import('member-allowed');
+     99 │ import { default as d4, forbidden1 } from 'member-allowed';
+  > 100 │ const { forbidden2, default: d5 } = await import('member-allowed');
+        │         ^^^^^^^^^^
+    101 │ const { forbidden3, default: d6 } = import('member-allowed');
+    102 │ const { "forbidden4": f4, "default": d7 } = import('member-allowed');
+  
+  i Only the following imports from 'member-allowed' are allowed:
+  
+  - allowed1
+  - allowed2
+  - allowed3
+  - allowed4
+  - allowed5
+  - allowed6
+  - allowed7
+  - allowed8
+  - allowed9
+  
+
+```
+
+```
+invalid.js:100:21 lint/style/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not import 'default' from 'member-allowed'.
+  
+     98 │ const { default: d3 } = await import('member-allowed');
+     99 │ import { default as d4, forbidden1 } from 'member-allowed';
+  > 100 │ const { forbidden2, default: d5 } = await import('member-allowed');
+        │                     ^^^^^^^
+    101 │ const { forbidden3, default: d6 } = import('member-allowed');
+    102 │ const { "forbidden4": f4, "default": d7 } = import('member-allowed');
+  
+  i Only the following imports from 'member-allowed' are allowed:
+  
+  - allowed1
+  - allowed2
+  - allowed3
+  - allowed4
+  - allowed5
+  - allowed6
+  - allowed7
+  - allowed8
+  - allowed9
+  
+
+```
+
+```
+invalid.js:101:9 lint/style/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not import 'forbidden3' from 'member-allowed'.
+  
+     99 │ import { default as d4, forbidden1 } from 'member-allowed';
+    100 │ const { forbidden2, default: d5 } = await import('member-allowed');
+  > 101 │ const { forbidden3, default: d6 } = import('member-allowed');
+        │         ^^^^^^^^^^
+    102 │ const { "forbidden4": f4, "default": d7 } = import('member-allowed');
+    103 │ 
+  
+  i Only the following imports from 'member-allowed' are allowed:
+  
+  - allowed1
+  - allowed2
+  - allowed3
+  - allowed4
+  - allowed5
+  - allowed6
+  - allowed7
+  - allowed8
+  - allowed9
+  
+
+```
+
+```
+invalid.js:101:21 lint/style/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not import 'default' from 'member-allowed'.
+  
+     99 │ import { default as d4, forbidden1 } from 'member-allowed';
+    100 │ const { forbidden2, default: d5 } = await import('member-allowed');
+  > 101 │ const { forbidden3, default: d6 } = import('member-allowed');
+        │                     ^^^^^^^
+    102 │ const { "forbidden4": f4, "default": d7 } = import('member-allowed');
+    103 │ 
+  
+  i Only the following imports from 'member-allowed' are allowed:
+  
+  - allowed1
+  - allowed2
+  - allowed3
+  - allowed4
+  - allowed5
+  - allowed6
+  - allowed7
+  - allowed8
+  - allowed9
+  
+
+```
+
+```
+invalid.js:102:9 lint/style/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not import 'forbidden4' from 'member-allowed'.
+  
+    100 │ const { forbidden2, default: d5 } = await import('member-allowed');
+    101 │ const { forbidden3, default: d6 } = import('member-allowed');
+  > 102 │ const { "forbidden4": f4, "default": d7 } = import('member-allowed');
+        │         ^^^^^^^^^^^^
+    103 │ 
+    104 │ import d0 from 'bare-allowed';
+  
+  i Only the following imports from 'member-allowed' are allowed:
+  
+  - allowed1
+  - allowed2
+  - allowed3
+  - allowed4
+  - allowed5
+  - allowed6
+  - allowed7
+  - allowed8
+  - allowed9
+  
+
+```
+
+```
+invalid.js:102:27 lint/style/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not import 'default' from 'member-allowed'.
+  
+    100 │ const { forbidden2, default: d5 } = await import('member-allowed');
+    101 │ const { forbidden3, default: d6 } = import('member-allowed');
+  > 102 │ const { "forbidden4": f4, "default": d7 } = import('member-allowed');
+        │                           ^^^^^^^^^
+    103 │ 
+    104 │ import d0 from 'bare-allowed';
+  
+  i Only the following imports from 'member-allowed' are allowed:
+  
+  - allowed1
+  - allowed2
+  - allowed3
+  - allowed4
+  - allowed5
+  - allowed6
+  - allowed7
+  - allowed8
+  - allowed9
+  
+
+```
+
+```
+invalid.js:104:8 lint/style/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not import 'default' from 'bare-allowed'.
+  
+    102 │ const { "forbidden4": f4, "default": d7 } = import('member-allowed');
+    103 │ 
+  > 104 │ import d0 from 'bare-allowed';
+        │        ^^
+    105 │ export { default as d1 } from 'bare-allowed';
+    106 │ import { default as d1 } from 'bare-allowed';
+  
+  i Only the following imports from 'bare-allowed' are allowed:
+  
+  - Side-effect only import
+  
+
+```
+
+```
+invalid.js:105:10 lint/style/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not import 'default' from 'bare-allowed'.
+  
+    104 │ import d0 from 'bare-allowed';
+  > 105 │ export { default as d1 } from 'bare-allowed';
+        │          ^^^^^^^
+    106 │ import { default as d1 } from 'bare-allowed';
+    107 │ const { "default": d2 } = await import('bare-allowed');
+  
+  i Only the following imports from 'bare-allowed' are allowed:
+  
+  - Side-effect only import
+  
+
+```
+
+```
+invalid.js:106:10 lint/style/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not import 'default' from 'bare-allowed'.
+  
+    104 │ import d0 from 'bare-allowed';
+    105 │ export { default as d1 } from 'bare-allowed';
+  > 106 │ import { default as d1 } from 'bare-allowed';
+        │          ^^^^^^^
+    107 │ const { "default": d2 } = await import('bare-allowed');
+    108 │ const { default: d3 } = await import('bare-allowed');
+  
+  i Only the following imports from 'bare-allowed' are allowed:
+  
+  - Side-effect only import
+  
+
+```
+
+```
+invalid.js:107:9 lint/style/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not import 'default' from 'bare-allowed'.
+  
+    105 │ export { default as d1 } from 'bare-allowed';
+    106 │ import { default as d1 } from 'bare-allowed';
+  > 107 │ const { "default": d2 } = await import('bare-allowed');
+        │         ^^^^^^^^^
+    108 │ const { default: d3 } = await import('bare-allowed');
+    109 │ export { default as d4, forbidden1 } from 'bare-allowed';
+  
+  i Only the following imports from 'bare-allowed' are allowed:
+  
+  - Side-effect only import
+  
+
+```
+
+```
+invalid.js:108:9 lint/style/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not import 'default' from 'bare-allowed'.
+  
+    106 │ import { default as d1 } from 'bare-allowed';
+    107 │ const { "default": d2 } = await import('bare-allowed');
+  > 108 │ const { default: d3 } = await import('bare-allowed');
+        │         ^^^^^^^
+    109 │ export { default as d4, forbidden1 } from 'bare-allowed';
+    110 │ import { default as d4, forbidden1 } from 'bare-allowed';
+  
+  i Only the following imports from 'bare-allowed' are allowed:
+  
+  - Side-effect only import
+  
+
+```
+
+```
+invalid.js:109:10 lint/style/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not import 'default' from 'bare-allowed'.
+  
+    107 │ const { "default": d2 } = await import('bare-allowed');
+    108 │ const { default: d3 } = await import('bare-allowed');
+  > 109 │ export { default as d4, forbidden1 } from 'bare-allowed';
+        │          ^^^^^^^
+    110 │ import { default as d4, forbidden1 } from 'bare-allowed';
+    111 │ const { forbidden2, default: d5 } = await import('bare-allowed');
+  
+  i Only the following imports from 'bare-allowed' are allowed:
+  
+  - Side-effect only import
+  
+
+```
+
+```
+invalid.js:109:25 lint/style/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not import 'forbidden1' from 'bare-allowed'.
+  
+    107 │ const { "default": d2 } = await import('bare-allowed');
+    108 │ const { default: d3 } = await import('bare-allowed');
+  > 109 │ export { default as d4, forbidden1 } from 'bare-allowed';
+        │                         ^^^^^^^^^^
+    110 │ import { default as d4, forbidden1 } from 'bare-allowed';
+    111 │ const { forbidden2, default: d5 } = await import('bare-allowed');
+  
+  i Only the following imports from 'bare-allowed' are allowed:
+  
+  - Side-effect only import
+  
+
+```
+
+```
+invalid.js:110:10 lint/style/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not import 'default' from 'bare-allowed'.
+  
+    108 │ const { default: d3 } = await import('bare-allowed');
+    109 │ export { default as d4, forbidden1 } from 'bare-allowed';
+  > 110 │ import { default as d4, forbidden1 } from 'bare-allowed';
+        │          ^^^^^^^
+    111 │ const { forbidden2, default: d5 } = await import('bare-allowed');
+    112 │ const { forbidden3, default: d6 } = import('bare-allowed');
+  
+  i Only the following imports from 'bare-allowed' are allowed:
+  
+  - Side-effect only import
+  
+
+```
+
+```
+invalid.js:110:25 lint/style/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not import 'forbidden1' from 'bare-allowed'.
+  
+    108 │ const { default: d3 } = await import('bare-allowed');
+    109 │ export { default as d4, forbidden1 } from 'bare-allowed';
+  > 110 │ import { default as d4, forbidden1 } from 'bare-allowed';
+        │                         ^^^^^^^^^^
+    111 │ const { forbidden2, default: d5 } = await import('bare-allowed');
+    112 │ const { forbidden3, default: d6 } = import('bare-allowed');
+  
+  i Only the following imports from 'bare-allowed' are allowed:
+  
+  - Side-effect only import
+  
+
+```
+
+```
+invalid.js:111:9 lint/style/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not import 'forbidden2' from 'bare-allowed'.
+  
+    109 │ export { default as d4, forbidden1 } from 'bare-allowed';
+    110 │ import { default as d4, forbidden1 } from 'bare-allowed';
+  > 111 │ const { forbidden2, default: d5 } = await import('bare-allowed');
+        │         ^^^^^^^^^^
+    112 │ const { forbidden3, default: d6 } = import('bare-allowed');
+    113 │ const { "forbidden4": f4, "default": d7 } = import('bare-allowed');
+  
+  i Only the following imports from 'bare-allowed' are allowed:
+  
+  - Side-effect only import
+  
+
+```
+
+```
+invalid.js:111:21 lint/style/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not import 'default' from 'bare-allowed'.
+  
+    109 │ export { default as d4, forbidden1 } from 'bare-allowed';
+    110 │ import { default as d4, forbidden1 } from 'bare-allowed';
+  > 111 │ const { forbidden2, default: d5 } = await import('bare-allowed');
+        │                     ^^^^^^^
+    112 │ const { forbidden3, default: d6 } = import('bare-allowed');
+    113 │ const { "forbidden4": f4, "default": d7 } = import('bare-allowed');
+  
+  i Only the following imports from 'bare-allowed' are allowed:
+  
+  - Side-effect only import
+  
+
+```
+
+```
+invalid.js:112:9 lint/style/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not import 'forbidden3' from 'bare-allowed'.
+  
+    110 │ import { default as d4, forbidden1 } from 'bare-allowed';
+    111 │ const { forbidden2, default: d5 } = await import('bare-allowed');
+  > 112 │ const { forbidden3, default: d6 } = import('bare-allowed');
+        │         ^^^^^^^^^^
+    113 │ const { "forbidden4": f4, "default": d7 } = import('bare-allowed');
+    114 │ 
+  
+  i Only the following imports from 'bare-allowed' are allowed:
+  
+  - Side-effect only import
+  
+
+```
+
+```
+invalid.js:112:21 lint/style/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not import 'default' from 'bare-allowed'.
+  
+    110 │ import { default as d4, forbidden1 } from 'bare-allowed';
+    111 │ const { forbidden2, default: d5 } = await import('bare-allowed');
+  > 112 │ const { forbidden3, default: d6 } = import('bare-allowed');
+        │                     ^^^^^^^
+    113 │ const { "forbidden4": f4, "default": d7 } = import('bare-allowed');
+    114 │ 
+  
+  i Only the following imports from 'bare-allowed' are allowed:
+  
+  - Side-effect only import
+  
+
+```
+
+```
+invalid.js:113:9 lint/style/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not import 'forbidden4' from 'bare-allowed'.
+  
+    111 │ const { forbidden2, default: d5 } = await import('bare-allowed');
+    112 │ const { forbidden3, default: d6 } = import('bare-allowed');
+  > 113 │ const { "forbidden4": f4, "default": d7 } = import('bare-allowed');
+        │         ^^^^^^^^^^^^
+    114 │ 
+    115 │ export { forbidden1 } from 'default-allowed';
+  
+  i Only the following imports from 'bare-allowed' are allowed:
+  
+  - Side-effect only import
+  
+
+```
+
+```
+invalid.js:113:27 lint/style/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not import 'default' from 'bare-allowed'.
+  
+    111 │ const { forbidden2, default: d5 } = await import('bare-allowed');
+    112 │ const { forbidden3, default: d6 } = import('bare-allowed');
+  > 113 │ const { "forbidden4": f4, "default": d7 } = import('bare-allowed');
+        │                           ^^^^^^^^^
+    114 │ 
+    115 │ export { forbidden1 } from 'default-allowed';
+  
+  i Only the following imports from 'bare-allowed' are allowed:
+  
+  - Side-effect only import
+  
+
+```
+
+```
+invalid.js:115:10 lint/style/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not import 'forbidden1' from 'default-allowed'.
+  
+    113 │ const { "forbidden4": f4, "default": d7 } = import('bare-allowed');
+    114 │ 
+  > 115 │ export { forbidden1 } from 'default-allowed';
+        │          ^^^^^^^^^^
+    116 │ import { forbidden1 } from 'default-allowed';
+    117 │ const { forbidden2, forbidden3: f1, "forbidden4": f2 } = await import('default-allowed');
+  
+  i Only the following imports from 'default-allowed' are allowed:
+  
+  - default
+  
+
+```
+
+```
+invalid.js:116:10 lint/style/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not import 'forbidden1' from 'default-allowed'.
+  
+    115 │ export { forbidden1 } from 'default-allowed';
+  > 116 │ import { forbidden1 } from 'default-allowed';
+        │          ^^^^^^^^^^
+    117 │ const { forbidden2, forbidden3: f1, "forbidden4": f2 } = await import('default-allowed');
+    118 │ import('default-allowed').then(({ forbidden2, forbidden3: f1, "forbidden4": f2 }) => { })
+  
+  i Only the following imports from 'default-allowed' are allowed:
+  
+  - default
+  
+
+```
+
+```
+invalid.js:117:9 lint/style/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not import 'forbidden2' from 'default-allowed'.
+  
+    115 │ export { forbidden1 } from 'default-allowed';
+    116 │ import { forbidden1 } from 'default-allowed';
+  > 117 │ const { forbidden2, forbidden3: f1, "forbidden4": f2 } = await import('default-allowed');
+        │         ^^^^^^^^^^
+    118 │ import('default-allowed').then(({ forbidden2, forbidden3: f1, "forbidden4": f2 }) => { })
+    119 │ import('default-allowed').then(function ({ forbidden2, forbidden3: f1, "forbidden4": f2 }) { })
+  
+  i Only the following imports from 'default-allowed' are allowed:
+  
+  - default
+  
+
+```
+
+```
+invalid.js:117:21 lint/style/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not import 'forbidden3' from 'default-allowed'.
+  
+    115 │ export { forbidden1 } from 'default-allowed';
+    116 │ import { forbidden1 } from 'default-allowed';
+  > 117 │ const { forbidden2, forbidden3: f1, "forbidden4": f2 } = await import('default-allowed');
+        │                     ^^^^^^^^^^
+    118 │ import('default-allowed').then(({ forbidden2, forbidden3: f1, "forbidden4": f2 }) => { })
+    119 │ import('default-allowed').then(function ({ forbidden2, forbidden3: f1, "forbidden4": f2 }) { })
+  
+  i Only the following imports from 'default-allowed' are allowed:
+  
+  - default
+  
+
+```
+
+```
+invalid.js:117:37 lint/style/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not import 'forbidden4' from 'default-allowed'.
+  
+    115 │ export { forbidden1 } from 'default-allowed';
+    116 │ import { forbidden1 } from 'default-allowed';
+  > 117 │ const { forbidden2, forbidden3: f1, "forbidden4": f2 } = await import('default-allowed');
+        │                                     ^^^^^^^^^^^^
+    118 │ import('default-allowed').then(({ forbidden2, forbidden3: f1, "forbidden4": f2 }) => { })
+    119 │ import('default-allowed').then(function ({ forbidden2, forbidden3: f1, "forbidden4": f2 }) { })
+  
+  i Only the following imports from 'default-allowed' are allowed:
+  
+  - default
+  
+
+```
+
+```
+invalid.js:118:35 lint/style/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not import 'forbidden2' from 'default-allowed'.
+  
+    116 │ import { forbidden1 } from 'default-allowed';
+    117 │ const { forbidden2, forbidden3: f1, "forbidden4": f2 } = await import('default-allowed');
+  > 118 │ import('default-allowed').then(({ forbidden2, forbidden3: f1, "forbidden4": f2 }) => { })
+        │                                   ^^^^^^^^^^
+    119 │ import('default-allowed').then(function ({ forbidden2, forbidden3: f1, "forbidden4": f2 }) { })
+    120 │ 
+  
+  i Only the following imports from 'default-allowed' are allowed:
+  
+  - default
+  
+
+```
+
+```
+invalid.js:118:47 lint/style/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not import 'forbidden3' from 'default-allowed'.
+  
+    116 │ import { forbidden1 } from 'default-allowed';
+    117 │ const { forbidden2, forbidden3: f1, "forbidden4": f2 } = await import('default-allowed');
+  > 118 │ import('default-allowed').then(({ forbidden2, forbidden3: f1, "forbidden4": f2 }) => { })
+        │                                               ^^^^^^^^^^
+    119 │ import('default-allowed').then(function ({ forbidden2, forbidden3: f1, "forbidden4": f2 }) { })
+    120 │ 
+  
+  i Only the following imports from 'default-allowed' are allowed:
+  
+  - default
+  
+
+```
+
+```
+invalid.js:118:63 lint/style/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not import 'forbidden4' from 'default-allowed'.
+  
+    116 │ import { forbidden1 } from 'default-allowed';
+    117 │ const { forbidden2, forbidden3: f1, "forbidden4": f2 } = await import('default-allowed');
+  > 118 │ import('default-allowed').then(({ forbidden2, forbidden3: f1, "forbidden4": f2 }) => { })
+        │                                                               ^^^^^^^^^^^^
+    119 │ import('default-allowed').then(function ({ forbidden2, forbidden3: f1, "forbidden4": f2 }) { })
+    120 │ 
+  
+  i Only the following imports from 'default-allowed' are allowed:
+  
+  - default
+  
+
+```
+
+```
+invalid.js:119:44 lint/style/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not import 'forbidden2' from 'default-allowed'.
+  
+    117 │ const { forbidden2, forbidden3: f1, "forbidden4": f2 } = await import('default-allowed');
+    118 │ import('default-allowed').then(({ forbidden2, forbidden3: f1, "forbidden4": f2 }) => { })
+  > 119 │ import('default-allowed').then(function ({ forbidden2, forbidden3: f1, "forbidden4": f2 }) { })
+        │                                            ^^^^^^^^^^
+    120 │ 
+    121 │ export { forbidden1 } from 'namespace-allowed';
+  
+  i Only the following imports from 'default-allowed' are allowed:
+  
+  - default
+  
+
+```
+
+```
+invalid.js:119:56 lint/style/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not import 'forbidden3' from 'default-allowed'.
+  
+    117 │ const { forbidden2, forbidden3: f1, "forbidden4": f2 } = await import('default-allowed');
+    118 │ import('default-allowed').then(({ forbidden2, forbidden3: f1, "forbidden4": f2 }) => { })
+  > 119 │ import('default-allowed').then(function ({ forbidden2, forbidden3: f1, "forbidden4": f2 }) { })
+        │                                                        ^^^^^^^^^^
+    120 │ 
+    121 │ export { forbidden1 } from 'namespace-allowed';
+  
+  i Only the following imports from 'default-allowed' are allowed:
+  
+  - default
+  
+
+```
+
+```
+invalid.js:119:72 lint/style/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not import 'forbidden4' from 'default-allowed'.
+  
+    117 │ const { forbidden2, forbidden3: f1, "forbidden4": f2 } = await import('default-allowed');
+    118 │ import('default-allowed').then(({ forbidden2, forbidden3: f1, "forbidden4": f2 }) => { })
+  > 119 │ import('default-allowed').then(function ({ forbidden2, forbidden3: f1, "forbidden4": f2 }) { })
+        │                                                                        ^^^^^^^^^^^^
+    120 │ 
+    121 │ export { forbidden1 } from 'namespace-allowed';
+  
+  i Only the following imports from 'default-allowed' are allowed:
+  
+  - default
+  
+
+```
+
+```
+invalid.js:121:10 lint/style/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not import 'forbidden1' from 'namespace-allowed'.
+  
+    119 │ import('default-allowed').then(function ({ forbidden2, forbidden3: f1, "forbidden4": f2 }) { })
+    120 │ 
+  > 121 │ export { forbidden1 } from 'namespace-allowed';
+        │          ^^^^^^^^^^
+    122 │ import { forbidden1 } from 'namespace-allowed';
+    123 │ const { forbidden2, forbidden3: f1, "forbidden4": f2 } = await import('namespace-allowed');
+  
+  i Only the following imports from 'namespace-allowed' are allowed:
+  
+  - *
+  
+
+```
+
+```
+invalid.js:122:10 lint/style/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not import 'forbidden1' from 'namespace-allowed'.
+  
+    121 │ export { forbidden1 } from 'namespace-allowed';
+  > 122 │ import { forbidden1 } from 'namespace-allowed';
+        │          ^^^^^^^^^^
+    123 │ const { forbidden2, forbidden3: f1, "forbidden4": f2 } = await import('namespace-allowed');
+    124 │ import('namespace-allowed').then(({ forbidden2, forbidden3: f1, "forbidden4": f2 }) => { })
+  
+  i Only the following imports from 'namespace-allowed' are allowed:
+  
+  - *
+  
+
+```
+
+```
+invalid.js:123:9 lint/style/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not import 'forbidden2' from 'namespace-allowed'.
+  
+    121 │ export { forbidden1 } from 'namespace-allowed';
+    122 │ import { forbidden1 } from 'namespace-allowed';
+  > 123 │ const { forbidden2, forbidden3: f1, "forbidden4": f2 } = await import('namespace-allowed');
+        │         ^^^^^^^^^^
+    124 │ import('namespace-allowed').then(({ forbidden2, forbidden3: f1, "forbidden4": f2 }) => { })
+    125 │ import('namespace-allowed').then(function ({ forbidden2, forbidden3: f1, "forbidden4": f2 }) { })
+  
+  i Only the following imports from 'namespace-allowed' are allowed:
+  
+  - *
+  
+
+```
+
+```
+invalid.js:123:21 lint/style/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not import 'forbidden3' from 'namespace-allowed'.
+  
+    121 │ export { forbidden1 } from 'namespace-allowed';
+    122 │ import { forbidden1 } from 'namespace-allowed';
+  > 123 │ const { forbidden2, forbidden3: f1, "forbidden4": f2 } = await import('namespace-allowed');
+        │                     ^^^^^^^^^^
+    124 │ import('namespace-allowed').then(({ forbidden2, forbidden3: f1, "forbidden4": f2 }) => { })
+    125 │ import('namespace-allowed').then(function ({ forbidden2, forbidden3: f1, "forbidden4": f2 }) { })
+  
+  i Only the following imports from 'namespace-allowed' are allowed:
+  
+  - *
+  
+
+```
+
+```
+invalid.js:123:37 lint/style/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not import 'forbidden4' from 'namespace-allowed'.
+  
+    121 │ export { forbidden1 } from 'namespace-allowed';
+    122 │ import { forbidden1 } from 'namespace-allowed';
+  > 123 │ const { forbidden2, forbidden3: f1, "forbidden4": f2 } = await import('namespace-allowed');
+        │                                     ^^^^^^^^^^^^
+    124 │ import('namespace-allowed').then(({ forbidden2, forbidden3: f1, "forbidden4": f2 }) => { })
+    125 │ import('namespace-allowed').then(function ({ forbidden2, forbidden3: f1, "forbidden4": f2 }) { })
+  
+  i Only the following imports from 'namespace-allowed' are allowed:
+  
+  - *
+  
+
+```
+
+```
+invalid.js:124:37 lint/style/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not import 'forbidden2' from 'namespace-allowed'.
+  
+    122 │ import { forbidden1 } from 'namespace-allowed';
+    123 │ const { forbidden2, forbidden3: f1, "forbidden4": f2 } = await import('namespace-allowed');
+  > 124 │ import('namespace-allowed').then(({ forbidden2, forbidden3: f1, "forbidden4": f2 }) => { })
+        │                                     ^^^^^^^^^^
+    125 │ import('namespace-allowed').then(function ({ forbidden2, forbidden3: f1, "forbidden4": f2 }) { })
+    126 │ 
+  
+  i Only the following imports from 'namespace-allowed' are allowed:
+  
+  - *
+  
+
+```
+
+```
+invalid.js:124:49 lint/style/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not import 'forbidden3' from 'namespace-allowed'.
+  
+    122 │ import { forbidden1 } from 'namespace-allowed';
+    123 │ const { forbidden2, forbidden3: f1, "forbidden4": f2 } = await import('namespace-allowed');
+  > 124 │ import('namespace-allowed').then(({ forbidden2, forbidden3: f1, "forbidden4": f2 }) => { })
+        │                                                 ^^^^^^^^^^
+    125 │ import('namespace-allowed').then(function ({ forbidden2, forbidden3: f1, "forbidden4": f2 }) { })
+    126 │ 
+  
+  i Only the following imports from 'namespace-allowed' are allowed:
+  
+  - *
+  
+
+```
+
+```
+invalid.js:124:65 lint/style/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not import 'forbidden4' from 'namespace-allowed'.
+  
+    122 │ import { forbidden1 } from 'namespace-allowed';
+    123 │ const { forbidden2, forbidden3: f1, "forbidden4": f2 } = await import('namespace-allowed');
+  > 124 │ import('namespace-allowed').then(({ forbidden2, forbidden3: f1, "forbidden4": f2 }) => { })
+        │                                                                 ^^^^^^^^^^^^
+    125 │ import('namespace-allowed').then(function ({ forbidden2, forbidden3: f1, "forbidden4": f2 }) { })
+    126 │ 
+  
+  i Only the following imports from 'namespace-allowed' are allowed:
+  
+  - *
+  
+
+```
+
+```
+invalid.js:125:46 lint/style/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not import 'forbidden2' from 'namespace-allowed'.
+  
+    123 │ const { forbidden2, forbidden3: f1, "forbidden4": f2 } = await import('namespace-allowed');
+    124 │ import('namespace-allowed').then(({ forbidden2, forbidden3: f1, "forbidden4": f2 }) => { })
+  > 125 │ import('namespace-allowed').then(function ({ forbidden2, forbidden3: f1, "forbidden4": f2 }) { })
+        │                                              ^^^^^^^^^^
+    126 │ 
+    127 │ export { forbidden1 } from 'bare-allowed';
+  
+  i Only the following imports from 'namespace-allowed' are allowed:
+  
+  - *
+  
+
+```
+
+```
+invalid.js:125:58 lint/style/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not import 'forbidden3' from 'namespace-allowed'.
+  
+    123 │ const { forbidden2, forbidden3: f1, "forbidden4": f2 } = await import('namespace-allowed');
+    124 │ import('namespace-allowed').then(({ forbidden2, forbidden3: f1, "forbidden4": f2 }) => { })
+  > 125 │ import('namespace-allowed').then(function ({ forbidden2, forbidden3: f1, "forbidden4": f2 }) { })
+        │                                                          ^^^^^^^^^^
+    126 │ 
+    127 │ export { forbidden1 } from 'bare-allowed';
+  
+  i Only the following imports from 'namespace-allowed' are allowed:
+  
+  - *
+  
+
+```
+
+```
+invalid.js:125:74 lint/style/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not import 'forbidden4' from 'namespace-allowed'.
+  
+    123 │ const { forbidden2, forbidden3: f1, "forbidden4": f2 } = await import('namespace-allowed');
+    124 │ import('namespace-allowed').then(({ forbidden2, forbidden3: f1, "forbidden4": f2 }) => { })
+  > 125 │ import('namespace-allowed').then(function ({ forbidden2, forbidden3: f1, "forbidden4": f2 }) { })
+        │                                                                          ^^^^^^^^^^^^
+    126 │ 
+    127 │ export { forbidden1 } from 'bare-allowed';
+  
+  i Only the following imports from 'namespace-allowed' are allowed:
+  
+  - *
+  
+
+```
+
+```
+invalid.js:127:10 lint/style/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not import 'forbidden1' from 'bare-allowed'.
+  
+    125 │ import('namespace-allowed').then(function ({ forbidden2, forbidden3: f1, "forbidden4": f2 }) { })
+    126 │ 
+  > 127 │ export { forbidden1 } from 'bare-allowed';
+        │          ^^^^^^^^^^
+    128 │ import { forbidden1 } from 'bare-allowed';
+    129 │ const { forbidden2, forbidden3: f1, "forbidden4": f2 } = await import('bare-allowed');
+  
+  i Only the following imports from 'bare-allowed' are allowed:
+  
+  - Side-effect only import
+  
+
+```
+
+```
+invalid.js:128:10 lint/style/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not import 'forbidden1' from 'bare-allowed'.
+  
+    127 │ export { forbidden1 } from 'bare-allowed';
+  > 128 │ import { forbidden1 } from 'bare-allowed';
+        │          ^^^^^^^^^^
+    129 │ const { forbidden2, forbidden3: f1, "forbidden4": f2 } = await import('bare-allowed');
+    130 │ import('bare-allowed').then(({ forbidden2, forbidden3: f1, "forbidden4": f2 }) => { })
+  
+  i Only the following imports from 'bare-allowed' are allowed:
+  
+  - Side-effect only import
+  
+
+```
+
+```
+invalid.js:129:9 lint/style/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not import 'forbidden2' from 'bare-allowed'.
+  
+    127 │ export { forbidden1 } from 'bare-allowed';
+    128 │ import { forbidden1 } from 'bare-allowed';
+  > 129 │ const { forbidden2, forbidden3: f1, "forbidden4": f2 } = await import('bare-allowed');
+        │         ^^^^^^^^^^
+    130 │ import('bare-allowed').then(({ forbidden2, forbidden3: f1, "forbidden4": f2 }) => { })
+    131 │ import('bare-allowed').then(function ({ forbidden2, forbidden3: f1, "forbidden4": f2 }) { })
+  
+  i Only the following imports from 'bare-allowed' are allowed:
+  
+  - Side-effect only import
+  
+
+```
+
+```
+invalid.js:129:21 lint/style/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not import 'forbidden3' from 'bare-allowed'.
+  
+    127 │ export { forbidden1 } from 'bare-allowed';
+    128 │ import { forbidden1 } from 'bare-allowed';
+  > 129 │ const { forbidden2, forbidden3: f1, "forbidden4": f2 } = await import('bare-allowed');
+        │                     ^^^^^^^^^^
+    130 │ import('bare-allowed').then(({ forbidden2, forbidden3: f1, "forbidden4": f2 }) => { })
+    131 │ import('bare-allowed').then(function ({ forbidden2, forbidden3: f1, "forbidden4": f2 }) { })
+  
+  i Only the following imports from 'bare-allowed' are allowed:
+  
+  - Side-effect only import
+  
+
+```
+
+```
+invalid.js:129:37 lint/style/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not import 'forbidden4' from 'bare-allowed'.
+  
+    127 │ export { forbidden1 } from 'bare-allowed';
+    128 │ import { forbidden1 } from 'bare-allowed';
+  > 129 │ const { forbidden2, forbidden3: f1, "forbidden4": f2 } = await import('bare-allowed');
+        │                                     ^^^^^^^^^^^^
+    130 │ import('bare-allowed').then(({ forbidden2, forbidden3: f1, "forbidden4": f2 }) => { })
+    131 │ import('bare-allowed').then(function ({ forbidden2, forbidden3: f1, "forbidden4": f2 }) { })
+  
+  i Only the following imports from 'bare-allowed' are allowed:
+  
+  - Side-effect only import
+  
+
+```
+
+```
+invalid.js:130:32 lint/style/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not import 'forbidden2' from 'bare-allowed'.
+  
+    128 │ import { forbidden1 } from 'bare-allowed';
+    129 │ const { forbidden2, forbidden3: f1, "forbidden4": f2 } = await import('bare-allowed');
+  > 130 │ import('bare-allowed').then(({ forbidden2, forbidden3: f1, "forbidden4": f2 }) => { })
+        │                                ^^^^^^^^^^
+    131 │ import('bare-allowed').then(function ({ forbidden2, forbidden3: f1, "forbidden4": f2 }) { })
+    132 │ 
+  
+  i Only the following imports from 'bare-allowed' are allowed:
+  
+  - Side-effect only import
+  
+
+```
+
+```
+invalid.js:130:44 lint/style/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not import 'forbidden3' from 'bare-allowed'.
+  
+    128 │ import { forbidden1 } from 'bare-allowed';
+    129 │ const { forbidden2, forbidden3: f1, "forbidden4": f2 } = await import('bare-allowed');
+  > 130 │ import('bare-allowed').then(({ forbidden2, forbidden3: f1, "forbidden4": f2 }) => { })
+        │                                            ^^^^^^^^^^
+    131 │ import('bare-allowed').then(function ({ forbidden2, forbidden3: f1, "forbidden4": f2 }) { })
+    132 │ 
+  
+  i Only the following imports from 'bare-allowed' are allowed:
+  
+  - Side-effect only import
+  
+
+```
+
+```
+invalid.js:130:60 lint/style/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not import 'forbidden4' from 'bare-allowed'.
+  
+    128 │ import { forbidden1 } from 'bare-allowed';
+    129 │ const { forbidden2, forbidden3: f1, "forbidden4": f2 } = await import('bare-allowed');
+  > 130 │ import('bare-allowed').then(({ forbidden2, forbidden3: f1, "forbidden4": f2 }) => { })
+        │                                                            ^^^^^^^^^^^^
+    131 │ import('bare-allowed').then(function ({ forbidden2, forbidden3: f1, "forbidden4": f2 }) { })
+    132 │ 
+  
+  i Only the following imports from 'bare-allowed' are allowed:
+  
+  - Side-effect only import
+  
+
+```
+
+```
+invalid.js:131:41 lint/style/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not import 'forbidden2' from 'bare-allowed'.
+  
+    129 │ const { forbidden2, forbidden3: f1, "forbidden4": f2 } = await import('bare-allowed');
+    130 │ import('bare-allowed').then(({ forbidden2, forbidden3: f1, "forbidden4": f2 }) => { })
+  > 131 │ import('bare-allowed').then(function ({ forbidden2, forbidden3: f1, "forbidden4": f2 }) { })
+        │                                         ^^^^^^^^^^
+    132 │ 
+  
+  i Only the following imports from 'bare-allowed' are allowed:
+  
+  - Side-effect only import
+  
+
+```
+
+```
+invalid.js:131:53 lint/style/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not import 'forbidden3' from 'bare-allowed'.
+  
+    129 │ const { forbidden2, forbidden3: f1, "forbidden4": f2 } = await import('bare-allowed');
+    130 │ import('bare-allowed').then(({ forbidden2, forbidden3: f1, "forbidden4": f2 }) => { })
+  > 131 │ import('bare-allowed').then(function ({ forbidden2, forbidden3: f1, "forbidden4": f2 }) { })
+        │                                                     ^^^^^^^^^^
+    132 │ 
+  
+  i Only the following imports from 'bare-allowed' are allowed:
+  
+  - Side-effect only import
+  
+
+```
+
+```
+invalid.js:131:69 lint/style/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not import 'forbidden4' from 'bare-allowed'.
+  
+    129 │ const { forbidden2, forbidden3: f1, "forbidden4": f2 } = await import('bare-allowed');
+    130 │ import('bare-allowed').then(({ forbidden2, forbidden3: f1, "forbidden4": f2 }) => { })
+  > 131 │ import('bare-allowed').then(function ({ forbidden2, forbidden3: f1, "forbidden4": f2 }) { })
+        │                                                                     ^^^^^^^^^^^^
+    132 │ 
+  
+  i Only the following imports from 'bare-allowed' are allowed:
+  
+  - Side-effect only import
+  
+
+```

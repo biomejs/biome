@@ -1,3 +1,5 @@
+#![deny(clippy::use_self)]
+
 use biome_graphql_syntax::GraphqlLanguage;
 use biome_rowan::TreeBuilder;
 

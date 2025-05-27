@@ -1,0 +1,23 @@
+{
+  "$schema": "../../../../../packages/@biomejs/biome/configuration_schema.json",
+  "files": {
+    "includes": [
+      "**/*.js",
+      "!dist",
+      "!node_modules"
+    ]
+  },
+  "linter": {
+    "enabled": true,
+    "rules": {
+      "correctness": {
+        "noUndeclaredDependencies": "error"
+      }
+    }
+  },
+  "vcs": {
+    "clientKind": "git",
+    "enabled": true,
+    "useIgnoreFile": true
+  }
+}

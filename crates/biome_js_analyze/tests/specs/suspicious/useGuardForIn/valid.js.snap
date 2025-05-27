@@ -1,0 +1,15 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid.js
+---
+# Input
+```js
+/* should not generate diagnostics */
+for (var x in o);
+for (var x in o) {}
+for (var x in o) if (x) f();
+for (var x in o) { if (x) { f(); } }
+for (var x in o) { if (x) continue; f(); }
+for (var x in o) { if (x) { continue; } f(); }
+for (var x in o) { if(Object.hasOwn(o, x)) f(); }
+```

@@ -275,6 +275,9 @@ impl ExtensionHandler for GraphqlFileHandler {
                 debug_syntax_tree: Some(debug_syntax_tree),
                 debug_control_flow: None,
                 debug_formatter_ir: Some(debug_formatter_ir),
+                debug_type_info: None,
+                debug_registered_types: None,
+                debug_semantic_model: None,
             },
             analyzer: AnalyzerCapabilities {
                 lint: Some(lint),
@@ -461,7 +464,7 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
         range,
         workspace,
         path,
-        dependency_graph: _,
+        module_graph: _,
         project_layout,
         language,
         only,
@@ -637,17 +640,19 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
                 }
             }
             None => {
-                // we don't have a formatter yet
-                // let code = if should_format {
-                //     format_node(
-                //         workspace.format_options::<GraphqlLanguage>(biome_path, &document_file_source),
-                //         tree.syntax(),
-                //     )?
-                //         .print()?
-                //         .into_code()
-                // } else {
-                let code = tree.syntax().to_string();
-                // };
+                let code = if params.should_format {
+                    format_node(
+                        params.workspace.format_options::<GraphqlLanguage>(
+                            params.biome_path,
+                            &params.document_file_source,
+                        ),
+                        tree.syntax(),
+                    )?
+                    .print()?
+                    .into_code()
+                } else {
+                    tree.syntax().to_string()
+                };
                 return Ok(FixFileResult {
                     code,
                     skipped_suggested_fixes,

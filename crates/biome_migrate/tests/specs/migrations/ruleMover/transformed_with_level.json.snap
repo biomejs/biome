@@ -1,0 +1,219 @@
+---
+source: crates/biome_migrate/tests/spec_tests.rs
+expression: transformed_with_level.json
+---
+# Input
+```json
+{
+  "linter": {
+    "rules": {
+      "suspicious": {
+        "noConsoleLog": {
+          "level": "warn"
+        },
+        "useSingleCaseStatement": {
+          "level": "error"
+        },
+        "useShorthandArrayType": {
+          "level": "error"
+        },
+        "noNewSymbol": {
+          "level": "error"
+        },
+        "noInvalidNewBuiltin": {
+          "level": "error"
+        }
+      }
+    }
+  }
+}
+
+```
+
+# Diagnostics
+```
+transformed_with_level.json:5:9 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This lint rule has been renamed to noConsole.
+  
+    3 │     "rules": {
+    4 │       "suspicious": {
+  > 5 │         "noConsoleLog": {
+      │         ^^^^^^^^^^^^^^
+    6 │           "level": "warn"
+    7 │         },
+  
+  i Safe fix: Rename the lint rule.
+  
+     3  3 │       "rules": {
+     4  4 │         "suspicious": {
+     5    │ - ········"noConsoleLog":·{
+     6    │ - ··········"level":·"warn"
+        5 │ + ········"useSingleCaseStatement":·{
+        6 │ + ··········"level":·"error"
+     7  7 │           },
+     8    │ - ········"useSingleCaseStatement":·{
+        8 │ + ········"useShorthandArrayType":·{
+     9  9 │             "level": "error"
+    10 10 │           },
+    11    │ - ········"useShorthandArrayType":·{
+       11 │ + ········"noNewSymbol":·{
+    12 12 │             "level": "error"
+    13 13 │           },
+    14    │ - ········"noNewSymbol":·{
+       14 │ + ········"noInvalidNewBuiltin":·{
+    15 15 │             "level": "error"
+    16 16 │           },
+    17    │ - ········"noInvalidNewBuiltin":·{
+    18    │ - ··········"level":·"error"
+    19    │ - ········}
+       17 │ + ········"noConsole":·{·"level":·"warn",·"options":·{·"allow":·["log"]·}·}
+    20 18 │         }
+    21 19 │       }
+  
+
+```
+
+```
+transformed_with_level.json:8:9 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This lint rule has been moved to correctness/noSwitchDeclarations.
+  
+     6 │           "level": "warn"
+     7 │         },
+   > 8 │         "useSingleCaseStatement": {
+       │         ^^^^^^^^^^^^^^^^^^^^^^^^
+     9 │           "level": "error"
+    10 │         },
+  
+  i Safe fix: Move and rename the lint rule.
+  
+     6  6 │             "level": "warn"
+     7  7 │           },
+     8    │ - ········"useSingleCaseStatement":·{
+        8 │ + ········"useShorthandArrayType":·{
+     9  9 │             "level": "error"
+    10 10 │           },
+    11    │ - ········"useShorthandArrayType":·{
+       11 │ + ········"noNewSymbol":·{
+    12 12 │             "level": "error"
+    13 13 │           },
+    14    │ - ········"noNewSymbol":·{
+       14 │ + ········"noInvalidNewBuiltin":·{
+    15 15 │             "level": "error"
+    16    │ - ········},
+    17    │ - ········"noInvalidNewBuiltin":·{
+       16 │ + ········}
+       17 │ + ······},
+       18 │ + ······"correctness":·{·"noSwitchDeclarations":·{
+    18 19 │             "level": "error"
+    19    │ - ········}
+    20    │ - ······}
+       20 │ + ········}·}
+    21 21 │       }
+    22 22 │     }
+  
+
+```
+
+```
+transformed_with_level.json:11:9 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This lint rule has been moved to style/useConsistentArrayType.
+  
+     9 │           "level": "error"
+    10 │         },
+  > 11 │         "useShorthandArrayType": {
+       │         ^^^^^^^^^^^^^^^^^^^^^^^
+    12 │           "level": "error"
+    13 │         },
+  
+  i Safe fix: Move and rename the lint rule.
+  
+     9  9 │             "level": "error"
+    10 10 │           },
+    11    │ - ········"useShorthandArrayType":·{
+       11 │ + ········"noNewSymbol":·{
+    12 12 │             "level": "error"
+    13 13 │           },
+    14    │ - ········"noNewSymbol":·{
+       14 │ + ········"noInvalidNewBuiltin":·{
+    15 15 │             "level": "error"
+    16    │ - ········},
+    17    │ - ········"noInvalidNewBuiltin":·{
+    18    │ - ··········"level":·"error"
+    19    │ - ········}
+    20    │ - ······}
+       16 │ + ········}
+       17 │ + ······},
+       18 │ + ······"style":·{·"useConsistentArrayType":·{·"level":·"error",·"options":·{·"syntax":·"shorthand"·}·}·}
+    21 19 │       }
+    22 20 │     }
+  
+
+```
+
+```
+transformed_with_level.json:14:9 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This lint rule has been moved to correctness/noInvalidBuiltinInstantiation.
+  
+    12 │           "level": "error"
+    13 │         },
+  > 14 │         "noNewSymbol": {
+       │         ^^^^^^^^^^^^^
+    15 │           "level": "error"
+    16 │         },
+  
+  i Safe fix: Move and rename the lint rule.
+  
+    12 12 │             "level": "error"
+    13 13 │           },
+    14    │ - ········"noNewSymbol":·{
+       14 │ + ········"noInvalidNewBuiltin":·{
+    15 15 │             "level": "error"
+    16    │ - ········},
+    17    │ - ········"noInvalidNewBuiltin":·{
+       16 │ + ········}
+       17 │ + ······},
+       18 │ + ······"correctness":·{·"noInvalidBuiltinInstantiation":·{
+    18 19 │             "level": "error"
+    19    │ - ········}
+    20    │ - ······}
+       20 │ + ········}·}
+    21 21 │       }
+    22 22 │     }
+  
+
+```
+
+```
+transformed_with_level.json:17:9 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This lint rule has been moved to correctness/noInvalidBuiltinInstantiation.
+  
+    15 │           "level": "error"
+    16 │         },
+  > 17 │         "noInvalidNewBuiltin": {
+       │         ^^^^^^^^^^^^^^^^^^^^^
+    18 │           "level": "error"
+    19 │         }
+  
+  i Safe fix: Move and rename the lint rule.
+  
+    14 14 │           "noNewSymbol": {
+    15 15 │             "level": "error"
+    16    │ - ········},
+    17    │ - ········"noInvalidNewBuiltin":·{
+       16 │ + ········}
+       17 │ + ······},
+       18 │ + ······"correctness":·{·"noInvalidBuiltinInstantiation":·{
+    18 19 │             "level": "error"
+    19    │ - ········}
+    20    │ - ······}
+       20 │ + ········}·}
+    21 21 │       }
+    22 22 │     }
+  
+
+```

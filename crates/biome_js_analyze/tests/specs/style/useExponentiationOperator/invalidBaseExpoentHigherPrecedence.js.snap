@@ -1,7 +1,6 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalidBaseExpoentHigherPrecedence.js
-snapshot_kind: text
 ---
 # Input
 ```js
@@ -22,7 +21,7 @@ snapshot_kind: text
 ```
 invalidBaseExpoentHigherPrecedence.js:2:2 lint/style/useExponentiationOperator  FIXABLE  ━━━━━━━━━━━
 
-  ! Use the '**' operator instead of 'Math.pow'.
+  i Use the '**' operator instead of 'Math.pow'.
   
     1 │  // base and exponent with a higher precedence
   > 2 │  Math.pow(2, 3)
@@ -30,7 +29,7 @@ invalidBaseExpoentHigherPrecedence.js:2:2 lint/style/useExponentiationOperator  
     3 │  Math.pow(a.foo, b)
     4 │  Math.pow(a, b.foo)
   
-  i Unsafe fix: Use the '**' operator instead of 'Math.pow'.
+  i Safe fix: Use the '**' operator instead of 'Math.pow'.
   
      1  1 │    // base and exponent with a higher precedence
      2    │ - ·Math.pow(2,·3)
@@ -44,7 +43,7 @@ invalidBaseExpoentHigherPrecedence.js:2:2 lint/style/useExponentiationOperator  
 ```
 invalidBaseExpoentHigherPrecedence.js:3:2 lint/style/useExponentiationOperator  FIXABLE  ━━━━━━━━━━━
 
-  ! Use the '**' operator instead of 'Math.pow'.
+  i Use the '**' operator instead of 'Math.pow'.
   
     1 │  // base and exponent with a higher precedence
     2 │  Math.pow(2, 3)
@@ -53,7 +52,7 @@ invalidBaseExpoentHigherPrecedence.js:3:2 lint/style/useExponentiationOperator  
     4 │  Math.pow(a, b.foo)
     5 │  Math.pow(a(), b)
   
-  i Unsafe fix: Use the '**' operator instead of 'Math.pow'.
+  i Safe fix: Use the '**' operator instead of 'Math.pow'.
   
      1  1 │    // base and exponent with a higher precedence
      2  2 │    Math.pow(2, 3)
@@ -68,7 +67,7 @@ invalidBaseExpoentHigherPrecedence.js:3:2 lint/style/useExponentiationOperator  
 ```
 invalidBaseExpoentHigherPrecedence.js:4:2 lint/style/useExponentiationOperator  FIXABLE  ━━━━━━━━━━━
 
-  ! Use the '**' operator instead of 'Math.pow'.
+  i Use the '**' operator instead of 'Math.pow'.
   
     2 │  Math.pow(2, 3)
     3 │  Math.pow(a.foo, b)
@@ -77,7 +76,7 @@ invalidBaseExpoentHigherPrecedence.js:4:2 lint/style/useExponentiationOperator  
     5 │  Math.pow(a(), b)
     6 │  Math.pow(a, b())
   
-  i Unsafe fix: Use the '**' operator instead of 'Math.pow'.
+  i Safe fix: Use the '**' operator instead of 'Math.pow'.
   
      2  2 │    Math.pow(2, 3)
      3  3 │    Math.pow(a.foo, b)
@@ -92,7 +91,7 @@ invalidBaseExpoentHigherPrecedence.js:4:2 lint/style/useExponentiationOperator  
 ```
 invalidBaseExpoentHigherPrecedence.js:5:2 lint/style/useExponentiationOperator  FIXABLE  ━━━━━━━━━━━
 
-  ! Use the '**' operator instead of 'Math.pow'.
+  i Use the '**' operator instead of 'Math.pow'.
   
     3 │  Math.pow(a.foo, b)
     4 │  Math.pow(a, b.foo)
@@ -101,7 +100,7 @@ invalidBaseExpoentHigherPrecedence.js:5:2 lint/style/useExponentiationOperator  
     6 │  Math.pow(a, b())
     7 │  Math.pow(++a, ++b)
   
-  i Unsafe fix: Use the '**' operator instead of 'Math.pow'.
+  i Safe fix: Use the '**' operator instead of 'Math.pow'.
   
      3  3 │    Math.pow(a.foo, b)
      4  4 │    Math.pow(a, b.foo)
@@ -116,7 +115,7 @@ invalidBaseExpoentHigherPrecedence.js:5:2 lint/style/useExponentiationOperator  
 ```
 invalidBaseExpoentHigherPrecedence.js:6:2 lint/style/useExponentiationOperator  FIXABLE  ━━━━━━━━━━━
 
-  ! Use the '**' operator instead of 'Math.pow'.
+  i Use the '**' operator instead of 'Math.pow'.
   
     4 │  Math.pow(a, b.foo)
     5 │  Math.pow(a(), b)
@@ -125,7 +124,7 @@ invalidBaseExpoentHigherPrecedence.js:6:2 lint/style/useExponentiationOperator  
     7 │  Math.pow(++a, ++b)
     8 │  Math.pow(a++, ++b)
   
-  i Unsafe fix: Use the '**' operator instead of 'Math.pow'.
+  i Safe fix: Use the '**' operator instead of 'Math.pow'.
   
      4  4 │    Math.pow(a, b.foo)
      5  5 │    Math.pow(a(), b)
@@ -140,7 +139,7 @@ invalidBaseExpoentHigherPrecedence.js:6:2 lint/style/useExponentiationOperator  
 ```
 invalidBaseExpoentHigherPrecedence.js:7:2 lint/style/useExponentiationOperator  FIXABLE  ━━━━━━━━━━━
 
-  ! Use the '**' operator instead of 'Math.pow'.
+  i Use the '**' operator instead of 'Math.pow'.
   
     5 │  Math.pow(a(), b)
     6 │  Math.pow(a, b())
@@ -149,7 +148,7 @@ invalidBaseExpoentHigherPrecedence.js:7:2 lint/style/useExponentiationOperator  
     8 │  Math.pow(a++, ++b)
     9 │  Math.pow(a--, b--)
   
-  i Unsafe fix: Use the '**' operator instead of 'Math.pow'.
+  i Safe fix: Use the '**' operator instead of 'Math.pow'.
   
      5  5 │    Math.pow(a(), b)
      6  6 │    Math.pow(a, b())
@@ -164,7 +163,7 @@ invalidBaseExpoentHigherPrecedence.js:7:2 lint/style/useExponentiationOperator  
 ```
 invalidBaseExpoentHigherPrecedence.js:8:2 lint/style/useExponentiationOperator  FIXABLE  ━━━━━━━━━━━
 
-  ! Use the '**' operator instead of 'Math.pow'.
+  i Use the '**' operator instead of 'Math.pow'.
   
      6 │  Math.pow(a, b())
      7 │  Math.pow(++a, ++b)
@@ -173,7 +172,7 @@ invalidBaseExpoentHigherPrecedence.js:8:2 lint/style/useExponentiationOperator  
      9 │  Math.pow(a--, b--)
     10 │  Math.pow(--a, b--)
   
-  i Unsafe fix: Use the '**' operator instead of 'Math.pow'.
+  i Safe fix: Use the '**' operator instead of 'Math.pow'.
   
      6  6 │    Math.pow(a, b())
      7  7 │    Math.pow(++a, ++b)
@@ -188,7 +187,7 @@ invalidBaseExpoentHigherPrecedence.js:8:2 lint/style/useExponentiationOperator  
 ```
 invalidBaseExpoentHigherPrecedence.js:9:2 lint/style/useExponentiationOperator  FIXABLE  ━━━━━━━━━━━
 
-  ! Use the '**' operator instead of 'Math.pow'.
+  i Use the '**' operator instead of 'Math.pow'.
   
      7 │  Math.pow(++a, ++b)
      8 │  Math.pow(a++, ++b)
@@ -197,7 +196,7 @@ invalidBaseExpoentHigherPrecedence.js:9:2 lint/style/useExponentiationOperator  
     10 │  Math.pow(--a, b--)
     11 │ 
   
-  i Unsafe fix: Use the '**' operator instead of 'Math.pow'.
+  i Safe fix: Use the '**' operator instead of 'Math.pow'.
   
      7  7 │    Math.pow(++a, ++b)
      8  8 │    Math.pow(a++, ++b)
@@ -212,7 +211,7 @@ invalidBaseExpoentHigherPrecedence.js:9:2 lint/style/useExponentiationOperator  
 ```
 invalidBaseExpoentHigherPrecedence.js:10:2 lint/style/useExponentiationOperator  FIXABLE  ━━━━━━━━━━
 
-  ! Use the '**' operator instead of 'Math.pow'.
+  i Use the '**' operator instead of 'Math.pow'.
   
      8 │  Math.pow(a++, ++b)
      9 │  Math.pow(a--, b--)
@@ -220,7 +219,7 @@ invalidBaseExpoentHigherPrecedence.js:10:2 lint/style/useExponentiationOperator 
        │  ^^^^^^^^^^^^^^^^^^
     11 │ 
   
-  i Unsafe fix: Use the '**' operator instead of 'Math.pow'.
+  i Safe fix: Use the '**' operator instead of 'Math.pow'.
   
      8  8 │    Math.pow(a++, ++b)
      9  9 │    Math.pow(a--, b--)

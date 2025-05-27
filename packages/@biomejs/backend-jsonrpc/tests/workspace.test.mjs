@@ -13,7 +13,7 @@ describe("Workspace API", () => {
 		);
 
 		const workspace = await createWorkspaceWithBinary(command);
-		const projectKey = await workspace.openProject({
+		const { projectKey } = await workspace.openProject({
 			path: "",
 			openUninitialized: true,
 		});

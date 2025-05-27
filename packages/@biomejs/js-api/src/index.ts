@@ -3,6 +3,7 @@ import type {
 	Configuration,
 	Diagnostic,
 	FixFileMode,
+	OpenProjectResult,
 	ProjectKey,
 	Workspace,
 } from "@biomejs/wasm-nodejs";
@@ -143,7 +144,7 @@ export class Biome {
 	 *
 	 * @param {string} [path]
 	 */
-	openProject(path?: string): ProjectKey {
+	openProject(path?: string): OpenProjectResult {
 		return this.workspace.openProject({
 			path: path || "",
 			openUninitialized: true,
@@ -212,9 +213,9 @@ export class Biome {
 				projectKey,
 				path,
 				categories: ["syntax"],
-				maxDiagnostics: Number.MAX_SAFE_INTEGER,
 				only: [],
 				skip: [],
+				pullCodeActions: false,
 			});
 
 			const hasErrors = diagnostics.some(
@@ -280,7 +281,7 @@ export class Biome {
 						shouldFormat: false,
 						only: [],
 						skip: [],
-						ruleCategories: ["syntax", "lint"],
+						ruleCategories: ["syntax", "lint", "action"],
 					});
 
 					code = result.code;
@@ -293,10 +294,10 @@ export class Biome {
 			const { diagnostics } = this.workspace.pullDiagnostics({
 				projectKey,
 				path,
-				categories: ["syntax", "lint"],
-				maxDiagnostics: Number.MAX_SAFE_INTEGER,
+				categories: ["syntax", "lint", "action"],
 				only: [],
 				skip: [],
+				pullCodeActions: false,
 			});
 
 			return {

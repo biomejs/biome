@@ -47,7 +47,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoDestructuredProps {
-        version: "next",
+        version: "2.0.0",
         name: "noDestructuredProps",
         language: "js",
         domains: &[RuleDomain::Solid],
@@ -65,15 +65,15 @@ pub enum Violation {
 impl Violation {
     fn range(&self) -> TextRange {
         match self {
-            Violation::EmptyBinding(range) => *range,
-            Violation::WithProps(range) => *range,
+            Self::EmptyBinding(range) => *range,
+            Self::WithProps(range) => *range,
         }
     }
 
     fn message(&self) -> &str {
         match self {
-            Violation::EmptyBinding(_) => "You cannot destructure props.",
-            Violation::WithProps(_) => "This variable shouldn't be destructured.",
+            Self::EmptyBinding(_) => "You cannot destructure props.",
+            Self::WithProps(_) => "This variable shouldn't be destructured.",
         }
     }
 }

@@ -1,3 +1,4 @@
+/* should not generate diagnostics */
 declare var x;
 
 export declare var y;

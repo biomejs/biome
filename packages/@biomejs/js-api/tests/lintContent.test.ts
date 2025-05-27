@@ -14,7 +14,8 @@ describe("Biome WebAssembly lintContent", () => {
 		biome = await Biome.create({
 			distribution: Distribution.NODE,
 		});
-		projectKey = await biome.openProject();
+		const result = biome.openProject();
+		projectKey = result.projectKey;
 	});
 
 	afterEach(() => {
@@ -26,11 +27,11 @@ describe("Biome WebAssembly lintContent", () => {
 			const result = biome.lintContent(projectKey, inputCode, {
 				filePath: "example.js",
 			});
-			expect(result.diagnostics).toMatchObject([
-				{ category: "lint/suspicious/noDebugger" },
-				{
-					category: "lint/complexity/noAdjacentSpacesInRegex",
-				},
+			const categories = result.diagnostics.map((d) => d.category);
+			expect(categories).toMatchObject([
+				"lint/suspicious/noDebugger",
+				"lint/complexity/noAdjacentSpacesInRegex",
+				"lint/correctness/noUnusedVariables",
 			]);
 		});
 		it("should not fix the code", () => {
@@ -47,8 +48,10 @@ describe("Biome WebAssembly lintContent", () => {
 				filePath: "example.js",
 				fixFileMode: "safeFixes",
 			});
-			expect(result.diagnostics).toMatchObject([
-				{ category: "lint/suspicious/noDebugger" },
+			const categories = result.diagnostics.map((d) => d.category);
+			expect(categories).toMatchObject([
+				"lint/suspicious/noDebugger",
+				"lint/correctness/noUnusedVariables",
 			]);
 		});
 		it("should fix the SafeFixes only", () => {

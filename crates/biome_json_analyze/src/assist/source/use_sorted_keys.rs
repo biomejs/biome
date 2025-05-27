@@ -1,12 +1,13 @@
 use crate::JsonRuleAction;
-use biome_analyze::{Ast, Rule, RuleAction, context::RuleContext, declare_source_rule};
+use biome_analyze::{
+    Ast, FixKind, Rule, RuleAction, RuleDiagnostic, context::RuleContext, declare_source_rule,
+};
 use biome_console::markup;
-use biome_diagnostics::Applicability;
+use biome_diagnostics::category;
 use biome_json_factory::make::{json_member_list, token};
 use biome_json_syntax::{JsonMember, JsonMemberList, JsonObjectValue, T, TextRange};
 use biome_rowan::{AstNode, AstNodeExt, AstSeparatedList, BatchMutationExt};
 use biome_string_case::StrLikeExtension;
-use std::borrow::Cow;
 use std::cmp::Ordering;
 use std::collections::BTreeSet;
 
@@ -28,14 +29,20 @@ declare_source_rule! {
         version: "1.9.0",
         name: "useSortedKeys",
         language: "json",
+        fix_kind: FixKind::Safe,
     }
 }
 
-#[derive(Eq, PartialEq)]
+#[derive(Debug)]
 pub struct MemberKey {
     node: JsonMember,
 }
-
+impl Eq for MemberKey {}
+impl PartialEq for MemberKey {
+    fn eq(&self, other: &Self) -> bool {
+        self.cmp(other) == Ordering::Equal
+    }
+}
 impl Ord for MemberKey {
     fn cmp(&self, other: &Self) -> Ordering {
         // Keep the order for elements that cannot be compared
@@ -122,6 +129,16 @@ impl Rule for UseSortedKeys {
         }
     }
 
+    fn diagnostic(ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
+        Some(RuleDiagnostic::new(
+            category!("assist/source/useSortedKeys"),
+            Self::text_range(ctx, state),
+            markup! {
+                "The keys are not sorted."
+            },
+        ))
+    }
+
     fn text_range(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<TextRange> {
         ctx.query()
             .syntax()
@@ -137,8 +154,8 @@ impl Rule for UseSortedKeys {
         mutation.replace_node(node, list);
 
         Some(RuleAction::new(
-            rule_action_category!(),
-            Applicability::Always,
+            ctx.metadata().action_category(ctx.category(), ctx.group()),
+            ctx.metadata().applicability(),
             markup! {
                 "They keys of the current object can be sorted."
             },

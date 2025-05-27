@@ -1,15 +1,14 @@
 ---
 source: crates/biome_cli/tests/snap_test.rs
-expression: content
+expression: redactor(content)
 ---
 ## `check.js`
 
 ```js
+debugger;
+// biome-ignore lint/performance/noDelete: <explanation>
+delete obj.prop;
 
-        debugger;
-        // biome-ignore lint/performance/noDelete: <explanation>
-        delete obj.prop;
-    
 ```
 
 # Termination Message
@@ -26,27 +25,38 @@ lint ━━━━━━━━━━━━━━━━━━━━━━━━━
 # Emitted Messages
 
 ```block
-check.js:2:9 lint/suspicious/noDebugger  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+check.js:2:44 suppressions/incorrect ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! A suppression shouldn't have an <explanation> placeholder. Example of suppression: // biome-ignore lint: false positive
+  
+    1 │ debugger;
+  > 2 │ // biome-ignore lint/performance/noDelete: <explanation>
+      │                                            ^^^^^^^^^^^^^
+    3 │ delete obj.prop;
+    4 │ 
+  
+
+```
+
+```block
+check.js:1:1 lint/suspicious/noDebugger  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × This is an unexpected use of the debugger statement.
   
-  > 2 │         debugger;
-      │         ^^^^^^^^^
-    3 │         // biome-ignore lint/performance/noDelete: <explanation>
-    4 │         delete obj.prop;
+  > 1 │ debugger;
+      │ ^^^^^^^^^
+    2 │ // biome-ignore lint/performance/noDelete: <explanation>
+    3 │ delete obj.prop;
   
   i Unsafe fix: Remove debugger statement
   
-    1   │ - 
-    2   │ - ········debugger;
-      1 │ + 
-    3 2 │           // biome-ignore lint/performance/noDelete: <explanation>
-    4 3 │           delete obj.prop;
-  
+    1 │ debugger;
+      │ ---------
 
 ```
 
 ```block
 Checked 1 file in <TIME>. No fixes applied.
 Found 1 error.
+Found 1 warning.
 ```

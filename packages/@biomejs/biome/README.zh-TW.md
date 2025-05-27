@@ -13,7 +13,6 @@
   [![npm version][npm-badge]][npm-url]
   [![VSCode version][vscode-badge]][vscode-url]
   [![Open VSX version][open-vsx-badge]][open-vsx-url]
-  [![Polar bounties][polar-badge]][polar-url]
 
   [ci-badge]: https://github.com/biomejs/biome/actions/workflows/main.yml/badge.svg
   [ci-url]: https://github.com/biomejs/biome/actions/workflows/main.yml
@@ -26,7 +25,6 @@
   [open-vsx-badge]: https://badgen.net/open-vsx/version/biomejs/biome?label=open-vsx&color=60a5fa
   [open-vsx-url]: https://open-vsx.org/extension/biomejs/biome
   [polar-badge]: https://polar.sh/embed/seeks-funding-shield.svg?org=biomejs
-  [polar-url]: https://polar.sh/biomejs
 
   <!-- Insert new entries lexicographically by language code.
      For example given below is the same order as these files appear on page:
@@ -39,9 +37,9 @@
 
 **Biome** 是一個高效能的 Web 專案工具鏈，旨在提供開發工具以維持這些專案的健康。
 
-**Biome 是一個 [快速格式化工具](./benchmark#formatting)**，支持 _JavaScript_、_TypeScript_、_JSX_、_JSON_、_CSS_ 和 _GraphQL_，其 **與 _Prettier_ 的相容性達到 [97%](https://console.algora.io/challenges/prettier)**。
+**Biome 是一個 [快速格式化工具](./benchmark#formatting)**，支援 _JavaScript_、_TypeScript_、_JSX_、_JSON_、_CSS_ 和 _GraphQL_，其 **與 _Prettier_ 的相容性達到 [97%](https://console.algora.io/challenges/prettier)**。
 
-**Biome 是一個 [高效能的語法檢查工具](https://github.com/biomejs/biome/tree/main/benchmark#linting)**，支持 _JavaScript_、_TypeScript_、_JSX_、_CSS_ 和 _GraphQL_，擁有來自 ESLint、typescript-eslint 和 [其他來源](https://github.com/biomejs/biome/discussions/3)的 **超過 270 條規則**。
+**Biome 是一個 [高效能的語法檢查工具](https://github.com/biomejs/biome/tree/main/benchmark#linting)**，支援 _JavaScript_、_TypeScript_、_JSX_、_CSS_ 和 _GraphQL_，擁有來自 ESLint、typescript-eslint 和 [其他來源](https://github.com/biomejs/biome/discussions/3)的 **超過 270 條規則**。
 它 **輸出詳細且具上下文的診斷資訊**，幫助你改進程式碼並成為更好的程式設計師！
 
 **Biome** 從一開始就設計為可在 [編輯器中互動使用](https://biomejs.dev/guides/integrate-in-editor/)。
@@ -80,11 +78,11 @@ npx @biomejs/biome ci ./src
 
 **Biome** 擁有合理的預設設定，無需配置。
 
-**Biome** 旨在支持現代 Web 開發的 [所有主要開發語言][language-support]。
+**Biome** 旨在支援現代 Web 開發的 [所有主要開發語言][language-support]。
 
 **Biome** [不需要 Node.js](https://biomejs.dev/guides/manual-installation/) 即可運行。
 
-**Biome** 擁有一流的 LSP 支持，配備了能完整保留原文的先進解析器和頂級的錯誤修復能力。
+**Biome** 擁有一流的 LSP 支援，配備了能完整保留原文的先進解析器和頂級的錯誤修復能力。
 
 **Biome** 整合了以前分離的工具功能。基於共享基礎構建，讓我們能夠為程式碼處理、錯誤顯示、並行工作、快取記憶體和配置提供一致的體驗。
 
@@ -110,7 +108,7 @@ Biome 提供了一個簡單的贊助計劃，允許公司在各種開發者中�
 
 ## 贊助商
 
-### 金牌贊助商
+### Platinum Sponsors
 
 <table>
   <tbody>
@@ -120,7 +118,25 @@ Biome 提供了一個簡單的贊助計劃，允許公司在各種開發者中�
           <picture>
             <source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/biomejs/resources/refs/heads/main/sponsors/vercel-dark.png" />
             <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/biomejs/resources/refs/heads/main/sponsors/vercel-light.png" />
-            <img src="https://raw.githubusercontent.com/biomejs/resources/refs/heads/main/sponsors/vercel-light.png" width="400" alt="Vercel" />
+            <img src="https://raw.githubusercontent.com/biomejs/resources/refs/heads/main/sponsors/vercel-light.png" width="500" alt="Vercel" />
+          </picture>
+        </a>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+### 金牌贊助商
+
+<table>
+  <tbody>
+    <tr>
+      <td align="center" valign="middle">
+        <a href="https://depot.dev/?utm_source=biome&utm_medium=readme" target="_blank">
+          <picture>
+            <source media="(prefers-color-scheme: light)" srcset="https://depot.dev/assets/brand/1693758816/depot-logo-horizontal-on-light@3x.png" />
+            <source media="(prefers-color-scheme: dark)" srcset="https://depot.dev/assets/brand/1693758816/depot-logo-horizontal-on-dark@3x.png" />
+            <img src="https://depot.dev/assets/brand/1693758816/depot-logo-horizontal-on-light@3x.png" width="400" alt="Depot" />
           </picture>
         </a>
       </td>
@@ -134,13 +150,13 @@ Biome 提供了一個簡單的贊助計劃，允許公司在各種開發者中�
   <tbody>
     <tr>
       <td align="center" valign="middle">
-        <a href="https://l2beat.com/?utm_source=biome&utm_medium=readme" target="_blank"><img src="https://images.opencollective.com/l2beat/c2b2a27/logo/256.png" height="100"></a>
+        <a href="https://l2beat.com/?utm_source=biome&utm_medium=readme" target="_blank"><img src="https://images.opencollective.com/l2beat/c2b2a27/logo/256.png" height="100" alt="L2BEAT logo"></a>
       </td>
       <td align="center" valign="middle">
-        <a href="https://www.phoenixlabs.dev/?utm_source=biome&utm_medium=readme" target="_blank"><img src="https://images.opencollective.com/phoenix-labs/2824ed4/logo/100.png?height=100" height="100"></a>
+        <a href="https://www.phoenixlabs.dev/?utm_source=biome&utm_medium=readme" target="_blank"><img src="https://images.opencollective.com/phoenix-labs/2824ed4/logo/100.png?height=100" height="100" alt="Phoenix Labs logo"></a>
       </td>
       <td align="center" valign="middle">
-        <a href="https://lokalise.com/?utm_source=biome&utm_medium=readme" target="_blank"><img src="https://avatars.githubusercontent.com/u/14294501?s=200&v=4" height="100"></a>
+        <a href="https://lokalise.com/?utm_source=biome&utm_medium=readme" target="_blank"><img src="https://avatars.githubusercontent.com/u/14294501?s=200&v=4" height="100" alt="Lokalise logo"></a>
       </td>
     </tr>
   </tbody>
@@ -152,22 +168,25 @@ Biome 提供了一個簡單的贊助計劃，允許公司在各種開發者中�
   <tbody>
     <tr>
       <td align="center" valign="middle">
-        <a href="https://www.kanamekey.com?utm_source=biome&utm_medium=readme" target="_blank"><img src="https://images.opencollective.com/kaname/d15fd98/logo/256.png?height=80" width="80"></a>
+        <a href="https://nanabit.dev/?utm_source=biome&utm_medium=readme" target="_blank"><img src="https://images.opencollective.com/nanabit/d15fd98/logo/256.png?height=80" width="80" alt="Nanabit logo"></a>
       </td>
       <td align="center" valign="middle">
-        <a href="https://nanabit.dev/?utm_source=biome&utm_medium=readme" target="_blank"><img src="https://images.opencollective.com/nanabit/d15fd98/logo/256.png?height=80" width="80"></a>
+        <a href="https://vital.io/?utm_source=biome&utm_medium=readme" target="_blank"><img src="https://avatars.githubusercontent.com/u/25357309?s=200" width="80" alt="Vital logo"></a>
       </td>
       <td align="center" valign="middle">
-        <a href="https://vital.io/?utm_source=biome&utm_medium=readme" target="_blank"><img src="https://avatars.githubusercontent.com/u/25357309?s=200" width="80"></a>
+        <a href="https://coderabbit.ai/?utm_source=biome&utm_medium=readme" target="_blank"><img src="https://avatars.githubusercontent.com/u/132028505?s=200&v=4" width="80" alt="CodeRabbit logo"></a>
       </td>
       <td align="center" valign="middle">
-        <a href="https://coderabbit.ai/?utm_source=biome&utm_medium=readme" target="_blank"><img src="https://avatars.githubusercontent.com/u/132028505?s=200&v=4" width="80"></a>
+        <a href="https://forge42.dev/?utm_source=biome&utm_medium=readme" target="_blank"><img src="https://avatars.githubusercontent.com/u/161314831?s=200&v=4" width="80" alt="Forge42 logo"></a>
       </td>
       <td align="center" valign="middle">
-        <a href="https://forge42.dev/?utm_source=biome&utm_medium=readme" target="_blank"><img src="https://avatars.githubusercontent.com/u/161314831?s=200&v=4" width="80"></a>
+        <a href="http://rstudio.org/?utm_source=biome&utm_medium=readme" target="_blank"><img src="https://avatars.githubusercontent.com/u/513560?s=200&v=4" width="80" alt="RStudio logo"></a>
       </td>
       <td align="center" valign="middle">
-        <a href="http://rstudio.org/?utm_source=biome&utm_medium=readme" target="_blank"><img src="https://avatars.githubusercontent.com/u/513560?s=200&v=4" width="80"></a>
+        <a href="https://pennylane.com/?utm_source=biome&utm_medium=readme" target="_blank"><img src="https://avatars.githubusercontent.com/u/57875210?s=200&v=4" width="80" alt="Pennylane logo"></a>
+      </td>
+      <td align="center" valign="middle">
+        <a href="https://jetbrains.com/?utm_source=biome&utm_medium=readme" target="_blank"><img src="https://resources.jetbrains.com/storage/products/company/brand/logos/jetbrains.png" width="100" alt="JetBrains logo"></a>
       </td>
     </tr>
   </tbody>

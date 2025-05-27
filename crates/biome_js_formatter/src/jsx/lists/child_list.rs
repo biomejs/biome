@@ -392,9 +392,7 @@ impl FormatJsxChildList {
                         .comments()
                         .mark_suppression_checked(text.syntax());
                 }
-                _ => {
-                    continue;
-                }
+                _ => {}
             }
         }
     }
@@ -460,7 +458,7 @@ pub enum JsxChildListLayout {
 
 impl JsxChildListLayout {
     const fn is_multiline(&self) -> bool {
-        matches!(self, JsxChildListLayout::Multiline)
+        matches!(self, Self::Multiline)
     }
 }
 
@@ -515,7 +513,7 @@ impl WordSeparator {
     fn will_break(&self) -> bool {
         matches!(
             self,
-            WordSeparator::EndOfText {
+            Self::EndOfText {
                 is_soft_line_break: false,
             }
         )
@@ -525,8 +523,8 @@ impl WordSeparator {
 impl Format<JsFormatContext> for WordSeparator {
     fn fmt(&self, f: &mut Formatter<JsFormatContext>) -> FormatResult<()> {
         match self {
-            WordSeparator::BetweenWords => soft_line_break_or_space().fmt(f),
-            WordSeparator::EndOfText { is_soft_line_break } => {
+            Self::BetweenWords => soft_line_break_or_space().fmt(f),
+            Self::EndOfText { is_soft_line_break } => {
                 if *is_soft_line_break {
                     soft_line_break().fmt(f)
                 }

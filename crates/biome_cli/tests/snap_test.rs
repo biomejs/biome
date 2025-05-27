@@ -33,7 +33,7 @@ pub(crate) struct CliSnapshot {
     /// the configuration, if set
     /// First string is the content
     /// Second string is the name
-    pub configuration: Option<(String, &'static str)>,
+    pub configuration_list: Vec<(String, String)>,
     /// file name -> content
     pub files: BTreeMap<String, String>,
     /// messages written in console
@@ -46,7 +46,7 @@ impl CliSnapshot {
     pub fn from_result(result: Result<(), CliDiagnostic>) -> Self {
         Self {
             in_messages: InMessages::default(),
-            configuration: None,
+            configuration_list: vec![],
             files: BTreeMap::default(),
             messages: Vec::new(),
             termination: result.err().map(Error::from),
@@ -58,7 +58,7 @@ impl CliSnapshot {
     pub fn emit_content_snapshot(&self) -> String {
         let mut content = String::new();
 
-        if let Some((configuration, file_name)) = &self.configuration {
+        for (configuration, file_name) in &self.configuration_list {
             let redacted = redact_snapshot(configuration).unwrap_or(String::new().into());
 
             let parsed = parse_json(
@@ -87,7 +87,7 @@ impl CliSnapshot {
 
         for (name, file_content) in &self.files {
             if !name.starts_with("biome.json") {
-                let extension = name.split('.').last().unwrap();
+                let extension = name.split('.').next_back().unwrap();
 
                 let redacted_name = redact_snapshot(name).unwrap_or(String::new().into());
                 let redacted_content =
@@ -230,6 +230,10 @@ fn replace_temp_dir(input: Cow<str>) -> Cow<str> {
     while let Some(index) = rest.find(temp_dir) {
         let (before, after) = rest.split_at(index);
 
+        // Normalize /var and /private/var on macOS
+        #[cfg(target_os = "macos")]
+        let before = before.trim_end_matches("/private");
+
         result.push_str(before);
         result.push_str("<TEMP_DIR>");
 
@@ -327,29 +331,24 @@ impl From<SnapshotPayload<'_>> for CliSnapshot {
             test_name: _,
             module_path: _,
         } = payload;
-        let mut cli_snapshot = CliSnapshot::from_result(result);
+        let mut cli_snapshot = Self::from_result(result);
+        for (file, entry) in fs.files.read().iter() {
+            let content = entry.lock();
+            let content = std::str::from_utf8(content.as_slice()).unwrap();
 
-        for file_name in ConfigName::file_names() {
-            let config_path = Utf8PathBuf::from(file_name);
-            let configuration = fs.open(&config_path).ok();
-            if let Some(mut configuration) = configuration {
-                let mut buffer = String::new();
-                if configuration.read_to_string(&mut buffer).is_ok() {
-                    cli_snapshot.configuration = Some((buffer, file_name));
-                }
+            if file
+                .file_name()
+                .is_some_and(|file_name| ConfigName::file_names().contains(&file_name))
+            {
+                cli_snapshot
+                    .configuration_list
+                    .push((content.to_string(), file.to_string()));
+            } else {
+                cli_snapshot
+                    .files
+                    .insert(file.as_str().to_string(), String::from(content));
             }
         }
-
-        cli_snapshot.files = fs
-            .files
-            .read()
-            .iter()
-            .map(|(file, entry)| {
-                let content = entry.lock();
-                let content = std::str::from_utf8(content.as_slice()).unwrap();
-                (file.as_str().to_string(), String::from(content))
-            })
-            .collect();
 
         let in_buffer = &console.in_buffer;
         for (index, message) in in_buffer.iter().enumerate() {

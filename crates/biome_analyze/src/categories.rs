@@ -1,8 +1,9 @@
 use enumflags2::{BitFlags, bitflags};
 use std::borrow::Cow;
-use std::fmt::{Display, Formatter};
+use std::fmt::{Debug, Display, Formatter};
+use std::str::FromStr;
 
-#[derive(Copy, Clone, Debug, Eq, PartialEq)]
+#[derive(Copy, Clone, Debug, Eq, PartialEq, Hash)]
 #[cfg_attr(
     feature = "serde",
     derive(serde::Serialize, serde::Deserialize),
@@ -28,10 +29,23 @@ impl RuleCategory {
     /// Returns a `str` that should be used for suppression comments
     pub const fn as_suppression_category(&self) -> &'static str {
         match self {
-            RuleCategory::Syntax => "syntax",
-            RuleCategory::Lint => "lint",
-            RuleCategory::Action => "assist",
-            RuleCategory::Transformation => "transformation",
+            Self::Syntax => "syntax",
+            Self::Lint => "lint",
+            Self::Action => "assist",
+            Self::Transformation => "transformation",
+        }
+    }
+}
+
+impl FromStr for RuleCategory {
+    type Err = &'static str;
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s {
+            "syntax" => Ok(Self::Syntax),
+            "lint" => Ok(Self::Lint),
+            "action" => Ok(Self::Action),
+            "transformation" => Ok(Self::Transformation),
+            _ => Err("Invalid rule category"),
         }
     }
 }
@@ -39,10 +53,10 @@ impl RuleCategory {
 impl Display for RuleCategory {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         match self {
-            RuleCategory::Syntax => write!(f, "Syntax"),
-            RuleCategory::Lint => write!(f, "Lint"),
-            RuleCategory::Action => write!(f, "Action"),
-            RuleCategory::Transformation => write!(f, "Transformation"),
+            Self::Syntax => write!(f, "Syntax"),
+            Self::Lint => write!(f, "Lint"),
+            Self::Action => write!(f, "Action"),
+            Self::Transformation => write!(f, "Transformation"),
         }
     }
 }
@@ -123,7 +137,7 @@ impl ActionCategory {
     /// Returns the representation of this [ActionCategory] as a `CodeActionKind` string
     pub fn to_str(&self) -> Cow<'static, str> {
         match self {
-            ActionCategory::QuickFix(tag) => {
+            Self::QuickFix(tag) => {
                 if tag.is_empty() {
                     Cow::Borrowed("quickfix.biome")
                 } else {
@@ -131,32 +145,20 @@ impl ActionCategory {
                 }
             }
 
-            ActionCategory::Refactor(RefactorKind::None) => Cow::Borrowed("refactor.biome"),
-            ActionCategory::Refactor(RefactorKind::Extract) => {
-                Cow::Borrowed("refactor.extract.biome")
-            }
-            ActionCategory::Refactor(RefactorKind::Inline) => {
-                Cow::Borrowed("refactor.inline.biome")
-            }
-            ActionCategory::Refactor(RefactorKind::Rewrite) => {
-                Cow::Borrowed("refactor.rewrite.biome")
-            }
-            ActionCategory::Refactor(RefactorKind::Other(tag)) => {
-                Cow::Owned(format!("refactor.{tag}.biome"))
-            }
+            Self::Refactor(RefactorKind::None) => Cow::Borrowed("refactor.biome"),
+            Self::Refactor(RefactorKind::Extract) => Cow::Borrowed("refactor.extract.biome"),
+            Self::Refactor(RefactorKind::Inline) => Cow::Borrowed("refactor.inline.biome"),
+            Self::Refactor(RefactorKind::Rewrite) => Cow::Borrowed("refactor.rewrite.biome"),
+            Self::Refactor(RefactorKind::Other(tag)) => Cow::Owned(format!("refactor.{tag}.biome")),
 
-            ActionCategory::Source(SourceActionKind::None) => Cow::Borrowed("source.biome"),
-            ActionCategory::Source(SourceActionKind::FixAll) => {
-                Cow::Borrowed("source.fixAll.biome")
-            }
-            ActionCategory::Source(SourceActionKind::OrganizeImports) => {
+            Self::Source(SourceActionKind::None) => Cow::Borrowed("source.biome"),
+            Self::Source(SourceActionKind::FixAll) => Cow::Borrowed("source.fixAll.biome"),
+            Self::Source(SourceActionKind::OrganizeImports) => {
                 Cow::Borrowed("source.organizeImports.biome")
             }
-            ActionCategory::Source(SourceActionKind::Other(tag)) => {
-                Cow::Owned(format!("source.biome.{tag}"))
-            }
+            Self::Source(SourceActionKind::Other(tag)) => Cow::Owned(format!("source.biome.{tag}")),
 
-            ActionCategory::Other(other_action) => match other_action {
+            Self::Other(other_action) => match other_action {
                 OtherActionCategory::InlineSuppression => {
                     Cow::Borrowed("quickfix.suppressRule.inline.biome")
                 }
@@ -247,7 +249,7 @@ pub(crate) enum Categories {
     Transformation = 1 << RuleCategory::Transformation as u8,
 }
 
-#[derive(Debug, Copy, Clone)]
+#[derive(Copy, Clone)]
 /// The categories supported by the analyzer.
 ///
 /// The default implementation of this type returns an instance with all the categories.
@@ -256,6 +258,12 @@ pub(crate) enum Categories {
 pub struct RuleCategories(BitFlags<Categories>);
 
 impl Display for RuleCategories {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        Debug::fmt(self, f)
+    }
+}
+
+impl Debug for RuleCategories {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         if self.0.is_empty() {
             write!(f, "No categories")
@@ -286,9 +294,26 @@ impl RuleCategories {
         Self(empty)
     }
 
+    pub fn insert(&mut self, other: impl Into<Self>) {
+        self.0.insert(other.into().0);
+    }
+
+    pub fn remove(&mut self, other: impl Into<Self>) {
+        self.0.remove(other.into().0);
+    }
+
     /// Checks whether the current categories contain a specific [RuleCategories]
-    pub fn contains(&self, other: impl Into<RuleCategories>) -> bool {
+    pub fn contains(&self, other: impl Into<Self>) -> bool {
         self.0.contains(other.into().0)
+    }
+
+    /// Checks if `category` matches the current categories
+    pub fn matches(&self, category: &str) -> bool {
+        if let Ok(category) = Self::from_str(category) {
+            self.contains(category)
+        } else {
+            false
+        }
     }
 }
 
@@ -307,12 +332,34 @@ impl RuleCategories {
 impl From<RuleCategory> for RuleCategories {
     fn from(input: RuleCategory) -> Self {
         match input {
-            RuleCategory::Syntax => RuleCategories(BitFlags::from_flag(Categories::Syntax)),
-            RuleCategory::Lint => RuleCategories(BitFlags::from_flag(Categories::Lint)),
-            RuleCategory::Action => RuleCategories(BitFlags::from_flag(Categories::Assist)),
-            RuleCategory::Transformation => {
-                RuleCategories(BitFlags::from_flag(Categories::Transformation))
-            }
+            RuleCategory::Syntax => Self(BitFlags::from_flag(Categories::Syntax)),
+            RuleCategory::Lint => Self(BitFlags::from_flag(Categories::Lint)),
+            RuleCategory::Action => Self(BitFlags::from_flag(Categories::Assist)),
+            RuleCategory::Transformation => Self(BitFlags::from_flag(Categories::Transformation)),
+        }
+    }
+}
+
+impl From<&RuleCategory> for RuleCategories {
+    fn from(input: &RuleCategory) -> Self {
+        match input {
+            RuleCategory::Syntax => Self(BitFlags::from_flag(Categories::Syntax)),
+            RuleCategory::Lint => Self(BitFlags::from_flag(Categories::Lint)),
+            RuleCategory::Action => Self(BitFlags::from_flag(Categories::Assist)),
+            RuleCategory::Transformation => Self(BitFlags::from_flag(Categories::Transformation)),
+        }
+    }
+}
+
+impl FromStr for RuleCategories {
+    type Err = &'static str;
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s {
+            "syntax" => Ok(Self(BitFlags::from_flag(Categories::Syntax))),
+            "lint" => Ok(Self(BitFlags::from_flag(Categories::Lint))),
+            "action" => Ok(Self(BitFlags::from_flag(Categories::Assist))),
+            "transformation" => Ok(Self(BitFlags::from_flag(Categories::Transformation))),
+            _ => Err("Invalid rule category"),
         }
     }
 }

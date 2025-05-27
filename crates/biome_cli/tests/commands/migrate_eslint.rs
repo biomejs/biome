@@ -306,6 +306,7 @@ fn migrate_eslintrcjson_rule_options() {
                 "ignoreNonDOM": true
             }],
             "@typescript-eslint/array-type": ["error", { "default": "generic" }],
+            "@typescript-eslint/consistent-type-imports": ["error", { "fixStyle": "inline-type-imports" }],
             "@typescript-eslint/naming-convention": ["error",
                 {
                     "selector": "property",

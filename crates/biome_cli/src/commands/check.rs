@@ -9,7 +9,6 @@ use biome_configuration::{Configuration, FormatterConfiguration, LinterConfigura
 use biome_console::Console;
 use biome_deserialize::Merge;
 use biome_fs::FileSystem;
-use biome_service::projects::ProjectKey;
 use biome_service::{Workspace, WorkspaceError, configuration::LoadedConfiguration};
 use std::ffi::OsString;
 
@@ -23,6 +22,7 @@ pub(crate) struct CheckCommandPayload {
     pub(crate) formatter_enabled: Option<FormatterEnabled>,
     pub(crate) linter_enabled: Option<LinterEnabled>,
     pub(crate) assist_enabled: Option<AssistEnabled>,
+    pub(crate) enforce_assist: bool,
     pub(crate) staged: bool,
     pub(crate) changed: bool,
     pub(crate) since: Option<String>,
@@ -122,7 +122,6 @@ impl CommandRunner for CheckCommandPayload {
         cli_options: &CliOptions,
         console: &mut dyn Console,
         _workspace: &dyn Workspace,
-        project_key: ProjectKey,
     ) -> Result<Execution, CliDiagnostic> {
         let fix_file_mode = determine_fix_file_mode(FixFileModeOptions {
             write: self.write,
@@ -133,10 +132,11 @@ impl CommandRunner for CheckCommandPayload {
         })?;
 
         Ok(Execution::new(TraversalMode::Check {
-            project_key,
             fix_file_mode,
             stdin: self.get_stdin(console)?,
             vcs_targeted: (self.staged, self.changed).into(),
+            enforce_assist: self.enforce_assist,
+            skip_parse_errors: cli_options.skip_parse_errors,
         })
         .set_report(cli_options))
     }

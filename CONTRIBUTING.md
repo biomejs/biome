@@ -3,11 +3,14 @@
 We can use help in a bunch of areas and any help is greatly appreciated!
 
 ## Table of Contents
+
 - [🚀 Contributing](#-contributing)
   * [Asking questions, making proposals](#asking-questions-making-proposals)
   * [Reporting bugs](#reporting-bugs)
   * [Getting Started](#getting-started)
-  * [Install the required tools](#install-the-required-tools)
+    + [Local development](#local-development)
+      - [Install the required tools](#install-the-required-tools)
+    + [GitHub Codespaces](#github-codespaces)
   * [Testing](#testing)
     + [Debugging](#debugging)
   * [Debug binaries](#debug-binaries)
@@ -24,12 +27,15 @@ We can use help in a bunch of areas and any help is greatly appreciated!
   * [Commit messages](#commit-messages)
   * [Creating pull requests](#creating-pull-requests)
     + [Changelog](#changelog)
+      - [Create a changeset](#create-a-changeset)
       - [Choose the correct packages](#choose-the-correct-packages)
       - [Choose the correct type of change](#choose-the-correct-type-of-change)
       - [Writing a changeset](#writing-a-changeset)
     + [Documentation](#documentation)
     + [Versioning](#versioning)
   * [Releasing](#releasing)
+    + [Beta releases](#beta-releases)
+    + [Regular releases](#regular-releases)
   * [Resources](#resources)
   * [Current Members](#current-members)
     + [Lead team](#lead-team)
@@ -39,7 +45,7 @@ We can use help in a bunch of areas and any help is greatly appreciated!
 
 ## Asking questions, making proposals
 
-If you have any questions, proposals, or feedbacks, open a [GitHub discussion](https://github.com/biomejs/biome/discussions).
+If you have any questions, proposals, or feedback, open a [GitHub discussion](https://github.com/biomejs/biome/discussions).
 Make sure your comment adds value: [don't post a comment just to get attention](https://jacobtomlinson.dev/posts/2022/dont-be-that-open-source-user-dont-be-me/).
 
 Our [Discord server](https://biomejs.dev/chat) is open for help and more ad-hoc discussion.
@@ -88,7 +94,7 @@ You can install `just` using cargo:
 cargo install just
 ```
 
-But we **highly recommend** to [install it using an OS package manager](https://github.com/casey/just#packages),  so you won't need to prefix every command with `cargo`.
+But we **highly recommend** to [install it using an OS package manager](https://github.com/casey/just#packages), so you won't need to prefix every command with `cargo`.
 
 Once installed, run the following command to install the required tools:
 
@@ -264,7 +270,7 @@ When you finished your work, and you are ready to **commit and open a PR**, ther
 things you would need to run and check:
 - `just f` (alias for `just format`), formats Rust and TOML files.
 - `just l` (alias for `just lint`), run the linter for the whole project.
-- Code generation. The code generation of the repository is spread in the different parts of the code base. Sometimes is needed and sometime it isn't:
+- Code generation. The code generation of the repository is spread in the different parts of the codebase. Sometimes is needed and sometime it isn't:
   - run `just gen-analyzer` when you're working on the **linter**;
   - run `just gen-bindings` in case you worked around the **workspace**.
 
@@ -327,7 +333,7 @@ For more information on how to help with translation, please see the [translatio
 ## Commit messages
 
 Internally, the Biome team adheres as closely as possible to the [conventional commit specification](https://www.conventionalcommits.org/en/v1.0.0-beta.2/).
-The following this convention encourages commit best-practices and facilitates commit-powered features like change log generation.
+The following this convention encourages commit best-practices and facilitates commit-powered features like changelog generation.
 
 The following commit prefixes are supported:
 
@@ -405,7 +411,7 @@ We are very strict about `major` changes in the `@biomejs/biome` package. To bet
 The description of the changeset should follow the these guidelines:
 
 - Use the past tense when describing what you did, e.g. "Added new feature", "Fixed edge case".
-- Use the present tense when describing Biome behaviour, e.g. "Biome now supports ...".
+- Use the present tense when describing Biome behavior, e.g. "Biome now supports ...".
 - If you fixed a bug, please add the link to the issue, e.g. "Fixed [#4444](https://github.com/biomejs/biome/issues/4444)".
 - If you reference a rule, please add the link to the rule on the website, e.g. "Added the rule [`useAwesomeThing`](https://biomejs.dev/linter/rules/use-awesome-thing/)" (even if the website isn't updated yet, the URL is pretty predictable...).
 - Similarly, if you reference an assist, please add the link to the assist on the website, e.g. "Added the assist [`awesomeAction`](https://biomejs.dev/assist/actions/awesome-action/)".
@@ -434,22 +440,21 @@ Even minor versions are dedicated to official releases, e.g. `*.6.*`.
 
 1. [ ] Run the `beta` workflow.
    Input the _upcoming_ version with an incremented number for each release (e.g. `2.0.0-beta.1`).
+2. [ ] If you're a Core Contributor, approve the deployment.
 
 ### Regular releases
 
 When releasing a new version of a Biome, follow these steps:
 
-1. [ ] Add a [changelog](./CHANGELOG.md) entry for every Pull Request that lacks one.
-   You can filter [merged PRs that don't update the changelog](https://github.com/biomejs/biome/pulls?q=is%3Apr+is%3Amerged+-label%3AA-Changelog).
-   Read our [guidelines for editing the changelog](#changelog).
-
-1. [ ] **Update to the same `version` in all crates** if you publish crates if applicable. (`Cargo.toml` and `crates/**/Cargo.toml`)
+1. [ ] **Update to the same `version` in all crates** if you publish crates, if applicable. (`Cargo.toml` and `crates/**/Cargo.toml`)
 
 1. [ ] Linter rules have a `version` metadata directly defined in their implementation.
    This field is set to `next` for newly created rules.
    This field must be updated to the new version.
 
 1. [ ] Merge the PR `ci: release`, and the release workflow will run. Once these workflows finish compiling the final artefact, **they need to be approved manually** by a member of the **Core Contributors**.
+
+1. [ ] In the [website repository](https://github.com/biomejs/website), merge `next` into `main` with a PR. Usually, `next` contains the docs of new rules/actions. As well as the docs of new options.
 
 1. [ ] Open a new PR in the [website repository](https://github.com/biomejs/website) to update the website with the new version number:
    `BIOME_VERSION=<version> pnpm run codegen:all`.
@@ -480,18 +485,15 @@ Members are listed in alphabetical order. Members are free to use the full name,
 - [Carson McManus @dyc3](https://github.com/dyc3)
 - [Denis Bezrukov @denbezrukov](https://github.com/denbezrukov)
 - [Hiroki Ihoriya @unvalley](https://github.com/unvalley)
+- [Naoki Ikeguchi @siketyan](https://github.com/siketyan)
 - [Nicolas Hedger @nhedger](https://github.com/nhedger)
-- [Ze-Zheng Wu @Sec-ant](https://github.com/Sec-ant)
 
 ### Maintainers team
 
 - [Dani Guardiola @DaniGuardiola](https://github.com/DaniGuardiola)
 - [Justinas Delinda @minht11](https://github.com/minht11)
 - [Madeline Gurriarán @SuperchupuDev](https://github.com/SuperchupuDev)
-- [Naoki Ikeguchi @siketyan](https://github.com/siketyan)
-- [Vasu Singh @vasucp1207](https://github.com/vasucp1207)
 - [Vo Hoang Long @vohoanglong0107](https://github.com/vohoanglong0107)
-- [Yagiz Nizipli @anonrig](https://github.com/anonrig)
 - [Yoshiaki Togami @togami2864](https://github.com/togami2864)
 - [Yusuke Abe @chansuke](https://github.com/chansuke)
 - [zoomdong @fireairforce](https://github.com/fireairforce)
@@ -501,5 +503,7 @@ Members are listed in alphabetical order. Members are free to use the full name,
 - [Daiki Nishikawa @nissy-dev](https://github.com/nissy-dev) (Core contributor)
 - [Jon Egeland @faultyserver](https://github.com/faultyserver) (Core contributor)
 - [Takayuki Maeda @TaKO8Ki](https://github.com/TaKO8Ki) (Maintainer)
+- [Yagiz Nizipli @anonrig](https://github.com/anonrig) (Maintainer)
+- [Vasu Singh @vasucp1207](https://github.com/vasucp1207) (Maintainer)
 - [Victor Teles @victor-teles](https://github.com/victor-teles) (Maintainer)
 - [Zheyu Zhang @ah-yu](https://github.com/ah-yu) (Core Contributor)

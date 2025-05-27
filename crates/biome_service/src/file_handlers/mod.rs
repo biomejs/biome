@@ -23,7 +23,6 @@ use biome_console::fmt::Formatter;
 use biome_console::markup;
 use biome_css_analyze::METADATA as css_metadata;
 use biome_css_syntax::{CssFileSource, CssLanguage};
-use biome_dependency_graph::DependencyGraph;
 use biome_diagnostics::{Diagnostic, DiagnosticExt, Severity, category};
 use biome_formatter::Printed;
 use biome_fs::BiomePath;
@@ -39,6 +38,7 @@ use biome_js_syntax::{
 };
 use biome_json_analyze::METADATA as json_metadata;
 use biome_json_syntax::{JsonFileSource, JsonLanguage};
+use biome_module_graph::ModuleGraph;
 use biome_parser::AnyParse;
 use biome_project_layout::ProjectLayout;
 use biome_rowan::{FileSourceError, NodeCache};
@@ -147,7 +147,7 @@ impl DocumentFileSource {
 
     /// Returns the document file source corresponding to this file name from well-known files
     pub fn from_well_known(path: &Utf8Path) -> Self {
-        Self::try_from_well_known(path).unwrap_or(DocumentFileSource::Unknown)
+        Self::try_from_well_known(path).unwrap_or(Self::Unknown)
     }
 
     fn try_from_extension(extension: &str) -> Result<Self, FileSourceError> {
@@ -174,7 +174,7 @@ impl DocumentFileSource {
 
     /// Returns the document file source corresponding to this file extension
     pub fn from_extension(extension: &str) -> Self {
-        Self::try_from_extension(extension).unwrap_or(DocumentFileSource::Unknown)
+        Self::try_from_extension(extension).unwrap_or(Self::Unknown)
     }
 
     #[instrument(level = "debug", fields(result))]
@@ -207,7 +207,7 @@ impl DocumentFileSource {
     /// [LSP spec]: https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#textDocumentItem
     /// [VS Code spec]: https://code.visualstudio.com/docs/languages/identifiers
     pub fn from_language_id(language_id: &str) -> Self {
-        Self::try_from_language_id(language_id).unwrap_or(DocumentFileSource::Unknown)
+        Self::try_from_language_id(language_id).unwrap_or(Self::Unknown)
     }
 
     pub(crate) fn try_from_path(path: &Utf8Path) -> Result<Self, FileSourceError> {
@@ -229,7 +229,7 @@ impl DocumentFileSource {
         let extension = &match filename {
             // Ignore files are extensionless files, so they need to be handled in particular way
             Some(filename) if filename == GIT_IGNORE_FILE_NAME || filename == IGNORE_FILE_NAME => {
-                return Ok(DocumentFileSource::Ignore);
+                return Ok(Self::Ignore);
             }
             Some(filename) if filename.ends_with(".d.ts") => Cow::Borrowed("d.ts"),
             Some(filename) if filename.ends_with(".d.mts") => Cow::Borrowed("d.mts"),
@@ -247,7 +247,7 @@ impl DocumentFileSource {
 
     /// Returns the document file source corresponding to the file path
     pub fn from_path(path: &Utf8Path) -> Self {
-        Self::try_from_path(path).unwrap_or(DocumentFileSource::Unknown)
+        Self::try_from_path(path).unwrap_or(Self::Unknown)
     }
 
     /// Returns the document file source if it's not unknown, otherwise returns `other`.
@@ -274,95 +274,87 @@ impl DocumentFileSource {
     /// let y = DocumentFileSource::Unknown;
     /// assert_eq!(x.or(y), DocumentFileSource::Unknown);
     /// ```
-    pub fn or(self, other: DocumentFileSource) -> DocumentFileSource {
-        if self != DocumentFileSource::Unknown {
-            self
-        } else {
-            other
-        }
+    pub fn or(self, other: Self) -> Self {
+        if self != Self::Unknown { self } else { other }
     }
 
     pub const fn is_javascript_like(&self) -> bool {
-        matches!(self, DocumentFileSource::Js(_))
+        matches!(self, Self::Js(_))
     }
 
     pub const fn is_json_like(&self) -> bool {
-        matches!(self, DocumentFileSource::Json(_))
+        matches!(self, Self::Json(_))
     }
 
     pub const fn is_css_like(&self) -> bool {
-        matches!(self, DocumentFileSource::Css(_))
+        matches!(self, Self::Css(_))
     }
 
     pub fn to_js_file_source(&self) -> Option<JsFileSource> {
         match self {
-            DocumentFileSource::Js(file_source) => Some(*file_source),
+            Self::Js(file_source) => Some(*file_source),
             _ => None,
         }
     }
 
     pub fn to_json_file_source(&self) -> Option<JsonFileSource> {
         match self {
-            DocumentFileSource::Json(json) => Some(*json),
+            Self::Json(json) => Some(*json),
             _ => None,
         }
     }
 
     pub fn to_graphql_file_source(&self) -> Option<GraphqlFileSource> {
         match self {
-            DocumentFileSource::Graphql(graphql) => Some(*graphql),
+            Self::Graphql(graphql) => Some(*graphql),
             _ => None,
         }
     }
 
     pub fn to_grit_file_source(&self) -> Option<GritFileSource> {
         match self {
-            DocumentFileSource::Grit(grit) => Some(*grit),
+            Self::Grit(grit) => Some(*grit),
             _ => None,
         }
     }
 
     pub fn to_css_file_source(&self) -> Option<CssFileSource> {
         match self {
-            DocumentFileSource::Css(css) => Some(*css),
+            Self::Css(css) => Some(*css),
             _ => None,
         }
     }
 
     pub fn to_html_file_source(&self) -> Option<HtmlFileSource> {
         match self {
-            DocumentFileSource::Html(html) => Some(*html),
+            Self::Html(html) => Some(*html),
             _ => None,
         }
     }
 
     /// The file can be parsed
     pub fn can_parse(path: &Utf8Path) -> bool {
-        let file_source = DocumentFileSource::from(path);
+        let file_source = Self::from(path);
         match file_source {
-            DocumentFileSource::Js(_) => true,
-            DocumentFileSource::Css(_)
-            | DocumentFileSource::Graphql(_)
-            | DocumentFileSource::Json(_)
-            | DocumentFileSource::Html(_)
-            | DocumentFileSource::Grit(_) => true,
-            DocumentFileSource::Ignore => false,
-            DocumentFileSource::Unknown => false,
+            Self::Js(_) => true,
+            Self::Css(_) | Self::Graphql(_) | Self::Json(_) | Self::Html(_) | Self::Grit(_) => true,
+            Self::Ignore => false,
+            Self::Unknown => false,
         }
     }
 
     /// The file can be read from the file system
     pub fn can_read(path: &Utf8Path) -> bool {
-        let file_source = DocumentFileSource::from(path);
+        let file_source = Self::from(path);
         match file_source {
-            DocumentFileSource::Js(_)
-            | DocumentFileSource::Css(_)
-            | DocumentFileSource::Graphql(_)
-            | DocumentFileSource::Json(_)
-            | DocumentFileSource::Html(_)
-            | DocumentFileSource::Grit(_) => true,
-            DocumentFileSource::Ignore => true,
-            DocumentFileSource::Unknown => false,
+            Self::Js(_)
+            | Self::Css(_)
+            | Self::Graphql(_)
+            | Self::Json(_)
+            | Self::Html(_)
+            | Self::Grit(_) => true,
+            Self::Ignore => true,
+            Self::Unknown => false,
         }
     }
 }
@@ -370,7 +362,7 @@ impl DocumentFileSource {
 impl biome_console::fmt::Display for DocumentFileSource {
     fn fmt(&self, fmt: &mut Formatter) -> std::io::Result<()> {
         match self {
-            DocumentFileSource::Js(js) => {
+            Self::Js(js) => {
                 let is_jsx = js.is_jsx();
                 if js.is_typescript() {
                     if is_jsx {
@@ -384,19 +376,19 @@ impl biome_console::fmt::Display for DocumentFileSource {
                     fmt.write_markup(markup! { "JavaScript" })
                 }
             }
-            DocumentFileSource::Json(json) => {
+            Self::Json(json) => {
                 if json.allow_comments() {
                     fmt.write_markup(markup! { "JSONC" })
                 } else {
                     fmt.write_markup(markup! { "JSON" })
                 }
             }
-            DocumentFileSource::Css(_) => fmt.write_markup(markup! { "CSS" }),
-            DocumentFileSource::Graphql(_) => fmt.write_markup(markup! { "GraphQL" }),
-            DocumentFileSource::Html(_) => fmt.write_markup(markup! { "HTML" }),
-            DocumentFileSource::Grit(_) => fmt.write_markup(markup! { "Grit" }),
-            DocumentFileSource::Ignore => fmt.write_markup(markup! { "Ignore" }),
-            DocumentFileSource::Unknown => fmt.write_markup(markup! { "Unknown" }),
+            Self::Css(_) => fmt.write_markup(markup! { "CSS" }),
+            Self::Graphql(_) => fmt.write_markup(markup! { "GraphQL" }),
+            Self::Html(_) => fmt.write_markup(markup! { "HTML" }),
+            Self::Grit(_) => fmt.write_markup(markup! { "Grit" }),
+            Self::Ignore => fmt.write_markup(markup! { "Ignore" }),
+            Self::Unknown => fmt.write_markup(markup! { "Unknown" }),
         }
     }
 }
@@ -408,7 +400,7 @@ pub struct FixAllParams<'a> {
     /// Whether it should format the code action
     pub(crate) should_format: bool,
     pub(crate) biome_path: &'a BiomePath,
-    pub(crate) dependency_graph: Arc<DependencyGraph>,
+    pub(crate) module_graph: Arc<ModuleGraph>,
     pub(crate) project_layout: Arc<ProjectLayout>,
     pub(crate) document_file_source: DocumentFileSource,
     pub(crate) only: Vec<RuleSelector>,
@@ -458,6 +450,9 @@ type DebugFormatterIR = fn(
     AnyParse,
     WorkspaceSettingsHandle,
 ) -> Result<String, WorkspaceError>;
+type DebugTypeInfo = fn(&BiomePath, AnyParse) -> Result<String, WorkspaceError>;
+type DebugRegisteredTypes = fn(&BiomePath, AnyParse) -> Result<String, WorkspaceError>;
+type DebugSemanticModel = fn(&BiomePath, AnyParse) -> Result<String, WorkspaceError>;
 
 #[derive(Default)]
 pub struct DebugCapabilities {
@@ -467,6 +462,12 @@ pub struct DebugCapabilities {
     pub(crate) debug_control_flow: Option<DebugControlFlow>,
     /// Prints the formatter IR
     pub(crate) debug_formatter_ir: Option<DebugFormatterIR>,
+    /// Prints the type info
+    pub(crate) debug_type_info: Option<DebugTypeInfo>,
+    /// Prints the registered types
+    pub(crate) debug_registered_types: Option<DebugRegisteredTypes>,
+    /// Prints the binding/scope tree of the semantic model
+    pub(crate) debug_semantic_model: Option<DebugSemanticModel>,
 }
 
 #[derive(Debug)]
@@ -474,16 +475,16 @@ pub(crate) struct LintParams<'a> {
     pub(crate) parse: AnyParse,
     pub(crate) workspace: &'a WorkspaceSettingsHandle,
     pub(crate) language: DocumentFileSource,
-    pub(crate) max_diagnostics: u32,
     pub(crate) path: &'a BiomePath,
     pub(crate) only: Vec<RuleSelector>,
     pub(crate) skip: Vec<RuleSelector>,
     pub(crate) categories: RuleCategories,
-    pub(crate) dependency_graph: Arc<DependencyGraph>,
+    pub(crate) module_graph: Arc<ModuleGraph>,
     pub(crate) project_layout: Arc<ProjectLayout>,
     pub(crate) suppression_reason: Option<String>,
     pub(crate) enabled_rules: Vec<RuleSelector>,
     pub(crate) plugins: AnalyzerPluginVec,
+    pub(crate) pull_code_actions: bool,
 }
 
 pub(crate) struct LintResults {
@@ -498,7 +499,7 @@ pub(crate) struct ProcessLint<'a> {
     diagnostics: Vec<biome_diagnostics::serde::Diagnostic>,
     ignores_suppression_comment: bool,
     rules: Option<Cow<'a, Rules>>,
-    max_diagnostics: u32,
+    pull_code_actions: bool,
 }
 
 impl<'a> ProcessLint<'a> {
@@ -517,7 +518,7 @@ impl<'a> ProcessLint<'a> {
                 .settings()
                 .as_ref()
                 .and_then(|settings| settings.as_linter_rules(params.path.as_path())),
-            max_diagnostics: params.max_diagnostics,
+            pull_code_actions: params.pull_code_actions,
         }
     }
 
@@ -551,18 +552,18 @@ impl<'a> ProcessLint<'a> {
                 self.errors += 1;
             }
 
-            if self.diagnostic_count <= self.max_diagnostics {
+            if self.pull_code_actions {
                 for action in signal.actions() {
                     if !action.is_suppression() {
                         diagnostic = diagnostic.add_code_suggestion(action.into());
                     }
                 }
-
-                let error = diagnostic.with_severity(severity);
-
-                self.diagnostics
-                    .push(biome_diagnostics::serde::Diagnostic::new(error));
             }
+
+            let error = diagnostic.with_severity(severity);
+
+            self.diagnostics
+                .push(biome_diagnostics::serde::Diagnostic::new(error));
         }
 
         ControlFlow::<Never>::Continue(())
@@ -604,7 +605,7 @@ pub(crate) struct CodeActionsParams<'a> {
     pub(crate) range: Option<TextRange>,
     pub(crate) workspace: &'a WorkspaceSettingsHandle,
     pub(crate) path: &'a BiomePath,
-    pub(crate) dependency_graph: Arc<DependencyGraph>,
+    pub(crate) module_graph: Arc<ModuleGraph>,
     pub(crate) project_layout: Arc<ProjectLayout>,
     pub(crate) language: DocumentFileSource,
     pub(crate) only: Vec<RuleSelector>,
@@ -711,7 +712,7 @@ pub(crate) struct Features {
 
 impl Features {
     pub(crate) fn new() -> Self {
-        Features {
+        Self {
             js: JsFileHandler {},
             json: JsonFileHandler {},
             css: CssFileHandler {},
@@ -749,15 +750,14 @@ impl Features {
 /// Checks whether a diagnostic coming from the analyzer is an [error](Severity::Error)
 ///
 /// The function checks the diagnostic against the current configured rules.
+// TODO: this function works only with lint rules, but it should work with assist actions too
 pub(crate) fn is_diagnostic_error(
     diagnostic: &'_ AnalyzerDiagnostic,
     rules: Option<&'_ Rules>,
 ) -> bool {
     let severity = diagnostic
         .category()
-        .filter(|category| {
-            category.name().starts_with("lint/") || category.name().starts_with("assist/")
-        })
+        .filter(|category| category.name().starts_with("lint/"))
         .map_or_else(
             || diagnostic.severity(),
             |category| {
@@ -832,10 +832,7 @@ pub(crate) fn search(
     _settings: WorkspaceSettingsHandle,
 ) -> Result<Vec<TextRange>, WorkspaceError> {
     let result = query
-        .execute(GritTargetFile {
-            path: path.to_path_buf(),
-            parse,
-        })
+        .execute(GritTargetFile::new(path.as_path(), parse))
         .map_err(|err| {
             WorkspaceError::SearchError(SearchError::QueryError(QueryDiagnostic(err.to_string())))
         })?;
@@ -1013,6 +1010,14 @@ impl<'a, 'b> LintVisitor<'a, 'b> {
         R: Rule<Query: Queryable<Language = L, Output: Clone>> + 'static,
     {
         let path = self.path.expect("File path");
+
+        let recommended_enabled = self
+            .settings
+            .is_some_and(|settings| settings.linter_recommended_enabled());
+        if !recommended_enabled {
+            return;
+        }
+
         let no_only = self.only.is_some_and(|only| only.is_empty());
         let no_domains = self
             .settings
@@ -1024,13 +1029,16 @@ impl<'a, 'b> LintVisitor<'a, 'b> {
 
         if let Some(manifest) = &self.package_json {
             for domain in R::METADATA.domains {
-                self.analyzer_options
-                    .push_globals(domain.globals().iter().map(|s| Box::from(*s)).collect());
+                let matches_a_dependency = domain
+                    .manifest_dependencies()
+                    .iter()
+                    .any(|(dependency, range)| manifest.matches_dependency(dependency, range));
 
-                for (dependency, range) in domain.manifest_dependencies() {
-                    if manifest.matches_dependency(dependency, range) {
-                        self.enabled_rules.insert(rule_filter);
-                    }
+                if matches_a_dependency {
+                    self.enabled_rules.insert(rule_filter);
+
+                    self.analyzer_options
+                        .push_globals(domain.globals().iter().map(|s| Box::from(*s)).collect());
                 }
             }
         }
@@ -1461,7 +1469,7 @@ impl<'b> AnalyzerVisitorBuilder<'b> {
 
         let package_json = self
             .path
-            .and_then(|path| self.project_layout.get_node_manifest_for_path(path))
+            .and_then(|path| self.project_layout.find_node_manifest_for_path(path))
             .map(|(_, manifest)| manifest);
 
         let mut lint = LintVisitor::new(

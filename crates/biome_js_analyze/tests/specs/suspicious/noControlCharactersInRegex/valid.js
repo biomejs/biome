@@ -1,3 +1,4 @@
+/* should not generate diagnostics */
 RegExp("x1f");
 RegExp("[");
 new RegExp("x1f");

@@ -4,6 +4,7 @@ use biome_analyze::context::RuleContext;
 use biome_analyze::{Rule, RuleDiagnostic, RuleSource, declare_lint_rule};
 use biome_console::markup;
 use biome_deserialize_macros::Deserializable;
+use biome_diagnostics::Severity;
 use biome_js_syntax::{
     AnyJsFunction, JsFileSource, Language, TextRange, TsAsExpression, TsReferenceType,
 };
@@ -50,6 +51,7 @@ declare_lint_rule! {
         language: "js",
         sources: &[RuleSource::Eslint("no-undef")],
         recommended: false,
+        severity: Severity::Error,
     }
 }
 
@@ -106,7 +108,7 @@ impl Rule for NoUndeclaredVariables {
                 }
 
                 let span = token.text_trimmed_range();
-                let text = text.to_string().into_boxed_str();
+                let text = text.into();
                 Some((span, text))
             })
             .collect::<Vec<_>>()

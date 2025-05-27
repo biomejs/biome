@@ -16,6 +16,7 @@
 //!
 //! Minimal Supported Rust Version: latest stable.
 
+#![deny(clippy::use_self)]
 #![forbid(unsafe_code)]
 #![warn(missing_debug_implementations, missing_docs)]
 

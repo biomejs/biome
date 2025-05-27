@@ -5,7 +5,7 @@ use crate::{AnyTsReturnType, AnyTsType, TsConditionalType, TsConstructorType, Ts
 
 impl AnyTsType {
     /// Try to extract non `TsParenthesizedType` from `AnyTsType`
-    pub fn omit_parentheses(self) -> AnyTsType {
+    pub fn omit_parentheses(self) -> Self {
         let first = self.as_ts_parenthesized_type().and_then(|x| x.ty().ok());
         iter::successors(first, |x| {
             let parenthesized = x.as_ts_parenthesized_type()?;
@@ -41,12 +41,12 @@ impl AnyTsType {
     pub fn is_literal_type(&self) -> bool {
         matches!(
             self,
-            AnyTsType::TsBooleanLiteralType(_)
-                | AnyTsType::TsBigintLiteralType(_)
-                | AnyTsType::TsNullLiteralType(_)
-                | AnyTsType::TsNumberLiteralType(_)
-                | AnyTsType::TsStringLiteralType(_)
-                | AnyTsType::TsUndefinedType(_)
+            Self::TsBooleanLiteralType(_)
+                | Self::TsBigintLiteralType(_)
+                | Self::TsNullLiteralType(_)
+                | Self::TsNumberLiteralType(_)
+                | Self::TsStringLiteralType(_)
+                | Self::TsUndefinedType(_)
         )
     }
 
@@ -69,13 +69,41 @@ impl AnyTsType {
     /// assert!(AnyTsType::TsNumberType(number).is_primitive_type());
     /// assert!(AnyTsType::TsStringType(string).is_primitive_type());
     /// ```
-    pub fn is_primitive_type(&self) -> bool {
+    pub const fn is_primitive_type(&self) -> bool {
         matches!(
             self,
-            AnyTsType::TsBooleanType(_)
-                | AnyTsType::TsBigintType(_)
-                | AnyTsType::TsNumberType(_)
-                | AnyTsType::TsStringType(_)
+            Self::TsBooleanType(_)
+                | Self::TsBigintType(_)
+                | Self::TsNumberType(_)
+                | Self::TsStringType(_)
+        )
+    }
+
+    /// Returns `true` if `self` is a non-null literal type.
+    ///
+    /// ### Examples
+    ///
+    /// ```
+    /// use biome_js_factory::make;
+    /// use biome_js_syntax::T;
+    /// use biome_js_syntax::AnyTsType;
+    ///
+    /// let boolean = make::ts_boolean_literal_type(make::token(T![boolean]));
+    /// let bigint = make::ts_bigint_literal_type(make::token(T![bigint])).build();
+    /// let number = make::ts_number_literal_type(make::token(T![number])).build();
+    /// let string = make::ts_string_literal_type(make::token(T![string]));
+    ///
+    /// assert!(AnyTsType::TsBooleanLiteralType(boolean).is_non_null_literal_type());
+    /// assert!(AnyTsType::TsBigintLiteralType(bigint).is_non_null_literal_type());
+    /// assert!(AnyTsType::TsNumberLiteralType(number).is_non_null_literal_type());
+    /// assert!(AnyTsType::TsStringLiteralType(string).is_non_null_literal_type());
+    pub const fn is_non_null_literal_type(&self) -> bool {
+        matches!(
+            self,
+            Self::TsBooleanLiteralType(_)
+                | Self::TsBigintLiteralType(_)
+                | Self::TsNumberLiteralType(_)
+                | Self::TsStringLiteralType(_)
         )
     }
 

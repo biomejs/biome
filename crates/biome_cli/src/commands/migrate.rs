@@ -9,7 +9,6 @@ use biome_configuration::Configuration;
 use biome_console::{Console, ConsoleExt, markup};
 use biome_fs::FileSystem;
 use biome_service::configuration::LoadedConfiguration;
-use biome_service::projects::ProjectKey;
 use biome_service::{Workspace, WorkspaceError};
 use camino::Utf8PathBuf;
 use std::ffi::OsString;
@@ -57,11 +56,9 @@ impl CommandRunner for MigrateCommandPayload {
         _cli_options: &CliOptions,
         console: &mut dyn Console,
         _workspace: &dyn Workspace,
-        project_key: ProjectKey,
     ) -> Result<Execution, CliDiagnostic> {
         if let Some(path) = self.configuration_file_path.clone() {
             Ok(Execution::new(TraversalMode::Migrate {
-                project_key,
                 write: self.should_write(),
                 configuration_file_path: path,
                 sub_command: self.sub_command.clone(),

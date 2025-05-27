@@ -8,7 +8,7 @@ use bpaf::Bpaf;
 use serde::{Deserialize, Serialize};
 
 pub type FormatterEnabled = Bool<true>;
-pub type UseEditorconfigEnabled = Bool<true>;
+pub type UseEditorconfigEnabled = Bool<false>;
 pub type FormatWithErrorsEnabled = Bool<false>;
 
 /// Generic options applied to all files
@@ -86,7 +86,7 @@ pub struct FormatterConfiguration {
     /// match these patterns.
     #[bpaf(pure(Default::default()), hide)]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub includes: Option<Vec<biome_glob::Glob>>,
+    pub includes: Option<Vec<biome_glob::NormalizedGlob>>,
 }
 
 impl FormatterConfiguration {

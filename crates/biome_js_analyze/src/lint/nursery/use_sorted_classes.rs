@@ -168,7 +168,7 @@ static SORT_CONFIG: LazyLock<SortConfig> =
 
 impl Rule for UseSortedClasses {
     type Query = Ast<AnyClassStringLike>;
-    type State = String;
+    type State = Box<str>;
     type Signals = Option<Self::State>;
     type Options = Box<UtilityClassSortingOptions>;
 
@@ -187,7 +187,7 @@ impl Rule for UseSortedClasses {
                     return None;
                 }
                 if value.text() != sorted_value {
-                    return Some(sorted_value);
+                    return Some(sorted_value.into());
                 }
             }
         }
@@ -237,7 +237,11 @@ impl Rule for UseSortedClasses {
                 mutation.replace_node(string_literal.clone(), replacement);
             }
             AnyClassStringLike::JsxString(jsx_string_node) => {
-                let replacement = jsx_string(if ctx.as_preferred_jsx_quote().is_double() {
+                let is_double_quote = jsx_string_node
+                    .value_token()
+                    .map(|token| token.text_trimmed().starts_with('"'))
+                    .unwrap_or(ctx.as_preferred_jsx_quote().is_double());
+                let replacement = jsx_string(if is_double_quote {
                     js_string_literal(state)
                 } else {
                     js_string_literal_single_quotes(state)

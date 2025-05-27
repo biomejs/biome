@@ -1,7 +1,6 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: ignore-types.ts
-snapshot_kind: text
 ---
 # Input
 ```ts
@@ -14,7 +13,7 @@ export const X = UndeclaredVariable;
 ```
 ignore-types.ts:3:18 lint/correctness/noUndeclaredVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i The UndeclaredVariable variable is undeclared.
+  × The UndeclaredVariable variable is undeclared.
   
     1 │ export function f(): UndeclaredType {}
     2 │ 

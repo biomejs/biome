@@ -1,0 +1,169 @@
+/* should not generate diagnostics */
+[].forEach((a) => {
+    if (a > 1) {
+        return;
+    }
+    a.fn();
+});
+[].forEach(function (a) {
+    if (a > 1) {
+        return;
+    }
+    a.fn();
+});
+[].forEach(function (a) {
+    if (a > 1) {
+        throw new Error();
+    }
+});
+[].forEach((a) => {
+    a.fn();
+});
+[].forEach(function (a) {
+    a.fn();
+});
+Array.from([], (a) => {
+    return a + 1;
+});
+Array.from([], function(a) {
+    return a + 1;
+});
+Array.from([], (a) => {
+    if (a > 10) {
+        throw new Error();
+    }
+    return a + 1;
+});
+Array.from([], (a) => a + 1);
+let x = {from: () => {}};
+x.from([], () => {});
+window.from = () => {};
+window.from([], () => {});
+[].every(() => {
+    return true;
+});
+[].every((a) => {
+    if (a > 10) {
+        throw new Error();
+    }
+    return true;
+});
+[].every(function() {
+    return true;
+});
+[].every(() => true);
+[].every(() => {
+    try {
+        // ok
+    } finally {
+        return true;
+    }
+});
+[].filter(() => {
+    return true;
+});
+[].filter(function() {
+    return true;
+});
+[].filter(() => true);
+[].find(() => {
+    return true;
+});
+[].find(function() {
+    return true;
+});
+[].find(() => true);
+[].findIndex(() => {
+    return true;
+});
+[].findIndex(function() {
+    return true;
+});
+[].findIndex(() => true);
+[].findLast(() => {
+    return true;
+});
+[].findLast(function() {
+    return true;
+});
+[].findLast(() => true);
+[].findLastIndex(() => {
+    return true;
+});
+[].findLastIndex(function() {
+    return true;
+});
+[].findLastIndex(() => true);
+[].some(() => {
+    return true;
+});
+[].some(function() {
+    return true;
+});
+[].some(() => true);
+[].flatMap(() => {
+    return [1];
+});
+[].flatMap(function() {
+    return [1];
+});
+[].flatMap(() => [1]);
+[].map(() => {
+    return 1;
+});
+[].map(function() {
+    return 1;
+});
+[].map(() => 1);
+[].reduce((a, b) => {
+    return a + b;
+});
+[].reduce(function(a, b) {
+    return a + b;
+});
+[].reduce((a, b) => a + b);
+[].reduceRight((a, b) => {
+    return a + b;
+});
+[].reduceRight(function(a, b) {
+    return a + b;
+});
+[].reduceRight((a, b) => a + b);
+[].sort((a, b) => {
+    return a - b;
+});
+[].sort(function(a, b) {
+    return a - b;
+});
+[].sort((a, b) => a - b);
+[].toSorted((a, b) => {
+    return a - b;
+});
+[].toSorted(function(a, b) {
+    return a - b;
+});
+[].toSorted((a, b) => {
+    if (a > b) {
+        return 1;
+    } else if (a < b) {
+        return -1;
+    } else {
+        return 0;
+    }
+});
+[].toSorted(function(a, b) {
+    if (a > b) {
+        return 1;
+    } else if (a < b) {
+        return -1;
+    } else {
+        return 0;
+    }
+});
+[].toSorted((a, b) => a - b);
+
+// Async and generator callbacks
+[].map(async (a) => {});
+[].map(function* (a) {});
+[].map(async function (a) {});
+[].map(async function* (a) {});

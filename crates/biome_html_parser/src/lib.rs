@@ -1,3 +1,5 @@
+#![deny(clippy::use_self)]
+
 mod lexer;
 mod parser;
 mod syntax;
@@ -12,19 +14,17 @@ use biome_rowan::{AstNode, NodeCache};
 
 /// Parses the provided string as HTML program using the provided node cache.
 pub fn parse_html_with_cache(source: &str, cache: &mut NodeCache) -> HtmlParse {
-    tracing::debug_span!("Parsing phase").in_scope(move || {
-        let mut parser = HtmlParser::new(source);
+    let mut parser = HtmlParser::new(source);
 
-        parse_root(&mut parser);
+    parse_root(&mut parser);
 
-        let (events, diagnostics, trivia) = parser.finish();
+    let (events, diagnostics, trivia) = parser.finish();
 
-        let mut tree_sink = HtmlLosslessTreeSink::with_cache(source, &trivia, cache);
-        biome_parser::event::process(&mut tree_sink, events, diagnostics);
-        let (green, diagnostics) = tree_sink.finish();
+    let mut tree_sink = HtmlLosslessTreeSink::with_cache(source, &trivia, cache);
+    biome_parser::event::process(&mut tree_sink, events, diagnostics);
+    let (green, diagnostics) = tree_sink.finish();
 
-        HtmlParse::new(green, diagnostics)
-    })
+    HtmlParse::new(green, diagnostics)
 }
 pub fn parse_html(source: &str) -> HtmlParse {
     let mut cache = NodeCache::default();

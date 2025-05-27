@@ -48,7 +48,7 @@ pub enum CssLexContext {
 impl LexContext for CssLexContext {
     /// Returns true if this is [CssLexContext::Regular]
     fn is_regular(&self) -> bool {
-        matches!(self, CssLexContext::Regular)
+        matches!(self, Self::Regular)
     }
 }
 
@@ -939,8 +939,8 @@ impl<'src> CssLexer<'src> {
     /// # Arguments
     ///
     /// * `buf` - A mutable reference to a byte array where the identifier characters
-    ///           will be appended. This buffer should be pre-allocated and have enough
-    ///           space to hold the expected identifier.
+    ///   will be appended. This buffer should be pre-allocated and have enough
+    ///   space to hold the expected identifier.
     ///
     /// # Returns
     ///

@@ -1,5 +1,7 @@
 const obj = {
+	// Comment b
 	b: 1,
+	// Comment a
 	a: 1,
 	...g,
 	ba: 2,

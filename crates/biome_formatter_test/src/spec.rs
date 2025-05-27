@@ -14,8 +14,8 @@ use biome_service::App;
 use biome_service::projects::ProjectKey;
 use biome_service::settings::Settings;
 use biome_service::workspace::{
-    DocumentFileSource, FeaturesBuilder, OpenProjectParams, SupportsFeatureParams,
-    UpdateSettingsParams,
+    DocumentFileSource, FeaturesBuilder, OpenProjectParams, OpenProjectResult,
+    SupportsFeatureParams, UpdateSettingsParams,
 };
 use camino::{Utf8Path, Utf8PathBuf};
 use std::ops::Range;
@@ -36,7 +36,7 @@ impl<'a> SpecTestFile<'a> {
         input_file: &'a str,
         root_path: &'a Utf8Path,
         settings_fn: impl FnOnce(ProjectKey) -> Option<UpdateSettingsParams>,
-    ) -> Option<SpecTestFile<'a>> {
+    ) -> Option<Self> {
         if input_file.ends_with("options.json") {
             return None;
         }
@@ -50,11 +50,13 @@ impl<'a> SpecTestFile<'a> {
             "The input '{spec_input_file}' must exist and be a file.",
         );
 
-        let project_key = app
+        let OpenProjectResult { project_key, .. } = app
             .workspace
             .open_project(OpenProjectParams {
                 path: BiomePath::new(""),
                 open_uninitialized: true,
+                only_rules: None,
+                skip_rules: None,
             })
             .unwrap();
 

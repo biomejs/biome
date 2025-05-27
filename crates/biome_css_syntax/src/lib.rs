@@ -1,3 +1,5 @@
+#![deny(clippy::use_self)]
+
 #[macro_use]
 mod file_source;
 mod generated;
@@ -15,15 +17,15 @@ use crate::CssSyntaxKind::*;
 use biome_rowan::{AstNode, RawSyntaxKind, SyntaxKind};
 
 impl From<u16> for CssSyntaxKind {
-    fn from(d: u16) -> CssSyntaxKind {
-        assert!(d <= (CssSyntaxKind::__LAST as u16));
-        unsafe { std::mem::transmute::<u16, CssSyntaxKind>(d) }
+    fn from(d: u16) -> Self {
+        assert!(d <= (Self::__LAST as u16));
+        unsafe { std::mem::transmute::<u16, Self>(d) }
     }
 }
 
 impl From<CssSyntaxKind> for u16 {
-    fn from(k: CssSyntaxKind) -> u16 {
-        k as u16
+    fn from(k: CssSyntaxKind) -> Self {
+        k as Self
     }
 }
 
@@ -71,7 +73,7 @@ impl CssSyntaxKind {
 }
 
 impl biome_rowan::SyntaxKind for CssSyntaxKind {
-    const TOMBSTONE: Self = CssSyntaxKind::TOMBSTONE;
+    const TOMBSTONE: Self = Self::TOMBSTONE;
     const EOF: Self = EOF;
 
     fn is_bogus(&self) -> bool {
@@ -96,6 +98,7 @@ impl biome_rowan::SyntaxKind for CssSyntaxKind {
                 | CSS_BOGUS_KEYFRAMES_NAME
                 | CSS_BOGUS_CUSTOM_IDENTIFIER
                 | CSS_BOGUS_UNICODE_RANGE_VALUE
+                | CSS_BOGUS_SUPPORTS_CONDITION
         )
     }
 
@@ -124,6 +127,7 @@ impl biome_rowan::SyntaxKind for CssSyntaxKind {
             kind if AnyCssConditionalBlock::can_cast(*kind) => CSS_BOGUS_BLOCK,
             kind if AnyCssFontFeatureValuesBlock::can_cast(*kind) => CSS_BOGUS_BLOCK,
             kind if AnyCssUnicodeValue::can_cast(*kind) => CSS_BOGUS_UNICODE_RANGE_VALUE,
+            kind if AnyCssSupportsCondition::can_cast(*kind) => CSS_BOGUS_SUPPORTS_CONDITION,
 
             _ => CSS_BOGUS,
         }
@@ -145,21 +149,18 @@ impl biome_rowan::SyntaxKind for CssSyntaxKind {
 
     #[inline]
     fn is_list(&self) -> bool {
-        CssSyntaxKind::is_list(*self)
+        Self::is_list(*self)
     }
 
     fn is_trivia(self) -> bool {
         matches!(
             self,
-            CssSyntaxKind::NEWLINE
-                | CssSyntaxKind::WHITESPACE
-                | CssSyntaxKind::COMMENT
-                | CssSyntaxKind::MULTILINE_COMMENT
+            Self::NEWLINE | Self::WHITESPACE | Self::COMMENT | Self::MULTILINE_COMMENT
         )
     }
 
     fn to_string(&self) -> Option<&'static str> {
-        CssSyntaxKind::to_string(self)
+        Self::to_string(self)
     }
 }
 
@@ -169,10 +170,10 @@ impl TryFrom<CssSyntaxKind> for TriviaPieceKind {
     fn try_from(value: CssSyntaxKind) -> Result<Self, Self::Error> {
         if value.is_trivia() {
             match value {
-                CssSyntaxKind::NEWLINE => Ok(TriviaPieceKind::Newline),
-                CssSyntaxKind::WHITESPACE => Ok(TriviaPieceKind::Whitespace),
-                CssSyntaxKind::COMMENT => Ok(TriviaPieceKind::SingleLineComment),
-                CssSyntaxKind::MULTILINE_COMMENT => Ok(TriviaPieceKind::MultiLineComment),
+                CssSyntaxKind::NEWLINE => Ok(Self::Newline),
+                CssSyntaxKind::WHITESPACE => Ok(Self::Whitespace),
+                CssSyntaxKind::COMMENT => Ok(Self::SingleLineComment),
+                CssSyntaxKind::MULTILINE_COMMENT => Ok(Self::MultiLineComment),
                 _ => unreachable!("Not Trivia"),
             }
         } else {

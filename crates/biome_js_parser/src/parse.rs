@@ -18,16 +18,16 @@ pub struct Parse<T> {
 }
 
 impl<T> Parse<T> {
-    pub fn new_module(root: JsSyntaxNode, errors: Vec<ParseDiagnostic>) -> Parse<T> {
+    pub fn new_module(root: JsSyntaxNode, errors: Vec<ParseDiagnostic>) -> Self {
         Self::new(root, errors)
     }
 
-    pub fn new_script(root: JsSyntaxNode, errors: Vec<ParseDiagnostic>) -> Parse<T> {
+    pub fn new_script(root: JsSyntaxNode, errors: Vec<ParseDiagnostic>) -> Self {
         Self::new(root, errors)
     }
 
-    pub fn new(root: JsSyntaxNode, errors: Vec<ParseDiagnostic>) -> Parse<T> {
-        Parse {
+    pub fn new(root: JsSyntaxNode, errors: Vec<ParseDiagnostic>) -> Self {
+        Self {
             root,
             errors,
             _ty: PhantomData,
@@ -275,11 +275,9 @@ pub fn parse_js_with_cache(
     options: JsParserOptions,
     cache: &mut NodeCache,
 ) -> Parse<AnyJsRoot> {
-    tracing::debug_span!("parse").in_scope(move || {
-        let (events, errors, tokens) = parse_common(text, source_type, options);
-        let mut tree_sink = JsLosslessTreeSink::with_cache(text, &tokens, cache);
-        biome_parser::event::process(&mut tree_sink, events, errors);
-        let (green, parse_errors) = tree_sink.finish();
-        Parse::new(green, parse_errors)
-    })
+    let (events, errors, tokens) = parse_common(text, source_type, options);
+    let mut tree_sink = JsLosslessTreeSink::with_cache(text, &tokens, cache);
+    biome_parser::event::process(&mut tree_sink, events, errors);
+    let (green, parse_errors) = tree_sink.finish();
+    Parse::new(green, parse_errors)
 }

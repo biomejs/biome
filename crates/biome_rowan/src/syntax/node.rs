@@ -21,8 +21,8 @@ pub struct SyntaxNode<L: Language> {
 }
 
 impl<L: Language> SyntaxNode<L> {
-    pub(crate) fn new_root(green: GreenNode) -> SyntaxNode<L> {
-        SyntaxNode::from(cursor::SyntaxNode::new_root(green))
+    pub(crate) fn new_root(green: GreenNode) -> Self {
+        Self::from(cursor::SyntaxNode::new_root(green))
     }
 
     /// Create a new detached (root) node from a syntax kind and an iterator of slots
@@ -30,12 +30,12 @@ impl<L: Language> SyntaxNode<L> {
     /// In general this function should not be used directly but through the
     /// type-checked factory function / builders generated from the grammar of
     /// the corresponding language (eg. `biome_js_factory::make`)
-    pub fn new_detached<I>(kind: L::Kind, slots: I) -> SyntaxNode<L>
+    pub fn new_detached<I>(kind: L::Kind, slots: I) -> Self
     where
         I: IntoIterator<Item = Option<SyntaxElement<L>>>,
         I::IntoIter: ExactSizeIterator,
     {
-        SyntaxNode::from(cursor::SyntaxNode::new_root(GreenNode::new(
+        Self::from(cursor::SyntaxNode::new_root(GreenNode::new(
             kind.to_raw(),
             slots.into_iter().map(|slot| {
                 slot.map(|element| match element {
@@ -246,12 +246,12 @@ impl<L: Language> SyntaxNode<L> {
         self.raw.last_trailing_trivia().map(SyntaxTrivia::new)
     }
 
-    pub fn parent(&self) -> Option<SyntaxNode<L>> {
+    pub fn parent(&self) -> Option<Self> {
         self.raw.parent().map(Self::from)
     }
 
     /// Returns the grandparent.
-    pub fn grand_parent(&self) -> Option<SyntaxNode<L>> {
+    pub fn grand_parent(&self) -> Option<Self> {
         self.parent().and_then(|parent| parent.parent())
     }
 
@@ -261,8 +261,8 @@ impl<L: Language> SyntaxNode<L> {
         self.raw.index()
     }
 
-    pub fn ancestors(&self) -> impl Iterator<Item = SyntaxNode<L>> + use<L> {
-        self.raw.ancestors().map(SyntaxNode::from)
+    pub fn ancestors(&self) -> impl Iterator<Item = Self> + use<L> {
+        self.raw.ancestors().map(Self::from)
     }
 
     pub fn children(&self) -> SyntaxNodeChildren<L> {
@@ -291,10 +291,10 @@ impl<L: Language> SyntaxNode<L> {
         self.raw.tokens().map(SyntaxToken::from)
     }
 
-    pub fn first_child(&self) -> Option<SyntaxNode<L>> {
+    pub fn first_child(&self) -> Option<Self> {
         self.raw.first_child().map(Self::from)
     }
-    pub fn last_child(&self) -> Option<SyntaxNode<L>> {
+    pub fn last_child(&self) -> Option<Self> {
         self.raw.last_child().map(Self::from)
     }
 
@@ -305,10 +305,10 @@ impl<L: Language> SyntaxNode<L> {
         self.raw.last_child_or_token().map(NodeOrToken::from)
     }
 
-    pub fn next_sibling(&self) -> Option<SyntaxNode<L>> {
+    pub fn next_sibling(&self) -> Option<Self> {
         self.raw.next_sibling().map(Self::from)
     }
-    pub fn prev_sibling(&self) -> Option<SyntaxNode<L>> {
+    pub fn prev_sibling(&self) -> Option<Self> {
         self.raw.prev_sibling().map(Self::from)
     }
 
@@ -328,8 +328,8 @@ impl<L: Language> SyntaxNode<L> {
         self.raw.last_token().map(SyntaxToken::from)
     }
 
-    pub fn siblings(&self, direction: Direction) -> impl Iterator<Item = SyntaxNode<L>> + use<L> {
-        self.raw.siblings(direction).map(SyntaxNode::from)
+    pub fn siblings(&self, direction: Direction) -> impl Iterator<Item = Self> + use<L> {
+        self.raw.siblings(direction).map(Self::from)
     }
 
     pub fn siblings_with_tokens(
@@ -341,8 +341,8 @@ impl<L: Language> SyntaxNode<L> {
             .map(SyntaxElement::from)
     }
 
-    pub fn descendants(&self) -> impl Iterator<Item = SyntaxNode<L>> + use<L> {
-        self.raw.descendants().map(SyntaxNode::from)
+    pub fn descendants(&self) -> impl Iterator<Item = Self> + use<L> {
+        self.raw.descendants().map(Self::from)
     }
 
     pub fn descendants_tokens(
@@ -380,6 +380,13 @@ impl<L: Language> SyntaxNode<L> {
         }
     }
 
+    pub fn preorder_tokens(&self, direction: Direction) -> PreorderTokens<L> {
+        PreorderTokens {
+            raw: self.raw.preorder_tokens(direction),
+            _p: PhantomData,
+        }
+    }
+
     /// Find a token in the subtree corresponding to this node, which covers the offset.
     /// Precondition: offset must be withing node's range.
     pub fn token_at_offset(&self, offset: TextSize) -> TokenAtOffset<SyntaxToken<L>> {
@@ -409,8 +416,8 @@ impl<L: Language> SyntaxNode<L> {
     ///
     /// The parent of the returned node will be `None`, the start offset will be
     /// zero, but, otherwise, it'll be equivalent to the source node.
-    pub fn clone_subtree(&self) -> SyntaxNode<L> {
-        SyntaxNode::from(self.raw.clone_subtree())
+    pub fn clone_subtree(&self) -> Self {
+        Self::from(self.raw.clone_subtree())
     }
 
     /// Return a new version of this node detached from its parent node
@@ -762,7 +769,7 @@ impl<L: Language> fmt::Debug for SyntaxNode<L> {
                         }
                         match element {
                             cursor::SyntaxSlot::Node(node) => {
-                                writeln!(f, "{}: {:?}", node.index(), SyntaxNode::<L>::from(node))?
+                                writeln!(f, "{}: {:?}", node.index(), Self::from(node))?
                             }
                             cursor::SyntaxSlot::Token(token) => writeln!(
                                 f,
@@ -794,14 +801,14 @@ impl<L: Language> fmt::Display for SyntaxNode<L> {
 }
 
 impl<L: Language> From<SyntaxNode<L>> for cursor::SyntaxNode {
-    fn from(node: SyntaxNode<L>) -> cursor::SyntaxNode {
+    fn from(node: SyntaxNode<L>) -> Self {
         node.raw
     }
 }
 
 impl<L: Language> From<cursor::SyntaxNode> for SyntaxNode<L> {
-    fn from(raw: cursor::SyntaxNode) -> SyntaxNode<L> {
-        SyntaxNode {
+    fn from(raw: cursor::SyntaxNode) -> Self {
+        Self {
             raw,
             _p: PhantomData,
         }
@@ -860,7 +867,7 @@ impl<L: Language> Debug for SyntaxElementChildren<L> {
 
 impl<L: Language> Default for SyntaxElementChildren<L> {
     fn default() -> Self {
-        SyntaxElementChildren {
+        Self {
             raw: cursor::SyntaxElementChildren::default(),
             _p: PhantomData,
         }
@@ -889,6 +896,18 @@ impl<L: Language> Iterator for Preorder<L> {
     type Item = WalkEvent<SyntaxNode<L>>;
     fn next(&mut self) -> Option<Self::Item> {
         self.raw.next().map(|it| it.map(SyntaxNode::from))
+    }
+}
+
+pub struct PreorderTokens<L: Language> {
+    raw: cursor::PreorderTokens,
+    _p: PhantomData<L>,
+}
+
+impl<L: Language> Iterator for PreorderTokens<L> {
+    type Item = SyntaxToken<L>;
+    fn next(&mut self) -> Option<Self::Item> {
+        self.raw.next().map(SyntaxToken::from)
     }
 }
 
@@ -927,31 +946,31 @@ pub enum SyntaxSlot<L: Language> {
 impl<L: Language> SyntaxSlot<L> {
     pub fn into_node(self) -> Option<SyntaxNode<L>> {
         match self {
-            SyntaxSlot::Node(node) => Some(node),
+            Self::Node(node) => Some(node),
             _ => None,
         }
     }
 
     pub fn into_token(self) -> Option<SyntaxToken<L>> {
         match self {
-            SyntaxSlot::Token(token) => Some(token),
+            Self::Token(token) => Some(token),
             _ => None,
         }
     }
 
     pub fn into_syntax_element(self) -> Option<SyntaxElement<L>> {
         match self {
-            SyntaxSlot::Node(node) => Some(SyntaxElement::Node(node)),
-            SyntaxSlot::Token(token) => Some(SyntaxElement::Token(token)),
+            Self::Node(node) => Some(SyntaxElement::Node(node)),
+            Self::Token(token) => Some(SyntaxElement::Token(token)),
             _ => None,
         }
     }
 
     pub fn kind(&self) -> Option<L::Kind> {
         match self {
-            SyntaxSlot::Node(node) => Some(node.kind()),
-            SyntaxSlot::Token(token) => Some(token.kind()),
-            SyntaxSlot::Empty { .. } => None,
+            Self::Node(node) => Some(node.kind()),
+            Self::Token(token) => Some(token.kind()),
+            Self::Empty { .. } => None,
         }
     }
 }
@@ -959,9 +978,9 @@ impl<L: Language> SyntaxSlot<L> {
 impl<L: Language> From<cursor::SyntaxSlot> for SyntaxSlot<L> {
     fn from(raw: cursor::SyntaxSlot) -> Self {
         match raw {
-            cursor::SyntaxSlot::Node(node) => SyntaxSlot::Node(node.into()),
-            cursor::SyntaxSlot::Token(token) => SyntaxSlot::Token(token.into()),
-            cursor::SyntaxSlot::Empty { index, .. } => SyntaxSlot::Empty { index },
+            cursor::SyntaxSlot::Node(node) => Self::Node(node.into()),
+            cursor::SyntaxSlot::Token(token) => Self::Token(token.into()),
+            cursor::SyntaxSlot::Empty { index, .. } => Self::Empty { index },
         }
     }
 }

@@ -1,7 +1,6 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid.js
-snapshot_kind: text
 ---
 # Input
 ```js
@@ -18,7 +17,7 @@ xtest('foo', () => {});
 ```
 invalid.js:1:10 lint/suspicious/noSkippedTests  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Don't disable tests.
+  ! Don't disable tests.
   
   > 1 │ describe.skip("test", () => {});
       │          ^^^^
@@ -39,7 +38,7 @@ invalid.js:1:10 lint/suspicious/noSkippedTests  FIXABLE  ━━━━━━━�
 ```
 invalid.js:2:4 lint/suspicious/noSkippedTests  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Don't disable tests.
+  ! Don't disable tests.
   
     1 │ describe.skip("test", () => {});
   > 2 │ it.skip("test", () => {});
@@ -61,7 +60,7 @@ invalid.js:2:4 lint/suspicious/noSkippedTests  FIXABLE  ━━━━━━━━
 ```
 invalid.js:3:6 lint/suspicious/noSkippedTests  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Don't disable tests.
+  ! Don't disable tests.
   
     1 │ describe.skip("test", () => {});
     2 │ it.skip("test", () => {});
@@ -84,7 +83,7 @@ invalid.js:3:6 lint/suspicious/noSkippedTests  FIXABLE  ━━━━━━━━
 ```
 invalid.js:4:1 lint/suspicious/noSkippedTests  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Don't disable tests.
+  ! Don't disable tests.
   
     2 │ it.skip("test", () => {});
     3 │ test.skip("test", () => {});
@@ -112,7 +111,7 @@ invalid.js:4:1 lint/suspicious/noSkippedTests  FIXABLE  ━━━━━━━━
 ```
 invalid.js:5:1 lint/suspicious/noSkippedTests  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Don't disable tests.
+  ! Don't disable tests.
   
     3 │ test.skip("test", () => {});
     4 │ xdescribe('foo', () => {});
@@ -140,7 +139,7 @@ invalid.js:5:1 lint/suspicious/noSkippedTests  FIXABLE  ━━━━━━━━
 ```
 invalid.js:6:1 lint/suspicious/noSkippedTests  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Don't disable tests.
+  ! Don't disable tests.
   
     4 │ xdescribe('foo', () => {});
     5 │ xit('foo', () => {});

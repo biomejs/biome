@@ -1,6 +1,6 @@
 ---
 source: crates/biome_cli/tests/snap_test.rs
-expression: content
+expression: redactor(content)
 snapshot_kind: text
 ---
 ## `check.js`
@@ -24,10 +24,6 @@ check ━━━━━━━━━━━━━━━━━━━━━━━━�
 # Emitted Messages
 
 ```block
-Scanned project folder in <TIME>.
-```
-
-```block
 check.js:1:6 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Unexpected constant condition.
@@ -40,6 +36,7 @@ check.js:1:6 lint/correctness/noConstantCondition ━━━━━━━━━━
 ```
 
 ```block
+Scanned project folder in <TIME>.
 Checked 1 file in <TIME>. Fixed 1 file.
 Found 1 error.
 ```

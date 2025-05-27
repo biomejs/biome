@@ -18,6 +18,7 @@ mod mutation;
 use crate::syntax::{SyntaxSlot, SyntaxSlots};
 use crate::{
     Language, RawSyntaxKind, SyntaxKind, SyntaxList, SyntaxNode, SyntaxToken, SyntaxTriviaPiece,
+    Text,
 };
 pub use batch::*;
 pub use mutation::{AstNodeExt, AstNodeListExt, AstSeparatedListExt};
@@ -215,6 +216,11 @@ pub trait AstNode: Clone {
     /// This function allocates a [String]
     fn to_trimmed_string(&self) -> std::string::String {
         self.syntax().text_trimmed().to_string()
+    }
+
+    /// Returns the string representation of this node without trivia, without allocating a string, if possible
+    fn to_trimmed_text(&self) -> Text {
+        self.syntax().text_trimmed().into_text()
     }
 
     fn range(&self) -> TextRange {
@@ -576,7 +582,7 @@ pub trait AstSeparatedList {
     }
 
     fn len(&self) -> usize {
-        (self.syntax_list().len() + 1) / 2
+        self.syntax_list().len().div_ceil(2)
     }
 
     fn trailing_separator(&self) -> Option<SyntaxToken<Self::Language>> {
@@ -759,9 +765,9 @@ pub enum SyntaxError {
 impl Display for SyntaxError {
     fn fmt(&self, fmt: &mut Formatter<'_>) -> fmt::Result {
         match self {
-            SyntaxError::MissingRequiredChild => fmt.write_str("missing required child"),
-            SyntaxError::UnexpectedBogusNode => fmt.write_str("unexpected bogus node"),
-            SyntaxError::UnexpectedMetavariable => fmt.write_str("unexpected metavariable node"),
+            Self::MissingRequiredChild => fmt.write_str("missing required child"),
+            Self::UnexpectedBogusNode => fmt.write_str("unexpected bogus node"),
+            Self::UnexpectedMetavariable => fmt.write_str("unexpected metavariable node"),
         }
     }
 }

@@ -15,11 +15,14 @@ use biome_fs::{FileSystemDiagnostic, PathKind};
 use camino::Utf8Path;
 use papaya::{Compute, Operation};
 
-use crate::{IGNORE_ENTRIES, WorkspaceError, workspace_watcher::WatcherSignalKind};
+use crate::{
+    IGNORE_ENTRIES, WorkspaceError,
+    workspace_watcher::{OpenFileReason, WatcherSignalKind},
+};
 
 use super::{
-    FileContent, OpenFileParams, ScanProjectFolderParams, ServiceDataNotification, Workspace,
-    WorkspaceServer, document::Document,
+    ScanKind, ScanProjectFolderParams, ServiceDataNotification, Workspace, WorkspaceServer,
+    document::Document,
 };
 
 impl WorkspaceServer {
@@ -55,7 +58,7 @@ impl WorkspaceServer {
     /// Used indirectly by the watcher to open an individual file or folder.
     ///
     /// If you already know the path is a folder, use
-    /// [Self::open_folder_through_watcher()] instead.
+    /// `Self::open_folder_through_watcher()` instead.
     pub fn open_path_through_watcher(&self, path: &Utf8Path) -> Result<(), WorkspaceError> {
         if let PathKind::Directory { .. } = self.fs.path_kind(path)? {
             return self.open_folder_through_watcher(path);
@@ -72,15 +75,12 @@ impl WorkspaceServer {
             return Ok(()); // file events outside our projects can be safely ignored.
         };
 
-        self.open_file_by_scanner(OpenFileParams {
-            project_key,
-            path: path.into(),
-            content: FileContent::FromServer,
-            document_file_source: None,
-            persist_node_cache: false,
-        })?;
+        self.open_file_by_watcher(project_key, path)?;
 
-        self.update_service_data(WatcherSignalKind::AddedOrChanged, path)
+        self.update_service_data(
+            WatcherSignalKind::AddedOrChanged(OpenFileReason::WatcherUpdate),
+            path,
+        )
     }
 
     /// Used indirectly by the watcher to open an individual folder.
@@ -94,6 +94,7 @@ impl WorkspaceServer {
             path: Some(path.into()),
             watch: false, // It's already being watched.
             force: true,
+            scan_kind: ScanKind::Project,
         })
         .map(|_| ())
     }

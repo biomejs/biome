@@ -1,7 +1,6 @@
 ---
 source: crates/biome_cli/tests/snap_test.rs
-expression: content
-snapshot_kind: text
+expression: redactor(content)
 ---
 ## `check.js`
 
@@ -320,5 +319,5 @@ Diagnostics not shown: 29.
 
 ```block
 Checked 1 file in <TIME>. No fixes applied.
-Found 21 errors.
+Found 49 errors.
 ```

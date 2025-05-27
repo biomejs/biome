@@ -6,7 +6,7 @@ use biome_js_syntax::{JsLabeledStatement, JsSyntaxNode, JsSyntaxToken};
 use biome_rowan::AstNode;
 
 declare_lint_rule! {
-    ///  Disallow labels that share a name with a variable
+    /// Disallow labels that share a name with a variable
     ///
     /// ## Examples
     ///

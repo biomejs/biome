@@ -1,7 +1,6 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid.js
-snapshot_kind: text
 ---
 # Input
 ```js
@@ -66,7 +65,7 @@ class C {
 ```
 invalid.js:2:2 lint/correctness/noUnusedPrivateClassMembers  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i This private class member is defined but never used.
+  ! This private class member is defined but never used.
   
     1 │ class Bioo {
   > 2 │ 	#unusedProperty = 5;
@@ -87,7 +86,7 @@ invalid.js:2:2 lint/correctness/noUnusedPrivateClassMembers  FIXABLE  ━━━�
 ```
 invalid.js:4:2 lint/correctness/noUnusedPrivateClassMembers  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i This private class member is defined but never used.
+  ! This private class member is defined but never used.
   
     2 │ 	#unusedProperty = 5;
     3 │ 
@@ -114,7 +113,7 @@ invalid.js:4:2 lint/correctness/noUnusedPrivateClassMembers  FIXABLE  ━━━�
 ```
 invalid.js:10:2 lint/correctness/noUnusedPrivateClassMembers  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i This private class member is defined but never used.
+  ! This private class member is defined but never used.
   
      9 │ class OnlyWrite {
   > 10 │ 	#usedOnlyInWrite = 5;
@@ -136,7 +135,7 @@ invalid.js:10:2 lint/correctness/noUnusedPrivateClassMembers  FIXABLE  ━━━
 ```
 invalid.js:18:2 lint/correctness/noUnusedPrivateClassMembers  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i This private class member is defined but never used.
+  ! This private class member is defined but never used.
   
     17 │ class SelfUpdate {
   > 18 │ 	#usedOnlyToUpdateItself = 5;
@@ -158,7 +157,7 @@ invalid.js:18:2 lint/correctness/noUnusedPrivateClassMembers  FIXABLE  ━━━
 ```
 invalid.js:26:6 lint/correctness/noUnusedPrivateClassMembers  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i This private class member is defined but never used.
+  ! This private class member is defined but never used.
   
     25 │ class Accessor {
   > 26 │ 	get #unusedAccessor() {}
@@ -180,7 +179,7 @@ invalid.js:26:6 lint/correctness/noUnusedPrivateClassMembers  FIXABLE  ━━━
 ```
 invalid.js:27:6 lint/correctness/noUnusedPrivateClassMembers  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i This private class member is defined but never used.
+  ! This private class member is defined but never used.
   
     25 │ class Accessor {
     26 │ 	get #unusedAccessor() {}
@@ -203,7 +202,7 @@ invalid.js:27:6 lint/correctness/noUnusedPrivateClassMembers  FIXABLE  ━━━
 ```
 invalid.js:31:2 lint/correctness/noUnusedPrivateClassMembers  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i This private class member is defined but never used.
+  ! This private class member is defined but never used.
   
     30 │ class First {
   > 31 │ 	#unusedMemberInFirstClass = 5;
@@ -225,7 +224,7 @@ invalid.js:31:2 lint/correctness/noUnusedPrivateClassMembers  FIXABLE  ━━━
 ```
 invalid.js:35:2 lint/correctness/noUnusedPrivateClassMembers  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i This private class member is defined but never used.
+  ! This private class member is defined but never used.
   
     34 │ class Foo {
   > 35 │ 	#usedOnlyInWrite = 5;
@@ -247,7 +246,7 @@ invalid.js:35:2 lint/correctness/noUnusedPrivateClassMembers  FIXABLE  ━━━
 ```
 invalid.js:42:2 lint/correctness/noUnusedPrivateClassMembers  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i This private class member is defined but never used.
+  ! This private class member is defined but never used.
   
     41 │ class Foo {
   > 42 │ 	#usedOnlyInWriteStatement = 5;
@@ -269,7 +268,7 @@ invalid.js:42:2 lint/correctness/noUnusedPrivateClassMembers  FIXABLE  ━━━
 ```
 invalid.js:49:2 lint/correctness/noUnusedPrivateClassMembers  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i This private class member is defined but never used.
+  ! This private class member is defined but never used.
   
     48 │ class C {
   > 49 │ 	#usedOnlyInIncrement;

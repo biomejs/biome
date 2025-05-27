@@ -145,9 +145,13 @@ pub trait ParseSeparatedList {
         let elements = self.start_list(p);
         let mut progress = ParserProgress::default();
         let mut first = true;
-        while (!self.allow_empty() && first)
-            || (!p.at(<Self::Parser<'_> as Parser>::Kind::EOF) && !self.is_at_list_end(p))
-        {
+        loop {
+            if (self.allow_empty() || !first)
+                && (p.at(<Self::Parser<'_> as Parser>::Kind::EOF) || self.is_at_list_end(p))
+            {
+                break;
+            }
+
             if first {
                 first = false;
             } else {

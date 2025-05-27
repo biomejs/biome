@@ -7,7 +7,7 @@ use biome_configuration::{Configuration, FilesConfiguration};
 use biome_fs::{BiomePath, MemoryFileSystem};
 use biome_js_syntax::{JsFileSource, TextSize};
 use camino::Utf8PathBuf;
-use insta::assert_debug_snapshot;
+use insta::{assert_debug_snapshot, assert_snapshot};
 
 use crate::file_handlers::DocumentFileSource;
 use crate::projects::ProjectKey;
@@ -16,15 +16,18 @@ use crate::{Workspace, WorkspaceError};
 use super::{
     CloseFileParams, CloseProjectParams, FileContent, FileFeaturesResult, FileGuard,
     GetFileContentParams, GetSyntaxTreeParams, OpenFileParams, OpenProjectParams,
-    PullDiagnosticsParams, ScanProjectFolderParams, UpdateSettingsParams, server,
+    OpenProjectResult, PullDiagnosticsParams, ScanKind, ScanProjectFolderParams,
+    UpdateSettingsParams, server,
 };
 
 fn create_server() -> (Box<dyn Workspace>, ProjectKey) {
     let workspace = server(Box::new(MemoryFileSystem::default()), None);
-    let project_key = workspace
+    let OpenProjectResult { project_key, .. } = workspace
         .open_project(OpenProjectParams {
             path: Default::default(),
             open_uninitialized: true,
+            only_rules: None,
+            skip_rules: None,
         })
         .unwrap();
 
@@ -266,12 +269,12 @@ fn correctly_pulls_lint_diagnostics() {
     .unwrap();
     let result = graphql_file.pull_diagnostics(
         RuleCategories::all(),
-        10,
         vec![RuleSelector::Rule(
-            RuleGroup::Nursery.as_str(),
+            RuleGroup::Style.as_str(),
             "useDeprecatedReason",
         )],
         vec![],
+        true,
     );
     assert!(result.is_ok());
     let diagnostics = result.unwrap().diagnostics;
@@ -314,10 +317,12 @@ fn files_loaded_by_the_scanner_are_only_unloaded_when_the_project_is_unregistere
     fs.insert(Utf8PathBuf::from("/project/b.ts"), FILE_B_CONTENT);
 
     let workspace = server(Box::new(fs), None);
-    let project_key = workspace
+    let OpenProjectResult { project_key, .. } = workspace
         .open_project(OpenProjectParams {
             path: Utf8PathBuf::from("/project").into(),
             open_uninitialized: true,
+            only_rules: None,
+            skip_rules: None,
         })
         .unwrap();
 
@@ -327,6 +332,7 @@ fn files_loaded_by_the_scanner_are_only_unloaded_when_the_project_is_unregistere
             path: None,
             watch: false,
             force: false,
+            scan_kind: ScanKind::Project,
         })
         .unwrap();
 
@@ -389,10 +395,12 @@ fn too_large_files_are_tracked_but_not_parsed() {
     fs.insert(Utf8PathBuf::from("/project/a.ts"), FILE_CONTENT);
 
     let workspace = server(Box::new(fs), None);
-    let project_key = workspace
+    let OpenProjectResult { project_key, .. } = workspace
         .open_project(OpenProjectParams {
             path: Utf8PathBuf::from("/project").into(),
             open_uninitialized: true,
+            only_rules: None,
+            skip_rules: None,
         })
         .unwrap();
 
@@ -416,6 +424,7 @@ fn too_large_files_are_tracked_but_not_parsed() {
             path: None,
             watch: false,
             force: false,
+            scan_kind: ScanKind::Project,
         })
         .unwrap();
 
@@ -447,10 +456,12 @@ fn plugins_are_loaded_and_used_during_analysis() {
     fs.insert(Utf8PathBuf::from("/project/a.ts"), FILE_CONTENT);
 
     let workspace = server(Box::new(fs), None);
-    let project_key = workspace
+    let OpenProjectResult { project_key, .. } = workspace
         .open_project(OpenProjectParams {
             path: Utf8PathBuf::from("/project").into(),
             open_uninitialized: true,
+            only_rules: None,
+            skip_rules: None,
         })
         .unwrap();
 
@@ -473,6 +484,7 @@ fn plugins_are_loaded_and_used_during_analysis() {
             path: None,
             watch: false,
             force: false,
+            scan_kind: ScanKind::Project,
         })
         .unwrap();
 
@@ -481,10 +493,10 @@ fn plugins_are_loaded_and_used_during_analysis() {
             project_key,
             path: BiomePath::new("/project/a.ts"),
             categories: RuleCategories::default(),
-            max_diagnostics: 10,
             only: Vec::new(),
             skip: Vec::new(),
             enabled_rules: Vec::new(),
+            pull_code_actions: true,
         })
         .unwrap();
     assert_debug_snapshot!(result.diagnostics);
@@ -513,10 +525,12 @@ language css;
     fs.insert(Utf8PathBuf::from("/project/a.css"), FILE_CONTENT);
 
     let workspace = server(Box::new(fs), None);
-    let project_key = workspace
+    let OpenProjectResult { project_key, .. } = workspace
         .open_project(OpenProjectParams {
             path: Utf8PathBuf::from("/project").into(),
             open_uninitialized: true,
+            only_rules: None,
+            skip_rules: None,
         })
         .unwrap();
 
@@ -539,6 +553,7 @@ language css;
             path: None,
             watch: false,
             force: false,
+            scan_kind: ScanKind::Project,
         })
         .unwrap();
 
@@ -547,10 +562,75 @@ language css;
             project_key,
             path: BiomePath::new("/project/a.css"),
             categories: RuleCategories::default(),
-            max_diagnostics: 10,
             only: Vec::new(),
             skip: Vec::new(),
             enabled_rules: Vec::new(),
+            pull_code_actions: true,
+        })
+        .unwrap();
+    assert_debug_snapshot!(result.diagnostics);
+    assert_eq!(result.errors, 0);
+}
+
+#[test]
+fn plugins_may_use_invalid_span() {
+    const PLUGIN_CONTENT: &[u8] = br#"
+`Object.assign($args)` where {
+    register_diagnostic(
+        span = `Object.assign`,
+        message = "Prefer object spread instead of `Object.assign()`"
+    )
+}
+"#;
+
+    const FILE_CONTENT: &[u8] = b"const a = Object.assign({ foo: 'bar' });";
+
+    let mut fs = MemoryFileSystem::default();
+    fs.insert(Utf8PathBuf::from("/project/plugin.grit"), PLUGIN_CONTENT);
+    fs.insert(Utf8PathBuf::from("/project/a.ts"), FILE_CONTENT);
+
+    let workspace = server(Box::new(fs), None);
+    let OpenProjectResult { project_key, .. } = workspace
+        .open_project(OpenProjectParams {
+            path: Utf8PathBuf::from("/project").into(),
+            open_uninitialized: true,
+            only_rules: None,
+            skip_rules: None,
+        })
+        .unwrap();
+
+    workspace
+        .update_settings(UpdateSettingsParams {
+            project_key,
+            configuration: Configuration {
+                plugins: Some(Plugins(vec![PluginConfiguration::Path(
+                    "./plugin.grit".to_string(),
+                )])),
+                ..Default::default()
+            },
+            workspace_directory: Some(BiomePath::new("/project")),
+        })
+        .unwrap();
+
+    workspace
+        .scan_project_folder(ScanProjectFolderParams {
+            project_key,
+            path: None,
+            watch: false,
+            force: false,
+            scan_kind: ScanKind::Project,
+        })
+        .unwrap();
+
+    let result = workspace
+        .pull_diagnostics(PullDiagnosticsParams {
+            project_key,
+            path: BiomePath::new("/project/a.ts"),
+            categories: RuleCategories::default(),
+            only: Vec::new(),
+            skip: Vec::new(),
+            enabled_rules: Vec::new(),
+            pull_code_actions: true,
         })
         .unwrap();
     assert_debug_snapshot!(result.diagnostics);
@@ -562,4 +642,106 @@ fn test_order() {
     for items in FileFeaturesResult::PROTECTED_FILES.windows(2) {
         assert!(items[0] < items[1], "{} < {}", items[0], items[1]);
     }
+}
+
+#[test]
+fn debug_type_info() {
+    let (workspace, project_key) = create_server();
+
+    let file = FileGuard::open(
+        workspace.as_ref(),
+        OpenFileParams {
+            project_key,
+            path: BiomePath::new("file.ts"),
+            content: FileContent::from_client(
+                r#"
+function foo(name: string, age: number): Person {
+    return new Person(string, age)
+}
+class Person {
+    #name: string
+    #age: number
+    constructor(name: string, age: number) {
+        this.#name = name;
+        this.#age = age;
+    }
+}
+"#,
+            ),
+            document_file_source: None,
+            persist_node_cache: false,
+        },
+    )
+    .unwrap();
+    let result = file.get_type_info();
+    assert!(result.is_ok());
+    assert_snapshot!(result.unwrap());
+}
+
+#[test]
+fn debug_registered_types() {
+    let (workspace, project_key) = create_server();
+
+    let file = FileGuard::open(
+        workspace.as_ref(),
+        OpenFileParams {
+            project_key,
+            path: BiomePath::new("file.ts"),
+            content: FileContent::from_client(
+                r#"
+function foo(name: string, age: number): Person {
+    return new Person(string, age)
+}
+class Person {
+    #name: string
+    #age: number
+    constructor(name: string, age: number) {
+        this.#name = name;
+        this.#age = age;
+    }
+}
+"#,
+            ),
+            document_file_source: None,
+            persist_node_cache: false,
+        },
+    )
+    .unwrap();
+    let result = file.get_registered_types();
+    assert!(result.is_ok());
+    assert_snapshot!(result.unwrap());
+}
+
+#[test]
+fn debug_semantic_model() {
+    let (workspace, project_key) = create_server();
+
+    let file = FileGuard::open(
+        workspace.as_ref(),
+        OpenFileParams {
+            project_key,
+            path: BiomePath::new("file.ts"),
+            content: FileContent::from_client(
+                r#"
+function foo(name: string, age: number): Person {
+    return new Person(string, age)
+}
+class Person {
+    #name: string
+    #age: number
+    constructor(name: string, age: number) {
+        this.#name = name;
+        this.#age = age;
+    }
+}
+"#,
+            ),
+            document_file_source: None,
+            persist_node_cache: false,
+        },
+    )
+    .unwrap();
+    let result = file.get_semantic_model();
+    assert!(result.is_ok());
+    assert_snapshot!(result.unwrap());
 }

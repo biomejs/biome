@@ -1,11 +1,12 @@
 use std::{borrow::Cow, cmp::Ordering, iter::zip};
 
 use biome_analyze::{
-    Ast, Rule, RuleAction, RuleSource, RuleSourceKind, context::RuleContext, declare_source_rule,
+    Ast, FixKind, Rule, RuleAction, RuleDiagnostic, RuleSource, RuleSourceKind,
+    context::RuleContext, declare_source_rule,
 };
 use biome_console::markup;
 use biome_deserialize::TextRange;
-use biome_diagnostics::Applicability;
+use biome_diagnostics::{Applicability, category};
 use biome_js_syntax::{
     AnyJsxAttribute, JsxAttribute, JsxAttributeList, JsxOpeningElement, JsxSelfClosingElement,
 };
@@ -43,6 +44,7 @@ declare_source_rule! {
         recommended: false,
         sources: &[RuleSource::EslintReact("jsx-sort-props")],
         source_kind: RuleSourceKind::SameLogic,
+        fix_kind: FixKind::Safe,
     }
 }
 
@@ -78,6 +80,16 @@ impl Rule for UseSortedAttributes {
             prop_groups.push(current_prop_group);
         }
         prop_groups.into_boxed_slice()
+    }
+
+    fn diagnostic(ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
+        Some(RuleDiagnostic::new(
+            category!("assist/source/useSortedAttributes"),
+            Self::text_range(ctx, state)?,
+            markup! {
+                "The attributes are not sorted. "
+            },
+        ))
     }
 
     fn text_range(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<TextRange> {

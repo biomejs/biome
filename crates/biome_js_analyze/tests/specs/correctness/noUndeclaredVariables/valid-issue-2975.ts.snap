@@ -4,6 +4,7 @@ expression: valid-issue-2975.ts
 ---
 # Input
 ```ts
+/* should not generate diagnostics */
 import type { MY_ATTRIBUTE} from './types';
 
 export type T = {

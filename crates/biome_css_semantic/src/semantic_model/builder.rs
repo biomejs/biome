@@ -5,10 +5,11 @@ use biome_rowan::{AstNode, TextRange};
 use rustc_hash::FxHashMap;
 
 use super::model::{
-    CssDeclaration, CssGlobalCustomVariable, Rule, RuleId, Selector, SemanticModel,
+    CssGlobalCustomVariable, CssModelDeclaration, Rule, RuleId, Selector, SemanticModel,
     SemanticModelData, Specificity,
 };
 use crate::events::SemanticEvent;
+use crate::model::RuleNode;
 
 pub struct SemanticModelBuilder {
     root: CssRoot,
@@ -61,7 +62,8 @@ impl SemanticModelBuilder {
 
                 let new_rule = Rule {
                     id: new_rule_id,
-                    node,
+                    // SAFETY: RuleStart event checks for the node kind
+                    node: RuleNode::cast(node.clone()).unwrap(),
                     selectors: Vec::new(),
                     declarations: Vec::new(),
                     parent_id,
@@ -127,15 +129,15 @@ impl SemanticModelBuilder {
                         let property_name = property.syntax().text_trimmed().to_string();
                         self.global_custom_variables.insert(
                             property_name,
-                            CssGlobalCustomVariable::Root(CssDeclaration {
-                                node: node.clone(),
+                            CssGlobalCustomVariable::Root(CssModelDeclaration {
+                                declaration: node.clone(),
                                 property: property.clone(),
                                 value: value.clone(),
                             }),
                         );
                     }
-                    current_rule.declarations.push(CssDeclaration {
-                        node,
+                    current_rule.declarations.push(CssModelDeclaration {
+                        declaration: node,
                         property,
                         value,
                     });

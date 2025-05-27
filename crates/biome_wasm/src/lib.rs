@@ -1,3 +1,5 @@
+#![deny(clippy::use_self)]
+
 use js_sys::Error;
 use wasm_bindgen::prelude::*;
 
@@ -5,7 +7,8 @@ use biome_fs::MemoryFileSystem;
 use biome_service::workspace::{
     self, ChangeFileParams, CloseFileParams, FixFileParams, FormatFileParams, FormatOnTypeParams,
     FormatRangeParams, GetControlFlowGraphParams, GetFileContentParams, GetFormatterIRParams,
-    GetSyntaxTreeParams, OpenProjectParams, PullActionsParams, PullDiagnosticsParams, RenameParams,
+    GetRegisteredTypesParams, GetSemanticModelParams, GetSyntaxTreeParams, GetTypeInfoParams,
+    OpenProjectParams, PullActionsParams, PullDiagnosticsParams, RenameParams,
     UpdateSettingsParams,
 };
 use biome_service::workspace::{OpenFileParams, SupportsFeatureParams};
@@ -30,8 +33,8 @@ pub struct Workspace {
 #[wasm_bindgen]
 impl Workspace {
     #[wasm_bindgen(constructor)]
-    pub fn new() -> Workspace {
-        Workspace {
+    pub fn new() -> Self {
+        Self {
             inner: workspace::server(Box::new(MemoryFileSystem::default()), None),
         }
     }
@@ -63,12 +66,14 @@ impl Workspace {
     }
 
     #[wasm_bindgen(js_name = openProject)]
-    pub fn open_project(&self, params: IOpenProjectParams) -> Result<IProjectKey, Error> {
+    pub fn open_project(&self, params: IOpenProjectParams) -> Result<IOpenProjectResult, Error> {
         let params: OpenProjectParams =
             serde_wasm_bindgen::from_value(params.into()).map_err(into_error)?;
         let result = self.inner.open_project(params).map_err(into_error)?;
 
-        to_value(&result).map(IProjectKey::from).map_err(into_error)
+        to_value(&result)
+            .map(IOpenProjectResult::from)
+            .map_err(into_error)
     }
 
     #[wasm_bindgen(js_name = openFile)]
@@ -115,6 +120,27 @@ impl Workspace {
         let params: GetFormatterIRParams =
             serde_wasm_bindgen::from_value(params.into()).map_err(into_error)?;
         self.inner.get_formatter_ir(params).map_err(into_error)
+    }
+
+    #[wasm_bindgen(js_name = getTypeInfo)]
+    pub fn get_type_info(&self, params: IGetTypeInfoParams) -> Result<String, Error> {
+        let params: GetTypeInfoParams =
+            serde_wasm_bindgen::from_value(params.into()).map_err(into_error)?;
+        self.inner.get_type_info(params).map_err(into_error)
+    }
+
+    #[wasm_bindgen(js_name = getRegisteredTypes)]
+    pub fn get_registered_types(&self, params: IGetRegisteredTypesParams) -> Result<String, Error> {
+        let params: GetRegisteredTypesParams =
+            serde_wasm_bindgen::from_value(params.into()).map_err(into_error)?;
+        self.inner.get_registered_types(params).map_err(into_error)
+    }
+
+    #[wasm_bindgen(js_name = getSemanticModel)]
+    pub fn get_semantic_model(&self, params: IGetSemanticModelParams) -> Result<String, Error> {
+        let params: GetSemanticModelParams =
+            serde_wasm_bindgen::from_value(params.into()).map_err(into_error)?;
+        self.inner.get_semantic_model(params).map_err(into_error)
     }
 
     #[wasm_bindgen(js_name = changeFile)]

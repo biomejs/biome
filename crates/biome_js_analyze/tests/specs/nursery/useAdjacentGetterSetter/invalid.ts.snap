@@ -1,0 +1,290 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 134
+expression: invalid.ts
+---
+# Input
+```ts
+class User {
+    get name() {
+        return 'John Doe';
+    }
+    set #age(age) {}
+    get #age() {
+        return 30;
+    }
+    set name(value) {}
+}
+
+const user = {
+    get age() {
+        return 30;
+    },
+    set name(value) {},
+    get name() {
+        return 'John Doe';
+    },
+    set age(age) {},
+};
+
+type UserType = {
+    set age(age: number);
+    set name(value: string);
+    get name(): string;
+    get age(): number;
+}
+
+interface UserInterface {
+    set name(value: string);
+    set age(age: number);
+    get age(): number;
+    get name(): string;
+}
+
+declare module 'module' {
+    export class User {
+        set name(value: string);
+        get name(): string;
+        set #age(age: number);
+        get #age(): number;
+    }
+}
+
+```
+
+# Diagnostics
+```
+invalid.ts:2:9 lint/nursery/useAdjacentGetterSetter ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Getter should be defined right before the setter.
+  
+    1 │ class User {
+  > 2 │     get name() {
+      │         ^^^^
+    3 │         return 'John Doe';
+    4 │     }
+  
+  i Move this setter after the getter.
+  
+     7 │         return 30;
+     8 │     }
+   > 9 │     set name(value) {}
+       │         ^^^^
+    10 │ }
+    11 │ 
+  
+
+```
+
+```
+invalid.ts:6:9 lint/nursery/useAdjacentGetterSetter ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Getter should be defined right before the setter.
+  
+    4 │     }
+    5 │     set #age(age) {}
+  > 6 │     get #age() {
+      │         ^^^^
+    7 │         return 30;
+    8 │     }
+  
+  i Move this setter after the getter.
+  
+    3 │         return 'John Doe';
+    4 │     }
+  > 5 │     set #age(age) {}
+      │         ^^^^
+    6 │     get #age() {
+    7 │         return 30;
+  
+
+```
+
+```
+invalid.ts:13:9 lint/nursery/useAdjacentGetterSetter ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Getter should be defined right before the setter.
+  
+    12 │ const user = {
+  > 13 │     get age() {
+       │         ^^^
+    14 │         return 30;
+    15 │     },
+  
+  i Move this setter after the getter.
+  
+    18 │         return 'John Doe';
+    19 │     },
+  > 20 │     set age(age) {},
+       │         ^^^
+    21 │ };
+    22 │ 
+  
+
+```
+
+```
+invalid.ts:17:9 lint/nursery/useAdjacentGetterSetter ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Getter should be defined right before the setter.
+  
+    15 │     },
+    16 │     set name(value) {},
+  > 17 │     get name() {
+       │         ^^^^
+    18 │         return 'John Doe';
+    19 │     },
+  
+  i Move this setter after the getter.
+  
+    14 │         return 30;
+    15 │     },
+  > 16 │     set name(value) {},
+       │         ^^^^
+    17 │     get name() {
+    18 │         return 'John Doe';
+  
+
+```
+
+```
+invalid.ts:26:9 lint/nursery/useAdjacentGetterSetter ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Getter should be defined right before the setter.
+  
+    24 │     set age(age: number);
+    25 │     set name(value: string);
+  > 26 │     get name(): string;
+       │         ^^^^
+    27 │     get age(): number;
+    28 │ }
+  
+  i Move this setter after the getter.
+  
+    23 │ type UserType = {
+    24 │     set age(age: number);
+  > 25 │     set name(value: string);
+       │         ^^^^
+    26 │     get name(): string;
+    27 │     get age(): number;
+  
+
+```
+
+```
+invalid.ts:27:9 lint/nursery/useAdjacentGetterSetter ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Getter should be defined right before the setter.
+  
+    25 │     set name(value: string);
+    26 │     get name(): string;
+  > 27 │     get age(): number;
+       │         ^^^
+    28 │ }
+    29 │ 
+  
+  i Move this setter after the getter.
+  
+    23 │ type UserType = {
+  > 24 │     set age(age: number);
+       │         ^^^
+    25 │     set name(value: string);
+    26 │     get name(): string;
+  
+
+```
+
+```
+invalid.ts:33:9 lint/nursery/useAdjacentGetterSetter ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Getter should be defined right before the setter.
+  
+    31 │     set name(value: string);
+    32 │     set age(age: number);
+  > 33 │     get age(): number;
+       │         ^^^
+    34 │     get name(): string;
+    35 │ }
+  
+  i Move this setter after the getter.
+  
+    30 │ interface UserInterface {
+    31 │     set name(value: string);
+  > 32 │     set age(age: number);
+       │         ^^^
+    33 │     get age(): number;
+    34 │     get name(): string;
+  
+
+```
+
+```
+invalid.ts:34:9 lint/nursery/useAdjacentGetterSetter ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Getter should be defined right before the setter.
+  
+    32 │     set age(age: number);
+    33 │     get age(): number;
+  > 34 │     get name(): string;
+       │         ^^^^
+    35 │ }
+    36 │ 
+  
+  i Move this setter after the getter.
+  
+    30 │ interface UserInterface {
+  > 31 │     set name(value: string);
+       │         ^^^^
+    32 │     set age(age: number);
+    33 │     get age(): number;
+  
+
+```
+
+```
+invalid.ts:40:13 lint/nursery/useAdjacentGetterSetter ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Getter should be defined right before the setter.
+  
+    38 │     export class User {
+    39 │         set name(value: string);
+  > 40 │         get name(): string;
+       │             ^^^^
+    41 │         set #age(age: number);
+    42 │         get #age(): number;
+  
+  i Move this setter after the getter.
+  
+    37 │ declare module 'module' {
+    38 │     export class User {
+  > 39 │         set name(value: string);
+       │             ^^^^
+    40 │         get name(): string;
+    41 │         set #age(age: number);
+  
+
+```
+
+```
+invalid.ts:42:13 lint/nursery/useAdjacentGetterSetter ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Getter should be defined right before the setter.
+  
+    40 │         get name(): string;
+    41 │         set #age(age: number);
+  > 42 │         get #age(): number;
+       │             ^^^^
+    43 │     }
+    44 │ }
+  
+  i Move this setter after the getter.
+  
+    39 │         set name(value: string);
+    40 │         get name(): string;
+  > 41 │         set #age(age: number);
+       │             ^^^^
+    42 │         get #age(): number;
+    43 │     }
+  
+
+```

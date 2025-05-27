@@ -21,6 +21,9 @@
       "groupName": "github-actions",
       "matchManagers": [
         "github-actions"
+      ],
+      "matchDepNames": [
+        "!rust"
       ]
     },
     {
@@ -38,7 +41,9 @@
         "tower",
         "hashbrown",
         "grit-pattern-matcher",
-        "grit-util"
+        "grit-util",
+        "getrandom",
+        "rand"
       ]
     },
     {
@@ -49,6 +54,26 @@
       "matchManagers": [
         "npm"
       ]
+    },
+    {
+      "matchDepTypes": [
+        "engines"
+      ],
+      "enabled": false
+    }
+  ],
+  "customManagers": [
+    {
+      "customType": "regex",
+      "managerFilePatterns": [
+        "/(^|/)rust-toolchain\\.toml?$/"
+      ],
+      "matchStrings": [
+        "channel\\s*=\\s*\"(?<currentValue>\\d+\\.\\d+(\\.\\d+)?)\""
+      ],
+      "depNameTemplate": "rust",
+      "packageNameTemplate": "rust-lang/rust",
+      "datasourceTemplate": "github-tags"
     }
   ]
 }

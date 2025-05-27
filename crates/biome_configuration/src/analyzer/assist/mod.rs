@@ -13,7 +13,7 @@ pub type AssistEnabled = Bool<true>;
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(deny_unknown_fields, rename_all = "camelCase")]
 pub struct AssistConfiguration {
-    /// Whether Biome should enable assist via LSP.
+    /// Whether Biome should enable assist via LSP and CLI.
     #[bpaf(long("assist-enabled"), argument("true|false"))]
     pub enabled: Option<AssistEnabled>,
 
@@ -26,7 +26,7 @@ pub struct AssistConfiguration {
     /// match these patterns.
     #[bpaf(hide, pure(Default::default()))]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub includes: Option<Vec<biome_glob::Glob>>,
+    pub includes: Option<Vec<biome_glob::NormalizedGlob>>,
 }
 
 impl AssistConfiguration {

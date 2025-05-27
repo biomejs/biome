@@ -2,6 +2,7 @@ use crate::analyzer::assist::AssistEnabled;
 use crate::analyzer::{LinterEnabled, RuleDomains};
 use crate::formatter::{FormatWithErrorsEnabled, FormatterEnabled};
 use crate::html::HtmlConfiguration;
+use crate::max_size::MaxSize;
 use crate::{
     CssConfiguration, GraphqlConfiguration, GritConfiguration, JsConfiguration, JsonConfiguration,
     Rules,
@@ -63,20 +64,24 @@ pub struct OverridePattern {
     /// Specific configuration for the Json language
     #[serde(skip_serializing_if = "Option::is_none")]
     pub assist: Option<OverrideAssistConfiguration>,
+
+    /// Specific configuration for the filesystem
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub files: Option<OverrideFilesConfiguration>,
 }
 
 #[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
 #[serde(untagged)]
 pub enum OverrideGlobs {
-    Globs(Box<[biome_glob::Glob]>),
+    Globs(Box<[biome_glob::NormalizedGlob]>),
     EditorconfigGlob(Box<biome_glob::editorconfig::EditorconfigGlob>),
 }
 impl OverrideGlobs {
     /// Normalize `path` and match it against the list of globs.
     pub fn is_match_candidate(&self, path: &biome_glob::CandidatePath) -> bool {
         match self {
-            OverrideGlobs::Globs(globs) => path.matches_with_exceptions(globs),
-            OverrideGlobs::EditorconfigGlob(glob) => glob.is_match_candidate(path),
+            Self::Globs(globs) => path.matches_with_exceptions(globs),
+            Self::EditorconfigGlob(glob) => glob.is_match_candidate(path),
         }
     }
 }
@@ -184,6 +189,15 @@ pub struct OverrideLinterConfiguration {
     #[serde(skip_serializing_if = "Option::is_none")]
     #[bpaf(pure(Default::default()), optional, hide)]
     pub domains: Option<RuleDomains>,
+}
+
+#[derive(Clone, Debug, Default, Deserialize, Deserializable, Eq, PartialEq, Serialize)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct OverrideFilesConfiguration {
+    /// File size limit in bytes
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub max_size: Option<MaxSize>,
 }
 
 #[derive(Bpaf, Clone, Debug, Default, Deserialize, Deserializable, Eq, PartialEq, Serialize)]

@@ -1,3 +1,5 @@
+#![deny(clippy::use_self)]
+
 mod constants;
 mod lexer;
 mod parser;
@@ -20,19 +22,17 @@ pub fn parse_grit(source: &str) -> GritParse {
 
 /// Parses the provided string as a GritQL pattern using the provided node cache.
 pub fn parse_grit_with_cache(source: &str, cache: &mut NodeCache) -> GritParse {
-    tracing::debug_span!("parse").in_scope(move || {
-        let mut parser = GritParser::new(source);
+    let mut parser = GritParser::new(source);
 
-        parse_root(&mut parser);
+    parse_root(&mut parser);
 
-        let (events, diagnostics, trivia) = parser.finish();
+    let (events, diagnostics, trivia) = parser.finish();
 
-        let mut tree_sink = GritLosslessTreeSink::with_cache(source, &trivia, cache);
-        biome_parser::event::process(&mut tree_sink, events, diagnostics);
-        let (green, diagnostics) = tree_sink.finish();
+    let mut tree_sink = GritLosslessTreeSink::with_cache(source, &trivia, cache);
+    biome_parser::event::process(&mut tree_sink, events, diagnostics);
+    let (green, diagnostics) = tree_sink.finish();
 
-        GritParse::new(green, diagnostics)
-    })
+    GritParse::new(green, diagnostics)
 }
 
 /// A utility struct for managing the result of a parser job

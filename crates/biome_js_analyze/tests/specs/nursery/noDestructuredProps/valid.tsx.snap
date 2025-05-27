@@ -1,10 +1,10 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: valid.tsx
-snapshot_kind: text
 ---
 # Input
 ```tsx
+/* should not generate diagnostics */
 let Component = (props) => <div />;
 
 let Component = (props) => <div />;

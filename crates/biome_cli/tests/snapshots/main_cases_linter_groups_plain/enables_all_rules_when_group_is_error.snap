@@ -1,7 +1,6 @@
 ---
 source: crates/biome_cli/tests/snap_test.rs
 expression: redactor(content)
-snapshot_kind: text
 ---
 ## `biome.json`
 
@@ -18,7 +17,7 @@ snapshot_kind: text
 ## `test1.js`
 
 ```js
-function f() { console.log(arguments); }
+export default function f() {}
 
 ```
 
@@ -36,15 +35,17 @@ lint ━━━━━━━━━━━━━━━━━━━━━━━━━
 # Emitted Messages
 
 ```block
-test1.js:1:28 lint/style/noArguments ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+test1.js:1:8 lint/style/noDefaultExport ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Use the rest parameters instead of arguments.
+  × Avoid default exports.
   
-  > 1 │ function f() { console.log(arguments); }
-      │                            ^^^^^^^^^
+  > 1 │ export default function f() {}
+      │        ^^^^^^^
     2 │ 
   
-  i arguments does not have Array.prototype methods and can be inconvenient to use.
+  i Default exports cannot be easily discovered inside an editor and don't encourage the use of consistent names through a code base.
+  
+  i Use a named export instead.
   
 
 ```

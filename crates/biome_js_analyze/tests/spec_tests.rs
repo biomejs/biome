@@ -1,5 +1,6 @@
 use biome_analyze::{
-    AnalysisFilter, AnalyzerAction, AnalyzerPluginSlice, ControlFlow, Never, RuleFilter,
+    AnalysisFilter, AnalyzerAction, AnalyzerPluginSlice, ControlFlow, Never, Queryable,
+    RegistryVisitor, Rule, RuleDomain, RuleFilter, RuleGroup,
 };
 use biome_diagnostics::advice::CodeSuggestionAdvice;
 use biome_fs::OsFileSystem;
@@ -10,12 +11,13 @@ use biome_package::PackageType;
 use biome_plugin_loader::AnalyzerGritPlugin;
 use biome_rowan::AstNode;
 use biome_test_utils::{
-    CheckActionType, assert_errors_are_absent, code_fix_to_string, create_analyzer_options,
-    dependency_graph_for_test_file, diagnostic_to_string, has_bogus_nodes_or_empty_slots,
-    parse_test_path, project_layout_with_node_manifest, register_leak_checker, scripts_from_json,
+    CheckActionType, assert_diagnostics_expectation_comment, assert_errors_are_absent,
+    code_fix_to_string, create_analyzer_options, diagnostic_to_string,
+    has_bogus_nodes_or_empty_slots, module_graph_for_test_file, parse_test_path,
+    project_layout_with_node_manifest, register_leak_checker, scripts_from_json,
     write_analyzer_snapshot,
 };
-use camino::{Utf8Component, Utf8Path};
+use camino::Utf8Path;
 use std::ops::Deref;
 use std::sync::Arc;
 use std::{fs::read_to_string, slice};
@@ -23,6 +25,43 @@ use std::{fs::read_to_string, slice};
 tests_macros::gen_tests! {"tests/specs/**/*.{cjs,cts,js,jsx,tsx,ts,json,jsonc,svelte}", crate::run_test, "module"}
 tests_macros::gen_tests! {"tests/suppression/**/*.{cjs,cts,js,jsx,tsx,ts,json,jsonc,svelte}", crate::run_suppression_test, "module"}
 tests_macros::gen_tests! {"tests/plugin/*.grit", crate::run_plugin_test, "module"}
+
+/// Checks if any of the enabled rules is in the project domain and requires the module graph.
+struct NeedsModuleGraph<'a> {
+    enabled_rules: Option<&'a [RuleFilter<'a>]>,
+    needs_module_graph: bool,
+}
+
+impl<'a> NeedsModuleGraph<'a> {
+    fn new(enabled_rules: Option<&'a [RuleFilter<'a>]>) -> Self {
+        Self {
+            enabled_rules,
+            needs_module_graph: false,
+        }
+    }
+
+    fn compute(mut self) -> bool {
+        biome_js_analyze::visit_registry(&mut self);
+        self.needs_module_graph
+    }
+}
+
+impl RegistryVisitor<JsLanguage> for NeedsModuleGraph<'_> {
+    fn record_rule<R>(&mut self)
+    where
+        R: Rule<Options: Default, Query: Queryable<Language = JsLanguage, Output: Clone>> + 'static,
+    {
+        let filter = RuleFilter::Rule(<R::Group as RuleGroup>::NAME, R::METADATA.name);
+
+        if self
+            .enabled_rules
+            .is_some_and(|enabled_rules| enabled_rules.contains(&filter))
+            && R::METADATA.domains.contains(&RuleDomain::Project)
+        {
+            self.needs_module_graph = true;
+        }
+    }
+}
 
 fn run_test(input: &'static str, _: &str, _: &str, _: &str) {
     register_leak_checker();
@@ -56,7 +95,8 @@ fn run_test(input: &'static str, _: &str, _: &str, _: &str) {
 
     let input_code = read_to_string(input_file)
         .unwrap_or_else(|err| panic!("failed to read {input_file:?}: {err:?}"));
-    let quantity_diagnostics = if let Some(scripts) = scripts_from_json(extension, &input_code) {
+
+    if let Some(scripts) = scripts_from_json(extension, &input_code) {
         for script in scripts {
             analyze_and_snap(
                 &mut snapshot,
@@ -70,8 +110,6 @@ fn run_test(input: &'static str, _: &str, _: &str, _: &str) {
                 &[],
             );
         }
-
-        0
     } else {
         let Ok(source_type) = input_file.try_into() else {
             return;
@@ -86,7 +124,7 @@ fn run_test(input: &'static str, _: &str, _: &str, _: &str) {
             CheckActionType::Lint,
             JsParserOptions::default(),
             &[],
-        )
+        );
     };
 
     insta::with_settings!({
@@ -95,10 +133,6 @@ fn run_test(input: &'static str, _: &str, _: &str, _: &str) {
     }, {
         insta::assert_snapshot!(file_name, snapshot, file_name);
     });
-
-    if input_code.contains("/* should not generate diagnostics */") && quantity_diagnostics > 0 {
-        panic!("This test should not generate diagnostics");
-    }
 }
 
 #[expect(clippy::too_many_arguments)]
@@ -112,12 +146,12 @@ pub(crate) fn analyze_and_snap(
     check_action_type: CheckActionType,
     parser_options: JsParserOptions,
     plugins: AnalyzerPluginSlice,
-) -> usize {
+) {
     let mut diagnostics = Vec::new();
     let mut code_fixes = Vec::new();
     let project_layout = project_layout_with_node_manifest(input_file, &mut diagnostics);
 
-    if let Some((_, manifest)) = project_layout.get_node_manifest_for_path(input_file) {
+    if let Some((_, manifest)) = project_layout.find_node_manifest_for_path(input_file) {
         if manifest.r#type == Some(PackageType::CommonJs) &&
             // At the moment we treat JS and JSX at the same way
             (source_type.file_extension() == "js" || source_type.file_extension() == "jsx" )
@@ -131,19 +165,14 @@ pub(crate) fn analyze_and_snap(
 
     let options = create_analyzer_options(input_file, &mut diagnostics);
 
-    // FIXME: We probably want to enable it for all rules? Right now it seems to
-    //        trigger a leak panic...
-    let dependency_graph = if input_file.components().any(|component| {
-        component == Utf8Component::Normal("noImportCycles")
-            || component == Utf8Component::Normal("noPrivateImports")
-            || component == Utf8Component::Normal("useImportExtensions")
-    }) {
-        dependency_graph_for_test_file(input_file, &project_layout)
+    let needs_module_graph = NeedsModuleGraph::new(filter.enabled_rules).compute();
+    let module_graph = if needs_module_graph {
+        module_graph_for_test_file(input_file, &project_layout)
     } else {
         Default::default()
     };
 
-    let services = JsAnalyzerServices::from((dependency_graph, project_layout, source_type));
+    let services = JsAnalyzerServices::from((module_graph, project_layout, source_type));
 
     let (_, errors) =
         biome_js_analyze::analyze(&root, filter, &options, plugins, services, |event| {
@@ -223,15 +252,12 @@ pub(crate) fn analyze_and_snap(
     //        for all tests, since it would cause many incorrect replacements.
     //        Maybe there's a regular expression that could work, but it feels
     //        flimsy too...
-    if input_file.components().any(|component| {
-        component == Utf8Component::Normal("noImportCycles")
-            || component == Utf8Component::Normal("noPrivateImports")
-    }) {
+    if needs_module_graph {
         // Normalize Windows paths.
         *snapshot = snapshot.replace('\\', "/");
     }
 
-    diagnostics.len()
+    assert_diagnostics_expectation_comment(input_file, root.syntax(), diagnostics.len());
 }
 
 fn check_code_action(

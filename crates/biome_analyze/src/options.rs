@@ -4,6 +4,7 @@ use rustc_hash::FxHashMap;
 use crate::{FixKind, Rule, RuleKey};
 use std::any::{Any, TypeId};
 use std::fmt::Debug;
+use std::sync::Arc;
 
 /// A convenient new type data structure to store the options that belong to a rule
 #[derive(Debug)]
@@ -17,7 +18,7 @@ impl RuleOptions {
 
     /// It returns the deserialized rule option
     pub fn value<O: 'static>(&self) -> &O {
-        let RuleOptions(type_id, value, _) = &self;
+        let Self(type_id, value, _) = &self;
         let current_id = TypeId::of::<O>();
         debug_assert_eq!(type_id, &current_id);
         // SAFETY: the code should fail when asserting the types.
@@ -57,19 +58,22 @@ pub struct AnalyzerConfiguration {
     /// A list of rules and their options
     pub(crate) rules: AnalyzerRules,
 
-    /// A collections of bindings that the analyzers should consider as "external".
+    /// A collection of bindings that the analyzers should consider as "external".
     ///
     /// For example, lint rules should ignore them.
     globals: Vec<Box<str>>,
 
-    /// Allows to choose a different quote when applying fixes inside the lint rules
+    /// Allows choosing a different quote when applying fixes inside the lint rules
     preferred_quote: PreferredQuote,
 
-    /// Allows to choose a different JSX quote when applying fixes inside the lint rules
+    /// Allows choosing a different JSX quote when applying fixes inside the lint rules
     pub preferred_jsx_quote: PreferredQuote,
 
     /// Indicates the type of runtime or transformation used for interpreting JSX.
     jsx_runtime: Option<JsxRuntime>,
+
+    /// Whether the CSS files contain CSS Modules
+    css_modules: bool,
 }
 
 impl AnalyzerConfiguration {
@@ -97,6 +101,11 @@ impl AnalyzerConfiguration {
         self.preferred_jsx_quote = preferred_jsx_quote;
         self
     }
+
+    pub fn with_css_modules(mut self, css_modules: bool) -> Self {
+        self.css_modules = css_modules;
+        self
+    }
 }
 
 /// A set of information useful to the analyzer infrastructure
@@ -106,7 +115,7 @@ pub struct AnalyzerOptions {
     pub(crate) configuration: AnalyzerConfiguration,
 
     /// The file that is being analyzed
-    pub file_path: Utf8PathBuf,
+    pub file_path: Arc<Utf8PathBuf>,
 
     /// Suppression reason used when applying a suppression code action
     pub(crate) suppression_reason: Option<String>,
@@ -114,7 +123,7 @@ pub struct AnalyzerOptions {
 
 impl AnalyzerOptions {
     pub fn with_file_path(mut self, file_path: impl Into<Utf8PathBuf>) -> Self {
-        self.file_path = file_path.into();
+        self.file_path = Arc::new(file_path.into());
         self
     }
 
@@ -169,6 +178,10 @@ impl AnalyzerOptions {
 
     pub fn preferred_jsx_quote(&self) -> &PreferredQuote {
         &self.configuration.preferred_jsx_quote
+    }
+
+    pub fn css_modules(&self) -> bool {
+        self.configuration.css_modules
     }
 }
 

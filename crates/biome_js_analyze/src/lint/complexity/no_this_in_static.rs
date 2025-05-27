@@ -84,7 +84,7 @@ declare_lint_rule! {
         sources: &[RuleSource::EslintMysticatea("no-this-in-static")],
         recommended: true,
         severity: Severity::Warning,
-        fix_kind: FixKind::Unsafe,
+        fix_kind: FixKind::Safe,
     }
 }
 
@@ -187,8 +187,8 @@ declare_node_union! {
 impl JsThisSuperExpression {
     fn token(&self) -> SyntaxResult<JsSyntaxToken> {
         match self {
-            JsThisSuperExpression::JsSuperExpression(expr) => expr.super_token(),
-            JsThisSuperExpression::JsThisExpression(expr) => expr.this_token(),
+            Self::JsSuperExpression(expr) => expr.super_token(),
+            Self::JsThisExpression(expr) => expr.this_token(),
         }
     }
 }

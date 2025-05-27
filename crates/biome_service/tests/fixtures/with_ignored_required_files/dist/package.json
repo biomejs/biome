@@ -1,0 +1,6 @@
+{
+    "name": "with_ignored_required_files_dist",
+    "dependencies": {
+        "declared": "0.1.0"
+    }
+}

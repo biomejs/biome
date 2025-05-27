@@ -1,0 +1,59 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```js
+let a = process.env;
+let a = process.env.ENV;
+let a = f(process.env);
+
+```
+
+# Diagnostics
+```
+invalid.js:1:9 lint/style/noProcessEnv ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Don't use process.env.
+  
+  > 1 │ let a = process.env;
+      │         ^^^^^^^^^^^
+    2 │ let a = process.env.ENV;
+    3 │ let a = f(process.env);
+  
+  i Use a centralized configuration file instead for better maintainability and deployment consistency.
+  
+
+```
+
+```
+invalid.js:2:9 lint/style/noProcessEnv ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Don't use process.env.
+  
+    1 │ let a = process.env;
+  > 2 │ let a = process.env.ENV;
+      │         ^^^^^^^^^^^
+    3 │ let a = f(process.env);
+    4 │ 
+  
+  i Use a centralized configuration file instead for better maintainability and deployment consistency.
+  
+
+```
+
+```
+invalid.js:3:11 lint/style/noProcessEnv ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Don't use process.env.
+  
+    1 │ let a = process.env;
+    2 │ let a = process.env.ENV;
+  > 3 │ let a = f(process.env);
+      │           ^^^^^^^^^^^
+    4 │ 
+  
+  i Use a centralized configuration file instead for better maintainability and deployment consistency.
+  
+
+```

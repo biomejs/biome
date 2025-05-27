@@ -5,10 +5,10 @@ use crate::utils::apply_document_changes;
 use crate::{documents::Document, session::Session};
 use biome_fs::BiomePath;
 use biome_service::workspace::{
-    ChangeFileParams, CloseFileParams, DocumentFileSource, FileContent, GetFileContentParams,
-    OpenFileParams, OpenProjectParams,
+    ChangeFileParams, CloseFileParams, DocumentFileSource, FeaturesBuilder, FileContent,
+    GetFileContentParams, IsPathIgnoredParams, OpenFileParams, OpenProjectParams,
 };
-use tower_lsp::lsp_types;
+use tower_lsp_server::lsp_types;
 use tracing::{debug, error, field, info};
 
 /// Handler for `textDocument/didOpen` LSP notification
@@ -16,7 +16,7 @@ use tracing::{debug, error, field, info};
     level = "debug",
     skip_all,
     fields(
-        text_document_uri = display(params.text_document.uri.as_ref()),
+        text_document_uri = display(params.text_document.uri.as_str()),
         text_document_language_id = display(&params.text_document.language_id),
     )
 )]
@@ -39,14 +39,29 @@ pub(crate) async fn did_open(
                     .map(|parent| parent.to_path_buf())
                     .unwrap_or_default(),
             );
-            let project_key = session.workspace.open_project(OpenProjectParams {
+            let result = session.workspace.open_project(OpenProjectParams {
                 path: parent_path.clone(),
                 open_uninitialized: true,
+                skip_rules: None,
+                only_rules: None,
             })?;
-            session.insert_and_scan_project(project_key, parent_path);
-            project_key
+            session.insert_and_scan_project(result.project_key, parent_path, result.scan_kind);
+            result.project_key
         }
     };
+
+    let is_ignored = session
+        .workspace
+        .is_path_ignored(IsPathIgnoredParams {
+            project_key,
+            path: path.clone(),
+            features: FeaturesBuilder::new().build(),
+        })
+        .unwrap_or_default();
+
+    if is_ignored {
+        return Ok(());
+    }
 
     let doc = Document::new(project_key, version, &content);
 
@@ -68,7 +83,7 @@ pub(crate) async fn did_open(
 }
 
 /// Handler for `textDocument/didChange` LSP notification
-#[tracing::instrument(level = "debug", skip_all, fields(url = field::display(&params.text_document.uri), version = params.text_document.version), err)]
+#[tracing::instrument(level = "debug", skip_all, fields(url = field::display(&params.text_document.uri.as_str()), version = params.text_document.version), err)]
 pub(crate) async fn did_change(
     session: &Session,
     params: lsp_types::DidChangeTextDocumentParams,
@@ -77,14 +92,25 @@ pub(crate) async fn did_change(
     let version = params.text_document.version;
 
     let path = session.file_path(&url)?;
-    let doc = session.document(&url)?;
+    let Some(doc) = session.document(&url) else {
+        return Ok(());
+    };
+
+    let features = FeaturesBuilder::new().build();
+    if session.workspace.is_path_ignored(IsPathIgnoredParams {
+        path: path.clone(),
+        project_key: doc.project_key,
+        features,
+    })? {
+        return Ok(());
+    }
 
     let old_text = session.workspace.get_file_content(GetFileContentParams {
         project_key: doc.project_key,
         path: path.clone(),
     })?;
-    tracing::debug!("old document: {:?}", old_text);
-    tracing::debug!("content changes: {:?}", params.content_changes);
+    debug!("old document: {:?}", old_text);
+    debug!("content changes: {:?}", params.content_changes);
 
     let text = apply_document_changes(
         session.position_encoding(),
@@ -92,7 +118,7 @@ pub(crate) async fn did_change(
         params.content_changes,
     );
 
-    tracing::debug!("new document: {:?}", text);
+    debug!("new document: {:?}", text);
 
     session.insert_document(url.clone(), Document::new(doc.project_key, version, &text));
 
@@ -116,10 +142,10 @@ pub(crate) async fn did_close(
     session: &Session,
     params: lsp_types::DidCloseTextDocumentParams,
 ) -> Result<(), LspError> {
-    let url = params.text_document.uri;
-    let path = session.file_path(&url)?;
-    let Some(project_key) = session.remove_document(&url) else {
-        debug!("Document wasn't open: {url}");
+    let uri = params.text_document.uri;
+    let path = session.file_path(&uri)?;
+    let Some(project_key) = session.remove_document(&uri) else {
+        debug!("Document wasn't open: {}", uri.as_str());
         return Ok(());
     };
 
@@ -129,7 +155,7 @@ pub(crate) async fn did_close(
 
     session
         .client
-        .publish_diagnostics(url, Vec::new(), None)
+        .publish_diagnostics(uri, Vec::new(), None)
         .await;
 
     Ok(())

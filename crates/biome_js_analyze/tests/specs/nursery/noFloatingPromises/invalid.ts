@@ -1,3 +1,5 @@
+import { returnPromiseResult } from "./returnPromiseResult.ts";
+
 async function returnsPromise(): Promise<string> {
 	return "value";
 }
@@ -329,3 +331,17 @@ async function testDestructuringAndCallingReturnsPromiseFromRest({
 		.then(() => {})
 		.finally(() => {});
 }
+
+import("some-module").then(() => {});
+
+returnPromiseResult();
+
+function returnMaybePromise(): Promise<void> | undefined {
+	if (!false) {
+		return;
+	}
+
+	return Promise.resolve();
+}
+
+returnMaybePromise();

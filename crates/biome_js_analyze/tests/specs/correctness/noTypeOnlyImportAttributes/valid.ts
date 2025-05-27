@@ -1,3 +1,4 @@
+/* should not generate diagnostics */
 import type A from "";
 import type * as B from "";
 import type { C } from "";

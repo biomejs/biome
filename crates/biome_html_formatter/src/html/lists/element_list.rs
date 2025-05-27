@@ -430,22 +430,16 @@ impl FormatHtmlElementList {
     /// [HtmlContent] and instead, formats the nodes itself.
     #[cfg(debug_assertions)]
     fn disarm_debug_assertions(&self, node: &HtmlElementList, f: &mut HtmlFormatter) {
-        use AnyHtmlElement::*;
         use biome_formatter::CstFormatContext;
 
         for child in node {
-            match child {
-                HtmlContent(text) => {
-                    f.state_mut().track_token(&text.value_token().unwrap());
+            if let AnyHtmlElement::HtmlContent(text) = child {
+                f.state_mut().track_token(&text.value_token().unwrap());
 
-                    // You can't suppress a text node
-                    f.context()
-                        .comments()
-                        .mark_suppression_checked(text.syntax());
-                }
-                _ => {
-                    continue;
-                }
+                // You can't suppress a text node
+                f.context()
+                    .comments()
+                    .mark_suppression_checked(text.syntax());
             }
         }
     }
@@ -501,7 +495,7 @@ pub enum HtmlChildListLayout {
 
 impl HtmlChildListLayout {
     const fn is_multiline(&self) -> bool {
-        matches!(self, HtmlChildListLayout::Multiline)
+        matches!(self, Self::Multiline)
     }
 }
 
@@ -559,7 +553,7 @@ impl WordSeparator {
     fn will_break(&self) -> bool {
         matches!(
             self,
-            WordSeparator::EndOfText {
+            Self::EndOfText {
                 is_soft_line_break: false,
                 is_next_element_whitespace_sensitive: _
             }
@@ -570,8 +564,8 @@ impl WordSeparator {
 impl Format<HtmlFormatContext> for WordSeparator {
     fn fmt(&self, f: &mut Formatter<HtmlFormatContext>) -> FormatResult<()> {
         match self {
-            WordSeparator::BetweenWords => soft_line_break_or_space().fmt(f),
-            WordSeparator::EndOfText {
+            Self::BetweenWords => soft_line_break_or_space().fmt(f),
+            Self::EndOfText {
                 is_soft_line_break,
                 is_next_element_whitespace_sensitive,
             } => {

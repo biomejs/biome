@@ -2,6 +2,7 @@ use biome_analyze::{
     Ast, FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
+use biome_diagnostics::Severity;
 use biome_js_factory::make::{
     js_binary_expression, js_string_literal, js_string_literal_expression,
 };
@@ -66,7 +67,8 @@ declare_lint_rule! {
         language: "js",
         sources: &[RuleSource::Eslint("no-useless-concat")],
         recommended: false,
-        fix_kind: FixKind::Unsafe,
+        severity: Severity::Information,
+        fix_kind: FixKind::Safe,
     }
 }
 
@@ -357,7 +359,7 @@ fn extract_string_value(expression: &Option<AnyJsExpression>) -> Option<String> 
                     String::new(),
                     |acc, element| {
                         if let Some(chunk) = element.as_js_template_chunk_element() {
-                            return acc + chunk.to_trimmed_string().as_str();
+                            return acc + chunk.to_trimmed_text().text();
                         }
                         acc
                     },

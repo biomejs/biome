@@ -1,11 +1,10 @@
 ---
 source: crates/biome_cli/tests/snap_test.rs
-expression: content
-snapshot_kind: text
+expression: redactor(content)
 ---
 ## `config/biome.jsonc`
 
-```jsonc
+```json
 {
   "assist": {
     "enabled": true
@@ -14,11 +13,11 @@ snapshot_kind: text
     "enabled": false
   },
   "formatter": {
-    "enabled": true,
+    "enabled": true
   },
   "javascript": {
     "formatter": {
-      "quoteStyle": "single", // comment
+      "quoteStyle": "single" // comment
     }
   }
 }

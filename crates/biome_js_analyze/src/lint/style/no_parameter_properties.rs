@@ -1,6 +1,7 @@
 use biome_analyze::context::RuleContext;
 use biome_analyze::{Ast, Rule, RuleDiagnostic, RuleSource, RuleSourceKind, declare_lint_rule};
 use biome_console::markup;
+use biome_diagnostics::Severity;
 use biome_js_syntax::TsPropertyParameter;
 use biome_rowan::AstNode;
 
@@ -37,6 +38,7 @@ declare_lint_rule! {
         sources: &[RuleSource::EslintTypeScript("parameter-properties")],
         source_kind: RuleSourceKind::Inspired,
         recommended: false,
+        severity: Severity::Warning,
     }
 }
 

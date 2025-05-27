@@ -5,7 +5,10 @@ async function returnsPromise(): Promise<string> {
 
 await returnsPromise();
 void returnsPromise();
-return returnsPromise();
+
+function otherFunction() {
+  return returnsPromise();
+}
 
 returnsPromise().then(
   () => { },
@@ -21,7 +24,7 @@ promise.then(() => { }, () => { })
 Promise.resolve('value').then(() => { }, () => { })
 Promise.all([p1, p2, p3]).catch(() => { })
 
-const Promise = { resolve(): {} };
+const Promise = { resolve() { return null; } };
 Promise.resolve()
 async function bindingPromiseInsideFunction() {
   Promise.resolve()

@@ -1,11 +1,12 @@
 use biome_console::fmt::Display;
 use biome_console::markup;
 use biome_deserialize::DeserializationDiagnostic;
-use biome_diagnostics::ResolveError;
 use biome_diagnostics::{Diagnostic, Error, MessageAndDescription};
 use biome_fs::FileSystemDiagnostic;
 use biome_grit_patterns::CompileError;
+use biome_resolver::{ResolveError, ResolveErrorDiagnostic};
 use biome_rowan::SyntaxError;
+use camino::Utf8PathBuf;
 use serde::{Deserialize, Serialize};
 use std::fmt::{Debug, Formatter};
 
@@ -37,7 +38,7 @@ pub enum PluginDiagnostic {
 impl From<CompileError> for PluginDiagnostic {
     fn from(value: CompileError) -> Self {
         println!("Compile Error: {value:?}");
-        PluginDiagnostic::Compile(CompileDiagnostic {
+        Self::Compile(CompileDiagnostic {
             source: Some(Error::from(value)),
         })
     }
@@ -45,32 +46,33 @@ impl From<CompileError> for PluginDiagnostic {
 
 impl From<DeserializationDiagnostic> for PluginDiagnostic {
     fn from(value: DeserializationDiagnostic) -> Self {
-        PluginDiagnostic::Deserialization(value)
+        Self::Deserialization(value)
     }
 }
 
 impl From<FileSystemDiagnostic> for PluginDiagnostic {
     fn from(value: FileSystemDiagnostic) -> Self {
-        PluginDiagnostic::FileSystem(value)
+        Self::FileSystem(value)
     }
 }
 
 impl From<SyntaxError> for PluginDiagnostic {
     fn from(_: SyntaxError) -> Self {
-        PluginDiagnostic::Deserialization(DeserializationDiagnostic::new(markup! {"Syntax Error"}))
+        Self::Deserialization(DeserializationDiagnostic::new(markup! {"Syntax Error"}))
     }
 }
 
 impl PluginDiagnostic {
-    pub fn cant_resolve(path: impl Display, source: Option<ResolveError>) -> Self {
+    pub fn cant_resolve(path: Utf8PathBuf, kind: Option<ResolveError>) -> Self {
         Self::CantResolve(CantResolve {
             message: MessageAndDescription::from(
                 markup! {
-                   "Failed to resolve the plugin manifest from "<Emphasis>{path}</Emphasis>
+                   "Failed to resolve the plugin manifest from "
+                   <Emphasis>{path.to_string()}</Emphasis>
                 }
                 .to_owned(),
             ),
-            source: source.map(Error::from),
+            source: kind.map(|kind| ResolveErrorDiagnostic::new(kind, path).into()),
         })
     }
 
@@ -102,7 +104,7 @@ impl std::fmt::Display for PluginDiagnostic {
 
 impl From<PluginDiagnostic> for biome_diagnostics::serde::Diagnostic {
     fn from(error: PluginDiagnostic) -> Self {
-        biome_diagnostics::serde::Diagnostic::new(error)
+        Self::new(error)
     }
 }
 

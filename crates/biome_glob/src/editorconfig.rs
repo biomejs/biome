@@ -115,7 +115,7 @@ impl TryFrom<String> for EditorconfigGlob {
         // Only `**` can match `/`
         glob_builder.literal_separator(true);
         match glob_builder.build() {
-            Ok(glob) => Ok(EditorconfigGlob {
+            Ok(glob) => Ok(Self {
                 glob: glob.compile_matcher(),
             }),
             Err(error) => Err(EditorconfigGlobError::Generic(

@@ -1,0 +1,30 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `invalid.js`
+
+```js
+while ) {}
+```
+
+## `valid.js`
+
+```js
+statement();
+
+```
+
+# Emitted Messages
+
+```block
+invalid.js parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Skipped file with syntax errors
+  
+
+```
+
+```block
+Formatted 1 file in <TIME>. Fixed 1 file.
+```

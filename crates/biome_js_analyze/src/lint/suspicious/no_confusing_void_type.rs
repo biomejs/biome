@@ -64,7 +64,7 @@ declare_lint_rule! {
         language: "ts",
         sources: &[RuleSource::EslintTypeScript("no-invalid-void-type")],
         recommended: true,
-        severity: Severity::Error,
+        severity: Severity::Warning,
         fix_kind: FixKind::Unsafe,
     }
 }
@@ -140,9 +140,7 @@ fn decide_void_type_context(node: &JsSyntaxNode) -> Option<VoidTypeContext> {
             JsSyntaxKind::TS_PARENTHESIZED_TYPE
             | JsSyntaxKind::TS_INTERSECTION_TYPE_ELEMENT_LIST
             | JsSyntaxKind::TS_TYPE_ANNOTATION
-            | JsSyntaxKind::TS_DEFAULT_TYPE_CLAUSE => {
-                continue;
-            }
+            | JsSyntaxKind::TS_DEFAULT_TYPE_CLAUSE => {}
 
             JsSyntaxKind::TS_UNION_TYPE => {
                 return Some(VoidTypeContext::Union);

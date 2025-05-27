@@ -1,3 +1,4 @@
+/* should not generate diagnostics */
 <>
 	<button tabIndex="0"></button>
 	<span role="button" tabIndex="0"></span>

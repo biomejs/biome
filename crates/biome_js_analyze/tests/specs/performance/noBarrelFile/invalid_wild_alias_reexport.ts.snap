@@ -1,7 +1,6 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid_wild_alias_reexport.ts
-snapshot_kind: text
 ---
 # Input
 ```ts
@@ -13,7 +12,7 @@ export * as bar from "foo";
 ```
 invalid_wild_alias_reexport.ts:1:1 lint/performance/noBarrelFile ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Avoid barrel files, they slow down performance, and cause large module graphs with modules that go unused.
+  ! Avoid barrel files, they slow down performance, and cause large module graphs with modules that go unused.
   
   > 1 │ export * as bar from "foo";
       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^

@@ -58,9 +58,9 @@ declare_lint_rule! {
         name: "useExponentiationOperator",
         language: "js",
         sources: &[RuleSource::Eslint("prefer-exponentiation-operator")],
-        recommended: false,
-        severity: Severity::Warning,
-        fix_kind: FixKind::Unsafe,
+        recommended: true,
+        severity: Severity::Information,
+        fix_kind: FixKind::Safe,
     }
 }
 

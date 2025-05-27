@@ -9,7 +9,7 @@ use std::{
 /// Limit the size of files to 1.0 MiB by default
 pub const DEFAULT_FILE_SIZE_LIMIT: NonZeroU64 =
     // SAFETY: This constant is initialized with a non-zero value
-    unsafe { NonZeroU64::new_unchecked(1024 * 1024) };
+    NonZeroU64::new(1024 * 1024).unwrap();
 
 #[derive(Clone, Copy, Eq, Merge, PartialEq, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]

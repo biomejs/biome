@@ -1,3 +1,4 @@
+/* should not generate diagnostics */
 foo.call(Object.prototype.hasOwnProperty, Object.prototype.hasOwnProperty.call);
 Object.prototype;
 Object.prototype(obj, prop);

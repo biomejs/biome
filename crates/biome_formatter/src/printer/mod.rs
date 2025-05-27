@@ -827,27 +827,27 @@ enum Indention {
 
 impl Indention {
     const fn is_empty(&self) -> bool {
-        matches!(self, Indention::Level(0))
+        matches!(self, Self::Level(0))
     }
 
     /// Creates a new indention level with a zero-indent.
     const fn new() -> Self {
-        Indention::Level(0)
+        Self::Level(0)
     }
 
     /// Returns the indention level
     fn level(&self) -> u16 {
         match self {
-            Indention::Level(count) => *count,
-            Indention::Align { level: indent, .. } => *indent,
+            Self::Level(count) => *count,
+            Self::Align { level: indent, .. } => *indent,
         }
     }
 
     /// Returns the number of trailing align spaces or 0 if none
     fn align(&self) -> u8 {
         match self {
-            Indention::Level(_) => 0,
-            Indention::Align { align, .. } => (*align).into(),
+            Self::Level(_) => 0,
+            Self::Align { align, .. } => (*align).into(),
         }
     }
 
@@ -860,16 +860,16 @@ impl Indention {
     /// Keeps any  the current value is [Indent::Align] and increments the level by one.
     fn increment_level(self, indent_style: IndentStyle) -> Self {
         match self {
-            Indention::Level(count) => Indention::Level(count + 1),
+            Self::Level(count) => Self::Level(count + 1),
             // Increase the indent AND convert the align to an indent
-            Indention::Align {
+            Self::Align {
                 level, align_count, ..
-            } if indent_style.is_tab() => Indention::Level(level + align_count + 1),
-            Indention::Align {
+            } if indent_style.is_tab() => Self::Level(level + align_count + 1),
+            Self::Align {
                 level: indent,
                 align,
                 align_count,
-            } => Indention::Align {
+            } => Self::Align {
                 level: indent + 1,
                 align,
                 align_count,
@@ -882,18 +882,18 @@ impl Indention {
     /// It increments the `level` value if the current value is [Indent::IndentAlign].
     fn set_align(self, count: NonZeroU8) -> Self {
         match self {
-            Indention::Level(indent_count) => Indention::Align {
+            Self::Level(indent_count) => Self::Align {
                 level: indent_count,
                 align: count,
                 align_count: 1,
             },
 
             // Convert the existing align to an indent
-            Indention::Align {
+            Self::Align {
                 level: indent,
                 align,
                 align_count,
-            } => Indention::Align {
+            } => Self::Align {
                 level: indent,
                 align: align.saturating_add(count.get()),
                 align_count: align_count + 1,
@@ -904,7 +904,7 @@ impl Indention {
 
 impl Default for Indention {
     fn default() -> Self {
-        Indention::new()
+        Self::new()
     }
 }
 
@@ -992,7 +992,7 @@ impl<'a, 'print> FitsMeasurer<'a, 'print> {
                         break;
                     }
 
-                    continue;
+                    {};
                 }
             }
         }
@@ -1376,8 +1376,8 @@ enum Fits {
 impl From<bool> for Fits {
     fn from(value: bool) -> Self {
         match value {
-            true => Fits::Yes,
-            false => Fits::No,
+            true => Self::Yes,
+            false => Self::No,
         }
     }
 }

@@ -1,0 +1,23 @@
+[package]
+authors.workspace    = true
+categories.workspace = true
+description          = "Macros to help implement type resolution"
+edition.workspace    = true
+homepage.workspace   = true
+keywords.workspace   = true
+license.workspace    = true
+name                 = "biome_js_type_info_macros"
+repository.workspace = true
+version              = "0.0.1"
+
+[lib]
+proc-macro = true
+
+[dependencies]
+proc-macro-error2 = { workspace = true }
+proc-macro2       = { workspace = true }
+quote             = { workspace = true }
+syn               = { workspace = true, features = ["extra-traits"] }
+
+[lints]
+workspace = true

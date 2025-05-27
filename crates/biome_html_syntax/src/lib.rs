@@ -1,5 +1,8 @@
+#![deny(clippy::use_self)]
+
 #[macro_use]
 mod generated;
+pub mod element_ext;
 mod file_source;
 mod syntax_node;
 
@@ -14,21 +17,21 @@ use crate::HtmlSyntaxKind::{
 use biome_rowan::{AstNode, RawSyntaxKind, SyntaxKind, TokenText};
 
 impl From<u16> for HtmlSyntaxKind {
-    fn from(d: u16) -> HtmlSyntaxKind {
-        assert!(d <= (HtmlSyntaxKind::__LAST as u16));
-        unsafe { std::mem::transmute::<u16, HtmlSyntaxKind>(d) }
+    fn from(d: u16) -> Self {
+        assert!(d <= (Self::__LAST as u16));
+        unsafe { std::mem::transmute::<u16, Self>(d) }
     }
 }
 
 impl From<HtmlSyntaxKind> for u16 {
-    fn from(k: HtmlSyntaxKind) -> u16 {
-        k as u16
+    fn from(k: HtmlSyntaxKind) -> Self {
+        k as Self
     }
 }
 
 impl HtmlSyntaxKind {
     pub fn is_comments(self) -> bool {
-        matches!(self, HtmlSyntaxKind::HTML_COMMENT)
+        matches!(self, Self::HTML_COMMENT)
     }
 
     #[inline]
@@ -38,15 +41,13 @@ impl HtmlSyntaxKind {
 }
 
 impl biome_rowan::SyntaxKind for HtmlSyntaxKind {
-    const TOMBSTONE: Self = HtmlSyntaxKind::TOMBSTONE;
-    const EOF: Self = HtmlSyntaxKind::EOF;
+    const TOMBSTONE: Self = Self::TOMBSTONE;
+    const EOF: Self = Self::EOF;
 
     fn is_bogus(&self) -> bool {
         matches!(
             self,
-            HtmlSyntaxKind::HTML_BOGUS
-                | HtmlSyntaxKind::HTML_BOGUS_ATTRIBUTE
-                | HtmlSyntaxKind::HTML_BOGUS_ELEMENT
+            Self::HTML_BOGUS | Self::HTML_BOGUS_ATTRIBUTE | Self::HTML_BOGUS_ELEMENT
         )
     }
 
@@ -71,19 +72,19 @@ impl biome_rowan::SyntaxKind for HtmlSyntaxKind {
     }
 
     fn is_root(&self) -> bool {
-        matches!(self, HtmlSyntaxKind::HTML_ROOT)
+        matches!(self, Self::HTML_ROOT)
     }
 
     fn is_list(&self) -> bool {
-        HtmlSyntaxKind::is_list(*self)
+        Self::is_list(*self)
     }
 
     fn is_trivia(self) -> bool {
-        matches!(self, HtmlSyntaxKind::NEWLINE | HtmlSyntaxKind::WHITESPACE)
+        matches!(self, Self::NEWLINE | Self::WHITESPACE)
     }
 
     fn to_string(&self) -> Option<&'static str> {
-        HtmlSyntaxKind::to_string(self)
+        Self::to_string(self)
     }
 }
 
@@ -93,13 +94,13 @@ impl TryFrom<HtmlSyntaxKind> for TriviaPieceKind {
     fn try_from(value: HtmlSyntaxKind) -> Result<Self, Self::Error> {
         if value.is_trivia() {
             match value {
-                HtmlSyntaxKind::NEWLINE => Ok(TriviaPieceKind::Newline),
-                HtmlSyntaxKind::WHITESPACE => Ok(TriviaPieceKind::Whitespace),
+                HtmlSyntaxKind::NEWLINE => Ok(Self::Newline),
+                HtmlSyntaxKind::WHITESPACE => Ok(Self::Whitespace),
                 _ => unreachable!("Not Trivia"),
             }
         } else if value.is_comments() {
             match value {
-                HtmlSyntaxKind::HTML_COMMENT => Ok(TriviaPieceKind::SingleLineComment),
+                HtmlSyntaxKind::HTML_COMMENT => Ok(Self::SingleLineComment),
                 _ => unreachable!("Not Comment"),
             }
         } else {

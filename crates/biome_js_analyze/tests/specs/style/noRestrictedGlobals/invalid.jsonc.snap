@@ -1,7 +1,6 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid.jsonc
-snapshot_kind: text
 ---
 # Input
 ```cjs
@@ -12,7 +11,7 @@ console.log(event);
 ```
 invalid.jsonc:1:13 lint/style/noRestrictedGlobals ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Do not use the global variable event.
+  ! Do not use the global variable event.
   
   > 1 │ console.log(event);
       │             ^^^^^
@@ -31,7 +30,7 @@ console.log(error);
 ```
 invalid.jsonc:1:13 lint/style/noRestrictedGlobals ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Do not use the global variable error.
+  ! Do not use the global variable error.
   
   > 1 │ console.log(error);
       │             ^^^^^

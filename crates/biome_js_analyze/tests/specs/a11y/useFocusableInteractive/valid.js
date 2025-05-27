@@ -1,3 +1,4 @@
+/* should not generate diagnostics */
 <div>
 	<div role="button" tabIndex={0} />
 

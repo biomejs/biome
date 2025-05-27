@@ -87,7 +87,6 @@ impl Rule for NoUnreachable {
                 "This code will never be reached ..."
             },
         )
-        .description("This code is unreachable")
         .unnecessary();
 
         // Pluralize and adapt the error message accordingly based on the
@@ -628,7 +627,7 @@ pub struct UnreachableRanges {
 
 impl UnreachableRanges {
     fn new() -> Self {
-        UnreachableRanges { ranges: Vec::new() }
+        Self { ranges: Vec::new() }
     }
 
     fn push(&mut self, node: &JsSyntaxElement, terminator: Option<PathTerminator>) {

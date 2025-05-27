@@ -8,7 +8,6 @@ use biome_diagnostics::{Diagnostic, DiagnosticExt, Error, Severity, category};
 use biome_fs::{BiomePath, TraversalContext};
 use biome_service::diagnostics::FileTooLarge;
 use biome_service::file_handlers::{AstroFileHandler, SvelteFileHandler, VueFileHandler};
-use std::sync::atomic::Ordering;
 use tracing::{debug, instrument};
 
 #[instrument(name = "cli_format", level = "debug", skip(ctx, path))]
@@ -35,28 +34,31 @@ pub(crate) fn format_with_guard<'ctx>(
     ctx: &'ctx SharedTraversalOptions<'ctx, '_>,
     workspace_file: &mut WorkspaceFile,
 ) -> FileResult {
-    let max_diagnostics = ctx.remaining_diagnostics.load(Ordering::Relaxed);
     let diagnostics_result = workspace_file
         .guard()
         .pull_diagnostics(
             RuleCategoriesBuilder::default().with_syntax().build(),
-            max_diagnostics,
             Vec::new(),
             Vec::new(),
+            false, // NOTE: probably to revisit
         )
         .with_file_path_and_code(workspace_file.path.to_string(), category!("format"))?;
 
     let input = workspace_file.input()?;
     let should_write = ctx.execution.should_write();
-    let ignore_errors = ctx.execution.should_ignore_errors();
+    let skip_parse_errors = ctx.execution.should_skip_parse_errors();
 
     tracing::Span::current().record("should_write", tracing::field::display(&should_write));
-    tracing::Span::current().record("ignore_errors", tracing::field::display(&ignore_errors));
+    tracing::Span::current().record(
+        "skip_parse_errors",
+        tracing::field::display(&skip_parse_errors),
+    );
 
-    if diagnostics_result.errors > 0 && ignore_errors {
-        return Err(Message::from(
+    if diagnostics_result.errors > 0 && skip_parse_errors {
+        ctx.push_message(Message::from(
             SkippedDiagnostic.with_file_path(workspace_file.path.to_string()),
         ));
+        return Ok(FileStatus::Ignored);
     }
 
     ctx.push_message(Message::Diagnostics {
@@ -65,11 +67,13 @@ pub(crate) fn format_with_guard<'ctx>(
         diagnostics: diagnostics_result
             .diagnostics
             .into_iter()
-            .filter_map(|diag| {
-                if diag.severity() >= Severity::Error && ignore_errors {
-                    None
+            // Formatting is usually blocked by errors, so we want to print only diagnostics that
+            // Have error severity
+            .filter_map(|diagnostic| {
+                if diagnostic.severity() >= Severity::Error {
+                    Some(Error::from(diagnostic))
                 } else {
-                    Some(Error::from(diag))
+                    None
                 }
             })
             .collect(),
@@ -82,10 +86,6 @@ pub(crate) fn format_with_guard<'ctx>(
         .with_file_path_and_code(workspace_file.path.to_string(), category!("format"))?;
 
     let mut output = printed.into_code();
-
-    if ignore_errors {
-        return Ok(FileStatus::Ignored);
-    }
 
     match workspace_file.as_extension() {
         Some("astro") => {
@@ -110,10 +110,7 @@ pub(crate) fn format_with_guard<'ctx>(
         _ => {}
     }
 
-    debug!(
-        "Format output is different from intput: {}",
-        output != input
-    );
+    debug!("Format output is different from input: {}", output != input);
     if output != input {
         if should_write {
             workspace_file.update_file(output)?;

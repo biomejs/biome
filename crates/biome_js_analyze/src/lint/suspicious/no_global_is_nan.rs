@@ -33,7 +33,7 @@ declare_lint_rule! {
         name: "noGlobalIsNan",
         language: "js",
         recommended: true,
-        severity: Severity::Error,
+        severity: Severity::Warning,
         fix_kind: FixKind::Unsafe,
     }
 }

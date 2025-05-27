@@ -1,0 +1,172 @@
+---
+source: crates/biome_migrate/tests/spec_tests.rs
+expression: transformed.json
+---
+# Input
+```json
+{
+  "linter": {
+    "rules": {
+      "suspicious": {
+        "noConsoleLog": "error",
+        "useSingleCaseStatement": "error",
+        "useShorthandArrayType": "error",
+        "noNewSymbol": "error",
+        "noInvalidNewBuiltin": "error"
+      }
+    }
+  }
+}
+
+```
+
+# Diagnostics
+```
+transformed.json:5:9 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This lint rule has been renamed to noConsole.
+  
+    3 │     "rules": {
+    4 │       "suspicious": {
+  > 5 │         "noConsoleLog": "error",
+      │         ^^^^^^^^^^^^^^
+    6 │         "useSingleCaseStatement": "error",
+    7 │         "useShorthandArrayType": "error",
+  
+  i Safe fix: Rename the lint rule.
+  
+     3  3 │       "rules": {
+     4  4 │         "suspicious": {
+     5    │ - ········"noConsoleLog":·"error",
+     6    │ - ········"useSingleCaseStatement":·"error",
+     7    │ - ········"useShorthandArrayType":·"error",
+     8    │ - ········"noNewSymbol":·"error",
+     9    │ - ········"noInvalidNewBuiltin":·"error"
+        5 │ + ········"useSingleCaseStatement":·"error",
+        6 │ + ········"useShorthandArrayType":·"error",
+        7 │ + ········"noNewSymbol":·"error",
+        8 │ + ········"noInvalidNewBuiltin":·"error",
+        9 │ + ········"noConsole":·{·"level":·"error",·"options":·{·"allow":·["log"]·}·}
+    10 10 │         }
+    11 11 │       }
+  
+
+```
+
+```
+transformed.json:6:9 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This lint rule has been moved to correctness/noSwitchDeclarations.
+  
+    4 │       "suspicious": {
+    5 │         "noConsoleLog": "error",
+  > 6 │         "useSingleCaseStatement": "error",
+      │         ^^^^^^^^^^^^^^^^^^^^^^^^
+    7 │         "useShorthandArrayType": "error",
+    8 │         "noNewSymbol": "error",
+  
+  i Safe fix: Move and rename the lint rule.
+  
+     4  4 │         "suspicious": {
+     5  5 │           "noConsoleLog": "error",
+     6    │ - ········"useSingleCaseStatement":·"error",
+     7    │ - ········"useShorthandArrayType":·"error",
+     8    │ - ········"noNewSymbol":·"error",
+     9    │ - ········"noInvalidNewBuiltin":·"error"
+    10    │ - ······}
+        6 │ + ········"useShorthandArrayType":·"error",
+        7 │ + ········"noNewSymbol":·"error",
+        8 │ + ········"noInvalidNewBuiltin":·"error"
+        9 │ + ······},
+       10 │ + ······"correctness":·{·"noSwitchDeclarations":·"error"·}
+    11 11 │       }
+    12 12 │     }
+  
+
+```
+
+```
+transformed.json:7:9 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This lint rule has been moved to style/useConsistentArrayType.
+  
+    5 │         "noConsoleLog": "error",
+    6 │         "useSingleCaseStatement": "error",
+  > 7 │         "useShorthandArrayType": "error",
+      │         ^^^^^^^^^^^^^^^^^^^^^^^
+    8 │         "noNewSymbol": "error",
+    9 │         "noInvalidNewBuiltin": "error"
+  
+  i Safe fix: Move and rename the lint rule.
+  
+     5  5 │           "noConsoleLog": "error",
+     6  6 │           "useSingleCaseStatement": "error",
+     7    │ - ········"useShorthandArrayType":·"error",
+     8    │ - ········"noNewSymbol":·"error",
+     9    │ - ········"noInvalidNewBuiltin":·"error"
+    10    │ - ······}
+        7 │ + ········"noNewSymbol":·"error",
+        8 │ + ········"noInvalidNewBuiltin":·"error"
+        9 │ + ······},
+       10 │ + ······"style":·{·"useConsistentArrayType":·{·"level":·"error",·"options":·{·"syntax":·"shorthand"·}·}·}
+    11 11 │       }
+    12 12 │     }
+  
+
+```
+
+```
+transformed.json:8:9 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This lint rule has been moved to correctness/noInvalidBuiltinInstantiation.
+  
+     6 │         "useSingleCaseStatement": "error",
+     7 │         "useShorthandArrayType": "error",
+   > 8 │         "noNewSymbol": "error",
+       │         ^^^^^^^^^^^^^
+     9 │         "noInvalidNewBuiltin": "error"
+    10 │       }
+  
+  i Safe fix: Move and rename the lint rule.
+  
+     6  6 │           "useSingleCaseStatement": "error",
+     7  7 │           "useShorthandArrayType": "error",
+     8    │ - ········"noNewSymbol":·"error",
+     9    │ - ········"noInvalidNewBuiltin":·"error"
+    10    │ - ······}
+        8 │ + ········"noInvalidNewBuiltin":·"error"
+        9 │ + ······},
+       10 │ + ······"correctness":·{·"noInvalidBuiltinInstantiation":·"error"·}
+    11 11 │       }
+    12 12 │     }
+  
+
+```
+
+```
+transformed.json:9:9 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This lint rule has been moved to correctness/noInvalidBuiltinInstantiation.
+  
+     7 │         "useShorthandArrayType": "error",
+     8 │         "noNewSymbol": "error",
+   > 9 │         "noInvalidNewBuiltin": "error"
+       │         ^^^^^^^^^^^^^^^^^^^^^
+    10 │       }
+    11 │     }
+  
+  i Safe fix: Move and rename the lint rule.
+  
+     6  6 │           "useSingleCaseStatement": "error",
+     7  7 │           "useShorthandArrayType": "error",
+     8    │ - ········"noNewSymbol":·"error",
+     9    │ - ········"noInvalidNewBuiltin":·"error"
+    10    │ - ······}
+        8 │ + ········"noNewSymbol":·"error"
+        9 │ + ······},
+       10 │ + ······"correctness":·{·"noInvalidBuiltinInstantiation":·"error"·}
+    11 11 │       }
+    12 12 │     }
+  
+
+```

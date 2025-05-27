@@ -208,7 +208,7 @@ if !p.at(T![if]) {
 }
 ```
 
-Why return `ParsedSyntax::Absent`? The function must return `ParsedSyntax::Absent` if the rule can't predict by the next token(s) if they form the expected node or not. Doing so allows the calling rule to decide if this is an error and perform an error recovery if necessary.  The second reason is to ensure that the rule doesn't return a node where all children are missing.
+Why return `ParsedSyntax::Absent`? The function must return `ParsedSyntax::Absent` if the rule can't predict by the next token(s) if they form the expected node or not. Doing so allows the calling rule to decide if this is an error and perform an error recovery if necessary. The second reason is to ensure that the rule doesn't return a node where all children are missing.
 
 Your rule implementation may want to consider more than just the first child to determine if it can parse at least some of the expected children.
 For example, the if statement rule could test if the parser is located at an `else` clause and then create an `if` statement where all children are missing except the `else` clause:
@@ -358,7 +358,7 @@ In these cases the `ParseSeparatedList` and `ParseNodeList` will recover the par
 The conditional syntax allows you to express that some syntax may not be valid in all source files. Some use cases are:
 
 * syntax that is only supported in strict or sloppy mode: for example, `with` statements is not valid when a JavaScript file uses `"use strict"` or is a module;
-* syntax that is only supported in certain file types: Typescript, JSX, modules;
+* syntax that is only supported in certain file types: TypeScript, JSX, modules;
 * syntax that is only available in specific language versions: experimental features, different versions of the language e.g. (ECMA versions for JavaScript);
 
 The idea is that the parser always parses the syntax regardless of whatever it is supported in this specific file or context.

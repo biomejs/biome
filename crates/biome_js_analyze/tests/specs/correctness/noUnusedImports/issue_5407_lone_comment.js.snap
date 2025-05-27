@@ -1,7 +1,6 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: issue_5407_lone_comment.js
-snapshot_kind: text
 ---
 # Input
 ```js
@@ -17,7 +16,7 @@ import x from "jquery";
 ```
 issue_5407_lone_comment.js:5:8 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i This import is unused.
+  ! This import is unused.
   
     3 │  */
     4 │ 

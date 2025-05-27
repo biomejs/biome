@@ -1,3 +1,4 @@
+/* should not generate diagnostics */
 const validExplicit = {
     // Properties with explicit values
     foo: foo,

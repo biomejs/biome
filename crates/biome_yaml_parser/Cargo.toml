@@ -19,10 +19,14 @@ biome_diagnostics   = { workspace = true }
 biome_parser        = { workspace = true }
 biome_rowan         = { workspace = true }
 biome_unicode_table = { workspace = true }
+biome_yaml_factory  = { workspace = true }
 biome_yaml_syntax   = { workspace = true }
 tracing             = { workspace = true }
 
 
 [dev-dependencies]
+biome_test_utils  = { workspace = true }
+insta             = { workspace = true }
 quickcheck        = { workspace = true }
 quickcheck_macros = { workspace = true }
+tests_macros      = { workspace = true }

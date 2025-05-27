@@ -3,7 +3,7 @@ use biome_analyze::{
     Ast, FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
-use biome_diagnostics::Applicability;
+use biome_diagnostics::{Applicability, Severity};
 use biome_js_factory::make::{self, js_binary_expression, token};
 use biome_js_syntax::{
     AnyJsExpression, AnyJsStatement, JsBinaryExpression, JsBinaryOperator, JsLanguage,
@@ -65,6 +65,7 @@ declare_lint_rule! {
         language: "js",
         sources: &[RuleSource::Eslint("yoda")],
         recommended: false,
+        severity: Severity::Information,
         fix_kind: FixKind::Safe,
     }
 }
@@ -364,9 +365,9 @@ fn extract_string_value(expression: AnyJsExpression) -> Option<String> {
     match expression {
         AnyJsExpression::JsUnaryExpression(unary) => match unary.operator() {
             Ok(JsUnaryOperator::Minus) => {
-                let argument = unary.argument().ok()?.to_trimmed_string();
+                let argument = unary.argument().ok()?.to_trimmed_text();
                 let is_numeric_literal = unary.is_signed_numeric_literal().ok()?;
-                is_numeric_literal.then_some(String::from("-") + argument.as_str())
+                is_numeric_literal.then_some(String::from("-") + argument.text())
             }
             _ => None,
         },

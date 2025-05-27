@@ -4,7 +4,7 @@ pub mod linter;
 use crate::analyzer::assist::Actions;
 pub use crate::analyzer::linter::*;
 use biome_analyze::options::RuleOptions;
-use biome_analyze::{FixKind, RuleFilter};
+use biome_analyze::{FixKind, RuleCategory, RuleFilter};
 use biome_deserialize::{
     Deserializable, DeserializableType, DeserializableValue, DeserializationContext, Merge,
 };
@@ -194,9 +194,9 @@ impl<T: Default> From<&RuleConfiguration<T>> for Severity {
 impl From<RulePlainConfiguration> for Severity {
     fn from(conf: RulePlainConfiguration) -> Self {
         match conf {
-            RulePlainConfiguration::Warn => Severity::Warning,
-            RulePlainConfiguration::Error => Severity::Error,
-            RulePlainConfiguration::Info => Severity::Information,
+            RulePlainConfiguration::Warn => Self::Warning,
+            RulePlainConfiguration::Error => Self::Error,
+            RulePlainConfiguration::Info => Self::Information,
             RulePlainConfiguration::Off => {
                 unreachable!("the rule is turned off, it should not step in here")
             }
@@ -209,7 +209,7 @@ impl From<RulePlainConfiguration> for Severity {
 impl From<RuleAssistPlainConfiguration> for Severity {
     fn from(conf: RuleAssistPlainConfiguration) -> Self {
         match conf {
-            RuleAssistPlainConfiguration::On => Severity::Hint,
+            RuleAssistPlainConfiguration::On => Self::Hint,
             RuleAssistPlainConfiguration::Off => {
                 unreachable!("the rule is turned off, it should not step in here")
             }
@@ -427,8 +427,8 @@ impl Debug for RuleSelector {
 impl Display for RuleSelector {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         match self {
-            RuleSelector::Group(group) => write!(f, "{}", group),
-            RuleSelector::Rule(group, rule) => write!(f, "{}/{}", group, rule),
+            Self::Group(group) => write!(f, "{}", group),
+            Self::Rule(group, rule) => write!(f, "{}/{}", group, rule),
         }
     }
 }
@@ -460,12 +460,12 @@ impl RuleSelector {
         if let Some(filter) = filter.strip_prefix("source.biome.") {
             let group = assist::RuleGroup::from_str("source").ok()?;
             let rule_name = Actions::has_rule(group, filter)?;
-            Some(RuleSelector::Rule(group.as_str(), rule_name))
+            Some(Self::Rule(group.as_str(), rule_name))
         } else if let Some(filter) = filter.strip_prefix("quickfix.biome.") {
             let (group, rule_name) = filter.split_once('.')?;
             let group = linter::RuleGroup::from_str(group).ok()?;
             let rule_name = Rules::has_rule(group, rule_name)?;
-            Some(RuleSelector::Rule(group.as_str(), rule_name))
+            Some(Self::Rule(group.as_str(), rule_name))
         } else {
             None
         }
@@ -493,35 +493,94 @@ impl<'a> From<&'a RuleSelector> for RuleFilter<'static> {
 impl FromStr for RuleSelector {
     type Err = &'static str;
     fn from_str(selector: &str) -> Result<Self, Self::Err> {
-        let selector = selector
-            .strip_prefix("lint/")
-            .or_else(|| selector.strip_prefix("assist/"))
-            .unwrap_or(selector);
+        let (selector_kind, selector) = if let Some(lint_selector) = selector.strip_prefix("lint/")
+        {
+            (Some(RuleCategory::Lint), lint_selector)
+        } else if let Some(assist_selector) = selector.strip_prefix("assist/") {
+            (Some(RuleCategory::Action), assist_selector)
+        } else {
+            (None, selector)
+        };
 
-        if let Some((group_name, rule_name)) = selector.split_once('/') {
-            if let Ok(group) = linter::RuleGroup::from_str(group_name) {
-                if let Some(rule_name) = Rules::has_rule(group, rule_name) {
-                    Ok(RuleSelector::Rule(group.as_str(), rule_name))
+        // If `optional_group_name` is set, then `rule_or_group_name` is a group.
+        // Otherwise it is either a rule or a group.
+        let (optional_group_name, rule_or_group_name) =
+            if let Some((group_name, rule_name)) = selector.split_once('/') {
+                (Some(group_name), rule_name)
+            } else {
+                (None, selector)
+            };
+
+        if let Ok(rule_name) = linter::RuleName::from_str(rule_or_group_name) {
+            let static_group_name = rule_name.group().as_str();
+            // TODO: remove the `style/useNamingConvention` exception,
+            // once we have promoted the GraphQL `useNamingConvention` rule.
+            //
+            // See https://github.com/biomejs/biome/issues/6018
+            if optional_group_name.is_none_or(|name| name == static_group_name)
+                || (rule_or_group_name == "useNamingConvention"
+                    && optional_group_name == Some("style"))
+            {
+                if matches!(selector_kind, None | Some(RuleCategory::Lint)) {
+                    // TODO: remove the `style/useNamingConvention` exception,
+                    // once we have promoted the GraphQL `useNamingConvention` rule.
+                    let static_group_name = if rule_or_group_name == "useNamingConvention"
+                        && optional_group_name == Some("style")
+                    {
+                        "style"
+                    } else {
+                        static_group_name
+                    };
+                    Ok(Self::Rule(static_group_name, rule_name.as_str()))
                 } else {
-                    Err("This rule doesn't exist.")
-                }
-            } else if let Ok(group) = assist::RuleGroup::from_str(group_name) {
-                if let Some(rule_name) = Actions::has_rule(group, rule_name) {
-                    Ok(RuleSelector::Rule(group.as_str(), rule_name))
-                } else {
-                    Err("This rule doesn't exist.")
+                    Err(
+                        "This is a lint rule and not an assist rule. Use the `lint/` prefix or remove the prefix.",
+                    )
                 }
             } else {
-                Err("This rule doesn't exist.")
+                Err("This rule is under a different group.")
             }
+        } else if let Ok(rule_name) = assist::ActionName::from_str(rule_or_group_name) {
+            let static_group_name = rule_name.group().as_str();
+            if optional_group_name.is_none_or(|name| name == static_group_name) {
+                if matches!(selector_kind, None | Some(RuleCategory::Action)) {
+                    Ok(Self::Rule(static_group_name, rule_name.as_str()))
+                } else {
+                    Err(
+                        "This is an assist rule and not a lint rule. Use the `assist/` prefix or remove the prefix.",
+                    )
+                }
+            } else {
+                Err("This action is under a different group.")
+            }
+        } else if let Some(group_name) = optional_group_name {
+            Err(if linter::RuleGroup::from_str(group_name).is_ok() {
+                "This rule doesn't exist."
+            } else if assist::RuleGroup::from_str(group_name).is_ok() {
+                "This action doesn't exist."
+            } else {
+                "This rule or action doesn't exist."
+            })
+        } else if let Ok(group) = linter::RuleGroup::from_str(rule_or_group_name) {
+            if matches!(selector_kind, None | Some(RuleCategory::Lint)) {
+                Ok(Self::Group(group.as_str()))
+            } else {
+                Err(
+                    "This is a lint group and not an assist group. Use the `lint/` prefix or remove the prefix.",
+                )
+            }
+        } else if let Ok(group) = assist::RuleGroup::from_str(rule_or_group_name) {
+            if matches!(selector_kind, None | Some(RuleCategory::Action)) {
+                Ok(Self::Group(group.as_str()))
+            } else {
+                Err(
+                    "This is an assist group and not a lint group. Use the `assist/` prefix or remove the prefix.",
+                )
+            }
+        } else if rule_or_group_name.bytes().all(|c| c.is_ascii_lowercase()) {
+            Err("This group doesn't exist.")
         } else {
-            if let Ok(group) = linter::RuleGroup::from_str(selector) {
-                return Ok(RuleSelector::Group(group.as_str()));
-            }
-            if let Ok(group) = assist::RuleGroup::from_str(selector) {
-                return Ok(RuleSelector::Group(group.as_str()));
-            }
-            Err("This group doesn't exist. Use the syntax `<group>/<rule>` to specify a rule.")
+            Err("This rule name or action name doesn't exist.")
         }
     }
 }
@@ -529,8 +588,8 @@ impl FromStr for RuleSelector {
 impl serde::Serialize for RuleSelector {
     fn serialize<S: serde::Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
         match self {
-            RuleSelector::Group(group) => serializer.serialize_str(group),
-            RuleSelector::Rule(group, rule_name) => {
+            Self::Group(group) => serializer.serialize_str(group),
+            Self::Rule(group, rule_name) => {
                 serializer.serialize_str(&format!("{group}/{rule_name}"))
             }
         }
@@ -603,15 +662,15 @@ pub enum SeverityOrGroup<G> {
 impl<G> SeverityOrGroup<G> {
     pub fn unwrap_group(self) -> G {
         match self {
-            SeverityOrGroup::Plain(_) => panic!("Cannot unwrap a plain configuration"),
-            SeverityOrGroup::Group(group) => group,
+            Self::Plain(_) => panic!("Cannot unwrap a plain configuration"),
+            Self::Group(group) => group,
         }
     }
 
     pub fn unwrap_group_as_mut(&mut self) -> &mut G {
         match self {
-            SeverityOrGroup::Plain(_) => panic!("Cannot unwrap a plain configuration"),
-            SeverityOrGroup::Group(group) => group,
+            Self::Plain(_) => panic!("Cannot unwrap a plain configuration"),
+            Self::Group(group) => group,
         }
     }
 }
@@ -650,11 +709,11 @@ pub enum GroupPlainConfiguration {
 impl From<GroupPlainConfiguration> for RulePlainConfiguration {
     fn from(value: GroupPlainConfiguration) -> Self {
         match value {
-            GroupPlainConfiguration::Off => RulePlainConfiguration::Off,
-            GroupPlainConfiguration::On => RulePlainConfiguration::On,
-            GroupPlainConfiguration::Info => RulePlainConfiguration::Info,
-            GroupPlainConfiguration::Warn => RulePlainConfiguration::Warn,
-            GroupPlainConfiguration::Error => RulePlainConfiguration::Error,
+            GroupPlainConfiguration::Off => Self::Off,
+            GroupPlainConfiguration::On => Self::On,
+            GroupPlainConfiguration::Info => Self::Info,
+            GroupPlainConfiguration::Warn => Self::Warn,
+            GroupPlainConfiguration::Error => Self::Error,
         }
     }
 }
@@ -668,14 +727,14 @@ where
         rule_name: &str,
     ) -> Option<(RulePlainConfiguration, Option<RuleOptions>)> {
         match self {
-            SeverityOrGroup::Plain(plain) => Some((RulePlainConfiguration::from(*plain), None)),
-            SeverityOrGroup::Group(group) => group.get_rule_configuration(rule_name),
+            Self::Plain(plain) => Some((RulePlainConfiguration::from(*plain), None)),
+            Self::Group(group) => group.get_rule_configuration(rule_name),
         }
     }
 
     pub(crate) fn get_enabled_rules(&self) -> FxHashSet<RuleFilter<'static>> {
         match self {
-            SeverityOrGroup::Plain(plain) => {
+            Self::Plain(plain) => {
                 let mut filters = FxHashSet::default();
                 match plain {
                     GroupPlainConfiguration::Off => filters,
@@ -688,13 +747,13 @@ where
                     }
                 }
             }
-            SeverityOrGroup::Group(group) => group.get_enabled_rules(),
+            Self::Group(group) => group.get_enabled_rules(),
         }
     }
 
     pub(crate) fn get_disabled_rules(&self) -> FxHashSet<RuleFilter<'static>> {
         match self {
-            SeverityOrGroup::Plain(plain) => {
+            Self::Plain(plain) => {
                 let mut filters = FxHashSet::default();
                 match plain {
                     GroupPlainConfiguration::Off => {
@@ -707,14 +766,14 @@ where
                     | GroupPlainConfiguration::Error => filters,
                 }
             }
-            SeverityOrGroup::Group(group) => group.get_disabled_rules(),
+            Self::Group(group) => group.get_disabled_rules(),
         }
     }
 
     pub(crate) fn set_recommended(&mut self, value: Option<bool>) {
         match self {
-            SeverityOrGroup::Plain(_) => {}
-            SeverityOrGroup::Group(group) => group.set_recommended(value),
+            Self::Plain(_) => {}
+            Self::Group(group) => group.set_recommended(value),
         }
     }
 
@@ -724,14 +783,12 @@ where
         enabled_rules: &mut FxHashSet<RuleFilter<'static>>,
     ) {
         match self {
-            SeverityOrGroup::Plain(plain) => {
+            Self::Plain(plain) => {
                 if *plain != GroupPlainConfiguration::Off {
                     enabled_rules.extend(G::all_rules_as_filters());
                 }
             }
-            SeverityOrGroup::Group(group) => {
-                group.collect_preset_rules(parent_is_recommended, enabled_rules)
-            }
+            Self::Group(group) => group.collect_preset_rules(parent_is_recommended, enabled_rules),
         }
     }
 }
@@ -741,7 +798,7 @@ where
     G: RuleGroupExt,
 {
     fn default() -> Self {
-        SeverityOrGroup::Group(G::default())
+        Self::Group(G::default())
     }
 }
 

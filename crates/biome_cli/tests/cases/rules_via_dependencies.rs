@@ -196,3 +196,57 @@ export default IndexPage;
         result,
     ));
 }
+
+#[test]
+fn doesnt_enable_rules_when_recommended_is_false() {
+    let mut console = BufferConsole::default();
+    let mut fs = TemporaryFs::new("doesnt_enable_rules_when_recommended_is_false");
+    fs.create_file(
+        "package.json",
+        r#"{
+    "dependencies": {
+        "react": "^16.0.0"
+    }
+}
+"#,
+    );
+
+    let content = r#"
+import { useCallback } from "react";
+
+function Component2() {
+    const [local,SetLocal] = useState(0);
+    const handle = useCallback(() => {
+      console.log(local);
+    }, [local, local]);
+}
+    "#;
+    fs.create_file("test.jsx", content);
+
+    fs.create_file(
+        "biome.json",
+        r#"{
+"linter": {
+    "rules": {
+        "recommended": false
+    }
+}
+    }"#,
+    );
+
+    let result = run_cli_with_dyn_fs(
+        Box::new(fs.create_os()),
+        &mut console,
+        Args::from(["lint", fs.cli_path()].as_slice()),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "doesnt_enable_rules_when_recommended_is_false",
+        fs.create_mem(),
+        console,
+        result,
+    ));
+}

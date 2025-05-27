@@ -15,7 +15,9 @@ use crate::reporter::json::{JsonReporter, JsonReporterVisitor};
 use crate::reporter::junit::{JunitReporter, JunitReporterVisitor};
 use crate::reporter::summary::{SummaryReporter, SummaryReporterVisitor};
 use crate::reporter::terminal::{ConsoleReporter, ConsoleReporterVisitor};
-use crate::{CliDiagnostic, CliSession, DiagnosticsPayload, Reporter};
+use crate::{
+    CliDiagnostic, CliSession, DiagnosticsPayload, Reporter, TEMPORARY_INTERNAL_REPORTER_FILE,
+};
 use biome_configuration::analyzer::RuleSelector;
 use biome_console::{ConsoleExt, markup};
 use biome_diagnostics::SerdeJsonError;
@@ -24,8 +26,8 @@ use biome_fs::BiomePath;
 use biome_grit_patterns::GritTargetLanguage;
 use biome_service::projects::ProjectKey;
 use biome_service::workspace::{
-    FeatureName, FeaturesBuilder, FileContent, FixFileMode, FormatFileParams, OpenFileParams,
-    PatternId,
+    CloseFileParams, FeatureName, FeaturesBuilder, FileContent, FixFileMode, FormatFileParams,
+    OpenFileParams, PatternId, ScanKind,
 };
 use camino::{Utf8Path, Utf8PathBuf};
 use std::ffi::OsString;
@@ -76,7 +78,7 @@ impl From<(Utf8PathBuf, String)> for Stdin {
     }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Default, Debug, Clone)]
 pub struct VcsTargeted {
     pub staged: bool,
     pub changed: bool,
@@ -92,8 +94,6 @@ impl From<(bool, bool)> for VcsTargeted {
 pub enum TraversalMode {
     /// This mode is enabled when running the command `biome check`
     Check {
-        /// Key of the project to check.
-        project_key: ProjectKey,
         /// The type of fixes that should be applied when analyzing a file.
         ///
         /// It's [None] if the `check` command is called without `--apply` or `--apply-suggested`
@@ -105,11 +105,15 @@ pub enum TraversalMode {
         stdin: Option<Stdin>,
         /// A flag to know vcs integrated options such as `--staged` or `--changed` are enabled
         vcs_targeted: VcsTargeted,
+
+        /// Whether assist diagnostics should be promoted to error, and fail the CLI
+        enforce_assist: bool,
+
+        /// It skips parse errors
+        skip_parse_errors: bool,
     },
     /// This mode is enabled when running the command `biome lint`
     Lint {
-        /// Key of the project to lint.
-        project_key: ProjectKey,
         /// The type of fixes that should be applied when analyzing a file.
         ///
         /// It's [None] if the `lint` command is called without `--apply` or `--apply-suggested`
@@ -132,22 +136,25 @@ pub enum TraversalMode {
         suppress: bool,
         /// Explanation for suppressing diagnostics with `--suppress` and `--reason`
         suppression_reason: Option<String>,
+
+        /// It skips parse errors
+        skip_parse_errors: bool,
     },
     /// This mode is enabled when running the command `biome ci`
     CI {
-        /// Key of the project to run the CI checks for.
-        project_key: ProjectKey,
         /// Whether the CI is running in a specific environment, e.g. GitHub, GitLab, etc.
         environment: Option<ExecutionEnvironment>,
         /// A flag to know vcs integrated options such as `--staged` or `--changed` are enabled
         vcs_targeted: VcsTargeted,
+        /// Whether assist diagnostics should be promoted to error, and fail the CLI
+        enforce_assist: bool,
+        /// It skips parse errors
+        skip_parse_errors: bool,
     },
     /// This mode is enabled when running the command `biome format`
     Format {
-        /// Key of the project to format.
-        project_key: ProjectKey,
-        /// It ignores parse errors
-        ignore_errors: bool,
+        /// It skips parse errors
+        skip_parse_errors: bool,
         /// It writes the new content on file
         write: bool,
         /// An optional tuple.
@@ -159,8 +166,6 @@ pub enum TraversalMode {
     },
     /// This mode is enabled when running the command `biome migrate`
     Migrate {
-        /// Key of the project to execute the migration in.
-        project_key: ProjectKey,
         /// Write result to disk
         write: bool,
         /// The path to `biome.json`
@@ -169,9 +174,6 @@ pub enum TraversalMode {
     },
     /// This mode is enabled when running the command `biome search`
     Search {
-        /// Key of the project to search in.
-        project_key: ProjectKey,
-
         /// The GritQL pattern to search for.
         ///
         /// Note that the search command does not support rewrites.
@@ -196,36 +198,36 @@ pub enum TraversalMode {
 impl Display for TraversalMode {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         match self {
-            TraversalMode::Check { .. } => write!(f, "check"),
-            TraversalMode::CI { .. } => write!(f, "ci"),
-            TraversalMode::Format { .. } => write!(f, "format"),
-            TraversalMode::Migrate { .. } => write!(f, "migrate"),
-            TraversalMode::Lint { .. } => write!(f, "lint"),
-            TraversalMode::Search { .. } => write!(f, "search"),
+            Self::Check { .. } => write!(f, "check"),
+            Self::CI { .. } => write!(f, "ci"),
+            Self::Format { .. } => write!(f, "format"),
+            Self::Migrate { .. } => write!(f, "migrate"),
+            Self::Lint { .. } => write!(f, "lint"),
+            Self::Search { .. } => write!(f, "search"),
         }
     }
 }
 
 impl TraversalMode {
-    pub fn project_key(&self) -> ProjectKey {
+    /// It returns the best [ScanKind] variant based on the [TraversalMode]
+    pub fn to_scan_kind(&self) -> ScanKind {
         match self {
-            Self::Check { project_key, .. }
-            | Self::CI { project_key, .. }
-            | Self::Format { project_key, .. }
-            | Self::Lint { project_key, .. }
-            | Self::Migrate { project_key, .. }
-            | Self::Search { project_key, .. } => *project_key,
-        }
-    }
-
-    pub fn should_scan_project(&self) -> bool {
-        match self {
-            Self::CI { .. } => true,
-            Self::Check { stdin, .. }
-            | Self::Format { stdin, .. }
-            | Self::Lint { stdin, .. }
-            | Self::Search { stdin, .. } => stdin.is_none(),
-            Self::Migrate { .. } => false,
+            Self::CI { .. } => ScanKind::Project,
+            Self::Format { stdin, .. } => {
+                if stdin.is_none() {
+                    ScanKind::KnownFiles
+                } else {
+                    ScanKind::None
+                }
+            }
+            Self::Check { stdin, .. } | Self::Lint { stdin, .. } | Self::Search { stdin, .. } => {
+                if stdin.is_none() {
+                    ScanKind::Project
+                } else {
+                    ScanKind::None
+                }
+            }
+            Self::Migrate { .. } => ScanKind::None,
         }
     }
 }
@@ -279,7 +281,11 @@ impl Execution {
         }
     }
 
-    pub(crate) fn new_ci(project_key: ProjectKey, vcs_targeted: VcsTargeted) -> Self {
+    pub(crate) fn new_ci(
+        vcs_targeted: VcsTargeted,
+        enforce_assist: bool,
+        skip_parse_errors: bool,
+    ) -> Self {
         // Ref: https://docs.github.com/actions/learn-github-actions/variables#default-environment-variables
         let is_github = std::env::var("GITHUB_ACTIONS")
             .ok()
@@ -288,13 +294,14 @@ impl Execution {
         Self {
             report_mode: ReportMode::default(),
             traversal_mode: TraversalMode::CI {
-                project_key,
                 environment: if is_github {
                     Some(ExecutionEnvironment::GitHub)
                 } else {
                     None
                 },
                 vcs_targeted,
+                enforce_assist,
+                skip_parse_errors,
             },
             max_diagnostics: 20,
         }
@@ -351,6 +358,21 @@ impl Execution {
 
     pub(crate) const fn is_lint(&self) -> bool {
         matches!(self.traversal_mode, TraversalMode::Lint { .. })
+    }
+
+    pub(crate) const fn is_migrate(&self) -> bool {
+        matches!(self.traversal_mode, TraversalMode::Migrate { .. })
+    }
+
+    pub(crate) fn is_stdin(&self) -> bool {
+        match &self.traversal_mode {
+            TraversalMode::Check { stdin, .. } => stdin.is_some(),
+            TraversalMode::Lint { stdin, .. } => stdin.is_some(),
+            TraversalMode::CI { .. } => false,
+            TraversalMode::Format { stdin, .. } => stdin.is_some(),
+            TraversalMode::Migrate { .. } => false,
+            TraversalMode::Search { stdin, .. } => stdin.is_some(),
+        }
     }
 
     #[instrument(level = "debug", skip(self), fields(result))]
@@ -432,11 +454,10 @@ impl Execution {
         }
     }
 
-    pub fn new_format(project_key: ProjectKey, vcs_targeted: VcsTargeted) -> Self {
+    pub fn new_format(vcs_targeted: VcsTargeted) -> Self {
         Self {
             traversal_mode: TraversalMode::Format {
-                project_key,
-                ignore_errors: false,
+                skip_parse_errors: false,
                 write: false,
                 stdin: None,
                 vcs_targeted,
@@ -475,15 +496,34 @@ impl Execution {
     }
 
     #[instrument(level = "debug", skip(self), fields(result))]
-    pub(crate) fn should_ignore_errors(&self) -> bool {
+    pub(crate) fn should_skip_parse_errors(&self) -> bool {
         let result = match self.traversal_mode {
-            TraversalMode::Format { ignore_errors, .. } => ignore_errors,
+            TraversalMode::Format {
+                skip_parse_errors, ..
+            }
+            | TraversalMode::Check {
+                skip_parse_errors, ..
+            }
+            | TraversalMode::Lint {
+                skip_parse_errors, ..
+            }
+            | TraversalMode::CI {
+                skip_parse_errors, ..
+            } => skip_parse_errors,
 
             _ => false,
         };
         tracing::Span::current().record("result", result);
 
         result
+    }
+
+    pub(crate) fn should_enforce_assist(&self) -> bool {
+        match self.traversal_mode {
+            TraversalMode::CI { enforce_assist, .. } => enforce_assist,
+            TraversalMode::Check { enforce_assist, .. } => enforce_assist,
+            _ => false,
+        }
     }
 }
 
@@ -494,7 +534,9 @@ pub fn execute_mode(
     mut session: CliSession,
     cli_options: &CliOptions,
     paths: Vec<OsString>,
-    duration: Option<Duration>,
+    scanner_duration: Option<Duration>,
+    nested_configuration_files: Vec<BiomePath>,
+    project_key: ProjectKey,
 ) -> Result<(), CliDiagnostic> {
     // If a custom reporter was provided, let's lift the limit so users can see all of them
     execution.max_diagnostics = if cli_options.reporter.is_default() {
@@ -509,7 +551,6 @@ pub fn execute_mode(
 
     // migrate command doesn't do any traversal.
     if let TraversalMode::Migrate {
-        project_key,
         write,
         configuration_file_path,
         sub_command,
@@ -520,13 +561,11 @@ pub fn execute_mode(
             project_key,
             write,
             configuration_file_path,
-            verbose: cli_options.verbose,
             sub_command,
+            nested_configuration_files,
         };
         return migrate::run(payload);
     }
-
-    let project_key = execution.traversal_mode.project_key();
 
     // don't do any traversal if there's some content coming from stdin
     if let Some(stdin) = execution.as_stdin_file() {
@@ -544,57 +583,63 @@ pub fn execute_mode(
     let TraverseResult {
         mut summary,
         evaluated_paths,
-        diagnostics,
-    } = traverse(&execution, &mut session, project_key, cli_options, paths)?;
+        mut diagnostics,
+    } = traverse(
+        &execution,
+        &mut session,
+        project_key,
+        cli_options,
+        paths.clone(),
+    )?;
+    diagnostics.sort_by_key(|diagnostic| diagnostic.severity());
     // We join the duration of the scanning with the duration of the traverse.
-    if let Some(duration) = duration {
-        summary.duration += duration;
-    }
+    summary.scanner_duration = scanner_duration;
     let console = session.app.console;
+    let workspace = &*session.app.workspace;
+    let fs = workspace.fs();
     let errors = summary.errors;
     let skipped = summary.skipped;
     let processed = summary.changed + summary.unchanged;
     let should_exit_on_warnings = summary.warnings > 0 && cli_options.error_on_warnings;
+    let diagnostics_payload = DiagnosticsPayload {
+        diagnostic_level: cli_options.diagnostic_level,
+        diagnostics,
+        max_diagnostics: cli_options.max_diagnostics,
+    };
 
     match execution.report_mode {
         ReportMode::Terminal { with_summary } => {
             if with_summary {
                 let reporter = SummaryReporter {
                     summary,
-                    diagnostics_payload: DiagnosticsPayload {
-                        verbose: cli_options.verbose,
-                        diagnostic_level: cli_options.diagnostic_level,
-                        diagnostics,
-                    },
+                    diagnostics_payload,
                     execution: execution.clone(),
+                    verbose: cli_options.verbose,
+                    working_directory: fs.working_directory().clone(),
+                    evaluated_paths,
                 };
                 reporter.write(&mut SummaryReporterVisitor(console))?;
             } else {
                 let reporter = ConsoleReporter {
                     summary,
-                    diagnostics_payload: DiagnosticsPayload {
-                        verbose: cli_options.verbose,
-                        diagnostic_level: cli_options.diagnostic_level,
-                        diagnostics,
-                    },
+                    diagnostics_payload,
                     execution: execution.clone(),
                     evaluated_paths,
+                    verbose: cli_options.verbose,
+                    working_directory: fs.working_directory().clone(),
                 };
                 reporter.write(&mut ConsoleReporterVisitor(console))?;
             }
         }
         ReportMode::Json { pretty } => {
-            console.error(markup!{
+            console.error(markup! {
                     <Warn>"The "<Emphasis>"--json"</Emphasis>" option is "<Underline>"unstable/experimental"</Underline>" and its output might change between patches/minor releases."</Warn>
                 });
             let reporter = JsonReporter {
                 summary,
-                diagnostics: DiagnosticsPayload {
-                    verbose: cli_options.verbose,
-                    diagnostic_level: cli_options.diagnostic_level,
-                    diagnostics,
-                },
+                diagnostics: diagnostics_payload,
                 execution: execution.clone(),
+                verbose: cli_options.verbose,
             };
             let mut buffer = JsonReporterVisitor::new(summary);
             reporter.write(&mut buffer)?;
@@ -604,7 +649,7 @@ pub fn execute_mode(
                         error,
                     )))
                 })?;
-                let report_file = BiomePath::new("_report_output.json");
+                let report_file = BiomePath::new(TEMPORARY_INTERNAL_REPORTER_FILE);
                 session.app.workspace.open_file(OpenFileParams {
                     project_key,
                     content: FileContent::from_client(content),
@@ -619,6 +664,10 @@ pub fn execute_mode(
                 console.log(markup! {
                     {code.as_code()}
                 });
+                session.app.workspace.close_file(CloseFileParams {
+                    project_key,
+                    path: report_file,
+                })?;
             } else {
                 console.log(markup! {
                     {buffer}
@@ -627,23 +676,17 @@ pub fn execute_mode(
         }
         ReportMode::GitHub => {
             let reporter = GithubReporter {
-                diagnostics_payload: DiagnosticsPayload {
-                    verbose: cli_options.verbose,
-                    diagnostic_level: cli_options.diagnostic_level,
-                    diagnostics,
-                },
+                diagnostics_payload,
                 execution: execution.clone(),
+                verbose: cli_options.verbose,
             };
             reporter.write(&mut GithubReporterVisitor(console))?;
         }
         ReportMode::GitLab => {
             let reporter = GitLabReporter {
-                diagnostics: DiagnosticsPayload {
-                    verbose: cli_options.verbose,
-                    diagnostic_level: cli_options.diagnostic_level,
-                    diagnostics,
-                },
+                diagnostics: diagnostics_payload,
                 execution: execution.clone(),
+                verbose: cli_options.verbose,
             };
             reporter.write(&mut GitLabReporterVisitor::new(
                 console,
@@ -653,12 +696,9 @@ pub fn execute_mode(
         ReportMode::Junit => {
             let reporter = JunitReporter {
                 summary,
-                diagnostics_payload: DiagnosticsPayload {
-                    verbose: cli_options.verbose,
-                    diagnostic_level: cli_options.diagnostic_level,
-                    diagnostics,
-                },
+                diagnostics_payload,
                 execution: execution.clone(),
+                verbose: cli_options.verbose,
             };
             reporter.write(&mut JunitReporterVisitor::new(console))?;
         }
@@ -666,7 +706,13 @@ pub fn execute_mode(
 
     // Processing emitted error diagnostics, exit with a non-zero code
     if processed.saturating_sub(skipped) == 0 && !cli_options.no_errors_on_unmatched {
-        Err(CliDiagnostic::no_files_processed())
+        Err(CliDiagnostic::no_files_processed(
+            execution.as_diagnostic_category(),
+            paths
+                .into_iter()
+                .flat_map(|p| p.into_string())
+                .collect::<Vec<_>>(),
+        ))
     } else if errors > 0 || should_exit_on_warnings {
         let category = execution.as_diagnostic_category();
         if should_exit_on_warnings {

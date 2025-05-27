@@ -38,9 +38,9 @@ impl Error for RecoveryError {}
 impl Display for RecoveryError {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         match self {
-            RecoveryError::Eof => write!(f, "EOF"),
-            RecoveryError::AlreadyRecovered => write!(f, "already recovered"),
-            RecoveryError::RecoveryDisabled => write!(f, "recovery disabled"),
+            Self::Eof => write!(f, "EOF"),
+            Self::AlreadyRecovered => write!(f, "already recovered"),
+            Self::RecoveryDisabled => write!(f, "recovery disabled"),
         }
     }
 }

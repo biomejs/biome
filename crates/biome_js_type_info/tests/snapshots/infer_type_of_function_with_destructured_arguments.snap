@@ -1,0 +1,53 @@
+---
+source: crates/biome_js_type_info/tests/utils.rs
+expression: content
+---
+## Input
+
+```ts
+function destruct(
+	{ a, b }: { a: number; b: string },
+	[first, ...rest]: Array<boolean>,
+) {}
+
+```
+
+## Result
+
+```
+sync Function "destruct" {
+  accepts: {
+    params: [
+      required (unnamed): Global TypeId(18) (bindings: a:Global TypeId(18).a,
+      b:Global TypeId(18).b)
+      required (unnamed): Global TypeId(22) (bindings: first:Global TypeId(22)[0],
+      rest:[(1 others)...Global TypeId(22)])
+    ]
+    type_args: []
+  }
+  returns: unknown reference
+}
+```
+
+## Registered types
+
+```
+Global TypeId(17) => string
+
+Global TypeId(18) => Object {
+  prototype: No prototype
+  members: ["a": number, "b": Global TypeId(17)]
+}
+
+Global TypeId(19) => Global TypeId(18).a
+
+Global TypeId(20) => Global TypeId(18).b
+
+Global TypeId(21) => boolean
+
+Global TypeId(22) => instanceof unresolved reference "Array"<Global TypeId(21)>
+
+Global TypeId(23) => Global TypeId(22)[0]
+
+Global TypeId(24) => [(1 others)...Global TypeId(22)]
+```

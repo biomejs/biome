@@ -81,7 +81,7 @@ fn run_invalid_tsconfig(input: &'static str, _: &str, _: &str, _: &str) {
                 input_code.as_str(),
                 JsonParserOptions::default().with_allow_comments(),
             );
-            project.deserialize_tsconfig(&parsed.tree());
+            project.insert_serialized_tsconfig(&parsed.tree());
         }
         _ => {
             panic!("Extension not supported");
@@ -138,7 +138,7 @@ fn run_valid_tsconfig(input: &'static str, _: &str, _: &str, _: &str) {
                 input_code.as_str(),
                 JsonParserOptions::default().with_allow_comments(),
             );
-            project.deserialize_tsconfig(&parsed.tree());
+            project.insert_serialized_tsconfig(&parsed.tree());
         }
         _ => {
             panic!("Extension not supported");
@@ -158,7 +158,7 @@ fn run_valid_tsconfig(input: &'static str, _: &str, _: &str, _: &str) {
     snapshot_result.push_str(&input_code);
     snapshot_result.push_str("\n\n");
     snapshot_result.push_str("## Data structure\n\n");
-    snapshot_result.push_str(&format!("{:#?}", project.tsconfig));
+    snapshot_result.push_str(&format!("{:#?}", project.tsconfig.unwrap()));
 
     insta::with_settings!({
         prepend_module_to_snapshot => false,

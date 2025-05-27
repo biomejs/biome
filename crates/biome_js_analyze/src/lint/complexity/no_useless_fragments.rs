@@ -1,6 +1,7 @@
 use crate::JsRuleAction;
 use crate::react::{jsx_member_name_is_react_fragment, jsx_reference_identifier_is_fragment};
 use crate::services::semantic::Semantic;
+use crate::utils::batch::JsBatchMutation;
 use biome_analyze::context::RuleContext;
 use biome_analyze::{FixKind, Rule, RuleDiagnostic, RuleSource, declare_lint_rule};
 use biome_console::markup;
@@ -85,11 +86,11 @@ declare_node_union! {
 impl NoUselessFragmentsQuery {
     fn replace_node(&self, mutation: &mut BatchMutation<JsLanguage>, new_node: AnyJsxChild) {
         match self {
-            NoUselessFragmentsQuery::JsxFragment(fragment) => {
+            Self::JsxFragment(fragment) => {
                 let old_node = AnyJsxChild::JsxFragment(fragment.clone());
                 mutation.replace_node(old_node, new_node);
             }
-            NoUselessFragmentsQuery::JsxElement(element) => {
+            Self::JsxElement(element) => {
                 let old_node = AnyJsxChild::JsxElement(element.clone());
                 mutation.replace_node(old_node, new_node);
             }
@@ -98,11 +99,11 @@ impl NoUselessFragmentsQuery {
 
     fn remove_node_from_list(&self, mutation: &mut BatchMutation<JsLanguage>) {
         match self {
-            NoUselessFragmentsQuery::JsxFragment(fragment) => {
+            Self::JsxFragment(fragment) => {
                 let old_node = AnyJsxChild::JsxFragment(fragment.clone());
                 mutation.remove_node(old_node);
             }
-            NoUselessFragmentsQuery::JsxElement(element) => {
+            Self::JsxElement(element) => {
                 let old_node = AnyJsxChild::JsxElement(element.clone());
                 mutation.remove_node(old_node);
             }
@@ -111,8 +112,17 @@ impl NoUselessFragmentsQuery {
 
     fn children(&self) -> JsxChildList {
         match self {
-            NoUselessFragmentsQuery::JsxFragment(element) => element.children(),
-            NoUselessFragmentsQuery::JsxElement(element) => element.children(),
+            Self::JsxFragment(element) => element.children(),
+            Self::JsxElement(element) => element.children(),
+        }
+    }
+}
+
+impl From<NoUselessFragmentsQuery> for AnyJsxChild {
+    fn from(value: NoUselessFragmentsQuery) -> Self {
+        match value {
+            NoUselessFragmentsQuery::JsxFragment(fragment) => Self::JsxFragment(fragment),
+            NoUselessFragmentsQuery::JsxElement(element) => Self::JsxElement(element),
         }
     }
 }
@@ -207,8 +217,8 @@ impl Rule for NoUselessFragments {
                             JsSyntaxKind::JSX_TEXT => {
                                 // We need to whitespaces and newlines from the original string.
                                 // Since in the JSX newlines aren't trivia, we require to allocate a string to trim from those characters.
-                                let original_text = child.to_trimmed_string();
-                                let child_text = original_text.trim();
+                                let original_text = child.to_trimmed_text();
+                                let child_text = original_text.text().trim();
 
                                 if (in_jsx_expr || in_js_logical_expr)
                                     && contains_html_character_references(child_text)
@@ -323,14 +333,8 @@ impl Rule for NoUselessFragments {
                 NoUselessFragmentsState::Child(child) => {
                     node.replace_node(&mut mutation, child.clone());
                 }
-                NoUselessFragmentsState::Children(children) => {
-                    if let Some(old_children) = node
-                        .syntax()
-                        .parent()
-                        .and_then(|parent| JsxChildList::cast(parent.clone()))
-                    {
-                        mutation.replace_node(old_children, children.clone());
-                    }
+                NoUselessFragmentsState::Children(_) => {
+                    mutation.replace_jsx_element_with_own_children(&node.clone().into());
                 }
                 _ => {
                     node.remove_node_from_list(&mut mutation);

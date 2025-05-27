@@ -18,31 +18,31 @@ declare_node_union! {
 impl JsObjectPatternLike {
     fn l_curly_token(&self) -> SyntaxResult<JsSyntaxToken> {
         match self {
-            JsObjectPatternLike::JsObjectAssignmentPattern(node) => node.l_curly_token(),
-            JsObjectPatternLike::JsObjectBindingPattern(node) => node.l_curly_token(),
+            Self::JsObjectAssignmentPattern(node) => node.l_curly_token(),
+            Self::JsObjectBindingPattern(node) => node.l_curly_token(),
         }
     }
 
     fn r_curly_token(&self) -> SyntaxResult<JsSyntaxToken> {
         match self {
-            JsObjectPatternLike::JsObjectAssignmentPattern(node) => node.r_curly_token(),
-            JsObjectPatternLike::JsObjectBindingPattern(node) => node.r_curly_token(),
+            Self::JsObjectAssignmentPattern(node) => node.r_curly_token(),
+            Self::JsObjectBindingPattern(node) => node.r_curly_token(),
         }
     }
 
     fn is_empty(&self) -> bool {
         match self {
-            JsObjectPatternLike::JsObjectAssignmentPattern(node) => node.properties().is_empty(),
-            JsObjectPatternLike::JsObjectBindingPattern(node) => node.properties().is_empty(),
+            Self::JsObjectAssignmentPattern(node) => node.properties().is_empty(),
+            Self::JsObjectBindingPattern(node) => node.properties().is_empty(),
         }
     }
 
     fn write_properties(&self, f: &mut JsFormatter) -> FormatResult<()> {
         match self {
-            JsObjectPatternLike::JsObjectAssignmentPattern(node) => {
+            Self::JsObjectAssignmentPattern(node) => {
                 write!(f, [node.properties().format()])
             }
-            JsObjectPatternLike::JsObjectBindingPattern(node) => {
+            Self::JsObjectBindingPattern(node) => {
                 write!(f, [node.properties().format()])
             }
         }
@@ -77,24 +77,22 @@ impl JsObjectPatternLike {
         }
 
         match self {
-            JsObjectPatternLike::JsObjectAssignmentPattern(node) => {
-                node.properties().iter().any(|property| {
-                    if let Ok(
-                        AnyJsObjectAssignmentPatternMember::JsObjectAssignmentPatternProperty(node),
-                    ) = property
-                    {
-                        let pattern = node.pattern();
-                        matches!(
-                            pattern,
-                            Ok(AnyJsAssignmentPattern::JsObjectAssignmentPattern(_)
-                                | AnyJsAssignmentPattern::JsArrayAssignmentPattern(_))
-                        )
-                    } else {
-                        false
-                    }
-                })
-            }
-            JsObjectPatternLike::JsObjectBindingPattern(node) => {
+            Self::JsObjectAssignmentPattern(node) => node.properties().iter().any(|property| {
+                if let Ok(AnyJsObjectAssignmentPatternMember::JsObjectAssignmentPatternProperty(
+                    node,
+                )) = property
+                {
+                    let pattern = node.pattern();
+                    matches!(
+                        pattern,
+                        Ok(AnyJsAssignmentPattern::JsObjectAssignmentPattern(_)
+                            | AnyJsAssignmentPattern::JsArrayAssignmentPattern(_))
+                    )
+                } else {
+                    false
+                }
+            }),
+            Self::JsObjectBindingPattern(node) => {
                 node.properties().iter().any(|property| {
                     if let Ok(AnyJsObjectBindingPatternMember::JsObjectBindingPatternProperty(
                         node,
@@ -102,11 +100,20 @@ impl JsObjectPatternLike {
                     {
                         let pattern = node.pattern();
 
+                        // In Prettier, object patterns with nested object patterns are always
+                        // expanded. However, it is not the case if the nested object pattern is in
+                        // an assignment pattern. Prettier's AST can have an AssignmentPattern as a
+                        // child of an ObjectPattern, while Biome's have an initializer **on** an
+                        // object pattern. Check an initializer is set to ensure it does not have an
+                        // assignment.
+                        // https://github.com/prettier/prettier/blob/2d6877fcd1b78f2624e22d0ddb17a895ab12ac07/src/language-js/print/object.js#L81-L95
+                        let is_assignment_pattern = node.init().is_some();
+
                         matches!(
                             pattern,
                             Ok(AnyJsBindingPattern::JsObjectBindingPattern(_)
                                 | AnyJsBindingPattern::JsArrayBindingPattern(_))
-                        )
+                        ) && !is_assignment_pattern
                     } else {
                         false
                     }
@@ -124,8 +131,8 @@ impl JsObjectPatternLike {
 
     fn is_hug_parameter(&self, comments: &JsComments) -> bool {
         match self {
-            JsObjectPatternLike::JsObjectAssignmentPattern(_) => false,
-            JsObjectPatternLike::JsObjectBindingPattern(binding) => binding
+            Self::JsObjectAssignmentPattern(_) => false,
+            Self::JsObjectBindingPattern(binding) => binding
                 .parent::<AnyJsFormalParameter>()
                 .and_then(|parameter| parameter.syntax().grand_parent())
                 .and_then(FormatAnyJsParameters::cast)

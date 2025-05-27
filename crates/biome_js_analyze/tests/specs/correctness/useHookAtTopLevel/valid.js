@@ -1,3 +1,4 @@
+/* should not generate diagnostics */
 /* does not generate diagnostics */
 
 function Component1({ a }) {
@@ -130,3 +131,15 @@ describe("foo", () => {
   beforeEach(() => jest.useFakeTimers('legacy'));
   afterEach(() => jest.useRealTimers());
 })
+
+class DemoMethod {
+    useHook() {
+        return useMemo(() => "string", []);
+    }
+}
+
+class DemoProperty {
+    useHook = () => {
+        return useMemo(() => "string", []);
+    }
+}

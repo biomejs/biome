@@ -4,7 +4,6 @@ use biome_diagnostics::{Error, Severity};
 use camino::{Utf8Path, Utf8PathBuf};
 pub use memory::{ErrorEntry, MemoryFileSystem};
 pub use os::{OsFileSystem, TemporaryFs};
-use oxc_resolver::{FsResolution, ResolveError};
 use serde::{Deserialize, Serialize};
 use std::collections::BTreeSet;
 use std::fmt::{Debug, Display, Formatter};
@@ -53,21 +52,8 @@ impl PathKind {
 
     pub fn is_symlink(self) -> bool {
         match self {
-            PathKind::File { is_symlink } => is_symlink,
-            PathKind::Directory { is_symlink } => is_symlink,
-        }
-    }
-}
-
-impl From<PathKind> for oxc_resolver::FileMetadata {
-    fn from(kind: PathKind) -> Self {
-        match kind {
-            PathKind::File { is_symlink } => {
-                oxc_resolver::FileMetadata::new(true, false, is_symlink)
-            }
-            PathKind::Directory { is_symlink } => {
-                oxc_resolver::FileMetadata::new(false, true, is_symlink)
-            }
+            Self::File { is_symlink } => is_symlink,
+            Self::Directory { is_symlink } => is_symlink,
         }
     }
 }
@@ -95,7 +81,7 @@ pub trait FileSystem: Send + Sync + RefUnwindSafe {
     /// [Self::path_is_symlink()] and this method to return `true` for the same
     /// path.
     fn path_is_file(&self, path: &Utf8Path) -> bool {
-        Self::path_kind(self, path).is_ok_and(|kind| matches!(kind, PathKind::File { .. }))
+        Self::path_kind(self, path).is_ok_and(PathKind::is_file)
     }
 
     /// Checks if the given path is a directory
@@ -104,28 +90,56 @@ pub trait FileSystem: Send + Sync + RefUnwindSafe {
     /// [Self::path_is_symlink()] and this method to return `true` for the same
     /// path.
     fn path_is_dir(&self, path: &Utf8Path) -> bool {
-        Self::path_kind(self, path).is_ok_and(|kind| matches!(kind, PathKind::Directory { .. }))
+        Self::path_kind(self, path).is_ok_and(PathKind::is_dir)
     }
 
     /// Checks if the given path is a symlink
     fn path_is_symlink(&self, path: &Utf8Path) -> bool {
-        Self::path_kind(self, path).is_ok_and(PathKind::is_symlink)
+        Self::symlink_path_kind(self, path).is_ok_and(PathKind::is_symlink)
     }
 
     /// Returns metadata about the path.
+    ///
+    /// This method follows symlinks.
+    ///
+    /// Errors if the path doesn't exist (including broken symlinks), isn't
+    /// accessible, or if the path points to neither a file or directory.
     fn path_kind(&self, path: &Utf8Path) -> Result<PathKind, FileSystemDiagnostic>;
 
-    /// This method accepts a directory path (`search_dir`) and a file name `search_file`,
+    /// Returns metadata about the path without following symlinks.
     ///
-    /// It looks for `search_file` starting from the given `search_dir`, and then it starts
-    /// navigating upwards the parent directories until it finds a file that matches `search_file` or
-    /// there aren't any more parent folders.
+    /// In other words, it returns the kind of the symlink itself, if it is one.
+    /// If the path is an ordinary file or directory, it still returns its kind.
     ///
-    /// If no file is found, the method returns `None`
+    /// Errors if the path doesn't exist, isn't accessible, or if the path is
+    /// not a file, directory, or symlink.
+    fn symlink_path_kind(&self, path: &Utf8Path) -> Result<PathKind, FileSystemDiagnostic>;
+
+    /// This method accepts a directory path (`search_dir`) and a slice of file
+    /// names (`search_files`),
+    ///
+    /// It looks for `search_files` in the given `search_dir`, and if they're
+    /// not there, it starts navigating upwards to parent directories until it
+    /// finds a file that matches one of the `search_files` in one of those, or
+    /// until there aren't any more parent folders, whichever comes first.
+    ///
+    /// If no file is found, the method returns `None`.
     fn auto_search_files(
         &self,
         search_dir: &Utf8Path,
         search_files: &[&str],
+    ) -> Option<AutoSearchResult> {
+        self.auto_search_files_with_predicate(search_dir, search_files, &mut |_, _| true)
+    }
+
+    /// Same as `auto_search_files()`, but runs a predicate on the path and
+    /// content of any file that matches `search_files` before deciding if it
+    /// really is a match.
+    fn auto_search_files_with_predicate(
+        &self,
+        search_dir: &Utf8Path,
+        search_files: &[&str],
+        predicate: &mut dyn FnMut(&Utf8Path, &str) -> bool,
     ) -> Option<AutoSearchResult> {
         let mut current_search_dir = search_dir.to_path_buf();
         let mut is_searching_in_parent_dir = false;
@@ -134,21 +148,21 @@ pub trait FileSystem: Send + Sync + RefUnwindSafe {
             // Iterate all possible file names
             for file_name in search_files {
                 let file_path = current_search_dir.join(file_name);
-                match self.read_file_from_path(&file_path) {
-                    Ok(content) => {
-                        if is_searching_in_parent_dir {
-                            info!(
-                                "Biome auto discovered the file at the following path that isn't in the working directory:\n{:?}",
-                                current_search_dir
-                            );
-                        }
-                        return Some(AutoSearchResult {
-                            content,
-                            file_path,
-                            directory_path: current_search_dir,
-                        });
+                if let Ok(content) = self.read_file_from_path(&file_path) {
+                    if !predicate(&file_path, &content) {
+                        break;
                     }
-                    _ => continue,
+                    if is_searching_in_parent_dir {
+                        info!(
+                            "Biome auto discovered the file at the following path that isn't in the working directory:\n{:?}",
+                            current_search_dir
+                        );
+                    }
+                    return Some(AutoSearchResult {
+                        content,
+                        file_path,
+                        directory_path: current_search_dir,
+                    });
                 }
             }
 
@@ -212,12 +226,6 @@ pub trait FileSystem: Send + Sync + RefUnwindSafe {
     fn get_changed_files(&self, base: &str) -> io::Result<Vec<String>>;
 
     fn get_staged_files(&self) -> io::Result<Vec<String>>;
-
-    fn resolve_configuration(
-        &self,
-        specifier: &str,
-        path: &Utf8Path,
-    ) -> Result<FsResolution, ResolveError>;
 }
 
 /// Result of the auto search
@@ -412,6 +420,10 @@ where
         T::path_kind(self, path)
     }
 
+    fn symlink_path_kind(&self, path: &Utf8Path) -> Result<PathKind, FileSystemDiagnostic> {
+        T::symlink_path_kind(self, path)
+    }
+
     fn get_changed_files(&self, base: &str) -> io::Result<Vec<String>> {
         T::get_changed_files(self, base)
     }
@@ -422,14 +434,6 @@ where
 
     fn read_link(&self, path: &Utf8Path) -> io::Result<Utf8PathBuf> {
         T::read_link(self, path)
-    }
-
-    fn resolve_configuration(
-        &self,
-        specifier: &str,
-        path: &Utf8Path,
-    ) -> Result<FsResolution, ResolveError> {
-        T::resolve_configuration(self, specifier, path)
     }
 }
 

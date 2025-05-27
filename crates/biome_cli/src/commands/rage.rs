@@ -10,7 +10,8 @@ use biome_console::{
 use biome_diagnostics::termcolor::{ColorChoice, WriteColor};
 use biome_diagnostics::{PrintDescription, termcolor};
 use biome_flags::biome_env;
-use biome_fs::{FileSystem, OsFileSystem};
+use biome_fs::OsFileSystem;
+use biome_resolver::FsWithResolverProxy;
 use biome_service::Workspace;
 use biome_service::configuration::{LoadedConfiguration, load_configuration};
 use biome_service::settings::Settings;
@@ -192,7 +193,7 @@ impl Display for RunningBiomeServer {
 }
 
 struct RageConfiguration<'a> {
-    fs: &'a dyn FileSystem,
+    fs: &'a dyn FsWithResolverProxy,
     formatter: bool,
     linter: bool,
 }
@@ -238,7 +239,13 @@ impl Display for RageConfiguration<'_> {
 
                     let config_path = file_path.as_ref().map_or_else(
                         || directory_path.as_ref().unwrap().as_str(),
-                        |path| path.as_str(),
+                        |path| {
+                            self.fs
+                                .working_directory()
+                                .and_then(|wd| path.strip_prefix(wd).ok())
+                                .unwrap_or(path)
+                                .as_str()
+                        },
                     );
 
                     markup! (

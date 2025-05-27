@@ -24,7 +24,7 @@ import privateFunction2, { fooPrivateVariable as subPrivate2 } from "./sub/foo.j
 ```
 invalid.js:2:10 lint/correctness/noPrivateImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i You may not import a symbol with package visibility from here.
+  ! You may not import a symbol with package visibility from here.
   
     1 │ // Attempt to import a package-private symbol from outside the package.
   > 2 │ import { fooPackageVariable as subPackage } from "./sub/foo.js";
@@ -42,7 +42,7 @@ invalid.js:2:10 lint/correctness/noPrivateImports ━━━━━━━━━━
 ```
 invalid.js:5:10 lint/correctness/noPrivateImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i You may not import a symbol with private visibility from here.
+  ! You may not import a symbol with private visibility from here.
   
     4 │ // Attempt to import a private symbol from outside the package.
   > 5 │ import { fooPrivateVariable as subPrivate } from "./sub/foo.js";
@@ -60,7 +60,7 @@ invalid.js:5:10 lint/correctness/noPrivateImports ━━━━━━━━━━
 ```
 invalid.js:6:10 lint/correctness/noPrivateImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i You may not import a symbol with private visibility from here.
+  ! You may not import a symbol with private visibility from here.
   
     4 │ // Attempt to import a private symbol from outside the package.
     5 │ import { fooPrivateVariable as subPrivate } from "./sub/foo.js";
@@ -79,7 +79,7 @@ invalid.js:6:10 lint/correctness/noPrivateImports ━━━━━━━━━━
 ```
 invalid.js:9:10 lint/correctness/noPrivateImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i You may not import a symbol with private visibility from here.
+  ! You may not import a symbol with private visibility from here.
   
      8 │ // Attempt to import a private symbol from the same package.
    > 9 │ import { fooPrivateVariable } from "./foo.js";
@@ -97,7 +97,7 @@ invalid.js:9:10 lint/correctness/noPrivateImports ━━━━━━━━━━
 ```
 invalid.js:12:8 lint/correctness/noPrivateImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i You may not import a symbol with private visibility from here.
+  ! You may not import a symbol with private visibility from here.
   
     11 │ // Default and combined imports of private symbols are still not allowed
   > 12 │ import privateFunction from "./foo.js";
@@ -115,7 +115,7 @@ invalid.js:12:8 lint/correctness/noPrivateImports ━━━━━━━━━━
 ```
 invalid.js:13:8 lint/correctness/noPrivateImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i You may not import a symbol with private visibility from here.
+  ! You may not import a symbol with private visibility from here.
   
     11 │ // Default and combined imports of private symbols are still not allowed
     12 │ import privateFunction from "./foo.js";
@@ -133,7 +133,7 @@ invalid.js:13:8 lint/correctness/noPrivateImports ━━━━━━━━━━
 ```
 invalid.js:13:28 lint/correctness/noPrivateImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i You may not import a symbol with private visibility from here.
+  ! You may not import a symbol with private visibility from here.
   
     11 │ // Default and combined imports of private symbols are still not allowed
     12 │ import privateFunction from "./foo.js";

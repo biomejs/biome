@@ -19,6 +19,7 @@ pub struct RuleContext<'a, R: Rule> {
     preferred_quote: &'a PreferredQuote,
     preferred_jsx_quote: &'a PreferredQuote,
     jsx_runtime: Option<JsxRuntime>,
+    css_modules: bool,
 }
 
 impl<'a, R> RuleContext<'a, R>
@@ -36,19 +37,21 @@ where
         preferred_quote: &'a PreferredQuote,
         preferred_jsx_quote: &'a PreferredQuote,
         jsx_runtime: Option<JsxRuntime>,
+        css_modules: bool,
     ) -> Result<Self, Error> {
         let rule_key = RuleKey::rule::<R>();
         Ok(Self {
             query_result,
             root,
             bag: services,
-            services: FromServices::from_services(&rule_key, services)?,
+            services: FromServices::from_services(&rule_key, &R::METADATA, services)?,
             globals,
             file_path,
             options,
             preferred_quote,
             preferred_jsx_quote,
             jsx_runtime,
+            css_modules,
         })
     }
 
@@ -174,6 +177,10 @@ where
     /// Returns the preferred JSX quote that should be used when providing code actions
     pub fn as_preferred_jsx_quote(&self) -> &PreferredQuote {
         self.preferred_jsx_quote
+    }
+
+    pub fn is_css_modules(&self) -> bool {
+        self.css_modules
     }
 
     /// Attempts to retrieve a service from the current context

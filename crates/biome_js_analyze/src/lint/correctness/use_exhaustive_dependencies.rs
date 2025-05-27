@@ -161,7 +161,7 @@ declare_lint_rule! {
     ///
     /// function component() {
     ///     let a = 1;
-    ///     // biome-ignore lint/correctness/useExhaustiveDependencies(a): <explanation>
+    ///     // biome-ignore lint/correctness/useExhaustiveDependencies(a): suppress dependency a
     ///     useEffect(() => {
     ///         console.log(a);
     ///     }, []);
@@ -173,7 +173,7 @@ declare_lint_rule! {
     ///
     /// ## Options
     ///
-    /// Allows to specify custom hooks - from libraries or internal projects -
+    /// Allows specifying custom hooks - from libraries or internal projects -
     /// for which dependencies should be checked and/or which are known to have
     /// stable return values.
     ///
@@ -261,20 +261,21 @@ declare_lint_rule! {
 
 #[derive(Debug, Clone)]
 pub struct HookConfigMaps {
-    pub(crate) hooks_config: FxHashMap<String, ReactHookConfiguration>,
+    pub(crate) hooks_config: FxHashMap<Box<str>, ReactHookConfiguration>,
     pub(crate) stable_config: FxHashSet<StableReactHookConfiguration>,
 }
 
 impl Default for HookConfigMaps {
     fn default() -> Self {
-        let hooks_config = FxHashMap::from_iter([
-            ("useEffect".to_string(), (0, 1, true).into()),
-            ("useLayoutEffect".to_string(), (0, 1, true).into()),
-            ("useInsertionEffect".to_string(), (0, 1, true).into()),
-            ("useCallback".to_string(), (0, 1, true).into()),
-            ("useMemo".to_string(), (0, 1, true).into()),
-            ("useImperativeHandle".to_string(), (1, 2, true).into()),
-        ]);
+        let hooks_config: std::collections::HashMap<Box<str>, _, rustc_hash::FxBuildHasher> =
+            FxHashMap::from_iter([
+                ("useEffect".into(), (0, 1, true).into()),
+                ("useLayoutEffect".into(), (0, 1, true).into()),
+                ("useInsertionEffect".into(), (0, 1, true).into()),
+                ("useCallback".into(), (0, 1, true).into()),
+                ("useMemo".into(), (0, 1, true).into()),
+                ("useImperativeHandle".into(), (1, 2, true).into()),
+            ]);
 
         let stable_config = FxHashSet::from_iter([
             StableReactHookConfiguration::new("useState", StableHookResult::Indices(vec![1]), true),
@@ -338,7 +339,7 @@ fn report_unnecessary_dependencies_default() -> bool {
 pub struct Hook {
     /// The name of the hook.
     #[deserializable(validate = "non_empty")]
-    pub name: String,
+    pub name: Box<str>,
 
     /// The "position" of the closure function, starting from zero.
     ///
@@ -391,7 +392,7 @@ impl DeserializableValidator for Hook {
 
 impl HookConfigMaps {
     pub fn new(hooks: &UseExhaustiveDependenciesOptions) -> Self {
-        let mut result = HookConfigMaps::default();
+        let mut result = Self::default();
         for hook in &hooks.hooks {
             if let Some(stable_result) = &hook.stable_result {
                 if *stable_result != StableHookResult::None {
@@ -514,6 +515,7 @@ fn capture_needs_to_be_in_the_dependency_list(
         | AnyJsBindingDeclaration::TsEnumDeclaration(_)
         | AnyJsBindingDeclaration::TsTypeAliasDeclaration(_)
         | AnyJsBindingDeclaration::TsInterfaceDeclaration(_)
+        | AnyJsBindingDeclaration::TsExternalModuleDeclaration(_)
         | AnyJsBindingDeclaration::TsModuleDeclaration(_)
         | AnyJsBindingDeclaration::TsInferType(_)
         | AnyJsBindingDeclaration::TsMappedType(_)
@@ -839,7 +841,7 @@ impl Rule for UseExhaustiveDependencies {
                                 function_name_range: result.function_name_range,
                                 capture_range: capture.text_trimmed_range(),
                                 dependency_range: dep.syntax().text_trimmed_range(),
-                                dependency_text: dep.syntax().text_trimmed().to_string().into(),
+                                dependency_text: dep.syntax().text_trimmed().into_text().into(),
                             });
                         }
                         _ => {}
@@ -852,7 +854,7 @@ impl Rule for UseExhaustiveDependencies {
 
                 if !is_captured_covered {
                     let captures = add_deps
-                        .entry(capture.text_trimmed().to_string().into())
+                        .entry(capture.text_trimmed().into_text().into())
                         .or_default();
 
                     captures.push(capture.clone());
@@ -930,7 +932,7 @@ impl Rule for UseExhaustiveDependencies {
             Fix::AddDependency { captures, .. } => vec![captures.0.clone()].into(),
             Fix::RemoveDependency { dependencies, .. } => dependencies
                 .iter()
-                .map(|dep| dep.syntax().text_trimmed().to_string().into_boxed_str())
+                .map(|dep| dep.syntax().text_trimmed().into_text().into())
                 .collect::<Vec<_>>()
                 .into_boxed_slice(),
             Fix::DependencyTooUnstable {
@@ -998,8 +1000,8 @@ impl Rule for UseExhaustiveDependencies {
             } => {
                 let deps_joined_with_comma = dependencies
                     .iter()
-                    .map(|dep| dep.syntax().text_trimmed().to_string())
-                    .collect::<Vec<String>>()
+                    .map(|dep| dep.syntax().text_trimmed().into_text().into())
+                    .collect::<Vec<Box<str>>>()
                     .join(", ");
                 let mut diag = RuleDiagnostic::new(
                     rule_category!(),

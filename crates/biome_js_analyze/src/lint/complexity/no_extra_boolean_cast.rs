@@ -60,8 +60,8 @@ declare_lint_rule! {
         language: "js",
         sources: &[RuleSource::Eslint("no-extra-boolean-cast")],
         recommended: true,
-        severity: Severity::Error,
-        fix_kind: FixKind::Unsafe,
+        severity: Severity::Information,
+        fix_kind: FixKind::Safe,
     }
 }
 

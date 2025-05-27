@@ -16,7 +16,7 @@ pub(crate) struct FilenameCaseOptions {
 impl From<FilenameCaseOptions> for use_filenaming_convention::FilenamingConventionOptions {
     fn from(val: FilenameCaseOptions) -> Self {
         let filename_cases: Option<use_filenaming_convention::FilenameCases> = val.cases.into();
-        use_filenaming_convention::FilenamingConventionOptions {
+        Self {
             strict_case: true,
             require_ascii: true,
             matching: None,
@@ -41,10 +41,10 @@ pub(crate) enum FilenameCase {
 impl From<FilenameCase> for use_filenaming_convention::FilenameCase {
     fn from(val: FilenameCase) -> Self {
         match val {
-            FilenameCase::Kebab => use_filenaming_convention::FilenameCase::Kebab,
-            FilenameCase::Camel => use_filenaming_convention::FilenameCase::Camel,
-            FilenameCase::Snake => use_filenaming_convention::FilenameCase::Snake,
-            FilenameCase::Pascal => use_filenaming_convention::FilenameCase::Pascal,
+            FilenameCase::Kebab => Self::Kebab,
+            FilenameCase::Camel => Self::Camel,
+            FilenameCase::Snake => Self::Snake,
+            FilenameCase::Pascal => Self::Pascal,
         }
     }
 }

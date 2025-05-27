@@ -1,9 +1,0 @@
-{
-  "linter": {
-    "rules": {
-      "nursery": {
-        "oldName": "error"
-      }
-    }
-  }
-}

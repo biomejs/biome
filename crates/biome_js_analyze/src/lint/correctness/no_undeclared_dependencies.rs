@@ -1,14 +1,18 @@
-use biome_analyze::{Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule};
+use biome_analyze::{
+    Rule, RuleDiagnostic, RuleDomain, RuleSource, context::RuleContext, declare_lint_rule,
+};
 use biome_console::markup;
 use biome_deserialize::{
     Deserializable, DeserializableType, DeserializableValue, DeserializationContext,
 };
 use biome_deserialize_macros::Deserializable;
+use biome_diagnostics::Severity;
 use biome_js_syntax::{AnyJsImportClause, AnyJsImportLike};
+use biome_resolver::is_builtin_node_module;
 use biome_rowan::AstNode;
-use camino::Utf8Path;
+use camino::{Utf8Path, Utf8PathBuf};
 
-use crate::{globals::is_node_builtin_module, services::manifest::Manifest};
+use crate::services::manifest::Manifest;
 
 declare_lint_rule! {
     /// Disallow the use of dependencies that aren't specified in the `package.json`.
@@ -83,6 +87,8 @@ declare_lint_rule! {
             RuleSource::EslintImport("no-extraneous-dependencies"),
         ],
         recommended: false,
+        severity: Severity::Error,
+        domains: &[RuleDomain::Project],
     }
 }
 
@@ -192,7 +198,7 @@ pub struct NoUndeclaredDependenciesOptions {
 }
 
 pub struct RuleState {
-    package_name: String,
+    package_name: Box<str>,
     is_dev_dependency_available: bool,
     is_peer_dependency_available: bool,
     is_optional_dependency_available: bool,
@@ -231,7 +237,7 @@ impl Rule for NoUndeclaredDependencies {
             // See https://nodejs.org/api/packages.html#self-referencing-a-package-using-its-name
             || ctx.name() == Some(package_name)
             // ignore Node.js builtin modules
-            || is_node_builtin_module(package_name)
+            || is_builtin_node_module(package_name)
             // Ignore `bun` import
             || package_name == "bun"
         {
@@ -252,7 +258,7 @@ impl Rule for NoUndeclaredDependencies {
         }
 
         Some(RuleState {
-            package_name: package_name.to_string(),
+            package_name: package_name.into(),
             is_dev_dependency_available,
             is_peer_dependency_available,
             is_optional_dependency_available,
@@ -277,7 +283,16 @@ impl Rule for NoUndeclaredDependencies {
             ));
         };
 
-        let manifest_path = package_path.clone();
+        let cwd = Utf8PathBuf::from(
+            std::env::current_dir()
+                .map(|cwd| cwd.to_string_lossy().to_string())
+                .unwrap_or_default(),
+        );
+
+        let manifest_path = package_path
+            .strip_prefix(&cwd)
+            .unwrap_or(package_path)
+            .join("package.json");
 
         let diag = RuleDiagnostic::new(
             rule_category!(),

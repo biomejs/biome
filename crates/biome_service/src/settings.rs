@@ -45,7 +45,9 @@ use std::borrow::Cow;
 use std::ops::Deref;
 use tracing::instrument;
 
-/// Global settings for the entire project.
+/// Settings active in a project.
+///
+/// These can be either root settings, or settings for a section of the project.
 #[derive(Clone, Debug, Default)]
 pub struct Settings {
     /// Formatter settings applied to all files in the project.
@@ -68,7 +70,7 @@ pub struct Settings {
 
 impl Settings {
     /// Merges the [Configuration] into the settings.
-    #[tracing::instrument(level = "debug", skip(self))]
+    #[tracing::instrument(level = "debug", skip_all)]
     pub fn merge_with_configuration(
         &mut self,
         configuration: Configuration,
@@ -226,6 +228,10 @@ impl Settings {
         self.linter.is_enabled()
     }
 
+    pub fn linter_recommended_enabled(&self) -> bool {
+        self.linter.recommended_enabled()
+    }
+
     pub fn is_assist_enabled(&self) -> bool {
         self.assist.is_enabled()
     }
@@ -312,6 +318,14 @@ impl LinterSettings {
     pub fn is_enabled(&self) -> bool {
         self.enabled.unwrap_or_default().into()
     }
+
+    pub fn recommended_enabled(&self) -> bool {
+        self.rules
+            .as_ref()
+            .and_then(|rules| rules.recommended)
+            // If there isn't a clear value, we default to true
+            .unwrap_or(true)
+    }
 }
 
 /// Linter settings for the entire workspace
@@ -356,6 +370,12 @@ pub struct OverrideAssistSettings {
     pub actions: Option<Actions>,
 }
 
+/// Files settings for the entire workspace
+#[derive(Clone, Debug, Default)]
+pub struct OverrideFilesSettings {
+    pub max_size: Option<MaxSize>,
+}
+
 /// Static map of language names to language-specific settings
 #[derive(Clone, Debug, Default)]
 pub struct LanguageListSettings {
@@ -369,7 +389,7 @@ pub struct LanguageListSettings {
 
 impl From<JsConfiguration> for LanguageSettings<JsLanguage> {
     fn from(javascript: JsConfiguration) -> Self {
-        let mut language_setting: LanguageSettings<JsLanguage> = LanguageSettings::default();
+        let mut language_setting: Self = Self::default();
 
         if let Some(formatter) = javascript.formatter {
             language_setting.formatter = formatter.into();
@@ -401,7 +421,7 @@ impl From<JsConfiguration> for LanguageSettings<JsLanguage> {
 
 impl From<JsonConfiguration> for LanguageSettings<JsonLanguage> {
     fn from(json: JsonConfiguration) -> Self {
-        let mut language_setting: LanguageSettings<JsonLanguage> = LanguageSettings::default();
+        let mut language_setting: Self = Self::default();
 
         if let Some(parser) = json.parser {
             language_setting.parser = parser.into();
@@ -422,7 +442,7 @@ impl From<JsonConfiguration> for LanguageSettings<JsonLanguage> {
 
 impl From<CssConfiguration> for LanguageSettings<CssLanguage> {
     fn from(css: CssConfiguration) -> Self {
-        let mut language_setting: LanguageSettings<CssLanguage> = LanguageSettings::default();
+        let mut language_setting: Self = Self::default();
 
         if let Some(parser) = css.parser {
             language_setting.parser = parser.into();
@@ -448,7 +468,7 @@ impl From<CssConfiguration> for LanguageSettings<CssLanguage> {
 
 impl From<GraphqlConfiguration> for LanguageSettings<GraphqlLanguage> {
     fn from(graphql: GraphqlConfiguration) -> Self {
-        let mut language_setting: LanguageSettings<GraphqlLanguage> = LanguageSettings::default();
+        let mut language_setting: Self = Self::default();
 
         if let Some(formatter) = graphql.formatter {
             language_setting.formatter = formatter.into();
@@ -468,7 +488,7 @@ impl From<GraphqlConfiguration> for LanguageSettings<GraphqlLanguage> {
 
 impl From<GritConfiguration> for LanguageSettings<GritLanguage> {
     fn from(grit: GritConfiguration) -> Self {
-        let mut language_setting: LanguageSettings<GritLanguage> = LanguageSettings::default();
+        let mut language_setting: Self = Self::default();
         if let Some(formatter) = grit.formatter {
             language_setting.formatter = formatter.into();
         }
@@ -487,7 +507,7 @@ impl From<GritConfiguration> for LanguageSettings<GritLanguage> {
 
 impl From<HtmlConfiguration> for LanguageSettings<HtmlLanguage> {
     fn from(html: HtmlConfiguration) -> Self {
-        let mut language_setting: LanguageSettings<HtmlLanguage> = LanguageSettings::default();
+        let mut language_setting: Self = Self::default();
         if let Some(formatter) = html.formatter {
             language_setting.formatter = formatter.into();
         }
@@ -663,10 +683,9 @@ pub enum VcsIgnoredPatterns {
 }
 
 impl VcsIgnoredPatterns {
-    #[instrument(level = "debug", skip(self, path, is_dir), fields(result))]
     pub fn is_ignored(&self, path: &Utf8Path, is_dir: bool) -> bool {
         match self {
-            VcsIgnoredPatterns::Git { root, nested } => {
+            Self::Git { root, nested } => {
                 root.matched(path, is_dir).is_ignore()
                     || nested.iter().any(|gitignore| {
                         let ignore_directory = if gitignore.path().is_file() {
@@ -681,7 +700,6 @@ impl VcsIgnoredPatterns {
                         } else {
                             false
                         };
-                        tracing::Span::current().record("result", result);
                         result
                     })
             }
@@ -690,7 +708,7 @@ impl VcsIgnoredPatterns {
 
     pub fn insert_git_match(&mut self, git_ignore: Gitignore) {
         match self {
-            VcsIgnoredPatterns::Git { nested, .. } => {
+            Self::Git { nested, .. } => {
                 nested.push(git_ignore);
             }
         }
@@ -731,17 +749,20 @@ pub struct Includes {
     working_directory: Option<Utf8PathBuf>,
     /// If `None`, then all files are included
     /// Otherwise this filtered out all files that doesn't match.
-    globs: Option<Vec<biome_glob::Glob>>,
+    globs: Option<Vec<biome_glob::NormalizedGlob>>,
 }
 impl Includes {
-    fn new(working_directory: Option<Utf8PathBuf>, globs: Option<Vec<biome_glob::Glob>>) -> Self {
+    fn new(
+        working_directory: Option<Utf8PathBuf>,
+        globs: Option<Vec<biome_glob::NormalizedGlob>>,
+    ) -> Self {
         Self {
             working_directory,
             globs,
         }
     }
 
-    pub fn store_globs(&mut self, globs: impl Into<Box<[biome_glob::Glob]>>) {
+    pub fn store_globs(&mut self, globs: impl Into<Box<[biome_glob::NormalizedGlob]>>) {
         let current_globs = self.globs.get_or_insert_default();
         current_globs.extend(globs.into());
     }
@@ -863,7 +884,7 @@ impl WorkspaceSettingsHandle {
     }
 
     /// Resolve the formatting context for the given language
-    #[instrument(level = "debug", skip(file_source))]
+    #[instrument(level = "debug", skip(self, file_source))]
     pub fn format_options<L>(
         &self,
         path: &BiomePath,
@@ -1217,6 +1238,8 @@ pub struct OverrideSettingPattern {
     pub assist: OverrideAssistSettings,
     /// Language specific settings
     pub languages: LanguageListSettings,
+    /// Files specific settings
+    pub files: OverrideFilesSettings,
 }
 
 impl OverrideSettingPattern {
@@ -1369,6 +1392,7 @@ impl OverrideSettingPattern {
         let html_formatter = &self.languages.html.formatter;
         let formatter = &self.formatter;
 
+        // #region global formatter options
         if let Some(indent_style) = html_formatter.indent_style.or(formatter.indent_style) {
             options.set_indent_style(indent_style);
         }
@@ -1381,6 +1405,38 @@ impl OverrideSettingPattern {
         if let Some(line_width) = html_formatter.line_width.or(formatter.line_width) {
             options.set_line_width(line_width);
         }
+
+        if let Some(bracket_same_line) = html_formatter
+            .bracket_same_line
+            .or(formatter.bracket_same_line)
+        {
+            options.set_bracket_same_line(bracket_same_line);
+        }
+
+        if let Some(attribute_position) = html_formatter
+            .attribute_position
+            .or(formatter.attribute_position)
+        {
+            options.set_attribute_position(attribute_position);
+        }
+
+        // #endregion
+
+        // #region HTML formatter options
+
+        if let Some(whitespace_sensitivity) = html_formatter.whitespace_sensitivity {
+            options.set_whitespace_sensitivity(whitespace_sensitivity);
+        }
+
+        if let Some(self_close_void_elements) = html_formatter.self_close_void_elements {
+            options.set_self_close_void_elements(self_close_void_elements);
+        }
+
+        if let Some(indent_script_and_style) = html_formatter.indent_script_and_style {
+            options.set_indent_script_and_style(indent_script_and_style);
+        }
+
+        // #endregion
     }
 
     fn apply_overrides_to_js_parser_options(&self, options: &mut JsParserOptions) {
@@ -1461,6 +1517,13 @@ pub fn to_override_settings(
             })
             .unwrap_or_default();
 
+        let files = pattern
+            .files
+            .map(|files| OverrideFilesSettings {
+                max_size: files.max_size,
+            })
+            .unwrap_or_default();
+
         let mut languages = LanguageListSettings::default();
         let javascript = pattern.javascript.take().unwrap_or_default();
         let json = pattern.json.take().unwrap_or_default();
@@ -1485,6 +1548,7 @@ pub fn to_override_settings(
             linter,
             assist,
             languages,
+            files,
         };
 
         override_settings.patterns.push(pattern_setting);

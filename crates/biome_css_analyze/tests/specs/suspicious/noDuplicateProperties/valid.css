@@ -1,0 +1,48 @@
+/* should not generate diagnostics */
+a {
+    color: pink;
+}
+
+a {
+    color: pink;
+    background: orange;
+}
+
+a { color: pink; { &:hover { color: orange; } } }
+
+a { color: pink; @media { color: orange; } }
+
+a { color: pink; @media { color: orange; &::before { color: black; } } }
+
+a { --custom-property: 0; --custom-property: 1; }
+
+a {
+    @supports (color: pink) {
+        color: pink;
+    }
+}
+
+a {
+    @supports (color: pink) {
+        color: pink;
+        &:hover {
+            color: orange;
+        }
+    }
+}
+
+/* TODO */
+/* @fontface {
+    src: url(font.eof);
+    src: url(font.woff);
+}
+
+@fontface {
+    src: url(font.eof);
+    src: url(font.woff);
+}
+
+@fontface {
+    src: url(font.eof);
+    src: url(font.woff);
+} */

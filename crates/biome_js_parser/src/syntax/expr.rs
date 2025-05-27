@@ -80,7 +80,7 @@ impl ExpressionContextFlags {
     const ALLOW_TS_TYPE_ASSERTION: Self =
         Self(make_bitflags!(ExpressionContextFlag::{AllowTSTypeAssertion}));
 
-    pub fn contains(&self, other: impl Into<ExpressionContextFlags>) -> bool {
+    pub fn contains(&self, other: impl Into<Self>) -> bool {
         self.0.contains(other.into().0)
     }
 }
@@ -89,7 +89,7 @@ impl BitOr for ExpressionContextFlags {
     type Output = Self;
 
     fn bitor(self, rhs: Self) -> Self::Output {
-        ExpressionContextFlags(self.0 | rhs.0)
+        Self(self.0 | rhs.0)
     }
 }
 
@@ -142,7 +142,7 @@ impl ExpressionContext {
 
     /// Adds the `flag` if `set` is `true`, otherwise removes the `flag`
     fn and(self, flag: ExpressionContextFlags, set: bool) -> Self {
-        ExpressionContext(if set { self.0 | flag } else { self.0 - flag })
+        Self(if set { self.0 | flag } else { self.0 - flag })
     }
 }
 
@@ -150,7 +150,7 @@ impl ExpressionContext {
 /// or sub-expression of another expression (the alternate branch of a condition expression).
 impl Default for ExpressionContext {
     fn default() -> Self {
-        ExpressionContext(
+        Self(
             ExpressionContextFlags::INCLUDE_IN
                 | ExpressionContextFlags::ALLOW_OBJECT_EXPRESSION
                 | ExpressionContextFlags::ALLOW_TS_TYPE_ASSERTION,
@@ -456,23 +456,22 @@ pub(super) fn parse_conditional_expr(p: &mut JsParser, context: ExpressionContex
     // foo ? bar :
     let lhs = parse_binary_or_logical_expression(p, OperatorPrecedence::lowest(), context);
 
-    if p.at(T![?]) {
-        lhs.map(|marker| {
-            let m = marker.precede(p);
-            p.bump(T![?]);
-
-            parse_conditional_expr_consequent(p, ExpressionContext::default())
-                .or_add_diagnostic(p, js_parse_error::expected_expression_assignment);
-
-            p.expect(T![:]);
-
-            parse_assignment_expression_or_higher(p, context)
-                .or_add_diagnostic(p, js_parse_error::expected_expression_assignment);
-            m.complete(p, JS_CONDITIONAL_EXPRESSION)
-        })
-    } else {
-        lhs
+    if !p.at(T![?]) {
+        return lhs;
     }
+    lhs.map(|marker| {
+        let m = marker.precede(p);
+        p.bump(T![?]);
+
+        parse_conditional_expr_consequent(p, ExpressionContext::default())
+            .or_add_diagnostic(p, js_parse_error::expected_expression_assignment);
+
+        p.expect(T![:]);
+
+        parse_assignment_expression_or_higher(p, context)
+            .or_add_diagnostic(p, js_parse_error::expected_expression_assignment);
+        m.complete(p, JS_CONDITIONAL_EXPRESSION)
+    })
 }
 
 /// Specialized version of [parse_assignment_expression_or_higher].
@@ -759,6 +758,14 @@ fn parse_member_expression_rest(
                 parse_template_literal(p, m, *in_optional_chain, true)
             }
             T![<] | T![<<] => {
+                // issue case: https://github.com/biomejs/biome/issues/5876
+                if Jsx.is_supported(p)
+                    && matches!(p.nth(0), T![<])
+                    && matches!(p.nth(1), IDENT)
+                    && matches!(p.nth(2), RETURN_KW)
+                {
+                    break;
+                }
                 //  only those two possible token in cur position `parse_ts_type_arguments_in_expression` could possibly return a `Present(_)`
                 if let Present(_) = parse_ts_type_arguments_in_expression(p, context) {
                     let new_marker = lhs.precede(p);

@@ -1,0 +1,254 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidExplicit.ts
+---
+# Input
+```ts
+class InvalidExplicit {
+  public constructor(readonly value: string) {}
+}
+
+class InvalidExplicit2 {
+  x: number;
+  public getX() {
+    return this.x;
+  }
+}
+
+class InvalidExplicit3 {
+  private x: number;
+  getX() {
+    return this.x;
+  }
+}
+
+class InvalidExplicit4 {
+  x?: number;
+  getX?() {
+    return this.x;
+  }
+}
+
+class InvalidExplicit5 {
+  private x: number;
+  constructor(x: number) {
+    this.x = x;
+  }
+  get internalValue() {
+    return this.x;
+  }
+  set internalValue(value: number) {
+    this.x = value;
+  }
+}
+
+class InvalidExplicit6 {
+  x = 2;
+}
+
+class InvalidExplicit7 {
+  constructor(public x: any[]) {}
+}
+
+abstract class InvalidExplicit8 {
+  abstract x: string;
+}
+
+```
+
+# Diagnostics
+```
+invalidExplicit.ts:2:22 lint/style/useConsistentMemberAccessibility ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Missing accessibility modifier on this member.
+  
+    1 │ class InvalidExplicit {
+  > 2 │   public constructor(readonly value: string) {}
+      │                      ^^^^^^^^^^^^^^^^^^^^^^
+    3 │ }
+    4 │ 
+  
+  i Use public to explicitly make a member public.
+  
+
+```
+
+```
+invalidExplicit.ts:6:3 lint/style/useConsistentMemberAccessibility ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Missing accessibility modifier on this member.
+  
+    5 │ class InvalidExplicit2 {
+  > 6 │   x: number;
+      │   ^^^^^^^^^^
+    7 │   public getX() {
+    8 │     return this.x;
+  
+  i Use public to explicitly make a member public.
+  
+
+```
+
+```
+invalidExplicit.ts:14:3 lint/style/useConsistentMemberAccessibility ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Missing accessibility modifier on this member.
+  
+    12 │ class InvalidExplicit3 {
+    13 │   private x: number;
+  > 14 │   getX() {
+       │   ^^^^^^^^
+  > 15 │     return this.x;
+  > 16 │   }
+       │   ^
+    17 │ }
+    18 │ 
+  
+  i Use public to explicitly make a member public.
+  
+
+```
+
+```
+invalidExplicit.ts:20:3 lint/style/useConsistentMemberAccessibility ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Missing accessibility modifier on this member.
+  
+    19 │ class InvalidExplicit4 {
+  > 20 │   x?: number;
+       │   ^^^^^^^^^^^
+    21 │   getX?() {
+    22 │     return this.x;
+  
+  i Use public to explicitly make a member public.
+  
+
+```
+
+```
+invalidExplicit.ts:21:3 lint/style/useConsistentMemberAccessibility ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Missing accessibility modifier on this member.
+  
+    19 │ class InvalidExplicit4 {
+    20 │   x?: number;
+  > 21 │   getX?() {
+       │   ^^^^^^^^^
+  > 22 │     return this.x;
+  > 23 │   }
+       │   ^
+    24 │ }
+    25 │ 
+  
+  i Use public to explicitly make a member public.
+  
+
+```
+
+```
+invalidExplicit.ts:28:3 lint/style/useConsistentMemberAccessibility ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Missing accessibility modifier on this member.
+  
+    26 │ class InvalidExplicit5 {
+    27 │   private x: number;
+  > 28 │   constructor(x: number) {
+       │   ^^^^^^^^^^^^^^^^^^^^^^^^
+  > 29 │     this.x = x;
+  > 30 │   }
+       │   ^
+    31 │   get internalValue() {
+    32 │     return this.x;
+  
+  i Use public to explicitly make a member public.
+  
+
+```
+
+```
+invalidExplicit.ts:31:3 lint/style/useConsistentMemberAccessibility ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Missing accessibility modifier on this member.
+  
+    29 │     this.x = x;
+    30 │   }
+  > 31 │   get internalValue() {
+       │   ^^^^^^^^^^^^^^^^^^^^^
+  > 32 │     return this.x;
+  > 33 │   }
+       │   ^
+    34 │   set internalValue(value: number) {
+    35 │     this.x = value;
+  
+  i Use public to explicitly make a member public.
+  
+
+```
+
+```
+invalidExplicit.ts:34:3 lint/style/useConsistentMemberAccessibility ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Missing accessibility modifier on this member.
+  
+    32 │     return this.x;
+    33 │   }
+  > 34 │   set internalValue(value: number) {
+       │   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 35 │     this.x = value;
+  > 36 │   }
+       │   ^
+    37 │ }
+    38 │ 
+  
+  i Use public to explicitly make a member public.
+  
+
+```
+
+```
+invalidExplicit.ts:40:3 lint/style/useConsistentMemberAccessibility ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Missing accessibility modifier on this member.
+  
+    39 │ class InvalidExplicit6 {
+  > 40 │   x = 2;
+       │   ^^^^^^
+    41 │ }
+    42 │ 
+  
+  i Use public to explicitly make a member public.
+  
+
+```
+
+```
+invalidExplicit.ts:44:3 lint/style/useConsistentMemberAccessibility ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Missing accessibility modifier on this member.
+  
+    43 │ class InvalidExplicit7 {
+  > 44 │   constructor(public x: any[]) {}
+       │   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    45 │ }
+    46 │ 
+  
+  i Use public to explicitly make a member public.
+  
+
+```
+
+```
+invalidExplicit.ts:48:3 lint/style/useConsistentMemberAccessibility ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Missing accessibility modifier on this member.
+  
+    47 │ abstract class InvalidExplicit8 {
+  > 48 │   abstract x: string;
+       │   ^^^^^^^^^^^^^^^^^^^
+    49 │ }
+    50 │ 
+  
+  i Use public to explicitly make a member public.
+  
+
+```

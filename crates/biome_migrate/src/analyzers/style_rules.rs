@@ -10,7 +10,7 @@ use biome_json_factory::make::{
 use biome_json_syntax::{
     AnyJsonValue, JsonMember, JsonMemberList, JsonObjectValue, JsonRoot, JsonSyntaxToken, T,
 };
-use biome_rowan::{AstNode, AstSeparatedList, BatchMutationExt, TriviaPieceKind, WalkEvent};
+use biome_rowan::{AstNode, AstSeparatedList, BatchMutationExt, TriviaPieceKind};
 use rustc_hash::FxHashSet;
 
 declare_migration! {
@@ -20,28 +20,16 @@ declare_migration! {
     }
 }
 
-const STYLE_RULES_THAT_WERE_ERROR: [&str; 22] = [
+const STYLE_RULES_THAT_WERE_ERROR: [&str; 10] = [
     "useNumberNamespace",
-    "noNonNullAssertion",
     "useAsConstAssertion",
     "noParameterAssign",
     "noInferrableTypes",
-    "useNodejsImportProtocol",
-    "useExportType",
     "useDefaultParameterLast",
     "noUnusedTemplateLiteral",
-    "useExponentiationOperator",
     "useEnumInitializers",
-    "useShorthandFunctionType",
-    "useLiteralEnumMembers",
     "noUselessElse",
-    "useNumericLiterals",
-    "noCommaOperator",
-    "useConst",
-    "noArguments",
     "useSelfClosingElements",
-    "useImportType",
-    "useTemplate",
     "useSingleVarDeclarator",
 ];
 
@@ -59,55 +47,48 @@ impl Rule for StyleRules {
             nodes.insert(Box::from(rule));
         }
 
-        let events = node.syntax().preorder();
+        for node in node.syntax().descendants() {
+            let Some(node) = JsonMember::cast(node) else {
+                continue;
+            };
+            let node_text = node
+                .name()
+                .ok()
+                .and_then(|node| node.inner_string_text().ok());
 
-        for event in events {
-            match event {
-                WalkEvent::Enter(node) => {
-                    let Some(node) = JsonMember::cast(node) else {
-                        continue;
-                    };
-                    let node_text = node
-                        .name()
+            let Some(node_text) = node_text else {
+                continue;
+            };
+
+            if node_text == "recommended" {
+                let recommended_disabled = node
+                    .value()
+                    .ok()
+                    .and_then(|n| n.as_json_boolean_value().cloned())
+                    .and_then(|n| n.value_token().ok())
+                    .is_some_and(|n| n.text() == "false");
+                if recommended_disabled {
+                    return vec![];
+                }
+            }
+
+            if node_text == "style" {
+                let list = node
+                    .value()
+                    .ok()
+                    .and_then(|n| n.as_json_object_value().cloned())
+                    .map(|n| n.json_member_list());
+
+                let Some(list) = list else { continue };
+                for item in list {
+                    let member = item
                         .ok()
-                        .and_then(|node| node.inner_string_text().ok());
-
-                    let Some(node_text) = node_text else {
-                        continue;
-                    };
-
-                    if node_text == "recommended" {
-                        let recommended_disabled = node
-                            .value()
-                            .ok()
-                            .and_then(|n| n.as_json_boolean_value().cloned())
-                            .and_then(|n| n.value_token().ok())
-                            .is_some_and(|n| n.text() == "false");
-                        if recommended_disabled {
-                            return vec![];
-                        }
-                    }
-
-                    if node_text == "style" {
-                        let list = node
-                            .value()
-                            .ok()
-                            .and_then(|n| n.as_json_object_value().cloned())
-                            .map(|n| n.json_member_list());
-
-                        let Some(list) = list else { continue };
-                        for item in list {
-                            let member = item
-                                .ok()
-                                .and_then(|n| n.name().ok())
-                                .and_then(|n| n.inner_string_text().ok());
-                            if let Some(node_text) = member {
-                                nodes.remove(&Box::from(node_text.text()));
-                            }
-                        }
+                        .and_then(|n| n.name().ok())
+                        .and_then(|n| n.inner_string_text().ok());
+                    if let Some(node_text) = member {
+                        nodes.remove(&Box::from(node_text.text()));
                     }
                 }
-                WalkEvent::Leave(_) => {}
             }
         }
 
@@ -132,7 +113,7 @@ impl Rule for StyleRules {
         let root = ctx.root();
         let new_rule_member = json_member(
             json_member_name(
-                json_string_literal(rule_to_move.as_ref()).with_leading_trivia(vec![
+                json_string_literal(rule_to_move.as_ref()).with_leading_trivia([
                     (TriviaPieceKind::Newline, "\n"),
                     (TriviaPieceKind::Whitespace, " ".repeat(8).as_str()),
                 ]),
@@ -140,7 +121,7 @@ impl Rule for StyleRules {
             token(T![:]),
             AnyJsonValue::JsonStringValue(json_string_value(
                 json_string_literal("error")
-                    .with_leading_trivia(vec![(TriviaPieceKind::Whitespace, " ")]),
+                    .with_leading_trivia([(TriviaPieceKind::Whitespace, " ")]),
             )),
         );
         let linter_member = get_linter_field(ctx.root());
@@ -159,8 +140,6 @@ impl Rule for StyleRules {
                 create_style_member(list, separators, 6)
             }
         };
-
-        eprintln!("{:#?}", new_styles_member.to_string());
 
         let new_rules_member = match rules_member {
             None => create_rules_member(vec![new_styles_member], vec![], 4),
@@ -225,44 +204,14 @@ fn find_member_by_name(member: &JsonMember, field_name: &str) -> Option<JsonMemb
         .value()
         .ok()?
         .as_json_object_value()?
-        .json_member_list()
-        .iter()
-        .flatten()
-        .find_map(|member| {
-            if member
-                .name()
-                .ok()?
-                .inner_string_text()
-                .ok()
-                .is_some_and(|name| name.text() == field_name)
-            {
-                Some(member)
-            } else {
-                None
-            }
-        })
+        .find_member(field_name)
 }
 
 fn get_linter_field(root: JsonRoot) -> Option<JsonMember> {
     root.value()
         .ok()?
         .as_json_object_value()?
-        .json_member_list()
-        .iter()
-        .flatten()
-        .find_map(|member| {
-            if member
-                .name()
-                .ok()?
-                .inner_string_text()
-                .ok()
-                .is_some_and(|name| name.text() == "linter")
-            {
-                Some(member)
-            } else {
-                None
-            }
-        })
+        .find_member("linter")
 }
 
 fn create_member(text: &str, value: AnyJsonValue, level: usize) -> JsonMember {
@@ -278,9 +227,9 @@ fn create_member(text: &str, value: AnyJsonValue, level: usize) -> JsonMember {
 
 fn create_object(list: JsonMemberList, spaces: usize) -> JsonObjectValue {
     json_object_value(
-        token(T!['{']).with_leading_trivia(vec![(TriviaPieceKind::Whitespace, " ")]),
+        token(T!['{']).with_leading_trivia([(TriviaPieceKind::Whitespace, " ")]),
         list,
-        token(T!['}']).with_leading_trivia(vec![
+        token(T!['}']).with_leading_trivia([
             (TriviaPieceKind::Newline, "\n"),
             (TriviaPieceKind::Whitespace, " ".repeat(spaces).as_str()),
         ]),

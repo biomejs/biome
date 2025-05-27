@@ -1,3 +1,4 @@
+/* should not generate diagnostics */
 <CustomComponent />;
 <CustomComponent aria-activedescendant={someID} />;
 <CustomComponent aria-activedescendant={someID} tabIndex={0} />;

@@ -48,8 +48,8 @@ pub fn is_css_variable(value: &str) -> bool {
 pub fn find_font_family(value: CssGenericComponentValueList) -> Vec<AnyCssValue> {
     let mut font_families: Vec<AnyCssValue> = Vec::new();
     for v in value {
-        let value = v.to_trimmed_string();
-        let lower_case_value = value.to_ascii_lowercase_cow();
+        let value = v.to_trimmed_text();
+        let lower_case_value = value.text().to_ascii_lowercase_cow();
 
         // Ignore CSS variables
         if is_css_variable(&lower_case_value) {
@@ -99,12 +99,12 @@ pub fn find_font_family(value: CssGenericComponentValueList) -> Vec<AnyCssValue>
         }
 
         match v {
-            AnyCssGenericComponentValue::CssGenericDelimiter(_) => continue,
+            AnyCssGenericComponentValue::CssGenericDelimiter(_) => {}
             AnyCssGenericComponentValue::AnyCssValue(css_value) => match css_value {
                 AnyCssValue::CssIdentifier(_) | AnyCssValue::CssString(_) => {
                     font_families.push(css_value)
                 }
-                _ => continue,
+                _ => {}
             },
         }
     }

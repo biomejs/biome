@@ -1,2 +1,3 @@
+/* should not generate diagnostics */
 @import 'foo.css';
 a {}

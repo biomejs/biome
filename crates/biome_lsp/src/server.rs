@@ -8,7 +8,8 @@ use crate::utils::{into_lsp_error, panic_to_lsp_error};
 use crate::{handlers, requests};
 use biome_console::markup;
 use biome_diagnostics::panic::PanicError;
-use biome_fs::{ConfigName, FileSystem, MemoryFileSystem, OsFileSystem};
+use biome_fs::{ConfigName, MemoryFileSystem, OsFileSystem};
+use biome_resolver::FsWithResolverProxy;
 use biome_service::workspace::{
     CloseProjectParams, OpenProjectParams, RageEntry, RageParams, RageResult,
     ServiceDataNotification,
@@ -25,10 +26,10 @@ use std::sync::{Arc, Mutex};
 use tokio::io::{AsyncRead, AsyncWrite};
 use tokio::sync::{Notify, watch};
 use tokio::task::spawn_blocking;
-use tower_lsp::jsonrpc::Result as LspResult;
-use tower_lsp::{ClientSocket, lsp_types::*};
-use tower_lsp::{LanguageServer, LspService, Server};
-use tracing::{error, info, warn};
+use tower_lsp_server::jsonrpc::Result as LspResult;
+use tower_lsp_server::{ClientSocket, UriExt, lsp_types::*};
+use tower_lsp_server::{LanguageServer, LspService, Server};
+use tracing::{error, info, instrument, warn};
 
 pub struct LSPServer {
     pub(crate) session: SessionHandle,
@@ -61,7 +62,10 @@ impl LSPServer {
 
     async fn syntax_tree_request(&self, params: SyntaxTreePayload) -> LspResult<String> {
         let url = params.text_document.uri;
-        requests::syntax_tree::syntax_tree(&self.session, &url).map_err(into_lsp_error)
+        match requests::syntax_tree::syntax_tree(&self.session, &url) {
+            Ok(result) => Ok(result.unwrap_or_default()),
+            Err(err) => Err(into_lsp_error(err)),
+        }
     }
 
     #[tracing::instrument(skip(self), name = "biome/rage", level = "debug")]
@@ -128,7 +132,21 @@ impl LSPServer {
         capabilities.add_capability(
             "biome_did_change_workspace_settings",
             "workspace/didChangeWatchedFiles",
-            if let Some(base_path) = self.session.base_path() {
+            if let Some(folders) = self.session.get_workspace_folders() {
+                let watchers = folders
+                    .iter()
+                    .map(|folder| FileSystemWatcher {
+                        glob_pattern: GlobPattern::String(format!(
+                            "{}/biome.json",
+                            folder.uri.as_str()
+                        )),
+                        kind: Some(WatchKind::all()),
+                    })
+                    .collect();
+                CapabilityStatus::Enable(Some(json!(DidChangeWatchedFilesRegistrationOptions {
+                    watchers
+                })))
+            } else if let Some(base_path) = self.session.base_path() {
                 CapabilityStatus::Enable(Some(json!(DidChangeWatchedFilesRegistrationOptions {
                     watchers: vec![
                         FileSystemWatcher {
@@ -224,7 +242,6 @@ impl LSPServer {
     }
 }
 
-#[tower_lsp::async_trait]
 impl LanguageServer for LSPServer {
     // The `root_path` field is deprecated, but we still read it so we can print a warning about it
     #[expect(deprecated)]
@@ -232,7 +249,6 @@ impl LanguageServer for LSPServer {
         level = "debug",
         skip_all,
         fields(
-            root_uri = params.root_uri.as_ref().map(display),
             capabilities = debug(&params.capabilities),
             client_info = params.client_info.as_ref().map(debug),
             root_path = params.root_path,
@@ -271,7 +287,7 @@ impl LanguageServer for LSPServer {
         Ok(init)
     }
 
-    #[tracing::instrument(level = "debug", skip(self))]
+    #[tracing::instrument(level = "debug", skip_all)]
     async fn initialized(&self, params: InitializedParams) {
         let _ = params;
 
@@ -313,7 +329,7 @@ impl LanguageServer for LSPServer {
             .map(|change| change.uri.to_file_path());
         for file_path in file_paths {
             match file_path {
-                Ok(file_path) => {
+                Some(file_path) => {
                     let base_path = self.session.base_path();
                     if let Some(base_path) = base_path {
                         let possible_biome_json = file_path.strip_prefix(&base_path);
@@ -332,11 +348,10 @@ impl LanguageServer for LSPServer {
                         }
                     }
                 }
-                Err(_) => {
+                None => {
                     error!(
                         "The Workspace root URI {file_path:?} could not be parsed as a filesystem path"
                     );
-                    continue;
                 }
             }
         }
@@ -360,6 +375,7 @@ impl LanguageServer for LSPServer {
             .ok();
     }
 
+    #[instrument(level = "debug", skip_all)]
     async fn did_change_workspace_folders(&self, params: DidChangeWorkspaceFoldersParams) {
         for removed in &params.event.removed {
             if let Some(project_key) = self
@@ -392,13 +408,18 @@ impl LanguageServer for LSPServer {
                     .open_project(OpenProjectParams {
                         path: project_path.clone(),
                         open_uninitialized: true,
+                        only_rules: None,
+                        skip_rules: None,
                     })
                     .map_err(into_lsp_error);
 
                 match result {
-                    Ok(project_key) => {
-                        self.session
-                            .insert_and_scan_project(project_key, project_path.clone());
+                    Ok(result) => {
+                        self.session.insert_and_scan_project(
+                            result.project_key,
+                            project_path.clone(),
+                            result.scan_kind,
+                        );
 
                         self.session.update_all_diagnostics().await;
                     }
@@ -584,7 +605,7 @@ impl ServerFactory {
     }
 
     /// Constructor for use in tests.
-    pub fn new_with_fs(fs: Box<dyn FileSystem>) -> Self {
+    pub fn new_with_fs(fs: Box<dyn FsWithResolverProxy>) -> Self {
         let (watcher_tx, _) = bounded(0);
         let (service_data_tx, service_data_rx) = watch::channel(ServiceDataNotification::Updated);
         Self {
@@ -646,6 +667,7 @@ impl ServerFactory {
         workspace_method!(builder, get_syntax_tree);
         workspace_method!(builder, get_control_flow_graph);
         workspace_method!(builder, get_formatter_ir);
+        workspace_method!(builder, get_type_info);
         workspace_method!(builder, change_file);
         workspace_method!(builder, check_file_size);
         workspace_method!(builder, get_file_content);

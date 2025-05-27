@@ -57,7 +57,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoBitwiseOperators {
-        version: "next",
+        version: "2.0.0",
         name: "noBitwiseOperators",
         language: "js",
         sources: &[
@@ -74,14 +74,14 @@ declare_node_union! {
 impl AnyExpressionWithBitwise {
     fn operator_token(&self) -> Option<JsSyntaxToken> {
         match self {
-            AnyExpressionWithBitwise::JsBinaryExpression(node) => node.operator_token().ok(),
-            AnyExpressionWithBitwise::JsUnaryExpression(node) => node.operator_token().ok(),
-            AnyExpressionWithBitwise::JsAssignmentExpression(node) => node.operator_token().ok(),
+            Self::JsBinaryExpression(node) => node.operator_token().ok(),
+            Self::JsUnaryExpression(node) => node.operator_token().ok(),
+            Self::JsAssignmentExpression(node) => node.operator_token().ok(),
         }
     }
     fn exist_bitwise_op(&self) -> bool {
         match self {
-            AnyExpressionWithBitwise::JsBinaryExpression(binary_expr) => {
+            Self::JsBinaryExpression(binary_expr) => {
                 binary_expr.operator().ok().is_some_and(|op| {
                     matches!(
                         op,
@@ -94,11 +94,11 @@ impl AnyExpressionWithBitwise {
                     )
                 })
             }
-            AnyExpressionWithBitwise::JsUnaryExpression(unary_expr) => unary_expr
+            Self::JsUnaryExpression(unary_expr) => unary_expr
                 .operator()
                 .ok()
                 .is_some_and(|op| op == JsUnaryOperator::BitwiseNot),
-            AnyExpressionWithBitwise::JsAssignmentExpression(assign_expr) => {
+            Self::JsAssignmentExpression(assign_expr) => {
                 assign_expr.operator().ok().is_some_and(|op| {
                     matches!(
                         op,

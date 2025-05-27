@@ -1,0 +1,37 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```cjs
+
+
+function f() {
+	return "lorem ipsum"
+}
+
+```
+
+# Diagnostics
+```
+invalid.js:3:1 lint/suspicious/useStrictMode  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected absence of the directive "use strict".
+  
+  > 3 │ function f() {
+      │ ^^^^^^^^^^^^^^
+  > 4 │ 	return "lorem ipsum"
+  > 5 │ }
+      │ ^
+    6 │ 
+  
+  i Strict mode allows to opt-in some optimisations of the runtime engines, and it eliminates some JavaScript silent errors by changing them to throw errors.
+  
+  i Check the MDN web docs for more information regarding strict mode.
+  
+  i Safe fix: Insert a top level "use strict".
+  
+    1 │ "use·strict";
+      │ +++++++++++++
+
+```

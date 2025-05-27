@@ -1,7 +1,6 @@
 ---
 source: crates/biome_cli/tests/snap_test.rs
-expression: content
-snapshot_kind: text
+expression: redactor(content)
 ---
 ## `index.css`
 
@@ -85,14 +84,14 @@ reporter/parse ━━━━━━━━━━━━━━━━━━━━━�
   
   - index.css
   
-reporter/linter ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+reporter/violations ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Some lint rules were triggered
+  i Some lint rules or assist actions reported some violations.
   
   Rule Name                                        Diagnostics
   
-  lint/correctness/noUnknownFunction               2 (2 error(s), 0 warning(s), 0 info(s))
-  lint/suspicious/noImplicitAnyLet                 12 (12 error(s), 0 warning(s), 0 info(s))
+  lint/correctness/noUnknownFunction               14 (2 error(s), 12 warning(s), 0 info(s))
+  lint/suspicious/noImplicitAnyLet                 16 (12 error(s), 4 warning(s), 0 info(s))
   lint/suspicious/noDoubleEquals                   8 (8 error(s), 0 warning(s), 0 info(s))
   lint/suspicious/noRedeclare                      12 (12 error(s), 0 warning(s), 0 info(s))
   lint/suspicious/noDebugger                       8 (8 error(s), 0 warning(s), 0 info(s))
@@ -102,4 +101,5 @@ reporter/linter ━━━━━━━━━━━━━━━━━━━━━�
 ```block
 Checked 3 files in <TIME>. No fixes applied.
 Found 43 errors.
+Found 16 warnings.
 ```

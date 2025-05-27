@@ -12,7 +12,7 @@ use biome_rowan::TextRange;
 use camino::{Utf8Path, Utf8PathBuf};
 use grit_pattern_matcher::{binding::Binding, pattern::ResolvedPattern};
 use grit_util::{AnalysisLogs, error::GritPatternError};
-use std::{borrow::Cow, fmt::Debug, str::FromStr};
+use std::{borrow::Cow, fmt::Debug, str::FromStr, sync::Arc};
 
 use crate::{AnalyzerPlugin, PluginDiagnostic};
 
@@ -42,25 +42,44 @@ impl AnalyzerGritPlugin {
 }
 
 impl AnalyzerPlugin for AnalyzerGritPlugin {
-    fn evaluate(&self, root: AnyParse, path: Utf8PathBuf) -> Vec<RuleDiagnostic> {
+    fn evaluate(&self, root: AnyParse, path: Arc<Utf8PathBuf>) -> Vec<RuleDiagnostic> {
         let name: &str = self.grit_query.name.as_deref().unwrap_or("anonymous");
 
         let file = GritTargetFile { parse: root, path };
         match self.grit_query.execute(file) {
-            Ok(result) => result
-                .logs
-                .iter()
-                .map(|log| {
-                    RuleDiagnostic::new(
+            Ok(result) => {
+                let mut diagnostics: Vec<_> = result
+                    .logs
+                    .iter()
+                    .map(|log| {
+                        RuleDiagnostic::new(
                         category!("plugin"),
                         log.range.map(from_grit_range),
                         markup!(<Emphasis>{name}</Emphasis>" logged: "<Info>{log.message}</Info>),
                     )
                     .verbose()
-                })
-                .chain(result.diagnostics)
-                .map(|diagnos| diagnos.subcategory(name.to_string()))
-                .collect(),
+                    })
+                    .chain(result.diagnostics)
+                    .map(|diagnostics| diagnostics.subcategory(name.to_string()))
+                    .collect();
+
+                if diagnostics
+                    .iter()
+                    .any(|diagnostic| diagnostic.span().is_none())
+                {
+                    diagnostics.push(RuleDiagnostic::new(
+                        category!("plugin"),
+                        None::<TextRange>,
+                        markup!(
+                            "Plugin "<Emphasis>{name}</Emphasis>" reported one or more diagnostics, "
+                            "but it didn't specify a valid "<Emphasis>"span"</Emphasis>". "
+                            "Diagnostics have been shown without context."
+                        ),
+                    ));
+                }
+
+                diagnostics
+            }
             Err(error) => vec![RuleDiagnostic::new(
                 category!("plugin"),
                 None::<TextRange>,

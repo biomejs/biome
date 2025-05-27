@@ -2,6 +2,8 @@ use super::{eslint_eslint::ShorthandVec, node};
 use crate::CliDiagnostic;
 use crate::diagnostics::MigrationDiagnostic;
 use anyhow::{Context, Error};
+use biome_configuration::HtmlConfiguration;
+use biome_configuration::html::HtmlFormatterConfiguration;
 use biome_configuration::javascript::JsFormatterConfiguration;
 use biome_console::{Console, ConsoleExt, markup};
 use biome_deserialize::json::deserialize_from_json_str;
@@ -11,6 +13,7 @@ use biome_formatter::{
     AttributePosition, BracketSpacing, Expand, IndentWidth, LineEnding, LineWidth, QuoteStyle,
 };
 use biome_fs::{FileSystem, OpenOptions};
+use biome_html_formatter::context::SelfCloseVoidElements;
 use biome_js_formatter::context::{ArrowParentheses, QuoteProperties, Semicolons, TrailingCommas};
 use biome_json_parser::JsonParserOptions;
 use camino::Utf8Path;
@@ -181,10 +184,10 @@ impl From<ArrowParens> for ArrowParentheses {
 impl From<EndOfLine> for LineEnding {
     fn from(value: EndOfLine) -> Self {
         match value {
-            EndOfLine::Lf => LineEnding::Lf,
-            EndOfLine::Crlf => LineEnding::Crlf,
-            EndOfLine::Cr => LineEnding::Cr,
-            EndOfLine::Auto => LineEnding::default(),
+            EndOfLine::Lf => Self::Lf,
+            EndOfLine::Crlf => Self::Crlf,
+            EndOfLine::Cr => Self::Cr,
+            EndOfLine::Auto => Self::default(),
         }
     }
 }
@@ -210,7 +213,7 @@ impl From<ObjectWrap> for Expand {
 impl TryFrom<PrettierConfiguration> for biome_configuration::Configuration {
     type Error = Error;
     fn try_from(value: PrettierConfiguration) -> anyhow::Result<Self> {
-        let mut result = biome_configuration::Configuration::default();
+        let mut result = Self::default();
 
         let line_width = LineWidth::try_from(value.print_width)
             .with_context(|| "top-level Prettier configuration")?;
@@ -276,7 +279,18 @@ impl TryFrom<PrettierConfiguration> for biome_configuration::Configuration {
             formatter: Some(js_formatter),
             ..Default::default()
         };
+        let html_formatter_config = HtmlFormatterConfiguration {
+            self_close_void_elements: Some(SelfCloseVoidElements::Always),
+            ..Default::default()
+        };
+
+        let html_config = HtmlConfiguration {
+            formatter: Some(html_formatter_config),
+            ..Default::default()
+        };
+
         result.javascript = Some(js_config);
+        result.html = Some(html_config);
         if !value.overrides.is_empty() {
             let mut overrides = biome_configuration::Overrides::default();
             for override_elt in value.overrides {
@@ -296,7 +310,7 @@ impl TryFrom<PrettierConfiguration> for biome_configuration::Configuration {
 impl TryFrom<Override> for biome_configuration::OverridePattern {
     type Error = Error;
     fn try_from(Override { files, options }: Override) -> anyhow::Result<Self> {
-        let mut result = biome_configuration::OverridePattern {
+        let mut result = Self {
             includes: Some(biome_configuration::OverrideGlobs::Globs(
                 files
                     .into_iter()

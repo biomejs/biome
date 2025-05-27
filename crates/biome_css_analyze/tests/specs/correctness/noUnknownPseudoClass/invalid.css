@@ -1,0 +1,16 @@
+a:unknown { }
+a:Unknown { }
+a:uNkNoWn { }
+a:UNKNOWN { }
+a:pseudo-class { }
+body:not(div):noot(span) {}
+a:unknown::before { }
+a,
+b > .foo:error { }
+::-webkit-scrollbar-button:horizontal:unknown {}
+:first { }
+:slotted {}
+:placeholder {}
+@page :blank:unknown { }
+@page foo:unknown { }
+:horizontal:decrement {}

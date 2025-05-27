@@ -1,0 +1,26 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `.editorconfig`
+
+```editorconfig
+
+root = on
+
+```
+
+# Termination Message
+
+```block
+.editorconfig:2:8 configuration ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Invalid boolean value: `true` or `false` is expected.
+  
+  > 2 │ root = on
+      │        ^^
+    3 │ 
+  
+
+
+```

@@ -12,7 +12,7 @@ use crate::{
     run_cli_with_server_workspace,
 };
 use biome_console::{BufferConsole, LogLevel, MarkupBuf, markup};
-use biome_fs::{ErrorEntry, FileSystemExt, MemoryFileSystem, OsFileSystem};
+use biome_fs::{ErrorEntry, FileSystemExt, MemoryFileSystem, OsFileSystem, TemporaryFs};
 use bpaf::Args;
 use camino::{Utf8Path, Utf8PathBuf};
 use std::env::temp_dir;
@@ -45,7 +45,7 @@ debugger;
 console.log(a);
 ";
 
-const APPLY_SUGGESTED_AFTER: &str = "let a = 4;\nconsole.log(a);\n";
+const APPLY_SUGGESTED_AFTER: &str = "const a = 4;\nconsole.log(a);\n";
 
 const NO_DEBUGGER_BEFORE: &str = "debugger;\n";
 const NO_DEBUGGER_AFTER: &str = "debugger;\n";
@@ -301,12 +301,12 @@ fn apply_unsafe_with_error() {
     let source = "let a = 4;
 debugger;
 console.log(a);
-function f() { arguments; }
+function _f() { arguments; }
 ";
 
-    let expected = "let a = 4;
+    let expected = "const a = 4;
 console.log(a);
-function f() { arguments; }
+function _f() { arguments; }
 ";
 
     let test1 = Utf8Path::new("test1.js");
@@ -925,14 +925,24 @@ fn fs_error_infinite_symlink_expansion_to_files() {
             .out_buffer
             .iter()
             .flat_map(|msg| msg.content.0.iter())
-            .any(|node| node.content.contains(&symlink1_path.to_string()))
+            .any(|node| node.content.contains(
+                &symlink1_path
+                    .strip_prefix(subdir1_path.as_path())
+                    .unwrap()
+                    .to_string()
+            ))
     );
     assert!(
         console
             .out_buffer
             .iter()
             .flat_map(|msg| msg.content.0.iter())
-            .any(|node| node.content.contains(&symlink2_path.to_string()))
+            .any(|node| node.content.contains(
+                &symlink2_path
+                    .strip_prefix(subdir2_path.as_path())
+                    .unwrap()
+                    .to_string()
+            ))
     );
 }
 
@@ -1831,7 +1841,7 @@ fn check_stdin_write_unsafe_successfully() {
         {message.content}
     });
 
-    assert_eq!(content, "function f() {var x=1; return{x}} class Foo {}");
+    assert_eq!(content, "function _f() {var x=1; return{x}} class Foo {}");
 
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
@@ -1986,8 +1996,6 @@ array.map((sentence) => sentence.split(" ")).flat();
         &mut console,
         Args::from(["lint", file_path.as_str()].as_slice()),
     );
-
-    assert!(result.is_err(), "run_cli returned {result:?}");
 
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
@@ -2795,7 +2803,7 @@ fn lint_only_missing_group() {
         Args::from(["lint", "--only=noDebugger", file_path.as_str()].as_slice()),
     );
 
-    assert!(result.is_err(), "run_cli returned {result:?}");
+    assert!(result.is_ok(), "run_cli returned {result:?}");
 
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
@@ -2898,11 +2906,10 @@ fn lint_only_rule_and_group() {
 fn lint_only_rule_ignore_suppression_comments() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
-    let content = r#"
-        debugger;
-        // biome-ignore lint/performance/noDelete: <explanation>
-        delete obj.prop;
-    "#;
+    let content = r#"debugger;
+// biome-ignore lint/performance/noDelete: <explanation>
+delete obj.prop;
+"#;
 
     let file_path = Utf8Path::new("check.js");
     fs.insert(file_path.into(), content.as_bytes());
@@ -3569,12 +3576,12 @@ fn fix_unsafe_with_error() {
     let source = "let a = 4;
 debugger;
 console.log(a);
-function f() { arguments; }
+function _f() { arguments; }
 ";
 
-    let expected = "let a = 4;
+    let expected = "const a = 4;
 console.log(a);
-function f() { arguments; }
+function _f() { arguments; }
 ";
     let test1 = Utf8Path::new("test1.js");
     fs.insert(test1.into(), source.as_bytes());
@@ -3925,12 +3932,82 @@ fn should_report_when_schema_version_mismatch() {
 }
         "#,
     );
-    let (fs, result) = run_cli(fs, &mut console, Args::from([("check")].as_slice()));
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["check", biome_json.as_str()].as_slice()),
+    );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
         "should_report_when_schema_version_mismatch",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn should_lint_module_in_commonjs_package() {
+    let mut console = BufferConsole::default();
+    let mut fs = TemporaryFs::new("should_lint_module_in_commonjs_package");
+
+    fs.create_file("biome.json", r#"{ "files": { "includes": ["**/*"] } }"#);
+
+    fs.create_file("package.json", r#"{ "type": "commonjs" }"#);
+
+    fs.create_file(
+        "src/file.mjs",
+        r#"import { foo } from "foo";
+var a = foo;
+"#,
+    );
+
+    let result = run_cli_with_dyn_fs(
+        Box::new(fs.create_os()),
+        &mut console,
+        Args::from(["lint", fs.cli_path()].as_slice()),
+    );
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "should_lint_module_in_commonjs_package",
+        fs.create_mem(),
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn lint_skip_parse_errors() {
+    let mut fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let valid = Utf8Path::new("valid.js");
+    let invalid = Utf8Path::new("invalid.js");
+    fs.insert(valid.into(), LINT_ERROR.as_bytes());
+    fs.insert(invalid.into(), PARSE_ERROR.as_bytes());
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(
+            [
+                "lint",
+                "--skip-parse-errors",
+                valid.as_str(),
+                invalid.as_str(),
+            ]
+            .as_slice(),
+        ),
+    );
+
+    assert!(result.is_err(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "lint_skip_parse_errors",
         fs,
         console,
         result,

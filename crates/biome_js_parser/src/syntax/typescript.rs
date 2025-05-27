@@ -34,8 +34,8 @@ pub(crate) enum TsIdentifierContext {
 impl TsIdentifierContext {
     fn is_reserved_word(&self, name: &str) -> bool {
         match self {
-            TsIdentifierContext::Module => is_reserved_module_name(name),
-            TsIdentifierContext::Type => is_reserved_type_name(name),
+            Self::Module => is_reserved_module_name(name),
+            Self::Type => is_reserved_type_name(name),
         }
     }
 }

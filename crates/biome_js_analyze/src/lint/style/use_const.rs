@@ -70,7 +70,7 @@ declare_lint_rule! {
     ///
     /// ```js
     /// let a;
-    /// a; // the variable is read before its assignement
+    /// a; // the variable is read before its assignment
     /// a = 0;
     /// ```
     pub UseConst {
@@ -78,7 +78,7 @@ declare_lint_rule! {
         name: "useConst",
         language: "js",
         sources: &[RuleSource::Eslint("prefer-const")],
-        recommended: false,
+        recommended: true,
         severity: Severity::Warning,
         fix_kind: FixKind::Safe,
     }

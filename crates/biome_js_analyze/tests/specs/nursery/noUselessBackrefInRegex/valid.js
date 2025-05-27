@@ -1,0 +1,95 @@
+/* should not generate diagnostics */
+// no capturing groups
+/(?:)/;
+/(?:a)/;
+/(?:a)|(?:b)*/;
+/^ab|[cd].\n$/;
+
+// no backreferences
+/(a)/;
+/(a)|(b)')/;
+/\n\\d(a)/;
+/\0(a)/;
+/\0(a)/u;
+/(?<=(a))(b)(?=(c))/;
+/(?<!(a))(b)(?!(c))/;
+/(?<foo>a)/;
+
+// not really a backreference
+/\\1(a)/; // escaped backslash
+/\\1(a)/; // escaped backslash
+/\1/; // group 1 doesn't exist, this is a regex octal escape
+/^\1$/; // group 1 doesn't exist, this is a regex octal escape
+/\2(a)/; // group 2 doesn't exist, this is a regex octal escape
+/\1(?:a)/; // group 1 doesn't exist, this is a regex octal escape
+/\1(?=a)/; // group 1 doesn't exist, this is a regex octal escape
+/\1(?!a)/; // group 1 doesn't exist, this is a regex octal escape
+/^[\1](a)$/; // \N in a character class is a regex octal escape
+/[\1](a)/; // \N in a character class is a regex octal escape
+/\11(a)/; // regex octal escape \11, regex matches "\x09a"
+/\k<foo>(a)/; // without the 'u' flag and any named groups this isn't a syntax error, matches "k<foo>a"
+/^(a)\1\2$/; // \1 is a backreference, \2 is an octal escape sequence.
+
+// Valid backreferences: correct position, after the group
+/(a)\1/;
+/(a).\1/;
+/(a)\\1(b)/;
+/(a)(b)\2(c)/;
+/(?<foo>a)\k<foo>/;
+/(.)\\1/;
+/(a)\\1(?:b)/;
+/(a)b\1/;
+/((a)\2)/;
+/((a)b\2c)/;
+/^(?:(a)\1)$/;
+/^((a)\2)$/;
+/^(((a)\3))|b$/;
+/a(?<foo>(.)b\2)/;
+/(a)?(b)*(\1)(c)/;
+/(a)?(b)*(\2)(c)/;
+/(?<=(a))b\1/;
+/(?<=(?=(a)\1))b/;
+
+// Valid backreferences: correct position before the group when they're both in the same lookbehind
+/(?<!\1(a))b/;
+/(?<=\1(a))b/;
+/(?<!\1.(a))b/;
+/(?<=\1.(a))b/;
+/(?<=(?:\1.(a)))b/;
+/(?<!(?:\1)((a)))b/;
+/(?<!(?:\2)((a)))b/;
+/(?=(?<=\1(a)))b/;
+/(?=(?<!\1(a)))b/;
+/(.)(?<=\2(a))b/;
+
+// Valid backreferences: not a reference into another alternative
+/^(a)\1|b/;
+/^a|(b)\1/;
+/^a|(b|c)\1/;
+/^(a)|(b)\2/;
+/^(?:(a)|(b)\2)$/;
+/^a|(?:.|(b)\1)/;
+/^a|(?:.|(b).(\1))/;
+/^a|(?:.|(?:(b)).(\1))/;
+/^a|(?:.|(?:(b)|c).(\1))/;
+/^a|(?:.|(?:(b)).(\1|c))/;
+/^a|(?:.|(?:(b)|c).(\1|d))/;
+
+// Valid backreferences: not a reference into a negative lookaround (reference from within the same lookaround is allowed)
+/.(?=(b))\1/;
+/.(?<=(b))\1/;
+/a(?!(b)\1)./;
+/a(?<!\1(b))./;
+/a(?!(b)(\1))./;
+/a(?!(?:(b)\1))./;
+/a(?!(?:(b))\1)./;
+/a(?<!(?:\1)(b))./;
+/a(?<!(?:(?:\1)(b)))./;
+/(?<!(a))(b)(?!(c))\2/;
+/a(?!(b|c)\1)./;
+
+// ES2024
+/([[A--B]])\1/v;
+
+// ES2025
+/((?<foo>bar)\k<foo>|(?<foo>baz))/;

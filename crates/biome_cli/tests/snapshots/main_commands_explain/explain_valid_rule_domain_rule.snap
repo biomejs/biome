@@ -1,7 +1,6 @@
 ---
 source: crates/biome_cli/tests/snap_test.rs
-expression: content
-snapshot_kind: text
+expression: redactor(content)
 ---
 # Emitted Messages
 
@@ -10,8 +9,9 @@ Summary
 
 - Name: noFocusedTests
 - Fix: unsafe
-- Default severity: error
+- Default severity: warn
 - Available from version: 1.6.0
+- Diagnostic category: lint/suspicious/noFocusedTests
 
 Domains
 
@@ -55,9 +55,17 @@ Invalid
  test.only("foo", () => {});
  ```
 
+ ```js,expect_diagnostic
+ test.only.each([["a"]])("%s", (a) => {});
+ ```
+
 Valid
  ```js
  test("foo", () => {});
+ ```
+
+ ```js
+ test.each([["a"]])("%s", (a) => {});
  ```
 
 ```

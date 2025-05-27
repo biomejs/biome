@@ -85,7 +85,7 @@ declare_lint_rule! {
         sources: &[RuleSource::Eslint("no-labels")],
         source_kind: RuleSourceKind::Inspired,
         recommended: true,
-        severity: Severity::Error,
+        severity: Severity::Warning,
     }
 }
 

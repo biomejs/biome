@@ -4,6 +4,7 @@ use biome_analyze::{
 };
 use biome_console::markup;
 use biome_deserialize_macros::Deserializable;
+use biome_diagnostics::Severity;
 use biome_js_syntax::{
     AnyFunctionLike, JsBreakStatement, JsContinueStatement, JsElseClause, JsLanguage,
     JsLogicalExpression, JsLogicalOperator, JsSyntaxNode,
@@ -74,6 +75,7 @@ declare_lint_rule! {
         language: "js",
         sources: &[RuleSource::EslintSonarJs("cognitive-complexity")],
         recommended: false,
+        severity: Severity::Information,
     }
 }
 

@@ -61,7 +61,7 @@ fn run_test(input: &'static str, _: &str, _: &str, _: &str) {
         let target_code = read_to_string(target_path)
             .unwrap_or_else(|err| panic!("failed to read code from {target_path:?}: {err:?}"));
 
-        GritTargetFile::parse(&target_code, target_path.into(), target_lang)
+        GritTargetFile::parse(&target_code, target_path, target_lang)
     };
 
     let result = query

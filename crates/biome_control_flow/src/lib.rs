@@ -1,3 +1,4 @@
+#![deny(clippy::use_self)]
 #![deny(rustdoc::broken_intra_doc_links)]
 
 use std::fmt::{self, Display, Formatter};
@@ -22,7 +23,7 @@ pub struct ControlFlowGraph<L: Language> {
 
 impl<L: Language> ControlFlowGraph<L> {
     fn new(node: SyntaxNode<L>) -> Self {
-        ControlFlowGraph {
+        Self {
             blocks: vec![BasicBlock::new(None, None)],
             node,
         }

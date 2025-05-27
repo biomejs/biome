@@ -1,0 +1,8 @@
+/*invalid query inside supports recovery at ')'*/
+@import url("narrow.css") supports( -- invalid  );
+
+/*invalid query inside supports recovery at any media query*/
+@import url("narrow.css") supports( -- invalid  screen and (max-width: 400px);
+
+/*invalid query inside supports recovery at ';'*/
+@import url("narrow.css") supports( -- invalid ;

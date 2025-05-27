@@ -1,5 +1,6 @@
 //! This is a generated file. Don't modify it by hand! Run 'cargo codegen formatter' to re-generate the file.
 
+#![allow(clippy::use_self)]
 #![expect(clippy::default_constructed_unit_structs)]
 use crate::{
     AsFormat, FormatBogusNodeRule, FormatNodeRule, IntoFormat, JsonFormatContext, JsonFormatter,

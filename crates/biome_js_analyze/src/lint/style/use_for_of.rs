@@ -1,5 +1,6 @@
 use biome_analyze::{Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule};
 use biome_console::markup;
+use biome_diagnostics::Severity;
 use biome_js_semantic::{ReferencesExtensions, SemanticModel};
 use biome_js_syntax::{
     AnyJsExpression, AnyJsForInitializer, AnyJsObjectMember, AnyJsStatement,
@@ -55,6 +56,7 @@ declare_lint_rule! {
             RuleSource::EslintUnicorn("no-for-loop"),
         ],
         recommended: false,
+        severity: Severity::Information,
     }
 }
 
@@ -321,15 +323,15 @@ impl AnyIncrementableLike {
     /// JsAssignmentExpression(Shorthand): i += 1
     fn is_increment_by_one(&self) -> Option<bool> {
         match self {
-            AnyIncrementableLike::JsPostUpdateExpression(expression) => Some(matches!(
+            Self::JsPostUpdateExpression(expression) => Some(matches!(
                 expression.operator().ok()?,
                 JsPostUpdateOperator::Increment
             )),
-            AnyIncrementableLike::JsPreUpdateExpression(expression) => Some(matches!(
+            Self::JsPreUpdateExpression(expression) => Some(matches!(
                 expression.operator().ok()?,
                 JsPreUpdateOperator::Increment
             )),
-            AnyIncrementableLike::JsAssignmentExpression(expression) => {
+            Self::JsAssignmentExpression(expression) => {
                 let operator = expression.operator().ok()?;
                 let right = expression.right().ok()?;
 
@@ -363,19 +365,19 @@ impl AnyIncrementableLike {
 
     fn get_name_token(&self) -> Option<JsSyntaxToken> {
         match self {
-            AnyIncrementableLike::JsPostUpdateExpression(expression) => expression
+            Self::JsPostUpdateExpression(expression) => expression
                 .operand()
                 .ok()?
                 .as_js_identifier_assignment()?
                 .name_token()
                 .ok(),
-            AnyIncrementableLike::JsPreUpdateExpression(expression) => expression
+            Self::JsPreUpdateExpression(expression) => expression
                 .operand()
                 .ok()?
                 .as_js_identifier_assignment()?
                 .name_token()
                 .ok(),
-            AnyIncrementableLike::JsAssignmentExpression(expression) => expression
+            Self::JsAssignmentExpression(expression) => expression
                 .left()
                 .ok()?
                 .as_any_js_assignment()?
@@ -392,13 +394,13 @@ impl TryFrom<AnyJsExpression> for AnyIncrementableLike {
     fn try_from(value: AnyJsExpression) -> Result<Self, Self::Error> {
         match value {
             AnyJsExpression::JsAssignmentExpression(expression) => {
-                Ok(AnyIncrementableLike::JsAssignmentExpression(expression))
+                Ok(Self::JsAssignmentExpression(expression))
             }
             AnyJsExpression::JsPostUpdateExpression(expression) => {
-                Ok(AnyIncrementableLike::JsPostUpdateExpression(expression))
+                Ok(Self::JsPostUpdateExpression(expression))
             }
             AnyJsExpression::JsPreUpdateExpression(expression) => {
-                Ok(AnyIncrementableLike::JsPreUpdateExpression(expression))
+                Ok(Self::JsPreUpdateExpression(expression))
             }
             _ => Err(()),
         }
@@ -411,13 +413,13 @@ impl TryFrom<AnyJsExpression> for AnyBindingExpression {
     fn try_from(value: AnyJsExpression) -> Result<Self, Self::Error> {
         match value {
             AnyJsExpression::JsPostUpdateExpression(expression) => {
-                Ok(AnyBindingExpression::JsPostUpdateExpression(expression))
+                Ok(Self::JsPostUpdateExpression(expression))
             }
             AnyJsExpression::JsIdentifierExpression(expression) => {
-                Ok(AnyBindingExpression::JsIdentifierExpression(expression))
+                Ok(Self::JsIdentifierExpression(expression))
             }
             AnyJsExpression::JsPreUpdateExpression(expression) => {
-                Ok(AnyBindingExpression::JsPreUpdateExpression(expression))
+                Ok(Self::JsPreUpdateExpression(expression))
             }
             _ => Err(()),
         }

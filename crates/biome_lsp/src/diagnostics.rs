@@ -3,7 +3,8 @@ use anyhow::Error;
 use biome_diagnostics::print_diagnostic_to_string;
 use biome_service::WorkspaceError;
 use std::fmt::{Display, Formatter};
-use tower_lsp::lsp_types::MessageType;
+use tower_lsp_server::lsp_types::MessageType;
+use tower_lsp_server::{Client, jsonrpc};
 
 #[derive(Debug)]
 pub enum LspError {
@@ -33,13 +34,13 @@ impl From<anyhow::Error> for LspError {
 impl Display for LspError {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         match self {
-            LspError::WorkspaceError(err) => {
+            Self::WorkspaceError(err) => {
                 write!(f, "{err}")
             }
-            LspError::Anyhow(err) => {
+            Self::Anyhow(err) => {
                 write!(f, "{err}")
             }
-            LspError::Error(err) => err.description(f),
+            Self::Error(err) => err.description(f),
         }
     }
 }
@@ -49,8 +50,8 @@ impl Display for LspError {
 /// It accepts a `Client`, so contextual messages are sent to the user.
 pub(crate) async fn handle_lsp_error<T>(
     err: LspError,
-    client: &tower_lsp::Client,
-) -> Result<Option<T>, tower_lsp::jsonrpc::Error> {
+    client: &Client,
+) -> Result<Option<T>, jsonrpc::Error> {
     match err {
         LspError::WorkspaceError(err) => match err {
             // diagnostics that shouldn't raise an hard error, but send a message to the user

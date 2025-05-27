@@ -1,3 +1,4 @@
+/* should not generate diagnostics */
 // Don't apply naming convention on the import source
 import { Unknown_Style as u } from ""
 

@@ -73,19 +73,19 @@ pub enum RuleState {
 impl RuleState {
     fn message(&self) -> MarkupBuf {
         match self {
-            RuleState::ClassMisleadingNew(_) => (markup! {
+            Self::ClassMisleadingNew(_) => (markup! {
                 "Don't use the "<Emphasis>"new"</Emphasis>" method in classes."
             })
             .to_owned(),
-            RuleState::InterfaceMisleadingNew(_) => (markup! {
+            Self::InterfaceMisleadingNew(_) => (markup! {
                 "Don't use the "<Emphasis>"new"</Emphasis>" method in interfaces."
             })
             .to_owned(),
-            RuleState::InterfaceMisleadingConstructor(_) => (markup! {
+            Self::InterfaceMisleadingConstructor(_) => (markup! {
                 "Don't use the "<Emphasis>"constructor"</Emphasis>" method in interfaces."
             })
             .to_owned(),
-            RuleState::TypeAliasMisleadingConstructor(_) => (markup! {
+            Self::TypeAliasMisleadingConstructor(_) => (markup! {
                 "Don't use the "<Emphasis>"constructor"</Emphasis>" method in type aliases."
             })
             .to_owned(),
@@ -94,19 +94,19 @@ impl RuleState {
 
     fn note(&self) -> MarkupBuf {
         match self {
-            RuleState::ClassMisleadingNew(_) => (markup! {
+            Self::ClassMisleadingNew(_) => (markup! {
                 ""<Emphasis>"new"</Emphasis>" is typically used to instantiate objects. In classes, its usage can be misleading."
             })
             .to_owned(),
-            RuleState::InterfaceMisleadingNew(_) => (markup! {
+            Self::InterfaceMisleadingNew(_) => (markup! {
                 ""<Emphasis>"new"</Emphasis>" in an interface suggests it's instantiable, which is incorrect. The returned type should different from the constructor's type."
             })
             .to_owned(),
-            RuleState::InterfaceMisleadingConstructor(_) => (markup! {
+            Self::InterfaceMisleadingConstructor(_) => (markup! {
                 "Interfaces define a contract, not an implementation. Thus, including a "<Emphasis>"constructor"</Emphasis>"is not appropriate."
             })
             .to_owned(),
-            RuleState::TypeAliasMisleadingConstructor(_) => (markup! {
+            Self::TypeAliasMisleadingConstructor(_) => (markup! {
                 "Type aliases simply rename types. They don't execute code, so a "<Emphasis>"constructor"</Emphasis>"is misleading."
             })
             .to_owned(),
@@ -115,10 +115,10 @@ impl RuleState {
 
     fn range(&self) -> &TextRange {
         match self {
-            RuleState::ClassMisleadingNew(range)
-            | RuleState::InterfaceMisleadingNew(range)
-            | RuleState::InterfaceMisleadingConstructor(range)
-            | RuleState::TypeAliasMisleadingConstructor(range) => range,
+            Self::ClassMisleadingNew(range)
+            | Self::InterfaceMisleadingNew(range)
+            | Self::InterfaceMisleadingConstructor(range)
+            | Self::TypeAliasMisleadingConstructor(range) => range,
         }
     }
 }
@@ -174,7 +174,7 @@ fn check_interface_methods(decl: &TsInterfaceDeclaration) -> Option<RuleState> {
                     AnyTsType::TsThisType(this_type) if this_type.this_token().ok().is_some() => {
                         return Some(RuleState::InterfaceMisleadingNew(construct.range()));
                     }
-                    _ => continue,
+                    _ => {}
                 }
             }
             AnyTsTypeMember::TsMethodSignatureTypeMember(method) => {
@@ -183,7 +183,7 @@ fn check_interface_methods(decl: &TsInterfaceDeclaration) -> Option<RuleState> {
                     return Some(RuleState::InterfaceMisleadingConstructor(method.range()));
                 }
             }
-            _ => continue,
+            _ => {}
         };
     }
     None
@@ -214,7 +214,7 @@ fn check_class_methods(js_class_decl: &JsClassDeclaration) -> Option<RuleState> 
                         {
                             return Some(RuleState::ClassMisleadingNew(method.range()));
                         }
-                        _ => continue,
+                        _ => {}
                     }
                 }
             }

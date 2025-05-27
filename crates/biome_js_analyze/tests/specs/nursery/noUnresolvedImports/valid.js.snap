@@ -1,0 +1,12 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid.js
+---
+# Input
+```js
+/* should not generate diagnostics */
+import { foo } from "./foo.js";
+import bar from "./bar";
+import { image } from "./image.svg";
+
+```

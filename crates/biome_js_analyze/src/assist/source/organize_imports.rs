@@ -1,14 +1,21 @@
 use biome_analyze::{
-    ActionCategory, Ast, FixKind, Rule, SourceActionKind, context::RuleContext, declare_source_rule,
+    ActionCategory, Ast, FixKind, Rule, RuleDiagnostic, SourceActionKind, context::RuleContext,
+    declare_source_rule,
 };
+use biome_console::markup;
 use biome_deserialize_macros::Deserializable;
-use biome_js_syntax::{AnyJsExportClause, AnyJsModuleItem, JsModule, JsSyntaxKind, JsSyntaxNode};
-use biome_rowan::{AstNode, TriviaPieceKind};
-use biome_rowan::{BatchMutationExt, chain_trivia_pieces};
+use biome_diagnostics::category;
+use biome_js_factory::make;
+use biome_js_syntax::{
+    AnyJsCombinedSpecifier, AnyJsExportClause, AnyJsImportClause, AnyJsModuleItem, JsModule,
+    JsSyntaxKind, T,
+};
+use biome_rowan::{AstNode, BatchMutationExt, TextRange, TriviaPieceKind, chain_trivia_pieces};
 use import_key::{ImportInfo, ImportKey};
 use rustc_hash::FxHashMap;
 use specifiers_attributes::{
-    are_import_attributes_sorted, sort_attributes, sort_export_specifiers, sort_import_specifiers,
+    are_import_attributes_sorted, merge_export_specifiers, merge_import_specifiers,
+    sort_attributes, sort_export_specifiers, sort_import_specifiers,
 };
 
 use crate::JsRuleAction;
@@ -27,6 +34,7 @@ declare_source_rule! {
     /// Imports and exports are first separated into chunks, before being sorted.
     /// Imports or exports of a chunk are then grouped according to the user-defined groups.
     /// Within a group, imports are sorted using a built-in order that depends on the import/export kind, whether the import/export has attributes and the source being imported from.
+    /// **source** is also often called **specifier** in the JavaScript ecosystem.
     ///
     /// ```js,ignore
     /// import A from "@my/lib" with { "attribute1": "value" };
@@ -38,21 +46,20 @@ declare_source_rule! {
     ///   kind         source                attributes
     /// ```
     ///
-    /// Note that **source** is also often called **specifier** in the JavaScript ecosystem.
     ///
-    ///
-    /// ## Chunk of imports and chunks of exports
+    /// ## Chunk of imports and chunk of exports
     ///
     /// A **chunk** is a sequence of adjacent imports or exports.
     /// A chunk contains only imports or exports, not both at the same time.
     /// The following example includes two chunks.
     /// The first chunk consists of the three imports and the second chunk consists of the three exports.
-    /// The first `export` that appears ends the first chunk and starts a new one.
     ///
     /// ```js,ignore
+    /// // chunk 1
     /// import A from "a";
     /// import * as B from "b";
     /// import { C } from "c";
+    /// // chunk 2
     /// export * from "d";
     /// export * as F from "e";
     /// export { F } from "f";
@@ -196,22 +203,21 @@ declare_source_rule! {
     ///
     /// If two imports or exports share the same source and are in the same chunk, then they are ordered according to their kind as follows:
     ///
-    /// 1. Default type import
-    /// 2. Default import
-    /// 3. Combined default and namespace import
-    /// 4. Combined default and named import
-    /// 5. Namespace type import / Namespace type export
-    /// 6. Namespace import / Namespace export
-    /// 7. Named type import / Named type export
+    /// 1. Namespace type import / Namespace type export
+    /// 2. Default type import
+    /// 3. Named type import / Named type export
+    /// 4. Namespace import / Namespace export
+    /// 5. Combined default and namespace import
+    /// 6. Default import
+    /// 7. Combined default and named import
     /// 8. Named import / Named export
     ///
-    /// Also, import and exports with attributes are always placed first.
+    /// Imports and exports with attributes are always placed first.
     /// For example, the following code...
     ///
-    /// ```ts,expect_diagnostic
+    /// ```ts,ignore
     /// import * as namespaceImport from "same-source";
     /// import type * as namespaceTypeImport from "same-source";
-    /// import { namedImport } from "same-source";
     /// import type { namedTypeImport } from "same-source";
     /// import defaultNamespaceCombined, * as namespaceCombined from "same-source";
     /// import defaultNamedCombined, { namedCombined } from "same-source";
@@ -224,18 +230,17 @@ declare_source_rule! {
     ///
     /// ```ts,ignore
     /// import { importWithAttribute } from "same-source" with { "attribute": "value" } ;
-    /// import type defaultTypeImport from "same-source";
-    /// import defaultImport from "same-source";
-    /// import defaultNamespaceCombined, * as namespaceCombined from "same-source";
-    /// import defaultNamedCombined, { namedCombined } from "same-source";
     /// import type * as namespaceTypeImport from "same-source";
-    /// import * as namespaceImport from "same-source";
+    /// import type defaultTypeImport from "same-source";
     /// import type { namedTypeImport } from "same-source";
-    /// import { namedImport } from "same-source";
+    /// import * as namespaceImport from "same-source";
+    /// import defaultNamespaceCombined, * as namespaceCombined from "same-source";
+    /// import defaultImport from "same-source";
+    /// import defaultNamedCombined, { namedCombined } from "same-source";
     /// ```
     ///
     /// This default order cannot be changed.
-    /// However, users can still customize how imports and exports are sorted using the concept of groups.
+    /// However, users can still customize how imports and exports are sorted using the concept of groups as explained in the following section.
     ///
     ///
     /// ## Import and export groups
@@ -249,7 +254,8 @@ declare_source_rule! {
     ///
     /// - A predefined group matcher, or
     /// - A glob pattern, or
-    /// - A list of glob patterns.
+    /// - An object matcher, or
+    /// - A list of glob patterns, predefined group matchers, and object matchers.
     ///
     /// Predefined group matchers are strings in `CONSTANT_CASE` prefixed and suffixed by `:`.
     /// The sorter provides several predefined group matchers:
@@ -257,13 +263,13 @@ declare_source_rule! {
     /// - `:ALIAS:`: sources starting with `#`, `@/`, `~`, or `%`.
     /// - `:BUN:`: sources starting with the protocol `bun:` or that correspond to a built-in Bun module such as `bun`.
     /// - `:NODE:`: sources starting with the protocol `node:` or that correspond to a built-in Node.js module such as `fs` or `path`.
-    /// - `:PACKAGE:`: Scoped and bare packages.
-    /// - `:PACKAGE_WITH_PROTOCOL:`: Scoped and bare packages with a protocol.
+    /// - `:PACKAGE:`: scoped and bare packages.
+    /// - `:PACKAGE_WITH_PROTOCOL:`: scoped and bare packages with a protocol.
     /// - `:PATH:`: absolute and relative paths.
-    /// - `:URL:`
+    /// - `:URL:`: sources starting with `https://` and `http://`.
     ///
     /// Let's take an example.
-    /// In the default configuration, Node.js modules without the `node:` protocols are separated from those with a protocol.
+    /// In the default configuration, Node.js modules without the `node:` protocol are separated from those with a protocol.
     /// To groups them together, you can use the predefined group `:NODE:`.
     /// Given the following configuration...
     ///
@@ -289,7 +295,7 @@ declare_source_rule! {
     ///
     /// ...and the following code...
     ///
-    /// ```js
+    /// ```js,ignore
     /// import sibling from "./file.js";
     /// import internal from "#alias";
     /// import fs from "fs";
@@ -306,10 +312,10 @@ declare_source_rule! {
     ///
     /// ```js,ignore
     /// import data from "https://example.org";
-    /// import scopedLibUsingJsr from "jsr:@scoped/lib";
-    /// import path from "node:path";
     /// import fs from "fs";
+    /// import path from "node:path";
     /// import { test } from "node:test";
+    /// import scopedLibUsingJsr from "jsr:@scoped/lib";
     /// import scopedLib from "@scoped/lib";
     /// import lib from "lib";
     /// import internal from "#alias";
@@ -320,8 +326,8 @@ declare_source_rule! {
     /// Note that all imports that don't match a group matcher are always placed at the end.
     ///
     ///
-    /// Groups matchers can also be glob patterns and list of glob patterns.
-    /// Glob patterns selects imports and exports with a source that matches the pattern.
+    /// Group matchers can also be glob patterns and list of glob patterns.
+    /// Glob patterns select imports and exports with a source that matches the pattern.
     /// In the following example, we create two groups: one that gathers imports/exports with a source starting with `@my/lib` except `@my/lib/speciaal` and the other that gathers imports/exports starting with `@/`.
     ///
     /// ```json
@@ -337,7 +343,7 @@ declare_source_rule! {
     ///
     /// By applying this configuration to the following code...
     ///
-    /// ```js
+    /// ```js,ignore
     /// import lib from "@my/lib";
     /// import aliased from "@/alias";
     /// import path from "@my/lib/special";
@@ -364,10 +370,40 @@ declare_source_rule! {
     /// The prefix `!` indicates an exception.
     /// You can create exceptions of exceptions by following an exception by a regular glob pattern.
     /// For example `["@my/lib", "@my/lib/**", "!@my/lib/special", "!@my/lib/special/**", "@my/lib/special/*/accepted/**"]` allows you to accepts all sources matching `@my/lib/special/*/accepted/**`.
+    /// Note that the predefined groups can also be negated. `!:NODE:` matches all sources that don't match `:NODE:`.
     /// For more details on the supported glob patterns, see the dedicated section.
     ///
-    /// For now, it is not possible to mix predefined group matchers and glob patterns inside a list of globs.
-    /// This is a limitation that we are working to remove.
+    /// Finally, group matchers can be object matchers.
+    /// An object matcher allows to match type-only imports and exports.
+    ///
+    /// Given the following configuration:
+    ///
+    /// ```json
+    /// {
+    ///     "options": {
+    ///         "groups": [
+    ///             { "type": false, "source": ["@my/lib", "@my/lib/**"] },
+    ///             ["@my/lib", "@my/lib/**"]
+    ///         ]
+    ///     }
+    /// }
+    /// ```
+    ///
+    /// The following code:
+    ///
+    /// ```ts,ignore
+    /// import type { T } from "@my/lib";
+    /// import { V } from "@my/lib";
+    /// ```
+    ///
+    /// is sorted as follows:
+    ///
+    /// ```ts,ignore
+    /// import { V } from "@my/lib";
+    /// import type { T } from "@my/lib";
+    /// ```
+    ///
+    /// The object matcher `{ "type": false, "source": ["@my/lib", "@my/lib/**"] }` match against imports and exports without the `type` keyword with a source that matches one of the glob pattern of the list `["@my/lib", "@my/lib/**"]`.
     ///
     /// The sorter allows the separation of two groups with a blank line using the predefined string `:BLANK_LINE:`.
     /// Given the following configuration...
@@ -376,7 +412,7 @@ declare_source_rule! {
     /// {
     ///     "options": {
     ///         "groups": [
-    ///             ":NODE:",
+    ///             [":BUN:", ":NODE:"],
     ///             ":BLANK_LINE:",
     ///             ["@my/lib", "@my/lib/**", "!@my/lib/special", "!@my/lib/special/**"],
     ///             "@/**"
@@ -387,11 +423,12 @@ declare_source_rule! {
     ///
     /// ...the following code...
     ///
-    /// ```js
+    /// ```js,ignore
+    /// import test from "bun:test";
     /// import path from "node:path";
     /// import lib from "@my/lib";
-    /// import test from "@my/lib/path";
-    /// import path from "@my/lib/special";
+    /// import libPath from "@my/lib/path";
+    /// import libSpecial from "@my/lib/special";
     /// import aliased from "@/alias";
     /// ```
     ///
@@ -406,6 +443,21 @@ declare_source_rule! {
     /// import path from "@my/lib/special";
     /// ```
     ///
+    /// Groups are matched in order.
+    /// This means that one group matcher can shadow succeeding groups.
+    /// For example, in the following configuration, the group matcher `:URL:` is never matched because all imports and exports match the first matcher `**`.
+    ///
+    /// ```json
+    /// {
+    ///     "options": {
+    ///         "groups": [
+    ///             "**",
+    ///             ":URL:"
+    ///         ]
+    ///     }
+    /// }
+    /// ```
+    ///
     ///
     /// ## Comment handling
     ///
@@ -418,7 +470,7 @@ declare_source_rule! {
     ///
     /// For example, the following code...
     ///
-    /// ```js,expect_diagnostic
+    /// ```js,ignore
     /// // Copyright notice and file header comment
     /// import F from "f";
     /// // Attached comment for `e`
@@ -454,6 +506,31 @@ declare_source_rule! {
     /// ```
     ///
     ///
+    /// ## Import and export merging
+    ///
+    /// The organizer also merges imports and exports that can be merged.
+    ///
+    /// For example, the following code:
+    ///
+    /// ```ts,ignore
+    /// import type { T1 } from "package";
+    /// import type { T2 } from "package";
+    /// import * as ns from "package";
+    /// import D1 from "package";
+    /// import D2 from "package";
+    /// import { A } from "package";
+    /// import { B } from "package";
+    /// ```
+    ///
+    /// is merged as follows:
+    ///
+    /// ```ts,ignore
+    /// import type { T1, T2 } from "package";
+    /// import D1, * as ns from "package";
+    /// import D2, { A, B } from "package";
+    /// ```
+    ///
+    ///
     /// ## Named imports, named exports and attributes sorting
     ///
     /// The sorter also sorts named imports, named exports, as well as attributes.
@@ -461,7 +538,7 @@ declare_source_rule! {
     ///
     /// The following code...
     ///
-    /// ```js,expect_diagnostic
+    /// ```js,ignore
     /// import { a, b, A, B, c10, c9 } from "a";
     ///
     /// export { a, b, A, B, c10, c9 } from "a";
@@ -513,6 +590,37 @@ declare_source_rule! {
     ///   `file.js` matches `!*.test.js`.
     ///   `src/file.js` matches `!*.js` because the source contains several segments.
     ///
+    ///
+    /// ## Common configurations
+    ///
+    /// This section provides some examples of common configurations.
+    ///
+    /// ### Placing `import type` and `export type` at the start of the chunks
+    ///
+    /// ```json
+    /// {
+    ///     "options": {
+    ///         "groups": [
+    ///             { "type": true }
+    ///         ]
+    ///     }
+    /// }
+    /// ```
+    ///
+    /// Note that you can want to use the lint rule [`useImportType`](https://next.biomejs.dev/linter/rules/use-import-type/) and its [`style`](https://next.biomejs.dev/linter/rules/use-import-type/#style) to enforce the use of `import type` instead of `import { type }`.
+    ///
+    /// ### Placing `import type` and `export type` at the end of the chunks
+    ///
+    /// ```json
+    /// {
+    ///     "options": {
+    ///         "groups": [
+    ///             { "type": false }
+    ///         ]
+    ///     }
+    /// }
+    /// ```
+    ///
     pub OrganizeImports {
         version: "1.0.0",
         name: "organizeImports",
@@ -527,6 +635,29 @@ impl Rule for OrganizeImports {
     type State = Box<[Issue]>;
     type Signals = Option<Self::State>;
     type Options = Options;
+
+    fn text_range(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<TextRange> {
+        ctx.query()
+            .items()
+            .into_iter()
+            .find(|item| {
+                matches!(
+                    item,
+                    AnyJsModuleItem::JsImport(_) | AnyJsModuleItem::JsExport(_)
+                )
+            })
+            .map(|item| item.range())
+    }
+
+    fn diagnostic(ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
+        Some(RuleDiagnostic::new(
+            category!("assist/source/organizeImports"),
+            Self::text_range(ctx, state),
+            markup! {
+                "The imports and exports are not sorted."
+            },
+        ))
+    }
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         struct ChunkBuilder {
@@ -576,7 +707,8 @@ impl Rule for OrganizeImports {
                 let are_specifiers_unsorted =
                     specifiers.is_some_and(|specifiers| !specifiers.are_sorted());
                 let are_attributes_unsorted = attributes.is_some_and(|attributes| {
-                    !(are_import_attributes_sorted(&attributes).unwrap_or_default())
+                    // Assume the attributes are sorted if there are any bogus nodes.
+                    !(are_import_attributes_sorted(&attributes).unwrap_or(true))
                 });
                 let newline_issue = if leading_newline_count == 1
                     // A chunk must start with a blank line (two newlines)
@@ -612,7 +744,7 @@ impl Rule for OrganizeImports {
                 }
                 if let Some(chunk) = &mut chunk {
                     // Check if the items are in order
-                    if chunk.max_key > key {
+                    if chunk.max_key > key || chunk.max_key.is_mergeable(&key) {
                         chunk.slot_indexes.end = key.slot_index + 1;
                     } else {
                         prev_group = key.group;
@@ -653,10 +785,20 @@ impl Rule for OrganizeImports {
     }
 
     fn action(ctx: &RuleContext<Self>, state: &Self::State) -> Option<JsRuleAction> {
+        struct KeyedItem {
+            /// Key associated to `item` before any merging.
+            key: ImportKey,
+            /// Was `item` obtained by merging it with previous items?
+            was_merged: bool,
+            /// None if the item has been merged with the next item.
+            item: Option<AnyJsModuleItem>,
+        }
+
         let options = ctx.options();
         let root = ctx.query();
-        let mut organized_items: FxHashMap<u32, JsSyntaxNode> = FxHashMap::default();
-        let mut import_keys: Vec<ImportKey> = Vec::new();
+        let items = root.items().into_syntax();
+        let mut organized_items: FxHashMap<u32, AnyJsModuleItem> = FxHashMap::default();
+        let mut import_keys: Vec<KeyedItem> = Vec::new();
         let mut mutation = ctx.root().begin();
         for issue in state {
             match issue {
@@ -740,11 +882,11 @@ impl Rule for OrganizeImports {
                         }
                     }
                     // Save the node
-                    organized_items.insert(*slot_index, item);
+                    organized_items.insert(*slot_index, AnyJsModuleItem::cast(item)?);
                 }
                 Issue::UnsortedChunkPrefix { slot_indexes } => {
                     debug_assert!(import_keys.is_empty(), "import_keys was previously drained");
-                    // Collect all import keys.
+                    // Collect all import keys and the associated items.
                     import_keys.reserve(slot_indexes.len());
                     import_keys.extend(
                         ctx.query()
@@ -752,31 +894,68 @@ impl Rule for OrganizeImports {
                             .into_iter()
                             .skip(slot_indexes.start as usize)
                             .take(slot_indexes.len())
-                            .filter_map(|item| ImportInfo::from_module_item(&item))
-                            .map(|(info, _, _)| ImportKey::new(info, &options.groups)),
+                            .filter_map(|item| {
+                                let info = ImportInfo::from_module_item(&item)?.0;
+                                let item = organized_items.remove(&info.slot_index).unwrap_or(item);
+                                Some(KeyedItem {
+                                    key: ImportKey::new(info, &options.groups),
+                                    was_merged: false,
+                                    item: Some(item),
+                                })
+                            }),
                     );
                     // Sort imports based on their import key
-                    import_keys.sort_unstable();
+                    import_keys.sort_unstable_by(
+                        |KeyedItem { key: k1, .. }, KeyedItem { key: k2, .. }| k1.cmp(k2),
+                    );
+                    // Merge imports/exports
+                    // We use `while` and indexing to allow both iteration and mutation of `import_keys`.
+                    let mut i = 0;
+                    while (i + 1) < import_keys.len() {
+                        let KeyedItem { key, item, .. } = &import_keys[i];
+                        let KeyedItem {
+                            key: next_key,
+                            item: next_item,
+                            ..
+                        } = &import_keys[i + 1];
+                        if key.is_mergeable(next_key) {
+                            if let Some(merged) = merge(item.as_ref(), next_item.as_ref()) {
+                                import_keys[i].item = None;
+                                import_keys[i + 1].was_merged = true;
+                                import_keys[i + 1].item = Some(merged);
+                            }
+                        }
+                        i += 1;
+                    }
                     // Swap the items to obtain a sorted chunk
-                    let items = ctx.query().items().into_syntax();
                     let mut prev_group: u16 = 0;
-                    for (index, key) in (slot_indexes.start..).zip(import_keys.drain(..)) {
+                    for (
+                        index,
+                        KeyedItem {
+                            key,
+                            was_merged,
+                            item: new_item,
+                        },
+                    ) in (slot_indexes.start..).zip(import_keys.drain(..))
+                    {
+                        let old_item = items.element_in_slot(index)?;
+                        let Some(new_item) = new_item else {
+                            mutation.remove_element(old_item);
+                            continue;
+                        };
+                        let mut new_item = new_item.into_syntax();
+                        let old_item = old_item.into_node()?;
                         let blank_line_separated_groups = options
                             .groups
                             .separated_by_blank_line(prev_group, key.group);
                         // Don't make any change if it is the same node and no change have to be done
-                        if !blank_line_separated_groups && index == key.slot_index {
+                        if !blank_line_separated_groups && index == key.slot_index && !was_merged {
                             continue;
                         }
-                        let old_item = items.element_in_slot(index)?.into_node()?;
-                        let mut new_item =
-                            if let Some(item) = organized_items.remove(&key.slot_index) {
-                                item
-                            } else {
-                                items.element_in_slot(key.slot_index)?.into_node()?
-                            };
                         if index == slot_indexes.start {
-                            if let Some(detached) = detached_trivia(&old_item) {
+                            if index == key.slot_index && was_merged {
+                                // DOn't change anything
+                            } else if let Some(detached) = detached_trivia(&old_item) {
                                 if leading_newlines(&old_item).count() == 1 {
                                     let newline = old_item.first_leading_trivia()?.pieces().take(1);
                                     new_item = new_item.prepend_trivia_pieces(
@@ -877,4 +1056,135 @@ pub enum NewLineIssue {
     None,
     ExtraNewLine,
     MissingNewLine,
+}
+
+fn merge(
+    item1: Option<&AnyJsModuleItem>,
+    item2: Option<&AnyJsModuleItem>,
+) -> Option<AnyJsModuleItem> {
+    match (item1?, item2?) {
+        (AnyJsModuleItem::JsExport(item1), AnyJsModuleItem::JsExport(item2)) => {
+            let clause1 = item1.export_clause().ok()?;
+            let clause2 = item2.export_clause().ok()?;
+            let AnyJsExportClause::JsExportNamedFromClause(clause1) = clause1 else {
+                return None;
+            };
+            let clause2 = clause2.as_js_export_named_from_clause()?;
+            let specifiers1 = clause1.specifiers();
+            let specifiers2 = clause2.specifiers();
+            if let Some(meregd_specifiers) = merge_export_specifiers(&specifiers1, &specifiers2) {
+                let meregd_clause = clause1.with_specifiers(meregd_specifiers);
+                let merged_item = item2.clone().with_export_clause(meregd_clause.into());
+                let merged_item = merged_item
+                    .trim_leading_trivia()?
+                    .prepend_trivia_pieces(item1.syntax().first_leading_trivia()?.pieces())?;
+                return Some(merged_item.into());
+            }
+        }
+        (AnyJsModuleItem::JsImport(item1), AnyJsModuleItem::JsImport(item2)) => {
+            let clause1 = item1.import_clause().ok()?;
+            let clause2 = item2.import_clause().ok()?;
+            match (clause1, clause2) {
+                (
+                    AnyJsImportClause::JsImportDefaultClause(clause1),
+                    AnyJsImportClause::JsImportNamespaceClause(clause2),
+                )
+                | (
+                    AnyJsImportClause::JsImportNamespaceClause(clause2),
+                    AnyJsImportClause::JsImportDefaultClause(clause1),
+                ) => {
+                    let default_specifier = clause1.default_specifier().ok()?;
+                    let namespace_specifier = clause2.namespace_specifier().ok()?;
+                    let comma_token = make::token(T![,])
+                        .with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")]);
+                    let merged_clause = make::js_import_combined_clause(
+                        default_specifier.trim_trailing_trivia()?,
+                        comma_token,
+                        namespace_specifier.into(),
+                        clause2.from_token().ok()?,
+                        clause2.source().ok()?,
+                    )
+                    .build();
+                    let merged_item = item2.clone().with_import_clause(merged_clause.into());
+                    let merged_item = merged_item
+                        .trim_leading_trivia()?
+                        .prepend_trivia_pieces(item1.syntax().first_leading_trivia()?.pieces())?;
+                    return Some(merged_item.into());
+                }
+                (
+                    AnyJsImportClause::JsImportCombinedClause(clause1),
+                    AnyJsImportClause::JsImportNamedClause(clause2),
+                )
+                | (
+                    AnyJsImportClause::JsImportNamedClause(clause2),
+                    AnyJsImportClause::JsImportCombinedClause(clause1),
+                ) => {
+                    let specifier1 = clause1.specifier().ok()?;
+                    let AnyJsCombinedSpecifier::JsNamedImportSpecifiers(specifiers1) = specifier1
+                    else {
+                        return None;
+                    };
+                    let specifiers2 = clause2.named_specifiers().ok()?;
+                    if let Some(meregd_specifiers) =
+                        merge_import_specifiers(specifiers1, &specifiers2)
+                    {
+                        let merged_clause = clause1.with_specifier(meregd_specifiers.into());
+                        let merged_item = item2.clone().with_import_clause(merged_clause.into());
+                        let merged_item =
+                            merged_item.trim_leading_trivia()?.prepend_trivia_pieces(
+                                item1.syntax().first_leading_trivia()?.pieces(),
+                            )?;
+                        return Some(merged_item.into());
+                    }
+                }
+                (
+                    AnyJsImportClause::JsImportNamedClause(clause1),
+                    AnyJsImportClause::JsImportNamedClause(clause2),
+                ) => {
+                    let specifiers1 = clause1.named_specifiers().ok()?;
+                    let specifiers2 = clause2.named_specifiers().ok()?;
+                    if let Some(meregd_specifiers) =
+                        merge_import_specifiers(specifiers1, &specifiers2)
+                    {
+                        let merged_clause = clause1.with_named_specifiers(meregd_specifiers);
+                        let merged_item = item2.clone().with_import_clause(merged_clause.into());
+                        let merged_item =
+                            merged_item.trim_leading_trivia()?.prepend_trivia_pieces(
+                                item1.syntax().first_leading_trivia()?.pieces(),
+                            )?;
+                        return Some(merged_item.into());
+                    }
+                }
+                (
+                    AnyJsImportClause::JsImportDefaultClause(clause1),
+                    AnyJsImportClause::JsImportNamedClause(clause2),
+                )
+                | (
+                    AnyJsImportClause::JsImportNamedClause(clause2),
+                    AnyJsImportClause::JsImportDefaultClause(clause1),
+                ) => {
+                    let default_specifier = clause1.default_specifier().ok()?;
+                    let named_specifiers = clause2.named_specifiers().ok()?;
+                    let comma_token = make::token(T![,])
+                        .with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")]);
+                    let merged_clause = make::js_import_combined_clause(
+                        default_specifier.trim_trailing_trivia()?,
+                        comma_token,
+                        named_specifiers.into(),
+                        clause2.from_token().ok()?,
+                        clause2.source().ok()?,
+                    )
+                    .build();
+                    let merged_item = item2.clone().with_import_clause(merged_clause.into());
+                    let merged_item = merged_item
+                        .trim_leading_trivia()?
+                        .prepend_trivia_pieces(item1.syntax().first_leading_trivia()?.pieces())?;
+                    return Some(merged_item.into());
+                }
+                _ => {}
+            }
+        }
+        _ => {}
+    }
+    None
 }

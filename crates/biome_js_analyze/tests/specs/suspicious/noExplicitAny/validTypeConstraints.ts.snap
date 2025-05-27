@@ -4,7 +4,6 @@ expression: validTypeConstraints.ts
 ---
 # Input
 ```ts
+/* should not generate diagnostics */
 function f<T extends any>() {}
 ```
-
-

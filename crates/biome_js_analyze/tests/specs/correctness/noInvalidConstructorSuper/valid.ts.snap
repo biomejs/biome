@@ -4,6 +4,7 @@ expression: valid.ts
 ---
 # Input
 ```ts
+/* should not generate diagnostics */
 class A  extends B {
     constructor() {
         super()
@@ -87,5 +88,3 @@ class ExtendStatisfiesExpression extends (A satisfies A) {
 }
 
 ```
-
-

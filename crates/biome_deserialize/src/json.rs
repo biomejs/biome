@@ -92,33 +92,33 @@ impl DeserializableValue for AnyJsonValue {
     ) -> Option<V::Output> {
         let range = AstNode::range(self);
         match self {
-            AnyJsonValue::JsonArrayValue(array) => {
+            Self::JsonArrayValue(array) => {
                 let items = array.elements().iter().map(|x| x.ok());
                 visitor.visit_array(ctx, items, range, name)
             }
-            AnyJsonValue::JsonBogusValue(_) => {
+            Self::JsonBogusValue(_) => {
                 // The parser should emit an error about this node
                 // No need to emit another diagnostic.
                 None
             }
-            AnyJsonValue::JsonBooleanValue(value) => {
+            Self::JsonBooleanValue(value) => {
                 let value = value.value_token().ok()?;
                 visitor.visit_bool(ctx, value.kind() == T![true], range, name)
             }
-            AnyJsonValue::JsonNullValue(_) => visitor.visit_null(ctx, range, name),
-            AnyJsonValue::JsonNumberValue(value) => {
+            Self::JsonNullValue(_) => visitor.visit_null(ctx, range, name),
+            Self::JsonNumberValue(value) => {
                 let value = value.value_token().ok()?;
                 let token_text = value.token_text_trimmed();
                 visitor.visit_number(ctx, TextNumber(token_text), range, name)
             }
-            AnyJsonValue::JsonObjectValue(object) => {
+            Self::JsonObjectValue(object) => {
                 let members = object.json_member_list().iter().map(|member| {
                     let member = member.ok()?;
                     Some((member.name().ok()?, member.value().ok()?))
                 });
                 visitor.visit_map(ctx, members, range, name)
             }
-            AnyJsonValue::JsonStringValue(value) => {
+            Self::JsonStringValue(value) => {
                 let value = unescape_json_string(value.inner_string_text().ok()?);
                 visitor.visit_str(ctx, value, range, name)
             }
@@ -127,13 +127,13 @@ impl DeserializableValue for AnyJsonValue {
 
     fn visitable_type(&self) -> Option<DeserializableType> {
         match self {
-            AnyJsonValue::JsonArrayValue(_) => Some(DeserializableType::Array),
-            AnyJsonValue::JsonBogusValue(_) => None,
-            AnyJsonValue::JsonBooleanValue(_) => Some(DeserializableType::Bool),
-            AnyJsonValue::JsonNullValue(_) => Some(DeserializableType::Null),
-            AnyJsonValue::JsonNumberValue(_) => Some(DeserializableType::Number),
-            AnyJsonValue::JsonObjectValue(_) => Some(DeserializableType::Map),
-            AnyJsonValue::JsonStringValue(_) => Some(DeserializableType::Str),
+            Self::JsonArrayValue(_) => Some(DeserializableType::Array),
+            Self::JsonBogusValue(_) => None,
+            Self::JsonBooleanValue(_) => Some(DeserializableType::Bool),
+            Self::JsonNullValue(_) => Some(DeserializableType::Null),
+            Self::JsonNumberValue(_) => Some(DeserializableType::Number),
+            Self::JsonObjectValue(_) => Some(DeserializableType::Map),
+            Self::JsonStringValue(_) => Some(DeserializableType::Str),
         }
     }
 }
@@ -222,7 +222,7 @@ impl Deserializable for serde_json::Value {
                         .filter_map(|entry| {
                             let (key, value) = entry?;
                             let key = Deserializable::deserialize(ctx, &key, "")?;
-                            let value = value.deserialize(ctx, Visitor, "")?;
+                            let value = value.deserialize(ctx, Self, "")?;
                             Some((key, value))
                         })
                         .collect(),
@@ -362,7 +362,7 @@ mod tests {
                 _value: &impl DeserializableValue,
                 name: &str,
             ) -> Option<Self> {
-                Some(Name {
+                Some(Self {
                     name: ctx.id().unwrap_or(name).to_string(),
                 })
             }

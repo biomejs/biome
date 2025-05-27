@@ -17,14 +17,14 @@ pub enum JsNamedSpecifiers {
 impl JsNamedSpecifiers {
     pub fn are_sorted(&self) -> bool {
         match self {
-            JsNamedSpecifiers::JsNamedImportSpecifiers(specifeirs) => {
-                are_import_specifiers_sorted(specifeirs)
-            }
-            JsNamedSpecifiers::JsExportNamedFromSpecifierList(specifeirs) => {
+            Self::JsNamedImportSpecifiers(specifeirs) => are_import_specifiers_sorted(specifeirs),
+            Self::JsExportNamedFromSpecifierList(specifeirs) => {
                 are_export_specifiers_sorted(specifeirs)
             }
         }
-        .unwrap_or_default()
+        // Assume the import is already sorted if there are any bogus nodes, otherwise the `--write`
+        // flag will cause infinite loop.
+        .unwrap_or(true)
     }
 }
 
@@ -79,7 +79,7 @@ pub fn sort_import_specifiers(
     handle_trvia(
         sorted.iter_mut().map(|(_, a, b)| (a, b)),
         last_has_separator,
-        || make::token(T![,]),
+        || make::token(T![,]).with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")]),
     );
     let separators: Vec<_> = sorted
         .iter_mut()
@@ -88,6 +88,44 @@ pub fn sort_import_specifiers(
     let nodes = sorted.into_iter().map(|(_, specifier, _)| specifier);
     let new_list = make::js_named_import_specifier_list(nodes, separators);
     Some(named_specifiers.with_specifiers(new_list))
+}
+
+pub fn merge_import_specifiers(
+    named_specifiers1: JsNamedImportSpecifiers,
+    named_specifiers2: &JsNamedImportSpecifiers,
+) -> Option<JsNamedImportSpecifiers> {
+    let specifiers1 = named_specifiers1.specifiers();
+    let specifiers2 = named_specifiers2.specifiers();
+    let mut nodes = Vec::with_capacity(specifiers1.len() + specifiers2.len());
+    let mut separators = Vec::with_capacity(specifiers1.len() + specifiers2.len());
+    for AstSeparatedElement {
+        node,
+        trailing_separator,
+    } in specifiers1.elements()
+    {
+        let separator = trailing_separator.ok()?;
+        let mut node = node.ok()?;
+        if separator.is_none() {
+            node = node.trim_trailing_trivia()?;
+        }
+        let separator = separator.unwrap_or_else(|| {
+            make::token(T![,]).with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")])
+        });
+        nodes.push(node);
+        separators.push(separator);
+    }
+    for AstSeparatedElement {
+        node,
+        trailing_separator,
+    } in specifiers2.elements()
+    {
+        nodes.push(node.ok()?);
+        if let Some(separator) = trailing_separator.ok()? {
+            separators.push(separator);
+        }
+    }
+    let new_list = make::js_named_import_specifier_list(nodes, separators);
+    sort_import_specifiers(named_specifiers1.with_specifiers(new_list))
 }
 
 pub fn are_export_specifiers_sorted(specifiers: &JsExportNamedFromSpecifierList) -> Option<bool> {
@@ -134,7 +172,7 @@ pub fn sort_export_specifiers(
     handle_trvia(
         sorted.iter_mut().map(|(_, a, b)| (a, b)),
         last_has_separator,
-        || make::token(T![,]),
+        || make::token(T![,]).with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")]),
     );
     let separators: Vec<_> = sorted
         .iter_mut()
@@ -142,6 +180,43 @@ pub fn sort_export_specifiers(
         .collect();
     let nodes = sorted.into_iter().map(|(_, node, _)| node);
     Some(make::js_export_named_from_specifier_list(nodes, separators))
+}
+
+pub fn merge_export_specifiers(
+    specifiers1: &JsExportNamedFromSpecifierList,
+    specifiers2: &JsExportNamedFromSpecifierList,
+) -> Option<JsExportNamedFromSpecifierList> {
+    let mut nodes = Vec::with_capacity(specifiers1.len() + specifiers2.len());
+    let mut separators = Vec::with_capacity(specifiers1.len() + specifiers2.len());
+    for AstSeparatedElement {
+        node,
+        trailing_separator,
+    } in specifiers1.elements()
+    {
+        let separator = trailing_separator.ok()?;
+        let mut node = node.ok()?;
+        if separator.is_none() {
+            node = node.trim_trailing_trivia()?;
+        }
+        let separator = separator.unwrap_or_else(|| {
+            make::token(T![,]).with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")])
+        });
+        nodes.push(node);
+        separators.push(separator);
+    }
+    for AstSeparatedElement {
+        node,
+        trailing_separator,
+    } in specifiers2.elements()
+    {
+        nodes.push(node.ok()?);
+        if let Some(separator) = trailing_separator.ok()? {
+            separators.push(separator);
+        }
+    }
+    sort_export_specifiers(&make::js_export_named_from_specifier_list(
+        nodes, separators,
+    ))
 }
 
 pub fn are_import_attributes_sorted(attributes: &JsImportAssertion) -> Option<bool> {
@@ -191,7 +266,7 @@ pub fn sort_attributes(attributes: JsImportAssertion) -> Option<JsImportAssertio
     handle_trvia(
         sorted.iter_mut().map(|(_, a, b)| (a, b)),
         last_has_separator,
-        || make::token(T![,]),
+        || make::token(T![,]).with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")]),
     );
     let separators: Vec<_> = sorted
         .iter_mut()
@@ -206,7 +281,7 @@ pub fn sort_attributes(attributes: JsImportAssertion) -> Option<JsImportAssertio
 fn handle_trvia<'a, L: Language + 'a, N: AstNode<Language = L> + 'a>(
     // Mutable iterator of a list of nodes and their optional separators
     iter: impl std::iter::ExactSizeIterator<Item = (&'a mut N, &'a mut Option<SyntaxToken<L>>)>,
-    keep_last_separator: bool,
+    needs_last_separator: bool,
     make_separator: fn() -> SyntaxToken<L>,
 ) {
     let last_index = iter.len().saturating_sub(1);
@@ -214,7 +289,7 @@ fn handle_trvia<'a, L: Language + 'a, N: AstNode<Language = L> + 'a>(
         if let Some(separator) = optional_separator {
             // Remove the last separator at the separator has no attached comments
             if i == last_index
-                && !(keep_last_separator
+                && !(needs_last_separator
                     || separator.has_leading_comments()
                     || separator.has_trailing_comments())
             {
@@ -227,14 +302,13 @@ fn handle_trvia<'a, L: Language + 'a, N: AstNode<Language = L> + 'a>(
                 }
                 *optional_separator = None;
             }
-        } else if i != last_index {
+        } else if i != last_index || needs_last_separator {
             // The last node is moved and has no trailing separator.
             // Thus we build a new separator and remove its trailing whitespaces.
             if let Some(new_node) = node.clone().trim_trailing_trivia() {
                 *node = new_node;
             }
-            *optional_separator =
-                Some(make_separator().with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")]));
+            *optional_separator = Some(make_separator());
         }
     }
 }

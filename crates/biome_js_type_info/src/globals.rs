@@ -1,0 +1,262 @@
+//! Hardcoded global definitions.
+
+// FIXME: Implement inference from type definitions.
+
+use std::sync::LazyLock;
+
+use biome_rowan::Text;
+
+use crate::{
+    Class, Function, GenericTypeParameter, Resolvable, ResolvedTypeData, ResolvedTypeId,
+    ReturnType, ScopeId, TypeData, TypeId, TypeMember, TypeMemberKind, TypeReference,
+    TypeReferenceQualifier, TypeResolver, TypeResolverLevel,
+};
+
+const GLOBAL_LEVEL: TypeResolverLevel = TypeResolverLevel::Global;
+
+pub static GLOBAL_RESOLVER: LazyLock<GlobalsResolver> = LazyLock::new(GlobalsResolver::default);
+
+pub static GLOBAL_TYPE_MEMBERS: LazyLock<Vec<TypeMember>> = LazyLock::new(|| {
+    (0..NUM_PREDEFINED_TYPES)
+        .map(TypeId::new)
+        .map(|id| TypeMember {
+            kind: TypeMemberKind::Named(Text::Static(global_type_name(id))),
+            is_static: false,
+            ty: ResolvedTypeId::new(GLOBAL_LEVEL, id).into(),
+        })
+        .collect()
+});
+
+pub const UNKNOWN_ID: TypeId = TypeId::new(0);
+pub const UNDEFINED_ID: TypeId = TypeId::new(1);
+pub const ARRAY_ID: TypeId = TypeId::new(2);
+pub const GLOBAL_ID: TypeId = TypeId::new(3);
+pub const INSTANCEOF_PROMISE_ID: TypeId = TypeId::new(4);
+pub const NUMBER_ID: TypeId = TypeId::new(5);
+pub const PROMISE_ID: TypeId = TypeId::new(6);
+pub const PROMISE_CATCH_ID: TypeId = TypeId::new(7);
+pub const PROMISE_FINALLY_ID: TypeId = TypeId::new(8);
+pub const PROMISE_THEN_ID: TypeId = TypeId::new(9);
+pub const PROMISE_ALL_ID: TypeId = TypeId::new(10);
+pub const PROMISE_ALL_SETTLED_ID: TypeId = TypeId::new(11);
+pub const PROMISE_ANY_ID: TypeId = TypeId::new(12);
+pub const PROMISE_RACE_ID: TypeId = TypeId::new(13);
+pub const PROMISE_REJECT_ID: TypeId = TypeId::new(14);
+pub const PROMISE_RESOLVE_ID: TypeId = TypeId::new(15);
+pub const PROMISE_TRY_ID: TypeId = TypeId::new(16);
+pub const NUM_PREDEFINED_TYPES: usize = 17; // Most be one more than the highest `TypeId` above.
+
+pub const GLOBAL_UNKNOWN_ID: ResolvedTypeId = ResolvedTypeId::new(GLOBAL_LEVEL, UNKNOWN_ID);
+pub const GLOBAL_UNDEFINED_ID: ResolvedTypeId = ResolvedTypeId::new(GLOBAL_LEVEL, UNDEFINED_ID);
+pub const GLOBAL_ARRAY_ID: ResolvedTypeId = ResolvedTypeId::new(GLOBAL_LEVEL, ARRAY_ID);
+pub const GLOBAL_GLOBAL_ID /* :smirk: */: ResolvedTypeId = ResolvedTypeId::new(GLOBAL_LEVEL, GLOBAL_ID);
+pub const GLOBAL_INSTANCEOF_PROMISE_ID: ResolvedTypeId =
+    ResolvedTypeId::new(GLOBAL_LEVEL, INSTANCEOF_PROMISE_ID);
+pub const GLOBAL_NUMBER_ID: ResolvedTypeId = ResolvedTypeId::new(GLOBAL_LEVEL, NUMBER_ID);
+pub const GLOBAL_PROMISE_ID: ResolvedTypeId = ResolvedTypeId::new(GLOBAL_LEVEL, PROMISE_ID);
+
+/// Returns a string for formatting global IDs in test snapshots.
+pub fn global_type_name(id: TypeId) -> &'static str {
+    match id.index() {
+        0 => "unknown",
+        1 => "undefined",
+        2 => "Array",
+        3 => "globalThis",
+        4 => "instanceof Promise",
+        5 => "number",
+        6 => "Promise",
+        7 => "Promise.prototype.catch",
+        8 => "Promise.prototype.finally",
+        9 => "Promise.prototype.then",
+        10 => "Promise.all",
+        11 => "Promise.allSettled",
+        12 => "Promise.any",
+        13 => "Promise.race",
+        14 => "Promise.reject",
+        15 => "Promise.resolve",
+        16 => "Promise.try",
+        _ => "inferred type",
+    }
+}
+
+/// Resolver that is limited to resolving symbols in the global scope.
+///
+/// This resolver does not check whether qualifiers that are being resolved have
+/// been shadowed by local declarations, so it should generally only be used
+/// after all other resolvers have failed.
+#[derive(Clone)]
+pub struct GlobalsResolver {
+    types: Vec<TypeData>,
+}
+
+impl Default for GlobalsResolver {
+    fn default() -> Self {
+        let promise_method = |name: &'static str, id: TypeId| TypeMember {
+            kind: TypeMemberKind::Named(Text::Static(name)),
+            is_static: false,
+            ty: ResolvedTypeId::new(TypeResolverLevel::Global, id).into(),
+        };
+
+        let static_promise_method = |name: &'static str, id: TypeId| TypeMember {
+            kind: TypeMemberKind::Named(Text::Static(name)),
+            is_static: true,
+            ty: ResolvedTypeId::new(TypeResolverLevel::Global, id).into(),
+        };
+
+        let promise_method_definition = |id: TypeId| {
+            TypeData::from(Function {
+                is_async: false,
+                type_parameters: Default::default(),
+                name: Some(Text::Static(global_type_name(id))),
+                parameters: Default::default(),
+                return_type: ReturnType::Type(GLOBAL_INSTANCEOF_PROMISE_ID.into()),
+            })
+        };
+
+        let types = vec![
+            TypeData::Unknown,
+            TypeData::Undefined,
+            TypeData::Class(Box::new(Class {
+                name: Some(Text::Static("Array")),
+                type_parameters: Box::new([GenericTypeParameter {
+                    name: Text::Static("T"),
+                    ty: TypeReference::Unknown,
+                }]),
+                extends: None,
+                members: Box::new([TypeMember {
+                    kind: TypeMemberKind::Named(Text::Static("length")),
+                    is_static: false,
+                    ty: GLOBAL_NUMBER_ID.into(),
+                }]),
+            })),
+            TypeData::Global,
+            TypeData::instance_of(TypeReference::from(GLOBAL_PROMISE_ID)),
+            TypeData::Number,
+            TypeData::Class(Box::new(Class {
+                name: Some(Text::Static("Promise")),
+                type_parameters: Box::new([GenericTypeParameter {
+                    name: Text::Static("T"),
+                    ty: TypeReference::Unknown,
+                }]),
+                extends: None,
+                members: Box::new([
+                    promise_method("catch", PROMISE_CATCH_ID),
+                    promise_method("finally", PROMISE_FINALLY_ID),
+                    promise_method("then", PROMISE_THEN_ID),
+                    static_promise_method("all", PROMISE_ALL_ID),
+                    static_promise_method("allSettled", PROMISE_ALL_SETTLED_ID),
+                    static_promise_method("any", PROMISE_ANY_ID),
+                    static_promise_method("race", PROMISE_RACE_ID),
+                    static_promise_method("reject", PROMISE_REJECT_ID),
+                    static_promise_method("resolve", PROMISE_RESOLVE_ID),
+                    static_promise_method("try", PROMISE_TRY_ID),
+                ]),
+            })),
+            promise_method_definition(PROMISE_CATCH_ID),
+            promise_method_definition(PROMISE_FINALLY_ID),
+            promise_method_definition(PROMISE_THEN_ID),
+            promise_method_definition(PROMISE_ALL_ID),
+            promise_method_definition(PROMISE_ALL_SETTLED_ID),
+            promise_method_definition(PROMISE_ANY_ID),
+            promise_method_definition(PROMISE_RACE_ID),
+            promise_method_definition(PROMISE_REJECT_ID),
+            promise_method_definition(PROMISE_RESOLVE_ID),
+            promise_method_definition(PROMISE_TRY_ID),
+        ];
+
+        Self { types }
+    }
+}
+
+impl GlobalsResolver {
+    pub fn run_inference(&mut self) {
+        self.resolve_all();
+        self.flatten_all();
+    }
+
+    pub fn resolve_all(&mut self) {
+        let mut i = NUM_PREDEFINED_TYPES;
+        while i < self.types.len() {
+            // First take the type to satisfy the borrow checker:
+            let ty = std::mem::take(&mut self.types[i]);
+            self.types[i] = ty.resolved(self);
+            i += 1;
+        }
+    }
+
+    fn flatten_all(&mut self) {
+        let mut i = NUM_PREDEFINED_TYPES;
+        while i < self.types.len() {
+            // First take the type to satisfy the borrow checker:
+            let ty = std::mem::take(&mut self.types[i]);
+            self.types[i] = ty.flattened(self);
+            i += 1;
+        }
+    }
+}
+
+impl TypeResolver for GlobalsResolver {
+    fn level(&self) -> TypeResolverLevel {
+        GLOBAL_LEVEL
+    }
+
+    fn find_type(&self, type_data: &TypeData) -> Option<TypeId> {
+        self.types
+            .iter()
+            .position(|data| data == type_data)
+            .map(TypeId::new)
+    }
+
+    fn get_by_id(&self, id: TypeId) -> &TypeData {
+        &self.types[id.index()]
+    }
+
+    fn get_by_resolved_id(&self, id: ResolvedTypeId) -> Option<ResolvedTypeData> {
+        (id.level() == GLOBAL_LEVEL).then(|| (id, self.get_by_id(id.id())).into())
+    }
+
+    fn register_type(&mut self, type_data: TypeData) -> TypeId {
+        // Searching linearly may potentially become quite expensive, but it
+        // should be outweighed by index lookups quite heavily.
+        match self.types.iter().position(|data| data == &type_data) {
+            Some(index) => TypeId::new(index),
+            None => {
+                let id = TypeId::new(self.types.len());
+                self.types.push(type_data);
+                id
+            }
+        }
+    }
+
+    fn resolve_reference(&self, ty: &TypeReference) -> Option<ResolvedTypeId> {
+        match ty {
+            TypeReference::Qualifier(qualifier) => self.resolve_qualifier(qualifier),
+            TypeReference::Resolved(resolved_id) => {
+                (resolved_id.level() == GLOBAL_LEVEL).then_some(*resolved_id)
+            }
+            TypeReference::Import(_) => None,
+            TypeReference::Unknown => Some(GLOBAL_UNKNOWN_ID),
+        }
+    }
+
+    fn resolve_qualifier(&self, qualifier: &TypeReferenceQualifier) -> Option<ResolvedTypeId> {
+        if qualifier.is_array() && !qualifier.has_known_type_parameters() {
+            Some(GLOBAL_ARRAY_ID)
+        } else if qualifier.is_promise() && !qualifier.has_known_type_parameters() {
+            Some(GLOBAL_PROMISE_ID)
+        } else {
+            None
+        }
+    }
+
+    fn resolve_type_of(&self, identifier: &Text, _scope_id: ScopeId) -> Option<ResolvedTypeId> {
+        match identifier.text() {
+            "globalThis" | "window" => Some(GLOBAL_GLOBAL_ID),
+            _ => None,
+        }
+    }
+
+    fn registered_types(&self) -> &[TypeData] {
+        &self.types[NUM_PREDEFINED_TYPES..]
+    }
+}

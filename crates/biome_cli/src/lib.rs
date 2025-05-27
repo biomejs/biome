@@ -6,6 +6,8 @@
 //! to parse commands and arguments, redirect the execution of the commands and
 //! execute the traversal of directory and files, based on the command that were passed.
 
+#![deny(clippy::use_self)]
+
 use biome_console::{ColorMode, Console};
 use biome_service::{App, Workspace, WorkspaceRef};
 use commands::search::SearchCommandPayload;
@@ -40,6 +42,14 @@ pub(crate) const VERSION: &str = match option_env!("BIOME_VERSION") {
     Some(version) => version,
     None => env!("CARGO_PKG_VERSION"),
 };
+
+/// File name  that is temporarily used when running the workspace internally.
+/// When using this file, make sure to close it via [Workspace::close_file].
+pub const TEMPORARY_INTERNAL_FILE_NAME: &str = "__BIOME_INTERNAL_FILE__";
+
+/// JSON file that is temporarily to handle internal files via [Workspace].
+/// When using this file, make sure to close it via [Workspace::close_file].
+pub const TEMPORARY_INTERNAL_REPORTER_FILE: &str = "__BIOME_INTERNAL_FILE__.json";
 
 /// Global context for an execution of the CLI
 pub struct CliSession<'app> {
@@ -81,6 +91,7 @@ impl<'app> CliSession<'app> {
                 linter_enabled,
                 formatter_enabled,
                 assist_enabled,
+                enforce_assist,
                 staged,
                 changed,
                 since,
@@ -97,6 +108,7 @@ impl<'app> CliSession<'app> {
                     linter_enabled,
                     formatter_enabled,
                     assist_enabled,
+                    enforce_assist,
                     staged,
                     changed,
                     since,
@@ -152,6 +164,7 @@ impl<'app> CliSession<'app> {
                 linter_enabled,
                 formatter_enabled,
                 assist_enabled,
+                enforce_assist,
                 configuration,
                 paths,
                 cli_options,
@@ -165,6 +178,7 @@ impl<'app> CliSession<'app> {
                     linter_enabled,
                     formatter_enabled,
                     assist_enabled,
+                    enforce_assist,
                     configuration,
                     paths,
                     changed,

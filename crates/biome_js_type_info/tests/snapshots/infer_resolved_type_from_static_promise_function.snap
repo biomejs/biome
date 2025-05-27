@@ -1,0 +1,24 @@
+---
+source: crates/biome_js_type_info/tests/utils.rs
+expression: content
+---
+## Input
+
+```ts
+Promise.resolve("value");
+
+```
+
+## Result
+
+```
+Call Global TypeId(17)(Global TypeId(18))
+```
+
+## Registered types
+
+```
+Global TypeId(17) => Promise.resolve
+
+Global TypeId(18) => value: value
+```

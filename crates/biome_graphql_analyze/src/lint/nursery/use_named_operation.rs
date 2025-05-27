@@ -3,6 +3,7 @@ use biome_analyze::{
     declare_lint_rule,
 };
 use biome_console::markup;
+use biome_diagnostics::Severity;
 use biome_graphql_factory::make;
 use biome_graphql_syntax::{GraphqlOperationDefinition, GraphqlOperationType};
 use biome_rowan::{AstNode, BatchMutationExt};
@@ -32,12 +33,13 @@ declare_lint_rule! {
     /// ```
     ///
     pub UseNamedOperation {
-        version: "next",
+        version: "2.0.0",
         name: "useNamedOperation",
         language: "graphql",
         sources: &[RuleSource::EslintGraphql("no-anonymous-operations")],
         source_kind: RuleSourceKind::SameLogic,
         recommended: true,
+        severity: Severity::Error,
         fix_kind: FixKind::Unsafe,
     }
 }

@@ -24,12 +24,12 @@ impl std::fmt::Display for DeserializableType {
             fmt,
             "{}",
             match self {
-                DeserializableType::Null => "null",
-                DeserializableType::Bool => "a boolean",
-                DeserializableType::Number => "a number",
-                DeserializableType::Str => "a string",
-                DeserializableType::Array => "an array",
-                DeserializableType::Map => "an object",
+                Self::Null => "null",
+                Self::Bool => "a boolean",
+                Self::Number => "a number",
+                Self::Str => "a string",
+                Self::Array => "an array",
+                Self::Map => "an object",
             }
         )
     }
@@ -49,7 +49,7 @@ impl DeserializableTypes {
     pub const fn empty() -> Self {
         Self(BitFlags::EMPTY)
     }
-    pub fn contains(self, other: impl Into<DeserializableTypes>) -> bool {
+    pub fn contains(self, other: impl Into<Self>) -> bool {
         self.0.contains(other.into().0)
     }
     pub const fn union(self, other: Self) -> Self {
@@ -231,7 +231,7 @@ impl DeserializationDiagnostic {
 
 impl From<SyntaxError> for DeserializationDiagnostic {
     fn from(_: SyntaxError) -> Self {
-        DeserializationDiagnostic::new("Syntax error")
+        Self::new("Syntax error")
     }
 }
 

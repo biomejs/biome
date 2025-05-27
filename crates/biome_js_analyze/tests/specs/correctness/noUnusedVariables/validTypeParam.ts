@@ -1,3 +1,4 @@
+/* should not generate diagnostics */
 export function f<T extends U, U>(a: T) {
     return a;
 }

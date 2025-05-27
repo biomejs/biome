@@ -1,0 +1,122 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```js
+for (var x in o) { if (x) { f(); continue; } g(); }
+for (var x in o) { if (x) { continue; f(); } g(); }
+for (var x in o) { if (x) { f(); } g(); }
+for (var x in o) { if (x) f(); g(); }
+for (var x in o) { foo() }
+for (var x in o) foo();
+```
+
+# Diagnostics
+```
+invalid.js:1:1 lint/suspicious/useGuardForIn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The body of a for-in should be wrapped in an `if` statement.
+  
+  > 1 │ for (var x in o) { if (x) { f(); continue; } g(); }
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    2 │ for (var x in o) { if (x) { continue; f(); } g(); }
+    3 │ for (var x in o) { if (x) { f(); } g(); }
+  
+  i Looping over the object with for-in loop  will include properties that are inherited through the prototype chain, the behaviour can lead to some unexpected items in your loop.
+  
+  i To resolve this issue, add an if statement like `if (Object.hasOwn(foo, key)) {...}` to filter out the extraneous properties. 
+  
+
+```
+
+```
+invalid.js:2:1 lint/suspicious/useGuardForIn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The body of a for-in should be wrapped in an `if` statement.
+  
+    1 │ for (var x in o) { if (x) { f(); continue; } g(); }
+  > 2 │ for (var x in o) { if (x) { continue; f(); } g(); }
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    3 │ for (var x in o) { if (x) { f(); } g(); }
+    4 │ for (var x in o) { if (x) f(); g(); }
+  
+  i Looping over the object with for-in loop  will include properties that are inherited through the prototype chain, the behaviour can lead to some unexpected items in your loop.
+  
+  i To resolve this issue, add an if statement like `if (Object.hasOwn(foo, key)) {...}` to filter out the extraneous properties. 
+  
+
+```
+
+```
+invalid.js:3:1 lint/suspicious/useGuardForIn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The body of a for-in should be wrapped in an `if` statement.
+  
+    1 │ for (var x in o) { if (x) { f(); continue; } g(); }
+    2 │ for (var x in o) { if (x) { continue; f(); } g(); }
+  > 3 │ for (var x in o) { if (x) { f(); } g(); }
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    4 │ for (var x in o) { if (x) f(); g(); }
+    5 │ for (var x in o) { foo() }
+  
+  i Looping over the object with for-in loop  will include properties that are inherited through the prototype chain, the behaviour can lead to some unexpected items in your loop.
+  
+  i To resolve this issue, add an if statement like `if (Object.hasOwn(foo, key)) {...}` to filter out the extraneous properties. 
+  
+
+```
+
+```
+invalid.js:4:1 lint/suspicious/useGuardForIn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The body of a for-in should be wrapped in an `if` statement.
+  
+    2 │ for (var x in o) { if (x) { continue; f(); } g(); }
+    3 │ for (var x in o) { if (x) { f(); } g(); }
+  > 4 │ for (var x in o) { if (x) f(); g(); }
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    5 │ for (var x in o) { foo() }
+    6 │ for (var x in o) foo();
+  
+  i Looping over the object with for-in loop  will include properties that are inherited through the prototype chain, the behaviour can lead to some unexpected items in your loop.
+  
+  i To resolve this issue, add an if statement like `if (Object.hasOwn(foo, key)) {...}` to filter out the extraneous properties. 
+  
+
+```
+
+```
+invalid.js:5:1 lint/suspicious/useGuardForIn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The body of a for-in should be wrapped in an `if` statement.
+  
+    3 │ for (var x in o) { if (x) { f(); } g(); }
+    4 │ for (var x in o) { if (x) f(); g(); }
+  > 5 │ for (var x in o) { foo() }
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    6 │ for (var x in o) foo();
+  
+  i Looping over the object with for-in loop  will include properties that are inherited through the prototype chain, the behaviour can lead to some unexpected items in your loop.
+  
+  i To resolve this issue, add an if statement like `if (Object.hasOwn(foo, key)) {...}` to filter out the extraneous properties. 
+  
+
+```
+
+```
+invalid.js:6:1 lint/suspicious/useGuardForIn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The body of a for-in should be wrapped in an `if` statement.
+  
+    4 │ for (var x in o) { if (x) f(); g(); }
+    5 │ for (var x in o) { foo() }
+  > 6 │ for (var x in o) foo();
+      │ ^^^^^^^^^^^^^^^^^^^^^^^
+  
+  i Looping over the object with for-in loop  will include properties that are inherited through the prototype chain, the behaviour can lead to some unexpected items in your loop.
+  
+  i To resolve this issue, add an if statement like `if (Object.hasOwn(foo, key)) {...}` to filter out the extraneous properties. 
+  
+
+```

@@ -1,3 +1,4 @@
+#![deny(clippy::use_self)]
 #![deny(rust_2018_idioms)]
 
 use ::serde::{Deserialize, Serialize};
@@ -15,12 +16,6 @@ pub mod serde;
 
 #[cfg(feature = "camino")]
 pub use adapters::CaminoError;
-
-#[cfg(feature = "serde_ini")]
-pub use adapters::IniError;
-
-#[cfg(feature = "oxc_resolver")]
-pub use adapters::ResolveError;
 
 #[cfg(feature = "bpaf")]
 pub use adapters::BpafError;
@@ -77,11 +72,11 @@ pub enum DiagnosticTag {
 
 impl DiagnosticTag {
     pub fn is_unnecessary(&self) -> bool {
-        matches!(self, DiagnosticTag::Unnecessary | DiagnosticTag::Both)
+        matches!(self, Self::Unnecessary | Self::Both)
     }
 
     pub fn is_deprecated(&self) -> bool {
-        matches!(self, DiagnosticTag::Deprecated | DiagnosticTag::Both)
+        matches!(self, Self::Deprecated | Self::Both)
     }
 }
 

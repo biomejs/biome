@@ -1,7 +1,6 @@
 ---
 source: crates/biome_cli/tests/snap_test.rs
 expression: redactor(content)
-snapshot_kind: text
 ---
 ## `biome.json`
 
@@ -14,9 +13,9 @@ snapshot_kind: text
 # Termination Message
 
 ```block
-internalError/io ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+check ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × No files were processed in the specified paths.
+  × Some errors were emitted while running checks.
   
 
 
@@ -45,5 +44,22 @@ biome.json:2:16 deserialize ━━━━━━━━━━━━━━━━━�
 ```
 
 ```block
-Checked 0 files in <TIME>. No fixes applied.
+biome.json format ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Formatter would have printed the following content:
+  
+    1 1 │   {
+    2   │ - ····"$schema":·"https://biomejs.dev/schemas/0.0.1/schema.json"
+      2 │ + → "$schema":·"https://biomejs.dev/schemas/0.0.1/schema.json"
+    3 3 │   }
+    4   │ - ········
+      4 │ + 
+  
+
+```
+
+```block
+Checked 1 file in <TIME>. No fixes applied.
+Found 1 error.
+Found 1 warning.
 ```

@@ -1,9 +1,11 @@
 use crate::changed::{get_changed_files, get_staged_files};
 use crate::cli_options::{CliOptions, CliReporter, ColorsArg, cli_options};
-use crate::execute::{ReportMode, Stdin};
+use crate::commands::scan_kind::compute_scan_kind;
+use crate::execute::Stdin;
 use crate::logging::LoggingKind;
 use crate::{
-    CliDiagnostic, CliSession, Execution, LoggingLevel, VERSION, execute_mode, setup_cli_subscriber,
+    CliDiagnostic, CliSession, Execution, LoggingLevel, TraversalMode, VERSION, execute_mode,
+    setup_cli_subscriber,
 };
 use biome_configuration::analyzer::assist::AssistEnabled;
 use biome_configuration::analyzer::{LinterEnabled, RuleSelector};
@@ -28,11 +30,12 @@ use biome_deserialize::Merge;
 use biome_diagnostics::{Diagnostic, PrintDiagnostic, Severity};
 use biome_fs::{BiomePath, FileSystem};
 use biome_grit_patterns::GritTargetLanguage;
+use biome_resolver::FsWithResolverProxy;
 use biome_service::configuration::{LoadedConfiguration, load_configuration, load_editorconfig};
 use biome_service::documentation::Doc;
 use biome_service::projects::ProjectKey;
 use biome_service::workspace::{
-    FixFileMode, OpenProjectParams, ScanProjectFolderParams, UpdateSettingsParams,
+    FixFileMode, OpenProjectParams, ScanKind, ScanProjectFolderParams, UpdateSettingsParams,
 };
 use biome_service::{Workspace, WorkspaceError};
 use bpaf::Bpaf;
@@ -51,6 +54,7 @@ pub(crate) mod init;
 pub(crate) mod lint;
 pub(crate) mod migrate;
 pub(crate) mod rage;
+mod scan_kind;
 pub(crate) mod search;
 pub(crate) mod version;
 
@@ -108,11 +112,11 @@ pub enum BiomeCommand {
     /// Runs formatter, linter and import sorting to the requested files.
     #[bpaf(command)]
     Check {
-        /// Writes safe fixes, formatting and import sorting
+        /// Apply safe fixes, formatting and import sorting
         #[bpaf(long("write"), switch)]
         write: bool,
 
-        /// Allow to do unsafe fixes, should be used with `--write` or `--fix`
+        /// Apply unsafe fixes. Should be used with `--write` or `--fix`
         #[bpaf(long("unsafe"), switch)]
         unsafe_: bool,
 
@@ -120,7 +124,7 @@ pub enum BiomeCommand {
         #[bpaf(long("fix"), switch, hide_usage)]
         fix: bool,
 
-        /// Allow to enable or disable the formatter check.
+        /// Allow enabling or disabling the formatter check.
         #[bpaf(
             long("formatter-enabled"),
             argument("true|false"),
@@ -128,13 +132,17 @@ pub enum BiomeCommand {
             hide_usage
         )]
         formatter_enabled: Option<FormatterEnabled>,
-        /// Allow to enable or disable the linter check.
+        /// Allow enabling or disabling the linter check.
         #[bpaf(long("linter-enabled"), argument("true|false"), optional, hide_usage)]
         linter_enabled: Option<LinterEnabled>,
 
-        /// Allow to enable or disable the assist.
+        /// Allow enabling or disabling the assist.
         #[bpaf(long("assist-enabled"), argument("true|false"), optional)]
         assist_enabled: Option<AssistEnabled>,
+
+        /// Allows enforcing assist, and make the CLI fail if some actions aren't applied. Defaults to `true`.
+        #[bpaf(long("enforce-assist"), argument("true|false"), fallback(true))]
+        enforce_assist: bool,
 
         #[bpaf(external(configuration), hide_usage, optional)]
         configuration: Option<Configuration>,
@@ -144,7 +152,10 @@ pub enum BiomeCommand {
         ///
         /// The file doesn't need to exist on disk, what matters is the extension of the file. Based on the extension, Biome knows how to check the code.
         ///
-        /// Example: `echo 'let a;' | biome check --stdin-file-path=file.js`
+        /// Example:
+        /// ```shell
+        /// echo 'let a;' | biome check --stdin-file-path=file.js --write
+        /// ```
         #[bpaf(long("stdin-file-path"), argument("PATH"), hide_usage)]
         stdin_file_path: Option<String>,
 
@@ -174,7 +185,7 @@ pub enum BiomeCommand {
         #[bpaf(long("write"), switch)]
         write: bool,
 
-        /// Allow to do unsafe fixes, should be used with `--write` or `--fix`
+        /// Apply unsafe fixes. Should be used with `--write` or `--fix`
         #[bpaf(long("unsafe"), switch)]
         unsafe_: bool,
 
@@ -182,7 +193,7 @@ pub enum BiomeCommand {
         #[bpaf(long("fix"), switch, hide_usage)]
         fix: bool,
 
-        /// Fixes lint rule violations with a comment a suppression instead of using a rule code action (fix)
+        /// Fixes lint rule violations with comment suppressions instead of using a rule code action (fix)
         #[bpaf(long("suppress"))]
         suppress: bool,
 
@@ -233,7 +244,10 @@ pub enum BiomeCommand {
         ///
         /// The file doesn't need to exist on disk, what matters is the extension of the file. Based on the extension, Biome knows how to lint the code.
         ///
-        /// Example: `echo 'let a;' | biome lint --stdin-file-path=file.js`
+        /// Example:
+        /// ```shell
+        /// echo 'let a;' | biome lint --stdin-file-path=file.js --write
+        /// ```
         #[bpaf(long("stdin-file-path"), argument("PATH"), hide_usage)]
         stdin_file_path: Option<String>,
         /// When set to true, only the files that have been staged (the ones prepared to be committed)
@@ -282,18 +296,21 @@ pub enum BiomeCommand {
         ///
         /// The file doesn't need to exist on disk, what matters is the extension of the file. Based on the extension, Biome knows how to format the code.
         ///
-        /// Example: `echo 'let a;' | biome format --stdin-file-path=file.js`
+        /// Example:
+        /// ```shell
+        /// echo 'let a;' | biome format --stdin-file-path=file.js --write
+        /// ```
         #[bpaf(long("stdin-file-path"), argument("PATH"), hide_usage)]
         stdin_file_path: Option<String>,
 
         #[bpaf(external, hide_usage)]
         cli_options: CliOptions,
 
-        /// Writes formatted files to file system.
+        /// Writes formatted files to a file system.
         #[bpaf(long("write"), switch)]
         write: bool,
 
-        /// Alias of `--write`, writes formatted files to file system.
+        /// Alias of `--write`, writes formatted files to a file system.
         #[bpaf(long("fix"), switch, hide_usage)]
         fix: bool,
 
@@ -308,7 +325,7 @@ pub enum BiomeCommand {
         changed: bool,
 
         /// Use this to specify the base branch to compare against when you're using the --changed
-        /// flag and the `defaultBranch` is not set in your biome.json
+        /// flag, and the `defaultBranch` is not set in your biome.json
         #[bpaf(long("since"), argument("REF"))]
         since: Option<String>,
 
@@ -321,16 +338,20 @@ pub enum BiomeCommand {
     /// Files won't be modified, the command is a read-only operation.
     #[bpaf(command)]
     Ci {
-        /// Allow to enable or disable the formatter check.
+        /// Allow enabling or disabling the formatter check.
         #[bpaf(long("formatter-enabled"), argument("true|false"), optional)]
         formatter_enabled: Option<FormatterEnabled>,
-        /// Allow to enable or disable the linter check.
+        /// Allow enabling or disable the linter check.
         #[bpaf(long("linter-enabled"), argument("true|false"), optional)]
         linter_enabled: Option<LinterEnabled>,
 
-        /// Allow to enable or disable the assist.
+        /// Allow enabling or disabling the assist.
         #[bpaf(long("assist-enabled"), argument("true|false"), optional)]
         assist_enabled: Option<AssistEnabled>,
+
+        /// Allows enforcing assist, and make the CLI fail if some actions aren't applied. Defaults to `true`.
+        #[bpaf(long("enforce-assist"), argument("true|false"), fallback(true))]
+        enforce_assist: bool,
 
         #[bpaf(external(configuration), hide_usage, optional)]
         configuration: Option<Configuration>,
@@ -443,7 +464,10 @@ pub enum BiomeCommand {
         /// extension of the file. Based on the extension, Biome knows how to
         /// parse the code.
         ///
-        /// Example: `echo 'let a;' | biome search '`let $var`' --stdin-file-path=file.js`
+        /// Example:
+        /// ```shell
+        /// echo 'let a;' | biome search '`let $var`' --stdin-file-path=file.js
+        /// ```
         #[bpaf(long("stdin-file-path"), argument("PATH"), hide_usage)]
         stdin_file_path: Option<String>,
 
@@ -453,7 +477,7 @@ pub enum BiomeCommand {
         /// target, so we currently do not support writing queries that apply
         /// to multiple languages at once.
         ///
-        /// If none given, the default language is JavaScript.
+        /// When none, the default language is JavaScript.
         #[bpaf(long("language"), short('l'))]
         language: Option<GritTargetLanguage>,
 
@@ -492,7 +516,7 @@ pub enum BiomeCommand {
 
     #[bpaf(command("__run_server"), hide)]
     RunServer {
-        /// Allows to change the prefix applied to the file name of the logs.
+        /// Allows changing the prefix applied to the file name of the logs.
         #[bpaf(
             env("BIOME_LOG_PREFIX_NAME"),
             long("log-prefix-name"),
@@ -502,7 +526,7 @@ pub enum BiomeCommand {
             display_fallback
         )]
         log_prefix_name: String,
-        /// Allows to change the folder where logs are stored.
+        /// Allows changing the folder where logs are stored.
         #[bpaf(
             env("BIOME_LOG_PATH"),
             long("log-path"),
@@ -540,29 +564,29 @@ pub enum MigrateSubCommand {
 
 impl MigrateSubCommand {
     pub const fn is_prettier(&self) -> bool {
-        matches!(self, MigrateSubCommand::Prettier)
+        matches!(self, Self::Prettier)
     }
 }
 
 impl BiomeCommand {
     const fn cli_options(&self) -> Option<&CliOptions> {
         match self {
-            BiomeCommand::Version(cli_options)
-            | BiomeCommand::Rage(cli_options, ..)
-            | BiomeCommand::Check { cli_options, .. }
-            | BiomeCommand::Lint { cli_options, .. }
-            | BiomeCommand::Ci { cli_options, .. }
-            | BiomeCommand::Format { cli_options, .. }
-            | BiomeCommand::Migrate { cli_options, .. }
-            | BiomeCommand::Search { cli_options, .. } => Some(cli_options),
-            BiomeCommand::LspProxy { .. }
-            | BiomeCommand::Start { .. }
-            | BiomeCommand::Stop
-            | BiomeCommand::Init(_)
-            | BiomeCommand::Explain { .. }
-            | BiomeCommand::RunServer { .. }
-            | BiomeCommand::Clean { .. }
-            | BiomeCommand::PrintSocket => None,
+            Self::Version(cli_options)
+            | Self::Rage(cli_options, ..)
+            | Self::Check { cli_options, .. }
+            | Self::Lint { cli_options, .. }
+            | Self::Ci { cli_options, .. }
+            | Self::Format { cli_options, .. }
+            | Self::Migrate { cli_options, .. }
+            | Self::Search { cli_options, .. } => Some(cli_options),
+            Self::LspProxy { .. }
+            | Self::Start { .. }
+            | Self::Stop
+            | Self::Init(_)
+            | Self::Explain { .. }
+            | Self::RunServer { .. }
+            | Self::Clean { .. }
+            | Self::PrintSocket => None,
         }
     }
 
@@ -575,7 +599,7 @@ impl BiomeCommand {
                 }
                 // We want force colors in CI, to give e better UX experience
                 // Unless users explicitly set the colors flag
-                if matches!(self, BiomeCommand::Ci { .. }) && cli_options.colors.is_none() {
+                if matches!(self, Self::Ci { .. }) && cli_options.colors.is_none() {
                     return Some(&ColorsArg::Force);
                 }
                 // Normal behaviors
@@ -587,7 +611,7 @@ impl BiomeCommand {
 
     pub const fn get_threads(&self) -> Option<usize> {
         match self {
-            BiomeCommand::Ci { threads, .. } => *threads,
+            Self::Ci { threads, .. } => *threads,
             _ => None,
         }
     }
@@ -624,15 +648,18 @@ pub(crate) fn validate_configuration_diagnostics(
     verbose: bool,
 ) -> Result<(), CliDiagnostic> {
     let diagnostics = loaded_configuration.as_diagnostics_iter();
-    for diagnostic in diagnostics {
-        if diagnostic.tags().is_verbose() && verbose {
-            console.error(markup! {{PrintDiagnostic::verbose(diagnostic)}})
-        } else {
-            console.error(markup! {{PrintDiagnostic::simple(diagnostic)}})
-        }
-    }
 
+    // We want to print the diagnostics only if there are errors. Other diagnostics such as
+    // information/warnings will be printed during the traversal
     if loaded_configuration.has_errors() {
+        for diagnostic in diagnostics {
+            if diagnostic.tags().is_verbose() && verbose {
+                console.error(markup! {{PrintDiagnostic::verbose(diagnostic)}})
+            } else {
+                console.error(markup! {{PrintDiagnostic::simple(diagnostic)}})
+            }
+        }
+
         return Err(CliDiagnostic::workspace_error(
             BiomeDiagnostic::invalid_configuration(
                 "Biome exited because the configuration resulted in errors. Please fix them.",
@@ -764,8 +791,18 @@ pub(crate) trait CommandRunner: Sized {
             execution,
             paths,
             duration,
+            configuration_files,
+            project_key,
         } = self.configure_workspace(fs, console, workspace, cli_options)?;
-        execute_mode(execution, session, cli_options, paths, duration)
+        execute_mode(
+            execution,
+            session,
+            cli_options,
+            paths,
+            duration,
+            configuration_files,
+            project_key,
+        )
     }
 
     /// This function prepares the workspace with the following:
@@ -776,13 +813,14 @@ pub(crate) trait CommandRunner: Sized {
     /// - Updates the settings that belong to the project registered
     fn configure_workspace(
         &mut self,
-        fs: &dyn FileSystem,
+        fs: &dyn FsWithResolverProxy,
         console: &mut dyn Console,
         workspace: &dyn Workspace,
         cli_options: &CliOptions,
     ) -> Result<ConfiguredWorkspace, CliDiagnostic> {
-        let loaded_configuration =
-            load_configuration(fs, cli_options.as_configuration_path_hint())?;
+        let configuration_path_hint = cli_options.as_configuration_path_hint();
+        let is_configuration_from_user = configuration_path_hint.is_from_user();
+        let loaded_configuration = load_configuration(fs, configuration_path_hint)?;
         if self.should_validate_configuration_diagnostics() {
             validate_configuration_diagnostics(
                 &loaded_configuration,
@@ -802,49 +840,77 @@ pub(crate) trait CommandRunner: Sized {
             .working_directory()
             .map(BiomePath::from)
             .unwrap_or_default();
-        let project_key = workspace.open_project(OpenProjectParams {
-            path: project_path.clone(),
-            open_uninitialized: true,
-        })?;
+
+        let execution = self.get_execution(cli_options, console, workspace)?;
+
+        let params = if let TraversalMode::Lint { only, skip, .. } = execution.traversal_mode() {
+            OpenProjectParams {
+                path: project_path.clone(),
+                open_uninitialized: true,
+                only_rules: Some(only.clone()),
+                skip_rules: Some(skip.clone()),
+            }
+        } else {
+            OpenProjectParams {
+                path: project_path.clone(),
+                open_uninitialized: true,
+                only_rules: None,
+                skip_rules: None,
+            }
+        };
+
+        let open_project_result = workspace.open_project(params)?;
+
+        let scan_kind = compute_scan_kind(&execution, &configuration).unwrap_or({
+            if open_project_result.scan_kind == ScanKind::None && configuration.use_ignore_file() {
+                ScanKind::KnownFiles
+            } else {
+                open_project_result.scan_kind
+            }
+        });
 
         let result = workspace.update_settings(UpdateSettingsParams {
-            project_key,
-            workspace_directory: configuration_path.map(BiomePath::from),
+            project_key: open_project_result.project_key,
+            // When the user provides the path to the configuration, we can't use its directory because
+            // it might be outside the project, so we need to use the current project directory.
+            workspace_directory: if is_configuration_from_user {
+                Some(project_path.clone())
+            } else {
+                configuration_path.map(BiomePath::from)
+            },
             configuration,
         })?;
         for diagnostic in &result.diagnostics {
-            console.log(markup! {{PrintDiagnostic::simple(diagnostic)}});
+            if diagnostic.tags().is_verbose() && cli_options.verbose {
+                console.error(markup! {{PrintDiagnostic::verbose(diagnostic)}})
+            } else {
+                console.error(markup! {{PrintDiagnostic::simple(diagnostic)}})
+            }
         }
 
-        let execution = self.get_execution(cli_options, console, workspace, project_key)?;
-
-        let duration = if execution.traversal_mode().should_scan_project() {
-            let result = workspace.scan_project_folder(ScanProjectFolderParams {
-                project_key,
-                path: Some(project_path),
-                watch: cli_options.use_server,
-                force: false, // TODO: Maybe we'll want a CLI flag for this.
-            })?;
-            for diagnostic in result.diagnostics {
-                if diagnostic.severity() >= Severity::Error {
-                    console.log(markup! {{PrintDiagnostic::simple(&diagnostic)}});
+        let result = workspace.scan_project_folder(ScanProjectFolderParams {
+            project_key: open_project_result.project_key,
+            path: Some(project_path.clone()),
+            watch: cli_options.use_server,
+            force: false, // TODO: Maybe we'll want a CLI flag for this.
+            scan_kind,
+        })?;
+        for diagnostic in result.diagnostics {
+            if diagnostic.severity() >= Severity::Error {
+                if diagnostic.tags().is_verbose() && cli_options.verbose {
+                    console.error(markup! {{PrintDiagnostic::verbose(&diagnostic)}})
+                } else {
+                    console.error(markup! {{PrintDiagnostic::simple(&diagnostic)}})
                 }
             }
-            if cli_options.verbose && matches!(execution.report_mode(), ReportMode::Terminal { .. })
-            {
-                console.log(markup! {
-                    <Info>"Scanned project folder in "<Emphasis>{result.duration}</Emphasis>"."</Info>
-                });
-            }
-            Some(result.duration)
-        } else {
-            None
-        };
+        }
 
         Ok(ConfiguredWorkspace {
             execution,
             paths,
-            duration,
+            duration: Some(result.duration),
+            configuration_files: result.configuration_files,
+            project_key: open_project_result.project_key,
         })
     }
 
@@ -900,7 +966,6 @@ pub(crate) trait CommandRunner: Sized {
         cli_options: &CliOptions,
         console: &mut dyn Console,
         workspace: &dyn Workspace,
-        project_key: ProjectKey,
     ) -> Result<Execution, CliDiagnostic>;
 
     // Below, methods that consumers can implement
@@ -925,6 +990,10 @@ pub(crate) struct ConfiguredWorkspace {
     pub paths: Vec<OsString>,
     /// The duration of the scanning
     pub duration: Option<Duration>,
+    /// Configuration files found inside the project
+    pub configuration_files: Vec<BiomePath>,
+    /// The unique identifier of the project
+    pub project_key: ProjectKey,
 }
 
 pub trait LoadEditorConfig: CommandRunner {

@@ -1,9 +1,10 @@
 use biome_css_syntax::{
-    CssComposesPropertyValue, CssDashedIdentifier, CssGenericComponentValueList, CssIdentifier,
-    CssRoot, CssSyntaxNode,
+    CssComposesPropertyValue, CssDashedIdentifier, CssDeclaration, CssGenericComponentValueList,
+    CssIdentifier, CssMediaAtRule, CssNestedQualifiedRule, CssQualifiedRule, CssRoot,
+    CssSupportsAtRule, CssSyntaxNode,
 };
 use biome_rowan::{
-    SyntaxNodeText, SyntaxResult, TextRange, TextSize, TokenText, declare_node_union,
+    AstNode, SyntaxNodeText, SyntaxResult, TextRange, TextSize, TokenText, declare_node_union,
 };
 use rustc_hash::FxHashMap;
 use std::hash::Hash;
@@ -102,11 +103,11 @@ pub(crate) struct SemanticModelData {
 #[derive(Debug, Clone)]
 pub struct Rule {
     pub(crate) id: RuleId,
-    pub(crate) node: CssSyntaxNode,
+    pub(crate) node: RuleNode,
     /// The selectors associated with this rule.
     pub(crate) selectors: Vec<Selector>,
     /// The declarations within this rule.
-    pub(crate) declarations: Vec<CssDeclaration>,
+    pub(crate) declarations: Vec<CssModelDeclaration>,
     /// The id of the parent rule
     pub(crate) parent_id: Option<RuleId>,
     /// The ids of the child rules
@@ -116,12 +117,27 @@ pub struct Rule {
     pub(crate) specificity: Specificity,
 }
 
+declare_node_union! {
+    pub RuleNode = CssQualifiedRule | CssNestedQualifiedRule | CssMediaAtRule | CssSupportsAtRule
+}
+
+impl RuleNode {
+    pub fn text_trimmed_range(&self) -> TextRange {
+        match self {
+            Self::CssQualifiedRule(node) => node.syntax().text_trimmed_range(),
+            Self::CssNestedQualifiedRule(node) => node.syntax().text_trimmed_range(),
+            Self::CssMediaAtRule(node) => node.syntax().text_trimmed_range(),
+            Self::CssSupportsAtRule(node) => node.syntax().text_trimmed_range(),
+        }
+    }
+}
+
 impl Rule {
     pub fn id(&self) -> RuleId {
         self.id
     }
 
-    pub fn node(&self) -> &CssSyntaxNode {
+    pub fn node(&self) -> &RuleNode {
         &self.node
     }
 
@@ -133,7 +149,7 @@ impl Rule {
         &self.selectors
     }
 
-    pub fn declarations(&self) -> &[CssDeclaration] {
+    pub fn declarations(&self) -> &[CssModelDeclaration] {
         &self.declarations
     }
 
@@ -207,7 +223,7 @@ pub struct Specificity(pub u32, pub u32, pub u32);
 ///
 /// More details https://drafts.csswg.org/selectors/#example-d97bd125
 impl std::ops::Add for Specificity {
-    type Output = Specificity;
+    type Output = Self;
     fn add(self, rhs: Self) -> Self::Output {
         Self(self.0 + rhs.0, self.1 + rhs.1, self.2 + rhs.2)
     }
@@ -238,19 +254,15 @@ impl std::fmt::Display for Specificity {
 /// }
 /// ```
 #[derive(Debug, Clone)]
-pub struct CssDeclaration {
-    pub(crate) node: CssSyntaxNode,
+pub struct CssModelDeclaration {
+    pub(crate) declaration: CssDeclaration,
     pub(crate) property: CssProperty,
     pub(crate) value: CssPropertyInitialValue,
 }
 
-impl CssDeclaration {
-    pub fn node(&self) -> &CssSyntaxNode {
-        &self.node
-    }
-
-    pub fn range(&self) -> TextRange {
-        self.node.text_trimmed_range()
+impl CssModelDeclaration {
+    pub fn declaration(&self) -> &CssDeclaration {
+        &self.declaration
     }
 
     pub fn property(&self) -> &CssProperty {
@@ -269,8 +281,8 @@ declare_node_union! {
 impl CssProperty {
     pub fn value(&self) -> SyntaxResult<TokenText> {
         let token = match self {
-            CssProperty::CssDashedIdentifier(node) => node.value_token()?,
-            CssProperty::CssIdentifier(node) => node.value_token()?,
+            Self::CssDashedIdentifier(node) => node.value_token()?,
+            Self::CssIdentifier(node) => node.value_token()?,
         };
 
         Ok(token.token_text_trimmed())
@@ -310,7 +322,7 @@ impl From<CssComposesPropertyValue> for CssPropertyInitialValue {
 /// ```
 #[derive(Debug, Clone)]
 pub enum CssGlobalCustomVariable {
-    Root(CssDeclaration),
+    Root(CssModelDeclaration),
     AtProperty {
         property: CssProperty,
         syntax: Option<String>,

@@ -25,3 +25,4 @@ incorrect_key.json:4:4 deserialize ━━━━━━━━━━━━━━━
   - formatter
   - linter
   - assist
+  - files

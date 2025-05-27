@@ -32,7 +32,7 @@ pub struct LinterConfiguration {
     /// match these patterns.
     #[bpaf(pure(Default::default()), hide)]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub includes: Option<Vec<biome_glob::Glob>>,
+    pub includes: Option<Vec<biome_glob::NormalizedGlob>>,
 
     /// An object where the keys are the names of the domains, and the values are `all`, `recommended`, or `none`.
     #[bpaf(hide, pure(Default::default()))]
@@ -53,7 +53,7 @@ pub enum RuleDomainValue {
 }
 
 #[derive(Clone, Debug, Default, Deserialize, Deserializable, Eq, PartialEq, Serialize, Merge)]
-pub struct RuleDomains(FxHashMap<RuleDomain, RuleDomainValue>);
+pub struct RuleDomains(pub FxHashMap<RuleDomain, RuleDomainValue>);
 
 impl Deref for RuleDomains {
     type Target = FxHashMap<RuleDomain, RuleDomainValue>;
@@ -92,4 +92,8 @@ impl LinterConfiguration {
     pub fn get_rules(&self) -> Rules {
         self.rules.clone().unwrap_or_default()
     }
+}
+
+impl Rules {
+    pub fn get_rule(&self) {}
 }

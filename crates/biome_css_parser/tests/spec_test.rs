@@ -9,7 +9,7 @@ use biome_diagnostics::{print_diagnostic_to_string, termcolor};
 use biome_fs::BiomePath;
 use biome_rowan::SyntaxKind;
 use biome_service::settings::Settings;
-use biome_test_utils::has_bogus_nodes_or_empty_slots;
+use biome_test_utils::{has_bogus_nodes_or_empty_slots, validate_eof_token};
 use camino::Utf8Path;
 use std::fmt::Write;
 use std::fs;
@@ -81,6 +81,8 @@ pub fn run(test_case: &str, _snapshot_name: &str, test_directory: &str, outcome_
     }
 
     let parsed = parse_css(&content, options);
+    validate_eof_token(parsed.syntax());
+
     let formatted_ast = format!("{:#?}", parsed.tree());
 
     let mut snapshot = String::new();
@@ -178,9 +180,8 @@ pub fn run(test_case: &str, _snapshot_name: &str, test_directory: &str, outcome_
 #[test]
 pub fn quick_test() {
     let code = r#"
-    .foo {
-       color: blue;;
-    }
+ @supports not (selector(:before) or not (not (selector(:before)))) {
+}
     "#;
 
     let root = parse_css(

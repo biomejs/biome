@@ -1,7 +1,6 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid.ts
-snapshot_kind: text
 ---
 # Input
 ```ts
@@ -41,7 +40,7 @@ class StaticConstants0 {
 ```
 invalid.ts:1:1 lint/complexity/noStaticOnlyClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Avoid classes that contain only static members.
+  ! Avoid classes that contain only static members.
   
   > 1 │ class X0 {
       │ ^^^^^^^^^^
@@ -60,7 +59,7 @@ invalid.ts:1:1 lint/complexity/noStaticOnlyClass ━━━━━━━━━━�
 ```
 invalid.ts:6:1 lint/complexity/noStaticOnlyClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Avoid classes that contain only static members.
+  ! Avoid classes that contain only static members.
   
      4 │ }
      5 │ 
@@ -81,7 +80,7 @@ invalid.ts:6:1 lint/complexity/noStaticOnlyClass ━━━━━━━━━━�
 ```
 invalid.ts:11:12 lint/complexity/noStaticOnlyClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Avoid classes that contain only static members.
+  ! Avoid classes that contain only static members.
   
      9 │ }
     10 │ 
@@ -101,7 +100,7 @@ invalid.ts:11:12 lint/complexity/noStaticOnlyClass ━━━━━━━━━�
 ```
 invalid.ts:15:12 lint/complexity/noStaticOnlyClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Avoid classes that contain only static members.
+  ! Avoid classes that contain only static members.
   
     13 │ };
     14 │ 
@@ -121,7 +120,7 @@ invalid.ts:15:12 lint/complexity/noStaticOnlyClass ━━━━━━━━━�
 ```
 invalid.ts:19:16 lint/complexity/noStaticOnlyClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Avoid classes that contain only static members.
+  ! Avoid classes that contain only static members.
   
     17 │ };
     18 │ 
@@ -141,7 +140,7 @@ invalid.ts:19:16 lint/complexity/noStaticOnlyClass ━━━━━━━━━�
 ```
 invalid.ts:23:1 lint/complexity/noStaticOnlyClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Avoid classes that contain only static members.
+  ! Avoid classes that contain only static members.
   
     21 │ }
     22 │ 

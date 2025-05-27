@@ -1,7 +1,6 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid.js
-snapshot_kind: text
 ---
 # Input
 ```js
@@ -17,7 +16,7 @@ assertEquals(1, 1)
 ```
 invalid.js:2:5 lint/suspicious/noMisplacedAssertion ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i The assertion isn't inside a it(), test() or Deno.test() function call.
+  ! The assertion isn't inside a it(), test() or Deno.test() function call.
   
     1 │ describe(() => {
   > 2 │     expect("something").toBeTrue()
@@ -35,7 +34,7 @@ invalid.js:2:5 lint/suspicious/noMisplacedAssertion ━━━━━━━━━�
 ```
 invalid.js:5:1 lint/suspicious/noMisplacedAssertion ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i The assertion isn't inside a it(), test() or Deno.test() function call.
+  ! The assertion isn't inside a it(), test() or Deno.test() function call.
   
     3 │ })
     4 │ 
@@ -53,7 +52,7 @@ invalid.js:5:1 lint/suspicious/noMisplacedAssertion ━━━━━━━━━�
 ```
 invalid.js:6:1 lint/suspicious/noMisplacedAssertion ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i The assertion isn't inside a it(), test() or Deno.test() function call.
+  ! The assertion isn't inside a it(), test() or Deno.test() function call.
   
     5 │ expect("")
   > 6 │ assertEquals(1, 1)

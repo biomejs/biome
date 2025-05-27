@@ -1,3 +1,4 @@
+/* should not generate diagnostics */
 export interface X {
     set p(x: unknown)
 

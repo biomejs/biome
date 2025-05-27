@@ -1,7 +1,6 @@
 ---
 source: crates/biome_cli/tests/snap_test.rs
 expression: redactor(content)
-snapshot_kind: text
 ---
 ## `check.js`
 
@@ -23,21 +22,6 @@ lint ━━━━━━━━━━━━━━━━━━━━━━━━━
 # Emitted Messages
 
 ```block
-check.js:1:1 lint/suspicious/noDebugger  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × This is an unexpected use of the debugger statement.
-  
-  > 1 │ debugger; delete obj.prop; a === -0;
-      │ ^^^^^^^^^
-  
-  i Unsafe fix: Remove debugger statement
-  
-    1 │ debugger;·delete·obj.prop;·a·===·-0;
-      │ ----------                          
-
-```
-
-```block
 check.js:1:11 lint/performance/noDelete  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Avoid the delete operator which can impact performance.
@@ -50,6 +34,21 @@ check.js:1:11 lint/performance/noDelete  FIXABLE  ━━━━━━━━━━
   - debugger;·delete·obj.prop;·a·===·-0;
   + debugger;·obj.prop·=·undefined;·a·===·-0;
   
+
+```
+
+```block
+check.js:1:1 lint/suspicious/noDebugger  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This is an unexpected use of the debugger statement.
+  
+  > 1 │ debugger; delete obj.prop; a === -0;
+      │ ^^^^^^^^^
+  
+  i Unsafe fix: Remove debugger statement
+  
+    1 │ debugger;·delete·obj.prop;·a·===·-0;
+      │ ----------                          
 
 ```
 

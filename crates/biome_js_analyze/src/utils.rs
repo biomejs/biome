@@ -24,7 +24,7 @@ pub(crate) fn is_node_equal(a_node: &JsSyntaxNode, b_node: &JsSyntaxNode) -> boo
         let b_token = b_child.as_token();
         match (a_token, b_token) {
             // both are nodes
-            (None, None) => continue,
+            (None, None) => {}
             // one of them is a node
             (None, Some(_)) | (Some(_), None) => return false,
             // both are tokens
@@ -32,7 +32,6 @@ pub(crate) fn is_node_equal(a_node: &JsSyntaxNode, b_node: &JsSyntaxNode) -> boo
                 if inner_string_text(a) != inner_string_text(b) {
                     return false;
                 }
-                continue;
             }
         }
     }

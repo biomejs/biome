@@ -1,7 +1,6 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: arguments-object.js
-snapshot_kind: text
 ---
 # Input
 ```js
@@ -22,7 +21,7 @@ const bar = () => {
 ```
 arguments-object.js:7:13 lint/correctness/noUndeclaredVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i The arguments variable is undeclared.
+  × The arguments variable is undeclared.
   
     6 │ // invalid
   > 7 │ console.log(arguments);
@@ -39,7 +38,7 @@ arguments-object.js:7:13 lint/correctness/noUndeclaredVariables ━━━━━�
 ```
 arguments-object.js:10:17 lint/correctness/noUndeclaredVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i The arguments variable is undeclared.
+  × The arguments variable is undeclared.
   
      9 │ const bar = () => {
   > 10 │     console.log(arguments);

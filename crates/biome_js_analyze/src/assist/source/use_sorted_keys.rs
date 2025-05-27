@@ -1,10 +1,12 @@
 use std::borrow::Cow;
 use std::cmp::Ordering;
 
-use biome_analyze::{Ast, Rule, RuleAction, context::RuleContext, declare_source_rule};
+use biome_analyze::{
+    Ast, FixKind, Rule, RuleAction, RuleDiagnostic, context::RuleContext, declare_source_rule,
+};
 use biome_console::markup;
 use biome_deserialize::TextRange;
-use biome_diagnostics::Applicability;
+use biome_diagnostics::{Applicability, category};
 use biome_js_syntax::{
     AnyJsObjectMember, AnyJsObjectMemberName, JsObjectExpression, JsObjectMemberList,
 };
@@ -71,10 +73,11 @@ declare_source_rule! {
     /// }
     /// ```
     pub UseSortedKeys {
-        version: "next",
+        version: "2.0.0",
         name: "useSortedKeys",
         language: "js",
         recommended: false,
+        fix_kind: FixKind::Safe,
     }
 }
 
@@ -135,6 +138,16 @@ impl Rule for UseSortedKeys {
         groups.into_boxed_slice()
     }
 
+    fn diagnostic(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<RuleDiagnostic> {
+        Some(RuleDiagnostic::new(
+            category!("assist/source/useSortedKeys"),
+            ctx.query().range(),
+            markup! {
+                "The keys are not sorted."
+            },
+        ))
+    }
+
     fn text_range(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<TextRange> {
         ctx.query()
             .syntax()
@@ -157,7 +170,7 @@ impl Rule for UseSortedKeys {
         let mut mutation = ctx.root().begin();
 
         for (unsorted, sorted) in state.iter().zip(sorted_state.iter()) {
-            mutation.replace_node(unsorted.member.clone(), sorted.member.clone());
+            mutation.replace_node_discard_trivia(unsorted.member.clone(), sorted.member.clone());
         }
 
         Some(RuleAction::new(
@@ -169,18 +182,22 @@ impl Rule for UseSortedKeys {
     }
 }
 
-#[derive(Debug, PartialEq, Eq, Clone)]
+#[derive(Debug, Clone)]
 pub struct ObjectMember {
     member: AnyJsObjectMember,
     name: Option<TokenText>,
 }
-
 impl ObjectMember {
     fn new(member: AnyJsObjectMember, name: Option<TokenText>) -> Self {
-        ObjectMember { member, name }
+        Self { member, name }
     }
 }
-
+impl Eq for ObjectMember {}
+impl PartialEq for ObjectMember {
+    fn eq(&self, other: &Self) -> bool {
+        self.cmp(other) == Ordering::Equal
+    }
+}
 impl Ord for ObjectMember {
     fn cmp(&self, other: &Self) -> Ordering {
         // If some doesn't have a name (e.g spread/calculated property) - keep the order.
@@ -191,7 +208,6 @@ impl Ord for ObjectMember {
         self_name.text().ascii_nat_cmp(other_name.text())
     }
 }
-
 impl PartialOrd for ObjectMember {
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
         Some(self.cmp(other))

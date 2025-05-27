@@ -7,6 +7,7 @@
 //! [introductory post](https://rust-analyzer.github.io/blog/2020/10/24/introducing-ungrammar.html)
 //! for details.
 
+#![deny(clippy::use_self)]
 #![deny(missing_debug_implementations)]
 #![deny(rust_2018_idioms)]
 

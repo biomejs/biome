@@ -1,3 +1,5 @@
+#![deny(clippy::use_self)]
+
 mod analyzer_grit_plugin;
 mod diagnostics;
 mod plugin_cache;
@@ -12,9 +14,9 @@ use std::sync::Arc;
 use biome_analyze::{AnalyzerPlugin, AnalyzerPluginVec};
 use biome_console::markup;
 use biome_deserialize::json::deserialize_from_json_str;
-use biome_fs::FileSystem;
+use biome_fs::{FileSystem, normalize_path};
 use biome_json_parser::JsonParserOptions;
-use camino::{Utf8Component, Utf8Path, Utf8PathBuf};
+use camino::{Utf8Path, Utf8PathBuf};
 use plugin_manifest::PluginManifest;
 
 #[derive(Debug)]
@@ -47,10 +49,7 @@ impl BiomePlugin {
 
         let manifest_path = plugin_path.join("biome-manifest.jsonc");
         if !fs.path_is_file(&manifest_path) {
-            return Err(PluginDiagnostic::cant_resolve(
-                manifest_path.to_string(),
-                None,
-            ));
+            return Err(PluginDiagnostic::cant_resolve(manifest_path, None));
         }
 
         let manifest_content = fs.read_file_from_path(&manifest_path)?;
@@ -89,39 +88,6 @@ impl BiomePlugin {
 
         Ok(plugin)
     }
-}
-
-/// Normalizes the given `path` without requiring filesystem access.
-///
-/// This only normalizes `.` and `..` entries, but does not resolve symlinks.
-fn normalize_path(path: &Utf8Path) -> Utf8PathBuf {
-    let mut stack = Vec::new();
-
-    for component in path.components() {
-        match component {
-            Utf8Component::ParentDir => {
-                if stack.last().is_some_and(|last| *last == "..") {
-                    stack.push("..");
-                } else {
-                    stack.pop();
-                }
-            }
-            Utf8Component::CurDir => {}
-            Utf8Component::RootDir => {
-                stack.clear();
-                stack.push("/");
-            }
-            Utf8Component::Normal(c) => stack.push(c),
-            _ => {}
-        }
-    }
-
-    let mut result = Utf8PathBuf::new();
-    for part in stack {
-        result.push(part);
-    }
-
-    result
 }
 
 #[cfg(test)]

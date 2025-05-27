@@ -1,3 +1,4 @@
+/* should not generate diagnostics */
 arbitraryFunctΩion(n) ?? foo;
 foo.Boolean(n) ?? foo;
 (x += 1) && foo;

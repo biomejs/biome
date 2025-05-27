@@ -1,3 +1,4 @@
+/* should not generate diagnostics */
 const x: undefined = undefined; // undefined is an identifier
 const x: RegExp = /a/; // RegExp could be redefined
 

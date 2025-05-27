@@ -143,8 +143,8 @@ impl<L: Language> Default for AnalyzerActionIter<L> {
 
 impl<L: Language> From<AnalyzerAction<L>> for CodeSuggestionAdvice<MarkupBuf> {
     fn from(action: AnalyzerAction<L>) -> Self {
-        let (_, suggestion) = action.mutation.as_text_range_and_edit().unwrap_or_default();
-        CodeSuggestionAdvice {
+        let (_, suggestion) = action.mutation.to_text_range_and_edit().unwrap_or_default();
+        Self {
             applicability: action.applicability,
             msg: action.message,
             suggestion,
@@ -154,9 +154,9 @@ impl<L: Language> From<AnalyzerAction<L>> for CodeSuggestionAdvice<MarkupBuf> {
 
 impl<L: Language> From<AnalyzerAction<L>> for CodeSuggestionItem {
     fn from(action: AnalyzerAction<L>) -> Self {
-        let (range, suggestion) = action.mutation.as_text_range_and_edit().unwrap_or_default();
+        let (range, suggestion) = action.mutation.to_text_range_and_edit().unwrap_or_default();
 
-        CodeSuggestionItem {
+        Self {
             rule_name: action.rule_name,
             category: action.category,
             suggestion: CodeSuggestion {
@@ -368,6 +368,7 @@ where
             preferred_quote,
             preferred_jsx_quote,
             self.options.jsx_runtime(),
+            self.options.css_modules(),
         )
         .ok()?;
 
@@ -403,6 +404,7 @@ where
             self.options.preferred_quote(),
             self.options.preferred_jsx_quote(),
             self.options.jsx_runtime(),
+            self.options.css_modules(),
         )
         .ok();
         let mut actions = Vec::new();
@@ -466,6 +468,7 @@ where
             self.options.preferred_quote(),
             self.options.preferred_jsx_quote(),
             self.options.jsx_runtime(),
+            self.options.css_modules(),
         )
         .ok();
         if let Some(ctx) = ctx {

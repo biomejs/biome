@@ -209,7 +209,7 @@ enum ClassKind {
 
 impl ClassKind {
     fn is_id_optional(&self) -> bool {
-        matches!(self, ClassKind::Expression | ClassKind::ExportDefault)
+        matches!(self, Self::Expression | Self::ExportDefault)
     }
 }
 
@@ -1345,34 +1345,34 @@ enum MemberKind {
 
 impl MemberKind {
     const fn is_signature(&self) -> bool {
-        matches!(self, MemberKind::Signature)
+        matches!(self, Self::Signature)
     }
 
     const fn as_method_syntax_kind(&self) -> JsSyntaxKind {
         match self {
-            MemberKind::Signature => TS_METHOD_SIGNATURE_CLASS_MEMBER,
-            MemberKind::Declaration => JS_METHOD_CLASS_MEMBER,
+            Self::Signature => TS_METHOD_SIGNATURE_CLASS_MEMBER,
+            Self::Declaration => JS_METHOD_CLASS_MEMBER,
         }
     }
 
     const fn as_constructor_syntax_kind(&self) -> JsSyntaxKind {
         match self {
-            MemberKind::Signature => TS_CONSTRUCTOR_SIGNATURE_CLASS_MEMBER,
-            MemberKind::Declaration => JS_CONSTRUCTOR_CLASS_MEMBER,
+            Self::Signature => TS_CONSTRUCTOR_SIGNATURE_CLASS_MEMBER,
+            Self::Declaration => JS_CONSTRUCTOR_CLASS_MEMBER,
         }
     }
 
     const fn as_setter_syntax_kind(&self) -> JsSyntaxKind {
         match self {
-            MemberKind::Signature => TS_SETTER_SIGNATURE_CLASS_MEMBER,
-            MemberKind::Declaration => JS_SETTER_CLASS_MEMBER,
+            Self::Signature => TS_SETTER_SIGNATURE_CLASS_MEMBER,
+            Self::Declaration => JS_SETTER_CLASS_MEMBER,
         }
     }
 
     const fn as_getter_syntax_kind(&self) -> JsSyntaxKind {
         match self {
-            MemberKind::Signature => TS_GETTER_SIGNATURE_CLASS_MEMBER,
-            MemberKind::Declaration => JS_GETTER_CLASS_MEMBER,
+            Self::Signature => TS_GETTER_SIGNATURE_CLASS_MEMBER,
+            Self::Declaration => JS_GETTER_CLASS_MEMBER,
         }
     }
 }
@@ -1398,21 +1398,18 @@ impl ClassMethodMemberKind {
     /// }
     /// ```
     const fn is_body_optional(&self) -> bool {
-        matches!(
-            self,
-            ClassMethodMemberKind::Method(_) | ClassMethodMemberKind::Constructor
-        )
+        matches!(self, Self::Method(_) | Self::Constructor)
     }
 
     const fn is_constructor(&self) -> bool {
-        matches!(self, ClassMethodMemberKind::Constructor)
+        matches!(self, Self::Constructor)
     }
 
     const fn signature_flags(&self) -> SignatureFlags {
         match self {
-            ClassMethodMemberKind::Method(flags) => *flags,
-            ClassMethodMemberKind::Constructor => SignatureFlags::CONSTRUCTOR,
-            ClassMethodMemberKind::Accessor => SignatureFlags::empty(),
+            Self::Method(flags) => *flags,
+            Self::Constructor => SignatureFlags::CONSTRUCTOR,
+            Self::Accessor => SignatureFlags::empty(),
         }
     }
 }
@@ -1949,15 +1946,15 @@ impl ModifierFlags {
         Self(BitFlags::EMPTY)
     }
 
-    pub fn contains(&self, other: impl Into<ModifierFlags>) -> bool {
+    pub fn contains(&self, other: impl Into<Self>) -> bool {
         self.0.contains(other.into().0)
     }
 
-    pub fn intersects(&self, other: impl Into<ModifierFlags>) -> bool {
+    pub fn intersects(&self, other: impl Into<Self>) -> bool {
         self.0.intersects(other.into().0)
     }
 
-    pub fn set(&mut self, other: impl Into<ModifierFlags>, cond: bool) {
+    pub fn set(&mut self, other: impl Into<Self>, cond: bool) {
         self.0.set(other.into().0, cond)
     }
 }
@@ -1966,7 +1963,7 @@ impl BitOr for ModifierFlags {
     type Output = Self;
 
     fn bitor(self, rhs: Self) -> Self::Output {
-        ModifierFlags(self.0 | rhs.0)
+        Self(self.0 | rhs.0)
     }
 }
 
@@ -1993,39 +1990,34 @@ enum ModifierKind {
 
 impl ModifierKind {
     const fn is_ts_modifier(&self) -> bool {
-        !matches!(
-            self,
-            ModifierKind::Static | ModifierKind::Accessor | ModifierKind::Decorator
-        )
+        !matches!(self, Self::Static | Self::Accessor | Self::Decorator)
     }
 
     const fn as_syntax_kind(&self) -> JsSyntaxKind {
         match self {
-            ModifierKind::Declare => TS_DECLARE_MODIFIER,
-            ModifierKind::Abstract => TS_ABSTRACT_MODIFIER,
-            ModifierKind::Private | ModifierKind::Protected | ModifierKind::Public => {
-                TS_ACCESSIBILITY_MODIFIER
-            }
-            ModifierKind::Static => JS_STATIC_MODIFIER,
-            ModifierKind::Accessor => JS_ACCESSOR_MODIFIER,
-            ModifierKind::Readonly => TS_READONLY_MODIFIER,
-            ModifierKind::Override => TS_OVERRIDE_MODIFIER,
-            ModifierKind::Decorator => JS_DECORATOR,
+            Self::Declare => TS_DECLARE_MODIFIER,
+            Self::Abstract => TS_ABSTRACT_MODIFIER,
+            Self::Private | Self::Protected | Self::Public => TS_ACCESSIBILITY_MODIFIER,
+            Self::Static => JS_STATIC_MODIFIER,
+            Self::Accessor => JS_ACCESSOR_MODIFIER,
+            Self::Readonly => TS_READONLY_MODIFIER,
+            Self::Override => TS_OVERRIDE_MODIFIER,
+            Self::Decorator => JS_DECORATOR,
         }
     }
 
     const fn as_flags(&self) -> ModifierFlags {
         match self {
-            ModifierKind::Declare => ModifierFlags::DECLARE,
-            ModifierKind::Abstract => ModifierFlags::ABSTRACT,
-            ModifierKind::Private => ModifierFlags::PRIVATE,
-            ModifierKind::Protected => ModifierFlags::PROTECTED,
-            ModifierKind::Public => ModifierFlags::PUBLIC,
-            ModifierKind::Static => ModifierFlags::STATIC,
-            ModifierKind::Accessor => ModifierFlags::ACCESSOR,
-            ModifierKind::Readonly => ModifierFlags::READONLY,
-            ModifierKind::Override => ModifierFlags::OVERRIDE,
-            ModifierKind::Decorator => ModifierFlags::DECORATOR,
+            Self::Declare => ModifierFlags::DECLARE,
+            Self::Abstract => ModifierFlags::ABSTRACT,
+            Self::Private => ModifierFlags::PRIVATE,
+            Self::Protected => ModifierFlags::PROTECTED,
+            Self::Public => ModifierFlags::PUBLIC,
+            Self::Static => ModifierFlags::STATIC,
+            Self::Accessor => ModifierFlags::ACCESSOR,
+            Self::Readonly => ModifierFlags::READONLY,
+            Self::Override => ModifierFlags::OVERRIDE,
+            Self::Decorator => ModifierFlags::DECORATOR,
         }
     }
 }

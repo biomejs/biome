@@ -1,5 +1,7 @@
 //! Extremely fast, lossless, and error tolerant GraphQL Parser.
 
+#![deny(clippy::use_self)]
+
 use biome_graphql_factory::GraphqlSyntaxFactory;
 use biome_graphql_syntax::{GraphqlLanguage, GraphqlRoot, GraphqlSyntaxNode};
 pub use biome_parser::prelude::*;
@@ -21,19 +23,17 @@ pub fn parse_graphql(source: &str) -> GraphqlParse {
 
 /// Parses the provided string as Graphql program using the provided node cache.
 pub fn parse_graphql_with_cache(source: &str, cache: &mut NodeCache) -> GraphqlParse {
-    tracing::debug_span!("Parsing phase").in_scope(move || {
-        let mut parser = GraphqlParser::new(source);
+    let mut parser = GraphqlParser::new(source);
 
-        parse_root(&mut parser);
+    parse_root(&mut parser);
 
-        let (events, diagnostics, trivia) = parser.finish();
+    let (events, diagnostics, trivia) = parser.finish();
 
-        let mut tree_sink = GraphqlLosslessTreeSink::with_cache(source, &trivia, cache);
-        biome_parser::event::process(&mut tree_sink, events, diagnostics);
-        let (green, diagnostics) = tree_sink.finish();
+    let mut tree_sink = GraphqlLosslessTreeSink::with_cache(source, &trivia, cache);
+    biome_parser::event::process(&mut tree_sink, events, diagnostics);
+    let (green, diagnostics) = tree_sink.finish();
 
-        GraphqlParse::new(green, diagnostics)
-    })
+    GraphqlParse::new(green, diagnostics)
 }
 
 /// A utility struct for managing the result of a parser job
@@ -44,8 +44,8 @@ pub struct GraphqlParse {
 }
 
 impl GraphqlParse {
-    pub fn new(root: GraphqlSyntaxNode, diagnostics: Vec<ParseDiagnostic>) -> GraphqlParse {
-        GraphqlParse { root, diagnostics }
+    pub fn new(root: GraphqlSyntaxNode, diagnostics: Vec<ParseDiagnostic>) -> Self {
+        Self { root, diagnostics }
     }
 
     /// The syntax node represented by this Parse result

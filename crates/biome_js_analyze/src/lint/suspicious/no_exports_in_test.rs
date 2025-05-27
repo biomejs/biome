@@ -56,8 +56,8 @@ declare_node_union! {
 impl MaybeExport {
     fn is_export(&self) -> bool {
         match self {
-            MaybeExport::JsExport(_) => true,
-            MaybeExport::JsAssignmentExpression(assignment_expr) => {
+            Self::JsExport(_) => true,
+            Self::JsAssignmentExpression(assignment_expr) => {
                 let left = assignment_expr.left().ok();
                 left.and_then(|left| AnyJsMemberAssignment::cast(left.into_syntax()))
                     .is_some_and(|member_expr| {
@@ -67,25 +67,25 @@ impl MaybeExport {
                                 AnyJsMemberAssignment::JsComputedMemberAssignment(_) => false,
                                 AnyJsMemberAssignment::JsStaticMemberAssignment(static_member) => {
                                     // module.exports = {}
-                                    let indent_text = ident.to_trimmed_string();
+                                    let indent_text = ident.to_trimmed_text();
                                     let member_text = static_member
                                         .member()
-                                        .map(|member| member.to_trimmed_string());
-                                    indent_text == "module"
-                                        && member_text
-                                            .is_ok_and(|member_text| member_text == "exports")
+                                        .map(|member| member.to_trimmed_text());
+                                    indent_text.text() == "module"
+                                        && member_text.is_ok_and(|member_text| {
+                                            member_text.text() == "exports"
+                                        })
                                 }
                             },
                             AnyJsExpression::JsStaticMemberExpression(member_expr) => {
                                 // modules.exports.foo = {}, module.exports[foo] = {}
-                                let object_text = member_expr
-                                    .object()
-                                    .map(|object| object.to_trimmed_string());
-                                let member_text = member_expr
-                                    .member()
-                                    .map(|member| member.to_trimmed_string());
-                                object_text.is_ok_and(|text| text == "module")
-                                    && member_text.is_ok_and(|member_text| member_text == "exports")
+                                let object_text =
+                                    member_expr.object().map(|object| object.to_trimmed_text());
+                                let member_text =
+                                    member_expr.member().map(|member| member.to_trimmed_text());
+                                object_text.is_ok_and(|text| text.text() == "module")
+                                    && member_text
+                                        .is_ok_and(|member_text| member_text.text() == "exports")
                             }
                             _ => false,
                         })

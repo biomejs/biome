@@ -70,7 +70,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoUselessUndefined {
-        version: "next",
+        version: "2.0.0",
         name: "noUselessUndefined",
         language: "js",
         fix_kind: FixKind::Safe,

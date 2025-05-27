@@ -6,6 +6,7 @@ use crate::configs::{
 use crate::snap_test::{SnapshotPayload, assert_file_contents, markup_to_string};
 use crate::{
     FORMATTED, LINT_ERROR, PARSE_ERROR, assert_cli_snapshot, run_cli, run_cli_with_dyn_fs,
+    run_cli_with_server_workspace,
 };
 use biome_console::{BufferConsole, LogLevel, MarkupBuf, markup};
 use biome_fs::{ErrorEntry, FileSystemExt, MemoryFileSystem, OsFileSystem};
@@ -46,7 +47,7 @@ debugger;
 console.log(a);
 ";
 
-const APPLY_SUGGESTED_AFTER: &str = "let a = 4;\nconsole.log(a);\n";
+const APPLY_SUGGESTED_AFTER: &str = "const a = 4;\nconsole.log(a);\n";
 
 const NO_DEBUGGER_BEFORE: &str = "debugger;\n";
 const NO_DEBUGGER_AFTER: &str = "debugger;\n";
@@ -327,12 +328,12 @@ fn apply_unsafe_with_error() {
     let source = "let a = 4;
 debugger;
 console.log(a);
-function f() { arguments; }
+function _f() { arguments; }
 ";
 
-    let expected = "let a = 4;
+    let expected = "const a = 4;
 console.log(a);
-function f() {\n\targuments;\n}
+function _f() {\n\targuments;\n}
 ";
 
     let test1 = Utf8Path::new("test1.js");
@@ -891,14 +892,24 @@ fn fs_error_infinite_symlink_expansion_to_files() {
             .out_buffer
             .iter()
             .flat_map(|msg| msg.content.0.iter())
-            .any(|node| node.content.contains(&symlink1_path.to_string()))
+            .any(|node| node.content.contains(
+                &symlink1_path
+                    .strip_prefix(subdir1_path.as_path())
+                    .unwrap()
+                    .to_string()
+            ))
     );
     assert!(
         console
             .out_buffer
             .iter()
             .flat_map(|msg| msg.content.0.iter())
-            .any(|node| node.content.contains(&symlink2_path.to_string()))
+            .any(|node| node.content.contains(
+                &symlink2_path
+                    .strip_prefix(subdir2_path.as_path())
+                    .unwrap()
+                    .to_string()
+            ))
     );
 }
 
@@ -1472,7 +1483,7 @@ fn applies_organize_imports() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    let config = r#"{ "assist": { "enabled": true } }"#;
+    let config = r#"{ "linter": { "enabled": false }, "assist": { "enabled": true } }"#;
     let file_path = Utf8Path::new("biome.json");
     fs.insert(file_path.into(), config.as_bytes());
 
@@ -1517,7 +1528,8 @@ fn applies_organize_imports_bug_4552() {
         "linter": {
             "enabled": true,
             "rules": {
-                    "recommended": true
+                "recommended": true,
+                "correctness": { "noUnusedImports": "off" }
             }
         }
     }"#;
@@ -1547,7 +1559,7 @@ fn applies_organize_imports_bug_4552() {
 }
 
 #[test]
-fn shows_organize_imports_diff_on_check() {
+fn shows_organize_imports_diff_on_check_when_enforced() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
@@ -1569,7 +1581,7 @@ import * as something from "../something";
 
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
-        "shows_organize_imports_diff_on_check",
+        "shows_organize_imports_diff_on_check_when_enforced",
         fs,
         console,
         result,
@@ -1593,7 +1605,15 @@ import * as something from "../something";
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["check", "--write", file_path.as_str()].as_slice()),
+        Args::from(
+            [
+                "check",
+                "--linter-enabled=false",
+                "--write",
+                file_path.as_str(),
+            ]
+            .as_slice(),
+        ),
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -1614,7 +1634,7 @@ fn dont_applies_organize_imports_for_ignored_file() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    let rome_json = r#"{ "assist": { "enabled": true, "includes": ["**", "!check.js"] } }"#;
+    let rome_json = r#"{ "assist": { "enabled": true, "includes": ["**", "!check.js"] }, "linter": { "enabled": false } }"#;
 
     let config_path = Utf8Path::new("biome.json");
     fs.insert(config_path.into(), rome_json.as_bytes());
@@ -1776,6 +1796,7 @@ fn check_stdin_write_unsafe_successfully() {
         Args::from(
             [
                 "check",
+                "--linter-enabled=false",
                 "--assist-enabled=true",
                 "--write",
                 "--unsafe",
@@ -2609,12 +2630,12 @@ fn fix_unsafe_with_error() {
     let source = "let a = 4;
 debugger;
 console.log(a);
-function f() { arguments; }
+function _f() { arguments; }
 ";
 
-    let expected = "let a = 4;
+    let expected = "const a = 4;
 console.log(a);
-function f() {\n\targuments;\n}
+function _f() {\n\targuments;\n}
 ";
 
     let test1 = Utf8Path::new("test1.js");
@@ -2754,12 +2775,12 @@ fn write_unsafe_with_error() {
     let source = "let a = 4;
 debugger;
 console.log(a);
-function f() { arguments; }
+function _f() { arguments; }
 ";
 
-    let expected = "let a = 4;
+    let expected = "const a = 4;
 console.log(a);
-function f() {\n\targuments;\n}
+function _f() {\n\targuments;\n}
 ";
 
     let test1 = Utf8Path::new("test1.js");
@@ -2872,6 +2893,99 @@ fn html_enabled_by_arg_check() {
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
         "html_enabled_by_arg_check",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn check_skip_parse_errors() {
+    let mut fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let valid = Utf8Path::new("valid.js");
+    let invalid = Utf8Path::new("invalid.js");
+
+    fs.insert(valid.into(), LINT_ERROR.as_bytes());
+    fs.insert(invalid.into(), PARSE_ERROR.as_bytes());
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(
+            [
+                "check",
+                "--skip-parse-errors",
+                valid.as_str(),
+                invalid.as_str(),
+            ]
+            .as_slice(),
+        ),
+    );
+
+    assert!(result.is_err(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "check_skip_parse_errors",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn check_plugin_suppressions() {
+    let mut fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    fs.insert(
+        Utf8PathBuf::from("biome.json"),
+        br#"{
+    "plugins": ["noManualZIndex.grit"],
+    "formatter": {
+        "indentStyle": "space",
+        "indentWidth": 4
+    }
+}
+"#,
+    );
+
+    fs.insert(
+        Utf8PathBuf::from("noManualZIndex.grit"),
+        br#"language css
+
+`z-index: $zIndexValue;` where {
+    not $zIndexValue <: r"^var\(--dt-z-index-\S+\)$",
+    register_diagnostic(span=$zIndexValue, message="company/plugin/noManualZIndex :: z-index values should be set using the design library.", severity="error")
+}
+"#,
+    );
+
+    let file_path = "style.css";
+    fs.insert(
+        file_path.into(),
+        br#".report-this-error {
+    z-index: 1;
+}
+
+.dont-report-this-error-please {
+    /* biome-ignore lint/plugin/noManualZIndex: Should not report */
+    z-index: 2;
+}
+"#,
+    );
+
+    let (fs, result) = run_cli_with_server_workspace(
+        fs,
+        &mut console,
+        Args::from(["check", file_path].as_slice()),
+    );
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "check_plugin_suppressions",
         fs,
         console,
         result,

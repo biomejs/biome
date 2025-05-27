@@ -21,8 +21,8 @@ pub struct Marker {
 }
 
 impl Marker {
-    pub fn new(pos: u32, start: TextSize) -> Marker {
-        Marker {
+    pub fn new(pos: u32, start: TextSize) -> Self {
+        Self {
             pos,
             start,
             old_start: pos,
@@ -114,7 +114,7 @@ pub struct CompletedMarker {
 
 impl CompletedMarker {
     pub fn new(start_pos: u32, finish_pos: u32, offset: TextSize) -> Self {
-        CompletedMarker {
+        Self {
             start_pos,
             offset,
             old_start: start_pos,
@@ -232,7 +232,7 @@ impl CompletedMarker {
             _ => unreachable!(),
         }
         match events[finish_idx] {
-            ref mut slot @ Event::Finish { .. } => *slot = Event::tombstone(),
+            ref mut slot @ Event::Finish => *slot = Event::tombstone(),
             _ => unreachable!(),
         }
         Marker::new(self.start_pos, self.offset)

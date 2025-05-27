@@ -16,88 +16,175 @@ macro_rules! map_syntax_node {
     ($ node : expr , $ pattern : pat => $ body : expr) => {
         match $node {
             node => match $crate::YamlSyntaxNode::kind(&node) {
-                $crate::YamlSyntaxKind::YAML_ARRAY => {
-                    let $pattern = unsafe { $crate::YamlArray::new_unchecked(node) };
+                $crate::YamlSyntaxKind::YAML_ALIAS_NODE => {
+                    let $pattern = unsafe { $crate::YamlAliasNode::new_unchecked(node) };
                     $body
                 }
-                $crate::YamlSyntaxKind::YAML_ARRAY_INLINE => {
-                    let $pattern = unsafe { $crate::YamlArrayInline::new_unchecked(node) };
+                $crate::YamlSyntaxKind::YAML_ANCHOR_PROPERTY => {
+                    let $pattern = unsafe { $crate::YamlAnchorProperty::new_unchecked(node) };
                     $body
                 }
-                $crate::YamlSyntaxKind::YAML_ARRAY_ITEM => {
-                    let $pattern = unsafe { $crate::YamlArrayItem::new_unchecked(node) };
+                $crate::YamlSyntaxKind::YAML_BLOCK_COLLECTION => {
+                    let $pattern = unsafe { $crate::YamlBlockCollection::new_unchecked(node) };
                     $body
                 }
-                $crate::YamlSyntaxKind::YAML_BLOCK_FOLDED => {
-                    let $pattern = unsafe { $crate::YamlBlockFolded::new_unchecked(node) };
+                $crate::YamlSyntaxKind::YAML_BLOCK_MAP_EXPLICIT_ENTRY => {
+                    let $pattern =
+                        unsafe { $crate::YamlBlockMapExplicitEntry::new_unchecked(node) };
                     $body
                 }
-                $crate::YamlSyntaxKind::YAML_BLOCK_LITERAL => {
-                    let $pattern = unsafe { $crate::YamlBlockLiteral::new_unchecked(node) };
+                $crate::YamlSyntaxKind::YAML_BLOCK_MAP_EXPLICIT_KEY => {
+                    let $pattern = unsafe { $crate::YamlBlockMapExplicitKey::new_unchecked(node) };
                     $body
                 }
-                $crate::YamlSyntaxKind::YAML_BLOCK_VALUE => {
-                    let $pattern = unsafe { $crate::YamlBlockValue::new_unchecked(node) };
+                $crate::YamlSyntaxKind::YAML_BLOCK_MAP_EXPLICIT_VALUE => {
+                    let $pattern =
+                        unsafe { $crate::YamlBlockMapExplicitValue::new_unchecked(node) };
                     $body
                 }
-                $crate::YamlSyntaxKind::YAML_BOOLEAN_VALUE => {
-                    let $pattern = unsafe { $crate::YamlBooleanValue::new_unchecked(node) };
+                $crate::YamlSyntaxKind::YAML_BLOCK_MAP_IMPLICIT_ENTRY => {
+                    let $pattern =
+                        unsafe { $crate::YamlBlockMapImplicitEntry::new_unchecked(node) };
+                    $body
+                }
+                $crate::YamlSyntaxKind::YAML_BLOCK_MAP_IMPLICIT_VALUE => {
+                    let $pattern =
+                        unsafe { $crate::YamlBlockMapImplicitValue::new_unchecked(node) };
+                    $body
+                }
+                $crate::YamlSyntaxKind::YAML_BLOCK_MAPPING => {
+                    let $pattern = unsafe { $crate::YamlBlockMapping::new_unchecked(node) };
+                    $body
+                }
+                $crate::YamlSyntaxKind::YAML_BLOCK_SCALAR => {
+                    let $pattern = unsafe { $crate::YamlBlockScalar::new_unchecked(node) };
+                    $body
+                }
+                $crate::YamlSyntaxKind::YAML_BLOCK_SEQUENCE => {
+                    let $pattern = unsafe { $crate::YamlBlockSequence::new_unchecked(node) };
+                    $body
+                }
+                $crate::YamlSyntaxKind::YAML_BLOCK_SEQUENCE_ENTRY => {
+                    let $pattern = unsafe { $crate::YamlBlockSequenceEntry::new_unchecked(node) };
+                    $body
+                }
+                $crate::YamlSyntaxKind::YAML_COMPACT_MAPPING => {
+                    let $pattern = unsafe { $crate::YamlCompactMapping::new_unchecked(node) };
+                    $body
+                }
+                $crate::YamlSyntaxKind::YAML_COMPACT_SEQUENCE => {
+                    let $pattern = unsafe { $crate::YamlCompactSequence::new_unchecked(node) };
+                    $body
+                }
+                $crate::YamlSyntaxKind::YAML_DIRECTIVE => {
+                    let $pattern = unsafe { $crate::YamlDirective::new_unchecked(node) };
                     $body
                 }
                 $crate::YamlSyntaxKind::YAML_DOCUMENT => {
                     let $pattern = unsafe { $crate::YamlDocument::new_unchecked(node) };
                     $body
                 }
-                $crate::YamlSyntaxKind::YAML_IDENTIFIER => {
-                    let $pattern = unsafe { $crate::YamlIdentifier::new_unchecked(node) };
+                $crate::YamlSyntaxKind::YAML_DOUBLE_QUOTED_SCALAR => {
+                    let $pattern = unsafe { $crate::YamlDoubleQuotedScalar::new_unchecked(node) };
                     $body
                 }
-                $crate::YamlSyntaxKind::YAML_NULL_VALUE => {
-                    let $pattern = unsafe { $crate::YamlNullValue::new_unchecked(node) };
+                $crate::YamlSyntaxKind::YAML_FLOW_IN_BLOCK_NODE => {
+                    let $pattern = unsafe { $crate::YamlFlowInBlockNode::new_unchecked(node) };
                     $body
                 }
-                $crate::YamlSyntaxKind::YAML_NUMBER_VALUE => {
-                    let $pattern = unsafe { $crate::YamlNumberValue::new_unchecked(node) };
+                $crate::YamlSyntaxKind::YAML_FLOW_JSON_NODE => {
+                    let $pattern = unsafe { $crate::YamlFlowJsonNode::new_unchecked(node) };
                     $body
                 }
-                $crate::YamlSyntaxKind::YAML_OBJECT => {
-                    let $pattern = unsafe { $crate::YamlObject::new_unchecked(node) };
+                $crate::YamlSyntaxKind::YAML_FLOW_MAP_EXPLICIT_ENTRY => {
+                    let $pattern = unsafe { $crate::YamlFlowMapExplicitEntry::new_unchecked(node) };
                     $body
                 }
-                $crate::YamlSyntaxKind::YAML_OBJECT_MEMBER => {
-                    let $pattern = unsafe { $crate::YamlObjectMember::new_unchecked(node) };
+                $crate::YamlSyntaxKind::YAML_FLOW_MAP_IMPLICIT_ENTRY => {
+                    let $pattern = unsafe { $crate::YamlFlowMapImplicitEntry::new_unchecked(node) };
+                    $body
+                }
+                $crate::YamlSyntaxKind::YAML_FLOW_MAPPING => {
+                    let $pattern = unsafe { $crate::YamlFlowMapping::new_unchecked(node) };
+                    $body
+                }
+                $crate::YamlSyntaxKind::YAML_FLOW_SEQUENCE => {
+                    let $pattern = unsafe { $crate::YamlFlowSequence::new_unchecked(node) };
+                    $body
+                }
+                $crate::YamlSyntaxKind::YAML_FLOW_YAML_NODE => {
+                    let $pattern = unsafe { $crate::YamlFlowYamlNode::new_unchecked(node) };
+                    $body
+                }
+                $crate::YamlSyntaxKind::YAML_FOLDED_SCALAR => {
+                    let $pattern = unsafe { $crate::YamlFoldedScalar::new_unchecked(node) };
+                    $body
+                }
+                $crate::YamlSyntaxKind::YAML_LITERAL_SCALAR => {
+                    let $pattern = unsafe { $crate::YamlLiteralScalar::new_unchecked(node) };
+                    $body
+                }
+                $crate::YamlSyntaxKind::YAML_PLAIN_SCALAR => {
+                    let $pattern = unsafe { $crate::YamlPlainScalar::new_unchecked(node) };
+                    $body
+                }
+                $crate::YamlSyntaxKind::YAML_PROPERTIES_ANCHOR_FIRST => {
+                    let $pattern =
+                        unsafe { $crate::YamlPropertiesAnchorFirst::new_unchecked(node) };
+                    $body
+                }
+                $crate::YamlSyntaxKind::YAML_PROPERTIES_TAG_FIRST => {
+                    let $pattern = unsafe { $crate::YamlPropertiesTagFirst::new_unchecked(node) };
                     $body
                 }
                 $crate::YamlSyntaxKind::YAML_ROOT => {
                     let $pattern = unsafe { $crate::YamlRoot::new_unchecked(node) };
                     $body
                 }
-                $crate::YamlSyntaxKind::YAML_STRING_VALUE => {
-                    let $pattern = unsafe { $crate::YamlStringValue::new_unchecked(node) };
+                $crate::YamlSyntaxKind::YAML_SINGLE_QUOTED_SCALAR => {
+                    let $pattern = unsafe { $crate::YamlSingleQuotedScalar::new_unchecked(node) };
+                    $body
+                }
+                $crate::YamlSyntaxKind::YAML_TAG_PROPERTY => {
+                    let $pattern = unsafe { $crate::YamlTagProperty::new_unchecked(node) };
                     $body
                 }
                 $crate::YamlSyntaxKind::YAML_BOGUS => {
                     let $pattern = unsafe { $crate::YamlBogus::new_unchecked(node) };
                     $body
                 }
-                $crate::YamlSyntaxKind::YAML_BOGUS_VALUE => {
-                    let $pattern = unsafe { $crate::YamlBogusValue::new_unchecked(node) };
+                $crate::YamlSyntaxKind::YAML_BOGUS_BLOCK_MAP_ENTRY => {
+                    let $pattern = unsafe { $crate::YamlBogusBlockMapEntry::new_unchecked(node) };
                     $body
                 }
-                $crate::YamlSyntaxKind::YAML_ARRAY_INLINE_LIST => {
-                    let $pattern = unsafe { $crate::YamlArrayInlineList::new_unchecked(node) };
+                $crate::YamlSyntaxKind::YAML_BOGUS_BLOCK_NODE => {
+                    let $pattern = unsafe { $crate::YamlBogusBlockNode::new_unchecked(node) };
                     $body
                 }
-                $crate::YamlSyntaxKind::YAML_ARRAY_ITEM_LIST => {
-                    let $pattern = unsafe { $crate::YamlArrayItemList::new_unchecked(node) };
+                $crate::YamlSyntaxKind::YAML_BLOCK_MAP_ENTRY_LIST => {
+                    let $pattern = unsafe { $crate::YamlBlockMapEntryList::new_unchecked(node) };
+                    $body
+                }
+                $crate::YamlSyntaxKind::YAML_BLOCK_SEQUENCE_ENTRY_LIST => {
+                    let $pattern =
+                        unsafe { $crate::YamlBlockSequenceEntryList::new_unchecked(node) };
+                    $body
+                }
+                $crate::YamlSyntaxKind::YAML_DIRECTIVE_LIST => {
+                    let $pattern = unsafe { $crate::YamlDirectiveList::new_unchecked(node) };
                     $body
                 }
                 $crate::YamlSyntaxKind::YAML_DOCUMENT_LIST => {
                     let $pattern = unsafe { $crate::YamlDocumentList::new_unchecked(node) };
                     $body
                 }
-                $crate::YamlSyntaxKind::YAML_OBJECT_MEMBER_LIST => {
-                    let $pattern = unsafe { $crate::YamlObjectMemberList::new_unchecked(node) };
+                $crate::YamlSyntaxKind::YAML_FLOW_MAP_ENTRY_LIST => {
+                    let $pattern = unsafe { $crate::YamlFlowMapEntryList::new_unchecked(node) };
+                    $body
+                }
+                $crate::YamlSyntaxKind::YAML_FLOW_SEQUENCE_ENTRY_LIST => {
+                    let $pattern =
+                        unsafe { $crate::YamlFlowSequenceEntryList::new_unchecked(node) };
                     $body
                 }
                 _ => unreachable!(),

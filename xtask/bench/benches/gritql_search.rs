@@ -4,14 +4,9 @@ use biome_grit_patterns::{
 };
 use camino::Utf8Path;
 use criterion::measurement::WallTime;
+pub use criterion::*;
 use std::collections::HashMap;
 use xtask_bench::TestCase;
-
-#[cfg(not(feature = "codspeed"))]
-pub use criterion::*;
-
-#[cfg(feature = "codspeed")]
-pub use codspeed_criterion_compat::*;
 
 #[cfg(target_os = "windows")]
 #[global_allocator]
@@ -58,7 +53,7 @@ pub fn bench_search_group(group: &mut BenchmarkGroup<WallTime>, test_case: TestC
     .unwrap();
 
     let code = test_case.code();
-    let target_file = GritTargetFile::parse(code, test_case.path().to_owned(), target_language);
+    let target_file = GritTargetFile::parse(code, test_case.path(), target_language);
 
     group.throughput(Throughput::Bytes(code.len() as u64));
     group.sample_size(10);

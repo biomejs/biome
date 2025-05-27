@@ -1,3 +1,5 @@
+#![deny(clippy::use_self)]
+
 use proc_macro_error2::*;
 use proc_macro2::{Delimiter, Group, Ident, TokenStream, TokenTree};
 use quote::{ToTokens, quote};

@@ -53,32 +53,8 @@ React.Children.map(c => React.cloneElement(c, {key: c}));
 
 <>{data.reduce((a, b) => a > b ? a : b, 0)}</>
 
-<>{data.map(a => a > 4 ? <h1 key={a}>{a}</h1> : <h2 key={a}>{a}</h2>)}</>
-
-[].map((item) => {
-	return <><div  key={item.id} /><div key={item.id}>{item}</div></>;
-});
-
-[].map((item) => {
-	const div = <div key={item.id} />;
-	return <>{div}<div key={item.id}>{item}</div></>;
-});
-
-[].map((item) => {
-	return <><div key={item.id}>foo</div></>;
-});
-
 [].map((item) => {
 	return item.condition ? <div key={item.id} /> : <div key={item.id}>foo</div>;
-});
-
-[].map((item) => {
-	return <>{item.condition ? <div key={item.id} /> : <div key={item.id}>foo</div>}</>;
-});
-
-[].map((item) => {
-	const div = <div key={item.id} />;
-	return <>{item.condition ? div : <div key={item.id}>{div}</div>}</>;
 });
 
 [].map(function(item) {
@@ -101,3 +77,24 @@ React.Children.map(c => React.cloneElement(c, {key: c}));
   const content = <p>Paragraph</p>
   return (<div key={el}>{content}</div>);
 });
+
+// is only checked when options.checkShorthandFragment is set
+data.map((x) => <>x</>)
+
+data.map((x) => {
+	if (x.type === 'string') {
+		return <div key={x.value}>{x.value}</div>
+	}
+	return <div key={x.value}>{x.value}</div>
+})
+
+data.map((x) => {
+	switch (x.type) {
+		case 'string':
+			return <div key={x.value}>{x.value}</div>
+		case 'number':
+			return <div key={x.value}>{x.value}</div>
+		default:
+			return <div key={x.value}>{x.value}</div>
+	}
+})

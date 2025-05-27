@@ -1,3 +1,4 @@
+/* should not generate diagnostics */
 Number.isNaN(Number.NaN);
 
 globalThis.Number.isNaN(Number.NaN);

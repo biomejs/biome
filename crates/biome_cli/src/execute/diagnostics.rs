@@ -12,20 +12,6 @@ use std::io;
     severity = Error
 )]
 pub(crate) struct CIFormatDiffDiagnostic {
-    #[location(resource)]
-    pub(crate) file_name: String,
-    #[advice]
-    pub(crate) diff: ContentDiffAdvice,
-}
-
-#[derive(Debug, Diagnostic)]
-#[diagnostic(
-    category = "assist",
-    message = "Applied actions differs from the output"
-)]
-pub(crate) struct CIAssistDiffDiagnostic {
-    #[location(resource)]
-    pub(crate) file_name: String,
     #[advice]
     pub(crate) diff: ContentDiffAdvice,
 }
@@ -37,21 +23,6 @@ pub(crate) struct CIAssistDiffDiagnostic {
     message = "Formatter would have printed the following content:"
 )]
 pub(crate) struct FormatDiffDiagnostic {
-    #[location(resource)]
-    pub(crate) file_name: String,
-    #[advice]
-    pub(crate) diff: ContentDiffAdvice,
-}
-
-#[derive(Debug, Diagnostic)]
-#[diagnostic(
-    category = "assist",
-    severity = Error,
-    message = "Not all actions were applied:"
-)]
-pub(crate) struct AssistDiffDiagnostic {
-    #[location(resource)]
-    pub(crate) file_name: String,
     #[advice]
     pub(crate) diff: ContentDiffAdvice,
 }
@@ -100,7 +71,11 @@ pub(crate) struct PanicDiagnostic {
 pub(crate) struct UnhandledDiagnostic;
 
 #[derive(Debug, Diagnostic)]
-#[diagnostic(category = "parse", message = "Skipped file with syntax errors")]
+#[diagnostic(
+    category = "parse",
+    message = "Skipped file with syntax errors",
+    severity = Information,
+)]
 pub(crate) struct SkippedDiagnostic;
 
 #[derive(Debug, Diagnostic)]

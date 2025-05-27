@@ -7,15 +7,15 @@
   "author": "Dani Guardiola",
   "type": "module",
   "dependencies": {
-    "tailwindcss": "^3.4.17"
+    "tailwindcss": "^4.1.7"
   },
   "scripts": {
     "build": "tsc",
     "execute": "node dist/generate-tailwind-preset.js"
   },
   "devDependencies": {
-    "@types/node": "22.13.12",
+    "@types/node": "22.15.21",
     "read-package-up": "11.0.0",
-    "typescript": "5.8.2"
+    "typescript": "5.8.3"
   }
 }

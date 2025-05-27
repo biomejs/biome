@@ -77,7 +77,7 @@
 //! to apply a deterministic formatting.
 //! - first group will be the identifier
 //! - the rest of the groups will be  will start StaticMemberExpression followed by the rest of the nodes,
-//!     right before the end of the next StaticMemberExpression
+//!   right before the end of the next StaticMemberExpression
 //!
 //! The first group is special, because it holds the reference; it has its own heuristic.
 //! Inside the first group we store the first element of the flattened array, then:
@@ -132,7 +132,7 @@ impl MemberChain {
         call_expression: JsCallExpression,
         comments: &JsComments,
         tab_width: TabWidth,
-    ) -> SyntaxResult<MemberChain> {
+    ) -> SyntaxResult<Self> {
         let parent = call_expression.syntax().parent();
         let mut chain_members =
             ChainMembersIterator::new(call_expression.clone().into(), comments).collect::<Vec<_>>();
@@ -146,7 +146,7 @@ impl MemberChain {
         // `[ StaticMemberExpression -> AnyNode + JsCallExpression ]`
         let tail_groups = compute_remaining_groups(remaining_members, comments);
 
-        let mut member_chain = MemberChain {
+        let mut member_chain = Self {
             head: head_group,
             tail: tail_groups,
             root: call_expression,

@@ -8,7 +8,8 @@
     ],
     "actions": {
       "source": {
-        "useSortedKeys": "off"
+        "useSortedKeys": "off",
+        "organizeImports": "on"
       }
     }
   },
@@ -47,26 +48,16 @@
     "enabled": true,
     "rules": {
       "style": {
-        "noNonNullAssertion": "off",
-        "useNodejsImportProtocol": "error",
-        "useLiteralEnumMembers": "error",
-        "noArguments": "error",
         "noParameterAssign": "error",
-        "useShorthandFunctionType": "error",
-        "useExportType": "error",
         "useDefaultParameterLast": "error",
-        "noCommaOperator": "error",
         "useSingleVarDeclarator": "error",
         "useConst": "error",
         "noInferrableTypes": "error",
-        "useExponentiationOperator": "error",
         "noUselessElse": "error",
         "useSelfClosingElements": "error",
-        "useImportType": "error",
         "useNumberNamespace": "error",
         "useAsConstAssertion": "error",
         "noUnusedTemplateLiteral": "error",
-        "useNumericLiterals": "error",
         "useTemplate": "error",
         "useEnumInitializers": "error"
       },

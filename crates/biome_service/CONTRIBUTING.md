@@ -5,7 +5,7 @@ The Biome Service is where we implement the [Workspace](src/workspace.rs).
 The workspace is where Biome keeps all internal state of projects, such as open
 documents, but also more advanced service data, such as the instances of our
 [project layout](../biome_project_layout/) and our
-[dependency graph](../biome_dependency_graph/).
+[module graph](../biome_module_graph/).
 
 Note that there are two implementations of the `Workspace` trait:
 
@@ -17,16 +17,16 @@ Note that there are two implementations of the `Workspace` trait:
 
 ## Watcher
 
-The state inside our workspace is kept in sync with the file system using the
+The state inside our workspace is kept in sync with the filesystem using the
 [`WorkspaceWatcher`](src/workspace_watcher.rs). The watcher is only active in
 daemon mode and not used by the CLI.
 
 ### Debugging
 
 Debugging the watcher can be tricky, because you need to run the daemon,
-interact with the file system, and observe the daemon's state somehow.
+interact with the filesystem, and observe the daemon's state somehow.
 
-Debugging is possible with the VS Code extension or Zed extension,  but for an easier experience,
+Debugging is possible with the VS Code extension or Zed extension, but for an easier experience,
 you can use these CLI commands:
 
 1. Start the daemon using `cargo run --bin=biome -- start`. Note there won't be
@@ -36,7 +36,7 @@ you can use these CLI commands:
    `cargo run --bin=biome -- lint --use-server <path>`.
 
 The rule `noImportCycles` is currently the best candidate to observe the state
-in the project layout and the dependency graph.
+in the project layout and the module graph.
 
 ### Tests
 

@@ -4,5 +4,6 @@ expression: validCustomStyleExceptions.ts
 ---
 # Input
 ```ts
+/* should not generate diagnostics */
 const aSepcial_CASE = 0;
 ```

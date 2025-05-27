@@ -1,0 +1,10 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid_default_component_as_default.jsx
+---
+# Input
+```jsx
+/* should not generate diagnostics */
+const App = () => <>Test</>;
+export { App as default };
+```

@@ -1,6 +1,6 @@
 use biome_analyze::{SUPPRESSION_INLINE_ACTION_CATEGORY, SUPPRESSION_TOP_LEVEL_ACTION_CATEGORY};
 use biome_lsp_converters::{PositionEncoding, WideEncoding, negotiated_encoding};
-use tower_lsp::lsp_types::{
+use tower_lsp_server::lsp_types::{
     ClientCapabilities, CodeActionKind, CodeActionOptions, CodeActionProviderCapability,
     DocumentOnTypeFormattingOptions, OneOf, PositionEncodingKind, ServerCapabilities,
     TextDocumentSyncCapability, TextDocumentSyncKind, WorkspaceFoldersServerCapabilities,
@@ -9,7 +9,7 @@ use tower_lsp::lsp_types::{
 
 /// The capabilities to send from server as part of [`InitializeResult`]
 ///
-/// [`InitializeResult`]: lspower::lsp::InitializeResult
+/// [`InitializeResult`]: tower_lsp_server::lsp::InitializeResult
 pub(crate) fn server_capabilities(capabilities: &ClientCapabilities) -> ServerCapabilities {
     let supports_formatter_dynamic_registration = capabilities
         .text_document

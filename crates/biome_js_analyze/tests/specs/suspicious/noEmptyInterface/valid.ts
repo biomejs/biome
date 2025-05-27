@@ -1,3 +1,4 @@
+/* should not generate diagnostics */
 interface A extends B { prop: number; }
 
 // valid because extending multiple interfaces

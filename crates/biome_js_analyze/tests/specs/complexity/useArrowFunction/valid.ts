@@ -1,3 +1,4 @@
+/* should not generate diagnostics */
 function functionDeclaration() {
     return 0;
 }

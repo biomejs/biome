@@ -1,10 +1,13 @@
-use biome_analyze::{Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule};
+use biome_analyze::{
+    Rule, RuleDiagnostic, RuleDomain, RuleSource, context::RuleContext, declare_lint_rule,
+};
 use biome_console::{fmt::Display, markup};
-use biome_dependency_graph::{DependencyGraph, ModuleDependencyData};
 use biome_deserialize_macros::Deserializable;
+use biome_diagnostics::Severity;
 use biome_js_syntax::{
     AnyJsImportClause, AnyJsImportLike, AnyJsNamedImportSpecifier, JsModuleSource, JsSyntaxToken,
 };
+use biome_module_graph::{JsModuleInfo, ModuleGraph, ResolvedPath};
 use biome_rowan::{AstNode, SyntaxResult, Text, TextRange};
 use camino::{Utf8Path, Utf8PathBuf};
 use serde::{Deserialize, Serialize};
@@ -13,12 +16,12 @@ use std::str::FromStr;
 #[cfg(feature = "schemars")]
 use schemars::JsonSchema;
 
-use crate::services::dependency_graph::ResolvedImports;
+use crate::services::module_graph::ResolvedImports;
 
 const INDEX_BASENAMES: &[&str] = &["index", "mod"];
 
 declare_lint_rule! {
-    /// Restricts imports of private exports.
+    /// Restrict imports of private exports.
     ///
     /// In JavaScript and TypeScript, as soon as you `export` a symbol, such as
     /// a type, function, or anything else that can be exported, it is
@@ -77,15 +80,11 @@ declare_lint_rule! {
     ///
     /// ## Known Limitations
     ///
-    /// * This rule currently only looks at the JSDoc comments that are attached
-    ///   to the _`export` statement_ nearest to the symbol's definition. If the
-    ///   symbol isn't exported in the same statement as in which it is defined,
-    ///   the visibility as specified in the `export` statement is used, not
-    ///   that of the symbol definition. Re-exports cannot (currently) override
-    ///   the visibility from the original `export`.
     /// * This rule only applies to imports from JavaScript and TypeScript
     ///   files. Imports for resources such as images or CSS files are exempted
     ///   regardless of the default visibility setting.
+    /// * This rule does not validate imports through dynamic `import()`
+    ///   expressions or CommonJS `require()` calls.
     ///
     /// ## Examples
     ///
@@ -141,13 +140,15 @@ declare_lint_rule! {
     /// import { subPrivateVariable } from "../index.js";
     /// ```
     pub NoPrivateImports {
-        version: "next",
+        version: "2.0.0",
         name: "noPrivateImports",
         language: "js",
         sources: &[
             RuleSource::EslintImportAccess("eslint-plugin-import-access")
         ],
         recommended: true,
+        severity: Severity::Warning,
+        domains: &[RuleDomain::Project],
     }
 }
 
@@ -175,9 +176,9 @@ pub enum Visibility {
 impl Display for Visibility {
     fn fmt(&self, fmt: &mut biome_console::fmt::Formatter) -> std::io::Result<()> {
         match self {
-            Visibility::Public => fmt.write_str("public"),
-            Visibility::Package => fmt.write_str("package"),
-            Visibility::Private => fmt.write_str("private"),
+            Self::Public => fmt.write_str("public"),
+            Self::Package => fmt.write_str("package"),
+            Self::Private => fmt.write_str("private"),
         }
     }
 }
@@ -187,9 +188,9 @@ impl FromStr for Visibility {
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         match s {
-            "public" => Ok(Visibility::Public),
-            "package" => Ok(Visibility::Package),
-            "private" => Ok(Visibility::Private),
+            "public" => Ok(Self::Public),
+            "package" => Ok(Self::Package),
+            "private" => Ok(Self::Private),
             _ => Err(()),
         }
     }
@@ -200,7 +201,7 @@ pub struct NoPrivateImportsState {
     range: TextRange,
 
     /// The path where the visibility of the imported symbol is defined.
-    path: String,
+    path: Box<str>,
 
     /// The visibility of the offending symbol.
     visibility: Visibility,
@@ -214,27 +215,27 @@ impl Rule for NoPrivateImports {
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let self_path = ctx.file_path();
-        let Some(file_imports) = ctx.imports_for_path(ctx.file_path()) else {
+        let Some(module_info) = ctx.module_info_for_path(ctx.file_path()) else {
             return Vec::new();
         };
 
         let node = ctx.query();
-        let Some(target_path) = file_imports
-            .get_import_by_node(node)
-            .and_then(|import| import.resolved_path.as_ref().ok())
+        let Some(target_path) = module_info
+            .get_import_path_by_js_node(node)
+            .and_then(ResolvedPath::as_path)
         else {
             return Vec::new();
         };
 
-        let Some(target_data) = ctx.imports_for_path(target_path) else {
+        let Some(target_info) = ctx.module_info_for_path(target_path) else {
             return Vec::new();
         };
 
         let options = GetRestrictedImportOptions {
-            dependency_graph: ctx.dependency_graph(),
+            module_graph: ctx.module_graph(),
             self_path,
             target_path,
-            target_data,
+            target_info,
             default_visibility: ctx.options().default_visibility,
         };
 
@@ -282,8 +283,8 @@ impl Rule for NoPrivateImports {
 }
 
 struct GetRestrictedImportOptions<'a> {
-    /// The dependency graph to use for further lookups.
-    dependency_graph: &'a DependencyGraph,
+    /// The module graph to use for further lookups.
+    module_graph: &'a ModuleGraph,
 
     /// The self module path we're importing to.
     self_path: &'a Utf8Path,
@@ -291,8 +292,8 @@ struct GetRestrictedImportOptions<'a> {
     /// The target module path we're importing from.
     target_path: &'a Utf8Path,
 
-    /// Dependency data of the target module we're importing from.
-    target_data: ModuleDependencyData,
+    /// Module info of the target module we're importing from.
+    target_info: JsModuleInfo,
 
     /// The visibility to assume for symbols without explicit visibility tag.
     default_visibility: Visibility,
@@ -316,7 +317,7 @@ fn get_restricted_imports_from_module_source(
     node: &JsModuleSource,
     options: &GetRestrictedImportOptions,
 ) -> SyntaxResult<Vec<NoPrivateImportsState>> {
-    let path = options.target_path.to_string();
+    let path: Box<str> = options.target_path.as_str().into();
 
     let results = match node.syntax().parent().and_then(AnyJsImportClause::cast) {
         Some(AnyJsImportClause::JsImportCombinedClause(node)) => {
@@ -409,8 +410,8 @@ fn get_restricted_import_visibility(
     options: &GetRestrictedImportOptions,
 ) -> Option<Visibility> {
     let visibility = options
-        .target_data
-        .find_exported_symbol(options.dependency_graph, import_name.text())
+        .target_info
+        .find_exported_symbol(options.module_graph, import_name.text())
         .and_then(|export| export.jsdoc_comment.as_deref().and_then(parse_visibility))
         .unwrap_or(options.default_visibility);
 

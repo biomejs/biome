@@ -1,8 +1,8 @@
-use crate::react::hooks::{is_react_component, is_react_hook, is_react_hook_call};
+use crate::react::hooks::{is_react_hook_call, is_react_hook_name};
 use crate::services::semantic::{SemanticModelBuilderVisitor, SemanticServices};
 use biome_analyze::{
-    AddVisitor, FromServices, MissingServicesDiagnostic, Phase, Phases, QueryMatch, Queryable,
-    Rule, RuleDiagnostic, RuleKey, ServiceBag, Visitor, VisitorContext, VisitorFinishContext,
+    AddVisitor, FromServices, Phase, Phases, QueryMatch, Queryable, Rule, RuleDiagnostic, RuleKey,
+    RuleMetadata, ServiceBag, ServicesDiagnostic, Visitor, VisitorContext, VisitorFinishContext,
     context::RuleContext, declare_lint_rule,
 };
 use biome_analyze::{RuleDomain, RuleSource};
@@ -13,17 +13,18 @@ use biome_deserialize::{
 };
 use biome_js_semantic::{CallsExtensions, SemanticModel};
 use biome_js_syntax::{
-    AnyFunctionLike, AnyJsBinding, AnyJsExpression, AnyJsFunction, AnyJsObjectMemberName,
-    JsArrayAssignmentPatternElement, JsArrayBindingPatternElement, JsCallExpression,
-    JsConditionalExpression, JsIfStatement, JsLanguage, JsLogicalExpression, JsMethodObjectMember,
-    JsObjectBindingPatternShorthandProperty, JsReturnStatement, JsSyntaxKind, JsSyntaxNode,
-    JsTryFinallyStatement, TextRange,
+    AnyFunctionLike, AnyJsBinding, AnyJsClassMemberName, AnyJsExpression, AnyJsFunction,
+    AnyJsObjectMemberName, JsArrayAssignmentPatternElement, JsArrayBindingPatternElement,
+    JsCallExpression, JsConditionalExpression, JsIfStatement, JsLanguage, JsLogicalExpression,
+    JsMethodClassMember, JsMethodObjectMember, JsObjectBindingPatternShorthandProperty,
+    JsReturnStatement, JsSyntaxKind, JsSyntaxNode, JsTryFinallyStatement, TextRange,
 };
 use biome_rowan::{AstNode, Language, SyntaxNode, WalkEvent, declare_node_union};
 use rustc_hash::FxHashMap;
 use serde::{Deserialize, Serialize};
 use std::ops::{Deref, DerefMut};
 
+use crate::react::components::is_react_component_name;
 use biome_diagnostics::Severity;
 #[cfg(feature = "schemars")]
 use schemars::JsonSchema;
@@ -77,13 +78,13 @@ declare_lint_rule! {
 }
 
 declare_node_union! {
-    pub AnyJsFunctionOrMethod = AnyJsFunction | JsMethodObjectMember
+    pub AnyJsFunctionOrMethod = AnyJsFunction | JsMethodClassMember | JsMethodObjectMember
 }
 
 impl AnyJsFunctionOrMethod {
     fn is_react_component_or_hook(&self) -> bool {
         if let Some(name) = self.name() {
-            if is_react_component(&name) || is_react_hook(&name) {
+            if is_react_component_name(&name) || is_react_hook_name(&name) {
                 return true;
             }
         }
@@ -91,17 +92,22 @@ impl AnyJsFunctionOrMethod {
         false
     }
 
-    fn name(&self) -> Option<String> {
+    fn name(&self) -> Option<Text> {
         match self {
-            AnyJsFunctionOrMethod::AnyJsFunction(function) => function
+            Self::AnyJsFunction(function) => function
                 .binding()
                 .as_ref()
-                .map(AnyJsBinding::to_trimmed_string),
-            AnyJsFunctionOrMethod::JsMethodObjectMember(method) => method
+                .map(AnyJsBinding::to_trimmed_text),
+            Self::JsMethodClassMember(method) => method
                 .name()
                 .ok()
                 .as_ref()
-                .map(AnyJsObjectMemberName::to_trimmed_string),
+                .map(AnyJsClassMemberName::to_trimmed_text),
+            Self::JsMethodObjectMember(method) => method
+                .name()
+                .ok()
+                .as_ref()
+                .map(AnyJsObjectMemberName::to_trimmed_text),
         }
     }
 }
@@ -353,14 +359,15 @@ impl FunctionCallServices {
 impl FromServices for FunctionCallServices {
     fn from_services(
         rule_key: &RuleKey,
+        rule_metadata: &RuleMetadata,
         services: &ServiceBag,
-    ) -> Result<Self, MissingServicesDiagnostic> {
-        let early_returns: &EarlyReturnsModel = services.get_service().ok_or_else(|| {
-            MissingServicesDiagnostic::new(rule_key.rule_name(), &["EarlyReturnsModel"])
-        })?;
+    ) -> Result<Self, ServicesDiagnostic> {
+        let early_returns: &EarlyReturnsModel = services
+            .get_service()
+            .ok_or_else(|| ServicesDiagnostic::new(rule_key.rule_name(), &["EarlyReturnsModel"]))?;
         Ok(Self {
             early_returns: early_returns.clone(),
-            semantic_services: SemanticServices::from_services(rule_key, services)?,
+            semantic_services: SemanticServices::from_services(rule_key, rule_metadata, services)?,
         })
     }
 }

@@ -32,7 +32,8 @@ expression: redactor(content)
       "attributePosition": "auto",
       "bracketSpacing": true
     }
-  }
+  },
+  "html": { "formatter": { "selfCloseVoidElements": "always" } }
 }
 ```
 
@@ -46,4 +47,8 @@ expression: redactor(content)
 
 ```block
 .prettierrc has been successfully migrated.
+```
+
+```block
+Your configuration file(s) have been successfully migrated.
 ```

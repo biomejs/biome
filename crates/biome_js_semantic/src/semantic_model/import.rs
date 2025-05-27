@@ -5,15 +5,20 @@ use biome_js_syntax::{
 };
 use biome_rowan::AstNode;
 
-pub(crate) fn is_imported(node: &JsSyntaxNode) -> bool {
-    node.ancestors().any(|x| {
+#[inline]
+pub fn find_import_node(node: &JsSyntaxNode) -> Option<JsSyntaxNode> {
+    node.ancestors().find(|ancestor| {
         matches!(
-            x.kind(),
+            ancestor.kind(),
             JsSyntaxKind::JS_IMPORT
                 | JsSyntaxKind::JS_NAMED_IMPORT_SPECIFIERS
                 | JsSyntaxKind::JS_DEFAULT_IMPORT_SPECIFIER
         )
     })
+}
+
+pub(crate) fn is_imported(node: &JsSyntaxNode) -> bool {
+    find_import_node(node).is_some()
 }
 
 /// Marker trait that groups all "AstNode" that can be imported or

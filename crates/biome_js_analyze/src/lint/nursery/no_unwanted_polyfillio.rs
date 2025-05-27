@@ -49,7 +49,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoUnwantedPolyfillio {
-        version: "next",
+        version: "2.0.0",
         name: "noUnwantedPolyfillio",
         language: "jsx",
         sources: &[RuleSource::EslintNext("no-unwanted-polyfillio")],

@@ -22,7 +22,7 @@ mod yaml_kinds_src;
 mod html_kinds_src;
 mod kind_src;
 mod language_kind;
-pub mod promote_rule;
+pub mod move_rule;
 mod termcolorful;
 mod unicode;
 
@@ -120,8 +120,8 @@ pub enum TaskCommand {
         category: Category,
     },
     /// Promotes a nursery rule
-    #[bpaf(command, long("promote-rule"))]
-    PromoteRule {
+    #[bpaf(command, long("move-rule"))]
+    MoveRule {
         /// Path of the rule
         #[bpaf(long("name"), argument("STRING"))]
         name: String,

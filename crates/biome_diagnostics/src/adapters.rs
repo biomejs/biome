@@ -120,34 +120,6 @@ impl Diagnostic for BpafError {
     }
 }
 
-#[cfg(feature = "oxc_resolver")]
-#[derive(Debug)]
-pub struct ResolveError {
-    error: oxc_resolver::ResolveError,
-}
-
-#[cfg(feature = "oxc_resolver")]
-impl From<oxc_resolver::ResolveError> for ResolveError {
-    fn from(error: oxc_resolver::ResolveError) -> Self {
-        Self { error }
-    }
-}
-
-#[cfg(feature = "oxc_resolver")]
-impl Diagnostic for ResolveError {
-    fn category(&self) -> Option<&'static Category> {
-        Some(category!("internalError/io"))
-    }
-
-    fn description(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(fmt, "{}", self.error)
-    }
-
-    fn message(&self, fmt: &mut fmt::Formatter<'_>) -> std::io::Result<()> {
-        fmt.write_markup(markup!({ AsConsoleDisplay(&self.error) }))
-    }
-}
-
 #[derive(Debug)]
 pub struct SerdeJsonError {
     error: serde_json::Error,
@@ -170,45 +142,6 @@ impl Diagnostic for SerdeJsonError {
 
     fn message(&self, fmt: &mut fmt::Formatter<'_>) -> std::io::Result<()> {
         fmt.write_markup(markup!({ AsConsoleDisplay(&self.error) }))
-    }
-}
-
-#[cfg(feature = "serde_ini")]
-#[derive(Debug, Clone)]
-pub struct IniError {
-    error: serde_ini::de::Error,
-}
-
-#[cfg(feature = "serde_ini")]
-impl Diagnostic for IniError {
-    fn category(&self) -> Option<&'static Category> {
-        Some(category!("configuration"))
-    }
-
-    fn severity(&self) -> crate::Severity {
-        crate::Severity::Error
-    }
-
-    fn description(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(fmt, "{}", self.error)
-    }
-
-    fn message(&self, fmt: &mut fmt::Formatter<'_>) -> std::io::Result<()> {
-        fmt.write_markup(markup!({ AsConsoleDisplay(&self.error) }))
-    }
-}
-
-#[cfg(feature = "serde_ini")]
-impl biome_console::fmt::Display for IniError {
-    fn fmt(&self, fmt: &mut biome_console::fmt::Formatter<'_>) -> std::io::Result<()> {
-        write!(fmt, "{:?}", self.error)
-    }
-}
-
-#[cfg(feature = "serde_ini")]
-impl From<serde_ini::de::Error> for IniError {
-    fn from(error: serde_ini::de::Error) -> Self {
-        Self { error }
     }
 }
 

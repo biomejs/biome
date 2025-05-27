@@ -1,3 +1,4 @@
+/* should not generate diagnostics */
 function f() {
 	"use strict"
 	switch (x) {

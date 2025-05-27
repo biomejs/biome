@@ -99,10 +99,10 @@ impl Format<JsFormatContext> for AnyTemplateElementList {
 impl AnyTemplateElementList {
     fn elements(&self) -> TemplateElementIterator {
         match self {
-            AnyTemplateElementList::JsTemplateElementList(list) => {
+            Self::JsTemplateElementList(list) => {
                 TemplateElementIterator::JsTemplateElementList(list.iter())
             }
-            AnyTemplateElementList::TsTemplateElementList(list) => {
+            Self::TsTemplateElementList(list) => {
                 TemplateElementIterator::TsTemplateElementList(list.iter())
             }
         }
@@ -123,7 +123,7 @@ impl Iterator for TemplateElementIterator {
 
     fn next(&mut self) -> Option<Self::Item> {
         match self {
-            TemplateElementIterator::JsTemplateElementList(inner) => {
+            Self::JsTemplateElementList(inner) => {
                 let result = match inner.next()? {
                     AnyJsTemplateElement::JsTemplateChunkElement(chunk) => {
                         AnyTemplateElementOrChunk::from(AnyTemplateChunkElement::from(chunk))
@@ -134,7 +134,7 @@ impl Iterator for TemplateElementIterator {
                 };
                 Some(result)
             }
-            TemplateElementIterator::TsTemplateElementList(inner) => {
+            Self::TsTemplateElementList(inner) => {
                 let result = match inner.next()? {
                     AnyTsTemplateElement::TsTemplateChunkElement(chunk) => {
                         AnyTemplateElementOrChunk::from(AnyTemplateChunkElement::from(chunk))
@@ -153,8 +153,8 @@ impl Iterator for TemplateElementIterator {
 impl ExactSizeIterator for TemplateElementIterator {
     fn len(&self) -> usize {
         match self {
-            TemplateElementIterator::JsTemplateElementList(inner) => inner.len(),
-            TemplateElementIterator::TsTemplateElementList(inner) => inner.len(),
+            Self::JsTemplateElementList(inner) => inner.len(),
+            Self::TsTemplateElementList(inner) => inner.len(),
         }
     }
 }
@@ -177,11 +177,7 @@ impl TemplateElementIndention {
     }
 
     /// Computes the indention after the last new line character.
-    fn after_last_new_line(
-        text: &str,
-        tab_width: TabWidth,
-        previous_indention: TemplateElementIndention,
-    ) -> Self {
+    fn after_last_new_line(text: &str, tab_width: TabWidth, previous_indention: Self) -> Self {
         let by_new_line = text.rsplit_once('\n');
 
         let size = match by_new_line {
@@ -212,6 +208,6 @@ impl TemplateElementIndention {
             }
         };
 
-        TemplateElementIndention(size)
+        Self(size)
     }
 }

@@ -1,41 +1,44 @@
+#![deny(clippy::use_self)]
+
 #[macro_use]
 mod generated;
 mod file_source;
 mod syntax_node;
 
 pub use self::generated::*;
-use biome_rowan::RawSyntaxKind;
+use biome_rowan::{AstNode, RawSyntaxKind};
 pub use biome_rowan::{TextLen, TextRange, TextSize, TokenAtOffset, TriviaPieceKind, WalkEvent};
 pub use syntax_node::*;
 
 impl From<u16> for YamlSyntaxKind {
-    fn from(d: u16) -> YamlSyntaxKind {
-        assert!(d <= (YamlSyntaxKind::__LAST as u16));
-        unsafe { std::mem::transmute::<u16, YamlSyntaxKind>(d) }
+    fn from(d: u16) -> Self {
+        assert!(d <= (Self::__LAST as u16));
+        unsafe { std::mem::transmute::<u16, Self>(d) }
     }
 }
 
 impl From<YamlSyntaxKind> for u16 {
-    fn from(k: YamlSyntaxKind) -> u16 {
-        k as u16
+    fn from(k: YamlSyntaxKind) -> Self {
+        k as Self
     }
 }
 
 impl biome_rowan::SyntaxKind for YamlSyntaxKind {
-    const TOMBSTONE: Self = YamlSyntaxKind::TOMBSTONE;
-    const EOF: Self = YamlSyntaxKind::EOF;
+    const TOMBSTONE: Self = Self::TOMBSTONE;
+    const EOF: Self = Self::EOF;
 
     fn is_bogus(&self) -> bool {
         matches!(
             self,
-            YamlSyntaxKind::YAML_BOGUS | YamlSyntaxKind::YAML_BOGUS_VALUE
+            Self::YAML_BOGUS | Self::YAML_BOGUS_BLOCK_NODE | Self::YAML_BOGUS_BLOCK_MAP_ENTRY
         )
     }
 
     fn to_bogus(&self) -> Self {
         match self {
-            YamlSyntaxKind::YAML_BOGUS_VALUE => YamlSyntaxKind::YAML_BOGUS_VALUE,
-            _ => YamlSyntaxKind::YAML_BOGUS,
+            kind if AnyYamlBlockMapEntry::can_cast(*kind) => Self::YAML_BOGUS_BLOCK_MAP_ENTRY,
+            kind if AnyYamlBlockNode::can_cast(*kind) => Self::YAML_BOGUS_BLOCK_NODE,
+            _ => Self::YAML_BOGUS,
         }
     }
 
@@ -50,37 +53,29 @@ impl biome_rowan::SyntaxKind for YamlSyntaxKind {
     }
 
     fn is_root(&self) -> bool {
-        matches!(self, YamlSyntaxKind::YAML_ROOT)
+        matches!(self, Self::YAML_ROOT)
     }
 
     fn is_list(&self) -> bool {
-        YamlSyntaxKind::is_list(*self)
+        Self::is_list(*self)
     }
 
     fn is_trivia(self) -> bool {
-        matches!(
-            self,
-            YamlSyntaxKind::NEWLINE | YamlSyntaxKind::WHITESPACE | YamlSyntaxKind::COMMENT
-        )
+        matches!(self, Self::WHITESPACE | Self::COMMENT)
     }
 
     fn to_string(&self) -> Option<&'static str> {
-        YamlSyntaxKind::to_string(self)
+        Self::to_string(self)
     }
 }
 
 impl YamlSyntaxKind {
     pub fn is_trivia(self) -> bool {
-        matches!(self, YamlSyntaxKind::NEWLINE | YamlSyntaxKind::WHITESPACE)
+        matches!(self, Self::WHITESPACE)
     }
 
     pub fn is_comments(self) -> bool {
-        matches!(self, YamlSyntaxKind::COMMENT)
-    }
-
-    #[inline]
-    pub const fn is_keyword(self) -> bool {
-        matches!(self, T![null])
+        matches!(self, Self::COMMENT)
     }
 }
 
@@ -88,19 +83,10 @@ impl TryFrom<YamlSyntaxKind> for TriviaPieceKind {
     type Error = ();
 
     fn try_from(value: YamlSyntaxKind) -> Result<Self, Self::Error> {
-        if value.is_trivia() {
-            match value {
-                YamlSyntaxKind::NEWLINE => Ok(TriviaPieceKind::Newline),
-                YamlSyntaxKind::WHITESPACE => Ok(TriviaPieceKind::Whitespace),
-                _ => unreachable!("Not Trivia"),
-            }
-        } else if value.is_comments() {
-            match value {
-                YamlSyntaxKind::COMMENT => Ok(TriviaPieceKind::SingleLineComment),
-                _ => unreachable!("Not Comment"),
-            }
-        } else {
-            Err(())
+        match value {
+            YamlSyntaxKind::WHITESPACE => Ok(Self::Whitespace),
+            YamlSyntaxKind::COMMENT => Ok(Self::SingleLineComment),
+            _ => Err(()),
         }
     }
 }

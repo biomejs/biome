@@ -1,7 +1,6 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: noUndeclaredVariables.js
-snapshot_kind: text
 ---
 # Input
 ```js
@@ -25,7 +24,7 @@ new AggregateError();
 ```
 noUndeclaredVariables.js:2:1 lint/correctness/noUndeclaredVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i The foobar variable is undeclared.
+  × The foobar variable is undeclared.
   
     1 │ // invalid
   > 2 │ foobar;
@@ -42,7 +41,7 @@ noUndeclaredVariables.js:2:1 lint/correctness/noUndeclaredVariables ━━━━
 ```
 noUndeclaredVariables.js:4:5 lint/correctness/noUndeclaredVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i The lorem variable is undeclared.
+  × The lorem variable is undeclared.
   
     2 │ foobar;
     3 │ function f() {
@@ -60,7 +59,7 @@ noUndeclaredVariables.js:4:5 lint/correctness/noUndeclaredVariables ━━━━
 ```
 noUndeclaredVariables.js:6:1 lint/correctness/noUndeclaredVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i The assignment variable is undeclared.
+  × The assignment variable is undeclared.
   
     4 │     lorem;
     5 │ }
@@ -78,7 +77,7 @@ noUndeclaredVariables.js:6:1 lint/correctness/noUndeclaredVariables ━━━━
 ```
 noUndeclaredVariables.js:7:2 lint/correctness/noUndeclaredVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i The Missing variable is undeclared.
+  × The Missing variable is undeclared.
   
     5 │ }
     6 │ assignment = "value";

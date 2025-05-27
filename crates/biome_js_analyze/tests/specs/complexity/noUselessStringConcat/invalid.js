@@ -1,4 +1,4 @@
-const a = 'a' + 'b'
+const a = /*1*/ 'a' + 'b' // comment
 const a = 'a' + 'b' + 'c'
 const a = 'a' + ('b' + 'c')
 const a = ('a' + 'b') + 'c'

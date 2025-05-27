@@ -50,8 +50,8 @@ declare_lint_rule! {
         name: "useTemplate",
         language: "js",
         sources: &[RuleSource::Eslint("prefer-template")],
-        recommended: false,
-        severity: Severity::Warning,
+        recommended: true,
+        severity: Severity::Information,
         fix_kind: FixKind::Unsafe,
     }
 }
@@ -198,7 +198,7 @@ fn template_expression_from_binary_expression(
                     // Skip parenthesized expressions, because they would be added twice to
                     // `left_expressions_stack` or `template_elements` (see the last match arm):
                     // First the contained expression and then the parenthesized expression itself.
-                    AnyJsExpression::JsParenthesizedExpression(_) => continue,
+                    AnyJsExpression::JsParenthesizedExpression(_) => {}
                     AnyJsExpression::JsBinaryExpression(binary)
                         if binary.operator() == Ok(JsBinaryOperator::Plus) =>
                     {

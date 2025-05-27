@@ -1,3 +1,5 @@
+#![deny(clippy::use_self)]
+
 #[macro_use]
 mod generated;
 mod syntax_node;
@@ -7,19 +9,19 @@ use biome_rowan::{RawSyntaxKind, SyntaxKind, TriviaPieceKind};
 pub use syntax_node::*;
 
 impl From<u16> for MarkdownSyntaxKind {
-    fn from(d: u16) -> MarkdownSyntaxKind {
-        assert!(d <= (MarkdownSyntaxKind::__LAST as u16));
-        unsafe { std::mem::transmute::<u16, MarkdownSyntaxKind>(d) }
+    fn from(d: u16) -> Self {
+        assert!(d <= (Self::__LAST as u16));
+        unsafe { std::mem::transmute::<u16, Self>(d) }
     }
 }
 
 impl SyntaxKind for MarkdownSyntaxKind {
-    const TOMBSTONE: Self = MarkdownSyntaxKind::TOMBSTONE;
+    const TOMBSTONE: Self = Self::TOMBSTONE;
 
-    const EOF: Self = MarkdownSyntaxKind::EOF;
+    const EOF: Self = Self::EOF;
 
     fn is_bogus(&self) -> bool {
-        matches!(self, MarkdownSyntaxKind::MD_BOGUS)
+        matches!(self, Self::MD_BOGUS)
     }
 
     fn to_bogus(&self) -> Self {
@@ -39,18 +41,15 @@ impl SyntaxKind for MarkdownSyntaxKind {
     }
 
     fn is_list(&self) -> bool {
-        MarkdownSyntaxKind::is_list(*self)
+        Self::is_list(*self)
     }
 
     fn is_trivia(self) -> bool {
-        matches!(
-            self,
-            MarkdownSyntaxKind::NEWLINE | MarkdownSyntaxKind::WHITESPACE | MarkdownSyntaxKind::TAB
-        )
+        matches!(self, Self::NEWLINE | Self::WHITESPACE | Self::TAB)
     }
 
     fn to_string(&self) -> Option<&'static str> {
-        MarkdownSyntaxKind::to_string(self)
+        Self::to_string(self)
     }
 }
 
@@ -60,9 +59,9 @@ impl TryFrom<MarkdownSyntaxKind> for TriviaPieceKind {
     fn try_from(value: MarkdownSyntaxKind) -> Result<Self, Self::Error> {
         if value.is_trivia() {
             match value {
-                MarkdownSyntaxKind::NEWLINE => Ok(TriviaPieceKind::Newline),
-                MarkdownSyntaxKind::WHITESPACE => Ok(TriviaPieceKind::Whitespace),
-                MarkdownSyntaxKind::TAB => Ok(TriviaPieceKind::Skipped),
+                MarkdownSyntaxKind::NEWLINE => Ok(Self::Newline),
+                MarkdownSyntaxKind::WHITESPACE => Ok(Self::Whitespace),
+                MarkdownSyntaxKind::TAB => Ok(Self::Skipped),
                 _ => unreachable!("Not Trivia"),
             }
         } else {

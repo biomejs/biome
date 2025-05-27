@@ -598,14 +598,15 @@ impl SemanticEventExtractor {
                             .map(|scope| scope.scope_id);
                         self.push_binding(hoisted_scope_id, BindingName::Type(name), info);
                     }
-                    AnyJsBindingDeclaration::TsModuleDeclaration(_) => {
-                        // This declarations has its own scope.
+                    AnyJsBindingDeclaration::TsExternalModuleDeclaration(_)
+                    | AnyJsBindingDeclaration::TsModuleDeclaration(_) => {
+                        // This declaration has its own scope.
                         // Thus we need to hoist the declaration to the parent scope.
                         hoisted_scope_id = self
                             .scopes
                             .get(self.scopes.len() - 2)
                             .map(|scope| scope.scope_id);
-                        self.push_binding(hoisted_scope_id, BindingName::Value(name.clone()), info);
+                        self.push_binding(hoisted_scope_id, BindingName::Value(name), info);
                     }
                     AnyJsBindingDeclaration::TsMappedType(_)
                     | AnyJsBindingDeclaration::TsTypeParameter(_) => {

@@ -2,6 +2,7 @@ use std::ops::{Deref, Range};
 
 use crate::{
     JsRuleAction,
+    lint::correctness::no_unused_variables::is_unused,
     services::{control_flow::AnyJsControlFlowRoot, semantic::Semantic},
     utils::{
         rename::{AnyJsRenamableDeclaration, RenameSymbolExtensions},
@@ -17,6 +18,7 @@ use biome_deserialize::{
     DeserializableValidator, DeserializationContext, DeserializationDiagnostic,
 };
 use biome_deserialize_macros::Deserializable;
+use biome_diagnostics::Severity;
 use biome_js_semantic::{CanBeImportedExported, SemanticModel};
 use biome_js_syntax::{
     AnyJsClassMember, AnyJsObjectMember, AnyJsVariableDeclaration, AnyTsTypeMember, JsFileSource,
@@ -25,7 +27,7 @@ use biome_js_syntax::{
     JsSyntaxToken, JsVariableDeclarator, JsVariableKind, Modifier, TsDeclarationModule,
     TsIdentifierBinding, TsIndexSignatureModifierList, TsLiteralEnumMemberName,
     TsMethodSignatureModifierList, TsPropertySignatureModifierList, TsTypeParameterName,
-    binding_ext::AnyJsBindingDeclaration,
+    binding_ext::{AnyJsBindingDeclaration, AnyJsIdentifierBinding},
 };
 use biome_rowan::{
     AstNode, BatchMutationExt, SyntaxResult, TextRange, TextSize, declare_node_union,
@@ -49,7 +51,9 @@ declare_lint_rule! {
     ///
     /// ## Naming conventions
     ///
-    /// All names can be prefixed and suffixed by underscores `_` and dollar signs `$`.
+    /// All names can be prefixed and suffixed with underscores `_` and dollar signs `$`.
+    /// Unused variables with a name prefixed with `_` are completely ignored.
+    /// This avoids conflicts with the `noUnusedVariables` rule.
     ///
     /// ### Variable and parameter names
     ///
@@ -283,48 +287,7 @@ declare_lint_rule! {
     ///
     /// - Declarations inside an external TypeScript module
     ///
-    ///   :::caution
-    ///   **Bug:** Declarations inside external TypeScript modules are currently not ignored.
-    ///   This is a bug, and is tracked under [#4545](https://github.com/biomejs/biome/issues/4545).
-    ///
-    ///   Until the bug is fixed, we recommend one of the following workarounds:
-    ///
-    ///   - Move the type declarations for external modules into separate `.d.ts` files,
-    ///     and use [overrides](https://biomejs.dev/reference/configuration/#overrides)
-    ///     in your [`biome.json`](https://biomejs.dev/reference/configuration/)
-    ///     to disable the `useNamingConvention` rule for those files:
-    ///
-    ///     ```jsonc,full_options
-    ///     {
-    ///       "linter": {
-    ///         "rules": {
-    ///           "style": {
-    ///             "useNamingConvention": "warn"
-    ///           }
-    ///           // ...
-    ///         }
-    ///       },
-    ///       // ...
-    ///       "overrides": [
-    ///         {
-    ///           "includes": ["typings/*.d.ts"],
-    ///           "linter": {
-    ///             "rules": {
-    ///               "style": {
-    ///                 "useNamingConvention": "off"
-    ///               }
-    ///             }
-    ///           }
-    ///         }
-    ///       ]
-    ///     }
-    ///     ```
-    ///
-    ///   - Use [`// biome-ignore lint/style/useNamingConvention: <explanation>`](https://biomejs.dev/linter/#ignore-code)
-    ///     to ignore the problematic lines.
-    ///   :::
-    ///
-    ///   ```ts,ignore
+    ///   ```ts
     ///   declare module "myExternalModule" {
     ///     export interface my_INTERFACE {}
     ///   }
@@ -478,7 +441,7 @@ declare_lint_rule! {
     ///   - `global`: the global scope (also includes the namespace scopes)
     ///
     /// For each declaration,
-    /// the `conventions` array is traversed until a selector selects the declaration.
+    /// the `conventions` array is traversed in-order until a selector selects the declaration.
     /// The requirements of the convention are so verified on the declaration.
     ///
     /// A convention must set at least one requirement among:
@@ -487,15 +450,8 @@ declare_lint_rule! {
     /// - `formats`: the string [case] that the name must follow.
     ///   The supported cases are: [`PascalCase`], [`CONSTANT_CASE`], [`camelCase`], and [`snake_case`].
     ///
-    /// If both `match` and `formats` are set, then `formats` is checked against the first capture of the regular expression.
-    /// Only the first capture is tested. Other captures are ignored.
-    /// If nothing is captured, then `formats` is ignored.
-    ///
-    /// In the following example, we check the following conventions:
-    ///
-    /// - A private property starts with `_` and consists of at least two characters.
-    /// - The captured name (the name without the leading `_`) is in [`camelCase`].
-    /// - An enum member is in [`PascalCase`] or [`CONSTANT_CASE`].
+    /// If only `formats` is set, it's checked against the name of the declaration.
+    /// In the following configuration, we require `static readonly` class properties to be in [`CONSTANT_CASE`].
     ///
     /// ```json,options
     /// {
@@ -503,43 +459,142 @@ declare_lint_rule! {
     ///         "conventions": [
     ///             {
     ///                 "selector": {
-    ///                     "kind": "classMember",
-    ///                     "modifiers": ["private"]
+    ///                     "kind": "classProperty",
+    ///                     "modifiers": ["static", "readonly"]
     ///                 },
-    ///                 "match": "_(.+)",
-    ///                 "formats": ["camelCase"]
-    ///             },
-    ///             {
-    ///                 "selector": {
-    ///                     "kind": "enumMember"
-    ///                 },
-    ///                 "formats": ["PascalCase", "CONSTANT_CASE"]
+    ///                 "formats": ["CONSTANT_CASE"]
     ///             }
     ///         ]
     ///     }
     /// }
     /// ```
     ///
-    /// If `match` is set and `formats` is unset,
-    /// then the part of the name captured by the regular expression is forwarded to the next conventions of the array.
-    /// In the following example, we require that private class members start with `_` and all class members are in ["camelCase"].
+    /// The following code is then reported by the rule:
+    ///
+    /// ```ts,use_options,expect_diagnostic
+    /// class C {
+    ///     static readonly prop = 0;
+    /// }
+    /// ```
+    ///
+    /// A convention can make another one useless.
+    /// In the following configuration, the second convention is useless because the first one always applies to class members, including class properties.
+    /// You should always place first more specific conventions.
+    ///
+    /// ```json,options
+    /// {
+    ///     "options": {
+    ///         "conventions": [
+    ///             {
+    ///                 "selector": { "kind": "classMember" },
+    ///                 "formats": ["camelCase"]
+    ///             },
+    ///             {
+    ///                 "selector": { "kind": "classProperty" },
+    ///                 "formats": ["camelCase", "CONSTANT_CASE"]
+    ///             }
+    ///         ]
+    ///     }
+    /// }
+    /// ```
+    ///
+    /// If only `match` is set and the regular expression has no capturing groups,
+    /// then `match` is checked against the name of the declaration directly.
+    /// In the following configuration, all variable names must have a minimum of 3 characters and a maximum of 20 characters.
+    ///
+    /// ```json,options
+    /// {
+    ///     "options": {
+    ///         "conventions": [
+    ///             {
+    ///                 "selector": { "kind": "variable" },
+    ///                 "match": ".{3,20}"
+    ///             }
+    ///         ]
+    ///     }
+    /// }
+    /// ```
+    ///
+    /// If both `match` and `formats` are set, then `formats` is checked against the first capture of the regular expression.
+    /// Only the first capture is tested. Other captures are ignored.
+    /// If nothing is captured, then `formats` is ignored.
+    ///
+    /// In the following example, we require that:
+    ///
+    /// - A private property starts with `_` and consists of at least two characters.
+    /// - The captured name (the name without the leading `_`) is in [`camelCase`].
+    ///
+    /// ```json,options
+    /// {
+    ///     "options": {
+    ///         "conventions": [
+    ///             {
+    ///                 "selector": { "kind": "classMember", "modifiers": ["private"] },
+    ///                 "match": "_(.+)",
+    ///                 "formats": ["camelCase"]
+    ///             }
+    ///         ]
+    ///     }
+    /// }
+    /// ```
+    ///
+    /// If `match` is set and `formats` is unset, then the part of the name captured by the regular expression is forwarded to the next conventions of the array that selects the declaration.
+    /// The following configuration has exactly the same effect as the previous one.
+    /// The first convention applies to any private class member name.
+    /// It stipulates that the name must have a leading underscore.
+    /// The regular expression captures the part of the name without the leading underscore.
+    /// Because `formats` is not set, the capture is forwarded to the next convention that applies to a private class member name.
+    /// In our case, the next convention applies.
+    /// The capture is then checked against `formats`.
     ///
     /// ```jsonc,options
     /// {
     ///     "options": {
     ///         "conventions": [
     ///             {
-    ///                 "selector": {
-    ///                     "kind": "classMember",
-    ///                     "modifiers": ["private"]
-    ///                 },
+    ///                 "selector": { "kind": "classMember", "modifiers": ["private"] },
     ///                 "match": "_(.+)"
     ///                 // We don't need to specify `formats` because the capture is forwarded to the next conventions.
-    ///             },
+    ///             }, {
+    ///                 "selector": { "kind": "classMember", "modifiers": ["private"] },
+    ///                 "formats": ["camelCase"]
+    ///             }
+    ///         ]
+    ///     }
+    /// }
+    /// ```
+    ///
+    /// The forwarding has particularly useful to factorize some conventions.
+    /// For example, the following configuration...
+    ///
+    /// ```jsonc,options
+    /// {
+    ///     "options": {
+    ///         "conventions": [
     ///             {
-    ///                 "selector": {
-    ///                     "kind": "classMember"
-    ///                 },
+    ///                 "selector": { "kind": "classMember", "modifiers": ["private"] },
+    ///                 "match": "_(.+)",
+    ///                 "formats": ["camelCase"]
+    ///             }, {
+    ///                 "selector": { "kind": "classMember" },
+    ///                 "formats": ["camelCase"]
+    ///             }
+    ///         ]
+    ///     }
+    /// }
+    /// ```
+    ///
+    /// can be factorized to...
+    ///
+    /// ```jsonc,options
+    /// {
+    ///     "options": {
+    ///         "conventions": [
+    ///             {
+    ///                 "selector": { "kind": "classMember", "modifiers": ["private"] },
+    ///                 "match": "_(.+)"
+    ///             }, {
+    ///                 "selector": { "kind": "classMember" },
     ///                 "formats": ["camelCase"]
     ///             }
     ///         ]
@@ -557,10 +612,7 @@ declare_lint_rule! {
     ///     "options": {
     ///         "conventions": [
     ///             {
-    ///                 "selector": {
-    ///                     "kind": "classMember",
-    ///                     "modifiers": ["private"]
-    ///                 },
+    ///                 "selector": { "kind": "classMember", "modifiers": ["private"] },
     ///                 "match": "_(.+)"
     ///                 // We don't need to specify `formats` because the capture is forwarded to the next conventions.
     ///             }
@@ -572,7 +624,7 @@ declare_lint_rule! {
     ///
     /// If the capture is identical to the initial name (it is not a part of the initial name),
     /// then, leading and trailing underscore and dollar signs are trimmed before being checked against default conventions.
-    /// In the previous example, the capture is a part of the name because `_` is not included in the capture.
+    /// In the previous example, the capture is a part of the name because `_` is not included in the capture, thus, no trimming is performed.
     ///
     /// You can reset all default conventions by adding a convention at the end of the array that accepts anything:
     ///
@@ -594,16 +646,13 @@ declare_lint_rule! {
     ///
     /// Let's take a more complex example with the following conventions:
     ///
-    /// - Accept variable names `i`, `j`, and check all other names against the next conventions.
-    /// - All identifiers must contain at least two characters.
-    /// - We require `private` class members to start with an underscore `_`.
-    /// - We require `static readonly` class properties to be in [`CONSTANT_CASE`].
-    ///   A `private static readonly` property must also start with an underscore as dictated by the previous convention.
-    /// - We require global constants to be in [`CONSTANT_CASE`] and
-    ///   we allow these constants to be enclosed by double underscores or to be named `_SPECIAL_`.
-    /// - We require interfaces to start with `I`, except for interfaces ending with `Error`,
-    ///   and to be in [`PascalCase`].
-    /// - All other names follow the default conventions
+    /// 1. A variable name is `i`, `j`, or follows the next selected convention (convention (2)).
+    /// 2. An identifier contains at least two characters and follow the next selected convention (the default convention).
+    /// 3. A `private` class member name starts with an underscore `_` and the name without the underscore follows the next selected convention (convention (4) for some of them, and the default convention for others).
+    /// 4. A `static readonly` class property name is in [`CONSTANT_CASE`].
+    /// 5. A global constant is in [`CONSTANT_CASE`] and can be enclosed by double underscores or to be named `_SPECIAL_`.
+    /// 6. An interface name starts with `I`, except for interfaces ending with `Error`, and is in [`PascalCase`].
+    /// 7. All other names follow the default conventions
     ///
     /// ```jsonc,options
     /// {
@@ -623,7 +672,7 @@ declare_lint_rule! {
     ///                     "kind": "classMember",
     ///                     "modifiers": ["private"]
     ///                 },
-    ///                 "match": "_(.+)"
+    ///                 "match": "_(.*)"
     ///             }, {
     ///                 "selector": {
     ///                     "kind": "classProperty",
@@ -649,6 +698,16 @@ declare_lint_rule! {
     ///     }
     /// }
     /// ```
+    ///
+    /// Hers some examples:
+    ///
+    /// - A private class property named `_` is reported by the rule because it contains a single character.
+    ///   According to the second convention, the name should contain at least two characters.
+    /// - A variable `a_variable` is reported by the rule because it doesn't respect the default convention that forbid variable names in [`snake_case`].
+    ///   The variable name is first verified against the first convention.
+    ///   It is forwarded to the second convention, which is also respected, because it is neither `i` nor `j`.
+    ///   The name is captured and is forwarded to the next convention.
+    ///   In our case, the next convention is the default one.
     ///
     /// ### Regular expression syntax
     ///
@@ -679,6 +738,7 @@ declare_lint_rule! {
         sources: &[RuleSource::EslintTypeScript("naming-convention")],
         source_kind: RuleSourceKind::Inspired,
         recommended: false,
+        severity: Severity::Information,
         fix_kind: FixKind::Safe,
     }
 }
@@ -701,6 +761,15 @@ impl Rule for UseNamingConvention {
             if name.is_empty() || !is_js_ident(name) {
                 // Ignore non-identifier strings
                 return None;
+            }
+        }
+        if name.starts_with('_') {
+            if let Ok(binding) = &node.try_into() {
+                if is_unused(ctx.model(), binding) {
+                    // Always ignore unused variables prefixed with `_`.
+                    // This notably avoids a conflict with the `noUnusedVariables` lint rule.
+                    return None;
+                }
             }
         }
         if options.require_ascii && !name.is_ascii() {
@@ -939,21 +1008,38 @@ declare_node_union! {
         TsLiteralEnumMemberName |
         TsTypeParameterName
 }
-
 impl AnyIdentifierBindingLike {
     fn name_token(&self) -> SyntaxResult<JsSyntaxToken> {
         match self {
-            AnyIdentifierBindingLike::JsIdentifierBinding(binding) => binding.name_token(),
-            AnyIdentifierBindingLike::JsLiteralMemberName(member_name) => member_name.value(),
-            AnyIdentifierBindingLike::JsPrivateClassMemberName(member_name) => {
-                member_name.id_token()
+            Self::JsIdentifierBinding(binding) => binding.name_token(),
+            Self::JsLiteralMemberName(member_name) => member_name.value(),
+            Self::JsPrivateClassMemberName(member_name) => member_name.id_token(),
+            Self::JsLiteralExportName(export_name) => export_name.value(),
+            Self::TsIdentifierBinding(binding) => binding.name_token(),
+            Self::TsLiteralEnumMemberName(member_name) => member_name.value(),
+            Self::TsTypeParameterName(type_parameter) => type_parameter.ident_token(),
+        }
+    }
+}
+impl TryFrom<&AnyIdentifierBindingLike> for AnyJsIdentifierBinding {
+    type Error = ();
+    fn try_from(value: &AnyIdentifierBindingLike) -> Result<Self, Self::Error> {
+        match value {
+            AnyIdentifierBindingLike::JsIdentifierBinding(binding) => {
+                Ok(Self::JsIdentifierBinding(binding.clone()))
             }
-            AnyIdentifierBindingLike::JsLiteralExportName(export_name) => export_name.value(),
-            AnyIdentifierBindingLike::TsIdentifierBinding(binding) => binding.name_token(),
-            AnyIdentifierBindingLike::TsLiteralEnumMemberName(member_name) => member_name.value(),
-            AnyIdentifierBindingLike::TsTypeParameterName(type_parameter) => {
-                type_parameter.ident_token()
+            AnyIdentifierBindingLike::TsIdentifierBinding(binding) => {
+                Ok(Self::TsIdentifierBinding(binding.clone()))
             }
+            AnyIdentifierBindingLike::TsLiteralEnumMemberName(binding) => {
+                Ok(Self::TsLiteralEnumMemberName(binding.clone()))
+            }
+            AnyIdentifierBindingLike::TsTypeParameterName(binding) => {
+                Ok(Self::TsTypeParameterName(binding.clone()))
+            }
+            AnyIdentifierBindingLike::JsLiteralMemberName(_)
+            | AnyIdentifierBindingLike::JsPrivateClassMemberName(_)
+            | AnyIdentifierBindingLike::JsLiteralExportName(_) => Err(()),
         }
     }
 }
@@ -1100,19 +1186,19 @@ impl std::error::Error for InvalidSelector {}
 impl std::fmt::Display for InvalidSelector {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            InvalidSelector::IncompatibleModifiers(modifier1, modifier2) => {
+            Self::IncompatibleModifiers(modifier1, modifier2) => {
                 write!(
                     f,
                     "The `{modifier1}` and `{modifier2}` modifiers cannot be used together.",
                 )
             }
-            InvalidSelector::UnsupportedModifiers(kind, modifier) => {
+            Self::UnsupportedModifiers(kind, modifier) => {
                 write!(
                     f,
                     "The `{modifier}` modifier cannot be used with the `{kind}` kind."
                 )
             }
-            InvalidSelector::UnsupportedScope(kind, scope) => {
+            Self::UnsupportedScope(kind, scope) => {
                 let scope = scope.to_string();
                 let scope = scope.trim_end();
                 write!(
@@ -1253,27 +1339,27 @@ impl Selector {
         }
     }
 
-    fn from_name(js_name: &AnyIdentifierBindingLike) -> Option<Selector> {
+    fn from_name(js_name: &AnyIdentifierBindingLike) -> Option<Self> {
         match js_name {
             AnyIdentifierBindingLike::JsIdentifierBinding(binding) => {
-                Selector::from_binding_declaration(&binding.declaration()?)
+                Self::from_binding_declaration(&binding.declaration()?)
             }
             AnyIdentifierBindingLike::TsIdentifierBinding(binding) => {
-                Selector::from_binding_declaration(&binding.declaration()?)
+                Self::from_binding_declaration(&binding.declaration()?)
             }
             AnyIdentifierBindingLike::JsLiteralMemberName(member_name) => {
                 if let Some(member) = member_name.parent::<AnyJsClassMember>() {
-                    Selector::from_class_member(&member)
+                    Self::from_class_member(&member)
                 } else if let Some(member) = member_name.parent::<AnyTsTypeMember>() {
-                    Selector::from_type_member(&member)
+                    Self::from_type_member(&member)
                 } else if let Some(member) = member_name.parent::<AnyJsObjectMember>() {
-                    Selector::from_object_member(&member)
+                    Self::from_object_member(&member)
                 } else {
                     None
                 }
             }
             AnyIdentifierBindingLike::JsPrivateClassMemberName(member_name) => {
-                Selector::from_class_member(&member_name.parent::<AnyJsClassMember>()?)
+                Self::from_class_member(&member_name.parent::<AnyJsClassMember>()?)
             }
             AnyIdentifierBindingLike::JsLiteralExportName(export_name) => {
                 let parent = export_name.syntax().parent()?;
@@ -1296,8 +1382,8 @@ impl Selector {
         }
     }
 
-    fn from_class_member(member: &AnyJsClassMember) -> Option<Selector> {
-        let Selector {
+    fn from_class_member(member: &AnyJsClassMember) -> Option<Self> {
+        let Self {
             kind,
             modifiers,
             scope,
@@ -1309,45 +1395,45 @@ impl Selector {
             | AnyJsClassMember::JsEmptyClassMember(_)
             | AnyJsClassMember::JsStaticInitializationBlockClassMember(_) => return None,
             AnyJsClassMember::TsIndexSignatureClassMember(getter) => {
-                Selector::with_modifiers(Kind::IndexParameter, getter.modifiers())
+                Self::with_modifiers(Kind::IndexParameter, getter.modifiers())
             }
             AnyJsClassMember::JsGetterClassMember(getter) => {
-                Selector::with_modifiers(Kind::ClassGetter, getter.modifiers())
+                Self::with_modifiers(Kind::ClassGetter, getter.modifiers())
             }
             AnyJsClassMember::TsGetterSignatureClassMember(getter) => {
-                Selector::with_modifiers(Kind::ClassGetter, getter.modifiers())
+                Self::with_modifiers(Kind::ClassGetter, getter.modifiers())
             }
             AnyJsClassMember::JsMethodClassMember(method) => {
-                Selector::with_modifiers(Kind::ClassMethod, method.modifiers())
+                Self::with_modifiers(Kind::ClassMethod, method.modifiers())
             }
             AnyJsClassMember::TsMethodSignatureClassMember(method) => {
-                Selector::with_modifiers(Kind::ClassMethod, method.modifiers())
+                Self::with_modifiers(Kind::ClassMethod, method.modifiers())
             }
             AnyJsClassMember::JsPropertyClassMember(property) => {
-                Selector::with_modifiers(Kind::ClassProperty, property.modifiers())
+                Self::with_modifiers(Kind::ClassProperty, property.modifiers())
             }
             AnyJsClassMember::TsPropertySignatureClassMember(property) => {
-                Selector::with_modifiers(Kind::ClassProperty, property.modifiers())
+                Self::with_modifiers(Kind::ClassProperty, property.modifiers())
             }
             AnyJsClassMember::TsInitializedPropertySignatureClassMember(property) => {
-                Selector::with_modifiers(Kind::ClassProperty, property.modifiers())
+                Self::with_modifiers(Kind::ClassProperty, property.modifiers())
             }
             AnyJsClassMember::JsSetterClassMember(setter) => {
-                Selector::with_modifiers(Kind::ClassSetter, setter.modifiers())
+                Self::with_modifiers(Kind::ClassSetter, setter.modifiers())
             }
             AnyJsClassMember::TsSetterSignatureClassMember(setter) => {
-                Selector::with_modifiers(Kind::ClassSetter, setter.modifiers())
+                Self::with_modifiers(Kind::ClassSetter, setter.modifiers())
             }
         };
         // Ignore explicitly overridden members
-        (!modifiers.contains(Modifier::Override)).then_some(Selector {
+        (!modifiers.contains(Modifier::Override)).then_some(Self {
             kind,
             modifiers,
             scope,
         })
     }
 
-    fn from_binding_declaration(decl: &AnyJsBindingDeclaration) -> Option<Selector> {
+    fn from_binding_declaration(decl: &AnyJsBindingDeclaration) -> Option<Self> {
         match decl {
             AnyJsBindingDeclaration::JsArrayBindingPatternElement(_)
             | AnyJsBindingDeclaration::JsArrayBindingPatternRestElement(_)
@@ -1356,7 +1442,7 @@ impl Selector {
                 Self::from_parent_binding_pattern_declaration(&decl.parent_binding_pattern_declaration()?)
             }
             AnyJsBindingDeclaration::JsVariableDeclarator(var) => {
-                Selector::from_variable_declarator(var, Scope::from_declaration(decl)?)
+                Self::from_variable_declarator(var, Scope::from_declaration(decl)?)
             }
             AnyJsBindingDeclaration::JsArrowFunctionExpression(_)
             | AnyJsBindingDeclaration::JsBogusParameter(_)
@@ -1366,30 +1452,30 @@ impl Selector {
             AnyJsBindingDeclaration::TsPropertyParameter(_) => Some(Kind::ClassProperty.into()),
             AnyJsBindingDeclaration::TsIndexSignatureParameter(member_name) => {
                 if let Some(member) = member_name.parent::<>() {
-                    Selector::from_class_member(&member)
+                    Self::from_class_member(&member)
                 } else if let Some(member) = member_name.parent::<AnyTsTypeMember>() {
-                    Selector::from_type_member(&member)
+                    Self::from_type_member(&member)
                 } else if let Some(member) = member_name.parent::<AnyJsObjectMember>() {
-                    Selector::from_object_member(&member)
+                    Self::from_object_member(&member)
                 } else {
                     Some(Kind::IndexParameter.into())
                 }
             }
-            AnyJsBindingDeclaration::JsNamespaceImportSpecifier(_) => Some(Selector::with_scope(Kind::ImportNamespace, Scope::Global)),
+            AnyJsBindingDeclaration::JsNamespaceImportSpecifier(_) => Some(Self::with_scope(Kind::ImportNamespace, Scope::Global)),
             AnyJsBindingDeclaration::JsFunctionDeclaration(_)
             | AnyJsBindingDeclaration::JsFunctionExpression(_)
             | AnyJsBindingDeclaration::JsFunctionExportDefaultDeclaration(_)
             | AnyJsBindingDeclaration::TsDeclareFunctionDeclaration(_)
             | AnyJsBindingDeclaration::TsDeclareFunctionExportDefaultDeclaration(_) => {
-                Some(Selector::with_scope(Kind::Function, Scope::from_declaration(decl)?))
+                Some(Self::with_scope(Kind::Function, Scope::from_declaration(decl)?))
             }
             AnyJsBindingDeclaration::TsImportEqualsDeclaration(_)
             | AnyJsBindingDeclaration::JsDefaultImportSpecifier(_)
-            | AnyJsBindingDeclaration::JsNamedImportSpecifier(_) => Some(Selector::with_scope(Kind::ImportAlias, Scope::Global)),
-            AnyJsBindingDeclaration::TsModuleDeclaration(_) => Some(Selector::with_scope(Kind::Namespace, Scope::Global)),
-            AnyJsBindingDeclaration::TsTypeAliasDeclaration(_) => Some(Selector::with_scope(Kind::TypeAlias, Scope::from_declaration(decl)?)),
+            | AnyJsBindingDeclaration::JsNamedImportSpecifier(_) => Some(Self::with_scope(Kind::ImportAlias, Scope::Global)),
+            AnyJsBindingDeclaration::TsModuleDeclaration(_) => Some(Self::with_scope(Kind::Namespace, Scope::Global)),
+            AnyJsBindingDeclaration::TsTypeAliasDeclaration(_) => Some(Self::with_scope(Kind::TypeAlias, Scope::from_declaration(decl)?)),
             AnyJsBindingDeclaration::JsClassDeclaration(class) => {
-                Some(Selector {
+                Some(Self {
                     kind: Kind::Class,
                     modifiers: if class.abstract_token().is_some() {
                         Modifier::Abstract.into()
@@ -1400,7 +1486,7 @@ impl Selector {
                 })
             }
             AnyJsBindingDeclaration::JsClassExportDefaultDeclaration(class) => {
-                Some(Selector {
+                Some(Self {
                     kind: Kind::Class,
                     modifiers: if class.abstract_token().is_some() {
                         Modifier::Abstract.into()
@@ -1411,10 +1497,10 @@ impl Selector {
                 })
             }
             AnyJsBindingDeclaration::JsClassExpression(_) => {
-                Some(Selector::with_scope(Kind::Class, Scope::from_declaration(decl)?))
+                Some(Self::with_scope(Kind::Class, Scope::from_declaration(decl)?))
             }
-            AnyJsBindingDeclaration::TsInterfaceDeclaration(_) => Some(Selector::with_scope(Kind::Interface, Scope::from_declaration(decl)?)),
-            AnyJsBindingDeclaration::TsEnumDeclaration(_) => Some(Selector::with_scope(Kind::Enum, Scope::from_declaration(decl)?)),
+            AnyJsBindingDeclaration::TsInterfaceDeclaration(_) => Some(Self::with_scope(Kind::Interface, Scope::from_declaration(decl)?)),
+            AnyJsBindingDeclaration::TsEnumDeclaration(_) => Some(Self::with_scope(Kind::Enum, Scope::from_declaration(decl)?)),
             AnyJsBindingDeclaration::JsObjectBindingPatternShorthandProperty(_)
             | AnyJsBindingDeclaration::JsShorthandNamedImportSpecifier(_)
             | AnyJsBindingDeclaration::JsBogusNamedImportSpecifier(_)
@@ -1423,19 +1509,22 @@ impl Selector {
             | AnyJsBindingDeclaration::TsMappedType(_)
             | AnyJsBindingDeclaration::TsTypeParameter(_)
             | AnyJsBindingDeclaration::TsEnumMember(_) => None,
+            // External modules are identified by source specifiers and are out
+            // of scope of this rule.
+            AnyJsBindingDeclaration::TsExternalModuleDeclaration(_) => None
         }
     }
 
-    fn from_parent_binding_pattern_declaration(decl: &AnyJsBindingDeclaration) -> Option<Selector> {
+    fn from_parent_binding_pattern_declaration(decl: &AnyJsBindingDeclaration) -> Option<Self> {
         let scope = Scope::from_declaration(decl)?;
         if let AnyJsBindingDeclaration::JsVariableDeclarator(declarator) = decl {
-            Selector::from_variable_declarator(declarator, scope)
+            Self::from_variable_declarator(declarator, scope)
         } else {
-            Some(Selector::with_scope(Kind::Variable, scope))
+            Some(Self::with_scope(Kind::Variable, scope))
         }
     }
 
-    fn from_variable_declarator(var: &JsVariableDeclarator, scope: Scope) -> Option<Selector> {
+    fn from_variable_declarator(var: &JsVariableDeclarator, scope: Scope) -> Option<Self> {
         let var_declaration = var
             .syntax()
             .ancestors()
@@ -1447,10 +1536,10 @@ impl Selector {
             JsVariableKind::Using => Kind::Using,
             JsVariableKind::Var => Kind::Var,
         };
-        Some(Selector::with_scope(kind, scope))
+        Some(Self::with_scope(kind, scope))
     }
 
-    fn from_object_member(member: &AnyJsObjectMember) -> Option<Selector> {
+    fn from_object_member(member: &AnyJsObjectMember) -> Option<Self> {
         match member {
             AnyJsObjectMember::JsBogusMember(_) | AnyJsObjectMember::JsSpread(_) => None,
             AnyJsObjectMember::JsGetterObjectMember(_) => Some(Kind::ObjectLiteralGetter.into()),
@@ -1463,14 +1552,14 @@ impl Selector {
         }
     }
 
-    fn from_type_member(member: &AnyTsTypeMember) -> Option<Selector> {
+    fn from_type_member(member: &AnyTsTypeMember) -> Option<Self> {
         match member {
             AnyTsTypeMember::JsBogusMember(_)
             | AnyTsTypeMember::TsCallSignatureTypeMember(_)
             | AnyTsTypeMember::TsConstructSignatureTypeMember(_) => None,
             AnyTsTypeMember::TsIndexSignatureTypeMember(property) => {
                 Some(if property.readonly_token().is_some() {
-                    Selector::with_modifiers(Kind::IndexParameter, Modifier::Readonly)
+                    Self::with_modifiers(Kind::IndexParameter, Modifier::Readonly)
                 } else {
                     Kind::IndexParameter.into()
                 })
@@ -1479,7 +1568,7 @@ impl Selector {
             AnyTsTypeMember::TsMethodSignatureTypeMember(_) => Some(Kind::TypeMethod.into()),
             AnyTsTypeMember::TsPropertySignatureTypeMember(property) => {
                 Some(if property.readonly_token().is_some() {
-                    Selector::with_modifiers(Kind::TypeProperty, Modifier::Readonly)
+                    Self::with_modifiers(Kind::TypeProperty, Modifier::Readonly)
                 } else {
                     Kind::TypeProperty.into()
                 })
@@ -1494,7 +1583,7 @@ impl Selector {
         let kind = self.kind;
         match kind {
             Kind::TypeProperty if self.modifiers.contains(Modifier::Readonly) => Convention {
-                selector: Selector::with_modifiers(self.kind, Modifier::Readonly),
+                selector: Self::with_modifiers(self.kind, Modifier::Readonly),
                 matching: None,
                 formats: Formats(Case::Camel | Case::Constant),
             },
@@ -1504,13 +1593,13 @@ impl Selector {
                 formats: Formats(Case::Camel | Case::Constant),
             },
             Kind::Function if Scope::Global.contains(self.scope) => Convention {
-                selector: Selector::with_scope(kind, Scope::Global),
+                selector: Self::with_scope(kind, Scope::Global),
                 matching: None,
                 formats: Formats(Case::Camel | Case::Pascal | Case::Upper),
             },
             Kind::Variable | Kind::Const | Kind::Var if Scope::Global.contains(self.scope) => {
                 Convention {
-                    selector: Selector::with_scope(kind, Scope::Global),
+                    selector: Self::with_scope(kind, Scope::Global),
                     matching: None,
                     formats: Formats(Case::Camel | Case::Pascal | Case::Constant),
                 }
@@ -1524,7 +1613,7 @@ impl Selector {
                 if self.modifiers.contains(Modifier::Static) =>
             {
                 Convention {
-                    selector: Selector::with_modifiers(kind, Modifier::Static),
+                    selector: Self::with_modifiers(kind, Modifier::Static),
                     matching: None,
                     formats: Formats(Case::Camel | Case::Constant),
                 }
@@ -1583,7 +1672,7 @@ impl Selector {
         }
     }
 
-    fn contains(&self, other: Selector) -> bool {
+    fn contains(&self, other: Self) -> bool {
         other.kind.contains(self.kind)
             && self.modifiers.contains(other.modifiers.0)
             && other.scope.contains(self.scope)
@@ -1618,7 +1707,7 @@ pub enum Kind {
     EnumMember,
     /// TypeScript namespaces, import and export namespaces
     NamespaceLike,
-    /// TypeScript mamespaces
+    /// TypeScript namespaces
     Namespace,
     ImportNamespace,
     ExportNamespace,
@@ -1773,22 +1862,22 @@ pub enum RestrictedModifier {
 impl From<RestrictedModifier> for Modifier {
     fn from(modifier: RestrictedModifier) -> Self {
         match modifier {
-            RestrictedModifier::Abstract => Modifier::Abstract,
-            RestrictedModifier::Private => Modifier::Private,
-            RestrictedModifier::Protected => Modifier::Protected,
-            RestrictedModifier::Readonly => Modifier::Readonly,
-            RestrictedModifier::Static => Modifier::Static,
+            RestrictedModifier::Abstract => Self::Abstract,
+            RestrictedModifier::Private => Self::Private,
+            RestrictedModifier::Protected => Self::Protected,
+            RestrictedModifier::Readonly => Self::Readonly,
+            RestrictedModifier::Static => Self::Static,
         }
     }
 }
 impl From<Modifier> for RestrictedModifier {
     fn from(modifier: Modifier) -> Self {
         match modifier {
-            Modifier::Abstract => RestrictedModifier::Abstract,
-            Modifier::Private => RestrictedModifier::Private,
-            Modifier::Protected => RestrictedModifier::Protected,
-            Modifier::Readonly => RestrictedModifier::Readonly,
-            Modifier::Static => RestrictedModifier::Static,
+            Modifier::Abstract => Self::Abstract,
+            Modifier::Private => Self::Private,
+            Modifier::Protected => Self::Protected,
+            Modifier::Readonly => Self::Readonly,
+            Modifier::Static => Self::Static,
             _ => unreachable!("Unsupported case"),
         }
     }
@@ -1825,7 +1914,7 @@ impl Deref for Modifiers {
 }
 impl From<Modifier> for Modifiers {
     fn from(value: Modifier) -> Self {
-        Modifiers(value.into())
+        Self(value.into())
     }
 }
 impl From<Modifiers> for SmallVec<[RestrictedModifier; 4]> {
@@ -1860,27 +1949,27 @@ impl JsonSchema for Modifiers {
 }
 impl From<JsMethodModifierList> for Modifiers {
     fn from(value: JsMethodModifierList) -> Self {
-        Modifiers((&value).into())
+        Self((&value).into())
     }
 }
 impl From<JsPropertyModifierList> for Modifiers {
     fn from(value: JsPropertyModifierList) -> Self {
-        Modifiers((&value).into())
+        Self((&value).into())
     }
 }
 impl From<TsIndexSignatureModifierList> for Modifiers {
     fn from(value: TsIndexSignatureModifierList) -> Self {
-        Modifiers((&value).into())
+        Self((&value).into())
     }
 }
 impl From<TsMethodSignatureModifierList> for Modifiers {
     fn from(value: TsMethodSignatureModifierList) -> Self {
-        Modifiers((&value).into())
+        Self((&value).into())
     }
 }
 impl From<TsPropertySignatureModifierList> for Modifiers {
     fn from(value: TsPropertySignatureModifierList) -> Self {
-        Modifiers((&value).into())
+        Self((&value).into())
     }
 }
 impl std::fmt::Display for Modifiers {
@@ -1915,23 +2004,24 @@ pub enum Scope {
 impl Scope {
     /// Returns the scope of `node` or `None` if the scope cannot be determined or
     /// if the scope is an external module.
-    fn from_declaration(node: &AnyJsBindingDeclaration) -> Option<Scope> {
+    fn from_declaration(node: &AnyJsBindingDeclaration) -> Option<Self> {
         let control_flow_root = node.syntax().ancestors().skip(1).find(|x| {
             AnyJsControlFlowRoot::can_cast(x.kind())
                 || x.kind() == JsSyntaxKind::TS_DECLARATION_MODULE
+                || x.kind() == JsSyntaxKind::TS_EXTERNAL_MODULE_DECLARATION
         })?;
         match control_flow_root.kind() {
             JsSyntaxKind::JS_MODULE
             | JsSyntaxKind::JS_SCRIPT
             | JsSyntaxKind::TS_DECLARATION_MODULE
-            | JsSyntaxKind::TS_MODULE_DECLARATION => Some(Scope::Global),
+            | JsSyntaxKind::TS_MODULE_DECLARATION => Some(Self::Global),
             // Ignore declarations in an external module declaration
             JsSyntaxKind::TS_EXTERNAL_MODULE_DECLARATION => None,
-            _ => Some(Scope::Any),
+            _ => Some(Self::Any),
         }
     }
 
-    fn contains(self, scope: Scope) -> bool {
+    fn contains(self, scope: Self) -> bool {
         matches!(self, Self::Any) || self == scope
     }
 }
@@ -1977,10 +2067,10 @@ pub enum Format {
 impl From<Format> for Case {
     fn from(value: Format) -> Self {
         match value {
-            Format::Camel => Case::Camel,
-            Format::Constant => Case::Constant,
-            Format::Pascal => Case::Pascal,
-            Format::Snake => Case::Snake,
+            Format::Camel => Self::Camel,
+            Format::Constant => Self::Constant,
+            Format::Pascal => Self::Pascal,
+            Format::Snake => Self::Snake,
         }
     }
 }
@@ -1989,10 +2079,10 @@ impl TryFrom<Case> for Format {
 
     fn try_from(value: Case) -> Result<Self, Self::Error> {
         match value {
-            Case::Camel => Ok(Format::Camel),
-            Case::Constant => Ok(Format::Constant),
-            Case::Pascal => Ok(Format::Pascal),
-            Case::Snake => Ok(Format::Snake),
+            Case::Camel => Ok(Self::Camel),
+            Case::Constant => Ok(Self::Constant),
+            Case::Pascal => Ok(Self::Pascal),
+            Case::Snake => Ok(Self::Snake),
             Case::Kebab
             | Case::Lower
             | Case::Number

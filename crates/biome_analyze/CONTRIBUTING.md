@@ -8,44 +8,57 @@ The analyzer allows implementors to create **four different** types of rules:
 - **Syntax**: This rule checks the syntax according to the language specification and emits error diagnostics accordingly.
 - **Lint**: This rule performs static analysis of the source code to detect invalid or error-prone patterns, and emits diagnostics along with proposed fixes.
 - **Assist**: This rule detects refactoring opportunities and emits code action signals.
-- **Transformation**: This rule detects transformations that should be applied to the code.
 
-### Table of Contents
 
-- [Creating a Rule](#creating-a-rule)
-  - [Guidelines](#guidelines)
-    - [Naming Conventions for Rules](#naming-conventions-for-rules)
-    - [What a Rule should say to the User](#what-a-rule-should-say-to-the-user)
-    - [Placement of New Rules](#placement-of-new-rules)
-  - [Creating and Implementing the Rule](#creating-and-implementing-the-rule)
-  - [Coding Tips for Rules](#coding-tips-for-rules)
-    - [`declare_lint_rule!` macro](#declare_lint_rule-macro)
-    - [`rule_category!` macro](#rule_category-macro)
-    - [Rule Options](#rule-options)
-    - [Navigating the CST (Concrete Syntax Tree)](#navigating-the-cst-concrete-syntax-tree)
-    - [Querying multiple node types via `declare_node_union!`](#querying-multiple-node-types-via-declare_node_union)
-    - [Semantic Model](#semantic-model)
-    - [Multiple Signals](#multiple-signals)
-    - [Code Actions](#code-actions)
-    - [Custom Syntax Tree Visitors](#custom-syntax-tree-visitors)
-    - [Common Logic Mistakes](#common-logic-mistakes)
-  - [Testing the Rule](#testing-the-rule)
-    - [Quick Test](#quick-test)
-    - [Snapshot Tests](#snapshot-tests)
-    - [Run the Snapshot Tests](#run-the-snapshot-tests)
-  - [Documenting the Rule](#documenting-the-rule)
-    - [General Structure](#general-structure)
-    - [Associated Language(s)](#associated-languages)
-    - [Code Blocks](#code-blocks)
-    - [Using Rule Options](#using-rule-options)
-    - [Full Documentation Example](#full-documentation-example)
-  - [Code generation](#code-generation)
-  - [Commiting your work](#commiting-your-work)
-  - [Sidenote: Deprecating a rule](#sidenote-deprecating-a-rule)
+## Table of Contents
+
+- [Analyzer](#analyzer)
+  * [Table of Contents](#table-of-contents)
+  * [Creating a Rule](#creating-a-rule)
+    + [Guidelines](#guidelines)
+      - [Naming Conventions for Rules](#naming-conventions-for-rules)
+      - [What a Rule should say to the User](#what-a-rule-should-say-to-the-user)
+      - [Placement of New Rules](#placement-of-new-rules)
+    + [Creating and Implementing the Rule](#creating-and-implementing-the-rule)
+    + [Coding Tips for Rules](#coding-tips-for-rules)
+      - [`declare_lint_rule!` macro](#declare_lint_rule-macro)
+        * [Biome lint rules inspired by other lint rules](#biome-lint-rules-inspired-by-other-lint-rules)
+      - [`rule_category!` macro](#rule_category-macro)
+      - [Rule severity](#rule-severity)
+      - [Rule domains](#rule-domains)
+      - [Rule Options](#rule-options)
+        * [Options for our example rule](#options-for-our-example-rule)
+        * [Representing the rule options in Rust](#representing-the-rule-options-in-rust)
+        * [Retrieving the rule options within a Rule](#retrieving-the-rule-options-within-a-rule)
+        * [Implementing JSON deserialization/serialization support](#implementing-json-deserializationserialization-support)
+        * [Testing & Documenting Rule Options](#testing-documenting-rule-options)
+      - [Navigating the CST (Concrete Syntax Tree)](#navigating-the-cst-concrete-syntax-tree)
+      - [Querying multiple node types via `declare_node_union!`](#querying-multiple-node-types-via-declare_node_union)
+      - [Semantic Model](#semantic-model)
+        * [How to use the query `Semantic<>` in a lint rule](#how-to-use-the-query-semantic-in-a-lint-rule)
+      - [Multiple Signals](#multiple-signals)
+      - [Code Actions](#code-actions)
+      - [Custom Syntax Tree Visitors](#custom-syntax-tree-visitors)
+      - [Common Logic Mistakes](#common-logic-mistakes)
+        * [Not checking if a variable is global](#not-checking-if-a-variable-is-global)
+    + [Testing the Rule](#testing-the-rule)
+      - [Quick Test](#quick-test)
+      - [Snapshot Tests](#snapshot-tests)
+        * [`.jsonc` files](#jsonc-files)
+      - [Run the Snapshot Tests](#run-the-snapshot-tests)
+    + [Documenting the Rule](#documenting-the-rule)
+      - [General Structure](#general-structure)
+      - [Associated Language(s)](#associated-languages)
+      - [Code Blocks](#code-blocks)
+      - [Using Rule Options](#using-rule-options)
+      - [Full Documentation Example](#full-documentation-example)
+    + [Code generation](#code-generation)
+    + [Committing your work](#committing-your-work)
+    + [Sidenote: Deprecating a rule](#sidenote-deprecating-a-rule)
 
 ## Creating a Rule
 
-When creating or updating a lint rule, you need to be aware that there's a lot of generated code inside our toolchain.
+When creating or updating a rule, you need to be aware that there's a lot of generated code inside our toolchain.
 Our CI ensures that this code is not out of sync and fails otherwise.
 See the [code generation section](#code-generation) for more details.
 
@@ -80,6 +93,90 @@ _Biome_ follows a naming convention according to what the rule does:
 
    > [!NOTE]
    > For example, the rule to mandating the use valid values for the HTML `lang` attribute is named `useValidLang`.
+
+We also try to ensure consistency in the naming of rules.
+Please feel free to refer to existing rules for inspiration when naming new ones.
+Here is a non-exhaustive list of common names:
+
+- `noConstant<Concept>`
+
+  These rules report a computation that is always evaluated to the same value.
+  For example `noConstantMathMinMaxClamp` report combination of `min` and `max` that always evaluate to a minimum or maximum.
+
+- `noDuplicate<Concept>`
+
+  These rules report a duplication that override a previous occurrence and is likely an error.
+  For example, `noDuplicateObjectKeys` reports a literal object containing two properties with the same name.
+
+- `noEmpty<Concept>`
+
+  These rules report empty codes, which could be the result of an oversight or could be improved by including a comment.
+  For example `noEmptyBlockStatements` reports empty block statements.
+
+- `noExcessive<Concept>`
+
+  These rules report codes that exceed some limits that are generally configurable.
+  For example `noExcessiveNestedTestSuites` reports code with nested test suites that exceed a configured threshold.
+
+- `noRedundant<Concept>`
+
+  These rules report codes that are redundant.
+  For example `noRedundantUseStrict` report `"use strict"` directive that are made redundant because of a parent `"use strict"` directive.
+
+- `noUnused<Concept>`
+
+  These rules report entities that are unused. It is usually the result of uncompleted refactorings.
+  For example `noUnusedVariables` reports variables that are not used.
+
+- `noUseless<Concept>`
+
+  These rules report codes which are unnecessary and could be removed or simplified without altering the program's behavior.
+  For example, `noUselessConstructor` reports constructors that are equivalent to the default constructor and can then be removed.
+
+- `noInvalid<Concept>` and `useValid<Concept>`
+
+  These rules report errors which are the result of mistyping and led to runtime errors.
+  Usually, we use `noInvalid<Concept>` for runtime errors and `useValid<Concept>` for code that always evaluate to a constant.
+  For example, `noInvalidConstructorSuper` reports errors in the use of `super()` in class constructors.
+  `useValidTypeof` reports uses of `typeof` that always evaluates to `false`.
+
+- `noUnknown<Concept>`
+
+  These rules report errors which are the result of mistyping and led to runtime errors or ignored code.
+  This naming convention is used for CSS rules.
+  For example, `noUnknownUnit` reports CSS units that are not standardized.
+
+- `noMisleading<Concept>`
+
+  These rules report codes that can be valid, but likely to mislead readers.
+  For example, `noMisleadingCharacterClass` reports character classes in non-Unicode regular expressions that use multiple code points.
+
+- `noRestricted<Concept>`
+
+  These rules report entities that the user wants to ban.
+  For example, `noRestrictedGlobals` allows to black lists some global variable names.
+
+- `noUndeclared<Concept>`
+
+  These rules report an entity that is not defined.
+  For example, `noUndeclaredVariables` reports variables that are not defined.
+
+- `noUnsafe<Concept>`
+
+  These rules report codes that can lead at runtime failures.
+  For example, `noUnsafeOptionalChaining` reports uses of optional chains in contexts where the `undefined` value is not allowed.
+
+- `useConsistent<Concept>`
+
+  These rules ensure consistency across the entire codebase.
+  For example, `useConsistentArrayType` ensures that developers use either `Array<T>` or `T[]`.
+
+- `useShorthand<Concept>`
+
+  These rules report syntax that can be rewritten using equivalent compact syntax.
+  For example `useShorthandAssign` promotes the use of combined assignment and operations.
+  Note that sometimes it is better to choose `useConsistent<Concept>` in order to offer choices to users.
+  You should choose `useShorthand<Concept>` if there is no doubt that the style is widely accepted as better.
 
 #### What a Rule should say to the User
 
@@ -122,11 +219,11 @@ Let's say we want to create a new **lint** rule called `useMyRuleName`, follow t
    # $ just new-js-assistrule useMyRuleName
    # $ just new-json-assistrule useMyRuleName
    ```
+
    The script `just new-js-lintrule` script will generate a bunch of files for the _JavaScript_ language inside the `biome_js_analyze` crate.
    Among the other files, you'll find a file called `use_my_rule_name.rs` inside the `biome_js_analyze/lib/src/lint/nursery` folder. You'll implement your rule in this file.
 
-2. Let's have a look at the generated code in  `use_my_rule_name.rs`:
-
+2. Let's have a look at the generated code in `use_my_rule_name.rs`:
 
    ```rust
    ...
@@ -156,7 +253,8 @@ Let's say we want to create a new **lint** rule called `useMyRuleName`, follow t
 
      Use `()` if your rule does not have additional options.
 
-   - The **`Query`** type defines the entities for which your your rule's `UseMyRuleName::run` function will be invoked:
+   - The **`Query`** type defines the entities for which your rule's `UseMyRuleName::run` function will be invoked:
+
      ```rust
      type Query = Ast<JsIdentifierBinding>;
      ```
@@ -240,7 +338,6 @@ Let's say we want to create a new **lint** rule called `useMyRuleName`, follow t
    }
    ```
 
-
 6. Optional: Implement the `action` function if your rule is able to provide a [code action](#code-actions):
 
    ```rust
@@ -280,7 +377,6 @@ That's it! Now, let's [test the rule](#testing-the-rule).
 
 Below, there are many tips and guidelines on how to create a lint rule using Biome infrastructure.
 
-
 #### `declare_lint_rule!` macro
 
 This macro is used to declare an analyzer rule type, and implement the [RuleMeta] trait for it.
@@ -305,7 +401,7 @@ declare_lint_rule! {
 
 If a **lint** rule is inspired by an existing rule from other ecosystems (ESLint, ESLint plugins, clippy, etc.), you can add a new metadata to the macro called `source`. Its value is `&'static [RuleSource]`, which is a reference to a slice of `RuleSource` elements, each representing a different source.
 
-If you're implementing a lint rule that matches the behaviour of the ESLint rule `no-debugger`, you'll use the variant `::ESLint` and pass the name of the rule:
+If you're implementing a lint rule that matches the behavior of the ESLint rule `no-debugger`, you'll use the variant `::ESLint` and pass the name of the rule:
 
 ```rust
 use biome_analyze::{declare_lint_rule, RuleSource};
@@ -322,7 +418,7 @@ declare_lint_rule! {
 }
 ```
 
-If the rule you're implementing has a different behaviour or option, you can add the `source_kind` metadata and use the `RuleSourceKind::Inspired` type. If there are multiple sources, we assume that each source has the same `source_kind`.
+If the rule you're implementing has a different behavior or option, you can add the `source_kind` metadata and use the `RuleSourceKind::Inspired` type. If there are multiple sources, we assume that each source has the same `source_kind`.
 
 ```rust
 use biome_analyze::{declare_lint_rule, RuleSource, RuleSourceKind};
@@ -376,7 +472,15 @@ impl Rule for ExampleRule {
 
 #### Rule severity
 
-The macro accepts a `severity` field, of type `biome_diagnostics::Severity`. By default, rules without `severity` will start with `Severity::Information`.
+Every diagnostic emitted by a rule has a severity set to `error`, `warn`, or `info`.
+The `declare_lint_rule!` macro accepts a `severity` field, of type `biome_diagnostics::Severity`.
+By default, rules without `severity` will start with `Severity::Information`.
+
+Here are some guidelines to choose a severity:
+
+- Rules with the `error` severity report hard errors, likely erroneous code, dangerous code, or accessibility issues.
+- Rules with the `warn` severity report possibly erroneous code, or code that could be cleaner if rewritten in another way.
+- Rules with the `info` severity report stylistic suggestions.
 
 If you want to change the default severity, you need to assign it:
 
@@ -421,7 +525,7 @@ Rule domains can unlock various perks in the Biome analyzer:
 - A domain can define a number of `package.json` dependencies. When a user has one or more of these dependencies, Biome will automatically enable the recommended rules that belong to the domain. To add/update/remove dependencies to a domain, check the function `RuleDomain::manifest_dependencies`.
 - A domain can define a number of "globals". These globals will be used by other rules, and improve the UX of them. To add/update/remove globals to a domain, check the function `RuleDomain::globals`.
 
-When a rule is **recommended** and _has domains_, the rule is enabled only when the user enables the relative domains via `"recommneded"` or `"all"`.
+When a rule is **recommended** and _has domains_, the rule is enabled only when the user enables the relative domains via `"recommended"` or `"all"`.
 Instead, if the rule is **recommended** but _doesn't have domains_, the rule is always enabled by default.
 
 > [!NOTE]
@@ -530,7 +634,7 @@ and do not need to be handled by the rule itself.
 > We instead provide a ***`serde`-inspired*** implementation in `biome_deserialize` and `biome_deserialize_macros` that [differs in some aspects](../biome_deserialize/README.md), like being fault-tolerant.
 
 The compiler should warn you that `MyRuleOptions` does not implement some required types.
-We currently require implementing _serde_'s traits `Deserialize`/`Serialize`.
+We currently require implementing _serde_'s `Deserialize`/`Serialize` traits.
 
 Also, we use other `serde` macros to adjust the JSON configuration:
 - `rename_all = "camelCase"`: it renames all fields in camel-case, so they are in line with the naming style of the `biome.json`.
@@ -617,7 +721,7 @@ The semantic model provides information about the references of a binding (decla
 
 ##### How to use the query `Semantic<>` in a lint rule
 
-We have a for loop that creates an index i, and we need to identify where this index is used inside the body of the loop
+We have a for loop that creates an index `i`, and we need to identify where this index is used inside the body of the loop
 
 ```js
 for (let i = 0; i < array.length; i++) {
@@ -860,7 +964,7 @@ There are some common mistakes that can lead to bugs or false positives in lint 
 
 ##### Not checking if a variable is global
 
-Some rules aim to ban certain functions or variables (eg. `noConsoleLog` bans `console.log`). A common mistake make this check without considering if the variable is global or not. This can lead to false positives if the variable is declared in a local scope.
+Some rules aim to ban certain functions or variables (e.g. `noConsoleLog` bans `console.log`). A common mistake make this check without considering if the variable is global or not. This can lead to false positives if the variable is declared in a local scope.
 
 ```js
 console.log(); // <-- This should be reported because `console` is a global variable
@@ -874,7 +978,7 @@ To avoid this, you should consult the semantic model to check if the variable is
 
 #### Quick Test
 
-A swift way to test your rule is to go inside the `biome_js_analyze/src/lib.rs` file (this will change based on where you're implementing the rule) and modify the `quick_test` function.
+A swift way to test your rule is to go inside the `biome_js_analyze/tests/quick_test.rs` file (this will change based on where you're implementing the rule) and modify the `quick_test` function.
 
 Usually this test is ignored, so remove/_comment_ the `#[ignore]` macro and change the `let SOURCE` variable to whatever source code you need to test. Then update the rule filter, and add your rule:
 
@@ -939,7 +1043,7 @@ Run the command:
 just test-lintrule myRuleName
 ```
 
-and if you've done everything correctly, you should see some snapshots emitted with diagnostics and code actions.
+And if you've done everything correctly, you should see some snapshots emitted with diagnostics and code actions.
 
 Check our main [contribution document](https://github.com/biomejs/biome/blob/main/CONTRIBUTING.md#testing) to know how to deal with the snapshot tests.
 
@@ -1194,7 +1298,7 @@ For simplicity, use `just` to run all the commands with:
 just gen-analyzer
 ```
 
-### Commiting your work
+### Committing your work
 
 Once the rule is implemented, tested and documented, you are ready to open a pull request!
 

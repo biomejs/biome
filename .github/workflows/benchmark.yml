@@ -30,7 +30,7 @@ jobs:
     permissions:
       pull-requests: write
     name: Bench
-    runs-on: ubuntu-latest
+    runs-on: depot-ubuntu-24.04-arm-16
 
     steps:
 
@@ -50,8 +50,8 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Compile
-        timeout-minutes: 15
-        run: cargo codspeed build --features codspeed -p xtask_bench
+        timeout-minutes: 20
+        run: cargo codspeed build -p xtask_bench
         env:
           CARGO_BUILD_JOBS: 3  # Default is 4 (equals to the vCPU count of the runner), which leads OOM on cargo build
 

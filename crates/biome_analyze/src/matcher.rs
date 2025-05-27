@@ -1,15 +1,16 @@
 use crate::{
-    AnalyzerOptions, AnalyzerSignal, Phases, QueryMatch, Rule, RuleFilter, RuleGroup, ServiceBag,
-    SuppressionAction,
+    AnalyzerOptions, AnalyzerSignal, Phases, QueryMatch, Rule, RuleCategory, RuleFilter, RuleGroup,
+    ServiceBag, SuppressionAction,
 };
 use biome_rowan::{Language, TextRange};
+use std::fmt::Display;
 use std::{
     any::{Any, TypeId},
     cmp::Ordering,
     collections::BinaryHeap,
 };
 
-/// The [QueryMatcher] trait is responsible of running lint rules on
+/// The [QueryMatcher] trait is responsible for running lint rules on
 /// [QueryMatch](crate::QueryMatch) instances emitted by the various
 /// [Visitor](crate::Visitor) and push signals wrapped in [SignalEntry]
 /// to the signal queue
@@ -98,6 +99,12 @@ pub struct RuleKey {
     rule: &'static str,
 }
 
+impl Display for RuleKey {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}/{}", self.group, self.rule)
+    }
+}
+
 impl RuleKey {
     pub fn new(group: &'static str, rule: &'static str) -> Self {
         Self { group, rule }
@@ -141,6 +148,8 @@ pub struct SignalEntry<'phase, L: Language> {
     pub instances: Box<[Box<str>]>,
     /// Text range in the document this signal covers
     pub text_range: TextRange,
+    /// The category of the rule emitted by this signal
+    pub category: RuleCategory,
 }
 
 // SignalEntry is ordered based on the starting point of its `text_range`
@@ -201,8 +210,8 @@ mod tests {
     use super::MatchQueryParams;
     use crate::{
         Analyzer, AnalyzerContext, AnalyzerSignal, ApplySuppression, ControlFlow, MetadataRegistry,
-        Never, Phases, QueryMatcher, RuleKey, ServiceBag, SignalEntry, SuppressionAction,
-        SyntaxVisitor, signals::DiagnosticSignal,
+        Never, Phases, QueryMatcher, RuleCategories, RuleCategory, RuleKey, ServiceBag,
+        SignalEntry, SuppressionAction, SyntaxVisitor, signals::DiagnosticSignal,
     };
     use crate::{AnalyzerOptions, AnalyzerSuppression};
     use biome_diagnostics::{Diagnostic, Severity};
@@ -237,6 +246,7 @@ mod tests {
                 rule: RuleKey::new("group", "rule"),
                 instances: Default::default(),
                 text_range: span,
+                category: RuleCategory::Lint,
             });
         }
     }
@@ -356,7 +366,16 @@ mod tests {
             comment
                 .trim_start_matches("//")
                 .split(' ')
-                .map(AnalyzerSuppression::rule)
+                .map(|rule_str| {
+                    AnalyzerSuppression::rule(
+                        RuleCategory::Lint,
+                        rule_str,
+                        (
+                            "",
+                            TextRange::new(TextSize::of(rule_str), TextSize::of(rule_str)),
+                        ),
+                    )
+                })
                 .map(Ok)
                 .collect()
         }
@@ -406,6 +425,7 @@ mod tests {
             parse_suppression_comment,
             Box::new(TestAction),
             &mut emit_signal,
+            RuleCategories::all(),
         );
 
         analyzer.add_visitor(Phases::Syntax, Box::<SyntaxVisitor<RawLanguage>>::default());
@@ -423,17 +443,18 @@ mod tests {
         assert_eq!(
             diagnostics.as_slice(),
             &[
+                // Suppression errors first since we check suppressions before syntax rules
                 (
                     category!("suppressions/unknownGroup"),
                     TextRange::new(TextSize::from(47), TextSize::from(62))
                 ),
                 (
-                    category!("args/fileNotFound"),
-                    TextRange::new(TextSize::from(63), TextSize::from(74))
-                ),
-                (
                     category!("suppressions/unknownRule"),
                     TextRange::new(TextSize::from(76), TextSize::from(96))
+                ),
+                (
+                    category!("args/fileNotFound"),
+                    TextRange::new(TextSize::from(63), TextSize::from(74))
                 ),
                 (
                     category!("args/fileNotFound"),

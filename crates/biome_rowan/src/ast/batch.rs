@@ -313,7 +313,7 @@ where
     ///
     /// If the new tree is also required,
     /// please use `commit_with_text_range_and_edit`
-    pub fn as_text_range_and_edit(self) -> Option<(TextRange, TextEdit)> {
+    pub fn to_text_range_and_edit(self) -> Option<(TextRange, TextEdit)> {
         self.commit_with_text_range_and_edit(true).1
     }
 
@@ -357,10 +357,10 @@ where
         self,
         with_text_range_and_edit: bool,
     ) -> (SyntaxNode<L>, Option<(TextRange, TextEdit)>) {
-        let BatchMutation { root, mut changes } = self;
+        let Self { root, mut changes } = self;
 
         // Ordered text mutation list sorted by text range
-        let mut text_mutation_list: Vec<(TextRange, Option<String>)> =
+        let mut text_mutation_list: Vec<(TextRange, Option<SyntaxElement<L>>)> =
             // SAFETY: this is safe bacause changes from actions can only
             // overwrite each other, so the total number of the finalized
             // text mutations will only be less.
@@ -431,20 +431,17 @@ where
                             }
                             None => continue,
                         };
-                        let optional_inserted_text = new_node.as_ref().map(|n| n.to_string());
-
                         // We use binary search to keep the text mutations in order
                         match text_mutation_list
                             .binary_search_by(|(range, _)| range.ordering(deleted_text_range))
                         {
                             // Overwrite the text mutation with an overlapping text range
                             Ok(pos) => {
-                                text_mutation_list[pos] =
-                                    (deleted_text_range, optional_inserted_text)
+                                text_mutation_list[pos] = (deleted_text_range, new_node.clone())
                             }
                             // Insert the text mutation at the correct position
                             Err(pos) => text_mutation_list
-                                .insert(pos, (deleted_text_range, optional_inserted_text)),
+                                .insert(pos, (deleted_text_range, new_node.clone())),
                         }
                     }
                 }
@@ -453,7 +450,7 @@ where
                 // and push a pending change to its parent
                 let mut current_parent = curr_parent.detach();
                 let is_list = current_parent.kind().is_list();
-                for (new_node_slot, new_node, ..) in modifications {
+                for (new_node_slot, new_node, ..) in modifications.clone() {
                     current_parent = if is_list && new_node.is_none() {
                         current_parent.splice_slots(new_node_slot..=new_node_slot, empty())
                     } else {
@@ -484,11 +481,7 @@ where
                     if curr_is_from_action {
                         text_mutation_list = vec![(
                             document_root.text_range_with_trivia(),
-                            Some(
-                                curr_new_node
-                                    .as_ref()
-                                    .map_or(String::new(), |n| n.to_string()),
-                            ),
+                            curr_new_node.clone(),
                         )];
                     }
 
@@ -509,9 +502,22 @@ where
                             }
 
                             let old = &root_string[range_start..range_end];
-                            let new = &optional_inserted_text.map_or(String::new(), |t| t);
 
-                            text_edit_builder.with_unicode_words_diff(old, new);
+                            match optional_inserted_text {
+                                None => {
+                                    text_edit_builder.with_unicode_words_diff(old, "");
+                                }
+                                Some(element) => match element {
+                                    SyntaxElement::Node(node) => {
+                                        text_edit_builder
+                                            .with_unicode_words_diff(old, &node.to_string());
+                                    }
+                                    SyntaxElement::Token(token) => {
+                                        text_edit_builder
+                                            .with_unicode_words_diff(old, token.text());
+                                    }
+                                },
+                            }
 
                             pointer = range_end;
                         }

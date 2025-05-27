@@ -1,3 +1,4 @@
+/* should not generate diagnostics */
 const dirname = import.meta.dirname;
 const filename = import.meta.filename;
 const dirname_ = { __dirname: import.meta.dirname };

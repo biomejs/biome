@@ -11,7 +11,7 @@ use super::{
 impl ClassInfo {
     /// Compare based on the existence of variants. Classes with variants go last.
     /// Returns `None` if both or none of the classes has variants.
-    fn cmp_variants_weight_existence(&self, other: &ClassInfo) -> Option<Ordering> {
+    fn cmp_variants_weight_existence(&self, other: &Self) -> Option<Ordering> {
         match (&self.variant_weight, &other.variant_weight) {
             (Some(_), Some(_)) => None,
             (Some(_), _) => Some(Ordering::Greater),
@@ -22,7 +22,7 @@ impl ClassInfo {
 
     /// Compare based on layer indexes. Classes with lower indexes go first.
     /// Returns `None` if the indexes are equal.
-    fn cmp_layers(&self, other: &ClassInfo) -> Option<Ordering> {
+    fn cmp_layers(&self, other: &Self) -> Option<Ordering> {
         let result = self.layer_index.cmp(&other.layer_index);
         if result != Ordering::Equal {
             return Some(result);
@@ -33,7 +33,7 @@ impl ClassInfo {
     /// Compare based on variants weight. Classes with lower weight go first.
     /// First compare variants weight length. Only if their equal compare their actual weight.
     /// Returns `None` if they have the same weight.
-    fn cmp_variants_weight(&self, other: &ClassInfo) -> Option<Ordering> {
+    fn cmp_variants_weight(&self, other: &Self) -> Option<Ordering> {
         let current_weight = self.variant_weight.as_ref()?;
         let other_weight = other.variant_weight.as_ref()?;
 
@@ -50,7 +50,7 @@ impl ClassInfo {
 
     /// Compare based on the existence of arbitrary variants. Classes with arbitrary variants go last.
     /// Returns `None` if both or none of the classes has arbitrary variants.
-    fn cmp_arbitrary_variants_existence(&self, other: &ClassInfo) -> Option<Ordering> {
+    fn cmp_arbitrary_variants_existence(&self, other: &Self) -> Option<Ordering> {
         match (&self.arbitrary_variants, &other.arbitrary_variants) {
             (Some(_), Some(_)) => None,
             (Some(_), _) => Some(Ordering::Greater),
@@ -60,7 +60,7 @@ impl ClassInfo {
     }
 
     /// Compare arbitrary variants based on their length and then lexicographically
-    fn cmp_arbitrary_variants(&self, other: &ClassInfo) -> Option<Ordering> {
+    fn cmp_arbitrary_variants(&self, other: &Self) -> Option<Ordering> {
         let a = self.arbitrary_variants.as_ref()?;
         let b = other.arbitrary_variants.as_ref()?;
 
@@ -77,7 +77,7 @@ impl ClassInfo {
 
     /// Compare based on utility index. Classes with lower indexes go first.
     /// Returns `None` if the indexes are equal.
-    fn cmp_utilities(&self, other: &ClassInfo) -> Option<Ordering> {
+    fn cmp_utilities(&self, other: &Self) -> Option<Ordering> {
         let result = self.utility_index.cmp(&other.utility_index);
         if result != Ordering::Equal {
             return Some(result);
@@ -180,7 +180,7 @@ pub fn sort_class_name(
     sorted_classes.extend(
         classes_info
             .iter()
-            .map(|class_info| class_info.text.as_str()),
+            .map(|class_info| class_info.text.as_ref()),
     );
 
     // Add the first class back if it was ignored.

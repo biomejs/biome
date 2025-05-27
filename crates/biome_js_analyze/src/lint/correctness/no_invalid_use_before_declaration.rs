@@ -205,18 +205,18 @@ impl TryFrom<&AnyJsBindingDeclaration> for DeclarationKind {
 
     fn try_from(value: &AnyJsBindingDeclaration) -> Result<Self, Self::Error> {
         match value {
-            AnyJsBindingDeclaration::TsEnumMember(_) => Ok(DeclarationKind::EnumMember),
+            AnyJsBindingDeclaration::TsEnumMember(_) => Ok(Self::EnumMember),
             // Variable declaration
             AnyJsBindingDeclaration::JsArrayBindingPatternElement(_)
             | AnyJsBindingDeclaration::JsArrayBindingPatternRestElement(_)
             | AnyJsBindingDeclaration::JsObjectBindingPatternProperty(_)
             | AnyJsBindingDeclaration::JsObjectBindingPatternRest(_)
             | AnyJsBindingDeclaration::JsObjectBindingPatternShorthandProperty(_)
-            | AnyJsBindingDeclaration::JsVariableDeclarator(_) => Ok(DeclarationKind::Variable),
+            | AnyJsBindingDeclaration::JsVariableDeclarator(_) => Ok(Self::Variable),
             // Parameters
             AnyJsBindingDeclaration::JsFormalParameter(_)
             | AnyJsBindingDeclaration::JsRestParameter(_)
-            | AnyJsBindingDeclaration::TsPropertyParameter(_) => Ok(DeclarationKind::Parameter),
+            | AnyJsBindingDeclaration::TsPropertyParameter(_) => Ok(Self::Parameter),
             // Other declarations allow use before definition
             AnyJsBindingDeclaration::JsArrowFunctionExpression(_)
             | AnyJsBindingDeclaration::JsBogusParameter(_)
@@ -232,6 +232,7 @@ impl TryFrom<&AnyJsBindingDeclaration> for DeclarationKind {
             | AnyJsBindingDeclaration::TsInterfaceDeclaration(_)
             | AnyJsBindingDeclaration::TsTypeAliasDeclaration(_)
             | AnyJsBindingDeclaration::TsEnumDeclaration(_)
+            | AnyJsBindingDeclaration::TsExternalModuleDeclaration(_)
             | AnyJsBindingDeclaration::TsModuleDeclaration(_)
             | AnyJsBindingDeclaration::JsShorthandNamedImportSpecifier(_)
             | AnyJsBindingDeclaration::JsNamedImportSpecifier(_)

@@ -2,6 +2,9 @@
 //!
 //! The configuration is divided by "tool", and then it's possible to further customise it
 //! by language. The language might further option divided by tool.
+
+#![deny(clippy::use_self)]
+
 pub mod analyzer;
 pub mod bool;
 pub mod css;
@@ -19,8 +22,8 @@ mod overrides;
 pub mod plugins;
 pub mod vcs;
 
-use crate::analyzer::RuleAssistConfiguration;
 use crate::analyzer::assist::{Actions, AssistConfiguration, Source, assist_configuration};
+use crate::analyzer::{RuleAssistConfiguration, RuleDomains};
 use crate::bool::Bool;
 use crate::css::{CssFormatterConfiguration, CssLinterConfiguration, CssParserConfiguration};
 pub use crate::diagnostics::BiomeDiagnostic;
@@ -54,8 +57,8 @@ pub use html::{HtmlConfiguration, html_configuration};
 pub use javascript::{JsConfiguration, js_configuration};
 pub use json::{JsonConfiguration, json_configuration};
 pub use overrides::{
-    OverrideAssistConfiguration, OverrideFormatterConfiguration, OverrideGlobs,
-    OverrideLinterConfiguration, OverridePattern, Overrides,
+    OverrideAssistConfiguration, OverrideFilesConfiguration, OverrideFormatterConfiguration,
+    OverrideGlobs, OverrideLinterConfiguration, OverridePattern, Overrides,
 };
 use plugins::Plugins;
 use regex::Regex;
@@ -75,7 +78,7 @@ pub const VERSION: &str = match option_env!("BIOME_VERSION") {
 /// Limit the size of files to 1.0 MiB by default
 pub const DEFAULT_FILE_SIZE_LIMIT: NonZeroU64 =
     // SAFETY: This constant is initialized with a non-zero value
-    unsafe { NonZeroU64::new_unchecked(1024 * 1024) };
+    NonZeroU64::new(1024 * 1024).unwrap();
 
 /// The configuration that is contained inside the file `biome.json`
 #[derive(
@@ -266,6 +269,10 @@ impl Configuration {
             .unwrap_or_default()
     }
 
+    pub fn get_linter_domains(&self) -> Option<&RuleDomains> {
+        self.linter.as_ref().and_then(|l| l.domains.as_ref())
+    }
+
     pub fn get_assist_actions(&self) -> Actions {
         self.assist
             .as_ref()
@@ -275,6 +282,14 @@ impl Configuration {
 
     pub fn is_vcs_enabled(&self) -> bool {
         self.vcs.as_ref().is_some_and(|v| v.is_enabled())
+    }
+
+    pub fn use_ignore_file(&self) -> bool {
+        self.is_vcs_enabled()
+            && self
+                .vcs
+                .as_ref()
+                .is_some_and(|vcs| vcs.use_ignore_file == Some(true.into()))
     }
 
     /// Whether Biome should check for `.editorconfig` file
@@ -451,7 +466,7 @@ impl Ord for Version<'_> {
 
         for (a, b) in self_parts.iter().zip(other_parts.iter()) {
             match a.cmp(b) {
-                Ordering::Equal => continue,
+                Ordering::Equal => {}
                 non_eq => return non_eq,
             }
         }
@@ -490,7 +505,7 @@ pub struct FilesConfiguration {
     /// match these patterns.
     #[bpaf(hide, pure(Default::default()))]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub includes: Option<Vec<biome_glob::Glob>>,
+    pub includes: Option<Vec<biome_glob::NormalizedGlob>>,
 }
 
 #[derive(Debug)]
@@ -527,16 +542,16 @@ pub enum ConfigurationPathHint {
 impl Display for ConfigurationPathHint {
     fn fmt(&self, fmt: &mut Formatter) -> std::io::Result<()> {
         match self {
-            ConfigurationPathHint::None => write!(fmt, "Configuration file not provided.",),
-            ConfigurationPathHint::FromWorkspace(path) => write!(
+            Self::None => write!(fmt, "Configuration file not provided.",),
+            Self::FromWorkspace(path) => write!(
                 fmt,
                 "Configuration path provided from a workspace: {}",
                 path
             ),
-            ConfigurationPathHint::FromLsp(path) => {
+            Self::FromLsp(path) => {
                 write!(fmt, "Configuration path provided from the LSP: {}", path,)
             }
-            ConfigurationPathHint::FromUser(path) => {
+            Self::FromUser(path) => {
                 write!(fmt, "Configuration path provided by the user: {}", path,)
             }
         }
@@ -549,63 +564,5 @@ impl ConfigurationPathHint {
     }
     pub const fn is_from_lsp(&self) -> bool {
         matches!(self, Self::FromLsp(_))
-    }
-}
-
-#[cfg(test)]
-mod test {
-    use oxc_resolver::{FileMetadata, FsCache, ResolveOptions, ResolverGeneric};
-    use std::env;
-    use std::fs::read_link;
-    use std::path::{Path, PathBuf};
-    use std::sync::Arc;
-
-    #[test]
-    fn resolver_test() {
-        #[derive(Debug, Default)]
-        struct Test;
-
-        impl oxc_resolver::FileSystem for Test {
-            fn read_to_string(&self, _path: &Path) -> std::io::Result<String> {
-                Ok(String::from(
-                    r#"{ "name": "example", "exports": { "./biome": "./biome.json" }}"#,
-                ))
-            }
-
-            fn metadata(&self, _path: &Path) -> std::io::Result<FileMetadata> {
-                Ok(FileMetadata::new(true, false, false))
-            }
-
-            fn symlink_metadata(&self, _path: &Path) -> std::io::Result<FileMetadata> {
-                Ok(FileMetadata::new(true, false, false))
-            }
-
-            fn read_link(&self, path: &Path) -> std::io::Result<PathBuf> {
-                read_link(path)
-            }
-        }
-
-        let resolver = ResolverGeneric::new_with_cache(
-            Arc::new(FsCache::new(Test {})),
-            ResolveOptions {
-                condition_names: vec!["node".to_string(), "import".to_string()],
-                extensions: vec![".json".to_string()],
-                ..ResolveOptions::default()
-            },
-        );
-
-        let result = resolver
-            .resolve(
-                env::current_dir()
-                    .unwrap()
-                    .canonicalize()
-                    .unwrap()
-                    .display()
-                    .to_string(),
-                "example/biome",
-            )
-            .unwrap();
-
-        dbg!(&result);
     }
 }

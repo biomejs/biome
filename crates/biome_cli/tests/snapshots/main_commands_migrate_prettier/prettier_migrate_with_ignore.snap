@@ -1,6 +1,7 @@
 ---
 source: crates/biome_cli/tests/snap_test.rs
 expression: redactor(content)
+snapshot_kind: text
 ---
 ## `biome.json`
 
@@ -63,9 +64,10 @@ biome.json migrate ━━━━━━━━━━━━━━━━━━━━�
       26 │ + → → → "attributePosition":·"auto",
       27 │ + → → → "bracketSpacing":·true
       28 │ + → → }
-      29 │ + → }
-      30 │ + }
-      31 │ + 
+      29 │ + → },
+      30 │ + → "html":·{·"formatter":·{·"selfCloseVoidElements":·"always"·}·}
+      31 │ + }
+      32 │ + 
   
 
 ```

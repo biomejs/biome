@@ -4,6 +4,7 @@ expression: validCustomStyleUnderscorePrivate.ts
 ---
 # Input
 ```ts
+/* should not generate diagnostics */
 class X {
     private _private: number
 }

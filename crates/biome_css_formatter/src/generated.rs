@@ -1,5 +1,6 @@
 //! This is a generated file. Don't modify it by hand! Run 'cargo codegen formatter' to re-generate the file.
 
+#![allow(clippy::use_self)]
 #![expect(clippy::default_constructed_unit_structs)]
 use crate::{
     AsFormat, CssFormatContext, CssFormatter, FormatBogusNodeRule, FormatNodeRule, IntoFormat,
@@ -6952,6 +6953,44 @@ impl IntoFormat<CssFormatContext> for biome_css_syntax::CssBogusSubSelector {
         FormatOwnedWithRule::new(
             self,
             crate::css::bogus::bogus_sub_selector::FormatCssBogusSubSelector::default(),
+        )
+    }
+}
+impl FormatRule<biome_css_syntax::CssBogusSupportsCondition>
+    for crate::css::bogus::bogus_supports_condition::FormatCssBogusSupportsCondition
+{
+    type Context = CssFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_css_syntax::CssBogusSupportsCondition,
+        f: &mut CssFormatter,
+    ) -> FormatResult<()> {
+        FormatBogusNodeRule::<biome_css_syntax::CssBogusSupportsCondition>::fmt(self, node, f)
+    }
+}
+impl AsFormat<CssFormatContext> for biome_css_syntax::CssBogusSupportsCondition {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_css_syntax::CssBogusSupportsCondition,
+        crate::css::bogus::bogus_supports_condition::FormatCssBogusSupportsCondition,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::css::bogus::bogus_supports_condition::FormatCssBogusSupportsCondition::default(),
+        )
+    }
+}
+impl IntoFormat<CssFormatContext> for biome_css_syntax::CssBogusSupportsCondition {
+    type Format = FormatOwnedWithRule<
+        biome_css_syntax::CssBogusSupportsCondition,
+        crate::css::bogus::bogus_supports_condition::FormatCssBogusSupportsCondition,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(
+            self,
+            crate::css::bogus::bogus_supports_condition::FormatCssBogusSupportsCondition::default(),
         )
     }
 }

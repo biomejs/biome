@@ -1,14 +1,16 @@
 use std::collections::HashSet;
 
-use biome_analyze::{Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule};
+use biome_analyze::{
+    Rule, RuleDiagnostic, RuleDomain, RuleSource, context::RuleContext, declare_lint_rule,
+};
 use biome_console::markup;
-use biome_dependency_graph::ModuleDependencyData;
 use biome_diagnostics::Severity;
 use biome_js_syntax::AnyJsImportLike;
+use biome_module_graph::{JsModuleInfo, ResolvedPath};
 use biome_rowan::AstNode;
 use camino::{Utf8Path, Utf8PathBuf};
 
-use crate::services::dependency_graph::ResolvedImports;
+use crate::services::module_graph::ResolvedImports;
 
 declare_lint_rule! {
     /// Prevent import cycles.
@@ -77,7 +79,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoImportCycles {
-        version: "next",
+        version: "2.0.0",
         name: "noImportCycles",
         language: "js",
         sources: &[
@@ -85,23 +87,25 @@ declare_lint_rule! {
         ],
         severity: Severity::Warning,
         recommended: false,
+        domains: &[RuleDomain::Project],
     }
 }
 
 impl Rule for NoImportCycles {
     type Query = ResolvedImports<AnyJsImportLike>;
-    type State = Vec<String>;
+    type State = Box<[Box<str>]>;
     type Signals = Option<Self::State>;
     type Options = ();
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
-        let file_imports = ctx.imports_for_path(ctx.file_path())?;
+        let module_info = ctx.module_info_for_path(ctx.file_path())?;
 
         let node = ctx.query();
-        let import = file_imports.get_import_by_node(node)?;
-        let resolved_path = import.resolved_path.as_ref().ok()?;
+        let resolved_path = module_info
+            .get_import_path_by_js_node(node)
+            .and_then(ResolvedPath::as_path)?;
 
-        let imports = ctx.imports_for_path(resolved_path)?;
+        let imports = ctx.module_info_for_path(resolved_path)?;
         find_cycle(ctx, resolved_path, imports)
     }
 
@@ -153,23 +157,24 @@ impl Rule for NoImportCycles {
 fn find_cycle(
     ctx: &RuleContext<NoImportCycles>,
     start_path: &Utf8Path,
-    mut imports: ModuleDependencyData,
-) -> Option<Vec<String>> {
+    mut module_info: JsModuleInfo,
+) -> Option<Box<[Box<str>]>> {
     let mut seen = HashSet::new();
-    let mut stack = Vec::new();
+    let mut stack: Vec<(Box<str>, JsModuleInfo)> = Vec::new();
 
     'outer: loop {
-        while let Some((_specifier, import)) = imports.drain_one() {
-            let Ok(resolved_path) = import.resolved_path else {
+        for resolved_path in module_info.all_import_paths() {
+            let Some(resolved_path) = resolved_path.as_path() else {
                 continue;
             };
 
             if resolved_path == ctx.file_path() {
                 // Return all the paths from `start_path` to `resolved_path`:
-                let paths = Some(start_path.to_string())
+                let paths = Some(start_path.as_str())
                     .into_iter()
+                    .map(Box::from)
                     .chain(stack.into_iter().map(|(path, _)| path))
-                    .chain(Some(resolved_path.into()))
+                    .chain(Some(Box::from(resolved_path.as_str())))
                     .collect();
                 return Some(paths);
             }
@@ -182,16 +187,16 @@ fn find_cycle(
 
             seen.insert(resolved_path.to_string());
 
-            if let Some(resolved_imports) = ctx.imports_for_path(&resolved_path) {
-                stack.push((resolved_path.into(), imports));
-                imports = resolved_imports;
+            if let Some(next_module_info) = ctx.module_info_for_path(resolved_path) {
+                stack.push((resolved_path.as_str().into(), module_info));
+                module_info = next_module_info;
                 continue 'outer;
             }
         }
 
         match stack.pop() {
-            Some((_previous_path, previous_imports)) => {
-                imports = previous_imports;
+            Some((_previous_path, previous_module_info)) => {
+                module_info = previous_module_info;
             }
             None => break,
         }

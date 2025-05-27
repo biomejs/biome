@@ -27,12 +27,12 @@ pub(crate) enum AnyConfigData {
 }
 impl From<FlatConfigData> for AnyConfigData {
     fn from(value: FlatConfigData) -> Self {
-        AnyConfigData::Flat(value)
+        Self::Flat(value)
     }
 }
 impl From<LegacyConfigData> for AnyConfigData {
     fn from(value: LegacyConfigData) -> Self {
-        AnyConfigData::Legacy(value)
+        Self::Legacy(value)
     }
 }
 
@@ -42,7 +42,7 @@ pub(crate) struct FlatConfigData(pub(crate) Vec<FlatConfigObject>);
 #[derive(Debug, Default, Deserializable)]
 #[deserializable(unknown_fields = "allow")]
 pub(crate) struct FlatConfigObject {
-    pub(crate) files: Vec<Box<str>>,
+    pub(crate) files: NestableVec<Box<str>>,
     /// The glob patterns that ignore to lint.
     pub(crate) ignores: Vec<Box<str>>,
     // using `Option` is important to distinguish a global ignores from a config objerct
@@ -175,8 +175,8 @@ pub(crate) enum GlobalConf {
 impl GlobalConf {
     pub(crate) fn is_enabled(&self) -> bool {
         match self {
-            GlobalConf::Flag(result) => *result,
-            GlobalConf::Qualifier(qualifier) => !matches!(qualifier, GlobalConfQualifier::Off),
+            Self::Flag(result) => *result,
+            Self::Qualifier(qualifier) => !matches!(qualifier, GlobalConfQualifier::Off),
         }
     }
 }
@@ -251,13 +251,80 @@ impl<T: Deserializable> Deserializable for ShorthandVec<T> {
         value: &impl DeserializableValue,
         name: &str,
     ) -> Option<Self> {
-        Some(ShorthandVec(
+        Some(Self(
             if value.visitable_type()? == DeserializableType::Array {
                 Deserializable::deserialize(ctx, value, name)?
             } else {
                 Vec::from_iter([Deserializable::deserialize(ctx, value, name)?])
             },
         ))
+    }
+}
+
+#[derive(Debug, Default)]
+pub(crate) struct NestableVec<T>(Vec<T>);
+impl<T> Deref for NestableVec<T> {
+    type Target = Vec<T>;
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
+}
+impl<T> DerefMut for NestableVec<T> {
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        &mut self.0
+    }
+}
+impl<T> IntoIterator for NestableVec<T> {
+    type Item = T;
+    type IntoIter = vec::IntoIter<T>;
+    fn into_iter(self) -> Self::IntoIter {
+        self.0.into_iter()
+    }
+}
+impl<T> From<Vec<T>> for NestableVec<T> {
+    fn from(value: Vec<T>) -> Self {
+        Self(value)
+    }
+}
+impl<T: Deserializable> Deserializable for NestableVec<T> {
+    fn deserialize(
+        ctx: &mut impl DeserializationContext,
+        value: &impl DeserializableValue,
+        name: &str,
+    ) -> Option<Self> {
+        value
+            .deserialize(ctx, NestableVecVisitor::<T>::new(), name)
+            .map(Self)
+    }
+}
+
+struct NestableVecVisitor<T> {
+    _ty: PhantomData<T>,
+}
+impl<T> NestableVecVisitor<T> {
+    fn new() -> Self {
+        Self { _ty: PhantomData }
+    }
+}
+impl<T: Deserializable> DeserializationVisitor for NestableVecVisitor<T> {
+    type Output = Vec<T>;
+    const EXPECTED_TYPE: DeserializableTypes = DeserializableTypes::ARRAY;
+    fn visit_array(
+        self,
+        ctx: &mut impl DeserializationContext,
+        items: impl Iterator<Item = Option<impl DeserializableValue>>,
+        _range: TextRange,
+        name: &str,
+    ) -> Option<Self::Output> {
+        let mut output = Vec::new();
+        for item in items.flatten() {
+            if item.visitable_type()? == DeserializableType::Array {
+                output.extend(Vec::<T>::deserialize(ctx, &item, name)?);
+            } else {
+                output.push(T::deserialize(ctx, &item, name)?);
+            }
+        }
+        Some(output)
     }
 }
 
@@ -286,19 +353,17 @@ impl<T, U> RuleConf<T, U> {
 impl<T> RuleConf<T, ()> {
     pub(crate) fn into_vec(self) -> Vec<T> {
         match self {
-            RuleConf::Severity(_) => vec![],
-            RuleConf::Option(_, value) | RuleConf::Options(_, value, _) => vec![value],
-            RuleConf::Spread(_, result) => result,
+            Self::Severity(_) => vec![],
+            Self::Option(_, value) | Self::Options(_, value, _) => vec![value],
+            Self::Spread(_, result) => result,
         }
     }
 }
 impl<T: Default, U: Default> RuleConf<T, U> {
     pub(crate) fn option_or_default(self) -> T {
         match self {
-            RuleConf::Severity(_) | RuleConf::Options(_, _, _) | RuleConf::Spread(_, _) => {
-                T::default()
-            }
-            RuleConf::Option(_, option) => option,
+            Self::Severity(_) | Self::Options(_, _, _) | Self::Spread(_, _) => T::default(),
+            Self::Option(_, option) => option,
         }
     }
 }
@@ -385,26 +450,26 @@ impl TryFrom<NumberOrString> for Severity {
     fn try_from(value: NumberOrString) -> Result<Self, &'static str> {
         match value {
             NumberOrString::Number(n) => match n {
-                0 => Ok(Severity::Off),
-                1 => Ok(Severity::Warn),
-                2 => Ok(Severity::Error),
+                0 => Ok(Self::Off),
+                1 => Ok(Self::Warn),
+                2 => Ok(Self::Error),
                 _ => Err("Severity should be 0, 1 or 2."),
             },
             NumberOrString::String(s) => match s.as_ref() {
-                "off" => Ok(Severity::Off),
-                "warn" => Ok(Severity::Warn),
-                "error" => Ok(Severity::Error),
+                "off" => Ok(Self::Off),
+                "warn" => Ok(Self::Warn),
+                "error" => Ok(Self::Error),
                 _ => Err("Severity should be 'off', 'warn' or 'error'."),
             },
         }
     }
 }
 impl From<Severity> for biome_configuration::RulePlainConfiguration {
-    fn from(value: Severity) -> biome_configuration::RulePlainConfiguration {
+    fn from(value: Severity) -> Self {
         match value {
-            Severity::Off => biome_configuration::RulePlainConfiguration::Off,
-            Severity::Warn => biome_configuration::RulePlainConfiguration::Warn,
-            Severity::Error => biome_configuration::RulePlainConfiguration::Error,
+            Severity::Off => Self::Off,
+            Severity::Warn => Self::Warn,
+            Severity::Error => Self::Error,
         }
     }
 }
@@ -491,6 +556,11 @@ impl Deserializable for Rules {
                                 result.insert(Rule::TypeScriptArrayType(conf));
                             }
                         }
+                        "@typescript-eslint/consistent-type-imports" => {
+                            if let Some(conf) = RuleConf::deserialize(ctx, &value, name) {
+                                result.insert(Rule::TypeScriptConsistentTypeImports(conf));
+                            }
+                        }
                         "@typescript-eslint/explicit-member-accessibility" => {
                             if let Some(conf) = RuleConf::deserialize(ctx, &value, name) {
                                 result.insert(Rule::TypeScriptExplicitMemberAccessibility(conf));
@@ -531,7 +601,7 @@ pub struct NoConsoleOptions {
 }
 impl From<NoConsoleOptions> for biome_js_analyze::lint::suspicious::no_console::NoConsoleOptions {
     fn from(val: NoConsoleOptions) -> Self {
-        biome_js_analyze::lint::suspicious::no_console::NoConsoleOptions { allow: val.allow }
+        Self { allow: val.allow }
     }
 }
 
@@ -541,10 +611,17 @@ pub(crate) enum NoRestrictedGlobal {
     WithMessage(GlobalWithMessage),
 }
 impl NoRestrictedGlobal {
-    pub(crate) fn into_name(self) -> String {
+    pub(crate) fn name(&self) -> &str {
         match self {
-            NoRestrictedGlobal::Plain(name) => name,
-            NoRestrictedGlobal::WithMessage(named) => named.name,
+            Self::Plain(name) => name.as_str(),
+            Self::WithMessage(named) => named.name.as_str(),
+        }
+    }
+
+    pub(crate) fn message(&self) -> Option<&str> {
+        match self {
+            Self::Plain(_) => None,
+            Self::WithMessage(named) => Some(named.message.as_str()),
         }
     }
 }
@@ -578,6 +655,7 @@ pub(crate) enum Rule {
     // Eslint plugins
     Jsxa11yArioaRoles(RuleConf<Box<eslint_jsxa11y::AriaRoleOptions>>),
     TypeScriptArrayType(RuleConf<eslint_typescript::ArrayTypeOptions>),
+    TypeScriptConsistentTypeImports(RuleConf<eslint_typescript::ConsistentTypeImportsOptions>),
     TypeScriptExplicitMemberAccessibility(
         RuleConf<eslint_typescript::ExplicitMemberAccessibilityOptions>,
     ),
@@ -588,18 +666,21 @@ pub(crate) enum Rule {
 impl Rule {
     pub(crate) fn name(&self) -> Cow<'static, str> {
         match self {
-            Rule::Any(name, _) => name.clone(),
-            Rule::NoConsole(_) => Cow::Borrowed("no-console"),
-            Rule::NoRestrictedGlobals(_) => Cow::Borrowed("no-restricted-globals"),
-            Rule::Jsxa11yArioaRoles(_) => Cow::Borrowed("jsx-a11y/aria-role"),
-            Rule::TypeScriptArrayType(_) => Cow::Borrowed("@typescript-eslint/array-type"),
-            Rule::TypeScriptExplicitMemberAccessibility(_) => {
+            Self::Any(name, _) => name.clone(),
+            Self::NoConsole(_) => Cow::Borrowed("no-console"),
+            Self::NoRestrictedGlobals(_) => Cow::Borrowed("no-restricted-globals"),
+            Self::Jsxa11yArioaRoles(_) => Cow::Borrowed("jsx-a11y/aria-role"),
+            Self::TypeScriptArrayType(_) => Cow::Borrowed("@typescript-eslint/array-type"),
+            Self::TypeScriptConsistentTypeImports(_) => {
+                Cow::Borrowed("@typescript-eslint/consistent-type-imports")
+            }
+            Self::TypeScriptExplicitMemberAccessibility(_) => {
                 Cow::Borrowed("@typescript-eslint/explicit-member-accessibility")
             }
-            Rule::TypeScriptNamingConvention(_) => {
+            Self::TypeScriptNamingConvention(_) => {
                 Cow::Borrowed("@typescript-eslint/naming-convention")
             }
-            Rule::UnicornFilenameCase(_) => Cow::Borrowed("unicorn/filename-case"),
+            Self::UnicornFilenameCase(_) => Cow::Borrowed("unicorn/filename-case"),
         }
     }
 }

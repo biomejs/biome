@@ -1,5 +1,6 @@
 //! A series of AST utilities to work with the React library
 
+pub mod components;
 pub mod hooks;
 
 use biome_js_semantic::{Binding, SemanticModel};
@@ -82,7 +83,7 @@ impl ReactCreateElementCall {
                     .and_then(|argument| argument.ok())
                     .and_then(|argument| argument.as_any_js_expression().cloned());
 
-                Some(ReactCreateElementCall {
+                Some(Self {
                     element_type: first_argument,
                     props: second_argument,
                     children: third_argument,
@@ -120,15 +121,15 @@ pub enum ReactLibrary {
 impl ReactLibrary {
     pub const fn import_names(self) -> &'static [&'static str] {
         match self {
-            ReactLibrary::React => &["react", "preact/compat", "preact/hooks"],
-            ReactLibrary::ReactDOM => &["react-dom"],
+            Self::React => &["react", "preact/compat", "preact/hooks"],
+            Self::ReactDOM => &["react-dom"],
         }
     }
 
     pub const fn global_name(self) -> &'static str {
         match self {
-            ReactLibrary::React => "React",
-            ReactLibrary::ReactDOM => "ReactDOM",
+            Self::React => "React",
+            Self::ReactDOM => "ReactDOM",
         }
     }
 }

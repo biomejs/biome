@@ -1,3 +1,4 @@
+/* should not generate diagnostics */
 export interface X {
     readonly A_CONSTANT: unknown
 

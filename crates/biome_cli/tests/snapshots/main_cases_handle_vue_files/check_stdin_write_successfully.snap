@@ -1,6 +1,6 @@
 ---
 source: crates/biome_cli/tests/snap_test.rs
-expression: content
+expression: redactor(content)
 ---
 # Input messages
 
@@ -18,9 +18,6 @@ delete a.c;
 
 ```block
 <script setup lang="ts">
-import * as vueUse from "vue-use";
-import { Button } from "./components/Button.vue";
-
 delete a.c;
 </script>
 <template></template>

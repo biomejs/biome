@@ -1,7 +1,6 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid.js
-snapshot_kind: text
 ---
 # Input
 ```js
@@ -73,7 +72,7 @@ const precisionLoss = [
 ```
 invalid.js:1:11 lint/suspicious/noApproximativeNumericConstant  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Prefer constants from the standard library.
+  ! Prefer constants from the standard library.
   
   > 1 │ const x = 3.141;
       │           ^^^^^
@@ -93,7 +92,7 @@ invalid.js:1:11 lint/suspicious/noApproximativeNumericConstant  FIXABLE  ━━�
 ```
 invalid.js:2:11 lint/suspicious/noApproximativeNumericConstant  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Prefer constants from the standard library.
+  ! Prefer constants from the standard library.
   
     1 │ const x = 3.141;
   > 2 │ const y = 2.302;
@@ -115,7 +114,7 @@ invalid.js:2:11 lint/suspicious/noApproximativeNumericConstant  FIXABLE  ━━�
 ```
 invalid.js:3:11 lint/suspicious/noApproximativeNumericConstant  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Prefer constants from the standard library.
+  ! Prefer constants from the standard library.
   
     1 │ const x = 3.141;
     2 │ const y = 2.302;
@@ -139,7 +138,7 @@ invalid.js:3:11 lint/suspicious/noApproximativeNumericConstant  FIXABLE  ━━�
 ```
 invalid.js:6:2 lint/suspicious/noApproximativeNumericConstant  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Prefer constants from the standard library.
+  ! Prefer constants from the standard library.
   
     5 │ const constants = [
   > 6 │ 	2.718281, // E
@@ -162,7 +161,7 @@ invalid.js:6:2 lint/suspicious/noApproximativeNumericConstant  FIXABLE  ━━�
 ```
 invalid.js:7:2 lint/suspicious/noApproximativeNumericConstant  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Prefer constants from the standard library.
+  ! Prefer constants from the standard library.
   
     5 │ const constants = [
     6 │ 	2.718281, // E
@@ -186,7 +185,7 @@ invalid.js:7:2 lint/suspicious/noApproximativeNumericConstant  FIXABLE  ━━�
 ```
 invalid.js:8:2 lint/suspicious/noApproximativeNumericConstant  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Prefer constants from the standard library.
+  ! Prefer constants from the standard library.
   
      6 │ 	2.718281, // E
      7 │ 	2.718_281, // E with separator
@@ -210,7 +209,7 @@ invalid.js:8:2 lint/suspicious/noApproximativeNumericConstant  FIXABLE  ━━�
 ```
 invalid.js:9:2 lint/suspicious/noApproximativeNumericConstant  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Prefer constants from the standard library.
+  ! Prefer constants from the standard library.
   
      7 │ 	2.718_281, // E with separator
      8 │ 	2.302585, // LN10
@@ -234,7 +233,7 @@ invalid.js:9:2 lint/suspicious/noApproximativeNumericConstant  FIXABLE  ━━�
 ```
 invalid.js:10:2 lint/suspicious/noApproximativeNumericConstant  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Prefer constants from the standard library.
+  ! Prefer constants from the standard library.
   
      8 │ 	2.302585, // LN10
      9 │ 	0.693147, // LN2
@@ -258,7 +257,7 @@ invalid.js:10:2 lint/suspicious/noApproximativeNumericConstant  FIXABLE  ━━�
 ```
 invalid.js:11:2 lint/suspicious/noApproximativeNumericConstant  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Prefer constants from the standard library.
+  ! Prefer constants from the standard library.
   
      9 │ 	0.693147, // LN2
     10 │ 	0.434294, // LOG10E
@@ -282,7 +281,7 @@ invalid.js:11:2 lint/suspicious/noApproximativeNumericConstant  FIXABLE  ━━�
 ```
 invalid.js:12:2 lint/suspicious/noApproximativeNumericConstant  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Prefer constants from the standard library.
+  ! Prefer constants from the standard library.
   
     10 │ 	0.434294, // LOG10E
     11 │ 	1.442695, // LOG2E
@@ -306,7 +305,7 @@ invalid.js:12:2 lint/suspicious/noApproximativeNumericConstant  FIXABLE  ━━�
 ```
 invalid.js:13:2 lint/suspicious/noApproximativeNumericConstant  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Prefer constants from the standard library.
+  ! Prefer constants from the standard library.
   
     11 │ 	1.442695, // LOG2E
     12 │ 	3.141592, // PI
@@ -330,7 +329,7 @@ invalid.js:13:2 lint/suspicious/noApproximativeNumericConstant  FIXABLE  ━━�
 ```
 invalid.js:14:2 lint/suspicious/noApproximativeNumericConstant  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Prefer constants from the standard library.
+  ! Prefer constants from the standard library.
   
     12 │ 	3.141592, // PI
     13 │ 	0.707106, // SQRT1_2
@@ -354,7 +353,7 @@ invalid.js:14:2 lint/suspicious/noApproximativeNumericConstant  FIXABLE  ━━�
 ```
 invalid.js:18:2 lint/suspicious/noApproximativeNumericConstant  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Prefer constants from the standard library.
+  ! Prefer constants from the standard library.
   
     17 │ const constants1 = [
   > 18 │ 	2.718, // E
@@ -377,7 +376,7 @@ invalid.js:18:2 lint/suspicious/noApproximativeNumericConstant  FIXABLE  ━━�
 ```
 invalid.js:19:2 lint/suspicious/noApproximativeNumericConstant  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Prefer constants from the standard library.
+  ! Prefer constants from the standard library.
   
     17 │ const constants1 = [
     18 │ 	2.718, // E
@@ -401,7 +400,7 @@ invalid.js:19:2 lint/suspicious/noApproximativeNumericConstant  FIXABLE  ━━�
 ```
 invalid.js:20:2 lint/suspicious/noApproximativeNumericConstant  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Prefer constants from the standard library.
+  ! Prefer constants from the standard library.
   
     18 │ 	2.718, // E
     19 │ 	2.302, // LN10
@@ -425,7 +424,7 @@ invalid.js:20:2 lint/suspicious/noApproximativeNumericConstant  FIXABLE  ━━�
 ```
 invalid.js:21:2 lint/suspicious/noApproximativeNumericConstant  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Prefer constants from the standard library.
+  ! Prefer constants from the standard library.
   
     19 │ 	2.302, // LN10
     20 │ 	0.693, // LN2
@@ -449,7 +448,7 @@ invalid.js:21:2 lint/suspicious/noApproximativeNumericConstant  FIXABLE  ━━�
 ```
 invalid.js:22:2 lint/suspicious/noApproximativeNumericConstant  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Prefer constants from the standard library.
+  ! Prefer constants from the standard library.
   
     20 │ 	0.693, // LN2
     21 │ 	0.434, // LOG10E
@@ -473,7 +472,7 @@ invalid.js:22:2 lint/suspicious/noApproximativeNumericConstant  FIXABLE  ━━�
 ```
 invalid.js:23:2 lint/suspicious/noApproximativeNumericConstant  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Prefer constants from the standard library.
+  ! Prefer constants from the standard library.
   
     21 │ 	0.434, // LOG10E
     22 │ 	1.442, // LOG2E
@@ -497,7 +496,7 @@ invalid.js:23:2 lint/suspicious/noApproximativeNumericConstant  FIXABLE  ━━�
 ```
 invalid.js:24:2 lint/suspicious/noApproximativeNumericConstant  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Prefer constants from the standard library.
+  ! Prefer constants from the standard library.
   
     22 │ 	1.442, // LOG2E
     23 │ 	3.141, // PI
@@ -521,7 +520,7 @@ invalid.js:24:2 lint/suspicious/noApproximativeNumericConstant  FIXABLE  ━━�
 ```
 invalid.js:25:2 lint/suspicious/noApproximativeNumericConstant  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Prefer constants from the standard library.
+  ! Prefer constants from the standard library.
   
     23 │ 	3.141, // PI
     24 │ 	0.707, // SQRT1_2
@@ -545,7 +544,7 @@ invalid.js:25:2 lint/suspicious/noApproximativeNumericConstant  FIXABLE  ━━�
 ```
 invalid.js:29:2 lint/suspicious/noApproximativeNumericConstant  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Prefer constants from the standard library.
+  ! Prefer constants from the standard library.
   
     28 │ const exact = [
   > 29 │ 	2.718281828459045, // E
@@ -568,7 +567,7 @@ invalid.js:29:2 lint/suspicious/noApproximativeNumericConstant  FIXABLE  ━━�
 ```
 invalid.js:30:5 lint/suspicious/noApproximativeNumericConstant  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Prefer constants from the standard library.
+  ! Prefer constants from the standard library.
   
     28 │ const exact = [
     29 │ 	2.718281828459045, // E
@@ -592,7 +591,7 @@ invalid.js:30:5 lint/suspicious/noApproximativeNumericConstant  FIXABLE  ━━�
 ```
 invalid.js:31:5 lint/suspicious/noApproximativeNumericConstant  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Prefer constants from the standard library.
+  ! Prefer constants from the standard library.
   
     29 │ 	2.718281828459045, // E
     30 │     2.302585092994046, // LN10
@@ -616,7 +615,7 @@ invalid.js:31:5 lint/suspicious/noApproximativeNumericConstant  FIXABLE  ━━�
 ```
 invalid.js:32:5 lint/suspicious/noApproximativeNumericConstant  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Prefer constants from the standard library.
+  ! Prefer constants from the standard library.
   
     30 │     2.302585092994046, // LN10
     31 │     0.6931471805599453, // LN2
@@ -640,7 +639,7 @@ invalid.js:32:5 lint/suspicious/noApproximativeNumericConstant  FIXABLE  ━━�
 ```
 invalid.js:33:5 lint/suspicious/noApproximativeNumericConstant  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Prefer constants from the standard library.
+  ! Prefer constants from the standard library.
   
     31 │     0.6931471805599453, // LN2
     32 │     0.4342944819032518, // LOG10E
@@ -664,7 +663,7 @@ invalid.js:33:5 lint/suspicious/noApproximativeNumericConstant  FIXABLE  ━━�
 ```
 invalid.js:34:5 lint/suspicious/noApproximativeNumericConstant  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Prefer constants from the standard library.
+  ! Prefer constants from the standard library.
   
     32 │     0.4342944819032518, // LOG10E
     33 │     1.4426950408889634, // LOG2E
@@ -688,7 +687,7 @@ invalid.js:34:5 lint/suspicious/noApproximativeNumericConstant  FIXABLE  ━━�
 ```
 invalid.js:35:5 lint/suspicious/noApproximativeNumericConstant  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Prefer constants from the standard library.
+  ! Prefer constants from the standard library.
   
     33 │     1.4426950408889634, // LOG2E
     34 │     3.141592653589793, // PI
@@ -712,7 +711,7 @@ invalid.js:35:5 lint/suspicious/noApproximativeNumericConstant  FIXABLE  ━━�
 ```
 invalid.js:36:5 lint/suspicious/noApproximativeNumericConstant  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Prefer constants from the standard library.
+  ! Prefer constants from the standard library.
   
     34 │     3.141592653589793, // PI
     35 │     0.7071067811865476, // SQRT1_2
@@ -736,7 +735,7 @@ invalid.js:36:5 lint/suspicious/noApproximativeNumericConstant  FIXABLE  ━━�
 ```
 invalid.js:37:5 lint/suspicious/noApproximativeNumericConstant  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Prefer constants from the standard library.
+  ! Prefer constants from the standard library.
   
     35 │     0.7071067811865476, // SQRT1_2
     36 │     .7071067811865476, // SQRT1_2 without leading 0
@@ -760,7 +759,7 @@ invalid.js:37:5 lint/suspicious/noApproximativeNumericConstant  FIXABLE  ━━�
 ```
 invalid.js:42:2 lint/suspicious/noApproximativeNumericConstant  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Prefer constants from the standard library.
+  ! Prefer constants from the standard library.
   
     40 │ const rounded = [
     41 │ 	// rounded
@@ -784,7 +783,7 @@ invalid.js:42:2 lint/suspicious/noApproximativeNumericConstant  FIXABLE  ━━�
 ```
 invalid.js:43:5 lint/suspicious/noApproximativeNumericConstant  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Prefer constants from the standard library.
+  ! Prefer constants from the standard library.
   
     41 │ 	// rounded
     42 │ 	2.7183, // E
@@ -808,7 +807,7 @@ invalid.js:43:5 lint/suspicious/noApproximativeNumericConstant  FIXABLE  ━━�
 ```
 invalid.js:44:5 lint/suspicious/noApproximativeNumericConstant  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Prefer constants from the standard library.
+  ! Prefer constants from the standard library.
   
     42 │ 	2.7183, // E
     43 │     2.302585093, // LN10
@@ -832,7 +831,7 @@ invalid.js:44:5 lint/suspicious/noApproximativeNumericConstant  FIXABLE  ━━�
 ```
 invalid.js:45:5 lint/suspicious/noApproximativeNumericConstant  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Prefer constants from the standard library.
+  ! Prefer constants from the standard library.
   
     43 │     2.302585093, // LN10
     44 │     0.6931471806, // LN2
@@ -856,7 +855,7 @@ invalid.js:45:5 lint/suspicious/noApproximativeNumericConstant  FIXABLE  ━━�
 ```
 invalid.js:46:5 lint/suspicious/noApproximativeNumericConstant  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Prefer constants from the standard library.
+  ! Prefer constants from the standard library.
   
     44 │     0.6931471806, // LN2
     45 │     0.4342944819033, // LOG10E
@@ -880,7 +879,7 @@ invalid.js:46:5 lint/suspicious/noApproximativeNumericConstant  FIXABLE  ━━�
 ```
 invalid.js:47:5 lint/suspicious/noApproximativeNumericConstant  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Prefer constants from the standard library.
+  ! Prefer constants from the standard library.
   
     45 │     0.4342944819033, // LOG10E
     46 │     1.442695040889, // LOG2E
@@ -904,7 +903,7 @@ invalid.js:47:5 lint/suspicious/noApproximativeNumericConstant  FIXABLE  ━━�
 ```
 invalid.js:48:5 lint/suspicious/noApproximativeNumericConstant  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Prefer constants from the standard library.
+  ! Prefer constants from the standard library.
   
     46 │     1.442695040889, // LOG2E
     47 │     3.1415926535898, // PI
@@ -928,7 +927,7 @@ invalid.js:48:5 lint/suspicious/noApproximativeNumericConstant  FIXABLE  ━━�
 ```
 invalid.js:49:5 lint/suspicious/noApproximativeNumericConstant  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Prefer constants from the standard library.
+  ! Prefer constants from the standard library.
   
     47 │     3.1415926535898, // PI
     48 │     0.70710678118655, // SQRT1_2
@@ -952,7 +951,7 @@ invalid.js:49:5 lint/suspicious/noApproximativeNumericConstant  FIXABLE  ━━�
 ```
 invalid.js:53:2 lint/suspicious/noApproximativeNumericConstant  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Prefer constants from the standard library.
+  ! Prefer constants from the standard library.
   
     52 │ const precisionLoss = [
   > 53 │ 	2.71828182845904523536028747135266250, // E
@@ -975,7 +974,7 @@ invalid.js:53:2 lint/suspicious/noApproximativeNumericConstant  FIXABLE  ━━�
 ```
 invalid.js:54:5 lint/suspicious/noApproximativeNumericConstant  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Prefer constants from the standard library.
+  ! Prefer constants from the standard library.
   
     52 │ const precisionLoss = [
     53 │ 	2.71828182845904523536028747135266250, // E
@@ -999,7 +998,7 @@ invalid.js:54:5 lint/suspicious/noApproximativeNumericConstant  FIXABLE  ━━�
 ```
 invalid.js:55:5 lint/suspicious/noApproximativeNumericConstant  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Prefer constants from the standard library.
+  ! Prefer constants from the standard library.
   
     53 │ 	2.71828182845904523536028747135266250, // E
     54 │     2.30258509299404568401799145468436421, // LN10
@@ -1023,7 +1022,7 @@ invalid.js:55:5 lint/suspicious/noApproximativeNumericConstant  FIXABLE  ━━�
 ```
 invalid.js:57:5 lint/suspicious/noApproximativeNumericConstant  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Prefer constants from the standard library.
+  ! Prefer constants from the standard library.
   
     55 │     0.693147180559945309417232121458176568, // LN2
     56 │     0.301029995663981195213738894724493027, // LOG10E
@@ -1047,7 +1046,7 @@ invalid.js:57:5 lint/suspicious/noApproximativeNumericConstant  FIXABLE  ━━�
 ```
 invalid.js:58:5 lint/suspicious/noApproximativeNumericConstant  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Prefer constants from the standard library.
+  ! Prefer constants from the standard library.
   
     56 │     0.301029995663981195213738894724493027, // LOG10E
     57 │     1.44269504088896340735992468100189214, // LOG2E

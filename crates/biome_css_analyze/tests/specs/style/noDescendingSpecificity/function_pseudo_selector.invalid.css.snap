@@ -1,0 +1,73 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+expression: function_pseudo_selector.invalid.css
+---
+# Input
+```css
+:is(#a, a) f {
+    color: red;
+}
+
+:is(a, b, c, d) f {
+    color: red;
+}
+
+:is(#fake#fake#fake#fake#fake#fake, *) g {
+    color: red;
+}
+
+:where(*) g {
+    color: red;
+}
+```
+
+# Diagnostics
+```
+function_pseudo_selector.invalid.css:5:1 lint/style/noDescendingSpecificity ━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Descending specificity selector found. This selector specificity is (0, 0, 2)
+  
+    3 │ }
+    4 │ 
+  > 5 │ :is(a, b, c, d) f {
+      │ ^^^^^^^^^^^^^^^^^
+    6 │     color: red;
+    7 │ }
+  
+  i This selector specificity is (1, 0, 1)
+  
+  > 1 │ :is(#a, a) f {
+      │ ^^^^^^^^^^^^
+    2 │     color: red;
+    3 │ }
+  
+  i Descending specificity selector may not applied. Consider rearranging the order of the selectors. See MDN web docs for more details.
+  
+
+```
+
+```
+function_pseudo_selector.invalid.css:13:1 lint/style/noDescendingSpecificity ━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Descending specificity selector found. This selector specificity is (0, 0, 1)
+  
+    11 │ }
+    12 │ 
+  > 13 │ :where(*) g {
+       │ ^^^^^^^^^^^
+    14 │     color: red;
+    15 │ }
+  
+  i This selector specificity is (6, 0, 1)
+  
+     7 │ }
+     8 │ 
+   > 9 │ :is(#fake#fake#fake#fake#fake#fake, *) g {
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    10 │     color: red;
+    11 │ }
+  
+  i Descending specificity selector may not applied. Consider rearranging the order of the selectors. See MDN web docs for more details.
+  
+
+```

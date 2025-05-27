@@ -1,7 +1,6 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid.js
-snapshot_kind: text
 ---
 # Input
 ```js
@@ -15,7 +14,7 @@ require("node:assert");
 ```
 invalid.js:1:20 lint/style/useNodeAssertStrict  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Use node:assert/strict instead.
+  ! Use node:assert/strict instead.
   
   > 1 │ import assert from 'node:assert';
       │                    ^^^^^^^^^^^^^
@@ -37,7 +36,7 @@ invalid.js:1:20 lint/style/useNodeAssertStrict  FIXABLE  ━━━━━━━�
 ```
 invalid.js:2:8 lint/style/useNodeAssertStrict  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Use node:assert/strict instead.
+  ! Use node:assert/strict instead.
   
     1 │ import assert from 'node:assert';
   > 2 │ import("node:assert");
@@ -57,7 +56,7 @@ invalid.js:2:8 lint/style/useNodeAssertStrict  FIXABLE  ━━━━━━━━
 ```
 invalid.js:3:9 lint/style/useNodeAssertStrict  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Use node:assert/strict instead.
+  ! Use node:assert/strict instead.
   
     1 │ import assert from 'node:assert';
     2 │ import("node:assert");

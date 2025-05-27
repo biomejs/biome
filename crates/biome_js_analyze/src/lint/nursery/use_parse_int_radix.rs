@@ -50,7 +50,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub UseParseIntRadix {
-        version: "next",
+        version: "2.0.0",
         name: "useParseIntRadix",
         language: "js",
         recommended: true,

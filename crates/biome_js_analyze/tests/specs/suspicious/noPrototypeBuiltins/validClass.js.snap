@@ -1,10 +1,10 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: validClass.js
-snapshot_kind: text
 ---
 # Input
 ```js
+/* should not generate diagnostics */
 class C { #hasOwnProperty; foo() { Object.#hasOwnProperty.call(obj, prop) } }
 class C { #call; foo() { Object.hasOwnProperty.#call(obj, prop) } }
 class C { #hasOwnProperty; foo() { Object.prototype.#hasOwnProperty.call(obj, prop) } }

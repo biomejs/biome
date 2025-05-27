@@ -340,11 +340,11 @@ impl JsxAttributeList {
 impl AnyJsxElementName {
     pub fn name_value_token(&self) -> SyntaxResult<JsSyntaxToken> {
         match self {
-            AnyJsxElementName::JsxMemberName(member) => member.member()?.value_token(),
-            AnyJsxElementName::JsxName(name) => name.value_token(),
-            AnyJsxElementName::JsxNamespaceName(name) => name.name()?.value_token(),
-            AnyJsxElementName::JsxReferenceIdentifier(name) => name.value_token(),
-            AnyJsxElementName::JsMetavariable(metavariable) => metavariable.value_token(),
+            Self::JsxMemberName(member) => member.member()?.value_token(),
+            Self::JsxName(name) => name.value_token(),
+            Self::JsxNamespaceName(name) => name.name()?.value_token(),
+            Self::JsxReferenceIdentifier(name) => name.value_token(),
+            Self::JsMetavariable(metavariable) => metavariable.value_token(),
         }
     }
 }
@@ -356,15 +356,15 @@ declare_node_union! {
 impl AnyJsxElement {
     pub fn name(&self) -> SyntaxResult<AnyJsxElementName> {
         match self {
-            AnyJsxElement::JsxOpeningElement(element) => element.name(),
-            AnyJsxElement::JsxSelfClosingElement(element) => element.name(),
+            Self::JsxOpeningElement(element) => element.name(),
+            Self::JsxSelfClosingElement(element) => element.name(),
         }
     }
 
     pub fn attributes(&self) -> JsxAttributeList {
         match self {
-            AnyJsxElement::JsxOpeningElement(element) => element.attributes(),
-            AnyJsxElement::JsxSelfClosingElement(element) => element.attributes(),
+            Self::JsxOpeningElement(element) => element.attributes(),
+            Self::JsxSelfClosingElement(element) => element.attributes(),
         }
     }
 
@@ -396,23 +396,17 @@ impl AnyJsxElement {
 
     pub fn has_trailing_spread_prop(&self, current_attribute: &JsxAttribute) -> bool {
         match self {
-            AnyJsxElement::JsxSelfClosingElement(element) => {
+            Self::JsxSelfClosingElement(element) => {
                 element.has_trailing_spread_prop(current_attribute)
             }
-            AnyJsxElement::JsxOpeningElement(element) => {
-                element.has_trailing_spread_prop(current_attribute)
-            }
+            Self::JsxOpeningElement(element) => element.has_trailing_spread_prop(current_attribute),
         }
     }
 
     pub fn find_attribute_by_name(&self, name_to_lookup: &str) -> Option<JsxAttribute> {
         match self {
-            AnyJsxElement::JsxSelfClosingElement(element) => {
-                element.find_attribute_by_name(name_to_lookup)
-            }
-            AnyJsxElement::JsxOpeningElement(element) => {
-                element.find_attribute_by_name(name_to_lookup)
-            }
+            Self::JsxSelfClosingElement(element) => element.find_attribute_by_name(name_to_lookup),
+            Self::JsxOpeningElement(element) => element.find_attribute_by_name(name_to_lookup),
         }
     }
 
@@ -568,13 +562,11 @@ impl AnyJsxAttributeValue {
 
     pub fn as_static_value(&self) -> Option<StaticValue> {
         match self {
-            AnyJsxAttributeValue::AnyJsxTag(_) => None,
-            AnyJsxAttributeValue::JsxExpressionAttributeValue(expression) => {
+            Self::AnyJsxTag(_) => None,
+            Self::JsxExpressionAttributeValue(expression) => {
                 expression.expression().ok()?.as_static_value()
             }
-            AnyJsxAttributeValue::JsxString(string) => {
-                Some(StaticValue::String(string.value_token().ok()?))
-            }
+            Self::JsxString(string) => Some(StaticValue::String(string.value_token().ok()?)),
         }
     }
 }
@@ -583,17 +575,17 @@ impl AnyJsxChild {
     /// Check if jsx child node is accessible for screen readers
     pub fn is_accessible_node(&self) -> Option<bool> {
         Some(match self {
-            AnyJsxChild::JsxText(text) => {
+            Self::JsxText(text) => {
                 let value_token = text.value_token().ok()?;
                 value_token.text_trimmed().trim() != ""
             }
-            AnyJsxChild::JsxExpressionChild(expression) => {
+            Self::JsxExpressionChild(expression) => {
                 let expression = expression.expression()?;
                 expression
                     .as_static_value()
                     .is_none_or(|value| !value.is_falsy())
             }
-            AnyJsxChild::JsxElement(element) => {
+            Self::JsxElement(element) => {
                 let opening_element = element.opening_element().ok()?;
                 let jsx_element = AnyJsxElement::cast(opening_element.into_syntax())?;
 
@@ -602,12 +594,12 @@ impl AnyJsxChild {
                 jsx_element.is_custom_component()
                     || !jsx_element.has_truthy_attribute("aria-hidden")
             }
-            AnyJsxChild::JsxSelfClosingElement(element) => {
+            Self::JsxSelfClosingElement(element) => {
                 let jsx_element = AnyJsxElement::unwrap_cast(element.syntax().clone());
                 jsx_element.is_custom_component()
                     || !jsx_element.has_truthy_attribute("aria-hidden")
             }
-            AnyJsxChild::JsxFragment(fragment) => fragment
+            Self::JsxFragment(fragment) => fragment
                 .children()
                 .into_iter()
                 .any(|child| child.is_accessible_node().unwrap_or(true)),

@@ -12,7 +12,7 @@ pub(crate) struct FormatHtmlAttribute {
 }
 
 pub(crate) struct FormatHtmlAttributeOptions {
-    /// Whether or not this attribute belongs to a canonical tag.
+    /// Whether this attribute belongs to a canonical tag.
     pub is_canonical_html_element: bool,
 
     /// The name of the tag this attribute belongs to.

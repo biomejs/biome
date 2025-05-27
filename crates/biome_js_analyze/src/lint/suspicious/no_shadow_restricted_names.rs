@@ -10,6 +10,8 @@ use biome_rowan::AstNode;
 declare_lint_rule! {
     /// Disallow identifiers from shadowing restricted names.
     ///
+    /// See also: [`noShadow`](http://biome.dev/linter/rules/no-shadow)
+    ///
     /// ## Examples
     ///
     /// ### Invalid
@@ -44,7 +46,7 @@ declare_lint_rule! {
 }
 
 pub struct State {
-    shadowed_name: String,
+    shadowed_name: Box<str>,
 }
 
 impl Rule for NoShadowRestrictedNames {
@@ -60,7 +62,7 @@ impl Rule for NoShadowRestrictedNames {
 
         if ES_BUILTIN.contains(&name) {
             Some(State {
-                shadowed_name: name.to_string(),
+                shadowed_name: name.into(),
             })
         } else {
             None

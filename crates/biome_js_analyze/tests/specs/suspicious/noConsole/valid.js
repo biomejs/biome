@@ -3,4 +3,5 @@
 var a = 1;
 
 const console = { log: (args) => { /* do nothing */} };
-console.log('hello world')
+console.log('hello world');
+console['log']('hello world');

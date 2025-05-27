@@ -1,3 +1,4 @@
+/* should not generate diagnostics */
 let valid: Array<Foo | Bar>;
 let valid: Array<keyof Bar>;
 let valid: Array<foo | bar>;

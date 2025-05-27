@@ -1,3 +1,4 @@
+/* should not generate diagnostics */
 import A from "" with { type: "json" };
 import * as B from "" with { type: "json" };
 import { C } from "" with { type: "json" };

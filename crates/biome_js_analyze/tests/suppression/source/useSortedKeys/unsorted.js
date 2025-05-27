@@ -1,4 +1,3 @@
-// biome-ignore assist/source/useSortedKeys: test
 const obj = {
 	b: 1,
 	a: 1,
