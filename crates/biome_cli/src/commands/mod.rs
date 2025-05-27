@@ -543,6 +543,9 @@ pub enum BiomeCommand {
     },
     #[bpaf(command("__print_socket"), hide)]
     PrintSocket,
+
+    #[bpaf(command("__where_am_i"), hide)]
+    WhereAmI,
 }
 
 #[derive(Debug, Bpaf, Clone)]
@@ -587,6 +590,7 @@ impl BiomeCommand {
             | Self::RunServer { .. }
             | Self::Clean { .. }
             | Self::PrintSocket => None,
+            Self::WhereAmI => None,
         }
     }
 

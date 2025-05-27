@@ -276,6 +276,12 @@ impl<'app> CliSession<'app> {
                 Some(log_prefix_name),
             ),
             BiomeCommand::PrintSocket => commands::daemon::print_socket(),
+            BiomeCommand::WhereAmI => {
+                if let Ok(path) = env::current_exe() {
+                    println!("{}", path.display());
+                }
+                Ok(())
+            }
         }
     }
 }
