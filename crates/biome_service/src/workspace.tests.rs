@@ -419,7 +419,6 @@ fn too_large_files_are_tracked_but_not_parsed() {
                 ..Default::default()
             },
             workspace_directory: None,
-            is_nested: false,
         })
         .unwrap();
 
@@ -480,7 +479,6 @@ fn plugins_are_loaded_and_used_during_analysis() {
                 ..Default::default()
             },
             workspace_directory: Some(BiomePath::new("/project")),
-            is_nested: false,
         })
         .unwrap();
 
@@ -550,7 +548,6 @@ language css;
                 ..Default::default()
             },
             workspace_directory: Some(BiomePath::new("/project")),
-            is_nested: false,
         })
         .unwrap();
 
@@ -616,7 +613,6 @@ fn plugins_may_use_invalid_span() {
                 ..Default::default()
             },
             workspace_directory: Some(BiomePath::new("/project")),
-            is_nested: false,
         })
         .unwrap();
 

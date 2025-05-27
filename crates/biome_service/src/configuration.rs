@@ -161,7 +161,7 @@ pub fn load_configuration(
     fs: &dyn FsWithResolverProxy,
     config_path: ConfigurationPathHint,
 ) -> Result<LoadedConfiguration, WorkspaceError> {
-    let config = read_config(fs, config_path, false)?;
+    let config = read_config(fs, config_path, true)?;
     let mut loaded_configuration = LoadedConfiguration::try_from_payload(config, fs);
 
     // We loaded the configuration, now we must check if this configuration is inside a monorepo.
@@ -276,9 +276,9 @@ pub fn read_config(
             .as_ref()
             .is_some_and(|config| {
                 if seek_root {
-                    config.root.is_some_and(|root| root.value())
+                    config.is_root()
                 } else {
-                    config.root.is_none_or(|root| root.value())
+                    !config.is_root()
                 }
             });
         if is_root {

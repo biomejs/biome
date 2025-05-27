@@ -664,6 +664,7 @@ pub(crate) fn validate_configuration_diagnostics(
             }
         }
 
+        dbg!("validate_configuration_diagnostics");
         return Err(CliDiagnostic::workspace_error(
             BiomeDiagnostic::invalid_configuration(
                 "Biome exited because the configuration resulted in errors. Please fix them.",
@@ -912,7 +913,6 @@ pub(crate) trait CommandRunner: Sized {
                 configuration_dir_path.map(BiomePath::from)
             },
             configuration,
-            is_nested: false,
         })?;
         if self.should_validate_configuration_diagnostics() {
             print_diagnostics_from_workspace_result(

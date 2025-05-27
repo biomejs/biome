@@ -1,5 +1,6 @@
 use crate::analyzers::all::RulesAll;
 use crate::analyzers::includes::Includes;
+use crate::analyzers::monorepo::Monorepo;
 use crate::analyzers::no_restriected_globals::NoRestrictedGlobals;
 use crate::analyzers::organize_imports::OrganizeImports;
 use crate::analyzers::rule_mover::RuleMover;
@@ -12,6 +13,7 @@ use biome_json_syntax::JsonLanguage;
 
 mod all;
 mod includes;
+mod monorepo;
 mod no_restriected_globals;
 mod organize_imports;
 mod rule_mover;
@@ -41,6 +43,7 @@ impl RuleGroup for MigrationGroup {
         registry.record_rule::<TrailingComma>();
         registry.record_rule::<UseNamingConventionEnumMemberCase>();
         registry.record_rule::<NoRestrictedGlobals>();
+        registry.record_rule::<Monorepo>();
     }
 }
 

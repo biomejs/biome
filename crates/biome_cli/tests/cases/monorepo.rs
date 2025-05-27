@@ -7,26 +7,11 @@ use camino::Utf8Path;
 
 const ROOT: &str = r#"
 {
-    "root": true,
     "javascript": {
         "formatter": {
             "quoteStyle": "double"
         }
     }
-}
-"#;
-
-const NESTED: &str = r#"
-{
-    "formatter": {
-        "indentStyle": "space",
-        "indentWidth": 8
-    },
-    "javascript": {
-        "formatter": {
-            "quoteStyle": "single"
-        }
-  }
 }
 "#;
 
@@ -64,14 +49,41 @@ fn should_format_nested_files_differently() {
     let mut fs = TemporaryFs::new("should_format_nested_files_differently");
 
     let file_path1 = Utf8Path::new("biome.json");
-    fs.create_file(file_path1.as_str(), ROOT);
+    fs.create_file(
+        file_path1.as_str(),
+        r#"
+{
+    "javascript": {
+        "formatter": {
+            "quoteStyle": "double"
+        }
+    }
+}
+"#,
+    );
     fs.create_file(
         "file.js",
         "function f() { const lorem_and_ipsum = 'lorem ipsum'; }",
     );
 
     let file_path2 = Utf8Path::new("packages/lib/biome.json");
-    fs.create_file(file_path2.as_str(), NESTED);
+    fs.create_file(
+        file_path2.as_str(),
+        r#"
+{
+    "root": false,
+    "formatter": {
+        "indentStyle": "space",
+        "indentWidth": 8
+    },
+    "javascript": {
+        "formatter": {
+            "quoteStyle": "single"
+        }
+  }
+}
+"#,
+    );
     fs.create_file(
         "packages/lib/file.js",
         "function f() { const lorem_and_ipsum = 'lorem ipsum'; }",
@@ -122,6 +134,7 @@ fn should_extend_from_the_root_config() {
         file_path2.as_str(),
         r#"
 {
+    "root": false,
     "extends": "//",
     "formatter": {
         "indentStyle": "space",
@@ -168,7 +181,6 @@ fn when_running_from_a_subdirectory_should_extend_from_the_root_config() {
         file_path1.as_str(),
         r#"
 {
-    "root": true,
     "formatter": {
         "indentStyle": "space",
         "indentWidth": 2
@@ -186,6 +198,7 @@ fn when_running_from_a_subdirectory_should_extend_from_the_root_config() {
         file_path2.as_str(),
         r#"
 {
+    "root": false,
     "extends": "//",
     "javascript": {
         "formatter": {

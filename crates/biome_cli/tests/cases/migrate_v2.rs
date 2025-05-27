@@ -1,9 +1,9 @@
 //! Migrations for Biome v2
 
-use crate::run_cli;
 use crate::snap_test::{SnapshotPayload, assert_cli_snapshot};
+use crate::{run_cli, run_cli_with_dyn_fs};
 use biome_console::BufferConsole;
-use biome_fs::MemoryFileSystem;
+use biome_fs::{MemoryFileSystem, TemporaryFs};
 use bpaf::Args;
 use camino::Utf8Path;
 
@@ -600,6 +600,39 @@ fn should_migrate_aws_config() {
         module_path!(),
         "should_migrate_aws_config",
         fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn should_migrate_nested_config() {
+    let mut fs = TemporaryFs::new("should_migrate_nested_config");
+    let mut console = BufferConsole::default();
+    fs.create_file(
+        "biome.json",
+        r#"{ "linter": { "rules": { "recommended": true } } }"#,
+    );
+    fs.create_file(
+        "foo/biome.json",
+        r#"{ "linter": { "rules": { "recommended": true } } }"#,
+    );
+    fs.create_file(
+        "bar/biome.json",
+        r#"{ "linter": { "rules": { "recommended": true } } }"#,
+    );
+
+    let result = run_cli_with_dyn_fs(
+        Box::new(fs.create_os()),
+        &mut console,
+        Args::from(["migrate"].as_slice()),
+    );
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "should_migrate_nested_config",
+        fs.create_mem(),
         console,
         result,
     ));

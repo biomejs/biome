@@ -586,7 +586,6 @@ pub struct UpdateSettingsParams {
     pub project_key: ProjectKey,
     pub configuration: Configuration,
     pub workspace_directory: Option<BiomePath>,
-    pub is_nested: bool,
 }
 
 #[derive(Debug, serde::Serialize, serde::Deserialize)]

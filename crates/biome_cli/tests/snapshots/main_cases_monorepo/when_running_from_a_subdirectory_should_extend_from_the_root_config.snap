@@ -6,6 +6,7 @@ expression: redactor(content)
 
 ```json
 {
+  "root": false,
   "extends": "//",
   "javascript": {
     "formatter": {
@@ -19,7 +20,6 @@ expression: redactor(content)
 
 ```json
 {
-  "root": true,
   "formatter": {
     "indentStyle": "space",
     "indentWidth": 2
@@ -57,22 +57,24 @@ biome.json format ━━━━━━━━━━━━━━━━━━━━�
 
   × Formatter would have printed the following content:
   
-     1   │ - 
-     2 1 │   {
-     3   │ - ····"extends":·"//",
-     4   │ - ····"javascript":·{
-     5   │ - ········"formatter":·{
-     6   │ - ············"quoteStyle":·"double"
-     7   │ - ········}
-     8   │ - ····}
-       2 │ + ··"extends":·"//",
-       3 │ + ··"javascript":·{
-       4 │ + ····"formatter":·{
-       5 │ + ······"quoteStyle":·"double"
-       6 │ + ····}
-       7 │ + ··}
-     9 8 │   }
-    10 9 │   
+     1    │ - 
+     2  1 │   {
+     3    │ - ····"root":·false,
+     4    │ - ····"extends":·"//",
+     5    │ - ····"javascript":·{
+     6    │ - ········"formatter":·{
+     7    │ - ············"quoteStyle":·"double"
+     8    │ - ········}
+     9    │ - ····}
+        2 │ + ··"root":·false,
+        3 │ + ··"extends":·"//",
+        4 │ + ··"javascript":·{
+        5 │ + ····"formatter":·{
+        6 │ + ······"quoteStyle":·"double"
+        7 │ + ····}
+        8 │ + ··}
+    10  9 │   }
+    11 10 │   
   
 
 ```

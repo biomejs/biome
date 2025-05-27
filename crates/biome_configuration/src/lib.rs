@@ -78,6 +78,8 @@ pub const VERSION: &str = match option_env!("BIOME_VERSION") {
     None => "0.0.0",
 };
 
+pub type RootEnabled = Bool<true>;
+
 /// Limit the size of files to 1.0 MiB by default
 pub const DEFAULT_FILE_SIZE_LIMIT: NonZeroU64 =
     // SAFETY: This constant is initialized with a non-zero value
@@ -101,7 +103,7 @@ pub struct Configuration {
     /// project. By default, this is `true`.
     #[bpaf(hide, hide_usage)]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub root: Option<Bool<false>>,
+    pub root: Option<RootEnabled>,
 
     /// A list of paths to other JSON files, used to extends the current configuration.
     #[bpaf(hide, pure(Default::default()))]
@@ -252,8 +254,10 @@ impl Configuration {
         }
     }
 
+    /// Whether these settings belong to a root.
+    /// It's returns `true` when it's `None` or `Some(true)`, `false` otherwise.
     pub fn is_root(&self) -> bool {
-        self.root.is_some_and(|root| root.value())
+        self.root.unwrap_or_default().into()
     }
 
     pub fn needs_to_extend_from_root(&self) -> bool {

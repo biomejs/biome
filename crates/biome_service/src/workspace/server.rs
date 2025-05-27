@@ -665,13 +665,13 @@ impl WorkspaceServer {
             }
 
             if nested_configuration.is_root() {
-                return Err(WorkspaceError::Configuration(
+                returned_diagnostics.push(biome_diagnostics::serde::Diagnostic::new(
                     BiomeDiagnostic::root_in_root(
                         filtered_path.to_string(),
                         Some(project_path.to_string()),
-                    )
-                    .into(),
+                    ),
                 ));
+                continue;
             }
 
             let nested_configuration = if nested_configuration.needs_to_extend_from_root() {
@@ -693,7 +693,6 @@ impl WorkspaceServer {
                 project_key,
                 workspace_directory: nested_directory_path.map(BiomePath::from),
                 configuration: nested_configuration,
-                is_nested: true,
             })?;
 
             returned_diagnostics.extend(result.diagnostics)
@@ -931,7 +930,7 @@ impl Workspace for WorkspaceServer {
     ) -> Result<UpdateSettingsResult, WorkspaceError> {
         let workspace_directory = params.workspace_directory.map(|p| p.to_path_buf());
 
-        let mut settings = if params.is_nested {
+        let mut settings = if !params.configuration.is_root() {
             if !self.projects.is_project_registered(params.project_key) {
                 return Err(WorkspaceError::no_project());
             }
@@ -974,7 +973,7 @@ impl Workspace for WorkspaceServer {
             return Err(WorkspaceError::plugin_errors(diagnostics));
         }
 
-        if params.is_nested {
+        if !settings.is_root() {
             self.projects.set_nested_settings(
                 params.project_key,
                 workspace_directory.unwrap_or_default(),
