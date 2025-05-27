@@ -7,7 +7,7 @@ use std::sync::LazyLock;
 use biome_rowan::Text;
 
 use crate::{
-    Class, Function, GenericTypeParameter, Resolvable, ResolvedTypeData, ResolvedTypeId,
+    Class, Function, GenericTypeParameter, Literal, Resolvable, ResolvedTypeData, ResolvedTypeId,
     ReturnType, ScopeId, TypeData, TypeId, TypeMember, TypeMemberKind, TypeReference,
     TypeReferenceQualifier, TypeResolver, TypeResolverLevel,
 };
@@ -44,7 +44,17 @@ pub const PROMISE_RACE_ID: TypeId = TypeId::new(13);
 pub const PROMISE_REJECT_ID: TypeId = TypeId::new(14);
 pub const PROMISE_RESOLVE_ID: TypeId = TypeId::new(15);
 pub const PROMISE_TRY_ID: TypeId = TypeId::new(16);
-pub const NUM_PREDEFINED_TYPES: usize = 17; // Most be one more than the highest `TypeId` above.
+pub const BIGINT_STRING_LITERAL_ID: TypeId = TypeId::new(17);
+pub const BOOLEAN_STRING_LITERAL_ID: TypeId = TypeId::new(18);
+pub const FUNCTION_STRING_LITERAL_ID: TypeId = TypeId::new(19);
+pub const NUMBER_STRING_LITERAL_ID: TypeId = TypeId::new(20);
+pub const OBJECT_STRING_LITERAL_ID: TypeId = TypeId::new(21);
+pub const STRING_STRING_LITERAL_ID: TypeId = TypeId::new(22);
+pub const SYMBOL_STRING_LITERAL_ID: TypeId = TypeId::new(23);
+pub const UNDEFINED_STRING_LITERAL_ID: TypeId = TypeId::new(24);
+pub const TYPEOF_OPERATOR_RETURN_UNION_ID: TypeId = TypeId::new(25);
+pub const STRING_ID: TypeId = TypeId::new(26);
+pub const NUM_PREDEFINED_TYPES: usize = 27; // Most be one more than the highest `TypeId` above.
 
 pub const GLOBAL_UNKNOWN_ID: ResolvedTypeId = ResolvedTypeId::new(GLOBAL_LEVEL, UNKNOWN_ID);
 pub const GLOBAL_UNDEFINED_ID: ResolvedTypeId = ResolvedTypeId::new(GLOBAL_LEVEL, UNDEFINED_ID);
@@ -54,6 +64,25 @@ pub const GLOBAL_INSTANCEOF_PROMISE_ID: ResolvedTypeId =
     ResolvedTypeId::new(GLOBAL_LEVEL, INSTANCEOF_PROMISE_ID);
 pub const GLOBAL_NUMBER_ID: ResolvedTypeId = ResolvedTypeId::new(GLOBAL_LEVEL, NUMBER_ID);
 pub const GLOBAL_PROMISE_ID: ResolvedTypeId = ResolvedTypeId::new(GLOBAL_LEVEL, PROMISE_ID);
+pub const GLOBAL_BIGINT_STRING_LITERAL_ID: ResolvedTypeId =
+    ResolvedTypeId::new(GLOBAL_LEVEL, BIGINT_STRING_LITERAL_ID);
+pub const GLOBAL_BOOLEAN_STRING_LITERAL_ID: ResolvedTypeId =
+    ResolvedTypeId::new(GLOBAL_LEVEL, BOOLEAN_STRING_LITERAL_ID);
+pub const GLOBAL_FUNCTION_STRING_LITERAL_ID: ResolvedTypeId =
+    ResolvedTypeId::new(GLOBAL_LEVEL, FUNCTION_STRING_LITERAL_ID);
+pub const GLOBAL_NUMBER_STRING_LITERAL_ID: ResolvedTypeId =
+    ResolvedTypeId::new(GLOBAL_LEVEL, NUMBER_STRING_LITERAL_ID);
+pub const GLOBAL_OBJECT_STRING_LITERAL_ID: ResolvedTypeId =
+    ResolvedTypeId::new(GLOBAL_LEVEL, OBJECT_STRING_LITERAL_ID);
+pub const GLOBAL_STRING_STRING_LITERAL_ID: ResolvedTypeId =
+    ResolvedTypeId::new(GLOBAL_LEVEL, STRING_STRING_LITERAL_ID);
+pub const GLOBAL_SYMBOL_STRING_LITERAL_ID: ResolvedTypeId =
+    ResolvedTypeId::new(GLOBAL_LEVEL, SYMBOL_STRING_LITERAL_ID);
+pub const GLOBAL_UNDEFINED_STRING_LITERAL_ID: ResolvedTypeId =
+    ResolvedTypeId::new(GLOBAL_LEVEL, UNDEFINED_STRING_LITERAL_ID);
+pub const GLOBAL_TYPEOF_OPERATOR_RETURN_UNION_ID: ResolvedTypeId =
+    ResolvedTypeId::new(GLOBAL_LEVEL, TYPEOF_OPERATOR_RETURN_UNION_ID);
+pub const GLOBAL_STRING_ID: ResolvedTypeId = ResolvedTypeId::new(GLOBAL_LEVEL, STRING_ID);
 
 /// Returns a string for formatting global IDs in test snapshots.
 pub fn global_type_name(id: TypeId) -> &'static str {
@@ -75,6 +104,19 @@ pub fn global_type_name(id: TypeId) -> &'static str {
         14 => "Promise.reject",
         15 => "Promise.resolve",
         16 => "Promise.try",
+        17 => "\"bigint\"",
+        18 => "\"boolean\"",
+        19 => "\"function\"",
+        20 => "\"number\"",
+        21 => "\"object\"",
+        22 => "\"string\"",
+        23 => "\"symbol\"",
+        24 => "\"undefined\"",
+        25 => {
+            "\"bigint\" | \"boolean\" | \"function\" | \"number\" | \"object\" \
+                | \"string\" | \"symbol\" | \"undefined\""
+        }
+        26 => "string",
         _ => "inferred type",
     }
 }
@@ -111,6 +153,10 @@ impl Default for GlobalsResolver {
                 parameters: Default::default(),
                 return_type: ReturnType::Type(GLOBAL_INSTANCEOF_PROMISE_ID.into()),
             })
+        };
+
+        let string_literal = |value: &'static str| -> TypeData {
+            TypeData::from(Literal::String(Text::Static(value).into()))
         };
 
         let types = vec![
@@ -162,6 +208,25 @@ impl Default for GlobalsResolver {
             promise_method_definition(PROMISE_REJECT_ID),
             promise_method_definition(PROMISE_RESOLVE_ID),
             promise_method_definition(PROMISE_TRY_ID),
+            string_literal("bigint"),
+            string_literal("boolean"),
+            string_literal("function"),
+            string_literal("number"),
+            string_literal("object"),
+            string_literal("string"),
+            string_literal("symbol"),
+            string_literal("undefined"),
+            TypeData::union_of(vec![
+                GLOBAL_BIGINT_STRING_LITERAL_ID.into(),
+                GLOBAL_BOOLEAN_STRING_LITERAL_ID.into(),
+                GLOBAL_FUNCTION_STRING_LITERAL_ID.into(),
+                GLOBAL_NUMBER_STRING_LITERAL_ID.into(),
+                GLOBAL_OBJECT_STRING_LITERAL_ID.into(),
+                GLOBAL_STRING_STRING_LITERAL_ID.into(),
+                GLOBAL_SYMBOL_STRING_LITERAL_ID.into(),
+                GLOBAL_UNDEFINED_STRING_LITERAL_ID.into(),
+            ]),
+            TypeData::String,
         ];
 
         Self { types }
@@ -244,6 +309,11 @@ impl TypeResolver for GlobalsResolver {
             Some(GLOBAL_ARRAY_ID)
         } else if qualifier.is_promise() && !qualifier.has_known_type_parameters() {
             Some(GLOBAL_PROMISE_ID)
+        } else if !qualifier.type_only && qualifier.path.len() == 1 {
+            self.resolve_type_of(
+                &qualifier.path[0],
+                qualifier.scope_id.unwrap_or(ScopeId::GLOBAL),
+            )
         } else {
             None
         }

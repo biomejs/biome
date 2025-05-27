@@ -5,13 +5,12 @@ expression: content
 ## Input
 
 ```ts
-const array: Array<string> = [];
+typeof foo;
 
 ```
 
 ## Result
 
 ```
-array => instanceof unresolved reference "Array"<string>
-
+typeof unresolved reference "foo"
 ```

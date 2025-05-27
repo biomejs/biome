@@ -5,20 +5,20 @@ expression: content
 ## Input
 
 ```ts
-Promise.resolve("value");
+const foo = "foo";
+
+typeof foo;
 
 ```
 
 ## Result
 
 ```
-Call Global TypeId(0)(Global TypeId(1))
+"string"
 ```
 
 ## Registered types
 
 ```
-Global TypeId(0) => Promise.resolve
-
-Global TypeId(1) => value: value
+Module TypeId(0) => value: foo
 ```

@@ -27,10 +27,10 @@ Module TypeId(0) => sync Function "returnsPromise" {
     params: []
     type_args: []
   }
-  returns: Global TypeId(17)
+  returns: Global TypeId(0)
 }
 
-Global TypeId(17) => instanceof Global TypeId(18)
+Global TypeId(0) => instanceof Global TypeId(1)
 
-Global TypeId(18) => instanceof Promise<T = number>
+Global TypeId(1) => instanceof Promise<T = number>
 ```

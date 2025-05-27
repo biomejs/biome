@@ -9,7 +9,7 @@ use biome_diagnostics::termcolor::Buffer;
 use biome_diagnostics::{DiagnosticExt, Error, PrintDiagnostic};
 use biome_fs::{BiomePath, FileSystem, OsFileSystem};
 use biome_js_parser::{AnyJsRoot, JsFileSource, JsParserOptions};
-use biome_js_type_info::{NUM_PREDEFINED_TYPES, TypeResolver, TypeResolverLevel};
+use biome_js_type_info::TypeResolver;
 use biome_json_parser::{JsonParserOptions, ParseDiagnostic};
 use biome_module_graph::ModuleGraph;
 use biome_package::PackageJson;
@@ -198,10 +198,7 @@ pub fn get_added_paths<'a>(
         .iter()
         .map(|path| {
             let root = fs.read_file_from_path(path).ok().and_then(|content| {
-                let file_source = path
-                    .extension()
-                    .and_then(|extension| JsFileSource::try_from_extension(extension).ok())
-                    .unwrap_or_default();
+                let file_source = JsFileSource::try_from(path.as_path()).unwrap_or_default();
                 let parsed =
                     biome_js_parser::parse(&content, file_source, JsParserOptions::default());
                 let diagnostics = parsed.diagnostics();
@@ -295,12 +292,7 @@ pub fn dump_registered_types(content: &mut String, resolver: &dyn TypeResolver) 
     while let Some(current_resolver) = resolver {
         for (i, ty) in current_resolver.registered_types().iter().enumerate() {
             let level = current_resolver.level();
-            let id = if level == TypeResolverLevel::Global {
-                i + NUM_PREDEFINED_TYPES
-            } else {
-                i
-            };
-            registered_types.push_str(&format!("\n{level:?} TypeId({id}) => {ty}\n"));
+            registered_types.push_str(&format!("\n{level:?} TypeId({i}) => {ty}\n"));
         }
 
         resolver = current_resolver.fallback_resolver();
