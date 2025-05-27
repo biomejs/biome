@@ -361,11 +361,7 @@ impl TypeResolver for ScopedResolver {
             return GLOBAL_RESOLVER.resolve_qualifier(qualifier);
         };
 
-        let binding_id = if qualifier.type_only {
-            binding_ref.ty()?
-        } else {
-            binding_ref.value_ty_or_ty()
-        };
+        let binding_id = binding_ref.get_binding_id_for_qualifier(qualifier)?;
 
         let binding = module.binding(binding_id);
         let mut ty = if binding.declaration_kind.is_import_declaration() {
@@ -392,6 +388,7 @@ impl TypeResolver for ScopedResolver {
             let resolved = self.resolve_and_get(&ty)?;
             let member = resolved
                 .all_members(self)
+                .with_excluded_binding_id(binding_id)
                 .find(|member| member.is_static() && member.has_name(identifier))?;
             ty = Cow::Owned(member.ty().into_owned());
         }

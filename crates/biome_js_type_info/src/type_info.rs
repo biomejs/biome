@@ -295,12 +295,9 @@ impl From<TypeofValue> for TypeData {
 
 impl TypeData {
     pub fn array_of(ty: TypeReference) -> Self {
-        Self::instance_of(TypeReference::from(TypeReferenceQualifier {
-            path: [Text::Static("Array")].into(),
-            type_parameters: [ty].into(),
-            scope_id: None,
-            type_only: false,
-        }))
+        Self::instance_of(TypeReference::from(
+            TypeReferenceQualifier::from_name(Text::Static("Array")).with_type_parameters([ty]),
+        ))
     }
 
     pub fn as_class(&self) -> Option<&Class> {
@@ -335,6 +332,11 @@ impl TypeData {
     #[inline]
     pub fn inferred(&self, resolver: &mut dyn TypeResolver) -> Self {
         self.resolved(resolver).flattened(resolver)
+    }
+
+    #[inline]
+    pub fn instance_of(instance: impl Into<TypeInstance>) -> Self {
+        Self::InstanceOf(Box::new(instance.into()))
     }
 
     /// Creates an intersection of type references.
@@ -972,6 +974,15 @@ impl TypeReference {
             _ => [].into(),
         }
     }
+
+    pub fn with_excluded_binding_id(self, binding_id: BindingId) -> Self {
+        match self {
+            Self::Qualifier(qualifier) => {
+                Self::Qualifier(Box::new(qualifier.with_excluded_binding_id(binding_id)))
+            }
+            other => other,
+        }
+    }
 }
 
 /// Qualifier for a type that should be imported from another module.
@@ -1025,6 +1036,11 @@ pub struct TypeReferenceQualifier {
 
     /// If `true`, this qualifier can reference types only.
     pub type_only: bool,
+
+    /// Optional [`BindingId`] this qualifier may not reference.
+    ///
+    /// This is used to prevent self-references.
+    pub excluded_binding_id: Option<BindingId>,
 }
 
 impl TypeReferenceQualifier {
@@ -1058,11 +1074,14 @@ impl TypeReferenceQualifier {
         self.path.len() == 1 && self.path[0] == "Promise"
     }
 
-    pub fn with_scope_id(self, scope_id: ScopeId) -> Self {
-        Self {
-            scope_id: Some(scope_id),
-            ..self
-        }
+    pub fn with_excluded_binding_id(mut self, binding_id: BindingId) -> Self {
+        self.excluded_binding_id = Some(binding_id);
+        self
+    }
+
+    pub fn with_scope_id(mut self, scope_id: ScopeId) -> Self {
+        self.scope_id = Some(scope_id);
+        self
     }
 
     pub fn without_type_parameters(&self) -> Self {
@@ -1071,7 +1090,38 @@ impl TypeReferenceQualifier {
             type_parameters: [].into(),
             scope_id: self.scope_id,
             type_only: self.type_only,
+            excluded_binding_id: self.excluded_binding_id,
         }
+    }
+}
+
+#[derive(Copy, Clone, Debug, Eq, Hash, PartialEq)]
+pub struct BindingId(u32);
+
+impl BindingId {
+    pub const fn new(index: usize) -> Self {
+        // SAFETY: We don't handle files exceeding `u32::MAX` bytes.
+        // Thus, it isn't possible to exceed `u32::MAX` bindings.
+        Self(index as u32)
+    }
+
+    pub const fn index(self) -> usize {
+        self.0 as usize
+    }
+}
+
+// We allow conversion from `BindingId` into `TypeId`, and vice versa, because
+// for project-level `ResolvedTypeId` instances, the `TypeId` is an indirection
+// that is resolved through a binding.
+impl From<BindingId> for TypeId {
+    fn from(id: BindingId) -> Self {
+        Self::new(id.0 as usize)
+    }
+}
+
+impl From<TypeId> for BindingId {
+    fn from(id: TypeId) -> Self {
+        Self::new(id.index())
     }
 }
 

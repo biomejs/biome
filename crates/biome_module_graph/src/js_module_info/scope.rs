@@ -1,13 +1,13 @@
 use std::{collections::VecDeque, iter::FusedIterator, sync::Arc};
 
 use biome_js_syntax::TextRange;
-use biome_js_type_info::ScopeId;
+use biome_js_type_info::{BindingId, ScopeId, TypeReferenceQualifier};
 use biome_rowan::TokenText;
 use rustc_hash::FxHashMap;
 
 use super::{
     JsModuleInfoInner,
-    binding::{BindingId, JsBinding, JsDeclarationKind},
+    binding::{JsBinding, JsDeclarationKind},
 };
 
 #[derive(Debug)]
@@ -48,6 +48,30 @@ impl TsBindingReference {
             (true, true) => Self::Both(binding_id),
             (true, false) => Self::Type(binding_id),
             (false, _) => Self::ValueType(binding_id),
+        }
+    }
+
+    pub fn get_binding_id_for_qualifier(
+        self,
+        qualifier: &TypeReferenceQualifier,
+    ) -> Option<BindingId> {
+        if let Some(excluded_binding_id) = qualifier.excluded_binding_id {
+            match self {
+                Self::Type(binding_id) | Self::ValueType(binding_id) | Self::Both(binding_id) => {
+                    (binding_id != excluded_binding_id).then_some(binding_id)
+                }
+                Self::Dual { ty, value_ty } => {
+                    Some(if ty == excluded_binding_id || !qualifier.type_only {
+                        value_ty
+                    } else {
+                        ty
+                    })
+                }
+            }
+        } else if qualifier.type_only {
+            self.ty()
+        } else {
+            Some(self.value_ty_or_ty())
         }
     }
 

@@ -11,9 +11,10 @@ use biome_js_syntax::{
     TsIdentifierBinding, inner_string_text,
 };
 use biome_js_type_info::{
-    FunctionParameter, GLOBAL_RESOLVER, GLOBAL_UNKNOWN_ID, Module, Namespace, Resolvable,
-    ResolvedTypeData, ResolvedTypeId, ScopeId, TypeData, TypeId, TypeImportQualifier, TypeMember,
-    TypeMemberKind, TypeReference, TypeReferenceQualifier, TypeResolver, TypeResolverLevel,
+    BindingId, FunctionParameter, GLOBAL_RESOLVER, GLOBAL_UNKNOWN_ID, Module, Namespace,
+    Resolvable, ResolvedTypeData, ResolvedTypeId, ScopeId, TypeData, TypeId, TypeImportQualifier,
+    TypeMember, TypeMemberKind, TypeReference, TypeReferenceQualifier, TypeResolver,
+    TypeResolverLevel,
 };
 use biome_jsdoc_comment::JsdocComment;
 use biome_rowan::{AstNode, Text, TextSize, TokenText};
@@ -27,9 +28,7 @@ use crate::js_module_info::{
 
 use super::{
     Exports, ImportSymbol, Imports, JsExport, JsImport, JsModuleInfo, JsModuleInfoInner,
-    JsOwnExport, JsReexport, ResolvedPath,
-    binding::{BindingId, JsBindingData},
-    scope::JsScopeData,
+    JsOwnExport, JsReexport, ResolvedPath, binding::JsBindingData, scope::JsScopeData,
 };
 
 /// Responsible for collecting all the information from which to build the
@@ -548,11 +547,7 @@ impl TypeResolver for JsModuleInfoCollector {
             return GLOBAL_RESOLVER.resolve_qualifier(qualifier);
         };
 
-        let binding_id = if qualifier.type_only {
-            binding_ref.ty()?
-        } else {
-            binding_ref.value_ty_or_ty()
-        };
+        let binding_id = binding_ref.get_binding_id_for_qualifier(qualifier)?;
 
         let binding = &self.bindings[binding_id.index()];
         if binding.declaration_kind.is_import_declaration() {
@@ -567,6 +562,7 @@ impl TypeResolver for JsModuleInfoCollector {
             let resolved = self.resolve_and_get(&ty)?;
             let member = resolved
                 .all_members(self)
+                .with_excluded_binding_id(binding_id)
                 .find(|member| member.is_static() && member.has_name(identifier))?;
             ty = Cow::Owned(member.ty().into_owned());
         }

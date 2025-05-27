@@ -684,13 +684,13 @@ impl Resolvable for TypeReference {
                                 let parameters =
                                     resolved.as_ref().and_then(|data| data.type_parameters())?;
                                 let resolved_id: ResolvedTypeId = resolver.register_and_resolve(
-                                    TypeData::InstanceOf(Box::new(TypeInstance {
+                                    TypeData::instance_of(TypeInstance {
                                         ty: resolved_id.into(),
                                         type_parameters: GenericTypeParameter::merge_types(
                                             parameters,
                                             &qualifier.type_parameters,
                                         ),
-                                    })),
+                                    }),
                                 );
                                 Some(resolved_id.into())
                             })
@@ -700,6 +700,7 @@ impl Resolvable for TypeReference {
                                     type_parameters: self.resolved_params(resolver),
                                     scope_id: qualifier.scope_id,
                                     type_only: qualifier.type_only,
+                                    excluded_binding_id: qualifier.excluded_binding_id,
                                 })
                             })
                     }

@@ -1011,10 +1011,6 @@ impl TypeData {
             .unwrap_or_default()
     }
 
-    pub fn instance_of(instance: impl Into<TypeInstance>) -> Self {
-        Self::InstanceOf(Box::new(instance.into()))
-    }
-
     pub fn object_with_members(members: Box<[TypeMember]>) -> Self {
         Self::Object(Box::new(Object {
             prototype: None,
@@ -1023,12 +1019,9 @@ impl TypeData {
     }
 
     pub fn promise_of(ty: TypeReference) -> Self {
-        Self::instance_of(TypeReference::from(TypeReferenceQualifier {
-            path: Box::new([Text::Static("Promise")]),
-            type_parameters: Box::new([ty]),
-            scope_id: None,
-            type_only: false,
-        }))
+        Self::instance_of(TypeReference::from(
+            TypeReferenceQualifier::from_path([Text::Static("Promise")]).with_type_parameters([ty]),
+        ))
     }
 
     pub fn typed_bindings_from_js_variable_declaration(
@@ -1725,22 +1718,22 @@ impl TypeReferenceQualifier {
                         }
                     }
                 }
-                Some(Self {
-                    path: identifiers.into(),
-                    type_parameters: [].into(),
-                    scope_id: None,
-                    type_only: true,
-                })
+                Some(Self::from_path(identifiers).with_type_only())
             }
         }
     }
 
     pub fn from_name(name: Text) -> Self {
+        Self::from_path([name])
+    }
+
+    pub fn from_path(path: impl Into<Box<[Text]>>) -> Self {
         Self {
-            path: Box::new([name]),
+            path: path.into(),
             type_parameters: [].into(),
             scope_id: None,
             type_only: false,
+            excluded_binding_id: None,
         }
     }
 
@@ -1749,8 +1742,8 @@ impl TypeReferenceQualifier {
         self
     }
 
-    pub fn with_type_parameters(mut self, params: Box<[TypeReference]>) -> Self {
-        self.type_parameters = params;
+    pub fn with_type_parameters(mut self, params: impl Into<Box<[TypeReference]>>) -> Self {
+        self.type_parameters = params.into();
         self
     }
 
