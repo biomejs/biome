@@ -278,7 +278,7 @@ impl<'app> CliSession<'app> {
             BiomeCommand::PrintSocket => commands::daemon::print_socket(),
             BiomeCommand::WhereAmI => {
                 if let Ok(path) = env::current_exe() {
-                    println!("{}", path.display());
+                    print!("{}", path.display());
                 }
                 Ok(())
             }
