@@ -4,14 +4,18 @@ use biome_analyze::{
 };
 use biome_console::markup;
 use biome_diagnostics::Severity;
-use biome_js_syntax::{AnyJsArrowFunctionParameters, AnyJsCallArgument, AnyJsExpression, AnyJsFunctionBody, AnyJsMemberExpression, JsArrowFunctionExpression, JsAssignmentExpression, JsBinaryExpression, JsCallExpression, JsFunctionExpression, JsLogicalExpression, JsParameterList, JsReturnStatement, JsSyntaxNode, JsSyntaxToken, JsVariableDeclaration, T};
+use biome_js_syntax::{
+    AnyJsArrowFunctionParameters, AnyJsCallArgument, AnyJsExpression, AnyJsFunctionBody,
+    AnyJsMemberExpression, JsArrowFunctionExpression, JsAssignmentExpression, JsBinaryExpression,
+    JsCallExpression, JsFunctionExpression, JsLogicalExpression, JsParameterList,
+    JsReturnStatement, JsSyntaxNode, JsSyntaxToken, JsVariableDeclaration, T,
+};
 use biome_rowan::{AstNode, AstSeparatedList, BatchMutationExt, SyntaxToken};
 
 pub struct JsSyntaxMatchPair {
     pub member_name: JsSyntaxToken,
     pub matching_array_element: JsSyntaxNode,
 }
-
 
 fn extract_simple_compare_match(
     expression: &JsBinaryExpression,
@@ -39,49 +43,41 @@ pub fn find_index_comparable_expression(
     parameter_name: &String,
     return_statement_required: bool,
 ) -> Option<JsSyntaxNode> {
-    let invalid_expressions: Vec<_> = body
+    let has_invalid_expression = body.syntax().descendants().filter(|node| {
+        JsAssignmentExpression::can_cast(node.kind())
+            || JsVariableDeclaration::can_cast(node.kind())
+            || JsLogicalExpression::can_cast(node.kind())
+    });
+
+    if has_invalid_expression {
+        return None;
+    }
+
+    let mut binary_expressions = body
         .syntax()
         .descendants()
-        .filter(|node| {
-            JsAssignmentExpression::can_cast(node.kind())
-                || JsVariableDeclaration::can_cast(node.kind())
-                || JsLogicalExpression::can_cast(node.kind())
-        })
-        .collect();
+        .filter_map(JsBinaryExpression::cast);
 
-    if !invalid_expressions.is_empty() {
+    let binary_expression = binary_expressions.next()?;
+    if binary_expressions.next().is_some() {
         return None;
     }
 
-    let binary_expressions: Vec<_> = body
+    let mut return_statements = body
         .syntax()
         .descendants()
-        .filter_map(JsBinaryExpression::cast)
-        .collect();
+        .filter_map(JsReturnStatement::cast);
 
-    if binary_expressions.len() != 1 {
+    if return_statement_required {
+        return_statements.next()?;
+    }
+
+    if return_statements.next().is_some() {
         return None;
     }
 
-    let return_statements: Vec<_> = body
-        .syntax()
-        .descendants()
-        .filter_map(JsReturnStatement::cast)
-        .collect();
-
-    if return_statements.len() > 1 {
-        return None;
-    }
-
-    if return_statement_required && return_statements.len() != 1 {
-        return None;
-    }
-
-    binary_expressions
-        .into_iter()
-        .find_map(|expression| extract_simple_compare_match(&expression, parameter_name))
+    extract_simple_compare_match(&binary_expression, parameter_name)
 }
-
 
 fn extract_function_parameter_name(parameters: &JsParameterList) -> Option<String> {
     if parameters.len() != 1 {
@@ -263,7 +259,7 @@ declare_lint_rule! {
         recommended: true,
         sources: &[RuleSource::EslintUnicorn("prefer-array-index-of")],
         severity: Severity::Information,
-        fix_kind: FixKind::Safe,
+        fix_kind: FixKind::Unsafe,
     }
 }
 
