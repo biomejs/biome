@@ -46,5 +46,9 @@ configuration ━━━━━━━━━━━━━━━━━━━━━━
   
   i The other configuration was found in <TEMP_DIR>/should_fail_for_nested_roots.
   
+  i Use the migration command from the root of the project to update the configuration.
+  
+  $ biome migrate --write
+  
 
 ```

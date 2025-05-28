@@ -131,10 +131,14 @@ configuration ━━━━━━━━━━━━━━━━━━━━━━
 
   i Migration results:
   
-  - <TEMP_DIR>/should_migrate_nested_config/biome.json: configuration needs migration. Use --write to apply the changes.
-  - <TEMP_DIR>/should_migrate_nested_config/foo/biome.json: configuration needs migration. Use --write to apply the changes.
-  - <TEMP_DIR>/should_migrate_nested_config/biome.json: configuration needs migration. Use --write to apply the changes.
-  - <TEMP_DIR>/should_migrate_nested_config/bar/biome.json: configuration needs migration. Use --write to apply the changes.
+  - <TEMP_DIR>/should_migrate_nested_config/biome.json: configuration needs migration.
+  - <TEMP_DIR>/should_migrate_nested_config/foo/biome.json: configuration needs migration.
+  - <TEMP_DIR>/should_migrate_nested_config/biome.json: configuration needs migration.
+  - <TEMP_DIR>/should_migrate_nested_config/bar/biome.json: configuration needs migration.
+  
+  i Use --write to apply the changes.
+  
+  $ biome migrate --write
   
 
 ```

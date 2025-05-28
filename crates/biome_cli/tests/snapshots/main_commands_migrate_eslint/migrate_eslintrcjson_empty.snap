@@ -39,7 +39,11 @@ configuration ━━━━━━━━━━━━━━━━━━━━━━
 
   i Migration results:
   
-  - biome.json: configuration needs migration. Use --write to apply the changes.
+  - biome.json: configuration needs migration.
+  
+  i Use --write to apply the changes.
+  
+  $ biome migrate --write
   
 
 ```

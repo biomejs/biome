@@ -156,7 +156,6 @@ impl Projects {
     /// Inserts a nested setting.
     ///
     /// Does nothing if the project doesn't exist.
-    #[instrument(level = "debug", skip_all)]
     pub fn set_nested_settings(
         &self,
         project_key: ProjectKey,

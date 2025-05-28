@@ -62,7 +62,11 @@ configuration ━━━━━━━━━━━━━━━━━━━━━━
 
   i Migration results:
   
-  - biome.jsonc: configuration needs migration. Use --write to apply the changes.
+  - biome.jsonc: configuration needs migration.
+  
+  i Use --write to apply the changes.
+  
+  $ biome migrate --write
   
 
 ```

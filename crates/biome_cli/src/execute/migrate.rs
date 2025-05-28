@@ -8,7 +8,9 @@ use biome_console::fmt::{Display, Formatter};
 use biome_console::{Console, ConsoleExt, markup};
 use biome_deserialize::Merge;
 use biome_deserialize::json::deserialize_from_json_ast;
-use biome_diagnostics::{Category, Diagnostic, PrintDiagnostic, Severity, Visit, category};
+use biome_diagnostics::{
+    Category, Diagnostic, LogCategory, PrintDiagnostic, Severity, Visit, category,
+};
 use biome_fs::{BiomePath, ConfigName, OpenOptions};
 use biome_json_parser::{JsonParserOptions, parse_json_with_cache};
 use biome_json_syntax::{JsonFileSource, JsonRoot};
@@ -120,7 +122,19 @@ impl Diagnostic for MigrationResultDiagnostic {
             .collect();
 
         let list: Vec<_> = list.iter().map(|item| item as &dyn Display).collect();
-        visitor.record_list(list.as_slice())
+        visitor.record_list(list.as_slice())?;
+        if self
+            .outcomes
+            .iter()
+            .any(|(_, result)| result == &MigrationFileResult::NeedsMigration)
+        {
+            visitor.record_log(
+                LogCategory::Info,
+                &markup! { "Use "<Emphasis>"--write"</Emphasis>" to apply the changes." },
+            )?;
+            visitor.record_command("biome migrate --write")?;
+        }
+        Ok(())
     }
 }
 
@@ -135,18 +149,10 @@ enum MigrationFileResult {
 impl biome_console::fmt::Display for MigrationFileResult {
     fn fmt(&self, fmt: &mut Formatter) -> std::io::Result<()> {
         match self {
-            Self::Migrated => {
-                fmt.write_markup(markup! { "configuration successfully migrated." })
-            }
-            Self::NeedsMigration => {
-                fmt.write_markup(markup! { "configuration needs migration. Use "<Emphasis>"--write"</Emphasis>" to apply the changes." })
-            }
-            Self::NoMigrationNeeded => {
-                fmt.write_markup(markup! { "no migration needed." })
-            }
-            Self::HasErrors => {
-                fmt.write_markup(markup! { "migration failed due to errors." })
-            }
+            Self::Migrated => fmt.write_markup(markup! { "configuration successfully migrated." }),
+            Self::NeedsMigration => fmt.write_markup(markup! { "configuration needs migration." }),
+            Self::NoMigrationNeeded => fmt.write_markup(markup! { "no migration needed." }),
+            Self::HasErrors => fmt.write_markup(markup! { "migration failed due to errors." }),
         }
     }
 }
