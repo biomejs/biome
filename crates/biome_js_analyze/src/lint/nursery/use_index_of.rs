@@ -12,151 +12,6 @@ use biome_js_syntax::{
 };
 use biome_rowan::{AstNode, AstSeparatedList, BatchMutationExt, SyntaxToken};
 
-pub struct JsSyntaxMatchPair {
-    pub member_name: JsSyntaxToken,
-    pub matching_array_element: JsSyntaxNode,
-}
-
-fn member_name_remap(old_member_name: &str) -> Option<&str> {
-    let new_member_name = match old_member_name {
-        "findIndex" => "indexOf",
-        "findLastIndex" => "lastIndexOf",
-        _ => return None,
-    };
-    Some(new_member_name)
-}
-
-fn extract_simple_compare_match(
-    expression: &JsBinaryExpression,
-    parameter_name: &String,
-) -> Option<JsSyntaxNode> {
-    if expression.operator_token().ok()?.kind() != T![===] {
-        return None;
-    }
-
-    let (left, right) = (expression.left().ok()?, expression.right().ok()?);
-
-    let matching_side = if left.syntax().to_text_trimmed() == *parameter_name {
-        right
-    } else if right.syntax().to_string().trim() == *parameter_name {
-        left
-    } else {
-        return None;
-    };
-
-    Some(matching_side.into_syntax())
-}
-
-pub fn find_index_comparable_expression(
-    body: &AnyJsFunctionBody,
-    parameter_name: &String,
-    return_statement_required: bool,
-) -> Option<JsSyntaxNode> {
-    let has_invalid_expression = body.syntax().descendants().find(|node| {
-        JsAssignmentExpression::can_cast(node.kind())
-            || JsVariableDeclaration::can_cast(node.kind())
-            || JsLogicalExpression::can_cast(node.kind())
-    });
-
-    if has_invalid_expression.is_some() {
-        return None;
-    }
-
-    let mut binary_expressions = body
-        .syntax()
-        .descendants()
-        .filter_map(JsBinaryExpression::cast);
-
-    let binary_expression = binary_expressions.next()?;
-    if binary_expressions.next().is_some() {
-        return None;
-    }
-
-    let mut return_statements = body
-        .syntax()
-        .descendants()
-        .filter_map(JsReturnStatement::cast);
-    let has_one_or_more_return_statements = return_statements.next().is_some();
-    let has_two_or_more_return_statements = return_statements.next().is_some();
-
-    if has_two_or_more_return_statements {
-        return None;
-    }
-
-    if return_statement_required && !has_one_or_more_return_statements {
-        return None;
-    }
-
-    extract_simple_compare_match(&binary_expression, parameter_name)
-}
-
-fn extract_function_parameter_name(parameters: &JsParameterList) -> Option<String> {
-    if parameters.len() != 1 {
-        return None;
-    }
-
-    Some(parameters.first().unwrap().unwrap().to_trimmed_string())
-}
-
-pub fn callback_function_match(
-    function: &JsFunctionExpression,
-    member_name_token: JsSyntaxToken,
-) -> Option<JsSyntaxMatchPair> {
-    if function.async_token().is_some() || function.star_token().is_some() {
-        return None;
-    }
-
-    let function_parameters = function.parameters().unwrap().items();
-    let parameter_name = extract_function_parameter_name(&function_parameters)?;
-    let binding = function.body().ok()?;
-    let body = binding
-        .syntax()
-        .descendants()
-        .find_map(AnyJsFunctionBody::cast)?;
-
-    let matched = find_index_comparable_expression(&body, &parameter_name, true);
-
-    matched.as_ref().map(|token_match| JsSyntaxMatchPair {
-        matching_array_element: token_match.clone(),
-        member_name: member_name_token,
-    })
-}
-
-fn extract_parameter_name(parameters: &AnyJsArrowFunctionParameters) -> Option<String> {
-    if parameters.len() != 1 {
-        return None;
-    }
-
-    match parameters {
-        AnyJsArrowFunctionParameters::AnyJsBinding(binding) => Some(binding.to_trimmed_string()),
-        AnyJsArrowFunctionParameters::JsParameters(param) => param
-            .items()
-            .first()?
-            .ok()
-            .map(|item| item.to_trimmed_string()),
-    }
-}
-
-pub fn callback_arrow_function_match(
-    function: &JsArrowFunctionExpression,
-    member_name_token: JsSyntaxToken,
-) -> Option<JsSyntaxMatchPair> {
-    if function.async_token().is_some() {
-        return None;
-    }
-
-    let parameters = function.parameters().ok()?;
-    let parameter_name = extract_parameter_name(&parameters)?;
-    let body = function.body().ok()?;
-
-    let matched = find_index_comparable_expression(&body, &parameter_name, false);
-
-    matched.as_ref().map(|token_match| JsSyntaxMatchPair {
-        matching_array_element: token_match.clone(),
-        member_name: member_name_token,
-    })
-}
-
 declare_lint_rule! {
     /// Prefer `Array#{indexOf,lastIndexOf}()` over `Array#{findIndex,findLastIndex}()` when looking for the index of an item.
     ///
@@ -360,4 +215,148 @@ impl Rule for UseIndexOf {
             mutation,
         ))
     }
+}
+
+pub struct JsSyntaxMatchPair {
+    pub member_name: JsSyntaxToken,
+    pub matching_array_element: JsSyntaxNode,
+}
+
+fn member_name_remap(old_member_name: &str) -> Option<&str> {
+    match old_member_name {
+        "findIndex" => Some("indexOf"),
+        "findLastIndex" => Some("lastIndexOf"),
+        _ => None,
+    }
+}
+
+fn extract_simple_compare_match(
+    expression: &JsBinaryExpression,
+    parameter_name: &String,
+) -> Option<JsSyntaxNode> {
+    if expression.operator_token().ok()?.kind() != T![===] {
+        return None;
+    }
+
+    let (left, right) = (expression.left().ok()?, expression.right().ok()?);
+
+    let matching_side = if left.to_trimmed_string() == *parameter_name {
+        right
+    } else if right.to_trimmed_string() == *parameter_name {
+        left
+    } else {
+        return None;
+    };
+
+    Some(matching_side.into_syntax())
+}
+
+fn find_index_comparable_expression(
+    body: &AnyJsFunctionBody,
+    parameter_name: &String,
+    return_statement_required: bool,
+) -> Option<JsSyntaxNode> {
+    let has_invalid_expression = body.syntax().descendants().find(|node| {
+        JsAssignmentExpression::can_cast(node.kind())
+            || JsVariableDeclaration::can_cast(node.kind())
+            || JsLogicalExpression::can_cast(node.kind())
+    });
+
+    if has_invalid_expression.is_some() {
+        return None;
+    }
+
+    let mut binary_expressions = body
+        .syntax()
+        .descendants()
+        .filter_map(JsBinaryExpression::cast);
+
+    let binary_expression = binary_expressions.next()?;
+    if binary_expressions.next().is_some() {
+        return None;
+    }
+
+    let mut return_statements = body
+        .syntax()
+        .descendants()
+        .filter_map(JsReturnStatement::cast);
+    let has_one_or_more_return_statements = return_statements.next().is_some();
+    let has_two_or_more_return_statements = return_statements.next().is_some();
+
+    if has_two_or_more_return_statements {
+        return None;
+    }
+
+    if return_statement_required && !has_one_or_more_return_statements {
+        return None;
+    }
+
+    extract_simple_compare_match(&binary_expression, parameter_name)
+}
+
+fn extract_function_parameter_name(parameters: &JsParameterList) -> Option<String> {
+    if parameters.len() != 1 {
+        return None;
+    }
+
+    Some(parameters.first().unwrap().unwrap().to_trimmed_string())
+}
+
+fn callback_function_match(
+    function: &JsFunctionExpression,
+    member_name_token: JsSyntaxToken,
+) -> Option<JsSyntaxMatchPair> {
+    if function.async_token().is_some() || function.star_token().is_some() {
+        return None;
+    }
+
+    let function_parameters = function.parameters().unwrap().items();
+    let parameter_name = extract_function_parameter_name(&function_parameters)?;
+    let binding = function.body().ok()?;
+    let body = binding
+        .syntax()
+        .descendants()
+        .find_map(AnyJsFunctionBody::cast)?;
+
+    let matched = find_index_comparable_expression(&body, &parameter_name, true);
+
+    matched.as_ref().map(|token_match| JsSyntaxMatchPair {
+        matching_array_element: token_match.clone(),
+        member_name: member_name_token,
+    })
+}
+
+fn extract_parameter_name(parameters: &AnyJsArrowFunctionParameters) -> Option<String> {
+    if parameters.len() != 1 {
+        return None;
+    }
+
+    match parameters {
+        AnyJsArrowFunctionParameters::AnyJsBinding(binding) => Some(binding.to_trimmed_string()),
+        AnyJsArrowFunctionParameters::JsParameters(param) => param
+            .items()
+            .first()?
+            .ok()
+            .map(|item| item.to_trimmed_string()),
+    }
+}
+
+fn callback_arrow_function_match(
+    function: &JsArrowFunctionExpression,
+    member_name_token: JsSyntaxToken,
+) -> Option<JsSyntaxMatchPair> {
+    if function.async_token().is_some() {
+        return None;
+    }
+
+    let parameters = function.parameters().ok()?;
+    let parameter_name = extract_parameter_name(&parameters)?;
+    let body = function.body().ok()?;
+
+    let matched = find_index_comparable_expression(&body, &parameter_name, false);
+
+    matched.as_ref().map(|token_match| JsSyntaxMatchPair {
+        matching_array_element: token_match.clone(),
+        member_name: member_name_token,
+    })
 }
