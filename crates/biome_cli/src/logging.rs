@@ -1,13 +1,16 @@
 use std::fmt::{Display, Formatter};
+use std::fs::File;
 use std::str::FromStr;
+
 use tracing::Metadata;
 use tracing::subscriber::Interest;
 use tracing_subscriber::filter::LevelFilter;
+use tracing_subscriber::fmt::format::FmtSpan;
 use tracing_subscriber::layer::{Context, Filter, SubscriberExt};
 use tracing_subscriber::util::SubscriberInitExt;
-use tracing_subscriber::{Layer, registry};
+use tracing_subscriber::{Layer as _, registry};
 
-pub fn setup_cli_subscriber(level: LoggingLevel, kind: LoggingKind) {
+pub fn setup_cli_subscriber(file: Option<&str>, level: LoggingLevel, kind: LoggingKind) {
     if level == LoggingLevel::None {
         return;
     }
@@ -15,27 +18,57 @@ pub fn setup_cli_subscriber(level: LoggingLevel, kind: LoggingKind) {
         .with_level(true)
         .with_target(false)
         .with_thread_names(true)
+        //.with_span_events(FmtSpan::CLOSE) // Uncomment this for timing info on spans
         .with_file(true)
         .with_ansi(true);
-    match kind {
-        LoggingKind::Pretty => {
-            let format = format.pretty();
-            registry()
-                .with(format.with_filter(LoggingFilter { level }))
-                .init()
-        }
-        LoggingKind::Compact => {
-            let format = format.compact();
-            registry()
-                .with(format.with_filter(LoggingFilter { level }))
-                .init()
-        }
-        LoggingKind::Json => {
-            let format = format.json().flatten_event(true);
 
-            registry()
-                .with(format.with_filter(LoggingFilter { level }))
-                .init()
+    // FIXME: I hate the duplication here, and I tried to make a function that
+    //        could take `impl Layer<Registry>` so the compiler could expand
+    //        this for us... but I got dragged into a horrible swamp of generic
+    //        constraints...
+    if let Some(file) = file {
+        let file = File::create(file).expect("Failed to create log file");
+        let format = format.with_writer(file);
+        match kind {
+            LoggingKind::Pretty => {
+                let format = format.compact();
+                registry()
+                    .with(format.with_filter(LoggingFilter { level }))
+                    .init()
+            }
+            LoggingKind::Compact => {
+                let format = format.compact();
+                registry()
+                    .with(format.with_filter(LoggingFilter { level }))
+                    .init()
+            }
+            LoggingKind::Json => {
+                let format = format.json().flatten_event(true);
+                registry()
+                    .with(format.with_filter(LoggingFilter { level }))
+                    .init()
+            }
+        }
+    } else {
+        match kind {
+            LoggingKind::Pretty => {
+                let format = format.compact();
+                registry()
+                    .with(format.with_filter(LoggingFilter { level }))
+                    .init()
+            }
+            LoggingKind::Compact => {
+                let format = format.compact();
+                registry()
+                    .with(format.with_filter(LoggingFilter { level }))
+                    .init()
+            }
+            LoggingKind::Json => {
+                let format = format.json().flatten_event(true);
+                registry()
+                    .with(format.with_filter(LoggingFilter { level }))
+                    .init()
+            }
         }
     };
 }

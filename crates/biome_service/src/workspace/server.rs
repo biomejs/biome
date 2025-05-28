@@ -672,6 +672,7 @@ impl WorkspaceServer {
     }
 
     /// Updates the [ModuleGraph] for the given `path` with an optional `root`.
+    #[tracing::instrument(level = "debug", skip(self, root))]
     fn update_module_graph(
         &self,
         signal_kind: WatcherSignalKind,
