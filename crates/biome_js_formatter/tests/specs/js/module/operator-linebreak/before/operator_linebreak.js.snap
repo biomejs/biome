@@ -1,0 +1,86 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+assertion_line: 211
+info: js/module/operator-linebreak/before/operator_linebreak.js
+---
+# Input
+
+```js
+const VERY_LONG_CONDITION_1234123412341234123412341234 = false;
+
+if (VERY_LONG_CONDITION_1234123412341234123412341234 && VERY_LONG_CONDITION_1234123412341234123412341234 && VERY_LONG_CONDITION_1234123412341234123412341234 && VERY_LONG_CONDITION_1234123412341234123412341234) {
+  console.log("DONE")
+}
+
+```
+
+
+=============================
+
+# Outputs
+
+## Output 1
+
+-----
+Indent style: Tab
+Indent width: 2
+Line ending: LF
+Line width: 80
+Quote style: Double Quotes
+JSX quote style: Double Quotes
+Quote properties: As needed
+Trailing commas: All
+Semicolons: Always
+Arrow parentheses: Always
+Bracket spacing: true
+Bracket same line: false
+Attribute Position: Auto
+Expand lists: Auto
+Operator linebreak: After
+-----
+
+```js
+const VERY_LONG_CONDITION_1234123412341234123412341234 = false;
+
+if (
+	VERY_LONG_CONDITION_1234123412341234123412341234 &&
+	VERY_LONG_CONDITION_1234123412341234123412341234 &&
+	VERY_LONG_CONDITION_1234123412341234123412341234 &&
+	VERY_LONG_CONDITION_1234123412341234123412341234
+) {
+	console.log("DONE");
+}
+```
+
+## Output 1
+
+-----
+Indent style: Tab
+Indent width: 2
+Line ending: LF
+Line width: 80
+Quote style: Double Quotes
+JSX quote style: Double Quotes
+Quote properties: As needed
+Trailing commas: All
+Semicolons: Always
+Arrow parentheses: Always
+Bracket spacing: true
+Bracket same line: false
+Attribute Position: Auto
+Expand lists: Auto
+Operator linebreak: Before
+-----
+
+```js
+const VERY_LONG_CONDITION_1234123412341234123412341234 = false;
+
+if (
+	VERY_LONG_CONDITION_1234123412341234123412341234
+	&& VERY_LONG_CONDITION_1234123412341234123412341234
+	&& VERY_LONG_CONDITION_1234123412341234123412341234
+	&& VERY_LONG_CONDITION_1234123412341234123412341234
+) {
+	console.log("DONE");
+}
+```
