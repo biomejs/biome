@@ -2942,7 +2942,7 @@
 				"useObjectSpread": {
 					"description": "Prefer object spread over Object.assign() when constructing new objects.",
 					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "$ref": "#/definitions/RuleFixConfiguration" },
 						{ "type": "null" }
 					]
 				},

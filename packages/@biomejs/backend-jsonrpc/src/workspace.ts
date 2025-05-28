@@ -1654,7 +1654,7 @@ export interface Nursery {
 	/**
 	 * Prefer object spread over Object.assign() when constructing new objects.
 	 */
-	useObjectSpread?: RuleConfiguration_for_Null;
+	useObjectSpread?: RuleFixConfiguration_for_Null;
 	/**
 	 * Enforce the consistent use of the radix argument when using parseInt().
 	 */

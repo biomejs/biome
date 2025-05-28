@@ -4831,7 +4831,7 @@ pub struct Nursery {
         Option<RuleFixConfiguration<biome_js_analyze::options::UseNumericSeparators>>,
     #[doc = "Prefer object spread over Object.assign() when constructing new objects."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub use_object_spread: Option<RuleConfiguration<biome_js_analyze::options::UseObjectSpread>>,
+    pub use_object_spread: Option<RuleFixConfiguration<biome_js_analyze::options::UseObjectSpread>>,
     #[doc = "Enforce the consistent use of the radix argument when using parseInt()."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub use_parse_int_radix:
