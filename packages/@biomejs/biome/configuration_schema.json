@@ -3193,6 +3193,10 @@
 						{ "$ref": "#/definitions/OverrideLinterConfiguration" },
 						{ "type": "null" }
 					]
+				},
+				"plugins": {
+					"description": "Specific configuration for additional plugins",
+					"anyOf": [{ "$ref": "#/definitions/Plugins" }, { "type": "null" }]
 				}
 			},
 			"additionalProperties": false

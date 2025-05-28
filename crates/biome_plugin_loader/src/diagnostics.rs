@@ -33,6 +33,9 @@ pub enum PluginDiagnostic {
 
     /// When an analyzer rule plugin uses an unsupported file format.
     UnsupportedRuleFormat(UnsupportedRuleFormat),
+
+    /// When plugin is requested but not loaded
+    NotLoaded(NotLoaded),
 }
 
 impl From<CompileError> for PluginDiagnostic {
@@ -86,6 +89,18 @@ impl PluginDiagnostic {
     pub fn unsupported_rule_format(message: impl Display) -> Self {
         Self::UnsupportedRuleFormat(UnsupportedRuleFormat {
             message: MessageAndDescription::from(markup! {{message}}.to_owned()),
+        })
+    }
+
+    pub fn not_loaded(path: Utf8PathBuf) -> Self {
+        Self::NotLoaded(NotLoaded {
+            message: MessageAndDescription::from(
+                markup! {
+                    "Plugin is requested but not loaded: "
+                    <Emphasis>{path.to_string()}</Emphasis>
+                }
+                .to_owned(),
+            ),
         })
     }
 }
@@ -156,6 +171,17 @@ pub struct CantResolve {
     severity = Error,
 )]
 pub struct UnsupportedRuleFormat {
+    #[message]
+    #[description]
+    pub message: MessageAndDescription,
+}
+
+#[derive(Debug, Serialize, Deserialize, Diagnostic)]
+#[diagnostic(
+    category = "plugin",
+    severity = Error,
+)]
+pub struct NotLoaded {
     #[message]
     #[description]
     pub message: MessageAndDescription,

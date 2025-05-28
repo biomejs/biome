@@ -805,6 +805,10 @@ export interface OverridePattern {
 	 * Specific configuration for the Json language
 	 */
 	linter?: OverrideLinterConfiguration;
+	/**
+	 * Specific configuration for additional plugins
+	 */
+	plugins?: Plugins;
 }
 export type PluginConfiguration = string;
 export type VcsClientKind = "git";
