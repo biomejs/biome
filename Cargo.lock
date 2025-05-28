@@ -1241,6 +1241,7 @@ name = "biome_plugin_loader"
 version = "0.0.1"
 dependencies = [
  "biome_analyze",
+ "biome_configuration",
  "biome_console",
  "biome_deserialize",
  "biome_deserialize_macros",
