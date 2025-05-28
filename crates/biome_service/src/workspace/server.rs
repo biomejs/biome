@@ -398,7 +398,11 @@ impl WorkspaceServer {
         let result = documents.compute(path.clone(), |current| {
             let biome_path = BiomePath::new(&path);
             if biome_path.is_dependency() && biome_path.is_type_declaration() {
-                return if current.is_some() { Operation::Remove } else { Operation::Abort(()) };
+                return if current.is_some() {
+                    Operation::Remove
+                } else {
+                    Operation::Abort(())
+                };
             }
             match current {
                 Some((_path, document)) => {
@@ -1133,10 +1137,6 @@ impl Workspace for WorkspaceServer {
             &path,
             Some(root),
         )?;
-
-        if path.is_dependency() && path.is_manifest() {
-            return Ok(());
-        }
 
         let document = Document {
             content,
