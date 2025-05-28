@@ -396,6 +396,16 @@ impl WorkspaceServer {
 
         let documents = self.documents.pin();
         let result = documents.compute(path.clone(), |current| {
+            let biome_path = BiomePath::new(&path);
+            if biome_path.is_dependency() && biome_path.is_type_declaration() {
+                return if current.is_some() {
+                    Operation::Remove
+                } else {
+                    // The document isn't inside the current files, however we want
+                    // signal that it's a type declaration, and we want to update the module graph
+                    Operation::Abort(true)
+                };
+            }
             match current {
                 Some((_path, document)) => {
                     let version = match (document.version, version) {
@@ -433,7 +443,7 @@ impl WorkspaceServer {
                         content.clone()
                     };
 
-                    Operation::Insert::<Document, ()>(Document {
+                    Operation::Insert::<Document, bool>(Document {
                         content,
                         version,
                         file_source_index: index,
@@ -456,6 +466,7 @@ impl WorkspaceServer {
             | Compute::Updated {
                 new: (_, document), ..
             } => document.opened_by_scanner,
+            Compute::Aborted(result) => result,
             _ => false,
         };
 
@@ -752,7 +763,6 @@ impl Workspace for WorkspaceServer {
         let Some(document) = documents.get(params.path.as_path()) else {
             return Err(WorkspaceError::not_found());
         };
-
         let file_size = document.content.len();
         let limit = self
             .projects
@@ -1044,9 +1054,9 @@ impl Workspace for WorkspaceServer {
             .debug
             .debug_type_info
             .ok_or_else(self.build_capability_error(&params.path))?;
-        let parse = self.get_parse(&params.path)?;
+        let parse = self.get_parse(&params.path).ok();
 
-        debug_type_info(&params.path, parse)
+        debug_type_info(&params.path, parse, self.module_graph.clone())
     }
 
     fn get_registered_types(
