@@ -57,7 +57,7 @@ impl Projects {
         }
 
         let key = ProjectKey::new();
-        self.0.pin().insert(
+        data.insert(
             key,
             ProjectData {
                 path,
