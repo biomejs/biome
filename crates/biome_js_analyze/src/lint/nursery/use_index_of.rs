@@ -10,7 +10,7 @@ use biome_js_syntax::{
     JsCallExpression, JsFunctionExpression, JsLogicalExpression, JsParameterList,
     JsReturnStatement, JsSyntaxNode, JsSyntaxToken, JsVariableDeclaration, T,
 };
-use biome_rowan::{AstNode, AstSeparatedList, BatchMutationExt, SyntaxToken};
+use biome_rowan::{AstNode, AstSeparatedList, BatchMutationExt, SyntaxToken, Text};
 
 declare_lint_rule! {
     /// Prefer `Array#{indexOf,lastIndexOf}()` over `Array#{findIndex,findLastIndex}()` when looking for the index of an item.
@@ -232,7 +232,7 @@ fn member_name_remap(old_member_name: &str) -> Option<&str> {
 
 fn extract_simple_compare_match(
     expression: &JsBinaryExpression,
-    parameter_name: &String,
+    parameter_name: &Text,
 ) -> Option<JsSyntaxNode> {
     if expression.operator_token().ok()?.kind() != T![===] {
         return None;
@@ -240,9 +240,9 @@ fn extract_simple_compare_match(
 
     let (left, right) = (expression.left().ok()?, expression.right().ok()?);
 
-    let matching_side = if left.to_trimmed_string() == *parameter_name {
+    let matching_side = if left.to_trimmed_text() == *parameter_name {
         right
-    } else if right.to_trimmed_string() == *parameter_name {
+    } else if right.to_trimmed_text() == *parameter_name {
         left
     } else {
         return None;
@@ -253,7 +253,7 @@ fn extract_simple_compare_match(
 
 fn find_index_comparable_expression(
     body: &AnyJsFunctionBody,
-    parameter_name: &String,
+    parameter_name: &Text,
     return_statement_required: bool,
 ) -> Option<JsSyntaxNode> {
     let has_invalid_expression = body.syntax().descendants().find(|node| {
@@ -294,12 +294,12 @@ fn find_index_comparable_expression(
     extract_simple_compare_match(&binary_expression, parameter_name)
 }
 
-fn extract_function_parameter_name(parameters: &JsParameterList) -> Option<String> {
+fn extract_function_parameter_name(parameters: &JsParameterList) -> Option<Text> {
     if parameters.len() != 1 {
         return None;
     }
 
-    Some(parameters.first().unwrap().unwrap().to_trimmed_string())
+    Some(parameters.first()?.ok()?.to_trimmed_text())
 }
 
 fn callback_function_match(
@@ -310,7 +310,7 @@ fn callback_function_match(
         return None;
     }
 
-    let function_parameters = function.parameters().unwrap().items();
+    let function_parameters = function.parameters().ok()?.items();
     let parameter_name = extract_function_parameter_name(&function_parameters)?;
     let binding = function.body().ok()?;
     let body = binding
@@ -326,18 +326,18 @@ fn callback_function_match(
     })
 }
 
-fn extract_parameter_name(parameters: &AnyJsArrowFunctionParameters) -> Option<String> {
+fn extract_parameter_name(parameters: &AnyJsArrowFunctionParameters) -> Option<Text> {
     if parameters.len() != 1 {
         return None;
     }
 
     match parameters {
-        AnyJsArrowFunctionParameters::AnyJsBinding(binding) => Some(binding.to_trimmed_string()),
+        AnyJsArrowFunctionParameters::AnyJsBinding(binding) => Some(binding.to_trimmed_text()),
         AnyJsArrowFunctionParameters::JsParameters(param) => param
             .items()
             .first()?
             .ok()
-            .map(|item| item.to_trimmed_string()),
+            .map(|item| item.to_trimmed_text()),
     }
 }
 

@@ -22,14 +22,19 @@ fn project_layout_with_top_level_dependencies(dependencies: Dependencies) -> Arc
 }
 
 // use this test check if your snippet produces the diagnostics you wish, without using a snapshot
-#[ignore]
+// #[ignore]
 #[test]
 fn quick_test() {
     const FILENAME: &str = "dummyFile.ts";
-    const SOURCE: &str = r#"import { returnPromiseResult } from "./returnPromiseResult.ts";
-
-returnPromiseResult();
-"#;
+    const SOURCE: &str = r#"
+    const list = ['foo', 'bar', 'baz'];
+    list.findIndex(x => {
+        if (x === 'foo') {
+            return true;
+        }
+        return x === bar;
+    });
+    "#;
 
     let parsed = parse(SOURCE, JsFileSource::tsx(), JsParserOptions::default());
 
@@ -46,7 +51,7 @@ returnPromiseResult();
 
     let mut error_ranges: Vec<TextRange> = Vec::new();
     let options = AnalyzerOptions::default().with_file_path(file_path.clone());
-    let rule_filter = RuleFilter::Rule("nursery", "noFloatingPromises");
+    let rule_filter = RuleFilter::Rule("nursery", "useIndexOf");
 
     let mut dependencies = Dependencies::default();
     dependencies.add("buffer", "latest");
