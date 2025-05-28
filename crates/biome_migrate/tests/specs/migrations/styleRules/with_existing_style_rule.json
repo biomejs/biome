@@ -4,7 +4,7 @@
       "recommended": true,
       "style": {
         "useLiteralEnumMembers": "warn",
-        "noArguments": "warn",
+        "useImportType": "warn",
         "noParameterAssign":  "warn",
         "useShorthandFunctionType": "warn",
         "useExportType":  "warn",

@@ -1126,9 +1126,17 @@ export interface Complexity {
 	 */
 	noAdjacentSpacesInRegex?: RuleFixConfiguration_for_Null;
 	/**
+	 * Disallow the use of arguments.
+	 */
+	noArguments?: RuleConfiguration_for_Null;
+	/**
 	 * Disallow primitive type aliases and misleading types.
 	 */
 	noBannedTypes?: RuleFixConfiguration_for_Null;
+	/**
+	 * Disallow comma operator.
+	 */
+	noCommaOperator?: RuleConfiguration_for_Null;
 	/**
 	 * Disallow empty type parameters in type aliases and interfaces.
 	 */
@@ -1169,6 +1177,10 @@ export interface Complexity {
 	 * Disallow unnecessary constructors.
 	 */
 	noUselessConstructor?: RuleFixConfiguration_for_Null;
+	/**
+	 * Avoid using unnecessary continue.
+	 */
+	noUselessContinue?: RuleFixConfiguration_for_Null;
 	/**
 	 * Disallow empty exports that don't change anything in a module file.
 	 */
@@ -1451,10 +1463,6 @@ export interface Correctness {
 	 */
 	noUnusedVariables?: RuleFixConfiguration_for_NoUnusedVariablesOptions;
 	/**
-	 * Avoid using unnecessary continue.
-	 */
-	noUselessContinue?: RuleFixConfiguration_for_Null;
-	/**
 	 * This rules prevents void elements (AKA self-closing elements) from having children.
 	 */
 	noVoidElementsWithChildren?: RuleFixConfiguration_for_Null;
@@ -1536,6 +1544,10 @@ export interface Nursery {
 	 */
 	noImportantStyles?: RuleFixConfiguration_for_Null;
 	/**
+	 * Disallows defining React components inside other components.
+	 */
+	noNestedComponentDefinitions?: RuleConfiguration_for_Null;
+	/**
 	 * Disallow use event handlers on non-interactive elements.
 	 */
 	noNoninteractiveElementInteractions?: RuleConfiguration_for_Null;
@@ -1596,6 +1608,10 @@ export interface Nursery {
 	 */
 	useConsistentObjectDefinition?: RuleFixConfiguration_for_UseConsistentObjectDefinitionOptions;
 	/**
+	 * Use static Response methods instead of new Response() constructor when possible.
+	 */
+	useConsistentResponse?: RuleFixConfiguration_for_Null;
+	/**
 	 * Require switch-case statements to be exhaustive.
 	 */
 	useExhaustiveSwitchCases?: RuleFixConfiguration_for_Null;
@@ -1647,6 +1663,10 @@ export interface Nursery {
 	 * Require a description parameter for the Symbol().
 	 */
 	useSymbolDescription?: RuleConfiguration_for_Null;
+	/**
+	 * Prevent the usage of static string literal id attribute on elements.
+	 */
+	useUniqueElementIds?: RuleConfiguration_for_Null;
 }
 /**
  * A list of rules that belong to this group
@@ -1718,14 +1738,6 @@ export interface Security {
  * A list of rules that belong to this group
  */
 export interface Style {
-	/**
-	 * Disallow the use of arguments.
-	 */
-	noArguments?: RuleConfiguration_for_Null;
-	/**
-	 * Disallow comma operator.
-	 */
-	noCommaOperator?: RuleConfiguration_for_Null;
 	/**
 	 * Disallow use of CommonJs module system in favor of ESM style imports.
 	 */
@@ -3352,7 +3364,9 @@ export type Category =
 	| "lint/a11y/useValidAutocomplete"
 	| "lint/a11y/useValidLang"
 	| "lint/complexity/noAdjacentSpacesInRegex"
+	| "lint/complexity/noArguments"
 	| "lint/complexity/noBannedTypes"
+	| "lint/complexity/noCommaOperator"
 	| "lint/complexity/noEmptyTypeParameters"
 	| "lint/complexity/noExcessiveCognitiveComplexity"
 	| "lint/complexity/noExcessiveNestedTestSuites"
@@ -3363,6 +3377,7 @@ export type Category =
 	| "lint/complexity/noThisInStatic"
 	| "lint/complexity/noUselessCatch"
 	| "lint/complexity/noUselessConstructor"
+	| "lint/complexity/noUselessContinue"
 	| "lint/complexity/noUselessEmptyExport"
 	| "lint/complexity/noUselessEscapeInRegex"
 	| "lint/complexity/noUselessFragments"
@@ -3434,7 +3449,6 @@ export type Category =
 	| "lint/correctness/noUnusedLabels"
 	| "lint/correctness/noUnusedPrivateClassMembers"
 	| "lint/correctness/noUnusedVariables"
-	| "lint/correctness/noUselessContinue"
 	| "lint/correctness/noVoidElementsWithChildren"
 	| "lint/correctness/noVoidTypeReturn"
 	| "lint/correctness/useExhaustiveDependencies"
@@ -3463,6 +3477,7 @@ export type Category =
 	| "lint/nursery/noInvalidGridAreas"
 	| "lint/nursery/noInvalidPositionAtImportRule"
 	| "lint/nursery/noMissingGenericFamilyKeyword"
+	| "lint/nursery/noNestedComponentDefinitions"
 	| "lint/nursery/noNoninteractiveElementInteractions"
 	| "lint/nursery/noProcessGlobal"
 	| "lint/nursery/noReactSpecificProps"
@@ -3488,6 +3503,7 @@ export type Category =
 	| "lint/nursery/useAdjacentGetterSetter"
 	| "lint/nursery/useBiomeSuppressionComment"
 	| "lint/nursery/useConsistentObjectDefinition"
+	| "lint/nursery/useConsistentResponse"
 	| "lint/nursery/useExhaustiveSwitchCases"
 	| "lint/nursery/useExplicitFunctionReturnType"
 	| "lint/nursery/useExplicitType"
@@ -3505,6 +3521,7 @@ export type Category =
 	| "lint/nursery/useSortedClasses"
 	| "lint/nursery/useSortedProperties"
 	| "lint/nursery/useSymbolDescription"
+	| "lint/nursery/useUniqueElementIds"
 	| "lint/performance/noAccumulatingSpread"
 	| "lint/performance/noBarrelFile"
 	| "lint/performance/noDelete"
@@ -3517,8 +3534,6 @@ export type Category =
 	| "lint/security/noDangerouslySetInnerHtml"
 	| "lint/security/noDangerouslySetInnerHtmlWithChildren"
 	| "lint/security/noGlobalEval"
-	| "lint/style/noArguments"
-	| "lint/style/noCommaOperator"
 	| "lint/style/noCommonJs"
 	| "lint/style/noDefaultExport"
 	| "lint/style/noDescendingSpecificity"
@@ -3802,6 +3817,10 @@ export interface BacktraceSymbol {
 }
 export interface OpenProjectParams {
 	/**
+	 * Whether the client wants to run only certain rules. This is needed to compute the kind of [ScanKind].
+	 */
+	onlyRules?: RuleCode[];
+	/**
 	 * Whether the folder should be opened as a project, even if no `biome.json` can be found.
 	 */
 	openUninitialized: boolean;
@@ -3809,7 +3828,23 @@ export interface OpenProjectParams {
 	 * The path to open
 	 */
 	path: BiomePath;
+	/**
+	 * Whether the client wants to skip some lint rule. This is needed to compute the kind of [ScanKind].
+	 */
+	skipRules?: RuleCode[];
 }
+export type RuleCode = string;
+export interface OpenProjectResult {
+	/**
+	 * A unique identifier for this project
+	 */
+	projectKey: ProjectKey;
+	/**
+	 * How to scan this project
+	 */
+	scanKind: ScanKind;
+}
+export type ScanKind = "none" | "knownFiles" | "project";
 export interface OpenFileParams {
 	content: FileContent;
 	documentFileSource?: DocumentFileSource;
@@ -3959,7 +3994,6 @@ export interface PullDiagnosticsParams {
 	skip?: RuleCode[];
 }
 export type RuleCategories = RuleCategory[];
-export type RuleCode = string;
 export type RuleCategory = "syntax" | "lint" | "action" | "transformation";
 export interface PullDiagnosticsResult {
 	diagnostics: Diagnostic[];
@@ -4152,7 +4186,7 @@ export interface DropPatternParams {
 export interface Workspace {
 	fileFeatures(params: SupportsFeatureParams): Promise<FileFeaturesResult>;
 	updateSettings(params: UpdateSettingsParams): Promise<UpdateSettingsResult>;
-	openProject(params: OpenProjectParams): Promise<ProjectKey>;
+	openProject(params: OpenProjectParams): Promise<OpenProjectResult>;
 	openFile(params: OpenFileParams): Promise<void>;
 	changeFile(params: ChangeFileParams): Promise<void>;
 	closeFile(params: CloseFileParams): Promise<void>;

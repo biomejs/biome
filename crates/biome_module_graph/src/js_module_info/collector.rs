@@ -1,4 +1,5 @@
 use std::{
+    borrow::Cow,
     collections::{BTreeMap, BTreeSet},
     sync::Arc,
 };
@@ -10,24 +11,24 @@ use biome_js_syntax::{
     TsIdentifierBinding, inner_string_text,
 };
 use biome_js_type_info::{
-    FunctionParameter, GLOBAL_RESOLVER, GLOBAL_UNKNOWN_ID, Resolvable, ResolvedTypeData,
-    ResolvedTypeId, ScopeId, TypeData, TypeId, TypeImportQualifier, TypeReference,
-    TypeReferenceQualifier, TypeResolver, TypeResolverLevel,
+    BindingId, FunctionParameter, GLOBAL_RESOLVER, GLOBAL_UNKNOWN_ID, Module, Namespace,
+    Resolvable, ResolvedTypeData, ResolvedTypeId, ScopeId, TypeData, TypeId, TypeImportQualifier,
+    TypeMember, TypeMemberKind, TypeReference, TypeReferenceQualifier, TypeResolver,
+    TypeResolverLevel,
 };
 use biome_jsdoc_comment::JsdocComment;
 use biome_rowan::{AstNode, Text, TextSize, TokenText};
 use rust_lapper::{Interval, Lapper};
 use rustc_hash::FxHashMap;
 
-use crate::js_module_info::binding::{
-    JsBindingReference, JsBindingReferenceKind, JsDeclarationKind,
+use crate::js_module_info::{
+    binding::{JsBindingReference, JsBindingReferenceKind, JsDeclarationKind},
+    scope::TsBindingReference,
 };
 
 use super::{
     Exports, ImportSymbol, Imports, JsExport, JsImport, JsModuleInfo, JsModuleInfoInner,
-    JsOwnExport, JsReexport, ResolvedPath,
-    binding::{BindingId, JsBindingData},
-    scope::JsScopeData,
+    JsOwnExport, JsReexport, ResolvedPath, binding::JsBindingData, scope::JsScopeData,
 };
 
 /// Responsible for collecting all the information from which to build the
@@ -226,6 +227,10 @@ impl JsModuleInfoCollector {
                 });
 
                 let name = name_token.as_ref().map(JsSyntaxToken::token_text_trimmed);
+                let declaration_kind = node
+                    .as_ref()
+                    .map(JsDeclarationKind::from_node)
+                    .unwrap_or_default();
                 let ty = match (&node, &name) {
                     (Some(node), Some(name)) => self.infer_type(finaliser, node, name),
                     _ => TypeReference::Unknown,
@@ -238,10 +243,7 @@ impl JsModuleInfoCollector {
                         .unwrap_or_default(),
                     references: Vec::new(),
                     scope_id: *self.scope_stack.last().expect("scope must be present"),
-                    declaration_kind: node
-                        .as_ref()
-                        .map(JsDeclarationKind::from_node)
-                        .unwrap_or_default(),
+                    declaration_kind,
                     ty,
                     jsdoc: node.as_ref().and_then(find_jsdoc),
                     export_ranges: Vec::new(),
@@ -252,7 +254,18 @@ impl JsModuleInfoCollector {
 
                 scope.bindings.push(binding_id);
                 if let Some(name) = name {
-                    scope.bindings_by_name.insert(name, binding_id);
+                    let binding_reference = TsBindingReference::from_binding_and_declaration_kind(
+                        binding_id,
+                        declaration_kind,
+                    );
+
+                    scope
+                        .bindings_by_name
+                        .entry(name)
+                        .and_modify(|binding| {
+                            *binding = binding.union_with(binding_reference);
+                        })
+                        .or_insert(binding_reference);
                 }
             }
             Read {
@@ -385,6 +398,7 @@ impl JsModuleInfoCollector {
                     TypeImportQualifier {
                         symbol: import.symbol.clone(),
                         resolved_path: import.resolved_path.clone(),
+                        type_only: binding.declaration_kind.is_import_type_declaration(),
                     }
                     .into()
                 })
@@ -394,19 +408,79 @@ impl JsModuleInfoCollector {
         while i < self.types.len() {
             // First take the type to satisfy the borrow checker:
             let ty = std::mem::take(&mut self.types[i]);
-            self.types[i] = ty.resolved_with_mapped_references(
-                |reference, _| match reference {
-                    TypeReference::Resolved(resolved)
-                        if resolved.level() == TypeResolverLevel::Import =>
-                    {
-                        downgrade_import_reference(resolved.id().into())
-                    }
-                    other => other,
+            self.types[i] = match ty {
+                TypeData::Module(module) => match self.find_binding_for_type_index(i) {
+                    Some(module_binding) => TypeData::from(Module {
+                        name: module.name,
+                        // Populate module members:
+                        members: self.find_type_members_in_scope(module_binding.scope_id),
+                    }),
+                    None => TypeData::Module(module),
                 },
-                self,
-            );
+                TypeData::Namespace(namespace) => match self.find_binding_for_type_index(i) {
+                    Some(namespace_binding) => TypeData::from(Namespace {
+                        path: namespace.path,
+                        // Populate namespace members:
+                        members: self.find_type_members_in_scope(namespace_binding.scope_id),
+                    }),
+                    None => TypeData::Namespace(namespace),
+                },
+                ty => ty.resolved_with_mapped_references(
+                    |reference, _| match reference {
+                        TypeReference::Resolved(resolved)
+                            if resolved.level() == TypeResolverLevel::Import =>
+                        {
+                            downgrade_import_reference(resolved.id().into())
+                        }
+                        other => other,
+                    },
+                    self,
+                ),
+            };
             i += 1;
         }
+    }
+
+    fn find_binding_for_type_index(&self, type_index: usize) -> Option<&JsBindingData> {
+        self.bindings.iter().find(|binding| match binding.ty {
+            TypeReference::Resolved(resolved) => {
+                resolved.level() == TypeResolverLevel::Module && resolved.id().index() == type_index
+            }
+            _ => false,
+        })
+    }
+
+    fn find_binding_in_scope(&self, name: &str, scope_id: ScopeId) -> Option<TsBindingReference> {
+        let mut scope = &self.scopes[scope_id.index()];
+        loop {
+            if let Some(binding_ref) = scope.bindings_by_name.get(name) {
+                return Some(*binding_ref);
+            }
+
+            match &scope.parent {
+                Some(parent_id) => scope = &self.scopes[parent_id.index()],
+                None => break,
+            }
+        }
+
+        None
+    }
+
+    fn find_type_members_in_scope(&self, scope_id: ScopeId) -> Box<[TypeMember]> {
+        self.bindings
+            .iter()
+            .filter(|binding| {
+                let scope = &self.scopes[binding.scope_id.index()];
+                scope
+                    .parent
+                    .is_some_and(|parent_scope_id| parent_scope_id == scope_id)
+            })
+            .map(|binding| TypeMember {
+                kind: TypeMemberKind::Named(binding.name.clone()),
+                is_static: true,
+                ty: binding.ty.clone(),
+            })
+            .collect()
     }
 
     fn flatten_all(&mut self) {
@@ -467,27 +541,45 @@ impl TypeResolver for JsModuleInfoCollector {
     }
 
     fn resolve_qualifier(&self, qualifier: &TypeReferenceQualifier) -> Option<ResolvedTypeId> {
-        if qualifier.path.len() == 1 {
-            self.resolve_type_of(
-                &qualifier.path[0],
-                qualifier.scope_id.unwrap_or(ScopeId::GLOBAL),
-            )
-            .or_else(|| GLOBAL_RESOLVER.resolve_qualifier(qualifier))
-        } else {
-            // TODO: Resolve nested qualifiers
-            None
+        let identifier = qualifier.path.first()?;
+        let scope_id = qualifier.scope_id.unwrap_or(ScopeId::GLOBAL);
+        let Some(binding_ref) = self.find_binding_in_scope(identifier, scope_id) else {
+            return GLOBAL_RESOLVER.resolve_qualifier(qualifier);
+        };
+
+        let binding_id = binding_ref.get_binding_id_for_qualifier(qualifier)?;
+
+        let binding = &self.bindings[binding_id.index()];
+        if binding.declaration_kind.is_import_declaration() {
+            return Some(ResolvedTypeId::new(
+                TypeResolverLevel::Import,
+                binding_id.into(),
+            ));
         }
+
+        let mut ty = Cow::Borrowed(&binding.ty);
+        for identifier in &qualifier.path[1..] {
+            let resolved = self.resolve_and_get(&ty)?;
+            let member = resolved
+                .all_members(self)
+                .with_excluded_binding_id(binding_id)
+                .find(|member| member.is_static() && member.has_name(identifier))?;
+            ty = Cow::Owned(member.ty().into_owned());
+        }
+
+        self.resolve_reference(&ty)
     }
 
     fn resolve_type_of(&self, identifier: &Text, scope_id: ScopeId) -> Option<ResolvedTypeId> {
-        // We only care about the global scope, since that's where all exported
-        // symbols reside.
-        if let Some(binding_id) = self.scopes[0].bindings_by_name.get(identifier.text()) {
+        if let Some(binding_id) = self
+            .find_binding_in_scope(identifier, scope_id)
+            .map(|binding_ref| binding_ref.value_ty_or_ty())
+        {
             let binding = &self.bindings[binding_id.index()];
             return if binding.declaration_kind.is_import_declaration() {
                 Some(ResolvedTypeId::new(
                     TypeResolverLevel::Import,
-                    (*binding_id).into(),
+                    binding_id.into(),
                 ))
             } else {
                 self.resolve_reference(&binding.ty)
@@ -527,7 +619,7 @@ pub(super) struct JsModuleInfoBag {
 }
 
 impl JsModuleInfoBag {
-    pub(super) fn from_collector(collector: &JsModuleInfoCollector) -> Self {
+    pub(super) fn from_collector(collector: &mut JsModuleInfoCollector) -> Self {
         let mut info = Self::default();
         info.collect_imports(collector);
         info.collect_exports(collector);
@@ -670,13 +762,12 @@ impl JsModuleInfoBag {
         Some(())
     }
 
-    fn collect_exports(&mut self, collector: &JsModuleInfoCollector) {
+    fn collect_exports(&mut self, collector: &mut JsModuleInfoCollector) {
         self.exports.clone_from(&collector.exports);
         self.blanket_reexports
             .clone_from(&collector.blanket_reexports);
 
         // Lookup types from the bindings in the global scope.
-        let global_scope = &collector.scopes[0];
         for export in self.exports.values_mut() {
             let Some(export) = export.as_own_export_mut() else {
                 continue;
@@ -686,10 +777,26 @@ impl JsModuleInfoBag {
                 continue;
             };
 
-            if let Some(binding_id) = global_scope.bindings_by_name.get(local_name) {
-                let binding = &collector.bindings[binding_id.index()];
-                export.jsdoc_comment.clone_from(&binding.jsdoc);
-                export.ty.clone_from(&binding.ty);
+            if let Some(binding_ref) = collector.scopes[0].bindings_by_name.get(local_name) {
+                match binding_ref {
+                    TsBindingReference::Dual { ty, value_ty } => {
+                        let ty_binding = &collector.bindings[ty.index()];
+                        let value_ty_binding = &collector.bindings[value_ty.index()];
+                        export.ty = collector
+                            .register_and_resolve(TypeData::dual_reference(
+                                ty_binding.ty.clone(),
+                                value_ty_binding.ty.clone(),
+                            ))
+                            .into();
+                    }
+                    TsBindingReference::Type(binding_id)
+                    | TsBindingReference::ValueType(binding_id)
+                    | TsBindingReference::Both(binding_id) => {
+                        let binding = &collector.bindings[binding_id.index()];
+                        export.jsdoc_comment.clone_from(&binding.jsdoc);
+                        export.ty.clone_from(&binding.ty);
+                    }
+                }
             }
         }
     }
@@ -697,7 +804,7 @@ impl JsModuleInfoBag {
 
 impl JsModuleInfo {
     pub(super) fn new(mut collector: JsModuleInfoCollector) -> Self {
-        let bag = JsModuleInfoBag::from_collector(&collector);
+        let bag = JsModuleInfoBag::from_collector(&mut collector);
 
         collector.resolve_all_and_downgrade_project_references(&bag);
         collector.flatten_all();

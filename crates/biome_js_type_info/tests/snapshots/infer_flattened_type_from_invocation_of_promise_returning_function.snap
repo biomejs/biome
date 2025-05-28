@@ -27,8 +27,8 @@ Module TypeId(0) => sync Function "returnsPromise" {
     params: []
     type_args: []
   }
-  returns: Global TypeId(7)
+  returns: Global TypeId(0)
 }
 
-Global TypeId(7) => instanceof unresolved reference "Promise"<number>
+Global TypeId(0) => instanceof unresolved reference "Promise"<number>
 ```

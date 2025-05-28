@@ -420,10 +420,24 @@
 						{ "type": "null" }
 					]
 				},
+				"noArguments": {
+					"description": "Disallow the use of arguments.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noBannedTypes": {
 					"description": "Disallow primitive type aliases and misleading types.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleFixConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noCommaOperator": {
+					"description": "Disallow comma operator.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -492,6 +506,13 @@
 				},
 				"noUselessConstructor": {
 					"description": "Disallow unnecessary constructors.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleFixConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noUselessContinue": {
+					"description": "Avoid using unnecessary continue.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleFixConfiguration" },
 						{ "type": "null" }
@@ -1065,13 +1086,6 @@
 					"description": "Disallow unused variables.",
 					"anyOf": [
 						{ "$ref": "#/definitions/NoUnusedVariablesConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"noUselessContinue": {
-					"description": "Avoid using unnecessary continue.",
-					"anyOf": [
-						{ "$ref": "#/definitions/RuleFixConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -2262,7 +2276,7 @@
 					"enum": ["namespaceLike"]
 				},
 				{
-					"description": "TypeScript mamespaces",
+					"description": "TypeScript namespaces",
 					"type": "string",
 					"enum": ["namespace"]
 				},
@@ -2737,6 +2751,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noNestedComponentDefinitions": {
+					"description": "Disallows defining React components inside other components.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noNoninteractiveElementInteractions": {
 					"description": "Disallow use event handlers on non-interactive elements.",
 					"anyOf": [
@@ -2841,6 +2862,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useConsistentResponse": {
+					"description": "Use static Response methods instead of new Response() constructor when possible.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleFixConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useExhaustiveSwitchCases": {
 					"description": "Require switch-case statements to be exhaustive.",
 					"anyOf": [
@@ -2927,6 +2955,13 @@
 				},
 				"useSymbolDescription": {
 					"description": "Require a description parameter for the Symbol().",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"useUniqueElementIds": {
+					"description": "Prevent the usage of static string literal id attribute on elements.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }
@@ -4215,20 +4250,6 @@
 			"description": "A list of rules that belong to this group",
 			"type": "object",
 			"properties": {
-				"noArguments": {
-					"description": "Disallow the use of arguments.",
-					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"noCommaOperator": {
-					"description": "Disallow comma operator.",
-					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
-						{ "type": "null" }
-					]
-				},
 				"noCommonJs": {
 					"description": "Disallow use of CommonJs module system in favor of ESM style imports.",
 					"anyOf": [
@@ -5348,7 +5369,7 @@
 			"properties": {
 				"syntax": {
 					"description": "The preferred syntax to enforce.",
-					"default": "explicit",
+					"default": "shorthand",
 					"allOf": [{ "$ref": "#/definitions/ObjectPropertySyntax" }]
 				}
 			},

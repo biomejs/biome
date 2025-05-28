@@ -70,7 +70,7 @@ pub struct Settings {
 
 impl Settings {
     /// Merges the [Configuration] into the settings.
-    #[tracing::instrument(level = "debug", skip(self))]
+    #[tracing::instrument(level = "debug", skip_all)]
     pub fn merge_with_configuration(
         &mut self,
         configuration: Configuration,
@@ -228,6 +228,10 @@ impl Settings {
         self.linter.is_enabled()
     }
 
+    pub fn linter_recommended_enabled(&self) -> bool {
+        self.linter.recommended_enabled()
+    }
+
     pub fn is_assist_enabled(&self) -> bool {
         self.assist.is_enabled()
     }
@@ -313,6 +317,14 @@ pub struct LinterSettings {
 impl LinterSettings {
     pub fn is_enabled(&self) -> bool {
         self.enabled.unwrap_or_default().into()
+    }
+
+    pub fn recommended_enabled(&self) -> bool {
+        self.rules
+            .as_ref()
+            .and_then(|rules| rules.recommended)
+            // If there isn't a clear value, we default to true
+            .unwrap_or(true)
     }
 }
 
@@ -671,7 +683,6 @@ pub enum VcsIgnoredPatterns {
 }
 
 impl VcsIgnoredPatterns {
-    #[instrument(level = "debug", skip(self, path, is_dir), fields(result))]
     pub fn is_ignored(&self, path: &Utf8Path, is_dir: bool) -> bool {
         match self {
             Self::Git { root, nested } => {
@@ -689,7 +700,6 @@ impl VcsIgnoredPatterns {
                         } else {
                             false
                         };
-                        tracing::Span::current().record("result", result);
                         result
                     })
             }

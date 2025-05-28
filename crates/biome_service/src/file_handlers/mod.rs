@@ -1010,6 +1010,14 @@ impl<'a, 'b> LintVisitor<'a, 'b> {
         R: Rule<Query: Queryable<Language = L, Output: Clone>> + 'static,
     {
         let path = self.path.expect("File path");
+
+        let recommended_enabled = self
+            .settings
+            .is_some_and(|settings| settings.linter_recommended_enabled());
+        if !recommended_enabled {
+            return;
+        }
+
         let no_only = self.only.is_some_and(|only| only.is_empty());
         let no_domains = self
             .settings
@@ -1021,13 +1029,16 @@ impl<'a, 'b> LintVisitor<'a, 'b> {
 
         if let Some(manifest) = &self.package_json {
             for domain in R::METADATA.domains {
-                self.analyzer_options
-                    .push_globals(domain.globals().iter().map(|s| Box::from(*s)).collect());
+                let matches_a_dependency = domain
+                    .manifest_dependencies()
+                    .iter()
+                    .any(|(dependency, range)| manifest.matches_dependency(dependency, range));
 
-                for (dependency, range) in domain.manifest_dependencies() {
-                    if manifest.matches_dependency(dependency, range) {
-                        self.enabled_rules.insert(rule_filter);
-                    }
+                if matches_a_dependency {
+                    self.enabled_rules.insert(rule_filter);
+
+                    self.analyzer_options
+                        .push_globals(domain.globals().iter().map(|s| Box::from(*s)).collect());
                 }
             }
         }

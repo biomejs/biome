@@ -1,0 +1,45 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```jsx
+class A {
+    constructor() {
+        super()
+    }
+}
+
+```
+
+# Diagnostics
+```
+invalid.js:3:9 syntax/correctness/noSuperWithoutExtends  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × super() is only valid in derived class constructors
+  
+    1 │ class A {
+    2 │     constructor() {
+  > 3 │         super()
+      │         ^^^^^
+    4 │     }
+    5 │ }
+  
+  i Safe fix: Suppress rule syntax/correctness/noSuperWithoutExtends for this line.
+  
+    1 1 │   class A {
+    2 2 │       constructor() {
+    3   │ - ········super()
+      3 │ + ········//·biome-ignore·syntax/correctness/noSuperWithoutExtends:·<explanation>
+      4 │ + ········super()
+    4 5 │       }
+    5 6 │   }
+  
+  i Safe fix: Suppress rule syntax/correctness/noSuperWithoutExtends for the whole file.
+  
+      1 │ + /**·biome-ignore-all·syntax/correctness/noSuperWithoutExtends:·<explanation>·*/
+    1 2 │   class A {
+    2 3 │       constructor() {
+  
+
+```

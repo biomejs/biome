@@ -38,7 +38,7 @@ jobs:
         run: pnpm install
 
       - name: Create Release Pull Request
-        uses: changesets/action@e0538e686673de0265c8a3e2904b8c76beaa43fd # v1.5.2
+        uses: changesets/action@e0145edc7d9d8679003495b11f87bd8ef63c0cba # v1.5.3
         with:
           version: pnpm run version
           commit: "ci: release"
@@ -119,7 +119,7 @@ jobs:
           sudo apt-get install -y musl-tools
 
       - name: Install cargo-audit
-        uses: taiki-e/install-action@83254c543806f3224380bf1001d6fac8feaf2d0b # v2.50.10
+        uses: taiki-e/install-action@941e8a4d9d7cdb696bd4f017cf54aca281f8ffff # v2.51.2
         if: matrix.code-target == 'linux-x64-musl'
         with:
           tool: cargo-audit
@@ -174,7 +174,7 @@ jobs:
     name: Package ${{ matrix.code-target }}
     runs-on: ${{ matrix.os }}
     container:
-      image: rust:1.86.0-bullseye@sha256:f40b8cc3195deda321031e8dfe23c7d2586e3db7c4103fa36946982d9fd6d588
+      image: rust:1.87.0-bullseye@sha256:eb809362961259a30f540857c3cac8423c466d558bea0f55f32e3a6354654353
 
     steps:
       - name: Checkout repository

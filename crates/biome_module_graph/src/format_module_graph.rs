@@ -133,7 +133,7 @@ impl Format<FormatTypeContext> for Imports {
                         [dynamic_text(
                             &std::format!("{:?}", t.text()),
                             TextSize::default()
-                        ),]
+                        )]
                     )
                 }
                 Text::Owned(t) => {
@@ -142,7 +142,7 @@ impl Format<FormatTypeContext> for Imports {
                         [dynamic_text(
                             &std::format!("{:?}", t.as_str()),
                             TextSize::default()
-                        ),]
+                        )]
                     )
                 }
                 Text::Static(t) => {

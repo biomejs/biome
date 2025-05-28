@@ -30,7 +30,7 @@ invalid.js:1:1 lint/complexity/noFlatMapIdentity  FIXABLE  ━━━━━━━
   
   i You can just use flat to flatten the array.
   
-  i Safe fix: Replace unnecessary flatMap call to flat instead.
+  i Unsafe fix: Replace unnecessary flatMap call to flat instead.
   
      1    │ - array.flatMap(function·f(arr)·{·return·arr·});
         1 │ + array.flat();
@@ -54,7 +54,7 @@ invalid.js:3:1 lint/complexity/noFlatMapIdentity  FIXABLE  ━━━━━━━
   
   i You can just use flat to flatten the array.
   
-  i Safe fix: Replace unnecessary flatMap call to flat instead.
+  i Unsafe fix: Replace unnecessary flatMap call to flat instead.
   
      1  1 │   array.flatMap(function f(arr) { return arr });
      2  2 │   
@@ -80,7 +80,7 @@ invalid.js:5:1 lint/complexity/noFlatMapIdentity  FIXABLE  ━━━━━━━
   
   i You can just use flat to flatten the array.
   
-  i Safe fix: Replace unnecessary flatMap call to flat instead.
+  i Unsafe fix: Replace unnecessary flatMap call to flat instead.
   
      3  3 │   array.flatMap(function (arr) { return arr });
      4  4 │   
@@ -106,7 +106,7 @@ invalid.js:7:1 lint/complexity/noFlatMapIdentity  FIXABLE  ━━━━━━━
   
   i You can just use flat to flatten the array.
   
-  i Safe fix: Replace unnecessary flatMap call to flat instead.
+  i Unsafe fix: Replace unnecessary flatMap call to flat instead.
   
      5  5 │   array.flatMap((arr) => arr)
      6  6 │   
@@ -132,7 +132,7 @@ invalid.js:9:1 lint/complexity/noFlatMapIdentity  FIXABLE  ━━━━━━━
   
   i You can just use flat to flatten the array.
   
-  i Safe fix: Replace unnecessary flatMap call to flat instead.
+  i Unsafe fix: Replace unnecessary flatMap call to flat instead.
   
      7  7 │   array.flatMap((arr) => {return arr})
      8  8 │   
@@ -156,7 +156,7 @@ invalid.js:11:1 lint/complexity/noFlatMapIdentity  FIXABLE  ━━━━━━�
   
   i You can just use flat to flatten the array.
   
-  i Safe fix: Replace unnecessary flatMap call to flat instead.
+  i Unsafe fix: Replace unnecessary flatMap call to flat instead.
   
      9  9 │   array.flatMap(arr => arr)
     10 10 │   

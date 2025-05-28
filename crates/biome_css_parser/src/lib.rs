@@ -33,19 +33,17 @@ pub fn parse_css_with_cache(
     cache: &mut NodeCache,
     options: CssParserOptions,
 ) -> CssParse {
-    tracing::debug_span!("Parsing phase").in_scope(move || {
-        let mut parser = CssParser::new(source, options);
+    let mut parser = CssParser::new(source, options);
 
-        parse_root(&mut parser);
+    parse_root(&mut parser);
 
-        let (events, diagnostics, trivia) = parser.finish();
+    let (events, diagnostics, trivia) = parser.finish();
 
-        let mut tree_sink = CssLosslessTreeSink::with_cache(source, &trivia, cache);
-        biome_parser::event::process(&mut tree_sink, events, diagnostics);
-        let (green, diagnostics) = tree_sink.finish();
+    let mut tree_sink = CssLosslessTreeSink::with_cache(source, &trivia, cache);
+    biome_parser::event::process(&mut tree_sink, events, diagnostics);
+    let (green, diagnostics) = tree_sink.finish();
 
-        CssParse::new(green, diagnostics)
-    })
+    CssParse::new(green, diagnostics)
 }
 
 /// A utility struct for managing the result of a parser job

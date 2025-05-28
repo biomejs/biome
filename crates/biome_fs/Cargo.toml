@@ -18,7 +18,6 @@ camino            = { workspace = true }
 crossbeam         = { workspace = true }
 directories       = "6.0.0"
 enumflags2        = { workspace = true, features = ["serde"] }
-oxc_resolver      = { workspace = true }
 papaya            = { workspace = true }
 parking_lot       = { version = "0.12.3", features = ["arc_lock"] }
 path-absolutize   = { workspace = true }

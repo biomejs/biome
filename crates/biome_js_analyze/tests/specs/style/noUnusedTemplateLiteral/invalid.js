@@ -1,4 +1,4 @@
-var foo = `bar`;
+var foo = /*1*/`bar`/*2*/;
 var foo1 = `bar `;
 var foo = `back\rtick`;
 var foo = `back\ntick`;

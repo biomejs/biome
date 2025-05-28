@@ -1,51 +1,3 @@
-use std::panic::RefUnwindSafe;
-use std::sync::atomic::{AtomicUsize, Ordering};
-use std::sync::{Arc, Mutex};
-use std::time::Duration;
-
-use append_only_vec::AppendOnlyVec;
-use biome_analyze::{AnalyzerPluginVec, RuleCategory};
-use biome_configuration::plugins::{PluginConfiguration, Plugins};
-use biome_configuration::{BiomeDiagnostic, Configuration};
-use biome_deserialize::Deserialized;
-use biome_deserialize::json::deserialize_from_json_str;
-use biome_diagnostics::print_diagnostic_to_string;
-use biome_diagnostics::{
-    Diagnostic, DiagnosticExt, Severity, serde::Diagnostic as SerdeDiagnostic,
-};
-use biome_formatter::Printed;
-use biome_fs::{BiomePath, ConfigName, FileSystem};
-use biome_grit_patterns::{CompilePatternOptions, GritQuery, compile_pattern_with_options};
-use biome_js_syntax::ModuleKind;
-use biome_json_parser::JsonParserOptions;
-use biome_json_syntax::JsonFileSource;
-use biome_module_graph::ModuleGraph;
-use biome_package::PackageType;
-use biome_parser::AnyParse;
-use biome_plugin_loader::{BiomePlugin, PluginCache, PluginDiagnostic};
-use biome_project_layout::ProjectLayout;
-use biome_rowan::NodeCache;
-use camino::{Utf8Path, Utf8PathBuf};
-use crossbeam::channel::Sender;
-use papaya::{Compute, HashMap, HashSet, Operation};
-use rustc_hash::{FxBuildHasher, FxHashMap};
-use tokio::sync::watch;
-use tracing::{info, instrument, warn};
-
-use crate::diagnostics::FileTooLarge;
-use crate::file_handlers::{
-    Capabilities, CodeActionsParams, DocumentFileSource, Features, FixAllParams, LintParams,
-    ParseResult,
-};
-use crate::projects::Projects;
-use crate::settings::WorkspaceSettingsHandle;
-use crate::workspace::{
-    FileFeaturesResult, GetFileContentParams, GetRegisteredTypesParams, GetTypeInfoParams,
-    IsPathIgnoredParams, RageEntry, RageParams, RageResult, ServerInfo,
-};
-use crate::workspace_watcher::{OpenFileReason, WatcherSignalKind};
-use crate::{WatcherInstruction, Workspace, WorkspaceError, is_dir};
-
 use super::document::Document;
 use super::{
     ChangeFileParams, CheckFileSizeParams, CheckFileSizeResult, CloseFileParams,
@@ -58,6 +10,55 @@ use super::{
     SearchResults, ServiceDataNotification, SupportsFeatureParams, UpdateSettingsParams,
     UpdateSettingsResult,
 };
+use crate::configuration::ProjectScanComputer;
+use crate::diagnostics::FileTooLarge;
+use crate::file_handlers::{
+    Capabilities, CodeActionsParams, DocumentFileSource, Features, FixAllParams, LintParams,
+    ParseResult,
+};
+use crate::projects::Projects;
+use crate::settings::WorkspaceSettingsHandle;
+use crate::workspace::{
+    FileFeaturesResult, GetFileContentParams, GetRegisteredTypesParams, GetTypeInfoParams,
+    IsPathIgnoredParams, OpenProjectResult, RageEntry, RageParams, RageResult, ScanKind,
+    ServerInfo,
+};
+use crate::workspace_watcher::{OpenFileReason, WatcherSignalKind};
+use crate::{WatcherInstruction, Workspace, WorkspaceError, is_dir};
+use append_only_vec::AppendOnlyVec;
+use biome_analyze::{AnalyzerPluginVec, RuleCategory};
+use biome_configuration::analyzer::RuleSelector;
+use biome_configuration::plugins::{PluginConfiguration, Plugins};
+use biome_configuration::{BiomeDiagnostic, Configuration};
+use biome_deserialize::Deserialized;
+use biome_deserialize::json::deserialize_from_json_str;
+use biome_diagnostics::print_diagnostic_to_string;
+use biome_diagnostics::{
+    Diagnostic, DiagnosticExt, Severity, serde::Diagnostic as SerdeDiagnostic,
+};
+use biome_formatter::Printed;
+use biome_fs::{BiomePath, ConfigName};
+use biome_grit_patterns::{CompilePatternOptions, GritQuery, compile_pattern_with_options};
+use biome_js_syntax::{AnyJsRoot, ModuleKind};
+use biome_json_parser::JsonParserOptions;
+use biome_json_syntax::JsonFileSource;
+use biome_module_graph::ModuleGraph;
+use biome_package::PackageType;
+use biome_parser::AnyParse;
+use biome_plugin_loader::{BiomePlugin, PluginCache, PluginDiagnostic};
+use biome_project_layout::ProjectLayout;
+use biome_resolver::FsWithResolverProxy;
+use biome_rowan::{AstNode, NodeCache, SendNode};
+use camino::{Utf8Path, Utf8PathBuf};
+use crossbeam::channel::Sender;
+use papaya::{Compute, HashMap, HashSet, Operation};
+use rustc_hash::{FxBuildHasher, FxHashMap};
+use std::panic::RefUnwindSafe;
+use std::sync::atomic::{AtomicUsize, Ordering};
+use std::sync::{Arc, Mutex};
+use std::time::Duration;
+use tokio::sync::watch;
+use tracing::{info, instrument, warn};
 
 pub struct WorkspaceServer {
     /// features available throughout the application
@@ -93,20 +94,20 @@ pub struct WorkspaceServer {
     /// instances of stored values, we use an `FxHashMap` here, wrapped in a
     /// `Mutex`. The node cache is only used by writers, meaning this wouldn't
     /// be a great use case for `papaya` anyway. But it does mean we need to be
-    /// careful for deadlocks, and release guards to the mutex as soon as we
+    /// careful with deadlocks and release guards to the mutex as soon as we
     /// can.
     ///
     /// Additionally, we only use the node cache for documents opened through
     /// the LSP proxy, since the editor use case is the one where we benefit
     /// most from low-latency parsing, and having a document open in an editor
-    /// gives us a clear signal that edits -- and thus reparsing -- is to be
-    /// anticipated. For other documents, the performance degradation due to
+    /// gives us a clear signal that edits -- and thus reparsing -- are to be
+    /// expected. For other documents, the performance degradation due to
     /// lock contention would not be worth the potential of faster reparsing
     /// that may never actually happen.
     pub(super) node_cache: Mutex<FxHashMap<Utf8PathBuf, NodeCache>>,
 
     /// File system implementation.
-    pub(super) fs: Box<dyn FileSystem>,
+    pub(super) fs: Box<dyn FsWithResolverProxy>,
 
     /// Channel sender for instructions to the [crate::WorkspaceWatcher].
     watcher_tx: Sender<WatcherInstruction>,
@@ -129,7 +130,7 @@ impl RefUnwindSafe for WorkspaceServer {}
 impl WorkspaceServer {
     /// Creates a new [Workspace].
     pub fn new(
-        fs: Box<dyn FileSystem>,
+        fs: Box<dyn FsWithResolverProxy>,
         watcher_tx: Sender<WatcherInstruction>,
         notification_tx: watch::Sender<ServiceDataNotification>,
         threads: Option<usize>,
@@ -161,7 +162,12 @@ impl WorkspaceServer {
     ///
     /// An error may be returned if no top-level `biome.json` can be found, or
     /// if there is an error opening a config file.
-    fn find_project_root(&self, path: BiomePath) -> Result<Utf8PathBuf, WorkspaceError> {
+    fn find_project_root(
+        &self,
+        path: BiomePath,
+        only_rules: Vec<RuleSelector>,
+        skip_rules: Vec<RuleSelector>,
+    ) -> Result<(Utf8PathBuf, ScanKind), WorkspaceError> {
         let path: Utf8PathBuf = path.into();
 
         for ancestor in path.ancestors() {
@@ -189,13 +195,17 @@ impl WorkspaceServer {
                 );
             }
 
-            if deserialized
-                .into_deserialized()
-                .and_then(|config| config.root)
-                .is_none_or(|root| root.value())
-            {
+            if let Some(configuration) = deserialized.into_deserialized() {
+                let found = configuration.root.is_none_or(|root| root.value());
                 // Found our root config!
-                return Ok(ancestor.to_path_buf());
+                if found {
+                    let scan_kind = ProjectScanComputer::new(
+                        &configuration,
+                        skip_rules.as_slice(),
+                        only_rules.as_slice(),
+                    );
+                    return Ok((ancestor.to_path_buf(), scan_kind.compute()));
+                }
             }
         }
 
@@ -217,9 +227,6 @@ impl WorkspaceServer {
     }
 
     /// Gets the supported capabilities for a given file path.
-    #[instrument(level = "debug", skip(self), fields(
-        path = display(path.as_path())
-    ))]
     fn get_file_capabilities(&self, path: &BiomePath) -> Capabilities {
         let language = self.get_file_source(path);
         self.features.get_capabilities(language)
@@ -268,7 +275,6 @@ impl WorkspaceServer {
     ///
     /// Returns the index at which the file source can be retrieved using
     /// `get_source()`.
-    #[tracing::instrument(level = "debug", skip_all)]
     fn insert_source(&self, document_file_source: DocumentFileSource) -> usize {
         self.file_sources
             .iter()
@@ -282,16 +288,7 @@ impl WorkspaceServer {
         project_key: ProjectKey,
         path: impl Into<BiomePath>,
     ) -> Result<(), WorkspaceError> {
-        self.open_file_internal(
-            OpenFileReason::InitialScan,
-            OpenFileParams {
-                project_key,
-                path: path.into(),
-                content: FileContent::FromServer,
-                document_file_source: None,
-                persist_node_cache: false,
-            },
-        )
+        self.open_file_for_reason(project_key, path.into(), OpenFileReason::InitialScan)
     }
 
     /// Opens the file and marks it as opened by the scanner.
@@ -300,22 +297,34 @@ impl WorkspaceServer {
         project_key: ProjectKey,
         path: impl Into<BiomePath>,
     ) -> Result<(), WorkspaceError> {
-        self.open_file_internal(
-            OpenFileReason::WatcherUpdate,
-            OpenFileParams {
-                project_key,
-                path: path.into(),
-                content: FileContent::FromServer,
-                document_file_source: None,
-                persist_node_cache: false,
-            },
-        )
+        self.open_file_for_reason(project_key, path.into(), OpenFileReason::WatcherUpdate)
     }
 
-    #[tracing::instrument(level = "debug", skip(self, params), fields(
-        project_key = display(params.project_key),
-        path = display(params.path.as_path()),
-    ))]
+    fn open_file_for_reason(
+        &self,
+        project_key: ProjectKey,
+        path: BiomePath,
+        reason: OpenFileReason,
+    ) -> Result<(), WorkspaceError> {
+        match self
+            .module_graph
+            .get_or_insert_path_info(&path, self.fs.as_ref())
+        {
+            Some(path_info) if path_info.is_symlink() => Ok(()),
+            Some(_) => self.open_file_internal(
+                reason,
+                OpenFileParams {
+                    project_key,
+                    path,
+                    content: FileContent::FromServer,
+                    document_file_source: None,
+                    persist_node_cache: false,
+                },
+            ),
+            None => Err(WorkspaceError::cant_read_file(path.to_string())),
+        }
+    }
+
     fn open_file_internal(
         &self,
         reason: OpenFileReason,
@@ -378,6 +387,10 @@ impl WorkspaceServer {
 
             Some(Ok(parsed.any_parse))
         };
+        let root = syntax
+            .as_ref()
+            .and_then(|syntax| syntax.as_ref().ok())
+            .map(|parse| parse.root());
 
         let opened_by_scanner = reason.is_opened_by_scanner();
 
@@ -438,7 +451,7 @@ impl WorkspaceServer {
             }
         });
 
-        self.update_service_data(WatcherSignalKind::AddedOrChanged(reason), &path)
+        self.update_service_data(WatcherSignalKind::AddedOrChanged(reason), &path, root)
     }
 
     /// Retrieves the parser result for a given file.
@@ -494,21 +507,21 @@ impl WorkspaceServer {
 
     /// Checks whether a file is ignored in the top-level config's
     /// `files.includes` or in the feature's `includes`.
-    #[instrument(level = "debug", skip(self), fields(ignored))]
     fn is_ignored(&self, project_key: ProjectKey, path: &Utf8Path, features: FeatureName) -> bool {
         let file_name = path.file_name();
         // Never ignore Biome's config file regardless of `includes`.
-        let ignored = (file_name != Some(ConfigName::biome_json()) || file_name != Some(ConfigName::biome_jsonc())) &&
-            // Apply top-level `includes`
-            (self.is_ignored_by_top_level_config(project_key, path) ||
+        if file_name == Some(ConfigName::biome_json())
+            || file_name == Some(ConfigName::biome_jsonc())
+        {
+            return false;
+        };
+
+        // Apply top-level `includes`
+        self.is_ignored_by_top_level_config(project_key, path) ||
                 // Apply feature-level `includes`
-                (!features.is_empty() && features.iter().all(|feature| self
+                !features.is_empty() && features.iter().all(|feature| self
                     .projects
-                    .is_ignored_by_feature_config(project_key, path, feature))));
-
-        tracing::Span::current().record("ignored", ignored);
-
-        ignored
+                    .is_ignored_by_feature_config(project_key, path, feature))
     }
 
     /// Checks whether a file is ignored in the top-level `files.includes`.
@@ -614,16 +627,13 @@ impl WorkspaceServer {
     }
 
     /// Updates the [ProjectLayout] for the given `path`.
-    #[instrument(level = "debug", skip(self))]
     pub(super) fn update_project_layout(
         &self,
         signal_kind: WatcherSignalKind,
         path: &Utf8Path,
     ) -> Result<(), WorkspaceError> {
-        if path
-            .file_name()
-            .is_some_and(|filename| filename == "package.json")
-        {
+        let filename = path.file_name();
+        if filename.is_some_and(|filename| filename == "package.json") {
             let package_path = path
                 .parent()
                 .map(|parent| parent.to_path_buf())
@@ -639,43 +649,51 @@ impl WorkspaceServer {
                     self.project_layout.remove_package(&package_path);
                 }
             }
+        } else if filename.is_some_and(|filename| filename == "tsconfig.json") {
+            let package_path = path
+                .parent()
+                .map(|parent| parent.to_path_buf())
+                .ok_or_else(WorkspaceError::not_found)?;
+
+            match signal_kind {
+                WatcherSignalKind::AddedOrChanged(_) => {
+                    let parsed = self.get_parse(path)?;
+                    self.project_layout
+                        .insert_serialized_tsconfig(package_path, parsed);
+                }
+                WatcherSignalKind::Removed => {
+                    self.project_layout
+                        .remove_tsconfig_from_package(&package_path);
+                }
+            }
         }
 
         Ok(())
     }
 
-    /// Updates the [ModuleGraph] for the given `paths`.
-    #[instrument(level = "debug", skip(self))]
-    pub(super) fn update_module_graph(&self, signal_kind: WatcherSignalKind, paths: &[BiomePath]) {
-        let no_paths: &[BiomePath] = &[];
+    /// Updates the [ModuleGraph] for the given `path` with an optional `root`.
+    fn update_module_graph(
+        &self,
+        signal_kind: WatcherSignalKind,
+        path: &BiomePath,
+        root: Option<SendNode>,
+    ) {
         let (added_or_changed_paths, removed_paths) = match signal_kind {
             WatcherSignalKind::AddedOrChanged(_) => {
-                let documents = self.documents.pin();
-                let mut added_or_changed_paths = Vec::with_capacity(paths.len());
-                for path in paths {
-                    let root = documents.get(path.as_path()).and_then(|doc| {
-                        let file_source = self.file_sources[doc.file_source_index];
-                        match file_source {
-                            DocumentFileSource::Js(_) => doc
-                                .syntax
-                                .as_ref()
-                                .and_then(|syntax| syntax.as_ref().ok())
-                                .map(AnyParse::tree),
-                            _ => None,
-                        }
-                    });
-                    added_or_changed_paths.push((path, root));
-                }
+                let Some(root) = root.and_then(SendNode::into_node).and_then(AnyJsRoot::cast)
+                else {
+                    return;
+                };
 
-                (added_or_changed_paths, no_paths)
+                (&[(path, root)] as &[_], &[] as &[_])
             }
-            WatcherSignalKind::Removed => (Vec::new(), paths),
+            WatcherSignalKind::Removed => (&[] as &[_], &[path] as &[_]),
         };
 
         self.module_graph.update_graph_for_js_paths(
             self.fs.as_ref(),
             &self.project_layout,
-            &added_or_changed_paths,
+            added_or_changed_paths,
             removed_paths,
         );
     }
@@ -685,13 +703,14 @@ impl WorkspaceServer {
         &self,
         signal_kind: WatcherSignalKind,
         path: &Utf8Path,
+        root: Option<SendNode>,
     ) -> Result<(), WorkspaceError> {
         let path = BiomePath::from(path);
         if path.is_config() || path.is_manifest() {
             self.update_project_layout(signal_kind, &path)?;
         }
 
-        self.update_module_graph(signal_kind, &[path]);
+        self.update_module_graph(signal_kind, &path, root);
 
         match signal_kind {
             WatcherSignalKind::AddedOrChanged(OpenFileReason::InitialScan) => {
@@ -707,7 +726,7 @@ impl WorkspaceServer {
 }
 
 impl Workspace for WorkspaceServer {
-    fn fs(&self) -> &dyn FileSystem {
+    fn fs(&self) -> &dyn FsWithResolverProxy {
         self.fs.as_ref()
     }
 
@@ -788,7 +807,7 @@ impl Workspace for WorkspaceServer {
     /// ## Panics
     /// This function may panic if the internal settings mutex has been poisoned
     /// by another thread having previously panicked while holding the lock
-    #[tracing::instrument(level = "debug", skip(self))]
+    #[tracing::instrument(level = "debug", skip_all)]
     fn update_settings(
         &self,
         params: UpdateSettingsParams,
@@ -828,18 +847,31 @@ impl Workspace for WorkspaceServer {
         self.open_file_internal(OpenFileReason::ClientRequest, params)
     }
 
-    fn open_project(&self, params: OpenProjectParams) -> Result<ProjectKey, WorkspaceError> {
-        let path = if params.open_uninitialized {
+    fn open_project(&self, params: OpenProjectParams) -> Result<OpenProjectResult, WorkspaceError> {
+        let (path, scan_kind) = if params.open_uninitialized {
             let path = params.path.to_path_buf();
-            self.find_project_root(params.path).unwrap_or(path)
+            self.find_project_root(
+                params.path,
+                params.only_rules.unwrap_or_default(),
+                params.skip_rules.unwrap_or_default(),
+            )
+            .unwrap_or((path, ScanKind::None))
         } else {
-            self.find_project_root(params.path)?
+            self.find_project_root(
+                params.path,
+                params.only_rules.unwrap_or_default(),
+                params.skip_rules.unwrap_or_default(),
+            )?
         };
 
-        Ok(self.projects.insert_project(path))
+        let project_key = self.projects.insert_project(path);
+
+        Ok(OpenProjectResult {
+            project_key,
+            scan_kind,
+        })
     }
 
-    #[instrument(level = "debug", skip(self))]
     fn scan_project_folder(
         &self,
         params: ScanProjectFolderParams,
@@ -1076,6 +1108,7 @@ impl Workspace for WorkspaceServer {
         let mut node_cache = node_cache.unwrap_or_default();
 
         let parsed = self.parse(project_key, &path, &content, index, &mut node_cache)?;
+        let root = parsed.any_parse.root();
 
         let document = Document {
             content,
@@ -1099,6 +1132,7 @@ impl Workspace for WorkspaceServer {
         self.update_service_data(
             WatcherSignalKind::AddedOrChanged(OpenFileReason::ClientRequest),
             &path,
+            Some(root),
         )
     }
 
@@ -1143,7 +1177,9 @@ impl Workspace for WorkspaceServer {
 
                 Ok(())
             }
-            Compute::Removed(_, _) => self.update_service_data(WatcherSignalKind::Removed, path),
+            Compute::Removed(_, _) => {
+                self.update_service_data(WatcherSignalKind::Removed, path, None)
+            }
             Compute::Aborted(_) => Err(WorkspaceError::not_found()),
         }
     }

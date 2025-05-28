@@ -3,6 +3,8 @@
     "rules": {
       "recommended": false,
       "complexity": {
+        "noArguments": "error",
+        "noCommaOperator": "error",
         "noExtraBooleanCast": "error",
         "noMultipleSpacesInRegularExpressionLiterals": "error",
         "noStaticOnlyClass": "error",
@@ -52,8 +54,6 @@
         "noGlobalEval": "error"
       },
       "style": {
-        "noArguments": "error",
-        "noCommaOperator": "error",
         "noInferrableTypes": "error",
         "noNamespace": "error",
         "noNonNullAssertion": "error",

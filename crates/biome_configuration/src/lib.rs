@@ -533,6 +533,7 @@ pub enum ConfigurationPathHint {
     /// The configuration path provided by the LSP, not having a configuration file is not an error.
     /// The path will always be a directory path.
     FromLsp(Utf8PathBuf),
+
     /// The configuration path provided by the user, not having a configuration file is an error.
     /// The path can either be a directory path or a file path.
     /// Throws any kind of I/O errors.
@@ -564,63 +565,5 @@ impl ConfigurationPathHint {
     }
     pub const fn is_from_lsp(&self) -> bool {
         matches!(self, Self::FromLsp(_))
-    }
-}
-
-#[cfg(test)]
-mod test {
-    use oxc_resolver::{FileMetadata, FsCache, ResolveOptions, ResolverGeneric};
-    use std::env;
-    use std::fs::read_link;
-    use std::path::{Path, PathBuf};
-    use std::sync::Arc;
-
-    #[test]
-    fn resolver_test() {
-        #[derive(Debug, Default)]
-        struct Test;
-
-        impl oxc_resolver::FileSystem for Test {
-            fn read_to_string(&self, _path: &Path) -> std::io::Result<String> {
-                Ok(String::from(
-                    r#"{ "name": "example", "exports": { "./biome": "./biome.json" }}"#,
-                ))
-            }
-
-            fn metadata(&self, _path: &Path) -> std::io::Result<FileMetadata> {
-                Ok(FileMetadata::new(true, false, false))
-            }
-
-            fn symlink_metadata(&self, _path: &Path) -> std::io::Result<FileMetadata> {
-                Ok(FileMetadata::new(true, false, false))
-            }
-
-            fn read_link(&self, path: &Path) -> std::io::Result<PathBuf> {
-                read_link(path)
-            }
-        }
-
-        let resolver = ResolverGeneric::new_with_cache(
-            Arc::new(FsCache::new(Test {})),
-            ResolveOptions {
-                condition_names: vec!["node".to_string(), "import".to_string()],
-                extensions: vec![".json".to_string()],
-                ..ResolveOptions::default()
-            },
-        );
-
-        let result = resolver
-            .resolve(
-                env::current_dir()
-                    .unwrap()
-                    .canonicalize()
-                    .unwrap()
-                    .display()
-                    .to_string(),
-                "example/biome",
-            )
-            .unwrap();
-
-        dbg!(&result);
     }
 }

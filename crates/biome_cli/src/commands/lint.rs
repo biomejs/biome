@@ -13,7 +13,6 @@ use biome_console::Console;
 use biome_deserialize::Merge;
 use biome_fs::FileSystem;
 use biome_service::configuration::LoadedConfiguration;
-use biome_service::projects::ProjectKey;
 use biome_service::{Workspace, WorkspaceError};
 use std::ffi::OsString;
 
@@ -127,7 +126,6 @@ impl CommandRunner for LintCommandPayload {
         cli_options: &CliOptions,
         console: &mut dyn Console,
         _workspace: &dyn Workspace,
-        project_key: ProjectKey,
     ) -> Result<Execution, CliDiagnostic> {
         let fix_file_mode = determine_fix_file_mode(FixFileModeOptions {
             write: self.write,
@@ -137,7 +135,6 @@ impl CommandRunner for LintCommandPayload {
             suppression_reason: self.suppression_reason.clone(),
         })?;
         Ok(Execution::new(TraversalMode::Lint {
-            project_key,
             fix_file_mode,
             stdin: self.get_stdin(console)?,
             only: self.only.clone(),

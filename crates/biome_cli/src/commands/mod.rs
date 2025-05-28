@@ -4,7 +4,8 @@ use crate::commands::scan_kind::compute_scan_kind;
 use crate::execute::Stdin;
 use crate::logging::LoggingKind;
 use crate::{
-    CliDiagnostic, CliSession, Execution, LoggingLevel, VERSION, execute_mode, setup_cli_subscriber,
+    CliDiagnostic, CliSession, Execution, LoggingLevel, TraversalMode, VERSION, execute_mode,
+    setup_cli_subscriber,
 };
 use biome_configuration::analyzer::assist::AssistEnabled;
 use biome_configuration::analyzer::{LinterEnabled, RuleSelector};
@@ -29,11 +30,12 @@ use biome_deserialize::Merge;
 use biome_diagnostics::{Diagnostic, PrintDiagnostic, Severity};
 use biome_fs::{BiomePath, FileSystem};
 use biome_grit_patterns::GritTargetLanguage;
+use biome_resolver::FsWithResolverProxy;
 use biome_service::configuration::{LoadedConfiguration, load_configuration, load_editorconfig};
 use biome_service::documentation::Doc;
 use biome_service::projects::ProjectKey;
 use biome_service::workspace::{
-    FixFileMode, OpenProjectParams, ScanProjectFolderParams, UpdateSettingsParams,
+    FixFileMode, OpenProjectParams, ScanKind, ScanProjectFolderParams, UpdateSettingsParams,
 };
 use biome_service::{Workspace, WorkspaceError};
 use bpaf::Bpaf;
@@ -541,6 +543,9 @@ pub enum BiomeCommand {
     },
     #[bpaf(command("__print_socket"), hide)]
     PrintSocket,
+
+    #[bpaf(command("__where_am_i"), hide)]
+    WhereAmI,
 }
 
 #[derive(Debug, Bpaf, Clone)]
@@ -585,6 +590,7 @@ impl BiomeCommand {
             | Self::RunServer { .. }
             | Self::Clean { .. }
             | Self::PrintSocket => None,
+            Self::WhereAmI => None,
         }
     }
 
@@ -790,6 +796,7 @@ pub(crate) trait CommandRunner: Sized {
             paths,
             duration,
             configuration_files,
+            project_key,
         } = self.configure_workspace(fs, console, workspace, cli_options)?;
         execute_mode(
             execution,
@@ -798,6 +805,7 @@ pub(crate) trait CommandRunner: Sized {
             paths,
             duration,
             configuration_files,
+            project_key,
         )
     }
 
@@ -809,7 +817,7 @@ pub(crate) trait CommandRunner: Sized {
     /// - Updates the settings that belong to the project registered
     fn configure_workspace(
         &mut self,
-        fs: &dyn FileSystem,
+        fs: &dyn FsWithResolverProxy,
         console: &mut dyn Console,
         workspace: &dyn Workspace,
         cli_options: &CliOptions,
@@ -836,16 +844,37 @@ pub(crate) trait CommandRunner: Sized {
             .working_directory()
             .map(BiomePath::from)
             .unwrap_or_default();
-        let project_key = workspace.open_project(OpenProjectParams {
-            path: project_path.clone(),
-            open_uninitialized: true,
-        })?;
 
-        let execution = self.get_execution(cli_options, console, workspace, project_key)?;
-        let scan_kind = compute_scan_kind(&execution, &configuration);
+        let execution = self.get_execution(cli_options, console, workspace)?;
+
+        let params = if let TraversalMode::Lint { only, skip, .. } = execution.traversal_mode() {
+            OpenProjectParams {
+                path: project_path.clone(),
+                open_uninitialized: true,
+                only_rules: Some(only.clone()),
+                skip_rules: Some(skip.clone()),
+            }
+        } else {
+            OpenProjectParams {
+                path: project_path.clone(),
+                open_uninitialized: true,
+                only_rules: None,
+                skip_rules: None,
+            }
+        };
+
+        let open_project_result = workspace.open_project(params)?;
+
+        let scan_kind = compute_scan_kind(&execution, &configuration).unwrap_or({
+            if open_project_result.scan_kind == ScanKind::None && configuration.use_ignore_file() {
+                ScanKind::KnownFiles
+            } else {
+                open_project_result.scan_kind
+            }
+        });
 
         let result = workspace.update_settings(UpdateSettingsParams {
-            project_key,
+            project_key: open_project_result.project_key,
             // When the user provides the path to the configuration, we can't use its directory because
             // it might be outside the project, so we need to use the current project directory.
             workspace_directory: if is_configuration_from_user {
@@ -864,7 +893,7 @@ pub(crate) trait CommandRunner: Sized {
         }
 
         let result = workspace.scan_project_folder(ScanProjectFolderParams {
-            project_key,
+            project_key: open_project_result.project_key,
             path: Some(project_path.clone()),
             watch: cli_options.use_server,
             force: false, // TODO: Maybe we'll want a CLI flag for this.
@@ -885,6 +914,7 @@ pub(crate) trait CommandRunner: Sized {
             paths,
             duration: Some(result.duration),
             configuration_files: result.configuration_files,
+            project_key: open_project_result.project_key,
         })
     }
 
@@ -940,7 +970,6 @@ pub(crate) trait CommandRunner: Sized {
         cli_options: &CliOptions,
         console: &mut dyn Console,
         workspace: &dyn Workspace,
-        project_key: ProjectKey,
     ) -> Result<Execution, CliDiagnostic>;
 
     // Below, methods that consumers can implement
@@ -967,6 +996,8 @@ pub(crate) struct ConfiguredWorkspace {
     pub duration: Option<Duration>,
     /// Configuration files found inside the project
     pub configuration_files: Vec<BiomePath>,
+    /// The unique identifier of the project
+    pub project_key: ProjectKey,
 }
 
 pub trait LoadEditorConfig: CommandRunner {

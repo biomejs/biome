@@ -1,42 +1,12 @@
 use std::sync::Arc;
 
 use biome_js_syntax::{AnyJsDeclaration, JsImport, JsSyntaxNode, JsVariableKind, TextRange};
-use biome_js_type_info::{ScopeId, TypeId, TypeReference};
+use biome_js_type_info::{BindingId, ScopeId, TypeReference};
 use biome_rowan::{AstNode, Text, TextSize};
 
 use biome_jsdoc_comment::JsdocComment;
 
 use super::{JsModuleInfoInner, scope::JsScope};
-
-#[derive(Copy, Clone, Debug, Eq, Hash, PartialEq)]
-pub struct BindingId(u32);
-
-impl BindingId {
-    pub const fn new(index: usize) -> Self {
-        // SAFETY: We don't handle files exceeding `u32::MAX` bytes.
-        // Thus, it isn't possible to exceed `u32::MAX` bindings.
-        Self(index as u32)
-    }
-
-    pub const fn index(self) -> usize {
-        self.0 as usize
-    }
-}
-
-// We allow conversion from `BindingId` into `TypeId`, and vice versa, because
-// for project-level `ResolvedTypeId` instances, the `TypeId` is an indirection
-// that is resolved through a binding.
-impl From<BindingId> for TypeId {
-    fn from(id: BindingId) -> Self {
-        Self::new(id.0 as usize)
-    }
-}
-
-impl From<TypeId> for BindingId {
-    fn from(id: TypeId) -> Self {
-        Self::new(id.index())
-    }
-}
 
 /// Internal type with all the semantic data of a specific binding
 #[derive(Clone, Debug)]
@@ -123,7 +93,7 @@ impl JsBinding {
     }
 }
 
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Copy, Debug, Default)]
 pub enum JsDeclarationKind {
     /// A `class` declaration.
     Class,
@@ -164,6 +134,36 @@ pub enum JsDeclarationKind {
 }
 
 impl JsDeclarationKind {
+    /// Returns whether this declaration declares a type.
+    pub fn declares_type(&self) -> bool {
+        matches!(
+            self,
+            Self::Class
+                | Self::Enum
+                | Self::Import
+                | Self::ImportType
+                | Self::Interface
+                | Self::Namespace
+                | Self::Type
+                | Self::Unknown
+        )
+    }
+
+    /// Returns whether this declaration declares a runtime value.
+    pub fn declares_value(&self) -> bool {
+        matches!(
+            self,
+            Self::Class
+                | Self::Enum
+                | Self::HoistedValue
+                | Self::Import
+                | Self::Namespace
+                | Self::Unknown
+                | Self::Using
+                | Self::Value
+        )
+    }
+
     pub fn from_node(node: &JsSyntaxNode) -> Self {
         let Some(declaration) = node.ancestors().find_map(AnyJsDeclaration::cast) else {
             return match node.ancestors().find_map(JsImport::cast) {
@@ -210,7 +210,13 @@ impl JsDeclarationKind {
         }
     }
 
+    #[inline]
     pub fn is_import_declaration(&self) -> bool {
         matches!(self, Self::Import | Self::ImportType)
+    }
+
+    #[inline]
+    pub fn is_import_type_declaration(&self) -> bool {
+        matches!(self, Self::ImportType)
     }
 }

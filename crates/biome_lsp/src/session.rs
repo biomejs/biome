@@ -7,7 +7,7 @@ use biome_analyze::RuleCategoriesBuilder;
 use biome_configuration::ConfigurationPathHint;
 use biome_console::markup;
 use biome_deserialize::Merge;
-use biome_diagnostics::{DiagnosticExt, Error, PrintDescription};
+use biome_diagnostics::PrintDescription;
 use biome_fs::BiomePath;
 use biome_lsp_converters::{PositionEncoding, WideEncoding, negotiated_encoding};
 use biome_service::Workspace;
@@ -43,7 +43,7 @@ use tower_lsp_server::lsp_types::{ClientCapabilities, Diagnostic, Uri};
 use tower_lsp_server::lsp_types::{MessageType, Registration};
 use tower_lsp_server::lsp_types::{Unregistration, WorkspaceFolder};
 use tower_lsp_server::{Client, UriExt, lsp_types};
-use tracing::{error, info, warn};
+use tracing::{error, info, instrument, warn};
 
 pub(crate) struct ClientInformation {
     /// The name of the client
@@ -207,6 +207,7 @@ impl Session {
     }
 
     /// Initialize this session instance with the incoming initialization parameters from the client
+    #[instrument(level = "debug", skip_all)]
     pub(crate) fn initialize(
         self: &Arc<Self>,
         client_capabilities: ClientCapabilities,
@@ -310,23 +311,24 @@ impl Session {
         self: &Arc<Self>,
         project_key: ProjectKey,
         path: BiomePath,
+        scan_kind: ScanKind,
     ) {
         self.projects.pin().insert(path.clone(), project_key);
 
         // Spawn the scan in the background, to avoid timing out the LSP request.
         let session = self.clone();
-        spawn(async move { session.scan_project_folder(project_key, path).await });
+        spawn(async move {
+            session
+                .scan_project_folder(project_key, path, scan_kind)
+                .await
+        });
     }
 
     /// Get a [`Document`] matching the provided [`Uri`]
     ///
     /// If document does not exist, result is [WorkspaceError::NotFound]
-    pub(crate) fn document(&self, url: &Uri) -> Result<Document, Error> {
-        self.documents
-            .pin()
-            .get(url)
-            .cloned()
-            .ok_or_else(|| WorkspaceError::not_found().with_file_path(url.to_string()))
+    pub(crate) fn document(&self, url: &Uri) -> Option<Document> {
+        self.documents.pin().get(url).cloned()
     }
 
     /// Set the [`Document`] for the provided [`Uri`]
@@ -360,7 +362,9 @@ impl Session {
     /// contents changes.
     #[tracing::instrument(level = "debug", skip_all, fields(url = display(url.as_str()), diagnostic_count), err)]
     pub(crate) async fn update_diagnostics(&self, url: Uri) -> Result<(), LspError> {
-        let doc = self.document(&url)?;
+        let Some(doc) = self.document(&url) else {
+            return Ok(());
+        };
         self.update_diagnostics_for_document(url, doc).await
     }
 
@@ -537,7 +541,7 @@ impl Session {
             self.set_configuration_status(ConfigurationStatus::Loading);
 
             let status = self
-                .load_biome_configuration_file(ConfigurationPathHint::FromWorkspace(config_path))
+                .load_biome_configuration_file(ConfigurationPathHint::FromUser(config_path))
                 .await;
 
             self.set_configuration_status(status);
@@ -576,10 +580,12 @@ impl Session {
         }
     }
 
+    #[instrument(level = "debug", skip(self))]
     pub(crate) async fn scan_project_folder(
         self: &Arc<Self>,
         project_key: ProjectKey,
         project_path: BiomePath,
+        scan_kind: ScanKind,
     ) {
         let session = self.clone();
         let scan_project = move || {
@@ -590,7 +596,7 @@ impl Session {
                     path: Some(project_path),
                     watch: true,
                     force: false,
-                    scan_kind: ScanKind::Project,
+                    scan_kind,
                 });
 
             match result {
@@ -680,19 +686,25 @@ impl Session {
 
         configuration.merge_with(fs_configuration);
 
-        let path = match (&configuration_path, &base_path) {
-            (Some(configuration_path), _) => configuration_path.as_path(),
-            (
-                None,
-                ConfigurationPathHint::FromLsp(path) | ConfigurationPathHint::FromWorkspace(path),
-            ) => path,
-            (None, _) => &fs.working_directory().unwrap_or_default(),
+        // If the configuration from the LSP or the workspace, the directory path is used as
+        // the working directory. Otherwise, the base path of the session is used, then the current
+        // working directory is used as the last resort.
+        let path = match &base_path {
+            ConfigurationPathHint::FromLsp(path) | ConfigurationPathHint::FromWorkspace(path) => {
+                path.to_path_buf()
+            }
+            _ => self
+                .base_path()
+                .or_else(|| fs.working_directory())
+                .unwrap_or_default(),
         };
         let register_result = self.workspace.open_project(OpenProjectParams {
-            path: path.into(),
+            path: path.as_path().into(),
             open_uninitialized: true,
+            skip_rules: None,
+            only_rules: None,
         });
-        let project_key = match register_result {
+        let project_result = match register_result {
             Ok(result) => result,
             Err(error) => {
                 error!("Failed to register the project folder: {error}");
@@ -702,7 +714,7 @@ impl Session {
         };
 
         let result = self.workspace.update_settings(UpdateSettingsParams {
-            project_key,
+            project_key: project_result.project_key,
             workspace_directory: configuration_path
                 .as_ref()
                 .map(Utf8PathBuf::as_path)
@@ -710,7 +722,11 @@ impl Session {
             configuration,
         });
 
-        self.insert_and_scan_project(project_key, path.into());
+        self.insert_and_scan_project(
+            project_result.project_key,
+            path.into(),
+            project_result.scan_kind,
+        );
 
         if let Err(WorkspaceError::PluginErrors(error)) = result {
             error!("Failed to load plugins: {error:?}");

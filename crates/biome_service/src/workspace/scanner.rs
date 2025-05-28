@@ -9,14 +9,14 @@
 //! well as the watcher to allow continuous scanning.
 
 use super::server::WorkspaceServer;
-use super::{FeatureName, IsPathIgnoredParams};
+use super::{FeaturesBuilder, IsPathIgnoredParams};
 use crate::diagnostics::Panic;
 use crate::projects::ProjectKey;
 use crate::workspace::DocumentFileSource;
 use crate::{Workspace, WorkspaceError};
 use biome_diagnostics::serde::Diagnostic;
 use biome_diagnostics::{Diagnostic as _, Error, Severity};
-use biome_fs::{BiomePath, PathInterner, TraversalContext, TraversalScope};
+use biome_fs::{BiomePath, PathInterner, PathKind, TraversalContext, TraversalScope};
 use camino::Utf8Path;
 use crossbeam::channel::{Receiver, Sender, unbounded};
 use std::collections::BTreeSet;
@@ -99,12 +99,14 @@ fn scan_folder(folder: &Utf8Path, ctx: ScanContext) -> (Duration, Vec<BiomePath>
     }));
 
     let evaluated_paths = ctx.evaluated_paths();
-
     let mut configs = Vec::new();
     let mut manifests = Vec::new();
-    let mut handleable_paths = Vec::with_capacity(evaluated_paths.len());
+    let mut handleable_paths = Vec::new();
     let mut ignore_paths = Vec::new();
-    for path in evaluated_paths {
+    // We want to process files that closest to the project root first. For example, we must process
+    // first the `.gitignore` at the root of the project.
+    let iter = evaluated_paths.into_iter().rev();
+    for path in iter {
         if path.is_config() {
             configs.push(path);
         } else if path.is_manifest() {
@@ -257,6 +259,9 @@ impl TraversalContext for ScanContext<'_> {
         self.send_diagnostic(Diagnostic::new(error));
     }
 
+    // This is the first filtering we apply at the scanner. In this function `can_handle`
+    // We roughly understand which files should be open by the scanner.
+    // Here, we mostly do file operations by reading their metadata.
     fn can_handle(&self, path: &BiomePath) -> bool {
         if path
             .file_name()
@@ -266,9 +271,9 @@ impl TraversalContext for ScanContext<'_> {
         }
 
         match self.workspace.fs().symlink_path_kind(path) {
-            Ok(path_kind) if path_kind.is_dir() => {
+            Ok(PathKind::Directory { .. }) => {
                 if self.scan_kind.is_project() && path.is_dependency() {
-                    // In project mode, the scanner always scans dependencies,
+                    // In project mode, the scanner always scans dependencies
                     // because they're a valuable source of type information.
                     true
                 } else {
@@ -279,22 +284,24 @@ impl TraversalContext for ScanContext<'_> {
                             path: path.clone(),
                             // The scanner only cares about the top-level
                             // `files.includes`.
-                            features: FeatureName::empty(),
+                            features: FeaturesBuilder::new().build(),
                         })
                         .unwrap_or_default()
                 }
             }
-            Ok(path_kind) if path_kind.is_file() => {
-                if self.scan_kind.is_known_files() {
-                    (path.is_ignore() || path.is_config() || path.is_manifest())
-                        && !path.is_dependency()
-                } else if path.is_dependency() {
-                    path.is_manifest() || path.is_type_declaration()
-                } else {
-                    DocumentFileSource::try_from_path(path).is_ok() || path.is_ignore()
+            Ok(PathKind::File { .. }) => match self.scan_kind {
+                ScanKind::KnownFiles => path.is_required_during_scan() && !path.is_dependency(),
+                ScanKind::Project => {
+                    if path.is_dependency() {
+                        path.is_package_json() || path.is_type_declaration()
+                    } else {
+                        path.is_required_during_scan()
+                            || DocumentFileSource::try_from_path(path).is_ok()
+                    }
                 }
-            }
-            _ => {
+                ScanKind::None => false,
+            },
+            Err(_) => {
                 // bail on fifo and socket files
                 false
             }
@@ -320,6 +327,35 @@ impl TraversalContext for ScanContext<'_> {
 /// so panics are caught, and diagnostics are submitted in case of panic too.
 fn open_file(ctx: &ScanContext, path: &BiomePath) {
     match catch_unwind(move || {
+        let is_ignored = if ctx.scan_kind.is_project() && path.is_dependency() {
+            !(path.is_package_json() || path.is_type_declaration())
+        } else if path.is_required_during_scan() {
+            // Required files are only ignored if they are in an ignored
+            // directory.
+            path.parent()
+                .and_then(|dir_path| {
+                    ctx.workspace
+                        .is_path_ignored(IsPathIgnoredParams {
+                            project_key: ctx.project_key,
+                            path: dir_path.into(),
+                            features: FeaturesBuilder::new().build(),
+                        })
+                        .ok()
+                })
+                .unwrap_or_default()
+        } else {
+            ctx.workspace
+                .is_path_ignored(IsPathIgnoredParams {
+                    project_key: ctx.project_key,
+                    path: path.clone(),
+                    features: FeaturesBuilder::new().build(),
+                })
+                .unwrap_or_default()
+        };
+        if is_ignored {
+            return Ok(());
+        }
+
         ctx.workspace
             .open_file_during_initial_scan(ctx.project_key, path.clone())
     }) {

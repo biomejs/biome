@@ -21,6 +21,9 @@
       "groupName": "github-actions",
       "matchManagers": [
         "github-actions"
+      ],
+      "matchDepNames": [
+        "!rust"
       ]
     },
     {

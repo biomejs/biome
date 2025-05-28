@@ -1,14 +1,13 @@
 {
   "linter": {
     "rules": {
-      
       "correctness": {
+        "noUnnecessaryContinue": "on",
         "noInvalidNewBuiltin": "on",
-        "noInvalidBuiltinInstantiation": "on",
-        "noUselessContinue": "on"
+        "noInvalidBuiltinInstantiation": "on"
       },
       "complexity": {
-        "noUnnecessaryContinue": "on"
+        "noUselessContinue": "on"
       }
     }
   }

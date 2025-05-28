@@ -22,11 +22,11 @@ biome_js_type_info   = { workspace = true }
 biome_jsdoc_comment  = { workspace = true }
 biome_package        = { workspace = true }
 biome_project_layout = { workspace = true }
+biome_resolver       = { workspace = true }
 biome_rowan          = { workspace = true }
 camino               = { workspace = true }
 cfg-if               = { workspace = true }
 once_cell            = "1.21.3"             # Use `std::sync::OnceLock::get_or_try_init` when it is stable.
-oxc_resolver         = { workspace = true }
 papaya               = { workspace = true }
 rust-lapper          = { workspace = true }
 rustc-hash           = { workspace = true }

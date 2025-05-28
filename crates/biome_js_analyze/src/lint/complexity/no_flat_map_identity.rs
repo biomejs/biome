@@ -42,7 +42,7 @@ declare_lint_rule! {
         recommended: true,
         severity: Severity::Information,
         sources: &[RuleSource::Clippy("flat_map_identity")],
-        fix_kind: FixKind::Safe,
+        fix_kind: FixKind::Unsafe,
     }
 }
 

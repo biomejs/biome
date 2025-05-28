@@ -67,7 +67,9 @@ Linter:
   Recommended:                  false
   Enabled rules:
     complexity/noAdjacentSpacesInRegex
+    complexity/noArguments
     complexity/noBannedTypes
+    complexity/noCommaOperator
     complexity/noEmptyTypeParameters
     complexity/noExtraBooleanCast
     complexity/noFlatMapIdentity
@@ -75,6 +77,7 @@ Linter:
     complexity/noThisInStatic
     complexity/noUselessCatch
     complexity/noUselessConstructor
+    complexity/noUselessContinue
     complexity/noUselessEmptyExport
     complexity/noUselessEscapeInRegex
     complexity/noUselessFragments

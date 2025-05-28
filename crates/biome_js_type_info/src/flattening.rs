@@ -3,9 +3,16 @@ use std::collections::{BTreeMap, btree_map::Entry};
 use biome_rowan::Text;
 
 use crate::{
-    DestructureField, GenericTypeParameter, ResolvedTypeData, ResolvedTypeMember, TypeData,
-    TypeInstance, TypeMember, TypeReference, TypeResolver, TypeofExpression,
-    TypeofStaticMemberExpression,
+    DestructureField, GLOBAL_UNKNOWN_ID, GenericTypeParameter, Literal, ResolvedTypeData,
+    ResolvedTypeMember, TypeData, TypeInstance, TypeMemberKind, TypeReference, TypeResolver,
+    TypeofExpression, TypeofStaticMemberExpression,
+    globals::{
+        GLOBAL_BIGINT_STRING_LITERAL_ID, GLOBAL_BOOLEAN_STRING_LITERAL_ID,
+        GLOBAL_FUNCTION_STRING_LITERAL_ID, GLOBAL_NUMBER_STRING_LITERAL_ID,
+        GLOBAL_OBJECT_STRING_LITERAL_ID, GLOBAL_STRING_STRING_LITERAL_ID,
+        GLOBAL_SYMBOL_STRING_LITERAL_ID, GLOBAL_TYPEOF_OPERATOR_RETURN_UNION_ID,
+        GLOBAL_UNDEFINED_STRING_LITERAL_ID,
+    },
 };
 
 impl TypeData {
@@ -59,6 +66,13 @@ fn flattened(mut ty: TypeData, resolver: &mut dyn TypeResolver, depth: usize) ->
 
     for depth in depth + 1..=MAX_FLATTEN_DEPTH {
         match &ty {
+            TypeData::DualReference(duality) => {
+                if duality.ty == duality.value_ty {
+                    ty = TypeData::Reference(duality.ty.clone());
+                } else {
+                    return ty;
+                }
+            }
             TypeData::InstanceOf(instance_of) => match resolver.resolve_and_get(&instance_of.ty) {
                 Some(resolved) => match resolved.as_raw_data() {
                     TypeData::InstanceOf(resolved_instance) => {
@@ -117,6 +131,15 @@ fn flattened(mut ty: TypeData, resolver: &mut dyn TypeResolver, depth: usize) ->
                     }
                     None => return ty,
                 },
+                TypeofExpression::BitwiseNot(expr) => {
+                    return match resolver.resolve_and_get(&expr.argument) {
+                        Some(resolved) => match resolved.as_raw_data() {
+                            TypeData::BigInt => TypeData::BigInt,
+                            _ => TypeData::Number,
+                        },
+                        None => ty,
+                    };
+                }
                 TypeofExpression::Call(expr) => match resolver.resolve_and_get(&expr.callee) {
                     Some(resolved) => {
                         return match resolved.as_raw_data() {
@@ -131,18 +154,17 @@ fn flattened(mut ty: TypeData, resolver: &mut dyn TypeResolver, depth: usize) ->
                                 None => ty,
                             },
                             TypeData::Object(_) => {
-                                let member = resolved
+                                let member_ty = resolved
                                     .all_members(resolver)
                                     .find(|member| member.has_name("constructor"))
-                                    .map(ResolvedTypeMember::to_member);
-                                match member {
-                                    Some(member) => {
-                                        ty = resolver
-                                            .type_from_member(resolved.to_data(), member)
-                                            .to_data();
+                                    .map(ResolvedTypeMember::to_member)
+                                    .and_then(|member| resolver.resolve_and_get(&member.ty));
+                                match member_ty {
+                                    Some(member_ty) => {
+                                        ty = member_ty.to_data();
                                         continue;
                                     }
-                                    None => TypeData::unknown(),
+                                    None => TypeData::reference(GLOBAL_UNKNOWN_ID),
                                 }
                             }
                             _ => ty,
@@ -160,20 +182,17 @@ fn flattened(mut ty: TypeData, resolver: &mut dyn TypeResolver, depth: usize) ->
                                     Some(member) => {
                                         ty = flattened(
                                             resolver
-                                                .type_from_member(
-                                                    resolved.to_data(),
-                                                    ResolvedTypeMember::from((
-                                                        resolved.resolver_id(),
-                                                        member,
-                                                    ))
-                                                    .to_member(),
+                                                .resolve_and_get(
+                                                    &resolved
+                                                        .apply_module_id_to_reference(&member.ty),
                                                 )
-                                                .to_data(),
+                                                .map(ResolvedTypeData::to_data)
+                                                .unwrap_or_default(),
                                             resolver,
                                             depth,
                                         );
                                     }
-                                    None => return TypeData::Unknown,
+                                    None => return TypeData::reference(GLOBAL_UNKNOWN_ID),
                                 }
                             }
                             (TypeData::Class(class), DestructureField::RestExcept(names)) => {
@@ -225,9 +244,10 @@ fn flattened(mut ty: TypeData, resolver: &mut dyn TypeResolver, depth: usize) ->
                                 });
                                 return match member {
                                     Some(member) => resolver
-                                        .type_from_member(resolved.to_data(), member.to_member())
-                                        .to_data(),
-                                    None => TypeData::Unknown,
+                                        .resolve_and_get(&member.ty())
+                                        .map(ResolvedTypeData::to_data)
+                                        .unwrap_or_default(),
+                                    None => TypeData::unknown(),
                                 };
                             }
                             (_, DestructureField::RestExcept(names)) => {
@@ -270,13 +290,19 @@ fn flattened(mut ty: TypeData, resolver: &mut dyn TypeResolver, depth: usize) ->
                             let constructed_ty = class
                                 .members
                                 .iter()
-                                .find_map(|member| match member {
-                                    TypeMember::Constructor(constructor) => {
-                                        // TODO: We might need to make an attempt to match
-                                        //       type signatures too.
-                                        (constructor.parameters.len() == num_args)
-                                            .then(|| constructor.return_type.clone())
-                                            .flatten()
+                                .find_map(|member| match member.kind {
+                                    TypeMemberKind::Constructor => {
+                                        let constructor = resolver.resolve_and_get(&member.ty)?;
+                                        match constructor.as_raw_data() {
+                                            TypeData::Constructor(constructor) => {
+                                                // TODO: We might need to make an attempt to match
+                                                //       type signatures too.
+                                                (constructor.parameters.len() == num_args)
+                                                    .then(|| constructor.return_type.clone())
+                                                    .flatten()
+                                            }
+                                            _ => None,
+                                        }
                                     }
                                     _ => None,
                                 })
@@ -386,12 +412,9 @@ fn flattened(mut ty: TypeData, resolver: &mut dyn TypeResolver, depth: usize) ->
                         });
                         match member {
                             Some(member) => {
-                                let member = member.to_member();
-                                ty = TypeData::reference(
-                                    resolver.register_type_from_member(object.to_data(), member),
-                                );
+                                ty = TypeData::reference(member.ty().into_owned());
                             }
-                            None => return TypeData::Unknown,
+                            None => return TypeData::unknown(),
                         }
                     } else {
                         return ty;
@@ -407,9 +430,9 @@ fn flattened(mut ty: TypeData, resolver: &mut dyn TypeResolver, depth: usize) ->
                                         .into_owned(),
                                 );
                             }
-                            None => return TypeData::Unknown,
+                            None => return TypeData::unknown(),
                         },
-                        _ => return TypeData::Unknown,
+                        _ => return TypeData::unknown(),
                     },
                     None => return ty,
                 },
@@ -419,15 +442,64 @@ fn flattened(mut ty: TypeData, resolver: &mut dyn TypeResolver, depth: usize) ->
                     }
                     None => return ty,
                 },
+                TypeofExpression::Typeof(expr) => {
+                    return match resolver.resolve_and_get(&expr.argument) {
+                        Some(resolved) => flattened_typeof_data(resolved),
+                        None => ty,
+                    };
+                }
+                TypeofExpression::UnaryMinus(expr) => {
+                    return match resolver.resolve_and_get(&expr.argument) {
+                        Some(resolved) => match resolved.as_raw_data() {
+                            TypeData::BigInt => TypeData::BigInt,
+                            _ => TypeData::Number,
+                        },
+                        None => ty,
+                    };
+                }
             },
-            TypeData::TypeofValue(value) => match resolver.resolve_reference(&value.ty) {
-                Some(type_id) => ty = TypeData::reference(type_id),
-                None => return ty,
-            },
+            TypeData::TypeofType(reference) => {
+                match resolver.resolve_reference(reference.as_ref()) {
+                    Some(resolved) => ty = TypeData::reference(resolved),
+                    None => return ty,
+                }
+            }
+            TypeData::TypeofValue(value) if value.ty.is_known() => {
+                match resolver.resolve_reference(&value.ty) {
+                    Some(resolved) => ty = TypeData::reference(resolved),
+                    None => return ty,
+                }
+            }
             _ => return ty,
         }
     }
 
     debug_assert!(false, "max flattening depth reached");
     TypeData::Unknown
+}
+
+#[inline]
+fn flattened_typeof_data(resolved: ResolvedTypeData) -> TypeData {
+    match resolved.as_raw_data() {
+        TypeData::BigInt => TypeData::reference(GLOBAL_BIGINT_STRING_LITERAL_ID),
+        TypeData::Boolean => TypeData::reference(GLOBAL_BOOLEAN_STRING_LITERAL_ID),
+        TypeData::Function(_) => TypeData::reference(GLOBAL_FUNCTION_STRING_LITERAL_ID),
+        TypeData::Literal(literal) => match literal.as_ref() {
+            Literal::BigInt(_) => TypeData::reference(GLOBAL_BIGINT_STRING_LITERAL_ID),
+            Literal::Boolean(_) => TypeData::reference(GLOBAL_BOOLEAN_STRING_LITERAL_ID),
+            Literal::Null | Literal::Object(_) | Literal::RegExp(_) => {
+                TypeData::reference(GLOBAL_OBJECT_STRING_LITERAL_ID)
+            }
+            Literal::Number(_) => TypeData::reference(GLOBAL_NUMBER_STRING_LITERAL_ID),
+            Literal::String(_) | Literal::Template(_) => {
+                TypeData::reference(GLOBAL_STRING_STRING_LITERAL_ID)
+            }
+        },
+        TypeData::Number => TypeData::reference(GLOBAL_NUMBER_STRING_LITERAL_ID),
+        TypeData::Object(_) => TypeData::reference(GLOBAL_OBJECT_STRING_LITERAL_ID),
+        TypeData::String => TypeData::reference(GLOBAL_STRING_STRING_LITERAL_ID),
+        TypeData::Symbol => TypeData::reference(GLOBAL_SYMBOL_STRING_LITERAL_ID),
+        TypeData::Undefined => TypeData::reference(GLOBAL_UNDEFINED_STRING_LITERAL_ID),
+        _ => TypeData::reference(GLOBAL_TYPEOF_OPERATOR_RETURN_UNION_ID),
+    }
 }

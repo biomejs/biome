@@ -66,12 +66,14 @@ impl Workspace {
     }
 
     #[wasm_bindgen(js_name = openProject)]
-    pub fn open_project(&self, params: IOpenProjectParams) -> Result<IProjectKey, Error> {
+    pub fn open_project(&self, params: IOpenProjectParams) -> Result<IOpenProjectResult, Error> {
         let params: OpenProjectParams =
             serde_wasm_bindgen::from_value(params.into()).map_err(into_error)?;
         let result = self.inner.open_project(params).map_err(into_error)?;
 
-        to_value(&result).map(IProjectKey::from).map_err(into_error)
+        to_value(&result)
+            .map(IOpenProjectResult::from)
+            .map_err(into_error)
     }
 
     #[wasm_bindgen(js_name = openFile)]

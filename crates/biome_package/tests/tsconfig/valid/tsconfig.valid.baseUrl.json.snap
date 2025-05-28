@@ -23,6 +23,7 @@ TsConfigJson {
         ),
         paths: None,
         paths_base: "",
+        type_roots: None,
     },
     references: [],
 }

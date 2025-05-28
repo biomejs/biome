@@ -60,7 +60,7 @@ declare_lint_rule! {
         sources: &[RuleSource::Eslint("no-nonoctal-decimal-escape")],
         recommended: true,
         severity: Severity::Error,
-        fix_kind: FixKind::Unsafe,
+        fix_kind: FixKind::Safe,
     }
 }
 

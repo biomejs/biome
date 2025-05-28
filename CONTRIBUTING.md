@@ -3,11 +3,14 @@
 We can use help in a bunch of areas and any help is greatly appreciated!
 
 ## Table of Contents
+
 - [🚀 Contributing](#-contributing)
   * [Asking questions, making proposals](#asking-questions-making-proposals)
   * [Reporting bugs](#reporting-bugs)
   * [Getting Started](#getting-started)
-  * [Install the required tools](#install-the-required-tools)
+    + [Local development](#local-development)
+      - [Install the required tools](#install-the-required-tools)
+    + [GitHub Codespaces](#github-codespaces)
   * [Testing](#testing)
     + [Debugging](#debugging)
   * [Debug binaries](#debug-binaries)
@@ -24,12 +27,15 @@ We can use help in a bunch of areas and any help is greatly appreciated!
   * [Commit messages](#commit-messages)
   * [Creating pull requests](#creating-pull-requests)
     + [Changelog](#changelog)
+      - [Create a changeset](#create-a-changeset)
       - [Choose the correct packages](#choose-the-correct-packages)
       - [Choose the correct type of change](#choose-the-correct-type-of-change)
       - [Writing a changeset](#writing-a-changeset)
     + [Documentation](#documentation)
     + [Versioning](#versioning)
   * [Releasing](#releasing)
+    + [Beta releases](#beta-releases)
+    + [Regular releases](#regular-releases)
   * [Resources](#resources)
   * [Current Members](#current-members)
     + [Lead team](#lead-team)
@@ -434,22 +440,21 @@ Even minor versions are dedicated to official releases, e.g. `*.6.*`.
 
 1. [ ] Run the `beta` workflow.
    Input the _upcoming_ version with an incremented number for each release (e.g. `2.0.0-beta.1`).
+2. [ ] If you're a Core Contributor, approve the deployment.
 
 ### Regular releases
 
 When releasing a new version of a Biome, follow these steps:
 
-1. [ ] Add a [changelog](./CHANGELOG.md) entry for every Pull Request that lacks one.
-   You can filter [merged PRs that don't update the changelog](https://github.com/biomejs/biome/pulls?q=is%3Apr+is%3Amerged+-label%3AA-Changelog).
-   Read our [guidelines for editing the changelog](#changelog).
-
-1. [ ] **Update to the same `version` in all crates** if you publish crates if applicable. (`Cargo.toml` and `crates/**/Cargo.toml`)
+1. [ ] **Update to the same `version` in all crates** if you publish crates, if applicable. (`Cargo.toml` and `crates/**/Cargo.toml`)
 
 1. [ ] Linter rules have a `version` metadata directly defined in their implementation.
    This field is set to `next` for newly created rules.
    This field must be updated to the new version.
 
 1. [ ] Merge the PR `ci: release`, and the release workflow will run. Once these workflows finish compiling the final artefact, **they need to be approved manually** by a member of the **Core Contributors**.
+
+1. [ ] In the [website repository](https://github.com/biomejs/website), merge `next` into `main` with a PR. Usually, `next` contains the docs of new rules/actions. As well as the docs of new options.
 
 1. [ ] Open a new PR in the [website repository](https://github.com/biomejs/website) to update the website with the new version number:
    `BIOME_VERSION=<version> pnpm run codegen:all`.

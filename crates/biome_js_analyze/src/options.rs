@@ -8,7 +8,8 @@ pub type NoAccessKey = <lint::a11y::no_access_key::NoAccessKey as biome_analyze:
 pub type NoAccumulatingSpread = < lint :: performance :: no_accumulating_spread :: NoAccumulatingSpread as biome_analyze :: Rule > :: Options ;
 pub type NoAdjacentSpacesInRegex = < lint :: complexity :: no_adjacent_spaces_in_regex :: NoAdjacentSpacesInRegex as biome_analyze :: Rule > :: Options ;
 pub type NoApproximativeNumericConstant = < lint :: suspicious :: no_approximative_numeric_constant :: NoApproximativeNumericConstant as biome_analyze :: Rule > :: Options ;
-pub type NoArguments = <lint::style::no_arguments::NoArguments as biome_analyze::Rule>::Options;
+pub type NoArguments =
+    <lint::complexity::no_arguments::NoArguments as biome_analyze::Rule>::Options;
 pub type NoAriaHiddenOnFocusable = < lint :: a11y :: no_aria_hidden_on_focusable :: NoAriaHiddenOnFocusable as biome_analyze :: Rule > :: Options ;
 pub type NoAriaUnsupportedElements = < lint :: a11y :: no_aria_unsupported_elements :: NoAriaUnsupportedElements as biome_analyze :: Rule > :: Options ;
 pub type NoArrayIndexKey =
@@ -33,7 +34,7 @@ pub type NoChildrenProp =
 pub type NoClassAssign =
     <lint::suspicious::no_class_assign::NoClassAssign as biome_analyze::Rule>::Options;
 pub type NoCommaOperator =
-    <lint::style::no_comma_operator::NoCommaOperator as biome_analyze::Rule>::Options;
+    <lint::complexity::no_comma_operator::NoCommaOperator as biome_analyze::Rule>::Options;
 pub type NoCommentText =
     <lint::suspicious::no_comment_text::NoCommentText as biome_analyze::Rule>::Options;
 pub type NoCommonJs = <lint::style::no_common_js::NoCommonJs as biome_analyze::Rule>::Options;
@@ -160,6 +161,7 @@ pub type NoNamespaceImport =
     <lint::performance::no_namespace_import::NoNamespaceImport as biome_analyze::Rule>::Options;
 pub type NoNegationElse =
     <lint::style::no_negation_else::NoNegationElse as biome_analyze::Rule>::Options;
+pub type NoNestedComponentDefinitions = < lint :: nursery :: no_nested_component_definitions :: NoNestedComponentDefinitions as biome_analyze :: Rule > :: Options ;
 pub type NoNestedTernary =
     <lint::style::no_nested_ternary::NoNestedTernary as biome_analyze::Rule>::Options;
 pub type NoNodejsModules =
@@ -266,7 +268,7 @@ pub type NoUselessCatch =
     <lint::complexity::no_useless_catch::NoUselessCatch as biome_analyze::Rule>::Options;
 pub type NoUselessConstructor = < lint :: complexity :: no_useless_constructor :: NoUselessConstructor as biome_analyze :: Rule > :: Options ;
 pub type NoUselessContinue =
-    <lint::correctness::no_useless_continue::NoUselessContinue as biome_analyze::Rule>::Options;
+    <lint::complexity::no_useless_continue::NoUselessContinue as biome_analyze::Rule>::Options;
 pub type NoUselessElse =
     <lint::style::no_useless_else::NoUselessElse as biome_analyze::Rule>::Options;
 pub type NoUselessEmptyExport = < lint :: complexity :: no_useless_empty_export :: NoUselessEmptyExport as biome_analyze :: Rule > :: Options ;
@@ -333,6 +335,8 @@ pub type UseConsistentBuiltinInstantiation = < lint :: style :: use_consistent_b
 pub type UseConsistentCurlyBraces = < lint :: style :: use_consistent_curly_braces :: UseConsistentCurlyBraces as biome_analyze :: Rule > :: Options ;
 pub type UseConsistentMemberAccessibility = < lint :: style :: use_consistent_member_accessibility :: UseConsistentMemberAccessibility as biome_analyze :: Rule > :: Options ;
 pub type UseConsistentObjectDefinition = < lint :: nursery :: use_consistent_object_definition :: UseConsistentObjectDefinition as biome_analyze :: Rule > :: Options ;
+pub type UseConsistentResponse =
+    <lint::nursery::use_consistent_response::UseConsistentResponse as biome_analyze::Rule>::Options;
 pub type UseConst = <lint::style::use_const::UseConst as biome_analyze::Rule>::Options;
 pub type UseDateNow = <lint::complexity::use_date_now::UseDateNow as biome_analyze::Rule>::Options;
 pub type UseDefaultParameterLast = < lint :: style :: use_default_parameter_last :: UseDefaultParameterLast as biome_analyze :: Rule > :: Options ;
@@ -441,6 +445,8 @@ pub type UseTopLevelRegex =
     <lint::performance::use_top_level_regex::UseTopLevelRegex as biome_analyze::Rule>::Options;
 pub type UseTrimStartEnd =
     <lint::style::use_trim_start_end::UseTrimStartEnd as biome_analyze::Rule>::Options;
+pub type UseUniqueElementIds =
+    <lint::nursery::use_unique_element_ids::UseUniqueElementIds as biome_analyze::Rule>::Options;
 pub type UseValidAnchor =
     <lint::a11y::use_valid_anchor::UseValidAnchor as biome_analyze::Rule>::Options;
 pub type UseValidAriaProps =

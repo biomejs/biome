@@ -68,7 +68,7 @@ declare_lint_rule! {
         sources: &[RuleSource::Eslint("no-useless-concat")],
         recommended: false,
         severity: Severity::Information,
-        fix_kind: FixKind::Unsafe,
+        fix_kind: FixKind::Safe,
     }
 }
 

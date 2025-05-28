@@ -6,7 +6,10 @@ Change the group of some rules, promote nursery rules and update the recommended
 
 The following rules have been moved to a new group:
 
+- [complexity/noArguments](https://biomejs.dev/linter/rules/no-arguments)
+- [complexity/noCommaOperator](https://biomejs.dev/linter/rules/no-comma-operator)
 - [complexity/noFlatMapIdentity](https://biomejs.dev/linter/rules/no-flat-map-identity)
+- [complexity/noUselessContinue](https://biomejs.dev/linter/rules/no-useless-continue)
 - [complexity/useNumericLiterals](https://biomejs.dev/linter/rules/use-numeric-literals)
 - [correctness/useValidTypeof](https://biomejs.dev/linter/rules/use-valid-typeof)
 - [performance/noNamespaceImport](https://biomejs.dev/linter/rules/no-namespace-import/)
@@ -90,6 +93,5 @@ And the following style rules are no longer recommended:
 - [style/noUnusedTemplateLiteral](https://biomejs.dev/linter/rules/no-unused-template-literal)
 - [style/useEnumInitializers](https://biomejs.dev/linter/rules/use-enum-initializers)
 - [style/noUselessElse](https://biomejs.dev/linter/rules/no-useless-else)
-- [style/useConst](https://biomejs.dev/linter/rules/use-const)
 - [style/useSelfClosingElements](https://biomejs.dev/linter/rules/use-self-closing-elements)
 - [style/useSingleVarDeclarator](https://biomejs.dev/linter/rules/use-single-var-declarator)

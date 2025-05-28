@@ -3,7 +3,7 @@
 use biome_js_formatter::context::JsFormatOptions;
 use biome_js_formatter::format_node;
 use biome_js_parser::{JsParserOptions, parse};
-use biome_js_syntax::JsVariableDeclaration;
+use biome_js_syntax::{AnyJsExpression, JsVariableDeclaration};
 use biome_js_syntax::{
     AnyJsModuleItem, AnyJsRoot, AnyJsStatement, JsFileSource, JsFunctionDeclaration,
 };
@@ -199,6 +199,22 @@ impl TypeResolver for HardcodedSymbolResolver {
     fn registered_types(&self) -> &[TypeData] {
         &self.types
     }
+}
+
+pub fn get_expression(root: &AnyJsRoot) -> AnyJsExpression {
+    let module = root.as_js_module().unwrap();
+    module
+        .items()
+        .into_iter()
+        .filter_map(|item| match item {
+            AnyJsModuleItem::AnyJsStatement(statement) => Some(statement),
+            _ => None,
+        })
+        .find_map(|statement| match statement {
+            AnyJsStatement::JsExpressionStatement(expr) => expr.expression().ok(),
+            _ => None,
+        })
+        .expect("cannot find expression")
 }
 
 pub fn get_function_declaration(root: &AnyJsRoot) -> JsFunctionDeclaration {

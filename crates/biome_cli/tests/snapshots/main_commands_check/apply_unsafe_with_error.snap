@@ -5,7 +5,7 @@ expression: redactor(content)
 ## `test1.js`
 
 ```js
-let a = 4;
+const a = 4;
 console.log(a);
 function _f() {
 	arguments;
@@ -16,7 +16,7 @@ function _f() {
 ## `test2.js`
 
 ```js
-let a = 4;
+const a = 4;
 console.log(a);
 function _f() {
 	arguments;
@@ -27,11 +27,11 @@ function _f() {
 # Emitted Messages
 
 ```block
-test1.js:3:17 lint/style/noArguments ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+test1.js:3:17 lint/complexity/noArguments ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use the rest parameters instead of arguments.
   
-    1 │ let a = 4;
+    1 │ const a = 4;
     2 │ console.log(a);
   > 3 │ function _f() { arguments; }
       │                 ^^^^^^^^^
@@ -43,11 +43,11 @@ test1.js:3:17 lint/style/noArguments ━━━━━━━━━━━━━━�
 ```
 
 ```block
-test2.js:3:17 lint/style/noArguments ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+test2.js:3:17 lint/complexity/noArguments ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use the rest parameters instead of arguments.
   
-    1 │ let a = 4;
+    1 │ const a = 4;
     2 │ console.log(a);
   > 3 │ function _f() { arguments; }
       │                 ^^^^^^^^^

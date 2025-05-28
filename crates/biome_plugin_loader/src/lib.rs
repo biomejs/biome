@@ -49,10 +49,7 @@ impl BiomePlugin {
 
         let manifest_path = plugin_path.join("biome-manifest.jsonc");
         if !fs.path_is_file(&manifest_path) {
-            return Err(PluginDiagnostic::cant_resolve(
-                manifest_path.to_string(),
-                None,
-            ));
+            return Err(PluginDiagnostic::cant_resolve(manifest_path, None));
         }
 
         let manifest_content = fs.read_file_from_path(&manifest_path)?;

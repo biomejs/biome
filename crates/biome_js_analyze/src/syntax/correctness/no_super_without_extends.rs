@@ -11,10 +11,10 @@ declare_syntax_rule! {
     ///
     /// ```js
     /// class A {
-    //     constructor() {
-    //         super()
-    //     }
-    // }
+    ///     constructor() {
+    ///         super()
+    ///     }
+    /// }
     /// ```
     pub NoSuperWithoutExtends {
         version: "1.0.0",
