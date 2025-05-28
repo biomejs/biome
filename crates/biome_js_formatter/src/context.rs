@@ -199,7 +199,7 @@ impl JsFormatOptions {
             bracket_same_line: BracketSameLine::default(),
             attribute_position: AttributePosition::default(),
             expand: Expand::default(),
-            operator_linebreak: OperatorLinebreak::default(), // Default to before operator
+            operator_linebreak: OperatorLinebreak::default(),
         }
     }
 
