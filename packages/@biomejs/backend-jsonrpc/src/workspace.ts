@@ -1657,6 +1657,10 @@ export interface Nursery {
 	 */
 	useNumericSeparators?: RuleFixConfiguration_for_Null;
 	/**
+	 * Prefer object spread over Object.assign() when constructing new objects.
+	 */
+	useObjectSpread?: RuleFixConfiguration_for_Null;
+	/**
 	 * Enforce the consistent use of the radix argument when using parseInt().
 	 */
 	useParseIntRadix?: RuleFixConfiguration_for_Null;
@@ -3526,6 +3530,7 @@ export type Category =
 	| "lint/nursery/useNamedOperation"
 	| "lint/nursery/useNamingConvention"
 	| "lint/nursery/useNumericSeparators"
+	| "lint/nursery/useObjectSpread"
 	| "lint/nursery/useParseIntRadix"
 	| "lint/nursery/useSingleJsDocAsterisk"
 	| "lint/nursery/useSortedClasses"

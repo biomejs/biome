@@ -1,0 +1,12 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 134
+expression: validRequiredObject.js
+---
+# Input
+```js
+/* should not generate diagnostics */
+const Object = require('foo');
+Object.assign({ foo: 'bar' });
+
+```

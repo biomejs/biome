@@ -203,6 +203,7 @@ define_categories! {
     "lint/nursery/useNamedOperation": "https://biomejs.dev/linter/rules/use-named-operation",
     "lint/nursery/useNamingConvention": "https://biomejs.dev/linter/rules/use-naming-convention",
     "lint/nursery/useNumericSeparators": "https://biomejs.dev/linter/rules/use-numeric-separators",
+    "lint/nursery/useObjectSpread": "https://biomejs.dev/linter/rules/use-object-spread",
     "lint/nursery/useParseIntRadix": "https://biomejs.dev/linter/rules/use-parse-int-radix",
     "lint/nursery/useSingleJsDocAsterisk": "https://biomejs.dev/linter/rules/use-single-js-doc-asterisk",
     "lint/nursery/useSortedClasses": "https://biomejs.dev/linter/rules/use-sorted-classes",

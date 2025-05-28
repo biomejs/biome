@@ -380,6 +380,7 @@ pub enum RuleName {
     UseNumberToFixedDigitsArgument,
     UseNumericLiterals,
     UseNumericSeparators,
+    UseObjectSpread,
     UseOptionalChain,
     UseParseIntRadix,
     UseRegexLiterals,
@@ -709,6 +710,7 @@ impl RuleName {
             Self::UseNumberToFixedDigitsArgument => "useNumberToFixedDigitsArgument",
             Self::UseNumericLiterals => "useNumericLiterals",
             Self::UseNumericSeparators => "useNumericSeparators",
+            Self::UseObjectSpread => "useObjectSpread",
             Self::UseOptionalChain => "useOptionalChain",
             Self::UseParseIntRadix => "useParseIntRadix",
             Self::UseRegexLiterals => "useRegexLiterals",
@@ -1027,13 +1029,14 @@ impl RuleName {
             Self::UseMediaCaption => RuleGroup::A11y,
             Self::UseNamedOperation => RuleGroup::Nursery,
             Self::UseNamespaceKeyword => RuleGroup::Suspicious,
-            Self::UseNamingConvention => RuleGroup::Style,
+            Self::UseNamingConvention => RuleGroup::Nursery,
             Self::UseNodeAssertStrict => RuleGroup::Style,
             Self::UseNodejsImportProtocol => RuleGroup::Style,
             Self::UseNumberNamespace => RuleGroup::Style,
             Self::UseNumberToFixedDigitsArgument => RuleGroup::Suspicious,
             Self::UseNumericLiterals => RuleGroup::Complexity,
             Self::UseNumericSeparators => RuleGroup::Nursery,
+            Self::UseObjectSpread => RuleGroup::Nursery,
             Self::UseOptionalChain => RuleGroup::Complexity,
             Self::UseParseIntRadix => RuleGroup::Nursery,
             Self::UseRegexLiterals => RuleGroup::Complexity,
@@ -1368,6 +1371,7 @@ impl std::str::FromStr for RuleName {
             "useNumberToFixedDigitsArgument" => Ok(Self::UseNumberToFixedDigitsArgument),
             "useNumericLiterals" => Ok(Self::UseNumericLiterals),
             "useNumericSeparators" => Ok(Self::UseNumericSeparators),
+            "useObjectSpread" => Ok(Self::UseObjectSpread),
             "useOptionalChain" => Ok(Self::UseOptionalChain),
             "useParseIntRadix" => Ok(Self::UseParseIntRadix),
             "useRegexLiterals" => Ok(Self::UseRegexLiterals),
@@ -4825,6 +4829,9 @@ pub struct Nursery {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub use_numeric_separators:
         Option<RuleFixConfiguration<biome_js_analyze::options::UseNumericSeparators>>,
+    #[doc = "Prefer object spread over Object.assign() when constructing new objects."]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub use_object_spread: Option<RuleFixConfiguration<biome_js_analyze::options::UseObjectSpread>>,
     #[doc = "Enforce the consistent use of the radix argument when using parseInt()."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub use_parse_int_radix:
@@ -4883,6 +4890,7 @@ impl Nursery {
         "useNamedOperation",
         "useNamingConvention",
         "useNumericSeparators",
+        "useObjectSpread",
         "useParseIntRadix",
         "useSingleJsDocAsterisk",
         "useSortedClasses",
@@ -4898,7 +4906,7 @@ impl Nursery {
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[29]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[30]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[31]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[34]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[35]),
     ];
     const ALL_RULES_AS_FILTERS: &'static [RuleFilter<'static>] = &[
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[0]),
@@ -4940,6 +4948,7 @@ impl Nursery {
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[36]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[37]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[38]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[39]),
     ];
 }
 impl RuleGroupExt for Nursery {
@@ -5121,29 +5130,34 @@ impl RuleGroupExt for Nursery {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[33]));
             }
         }
-        if let Some(rule) = self.use_parse_int_radix.as_ref() {
+        if let Some(rule) = self.use_object_spread.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[34]));
             }
         }
-        if let Some(rule) = self.use_single_js_doc_asterisk.as_ref() {
+        if let Some(rule) = self.use_parse_int_radix.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[35]));
             }
         }
-        if let Some(rule) = self.use_sorted_classes.as_ref() {
+        if let Some(rule) = self.use_single_js_doc_asterisk.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[36]));
             }
         }
-        if let Some(rule) = self.use_symbol_description.as_ref() {
+        if let Some(rule) = self.use_sorted_classes.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[37]));
             }
         }
-        if let Some(rule) = self.use_unique_element_ids.as_ref() {
+        if let Some(rule) = self.use_symbol_description.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[38]));
+            }
+        }
+        if let Some(rule) = self.use_unique_element_ids.as_ref() {
+            if rule.is_enabled() {
+                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[39]));
             }
         }
         index_set
@@ -5320,29 +5334,34 @@ impl RuleGroupExt for Nursery {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[33]));
             }
         }
-        if let Some(rule) = self.use_parse_int_radix.as_ref() {
+        if let Some(rule) = self.use_object_spread.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[34]));
             }
         }
-        if let Some(rule) = self.use_single_js_doc_asterisk.as_ref() {
+        if let Some(rule) = self.use_parse_int_radix.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[35]));
             }
         }
-        if let Some(rule) = self.use_sorted_classes.as_ref() {
+        if let Some(rule) = self.use_single_js_doc_asterisk.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[36]));
             }
         }
-        if let Some(rule) = self.use_symbol_description.as_ref() {
+        if let Some(rule) = self.use_sorted_classes.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[37]));
             }
         }
-        if let Some(rule) = self.use_unique_element_ids.as_ref() {
+        if let Some(rule) = self.use_symbol_description.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[38]));
+            }
+        }
+        if let Some(rule) = self.use_unique_element_ids.as_ref() {
+            if rule.is_disabled() {
+                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[39]));
             }
         }
         index_set
@@ -5511,6 +5530,10 @@ impl RuleGroupExt for Nursery {
                 .use_numeric_separators
                 .as_ref()
                 .map(|conf| (conf.level(), conf.get_options())),
+            "useObjectSpread" => self
+                .use_object_spread
+                .as_ref()
+                .map(|conf| (conf.level(), conf.get_options())),
             "useParseIntRadix" => self
                 .use_parse_int_radix
                 .as_ref()
@@ -5573,6 +5596,7 @@ impl From<GroupPlainConfiguration> for Nursery {
             use_named_operation: Some(value.into()),
             use_naming_convention: Some(value.into()),
             use_numeric_separators: Some(value.into()),
+            use_object_spread: Some(value.into()),
             use_parse_int_radix: Some(value.into()),
             use_single_js_doc_asterisk: Some(value.into()),
             use_sorted_classes: Some(value.into()),
