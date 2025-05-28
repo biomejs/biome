@@ -410,6 +410,8 @@ pub type UseNumericLiterals =
     <lint::complexity::use_numeric_literals::UseNumericLiterals as biome_analyze::Rule>::Options;
 pub type UseNumericSeparators =
     <lint::nursery::use_numeric_separators::UseNumericSeparators as biome_analyze::Rule>::Options;
+pub type UseObjectSpread =
+    <lint::nursery::use_object_spread::UseObjectSpread as biome_analyze::Rule>::Options;
 pub type UseOptionalChain =
     <lint::complexity::use_optional_chain::UseOptionalChain as biome_analyze::Rule>::Options;
 pub type UseParseIntRadix =
