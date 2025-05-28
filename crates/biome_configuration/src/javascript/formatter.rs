@@ -163,4 +163,8 @@ impl JsFormatterConfiguration {
     pub fn expand_resolved(&self) -> Expand {
         self.expand.unwrap_or_default()
     }
+
+    pub fn operator_linebreak_resolved(&self) -> OperatorLinebreak {
+        self.operator_linebreak.unwrap_or_default()
+    }
 }
