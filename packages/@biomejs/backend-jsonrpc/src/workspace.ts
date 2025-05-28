@@ -1637,6 +1637,10 @@ export interface Nursery {
 	 */
 	useGoogleFontPreconnect?: RuleFixConfiguration_for_Null;
 	/**
+	 * Prefer Array#{indexOf,lastIndexOf}() over Array#{findIndex,findLastIndex}() when looking for the index of an item.
+	 */
+	useIndexOf?: RuleFixConfiguration_for_Null;
+	/**
 	 * Enforce consistent return values in iterable callbacks.
 	 */
 	useIterableCallbackReturn?: RuleConfiguration_for_Null;
@@ -3516,6 +3520,7 @@ export type Category =
 	| "lint/nursery/useForComponent"
 	| "lint/nursery/useGoogleFontPreconnect"
 	| "lint/nursery/useImportRestrictions"
+	| "lint/nursery/useIndexOf"
 	| "lint/nursery/useIterableCallbackReturn"
 	| "lint/nursery/useJsxCurlyBraceConvention"
 	| "lint/nursery/useNamedOperation"
