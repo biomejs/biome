@@ -19,6 +19,7 @@ expression: redactor(content)
 
 ```json
 {
+  "root": false,
   "formatter": {
     "indentStyle": "space",
     "indentWidth": 2

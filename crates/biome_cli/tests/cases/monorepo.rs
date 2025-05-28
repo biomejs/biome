@@ -244,6 +244,7 @@ fn should_error_when_no_root_config_is_found() {
         file_path1.as_str(),
         r#"
 {
+    "root": false,
     "formatter": {
         "indentStyle": "space",
         "indentWidth": 2
