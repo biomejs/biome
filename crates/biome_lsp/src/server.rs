@@ -409,11 +409,13 @@ impl LanguageServer for LSPServer {
 
                 match result {
                     Ok(result) => {
-                        self.session.insert_and_scan_project(
-                            result.project_key,
-                            project_path.clone(),
-                            result.scan_kind,
-                        );
+                        self.session
+                            .insert_and_scan_project(
+                                result.project_key,
+                                project_path.clone(),
+                                result.scan_kind,
+                            )
+                            .await;
 
                         self.session.update_all_diagnostics().await;
                     }
