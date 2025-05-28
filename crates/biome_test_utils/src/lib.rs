@@ -193,10 +193,10 @@ pub fn module_graph_for_test_file(
 pub fn get_added_paths<'a>(
     fs: &dyn FileSystem,
     paths: &'a [BiomePath],
-) -> Vec<(&'a BiomePath, Option<AnyJsRoot>)> {
+) -> Vec<(&'a BiomePath, AnyJsRoot)> {
     paths
         .iter()
-        .map(|path| {
+        .filter_map(|path| {
             let root = fs.read_file_from_path(path).ok().and_then(|content| {
                 let file_source = JsFileSource::try_from(path.as_path()).unwrap_or_default();
                 let parsed =
@@ -207,8 +207,8 @@ pub fn get_added_paths<'a>(
                     "Unexpected diagnostics: {diagnostics:?}"
                 );
                 parsed.try_tree()
-            });
-            (path, root)
+            })?;
+            Some((path, root))
         })
         .collect()
 }
