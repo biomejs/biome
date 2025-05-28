@@ -1052,9 +1052,9 @@ impl Workspace for WorkspaceServer {
             .debug
             .debug_type_info
             .ok_or_else(self.build_capability_error(&params.path))?;
-        let parse = self.get_parse(&params.path)?;
+        let parse = self.get_parse(&params.path).ok();
 
-        debug_type_info(&params.path, parse)
+        debug_type_info(&params.path, parse, self.module_graph.clone())
     }
 
     fn get_registered_types(
