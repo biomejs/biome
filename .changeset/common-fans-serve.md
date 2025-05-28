@@ -2,4 +2,4 @@
 "@biomejs/biome": minor
 ---
 
-The rule [`noFlatMapIdentity`](https://biomejs.dev/linter/rules/no-flat-map-identity) have now an unsafe fix.
+Update rule [`noFlatMapIdentity`](https://biomejs.dev/linter/rules/no-flat-map-identity) to have an unsafe fix (previously safe).
