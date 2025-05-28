@@ -177,7 +177,7 @@ pub struct JsFormatOptions {
     /// Whether to expand object and array literals to multiple lines. Defaults to "auto".
     expand: Expand,
 
-    /// When formatting binary expressions, whether to break the line before or after the operator. Defaults to "before".
+    /// When formatting binary expressions, whether to break the line before or after the operator. Defaults to "after".
     operator_linebreak: OperatorLinebreak,
 }
 
