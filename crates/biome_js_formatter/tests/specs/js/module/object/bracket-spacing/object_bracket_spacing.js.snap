@@ -52,6 +52,7 @@ Bracket spacing: true
 Bracket same line: false
 Attribute Position: Auto
 Expand lists: Auto
+Operator linebreak: After
 -----
 
 ```js
@@ -92,6 +93,7 @@ Bracket spacing: false
 Bracket same line: false
 Attribute Position: Auto
 Expand lists: Auto
+Operator linebreak: After
 -----
 
 ```js
