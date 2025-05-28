@@ -74,8 +74,8 @@ impl ModuleGraph {
         &self,
         fs: &dyn FsWithResolverProxy,
         project_layout: &ProjectLayout,
-        added_or_updated_paths: &[(&BiomePath, Option<AnyJsRoot>)],
-        removed_paths: &[BiomePath],
+        added_or_updated_paths: &[(&BiomePath, AnyJsRoot)],
+        removed_paths: &[&BiomePath],
     ) {
         // Make sure all directories are registered for the added/updated paths.
         let path_info = self.path_info.pin();
@@ -99,12 +99,9 @@ impl ModuleGraph {
         // Traverse all the added and updated paths and insert their resolved
         // imports.
         let imports = self.data.pin();
-        for (path, root) in added_or_updated_paths
-            .iter()
-            .filter_map(|(path, root)| root.clone().map(|root| (path, root)))
-        {
+        for (path, root) in added_or_updated_paths {
             let directory = path.parent().unwrap_or(path);
-            let visitor = JsModuleVisitor::new(root, directory, &fs_proxy);
+            let visitor = JsModuleVisitor::new(root.clone(), directory, &fs_proxy);
             imports.insert(path.to_path_buf(), visitor.collect_info());
         }
 

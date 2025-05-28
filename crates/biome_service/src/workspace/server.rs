@@ -39,7 +39,7 @@ use biome_diagnostics::{
 use biome_formatter::Printed;
 use biome_fs::{BiomePath, ConfigName};
 use biome_grit_patterns::{CompilePatternOptions, GritQuery, compile_pattern_with_options};
-use biome_js_syntax::ModuleKind;
+use biome_js_syntax::{AnyJsRoot, ModuleKind};
 use biome_json_parser::JsonParserOptions;
 use biome_json_syntax::JsonFileSource;
 use biome_module_graph::ModuleGraph;
@@ -48,7 +48,7 @@ use biome_parser::AnyParse;
 use biome_plugin_loader::{BiomePlugin, PluginCache, PluginDiagnostic};
 use biome_project_layout::ProjectLayout;
 use biome_resolver::FsWithResolverProxy;
-use biome_rowan::NodeCache;
+use biome_rowan::{AstNode, NodeCache, SendNode};
 use camino::{Utf8Path, Utf8PathBuf};
 use crossbeam::channel::Sender;
 use papaya::{Compute, HashMap, HashSet, Operation};
@@ -387,6 +387,10 @@ impl WorkspaceServer {
 
             Some(Ok(parsed.any_parse))
         };
+        let root = syntax
+            .as_ref()
+            .and_then(|syntax| syntax.as_ref().ok())
+            .map(|parse| parse.root());
 
         let opened_by_scanner = reason.is_opened_by_scanner();
 
@@ -447,7 +451,7 @@ impl WorkspaceServer {
             }
         });
 
-        self.update_service_data(WatcherSignalKind::AddedOrChanged(reason), &path)
+        self.update_service_data(WatcherSignalKind::AddedOrChanged(reason), &path, root)
     }
 
     /// Retrieves the parser result for a given file.
@@ -667,37 +671,29 @@ impl WorkspaceServer {
         Ok(())
     }
 
-    /// Updates the [ModuleGraph] for the given `paths`.
-    pub(super) fn update_module_graph(&self, signal_kind: WatcherSignalKind, paths: &[BiomePath]) {
-        let no_paths: &[BiomePath] = &[];
+    /// Updates the [ModuleGraph] for the given `path` with an optional `root`.
+    fn update_module_graph(
+        &self,
+        signal_kind: WatcherSignalKind,
+        path: &BiomePath,
+        root: Option<SendNode>,
+    ) {
         let (added_or_changed_paths, removed_paths) = match signal_kind {
             WatcherSignalKind::AddedOrChanged(_) => {
-                let documents = self.documents.pin();
-                let mut added_or_changed_paths = Vec::with_capacity(paths.len());
-                for path in paths {
-                    let root = documents.get(path.as_path()).and_then(|doc| {
-                        let file_source = self.file_sources[doc.file_source_index];
-                        match file_source {
-                            DocumentFileSource::Js(_) => doc
-                                .syntax
-                                .as_ref()
-                                .and_then(|syntax| syntax.as_ref().ok())
-                                .map(AnyParse::tree),
-                            _ => None,
-                        }
-                    });
-                    added_or_changed_paths.push((path, root));
-                }
+                let Some(root) = root.and_then(SendNode::into_node).and_then(AnyJsRoot::cast)
+                else {
+                    return;
+                };
 
-                (added_or_changed_paths, no_paths)
+                (&[(path, root)] as &[_], &[] as &[_])
             }
-            WatcherSignalKind::Removed => (Vec::new(), paths),
+            WatcherSignalKind::Removed => (&[] as &[_], &[path] as &[_]),
         };
 
         self.module_graph.update_graph_for_js_paths(
             self.fs.as_ref(),
             &self.project_layout,
-            &added_or_changed_paths,
+            added_or_changed_paths,
             removed_paths,
         );
     }
@@ -707,13 +703,14 @@ impl WorkspaceServer {
         &self,
         signal_kind: WatcherSignalKind,
         path: &Utf8Path,
+        root: Option<SendNode>,
     ) -> Result<(), WorkspaceError> {
         let path = BiomePath::from(path);
         if path.is_config() || path.is_manifest() {
             self.update_project_layout(signal_kind, &path)?;
         }
 
-        self.update_module_graph(signal_kind, &[path]);
+        self.update_module_graph(signal_kind, &path, root);
 
         match signal_kind {
             WatcherSignalKind::AddedOrChanged(OpenFileReason::InitialScan) => {
@@ -1111,6 +1108,7 @@ impl Workspace for WorkspaceServer {
         let mut node_cache = node_cache.unwrap_or_default();
 
         let parsed = self.parse(project_key, &path, &content, index, &mut node_cache)?;
+        let root = parsed.any_parse.root();
 
         let document = Document {
             content,
@@ -1134,6 +1132,7 @@ impl Workspace for WorkspaceServer {
         self.update_service_data(
             WatcherSignalKind::AddedOrChanged(OpenFileReason::ClientRequest),
             &path,
+            Some(root),
         )
     }
 
@@ -1178,7 +1177,9 @@ impl Workspace for WorkspaceServer {
 
                 Ok(())
             }
-            Compute::Removed(_, _) => self.update_service_data(WatcherSignalKind::Removed, path),
+            Compute::Removed(_, _) => {
+                self.update_service_data(WatcherSignalKind::Removed, path, None)
+            }
             Compute::Aborted(_) => Err(WorkspaceError::not_found()),
         }
     }
