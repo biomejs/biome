@@ -397,7 +397,7 @@ impl WorkspaceServer {
         let documents = self.documents.pin();
         let result = documents.compute(path.clone(), |current| {
             let biome_path = BiomePath::new(&path);
-            if biome_path.is_dependency() && biome_path.is_type_declaration() && current.is_none() {
+            if biome_path.is_dependency() && biome_path.is_type_declaration() && current.is_some() {
                 return Operation::Remove;
             }
             match current {
