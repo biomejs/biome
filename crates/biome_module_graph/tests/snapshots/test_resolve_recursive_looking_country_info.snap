@@ -68,37 +68,37 @@ export const codes: {
 Exports {
   "CountryInfo" => {
     ExportOwnExport => JsOwnExport(
-      Module(0) TypeId(15)
+      Module(0) TypeId(22)
       Local name: CountryInfo
     )
   }
   "SubdivisionInfo" => {
     ExportOwnExport => JsOwnExport(
-      Module(0) TypeId(16)
+      Module(0) TypeId(23)
       Local name: SubdivisionInfo
     )
   }
   "codes" => {
     ExportOwnExport => JsOwnExport(
-      Module(0) TypeId(13)
+      Module(0) TypeId(20)
       Local name: codes
     )
   }
   "country" => {
     ExportOwnExport => JsOwnExport(
-      Module(0) TypeId(10)
+      Module(0) TypeId(17)
       Local name: country
     )
   }
   "data" => {
     ExportOwnExport => JsOwnExport(
-      Module(0) TypeId(11)
+      Module(0) TypeId(18)
       Local name: data
     )
   }
   "subdivision" => {
     ExportOwnExport => JsOwnExport(
-      Module(0) TypeId(7)
+      Module(0) TypeId(14)
       Local name: subdivision
     )
   }
@@ -126,7 +126,7 @@ Module TypeId(0) => Namespace {
             ),
             is_static: true,
             ty: Resolved(
-                unknown,
+                Module(0) TypeId(2),
             ),
         },
         TypeMember {
@@ -137,7 +137,7 @@ Module TypeId(0) => Namespace {
             ),
             is_static: true,
             ty: Resolved(
-                unknown,
+                Module(0) TypeId(4),
             ),
         },
         TypeMember {
@@ -148,15 +148,37 @@ Module TypeId(0) => Namespace {
             ),
             is_static: true,
             ty: Resolved(
-                unknown,
+                Module(0) TypeId(5),
             ),
         },
     ],
 }
 
-Module TypeId(1) => instanceof unresolved reference "CountryInfo.Full"
+Module TypeId(1) => instanceof unresolved reference "SubdivisionInfo.Map"
 
-Module TypeId(2) => Namespace {
+Module TypeId(2) => interface "Partial" {
+  extends: []
+  type_args: []
+  members: ["name": string, "sub": Module(0) TypeId(1)]
+}
+
+Module TypeId(3) => instanceof unresolved reference "Partial"
+
+Module TypeId(4) => interface "Full" {
+  extends: [Module(0) TypeId(3)]
+  type_args: []
+  members: ["code": string]
+}
+
+Module TypeId(5) => interface "Map" {
+  extends: []
+  type_args: []
+  members: []
+}
+
+Module TypeId(6) => instanceof unresolved reference "CountryInfo.Full"
+
+Module TypeId(7) => Namespace {
     path: [
         Borrowed(
             "SubdivisionInfo",
@@ -171,7 +193,7 @@ Module TypeId(2) => Namespace {
             ),
             is_static: true,
             ty: Resolved(
-                unknown,
+                Module(0) TypeId(8),
             ),
         },
         TypeMember {
@@ -182,7 +204,7 @@ Module TypeId(2) => Namespace {
             ),
             is_static: true,
             ty: Resolved(
-                unknown,
+                Module(0) TypeId(9),
             ),
         },
         TypeMember {
@@ -193,21 +215,38 @@ Module TypeId(2) => Namespace {
             ),
             is_static: true,
             ty: Resolved(
-                unknown,
+                Module(0) TypeId(5),
             ),
         },
     ],
 }
 
-Module TypeId(3) => instanceof unresolved reference "SubdivisionInfo.Full"
+Module TypeId(8) => interface "Partial" {
+  extends: []
+  type_args: []
+  members: ["type": string, "name": string]
+}
 
-Module TypeId(4) => instanceof unresolved reference "SubdivisionInfo.Full"
+Module TypeId(9) => interface "Full" {
+  extends: [Module(0) TypeId(3)]
+  type_args: []
+  members: [
+    "countryName": string,
+    "countryCode": string,
+    "code": string,
+    "regionCode": string
+  ]
+}
 
-Module TypeId(5) => value: null
+Module TypeId(10) => instanceof unresolved reference "SubdivisionInfo.Full"
 
-Module TypeId(6) => Module(0) TypeId(4) | Module(0) TypeId(5)
+Module TypeId(11) => instanceof unresolved reference "SubdivisionInfo.Full"
 
-Module TypeId(7) => sync Function "subdivision" {
+Module TypeId(12) => value: null
+
+Module TypeId(13) => Module(0) TypeId(11) | Module(0) TypeId(12)
+
+Module TypeId(14) => sync Function "subdivision" {
   accepts: {
     params: [
       required countryCodeOrFullSubdivisionCode: string (bindings: countryCodeOrFullSubdivisionCode:string)
@@ -215,38 +254,38 @@ Module TypeId(7) => sync Function "subdivision" {
     ]
     type_args: []
   }
-  returns: Module(0) TypeId(6)
+  returns: Module(0) TypeId(13)
 }
 
-Module TypeId(8) => instanceof unresolved reference "CountryInfo.Full"
+Module TypeId(15) => instanceof unresolved reference "CountryInfo.Full"
 
-Module TypeId(9) => Module(0) TypeId(8) | Module(0) TypeId(5)
+Module TypeId(16) => Module(0) TypeId(15) | Module(0) TypeId(12)
 
-Module TypeId(10) => sync Function "country" {
+Module TypeId(17) => sync Function "country" {
   accepts: {
     params: [
       required countryCodeOrName: string (bindings: countryCodeOrName:string)
     ]
     type_args: []
   }
-  returns: Module(0) TypeId(9)
+  returns: Module(0) TypeId(16)
 }
 
-Module TypeId(11) => instanceof unresolved reference "CountryInfo.Map"
+Module TypeId(18) => instanceof unresolved reference "CountryInfo.Map"
 
-Module TypeId(12) => Object {
+Module TypeId(19) => Object {
   prototype: No prototype
   members: []
 }
 
-Module TypeId(13) => Object {
+Module TypeId(20) => Object {
   prototype: No prototype
   members: []
 }
 
-Module TypeId(14) => unknown
+Module TypeId(21) => unknown
 
-Module TypeId(15) => (type: Module(0) TypeId(1), value: Module(0) TypeId(0))
+Module TypeId(22) => (type: Module(0) TypeId(6), value: Module(0) TypeId(0))
 
-Module TypeId(16) => (type: Module(0) TypeId(3), value: Module(0) TypeId(2))
+Module TypeId(23) => (type: Module(0) TypeId(10), value: Module(0) TypeId(7))
 ```

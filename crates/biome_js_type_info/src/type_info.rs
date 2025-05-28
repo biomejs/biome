@@ -179,6 +179,7 @@ pub enum TypeData {
     Class(Box<Class>),
     Constructor(Box<Constructor>),
     Function(Box<Function>),
+    Interface(Box<Interface>),
     Module(Box<Module>),
     Namespace(Box<Namespace>),
     Object(Box<Object>),
@@ -260,6 +261,12 @@ impl From<Constructor> for TypeData {
 impl From<Function> for TypeData {
     fn from(value: Function) -> Self {
         Self::Function(Box::new(value))
+    }
+}
+
+impl From<Interface> for TypeData {
+    fn from(value: Interface) -> Self {
+        Self::Interface(Box::new(value))
     }
 }
 
@@ -410,6 +417,9 @@ pub struct Class {
     /// Type of another class being extended by this one.
     pub extends: Option<TypeReference>,
 
+    /// Interfaces being implemented by this class.
+    pub implements: Box<[TypeReference]>,
+
     /// Class members.
     pub members: Box<[TypeMember]>,
 }
@@ -547,6 +557,32 @@ impl GenericTypeParameter {
                 ty: types.get(i).cloned().unwrap_or_else(|| param.ty.clone()),
             })
             .collect()
+    }
+}
+
+/// An interface definition.
+#[derive(Clone, PartialEq, Resolvable)]
+pub struct Interface {
+    /// Name of the interface.
+    pub name: Text,
+
+    /// The interface's type parameters.
+    pub type_parameters: Box<[GenericTypeParameter]>,
+
+    /// Types being extended by this interface.
+    pub extends: Box<[TypeReference]>,
+
+    /// Interface members.
+    pub members: Box<[TypeMember]>,
+}
+
+impl Debug for Interface {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("Interface")
+            .field("name", &self.name)
+            .field("type_parameters", &self.type_parameters)
+            .field("extends", &self.extends)
+            .finish()
     }
 }
 
