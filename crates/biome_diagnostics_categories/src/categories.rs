@@ -197,6 +197,7 @@ define_categories! {
     "lint/nursery/useForComponent": "https://biomejs.dev/linter/rules/use-for-component",
     "lint/nursery/useGoogleFontPreconnect": "https://biomejs.dev/linter/rules/use-google-font-preconnect",
     "lint/nursery/useImportRestrictions": "https://biomejs.dev/linter/rules/use-import-restrictions",
+    "lint/nursery/useIndexOf": "https://biomejs.dev/linter/rules/use-index-of",
     "lint/nursery/useIterableCallbackReturn": "https://biomejs.dev/linter/rules/use-iterable-callback-return",
     "lint/nursery/useJsxCurlyBraceConvention": "https://biomejs.dev/linter/rules/use-jsx-curly-brace-convention",
     "lint/nursery/useNamedOperation": "https://biomejs.dev/linter/rules/use-named-operation",

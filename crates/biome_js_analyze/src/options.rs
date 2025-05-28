@@ -381,6 +381,7 @@ pub type UseImportExtensions =
     <lint::correctness::use_import_extensions::UseImportExtensions as biome_analyze::Rule>::Options;
 pub type UseImportType =
     <lint::style::use_import_type::UseImportType as biome_analyze::Rule>::Options;
+pub type UseIndexOf = <lint::nursery::use_index_of::UseIndexOf as biome_analyze::Rule>::Options;
 pub type UseIsArray = <lint::suspicious::use_is_array::UseIsArray as biome_analyze::Rule>::Options;
 pub type UseIsNan = <lint::correctness::use_is_nan::UseIsNan as biome_analyze::Rule>::Options;
 pub type UseIterableCallbackReturn = < lint :: nursery :: use_iterable_callback_return :: UseIterableCallbackReturn as biome_analyze :: Rule > :: Options ;

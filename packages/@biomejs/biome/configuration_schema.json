@@ -2904,6 +2904,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useIndexOf": {
+					"description": "Prefer Array#{indexOf,lastIndexOf}() over Array#{findIndex,findLastIndex}() when looking for the index of an item.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleFixConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useIterableCallbackReturn": {
 					"description": "Enforce consistent return values in iterable callbacks.",
 					"anyOf": [
