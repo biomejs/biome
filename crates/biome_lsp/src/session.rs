@@ -323,7 +323,7 @@ impl Session {
                 .await
         })
         .await
-        .unwrap();
+        .expect("Scanning task to complete successfully");
     }
 
     /// Get a [`Document`] matching the provided [`Uri`]
@@ -597,7 +597,7 @@ impl Session {
                 .scan_project_folder(ScanProjectFolderParams {
                     project_key,
                     path: Some(project_path),
-                    watch: false,
+                    watch: true,
                     force: false,
                     scan_kind,
                 });
