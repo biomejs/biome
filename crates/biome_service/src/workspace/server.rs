@@ -581,21 +581,10 @@ impl WorkspaceServer {
         project_key: ProjectKey,
         plugins: Cow<Plugins>,
     ) -> Result<AnalyzerPluginVec, Vec<PluginDiagnostic>> {
-        self.plugin_caches
-            .pin()
-            .get(&project_key)
-            .ok_or_else(|| {
-                if let Some(path) = self.projects.get_project_path(project_key) {
-                    vec![PluginDiagnostic::not_loaded_for_whole_project(
-                        path.to_string(),
-                    )]
-                } else {
-                    vec![PluginDiagnostic::not_loaded_for_whole_project(
-                        project_key.to_string(),
-                    )]
-                }
-            })
-            .and_then(|cache| cache.get_analyzer_plugins(&plugins))
+        match self.plugin_caches.pin().get(&project_key) {
+            Some(cache) => cache.get_analyzer_plugins(&plugins),
+            None => Ok(Vec::new()),
+        }
     }
 
     /// It accepts a list of ignore files. If the VCS integration is enabled, the files

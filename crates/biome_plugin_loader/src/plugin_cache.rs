@@ -39,8 +39,7 @@ impl PluginCache {
                                 result.extend_from_slice(&plugin.analyzer_plugins);
                             }
                             None => {
-                                diagnostics
-                                    .push(PluginDiagnostic::not_loaded_for_single_plugin(path_buf));
+                                diagnostics.push(PluginDiagnostic::not_loaded(path_buf));
                             }
                         }
                     }

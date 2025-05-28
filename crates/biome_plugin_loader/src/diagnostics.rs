@@ -92,24 +92,12 @@ impl PluginDiagnostic {
         })
     }
 
-    pub fn not_loaded_for_single_plugin(path: Utf8PathBuf) -> Self {
+    pub fn not_loaded(path: Utf8PathBuf) -> Self {
         Self::NotLoaded(NotLoaded {
             message: MessageAndDescription::from(
                 markup! {
                     "Plugin is requested but not loaded: "
                     <Emphasis>{path.to_string()}</Emphasis>
-                }
-                .to_owned(),
-            ),
-        })
-    }
-
-    pub fn not_loaded_for_whole_project(project: impl Display) -> Self {
-        Self::NotLoaded(NotLoaded {
-            message: MessageAndDescription::from(
-                markup! {
-                    "No plugin loaded for project: "
-                    <Emphasis>{project}</Emphasis>
                 }
                 .to_owned(),
             ),
