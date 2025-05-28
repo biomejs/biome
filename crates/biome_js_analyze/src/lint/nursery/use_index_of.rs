@@ -36,7 +36,7 @@ fn extract_simple_compare_match(
 
     let (left, right) = (expression.left().ok()?, expression.right().ok()?);
 
-    let matching_side = if left.syntax().to_string().trim() == *parameter_name {
+    let matching_side = if left.syntax().to_text_trimmed() == *parameter_name {
         right
     } else if right.syntax().to_string().trim() == *parameter_name {
         left
