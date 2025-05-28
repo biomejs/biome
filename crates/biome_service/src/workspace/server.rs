@@ -1139,15 +1139,20 @@ impl Workspace for WorkspaceServer {
                 .insert(path.to_path_buf(), node_cache);
         }
 
+        let opened_by_scanner = document.opened_by_scanner;
         documents
             .insert(path.clone().into(), document)
             .ok_or_else(WorkspaceError::not_found)?;
 
-        self.update_service_data(
-            WatcherSignalKind::AddedOrChanged(OpenFileReason::ClientRequest),
-            &path,
-            Some(root),
-        )
+        if opened_by_scanner {
+            self.update_service_data(
+                WatcherSignalKind::AddedOrChanged(OpenFileReason::ClientRequest),
+                &path,
+                Some(root),
+            )
+        } else {
+            Ok(())
+        }
     }
 
     /// Closes a file that is opened in the workspace.
@@ -1178,7 +1183,7 @@ impl Workspace for WorkspaceServer {
         self.node_cache.lock().unwrap().remove(path);
 
         match result {
-            Compute::Inserted(_, _) => unreachable!(),
+            Compute::Inserted(_, _) => Ok(()), // should be unreachable
             Compute::Updated { .. } => {
                 // This may look counter-intuitive, but we need to consider
                 // that the file may have gone out-of-sync between the client
@@ -1191,9 +1196,7 @@ impl Workspace for WorkspaceServer {
 
                 Ok(())
             }
-            Compute::Removed(_, _) => {
-                self.update_service_data(WatcherSignalKind::Removed, path, None)
-            }
+            Compute::Removed(_, _) => Ok(()),
             Compute::Aborted(_) => Err(WorkspaceError::not_found()),
         }
     }
