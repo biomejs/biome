@@ -396,6 +396,10 @@ impl WorkspaceServer {
 
         let documents = self.documents.pin();
         let result = documents.compute(path.clone(), |current| {
+            let biome_path = BiomePath::new(&path);
+            if biome_path.is_dependency() && biome_path.is_type_declaration() && current.is_none() {
+                return Operation::Remove;
+            }
             match current {
                 Some((_path, document)) => {
                     let version = match (document.version, version) {
@@ -450,6 +454,7 @@ impl WorkspaceServer {
                 }),
             }
         });
+        self.update_service_data(WatcherSignalKind::AddedOrChanged(reason), &path, root)?;
 
         let opened_by_scanner = match result {
             Compute::Inserted(_, document)
@@ -752,7 +757,6 @@ impl Workspace for WorkspaceServer {
         let Some(document) = documents.get(params.path.as_path()) else {
             return Err(WorkspaceError::not_found());
         };
-
         let file_size = document.content.len();
         let limit = self
             .projects
@@ -1123,6 +1127,16 @@ impl Workspace for WorkspaceServer {
 
         let parsed = self.parse(project_key, &path, &content, index, &mut node_cache)?;
         let root = parsed.any_parse.root();
+
+        self.update_service_data(
+            WatcherSignalKind::AddedOrChanged(OpenFileReason::ClientRequest),
+            &path,
+            Some(root),
+        )?;
+
+        if path.is_dependency() && path.is_manifest() {
+            return Ok(());
+        }
 
         let document = Document {
             content,

@@ -307,7 +307,7 @@ impl Session {
 
     /// Registers an open project with its root path and scans the folder.
     #[tracing::instrument(level = "debug", skip(self))]
-    pub(crate) fn insert_and_scan_project(
+    pub(crate) async fn insert_and_scan_project(
         self: &Arc<Self>,
         project_key: ProjectKey,
         path: BiomePath,
@@ -321,7 +321,9 @@ impl Session {
             session
                 .scan_project_folder(project_key, path, scan_kind)
                 .await
-        });
+        })
+        .await
+        .unwrap();
     }
 
     /// Get a [`Document`] matching the provided [`Uri`]
@@ -588,13 +590,14 @@ impl Session {
         scan_kind: ScanKind,
     ) {
         let session = self.clone();
-        let scan_project = move || {
+
+        spawn_blocking(move || {
             let result = session
                 .workspace
                 .scan_project_folder(ScanProjectFolderParams {
                     project_key,
                     path: Some(project_path),
-                    watch: true,
+                    watch: false,
                     force: false,
                     scan_kind,
                 });
@@ -621,9 +624,9 @@ impl Session {
                     });
                 }
             }
-        };
-
-        let _ = spawn_blocking(scan_project).await;
+        })
+        .await
+        .unwrap();
     }
 
     #[tracing::instrument(level = "debug", skip(self))]
@@ -726,7 +729,8 @@ impl Session {
             project_result.project_key,
             path.into(),
             project_result.scan_kind,
-        );
+        )
+        .await;
 
         if let Err(WorkspaceError::PluginErrors(error)) = result {
             error!("Failed to load plugins: {error:?}");

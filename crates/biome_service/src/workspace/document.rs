@@ -5,6 +5,9 @@ use crate::diagnostics::FileTooLarge;
 #[derive(Clone, Debug)]
 pub(crate) struct Document {
     /// Document content.
+    ///
+    /// The content of the file is only available if it belongs to the project. For example, we don't
+    /// want to store the content of files coming from dependencies.
     pub(crate) content: String,
 
     /// The version of the document.
