@@ -395,7 +395,7 @@ impl WorkspaceServer {
         let opened_by_scanner = reason.is_opened_by_scanner();
 
         let documents = self.documents.pin();
-        documents.compute(path.clone(), |current| {
+        let result = documents.compute(path.clone(), |current| {
             match current {
                 Some((_path, document)) => {
                     let version = match (document.version, version) {
@@ -451,7 +451,21 @@ impl WorkspaceServer {
             }
         });
 
-        self.update_service_data(WatcherSignalKind::AddedOrChanged(reason), &path, root)
+        let opened_by_scanner = match result {
+            Compute::Inserted(_, document)
+            | Compute::Updated {
+                new: (_, document), ..
+            } => document.opened_by_scanner,
+            _ => false,
+        };
+
+        if opened_by_scanner {
+            self.update_service_data(WatcherSignalKind::AddedOrChanged(reason), &path, root)
+        } else {
+            // If the document was never opened by the scanner, we don't care
+            // about updating service data.
+            Ok(())
+        }
     }
 
     /// Retrieves the parser result for a given file.
