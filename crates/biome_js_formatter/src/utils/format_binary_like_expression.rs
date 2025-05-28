@@ -276,13 +276,13 @@ impl Format<JsFormatContext> for BinaryLeftOrRightSide {
                 let operator_and_right_expression = format_with(|f| {
                     let should_inline = binary_like_expression.should_inline_logical_expression();
 
-                    write!(f, [space(), operator_token.format()])?;
-
                     if should_inline {
                         write!(f, [space()])?;
                     } else {
                         write!(f, [soft_line_break_or_space()])?;
                     }
+
+                    write!(f, [operator_token.format(), space()])?;
 
                     write!(f, [right.format()])?;
 
