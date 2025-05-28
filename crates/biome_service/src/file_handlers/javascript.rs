@@ -644,6 +644,7 @@ fn debug_type_info(
 ) -> Result<String, WorkspaceError> {
     let Some(parse) = parse else {
         let result = graph.module_info_for_path(path);
+        dbg!(&result);
         return match result {
             None => Ok(String::new()),
             // TODO: print correct type info

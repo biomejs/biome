@@ -401,7 +401,9 @@ impl WorkspaceServer {
                 return if current.is_some() {
                     Operation::Remove
                 } else {
-                    Operation::Abort(())
+                    // The document isn't inside the current files, however we want
+                    // signal that it's a type declaration, and we want to update the module graph
+                    Operation::Abort(true)
                 };
             }
             match current {
@@ -441,7 +443,7 @@ impl WorkspaceServer {
                         content.clone()
                     };
 
-                    Operation::Insert::<Document, ()>(Document {
+                    Operation::Insert::<Document, bool>(Document {
                         content,
                         version,
                         file_source_index: index,
@@ -464,6 +466,7 @@ impl WorkspaceServer {
             | Compute::Updated {
                 new: (_, document), ..
             } => document.opened_by_scanner,
+            Compute::Aborted(result) => result,
             _ => false,
         };
 
