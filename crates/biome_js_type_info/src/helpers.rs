@@ -3,7 +3,7 @@ use std::borrow::Cow;
 use biome_rowan::Text;
 
 use crate::{
-    BindingId, Class, GenericTypeParameter, Module, Namespace, Object, ResolvedTypeData,
+    BindingId, Class, GenericTypeParameter, Interface, Module, Namespace, Object, ResolvedTypeData,
     ResolvedTypeId, ResolvedTypeMember, ResolverId, TypeData, TypeInstance, TypeReference,
     TypeResolver,
     globals::{GLOBAL_ARRAY_ID, GLOBAL_PROMISE_ID, GLOBAL_TYPE_MEMBERS},
@@ -243,6 +243,18 @@ impl<'a> Iterator for TypeMemberIterator<'a> {
                 }
             }
             Some(TypeMemberOwner::InstanceOf(instance_of)) => &instance_of.ty,
+            Some(TypeMemberOwner::Interface(interface)) => {
+                match interface.members.get(self.index) {
+                    Some(member) => {
+                        self.index += 1;
+                        return Some((self.resolver_id, member).into());
+                    }
+                    None => {
+                        self.owner = None;
+                        return None;
+                    }
+                }
+            }
             Some(TypeMemberOwner::Module(module)) => match module.members.get(self.index) {
                 Some(member) => {
                     self.index += 1;
@@ -322,6 +334,7 @@ enum TypeMemberOwner<'a> {
     Class(&'a Class),
     Global,
     InstanceOf(&'a TypeInstance),
+    Interface(&'a Interface),
     Module(&'a Module),
     Namespace(&'a Namespace),
     Object(&'a Object),
@@ -333,6 +346,7 @@ impl<'a> TypeMemberOwner<'a> {
             TypeData::Class(class) => Some(Self::Class(class)),
             TypeData::Global => Some(Self::Global),
             TypeData::InstanceOf(type_instance) => Some(Self::InstanceOf(type_instance)),
+            TypeData::Interface(interface) => Some(Self::Interface(interface)),
             TypeData::Module(module) => Some(Self::Module(module)),
             TypeData::Namespace(namespace) => Some(Self::Namespace(namespace)),
             TypeData::Object(object) => Some(Self::Object(object)),
