@@ -679,6 +679,10 @@ impl AnyParse {
         Self { root, diagnostics }
     }
 
+    pub fn root(&self) -> SendNode {
+        self.root.clone()
+    }
+
     pub fn syntax<L>(&self) -> SyntaxNode<L>
     where
         L: Language + 'static,
