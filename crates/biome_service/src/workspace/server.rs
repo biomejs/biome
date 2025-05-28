@@ -458,7 +458,6 @@ impl WorkspaceServer {
                 }),
             }
         });
-        self.update_service_data(WatcherSignalKind::AddedOrChanged(reason), &path, root)?;
 
         let opened_by_scanner = match result {
             Compute::Inserted(_, document)
@@ -1131,12 +1130,6 @@ impl Workspace for WorkspaceServer {
 
         let parsed = self.parse(project_key, &path, &content, index, &mut node_cache)?;
         let root = parsed.any_parse.root();
-
-        self.update_service_data(
-            WatcherSignalKind::AddedOrChanged(OpenFileReason::ClientRequest),
-            &path,
-            Some(root),
-        )?;
 
         let document = Document {
             content,
