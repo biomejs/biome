@@ -501,9 +501,9 @@ impl TypeData {
                 BooleanLiteral::parse(text_from_token(expr.value_token())?.text())?,
             ),
             AnyJsLiteralExpression::JsNullLiteralExpression(_) => Literal::Null,
-            AnyJsLiteralExpression::JsNumberLiteralExpression(expr) => Literal::Number(
-                NumberLiteral::parse(text_from_token(expr.value_token())?.text())?,
-            ),
+            AnyJsLiteralExpression::JsNumberLiteralExpression(expr) => {
+                Literal::Number(NumberLiteral::new(text_from_token(expr.value_token())?))
+            }
             AnyJsLiteralExpression::JsRegexLiteralExpression(expr) => {
                 Literal::RegExp(text_from_token(expr.value_token())?)
             }
@@ -592,19 +592,11 @@ impl TypeData {
             AnyTsType::TsNonPrimitiveType(_) => Self::ObjectKeyword,
             AnyTsType::TsNullLiteralType(_) => Self::Literal(Box::new(Literal::Null)),
             AnyTsType::TsNumberLiteralType(ty) => {
-                let Ok(literal_token) = ty.literal_token() else {
+                if ty.literal_token().is_err() {
                     return Self::unknown();
-                };
+                }
 
-                let Some(lit) = NumberLiteral::parse(literal_token.text_trimmed()) else {
-                    return Self::unknown();
-                };
-
-                Literal::Number(match ty.minus_token() {
-                    Some(_) => lit.inverse(),
-                    _ => lit,
-                })
-                .into()
+                Literal::Number(NumberLiteral::new(ty.to_trimmed_text())).into()
             }
             AnyTsType::TsNumberType(_) => Self::reference(GLOBAL_NUMBER_ID),
             AnyTsType::TsObjectType(ty) => Self::object_with_members(

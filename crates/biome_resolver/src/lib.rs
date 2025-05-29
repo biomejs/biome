@@ -841,7 +841,7 @@ impl<'a> TypeRoots<'a> {
 
 /// Reference-counted resolved path wrapped in a [Result] that may contain an
 /// error if the resolution failed.
-#[derive(Clone, Debug, Eq, Ord, PartialEq, PartialOrd)]
+#[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct ResolvedPath(Arc<Result<Utf8PathBuf, ResolveError>>);
 
 impl Deref for ResolvedPath {

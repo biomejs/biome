@@ -657,13 +657,9 @@ impl Format<FormatTypeContext> for Literal {
                 )]
             ),
             Self::Null => write!(f, [text("null")]),
-            Self::Number(lit) => write!(
-                f,
-                [dynamic_text(
-                    lit.as_f64().to_string().as_str(),
-                    TextSize::default()
-                )]
-            ),
+            Self::Number(lit) => {
+                write!(f, [dynamic_text(lit.as_str(), TextSize::default())])
+            }
             Self::Object(obj) => write!(f, [&obj]),
             Self::RegExp(text) => write!(f, [dynamic_text(text, TextSize::default())]),
             Self::String(lit) => write!(f, [dynamic_text(lit.as_str(), TextSize::default())]),
