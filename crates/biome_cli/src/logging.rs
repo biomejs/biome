@@ -14,13 +14,17 @@ pub fn setup_cli_subscriber(file: Option<&str>, level: LoggingLevel, kind: Loggi
     if level == LoggingLevel::None {
         return;
     }
-    let format = tracing_subscriber::fmt::layer()
+
+    let mut format = tracing_subscriber::fmt::layer()
         .with_level(true)
         .with_target(false)
         .with_thread_names(true)
-        //.with_span_events(FmtSpan::CLOSE) // Uncomment this for timing info on spans
         .with_file(true)
         .with_ansi(true);
+
+    if level == LoggingLevel::Tracing {
+        format = format.with_span_events(FmtSpan::CLOSE);
+    }
 
     // FIXME: I hate the duplication here, and I tried to make a function that
     //        could take `impl Layer<Registry>` so the compiler could expand
@@ -78,6 +82,7 @@ pub enum LoggingLevel {
     /// No logs should be shown
     #[default]
     None,
+    Tracing,
     Debug,
     Info,
     Warn,
@@ -88,10 +93,11 @@ impl LoggingLevel {
     fn to_filter_level(self) -> Option<LevelFilter> {
         match self {
             Self::None => None,
+            Self::Tracing => Some(LevelFilter::TRACE),
+            Self::Debug => Some(LevelFilter::DEBUG),
             Self::Info => Some(LevelFilter::INFO),
             Self::Warn => Some(LevelFilter::WARN),
             Self::Error => Some(LevelFilter::ERROR),
-            Self::Debug => Some(LevelFilter::DEBUG),
         }
     }
 }
@@ -101,10 +107,11 @@ impl FromStr for LoggingLevel {
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         match s {
             "none" => Ok(Self::None),
+            "tracing" => Ok(Self::Tracing),
+            "debug" => Ok(Self::Debug),
             "info" => Ok(Self::Info),
             "warn" => Ok(Self::Warn),
             "error" => Ok(Self::Error),
-            "debug" => Ok(Self::Debug),
             _ => Err("Unexpected value".to_string()),
         }
     }
@@ -114,6 +121,7 @@ impl Display for LoggingLevel {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         match self {
             Self::None => write!(f, "none"),
+            Self::Tracing => write!(f, "tracing"),
             Self::Debug => write!(f, "debug"),
             Self::Info => write!(f, "info"),
             Self::Warn => write!(f, "warn"),
