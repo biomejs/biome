@@ -32,12 +32,22 @@ info: html/comments/for_debugging.html
 ```diff
 --- Prettier
 +++ Biome
-@@ -1,4 +1,4 @@
+@@ -1,14 +1,12 @@
 -<!doctype html>
 +<!DOCTYPE html>
  <html>
    <body>
      <!-- Do not display this at the moment
+ <img border="0" src="pic_trulli.jpg" alt="Trulli">
+ -->
+-
+     <!-- Do not display this at the moment
+   <img border="0" src="pic_trulli.jpg" alt="Trulli">
+   -->
+-
+     <!-- Do not display this at the moment
+     <img border="0" src="pic_trulli.jpg" alt="Trulli">
+     -->
 ```
 
 # Output
@@ -49,11 +59,9 @@ info: html/comments/for_debugging.html
     <!-- Do not display this at the moment
 <img border="0" src="pic_trulli.jpg" alt="Trulli">
 -->
-
     <!-- Do not display this at the moment
   <img border="0" src="pic_trulli.jpg" alt="Trulli">
   -->
-
     <!-- Do not display this at the moment
     <img border="0" src="pic_trulli.jpg" alt="Trulli">
     -->
