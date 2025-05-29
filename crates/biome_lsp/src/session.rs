@@ -749,7 +749,7 @@ impl Session {
         });
 
         self.insert_and_scan_project(project_key, path.into(), scan_kind)
-        .await;
+            .await;
 
         if let Err(WorkspaceError::PluginErrors(error)) = result {
             error!("Failed to load plugins: {error:?}");
