@@ -938,7 +938,9 @@ dependencies = [
  "biome_rowan",
  "biome_test_utils",
  "camino",
+ "hashbrown 0.15.2",
  "insta",
+ "rustc-hash 2.1.1",
 ]
 
 [[package]]

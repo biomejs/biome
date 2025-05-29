@@ -24,12 +24,12 @@ static GLOBAL: tikv_jemallocator::Jemalloc = tikv_jemallocator::Jemalloc;
 static GLOBAL: std::alloc::System = std::alloc::System;
 fn bench_module_graph(criterion: &mut Criterion) {
     let cases = [
-        /*(
+        (
             "react/index.d.ts",
             include_bytes!(
                 "../../../crates/biome_resolver/tests/fixtures/resolver_cases_5/node_modules/@types/react/index.d.ts"
             ) as &[u8],
-        ),*/
+        ),
         (
             "RedisCommander.d.ts",
             include_bytes!("./RedisCommander.d.ts") as &[u8],

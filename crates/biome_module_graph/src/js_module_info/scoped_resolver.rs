@@ -8,7 +8,7 @@ use biome_js_syntax::{AnyJsExpression, JsSyntaxNode};
 use biome_js_type_info::{
     GLOBAL_RESOLVER, GLOBAL_UNKNOWN_ID, ImportSymbol, ModuleId, Resolvable, ResolvedTypeData,
     ResolvedTypeId, ScopeId, Type, TypeData, TypeId, TypeImportQualifier, TypeReference,
-    TypeReferenceQualifier, TypeResolver, TypeResolverLevel,
+    TypeReferenceQualifier, TypeResolver, TypeResolverLevel, TypeStore,
 };
 use biome_resolver::ResolvedPath;
 use biome_rowan::{AstNode, Text};
@@ -31,7 +31,7 @@ const MAX_IMPORT_DEPTH: usize = 10; // Arbitrary depth, may require tweaking.
 /// The scoped resolver is also able to resolve imported symbols from other
 /// modules, but any expressions it evaluates must be from the module for
 /// which the resolver was created.
-#[derive(Clone, Debug)]
+#[derive(Debug)]
 pub struct ScopedResolver {
     module_graph: Arc<ModuleGraph>,
 
@@ -48,7 +48,7 @@ pub struct ScopedResolver {
     pub modules_by_path: BTreeMap<ResolvedPath, ModuleId>,
 
     /// Types registered within this resolver.
-    types: Vec<TypeData>,
+    types: TypeStore,
 
     /// Map for looking up types of expressions.
     expressions: FxHashMap<JsSyntaxNode, ResolvedTypeId>,
@@ -136,9 +136,9 @@ impl ScopedResolver {
     fn resolve_all_own_types(&mut self, from_index: usize) {
         let mut i = from_index;
         while i < self.types.len() {
-            // First take the type to satisfy the borrow checker:
-            let ty = std::mem::take(&mut self.types[i]);
-            self.types[i] = ty.resolved_with_mapped_references(
+            // SAFETY: We immediately reinsert after taking.
+            let ty = unsafe { self.types.take_from_index_temporarily(i) };
+            let ty = ty.resolved_with_mapped_references(
                 |reference, resolver| match reference {
                     TypeReference::Import(import) => resolver
                         .resolve_import(&import)
@@ -147,6 +147,8 @@ impl ScopedResolver {
                 },
                 self,
             );
+            // SAFETY: We reinsert before anyone got a chance to do lookups.
+            unsafe { self.types.reinsert_temporarily_taken_data(i, ty) };
             i += 1;
         }
     }
@@ -167,9 +169,12 @@ impl ScopedResolver {
     fn flatten_all(&mut self, from_index: usize) {
         let mut i = from_index;
         while i < self.types.len() {
-            // First take the type to satisfy the borrow checker:
-            let ty = std::mem::take(&mut self.types[i]);
-            self.types[i] = ty.flattened(self);
+            // SAFETY: We reinsert before anyone got a chance to do lookups.
+            unsafe {
+                let ty = self.types.take_from_index_temporarily(i);
+                let ty = ty.flattened(self);
+                self.types.reinsert_temporarily_taken_data(i, ty);
+            }
             i += 1;
         }
     }
@@ -242,14 +247,11 @@ impl TypeResolver for ScopedResolver {
     }
 
     fn find_type(&self, type_data: &TypeData) -> Option<TypeId> {
-        self.types
-            .iter()
-            .position(|data| data == type_data)
-            .map(TypeId::new)
+        self.types.find_type(type_data)
     }
 
     fn get_by_id(&self, id: TypeId) -> &TypeData {
-        &self.types[id.index()]
+        self.types.get_by_id(id)
     }
 
     fn get_by_resolved_id(&self, id: ResolvedTypeId) -> Option<ResolvedTypeData> {
@@ -273,16 +275,7 @@ impl TypeResolver for ScopedResolver {
     }
 
     fn register_type(&mut self, type_data: TypeData) -> TypeId {
-        // Searching linearly may potentially become quite expensive, but it
-        // should be outweighed by index lookups quite heavily.
-        match self.types.iter().position(|data| data == &type_data) {
-            Some(index) => TypeId::new(index),
-            None => {
-                let id = TypeId::new(self.types.len());
-                self.types.push(type_data);
-                id
-            }
-        }
+        self.types.register_type(type_data)
     }
 
     fn resolve_reference(&self, ty: &TypeReference) -> Option<ResolvedTypeId> {
@@ -421,7 +414,7 @@ impl TypeResolver for ScopedResolver {
     }
 
     fn registered_types(&self) -> &[TypeData] {
-        &self.types
+        self.types.as_slice()
     }
 }
 
