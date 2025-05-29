@@ -37,7 +37,7 @@ jobs:
         if: env.nightly == 'true'
         run: |
           echo "prerelease=true" >> $GITHUB_ENV
-          echo "version=$(node packages/@biomejs/biome/scripts/update-nightly-version.mjs)" >> $GITHUB_ENV
+          echo "version=$(node packages/@biomejs/biome/scripts/update-preview-version.mjs)" >> $GITHUB_ENV
 
   build:
     strategy:
@@ -242,7 +242,7 @@ jobs:
 
       - name: Set release infos
         if: needs.build.outputs.prerelease == 'true'
-        run: node packages/@biomejs/biome/scripts/update-nightly-version.mjs
+        run: node packages/@biomejs/biome/scripts/update-preview-version.mjs
       - name: Generate npm packages
         run: node packages/@biomejs/biome/scripts/generate-packages.mjs
 
