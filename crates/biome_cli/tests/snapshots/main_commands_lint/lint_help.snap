@@ -60,6 +60,8 @@ Global options applied to all commands
                               warnings.
         --reporter=<json|json-pretty|github|junit|summary|gitlab>  Allows to change how diagnostics
                               and summary are reported.
+        --log-file=ARG        Optional path to redirect log messages to.
+                              If omitted, logs are printed to stdout.
         --log-level=<none|debug|info|warn|error>  The level of logging. In order, from the most
                               verbose to the least verbose: debug, info, warn, error.
                               The value `none` won't show any logging.

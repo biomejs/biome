@@ -58,7 +58,7 @@ pub struct CliOptions {
 
     /// Optional path to redirect log messages to.
     ///
-    /// If `None`, logs are printed to stdout.
+    /// If omitted, logs are printed to stdout.
     #[bpaf(long("log-file"))]
     pub log_file: Option<String>,
 
