@@ -33,5 +33,15 @@ Run the command with the option --include-inspired to also migrate inspired rule
 ```
 
 ```block
-Run the command with the option --write to apply the changes.
+configuration ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Migration results:
+  
+  - biome.json: configuration needs migration.
+  
+  i Use --write to apply the changes.
+  
+  $ biome migrate --write
+  
+
 ```

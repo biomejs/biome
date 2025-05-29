@@ -15,8 +15,8 @@ use biome_configuration::{
     BiomeDiagnostic, Configuration, CssConfiguration, FilesConfiguration,
     FilesIgnoreUnknownEnabled, FormatterConfiguration, GraphqlConfiguration, GritConfiguration,
     JsConfiguration, JsonConfiguration, LinterConfiguration, OverrideAssistConfiguration,
-    OverrideFormatterConfiguration, OverrideGlobs, OverrideLinterConfiguration, Overrides, Rules,
-    push_to_analyzer_assist, push_to_analyzer_rules,
+    OverrideFormatterConfiguration, OverrideGlobs, OverrideLinterConfiguration, Overrides,
+    RootEnabled, Rules, push_to_analyzer_assist, push_to_analyzer_rules,
 };
 use biome_css_formatter::context::CssFormatOptions;
 use biome_css_parser::CssParserOptions;
@@ -43,6 +43,7 @@ use camino::{Utf8Path, Utf8PathBuf};
 use ignore::gitignore::{Gitignore, GitignoreBuilder};
 use std::borrow::Cow;
 use std::ops::Deref;
+use std::sync::Arc;
 use tracing::instrument;
 
 /// Settings active in a project.
@@ -50,6 +51,11 @@ use tracing::instrument;
 /// These can be either root settings, or settings for a section of the project.
 #[derive(Clone, Debug, Default)]
 pub struct Settings {
+    /// The configuration that originated this setting, if applicable
+    source: Option<Arc<Configuration>>,
+
+    /// Whether this belongs to a root configuration file
+    pub root: Option<RootEnabled>,
     /// Formatter settings applied to all files in the project.
     pub formatter: FormatSettings,
     /// Linter settings applied to all files in the project.
@@ -69,6 +75,10 @@ pub struct Settings {
 }
 
 impl Settings {
+    pub fn source(&self) -> Option<Configuration> {
+        self.source.as_ref().map(|source| source.deref().clone())
+    }
+
     /// Merges the [Configuration] into the settings.
     #[tracing::instrument(level = "debug", skip_all)]
     pub fn merge_with_configuration(
@@ -76,7 +86,12 @@ impl Settings {
         configuration: Configuration,
         working_directory: Option<Utf8PathBuf>,
     ) -> Result<(), WorkspaceError> {
-        // formatter part
+        self.source = Some(Arc::new(configuration.clone()));
+
+        // Set root value
+        self.root = configuration.root;
+
+        // formatter part§
         if let Some(formatter) = configuration.formatter {
             self.formatter = to_format_settings(working_directory.clone(), formatter)?;
         }
@@ -265,6 +280,12 @@ impl Settings {
 
     pub fn is_assist_enabled(&self) -> bool {
         self.assist.is_enabled()
+    }
+
+    /// Whether these settings belong to a root.
+    /// It's returns `true` when it's `None` or `Some(true)`, `false` otherwise.
+    pub fn is_root(&self) -> bool {
+        self.root.unwrap_or_default().into()
     }
 }
 

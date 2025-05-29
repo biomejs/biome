@@ -17,8 +17,8 @@ use biome_service::file_handlers::{AstroFileHandler, SvelteFileHandler, VueFileH
 use biome_service::projects::ProjectKey;
 use biome_service::workspace::ServiceDataNotification;
 use biome_service::workspace::{
-    FeaturesBuilder, GetFileContentParams, OpenProjectParams, PullDiagnosticsParams,
-    SupportsFeatureParams,
+    FeaturesBuilder, GetFileContentParams, OpenProjectParams, OpenProjectResult,
+    PullDiagnosticsParams, SupportsFeatureParams,
 };
 use biome_service::workspace::{RageEntry, RageParams, RageResult, UpdateSettingsParams};
 use biome_service::workspace::{ScanKind, ScanProjectFolderParams};
@@ -317,9 +317,10 @@ impl Session {
 
         // Spawn the scan in the background, to avoid timing out the LSP request.
         let session = self.clone();
+        let project_path = path.clone();
         spawn(async move {
             session
-                .scan_project_folder(project_key, path, scan_kind)
+                .scan_project_folder(project_key, project_path, scan_kind)
                 .await
         })
         .await
@@ -490,13 +491,32 @@ impl Session {
     }
 
     /// True if the client supports dynamic registration of "workspace/didChangeConfiguration" requests
+    #[instrument(level = "info", skip(self))]
     pub(crate) fn can_register_did_change_configuration(&self) -> bool {
-        self.initialize_params
+        let result = self
+            .initialize_params
             .get()
             .and_then(|c| c.client_capabilities.workspace.as_ref())
             .and_then(|c| c.did_change_configuration)
             .and_then(|c| c.dynamic_registration)
-            == Some(true)
+            == Some(true);
+
+        info!("Can register didChangeConfiguration: {result}");
+        result
+    }
+
+    #[instrument(level = "info", skip(self))]
+    pub(crate) fn can_register_did_change_watched_files(&self) -> bool {
+        let result = self
+            .initialize_params
+            .get()
+            .and_then(|c| c.client_capabilities.workspace.as_ref())
+            .and_then(|c| c.did_change_watched_files)
+            .and_then(|c| c.dynamic_registration)
+            == Some(true);
+
+        info!("Can register didChangeWatchedFiles: {result}");
+        result
     }
 
     /// Get the current workspace folders
@@ -707,7 +727,10 @@ impl Session {
             skip_rules: None,
             only_rules: None,
         });
-        let project_result = match register_result {
+        let OpenProjectResult {
+            project_key,
+            scan_kind,
+        } = match register_result {
             Ok(result) => result,
             Err(error) => {
                 error!("Failed to register the project folder: {error}");
@@ -717,7 +740,7 @@ impl Session {
         };
 
         let result = self.workspace.update_settings(UpdateSettingsParams {
-            project_key: project_result.project_key,
+            project_key,
             workspace_directory: configuration_path
                 .as_ref()
                 .map(Utf8PathBuf::as_path)
@@ -725,12 +748,8 @@ impl Session {
             configuration,
         });
 
-        self.insert_and_scan_project(
-            project_result.project_key,
-            path.into(),
-            project_result.scan_kind,
-        )
-        .await;
+        self.insert_and_scan_project(project_key, path.into(), scan_kind)
+            .await;
 
         if let Err(WorkspaceError::PluginErrors(error)) = result {
             error!("Failed to load plugins: {error:?}");
