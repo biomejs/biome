@@ -269,11 +269,9 @@ pub fn project_layout_with_node_manifest(
 
 pub fn diagnostic_to_string(name: &str, source: &str, diag: Error) -> String {
     let error = diag.with_file_path(name).with_file_source_code(source);
-    let text = markup_to_string(biome_console::markup! {
+    markup_to_string(biome_console::markup! {
         {PrintDiagnostic::verbose(&error)}
-    });
-
-    text
+    })
 }
 
 fn markup_to_string(markup: biome_console::Markup) -> String {

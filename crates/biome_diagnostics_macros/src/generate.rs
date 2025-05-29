@@ -8,8 +8,8 @@ use crate::parse::{
 
 pub(crate) fn generate_diagnostic(input: DeriveInput) -> TokenStream {
     match input {
-        DeriveInput::DeriveStructInput(input) => generate_struct_diagnostic(input),
-        DeriveInput::DeriveEnumInput(input) => generate_enum_diagnostic(input),
+        DeriveInput::DeriveStructInput(input) => generate_struct_diagnostic(*input),
+        DeriveInput::DeriveEnumInput(input) => generate_enum_diagnostic(*input),
     }
 }
 

@@ -105,13 +105,12 @@ impl Rule for UseDefaultParameterLast {
         if formal_param.is_required() {
             return None;
         }
-        let last_required_param = formal_param
+        formal_param
             .syntax()
             .siblings(Direction::Next)
             .filter_map(AnyFormalParameter::cast)
             .filter(|x| x.is_required())
-            .last();
-        last_required_param
+            .last()
     }
 
     fn diagnostic(
