@@ -1,7 +1,6 @@
 ---
 source: crates/biome_cli/tests/snap_test.rs
 expression: redactor(content)
-snapshot_kind: text
 ---
 ## `biome.jsonc`
 
@@ -59,5 +58,15 @@ biome.jsonc migrate ━━━━━━━━━━━━━━━━━━━━
 ```
 
 ```block
-Run the command with the option --write to apply the changes.
+configuration ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Migration results:
+  
+  - biome.jsonc: configuration needs migration.
+  
+  i Use --write to apply the changes.
+  
+  $ biome migrate --write
+  
+
 ```

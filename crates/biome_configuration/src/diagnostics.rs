@@ -372,6 +372,7 @@ impl Diagnostic for RootInRoot {
     fn severity(&self) -> Severity {
         Severity::Error
     }
+
     fn category(&self) -> Option<&'static Category> {
         Some(category!("configuration"))
     }
@@ -388,6 +389,13 @@ impl Diagnostic for RootInRoot {
                     "The other configuration was found in "<Emphasis>{other_path}</Emphasis>"."
                 },
             )?;
+            visitor.record_log(
+                LogCategory::Info,
+                &markup! {
+                    "Use the migration command "<Emphasis>"from the root of the project"</Emphasis>" to update the configuration."
+                },
+            )?;
+            visitor.record_command("biome migrate --write")?;
         }
         Ok(())
     }

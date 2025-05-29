@@ -161,16 +161,13 @@ pub fn load_configuration(
     fs: &dyn FsWithResolverProxy,
     config_path: ConfigurationPathHint,
 ) -> Result<LoadedConfiguration, WorkspaceError> {
-    let config = read_config(fs, config_path, false)?;
+    let config = read_config(fs, config_path, true)?;
     let mut loaded_configuration = LoadedConfiguration::try_from_payload(config, fs);
 
     // We loaded the configuration, now we must check if this configuration is inside a monorepo.
     if let Ok(loaded_configuration) = &mut loaded_configuration {
         // First, we check if the configuration found uses the syntax `"extends": "//"`
-        if loaded_configuration
-            .configuration
-            .needs_to_extend_from_root()
-        {
+        if loaded_configuration.configuration.extends_root() {
             // We start looking upwards and find a `biome.json` that has `root: true`
             if let Some(directory_path) = loaded_configuration.directory_path.as_ref() {
                 let root_config = read_config(
@@ -276,9 +273,9 @@ pub fn read_config(
             .as_ref()
             .is_some_and(|config| {
                 if seek_root {
-                    config.root.is_some_and(|root| root.value())
+                    config.is_root()
                 } else {
-                    config.root.is_none_or(|root| root.value())
+                    !config.is_root()
                 }
             });
         if is_root {

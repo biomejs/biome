@@ -912,7 +912,6 @@ pub(crate) trait CommandRunner: Sized {
                 configuration_dir_path.map(BiomePath::from)
             },
             configuration,
-            is_nested: false,
         })?;
         if self.should_validate_configuration_diagnostics() {
             print_diagnostics_from_workspace_result(

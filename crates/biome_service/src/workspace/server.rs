@@ -17,7 +17,7 @@ use crate::file_handlers::{
     ParseResult,
 };
 use crate::projects::Projects;
-use crate::settings::{Settings, WorkspaceSettingsHandle};
+use crate::settings::WorkspaceSettingsHandle;
 use crate::workspace::{
     FileFeaturesResult, GetFileContentParams, GetRegisteredTypesParams, GetTypeInfoParams,
     IsPathIgnoredParams, OpenProjectResult, RageEntry, RageParams, RageResult, ScanKind,
@@ -665,16 +665,16 @@ impl WorkspaceServer {
             }
 
             if nested_configuration.is_root() {
-                return Err(WorkspaceError::Configuration(
+                returned_diagnostics.push(biome_diagnostics::serde::Diagnostic::new(
                     BiomeDiagnostic::root_in_root(
                         filtered_path.to_string(),
                         Some(project_path.to_string()),
-                    )
-                    .into(),
+                    ),
                 ));
+                continue;
             }
 
-            let nested_configuration = if nested_configuration.needs_to_extend_from_root() {
+            let nested_configuration = if nested_configuration.extends_root() {
                 let root_settings = self
                     .projects
                     .get_root_settings(project_key)
@@ -693,11 +693,11 @@ impl WorkspaceServer {
                 project_key,
                 workspace_directory: nested_directory_path.map(BiomePath::from),
                 configuration: nested_configuration,
-                is_nested: true,
             })?;
 
             returned_diagnostics.extend(result.diagnostics)
         }
+
         Ok(returned_diagnostics)
     }
 
@@ -931,7 +931,7 @@ impl Workspace for WorkspaceServer {
     ) -> Result<UpdateSettingsResult, WorkspaceError> {
         let workspace_directory = params.workspace_directory.map(|p| p.to_path_buf());
 
-        let mut settings = if params.is_nested {
+        let mut settings = if !params.configuration.is_root() {
             if !self.projects.is_project_registered(params.project_key) {
                 return Err(WorkspaceError::no_project());
             }
@@ -939,15 +939,7 @@ impl Workspace for WorkspaceServer {
             if let Some(workspace_directory) = &workspace_directory {
                 self.projects
                     .get_nested_settings(params.project_key, workspace_directory.as_path())
-                    .unwrap_or_else(|| {
-                        if params.configuration.needs_to_extend_from_root() {
-                            self.projects
-                                .get_root_settings(params.project_key)
-                                .unwrap_or_default()
-                        } else {
-                            Settings::default()
-                        }
-                    })
+                    .unwrap_or_default()
             } else {
                 return Err(WorkspaceError::no_workspace_directory());
             }
@@ -974,7 +966,7 @@ impl Workspace for WorkspaceServer {
             return Err(WorkspaceError::plugin_errors(diagnostics));
         }
 
-        if params.is_nested {
+        if !settings.is_root() {
             self.projects.set_nested_settings(
                 params.project_key,
                 workspace_directory.unwrap_or_default(),

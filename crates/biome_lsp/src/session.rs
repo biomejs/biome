@@ -746,11 +746,10 @@ impl Session {
                 .map(Utf8PathBuf::as_path)
                 .map(BiomePath::from),
             configuration,
-            is_nested: false,
         });
 
         self.insert_and_scan_project(project_key, path.into(), scan_kind)
-        .await;
+            .await;
 
         if let Err(WorkspaceError::PluginErrors(error)) = result {
             error!("Failed to load plugins: {error:?}");

@@ -6,7 +6,6 @@ expression: redactor(content)
 
 ```json
 {
-  "root": true,
   "javascript": {
     "formatter": {
       "quoteStyle": "double"
@@ -19,7 +18,6 @@ expression: redactor(content)
 
 ```json
 {
-  "root": true,
   "javascript": {
     "formatter": {
       "quoteStyle": "double"
@@ -47,6 +45,10 @@ configuration ━━━━━━━━━━━━━━━━━━━━━━
   × Found a nested root configuration, but there's already a root configuration.
   
   i The other configuration was found in <TEMP_DIR>/should_fail_for_nested_roots.
+  
+  i Use the migration command from the root of the project to update the configuration.
+  
+  $ biome migrate --write
   
 
 ```

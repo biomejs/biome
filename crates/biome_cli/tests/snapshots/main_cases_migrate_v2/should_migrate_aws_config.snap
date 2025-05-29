@@ -6,6 +6,7 @@ expression: redactor(content)
 
 ```json
 {
+  "root": false,
   "$schema": "https://biomejs.dev/schemas/0.0.0/schema.json",
   "files": {
     "maxSize": 5242880,
@@ -61,5 +62,11 @@ expression: redactor(content)
 # Emitted Messages
 
 ```block
-Your configuration file(s) have been successfully migrated.
+configuration ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Migration results:
+  
+  - biome.json: configuration successfully migrated.
+  
+
 ```

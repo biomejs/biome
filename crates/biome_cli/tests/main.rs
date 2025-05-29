@@ -360,7 +360,9 @@ pub(crate) fn run_cli_with_dyn_fs(
         runtime::Runtime,
     };
 
-    let factory = ServerFactory::new_with_fs(Box::new(OsFileSystem::default()));
+    let factory = ServerFactory::new_with_fs(Box::new(OsFileSystem::new(
+        fs.working_directory().unwrap_or_default(),
+    )));
     let connection = factory.create();
 
     let runtime = Runtime::new().expect("failed to create runtime");

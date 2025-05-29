@@ -20,7 +20,6 @@ export type SupportKind =
 	| "fileNotSupported";
 export interface UpdateSettingsParams {
 	configuration: Configuration;
-	isNested: boolean;
 	projectKey: ProjectKey;
 	workspaceDirectory?: BiomePath;
 }
