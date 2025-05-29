@@ -21,6 +21,7 @@ use futures::future::ready;
 use rustc_hash::FxHashMap;
 use serde_json::json;
 use std::panic::RefUnwindSafe;
+use std::str::FromStr;
 use std::sync::atomic::{AtomicBool, AtomicU64, Ordering};
 use std::sync::{Arc, Mutex};
 use tokio::io::{AsyncRead, AsyncWrite};
@@ -29,7 +30,7 @@ use tokio::task::spawn_blocking;
 use tower_lsp_server::jsonrpc::Result as LspResult;
 use tower_lsp_server::{ClientSocket, UriExt, lsp_types::*};
 use tower_lsp_server::{LanguageServer, LspService, Server};
-use tracing::{debug, error, info, instrument, warn};
+use tracing::{error, info, instrument, warn};
 
 pub struct LSPServer {
     pub(crate) session: SessionHandle,
@@ -134,15 +135,25 @@ impl LSPServer {
             if let Some(folders) = self.session.get_workspace_folders() {
                 let watchers = folders
                     .iter()
-                    .map(|folder| FileSystemWatcher {
-                        glob_pattern: GlobPattern::String(format!(
-                            "{}/**/biome.{{json,jsonc}}",
-                            folder.uri.as_str()
-                        )),
-                        kind: Some(WatchKind::all()),
+                    .flat_map(|folder| {
+                        vec![
+                            FileSystemWatcher {
+                                glob_pattern: GlobPattern::Relative(RelativePattern {
+                                    pattern: "**/biome.{json,jsonc}".to_string(),
+                                    base_uri: OneOf::Left(folder.clone()),
+                                }),
+                                kind: Some(WatchKind::all()),
+                            },
+                            FileSystemWatcher {
+                                glob_pattern: GlobPattern::Relative(RelativePattern {
+                                    pattern: ".editorconfig".to_string(),
+                                    base_uri: OneOf::Left(folder.clone()),
+                                }),
+                                kind: Some(WatchKind::all()),
+                            },
+                        ]
                     })
                     .collect();
-                debug!("Watchers: {:?}", &watchers);
                 CapabilityStatus::Enable(Some(json!(DidChangeWatchedFilesRegistrationOptions {
                     watchers
                 })))
@@ -150,25 +161,23 @@ impl LSPServer {
                 let value = DidChangeWatchedFilesRegistrationOptions {
                     watchers: vec![
                         FileSystemWatcher {
-                            glob_pattern: GlobPattern::String(format!(
-                                "{}/**/biome.{{json,jsonc}}",
-                                base_path.as_str()
-                            )),
+                            glob_pattern: GlobPattern::Relative(RelativePattern {
+                                pattern: "**/biome.{json,jsonc}".to_string(),
+                                base_uri: OneOf::Right(Uri::from_str(base_path.as_str()).unwrap()),
+                            }),
                             kind: Some(WatchKind::all()),
                         },
                         FileSystemWatcher {
                             glob_pattern: GlobPattern::String(format!(
                                 "{}/.editorconfig",
-                                base_path.as_str()
+                                base_path.as_path().as_str()
                             )),
                             kind: Some(WatchKind::all()),
                         },
                     ],
                 };
-                debug!("Watchers: {:?}", &value);
                 CapabilityStatus::Enable(Some(json!(value)))
             } else {
-                debug!("No workspace folders, no watchers");
                 CapabilityStatus::Disable
             }
         } else {
