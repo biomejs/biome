@@ -176,7 +176,7 @@ Module TypeId(5) => interface "Map" {
   members: []
 }
 
-Module TypeId(6) => instanceof unresolved reference "CountryInfo.Full"
+Module TypeId(6) => instanceof Module(0) TypeId(4)
 
 Module TypeId(7) => Namespace {
     path: [
@@ -238,9 +238,9 @@ Module TypeId(9) => interface "Full" {
   ]
 }
 
-Module TypeId(10) => instanceof unresolved reference "SubdivisionInfo.Full"
+Module TypeId(10) => instanceof Module(0) TypeId(9)
 
-Module TypeId(11) => instanceof unresolved reference "SubdivisionInfo.Full"
+Module TypeId(11) => instanceof Module(0) TypeId(7)
 
 Module TypeId(12) => value: null
 
@@ -257,7 +257,7 @@ Module TypeId(14) => sync Function "subdivision" {
   returns: Module(0) TypeId(13)
 }
 
-Module TypeId(15) => instanceof unresolved reference "CountryInfo.Full"
+Module TypeId(15) => instanceof Module(0) TypeId(0)
 
 Module TypeId(16) => Module(0) TypeId(15) | Module(0) TypeId(12)
 
@@ -271,7 +271,7 @@ Module TypeId(17) => sync Function "country" {
   returns: Module(0) TypeId(16)
 }
 
-Module TypeId(18) => instanceof unresolved reference "CountryInfo.Map"
+Module TypeId(18) => instanceof Module(0) TypeId(5)
 
 Module TypeId(19) => Object {
   prototype: No prototype
@@ -285,7 +285,7 @@ Module TypeId(20) => Object {
 
 Module TypeId(21) => unknown
 
-Module TypeId(22) => (type: Module(0) TypeId(6), value: Module(0) TypeId(0))
+Module TypeId(22) => (type: Module(0) TypeId(6), value: Module(0) TypeId(0), namespace: Module(0) TypeId(0))
 
-Module TypeId(23) => (type: Module(0) TypeId(10), value: Module(0) TypeId(7))
+Module TypeId(23) => (type: Module(0) TypeId(10), value: Module(0) TypeId(7), namespace: Module(0) TypeId(7))
 ```

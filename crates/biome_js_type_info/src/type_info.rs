@@ -201,14 +201,15 @@ pub enum TypeData {
     /// Reference to another type.
     Reference(TypeReference),
 
-    /// This one is nasty: TypeScript allows types and values to exist with
-    /// the same name within the same scope. Such duality can even be tracked
-    /// across modules, because a single imported symbol can import both the
-    /// value and the type meaning associated with a single name.
+    /// This one is nasty: TypeScript allows types, namespaces and values to
+    /// exist with the same name within the same scope. This results in _merged_
+    /// references that can reference each simultaneously. Merged references can
+    /// be tracked across modules, because a single imported symbol can import
+    /// all merged references under a single name.
     ///
-    /// Therefore, the dual reference can track both a type as well as the type
-    /// of the value with the same name.
-    DualReference(Box<DualReference>),
+    /// See also:
+    /// https://www.typescriptlang.org/docs/handbook/declaration-merging.html
+    MergedReference(Box<MergedReference>),
 
     /// Reference to the type of a JavaScript expression.
     TypeofExpression(Box<TypeofExpression>),
@@ -325,13 +326,15 @@ impl TypeData {
         Self::Boolean
     }
 
-    pub fn dual_reference(
-        ty: impl Into<TypeReference>,
-        value_ty: impl Into<TypeReference>,
+    pub fn merged_reference(
+        ty: Option<impl Into<TypeReference>>,
+        value_ty: Option<impl Into<TypeReference>>,
+        namespace_ty: Option<impl Into<TypeReference>>,
     ) -> Self {
-        Self::DualReference(Box::new(DualReference {
-            ty: ty.into(),
-            value_ty: value_ty.into(),
+        Self::MergedReference(Box::new(MergedReference {
+            ty: ty.map(Into::into),
+            value_ty: value_ty.map(Into::into),
+            namespace_ty: namespace_ty.map(Into::into),
         }))
     }
 
@@ -461,9 +464,10 @@ pub struct Constructor {
 ///
 /// With a dual reference, which type gets used depends entirely on context.
 #[derive(Clone, Debug, Eq, Hash, PartialEq, Resolvable)]
-pub struct DualReference {
-    pub ty: TypeReference,
-    pub value_ty: TypeReference,
+pub struct MergedReference {
+    pub ty: Option<TypeReference>,
+    pub value_ty: Option<TypeReference>,
+    pub namespace_ty: Option<TypeReference>,
 }
 
 /// A function definition.
@@ -1070,7 +1074,7 @@ pub struct TypeReferenceQualifier {
     /// ID of the scope from which the qualifier is being referenced.
     pub scope_id: Option<ScopeId>,
 
-    /// If `true`, this qualifier can reference types only.
+    /// If `true`, this qualifier can reference types (and namespaces) only.
     pub type_only: bool,
 
     /// Optional [`BindingId`] this qualifier may not reference.
