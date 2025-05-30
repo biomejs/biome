@@ -4,9 +4,10 @@ use biome_diagnostics::Severity;
 use biome_js_semantic::SemanticModel;
 use biome_js_syntax::{
     AnyJsFunction, AnyJsMemberExpression, JsCallArgumentList, JsCallArguments, JsCallExpression,
-    JsFormalParameter, JsParameterList, JsParameters, JsSpread,
+    JsFormalParameter, JsParameterList, JsParameters, JsReferenceIdentifier, JsSpread,
+    JsStaticMemberExpression,
 };
-use biome_rowan::{AstNode, AstSeparatedList};
+use biome_rowan::{AstNode, AstSeparatedList, TextRange, declare_node_union};
 
 use crate::services::semantic::Semantic;
 
@@ -39,6 +40,16 @@ declare_lint_rule! {
     /// a.reduce((acc, val) => ({...acc, [val]: val}), {});
     /// ```
     ///
+    /// ```js,expect_diagnostic
+    /// var a = ['a', 'b', 'c'];
+    /// a.reduce((acc, val) => Object.assign(accum, obj), []);
+    /// ```
+    ///
+    /// ```js,expect_diagnostic
+    /// var a = ['a', 'b', 'c'];
+    /// a.reduce((acc, val) => {return Object.assign(accum, obj);}, []);
+    /// ```
+    ///
     /// ### Valid
     ///
     /// ```js
@@ -56,26 +67,41 @@ declare_lint_rule! {
 }
 
 impl Rule for NoAccumulatingSpread {
-    type Query = Semantic<JsSpread>;
-    type State = ();
+    type Query = Semantic<SpreadOrAssign>;
+    type State = (TextRange, bool);
     type Signals = Option<Self::State>;
     type Options = ();
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
-        let node = ctx.query();
         let model = ctx.model();
 
-        is_known_accumulator(node, model)?.then_some(())
+        match ctx.query() {
+            SpreadOrAssign::JsSpread(node) => {
+                handle_spread(node, model)?.then_some((node.range(), true))
+            }
+            SpreadOrAssign::JsStaticMemberExpression(node) => {
+                handle_object_assign(node, model)?.then_some((node.range(), false))
+            }
+        }
     }
 
-    fn diagnostic(ctx: &RuleContext<Self>, _: &Self::State) -> Option<RuleDiagnostic> {
-        let node = ctx.query();
+    fn diagnostic(
+        _: &RuleContext<Self>,
+        (range, is_spread): &Self::State,
+    ) -> Option<RuleDiagnostic> {
         Some(
             RuleDiagnostic::new(
                 rule_category!(),
-                node.range(),
-                markup! {
-                    "Avoid the use of spread (`...`) syntax on accumulators."
+                range,
+                if *is_spread {
+                    markup! {
+                        "Avoid the use of spread (`...`) syntax on accumulators."
+                    }
+                }
+                else {
+                    markup! {
+                        "Avoid the use of Object.assign on accumulators."
+                    }
                 },
             )
             .note(markup! {
@@ -88,13 +114,7 @@ impl Rule for NoAccumulatingSpread {
     }
 }
 
-fn is_known_accumulator(node: &JsSpread, model: &SemanticModel) -> Option<bool> {
-    let reference = node
-        .argument()
-        .ok()?
-        .as_js_identifier_expression()?
-        .name()
-        .ok()?;
+fn is_known_accumulator(reference: JsReferenceIdentifier, model: &SemanticModel) -> Option<bool> {
     let parameter = model
         .binding(&reference)
         .and_then(|declaration| declaration.syntax().parent())
@@ -139,4 +159,48 @@ fn is_known_accumulator(node: &JsSpread, model: &SemanticModel) -> Option<bool> 
 
     // Finally check that the spread references the first parameter.
     Some(parameter.syntax().index() == 0)
+}
+
+fn handle_spread(node: &JsSpread, model: &SemanticModel) -> Option<bool> {
+    let reference = node
+        .argument()
+        .ok()?
+        .as_js_identifier_expression()?
+        .name()
+        .ok()?;
+
+    is_known_accumulator(reference, model)
+}
+
+// https://github.com/biomejs/biome/issues/5277
+// Spread operators are just syntax for Object.assign
+// Lets handle the rare cases where someone may use this
+fn handle_object_assign(node: &JsStaticMemberExpression, model: &SemanticModel) -> Option<bool> {
+    let object = node.object().ok()?;
+
+    let object_name = object.as_js_identifier_expression()?.name().ok()?;
+    if object_name.to_trimmed_text() != "Object" {
+        return None;
+    }
+    let operator = node.member().ok()?;
+    if operator.to_trimmed_text() != "assign" {
+        return None;
+    }
+
+    let call_expression = node.parent::<JsCallExpression>()?;
+    let arguments = call_expression.arguments().ok()?;
+    let reference = arguments
+        .args()
+        .first()?
+        .ok()?
+        .as_any_js_expression()?
+        .as_js_identifier_expression()?
+        .name()
+        .ok()?;
+
+    is_known_accumulator(reference, model)
+}
+
+declare_node_union! {
+    pub SpreadOrAssign = JsSpread | JsStaticMemberExpression
 }

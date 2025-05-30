@@ -15,6 +15,14 @@
 	"foo.reduce((acc, bar) => {return [...acc, ...bar];}, [])",
 	"foo.reduceRight((acc, bar) => {return [...acc, ...bar];}, [])",
 
+	// Array - Arrow return with assign
+	"foo.reduce((acc, bar) => Object.assign(acc, bar), [])",
+	"foo.reduceRight((acc, bar) => Object.assign(acc, bar), [])",
+
+	// Array - Body return with Assign
+	"foo.reduce((acc, bar) => { return Object.assign(acc, bar) }, [])",
+	"foo.reduceRight((acc, bar) => { return Object.assign(acc, bar) }, [])",
+
 	// Object - Arrow return
 	"foo.reduce((acc, bar) => ({...acc, [bar.key]: bar.value}), {})",
 	"foo.reduceRight((acc, bar) => ({...acc, [bar.key]: bar.value}), {})",
@@ -29,5 +37,13 @@
 
 	// Object - Body return with item spread
 	"foo.reduce((acc, bar) => {return {...acc, ...bar};}, {})",
-	"foo.reduceRight((acc, bar) => {return {...acc, ...bar};}, {})"
+	"foo.reduceRight((acc, bar) => {return {...acc, ...bar};}, {})",
+
+	// Object - Arrow return with assign
+	"foo.reduce((acc, bar) => Object.assign(acc, bar), {})",
+	"foo.reduceRight((acc, bar) => Object.assign(acc, bar), {})",
+
+	// Object - Body return with Assign
+	"foo.reduce((acc, bar) => { return Object.assign(acc, bar) }, {})",
+	"foo.reduceRight((acc, bar) => { return Object.assign(acc, bar) }, {})"
 ]
