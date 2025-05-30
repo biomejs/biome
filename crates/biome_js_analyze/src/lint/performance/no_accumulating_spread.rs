@@ -42,12 +42,12 @@ declare_lint_rule! {
     ///
     /// ```js,expect_diagnostic
     /// var a = ['a', 'b', 'c'];
-    /// a.reduce((acc, val) => Object.assign(accum, obj), []);
+    /// a.reduce((acc, val) => Object.assign(acc, val), []);
     /// ```
     ///
     /// ```js,expect_diagnostic
     /// var a = ['a', 'b', 'c'];
-    /// a.reduce((acc, val) => {return Object.assign(accum, obj);}, []);
+    /// a.reduce((acc, val) => {return Object.assign(acc, val);}, []);
     /// ```
     ///
     /// ### Valid
