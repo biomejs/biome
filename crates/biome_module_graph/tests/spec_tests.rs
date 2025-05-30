@@ -895,16 +895,56 @@ fn test_resolve_react_types() {
         "/node_modules/@types/react/index.d.ts".into(),
         include_bytes!("../../biome_resolver/tests/fixtures/resolver_cases_5/node_modules/@types/react/index.d.ts")
     );
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"import { useCallback } from "react";
 
-    let added_paths = [BiomePath::new("/node_modules/@types/react/index.d.ts")];
+        const fn = useCallback(async () => {});
+        const promise = fn();
+        "#,
+    );
+
+    let added_paths = [
+        BiomePath::new("/node_modules/@types/react/index.d.ts"),
+        BiomePath::new("/src/index.ts"),
+    ];
     let added_paths = get_added_paths(&fs, &added_paths);
 
-    let module_graph = ModuleGraph::default();
-    module_graph.update_graph_for_js_paths(&fs, &ProjectLayout::default(), &added_paths, &[]);
+    let project_layout = ProjectLayout::default();
+    project_layout.insert_node_manifest(
+        "/".into(),
+        PackageJson::new("frontend")
+            .with_version("0.0.0".into())
+            .with_dependencies(Dependencies::from([("react".into(), "19.0.0".into())])),
+    );
 
-    let snapshot = ModuleGraphSnapshot::new(&module_graph, &fs);
+    let tsconfig_json = parse_json(r#"{}"#, JsonParserOptions::default());
+    project_layout.insert_serialized_tsconfig("/".into(), tsconfig_json.into());
 
+    let module_graph = Arc::new(ModuleGraph::default());
+    module_graph.update_graph_for_js_paths(&fs, &project_layout, &added_paths, &[]);
+
+    let index_module = module_graph
+        .module_info_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+    let mut resolver = ScopedResolver::from_global_scope(index_module, module_graph.clone());
+    resolver.run_inference();
+
+    let snapshot = ModuleGraphSnapshot::new(module_graph.as_ref(), &fs).with_resolver(&resolver);
     snapshot.assert_snapshot("test_resolve_react_types");
+
+    let resolved_id = resolver
+        .resolve_type_of(&Text::Static("promise"), ScopeId::GLOBAL)
+        .expect("promise variable not found");
+    let ty = resolver
+        .get_by_resolved_id(resolved_id)
+        .expect("cannot find type data")
+        .to_data();
+    let _ty_string = format!("{ty:?}"); // for debugging
+    let ty = ty.inferred(&mut resolver);
+    let _ty_string = format!("{ty:?}"); // for debugging
+    let ty = Type::from_data(Box::new(resolver), ty);
+    // assert!(ty.is_promise_instance()); // FIXME: Let's make this pass
 }
 
 #[test]

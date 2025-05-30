@@ -84,14 +84,14 @@ impl<'a> ModuleGraphSnapshot<'a> {
             content.push_str(formatted.as_code().trim());
             content.push_str("\n```");
 
-            let data = dependency_data.get(file_name.as_path()).unwrap().clone();
+            if let Some(data) = dependency_data.get(file_name.as_path()) {
+                content.push_str("\n\n## Module Info\n\n");
+                content.push_str("```\n");
+                content.push_str(&data.to_string());
+                content.push_str("\n```\n\n");
 
-            content.push_str("\n\n## Module Info\n\n");
-            content.push_str("```\n");
-            content.push_str(&data.to_string());
-            content.push_str("\n```\n\n");
-
-            dump_registered_types(&mut content, data.as_resolver());
+                dump_registered_types(&mut content, data.as_resolver());
+            }
         }
 
         if let Some(resolver) = self.resolver {
