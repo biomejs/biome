@@ -268,7 +268,11 @@ impl TraversalContext for ScanContext<'_> {
     // We roughly understand which files should be open by the scanner.
     // Here, we mostly do file operations by reading their metadata.
     fn can_handle(&self, path: &BiomePath) -> bool {
-        if self.workspace.is_ignored_by_scanner(self.project_key, path) {
+        if self
+            .workspace
+            .projects
+            .is_ignored_by_scanner(self.project_key, path)
+        {
             return false;
         }
 
