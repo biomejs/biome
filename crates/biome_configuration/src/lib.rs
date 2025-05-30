@@ -261,7 +261,7 @@ impl Configuration {
     /// extends the root cannot be a root itself).
     pub fn is_root(&self) -> bool {
         match self.root {
-            Some(root) => root.into(),
+            Some(root) => root.value(),
             None => !self.extends_root(),
         }
     }
