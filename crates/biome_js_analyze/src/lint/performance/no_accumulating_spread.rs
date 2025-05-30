@@ -114,9 +114,9 @@ impl Rule for NoAccumulatingSpread {
     }
 }
 
-fn is_known_accumulator(reference: JsReferenceIdentifier, model: &SemanticModel) -> Option<bool> {
+fn is_known_accumulator(reference: &JsReferenceIdentifier, model: &SemanticModel) -> Option<bool> {
     let parameter = model
-        .binding(&reference)
+        .binding(reference)
         .and_then(|declaration| declaration.syntax().parent())
         .and_then(JsFormalParameter::cast)?;
     let function = parameter
@@ -169,7 +169,7 @@ fn handle_spread(node: &JsSpread, model: &SemanticModel) -> Option<bool> {
         .name()
         .ok()?;
 
-    is_known_accumulator(reference, model)
+    is_known_accumulator(&reference, model)
 }
 
 // https://github.com/biomejs/biome/issues/5277
@@ -198,7 +198,7 @@ fn handle_object_assign(node: &JsStaticMemberExpression, model: &SemanticModel) 
         .name()
         .ok()?;
 
-    is_known_accumulator(reference, model)
+    is_known_accumulator(&reference, model)
 }
 
 declare_node_union! {
