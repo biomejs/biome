@@ -931,7 +931,7 @@ impl Workspace for WorkspaceServer {
         let workspace_directory = params.workspace_directory.map(|p| p.to_path_buf());
         let is_root = params.configuration.is_root();
         let extends_root = params.configuration.extends_root();
-        let mut settings = if !params.configuration.is_root() {
+        let mut settings = if !is_root {
             if !self.projects.is_project_registered(params.project_key) {
                 return Err(WorkspaceError::no_project());
             }
