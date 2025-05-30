@@ -1,4 +1,4 @@
-use std::ops::Neg;
+use std::{borrow::Cow, ops::Neg};
 
 use biome_js_type_info_macros::Resolvable;
 use biome_rowan::Text;
@@ -48,32 +48,27 @@ impl NumberLiteral {
     pub fn to_f64(&self) -> Option<f64> {
         let parse = |text: &str| {
             // Remove numeric separators first.
-            let s = text.replace('_', "");
+            // Most of numbers have no separators.
+            // Thus we check if the number contains any separator before calling `replace` that allocates a String.
+            let s = if text.contains('_') {
+                Cow::Owned(text.replace('_', ""))
+            } else {
+                Cow::Borrowed(text)
+            };
 
-            if let Some(s) = s.strip_prefix("0b").or_else(|| s.strip_prefix("0B")) {
-                return Some(u64::from_str_radix(s, 2).ok()? as f64);
-            }
-
-            if let Some(s) = s.strip_prefix("0o").or_else(|| s.strip_prefix("0O")) {
-                return Some(u64::from_str_radix(s, 8).ok()? as f64);
-            }
-
-            if let Some(s) = s.strip_prefix("0x").or_else(|| s.strip_prefix("0X")) {
-                return Some(u64::from_str_radix(s, 16).ok()? as f64);
-            }
-
-            // Handle a legacy octal literal or a decimal literal with a leading zero.
-            if let Some(s) = s.strip_prefix("0") {
-                if !s.is_empty() && !s.starts_with('e') && !s.starts_with('E') {
-                    if !s.contains('8') && !s.contains('9') {
-                        return Some(u64::from_str_radix(s, 8).ok()? as f64);
-                    }
-
-                    return s.parse().ok();
+            match s.get(..2) {
+                Some("0b" | "0B") => Some(u64::from_str_radix(&s[2..], 2).ok()? as f64),
+                Some("0o" | "0O") => Some(u64::from_str_radix(&s[2..], 8).ok()? as f64),
+                Some("0x" | "0X") => Some(u64::from_str_radix(&s[2..], 16).ok()? as f64),
+                Some(prefix)
+                    if prefix.starts_with('0')
+                        && !prefix.ends_with(['e', 'E'])
+                        && !s[1..].contains(['8', '9']) =>
+                {
+                    Some(u64::from_str_radix(&s[1..], 8).ok()? as f64)
                 }
+                _ => s.parse().ok(),
             }
-
-            s.parse().ok()
         };
 
         let text = self.as_str();
@@ -149,6 +144,7 @@ mod tests {
     #[test]
     fn parse_number_legacy_octal() {
         assert_eq!(NumberLiteral(Text::Static("0888")).to_f64(), Some(888.0));
+        assert_eq!(NumberLiteral(Text::Static("0788")).to_f64(), Some(788.0));
         assert_eq!(NumberLiteral(Text::Static("0777")).to_f64(), Some(511.0));
     }
 
