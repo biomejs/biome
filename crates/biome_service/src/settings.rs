@@ -58,7 +58,8 @@ const DEFAULT_SCANNER_IGNORE_ENTRIES: &[&[u8]] = &[
     b".turbo",
     b".vercel",
     b".DS_Store",
-    b"RedisCommander.d.ts", // See: https://github.com/biomejs/biome/issues/6172
+    // TODO: Remove when https://github.com/biomejs/biome/issues/6172 is fixed.
+    b"RedisCommander.d.ts",
 ];
 
 /// Settings active in a project.
