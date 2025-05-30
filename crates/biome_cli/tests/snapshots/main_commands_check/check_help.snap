@@ -90,6 +90,9 @@ The configuration that is contained inside the file `biome.json`
                               formatted on a single line if it fits in the line. When formatting
                               `package.json`, Biome will use `always` unless configured otherwise.
                               Defaults to "auto".
+        --javascript-formatter-operator-linebreak=<before|after>  When breaking binary expressions
+                              into multiple lines, whether to break them before or after the binary
+                              operator. Defaults to "after".
         --javascript-linter-enabled=<true|false>  Control the linter for JavaScript (and its super
                               languages) files.
         --javascript-assist-enabled=<true|false>  Control the assist for JavaScript (and its super
