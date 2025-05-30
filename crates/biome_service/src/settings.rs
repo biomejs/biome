@@ -15,8 +15,8 @@ use biome_configuration::{
     BiomeDiagnostic, Configuration, CssConfiguration, FilesConfiguration,
     FilesIgnoreUnknownEnabled, FormatterConfiguration, GraphqlConfiguration, GritConfiguration,
     JsConfiguration, JsonConfiguration, LinterConfiguration, OverrideAssistConfiguration,
-    OverrideFormatterConfiguration, OverrideGlobs, OverrideLinterConfiguration, Overrides,
-    RootEnabled, Rules, push_to_analyzer_assist, push_to_analyzer_rules,
+    OverrideFormatterConfiguration, OverrideGlobs, OverrideLinterConfiguration, Overrides, Rules,
+    push_to_analyzer_assist, push_to_analyzer_rules,
 };
 use biome_css_formatter::context::CssFormatOptions;
 use biome_css_parser::CssParserOptions;
@@ -72,8 +72,6 @@ pub struct Settings {
     /// It contains [Configuration] and the folder where it was found.
     source: Option<Arc<(Configuration, Option<Utf8PathBuf>)>>,
 
-    /// Whether this belongs to a root configuration file
-    pub root: Option<RootEnabled>,
     /// Formatter settings applied to all files in the project.
     pub formatter: FormatSettings,
     /// Linter settings applied to all files in the project.
@@ -115,9 +113,6 @@ impl Settings {
         working_directory: Option<Utf8PathBuf>,
     ) -> Result<(), WorkspaceError> {
         self.source = Some(Arc::new((configuration.clone(), working_directory.clone())));
-
-        // Set root value
-        self.root = configuration.root;
 
         // formatter part§
         if let Some(formatter) = configuration.formatter {
@@ -312,12 +307,6 @@ impl Settings {
 
     pub fn is_assist_enabled(&self) -> bool {
         self.assist.is_enabled()
-    }
-
-    /// Whether these settings belong to a root.
-    /// It's returns `true` when it's `None` or `Some(true)`, `false` otherwise.
-    pub fn is_root(&self) -> bool {
-        self.root.unwrap_or_default().into()
     }
 }
 
