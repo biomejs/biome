@@ -42,7 +42,7 @@ url       = "2.5.4"
 [target.'cfg(target_os = "windows")'.dependencies]
 mimalloc = "0.1.46"
 
-[target.'cfg(all(target_family="unix", not(all(target_arch = "aarch64", target_env = "musl"))))'.dependencies]
+[target.'cfg(all(target_family="unix", not(all(target_arch = "aarch64", target_env = "musl")), not(target_os = "openbsd")))'.dependencies]
 tikv-jemallocator = "0.6.0"
 
 #[features]
