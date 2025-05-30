@@ -120,6 +120,11 @@ fn should_extend_from_the_root_config() {
     "formatter": {
         "indentStyle": "space",
         "indentWidth": 2
+    },
+    "javascript": {
+        "formatter": {
+            "quoteStyle": "single"
+        }
     }
 }
 "#,

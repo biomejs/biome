@@ -28,6 +28,7 @@ use crate::{WatcherInstruction, Workspace, WorkspaceError, is_dir};
 use append_only_vec::AppendOnlyVec;
 use biome_analyze::{AnalyzerPluginVec, RuleCategory};
 use biome_configuration::analyzer::RuleSelector;
+use biome_configuration::bool::Bool;
 use biome_configuration::plugins::{PluginConfiguration, Plugins};
 use biome_configuration::{BiomeDiagnostic, Configuration, ConfigurationPathHint};
 use biome_deserialize::json::deserialize_from_json_str;
@@ -695,6 +696,9 @@ impl WorkspaceServer {
                     .ok_or_else(WorkspaceError::no_project)?;
 
                 root_configuration.merge_with(nested_configuration);
+                // We need to be careful that our merge doesn't leave
+                // `root: true` from the root config.
+                root_configuration.root = Some(Bool(false));
                 root_configuration
             } else {
                 nested_configuration
