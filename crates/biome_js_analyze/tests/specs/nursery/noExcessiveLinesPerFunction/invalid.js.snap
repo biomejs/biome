@@ -44,6 +44,11 @@ class foo {
 		let x = 20;
 		return y + x;
 	}
+	constructor() {
+		let y = 10;
+		let x = 20;
+		return y + x;
+	}
 }
 
 ```
@@ -170,8 +175,30 @@ invalid.js:36:2 lint/nursery/noExcessiveLinesPerFunction ━━━━━━━�
   > 39 │ 		return y + x;
   > 40 │ 	}
        │ 	^
-    41 │ }
-    42 │ 
+    41 │ 	constructor() {
+    42 │ 		let y = 10;
+  
+  i Consider refactoring this function to split it into smaller functions.
+  
+
+```
+
+```
+invalid.js:41:2 lint/nursery/noExcessiveLinesPerFunction ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This function has too many lines (5). Maximum allowed is 4.
+  
+    39 │ 		return y + x;
+    40 │ 	}
+  > 41 │ 	constructor() {
+       │ 	^^^^^^^^^^^^^^^
+  > 42 │ 		let y = 10;
+  > 43 │ 		let x = 20;
+  > 44 │ 		return y + x;
+  > 45 │ 	}
+       │ 	^
+    46 │ }
+    47 │ 
   
   i Consider refactoring this function to split it into smaller functions.
   
