@@ -815,7 +815,11 @@ pub(crate) trait CommandRunner: Sized {
 
     /// The main command to use.
     fn run(&mut self, session: CliSession, cli_options: &CliOptions) -> Result<(), CliDiagnostic> {
-        setup_cli_subscriber(cli_options.log_level, cli_options.log_kind);
+        setup_cli_subscriber(
+            cli_options.log_file.as_deref(),
+            cli_options.log_level,
+            cli_options.log_kind,
+        );
         let console = &mut *session.app.console;
         let workspace = &*session.app.workspace;
         let fs = workspace.fs();

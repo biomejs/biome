@@ -443,8 +443,6 @@ fn format(
 ) -> Result<Printed, WorkspaceError> {
     let options = settings.format_options::<CssLanguage>(biome_path, document_file_source);
 
-    tracing::debug!("Format with the following options: {:?}", options);
-
     let tree = parse.syntax();
     let formatted = format_node(options, &tree)?;
 
