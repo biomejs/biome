@@ -1,5 +1,5 @@
 use crate::is_dir;
-use crate::settings::{FilesSettings, Settings, VcsIgnoredPatterns};
+use crate::settings::Settings;
 use crate::workspace::FeatureKind;
 use camino::{Utf8Path, Utf8PathBuf};
 use papaya::HashMap;
@@ -126,24 +126,36 @@ impl Projects {
             .map(|data| data.root_settings.clone())
     }
 
-    /// Retrieves the `files` settings for the given project.
-    pub fn get_files_settings(
-        &self,
-        project_key: ProjectKey,
-        path: &Utf8Path,
-    ) -> Option<FilesSettings> {
-        self.get_settings_based_on_path(project_key, path)
-            .map(|settings| settings.files.clone())
+    pub fn is_ignored_by_scanner(&self, project_key: ProjectKey, path: &Utf8Path) -> bool {
+        self.0.pin().get(&project_key).is_none_or(|data| {
+            let ignore_entries = &data.root_settings.files.scanner_ignore_entries;
+            path.components().any(|component| {
+                ignore_entries
+                    .iter()
+                    .any(|entry| entry == component.as_os_str().as_encoded_bytes())
+            })
+        })
     }
 
-    /// Retrieves the ignore matches that have been stored inside the settings of the current project
-    pub fn get_vcs_ignored_matches(
-        &self,
-        project_key: ProjectKey,
-        path: &Utf8Path,
-    ) -> Option<VcsIgnoredPatterns> {
+    pub fn is_ignored_by_top_level_config(&self, project_key: ProjectKey, path: &Utf8Path) -> bool {
         self.get_settings_based_on_path(project_key, path)
-            .and_then(|settings| settings.vcs_settings.ignore_matches.clone())
+            .is_some_and(|settings| {
+                let includes = &settings.files.includes;
+
+                let mut is_included = true;
+                if !includes.is_unset() {
+                    is_included = if is_dir(path) {
+                        includes.matches_directory_with_exceptions(path)
+                    } else {
+                        includes.matches_with_exceptions(path)
+                    };
+                }
+
+                !is_included
+                    || settings.vcs_settings.ignore_matches.as_ref().is_some_and(
+                        |ignored_matches| ignored_matches.is_ignored(path, is_dir(path)),
+                    )
+            })
     }
 
     /// Sets the root settings for the given project.

@@ -24,7 +24,7 @@ use crate::workspace::{
     ServerInfo,
 };
 use crate::workspace_watcher::{OpenFileReason, WatcherSignalKind};
-use crate::{WatcherInstruction, Workspace, WorkspaceError, is_dir};
+use crate::{WatcherInstruction, Workspace, WorkspaceError};
 use append_only_vec::AppendOnlyVec;
 use biome_analyze::{AnalyzerPluginVec, RuleCategory};
 use biome_configuration::analyzer::RuleSelector;
@@ -552,40 +552,12 @@ impl WorkspaceServer {
 
     /// Checks whether a file is ignored in the top-level `files.includes`.
     fn is_ignored_by_top_level_config(&self, project_key: ProjectKey, path: &Utf8Path) -> bool {
-        let Some(files_settings) = self.projects.get_files_settings(project_key, path) else {
-            return false;
-        };
-        let mut is_included = true;
-        if !files_settings.includes.is_unset() {
-            is_included = if is_dir(path) {
-                files_settings
-                    .includes
-                    .matches_directory_with_exceptions(path)
-            } else {
-                files_settings.includes.matches_with_exceptions(path)
-            };
-        }
-
-        let ignore_matches = self.projects.get_vcs_ignored_matches(project_key, path);
-
-        !is_included
-            || ignore_matches
-                .as_ref()
-                .is_some_and(|ignored_matches| ignored_matches.is_ignored(path, is_dir(path)))
+        self.projects
+            .is_ignored_by_top_level_config(project_key, path)
     }
 
     pub(super) fn is_ignored_by_scanner(&self, project_key: ProjectKey, path: &Utf8Path) -> bool {
-        let Some(settings) = self.projects.get_root_settings(project_key) else {
-            return true; // If the project isn't loaded, nothing should be scanned.
-        };
-
-        path.components().any(|component| {
-            settings
-                .files
-                .scanner_ignore_entries
-                .iter()
-                .any(|entry| entry == component.as_os_str().as_encoded_bytes())
-        })
+        self.projects.is_ignored_by_scanner(project_key, path)
     }
 
     fn load_plugins(&self, base_path: &Utf8Path, plugins: &Plugins) -> Vec<PluginDiagnostic> {
