@@ -75,7 +75,7 @@ pub struct WorkspaceServer {
     module_graph: Arc<ModuleGraph>,
 
     /// Keeps all loaded plugins in memory, per project.
-    plugin_caches: Arc<HashMap<ProjectKey, PluginCache>>,
+    plugin_caches: Arc<HashMap<Utf8PathBuf, PluginCache>>,
 
     /// Stores the document (text content + version number) associated with a URL
     pub(super) documents: HashMap<Utf8PathBuf, Document, FxBuildHasher>,
@@ -551,7 +551,7 @@ impl WorkspaceServer {
 
     /// Checks whether a file is ignored in the top-level `files.includes`.
     fn is_ignored_by_top_level_config(&self, project_key: ProjectKey, path: &Utf8Path) -> bool {
-        let Some(files_settings) = self.projects.get_files_settings(project_key) else {
+        let Some(files_settings) = self.projects.get_files_settings(project_key, path) else {
             return false;
         };
         let mut is_included = true;
@@ -565,7 +565,7 @@ impl WorkspaceServer {
             };
         }
 
-        let ignore_matches = self.projects.get_vcs_ignored_matches(project_key);
+        let ignore_matches = self.projects.get_vcs_ignored_matches(project_key, path);
 
         !is_included
             || ignore_matches
@@ -573,12 +573,7 @@ impl WorkspaceServer {
                 .is_some_and(|ignored_matches| ignored_matches.is_ignored(path, is_dir(path)))
     }
 
-    fn load_plugins(
-        &self,
-        project_key: ProjectKey,
-        base_path: &Utf8Path,
-        plugins: &Plugins,
-    ) -> Vec<PluginDiagnostic> {
+    fn load_plugins(&self, base_path: &Utf8Path, plugins: &Plugins) -> Vec<PluginDiagnostic> {
         let mut diagnostics = Vec::new();
         let plugin_cache = PluginCache::default();
 
@@ -586,7 +581,7 @@ impl WorkspaceServer {
             match plugin_config {
                 PluginConfiguration::Path(plugin_path) => {
                     match BiomePlugin::load(self.fs.as_ref(), plugin_path, base_path) {
-                        Ok(plugin) => {
+                        Ok((plugin, _)) => {
                             plugin_cache.insert_plugin(plugin_path.clone().into(), plugin);
                         }
                         Err(diagnostic) => diagnostics.push(diagnostic),
@@ -595,17 +590,19 @@ impl WorkspaceServer {
             }
         }
 
-        self.plugin_caches.pin().insert(project_key, plugin_cache);
+        self.plugin_caches
+            .pin()
+            .insert(base_path.to_path_buf(), plugin_cache);
 
         diagnostics
     }
 
     fn get_analyzer_plugins_for_project(
         &self,
-        project_key: ProjectKey,
+        path: &Utf8Path,
         plugins: &Plugins,
     ) -> Result<AnalyzerPluginVec, Vec<PluginDiagnostic>> {
-        match self.plugin_caches.pin().get(&project_key) {
+        match self.plugin_caches.pin().get(path) {
             Some(cache) => cache.get_analyzer_plugins(plugins),
             None => Ok(Vec::new()),
         }
@@ -721,6 +718,7 @@ impl WorkspaceServer {
             .ok_or_else(WorkspaceError::no_project)?;
 
         let vcs_settings = &mut settings.vcs_settings;
+
         if !vcs_settings.is_enabled() {
             return Ok(());
         }
@@ -931,8 +929,9 @@ impl Workspace for WorkspaceServer {
         params: UpdateSettingsParams,
     ) -> Result<UpdateSettingsResult, WorkspaceError> {
         let workspace_directory = params.workspace_directory.map(|p| p.to_path_buf());
-
-        let mut settings = if !params.configuration.is_root() {
+        let is_root = params.configuration.is_root();
+        let extends_root = params.configuration.extends_root();
+        let mut settings = if !is_root {
             if !self.projects.is_project_registered(params.project_key) {
                 return Err(WorkspaceError::no_project());
             }
@@ -952,9 +951,14 @@ impl Workspace for WorkspaceServer {
 
         settings.merge_with_configuration(params.configuration, workspace_directory.clone())?;
 
+        let loading_directory = if extends_root {
+            self.projects.get_project_path(params.project_key)
+        } else {
+            workspace_directory.clone()
+        };
+
         let diagnostics = self.load_plugins(
-            params.project_key,
-            &workspace_directory.clone().unwrap_or_default(),
+            &loading_directory.clone().unwrap_or_default(),
             &settings.as_all_plugins(),
         );
         let has_errors = diagnostics
@@ -967,7 +971,7 @@ impl Workspace for WorkspaceServer {
             return Err(WorkspaceError::plugin_errors(diagnostics));
         }
 
-        if !settings.is_root() {
+        if !is_root {
             self.projects.set_nested_settings(
                 params.project_key,
                 workspace_directory.unwrap_or_default(),
@@ -1361,9 +1365,10 @@ impl Workspace for WorkspaceServer {
                     .projects
                     .get_settings_based_on_path(project_key, &path)
                     .ok_or_else(WorkspaceError::no_project)?;
+
                 let plugins = self
                     .get_analyzer_plugins_for_project(
-                        project_key,
+                        settings.source_path().unwrap_or_default().as_path(),
                         &settings.get_plugins_for_path(&path),
                     )
                     .map_err(WorkspaceError::plugin_errors)?;
@@ -1594,7 +1599,10 @@ impl Workspace for WorkspaceServer {
             .get_settings_based_on_path(project_key, &path)
             .ok_or_else(WorkspaceError::no_project)?;
         let plugins = self
-            .get_analyzer_plugins_for_project(project_key, &settings.get_plugins_for_path(&path))
+            .get_analyzer_plugins_for_project(
+                settings.source_path().unwrap_or_default().as_path(),
+                &settings.get_plugins_for_path(&path),
+            )
             .map_err(WorkspaceError::plugin_errors)?;
         let language = self.get_file_source(&path);
         fix_all(FixAllParams {

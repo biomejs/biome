@@ -51,8 +51,10 @@ use tracing::instrument;
 /// These can be either root settings, or settings for a section of the project.
 #[derive(Clone, Debug, Default)]
 pub struct Settings {
-    /// The configuration that originated this setting, if applicable
-    source: Option<Arc<Configuration>>,
+    /// The configuration that originated this setting, if applicable.
+    ///
+    /// It contains [Configuration] and the folder where it was found.
+    source: Option<Arc<(Configuration, Option<Utf8PathBuf>)>>,
 
     /// Whether this belongs to a root configuration file
     pub root: Option<RootEnabled>,
@@ -76,7 +78,17 @@ pub struct Settings {
 
 impl Settings {
     pub fn source(&self) -> Option<Configuration> {
-        self.source.as_ref().map(|source| source.deref().clone())
+        self.source.as_ref().map(|source| {
+            let (config, _) = source.deref().clone();
+            config
+        })
+    }
+
+    pub fn source_path(&self) -> Option<Utf8PathBuf> {
+        self.source.as_ref().and_then(|source| {
+            let (_, path) = source.deref().clone();
+            path
+        })
     }
 
     /// Merges the [Configuration] into the settings.
@@ -86,7 +98,7 @@ impl Settings {
         configuration: Configuration,
         working_directory: Option<Utf8PathBuf>,
     ) -> Result<(), WorkspaceError> {
-        self.source = Some(Arc::new(configuration.clone()));
+        self.source = Some(Arc::new((configuration.clone(), working_directory.clone())));
 
         // Set root value
         self.root = configuration.root;
@@ -272,6 +284,10 @@ impl Settings {
 
     pub fn is_linter_enabled(&self) -> bool {
         self.linter.is_enabled()
+    }
+
+    pub fn is_vcs_enabled(&self) -> bool {
+        self.vcs_settings.is_enabled()
     }
 
     pub fn linter_recommended_enabled(&self) -> bool {

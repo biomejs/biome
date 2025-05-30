@@ -1376,10 +1376,9 @@
 			]
 		},
 		"Extends": {
-			"description": "A list of paths to other JSON files, used to extends the current configuration.",
 			"anyOf": [
 				{ "type": "array", "items": { "type": "string" } },
-				{ "type": "null" }
+				{ "type": "string" }
 			]
 		},
 		"FilenameCase": {

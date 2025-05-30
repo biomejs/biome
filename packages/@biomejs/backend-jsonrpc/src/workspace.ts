@@ -132,10 +132,7 @@ export interface CssConfiguration {
 	 */
 	parser?: CssParserConfiguration;
 }
-/**
- * A list of paths to other JSON files, used to extends the current configuration.
- */
-export type Extends = string[] | null;
+export type Extends = string[] | string;
 /**
  * The configuration of the filesystem
  */

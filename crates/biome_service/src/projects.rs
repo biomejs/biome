@@ -127,19 +127,23 @@ impl Projects {
     }
 
     /// Retrieves the `files` settings for the given project.
-    pub fn get_files_settings(&self, project_key: ProjectKey) -> Option<FilesSettings> {
-        self.0
-            .pin()
-            .get(&project_key)
-            .map(|data| data.root_settings.files.clone())
+    pub fn get_files_settings(
+        &self,
+        project_key: ProjectKey,
+        path: &Utf8Path,
+    ) -> Option<FilesSettings> {
+        self.get_settings_based_on_path(project_key, path)
+            .map(|settings| settings.files.clone())
     }
 
     /// Retrieves the ignore matches that have been stored inside the settings of the current project
-    pub fn get_vcs_ignored_matches(&self, project_key: ProjectKey) -> Option<VcsIgnoredPatterns> {
-        self.0
-            .pin()
-            .get(&project_key)
-            .and_then(|data| data.root_settings.vcs_settings.ignore_matches.clone())
+    pub fn get_vcs_ignored_matches(
+        &self,
+        project_key: ProjectKey,
+        path: &Utf8Path,
+    ) -> Option<VcsIgnoredPatterns> {
+        self.get_settings_based_on_path(project_key, path)
+            .and_then(|settings| settings.vcs_settings.ignore_matches.clone())
     }
 
     /// Sets the root settings for the given project.
@@ -169,8 +173,8 @@ impl Projects {
 
             ProjectData {
                 path: data.path.clone(),
-                root_settings: settings.clone(),
-                nested_settings: data.nested_settings.clone(),
+                root_settings: data.root_settings.clone(),
+                nested_settings: nested_settings.clone(),
             }
         });
     }

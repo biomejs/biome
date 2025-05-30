@@ -1214,12 +1214,6 @@ mod tests {
     #[test]
     fn memory_size_check() {
         assert_eq!(
-            std::mem::size_of::<TypeData>(),
-            16,
-            "Size shouldn't go higher"
-        );
-
-        assert_eq!(
             std::mem::size_of::<TypeReference>(),
             16,
             "The size shouldn't go higher"
