@@ -11,6 +11,11 @@ function name() {
 }
 
 class foo {
+	constructor() {
+		let y = 10;
+		let x = 20;
+		return y + x;
+	}
 	method() {
 		let y = 10;
 		let x = 20;

@@ -38,4 +38,9 @@ class foo {
 		let x = 20;
 		return y + x;
 	}
+	constructor() {
+		let y = 10;
+		let x = 20;
+		return y + x;
+	}
 }
