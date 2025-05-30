@@ -66,9 +66,24 @@ declare_lint_rule! {
     }
 }
 
+declare_node_union! {
+    pub AnySpread = JsSpread | JsStaticMemberExpression
+}
+
+pub struct FoundSpread {
+    range: TextRange,
+    is_spread: bool,
+}
+
+impl FoundSpread {
+    fn new(range: TextRange, is_spread: bool) -> Self {
+        Self { range, is_spread }
+    }
+}
+
 impl Rule for NoAccumulatingSpread {
-    type Query = Semantic<SpreadOrAssign>;
-    type State = (TextRange, bool);
+    type Query = Semantic<AnySpread>;
+    type State = FoundSpread;
     type Signals = Option<Self::State>;
     type Options = ();
 
@@ -76,30 +91,25 @@ impl Rule for NoAccumulatingSpread {
         let model = ctx.model();
 
         match ctx.query() {
-            SpreadOrAssign::JsSpread(node) => {
-                handle_spread(node, model)?.then_some((node.range(), true))
+            AnySpread::JsSpread(node) => {
+                handle_spread(node, model)?.then_some(FoundSpread::new(node.range(), true))
             }
-            SpreadOrAssign::JsStaticMemberExpression(node) => {
-                handle_object_assign(node, model)?.then_some((node.range(), false))
+            AnySpread::JsStaticMemberExpression(node) => {
+                handle_object_assign(node, model)?.then_some(FoundSpread::new(node.range(), false))
             }
         }
     }
 
-    fn diagnostic(
-        _: &RuleContext<Self>,
-        (range, is_spread): &Self::State,
-    ) -> Option<RuleDiagnostic> {
+    fn diagnostic(_: &RuleContext<Self>, found_spread: &Self::State) -> Option<RuleDiagnostic> {
         Some(
             RuleDiagnostic::new(
                 rule_category!(),
-                range,
-                if *is_spread {
-                    markup! {
+                found_spread.range,
+                match found_spread.is_spread {
+                    true => markup! {
                         "Avoid the use of spread (`...`) syntax on accumulators."
-                    }
-                }
-                else {
-                    markup! {
+                    },
+                    false => markup! {
                         "Avoid the use of Object.assign on accumulators."
                     }
                 },
@@ -199,8 +209,4 @@ fn handle_object_assign(node: &JsStaticMemberExpression, model: &SemanticModel) 
         .ok()?;
 
     is_known_accumulator(&reference, model)
-}
-
-declare_node_union! {
-    pub SpreadOrAssign = JsSpread | JsStaticMemberExpression
 }
