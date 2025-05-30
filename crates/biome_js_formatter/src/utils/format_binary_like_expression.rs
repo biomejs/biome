@@ -283,9 +283,15 @@ impl Format<JsFormatContext> for BinaryLeftOrRightSide {
                     if should_inline {
                         write!(f, [space(), operator_token.format(), space()])?;
                     } else if let OperatorLinebreak::Before = op_linebreak {
-                        write!(f, [soft_line_break_or_space(), operator_token.format(), space()])?;
+                        write!(
+                            f,
+                            [soft_line_break_or_space(), operator_token.format(), space()]
+                        )?;
                     } else {
-                        write!(f, [space(), operator_token.format(), soft_line_break_or_space()])?;
+                        write!(
+                            f,
+                            [space(), operator_token.format(), soft_line_break_or_space()]
+                        )?;
                     }
 
                     write!(f, [right.format()])?;
