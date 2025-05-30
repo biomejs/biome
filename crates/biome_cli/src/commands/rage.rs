@@ -416,7 +416,7 @@ impl Display for BiomeServerLog {
         if let Ok(Some(log)) = read_most_recent_log_file(
             biome_env().biome_log_path.value().map(Utf8PathBuf::from),
             biome_env()
-                .biome_log_prefix
+                .biome_log_prefix_name
                 .value()
                 .unwrap_or("server.log".to_string()),
         ) {
