@@ -24,7 +24,12 @@ pub struct CliOptions {
 
     /// Set the file path to the configuration file, or the directory path to find `biome.json` or `biome.jsonc`.
     /// If used, it disables the default configuration file resolution.
-    #[bpaf(long("config-path"), argument("PATH"), optional)]
+    #[bpaf(
+        long("config-path"),
+        env("BIOME_CONFIG_PATH"),
+        argument("PATH"),
+        optional
+    )]
     pub config_path: Option<String>,
 
     /// Cap the amount of diagnostics displayed. When `none` is provided, the limit is lifted.
