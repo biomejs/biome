@@ -554,6 +554,20 @@ pub struct FilesConfiguration {
     #[bpaf(hide, pure(Default::default()))]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub includes: Option<Vec<biome_glob::NormalizedGlob>>,
+
+    /// Set of file and folder names that should be unconditionally ignored by
+    /// Biome's scanner.
+    ///
+    /// Biome maintains an internal list of default ignore entries, which is
+    /// based on user feedback and which may change in any release. This setting
+    /// allows overriding this internal list completely.
+    ///
+    /// This is considered an advanced feature that users _should_ not need to
+    /// tweak themselves, but they can as a last resort. This setting can only
+    /// be configured in root configurations, and is ignored in nested configs.
+    #[bpaf(hide, pure(Default::default()))]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub experimental_scanner_ignores: Option<Vec<String>>,
 }
 
 #[derive(Debug)]

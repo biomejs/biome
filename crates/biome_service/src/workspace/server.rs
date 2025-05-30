@@ -573,6 +573,20 @@ impl WorkspaceServer {
                 .is_some_and(|ignored_matches| ignored_matches.is_ignored(path, is_dir(path)))
     }
 
+    pub(super) fn is_ignored_by_scanner(&self, project_key: ProjectKey, path: &Utf8Path) -> bool {
+        let Some(settings) = self.projects.get_root_settings(project_key) else {
+            return true; // If the project isn't loaded, nothing should be scanned.
+        };
+
+        path.components().any(|component| {
+            settings
+                .files
+                .scanner_ignore_entries
+                .iter()
+                .any(|entry| entry == component.as_os_str().as_encoded_bytes())
+        })
+    }
+
     fn load_plugins(&self, base_path: &Utf8Path, plugins: &Plugins) -> Vec<PluginDiagnostic> {
         let mut diagnostics = Vec::new();
         let plugin_cache = PluginCache::default();

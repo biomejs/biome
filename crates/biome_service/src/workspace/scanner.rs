@@ -13,7 +13,7 @@ use super::{FeaturesBuilder, IsPathIgnoredParams};
 use crate::diagnostics::Panic;
 use crate::projects::ProjectKey;
 use crate::workspace::DocumentFileSource;
-use crate::{IGNORE_ENTRIES, Workspace, WorkspaceError};
+use crate::{Workspace, WorkspaceError};
 use biome_diagnostics::serde::Diagnostic;
 use biome_diagnostics::{Diagnostic as _, Error, Severity};
 use biome_fs::{BiomePath, PathInterner, PathKind, TraversalContext, TraversalScope};
@@ -268,10 +268,7 @@ impl TraversalContext for ScanContext<'_> {
     // We roughly understand which files should be open by the scanner.
     // Here, we mostly do file operations by reading their metadata.
     fn can_handle(&self, path: &BiomePath) -> bool {
-        if path
-            .file_name()
-            .is_some_and(|file_name| IGNORE_ENTRIES.contains(&file_name.as_bytes()))
-        {
+        if self.workspace.is_ignored_by_scanner(self.project_key, path) {
             return false;
         }
 

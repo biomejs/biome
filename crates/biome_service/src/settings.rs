@@ -46,6 +46,21 @@ use std::ops::Deref;
 use std::sync::Arc;
 use tracing::instrument;
 
+const DEFAULT_SCANNER_IGNORE_ENTRIES: &[&[u8]] = &[
+    b".cache",
+    b".git",
+    b".hg",
+    b".netlify",
+    b".output",
+    b".svn",
+    b".yarn",
+    b".timestamp",
+    b".turbo",
+    b".vercel",
+    b".DS_Store",
+    b"RedisCommander.d.ts", // See: https://github.com/biomejs/biome/issues/6172
+];
+
 /// Settings active in a project.
 ///
 /// These can be either root settings, or settings for a section of the project.
@@ -681,6 +696,10 @@ pub struct FilesSettings {
 
     /// Files not recognized by Biome should not emit a diagnostic
     pub ignore_unknown: Option<FilesIgnoreUnknownEnabled>,
+
+    /// List of file and folder names that should be unconditionally ignored by
+    /// the scanner.
+    pub scanner_ignore_entries: Vec<Vec<u8>>,
 }
 
 #[derive(Clone, Default, Debug)]
@@ -911,6 +930,15 @@ fn to_file_settings(
         max_size: config.max_size,
         includes: Includes::new(working_directory, config.includes),
         ignore_unknown: config.ignore_unknown,
+        scanner_ignore_entries: config.experimental_scanner_ignores.map_or_else(
+            || {
+                DEFAULT_SCANNER_IGNORE_ENTRIES
+                    .iter()
+                    .map(|entry| entry.to_vec())
+                    .collect()
+            },
+            |entries| entries.into_iter().map(String::into_bytes).collect(),
+        ),
     })
 }
 
