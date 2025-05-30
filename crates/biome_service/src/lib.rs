@@ -26,23 +26,6 @@ pub use file_handlers::JsFormatterSettings;
 pub use workspace::{Workspace, WorkspaceServer};
 pub use workspace_watcher::{WatcherInstruction, WorkspaceWatcher};
 
-/// Path entries that should be ignored in the workspace, even by the scanner.
-///
-/// These cannot (yet) be configured.
-pub const IGNORE_ENTRIES: &[&[u8]] = &[
-    b".cache",
-    b".git",
-    b".hg",
-    b".netlify",
-    b".output",
-    b".svn",
-    b".yarn",
-    b".timestamp",
-    b".turbo",
-    b".vercel",
-    b".DS_Store",
-];
-
 /// This is the main entrypoint of the application.
 pub struct App<'app> {
     /// A reference to the internal workspace
