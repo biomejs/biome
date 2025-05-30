@@ -746,13 +746,11 @@ impl VcsIgnoredPatterns {
                         } else {
                             gitignore.path()
                         };
-                        let result = if let Ok(stripped_path) = path.strip_prefix(ignore_directory)
-                        {
+                        if let Ok(stripped_path) = path.strip_prefix(ignore_directory) {
                             gitignore.matched(stripped_path, is_dir).is_ignore()
                         } else {
                             false
-                        };
-                        result
+                        }
                     })
             }
         }

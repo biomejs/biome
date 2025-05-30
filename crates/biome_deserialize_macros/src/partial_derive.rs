@@ -108,7 +108,7 @@ pub(crate) fn generate_partial(input: DeriveInput) -> TokenStream {
             });
 
             let ty = match attrs.ty.as_ref() {
-                Some(PartialType::Literal(ty)) => ty.clone(),
+                Some(PartialType::Literal(ty)) => ty.as_ref().clone(),
                 Some(PartialType::Prefixed) => {
                     let mut ty = ty.clone();
                     if let Type::Path(type_path) = &mut ty {
