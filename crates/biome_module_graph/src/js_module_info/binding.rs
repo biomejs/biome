@@ -134,7 +134,14 @@ pub enum JsDeclarationKind {
 }
 
 impl JsDeclarationKind {
+    /// Returns whether this declaration declares a namespace.
+    #[inline]
+    pub fn declares_namespace(&self) -> bool {
+        matches!(self, Self::Namespace)
+    }
+
     /// Returns whether this declaration declares a type.
+    #[inline]
     pub fn declares_type(&self) -> bool {
         matches!(
             self,
@@ -143,13 +150,13 @@ impl JsDeclarationKind {
                 | Self::Import
                 | Self::ImportType
                 | Self::Interface
-                | Self::Namespace
                 | Self::Type
                 | Self::Unknown
         )
     }
 
     /// Returns whether this declaration declares a runtime value.
+    #[inline]
     pub fn declares_value(&self) -> bool {
         matches!(
             self,

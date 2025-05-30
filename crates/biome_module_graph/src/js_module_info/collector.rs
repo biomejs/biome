@@ -772,19 +772,23 @@ impl JsModuleInfoBag {
 
             if let Some(binding_ref) = collector.scopes[0].bindings_by_name.get(local_name) {
                 match binding_ref {
-                    TsBindingReference::Dual { ty, value_ty } => {
-                        let ty_binding = &collector.bindings[ty.index()];
-                        let value_ty_binding = &collector.bindings[value_ty.index()];
+                    TsBindingReference::Merged {
+                        ty,
+                        value_ty,
+                        namespace_ty,
+                    } => {
                         export.ty = collector
-                            .register_and_resolve(TypeData::dual_reference(
-                                ty_binding.ty.clone(),
-                                value_ty_binding.ty.clone(),
+                            .register_and_resolve(TypeData::merged_reference(
+                                ty.map(|ty| collector.bindings[ty.index()].ty.clone()),
+                                value_ty.map(|ty| collector.bindings[ty.index()].ty.clone()),
+                                namespace_ty.map(|ty| collector.bindings[ty.index()].ty.clone()),
                             ))
                             .into();
                     }
                     TsBindingReference::Type(binding_id)
                     | TsBindingReference::ValueType(binding_id)
-                    | TsBindingReference::Both(binding_id) => {
+                    | TsBindingReference::TypeAndValueType(binding_id)
+                    | TsBindingReference::NamespaceAndValueType(binding_id) => {
                         let binding = &collector.bindings[binding_id.index()];
                         export.jsdoc_comment.clone_from(&binding.jsdoc);
                         export.ty.clone_from(&binding.ty);

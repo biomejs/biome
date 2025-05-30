@@ -1,9 +1,9 @@
 use crate::globals::global_type_name;
 use crate::{
-    CallArgumentType, Class, DestructureField, DualReference, Function, FunctionParameter,
+    CallArgumentType, Class, DestructureField, Function, FunctionParameter,
     FunctionParameterBinding, GenericTypeParameter, ImportSymbol, Interface, Literal,
-    NUM_PREDEFINED_TYPES, Object, ObjectLiteral, ReturnType, Type, TypeData, TypeId,
-    TypeImportQualifier, TypeInstance, TypeMember, TypeMemberKind, TypeReference,
+    MergedReference, NUM_PREDEFINED_TYPES, Object, ObjectLiteral, ReturnType, Type, TypeData,
+    TypeId, TypeImportQualifier, TypeInstance, TypeMember, TypeMemberKind, TypeReference,
     TypeReferenceQualifier, TypeResolverLevel, TypeofAwaitExpression, TypeofExpression, Union,
 };
 use biome_formatter::prelude::*;
@@ -109,7 +109,7 @@ impl Format<FormatTypeContext> for TypeData {
                 [&format_args![text("instanceof"), space(), &ty.as_ref()]]
             ),
             Self::Reference(reference) => write!(f, [reference]),
-            Self::DualReference(reference) => write!(f, [reference.as_ref()]),
+            Self::MergedReference(reference) => write!(f, [reference.as_ref()]),
             Self::TypeofExpression(expression) => write!(f, [&expression.as_ref()]),
             Self::TypeofType(reference) => {
                 write!(
@@ -545,7 +545,7 @@ impl Format<FormatTypeContext> for TypeImportQualifier {
     }
 }
 
-impl Format<FormatTypeContext> for DualReference {
+impl Format<FormatTypeContext> for MergedReference {
     fn fmt(&self, f: &mut Formatter<FormatTypeContext>) -> FormatResult<()> {
         write!(
             f,
@@ -559,6 +559,11 @@ impl Format<FormatTypeContext> for DualReference {
                 text("value:"),
                 space(),
                 &self.value_ty,
+                text(","),
+                space(),
+                text("namespace:"),
+                space(),
+                &self.namespace_ty,
                 text(")")
             ]]
         )
