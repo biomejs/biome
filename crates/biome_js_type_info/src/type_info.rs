@@ -29,7 +29,7 @@ const UNKNOWN: TypeData = TypeData::Reference(TypeReference::Resolved(GLOBAL_UNK
 ///
 /// Note that separate modules typically use separate resolvers. Because of
 /// this, type IDs are only unique within a single module/resolver.
-#[derive(Clone, Copy, Debug, Eq, PartialEq, Resolvable)]
+#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq, Resolvable)]
 pub struct TypeId(u32);
 
 impl TypeId {
@@ -153,7 +153,7 @@ impl Type {
     }
 }
 
-#[derive(Clone, Debug, Default, PartialEq, Resolvable)]
+#[derive(Clone, Debug, Default, Eq, Hash, PartialEq, Resolvable)]
 pub enum TypeData {
     /// The type is unknown because inference couldn't determine a type.
     ///
@@ -179,6 +179,7 @@ pub enum TypeData {
     Class(Box<Class>),
     Constructor(Box<Constructor>),
     Function(Box<Function>),
+    Interface(Box<Interface>),
     Module(Box<Module>),
     Namespace(Box<Namespace>),
     Object(Box<Object>),
@@ -260,6 +261,12 @@ impl From<Constructor> for TypeData {
 impl From<Function> for TypeData {
     fn from(value: Function) -> Self {
         Self::Function(Box::new(value))
+    }
+}
+
+impl From<Interface> for TypeData {
+    fn from(value: Interface) -> Self {
+        Self::Interface(Box::new(value))
     }
 }
 
@@ -399,7 +406,7 @@ impl TypeData {
 }
 
 /// A class definition.
-#[derive(Clone, PartialEq, Resolvable)]
+#[derive(Clone, Eq, Hash, PartialEq, Resolvable)]
 pub struct Class {
     /// Name of the class, if specified in the definition.
     pub name: Option<Text>,
@@ -409,6 +416,9 @@ pub struct Class {
 
     /// Type of another class being extended by this one.
     pub extends: Option<TypeReference>,
+
+    /// Interfaces being implemented by this class.
+    pub implements: Box<[TypeReference]>,
 
     /// Class members.
     pub members: Box<[TypeMember]>,
@@ -425,7 +435,7 @@ impl Debug for Class {
 }
 
 /// A constructor definition.
-#[derive(Clone, Debug, PartialEq, Resolvable)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq, Resolvable)]
 pub struct Constructor {
     /// Generic type parameters used in the call signature.
     pub type_parameters: Box<[GenericTypeParameter]>,
@@ -450,14 +460,14 @@ pub struct Constructor {
 /// name.
 ///
 /// With a dual reference, which type gets used depends entirely on context.
-#[derive(Clone, Debug, PartialEq, Resolvable)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq, Resolvable)]
 pub struct DualReference {
     pub ty: TypeReference,
     pub value_ty: TypeReference,
 }
 
 /// A function definition.
-#[derive(Clone, Debug, Default, PartialEq, Resolvable)]
+#[derive(Clone, Debug, Default, Eq, Hash, PartialEq, Resolvable)]
 pub struct Function {
     /// Whether the function has an `async` specifier or not.
     pub is_async: bool,
@@ -485,7 +495,7 @@ impl Function {
 }
 
 /// Definition of a function argument.
-#[derive(Clone, Debug, PartialEq, Resolvable)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq, Resolvable)]
 pub struct FunctionParameter {
     /// Name of the argument, if specified in the definition.
     pub name: Option<Text>,
@@ -504,7 +514,7 @@ pub struct FunctionParameter {
 }
 
 /// An individual binding created from a function parameter.
-#[derive(Clone, Debug, PartialEq, Resolvable)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq, Resolvable)]
 pub struct FunctionParameterBinding {
     pub name: Text,
     pub ty: TypeData,
@@ -512,7 +522,7 @@ pub struct FunctionParameterBinding {
 
 /// Definition of a generic type parameter.
 // TODO: Include modifiers and constraints.
-#[derive(Clone, Debug, PartialEq, Resolvable)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq, Resolvable)]
 pub struct GenericTypeParameter {
     /// Name of the type parameter.
     pub name: Text,
@@ -550,8 +560,34 @@ impl GenericTypeParameter {
     }
 }
 
+/// An interface definition.
+#[derive(Clone, Hash, Eq, PartialEq, Resolvable)]
+pub struct Interface {
+    /// Name of the interface.
+    pub name: Text,
+
+    /// The interface's type parameters.
+    pub type_parameters: Box<[GenericTypeParameter]>,
+
+    /// Types being extended by this interface.
+    pub extends: Box<[TypeReference]>,
+
+    /// Interface members.
+    pub members: Box<[TypeMember]>,
+}
+
+impl Debug for Interface {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("Interface")
+            .field("name", &self.name)
+            .field("type_parameters", &self.type_parameters)
+            .field("extends", &self.extends)
+            .finish()
+    }
+}
+
 /// The intersection between other types.
-#[derive(Clone, Debug, PartialEq, Resolvable)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq, Resolvable)]
 pub struct Intersection(pub(super) Box<[TypeReference]>);
 
 impl Intersection {
@@ -561,7 +597,7 @@ impl Intersection {
 }
 
 /// Literal value used as a type.
-#[derive(Clone, Debug, PartialEq, Resolvable)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq, Resolvable)]
 pub enum Literal {
     BigInt(Text),
     Boolean(BooleanLiteral),
@@ -574,21 +610,21 @@ pub enum Literal {
 }
 
 /// A module definition.
-#[derive(Clone, Debug, PartialEq, Resolvable)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq, Resolvable)]
 pub struct Module {
     pub name: Text,
     pub members: Box<[TypeMember]>,
 }
 
 /// A namespace definition.
-#[derive(Clone, Debug, PartialEq, Resolvable)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq, Resolvable)]
 pub struct Namespace {
     pub path: Box<[Text]>,
     pub members: Box<[TypeMember]>,
 }
 
 /// An object definition.
-#[derive(Clone, Debug, PartialEq, Resolvable)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq, Resolvable)]
 pub struct Object {
     /// Optional prototype of the object.
     ///
@@ -601,7 +637,7 @@ pub struct Object {
 }
 
 /// Object literal used as a type.
-#[derive(Clone, Debug, PartialEq, Resolvable)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq, Resolvable)]
 pub struct ObjectLiteral(pub(super) Box<[TypeMember]>);
 
 impl ObjectLiteral {
@@ -610,7 +646,7 @@ impl ObjectLiteral {
     }
 }
 
-#[derive(Clone, Debug, PartialEq, Resolvable)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq, Resolvable)]
 pub enum ReturnType {
     Type(TypeReference),
     Predicate(PredicateReturnType),
@@ -636,7 +672,7 @@ impl ReturnType {
 /// whether one of its arguments is of a given type.
 ///
 /// Predicate functions return `boolean` at runtime.
-#[derive(Clone, Debug, PartialEq, Resolvable)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq, Resolvable)]
 pub struct PredicateReturnType {
     pub parameter_name: Text,
     pub ty: TypeReference,
@@ -646,7 +682,7 @@ pub struct PredicateReturnType {
 /// one of its arguments to be of a given type.
 ///
 /// Assertion functions throw at runtime if the type assertion fails.
-#[derive(Clone, Debug, PartialEq, Resolvable)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq, Resolvable)]
 pub struct AssertsReturnType {
     pub parameter_name: Text,
     pub ty: TypeReference,
@@ -655,7 +691,7 @@ pub struct AssertsReturnType {
 /// Tuple type.
 ///
 /// Tuples in TypeScript are created using `Array`s of a fixed size.
-#[derive(Clone, Debug, PartialEq, Resolvable)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq, Resolvable)]
 pub struct Tuple(pub(super) Box<[TupleElementType]>);
 
 impl Tuple {
@@ -699,7 +735,7 @@ impl Tuple {
 }
 
 /// An individual element within a tuple.
-#[derive(Clone, Debug, PartialEq, Resolvable)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq, Resolvable)]
 pub struct TupleElementType {
     /// Type of the element.
     pub ty: TypeReference,
@@ -715,7 +751,7 @@ pub struct TupleElementType {
 }
 
 /// Members of a definition, such as an object, namespace or module.
-#[derive(Clone, Debug, PartialEq, Resolvable)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq, Resolvable)]
 pub struct TypeMember {
     pub kind: TypeMemberKind,
     pub is_static: bool,
@@ -738,7 +774,7 @@ impl TypeMember {
 
 /// Kind of a [`TypeMember`], with an optional name.
 // TODO: Include getters, setters and index signatures.
-#[derive(Clone, Debug, PartialEq, Resolvable)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq, Resolvable)]
 pub enum TypeMemberKind {
     CallSignature,
     Constructor,
@@ -764,7 +800,7 @@ impl TypeMemberKind {
 }
 
 /// Instance of another type.
-#[derive(Clone, Debug, PartialEq, Resolvable)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq, Resolvable)]
 pub struct TypeInstance {
     /// The type being instantiated.
     pub ty: TypeReference,
@@ -794,7 +830,7 @@ impl TypeInstance {
 }
 
 /// Reference to the type of a JavaScript expression.
-#[derive(Clone, Debug, PartialEq, Resolvable)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq, Resolvable)]
 pub enum TypeofExpression {
     Addition(TypeofAdditionExpression),
     Await(TypeofAwaitExpression),
@@ -809,29 +845,29 @@ pub enum TypeofExpression {
     UnaryMinus(TypeofUnaryMinusExpression),
 }
 
-#[derive(Clone, Debug, PartialEq, Resolvable)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq, Resolvable)]
 pub struct TypeofAdditionExpression {
     pub left: TypeReference,
     pub right: TypeReference,
 }
 
-#[derive(Clone, Debug, PartialEq, Resolvable)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq, Resolvable)]
 pub struct TypeofAwaitExpression {
     pub argument: TypeReference,
 }
 
-#[derive(Clone, Debug, PartialEq, Resolvable)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq, Resolvable)]
 pub struct TypeofBitwiseNotExpression {
     pub argument: TypeReference,
 }
 
-#[derive(Clone, Debug, PartialEq, Resolvable)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq, Resolvable)]
 pub struct TypeofCallExpression {
     pub callee: TypeReference,
     pub arguments: Box<[CallArgumentType]>,
 }
 
-#[derive(Clone, Debug, PartialEq, Resolvable)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq, Resolvable)]
 pub struct TypeofDestructureExpression {
     /// The type being destructured.
     pub ty: TypeReference,
@@ -840,7 +876,7 @@ pub struct TypeofDestructureExpression {
     pub destructure_field: DestructureField,
 }
 
-#[derive(Clone, Debug, PartialEq, Resolvable)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq, Resolvable)]
 pub enum DestructureField {
     Index(usize),
     Name(Text),
@@ -848,45 +884,45 @@ pub enum DestructureField {
     RestFrom(usize),
 }
 
-#[derive(Clone, Debug, PartialEq, Resolvable)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq, Resolvable)]
 pub struct TypeofNewExpression {
     pub callee: TypeReference,
     pub arguments: Box<[CallArgumentType]>,
 }
 
-#[derive(Clone, Debug, PartialEq, Resolvable)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq, Resolvable)]
 pub enum CallArgumentType {
     Argument(TypeReference),
     Spread(TypeReference),
 }
 
-#[derive(Clone, Debug, PartialEq, Resolvable)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq, Resolvable)]
 pub struct TypeofStaticMemberExpression {
     pub object: TypeReference,
     pub member: Text,
 }
 
-#[derive(Clone, Debug, PartialEq, Resolvable)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq, Resolvable)]
 pub struct TypeofThisOrSuperExpression {
     /// Type from which the `this` or `super` expression should be resolved.
     pub parent: TypeReference,
 }
 
 /// Type of expressions using the `typeof` operator.
-#[derive(Clone, Debug, PartialEq, Resolvable)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq, Resolvable)]
 pub struct TypeofTypeofExpression {
     /// Reference to the type of the expression from which a string
     /// representation should be created.
     pub argument: TypeReference,
 }
 
-#[derive(Clone, Debug, PartialEq, Resolvable)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq, Resolvable)]
 pub struct TypeofUnaryMinusExpression {
     pub argument: TypeReference,
 }
 
 /// Reference to the type of a named JavaScript value.
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub struct TypeofValue {
     /// Identifier of the type being referenced.
     ///
@@ -902,13 +938,13 @@ pub struct TypeofValue {
     pub scope_id: Option<ScopeId>,
 }
 
-#[derive(Clone, Debug, PartialEq, Resolvable)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq, Resolvable)]
 pub struct TypeOperatorType {
     pub operator: TypeOperator,
     pub ty: TypeReference,
 }
 
-#[derive(Clone, Copy, Debug, PartialEq, Resolvable)]
+#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq, Resolvable)]
 pub enum TypeOperator {
     Keyof,
     Readonly,
@@ -931,7 +967,7 @@ impl FromStr for TypeOperator {
 /// Reference to another type definition.
 ///
 /// This definition may require importing from another module.
-#[derive(Clone, Debug, Default, PartialEq)]
+#[derive(Clone, Debug, Default, Eq, Hash, PartialEq)]
 pub enum TypeReference {
     Qualifier(Box<TypeReferenceQualifier>),
     Resolved(ResolvedTypeId),
@@ -986,7 +1022,7 @@ impl TypeReference {
 }
 
 /// Qualifier for a type that should be imported from another module.
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub struct TypeImportQualifier {
     /// The imported symbol.
     pub symbol: ImportSymbol,
@@ -998,7 +1034,7 @@ pub struct TypeImportQualifier {
     pub type_only: bool,
 }
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub enum ImportSymbol {
     /// Imports the `default` export.
     Default,
@@ -1023,7 +1059,7 @@ impl From<&'static str> for ImportSymbol {
 }
 
 /// Path of identifiers to a referenced type, with associated type parameters.
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub struct TypeReferenceQualifier {
     /// The identifier path.
     pub path: Box<[Text]>,
@@ -1154,7 +1190,7 @@ impl ScopeId {
 }
 
 /// A union of types.
-#[derive(Clone, Debug, PartialEq, Resolvable)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq, Resolvable)]
 pub struct Union(pub(super) Box<[TypeReference]>);
 
 impl Union {
@@ -1168,5 +1204,151 @@ impl Union {
 
     pub fn with_type(&self, ty: TypeReference) -> Self {
         Self(self.0.iter().cloned().chain(Some(ty)).collect())
+    }
+}
+
+#[cfg(test)]
+mod tests {
+
+    use super::*;
+    #[test]
+    fn memory_size_check() {
+        assert_eq!(
+            std::mem::size_of::<TypeReference>(),
+            16,
+            "The size shouldn't go higher"
+        );
+
+        assert_eq!(
+            std::mem::size_of::<TypeReferenceQualifier>(),
+            48,
+            "The size shouldn't go higher"
+        );
+
+        assert_eq!(
+            std::mem::size_of::<TypeImportQualifier>(),
+            40,
+            "The size shouldn't go higher"
+        );
+
+        assert_eq!(
+            std::mem::size_of::<TypeMember>(),
+            48,
+            "The size shouldn't go higher"
+        );
+
+        assert_eq!(
+            std::mem::size_of::<TypeMemberKind>(),
+            24,
+            "The size shouldn't go higher"
+        );
+
+        assert_eq!(
+            std::mem::size_of::<TypeofExpression>(),
+            48,
+            "The size shouldn't go higher"
+        );
+
+        assert_eq!(
+            std::mem::size_of::<TypeofAdditionExpression>(),
+            32,
+            "The size shouldn't go higher"
+        );
+
+        assert_eq!(
+            std::mem::size_of::<TypeofAwaitExpression>(),
+            16,
+            "The size shouldn't go higher"
+        );
+
+        assert_eq!(
+            std::mem::size_of::<TypeofBitwiseNotExpression>(),
+            16,
+            "The size shouldn't go higher"
+        );
+
+        assert_eq!(
+            std::mem::size_of::<TypeofCallExpression>(),
+            32,
+            "The size shouldn't go higher"
+        );
+
+        assert_eq!(
+            std::mem::size_of::<TypeofDestructureExpression>(),
+            40,
+            "The size shouldn't go higher"
+        );
+
+        assert_eq!(
+            std::mem::size_of::<TypeofNewExpression>(),
+            32,
+            "The size shouldn't go higher"
+        );
+
+        assert_eq!(
+            std::mem::size_of::<TypeofStaticMemberExpression>(),
+            40,
+            "The size shouldn't go higher"
+        );
+
+        assert_eq!(
+            std::mem::size_of::<TypeofThisOrSuperExpression>(),
+            16,
+            "The size shouldn't go higher"
+        );
+
+        assert_eq!(
+            std::mem::size_of::<TypeofTypeofExpression>(),
+            16,
+            "The size shouldn't go higher"
+        );
+
+        assert_eq!(
+            std::mem::size_of::<TypeofUnaryMinusExpression>(),
+            16,
+            "The size shouldn't go higher"
+        );
+
+        assert_eq!(
+            std::mem::size_of::<TypeofValue>(),
+            48,
+            "The size shouldn't go higher"
+        );
+
+        assert_eq!(
+            std::mem::size_of::<TypeOperatorType>(),
+            24,
+            "The size shouldn't go higher"
+        );
+
+        assert_eq!(
+            std::mem::size_of::<TypeOperator>(),
+            1,
+            "The size shouldn't go higher"
+        );
+
+        assert_eq!(
+            std::mem::size_of::<Union>(),
+            16,
+            "The size shouldn't go higher"
+        );
+
+        assert_eq!(
+            std::mem::size_of::<GenericTypeParameter>(),
+            40,
+            "The size shouldn't go higher"
+        );
+
+        assert_eq!(
+            std::mem::size_of::<TypeInstance>(),
+            32,
+            "The size shouldn't go higher"
+        );
+
+        assert_eq!(
+            std::mem::size_of::<TypeData>(),
+            16,
+            "The size shouldn't go higher"
+        );
     }
 }

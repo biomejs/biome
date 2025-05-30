@@ -106,6 +106,7 @@ fn scan_folder(folder: &Utf8Path, ctx: ScanContext) -> (Duration, Vec<BiomePath>
     // We want to process files that closest to the project root first. For example, we must process
     // first the `.gitignore` at the root of the project.
     let iter = evaluated_paths.into_iter().rev();
+
     for path in iter {
         if path.is_config() {
             configs.push(path);
@@ -128,6 +129,21 @@ fn scan_folder(folder: &Utf8Path, ctx: ScanContext) -> (Duration, Vec<BiomePath>
             scope.handle(ctx_ref, path.to_path_buf());
         }
     }));
+
+    let result = ctx
+        .workspace
+        .update_project_config_files(ctx.project_key, &configs);
+
+    match result {
+        Ok(diagnostics) => {
+            for diagnostic in diagnostics {
+                ctx.send_diagnostic(diagnostic)
+            }
+        }
+        Err(error) => {
+            ctx.send_diagnostic(error);
+        }
+    }
 
     let result = ctx
         .workspace
@@ -235,17 +251,6 @@ impl ScanContext<'_> {
     }
 }
 
-/// Path entries that we want to ignore during the scanning phase.
-pub const SCANNER_IGNORE_ENTRIES: &[&[u8]] = &[
-    b".cache",
-    b".git",
-    b".hg",
-    b".svn",
-    b".yarn",
-    b".timestamp",
-    b".DS_Store",
-];
-
 impl TraversalContext for ScanContext<'_> {
     fn interner(&self) -> &PathInterner {
         &self.interner
@@ -263,10 +268,7 @@ impl TraversalContext for ScanContext<'_> {
     // We roughly understand which files should be open by the scanner.
     // Here, we mostly do file operations by reading their metadata.
     fn can_handle(&self, path: &BiomePath) -> bool {
-        if path
-            .file_name()
-            .is_some_and(|file_name| SCANNER_IGNORE_ENTRIES.contains(&file_name.as_bytes()))
-        {
+        if self.workspace.is_ignored_by_scanner(self.project_key, path) {
             return false;
         }
 

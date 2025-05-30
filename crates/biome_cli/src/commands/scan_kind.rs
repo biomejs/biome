@@ -15,7 +15,7 @@ pub(crate) fn compute_scan_kind(
 ) -> Option<ScanKind> {
     if execution.is_stdin() {
         Some(ScanKind::None)
-    } else if execution.is_migrate() {
+    } else if execution.is_migrate() || configuration.is_root() {
         Some(ScanKind::KnownFiles)
     } else if execution.is_format() {
         // There's no need to scan further known files if the VCS isn't enabled
@@ -38,6 +38,7 @@ mod tests {
     use biome_configuration::{
         LinterConfiguration, RuleConfiguration, RulePlainConfiguration, Rules,
     };
+    use biome_service::workspace::ScanKind::KnownFiles;
 
     #[test]
     fn should_return_none_for_lint_command() {
@@ -69,7 +70,10 @@ mod tests {
             ..Default::default()
         };
 
-        assert_eq!(compute_scan_kind(&execution, &configuration), None);
+        assert_eq!(
+            compute_scan_kind(&execution, &configuration),
+            Some(KnownFiles)
+        );
     }
 
     #[test]

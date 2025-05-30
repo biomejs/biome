@@ -938,7 +938,9 @@ dependencies = [
  "biome_rowan",
  "biome_test_utils",
  "camino",
+ "hashbrown 0.15.2",
  "insta",
+ "rustc-hash 2.1.1",
 ]
 
 [[package]]
@@ -4923,6 +4925,7 @@ dependencies = [
  "biome_css_syntax",
  "biome_diagnostics",
  "biome_formatter",
+ "biome_fs",
  "biome_graphql_formatter",
  "biome_graphql_parser",
  "biome_graphql_syntax",
@@ -4938,7 +4941,9 @@ dependencies = [
  "biome_json_formatter",
  "biome_json_parser",
  "biome_json_syntax",
+ "biome_module_graph",
  "biome_parser",
+ "biome_project_layout",
  "biome_rowan",
  "camino",
  "codspeed-criterion-compat",

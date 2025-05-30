@@ -13,9 +13,9 @@ use biome_js_syntax::{
     JsNewExpression, JsObjectBindingPattern, JsObjectExpression, JsParameters,
     JsReferenceIdentifier, JsSyntaxToken, JsUnaryExpression, JsUnaryOperator,
     JsVariableDeclaration, JsVariableDeclarator, TsDeclareFunctionDeclaration,
-    TsExternalModuleDeclaration, TsModuleDeclaration, TsReferenceType, TsReturnTypeAnnotation,
-    TsTypeAliasDeclaration, TsTypeAnnotation, TsTypeArguments, TsTypeParameter, TsTypeParameters,
-    TsTypeofType, inner_string_text, unescape_js_string,
+    TsExternalModuleDeclaration, TsInterfaceDeclaration, TsModuleDeclaration, TsReferenceType,
+    TsReturnTypeAnnotation, TsTypeAliasDeclaration, TsTypeAnnotation, TsTypeArguments, TsTypeList,
+    TsTypeParameter, TsTypeParameters, TsTypeofType, inner_string_text, unescape_js_string,
 };
 use biome_rowan::{AstNode, SyntaxResult, Text, TokenText};
 
@@ -23,11 +23,11 @@ use crate::globals::{GLOBAL_INSTANCEOF_PROMISE_ID, GLOBAL_NUMBER_ID, GLOBAL_STRI
 use crate::literal::{BooleanLiteral, NumberLiteral, StringLiteral};
 use crate::{
     AssertsReturnType, CallArgumentType, Class, Constructor, DestructureField, Function,
-    FunctionParameter, FunctionParameterBinding, GenericTypeParameter, Literal, Module, Namespace,
-    Object, PredicateReturnType, ResolvedTypeId, ReturnType, Tuple, TupleElementType, TypeData,
-    TypeInstance, TypeMember, TypeMemberKind, TypeOperator, TypeOperatorType, TypeReference,
-    TypeReferenceQualifier, TypeResolver, TypeofBitwiseNotExpression, TypeofCallExpression,
-    TypeofExpression, TypeofNewExpression, TypeofStaticMemberExpression,
+    FunctionParameter, FunctionParameterBinding, GenericTypeParameter, Interface, Literal, Module,
+    Namespace, Object, PredicateReturnType, ResolvedTypeId, ReturnType, Tuple, TupleElementType,
+    TypeData, TypeInstance, TypeMember, TypeMemberKind, TypeOperator, TypeOperatorType,
+    TypeReference, TypeReferenceQualifier, TypeResolver, TypeofBitwiseNotExpression,
+    TypeofCallExpression, TypeofExpression, TypeofNewExpression, TypeofStaticMemberExpression,
     TypeofThisOrSuperExpression, TypeofTypeofExpression, TypeofUnaryMinusExpression, TypeofValue,
 };
 
@@ -252,9 +252,8 @@ impl TypeData {
                 // TODO: Handle `import T = Name` syntax.
                 Self::unknown()
             }
-            AnyJsDeclaration::TsInterfaceDeclaration(_decl) => {
-                // TODO: Handle interface declarations.
-                Self::unknown()
+            AnyJsDeclaration::TsInterfaceDeclaration(decl) => {
+                Self::from_ts_interface_declaration(resolver, decl).unwrap_or_default()
             }
             AnyJsDeclaration::TsModuleDeclaration(decl) => {
                 Self::from_ts_module_declaration(decl).unwrap_or_default()
@@ -299,6 +298,12 @@ impl TypeData {
                         .map(|super_class| {
                             TypeReference::from_any_js_expression(resolver, &super_class)
                         }),
+                    implements: decl
+                        .implements_clause()
+                        .map(|implements| {
+                            TypeReference::types_from_ts_type_list(resolver, implements.types())
+                        })
+                        .unwrap_or_default(),
                     members: decl
                         .members()
                         .into_iter()
@@ -496,9 +501,9 @@ impl TypeData {
                 BooleanLiteral::parse(text_from_token(expr.value_token())?.text())?,
             ),
             AnyJsLiteralExpression::JsNullLiteralExpression(_) => Literal::Null,
-            AnyJsLiteralExpression::JsNumberLiteralExpression(expr) => Literal::Number(
-                NumberLiteral::parse(text_from_token(expr.value_token())?.text())?,
-            ),
+            AnyJsLiteralExpression::JsNumberLiteralExpression(expr) => {
+                Literal::Number(NumberLiteral::new(text_from_token(expr.value_token())?))
+            }
             AnyJsLiteralExpression::JsRegexLiteralExpression(expr) => {
                 Literal::RegExp(text_from_token(expr.value_token())?)
             }
@@ -587,19 +592,11 @@ impl TypeData {
             AnyTsType::TsNonPrimitiveType(_) => Self::ObjectKeyword,
             AnyTsType::TsNullLiteralType(_) => Self::Literal(Box::new(Literal::Null)),
             AnyTsType::TsNumberLiteralType(ty) => {
-                let Ok(literal_token) = ty.literal_token() else {
+                if ty.literal_token().is_err() {
                     return Self::unknown();
-                };
+                }
 
-                let Some(lit) = NumberLiteral::parse(literal_token.text_trimmed()) else {
-                    return Self::unknown();
-                };
-
-                Literal::Number(match ty.minus_token() {
-                    Some(_) => lit.inverse(),
-                    _ => lit,
-                })
-                .into()
+                Literal::Number(NumberLiteral::new(ty.to_trimmed_text())).into()
             }
             AnyTsType::TsNumberType(_) => Self::reference(GLOBAL_NUMBER_ID),
             AnyTsType::TsObjectType(ty) => Self::object_with_members(
@@ -758,6 +755,12 @@ impl TypeData {
                 .extends_clause()
                 .and_then(|extends| extends.super_class().ok())
                 .map(|super_class| TypeReference::from_any_js_expression(resolver, &super_class)),
+            implements: decl
+                .implements_clause()
+                .map(|implements| {
+                    TypeReference::types_from_ts_type_list(resolver, implements.types())
+                })
+                .unwrap_or_default(),
             members: decl
                 .members()
                 .into_iter()
@@ -787,6 +790,12 @@ impl TypeData {
                 .extends_clause()
                 .and_then(|extends| extends.super_class().ok())
                 .map(|super_class| TypeReference::from_any_js_expression(resolver, &super_class)),
+            implements: decl
+                .implements_clause()
+                .map(|implements| {
+                    TypeReference::types_from_ts_type_list(resolver, implements.types())
+                })
+                .unwrap_or_default(),
             members: decl
                 .members()
                 .into_iter()
@@ -952,6 +961,30 @@ impl TypeData {
             members: Box::new([]),
         };
         Some(module.into())
+    }
+
+    pub fn from_ts_interface_declaration(
+        resolver: &mut dyn TypeResolver,
+        decl: &TsInterfaceDeclaration,
+    ) -> Option<Self> {
+        Some(Self::from(Interface {
+            name: text_from_token(decl.id().ok()?.as_ts_identifier_binding()?.name_token())?,
+            type_parameters: decl
+                .type_parameters()
+                .map(|params| {
+                    GenericTypeParameter::params_from_ts_type_parameters(resolver, &params)
+                })
+                .unwrap_or_default(),
+            extends: decl
+                .extends_clause()
+                .map(|extends| TypeReference::types_from_ts_type_list(resolver, extends.types()))
+                .unwrap_or_default(),
+            members: decl
+                .members()
+                .into_iter()
+                .filter_map(|member| TypeMember::from_any_ts_type_member(resolver, &member))
+                .collect(),
+        }))
     }
 
     pub fn from_ts_module_declaration(decl: &TsModuleDeclaration) -> Option<Self> {
@@ -1680,6 +1713,11 @@ impl TypeReference {
         Self::from(TypeReferenceQualifier::from_name(name.into()))
     }
 
+    pub fn from_ts_reference_type(resolver: &mut dyn TypeResolver, ty: &TsReferenceType) -> Self {
+        let data = TypeData::from_ts_reference_type(resolver, ty);
+        resolver.reference_to_registered_data(data)
+    }
+
     pub fn types_from_ts_type_arguments(
         resolver: &mut dyn TypeResolver,
         arguments: Option<TsTypeArguments>,
@@ -1688,10 +1726,22 @@ impl TypeReference {
             .map(|args| {
                 args.ts_type_argument_list()
                     .into_iter()
-                    .filter_map(|arg| arg.ok().map(|ty| Self::from_any_ts_type(resolver, &ty)))
+                    .filter_map(Result::ok)
+                    .map(|ty| Self::from_any_ts_type(resolver, &ty))
                     .collect()
             })
             .unwrap_or_default()
+    }
+
+    pub fn types_from_ts_type_list(
+        resolver: &mut dyn TypeResolver,
+        types: TsTypeList,
+    ) -> Box<[Self]> {
+        types
+            .into_iter()
+            .filter_map(Result::ok)
+            .map(|ty| Self::from_ts_reference_type(resolver, &ty))
+            .collect()
     }
 }
 

@@ -1,3 +1,12 @@
+use super::{
+    ChangeFileParams, CloseFileParams, FixFileParams, FixFileResult, FormatFileParams,
+    FormatOnTypeParams, FormatRangeParams, GetControlFlowGraphParams, GetFormatterIRParams,
+    GetSemanticModelParams, GetSyntaxTreeParams, GetSyntaxTreeResult, OpenFileParams,
+    PullActionsParams, PullActionsResult, PullDiagnosticsParams, PullDiagnosticsResult,
+    RenameParams, RenameResult, ScanProjectFolderParams, ScanProjectFolderResult,
+    SearchPatternParams, SearchResults, SupportsFeatureParams, UpdateSettingsParams,
+    UpdateSettingsResult,
+};
 use crate::workspace::{
     CheckFileSizeParams, CheckFileSizeResult, CloseProjectParams, FileFeaturesResult,
     GetFileContentParams, GetRegisteredTypesParams, GetTypeInfoParams, IsPathIgnoredParams,
@@ -12,16 +21,7 @@ use std::{
     panic::RefUnwindSafe,
     sync::atomic::{AtomicU64, Ordering},
 };
-
-use super::{
-    ChangeFileParams, CloseFileParams, FixFileParams, FixFileResult, FormatFileParams,
-    FormatOnTypeParams, FormatRangeParams, GetControlFlowGraphParams, GetFormatterIRParams,
-    GetSemanticModelParams, GetSyntaxTreeParams, GetSyntaxTreeResult, OpenFileParams,
-    PullActionsParams, PullActionsResult, PullDiagnosticsParams, PullDiagnosticsResult,
-    RenameParams, RenameResult, ScanProjectFolderParams, ScanProjectFolderResult,
-    SearchPatternParams, SearchResults, SupportsFeatureParams, UpdateSettingsParams,
-    UpdateSettingsResult,
-};
+use tracing::instrument;
 
 pub struct WorkspaceClient<T> {
     transport: T,
@@ -117,6 +117,7 @@ where
         self.request("biome/scan_project_folder", params)
     }
 
+    #[instrument(level = "info", skip_all)]
     fn update_settings(
         &self,
         params: UpdateSettingsParams,

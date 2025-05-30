@@ -206,7 +206,19 @@ impl BindingInfo {
                 | JsSyntaxKind::JS_NAMESPACE_IMPORT_SPECIFIER
                 | JsSyntaxKind::JS_BOGUS_NAMED_IMPORT_SPECIFIER
                 | JsSyntaxKind::JS_SHORTHAND_NAMED_IMPORT_SPECIFIER
-                | JsSyntaxKind::JS_NAMED_IMPORT_SPECIFIER
+                | JsSyntaxKind::JS_NAMED_IMPORT_SPECIFIER,
+        )
+    }
+
+    fn is_parameter(&self) -> bool {
+        matches!(
+            self.declaration_kind,
+            JsSyntaxKind::JS_ARROW_FUNCTION_EXPRESSION
+                | JsSyntaxKind::JS_BOGUS_PARAMETER
+                | JsSyntaxKind::JS_FORMAL_PARAMETER
+                | JsSyntaxKind::JS_REST_PARAMETER
+                | JsSyntaxKind::TS_PROPERTY_PARAMETER
+                | JsSyntaxKind::JS_CATCH_DECLARATION,
         )
     }
 }
@@ -250,6 +262,10 @@ enum Reference {
 impl Reference {
     const fn is_write(&self) -> bool {
         matches!(self, Self::Write { .. })
+    }
+
+    const fn is_ambient_read(&self) -> bool {
+        matches!(self, Self::AmbientRead { .. })
     }
 
     /// Range of the referenced binding
@@ -959,12 +975,8 @@ impl SemanticEventExtractor {
 
         // Bind references to declarations
         for (name, mut references) in scope.references {
-            if let Some(&BindingInfo {
-                range_start: declaration_range_start,
-                declaration_kind,
-            }) = self.bindings.get(&name)
-            {
-                let declaration_at = declaration_range_start;
+            if let Some(info) = self.bindings.get(&name) {
+                let declaration_at = info.range_start;
                 // We know the declaration of these reference.
                 for reference in references {
                     let declaration_before_reference = declaration_at < reference.range().start();
@@ -988,8 +1000,8 @@ impl SemanticEventExtractor {
                                 }
                             }
                         }
-                        Reference::Read(range) | Reference::AmbientRead(range) => {
-                            if declaration_kind == JsSyntaxKind::JS_NAMESPACE_IMPORT_SPECIFIER
+                        reference @ (Reference::Read(_) | Reference::AmbientRead(_)) => {
+                            if info.declaration_kind == JsSyntaxKind::JS_NAMESPACE_IMPORT_SPECIFIER
                                 && matches!(name, BindingName::Type(_))
                             {
                                 // An import namespace imported as a type can only be
@@ -1003,15 +1015,29 @@ impl SemanticEventExtractor {
                                 });
                                 continue;
                             }
+                            // Handle edge case where a parameter has the same name that a parameter type name
+                            // For example `(stream: stream.T) => {}`
+                            // In this particular case, the reference should be promoted to the parent scope.
+                            if reference.is_ambient_read() && info.is_parameter() {
+                                // A parent scope should exist because the binding is a parameter.
+                                if let Some(parent) = self.scopes.last_mut() {
+                                    // Promote this reference to the parent scope
+                                    let parent_references =
+                                        parent.references.entry(name.clone()).or_default();
+                                    parent_references
+                                        .push(Reference::AmbientRead(reference.range()));
+                                    continue;
+                                }
+                            }
                             if declaration_before_reference {
                                 SemanticEvent::Read {
-                                    range,
+                                    range: reference.range(),
                                     declaration_at,
                                     scope_id,
                                 }
                             } else {
                                 SemanticEvent::HoistedRead {
-                                    range,
+                                    range: reference.range(),
                                     declaration_at,
                                     scope_id,
                                 }

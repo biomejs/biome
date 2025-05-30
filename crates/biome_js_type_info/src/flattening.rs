@@ -216,6 +216,50 @@ fn flattened(mut ty: TypeData, resolver: &mut dyn TypeResolver, depth: usize) ->
                                         .collect(),
                                 );
                             }
+                            (TypeData::Interface(interface), DestructureField::Name(name)) => {
+                                match interface.members.iter().find(|own_member| {
+                                    own_member.is_static() && own_member.has_name(name.text())
+                                }) {
+                                    Some(member) => {
+                                        ty = flattened(
+                                            resolver
+                                                .resolve_and_get(
+                                                    &resolved
+                                                        .apply_module_id_to_reference(&member.ty),
+                                                )
+                                                .map(ResolvedTypeData::to_data)
+                                                .unwrap_or_default(),
+                                            resolver,
+                                            depth,
+                                        );
+                                    }
+                                    None => return TypeData::reference(GLOBAL_UNKNOWN_ID),
+                                }
+                            }
+                            (
+                                TypeData::Interface(interface),
+                                DestructureField::RestExcept(names),
+                            ) => {
+                                return TypeData::object_with_members(
+                                    interface
+                                        .members
+                                        .iter()
+                                        .filter(|own_member| {
+                                            own_member.is_static()
+                                                && !names
+                                                    .iter()
+                                                    .any(|name| own_member.has_name(name))
+                                        })
+                                        .map(|member| {
+                                            ResolvedTypeMember::from((
+                                                resolved.resolver_id(),
+                                                member,
+                                            ))
+                                            .to_member()
+                                        })
+                                        .collect(),
+                                );
+                            }
                             (subject, DestructureField::Index(index)) => {
                                 return subject
                                     .clone()
