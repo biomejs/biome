@@ -1,0 +1,25 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: validSkipIifes.js
+---
+# Input
+```js
+/* should not generate diagnostics */
+
+(function () {
+	let x = 0;
+	let y = 0;
+	let z = x + y;
+	let foo = {};
+	return bar;
+})();
+
+(() => {
+	let x = 0;
+	let y = 0;
+	let z = x + y;
+	let foo = {};
+	return bar;
+})();
+
+```

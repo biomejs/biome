@@ -1,0 +1,22 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: validSkipBlankLines.js
+---
+# Input
+```js
+/* should not generate diagnostics */
+
+const foo = () => {
+	const x = 0;
+
+	const y = 0;
+};
+
+function name() {
+	var x = 5;
+
+	
+	var x = 2;
+}
+
+```
