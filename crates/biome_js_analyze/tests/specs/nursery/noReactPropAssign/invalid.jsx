@@ -49,11 +49,4 @@ const Foo = (props) => {
 	return <div>{props.bar}</div>
 };
 
-function Foo(props) {
-	const callback = (props) => {
-		props.bar = 1; // this should not trigger the rule
-	};
-
-	return <div>{props.bar}</div>;
-}
 

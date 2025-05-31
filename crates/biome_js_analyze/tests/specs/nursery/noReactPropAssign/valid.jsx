@@ -64,3 +64,11 @@ function Foo(props) {
 	return <div>{props.bar}</div>;
 }
 
+function Foo(props) {
+	const callback = (props) => {
+		props.bar = 1;
+	};
+
+	return <div>{props.bar}</div>;
+}
+
