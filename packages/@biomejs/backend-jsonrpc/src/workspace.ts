@@ -1581,6 +1581,10 @@ export interface Nursery {
 	 */
 	noProcessGlobal?: RuleFixConfiguration_for_Null;
 	/**
+	 * Disallow assigning to React component props.
+	 */
+	noReactPropAssign?: RuleConfiguration_for_Null;
+	/**
 	 * Disallow the use of configured elements.
 	 */
 	noRestrictedElements?: RuleConfiguration_for_NoRestrictedElementsOptions;
@@ -3513,6 +3517,7 @@ export type Category =
 	| "lint/nursery/noNestedComponentDefinitions"
 	| "lint/nursery/noNoninteractiveElementInteractions"
 	| "lint/nursery/noProcessGlobal"
+	| "lint/nursery/noReactPropAssign"
 	| "lint/nursery/noReactSpecificProps"
 	| "lint/nursery/noRestrictedElements"
 	| "lint/nursery/noSecrets"

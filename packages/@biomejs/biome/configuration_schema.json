@@ -2782,6 +2782,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noReactPropAssign": {
+					"description": "Disallow assigning to React component props.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noRestrictedElements": {
 					"description": "Disallow the use of configured elements.",
 					"anyOf": [
