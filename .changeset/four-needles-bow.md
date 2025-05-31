@@ -2,7 +2,7 @@
 "@biomejs/biome": patch
 ---
 
-Fix `useHookAtTopLevel` rule to properly detect React components wrapped in `memo` and `forwardRef`, and correctly handle property accessors in control flow analysis.
+Fixed `useHookAtTopLevel` rule to properly detect React components wrapped in `memo` and `forwardRef`, and correctly handle property accessors in control flow analysis.
 
 The rule now correctly identifies hooks in components like:
 ```js
