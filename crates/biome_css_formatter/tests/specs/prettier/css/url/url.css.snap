@@ -55,7 +55,7 @@ a {
 +  content: url(https://example.com/\)\).jpg);
 +  content: url(https://example.com/\(\(.jpg);
    content: url(https://example.com/\ \ .jpg);
- 
+
 -  background: no-repeat url(https://example.com/\)\).jpg),
 +  background:
 +    no-repeat url(https://example.com/\)\).jpg),
@@ -115,49 +115,49 @@ a {
 url.css:3:23 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected a declaration item but instead found '/'.
-  
+
     1 │ div {
     2 │   background: url(/images/bg.png);
   > 3 │   background: -fb-url(/images/bg.png);
       │                       ^
     4 │ }
-    5 │ 
-  
+    5 │
+
   i Expected a declaration item here.
-  
+
     1 │ div {
     2 │   background: url(/images/bg.png);
   > 3 │   background: -fb-url(/images/bg.png);
       │                       ^
     4 │ }
-    5 │ 
-  
+    5 │
+
 url.css:3:24 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × expected `,` but instead found `images`
-  
+
     1 │ div {
     2 │   background: url(/images/bg.png);
   > 3 │   background: -fb-url(/images/bg.png);
       │                        ^^^^^^
     4 │ }
-    5 │ 
-  
+    5 │
+
   i Remove images
-  
+
 url.css:3:33 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Unexpected value or character.
-  
+
     1 │ div {
     2 │   background: url(/images/bg.png);
   > 3 │   background: -fb-url(/images/bg.png);
       │                                 ^^^^
     4 │ }
-    5 │ 
-  
+    5 │
+
   i Expected one of:
-  
+
   - identifier
   - string
   - number
@@ -165,7 +165,7 @@ url.css:3:33 parse ━━━━━━━━━━━━━━━━━━━━�
   - ratio
   - custom property
   - function
-  
+
 
 ```
 
