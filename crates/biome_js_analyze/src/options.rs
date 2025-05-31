@@ -387,6 +387,7 @@ pub type UseIndexOf = <lint::nursery::use_index_of::UseIndexOf as biome_analyze:
 pub type UseIsArray = <lint::suspicious::use_is_array::UseIsArray as biome_analyze::Rule>::Options;
 pub type UseIsNan = <lint::correctness::use_is_nan::UseIsNan as biome_analyze::Rule>::Options;
 pub type UseIterableCallbackReturn = < lint :: nursery :: use_iterable_callback_return :: UseIterableCallbackReturn as biome_analyze :: Rule > :: Options ;
+pub type UseJsonImportAttribute = < lint :: nursery :: use_json_import_attribute :: UseJsonImportAttribute as biome_analyze :: Rule > :: Options ;
 pub type UseJsxKeyInIterable = < lint :: correctness :: use_jsx_key_in_iterable :: UseJsxKeyInIterable as biome_analyze :: Rule > :: Options ;
 pub type UseKeyWithClickEvents =
     <lint::a11y::use_key_with_click_events::UseKeyWithClickEvents as biome_analyze::Rule>::Options;
