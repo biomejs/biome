@@ -68,7 +68,9 @@ pub enum YamlSyntaxKind {
     YAML_BLOCK_MAP_IMPLICIT_VALUE,
     YAML_INDENTED_BLOCK,
     YAML_COMPACT_MAPPING,
+    YAML_COMPACT_MAPPING_INDENTED,
     YAML_COMPACT_SEQUENCE,
+    YAML_COMPACT_SEQUENCE_INDENTED,
     YAML_SINGLE_QUOTED_SCALAR,
     YAML_DOUBLE_QUOTED_SCALAR,
     YAML_PLAIN_SCALAR,
@@ -146,6 +148,9 @@ impl YamlSyntaxKind {
             BACKTICK => "`",
             AT => "@",
             EOF => "EOF",
+            NEWLINE => "NEWLINE",
+            INDENT => "indent",
+            DEDENT => "dedent",
             _ => return None,
         };
         Some(tok)

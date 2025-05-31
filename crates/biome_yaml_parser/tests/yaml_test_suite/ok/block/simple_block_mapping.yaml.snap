@@ -17,12 +17,13 @@ YamlRoot {
     documents: YamlDocumentList [
         YamlDocument {
             bom_token: missing (optional),
+            newline_token: missing (optional),
             directives: YamlDirectiveList [],
             dashdashdash_token: missing (optional),
             node: YamlBlockCollection {
+                indent_token: missing (optional),
                 properties: missing (optional),
                 content: YamlBlockMapping {
-                    indent_token: missing (optional),
                     entries: YamlBlockMapEntryList [
                         YamlBlockMapImplicitEntry {
                             key: YamlFlowYamlNode {
@@ -34,6 +35,7 @@ YamlRoot {
                             value: YamlBlockMapImplicitValue {
                                 colon_token: COLON@1..3 ":" [] [Whitespace(" ")],
                                 value: YamlFlowInBlockNode {
+                                    indent_token: missing (optional),
                                     flow: YamlFlowYamlNode {
                                         properties: missing (optional),
                                         content: YamlPlainScalar {
@@ -55,6 +57,7 @@ YamlRoot {
                             value: YamlBlockMapImplicitValue {
                                 colon_token: COLON@7..9 ":" [] [Whitespace(" ")],
                                 value: YamlFlowInBlockNode {
+                                    indent_token: missing (optional),
                                     flow: YamlFlowYamlNode {
                                         properties: missing (optional),
                                         content: YamlPlainScalar {
@@ -76,6 +79,7 @@ YamlRoot {
                             value: YamlBlockMapImplicitValue {
                                 colon_token: COLON@13..15 ":" [] [Whitespace(" ")],
                                 value: YamlFlowInBlockNode {
+                                    indent_token: missing (optional),
                                     flow: YamlFlowYamlNode {
                                         properties: missing (optional),
                                         content: YamlPlainScalar {
@@ -88,8 +92,8 @@ YamlRoot {
                             },
                         },
                     ],
-                    dedent_token: missing (optional),
                 },
+                dedent_token: missing (optional),
             },
             dotdotdot_token: missing (optional),
         },
@@ -105,13 +109,14 @@ YamlRoot {
   0: YAML_DOCUMENT_LIST@0..18
     0: YAML_DOCUMENT@0..18
       0: (empty)
-      1: YAML_DIRECTIVE_LIST@0..0
-      2: (empty)
-      3: YAML_BLOCK_COLLECTION@0..18
+      1: (empty)
+      2: YAML_DIRECTIVE_LIST@0..0
+      3: (empty)
+      4: YAML_BLOCK_COLLECTION@0..18
         0: (empty)
-        1: YAML_BLOCK_MAPPING@0..18
-          0: (empty)
-          1: YAML_BLOCK_MAP_ENTRY_LIST@0..18
+        1: (empty)
+        2: YAML_BLOCK_MAPPING@0..18
+          0: YAML_BLOCK_MAP_ENTRY_LIST@0..18
             0: YAML_BLOCK_MAP_IMPLICIT_ENTRY@0..6
               0: YAML_FLOW_YAML_NODE@0..1
                 0: (empty)
@@ -120,11 +125,12 @@ YamlRoot {
               1: YAML_BLOCK_MAP_IMPLICIT_VALUE@1..6
                 0: COLON@1..3 ":" [] [Whitespace(" ")]
                 1: YAML_FLOW_IN_BLOCK_NODE@3..6
-                  0: YAML_FLOW_YAML_NODE@3..5
+                  0: (empty)
+                  1: YAML_FLOW_YAML_NODE@3..5
                     0: (empty)
                     1: YAML_PLAIN_SCALAR@3..5
                       0: PLAIN_LITERAL@3..5 "10" [] []
-                  1: NEWLINE@5..6 "\n" [] []
+                  2: NEWLINE@5..6 "\n" [] []
                 2: (empty)
             1: YAML_BLOCK_MAP_IMPLICIT_ENTRY@6..12
               0: YAML_FLOW_YAML_NODE@6..7
@@ -134,11 +140,12 @@ YamlRoot {
               1: YAML_BLOCK_MAP_IMPLICIT_VALUE@7..12
                 0: COLON@7..9 ":" [] [Whitespace(" ")]
                 1: YAML_FLOW_IN_BLOCK_NODE@9..12
-                  0: YAML_FLOW_YAML_NODE@9..11
+                  0: (empty)
+                  1: YAML_FLOW_YAML_NODE@9..11
                     0: (empty)
                     1: YAML_PLAIN_SCALAR@9..11
                       0: PLAIN_LITERAL@9..11 "20" [] []
-                  1: NEWLINE@11..12 "\n" [] []
+                  2: NEWLINE@11..12 "\n" [] []
                 2: (empty)
             2: YAML_BLOCK_MAP_IMPLICIT_ENTRY@12..18
               0: YAML_FLOW_YAML_NODE@12..13
@@ -148,14 +155,15 @@ YamlRoot {
               1: YAML_BLOCK_MAP_IMPLICIT_VALUE@13..18
                 0: COLON@13..15 ":" [] [Whitespace(" ")]
                 1: YAML_FLOW_IN_BLOCK_NODE@15..18
-                  0: YAML_FLOW_YAML_NODE@15..17
+                  0: (empty)
+                  1: YAML_FLOW_YAML_NODE@15..17
                     0: (empty)
                     1: YAML_PLAIN_SCALAR@15..17
                       0: PLAIN_LITERAL@15..17 "30" [] []
-                  1: NEWLINE@17..18 "\n" [] []
+                  2: NEWLINE@17..18 "\n" [] []
                 2: (empty)
-          2: (empty)
-      4: (empty)
+        3: (empty)
+      5: (empty)
   1: EOF@18..18 "" [] []
 
 ```
