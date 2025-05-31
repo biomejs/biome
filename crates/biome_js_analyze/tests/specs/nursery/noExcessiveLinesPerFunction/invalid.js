@@ -21,7 +21,9 @@ function foo(
 	bbb = 2,
 	ccc = 3
 ) {
-	return aaa + bbb + ccc
+	const x = 4;
+	const y = 5;
+	return aaa + bbb + ccc + x + y;
 }
 
 function parent() {
@@ -29,6 +31,7 @@ function parent() {
 	function nested() {
 		var y = 0;
 		x = 2;
+		var z = x + y;
 	}
 };
 
@@ -44,3 +47,19 @@ class foo {
 		return y + x;
 	}
 }
+
+(function () {
+	let x = 0;
+	let y = 0;
+	let z = x + y;
+	let foo = {};
+	return bar;
+})();
+
+(() => {
+	let x = 0;
+	let y = 0;
+	let z = x + y;
+	let foo = {};
+	return bar;
+})();

@@ -6,8 +6,8 @@
         "noExcessiveLinesPerFunction": {
           "level": "error",
           "options": {
-            "max": 4,
-            "iifes": true
+            "maxLines": 2,
+            "skipIifes": true
           }
         }
       }

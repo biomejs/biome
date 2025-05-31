@@ -4731,7 +4731,7 @@ pub struct Nursery {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_destructured_props:
         Option<RuleConfiguration<biome_js_analyze::options::NoDestructuredProps>>,
-    #[doc = "Restrict a maximum number of lines of code in a function."]
+    #[doc = "Restrict the number of lines of code in a function."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_excessive_lines_per_function:
         Option<RuleConfiguration<biome_js_analyze::options::NoExcessiveLinesPerFunction>>,
