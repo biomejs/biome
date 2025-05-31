@@ -27,7 +27,9 @@ function foo(
 	bbb = 2,
 	ccc = 3
 ) {
-	return aaa + bbb + ccc
+	const x = 4;
+	const y = 5;
+	return aaa + bbb + ccc + x + y;
 }
 
 function parent() {
@@ -35,6 +37,7 @@ function parent() {
 	function nested() {
 		var y = 0;
 		x = 2;
+		var z = x + y;
 	}
 };
 
@@ -51,13 +54,28 @@ class foo {
 	}
 }
 
+(function () {
+	let x = 0;
+	let y = 0;
+	let z = x + y;
+	let foo = {};
+	return bar;
+})();
+
+(() => {
+	let x = 0;
+	let y = 0;
+	let z = x + y;
+	let foo = {};
+	return bar;
+})();
 ```
 
 # Diagnostics
 ```
 invalid.js:1:13 lint/nursery/noExcessiveLinesPerFunction ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i This function has too many lines (5). Maximum allowed is 4.
+  i This function has too many lines (3). Maximum allowed is 2.
   
   > 1 │ const foo = () => {
       │             ^^^^^^^
@@ -77,7 +95,7 @@ invalid.js:1:13 lint/nursery/noExcessiveLinesPerFunction ━━━━━━━�
 ```
 invalid.js:7:1 lint/nursery/noExcessiveLinesPerFunction ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i This function has too many lines (5). Maximum allowed is 4.
+  i This function has too many lines (3). Maximum allowed is 2.
   
      5 │ };
      6 │ 
@@ -99,7 +117,7 @@ invalid.js:7:1 lint/nursery/noExcessiveLinesPerFunction ━━━━━━━━
 ```
 invalid.js:13:1 lint/nursery/noExcessiveLinesPerFunction ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i This function has too many lines (5). Maximum allowed is 4.
+  i This function has too many lines (3). Maximum allowed is 2.
   
     11 │ }
     12 │ 
@@ -121,7 +139,7 @@ invalid.js:13:1 lint/nursery/noExcessiveLinesPerFunction ━━━━━━━�
 ```
 invalid.js:19:1 lint/nursery/noExcessiveLinesPerFunction ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i This function has too many lines (7). Maximum allowed is 4.
+  i This function has too many lines (3). Maximum allowed is 2.
   
     17 │ }
     18 │ 
@@ -129,11 +147,11 @@ invalid.js:19:1 lint/nursery/noExcessiveLinesPerFunction ━━━━━━━�
        │ ^^^^^^^^^^^^^
   > 20 │ 	aaa = 1,
         ...
-  > 24 │ 	return aaa + bbb + ccc
-  > 25 │ }
+  > 26 │ 	return aaa + bbb + ccc + x + y;
+  > 27 │ }
        │ ^
-    26 │ 
-    27 │ function parent() {
+    28 │ 
+    29 │ function parent() {
   
   i Consider refactoring this function to split it into smaller functions.
   
@@ -141,21 +159,21 @@ invalid.js:19:1 lint/nursery/noExcessiveLinesPerFunction ━━━━━━━�
 ```
 
 ```
-invalid.js:27:1 lint/nursery/noExcessiveLinesPerFunction ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:29:1 lint/nursery/noExcessiveLinesPerFunction ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i This function has too many lines (7). Maximum allowed is 4.
+  i This function has too many lines (5). Maximum allowed is 2.
   
-    25 │ }
-    26 │ 
-  > 27 │ function parent() {
+    27 │ }
+    28 │ 
+  > 29 │ function parent() {
        │ ^^^^^^^^^^^^^^^^^^^
-  > 28 │ 	var x = 0;
+  > 30 │ 	var x = 0;
         ...
-  > 32 │ 	}
-  > 33 │ };
+  > 35 │ 	}
+  > 36 │ };
        │ ^
-    34 │ 
-    35 │ class foo {
+    37 │ 
+    38 │ class foo {
   
   i Consider refactoring this function to split it into smaller functions.
   
@@ -163,20 +181,42 @@ invalid.js:27:1 lint/nursery/noExcessiveLinesPerFunction ━━━━━━━�
 ```
 
 ```
-invalid.js:36:2 lint/nursery/noExcessiveLinesPerFunction ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:31:2 lint/nursery/noExcessiveLinesPerFunction ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i This function has too many lines (5). Maximum allowed is 4.
+  i This function has too many lines (3). Maximum allowed is 2.
   
-    35 │ class foo {
-  > 36 │ 	method() {
+    29 │ function parent() {
+    30 │ 	var x = 0;
+  > 31 │ 	function nested() {
+       │ 	^^^^^^^^^^^^^^^^^^^
+  > 32 │ 		var y = 0;
+  > 33 │ 		x = 2;
+  > 34 │ 		var z = x + y;
+  > 35 │ 	}
+       │ 	^
+    36 │ };
+    37 │ 
+  
+  i Consider refactoring this function to split it into smaller functions.
+  
+
+```
+
+```
+invalid.js:39:2 lint/nursery/noExcessiveLinesPerFunction ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This function has too many lines (3). Maximum allowed is 2.
+  
+    38 │ class foo {
+  > 39 │ 	method() {
        │ 	^^^^^^^^^^
-  > 37 │ 		let y = 10;
-  > 38 │ 		let x = 20;
-  > 39 │ 		return y + x;
-  > 40 │ 	}
+  > 40 │ 		let y = 10;
+  > 41 │ 		let x = 20;
+  > 42 │ 		return y + x;
+  > 43 │ 	}
        │ 	^
-    41 │ 	constructor() {
-    42 │ 		let y = 10;
+    44 │ 	constructor() {
+    45 │ 		let y = 10;
   
   i Consider refactoring this function to split it into smaller functions.
   
@@ -184,21 +224,65 @@ invalid.js:36:2 lint/nursery/noExcessiveLinesPerFunction ━━━━━━━�
 ```
 
 ```
-invalid.js:41:2 lint/nursery/noExcessiveLinesPerFunction ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:44:2 lint/nursery/noExcessiveLinesPerFunction ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i This function has too many lines (5). Maximum allowed is 4.
+  i This function has too many lines (3). Maximum allowed is 2.
   
-    39 │ 		return y + x;
-    40 │ 	}
-  > 41 │ 	constructor() {
+    42 │ 		return y + x;
+    43 │ 	}
+  > 44 │ 	constructor() {
        │ 	^^^^^^^^^^^^^^^
-  > 42 │ 		let y = 10;
-  > 43 │ 		let x = 20;
-  > 44 │ 		return y + x;
-  > 45 │ 	}
+  > 45 │ 		let y = 10;
+  > 46 │ 		let x = 20;
+  > 47 │ 		return y + x;
+  > 48 │ 	}
        │ 	^
-    46 │ }
-    47 │ 
+    49 │ }
+    50 │ 
+  
+  i Consider refactoring this function to split it into smaller functions.
+  
+
+```
+
+```
+invalid.js:51:2 lint/nursery/noExcessiveLinesPerFunction ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This function has too many lines (5). Maximum allowed is 2.
+  
+    49 │ }
+    50 │ 
+  > 51 │ (function () {
+       │  ^^^^^^^^^^^^^
+  > 52 │ 	let x = 0;
+        ...
+  > 56 │ 	return bar;
+  > 57 │ })();
+       │ ^
+    58 │ 
+    59 │ (() => {
+  
+  i Consider refactoring this function to split it into smaller functions.
+  
+
+```
+
+```
+invalid.js:59:2 lint/nursery/noExcessiveLinesPerFunction ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This function has too many lines (5). Maximum allowed is 2.
+  
+    57 │ })();
+    58 │ 
+  > 59 │ (() => {
+       │  ^^^^^^^
+  > 60 │ 	let x = 0;
+  > 61 │ 	let y = 0;
+  > 62 │ 	let z = x + y;
+  > 63 │ 	let foo = {};
+  > 64 │ 	return bar;
+  > 65 │ })();
+       │ ^
   
   i Consider refactoring this function to split it into smaller functions.
   

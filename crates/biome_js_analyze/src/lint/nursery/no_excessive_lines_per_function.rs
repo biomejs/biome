@@ -14,29 +14,21 @@ use schemars::JsonSchema;
 use std::num::NonZeroU8;
 
 declare_lint_rule! {
-    /// Restrict a maximum number of lines of code in a function.
+    /// Restrict the number of lines of code in a function.
     ///
+    /// This rule checks the number of lines in a function body and reports a diagnostic if it exceeds a specified limit.
     /// Some people consider large functions a code smell. Large functions tend to do a lot of things and can make it hard following what’s going on. Many coding style guides dictate a limit of the number of lines that a function can comprise of. This rule can help enforce that style.
     ///
-    /// ## Options
+    /// ## Examples
     ///
-    /// The rule supports the following options:
-    ///
+    /// When maximum number of lines is set to `2` with the following option, the following code will be considered invalid:
     /// ```json,options
     /// {
     ///     "options": {
-    ///        "max": 4,
-    ///        "skipBlankLines": true,
-    ///        "iifes": true
+    ///        "maxLines": 2
     ///     }
     /// }
     /// ```
-    ///
-    /// - `max` (positive integer, default: 50): The maximum number of lines allowed in a function.
-    /// - `skip_blank_lines` (bool, default: false): A boolean value which indicates whether blank lines are counted or not.
-    /// - `iifes` (bool, default: false): A boolean value which indicates whether IIFEs (Immediately Invoked Function Expression) are checked or not.
-    ///
-    /// ## Examples
     ///
     /// ### Invalid
     ///
@@ -51,7 +43,6 @@ declare_lint_rule! {
     /// ```js,expect_diagnostic,use_options
     /// const bar = () => {
     ///   const x = 0;
-    ///
     ///   const y = 1;
     ///   const z = 2;
     /// };
@@ -85,7 +76,6 @@ declare_lint_rule! {
     ///
     /// const bar = () => {
     ///   const x = 0;
-    ///
     ///   const y = 1;
     /// };
     ///
@@ -99,6 +89,89 @@ declare_lint_rule! {
     /// (() => {
     ///	 const x = 0;
     ///	 const y = 0;
+    /// })();
+    /// ```
+    ///
+    /// ## Options
+    ///
+    /// The rule supports the following options:
+    ///
+    /// ```json
+    /// {
+    ///     "options": {
+    ///        "maxLines": 50,
+    ///        "skipBlankLines": false,
+    ///        "skipIifes": false
+    ///     }
+    /// }
+    /// ```
+    ///
+    /// ### maxLines
+    ///
+    /// This option sets the maximum number of lines allowed in a function body.
+    /// If the function body exceeds this limit, a diagnostic will be reported.
+    ///
+    /// Default: `50`
+    ///
+    /// When `maxLines: 2`, the following function will be considered invalid:
+    /// ```json,options
+    /// {
+    ///     "options": {
+    ///        "maxLines": 2
+    ///     }
+    /// }
+    /// ```
+    /// ```js,expect_diagnostic,use_options
+    /// function example() {
+    ///  const a = 1; // 1
+    ///  const b = 2; // 2
+    ///  const c = 3; // 3
+    /// };
+    /// ```
+    ///
+    /// ### skipBlankLines
+    /// When this options is set to `true`, blank lines in the function body are not counted towards the maximum line limit.
+    /// This means that only lines with actual code or comments will be counted.
+    ///
+    /// Default: `false`
+    ///
+    /// When `maxLines: 2` and `skipBlankLines: true`, the following function will be considered valid:
+    /// ```json,options
+    /// {
+    ///     "options": {
+    ///        "maxLines": 2,
+    ///        "skipBlankLines": true
+    ///     }
+    /// }
+    /// ```
+    /// ```js,use_options
+    /// function example() {
+    ///  const a = 1; // 1
+    ///  // not counted
+    ///  const b = 2; // 2
+    ///  // not counted
+    /// };
+    /// ```
+    ///
+    /// ### skipIifes
+    /// When this option is set to `true`, Immediately Invoked Function Expressions (IIFEs) are not checked for the maximum line limit.
+    ///
+    /// Default: `false`
+    ///
+    /// When `maxLines: 2` and `skipIifes: true`, the following IIFE will be considered valid even though its body has 3 lines:
+    /// ```json,options
+    /// {
+    ///     "options": {
+    ///        "maxLines": 2,
+    ///        "skipIifes": true
+    ///     }
+    /// }
+    /// ```
+    /// ```js,use_options
+    /// (() => {
+    ///  const a = 1; // 1
+    ///  const b = 2; // 2
+    ///  const c = 3; // 3
     /// })();
     /// ```
     ///
@@ -123,30 +196,45 @@ impl Rule for NoExcessiveLinesPerFunction {
         let options = ctx.options();
 
         if let AnyFunctionLike::AnyJsFunction(func) = binding {
-            if is_iife(func) && !options.iifes {
+            if is_iife(func) && options.skip_iifes {
                 return None;
             }
         };
 
-        let func_string = binding.to_string();
-        let func_lines = func_string.trim().lines();
-
-        let function_line_count = if options.skip_blank_lines {
-            func_lines
-                .filter(|line| !line.trim().is_empty())
-                .collect::<Vec<_>>()
-                .len()
-        } else {
-            func_lines.collect::<Vec<_>>().len()
+        let Ok(func_body) = binding.body() else {
+            return None;
         };
 
-        if function_line_count <= options.max.get().into() {
-            return None;
+        let function_lines_count = func_body
+            .syntax()
+            .descendants()
+            .flat_map(|descendant| descendant.tokens().collect::<Vec<_>>())
+            .filter(|token| {
+                !matches!(
+                    token.kind(),
+                    biome_js_syntax::JsSyntaxKind::L_CURLY | biome_js_syntax::JsSyntaxKind::R_CURLY
+                )
+            })
+            .fold(0, |acc, token| {
+                if options.skip_blank_lines {
+                    return acc + token.has_leading_newline() as usize;
+                };
+
+                acc + token
+                    .trim_trailing_trivia()
+                    .leading_trivia()
+                    .pieces()
+                    .filter(|piece| piece.is_newline())
+                    .count()
+            });
+
+        if function_lines_count > options.max_lines.get().into() {
+            return Some(State {
+                function_lines_count,
+            });
         }
 
-        Some(State {
-            function_line_count,
-        })
+        None
     }
 
     fn diagnostic(ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
@@ -158,7 +246,7 @@ impl Rule for NoExcessiveLinesPerFunction {
                 rule_category!(),
                 node.range(),
                 markup! {
-                    "This function has too many lines ("{state.function_line_count}"). Maximum allowed is "{options.max.to_string()}"."
+                    "This function has too many lines ("{state.function_lines_count}"). Maximum allowed is "{options.max_lines.to_string()}"."
                 },
             )
             .note(markup! {
@@ -175,24 +263,24 @@ fn is_iife(func: &AnyJsFunction) -> bool {
 }
 
 pub struct State {
-    function_line_count: usize,
+    function_lines_count: usize,
 }
 
 #[derive(Clone, Debug, Deserialize, Deserializable, Eq, PartialEq, Serialize)]
 #[cfg_attr(feature = "schema", derive(JsonSchema))]
 #[serde(rename_all = "camelCase", deny_unknown_fields, default)]
 pub struct NoExcessiveLinesPerFunctionOptions {
-    pub max: NonZeroU8,
+    pub max_lines: NonZeroU8,
     pub skip_blank_lines: bool,
-    pub iifes: bool,
+    pub skip_iifes: bool,
 }
 
 impl Default for NoExcessiveLinesPerFunctionOptions {
     fn default() -> Self {
         Self {
-            max: NonZeroU8::new(50).unwrap(),
+            max_lines: NonZeroU8::new(50).unwrap(),
             skip_blank_lines: false,
-            iifes: false,
+            skip_iifes: false,
         }
     }
 }

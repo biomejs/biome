@@ -18,7 +18,7 @@ function name() {
 ```
 invalidSkipBlankLines.js:1:1 lint/nursery/noExcessiveLinesPerFunction ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i This function has too many lines (5). Maximum allowed is 4.
+  i This function has too many lines (3). Maximum allowed is 2.
   
   > 1 │ function name() {
       │ ^^^^^^^^^^^^^^^^^

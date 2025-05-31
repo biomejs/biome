@@ -2543,14 +2543,14 @@
 		"NoExcessiveLinesPerFunctionOptions": {
 			"type": "object",
 			"properties": {
-				"iifes": { "default": false, "type": "boolean" },
-				"max": {
+				"maxLines": {
 					"default": 50,
 					"type": "integer",
 					"format": "uint8",
 					"minimum": 1.0
 				},
-				"skipBlankLines": { "default": false, "type": "boolean" }
+				"skipBlankLines": { "default": false, "type": "boolean" },
+				"skipIifes": { "default": false, "type": "boolean" }
 			},
 			"additionalProperties": false
 		},
@@ -2754,7 +2754,7 @@
 					]
 				},
 				"noExcessiveLinesPerFunction": {
-					"description": "Restrict a maximum number of lines of code in a function.",
+					"description": "Restrict the number of lines of code in a function.",
 					"anyOf": [
 						{
 							"$ref": "#/definitions/NoExcessiveLinesPerFunctionConfiguration"

@@ -30,17 +30,18 @@ class foo {
 }
 
 function baz(
-	aaa = 1
+	aaa = 1,
+	bbb = 2,
+	ccc = 3
 ) {
-	return aaa;
+	const x = 4;
+	return aaa + bbb + ccc + x;
 }
 
-// valid because iifes: false
-(() => {
+(function () {})();
+
+(function () {
 	let x = 0;
-	let y = 0;
-	let z = x + y;
-	let foo = {};
 	return bar;
 })();
 
