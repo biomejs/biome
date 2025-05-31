@@ -1,3 +1,5 @@
+/* should not generate diagnostics */
+
 (function () {
 	let x = 0;
 	let y = 0;

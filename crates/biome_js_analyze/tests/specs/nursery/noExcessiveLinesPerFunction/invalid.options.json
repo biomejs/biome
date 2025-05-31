@@ -6,7 +6,7 @@
         "noExcessiveLinesPerFunction": {
           "level": "error",
           "options": {
-            "max": 4
+            "maxLines": 2
           }
         }
       }

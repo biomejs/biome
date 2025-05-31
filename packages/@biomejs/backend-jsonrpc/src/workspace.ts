@@ -1559,7 +1559,7 @@ export interface Nursery {
 	 */
 	noDestructuredProps?: RuleConfiguration_for_Null;
 	/**
-	 * Restrict a maximum number of lines of code in a function.
+	 * Restrict the number of lines of code in a function.
 	 */
 	noExcessiveLinesPerFunction?: RuleConfiguration_for_NoExcessiveLinesPerFunctionOptions;
 	/**
@@ -3072,9 +3072,9 @@ export interface NoBitwiseOperatorsOptions {
 	allow: string[];
 }
 export interface NoExcessiveLinesPerFunctionOptions {
-	iifes?: boolean;
-	max?: number;
+	maxLines?: number;
 	skipBlankLines?: boolean;
+	skipIifes?: boolean;
 }
 export interface NoRestrictedElementsOptions {
 	/**
