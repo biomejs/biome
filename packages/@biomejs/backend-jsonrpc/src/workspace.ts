@@ -2977,6 +2977,10 @@ export interface UseExhaustiveDependenciesOptions {
 	 */
 	hooks?: Hook[];
 	/**
+	 * Whether to report a diagnostic when using functions that are not wrapped with useCallback as a dependency when react compiler is in scope. Defaults to false.
+	 */
+	reactCompilerEnabled?: boolean;
+	/**
 	 * Whether to report an error when a hook has no dependencies array.
 	 */
 	reportMissingDependenciesArray?: boolean;

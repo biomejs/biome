@@ -308,6 +308,11 @@ pub struct UseExhaustiveDependenciesOptions {
     #[serde(default = "report_unnecessary_dependencies_default")]
     pub report_unnecessary_dependencies: bool,
 
+    /// Whether to report a diagnostic when using functions that are not wrapped with useCallback as a dependency when react compiler is in scope.
+    /// Defaults to false.
+    #[serde(default = "react_compiler_enabled_default")]
+    pub react_compiler_enabled: bool,
+
     /// Whether to report an error when a hook has no dependencies array.
     #[serde(default)]
     pub report_missing_dependencies_array: bool,
@@ -323,6 +328,7 @@ impl Default for UseExhaustiveDependenciesOptions {
         Self {
             report_unnecessary_dependencies: report_unnecessary_dependencies_default(),
             report_missing_dependencies_array: false,
+            react_compiler_enabled: react_compiler_enabled_default(),
             hooks: Vec::new().into_boxed_slice(),
         }
     }
@@ -330,6 +336,10 @@ impl Default for UseExhaustiveDependenciesOptions {
 
 fn report_unnecessary_dependencies_default() -> bool {
     true
+}
+
+fn react_compiler_enabled_default() -> bool {
+    false
 }
 
 #[derive(Clone, Debug, Default, Deserialize, Deserializable, Eq, PartialEq, Serialize)]
@@ -667,6 +677,7 @@ fn is_out_of_function_scope(
 fn determine_unstable_dependency(
     dependency: &AnyJsExpression,
     model: &SemanticModel,
+    react_compiler_enabled: bool,
 ) -> Option<UnstableDependencyKind> {
     let identifier_name = dependency.as_js_identifier_expression()?.name().ok()?;
 
@@ -674,6 +685,10 @@ fn determine_unstable_dependency(
     match declaration {
         AnyJsBindingDeclaration::JsArrowFunctionExpression(_)
         | AnyJsBindingDeclaration::JsFunctionDeclaration(_) => {
+            if react_compiler_enabled {
+                return None;
+            }
+
             Some(UnstableDependencyKind::Function)
         }
         AnyJsBindingDeclaration::JsArrayBindingPatternRestElement(_)
@@ -685,6 +700,10 @@ fn determine_unstable_dependency(
             match initializer.expression().ok()? {
                 AnyJsExpression::JsArrowFunctionExpression(_)
                 | AnyJsExpression::JsFunctionExpression(_) => {
+                    if react_compiler_enabled {
+                        return None;
+                    }
+
                     Some(UnstableDependencyKind::Function)
                 }
                 AnyJsExpression::JsArrayExpression(_) | AnyJsExpression::JsObjectExpression(_) => {
@@ -892,7 +911,8 @@ impl Rule for UseExhaustiveDependencies {
             // Find correctly specified dependencies with an unstable identity,
             // since they would trigger re-evaluation on every render.
             let unstable_deps = correct_deps.into_iter().filter_map(|dep| {
-                determine_unstable_dependency(&dep, model).map(|kind| (dep, kind))
+                determine_unstable_dependency(&dep, model, options.react_compiler_enabled)
+                    .map(|kind| (dep, kind))
             });
 
             // Generate signals
