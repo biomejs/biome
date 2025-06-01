@@ -44,13 +44,9 @@ declare_lint_rule! {
     ///
     /// ```js
     /// import jsonData from './data.json' with { type: "json" };
-    /// ```
     ///
-    /// ```js
     /// import jsonData from './data.json' with { type: "json", other: "value" };
-    /// ```
     ///
-    /// ```js
     /// import code from './script.js'; // Not a JSON import
     /// ```
     ///
@@ -74,15 +70,11 @@ impl Rule for UseJsonImportAttribute {
         let node = ctx.query();
         let source = node.source().ok()?;
         let source = source.as_js_module_source()?;
-        let import_path = source.inner_string_text().ok()?.text().to_string();
-
-        // Get the file extension
-        let Some(extension) = import_path.split('.').next_back() else {
-            return None; // missing extension for file
-        };
+        let import_path = source.inner_string_text().ok()?;
+        let import_path = import_path.text();
 
         // Only proceed if it's a JSON file
-        if extension != "json" {
+        if !import_path.ends_with(".json") {
             return None;
         }
 

@@ -74,8 +74,7 @@
       },
       "nursery": {
         "noFloatingPromises": "error",
-        "noImportCycles": "error",
-        "useJsonImportAttribute": "error"
+        "noImportCycles": "error"
       }
     }
   },
