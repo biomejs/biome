@@ -347,13 +347,19 @@ impl WorkspaceServer {
         let mut source = document_file_source.unwrap_or(DocumentFileSource::from_path(&path));
 
         if let DocumentFileSource::Js(js) = &mut source {
-            if path.extension().is_some_and(|extension| extension == "js") {
-                let manifest = self.project_layout.find_node_manifest_for_path(&path);
-                if let Some((_, manifest)) = manifest {
-                    if manifest.r#type == Some(PackageType::CommonJs) {
-                        js.set_module_kind(ModuleKind::Script);
+            match path.extension() {
+                Some("js") => {
+                    let manifest = self.project_layout.find_node_manifest_for_path(&path);
+                    if let Some((_, manifest)) = manifest {
+                        if manifest.r#type == Some(PackageType::CommonJs) {
+                            js.set_module_kind(ModuleKind::Script);
+                        }
                     }
                 }
+                Some("cjs") => {
+                    js.set_module_kind(ModuleKind::Script);
+                }
+                _ => {}
             }
         }
 
