@@ -16,80 +16,31 @@ use std::num::NonZeroU8;
 declare_lint_rule! {
     /// Restrict the number of lines of code in a function.
     ///
-    /// This rule checks the number of lines in a function body and reports a diagnostic if it exceeds a specified limit.
+    /// This rule checks the number of lines in a function body and reports a diagnostic if it exceeds a specified limit. Remember that this rule only counts the lines of code in the function body, not the entire function declaration.
     /// Some people consider large functions a code smell. Large functions tend to do a lot of things and can make it hard following what’s going on. Many coding style guides dictate a limit of the number of lines that a function can comprise of. This rule can help enforce that style.
     ///
     /// ## Examples
     ///
-    /// When maximum number of lines is set to `2` with the following option, the following code will be considered invalid:
-    /// ```json,options
-    /// {
-    ///     "options": {
-    ///        "maxLines": 2
-    ///     }
-    /// }
-    /// ```
-    ///
     /// ### Invalid
     ///
-    /// ```js,expect_diagnostic,use_options
+    /// The following example will show diagnostic when you set the maxLines limit to 3, however the default value is 50.
+    ///
+    /// ```js
     /// function foo () {
     ///   const x = 0;
     ///   const y = 1;
     ///   const z = 2;
+    ///   return x + y + z;
     /// };
-    /// ```
-    ///
-    /// ```js,expect_diagnostic,use_options
-    /// const bar = () => {
-    ///   const x = 0;
-    ///   const y = 1;
-    ///   const z = 2;
-    /// };
-    /// ```
-    ///
-    /// ```js,expect_diagnostic,use_options
-    /// class Baz {
-    ///	  foo() {
-    ///     const x = 0;
-    ///	    const y = 0;
-    ///     const z = 2;
-    ///	  };
-    /// };
-    /// ```
-    ///
-    /// ```js,expect_diagnostic,use_options
-    /// (() => {
-    ///	 const x = 0;
-    ///	 const y = 0;
-    ///	 const z = 0;
-    /// })();
     /// ```
     ///
     /// ### Valid
     ///
-    /// ```js,use_options
+    /// ```js
     ///  function foo () {
     ///     const x = 0;
     ///     const y = 1;
     /// };
-    ///
-    /// const bar = () => {
-    ///   const x = 0;
-    ///   const y = 1;
-    /// };
-    ///
-    /// class Baz {
-    ///	  foo() {
-    ///     const x = 0;
-    ///	    const y = 0;
-    ///	  };
-    /// };
-    ///
-    /// (() => {
-    ///	 const x = 0;
-    ///	 const y = 0;
-    /// })();
     /// ```
     ///
     /// ## Options
@@ -181,7 +132,7 @@ declare_lint_rule! {
         language: "js",
         recommended: false,
         sources: &[RuleSource::Eslint("max-lines-per-function")],
-        source_kind: RuleSourceKind::SameLogic,
+        source_kind: RuleSourceKind::Inspired,
     }
 }
 
