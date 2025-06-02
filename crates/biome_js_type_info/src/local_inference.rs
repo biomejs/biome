@@ -1309,7 +1309,7 @@ impl ReturnType {
             }
             AnyTsReturnType::TsAssertsReturnType(ty) => {
                 ty.parameter_name().ok().and_then(|parameter_name| {
-                    Some(Self::Asserts(AssertsReturnType {
+                    Some(Self::Asserts(Box::new(AssertsReturnType {
                         parameter_name: match parameter_name {
                             AnyTsTypePredicateParameterName::JsReferenceIdentifier(identifier) => {
                                 text_from_token(identifier.value_token())?
@@ -1321,12 +1321,12 @@ impl ReturnType {
                             .and_then(|asserts| asserts.ty().ok())
                             .map(|ty| TypeReference::from_any_ts_type(resolver, &ty))
                             .unwrap_or_default(),
-                    }))
+                    })))
                 })
             }
             AnyTsReturnType::TsPredicateReturnType(ty) => {
                 ty.parameter_name().ok().and_then(|parameter_name| {
-                    Some(Self::Predicate(PredicateReturnType {
+                    Some(Self::Predicate(Box::new(PredicateReturnType {
                         parameter_name: match parameter_name {
                             AnyTsTypePredicateParameterName::JsReferenceIdentifier(identifier) => {
                                 text_from_token(identifier.value_token())?
@@ -1337,7 +1337,7 @@ impl ReturnType {
                             .ty()
                             .map(|ty| TypeReference::from_any_ts_type(resolver, &ty))
                             .unwrap_or_default(),
-                    }))
+                    })))
                 })
             }
         }
