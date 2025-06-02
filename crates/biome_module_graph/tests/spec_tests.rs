@@ -5,7 +5,7 @@ use std::sync::Arc;
 use crate::snap::ModuleGraphSnapshot;
 use biome_deserialize::json::deserialize_from_json_str;
 use biome_fs::{BiomePath, FileSystem, MemoryFileSystem, OsFileSystem};
-use biome_js_type_info::{ScopeId, Type, TypeResolver};
+use biome_js_type_info::{ScopeId, Type, TypeData, TypeResolver};
 use biome_jsdoc_comment::JsdocComment;
 use biome_json_parser::{JsonParserOptions, parse_json};
 use biome_json_value::{JsonObject, JsonString};
@@ -560,6 +560,35 @@ fn test_resolve_export_types() {
 }
 
 #[test]
+fn test_resolve_generic_return_value() {
+    let mut fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"function useCallback<T extends Function>(
+    callback: T,
+    deps: DependencyList,
+): T;
+
+export const makeOne = () => 1;
+
+export const makeOneCb = useCallback(makeOne);
+
+export const one = makeOneCb();
+"#,
+    );
+
+    let added_paths = [BiomePath::new("/src/index.ts")];
+    let added_paths = get_added_paths(&fs, &added_paths);
+
+    let module_graph = ModuleGraph::default();
+    module_graph.update_graph_for_js_paths(&fs, &ProjectLayout::default(), &added_paths, &[]);
+
+    let snapshot = ModuleGraphSnapshot::new(&module_graph, &fs);
+
+    snapshot.assert_snapshot("test_resolve_generic_return_value");
+}
+
+#[test]
 fn test_resolve_promise_export() {
     let mut fs = MemoryFileSystem::default();
     fs.insert(
@@ -933,18 +962,26 @@ fn test_resolve_react_types() {
     let snapshot = ModuleGraphSnapshot::new(module_graph.as_ref(), &fs).with_resolver(&resolver);
     snapshot.assert_snapshot("test_resolve_react_types");
 
-    let resolved_id = resolver
+    let use_callback_id = resolver
+        .resolve_type_of(&Text::Static("useCallback"), ScopeId::GLOBAL)
+        .expect("useCallback variable not found");
+    let ty = resolver
+        .get_by_resolved_id(use_callback_id)
+        .expect("cannot find type data");
+    assert!(matches!(ty.as_raw_data(), TypeData::Function(_)));
+
+    let promise_id = resolver
         .resolve_type_of(&Text::Static("promise"), ScopeId::GLOBAL)
         .expect("promise variable not found");
     let ty = resolver
-        .get_by_resolved_id(resolved_id)
+        .get_by_resolved_id(promise_id)
         .expect("cannot find type data")
         .to_data();
     let _ty_string = format!("{ty:?}"); // for debugging
     let ty = ty.inferred(&mut resolver);
     let _ty_string = format!("{ty:?}"); // for debugging
-    //let ty = Type::from_data(Box::new(resolver), ty);
-    // assert!(ty.is_promise_instance()); // FIXME: Let's make this pass
+    let ty = Type::from_data(Box::new(resolver), ty);
+    assert!(ty.is_promise_instance()); // FIXME: Let's make this pass
 }
 
 #[test]

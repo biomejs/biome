@@ -138,6 +138,16 @@ Module TypeId(1) => sync Function "returnPromiseResult" {
   }
   returns: Module(0) TypeId(0)
 }
+
+Module TypeId(2) => instanceof Import Symbol: PromisedResult from "/src/promisedResult.ts"
+
+Module TypeId(3) => sync Function "returnPromiseResult" {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: Module(0) TypeId(2)
+}
 ```
 
 # Scoped Type Resolver

@@ -518,6 +518,19 @@ impl Format<FormatTypeContext> for TypeReferenceQualifier {
             }
         });
 
+        let scope_id = format_with(|f| {
+            write!(
+                f,
+                [&format_args![
+                    space(),
+                    dynamic_text(
+                        &std::format!("(scope ID: {})", self.scope_id.index()),
+                        TextSize::default()
+                    )
+                ]]
+            )
+        });
+
         write!(f, [text("\"")])?;
         for (index, part) in self.path.iter().enumerate() {
             write!(f, [dynamic_text(part, TextSize::default())])?;
@@ -525,7 +538,7 @@ impl Format<FormatTypeContext> for TypeReferenceQualifier {
                 write!(f, [text(".")])?;
             }
         }
-        write!(f, [text("\""), type_args])?;
+        write!(f, [text("\""), type_args, scope_id])?;
         Ok(())
     }
 }

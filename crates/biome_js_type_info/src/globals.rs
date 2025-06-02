@@ -312,10 +312,7 @@ impl TypeResolver for GlobalsResolver {
         } else if qualifier.is_promise() && !qualifier.has_known_type_parameters() {
             Some(GLOBAL_PROMISE_ID)
         } else if !qualifier.type_only && qualifier.path.len() == 1 {
-            self.resolve_type_of(
-                &qualifier.path[0],
-                qualifier.scope_id.unwrap_or(ScopeId::GLOBAL),
-            )
+            self.resolve_type_of(&qualifier.path[0], qualifier.scope_id)
         } else {
             None
         }

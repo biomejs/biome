@@ -8,7 +8,7 @@ use biome_js_semantic::{SemanticEvent, SemanticEventExtractor};
 use biome_js_syntax::{
     AnyJsCombinedSpecifier, AnyJsDeclaration, AnyJsExportDefaultDeclaration, AnyJsImportClause,
     JsFormalParameter, JsIdentifierBinding, JsSyntaxKind, JsSyntaxNode, JsSyntaxToken,
-    TsIdentifierBinding, inner_string_text,
+    TsIdentifierBinding, TsTypeParameter, TsTypeParameterName, inner_string_text,
 };
 use biome_js_type_info::{
     BindingId, FunctionParameter, GLOBAL_RESOLVER, GLOBAL_UNKNOWN_ID, Module, Namespace,
@@ -244,6 +244,8 @@ impl JsModuleInfoCollector {
                         node.name_token().ok()
                     } else if let Some(node) = TsIdentifierBinding::cast_ref(node) {
                         node.name_token().ok()
+                    } else if let Some(node) = TsTypeParameterName::cast_ref(node) {
+                        node.ident_token().ok()
                     } else {
                         None
                     }
@@ -254,10 +256,13 @@ impl JsModuleInfoCollector {
                     .as_ref()
                     .map(JsDeclarationKind::from_node)
                     .unwrap_or_default();
+                let scope_id = *self.scope_stack.last().expect("scope must be present");
                 let ty = match (&node, &name) {
-                    (Some(node), Some(name)) => self.infer_type(finaliser, node, name),
+                    (Some(node), Some(name)) => self.infer_type(finaliser, node, name, scope_id),
                     _ => TypeReference::Unknown,
                 };
+
+                let printed = format!("{:?}", name);
 
                 self.bindings.push(JsBindingData {
                     name: name
@@ -265,7 +270,7 @@ impl JsModuleInfoCollector {
                         .map(|name| name.clone().into())
                         .unwrap_or_default(),
                     references: Vec::new(),
-                    scope_id: *self.scope_stack.last().expect("scope must be present"),
+                    scope_id,
                     declaration_kind,
                     ty,
                     jsdoc: node.as_ref().and_then(find_jsdoc),
@@ -356,6 +361,7 @@ impl JsModuleInfoCollector {
         finaliser: &mut JsModuleInfoCollectorFinaliser,
         node: &JsSyntaxNode,
         binding_name: &TokenText,
+        scope_id: ScopeId,
     ) -> TypeReference {
         let mut infer_type = || {
             for ancestor in node.ancestors() {
@@ -366,7 +372,7 @@ impl JsModuleInfoCollector {
                             .entry(var_decl.syntax().clone())
                             .or_insert_with(|| {
                                 TypeData::typed_bindings_from_js_variable_declaration(
-                                    self, var_decl,
+                                    self, scope_id, var_decl,
                                 )
                             });
                         typed_bindings
@@ -376,17 +382,21 @@ impl JsModuleInfoCollector {
                             })
                             .unwrap_or_default()
                     } else {
-                        TypeData::from_any_js_declaration(self, &decl)
+                        TypeData::from_any_js_declaration(self, scope_id, &decl)
                     };
                 } else if let Some(declaration) = AnyJsExportDefaultDeclaration::cast_ref(&ancestor)
                 {
-                    return TypeData::from_any_js_export_default_declaration(self, &declaration);
+                    return TypeData::from_any_js_export_default_declaration(
+                        self,
+                        scope_id,
+                        &declaration,
+                    );
                 } else if let Some(param) = JsFormalParameter::cast_ref(&ancestor) {
                     let param = finaliser
                         .parsed_parameters
                         .entry(ancestor.clone())
                         .or_insert_with(|| {
-                            FunctionParameter::from_js_formal_parameter(self, &param)
+                            FunctionParameter::from_js_formal_parameter(self, scope_id, &param)
                         });
                     return param
                         .bindings
@@ -395,6 +405,10 @@ impl JsModuleInfoCollector {
                             (binding.name == binding_name.text()).then(|| binding.ty.clone())
                         })
                         .unwrap_or_default();
+                } else if let Some(param) = TsTypeParameter::cast_ref(&ancestor) {
+                    return TypeData::reference(
+                        TypeReference::from_ts_type_parameter(scope_id, &param).unwrap_or_default(),
+                    );
                 }
             }
 
@@ -561,8 +575,8 @@ impl TypeResolver for JsModuleInfoCollector {
 
     fn resolve_qualifier(&self, qualifier: &TypeReferenceQualifier) -> Option<ResolvedTypeId> {
         let identifier = qualifier.path.first()?;
-        let scope_id = qualifier.scope_id.unwrap_or(ScopeId::GLOBAL);
-        let Some(binding_ref) = self.find_binding_in_scope(identifier, scope_id) else {
+        let printed_id = format!("{identifier}");
+        let Some(binding_ref) = self.find_binding_in_scope(identifier, qualifier.scope_id) else {
             return GLOBAL_RESOLVER.resolve_qualifier(qualifier);
         };
 

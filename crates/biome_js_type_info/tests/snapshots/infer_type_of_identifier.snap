@@ -12,5 +12,5 @@ foo;
 ## Result
 
 ```
-unresolved reference "foo"
+unresolved reference "foo" (scope ID: 0)
 ```

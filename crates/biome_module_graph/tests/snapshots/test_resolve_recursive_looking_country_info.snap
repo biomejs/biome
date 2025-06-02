@@ -67,10 +67,10 @@ export const codes: {
 ```
 Exports {
   "CountryInfo" => {
-    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(22))
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(23))
   }
   "SubdivisionInfo" => {
-    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(23))
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(24))
   }
   "codes" => {
     ExportOwnExport => JsOwnExport::Binding(18)
@@ -95,25 +95,25 @@ Imports {
 ```
 BindingId(12) => JsBindingData {
   Name: subdivision,
-  Type: Module(0) TypeId(14),
+  Type: Module(0) TypeId(15),
   Declaration kind: HoistedValue
 }
 
 BindingId(15) => JsBindingData {
   Name: country,
-  Type: Module(0) TypeId(17),
+  Type: Module(0) TypeId(18),
   Declaration kind: HoistedValue
 }
 
 BindingId(17) => JsBindingData {
   Name: data,
-  Type: Module(0) TypeId(18),
+  Type: Module(0) TypeId(19),
   Declaration kind: Value
 }
 
 BindingId(18) => JsBindingData {
   Name: codes,
-  Type: Module(0) TypeId(20),
+  Type: Module(0) TypeId(21),
   Declaration kind: Value
 }
 ```
@@ -164,7 +164,7 @@ Module TypeId(0) => Namespace {
     ],
 }
 
-Module TypeId(1) => instanceof unresolved reference "SubdivisionInfo.Map"
+Module TypeId(1) => instanceof unresolved reference "SubdivisionInfo.Map" (scope ID: 2)
 
 Module TypeId(2) => interface "Partial" {
   extends: []
@@ -172,7 +172,7 @@ Module TypeId(2) => interface "Partial" {
   members: ["name": string, "sub": Module(0) TypeId(1)]
 }
 
-Module TypeId(3) => instanceof unresolved reference "Partial"
+Module TypeId(3) => instanceof Module(0) TypeId(2)
 
 Module TypeId(4) => interface "Full" {
   extends: [Module(0) TypeId(3)]
@@ -214,7 +214,7 @@ Module TypeId(7) => Namespace {
             ),
             is_static: true,
             ty: Resolved(
-                Module(0) TypeId(9),
+                Module(0) TypeId(10),
             ),
         },
         TypeMember {
@@ -237,8 +237,10 @@ Module TypeId(8) => interface "Partial" {
   members: ["type": string, "name": string]
 }
 
-Module TypeId(9) => interface "Full" {
-  extends: [Module(0) TypeId(3)]
+Module TypeId(9) => instanceof Module(0) TypeId(8)
+
+Module TypeId(10) => interface "Full" {
+  extends: [Module(0) TypeId(9)]
   type_args: []
   members: [
     "countryName": string,
@@ -248,15 +250,15 @@ Module TypeId(9) => interface "Full" {
   ]
 }
 
-Module TypeId(10) => instanceof Module(0) TypeId(9)
+Module TypeId(11) => instanceof Module(0) TypeId(10)
 
-Module TypeId(11) => instanceof Module(0) TypeId(7)
+Module TypeId(12) => instanceof Module(0) TypeId(7)
 
-Module TypeId(12) => value: null
+Module TypeId(13) => value: null
 
-Module TypeId(13) => Module(0) TypeId(11) | Module(0) TypeId(12)
+Module TypeId(14) => Module(0) TypeId(12) | Module(0) TypeId(13)
 
-Module TypeId(14) => sync Function "subdivision" {
+Module TypeId(15) => sync Function "subdivision" {
   accepts: {
     params: [
       required countryCodeOrFullSubdivisionCode: string (bindings: countryCodeOrFullSubdivisionCode:string)
@@ -264,38 +266,38 @@ Module TypeId(14) => sync Function "subdivision" {
     ]
     type_args: []
   }
-  returns: Module(0) TypeId(13)
+  returns: Module(0) TypeId(14)
 }
 
-Module TypeId(15) => instanceof Module(0) TypeId(0)
+Module TypeId(16) => instanceof Module(0) TypeId(0)
 
-Module TypeId(16) => Module(0) TypeId(15) | Module(0) TypeId(12)
+Module TypeId(17) => Module(0) TypeId(16) | Module(0) TypeId(13)
 
-Module TypeId(17) => sync Function "country" {
+Module TypeId(18) => sync Function "country" {
   accepts: {
     params: [
       required countryCodeOrName: string (bindings: countryCodeOrName:string)
     ]
     type_args: []
   }
-  returns: Module(0) TypeId(16)
+  returns: Module(0) TypeId(17)
 }
 
-Module TypeId(18) => instanceof Module(0) TypeId(5)
-
-Module TypeId(19) => Object {
-  prototype: No prototype
-  members: []
-}
+Module TypeId(19) => instanceof Module(0) TypeId(5)
 
 Module TypeId(20) => Object {
   prototype: No prototype
   members: []
 }
 
-Module TypeId(21) => unknown
+Module TypeId(21) => Object {
+  prototype: No prototype
+  members: []
+}
 
-Module TypeId(22) => (type: Module(0) TypeId(6), value: Module(0) TypeId(0), namespace: Module(0) TypeId(0))
+Module TypeId(22) => unknown
 
-Module TypeId(23) => (type: Module(0) TypeId(10), value: Module(0) TypeId(7), namespace: Module(0) TypeId(7))
+Module TypeId(23) => (type: Module(0) TypeId(6), value: Module(0) TypeId(0), namespace: Module(0) TypeId(0))
+
+Module TypeId(24) => (type: Module(0) TypeId(11), value: Module(0) TypeId(7), namespace: Module(0) TypeId(7))
 ```

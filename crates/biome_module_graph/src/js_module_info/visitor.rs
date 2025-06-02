@@ -5,7 +5,7 @@ use biome_js_syntax::{
     JsExportFromClause, JsExportNamedFromClause, JsExportNamedSpecifierList, JsIdentifierBinding,
     JsVariableDeclaratorList, TsExportAssignmentClause, unescape_js_string,
 };
-use biome_js_type_info::{ImportSymbol, TypeData, TypeReference, TypeResolver};
+use biome_js_type_info::{ImportSymbol, ScopeId, TypeData, TypeReference, TypeResolver};
 use biome_jsdoc_comment::JsdocComment;
 use biome_resolver::{ResolveOptions, resolve};
 use biome_rowan::{AstNode, TokenText, WalkEvent};
@@ -123,7 +123,8 @@ impl<'a> JsModuleVisitor<'a> {
         node: TsExportAssignmentClause,
         collector: &mut JsModuleInfoCollector,
     ) -> Option<()> {
-        let type_data = TypeData::from_any_js_expression(collector, &node.expression().ok()?);
+        let type_data =
+            TypeData::from_any_js_expression(collector, ScopeId::GLOBAL, &node.expression().ok()?);
         let ty = TypeReference::from(collector.register_and_resolve(type_data));
         collector.register_export(JsCollectedExport::ExportDefaultAssignment { ty });
 
@@ -200,7 +201,7 @@ impl<'a> JsModuleVisitor<'a> {
         node: &AnyJsExpression,
         collector: &mut JsModuleInfoCollector,
     ) -> Option<()> {
-        let type_data = TypeData::from_any_js_expression(collector, node);
+        let type_data = TypeData::from_any_js_expression(collector, ScopeId::GLOBAL, node);
         let ty = TypeReference::from(collector.register_and_resolve(type_data));
 
         collector.register_export(JsCollectedExport::ExportDefault { ty });

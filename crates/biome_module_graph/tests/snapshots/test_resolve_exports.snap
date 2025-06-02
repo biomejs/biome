@@ -323,7 +323,7 @@ Module TypeId(19) => sync Function "getObject" {
   returns: Module(0) TypeId(18)
 }
 
-Module TypeId(20) => instanceof unresolved reference "JSX.Element"
+Module TypeId(20) => instanceof unresolved reference "JSX.Element" (scope ID: 10)
 
 Module TypeId(21) => sync Function "Component" {
   accepts: {

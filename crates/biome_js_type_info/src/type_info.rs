@@ -302,9 +302,10 @@ impl From<TypeofValue> for TypeData {
 }
 
 impl TypeData {
-    pub fn array_of(ty: TypeReference) -> Self {
+    pub fn array_of(scope_id: ScopeId, ty: TypeReference) -> Self {
         Self::instance_of(TypeReference::from(
-            TypeReferenceQualifier::from_name(Text::Static("Array")).with_type_parameters([ty]),
+            TypeReferenceQualifier::from_name(scope_id, Text::Static("Array"))
+                .with_type_parameters([ty]),
         ))
     }
 
@@ -1072,7 +1073,7 @@ pub struct TypeReferenceQualifier {
     pub type_parameters: Box<[TypeReference]>,
 
     /// ID of the scope from which the qualifier is being referenced.
-    pub scope_id: Option<ScopeId>,
+    pub scope_id: ScopeId,
 
     /// If `true`, this qualifier can reference types (and namespaces) only.
     pub type_only: bool,
@@ -1085,11 +1086,7 @@ pub struct TypeReferenceQualifier {
 
 impl TypeReferenceQualifier {
     pub fn has_known_type_parameters(&self) -> bool {
-        !self.type_parameters.is_empty()
-            && self
-                .type_parameters
-                .iter()
-                .any(|param| *param != TypeReference::Unknown)
+        self.type_parameters.iter().any(TypeReference::is_known)
     }
 
     /// Checks whether this type qualifier references an `Array` type.
@@ -1120,7 +1117,7 @@ impl TypeReferenceQualifier {
     }
 
     pub fn with_scope_id(mut self, scope_id: ScopeId) -> Self {
-        self.scope_id = Some(scope_id);
+        self.scope_id = scope_id;
         self
     }
 
