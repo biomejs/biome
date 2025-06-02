@@ -366,6 +366,7 @@ pub enum RuleName {
     UseIsArray,
     UseIsNan,
     UseIterableCallbackReturn,
+    UseJsonImportAttribute,
     UseJsxKeyInIterable,
     UseKeyWithClickEvents,
     UseKeyWithMouseEvents,
@@ -697,6 +698,7 @@ impl RuleName {
             Self::UseIsArray => "useIsArray",
             Self::UseIsNan => "useIsNan",
             Self::UseIterableCallbackReturn => "useIterableCallbackReturn",
+            Self::UseJsonImportAttribute => "useJsonImportAttribute",
             Self::UseJsxKeyInIterable => "useJsxKeyInIterable",
             Self::UseKeyWithClickEvents => "useKeyWithClickEvents",
             Self::UseKeyWithMouseEvents => "useKeyWithMouseEvents",
@@ -1024,6 +1026,7 @@ impl RuleName {
             Self::UseIsArray => RuleGroup::Suspicious,
             Self::UseIsNan => RuleGroup::Correctness,
             Self::UseIterableCallbackReturn => RuleGroup::Nursery,
+            Self::UseJsonImportAttribute => RuleGroup::Nursery,
             Self::UseJsxKeyInIterable => RuleGroup::Correctness,
             Self::UseKeyWithClickEvents => RuleGroup::A11y,
             Self::UseKeyWithMouseEvents => RuleGroup::A11y,
@@ -1032,7 +1035,7 @@ impl RuleName {
             Self::UseMediaCaption => RuleGroup::A11y,
             Self::UseNamedOperation => RuleGroup::Nursery,
             Self::UseNamespaceKeyword => RuleGroup::Suspicious,
-            Self::UseNamingConvention => RuleGroup::Nursery,
+            Self::UseNamingConvention => RuleGroup::Style,
             Self::UseNodeAssertStrict => RuleGroup::Style,
             Self::UseNodejsImportProtocol => RuleGroup::Style,
             Self::UseNumberNamespace => RuleGroup::Style,
@@ -1360,6 +1363,7 @@ impl std::str::FromStr for RuleName {
             "useIsArray" => Ok(Self::UseIsArray),
             "useIsNan" => Ok(Self::UseIsNan),
             "useIterableCallbackReturn" => Ok(Self::UseIterableCallbackReturn),
+            "useJsonImportAttribute" => Ok(Self::UseJsonImportAttribute),
             "useJsxKeyInIterable" => Ok(Self::UseJsxKeyInIterable),
             "useKeyWithClickEvents" => Ok(Self::UseKeyWithClickEvents),
             "useKeyWithMouseEvents" => Ok(Self::UseKeyWithMouseEvents),
@@ -4825,6 +4829,10 @@ pub struct Nursery {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub use_iterable_callback_return:
         Option<RuleConfiguration<biome_js_analyze::options::UseIterableCallbackReturn>>,
+    #[doc = "Enforces the use of with { type: \"json\" } for JSON module imports."]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub use_json_import_attribute:
+        Option<RuleFixConfiguration<biome_js_analyze::options::UseJsonImportAttribute>>,
     #[doc = "Enforce specifying the name of GraphQL operations."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub use_named_operation:
@@ -4896,6 +4904,7 @@ impl Nursery {
         "useGoogleFontPreconnect",
         "useIndexOf",
         "useIterableCallbackReturn",
+        "useJsonImportAttribute",
         "useNamedOperation",
         "useNamingConvention",
         "useNumericSeparators",
@@ -4914,8 +4923,8 @@ impl Nursery {
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[20]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[30]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[31]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[32]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[36]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[33]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[37]),
     ];
     const ALL_RULES_AS_FILTERS: &'static [RuleFilter<'static>] = &[
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[0]),
@@ -4959,6 +4968,7 @@ impl Nursery {
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[38]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[39]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[40]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[41]),
     ];
 }
 impl RuleGroupExt for Nursery {
@@ -5130,49 +5140,54 @@ impl RuleGroupExt for Nursery {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[31]));
             }
         }
-        if let Some(rule) = self.use_named_operation.as_ref() {
+        if let Some(rule) = self.use_json_import_attribute.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[32]));
             }
         }
-        if let Some(rule) = self.use_naming_convention.as_ref() {
+        if let Some(rule) = self.use_named_operation.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[33]));
             }
         }
-        if let Some(rule) = self.use_numeric_separators.as_ref() {
+        if let Some(rule) = self.use_naming_convention.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[34]));
             }
         }
-        if let Some(rule) = self.use_object_spread.as_ref() {
+        if let Some(rule) = self.use_numeric_separators.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[35]));
             }
         }
-        if let Some(rule) = self.use_parse_int_radix.as_ref() {
+        if let Some(rule) = self.use_object_spread.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[36]));
             }
         }
-        if let Some(rule) = self.use_single_js_doc_asterisk.as_ref() {
+        if let Some(rule) = self.use_parse_int_radix.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[37]));
             }
         }
-        if let Some(rule) = self.use_sorted_classes.as_ref() {
+        if let Some(rule) = self.use_single_js_doc_asterisk.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[38]));
             }
         }
-        if let Some(rule) = self.use_symbol_description.as_ref() {
+        if let Some(rule) = self.use_sorted_classes.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[39]));
             }
         }
-        if let Some(rule) = self.use_unique_element_ids.as_ref() {
+        if let Some(rule) = self.use_symbol_description.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[40]));
+            }
+        }
+        if let Some(rule) = self.use_unique_element_ids.as_ref() {
+            if rule.is_enabled() {
+                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[41]));
             }
         }
         index_set
@@ -5339,49 +5354,54 @@ impl RuleGroupExt for Nursery {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[31]));
             }
         }
-        if let Some(rule) = self.use_named_operation.as_ref() {
+        if let Some(rule) = self.use_json_import_attribute.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[32]));
             }
         }
-        if let Some(rule) = self.use_naming_convention.as_ref() {
+        if let Some(rule) = self.use_named_operation.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[33]));
             }
         }
-        if let Some(rule) = self.use_numeric_separators.as_ref() {
+        if let Some(rule) = self.use_naming_convention.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[34]));
             }
         }
-        if let Some(rule) = self.use_object_spread.as_ref() {
+        if let Some(rule) = self.use_numeric_separators.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[35]));
             }
         }
-        if let Some(rule) = self.use_parse_int_radix.as_ref() {
+        if let Some(rule) = self.use_object_spread.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[36]));
             }
         }
-        if let Some(rule) = self.use_single_js_doc_asterisk.as_ref() {
+        if let Some(rule) = self.use_parse_int_radix.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[37]));
             }
         }
-        if let Some(rule) = self.use_sorted_classes.as_ref() {
+        if let Some(rule) = self.use_single_js_doc_asterisk.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[38]));
             }
         }
-        if let Some(rule) = self.use_symbol_description.as_ref() {
+        if let Some(rule) = self.use_sorted_classes.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[39]));
             }
         }
-        if let Some(rule) = self.use_unique_element_ids.as_ref() {
+        if let Some(rule) = self.use_symbol_description.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[40]));
+            }
+        }
+        if let Some(rule) = self.use_unique_element_ids.as_ref() {
+            if rule.is_disabled() {
+                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[41]));
             }
         }
         index_set
@@ -5542,6 +5562,10 @@ impl RuleGroupExt for Nursery {
                 .use_iterable_callback_return
                 .as_ref()
                 .map(|conf| (conf.level(), conf.get_options())),
+            "useJsonImportAttribute" => self
+                .use_json_import_attribute
+                .as_ref()
+                .map(|conf| (conf.level(), conf.get_options())),
             "useNamedOperation" => self
                 .use_named_operation
                 .as_ref()
@@ -5618,6 +5642,7 @@ impl From<GroupPlainConfiguration> for Nursery {
             use_google_font_preconnect: Some(value.into()),
             use_index_of: Some(value.into()),
             use_iterable_callback_return: Some(value.into()),
+            use_json_import_attribute: Some(value.into()),
             use_named_operation: Some(value.into()),
             use_naming_convention: Some(value.into()),
             use_numeric_separators: Some(value.into()),

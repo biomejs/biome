@@ -2935,6 +2935,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useJsonImportAttribute": {
+					"description": "Enforces the use of with { type: \"json\" } for JSON module imports.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleFixConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useNamedOperation": {
 					"description": "Enforce specifying the name of GraphQL operations.",
 					"anyOf": [
