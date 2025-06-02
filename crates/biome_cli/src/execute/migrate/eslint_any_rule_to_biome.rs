@@ -1118,6 +1118,10 @@ pub(crate) fn migrate_eslint_any_rule(
             rule.set_level(rule.level().max(rule_severity.into()));
         }
         "max-lines-per-function" => {
+            if !options.include_inspired {
+                results.has_inspired_rules = true;
+                return false;
+            }
             if !options.include_nursery {
                 return false;
             }
