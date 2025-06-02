@@ -73,7 +73,7 @@ pub(super) struct JsModuleInfoCollector {
     /// All collected exports.
     ///
     /// When we've completed a pass over the module, we will attempt to resolve
-    /// the references of
+    /// the references of these exports and construct the final exports.
     exports: Vec<JsCollectedExport>,
 
     /// All imports nodes.
