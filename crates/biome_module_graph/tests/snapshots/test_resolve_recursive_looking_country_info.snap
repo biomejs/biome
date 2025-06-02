@@ -93,10 +93,10 @@ Imports {
 ## Exported Bindings
 
 ```
-BindingId(18) => JsBindingData {
-  Name: codes,
-  Type: Module(0) TypeId(20),
-  Declaration kind: Value
+BindingId(12) => JsBindingData {
+  Name: subdivision,
+  Type: Module(0) TypeId(14),
+  Declaration kind: HoistedValue
 }
 
 BindingId(15) => JsBindingData {
@@ -111,10 +111,10 @@ BindingId(17) => JsBindingData {
   Declaration kind: Value
 }
 
-BindingId(12) => JsBindingData {
-  Name: subdivision,
-  Type: Module(0) TypeId(14),
-  Declaration kind: HoistedValue
+BindingId(18) => JsBindingData {
+  Name: codes,
+  Type: Module(0) TypeId(20),
+  Declaration kind: Value
 }
 ```
 

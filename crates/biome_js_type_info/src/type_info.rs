@@ -1135,7 +1135,7 @@ impl TypeReferenceQualifier {
     }
 }
 
-#[derive(Copy, Clone, Debug, Eq, Hash, PartialEq)]
+#[derive(Copy, Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct BindingId(u32);
 
 impl BindingId {

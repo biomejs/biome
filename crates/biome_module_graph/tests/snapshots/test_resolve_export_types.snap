@@ -57,15 +57,15 @@ Imports {
 ## Exported Bindings
 
 ```
-BindingId(3) => JsBindingData {
-  Name: superComputer,
-  Type: Module(0) TypeId(6),
-  Declaration kind: Value
-}
-
 BindingId(0) => JsBindingData {
   Name: theAnswer,
   Type: Module(0) TypeId(0),
+  Declaration kind: Value
+}
+
+BindingId(3) => JsBindingData {
+  Name: superComputer,
+  Type: Module(0) TypeId(6),
   Declaration kind: Value
 }
 ```

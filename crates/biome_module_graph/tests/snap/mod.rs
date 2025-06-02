@@ -1,3 +1,5 @@
+use std::collections::BTreeSet;
+
 use biome_fs::MemoryFileSystem;
 use biome_js_formatter::context::JsFormatOptions;
 use biome_js_formatter::format_node;
@@ -90,7 +92,7 @@ impl<'a> ModuleGraphSnapshot<'a> {
                 content.push_str(&data.to_string());
                 content.push_str("\n```\n\n");
 
-                let exported_binding_ids: Vec<_> = data
+                let exported_binding_ids: BTreeSet<_> = data
                     .exports
                     .values()
                     .filter_map(JsExport::as_own_export)
