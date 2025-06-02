@@ -80,14 +80,8 @@ fn is_file_compatible_with_pattern(
     file_source: &DocumentFileSource,
     pattern_language: &GritTargetLanguage,
 ) -> bool {
-    matches!(
-        (file_source, pattern_language),
-        (
-            DocumentFileSource::Js(_),
-            GritTargetLanguage::JsTargetLanguage(_)
-        ) | (
-            DocumentFileSource::Css(_),
-            GritTargetLanguage::CssTargetLanguage(_)
-        )
-    )
+    match pattern_language {
+        GritTargetLanguage::JsTargetLanguage(_) => matches!(file_source, DocumentFileSource::Js(_)),
+        GritTargetLanguage::CssTargetLanguage(_) => matches!(file_source, DocumentFileSource::Css(_)),
+    }
 }
