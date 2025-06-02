@@ -14,7 +14,7 @@ use biome_resolver::ResolvedPath;
 use biome_rowan::{AstNode, Text};
 use rustc_hash::FxHashMap;
 
-use crate::{JsExport, ModuleGraph};
+use crate::{JsExport, JsOwnExport, ModuleGraph, js_module_info::JsModuleInfoInner};
 
 use super::JsModuleInfo;
 
@@ -222,19 +222,12 @@ impl ScopedResolver {
                 }
             };
 
-            return match &export.ty {
-                TypeReference::Qualifier(_qualifier) => {
-                    // If it wasn't resolved before exporting, we can't
-                    // help it anymore.
-                    None
-                }
-                TypeReference::Resolved(resolved_id) => Some(resolved_id.with_module_id(module_id)),
-                TypeReference::Import(import) => {
+            match resolve_from_export(module_id, module, export) {
+                ResolveFromExportResult::Resolved(resolved) => return resolved,
+                ResolveFromExportResult::FollowImport(import) => {
                     qualifier = Cow::Borrowed(import);
-                    continue;
                 }
-                TypeReference::Unknown => None,
-            };
+            }
         }
 
         None
@@ -327,19 +320,12 @@ impl TypeResolver for ScopedResolver {
                 }
             };
 
-            return match &export.ty {
-                TypeReference::Qualifier(_qualifier) => {
-                    // If it wasn't resolved before exporting, we can't
-                    // help it anymore.
-                    None
+            match resolve_from_export(module_id, module, export) {
+                ResolveFromExportResult::Resolved(resolved) => return resolved,
+                ResolveFromExportResult::FollowImport(import) => {
+                    qualifier = Cow::Owned(import.clone());
                 }
-                TypeReference::Resolved(resolved) => Some(resolved.with_module_id(module_id)),
-                TypeReference::Import(import) => {
-                    qualifier = Cow::Owned(import.as_ref().clone());
-                    continue;
-                }
-                TypeReference::Unknown => None,
-            };
+            }
         }
 
         None
@@ -477,4 +463,39 @@ impl TypeResolver for ScopeRestrictedRegistrationResolver<'_> {
     fn registered_types(&self) -> &[TypeData] {
         panic!("ScopeRestrictedRegistrationResolver is only used for registering types")
     }
+}
+
+enum ResolveFromExportResult<'a> {
+    Resolved(Option<ResolvedTypeId>),
+    FollowImport(&'a TypeImportQualifier),
+}
+
+/// Resolves an export from the given `module` with the given `module_id`.
+///
+/// If the export can be resolved within the given module, an optional
+/// [`ResolvedTypeId`] is returned. If the export references another module, it
+/// returns the [`TypeImportQualifier`] to follow.
+#[inline]
+fn resolve_from_export<'a>(
+    module_id: ModuleId,
+    module: &'a JsModuleInfoInner,
+    export: &JsOwnExport,
+) -> ResolveFromExportResult<'a> {
+    let resolved = match export {
+        JsOwnExport::Binding(binding_id) => match &module.bindings[binding_id.index()].ty {
+            TypeReference::Qualifier(_qualifier) => {
+                // If it wasn't resolved before exporting, we can't help it
+                // anymore.
+                None
+            }
+            TypeReference::Resolved(resolved_id) => Some(resolved_id.with_module_id(module_id)),
+            TypeReference::Import(import) => {
+                return ResolveFromExportResult::FollowImport(import);
+            }
+            TypeReference::Unknown => None,
+        },
+        JsOwnExport::Type(resolved_id) => Some(resolved_id.with_module_id(module_id)),
+    };
+
+    ResolveFromExportResult::Resolved(resolved)
 }

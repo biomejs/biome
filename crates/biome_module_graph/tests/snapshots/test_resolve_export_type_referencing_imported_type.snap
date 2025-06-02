@@ -21,10 +21,7 @@ export { returnPromiseResult };
 ```
 Exports {
   "returnPromiseResult" => {
-    ExportOwnExport => JsOwnExport(
-      Module(0) TypeId(1)
-      Local name: returnPromiseResult
-    )
+    ExportOwnExport => JsOwnExport::Binding(1)
   }
 }
 Imports {
@@ -33,6 +30,16 @@ Imports {
     Resolved path: "/src/promisedResult.ts"
     Import Symbol: PromisedResult
   }
+}
+```
+
+## Exported Bindings
+
+```
+BindingId(1) => JsBindingData {
+  Name: returnPromiseResult,
+  Type: Module(0) TypeId(1),
+  Declaration kind: HoistedValue
 }
 ```
 
@@ -63,14 +70,21 @@ export type PromisedResult = Promise<{ result: true | false }>;
 ```
 Exports {
   "PromisedResult" => {
-    ExportOwnExport => JsOwnExport(
-      Module(0) TypeId(4)
-      Local name: PromisedResult
-    )
+    ExportOwnExport => JsOwnExport::Binding(0)
   }
 }
 Imports {
   No imports
+}
+```
+
+## Exported Bindings
+
+```
+BindingId(0) => JsBindingData {
+  Name: PromisedResult,
+  Type: Module(0) TypeId(4),
+  Declaration kind: Type
 }
 ```
 

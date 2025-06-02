@@ -26,32 +26,36 @@ export { A, B };
 ```
 Exports {
   "A" => {
-    ExportOwnExport => JsOwnExport(
-      Module(0) TypeId(13)
-      Local name: A
-    )
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(0))
   }
   "B" => {
-    ExportOwnExport => JsOwnExport(
-      Module(0) TypeId(14)
-      Local name: B
-    )
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(13))
   }
   "Union" => {
-    ExportOwnExport => JsOwnExport(
-      Module(0) TypeId(6)
-      Local name: Union
-    )
+    ExportOwnExport => JsOwnExport::Binding(3)
   }
   "Union2" => {
-    ExportOwnExport => JsOwnExport(
-      Module(0) TypeId(12)
-      Local name: Union2
-    )
+    ExportOwnExport => JsOwnExport::Binding(7)
   }
 }
 Imports {
   No imports
+}
+```
+
+## Exported Bindings
+
+```
+BindingId(3) => JsBindingData {
+  Name: Union,
+  Type: Module(0) TypeId(6),
+  Declaration kind: Type
+}
+
+BindingId(7) => JsBindingData {
+  Name: Union2,
+  Type: Module(0) TypeId(12),
+  Declaration kind: Type
 }
 ```
 
@@ -84,7 +88,5 @@ Module TypeId(11) => value: true
 
 Module TypeId(12) => Module(0) TypeId(9) | Module(0) TypeId(10) | Module(0) TypeId(11)
 
-Module TypeId(13) => value: a
-
-Module TypeId(14) => (type: Module(0) TypeId(1), value: Module(0) TypeId(7), namespace: )
+Module TypeId(13) => (type: Module(0) TypeId(1), value: Module(0) TypeId(7), namespace: )
 ```

@@ -28,13 +28,11 @@ pub enum JsBindingReferenceKind {
 
 /// Internal type with all the semantic data of a specific reference
 #[derive(Clone, Debug)]
-#[expect(unused)]
 pub struct JsBindingReference {
     pub range_start: TextSize,
     pub kind: JsBindingReferenceKind,
 }
 
-#[expect(unused)]
 impl JsBindingReference {
     #[inline(always)]
     pub fn is_read(&self) -> bool {

@@ -14,13 +14,13 @@ use biome_js_type_info::{
 };
 use biome_jsdoc_comment::JsdocComment;
 use biome_resolver::ResolvedPath;
-use biome_rowan::{Text, TextRange, TokenText};
+use biome_rowan::{Text, TextRange};
 
 use crate::ModuleGraph;
 
-use binding::JsBindingData;
 use scope::{JsScope, JsScopeData, TsBindingReference};
 
+pub(super) use binding::JsBindingData;
 pub use scoped_resolver::ScopedResolver;
 pub(crate) use visitor::JsModuleVisitor;
 
@@ -60,6 +60,17 @@ impl JsModuleInfo {
         name: &str,
     ) -> Option<JsOwnExport> {
         module_graph.find_exported_symbol(self, name)
+    }
+
+    /// Finds an exported symbol by `name`, using the `module_graph` to
+    /// lookup re-exports if necessary.
+    #[inline]
+    pub fn find_jsdoc_for_exported_symbol(
+        &self,
+        module_graph: &ModuleGraph,
+        name: &str,
+    ) -> Option<JsdocComment> {
+        module_graph.find_jsdoc_for_exported_symbol(self, name)
     }
 
     /// Returns the module's global scope.
@@ -185,7 +196,8 @@ static_assertions::assert_impl_all!(JsModuleInfo: Send, Sync);
 
 impl JsModuleInfoInner {
     /// Returns one of the bindings by ID.
-    pub(crate) fn binding(&self, binding_id: BindingId) -> &JsBindingData {
+    #[inline]
+    pub fn binding(&self, binding_id: BindingId) -> &JsBindingData {
         &self.bindings[binding_id.index()]
     }
 
@@ -267,7 +279,12 @@ impl TypeResolver for JsModuleInfoInner {
         if let Some(export) = self.exports.get(&qualifier.path[0]) {
             export
                 .as_own_export()
-                .and_then(|own_export| self.resolve_reference(&own_export.ty))
+                .and_then(|own_export| match own_export {
+                    JsOwnExport::Binding(binding_id) => {
+                        self.resolve_reference(&self.bindings[binding_id.index()].ty)
+                    }
+                    JsOwnExport::Type(type_id) => Some(*type_id),
+                })
         } else {
             GLOBAL_RESOLVER.resolve_qualifier(qualifier)
         }
@@ -277,7 +294,12 @@ impl TypeResolver for JsModuleInfoInner {
         if let Some(export) = self.exports.get(identifier) {
             export
                 .as_own_export()
-                .and_then(|own_export| self.resolve_reference(&own_export.ty))
+                .and_then(|own_export| match own_export {
+                    JsOwnExport::Binding(binding_id) => {
+                        self.resolve_reference(&self.bindings[binding_id.index()].ty)
+                    }
+                    JsOwnExport::Type(type_id) => Some(*type_id),
+                })
         } else {
             GLOBAL_RESOLVER.resolve_type_of(identifier, scope_id)
         }
@@ -352,16 +374,13 @@ pub struct JsImport {
 }
 
 /// Information tracked for every "own" export.
+///
+/// Exports can reference bindings, types of expressions or other references for
+/// which no binding exists, or namespaces defined by exports of another module.
 #[derive(Clone, Debug, PartialEq)]
-pub struct JsOwnExport {
-    /// Optional JSDoc comment associated with the symbol being exported.
-    pub jsdoc_comment: Option<JsdocComment>,
-
-    /// Name of the binding in the module's global scope.
-    pub local_name: Option<TokenText>,
-
-    /// Type of the exported symbol.
-    pub ty: TypeReference,
+pub enum JsOwnExport {
+    Binding(BindingId),
+    Type(ResolvedTypeId),
 }
 
 /// Information about an export statement that re-exports all symbols from

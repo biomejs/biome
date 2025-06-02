@@ -943,7 +943,7 @@ fn test_resolve_react_types() {
     let _ty_string = format!("{ty:?}"); // for debugging
     let ty = ty.inferred(&mut resolver);
     let _ty_string = format!("{ty:?}"); // for debugging
-    let ty = Type::from_data(Box::new(resolver), ty);
+    //let ty = Type::from_data(Box::new(resolver), ty);
     // assert!(ty.is_promise_instance()); // FIXME: Let's make this pass
 }
 

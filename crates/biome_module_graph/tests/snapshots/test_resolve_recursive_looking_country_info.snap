@@ -67,44 +67,54 @@ export const codes: {
 ```
 Exports {
   "CountryInfo" => {
-    ExportOwnExport => JsOwnExport(
-      Module(0) TypeId(22)
-      Local name: CountryInfo
-    )
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(22))
   }
   "SubdivisionInfo" => {
-    ExportOwnExport => JsOwnExport(
-      Module(0) TypeId(23)
-      Local name: SubdivisionInfo
-    )
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(23))
   }
   "codes" => {
-    ExportOwnExport => JsOwnExport(
-      Module(0) TypeId(20)
-      Local name: codes
-    )
+    ExportOwnExport => JsOwnExport::Binding(18)
   }
   "country" => {
-    ExportOwnExport => JsOwnExport(
-      Module(0) TypeId(17)
-      Local name: country
-    )
+    ExportOwnExport => JsOwnExport::Binding(15)
   }
   "data" => {
-    ExportOwnExport => JsOwnExport(
-      Module(0) TypeId(18)
-      Local name: data
-    )
+    ExportOwnExport => JsOwnExport::Binding(17)
   }
   "subdivision" => {
-    ExportOwnExport => JsOwnExport(
-      Module(0) TypeId(14)
-      Local name: subdivision
-    )
+    ExportOwnExport => JsOwnExport::Binding(12)
   }
 }
 Imports {
   No imports
+}
+```
+
+## Exported Bindings
+
+```
+BindingId(18) => JsBindingData {
+  Name: codes,
+  Type: Module(0) TypeId(20),
+  Declaration kind: Value
+}
+
+BindingId(15) => JsBindingData {
+  Name: country,
+  Type: Module(0) TypeId(17),
+  Declaration kind: HoistedValue
+}
+
+BindingId(17) => JsBindingData {
+  Name: data,
+  Type: Module(0) TypeId(18),
+  Declaration kind: Value
+}
+
+BindingId(12) => JsBindingData {
+  Name: subdivision,
+  Type: Module(0) TypeId(14),
+  Declaration kind: HoistedValue
 }
 ```
 

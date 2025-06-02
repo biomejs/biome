@@ -19,18 +19,25 @@ export default function Component(): JSX.Element {}
 ```
 Exports {
   "default" => {
-    ExportOwnExport => JsOwnExport(
-      Module(0) TypeId(1)
-      Local name: Component
-      JsDoc(
-        @public
-        @returns {JSX.Element}
-      )
-    )
+    ExportOwnExport => JsOwnExport::Binding(0)
   }
 }
 Imports {
   No imports
+}
+```
+
+## Exported Bindings
+
+```
+BindingId(0) => JsBindingData {
+  Name: Component,
+  Type: Module(0) TypeId(1),
+  JSDoc comment: JsDoc(
+    @public
+    @returns {JSX.Element}
+  ),
+  Declaration kind: Unknown
 }
 ```
 

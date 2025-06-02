@@ -4,8 +4,8 @@ use biome_rowan::Text;
 
 use crate::{
     BindingId, Class, GenericTypeParameter, Interface, Module, Namespace, Object, ResolvedTypeData,
-    ResolvedTypeId, ResolvedTypeMember, ResolverId, TypeData, TypeInstance, TypeReference,
-    TypeResolver,
+    ResolvedTypeId, ResolvedTypeMember, ResolverId, TypeData, TypeInstance, TypeMember,
+    TypeReference, TypeResolver,
     globals::{GLOBAL_ARRAY_ID, GLOBAL_PROMISE_ID, GLOBAL_TYPE_MEMBERS},
 };
 
@@ -16,8 +16,8 @@ impl<'a> ResolvedTypeData<'a> {
     /// Note that members which are inherited and overridden may appear multiple
     /// times, but the member that is closest to the current type is guaranteed
     /// to come first.
-    pub fn all_members(self, resolver: &'a dyn TypeResolver) -> TypeMemberIterator<'a> {
-        TypeMemberIterator {
+    pub fn all_members(self, resolver: &'a dyn TypeResolver) -> AllTypeMemberIterator<'a> {
+        AllTypeMemberIterator {
             resolver,
             resolver_id: self.resolver_id(),
             owner: TypeMemberOwner::from_type_data(self.as_raw_data()),
@@ -197,9 +197,21 @@ impl TypeData {
         let id = resolver.register_and_resolve(data);
         resolver.get_by_resolved_id(id)
     }
+
+    /// Iterates own member fields.
+    ///
+    /// This iterator does not return members of [`TypeData::InstanceOf`] or
+    /// [`TypeData::Reference`] variants. If that's what you want, you will need
+    /// to dereference them first.
+    pub fn own_members(&self) -> OwnTypeMemberIterator {
+        OwnTypeMemberIterator {
+            owner: TypeMemberOwner::from_type_data(self),
+            index: 0,
+        }
+    }
 }
 
-pub struct TypeMemberIterator<'a> {
+pub struct AllTypeMemberIterator<'a> {
     resolver: &'a dyn TypeResolver,
     resolver_id: ResolverId,
     owner: Option<TypeMemberOwner<'a>>,
@@ -208,14 +220,14 @@ pub struct TypeMemberIterator<'a> {
     excluded_binding_id: Option<BindingId>,
 }
 
-impl TypeMemberIterator<'_> {
+impl AllTypeMemberIterator<'_> {
     pub fn with_excluded_binding_id(mut self, binding_id: BindingId) -> Self {
         self.excluded_binding_id = Some(binding_id);
         self
     }
 }
 
-impl<'a> Iterator for TypeMemberIterator<'a> {
+impl<'a> Iterator for AllTypeMemberIterator<'a> {
     type Item = ResolvedTypeMember<'a>;
 
     fn next(&mut self) -> Option<Self::Item> {
@@ -326,6 +338,35 @@ impl<'a> Iterator for TypeMemberIterator<'a> {
 
         self.index = 0;
         self.next()
+    }
+}
+
+pub struct OwnTypeMemberIterator<'a> {
+    owner: Option<TypeMemberOwner<'a>>,
+    index: usize,
+}
+
+impl<'a> Iterator for OwnTypeMemberIterator<'a> {
+    type Item = &'a TypeMember;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        let next = match &self.owner {
+            Some(TypeMemberOwner::Class(class)) => class.members.get(self.index),
+            Some(TypeMemberOwner::Global) => GLOBAL_TYPE_MEMBERS.get(self.index),
+            Some(TypeMemberOwner::Interface(interface)) => interface.members.get(self.index),
+            Some(TypeMemberOwner::Module(module)) => module.members.get(self.index),
+            Some(TypeMemberOwner::Namespace(namespace)) => namespace.members.get(self.index),
+            Some(TypeMemberOwner::Object(object)) => object.members.get(self.index),
+            None | Some(TypeMemberOwner::InstanceOf(_)) => None,
+        };
+
+        if next.is_some() {
+            self.index += 1;
+        } else {
+            self.owner = None;
+        }
+
+        next
     }
 }
 
