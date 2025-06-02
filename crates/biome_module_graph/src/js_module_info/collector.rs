@@ -70,8 +70,11 @@ pub(super) struct JsModuleInfoCollector {
     /// Map with all dynamic import paths, from the import source to the resolved path.
     dynamic_import_paths: BTreeMap<Text, ResolvedPath>,
 
-    /// Map with exports, from the exported symbol name to a [JsExport] definition.
-    exports: BTreeMap<Text, JsExport>,
+    /// All collected exports.
+    ///
+    /// When we've completed a pass over the module, we will attempt to resolve
+    /// the references of these exports and construct the final exports.
+    exports: Vec<JsCollectedExport>,
 
     /// All imports nodes.
     imports: Vec<biome_js_syntax::JsImport>,
@@ -81,6 +84,32 @@ pub(super) struct JsModuleInfoCollector {
 
     /// Types collected in the module.
     types: TypeStore,
+}
+
+/// Intermediary representation for an exported symbol.
+pub(super) enum JsCollectedExport {
+    ExportNamedSymbol {
+        /// Name under which the symbol will be exported.
+        export_name: Text,
+
+        /// Local name of the symbol in the global scope.
+        local_name: TokenText,
+    },
+    ExportDefault {
+        /// Reference to the type being exported.
+        ty: TypeReference,
+    },
+    ExportDefaultAssignment {
+        /// Reference to the type assigned to the export.
+        ty: TypeReference,
+    },
+    Reexport {
+        /// Name under which the import will be re-exported.
+        export_name: Text,
+
+        /// Re-export definition.
+        reexport: JsReexport,
+    },
 }
 
 impl JsModuleInfoCollector {
@@ -111,25 +140,19 @@ impl JsModuleInfoCollector {
         self.extractor.leave(node);
     }
 
-    pub fn register_export(&mut self, name: impl Into<Text>, export: JsExport) -> Option<()> {
-        self.exports.insert(name.into(), export);
-
-        Some(())
+    pub fn register_export(&mut self, export: JsCollectedExport) {
+        self.exports.push(export)
     }
 
     pub fn register_export_with_name(
         &mut self,
         export_name: impl Into<Text>,
-        local_name: Option<TokenText>,
-    ) -> Option<()> {
-        self.register_export(
-            export_name,
-            JsExport::Own(JsOwnExport {
-                jsdoc_comment: None,
-                local_name,
-                ty: TypeReference::Unknown,
-            }),
-        )
+        local_name: TokenText,
+    ) {
+        self.register_export(JsCollectedExport::ExportNamedSymbol {
+            export_name: export_name.into(),
+            local_name,
+        })
     }
 
     pub fn register_blanket_reexport(&mut self, reexport: JsReexport) {
@@ -388,11 +411,14 @@ impl JsModuleInfoCollector {
     /// module's semantic data, and `ResolvedTypeId` is only 8 bytes. So during
     /// resolving, we "downgrade" the import references from
     /// [`TypeReference::Resolved`] to [`TypeReference::Import`].
-    fn resolve_all_and_downgrade_project_references(&mut self, bag: &JsModuleInfoBag) {
+    fn resolve_all_and_downgrade_project_references(
+        &mut self,
+        static_imports: &BTreeMap<Text, JsImport>,
+    ) {
         let bindings = self.bindings.clone(); // TODO: Can we omit the clone?
         let downgrade_import_reference = |id: BindingId| {
             let binding = &bindings[id.index()];
-            bag.static_imports
+            static_imports
                 .get(&binding.name)
                 .map_or(TypeReference::Unknown, |import| {
                     TypeImportQualifier {
@@ -615,7 +641,12 @@ impl JsModuleInfoBag {
     pub(super) fn from_collector(collector: &mut JsModuleInfoCollector) -> Self {
         let mut info = Self::default();
         info.collect_imports(collector);
+
+        collector.resolve_all_and_downgrade_project_references(&info.static_imports);
+        collector.flatten_all();
+
         info.collect_exports(collector);
+
         info
     }
 
@@ -756,43 +787,106 @@ impl JsModuleInfoBag {
     }
 
     fn collect_exports(&mut self, collector: &mut JsModuleInfoCollector) {
-        self.exports.clone_from(&collector.exports);
-        self.blanket_reexports
-            .clone_from(&collector.blanket_reexports);
+        self.blanket_reexports = std::mem::take(&mut collector.blanket_reexports);
 
-        // Lookup types from the bindings in the global scope.
-        for export in self.exports.values_mut() {
-            let Some(export) = export.as_own_export_mut() else {
-                continue;
-            };
+        let exports = std::mem::take(&mut collector.exports);
+        for export in exports {
+            match export {
+                JsCollectedExport::ExportNamedSymbol {
+                    export_name,
+                    local_name,
+                } => {
+                    let Some(binding_ref) = collector.scopes[0].bindings_by_name.get(&local_name)
+                    else {
+                        continue;
+                    };
 
-            let Some(local_name) = &export.local_name else {
-                continue;
-            };
+                    let export = match binding_ref {
+                        TsBindingReference::Merged {
+                            ty,
+                            value_ty,
+                            namespace_ty,
+                        } => {
+                            let ty = ty.map(|ty| &collector.bindings[ty.index()].ty);
+                            let value_ty = value_ty.map(|ty| &collector.bindings[ty.index()].ty);
+                            let namespace_ty =
+                                namespace_ty.map(|ty| &collector.bindings[ty.index()].ty);
+                            match (ty, value_ty, namespace_ty) {
+                                (Some(ty1), Some(ty2), None)
+                                | (Some(ty1), None, Some(ty2))
+                                | (None, Some(ty1), Some(ty2))
+                                    if ty1 == ty2 =>
+                                {
+                                    let ty = collector
+                                        .register_and_resolve(TypeData::reference(ty1.clone()));
+                                    JsOwnExport::Type(ty)
+                                }
+                                (Some(ty1), Some(ty2), Some(ty3)) if ty1 == ty2 && ty2 == ty3 => {
+                                    let ty = collector
+                                        .register_and_resolve(TypeData::reference(ty1.clone()));
+                                    JsOwnExport::Type(ty)
+                                }
+                                _ => {
+                                    let ty =
+                                        collector.register_and_resolve(TypeData::merged_reference(
+                                            ty.cloned(),
+                                            value_ty.cloned(),
+                                            namespace_ty.cloned(),
+                                        ));
+                                    JsOwnExport::Type(ty)
+                                }
+                            }
+                        }
+                        TsBindingReference::Type(binding_id)
+                        | TsBindingReference::ValueType(binding_id)
+                        | TsBindingReference::TypeAndValueType(binding_id)
+                        | TsBindingReference::NamespaceAndValueType(binding_id) => {
+                            JsOwnExport::Binding(*binding_id)
+                        }
+                    };
 
-            if let Some(binding_ref) = collector.scopes[0].bindings_by_name.get(local_name) {
-                match binding_ref {
-                    TsBindingReference::Merged {
-                        ty,
-                        value_ty,
-                        namespace_ty,
-                    } => {
-                        export.ty = collector
-                            .register_and_resolve(TypeData::merged_reference(
-                                ty.map(|ty| collector.bindings[ty.index()].ty.clone()),
-                                value_ty.map(|ty| collector.bindings[ty.index()].ty.clone()),
-                                namespace_ty.map(|ty| collector.bindings[ty.index()].ty.clone()),
-                            ))
-                            .into();
+                    self.exports.insert(export_name, JsExport::Own(export));
+                }
+                JsCollectedExport::ExportDefault { ty } => {
+                    let resolved = collector
+                        .resolve_reference(&ty)
+                        .unwrap_or(GLOBAL_UNKNOWN_ID);
+
+                    let export = JsExport::Own(JsOwnExport::Type(resolved));
+                    self.exports.insert(Text::Static("default"), export);
+                }
+                JsCollectedExport::ExportDefaultAssignment { ty } => {
+                    let resolved = collector
+                        .resolve_reference(&ty)
+                        .unwrap_or(GLOBAL_UNKNOWN_ID);
+
+                    if let Some(data) = collector.get_by_resolved_id(resolved) {
+                        for member in data.as_raw_data().own_members() {
+                            let Some(name) = member.name() else {
+                                continue;
+                            };
+
+                            // DANGER: Normally, when resolving a type reference retrieved through
+                            //         `as_raw_data()`, we should call
+                            //         `apply_module_id_to_reference()` on the reference first. But
+                            //         because we know we are resolving inside the collector, before
+                            //         any module IDs _could_ be applied, we can omit this here.
+                            if let Some(resolved_member) = collector.resolve_reference(&member.ty) {
+                                let export = JsExport::Own(JsOwnExport::Type(resolved_member));
+                                self.exports.insert(name, export);
+                            }
+                        }
                     }
-                    TsBindingReference::Type(binding_id)
-                    | TsBindingReference::ValueType(binding_id)
-                    | TsBindingReference::TypeAndValueType(binding_id)
-                    | TsBindingReference::NamespaceAndValueType(binding_id) => {
-                        let binding = &collector.bindings[binding_id.index()];
-                        export.jsdoc_comment.clone_from(&binding.jsdoc);
-                        export.ty.clone_from(&binding.ty);
-                    }
+
+                    let export = JsExport::Own(JsOwnExport::Type(resolved));
+                    self.exports.insert(Text::Static("default"), export);
+                }
+                JsCollectedExport::Reexport {
+                    export_name,
+                    reexport,
+                } => {
+                    self.exports
+                        .insert(export_name, JsExport::Reexport(reexport));
                 }
             }
         }
@@ -802,9 +896,6 @@ impl JsModuleInfoBag {
 impl JsModuleInfo {
     pub(super) fn new(mut collector: JsModuleInfoCollector) -> Self {
         let bag = JsModuleInfoBag::from_collector(&mut collector);
-
-        collector.resolve_all_and_downgrade_project_references(&bag);
-        collector.flatten_all();
 
         Self(Arc::new(JsModuleInfoInner {
             static_imports: Imports(bag.static_imports),

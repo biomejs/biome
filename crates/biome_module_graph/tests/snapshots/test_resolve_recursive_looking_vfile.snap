@@ -175,10 +175,7 @@ export = vfile;
 ```
 Exports {
   "default" => {
-    ExportOwnExport => JsOwnExport(
-      Module(0) TypeId(0)
-      Local name: None
-    )
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(0))
   }
 }
 Imports {

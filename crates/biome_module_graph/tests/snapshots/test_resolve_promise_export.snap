@@ -19,14 +19,21 @@ export const promise = returnsPromise();
 ```
 Exports {
   "promise" => {
-    ExportOwnExport => JsOwnExport(
-      Module(0) TypeId(2)
-      Local name: promise
-    )
+    ExportOwnExport => JsOwnExport::Binding(1)
   }
 }
 Imports {
   No imports
+}
+```
+
+## Exported Bindings
+
+```
+BindingId(1) => JsBindingData {
+  Name: promise,
+  Type: Module(0) TypeId(2),
+  Declaration kind: Value
 }
 ```
 

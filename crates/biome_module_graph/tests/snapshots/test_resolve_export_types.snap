@@ -43,20 +43,30 @@ export const superComputer = new DeepThought();
 ```
 Exports {
   "superComputer" => {
-    ExportOwnExport => JsOwnExport(
-      Module(0) TypeId(6)
-      Local name: superComputer
-    )
+    ExportOwnExport => JsOwnExport::Binding(3)
   }
   "theAnswer" => {
-    ExportOwnExport => JsOwnExport(
-      Module(0) TypeId(0)
-      Local name: theAnswer
-    )
+    ExportOwnExport => JsOwnExport::Binding(0)
   }
 }
 Imports {
   No imports
+}
+```
+
+## Exported Bindings
+
+```
+BindingId(0) => JsBindingData {
+  Name: theAnswer,
+  Type: Module(0) TypeId(0),
+  Declaration kind: Value
+}
+
+BindingId(3) => JsBindingData {
+  Name: superComputer,
+  Type: Module(0) TypeId(6),
+  Declaration kind: Value
 }
 ```
 

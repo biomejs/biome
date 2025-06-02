@@ -2,7 +2,53 @@
 source: crates/biome_module_graph/tests/snap/mod.rs
 expression: content
 ---
-# `/node_modules/@types/react/index.d.ts`
+# `/src/index.ts` (Not imported by resolver)
+
+## Source
+
+```ts
+import { useCallback } from "react";
+
+const fn = useCallback(async () => {});
+const promise = fn();
+```
+
+## Module Info
+
+```
+Exports {
+  No exports
+}
+Imports {
+  "useCallback" => {
+    Specifier: "react"
+    Resolved path: "/node_modules/@types/react/index.d.ts"
+    Import Symbol: useCallback
+  }
+}
+```
+
+## Registered types
+
+```
+Module TypeId(0) => instanceof Promise
+
+Module TypeId(1) => async Function {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: Module(0) TypeId(0)
+}
+
+Module TypeId(2) => Call Import Symbol: useCallback from "/node_modules/@types/react/index.d.ts"(
+  Module(0) TypeId(1)
+)
+
+Module TypeId(3) => Call Module(0) TypeId(2)(No parameters)
+```
+
+# `/node_modules/@types/react/index.d.ts` (Module 1)
 
 ## Source
 
@@ -4792,119 +4838,812 @@ type ReactManagedAttributes<C, P> = C extends { defaultProps: infer D }
 
 ```
 Exports {
+  "" => {
+    ExportOwnExport => JsOwnExport::Type(unknown)
+  }
+  "AbstractView" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(1285))
+  }
+  "ActionDispatch" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(369))
+  }
+  "AllHTMLAttributes" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(871))
+  }
+  "AnchorHTMLAttributes" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(892))
+  }
+  "AnimationEvent" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(550))
+  }
+  "AnimationEventHandler" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(601))
+  }
+  "AnyActionArg" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(366))
+  }
+  "AreaHTMLAttributes" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(895))
+  }
+  "AriaAttributes" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(735))
+  }
+  "AriaRole" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(798))
+  }
+  "Attributes" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(76))
+  }
+  "AudioHTMLAttributes" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(894))
+  }
+  "AutoFill" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(1011))
+  }
+  "AutoFillAddressKind" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(947))
+  }
+  "AutoFillBase" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(948))
+  }
+  "AutoFillContactField" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(956))
+  }
+  "AutoFillContactKind" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(960))
+  }
+  "AutoFillCredentialField" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(961))
+  }
+  "AutoFillField" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(1007))
+  }
+  "AutoFillNormalField" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(998))
+  }
+  "AutoFillSection" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(1008))
+  }
+  "BaseHTMLAttributes" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(896))
+  }
+  "BaseSyntheticEvent" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(478))
+  }
+  "BlockquoteHTMLAttributes" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(897))
+  }
+  "ButtonHTMLAttributes" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(904))
+  }
+  "CElement" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(103))
+  }
   "CSSProperties" => {
-    ExportOwnExport => JsOwnExport(
-      unknown reference
-      Local name: CSSProperties
-    )
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(669))
+  }
+  "CanvasHTMLAttributes" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(905))
+  }
+  "ChangeEvent" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(512))
+  }
+  "ChangeEventHandler" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(580))
+  }
+  "ClassAttributes" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(82))
+  }
+  "ClassType" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(279))
+  }
+  "ClassicComponent" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(259))
+  }
+  "ClassicComponentClass" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(276))
+  }
+  "ClassicElement" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(109))
+  }
+  "ClipboardEvent" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(487))
+  }
+  "ClipboardEventHandler" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(565))
+  }
+  "ColHTMLAttributes" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(906))
+  }
+  "ColgroupHTMLAttributes" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(907))
+  }
+  "Component" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(58))
+  }
+  "ComponentClass" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(272))
+  }
+  "ComponentElement" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(105))
+  }
+  "ComponentLifecycle" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(292))
+  }
+  "ComponentProps" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(61))
+  }
+  "ComponentPropsWithRef" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(61))
+  }
+  "ComponentPropsWithoutRef" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(339))
+  }
+  "ComponentRef" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(61))
+  }
+  "ComponentState" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(42))
+  }
+  "ComponentType" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(49))
+  }
+  "CompositionEvent" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(490))
+  }
+  "CompositionEventHandler" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(568))
+  }
+  "Consumer" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(189))
+  }
+  "ConsumerProps" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(175))
+  }
+  "Context" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(192))
+  }
+  "ContextType" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(183))
+  }
+  "CustomComponentPropsWithRef" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(61))
+  }
+  "DOMAttributes" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(666))
+  }
+  "DOMElement" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(111))
+  }
+  "DO_NOT_USE_OR_YOU_WILL_BE_FIRED_CALLBACK_REF_RETURN_VALUES" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(60))
+  }
+  "DO_NOT_USE_OR_YOU_WILL_BE_FIRED_EXPERIMENTAL_FORM_ACTIONS" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(853))
+  }
+  "DO_NOT_USE_OR_YOU_WILL_BE_FIRED_EXPERIMENTAL_IMG_SRC_TYPES" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(921))
+  }
+  "DO_NOT_USE_OR_YOU_WILL_BE_FIRED_EXPERIMENTAL_MEDIA_SRC_TYPES" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(1030))
+  }
+  "DO_NOT_USE_OR_YOU_WILL_BE_FIRED_EXPERIMENTAL_REACT_NODES" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(125))
+  }
+  "DataHTMLAttributes" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(908))
+  }
+  "DelHTMLAttributes" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(910))
+  }
+  "DependencyList" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(375))
+  }
+  "DeprecatedLifecycle" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(324))
+  }
+  "DetailedHTMLProps" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(610))
+  }
+  "DetailedReactHTMLElement" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(117))
+  }
+  "DetailsHTMLAttributes" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(909))
+  }
+  "DialogHTMLAttributes" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(911))
+  }
+  "Dispatch" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(363))
+  }
+  "DispatchWithoutAction" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(252))
+  }
+  "DragEvent" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(493))
+  }
+  "DragEventHandler" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(571))
+  }
+  "EffectCallback" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(378))
+  }
+  "ElementRef" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(71))
+  }
+  "ElementType" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(45))
+  }
+  "EmbedHTMLAttributes" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(912))
+  }
+  "ErrorInfo" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(1292))
+  }
+  "EventHandler" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(560))
+  }
+  "ExoticComponent" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(177))
+  }
+  "FC" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(260))
+  }
+  "FieldsetHTMLAttributes" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(913))
+  }
+  "FocusEvent" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(508))
+  }
+  "FocusEventHandler" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(574))
+  }
+  "FormEvent" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(510))
+  }
+  "FormEventHandler" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(577))
+  }
+  "FormHTMLAttributes" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(914))
+  }
+  "ForwardRefExoticComponent" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(327))
+  }
+  "ForwardRefRenderFunction" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(267))
+  }
+  "ForwardedRef" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(264))
   }
   "FragmentProps" => {
-    ExportOwnExport => JsOwnExport(
-      unknown reference
-      Local name: FragmentProps
-    )
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(214))
+  }
+  "FunctionComponent" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(261))
+  }
+  "FunctionComponentElement" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(101))
+  }
+  "GetDerivedStateFromError" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(305))
+  }
+  "GetDerivedStateFromProps" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(303))
+  }
+  "HTMLAttributeAnchorTarget" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(885))
+  }
+  "HTMLAttributeReferrerPolicy" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(880))
+  }
+  "HTMLAttributes" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(852))
+  }
+  "HTMLElementType" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(1229))
+  }
+  "HTMLInputAutoCompleteAttribute" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(1013))
+  }
+  "HTMLInputTypeAttribute" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(944))
+  }
+  "HTMLProps" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(608))
+  }
+  "HtmlHTMLAttributes" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(915))
+  }
+  "IframeHTMLAttributes" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(920))
+  }
+  "ImgHTMLAttributes" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(932))
+  }
+  "InputHTMLAttributes" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(1023))
+  }
+  "InsHTMLAttributes" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(933))
+  }
+  "InvalidEvent" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(511))
+  }
+  "JSX" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(1293))
+  }
+  "JSXElementConstructor" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(57))
+  }
+  "Key" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(72))
+  }
+  "KeyboardEvent" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(532))
+  }
+  "KeyboardEventHandler" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(583))
+  }
+  "KeygenHTMLAttributes" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(1024))
+  }
+  "LabelHTMLAttributes" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(1025))
+  }
+  "LazyExoticComponent" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(352))
+  }
+  "LegacyRef" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(68))
+  }
+  "LiHTMLAttributes" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(1026))
+  }
+  "LinkHTMLAttributes" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(1027))
+  }
+  "MapHTMLAttributes" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(1028))
+  }
+  "MediaHTMLAttributes" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(1031))
+  }
+  "MemoExoticComponent" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(344))
+  }
+  "MenuHTMLAttributes" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(1029))
+  }
+  "MetaHTMLAttributes" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(1032))
+  }
+  "MeterHTMLAttributes" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(1033))
   }
   "ModifierKey" => {
-    ExportOwnExport => JsOwnExport(
-      unknown reference
-      Local name: ModifierKey
-    )
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(527))
   }
-  "React" => {
-    ExportOwnExport => JsOwnExport(
-      unknown reference
-      Local name: None
-    )
+  "MouseEvent" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(536))
+  }
+  "MouseEventHandler" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(586))
+  }
+  "MutableRefObject" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(379))
+  }
+  "NamedExoticComponent" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(181))
+  }
+  "NewLifecycle" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(311))
+  }
+  "ObjectHTMLAttributes" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(1035))
+  }
+  "OlHTMLAttributes" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(1043))
+  }
+  "OptgroupHTMLAttributes" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(1044))
+  }
+  "OptionHTMLAttributes" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(1045))
+  }
+  "OptionalPostfixToken" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(1004))
+  }
+  "OptionalPrefixToken" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(1001))
+  }
+  "OutputHTMLAttributes" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(1046))
+  }
+  "ParamHTMLAttributes" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(1047))
+  }
+  "PointerEvent" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(500))
+  }
+  "PointerEventHandler" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(592))
+  }
+  "ProfilerOnRenderCallback" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(228))
+  }
+  "ProfilerProps" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(230))
+  }
+  "ProgressHTMLAttributes" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(1048))
+  }
+  "PropsWithChildren" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(337))
+  }
+  "PropsWithRef" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(335))
+  }
+  "PropsWithoutRef" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(333))
+  }
+  "Provider" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(186))
+  }
+  "ProviderExoticComponent" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(182))
+  }
+  "ProviderProps" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(173))
+  }
+  "PureComponent" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(253))
+  }
+  "QuoteHTMLAttributes" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(1034))
+  }
+  "ReactComponentElement" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(97))
+  }
+  "ReactElement" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(87))
+  }
+  "ReactEventHandler" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(562))
+  }
+  "ReactHTMLElement" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(114))
+  }
+  "ReactInstance" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(235))
+  }
+  "ReactNode" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(130))
+  }
+  "ReactPortal" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(124))
+  }
+  "ReactSVGElement" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(122))
+  }
+  "Reducer" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(371))
+  }
+  "ReducerState" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(373))
+  }
+  "ReducerWithoutAction" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(372))
+  }
+  "Ref" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(66))
+  }
+  "RefAttributes" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(80))
+  }
+  "RefCallback" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(61))
+  }
+  "RefObject" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(59))
+  }
+  "SVGAttributes" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(1127))
+  }
+  "SVGElementType" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(1282))
+  }
+  "SVGLineElementAttributes" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(614))
+  }
+  "SVGProps" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(612))
+  }
+  "SVGTextElementAttributes" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(615))
+  }
+  "ScriptHTMLAttributes" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(1050))
+  }
+  "SelectHTMLAttributes" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(1051))
+  }
+  "SetStateAction" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(360))
+  }
+  "SlotHTMLAttributes" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(1049))
+  }
+  "SourceHTMLAttributes" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(1052))
+  }
+  "StaticLifecycle" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(299))
+  }
+  "StyleHTMLAttributes" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(1053))
+  }
+  "SuspenseProps" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(220))
+  }
+  "SyntheticEvent" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(483))
+  }
+  "TableHTMLAttributes" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(1064))
+  }
+  "TdHTMLAttributes" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(1076))
+  }
+  "TextareaHTMLAttributes" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(1065))
+  }
+  "ThHTMLAttributes" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(1077))
+  }
+  "TimeHTMLAttributes" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(1078))
+  }
+  "ToggleEvent" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(556))
+  }
+  "ToggleEventHandler" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(604))
+  }
+  "Touch" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(1286))
+  }
+  "TouchEvent" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(540))
+  }
+  "TouchEventHandler" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(589))
+  }
+  "TouchList" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(1290))
+  }
+  "TrackHTMLAttributes" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(1079))
+  }
+  "TransitionEvent" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(559))
+  }
+  "TransitionEventHandler" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(607))
   }
   "TransitionFunction" => {
-    ExportOwnExport => JsOwnExport(
-      unknown reference
-      Local name: TransitionFunction
-    )
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(420))
   }
   "TransitionStartFunction" => {
-    ExportOwnExport => JsOwnExport(
-      unknown reference
-      Local name: TransitionStartFunction
-    )
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(423))
+  }
+  "UIEvent" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(544))
+  }
+  "UIEventHandler" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(595))
   }
   "Usable" => {
-    ExportOwnExport => JsOwnExport(
-      unknown reference
-      Local name: Usable
-    )
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(454))
+  }
+  "VideoHTMLAttributes" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(1080))
+  }
+  "WebViewHTMLAttributes" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(1128))
+  }
+  "WheelEvent" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(547))
+  }
+  "WheelEventHandler" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(598))
   }
   "act" => {
-    ExportOwnExport => JsOwnExport(
-      unknown reference
-      Local name: act
-    )
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(434))
+  }
+  "action" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(464))
   }
   "cache" => {
-    ExportOwnExport => JsOwnExport(
-      unknown reference
-      Local name: cache
-    )
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(469))
+  }
+  "callback" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(433))
+  }
+  "captureOwnerStack" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(470))
+  }
+  "children" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(206))
+  }
+  "cloneElement" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(170))
+  }
+  "context" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(193))
+  }
+  "createContext" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(194))
+  }
+  "createElement" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(157))
+  }
+  "createRef" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(325))
   }
   "default" => {
-    ExportOwnExport => JsOwnExport(
-      Module(0) TypeId(0)
-      Local name: None
-    )
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(0))
+  }
+  "defaultValue" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(58))
+  }
+  "deps" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(406))
+  }
+  "effect" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(405))
+  }
+  "element" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(156))
+  }
+  "factory" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(413))
+  }
+  "fn" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(468))
+  }
+  "format" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(415))
+  }
+  "forwardRef" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(332))
+  }
+  "getServerSnapshot" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(439))
+  }
+  "getSnapshot" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(439))
+  }
+  "init" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(410))
+  }
+  "initialArg" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(396))
+  }
+  "initialState" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(457))
+  }
+  "initialValue" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(58))
+  }
+  "isValidElement" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(196))
+  }
+  "lazy" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(357))
+  }
+  "load" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(355))
+  }
+  "memo" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(350))
+  }
+  "object" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(195))
+  }
+  "passthrough" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(441))
+  }
+  "permalink" => {
+    ExportOwnExport => JsOwnExport::Type(string)
+  }
+  "props" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(39))
+  }
+  "propsAreEqual" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(348))
+  }
+  "reducer" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(448))
+  }
+  "ref" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(78))
+  }
+  "render" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(329))
+  }
+  "scope" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(421))
   }
   "startTransition" => {
-    ExportOwnExport => JsOwnExport(
-      unknown reference
-      Local name: startTransition
-    )
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(428))
+  }
+  "subscribe" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(437))
+  }
+  "type" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(155))
+  }
+  "usable" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(455))
   }
   "use" => {
-    ExportOwnExport => JsOwnExport(
-      unknown reference
-      Local name: use
-    )
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(456))
   }
   "useActionState" => {
-    ExportOwnExport => JsOwnExport(
-      unknown reference
-      Local name: useActionState
-    )
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(467))
+  }
+  "useCallback" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(412))
+  }
+  "useContext" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(380))
+  }
+  "useDebugValue" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(416))
   }
   "useDeferredValue" => {
-    ExportOwnExport => JsOwnExport(
-      unknown reference
-      Local name: useDeferredValue
-    )
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(424))
+  }
+  "useEffect" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(408))
   }
   "useId" => {
-    ExportOwnExport => JsOwnExport(
-      unknown reference
-      Local name: useId
-    )
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(435))
+  }
+  "useImperativeHandle" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(411))
   }
   "useInsertionEffect" => {
-    ExportOwnExport => JsOwnExport(
-      unknown reference
-      Local name: useInsertionEffect
-    )
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(436))
+  }
+  "useLayoutEffect" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(407))
+  }
+  "useMemo" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(414))
   }
   "useOptimistic" => {
-    ExportOwnExport => JsOwnExport(
-      unknown reference
-      Local name: useOptimistic
-    )
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(451))
+  }
+  "useReducer" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(398))
+  }
+  "useRef" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(404))
+  }
+  "useState" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(391))
   }
   "useSyncExternalStore" => {
-    ExportOwnExport => JsOwnExport(
-      unknown reference
-      Local name: useSyncExternalStore
-    )
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(440))
   }
   "useTransition" => {
-    ExportOwnExport => JsOwnExport(
-      unknown reference
-      Local name: useTransition
-    )
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(427))
+  }
+  "value" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(58))
   }
 }
 Imports {
@@ -24549,3 +25288,5 @@ Module TypeId(1629) => instanceof Array<T = string>
 
 Module TypeId(1630) => instanceof Promise<T = Module(0) TypeId(34)>
 ```
+
+# Scoped Type Resolver
