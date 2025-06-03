@@ -100,6 +100,7 @@ impl Format<FormatTypeContext> for TypeData {
             Self::Namespace(ty) => write!(f, [FmtVerbatim(ty.as_ref())]),
             Self::Object(object) => write!(f, [object.as_ref()]),
             Self::Tuple(ty) => write!(f, [FmtVerbatim(&ty.as_ref())]),
+            Self::Generic(generic) => write!(f, [&generic.as_ref()]),
             Self::Intersection(ty) => write!(f, [FmtVerbatim(&ty.as_ref())]),
             Self::Union(union) => write!(f, [&union.as_ref()]),
             Self::TypeOperator(ty) => write!(f, [FmtVerbatim(&ty.as_ref())]),
@@ -205,7 +206,7 @@ impl Format<FormatTypeContext> for Function {
                         hard_line_break(),
                         text("type_args:"),
                         space(),
-                        FmtGenericTypeParameters(&self.type_parameters),
+                        FmtTypeReferences(&self.type_parameters),
                     ])),
                     text("}"),
                     hard_line_break(),
@@ -428,14 +429,27 @@ impl Format<FormatTypeContext> for TypeofExpression {
 
 impl Format<FormatTypeContext> for GenericTypeParameter {
     fn fmt(&self, f: &mut Formatter<FormatTypeContext>) -> FormatResult<()> {
+        let constraint = format_with(|f| {
+            if self.constraint.is_known() {
+                write!(f, [space(), text("extends"), space(), &self.constraint])
+            } else {
+                Ok(())
+            }
+        });
+
+        let default = format_with(|f| {
+            if self.default.is_known() {
+                write!(f, [space(), text("="), space(), &self.constraint])
+            } else {
+                Ok(())
+            }
+        });
+
         write!(
             f,
             [&format_args![
                 dynamic_text(&self.name, TextSize::default()),
-                space(),
-                text("="),
-                space(),
-                &self.ty
+                constraint, default
             ]]
         )
     }
@@ -625,7 +639,7 @@ impl Format<FormatTypeContext> for Class {
                     hard_line_break(),
                     text("type_args:"),
                     space(),
-                    FmtGenericTypeParameters(&self.type_parameters),
+                    FmtTypeReferences(&self.type_parameters),
                 ])),
                 text("}")
             ]]

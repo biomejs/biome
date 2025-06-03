@@ -11,10 +11,10 @@ use biome_js_syntax::{
     TsIdentifierBinding, TsTypeParameter, TsTypeParameterName, inner_string_text,
 };
 use biome_js_type_info::{
-    BindingId, FunctionParameter, GLOBAL_RESOLVER, GLOBAL_UNKNOWN_ID, Module, Namespace,
-    Resolvable, ResolvedTypeData, ResolvedTypeId, ScopeId, TypeData, TypeId, TypeImportQualifier,
-    TypeMember, TypeMemberKind, TypeReference, TypeReferenceQualifier, TypeResolver,
-    TypeResolverLevel, TypeStore,
+    BindingId, FunctionParameter, GLOBAL_RESOLVER, GLOBAL_UNKNOWN_ID, GenericTypeParameter, Module,
+    Namespace, Resolvable, ResolvedTypeData, ResolvedTypeId, ScopeId, TypeData, TypeId,
+    TypeImportQualifier, TypeMember, TypeMemberKind, TypeReference, TypeReferenceQualifier,
+    TypeResolver, TypeResolverLevel, TypeStore,
 };
 use biome_jsdoc_comment::JsdocComment;
 use biome_rowan::{AstNode, Text, TextSize, TokenText};
@@ -406,9 +406,12 @@ impl JsModuleInfoCollector {
                         })
                         .unwrap_or_default();
                 } else if let Some(param) = TsTypeParameter::cast_ref(&ancestor) {
-                    return TypeData::reference(
-                        TypeReference::from_ts_type_parameter(scope_id, &param).unwrap_or_default(),
-                    );
+                    return match GenericTypeParameter::from_ts_type_parameter(
+                        self, scope_id, &param,
+                    ) {
+                        Some(generic) => TypeData::from(generic),
+                        None => TypeData::unknown(),
+                    };
                 }
             }
 

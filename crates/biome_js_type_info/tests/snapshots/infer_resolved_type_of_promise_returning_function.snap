@@ -28,5 +28,5 @@ sync Function "returnsPromise" {
 ```
 Global TypeId(0) => instanceof Global TypeId(1)
 
-Global TypeId(1) => instanceof Promise<T = number>
+Global TypeId(1) => instanceof Promise<number>
 ```

@@ -167,7 +167,7 @@ fn verify_type_sizes() {
 
     assert_eq!(
         std::mem::size_of::<GenericTypeParameter>(),
-        40,
+        56,
         "The size shouldn't go higher"
     );
 

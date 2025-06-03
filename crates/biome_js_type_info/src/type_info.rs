@@ -185,6 +185,9 @@ pub enum TypeData {
     Object(Box<Object>),
     Tuple(Box<Tuple>),
 
+    // Definition of a generic type argument.
+    Generic(Box<GenericTypeParameter>),
+
     // Compound types
     Intersection(Box<Intersection>),
     Union(Box<Union>),
@@ -262,6 +265,12 @@ impl From<Constructor> for TypeData {
 impl From<Function> for TypeData {
     fn from(value: Function) -> Self {
         Self::Function(Box::new(value))
+    }
+}
+
+impl From<GenericTypeParameter> for TypeData {
+    fn from(value: GenericTypeParameter) -> Self {
+        Self::Generic(Box::new(value))
     }
 }
 
@@ -380,11 +389,11 @@ impl TypeData {
         Self::Reference(reference.into())
     }
 
-    pub fn type_parameters(&self) -> Option<&[GenericTypeParameter]> {
+    pub fn type_parameters(&self) -> Option<&[TypeReference]> {
         match self {
             Self::Class(class) => Some(&class.type_parameters),
             Self::Function(function) => Some(&function.type_parameters),
-            Self::InstanceOf(instance) => Some(&instance.type_parameters),
+            Self::InstanceOf(type_instance) => Some(&type_instance.type_parameters),
             _ => None,
         }
     }
@@ -416,7 +425,7 @@ pub struct Class {
     pub name: Option<Text>,
 
     /// The class's type parameters.
-    pub type_parameters: Box<[GenericTypeParameter]>,
+    pub type_parameters: Box<[TypeReference]>,
 
     /// Type of another class being extended by this one.
     pub extends: Option<TypeReference>,
@@ -442,7 +451,7 @@ impl Debug for Class {
 #[derive(Clone, Debug, Eq, Hash, PartialEq, Resolvable)]
 pub struct Constructor {
     /// Generic type parameters used in the call signature.
-    pub type_parameters: Box<[GenericTypeParameter]>,
+    pub type_parameters: Box<[TypeReference]>,
 
     /// Call parameter of the constructor.
     pub parameters: Box<[FunctionParameter]>,
@@ -478,7 +487,7 @@ pub struct Function {
     pub is_async: bool,
 
     /// Generic type parameters defined in the function signature.
-    pub type_parameters: Box<[GenericTypeParameter]>,
+    pub type_parameters: Box<[TypeReference]>,
 
     /// Name of the function, if specified in the definition.
     pub name: Option<Text>,
@@ -526,43 +535,16 @@ pub struct FunctionParameterBinding {
 }
 
 /// Definition of a generic type parameter.
-// TODO: Include modifiers and constraints.
 #[derive(Clone, Debug, Eq, Hash, PartialEq, Resolvable)]
 pub struct GenericTypeParameter {
     /// Name of the type parameter.
     pub name: Text,
 
-    /// The resolved type to use.
-    ///
-    /// May be the default type from the type definition.
-    pub ty: TypeReference,
-}
+    /// Optional constraint of the parameter.
+    pub constraint: TypeReference,
 
-impl GenericTypeParameter {
-    /// Merges the parameters from `incoming` into `base`.
-    pub fn merge_parameters(base: &[Self], incoming: &[Self]) -> Box<[Self]> {
-        base.iter()
-            .enumerate()
-            .map(|(i, param)| Self {
-                name: param.name.clone(),
-                ty: incoming
-                    .get(i)
-                    .map_or_else(|| param.ty.clone(), |incoming| incoming.ty.clone()),
-            })
-            .collect()
-    }
-
-    /// Merges the `types` into `parameters`.
-    pub fn merge_types(parameters: &[Self], types: &[TypeReference]) -> Box<[Self]> {
-        parameters
-            .iter()
-            .enumerate()
-            .map(|(i, param)| Self {
-                name: param.name.clone(),
-                ty: types.get(i).cloned().unwrap_or_else(|| param.ty.clone()),
-            })
-            .collect()
-    }
+    /// Default to use if the parameter is unknown.
+    pub default: TypeReference,
 }
 
 /// An interface definition.
@@ -812,7 +794,7 @@ pub struct TypeInstance {
 
     /// Generic type parameters that should be passed onto the type being
     /// instantiated.
-    pub type_parameters: Box<[GenericTypeParameter]>,
+    pub type_parameters: Box<[TypeReference]>,
 }
 
 impl From<TypeReference> for TypeInstance {
@@ -826,11 +808,7 @@ impl From<TypeReference> for TypeInstance {
 
 impl TypeInstance {
     pub fn has_known_type_parameters(&self) -> bool {
-        !self.type_parameters.is_empty()
-            && self
-                .type_parameters
-                .iter()
-                .any(|param| param.ty != TypeReference::Unknown)
+        self.type_parameters.iter().any(TypeReference::is_known)
     }
 }
 
@@ -1003,6 +981,13 @@ impl TypeReference {
     #[inline]
     pub fn is_known(&self) -> bool {
         *self != Self::Unknown
+    }
+    /// Merges the generic type parameters referenced by `incoming` into `base`.
+    pub fn merge_parameters(base: &[Self], incoming: &[Self]) -> Box<[Self]> {
+        base.iter()
+            .enumerate()
+            .map(|(i, param)| incoming.get(i).unwrap_or(param).clone())
+            .collect()
     }
 
     pub fn resolved_params(&self, resolver: &mut dyn TypeResolver) -> Box<[Self]> {

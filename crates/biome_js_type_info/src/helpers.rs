@@ -1,11 +1,9 @@
 use std::borrow::Cow;
 
-use biome_rowan::Text;
-
 use crate::{
-    BindingId, Class, GenericTypeParameter, Interface, Module, Namespace, Object, ResolvedTypeData,
-    ResolvedTypeId, ResolvedTypeMember, ResolverId, TypeData, TypeInstance, TypeMember,
-    TypeReference, TypeResolver,
+    BindingId, Class, Interface, Module, Namespace, Object, ResolvedTypeData, ResolvedTypeId,
+    ResolvedTypeMember, ResolverId, TypeData, TypeInstance, TypeMember, TypeReference,
+    TypeResolver,
     globals::{GLOBAL_ARRAY_ID, GLOBAL_PROMISE_ID, GLOBAL_TYPE_MEMBERS},
 };
 
@@ -30,7 +28,7 @@ impl<'a> ResolvedTypeData<'a> {
     /// Returns the type of an array's elements, if this object is an instance of `Array`.
     pub fn find_array_element_type(self, resolver: &'a dyn TypeResolver) -> Option<Self> {
         if self.is_instance_of(resolver, GLOBAL_ARRAY_ID) {
-            self.find_type_parameter(resolver, "T")
+            self.get_type_parameter(0)
                 .and_then(|reference| resolver.resolve_and_get(&reference))
         } else {
             None
@@ -40,47 +38,18 @@ impl<'a> ResolvedTypeData<'a> {
     /// Returns the promised type, if this object is an instance of `Promise`.
     pub fn find_promise_type(self, resolver: &'a dyn TypeResolver) -> Option<Self> {
         if self.is_instance_of(resolver, GLOBAL_PROMISE_ID) {
-            self.find_type_parameter(resolver, "T")
+            self.get_type_parameter(0)
                 .and_then(|reference| resolver.resolve_and_get(&reference))
         } else {
             None
         }
     }
 
-    pub fn find_type_parameter(
-        self,
-        resolver: &'a dyn TypeResolver,
-        parameter_name: &str,
-    ) -> Option<Cow<'a, TypeReference>> {
-        let mut seen_types = Vec::new();
-        let mut current_object = Some(self);
-        while let Some(current) = current_object {
-            if let Some(argument) = current
-                .as_raw_data()
-                .type_parameters()
-                .iter()
-                .flat_map(|params| params.iter())
-                .find(|param| param.name == parameter_name && param.ty.is_known())
-            {
-                return Some(current.apply_module_id_to_reference(&argument.ty));
-            }
-
-            let Some(next_object) = current
-                .prototype(resolver)
-                .and_then(|prototype| resolver.resolve_reference(&prototype))
-            else {
-                break;
-            };
-
-            if seen_types.contains(&next_object) {
-                break;
-            }
-
-            seen_types.push(next_object);
-            current_object = resolver.get_by_resolved_id(next_object);
-        }
-
-        None
+    pub fn get_type_parameter(self, index: usize) -> Option<Cow<'a, TypeReference>> {
+        self.as_raw_data()
+            .type_parameters()
+            .and_then(|params| params.get(index))
+            .map(|param| self.apply_module_id_to_reference(param))
     }
 
     /// Returns whether this object is an instance of the type with the given ID.
@@ -149,7 +118,7 @@ impl TypeData {
                 let resolved = ResolvedTypeData::from((resolver_id, self));
                 if resolved.is_instance_of(resolver, GLOBAL_ARRAY_ID) {
                     resolved
-                        .find_type_parameter(resolver, "T")
+                        .get_type_parameter(0)
                         .map(|reference| reference.into_owned())
                         .map(|reference| resolver.optional(reference))
                         .map(|id| {
@@ -178,13 +147,10 @@ impl TypeData {
             _ => {
                 let resolved = ResolvedTypeData::from((resolver_id, self));
                 if resolved.is_instance_of(resolver, GLOBAL_ARRAY_ID) {
-                    match resolved.find_type_parameter(resolver, "T") {
+                    match resolved.get_type_parameter(0) {
                         Some(elem_ty) => Some(Self::instance_of(TypeInstance {
                             ty: GLOBAL_ARRAY_ID.into(),
-                            type_parameters: Box::new([GenericTypeParameter {
-                                name: Text::Static("T"),
-                                ty: elem_ty.into_owned(),
-                            }]),
+                            type_parameters: Box::new([elem_ty.into_owned()]),
                         })),
                         None => return resolver.get_by_resolved_id(GLOBAL_ARRAY_ID),
                     }

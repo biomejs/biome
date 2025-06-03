@@ -40,19 +40,19 @@ Imports {
 ```
 BindingId(4) => JsBindingData {
   Name: makeOne,
-  Type: Module(0) TypeId(3),
+  Type: Module(0) TypeId(5),
   Declaration kind: Value
 }
 
 BindingId(5) => JsBindingData {
   Name: makeOneCb,
-  Type: Module(0) TypeId(4),
+  Type: Module(0) TypeId(6),
   Declaration kind: Value
 }
 
 BindingId(6) => JsBindingData {
   Name: one,
-  Type: Module(0) TypeId(5),
+  Type: Module(0) TypeId(7),
   Declaration kind: Value
 }
 ```
@@ -60,22 +60,26 @@ BindingId(6) => JsBindingData {
 ## Registered types
 
 ```
-Module TypeId(0) => instanceof unresolved reference "T" (scope ID: 1)
+Module TypeId(0) => instanceof unresolved reference "Function" (scope ID: 1)
 
-Module TypeId(1) => instanceof unresolved reference "DependencyList" (scope ID: 1)
+Module TypeId(1) => T extends Module(0) TypeId(0)
 
-Module TypeId(2) => sync Function "useCallback" {
+Module TypeId(2) => instanceof Module(0) TypeId(1)
+
+Module TypeId(3) => instanceof unresolved reference "DependencyList" (scope ID: 1)
+
+Module TypeId(4) => sync Function "useCallback" {
   accepts: {
     params: [
-      required callback: Module(0) TypeId(0) (bindings: callback:instanceof unresolved reference "T" (scope ID: 1))
-      required deps: Module(0) TypeId(1) (bindings: deps:instanceof unresolved reference "DependencyList" (scope ID: 1))
+      required callback: Module(0) TypeId(2) (bindings: callback:instanceof Module(0) TypeId(1))
+      required deps: Module(0) TypeId(3) (bindings: deps:instanceof unresolved reference "DependencyList" (scope ID: 1))
     ]
-    type_args: [T = unknown reference]
+    type_args: [Module(0) TypeId(1)]
   }
-  returns: Module(0) TypeId(0)
+  returns: Module(0) TypeId(2)
 }
 
-Module TypeId(3) => sync Function {
+Module TypeId(5) => sync Function {
   accepts: {
     params: []
     type_args: []
@@ -83,7 +87,7 @@ Module TypeId(3) => sync Function {
   returns: unknown reference
 }
 
-Module TypeId(4) => instanceof unresolved reference "T" (scope ID: 1)
+Module TypeId(6) => instanceof Module(0) TypeId(1)
 
-Module TypeId(5) => Call Module(0) TypeId(4)(No parameters)
+Module TypeId(7) => Call Module(0) TypeId(6)(No parameters)
 ```

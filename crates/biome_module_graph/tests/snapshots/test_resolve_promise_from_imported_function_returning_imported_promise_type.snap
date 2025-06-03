@@ -80,9 +80,9 @@ Module TypeId(3) => Object {
   members: ["result": Module(0) TypeId(2)]
 }
 
-Module TypeId(4) => instanceof Promise<T = Module(0) TypeId(3)>
+Module TypeId(4) => instanceof Promise<Module(0) TypeId(3)>
 
-Module TypeId(5) => instanceof Promise<T = Module(0) TypeId(3)>
+Module TypeId(5) => instanceof Promise<Module(0) TypeId(3)>
 ```
 
 # `/src/returnPromiseResult.ts` (Module 1)

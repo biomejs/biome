@@ -299,7 +299,7 @@ impl TypeData {
                     type_parameters: decl
                         .type_parameters()
                         .map(|params| {
-                            GenericTypeParameter::params_from_ts_type_parameters(
+                            TypeReference::types_from_ts_type_parameters(
                                 resolver, scope_id, &params,
                             )
                         })
@@ -821,14 +821,11 @@ impl TypeData {
                 .and_then(|id| id.as_js_identifier_binding())
                 .and_then(|id| id.name_token().ok())
                 .map(|token| token.token_text_trimmed().into()),
-            type_parameters: decl
-                .type_parameters()
-                .map(|params| {
-                    GenericTypeParameter::params_from_ts_type_parameters(
-                        resolver, scope_id, &params,
-                    )
-                })
-                .unwrap_or_default(),
+            type_parameters: generic_params_from_ts_type_params(
+                resolver,
+                scope_id,
+                decl.type_parameters(),
+            ),
             extends: decl
                 .extends_clause()
                 .and_then(|extends| extends.super_class().ok())
@@ -863,14 +860,11 @@ impl TypeData {
                 .and_then(|id| id.as_js_identifier_binding())
                 .and_then(|id| id.name_token().ok())
                 .map(|token| token.token_text_trimmed().into()),
-            type_parameters: decl
-                .type_parameters()
-                .map(|params| {
-                    GenericTypeParameter::params_from_ts_type_parameters(
-                        resolver, scope_id, &params,
-                    )
-                })
-                .unwrap_or_default(),
+            type_parameters: generic_params_from_ts_type_params(
+                resolver,
+                scope_id,
+                decl.type_parameters(),
+            ),
             extends: decl
                 .extends_clause()
                 .and_then(|extends| extends.super_class().ok())
@@ -1177,7 +1171,7 @@ impl TypeData {
         Some(match decl.type_parameters() {
             Some(params) => Self::instance_of(TypeInstance {
                 ty: TypeReference::from_any_ts_type(resolver, scope_id, &decl.ty().ok()?),
-                type_parameters: GenericTypeParameter::params_from_ts_type_parameters(
+                type_parameters: TypeReference::types_from_ts_type_parameters(
                     resolver, scope_id, &params,
                 ),
             }),
@@ -1464,7 +1458,14 @@ impl GenericTypeParameter {
             .and_then(|name| name.ident_token())
             .map(|name| Self {
                 name: name.token_text_trimmed().into(),
-                ty: param
+                constraint: param
+                    .constraint()
+                    .and_then(|constraint| constraint.ty().ok())
+                    .map(|constraint_ty| {
+                        TypeReference::from_any_ts_type(resolver, scope_id, &constraint_ty)
+                    })
+                    .unwrap_or_default(),
+                default: param
                     .default()
                     .and_then(|default| default.ty().ok())
                     .map(|default_ty| {
@@ -1960,19 +1961,6 @@ impl TypeReference {
         resolver.reference_to_registered_data(data)
     }
 
-    pub fn from_ts_type_parameter(scope_id: ScopeId, param: &TsTypeParameter) -> Option<Self> {
-        param
-            .name()
-            .and_then(|name| name.ident_token())
-            .map(|name| {
-                Self::from(TypeReferenceQualifier::from_name(
-                    scope_id,
-                    name.token_text_trimmed().into(),
-                ))
-            })
-            .ok()
-    }
-
     pub fn types_from_ts_type_arguments(
         resolver: &mut dyn TypeResolver,
         scope_id: ScopeId,
@@ -1998,6 +1986,28 @@ impl TypeReference {
             .into_iter()
             .filter_map(Result::ok)
             .map(|ty| Self::from_ts_reference_type(resolver, scope_id, &ty))
+            .collect()
+    }
+
+    pub fn types_from_ts_type_parameters(
+        resolver: &mut dyn TypeResolver,
+        scope_id: ScopeId,
+        params: &TsTypeParameters,
+    ) -> Box<[Self]> {
+        params
+            .items()
+            .into_iter()
+            .map(|param| {
+                param
+                    .ok()
+                    .and_then(|param| {
+                        GenericTypeParameter::from_ts_type_parameter(resolver, scope_id, &param)
+                    })
+                    .map(|generic| {
+                        Self::from(resolver.register_and_resolve(TypeData::from(generic)))
+                    })
+                    .unwrap_or_default()
+            })
             .collect()
     }
 }
@@ -2133,11 +2143,9 @@ fn generic_params_from_ts_type_params(
     resolver: &mut dyn TypeResolver,
     scope_id: ScopeId,
     params: Option<TsTypeParameters>,
-) -> Box<[GenericTypeParameter]> {
+) -> Box<[TypeReference]> {
     params
-        .map(|params| {
-            GenericTypeParameter::params_from_ts_type_parameters(resolver, scope_id, &params)
-        })
+        .map(|params| TypeReference::types_from_ts_type_parameters(resolver, scope_id, &params))
         .unwrap_or_default()
 }
 

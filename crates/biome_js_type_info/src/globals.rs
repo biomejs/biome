@@ -54,7 +54,8 @@ pub const SYMBOL_STRING_LITERAL_ID: TypeId = TypeId::new(23);
 pub const UNDEFINED_STRING_LITERAL_ID: TypeId = TypeId::new(24);
 pub const TYPEOF_OPERATOR_RETURN_UNION_ID: TypeId = TypeId::new(25);
 pub const STRING_ID: TypeId = TypeId::new(26);
-pub const NUM_PREDEFINED_TYPES: usize = 27; // Most be one more than the highest `TypeId` above.
+pub const T_ID: TypeId = TypeId::new(27);
+pub const NUM_PREDEFINED_TYPES: usize = 28; // Most be one more than the highest `TypeId` above.
 
 pub const GLOBAL_UNKNOWN_ID: ResolvedTypeId = ResolvedTypeId::new(GLOBAL_LEVEL, UNKNOWN_ID);
 pub const GLOBAL_UNDEFINED_ID: ResolvedTypeId = ResolvedTypeId::new(GLOBAL_LEVEL, UNDEFINED_ID);
@@ -83,6 +84,7 @@ pub const GLOBAL_UNDEFINED_STRING_LITERAL_ID: ResolvedTypeId =
 pub const GLOBAL_TYPEOF_OPERATOR_RETURN_UNION_ID: ResolvedTypeId =
     ResolvedTypeId::new(GLOBAL_LEVEL, TYPEOF_OPERATOR_RETURN_UNION_ID);
 pub const GLOBAL_STRING_ID: ResolvedTypeId = ResolvedTypeId::new(GLOBAL_LEVEL, STRING_ID);
+pub const GLOBAL_T_ID: ResolvedTypeId = ResolvedTypeId::new(GLOBAL_LEVEL, T_ID);
 
 /// Returns a string for formatting global IDs in test snapshots.
 pub fn global_type_name(id: TypeId) -> &'static str {
@@ -117,6 +119,7 @@ pub fn global_type_name(id: TypeId) -> &'static str {
                 | \"string\" | \"symbol\" | \"undefined\""
         }
         26 => "string",
+        27 => "T",
         _ => "inferred type",
     }
 }
@@ -164,10 +167,7 @@ impl Default for GlobalsResolver {
             TypeData::Undefined,
             TypeData::Class(Box::new(Class {
                 name: Some(Text::Static("Array")),
-                type_parameters: Box::new([GenericTypeParameter {
-                    name: Text::Static("T"),
-                    ty: TypeReference::Unknown,
-                }]),
+                type_parameters: Box::new([TypeReference::from(GLOBAL_T_ID)]),
                 extends: None,
                 implements: [].into(),
                 members: Box::new([TypeMember {
@@ -181,10 +181,7 @@ impl Default for GlobalsResolver {
             TypeData::Number,
             TypeData::Class(Box::new(Class {
                 name: Some(Text::Static("Promise")),
-                type_parameters: Box::new([GenericTypeParameter {
-                    name: Text::Static("T"),
-                    ty: TypeReference::Unknown,
-                }]),
+                type_parameters: Box::new([TypeReference::from(GLOBAL_T_ID)]),
                 extends: None,
                 implements: [].into(),
                 members: Box::new([
@@ -229,6 +226,11 @@ impl Default for GlobalsResolver {
                 GLOBAL_UNDEFINED_STRING_LITERAL_ID.into(),
             ]),
             TypeData::String,
+            TypeData::from(GenericTypeParameter {
+                name: Text::Static("T"),
+                constraint: TypeReference::Unknown,
+                default: TypeReference::Unknown,
+            }),
         ];
 
         Self { types }

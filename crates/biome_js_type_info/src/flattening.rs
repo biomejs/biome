@@ -3,9 +3,9 @@ use std::collections::{BTreeMap, btree_map::Entry};
 use biome_rowan::Text;
 
 use crate::{
-    DestructureField, GLOBAL_UNKNOWN_ID, GenericTypeParameter, Literal, ResolvedTypeData,
-    ResolvedTypeMember, TypeData, TypeInstance, TypeMemberKind, TypeReference, TypeResolver,
-    TypeofExpression, TypeofStaticMemberExpression,
+    DestructureField, GLOBAL_UNKNOWN_ID, Literal, ResolvedTypeData, ResolvedTypeMember, TypeData,
+    TypeInstance, TypeMemberKind, TypeReference, TypeResolver, TypeofExpression,
+    TypeofStaticMemberExpression,
     globals::{
         GLOBAL_BIGINT_STRING_LITERAL_ID, GLOBAL_BOOLEAN_STRING_LITERAL_ID,
         GLOBAL_FUNCTION_STRING_LITERAL_ID, GLOBAL_NUMBER_STRING_LITERAL_ID,
@@ -87,7 +87,7 @@ fn flattened(mut ty: TypeData, resolver: &mut dyn TypeResolver, depth: usize) ->
                         return resolved.apply_module_id_to_data(TypeData::instance_of(
                             TypeInstance {
                                 ty: resolved_instance.ty.clone(),
-                                type_parameters: GenericTypeParameter::merge_parameters(
+                                type_parameters: TypeReference::merge_parameters(
                                     &resolved_instance.type_parameters,
                                     &instance_of.type_parameters,
                                 ),
