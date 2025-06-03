@@ -534,7 +534,7 @@ fn flattened_function_call(
                 .as_raw_data()
             {
                 TypeData::InstanceOf(instance) if instance.type_parameters.is_empty() => resolver
-                    .resolve_and_get(&callee.apply_module_id_to_reference(&instance.ty))
+                    .resolve_and_get(&resolved_return_ty.apply_module_id_to_reference(&instance.ty))
                     .filter(|resolved| resolved.is_generic())
                     .map_or((false, resolved_return_ty), |resolved| (true, resolved)),
                 _ => (false, resolved_return_ty),
