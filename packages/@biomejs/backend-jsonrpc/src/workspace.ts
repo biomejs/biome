@@ -1834,7 +1834,7 @@ export interface Style {
 	/**
 	 * Disallow reassigning function parameters.
 	 */
-	noParameterAssign?: RuleConfiguration_for_Null;
+	noParameterAssign?: RuleConfiguration_for_NoParameterAssignOptions;
 	/**
 	 * Disallow the use of parameter properties in class constructors.
 	 */
@@ -2445,6 +2445,9 @@ export type RuleFixConfiguration_for_UtilityClassSortingOptions =
 export type RuleFixConfiguration_for_NoBlankTargetOptions =
 	| RulePlainConfiguration
 	| RuleWithFixOptions_for_NoBlankTargetOptions;
+export type RuleConfiguration_for_NoParameterAssignOptions =
+	| RulePlainConfiguration
+	| RuleWithOptions_for_NoParameterAssignOptions;
 export type RuleConfiguration_for_RestrictedGlobalsOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_RestrictedGlobalsOptions;
@@ -2729,6 +2732,16 @@ export interface RuleWithFixOptions_for_NoBlankTargetOptions {
 	 * Rule's options
 	 */
 	options: NoBlankTargetOptions;
+}
+export interface RuleWithOptions_for_NoParameterAssignOptions {
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: NoParameterAssignOptions;
 }
 export interface RuleWithOptions_for_RestrictedGlobalsOptions {
 	/**
@@ -3053,6 +3066,15 @@ export interface NoBlankTargetOptions {
 	allowNoReferrer?: boolean;
 }
 /**
+ * Options for the rule `NoParameterAssign`
+ */
+export interface NoParameterAssignOptions {
+	/**
+	 * Whether to report an error when a dependency is listed in the dependencies array but isn't used. Defaults to `allow`.
+	 */
+	propertyAssignment?: PropertyAssignmentMode;
+}
+/**
  * Options for the rule `noRestrictedGlobals`.
  */
 export interface RestrictedGlobalsOptions {
@@ -3196,6 +3218,10 @@ For example, for React's `useRef()` hook the value would be `true`, while for `u
 }
 export type CustomRestrictedElements = Record<string, string>;
 export type ObjectPropertySyntax = "explicit" | "shorthand";
+/**
+ * Specifies whether property assignments on function parameters are allowed or denied.
+ */
+export type PropertyAssignmentMode = "allow" | "deny";
 export type CustomRestrictedImport = string | CustomRestrictedImportOptions;
 export type CustomRestrictedType = string | CustomRestrictedTypeOptions;
 export type ConsistentArrayType = "shorthand" | "generic";
