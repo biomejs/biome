@@ -1576,6 +1576,10 @@ export interface Nursery {
 	 */
 	noTsIgnore?: RuleFixConfiguration_for_Null;
 	/**
+	 * Succinct description of the rule.
+	 */
+	noUnassignedVariables?: RuleConfiguration_for_Null;
+	/**
 	 * Disallow unknown at-rules.
 	 */
 	noUnknownAtRule?: RuleConfiguration_for_Null;
@@ -3498,6 +3502,7 @@ export type Category =
 	| "lint/nursery/noShadow"
 	| "lint/nursery/noShorthandPropertyOverrides"
 	| "lint/nursery/noTsIgnore"
+	| "lint/nursery/noUnassignedVariables"
 	| "lint/nursery/noUndeclaredDependencies"
 	| "lint/nursery/noUnknownAtRule"
 	| "lint/nursery/noUnknownFunction"

@@ -1,0 +1,132 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```js
+let status;
+if (status === 'ready') {
+  console.log('Ready!');
+}
+
+let user;
+greet(user);
+
+function test() {
+  let error;
+  return error || "Unknown error";
+}
+
+let options;
+const { debug } = options || {};
+
+let flag;
+while (!flag) {
+  // Do something...
+}
+
+let config;
+function init() {
+  return config?.enabled;
+}
+```
+
+# Diagnostics
+```
+invalid.js:1:5 lint/nursery/noUnassignedVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Variable is read here.
+  
+  > 1 │ let status;
+      │     ^^^^^^
+    2 │ if (status === 'ready') {
+    3 │   console.log('Ready!');
+  
+  i This note will give you more information.
+  
+
+```
+
+```
+invalid.js:6:5 lint/nursery/noUnassignedVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Variable is read here.
+  
+    4 │ }
+    5 │ 
+  > 6 │ let user;
+      │     ^^^^
+    7 │ greet(user);
+    8 │ 
+  
+  i This note will give you more information.
+  
+
+```
+
+```
+invalid.js:10:7 lint/nursery/noUnassignedVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Variable is read here.
+  
+     9 │ function test() {
+  > 10 │   let error;
+       │       ^^^^^
+    11 │   return error || "Unknown error";
+    12 │ }
+  
+  i This note will give you more information.
+  
+
+```
+
+```
+invalid.js:14:5 lint/nursery/noUnassignedVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Variable is read here.
+  
+    12 │ }
+    13 │ 
+  > 14 │ let options;
+       │     ^^^^^^^
+    15 │ const { debug } = options || {};
+    16 │ 
+  
+  i This note will give you more information.
+  
+
+```
+
+```
+invalid.js:17:5 lint/nursery/noUnassignedVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Variable is read here.
+  
+    15 │ const { debug } = options || {};
+    16 │ 
+  > 17 │ let flag;
+       │     ^^^^
+    18 │ while (!flag) {
+    19 │   // Do something...
+  
+  i This note will give you more information.
+  
+
+```
+
+```
+invalid.js:22:5 lint/nursery/noUnassignedVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Variable is read here.
+  
+    20 │ }
+    21 │ 
+  > 22 │ let config;
+       │     ^^^^^^
+    23 │ function init() {
+    24 │   return config?.enabled;
+  
+  i This note will give you more information.
+  
+
+```

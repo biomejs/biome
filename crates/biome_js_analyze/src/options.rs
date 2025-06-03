@@ -238,6 +238,8 @@ pub type NoThenProperty =
 pub type NoThisInStatic =
     <lint::complexity::no_this_in_static::NoThisInStatic as biome_analyze::Rule>::Options;
 pub type NoTsIgnore = <lint::nursery::no_ts_ignore::NoTsIgnore as biome_analyze::Rule>::Options;
+pub type NoUnassignedVariables =
+    <lint::nursery::no_unassigned_variables::NoUnassignedVariables as biome_analyze::Rule>::Options;
 pub type NoUndeclaredDependencies = < lint :: correctness :: no_undeclared_dependencies :: NoUndeclaredDependencies as biome_analyze :: Rule > :: Options ;
 pub type NoUndeclaredVariables = < lint :: correctness :: no_undeclared_variables :: NoUndeclaredVariables as biome_analyze :: Rule > :: Options ;
 pub type NoUnreachable =
