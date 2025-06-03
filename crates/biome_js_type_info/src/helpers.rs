@@ -52,6 +52,10 @@ impl<'a> ResolvedTypeData<'a> {
             .map(|param| self.apply_module_id_to_reference(param))
     }
 
+    pub fn is_expression(self) -> bool {
+        matches!(self.as_raw_data(), TypeData::TypeofExpression(_))
+    }
+
     pub fn is_generic(self) -> bool {
         matches!(self.as_raw_data(), TypeData::Generic(_))
     }

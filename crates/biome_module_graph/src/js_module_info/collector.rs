@@ -262,8 +262,6 @@ impl JsModuleInfoCollector {
                     _ => TypeReference::Unknown,
                 };
 
-                let printed = format!("{:?}", name);
-
                 self.bindings.push(JsBindingData {
                     name: name
                         .as_ref()
@@ -578,7 +576,6 @@ impl TypeResolver for JsModuleInfoCollector {
 
     fn resolve_qualifier(&self, qualifier: &TypeReferenceQualifier) -> Option<ResolvedTypeId> {
         let identifier = qualifier.path.first()?;
-        let printed_id = format!("{identifier}");
         let Some(binding_ref) = self.find_binding_in_scope(identifier, qualifier.scope_id) else {
             return GLOBAL_RESOLVER.resolve_qualifier(qualifier);
         };

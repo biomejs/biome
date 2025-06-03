@@ -4,8 +4,8 @@ use biome_rowan::Text;
 
 use crate::{
     CallArgumentType, DestructureField, GLOBAL_UNKNOWN_ID, Literal, ResolvedTypeData,
-    ResolvedTypeMember, TypeData, TypeInstance, TypeMemberKind, TypeReference, TypeResolver,
-    TypeofCallExpression, TypeofExpression, TypeofStaticMemberExpression,
+    ResolvedTypeMember, ResolverId, TypeData, TypeInstance, TypeMemberKind, TypeReference,
+    TypeResolver, TypeofCallExpression, TypeofExpression, TypeofStaticMemberExpression,
     globals::{
         GLOBAL_BIGINT_STRING_LITERAL_ID, GLOBAL_BOOLEAN_STRING_LITERAL_ID,
         GLOBAL_FUNCTION_STRING_LITERAL_ID, GLOBAL_NUMBER_STRING_LITERAL_ID,
@@ -149,7 +149,15 @@ fn flattened(mut ty: TypeData, resolver: &mut dyn TypeResolver, depth: usize) ->
                     };
                 }
                 TypeofExpression::Call(expr) => match resolver.resolve_and_get(&expr.callee) {
-                    Some(callee) => {
+                    Some(mut callee) => {
+                        if callee.is_expression() {
+                            let flattened_callee = flattened(callee.to_data(), resolver, depth);
+                            let resolver_id = ResolverId::from_level(resolver.level());
+                            let type_id = resolver.register_type(flattened_callee);
+                            let data = resolver.get_by_id(type_id);
+                            callee = ResolvedTypeData::from((resolver_id, data));
+                        }
+
                         return flattened_function_call(expr, callee, resolver)
                             .map(|(is_instance, mut ty)| {
                                 if is_instance {
