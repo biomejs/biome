@@ -4,28 +4,25 @@ expression: invalid-06.ts
 ---
 # Input
 ```ts
-const test = 1;
-type Fn = (test: string) => typeof test;
+type foo = <T>(bar: <T>() => T) => T;
 
 ```
 
 # Diagnostics
 ```
-invalid-06.ts:2:12 lint/nursery/noShadow ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-06.ts:1:22 lint/nursery/noShadow ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i This variable shadows another variable with the same name in the outer scope.
   
-    1 │ const test = 1;
-  > 2 │ type Fn = (test: string) => typeof test;
-      │            ^^^^
-    3 │ 
+  > 1 │ type foo = <T>(bar: <T>() => T) => T;
+      │                      ^
+    2 │ 
   
   i This is the shadowed variable, which is now inaccessible in the inner scope.
   
-  > 1 │ const test = 1;
-      │       ^^^^
-    2 │ type Fn = (test: string) => typeof test;
-    3 │ 
+  > 1 │ type foo = <T>(bar: <T>() => T) => T;
+      │             ^
+    2 │ 
   
   i Consider renaming this variable. It's easy to confuse the origin of variables if they share the same name.
   

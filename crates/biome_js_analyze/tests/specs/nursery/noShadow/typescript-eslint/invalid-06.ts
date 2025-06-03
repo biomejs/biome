@@ -1,2 +1,1 @@
-const test = 1;
-type Fn = (test: string) => typeof test;
+type foo = <T>(bar: <T>() => T) => T;
