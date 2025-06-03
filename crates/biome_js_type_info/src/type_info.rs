@@ -394,6 +394,7 @@ impl TypeData {
             Self::Class(class) => Some(&class.type_parameters),
             Self::Function(function) => Some(&function.type_parameters),
             Self::InstanceOf(type_instance) => Some(&type_instance.type_parameters),
+            Self::Interface(interface) => Some(&interface.type_parameters),
             _ => None,
         }
     }
@@ -554,7 +555,7 @@ pub struct Interface {
     pub name: Text,
 
     /// The interface's type parameters.
-    pub type_parameters: Box<[GenericTypeParameter]>,
+    pub type_parameters: Box<[TypeReference]>,
 
     /// Types being extended by this interface.
     pub extends: Box<[TypeReference]>,

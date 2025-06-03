@@ -1107,14 +1107,11 @@ impl TypeData {
     ) -> Option<Self> {
         Some(Self::from(Interface {
             name: text_from_token(decl.id().ok()?.as_ts_identifier_binding()?.name_token())?,
-            type_parameters: decl
-                .type_parameters()
-                .map(|params| {
-                    GenericTypeParameter::params_from_ts_type_parameters(
-                        resolver, scope_id, &params,
-                    )
-                })
-                .unwrap_or_default(),
+            type_parameters: generic_params_from_ts_type_params(
+                resolver,
+                scope_id,
+                decl.type_parameters(),
+            ),
             extends: decl
                 .extends_clause()
                 .map(|extends| {

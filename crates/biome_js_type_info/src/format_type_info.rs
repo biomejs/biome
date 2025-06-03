@@ -664,7 +664,7 @@ impl Format<FormatTypeContext> for Interface {
                     hard_line_break(),
                     text("type_args:"),
                     space(),
-                    FmtGenericTypeParameters(&self.type_parameters),
+                    FmtTypeReferences(&self.type_parameters),
                     hard_line_break(),
                     text("members:"),
                     space(),
@@ -828,33 +828,6 @@ impl Format<FormatTypeContext> for FmtFunctionParameterBindings<'_> {
             joiner.finish()
         });
         write!(f, [&function_parameters])
-    }
-}
-
-struct FmtGenericTypeParameters<'a>(&'a [GenericTypeParameter]);
-
-impl Format<FormatTypeContext> for FmtGenericTypeParameters<'_> {
-    fn fmt(&self, f: &mut Formatter<FormatTypeContext>) -> FormatResult<()> {
-        if self.0.is_empty() {
-            return write!(f, [text("[]")]);
-        }
-
-        let type_parameters = format_with(|f| {
-            let separator = format_with(|f| write!(f, [&format_args![text(","), space()]]));
-            let mut joiner = f.join_with(separator);
-            for part in self.0 {
-                joiner.entry(&format_args![part]);
-            }
-            joiner.finish()
-        });
-        write!(
-            f,
-            [&format_args![
-                text("["),
-                &group(&soft_block_indent(&type_parameters)),
-                text("]")
-            ]]
-        )
     }
 }
 
