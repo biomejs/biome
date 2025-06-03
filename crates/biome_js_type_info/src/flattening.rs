@@ -3,9 +3,9 @@ use std::collections::{BTreeMap, btree_map::Entry};
 use biome_rowan::Text;
 
 use crate::{
-    DestructureField, GLOBAL_UNKNOWN_ID, Literal, ResolvedTypeData, ResolvedTypeMember, TypeData,
-    TypeInstance, TypeMemberKind, TypeReference, TypeResolver, TypeofExpression,
-    TypeofStaticMemberExpression,
+    CallArgumentType, DestructureField, GLOBAL_UNKNOWN_ID, Literal, ResolvedTypeData,
+    ResolvedTypeMember, TypeData, TypeInstance, TypeMemberKind, TypeReference, TypeResolver,
+    TypeofCallExpression, TypeofExpression, TypeofStaticMemberExpression,
     globals::{
         GLOBAL_BIGINT_STRING_LITERAL_ID, GLOBAL_BOOLEAN_STRING_LITERAL_ID,
         GLOBAL_FUNCTION_STRING_LITERAL_ID, GLOBAL_NUMBER_STRING_LITERAL_ID,
@@ -149,34 +149,16 @@ fn flattened(mut ty: TypeData, resolver: &mut dyn TypeResolver, depth: usize) ->
                     };
                 }
                 TypeofExpression::Call(expr) => match resolver.resolve_and_get(&expr.callee) {
-                    Some(resolved) => {
-                        return match resolved.as_raw_data() {
-                            TypeData::Function(function) => match function.return_type.as_type() {
-                                Some(return_ty) => resolver
-                                    .resolve_and_get(
-                                        &resolved.apply_module_id_to_reference(return_ty),
-                                    )
-                                    .map(ResolvedTypeData::to_data)
-                                    .map(|data| flattened(data, resolver, depth))
-                                    .unwrap_or_default(),
-                                None => ty,
-                            },
-                            TypeData::Object(_) => {
-                                let member_ty = resolved
-                                    .all_members(resolver)
-                                    .find(|member| member.has_name("constructor"))
-                                    .map(ResolvedTypeMember::to_member)
-                                    .and_then(|member| resolver.resolve_and_get(&member.ty));
-                                match member_ty {
-                                    Some(member_ty) => {
-                                        ty = member_ty.to_data();
-                                        continue;
-                                    }
-                                    None => TypeData::reference(GLOBAL_UNKNOWN_ID),
+                    Some(callee) => {
+                        return flattened_function_call(expr, callee, resolver)
+                            .map(|(is_instance, mut ty)| {
+                                if is_instance {
+                                    ty = ty.into_instance(resolver);
                                 }
-                            }
-                            _ => ty,
-                        };
+
+                                flattened(ty, resolver, depth)
+                            })
+                            .unwrap_or(ty);
                     }
                     None => return ty,
                 },
@@ -528,6 +510,56 @@ fn flattened(mut ty: TypeData, resolver: &mut dyn TypeResolver, depth: usize) ->
 
     debug_assert!(false, "max flattening depth reached");
     TypeData::Unknown
+}
+
+fn flattened_function_call(
+    expr: &TypeofCallExpression,
+    callee: ResolvedTypeData,
+    resolver: &dyn TypeResolver,
+) -> Option<(bool, TypeData)> {
+    match callee.as_raw_data() {
+        TypeData::Function(function) => function.return_type.as_type().and_then(|return_ty| {
+            let resolved_return_ty =
+                resolver.resolve_and_get(&callee.apply_module_id_to_reference(return_ty))?;
+
+            let (is_generic_instance, mut resolved_return_ty) = match resolved_return_ty
+                .as_raw_data()
+            {
+                TypeData::InstanceOf(instance) if instance.type_parameters.is_empty() => resolver
+                    .resolve_and_get(&callee.apply_module_id_to_reference(&instance.ty))
+                    .filter(|resolved| resolved.is_generic())
+                    .map_or((false, resolved_return_ty), |resolved| (true, resolved)),
+                _ => (false, resolved_return_ty),
+            };
+
+            if is_generic_instance {
+                // See if we can infer the return type by looking for the
+                // generic in the input arguments.
+                let arg_index = function
+                    .parameters
+                    .iter()
+                    .position(|param| (param.ty == *return_ty))?;
+                let arg = expr.arguments.get(arg_index)?;
+                let reference = match arg {
+                    CallArgumentType::Argument(reference) => reference,
+                    CallArgumentType::Spread(_) => {
+                        return None; // TODO: Handle spread arguments
+                    }
+                };
+                resolved_return_ty = resolver.resolve_and_get(reference)?;
+            }
+
+            Some((is_generic_instance, resolved_return_ty.to_data()))
+        }),
+        TypeData::Object(_) => callee
+            .all_members(resolver)
+            .find(|member| member.has_name("constructor"))
+            .map(ResolvedTypeMember::to_member)
+            .and_then(|member| resolver.resolve_and_get(&member.ty))
+            .map(ResolvedTypeData::to_data)
+            .map(|data| (false, data)),
+        _ => None,
+    }
 }
 
 #[inline]

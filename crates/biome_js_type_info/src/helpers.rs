@@ -52,6 +52,10 @@ impl<'a> ResolvedTypeData<'a> {
             .map(|param| self.apply_module_id_to_reference(param))
     }
 
+    pub fn is_generic(self) -> bool {
+        matches!(self.as_raw_data(), TypeData::Generic(_))
+    }
+
     /// Returns whether this object is an instance of the type with the given ID.
     pub fn is_instance_of(self, resolver: &dyn TypeResolver, id: ResolvedTypeId) -> bool {
         let mut seen_types = Vec::new();
@@ -162,6 +166,15 @@ impl TypeData {
 
         let id = resolver.register_and_resolve(data);
         resolver.get_by_resolved_id(id)
+    }
+
+    /// Turns this [`TypeData`] into an instance of itself.
+    pub fn into_instance(self, resolver: &mut dyn TypeResolver) -> Self {
+        match self {
+            Self::InstanceOf(instance) => Self::InstanceOf(instance),
+            Self::Reference(reference) => Self::instance_of(reference),
+            other => Self::instance_of(TypeReference::from(resolver.register_and_resolve(other))),
+        }
     }
 
     /// Iterates own member fields.

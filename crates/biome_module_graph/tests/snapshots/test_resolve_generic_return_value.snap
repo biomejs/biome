@@ -2,31 +2,31 @@
 source: crates/biome_module_graph/tests/snap/mod.rs
 expression: content
 ---
-# `/src/index.ts`
+# `/src/index.ts` (Not imported by resolver)
 
 ## Source
 
 ```ts
 function useCallback<T extends Function>(callback: T, deps: DependencyList): T;
 
-export const makeOne = () => 1;
+export const makePromise = (): Promise => Promise.resolve(1);
 
-export const makeOneCb = useCallback(makeOne);
+export const makePromiseCb = useCallback(makePromise);
 
-export const one = makeOneCb();
+export const promise = makePromiseCb();
 ```
 
 ## Module Info
 
 ```
 Exports {
-  "makeOne" => {
+  "makePromise" => {
     ExportOwnExport => JsOwnExport::Binding(4)
   }
-  "makeOneCb" => {
+  "makePromiseCb" => {
     ExportOwnExport => JsOwnExport::Binding(5)
   }
-  "one" => {
+  "promise" => {
     ExportOwnExport => JsOwnExport::Binding(6)
   }
 }
@@ -39,20 +39,20 @@ Imports {
 
 ```
 BindingId(4) => JsBindingData {
-  Name: makeOne,
-  Type: Module(0) TypeId(5),
-  Declaration kind: Value
-}
-
-BindingId(5) => JsBindingData {
-  Name: makeOneCb,
+  Name: makePromise,
   Type: Module(0) TypeId(6),
   Declaration kind: Value
 }
 
-BindingId(6) => JsBindingData {
-  Name: one,
+BindingId(5) => JsBindingData {
+  Name: makePromiseCb,
   Type: Module(0) TypeId(7),
+  Declaration kind: Value
+}
+
+BindingId(6) => JsBindingData {
+  Name: promise,
+  Type: Module(0) TypeId(8),
   Declaration kind: Value
 }
 ```
@@ -79,15 +79,25 @@ Module TypeId(4) => sync Function "useCallback" {
   returns: Module(0) TypeId(2)
 }
 
-Module TypeId(5) => sync Function {
+Module TypeId(5) => instanceof Promise
+
+Module TypeId(6) => sync Function {
   accepts: {
     params: []
     type_args: []
   }
-  returns: unknown reference
+  returns: Module(0) TypeId(5)
 }
 
-Module TypeId(6) => instanceof Module(0) TypeId(1)
+Module TypeId(7) => sync Function {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: Module(0) TypeId(5)
+}
 
-Module TypeId(7) => Call Module(0) TypeId(6)(No parameters)
+Module TypeId(8) => instanceof Promise
 ```
+
+# Scoped Type Resolver
