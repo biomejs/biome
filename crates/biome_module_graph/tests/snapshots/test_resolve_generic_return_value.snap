@@ -101,3 +101,9 @@ Module TypeId(8) => instanceof Promise
 ```
 
 # Scoped Type Resolver
+
+## Registered types
+
+```
+Scope TypeId(0) => instanceof Promise
+```

@@ -151,3 +151,9 @@ Module TypeId(3) => sync Function "returnPromiseResult" {
 ```
 
 # Scoped Type Resolver
+
+## Registered types
+
+```
+Scope TypeId(0) => instanceof Promise<Module(2) TypeId(3)>
+```

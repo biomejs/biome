@@ -19,7 +19,7 @@ use biome_js_type_info_macros::Resolvable;
 use biome_resolver::ResolvedPath;
 use biome_rowan::Text;
 
-use crate::globals::{GLOBAL_PROMISE_ID, GLOBAL_UNKNOWN_ID, PROMISE_ID};
+use crate::globals::{GLOBAL_PROMISE_ID, GLOBAL_STRING_ID, GLOBAL_UNKNOWN_ID};
 use crate::type_info::literal::{BooleanLiteral, NumberLiteral, StringLiteral};
 use crate::{GLOBAL_RESOLVER, Resolvable, ResolvedTypeData, ResolvedTypeId, TypeResolver};
 
@@ -75,14 +75,6 @@ impl Deref for Type {
 }
 
 impl Type {
-    pub fn from_data(mut resolver: Box<dyn TypeResolver>, data: TypeData) -> Self {
-        let id = resolver.register_and_resolve(data);
-        Self {
-            resolver: Arc::from(resolver),
-            id,
-        }
-    }
-
     pub fn from_id(resolver: Arc<dyn TypeResolver>, id: ResolvedTypeId) -> Self {
         Self { resolver, id }
     }
@@ -112,7 +104,7 @@ impl Type {
 
     /// Returns whether this type is the `Promise` class.
     pub fn is_promise(&self) -> bool {
-        self.id.is_global() && self.id() == PROMISE_ID
+        self.id == GLOBAL_PROMISE_ID
     }
 
     /// Returns whether this type is an instance of a `Promise`.
@@ -132,6 +124,18 @@ impl Type {
                 .is_some_and(|ty| ty.is_promise()),
             _ => false,
         }
+    }
+
+    /// Returns whether this type is a string.
+    pub fn is_string(&self) -> bool {
+        self.id == GLOBAL_STRING_ID
+            || self
+                .resolved_data()
+                .is_some_and(|ty| match ty.as_raw_data() {
+                    TypeData::String => true,
+                    TypeData::Literal(literal) => matches!(literal.as_ref(), Literal::String(_)),
+                    _ => false,
+                })
     }
 
     pub fn resolve(&self, ty: &TypeReference) -> Option<Self> {

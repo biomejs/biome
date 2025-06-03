@@ -28663,3 +28663,17 @@ Module TypeId(2566) => instanceof Promise<Module(0) TypeId(34)>
 ```
 
 # Scoped Type Resolver
+
+## Registered types
+
+```
+Scope TypeId(0) => async Function {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: Module(0) TypeId(0)
+}
+
+Scope TypeId(1) => instanceof Promise
+```

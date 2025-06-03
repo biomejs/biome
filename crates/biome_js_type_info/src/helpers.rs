@@ -52,6 +52,10 @@ impl<'a> ResolvedTypeData<'a> {
             .map(|param| self.apply_module_id_to_reference(param))
     }
 
+    pub fn has_members(self) -> bool {
+        TypeMemberOwner::from_type_data(self.as_raw_data()).is_some()
+    }
+
     pub fn is_expression(self) -> bool {
         matches!(self.as_raw_data(), TypeData::TypeofExpression(_))
     }
@@ -365,6 +369,7 @@ enum TypeMemberOwner<'a> {
 }
 
 impl<'a> TypeMemberOwner<'a> {
+    #[inline]
     fn from_type_data(type_data: &'a TypeData) -> Option<Self> {
         match type_data {
             TypeData::Class(class) => Some(Self::Class(class)),

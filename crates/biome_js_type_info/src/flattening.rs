@@ -64,6 +64,8 @@ impl TypeData {
 fn flattened(mut ty: TypeData, resolver: &mut dyn TypeResolver, depth: usize) -> TypeData {
     const MAX_FLATTEN_DEPTH: usize = 10; // Arbitrary depth, may require tweaking.
 
+    let printed = format!("{ty:?}");
+
     for depth in depth + 1..=MAX_FLATTEN_DEPTH {
         match &ty {
             TypeData::MergedReference(merged) => {
@@ -357,90 +359,98 @@ fn flattened(mut ty: TypeData, resolver: &mut dyn TypeResolver, depth: usize) ->
                 }
                 TypeofExpression::StaticMember(expr) => {
                     if let Some(object) = resolver.resolve_and_get(&expr.object) {
-                        // FIXME: Flattening intersections and unions for members should be done in
-                        //        `TypeMemberIterator`.
-
-                        if let TypeData::InstanceOf(instance) = object.as_raw_data() {
-                            let instance_ty = object.apply_module_id_to_reference(&instance.ty);
-                            if resolver
-                                .resolve_and_get(&instance_ty)
-                                .is_some_and(|object| {
+                        match object.as_raw_data() {
+                            TypeData::InstanceOf(instance) => {
+                                let instance_ty = object.apply_module_id_to_reference(&instance.ty);
+                                let resolved_instance_ty = resolver.resolve_and_get(&instance_ty);
+                                if resolved_instance_ty.is_some_and(|resolved| {
                                     matches!(
-                                        object.as_raw_data(),
+                                        resolved.as_raw_data(),
                                         TypeData::Intersection(_) | TypeData::Union(_)
                                     )
-                                })
-                            {
-                                ty = TypeData::TypeofExpression(Box::new(
-                                    TypeofExpression::StaticMember(TypeofStaticMemberExpression {
-                                        object: instance_ty.into_owned(),
-                                        member: expr.member.clone(),
-                                    }),
-                                ));
-                                continue;
+                                }) {
+                                    ty = TypeData::TypeofExpression(Box::new(
+                                        TypeofExpression::StaticMember(
+                                            TypeofStaticMemberExpression {
+                                                object: instance_ty.into_owned(),
+                                                member: expr.member.clone(),
+                                            },
+                                        ),
+                                    ));
+                                    continue;
+                                } else if !resolved_instance_ty
+                                    .is_some_and(ResolvedTypeData::has_members)
+                                {
+                                    return ty;
+                                }
                             }
-                        };
 
-                        if let TypeData::Intersection(intersection) = object.as_raw_data() {
-                            let types: Vec<_> = intersection
-                                .types()
-                                .iter()
-                                .map(|reference| object.apply_module_id_to_reference(reference))
-                                .map(|reference| reference.into_owned())
-                                .collect();
-                            let types = types
-                                .into_iter()
-                                .map(|variant| {
-                                    // Resolve and flatten the type member for each variant.
-                                    let variant = flattened(
-                                        TypeData::TypeofExpression(Box::new(
-                                            TypeofExpression::StaticMember(
-                                                TypeofStaticMemberExpression {
-                                                    object: variant,
-                                                    member: expr.member.clone(),
-                                                },
-                                            ),
-                                        )),
-                                        resolver,
-                                        depth,
-                                    );
+                            // FIXME: Flattening intersections and unions for members should be done
+                            //        in `TypeMemberIterator`.
+                            TypeData::Intersection(intersection) => {
+                                let types: Vec<_> = intersection
+                                    .types()
+                                    .iter()
+                                    .map(|reference| object.apply_module_id_to_reference(reference))
+                                    .map(|reference| reference.into_owned())
+                                    .collect();
+                                let types = types
+                                    .into_iter()
+                                    .map(|variant| {
+                                        // Resolve and flatten the type member for each variant.
+                                        let variant = flattened(
+                                            TypeData::TypeofExpression(Box::new(
+                                                TypeofExpression::StaticMember(
+                                                    TypeofStaticMemberExpression {
+                                                        object: variant,
+                                                        member: expr.member.clone(),
+                                                    },
+                                                ),
+                                            )),
+                                            resolver,
+                                            depth,
+                                        );
 
-                                    resolver.reference_to_registered_data(variant)
-                                })
-                                .collect();
+                                        resolver.reference_to_registered_data(variant)
+                                    })
+                                    .collect();
 
-                            return TypeData::intersection_of(types);
-                        }
+                                return TypeData::intersection_of(types);
+                            }
+                            TypeData::Union(union) => {
+                                let types: Vec<_> = union
+                                    .types()
+                                    .iter()
+                                    .map(|reference| object.apply_module_id_to_reference(reference))
+                                    .map(|reference| reference.into_owned())
+                                    .collect();
+                                let types = types
+                                    .into_iter()
+                                    .map(|variant| {
+                                        // Resolve and flatten the type member for each variant.
+                                        let variant = flattened(
+                                            TypeData::TypeofExpression(Box::new(
+                                                TypeofExpression::StaticMember(
+                                                    TypeofStaticMemberExpression {
+                                                        object: variant,
+                                                        member: expr.member.clone(),
+                                                    },
+                                                ),
+                                            )),
+                                            resolver,
+                                            depth,
+                                        );
 
-                        if let TypeData::Union(union) = object.as_raw_data() {
-                            let types: Vec<_> = union
-                                .types()
-                                .iter()
-                                .map(|reference| object.apply_module_id_to_reference(reference))
-                                .map(|reference| reference.into_owned())
-                                .collect();
-                            let types = types
-                                .into_iter()
-                                .map(|variant| {
-                                    // Resolve and flatten the type member for each variant.
-                                    let variant = flattened(
-                                        TypeData::TypeofExpression(Box::new(
-                                            TypeofExpression::StaticMember(
-                                                TypeofStaticMemberExpression {
-                                                    object: variant,
-                                                    member: expr.member.clone(),
-                                                },
-                                            ),
-                                        )),
-                                        resolver,
-                                        depth,
-                                    );
+                                        resolver.reference_to_registered_data(variant)
+                                    })
+                                    .collect();
 
-                                    resolver.reference_to_registered_data(variant)
-                                })
-                                .collect();
+                                return TypeData::union_of(types);
+                            }
 
-                            return TypeData::union_of(types);
+                            TypeData::Reference(_) => return ty,
+
+                            _ => {}
                         }
 
                         let is_class = matches!(object.as_raw_data(), TypeData::Class(_));
