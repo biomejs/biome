@@ -1,11 +1,19 @@
-div {
-	box-shadow: 0 0 1px 2px rgba(88, 144, 255, 0.75), 10px 20px 1px 2px rgba(87, 145, 254, 0.65);
-}
-
 html {
 	font-family: system-ui, -apple-system;
 }
 
 html {
 	font-family: -apple-system, system-ui;
+}
+
+html {
+	font-family: "Lato", system-ui, -apple-system, Arial, sans-serif;
+}
+
+html {
+	font-family: -apple-system, "Lato", system-ui, -apple-system, Arial, sans-serif;
+}
+
+html {
+	font-family: -apple-system, Arial, sans-serif, sans-serif, sans-serif, Arial, sans-serif;
 }
