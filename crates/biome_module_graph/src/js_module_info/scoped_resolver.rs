@@ -78,7 +78,7 @@ impl ScopedResolver {
         let scope_id = self.modules[0].scope_id_for_range(expr.range());
 
         let mut resolver = ScopeRestrictedRegistrationResolver::new(self, scope_id);
-        let ty = TypeData::from_any_js_expression(&mut resolver, expr);
+        let ty = TypeData::from_any_js_expression(&mut resolver, scope_id, expr);
         resolver.run_inference();
 
         let ty = ty.inferred(&mut resolver);
@@ -333,10 +333,9 @@ impl TypeResolver for ScopedResolver {
 
     fn resolve_qualifier(&self, qualifier: &TypeReferenceQualifier) -> Option<ResolvedTypeId> {
         let module = &self.modules[0];
-        let scope_id = qualifier.scope_id.unwrap_or(ScopeId::GLOBAL);
 
         let identifier = qualifier.path.first()?;
-        let Some(binding_ref) = module.find_binding_in_scope(identifier, scope_id) else {
+        let Some(binding_ref) = module.find_binding_in_scope(identifier, qualifier.scope_id) else {
             return GLOBAL_RESOLVER.resolve_qualifier(qualifier);
         };
 

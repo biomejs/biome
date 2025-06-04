@@ -12,6 +12,6 @@ const array: Array<string> = [];
 ## Result
 
 ```
-array => instanceof unresolved reference "Array"<string>
+array => instanceof unresolved reference "Array"<string> (scope ID: 0)
 
 ```

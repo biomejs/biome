@@ -1,3 +1,5 @@
+#![allow(clippy::arc_with_non_send_sync)]
+
 mod snap;
 
 use std::sync::Arc;
@@ -5,7 +7,7 @@ use std::sync::Arc;
 use crate::snap::ModuleGraphSnapshot;
 use biome_deserialize::json::deserialize_from_json_str;
 use biome_fs::{BiomePath, FileSystem, MemoryFileSystem, OsFileSystem};
-use biome_js_type_info::{ScopeId, Type, TypeResolver};
+use biome_js_type_info::{ResolvedTypeId, ScopeId, Type, TypeData, TypeResolver};
 use biome_jsdoc_comment::JsdocComment;
 use biome_json_parser::{JsonParserOptions, parse_json};
 use biome_json_value::{JsonObject, JsonString};
@@ -560,6 +562,140 @@ fn test_resolve_export_types() {
 }
 
 #[test]
+fn test_resolve_generic_return_value() {
+    let mut fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"function useCallback<T extends Function>(
+    callback: T,
+    deps: DependencyList,
+): T;
+
+export const makePromise = (): Promise => Promise.resolve(1);
+
+export const makePromiseCb = useCallback(makePromise);
+
+export const promise = makePromiseCb();
+"#,
+    );
+
+    let added_paths = [BiomePath::new("/src/index.ts")];
+    let added_paths = get_added_paths(&fs, &added_paths);
+
+    let module_graph = Arc::new(ModuleGraph::default());
+    module_graph.update_graph_for_js_paths(&fs, &ProjectLayout::default(), &added_paths, &[]);
+
+    let index_module = module_graph
+        .module_info_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+    let mut resolver = ScopedResolver::from_global_scope(index_module, module_graph.clone());
+    resolver.run_inference();
+
+    let resolved_id = resolver
+        .resolve_type_of(&Text::Static("promise"), ScopeId::GLOBAL)
+        .expect("promise variable not found");
+    let ty = resolver
+        .get_by_resolved_id(resolved_id)
+        .expect("cannot find type data")
+        .to_data();
+    let _ty_string = format!("{ty:?}"); // for debugging
+    let ty = ty.inferred(&mut resolver);
+    let _ty_string = format!("{ty:?}"); // for debugging
+
+    let id = resolver.register_type(ty);
+    resolver.run_inference();
+
+    let resolved_id = ResolvedTypeId::new(resolver.level(), id);
+    let resolver = Arc::new(resolver);
+    let ty = Type::from_id(resolver.clone(), resolved_id);
+    assert!(ty.is_promise_instance());
+
+    let snapshot = ModuleGraphSnapshot::new(module_graph.as_ref(), &fs).with_resolver(&resolver);
+    snapshot.assert_snapshot("test_resolve_generic_return_value");
+}
+
+#[test]
+fn test_resolve_generic_return_value_with_multiple_modules() {
+    let mut fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/bar.ts".into(),
+        r#"
+        export type Bar = { bar: "bar" };
+        "#,
+    );
+    fs.insert(
+        "/src/foo.ts".into(),
+        r#"
+        import type { Bar } from "./bar.ts";
+
+        export function foo<T>(foo: T, bar: Bar): T;
+        "#,
+    );
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"import type { Bar } from "./bar.ts";
+        import { foo } from "./foo.ts";
+
+        const bar: Bar = { bar: "bar" };
+
+        const stringyBar = bar.bar;
+
+        const result = foo(bar.bar, 1);
+        "#,
+    );
+
+    let added_paths = [
+        BiomePath::new("/src/foo.ts"),
+        BiomePath::new("/src/bar.ts"),
+        BiomePath::new("/src/index.ts"),
+    ];
+    let added_paths = get_added_paths(&fs, &added_paths);
+
+    let project_layout = ProjectLayout::default();
+    project_layout.insert_node_manifest(
+        "/".into(),
+        PackageJson::new("frontend")
+            .with_version("0.0.0".into())
+            .with_dependencies(Dependencies::from([("react".into(), "19.0.0".into())])),
+    );
+
+    let tsconfig_json = parse_json(r#"{}"#, JsonParserOptions::default());
+    project_layout.insert_serialized_tsconfig("/".into(), tsconfig_json.into());
+
+    let module_graph = Arc::new(ModuleGraph::default());
+    module_graph.update_graph_for_js_paths(&fs, &project_layout, &added_paths, &[]);
+
+    let index_module = module_graph
+        .module_info_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+    let mut resolver = ScopedResolver::from_global_scope(index_module, module_graph.clone());
+    resolver.run_inference();
+
+    let result_id = resolver
+        .resolve_type_of(&Text::Static("result"), ScopeId::GLOBAL)
+        .expect("result variable not found");
+    let ty = resolver
+        .get_by_resolved_id(result_id)
+        .expect("cannot find type data")
+        .to_data();
+    let _ty_string = format!("{ty:?}"); // for debugging
+    let ty = ty.inferred(&mut resolver);
+    let _ty_string = format!("{ty:?}"); // for debugging
+
+    let id = resolver.register_type(ty);
+    resolver.run_inference();
+
+    let resolved_id = ResolvedTypeId::new(resolver.level(), id);
+    let resolver = Arc::new(resolver);
+    let ty = Type::from_id(resolver.clone(), resolved_id);
+    assert!(ty.is_string());
+
+    let snapshot =
+        ModuleGraphSnapshot::new(module_graph.as_ref(), &fs).with_resolver(resolver.as_ref());
+    snapshot.assert_snapshot("test_resolve_generic_return_value_with_multiple_modules");
+}
+
+#[test]
 fn test_resolve_promise_export() {
     let mut fs = MemoryFileSystem::default();
     fs.insert(
@@ -930,21 +1066,36 @@ fn test_resolve_react_types() {
     let mut resolver = ScopedResolver::from_global_scope(index_module, module_graph.clone());
     resolver.run_inference();
 
-    let snapshot = ModuleGraphSnapshot::new(module_graph.as_ref(), &fs).with_resolver(&resolver);
-    snapshot.assert_snapshot("test_resolve_react_types");
+    let use_callback_id = resolver
+        .resolve_type_of(&Text::Static("useCallback"), ScopeId::GLOBAL)
+        .expect("useCallback variable not found");
+    let ty = resolver
+        .get_by_resolved_id(use_callback_id)
+        .expect("cannot find type data");
+    assert!(matches!(ty.as_raw_data(), TypeData::Function(_)));
 
-    let resolved_id = resolver
+    let promise_id = resolver
         .resolve_type_of(&Text::Static("promise"), ScopeId::GLOBAL)
         .expect("promise variable not found");
     let ty = resolver
-        .get_by_resolved_id(resolved_id)
+        .get_by_resolved_id(promise_id)
         .expect("cannot find type data")
         .to_data();
     let _ty_string = format!("{ty:?}"); // for debugging
     let ty = ty.inferred(&mut resolver);
     let _ty_string = format!("{ty:?}"); // for debugging
-    //let ty = Type::from_data(Box::new(resolver), ty);
-    // assert!(ty.is_promise_instance()); // FIXME: Let's make this pass
+
+    let id = resolver.register_type(ty);
+    resolver.run_inference();
+
+    let resolved_id = ResolvedTypeId::new(resolver.level(), id);
+    let resolver = Arc::new(resolver);
+    let ty = Type::from_id(resolver.clone(), resolved_id);
+    assert!(ty.is_promise_instance());
+
+    let snapshot =
+        ModuleGraphSnapshot::new(module_graph.as_ref(), &fs).with_resolver(resolver.as_ref());
+    snapshot.assert_snapshot("test_resolve_react_types");
 }
 
 #[test]
@@ -1022,11 +1173,6 @@ fn test_resolve_promise_from_imported_function_returning_imported_promise_type()
     let mut resolver = ScopedResolver::from_global_scope(index_module, module_graph.clone());
     resolver.run_inference();
 
-    let snapshot = ModuleGraphSnapshot::new(module_graph.as_ref(), &fs).with_resolver(&resolver);
-    snapshot.assert_snapshot(
-        "test_resolve_promise_from_imported_function_returning_imported_promise_type",
-    );
-
     let resolved_id = resolver
         .resolve_type_of(&Text::Static("promise"), ScopeId::GLOBAL)
         .expect("promise variable not found");
@@ -1037,8 +1183,20 @@ fn test_resolve_promise_from_imported_function_returning_imported_promise_type()
     let _ty_string = format!("{ty:?}"); // for debugging
     let ty = ty.inferred(&mut resolver);
     let _ty_string = format!("{ty:?}"); // for debugging
-    let ty = Type::from_data(Box::new(resolver), ty);
+
+    let id = resolver.register_type(ty);
+    resolver.run_inference();
+
+    let resolved_id = ResolvedTypeId::new(resolver.level(), id);
+    let resolver = Arc::new(resolver);
+    let ty = Type::from_id(resolver.clone(), resolved_id);
     assert!(ty.is_promise_instance());
+
+    let snapshot =
+        ModuleGraphSnapshot::new(module_graph.as_ref(), &fs).with_resolver(resolver.as_ref());
+    snapshot.assert_snapshot(
+        "test_resolve_promise_from_imported_function_returning_imported_promise_type",
+    );
 }
 
 #[test]
@@ -1088,11 +1246,6 @@ fn test_resolve_promise_from_imported_function_returning_reexported_promise_type
     let mut resolver = ScopedResolver::from_global_scope(index_module, module_graph.clone());
     resolver.run_inference();
 
-    let snapshot = ModuleGraphSnapshot::new(module_graph.as_ref(), &fs).with_resolver(&resolver);
-    snapshot.assert_snapshot(
-        "test_resolve_promise_from_imported_function_returning_reexported_promise_type",
-    );
-
     let resolved_id = resolver
         .resolve_type_of(&Text::Static("promise"), ScopeId::GLOBAL)
         .expect("promise variable not found");
@@ -1103,6 +1256,18 @@ fn test_resolve_promise_from_imported_function_returning_reexported_promise_type
     let _ty_string = format!("{ty:?}"); // for debugging
     let ty = ty.inferred(&mut resolver);
     let _ty_string = format!("{ty:?}"); // for debugging
-    let ty = Type::from_data(Box::new(resolver), ty);
+
+    let id = resolver.register_type(ty);
+    resolver.run_inference();
+
+    let resolved_id = ResolvedTypeId::new(resolver.level(), id);
+    let resolver = Arc::new(resolver);
+    let ty = Type::from_id(resolver.clone(), resolved_id);
     assert!(ty.is_promise_instance());
+
+    let snapshot =
+        ModuleGraphSnapshot::new(module_graph.as_ref(), &fs).with_resolver(resolver.as_ref());
+    snapshot.assert_snapshot(
+        "test_resolve_promise_from_imported_function_returning_reexported_promise_type",
+    );
 }

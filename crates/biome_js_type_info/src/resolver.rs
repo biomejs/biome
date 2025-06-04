@@ -3,9 +3,9 @@ use std::{borrow::Cow, fmt::Debug};
 use biome_rowan::Text;
 
 use crate::{
-    Class, DestructureField, GenericTypeParameter, NUM_PREDEFINED_TYPES, ScopeId, TypeData, TypeId,
-    TypeImportQualifier, TypeInstance, TypeMember, TypeReference, TypeReferenceQualifier,
-    TypeofDestructureExpression, TypeofExpression, TypeofValue, Union,
+    DestructureField, NUM_PREDEFINED_TYPES, ScopeId, TypeData, TypeId, TypeImportQualifier,
+    TypeInstance, TypeMember, TypeReference, TypeReferenceQualifier, TypeofDestructureExpression,
+    TypeofExpression, TypeofValue, Union,
     globals::{GLOBAL_UNDEFINED_ID, global_type_name},
 };
 
@@ -556,34 +556,6 @@ pub trait TypeResolver {
 
     // #region Registration utilities
 
-    fn assign_type_parameters(
-        &mut self,
-        type_data: &TypeData,
-        type_parameters: &[TypeReference],
-    ) -> Option<TypeId> {
-        match type_data {
-            TypeData::Class(class) => Some(
-                self.register_type(TypeData::Class(Box::new(Class {
-                    type_parameters: class
-                        .type_parameters
-                        .iter()
-                        .enumerate()
-                        .map(|(i, param)| GenericTypeParameter {
-                            name: param.name.clone(),
-                            ty: type_parameters
-                                .get(i)
-                                .cloned()
-                                .unwrap_or_else(|| param.ty.clone()),
-                        })
-                        .collect(),
-                    ..class.as_ref().clone()
-                }))),
-            ),
-            // TODO: Which other types do we need to handle here?
-            _ => None,
-        }
-    }
-
     fn destructuring_of(
         &mut self,
         ty: TypeReference,
@@ -686,7 +658,7 @@ impl Resolvable for TypeReference {
                                 let resolved_id: ResolvedTypeId = resolver.register_and_resolve(
                                     TypeData::instance_of(TypeInstance {
                                         ty: resolved_id.into(),
-                                        type_parameters: GenericTypeParameter::merge_types(
+                                        type_parameters: Self::merge_parameters(
                                             parameters,
                                             &qualifier.type_parameters,
                                         ),

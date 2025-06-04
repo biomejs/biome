@@ -19,7 +19,7 @@ use biome_js_type_info_macros::Resolvable;
 use biome_resolver::ResolvedPath;
 use biome_rowan::Text;
 
-use crate::globals::{GLOBAL_PROMISE_ID, GLOBAL_UNKNOWN_ID, PROMISE_ID};
+use crate::globals::{GLOBAL_PROMISE_ID, GLOBAL_STRING_ID, GLOBAL_UNKNOWN_ID};
 use crate::type_info::literal::{BooleanLiteral, NumberLiteral, StringLiteral};
 use crate::{GLOBAL_RESOLVER, Resolvable, ResolvedTypeData, ResolvedTypeId, TypeResolver};
 
@@ -75,14 +75,6 @@ impl Deref for Type {
 }
 
 impl Type {
-    pub fn from_data(mut resolver: Box<dyn TypeResolver>, data: TypeData) -> Self {
-        let id = resolver.register_and_resolve(data);
-        Self {
-            resolver: Arc::from(resolver),
-            id,
-        }
-    }
-
     pub fn from_id(resolver: Arc<dyn TypeResolver>, id: ResolvedTypeId) -> Self {
         Self { resolver, id }
     }
@@ -112,7 +104,7 @@ impl Type {
 
     /// Returns whether this type is the `Promise` class.
     pub fn is_promise(&self) -> bool {
-        self.id.is_global() && self.id() == PROMISE_ID
+        self.id == GLOBAL_PROMISE_ID
     }
 
     /// Returns whether this type is an instance of a `Promise`.
@@ -132,6 +124,18 @@ impl Type {
                 .is_some_and(|ty| ty.is_promise()),
             _ => false,
         }
+    }
+
+    /// Returns whether this type is a string.
+    pub fn is_string(&self) -> bool {
+        self.id == GLOBAL_STRING_ID
+            || self
+                .resolved_data()
+                .is_some_and(|ty| match ty.as_raw_data() {
+                    TypeData::String => true,
+                    TypeData::Literal(literal) => matches!(literal.as_ref(), Literal::String(_)),
+                    _ => false,
+                })
     }
 
     pub fn resolve(&self, ty: &TypeReference) -> Option<Self> {
@@ -184,6 +188,9 @@ pub enum TypeData {
     Namespace(Box<Namespace>),
     Object(Box<Object>),
     Tuple(Box<Tuple>),
+
+    // Definition of a generic type argument.
+    Generic(Box<GenericTypeParameter>),
 
     // Compound types
     Intersection(Box<Intersection>),
@@ -265,6 +272,12 @@ impl From<Function> for TypeData {
     }
 }
 
+impl From<GenericTypeParameter> for TypeData {
+    fn from(value: GenericTypeParameter) -> Self {
+        Self::Generic(Box::new(value))
+    }
+}
+
 impl From<Interface> for TypeData {
     fn from(value: Interface) -> Self {
         Self::Interface(Box::new(value))
@@ -302,9 +315,10 @@ impl From<TypeofValue> for TypeData {
 }
 
 impl TypeData {
-    pub fn array_of(ty: TypeReference) -> Self {
+    pub fn array_of(scope_id: ScopeId, ty: TypeReference) -> Self {
         Self::instance_of(TypeReference::from(
-            TypeReferenceQualifier::from_name(Text::Static("Array")).with_type_parameters([ty]),
+            TypeReferenceQualifier::from_name(scope_id, Text::Static("Array"))
+                .with_type_parameters([ty]),
         ))
     }
 
@@ -379,11 +393,12 @@ impl TypeData {
         Self::Reference(reference.into())
     }
 
-    pub fn type_parameters(&self) -> Option<&[GenericTypeParameter]> {
+    pub fn type_parameters(&self) -> Option<&[TypeReference]> {
         match self {
             Self::Class(class) => Some(&class.type_parameters),
             Self::Function(function) => Some(&function.type_parameters),
-            Self::InstanceOf(instance) => Some(&instance.type_parameters),
+            Self::InstanceOf(type_instance) => Some(&type_instance.type_parameters),
+            Self::Interface(interface) => Some(&interface.type_parameters),
             _ => None,
         }
     }
@@ -415,7 +430,7 @@ pub struct Class {
     pub name: Option<Text>,
 
     /// The class's type parameters.
-    pub type_parameters: Box<[GenericTypeParameter]>,
+    pub type_parameters: Box<[TypeReference]>,
 
     /// Type of another class being extended by this one.
     pub extends: Option<TypeReference>,
@@ -441,7 +456,7 @@ impl Debug for Class {
 #[derive(Clone, Debug, Eq, Hash, PartialEq, Resolvable)]
 pub struct Constructor {
     /// Generic type parameters used in the call signature.
-    pub type_parameters: Box<[GenericTypeParameter]>,
+    pub type_parameters: Box<[TypeReference]>,
 
     /// Call parameter of the constructor.
     pub parameters: Box<[FunctionParameter]>,
@@ -477,7 +492,7 @@ pub struct Function {
     pub is_async: bool,
 
     /// Generic type parameters defined in the function signature.
-    pub type_parameters: Box<[GenericTypeParameter]>,
+    pub type_parameters: Box<[TypeReference]>,
 
     /// Name of the function, if specified in the definition.
     pub name: Option<Text>,
@@ -525,43 +540,16 @@ pub struct FunctionParameterBinding {
 }
 
 /// Definition of a generic type parameter.
-// TODO: Include modifiers and constraints.
 #[derive(Clone, Debug, Eq, Hash, PartialEq, Resolvable)]
 pub struct GenericTypeParameter {
     /// Name of the type parameter.
     pub name: Text,
 
-    /// The resolved type to use.
-    ///
-    /// May be the default type from the type definition.
-    pub ty: TypeReference,
-}
+    /// Optional constraint of the parameter.
+    pub constraint: TypeReference,
 
-impl GenericTypeParameter {
-    /// Merges the parameters from `incoming` into `base`.
-    pub fn merge_parameters(base: &[Self], incoming: &[Self]) -> Box<[Self]> {
-        base.iter()
-            .enumerate()
-            .map(|(i, param)| Self {
-                name: param.name.clone(),
-                ty: incoming
-                    .get(i)
-                    .map_or_else(|| param.ty.clone(), |incoming| incoming.ty.clone()),
-            })
-            .collect()
-    }
-
-    /// Merges the `types` into `parameters`.
-    pub fn merge_types(parameters: &[Self], types: &[TypeReference]) -> Box<[Self]> {
-        parameters
-            .iter()
-            .enumerate()
-            .map(|(i, param)| Self {
-                name: param.name.clone(),
-                ty: types.get(i).cloned().unwrap_or_else(|| param.ty.clone()),
-            })
-            .collect()
-    }
+    /// Default to use if the parameter is unknown.
+    pub default: TypeReference,
 }
 
 /// An interface definition.
@@ -571,7 +559,7 @@ pub struct Interface {
     pub name: Text,
 
     /// The interface's type parameters.
-    pub type_parameters: Box<[GenericTypeParameter]>,
+    pub type_parameters: Box<[TypeReference]>,
 
     /// Types being extended by this interface.
     pub extends: Box<[TypeReference]>,
@@ -811,7 +799,7 @@ pub struct TypeInstance {
 
     /// Generic type parameters that should be passed onto the type being
     /// instantiated.
-    pub type_parameters: Box<[GenericTypeParameter]>,
+    pub type_parameters: Box<[TypeReference]>,
 }
 
 impl From<TypeReference> for TypeInstance {
@@ -825,11 +813,7 @@ impl From<TypeReference> for TypeInstance {
 
 impl TypeInstance {
     pub fn has_known_type_parameters(&self) -> bool {
-        !self.type_parameters.is_empty()
-            && self
-                .type_parameters
-                .iter()
-                .any(|param| param.ty != TypeReference::Unknown)
+        self.type_parameters.iter().any(TypeReference::is_known)
     }
 }
 
@@ -1003,6 +987,13 @@ impl TypeReference {
     pub fn is_known(&self) -> bool {
         *self != Self::Unknown
     }
+    /// Merges the generic type parameters referenced by `incoming` into `base`.
+    pub fn merge_parameters(base: &[Self], incoming: &[Self]) -> Box<[Self]> {
+        base.iter()
+            .enumerate()
+            .map(|(i, param)| incoming.get(i).unwrap_or(param).clone())
+            .collect()
+    }
 
     pub fn resolved_params(&self, resolver: &mut dyn TypeResolver) -> Box<[Self]> {
         match self {
@@ -1072,7 +1063,7 @@ pub struct TypeReferenceQualifier {
     pub type_parameters: Box<[TypeReference]>,
 
     /// ID of the scope from which the qualifier is being referenced.
-    pub scope_id: Option<ScopeId>,
+    pub scope_id: ScopeId,
 
     /// If `true`, this qualifier can reference types (and namespaces) only.
     pub type_only: bool,
@@ -1085,11 +1076,7 @@ pub struct TypeReferenceQualifier {
 
 impl TypeReferenceQualifier {
     pub fn has_known_type_parameters(&self) -> bool {
-        !self.type_parameters.is_empty()
-            && self
-                .type_parameters
-                .iter()
-                .any(|param| *param != TypeReference::Unknown)
+        self.type_parameters.iter().any(TypeReference::is_known)
     }
 
     /// Checks whether this type qualifier references an `Array` type.
@@ -1120,7 +1107,7 @@ impl TypeReferenceQualifier {
     }
 
     pub fn with_scope_id(mut self, scope_id: ScopeId) -> Self {
-        self.scope_id = Some(scope_id);
+        self.scope_id = scope_id;
         self
     }
 

@@ -106,9 +106,9 @@ Module TypeId(3) => Object {
   members: ["result": Module(0) TypeId(2)]
 }
 
-Module TypeId(4) => instanceof Promise<T = Module(0) TypeId(3)>
+Module TypeId(4) => instanceof Promise<Module(0) TypeId(3)>
 
-Module TypeId(5) => instanceof Promise<T = Module(0) TypeId(3)>
+Module TypeId(5) => instanceof Promise<Module(0) TypeId(3)>
 ```
 
 # `/src/returnPromiseResult.ts` (Module 1)
@@ -164,6 +164,22 @@ Module TypeId(1) => sync Function "returnPromiseResult" {
   }
   returns: Module(0) TypeId(0)
 }
+
+Module TypeId(2) => instanceof Import Symbol: PromisedResult from "/src/reexport.ts"
+
+Module TypeId(3) => sync Function "returnPromiseResult" {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: Module(0) TypeId(2)
+}
 ```
 
 # Scoped Type Resolver
+
+## Registered types
+
+```
+Scope TypeId(0) => instanceof Promise<Module(3) TypeId(3)>
+```

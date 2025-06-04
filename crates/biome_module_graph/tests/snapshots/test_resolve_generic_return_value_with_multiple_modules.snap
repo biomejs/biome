@@ -1,0 +1,163 @@
+---
+source: crates/biome_module_graph/tests/snap/mod.rs
+expression: content
+---
+# `/src/bar.ts` (Module 1)
+
+## Source
+
+```ts
+export type Bar = { bar: "bar" };
+```
+
+## Module Info
+
+```
+Exports {
+  "Bar" => {
+    ExportOwnExport => JsOwnExport::Binding(0)
+  }
+}
+Imports {
+  No imports
+}
+```
+
+## Exported Bindings
+
+```
+BindingId(0) => JsBindingData {
+  Name: Bar,
+  Type: Module(0) TypeId(1),
+  Declaration kind: Type
+}
+```
+
+## Registered types
+
+```
+Module TypeId(0) => value: bar
+
+Module TypeId(1) => Object {
+  prototype: No prototype
+  members: ["bar": Module(0) TypeId(0)]
+}
+```
+
+# `/src/index.ts` (Not imported by resolver)
+
+## Source
+
+```ts
+import type { Bar } from "./bar.ts";
+import { foo } from "./foo.ts";
+
+const bar: Bar = { bar: "bar" };
+
+const stringyBar = bar.bar;
+
+const result = foo(bar.bar, 1);
+```
+
+## Module Info
+
+```
+Exports {
+  No exports
+}
+Imports {
+  "Bar" => {
+    Specifier: "./bar.ts"
+    Resolved path: "/src/bar.ts"
+    Import Symbol: Bar
+  }
+  "foo" => {
+    Specifier: "./foo.ts"
+    Resolved path: "/src/foo.ts"
+    Import Symbol: foo
+  }
+}
+```
+
+## Registered types
+
+```
+Module TypeId(0) => instanceof Import Symbol: Bar from "/src/bar.ts"
+
+Module TypeId(1) => Module(0) TypeId(0).bar
+
+Module TypeId(2) => value: 1
+
+Module TypeId(3) => Call Import Symbol: foo from "/src/foo.ts"(
+  Module(0) TypeId(1)
+  Module(0) TypeId(2)
+)
+```
+
+# `/src/foo.ts` (Module 2)
+
+## Source
+
+```ts
+import type { Bar } from "./bar.ts";
+
+export function foo<T>(foo: T, bar: Bar): T;
+```
+
+## Module Info
+
+```
+Exports {
+  "foo" => {
+    ExportOwnExport => JsOwnExport::Binding(1)
+  }
+}
+Imports {
+  "Bar" => {
+    Specifier: "./bar.ts"
+    Resolved path: "/src/bar.ts"
+    Import Symbol: Bar
+  }
+}
+```
+
+## Exported Bindings
+
+```
+BindingId(1) => JsBindingData {
+  Name: foo,
+  Type: Module(0) TypeId(3),
+  Declaration kind: HoistedValue
+}
+```
+
+## Registered types
+
+```
+Module TypeId(0) => T
+
+Module TypeId(1) => instanceof Module(0) TypeId(0)
+
+Module TypeId(2) => instanceof Import Symbol: Bar from "/src/bar.ts"
+
+Module TypeId(3) => sync Function "foo" {
+  accepts: {
+    params: [
+      required foo: Module(0) TypeId(1) (bindings: foo:instanceof Module(0) TypeId(0))
+      required bar: Module(0) TypeId(2) (bindings: bar:instanceof Import Symbol: Bar from "/src/bar.ts")
+    ]
+    type_args: [Module(0) TypeId(0)]
+  }
+  returns: Module(0) TypeId(1)
+}
+```
+
+# Scoped Type Resolver
+
+## Registered types
+
+```
+Scope TypeId(0) => value: bar
+
+Scope TypeId(1) => value: bar
+```

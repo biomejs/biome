@@ -268,7 +268,7 @@ Module TypeId(10) => Module(0) TypeId(13)
 
 Module TypeId(11) => Module(0) TypeId(15)
 
-Module TypeId(12) => instanceof Array<T = number>
+Module TypeId(12) => instanceof Array<number>
 
 Module TypeId(13) => boolean
 
@@ -323,7 +323,7 @@ Module TypeId(19) => sync Function "getObject" {
   returns: Module(0) TypeId(18)
 }
 
-Module TypeId(20) => instanceof unresolved reference "JSX.Element"
+Module TypeId(20) => instanceof unresolved reference "JSX.Element" (scope ID: 10)
 
 Module TypeId(21) => sync Function "Component" {
   accepts: {
@@ -333,7 +333,7 @@ Module TypeId(21) => sync Function "Component" {
   returns: Module(0) TypeId(20)
 }
 
-Module TypeId(22) => instanceof Array<T = number>
+Module TypeId(22) => instanceof Array<number>
 
 Module TypeId(23) => boolean
 

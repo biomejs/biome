@@ -1,0 +1,109 @@
+---
+source: crates/biome_module_graph/tests/snap/mod.rs
+expression: content
+---
+# `/src/index.ts` (Not imported by resolver)
+
+## Source
+
+```ts
+function useCallback<T extends Function>(callback: T, deps: DependencyList): T;
+
+export const makePromise = (): Promise => Promise.resolve(1);
+
+export const makePromiseCb = useCallback(makePromise);
+
+export const promise = makePromiseCb();
+```
+
+## Module Info
+
+```
+Exports {
+  "makePromise" => {
+    ExportOwnExport => JsOwnExport::Binding(4)
+  }
+  "makePromiseCb" => {
+    ExportOwnExport => JsOwnExport::Binding(5)
+  }
+  "promise" => {
+    ExportOwnExport => JsOwnExport::Binding(6)
+  }
+}
+Imports {
+  No imports
+}
+```
+
+## Exported Bindings
+
+```
+BindingId(4) => JsBindingData {
+  Name: makePromise,
+  Type: Module(0) TypeId(6),
+  Declaration kind: Value
+}
+
+BindingId(5) => JsBindingData {
+  Name: makePromiseCb,
+  Type: Module(0) TypeId(7),
+  Declaration kind: Value
+}
+
+BindingId(6) => JsBindingData {
+  Name: promise,
+  Type: Module(0) TypeId(8),
+  Declaration kind: Value
+}
+```
+
+## Registered types
+
+```
+Module TypeId(0) => instanceof unresolved reference "Function" (scope ID: 1)
+
+Module TypeId(1) => T extends Module(0) TypeId(0)
+
+Module TypeId(2) => instanceof Module(0) TypeId(1)
+
+Module TypeId(3) => instanceof unresolved reference "DependencyList" (scope ID: 1)
+
+Module TypeId(4) => sync Function "useCallback" {
+  accepts: {
+    params: [
+      required callback: Module(0) TypeId(2) (bindings: callback:instanceof Module(0) TypeId(1))
+      required deps: Module(0) TypeId(3) (bindings: deps:instanceof unresolved reference "DependencyList" (scope ID: 1))
+    ]
+    type_args: [Module(0) TypeId(1)]
+  }
+  returns: Module(0) TypeId(2)
+}
+
+Module TypeId(5) => instanceof Promise
+
+Module TypeId(6) => sync Function {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: Module(0) TypeId(5)
+}
+
+Module TypeId(7) => sync Function {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: Module(0) TypeId(5)
+}
+
+Module TypeId(8) => instanceof Promise
+```
+
+# Scoped Type Resolver
+
+## Registered types
+
+```
+Scope TypeId(0) => instanceof Promise
+```
