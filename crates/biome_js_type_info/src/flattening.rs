@@ -64,8 +64,6 @@ impl TypeData {
 fn flattened(mut ty: TypeData, resolver: &mut dyn TypeResolver, depth: usize) -> TypeData {
     const MAX_FLATTEN_DEPTH: usize = 10; // Arbitrary depth, may require tweaking.
 
-    let printed = format!("{ty:?}");
-
     for depth in depth + 1..=MAX_FLATTEN_DEPTH {
         match &ty {
             TypeData::MergedReference(merged) => {
