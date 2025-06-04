@@ -4762,7 +4762,7 @@ pub struct Nursery {
     #[doc = "Prevents the use of the TypeScript directive @ts-ignore."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_ts_ignore: Option<RuleFixConfiguration<biome_js_analyze::options::NoTsIgnore>>,
-    #[doc = "Succinct description of the rule."]
+    #[doc = "Disallow let or var variables that are read but never assigned."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_unassigned_variables:
         Option<RuleConfiguration<biome_js_analyze::options::NoUnassignedVariables>>,

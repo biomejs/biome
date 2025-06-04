@@ -12,13 +12,13 @@ console.log(value);
 ```
 invalid.ts:1:5 lint/nursery/noUnassignedVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Variable is read here.
+  i The variable 'value' is declared but never assigned a value.
   
   > 1 │ let value: number | undefined;
       │     ^^^^^^^^^^^^^^^^^^^^^^^^^
     2 │ console.log(value);
   
-  i This note will give you more information.
+  i Variable declared without assignment. Either assign a value or remove the declaration.
   
 
 ```

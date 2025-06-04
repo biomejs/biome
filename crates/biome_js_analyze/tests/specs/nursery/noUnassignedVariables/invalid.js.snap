@@ -35,14 +35,14 @@ function init() {
 ```
 invalid.js:1:5 lint/nursery/noUnassignedVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Variable is read here.
+  i The variable 'status' is declared but never assigned a value.
   
   > 1 │ let status;
       │     ^^^^^^
     2 │ if (status === 'ready') {
     3 │   console.log('Ready!');
   
-  i This note will give you more information.
+  i Variable declared without assignment. Either assign a value or remove the declaration.
   
 
 ```
@@ -50,7 +50,7 @@ invalid.js:1:5 lint/nursery/noUnassignedVariables ━━━━━━━━━━
 ```
 invalid.js:6:5 lint/nursery/noUnassignedVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Variable is read here.
+  i The variable 'user' is declared but never assigned a value.
   
     4 │ }
     5 │ 
@@ -59,7 +59,7 @@ invalid.js:6:5 lint/nursery/noUnassignedVariables ━━━━━━━━━━
     7 │ greet(user);
     8 │ 
   
-  i This note will give you more information.
+  i Variable declared without assignment. Either assign a value or remove the declaration.
   
 
 ```
@@ -67,7 +67,7 @@ invalid.js:6:5 lint/nursery/noUnassignedVariables ━━━━━━━━━━
 ```
 invalid.js:10:7 lint/nursery/noUnassignedVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Variable is read here.
+  i The variable 'error' is declared but never assigned a value.
   
      9 │ function test() {
   > 10 │   let error;
@@ -75,7 +75,7 @@ invalid.js:10:7 lint/nursery/noUnassignedVariables ━━━━━━━━━�
     11 │   return error || "Unknown error";
     12 │ }
   
-  i This note will give you more information.
+  i Variable declared without assignment. Either assign a value or remove the declaration.
   
 
 ```
@@ -83,7 +83,7 @@ invalid.js:10:7 lint/nursery/noUnassignedVariables ━━━━━━━━━�
 ```
 invalid.js:14:5 lint/nursery/noUnassignedVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Variable is read here.
+  i The variable 'options' is declared but never assigned a value.
   
     12 │ }
     13 │ 
@@ -92,7 +92,7 @@ invalid.js:14:5 lint/nursery/noUnassignedVariables ━━━━━━━━━�
     15 │ const { debug } = options || {};
     16 │ 
   
-  i This note will give you more information.
+  i Variable declared without assignment. Either assign a value or remove the declaration.
   
 
 ```
@@ -100,7 +100,7 @@ invalid.js:14:5 lint/nursery/noUnassignedVariables ━━━━━━━━━�
 ```
 invalid.js:17:5 lint/nursery/noUnassignedVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Variable is read here.
+  i The variable 'flag' is declared but never assigned a value.
   
     15 │ const { debug } = options || {};
     16 │ 
@@ -109,7 +109,7 @@ invalid.js:17:5 lint/nursery/noUnassignedVariables ━━━━━━━━━�
     18 │ while (!flag) {
     19 │   // Do something...
   
-  i This note will give you more information.
+  i Variable declared without assignment. Either assign a value or remove the declaration.
   
 
 ```
@@ -117,7 +117,7 @@ invalid.js:17:5 lint/nursery/noUnassignedVariables ━━━━━━━━━�
 ```
 invalid.js:22:5 lint/nursery/noUnassignedVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Variable is read here.
+  i The variable 'config' is declared but never assigned a value.
   
     20 │ }
     21 │ 
@@ -126,7 +126,7 @@ invalid.js:22:5 lint/nursery/noUnassignedVariables ━━━━━━━━━�
     23 │ function init() {
     24 │   return config?.enabled;
   
-  i This note will give you more information.
+  i Variable declared without assignment. Either assign a value or remove the declaration.
   
 
 ```

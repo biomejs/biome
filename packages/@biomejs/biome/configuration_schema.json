@@ -2801,7 +2801,7 @@
 					]
 				},
 				"noUnassignedVariables": {
-					"description": "Succinct description of the rule.",
+					"description": "Disallow let or var variables that are read but never assigned.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }

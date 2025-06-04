@@ -1576,7 +1576,7 @@ export interface Nursery {
 	 */
 	noTsIgnore?: RuleFixConfiguration_for_Null;
 	/**
-	 * Succinct description of the rule.
+	 * Disallow let or var variables that are read but never assigned.
 	 */
 	noUnassignedVariables?: RuleConfiguration_for_Null;
 	/**

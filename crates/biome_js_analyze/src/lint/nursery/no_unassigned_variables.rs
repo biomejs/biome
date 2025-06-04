@@ -1,32 +1,60 @@
 use biome_analyze::{Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule};
 use biome_console::markup;
 use biome_js_semantic::ReferencesExtensions;
-use biome_js_syntax::{JsIdentifierBinding, AnyJsBindingPattern, AnyJsBinding, JsVariableDeclaration, JsVariableDeclarationClause, JsVariableDeclarator, JsVariableDeclaratorList, TsDeclareStatement};
-use biome_rowan::AstNode;
+use biome_js_syntax::{
+    AnyJsBinding, AnyJsBindingPattern, JsIdentifierBinding, JsVariableDeclaration,
+    JsVariableDeclarationClause, JsVariableDeclarator, JsVariableDeclaratorList,
+    TsDeclareStatement,
+};
+use biome_rowan::{AstNode, SyntaxNodeCast};
 
 use crate::services::semantic::Semantic;
 
 declare_lint_rule! {
-    /// Succinct description of the rule.
+    /// Disallow let or var variables that are read but never assigned.
     ///
-    /// Put context and details about the rule.
-    /// As a starting point, you can take the description of the corresponding _ESLint_ rule (if any).
-    ///
-    /// Try to stay consistent with the descriptions of implemented rules.
+    /// This rule flags let or var declarations that are never assigned a value but are still read or used in the code.
+    /// Since these variables will always be undefined, their usage is likely a programming mistake.
     ///
     /// ## Examples
     ///
     /// ### Invalid
     ///
     /// ```js,expect_diagnostic
-    /// var a = 1;
-    /// a = 2;
+    /// let status;
+    /// if (status === 'ready') {
+    ///     console.log('Status is ready');
+    /// }
+    /// ```
+    ///
+    /// ```ts,expect_diagnostic
+    /// let value: number | undefined;
+    /// console.log(value);
     /// ```
     ///
     /// ### Valid
     ///
     /// ```js
-    /// // var a = 1;
+    /// let message = "hello";
+    /// console.log(message);
+    ///
+    /// let user;
+    /// user = getUser();
+    /// console.log(user.name);
+    ///
+    /// let count;
+    /// count = 0;
+    /// count++;
+    /// ```
+    ///
+    /// ```ts
+    /// declare let value: number | undefined;
+    /// console.log(value);
+    ///
+    /// declare module "my-module" {
+    ///     let value: string;
+    ///     export = value;
+    /// }
     /// ```
     ///
     pub NoUnassignedVariables {
@@ -57,43 +85,53 @@ impl Rule for NoUnassignedVariables {
         if declaration.is_const() || declarator.initializer().is_some() {
             return None;
         }
-        if declaration.parent::<JsVariableDeclarationClause>().is_some_and(|clause| clause.parent::<TsDeclareStatement>().is_some()) {
+        // e.g. `declare let value: number | undefined;`
+        if declaration
+            .parent::<JsVariableDeclarationClause>()
+            .is_some_and(|clause| clause.parent::<TsDeclareStatement>().is_some())
+        {
+            return None;
+        }
+        // check if the variable is declared in a function or module
+        // e.g. `declare module "my-module" { let value: string; export = value; }`
+        if is_inside_ts_declare_statement(&declaration) {
             return None;
         }
         let model = ctx.model();
 
-        if id
-            .all_writes(model)
-            .next()
-            .is_some()
-        {
+        if id.all_writes(model).next().is_some() {
             return None;
         }
-        if id
-           .all_reads(model)
-           .next()
-           .is_some()
-        {
+        if id.all_reads(model).next().is_some() {
             return Some(id);
         }
 
         None
     }
 
-    fn diagnostic(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<RuleDiagnostic> {
+    fn diagnostic(ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
         // let state = state.to_trimmed_text();
         let node = ctx.query();
+        let name_token = state.name_token().ok()?;
+        let name = name_token.text_trimmed();
         Some(
             RuleDiagnostic::new(
                 rule_category!(),
                 node.range(),
                 markup! {
-                    "Variable is read here."
+                    "The variable '"<Emphasis>{name}</Emphasis>"' is declared but never assigned a value."
                 },
             )
             .note(markup! {
-                "This note will give you more information."
+                "Variable declared without assignment. Either assign a value or remove the declaration."
             }),
         )
     }
+}
+
+fn is_inside_ts_declare_statement(node: &JsVariableDeclaration) -> bool {
+    node.syntax()
+        .ancestors()
+        .skip(1)
+        .any(|ancestor| ancestor.cast::<TsDeclareStatement>().is_some())
 }
