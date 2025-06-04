@@ -1,5 +1,7 @@
 #![allow(unused)]
 
+use std::borrow::Cow;
+
 use biome_js_formatter::context::JsFormatOptions;
 use biome_js_formatter::format_node;
 use biome_js_parser::{JsParserOptions, parse};
@@ -51,7 +53,7 @@ pub fn assert_type_data_snapshot(
 
 pub fn assert_typed_bindings_snapshot(
     source_code: &str,
-    typed_bindings: &[(Text, TypeData)],
+    typed_bindings: &[(Text, TypeReference)],
     resolver: &dyn TypeResolver,
     test_name: &str,
 ) {
@@ -72,6 +74,10 @@ pub fn assert_typed_bindings_snapshot(
     content.push_str("## Result\n\n");
     content.push_str("```\n");
     for (name, ty) in typed_bindings {
+        let ty = resolver
+            .resolve_and_get(ty)
+            .expect("must resolve")
+            .to_data();
         content.push_str(&format!("{name} => {ty}\n"));
     }
     content.push_str("\n```\n\n");
@@ -158,12 +164,16 @@ impl TypeResolver for HardcodedSymbolResolver {
         }
     }
 
-    fn register_type(&mut self, type_data: TypeData) -> TypeId {
-        match self.types.iter().position(|data| data == &type_data) {
+    fn register_type(&mut self, type_data: Cow<TypeData>) -> TypeId {
+        match self
+            .types
+            .iter()
+            .position(|data| data == type_data.as_ref())
+        {
             Some(index) => TypeId::new(index),
             None => {
                 let id = TypeId::new(self.types.len());
-                self.types.push(type_data);
+                self.types.push(type_data.into_owned());
                 id
             }
         }
@@ -190,6 +200,10 @@ impl TypeResolver for HardcodedSymbolResolver {
 
     fn resolve_type_of(&self, identifier: &Text, scope_id: ScopeId) -> Option<ResolvedTypeId> {
         self.globals.resolve_type_of(identifier, scope_id)
+    }
+
+    fn resolve_expression(&mut self, scope_id: ScopeId, expr: &AnyJsExpression) -> Cow<TypeData> {
+        Cow::Owned(TypeData::from_any_js_expression(self, scope_id, expr))
     }
 
     fn fallback_resolver(&self) -> Option<&dyn TypeResolver> {

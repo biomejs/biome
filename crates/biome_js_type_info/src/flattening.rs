@@ -1,4 +1,7 @@
-use std::collections::{BTreeMap, btree_map::Entry};
+use std::{
+    borrow::Cow,
+    collections::{BTreeMap, btree_map::Entry},
+};
 
 use biome_rowan::Text;
 
@@ -106,407 +109,11 @@ fn flattened(mut ty: TypeData, resolver: &mut dyn TypeResolver, depth: usize) ->
                 Some(reference) => ty = reference.to_data(),
                 None => return ty,
             },
-            TypeData::TypeofExpression(expr) => match expr.as_ref() {
-                TypeofExpression::Addition(_expr) => {
-                    // TODO
-                    return ty;
+            TypeData::TypeofExpression(expr) => match flattened_expression(expr, resolver, depth) {
+                Some(flattened_ty) => {
+                    ty = flattened_ty;
                 }
-                TypeofExpression::Await(expr) => match resolver.resolve_and_get(&expr.argument) {
-                    Some(resolved) => {
-                        return match resolved.as_raw_data() {
-                            TypeData::BigInt => TypeData::BigInt,
-                            TypeData::Boolean => TypeData::Boolean,
-                            TypeData::Class(class) => {
-                                resolved.apply_module_id_to_data(TypeData::Class(class.clone()))
-                            }
-                            TypeData::Function(function) => resolved
-                                .apply_module_id_to_data(TypeData::Function(function.clone())),
-                            TypeData::Literal(literal) => TypeData::Literal(literal.clone()),
-                            TypeData::Null => TypeData::Null,
-                            TypeData::Number => TypeData::Number,
-                            TypeData::Object(object) => {
-                                resolved.apply_module_id_to_data(TypeData::Object(object.clone()))
-                            }
-                            TypeData::String => TypeData::String,
-                            _ => match resolved.find_promise_type(resolver) {
-                                Some(promised_ty) => {
-                                    ty = promised_ty.to_data();
-                                    continue;
-                                }
-                                None => ty,
-                            },
-                        };
-                    }
-                    None => return ty,
-                },
-                TypeofExpression::BitwiseNot(expr) => {
-                    return match resolver.resolve_and_get(&expr.argument) {
-                        Some(resolved) => match resolved.as_raw_data() {
-                            TypeData::BigInt => TypeData::BigInt,
-                            _ => TypeData::Number,
-                        },
-                        None => ty,
-                    };
-                }
-                TypeofExpression::Call(expr) => match resolver.resolve_and_get(&expr.callee) {
-                    Some(mut callee) => {
-                        if callee.is_expression() {
-                            let flattened_callee = flattened(callee.to_data(), resolver, depth);
-                            let resolver_id = ResolverId::from_level(resolver.level());
-                            let type_id = resolver.register_type(flattened_callee);
-                            let data = resolver.get_by_id(type_id);
-                            callee = ResolvedTypeData::from((resolver_id, data));
-                        }
-
-                        return flattened_function_call(expr, callee, resolver)
-                            .map(|(is_instance, mut ty)| {
-                                if is_instance {
-                                    ty = ty.into_instance(resolver);
-                                }
-
-                                flattened(ty, resolver, depth)
-                            })
-                            .unwrap_or(ty);
-                    }
-                    None => return ty,
-                },
-                TypeofExpression::Destructure(expr) => {
-                    match resolver.resolve_and_get(&expr.ty) {
-                        Some(resolved) => match (resolved.as_raw_data(), &expr.destructure_field) {
-                            (TypeData::Class(class), DestructureField::Name(name)) => {
-                                match class.members.iter().find(|own_member| {
-                                    own_member.is_static() && own_member.has_name(name.text())
-                                }) {
-                                    Some(member) => {
-                                        ty = flattened(
-                                            resolver
-                                                .resolve_and_get(
-                                                    &resolved
-                                                        .apply_module_id_to_reference(&member.ty),
-                                                )
-                                                .map(ResolvedTypeData::to_data)
-                                                .unwrap_or_default(),
-                                            resolver,
-                                            depth,
-                                        );
-                                    }
-                                    None => return TypeData::reference(GLOBAL_UNKNOWN_ID),
-                                }
-                            }
-                            (TypeData::Class(class), DestructureField::RestExcept(names)) => {
-                                return TypeData::object_with_members(
-                                    class
-                                        .members
-                                        .iter()
-                                        .filter(|own_member| {
-                                            own_member.is_static()
-                                                && !names
-                                                    .iter()
-                                                    .any(|name| own_member.has_name(name))
-                                        })
-                                        .map(|member| {
-                                            ResolvedTypeMember::from((
-                                                resolved.resolver_id(),
-                                                member,
-                                            ))
-                                            .to_member()
-                                        })
-                                        .collect(),
-                                );
-                            }
-                            (TypeData::Interface(interface), DestructureField::Name(name)) => {
-                                match interface.members.iter().find(|own_member| {
-                                    own_member.is_static() && own_member.has_name(name.text())
-                                }) {
-                                    Some(member) => {
-                                        ty = flattened(
-                                            resolver
-                                                .resolve_and_get(
-                                                    &resolved
-                                                        .apply_module_id_to_reference(&member.ty),
-                                                )
-                                                .map(ResolvedTypeData::to_data)
-                                                .unwrap_or_default(),
-                                            resolver,
-                                            depth,
-                                        );
-                                    }
-                                    None => return TypeData::reference(GLOBAL_UNKNOWN_ID),
-                                }
-                            }
-                            (
-                                TypeData::Interface(interface),
-                                DestructureField::RestExcept(names),
-                            ) => {
-                                return TypeData::object_with_members(
-                                    interface
-                                        .members
-                                        .iter()
-                                        .filter(|own_member| {
-                                            own_member.is_static()
-                                                && !names
-                                                    .iter()
-                                                    .any(|name| own_member.has_name(name))
-                                        })
-                                        .map(|member| {
-                                            ResolvedTypeMember::from((
-                                                resolved.resolver_id(),
-                                                member,
-                                            ))
-                                            .to_member()
-                                        })
-                                        .collect(),
-                                );
-                            }
-                            (subject, DestructureField::Index(index)) => {
-                                return subject
-                                    .clone()
-                                    .find_element_type_at_index(
-                                        resolved.resolver_id(),
-                                        resolver,
-                                        *index,
-                                    )
-                                    .map(ResolvedTypeData::to_data)
-                                    .unwrap_or_default();
-                            }
-                            (subject, DestructureField::RestFrom(index)) => {
-                                return subject
-                                    .clone()
-                                    .find_type_of_elements_from_index(
-                                        resolved.resolver_id(),
-                                        resolver,
-                                        *index,
-                                    )
-                                    .map(ResolvedTypeData::to_data)
-                                    .unwrap_or_default();
-                            }
-                            (_, DestructureField::Name(name)) => {
-                                let member = resolved.all_members(resolver).find(|member| {
-                                    !member.is_static() && member.has_name(name.text())
-                                });
-                                return match member {
-                                    Some(member) => resolver
-                                        .resolve_and_get(&member.ty())
-                                        .map(ResolvedTypeData::to_data)
-                                        .unwrap_or_default(),
-                                    None => TypeData::unknown(),
-                                };
-                            }
-                            (_, DestructureField::RestExcept(names)) => {
-                                // We need to look up the prototype chain, which may
-                                // yield duplicate member names. We deduplicate
-                                // using a map before constructing a new object.
-                                let members: BTreeMap<Text, ResolvedTypeMember> = resolved
-                                    .all_members(resolver)
-                                    .filter(|member| {
-                                        !member.is_static()
-                                            && !names.iter().any(|name| member.has_name(name))
-                                    })
-                                    .fold(BTreeMap::new(), |mut map, member| {
-                                        if let Some(name) = member.name() {
-                                            if let Entry::Vacant(entry) = map.entry(name) {
-                                                entry.insert(member);
-                                            }
-                                        }
-                                        map
-                                    });
-                                return TypeData::object_with_members(
-                                    members
-                                        .into_values()
-                                        .map(ResolvedTypeMember::to_member)
-                                        .collect(),
-                                );
-                            }
-                        },
-                        None => return ty,
-                    }
-                }
-                TypeofExpression::New(expr) => {
-                    match resolver
-                        .resolve_and_get(&expr.callee)
-                        .map(ResolvedTypeData::to_data)
-                        .map(|type_data| flattened(type_data, resolver, depth))
-                    {
-                        Some(TypeData::Class(class)) => {
-                            let num_args = expr.arguments.len();
-                            let constructed_ty = class
-                                .members
-                                .iter()
-                                .find_map(|member| match member.kind {
-                                    TypeMemberKind::Constructor => {
-                                        let constructor = resolver.resolve_and_get(&member.ty)?;
-                                        match constructor.as_raw_data() {
-                                            TypeData::Constructor(constructor) => {
-                                                // TODO: We might need to make an attempt to match
-                                                //       type signatures too.
-                                                (constructor.parameters.len() == num_args)
-                                                    .then(|| constructor.return_type.clone())
-                                                    .flatten()
-                                            }
-                                            _ => None,
-                                        }
-                                    }
-                                    _ => None,
-                                })
-                                .unwrap_or_else(|| expr.callee.clone());
-                            ty = TypeData::instance_of(constructed_ty);
-                        }
-                        // TODO: Handle objects with call signatures.
-                        _ => return ty,
-                    }
-                }
-                TypeofExpression::StaticMember(expr) => {
-                    if let Some(object) = resolver.resolve_and_get(&expr.object) {
-                        match object.as_raw_data() {
-                            TypeData::InstanceOf(instance) => {
-                                let instance_ty = object.apply_module_id_to_reference(&instance.ty);
-                                let resolved_instance_ty = resolver.resolve_and_get(&instance_ty);
-                                if resolved_instance_ty.is_some_and(|resolved| {
-                                    matches!(
-                                        resolved.as_raw_data(),
-                                        TypeData::Intersection(_) | TypeData::Union(_)
-                                    )
-                                }) {
-                                    ty = TypeData::TypeofExpression(Box::new(
-                                        TypeofExpression::StaticMember(
-                                            TypeofStaticMemberExpression {
-                                                object: instance_ty.into_owned(),
-                                                member: expr.member.clone(),
-                                            },
-                                        ),
-                                    ));
-                                    continue;
-                                } else if !resolved_instance_ty
-                                    .is_some_and(ResolvedTypeData::has_members)
-                                {
-                                    return ty;
-                                }
-                            }
-
-                            // FIXME: Flattening intersections and unions for members should be done
-                            //        in `TypeMemberIterator`.
-                            TypeData::Intersection(intersection) => {
-                                let types: Vec<_> = intersection
-                                    .types()
-                                    .iter()
-                                    .map(|reference| object.apply_module_id_to_reference(reference))
-                                    .map(|reference| reference.into_owned())
-                                    .collect();
-                                let types = types
-                                    .into_iter()
-                                    .map(|variant| {
-                                        // Resolve and flatten the type member for each variant.
-                                        let variant = flattened(
-                                            TypeData::TypeofExpression(Box::new(
-                                                TypeofExpression::StaticMember(
-                                                    TypeofStaticMemberExpression {
-                                                        object: variant,
-                                                        member: expr.member.clone(),
-                                                    },
-                                                ),
-                                            )),
-                                            resolver,
-                                            depth,
-                                        );
-
-                                        resolver.reference_to_registered_data(variant)
-                                    })
-                                    .collect();
-
-                                return TypeData::intersection_of(types);
-                            }
-                            TypeData::Union(union) => {
-                                let types: Vec<_> = union
-                                    .types()
-                                    .iter()
-                                    .map(|reference| object.apply_module_id_to_reference(reference))
-                                    .map(|reference| reference.into_owned())
-                                    .collect();
-                                let types = types
-                                    .into_iter()
-                                    .map(|variant| {
-                                        // Resolve and flatten the type member for each variant.
-                                        let variant = flattened(
-                                            TypeData::TypeofExpression(Box::new(
-                                                TypeofExpression::StaticMember(
-                                                    TypeofStaticMemberExpression {
-                                                        object: variant,
-                                                        member: expr.member.clone(),
-                                                    },
-                                                ),
-                                            )),
-                                            resolver,
-                                            depth,
-                                        );
-
-                                        resolver.reference_to_registered_data(variant)
-                                    })
-                                    .collect();
-
-                                return TypeData::union_of(types);
-                            }
-
-                            TypeData::Reference(_) => return ty,
-
-                            _ => {}
-                        }
-
-                        let is_class = matches!(object.as_raw_data(), TypeData::Class(_));
-                        let member = object.all_members(resolver).find(|member| {
-                            member.has_name(&expr.member)
-                                && if is_class {
-                                    member.is_static()
-                                } else {
-                                    !member.is_static()
-                                }
-                        });
-                        match member {
-                            Some(member) => {
-                                ty = TypeData::reference(member.ty().into_owned());
-                            }
-                            None => return TypeData::unknown(),
-                        }
-                    } else {
-                        return ty;
-                    }
-                }
-                TypeofExpression::Super(expr) => match resolver.resolve_and_get(&expr.parent) {
-                    Some(resolved) => match resolved.as_raw_data() {
-                        TypeData::Class(class) => match class.extends.as_ref() {
-                            Some(super_class) => {
-                                ty = TypeData::instance_of(
-                                    resolved
-                                        .apply_module_id_to_reference(super_class)
-                                        .into_owned(),
-                                );
-                            }
-                            None => return TypeData::unknown(),
-                        },
-                        _ => return TypeData::unknown(),
-                    },
-                    None => return ty,
-                },
-                TypeofExpression::This(expr) => match resolver.resolve_reference(&expr.parent) {
-                    Some(class_id) => {
-                        ty = TypeData::instance_of(TypeReference::from(class_id));
-                    }
-                    None => return ty,
-                },
-                TypeofExpression::Typeof(expr) => {
-                    return match resolver.resolve_and_get(&expr.argument) {
-                        Some(resolved) => flattened_typeof_data(resolved),
-                        None => ty,
-                    };
-                }
-                TypeofExpression::UnaryMinus(expr) => {
-                    return match resolver.resolve_and_get(&expr.argument) {
-                        Some(resolved) => match resolved.as_raw_data() {
-                            TypeData::BigInt => TypeData::BigInt,
-                            _ => TypeData::Number,
-                        },
-                        None => ty,
-                    };
-                }
+                None => return ty,
             },
             TypeData::TypeofType(reference) => {
                 match resolver.resolve_reference(reference.as_ref()) {
@@ -526,6 +133,368 @@ fn flattened(mut ty: TypeData, resolver: &mut dyn TypeResolver, depth: usize) ->
 
     debug_assert!(false, "max flattening depth reached");
     TypeData::Unknown
+}
+
+fn flattened_expression(
+    expr: &TypeofExpression,
+    resolver: &mut dyn TypeResolver,
+    depth: usize,
+) -> Option<TypeData> {
+    match expr {
+        TypeofExpression::Addition(_expr) => {
+            // TODO
+            None
+        }
+        TypeofExpression::Await(expr) => {
+            resolver
+                .resolve_and_get(&expr.argument)
+                .and_then(|resolved| {
+                    let flattened = match resolved.as_raw_data() {
+                        TypeData::BigInt => TypeData::BigInt,
+                        TypeData::Boolean => TypeData::Boolean,
+                        TypeData::Class(class) => {
+                            resolved.apply_module_id_to_data(TypeData::Class(class.clone()))
+                        }
+                        TypeData::Function(function) => {
+                            resolved.apply_module_id_to_data(TypeData::Function(function.clone()))
+                        }
+                        TypeData::Literal(literal) => TypeData::Literal(literal.clone()),
+                        TypeData::Null => TypeData::Null,
+                        TypeData::Number => TypeData::Number,
+                        TypeData::Object(object) => {
+                            resolved.apply_module_id_to_data(TypeData::Object(object.clone()))
+                        }
+                        TypeData::String => TypeData::String,
+                        _ => resolved.find_promise_type(resolver)?.to_data(),
+                    };
+                    Some(flattened)
+                })
+        }
+        TypeofExpression::BitwiseNot(expr) => {
+            resolver
+                .resolve_and_get(&expr.argument)
+                .map(|resolved| match resolved.as_raw_data() {
+                    TypeData::BigInt => TypeData::BigInt,
+                    _ => TypeData::Number,
+                })
+        }
+        TypeofExpression::Call(expr) => match resolver.resolve_and_get(&expr.callee) {
+            Some(mut callee) => {
+                if callee.is_expression() {
+                    let flattened_callee = flattened(callee.to_data(), resolver, depth);
+                    let resolver_id = ResolverId::from_level(resolver.level());
+                    let type_id = resolver.register_type(Cow::Owned(flattened_callee));
+                    let data = resolver.get_by_id(type_id);
+                    callee = ResolvedTypeData::from((resolver_id, data));
+                }
+
+                flattened_function_call(expr, callee, resolver).map(|(is_instance, mut ty)| {
+                    if is_instance {
+                        ty = ty.into_instance(resolver);
+                    }
+
+                    flattened(ty, resolver, depth)
+                })
+            }
+            None => None,
+        },
+        TypeofExpression::Destructure(expr) => {
+            match resolver.resolve_and_get(&expr.ty) {
+                Some(resolved) => match (resolved.as_raw_data(), &expr.destructure_field) {
+                    (TypeData::Class(class), DestructureField::Name(name)) => Some(
+                        match class.members.iter().find(|own_member| {
+                            own_member.is_static() && own_member.has_name(name.text())
+                        }) {
+                            Some(member) => flattened(
+                                resolver
+                                    .resolve_and_get(
+                                        &resolved.apply_module_id_to_reference(&member.ty),
+                                    )
+                                    .map(ResolvedTypeData::to_data)
+                                    .unwrap_or_default(),
+                                resolver,
+                                depth,
+                            ),
+                            None => TypeData::reference(GLOBAL_UNKNOWN_ID),
+                        },
+                    ),
+                    (TypeData::Class(class), DestructureField::RestExcept(names)) => {
+                        Some(TypeData::object_with_members(
+                            class
+                                .members
+                                .iter()
+                                .filter(|own_member| {
+                                    own_member.is_static()
+                                        && !names.iter().any(|name| own_member.has_name(name))
+                                })
+                                .map(|member| {
+                                    ResolvedTypeMember::from((resolved.resolver_id(), member))
+                                        .to_member()
+                                })
+                                .collect(),
+                        ))
+                    }
+                    (TypeData::Interface(interface), DestructureField::Name(name)) => Some(
+                        match interface.members.iter().find(|own_member| {
+                            own_member.is_static() && own_member.has_name(name.text())
+                        }) {
+                            Some(member) => flattened(
+                                resolver
+                                    .resolve_and_get(
+                                        &resolved.apply_module_id_to_reference(&member.ty),
+                                    )
+                                    .map(ResolvedTypeData::to_data)
+                                    .unwrap_or_default(),
+                                resolver,
+                                depth,
+                            ),
+                            None => TypeData::reference(GLOBAL_UNKNOWN_ID),
+                        },
+                    ),
+                    (TypeData::Interface(interface), DestructureField::RestExcept(names)) => {
+                        Some(TypeData::object_with_members(
+                            interface
+                                .members
+                                .iter()
+                                .filter(|own_member| {
+                                    own_member.is_static()
+                                        && !names.iter().any(|name| own_member.has_name(name))
+                                })
+                                .map(|member| {
+                                    ResolvedTypeMember::from((resolved.resolver_id(), member))
+                                        .to_member()
+                                })
+                                .collect(),
+                        ))
+                    }
+                    (subject, DestructureField::Index(index)) => Some(
+                        subject
+                            .clone()
+                            .find_element_type_at_index(resolved.resolver_id(), resolver, *index)
+                            .map(ResolvedTypeData::to_data)
+                            .unwrap_or_default(),
+                    ),
+                    (subject, DestructureField::RestFrom(index)) => Some(
+                        subject
+                            .clone()
+                            .find_type_of_elements_from_index(
+                                resolved.resolver_id(),
+                                resolver,
+                                *index,
+                            )
+                            .map(ResolvedTypeData::to_data)
+                            .unwrap_or_default(),
+                    ),
+                    (_, DestructureField::Name(name)) => Some({
+                        let member = resolved
+                            .all_members(resolver)
+                            .find(|member| !member.is_static() && member.has_name(name.text()));
+                        match member {
+                            Some(member) => resolver
+                                .resolve_and_get(&member.ty())
+                                .map(ResolvedTypeData::to_data)
+                                .unwrap_or_default(),
+                            None => TypeData::unknown(),
+                        }
+                    }),
+                    (_, DestructureField::RestExcept(names)) => Some({
+                        // We need to look up the prototype chain, which may
+                        // yield duplicate member names. We deduplicate
+                        // using a map before constructing a new object.
+                        let members: BTreeMap<Text, ResolvedTypeMember> = resolved
+                            .all_members(resolver)
+                            .filter(|member| {
+                                !member.is_static()
+                                    && !names.iter().any(|name| member.has_name(name))
+                            })
+                            .fold(BTreeMap::new(), |mut map, member| {
+                                if let Some(name) = member.name() {
+                                    if let Entry::Vacant(entry) = map.entry(name) {
+                                        entry.insert(member);
+                                    }
+                                }
+                                map
+                            });
+                        TypeData::object_with_members(
+                            members
+                                .into_values()
+                                .map(ResolvedTypeMember::to_member)
+                                .collect(),
+                        )
+                    }),
+                },
+                None => None,
+            }
+        }
+        TypeofExpression::New(expr) => {
+            match resolver
+                .resolve_and_get(&expr.callee)
+                .map(ResolvedTypeData::to_data)
+                .map(|type_data| flattened(type_data, resolver, depth))
+            {
+                Some(TypeData::Class(class)) => Some({
+                    let num_args = expr.arguments.len();
+                    let constructed_ty = class
+                        .members
+                        .iter()
+                        .find_map(|member| match member.kind {
+                            TypeMemberKind::Constructor => {
+                                let constructor = resolver.resolve_and_get(&member.ty)?;
+                                match constructor.as_raw_data() {
+                                    TypeData::Constructor(constructor) => {
+                                        // TODO: We might need to make an attempt to match
+                                        //       type signatures too.
+                                        (constructor.parameters.len() == num_args)
+                                            .then(|| constructor.return_type.clone())
+                                            .flatten()
+                                    }
+                                    _ => None,
+                                }
+                            }
+                            _ => None,
+                        })
+                        .unwrap_or_else(|| expr.callee.clone());
+                    TypeData::instance_of(constructed_ty)
+                }),
+                // TODO: Handle objects with call signatures.
+                _ => None,
+            }
+        }
+        TypeofExpression::StaticMember(expr) => {
+            if let Some(object) = resolver.resolve_and_get(&expr.object) {
+                match object.as_raw_data() {
+                    TypeData::InstanceOf(instance) => {
+                        let instance_ty = object.apply_module_id_to_reference(&instance.ty);
+                        let resolved_instance_ty = resolver.resolve_and_get(&instance_ty);
+                        if resolved_instance_ty.is_some_and(|resolved| {
+                            matches!(
+                                resolved.as_raw_data(),
+                                TypeData::Intersection(_) | TypeData::Union(_)
+                            )
+                        }) {
+                            return Some(TypeData::TypeofExpression(Box::new(
+                                TypeofExpression::StaticMember(TypeofStaticMemberExpression {
+                                    object: instance_ty.into_owned(),
+                                    member: expr.member.clone(),
+                                }),
+                            )));
+                        } else if !resolved_instance_ty.is_some_and(ResolvedTypeData::has_members) {
+                            return None;
+                        }
+                    }
+
+                    // FIXME: Flattening intersections and unions for members should be done
+                    //        in `TypeMemberIterator`.
+                    TypeData::Intersection(intersection) => {
+                        let types: Vec<_> = intersection
+                            .types()
+                            .iter()
+                            .map(|reference| object.apply_module_id_to_reference(reference))
+                            .map(|reference| reference.into_owned())
+                            .collect();
+                        let types = types
+                            .into_iter()
+                            .map(|variant| {
+                                // Resolve and flatten the type member for each variant.
+                                let variant = flattened(
+                                    TypeData::TypeofExpression(Box::new(
+                                        TypeofExpression::StaticMember(
+                                            TypeofStaticMemberExpression {
+                                                object: variant,
+                                                member: expr.member.clone(),
+                                            },
+                                        ),
+                                    )),
+                                    resolver,
+                                    depth,
+                                );
+
+                                resolver.reference_to_owned_data(variant)
+                            })
+                            .collect();
+
+                        return Some(TypeData::intersection_of(types));
+                    }
+                    TypeData::Union(union) => {
+                        let types: Vec<_> = union
+                            .types()
+                            .iter()
+                            .map(|reference| object.apply_module_id_to_reference(reference))
+                            .map(|reference| reference.into_owned())
+                            .collect();
+                        let types = types
+                            .into_iter()
+                            .map(|variant| {
+                                // Resolve and flatten the type member for each variant.
+                                let variant = flattened(
+                                    TypeData::TypeofExpression(Box::new(
+                                        TypeofExpression::StaticMember(
+                                            TypeofStaticMemberExpression {
+                                                object: variant,
+                                                member: expr.member.clone(),
+                                            },
+                                        ),
+                                    )),
+                                    resolver,
+                                    depth,
+                                );
+
+                                resolver.reference_to_owned_data(variant)
+                            })
+                            .collect();
+
+                        return Some(TypeData::union_of(types));
+                    }
+
+                    TypeData::Reference(_) => return None,
+
+                    _ => {}
+                }
+
+                let is_class = matches!(object.as_raw_data(), TypeData::Class(_));
+                let member = object.all_members(resolver).find(|member| {
+                    member.has_name(&expr.member)
+                        && if is_class {
+                            member.is_static()
+                        } else {
+                            !member.is_static()
+                        }
+                });
+                member.map(|member| TypeData::reference(member.ty().into_owned()))
+            } else {
+                None
+            }
+        }
+        TypeofExpression::Super(expr) => {
+            resolver
+                .resolve_and_get(&expr.parent)
+                .map(|resolved| match resolved.as_raw_data() {
+                    TypeData::Class(class) => match class.extends.as_ref() {
+                        Some(super_class) => TypeData::instance_of(
+                            resolved
+                                .apply_module_id_to_reference(super_class)
+                                .into_owned(),
+                        ),
+                        None => TypeData::unknown(),
+                    },
+                    _ => TypeData::unknown(),
+                })
+        }
+        TypeofExpression::This(expr) => resolver
+            .resolve_reference(&expr.parent)
+            .map(|class_id| TypeData::instance_of(TypeReference::from(class_id))),
+        TypeofExpression::Typeof(expr) => resolver
+            .resolve_and_get(&expr.argument)
+            .map(flattened_typeof_data),
+        TypeofExpression::UnaryMinus(expr) => {
+            resolver
+                .resolve_and_get(&expr.argument)
+                .map(|resolved| match resolved.as_raw_data() {
+                    TypeData::BigInt => TypeData::BigInt,
+                    _ => TypeData::Number,
+                })
+        }
+    }
 }
 
 fn flattened_function_call(

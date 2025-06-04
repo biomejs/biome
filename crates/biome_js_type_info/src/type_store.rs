@@ -1,4 +1,7 @@
-use std::hash::{Hash, Hasher};
+use std::{
+    borrow::Cow,
+    hash::{Hash, Hasher},
+};
 
 use hashbrown::{HashTable, hash_table::Entry};
 use rustc_hash::FxHasher;
@@ -58,14 +61,14 @@ impl TypeStore {
     ///
     /// Returns the `TypeId` of the newly registered data, or the `TypeId` of
     /// an already registered equivalent type.
-    pub fn register_type(&mut self, data: TypeData) -> TypeId {
+    pub fn register_type(&mut self, data: Cow<TypeData>) -> TypeId {
         let mut hash = FxHasher::default();
         data.hash(&mut hash);
         let hash = hash.finish();
 
         let entry = self.table.entry(
             hash,
-            |i| self.types[*i] == data,
+            |i| &self.types[*i] == data.as_ref(),
             |i| {
                 let mut hash = FxHasher::default();
                 self.types[*i].hash(&mut hash);
@@ -76,7 +79,7 @@ impl TypeStore {
             Entry::Occupied(entry) => TypeId::new(*entry.get()),
             Entry::Vacant(entry) => {
                 let index = self.types.len();
-                self.types.push(data);
+                self.types.push(data.into_owned());
                 entry.insert(index);
                 TypeId::new(index)
             }

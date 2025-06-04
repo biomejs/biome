@@ -20,6 +20,7 @@ pub struct JsBindingData {
     pub ty: TypeReference,
     pub jsdoc: Option<JsdocComment>,
     pub export_ranges: Vec<TextRange>,
+    pub range: TextRange,
 }
 
 #[derive(Clone, Copy, Debug)]

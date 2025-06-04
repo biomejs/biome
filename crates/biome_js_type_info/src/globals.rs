@@ -2,8 +2,9 @@
 
 // FIXME: Implement inference from type definitions.
 
-use std::sync::LazyLock;
+use std::{borrow::Cow, sync::LazyLock};
 
+use biome_js_syntax::AnyJsExpression;
 use biome_rowan::Text;
 
 use crate::{
@@ -284,14 +285,18 @@ impl TypeResolver for GlobalsResolver {
         (id.level() == GLOBAL_LEVEL).then(|| (id, self.get_by_id(id.id())).into())
     }
 
-    fn register_type(&mut self, type_data: TypeData) -> TypeId {
+    fn register_type(&mut self, type_data: Cow<TypeData>) -> TypeId {
         // Searching linearly may potentially become quite expensive, but it
         // should be outweighed by index lookups quite heavily.
-        match self.types.iter().position(|data| data == &type_data) {
+        match self
+            .types
+            .iter()
+            .position(|data| data == type_data.as_ref())
+        {
             Some(index) => TypeId::new(index),
             None => {
                 let id = TypeId::new(self.types.len());
-                self.types.push(type_data);
+                self.types.push(type_data.into_owned());
                 id
             }
         }
@@ -325,6 +330,10 @@ impl TypeResolver for GlobalsResolver {
             "globalThis" | "window" => Some(GLOBAL_GLOBAL_ID),
             _ => None,
         }
+    }
+
+    fn resolve_expression(&mut self, scope_id: ScopeId, expr: &AnyJsExpression) -> Cow<TypeData> {
+        Cow::Owned(TypeData::from_any_js_expression(self, scope_id, expr))
     }
 
     fn registered_types(&self) -> &[TypeData] {
