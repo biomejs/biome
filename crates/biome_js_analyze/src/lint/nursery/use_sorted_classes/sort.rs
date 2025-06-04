@@ -237,7 +237,7 @@ pub fn get_sort_class_name_range(
 pub fn should_ignore_prefix(node: &AnyClassStringLike) -> bool {
     if let Some(value) = node.value() {
         // For example, for <div class={`${variable}mx-2 m-5`} />, we should ignore "${variable}mx-2" as a sorting item because it is an indivisible whole.
-        let ignore_prefix = if let AnyClassStringLike::JsTemplateChunkElement(_template) = node {
+        if let AnyClassStringLike::JsTemplateChunkElement(_template) = node {
             !value.starts_with(' ')
                 && node
                     .syntax()
@@ -245,8 +245,7 @@ pub fn should_ignore_prefix(node: &AnyClassStringLike) -> bool {
                     .is_some_and(|sibling| JsTemplateElement::can_cast(sibling.kind()))
         } else {
             false
-        };
-        ignore_prefix
+        }
     } else {
         false
     }
@@ -256,7 +255,7 @@ pub fn should_ignore_prefix(node: &AnyClassStringLike) -> bool {
 pub fn should_ignore_postfix(node: &AnyClassStringLike) -> bool {
     if let Some(value) = node.value() {
         // For example, for <div class={`mx-2 m-5${variable}`} />, we should ignore "m-5${variable}" as a sorting item because it is an indivisible whole.
-        let ignore_postfix = if let AnyClassStringLike::JsTemplateChunkElement(_template) = node {
+        if let AnyClassStringLike::JsTemplateChunkElement(_template) = node {
             !value.ends_with(' ')
                 && node
                     .syntax()
@@ -264,8 +263,7 @@ pub fn should_ignore_postfix(node: &AnyClassStringLike) -> bool {
                     .is_some_and(|sibling| JsTemplateElement::can_cast(sibling.kind()))
         } else {
             false
-        };
-        ignore_postfix
+        }
     } else {
         false
     }

@@ -14,5 +14,6 @@ sync Function "foo" {
 }
 class "Person" {
   extends: none
+  implements: []
   type_args: []
 }

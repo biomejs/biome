@@ -1,0 +1,97 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `packages/lib/biome.json`
+
+```json
+{
+  "extends": "//",
+  "javascript": {
+    "formatter": {
+      "quoteStyle": "double"
+    }
+  }
+}
+```
+
+## `biome.json`
+
+```json
+{
+  "root": false,
+  "formatter": {
+    "indentStyle": "space",
+    "indentWidth": 2
+  }
+}
+```
+
+## `file.js`
+
+```js
+function f() { const lorem_and_ipsum = 'lorem ipsum'; }
+```
+
+## `packages/lib/file.js`
+
+```js
+function f() { const lorem_and_ipsum = 'lorem ipsum'; }
+```
+
+# Termination Message
+
+```block
+format ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Some errors were emitted while running checks.
+  
+
+
+```
+
+# Emitted Messages
+
+```block
+biome.json format ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Formatter would have printed the following content:
+  
+     1   │ - 
+     2 1 │   {
+     3   │ - ····"extends":·"//",
+     4   │ - ····"javascript":·{
+     5   │ - ········"formatter":·{
+     6   │ - ············"quoteStyle":·"double"
+     7   │ - ········}
+     8   │ - ····}
+       2 │ + → "extends":·"//",
+       3 │ + → "javascript":·{
+       4 │ + → → "formatter":·{
+       5 │ + → → → "quoteStyle":·"double"
+       6 │ + → → }
+       7 │ + → }
+     9 8 │   }
+    10 9 │   
+  
+
+```
+
+```block
+file.js format ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Formatter would have printed the following content:
+  
+    1   │ - function·f()·{·const·lorem_and_ipsum·=·'lorem·ipsum';·}
+      1 │ + function·f()·{
+      2 │ + → const·lorem_and_ipsum·=·"lorem·ipsum";
+      3 │ + }
+      4 │ + 
+  
+
+```
+
+```block
+Checked 2 files in <TIME>. No fixes applied.
+Found 2 errors.
+```

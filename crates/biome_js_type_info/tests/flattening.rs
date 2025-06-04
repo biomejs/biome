@@ -4,7 +4,8 @@ use biome_js_type_info::{GlobalsResolver, TypeData};
 
 use utils::{
     HardcodedSymbolResolver, assert_type_data_snapshot, assert_typed_bindings_snapshot,
-    get_expression, get_function_declaration, get_variable_declaration, parse_ts,
+    get_expression, get_function_declaration, get_interface_declaration, get_variable_declaration,
+    parse_ts,
 };
 
 #[test]
@@ -220,4 +221,35 @@ fn infer_flattened_type_of_destructured_array_element() {
         &resolver,
         "infer_flattened_type_of_destructured_array_element",
     );
+}
+
+#[test]
+fn infer_flattened_type_of_destructured_interface_field() {
+    const CODE: &str = r#"interface Foo {
+    foo(): string;
+}
+
+function bar({ foo }: Foo) {
+}"#;
+
+    let root = parse_ts(CODE);
+    let decl = get_interface_declaration(&root);
+    let mut resolver = GlobalsResolver::default();
+    let interface_ty = TypeData::from_ts_interface_declaration(&mut resolver, &decl)
+        .expect("interface must be inferred");
+    resolver.run_inference();
+
+    let function_decl = get_function_declaration(&root);
+    let mut resolver = HardcodedSymbolResolver::new("Foo", interface_ty, resolver);
+    let function_decl = TypeData::from_js_function_declaration(&mut resolver, &function_decl);
+    resolver.run_inference();
+
+    let expr_ty = function_decl.inferred(&mut resolver);
+
+    assert_type_data_snapshot(
+        CODE,
+        expr_ty,
+        &resolver,
+        "infer_flattened_type_of_destructured_interface_field",
+    )
 }

@@ -50,7 +50,7 @@ pub(crate) fn convert_pattern(line: &str) -> String {
     } else {
         ("!", line)
     };
-    let result = if let Some(stripped_line) = line.strip_prefix('/') {
+    if let Some(stripped_line) = line.strip_prefix('/') {
         // Patterns that starts with `/` are relative to the ignore file
         format!("{negation}./{stripped_line}")
     } else if line.find('/').is_some_and(|index| index < (line.len() - 1))
@@ -61,8 +61,7 @@ pub(crate) fn convert_pattern(line: &str) -> String {
         format!("{negation}{line}")
     } else {
         format!("{negation}**/{line}")
-    };
-    result
+    }
 }
 
 #[cfg(test)]

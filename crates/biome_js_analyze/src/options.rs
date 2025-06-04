@@ -191,6 +191,8 @@ pub type NoPrototypeBuiltins =
     <lint::suspicious::no_prototype_builtins::NoPrototypeBuiltins as biome_analyze::Rule>::Options;
 pub type NoReExportAll =
     <lint::performance::no_re_export_all::NoReExportAll as biome_analyze::Rule>::Options;
+pub type NoReactPropAssign =
+    <lint::nursery::no_react_prop_assign::NoReactPropAssign as biome_analyze::Rule>::Options;
 pub type NoReactSpecificProps = < lint :: suspicious :: no_react_specific_props :: NoReactSpecificProps as biome_analyze :: Rule > :: Options ;
 pub type NoRedeclare =
     <lint::suspicious::no_redeclare::NoRedeclare as biome_analyze::Rule>::Options;
@@ -387,6 +389,7 @@ pub type UseIndexOf = <lint::nursery::use_index_of::UseIndexOf as biome_analyze:
 pub type UseIsArray = <lint::suspicious::use_is_array::UseIsArray as biome_analyze::Rule>::Options;
 pub type UseIsNan = <lint::correctness::use_is_nan::UseIsNan as biome_analyze::Rule>::Options;
 pub type UseIterableCallbackReturn = < lint :: nursery :: use_iterable_callback_return :: UseIterableCallbackReturn as biome_analyze :: Rule > :: Options ;
+pub type UseJsonImportAttribute = < lint :: nursery :: use_json_import_attribute :: UseJsonImportAttribute as biome_analyze :: Rule > :: Options ;
 pub type UseJsxKeyInIterable = < lint :: correctness :: use_jsx_key_in_iterable :: UseJsxKeyInIterable as biome_analyze :: Rule > :: Options ;
 pub type UseKeyWithClickEvents =
     <lint::a11y::use_key_with_click_events::UseKeyWithClickEvents as biome_analyze::Rule>::Options;

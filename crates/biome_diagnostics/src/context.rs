@@ -344,9 +344,7 @@ mod internal {
 
     impl fmt::Write for DisplayMarkup<'_, '_> {
         fn write_str(&mut self, _: &fmt::MarkupElements<'_>, content: &str) -> io::Result<()> {
-            self.0
-                .write_str(content)
-                .map_err(|error| io::Error::new(io::ErrorKind::Other, error))
+            self.0.write_str(content).map_err(io::Error::other)
         }
 
         fn write_fmt(
@@ -354,9 +352,7 @@ mod internal {
             _: &fmt::MarkupElements<'_>,
             content: std::fmt::Arguments<'_>,
         ) -> io::Result<()> {
-            self.0
-                .write_fmt(content)
-                .map_err(|error| io::Error::new(io::ErrorKind::Other, error))
+            self.0.write_fmt(content).map_err(io::Error::other)
         }
     }
 

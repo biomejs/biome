@@ -105,7 +105,7 @@ impl AriaValueType {
             Self::Number => value.parse::<f32>().is_ok(),
             Self::Boolean => matches!(value, "false" | "true"),
             Self::OptionalBoolean => matches!(value, "undefined" | "false" | "true"),
-            Self::Token(tokens) => tokens.iter().any(|allowed_token| *allowed_token == value),
+            Self::Token(tokens) => tokens.contains(&value),
             Self::TokenList(tokens) => value.split_ascii_whitespace().all(|input_token| {
                 tokens
                     .iter()

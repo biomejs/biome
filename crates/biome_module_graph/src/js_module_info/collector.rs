@@ -14,7 +14,7 @@ use biome_js_type_info::{
     BindingId, FunctionParameter, GLOBAL_RESOLVER, GLOBAL_UNKNOWN_ID, Module, Namespace,
     Resolvable, ResolvedTypeData, ResolvedTypeId, ScopeId, TypeData, TypeId, TypeImportQualifier,
     TypeMember, TypeMemberKind, TypeReference, TypeReferenceQualifier, TypeResolver,
-    TypeResolverLevel,
+    TypeResolverLevel, TypeStore,
 };
 use biome_jsdoc_comment::JsdocComment;
 use biome_rowan::{AstNode, Text, TextSize, TokenText};
@@ -80,7 +80,7 @@ pub(super) struct JsModuleInfoCollector {
     blanket_reexports: Vec<JsReexport>,
 
     /// Types collected in the module.
-    types: Vec<TypeData>,
+    types: TypeStore,
 }
 
 impl JsModuleInfoCollector {
@@ -406,9 +406,9 @@ impl JsModuleInfoCollector {
 
         let mut i = 0;
         while i < self.types.len() {
-            // First take the type to satisfy the borrow checker:
-            let ty = std::mem::take(&mut self.types[i]);
-            self.types[i] = match ty {
+            // SAFETY: We immediately reinsert after taking.
+            let ty = unsafe { self.types.take_from_index_temporarily(i) };
+            let ty = match ty {
                 TypeData::Module(module) => match self.find_binding_for_type_index(i) {
                     Some(module_binding) => TypeData::from(Module {
                         name: module.name,
@@ -437,6 +437,8 @@ impl JsModuleInfoCollector {
                     self,
                 ),
             };
+            // SAFETY: We reinsert before anyone got a chance to do lookups.
+            unsafe { self.types.reinsert_temporarily_taken_data(i, ty) };
             i += 1;
         }
     }
@@ -486,9 +488,12 @@ impl JsModuleInfoCollector {
     fn flatten_all(&mut self) {
         let mut i = 0;
         while i < self.types.len() {
-            // First take the type to satisfy the borrow checker:
-            let ty = std::mem::take(&mut self.types[i]);
-            self.types[i] = ty.flattened(self);
+            // SAFETY: We reinsert before anyone got a chance to do lookups.
+            unsafe {
+                let ty = self.types.take_from_index_temporarily(i);
+                let ty = ty.flattened(self);
+                self.types.reinsert_temporarily_taken_data(i, ty);
+            }
             i += 1;
         }
     }
@@ -500,14 +505,11 @@ impl TypeResolver for JsModuleInfoCollector {
     }
 
     fn find_type(&self, type_data: &TypeData) -> Option<TypeId> {
-        self.types
-            .iter()
-            .position(|data| data == type_data)
-            .map(TypeId::new)
+        self.types.find_type(type_data)
     }
 
     fn get_by_id(&self, id: TypeId) -> &TypeData {
-        &self.types[id.index()]
+        self.types.get_by_id(id)
     }
 
     fn get_by_resolved_id(&self, id: ResolvedTypeId) -> Option<ResolvedTypeData> {
@@ -519,16 +521,7 @@ impl TypeResolver for JsModuleInfoCollector {
     }
 
     fn register_type(&mut self, type_data: TypeData) -> TypeId {
-        // Searching linearly may potentially become quite expensive, but it
-        // should be outweighed by index lookups quite heavily.
-        match self.types.iter().position(|data| data == &type_data) {
-            Some(index) => TypeId::new(index),
-            None => {
-                let id = TypeId::new(self.types.len());
-                self.types.push(type_data);
-                id
-            }
-        }
+        self.types.register_type(type_data)
     }
 
     fn resolve_reference(&self, ty: &TypeReference) -> Option<ResolvedTypeId> {
@@ -594,7 +587,7 @@ impl TypeResolver for JsModuleInfoCollector {
     }
 
     fn registered_types(&self) -> &[TypeData] {
-        &self.types
+        self.types.as_slice()
     }
 }
 
@@ -779,19 +772,23 @@ impl JsModuleInfoBag {
 
             if let Some(binding_ref) = collector.scopes[0].bindings_by_name.get(local_name) {
                 match binding_ref {
-                    TsBindingReference::Dual { ty, value_ty } => {
-                        let ty_binding = &collector.bindings[ty.index()];
-                        let value_ty_binding = &collector.bindings[value_ty.index()];
+                    TsBindingReference::Merged {
+                        ty,
+                        value_ty,
+                        namespace_ty,
+                    } => {
                         export.ty = collector
-                            .register_and_resolve(TypeData::dual_reference(
-                                ty_binding.ty.clone(),
-                                value_ty_binding.ty.clone(),
+                            .register_and_resolve(TypeData::merged_reference(
+                                ty.map(|ty| collector.bindings[ty.index()].ty.clone()),
+                                value_ty.map(|ty| collector.bindings[ty.index()].ty.clone()),
+                                namespace_ty.map(|ty| collector.bindings[ty.index()].ty.clone()),
                             ))
                             .into();
                     }
                     TsBindingReference::Type(binding_id)
                     | TsBindingReference::ValueType(binding_id)
-                    | TsBindingReference::Both(binding_id) => {
+                    | TsBindingReference::TypeAndValueType(binding_id)
+                    | TsBindingReference::NamespaceAndValueType(binding_id) => {
                         let binding = &collector.bindings[binding_id.index()];
                         export.jsdoc_comment.clone_from(&binding.jsdoc);
                         export.ty.clone_from(&binding.ty);

@@ -66,11 +66,19 @@ fn flattened(mut ty: TypeData, resolver: &mut dyn TypeResolver, depth: usize) ->
 
     for depth in depth + 1..=MAX_FLATTEN_DEPTH {
         match &ty {
-            TypeData::DualReference(duality) => {
-                if duality.ty == duality.value_ty {
-                    ty = TypeData::Reference(duality.ty.clone());
-                } else {
-                    return ty;
+            TypeData::MergedReference(merged) => {
+                match (&merged.ty, &merged.value_ty, &merged.namespace_ty) {
+                    (Some(ty1), Some(ty2), Some(ty3)) if ty1 == ty2 && ty1 == ty3 => {
+                        ty = TypeData::Reference(ty1.clone());
+                    }
+                    (Some(ty1), Some(ty2), None)
+                    | (Some(ty1), None, Some(ty2))
+                    | (None, Some(ty1), Some(ty2))
+                        if ty1 == ty2 =>
+                    {
+                        ty = TypeData::Reference(ty1.clone());
+                    }
+                    _ => return ty,
                 }
             }
             TypeData::InstanceOf(instance_of) => match resolver.resolve_and_get(&instance_of.ty) {
@@ -198,6 +206,50 @@ fn flattened(mut ty: TypeData, resolver: &mut dyn TypeResolver, depth: usize) ->
                             (TypeData::Class(class), DestructureField::RestExcept(names)) => {
                                 return TypeData::object_with_members(
                                     class
+                                        .members
+                                        .iter()
+                                        .filter(|own_member| {
+                                            own_member.is_static()
+                                                && !names
+                                                    .iter()
+                                                    .any(|name| own_member.has_name(name))
+                                        })
+                                        .map(|member| {
+                                            ResolvedTypeMember::from((
+                                                resolved.resolver_id(),
+                                                member,
+                                            ))
+                                            .to_member()
+                                        })
+                                        .collect(),
+                                );
+                            }
+                            (TypeData::Interface(interface), DestructureField::Name(name)) => {
+                                match interface.members.iter().find(|own_member| {
+                                    own_member.is_static() && own_member.has_name(name.text())
+                                }) {
+                                    Some(member) => {
+                                        ty = flattened(
+                                            resolver
+                                                .resolve_and_get(
+                                                    &resolved
+                                                        .apply_module_id_to_reference(&member.ty),
+                                                )
+                                                .map(ResolvedTypeData::to_data)
+                                                .unwrap_or_default(),
+                                            resolver,
+                                            depth,
+                                        );
+                                    }
+                                    None => return TypeData::reference(GLOBAL_UNKNOWN_ID),
+                                }
+                            }
+                            (
+                                TypeData::Interface(interface),
+                                DestructureField::RestExcept(names),
+                            ) => {
+                                return TypeData::object_with_members(
+                                    interface
                                         .members
                                         .iter()
                                         .filter(|own_member| {

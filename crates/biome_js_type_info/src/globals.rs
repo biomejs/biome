@@ -169,6 +169,7 @@ impl Default for GlobalsResolver {
                     ty: TypeReference::Unknown,
                 }]),
                 extends: None,
+                implements: [].into(),
                 members: Box::new([TypeMember {
                     kind: TypeMemberKind::Named(Text::Static("length")),
                     is_static: false,
@@ -185,6 +186,7 @@ impl Default for GlobalsResolver {
                     ty: TypeReference::Unknown,
                 }]),
                 extends: None,
+                implements: [].into(),
                 members: Box::new([
                     promise_method("catch", PROMISE_CATCH_ID),
                     promise_method("finally", PROMISE_FINALLY_ID),

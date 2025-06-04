@@ -1,0 +1,174 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 134
+expression: invalid.jsx
+---
+# Input
+```jsx
+function Foo(props) {
+	props.bar = `Hello ${props.bar}`;
+
+	return <div>{props.bar}</div>;
+}
+
+export function Foo(props) {
+	props.bar = `Hello ${props.bar}`;
+
+	return <div>{props.bar}</div>;
+}
+
+const Foo = (props) => {
+	props.bar = `Hello ${props.bar}`;
+
+	return <div>{props.bar}</div>;
+}
+
+const Foo = (props) => {
+	const baz = props.baz;
+
+	useEffect(() => {
+		props.bar = `Hello ${props.bar}`;
+	}, [props.bar]);
+
+	props.bar = `Hello ${props.bar}`;
+	return <div>{props.bar}</div>;
+}
+
+const Foo = memo((props) => {
+	props.bar = `Hello ${props.bar}`;
+	return <div>{props.bar}</div>;
+});
+
+const Foo = forwardRef(function (props, ref) {
+	props.bar = `Hello ${props.bar}`;
+	return <div>{props.bar}</div>;
+});
+
+const Foo = (props) => {
+	const baz = props.baz;
+
+	useEffect(() => {
+		props.bar = `Hello ${props.bar}`;
+	}, [props.bar]);
+
+	props.bar = `Hello ${props.bar}`;
+	props.baz = `Hello ${props.baz}`;
+	return <div>{props.bar}</div>
+};
+
+
+
+```
+
+# Diagnostics
+```
+invalid.jsx:2:2 lint/nursery/noReactPropAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Mutating component props is not allowed.
+  
+    1 │ function Foo(props) {
+  > 2 │ 	props.bar = `Hello ${props.bar}`;
+      │ 	^^^^^
+    3 │ 
+    4 │ 	return <div>{props.bar}</div>;
+  
+  i Consider using a local variable instead.
+  
+
+```
+
+```
+invalid.jsx:8:2 lint/nursery/noReactPropAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Mutating component props is not allowed.
+  
+     7 │ export function Foo(props) {
+   > 8 │ 	props.bar = `Hello ${props.bar}`;
+       │ 	^^^^^
+     9 │ 
+    10 │ 	return <div>{props.bar}</div>;
+  
+  i Consider using a local variable instead.
+  
+
+```
+
+```
+invalid.jsx:14:2 lint/nursery/noReactPropAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Mutating component props is not allowed.
+  
+    13 │ const Foo = (props) => {
+  > 14 │ 	props.bar = `Hello ${props.bar}`;
+       │ 	^^^^^
+    15 │ 
+    16 │ 	return <div>{props.bar}</div>;
+  
+  i Consider using a local variable instead.
+  
+
+```
+
+```
+invalid.jsx:23:3 lint/nursery/noReactPropAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Mutating component props is not allowed.
+  
+    22 │ 	useEffect(() => {
+  > 23 │ 		props.bar = `Hello ${props.bar}`;
+       │ 		^^^^^
+    24 │ 	}, [props.bar]);
+    25 │ 
+  
+  i Consider using a local variable instead.
+  
+
+```
+
+```
+invalid.jsx:31:2 lint/nursery/noReactPropAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Mutating component props is not allowed.
+  
+    30 │ const Foo = memo((props) => {
+  > 31 │ 	props.bar = `Hello ${props.bar}`;
+       │ 	^^^^^
+    32 │ 	return <div>{props.bar}</div>;
+    33 │ });
+  
+  i Consider using a local variable instead.
+  
+
+```
+
+```
+invalid.jsx:36:2 lint/nursery/noReactPropAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Mutating component props is not allowed.
+  
+    35 │ const Foo = forwardRef(function (props, ref) {
+  > 36 │ 	props.bar = `Hello ${props.bar}`;
+       │ 	^^^^^
+    37 │ 	return <div>{props.bar}</div>;
+    38 │ });
+  
+  i Consider using a local variable instead.
+  
+
+```
+
+```
+invalid.jsx:44:3 lint/nursery/noReactPropAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Mutating component props is not allowed.
+  
+    43 │ 	useEffect(() => {
+  > 44 │ 		props.bar = `Hello ${props.bar}`;
+       │ 		^^^^^
+    45 │ 	}, [props.bar]);
+    46 │ 
+  
+  i Consider using a local variable instead.
+  
+
+```

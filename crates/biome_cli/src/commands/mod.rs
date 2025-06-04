@@ -1,6 +1,6 @@
 use crate::changed::{get_changed_files, get_staged_files};
 use crate::cli_options::{CliOptions, CliReporter, ColorsArg, cli_options};
-use crate::commands::scan_kind::compute_scan_kind;
+use crate::commands::scan_kind::get_forced_scan_kind;
 use crate::execute::Stdin;
 use crate::logging::LoggingKind;
 use crate::{
@@ -675,6 +675,35 @@ pub(crate) fn validate_configuration_diagnostics(
     Ok(())
 }
 
+pub(crate) fn print_diagnostics_from_workspace_result(
+    diagnostics: &[biome_diagnostics::serde::Diagnostic],
+    console: &mut dyn Console,
+    verbose: bool,
+) -> Result<(), CliDiagnostic> {
+    let mut has_errors = false;
+    for diagnostic in diagnostics {
+        if diagnostic.severity() >= Severity::Error {
+            has_errors = true;
+            if diagnostic.tags().is_verbose() && verbose {
+                console.error(markup! {{PrintDiagnostic::verbose(diagnostic)}})
+            } else {
+                console.error(markup! {{PrintDiagnostic::simple(diagnostic)}})
+            }
+        }
+    }
+
+    if has_errors {
+        return Err(CliDiagnostic::workspace_error(
+            BiomeDiagnostic::invalid_configuration(
+                "Biome exited because the configuration resulted in errors. Please fix them.",
+            )
+            .into(),
+        ));
+    }
+
+    Ok(())
+}
+
 fn get_files_to_process_with_cli_options(
     since: Option<&str>,
     changed: bool,
@@ -786,7 +815,11 @@ pub(crate) trait CommandRunner: Sized {
 
     /// The main command to use.
     fn run(&mut self, session: CliSession, cli_options: &CliOptions) -> Result<(), CliDiagnostic> {
-        setup_cli_subscriber(cli_options.log_level, cli_options.log_kind);
+        setup_cli_subscriber(
+            cli_options.log_file.as_deref(),
+            cli_options.log_level,
+            cli_options.log_kind,
+        );
         let console = &mut *session.app.console;
         let workspace = &*session.app.workspace;
         let fs = workspace.fs();
@@ -837,7 +870,7 @@ pub(crate) trait CommandRunner: Sized {
             loaded_configuration.file_path,
             loaded_configuration.diagnostics.len(),
         );
-        let configuration_path = loaded_configuration.directory_path.clone();
+        let configuration_dir_path = loaded_configuration.directory_path.clone();
         let configuration = self.merge_configuration(loaded_configuration, fs, console)?;
         let paths = self.get_files_to_process(fs, &configuration)?;
         let project_path = fs
@@ -865,7 +898,7 @@ pub(crate) trait CommandRunner: Sized {
 
         let open_project_result = workspace.open_project(params)?;
 
-        let scan_kind = compute_scan_kind(&execution, &configuration).unwrap_or({
+        let scan_kind = get_forced_scan_kind(&execution).unwrap_or({
             if open_project_result.scan_kind == ScanKind::None && configuration.use_ignore_file() {
                 ScanKind::KnownFiles
             } else {
@@ -880,16 +913,16 @@ pub(crate) trait CommandRunner: Sized {
             workspace_directory: if is_configuration_from_user {
                 Some(project_path.clone())
             } else {
-                configuration_path.map(BiomePath::from)
+                configuration_dir_path.map(BiomePath::from)
             },
             configuration,
         })?;
-        for diagnostic in &result.diagnostics {
-            if diagnostic.tags().is_verbose() && cli_options.verbose {
-                console.error(markup! {{PrintDiagnostic::verbose(diagnostic)}})
-            } else {
-                console.error(markup! {{PrintDiagnostic::simple(diagnostic)}})
-            }
+        if self.should_validate_configuration_diagnostics() {
+            print_diagnostics_from_workspace_result(
+                result.diagnostics.as_slice(),
+                console,
+                cli_options.verbose,
+            )?;
         }
 
         let result = workspace.scan_project_folder(ScanProjectFolderParams {
@@ -899,14 +932,13 @@ pub(crate) trait CommandRunner: Sized {
             force: false, // TODO: Maybe we'll want a CLI flag for this.
             scan_kind,
         })?;
-        for diagnostic in result.diagnostics {
-            if diagnostic.severity() >= Severity::Error {
-                if diagnostic.tags().is_verbose() && cli_options.verbose {
-                    console.error(markup! {{PrintDiagnostic::verbose(&diagnostic)}})
-                } else {
-                    console.error(markup! {{PrintDiagnostic::simple(&diagnostic)}})
-                }
-            }
+
+        if self.should_validate_configuration_diagnostics() {
+            print_diagnostics_from_workspace_result(
+                result.diagnostics.as_slice(),
+                console,
+                cli_options.verbose,
+            )?;
         }
 
         Ok(ConfiguredWorkspace {

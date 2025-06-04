@@ -1,29 +1,21 @@
 use crate::Execution;
-use biome_configuration::Configuration;
 use biome_service::workspace::ScanKind;
 
-/// It analyzes the CLI and the configuration to understand what kind of scanning Biome needs to execute.
+/// Returns a forced scan kind based on the given `execution`.
 ///
 /// Rules:
-/// - CLI via `stdin` return [ScanKind::None]
-/// - `biome migrate` return [ScanKind:KnownFiles], so it can migrate all nested configuration files
-/// - `biome format` return [ScanKind::KnownFiles] if VCS is enabled, otherwise [ScanKind::None]
-/// -  `None` otherwise
-pub(crate) fn compute_scan_kind(
-    execution: &Execution,
-    configuration: &Configuration,
-) -> Option<ScanKind> {
+/// - Returns [ScanKind::None] when processing from `stdin`. When using `stdin`,
+///   we don't know the input's real path, so we can't match nested configs or
+///   resolve import paths, meaning there's no use for the scanner.
+/// - Returns [ScanKind::KnownFiles] for `biome format`, `biome migrate`, and
+///   `biome search` because we know there is no use for project analysis with
+///   these commands.
+/// - Returns `None` otherwise.
+pub(crate) fn get_forced_scan_kind(execution: &Execution) -> Option<ScanKind> {
     if execution.is_stdin() {
         Some(ScanKind::None)
-    } else if execution.is_migrate() {
+    } else if execution.is_migrate() || execution.is_format() || execution.is_search() {
         Some(ScanKind::KnownFiles)
-    } else if execution.is_format() {
-        // There's no need to scan further known files if the VCS isn't enabled
-        if !configuration.use_ignore_file() {
-            Some(ScanKind::None)
-        } else {
-            Some(ScanKind::KnownFiles)
-        }
     } else {
         None
     }
@@ -33,11 +25,7 @@ pub(crate) fn compute_scan_kind(
 mod tests {
     use super::*;
     use crate::{TraversalMode, VcsTargeted};
-    use biome_configuration::analyzer::{Correctness, RuleSelector, SeverityOrGroup};
-    use biome_configuration::vcs::{VcsClientKind, VcsConfiguration};
-    use biome_configuration::{
-        LinterConfiguration, RuleConfiguration, RulePlainConfiguration, Rules,
-    };
+    use biome_configuration::analyzer::RuleSelector;
 
     #[test]
     fn should_return_none_for_lint_command() {
@@ -53,59 +41,19 @@ mod tests {
             skip_parse_errors: false,
         });
 
-        let configuration = Configuration {
-            linter: Some(LinterConfiguration {
-                rules: Some(Rules {
-                    correctness: Some(SeverityOrGroup::Group(Correctness {
-                        no_private_imports: Some(RuleConfiguration::Plain(
-                            RulePlainConfiguration::Error,
-                        )),
-                        ..Default::default()
-                    })),
-                    ..Default::default()
-                }),
-                ..Default::default()
-            }),
-            ..Default::default()
-        };
-
-        assert_eq!(compute_scan_kind(&execution, &configuration), None);
+        assert_eq!(get_forced_scan_kind(&execution), None);
     }
 
     #[test]
-    fn should_return_known_files_if_vcs_is_enabled_when_formatting() {
+    fn should_return_known_files_for_format_command() {
         let execution = Execution::new(TraversalMode::Format {
-            stdin: None,
-            vcs_targeted: VcsTargeted::default(),
             skip_parse_errors: false,
-            write: false,
+            write: true,
+            stdin: None,
+
+            vcs_targeted: VcsTargeted::default(),
         });
 
-        let configuration = Configuration {
-            linter: Some(LinterConfiguration {
-                rules: Some(Rules {
-                    correctness: Some(SeverityOrGroup::Group(Correctness {
-                        no_private_imports: Some(RuleConfiguration::Plain(
-                            RulePlainConfiguration::Error,
-                        )),
-                        ..Default::default()
-                    })),
-                    ..Default::default()
-                }),
-                ..Default::default()
-            }),
-            vcs: Some(VcsConfiguration {
-                enabled: Some(true.into()),
-                client_kind: Some(VcsClientKind::Git),
-                use_ignore_file: Some(true.into()),
-                ..Default::default()
-            }),
-            ..Default::default()
-        };
-
-        assert_eq!(
-            compute_scan_kind(&execution, &configuration),
-            Some(ScanKind::KnownFiles)
-        );
+        assert_eq!(get_forced_scan_kind(&execution), Some(ScanKind::KnownFiles));
     }
 }

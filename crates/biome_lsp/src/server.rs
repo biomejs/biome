@@ -21,6 +21,7 @@ use futures::future::ready;
 use rustc_hash::FxHashMap;
 use serde_json::json;
 use std::panic::RefUnwindSafe;
+use std::str::FromStr;
 use std::sync::atomic::{AtomicBool, AtomicU64, Ordering};
 use std::sync::{Arc, Mutex};
 use tokio::io::{AsyncRead, AsyncWrite};
@@ -116,6 +117,7 @@ impl LSPServer {
         Ok(RageResult { entries })
     }
 
+    #[instrument(level = "info", skip(self))]
     async fn setup_capabilities(&self) {
         let mut capabilities = CapabilitySet::default();
 
@@ -129,52 +131,63 @@ impl LSPServer {
             },
         );
 
-        capabilities.add_capability(
-            "biome_did_change_workspace_settings",
-            "workspace/didChangeWatchedFiles",
+        let watched_files_capability = if self.session.can_register_did_change_watched_files() {
             if let Some(folders) = self.session.get_workspace_folders() {
                 let watchers = folders
                     .iter()
-                    .map(|folder| FileSystemWatcher {
-                        glob_pattern: GlobPattern::String(format!(
-                            "{}/biome.json",
-                            folder.uri.as_str()
-                        )),
-                        kind: Some(WatchKind::all()),
+                    .flat_map(|folder| {
+                        vec![
+                            FileSystemWatcher {
+                                glob_pattern: GlobPattern::Relative(RelativePattern {
+                                    pattern: "**/biome.{json,jsonc}".to_string(),
+                                    base_uri: OneOf::Left(folder.clone()),
+                                }),
+                                kind: Some(WatchKind::all()),
+                            },
+                            FileSystemWatcher {
+                                glob_pattern: GlobPattern::Relative(RelativePattern {
+                                    pattern: ".editorconfig".to_string(),
+                                    base_uri: OneOf::Left(folder.clone()),
+                                }),
+                                kind: Some(WatchKind::all()),
+                            },
+                        ]
                     })
                     .collect();
                 CapabilityStatus::Enable(Some(json!(DidChangeWatchedFilesRegistrationOptions {
                     watchers
                 })))
             } else if let Some(base_path) = self.session.base_path() {
-                CapabilityStatus::Enable(Some(json!(DidChangeWatchedFilesRegistrationOptions {
+                let value = DidChangeWatchedFilesRegistrationOptions {
                     watchers: vec![
                         FileSystemWatcher {
-                            glob_pattern: GlobPattern::String(format!(
-                                "{}/biome.json",
-                                base_path.as_str()
-                            )),
-                            kind: Some(WatchKind::all()),
-                        },
-                        FileSystemWatcher {
-                            glob_pattern: GlobPattern::String(format!(
-                                "{}/biome.jsonc",
-                                base_path.as_str()
-                            )),
+                            glob_pattern: GlobPattern::Relative(RelativePattern {
+                                pattern: "**/biome.{json,jsonc}".to_string(),
+                                base_uri: OneOf::Right(Uri::from_str(base_path.as_str()).unwrap()),
+                            }),
                             kind: Some(WatchKind::all()),
                         },
                         FileSystemWatcher {
                             glob_pattern: GlobPattern::String(format!(
                                 "{}/.editorconfig",
-                                base_path.as_str()
+                                base_path.as_path().as_str()
                             )),
                             kind: Some(WatchKind::all()),
-                        }
+                        },
                     ],
-                })))
+                };
+                CapabilityStatus::Enable(Some(json!(value)))
             } else {
                 CapabilityStatus::Disable
-            },
+            }
+        } else {
+            CapabilityStatus::Disable
+        };
+
+        capabilities.add_capability(
+            "biome_did_change_watched_files",
+            "workspace/didChangeWatchedFiles",
+            watched_files_capability,
         );
 
         capabilities.add_capability(
@@ -245,16 +258,7 @@ impl LSPServer {
 impl LanguageServer for LSPServer {
     // The `root_path` field is deprecated, but we still read it so we can print a warning about it
     #[expect(deprecated)]
-    #[tracing::instrument(
-        level = "debug",
-        skip_all,
-        fields(
-            capabilities = debug(&params.capabilities),
-            client_info = params.client_info.as_ref().map(debug),
-            root_path = params.root_path,
-            workspace_folders = params.workspace_folders.as_ref().map(debug),
-        )
-    )]
+    #[tracing::instrument(level = "debug", skip_all)]
     async fn initialize(&self, params: InitializeParams) -> LspResult<InitializeResult> {
         info!("Starting Biome Language Server...");
         self.is_initialized.store(true, Ordering::Relaxed);
@@ -316,12 +320,11 @@ impl LanguageServer for LSPServer {
     async fn did_change_configuration(&self, params: DidChangeConfigurationParams) {
         let _ = params;
         self.session.load_extension_settings().await;
-        self.session.load_workspace_settings().await;
         self.setup_capabilities().await;
         self.session.update_all_diagnostics().await;
     }
 
-    #[tracing::instrument(level = "debug", skip(self))]
+    #[tracing::instrument(level = "debug", skip_all)]
     async fn did_change_watched_files(&self, params: DidChangeWatchedFilesParams) {
         let file_paths = params
             .changes

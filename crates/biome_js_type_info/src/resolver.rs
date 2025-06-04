@@ -18,7 +18,7 @@ const LEVEL_MASK: u32 = 0xc000_0000; // Upper 2 bits.
 /// `ResolvedTypeId` uses `u32` for its first field so that it can fit the
 /// module ID and the resolver level together in 4 bytes, making the struct as
 /// a whole still fit in 8 bytes without alignment issues.
-#[derive(Clone, Copy, Eq, PartialEq)]
+#[derive(Clone, Copy, Eq, Hash, PartialEq)]
 pub struct ResolvedTypeId(ResolverId, TypeId);
 
 impl Debug for ResolvedTypeId {
@@ -94,7 +94,7 @@ impl ResolvedTypeId {
 /// uniquely identify where a resolver has resolved a specific type.
 ///
 /// Combined with a [`TypeId`] this makes a [`ResolvedTypeId`].
-#[derive(Clone, Copy, Eq, PartialEq)]
+#[derive(Clone, Copy, Eq, Hash, PartialEq)]
 pub struct ResolverId(u32);
 
 impl Debug for ResolverId {

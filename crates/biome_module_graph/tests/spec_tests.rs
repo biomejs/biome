@@ -585,7 +585,7 @@ fn test_resolve_promise_export() {
 }
 
 #[test]
-fn test_resolve_dual_types() {
+fn test_resolve_merged_types() {
     let mut fs = MemoryFileSystem::default();
     fs.insert(
         "/src/index.ts".into(),
@@ -612,7 +612,31 @@ export { A, B };
 
     let snapshot = ModuleGraphSnapshot::new(&module_graph, &fs);
 
-    snapshot.assert_snapshot("test_resolve_dual_types");
+    snapshot.assert_snapshot("test_resolve_merged_types");
+}
+
+#[test]
+fn test_resolve_merged_namespace_with_type() {
+    let mut fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"export namespace Foo {
+    interface Bar {};
+}
+
+export type Foo = Foo.Bar;
+"#,
+    );
+
+    let added_paths = [BiomePath::new("/src/index.ts")];
+    let added_paths = get_added_paths(&fs, &added_paths);
+
+    let module_graph = ModuleGraph::default();
+    module_graph.update_graph_for_js_paths(&fs, &ProjectLayout::default(), &added_paths, &[]);
+
+    let snapshot = ModuleGraphSnapshot::new(&module_graph, &fs);
+
+    snapshot.assert_snapshot("test_resolve_merged_namespace_with_type");
 }
 
 #[test]

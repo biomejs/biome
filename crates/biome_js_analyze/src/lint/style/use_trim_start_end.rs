@@ -228,7 +228,7 @@ impl Rule for UseTrimStartEnd {
 }
 
 fn extract_token_from_expression(callee: AnyJsExpression) -> Option<SyntaxToken<JsLanguage>> {
-    let token = if let AnyJsExpression::JsComputedMemberExpression(expression) = callee {
+    if let AnyJsExpression::JsComputedMemberExpression(expression) = callee {
         let member = expression.member().ok()?;
         match member {
             AnyJsExpression::AnyJsLiteralExpression(literal) => literal.value_token().ok(),
@@ -244,8 +244,7 @@ fn extract_token_from_expression(callee: AnyJsExpression) -> Option<SyntaxToken<
         expression.member().ok()?.value_token().ok()
     } else {
         None
-    };
-    token
+    }
 }
 
 // Handle "'text'" and "\"text\"" and "text" cases

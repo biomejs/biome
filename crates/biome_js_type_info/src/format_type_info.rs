@@ -1,10 +1,10 @@
 use crate::globals::global_type_name;
 use crate::{
-    CallArgumentType, Class, DestructureField, DualReference, Function, FunctionParameter,
-    FunctionParameterBinding, GenericTypeParameter, ImportSymbol, Literal, NUM_PREDEFINED_TYPES,
-    Object, ObjectLiteral, ReturnType, Type, TypeData, TypeId, TypeImportQualifier, TypeInstance,
-    TypeMember, TypeMemberKind, TypeReference, TypeReferenceQualifier, TypeResolverLevel,
-    TypeofAwaitExpression, TypeofExpression, Union,
+    CallArgumentType, Class, DestructureField, Function, FunctionParameter,
+    FunctionParameterBinding, GenericTypeParameter, ImportSymbol, Interface, Literal,
+    MergedReference, NUM_PREDEFINED_TYPES, Object, ObjectLiteral, ReturnType, Type, TypeData,
+    TypeId, TypeImportQualifier, TypeInstance, TypeMember, TypeMemberKind, TypeReference,
+    TypeReferenceQualifier, TypeResolverLevel, TypeofAwaitExpression, TypeofExpression, Union,
 };
 use biome_formatter::prelude::*;
 use biome_formatter::{
@@ -95,6 +95,7 @@ impl Format<FormatTypeContext> for TypeData {
             Self::Class(class) => write!(f, [&class.as_ref()]),
             Self::Constructor(ty) => write!(f, [FmtVerbatim(ty.as_ref())]),
             Self::Function(function) => write!(f, [&function.as_ref()]),
+            Self::Interface(interface) => write!(f, [&interface.as_ref()]),
             Self::Module(ty) => write!(f, [FmtVerbatim(ty.as_ref())]),
             Self::Namespace(ty) => write!(f, [FmtVerbatim(ty.as_ref())]),
             Self::Object(object) => write!(f, [object.as_ref()]),
@@ -108,7 +109,7 @@ impl Format<FormatTypeContext> for TypeData {
                 [&format_args![text("instanceof"), space(), &ty.as_ref()]]
             ),
             Self::Reference(reference) => write!(f, [reference]),
-            Self::DualReference(reference) => write!(f, [reference.as_ref()]),
+            Self::MergedReference(reference) => write!(f, [reference.as_ref()]),
             Self::TypeofExpression(expression) => write!(f, [&expression.as_ref()]),
             Self::TypeofType(reference) => {
                 write!(
@@ -544,7 +545,7 @@ impl Format<FormatTypeContext> for TypeImportQualifier {
     }
 }
 
-impl Format<FormatTypeContext> for DualReference {
+impl Format<FormatTypeContext> for MergedReference {
     fn fmt(&self, f: &mut Formatter<FormatTypeContext>) -> FormatResult<()> {
         write!(
             f,
@@ -558,6 +559,11 @@ impl Format<FormatTypeContext> for DualReference {
                 text("value:"),
                 space(),
                 &self.value_ty,
+                text(","),
+                space(),
+                text("namespace:"),
+                space(),
+                &self.namespace_ty,
                 text(")")
             ]]
         )
@@ -586,8 +592,7 @@ impl Format<FormatTypeContext> for Class {
                 write!(f, [text("none")])
             }
         });
-        // NOTE: members are hidden on purpose until we find a way to distinguish own members
-        // from the ones inherited from the global prototype
+
         write!(
             f,
             [&format_args![
@@ -601,9 +606,42 @@ impl Format<FormatTypeContext> for Class {
                     space(),
                     extends,
                     hard_line_break(),
+                    text("implements:"),
+                    space(),
+                    FmtTypeReferences(self.implements.as_ref()),
+                    hard_line_break(),
                     text("type_args:"),
                     space(),
                     FmtGenericTypeParameters(&self.type_parameters),
+                ])),
+                text("}")
+            ]]
+        )
+    }
+}
+
+impl Format<FormatTypeContext> for Interface {
+    fn fmt(&self, f: &mut Formatter<FormatTypeContext>) -> FormatResult<()> {
+        write!(
+            f,
+            [&format_args![
+                text("interface"),
+                space(),
+                dynamic_text(&std::format!("\"{}\"", self.name), TextSize::default()),
+                space(),
+                text("{"),
+                &group(&block_indent(&format_args![
+                    text("extends:"),
+                    space(),
+                    FmtTypeReferences(self.extends.as_ref()),
+                    hard_line_break(),
+                    text("type_args:"),
+                    space(),
+                    FmtGenericTypeParameters(&self.type_parameters),
+                    hard_line_break(),
+                    text("members:"),
+                    space(),
+                    FmtTypeMembers(self.members.as_ref()),
                 ])),
                 text("}")
             ]]
@@ -624,13 +662,9 @@ impl Format<FormatTypeContext> for Literal {
                 )]
             ),
             Self::Null => write!(f, [text("null")]),
-            Self::Number(lit) => write!(
-                f,
-                [dynamic_text(
-                    lit.as_f64().to_string().as_str(),
-                    TextSize::default()
-                )]
-            ),
+            Self::Number(lit) => {
+                write!(f, [dynamic_text(lit.as_str(), TextSize::default())])
+            }
             Self::Object(obj) => write!(f, [&obj]),
             Self::RegExp(text) => write!(f, [dynamic_text(text, TextSize::default())]),
             Self::String(lit) => write!(f, [dynamic_text(lit.as_str(), TextSize::default())]),
@@ -815,6 +849,31 @@ impl Format<FormatTypeContext> for FmtTypeMembers<'_> {
         write!(
             f,
             [&format_args![group(&soft_block_indent(&types)), text("]")]]
+        )
+    }
+}
+
+struct FmtTypeReferences<'a>(&'a [TypeReference]);
+
+impl Format<FormatTypeContext> for FmtTypeReferences<'_> {
+    fn fmt(&self, f: &mut Formatter<FormatTypeContext>) -> FormatResult<()> {
+        write!(f, [text("[")])?;
+
+        let references = format_with(|f| {
+            let separator =
+                format_with(|f| write!(f, [&format_args![text(","), soft_line_break_or_space()]]));
+            let mut joiner = f.join_with(separator);
+            for part in self.0 {
+                joiner.entry(&format_args![part]);
+            }
+            joiner.finish()
+        });
+        write!(
+            f,
+            [&format_args![
+                group(&soft_block_indent(&references)),
+                text("]")
+            ]]
         )
     }
 }

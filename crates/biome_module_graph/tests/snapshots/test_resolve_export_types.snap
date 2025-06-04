@@ -95,6 +95,7 @@ Module TypeId(4) => sync Function "whatWasTheUltimateQuestion" {
 
 Module TypeId(5) => class "DeepThought" {
   extends: none
+  implements: []
   type_args: []
 }
 
