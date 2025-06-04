@@ -1062,6 +1062,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "biome_line_index"
+version = "0.1.0"
+dependencies = [
+ "biome_text_size",
+ "rustc-hash 2.1.1",
+]
+
+[[package]]
 name = "biome_lsp"
 version = "0.0.0"
 dependencies = [
@@ -1072,6 +1080,7 @@ dependencies = [
  "biome_deserialize",
  "biome_diagnostics",
  "biome_fs",
+ "biome_line_index",
  "biome_lsp_converters",
  "biome_resolver",
  "biome_rowan",
@@ -1095,7 +1104,8 @@ name = "biome_lsp_converters"
 version = "0.1.0"
 dependencies = [
  "anyhow",
- "biome_rowan",
+ "biome_line_index",
+ "biome_text_size",
  "rustc-hash 2.1.1",
  "tower",
  "tower-lsp-server",
