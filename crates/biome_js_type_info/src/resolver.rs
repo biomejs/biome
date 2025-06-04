@@ -253,7 +253,7 @@ impl TypeResolverLevel {
 }
 
 /// Identifier that indicates which module a type is defined in.
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
 pub struct ModuleId(u32);
 
 impl ModuleId {
@@ -699,6 +699,12 @@ impl Resolvable for TypeReference {
 
     fn with_module_id(self, module_id: ModuleId) -> Self {
         match self {
+            Self::Qualifier(_) => {
+                // When we assign a module ID in order to store a type in the
+                // scoped resolver, we also clear out qualifiers to avoid
+                // resolving from an incorrect scope.
+                Self::Unknown
+            }
             Self::Resolved(resolved_type_id) => {
                 Self::Resolved(resolved_type_id.with_module_id(module_id))
             }

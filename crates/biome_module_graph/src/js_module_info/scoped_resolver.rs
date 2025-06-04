@@ -140,6 +140,7 @@ impl ScopedResolver {
             let ty = unsafe { self.types.take_from_index_temporarily(i) };
             let ty = ty.resolved_with_mapped_references(
                 |reference, resolver| match reference {
+                    TypeReference::Qualifier(_qualifier) => TypeReference::Unknown,
                     TypeReference::Import(import) => resolver
                         .resolve_import(&import)
                         .map_or(TypeReference::Unknown, Into::into),
