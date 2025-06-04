@@ -44,9 +44,7 @@ div {
 	/* Custom property, always generic */
 	unknown-property: one-value;
 	unknown-property: multiple values;
-	unknown-property:
-		delimited,
-		values;
+	unknown-property: delimited, values;
 	unknown-property: delimited / slash / values;
 	unknown-property:
 		mixed,

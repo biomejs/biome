@@ -347,15 +347,6 @@ a {
    prop77: calc(-5px);
    prop78: calc(+5px);
    prop79: calc(-100px + 100px);
-@@ -156,5 +156,7 @@
-   unicode-range: U+0-7F;
-   unicode-range: U+0025-00FF; /* codepoint range */
-   unicode-range: U+4??; /* wildcard range */
--  unicode-range: U+0025-00FF, U+4??; /* multiple values */
-+  unicode-range:
-+    U+0025-00FF,
-+    U+4??; /* multiple values */
- }
 ```
 
 # Output
@@ -519,9 +510,7 @@ a {
   unicode-range: U+0-7F;
   unicode-range: U+0025-00FF; /* codepoint range */
   unicode-range: U+4??; /* wildcard range */
-  unicode-range:
-    U+0025-00FF,
-    U+4??; /* multiple values */
+  unicode-range: U+0025-00FF, U+4??; /* multiple values */
 }
 ```
 
