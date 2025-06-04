@@ -14,7 +14,7 @@ pub(crate) enum DeriveInput {
     },
     Unit {
         ident: Ident,
-        ty: Type,
+        ty: Box<Type>,
     },
 }
 
@@ -43,7 +43,7 @@ impl DeriveInput {
             {
                 Self::Unit {
                     ident,
-                    ty: data.fields.into_iter().next().unwrap().ty,
+                    ty: Box::new(data.fields.into_iter().next().unwrap().ty),
                 }
             }
             Data::Struct(data) => {
@@ -101,7 +101,7 @@ pub(crate) fn generate_resolvable(input: DeriveInput) -> TokenStream {
     match input {
         DeriveInput::Enum { ident, variants } => generate_resolvable_enum(ident, variants),
         DeriveInput::Struct { ident, fields } => generate_resolvable_struct(ident, fields),
-        DeriveInput::Unit { ident, ty } => generate_resolvable_unit_type(ident, ty),
+        DeriveInput::Unit { ident, ty } => generate_resolvable_unit_type(ident, *ty),
     }
 }
 

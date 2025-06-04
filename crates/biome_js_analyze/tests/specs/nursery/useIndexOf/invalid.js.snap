@@ -1,0 +1,293 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 134
+expression: invalid.js
+---
+# Input
+```js
+const list = ['foo', 'bar', 'baz'];
+list.findIndex(bar => bar === 'foo');
+list.findIndex((x) => x === 'foo');
+list.findIndex(x => 'foo' === x);
+list.findIndex(x => {
+	return x === 'foo';
+});
+list.findIndex((x, y) => x === 'foo');
+list.findIndex(x => x === undefined);
+
+list.findLastIndex(bar => bar === 'foo');
+list.findLastIndex((x) => x === 'foo');
+list.findLastIndex(x => 'foo' === x);
+list.findLastIndex(x => {
+	return x === 'foo';
+});
+list.findLastIndex((x, y) => x === 'foo');
+list.findLastIndex(x => x === undefined);
+
+```
+
+# Diagnostics
+```
+invalid.js:2:1 lint/nursery/useIndexOf  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer Array#findIndex() over Array#indexOf() when looking for the index of an item.`
+  
+    1 │ const list = ['foo', 'bar', 'baz'];
+  > 2 │ list.findIndex(bar => bar === 'foo');
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    3 │ list.findIndex((x) => x === 'foo');
+    4 │ list.findIndex(x => 'foo' === x);
+  
+  i This callback only tests for equality against a single value. This value can be passed directly to indexOf() instead.
+  
+  i Unsafe fix: Replace Array#findIndex() with Array#indexOf()
+  
+     1  1 │   const list = ['foo', 'bar', 'baz'];
+     2    │ - list.findIndex(bar·=>·bar·===·'foo');
+        2 │ + list.indexOf('foo');
+     3  3 │   list.findIndex((x) => x === 'foo');
+     4  4 │   list.findIndex(x => 'foo' === x);
+  
+
+```
+
+```
+invalid.js:3:1 lint/nursery/useIndexOf  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer Array#findIndex() over Array#indexOf() when looking for the index of an item.`
+  
+    1 │ const list = ['foo', 'bar', 'baz'];
+    2 │ list.findIndex(bar => bar === 'foo');
+  > 3 │ list.findIndex((x) => x === 'foo');
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    4 │ list.findIndex(x => 'foo' === x);
+    5 │ list.findIndex(x => {
+  
+  i This callback only tests for equality against a single value. This value can be passed directly to indexOf() instead.
+  
+  i Unsafe fix: Replace Array#findIndex() with Array#indexOf()
+  
+     1  1 │   const list = ['foo', 'bar', 'baz'];
+     2  2 │   list.findIndex(bar => bar === 'foo');
+     3    │ - list.findIndex((x)·=>·x·===·'foo');
+        3 │ + list.indexOf('foo');
+     4  4 │   list.findIndex(x => 'foo' === x);
+     5  5 │   list.findIndex(x => {
+  
+
+```
+
+```
+invalid.js:4:1 lint/nursery/useIndexOf  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer Array#findIndex() over Array#indexOf() when looking for the index of an item.`
+  
+    2 │ list.findIndex(bar => bar === 'foo');
+    3 │ list.findIndex((x) => x === 'foo');
+  > 4 │ list.findIndex(x => 'foo' === x);
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    5 │ list.findIndex(x => {
+    6 │ 	return x === 'foo';
+  
+  i This callback only tests for equality against a single value. This value can be passed directly to indexOf() instead.
+  
+  i Unsafe fix: Replace Array#findIndex() with Array#indexOf()
+  
+     2  2 │   list.findIndex(bar => bar === 'foo');
+     3  3 │   list.findIndex((x) => x === 'foo');
+     4    │ - list.findIndex(x·=>·'foo'·===·x);
+        4 │ + list.indexOf('foo'·);
+     5  5 │   list.findIndex(x => {
+     6  6 │   	return x === 'foo';
+  
+
+```
+
+```
+invalid.js:5:1 lint/nursery/useIndexOf  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer Array#findIndex() over Array#indexOf() when looking for the index of an item.`
+  
+    3 │ list.findIndex((x) => x === 'foo');
+    4 │ list.findIndex(x => 'foo' === x);
+  > 5 │ list.findIndex(x => {
+      │ ^^^^^^^^^^^^^^^^^^^^^
+  > 6 │ 	return x === 'foo';
+  > 7 │ });
+      │ ^^
+    8 │ list.findIndex((x, y) => x === 'foo');
+    9 │ list.findIndex(x => x === undefined);
+  
+  i This callback only tests for equality against a single value. This value can be passed directly to indexOf() instead.
+  
+  i Unsafe fix: Replace Array#findIndex() with Array#indexOf()
+  
+     3  3 │   list.findIndex((x) => x === 'foo');
+     4  4 │   list.findIndex(x => 'foo' === x);
+     5    │ - list.findIndex(x·=>·{
+     6    │ - → return·x·===·'foo';
+     7    │ - });
+        5 │ + list.indexOf('foo');
+     8  6 │   list.findIndex((x, y) => x === 'foo');
+     9  7 │   list.findIndex(x => x === undefined);
+  
+
+```
+
+```
+invalid.js:9:1 lint/nursery/useIndexOf  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer Array#findIndex() over Array#indexOf() when looking for the index of an item.`
+  
+     7 │ });
+     8 │ list.findIndex((x, y) => x === 'foo');
+   > 9 │ list.findIndex(x => x === undefined);
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    10 │ 
+    11 │ list.findLastIndex(bar => bar === 'foo');
+  
+  i This callback only tests for equality against a single value. This value can be passed directly to indexOf() instead.
+  
+  i Unsafe fix: Replace Array#findIndex() with Array#indexOf()
+  
+     7  7 │   });
+     8  8 │   list.findIndex((x, y) => x === 'foo');
+     9    │ - list.findIndex(x·=>·x·===·undefined);
+        9 │ + list.indexOf(undefined);
+    10 10 │   
+    11 11 │   list.findLastIndex(bar => bar === 'foo');
+  
+
+```
+
+```
+invalid.js:11:1 lint/nursery/useIndexOf  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer Array#findLastIndex() over Array#lastIndexOf() when looking for the index of an item.`
+  
+     9 │ list.findIndex(x => x === undefined);
+    10 │ 
+  > 11 │ list.findLastIndex(bar => bar === 'foo');
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    12 │ list.findLastIndex((x) => x === 'foo');
+    13 │ list.findLastIndex(x => 'foo' === x);
+  
+  i This callback only tests for equality against a single value. This value can be passed directly to lastIndexOf() instead.
+  
+  i Unsafe fix: Replace Array#findLastIndex() with Array#lastIndexOf()
+  
+     9  9 │   list.findIndex(x => x === undefined);
+    10 10 │   
+    11    │ - list.findLastIndex(bar·=>·bar·===·'foo');
+       11 │ + list.lastIndexOf('foo');
+    12 12 │   list.findLastIndex((x) => x === 'foo');
+    13 13 │   list.findLastIndex(x => 'foo' === x);
+  
+
+```
+
+```
+invalid.js:12:1 lint/nursery/useIndexOf  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer Array#findLastIndex() over Array#lastIndexOf() when looking for the index of an item.`
+  
+    11 │ list.findLastIndex(bar => bar === 'foo');
+  > 12 │ list.findLastIndex((x) => x === 'foo');
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    13 │ list.findLastIndex(x => 'foo' === x);
+    14 │ list.findLastIndex(x => {
+  
+  i This callback only tests for equality against a single value. This value can be passed directly to lastIndexOf() instead.
+  
+  i Unsafe fix: Replace Array#findLastIndex() with Array#lastIndexOf()
+  
+    10 10 │   
+    11 11 │   list.findLastIndex(bar => bar === 'foo');
+    12    │ - list.findLastIndex((x)·=>·x·===·'foo');
+       12 │ + list.lastIndexOf('foo');
+    13 13 │   list.findLastIndex(x => 'foo' === x);
+    14 14 │   list.findLastIndex(x => {
+  
+
+```
+
+```
+invalid.js:13:1 lint/nursery/useIndexOf  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer Array#findLastIndex() over Array#lastIndexOf() when looking for the index of an item.`
+  
+    11 │ list.findLastIndex(bar => bar === 'foo');
+    12 │ list.findLastIndex((x) => x === 'foo');
+  > 13 │ list.findLastIndex(x => 'foo' === x);
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    14 │ list.findLastIndex(x => {
+    15 │ 	return x === 'foo';
+  
+  i This callback only tests for equality against a single value. This value can be passed directly to lastIndexOf() instead.
+  
+  i Unsafe fix: Replace Array#findLastIndex() with Array#lastIndexOf()
+  
+    11 11 │   list.findLastIndex(bar => bar === 'foo');
+    12 12 │   list.findLastIndex((x) => x === 'foo');
+    13    │ - list.findLastIndex(x·=>·'foo'·===·x);
+       13 │ + list.lastIndexOf('foo'·);
+    14 14 │   list.findLastIndex(x => {
+    15 15 │   	return x === 'foo';
+  
+
+```
+
+```
+invalid.js:14:1 lint/nursery/useIndexOf  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer Array#findLastIndex() over Array#lastIndexOf() when looking for the index of an item.`
+  
+    12 │ list.findLastIndex((x) => x === 'foo');
+    13 │ list.findLastIndex(x => 'foo' === x);
+  > 14 │ list.findLastIndex(x => {
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 15 │ 	return x === 'foo';
+  > 16 │ });
+       │ ^^
+    17 │ list.findLastIndex((x, y) => x === 'foo');
+    18 │ list.findLastIndex(x => x === undefined);
+  
+  i This callback only tests for equality against a single value. This value can be passed directly to lastIndexOf() instead.
+  
+  i Unsafe fix: Replace Array#findLastIndex() with Array#lastIndexOf()
+  
+    12 12 │   list.findLastIndex((x) => x === 'foo');
+    13 13 │   list.findLastIndex(x => 'foo' === x);
+    14    │ - list.findLastIndex(x·=>·{
+    15    │ - → return·x·===·'foo';
+    16    │ - });
+       14 │ + list.lastIndexOf('foo');
+    17 15 │   list.findLastIndex((x, y) => x === 'foo');
+    18 16 │   list.findLastIndex(x => x === undefined);
+  
+
+```
+
+```
+invalid.js:18:1 lint/nursery/useIndexOf  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer Array#findLastIndex() over Array#lastIndexOf() when looking for the index of an item.`
+  
+    16 │ });
+    17 │ list.findLastIndex((x, y) => x === 'foo');
+  > 18 │ list.findLastIndex(x => x === undefined);
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    19 │ 
+  
+  i This callback only tests for equality against a single value. This value can be passed directly to lastIndexOf() instead.
+  
+  i Unsafe fix: Replace Array#findLastIndex() with Array#lastIndexOf()
+  
+    16 16 │   });
+    17 17 │   list.findLastIndex((x, y) => x === 'foo');
+    18    │ - list.findLastIndex(x·=>·x·===·undefined);
+       18 │ + list.lastIndexOf(undefined);
+    19 19 │   
+  
+
+```

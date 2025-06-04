@@ -7,7 +7,7 @@ use biome_formatter::{
 };
 use biome_html_syntax::{HtmlFileSource, HtmlLanguage};
 
-use crate::comments::{FormatHtmlLeadingComment, HtmlCommentStyle, HtmlComments};
+use crate::comments::{FormatHtmlComment, HtmlCommentStyle, HtmlComments};
 
 #[derive(Debug, Clone, Default)]
 pub struct HtmlFormatOptions {
@@ -395,7 +395,7 @@ impl FormatContext for HtmlFormatContext {
 impl CstFormatContext for HtmlFormatContext {
     type Language = HtmlLanguage;
     type Style = HtmlCommentStyle;
-    type CommentRule = FormatHtmlLeadingComment;
+    type CommentRule = FormatHtmlComment;
 
     fn comments(&self) -> &HtmlComments {
         &self.comments

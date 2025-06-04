@@ -15,16 +15,17 @@ use biome_js_semantic::{CallsExtensions, SemanticModel};
 use biome_js_syntax::{
     AnyFunctionLike, AnyJsBinding, AnyJsClassMemberName, AnyJsExpression, AnyJsFunction,
     AnyJsObjectMemberName, JsArrayAssignmentPatternElement, JsArrayBindingPatternElement,
-    JsCallExpression, JsConditionalExpression, JsIfStatement, JsLanguage, JsLogicalExpression,
-    JsMethodClassMember, JsMethodObjectMember, JsObjectBindingPatternShorthandProperty,
-    JsReturnStatement, JsSyntaxKind, JsSyntaxNode, JsTryFinallyStatement, TextRange,
+    JsCallExpression, JsConditionalExpression, JsGetterClassMember, JsGetterObjectMember,
+    JsIfStatement, JsLanguage, JsLogicalExpression, JsMethodClassMember, JsMethodObjectMember,
+    JsObjectBindingPatternShorthandProperty, JsReturnStatement, JsSetterClassMember,
+    JsSetterObjectMember, JsSyntaxKind, JsSyntaxNode, JsTryFinallyStatement, TextRange,
 };
 use biome_rowan::{AstNode, Language, SyntaxNode, WalkEvent, declare_node_union};
 use rustc_hash::FxHashMap;
 use serde::{Deserialize, Serialize};
 use std::ops::{Deref, DerefMut};
 
-use crate::react::components::is_react_component_name;
+use crate::react::components::ReactComponentInfo;
 use biome_diagnostics::Severity;
 #[cfg(feature = "schemars")]
 use schemars::JsonSchema;
@@ -83,10 +84,11 @@ declare_node_union! {
 
 impl AnyJsFunctionOrMethod {
     fn is_react_component_or_hook(&self) -> bool {
+        if ReactComponentInfo::from_function(self.syntax()).is_some() {
+            return true;
+        }
         if let Some(name) = self.name() {
-            if is_react_component_name(&name) || is_react_hook_name(&name) {
-                return true;
-            }
+            return is_react_hook_name(&name);
         }
 
         false
@@ -290,13 +292,17 @@ impl Visitor for EarlyReturnDetectionVisitor {
     ) {
         match event {
             WalkEvent::Enter(node) => {
-                if AnyFunctionLike::can_cast(node.kind()) {
+                if AnyFunctionLike::can_cast(node.kind())
+                    || AnyPropertyAccessor::can_cast(node.kind())
+                {
                     self.stack
                         .push(EarlyReturnDetectionVisitorStackEntry::default());
                 }
             }
             WalkEvent::Leave(node) => {
-                if AnyFunctionLike::can_cast(node.kind()) {
+                if AnyFunctionLike::can_cast(node.kind())
+                    || AnyPropertyAccessor::can_cast(node.kind())
+                {
                     self.stack.pop();
                     return;
                 }
@@ -317,6 +323,14 @@ impl Visitor for EarlyReturnDetectionVisitor {
     fn finish(self: Box<Self>, ctx: VisitorFinishContext<JsLanguage>) {
         ctx.services.insert_service(self.early_returns);
     }
+}
+
+declare_node_union! {
+    AnyPropertyAccessor =
+        JsGetterObjectMember
+        | JsSetterObjectMember
+        | JsGetterClassMember
+        | JsSetterClassMember
 }
 
 #[derive(Default)]

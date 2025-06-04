@@ -44,7 +44,7 @@ export const superComputer = new DeepThought();
 Exports {
   "superComputer" => {
     ExportOwnExport => JsOwnExport(
-      Module(0) TypeId(7)
+      Module(0) TypeId(6)
       Local name: superComputer
     )
   }
@@ -65,40 +65,39 @@ Imports {
 ```
 Module TypeId(0) => value: 42
 
-Module TypeId(1) => number
-
-Module TypeId(2) => sync Function "answerMe" {
+Module TypeId(1) => sync Function "answerMe" {
   accepts: {
     params: []
     type_args: []
   }
-  returns: Module(0) TypeId(1)
+  returns: number
 }
 
-Module TypeId(3) => sync Function "giveMeABiggerAnswer" {
+Module TypeId(2) => sync Function "giveMeABiggerAnswer" {
   accepts: {
     params: [
-      required delta: Module(0) TypeId(1) (bindings: delta:number)
+      required delta: number (bindings: delta:number)
     ]
     type_args: []
   }
   returns: unknown reference
 }
 
-Module TypeId(4) => unknown
+Module TypeId(3) => unknown
 
-Module TypeId(5) => sync Function "whatWasTheUltimateQuestion" {
+Module TypeId(4) => sync Function "whatWasTheUltimateQuestion" {
   accepts: {
     params: []
     type_args: []
   }
-  returns: Module(0) TypeId(4)
+  returns: Module(0) TypeId(3)
 }
 
-Module TypeId(6) => class "DeepThought" {
+Module TypeId(5) => class "DeepThought" {
   extends: none
+  implements: []
   type_args: []
 }
 
-Module TypeId(7) => instanceof Module(0) TypeId(6)
+Module TypeId(6) => instanceof Module(0) TypeId(5)
 ```

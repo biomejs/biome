@@ -1,9 +1,12 @@
+use crate::execute::TraversalMode;
 use crate::execute::diagnostics::{ResultExt, SearchDiagnostic};
 use crate::execute::process_file::workspace_file::WorkspaceFile;
 use crate::execute::process_file::{FileResult, FileStatus, Message, SharedTraversalOptions};
 use biome_diagnostics::{DiagnosticExt, category};
 use biome_fs::{BiomePath, TraversalContext};
+use biome_grit_patterns::{GritTargetLanguage, JsTargetLanguage};
 use biome_service::diagnostics::FileTooLarge;
+use biome_service::file_handlers::DocumentFileSource;
 use biome_service::workspace::PatternId;
 
 pub(crate) fn search<'ctx>(
@@ -31,6 +34,25 @@ pub(crate) fn search_with_guard<'ctx>(
     pattern: &PatternId,
 ) -> FileResult {
     let _ = tracing::info_span!("Search ", path =? workspace_file.path).entered();
+
+    let file_source = DocumentFileSource::from_path(workspace_file.path.as_path());
+    let pattern_language = match &_ctx.execution.traversal_mode {
+        TraversalMode::Search {
+            language: Some(pattern_language),
+            ..
+        } => pattern_language,
+        TraversalMode::Search { language: None, .. } => {
+            // Default to JavaScript when no language is specified
+            &GritTargetLanguage::JsTargetLanguage(JsTargetLanguage)
+        }
+        _ => return Ok(FileStatus::Ignored), // unreachable
+    };
+
+    // Ignore files that don't match the pattern's target language
+    if !is_file_compatible_with_pattern(&file_source, pattern_language) {
+        return Ok(FileStatus::Ignored);
+    }
+
     let result = workspace_file
         .guard()
         .search_pattern(pattern)
@@ -52,4 +74,16 @@ pub(crate) fn search_with_guard<'ctx>(
     };
 
     Ok(FileStatus::SearchResult(matches_len, search_results))
+}
+
+fn is_file_compatible_with_pattern(
+    file_source: &DocumentFileSource,
+    pattern_language: &GritTargetLanguage,
+) -> bool {
+    match pattern_language {
+        GritTargetLanguage::JsTargetLanguage(_) => matches!(file_source, DocumentFileSource::Js(_)),
+        GritTargetLanguage::CssTargetLanguage(_) => {
+            matches!(file_source, DocumentFileSource::Css(_))
+        }
+    }
 }

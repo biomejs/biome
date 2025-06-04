@@ -3,7 +3,7 @@
 use biome_js_formatter::context::JsFormatOptions;
 use biome_js_formatter::format_node;
 use biome_js_parser::{JsParserOptions, parse};
-use biome_js_syntax::JsVariableDeclaration;
+use biome_js_syntax::{AnyJsExpression, JsVariableDeclaration, TsInterfaceDeclaration};
 use biome_js_syntax::{
     AnyJsModuleItem, AnyJsRoot, AnyJsStatement, JsFileSource, JsFunctionDeclaration,
 };
@@ -201,6 +201,22 @@ impl TypeResolver for HardcodedSymbolResolver {
     }
 }
 
+pub fn get_expression(root: &AnyJsRoot) -> AnyJsExpression {
+    let module = root.as_js_module().unwrap();
+    module
+        .items()
+        .into_iter()
+        .filter_map(|item| match item {
+            AnyJsModuleItem::AnyJsStatement(statement) => Some(statement),
+            _ => None,
+        })
+        .find_map(|statement| match statement {
+            AnyJsStatement::JsExpressionStatement(expr) => expr.expression().ok(),
+            _ => None,
+        })
+        .expect("cannot find expression")
+}
+
 pub fn get_function_declaration(root: &AnyJsRoot) -> JsFunctionDeclaration {
     let module = root.as_js_module().unwrap();
     module
@@ -215,6 +231,22 @@ pub fn get_function_declaration(root: &AnyJsRoot) -> JsFunctionDeclaration {
             _ => None,
         })
         .expect("cannot find function declaration")
+}
+
+pub fn get_interface_declaration(root: &AnyJsRoot) -> TsInterfaceDeclaration {
+    let module = root.as_js_module().unwrap();
+    module
+        .items()
+        .into_iter()
+        .filter_map(|item| match item {
+            AnyJsModuleItem::AnyJsStatement(statement) => Some(statement),
+            _ => None,
+        })
+        .find_map(|statement| match statement {
+            AnyJsStatement::TsInterfaceDeclaration(decl) => Some(decl),
+            _ => None,
+        })
+        .expect("cannot find interface declaration")
 }
 
 pub fn get_variable_declaration(root: &AnyJsRoot) -> JsVariableDeclaration {

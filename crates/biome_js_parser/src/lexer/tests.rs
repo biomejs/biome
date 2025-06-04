@@ -1,12 +1,12 @@
 #![cfg(test)]
 #![expect(unused_mut, unused_variables)]
 
-use super::{JsLexContext, JsLexer, TextRange, TextSize};
+use super::{JsLexContext, JsLexer, JsReLexContext, TextRange, TextSize};
 use crate::span::Span;
-use biome_js_syntax::JsSyntaxKind::{self, EOF};
+use biome_js_syntax::JsSyntaxKind::{self, EOF, ERROR_TOKEN};
 use biome_js_syntax::JsSyntaxKind::{JS_NUMBER_LITERAL, NEWLINE, WHITESPACE};
 use biome_js_syntax::T;
-use biome_parser::lexer::{BufferedLexer, Lexer};
+use biome_parser::lexer::{BufferedLexer, Lexer, ReLexer};
 use quickcheck_macros::quickcheck;
 use std::sync::mpsc::channel;
 use std::thread;
@@ -1497,4 +1497,22 @@ fn lookahead() {
         JS_NUMBER_LITERAL
     );
     assert_eq!(buffered.next_token(JsLexContext::default()), T![EOF]);
+}
+
+#[test]
+fn unterminated_regex_error() {
+    // Test the problematic case: /\217483 (unterminated regex)
+    let source = "/\\217483";
+    let mut lexer = JsLexer::from_str(source);
+
+    // First get the initial token (should be T![/])
+    let initial_token = lexer.next_token(JsLexContext::Regular);
+    assert_eq!(initial_token, T![/]);
+
+    // Now re-lex as regex - should return ERROR_TOKEN for unterminated regex
+    let regex_token = lexer.re_lex(JsReLexContext::Regex);
+    assert_eq!(
+        regex_token, ERROR_TOKEN,
+        "Unterminated regex should return ERROR_TOKEN"
+    );
 }

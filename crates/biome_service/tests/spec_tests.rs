@@ -3,8 +3,8 @@ use biome_deserialize::json::deserialize_from_json_str;
 use biome_fs::{BiomePath, OsFileSystem};
 use biome_json_parser::JsonParserOptions;
 use biome_service::workspace::{
-    GetFileContentParams, OpenProjectParams, OpenProjectResult, ScanKind, ScanProjectFolderParams,
-    UpdateSettingsParams, server,
+    GetFileContentParams, GetTypeInfoParams, OpenProjectParams, OpenProjectResult, ScanKind,
+    ScanProjectFolderParams, UpdateSettingsParams, server,
 };
 use camino::Utf8PathBuf;
 
@@ -66,13 +66,26 @@ fn test_scanner_only_loads_type_definitions_from_node_modules() {
         "package.json should be loaded"
     );
 
-    let d_mts_result = workspace.get_file_content(GetFileContentParams {
+    let mtd_file_content_result = workspace.get_file_content(GetFileContentParams {
         project_key,
         path: BiomePath::new(format!(
             "{fixtures_path}/node_modules/shared/dist/index.d.mts"
         )),
     });
 
+    assert!(
+        mtd_file_content_result.is_err(),
+        "index.d.mts should not be stored"
+    );
+
+    let d_mts_result = workspace.get_type_info(GetTypeInfoParams {
+        project_key,
+        path: BiomePath::new(format!(
+            "{fixtures_path}/node_modules/shared/dist/index.d.mts"
+        )),
+    });
+
+    dbg!(&d_mts_result);
     assert!(
         d_mts_result.is_ok_and(|result| !result.is_empty()),
         "Type definitions should be loaded"

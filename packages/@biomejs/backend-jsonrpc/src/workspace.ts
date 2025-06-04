@@ -42,7 +42,7 @@ export interface Configuration {
 	/**
 	 * A list of paths to other JSON files, used to extends the current configuration.
 	 */
-	extends?: string[];
+	extends?: Extends;
 	/**
 	 * The configuration of the filesystem
 	 */
@@ -132,10 +132,31 @@ export interface CssConfiguration {
 	 */
 	parser?: CssParserConfiguration;
 }
+export type Extends = string[] | string;
 /**
  * The configuration of the filesystem
  */
 export interface FilesConfiguration {
+	/**
+	* Set of file and folder names that should be unconditionally ignored by Biome's scanner.
+
+Biome maintains an internal list of default ignore entries, which is based on user feedback and which may change in any release. This setting allows overriding this internal list completely.
+
+This is considered an advanced feature that users _should_ not need to tweak themselves, but they can as a last resort. This setting can only be configured in root configurations, and is ignored in nested configs.
+
+Entries must be file or folder *names*. Specific paths and globs are not supported.
+
+Examples where this may be useful:
+
+```jsonc { "files": { "experimentalScannerIgnores": [ // You almost certainly don't want to scan your `.git` // folder, which is why it's already ignored by default: ".git",
+
+// But the scanner does scan `node_modules` by default. If // you *really* don't want this, you can ignore it like // this: "node_modules",
+
+// But it's probably better to ignore a specific dependency. // For instance, one that happens to be particularly slow to // scan: "RedisCommander.d.ts", ], } } ```
+
+Please be aware that rules relying on the module graph or type inference information may be negatively affected if dependencies of your project aren't (fully) scanned. 
+	 */
+	experimentalScannerIgnores?: string[];
 	/**
 	 * Tells Biome to not emit diagnostics when handling files that doesn't know
 	 */
@@ -800,6 +821,10 @@ export interface OverridePattern {
 	 * Specific configuration for the Json language
 	 */
 	linter?: OverrideLinterConfiguration;
+	/**
+	 * Specific configuration for additional plugins
+	 */
+	plugins?: Plugins;
 }
 export type PluginConfiguration = string;
 export type VcsClientKind = "git";
@@ -1556,6 +1581,10 @@ export interface Nursery {
 	 */
 	noProcessGlobal?: RuleFixConfiguration_for_Null;
 	/**
+	 * Disallow assigning to React component props.
+	 */
+	noReactPropAssign?: RuleConfiguration_for_Null;
+	/**
 	 * Disallow the use of configured elements.
 	 */
 	noRestrictedElements?: RuleConfiguration_for_NoRestrictedElementsOptions;
@@ -1632,9 +1661,17 @@ export interface Nursery {
 	 */
 	useGoogleFontPreconnect?: RuleFixConfiguration_for_Null;
 	/**
+	 * Prefer Array#{indexOf,lastIndexOf}() over Array#{findIndex,findLastIndex}() when looking for the index of an item.
+	 */
+	useIndexOf?: RuleFixConfiguration_for_Null;
+	/**
 	 * Enforce consistent return values in iterable callbacks.
 	 */
 	useIterableCallbackReturn?: RuleConfiguration_for_Null;
+	/**
+	 * Enforces the use of with { type: "json" } for JSON module imports.
+	 */
+	useJsonImportAttribute?: RuleFixConfiguration_for_Null;
 	/**
 	 * Enforce specifying the name of GraphQL operations.
 	 */
@@ -1647,6 +1684,10 @@ export interface Nursery {
 	 * Enforce the use of numeric separators in numeric literals.
 	 */
 	useNumericSeparators?: RuleFixConfiguration_for_Null;
+	/**
+	 * Prefer object spread over Object.assign() when constructing new objects.
+	 */
+	useObjectSpread?: RuleFixConfiguration_for_Null;
 	/**
 	 * Enforce the consistent use of the radix argument when using parseInt().
 	 */
@@ -3480,6 +3521,7 @@ export type Category =
 	| "lint/nursery/noNestedComponentDefinitions"
 	| "lint/nursery/noNoninteractiveElementInteractions"
 	| "lint/nursery/noProcessGlobal"
+	| "lint/nursery/noReactPropAssign"
 	| "lint/nursery/noReactSpecificProps"
 	| "lint/nursery/noRestrictedElements"
 	| "lint/nursery/noSecrets"
@@ -3511,11 +3553,14 @@ export type Category =
 	| "lint/nursery/useForComponent"
 	| "lint/nursery/useGoogleFontPreconnect"
 	| "lint/nursery/useImportRestrictions"
+	| "lint/nursery/useIndexOf"
 	| "lint/nursery/useIterableCallbackReturn"
+	| "lint/nursery/useJsonImportAttribute"
 	| "lint/nursery/useJsxCurlyBraceConvention"
 	| "lint/nursery/useNamedOperation"
 	| "lint/nursery/useNamingConvention"
 	| "lint/nursery/useNumericSeparators"
+	| "lint/nursery/useObjectSpread"
 	| "lint/nursery/useParseIntRadix"
 	| "lint/nursery/useSingleJsDocAsterisk"
 	| "lint/nursery/useSortedClasses"

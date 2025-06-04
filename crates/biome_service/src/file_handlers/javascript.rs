@@ -51,13 +51,15 @@ use biome_js_syntax::{
     JsLanguage, JsSyntaxNode, JsVariableDeclarator, LanguageVariant, TextRange, TextSize,
     TokenAtOffset,
 };
-use biome_js_type_info::{GlobalsResolver, NUM_PREDEFINED_TYPES, TypeData, TypeResolver};
+use biome_js_type_info::{GlobalsResolver, TypeData, TypeResolver};
+use biome_module_graph::ModuleGraph;
 use biome_parser::AnyParse;
 use biome_rowan::{AstNode, BatchMutationExt, Direction, NodeCache, WalkEvent};
 use camino::Utf8Path;
 use serde::{Deserialize, Serialize};
 use std::borrow::Cow;
 use std::fmt::Debug;
+use std::sync::Arc;
 use tracing::{debug, debug_span, error, trace_span};
 
 #[derive(Debug, Clone, Default, serde::Serialize, serde::Deserialize)]
@@ -635,7 +637,26 @@ fn debug_formatter_ir(
     Ok(root_element.to_string())
 }
 
-fn debug_type_info(_path: &BiomePath, parse: AnyParse) -> Result<String, WorkspaceError> {
+fn debug_type_info(
+    path: &BiomePath,
+    parse: Option<AnyParse>,
+    graph: Arc<ModuleGraph>,
+) -> Result<String, WorkspaceError> {
+    let Some(parse) = parse else {
+        let result = graph.module_info_for_path(path);
+        return match result {
+            None => Ok(String::new()),
+            // TODO: print correct type info
+            Some(module_info) => {
+                let mut result = String::new();
+                let types = module_info.as_resolver().registered_types();
+                for ty in types {
+                    result.push_str(format!("{ty}\n").as_str());
+                }
+                Ok(result)
+            }
+        };
+    };
     let tree: AnyJsRoot = parse.tree();
     let mut result = String::new();
     let preorder = tree.syntax().preorder();
@@ -699,9 +720,7 @@ fn debug_registered_types(_path: &BiomePath, parse: AnyParse) -> Result<String, 
     }
 
     for (i, ty) in resolver.registered_types().iter().enumerate() {
-        // TODO: Should we include the predefined types in debug info too?
-        let id = i + NUM_PREDEFINED_TYPES;
-        result.push_str(&format!("\nTypeId({id}) => {ty}\n"));
+        result.push_str(&format!("\nTypeId({i}) => {ty}\n"));
     }
 
     Ok(result)

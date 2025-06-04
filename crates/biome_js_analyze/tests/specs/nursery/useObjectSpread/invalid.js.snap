@@ -1,0 +1,691 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 134
+expression: invalid.js
+---
+# Input
+```js
+Object.assign({}, foo);
+Object.assign  ({}, foo);
+Object  .assign  ({}, foo);
+Object.assign({}, {foo: 'bar'});
+Object.assign({ foo: 'bar'}, baz);
+Object.assign({}, baz, { foo: 'bar' });
+Object.assign({}, { foo: 'bar', baz: 'foo' });
+Object.assign({}, { ...baz });
+Object.assign({});
+Object.assign({ foo: bar });
+Object.assign({ foo: 'bar' }, cats, dogs, trees, birds);
+Object.assign({ foo: 'bar' }, Object.assign({ bar: 'foo' }, baz));
+({foo: 'bar', ...Object.assign({ bar: 'foo' }, baz)});
+Object.assign({ foo: 'bar' }, Object.assign({ bar: 'foo' }, Object.assign({}, { superNested: 'butwhy' })));
+Object.assign({foo: 'bar', ...bar}, baz);
+Object.assign({}, { foo, bar, baz });
+Object.assign({}, { [bar]: 'foo' });
+Object.assign({ ...bar }, { ...baz });
+Object.assign({ ...bar }, {
+    // this is a bar
+    foo: 'bar',
+    baz: "cats"
+});
+Object.assign({
+    boo: "lol",
+    // I'm a comment
+    dog: "cat"
+}, {
+    // this is a bar
+    foo: 'bar',
+    baz: "cats"
+});
+const test1 = Object.assign({ ...bar }, {
+    foo: 'bar', // inline comment
+    baz: "cats"
+});
+const test2 = Object.assign({ ...bar }, {
+    /**
+     * foo
+     */
+    foo: 'bar',
+    baz: "cats"
+});
+globalThis.Object.assign({}, foo);
+
+```
+
+# Diagnostics
+```
+invalid.js:1:1 lint/nursery/useObjectSpread  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Object spread syntax is more concise, readable, and performs better than Object.assign.
+  
+  > 1 │ Object.assign({}, foo);
+      │ ^^^^^^^^^^^^^
+    2 │ Object.assign  ({}, foo);
+    3 │ Object  .assign  ({}, foo);
+  
+  i Safe fix: Replace Object.assign({...}, <object>) with { ...<object> }.
+  
+     1    │ - Object.assign({},·foo);
+        1 │ + ({...foo,});
+     2  2 │   Object.assign  ({}, foo);
+     3  3 │   Object  .assign  ({}, foo);
+  
+
+```
+
+```
+invalid.js:2:1 lint/nursery/useObjectSpread  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Object spread syntax is more concise, readable, and performs better than Object.assign.
+  
+    1 │ Object.assign({}, foo);
+  > 2 │ Object.assign  ({}, foo);
+      │ ^^^^^^^^^^^^^
+    3 │ Object  .assign  ({}, foo);
+    4 │ Object.assign({}, {foo: 'bar'});
+  
+  i Safe fix: Replace Object.assign({...}, <object>) with { ...<object> }.
+  
+     1  1 │   Object.assign({}, foo);
+     2    │ - Object.assign··({},·foo);
+        2 │ + ({...foo,});
+     3  3 │   Object  .assign  ({}, foo);
+     4  4 │   Object.assign({}, {foo: 'bar'});
+  
+
+```
+
+```
+invalid.js:3:1 lint/nursery/useObjectSpread  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Object spread syntax is more concise, readable, and performs better than Object.assign.
+  
+    1 │ Object.assign({}, foo);
+    2 │ Object.assign  ({}, foo);
+  > 3 │ Object  .assign  ({}, foo);
+      │ ^^^^^^^^^^^^^^^
+    4 │ Object.assign({}, {foo: 'bar'});
+    5 │ Object.assign({ foo: 'bar'}, baz);
+  
+  i Safe fix: Replace Object.assign({...}, <object>) with { ...<object> }.
+  
+     1  1 │   Object.assign({}, foo);
+     2  2 │   Object.assign  ({}, foo);
+     3    │ - Object··.assign··({},·foo);
+        3 │ + ({...foo,});
+     4  4 │   Object.assign({}, {foo: 'bar'});
+     5  5 │   Object.assign({ foo: 'bar'}, baz);
+  
+
+```
+
+```
+invalid.js:4:1 lint/nursery/useObjectSpread  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Object spread syntax is more concise, readable, and performs better than Object.assign.
+  
+    2 │ Object.assign  ({}, foo);
+    3 │ Object  .assign  ({}, foo);
+  > 4 │ Object.assign({}, {foo: 'bar'});
+      │ ^^^^^^^^^^^^^
+    5 │ Object.assign({ foo: 'bar'}, baz);
+    6 │ Object.assign({}, baz, { foo: 'bar' });
+  
+  i Safe fix: Replace Object.assign({...}, <object>) with { ...<object> }.
+  
+     2  2 │   Object.assign  ({}, foo);
+     3  3 │   Object  .assign  ({}, foo);
+     4    │ - Object.assign({},·{foo:·'bar'});
+        4 │ + ({foo:·'bar',});
+     5  5 │   Object.assign({ foo: 'bar'}, baz);
+     6  6 │   Object.assign({}, baz, { foo: 'bar' });
+  
+
+```
+
+```
+invalid.js:5:1 lint/nursery/useObjectSpread  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Object spread syntax is more concise, readable, and performs better than Object.assign.
+  
+    3 │ Object  .assign  ({}, foo);
+    4 │ Object.assign({}, {foo: 'bar'});
+  > 5 │ Object.assign({ foo: 'bar'}, baz);
+      │ ^^^^^^^^^^^^^
+    6 │ Object.assign({}, baz, { foo: 'bar' });
+    7 │ Object.assign({}, { foo: 'bar', baz: 'foo' });
+  
+  i Safe fix: Replace Object.assign({...}, <object>) with { ...<object> }.
+  
+     3  3 │   Object  .assign  ({}, foo);
+     4  4 │   Object.assign({}, {foo: 'bar'});
+     5    │ - Object.assign({·foo:·'bar'},·baz);
+        5 │ + ({foo:·'bar',...baz,});
+     6  6 │   Object.assign({}, baz, { foo: 'bar' });
+     7  7 │   Object.assign({}, { foo: 'bar', baz: 'foo' });
+  
+
+```
+
+```
+invalid.js:6:1 lint/nursery/useObjectSpread  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Object spread syntax is more concise, readable, and performs better than Object.assign.
+  
+    4 │ Object.assign({}, {foo: 'bar'});
+    5 │ Object.assign({ foo: 'bar'}, baz);
+  > 6 │ Object.assign({}, baz, { foo: 'bar' });
+      │ ^^^^^^^^^^^^^
+    7 │ Object.assign({}, { foo: 'bar', baz: 'foo' });
+    8 │ Object.assign({}, { ...baz });
+  
+  i Safe fix: Replace Object.assign({...}, <object>) with { ...<object> }.
+  
+     4  4 │   Object.assign({}, {foo: 'bar'});
+     5  5 │   Object.assign({ foo: 'bar'}, baz);
+     6    │ - Object.assign({},·baz,·{·foo:·'bar'·});
+        6 │ + ({...baz,foo:·'bar'·,});
+     7  7 │   Object.assign({}, { foo: 'bar', baz: 'foo' });
+     8  8 │   Object.assign({}, { ...baz });
+  
+
+```
+
+```
+invalid.js:7:1 lint/nursery/useObjectSpread  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Object spread syntax is more concise, readable, and performs better than Object.assign.
+  
+    5 │ Object.assign({ foo: 'bar'}, baz);
+    6 │ Object.assign({}, baz, { foo: 'bar' });
+  > 7 │ Object.assign({}, { foo: 'bar', baz: 'foo' });
+      │ ^^^^^^^^^^^^^
+    8 │ Object.assign({}, { ...baz });
+    9 │ Object.assign({});
+  
+  i Safe fix: Replace Object.assign({...}, <object>) with { ...<object> }.
+  
+     5  5 │   Object.assign({ foo: 'bar'}, baz);
+     6  6 │   Object.assign({}, baz, { foo: 'bar' });
+     7    │ - Object.assign({},·{·foo:·'bar',·baz:·'foo'·});
+        7 │ + ({foo:·'bar',·baz:·'foo'·,});
+     8  8 │   Object.assign({}, { ...baz });
+     9  9 │   Object.assign({});
+  
+
+```
+
+```
+invalid.js:8:1 lint/nursery/useObjectSpread  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Object spread syntax is more concise, readable, and performs better than Object.assign.
+  
+     6 │ Object.assign({}, baz, { foo: 'bar' });
+     7 │ Object.assign({}, { foo: 'bar', baz: 'foo' });
+   > 8 │ Object.assign({}, { ...baz });
+       │ ^^^^^^^^^^^^^
+     9 │ Object.assign({});
+    10 │ Object.assign({ foo: bar });
+  
+  i Safe fix: Replace Object.assign({...}, <object>) with { ...<object> }.
+  
+     6  6 │   Object.assign({}, baz, { foo: 'bar' });
+     7  7 │   Object.assign({}, { foo: 'bar', baz: 'foo' });
+     8    │ - Object.assign({},·{·...baz·});
+        8 │ + ({...baz·,});
+     9  9 │   Object.assign({});
+    10 10 │   Object.assign({ foo: bar });
+  
+
+```
+
+```
+invalid.js:9:1 lint/nursery/useObjectSpread  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Object spread syntax is more concise, readable, and performs better than Object.assign.
+  
+     7 │ Object.assign({}, { foo: 'bar', baz: 'foo' });
+     8 │ Object.assign({}, { ...baz });
+   > 9 │ Object.assign({});
+       │ ^^^^^^^^^^^^^
+    10 │ Object.assign({ foo: bar });
+    11 │ Object.assign({ foo: 'bar' }, cats, dogs, trees, birds);
+  
+  i Safe fix: Replace Object.assign({...}, <object>) with { ...<object> }.
+  
+    9 │ Object.assign({});
+      │ -------------     
+
+```
+
+```
+invalid.js:10:1 lint/nursery/useObjectSpread  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Object spread syntax is more concise, readable, and performs better than Object.assign.
+  
+     8 │ Object.assign({}, { ...baz });
+     9 │ Object.assign({});
+  > 10 │ Object.assign({ foo: bar });
+       │ ^^^^^^^^^^^^^
+    11 │ Object.assign({ foo: 'bar' }, cats, dogs, trees, birds);
+    12 │ Object.assign({ foo: 'bar' }, Object.assign({ bar: 'foo' }, baz));
+  
+  i Safe fix: Replace Object.assign({...}, <object>) with { ...<object> }.
+  
+     8  8 │   Object.assign({}, { ...baz });
+     9  9 │   Object.assign({});
+    10    │ - Object.assign({·foo:·bar·});
+       10 │ + ({foo:·bar·,});
+    11 11 │   Object.assign({ foo: 'bar' }, cats, dogs, trees, birds);
+    12 12 │   Object.assign({ foo: 'bar' }, Object.assign({ bar: 'foo' }, baz));
+  
+
+```
+
+```
+invalid.js:11:1 lint/nursery/useObjectSpread  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Object spread syntax is more concise, readable, and performs better than Object.assign.
+  
+     9 │ Object.assign({});
+    10 │ Object.assign({ foo: bar });
+  > 11 │ Object.assign({ foo: 'bar' }, cats, dogs, trees, birds);
+       │ ^^^^^^^^^^^^^
+    12 │ Object.assign({ foo: 'bar' }, Object.assign({ bar: 'foo' }, baz));
+    13 │ ({foo: 'bar', ...Object.assign({ bar: 'foo' }, baz)});
+  
+  i Safe fix: Replace Object.assign({...}, <object>) with { ...<object> }.
+  
+     9  9 │   Object.assign({});
+    10 10 │   Object.assign({ foo: bar });
+    11    │ - Object.assign({·foo:·'bar'·},·cats,·dogs,·trees,·birds);
+       11 │ + ({foo:·'bar'·,...cats,...dogs,...trees,...birds,});
+    12 12 │   Object.assign({ foo: 'bar' }, Object.assign({ bar: 'foo' }, baz));
+    13 13 │   ({foo: 'bar', ...Object.assign({ bar: 'foo' }, baz)});
+  
+
+```
+
+```
+invalid.js:12:1 lint/nursery/useObjectSpread  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Object spread syntax is more concise, readable, and performs better than Object.assign.
+  
+    10 │ Object.assign({ foo: bar });
+    11 │ Object.assign({ foo: 'bar' }, cats, dogs, trees, birds);
+  > 12 │ Object.assign({ foo: 'bar' }, Object.assign({ bar: 'foo' }, baz));
+       │ ^^^^^^^^^^^^^
+    13 │ ({foo: 'bar', ...Object.assign({ bar: 'foo' }, baz)});
+    14 │ Object.assign({ foo: 'bar' }, Object.assign({ bar: 'foo' }, Object.assign({}, { superNested: 'butwhy' })));
+  
+  i Safe fix: Replace Object.assign({...}, <object>) with { ...<object> }.
+  
+    10 10 │   Object.assign({ foo: bar });
+    11 11 │   Object.assign({ foo: 'bar' }, cats, dogs, trees, birds);
+    12    │ - Object.assign({·foo:·'bar'·},·Object.assign({·bar:·'foo'·},·baz));
+       12 │ + ({foo:·'bar'·,...Object.assign({·bar:·'foo'·},·baz),});
+    13 13 │   ({foo: 'bar', ...Object.assign({ bar: 'foo' }, baz)});
+    14 14 │   Object.assign({ foo: 'bar' }, Object.assign({ bar: 'foo' }, Object.assign({}, { superNested: 'butwhy' })));
+  
+
+```
+
+```
+invalid.js:12:31 lint/nursery/useObjectSpread  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Object spread syntax is more concise, readable, and performs better than Object.assign.
+  
+    10 │ Object.assign({ foo: bar });
+    11 │ Object.assign({ foo: 'bar' }, cats, dogs, trees, birds);
+  > 12 │ Object.assign({ foo: 'bar' }, Object.assign({ bar: 'foo' }, baz));
+       │                               ^^^^^^^^^^^^^
+    13 │ ({foo: 'bar', ...Object.assign({ bar: 'foo' }, baz)});
+    14 │ Object.assign({ foo: 'bar' }, Object.assign({ bar: 'foo' }, Object.assign({}, { superNested: 'butwhy' })));
+  
+  i Safe fix: Replace Object.assign({...}, <object>) with { ...<object> }.
+  
+    10 10 │   Object.assign({ foo: bar });
+    11 11 │   Object.assign({ foo: 'bar' }, cats, dogs, trees, birds);
+    12    │ - Object.assign({·foo:·'bar'·},·Object.assign({·bar:·'foo'·},·baz));
+       12 │ + Object.assign({·foo:·'bar'·},·({bar:·'foo'·,...baz,}));
+    13 13 │   ({foo: 'bar', ...Object.assign({ bar: 'foo' }, baz)});
+    14 14 │   Object.assign({ foo: 'bar' }, Object.assign({ bar: 'foo' }, Object.assign({}, { superNested: 'butwhy' })));
+  
+
+```
+
+```
+invalid.js:13:18 lint/nursery/useObjectSpread  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Object spread syntax is more concise, readable, and performs better than Object.assign.
+  
+    11 │ Object.assign({ foo: 'bar' }, cats, dogs, trees, birds);
+    12 │ Object.assign({ foo: 'bar' }, Object.assign({ bar: 'foo' }, baz));
+  > 13 │ ({foo: 'bar', ...Object.assign({ bar: 'foo' }, baz)});
+       │                  ^^^^^^^^^^^^^
+    14 │ Object.assign({ foo: 'bar' }, Object.assign({ bar: 'foo' }, Object.assign({}, { superNested: 'butwhy' })));
+    15 │ Object.assign({foo: 'bar', ...bar}, baz);
+  
+  i Safe fix: Replace Object.assign({...}, <object>) with { ...<object> }.
+  
+    11 11 │   Object.assign({ foo: 'bar' }, cats, dogs, trees, birds);
+    12 12 │   Object.assign({ foo: 'bar' }, Object.assign({ bar: 'foo' }, baz));
+    13    │ - ({foo:·'bar',·...Object.assign({·bar:·'foo'·},·baz)});
+       13 │ + ({foo:·'bar',·...({bar:·'foo'·,...baz,})});
+    14 14 │   Object.assign({ foo: 'bar' }, Object.assign({ bar: 'foo' }, Object.assign({}, { superNested: 'butwhy' })));
+    15 15 │   Object.assign({foo: 'bar', ...bar}, baz);
+  
+
+```
+
+```
+invalid.js:14:1 lint/nursery/useObjectSpread  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Object spread syntax is more concise, readable, and performs better than Object.assign.
+  
+    12 │ Object.assign({ foo: 'bar' }, Object.assign({ bar: 'foo' }, baz));
+    13 │ ({foo: 'bar', ...Object.assign({ bar: 'foo' }, baz)});
+  > 14 │ Object.assign({ foo: 'bar' }, Object.assign({ bar: 'foo' }, Object.assign({}, { superNested: 'butwhy' })));
+       │ ^^^^^^^^^^^^^
+    15 │ Object.assign({foo: 'bar', ...bar}, baz);
+    16 │ Object.assign({}, { foo, bar, baz });
+  
+  i Safe fix: Replace Object.assign({...}, <object>) with { ...<object> }.
+  
+    12 12 │   Object.assign({ foo: 'bar' }, Object.assign({ bar: 'foo' }, baz));
+    13 13 │   ({foo: 'bar', ...Object.assign({ bar: 'foo' }, baz)});
+    14    │ - Object.assign({·foo:·'bar'·},·Object.assign({·bar:·'foo'·},·Object.assign({},·{·superNested:·'butwhy'·})));
+       14 │ + ({foo:·'bar'·,...Object.assign({·bar:·'foo'·},·Object.assign({},·{·superNested:·'butwhy'·})),});
+    15 15 │   Object.assign({foo: 'bar', ...bar}, baz);
+    16 16 │   Object.assign({}, { foo, bar, baz });
+  
+
+```
+
+```
+invalid.js:14:31 lint/nursery/useObjectSpread  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Object spread syntax is more concise, readable, and performs better than Object.assign.
+  
+    12 │ Object.assign({ foo: 'bar' }, Object.assign({ bar: 'foo' }, baz));
+    13 │ ({foo: 'bar', ...Object.assign({ bar: 'foo' }, baz)});
+  > 14 │ Object.assign({ foo: 'bar' }, Object.assign({ bar: 'foo' }, Object.assign({}, { superNested: 'butwhy' })));
+       │                               ^^^^^^^^^^^^^
+    15 │ Object.assign({foo: 'bar', ...bar}, baz);
+    16 │ Object.assign({}, { foo, bar, baz });
+  
+  i Safe fix: Replace Object.assign({...}, <object>) with { ...<object> }.
+  
+    12 12 │   Object.assign({ foo: 'bar' }, Object.assign({ bar: 'foo' }, baz));
+    13 13 │   ({foo: 'bar', ...Object.assign({ bar: 'foo' }, baz)});
+    14    │ - Object.assign({·foo:·'bar'·},·Object.assign({·bar:·'foo'·},·Object.assign({},·{·superNested:·'butwhy'·})));
+       14 │ + Object.assign({·foo:·'bar'·},·({bar:·'foo'·,...Object.assign({},·{·superNested:·'butwhy'·}),}));
+    15 15 │   Object.assign({foo: 'bar', ...bar}, baz);
+    16 16 │   Object.assign({}, { foo, bar, baz });
+  
+
+```
+
+```
+invalid.js:14:61 lint/nursery/useObjectSpread  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Object spread syntax is more concise, readable, and performs better than Object.assign.
+  
+    12 │ Object.assign({ foo: 'bar' }, Object.assign({ bar: 'foo' }, baz));
+    13 │ ({foo: 'bar', ...Object.assign({ bar: 'foo' }, baz)});
+  > 14 │ Object.assign({ foo: 'bar' }, Object.assign({ bar: 'foo' }, Object.assign({}, { superNested: 'butwhy' })));
+       │                                                             ^^^^^^^^^^^^^
+    15 │ Object.assign({foo: 'bar', ...bar}, baz);
+    16 │ Object.assign({}, { foo, bar, baz });
+  
+  i Safe fix: Replace Object.assign({...}, <object>) with { ...<object> }.
+  
+    12 12 │   Object.assign({ foo: 'bar' }, Object.assign({ bar: 'foo' }, baz));
+    13 13 │   ({foo: 'bar', ...Object.assign({ bar: 'foo' }, baz)});
+    14    │ - Object.assign({·foo:·'bar'·},·Object.assign({·bar:·'foo'·},·Object.assign({},·{·superNested:·'butwhy'·})));
+       14 │ + Object.assign({·foo:·'bar'·},·Object.assign({·bar:·'foo'·},·({superNested:·'butwhy'·,})));
+    15 15 │   Object.assign({foo: 'bar', ...bar}, baz);
+    16 16 │   Object.assign({}, { foo, bar, baz });
+  
+
+```
+
+```
+invalid.js:15:1 lint/nursery/useObjectSpread  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Object spread syntax is more concise, readable, and performs better than Object.assign.
+  
+    13 │ ({foo: 'bar', ...Object.assign({ bar: 'foo' }, baz)});
+    14 │ Object.assign({ foo: 'bar' }, Object.assign({ bar: 'foo' }, Object.assign({}, { superNested: 'butwhy' })));
+  > 15 │ Object.assign({foo: 'bar', ...bar}, baz);
+       │ ^^^^^^^^^^^^^
+    16 │ Object.assign({}, { foo, bar, baz });
+    17 │ Object.assign({}, { [bar]: 'foo' });
+  
+  i Safe fix: Replace Object.assign({...}, <object>) with { ...<object> }.
+  
+    13 13 │   ({foo: 'bar', ...Object.assign({ bar: 'foo' }, baz)});
+    14 14 │   Object.assign({ foo: 'bar' }, Object.assign({ bar: 'foo' }, Object.assign({}, { superNested: 'butwhy' })));
+    15    │ - Object.assign({foo:·'bar',·...bar},·baz);
+       15 │ + ({foo:·'bar',·...bar,...baz,});
+    16 16 │   Object.assign({}, { foo, bar, baz });
+    17 17 │   Object.assign({}, { [bar]: 'foo' });
+  
+
+```
+
+```
+invalid.js:16:1 lint/nursery/useObjectSpread  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Object spread syntax is more concise, readable, and performs better than Object.assign.
+  
+    14 │ Object.assign({ foo: 'bar' }, Object.assign({ bar: 'foo' }, Object.assign({}, { superNested: 'butwhy' })));
+    15 │ Object.assign({foo: 'bar', ...bar}, baz);
+  > 16 │ Object.assign({}, { foo, bar, baz });
+       │ ^^^^^^^^^^^^^
+    17 │ Object.assign({}, { [bar]: 'foo' });
+    18 │ Object.assign({ ...bar }, { ...baz });
+  
+  i Safe fix: Replace Object.assign({...}, <object>) with { ...<object> }.
+  
+    14 14 │   Object.assign({ foo: 'bar' }, Object.assign({ bar: 'foo' }, Object.assign({}, { superNested: 'butwhy' })));
+    15 15 │   Object.assign({foo: 'bar', ...bar}, baz);
+    16    │ - Object.assign({},·{·foo,·bar,·baz·});
+       16 │ + ({foo,·bar,·baz·,});
+    17 17 │   Object.assign({}, { [bar]: 'foo' });
+    18 18 │   Object.assign({ ...bar }, { ...baz });
+  
+
+```
+
+```
+invalid.js:17:1 lint/nursery/useObjectSpread  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Object spread syntax is more concise, readable, and performs better than Object.assign.
+  
+    15 │ Object.assign({foo: 'bar', ...bar}, baz);
+    16 │ Object.assign({}, { foo, bar, baz });
+  > 17 │ Object.assign({}, { [bar]: 'foo' });
+       │ ^^^^^^^^^^^^^
+    18 │ Object.assign({ ...bar }, { ...baz });
+    19 │ Object.assign({ ...bar }, {
+  
+  i Safe fix: Replace Object.assign({...}, <object>) with { ...<object> }.
+  
+    15 15 │   Object.assign({foo: 'bar', ...bar}, baz);
+    16 16 │   Object.assign({}, { foo, bar, baz });
+    17    │ - Object.assign({},·{·[bar]:·'foo'·});
+       17 │ + ({[bar]:·'foo'·,});
+    18 18 │   Object.assign({ ...bar }, { ...baz });
+    19 19 │   Object.assign({ ...bar }, {
+  
+
+```
+
+```
+invalid.js:18:1 lint/nursery/useObjectSpread  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Object spread syntax is more concise, readable, and performs better than Object.assign.
+  
+    16 │ Object.assign({}, { foo, bar, baz });
+    17 │ Object.assign({}, { [bar]: 'foo' });
+  > 18 │ Object.assign({ ...bar }, { ...baz });
+       │ ^^^^^^^^^^^^^
+    19 │ Object.assign({ ...bar }, {
+    20 │     // this is a bar
+  
+  i Safe fix: Replace Object.assign({...}, <object>) with { ...<object> }.
+  
+    16 16 │   Object.assign({}, { foo, bar, baz });
+    17 17 │   Object.assign({}, { [bar]: 'foo' });
+    18    │ - Object.assign({·...bar·},·{·...baz·});
+       18 │ + ({...bar·,...baz·,});
+    19 19 │   Object.assign({ ...bar }, {
+    20 20 │       // this is a bar
+  
+
+```
+
+```
+invalid.js:19:1 lint/nursery/useObjectSpread  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Object spread syntax is more concise, readable, and performs better than Object.assign.
+  
+    17 │ Object.assign({}, { [bar]: 'foo' });
+    18 │ Object.assign({ ...bar }, { ...baz });
+  > 19 │ Object.assign({ ...bar }, {
+       │ ^^^^^^^^^^^^^
+    20 │     // this is a bar
+    21 │     foo: 'bar',
+  
+  i Safe fix: Replace Object.assign({...}, <object>) with { ...<object> }.
+  
+    17 17 │   Object.assign({}, { [bar]: 'foo' });
+    18 18 │   Object.assign({ ...bar }, { ...baz });
+    19    │ - Object.assign({·...bar·},·{
+       19 │ + ({...bar·,
+    20 20 │       // this is a bar
+    21 21 │       foo: 'bar',
+    22    │ - ····baz:·"cats"
+    23    │ - });
+       22 │ + ····baz:·"cats",});
+    24 23 │   Object.assign({
+    25 24 │       boo: "lol",
+  
+
+```
+
+```
+invalid.js:24:1 lint/nursery/useObjectSpread  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Object spread syntax is more concise, readable, and performs better than Object.assign.
+  
+    22 │     baz: "cats"
+    23 │ });
+  > 24 │ Object.assign({
+       │ ^^^^^^^^^^^^^
+    25 │     boo: "lol",
+    26 │     // I'm a comment
+  
+  i Safe fix: Replace Object.assign({...}, <object>) with { ...<object> }.
+  
+    22 22 │       baz: "cats"
+    23 23 │   });
+    24    │ - Object.assign({
+       24 │ + ({
+    25 25 │       boo: "lol",
+    26 26 │       // I'm a comment
+    27    │ - ····dog:·"cat"
+    28    │ - },·{
+       27 │ + ····dog:·"cat",
+    29 28 │       // this is a bar
+    30 29 │       foo: 'bar',
+    31    │ - ····baz:·"cats"
+    32    │ - });
+       30 │ + ····baz:·"cats",});
+    33 31 │   const test1 = Object.assign({ ...bar }, {
+    34 32 │       foo: 'bar', // inline comment
+  
+
+```
+
+```
+invalid.js:33:15 lint/nursery/useObjectSpread  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Object spread syntax is more concise, readable, and performs better than Object.assign.
+  
+    31 │     baz: "cats"
+    32 │ });
+  > 33 │ const test1 = Object.assign({ ...bar }, {
+       │               ^^^^^^^^^^^^^
+    34 │     foo: 'bar', // inline comment
+    35 │     baz: "cats"
+  
+  i Safe fix: Replace Object.assign({...}, <object>) with { ...<object> }.
+  
+    31 31 │       baz: "cats"
+    32 32 │   });
+    33    │ - const·test1·=·Object.assign({·...bar·},·{
+       33 │ + const·test1·=·({...bar·,
+    34 34 │       foo: 'bar', // inline comment
+    35    │ - ····baz:·"cats"
+    36    │ - });
+       35 │ + ····baz:·"cats",});
+    37 36 │   const test2 = Object.assign({ ...bar }, {
+    38 37 │       /**
+  
+
+```
+
+```
+invalid.js:37:15 lint/nursery/useObjectSpread  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Object spread syntax is more concise, readable, and performs better than Object.assign.
+  
+    35 │     baz: "cats"
+    36 │ });
+  > 37 │ const test2 = Object.assign({ ...bar }, {
+       │               ^^^^^^^^^^^^^
+    38 │     /**
+    39 │      * foo
+  
+  i Safe fix: Replace Object.assign({...}, <object>) with { ...<object> }.
+  
+    35 35 │       baz: "cats"
+    36 36 │   });
+    37    │ - const·test2·=·Object.assign({·...bar·},·{
+       37 │ + const·test2·=·({...bar·,
+    38 38 │       /**
+    39 39 │        * foo
+    40 40 │        */
+    41 41 │       foo: 'bar',
+    42    │ - ····baz:·"cats"
+    43    │ - });
+       42 │ + ····baz:·"cats",});
+    44 43 │   globalThis.Object.assign({}, foo);
+    45 44 │   
+  
+
+```
+
+```
+invalid.js:44:1 lint/nursery/useObjectSpread  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Object spread syntax is more concise, readable, and performs better than Object.assign.
+  
+    42 │     baz: "cats"
+    43 │ });
+  > 44 │ globalThis.Object.assign({}, foo);
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^
+    45 │ 
+  
+  i Safe fix: Replace Object.assign({...}, <object>) with { ...<object> }.
+  
+    42 42 │       baz: "cats"
+    43 43 │   });
+    44    │ - globalThis.Object.assign({},·foo);
+       44 │ + ({...foo,});
+    45 45 │   
+  
+
+```

@@ -1,6 +1,5 @@
 ---
 source: crates/biome_configuration/tests/spec_tests.rs
-assertion_line: 58
 expression: files_extraneous_field.json
 ---
 files_extraneous_field.json:3:3 deserialize ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -19,3 +18,4 @@ files_extraneous_field.json:3:3 deserialize ━━━━━━━━━━━━
   - maxSize
   - ignoreUnknown
   - includes
+  - experimentalScannerIgnores

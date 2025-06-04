@@ -1171,6 +1171,7 @@ fn include_files_in_symlinked_subdir() {
     let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
     let config = r#"{
+        "root": false,
         "files": {
             "includes": ["**/*.js"]
         }
@@ -1181,6 +1182,17 @@ fn include_files_in_symlinked_subdir() {
         .join("include_files_in_symlinked_subdir");
     let _ = remove_dir_all(&root_path);
     create_dir(&root_path).unwrap();
+    File::create(root_path.join("biome.json"))
+        .unwrap()
+        .write_all(
+            r#"{
+        "files": {
+            "includes": ["**/*.js"]
+        }
+    }"#
+            .as_bytes(),
+        )
+        .unwrap();
 
     let symlinked = root_path.join("symlinked");
     create_dir(&symlinked).unwrap();

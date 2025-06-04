@@ -3,8 +3,9 @@ use std::borrow::Cow;
 use biome_rowan::Text;
 
 use crate::{
-    Class, GenericTypeParameter, Module, Namespace, Object, ResolvedTypeData, ResolvedTypeId,
-    ResolvedTypeMember, ResolverId, TypeData, TypeInstance, TypeReference, TypeResolver,
+    BindingId, Class, GenericTypeParameter, Interface, Module, Namespace, Object, ResolvedTypeData,
+    ResolvedTypeId, ResolvedTypeMember, ResolverId, TypeData, TypeInstance, TypeReference,
+    TypeResolver,
     globals::{GLOBAL_ARRAY_ID, GLOBAL_PROMISE_ID, GLOBAL_TYPE_MEMBERS},
 };
 
@@ -15,16 +16,14 @@ impl<'a> ResolvedTypeData<'a> {
     /// Note that members which are inherited and overridden may appear multiple
     /// times, but the member that is closest to the current type is guaranteed
     /// to come first.
-    pub fn all_members(
-        self,
-        resolver: &'a dyn TypeResolver,
-    ) -> impl Iterator<Item = ResolvedTypeMember<'a>> {
+    pub fn all_members(self, resolver: &'a dyn TypeResolver) -> TypeMemberIterator<'a> {
         TypeMemberIterator {
             resolver,
             resolver_id: self.resolver_id(),
             owner: TypeMemberOwner::from_type_data(self.as_raw_data()),
             seen_types: Vec::new(),
             index: 0,
+            excluded_binding_id: None,
         }
     }
 
@@ -180,13 +179,13 @@ impl TypeData {
                 let resolved = ResolvedTypeData::from((resolver_id, self));
                 if resolved.is_instance_of(resolver, GLOBAL_ARRAY_ID) {
                     match resolved.find_type_parameter(resolver, "T") {
-                        Some(elem_ty) => Some(Self::InstanceOf(Box::new(TypeInstance {
+                        Some(elem_ty) => Some(Self::instance_of(TypeInstance {
                             ty: GLOBAL_ARRAY_ID.into(),
                             type_parameters: Box::new([GenericTypeParameter {
                                 name: Text::Static("T"),
                                 ty: elem_ty.into_owned(),
                             }]),
-                        }))),
+                        })),
                         None => return resolver.get_by_resolved_id(GLOBAL_ARRAY_ID),
                     }
                 } else {
@@ -200,12 +199,20 @@ impl TypeData {
     }
 }
 
-struct TypeMemberIterator<'a> {
+pub struct TypeMemberIterator<'a> {
     resolver: &'a dyn TypeResolver,
     resolver_id: ResolverId,
     owner: Option<TypeMemberOwner<'a>>,
     seen_types: Vec<ResolvedTypeId>,
     index: usize,
+    excluded_binding_id: Option<BindingId>,
+}
+
+impl TypeMemberIterator<'_> {
+    pub fn with_excluded_binding_id(mut self, binding_id: BindingId) -> Self {
+        self.excluded_binding_id = Some(binding_id);
+        self
+    }
 }
 
 impl<'a> Iterator for TypeMemberIterator<'a> {
@@ -236,6 +243,18 @@ impl<'a> Iterator for TypeMemberIterator<'a> {
                 }
             }
             Some(TypeMemberOwner::InstanceOf(instance_of)) => &instance_of.ty,
+            Some(TypeMemberOwner::Interface(interface)) => {
+                match interface.members.get(self.index) {
+                    Some(member) => {
+                        self.index += 1;
+                        return Some((self.resolver_id, member).into());
+                    }
+                    None => {
+                        self.owner = None;
+                        return None;
+                    }
+                }
+            }
             Some(TypeMemberOwner::Module(module)) => match module.members.get(self.index) {
                 Some(member) => {
                     self.index += 1;
@@ -274,11 +293,18 @@ impl<'a> Iterator for TypeMemberIterator<'a> {
             None => return None,
         };
 
-        let Some(next_resolved_id) = self.resolver.resolve_reference(
-            &self
-                .resolver_id
-                .apply_module_id_to_reference(next_reference),
-        ) else {
+        let mut next_reference = self
+            .resolver_id
+            .apply_module_id_to_reference(next_reference);
+        if let Some(excluded_binding_id) = self.excluded_binding_id {
+            next_reference = Cow::Owned(
+                next_reference
+                    .into_owned()
+                    .with_excluded_binding_id(excluded_binding_id),
+            );
+        }
+
+        let Some(next_resolved_id) = self.resolver.resolve_reference(&next_reference) else {
             self.owner = None;
             return None;
         };
@@ -303,10 +329,12 @@ impl<'a> Iterator for TypeMemberIterator<'a> {
     }
 }
 
+#[derive(Debug)]
 enum TypeMemberOwner<'a> {
     Class(&'a Class),
     Global,
     InstanceOf(&'a TypeInstance),
+    Interface(&'a Interface),
     Module(&'a Module),
     Namespace(&'a Namespace),
     Object(&'a Object),
@@ -318,6 +346,7 @@ impl<'a> TypeMemberOwner<'a> {
             TypeData::Class(class) => Some(Self::Class(class)),
             TypeData::Global => Some(Self::Global),
             TypeData::InstanceOf(type_instance) => Some(Self::InstanceOf(type_instance)),
+            TypeData::Interface(interface) => Some(Self::Interface(interface)),
             TypeData::Module(module) => Some(Self::Module(module)),
             TypeData::Namespace(namespace) => Some(Self::Namespace(namespace)),
             TypeData::Object(object) => Some(Self::Object(object)),

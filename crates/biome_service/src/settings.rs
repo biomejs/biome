@@ -43,13 +43,35 @@ use camino::{Utf8Path, Utf8PathBuf};
 use ignore::gitignore::{Gitignore, GitignoreBuilder};
 use std::borrow::Cow;
 use std::ops::Deref;
+use std::sync::Arc;
 use tracing::instrument;
+
+const DEFAULT_SCANNER_IGNORE_ENTRIES: &[&[u8]] = &[
+    b".cache",
+    b".git",
+    b".hg",
+    b".netlify",
+    b".output",
+    b".svn",
+    b".yarn",
+    b".timestamp",
+    b".turbo",
+    b".vercel",
+    b".DS_Store",
+    // TODO: Remove when https://github.com/biomejs/biome/issues/6172 is fixed.
+    b"RedisCommander.d.ts",
+];
 
 /// Settings active in a project.
 ///
 /// These can be either root settings, or settings for a section of the project.
 #[derive(Clone, Debug, Default)]
 pub struct Settings {
+    /// The configuration that originated this setting, if applicable.
+    ///
+    /// It contains [Configuration] and the folder where it was found.
+    source: Option<Arc<(Configuration, Option<Utf8PathBuf>)>>,
+
     /// Formatter settings applied to all files in the project.
     pub formatter: FormatSettings,
     /// Linter settings applied to all files in the project.
@@ -69,6 +91,20 @@ pub struct Settings {
 }
 
 impl Settings {
+    pub fn source(&self) -> Option<Configuration> {
+        self.source.as_ref().map(|source| {
+            let (config, _) = source.deref().clone();
+            config
+        })
+    }
+
+    pub fn source_path(&self) -> Option<Utf8PathBuf> {
+        self.source.as_ref().and_then(|source| {
+            let (_, path) = source.deref().clone();
+            path
+        })
+    }
+
     /// Merges the [Configuration] into the settings.
     #[tracing::instrument(level = "debug", skip_all)]
     pub fn merge_with_configuration(
@@ -76,7 +112,9 @@ impl Settings {
         configuration: Configuration,
         working_directory: Option<Utf8PathBuf>,
     ) -> Result<(), WorkspaceError> {
-        // formatter part
+        self.source = Some(Arc::new((configuration.clone(), working_directory.clone())));
+
+        // formatter part§
         if let Some(formatter) = configuration.formatter {
             self.formatter = to_format_settings(working_directory.clone(), formatter)?;
         }
@@ -220,12 +258,47 @@ impl Settings {
         result
     }
 
+    /// Returns the plugins that should be enabled for the given `path`, taking overrides into account.
+    pub fn get_plugins_for_path(&self, path: &Utf8Path) -> Cow<Plugins> {
+        let mut result = Cow::Borrowed(&self.plugins);
+
+        for pattern in &self.override_settings.patterns {
+            if pattern.is_file_included(path) {
+                result.to_mut().extend_from_slice(&pattern.plugins);
+            }
+        }
+
+        result
+    }
+
+    /// Return all plugins configured in setting
+    pub fn as_all_plugins(&self) -> Cow<Plugins> {
+        let mut result = Cow::Borrowed(&self.plugins);
+
+        let all_override_plugins = self
+            .override_settings
+            .patterns
+            .iter()
+            .flat_map(|pattern| pattern.plugins.iter().cloned())
+            .collect::<Vec<_>>();
+
+        if !all_override_plugins.is_empty() {
+            result.to_mut().0.extend(all_override_plugins);
+        }
+
+        result
+    }
+
     pub fn is_formatter_enabled(&self) -> bool {
         self.formatter.is_enabled()
     }
 
     pub fn is_linter_enabled(&self) -> bool {
         self.linter.is_enabled()
+    }
+
+    pub fn is_vcs_enabled(&self) -> bool {
+        self.vcs_settings.is_enabled()
     }
 
     pub fn linter_recommended_enabled(&self) -> bool {
@@ -613,6 +686,10 @@ pub struct FilesSettings {
 
     /// Files not recognized by Biome should not emit a diagnostic
     pub ignore_unknown: Option<FilesIgnoreUnknownEnabled>,
+
+    /// List of file and folder names that should be unconditionally ignored by
+    /// the scanner.
+    pub scanner_ignore_entries: Vec<Vec<u8>>,
 }
 
 #[derive(Clone, Default, Debug)]
@@ -694,13 +771,11 @@ impl VcsIgnoredPatterns {
                         } else {
                             gitignore.path()
                         };
-                        let result = if let Ok(stripped_path) = path.strip_prefix(ignore_directory)
-                        {
+                        if let Ok(stripped_path) = path.strip_prefix(ignore_directory) {
                             gitignore.matched(stripped_path, is_dir).is_ignore()
                         } else {
                             false
-                        };
-                        result
+                        }
                     })
             }
         }
@@ -845,6 +920,15 @@ fn to_file_settings(
         max_size: config.max_size,
         includes: Includes::new(working_directory, config.includes),
         ignore_unknown: config.ignore_unknown,
+        scanner_ignore_entries: config.experimental_scanner_ignores.map_or_else(
+            || {
+                DEFAULT_SCANNER_IGNORE_ENTRIES
+                    .iter()
+                    .map(|entry| entry.to_vec())
+                    .collect()
+            },
+            |entries| entries.into_iter().map(String::into_bytes).collect(),
+        ),
     })
 }
 
@@ -1240,6 +1324,8 @@ pub struct OverrideSettingPattern {
     pub languages: LanguageListSettings,
     /// Files specific settings
     pub files: OverrideFilesSettings,
+    /// Additional plugins to be applied
+    pub plugins: Plugins,
 }
 
 impl OverrideSettingPattern {
@@ -1516,6 +1602,7 @@ pub fn to_override_settings(
                 actions: assist.actions,
             })
             .unwrap_or_default();
+        let plugins = pattern.plugins.unwrap_or_default();
 
         let files = pattern
             .files
@@ -1549,6 +1636,7 @@ pub fn to_override_settings(
             assist,
             languages,
             files,
+            plugins,
         };
 
         override_settings.patterns.push(pattern_setting);

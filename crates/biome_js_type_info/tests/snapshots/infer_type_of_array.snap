@@ -12,12 +12,6 @@ const array: Array<string> = [];
 ## Result
 
 ```
-array => instanceof unresolved reference "Array"<Global TypeId(17)>
+array => instanceof unresolved reference "Array"<string>
 
-```
-
-## Registered types
-
-```
-Global TypeId(17) => string
 ```
