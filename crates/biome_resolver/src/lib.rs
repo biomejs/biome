@@ -581,7 +581,7 @@ fn resolve_path_info(
     }
 }
 
-fn is_relative_specifier(specifier: &str) -> bool {
+pub fn is_relative_specifier(specifier: &str) -> bool {
     specifier == "." || specifier.starts_with("./") || specifier.starts_with("../")
 }
 
