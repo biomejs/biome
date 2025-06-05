@@ -1,5 +1,5 @@
 ---
-"@biomejs/biome": major
+"@biomejs/biome": patch
 ---
 
 Fixed [#6211](https://github.com/biomejs/biome/issues/6211): previously the

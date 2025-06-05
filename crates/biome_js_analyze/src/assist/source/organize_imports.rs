@@ -913,12 +913,12 @@ impl Rule for OrganizeImports {
                     let mut i = import_keys.len() - 1;
                     while i > 0 {
                         let KeyedItem {
-                            key: pre_key,
+                            key: prev_key,
                             item: prev_item,
                             ..
                         } = &import_keys[i - 1];
                         let KeyedItem { key, item, .. } = &import_keys[i];
-                        if pre_key.is_mergeable(key) {
+                        if prev_key.is_mergeable(key) {
                             if let Some(merged) = merge(prev_item.as_ref(), item.as_ref()) {
                                 import_keys[i - 1].was_merged = true;
                                 import_keys[i - 1].item = Some(merged);
