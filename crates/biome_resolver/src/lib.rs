@@ -192,7 +192,7 @@ fn resolve_module_with_package_json(
     }
 
     if let Some(package_name) = &package_json.name {
-        if specifier.starts_with(package_name)
+        if specifier.starts_with(package_name.text())
             && specifier
                 .as_bytes()
                 .get(package_name.len())

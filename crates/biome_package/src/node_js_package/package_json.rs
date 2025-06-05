@@ -18,24 +18,24 @@ use std::{ops::Deref, str::FromStr};
 /// Deserialized `package.json`.
 #[derive(Debug, Default, Clone)]
 pub struct PackageJson {
-    /// The "name" field defines your package's name.
-    /// The "name" field can be used in addition to the "exports" field to self-reference a package using its name.
+    /// The "name" field defines your package's name. The "name" field can be
+    /// used in addition to the "exports" field to self-reference a package
+    /// using its name.
     ///
     /// <https://nodejs.org/api/packages.html#name>
-    pub name: Option<String>,
+    pub name: Option<Text>,
 
     /// The "type" field.
     ///
     /// <https://nodejs.org/api/packages.html#type>
     pub r#type: Option<PackageType>,
 
-    pub version: Option<String>,
-    pub description: Option<String>,
+    pub version: Option<Text>,
     pub dependencies: Dependencies,
     pub dev_dependencies: Dependencies,
     pub peer_dependencies: Dependencies,
     pub optional_dependencies: Dependencies,
-    pub license: Option<(String, TextRange)>,
+    pub license: Option<(Text, TextRange)>,
 
     pub(crate) raw_json: JsonObject,
 }
@@ -43,7 +43,7 @@ pub struct PackageJson {
 static_assertions::assert_impl_all!(PackageJson: Send, Sync);
 
 impl PackageJson {
-    pub fn new(name: impl Into<String>) -> Self {
+    pub fn new(name: impl Into<Text>) -> Self {
         Self {
             name: Some(name.into()),
             r#type: Some(PackageType::Module),
@@ -51,7 +51,7 @@ impl PackageJson {
         }
     }
 
-    pub fn with_version(self, version: String) -> Self {
+    pub fn with_version(self, version: Text) -> Self {
         Self {
             version: Some(version),
             ..self
@@ -71,15 +71,17 @@ impl PackageJson {
         }
     }
 
-    /// Checks whether the `specifier` is defined in `dependencies`, `dev_dependencies` or `peer_dependencies`
+    /// Checks whether the `specifier` is defined in `dependencies`,
+    /// `dev_dependencies` or `peer_dependencies`
     pub fn contains_dependency(&self, specifier: &str) -> bool {
         self.dependencies.contains(specifier)
             || self.dev_dependencies.contains(specifier)
             || self.peer_dependencies.contains(specifier)
     }
 
-    /// Checks whether the `specifier` is defined in `dependencies`, `dev_dependencies` or `peer_dependencies`, and the `range`
-    /// of matches the one of the manifest
+    /// Checks whether the `specifier` is defined in `dependencies`,
+    /// `dev_dependencies` or `peer_dependencies`, and the `range` of matches
+    /// the one of the manifest
     pub fn matches_dependency(&self, specifier: &str, range: &str) -> bool {
         let iter = self
             .dependencies
@@ -239,9 +241,6 @@ impl DeserializationVisitor for PackageJsonVisitor {
                     result.license = Deserializable::deserialize(ctx, &value, &key_text)
                         .map(|license| (license, license_range));
                 }
-                "description" => {
-                    result.description = Deserializable::deserialize(ctx, &value, &key_text);
-                }
                 "dependencies" => {
                     if let Some(deps) = Deserializable::deserialize(ctx, &value, &key_text) {
                         result.dependencies = deps;
@@ -265,9 +264,9 @@ impl DeserializationVisitor for PackageJsonVisitor {
                 "type" => {
                     result.r#type = Deserializable::deserialize(ctx, &value, &key_text);
                 }
-                key => {
+                _ => {
                     if let Some(value) = JsonValue::deserialize(ctx, &value, &key_text) {
-                        result.raw_json.insert(key.into(), value);
+                        result.raw_json.insert(key_text.into(), value);
                     }
                 }
             }
@@ -319,6 +318,29 @@ fn parse_range(range: &str) -> Result<Version, SemverError> {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn parse_package_json_author_field() {
+        let deserialized = deserialize_from_json_str::<PackageJson>(
+            r#"{
+    "name": "@shared/format",
+    "author": "Biome Team",
+    "exports": {
+        "./biome": "./biome.json"
+    }
+}"#,
+            JsonParserOptions::default(),
+            "",
+        );
+        let (package_json, errors) = deserialized.consume();
+        assert!(errors.is_empty());
+
+        let package_json = package_json.expect("parsing must have succeeded");
+        assert_eq!(
+            package_json.get_value_by_path(&["author"]),
+            Some(&JsonValue::String(Text::Static("Biome Team").into()))
+        );
+    }
 
     #[test]
     fn should_not_panic_on_invalid_semver_range() {
