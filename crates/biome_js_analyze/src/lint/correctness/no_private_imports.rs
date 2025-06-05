@@ -4,11 +4,11 @@ use biome_analyze::{
 use biome_console::{fmt::Display, markup};
 use biome_deserialize_macros::Deserializable;
 use biome_diagnostics::Severity;
+use biome_fs::BiomePath;
 use biome_js_syntax::{
     AnyJsImportClause, AnyJsImportLike, AnyJsNamedImportSpecifier, JsModuleSource, JsSyntaxToken,
 };
 use biome_module_graph::{JsModuleInfo, ModuleGraph, ResolvedPath};
-use biome_resolver::is_relative_specifier;
 use biome_rowan::{AstNode, SyntaxResult, Text, TextRange};
 use camino::{Utf8Path, Utf8PathBuf};
 use serde::{Deserialize, Serialize};
@@ -52,8 +52,8 @@ declare_lint_rule! {
     /// import the symbol. Modules that only share a common folder higher up in
     /// the hierarchy are not allowed to import the symbol.
     ///
-    /// For a visual explanation, see [this
-    /// illustration](https://github.com/uhyo/eslint-plugin-import-access?tab=readme-ov-file#what).
+    /// For a visual explanation, see
+    /// [this illustration](https://github.com/uhyo/eslint-plugin-import-access?tab=readme-ov-file#what).
     ///
     /// ## Private visibility
     ///
@@ -67,8 +67,10 @@ declare_lint_rule! {
     /// `@private` from an index file, such as `index.js`, can _still_ be
     /// imported from other submodules in that same module.
     ///
-    /// :::note For the sake of compatibility with conventions used with Deno,
-    /// modules named `mod.js`/`mod.ts` are considered index files too. :::
+    /// :::note
+    /// For the sake of compatibility with conventions used with Deno, modules
+    /// named `mod.js`/`mod.ts` are considered index files too.
+    /// :::
     ///
     /// Another reason why private visibility may still be useful is that it
     /// allows you to choose specific exceptions. For example, using
@@ -84,15 +86,8 @@ declare_lint_rule! {
     ///   regardless of the default visibility setting.
     /// * This rule does not validate imports through dynamic `import()`
     ///   expressions or CommonJS `require()` calls.
-    /// * This rule only works for _relative_ imports. Imports from external
-    ///   packages, but also from path aliases, are considered out of scope.
-    ///   Note you may also use this to your advantage: You can set the default
-    ///   of this rule to _package visibility_ and use path aliases as an
-    ///   exception. The rationale behind this is that if you set up path
-    ///   aliases, you probably intent for their symbols to be available
-    ///   everywhere. (If not, maybe
-    ///   ]`noRestrictedImports`](https://biomejs.dev/linter/rules/no-restricted-imports/`)
-    ///   is what you are looking for.)
+    /// * Imports from dependencies under `node_modules` are considered out of
+    ///   scope.
     ///
     /// ## Examples
     ///
@@ -232,7 +227,7 @@ impl Rule for NoPrivateImports {
             .is_static_import()
             .then(|| node.inner_string_text())
             .flatten()
-            .filter(|specifier| is_relative_specifier(specifier.text()))
+            .filter(|specifier| !BiomePath::new(specifier.text()).is_dependency())
             .and_then(|specifier| module_info.static_import_paths.get(specifier.text()))
             .and_then(ResolvedPath::as_path)
         else {
