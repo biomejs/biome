@@ -21616,7 +21616,7 @@ Module TypeId(635) => sync Function {
 Module TypeId(636) => sync Function {
   accepts: {
     params: [
-      required nextProps: Module(0) TypeId(631) (bindings: nextProps:instanceof unresolved reference "Readonly"<Module(0) TypeId(630)> (scope ID: 132))
+      required nextProps: Module(0) TypeId(631) (bindings: nextProps:instanceof unknown reference)
       required prevState: Module(0) TypeId(632) (bindings: prevState:instanceof Module(0) TypeId(500))
     ]
     type_args: []
@@ -23670,7 +23670,7 @@ Module TypeId(1035) => T = unknown reference
 
 Module TypeId(1036) => instanceof Module(0) TypeId(1035)
 
-Module TypeId(1037) => instanceof unresolved reference "ClipboardEvent" (scope ID: 2)
+Module TypeId(1037) => instanceof unknown reference
 
 Module TypeId(1038) => instanceof Module(0) TypeId(1033)
 
@@ -23688,7 +23688,7 @@ Module TypeId(1042) => T = unknown reference
 
 Module TypeId(1043) => instanceof Module(0) TypeId(1042)
 
-Module TypeId(1044) => instanceof unresolved reference "CompositionEvent" (scope ID: 3)
+Module TypeId(1044) => instanceof unknown reference
 
 Module TypeId(1045) => instanceof Module(0) TypeId(1033)
 
@@ -23704,7 +23704,7 @@ Module TypeId(1048) => T = unknown reference
 
 Module TypeId(1049) => instanceof Module(0) TypeId(1048)
 
-Module TypeId(1050) => instanceof unresolved reference "DragEvent" (scope ID: 4)
+Module TypeId(1050) => instanceof unknown reference
 
 Module TypeId(1051) => instanceof Module(0) TypeId(1130)
 
@@ -23722,7 +23722,7 @@ Module TypeId(1055) => T = unknown reference
 
 Module TypeId(1056) => instanceof Module(0) TypeId(1055)
 
-Module TypeId(1057) => instanceof unresolved reference "PointerEvent" (scope ID: 9)
+Module TypeId(1057) => instanceof unknown reference
 
 Module TypeId(1058) => instanceof Module(0) TypeId(1130)
 
@@ -23759,7 +23759,7 @@ Module TypeId(1066) => RelatedTarget = unknown reference
 
 Module TypeId(1067) => instanceof Module(0) TypeId(1065)
 
-Module TypeId(1068) => instanceof unresolved reference "FocusEvent" (scope ID: 5)
+Module TypeId(1068) => instanceof unknown reference
 
 Module TypeId(1069) => instanceof Module(0) TypeId(1033)
 
@@ -23904,7 +23904,7 @@ Module TypeId(1111) => T = unknown reference
 
 Module TypeId(1112) => instanceof Module(0) TypeId(1111)
 
-Module TypeId(1113) => instanceof unresolved reference "KeyboardEvent" (scope ID: 6)
+Module TypeId(1113) => instanceof unknown reference
 
 Module TypeId(1114) => instanceof Module(0) TypeId(1150)
 
@@ -23946,7 +23946,7 @@ Module TypeId(1119) => instanceof unresolved reference "Element" (scope ID: 269)
 
 Module TypeId(1120) => T = unknown reference
 
-Module TypeId(1121) => instanceof unresolved reference "MouseEvent" (scope ID: 7)
+Module TypeId(1121) => instanceof unknown reference
 
 Module TypeId(1122) => E = unknown reference
 
@@ -24003,7 +24003,7 @@ Module TypeId(1133) => T = unknown reference
 
 Module TypeId(1134) => instanceof Module(0) TypeId(1133)
 
-Module TypeId(1135) => instanceof unresolved reference "TouchEvent" (scope ID: 8)
+Module TypeId(1135) => instanceof unknown reference
 
 Module TypeId(1136) => instanceof Module(0) TypeId(1150)
 
@@ -24042,7 +24042,7 @@ Module TypeId(1142) => instanceof unresolved reference "Element" (scope ID: 273)
 
 Module TypeId(1143) => T = unknown reference
 
-Module TypeId(1144) => instanceof unresolved reference "UIEvent" (scope ID: 12)
+Module TypeId(1144) => instanceof unknown reference
 
 Module TypeId(1145) => E = unknown reference
 
@@ -24066,7 +24066,7 @@ Module TypeId(1152) => T = unknown reference
 
 Module TypeId(1153) => instanceof Module(0) TypeId(1152)
 
-Module TypeId(1154) => instanceof unresolved reference "WheelEvent" (scope ID: 13)
+Module TypeId(1154) => instanceof unknown reference
 
 Module TypeId(1155) => instanceof Module(0) TypeId(1130)
 
@@ -24087,7 +24087,7 @@ Module TypeId(1158) => T = unknown reference
 
 Module TypeId(1159) => instanceof Module(0) TypeId(1158)
 
-Module TypeId(1160) => instanceof unresolved reference "AnimationEvent" (scope ID: 1)
+Module TypeId(1160) => instanceof unknown reference
 
 Module TypeId(1161) => instanceof Module(0) TypeId(1033)
 
@@ -24107,7 +24107,7 @@ Module TypeId(1164) => T = unknown reference
 
 Module TypeId(1165) => instanceof Module(0) TypeId(1164)
 
-Module TypeId(1166) => instanceof unresolved reference "ToggleEvent" (scope ID: 10)
+Module TypeId(1166) => instanceof unknown reference
 
 Module TypeId(1167) => instanceof Module(0) TypeId(1033)
 
@@ -24132,7 +24132,7 @@ Module TypeId(1173) => T = unknown reference
 
 Module TypeId(1174) => instanceof Module(0) TypeId(1173)
 
-Module TypeId(1175) => instanceof unresolved reference "TransitionEvent" (scope ID: 11)
+Module TypeId(1175) => instanceof unknown reference
 
 Module TypeId(1176) => instanceof Module(0) TypeId(1033)
 

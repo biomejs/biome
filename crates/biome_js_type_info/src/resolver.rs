@@ -253,7 +253,7 @@ impl TypeResolverLevel {
 }
 
 /// Identifier that indicates which module a type is defined in.
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
 pub struct ModuleId(u32);
 
 impl ModuleId {
@@ -623,12 +623,6 @@ pub trait Resolvable: Sized {
     ///
     /// Does not perform any resolving in the process.
     fn with_module_id(self, module_id: ModuleId) -> Self;
-
-    /// Returns the instance with all scoped references augmented with the
-    /// given `scope_id`.
-    ///
-    /// Does not perform any resolving in the process.
-    fn with_scope_id(self, scope_id: ScopeId) -> Self;
 }
 
 impl Resolvable for TypeReference {
@@ -699,16 +693,15 @@ impl Resolvable for TypeReference {
 
     fn with_module_id(self, module_id: ModuleId) -> Self {
         match self {
+            Self::Qualifier(_) => {
+                // When we assign a module ID in order to store a type in the
+                // scoped resolver, we also clear out qualifiers to avoid
+                // resolving from an incorrect scope.
+                Self::Unknown
+            }
             Self::Resolved(resolved_type_id) => {
                 Self::Resolved(resolved_type_id.with_module_id(module_id))
             }
-            other => other,
-        }
-    }
-
-    fn with_scope_id(self, scope_id: ScopeId) -> Self {
-        match self {
-            Self::Qualifier(qualifier) => Self::from(qualifier.with_scope_id(scope_id)),
             other => other,
         }
     }
@@ -761,13 +754,6 @@ impl Resolvable for TypeofValue {
             scope_id,
         }
     }
-
-    fn with_scope_id(self, scope_id: ScopeId) -> Self {
-        Self {
-            scope_id: Some(scope_id),
-            ..self
-        }
-    }
 }
 
 macro_rules! derive_primitive_resolved {
@@ -786,10 +772,6 @@ macro_rules! derive_primitive_resolved {
             }
 
             fn with_module_id(self, _module_id: ModuleId) -> Self {
-                self
-            }
-
-            fn with_scope_id(self, _scope_id: ScopeId) -> Self {
                 self
             }
         })+

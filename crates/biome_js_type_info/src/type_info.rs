@@ -1106,11 +1106,6 @@ impl TypeReferenceQualifier {
         self
     }
 
-    pub fn with_scope_id(mut self, scope_id: ScopeId) -> Self {
-        self.scope_id = scope_id;
-        self
-    }
-
     pub fn without_type_parameters(&self) -> Self {
         Self {
             path: self.path.clone(),
