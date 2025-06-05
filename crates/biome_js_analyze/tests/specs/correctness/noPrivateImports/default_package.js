@@ -1,3 +1,5 @@
+import { unknown } from "external-package";
+
 // Importing a symbol without any visibility from sub package is NOT allowed when the default visibility is package.
 import { fooDefaultVariable } from "./sub/foo.js";
 
