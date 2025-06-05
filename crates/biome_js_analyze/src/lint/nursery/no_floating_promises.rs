@@ -3,13 +3,10 @@ use biome_analyze::{
 };
 use biome_console::markup;
 use biome_js_factory::make;
-use biome_js_syntax::{
-    AnyJsExpression, JsArrowFunctionExpression, JsExpressionStatement, JsFunctionDeclaration,
-    JsMethodClassMember, JsMethodObjectMember, JsSyntaxKind,
-};
-use biome_rowan::{AstNode, AstSeparatedList, BatchMutationExt, SyntaxNodeCast, TriviaPieceKind};
+use biome_js_syntax::{AnyJsExpression, JsExpressionStatement, JsSyntaxKind};
+use biome_rowan::{AstNode, AstSeparatedList, BatchMutationExt, TriviaPieceKind};
 
-use crate::{JsRuleAction, services::typed::Typed};
+use crate::{JsRuleAction, ast_utils::is_in_async_function, services::typed::Typed};
 
 declare_lint_rule! {
     /// Require Promise-like statements to be handled appropriately.
@@ -212,7 +209,7 @@ impl Rule for NoFloatingPromises {
     fn action(ctx: &RuleContext<Self>, _: &Self::State) -> Option<JsRuleAction> {
         let node = ctx.query();
 
-        if !is_in_async_function(node) {
+        if !is_in_async_function(node.syntax()) {
             return None;
         }
 
@@ -290,40 +287,4 @@ fn is_handled_promise(expression: AnyJsExpression) -> Option<bool> {
     }
 
     Some(false)
-}
-
-/// Checks if the given `JsExpressionStatement` is within an async function.
-///
-/// This function traverses up the syntax tree from the given expression node
-/// to find the nearest function and checks if it is an async function. It
-/// supports arrow functions, function declarations, class methods, and object
-/// methods.
-///
-/// # Arguments
-///
-/// * `node` - A reference to a `JsExpressionStatement` to check.
-///
-/// # Returns
-///
-/// * `true` if the expression is within an async function.
-/// * `false` otherwise.
-fn is_in_async_function(node: &JsExpressionStatement) -> bool {
-    node.syntax()
-        .ancestors()
-        .find_map(|ancestor| match ancestor.kind() {
-            JsSyntaxKind::JS_ARROW_FUNCTION_EXPRESSION => ancestor
-                .cast::<JsArrowFunctionExpression>()
-                .and_then(|func| func.async_token()),
-            JsSyntaxKind::JS_FUNCTION_DECLARATION => ancestor
-                .cast::<JsFunctionDeclaration>()
-                .and_then(|func| func.async_token()),
-            JsSyntaxKind::JS_METHOD_CLASS_MEMBER => ancestor
-                .cast::<JsMethodClassMember>()
-                .and_then(|method| method.async_token()),
-            JsSyntaxKind::JS_METHOD_OBJECT_MEMBER => ancestor
-                .cast::<JsMethodObjectMember>()
-                .and_then(|method| method.async_token()),
-            _ => None,
-        })
-        .is_some()
 }

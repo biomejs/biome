@@ -2779,6 +2779,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noMisusedPromises": {
+					"description": "Succinct description of the rule.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noNestedComponentDefinitions": {
 					"description": "Disallows defining React components inside other components.",
 					"anyOf": [
