@@ -623,12 +623,6 @@ pub trait Resolvable: Sized {
     ///
     /// Does not perform any resolving in the process.
     fn with_module_id(self, module_id: ModuleId) -> Self;
-
-    /// Returns the instance with all scoped references augmented with the
-    /// given `scope_id`.
-    ///
-    /// Does not perform any resolving in the process.
-    fn with_scope_id(self, scope_id: ScopeId) -> Self;
 }
 
 impl Resolvable for TypeReference {
@@ -711,13 +705,6 @@ impl Resolvable for TypeReference {
             other => other,
         }
     }
-
-    fn with_scope_id(self, scope_id: ScopeId) -> Self {
-        match self {
-            Self::Qualifier(qualifier) => Self::from(qualifier.with_scope_id(scope_id)),
-            other => other,
-        }
-    }
 }
 
 impl Resolvable for TypeofValue {
@@ -767,13 +754,6 @@ impl Resolvable for TypeofValue {
             scope_id,
         }
     }
-
-    fn with_scope_id(self, scope_id: ScopeId) -> Self {
-        Self {
-            scope_id: Some(scope_id),
-            ..self
-        }
-    }
 }
 
 macro_rules! derive_primitive_resolved {
@@ -792,10 +772,6 @@ macro_rules! derive_primitive_resolved {
             }
 
             fn with_module_id(self, _module_id: ModuleId) -> Self {
-                self
-            }
-
-            fn with_scope_id(self, _scope_id: ScopeId) -> Self {
                 self
             }
         })+

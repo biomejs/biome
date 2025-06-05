@@ -77,12 +77,11 @@ impl ScopedResolver {
     pub fn register_types_for_expression(&mut self, expr: &AnyJsExpression) {
         let scope_id = self.modules[0].scope_id_for_range(expr.range());
 
-        let mut resolver = ScopeRestrictedRegistrationResolver::new(self, scope_id);
-        let ty = TypeData::from_any_js_expression(&mut resolver, scope_id, expr);
-        resolver.run_inference();
+        let ty = TypeData::from_any_js_expression(self, scope_id, expr);
+        self.run_inference();
 
-        let ty = ty.inferred(&mut resolver);
-        let id = resolver.register_and_resolve(ty);
+        let ty = ty.inferred(self);
+        let id = self.register_and_resolve(ty);
         self.expressions.insert(expr.syntax().clone(), id);
     }
 
@@ -401,67 +400,6 @@ impl TypeResolver for ScopedResolver {
 
     fn registered_types(&self) -> &[TypeData] {
         self.types.as_slice()
-    }
-}
-
-struct ScopeRestrictedRegistrationResolver<'a> {
-    resolver: &'a mut ScopedResolver,
-    scope_id: ScopeId,
-}
-
-impl<'a> ScopeRestrictedRegistrationResolver<'a> {
-    fn new(resolver: &'a mut ScopedResolver, scope_id: ScopeId) -> Self {
-        Self { resolver, scope_id }
-    }
-
-    fn run_inference(&mut self) {
-        self.resolver.run_inference();
-    }
-}
-
-impl TypeResolver for ScopeRestrictedRegistrationResolver<'_> {
-    fn level(&self) -> TypeResolverLevel {
-        TypeResolverLevel::Scope
-    }
-
-    fn find_type(&self, type_data: &TypeData) -> Option<TypeId> {
-        self.resolver
-            .find_type(&type_data.clone().with_scope_id(self.scope_id))
-    }
-
-    fn get_by_id(&self, id: TypeId) -> &TypeData {
-        self.resolver.get_by_id(id)
-    }
-
-    fn get_by_resolved_id(&self, id: ResolvedTypeId) -> Option<ResolvedTypeData> {
-        self.resolver.get_by_resolved_id(id)
-    }
-
-    fn register_type(&mut self, type_data: TypeData) -> TypeId {
-        self.resolver
-            .register_type(type_data.with_scope_id(self.scope_id))
-    }
-
-    fn resolve_reference(&self, ty: &TypeReference) -> Option<ResolvedTypeId> {
-        match ty {
-            TypeReference::Qualifier(qualifier) => self.resolve_qualifier(qualifier),
-            TypeReference::Resolved(id) => Some(*id),
-            TypeReference::Import(import) => self.resolver.resolve_import_reference(import),
-            TypeReference::Unknown => Some(GLOBAL_UNKNOWN_ID),
-        }
-    }
-
-    fn resolve_qualifier(&self, qualifier: &TypeReferenceQualifier) -> Option<ResolvedTypeId> {
-        self.resolver
-            .resolve_qualifier(&qualifier.clone().with_scope_id(self.scope_id))
-    }
-
-    fn resolve_type_of(&self, _identifier: &Text, _scope_id: ScopeId) -> Option<ResolvedTypeId> {
-        panic!("ScopeRestrictedRegistrationResolver is only used for registering types")
-    }
-
-    fn registered_types(&self) -> &[TypeData] {
-        panic!("ScopeRestrictedRegistrationResolver is only used for registering types")
     }
 }
 
