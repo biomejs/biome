@@ -13,7 +13,7 @@ version              = "0.5.7"
 [dependencies]
 biome_text_edit = { workspace = true }
 biome_text_size = { workspace = true }
-countme         = { workspace = true }
+countme         = { workspace = true, optional = true }
 hashbrown       = { workspace = true, features = ["inline-more", "raw-entry"] }
 rustc-hash      = { workspace = true }
 schemars        = { workspace = true, optional = true }
@@ -26,8 +26,9 @@ quickcheck_macros = { workspace = true }
 serde_json        = { workspace = true }
 
 [features]
-schema = ["dep:schemars", "serde"]
-serde  = ["dep:serde", "biome_text_size/serde", "biome_text_size/serde"]
+countme = ["dep:countme"]
+schema  = ["dep:schemars", "serde"]
+serde   = ["dep:serde", "biome_text_size/serde", "biome_text_size/serde"]
 
 [[bench]]
 harness = false
