@@ -1,0 +1,278 @@
+---
+source: crates/biome_yaml_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+```yaml
+# Equivalent to {{a: 10}: null, {b: 11}: null}
+? a: 10
+? b: 11
+
+# Equivalent to {{c: 12, d: 13}: null}
+? c: 12
+  ? d: 13
+
+```
+
+## AST
+
+```
+YamlRoot {
+    documents: YamlDocumentList [
+        YamlDocument {
+            bom_token: missing (optional),
+            newline_token: NEWLINE@0..47 "\n" [Comments("# Equivalent to {{a:  ...")] [],
+            directives: YamlDirectiveList [],
+            dashdashdash_token: missing (optional),
+            node: YamlBlockCollection {
+                indent_token: missing (optional),
+                properties: missing (optional),
+                content: YamlBlockMapping {
+                    entries: YamlBlockMapEntryList [
+                        YamlBlockMapExplicitEntry {
+                            key: YamlBlockMapExplicitKey {
+                                question_mark_token: QUESTION@47..49 "?" [] [Whitespace(" ")],
+                                key: YamlCompactMapping {
+                                    inline_entry: YamlBlockMapImplicitEntry {
+                                        key: YamlFlowYamlNode {
+                                            properties: missing (optional),
+                                            content: YamlPlainScalar {
+                                                value_token: PLAIN_LITERAL@49..50 "a" [] [],
+                                            },
+                                        },
+                                        value: YamlBlockMapImplicitValue {
+                                            colon_token: COLON@50..52 ":" [] [Whitespace(" ")],
+                                            value: YamlFlowInBlockNode {
+                                                indent_token: missing (optional),
+                                                flow: YamlFlowYamlNode {
+                                                    properties: missing (optional),
+                                                    content: YamlPlainScalar {
+                                                        value_token: PLAIN_LITERAL@52..54 "10" [] [],
+                                                    },
+                                                },
+                                                newline_token: NEWLINE@54..55 "\n" [] [],
+                                            },
+                                            newline_token: missing (optional),
+                                        },
+                                    },
+                                    indented_entries: missing (optional),
+                                },
+                            },
+                            value: missing (optional),
+                        },
+                        YamlBlockMapExplicitEntry {
+                            key: YamlBlockMapExplicitKey {
+                                question_mark_token: QUESTION@55..57 "?" [] [Whitespace(" ")],
+                                key: YamlCompactMapping {
+                                    inline_entry: YamlBlockMapImplicitEntry {
+                                        key: YamlFlowYamlNode {
+                                            properties: missing (optional),
+                                            content: YamlPlainScalar {
+                                                value_token: PLAIN_LITERAL@57..58 "b" [] [],
+                                            },
+                                        },
+                                        value: YamlBlockMapImplicitValue {
+                                            colon_token: COLON@58..60 ":" [] [Whitespace(" ")],
+                                            value: YamlFlowInBlockNode {
+                                                indent_token: missing (optional),
+                                                flow: YamlFlowYamlNode {
+                                                    properties: missing (optional),
+                                                    content: YamlPlainScalar {
+                                                        value_token: PLAIN_LITERAL@60..62 "11" [] [],
+                                                    },
+                                                },
+                                                newline_token: NEWLINE@62..102 "\n\n" [] [Comments("# Equivalent to {{c:  ...")],
+                                            },
+                                            newline_token: missing (optional),
+                                        },
+                                    },
+                                    indented_entries: missing (optional),
+                                },
+                            },
+                            value: missing (optional),
+                        },
+                        YamlBlockMapExplicitEntry {
+                            key: YamlBlockMapExplicitKey {
+                                question_mark_token: QUESTION@102..105 "?" [Skipped("\n")] [Whitespace(" ")],
+                                key: YamlCompactMapping {
+                                    inline_entry: YamlBlockMapImplicitEntry {
+                                        key: YamlFlowYamlNode {
+                                            properties: missing (optional),
+                                            content: YamlPlainScalar {
+                                                value_token: PLAIN_LITERAL@105..106 "c" [] [],
+                                            },
+                                        },
+                                        value: YamlBlockMapImplicitValue {
+                                            colon_token: COLON@106..108 ":" [] [Whitespace(" ")],
+                                            value: YamlFlowInBlockNode {
+                                                indent_token: missing (optional),
+                                                flow: YamlFlowYamlNode {
+                                                    properties: missing (optional),
+                                                    content: YamlPlainScalar {
+                                                        value_token: PLAIN_LITERAL@108..110 "12" [] [],
+                                                    },
+                                                },
+                                                newline_token: missing (optional),
+                                            },
+                                            newline_token: missing (optional),
+                                        },
+                                    },
+                                    indented_entries: YamlCompactMappingIndented {
+                                        indent_token: INDENT@110..113 "\n  " [] [],
+                                        entries: YamlBlockMapEntryList [
+                                            YamlBlockMapExplicitEntry {
+                                                key: YamlBlockMapExplicitKey {
+                                                    question_mark_token: QUESTION@113..115 "?" [] [Whitespace(" ")],
+                                                    key: YamlCompactMapping {
+                                                        inline_entry: YamlBlockMapImplicitEntry {
+                                                            key: YamlFlowYamlNode {
+                                                                properties: missing (optional),
+                                                                content: YamlPlainScalar {
+                                                                    value_token: PLAIN_LITERAL@115..116 "d" [] [],
+                                                                },
+                                                            },
+                                                            value: YamlBlockMapImplicitValue {
+                                                                colon_token: COLON@116..118 ":" [] [Whitespace(" ")],
+                                                                value: YamlFlowInBlockNode {
+                                                                    indent_token: missing (optional),
+                                                                    flow: YamlFlowYamlNode {
+                                                                        properties: missing (optional),
+                                                                        content: YamlPlainScalar {
+                                                                            value_token: PLAIN_LITERAL@118..120 "13" [] [],
+                                                                        },
+                                                                    },
+                                                                    newline_token: missing (optional),
+                                                                },
+                                                                newline_token: missing (optional),
+                                                            },
+                                                        },
+                                                        indented_entries: missing (optional),
+                                                    },
+                                                },
+                                                value: missing (optional),
+                                            },
+                                        ],
+                                        dedent_token: DEDENT@120..121 "\n" [] [],
+                                    },
+                                },
+                            },
+                            value: missing (optional),
+                        },
+                    ],
+                },
+                dedent_token: missing (optional),
+            },
+            dotdotdot_token: missing (optional),
+        },
+    ],
+    eof_token: EOF@121..121 "" [] [],
+}
+```
+
+## CST
+
+```
+0: YAML_ROOT@0..121
+  0: YAML_DOCUMENT_LIST@0..121
+    0: YAML_DOCUMENT@0..121
+      0: (empty)
+      1: NEWLINE@0..47 "\n" [Comments("# Equivalent to {{a:  ...")] []
+      2: YAML_DIRECTIVE_LIST@47..47
+      3: (empty)
+      4: YAML_BLOCK_COLLECTION@47..121
+        0: (empty)
+        1: (empty)
+        2: YAML_BLOCK_MAPPING@47..121
+          0: YAML_BLOCK_MAP_ENTRY_LIST@47..121
+            0: YAML_BLOCK_MAP_EXPLICIT_ENTRY@47..55
+              0: YAML_BLOCK_MAP_EXPLICIT_KEY@47..55
+                0: QUESTION@47..49 "?" [] [Whitespace(" ")]
+                1: YAML_COMPACT_MAPPING@49..55
+                  0: YAML_BLOCK_MAP_IMPLICIT_ENTRY@49..55
+                    0: YAML_FLOW_YAML_NODE@49..50
+                      0: (empty)
+                      1: YAML_PLAIN_SCALAR@49..50
+                        0: PLAIN_LITERAL@49..50 "a" [] []
+                    1: YAML_BLOCK_MAP_IMPLICIT_VALUE@50..55
+                      0: COLON@50..52 ":" [] [Whitespace(" ")]
+                      1: YAML_FLOW_IN_BLOCK_NODE@52..55
+                        0: (empty)
+                        1: YAML_FLOW_YAML_NODE@52..54
+                          0: (empty)
+                          1: YAML_PLAIN_SCALAR@52..54
+                            0: PLAIN_LITERAL@52..54 "10" [] []
+                        2: NEWLINE@54..55 "\n" [] []
+                      2: (empty)
+                  1: (empty)
+              1: (empty)
+            1: YAML_BLOCK_MAP_EXPLICIT_ENTRY@55..102
+              0: YAML_BLOCK_MAP_EXPLICIT_KEY@55..102
+                0: QUESTION@55..57 "?" [] [Whitespace(" ")]
+                1: YAML_COMPACT_MAPPING@57..102
+                  0: YAML_BLOCK_MAP_IMPLICIT_ENTRY@57..102
+                    0: YAML_FLOW_YAML_NODE@57..58
+                      0: (empty)
+                      1: YAML_PLAIN_SCALAR@57..58
+                        0: PLAIN_LITERAL@57..58 "b" [] []
+                    1: YAML_BLOCK_MAP_IMPLICIT_VALUE@58..102
+                      0: COLON@58..60 ":" [] [Whitespace(" ")]
+                      1: YAML_FLOW_IN_BLOCK_NODE@60..102
+                        0: (empty)
+                        1: YAML_FLOW_YAML_NODE@60..62
+                          0: (empty)
+                          1: YAML_PLAIN_SCALAR@60..62
+                            0: PLAIN_LITERAL@60..62 "11" [] []
+                        2: NEWLINE@62..102 "\n\n" [] [Comments("# Equivalent to {{c:  ...")]
+                      2: (empty)
+                  1: (empty)
+              1: (empty)
+            2: YAML_BLOCK_MAP_EXPLICIT_ENTRY@102..121
+              0: YAML_BLOCK_MAP_EXPLICIT_KEY@102..121
+                0: QUESTION@102..105 "?" [Skipped("\n")] [Whitespace(" ")]
+                1: YAML_COMPACT_MAPPING@105..121
+                  0: YAML_BLOCK_MAP_IMPLICIT_ENTRY@105..110
+                    0: YAML_FLOW_YAML_NODE@105..106
+                      0: (empty)
+                      1: YAML_PLAIN_SCALAR@105..106
+                        0: PLAIN_LITERAL@105..106 "c" [] []
+                    1: YAML_BLOCK_MAP_IMPLICIT_VALUE@106..110
+                      0: COLON@106..108 ":" [] [Whitespace(" ")]
+                      1: YAML_FLOW_IN_BLOCK_NODE@108..110
+                        0: (empty)
+                        1: YAML_FLOW_YAML_NODE@108..110
+                          0: (empty)
+                          1: YAML_PLAIN_SCALAR@108..110
+                            0: PLAIN_LITERAL@108..110 "12" [] []
+                        2: (empty)
+                      2: (empty)
+                  1: YAML_COMPACT_MAPPING_INDENTED@110..121
+                    0: INDENT@110..113 "\n  " [] []
+                    1: YAML_BLOCK_MAP_ENTRY_LIST@113..120
+                      0: YAML_BLOCK_MAP_EXPLICIT_ENTRY@113..120
+                        0: YAML_BLOCK_MAP_EXPLICIT_KEY@113..120
+                          0: QUESTION@113..115 "?" [] [Whitespace(" ")]
+                          1: YAML_COMPACT_MAPPING@115..120
+                            0: YAML_BLOCK_MAP_IMPLICIT_ENTRY@115..120
+                              0: YAML_FLOW_YAML_NODE@115..116
+                                0: (empty)
+                                1: YAML_PLAIN_SCALAR@115..116
+                                  0: PLAIN_LITERAL@115..116 "d" [] []
+                              1: YAML_BLOCK_MAP_IMPLICIT_VALUE@116..120
+                                0: COLON@116..118 ":" [] [Whitespace(" ")]
+                                1: YAML_FLOW_IN_BLOCK_NODE@118..120
+                                  0: (empty)
+                                  1: YAML_FLOW_YAML_NODE@118..120
+                                    0: (empty)
+                                    1: YAML_PLAIN_SCALAR@118..120
+                                      0: PLAIN_LITERAL@118..120 "13" [] []
+                                  2: (empty)
+                                2: (empty)
+                            1: (empty)
+                        1: (empty)
+                    2: DEDENT@120..121 "\n" [] []
+              1: (empty)
+        3: (empty)
+      5: (empty)
+  1: EOF@121..121 "" [] []
+
+```
