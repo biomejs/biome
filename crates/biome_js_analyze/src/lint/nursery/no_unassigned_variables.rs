@@ -6,12 +6,12 @@ use biome_js_syntax::{
     JsVariableDeclarationClause, JsVariableDeclarator, JsVariableDeclaratorList,
     TsDeclareStatement,
 };
-use biome_rowan::{AstNode, SyntaxNodeCast};
+use biome_rowan::AstNode;
 
 use crate::services::semantic::Semantic;
 
 declare_lint_rule! {
-    /// Disallow let or var variables that are read but never assigned.
+    /// Disallow `let` or `var` variables that are read but never assigned.
     ///
     /// This rule flags let or var declarations that are never assigned a value but are still read or used in the code.
     /// Since these variables will always be undefined, their usage is likely a programming mistake.
@@ -133,5 +133,5 @@ fn is_inside_ts_declare_statement(node: &JsVariableDeclaration) -> bool {
     node.syntax()
         .ancestors()
         .skip(1)
-        .any(|ancestor| ancestor.cast::<TsDeclareStatement>().is_some())
+        .any(|ancestor| TsDeclareStatement::can_cast(ancestor.kind()))
 }

@@ -2,4 +2,22 @@
 "@biomejs/biome": minor
 ---
 
-Added new rule `noUnassignedVariables`, which disallow let or var variables that are read but never assigned.
+Added new rule [`noUnassignedVariables`](https://biomejs.dev/linter/rules/no-unassigned-variables/), which disallows `let` or `var` variables that are read but never assigned.
+
+The following code is now reported as invalid:
+
+```js
+let x;
+if (x) {
+  console.log(1);
+}
+```
+
+The following code is now reported as valid:
+
+```js
+let x = 1;
+if (x) {
+  console.log(1);
+}
+```
