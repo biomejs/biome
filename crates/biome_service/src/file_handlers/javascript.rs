@@ -42,7 +42,9 @@ use biome_js_analyze::{
     ControlFlowGraph, JsAnalyzerServices, analyze, analyze_with_inspect_matcher,
 };
 use biome_js_formatter::context::trailing_commas::TrailingCommas;
-use biome_js_formatter::context::{ArrowParentheses, JsFormatOptions, QuoteProperties, Semicolons};
+use biome_js_formatter::context::{
+    ArrowParentheses, JsFormatOptions, OperatorLinebreak, QuoteProperties, Semicolons,
+};
 use biome_js_formatter::format_node;
 use biome_js_parser::JsParserOptions;
 use biome_js_semantic::{SemanticModelOptions, semantic_model};
@@ -80,6 +82,7 @@ pub struct JsFormatterSettings {
     pub enabled: Option<JsFormatterEnabled>,
     pub attribute_position: Option<AttributePosition>,
     pub expand: Option<Expand>,
+    pub operator_linebreak: Option<OperatorLinebreak>,
 }
 
 impl From<JsFormatterConfiguration> for JsFormatterSettings {
@@ -100,6 +103,7 @@ impl From<JsFormatterConfiguration> for JsFormatterSettings {
             indent_style: value.indent_style,
             line_ending: value.line_ending,
             expand: value.expand,
+            operator_linebreak: value.operator_linebreak,
         }
     }
 }
@@ -253,6 +257,11 @@ impl ServiceLanguage for JsLanguage {
             language
                 .and_then(|l| l.expand)
                 .or(global.and_then(|g| g.expand))
+                .unwrap_or_default(),
+        )
+        .with_operator_linebreak(
+            language
+                .and_then(|l| l.operator_linebreak)
                 .unwrap_or_default(),
         );
 
