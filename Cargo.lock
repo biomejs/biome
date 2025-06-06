@@ -628,7 +628,6 @@ dependencies = [
  "biome_rowan",
  "biome_service",
  "camino",
- "countme",
  "serde",
  "serde_json",
  "tests_macros",
