@@ -4,9 +4,9 @@ use biome_analyze::{
 use biome_console::markup;
 use biome_js_semantic::{Binding, SemanticModel};
 use biome_js_syntax::{
-    JsClassExpression, JsFunctionExpression, JsIdentifierBinding, JsParameterList,
-    JsVariableDeclarator, TsIdentifierBinding, TsTypeAliasDeclaration, TsTypeParameter,
-    TsTypeParameterName,
+    JsClassExpression, JsFormalParameter, JsFunctionExpression, JsIdentifierBinding,
+    JsParameterList, JsVariableDeclarator, TsFunctionType, TsIdentifierBinding,
+    TsTypeAliasDeclaration, TsTypeParameter, TsTypeParameterName,
 };
 use biome_rowan::{AstNode, SyntaxNodeCast, TokenText, declare_node_union};
 
@@ -155,7 +155,9 @@ fn evaluate_shadowing(model: &SemanticModel, binding: &Binding, upper_binding: &
     if is_on_initializer(binding, upper_binding) {
         return false;
     }
-    if is_declaration(binding) && is_declaration(upper_binding) {
+    if (is_declaration(binding) && is_declaration(upper_binding))
+        || (is_ts_type_parameter(binding) && is_ts_type_parameter(upper_binding))
+    {
         let binding_hoisted_scope = model
             .scope_hoisted_to(binding.syntax())
             .unwrap_or(binding.scope());
@@ -170,7 +172,9 @@ fn evaluate_shadowing(model: &SemanticModel, binding: &Binding, upper_binding: &
             // the shadowed binding must be declared before the shadowing one
             return false;
         }
-    } else if is_inside_function_parameters(binding) && is_inside_type_parameter(binding) {
+    } else if (is_inside_function_parameters(binding) && is_inside_type_parameter(binding))
+        || (is_js_formal_parameter(binding) && is_inside_ts_function_type(binding))
+    {
         return false;
     }
     true
@@ -242,6 +246,41 @@ fn is_declaration(binding: &Binding) -> bool {
         || binding.tree().parent::<TsTypeAliasDeclaration>().is_some()
 }
 
+/// Whether the binding is a function parameter
+///
+/// Examples of a JS formal parameters:
+/// ```js
+/// function foo(param) {}
+/// //           ^^^^^
+/// ```
+///
+/// ```ts
+/// type A = (param: string) => void;
+/// //        ^^^^^
+/// ```
+fn is_js_formal_parameter(binding: &Binding) -> bool {
+    binding.tree().parent::<JsFormalParameter>().is_some()
+}
+
+/// Whether the binding is a TypeScript type parameter.
+///
+/// Examples of type parameters:
+/// ```ts
+/// function foo<T>(param: T) {}
+/// //           ^
+///
+/// type Foo<T> = T[];
+/// //       ^
+///
+/// interface Bar<T, U> {
+/// //            ^  ^
+///     baz: T;
+/// }
+/// ```
+fn is_ts_type_parameter(binding: &Binding) -> bool {
+    binding.tree().parent::<TsTypeParameter>().is_some()
+}
+
 fn is_inside_type_parameter(binding: &Binding) -> bool {
     binding
         .syntax()
@@ -254,4 +293,18 @@ fn is_inside_function_parameters(binding: &Binding) -> bool {
         .syntax()
         .ancestors()
         .any(|ancestor| ancestor.cast::<JsParameterList>().is_some())
+}
+
+/// Whether the binding is inside a TypeScript function type.
+///
+/// Examples of function types:
+/// ```ts
+/// type A = (param: string) => void;
+/// //       ^^^^^^^^^^^^^^^^^^^^^^^
+/// ```
+fn is_inside_ts_function_type(binding: &Binding) -> bool {
+    binding
+        .syntax()
+        .ancestors()
+        .any(|ancestor| ancestor.cast::<TsFunctionType>().is_some())
 }
