@@ -1687,6 +1687,12 @@ fn to_json_language_settings(
         .allow_trailing_commas
         .or(parent_parser.allow_trailing_commas);
 
+    let linter = conf.linter.take().unwrap_or_default();
+    language_setting.linter.enabled = linter.enabled;
+
+    let assist = conf.assist.take().unwrap_or_default();
+    language_setting.assist.enabled = assist.enabled;
+
     language_setting
 }
 
@@ -1707,6 +1713,12 @@ fn to_css_language_settings(
     language_setting.parser.css_modules_enabled =
         parser.css_modules.or(parent_parser.css_modules_enabled);
 
+    let linter = conf.linter.take().unwrap_or_default();
+    language_setting.linter.enabled = linter.enabled;
+
+    let assist = conf.assist.take().unwrap_or_default();
+    language_setting.assist.enabled = assist.enabled;
+
     language_setting
 }
 
@@ -1719,6 +1731,12 @@ fn to_graphql_language_settings(
 
     language_setting.formatter = formatter.into();
 
+    let linter = conf.linter.take().unwrap_or_default();
+    language_setting.linter.enabled = linter.enabled;
+
+    let assist = conf.assist.take().unwrap_or_default();
+    language_setting.assist.enabled = assist.enabled;
+
     language_setting
 }
 
@@ -1730,6 +1748,12 @@ fn to_grit_language_settings(
     let formatter = conf.formatter.take().unwrap_or_default();
 
     language_setting.formatter = formatter.into();
+
+    let linter = conf.linter.take().unwrap_or_default();
+    language_setting.linter = linter.into();
+
+    let assist = conf.assist.take().unwrap_or_default();
+    language_setting.assist = assist.into();
 
     language_setting
 }
