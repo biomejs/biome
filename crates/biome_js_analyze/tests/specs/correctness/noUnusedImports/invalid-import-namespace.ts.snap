@@ -24,7 +24,7 @@ invalid-import-namespace.ts:1:13 lint/correctness/noUnusedImports  FIXABLE  ━�
   
   i Unused imports might be the result of an incomplete refactoring.
   
-  i Safe fix: Remove the unused imports.
+  i Unsafe fix: Remove the unused imports.
   
     1 │ import·*·as·Ns1·from·""
       │ -----------------------
@@ -44,7 +44,7 @@ invalid-import-namespace.ts:4:18 lint/correctness/noUnusedImports  FIXABLE  ━�
   
   i Unused imports might be the result of an incomplete refactoring.
   
-  i Safe fix: Remove the unused imports.
+  i Unsafe fix: Remove the unused imports.
   
     1 1 │   import * as Ns1 from ""
     2   │ - export·type·T1·=·Ns1;

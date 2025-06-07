@@ -23,6 +23,7 @@ serde                        = { workspace = true, optional = true }
 
 [dev-dependencies]
 biome_configuration  = { workspace = true }
+biome_formatter      = { workspace = true, features = ["countme"] }
 biome_formatter_test = { workspace = true }
 biome_fs             = { workspace = true }
 biome_html_parser    = { workspace = true }

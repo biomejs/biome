@@ -42,7 +42,7 @@
 **Biome 是一個 [高效能的語法檢查工具](https://github.com/biomejs/biome/tree/main/benchmark#linting)**，支援 _JavaScript_、_TypeScript_、_JSX_、_CSS_ 和 _GraphQL_，擁有來自 ESLint、typescript-eslint 和 [其他來源](https://github.com/biomejs/biome/discussions/3)的 **超過 270 條規則**。
 它 **輸出詳細且具上下文的診斷資訊**，幫助你改進程式碼並成為更好的程式設計師！
 
-**Biome** 從一開始就設計為可在 [編輯器中互動使用](https://biomejs.dev/guides/integrate-in-editor/)。
+**Biome** 從一開始就設計為可在 [編輯器中互動使用](https://biomejs.dev/guides/editors/first-party-extensions/)。
 它可以在你編寫程式碼時格式化和檢查錯誤的程式碼。
 
 ### 安裝

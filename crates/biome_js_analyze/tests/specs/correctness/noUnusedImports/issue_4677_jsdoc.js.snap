@@ -78,7 +78,7 @@ issue_4677_jsdoc.js:7:8 lint/correctness/noUnusedImports  FIXABLE  ━━━━�
   
   i Unused imports might be the result of an incomplete refactoring.
   
-  i Safe fix: Remove the unused imports.
+  i Unsafe fix: Remove the unused imports.
   
      5  5 │   import TypeOnClassMethodParam from "mod";
      6  6 │   import TypeOnClassConstructorParam from "mod";

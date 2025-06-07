@@ -2,7 +2,7 @@
 "@biomejs/biome": minor
 ---
 
-Upgrade some unsafe fixes to safe fixes.
+Upgraded some unsafe fixes to safe fixes.
 
 The following rules have now a safe fix:
 
