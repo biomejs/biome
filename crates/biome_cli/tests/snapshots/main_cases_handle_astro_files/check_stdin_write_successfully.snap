@@ -19,6 +19,9 @@ var foo: string = "";
 
 ```block
 ---
+import { something } from "file.astro";
+import { a } from "mod";
+
 debugger;
 statement();
 var foo: string = "";

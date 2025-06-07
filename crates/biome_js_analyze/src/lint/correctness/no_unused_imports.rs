@@ -96,7 +96,7 @@ declare_lint_rule! {
         sources: &[RuleSource::EslintUnusedImports("no-unused-imports")],
         recommended: true,
         severity: Severity::Warning,
-        fix_kind: FixKind::Safe,
+        fix_kind: FixKind::Unsafe,
     }
 }
 
