@@ -3,7 +3,7 @@
 use crate::cli_options::CliOptions;
 use crate::diagnostics::StdinDiagnostic;
 use crate::execute::Execution;
-use crate::{CliDiagnostic, CliSession, TraversalMode};
+use crate::{CliDiagnostic, CliSession, TraversalMode, Verbosity};
 use biome_analyze::RuleCategoriesBuilder;
 use biome_console::{ConsoleExt, markup};
 use biome_diagnostics::Diagnostic;
@@ -52,12 +52,19 @@ pub(crate) fn run<'a>(
 
         if file_features.is_protected() {
             let protected_diagnostic = WorkspaceError::protected_file(biome_path.to_string());
-            if protected_diagnostic.tags().is_verbose() {
-                if cli_options.verbose {
-                    console.error(markup! {{PrintDiagnostic::verbose(&protected_diagnostic)}})
+
+            match cli_options.verbosity {
+                Verbosity::Simple => {
+                    console.error(markup! {{PrintDiagnostic::simple(&protected_diagnostic)}})
                 }
-            } else {
-                console.error(markup! {{PrintDiagnostic::simple(&protected_diagnostic)}})
+                Verbosity::Full => {
+                    if protected_diagnostic.tags().is_verbose() {
+                        console.error(markup! {{PrintDiagnostic::verbose(&protected_diagnostic)}})
+                    }
+                }
+                Verbosity::Minimal => {
+                    console.error(markup! {{PrintDiagnostic::minimal(&protected_diagnostic)}})
+                }
             }
             console.append(markup! {{content}});
             return Ok(());
@@ -126,12 +133,18 @@ pub(crate) fn run<'a>(
 
         if file_features.is_protected() {
             let protected_diagnostic = WorkspaceError::protected_file(biome_path.to_string());
-            if protected_diagnostic.tags().is_verbose() {
-                if cli_options.verbose {
-                    console.error(markup! {{PrintDiagnostic::verbose(&protected_diagnostic)}})
+            match cli_options.verbosity {
+                Verbosity::Simple => {
+                    console.error(markup! {{PrintDiagnostic::simple(&protected_diagnostic)}})
                 }
-            } else {
-                console.error(markup! {{PrintDiagnostic::simple(&protected_diagnostic)}})
+                Verbosity::Full => {
+                    if protected_diagnostic.tags().is_verbose() {
+                        console.error(markup! {{PrintDiagnostic::verbose(&protected_diagnostic)}})
+                    }
+                }
+                Verbosity::Minimal => {
+                    console.error(markup! {{PrintDiagnostic::minimal(&protected_diagnostic)}})
+                }
             }
             console.append(markup! {{content}});
 

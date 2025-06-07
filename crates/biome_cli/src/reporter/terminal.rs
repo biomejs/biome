@@ -1,4 +1,5 @@
 use crate::Reporter;
+use crate::cli_options::Verbosity;
 use crate::execute::{Execution, TraversalMode};
 use crate::reporter::{
     DiagnosticsPayload, EvaluatedPathsDiagnostic, FixedPathsDiagnostic, ReporterVisitor,
@@ -20,16 +21,16 @@ pub(crate) struct ConsoleReporter {
     pub(crate) execution: Execution,
     pub(crate) evaluated_paths: BTreeSet<BiomePath>,
     pub(crate) working_directory: Option<Utf8PathBuf>,
-    pub(crate) verbose: bool,
+    pub(crate) verbosity: Verbosity,
 }
 
 impl Reporter for ConsoleReporter {
     fn write(self, visitor: &mut dyn ReporterVisitor) -> io::Result<()> {
-        visitor.report_diagnostics(&self.execution, self.diagnostics_payload, self.verbose)?;
-        if self.verbose {
+        visitor.report_diagnostics(&self.execution, self.diagnostics_payload, self.verbosity)?;
+        if self.verbosity.is_verbose() {
             visitor.report_handled_paths(self.evaluated_paths, self.working_directory)?;
         }
-        visitor.report_summary(&self.execution, self.summary, self.verbose)?;
+        visitor.report_summary(&self.execution, self.summary, self.verbosity)?;
         Ok(())
     }
 }
@@ -41,7 +42,7 @@ impl ReporterVisitor for ConsoleReporterVisitor<'_> {
         &mut self,
         execution: &Execution,
         summary: TraversalSummary,
-        verbose: bool,
+        verbosity: Verbosity,
     ) -> io::Result<()> {
         if execution.is_check() && summary.suggested_fixes_skipped > 0 {
             self.0.log(markup! {
@@ -58,7 +59,7 @@ impl ReporterVisitor for ConsoleReporterVisitor<'_> {
         }
 
         self.0.log(markup! {
-            {ConsoleTraversalSummary(execution.traversal_mode(), &summary, verbose)}
+            {ConsoleTraversalSummary(execution.traversal_mode(), &summary, verbosity.is_verbose())}
         });
 
         Ok(())
@@ -120,7 +121,7 @@ impl ReporterVisitor for ConsoleReporterVisitor<'_> {
         &mut self,
         execution: &Execution,
         diagnostics_payload: DiagnosticsPayload,
-        verbose: bool,
+        verbosity: Verbosity,
     ) -> io::Result<()> {
         for diagnostic in &diagnostics_payload.diagnostics {
             if execution.is_search() {
@@ -129,12 +130,21 @@ impl ReporterVisitor for ConsoleReporterVisitor<'_> {
             }
 
             if diagnostic.severity() >= diagnostics_payload.diagnostic_level {
-                if diagnostic.tags().is_verbose() && verbose {
-                    self.0
-                        .error(markup! {{PrintDiagnostic::verbose(diagnostic)}});
-                } else {
-                    self.0
-                        .error(markup! {{PrintDiagnostic::simple(diagnostic)}});
+                match verbosity {
+                    Verbosity::Simple => {
+                        self.0
+                            .error(markup! {{PrintDiagnostic::simple(diagnostic)}});
+                    }
+                    Verbosity::Full => {
+                        if diagnostic.tags().is_verbose() {
+                            self.0
+                                .error(markup! {{PrintDiagnostic::verbose(diagnostic)}});
+                        }
+                    }
+                    Verbosity::Minimal => {
+                        self.0
+                            .error(markup! {{PrintDiagnostic::minimal(diagnostic)}});
+                    }
                 }
             }
         }

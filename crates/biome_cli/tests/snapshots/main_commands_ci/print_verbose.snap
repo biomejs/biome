@@ -23,24 +23,14 @@ ci ━━━━━━━━━━━━━━━━━━━━━━━━━�
 # Emitted Messages
 
 ```block
-ci.js:1:6 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+flags/deprecated  DEPRECATED  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Unexpected constant condition.
+  ! The --verbose argument is deprecated
   
-  > 1 │ for(;true;);
-      │      ^^^^
-    2 │ 
+  i Use the following command instead
   
-
-```
-
-```block
-ci.js format ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × File content differs from formatting output
+  $ biome ci --verbosity=full
   
-    1 │ for·(;·true;·);
-      │    +  +     +  
 
 ```
 

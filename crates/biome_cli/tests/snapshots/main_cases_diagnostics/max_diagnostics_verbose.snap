@@ -5,7 +5,7 @@ expression: redactor(content)
 ## `src/file.js`
 
 ```js
-  statement(  )  
+  statement(  )
 ```
 
 # Termination Message
@@ -14,7 +14,7 @@ expression: redactor(content)
 ci ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Some errors were emitted while running checks.
-  
+
 
 
 ```
@@ -25,11 +25,11 @@ ci ━━━━━━━━━━━━━━━━━━━━━━━━━�
 src/folder_0/package-lock.json project  VERBOSE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i The file src/folder_0/package-lock.json is protected because is handled by another tool. Biome won't process it.
-  
+
   Verbose advice
-  
+
     i You can hide this diagnostic by using --diagnostic-level=warn to increase the diagnostic level shown by CLI.
-    
+
 
 ```
 
@@ -37,11 +37,11 @@ src/folder_0/package-lock.json project  VERBOSE  ━━━━━━━━━━�
 src/folder_1/package-lock.json project  VERBOSE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i The file src/folder_1/package-lock.json is protected because is handled by another tool. Biome won't process it.
-  
+
   Verbose advice
-  
+
     i You can hide this diagnostic by using --diagnostic-level=warn to increase the diagnostic level shown by CLI.
-    
+
 
 ```
 
@@ -49,11 +49,11 @@ src/folder_1/package-lock.json project  VERBOSE  ━━━━━━━━━━�
 src/folder_2/package-lock.json project  VERBOSE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i The file src/folder_2/package-lock.json is protected because is handled by another tool. Biome won't process it.
-  
+
   Verbose advice
-  
+
     i You can hide this diagnostic by using --diagnostic-level=warn to increase the diagnostic level shown by CLI.
-    
+
 
 ```
 
@@ -61,11 +61,11 @@ src/folder_2/package-lock.json project  VERBOSE  ━━━━━━━━━━�
 src/folder_3/package-lock.json project  VERBOSE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i The file src/folder_3/package-lock.json is protected because is handled by another tool. Biome won't process it.
-  
+
   Verbose advice
-  
+
     i You can hide this diagnostic by using --diagnostic-level=warn to increase the diagnostic level shown by CLI.
-    
+
 
 ```
 
@@ -73,11 +73,11 @@ src/folder_3/package-lock.json project  VERBOSE  ━━━━━━━━━━�
 src/folder_4/package-lock.json project  VERBOSE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i The file src/folder_4/package-lock.json is protected because is handled by another tool. Biome won't process it.
-  
+
   Verbose advice
-  
+
     i You can hide this diagnostic by using --diagnostic-level=warn to increase the diagnostic level shown by CLI.
-    
+
 
 ```
 
@@ -85,11 +85,11 @@ src/folder_4/package-lock.json project  VERBOSE  ━━━━━━━━━━�
 src/folder_5/package-lock.json project  VERBOSE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i The file src/folder_5/package-lock.json is protected because is handled by another tool. Biome won't process it.
-  
+
   Verbose advice
-  
+
     i You can hide this diagnostic by using --diagnostic-level=warn to increase the diagnostic level shown by CLI.
-    
+
 
 ```
 
@@ -97,11 +97,11 @@ src/folder_5/package-lock.json project  VERBOSE  ━━━━━━━━━━�
 src/folder_6/package-lock.json project  VERBOSE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i The file src/folder_6/package-lock.json is protected because is handled by another tool. Biome won't process it.
-  
+
   Verbose advice
-  
+
     i You can hide this diagnostic by using --diagnostic-level=warn to increase the diagnostic level shown by CLI.
-    
+
 
 ```
 
@@ -109,11 +109,11 @@ src/folder_6/package-lock.json project  VERBOSE  ━━━━━━━━━━�
 src/folder_7/package-lock.json project  VERBOSE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i The file src/folder_7/package-lock.json is protected because is handled by another tool. Biome won't process it.
-  
+
   Verbose advice
-  
+
     i You can hide this diagnostic by using --diagnostic-level=warn to increase the diagnostic level shown by CLI.
-    
+
 
 ```
 
@@ -121,11 +121,11 @@ src/folder_7/package-lock.json project  VERBOSE  ━━━━━━━━━━�
 src/file.js format ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × File content differs from formatting output
-  
+
     1   │ - ··statement(··)··
       1 │ + statement();
-      2 │ + 
-  
+      2 │ +
+
 
 ```
 
@@ -133,9 +133,9 @@ src/file.js format ━━━━━━━━━━━━━━━━━━━━�
  VERBOSE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Files processed:
-  
+
   - src/file.js
-  
+
 
 ```
 
@@ -143,9 +143,9 @@ src/file.js format ━━━━━━━━━━━━━━━━━━━━�
  VERBOSE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Files fixed:
-  
+
   ! The list is empty.
-  
+
 
 ```
 

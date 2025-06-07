@@ -23,13 +23,13 @@ lint ━━━━━━━━━━━━━━━━━━━━━━━━━
 # Emitted Messages
 
 ```block
-check.js:1:6 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+flags/deprecated  DEPRECATED  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Unexpected constant condition.
+  ! The --verbose argument is deprecated
   
-  > 1 │ for(;true;);
-      │      ^^^^
-    2 │ 
+  i Use the following command instead
+  
+  $ biome lint --verbosity=full
   
 
 ```

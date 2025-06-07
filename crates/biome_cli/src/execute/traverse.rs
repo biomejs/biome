@@ -55,7 +55,7 @@ pub(crate) fn traverse(
 
     let working_directory = fs.working_directory();
     let printer = DiagnosticsPrinter::new(execution, working_directory.as_deref())
-        .with_verbose(cli_options.verbose)
+        .with_verbose(cli_options.verbosity.is_verbose())
         .with_diagnostic_level(cli_options.diagnostic_level)
         .with_max_diagnostics(max_diagnostics);
 

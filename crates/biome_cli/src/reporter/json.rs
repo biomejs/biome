@@ -1,3 +1,4 @@
+use crate::cli_options::Verbosity;
 use crate::{DiagnosticsPayload, Execution, Reporter, ReporterVisitor, TraversalSummary};
 use biome_console::fmt::Formatter;
 use serde::Serialize;
@@ -31,13 +32,13 @@ pub struct JsonReporter {
     pub execution: Execution,
     pub diagnostics: DiagnosticsPayload,
     pub summary: TraversalSummary,
-    pub verbose: bool,
+    pub verbosity: Verbosity,
 }
 
 impl Reporter for JsonReporter {
     fn write(self, visitor: &mut dyn ReporterVisitor) -> std::io::Result<()> {
-        visitor.report_summary(&self.execution, self.summary, self.verbose)?;
-        visitor.report_diagnostics(&self.execution, self.diagnostics, self.verbose)?;
+        visitor.report_summary(&self.execution, self.summary, self.verbosity)?;
+        visitor.report_diagnostics(&self.execution, self.diagnostics, self.verbosity)?;
 
         Ok(())
     }
@@ -48,7 +49,7 @@ impl ReporterVisitor for JsonReporterVisitor {
         &mut self,
         execution: &Execution,
         summary: TraversalSummary,
-        _verbose: bool,
+        _verbosity: Verbosity,
     ) -> std::io::Result<()> {
         self.summary = summary;
         self.command = format!("{}", execution.traversal_mode());
@@ -60,12 +61,12 @@ impl ReporterVisitor for JsonReporterVisitor {
         &mut self,
         _execution: &Execution,
         payload: DiagnosticsPayload,
-        verbose: bool,
+        verbosity: Verbosity,
     ) -> std::io::Result<()> {
         for diagnostic in payload.diagnostics {
             if diagnostic.severity() >= payload.diagnostic_level {
                 if diagnostic.tags().is_verbose() {
-                    if verbose {
+                    if verbosity.is_verbose() {
                         self.diagnostics
                             .push(biome_diagnostics::serde::Diagnostic::new(diagnostic))
                     }

@@ -5,7 +5,7 @@ pub(crate) mod junit;
 pub(crate) mod summary;
 pub(crate) mod terminal;
 
-use crate::cli_options::MaxDiagnostics;
+use crate::cli_options::{MaxDiagnostics, Verbosity};
 use crate::execute::Execution;
 use biome_diagnostics::advice::ListAdvice;
 use biome_diagnostics::{Diagnostic, Error, Severity};
@@ -55,7 +55,7 @@ pub trait ReporterVisitor {
         &mut self,
         _execution: &Execution,
         _summary: TraversalSummary,
-        _verbose: bool,
+        _verbosity: Verbosity,
     ) -> io::Result<()>;
 
     /// Writes the paths handled during a run.
@@ -72,7 +72,7 @@ pub trait ReporterVisitor {
         &mut self,
         _execution: &Execution,
         _payload: DiagnosticsPayload,
-        _verbose: bool,
+        _verbosity: Verbosity,
     ) -> io::Result<()>;
 }
 

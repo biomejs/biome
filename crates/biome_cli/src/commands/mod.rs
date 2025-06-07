@@ -4,8 +4,8 @@ use crate::commands::scan_kind::get_forced_scan_kind;
 use crate::execute::Stdin;
 use crate::logging::LoggingKind;
 use crate::{
-    CliDiagnostic, CliSession, Execution, LoggingLevel, TraversalMode, VERSION, execute_mode,
-    setup_cli_subscriber,
+    CliDiagnostic, CliSession, Execution, LoggingLevel, TraversalMode, VERSION, Verbosity,
+    execute_mode, setup_cli_subscriber,
 };
 use biome_configuration::analyzer::assist::AssistEnabled;
 use biome_configuration::analyzer::{LinterEnabled, RuleSelector};
@@ -635,7 +635,7 @@ impl BiomeCommand {
 
     pub fn is_verbose(&self) -> bool {
         self.cli_options()
-            .is_some_and(|cli_options| cli_options.verbose)
+            .is_some_and(|cli_options| cli_options.verbosity.is_verbose())
     }
 
     pub fn log_level(&self) -> LoggingLevel {
@@ -655,7 +655,7 @@ impl BiomeCommand {
 pub(crate) fn validate_configuration_diagnostics(
     loaded_configuration: &LoadedConfiguration,
     console: &mut dyn Console,
-    verbose: bool,
+    verbosity: Verbosity,
 ) -> Result<(), CliDiagnostic> {
     let diagnostics = loaded_configuration.as_diagnostics_iter();
 
@@ -663,7 +663,7 @@ pub(crate) fn validate_configuration_diagnostics(
     // information/warnings will be printed during the traversal
     if loaded_configuration.has_errors() {
         for diagnostic in diagnostics {
-            if diagnostic.tags().is_verbose() && verbose {
+            if diagnostic.tags().is_verbose() && verbosity.is_verbose() {
                 console.error(markup! {{PrintDiagnostic::verbose(diagnostic)}})
             } else {
                 console.error(markup! {{PrintDiagnostic::simple(diagnostic)}})
@@ -684,13 +684,13 @@ pub(crate) fn validate_configuration_diagnostics(
 pub(crate) fn print_diagnostics_from_workspace_result(
     diagnostics: &[biome_diagnostics::serde::Diagnostic],
     console: &mut dyn Console,
-    verbose: bool,
+    verbosity: Verbosity,
 ) -> Result<(), CliDiagnostic> {
     let mut has_errors = false;
     for diagnostic in diagnostics {
         if diagnostic.severity() >= Severity::Error {
             has_errors = true;
-            if diagnostic.tags().is_verbose() && verbose {
+            if diagnostic.tags().is_verbose() && verbosity.is_verbose() {
                 console.error(markup! {{PrintDiagnostic::verbose(diagnostic)}})
             } else {
                 console.error(markup! {{PrintDiagnostic::simple(diagnostic)}})
@@ -820,7 +820,11 @@ pub(crate) trait CommandRunner: Sized {
     const COMMAND_NAME: &'static str;
 
     /// The main command to use.
-    fn run(&mut self, session: CliSession, cli_options: &CliOptions) -> Result<(), CliDiagnostic> {
+    fn run(
+        &mut self,
+        session: CliSession,
+        mut cli_options: CliOptions,
+    ) -> Result<(), CliDiagnostic> {
         setup_cli_subscriber(
             cli_options.log_file.as_deref(),
             cli_options.log_level,
@@ -830,17 +834,30 @@ pub(crate) trait CommandRunner: Sized {
         let workspace = &*session.app.workspace;
         let fs = workspace.fs();
         self.check_incompatible_arguments()?;
+
         let ConfiguredWorkspace {
             execution,
             paths,
             duration,
             configuration_files,
             project_key,
-        } = self.configure_workspace(fs, console, workspace, cli_options)?;
+        } = self.configure_workspace(fs, console, workspace, &cli_options)?;
+
+        if cli_options.verbose {
+            let command = format!("biome {} --verbosity=full", execution.command_name());
+            console.error(markup! {
+                {PrintDiagnostic::simple(&CliDiagnostic::deprecated(
+                    "The --verbose argument is deprecated",
+                    command,
+                ))}
+            });
+            cli_options.verbosity = Verbosity::Full;
+        }
+
         execute_mode(
             execution,
             session,
-            cli_options,
+            &cli_options,
             paths,
             duration,
             configuration_files,
@@ -867,7 +884,7 @@ pub(crate) trait CommandRunner: Sized {
             validate_configuration_diagnostics(
                 &loaded_configuration,
                 console,
-                cli_options.verbose,
+                cli_options.verbosity,
             )?;
         }
         info!(
@@ -954,7 +971,7 @@ pub(crate) trait CommandRunner: Sized {
             print_diagnostics_from_workspace_result(
                 result.diagnostics.as_slice(),
                 console,
-                cli_options.verbose,
+                cli_options.verbosity,
             )?;
         }
 
@@ -970,7 +987,7 @@ pub(crate) trait CommandRunner: Sized {
             print_diagnostics_from_workspace_result(
                 result.diagnostics.as_slice(),
                 console,
-                cli_options.verbose,
+                cli_options.verbosity,
             )?;
         }
 

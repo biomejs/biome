@@ -35,11 +35,24 @@ impl<D: AsDiagnostic + ?Sized> std::fmt::Display for PrintDescription<'_, D> {
     }
 }
 
+#[derive(Copy, Clone)]
+pub(crate) enum Verbosity {
+    Simple,
+    Verbose,
+    Minimal,
+}
+
+impl Verbosity {
+    const fn is_minimal(&self) -> bool {
+        matches!(self, Self::Minimal)
+    }
+}
+
 /// Helper struct for printing a diagnostic as markup into any formatter
 /// implementing [biome_console::fmt::Write].
 pub struct PrintDiagnostic<'fmt, D: ?Sized> {
     diag: &'fmt D,
-    verbose: bool,
+    verbose: Verbosity,
     search: bool,
 }
 
@@ -47,7 +60,7 @@ impl<'fmt, D: AsDiagnostic + ?Sized> PrintDiagnostic<'fmt, D> {
     pub fn simple(diag: &'fmt D) -> Self {
         Self {
             diag,
-            verbose: false,
+            verbose: Verbosity::Simple,
             search: false,
         }
     }
@@ -55,7 +68,7 @@ impl<'fmt, D: AsDiagnostic + ?Sized> PrintDiagnostic<'fmt, D> {
     pub fn verbose(diag: &'fmt D) -> Self {
         Self {
             diag,
-            verbose: true,
+            verbose: Verbosity::Verbose,
             search: false,
         }
     }
@@ -63,8 +76,16 @@ impl<'fmt, D: AsDiagnostic + ?Sized> PrintDiagnostic<'fmt, D> {
     pub fn search(diag: &'fmt D) -> Self {
         Self {
             diag,
-            verbose: false,
+            verbose: Verbosity::Simple,
             search: true,
+        }
+    }
+
+    pub fn minimal(diag: &'fmt D) -> Self {
+        Self {
+            diag,
+            verbose: Verbosity::Minimal,
+            search: false,
         }
     }
 }
@@ -75,28 +96,37 @@ impl<D: AsDiagnostic + ?Sized> fmt::Display for PrintDiagnostic<'_, D> {
 
         // Print the header for the diagnostic
         fmt.write_markup(markup! {
-            {PrintHeader(diagnostic)}"\n\n"
+            {PrintHeader(diagnostic, self.verbose)}
         })?;
+        if self.verbose.is_minimal() {
+            fmt.write_str("\n")?;
+        } else {
+            fmt.write_str("\n\n")?;
+        }
         // Wrap the formatter with an indentation level and print the advices
         let mut slot = None;
         let mut fmt = IndentWriter::wrap(fmt, &mut slot, true, "  ");
 
-        if self.search {
-            let mut visitor = PrintSearch(&mut fmt);
-            print_advices(&mut visitor, diagnostic, self.verbose)
+        if !self.verbose.is_minimal() {
+            if self.search {
+                let mut visitor = PrintSearch(&mut fmt);
+                print_advices(&mut visitor, diagnostic, self.verbose)
+            } else {
+                let mut visitor = PrintAdvices(&mut fmt);
+                print_advices(&mut visitor, diagnostic, self.verbose)
+            }
         } else {
-            let mut visitor = PrintAdvices(&mut fmt);
-            print_advices(&mut visitor, diagnostic, self.verbose)
+            Ok(())
         }
     }
 }
 
 /// Display struct implementing the formatting of a diagnostic header.
-pub(crate) struct PrintHeader<'fmt, D: ?Sized>(pub(crate) &'fmt D);
+pub(crate) struct PrintHeader<'fmt, D: ?Sized>(pub(crate) &'fmt D, pub(crate) Verbosity);
 
 impl<D: Diagnostic + ?Sized> fmt::Display for PrintHeader<'_, D> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> io::Result<()> {
-        let Self(diagnostic) = *self;
+        let Self(diagnostic, verbosity) = *self;
 
         // Wrap the formatter with a counter to measure the width of the printed text
         let mut slot = None;
@@ -191,6 +221,10 @@ impl<D: Diagnostic + ?Sized> fmt::Display for PrintHeader<'_, D> {
             })?;
         }
 
+        if verbosity.is_minimal() {
+            return Ok(());
+        }
+
         // Load the printed width for the header, and fill the rest of the line
         // with the '━' line character up to 100 columns with at least 10 characters
         let header_width = {
@@ -247,7 +281,7 @@ impl<W: fmt::Write + ?Sized> fmt::Write for CountWidth<'_, W> {
 }
 
 /// Write the advices for `diagnostic` into `visitor`.
-fn print_advices<V, D>(visitor: &mut V, diagnostic: &D, verbose: bool) -> io::Result<()>
+fn print_advices<V, D>(visitor: &mut V, diagnostic: &D, verbose: Verbosity) -> io::Result<()>
 where
     V: Visit,
     D: Diagnostic + ?Sized,
@@ -273,7 +307,7 @@ where
     print_tags_advices(visitor, diagnostic)?;
 
     // If verbose printing is enabled, print the verbose advices in a nested group
-    if verbose {
+    if !verbose.is_minimal() {
         // Count the number of verbose advices in the diagnostic
         let mut counter = CountAdvices(0);
         diagnostic.verbose_advices(&mut counter)?;
@@ -1097,6 +1131,23 @@ mod tests {
             "    none\n"
             "    \n"
         }.to_owned();
+
+        assert_eq!(
+            diag, expected,
+            "\nactual:\n{diag:#?}\nexpected:\n{expected:#?}"
+        );
+    }
+
+    #[test]
+    fn test_minimal_diagnostic() {
+        let diag = TestDiagnostic::<LogAdvices>::with_location();
+
+        let diag = markup!({ PrintDiagnostic::minimal(&diag) }).to_owned();
+
+        let expected = markup! {
+            "path:1:1 internalError/io "<Inverse>" FIXABLE "</Inverse>" \n"
+        }
+        .to_owned();
 
         assert_eq!(
             diag, expected,

@@ -434,5 +434,6 @@ define_categories! {
     // Used in tests and examples
     "args/fileNotFound",
     "flags/invalid",
+    "flags/deprecated",
     "semanticTests",
 }
