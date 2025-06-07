@@ -254,6 +254,6 @@ fn extract_statement_from_reference(reference: &Reference) -> Option<JsExpressio
 
 #[derive(Debug)]
 pub enum ProblemType {
-    ParameterReassignment(Reference),
-    PropertyAssignment(AnyJsExpression),
+    ParameterReassignment(TextRange),
+    PropertyAssignment(TextRange),
 }
