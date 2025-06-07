@@ -42,7 +42,7 @@
 **Biome is a [performant linter](https://github.com/biomejs/biome/tree/main/benchmark#linting)** for _JavaScript_, _TypeScript_, _JSX_, _CSS_ and _GraphQL_ that features **[more than 270 rules](https://biomejs.dev/linter/rules/)** from ESLint, typescript-eslint, and [other sources](https://github.com/biomejs/biome/discussions/3).
 It **outputs detailed and contextualized diagnostics** that help you to improve your code and become a better programmer!
 
-**Biome** is designed from the start to be used [interactively within an editor](https://biomejs.dev/guides/integrate-in-editor/).
+**Biome** is designed from the start to be used [interactively within an editor](https://biomejs.dev/guides/editors/first-party-extensions/).
 It can format and lint malformed code as you are writing it.
 
 ### Installation
