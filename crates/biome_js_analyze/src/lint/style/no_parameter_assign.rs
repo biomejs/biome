@@ -230,7 +230,7 @@ impl Rule for NoParameterAssign {
                         rule_category!(),
                         expression.syntax().text_trimmed_range(),
                         markup! {
-                        "Assignment to a property of "<Emphasis>"function parameter"</Emphasis>" is confusing."
+                        "Assigning to a "<Emphasis>"property of a function parameter"</Emphasis>" is confusing."
                     })
                         .note(markup! {"Use a local variable instead."}),
                 )
