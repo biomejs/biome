@@ -243,7 +243,9 @@ fn extract_statement_from_reference(reference: &Reference) -> Option<JsExpressio
     reference
         .syntax()
         .ancestors()
-        .find_map(AnyJsStatement::cast)
+        .skip(2) // skip the refrence identifier and its expression
+        .skip_while(|node| matches!(node.kind, JsSyntaxKind::JS_STATIC_MEMBER_EXPRESSION | JsSyntaxKind::JS_COMPUTED_MEMBER_EXPRESSION))
+        .filter_map(AnyJsAssignment::cast)
         .and_then(|stmt| match stmt {
             AnyJsStatement::JsExpressionStatement(statement) => Some(statement),
             _ => None,
