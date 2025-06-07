@@ -7,11 +7,17 @@ pub(crate) struct GithubReporter {
     pub(crate) diagnostics_payload: DiagnosticsPayload,
     pub(crate) execution: Execution,
     pub(crate) verbose: bool,
+    pub(crate) minimal: bool,
 }
 
 impl Reporter for GithubReporter {
     fn write(self, visitor: &mut dyn ReporterVisitor) -> io::Result<()> {
-        visitor.report_diagnostics(&self.execution, self.diagnostics_payload, self.verbose)?;
+        visitor.report_diagnostics(
+            &self.execution,
+            self.diagnostics_payload,
+            self.verbose,
+            self.minimal,
+        )?;
         Ok(())
     }
 }
@@ -23,6 +29,7 @@ impl ReporterVisitor for GithubReporterVisitor<'_> {
         _execution: &Execution,
         _summary: TraversalSummary,
         _verbose: bool,
+        _minimal: bool,
     ) -> io::Result<()> {
         Ok(())
     }
@@ -32,6 +39,7 @@ impl ReporterVisitor for GithubReporterVisitor<'_> {
         _execution: &Execution,
         diagnostics_payload: DiagnosticsPayload,
         verbose: bool,
+        _minimal: bool,
     ) -> io::Result<()> {
         for diagnostic in &diagnostics_payload.diagnostics {
             if diagnostic.severity() >= diagnostics_payload.diagnostic_level {

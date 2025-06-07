@@ -56,6 +56,7 @@ pub trait ReporterVisitor {
         _execution: &Execution,
         _summary: TraversalSummary,
         _verbose: bool,
+        _minimal: bool,
     ) -> io::Result<()>;
 
     /// Writes the paths handled during a run.
@@ -73,6 +74,7 @@ pub trait ReporterVisitor {
         _execution: &Execution,
         _payload: DiagnosticsPayload,
         _verbose: bool,
+        _minimal: bool,
     ) -> io::Result<()>;
 }
 

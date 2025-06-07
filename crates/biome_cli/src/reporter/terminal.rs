@@ -21,12 +21,18 @@ pub(crate) struct ConsoleReporter {
     pub(crate) evaluated_paths: BTreeSet<BiomePath>,
     pub(crate) working_directory: Option<Utf8PathBuf>,
     pub(crate) verbose: bool,
+    pub(crate) minimal: bool,
 }
 
 impl Reporter for ConsoleReporter {
     fn write(self, visitor: &mut dyn ReporterVisitor) -> io::Result<()> {
-        visitor.report_diagnostics(&self.execution, self.diagnostics_payload, self.verbose)?;
-        visitor.report_summary(&self.execution, self.summary, self.verbose)?;
+        visitor.report_diagnostics(
+            &self.execution,
+            self.diagnostics_payload,
+            self.verbose,
+            self.minimal,
+        )?;
+        visitor.report_summary(&self.execution, self.summary, self.verbose, self.minimal)?;
         if self.verbose {
             visitor.report_handled_paths(self.evaluated_paths, self.working_directory)?;
         }
@@ -42,6 +48,7 @@ impl ReporterVisitor for ConsoleReporterVisitor<'_> {
         execution: &Execution,
         summary: TraversalSummary,
         verbose: bool,
+        _minimal: bool,
     ) -> io::Result<()> {
         if execution.is_check() && summary.suggested_fixes_skipped > 0 {
             self.0.log(markup! {
@@ -121,6 +128,7 @@ impl ReporterVisitor for ConsoleReporterVisitor<'_> {
         execution: &Execution,
         diagnostics_payload: DiagnosticsPayload,
         verbose: bool,
+        minimal: bool,
     ) -> io::Result<()> {
         for diagnostic in &diagnostics_payload.diagnostics {
             if execution.is_search() {
@@ -128,10 +136,14 @@ impl ReporterVisitor for ConsoleReporterVisitor<'_> {
                 continue;
             }
 
+            dbg!("minimal", minimal);
             if diagnostic.severity() >= diagnostics_payload.diagnostic_level {
                 if diagnostic.tags().is_verbose() && verbose {
                     self.0
                         .error(markup! {{PrintDiagnostic::verbose(diagnostic)}});
+                } else if minimal {
+                    self.0
+                        .error(markup! {{PrintDiagnostic::minimal(diagnostic)}});
                 } else {
                     self.0
                         .error(markup! {{PrintDiagnostic::simple(diagnostic)}});

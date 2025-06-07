@@ -22,6 +22,10 @@ pub struct CliOptions {
     #[bpaf(long("verbose"), switch, fallback(false))]
     pub verbose: bool,
 
+    /// Prints only the header of the diagnostic and excludes the code frame.
+    #[bpaf(long("minimal"), switch, fallback(false))]
+    pub minimal: bool,
+
     /// Set the file path to the configuration file, or the directory path to find `biome.json` or `biome.jsonc`.
     /// If used, it disables the default configuration file resolution.
     #[bpaf(

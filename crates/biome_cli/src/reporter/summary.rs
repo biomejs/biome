@@ -22,15 +22,21 @@ pub(crate) struct SummaryReporter {
     pub(crate) evaluated_paths: BTreeSet<BiomePath>,
     pub(crate) working_directory: Option<Utf8PathBuf>,
     pub(crate) verbose: bool,
+    pub(crate) minimal: bool,
 }
 
 impl Reporter for SummaryReporter {
     fn write(self, visitor: &mut dyn ReporterVisitor) -> io::Result<()> {
-        visitor.report_diagnostics(&self.execution, self.diagnostics_payload, self.verbose)?;
+        visitor.report_diagnostics(
+            &self.execution,
+            self.diagnostics_payload,
+            self.verbose,
+            self.minimal,
+        )?;
         if self.verbose {
             visitor.report_handled_paths(self.evaluated_paths, self.working_directory)?;
         }
-        visitor.report_summary(&self.execution, self.summary, self.verbose)?;
+        visitor.report_summary(&self.execution, self.summary, self.verbose, self.minimal)?;
         Ok(())
     }
 }
@@ -43,6 +49,7 @@ impl ReporterVisitor for SummaryReporterVisitor<'_> {
         execution: &Execution,
         summary: TraversalSummary,
         verbose: bool,
+        _minimal: bool,
     ) -> io::Result<()> {
         if execution.is_check() && summary.suggested_fixes_skipped > 0 {
             self.0.log(markup! {
@@ -70,6 +77,7 @@ impl ReporterVisitor for SummaryReporterVisitor<'_> {
         execution: &Execution,
         diagnostics_payload: DiagnosticsPayload,
         verbose: bool,
+        _minimal: bool,
     ) -> io::Result<()> {
         let mut files_to_diagnostics = FileToDiagnostics::default();
 

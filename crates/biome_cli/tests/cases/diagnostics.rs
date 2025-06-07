@@ -167,6 +167,38 @@ fn max_diagnostics_verbose() {
 }
 
 #[test]
+fn max_diagnostics_minimal() {
+    let mut fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    for i in 0..8 {
+        let file_path = Utf8PathBuf::from(format!("src/file_{i}.js"));
+        fs.insert(file_path, "a == b".as_bytes());
+    }
+
+    let (mut fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["ci", "--max-diagnostics=10", "--minimal", "src"].as_slice()),
+    );
+
+    assert!(result.is_err(), "run_cli returned {result:?}");
+
+    for i in 0..8 {
+        let file_path = Utf8PathBuf::from(format!("src/folder_{i}/package-lock.json"));
+        fs.remove(Utf8Path::new(&file_path));
+    }
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "max_diagnostics_minimal",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
 fn diagnostic_level() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();

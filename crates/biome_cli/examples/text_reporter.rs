@@ -16,7 +16,7 @@ impl Reporter for TextReport {
             staged: false,
             changed: false,
         });
-        visitor.report_summary(&execution, self.summary, false)?;
+        visitor.report_summary(&execution, self.summary, false, false)?;
         Ok(())
     }
 }
@@ -27,6 +27,7 @@ impl ReporterVisitor for BufferVisitor {
         _execution: &Execution,
         summary: TraversalSummary,
         _verbose: bool,
+        _minimal: bool,
     ) -> std::io::Result<()> {
         self.0
             .push_str(&format!("Total is {}", summary.changed + summary.unchanged));
@@ -38,6 +39,7 @@ impl ReporterVisitor for BufferVisitor {
         _execution: &Execution,
         _payload: DiagnosticsPayload,
         _verbose: bool,
+        _minimal: bool,
     ) -> std::io::Result<()> {
         todo!()
     }
