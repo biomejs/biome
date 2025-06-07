@@ -126,7 +126,7 @@ pub struct NoParameterAssignOptions {
     pub property_assignment: PropertyAssignmentMode,
 }
 
-#[derive(Clone, Debug, Default, Deserialize, Deserializable, Eq, PartialEq, Serialize)]
+#[derive(Copy, Clone, Debug, Default, Deserialize, Deserializable, Eq, PartialEq, Serialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 /// Specifies whether property assignments on function parameters are allowed or denied.
