@@ -232,7 +232,7 @@ impl Rule for NoParameterAssign {
                         markup! {
                         "Assigning to a "<Emphasis>"property of a function parameter"</Emphasis>" is confusing."
                     })
-                        .note(markup! {"Use a local variable instead."}),
+                        .note(markup! {"Function callers usually don't expect the parameters they pass in to be modified. To avoid mutation, create a new instance and return it to the caller."}),
                 )
             }
         }
