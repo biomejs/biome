@@ -220,7 +220,7 @@ impl Rule for NoParameterAssign {
                     },
                     )
                     .note(markup! {
-                    "Use a local variable instead."
+                    "Developers usually expect function parameters to be readonly. To align with this expectation, use a local variable instead."
                 }),
             ),
 
