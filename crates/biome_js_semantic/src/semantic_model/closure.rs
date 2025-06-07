@@ -249,6 +249,19 @@ impl Closure {
         self.data.scopes[self.scope_id.index()].range
     }
 
+    fn is_parent_reference_in_scope(
+        &self,
+        scope: &SemanticModelScopeData,
+        reference: &ReferenceId,
+    ) -> bool {
+        let binding_id = reference.binding_id();
+        let binding = self.data.binding(binding_id);
+        binding
+            .references
+            .iter()
+            .any(|parent_reference| scope.range.contains(parent_reference.range_start))
+    }
+
     /// Return all [Reference] this closure captures, not taking into
     /// consideration any capture of children closures
     ///
@@ -266,9 +279,23 @@ impl Closure {
         let scope = &self.data.scopes[self.scope_id.index()];
 
         let scopes = scope.children.clone();
-
+        let parent_scope = &self.data.scopes[scope.parent.unwrap().index()];
         let mut references = scope.read_references.clone();
+
+        let parent_read_references: Vec<_> = parent_scope
+            .read_references
+            .iter()
+            .filter(|reference| self.is_parent_reference_in_scope(scope, reference))
+            .collect();
+        let parent_write_references: Vec<_> = parent_scope
+            .write_references
+            .iter()
+            .filter(|reference| self.is_parent_reference_in_scope(scope, reference))
+            .collect();
+
         references.extend(scope.write_references.iter().copied());
+        references.extend(parent_read_references.iter().copied());
+        references.extend(parent_write_references.iter().copied());
 
         AllCapturesIter {
             data: self.data.clone(),
