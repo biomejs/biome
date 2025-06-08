@@ -3026,7 +3026,7 @@ invalid.js:131:69 lint/style/noRestrictedImports ━━━━━━━━━━�
 ```
 invalid.js:133:17 lint/style/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! 'import-foo/foo' import is restricted by a pattern. import-foo is deprecated, except the modules in import-foo/bar.
+  ! import-foo is deprecated, except the modules in import-foo/bar.
   
     131 │ import('bare-allowed').then(function ({ forbidden2, forbidden3: f1, "forbidden4": f2 }) { })
     132 │ 
