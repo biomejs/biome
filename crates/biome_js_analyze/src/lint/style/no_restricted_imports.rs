@@ -20,7 +20,6 @@ use biome_js_syntax::{
 use biome_rowan::{
     AstNode, AstSeparatedList, SyntaxNode, SyntaxNodeCast, SyntaxToken, TextRange, TokenText,
 };
-use regex::RegexBuilder;
 use rustc_hash::FxHashMap;
 use serde::{Deserialize, Serialize};
 
@@ -29,6 +28,7 @@ use crate::assist::source::organize_imports::import_groups::{
     ImportSourceCandidate, SourcesMatcher,
 };
 use crate::assist::source::organize_imports::import_source::ImportSource;
+use crate::utils::restricted_regex::RestrictedRegex;
 
 declare_lint_rule! {
     /// Disallow specified modules when loaded by import or require.
@@ -396,7 +396,7 @@ declare_lint_rule! {
     ///     "options": {
     ///        "patterns": {
     ///             "group": ["import-foo/*"],
-    ///             "importNamePattern": "^foo"
+    ///             "importNamePattern": "[xyz]"
     ///         }
     ///     }
     /// }
@@ -405,13 +405,13 @@ declare_lint_rule! {
     /// #### Invalid
     ///
     /// ```js,expect_diagnostic,use_options
-    /// import { foo } from 'import-foo/foo';
+    /// import { x } from 'import-foo/foo';
     /// ```
     ///
     /// #### Valid
     ///
     /// ```js,use_options
-    /// import { Foo } from 'import-foo/foo';
+    /// import { foo } from 'import-foo/foo';
     /// ```
     ///
     pub NoRestrictedImports {
@@ -681,7 +681,7 @@ pub struct PatternOptions {
 
     /// A regex pattern for import names to forbid within the matched modules.
     #[serde(skip_serializing_if = "Option::is_none")]
-    import_name_pattern: Option<Box<str>>,
+    import_name_pattern: Option<RestrictedRegex>,
 }
 
 impl PatternOptions {
@@ -691,15 +691,10 @@ impl PatternOptions {
 
     fn check_restriction(&self, imported_name: &str) -> Restriction {
         if let Some(import_name_pattern) = &self.import_name_pattern {
-            match RegexBuilder::new(import_name_pattern.as_ref()).build() {
-                Ok(re) => {
-                    if re.is_match(imported_name) {
-                        Restriction::forbidden(Cause::ImportNames)
-                    } else {
-                        Restriction::allowed(Cause::ImportNames)
-                    }
-                }
-                Err(e) => panic!("invalid importNamePattern: {e}"),
+            if import_name_pattern.is_match(imported_name) {
+                Restriction::forbidden(Cause::ImportNames)
+            } else {
+                Restriction::allowed(Cause::ImportNames)
             }
         } else {
             Restriction::allowed(Cause::ImportNames)

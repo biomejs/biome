@@ -3363,7 +3363,7 @@ export interface PatternOptions {
 	/**
 	 * A regex pattern for import names to forbid within the matched modules.
 	 */
-	importNamePattern?: string;
+	importNamePattern?: Regex;
 	/**
 	 * A custom message for diagnostics related to this pattern.
 	 */
