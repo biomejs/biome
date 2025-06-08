@@ -5,7 +5,6 @@ use biome_deserialize::{
     Deserializable, DeserializableType, DeserializableValue, DeserializationContext,
 };
 use biome_diagnostics::Severity;
-use biome_glob::{CandidatePath, Glob};
 use biome_js_syntax::{
     AnyJsArrowFunctionParameters, AnyJsBindingPattern, AnyJsCombinedSpecifier, AnyJsExpression,
     AnyJsImportLike, AnyJsNamedImportSpecifier, AnyJsObjectBindingPatternMember, JsCallExpression,
@@ -18,10 +17,18 @@ use biome_js_syntax::{
     JsObjectBindingPatternShorthandProperty, JsShorthandNamedImportSpecifier,
     JsStaticMemberExpression, JsSyntaxKind, JsVariableDeclarator, inner_string_text,
 };
-use biome_rowan::{AstNode, AstSeparatedList, SyntaxNode, SyntaxNodeCast, SyntaxToken, TextRange};
+use biome_rowan::{
+    AstNode, AstSeparatedList, SyntaxNode, SyntaxNodeCast, SyntaxToken, TextRange, TokenText,
+};
 use regex::RegexBuilder;
 use rustc_hash::FxHashMap;
 use serde::{Deserialize, Serialize};
+
+use crate::assist::source::organize_imports::comparable_token::ComparableToken;
+use crate::assist::source::organize_imports::import_groups::{
+    ImportSourceCandidate, SourcesMatcher,
+};
+use crate::assist::source::organize_imports::import_source::ImportSource;
 
 declare_lint_rule! {
     /// Disallow specified modules when loaded by import or require.
@@ -443,7 +450,7 @@ impl Rule for NoRestrictedImports {
             check_import_restrictions(&path_options, node, &module_name, import_source)
         } else if let Some(patterns) = &options.patterns {
             let pattern_options: PatternOptions = patterns.clone().into();
-            pattern_options.check_import_restrictions(node, &module_name, import_source)
+            pattern_options.check_import_restrictions(node, &module_name, &import_source_text)
         } else {
             return vec![];
         }
@@ -666,7 +673,7 @@ impl Deserializable for Paths {
 pub struct PatternOptions {
     /// An array of gitignore-style patterns.
     #[serde(skip_serializing_if = "Option::is_none")]
-    group: Option<Box<[Box<str>]>>,
+    group: Option<SourcesMatcher>,
 
     /// A custom message for diagnostics related to this pattern.
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -703,24 +710,20 @@ impl PatternOptions {
         &self,
         node: &AnyJsImportLike,
         module_name: &SyntaxToken<JsLanguage>,
-        import_source: &str,
+        import_source_text: &TokenText,
     ) -> Vec<RestrictedImportMessage> {
         if let Some(group) = &self.group {
-            let mut globs: Vec<Glob> = vec![];
-            for glob in group.iter() {
-                match glob.parse::<Glob>() {
-                    Ok(glob) => globs.push(glob),
-                    Err(err) => {
-                        eprintln!("unsupported glob '{glob}': {err}");
-                    }
-                }
-            }
-            let path = CandidatePath::new(import_source);
-            if path.matches_with_exceptions(globs) {
-                return check_import_restrictions(self, node, module_name, import_source);
+            let source = ImportSource::from(ComparableToken(import_source_text.clone()));
+            let candidate = ImportSourceCandidate::new(&source);
+            if group.is_match(&candidate) {
+                return check_import_restrictions(
+                    self,
+                    node,
+                    module_name,
+                    import_source_text.text(),
+                );
             }
         }
-
         vec![]
     }
 
