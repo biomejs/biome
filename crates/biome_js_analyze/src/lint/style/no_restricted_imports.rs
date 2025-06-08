@@ -414,6 +414,33 @@ declare_lint_rule! {
     /// import { foo } from 'import-foo/foo';
     /// ```
     ///
+    /// ### `invertImportNamePattern`
+    ///
+    /// If true, the matched patterns in the importNamePattern will be allowed
+    ///
+    /// ```json,options
+    /// {
+    ///     "options": {
+    ///        "patterns": {
+    ///             "group": ["import-foo/*"],
+    ///             "importNamePattern": "[xyz]",
+    ///             "invertImportNamePattern": true
+    ///         }
+    ///     }
+    /// }
+    /// ```
+    ///
+    /// #### Invalid
+    ///
+    /// ```js,expect_diagnostic,use_options
+    /// import { foo } from 'import-foo/foo';
+    /// ```
+    ///
+    /// #### Valid
+    ///
+    /// ```js,use_options
+    /// import { x } from 'import-foo/foo';
+    /// ```
     pub NoRestrictedImports {
         version: "1.6.0",
         name: "noRestrictedImports",
@@ -682,6 +709,9 @@ pub struct PatternOptions {
     /// A regex pattern for import names to forbid within the matched modules.
     #[serde(skip_serializing_if = "Option::is_none")]
     import_name_pattern: Option<RestrictedRegex>,
+
+    /// If true, the matched patterns in the importNamePattern will be allowed. Defaults to `false`.
+    invert_import_name_pattern: bool,
 }
 
 impl PatternOptions {
@@ -690,14 +720,21 @@ impl PatternOptions {
     }
 
     fn check_restriction(&self, imported_name: &str) -> Restriction {
-        if let Some(import_name_pattern) = &self.import_name_pattern {
-            if import_name_pattern.is_match(imported_name) {
-                Restriction::forbidden(Cause::ImportNames)
-            } else {
-                Restriction::allowed(Cause::ImportNames)
+        match &self.import_name_pattern {
+            Some(pattern) => {
+                // The imported name is forbidden if the match result and the inversion flag are different.
+                // - don't invert (false) + match (true) => forbidden
+                // - invert (true) + no match (false) => forbidden
+                let is_forbidden =
+                    pattern.is_match(imported_name) != self.invert_import_name_pattern;
+
+                if is_forbidden {
+                    Restriction::forbidden(Cause::ImportNames)
+                } else {
+                    Restriction::allowed(Cause::ImportNames)
+                }
             }
-        } else {
-            Restriction::allowed(Cause::ImportNames)
+            None => Restriction::allowed(Cause::ImportNames),
         }
     }
 

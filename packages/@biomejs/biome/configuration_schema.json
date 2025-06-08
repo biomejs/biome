@@ -3328,6 +3328,11 @@
 					"description": "A regex pattern for import names to forbid within the matched modules.",
 					"anyOf": [{ "$ref": "#/definitions/Regex" }, { "type": "null" }]
 				},
+				"invertImportNamePattern": {
+					"description": "If true, the matched patterns in the importNamePattern will be allowed. Defaults to `false`.",
+					"default": false,
+					"type": "boolean"
+				},
 				"message": {
 					"description": "A custom message for diagnostics related to this pattern.",
 					"type": ["string", "null"]
