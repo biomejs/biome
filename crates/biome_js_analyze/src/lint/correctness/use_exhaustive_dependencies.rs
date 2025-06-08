@@ -857,7 +857,9 @@ impl Rule for UseExhaustiveDependencies {
                         .entry(capture.text_trimmed().into_text().into())
                         .or_default();
 
-                    captures.push(capture.clone());
+                    if !captures.iter().any(|existing| existing == capture) {
+                        captures.push(capture.clone());
+                    }
                 }
             }
 
