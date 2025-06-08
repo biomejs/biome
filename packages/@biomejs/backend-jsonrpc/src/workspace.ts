@@ -3359,7 +3359,7 @@ export interface PatternOptions {
 	/**
 	 * An array of gitignore-style patterns.
 	 */
-	group?: string[];
+	group?: SourcesMatcher;
 	/**
 	 * A regex pattern for import names to forbid within the matched modules.
 	 */
@@ -3402,6 +3402,7 @@ export interface ImportMatcher {
 	type?: boolean;
 }
 export type SourceMatcher = NegatablePredefinedSourceMatcher | ImportSourceGlob;
+export type SourcesMatcher = SourceMatcher | SourceMatcher[];
 /**
  * Supported cases.
  */
@@ -3451,7 +3452,6 @@ export type Kind =
 	| "typeMethod";
 export type Modifiers = RestrictedModifier[];
 export type Scope = "any" | "global";
-export type SourcesMatcher = SourceMatcher | SourceMatcher[];
 export type NegatablePredefinedSourceMatcher =
 	| ":ALIAS:"
 	| ":BUN:"

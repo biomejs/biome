@@ -3319,8 +3319,10 @@
 			"properties": {
 				"group": {
 					"description": "An array of gitignore-style patterns.",
-					"type": ["array", "null"],
-					"items": { "type": "string" }
+					"anyOf": [
+						{ "$ref": "#/definitions/SourcesMatcher" },
+						{ "type": "null" }
+					]
 				},
 				"importNamePattern": {
 					"description": "A regex pattern for import names to forbid within the matched modules.",
