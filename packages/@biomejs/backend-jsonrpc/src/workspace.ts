@@ -3179,9 +3179,9 @@ export interface RestrictedImportsOptions {
 	 */
 	paths: Record<string, Paths>;
 	/**
-	 * A list of gitignore-style patterns or regular expressions that should trigger the rule.
+	 * gitignore-style patterns that should trigger the rule.
 	 */
-	patterns?: Patterns[];
+	patterns?: Patterns;
 }
 export interface NoRestrictedTypesOptions {
 	types?: Record<string, CustomRestrictedType>;
@@ -3315,7 +3315,7 @@ export type ObjectPropertySyntax = "explicit" | "shorthand";
 export type PropertyAssignmentMode = "allow" | "deny";
 export type CustomRestrictedImport = string | CustomRestrictedImportOptions;
 export type Paths = string | PathOptions;
-export type Patterns = string | PatternOptions;
+export type Patterns = PatternOptions;
 export type CustomRestrictedType = string | CustomRestrictedTypeOptions;
 export type ConsistentArrayType = "shorthand" | "generic";
 export type Accessibility = "noPublic" | "explicit" | "none";
@@ -3355,139 +3355,20 @@ export interface PathOptions {
 	 */
 	message: string;
 }
-export type PatternOptions =
-	| {
-			/**
-			 * An array of gitignore-style patterns. Cannot be used with regex.
-			 */
-			group: string[];
-			/**
-			 * A custom message for diagnostics related to this pattern.
-			 */
-			message: string;
-	  }
-	| {
-			/**
-			 * An array of gitignore-style patterns. Cannot be used with regex.
-			 */
-			group: string[];
-			/**
-			 * An array of specific import names to forbid within the matched modules. Cannot be used with importNamePattern, allowImportNames and allowImportNamePattern.
-			 */
-			importNames: string[];
-			/**
-			 * A custom message for diagnostics related to this pattern.
-			 */
-			message: string;
-	  }
-	| {
-			/**
-			 * An array of specific import names to allow within the matched modules. Cannot be used with importNames, importNamePattern and allowImportNamePattern.
-			 */
-			allowImportNames: string[];
-			/**
-			 * An array of gitignore-style patterns. Cannot be used with regex.
-			 */
-			group: string[];
-			/**
-			 * A custom message for diagnostics related to this pattern.
-			 */
-			message: string;
-	  }
-	| {
-			/**
-			 * An array of gitignore-style patterns. Cannot be used with regex.
-			 */
-			group: string[];
-			/**
-			 * A regex pattern for import names to forbid within the matched modules. Cannot be used with importNames, allowImportNames and allowImportNamePattern.
-			 */
-			importNamePattern: string;
-			/**
-			 * A custom message for diagnostics related to this pattern.
-			 */
-			message: string;
-	  }
-	| {
-			/**
-			 * A regex pattern for import names to allow within the matched modules. Cannot be used with importNames, importNamePattern and allowImportNames.
-			 */
-			allowImportNamePattern: string;
-			/**
-			 * An array of gitignore-style patterns. Cannot be used with regex.
-			 */
-			group: string[];
-			/**
-			 * A custom message for diagnostics related to this pattern.
-			 */
-			message: string;
-	  }
-	| {
-			/**
-			 * A custom message for diagnostics related to this pattern.
-			 */
-			message: string;
-			/**
-			 * A regular expression pattern string. Cannot be used with group.
-			 */
-			regex: string;
-	  }
-	| {
-			/**
-			 * An array of specific import names to forbid within the matched modules. Cannot be used with importNamePattern, allowImportNames and allowImportNamePattern.
-			 */
-			importNames: string[];
-			/**
-			 * A custom message for diagnostics related to this pattern.
-			 */
-			message: string;
-			/**
-			 * A regular expression pattern string. Cannot be used with group.
-			 */
-			regex: string;
-	  }
-	| {
-			/**
-			 * An array of specific import names to allow within the matched modules. Cannot be used with importNames, importNamePattern and allowImportNamePattern.
-			 */
-			allowImportNames: string[];
-			/**
-			 * A custom message for diagnostics related to this pattern.
-			 */
-			message: string;
-			/**
-			 * A regular expression pattern string. Cannot be used with group.
-			 */
-			regex: string;
-	  }
-	| {
-			/**
-			 * A regex pattern for import names to forbid within the matched modules. Cannot be used with importNames, allowImportNames and allowImportNamePattern.
-			 */
-			importNamePattern: string;
-			/**
-			 * A custom message for diagnostics related to this pattern.
-			 */
-			message: string;
-			/**
-			 * A regular expression pattern string. Cannot be used with group.
-			 */
-			regex: string;
-	  }
-	| {
-			/**
-			 * A regex pattern for import names to allow within the matched modules. Cannot be used with importNames, importNamePattern and allowImportNames.
-			 */
-			allowImportNamePattern: string;
-			/**
-			 * A custom message for diagnostics related to this pattern.
-			 */
-			message: string;
-			/**
-			 * A regular expression pattern string. Cannot be used with group.
-			 */
-			regex: string;
-	  };
+export interface PatternOptions {
+	/**
+	 * An array of gitignore-style patterns.
+	 */
+	group?: string[];
+	/**
+	 * A regex pattern for import names to forbid within the matched modules.
+	 */
+	importNamePattern?: string;
+	/**
+	 * A custom message for diagnostics related to this pattern.
+	 */
+	message?: string;
+}
 export interface CustomRestrictedTypeOptions {
 	message?: string;
 	use?: string;
