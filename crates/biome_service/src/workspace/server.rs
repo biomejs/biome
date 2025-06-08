@@ -1442,6 +1442,7 @@ impl Workspace for WorkspaceServer {
             only,
             skip,
             enabled_rules,
+            categories,
         } = params;
         let capabilities = self.get_file_capabilities(&path);
         let code_actions = capabilities
@@ -1468,6 +1469,7 @@ impl Workspace for WorkspaceServer {
             suppression_reason: None,
             enabled_rules,
             plugins: Vec::new(),
+            categories,
         }))
     }
 
