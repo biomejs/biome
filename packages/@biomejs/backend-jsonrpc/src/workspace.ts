@@ -3365,6 +3365,10 @@ export interface PatternOptions {
 	 */
 	importNamePattern?: Regex;
 	/**
+	 * If true, the matched patterns in the importNamePattern will be allowed. Defaults to `false`.
+	 */
+	invertImportNamePattern?: boolean;
+	/**
 	 * A custom message for diagnostics related to this pattern.
 	 */
 	message?: string;
