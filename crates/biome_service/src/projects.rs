@@ -138,7 +138,8 @@ impl Projects {
     }
 
     pub fn is_ignored_by_top_level_config(&self, project_key: ProjectKey, path: &Utf8Path) -> bool {
-        self.get_settings_based_on_path(project_key, path)
+        let is_included = self
+            .get_settings_based_on_path(project_key, path)
             .is_some_and(|settings| {
                 let includes = &settings.files.includes;
 
@@ -151,11 +152,19 @@ impl Projects {
                     };
                 }
 
-                !is_included
-                    || settings.vcs_settings.ignore_matches.as_ref().is_some_and(
-                        |ignored_matches| ignored_matches.is_ignored(path, is_dir(path)),
-                    )
-            })
+                is_included
+            });
+
+        // We store ignore matches inside the root settings, regardless of what package we are analyzing
+        let is_vcs_ignored = self.get_root_settings(project_key).is_some_and(|settings| {
+            settings
+                .vcs_settings
+                .ignore_matches
+                .as_ref()
+                .is_some_and(|ignored_matches| ignored_matches.is_ignored(path, is_dir(path)))
+        });
+
+        !is_included || is_vcs_ignored
     }
 
     /// Sets the root settings for the given project.
