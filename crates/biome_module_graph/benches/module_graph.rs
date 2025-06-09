@@ -29,10 +29,11 @@ fn bench_module_graph(criterion: &mut Criterion) {
                 "../../biome_resolver/tests/fixtures/resolver_cases_5/node_modules/@types/react/index.d.ts"
             ) as &[u8],
         ),
-        (
-            "RedisCommander.d.ts",
-            include_bytes!("./RedisCommander.d.ts") as &[u8],
-        ),
+        // FIXME: enable it once the perf reaches a decent number
+        // (
+        //     "RedisCommander.d.ts",
+        //     include_bytes!("./RedisCommander.d.ts") as &[u8],
+        // ),
     ];
 
     let mut group = criterion.benchmark_group("module_graph");
