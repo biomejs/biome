@@ -36,13 +36,13 @@ jobs:
         package:
           - biome_js_parser
           - biome_js_formatter
-          - biome_js_analyzer
+          - biome_js_analyze
           - biome_css_parser
           - biome_css_formatter
-          - biome_css_analyzer
+          - biome_css_analyze
           - biome_json_parser
           - biome_json_formatter
-          - biome_json_analyzer
+          - biome_json_analyze
           - biome_graphql_parser
           - biome_graphql_formatter
           - biome_html_parser

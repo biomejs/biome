@@ -38,8 +38,7 @@ fn bench_analyzer(criterion: &mut Criterion) {
         match test_case {
             Ok(test_case) => {
                 let code = test_case.code();
-                let file_source =
-                    JsonFileSource::try_from(test_case.filename()).unwrap_or_default();
+                let file_source = JsonFileSource::json();
                 group.throughput(criterion::Throughput::Bytes(code.len() as u64));
                 group.bench_with_input(
                     BenchmarkId::from_parameter(test_case.filename()),

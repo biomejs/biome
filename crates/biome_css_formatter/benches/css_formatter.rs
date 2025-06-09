@@ -2,6 +2,7 @@ use biome_css_formatter::context::CssFormatOptions;
 use biome_css_formatter::format_node;
 use biome_css_parser::{CssParserOptions, parse_css};
 use biome_css_syntax::CssRoot;
+use biome_formatter::Printed;
 use biome_rowan::AstNode;
 use biome_test_utils::BenchCase;
 use criterion::{BenchmarkId, Criterion, Throughput, black_box, criterion_group, criterion_main};
@@ -42,12 +43,12 @@ fn bench_css_formatter(criterion: &mut Criterion) {
                     BenchmarkId::from_parameter(test_case.filename()),
                     &code,
                     |b, _| {
-                        fn format(root: CssRoot) {
+                        fn format(root: CssRoot) -> Printed {
                             let formatted =
                                 format_node(CssFormatOptions::default(), root.syntax()).unwrap();
                             let printed = formatted.print();
                             drop(formatted);
-                            printed.expect("Document to be valid");
+                            printed.expect("Document to be valid")
                         }
                         b.iter(|| {
                             black_box(format(parsed.tree()));

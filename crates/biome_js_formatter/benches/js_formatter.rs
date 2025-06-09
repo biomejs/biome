@@ -1,3 +1,4 @@
+use biome_formatter::Printed;
 use biome_js_formatter::context::JsFormatOptions;
 use biome_js_parser::JsParserOptions;
 use biome_js_syntax::{AnyJsRoot, JsFileSource};
@@ -43,7 +44,7 @@ fn bench_js_formatter(criterion: &mut Criterion) {
                     BenchmarkId::from_parameter(test_case.filename()),
                     &code,
                     |b, _| {
-                        fn format(root: AnyJsRoot) {
+                        fn format(root: AnyJsRoot) -> Printed {
                             let formatted = biome_js_formatter::format_node(
                                 JsFormatOptions::default(),
                                 root.syntax(),
@@ -51,7 +52,7 @@ fn bench_js_formatter(criterion: &mut Criterion) {
                             .unwrap();
                             let printed = formatted.print();
                             drop(formatted);
-                            printed.expect("Document to be valid");
+                            printed.expect("Document to be valid")
                         }
                         b.iter(|| {
                             black_box(format(parsed.tree()));

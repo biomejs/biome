@@ -1,6 +1,7 @@
+use biome_formatter::Printed;
 use biome_json_formatter::context::JsonFormatOptions;
 use biome_json_formatter::format_node;
-use biome_json_parser::{JsonParse, JsonParserOptions, parse_json};
+use biome_json_parser::{JsonParserOptions, parse_json};
 use biome_json_syntax::JsonRoot;
 use biome_rowan::AstNode;
 use biome_test_utils::BenchCase;
@@ -42,12 +43,12 @@ fn bench_formatter(criterion: &mut Criterion) {
                     BenchmarkId::from_parameter(test_case.filename()),
                     &code,
                     |b, _| {
-                        fn format(root: JsonRoot) {
+                        fn format(root: JsonRoot) -> Printed {
                             let formatted =
                                 format_node(JsonFormatOptions::default(), root.syntax()).unwrap();
                             let printed = formatted.print();
                             drop(formatted);
-                            printed.expect("Document to be valid");
+                            printed.expect("Document to be valid")
                         }
                         b.iter(|| {
                             black_box(format(parsed.tree()));

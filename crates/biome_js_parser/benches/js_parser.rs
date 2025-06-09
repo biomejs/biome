@@ -1,9 +1,11 @@
 use biome_diagnostics::{DiagnosticExt, print_diagnostic_to_string};
-use biome_js_parser::{JsParserOptions, parse, parse_module};
+use biome_js_parser::JsParserOptions;
 use biome_js_syntax::JsFileSource;
 use biome_rowan::NodeCache;
 use biome_test_utils::BenchCase;
-use criterion::{BatchSize, BenchmarkId, Criterion, Throughput, black_box};
+use criterion::{
+    BatchSize, BenchmarkId, Criterion, Throughput, black_box, criterion_group, criterion_main,
+};
 use std::collections::HashMap;
 
 #[cfg(target_os = "windows")]
@@ -21,7 +23,7 @@ static GLOBAL: tikv_jemallocator::Jemalloc = tikv_jemallocator::Jemalloc;
 #[cfg(all(target_env = "musl", target_os = "linux", target_arch = "aarch64"))]
 #[global_allocator]
 static GLOBAL: std::alloc::System = std::alloc::System;
-fn js_parser(criterion: &mut Criterion) {
+fn bench_parser(criterion: &mut Criterion) {
     let mut all_suites = HashMap::new();
     all_suites.insert("js", include_str!("libs-js.txt"));
     all_suites.insert("ts", include_str!("libs-ts.txt"));
@@ -65,19 +67,19 @@ fn js_parser(criterion: &mut Criterion) {
                             || {
                                 let mut cache = NodeCache::default();
                                 biome_js_parser::parse_js_with_cache(
-                                    &mut cache,
                                     code,
                                     file_source,
                                     JsParserOptions::default(),
+                                    &mut cache,
                                 );
                                 cache
                             },
                             |mut cache| {
                                 black_box(biome_js_parser::parse_js_with_cache(
-                                    &mut cache,
                                     code,
                                     file_source,
                                     JsParserOptions::default(),
+                                    &mut cache,
                                 ));
                             },
                             BatchSize::SmallInput,
@@ -91,5 +93,5 @@ fn js_parser(criterion: &mut Criterion) {
     group.finish();
 }
 
-criterion_group!(js_parser, js_parser);
+criterion_group!(js_parser, bench_parser);
 criterion_main!(js_parser);

@@ -1,3 +1,4 @@
+use biome_formatter::Printed;
 use biome_graphql_formatter::context::GraphqlFormatOptions;
 use biome_graphql_formatter::format_node;
 use biome_graphql_parser::parse_graphql;
@@ -42,13 +43,13 @@ fn bench_formatter(criterion: &mut Criterion) {
                     BenchmarkId::from_parameter(test_case.filename()),
                     &code,
                     |b, _| {
-                        fn format(root: GraphqlRoot) {
+                        fn format(root: GraphqlRoot) -> Printed {
                             let formatted =
                                 format_node(GraphqlFormatOptions::default(), root.syntax())
                                     .unwrap();
                             let printed = formatted.print();
                             drop(formatted);
-                            printed.expect("Document to be valid");
+                            printed.expect("Document to be valid")
                         }
                         b.iter(|| {
                             black_box(format(parsed.tree()));

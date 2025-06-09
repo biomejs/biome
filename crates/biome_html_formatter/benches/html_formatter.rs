@@ -1,3 +1,4 @@
+use biome_formatter::Printed;
 use biome_html_formatter::{HtmlFormatOptions, format_node};
 use biome_html_parser::parse_html;
 use biome_html_syntax::HtmlRoot;
@@ -41,12 +42,12 @@ fn bench_formatter(criterion: &mut Criterion) {
                     BenchmarkId::from_parameter(test_case.filename()),
                     &code,
                     |b, _| {
-                        fn format(root: HtmlRoot) {
+                        fn format(root: HtmlRoot) -> Printed {
                             let formatted =
                                 format_node(HtmlFormatOptions::default(), root.syntax()).unwrap();
                             let printed = formatted.print();
                             drop(formatted);
-                            printed.expect("Document to be valid");
+                            printed.expect("Document to be valid")
                         }
                         b.iter(|| {
                             black_box(format(parsed.tree()));

@@ -4,7 +4,7 @@ use biome_analyze::{
     RuleCategoriesBuilder,
 };
 use biome_js_parser::JsParserOptions;
-use biome_js_syntax::{JsFileSource, file_source};
+use biome_js_syntax::JsFileSource;
 use biome_test_utils::BenchCase;
 use criterion::{BenchmarkId, Criterion, black_box, criterion_group, criterion_main};
 use std::collections::HashMap;
