@@ -15,3 +15,9 @@ const array: Array<string> = [];
 array => instanceof unresolved reference "Array"<string> (scope ID: 0)
 
 ```
+
+## Registered types
+
+```
+Global TypeId(0) => instanceof unresolved reference "Array"<string> (scope ID: 0)
+```

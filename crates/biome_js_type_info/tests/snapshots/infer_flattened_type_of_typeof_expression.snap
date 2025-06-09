@@ -14,11 +14,13 @@ typeof foo;
 ## Result
 
 ```
-"string"
+value: string
 ```
 
 ## Registered types
 
 ```
 Module TypeId(0) => value: foo
+
+Global TypeId(0) => value: foo
 ```

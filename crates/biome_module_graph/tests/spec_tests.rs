@@ -2,6 +2,7 @@
 
 mod snap;
 
+use std::borrow::Cow;
 use std::sync::Arc;
 
 use crate::snap::ModuleGraphSnapshot;
@@ -602,7 +603,7 @@ export const promise = makePromiseCb();
     let ty = ty.inferred(&mut resolver);
     let _ty_string = format!("{ty:?}"); // for debugging
 
-    let id = resolver.register_type(ty);
+    let id = resolver.register_type(Cow::Owned(ty));
     resolver.run_inference();
 
     let resolved_id = ResolvedTypeId::new(resolver.level(), id);
@@ -651,19 +652,8 @@ fn test_resolve_generic_return_value_with_multiple_modules() {
     ];
     let added_paths = get_added_paths(&fs, &added_paths);
 
-    let project_layout = ProjectLayout::default();
-    project_layout.insert_node_manifest(
-        "/".into(),
-        PackageJson::new("frontend")
-            .with_version("0.0.0".into())
-            .with_dependencies(Dependencies::from([("react".into(), "19.0.0".into())])),
-    );
-
-    let tsconfig_json = parse_json(r#"{}"#, JsonParserOptions::default());
-    project_layout.insert_serialized_tsconfig("/".into(), tsconfig_json.into());
-
     let module_graph = Arc::new(ModuleGraph::default());
-    module_graph.update_graph_for_js_paths(&fs, &project_layout, &added_paths, &[]);
+    module_graph.update_graph_for_js_paths(&fs, &ProjectLayout::default(), &added_paths, &[]);
 
     let index_module = module_graph
         .module_info_for_path(Utf8Path::new("/src/index.ts"))
@@ -682,7 +672,7 @@ fn test_resolve_generic_return_value_with_multiple_modules() {
     let ty = ty.inferred(&mut resolver);
     let _ty_string = format!("{ty:?}"); // for debugging
 
-    let id = resolver.register_type(ty);
+    let id = resolver.register_type(Cow::Owned(ty));
     resolver.run_inference();
 
     let resolved_id = ResolvedTypeId::new(resolver.level(), id);
@@ -693,6 +683,54 @@ fn test_resolve_generic_return_value_with_multiple_modules() {
     let snapshot =
         ModuleGraphSnapshot::new(module_graph.as_ref(), &fs).with_resolver(resolver.as_ref());
     snapshot.assert_snapshot("test_resolve_generic_return_value_with_multiple_modules");
+}
+
+#[test]
+fn test_resolve_nested_function_call_with_namespace_in_return_type() {
+    let mut fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/foo.ts".into(),
+        r#"
+        export function foo(): Type {}
+        "#,
+    );
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"import { foo } from "./foo.ts";
+
+        const result = bar(foo());
+        "#,
+    );
+
+    let added_paths = [
+        BiomePath::new("/src/foo.ts"),
+        BiomePath::new("/src/index.ts"),
+    ];
+    let added_paths = get_added_paths(&fs, &added_paths);
+
+    let module_graph = Arc::new(ModuleGraph::default());
+    module_graph.update_graph_for_js_paths(&fs, &ProjectLayout::default(), &added_paths, &[]);
+
+    let index_module = module_graph
+        .module_info_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+    let mut resolver = ScopedResolver::from_global_scope(index_module, module_graph.clone());
+    resolver.run_inference();
+
+    let result_id = resolver
+        .resolve_type_of(&Text::Static("result"), ScopeId::GLOBAL)
+        .expect("result variable not found");
+    let ty = resolver
+        .get_by_resolved_id(result_id)
+        .expect("cannot find type data")
+        .to_data();
+
+    let ty = ty.flattened(&mut resolver);
+    resolver.register_type(Cow::Owned(ty));
+    resolver.run_inference();
+
+    let snapshot = ModuleGraphSnapshot::new(module_graph.as_ref(), &fs).with_resolver(&resolver);
+    snapshot.assert_snapshot("test_resolve_nested_function_call_with_namespace_in_return_type");
 }
 
 #[test]
@@ -716,7 +754,6 @@ fn test_resolve_promise_export() {
     module_graph.update_graph_for_js_paths(&fs, &ProjectLayout::default(), &added_paths, &[]);
 
     let snapshot = ModuleGraphSnapshot::new(&module_graph, &fs);
-
     snapshot.assert_snapshot("test_resolve_promise_export");
 }
 
@@ -1085,7 +1122,7 @@ fn test_resolve_react_types() {
     let ty = ty.inferred(&mut resolver);
     let _ty_string = format!("{ty:?}"); // for debugging
 
-    let id = resolver.register_type(ty);
+    let id = resolver.register_type(Cow::Owned(ty));
     resolver.run_inference();
 
     let resolved_id = ResolvedTypeId::new(resolver.level(), id);
@@ -1184,7 +1221,7 @@ fn test_resolve_promise_from_imported_function_returning_imported_promise_type()
     let ty = ty.inferred(&mut resolver);
     let _ty_string = format!("{ty:?}"); // for debugging
 
-    let id = resolver.register_type(ty);
+    let id = resolver.register_type(Cow::Owned(ty));
     resolver.run_inference();
 
     let resolved_id = ResolvedTypeId::new(resolver.level(), id);
@@ -1257,7 +1294,7 @@ fn test_resolve_promise_from_imported_function_returning_reexported_promise_type
     let ty = ty.inferred(&mut resolver);
     let _ty_string = format!("{ty:?}"); // for debugging
 
-    let id = resolver.register_type(ty);
+    let id = resolver.register_type(Cow::Owned(ty));
     resolver.run_inference();
 
     let resolved_id = ResolvedTypeId::new(resolver.level(), id);

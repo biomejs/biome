@@ -54,9 +54,9 @@ impl<'a> JsModuleVisitor<'a> {
             }
         }
 
-        collector.finalise();
+        let scope_by_range = collector.finalise();
 
-        JsModuleInfo::new(collector)
+        JsModuleInfo::new(collector, scope_by_range)
     }
 
     fn visit_import(&self, node: AnyJsImportLike, collector: &mut JsModuleInfoCollector) {

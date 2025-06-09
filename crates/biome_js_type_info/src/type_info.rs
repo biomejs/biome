@@ -11,6 +11,7 @@
 
 pub mod literal;
 
+use std::borrow::Cow;
 use std::cmp::Ordering;
 use std::fmt::Debug;
 use std::{ops::Deref, str::FromStr, sync::Arc};
@@ -536,7 +537,7 @@ pub struct FunctionParameter {
 #[derive(Clone, Debug, Eq, Hash, PartialEq, Resolvable)]
 pub struct FunctionParameterBinding {
     pub name: Text,
-    pub ty: TypeData,
+    pub ty: TypeReference,
 }
 
 /// Definition of a generic type parameter.
@@ -702,7 +703,7 @@ impl Tuple {
             let id = if elem_type.is_optional {
                 resolver.optional(ty)
             } else {
-                resolver.register_type(TypeData::reference(ty))
+                resolver.register_type(Cow::Owned(TypeData::reference(ty)))
             };
             ResolvedTypeId::new(resolver.level(), id)
         } else {

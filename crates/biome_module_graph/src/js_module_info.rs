@@ -4,9 +4,9 @@ mod scope;
 mod scoped_resolver;
 mod visitor;
 
-use std::{collections::BTreeMap, ops::Deref, sync::Arc};
+use std::{borrow::Cow, collections::BTreeMap, ops::Deref, sync::Arc};
 
-use biome_js_syntax::AnyJsImportLike;
+use biome_js_syntax::{AnyJsExpression, AnyJsImportLike};
 use biome_js_type_info::{
     BindingId, GLOBAL_RESOLVER, GLOBAL_UNKNOWN_ID, ImportSymbol, ResolvedTypeData, ResolvedTypeId,
     ScopeId, TypeData, TypeId, TypeReference, TypeReferenceQualifier, TypeResolver,
@@ -14,7 +14,9 @@ use biome_js_type_info::{
 };
 use biome_jsdoc_comment::JsdocComment;
 use biome_resolver::ResolvedPath;
-use biome_rowan::{Text, TextRange};
+use biome_rowan::{AstNode, Text, TextRange};
+use rust_lapper::Lapper;
+use rustc_hash::FxHashMap;
 
 use crate::ModuleGraph;
 
@@ -85,21 +87,8 @@ impl JsModuleInfo {
     pub fn scope_for_range(&self, range: TextRange) -> JsScope {
         JsScope {
             info: self.0.clone(),
-            id: self.scope_id_for_range(range),
+            id: scope_id_for_range(&self.0.scope_by_range, range),
         }
-    }
-
-    pub fn scope_id_for_range(&self, range: TextRange) -> ScopeId {
-        let start = range.start().into();
-        let end = range.end().into();
-        self.0
-            .scope_by_range
-            .find(start, end)
-            .filter(|interval| !(start < interval.start || end > interval.stop))
-            .max_by_key(|interval| interval.val)
-            .map_or(ScopeId::GLOBAL, |interval| {
-                ScopeId::new(interval.val.index())
-            })
     }
 }
 
@@ -159,13 +148,16 @@ pub struct JsModuleInfoInner {
     /// Collection of all the declarations in the module.
     pub(crate) bindings: Box<[JsBindingData]>,
 
+    /// Parsed expressions, mapped from their range to their type ID.
+    pub(crate) expressions: FxHashMap<TextRange, TypeId>,
+
     /// All scopes in this module.
     ///
     /// The first entry is expected to be the global scope.
     pub(crate) scopes: Box<[JsScopeData]>,
 
     /// Lookup tree to find scopes by text range.
-    pub(crate) scope_by_range: rust_lapper::Lapper<u32, ScopeId>,
+    pub(crate) scope_by_range: Lapper<u32, ScopeId>,
 
     /// Collection of all types in the module.
     pub(crate) types: Box<[TypeData]>,
@@ -258,7 +250,7 @@ impl TypeResolver for JsModuleInfoInner {
         }
     }
 
-    fn register_type(&mut self, _type_data: TypeData) -> TypeId {
+    fn register_type(&mut self, _type_data: Cow<TypeData>) -> TypeId {
         panic!("Cannot register new types after the module has been constructed");
     }
 
@@ -303,6 +295,13 @@ impl TypeResolver for JsModuleInfoInner {
         } else {
             GLOBAL_RESOLVER.resolve_type_of(identifier, scope_id)
         }
+    }
+
+    fn resolve_expression(&mut self, _scope_id: ScopeId, expr: &AnyJsExpression) -> Cow<TypeData> {
+        self.expressions.get(&expr.range()).map_or_else(
+            || Cow::Owned(TypeData::unknown()),
+            |id| Cow::Borrowed(self.get_by_id(*id)),
+        )
     }
 
     fn registered_types(&self) -> &[TypeData] {
@@ -413,4 +412,16 @@ impl Iterator for ImportPathIterator {
                 .map(|(_identifier, path)| path)
         }
     }
+}
+
+fn scope_id_for_range(scope_by_range: &Lapper<u32, ScopeId>, range: TextRange) -> ScopeId {
+    let start = range.start().into();
+    let end = range.end().into();
+    scope_by_range
+        .find(start, end)
+        .filter(|interval| !(start < interval.start || end > interval.stop))
+        .max_by_key(|interval| interval.val)
+        .map_or(ScopeId::GLOBAL, |interval| {
+            ScopeId::new(interval.val.index())
+        })
 }

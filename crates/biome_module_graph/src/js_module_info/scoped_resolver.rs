@@ -4,14 +4,14 @@ use std::{
     sync::Arc,
 };
 
-use biome_js_syntax::{AnyJsExpression, JsSyntaxNode};
+use biome_js_syntax::AnyJsExpression;
 use biome_js_type_info::{
     GLOBAL_RESOLVER, GLOBAL_UNKNOWN_ID, ImportSymbol, ModuleId, Resolvable, ResolvedTypeData,
-    ResolvedTypeId, ScopeId, Type, TypeData, TypeId, TypeImportQualifier, TypeReference,
-    TypeReferenceQualifier, TypeResolver, TypeResolverLevel, TypeStore,
+    ResolvedTypeId, ResolverId, ScopeId, Type, TypeData, TypeId, TypeImportQualifier,
+    TypeReference, TypeReferenceQualifier, TypeResolver, TypeResolverLevel, TypeStore,
 };
 use biome_resolver::ResolvedPath;
-use biome_rowan::{AstNode, Text};
+use biome_rowan::{AstNode, Text, TextRange};
 use rustc_hash::FxHashMap;
 
 use crate::{JsExport, JsOwnExport, ModuleGraph, js_module_info::JsModuleInfoInner};
@@ -19,6 +19,13 @@ use crate::{JsExport, JsOwnExport, ModuleGraph, js_module_info::JsModuleInfoInne
 use super::JsModuleInfo;
 
 const MAX_IMPORT_DEPTH: usize = 10; // Arbitrary depth, may require tweaking.
+
+// Any references that resolve to module 0 will be rewritten to
+// reference the scoped resolver. The reason we do this is that any
+// references to other modules can be resolved within the scoped
+// resolver, whereas the references that still point to the module types
+// would remain unresolved.
+const MODULE_0_ID: ResolverId = ResolverId::from_level(TypeResolverLevel::Module);
 
 /// Type resolver that is able to resolve types from arbitrary scopes in a
 /// module.
@@ -47,14 +54,15 @@ pub struct ScopedResolver {
     /// Module IDs are used to index the [`Self::modules`] vector.
     pub modules_by_path: BTreeMap<ResolvedPath, ModuleId>,
 
+    /// Parsed expressions, mapped by their starting index to the ID of their
+    /// type.
+    expressions: FxHashMap<TextRange, TypeId>,
+
     /// Types registered within this resolver.
     types: TypeStore,
 
-    /// Map for looking up types of expressions.
-    expressions: FxHashMap<JsSyntaxNode, ResolvedTypeId>,
-
-    /// Type index up to which inference has run thus far.
-    inference_index: usize,
+    /// Maps from `TypeId` indices in `modules[0]` to our own modules.
+    type_id_map: Vec<TypeId>,
 }
 
 impl ScopedResolver {
@@ -63,26 +71,10 @@ impl ScopedResolver {
             module_graph,
             modules: vec![module_info],
             modules_by_path: Default::default(),
-            types: Default::default(),
             expressions: Default::default(),
-            inference_index: 0,
+            types: Default::default(),
+            type_id_map: Default::default(),
         }
-    }
-
-    /// Registers all the necessary types so the given expression becomes
-    /// resolvable.
-    ///
-    /// The given expression must be from the module for which the resolver was
-    /// created.
-    pub fn register_types_for_expression(&mut self, expr: &AnyJsExpression) {
-        let scope_id = self.modules[0].scope_id_for_range(expr.range());
-
-        let ty = TypeData::from_any_js_expression(self, scope_id, expr);
-        self.run_inference();
-
-        let ty = ty.inferred(self);
-        let id = self.register_and_resolve(ty);
-        self.expressions.insert(expr.syntax().clone(), id);
     }
 
     /// Returns the resolved type of the given expression within this module.
@@ -90,12 +82,7 @@ impl ScopedResolver {
     /// Assumes that [`Self::register_types_for_expression()`] has already been
     /// called for this expression and the resolver's inference has run.
     pub fn resolved_type_for_expression(self: &Arc<Self>, expr: &AnyJsExpression) -> Type {
-        let type_id = self
-            .expressions
-            .get(expr.syntax())
-            .copied()
-            .unwrap_or(GLOBAL_UNKNOWN_ID);
-
+        let type_id = self.resolved_id_for_expression(expr);
         Type::from_id(self.clone(), type_id)
     }
 
@@ -117,40 +104,9 @@ impl ScopedResolver {
     }
 
     pub fn run_inference(&mut self) {
-        let from_index = self.inference_index;
-
-        self.resolve_all_own_types(from_index);
-
-        // We only perform import resolution for the first inference run in the
-        // global scope.
-        if from_index == 0 {
-            self.resolve_imports_in_modules();
-        }
-
-        self.flatten_all(from_index);
-
-        self.inference_index = self.types.len();
-    }
-
-    fn resolve_all_own_types(&mut self, from_index: usize) {
-        let mut i = from_index;
-        while i < self.types.len() {
-            // SAFETY: We immediately reinsert after taking.
-            let ty = unsafe { self.types.take_from_index_temporarily(i) };
-            let ty = ty.resolved_with_mapped_references(
-                |reference, resolver| match reference {
-                    TypeReference::Qualifier(_qualifier) => TypeReference::Unknown,
-                    TypeReference::Import(import) => resolver
-                        .resolve_import(&import)
-                        .map_or(TypeReference::Unknown, Into::into),
-                    other => other,
-                },
-                self,
-            );
-            // SAFETY: We reinsert before anyone got a chance to do lookups.
-            unsafe { self.types.reinsert_temporarily_taken_data(i, ty) };
-            i += 1;
-        }
+        self.resolve_imports_in_modules();
+        self.resolve_all();
+        self.flatten_all();
     }
 
     /// Actively resolves imports in the modules we are of.
@@ -166,8 +122,32 @@ impl ScopedResolver {
         }
     }
 
-    fn flatten_all(&mut self, from_index: usize) {
-        let mut i = from_index;
+    fn resolve_all(&mut self) {
+        self.type_id_map = self.modules[0]
+            .types
+            .iter()
+            .map(|ty| self.types.register_type(Cow::Borrowed(ty)))
+            .collect();
+
+        for (range, type_id) in &self.modules[0].expressions {
+            self.expressions
+                .insert(*range, self.type_id_map[type_id.index()]);
+        }
+
+        let mut i = 0;
+        while i < self.types.len() {
+            // SAFETY: We reinsert before anyone got a chance to do lookups.
+            unsafe {
+                let ty = self.types.take_from_index_temporarily(i);
+                let ty = ty.resolved(self);
+                self.types.reinsert_temporarily_taken_data(i, ty);
+            }
+            i += 1;
+        }
+    }
+
+    fn flatten_all(&mut self) {
+        let mut i = 0;
         while i < self.types.len() {
             // SAFETY: We reinsert before anyone got a chance to do lookups.
             unsafe {
@@ -179,10 +159,70 @@ impl ScopedResolver {
         }
     }
 
-    /// Attempts to resolve an import reference by its qualifier.
-    ///
-    /// Assumes full inference has already been performed.
-    fn resolve_import_reference(&self, qualifier: &TypeImportQualifier) -> Option<ResolvedTypeId> {
+    pub fn resolved_id_for_expression(&self, expr: &AnyJsExpression) -> ResolvedTypeId {
+        match self.expressions.get(&expr.range()) {
+            Some(id) => ResolvedTypeId::new(TypeResolverLevel::Scope, *id),
+            None => GLOBAL_UNKNOWN_ID,
+        }
+    }
+}
+
+impl TypeResolver for ScopedResolver {
+    fn level(&self) -> TypeResolverLevel {
+        TypeResolverLevel::Scope
+    }
+
+    fn find_type(&self, type_data: &TypeData) -> Option<TypeId> {
+        self.types.find_type(type_data)
+    }
+
+    fn get_by_id(&self, id: TypeId) -> &TypeData {
+        self.types.get_by_id(id)
+    }
+
+    fn get_by_resolved_id(&self, id: ResolvedTypeId) -> Option<ResolvedTypeData> {
+        match id.level() {
+            TypeResolverLevel::Scope => Some((id, self.get_by_id(id.id())).into()),
+            TypeResolverLevel::Module => {
+                let module_id = id.module_id();
+                let module = &self.modules[module_id.index()];
+                if let Some(ty) = module.types.get(id.index()) {
+                    Some((id, ty).into())
+                } else {
+                    debug_assert!(false, "Invalid type reference: {id:?}");
+                    None
+                }
+            }
+            TypeResolverLevel::Import => {
+                panic!("import IDs should not be exposed outside the module info collector")
+            }
+            TypeResolverLevel::Global => Some((id, GLOBAL_RESOLVER.get_by_id(id.id())).into()),
+        }
+    }
+
+    fn register_type(&mut self, type_data: Cow<TypeData>) -> TypeId {
+        self.types.register_type(type_data)
+    }
+
+    fn resolve_reference(&self, ty: &TypeReference) -> Option<ResolvedTypeId> {
+        match ty {
+            TypeReference::Qualifier(_qualifier) => None,
+            TypeReference::Resolved(resolved_id) => {
+                Some(if resolved_id.resolver_id() == MODULE_0_ID {
+                    ResolvedTypeId::new(
+                        TypeResolverLevel::Scope,
+                        self.type_id_map[resolved_id.id().index()],
+                    )
+                } else {
+                    *resolved_id
+                })
+            }
+            TypeReference::Import(import) => self.resolve_import(import),
+            TypeReference::Unknown => Some(GLOBAL_UNKNOWN_ID),
+        }
+    }
+
+    fn resolve_import(&self, qualifier: &TypeImportQualifier) -> Option<ResolvedTypeId> {
         let mut qualifier = Cow::Borrowed(qualifier);
 
         for _ in 0..MAX_IMPORT_DEPTH {
@@ -232,146 +272,11 @@ impl ScopedResolver {
 
         None
     }
-}
 
-impl TypeResolver for ScopedResolver {
-    fn level(&self) -> TypeResolverLevel {
-        TypeResolverLevel::Scope
-    }
-
-    fn find_type(&self, type_data: &TypeData) -> Option<TypeId> {
-        self.types.find_type(type_data)
-    }
-
-    fn get_by_id(&self, id: TypeId) -> &TypeData {
-        self.types.get_by_id(id)
-    }
-
-    fn get_by_resolved_id(&self, id: ResolvedTypeId) -> Option<ResolvedTypeData> {
-        match id.level() {
-            TypeResolverLevel::Scope => Some((id, self.get_by_id(id.id())).into()),
-            TypeResolverLevel::Module => {
-                let module_id = id.module_id();
-                let module = &self.modules[module_id.index()];
-                if let Some(ty) = module.types.get(id.index()) {
-                    Some((id, ty).into())
-                } else {
-                    debug_assert!(false, "Invalid type reference: {id:?}");
-                    None
-                }
-            }
-            TypeResolverLevel::Import => {
-                panic!("import IDs should not be exposed outside the module info collector")
-            }
-            TypeResolverLevel::Global => Some((id, GLOBAL_RESOLVER.get_by_id(id.id())).into()),
-        }
-    }
-
-    fn register_type(&mut self, type_data: TypeData) -> TypeId {
-        self.types.register_type(type_data)
-    }
-
-    fn resolve_reference(&self, ty: &TypeReference) -> Option<ResolvedTypeId> {
-        match ty {
-            TypeReference::Qualifier(qualifier) => self.resolve_qualifier(qualifier),
-            TypeReference::Resolved(resolved_id) => Some(*resolved_id),
-            TypeReference::Import(import) => self.resolve_import_reference(import),
-            TypeReference::Unknown => Some(GLOBAL_UNKNOWN_ID),
-        }
-    }
-
-    fn resolve_import(&mut self, qualifier: &TypeImportQualifier) -> Option<ResolvedTypeId> {
-        let mut qualifier = Cow::Borrowed(qualifier);
-
-        for _ in 0..MAX_IMPORT_DEPTH {
-            let module_id = self.register_module(qualifier.resolved_path.clone())?;
-            let module = &self.modules[module_id.index()];
-
-            let name = match &qualifier.symbol {
-                ImportSymbol::Default => "default",
-                ImportSymbol::Named(name) => name.text(),
-                ImportSymbol::All => {
-                    // TODO: Register type for imported namespace.
-                    return None;
-                }
-            };
-
-            let export = match module.exports.get(name) {
-                Some(JsExport::Own(export) | JsExport::OwnType(export)) => export,
-                Some(JsExport::Reexport(reexport)) => {
-                    qualifier = Cow::Owned(TypeImportQualifier {
-                        symbol: reexport.import.symbol.clone(),
-                        resolved_path: reexport.import.resolved_path.clone(),
-                        type_only: false,
-                    });
-                    continue;
-                }
-                Some(JsExport::ReexportType(reexport)) => {
-                    qualifier = Cow::Owned(TypeImportQualifier {
-                        symbol: reexport.import.symbol.clone(),
-                        resolved_path: reexport.import.resolved_path.clone(),
-                        type_only: true,
-                    });
-                    continue;
-                }
-                None => {
-                    // TODO: Follow blanket reexports.
-                    return None;
-                }
-            };
-
-            match resolve_from_export(module_id, module, export) {
-                ResolveFromExportResult::Resolved(resolved) => return resolved,
-                ResolveFromExportResult::FollowImport(import) => {
-                    qualifier = Cow::Owned(import.clone());
-                }
-            }
-        }
-
+    fn resolve_qualifier(&self, _qualifier: &TypeReferenceQualifier) -> Option<ResolvedTypeId> {
+        // We rely on qualifiers to have been resolved during the construction
+        // of the module graph.
         None
-    }
-
-    fn resolve_qualifier(&self, qualifier: &TypeReferenceQualifier) -> Option<ResolvedTypeId> {
-        let module = &self.modules[0];
-
-        let identifier = qualifier.path.first()?;
-        let Some(binding_ref) = module.find_binding_in_scope(identifier, qualifier.scope_id) else {
-            return GLOBAL_RESOLVER.resolve_qualifier(qualifier);
-        };
-
-        let binding_id = binding_ref.get_binding_id_for_qualifier(qualifier)?;
-
-        let binding = module.binding(binding_id);
-        let mut ty = if binding.declaration_kind.is_import_declaration() {
-            let resolved_id = module
-                .static_imports
-                .get(&binding.name)
-                .and_then(|import| {
-                    self.resolve_import_reference(&TypeImportQualifier {
-                        symbol: import.symbol.clone(),
-                        resolved_path: import.resolved_path.clone(),
-                        type_only: binding.declaration_kind.is_import_type_declaration(),
-                    })
-                })?;
-            if qualifier.path.len() == 1 {
-                return Some(resolved_id);
-            }
-
-            Cow::Owned(resolved_id.into())
-        } else {
-            Cow::Borrowed(&binding.ty)
-        };
-
-        for identifier in &qualifier.path[1..] {
-            let resolved = self.resolve_and_get(&ty)?;
-            let member = resolved
-                .all_members(self)
-                .with_excluded_binding_id(binding_id)
-                .find(|member| member.is_static() && member.has_name(identifier))?;
-            ty = Cow::Owned(member.ty().into_owned());
-        }
-
-        self.resolve_reference(&ty)
     }
 
     fn resolve_type_of(&self, identifier: &Text, scope_id: ScopeId) -> Option<ResolvedTypeId> {
@@ -383,7 +288,7 @@ impl TypeResolver for ScopedResolver {
         let binding = module.binding(binding_ref.value_ty_or_ty());
         if binding.declaration_kind.is_import_declaration() {
             module.static_imports.get(&binding.name).and_then(|import| {
-                self.resolve_import_reference(&TypeImportQualifier {
+                self.resolve_import(&TypeImportQualifier {
                     symbol: import.symbol.clone(),
                     resolved_path: import.resolved_path.clone(),
                     type_only: binding.declaration_kind.is_import_type_declaration(),
@@ -391,6 +296,14 @@ impl TypeResolver for ScopedResolver {
             })
         } else {
             self.resolve_reference(&binding.ty)
+        }
+    }
+
+    fn resolve_expression(&mut self, _scope_id: ScopeId, expr: &AnyJsExpression) -> Cow<TypeData> {
+        let id = self.resolved_id_for_expression(expr);
+        match self.get_by_resolved_id(id) {
+            Some(resolved) => Cow::Owned(resolved.to_data()),
+            None => Cow::Owned(TypeData::unknown()),
         }
     }
 

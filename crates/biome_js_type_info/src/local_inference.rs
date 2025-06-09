@@ -1,3 +1,4 @@
+use std::borrow::Cow;
 use std::str::FromStr;
 
 use biome_js_syntax::{
@@ -27,9 +28,9 @@ use crate::{
     Namespace, Object, PredicateReturnType, ResolvedTypeId, ReturnType, ScopeId, Tuple,
     TupleElementType, TypeData, TypeInstance, TypeMember, TypeMemberKind, TypeOperator,
     TypeOperatorType, TypeReference, TypeReferenceQualifier, TypeResolver,
-    TypeofBitwiseNotExpression, TypeofCallExpression, TypeofExpression, TypeofNewExpression,
-    TypeofStaticMemberExpression, TypeofThisOrSuperExpression, TypeofTypeofExpression,
-    TypeofUnaryMinusExpression, TypeofValue,
+    TypeofBitwiseNotExpression, TypeofCallExpression, TypeofDestructureExpression,
+    TypeofExpression, TypeofNewExpression, TypeofStaticMemberExpression,
+    TypeofThisOrSuperExpression, TypeofTypeofExpression, TypeofUnaryMinusExpression, TypeofValue,
 };
 
 impl TypeData {
@@ -40,7 +41,7 @@ impl TypeData {
         resolver: &mut dyn TypeResolver,
         scope_id: ScopeId,
         pattern: &JsArrayBindingPattern,
-    ) -> Box<[(Text, Self)]> {
+    ) -> Box<[(Text, TypeReference)]> {
         pattern
             .elements()
             .into_iter()
@@ -59,8 +60,8 @@ impl TypeData {
         scope_id: ScopeId,
         i: usize,
         elem: AnyJsArrayBindingPatternElement,
-    ) -> Option<Box<[(Text, Self)]>> {
-        let reference = resolver.reference_to_registered_data(self.clone());
+    ) -> Option<Box<[(Text, TypeReference)]>> {
+        let reference = resolver.reference_to_registered_data(self);
         match elem {
             AnyJsArrayBindingPatternElement::JsArrayBindingPatternElement(elem) => {
                 match elem.pattern().ok()? {
@@ -69,15 +70,18 @@ impl TypeData {
                         let name = text_from_token(binding.name_token())?;
                         Box::new([(
                             name,
-                            resolver.destructuring_of(reference, DestructureField::Index(i)),
+                            resolver.reference_to_owned_data(Self::destructuring_of(
+                                reference,
+                                DestructureField::Index(i),
+                            )),
                         )])
                     }),
                     AnyJsBindingPattern::JsArrayBindingPattern(pattern) => Some({
-                        let data = resolver.destructuring_of(reference, DestructureField::Index(i));
+                        let data = Self::destructuring_of(reference, DestructureField::Index(i));
                         data.apply_array_binding_pattern(resolver, scope_id, &pattern)
                     }),
                     AnyJsBindingPattern::JsObjectBindingPattern(pattern) => Some({
-                        let data = resolver.destructuring_of(reference, DestructureField::Index(i));
+                        let data = Self::destructuring_of(reference, DestructureField::Index(i));
                         data.apply_object_binding_pattern(resolver, scope_id, &pattern)
                     }),
                 }
@@ -89,14 +93,14 @@ impl TypeData {
                         let name = text_from_token(binding.name_token())?;
                         Box::new([(
                             name,
-                            resolver
-                                .destructuring_of(reference, DestructureField::RestFrom(i))
-                                .clone(),
+                            resolver.reference_to_owned_data(Self::destructuring_of(
+                                reference,
+                                DestructureField::RestFrom(i),
+                            )),
                         )])
                     }),
                     AnyJsBindingPattern::JsArrayBindingPattern(pattern) => Some({
-                        let data =
-                            resolver.destructuring_of(reference, DestructureField::RestFrom(i));
+                        let data = Self::destructuring_of(reference, DestructureField::RestFrom(i));
                         data.apply_array_binding_pattern(resolver, scope_id, &pattern)
                     }),
                     AnyJsBindingPattern::JsObjectBindingPattern(_pattern) => {
@@ -118,7 +122,7 @@ impl TypeData {
         resolver: &mut dyn TypeResolver,
         scope_id: ScopeId,
         pattern: &JsObjectBindingPattern,
-    ) -> Box<[(Text, Self)]> {
+    ) -> Box<[(Text, TypeReference)]> {
         // Accumulate names to exclude from the rest operator.
         let mut names = Vec::new();
 
@@ -174,8 +178,8 @@ impl TypeData {
         names: &[Text],
         member_name: Option<Text>,
         member: AnyJsObjectBindingPatternMember,
-    ) -> Option<Box<[(Text, Self)]>> {
-        let reference = resolver.reference_to_registered_data(self.clone());
+    ) -> Option<Box<[(Text, TypeReference)]>> {
+        let reference = resolver.reference_to_registered_data(self);
         match member {
             AnyJsObjectBindingPatternMember::JsObjectBindingPatternProperty(prop) => {
                 let member_name = member_name?;
@@ -185,18 +189,20 @@ impl TypeData {
                         let name = text_from_token(binding.name_token())?;
                         Box::new([(
                             name,
-                            resolver
-                                .destructuring_of(reference, DestructureField::Name(member_name)),
+                            resolver.reference_to_owned_data(Self::destructuring_of(
+                                reference,
+                                DestructureField::Name(member_name),
+                            )),
                         )])
                     }),
                     AnyJsBindingPattern::JsArrayBindingPattern(pattern) => Some({
-                        let data = resolver
-                            .destructuring_of(reference, DestructureField::Name(member_name));
+                        let data =
+                            Self::destructuring_of(reference, DestructureField::Name(member_name));
                         data.apply_array_binding_pattern(resolver, scope_id, &pattern)
                     }),
                     AnyJsBindingPattern::JsObjectBindingPattern(pattern) => Some({
-                        let data = resolver
-                            .destructuring_of(reference, DestructureField::Name(member_name));
+                        let data =
+                            Self::destructuring_of(reference, DestructureField::Name(member_name));
                         data.apply_object_binding_pattern(resolver, scope_id, &pattern)
                     }),
                 }
@@ -205,7 +211,10 @@ impl TypeData {
                 let member_name = member_name?;
                 Box::new([(
                     member_name.clone(),
-                    resolver.destructuring_of(reference, DestructureField::Name(member_name)),
+                    resolver.reference_to_owned_data(Self::destructuring_of(
+                        reference,
+                        DestructureField::Name(member_name),
+                    )),
                 )])
             }),
             AnyJsObjectBindingPatternMember::JsObjectBindingPatternRest(rest) => Some({
@@ -214,15 +223,24 @@ impl TypeData {
                 let name = text_from_token(binding.name_token())?;
                 Box::new([(
                     name,
-                    resolver.destructuring_of(
+                    resolver.reference_to_owned_data(Self::destructuring_of(
                         reference,
                         DestructureField::RestExcept(names.iter().cloned().collect()),
-                    ),
+                    )),
                 )])
             }),
             AnyJsObjectBindingPatternMember::JsBogusBinding(_)
             | AnyJsObjectBindingPatternMember::JsMetavariable(_) => None,
         }
+    }
+
+    fn destructuring_of(ty: TypeReference, destructure_field: DestructureField) -> Self {
+        Self::TypeofExpression(Box::new(TypeofExpression::Destructure(
+            TypeofDestructureExpression {
+                ty,
+                destructure_field,
+            },
+        )))
     }
 
     pub fn from_any_js_declaration(
@@ -753,7 +771,7 @@ impl TypeData {
                             .iter()
                             .map(|name| FunctionParameterBinding {
                                 name: name.clone(),
-                                ty: Self::unknown(),
+                                ty: TypeReference::Unknown,
                             })
                             .collect(),
                         name,
@@ -1031,11 +1049,11 @@ impl TypeData {
             .unwrap_or_default()
     }
 
-    pub fn from_js_variable_declarator(
-        resolver: &mut dyn TypeResolver,
+    pub fn from_js_variable_declarator<'a>(
+        resolver: &'a mut dyn TypeResolver,
         scope_id: ScopeId,
         decl: &JsVariableDeclarator,
-    ) -> Option<Self> {
+    ) -> Option<Cow<'a, Self>> {
         let ty = match decl.variable_annotation() {
             Some(annotation) => {
                 let data = Self::from_any_ts_type(
@@ -1043,16 +1061,12 @@ impl TypeData {
                     scope_id,
                     &annotation.type_annotation().ok()??.ty().ok()?,
                 );
-                match data {
+                Cow::Owned(match data {
                     Self::InstanceOf(type_instance) => Self::InstanceOf(type_instance),
-                    _ => Self::instance_of(resolver.reference_to_registered_data(data)),
-                }
+                    _ => Self::instance_of(resolver.reference_to_owned_data(data)),
+                })
             }
-            None => Self::from_any_js_expression(
-                resolver,
-                scope_id,
-                &decl.initializer()?.expression().ok()?,
-            ),
+            None => resolver.resolve_expression(scope_id, &decl.initializer()?.expression().ok()?),
         };
 
         Some(ty)
@@ -1220,7 +1234,7 @@ impl TypeData {
         resolver: &mut dyn TypeResolver,
         scope_id: ScopeId,
         decl: &JsVariableDeclaration,
-    ) -> Box<[(Text, Self)]> {
+    ) -> Box<[(Text, TypeReference)]> {
         decl.declarators()
             .into_iter()
             .filter_map(|decl| decl.ok())
@@ -1235,23 +1249,29 @@ impl TypeData {
         resolver: &mut dyn TypeResolver,
         scope_id: ScopeId,
         decl: &JsVariableDeclarator,
-    ) -> Option<Box<[(Text, Self)]>> {
+    ) -> Option<Box<[(Text, TypeReference)]>> {
         match decl.id().ok()? {
             AnyJsBindingPattern::AnyJsBinding(binding) => Some({
                 let binding = binding.as_js_identifier_binding()?;
                 let name_token = binding.name_token().ok()?;
+                let data =
+                    Self::from_js_variable_declarator(resolver, scope_id, decl)?.into_owned();
                 Box::new([(
                     name_token.token_text_trimmed().into(),
-                    Self::from_js_variable_declarator(resolver, scope_id, decl)?,
+                    resolver.reference_to_owned_data(data),
                 )])
             }),
             AnyJsBindingPattern::JsArrayBindingPattern(pattern) => Some({
                 let pattern_ty = Self::from_js_variable_declarator(resolver, scope_id, decl)?;
-                pattern_ty.apply_array_binding_pattern(resolver, scope_id, &pattern)
+                pattern_ty
+                    .into_owned()
+                    .apply_array_binding_pattern(resolver, scope_id, &pattern)
             }),
             AnyJsBindingPattern::JsObjectBindingPattern(pattern) => Some({
                 let pattern_ty = Self::from_js_variable_declarator(resolver, scope_id, decl)?;
-                pattern_ty.apply_object_binding_pattern(resolver, scope_id, &pattern)
+                pattern_ty
+                    .into_owned()
+                    .apply_object_binding_pattern(resolver, scope_id, &pattern)
             }),
         }
     }
@@ -1332,7 +1352,7 @@ impl FunctionParameter {
                     .unwrap_or_default();
                 Self {
                     name: None,
-                    ty: resolver.reference_to_registered_data(ty),
+                    ty: resolver.reference_to_owned_data(ty),
                     bindings,
                     is_optional: false,
                     is_rest: true,
@@ -1381,7 +1401,7 @@ impl FunctionParameter {
             .unwrap_or_default();
         Self {
             name,
-            ty: resolver.reference_to_registered_data(ty),
+            ty: resolver.reference_to_owned_data(ty),
             bindings,
             is_optional: param.question_mark_token().is_some(),
             is_rest: false,
@@ -1406,8 +1426,8 @@ impl FunctionParameter {
     }
 }
 
-impl From<(Text, TypeData)> for FunctionParameterBinding {
-    fn from((name, ty): (Text, TypeData)) -> Self {
+impl From<(Text, TypeReference)> for FunctionParameterBinding {
+    fn from((name, ty): (Text, TypeReference)) -> Self {
         Self { name, ty }
     }
 }
@@ -1425,7 +1445,7 @@ impl FunctionParameterBinding {
                 let name = text_from_token(binding.name_token())?;
                 Some(Box::new([Self {
                     name,
-                    ty: ty.clone(),
+                    ty: resolver.reference_to_registered_data(ty),
                 }]))
             }
             AnyJsBindingPattern::JsArrayBindingPattern(pattern) => Some(
@@ -1767,7 +1787,7 @@ impl TypeMember {
                 .map(|name| Self {
                     kind: TypeMemberKind::Named(name.clone()),
                     is_static: false,
-                    ty: resolver.reference_to_registered_data(TypeData::from(TypeofValue {
+                    ty: resolver.reference_to_owned_data(TypeData::from(TypeofValue {
                         identifier: name,
                         ty: TypeReference::Unknown,
                         scope_id: None,
@@ -1933,7 +1953,7 @@ impl TypeReference {
         expr: &AnyJsExpression,
     ) -> Self {
         let data = TypeData::from_any_js_expression(resolver, scope_id, expr);
-        resolver.reference_to_registered_data(data)
+        resolver.reference_to_owned_data(data)
     }
 
     pub fn from_any_ts_type(
@@ -1942,7 +1962,7 @@ impl TypeReference {
         ty: &AnyTsType,
     ) -> Self {
         let data = TypeData::from_any_ts_type(resolver, scope_id, ty);
-        resolver.reference_to_registered_data(data)
+        resolver.reference_to_owned_data(data)
     }
 
     pub fn from_name(scope_id: ScopeId, name: TokenText) -> Self {
@@ -1955,7 +1975,7 @@ impl TypeReference {
         ty: &TsReferenceType,
     ) -> Self {
         let data = TypeData::from_ts_reference_type(resolver, scope_id, ty);
-        resolver.reference_to_registered_data(data)
+        resolver.reference_to_owned_data(data)
     }
 
     pub fn types_from_ts_type_arguments(
@@ -2188,8 +2208,9 @@ fn return_type_from_async_token(
     async_token: Option<JsSyntaxToken>,
 ) -> ReturnType {
     ReturnType::Type(match async_token {
-        Some(_) => resolver
-            .reference_to_registered_data(TypeData::promise_of(scope_id, TypeReference::Unknown)),
+        Some(_) => {
+            resolver.reference_to_owned_data(TypeData::promise_of(scope_id, TypeReference::Unknown))
+        }
         None => TypeReference::Unknown,
     })
 }

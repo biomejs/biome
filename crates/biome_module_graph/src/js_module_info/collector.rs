@@ -6,9 +6,10 @@ use std::{
 
 use biome_js_semantic::{SemanticEvent, SemanticEventExtractor};
 use biome_js_syntax::{
-    AnyJsCombinedSpecifier, AnyJsDeclaration, AnyJsExportDefaultDeclaration, AnyJsImportClause,
-    JsFormalParameter, JsIdentifierBinding, JsSyntaxKind, JsSyntaxNode, JsSyntaxToken,
-    TsIdentifierBinding, TsTypeParameter, TsTypeParameterName, inner_string_text,
+    AnyJsCombinedSpecifier, AnyJsDeclaration, AnyJsExportDefaultDeclaration, AnyJsExpression,
+    AnyJsImportClause, JsFormalParameter, JsIdentifierBinding, JsSyntaxKind, JsSyntaxNode,
+    JsSyntaxToken, JsVariableDeclaration, TsIdentifierBinding, TsTypeParameter,
+    TsTypeParameterName, inner_string_text,
 };
 use biome_js_type_info::{
     BindingId, FunctionParameter, GLOBAL_RESOLVER, GLOBAL_UNKNOWN_ID, GenericTypeParameter, Module,
@@ -17,13 +18,14 @@ use biome_js_type_info::{
     TypeResolver, TypeResolverLevel, TypeStore,
 };
 use biome_jsdoc_comment::JsdocComment;
-use biome_rowan::{AstNode, Text, TextSize, TokenText};
+use biome_rowan::{AstNode, Text, TextRange, TextSize, TokenText};
 use rust_lapper::{Interval, Lapper};
 use rustc_hash::FxHashMap;
 
 use crate::js_module_info::{
     binding::{JsBindingReference, JsBindingReferenceKind, JsDeclarationKind},
     scope::TsBindingReference,
+    scope_id_for_range,
 };
 
 use super::{
@@ -52,6 +54,30 @@ pub(super) struct JsModuleInfoCollector {
     ///
     /// Re-used from the semantic model in `biome_js_semantic`.
     extractor: SemanticEventExtractor,
+
+    /// Expression nodes.
+    ///
+    /// They will get parsed when bindings from their scope is known.
+    expressions: Vec<AnyJsExpression>,
+
+    /// Formal parameters.
+    ///
+    /// They will get parsed when bindings from their scope is known.
+    formal_parameters: Vec<JsFormalParameter>,
+
+    /// Variable declarations.
+    ///
+    /// They will get parsed when bindings from their scope is known.
+    variable_declarations: Vec<JsVariableDeclaration>,
+
+    /// Map of parsed declarations, for caching purposes.
+    parsed_declarations: FxHashMap<JsSyntaxNode, Box<[(Text, TypeReference)]>>,
+
+    /// Map of parsed declarations, for caching purposes.
+    parsed_expressions: FxHashMap<TextRange, TypeId>,
+
+    /// Map of parsed function parameters, for caching purposes.
+    parsed_parameters: FxHashMap<JsSyntaxNode, FunctionParameter>,
 
     /// Collection of all the scopes within the module.
     ///
@@ -127,10 +153,18 @@ impl JsModuleInfoCollector {
                 self.binding_node_by_start
                     .insert(node.text_trimmed_range().start(), node.clone());
             }
-            JS_IMPORT => self
-                .imports
-                .push(biome_js_syntax::JsImport::cast_ref(node).unwrap()),
-            _ => {}
+
+            _ => {
+                if let Some(expr) = AnyJsExpression::cast_ref(node) {
+                    self.expressions.push(expr);
+                } else if let Some(param) = JsFormalParameter::cast_ref(node) {
+                    self.formal_parameters.push(param);
+                } else if let Some(decl) = JsVariableDeclaration::cast_ref(node) {
+                    self.variable_declarations.push(decl);
+                } else if let Some(import) = biome_js_syntax::JsImport::cast_ref(node) {
+                    self.imports.push(import)
+                }
+            }
         }
 
         self.extractor.enter(node);
@@ -177,14 +211,25 @@ impl JsModuleInfoCollector {
             .insert(specifier.into(), resolved_path);
     }
 
-    pub fn finalise(&mut self) {
-        let mut finaliser = JsModuleInfoCollectorFinaliser::default();
+    pub fn finalise(&mut self) -> Lapper<u32, ScopeId> {
         while let Some(event) = self.extractor.pop() {
-            self.push_event(&mut finaliser, event);
+            self.push_event(event);
         }
+
+        let scope_by_range = Lapper::new(
+            self.scope_range_by_start
+                .iter()
+                .flat_map(|(_, scopes)| scopes.iter())
+                .cloned()
+                .collect(),
+        );
+
+        self.infer_all_types(&scope_by_range);
+
+        scope_by_range
     }
 
-    fn push_event(&mut self, finaliser: &mut JsModuleInfoCollectorFinaliser, event: SemanticEvent) {
+    fn push_event(&mut self, event: SemanticEvent) {
         use SemanticEvent::*;
         match event {
             ScopeStarted {
@@ -257,10 +302,6 @@ impl JsModuleInfoCollector {
                     .map(JsDeclarationKind::from_node)
                     .unwrap_or_default();
                 let scope_id = *self.scope_stack.last().expect("scope must be present");
-                let ty = match (&node, &name) {
-                    (Some(node), Some(name)) => self.infer_type(finaliser, node, name, scope_id),
-                    _ => TypeReference::Unknown,
-                };
 
                 self.bindings.push(JsBindingData {
                     name: name
@@ -270,9 +311,10 @@ impl JsModuleInfoCollector {
                     references: Vec::new(),
                     scope_id,
                     declaration_kind,
-                    ty,
+                    ty: TypeReference::Unknown,
                     jsdoc: node.as_ref().and_then(find_jsdoc),
                     export_ranges: Vec::new(),
+                    range,
                 });
                 self.bindings_by_start.insert(range.start(), binding_id);
 
@@ -354,70 +396,89 @@ impl JsModuleInfoCollector {
         }
     }
 
+    fn infer_all_types(&mut self, scope_by_range: &Lapper<u32, ScopeId>) {
+        let expressions = std::mem::take(&mut self.expressions);
+        for expr in expressions {
+            let range = expr.range();
+            let scope_id = scope_id_for_range(scope_by_range, range);
+            let ty = TypeData::from_any_js_expression(self, scope_id, &expr);
+            let id = self.register_type(Cow::Owned(ty));
+
+            self.parsed_expressions.insert(range, id);
+        }
+
+        let formal_parameters = std::mem::take(&mut self.formal_parameters);
+        for param in formal_parameters {
+            let range = param.range();
+            let scope_id = scope_id_for_range(scope_by_range, range);
+            let parsed_param = FunctionParameter::from_js_formal_parameter(self, scope_id, &param);
+            self.parsed_parameters
+                .insert(param.syntax().clone(), parsed_param);
+        }
+
+        let variable_declarations = std::mem::take(&mut self.variable_declarations);
+        for decl in variable_declarations {
+            let range = decl.range();
+            let scope_id = scope_id_for_range(scope_by_range, range);
+            let type_bindings =
+                TypeData::typed_bindings_from_js_variable_declaration(self, scope_id, &decl);
+            self.parsed_declarations
+                .insert(decl.syntax().clone(), type_bindings);
+        }
+
+        for index in 0..self.bindings.len() {
+            let binding_id = BindingId::new(index);
+            let binding = &self.bindings[binding_id.index()];
+            if let Some(node) = self.binding_node_by_start.get(&binding.range.start()) {
+                let name = binding.name.clone();
+                let scope_id = scope_id_for_range(scope_by_range, binding.range);
+                let ty = self.infer_type(&node.clone(), &name, scope_id);
+                self.bindings[binding_id.index()].ty = ty;
+            }
+        }
+    }
+
     fn infer_type(
         &mut self,
-        finaliser: &mut JsModuleInfoCollectorFinaliser,
         node: &JsSyntaxNode,
-        binding_name: &TokenText,
+        binding_name: &Text,
         scope_id: ScopeId,
     ) -> TypeReference {
-        let mut infer_type = || {
-            for ancestor in node.ancestors() {
-                if let Some(decl) = AnyJsDeclaration::cast_ref(&ancestor) {
-                    return if let Some(var_decl) = decl.as_js_variable_declaration() {
-                        let typed_bindings = finaliser
-                            .parsed_declarations
-                            .entry(var_decl.syntax().clone())
-                            .or_insert_with(|| {
-                                TypeData::typed_bindings_from_js_variable_declaration(
-                                    self, scope_id, var_decl,
-                                )
-                            });
-                        typed_bindings
-                            .iter()
-                            .find_map(|(name, ty)| {
-                                (*name == binding_name.text()).then(|| ty.clone())
-                            })
-                            .unwrap_or_default()
-                    } else {
-                        TypeData::from_any_js_declaration(self, scope_id, &decl)
-                    };
-                } else if let Some(declaration) = AnyJsExportDefaultDeclaration::cast_ref(&ancestor)
+        for ancestor in node.ancestors() {
+            if let Some(decl) = AnyJsDeclaration::cast_ref(&ancestor) {
+                return if let Some(typed_bindings) = decl
+                    .as_js_variable_declaration()
+                    .and_then(|decl| self.parsed_declarations.get(decl.syntax()))
                 {
-                    return TypeData::from_any_js_export_default_declaration(
-                        self,
-                        scope_id,
-                        &declaration,
-                    );
-                } else if let Some(param) = JsFormalParameter::cast_ref(&ancestor) {
-                    let param = finaliser
-                        .parsed_parameters
-                        .entry(ancestor.clone())
-                        .or_insert_with(|| {
-                            FunctionParameter::from_js_formal_parameter(self, scope_id, &param)
-                        });
-                    return param
-                        .bindings
+                    typed_bindings
                         .iter()
-                        .find_map(|binding| {
-                            (binding.name == binding_name.text()).then(|| binding.ty.clone())
-                        })
-                        .unwrap_or_default();
-                } else if let Some(param) = TsTypeParameter::cast_ref(&ancestor) {
-                    return match GenericTypeParameter::from_ts_type_parameter(
-                        self, scope_id, &param,
-                    ) {
-                        Some(generic) => TypeData::from(generic),
-                        None => TypeData::unknown(),
-                    };
-                }
+                        .find_map(|(name, ty)| (name == binding_name).then(|| ty.clone()))
+                        .unwrap_or_default()
+                } else {
+                    let data = TypeData::from_any_js_declaration(self, scope_id, &decl);
+                    self.reference_to_owned_data(data)
+                };
+            } else if let Some(declaration) = AnyJsExportDefaultDeclaration::cast_ref(&ancestor) {
+                let data =
+                    TypeData::from_any_js_export_default_declaration(self, scope_id, &declaration);
+                return self.reference_to_owned_data(data);
+            } else if let Some(param) = JsFormalParameter::cast_ref(&ancestor)
+                .and_then(|param| self.parsed_parameters.get(param.syntax()))
+            {
+                return param
+                    .bindings
+                    .iter()
+                    .find_map(|binding| (binding.name == *binding_name).then(|| binding.ty.clone()))
+                    .unwrap_or_default();
+            } else if let Some(param) = TsTypeParameter::cast_ref(&ancestor) {
+                return match GenericTypeParameter::from_ts_type_parameter(self, scope_id, &param) {
+                    Some(generic) => self.reference_to_owned_data(TypeData::from(generic)),
+                    None => TypeReference::Unknown,
+                };
             }
+        }
 
-            TypeData::unknown()
-        };
-
-        let type_data = infer_type();
-        self.register_and_resolve(type_data).into()
+        TypeReference::Unknown
     }
 
     /// After the first pass of the collector, import references have been
@@ -445,6 +506,7 @@ impl JsModuleInfoCollector {
                 })
         };
 
+        // First do a pass in which we populate module and namespace members:
         let mut i = 0;
         while i < self.types.len() {
             // SAFETY: We immediately reinsert after taking.
@@ -466,18 +528,29 @@ impl JsModuleInfoCollector {
                     }),
                     None => TypeData::Namespace(namespace),
                 },
-                ty => ty.resolved_with_mapped_references(
-                    |reference, _| match reference {
-                        TypeReference::Resolved(resolved)
-                            if resolved.level() == TypeResolverLevel::Import =>
-                        {
-                            downgrade_import_reference(resolved.id().into())
-                        }
-                        other => other,
-                    },
-                    self,
-                ),
+                ty => ty,
             };
+            // SAFETY: We reinsert before anyone got a chance to do lookups.
+            unsafe { self.types.reinsert_temporarily_taken_data(i, ty) };
+            i += 1;
+        }
+
+        // Now perform a pass for the actual resolving:
+        let mut i = 0;
+        while i < self.types.len() {
+            // SAFETY: We immediately reinsert after taking.
+            let ty = unsafe { self.types.take_from_index_temporarily(i) };
+            let ty = ty.resolved_with_mapped_references(
+                |reference, _| match reference {
+                    TypeReference::Resolved(resolved)
+                        if resolved.level() == TypeResolverLevel::Import =>
+                    {
+                        downgrade_import_reference(resolved.id().into())
+                    }
+                    other => other,
+                },
+                self,
+            );
             // SAFETY: We reinsert before anyone got a chance to do lookups.
             unsafe { self.types.reinsert_temporarily_taken_data(i, ty) };
             i += 1;
@@ -561,7 +634,7 @@ impl TypeResolver for JsModuleInfoCollector {
         }
     }
 
-    fn register_type(&mut self, type_data: TypeData) -> TypeId {
+    fn register_type(&mut self, type_data: Cow<TypeData>) -> TypeId {
         self.types.register_type(type_data)
     }
 
@@ -622,6 +695,13 @@ impl TypeResolver for JsModuleInfoCollector {
         GLOBAL_RESOLVER.resolve_type_of(identifier, scope_id)
     }
 
+    fn resolve_expression(&mut self, _scope_id: ScopeId, expr: &AnyJsExpression) -> Cow<TypeData> {
+        match self.parsed_expressions.get(&expr.range()) {
+            Some(id) => Cow::Borrowed(self.get_by_id(*id)),
+            None => Cow::Owned(TypeData::unknown()),
+        }
+    }
+
     fn fallback_resolver(&self) -> Option<&dyn TypeResolver> {
         Some(&*GLOBAL_RESOLVER)
     }
@@ -629,15 +709,6 @@ impl TypeResolver for JsModuleInfoCollector {
     fn registered_types(&self) -> &[TypeData] {
         self.types.as_slice()
     }
-}
-
-#[derive(Default)]
-struct JsModuleInfoCollectorFinaliser {
-    /// Map of parsed declarations, for caching purposes.
-    parsed_declarations: FxHashMap<JsSyntaxNode, Box<[(Text, TypeData)]>>,
-
-    /// Map of parsed function parameters, for caching purposes.
-    parsed_parameters: FxHashMap<JsSyntaxNode, FunctionParameter>,
 }
 
 /// Used for collecting information to store in the [JsModuleInfo].
@@ -908,7 +979,10 @@ impl JsModuleInfoBag {
 }
 
 impl JsModuleInfo {
-    pub(super) fn new(mut collector: JsModuleInfoCollector) -> Self {
+    pub(super) fn new(
+        mut collector: JsModuleInfoCollector,
+        scope_by_range: Lapper<u32, ScopeId>,
+    ) -> Self {
         let bag = JsModuleInfoBag::from_collector(&mut collector);
 
         Self(Arc::new(JsModuleInfoInner {
@@ -918,15 +992,9 @@ impl JsModuleInfo {
             exports: Exports(bag.exports),
             blanket_reexports: bag.blanket_reexports.into(),
             bindings: collector.bindings.into(),
+            expressions: collector.parsed_expressions,
             scopes: collector.scopes.into(),
-            scope_by_range: Lapper::new(
-                collector
-                    .scope_range_by_start
-                    .iter()
-                    .flat_map(|(_, scopes)| scopes.iter())
-                    .cloned()
-                    .collect(),
-            ),
+            scope_by_range,
             types: collector.types.into(),
         }))
     }

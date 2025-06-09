@@ -1,6 +1,6 @@
 mod utils;
 
-use biome_js_type_info::{GlobalsResolver, ScopeId, TypeData};
+use biome_js_type_info::{GlobalsResolver, ScopeId, TypeData, TypeResolver};
 
 use utils::{
     HardcodedSymbolResolver, assert_type_data_snapshot, assert_typed_bindings_snapshot,
@@ -27,6 +27,10 @@ typeof foo
 
     let (var_name, var_ty) = bindings.into_vec().remove(0);
     assert_eq!(var_name.text(), "foo");
+    let var_ty = resolver
+        .resolve_and_get(&var_ty)
+        .expect("must resolve")
+        .to_data();
 
     let expr = get_expression(&root);
     let mut resolver = HardcodedSymbolResolver::new("foo", var_ty, resolver);
@@ -217,11 +221,6 @@ fn infer_flattened_type_of_destructured_array_element() {
         &decl,
     );
     resolver.run_inference();
-
-    let bindings: Vec<_> = bindings
-        .into_iter()
-        .map(|(name, binding)| (name, binding.inferred(&mut resolver)))
-        .collect();
 
     assert_typed_bindings_snapshot(
         CODE,

@@ -118,7 +118,7 @@ Imports {
 ```
 BindingId(0) => JsBindingData {
   Name: foo,
-  Type: Module(0) TypeId(0),
+  Type: Module(0) TypeId(9),
   JSDoc comment: JsDoc(
     @returns {string}
   ),
@@ -127,7 +127,7 @@ BindingId(0) => JsBindingData {
 
 BindingId(1) => JsBindingData {
   Name: bar,
-  Type: Module(0) TypeId(1),
+  Type: Module(0) TypeId(10),
   JSDoc comment: JsDoc(
     @package
   ),
@@ -136,7 +136,7 @@ BindingId(1) => JsBindingData {
 
 BindingId(2) => JsBindingData {
   Name: quz,
-  Type: Module(0) TypeId(2),
+  Type: Module(0) TypeId(0),
   JSDoc comment: JsDoc(
     @private
   ),
@@ -145,43 +145,43 @@ BindingId(2) => JsBindingData {
 
 BindingId(3) => JsBindingData {
   Name: baz,
-  Type: Module(0) TypeId(4),
+  Type: Module(0) TypeId(12),
   Declaration kind: HoistedValue
 }
 
 BindingId(4) => JsBindingData {
   Name: qux,
-  Type: Module(0) TypeId(5),
+  Type: Module(0) TypeId(1),
   Declaration kind: HoistedValue
 }
 
 BindingId(5) => JsBindingData {
   Name: a,
-  Type: Module(0) TypeId(7),
+  Type: Module(0) TypeId(4),
   Declaration kind: Value
 }
 
 BindingId(6) => JsBindingData {
   Name: b,
-  Type: Module(0) TypeId(8),
+  Type: Module(0) TypeId(5),
   Declaration kind: Value
 }
 
 BindingId(7) => JsBindingData {
   Name: d,
-  Type: Module(0) TypeId(10),
+  Type: Module(0) TypeId(7),
   Declaration kind: Value
 }
 
 BindingId(8) => JsBindingData {
   Name: e,
-  Type: Module(0) TypeId(11),
+  Type: Module(0) TypeId(8),
   Declaration kind: Value
 }
 
 BindingId(11) => JsBindingData {
   Name: Component,
-  Type: Module(0) TypeId(21),
+  Type: Module(0) TypeId(22),
   JSDoc comment: JsDoc(
     @public
     @returns {JSX.Element}
@@ -193,53 +193,35 @@ BindingId(11) => JsBindingData {
 ## Registered types
 
 ```
-Module TypeId(0) => sync Function "foo" {
-  accepts: {
-    params: []
-    type_args: []
-  }
-  returns: unknown reference
-}
-
-Module TypeId(1) => sync Function "bar" {
-  accepts: {
-    params: []
-    type_args: []
-  }
-  returns: unknown reference
-}
-
-Module TypeId(2) => Object {
+Module TypeId(0) => Object {
   prototype: No prototype
   members: []
 }
 
-Module TypeId(3) => instanceof Promise
+Module TypeId(1) => value: 1
 
-Module TypeId(4) => async Function "baz" {
+Module TypeId(2) => Object {
+  prototype: No prototype
+  members: ["a": string, "b": Module(0) TypeId(13), "c": Module(0) TypeId(17)]
+}
+
+Module TypeId(3) => sync Function "getObject" {
   accepts: {
     params: []
     type_args: []
   }
-  returns: Module(0) TypeId(3)
+  returns: Module(0) TypeId(19)
 }
 
-Module TypeId(5) => value: 1
+Module TypeId(4) => string
 
-Module TypeId(6) => Object {
-  prototype: No prototype
-  members: ["a": string, "b": Module(0) TypeId(12), "c": Module(0) TypeId(16)]
-}
+Module TypeId(5) => instanceof Array<number>
 
-Module TypeId(7) => string
-
-Module TypeId(8) => instanceof Module(0) TypeId(22)
-
-Module TypeId(9) => Tuple(
+Module TypeId(6) => Tuple(
     [
         TupleElementType {
             ty: Resolved(
-                Module(0) TypeId(13),
+                Module(0) TypeId(14),
             ),
             name: Some(
                 Borrowed(
@@ -251,7 +233,7 @@ Module TypeId(9) => Tuple(
         },
         TupleElementType {
             ty: Resolved(
-                Module(0) TypeId(15),
+                Module(0) TypeId(16),
             ),
             name: Some(
                 Borrowed(
@@ -264,23 +246,49 @@ Module TypeId(9) => Tuple(
     ],
 )
 
-Module TypeId(10) => Module(0) TypeId(13)
+Module TypeId(7) => boolean
 
-Module TypeId(11) => Module(0) TypeId(15)
+Module TypeId(8) => Module(0) TypeId(14) | Module(0) TypeId(15)
 
-Module TypeId(12) => instanceof Array<number>
+Module TypeId(9) => sync Function "foo" {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: unknown reference
+}
 
-Module TypeId(13) => boolean
+Module TypeId(10) => sync Function "bar" {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: unknown reference
+}
 
-Module TypeId(14) => undefined
+Module TypeId(11) => instanceof Promise
 
-Module TypeId(15) => Module(0) TypeId(13) | Module(0) TypeId(14)
+Module TypeId(12) => async Function "baz" {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: Module(0) TypeId(11)
+}
 
-Module TypeId(16) => Tuple(
+Module TypeId(13) => instanceof Array<number>
+
+Module TypeId(14) => boolean
+
+Module TypeId(15) => undefined
+
+Module TypeId(16) => Module(0) TypeId(14) | Module(0) TypeId(15)
+
+Module TypeId(17) => Tuple(
     [
         TupleElementType {
             ty: Resolved(
-                Module(0) TypeId(13),
+                Module(0) TypeId(14),
             ),
             name: Some(
                 Borrowed(
@@ -292,7 +300,7 @@ Module TypeId(16) => Tuple(
         },
         TupleElementType {
             ty: Resolved(
-                Module(0) TypeId(15),
+                Module(0) TypeId(16),
             ),
             name: Some(
                 Borrowed(
@@ -304,40 +312,40 @@ Module TypeId(16) => Tuple(
         },
     ],
 )
-
-Module TypeId(17) => Object {
-  prototype: No prototype
-  members: ["a": string, "b": Module(0) TypeId(12), "c": Module(0) TypeId(16)]
-}
 
 Module TypeId(18) => Object {
   prototype: No prototype
-  members: ["a": string, "b": Module(0) TypeId(12), "c": Module(0) TypeId(16)]
+  members: ["a": string, "b": Module(0) TypeId(13), "c": Module(0) TypeId(17)]
 }
 
-Module TypeId(19) => sync Function "getObject" {
+Module TypeId(19) => Object {
+  prototype: No prototype
+  members: ["a": string, "b": Module(0) TypeId(13), "c": Module(0) TypeId(17)]
+}
+
+Module TypeId(20) => sync Function "getObject" {
   accepts: {
     params: []
     type_args: []
   }
-  returns: Module(0) TypeId(18)
+  returns: Module(0) TypeId(19)
 }
 
-Module TypeId(20) => instanceof unresolved reference "JSX.Element" (scope ID: 10)
+Module TypeId(21) => instanceof unresolved reference "JSX.Element" (scope ID: 10)
 
-Module TypeId(21) => sync Function "Component" {
+Module TypeId(22) => sync Function "Component" {
   accepts: {
     params: []
     type_args: []
   }
-  returns: Module(0) TypeId(20)
+  returns: Module(0) TypeId(21)
 }
 
-Module TypeId(22) => instanceof Array<number>
+Module TypeId(23) => instanceof Array<number>
 
-Module TypeId(23) => boolean
+Module TypeId(24) => boolean
 
-Module TypeId(24) => Module(0) TypeId(13) | Module(0) TypeId(14)
+Module TypeId(25) => Module(0) TypeId(14) | Module(0) TypeId(15)
 ```
 
 # `/src/renamed-reexports.ts`

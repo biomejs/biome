@@ -18,10 +18,10 @@ function destruct(
 sync Function "destruct" {
   accepts: {
     params: [
-      required (unnamed): Global TypeId(0) (bindings: a:Global TypeId(0).a,
-      b:Global TypeId(0).b)
-      required (unnamed): Global TypeId(4) (bindings: first:Global TypeId(4)[0],
-      rest:[(1 others)...Global TypeId(4)])
+      required (unnamed): Global TypeId(0) (bindings: a:Global TypeId(1),
+      b:Global TypeId(2))
+      required (unnamed): Global TypeId(4) (bindings: first:Global TypeId(5),
+      rest:Global TypeId(6))
     ]
     type_args: []
   }

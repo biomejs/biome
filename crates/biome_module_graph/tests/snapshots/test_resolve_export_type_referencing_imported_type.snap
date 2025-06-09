@@ -38,7 +38,7 @@ Imports {
 ```
 BindingId(1) => JsBindingData {
   Name: returnPromiseResult,
-  Type: Module(0) TypeId(1),
+  Type: Module(0) TypeId(8),
   Declaration kind: HoistedValue
 }
 ```
@@ -46,24 +46,59 @@ BindingId(1) => JsBindingData {
 ## Registered types
 
 ```
-Module TypeId(0) => instanceof Import Symbol: PromisedResult from "/src/promisedResult.ts"
-
-Module TypeId(1) => sync Function "returnPromiseResult" {
+Module TypeId(0) => sync Function {
   accepts: {
-    params: []
+    params: [
+      required resolve: unknown reference (bindings: resolve:unknown reference)
+    ]
     type_args: []
   }
-  returns: Module(0) TypeId(0)
+  returns: unknown reference
 }
 
-Module TypeId(2) => instanceof Import Symbol: PromisedResult from "/src/promisedResult.ts"
+Module TypeId(1) => instanceof Promise
 
-Module TypeId(3) => sync Function "returnPromiseResult" {
+Module TypeId(2) => class "Promise" {
+  extends: none
+  implements: []
+  type_args: [T]
+}
+
+Module TypeId(3) => value: true
+
+Module TypeId(4) => Object {
+  prototype: No prototype
+  members: ["result": Module(0) TypeId(3)]
+}
+
+Module TypeId(5) => instanceof Import Symbol: PromisedResult from "/src/promisedResult.ts"
+
+Module TypeId(6) => sync Function "returnPromiseResult" {
   accepts: {
     params: []
     type_args: []
   }
-  returns: Module(0) TypeId(2)
+  returns: Module(0) TypeId(9)
+}
+
+Module TypeId(7) => instanceof Import Symbol: PromisedResult from "/src/promisedResult.ts"
+
+Module TypeId(8) => sync Function "returnPromiseResult" {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: Module(0) TypeId(7)
+}
+
+Module TypeId(9) => instanceof Import Symbol: PromisedResult from "/src/promisedResult.ts"
+
+Module TypeId(10) => sync Function "returnPromiseResult" {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: Module(0) TypeId(9)
 }
 ```
 
