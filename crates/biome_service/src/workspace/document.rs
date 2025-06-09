@@ -1,6 +1,7 @@
 use biome_parser::AnyParse;
 
 use crate::diagnostics::FileTooLarge;
+use crate::workspace::injection::InjectedSyntax;
 
 #[derive(Clone, Debug)]
 pub(crate) struct Document {
@@ -27,6 +28,8 @@ pub(crate) struct Document {
     /// - `Result`: if the file is read, but the  file is too large
     /// - `AnyParse`: the result of the parsed file
     pub(crate) syntax: Option<Result<AnyParse, FileTooLarge>>,
+
+    pub(crate) injected_syntax: Vec<InjectedSyntax>,
 
     /// If `true`, this indicates the document has been opened by the scanner,
     /// and should be unloaded only when the project is unregistered.

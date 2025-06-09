@@ -180,7 +180,7 @@ pub fn run(test_case: &str, _snapshot_name: &str, test_directory: &str, outcome_
 #[test]
 pub fn quick_test() {
     let code = r#"
- @supports not (selector(:before) or not (not (selector(:before)))) {
+ @supports selector(> .child-one) {
 }
     "#;
 

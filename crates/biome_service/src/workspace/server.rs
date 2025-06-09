@@ -12,10 +12,7 @@ use super::{
 };
 use crate::configuration::{LoadedConfiguration, ProjectScanComputer, read_config};
 use crate::diagnostics::FileTooLarge;
-use crate::file_handlers::{
-    Capabilities, CodeActionsParams, DocumentFileSource, Features, FixAllParams, LintParams,
-    ParseResult,
-};
+use crate::file_handlers::{Capabilities, CodeActionsParams, DocumentFileSource, Features, FixAllParams, LintParams, ParseResult};
 use crate::projects::Projects;
 use crate::settings::WorkspaceSettingsHandle;
 use crate::workspace::{
@@ -40,7 +37,7 @@ use biome_diagnostics::{
 use biome_formatter::Printed;
 use biome_fs::{BiomePath, ConfigName};
 use biome_grit_patterns::{CompilePatternOptions, GritQuery, compile_pattern_with_options};
-use biome_js_syntax::{AnyJsRoot, ModuleKind};
+use biome_js_syntax::{AnyJsRoot, JsIdentifierExpression, JsLanguage, JsTemplateExpression, ModuleKind};
 use biome_json_parser::JsonParserOptions;
 use biome_json_syntax::JsonFileSource;
 use biome_module_graph::ModuleGraph;
@@ -60,6 +57,8 @@ use std::sync::{Arc, Mutex};
 use std::time::Duration;
 use tokio::sync::watch;
 use tracing::{info, instrument, warn};
+use biome_css_syntax::{CssFileSource, CssRoot, CssSyntaxNode};
+use crate::workspace::injection::InjectedSyntax;
 
 pub struct WorkspaceServer {
     /// features available throughout the application
@@ -399,6 +398,10 @@ impl WorkspaceServer {
             .and_then(|syntax| syntax.as_ref().ok())
             .map(|parse| parse.root());
 
+        let injected_syntax = root.clone().map_or_else(|| Vec::new(), |root| {
+            self.collect_injections(root, project_key, &path, &content)
+        });
+
         let opened_by_scanner = reason.is_opened_by_scanner();
 
         let documents = self.documents.pin();
@@ -455,6 +458,7 @@ impl WorkspaceServer {
                         version,
                         file_source_index: index,
                         syntax: syntax.clone(),
+                        injected_syntax: injected_syntax.clone(),
                         opened_by_scanner: opened_by_scanner || document.opened_by_scanner,
                     })
                 }
@@ -463,6 +467,7 @@ impl WorkspaceServer {
                     version,
                     file_source_index: index,
                     syntax: syntax.clone(),
+                    injected_syntax: injected_syntax.clone(),
                     opened_by_scanner,
                 }),
             }
@@ -835,6 +840,72 @@ impl WorkspaceServer {
         }
 
         Ok(())
+    }
+
+    pub(crate) fn collect_injections(&self, root: SendNode, project_key: ProjectKey, path: &Utf8Path, content: &str) -> Vec<InjectedSyntax> {
+        let mut result = Vec::new();
+
+        if let Some(root) = root.into_node::<JsLanguage>() {
+            for node in root.descendants() {
+                if let Some(template) = JsTemplateExpression::cast(node) {
+                    // tag: JsIdentifierExpression {
+                    //     name: JsReferenceIdentifier {
+                    //         value_token: IDENT@12..15 "css" [] [],
+                    //     },
+                    // },
+                    let is_css = template.tag().and_then(|tag| {
+                        JsIdentifierExpression::cast_ref(&tag.syntax()).and_then(|exp| {
+                            if exp.name().map_or(false, |reference| reference.has_name("css")) {
+                                Some(())
+                            } else {
+                                None
+                            }
+                        })
+                    }).is_some();
+
+                    if is_css {
+                        let file_source: DocumentFileSource = CssFileSource::css().into();
+                        let capabilities = self.features.get_capabilities(file_source);
+                        let parse = capabilities.parser.parse;
+                        let settings = self
+                            .projects
+                            .get_settings_based_on_path(project_key, path);
+
+                        if let (Some(parse), Some(settings)) = (parse, settings) {
+                            let mut node_cache = NodeCache::default();
+                            let range = template.elements().range();
+                            let src = &content[range];
+
+                            let parsed = parse(
+                                &BiomePath::new(path),
+                                file_source,
+                                src,
+                                settings.into(),
+                                &mut node_cache,
+                            );
+
+                            let any_parse = parsed.any_parse;
+                            let syntax: CssSyntaxNode = any_parse.syntax();
+                            let tree: CssRoot = any_parse.tree();
+                            let tree_result = GetSyntaxTreeResult {
+                                cst: format!("{syntax:#?}"),
+                                ast: format!("{tree:#?}"),
+                            };
+
+                            dbg!(&tree_result);
+
+                            result.push(
+                                InjectedSyntax {
+                                    syntax: any_parse,
+                                    range_in_host: range,
+                                }
+                            )
+                        }
+                    }
+                }
+            }
+        }
+        result
     }
 }
 
@@ -1250,11 +1321,14 @@ impl Workspace for WorkspaceServer {
         let parsed = self.parse(project_key, &path, &content, index, &mut node_cache)?;
         let root = parsed.any_parse.root();
 
+        let injected_syntax = self.collect_injections(root.clone(), project_key, &path, &content);
+
         let document = Document {
             content,
             version: Some(version),
             file_source_index: index,
             syntax: Some(Ok(parsed.any_parse)),
+            injected_syntax,
             opened_by_scanner,
         };
 
