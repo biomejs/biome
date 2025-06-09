@@ -4025,3 +4025,56 @@ fn lint_skip_parse_errors() {
         result,
     ));
 }
+
+#[test]
+fn linter_can_resolve_imported_symbols() {
+    let mut console = BufferConsole::default();
+    let mut fs = MemoryFileSystem::default();
+
+    fs.insert(
+        Utf8Path::new("biome.json").into(),
+        r#"{
+    "linter": {
+        "rules": {
+            "nursery": {
+                "noFloatingPromises": "on"
+            }
+        }
+    }
+}"#
+        .as_bytes(),
+    );
+
+    let file = Utf8Path::new("src/foo.ts");
+    fs.insert(
+        file.into(),
+        r#"export function foo(): Foo {}
+
+export async function bar() {}"#
+            .as_bytes(),
+    );
+
+    let file = Utf8Path::new("src/index.ts");
+    fs.insert(
+        file.into(),
+        r#"import { foo, bar } from "./foo.ts";
+
+fn(foo());
+
+bar();"#
+            .as_bytes(),
+    );
+
+    let (fs, result) = run_cli_with_server_workspace(
+        fs,
+        &mut console,
+        Args::from(["lint", file.as_str()].as_slice()),
+    );
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "linter_can_resolve_imported_symbols",
+        fs,
+        console,
+        result,
+    ));
+}
