@@ -799,6 +799,7 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
         suppression_reason,
         enabled_rules: rules,
         plugins,
+        categories,
     } = params;
     let _ = debug_span!("Code actions JavaScript", range =? range, path =? path).entered();
     let tree = parse.tree();
@@ -815,11 +816,7 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
             .with_project_layout(project_layout.clone())
             .finish();
     let filter = AnalysisFilter {
-        categories: RuleCategoriesBuilder::default()
-            .with_syntax()
-            .with_lint()
-            .with_assist()
-            .build(),
+        categories,
         enabled_rules: Some(enabled_rules.as_slice()),
         disabled_rules: &disabled_rules,
         range,

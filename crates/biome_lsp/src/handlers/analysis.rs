@@ -76,6 +76,13 @@ pub(crate) fn code_actions(
         info!("Linter and assist are disabled.");
         return Ok(Some(Vec::new()));
     }
+    let mut categories = RuleCategoriesBuilder::default();
+    if file_features.supports_lint() {
+        categories = categories.with_lint();
+    }
+    if file_features.supports_assist() {
+        categories = categories.with_assist();
+    }
 
     let size_limit_result = session.workspace.check_file_size(CheckFileSizeParams {
         project_key: doc.project_key,
@@ -149,6 +156,7 @@ pub(crate) fn code_actions(
             .iter()
             .filter_map(|filter| RuleSelector::from_lsp_filter(filter))
             .collect(),
+        categories: categories.build(),
     }) {
         Ok(result) => result,
         Err(err) => {
@@ -292,14 +300,12 @@ fn fix_all(
         return Ok(None);
     }
 
-    let should_format = session
-        .workspace
-        .file_features(SupportsFeatureParams {
-            project_key: doc.project_key,
-            path: path.clone(),
-            features: FeaturesBuilder::new().with_formatter().build(),
-        })?
-        .supports_format();
+    let file_features = session.workspace.file_features(SupportsFeatureParams {
+        project_key: doc.project_key,
+        path: path.clone(),
+        features: FeaturesBuilder::new().with_formatter().build(),
+    })?;
+    let should_format = file_features.supports_format();
 
     let features = FeaturesBuilder::new().with_linter().with_assist().build();
     if session.workspace.is_path_ignored(IsPathIgnoredParams {
@@ -318,6 +324,14 @@ fn fix_all(
         return Ok(None);
     }
 
+    let mut categories = RuleCategoriesBuilder::default();
+    if file_features.supports_lint() {
+        categories = categories.with_lint();
+    }
+    if file_features.supports_assist() {
+        categories = categories.with_assist();
+    }
+
     let fixed = session.workspace.fix_file(FixFileParams {
         project_key: doc.project_key,
         path,
@@ -327,11 +341,7 @@ fn fix_all(
         skip: vec![],
         enabled_rules: vec![],
         suppression_reason: None,
-        rule_categories: RuleCategoriesBuilder::default()
-            .with_syntax()
-            .with_lint()
-            .with_assist()
-            .build(),
+        rule_categories: categories.build(),
     })?;
 
     if fixed.actions.is_empty() {

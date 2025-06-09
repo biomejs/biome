@@ -4046,6 +4046,7 @@ export interface PullDiagnosticsResult {
 	skippedDiagnostics: number;
 }
 export interface PullActionsParams {
+	categories?: RuleCategories;
 	enabledRules?: RuleCode[];
 	only?: RuleCode[];
 	path: BiomePath;
