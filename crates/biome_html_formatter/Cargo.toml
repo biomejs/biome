@@ -29,9 +29,17 @@ biome_fs             = { workspace = true }
 biome_html_parser    = { workspace = true }
 biome_parser         = { workspace = true }
 biome_service        = { workspace = true }
+biome_test_utils     = { path = "../biome_test_utils" }
 camino               = { workspace = true }
 countme              = { workspace = true, features = ["enable"] }
+criterion            = { package = "codspeed-criterion-compat", version = "*" }
 tests_macros         = { workspace = true }
+
+[target.'cfg(target_os = "windows")'.dev-dependencies]
+mimalloc = { workspace = true }
+
+[target.'cfg(all(target_family="unix", not(all(target_arch = "aarch64", target_env = "musl"))))'.dev-dependencies]
+tikv-jemallocator = { workspace = true }
 
 [features]
 schema = ["dep:schemars", "serde"]
@@ -39,3 +47,7 @@ serde  = ["dep:serde", "biome_rowan/serde"]
 
 [lints]
 workspace = true
+
+[[bench]]
+harness = false
+name    = "html_formatter"
