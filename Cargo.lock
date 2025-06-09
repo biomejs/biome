@@ -270,12 +270,15 @@ dependencies = [
  "biome_suppression",
  "biome_test_utils",
  "camino",
+ "codspeed-criterion-compat",
  "insta",
+ "mimalloc",
  "regex",
  "rustc-hash 2.1.1",
  "schemars",
  "serde",
  "tests_macros",
+ "tikv-jemallocator",
 ]
 
 [[package]]
@@ -302,11 +305,15 @@ dependencies = [
  "biome_service",
  "biome_string_case",
  "biome_suppression",
+ "biome_test_utils",
  "camino",
+ "codspeed-criterion-compat",
  "countme",
+ "mimalloc",
  "serde",
  "serde_json",
  "tests_macros",
+ "tikv-jemallocator",
 ]
 
 [[package]]
@@ -326,10 +333,13 @@ dependencies = [
  "biome_test_utils",
  "biome_unicode_table",
  "camino",
+ "codspeed-criterion-compat",
  "insta",
+ "mimalloc",
  "quickcheck",
  "quickcheck_macros",
  "tests_macros",
+ "tikv-jemallocator",
  "tracing",
 ]
 
@@ -557,11 +567,15 @@ dependencies = [
  "biome_rowan",
  "biome_service",
  "biome_suppression",
+ "biome_test_utils",
  "camino",
+ "codspeed-criterion-compat",
  "countme",
+ "mimalloc",
  "serde",
  "serde_json",
  "tests_macros",
+ "tikv-jemallocator",
 ]
 
 [[package]]
@@ -576,10 +590,13 @@ dependencies = [
  "biome_rowan",
  "biome_test_utils",
  "biome_unicode_table",
+ "codspeed-criterion-compat",
  "insta",
+ "mimalloc",
  "quickcheck",
  "quickcheck_macros",
  "tests_macros",
+ "tikv-jemallocator",
  "tracing",
  "unicode-bom",
 ]
@@ -724,11 +741,15 @@ dependencies = [
  "biome_service",
  "biome_string_case",
  "biome_suppression",
+ "biome_test_utils",
  "camino",
+ "codspeed-criterion-compat",
  "countme",
+ "mimalloc",
  "schemars",
  "serde",
  "tests_macros",
+ "tikv-jemallocator",
 ]
 
 [[package]]
@@ -743,10 +764,13 @@ dependencies = [
  "biome_rowan",
  "biome_test_utils",
  "biome_unicode_table",
+ "codspeed-criterion-compat",
  "insta",
+ "mimalloc",
  "quickcheck",
  "quickcheck_macros",
  "tests_macros",
+ "tikv-jemallocator",
  "tracing",
 ]
 
@@ -793,9 +817,11 @@ dependencies = [
  "biome_unicode_table",
  "bitvec",
  "camino",
+ "codspeed-criterion-compat",
  "enumflags2",
  "globset",
  "insta",
+ "mimalloc",
  "regex",
  "roaring",
  "rustc-hash 2.1.1",
@@ -803,6 +829,7 @@ dependencies = [
  "serde",
  "smallvec",
  "tests_macros",
+ "tikv-jemallocator",
 ]
 
 [[package]]
@@ -831,16 +858,20 @@ dependencies = [
  "biome_service",
  "biome_string_case",
  "biome_suppression",
+ "biome_test_utils",
  "biome_text_size",
  "biome_unicode_table",
  "camino",
+ "codspeed-criterion-compat",
  "countme",
+ "mimalloc",
  "quickcheck",
  "schemars",
  "serde",
  "serde_json",
  "smallvec",
  "tests_macros",
+ "tikv-jemallocator",
  "unicode-width 0.1.12",
 ]
 
@@ -861,10 +892,12 @@ dependencies = [
  "biome_test_utils",
  "biome_unicode_table",
  "camino",
+ "codspeed-criterion-compat",
  "drop_bomb",
  "enumflags2",
  "indexmap",
  "insta",
+ "mimalloc",
  "quickcheck",
  "quickcheck_macros",
  "rustc-hash 2.1.1",
@@ -873,6 +906,7 @@ dependencies = [
  "serde_json",
  "smallvec",
  "tests_macros",
+ "tikv-jemallocator",
  "tracing",
 ]
 
@@ -977,9 +1011,12 @@ dependencies = [
  "biome_suppression",
  "biome_test_utils",
  "camino",
+ "codspeed-criterion-compat",
  "insta",
+ "mimalloc",
  "rustc-hash 2.1.1",
  "tests_macros",
+ "tikv-jemallocator",
 ]
 
 [[package]]
@@ -1008,11 +1045,14 @@ dependencies = [
  "biome_suppression",
  "biome_test_utils",
  "camino",
+ "codspeed-criterion-compat",
  "countme",
+ "mimalloc",
  "schemars",
  "serde",
  "serde_json",
  "tests_macros",
+ "tikv-jemallocator",
 ]
 
 [[package]]
@@ -1027,10 +1067,13 @@ dependencies = [
  "biome_rowan",
  "biome_test_utils",
  "biome_unicode_table",
+ "codspeed-criterion-compat",
  "insta",
+ "mimalloc",
  "quickcheck",
  "quickcheck_macros",
  "tests_macros",
+ "tikv-jemallocator",
  "tracing",
  "unicode-bom",
 ]
@@ -1190,13 +1233,16 @@ dependencies = [
  "biome_test_utils",
  "camino",
  "cfg-if",
+ "codspeed-criterion-compat",
  "insta",
+ "mimalloc",
  "once_cell",
  "papaya",
  "rust-lapper",
  "rustc-hash 2.1.1",
  "serde_json",
  "static_assertions",
+ "tikv-jemallocator",
 ]
 
 [[package]]
@@ -1398,6 +1444,7 @@ dependencies = [
 name = "biome_test_utils"
 version = "0.0.0"
 dependencies = [
+ "ansi_rgb",
  "biome_analyze",
  "biome_configuration",
  "biome_console",
@@ -1419,6 +1466,8 @@ dependencies = [
  "json_comments",
  "serde_json",
  "similar",
+ "ureq",
+ "url",
 ]
 
 [[package]]
@@ -4901,46 +4950,6 @@ name = "xtask"
 version = "0.0.0"
 dependencies = [
  "anyhow",
-]
-
-[[package]]
-name = "xtask_bench"
-version = "0.0.0"
-dependencies = [
- "ansi_rgb",
- "biome_analyze",
- "biome_css_analyze",
- "biome_css_formatter",
- "biome_css_parser",
- "biome_css_syntax",
- "biome_diagnostics",
- "biome_formatter",
- "biome_fs",
- "biome_graphql_formatter",
- "biome_graphql_parser",
- "biome_graphql_syntax",
- "biome_grit_patterns",
- "biome_html_formatter",
- "biome_html_parser",
- "biome_html_syntax",
- "biome_js_analyze",
- "biome_js_formatter",
- "biome_js_parser",
- "biome_js_syntax",
- "biome_json_analyze",
- "biome_json_formatter",
- "biome_json_parser",
- "biome_json_syntax",
- "biome_module_graph",
- "biome_parser",
- "biome_project_layout",
- "biome_rowan",
- "camino",
- "codspeed-criterion-compat",
- "mimalloc",
- "tikv-jemallocator",
- "ureq",
- "url",
 ]
 
 [[package]]

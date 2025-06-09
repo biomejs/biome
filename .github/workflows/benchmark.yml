@@ -31,6 +31,23 @@ jobs:
       pull-requests: write
     name: Bench
     runs-on: depot-ubuntu-24.04-arm-16
+    strategy:
+      matrix:
+        package:
+          - biome_js_parser
+          - biome_js_formatter
+          - biome_js_analyze
+          - biome_css_parser
+          - biome_css_formatter
+          - biome_css_analyze
+          - biome_json_parser
+          - biome_json_formatter
+          - biome_json_analyze
+          - biome_graphql_parser
+          - biome_graphql_formatter
+          - biome_html_parser
+          - biome_html_formatter
+          - biome_module_graph
 
     steps:
 
@@ -51,7 +68,7 @@ jobs:
 
       - name: Compile
         timeout-minutes: 20
-        run: cargo codspeed build -p xtask_bench
+        run: cargo codspeed build -p ${{ matrix.package }}
         env:
           CARGO_BUILD_JOBS: 3  # Default is 4 (equals to the vCPU count of the runner), which leads OOM on cargo build
 

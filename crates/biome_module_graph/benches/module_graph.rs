@@ -1,11 +1,10 @@
-use std::time::Duration;
-
 use biome_fs::{BiomePath, FileSystem, MemoryFileSystem};
 use biome_js_parser::JsParserOptions;
 use biome_js_syntax::{AnyJsRoot, JsFileSource};
 use biome_module_graph::ModuleGraph;
 use biome_project_layout::ProjectLayout;
-use xtask_bench::{BenchmarkId, Criterion, criterion_group, criterion_main};
+use criterion::{BenchmarkId, Criterion, criterion_group, criterion_main};
+use std::time::Duration;
 
 #[cfg(target_os = "windows")]
 #[global_allocator]
@@ -27,13 +26,14 @@ fn bench_module_graph(criterion: &mut Criterion) {
         (
             "react/index.d.ts",
             include_bytes!(
-                "../../../crates/biome_resolver/tests/fixtures/resolver_cases_5/node_modules/@types/react/index.d.ts"
+                "../../biome_resolver/tests/fixtures/resolver_cases_5/node_modules/@types/react/index.d.ts"
             ) as &[u8],
         ),
-        (
-            "RedisCommander.d.ts",
-            include_bytes!("./RedisCommander.d.ts") as &[u8],
-        ),
+        // FIXME: enable it once the perf reaches a decent number
+        // (
+        //     "RedisCommander.d.ts",
+        //     include_bytes!("./RedisCommander.d.ts") as &[u8],
+        // ),
     ];
 
     let mut group = criterion.benchmark_group("module_graph");

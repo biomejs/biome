@@ -1,4 +1,3 @@
-use crate::err_to_string;
 use ansi_rgb::{Foreground, red};
 use camino::{Utf8Path, Utf8PathBuf};
 use std::env;
@@ -7,7 +6,7 @@ use std::path::PathBuf;
 use std::str::FromStr;
 
 #[derive(Hash)]
-pub struct TestCase {
+pub struct BenchCase {
     code: String,
     id: String,
     path: Utf8PathBuf,
@@ -19,7 +18,7 @@ fn calculate_hash<T: Hash>(t: &T) -> u64 {
     s.finish()
 }
 
-impl TestCase {
+impl BenchCase {
     pub fn try_from(file_url: &str) -> Result<Self, String> {
         let url = url::Url::from_str(file_url).map_err(err_to_string)?;
         let filename = url
@@ -100,8 +99,6 @@ impl TestCase {
     }
 }
 
-#[test]
-fn file_extension() {
-    let path = PathBuf::from("io.d.ts");
-    dbg!(path.extension().unwrap());
+pub fn err_to_string<E: std::fmt::Debug>(e: E) -> String {
+    format!("{e:?}")
 }

@@ -33,8 +33,15 @@ biome_parser         = { path = "../biome_parser" }
 biome_service        = { path = "../biome_service" }
 biome_test_utils     = { path = "../biome_test_utils" }
 countme              = { workspace = true, features = ["enable"] }
+criterion            = { package = "codspeed-criterion-compat", version = "*" }
 serde_json           = { workspace = true }
 tests_macros         = { path = "../tests_macros" }
+
+[target.'cfg(target_os = "windows")'.dev-dependencies]
+mimalloc = { workspace = true }
+
+[target.'cfg(all(target_family="unix", not(all(target_arch = "aarch64", target_env = "musl"))))'.dev-dependencies]
+tikv-jemallocator = { workspace = true }
 
 # cargo-workspaces metadata
 [package.metadata.workspaces]
@@ -46,3 +53,7 @@ serde  = ["dep:serde"]
 
 [lints]
 workspace = true
+
+[[bench]]
+harness = false
+name    = "json_formatter"
