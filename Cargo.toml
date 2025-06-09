@@ -184,7 +184,7 @@ tests_macros         = { path = "./crates/tests_macros" }
 # Crates needed in the workspace
 anyhow               = "1.0.98"
 bpaf                 = { version = "0.9.20", features = ["derive"] }
-camino               = "1.1.9"
+camino               = "1.1.10"
 cfg-if               = "1"
 countme              = "3.0.1"
 crossbeam            = "0.8.4"
@@ -213,7 +213,7 @@ schemars             = { version = "0.8.22", features = ["indexmap2", "smallvec"
 serde                = { version = "1.0.219", features = ["derive"] }
 serde_json           = "1.0.140"
 similar              = "2.7.0"
-smallvec             = { version = "1.15.0", features = ["union", "const_new", "serde"] }
+smallvec             = { version = "1.15.1", features = ["union", "const_new", "serde"] }
 static_assertions    = "1.1"
 syn                  = "1.0.109"
 termcolor            = "1.4.1"
