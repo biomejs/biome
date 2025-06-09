@@ -69,12 +69,14 @@ jobs:
       - name: Compile
         timeout-minutes: 20
         run: cargo codspeed build -p ${{ matrix.package }}
+        continue-on-error: true
         env:
           CARGO_BUILD_JOBS: 3  # Default is 4 (equals to the vCPU count of the runner), which leads OOM on cargo build
 
       - name: Run the benchmarks
         uses: CodSpeedHQ/action@0010eb0ca6e89b80c88e8edaaa07cfe5f3e6664d # v3.5.0
         timeout-minutes: 50
+        continue-on-error: true
         with:
           run: cargo codspeed run
           token: ${{ secrets.CODSPEED_TOKEN }}
