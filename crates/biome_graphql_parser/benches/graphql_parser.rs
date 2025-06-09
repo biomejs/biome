@@ -41,7 +41,7 @@ fn bench_parser(criterion: &mut Criterion) {
                     &code,
                     |b, _| {
                         b.iter(|| {
-                            let result = black_box(parse_graphql(lib));
+                            let result = black_box(parse_graphql(code));
                             diagnostics.extend(result.into_diagnostics());
                         })
                     },

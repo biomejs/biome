@@ -45,7 +45,7 @@ fn bench_parser(criterion: &mut Criterion) {
                     |b, _| {
                         b.iter(|| {
                             let result = black_box(biome_js_parser::parse(
-                                lib,
+                                code,
                                 file_source,
                                 JsParserOptions::default(),
                             ));

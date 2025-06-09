@@ -42,7 +42,7 @@ fn bench_css_parser(criterion: &mut Criterion) {
                     |b, _| {
                         b.iter(|| {
                             let result = black_box(biome_css_parser::parse_css(
-                                lib,
+                                code,
                                 CssParserOptions::default(),
                             ));
                             diagnostics.extend(result.into_diagnostics());

@@ -41,7 +41,7 @@ fn bench_parser(criterion: &mut Criterion) {
                     &code,
                     |b, _| {
                         b.iter(|| {
-                            let result = black_box(parse_html(lib));
+                            let result = black_box(parse_html(code));
                             diagnostics.extend(result.into_diagnostics());
                         })
                     },

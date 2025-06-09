@@ -38,7 +38,7 @@ fn bench_js_formatter(criterion: &mut Criterion) {
             Ok(test_case) => {
                 let code = test_case.code();
                 let file_source = JsFileSource::try_from(test_case.path()).unwrap_or_default();
-                let parsed = biome_js_parser::parse(lib, file_source, JsParserOptions::default());
+                let parsed = biome_js_parser::parse(code, file_source, JsParserOptions::default());
                 group.throughput(Throughput::Bytes(code.len() as u64));
                 group.bench_with_input(
                     BenchmarkId::from_parameter(test_case.filename()),

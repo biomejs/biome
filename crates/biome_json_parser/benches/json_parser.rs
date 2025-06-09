@@ -41,7 +41,7 @@ fn bench_parser(criterion: &mut Criterion) {
                     &code,
                     |b, _| {
                         b.iter(|| {
-                            let result = black_box(parse_json(lib, JsonParserOptions::default()));
+                            let result = black_box(parse_json(code, JsonParserOptions::default()));
                             diagnostics.extend(result.into_diagnostics());
                         })
                     },

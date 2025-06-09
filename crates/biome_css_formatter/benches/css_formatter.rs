@@ -37,7 +37,7 @@ fn bench_css_formatter(criterion: &mut Criterion) {
         match test_case {
             Ok(test_case) => {
                 let code = test_case.code();
-                let parsed = parse_css(lib, CssParserOptions::default());
+                let parsed = parse_css(code, CssParserOptions::default());
                 group.throughput(Throughput::Bytes(code.len() as u64));
                 group.bench_with_input(
                     BenchmarkId::from_parameter(test_case.filename()),

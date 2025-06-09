@@ -37,7 +37,7 @@ fn bench_formatter(criterion: &mut Criterion) {
         match test_case {
             Ok(test_case) => {
                 let code = test_case.code();
-                let parsed = parse_json(lib, JsonParserOptions::default());
+                let parsed = parse_json(code, JsonParserOptions::default());
                 group.throughput(Throughput::Bytes(code.len() as u64));
                 group.bench_with_input(
                     BenchmarkId::from_parameter(test_case.filename()),

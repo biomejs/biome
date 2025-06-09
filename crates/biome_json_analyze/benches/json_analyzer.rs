@@ -44,7 +44,7 @@ fn bench_analyzer(criterion: &mut Criterion) {
                     BenchmarkId::from_parameter(test_case.filename()),
                     code,
                     |b, _| {
-                        let parse = parse_json(lib, JsonParserOptions::default());
+                        let parse = parse_json(code, JsonParserOptions::default());
 
                         let filter = AnalysisFilter {
                             categories: RuleCategoriesBuilder::default()
