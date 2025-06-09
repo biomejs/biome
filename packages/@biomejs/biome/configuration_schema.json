@@ -2581,6 +2581,24 @@
 			},
 			"additionalProperties": false
 		},
+		"NoParameterAssignConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{ "$ref": "#/definitions/RuleWithNoParameterAssignOptions" }
+			]
+		},
+		"NoParameterAssignOptions": {
+			"description": "Options for the rule `NoParameterAssign`",
+			"type": "object",
+			"properties": {
+				"propertyAssignment": {
+					"description": "Whether to report an error when a dependency is listed in the dependencies array but isn't used. Defaults to `allow`.",
+					"default": "allow",
+					"allOf": [{ "$ref": "#/definitions/PropertyAssignmentMode" }]
+				}
+			},
+			"additionalProperties": false
+		},
 		"NoPrivateImportsConfiguration": {
 			"anyOf": [
 				{ "$ref": "#/definitions/RulePlainConfiguration" },
@@ -3295,6 +3313,21 @@
 			"type": "array",
 			"items": { "$ref": "#/definitions/PluginConfiguration" }
 		},
+		"PropertyAssignmentMode": {
+			"description": "Specifies whether property assignments on function parameters are allowed or denied.",
+			"oneOf": [
+				{
+					"description": "Allows property assignments on function parameters. This is the default behavior, enabling flexibility in parameter usage.",
+					"type": "string",
+					"enum": ["allow"]
+				},
+				{
+					"description": "Disallows property assignments on function parameters. Enforces stricter immutability to prevent unintended side effects.",
+					"type": "string",
+					"enum": ["deny"]
+				}
+			]
+		},
 		"QuoteProperties": { "type": "string", "enum": ["asNeeded", "preserve"] },
 		"QuoteStyle": { "type": "string", "enum": ["double", "single"] },
 		"Regex": { "type": "string" },
@@ -3725,6 +3758,21 @@
 				"level": {
 					"description": "The severity of the emitted diagnostics by the rule",
 					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				}
+			},
+			"additionalProperties": false
+		},
+		"RuleWithNoParameterAssignOptions": {
+			"type": "object",
+			"required": ["level"],
+			"properties": {
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [{ "$ref": "#/definitions/NoParameterAssignOptions" }]
 				}
 			},
 			"additionalProperties": false
@@ -4386,7 +4434,7 @@
 				"noParameterAssign": {
 					"description": "Disallow reassigning function parameters.",
 					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "$ref": "#/definitions/NoParameterAssignConfiguration" },
 						{ "type": "null" }
 					]
 				},
