@@ -1,0 +1,19 @@
+---
+"@biomejs/biome": patch
+---
+
+
+Added test for invalid scenario reported here [`Incorrect lint/correctness/useJsxKeyInIterable in array assignments`](https://github.com/biomejs/biome/issues/4981)
+
+The reported Invalid case:
+
+```jsx
+const Valid = [<>
+  <p>Test 1</p>
+  <p>Test 2</p>
+</>]
+```
+
+Is actually valid now.
+
+So the scope of the change is to just add a test for that.
