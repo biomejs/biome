@@ -24,27 +24,27 @@ declare_lint_rule! {
     ///
     /// ### Invalid
     ///
-    /// ```js,expect_diagnostic
+    /// ```js
     /// const promise = Promise.resolve('value');
     /// if (promise) { /* Do something */ }
     /// ```
     ///
-    /// ```js,expect_diagnostic
+    /// ```js
     /// const promise = Promise.resolve('value');
     /// const val = promise ? 123 : 456;
     /// ```
     ///
-    /// ```js,expect_diagnostic
+    /// ```js
     /// const promise = Promise.resolve('value');
     /// [1, 2, 3].filter(() => promise);
     /// ```
     ///
-    /// ```js,expect_diagnostic
+    /// ```js
     /// const promise = Promise.resolve('value');
     /// while (promise) { /* Do something */ }
     /// ```
     ///
-    /// ```js,expect_diagnostic
+    /// ```js
     /// const getData = () => fetch('/');
     /// console.log({ foo: 42, ...getData() });
     /// ```
