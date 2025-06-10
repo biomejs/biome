@@ -4746,10 +4746,10 @@ pub struct Nursery {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_important_styles:
         Option<RuleFixConfiguration<biome_css_analyze::options::NoImportantStyles>>,
-    #[doc = "Succinct description of the rule."]
+    #[doc = "Disallow Promises to be used in places where they are almost certainly a mistake."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_misused_promises:
-        Option<RuleConfiguration<biome_js_analyze::options::NoMisusedPromises>>,
+        Option<RuleFixConfiguration<biome_js_analyze::options::NoMisusedPromises>>,
     #[doc = "Disallows defining React components inside other components."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_nested_component_definitions:

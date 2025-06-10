@@ -1569,9 +1569,9 @@ export interface Nursery {
 	 */
 	noImportantStyles?: RuleFixConfiguration_for_Null;
 	/**
-	 * Succinct description of the rule.
+	 * Disallow Promises to be used in places where they are almost certainly a mistake.
 	 */
-	noMisusedPromises?: RuleConfiguration_for_Null;
+	noMisusedPromises?: RuleFixConfiguration_for_Null;
 	/**
 	 * Disallows defining React components inside other components.
 	 */

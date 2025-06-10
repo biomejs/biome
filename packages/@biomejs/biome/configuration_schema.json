@@ -2780,9 +2780,9 @@
 					]
 				},
 				"noMisusedPromises": {
-					"description": "Succinct description of the rule.",
+					"description": "Disallow Promises to be used in places where they are almost certainly a mistake.",
 					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "$ref": "#/definitions/RuleFixConfiguration" },
 						{ "type": "null" }
 					]
 				},
