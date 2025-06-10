@@ -1569,6 +1569,10 @@ export interface Nursery {
 	 */
 	noImportantStyles?: RuleFixConfiguration_for_Null;
 	/**
+	 * Disallow Promises to be used in places where they are almost certainly a mistake.
+	 */
+	noMisusedPromises?: RuleFixConfiguration_for_Null;
+	/**
 	 * Disallows defining React components inside other components.
 	 */
 	noNestedComponentDefinitions?: RuleConfiguration_for_Null;
@@ -3544,6 +3548,7 @@ export type Category =
 	| "lint/nursery/noInvalidGridAreas"
 	| "lint/nursery/noInvalidPositionAtImportRule"
 	| "lint/nursery/noMissingGenericFamilyKeyword"
+	| "lint/nursery/noMisusedPromises"
 	| "lint/nursery/noNestedComponentDefinitions"
 	| "lint/nursery/noNoninteractiveElementInteractions"
 	| "lint/nursery/noProcessGlobal"

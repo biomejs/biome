@@ -2779,6 +2779,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noMisusedPromises": {
+					"description": "Disallow Promises to be used in places where they are almost certainly a mistake.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleFixConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noNestedComponentDefinitions": {
 					"description": "Disallows defining React components inside other components.",
 					"anyOf": [
