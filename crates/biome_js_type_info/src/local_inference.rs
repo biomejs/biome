@@ -5,22 +5,24 @@ use biome_js_syntax::{
     AnyJsArrayBindingPatternElement, AnyJsArrayElement, AnyJsArrowFunctionParameters,
     AnyJsBindingPattern, AnyJsCallArgument, AnyJsClassMember, AnyJsDeclaration,
     AnyJsDeclarationClause, AnyJsExportDefaultDeclaration, AnyJsExpression, AnyJsFormalParameter,
-    AnyJsLiteralExpression, AnyJsName, AnyJsObjectBindingPatternMember, AnyJsObjectMember,
-    AnyJsObjectMemberName, AnyJsParameter, AnyTsModuleName, AnyTsName, AnyTsReturnType,
-    AnyTsTupleTypeElement, AnyTsType, AnyTsTypeMember, AnyTsTypePredicateParameterName,
-    ClassMemberName, JsArrayBindingPattern, JsArrowFunctionExpression, JsBinaryExpression,
-    JsBinaryOperator, JsCallArguments, JsClassDeclaration, JsClassExportDefaultDeclaration,
-    JsClassExpression, JsFormalParameter, JsFunctionDeclaration, JsFunctionExpression,
-    JsNewExpression, JsObjectBindingPattern, JsObjectExpression, JsParameters,
-    JsReferenceIdentifier, JsSyntaxToken, JsUnaryExpression, JsUnaryOperator,
-    JsVariableDeclaration, JsVariableDeclarator, TsDeclareFunctionDeclaration,
+    AnyJsFunctionBody, AnyJsLiteralExpression, AnyJsName, AnyJsObjectBindingPatternMember,
+    AnyJsObjectMember, AnyJsObjectMemberName, AnyJsParameter, AnyTsModuleName, AnyTsName,
+    AnyTsReturnType, AnyTsTupleTypeElement, AnyTsType, AnyTsTypeMember,
+    AnyTsTypePredicateParameterName, ClassMemberName, JsArrayBindingPattern,
+    JsArrowFunctionExpression, JsBinaryExpression, JsBinaryOperator, JsCallArguments,
+    JsClassDeclaration, JsClassExportDefaultDeclaration, JsClassExpression, JsFormalParameter,
+    JsFunctionDeclaration, JsFunctionExpression, JsNewExpression, JsObjectBindingPattern,
+    JsObjectExpression, JsParameters, JsReferenceIdentifier, JsSyntaxToken, JsUnaryExpression,
+    JsUnaryOperator, JsVariableDeclaration, JsVariableDeclarator, TsDeclareFunctionDeclaration,
     TsExternalModuleDeclaration, TsInterfaceDeclaration, TsModuleDeclaration, TsReferenceType,
     TsReturnTypeAnnotation, TsTypeAliasDeclaration, TsTypeAnnotation, TsTypeArguments, TsTypeList,
     TsTypeParameter, TsTypeParameters, TsTypeofType, inner_string_text, unescape_js_string,
 };
 use biome_rowan::{AstNode, SyntaxResult, Text, TokenText};
 
-use crate::globals::{GLOBAL_INSTANCEOF_PROMISE_ID, GLOBAL_NUMBER_ID, GLOBAL_STRING_ID};
+use crate::globals::{
+    GLOBAL_INSTANCEOF_PROMISE_ID, GLOBAL_NUMBER_ID, GLOBAL_PROMISE_ID, GLOBAL_STRING_ID,
+};
 use crate::literal::{BooleanLiteral, NumberLiteral, StringLiteral};
 use crate::{
     AssertsReturnType, CallArgumentType, Class, Constructor, DestructureField, Function,
@@ -787,7 +789,38 @@ impl TypeData {
                 expr.return_type_annotation(),
             )
             .unwrap_or_else(|| {
-                return_type_from_async_token(resolver, scope_id, expr.async_token())
+                let return_ty = match expr.body() {
+                    Ok(AnyJsFunctionBody::AnyJsExpression(return_expr)) => Some(
+                        resolver
+                            .resolve_expression(scope_id, &return_expr)
+                            .into_owned(),
+                    ),
+                    _ => {
+                        // TODO: We may infer bracketed arrow functions too...
+                        None
+                    }
+                };
+
+                ReturnType::Type(match expr.async_token() {
+                    Some(_) => resolver.reference_to_owned_data(Self::promise_of(
+                        scope_id,
+                        match return_ty {
+                            Some(Self::InstanceOf(instance))
+                                if instance.ty == TypeReference::Resolved(GLOBAL_PROMISE_ID) =>
+                            {
+                                instance
+                                    .type_parameters
+                                    .first()
+                                    .cloned()
+                                    .unwrap_or_default()
+                            }
+                            _ => TypeReference::Unknown,
+                        },
+                    )),
+                    None => return_ty
+                        .map(|return_ty| resolver.reference_to_owned_data(return_ty))
+                        .unwrap_or_default(),
+                })
             }),
         }))
     }

@@ -66,7 +66,7 @@ Module TypeId(5) => sync Function {
     ]
     type_args: []
   }
-  returns: unknown reference
+  returns: Module(0) TypeId(4)
 }
 
 Module TypeId(6) => instanceof Module(0) TypeId(0)

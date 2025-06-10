@@ -103,6 +103,29 @@ impl Type {
         }
     }
 
+    /// Returns whether this type is used as a truthy conditional.
+    pub fn is_conditional(&self) -> bool {
+        matches!(self.as_raw_data(), Some(TypeData::Conditional))
+    }
+
+    /// Returns whether this type is a function.
+    pub fn is_function(&self) -> bool {
+        matches!(self.as_raw_data(), Some(TypeData::Function(_)))
+    }
+
+    /// Returns whether `self` is a function with a return type matching the
+    /// given `predicate`.
+    pub fn is_function_with_return_type(&self, predicate: impl Fn(Self) -> bool) -> bool {
+        match self.as_raw_data() {
+            Some(TypeData::Function(function)) => function
+                .return_type
+                .as_type()
+                .and_then(|ty| self.resolve(ty))
+                .is_some_and(predicate),
+            _ => false,
+        }
+    }
+
     /// Returns whether this type is the `Promise` class.
     pub fn is_promise(&self) -> bool {
         self.id == GLOBAL_PROMISE_ID
@@ -114,19 +137,6 @@ impl Type {
             .is_some_and(|ty| ty.is_instance_of(self.resolver.as_ref(), GLOBAL_PROMISE_ID))
     }
 
-    /// Returns whether the given type is known to reference a function that
-    /// returns a `Promise`.
-    pub fn is_function_that_returns_promise(&self) -> bool {
-        match self.as_raw_data() {
-            Some(TypeData::Function(function)) => function
-                .return_type
-                .as_type()
-                .and_then(|ty| self.resolve(ty))
-                .is_some_and(|ty| ty.is_promise()),
-            _ => false,
-        }
-    }
-
     /// Returns whether this type is a string.
     pub fn is_string(&self) -> bool {
         self.id == GLOBAL_STRING_ID
@@ -135,6 +145,11 @@ impl Type {
                 TypeData::Literal(literal) => matches!(literal.as_ref(), Literal::String(_)),
                 _ => false,
             })
+    }
+
+    /// Returns whether this type indicates the `void` keyword.
+    pub fn is_void(&self) -> bool {
+        matches!(self.as_raw_data(), Some(TypeData::VoidKeyword))
     }
 
     pub fn resolve(&self, ty: &TypeReference) -> Option<Self> {
@@ -154,6 +169,19 @@ impl Type {
     }
 
     fn with_resolved_id(&self, id: ResolvedTypeId) -> Self {
+        let mut id = id;
+        loop {
+            let Some(resolved_data) = self.resolver.get_by_resolved_id(id) else {
+                break;
+            };
+            match resolved_data.as_raw_data() {
+                TypeData::Reference(TypeReference::Resolved(resolved_id)) => {
+                    id = resolved_data.apply_module_id(*resolved_id);
+                }
+                _ => break,
+            }
+        }
+
         Self {
             resolver: self.resolver.clone(),
             id,
@@ -182,6 +210,13 @@ pub enum TypeData {
     String,
     Symbol,
     Undefined,
+
+    /// Special type that is used for indicating an expression or return value
+    /// is interpreted as a conditional, where the condition is decided upon the
+    /// truthiness of the value.
+    ///
+    /// An example is the return value of the callback to `Array#filter()`.
+    Conditional,
 
     // Complex types
     Class(Box<Class>),
@@ -329,6 +364,13 @@ impl TypeData {
     pub fn as_class(&self) -> Option<&Class> {
         match self {
             Self::Class(class) => Some(class.as_ref()),
+            _ => None,
+        }
+    }
+
+    pub fn as_function(&self) -> Option<&Function> {
+        match self {
+            Self::Function(function) => Some(function.as_ref()),
             _ => None,
         }
     }

@@ -1,6 +1,7 @@
 use std::{
     borrow::Cow,
     collections::{BTreeMap, btree_map::Entry},
+    ops::Deref,
     sync::Arc,
 };
 
@@ -54,7 +55,7 @@ pub struct ModuleResolver {
     /// "Module 0" derives its name from being stored at the first index of this
     /// vector. Other modules are those imported by module 0, either directly
     /// or transitively.
-    modules: Vec<JsModuleInfo>,
+    pub modules: Vec<JsModuleInfo>,
 
     /// Map of module IDs keyed by their resolved paths.
     ///
@@ -85,6 +86,8 @@ impl ModuleResolver {
         }
     }
 
+    /// Runs the resolver's inference.
+    ///
     /// This method must've been called before attempting to query the types of
     /// functions or expressions.
     pub fn run_inference(&mut self) {
@@ -94,9 +97,16 @@ impl ModuleResolver {
     }
 
     /// Creates a [`Type`] instance for the given `resolved_id`.
+    ///
+    /// If `resolved_id` points to a reference, this automatically dereferences
+    /// the type.
     #[inline]
     pub fn resolved_type_for_id(self: &Arc<Self>, resolved_id: ResolvedTypeId) -> Type {
-        Type::from_id(self.clone(), resolved_id)
+        let ty = Type::from_id(self.clone(), resolved_id);
+        match ty.deref() {
+            TypeData::Reference(reference) => self.resolved_type_for_reference(reference),
+            _ => ty,
+        }
     }
 
     /// Returns the resolved type for the given `reference`.
