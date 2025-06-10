@@ -163,6 +163,7 @@ define_categories! {
     "lint/nursery/noInvalidGridAreas": "https://biomejs.dev/linter/rules/use-consistent-grid-areas",
     "lint/nursery/noInvalidPositionAtImportRule": "https://biomejs.dev/linter/rules/no-invalid-position-at-import-rule",
     "lint/nursery/noMissingGenericFamilyKeyword": "https://biomejs.dev/linter/rules/no-missing-generic-family-keyword",
+    "lint/nursery/noMisusedPromises": "https://biomejs.dev/linter/rules/no-misused-promises",
     "lint/nursery/noNestedComponentDefinitions": "https://biomejs.dev/linter/rules/no-nested-component-definitions",
     "lint/nursery/noNoninteractiveElementInteractions": "https://biomejs.dev/linter/rules/no-noninteractive-element-interactions",
     "lint/nursery/noProcessGlobal": "https://biomejs.dev/linter/rules/no-process-global",

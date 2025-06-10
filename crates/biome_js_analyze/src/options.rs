@@ -156,6 +156,8 @@ pub type NoMisleadingCharacterClass = < lint :: suspicious :: no_misleading_char
 pub type NoMisleadingInstantiator = < lint :: suspicious :: no_misleading_instantiator :: NoMisleadingInstantiator as biome_analyze :: Rule > :: Options ;
 pub type NoMisplacedAssertion = < lint :: suspicious :: no_misplaced_assertion :: NoMisplacedAssertion as biome_analyze :: Rule > :: Options ;
 pub type NoMisrefactoredShorthandAssign = < lint :: suspicious :: no_misrefactored_shorthand_assign :: NoMisrefactoredShorthandAssign as biome_analyze :: Rule > :: Options ;
+pub type NoMisusedPromises =
+    <lint::nursery::no_misused_promises::NoMisusedPromises as biome_analyze::Rule>::Options;
 pub type NoNamespace = <lint::style::no_namespace::NoNamespace as biome_analyze::Rule>::Options;
 pub type NoNamespaceImport =
     <lint::performance::no_namespace_import::NoNamespaceImport as biome_analyze::Rule>::Options;
