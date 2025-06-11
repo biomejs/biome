@@ -59,8 +59,15 @@ schema = [
 ]
 
 [dev-dependencies]
+criterion    = { package = "codspeed-criterion-compat", version = "*" }
 insta        = { workspace = true }
 tests_macros = { workspace = true }
+
+[target.'cfg(target_os = "windows")'.dev-dependencies]
+mimalloc = { workspace = true }
+
+[target.'cfg(all(target_family="unix", not(all(target_arch = "aarch64", target_env = "musl"))))'.dev-dependencies]
+tikv-jemallocator = { workspace = true }
 
 [lints]
 workspace = true
@@ -68,3 +75,7 @@ workspace = true
 [package.metadata.cargo-udeps.ignore]
 # currently technically not used, but needed in order to compile because of the `schema` feature
 normal = ["biome_html_syntax"]
+
+[[bench]]
+harness = false
+name    = "biome_json"

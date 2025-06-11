@@ -220,12 +220,15 @@ dependencies = [
  "biome_rowan",
  "bpaf",
  "camino",
+ "codspeed-criterion-compat",
  "insta",
+ "mimalloc",
  "regex",
  "rustc-hash 2.1.1",
  "schemars",
  "serde",
  "tests_macros",
+ "tikv-jemallocator",
 ]
 
 [[package]]
@@ -1261,13 +1264,16 @@ dependencies = [
  "biome_rowan",
  "biome_text_size",
  "camino",
+ "codspeed-criterion-compat",
  "indexmap",
  "insta",
+ "mimalloc",
  "node-semver",
  "rustc-hash 2.1.1",
  "serde",
  "static_assertions",
  "tests_macros",
+ "tikv-jemallocator",
 ]
 
 [[package]]
