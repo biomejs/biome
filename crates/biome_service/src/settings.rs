@@ -707,6 +707,10 @@ impl VcsSettings {
         self.enabled.unwrap_or_default().into()
     }
 
+    pub fn should_use_ignore_file(&self) -> bool {
+        self.use_ignore_file.unwrap_or_default().into()
+    }
+
     pub fn to_base_path(&self, base_path: Option<&Utf8Path>) -> Option<Utf8PathBuf> {
         Some(match (base_path, &self.root) {
             (Some(vcs_base_path), Some(root)) => vcs_base_path.join(root),
