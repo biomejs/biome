@@ -250,7 +250,7 @@ If you're debugging an LSP reproduction, make sure that the client allows to use
 
 ```json
 {
-  "biome.lspBin": "/Users/john/www/biome/target/debug/biome"
+  "biome.lsp.bin": "/Users/john/www/biome/target/debug/biome"
 }
 ```
 

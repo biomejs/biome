@@ -168,3 +168,22 @@ function MissingFunctionDeclaration() {
 
   return <>{value}</>
 }
+
+function HoistedDeclaration() {
+	useEffect(() => {
+		console.log(a);
+	}, []);
+
+	let a = 1;
+}
+
+
+function HoistedDeclarations() {
+	useEffect(() => {
+		console.log(a, b);
+	}, []);
+
+	let a = 1;
+	let b = a + 1;
+}
+

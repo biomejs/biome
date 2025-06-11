@@ -157,14 +157,12 @@ pub(crate) fn is_complex_type_annotation(
                             return true;
                         }
 
-                        let is_complex_type = argument
+                        argument
                             .as_ts_reference_type()
                             .and_then(|reference_type| reference_type.type_arguments())
                             .is_some_and(|type_arguments| {
                                 type_arguments.ts_type_argument_list().len() > 0
-                            });
-
-                        is_complex_type
+                            })
                     });
                 Some(has_at_least_a_complex_type)
             }

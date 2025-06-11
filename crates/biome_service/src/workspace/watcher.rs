@@ -9,13 +9,13 @@
 //! watcher. Apart from updating open documents, they are also responsible for
 //! updating service data such as the dependency graph.
 
-use std::path::{Path, PathBuf};
+use std::path::PathBuf;
 
-use biome_fs::{FileSystemDiagnostic, PathKind};
-use camino::Utf8Path;
+use biome_fs::PathKind;
+use camino::{Utf8Path, Utf8PathBuf};
 use papaya::{Compute, Operation};
 
-use crate::{IGNORE_ENTRIES, WorkspaceError, workspace_watcher::WatcherSignalKind};
+use crate::{WorkspaceError, workspace_watcher::WatcherSignalKind};
 
 use super::{
     ScanKind, ScanProjectFolderParams, ServiceDataNotification, Workspace, WorkspaceServer,
@@ -23,30 +23,48 @@ use super::{
 };
 
 impl WorkspaceServer {
+    /// Filters the given `paths` and returns only those the watcher is
+    /// interested in.
+    pub fn filter_paths_for_watcher(&self, paths: Vec<PathBuf>) -> Vec<Utf8PathBuf> {
+        paths
+            .into_iter()
+            .filter_map(|path| {
+                let path = Utf8PathBuf::from_path_buf(path).ok()?;
+                self.projects
+                    .find_project_for_path(&path)
+                    .and_then(|project_key| {
+                        if self.is_ignored_by_scanner(project_key, &path) {
+                            None
+                        } else {
+                            Some(path)
+                        }
+                    })
+            })
+            .collect()
+    }
+
     /// Used by the watcher to open one or more files or folders.
     ///
     /// If you already know the paths are folders, use
     /// [Self::open_folders_through_watcher()] instead.
-    pub fn open_paths_through_watcher(&self, paths: Vec<PathBuf>) -> Result<(), WorkspaceError> {
+    pub fn open_paths_through_watcher(
+        &self,
+        paths: Vec<Utf8PathBuf>,
+    ) -> Result<(), WorkspaceError> {
         for path in paths {
-            self.open_path_through_watcher(
-                path.as_path()
-                    .try_into()
-                    .map_err(|_| FileSystemDiagnostic::non_utf8_path(&path))?,
-            )?;
+            self.open_path_through_watcher(&path)?;
         }
 
         Ok(())
     }
 
     /// Used by the watcher to open one or more folders.
-    pub fn open_folders_through_watcher(&self, paths: Vec<PathBuf>) -> Result<(), WorkspaceError> {
+    pub fn open_folders_through_watcher(
+        &self,
+        paths: Vec<Utf8PathBuf>,
+    ) -> Result<(), WorkspaceError> {
         for path in paths {
-            self.open_folder_through_watcher(
-                path.as_path()
-                    .try_into()
-                    .map_err(|_| FileSystemDiagnostic::non_utf8_path(&path))?,
-            )?;
+            self.open_folder_through_watcher(&path)?;
         }
 
         Ok(())
@@ -61,16 +79,13 @@ impl WorkspaceServer {
             return self.open_folder_through_watcher(path);
         }
 
-        if path
-            .components()
-            .any(|component| IGNORE_ENTRIES.contains(&component.as_os_str().as_encoded_bytes()))
-        {
-            return Ok(());
-        }
-
         let Some(project_key) = self.projects.find_project_for_path(path) else {
             return Ok(()); // file events outside our projects can be safely ignored.
         };
+
+        if self.is_ignored_by_scanner(project_key, path) {
+            return Ok(());
+        }
 
         self.open_file_by_watcher(project_key, path)
     }
@@ -92,13 +107,12 @@ impl WorkspaceServer {
     }
 
     /// Used by the watcher to close one or more files.
-    pub fn close_files_through_watcher(&self, paths: Vec<PathBuf>) -> Result<(), WorkspaceError> {
+    pub fn close_files_through_watcher(
+        &self,
+        paths: Vec<Utf8PathBuf>,
+    ) -> Result<(), WorkspaceError> {
         for path in paths {
-            self.close_file_through_watcher(
-                path.as_path()
-                    .try_into()
-                    .map_err(|_| FileSystemDiagnostic::non_utf8_path(&path))?,
-            )?;
+            self.close_file_through_watcher(&path)?;
         }
 
         Ok(())
@@ -108,13 +122,12 @@ impl WorkspaceServer {
     ///
     /// If you know the paths are files, use
     /// [Self::close_files_through_watcher()] instead.
-    pub fn close_paths_through_watcher(&self, paths: Vec<PathBuf>) -> Result<(), WorkspaceError> {
+    pub fn close_paths_through_watcher(
+        &self,
+        paths: Vec<Utf8PathBuf>,
+    ) -> Result<(), WorkspaceError> {
         for path in &paths {
-            self.close_path_through_watcher(
-                path.as_path()
-                    .try_into()
-                    .map_err(|_| FileSystemDiagnostic::non_utf8_path(path))?,
-            )?;
+            self.close_path_through_watcher(path)?;
         }
 
         Ok(())
@@ -172,17 +185,10 @@ impl WorkspaceServer {
     /// paths.
     pub fn rename_path_through_watcher(
         &self,
-        from: &Path,
-        to: &Path,
+        from: &Utf8Path,
+        to: &Utf8Path,
     ) -> Result<(), WorkspaceError> {
-        let from = from
-            .try_into()
-            .map_err(|_| FileSystemDiagnostic::non_utf8_path(from))?;
         self.close_path_through_watcher(from)?;
-
-        let to = to
-            .try_into()
-            .map_err(|_| FileSystemDiagnostic::non_utf8_path(to))?;
         self.open_path_through_watcher(to)?;
 
         Ok(())

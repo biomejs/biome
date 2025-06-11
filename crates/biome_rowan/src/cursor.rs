@@ -47,7 +47,6 @@ mod trivia;
 use std::{iter, ops};
 use std::{ptr, rc::Rc};
 
-use countme::Count;
 pub(crate) use trivia::{SyntaxTrivia, SyntaxTriviaPiecesIterator};
 
 use crate::cursor::node::Siblings;
@@ -66,13 +65,15 @@ pub(crate) use node::{
 #[derive(Debug)]
 struct _SyntaxElement;
 
+#[cfg(feature = "countme")]
 pub(crate) fn has_live() -> bool {
     countme::get::<_SyntaxElement>().live > 0
 }
 
 #[derive(Debug)]
 struct NodeData {
-    _c: Count<_SyntaxElement>,
+    #[cfg(feature = "countme")]
+    _c: countme::Count<_SyntaxElement>,
 
     kind: NodeKind,
     slot: u32,
@@ -141,7 +142,8 @@ impl NodeData {
     #[inline]
     fn new(kind: NodeKind, slot: u32, offset: TextSize) -> Rc<Self> {
         let res = Self {
-            _c: Count::new(),
+            #[cfg(feature = "countme")]
+            _c: countme::Count::new(),
             kind,
             slot,
             offset,

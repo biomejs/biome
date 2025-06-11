@@ -41,7 +41,7 @@
 
 **Biome は _JavaScript_, _TypeScript_, _JSX_ のための[高性能なLinter](https://github.com/biomejs/biome/tree/main/benchmark#linting)** であり、ESLint, typescript-eslint, [その他のソース](https://github.com/biomejs/biome/discussions/3)から **[270以上のルール](https://biomejs.dev/linter/rules/)**を提供しています。Biome は**詳細で文脈に沿った結果を出力**するため、コードを改善し、より良いプログラマになるための手助けをします！
 
-**Biome** は最初から[**エディタ内で対話的に**](https://biomejs.dev/ja/guides/integrate-in-editor/)使用できるように設計されています。
+**Biome** は最初から[**エディタ内で対話的に**](https://biomejs.dev/ja/guides/editors/first-party-extensions/)使用できるように設計されています。
 あなたがコードを書いているときに、形の崩れたコードを format と lint することができます。
 
 ### インストール

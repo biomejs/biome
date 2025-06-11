@@ -257,16 +257,14 @@ impl<'src> CssLexer<'src> {
                     .get_unchecked((self.position + offset)..),
             )
         };
-        let chr = if let Some(chr) = string.chars().next() {
+        if let Some(chr) = string.chars().next() {
             chr
         } else {
             // Safety: we always call this when we are at a valid char, so this branch is completely unreachable
             unsafe {
                 core::hint::unreachable_unchecked();
             }
-        };
-
-        chr
+        }
     }
 
     /// Check if the lexer is at a valid escape. U+005C REVERSE SOLIDUS (\)

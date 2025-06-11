@@ -120,6 +120,11 @@ fn should_extend_from_the_root_config() {
     "formatter": {
         "indentStyle": "space",
         "indentWidth": 2
+    },
+    "javascript": {
+        "formatter": {
+            "quoteStyle": "single"
+        }
     }
 }
 "#,
@@ -291,6 +296,57 @@ fn should_error_when_no_root_config_is_found() {
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
         "should_error_when_no_root_config_is_found",
+        fs.create_mem(),
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn should_ignore_files_in_nested_projects() {
+    let mut console = BufferConsole::default();
+    let mut fs = TemporaryFs::new("should_ignore_files_in_nested_projects");
+
+    fs.create_file(
+        "biome.json",
+        r#"
+{
+    "root": true,
+    "vcs": {
+        "enabled": true,
+        "clientKind": "git",
+        "useIgnoreFile": true
+    }
+}
+"#,
+    );
+    fs.create_file(".gitignore", ".next");
+    fs.create_file(".next/file.json", "[\n\n\n\n]");
+    fs.create_file(
+        "file.js",
+        "function f() { const lorem_and_ipsum = 'lorem ipsum'; }",
+    );
+
+    fs.create_file("packages/lib/biome.json", r#"{ "extends": "//" }"#);
+
+    fs.create_file("packages/lib/.gitignore", ".next");
+    fs.create_file("packages/lib/.next/file.json", "[\n\n\n\n]");
+    fs.create_file(
+        "packages/lib/file.js",
+        "function f() { const lorem_and_ipsum = 'lorem ipsum'; }",
+    );
+
+    let result = run_cli_with_dyn_fs(
+        Box::new(fs.create_os()),
+        &mut console,
+        Args::from(["check", fs.cli_path()].as_slice()),
+    );
+
+    assert!(result.is_err(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "should_ignore_files_in_nested_projects",
         fs.create_mem(),
         console,
         result,

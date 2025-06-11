@@ -11,6 +11,7 @@
 
 pub mod literal;
 
+use std::borrow::Cow;
 use std::cmp::Ordering;
 use std::fmt::Debug;
 use std::{ops::Deref, str::FromStr, sync::Arc};
@@ -19,7 +20,7 @@ use biome_js_type_info_macros::Resolvable;
 use biome_resolver::ResolvedPath;
 use biome_rowan::Text;
 
-use crate::globals::{GLOBAL_PROMISE_ID, GLOBAL_UNKNOWN_ID, PROMISE_ID};
+use crate::globals::{GLOBAL_PROMISE_ID, GLOBAL_STRING_ID, GLOBAL_UNKNOWN_ID};
 use crate::type_info::literal::{BooleanLiteral, NumberLiteral, StringLiteral};
 use crate::{GLOBAL_RESOLVER, Resolvable, ResolvedTypeData, ResolvedTypeId, TypeResolver};
 
@@ -29,7 +30,7 @@ const UNKNOWN: TypeData = TypeData::Reference(TypeReference::Resolved(GLOBAL_UNK
 ///
 /// Note that separate modules typically use separate resolvers. Because of
 /// this, type IDs are only unique within a single module/resolver.
-#[derive(Clone, Copy, Debug, Eq, PartialEq, Resolvable)]
+#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq, Resolvable)]
 pub struct TypeId(u32);
 
 impl TypeId {
@@ -75,14 +76,6 @@ impl Deref for Type {
 }
 
 impl Type {
-    pub fn from_data(mut resolver: Box<dyn TypeResolver>, data: TypeData) -> Self {
-        let id = resolver.register_and_resolve(data);
-        Self {
-            resolver: Arc::from(resolver),
-            id,
-        }
-    }
-
     pub fn from_id(resolver: Arc<dyn TypeResolver>, id: ResolvedTypeId) -> Self {
         Self { resolver, id }
     }
@@ -112,7 +105,7 @@ impl Type {
 
     /// Returns whether this type is the `Promise` class.
     pub fn is_promise(&self) -> bool {
-        self.id.is_global() && self.id() == PROMISE_ID
+        self.id == GLOBAL_PROMISE_ID
     }
 
     /// Returns whether this type is an instance of a `Promise`.
@@ -134,6 +127,18 @@ impl Type {
         }
     }
 
+    /// Returns whether this type is a string.
+    pub fn is_string(&self) -> bool {
+        self.id == GLOBAL_STRING_ID
+            || self
+                .resolved_data()
+                .is_some_and(|ty| match ty.as_raw_data() {
+                    TypeData::String => true,
+                    TypeData::Literal(literal) => matches!(literal.as_ref(), Literal::String(_)),
+                    _ => false,
+                })
+    }
+
     pub fn resolve(&self, ty: &TypeReference) -> Option<Self> {
         self.resolver
             .resolve_reference(&self.id.apply_module_id_to_reference(ty))
@@ -153,7 +158,7 @@ impl Type {
     }
 }
 
-#[derive(Clone, Debug, Default, PartialEq, Resolvable)]
+#[derive(Clone, Debug, Default, Eq, Hash, PartialEq, Resolvable)]
 pub enum TypeData {
     /// The type is unknown because inference couldn't determine a type.
     ///
@@ -179,10 +184,14 @@ pub enum TypeData {
     Class(Box<Class>),
     Constructor(Box<Constructor>),
     Function(Box<Function>),
+    Interface(Box<Interface>),
     Module(Box<Module>),
     Namespace(Box<Namespace>),
     Object(Box<Object>),
     Tuple(Box<Tuple>),
+
+    // Definition of a generic type argument.
+    Generic(Box<GenericTypeParameter>),
 
     // Compound types
     Intersection(Box<Intersection>),
@@ -200,14 +209,15 @@ pub enum TypeData {
     /// Reference to another type.
     Reference(TypeReference),
 
-    /// This one is nasty: TypeScript allows types and values to exist with
-    /// the same name within the same scope. Such duality can even be tracked
-    /// across modules, because a single imported symbol can import both the
-    /// value and the type meaning associated with a single name.
+    /// This one is nasty: TypeScript allows types, namespaces and values to
+    /// exist with the same name within the same scope. This results in _merged_
+    /// references that can reference each simultaneously. Merged references can
+    /// be tracked across modules, because a single imported symbol can import
+    /// all merged references under a single name.
     ///
-    /// Therefore, the dual reference can track both a type as well as the type
-    /// of the value with the same name.
-    DualReference(Box<DualReference>),
+    /// See also:
+    /// https://www.typescriptlang.org/docs/handbook/declaration-merging.html
+    MergedReference(Box<MergedReference>),
 
     /// Reference to the type of a JavaScript expression.
     TypeofExpression(Box<TypeofExpression>),
@@ -263,6 +273,18 @@ impl From<Function> for TypeData {
     }
 }
 
+impl From<GenericTypeParameter> for TypeData {
+    fn from(value: GenericTypeParameter) -> Self {
+        Self::Generic(Box::new(value))
+    }
+}
+
+impl From<Interface> for TypeData {
+    fn from(value: Interface) -> Self {
+        Self::Interface(Box::new(value))
+    }
+}
+
 impl From<Literal> for TypeData {
     fn from(value: Literal) -> Self {
         Self::Literal(Box::new(value))
@@ -294,9 +316,10 @@ impl From<TypeofValue> for TypeData {
 }
 
 impl TypeData {
-    pub fn array_of(ty: TypeReference) -> Self {
+    pub fn array_of(scope_id: ScopeId, ty: TypeReference) -> Self {
         Self::instance_of(TypeReference::from(
-            TypeReferenceQualifier::from_name(Text::Static("Array")).with_type_parameters([ty]),
+            TypeReferenceQualifier::from_name(scope_id, Text::Static("Array"))
+                .with_type_parameters([ty]),
         ))
     }
 
@@ -318,13 +341,15 @@ impl TypeData {
         Self::Boolean
     }
 
-    pub fn dual_reference(
-        ty: impl Into<TypeReference>,
-        value_ty: impl Into<TypeReference>,
+    pub fn merged_reference(
+        ty: Option<impl Into<TypeReference>>,
+        value_ty: Option<impl Into<TypeReference>>,
+        namespace_ty: Option<impl Into<TypeReference>>,
     ) -> Self {
-        Self::DualReference(Box::new(DualReference {
-            ty: ty.into(),
-            value_ty: value_ty.into(),
+        Self::MergedReference(Box::new(MergedReference {
+            ty: ty.map(Into::into),
+            value_ty: value_ty.map(Into::into),
+            namespace_ty: namespace_ty.map(Into::into),
         }))
     }
 
@@ -369,11 +394,12 @@ impl TypeData {
         Self::Reference(reference.into())
     }
 
-    pub fn type_parameters(&self) -> Option<&[GenericTypeParameter]> {
+    pub fn type_parameters(&self) -> Option<&[TypeReference]> {
         match self {
             Self::Class(class) => Some(&class.type_parameters),
             Self::Function(function) => Some(&function.type_parameters),
-            Self::InstanceOf(instance) => Some(&instance.type_parameters),
+            Self::InstanceOf(type_instance) => Some(&type_instance.type_parameters),
+            Self::Interface(interface) => Some(&interface.type_parameters),
             _ => None,
         }
     }
@@ -399,16 +425,19 @@ impl TypeData {
 }
 
 /// A class definition.
-#[derive(Clone, PartialEq, Resolvable)]
+#[derive(Clone, Eq, Hash, PartialEq, Resolvable)]
 pub struct Class {
     /// Name of the class, if specified in the definition.
     pub name: Option<Text>,
 
     /// The class's type parameters.
-    pub type_parameters: Box<[GenericTypeParameter]>,
+    pub type_parameters: Box<[TypeReference]>,
 
     /// Type of another class being extended by this one.
     pub extends: Option<TypeReference>,
+
+    /// Interfaces being implemented by this class.
+    pub implements: Box<[TypeReference]>,
 
     /// Class members.
     pub members: Box<[TypeMember]>,
@@ -425,10 +454,10 @@ impl Debug for Class {
 }
 
 /// A constructor definition.
-#[derive(Clone, Debug, PartialEq, Resolvable)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq, Resolvable)]
 pub struct Constructor {
     /// Generic type parameters used in the call signature.
-    pub type_parameters: Box<[GenericTypeParameter]>,
+    pub type_parameters: Box<[TypeReference]>,
 
     /// Call parameter of the constructor.
     pub parameters: Box<[FunctionParameter]>,
@@ -450,20 +479,21 @@ pub struct Constructor {
 /// name.
 ///
 /// With a dual reference, which type gets used depends entirely on context.
-#[derive(Clone, Debug, PartialEq, Resolvable)]
-pub struct DualReference {
-    pub ty: TypeReference,
-    pub value_ty: TypeReference,
+#[derive(Clone, Debug, Eq, Hash, PartialEq, Resolvable)]
+pub struct MergedReference {
+    pub ty: Option<TypeReference>,
+    pub value_ty: Option<TypeReference>,
+    pub namespace_ty: Option<TypeReference>,
 }
 
 /// A function definition.
-#[derive(Clone, Debug, Default, PartialEq, Resolvable)]
+#[derive(Clone, Debug, Default, Eq, Hash, PartialEq, Resolvable)]
 pub struct Function {
     /// Whether the function has an `async` specifier or not.
     pub is_async: bool,
 
     /// Generic type parameters defined in the function signature.
-    pub type_parameters: Box<[GenericTypeParameter]>,
+    pub type_parameters: Box<[TypeReference]>,
 
     /// Name of the function, if specified in the definition.
     pub name: Option<Text>,
@@ -485,7 +515,7 @@ impl Function {
 }
 
 /// Definition of a function argument.
-#[derive(Clone, Debug, PartialEq, Resolvable)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq, Resolvable)]
 pub struct FunctionParameter {
     /// Name of the argument, if specified in the definition.
     pub name: Option<Text>,
@@ -504,54 +534,53 @@ pub struct FunctionParameter {
 }
 
 /// An individual binding created from a function parameter.
-#[derive(Clone, Debug, PartialEq, Resolvable)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq, Resolvable)]
 pub struct FunctionParameterBinding {
     pub name: Text,
-    pub ty: TypeData,
+    pub ty: TypeReference,
 }
 
 /// Definition of a generic type parameter.
-// TODO: Include modifiers and constraints.
-#[derive(Clone, Debug, PartialEq, Resolvable)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq, Resolvable)]
 pub struct GenericTypeParameter {
     /// Name of the type parameter.
     pub name: Text,
 
-    /// The resolved type to use.
-    ///
-    /// May be the default type from the type definition.
-    pub ty: TypeReference,
+    /// Optional constraint of the parameter.
+    pub constraint: TypeReference,
+
+    /// Default to use if the parameter is unknown.
+    pub default: TypeReference,
 }
 
-impl GenericTypeParameter {
-    /// Merges the parameters from `incoming` into `base`.
-    pub fn merge_parameters(base: &[Self], incoming: &[Self]) -> Box<[Self]> {
-        base.iter()
-            .enumerate()
-            .map(|(i, param)| Self {
-                name: param.name.clone(),
-                ty: incoming
-                    .get(i)
-                    .map_or_else(|| param.ty.clone(), |incoming| incoming.ty.clone()),
-            })
-            .collect()
-    }
+/// An interface definition.
+#[derive(Clone, Hash, Eq, PartialEq, Resolvable)]
+pub struct Interface {
+    /// Name of the interface.
+    pub name: Text,
 
-    /// Merges the `types` into `parameters`.
-    pub fn merge_types(parameters: &[Self], types: &[TypeReference]) -> Box<[Self]> {
-        parameters
-            .iter()
-            .enumerate()
-            .map(|(i, param)| Self {
-                name: param.name.clone(),
-                ty: types.get(i).cloned().unwrap_or_else(|| param.ty.clone()),
-            })
-            .collect()
+    /// The interface's type parameters.
+    pub type_parameters: Box<[TypeReference]>,
+
+    /// Types being extended by this interface.
+    pub extends: Box<[TypeReference]>,
+
+    /// Interface members.
+    pub members: Box<[TypeMember]>,
+}
+
+impl Debug for Interface {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("Interface")
+            .field("name", &self.name)
+            .field("type_parameters", &self.type_parameters)
+            .field("extends", &self.extends)
+            .finish()
     }
 }
 
 /// The intersection between other types.
-#[derive(Clone, Debug, PartialEq, Resolvable)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq, Resolvable)]
 pub struct Intersection(pub(super) Box<[TypeReference]>);
 
 impl Intersection {
@@ -561,7 +590,7 @@ impl Intersection {
 }
 
 /// Literal value used as a type.
-#[derive(Clone, Debug, PartialEq, Resolvable)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq, Resolvable)]
 pub enum Literal {
     BigInt(Text),
     Boolean(BooleanLiteral),
@@ -574,21 +603,21 @@ pub enum Literal {
 }
 
 /// A module definition.
-#[derive(Clone, Debug, PartialEq, Resolvable)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq, Resolvable)]
 pub struct Module {
     pub name: Text,
     pub members: Box<[TypeMember]>,
 }
 
 /// A namespace definition.
-#[derive(Clone, Debug, PartialEq, Resolvable)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq, Resolvable)]
 pub struct Namespace {
     pub path: Box<[Text]>,
     pub members: Box<[TypeMember]>,
 }
 
 /// An object definition.
-#[derive(Clone, Debug, PartialEq, Resolvable)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq, Resolvable)]
 pub struct Object {
     /// Optional prototype of the object.
     ///
@@ -601,7 +630,7 @@ pub struct Object {
 }
 
 /// Object literal used as a type.
-#[derive(Clone, Debug, PartialEq, Resolvable)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq, Resolvable)]
 pub struct ObjectLiteral(pub(super) Box<[TypeMember]>);
 
 impl ObjectLiteral {
@@ -610,11 +639,11 @@ impl ObjectLiteral {
     }
 }
 
-#[derive(Clone, Debug, PartialEq, Resolvable)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq, Resolvable)]
 pub enum ReturnType {
     Type(TypeReference),
-    Predicate(PredicateReturnType),
-    Asserts(AssertsReturnType),
+    Predicate(Box<PredicateReturnType>),
+    Asserts(Box<AssertsReturnType>),
 }
 
 impl Default for ReturnType {
@@ -636,7 +665,7 @@ impl ReturnType {
 /// whether one of its arguments is of a given type.
 ///
 /// Predicate functions return `boolean` at runtime.
-#[derive(Clone, Debug, PartialEq, Resolvable)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq, Resolvable)]
 pub struct PredicateReturnType {
     pub parameter_name: Text,
     pub ty: TypeReference,
@@ -646,7 +675,7 @@ pub struct PredicateReturnType {
 /// one of its arguments to be of a given type.
 ///
 /// Assertion functions throw at runtime if the type assertion fails.
-#[derive(Clone, Debug, PartialEq, Resolvable)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq, Resolvable)]
 pub struct AssertsReturnType {
     pub parameter_name: Text,
     pub ty: TypeReference,
@@ -655,7 +684,7 @@ pub struct AssertsReturnType {
 /// Tuple type.
 ///
 /// Tuples in TypeScript are created using `Array`s of a fixed size.
-#[derive(Clone, Debug, PartialEq, Resolvable)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq, Resolvable)]
 pub struct Tuple(pub(super) Box<[TupleElementType]>);
 
 impl Tuple {
@@ -674,7 +703,7 @@ impl Tuple {
             let id = if elem_type.is_optional {
                 resolver.optional(ty)
             } else {
-                resolver.register_type(TypeData::reference(ty))
+                resolver.register_type(Cow::Owned(TypeData::reference(ty)))
             };
             ResolvedTypeId::new(resolver.level(), id)
         } else {
@@ -699,7 +728,7 @@ impl Tuple {
 }
 
 /// An individual element within a tuple.
-#[derive(Clone, Debug, PartialEq, Resolvable)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq, Resolvable)]
 pub struct TupleElementType {
     /// Type of the element.
     pub ty: TypeReference,
@@ -715,7 +744,7 @@ pub struct TupleElementType {
 }
 
 /// Members of a definition, such as an object, namespace or module.
-#[derive(Clone, Debug, PartialEq, Resolvable)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq, Resolvable)]
 pub struct TypeMember {
     pub kind: TypeMemberKind,
     pub is_static: bool,
@@ -738,7 +767,7 @@ impl TypeMember {
 
 /// Kind of a [`TypeMember`], with an optional name.
 // TODO: Include getters, setters and index signatures.
-#[derive(Clone, Debug, PartialEq, Resolvable)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq, Resolvable)]
 pub enum TypeMemberKind {
     CallSignature,
     Constructor,
@@ -764,14 +793,14 @@ impl TypeMemberKind {
 }
 
 /// Instance of another type.
-#[derive(Clone, Debug, PartialEq, Resolvable)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq, Resolvable)]
 pub struct TypeInstance {
     /// The type being instantiated.
     pub ty: TypeReference,
 
     /// Generic type parameters that should be passed onto the type being
     /// instantiated.
-    pub type_parameters: Box<[GenericTypeParameter]>,
+    pub type_parameters: Box<[TypeReference]>,
 }
 
 impl From<TypeReference> for TypeInstance {
@@ -785,16 +814,12 @@ impl From<TypeReference> for TypeInstance {
 
 impl TypeInstance {
     pub fn has_known_type_parameters(&self) -> bool {
-        !self.type_parameters.is_empty()
-            && self
-                .type_parameters
-                .iter()
-                .any(|param| param.ty != TypeReference::Unknown)
+        self.type_parameters.iter().any(TypeReference::is_known)
     }
 }
 
 /// Reference to the type of a JavaScript expression.
-#[derive(Clone, Debug, PartialEq, Resolvable)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq, Resolvable)]
 pub enum TypeofExpression {
     Addition(TypeofAdditionExpression),
     Await(TypeofAwaitExpression),
@@ -809,29 +834,29 @@ pub enum TypeofExpression {
     UnaryMinus(TypeofUnaryMinusExpression),
 }
 
-#[derive(Clone, Debug, PartialEq, Resolvable)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq, Resolvable)]
 pub struct TypeofAdditionExpression {
     pub left: TypeReference,
     pub right: TypeReference,
 }
 
-#[derive(Clone, Debug, PartialEq, Resolvable)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq, Resolvable)]
 pub struct TypeofAwaitExpression {
     pub argument: TypeReference,
 }
 
-#[derive(Clone, Debug, PartialEq, Resolvable)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq, Resolvable)]
 pub struct TypeofBitwiseNotExpression {
     pub argument: TypeReference,
 }
 
-#[derive(Clone, Debug, PartialEq, Resolvable)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq, Resolvable)]
 pub struct TypeofCallExpression {
     pub callee: TypeReference,
     pub arguments: Box<[CallArgumentType]>,
 }
 
-#[derive(Clone, Debug, PartialEq, Resolvable)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq, Resolvable)]
 pub struct TypeofDestructureExpression {
     /// The type being destructured.
     pub ty: TypeReference,
@@ -840,7 +865,7 @@ pub struct TypeofDestructureExpression {
     pub destructure_field: DestructureField,
 }
 
-#[derive(Clone, Debug, PartialEq, Resolvable)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq, Resolvable)]
 pub enum DestructureField {
     Index(usize),
     Name(Text),
@@ -848,45 +873,45 @@ pub enum DestructureField {
     RestFrom(usize),
 }
 
-#[derive(Clone, Debug, PartialEq, Resolvable)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq, Resolvable)]
 pub struct TypeofNewExpression {
     pub callee: TypeReference,
     pub arguments: Box<[CallArgumentType]>,
 }
 
-#[derive(Clone, Debug, PartialEq, Resolvable)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq, Resolvable)]
 pub enum CallArgumentType {
     Argument(TypeReference),
     Spread(TypeReference),
 }
 
-#[derive(Clone, Debug, PartialEq, Resolvable)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq, Resolvable)]
 pub struct TypeofStaticMemberExpression {
     pub object: TypeReference,
     pub member: Text,
 }
 
-#[derive(Clone, Debug, PartialEq, Resolvable)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq, Resolvable)]
 pub struct TypeofThisOrSuperExpression {
     /// Type from which the `this` or `super` expression should be resolved.
     pub parent: TypeReference,
 }
 
 /// Type of expressions using the `typeof` operator.
-#[derive(Clone, Debug, PartialEq, Resolvable)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq, Resolvable)]
 pub struct TypeofTypeofExpression {
     /// Reference to the type of the expression from which a string
     /// representation should be created.
     pub argument: TypeReference,
 }
 
-#[derive(Clone, Debug, PartialEq, Resolvable)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq, Resolvable)]
 pub struct TypeofUnaryMinusExpression {
     pub argument: TypeReference,
 }
 
 /// Reference to the type of a named JavaScript value.
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub struct TypeofValue {
     /// Identifier of the type being referenced.
     ///
@@ -902,13 +927,13 @@ pub struct TypeofValue {
     pub scope_id: Option<ScopeId>,
 }
 
-#[derive(Clone, Debug, PartialEq, Resolvable)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq, Resolvable)]
 pub struct TypeOperatorType {
     pub operator: TypeOperator,
     pub ty: TypeReference,
 }
 
-#[derive(Clone, Copy, Debug, PartialEq, Resolvable)]
+#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq, Resolvable)]
 pub enum TypeOperator {
     Keyof,
     Readonly,
@@ -931,7 +956,7 @@ impl FromStr for TypeOperator {
 /// Reference to another type definition.
 ///
 /// This definition may require importing from another module.
-#[derive(Clone, Debug, Default, PartialEq)]
+#[derive(Clone, Debug, Default, Eq, Hash, PartialEq)]
 pub enum TypeReference {
     Qualifier(Box<TypeReferenceQualifier>),
     Resolved(ResolvedTypeId),
@@ -963,6 +988,13 @@ impl TypeReference {
     pub fn is_known(&self) -> bool {
         *self != Self::Unknown
     }
+    /// Merges the generic type parameters referenced by `incoming` into `base`.
+    pub fn merge_parameters(base: &[Self], incoming: &[Self]) -> Box<[Self]> {
+        base.iter()
+            .enumerate()
+            .map(|(i, param)| incoming.get(i).unwrap_or(param).clone())
+            .collect()
+    }
 
     pub fn resolved_params(&self, resolver: &mut dyn TypeResolver) -> Box<[Self]> {
         match self {
@@ -986,7 +1018,7 @@ impl TypeReference {
 }
 
 /// Qualifier for a type that should be imported from another module.
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub struct TypeImportQualifier {
     /// The imported symbol.
     pub symbol: ImportSymbol,
@@ -998,7 +1030,7 @@ pub struct TypeImportQualifier {
     pub type_only: bool,
 }
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub enum ImportSymbol {
     /// Imports the `default` export.
     Default,
@@ -1023,7 +1055,7 @@ impl From<&'static str> for ImportSymbol {
 }
 
 /// Path of identifiers to a referenced type, with associated type parameters.
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub struct TypeReferenceQualifier {
     /// The identifier path.
     pub path: Box<[Text]>,
@@ -1032,9 +1064,9 @@ pub struct TypeReferenceQualifier {
     pub type_parameters: Box<[TypeReference]>,
 
     /// ID of the scope from which the qualifier is being referenced.
-    pub scope_id: Option<ScopeId>,
+    pub scope_id: ScopeId,
 
-    /// If `true`, this qualifier can reference types only.
+    /// If `true`, this qualifier can reference types (and namespaces) only.
     pub type_only: bool,
 
     /// Optional [`BindingId`] this qualifier may not reference.
@@ -1045,11 +1077,7 @@ pub struct TypeReferenceQualifier {
 
 impl TypeReferenceQualifier {
     pub fn has_known_type_parameters(&self) -> bool {
-        !self.type_parameters.is_empty()
-            && self
-                .type_parameters
-                .iter()
-                .any(|param| *param != TypeReference::Unknown)
+        self.type_parameters.iter().any(TypeReference::is_known)
     }
 
     /// Checks whether this type qualifier references an `Array` type.
@@ -1079,11 +1107,6 @@ impl TypeReferenceQualifier {
         self
     }
 
-    pub fn with_scope_id(mut self, scope_id: ScopeId) -> Self {
-        self.scope_id = Some(scope_id);
-        self
-    }
-
     pub fn without_type_parameters(&self) -> Self {
         Self {
             path: self.path.clone(),
@@ -1095,7 +1118,7 @@ impl TypeReferenceQualifier {
     }
 }
 
-#[derive(Copy, Clone, Debug, Eq, Hash, PartialEq)]
+#[derive(Copy, Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct BindingId(u32);
 
 impl BindingId {
@@ -1154,7 +1177,7 @@ impl ScopeId {
 }
 
 /// A union of types.
-#[derive(Clone, Debug, PartialEq, Resolvable)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq, Resolvable)]
 pub struct Union(pub(super) Box<[TypeReference]>);
 
 impl Union {

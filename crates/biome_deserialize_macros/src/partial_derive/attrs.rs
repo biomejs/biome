@@ -100,5 +100,5 @@ impl TryFrom<&Vec<Attribute>> for FieldAttrs {
 pub enum PartialType {
     #[default]
     Prefixed,
-    Literal(Type),
+    Literal(Box<Type>),
 }

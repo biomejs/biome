@@ -272,6 +272,16 @@ impl From<String> for JsonString {
     }
 }
 
+impl From<Text> for JsonString {
+    fn from(text: Text) -> Self {
+        match text {
+            Text::Borrowed(token_text) => token_text.into(),
+            Text::Owned(string) => Self(Text::Owned(string)),
+            Text::Static(string) => Self(Text::Static(string)),
+        }
+    }
+}
+
 impl From<TokenText> for JsonString {
     fn from(text: TokenText) -> Self {
         Self(unescape_json_string(text))

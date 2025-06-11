@@ -28,6 +28,11 @@ expression: redactor(content)
   "formatter": {
     "indentStyle": "space",
     "indentWidth": 2
+  },
+  "javascript": {
+    "formatter": {
+      "quoteStyle": "single"
+    }
   }
 }
 ```
@@ -62,20 +67,30 @@ biome.json format ━━━━━━━━━━━━━━━━━━━━�
 
   × Formatter would have printed the following content:
   
-    1   │ - 
-    2 1 │   {
-    3   │ - ····"root":·true,
-    4   │ - ····"formatter":·{
-    5   │ - ········"indentStyle":·"space",
-    6   │ - ········"indentWidth":·2
-    7   │ - ····}
-      2 │ + ········"root":·true,
-      3 │ + ········"formatter":·{
-      4 │ + ················"indentStyle":·"space",
-      5 │ + ················"indentWidth":·2
-      6 │ + ········}
-    8 7 │   }
-    9 8 │   
+     1    │ - 
+     2  1 │   {
+     3    │ - ····"root":·true,
+     4    │ - ····"formatter":·{
+     5    │ - ········"indentStyle":·"space",
+     6    │ - ········"indentWidth":·2
+     7    │ - ····},
+     8    │ - ····"javascript":·{
+     9    │ - ········"formatter":·{
+    10    │ - ············"quoteStyle":·"single"
+    11    │ - ········}
+    12    │ - ····}
+        2 │ + ··"root":·true,
+        3 │ + ··"formatter":·{
+        4 │ + ····"indentStyle":·"space",
+        5 │ + ····"indentWidth":·2
+        6 │ + ··},
+        7 │ + ··"javascript":·{
+        8 │ + ····"formatter":·{
+        9 │ + ······"quoteStyle":·"single"
+       10 │ + ····}
+       11 │ + ··}
+    13 12 │   }
+    14 13 │   
   
 
 ```
@@ -87,7 +102,7 @@ file.js format ━━━━━━━━━━━━━━━━━━━━━�
   
     1   │ - function·f()·{·const·lorem_and_ipsum·=·'lorem·ipsum';·}
       1 │ + function·f()·{
-      2 │ + ········const·lorem_and_ipsum·=·"lorem·ipsum";
+      2 │ + ··const·lorem_and_ipsum·=·'lorem·ipsum';
       3 │ + }
       4 │ + 
   

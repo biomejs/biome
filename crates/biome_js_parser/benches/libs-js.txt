@@ -1,0 +1,12 @@
+https://cdn.jsdelivr.net/npm/jquery@3.2.1/dist/jquery.min.js
+https://cdn.jsdelivr.net/npm/vue@3.2.22/dist/vue.global.prod.js
+https://cdn.jsdelivr.net/npm/react@17.0.2/cjs/react.production.min.js
+https://cdn.jsdelivr.net/npm/react-dom@17.0.2/cjs/react-dom.production.min.js
+https://cdn.jsdelivr.net/npm/svelte@3.44.2/compiler.js
+https://cdn.jsdelivr.net/npm/dojo@1.16.4/dojo.js
+https://cdn.jsdelivr.net/npm/d3@7.1.1/dist/d3.min.js
+https://cdn.jsdelivr.net/npm/pixi.js@6.2.0/dist/browser/pixi.min.js
+https://cdn.jsdelivr.net/npm/three@0.134.0/build/three.min.js
+https://cdn.jsdelivr.net/npm/mathjax@3.2.0/es5/tex-chtml-full.js
+https://cdn.jsdelivr.net/npm/mathjs@10.3.0/lib/browser/math.js
+https://www.unpkg.com/typescript@4.5.5/lib/typescript.js

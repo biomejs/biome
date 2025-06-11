@@ -18,6 +18,7 @@ use biome_rowan::AstNode;
 use rustc_hash::{FxHashMap, FxHashSet};
 use serde::{Deserialize, Serialize};
 
+use biome_analyze::QueryMatch;
 #[cfg(feature = "schemars")]
 use schemars::JsonSchema;
 
@@ -72,7 +73,10 @@ impl ReactCallWithDependencyResult {
                 closure
                     .descendents()
                     .flat_map(|closure| closure.all_captures())
-                    .filter(move |capture| !range.contains(capture.declaration_range().start()))
+                    .filter(move |capture| {
+                        !range.contains(capture.declaration_range().start())
+                            && range.contains(capture.node().text_range().start())
+                    })
             })
             .into_iter()
             .flatten()

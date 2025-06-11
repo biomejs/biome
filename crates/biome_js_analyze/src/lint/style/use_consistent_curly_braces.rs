@@ -6,8 +6,9 @@ use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_factory::make;
 use biome_js_syntax::{
-    AnyJsExpression, AnyJsLiteralExpression, AnyJsxAttributeValue, AnyJsxChild, JsSyntaxKind,
-    JsSyntaxToken, JsxAttributeInitializerClause, JsxChildList, JsxExpressionAttributeValue, T,
+    AnyJsExpression, AnyJsLiteralExpression, AnyJsxAttributeValue, AnyJsxChild,
+    JsStringLiteralExpression, JsSyntaxKind, JsSyntaxToken, JsxAttributeInitializerClause,
+    JsxChildList, JsxExpressionAttributeValue, T,
 };
 use biome_rowan::{AstNode, BatchMutationExt, TextRange, TriviaPiece, declare_node_union};
 
@@ -342,7 +343,14 @@ fn handle_attr_init_clause(
             if has_curly_braces && contains_single_space(&node) {
                 None
             } else if has_curly_braces && contains_string_literal(&node) {
-                Some(CurlyBraceResolution::RemoveBraces)
+                let expression = node.expression().ok()?;
+                let literal = expression
+                    .as_any_js_literal_expression()?
+                    .as_js_string_literal_expression()?;
+                if !contains_forbidden_chars(literal) {
+                    return Some(CurlyBraceResolution::RemoveBraces);
+                }
+                None
             } else if !has_curly_braces && contains_jsx_tag(&node) {
                 Some(CurlyBraceResolution::AddBraces)
             } else {
@@ -360,10 +368,11 @@ fn handle_jsx_child(child: &AnyJsxChild, has_curly_braces: bool) -> Option<Curly
                 AnyJsLiteralExpression::JsStringLiteralExpression(literal),
             )) = child.expression().as_ref()
             {
-                // Don't suggest removing braces for single space
+                // Don't suggest removing braces for single space or if forbidden chars found
                 if literal
                     .inner_string_text()
                     .is_ok_and(|text| text.text() == " ")
+                    || contains_forbidden_chars(literal)
                 {
                     return None;
                 }
@@ -417,5 +426,15 @@ fn contains_single_space(node: &JsxExpressionAttributeValue) -> bool {
                 AnyJsLiteralExpression::JsStringLiteralExpression(literal)
             ) if literal.inner_string_text().is_ok_and(|text| text.text() == " ")
         )
+    })
+}
+
+const FORBIDDEN_CHARS: [char; 4] = ['>', '"', '\'', '}'];
+
+fn contains_forbidden_chars(str_literal: &JsStringLiteralExpression) -> bool {
+    str_literal.inner_string_text().is_ok_and(|text| {
+        text.text()
+            .chars()
+            .any(|char| FORBIDDEN_CHARS.contains(&char))
     })
 }

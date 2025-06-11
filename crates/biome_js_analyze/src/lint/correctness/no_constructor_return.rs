@@ -73,12 +73,10 @@ impl Rule for NoConstructorReturn {
         let ret = ctx.query();
         // Do not take arg-less returns into account
         let _arg = ret.argument()?;
-        let constructor = ret
-            .syntax()
+        ret.syntax()
             .ancestors()
             .find(|x| AnyJsControlFlowRoot::can_cast(x.kind()))
-            .and_then(JsConstructorClassMember::cast);
-        constructor
+            .and_then(JsConstructorClassMember::cast)
     }
 
     fn diagnostic(ctx: &RuleContext<Self>, constructor: &Self::State) -> Option<RuleDiagnostic> {

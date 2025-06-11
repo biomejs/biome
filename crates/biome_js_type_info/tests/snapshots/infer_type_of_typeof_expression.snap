@@ -12,5 +12,5 @@ typeof foo;
 ## Result
 
 ```
-typeof unresolved reference "foo"
+typeof unresolved reference "foo" (scope ID: 0)
 ```

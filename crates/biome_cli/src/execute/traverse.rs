@@ -611,7 +611,7 @@ impl TraversalContext for TraversalOptions<'_, '_> {
                 return false;
             }
         };
-        let result = match self.execution.traversal_mode() {
+        match self.execution.traversal_mode() {
             TraversalMode::Check { .. } | TraversalMode::CI { .. } => {
                 file_features.supports_lint()
                     || file_features.supports_format()
@@ -622,8 +622,7 @@ impl TraversalContext for TraversalOptions<'_, '_> {
             // Imagine if Biome can't handle its own configuration file...
             TraversalMode::Migrate { .. } => true,
             TraversalMode::Search { .. } => file_features.supports_search(),
-        };
-        result
+        }
     }
 
     fn handle_path(&self, path: BiomePath) {

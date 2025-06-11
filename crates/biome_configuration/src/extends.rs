@@ -9,7 +9,6 @@ use serde::{Deserialize, Serialize};
 
 /// A list of paths to other JSON files, used to extends the current configuration.
 #[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize, Merge)]
-#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(deny_unknown_fields, rename_all = "camelCase", untagged)]
 pub enum Extends {
     List(Box<[Box<str>]>),
@@ -58,5 +57,23 @@ impl Deserializable for Extends {
         } else {
             Self::List(Deserializable::deserialize(ctx, value, name)?)
         })
+    }
+}
+
+#[cfg(feature = "schema")]
+impl schemars::JsonSchema for Extends {
+    fn schema_name() -> String {
+        "Extends".to_string()
+    }
+
+    fn json_schema(generator: &mut schemars::SchemaGenerator) -> schemars::schema::Schema {
+        #[derive(serde::Deserialize, schemars::JsonSchema)]
+        #[serde(untagged)]
+        #[expect(dead_code)]
+        enum ExtendsSchema {
+            List(Vec<String>),
+            String(String),
+        }
+        ExtendsSchema::json_schema(generator)
     }
 }

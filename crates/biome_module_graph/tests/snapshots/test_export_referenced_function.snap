@@ -20,17 +20,24 @@ export { foo };
 ```
 Exports {
   "foo" => {
-    ExportOwnExport => JsOwnExport(
-      Module(0) TypeId(0)
-      Local name: foo
-      JsDoc(
-        @returns {string}
-      )
-    )
+    ExportOwnExport => JsOwnExport::Binding(0)
   }
 }
 Imports {
   No imports
+}
+```
+
+## Exported Bindings
+
+```
+BindingId(0) => JsBindingData {
+  Name: foo,
+  Type: Module(0) TypeId(0),
+  JSDoc comment: JsDoc(
+    @returns {string}
+  ),
+  Declaration kind: HoistedValue
 }
 ```
 

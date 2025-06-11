@@ -15,8 +15,8 @@ use biome_configuration::{
     BiomeDiagnostic, Configuration, CssConfiguration, FilesConfiguration,
     FilesIgnoreUnknownEnabled, FormatterConfiguration, GraphqlConfiguration, GritConfiguration,
     JsConfiguration, JsonConfiguration, LinterConfiguration, OverrideAssistConfiguration,
-    OverrideFormatterConfiguration, OverrideGlobs, OverrideLinterConfiguration, Overrides,
-    RootEnabled, Rules, push_to_analyzer_assist, push_to_analyzer_rules,
+    OverrideFormatterConfiguration, OverrideGlobs, OverrideLinterConfiguration, Overrides, Rules,
+    push_to_analyzer_assist, push_to_analyzer_rules,
 };
 use biome_css_formatter::context::CssFormatOptions;
 use biome_css_parser::CssParserOptions;
@@ -46,16 +46,32 @@ use std::ops::Deref;
 use std::sync::Arc;
 use tracing::instrument;
 
+const DEFAULT_SCANNER_IGNORE_ENTRIES: &[&[u8]] = &[
+    b".cache",
+    b".git",
+    b".hg",
+    b".netlify",
+    b".output",
+    b".svn",
+    b".yarn",
+    b".timestamp",
+    b".turbo",
+    b".vercel",
+    b".DS_Store",
+    // TODO: Remove when https://github.com/biomejs/biome/issues/6172 is fixed.
+    b"RedisCommander.d.ts",
+];
+
 /// Settings active in a project.
 ///
 /// These can be either root settings, or settings for a section of the project.
 #[derive(Clone, Debug, Default)]
 pub struct Settings {
-    /// The configuration that originated this setting, if applicable
-    source: Option<Arc<Configuration>>,
+    /// The configuration that originated this setting, if applicable.
+    ///
+    /// It contains [Configuration] and the folder where it was found.
+    source: Option<Arc<(Configuration, Option<Utf8PathBuf>)>>,
 
-    /// Whether this belongs to a root configuration file
-    pub root: Option<RootEnabled>,
     /// Formatter settings applied to all files in the project.
     pub formatter: FormatSettings,
     /// Linter settings applied to all files in the project.
@@ -76,7 +92,17 @@ pub struct Settings {
 
 impl Settings {
     pub fn source(&self) -> Option<Configuration> {
-        self.source.as_ref().map(|source| source.deref().clone())
+        self.source.as_ref().map(|source| {
+            let (config, _) = source.deref().clone();
+            config
+        })
+    }
+
+    pub fn source_path(&self) -> Option<Utf8PathBuf> {
+        self.source.as_ref().and_then(|source| {
+            let (_, path) = source.deref().clone();
+            path
+        })
     }
 
     /// Merges the [Configuration] into the settings.
@@ -86,10 +112,7 @@ impl Settings {
         configuration: Configuration,
         working_directory: Option<Utf8PathBuf>,
     ) -> Result<(), WorkspaceError> {
-        self.source = Some(Arc::new(configuration.clone()));
-
-        // Set root value
-        self.root = configuration.root;
+        self.source = Some(Arc::new((configuration.clone(), working_directory.clone())));
 
         // formatter part§
         if let Some(formatter) = configuration.formatter {
@@ -274,18 +297,16 @@ impl Settings {
         self.linter.is_enabled()
     }
 
+    pub fn is_vcs_enabled(&self) -> bool {
+        self.vcs_settings.is_enabled()
+    }
+
     pub fn linter_recommended_enabled(&self) -> bool {
         self.linter.recommended_enabled()
     }
 
     pub fn is_assist_enabled(&self) -> bool {
         self.assist.is_enabled()
-    }
-
-    /// Whether these settings belong to a root.
-    /// It's returns `true` when it's `None` or `Some(true)`, `false` otherwise.
-    pub fn is_root(&self) -> bool {
-        self.root.unwrap_or_default().into()
     }
 }
 
@@ -665,6 +686,10 @@ pub struct FilesSettings {
 
     /// Files not recognized by Biome should not emit a diagnostic
     pub ignore_unknown: Option<FilesIgnoreUnknownEnabled>,
+
+    /// List of file and folder names that should be unconditionally ignored by
+    /// the scanner.
+    pub scanner_ignore_entries: Vec<Vec<u8>>,
 }
 
 #[derive(Clone, Default, Debug)]
@@ -680,6 +705,10 @@ pub struct VcsSettings {
 impl VcsSettings {
     pub fn is_enabled(&self) -> bool {
         self.enabled.unwrap_or_default().into()
+    }
+
+    pub fn should_use_ignore_file(&self) -> bool {
+        self.use_ignore_file.unwrap_or_default().into()
     }
 
     pub fn to_base_path(&self, base_path: Option<&Utf8Path>) -> Option<Utf8PathBuf> {
@@ -746,13 +775,11 @@ impl VcsIgnoredPatterns {
                         } else {
                             gitignore.path()
                         };
-                        let result = if let Ok(stripped_path) = path.strip_prefix(ignore_directory)
-                        {
+                        if let Ok(stripped_path) = path.strip_prefix(ignore_directory) {
                             gitignore.matched(stripped_path, is_dir).is_ignore()
                         } else {
                             false
-                        };
-                        result
+                        }
                     })
             }
         }
@@ -897,6 +924,15 @@ fn to_file_settings(
         max_size: config.max_size,
         includes: Includes::new(working_directory, config.includes),
         ignore_unknown: config.ignore_unknown,
+        scanner_ignore_entries: config.experimental_scanner_ignores.map_or_else(
+            || {
+                DEFAULT_SCANNER_IGNORE_ENTRIES
+                    .iter()
+                    .map(|entry| entry.to_vec())
+                    .collect()
+            },
+            |entries| entries.into_iter().map(String::into_bytes).collect(),
+        ),
     })
 }
 
@@ -1655,6 +1691,12 @@ fn to_json_language_settings(
         .allow_trailing_commas
         .or(parent_parser.allow_trailing_commas);
 
+    let linter = conf.linter.take().unwrap_or_default();
+    language_setting.linter.enabled = linter.enabled;
+
+    let assist = conf.assist.take().unwrap_or_default();
+    language_setting.assist.enabled = assist.enabled;
+
     language_setting
 }
 
@@ -1675,6 +1717,12 @@ fn to_css_language_settings(
     language_setting.parser.css_modules_enabled =
         parser.css_modules.or(parent_parser.css_modules_enabled);
 
+    let linter = conf.linter.take().unwrap_or_default();
+    language_setting.linter.enabled = linter.enabled;
+
+    let assist = conf.assist.take().unwrap_or_default();
+    language_setting.assist.enabled = assist.enabled;
+
     language_setting
 }
 
@@ -1687,6 +1735,12 @@ fn to_graphql_language_settings(
 
     language_setting.formatter = formatter.into();
 
+    let linter = conf.linter.take().unwrap_or_default();
+    language_setting.linter.enabled = linter.enabled;
+
+    let assist = conf.assist.take().unwrap_or_default();
+    language_setting.assist.enabled = assist.enabled;
+
     language_setting
 }
 
@@ -1698,6 +1752,12 @@ fn to_grit_language_settings(
     let formatter = conf.formatter.take().unwrap_or_default();
 
     language_setting.formatter = formatter.into();
+
+    let linter = conf.linter.take().unwrap_or_default();
+    language_setting.linter = linter.into();
+
+    let assist = conf.assist.take().unwrap_or_default();
+    language_setting.assist = assist.into();
 
     language_setting
 }

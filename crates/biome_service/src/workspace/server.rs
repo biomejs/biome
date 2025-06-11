@@ -24,10 +24,11 @@ use crate::workspace::{
     ServerInfo,
 };
 use crate::workspace_watcher::{OpenFileReason, WatcherSignalKind};
-use crate::{WatcherInstruction, Workspace, WorkspaceError, is_dir};
+use crate::{WatcherInstruction, Workspace, WorkspaceError};
 use append_only_vec::AppendOnlyVec;
 use biome_analyze::{AnalyzerPluginVec, RuleCategory};
 use biome_configuration::analyzer::RuleSelector;
+use biome_configuration::bool::Bool;
 use biome_configuration::plugins::{PluginConfiguration, Plugins};
 use biome_configuration::{BiomeDiagnostic, Configuration, ConfigurationPathHint};
 use biome_deserialize::json::deserialize_from_json_str;
@@ -75,7 +76,7 @@ pub struct WorkspaceServer {
     module_graph: Arc<ModuleGraph>,
 
     /// Keeps all loaded plugins in memory, per project.
-    plugin_caches: Arc<HashMap<ProjectKey, PluginCache>>,
+    plugin_caches: Arc<HashMap<Utf8PathBuf, PluginCache>>,
 
     /// Stores the document (text content + version number) associated with a URL
     pub(super) documents: HashMap<Utf8PathBuf, Document, FxBuildHasher>,
@@ -346,13 +347,19 @@ impl WorkspaceServer {
         let mut source = document_file_source.unwrap_or(DocumentFileSource::from_path(&path));
 
         if let DocumentFileSource::Js(js) = &mut source {
-            if path.extension().is_some_and(|extension| extension == "js") {
-                let manifest = self.project_layout.find_node_manifest_for_path(&path);
-                if let Some((_, manifest)) = manifest {
-                    if manifest.r#type == Some(PackageType::CommonJs) {
-                        js.set_module_kind(ModuleKind::Script);
+            match path.extension() {
+                Some("js") => {
+                    let manifest = self.project_layout.find_node_manifest_for_path(&path);
+                    if let Some((_, manifest)) = manifest {
+                        if manifest.r#type == Some(PackageType::CommonJs) {
+                            js.set_module_kind(ModuleKind::Script);
+                        }
                     }
                 }
+                Some("cjs") => {
+                    js.set_module_kind(ModuleKind::Script);
+                }
+                _ => {}
             }
         }
 
@@ -551,34 +558,15 @@ impl WorkspaceServer {
 
     /// Checks whether a file is ignored in the top-level `files.includes`.
     fn is_ignored_by_top_level_config(&self, project_key: ProjectKey, path: &Utf8Path) -> bool {
-        let Some(files_settings) = self.projects.get_files_settings(project_key) else {
-            return false;
-        };
-        let mut is_included = true;
-        if !files_settings.includes.is_unset() {
-            is_included = if is_dir(path) {
-                files_settings
-                    .includes
-                    .matches_directory_with_exceptions(path)
-            } else {
-                files_settings.includes.matches_with_exceptions(path)
-            };
-        }
-
-        let ignore_matches = self.projects.get_vcs_ignored_matches(project_key);
-
-        !is_included
-            || ignore_matches
-                .as_ref()
-                .is_some_and(|ignored_matches| ignored_matches.is_ignored(path, is_dir(path)))
+        self.projects
+            .is_ignored_by_top_level_config(project_key, path)
     }
 
-    fn load_plugins(
-        &self,
-        project_key: ProjectKey,
-        base_path: &Utf8Path,
-        plugins: &Plugins,
-    ) -> Vec<PluginDiagnostic> {
+    pub(super) fn is_ignored_by_scanner(&self, project_key: ProjectKey, path: &Utf8Path) -> bool {
+        self.projects.is_ignored_by_scanner(project_key, path)
+    }
+
+    fn load_plugins(&self, base_path: &Utf8Path, plugins: &Plugins) -> Vec<PluginDiagnostic> {
         let mut diagnostics = Vec::new();
         let plugin_cache = PluginCache::default();
 
@@ -586,7 +574,7 @@ impl WorkspaceServer {
             match plugin_config {
                 PluginConfiguration::Path(plugin_path) => {
                     match BiomePlugin::load(self.fs.as_ref(), plugin_path, base_path) {
-                        Ok(plugin) => {
+                        Ok((plugin, _)) => {
                             plugin_cache.insert_plugin(plugin_path.clone().into(), plugin);
                         }
                         Err(diagnostic) => diagnostics.push(diagnostic),
@@ -595,17 +583,19 @@ impl WorkspaceServer {
             }
         }
 
-        self.plugin_caches.pin().insert(project_key, plugin_cache);
+        self.plugin_caches
+            .pin()
+            .insert(base_path.to_path_buf(), plugin_cache);
 
         diagnostics
     }
 
     fn get_analyzer_plugins_for_project(
         &self,
-        project_key: ProjectKey,
+        path: &Utf8Path,
         plugins: &Plugins,
     ) -> Result<AnalyzerPluginVec, Vec<PluginDiagnostic>> {
-        match self.plugin_caches.pin().get(&project_key) {
+        match self.plugin_caches.pin().get(path) {
             Some(cache) => cache.get_analyzer_plugins(plugins),
             None => Ok(Vec::new()),
         }
@@ -684,6 +674,9 @@ impl WorkspaceServer {
                     .ok_or_else(WorkspaceError::no_project)?;
 
                 root_configuration.merge_with(nested_configuration);
+                // We need to be careful that our merge doesn't leave
+                // `root: true` from the root config.
+                root_configuration.root = Some(Bool(false));
                 root_configuration
             } else {
                 nested_configuration
@@ -721,9 +714,15 @@ impl WorkspaceServer {
             .ok_or_else(WorkspaceError::no_project)?;
 
         let vcs_settings = &mut settings.vcs_settings;
+
         if !vcs_settings.is_enabled() {
             return Ok(());
         }
+
+        if !vcs_settings.should_use_ignore_file() {
+            return Ok(());
+        }
+
         for path in paths.iter().filter(|path| path.is_ignore()) {
             let is_in_project_path = project_path
                 .as_ref()
@@ -790,6 +789,7 @@ impl WorkspaceServer {
     }
 
     /// Updates the [ModuleGraph] for the given `path` with an optional `root`.
+    #[tracing::instrument(level = "debug", skip(self, root))]
     fn update_module_graph(
         &self,
         signal_kind: WatcherSignalKind,
@@ -930,8 +930,9 @@ impl Workspace for WorkspaceServer {
         params: UpdateSettingsParams,
     ) -> Result<UpdateSettingsResult, WorkspaceError> {
         let workspace_directory = params.workspace_directory.map(|p| p.to_path_buf());
-
-        let mut settings = if !params.configuration.is_root() {
+        let is_root = params.configuration.is_root();
+        let extends_root = params.configuration.extends_root();
+        let mut settings = if !is_root {
             if !self.projects.is_project_registered(params.project_key) {
                 return Err(WorkspaceError::no_project());
             }
@@ -951,9 +952,14 @@ impl Workspace for WorkspaceServer {
 
         settings.merge_with_configuration(params.configuration, workspace_directory.clone())?;
 
+        let loading_directory = if extends_root {
+            self.projects.get_project_path(params.project_key)
+        } else {
+            workspace_directory.clone()
+        };
+
         let diagnostics = self.load_plugins(
-            params.project_key,
-            &workspace_directory.clone().unwrap_or_default(),
+            &loading_directory.clone().unwrap_or_default(),
             &settings.as_all_plugins(),
         );
         let has_errors = diagnostics
@@ -966,7 +972,7 @@ impl Workspace for WorkspaceServer {
             return Err(WorkspaceError::plugin_errors(diagnostics));
         }
 
-        if !settings.is_root() {
+        if !is_root {
             self.projects.set_nested_settings(
                 params.project_key,
                 workspace_directory.unwrap_or_default(),
@@ -1360,9 +1366,10 @@ impl Workspace for WorkspaceServer {
                     .projects
                     .get_settings_based_on_path(project_key, &path)
                     .ok_or_else(WorkspaceError::no_project)?;
+
                 let plugins = self
                     .get_analyzer_plugins_for_project(
-                        project_key,
+                        settings.source_path().unwrap_or_default().as_path(),
                         &settings.get_plugins_for_path(&path),
                     )
                     .map_err(WorkspaceError::plugin_errors)?;
@@ -1440,6 +1447,7 @@ impl Workspace for WorkspaceServer {
             only,
             skip,
             enabled_rules,
+            categories,
         } = params;
         let capabilities = self.get_file_capabilities(&path);
         let code_actions = capabilities
@@ -1466,6 +1474,7 @@ impl Workspace for WorkspaceServer {
             suppression_reason: None,
             enabled_rules,
             plugins: Vec::new(),
+            categories,
         }))
     }
 
@@ -1593,7 +1602,10 @@ impl Workspace for WorkspaceServer {
             .get_settings_based_on_path(project_key, &path)
             .ok_or_else(WorkspaceError::no_project)?;
         let plugins = self
-            .get_analyzer_plugins_for_project(project_key, &settings.get_plugins_for_path(&path))
+            .get_analyzer_plugins_for_project(
+                settings.source_path().unwrap_or_default().as_path(),
+                &settings.get_plugins_for_path(&path),
+            )
             .map_err(WorkspaceError::plugin_errors)?;
         let language = self.get_file_source(&path);
         fix_all(FixAllParams {

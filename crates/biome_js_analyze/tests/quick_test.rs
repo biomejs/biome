@@ -26,9 +26,19 @@ fn project_layout_with_top_level_dependencies(dependencies: Dependencies) -> Arc
 #[test]
 fn quick_test() {
     const FILENAME: &str = "dummyFile.ts";
-    const SOURCE: &str = r#"import { returnPromiseResult } from "./returnPromiseResult.ts";
-
-returnPromiseResult();
+    const SOURCE: &str = r#"type Props = {
+	a: string;
+	returnsPromise: () => Promise<void>;
+};
+async function testDestructuringAndCallingReturnsPromiseFromRest({
+	a,
+	...rest
+}: Props) {
+	rest
+		.returnsPromise()
+		.then(() => {})
+		.finally(() => {});
+}
 "#;
 
     let parsed = parse(SOURCE, JsFileSource::tsx(), JsParserOptions::default());

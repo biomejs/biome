@@ -61,7 +61,7 @@ test.jsx:1:8 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━━━
   
   i Unused imports might be the result of an incomplete refactoring.
   
-  i Safe fix: Remove the unused imports.
+  i Unsafe fix: Remove the unused imports.
   
     1 │ import·React·from·'react';
       │ --------------------------

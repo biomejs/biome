@@ -132,14 +132,31 @@ export interface CssConfiguration {
 	 */
 	parser?: CssParserConfiguration;
 }
-/**
- * A list of paths to other JSON files, used to extends the current configuration.
- */
-export type Extends = string[] | null;
+export type Extends = string[] | string;
 /**
  * The configuration of the filesystem
  */
 export interface FilesConfiguration {
+	/**
+	* Set of file and folder names that should be unconditionally ignored by Biome's scanner.
+
+Biome maintains an internal list of default ignore entries, which is based on user feedback and which may change in any release. This setting allows overriding this internal list completely.
+
+This is considered an advanced feature that users _should_ not need to tweak themselves, but they can as a last resort. This setting can only be configured in root configurations, and is ignored in nested configs.
+
+Entries must be file or folder *names*. Specific paths and globs are not supported.
+
+Examples where this may be useful:
+
+```jsonc { "files": { "experimentalScannerIgnores": [ // You almost certainly don't want to scan your `.git` // folder, which is why it's already ignored by default: ".git",
+
+// But the scanner does scan `node_modules` by default. If // you *really* don't want this, you can ignore it like // this: "node_modules",
+
+// But it's probably better to ignore a specific dependency. // For instance, one that happens to be particularly slow to // scan: "RedisCommander.d.ts", ], } } ```
+
+Please be aware that rules relying on the module graph or type inference information may be negatively affected if dependencies of your project aren't (fully) scanned. 
+	 */
+	experimentalScannerIgnores?: string[];
 	/**
 	 * Tells Biome to not emit diagnostics when handling files that doesn't know
 	 */
@@ -1564,6 +1581,10 @@ export interface Nursery {
 	 */
 	noProcessGlobal?: RuleFixConfiguration_for_Null;
 	/**
+	 * Disallow assigning to React component props.
+	 */
+	noReactPropAssign?: RuleConfiguration_for_Null;
+	/**
 	 * Disallow the use of configured elements.
 	 */
 	noRestrictedElements?: RuleConfiguration_for_NoRestrictedElementsOptions;
@@ -1651,6 +1672,10 @@ export interface Nursery {
 	 * Enforce consistent return values in iterable callbacks.
 	 */
 	useIterableCallbackReturn?: RuleConfiguration_for_Null;
+	/**
+	 * Enforces the use of with { type: "json" } for JSON module imports.
+	 */
+	useJsonImportAttribute?: RuleFixConfiguration_for_Null;
 	/**
 	 * Enforce specifying the name of GraphQL operations.
 	 */
@@ -1813,7 +1838,7 @@ export interface Style {
 	/**
 	 * Disallow reassigning function parameters.
 	 */
-	noParameterAssign?: RuleConfiguration_for_Null;
+	noParameterAssign?: RuleConfiguration_for_NoParameterAssignOptions;
 	/**
 	 * Disallow the use of parameter properties in class constructors.
 	 */
@@ -2424,6 +2449,9 @@ export type RuleFixConfiguration_for_UtilityClassSortingOptions =
 export type RuleFixConfiguration_for_NoBlankTargetOptions =
 	| RulePlainConfiguration
 	| RuleWithFixOptions_for_NoBlankTargetOptions;
+export type RuleConfiguration_for_NoParameterAssignOptions =
+	| RulePlainConfiguration
+	| RuleWithOptions_for_NoParameterAssignOptions;
 export type RuleConfiguration_for_RestrictedGlobalsOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_RestrictedGlobalsOptions;
@@ -2708,6 +2736,16 @@ export interface RuleWithFixOptions_for_NoBlankTargetOptions {
 	 * Rule's options
 	 */
 	options: NoBlankTargetOptions;
+}
+export interface RuleWithOptions_for_NoParameterAssignOptions {
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: NoParameterAssignOptions;
 }
 export interface RuleWithOptions_for_RestrictedGlobalsOptions {
 	/**
@@ -3032,6 +3070,15 @@ export interface NoBlankTargetOptions {
 	allowNoReferrer?: boolean;
 }
 /**
+ * Options for the rule `NoParameterAssign`
+ */
+export interface NoParameterAssignOptions {
+	/**
+	 * Whether to report an error when a dependency is listed in the dependencies array but isn't used. Defaults to `allow`.
+	 */
+	propertyAssignment?: PropertyAssignmentMode;
+}
+/**
  * Options for the rule `noRestrictedGlobals`.
  */
 export interface RestrictedGlobalsOptions {
@@ -3175,6 +3222,10 @@ For example, for React's `useRef()` hook the value would be `true`, while for `u
 }
 export type CustomRestrictedElements = Record<string, string>;
 export type ObjectPropertySyntax = "explicit" | "shorthand";
+/**
+ * Specifies whether property assignments on function parameters are allowed or denied.
+ */
+export type PropertyAssignmentMode = "allow" | "deny";
 export type CustomRestrictedImport = string | CustomRestrictedImportOptions;
 export type CustomRestrictedType = string | CustomRestrictedTypeOptions;
 export type ConsistentArrayType = "shorthand" | "generic";
@@ -3500,6 +3551,7 @@ export type Category =
 	| "lint/nursery/noNestedComponentDefinitions"
 	| "lint/nursery/noNoninteractiveElementInteractions"
 	| "lint/nursery/noProcessGlobal"
+	| "lint/nursery/noReactPropAssign"
 	| "lint/nursery/noReactSpecificProps"
 	| "lint/nursery/noRestrictedElements"
 	| "lint/nursery/noSecrets"
@@ -3534,6 +3586,7 @@ export type Category =
 	| "lint/nursery/useImportRestrictions"
 	| "lint/nursery/useIndexOf"
 	| "lint/nursery/useIterableCallbackReturn"
+	| "lint/nursery/useJsonImportAttribute"
 	| "lint/nursery/useJsxCurlyBraceConvention"
 	| "lint/nursery/useNamedOperation"
 	| "lint/nursery/useNamingConvention"
@@ -4024,6 +4077,7 @@ export interface PullDiagnosticsResult {
 	skippedDiagnostics: number;
 }
 export interface PullActionsParams {
+	categories?: RuleCategories;
 	enabledRules?: RuleCode[];
 	only?: RuleCode[];
 	path: BiomePath;

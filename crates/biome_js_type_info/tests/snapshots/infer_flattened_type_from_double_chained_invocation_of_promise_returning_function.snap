@@ -32,7 +32,7 @@ Module TypeId(0) => sync Function "returnsPromise" {
   returns: Global TypeId(0)
 }
 
-Module TypeId(1) => instanceof Promise<T = number>
+Module TypeId(1) => instanceof Promise<number>
 
 Module TypeId(2) => sync Function "Promise.prototype.then" {
   accepts: {
@@ -60,7 +60,7 @@ Module TypeId(5) => sync Function "Promise.prototype.finally" {
   returns: instanceof Promise
 }
 
-Global TypeId(0) => instanceof Promise<T = number>
+Global TypeId(0) => instanceof Promise<number>
 
-Global TypeId(1) => instanceof Promise<T = number>
+Global TypeId(1) => instanceof Promise<number>
 ```

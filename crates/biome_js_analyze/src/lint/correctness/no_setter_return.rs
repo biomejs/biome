@@ -89,12 +89,10 @@ impl Rule for NoSetterReturn {
         let ret = ctx.query();
         // Do not take arg-less returns into account
         let _arg = ret.argument()?;
-        let setter = ret
-            .syntax()
+        ret.syntax()
             .ancestors()
             .find(|x| AnyJsControlFlowRoot::can_cast(x.kind()))
-            .and_then(JsSetterMember::cast);
-        setter
+            .and_then(JsSetterMember::cast)
     }
 
     fn diagnostic(ctx: &RuleContext<Self>, setter: &Self::State) -> Option<RuleDiagnostic> {

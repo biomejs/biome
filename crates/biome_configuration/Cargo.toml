@@ -43,7 +43,6 @@ schemars                 = { workspace = true, optional = true }
 serde                    = { workspace = true, features = ["derive"] }
 
 [features]
-default = ["schema"]
 schema = [
   "dep:schemars",
   "biome_js_analyze/schema",

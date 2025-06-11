@@ -1,0 +1,197 @@
+---
+source: crates/biome_module_graph/tests/snap/mod.rs
+expression: content
+---
+# `/src/index.ts` (Not imported by resolver)
+
+## Source
+
+```ts
+function useCallback<T extends Function>(callback: T, deps: DependencyList): T;
+
+export const makePromise = (): Promise => Promise.resolve(1);
+
+export const makePromiseCb = useCallback(makePromise);
+
+export const promise = makePromiseCb();
+```
+
+## Module Info
+
+```
+Exports {
+  "makePromise" => {
+    ExportOwnExport => JsOwnExport::Binding(4)
+  }
+  "makePromiseCb" => {
+    ExportOwnExport => JsOwnExport::Binding(5)
+  }
+  "promise" => {
+    ExportOwnExport => JsOwnExport::Binding(6)
+  }
+}
+Imports {
+  No imports
+}
+```
+
+## Exported Bindings
+
+```
+BindingId(4) => JsBindingData {
+  Name: makePromise,
+  Type: Module(0) TypeId(1),
+  Declaration kind: Value
+}
+
+BindingId(5) => JsBindingData {
+  Name: makePromiseCb,
+  Type: Module(0) TypeId(6),
+  Declaration kind: Value
+}
+
+BindingId(6) => JsBindingData {
+  Name: promise,
+  Type: Module(0) TypeId(9),
+  Declaration kind: Value
+}
+```
+
+## Registered types
+
+```
+Module TypeId(0) => instanceof Promise
+
+Module TypeId(1) => sync Function {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: Module(0) TypeId(0)
+}
+
+Module TypeId(2) => sync Function "Promise.resolve" {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: instanceof Promise
+}
+
+Module TypeId(3) => value: 1
+
+Module TypeId(4) => instanceof Promise
+
+Module TypeId(5) => class "Promise" {
+  extends: none
+  implements: []
+  type_args: [T]
+}
+
+Module TypeId(6) => sync Function {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: Module(0) TypeId(0)
+}
+
+Module TypeId(7) => sync Function "useCallback" {
+  accepts: {
+    params: [
+      required callback: Module(0) TypeId(11) (bindings: callback:Module(0) TypeId(11))
+      required deps: Module(0) TypeId(12) (bindings: deps:Module(0) TypeId(12))
+    ]
+    type_args: [Module(0) TypeId(14)]
+  }
+  returns: Module(0) TypeId(11)
+}
+
+Module TypeId(8) => sync Function {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: Module(0) TypeId(0)
+}
+
+Module TypeId(9) => instanceof Promise
+
+Module TypeId(10) => sync Function {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: Module(0) TypeId(0)
+}
+
+Module TypeId(11) => instanceof Module(0) TypeId(14)
+
+Module TypeId(12) => instanceof unresolved reference "DependencyList" (scope ID: 1)
+
+Module TypeId(13) => instanceof unresolved reference "Function" (scope ID: 1)
+
+Module TypeId(14) => T extends Module(0) TypeId(13)
+
+Module TypeId(15) => sync Function "useCallback" {
+  accepts: {
+    params: [
+      required callback: Module(0) TypeId(11) (bindings: callback:Module(0) TypeId(11))
+      required deps: Module(0) TypeId(12) (bindings: deps:Module(0) TypeId(12))
+    ]
+    type_args: [Module(0) TypeId(14)]
+  }
+  returns: Module(0) TypeId(11)
+}
+```
+
+# Scoped Type Resolver
+
+## Registered types
+
+```
+Scope TypeId(0) => instanceof Promise
+
+Scope TypeId(1) => sync Function {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: Module(0) TypeId(0)
+}
+
+Scope TypeId(2) => sync Function "Promise.resolve" {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: instanceof Promise
+}
+
+Scope TypeId(3) => value: 1
+
+Scope TypeId(4) => class "Promise" {
+  extends: none
+  implements: []
+  type_args: [T]
+}
+
+Scope TypeId(5) => sync Function "useCallback" {
+  accepts: {
+    params: [
+      required callback: Module(0) TypeId(11) (bindings: callback:Module(0) TypeId(11))
+      required deps: Module(0) TypeId(12) (bindings: deps:Module(0) TypeId(12))
+    ]
+    type_args: [Module(0) TypeId(14)]
+  }
+  returns: Module(0) TypeId(11)
+}
+
+Scope TypeId(6) => instanceof Module(0) TypeId(14)
+
+Scope TypeId(7) => instanceof unresolved reference "DependencyList" (scope ID: 1)
+
+Scope TypeId(8) => instanceof unresolved reference "Function" (scope ID: 1)
+
+Scope TypeId(9) => T extends Module(0) TypeId(13)
+```

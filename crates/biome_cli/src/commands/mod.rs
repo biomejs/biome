@@ -1,6 +1,6 @@
 use crate::changed::{get_changed_files, get_staged_files};
 use crate::cli_options::{CliOptions, CliReporter, ColorsArg, cli_options};
-use crate::commands::scan_kind::compute_scan_kind;
+use crate::commands::scan_kind::get_forced_scan_kind;
 use crate::execute::Stdin;
 use crate::logging::LoggingKind;
 use crate::{
@@ -815,7 +815,11 @@ pub(crate) trait CommandRunner: Sized {
 
     /// The main command to use.
     fn run(&mut self, session: CliSession, cli_options: &CliOptions) -> Result<(), CliDiagnostic> {
-        setup_cli_subscriber(cli_options.log_level, cli_options.log_kind);
+        setup_cli_subscriber(
+            cli_options.log_file.as_deref(),
+            cli_options.log_level,
+            cli_options.log_kind,
+        );
         let console = &mut *session.app.console;
         let workspace = &*session.app.workspace;
         let fs = workspace.fs();
@@ -894,7 +898,7 @@ pub(crate) trait CommandRunner: Sized {
 
         let open_project_result = workspace.open_project(params)?;
 
-        let scan_kind = compute_scan_kind(&execution, &configuration).unwrap_or({
+        let scan_kind = get_forced_scan_kind(&execution).unwrap_or({
             if open_project_result.scan_kind == ScanKind::None && configuration.use_ignore_file() {
                 ScanKind::KnownFiles
             } else {

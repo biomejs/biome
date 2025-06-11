@@ -223,6 +223,7 @@ pub enum RuleName {
     NoProcessGlobal,
     NoPrototypeBuiltins,
     NoReExportAll,
+    NoReactPropAssign,
     NoReactSpecificProps,
     NoRedeclare,
     NoRedundantAlt,
@@ -340,7 +341,6 @@ pub enum RuleName {
     UseExhaustiveDependencies,
     UseExhaustiveSwitchCases,
     UseExplicitLengthCheck,
-    UseExplicitTestAssertions,
     UseExplicitType,
     UseExponentiationOperator,
     UseExportType,
@@ -366,6 +366,7 @@ pub enum RuleName {
     UseIsArray,
     UseIsNan,
     UseIterableCallbackReturn,
+    UseJsonImportAttribute,
     UseJsxKeyInIterable,
     UseKeyWithClickEvents,
     UseKeyWithMouseEvents,
@@ -554,6 +555,7 @@ impl RuleName {
             Self::NoProcessGlobal => "noProcessGlobal",
             Self::NoPrototypeBuiltins => "noPrototypeBuiltins",
             Self::NoReExportAll => "noReExportAll",
+            Self::NoReactPropAssign => "noReactPropAssign",
             Self::NoReactSpecificProps => "noReactSpecificProps",
             Self::NoRedeclare => "noRedeclare",
             Self::NoRedundantAlt => "noRedundantAlt",
@@ -671,7 +673,6 @@ impl RuleName {
             Self::UseExhaustiveDependencies => "useExhaustiveDependencies",
             Self::UseExhaustiveSwitchCases => "useExhaustiveSwitchCases",
             Self::UseExplicitLengthCheck => "useExplicitLengthCheck",
-            Self::UseExplicitTestAssertions => "useExplicitTestAssertions",
             Self::UseExplicitType => "useExplicitType",
             Self::UseExponentiationOperator => "useExponentiationOperator",
             Self::UseExportType => "useExportType",
@@ -697,6 +698,7 @@ impl RuleName {
             Self::UseIsArray => "useIsArray",
             Self::UseIsNan => "useIsNan",
             Self::UseIterableCallbackReturn => "useIterableCallbackReturn",
+            Self::UseJsonImportAttribute => "useJsonImportAttribute",
             Self::UseJsxKeyInIterable => "useJsxKeyInIterable",
             Self::UseKeyWithClickEvents => "useKeyWithClickEvents",
             Self::UseKeyWithMouseEvents => "useKeyWithMouseEvents",
@@ -881,6 +883,7 @@ impl RuleName {
             Self::NoProcessGlobal => RuleGroup::Nursery,
             Self::NoPrototypeBuiltins => RuleGroup::Suspicious,
             Self::NoReExportAll => RuleGroup::Performance,
+            Self::NoReactPropAssign => RuleGroup::Nursery,
             Self::NoReactSpecificProps => RuleGroup::Suspicious,
             Self::NoRedeclare => RuleGroup::Suspicious,
             Self::NoRedundantAlt => RuleGroup::A11y,
@@ -998,7 +1001,6 @@ impl RuleName {
             Self::UseExhaustiveDependencies => RuleGroup::Correctness,
             Self::UseExhaustiveSwitchCases => RuleGroup::Nursery,
             Self::UseExplicitLengthCheck => RuleGroup::Style,
-            Self::UseExplicitTestAssertions => RuleGroup::Nursery,
             Self::UseExplicitType => RuleGroup::Nursery,
             Self::UseExponentiationOperator => RuleGroup::Style,
             Self::UseExportType => RuleGroup::Style,
@@ -1024,6 +1026,7 @@ impl RuleName {
             Self::UseIsArray => RuleGroup::Suspicious,
             Self::UseIsNan => RuleGroup::Correctness,
             Self::UseIterableCallbackReturn => RuleGroup::Nursery,
+            Self::UseJsonImportAttribute => RuleGroup::Nursery,
             Self::UseJsxKeyInIterable => RuleGroup::Correctness,
             Self::UseKeyWithClickEvents => RuleGroup::A11y,
             Self::UseKeyWithMouseEvents => RuleGroup::A11y,
@@ -1217,6 +1220,7 @@ impl std::str::FromStr for RuleName {
             "noProcessGlobal" => Ok(Self::NoProcessGlobal),
             "noPrototypeBuiltins" => Ok(Self::NoPrototypeBuiltins),
             "noReExportAll" => Ok(Self::NoReExportAll),
+            "noReactPropAssign" => Ok(Self::NoReactPropAssign),
             "noReactSpecificProps" => Ok(Self::NoReactSpecificProps),
             "noRedeclare" => Ok(Self::NoRedeclare),
             "noRedundantAlt" => Ok(Self::NoRedundantAlt),
@@ -1334,7 +1338,6 @@ impl std::str::FromStr for RuleName {
             "useExhaustiveDependencies" => Ok(Self::UseExhaustiveDependencies),
             "useExhaustiveSwitchCases" => Ok(Self::UseExhaustiveSwitchCases),
             "useExplicitLengthCheck" => Ok(Self::UseExplicitLengthCheck),
-            "useExplicitTestAssertions" => Ok(Self::UseExplicitTestAssertions),
             "useExplicitType" => Ok(Self::UseExplicitType),
             "useExponentiationOperator" => Ok(Self::UseExponentiationOperator),
             "useExportType" => Ok(Self::UseExportType),
@@ -1360,6 +1363,7 @@ impl std::str::FromStr for RuleName {
             "useIsArray" => Ok(Self::UseIsArray),
             "useIsNan" => Ok(Self::UseIsNan),
             "useIterableCallbackReturn" => Ok(Self::UseIterableCallbackReturn),
+            "useJsonImportAttribute" => Ok(Self::UseJsonImportAttribute),
             "useJsxKeyInIterable" => Ok(Self::UseJsxKeyInIterable),
             "useKeyWithClickEvents" => Ok(Self::UseKeyWithClickEvents),
             "useKeyWithMouseEvents" => Ok(Self::UseKeyWithMouseEvents),
@@ -4749,6 +4753,10 @@ pub struct Nursery {
     #[doc = "Disallow the use of process global."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_process_global: Option<RuleFixConfiguration<biome_js_analyze::options::NoProcessGlobal>>,
+    #[doc = "Disallow assigning to React component props."]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub no_react_prop_assign:
+        Option<RuleConfiguration<biome_js_analyze::options::NoReactPropAssign>>,
     #[doc = "Disallow the use of configured elements."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_restricted_elements:
@@ -4801,10 +4809,6 @@ pub struct Nursery {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub use_exhaustive_switch_cases:
         Option<RuleFixConfiguration<biome_js_analyze::options::UseExhaustiveSwitchCases>>,
-    #[doc = "Require each test function (test(), it()) to have an assertion (expect(), assert(), etc.)."]
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub use_explicit_test_assertions:
-        Option<RuleConfiguration<biome_js_analyze::options::UseExplicitTestAssertions>>,
     #[doc = "Enforce types in functions, methods, variables, and parameters."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub use_explicit_type: Option<RuleConfiguration<biome_js_analyze::options::UseExplicitType>>,
@@ -4825,6 +4829,10 @@ pub struct Nursery {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub use_iterable_callback_return:
         Option<RuleConfiguration<biome_js_analyze::options::UseIterableCallbackReturn>>,
+    #[doc = "Enforces the use of with { type: \"json\" } for JSON module imports."]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub use_json_import_attribute:
+        Option<RuleFixConfiguration<biome_js_analyze::options::UseJsonImportAttribute>>,
     #[doc = "Enforce specifying the name of GraphQL operations."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub use_named_operation:
@@ -4875,6 +4883,7 @@ impl Nursery {
         "noNestedComponentDefinitions",
         "noNoninteractiveElementInteractions",
         "noProcessGlobal",
+        "noReactPropAssign",
         "noRestrictedElements",
         "noSecrets",
         "noShadow",
@@ -4889,13 +4898,13 @@ impl Nursery {
         "useConsistentObjectDefinition",
         "useConsistentResponse",
         "useExhaustiveSwitchCases",
-        "useExplicitTestAssertions",
         "useExplicitType",
         "useExportsLast",
         "useForComponent",
         "useGoogleFontPreconnect",
         "useIndexOf",
         "useIterableCallbackReturn",
+        "useJsonImportAttribute",
         "useNamedOperation",
         "useNamingConvention",
         "useNumericSeparators",
@@ -4908,14 +4917,14 @@ impl Nursery {
     ];
     const RECOMMENDED_RULES_AS_FILTERS: &'static [RuleFilter<'static>] = &[
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[7]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[14]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[15]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[18]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[16]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[19]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[20]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[30]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[31]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[32]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[36]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[33]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[37]),
     ];
     const ALL_RULES_AS_FILTERS: &'static [RuleFilter<'static>] = &[
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[0]),
@@ -4959,6 +4968,7 @@ impl Nursery {
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[38]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[39]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[40]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[41]),
     ];
 }
 impl RuleGroupExt for Nursery {
@@ -5025,77 +5035,77 @@ impl RuleGroupExt for Nursery {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[10]));
             }
         }
-        if let Some(rule) = self.no_restricted_elements.as_ref() {
+        if let Some(rule) = self.no_react_prop_assign.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[11]));
             }
         }
-        if let Some(rule) = self.no_secrets.as_ref() {
+        if let Some(rule) = self.no_restricted_elements.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[12]));
             }
         }
-        if let Some(rule) = self.no_shadow.as_ref() {
+        if let Some(rule) = self.no_secrets.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[13]));
             }
         }
-        if let Some(rule) = self.no_ts_ignore.as_ref() {
+        if let Some(rule) = self.no_shadow.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[14]));
             }
         }
-        if let Some(rule) = self.no_unknown_at_rule.as_ref() {
+        if let Some(rule) = self.no_ts_ignore.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[15]));
             }
         }
-        if let Some(rule) = self.no_unresolved_imports.as_ref() {
+        if let Some(rule) = self.no_unknown_at_rule.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[16]));
             }
         }
-        if let Some(rule) = self.no_unwanted_polyfillio.as_ref() {
+        if let Some(rule) = self.no_unresolved_imports.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[17]));
             }
         }
-        if let Some(rule) = self.no_useless_backref_in_regex.as_ref() {
+        if let Some(rule) = self.no_unwanted_polyfillio.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[18]));
             }
         }
-        if let Some(rule) = self.no_useless_escape_in_string.as_ref() {
+        if let Some(rule) = self.no_useless_backref_in_regex.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[19]));
             }
         }
-        if let Some(rule) = self.no_useless_undefined.as_ref() {
+        if let Some(rule) = self.no_useless_escape_in_string.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[20]));
             }
         }
-        if let Some(rule) = self.use_adjacent_getter_setter.as_ref() {
+        if let Some(rule) = self.no_useless_undefined.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[21]));
             }
         }
-        if let Some(rule) = self.use_consistent_object_definition.as_ref() {
+        if let Some(rule) = self.use_adjacent_getter_setter.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[22]));
             }
         }
-        if let Some(rule) = self.use_consistent_response.as_ref() {
+        if let Some(rule) = self.use_consistent_object_definition.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[23]));
             }
         }
-        if let Some(rule) = self.use_exhaustive_switch_cases.as_ref() {
+        if let Some(rule) = self.use_consistent_response.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[24]));
             }
         }
-        if let Some(rule) = self.use_explicit_test_assertions.as_ref() {
+        if let Some(rule) = self.use_exhaustive_switch_cases.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[25]));
             }
@@ -5130,49 +5140,54 @@ impl RuleGroupExt for Nursery {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[31]));
             }
         }
-        if let Some(rule) = self.use_named_operation.as_ref() {
+        if let Some(rule) = self.use_json_import_attribute.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[32]));
             }
         }
-        if let Some(rule) = self.use_naming_convention.as_ref() {
+        if let Some(rule) = self.use_named_operation.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[33]));
             }
         }
-        if let Some(rule) = self.use_numeric_separators.as_ref() {
+        if let Some(rule) = self.use_naming_convention.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[34]));
             }
         }
-        if let Some(rule) = self.use_object_spread.as_ref() {
+        if let Some(rule) = self.use_numeric_separators.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[35]));
             }
         }
-        if let Some(rule) = self.use_parse_int_radix.as_ref() {
+        if let Some(rule) = self.use_object_spread.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[36]));
             }
         }
-        if let Some(rule) = self.use_single_js_doc_asterisk.as_ref() {
+        if let Some(rule) = self.use_parse_int_radix.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[37]));
             }
         }
-        if let Some(rule) = self.use_sorted_classes.as_ref() {
+        if let Some(rule) = self.use_single_js_doc_asterisk.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[38]));
             }
         }
-        if let Some(rule) = self.use_symbol_description.as_ref() {
+        if let Some(rule) = self.use_sorted_classes.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[39]));
             }
         }
-        if let Some(rule) = self.use_unique_element_ids.as_ref() {
+        if let Some(rule) = self.use_symbol_description.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[40]));
+            }
+        }
+        if let Some(rule) = self.use_unique_element_ids.as_ref() {
+            if rule.is_enabled() {
+                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[41]));
             }
         }
         index_set
@@ -5234,77 +5249,77 @@ impl RuleGroupExt for Nursery {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[10]));
             }
         }
-        if let Some(rule) = self.no_restricted_elements.as_ref() {
+        if let Some(rule) = self.no_react_prop_assign.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[11]));
             }
         }
-        if let Some(rule) = self.no_secrets.as_ref() {
+        if let Some(rule) = self.no_restricted_elements.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[12]));
             }
         }
-        if let Some(rule) = self.no_shadow.as_ref() {
+        if let Some(rule) = self.no_secrets.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[13]));
             }
         }
-        if let Some(rule) = self.no_ts_ignore.as_ref() {
+        if let Some(rule) = self.no_shadow.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[14]));
             }
         }
-        if let Some(rule) = self.no_unknown_at_rule.as_ref() {
+        if let Some(rule) = self.no_ts_ignore.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[15]));
             }
         }
-        if let Some(rule) = self.no_unresolved_imports.as_ref() {
+        if let Some(rule) = self.no_unknown_at_rule.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[16]));
             }
         }
-        if let Some(rule) = self.no_unwanted_polyfillio.as_ref() {
+        if let Some(rule) = self.no_unresolved_imports.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[17]));
             }
         }
-        if let Some(rule) = self.no_useless_backref_in_regex.as_ref() {
+        if let Some(rule) = self.no_unwanted_polyfillio.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[18]));
             }
         }
-        if let Some(rule) = self.no_useless_escape_in_string.as_ref() {
+        if let Some(rule) = self.no_useless_backref_in_regex.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[19]));
             }
         }
-        if let Some(rule) = self.no_useless_undefined.as_ref() {
+        if let Some(rule) = self.no_useless_escape_in_string.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[20]));
             }
         }
-        if let Some(rule) = self.use_adjacent_getter_setter.as_ref() {
+        if let Some(rule) = self.no_useless_undefined.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[21]));
             }
         }
-        if let Some(rule) = self.use_consistent_object_definition.as_ref() {
+        if let Some(rule) = self.use_adjacent_getter_setter.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[22]));
             }
         }
-        if let Some(rule) = self.use_consistent_response.as_ref() {
+        if let Some(rule) = self.use_consistent_object_definition.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[23]));
             }
         }
-        if let Some(rule) = self.use_exhaustive_switch_cases.as_ref() {
+        if let Some(rule) = self.use_consistent_response.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[24]));
             }
         }
-        if let Some(rule) = self.use_explicit_test_assertions.as_ref() {
+        if let Some(rule) = self.use_exhaustive_switch_cases.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[25]));
             }
@@ -5339,49 +5354,54 @@ impl RuleGroupExt for Nursery {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[31]));
             }
         }
-        if let Some(rule) = self.use_named_operation.as_ref() {
+        if let Some(rule) = self.use_json_import_attribute.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[32]));
             }
         }
-        if let Some(rule) = self.use_naming_convention.as_ref() {
+        if let Some(rule) = self.use_named_operation.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[33]));
             }
         }
-        if let Some(rule) = self.use_numeric_separators.as_ref() {
+        if let Some(rule) = self.use_naming_convention.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[34]));
             }
         }
-        if let Some(rule) = self.use_object_spread.as_ref() {
+        if let Some(rule) = self.use_numeric_separators.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[35]));
             }
         }
-        if let Some(rule) = self.use_parse_int_radix.as_ref() {
+        if let Some(rule) = self.use_object_spread.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[36]));
             }
         }
-        if let Some(rule) = self.use_single_js_doc_asterisk.as_ref() {
+        if let Some(rule) = self.use_parse_int_radix.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[37]));
             }
         }
-        if let Some(rule) = self.use_sorted_classes.as_ref() {
+        if let Some(rule) = self.use_single_js_doc_asterisk.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[38]));
             }
         }
-        if let Some(rule) = self.use_symbol_description.as_ref() {
+        if let Some(rule) = self.use_sorted_classes.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[39]));
             }
         }
-        if let Some(rule) = self.use_unique_element_ids.as_ref() {
+        if let Some(rule) = self.use_symbol_description.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[40]));
+            }
+        }
+        if let Some(rule) = self.use_unique_element_ids.as_ref() {
+            if rule.is_disabled() {
+                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[41]));
             }
         }
         index_set
@@ -5458,6 +5478,10 @@ impl RuleGroupExt for Nursery {
                 .no_process_global
                 .as_ref()
                 .map(|conf| (conf.level(), conf.get_options())),
+            "noReactPropAssign" => self
+                .no_react_prop_assign
+                .as_ref()
+                .map(|conf| (conf.level(), conf.get_options())),
             "noRestrictedElements" => self
                 .no_restricted_elements
                 .as_ref()
@@ -5514,10 +5538,6 @@ impl RuleGroupExt for Nursery {
                 .use_exhaustive_switch_cases
                 .as_ref()
                 .map(|conf| (conf.level(), conf.get_options())),
-            "useExplicitTestAssertions" => self
-                .use_explicit_test_assertions
-                .as_ref()
-                .map(|conf| (conf.level(), conf.get_options())),
             "useExplicitType" => self
                 .use_explicit_type
                 .as_ref()
@@ -5540,6 +5560,10 @@ impl RuleGroupExt for Nursery {
                 .map(|conf| (conf.level(), conf.get_options())),
             "useIterableCallbackReturn" => self
                 .use_iterable_callback_return
+                .as_ref()
+                .map(|conf| (conf.level(), conf.get_options())),
+            "useJsonImportAttribute" => self
+                .use_json_import_attribute
                 .as_ref()
                 .map(|conf| (conf.level(), conf.get_options())),
             "useNamedOperation" => self
@@ -5597,6 +5621,7 @@ impl From<GroupPlainConfiguration> for Nursery {
             no_nested_component_definitions: Some(value.into()),
             no_noninteractive_element_interactions: Some(value.into()),
             no_process_global: Some(value.into()),
+            no_react_prop_assign: Some(value.into()),
             no_restricted_elements: Some(value.into()),
             no_secrets: Some(value.into()),
             no_shadow: Some(value.into()),
@@ -5611,13 +5636,13 @@ impl From<GroupPlainConfiguration> for Nursery {
             use_consistent_object_definition: Some(value.into()),
             use_consistent_response: Some(value.into()),
             use_exhaustive_switch_cases: Some(value.into()),
-            use_explicit_test_assertions: Some(value.into()),
             use_explicit_type: Some(value.into()),
             use_exports_last: Some(value.into()),
             use_for_component: Some(value.into()),
             use_google_font_preconnect: Some(value.into()),
             use_index_of: Some(value.into()),
             use_iterable_callback_return: Some(value.into()),
+            use_json_import_attribute: Some(value.into()),
             use_named_operation: Some(value.into()),
             use_naming_convention: Some(value.into()),
             use_numeric_separators: Some(value.into()),

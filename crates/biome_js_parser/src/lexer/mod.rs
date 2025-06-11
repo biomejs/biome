@@ -1655,13 +1655,15 @@ impl<'src> JsLexer<'src> {
             }
         }
 
+        // If we reach EOF without finding a closing '/', this is a real error
+        // and should be treated as ERROR_TOKEN for proper error recovery
         self.push_diagnostic(
             ParseDiagnostic::new("unterminated regex literal", self.position..self.position)
                 .with_detail(self.position..self.position, "...but the file ends here")
                 .with_detail(start..start + 1, "a regex literal starts there..."),
         );
 
-        JsSyntaxKind::JS_REGEX_LITERAL
+        JsSyntaxKind::ERROR_TOKEN
     }
 
     #[inline]

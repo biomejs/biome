@@ -34,8 +34,11 @@ impl PluginCache {
                 PluginConfiguration::Path(plugin_path) => {
                     if seen.insert(plugin_path) {
                         let path_buf = Utf8PathBuf::from(plugin_path);
-                        match map.get(path_buf.as_path()) {
-                            Some(plugin) => {
+                        match map
+                            .iter()
+                            .find(|(path, _)| path.ends_with(path_buf.as_path()))
+                        {
+                            Some((_, plugin)) => {
                                 result.extend_from_slice(&plugin.analyzer_plugins);
                             }
                             None => {

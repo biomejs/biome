@@ -49,7 +49,7 @@ expression: redactor(content)
 ```
 
 ```block
-<TEMP_DIR>/should_migrate_nested_config/foo/biome.json migrate ━━━━━━━━━━━━━━━━━━━━
+<TEMP_DIR>/should_migrate_nested_config/bar/biome.json migrate ━━━━━━━━━━━━━━━━━━━━
 
   i Configuration file can be updated.
   
@@ -101,7 +101,7 @@ expression: redactor(content)
 ```
 
 ```block
-<TEMP_DIR>/should_migrate_nested_config/bar/biome.json migrate ━━━━━━━━━━━━━━━━━━━━
+<TEMP_DIR>/should_migrate_nested_config/foo/biome.json migrate ━━━━━━━━━━━━━━━━━━━━
 
   i Configuration file can be updated.
   
@@ -132,9 +132,9 @@ configuration ━━━━━━━━━━━━━━━━━━━━━━
   i Migration results:
   
   - <TEMP_DIR>/should_migrate_nested_config/biome.json: configuration needs migration.
-  - <TEMP_DIR>/should_migrate_nested_config/foo/biome.json: configuration needs migration.
-  - <TEMP_DIR>/should_migrate_nested_config/biome.json: configuration needs migration.
   - <TEMP_DIR>/should_migrate_nested_config/bar/biome.json: configuration needs migration.
+  - <TEMP_DIR>/should_migrate_nested_config/biome.json: configuration needs migration.
+  - <TEMP_DIR>/should_migrate_nested_config/foo/biome.json: configuration needs migration.
   
   i Use --write to apply the changes.
   

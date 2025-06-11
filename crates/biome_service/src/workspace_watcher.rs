@@ -8,7 +8,7 @@ use notify::{
 };
 use tracing::{debug, warn};
 
-use crate::{IGNORE_ENTRIES, WorkspaceError, WorkspaceServer, diagnostics::WatchError};
+use crate::{WorkspaceError, WorkspaceServer, diagnostics::WatchError};
 
 /// Instructions to let the watcher either watch or unwatch a given folder.
 #[derive(Debug, Eq, PartialEq)]
@@ -138,48 +138,46 @@ impl WorkspaceWatcher {
             crossbeam::channel::select! {
                 recv(self.notify_rx) -> event => match event {
                     Ok(Ok(event)) => {
-                        if event.paths.iter().all(|path| path
-                            .components()
-                            .any(|component| IGNORE_ENTRIES.contains(&component.as_os_str().as_encoded_bytes())))
-                        {
-                            continue;
-                        }
-
-                        if !matches!(event.kind, EventKind::Access(_)) {
+                        if cfg!(debug_assertions) && !matches!(event.kind, EventKind::Access(_)) {
                             debug!(event = debug(&event), "watcher_event");
                         }
+
+                        let paths = workspace.filter_paths_for_watcher(event.paths);
+                        if paths.is_empty() {
+                            continue;
+                        };
 
                         let result = match event.kind {
                             EventKind::Access(_) => Ok(()),
                             EventKind::Create(create_kind) => match create_kind {
                                 CreateKind::Folder => {
-                                    workspace.open_folders_through_watcher(event.paths)
+                                    workspace.open_folders_through_watcher(paths)
                                 }
-                                _ => workspace.open_paths_through_watcher(event.paths),
+                                _ => workspace.open_paths_through_watcher(paths),
                             },
                             EventKind::Modify(modify_kind) => match modify_kind {
                                 ModifyKind::Name(RenameMode::From) => {
-                                    workspace.close_paths_through_watcher(event.paths)
+                                    workspace.close_paths_through_watcher(paths)
                                 }
                                 ModifyKind::Name(RenameMode::To) => {
-                                    workspace.open_paths_through_watcher(event.paths)
+                                    workspace.open_paths_through_watcher(paths)
                                 },
-                                ModifyKind::Name(RenameMode::Both) => {
+                                ModifyKind::Name(RenameMode::Both) if paths.len() == 2 => {
                                     workspace.rename_path_through_watcher(
-                                        &event.paths[0],
-                                        &event.paths[1]
+                                        &paths[0],
+                                        &paths[1]
                                     )
                                 },
                                 // `RenameMode::Any` and `ModifyKind::Any` need to be included as a catch-all.
                                 // Without it, we'll miss events on Windows or macOS.
                                 ModifyKind::Data(_) | ModifyKind::Name(RenameMode::Any) | ModifyKind::Any => {
-                                    workspace.open_paths_through_watcher(event.paths)
+                                    workspace.open_paths_through_watcher(paths)
                                 },
                                 _ => Ok(()),
                             },
                             EventKind::Remove(remove_kind) => match remove_kind {
-                                RemoveKind::File => workspace.close_files_through_watcher(event.paths),
-                                _ => workspace.close_paths_through_watcher(event.paths),
+                                RemoveKind::File => workspace.close_files_through_watcher(paths),
+                                _ => workspace.close_paths_through_watcher(paths),
                             },
                             EventKind::Any | EventKind::Other => Ok(()),
                         };

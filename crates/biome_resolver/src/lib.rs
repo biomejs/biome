@@ -192,7 +192,7 @@ fn resolve_module_with_package_json(
     }
 
     if let Some(package_name) = &package_json.name {
-        if specifier.starts_with(package_name)
+        if specifier.starts_with(package_name.text())
             && specifier
                 .as_bytes()
                 .get(package_name.len())
@@ -581,7 +581,7 @@ fn resolve_path_info(
     }
 }
 
-fn is_relative_specifier(specifier: &str) -> bool {
+pub fn is_relative_specifier(specifier: &str) -> bool {
     specifier == "." || specifier.starts_with("./") || specifier.starts_with("../")
 }
 
@@ -841,7 +841,7 @@ impl<'a> TypeRoots<'a> {
 
 /// Reference-counted resolved path wrapped in a [Result] that may contain an
 /// error if the resolution failed.
-#[derive(Clone, Debug, Eq, Ord, PartialEq, PartialOrd)]
+#[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct ResolvedPath(Arc<Result<Utf8PathBuf, ResolveError>>);
 
 impl Deref for ResolvedPath {

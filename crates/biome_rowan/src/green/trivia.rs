@@ -1,16 +1,17 @@
 use crate::TriviaPiece;
 use crate::arc::{Arc, HeaderSlice, ThinArc};
 use biome_text_size::TextSize;
-use countme::Count;
 use std::fmt::Formatter;
 use std::mem::ManuallyDrop;
 use std::{fmt, mem, ptr};
 
 #[derive(PartialEq, Eq, Hash)]
 pub(crate) struct GreenTriviaHead {
-    _c: Count<GreenTrivia>,
+    #[cfg(feature = "countme")]
+    _c: countme::Count<GreenTrivia>,
 }
 
+#[cfg(feature = "countme")]
 pub(crate) fn has_live() -> bool {
     countme::get::<GreenTrivia>().live > 0
 }
@@ -82,8 +83,13 @@ impl GreenTrivia {
         I: IntoIterator<Item = TriviaPiece>,
         I::IntoIter: ExactSizeIterator,
     {
-        let data =
-            ThinArc::from_header_and_iter(GreenTriviaHead { _c: Count::new() }, pieces.into_iter());
+        let data = ThinArc::from_header_and_iter(
+            GreenTriviaHead {
+                #[cfg(feature = "countme")]
+                _c: countme::Count::new(),
+            },
+            pieces.into_iter(),
+        );
 
         Self { ptr: Some(data) }
     }

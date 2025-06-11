@@ -15,3 +15,9 @@ const a = 1 === 1;
 a => value: true
 
 ```
+
+## Registered types
+
+```
+Global TypeId(0) => value: true
+```

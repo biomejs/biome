@@ -30,6 +30,11 @@
       "!**/__snapshots__",
       "!**/undefined/**",
       "!**/benchmark/target/**"
+    ],
+    "experimentalScannerIgnores": [
+      ".cargo",
+      ".git",
+      "target"
     ]
   },
   "formatter": {
@@ -68,6 +73,7 @@
         "noVar": "on"
       },
       "nursery": {
+        "noFloatingPromises": "error",
         "noImportCycles": "error"
       }
     }
