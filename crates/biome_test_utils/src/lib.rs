@@ -9,7 +9,7 @@ use biome_diagnostics::termcolor::Buffer;
 use biome_diagnostics::{DiagnosticExt, Error, PrintDiagnostic};
 use biome_fs::{BiomePath, FileSystem, OsFileSystem};
 use biome_js_parser::{AnyJsRoot, JsFileSource, JsParserOptions};
-use biome_js_type_info::TypeResolver;
+use biome_js_type_info::{TypeData, TypeResolver};
 use biome_json_parser::{JsonParserOptions, ParseDiagnostic};
 use biome_module_graph::ModuleGraph;
 use biome_package::PackageJson;
@@ -307,6 +307,21 @@ pub fn dump_registered_types(content: &mut String, resolver: &dyn TypeResolver) 
         content.push_str(&registered_types);
         content.push_str("```\n");
     }
+}
+
+pub fn dump_registered_module_types(content: &mut String, types: &[TypeData]) {
+    if types.is_empty() {
+        return;
+    }
+
+    content.push_str("## Registered types\n\n");
+    content.push_str("```");
+
+    for (i, ty) in types.iter().enumerate() {
+        content.push_str(&format!("\nModule TypeId({i}) => {ty}\n"));
+    }
+
+    content.push_str("```\n");
 }
 
 // Check that all red / green nodes have correctly been released on exit

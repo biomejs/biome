@@ -55,26 +55,21 @@ pub(super) struct JsModuleInfoCollector {
     /// Re-used from the semantic model in `biome_js_semantic`.
     extractor: SemanticEventExtractor,
 
-    /// Expression nodes.
-    ///
-    /// They will get parsed when bindings from their scope is known.
-    expressions: Vec<AnyJsExpression>,
-
     /// Formal parameters.
     ///
-    /// They will get parsed when bindings from their scope is known.
+    /// They will get parsed when bindings from their scope are known.
     formal_parameters: Vec<JsFormalParameter>,
 
     /// Variable declarations.
     ///
-    /// They will get parsed when bindings from their scope is known.
+    /// They will get parsed when bindings from their scope are known.
     variable_declarations: Vec<JsVariableDeclaration>,
 
     /// Map of parsed declarations, for caching purposes.
     parsed_declarations: FxHashMap<JsSyntaxNode, Box<[(Text, TypeReference)]>>,
 
     /// Map of parsed declarations, for caching purposes.
-    parsed_expressions: FxHashMap<TextRange, TypeId>,
+    parsed_expressions: FxHashMap<TextRange, ResolvedTypeId>,
 
     /// Map of parsed function parameters, for caching purposes.
     parsed_parameters: FxHashMap<JsSyntaxNode, FunctionParameter>,
@@ -154,17 +149,7 @@ impl JsModuleInfoCollector {
                     .insert(node.text_trimmed_range().start(), node.clone());
             }
 
-            _ => {
-                if let Some(expr) = AnyJsExpression::cast_ref(node) {
-                    self.expressions.push(expr);
-                } else if let Some(param) = JsFormalParameter::cast_ref(node) {
-                    self.formal_parameters.push(param);
-                } else if let Some(decl) = JsVariableDeclaration::cast_ref(node) {
-                    self.variable_declarations.push(decl);
-                } else if let Some(import) = biome_js_syntax::JsImport::cast_ref(node) {
-                    self.imports.push(import)
-                }
-            }
+            _ => {}
         }
 
         self.extractor.enter(node);
@@ -172,6 +157,31 @@ impl JsModuleInfoCollector {
 
     pub fn leave_node(&mut self, node: &JsSyntaxNode) {
         self.extractor.leave(node);
+
+        while let Some(event) = self.extractor.pop() {
+            self.push_event(event);
+        }
+
+        if let Some(expr) = AnyJsExpression::cast_ref(node) {
+            let range = expr.range();
+            let scope_id = *self.scope_stack.last().expect("there must be a scope");
+            let ty = TypeData::from_any_js_expression(self, scope_id, &expr);
+            let resolved_id = match GLOBAL_RESOLVER.find_type(&ty) {
+                Some(id) => ResolvedTypeId::new(TypeResolverLevel::Global, id),
+                None => {
+                    let id = self.register_type(Cow::Owned(ty));
+                    ResolvedTypeId::new(TypeResolverLevel::Thin, id)
+                }
+            };
+
+            self.parsed_expressions.insert(range, resolved_id);
+        } else if let Some(param) = JsFormalParameter::cast_ref(node) {
+            self.formal_parameters.push(param);
+        } else if let Some(decl) = JsVariableDeclaration::cast_ref(node) {
+            self.variable_declarations.push(decl);
+        } else if let Some(import) = biome_js_syntax::JsImport::cast_ref(node) {
+            self.imports.push(import)
+        }
     }
 
     pub fn register_export(&mut self, export: JsCollectedExport) {
@@ -397,16 +407,6 @@ impl JsModuleInfoCollector {
     }
 
     fn infer_all_types(&mut self, scope_by_range: &Lapper<u32, ScopeId>) {
-        let expressions = std::mem::take(&mut self.expressions);
-        for expr in expressions {
-            let range = expr.range();
-            let scope_id = scope_id_for_range(scope_by_range, range);
-            let ty = TypeData::from_any_js_expression(self, scope_id, &expr);
-            let id = self.register_type(Cow::Owned(ty));
-
-            self.parsed_expressions.insert(range, id);
-        }
-
         let formal_parameters = std::mem::take(&mut self.formal_parameters);
         for param in formal_parameters {
             let range = param.range();
@@ -560,7 +560,7 @@ impl JsModuleInfoCollector {
     fn find_binding_for_type_index(&self, type_index: usize) -> Option<&JsBindingData> {
         self.bindings.iter().find(|binding| match binding.ty {
             TypeReference::Resolved(resolved) => {
-                resolved.level() == TypeResolverLevel::Module && resolved.id().index() == type_index
+                resolved.level() == TypeResolverLevel::Thin && resolved.id().index() == type_index
             }
             _ => false,
         })
@@ -615,7 +615,7 @@ impl JsModuleInfoCollector {
 
 impl TypeResolver for JsModuleInfoCollector {
     fn level(&self) -> TypeResolverLevel {
-        TypeResolverLevel::Module
+        TypeResolverLevel::Thin
     }
 
     fn find_type(&self, type_data: &TypeData) -> Option<TypeId> {
@@ -627,15 +627,32 @@ impl TypeResolver for JsModuleInfoCollector {
     }
 
     fn get_by_resolved_id(&self, id: ResolvedTypeId) -> Option<ResolvedTypeData> {
-        match id.level() {
-            TypeResolverLevel::Module => Some((id, self.get_by_id(id.id())).into()),
-            TypeResolverLevel::Global => Some((id, GLOBAL_RESOLVER.get_by_id(id.id())).into()),
-            TypeResolverLevel::Scope | TypeResolverLevel::Import => None,
+        let mut id = id;
+        loop {
+            let resolved_id: ResolvedTypeData = match id.level() {
+                TypeResolverLevel::Thin => (id, self.get_by_id(id.id())).into(),
+                TypeResolverLevel::Global => (id, GLOBAL_RESOLVER.get_by_id(id.id())).into(),
+                TypeResolverLevel::Full | TypeResolverLevel::Import => break None,
+            };
+
+            match resolved_id.as_raw_data() {
+                TypeData::Reference(TypeReference::Resolved(resolved_id)) if id != *resolved_id => {
+                    id = *resolved_id;
+                }
+                _ => break Some(resolved_id),
+            }
         }
     }
 
     fn register_type(&mut self, type_data: Cow<TypeData>) -> TypeId {
-        self.types.register_type(type_data)
+        match GLOBAL_RESOLVER.find_type(&type_data) {
+            Some(id) => {
+                let reference =
+                    TypeData::reference(ResolvedTypeId::new(TypeResolverLevel::Global, id));
+                self.types.register_type(Cow::Owned(reference))
+            }
+            None => self.types.register_type(type_data),
+        }
     }
 
     fn resolve_reference(&self, ty: &TypeReference) -> Option<ResolvedTypeId> {
@@ -697,13 +714,32 @@ impl TypeResolver for JsModuleInfoCollector {
 
     fn resolve_expression(&mut self, _scope_id: ScopeId, expr: &AnyJsExpression) -> Cow<TypeData> {
         match self.parsed_expressions.get(&expr.range()) {
-            Some(id) => Cow::Borrowed(self.get_by_id(*id)),
+            Some(resolved_id) => match resolved_id.level() {
+                TypeResolverLevel::Thin => Cow::Borrowed(self.get_by_id(resolved_id.id())),
+                TypeResolverLevel::Global => {
+                    Cow::Borrowed(GLOBAL_RESOLVER.get_by_id(resolved_id.id()))
+                }
+                TypeResolverLevel::Full | TypeResolverLevel::Import => {
+                    Cow::Owned(TypeData::unknown())
+                }
+            },
             None => Cow::Owned(TypeData::unknown()),
         }
     }
 
+    fn reference_to_resolved_expression(
+        &mut self,
+        _scope_id: ScopeId,
+        expression: &AnyJsExpression,
+    ) -> TypeReference {
+        self.parsed_expressions
+            .get(&expression.range())
+            .map(|resolved_id| TypeReference::Resolved(*resolved_id))
+            .unwrap_or_default()
+    }
+
     fn fallback_resolver(&self) -> Option<&dyn TypeResolver> {
-        Some(&*GLOBAL_RESOLVER)
+        Some(GLOBAL_RESOLVER.as_ref())
     }
 
     fn registered_types(&self) -> &[TypeData] {

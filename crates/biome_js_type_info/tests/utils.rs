@@ -137,7 +137,7 @@ impl HardcodedSymbolResolver {
 
 impl TypeResolver for HardcodedSymbolResolver {
     fn level(&self) -> TypeResolverLevel {
-        TypeResolverLevel::Module
+        TypeResolverLevel::Thin
     }
 
     fn find_type(&self, type_data: &TypeData) -> Option<TypeId> {
@@ -153,10 +153,10 @@ impl TypeResolver for HardcodedSymbolResolver {
 
     fn get_by_resolved_id(&self, id: ResolvedTypeId) -> Option<ResolvedTypeData> {
         match id.level() {
-            TypeResolverLevel::Scope => {
+            TypeResolverLevel::Full => {
                 panic!("Ad-hoc references unsupported by resolver")
             }
-            TypeResolverLevel::Module => Some((id, self.get_by_id(id.id())).into()),
+            TypeResolverLevel::Thin => Some((id, self.get_by_id(id.id())).into()),
             TypeResolverLevel::Import => {
                 panic!("Import references unsupported by resolver")
             }

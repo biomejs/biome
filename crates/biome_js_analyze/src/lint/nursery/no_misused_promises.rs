@@ -98,7 +98,7 @@ impl Rule for NoMisusedPromises {
             _ => return None,
         };
 
-        let ty = ctx.type_for_expression(expression);
+        let ty = ctx.type_of_expression(expression);
 
         // Uncomment the following line for debugging convenience:
         //let printed = format!("type of {expression:?} = {ty:?}");

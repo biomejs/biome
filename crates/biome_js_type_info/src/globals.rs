@@ -2,7 +2,10 @@
 
 // FIXME: Implement inference from type definitions.
 
-use std::{borrow::Cow, sync::LazyLock};
+use std::{
+    borrow::Cow,
+    sync::{Arc, LazyLock},
+};
 
 use biome_js_syntax::AnyJsExpression;
 use biome_rowan::Text;
@@ -15,7 +18,8 @@ use crate::{
 
 const GLOBAL_LEVEL: TypeResolverLevel = TypeResolverLevel::Global;
 
-pub static GLOBAL_RESOLVER: LazyLock<GlobalsResolver> = LazyLock::new(GlobalsResolver::default);
+pub static GLOBAL_RESOLVER: LazyLock<Arc<GlobalsResolver>> =
+    LazyLock::new(|| Arc::new(GlobalsResolver::default()));
 
 pub static GLOBAL_TYPE_MEMBERS: LazyLock<Vec<TypeMember>> = LazyLock::new(|| {
     (0..NUM_PREDEFINED_TYPES)

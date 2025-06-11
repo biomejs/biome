@@ -97,8 +97,8 @@ impl ModuleGraph {
 
         let fs_proxy = ModuleGraphFsProxy::new(fs, self, project_layout);
 
-        // Traverse all the added and updated paths and insert their resolved
-        // imports.
+        // Traverse all the added and updated paths and insert their module
+        // info.
         let imports = self.data.pin();
         for (path, root) in added_or_updated_paths {
             let directory = path.parent().unwrap_or(path);

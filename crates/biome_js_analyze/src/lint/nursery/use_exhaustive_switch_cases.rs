@@ -122,7 +122,7 @@ impl Rule for UseExhaustiveSwitchCases {
             .filter_map(|case| match case {
                 AnyJsSwitchClause::JsCaseClause(case) => {
                     let test = case.test().ok()?;
-                    flatten_type(&ctx.type_for_expression(&test))
+                    flatten_type(&ctx.type_of_expression(&test))
                         .as_deref()
                         .cloned()
                 }
@@ -133,7 +133,7 @@ impl Rule for UseExhaustiveSwitchCases {
         let mut missing_cases = Vec::new();
 
         let discriminant = stmt.discriminant().ok()?;
-        let discriminant_ty = flatten_type(&ctx.type_for_expression(&discriminant))?;
+        let discriminant_ty = flatten_type(&ctx.type_of_expression(&discriminant))?;
 
         for union_part in match discriminant_ty.deref() {
             TypeData::Union(union) => union
@@ -274,6 +274,7 @@ impl Rule for UseExhaustiveSwitchCases {
 fn flatten_type(ty: &Type) -> Option<Type> {
     match ty.deref() {
         TypeData::InstanceOf(instance) => ty.resolve(&instance.ty),
+        TypeData::Reference(reference) => ty.resolve(reference),
         TypeData::TypeofType(inner) => ty.resolve(inner),
         _ => Some(ty.clone()),
     }

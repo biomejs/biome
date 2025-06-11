@@ -4,21 +4,21 @@ use biome_analyze::{
 };
 use biome_js_syntax::{AnyJsExpression, AnyJsRoot, JsLanguage, JsSyntaxNode};
 use biome_js_type_info::Type;
-use biome_module_graph::ScopedResolver;
+use biome_module_graph::ModuleResolver;
 use biome_rowan::{AstNode, TextRange};
 use std::sync::Arc;
 
 /// Service for use with type inference rules.
 #[derive(Clone, Debug)]
 pub struct TypedService {
-    resolver: Option<Arc<ScopedResolver>>,
+    resolver: Option<Arc<ModuleResolver>>,
 }
 
 impl TypedService {
-    pub fn type_for_expression(&self, expr: &AnyJsExpression) -> Type {
+    pub fn type_of_expression(&self, expr: &AnyJsExpression) -> Type {
         self.resolver
             .as_ref()
-            .map(|resolver| resolver.resolved_type_for_expression(expr))
+            .map(|resolver| resolver.resolved_type_of_expression(expr))
             .unwrap_or_default()
     }
 }
@@ -41,7 +41,7 @@ impl FromServices for TypedService {
             }
         }
 
-        let resolver: Option<&Option<Arc<ScopedResolver>>> = services.get_service();
+        let resolver: Option<&Option<Arc<ModuleResolver>>> = services.get_service();
         let resolver = resolver.and_then(|resolver| resolver.as_ref().map(Arc::clone));
         Ok(Self { resolver })
     }

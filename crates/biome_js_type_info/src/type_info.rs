@@ -60,7 +60,7 @@ impl Debug for Type {
 impl Default for Type {
     fn default() -> Self {
         Self {
-            resolver: Arc::new(GLOBAL_RESOLVER.clone()),
+            resolver: GLOBAL_RESOLVER.clone(),
             id: GLOBAL_UNKNOWN_ID,
         }
     }
@@ -93,8 +93,8 @@ impl Type {
     ///
     /// Returns `false` otherwise.
     pub fn has_variant(&self, predicate: impl Fn(Self) -> bool) -> bool {
-        match self.deref() {
-            TypeData::Union(union) => union
+        match self.as_raw_data() {
+            Some(TypeData::Union(union)) => union
                 .types()
                 .iter()
                 .filter_map(|ty| self.resolve(ty))
@@ -117,8 +117,8 @@ impl Type {
     /// Returns whether the given type is known to reference a function that
     /// returns a `Promise`.
     pub fn is_function_that_returns_promise(&self) -> bool {
-        match self.deref() {
-            TypeData::Function(function) => function
+        match self.as_raw_data() {
+            Some(TypeData::Function(function)) => function
                 .return_type
                 .as_type()
                 .and_then(|ty| self.resolve(ty))
@@ -130,19 +130,22 @@ impl Type {
     /// Returns whether this type is a string.
     pub fn is_string(&self) -> bool {
         self.id == GLOBAL_STRING_ID
-            || self
-                .resolved_data()
-                .is_some_and(|ty| match ty.as_raw_data() {
-                    TypeData::String => true,
-                    TypeData::Literal(literal) => matches!(literal.as_ref(), Literal::String(_)),
-                    _ => false,
-                })
+            || self.as_raw_data().is_some_and(|ty| match ty {
+                TypeData::String => true,
+                TypeData::Literal(literal) => matches!(literal.as_ref(), Literal::String(_)),
+                _ => false,
+            })
     }
 
     pub fn resolve(&self, ty: &TypeReference) -> Option<Self> {
         self.resolver
             .resolve_reference(&self.id.apply_module_id_to_reference(ty))
             .map(|resolved_id| self.with_resolved_id(resolved_id))
+    }
+
+    #[inline]
+    fn as_raw_data(&self) -> Option<&TypeData> {
+        self.resolved_data().map(ResolvedTypeData::as_raw_data)
     }
 
     #[inline]

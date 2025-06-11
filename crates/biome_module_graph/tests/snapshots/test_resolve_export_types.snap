@@ -65,7 +65,7 @@ BindingId(0) => JsBindingData {
 
 BindingId(3) => JsBindingData {
   Name: superComputer,
-  Type: Module(0) TypeId(6),
+  Type: Module(0) TypeId(7),
   Declaration kind: Value
 }
 ```
@@ -75,23 +75,19 @@ BindingId(3) => JsBindingData {
 ```
 Module TypeId(0) => value: 42
 
-Module TypeId(1) => value: 42
+Module TypeId(1) => Module(0) TypeId(0)
 
-Module TypeId(2) => unknown
+Module TypeId(2) => Module(0) TypeId(0)
 
-Module TypeId(3) => value: 42
+Module TypeId(3) => number
 
-Module TypeId(4) => number
+Module TypeId(4) => unknown
 
 Module TypeId(5) => value: Life, The Universe, and Everything
 
-Module TypeId(6) => instanceof Module(0) TypeId(12)
+Module TypeId(6) => Module(0) TypeId(12)
 
-Module TypeId(7) => class "DeepThought" {
-  extends: none
-  implements: []
-  type_args: []
-}
+Module TypeId(7) => instanceof Module(0) TypeId(6)
 
 Module TypeId(8) => sync Function "answerMe" {
   accepts: {
