@@ -71,7 +71,7 @@ impl ResolvedTypeId {
 
     #[inline]
     pub const fn is_at_module_level(self) -> bool {
-        matches!(self.level(), TypeResolverLevel::Module)
+        matches!(self.level(), TypeResolverLevel::Thin)
     }
 
     #[inline]
@@ -105,8 +105,8 @@ pub struct ResolverId(u32);
 impl Debug for ResolverId {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self.level() {
-            TypeResolverLevel::Scope => f.write_fmt(format_args!("Scope")),
-            TypeResolverLevel::Module => {
+            TypeResolverLevel::Full => f.write_fmt(format_args!("Full")),
+            TypeResolverLevel::Thin => {
                 f.write_fmt(format_args!("Module({:?})", self.module_id().index()))
             }
             TypeResolverLevel::Import => f.write_fmt(format_args!("Import")),
@@ -131,14 +131,14 @@ impl ResolverId {
     /// it's a safe default in many contexts.
     #[inline]
     pub const fn scope() -> Self {
-        Self::from_level(TypeResolverLevel::Scope)
+        Self::from_level(TypeResolverLevel::Full)
     }
 
     /// Applies the module ID of `self` to the given `id`.
     #[inline]
     pub const fn apply_module_id(self, id: ResolvedTypeId) -> ResolvedTypeId {
         match (self.level(), id.level()) {
-            (TypeResolverLevel::Module, TypeResolverLevel::Module) => {
+            (TypeResolverLevel::Thin, TypeResolverLevel::Thin) => {
                 id.with_module_id(self.module_id())
             }
             _ => id,
@@ -149,7 +149,7 @@ impl ResolverId {
     #[inline]
     pub fn apply_module_id_to_data(self, data: TypeData) -> TypeData {
         match self.level() {
-            TypeResolverLevel::Module => data.with_module_id(self.module_id()),
+            TypeResolverLevel::Thin => data.with_module_id(self.module_id()),
             _ => data,
         }
     }
@@ -172,7 +172,7 @@ impl ResolverId {
 
     #[inline]
     pub const fn is_at_module_level(self) -> bool {
-        matches!(self.level(), TypeResolverLevel::Module)
+        matches!(self.level(), TypeResolverLevel::Thin)
     }
 
     #[inline]
@@ -197,7 +197,7 @@ impl ResolverId {
     }
 }
 
-/// Indicates the level within which a symbol has been resolved.
+/// Indicates the level within which a symbol has been or can be resolved.
 ///
 /// The level is used by type resolvers to determine _where_ to look up a given
 /// [`TypeId`]. They can look up types within their own registered types, within
@@ -205,9 +205,8 @@ impl ResolverId {
 /// another resolver that may be able to handle the level.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum TypeResolverLevel {
-    /// Used for scope-level inference that is not cached except in the scoped
-    /// resolver.
-    Scope,
+    /// Used for full inference where resolution across modules takes place.
+    Full,
 
     /// Used for resolving types that exist within the same module as from which
     /// the resolution took place.
@@ -215,17 +214,17 @@ pub enum TypeResolverLevel {
     /// A [`ResolvedTypeId`] that uses this level may have a [`ModuleId`] stored
     /// as well. However, we **don't** store such module IDs as part of a
     /// module's type information, because a module is unaware of its own ID.
-    /// Instead, we rely on the resolver to attach the module ID at resolution
-    /// time.
-    Module,
+    /// Instead, we rely on the module resolver to attach the module ID at
+    /// resolution time.
+    Thin,
 
-    /// Used for resolving types that exist across modules within the project.
+    /// Used for marking types that exist across modules that are beyond the
+    /// capability of the current resolver to resolve.
     ///
-    /// Currently, we don't store resolved IDs with this level in the module
-    /// info. Instead, we use it during a module's type collection to flag
-    /// resolved types that require imports from other modules. Such resolved
-    /// IDs then get converted to [`TypeReference::Import`] before storing
-    /// them in the module info.
+    /// We don't store resolved IDs with this level in the module info. Instead,
+    /// we use it during a module's type collection to flag resolved types that
+    /// require imports from other modules. Such resolved IDs then get converted
+    /// to [`TypeReference::Import`] before storing them in the module info.
     ///
     /// **Important:** [`ResolvedTypeId`]s of this level store a `BindingId` in
     ///                the field that is used for `TypeId`s normally.
@@ -248,8 +247,8 @@ impl TypeResolverLevel {
     ///       constraint ;)
     pub const fn from_u2(bits: u32) -> Self {
         match bits {
-            0 => Self::Scope,
-            1 => Self::Module,
+            0 => Self::Full,
+            1 => Self::Thin,
             2 => Self::Import,
             3 => Self::Global,
             _ => panic!("invalid bits passed to TypeResolverLevel"),
@@ -347,7 +346,7 @@ impl<'a> ResolvedTypeData<'a> {
     /// the [`ResolverId`] applied to all its references.
     pub fn to_data(self) -> TypeData {
         match self.id.level() {
-            TypeResolverLevel::Module => self.data.clone().with_module_id(self.id.module_id()),
+            TypeResolverLevel::Thin => self.data.clone().with_module_id(self.id.module_id()),
             _ => self.data.clone(),
         }
     }
@@ -413,7 +412,7 @@ impl<'a> ResolvedTypeMember<'a> {
     /// module ID from the [`ResolverId`] applied to all its references.
     pub fn to_member(self) -> TypeMember {
         match self.id.level() {
-            TypeResolverLevel::Module => self.member.clone().with_module_id(self.id.module_id()),
+            TypeResolverLevel::Thin => self.member.clone().with_module_id(self.id.module_id()),
             _ => self.member.clone(),
         }
     }
@@ -486,6 +485,25 @@ pub trait TypeResolver {
             TypeData::Reference(reference) => reference,
             _ => {
                 let id = self.register_type(Cow::Owned(type_data));
+                self.reference_to_id(id)
+            }
+        }
+    }
+
+    /// Returns a reference to the given `expression` in the given scope with
+    /// the given ID.
+    fn reference_to_resolved_expression(
+        &mut self,
+        scope_id: ScopeId,
+        expression: &AnyJsExpression,
+    ) -> TypeReference {
+        let data = self.resolve_expression(scope_id, expression);
+        match data {
+            Cow::Owned(TypeData::Reference(reference)) => reference,
+            Cow::Borrowed(TypeData::Reference(reference)) => reference.clone(),
+            data => {
+                let data = Cow::Owned(data.into_owned());
+                let id = self.register_type(data);
                 self.reference_to_id(id)
             }
         }
@@ -568,6 +586,15 @@ pub trait TypeResolver {
 
     /// Resolves the type of a value by its `identifier` in a specific scope.
     fn resolve_type_of(&self, identifier: &Text, scope_id: ScopeId) -> Option<ResolvedTypeId>;
+
+    /// Maps from one resolved ID to another.
+    ///
+    /// Some resolvers may wish to map resolved IDs that reference other
+    /// resolvers to their own resolved types. They can reimplement this method
+    /// to do so.
+    fn mapped_resolved_id(&self, resolved_id: ResolvedTypeId) -> ResolvedTypeId {
+        resolved_id
+    }
 
     // #region Utilities for test inspection
 

@@ -50,7 +50,7 @@ impl TypeData {
     /// ```no_test
     /// TypeData::TypeofValue {
     ///     identifier: "c",
-    ///     ty: TypeReference::Module(<type ID of literal>)
+    ///     ty: TypeReference::Resolved(<type ID of literal>)
     /// })
     /// ```
     ///
@@ -97,6 +97,14 @@ fn flattened(mut ty: TypeData, resolver: &mut dyn TypeResolver, depth: usize) ->
                             },
                         ));
                     }
+                    TypeData::Reference(reference) => {
+                        return resolved.apply_module_id_to_data(TypeData::instance_of(
+                            TypeInstance {
+                                ty: reference.clone(),
+                                type_parameters: instance_of.type_parameters.clone(),
+                            },
+                        ));
+                    }
                     TypeData::Global
                     | TypeData::Function(_)
                     | TypeData::Literal(_)
@@ -106,7 +114,18 @@ fn flattened(mut ty: TypeData, resolver: &mut dyn TypeResolver, depth: usize) ->
                 None => return ty,
             },
             TypeData::Reference(reference) => match resolver.resolve_and_get(reference) {
-                Some(reference) => ty = reference.to_data(),
+                Some(reference) => match reference.as_raw_data() {
+                    TypeData::InstanceOf(instance_of) => {
+                        ty = reference
+                            .apply_module_id_to_data(TypeData::InstanceOf(instance_of.clone()));
+                    }
+                    TypeData::Reference(target) => {
+                        ty = TypeData::Reference(
+                            reference.apply_module_id_to_reference(target).into_owned(),
+                        );
+                    }
+                    _ => return ty,
+                },
                 None => return ty,
             },
             TypeData::TypeofExpression(expr) => match flattened_expression(expr, resolver, depth) {
@@ -446,12 +465,10 @@ fn flattened_expression(
                         return Some(TypeData::union_of(types));
                     }
 
-                    TypeData::Reference(_) => return None,
-
                     _ => {}
                 }
 
-                let is_class = matches!(object.as_raw_data(), TypeData::Class(_));
+                let is_class = object.is_class();
                 let member = object.all_members(resolver).find(|member| {
                     member.has_name(&expr.member)
                         && if is_class {

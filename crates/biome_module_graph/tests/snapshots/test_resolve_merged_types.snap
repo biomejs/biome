@@ -80,11 +80,11 @@ Module TypeId(7) => value: c
 
 Module TypeId(8) => Module(0) TypeId(5) | Module(0) TypeId(6) | Module(0) TypeId(7)
 
-Module TypeId(9) => value: a
+Module TypeId(9) => Module(0) TypeId(0)
 
-Module TypeId(10) => value: 1
+Module TypeId(10) => Module(0) TypeId(1)
 
-Module TypeId(11) => value: true
+Module TypeId(11) => Module(0) TypeId(2)
 
 Module TypeId(12) => Module(0) TypeId(9) | Module(0) TypeId(10) | Module(0) TypeId(11)
 

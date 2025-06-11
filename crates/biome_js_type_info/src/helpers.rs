@@ -56,6 +56,10 @@ impl<'a> ResolvedTypeData<'a> {
         TypeMemberOwner::from_type_data(self.as_raw_data()).is_some()
     }
 
+    pub fn is_class(self) -> bool {
+        matches!(self.as_raw_data(), TypeData::Class(_))
+    }
+
     pub fn is_expression(self) -> bool {
         matches!(self.as_raw_data(), TypeData::TypeofExpression(_))
     }
@@ -70,7 +74,12 @@ impl<'a> ResolvedTypeData<'a> {
         let mut current_object = Some(self);
         while let Some(current) = current_object {
             let Some(prototype) = current.prototype(resolver) else {
-                break;
+                match current.as_raw_data() {
+                    TypeData::Reference(TypeReference::Resolved(resolved_id)) => {
+                        return *resolved_id == id;
+                    }
+                    _ => break,
+                }
             };
 
             let Some(next_id) = resolver.resolve_reference(&prototype) else {
@@ -95,6 +104,12 @@ impl<'a> ResolvedTypeData<'a> {
     /// Returns whether this type is an instance of a `Promise`.
     pub fn is_promise_instance(self, resolver: &dyn TypeResolver) -> bool {
         self.is_instance_of(resolver, GLOBAL_PROMISE_ID)
+    }
+
+    /// Returns whether this type is a reference to another type.
+    #[inline]
+    pub fn is_reference(self) -> bool {
+        matches!(self.as_raw_data(), TypeData::Reference(_))
     }
 
     /// Returns a reference to the type's prototype, if any.
@@ -292,18 +307,43 @@ impl<'a> Iterator for AllTypeMemberIterator<'a> {
             None => return None,
         };
 
-        let mut next_reference = self
-            .resolver_id
-            .apply_module_id_to_reference(next_reference);
-        if let Some(excluded_binding_id) = self.excluded_binding_id {
-            next_reference = Cow::Owned(
-                next_reference
-                    .into_owned()
-                    .with_excluded_binding_id(excluded_binding_id),
-            );
+        // If there are any references in the inheritance chain, we need to keep
+        // resolving them until we find an "actual" type again.
+        let mut next_resolved_id = None;
+        let mut next_reference = Cow::Borrowed(next_reference);
+        while next_resolved_id.is_none() {
+            if let TypeReference::Resolved(id) = next_reference.as_ref() {
+                next_reference = Cow::Owned(TypeReference::Resolved(
+                    self.resolver_id.apply_module_id(*id),
+                ));
+            }
+
+            if let Some(excluded_binding_id) = self.excluded_binding_id {
+                next_reference = Cow::Owned(
+                    next_reference
+                        .into_owned()
+                        .with_excluded_binding_id(excluded_binding_id),
+                );
+            }
+
+            let Some(resolved_id) = self.resolver.resolve_reference(&next_reference) else {
+                break;
+            };
+
+            let Some(ty) = self.resolver.get_by_resolved_id(resolved_id) else {
+                break;
+            };
+
+            match ty.as_raw_data() {
+                TypeData::Reference(reference) => {
+                    self.resolver_id = ty.resolver_id();
+                    next_reference = Cow::Borrowed(reference);
+                }
+                _ => next_resolved_id = Some(resolved_id),
+            }
         }
 
-        let Some(next_resolved_id) = self.resolver.resolve_reference(&next_reference) else {
+        let Some(next_resolved_id) = next_resolved_id else {
             self.owner = None;
             return None;
         };
