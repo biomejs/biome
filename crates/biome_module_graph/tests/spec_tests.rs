@@ -73,11 +73,11 @@ fn create_test_project_layout() -> (MemoryFileSystem, ProjectLayout) {
     project_layout.insert_node_manifest(
         "/".into(),
         PackageJson::new("frontend")
-            .with_version("0.0.0".into())
-            .with_dependencies(Dependencies::from([(
+            .with_version("0.0.0")
+            .with_dependencies(Dependencies(Box::new([(
                 "shared".into(),
                 "link:./node_modules/shared".into(),
-            )])),
+            )]))),
     );
 
     let tsconfig_json = parse_json(
@@ -99,7 +99,7 @@ fn create_test_project_layout() -> (MemoryFileSystem, ProjectLayout) {
                 ("types".into(), JsonString::from("./dist/index.d.ts").into()),
                 ("default".into(), JsonString::from("./dist/index.js").into()),
             ]))
-            .with_version("0.0.1".into()),
+            .with_version("0.0.1"),
     );
 
     (fs, project_layout)
@@ -432,7 +432,7 @@ fn test_resolve_exports() {
     let project_layout = ProjectLayout::default();
     project_layout.insert_node_manifest(
         "/".into(),
-        PackageJson::new("frontend").with_version("0.0.0".into()),
+        PackageJson::new("frontend").with_version("0.0.0"),
     );
 
     let added_paths = [
@@ -742,7 +742,7 @@ fn test_resolve_promise_export() {
             async function returnsPromise() {
                 return 'value';
             }
-            
+
             export const promise = returnsPromise();
         "#,
     );
@@ -1087,8 +1087,8 @@ fn test_resolve_react_types() {
     project_layout.insert_node_manifest(
         "/".into(),
         PackageJson::new("frontend")
-            .with_version("0.0.0".into())
-            .with_dependencies(Dependencies::from([("react".into(), "19.0.0".into())])),
+            .with_version("0.0.0")
+            .with_dependencies(Dependencies(Box::new([("react".into(), "19.0.0".into())]))),
     );
 
     let tsconfig_json = parse_json(r#"{}"#, JsonParserOptions::default());
