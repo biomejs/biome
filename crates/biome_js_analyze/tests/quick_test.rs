@@ -58,8 +58,7 @@ async function testDestructuringAndCallingReturnsPromiseFromRest({
     let options = AnalyzerOptions::default().with_file_path(file_path.clone());
     let rule_filter = RuleFilter::Rule("nursery", "noFloatingPromises");
 
-    let mut dependencies = Dependencies::default();
-    dependencies.add("buffer", "latest");
+    let dependencies = Dependencies(Box::new([("buffer".into(), "latest".into())]));
 
     let project_layout = project_layout_with_top_level_dependencies(dependencies);
     let services = crate::JsAnalyzerServices::from((
