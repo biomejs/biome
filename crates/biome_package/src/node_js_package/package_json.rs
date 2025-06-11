@@ -23,19 +23,19 @@ pub struct PackageJson {
     /// using its name.
     ///
     /// <https://nodejs.org/api/packages.html#name>
-    pub name: Option<Text>,
+    pub name: Option<Box<str>>,
 
     /// The "type" field.
     ///
     /// <https://nodejs.org/api/packages.html#type>
     pub r#type: Option<PackageType>,
 
-    pub version: Option<Text>,
+    pub version: Option<Box<str>>,
     pub dependencies: Dependencies,
     pub dev_dependencies: Dependencies,
     pub peer_dependencies: Dependencies,
     pub optional_dependencies: Dependencies,
-    pub license: Option<(Text, TextRange)>,
+    pub license: Option<(Box<str>, TextRange)>,
 
     pub(crate) raw_json: JsonObject,
 }
@@ -43,7 +43,7 @@ pub struct PackageJson {
 static_assertions::assert_impl_all!(PackageJson: Send, Sync);
 
 impl PackageJson {
-    pub fn new(name: impl Into<Text>) -> Self {
+    pub fn new(name: impl Into<Box<str>>) -> Self {
         Self {
             name: Some(name.into()),
             r#type: Some(PackageType::Module),
@@ -51,9 +51,9 @@ impl PackageJson {
         }
     }
 
-    pub fn with_version(self, version: Text) -> Self {
+    pub fn with_version(self, version: impl Into<Box<str>>) -> Self {
         Self {
-            version: Some(version),
+            version: Some(version.into()),
             ..self
         }
     }
@@ -89,8 +89,8 @@ impl PackageJson {
             .chain(self.dev_dependencies.iter())
             .chain(self.peer_dependencies.iter());
         for (dependency_name, dependency_version) in iter {
-            if dependency_name == specifier
-                && Version::from(dependency_version.as_str()).satisfies(range)
+            if dependency_name.as_ref() == specifier
+                && Version::from(dependency_version.as_ref()).satisfies(range)
             {
                 return true;
             }
@@ -132,20 +132,20 @@ impl Manifest for PackageJson {
 }
 
 #[derive(Debug, Default, Clone, biome_deserialize_macros::Deserializable)]
-pub struct Dependencies(FxHashMap<String, String>);
+pub struct Dependencies(FxHashMap<Box<str>, Box<str>>);
 
 impl<const N: usize> From<[(String, String); N]> for Dependencies {
     fn from(dependencies: [(String, String); N]) -> Self {
         let mut map = FxHashMap::with_capacity_and_hasher(N, FxBuildHasher);
         for (dependency, version) in dependencies {
-            map.insert(dependency, version);
+            map.insert(dependency.as_str().into(), version.as_str().into());
         }
         Self(map)
     }
 }
 
 impl Deref for Dependencies {
-    type Target = FxHashMap<String, String>;
+    type Target = FxHashMap<Box<str>, Box<str>>;
 
     fn deref(&self) -> &Self::Target {
         &self.0
@@ -153,7 +153,7 @@ impl Deref for Dependencies {
 }
 
 impl Dependencies {
-    pub fn to_keys(&self) -> Vec<String> {
+    pub fn to_keys(&self) -> Vec<Box<str>> {
         self.0.keys().cloned().collect()
     }
 
@@ -161,7 +161,7 @@ impl Dependencies {
         self.0.contains_key(specifier)
     }
 
-    pub fn add(&mut self, dependency: impl Into<String>, version: impl Into<String>) {
+    pub fn add(&mut self, dependency: impl Into<Box<str>>, version: impl Into<Box<str>>) {
         self.0.insert(dependency.into(), version.into());
     }
 }
