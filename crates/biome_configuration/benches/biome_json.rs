@@ -19,7 +19,7 @@ static GLOBAL: tikv_jemallocator::Jemalloc = tikv_jemallocator::Jemalloc;
 #[global_allocator]
 static GLOBAL: std::alloc::System = std::alloc::System;
 fn bench_biome_json(criterion: &mut Criterion) {
-    let code = include_str!("biome.json");
+    let code = include_str!("biome_bench.json");
 
     let mut group = criterion.benchmark_group("biome_json");
     group.throughput(Throughput::Bytes(code.len() as u64));

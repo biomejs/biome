@@ -19,7 +19,7 @@ static GLOBAL: tikv_jemallocator::Jemalloc = tikv_jemallocator::Jemalloc;
 #[global_allocator]
 static GLOBAL: std::alloc::System = std::alloc::System;
 fn bench_tsconfig(criterion: &mut Criterion) {
-    let code = include_str!("tsconfig.json");
+    let code = include_str!("tsconfig_bench.json");
 
     let mut group = criterion.benchmark_group("tsconfig_json");
     group.throughput(Throughput::Bytes(code.len() as u64));
