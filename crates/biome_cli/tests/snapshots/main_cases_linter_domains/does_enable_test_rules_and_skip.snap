@@ -38,6 +38,67 @@ describe("foo", () => {
 # Emitted Messages
 
 ```block
+test1.js:1:1 lint/nursery/useExplicitTestAssertions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Missing assertion in test body.
+  
+  > 1 │ describe.only("bar", () => {});
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    2 │ 
+  
+  i This could cause false positives where the test always passes but isn’t testing anything.
+  
+  i Add an expect() (Vitest/Jest) or assert() (node:assert) assertion to this test.
+  
+
+```
+
+```block
+test2.js:2:1 lint/nursery/useExplicitTestAssertions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Missing assertion in test body.
+  
+  > 2 │ describe("foo", () => {
+      │ ^^^^^^^^^^^^^^^^^^^^^^^
+  > 3 │ 	beforeEach(() => {});
+  > 4 │     beforeEach(() => {});
+  > 5 │     test("bar", () => {
+  > 6 │         someFn();
+  > 7 │     });
+  > 8 │ });
+      │ ^^
+    9 │     
+  
+  i This could cause false positives where the test always passes but isn’t testing anything.
+  
+  i Add an expect() (Vitest/Jest) or assert() (node:assert) assertion to this test.
+  
+
+```
+
+```block
+test2.js:5:5 lint/nursery/useExplicitTestAssertions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Missing assertion in test body.
+  
+    3 │ 	beforeEach(() => {});
+    4 │     beforeEach(() => {});
+  > 5 │     test("bar", () => {
+      │     ^^^^^^^^^^^^^^^^^^^
+  > 6 │         someFn();
+  > 7 │     });
+      │     ^^
+    8 │ });
+    9 │     
+  
+  i This could cause false positives where the test always passes but isn’t testing anything.
+  
+  i Add an expect() (Vitest/Jest) or assert() (node:assert) assertion to this test.
+  
+
+```
+
+```block
 test1.js:1:10 lint/suspicious/noFocusedTests  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Don't focus the test.
