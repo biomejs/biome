@@ -488,7 +488,7 @@ impl Format<FormatTypeContext> for TypeReference {
                             ]]
                         )
                     }
-                } else if level == TypeResolverLevel::Module {
+                } else if level == TypeResolverLevel::Thin {
                     let module_id = resolved.module_id().index();
                     write!(
                         f,

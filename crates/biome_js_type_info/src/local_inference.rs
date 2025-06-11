@@ -326,7 +326,7 @@ impl TypeData {
                         .extends_clause()
                         .and_then(|extends| extends.super_class().ok())
                         .map(|super_class| {
-                            TypeReference::from_any_js_expression(resolver, scope_id, &super_class)
+                            resolver.reference_to_resolved_expression(scope_id, &super_class)
                         }),
                     implements: decl
                         .implements_clause()
@@ -426,7 +426,7 @@ impl TypeData {
                     .into_iter()
                     .filter_map(|el| match el {
                         Ok(AnyJsArrayElement::AnyJsExpression(expr)) => Some(TupleElementType {
-                            ty: TypeReference::from_any_js_expression(resolver, scope_id, &expr),
+                            ty: resolver.reference_to_resolved_expression(scope_id, &expr),
                             name: None,
                             is_optional: false,
                             is_rest: false,
@@ -434,9 +434,7 @@ impl TypeData {
                         Ok(AnyJsArrayElement::JsSpread(spread)) => spread
                             .argument()
                             .ok()
-                            .map(|expr| {
-                                TypeReference::from_any_js_expression(resolver, scope_id, &expr)
-                            })
+                            .map(|expr| resolver.reference_to_resolved_expression(scope_id, &expr))
                             .map(|ty| TupleElementType {
                                 ty,
                                 name: None,
@@ -460,7 +458,7 @@ impl TypeData {
             }
             AnyJsExpression::JsCallExpression(expr) => match expr.callee() {
                 Ok(callee) => Self::from(TypeofExpression::Call(TypeofCallExpression {
-                    callee: TypeReference::from_any_js_expression(resolver, scope_id, &callee),
+                    callee: resolver.reference_to_resolved_expression(scope_id, &callee),
                     arguments: CallArgumentType::types_from_js_call_arguments(
                         resolver,
                         scope_id,
@@ -483,9 +481,8 @@ impl TypeData {
                         .map(|member| {
                             Self::from(TypeofExpression::StaticMember(
                                 TypeofStaticMemberExpression {
-                                    object: TypeReference::from_any_js_expression(
-                                        resolver, scope_id, &object,
-                                    ),
+                                    object: resolver
+                                        .reference_to_resolved_expression(scope_id, &object),
                                     member,
                                 },
                             ))
@@ -519,7 +516,7 @@ impl TypeData {
             ),
             AnyJsExpression::JsParenthesizedExpression(expr) => expr
                 .expression()
-                .map(|expr| Self::from_any_js_expression(resolver, scope_id, &expr))
+                .map(|expr| resolver.resolve_expression(scope_id, &expr).into_owned())
                 .unwrap_or_default(),
             AnyJsExpression::JsStaticMemberExpression(expr) => match (expr.object(), expr.member())
             {
@@ -527,9 +524,8 @@ impl TypeData {
                     .map(|member| {
                         Self::from(TypeofExpression::StaticMember(
                             TypeofStaticMemberExpression {
-                                object: TypeReference::from_any_js_expression(
-                                    resolver, scope_id, &object,
-                                ),
+                                object: resolver
+                                    .reference_to_resolved_expression(scope_id, &object),
                                 member,
                             },
                         ))
@@ -806,19 +802,19 @@ impl TypeData {
             return Self::unknown();
         };
 
-        let left = Self::from_any_js_expression(resolver, scope_id, &left);
-        let right = Self::from_any_js_expression(resolver, scope_id, &right);
+        let left = resolver.resolve_expression(scope_id, &left).into_owned();
+        let right = resolver.resolve_expression(scope_id, &right);
 
         match operator {
-            JsBinaryOperator::StrictEquality => match (left, right) {
+            JsBinaryOperator::StrictEquality => match (left, right.as_ref()) {
                 (Self::Literal(left), Self::Literal(right)) => {
-                    Literal::Boolean((left == right).into()).into()
+                    Literal::Boolean((left == *right).into()).into()
                 }
                 _ => Self::boolean(),
             },
-            JsBinaryOperator::StrictInequality => match (left, right) {
+            JsBinaryOperator::StrictInequality => match (left, right.as_ref()) {
                 (Self::Literal(left), Self::Literal(right)) => {
-                    Literal::Boolean((left != right).into()).into()
+                    Literal::Boolean((left != *right).into()).into()
                 }
                 _ => Self::boolean(),
             },
@@ -848,7 +844,7 @@ impl TypeData {
                 .extends_clause()
                 .and_then(|extends| extends.super_class().ok())
                 .map(|super_class| {
-                    TypeReference::from_any_js_expression(resolver, scope_id, &super_class)
+                    resolver.reference_to_resolved_expression(scope_id, &super_class)
                 }),
             implements: decl
                 .implements_clause()
@@ -887,7 +883,7 @@ impl TypeData {
                 .extends_clause()
                 .and_then(|extends| extends.super_class().ok())
                 .map(|super_class| {
-                    TypeReference::from_any_js_expression(resolver, scope_id, &super_class)
+                    resolver.reference_to_resolved_expression(scope_id, &super_class)
                 }),
             implements: decl
                 .implements_clause()
@@ -970,7 +966,7 @@ impl TypeData {
         expr: &JsNewExpression,
     ) -> Option<Self> {
         Some(Self::from(TypeofExpression::New(TypeofNewExpression {
-            callee: TypeReference::from_any_js_expression(resolver, scope_id, &expr.callee().ok()?),
+            callee: resolver.reference_to_resolved_expression(scope_id, &expr.callee().ok()?),
             arguments: CallArgumentType::types_from_js_call_arguments(
                 resolver,
                 scope_id,
@@ -1015,9 +1011,7 @@ impl TypeData {
                     Self::from(TypeofExpression::BitwiseNot(TypeofBitwiseNotExpression {
                         argument: expr
                             .argument()
-                            .map(|arg| {
-                                TypeReference::from_any_js_expression(resolver, scope_id, &arg)
-                            })
+                            .map(|arg| resolver.reference_to_resolved_expression(scope_id, &arg))
                             .unwrap_or_default(),
                     }))
                 }
@@ -1026,9 +1020,7 @@ impl TypeData {
                     Self::from(TypeofExpression::UnaryMinus(TypeofUnaryMinusExpression {
                         argument: expr
                             .argument()
-                            .map(|arg| {
-                                TypeReference::from_any_js_expression(resolver, scope_id, &arg)
-                            })
+                            .map(|arg| resolver.reference_to_resolved_expression(scope_id, &arg))
                             .unwrap_or_default(),
                     }))
                 }
@@ -1038,9 +1030,7 @@ impl TypeData {
                     Self::from(TypeofExpression::Typeof(TypeofTypeofExpression {
                         argument: expr
                             .argument()
-                            .map(|arg| {
-                                TypeReference::from_any_js_expression(resolver, scope_id, &arg)
-                            })
+                            .map(|arg| resolver.reference_to_resolved_expression(scope_id, &arg))
                             .unwrap_or_default(),
                     }))
                 }
@@ -1305,13 +1295,13 @@ impl CallArgumentType {
         arg: &AnyJsCallArgument,
     ) -> Self {
         match arg {
-            AnyJsCallArgument::AnyJsExpression(expr) => Self::Argument(
-                TypeReference::from_any_js_expression(resolver, scope_id, expr),
-            ),
+            AnyJsCallArgument::AnyJsExpression(expr) => {
+                Self::Argument(resolver.reference_to_resolved_expression(scope_id, expr))
+            }
             AnyJsCallArgument::JsSpread(spread) => Self::Spread(
                 spread
                     .argument()
-                    .map(|arg| TypeReference::from_any_js_expression(resolver, scope_id, &arg))
+                    .map(|arg| resolver.reference_to_resolved_expression(scope_id, &arg))
                     .unwrap_or_default(),
             ),
         }
@@ -1652,9 +1642,7 @@ impl TypeMember {
                         None => member
                             .value()
                             .and_then(|initializer| initializer.expression().ok())
-                            .map(|expr| {
-                                TypeReference::from_any_js_expression(resolver, scope_id, &expr)
-                            })
+                            .map(|expr| resolver.reference_to_resolved_expression(scope_id, &expr))
                             .unwrap_or_default(),
                     };
                     let is_static = member
@@ -1674,8 +1662,7 @@ impl TypeMember {
                 .ok()
                 .and_then(|name| name.name())
                 .and_then(|name| {
-                    let ty = TypeReference::from_any_js_expression(
-                        resolver,
+                    let ty = resolver.reference_to_resolved_expression(
                         scope_id,
                         &member.value().ok()?.expression().ok()?,
                     );
@@ -1771,9 +1758,7 @@ impl TypeMember {
                     is_static: false,
                     ty: member
                         .value()
-                        .map(|value| {
-                            TypeReference::from_any_js_expression(resolver, scope_id, &value)
-                        })
+                        .map(|value| resolver.reference_to_resolved_expression(scope_id, &value))
                         .unwrap_or_default(),
                 }),
             AnyJsObjectMember::JsSetterObjectMember(_) => {
@@ -1947,15 +1932,6 @@ impl TypeMember {
 }
 
 impl TypeReference {
-    pub fn from_any_js_expression(
-        resolver: &mut dyn TypeResolver,
-        scope_id: ScopeId,
-        expr: &AnyJsExpression,
-    ) -> Self {
-        let data = TypeData::from_any_js_expression(resolver, scope_id, expr);
-        resolver.reference_to_owned_data(data)
-    }
-
     pub fn from_any_ts_type(
         resolver: &mut dyn TypeResolver,
         scope_id: ScopeId,

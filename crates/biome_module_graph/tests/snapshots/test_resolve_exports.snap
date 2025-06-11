@@ -200,17 +200,11 @@ Module TypeId(0) => Object {
 
 Module TypeId(1) => value: 1
 
-Module TypeId(2) => Object {
+Module TypeId(2) => Module(0) TypeId(20)
+
+Module TypeId(3) => Object {
   prototype: No prototype
   members: ["a": string, "b": Module(0) TypeId(13), "c": Module(0) TypeId(17)]
-}
-
-Module TypeId(3) => sync Function "getObject" {
-  accepts: {
-    params: []
-    type_args: []
-  }
-  returns: Module(0) TypeId(19)
 }
 
 Module TypeId(4) => string
@@ -343,9 +337,9 @@ Module TypeId(22) => sync Function "Component" {
 
 Module TypeId(23) => instanceof Array<number>
 
-Module TypeId(24) => boolean
+Module TypeId(24) => Module(0) TypeId(14)
 
-Module TypeId(25) => Module(0) TypeId(14) | Module(0) TypeId(15)
+Module TypeId(25) => Module(0) TypeId(16)
 ```
 
 # `/src/renamed-reexports.ts`

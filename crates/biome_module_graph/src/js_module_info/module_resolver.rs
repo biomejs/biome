@@ -14,39 +14,46 @@ use biome_resolver::ResolvedPath;
 use biome_rowan::{AstNode, Text, TextRange};
 use rustc_hash::FxHashMap;
 
-use crate::{JsExport, JsOwnExport, ModuleGraph, js_module_info::JsModuleInfoInner};
+use crate::{
+    JsExport, JsOwnExport, ModuleGraph,
+    js_module_info::{JsModuleInfoInner, scope::TsBindingReference},
+};
 
 use super::JsModuleInfo;
 
 const MAX_IMPORT_DEPTH: usize = 10; // Arbitrary depth, may require tweaking.
 
-// Any references that resolve to module 0 will be rewritten to
-// reference the scoped resolver. The reason we do this is that any
-// references to other modules can be resolved within the scoped
-// resolver, whereas the references that still point to the module types
-// would remain unresolved.
-const MODULE_0_ID: ResolverId = ResolverId::from_level(TypeResolverLevel::Module);
+// Any references that resolve to "module 0" will be rewritten to reference the
+// module resolver. The reason we do this is that any references to other
+// modules can be resolved within the module resolver, whereas references that
+// still point to the module's own types would remain unresolved.
+const MODULE_0_ID: ResolverId = ResolverId::from_level(TypeResolverLevel::Thin);
 
-/// Type resolver that is able to resolve types from arbitrary scopes in a
-/// module.
+/// Type resolver that is able to resolve types _across_ modules.
 ///
-/// The scoped resolver can register types in order to infer the type of
-/// expressions, but it cannot create bindings for such types. For this reason,
-/// whenever the type of an expression is inferred, a `ScopeId` needs to be
-/// provided explicitly.
+/// This resolver is instantiated for a given module using
+/// [`Self::for_module()`]. Besides the module info, it also receives a
+/// reference to the [`ModuleGraph`] so that other modules can be resolved.
 ///
-/// The scoped resolver is also able to resolve imported symbols from other
-/// modules, but any expressions it evaluates must be from the module for
-/// which the resolver was created.
+/// The module for which this resolver is created is referred to as "module 0",
+/// because it is stored at the first index of the resolver's [`Self::modules`]
+/// vector. In other words, "module 0" is the module from which all inference
+/// in this resolver starts.
+///
+/// When [`Self::run_inference()`] is called, the modules imported by module 0
+/// are retrieved from the module graph, and types are inferred across `import`
+/// statements.
+///
+/// The module resolver is typically consumed through the `Typed` service.
 #[derive(Debug)]
-pub struct ScopedResolver {
+pub struct ModuleResolver {
     module_graph: Arc<ModuleGraph>,
 
     /// Modules from which this resolver is using types.
     ///
-    /// Any scopes referenced by this resolver are always assumed to be part of
-    /// the first module in this vector. Other modules are those imported by
-    /// the first module, either directly or transitively.
+    /// "Module 0" derives its name from being stored at the first index of this
+    /// vector. Other modules are those imported by module 0, either directly
+    /// or transitively.
     modules: Vec<JsModuleInfo>,
 
     /// Map of module IDs keyed by their resolved paths.
@@ -56,17 +63,18 @@ pub struct ScopedResolver {
 
     /// Parsed expressions, mapped by their starting index to the ID of their
     /// type.
-    expressions: FxHashMap<TextRange, TypeId>,
+    expressions: FxHashMap<TextRange, ResolvedTypeId>,
 
     /// Types registered within this resolver.
     types: TypeStore,
 
-    /// Maps from `TypeId` indices in `modules[0]` to our own modules.
+    /// Maps from `TypeId` indices in module 0 to indices in our own `types`
+    /// store.
     type_id_map: Vec<TypeId>,
 }
 
-impl ScopedResolver {
-    pub fn from_global_scope(module_info: JsModuleInfo, module_graph: Arc<ModuleGraph>) -> Self {
+impl ModuleResolver {
+    pub fn for_module(module_info: JsModuleInfo, module_graph: Arc<ModuleGraph>) -> Self {
         Self {
             module_graph,
             modules: vec![module_info],
@@ -77,13 +85,66 @@ impl ScopedResolver {
         }
     }
 
+    /// This method must've been called before attempting to query the types of
+    /// functions or expressions.
+    pub fn run_inference(&mut self) {
+        self.resolve_imports_in_modules();
+        self.resolve_all();
+        self.flatten_all();
+    }
+
+    /// Creates a [`Type`] instance for the given `resolved_id`.
+    #[inline]
+    pub fn resolved_type_for_id(self: &Arc<Self>, resolved_id: ResolvedTypeId) -> Type {
+        Type::from_id(self.clone(), resolved_id)
+    }
+
+    /// Returns the resolved type for the given `reference`.
+    #[inline]
+    pub fn resolved_type_for_reference(self: &Arc<Self>, reference: &TypeReference) -> Type {
+        match reference {
+            TypeReference::Resolved(resolved_id) => self.resolved_type_for_id(*resolved_id),
+            _ => Type::default(),
+        }
+    }
+
+    /// Returns the type of "module 0"'s default export, if any.
+    pub fn resolved_type_of_default_export(self: &Arc<Self>) -> Option<Type> {
+        let module = &self.modules[0];
+        module
+            .exports
+            .get("default")
+            .and_then(JsExport::as_own_export)
+            .map(|own_export| match own_export {
+                JsOwnExport::Binding(binding_id) => {
+                    self.resolved_type_for_reference(&module.bindings[binding_id.index()].ty)
+                }
+                JsOwnExport::Type(resolved_id) => self.resolved_type_for_id(*resolved_id),
+            })
+    }
+
     /// Returns the resolved type of the given expression within this module.
-    ///
-    /// Assumes that [`Self::register_types_for_expression()`] has already been
-    /// called for this expression and the resolver's inference has run.
-    pub fn resolved_type_for_expression(self: &Arc<Self>, expr: &AnyJsExpression) -> Type {
-        let type_id = self.resolved_id_for_expression(expr);
-        Type::from_id(self.clone(), type_id)
+    pub fn resolved_type_of_expression(self: &Arc<Self>, expr: &AnyJsExpression) -> Type {
+        self.resolved_type_for_id(self.resolved_id_for_expression(expr))
+    }
+
+    /// Returns the resolved type of the value with the given `name`, as
+    /// defined in the scope of the given `range`.
+    pub fn resolved_type_of_named_value(self: &Arc<Self>, range: TextRange, name: &str) -> Type {
+        let module = &self.modules[0];
+        let scope = module.scope_for_range(range);
+        let Some(resolved_id) = module
+            .find_binding_in_scope(name, scope.id)
+            .and_then(TsBindingReference::value_ty)
+            .and_then(|binding_id| match &module.binding(binding_id).ty {
+                TypeReference::Resolved(resolved_id) => Some(*resolved_id),
+                _ => None,
+            })
+        else {
+            return self.resolved_type_for_id(GLOBAL_UNKNOWN_ID);
+        };
+
+        self.resolved_type_for_id(self.mapped_resolved_id(resolved_id))
     }
 
     fn find_module(&self, path: &ResolvedPath) -> Option<ModuleId> {
@@ -103,13 +164,10 @@ impl ScopedResolver {
         }
     }
 
-    pub fn run_inference(&mut self) {
-        self.resolve_imports_in_modules();
-        self.resolve_all();
-        self.flatten_all();
-    }
-
-    /// Actively resolves imports in the modules we are of.
+    /// Actively resolves imports in the modules we are aware of.
+    ///
+    /// This process starts from "module 0" and works recursively until all the
+    /// paths from static `import` statements are resolved.
     fn resolve_imports_in_modules(&mut self) {
         let mut i = 0;
         while i < self.modules.len() {
@@ -129,9 +187,9 @@ impl ScopedResolver {
             .map(|ty| self.types.register_type(Cow::Borrowed(ty)))
             .collect();
 
-        for (range, type_id) in &self.modules[0].expressions {
+        for (range, resolved_id) in &self.modules[0].expressions {
             self.expressions
-                .insert(*range, self.type_id_map[type_id.index()]);
+                .insert(*range, self.mapped_resolved_id(*resolved_id));
         }
 
         let mut i = 0;
@@ -159,17 +217,17 @@ impl ScopedResolver {
         }
     }
 
-    pub fn resolved_id_for_expression(&self, expr: &AnyJsExpression) -> ResolvedTypeId {
-        match self.expressions.get(&expr.range()) {
-            Some(id) => ResolvedTypeId::new(TypeResolverLevel::Scope, *id),
-            None => GLOBAL_UNKNOWN_ID,
-        }
+    fn resolved_id_for_expression(&self, expr: &AnyJsExpression) -> ResolvedTypeId {
+        self.expressions
+            .get(&expr.range())
+            .copied()
+            .unwrap_or(GLOBAL_UNKNOWN_ID)
     }
 }
 
-impl TypeResolver for ScopedResolver {
+impl TypeResolver for ModuleResolver {
     fn level(&self) -> TypeResolverLevel {
-        TypeResolverLevel::Scope
+        TypeResolverLevel::Full
     }
 
     fn find_type(&self, type_data: &TypeData) -> Option<TypeId> {
@@ -182,8 +240,8 @@ impl TypeResolver for ScopedResolver {
 
     fn get_by_resolved_id(&self, id: ResolvedTypeId) -> Option<ResolvedTypeData> {
         match id.level() {
-            TypeResolverLevel::Scope => Some((id, self.get_by_id(id.id())).into()),
-            TypeResolverLevel::Module => {
+            TypeResolverLevel::Full => Some((id, self.get_by_id(id.id())).into()),
+            TypeResolverLevel::Thin => {
                 let module_id = id.module_id();
                 let module = &self.modules[module_id.index()];
                 if let Some(ty) = module.types.get(id.index()) {
@@ -207,16 +265,7 @@ impl TypeResolver for ScopedResolver {
     fn resolve_reference(&self, ty: &TypeReference) -> Option<ResolvedTypeId> {
         match ty {
             TypeReference::Qualifier(_qualifier) => None,
-            TypeReference::Resolved(resolved_id) => {
-                Some(if resolved_id.resolver_id() == MODULE_0_ID {
-                    ResolvedTypeId::new(
-                        TypeResolverLevel::Scope,
-                        self.type_id_map[resolved_id.id().index()],
-                    )
-                } else {
-                    *resolved_id
-                })
-            }
+            TypeReference::Resolved(resolved_id) => Some(self.mapped_resolved_id(*resolved_id)),
             TypeReference::Import(import) => self.resolve_import(import),
             TypeReference::Unknown => Some(GLOBAL_UNKNOWN_ID),
         }
@@ -307,8 +356,30 @@ impl TypeResolver for ScopedResolver {
         }
     }
 
+    fn reference_to_resolved_expression(
+        &mut self,
+        _scope_id: ScopeId,
+        expression: &AnyJsExpression,
+    ) -> TypeReference {
+        self.resolved_id_for_expression(expression).into()
+    }
+
+    /// Maps the given `resolved_id` such that if it references a type belonging
+    /// to "module 0" (the module for which this resolver was created) it will
+    /// be mapped to the resolver's own types instead.
+    fn mapped_resolved_id(&self, resolved_id: ResolvedTypeId) -> ResolvedTypeId {
+        if resolved_id.resolver_id() == MODULE_0_ID {
+            ResolvedTypeId::new(
+                TypeResolverLevel::Full,
+                self.type_id_map[resolved_id.id().index()],
+            )
+        } else {
+            resolved_id
+        }
+    }
+
     fn fallback_resolver(&self) -> Option<&dyn TypeResolver> {
-        Some(&*GLOBAL_RESOLVER)
+        Some(GLOBAL_RESOLVER.as_ref())
     }
 
     fn registered_types(&self) -> &[TypeData] {

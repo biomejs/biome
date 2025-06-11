@@ -173,7 +173,7 @@ impl Rule for NoFloatingPromises {
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
         let expression = node.expression().ok()?;
-        let ty = ctx.type_for_expression(&expression);
+        let ty = ctx.type_of_expression(&expression);
 
         // Uncomment the following line for debugging convenience:
         //let printed = format!("type of {expression:?} = {ty:?}");

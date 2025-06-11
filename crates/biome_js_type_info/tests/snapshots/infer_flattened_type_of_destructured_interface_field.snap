@@ -30,15 +30,15 @@ sync Function "bar" {
 ## Registered types
 
 ```
-Module TypeId(0) => interface "Foo" {
+Thin TypeId(0) => interface "Foo" {
   extends: []
   type_args: []
   members: ["foo": Global TypeId(0)]
 }
 
-Module TypeId(1) => instanceof Module(0) TypeId(0)
+Thin TypeId(1) => instanceof Module(0) TypeId(0)
 
-Module TypeId(2) => sync Function "foo" {
+Thin TypeId(2) => sync Function "foo" {
   accepts: {
     params: []
     type_args: []

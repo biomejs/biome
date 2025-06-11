@@ -40,19 +40,19 @@ Imports {
 ```
 BindingId(4) => JsBindingData {
   Name: makePromise,
-  Type: Module(0) TypeId(1),
+  Type: Module(0) TypeId(5),
   Declaration kind: Value
 }
 
 BindingId(5) => JsBindingData {
   Name: makePromiseCb,
-  Type: Module(0) TypeId(6),
+  Type: Module(0) TypeId(8),
   Declaration kind: Value
 }
 
 BindingId(6) => JsBindingData {
   Name: promise,
-  Type: Module(0) TypeId(9),
+  Type: Module(0) TypeId(10),
   Declaration kind: Value
 }
 ```
@@ -60,70 +60,39 @@ BindingId(6) => JsBindingData {
 ## Registered types
 
 ```
-Module TypeId(0) => instanceof Promise
+Module TypeId(0) => Promise
 
-Module TypeId(1) => sync Function {
-  accepts: {
-    params: []
-    type_args: []
-  }
-  returns: Module(0) TypeId(0)
-}
+Module TypeId(1) => Promise.resolve
 
-Module TypeId(2) => sync Function "Promise.resolve" {
-  accepts: {
-    params: []
-    type_args: []
-  }
-  returns: instanceof Promise
-}
+Module TypeId(2) => value: 1
 
-Module TypeId(3) => value: 1
+Module TypeId(3) => instanceof Promise
 
 Module TypeId(4) => instanceof Promise
 
-Module TypeId(5) => class "Promise" {
-  extends: none
-  implements: []
-  type_args: [T]
-}
-
-Module TypeId(6) => sync Function {
+Module TypeId(5) => sync Function {
   accepts: {
     params: []
     type_args: []
   }
-  returns: Module(0) TypeId(0)
+  returns: Module(0) TypeId(4)
 }
 
-Module TypeId(7) => sync Function "useCallback" {
-  accepts: {
-    params: [
-      required callback: Module(0) TypeId(11) (bindings: callback:Module(0) TypeId(11))
-      required deps: Module(0) TypeId(12) (bindings: deps:Module(0) TypeId(12))
-    ]
-    type_args: [Module(0) TypeId(14)]
-  }
-  returns: Module(0) TypeId(11)
-}
+Module TypeId(6) => Module(0) TypeId(15)
+
+Module TypeId(7) => Module(0) TypeId(5)
 
 Module TypeId(8) => sync Function {
   accepts: {
     params: []
     type_args: []
   }
-  returns: Module(0) TypeId(0)
+  returns: Module(0) TypeId(4)
 }
 
-Module TypeId(9) => instanceof Promise
+Module TypeId(9) => Module(0) TypeId(8)
 
-Module TypeId(10) => sync Function {
-  accepts: {
-    params: []
-    type_args: []
-  }
-  returns: Module(0) TypeId(0)
-}
+Module TypeId(10) => instanceof Promise
 
 Module TypeId(11) => instanceof Module(0) TypeId(14)
 
@@ -150,33 +119,37 @@ Module TypeId(15) => sync Function "useCallback" {
 ## Registered types
 
 ```
-Scope TypeId(0) => instanceof Promise
+Full TypeId(0) => Promise
 
-Scope TypeId(1) => sync Function {
+Full TypeId(1) => Promise.resolve
+
+Full TypeId(2) => value: 1
+
+Full TypeId(3) => instanceof Promise
+
+Full TypeId(4) => sync Function {
   accepts: {
     params: []
     type_args: []
   }
-  returns: Module(0) TypeId(0)
+  returns: Module(0) TypeId(4)
 }
 
-Scope TypeId(2) => sync Function "Promise.resolve" {
-  accepts: {
-    params: []
-    type_args: []
-  }
-  returns: instanceof Promise
-}
+Full TypeId(5) => Module(0) TypeId(15)
 
-Scope TypeId(3) => value: 1
+Full TypeId(6) => Module(0) TypeId(5)
 
-Scope TypeId(4) => class "Promise" {
-  extends: none
-  implements: []
-  type_args: [T]
-}
+Full TypeId(7) => Module(0) TypeId(8)
 
-Scope TypeId(5) => sync Function "useCallback" {
+Full TypeId(8) => instanceof Module(0) TypeId(14)
+
+Full TypeId(9) => instanceof unresolved reference "DependencyList" (scope ID: 1)
+
+Full TypeId(10) => instanceof unresolved reference "Function" (scope ID: 1)
+
+Full TypeId(11) => T extends Module(0) TypeId(13)
+
+Full TypeId(12) => sync Function "useCallback" {
   accepts: {
     params: [
       required callback: Module(0) TypeId(11) (bindings: callback:Module(0) TypeId(11))
@@ -186,12 +159,4 @@ Scope TypeId(5) => sync Function "useCallback" {
   }
   returns: Module(0) TypeId(11)
 }
-
-Scope TypeId(6) => instanceof Module(0) TypeId(14)
-
-Scope TypeId(7) => instanceof unresolved reference "DependencyList" (scope ID: 1)
-
-Scope TypeId(8) => instanceof unresolved reference "Function" (scope ID: 1)
-
-Scope TypeId(9) => T extends Module(0) TypeId(13)
 ```

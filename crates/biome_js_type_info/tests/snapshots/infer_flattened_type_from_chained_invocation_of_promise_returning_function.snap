@@ -22,7 +22,7 @@ instanceof Promise
 ## Registered types
 
 ```
-Module TypeId(0) => sync Function "returnsPromise" {
+Thin TypeId(0) => sync Function "returnsPromise" {
   accepts: {
     params: []
     type_args: []
@@ -30,17 +30,11 @@ Module TypeId(0) => sync Function "returnsPromise" {
   returns: Global TypeId(0)
 }
 
-Module TypeId(1) => instanceof Promise<number>
+Thin TypeId(1) => instanceof Promise<number>
 
-Module TypeId(2) => sync Function "Promise.prototype.then" {
-  accepts: {
-    params: []
-    type_args: []
-  }
-  returns: instanceof Promise
-}
+Thin TypeId(2) => Promise.prototype.then
 
-Module TypeId(3) => sync Function {
+Thin TypeId(3) => sync Function {
   accepts: {
     params: []
     type_args: []

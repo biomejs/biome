@@ -14,7 +14,7 @@ use biome_json_parser::{JsonParserOptions, parse_json};
 use biome_json_value::{JsonObject, JsonString};
 use biome_module_graph::JsExport;
 use biome_module_graph::{
-    ImportSymbol, JsImport, JsReexport, ModuleGraph, ResolvedPath, ScopedResolver,
+    ImportSymbol, JsImport, JsReexport, ModuleGraph, ModuleResolver, ResolvedPath,
 };
 use biome_package::{Dependencies, PackageJson};
 use biome_project_layout::ProjectLayout;
@@ -589,7 +589,7 @@ export const promise = makePromiseCb();
     let index_module = module_graph
         .module_info_for_path(Utf8Path::new("/src/index.ts"))
         .expect("module must exist");
-    let mut resolver = ScopedResolver::from_global_scope(index_module, module_graph.clone());
+    let mut resolver = ModuleResolver::for_module(index_module, module_graph.clone());
     resolver.run_inference();
 
     let resolved_id = resolver
@@ -658,7 +658,7 @@ fn test_resolve_generic_return_value_with_multiple_modules() {
     let index_module = module_graph
         .module_info_for_path(Utf8Path::new("/src/index.ts"))
         .expect("module must exist");
-    let mut resolver = ScopedResolver::from_global_scope(index_module, module_graph.clone());
+    let mut resolver = ModuleResolver::for_module(index_module, module_graph.clone());
     resolver.run_inference();
 
     let result_id = resolver
@@ -714,7 +714,7 @@ fn test_resolve_nested_function_call_with_namespace_in_return_type() {
     let index_module = module_graph
         .module_info_for_path(Utf8Path::new("/src/index.ts"))
         .expect("module must exist");
-    let mut resolver = ScopedResolver::from_global_scope(index_module, module_graph.clone());
+    let mut resolver = ModuleResolver::for_module(index_module, module_graph.clone());
     resolver.run_inference();
 
     let result_id = resolver
@@ -1100,7 +1100,7 @@ fn test_resolve_react_types() {
     let index_module = module_graph
         .module_info_for_path(Utf8Path::new("/src/index.ts"))
         .expect("module must exist");
-    let mut resolver = ScopedResolver::from_global_scope(index_module, module_graph.clone());
+    let mut resolver = ModuleResolver::for_module(index_module, module_graph.clone());
     resolver.run_inference();
 
     let use_callback_id = resolver
@@ -1207,7 +1207,7 @@ fn test_resolve_promise_from_imported_function_returning_imported_promise_type()
     let index_module = module_graph
         .module_info_for_path(Utf8Path::new("/src/index.ts"))
         .expect("module must exist");
-    let mut resolver = ScopedResolver::from_global_scope(index_module, module_graph.clone());
+    let mut resolver = ModuleResolver::for_module(index_module, module_graph.clone());
     resolver.run_inference();
 
     let resolved_id = resolver
@@ -1280,7 +1280,7 @@ fn test_resolve_promise_from_imported_function_returning_reexported_promise_type
     let index_module = module_graph
         .module_info_for_path(Utf8Path::new("/src/index.ts"))
         .expect("module must exist");
-    let mut resolver = ScopedResolver::from_global_scope(index_module, module_graph.clone());
+    let mut resolver = ModuleResolver::for_module(index_module, module_graph.clone());
     resolver.run_inference();
 
     let resolved_id = resolver

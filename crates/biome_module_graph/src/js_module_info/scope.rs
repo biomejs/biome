@@ -301,6 +301,17 @@ impl TsBindingReference {
         }
     }
 
+    /// Returns the value type binding.
+    pub fn value_ty(self) -> Option<BindingId> {
+        match self {
+            Self::ValueType(binding_id)
+            | Self::TypeAndValueType(binding_id)
+            | Self::NamespaceAndValueType(binding_id) => Some(binding_id),
+            Self::Merged { value_ty, .. } => value_ty,
+            Self::Type(_) => None,
+        }
+    }
+
     /// Returns the value type binding, or the type binding if the value type
     /// binding is unknown.
     pub fn value_ty_or_ty(self) -> BindingId {
