@@ -81,6 +81,7 @@ declare_lint_rule! {
     /// ```
     ///
     /// ### skipBlankLines
+    ///
     /// When this options is set to `true`, blank lines in the function body are not counted towards the maximum line limit.
     /// This means that only lines with actual code or comments will be counted.
     ///
@@ -105,6 +106,7 @@ declare_lint_rule! {
     /// ```
     ///
     /// ### skipIifes
+    ///
     /// When this option is set to `true`, Immediately Invoked Function Expressions (IIFEs) are not checked for the maximum line limit.
     ///
     /// Default: `false`
@@ -221,8 +223,11 @@ pub struct State {
 #[cfg_attr(feature = "schema", derive(JsonSchema))]
 #[serde(rename_all = "camelCase", deny_unknown_fields, default)]
 pub struct NoExcessiveLinesPerFunctionOptions {
+    /// The maximum number of lines allowed in a function body.
     pub max_lines: NonZeroU8,
+    /// When this options is set to `true`, blank lines in the function body are not counted towards the maximum line limit.
     pub skip_blank_lines: bool,
+    /// When this option is set to `true`, Immediately Invoked Function Expressions (IIFEs) are not checked for the maximum line limit.
     pub skip_iifes: bool,
 }
 

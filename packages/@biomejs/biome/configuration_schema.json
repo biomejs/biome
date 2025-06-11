@@ -2544,13 +2544,22 @@
 			"type": "object",
 			"properties": {
 				"maxLines": {
+					"description": "The maximum number of lines allowed in a function body.",
 					"default": 50,
 					"type": "integer",
 					"format": "uint8",
 					"minimum": 1.0
 				},
-				"skipBlankLines": { "default": false, "type": "boolean" },
-				"skipIifes": { "default": false, "type": "boolean" }
+				"skipBlankLines": {
+					"description": "When this options is set to `true`, blank lines in the function body are not counted towards the maximum line limit.",
+					"default": false,
+					"type": "boolean"
+				},
+				"skipIifes": {
+					"description": "When this option is set to `true`, Immediately Invoked Function Expressions (IIFEs) are not checked for the maximum line limit.",
+					"default": false,
+					"type": "boolean"
+				}
 			},
 			"additionalProperties": false
 		},

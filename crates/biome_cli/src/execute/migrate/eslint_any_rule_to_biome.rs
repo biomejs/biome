@@ -1147,7 +1147,7 @@ pub(crate) fn migrate_eslint_any_rule(
         }
         "max-lines-per-function" => {
             if !options.include_inspired {
-                results.has_inspired_rules = true;
+                results.add(eslint_name, eslint_to_biome::RuleMigrationResult::Inspired);
                 return false;
             }
             if !options.include_nursery {

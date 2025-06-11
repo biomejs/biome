@@ -3072,8 +3072,17 @@ export interface NoBitwiseOperatorsOptions {
 	allow: string[];
 }
 export interface NoExcessiveLinesPerFunctionOptions {
+	/**
+	 * The maximum number of lines allowed in a function body.
+	 */
 	maxLines?: number;
+	/**
+	 * When this options is set to `true`, blank lines in the function body are not counted towards the maximum line limit.
+	 */
 	skipBlankLines?: boolean;
+	/**
+	 * When this option is set to `true`, Immediately Invoked Function Expressions (IIFEs) are not checked for the maximum line limit.
+	 */
 	skipIifes?: boolean;
 }
 export interface NoRestrictedElementsOptions {
