@@ -2,7 +2,7 @@
 "@biomejs/biome": minor
 ---
 
-Added [`useExplicitTestAssertions`](https://biomejs.dev/linter/rules/no-explicit-test-assertions/) rule, inspired by expect-expect. Require all test cases to use `expect()` (Vitest/Jest) or `assert()` (node:assert).
+Added new nursery [`useExplicitTestAssertions`](https://biomejs.dev/linter/rules/no-explicit-test-assertions/) rule, inspired by [`expect-expect`](https://github.com/jest-community/eslint-plugin-jest/blob/main/docs/rules/expect-expect.md). Require all test cases to use `expect()` (Vitest/Jest) or `assert()` (node:assert).
 
 ## Examples
 

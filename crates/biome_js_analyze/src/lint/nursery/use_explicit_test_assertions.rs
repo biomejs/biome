@@ -1,6 +1,5 @@
 use biome_analyze::{
-    Ast, Rule, RuleDiagnostic, RuleDomain, RuleSource, RuleSourceKind, RuleSourceWithKind,
-    context::RuleContext, declare_lint_rule,
+    Ast, Rule, RuleDiagnostic, RuleDomain, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
 use biome_js_syntax::{AnyJsExpression, AnyJsStatement, JsCallExpression, JsStatementList};
@@ -25,7 +24,7 @@ declare_lint_rule! {
     ///
     /// ### Valid
     ///
-    /// ```js,expect_diagnostic
+    /// ```js
     /// test('myLogic', () => {
     ///   const actual = myLogic();
     ///   expect(actual).toBe(true);
@@ -35,7 +34,7 @@ declare_lint_rule! {
         version: "next",
         name: "useExplicitTestAssertions",
         language: "js",
-        sources: &[RuleSourceWithKind::EslintJest("expect-expect").inspired()],
+        sources: &[RuleSource::EslintJest("expect-expect").inspired()],
         recommended: false,
         domains: &[RuleDomain::Test],
     }
@@ -82,7 +81,7 @@ impl Rule for UseExplicitTestAssertions {
             .note(markup! {
                 "This could cause false positives where the test always passes but isn’t testing anything."
             }).note(markup! {
-                "Add an expect() (Vitest/Jest) or assert() (node:assert) assertion to this test."
+                "Add an expect() or assert() assertion to this test."
             }),
         )
     }

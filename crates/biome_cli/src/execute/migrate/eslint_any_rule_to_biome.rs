@@ -867,10 +867,11 @@ pub(crate) fn migrate_eslint_any_rule(
         }
         "jest/expect-expect" => {
             if !options.include_inspired {
-                results.has_inspired_rules = true;
+                results.add(eslint_name, eslint_to_biome::RuleMigrationResult::Inspired);
                 return false;
             }
             if !options.include_nursery {
+                results.add(eslint_name, eslint_to_biome::RuleMigrationResult::Nursery);
                 return false;
             }
             let group = rules.nursery.get_or_insert_with(Default::default);
