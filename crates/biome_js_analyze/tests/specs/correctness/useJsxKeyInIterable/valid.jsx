@@ -98,3 +98,14 @@ data.map((x) => {
 			return <div key={x.value}>{x.value}</div>
 	}
 })
+
+const Valid = [<>
+	<p>Test 1</p>
+	<p>Test 2</p>
+</>]
+
+[<>
+	<p>Test 1</p>
+	<p>Test 2</p>
+	<p>Test 3</p>
+</>]
