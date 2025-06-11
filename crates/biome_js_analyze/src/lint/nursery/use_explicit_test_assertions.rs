@@ -25,7 +25,7 @@ declare_lint_rule! {
     ///
     /// ### Valid
     ///
-    /// ```js,expect_diagnostic
+    /// ```js
     /// test('myLogic', () => {
     ///   const actual = myLogic();
     ///   expect(actual).toBe(true);
