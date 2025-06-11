@@ -48,6 +48,8 @@ jobs:
           - biome_html_parser
           - biome_html_formatter
           - biome_module_graph
+          - biome_package
+          - biome_configuration
 
     steps:
 
