@@ -55,7 +55,7 @@ pub struct ModuleResolver {
     /// "Module 0" derives its name from being stored at the first index of this
     /// vector. Other modules are those imported by module 0, either directly
     /// or transitively.
-    pub modules: Vec<JsModuleInfo>,
+    modules: Vec<JsModuleInfo>,
 
     /// Map of module IDs keyed by their resolved paths.
     ///

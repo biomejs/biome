@@ -262,6 +262,7 @@ fn find_misused_promise_returning_callback(
     let argument_ty = if let Some(call_expression) = argument_list
         .syntax()
         .ancestors()
+        .skip(1)
         .find_map(JsCallExpression::cast)
     {
         let callee_ty = ctx.type_of_expression(&call_expression.callee().ok()?);
@@ -270,6 +271,7 @@ fn find_misused_promise_returning_callback(
     } else if let Some(new_expression) = argument_list
         .syntax()
         .ancestors()
+        .skip(1)
         .find_map(JsNewExpression::cast)
     {
         let callee_ty = ctx.type_of_expression(&new_expression.callee().ok()?);

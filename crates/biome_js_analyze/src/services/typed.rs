@@ -6,7 +6,7 @@ use biome_js_syntax::{
     AnyFunctionLike, AnyJsBinding, AnyJsClass, AnyJsClassMemberName, AnyJsExpression,
     AnyJsFunction, AnyJsObjectMemberName, AnyJsRoot, JsLanguage, JsObjectExpression, JsSyntaxNode,
 };
-use biome_js_type_info::{Type, TypeData};
+use biome_js_type_info::Type;
 use biome_module_graph::ModuleResolver;
 use biome_rowan::{AstNode, TextRange};
 use std::sync::Arc;
@@ -18,13 +18,6 @@ pub struct TypedService {
 }
 
 impl TypedService {
-    pub fn module_0_types(&self) -> &[TypeData] {
-        const EMPTY: &[TypeData] = &[];
-        self.resolver
-            .as_ref()
-            .map_or(EMPTY, |resolver| resolver.modules[0].types())
-    }
-
     pub fn type_of_expression(&self, expr: &AnyJsExpression) -> Type {
         self.resolver
             .as_ref()
@@ -75,6 +68,7 @@ impl TypedService {
                 let object = member
                     .syntax()
                     .ancestors()
+                    .skip(1)
                     .find_map(JsObjectExpression::cast)?;
 
                 let object_ty =
@@ -95,7 +89,11 @@ impl TypedService {
                     .and_then(|name| name.value().ok())?;
                 let name = name.text_trimmed();
 
-                let class = member.syntax().ancestors().find_map(AnyJsClass::cast)?;
+                let class = member
+                    .syntax()
+                    .ancestors()
+                    .skip(1)
+                    .find_map(AnyJsClass::cast)?;
 
                 let class_ty = match class {
                     AnyJsClass::JsClassDeclaration(decl) => {
