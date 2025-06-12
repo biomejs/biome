@@ -281,17 +281,19 @@ impl TraversalContext for ScanContext<'_> {
                     // In project mode, the scanner always scans dependencies
                     // because they're a valuable source of type information.
                     true
-                } else {
+                } else if !path.is_dependency() {
                     !self
                         .workspace
                         .is_path_ignored(IsPathIgnoredParams {
                             project_key: self.project_key,
                             path: path.clone(),
                             // The scanner only cares about the top-level
-                            // `files.includes`.
+                            // `files.includes`
                             features: FeaturesBuilder::new().build(),
                         })
                         .unwrap_or_default()
+                } else {
+                    false
                 }
             }
             Ok(PathKind::File { .. }) => match self.scan_kind {

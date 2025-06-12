@@ -3578,7 +3578,7 @@ export function bar() {
             "scan_project_folder",
             ScanProjectFolderParams {
                 project_key,
-                path: None,
+                path: Some(BiomePath::new(fs.working_directory.as_path())),
                 watch: true,
                 force: false,
                 scan_kind: ScanKind::Project,

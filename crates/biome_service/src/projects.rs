@@ -157,11 +157,15 @@ impl Projects {
 
         // We store ignore matches inside the root settings, regardless of what package we are analyzing
         let is_vcs_ignored = self.get_root_settings(project_key).is_some_and(|settings| {
-            settings
-                .vcs_settings
-                .ignore_matches
-                .as_ref()
-                .is_some_and(|ignored_matches| ignored_matches.is_ignored(path, is_dir(path)))
+            if settings.vcs_settings.should_use_ignore_file() {
+                settings
+                    .vcs_settings
+                    .ignore_matches
+                    .as_ref()
+                    .is_some_and(|ignored_matches| ignored_matches.is_ignored(path, is_dir(path)))
+            } else {
+                false
+            }
         });
 
         !is_included || is_vcs_ignored
