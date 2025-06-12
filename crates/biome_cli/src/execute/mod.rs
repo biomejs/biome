@@ -630,6 +630,7 @@ pub fn execute_mode(
                     verbose: cli_options.verbose,
                     working_directory: fs.working_directory().clone(),
                     evaluated_paths,
+                    minimal: cli_options.minimal,
                 };
                 reporter.write(&mut SummaryReporterVisitor(console))?;
             } else {
@@ -640,6 +641,7 @@ pub fn execute_mode(
                     evaluated_paths,
                     verbose: cli_options.verbose,
                     working_directory: fs.working_directory().clone(),
+                    minimal: cli_options.minimal,
                 };
                 reporter.write(&mut ConsoleReporterVisitor(console))?;
             }
@@ -653,6 +655,7 @@ pub fn execute_mode(
                 diagnostics: diagnostics_payload,
                 execution: execution.clone(),
                 verbose: cli_options.verbose,
+                minimal: cli_options.minimal,
             };
             let mut buffer = JsonReporterVisitor::new(summary);
             reporter.write(&mut buffer)?;
@@ -692,6 +695,7 @@ pub fn execute_mode(
                 diagnostics_payload,
                 execution: execution.clone(),
                 verbose: cli_options.verbose,
+                minimal: cli_options.minimal,
             };
             reporter.write(&mut GithubReporterVisitor(console))?;
         }
@@ -700,6 +704,7 @@ pub fn execute_mode(
                 diagnostics: diagnostics_payload,
                 execution: execution.clone(),
                 verbose: cli_options.verbose,
+                minimal: cli_options.minimal,
             };
             reporter.write(&mut GitLabReporterVisitor::new(
                 console,
@@ -712,6 +717,7 @@ pub fn execute_mode(
                 diagnostics_payload,
                 execution: execution.clone(),
                 verbose: cli_options.verbose,
+                minimal: cli_options.minimal,
             };
             reporter.write(&mut JunitReporterVisitor::new(console))?;
         }

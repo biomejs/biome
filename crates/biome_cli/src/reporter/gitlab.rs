@@ -17,11 +17,17 @@ pub struct GitLabReporter {
     pub(crate) execution: Execution,
     pub(crate) diagnostics: DiagnosticsPayload,
     pub(crate) verbose: bool,
+    pub(crate) minimal: bool,
 }
 
 impl Reporter for GitLabReporter {
     fn write(self, visitor: &mut dyn ReporterVisitor) -> std::io::Result<()> {
-        visitor.report_diagnostics(&self.execution, self.diagnostics, self.verbose)?;
+        visitor.report_diagnostics(
+            &self.execution,
+            self.diagnostics,
+            self.verbose,
+            self.minimal,
+        )?;
         Ok(())
     }
 }
@@ -65,6 +71,7 @@ impl ReporterVisitor for GitLabReporterVisitor<'_> {
         _: &Execution,
         _: TraversalSummary,
         _verbose: bool,
+        _minimal: bool,
     ) -> std::io::Result<()> {
         Ok(())
     }
@@ -74,6 +81,7 @@ impl ReporterVisitor for GitLabReporterVisitor<'_> {
         _execution: &Execution,
         payload: DiagnosticsPayload,
         verbose: bool,
+        _minimal: bool,
     ) -> std::io::Result<()> {
         let hasher = RwLock::default();
         let diagnostics = GitLabDiagnostics {

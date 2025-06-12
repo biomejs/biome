@@ -11,12 +11,18 @@ pub(crate) struct JunitReporter {
     pub(crate) execution: Execution,
     pub(crate) summary: TraversalSummary,
     pub(crate) verbose: bool,
+    pub(crate) minimal: bool,
 }
 
 impl Reporter for JunitReporter {
     fn write(self, visitor: &mut dyn ReporterVisitor) -> io::Result<()> {
-        visitor.report_summary(&self.execution, self.summary, self.verbose)?;
-        visitor.report_diagnostics(&self.execution, self.diagnostics_payload, self.verbose)?;
+        visitor.report_summary(&self.execution, self.summary, self.verbose, self.minimal)?;
+        visitor.report_diagnostics(
+            &self.execution,
+            self.diagnostics_payload,
+            self.verbose,
+            self.minimal,
+        )?;
         Ok(())
     }
 }
@@ -46,6 +52,7 @@ impl ReporterVisitor for JunitReporterVisitor<'_> {
         _execution: &Execution,
         summary: TraversalSummary,
         _verbose: bool,
+        _minimal: bool,
     ) -> io::Result<()> {
         self.0.time = Some(summary.duration);
         self.0.errors = summary.errors as usize;
@@ -58,6 +65,7 @@ impl ReporterVisitor for JunitReporterVisitor<'_> {
         _execution: &Execution,
         payload: DiagnosticsPayload,
         verbose: bool,
+        _minimal: bool,
     ) -> io::Result<()> {
         let diagnostics = payload.diagnostics.iter().filter(|diagnostic| {
             if diagnostic.tags().is_verbose() {

@@ -32,12 +32,18 @@ pub struct JsonReporter {
     pub diagnostics: DiagnosticsPayload,
     pub summary: TraversalSummary,
     pub verbose: bool,
+    pub minimal: bool,
 }
 
 impl Reporter for JsonReporter {
     fn write(self, visitor: &mut dyn ReporterVisitor) -> std::io::Result<()> {
-        visitor.report_summary(&self.execution, self.summary, self.verbose)?;
-        visitor.report_diagnostics(&self.execution, self.diagnostics, self.verbose)?;
+        visitor.report_summary(&self.execution, self.summary, self.verbose, self.minimal)?;
+        visitor.report_diagnostics(
+            &self.execution,
+            self.diagnostics,
+            self.verbose,
+            self.minimal,
+        )?;
 
         Ok(())
     }
@@ -49,6 +55,7 @@ impl ReporterVisitor for JsonReporterVisitor {
         execution: &Execution,
         summary: TraversalSummary,
         _verbose: bool,
+        _minimal: bool,
     ) -> std::io::Result<()> {
         self.summary = summary;
         self.command = format!("{}", execution.traversal_mode());
@@ -61,6 +68,7 @@ impl ReporterVisitor for JsonReporterVisitor {
         _execution: &Execution,
         payload: DiagnosticsPayload,
         verbose: bool,
+        _minimal: bool,
     ) -> std::io::Result<()> {
         for diagnostic in payload.diagnostics {
             if diagnostic.severity() >= payload.diagnostic_level {

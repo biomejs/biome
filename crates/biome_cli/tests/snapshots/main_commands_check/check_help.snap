@@ -188,6 +188,7 @@ Global options applied to all commands
         --verbose             Print additional diagnostics, and some diagnostics show more
                               information. Also, print out what files were processed and which ones
                               were modified.
+        --minimal             Prints only the header of the diagnostic and excludes the code frame.
         --config-path=PATH    Set the file path to the configuration file, or the directory path to
                               find `biome.json` or `biome.jsonc`. If used, it disables the default
                               configuration file resolution.

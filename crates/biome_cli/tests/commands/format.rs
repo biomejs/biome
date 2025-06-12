@@ -1840,6 +1840,31 @@ fn print_verbose() {
 }
 
 #[test]
+fn print_minimal() {
+    let mut fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let file_path = Utf8Path::new("format.js");
+    fs.insert(file_path.into(), UNFORMATTED.as_bytes());
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["format", "--minimal", file_path.as_str()].as_slice()),
+    );
+
+    assert!(result.is_err(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "print_minimal",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
 fn vcs_absolute_path() {
     let git_ignore = r#"file.js"#;
     let config = r#"{

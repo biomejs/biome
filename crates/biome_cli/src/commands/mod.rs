@@ -824,6 +824,11 @@ pub(crate) trait CommandRunner: Sized {
         let workspace = &*session.app.workspace;
         let fs = workspace.fs();
         self.check_incompatible_arguments()?;
+
+        if cli_options.verbose && cli_options.minimal {
+            return Err(CliDiagnostic::incompatible_arguments("verbose", "minimal"));
+        }
+
         let ConfiguredWorkspace {
             execution,
             paths,
