@@ -164,24 +164,6 @@ index.css format ━━━━━━━━━━━━━━━━━━━━━
 ```
 
 ```block
-Skipped 32 suggested fixes.
-If you wish to apply the suggested (unsafe) fixes, use the command biome check --write --unsafe
-
-```
-
-```block
-The number of diagnostics exceeds the limit allowed. Use --max-diagnostics to increase it.
-Diagnostics not shown: 56.
-```
-
-```block
-Scanned project folder in <TIME>.
-Checked 3 files in <TIME>. Fixed 2 files.
-Found 45 errors.
-Found 16 warnings.
-```
-
-```block
  VERBOSE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Files processed:
@@ -202,4 +184,22 @@ Found 16 warnings.
   - main.ts
   
 
+```
+
+```block
+Skipped 32 suggested fixes.
+If you wish to apply the suggested (unsafe) fixes, use the command biome check --write --unsafe
+
+```
+
+```block
+The number of diagnostics exceeds the limit allowed. Use --max-diagnostics to increase it.
+Diagnostics not shown: 56.
+```
+
+```block
+Scanned project folder in <TIME>.
+Checked 3 files in <TIME>. Fixed 2 files.
+Found 45 errors.
+Found 16 warnings.
 ```
