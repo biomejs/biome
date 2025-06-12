@@ -10,7 +10,7 @@ use crate::{
     ResolvedTypeMember, ResolverId, TypeData, TypeInstance, TypeMemberKind, TypeReference,
     TypeResolver, TypeofCallExpression, TypeofExpression, TypeofStaticMemberExpression,
     globals::{
-        GLOBAL_BIGINT_STRING_LITERAL_ID, GLOBAL_BOOLEAN_STRING_LITERAL_ID,
+        GLOBAL_ARRAY_ID, GLOBAL_BIGINT_STRING_LITERAL_ID, GLOBAL_BOOLEAN_STRING_LITERAL_ID,
         GLOBAL_FUNCTION_STRING_LITERAL_ID, GLOBAL_NUMBER_STRING_LITERAL_ID,
         GLOBAL_OBJECT_STRING_LITERAL_ID, GLOBAL_STRING_STRING_LITERAL_ID,
         GLOBAL_SYMBOL_STRING_LITERAL_ID, GLOBAL_TYPEOF_OPERATOR_RETURN_UNION_ID,
@@ -402,8 +402,6 @@ fn flattened_expression(
                         }
                     }
 
-                    // FIXME: Flattening intersections and unions for members should be done
-                    //        in `TypeMemberIterator`.
                     TypeData::Intersection(intersection) => {
                         let types: Vec<_> = intersection
                             .types()
@@ -434,6 +432,19 @@ fn flattened_expression(
 
                         return Some(TypeData::intersection_of(types));
                     }
+
+                    TypeData::Tuple(_tuple) => {
+                        // Tuples are just fancy arrays, so make sure method on
+                        // them can be looked up as such:
+                        let array = resolver
+                            .get_by_resolved_id(GLOBAL_ARRAY_ID)
+                            .expect("Array type must be registered");
+                        let member = array
+                            .all_members(resolver)
+                            .find(|member| member.has_name(&expr.member) && !member.is_static());
+                        return member.map(|member| TypeData::reference(member.ty().into_owned()));
+                    }
+
                     TypeData::Union(union) => {
                         let types: Vec<_> = union
                             .types()
@@ -582,7 +593,9 @@ fn flattened_typeof_data(resolved: ResolvedTypeData) -> TypeData {
             }
         },
         TypeData::Number => TypeData::reference(GLOBAL_NUMBER_STRING_LITERAL_ID),
-        TypeData::Object(_) => TypeData::reference(GLOBAL_OBJECT_STRING_LITERAL_ID),
+        TypeData::Object(_) | TypeData::Tuple(_) => {
+            TypeData::reference(GLOBAL_OBJECT_STRING_LITERAL_ID)
+        }
         TypeData::String => TypeData::reference(GLOBAL_STRING_STRING_LITERAL_ID),
         TypeData::Symbol => TypeData::reference(GLOBAL_SYMBOL_STRING_LITERAL_ID),
         TypeData::Undefined => TypeData::reference(GLOBAL_UNDEFINED_STRING_LITERAL_ID),

@@ -92,6 +92,7 @@ impl Format<FormatTypeContext> for TypeData {
             Self::String => write!(f, [text("string")]),
             Self::Symbol => write!(f, [text("symbol")]),
             Self::Undefined => write!(f, [text("undefined")]),
+            Self::Conditional => write!(f, [text("conditional")]),
             Self::Class(class) => write!(f, [&class.as_ref()]),
             Self::Constructor(ty) => write!(f, [FmtVerbatim(ty.as_ref())]),
             Self::Function(function) => write!(f, [&function.as_ref()]),

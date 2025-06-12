@@ -629,17 +629,17 @@ impl TypeResolver for JsModuleInfoCollector {
     fn get_by_resolved_id(&self, id: ResolvedTypeId) -> Option<ResolvedTypeData> {
         let mut id = id;
         loop {
-            let resolved_id: ResolvedTypeData = match id.level() {
+            let resolved_data: ResolvedTypeData = match id.level() {
                 TypeResolverLevel::Thin => (id, self.get_by_id(id.id())).into(),
                 TypeResolverLevel::Global => (id, GLOBAL_RESOLVER.get_by_id(id.id())).into(),
                 TypeResolverLevel::Full | TypeResolverLevel::Import => break None,
             };
 
-            match resolved_id.as_raw_data() {
+            match resolved_data.as_raw_data() {
                 TypeData::Reference(TypeReference::Resolved(resolved_id)) if id != *resolved_id => {
                     id = *resolved_id;
                 }
-                _ => break Some(resolved_id),
+                _ => break Some(resolved_data),
             }
         }
     }

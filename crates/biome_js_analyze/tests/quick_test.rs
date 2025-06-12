@@ -26,11 +26,9 @@ fn project_layout_with_top_level_dependencies(dependencies: Dependencies) -> Arc
 #[test]
 fn quick_test() {
     const FILENAME: &str = "dummyFile.ts";
-    const SOURCE: &str = r#"const promiseWithParentheses = new Promise((resolve, reject) =>
-	resolve("value")
-);
-promiseWithParentheses;
-"#;
+    const SOURCE: &str = r#"[1, 2, 3].forEach(async value => {
+  await fetch(`/${value}`);
+});"#;
 
     let parsed = parse(SOURCE, JsFileSource::tsx(), JsParserOptions::default());
 
@@ -41,7 +39,7 @@ promiseWithParentheses;
 
     let mut error_ranges: Vec<TextRange> = Vec::new();
     let options = AnalyzerOptions::default().with_file_path(file_path.clone());
-    let rule_filter = RuleFilter::Rule("nursery", "noFloatingPromises");
+    let rule_filter = RuleFilter::Rule("nursery", "noMisusedPromises");
 
     let dependencies = Dependencies(Box::new([("buffer".into(), "latest".into())]));
 

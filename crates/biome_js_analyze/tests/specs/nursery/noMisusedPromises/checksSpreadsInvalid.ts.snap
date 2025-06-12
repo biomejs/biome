@@ -6,7 +6,6 @@ expression: checksSpreadsInvalid.ts
 ```ts
 const getData = () => fetch('/');
 
-// FIXME: Not yet detected
 console.log({ foo: 42, ...getData() });
 
 const awaitData = async () => {
@@ -19,15 +18,32 @@ console.log({ foo: 42, ...awaitData() });
 
 # Diagnostics
 ```
-checksSpreadsInvalid.ts:10:27 lint/nursery/noMisusedPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+checksSpreadsInvalid.ts:3:27 lint/nursery/noMisusedPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i A Promise was found where an iterable was expected.
   
-     8 │ };
-     9 │ 
-  > 10 │ console.log({ foo: 42, ...awaitData() });
+    1 │ const getData = () => fetch('/');
+    2 │ 
+  > 3 │ console.log({ foo: 42, ...getData() });
+      │                           ^^^^^^^^^
+    4 │ 
+    5 │ const awaitData = async () => {
+  
+  i The spread syntax is used to expand an iterable, but a Promise needs to be `await`-ed to take its value.
+  
+
+```
+
+```
+checksSpreadsInvalid.ts:9:27 lint/nursery/noMisusedPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i A Promise was found where an iterable was expected.
+  
+     7 │ };
+     8 │ 
+   > 9 │ console.log({ foo: 42, ...awaitData() });
        │                           ^^^^^^^^^^^
-    11 │ 
+    10 │ 
   
   i The spread syntax is used to expand an iterable, but a Promise needs to be `await`-ed to take its value.
   

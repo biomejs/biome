@@ -16,6 +16,12 @@ if (promise) { /* ... */ }
 
 // Spreading a `Promise` has no effect:
 console.log({ foo: 42, ...promise });
+
+// This does not `await` the `Promise`s from the callbacks,
+// so it does not behave as you may expect:
+[1, 2, 3].forEach(async value => {
+  await fetch(`/${value}`);
+});
 ```
 
 ## Valid examples
