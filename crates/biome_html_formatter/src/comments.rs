@@ -8,7 +8,7 @@ use biome_formatter::{
     write,
 };
 use biome_html_syntax::{HtmlClosingElement, HtmlLanguage, HtmlOpeningElement, HtmlSyntaxKind};
-use biome_rowan::{SyntaxNodeCast, SyntaxTriviaPieceComments, TextLen};
+use biome_rowan::{SyntaxNodeCast, SyntaxTriviaPieceComments};
 use biome_suppression::parse_suppression_comment;
 
 use crate::context::HtmlFormatContext;
@@ -44,7 +44,7 @@ impl CommentStyle for HtmlCommentStyle {
     }
 
     fn get_comment_kind(_comment: &SyntaxTriviaPieceComments<HtmlLanguage>) -> CommentKind {
-        CommentKind::Block
+        CommentKind::Line
     }
 
     /// This allows us to override which comments are associated with which nodes.

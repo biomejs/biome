@@ -100,7 +100,7 @@ impl TryFrom<HtmlSyntaxKind> for TriviaPieceKind {
             }
         } else if value.is_comments() {
             match value {
-                HtmlSyntaxKind::COMMENT => Ok(Self::MultiLineComment),
+                HtmlSyntaxKind::COMMENT => Ok(Self::SingleLineComment),
                 _ => unreachable!("Not Comment"),
             }
         } else {
