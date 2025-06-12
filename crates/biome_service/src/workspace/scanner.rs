@@ -277,10 +277,10 @@ impl TraversalContext for ScanContext<'_> {
 
         match self.workspace.fs().symlink_path_kind(path) {
             Ok(PathKind::Directory { .. }) => {
-                if self.scan_kind.is_project() {
+                if self.scan_kind.is_project() && path.is_dependency() {
                     // In project mode, the scanner always scans dependencies
                     // because they're a valuable source of type information.
-                    path.is_dependency()
+                    true
                 } else if !path.is_dependency() {
                     !self
                         .workspace
