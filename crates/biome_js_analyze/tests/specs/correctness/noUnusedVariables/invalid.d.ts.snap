@@ -14,7 +14,7 @@ interface Unused {}
 ```
 invalid.d.ts:3:11 lint/correctness/noUnusedVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This interface is unused.
+  ! This interface Unused is unused.
   
     1 │ export const C: number
     2 │ 

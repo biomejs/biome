@@ -2981,7 +2981,7 @@ export interface UndeclaredVariablesOptions {
 }
 export interface NoUnusedVariablesOptions {
 	/**
-	 * Whether to ignore unused variables from an object destructuring with a spread (i.e.: whether `a` and `b` in `const { a, b, ...rest } = obj` should be ignored by this rule).
+	 * Whether to ignore unused variables from an object destructuring with a spread.
 	 */
 	ignoreRestSiblings?: boolean;
 }

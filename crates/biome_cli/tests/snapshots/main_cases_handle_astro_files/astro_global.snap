@@ -16,7 +16,7 @@ const { some } = Astro.props
 ```block
 file.astro:2:9 lint/correctness/noUnusedVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This variable is unused.
+  ! This variable some is unused.
   
     1 │ ---
   > 2 │ const { some } = Astro.props

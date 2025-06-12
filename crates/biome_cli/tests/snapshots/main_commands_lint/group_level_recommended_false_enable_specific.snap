@@ -43,7 +43,7 @@ lint ━━━━━━━━━━━━━━━━━━━━━━━━━
 ```block
 fix.jsx:2:14 lint/correctness/noUnusedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This function is unused.
+  ! This function SubmitButton is unused.
   
   > 2 │     function SubmitButton() {
       │              ^^^^^^^^^^^^
