@@ -373,10 +373,8 @@ pub enum RuleDomain {
     Solid,
     /// Next.js framework rules
     Next,
-    /// Vue.js 2 & 3 framework rules
+    /// Vue.js framework rules
     Vue,
-    /// Vue.js 3 framework rules
-    Vue3,
     /// For rules that require querying multiple files inside a project
     Project,
 }
@@ -390,7 +388,6 @@ impl Display for RuleDomain {
             Self::Solid => fmt.write_str("solid"),
             Self::Next => fmt.write_str("next"),
             Self::Vue => fmt.write_str("vue"),
-            Self::Vue3 => fmt.write_str("vue3"),
             Self::Project => fmt.write_str("project"),
         }
     }
@@ -424,8 +421,7 @@ impl RuleDomain {
             ],
             Self::Solid => &[&("solid", ">=1.0.0")],
             Self::Next => &[&("next", ">=14.0.0")],
-            Self::Vue => &[&("vue", ">=2.0.0")],
-            Self::Vue3 => &[&("vue", ">=3.0.0")],
+            Self::Vue => &[&("vue", ">=3.0.0")],
             Self::Project => &[],
         }
     }
@@ -449,7 +445,6 @@ impl RuleDomain {
             Self::Solid => &[],
             Self::Next => &[],
             Self::Vue => &[],
-            Self::Vue3 => &[],
             Self::Project => &[],
         }
     }

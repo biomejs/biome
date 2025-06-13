@@ -896,7 +896,6 @@ export type RuleDomain =
 	| "solid"
 	| "next"
 	| "vue"
-	| "vue3"
 	| "project";
 export type RuleDomainValue = "all" | "none" | "recommended";
 export type SeverityOrGroup_for_A11y = GroupPlainConfiguration | A11y;
