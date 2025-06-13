@@ -18,7 +18,7 @@ export type f = () => {}
 ```
 invalidTypeValueSameNames.ts:2:6 lint/correctness/noUnusedVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This type alias is unused.
+  ! This type alias a is unused.
   
   > 2 │ type a = number
       │      ^
@@ -33,7 +33,7 @@ invalidTypeValueSameNames.ts:2:6 lint/correctness/noUnusedVariables ━━━━
 ```
 invalidTypeValueSameNames.ts:5:10 lint/correctness/noUnusedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
 
-  ! This function is unused.
+  ! This function f is unused.
   
     3 │ export const a = 5;
     4 │ 

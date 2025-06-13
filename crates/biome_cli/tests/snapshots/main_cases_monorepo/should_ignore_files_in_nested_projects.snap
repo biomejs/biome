@@ -81,7 +81,7 @@ check ━━━━━━━━━━━━━━━━━━━━━━━━�
 ```block
 file.js:1:10 lint/correctness/noUnusedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This function is unused.
+  ! This function f is unused.
   
   > 1 │ function f() { const lorem_and_ipsum = 'lorem ipsum'; }
       │          ^
@@ -99,7 +99,7 @@ file.js:1:10 lint/correctness/noUnusedVariables  FIXABLE  ━━━━━━━�
 ```block
 file.js:1:22 lint/correctness/noUnusedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This variable is unused.
+  ! This variable lorem_and_ipsum is unused.
   
   > 1 │ function f() { const lorem_and_ipsum = 'lorem ipsum'; }
       │                      ^^^^^^^^^^^^^^^
@@ -117,7 +117,7 @@ file.js:1:22 lint/correctness/noUnusedVariables  FIXABLE  ━━━━━━━�
 ```block
 packages/lib/file.js:1:10 lint/correctness/noUnusedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This function is unused.
+  ! This function f is unused.
   
   > 1 │ function f() { const lorem_and_ipsum = 'lorem ipsum'; }
       │          ^
@@ -135,7 +135,7 @@ packages/lib/file.js:1:10 lint/correctness/noUnusedVariables  FIXABLE  ━━━
 ```block
 packages/lib/file.js:1:22 lint/correctness/noUnusedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This variable is unused.
+  ! This variable lorem_and_ipsum is unused.
   
   > 1 │ function f() { const lorem_and_ipsum = 'lorem ipsum'; }
       │                      ^^^^^^^^^^^^^^^

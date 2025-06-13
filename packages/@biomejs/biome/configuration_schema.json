@@ -2708,8 +2708,8 @@
 			"type": "object",
 			"properties": {
 				"ignoreRestSiblings": {
-					"description": "Whether to ignore unused variables from an object destructuring with a spread (i.e.: whether `a` and `b` in `const { a, b, ...rest } = obj` should be ignored by this rule).",
-					"default": false,
+					"description": "Whether to ignore unused variables from an object destructuring with a spread.",
+					"default": true,
 					"type": "boolean"
 				}
 			},
