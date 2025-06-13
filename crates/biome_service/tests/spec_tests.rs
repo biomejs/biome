@@ -2,10 +2,7 @@ use biome_configuration::Configuration;
 use biome_deserialize::json::deserialize_from_json_str;
 use biome_fs::{BiomePath, OsFileSystem};
 use biome_json_parser::JsonParserOptions;
-use biome_service::workspace::{
-    GetFileContentParams, GetTypeInfoParams, OpenProjectParams, OpenProjectResult, ScanKind,
-    ScanProjectFolderParams, UpdateSettingsParams, server,
-};
+use biome_service::workspace::{GetFileContentParams, GetTypeInfoParams, OpenProjectParams, OpenProjectResult, ScanKind, ScanProjectFolderParams, UpdateSettingsParams, server, OpenFileParams, FileContent};
 use camino::Utf8PathBuf;
 
 /// Returns the path to the `fixtures/` directory, regardless of working dir.
@@ -232,4 +229,36 @@ fn test_scanner_required_files_are_only_ignored_in_ignored_directories() {
         ignored_file.is_err(),
         "package.json inside ignored dir should really be ignored"
     );
+}
+
+#[test]
+fn test_injection() {
+    let fixtures_path = get_fixtures_path("injection");
+    let fs = OsFileSystem::new(fixtures_path.clone());
+
+    let workspace = server(Box::new(fs), None);
+    let OpenProjectResult { project_key, .. } = workspace
+        .open_project(OpenProjectParams {
+            path: fixtures_path.clone().into(),
+            open_uninitialized: true,
+            only_rules: None,
+            skip_rules: None,
+        })
+        .unwrap();
+
+    workspace
+        .update_settings(UpdateSettingsParams {
+            project_key,
+            configuration: Default::default(),
+            workspace_directory: Some(fixtures_path.clone().into()),
+        })
+        .unwrap();
+
+    workspace.open_file(OpenFileParams {
+        project_key,
+        path: BiomePath::new(format!("{fixtures_path}/css-in-js.js")),
+        content: FileContent::FromServer,
+        document_file_source: None,
+        persist_node_cache: false,
+    }).expect("failed to open css-in-js.js");
 }
