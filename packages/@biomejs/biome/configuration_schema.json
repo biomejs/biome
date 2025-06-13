@@ -3439,14 +3439,9 @@
 					"enum": ["next"]
 				},
 				{
-					"description": "Vue.js 2 & 3 framework rules",
+					"description": "Vue.js framework rules",
 					"type": "string",
 					"enum": ["vue"]
-				},
-				{
-					"description": "Vue.js 3 framework rules",
-					"type": "string",
-					"enum": ["vue3"]
 				},
 				{
 					"description": "For rules that require querying multiple files inside a project",
