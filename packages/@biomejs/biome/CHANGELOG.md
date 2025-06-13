@@ -1,5 +1,41 @@
 # @biomejs/biome
 
+## 2.1.0
+
+### Minor Changes
+
+- [#5157](https://github.com/biomejs/biome/pull/5157) [`31b6870`](https://github.com/biomejs/biome/commit/31b68701464b6325247cf853ddb31ea36df9afc6) Thanks [@iamakulov](https://github.com/iamakulov)! - Add an `ignoreRestSiblings` option into [`noUnusedVariables`](https://biomejs.dev/linter/rules/no-unused-variables).
+
+  When this option is set to `false`, the rule will **not** ignore variables that created using the rest pattern:
+
+  ```json
+  {
+    "linter": {
+      "rules": {
+        "correctness": {
+          "noUnusedVariables": {
+            "level": "error",
+            "options": {
+              "ignoreRestSiblings": false
+            }
+          }
+        }
+      }
+    }
+  }
+  ```
+
+  ```js
+  const { lorem, ...test } = bar; // the variable "test" will trigger the rule
+  console.log(lorem);
+  ```
+
+### Patch Changes
+
+- [#6296](https://github.com/biomejs/biome/pull/6296) [`182fb2f`](https://github.com/biomejs/biome/commit/182fb2f667522d753e337a073d7371e07797dec2) Thanks [@ematipico](https://github.com/ematipico)! - Fixed an issue where react lint rules could panic Biome when some incorrect code was analyzed.
+
+- [#6296](https://github.com/biomejs/biome/pull/6296) [`182fb2f`](https://github.com/biomejs/biome/commit/182fb2f667522d753e337a073d7371e07797dec2) Thanks [@ematipico](https://github.com/ematipico)! - Improved the diagnostic of the rule `noUnusedVariables`. The rule message now provides the name of the unused binding.
+
 ## 2.0.0
 
 ### Major Changes
