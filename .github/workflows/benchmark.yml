@@ -6,6 +6,7 @@ on:
     types: [ opened, synchronize ]
     branches:
       - main
+      - next
     paths:
       - 'Cargo.lock'
       - 'crates/**_parser/**/*.rs'
