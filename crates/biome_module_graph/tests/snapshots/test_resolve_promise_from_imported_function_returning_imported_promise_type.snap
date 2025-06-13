@@ -180,11 +180,15 @@ Module TypeId(10) => sync Function "returnPromiseResult" {
 ## Registered types
 
 ```
-Full TypeId(0) => Module(1) TypeId(8)
+Full TypeId(0) => namespace for ModuleId(1)
 
-Full TypeId(1) => instanceof Promise<Module(2) TypeId(3)>
+Full TypeId(1) => namespace for ModuleId(2)
 
 Full TypeId(2) => Module(1) TypeId(8)
 
 Full TypeId(3) => instanceof Promise<Module(2) TypeId(3)>
+
+Full TypeId(4) => Module(1) TypeId(8)
+
+Full TypeId(5) => instanceof Promise<Module(2) TypeId(3)>
 ```

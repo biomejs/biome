@@ -169,6 +169,8 @@ impl ModuleResolver {
                 let module_info = self.module_graph.module_info_for_path(path)?;
                 let module_id = ModuleId::new(self.modules.len());
                 self.modules.push(module_info);
+                self.types
+                    .register_type(Cow::Owned(TypeData::ImportNamespace(module_id)));
                 Some(*entry.insert(module_id))
             }
         }
@@ -250,20 +252,20 @@ impl TypeResolver for ModuleResolver {
 
     fn get_by_resolved_id(&self, id: ResolvedTypeId) -> Option<ResolvedTypeData> {
         match id.level() {
-            TypeResolverLevel::Full => Some((id, self.get_by_id(id.id())).into()),
+            TypeResolverLevel::Full => Some(ResolvedTypeData::from((id, self.get_by_id(id.id())))),
             TypeResolverLevel::Thin => {
                 let module_id = id.module_id();
                 let module = &self.modules[module_id.index()];
                 if let Some(ty) = module.types.get(id.index()) {
-                    Some((id, ty).into())
+                    Some(ResolvedTypeData::from((id, ty)))
                 } else {
                     debug_assert!(false, "Invalid type reference: {id:?}");
                     None
                 }
             }
-            TypeResolverLevel::Import => {
-                panic!("import IDs should not be exposed outside the module info collector")
-            }
+            TypeResolverLevel::Import => self
+                .find_type(&TypeData::ImportNamespace(ModuleId::new(id.index())))
+                .map(|type_id| ResolvedTypeData::from((id, self.get_by_id(type_id)))),
             TypeResolverLevel::Global => Some((id, GLOBAL_RESOLVER.get_by_id(id.id())).into()),
         }
     }
@@ -292,8 +294,12 @@ impl TypeResolver for ModuleResolver {
                 ImportSymbol::Default => "default",
                 ImportSymbol::Named(name) => name.text(),
                 ImportSymbol::All => {
-                    // TODO: Register type for imported namespace.
-                    return None;
+                    // Create a `ResolvedTypeId` that resolves to a
+                    // `TypeData::ImportNamespace` variant.
+                    return Some(ResolvedTypeId::new(
+                        TypeResolverLevel::Import,
+                        TypeId::new(module_id.index()),
+                    ));
                 }
             };
 
@@ -330,6 +336,40 @@ impl TypeResolver for ModuleResolver {
         }
 
         None
+    }
+
+    fn resolve_import_namespace_member(
+        &self,
+        module_id: ModuleId,
+        name: &str,
+    ) -> Option<ResolvedTypeId> {
+        let module = &self.modules[module_id.index()];
+        let export = match module.exports.get(name) {
+            Some(JsExport::Own(export) | JsExport::OwnType(export)) => export,
+            Some(JsExport::Reexport(reexport)) => {
+                return self.resolve_import(&TypeImportQualifier {
+                    symbol: reexport.import.symbol.clone(),
+                    resolved_path: reexport.import.resolved_path.clone(),
+                    type_only: false,
+                });
+            }
+            Some(JsExport::ReexportType(reexport)) => {
+                return self.resolve_import(&TypeImportQualifier {
+                    symbol: reexport.import.symbol.clone(),
+                    resolved_path: reexport.import.resolved_path.clone(),
+                    type_only: true,
+                });
+            }
+            None => {
+                // TODO: Follow blanket reexports.
+                return None;
+            }
+        };
+
+        match resolve_from_export(module_id, module, export) {
+            ResolveFromExportResult::Resolved(resolved) => resolved,
+            ResolveFromExportResult::FollowImport(import) => self.resolve_import(import),
+        }
     }
 
     fn resolve_qualifier(&self, _qualifier: &TypeReferenceQualifier) -> Option<ResolvedTypeId> {

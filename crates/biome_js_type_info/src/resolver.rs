@@ -1,6 +1,7 @@
 use std::{borrow::Cow, fmt::Debug};
 
 use biome_js_syntax::AnyJsExpression;
+use biome_js_type_info_macros::Resolvable;
 use biome_rowan::Text;
 
 use crate::{
@@ -18,6 +19,14 @@ const LEVEL_MASK: u32 = 0xc000_0000; // Upper 2 bits.
 /// `ResolvedTypeId` uses `u32` for its first field so that it can fit the
 /// module ID and the resolver level together in 4 bytes, making the struct as
 /// a whole still fit in 8 bytes without alignment issues.
+///
+/// **FIXME:** The second field, that is normally used for storing a `TypeId`,
+///            is used instead to store a `BindingId` or a `ModuleId` if the
+///            `ResolverId` is of level `TypeResolverLevel::Import`. See
+///            [`TypeResolverLevel`] for details.
+///            It would be cleaner and safer to avoid this by using an enum for
+///            `ResolvedTypeId` instead, but I don't see a way to limit the size
+///            of such an enum to 8 bytes, given how we use the [`ResolverId`].
 #[derive(Clone, Copy, Eq, Hash, PartialEq)]
 pub struct ResolvedTypeId(ResolverId, TypeId);
 
@@ -218,16 +227,23 @@ pub enum TypeResolverLevel {
     /// resolution time.
     Thin,
 
-    /// Used for marking types that exist across modules that are beyond the
-    /// capability of the current resolver to resolve.
+    /// Used for two disjoint purposes, though both are related to the handling
+    /// of imports:
     ///
-    /// We don't store resolved IDs with this level in the module info. Instead,
-    /// we use it during a module's type collection to flag resolved types that
-    /// require imports from other modules. Such resolved IDs then get converted
-    /// to [`TypeReference::Import`] before storing them in the module info.
+    /// * The module info collector uses this level for marking types that exist
+    ///   across modules that are beyond the capability of the current resolver
+    ///   to resolve. Any resolved IDs with this level are **NOT** allowed to
+    ///   leave the resolver. Instead, any references at this level are
+    ///   converted to [`TypeReference::Import`] before storing them in the
+    ///   module info.
+    /// * The module resolver uses this level for creating [`ResolvedTypeId`]s
+    ///   that resolve to an ad-hoc namespace for a given module that is created
+    ///   using the `import * as namespace` syntax.
     ///
-    /// **Important:** [`ResolvedTypeId`]s of this level store a `BindingId` in
-    ///                the field that is used for `TypeId`s normally.
+    /// **Important:** [`ResolvedTypeId`]s of this level do not store a `TypeId`
+    ///                where one is normally expected. Instead, the module info
+    ///                collector stores a `BindingId` in its place, while the
+    ///                module resolver stores a `ModuleId` there.
     Import,
 
     /// Used for language- and environment-level globals.
@@ -257,7 +273,7 @@ impl TypeResolverLevel {
 }
 
 /// Identifier that indicates which module a type is defined in.
-#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
+#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq, Resolvable)]
 pub struct ModuleId(u32);
 
 impl ModuleId {
@@ -562,9 +578,17 @@ pub trait TypeResolver {
         }
     }
 
-    /// Resolves the given import qualifier, registering the result into this
-    /// resolver's type array if necessary.
+    /// Resolves the given import qualifier.
     fn resolve_import(&self, _qualifier: &TypeImportQualifier) -> Option<ResolvedTypeId> {
+        None
+    }
+
+    /// Resolves a named symbol in a given module.
+    fn resolve_import_namespace_member(
+        &self,
+        _module_id: ModuleId,
+        _name: &str,
+    ) -> Option<ResolvedTypeId> {
         None
     }
 
