@@ -4,8 +4,8 @@ use biome_analyze::{
 use biome_console::markup;
 use biome_js_factory::make;
 use biome_js_syntax::{
-    AnyJsCallArgument, AnyJsExpression, JsCallArgumentList, JsCallExpression, JsNewExpression,
-    JsSyntaxKind,
+    AnyJsCallArgument, AnyJsExpression, JsCallArgumentList, JsCallExpression,
+    JsConditionalExpression, JsNewExpression, JsSyntaxKind,
 };
 use biome_js_type_info::{Type, TypeMemberKind};
 use biome_rowan::{AstNode, AstSeparatedList, BatchMutationExt, TriviaPieceKind};
@@ -215,7 +215,15 @@ fn find_misused_promise_expression(
 ) -> Option<NoMisusedPromisesState> {
     let parent = expression.syntax().parent()?;
     let state = match parent.kind() {
-        JsSyntaxKind::JS_CONDITIONAL_EXPRESSION => NoMisusedPromisesState::Conditional,
+        JsSyntaxKind::JS_CONDITIONAL_EXPRESSION => {
+            if JsConditionalExpression::cast(parent)
+                .is_some_and(|conditional| conditional.test().is_ok_and(|test| test == *expression))
+            {
+                NoMisusedPromisesState::Conditional
+            } else {
+                return None; // Promise occurred in the branches.
+            }
+        }
         JsSyntaxKind::JS_DO_WHILE_STATEMENT => NoMisusedPromisesState::Conditional,
         JsSyntaxKind::JS_IF_STATEMENT => NoMisusedPromisesState::Conditional,
         JsSyntaxKind::JS_SPREAD => NoMisusedPromisesState::Spread,
