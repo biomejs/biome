@@ -1181,6 +1181,128 @@ fn test_resolve_react_types() {
 }
 
 #[test]
+fn test_resolve_single_reexport() {
+    let mut fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/foo.ts".into(),
+        r#"
+        export function foo(): number {
+            return 1;
+        }
+        "#,
+    );
+    fs.insert(
+        "/src/reexport.ts".into(),
+        r#"
+        export * from "./foo.ts";
+        "#,
+    );
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"import { foo } from "./reexport.ts";
+
+        const result = foo();
+        "#,
+    );
+
+    let added_paths = [
+        BiomePath::new("/src/foo.ts"),
+        BiomePath::new("/src/index.ts"),
+        BiomePath::new("/src/reexport.ts"),
+    ];
+    let added_paths = get_added_paths(&fs, &added_paths);
+
+    let module_graph = Arc::new(ModuleGraph::default());
+    module_graph.update_graph_for_js_paths(&fs, &ProjectLayout::default(), &added_paths, &[]);
+
+    let index_module = module_graph
+        .module_info_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+    let mut resolver = ModuleResolver::for_module(index_module, module_graph.clone());
+    resolver.run_inference();
+    let resolver = Arc::new(resolver);
+
+    let result_id = resolver
+        .resolve_type_of(&Text::Static("result"), ScopeId::GLOBAL)
+        .expect("result variable not found");
+    let ty = resolver.resolved_type_for_id(result_id);
+    assert!(ty.is_number());
+
+    let snapshot = ModuleGraphSnapshot::new(module_graph.as_ref(), &fs).with_resolver(&resolver);
+    snapshot.assert_snapshot("test_resolve_single_reexport");
+}
+
+#[test]
+fn test_resolve_multiple_reexports() {
+    let mut fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/foo.ts".into(),
+        r#"
+        export function foo(): number {
+            return 1;
+        }
+        "#,
+    );
+    fs.insert(
+        "/src/bar.ts".into(),
+        r#"
+        export function bar(): string {
+            return "bar";
+        }
+        "#,
+    );
+    fs.insert(
+        "/src/reexports.ts".into(),
+        r#"
+        export * from "./foo.ts";
+        export * from "./bar.ts";
+        "#,
+    );
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"import { foo } from "./reexports.ts";
+        import * as reexports from "./reexports.ts";
+
+        const result1 = foo();
+        const result2 = reexports.bar();
+        "#,
+    );
+
+    let added_paths = [
+        BiomePath::new("/src/foo.ts"),
+        BiomePath::new("/src/bar.ts"),
+        BiomePath::new("/src/index.ts"),
+        BiomePath::new("/src/reexports.ts"),
+    ];
+    let added_paths = get_added_paths(&fs, &added_paths);
+
+    let module_graph = Arc::new(ModuleGraph::default());
+    module_graph.update_graph_for_js_paths(&fs, &ProjectLayout::default(), &added_paths, &[]);
+
+    let index_module = module_graph
+        .module_info_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+    let mut resolver = ModuleResolver::for_module(index_module, module_graph.clone());
+    resolver.run_inference();
+    let resolver = Arc::new(resolver);
+
+    let result1_id = resolver
+        .resolve_type_of(&Text::Static("result1"), ScopeId::GLOBAL)
+        .expect("result1 variable not found");
+    let ty = resolver.resolved_type_for_id(result1_id);
+    assert!(ty.is_number());
+
+    let result2_id = resolver
+        .resolve_type_of(&Text::Static("result2"), ScopeId::GLOBAL)
+        .expect("result2 variable not found");
+    let ty = resolver.resolved_type_for_id(result2_id);
+    assert!(ty.is_string());
+
+    let snapshot = ModuleGraphSnapshot::new(module_graph.as_ref(), &fs).with_resolver(&resolver);
+    snapshot.assert_snapshot("test_resolve_multiple_reexports");
+}
+
+#[test]
 fn test_resolve_export_type_referencing_imported_type() {
     let mut fs = MemoryFileSystem::default();
     fs.insert(

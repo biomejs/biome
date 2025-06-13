@@ -273,7 +273,7 @@ impl TypeResolverLevel {
 }
 
 /// Identifier that indicates which module a type is defined in.
-#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq, Resolvable)]
+#[derive(Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Resolvable)]
 pub struct ModuleId(u32);
 
 impl ModuleId {

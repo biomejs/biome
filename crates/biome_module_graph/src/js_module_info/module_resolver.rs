@@ -1,6 +1,6 @@
 use std::{
     borrow::Cow,
-    collections::{BTreeMap, btree_map::Entry},
+    collections::{BTreeMap, BTreeSet, btree_map::Entry},
     ops::Deref,
     sync::Arc,
 };
@@ -12,7 +12,7 @@ use biome_js_type_info::{
     TypeReference, TypeReferenceQualifier, TypeResolver, TypeResolverLevel, TypeStore,
 };
 use biome_resolver::ResolvedPath;
-use biome_rowan::{AstNode, Text, TextRange};
+use biome_rowan::{AstNode, RawSyntaxKind, Text, TextRange, TokenText};
 use rustc_hash::FxHashMap;
 
 use crate::{
@@ -235,6 +235,75 @@ impl ModuleResolver {
             .copied()
             .unwrap_or(GLOBAL_UNKNOWN_ID)
     }
+
+    fn resolve_import_internal<'a>(
+        &'a self,
+        mut module_id: ModuleId,
+        mut symbol: Cow<'a, ImportSymbol>,
+        mut type_only: bool,
+        mut seen_modules: BTreeSet<ModuleId>,
+    ) -> Option<ResolvedTypeId> {
+        while seen_modules.len() < MAX_IMPORT_DEPTH {
+            if !seen_modules.insert(module_id) {
+                return None;
+            }
+
+            let module = &self.modules[module_id.index()];
+
+            let name = match symbol.as_ref() {
+                ImportSymbol::Default => "default",
+                ImportSymbol::Named(name) => name.text(),
+                ImportSymbol::All => {
+                    // Create a `ResolvedTypeId` that resolves to a
+                    // `TypeData::ImportNamespace` variant.
+                    return Some(ResolvedTypeId::new(
+                        TypeResolverLevel::Import,
+                        TypeId::new(module_id.index()),
+                    ));
+                }
+            };
+
+            let export = match module.exports.get(name) {
+                Some(JsExport::Own(export) | JsExport::OwnType(export)) => export,
+                Some(JsExport::Reexport(reexport)) => {
+                    module_id = self.find_module(&reexport.import.resolved_path)?;
+                    symbol = Cow::Borrowed(&reexport.import.symbol);
+                    continue;
+                }
+                Some(JsExport::ReexportType(reexport)) => {
+                    module_id = self.find_module(&reexport.import.resolved_path)?;
+                    symbol = Cow::Borrowed(&reexport.import.symbol);
+                    type_only = true;
+                    continue;
+                }
+                None => {
+                    return module
+                        .blanket_reexports
+                        .iter()
+                        .filter_map(|reexport| self.find_module(&reexport.import.resolved_path))
+                        .find_map(|module_id| {
+                            self.resolve_import_internal(
+                                module_id,
+                                symbol.clone(),
+                                type_only,
+                                seen_modules.clone(),
+                            )
+                        });
+                }
+            };
+
+            match resolve_from_export(module_id, module, export) {
+                ResolveFromExportResult::Resolved(resolved) => return resolved,
+                ResolveFromExportResult::FollowImport(import) => {
+                    module_id = self.find_module(&import.resolved_path)?;
+                    symbol = Cow::Owned(import.symbol.clone());
+                    type_only = if import.type_only { true } else { type_only };
+                }
+            }
+        }
+
+        None
+    }
 }
 
 impl TypeResolver for ModuleResolver {
@@ -284,58 +353,13 @@ impl TypeResolver for ModuleResolver {
     }
 
     fn resolve_import(&self, qualifier: &TypeImportQualifier) -> Option<ResolvedTypeId> {
-        let mut qualifier = Cow::Borrowed(qualifier);
-
-        for _ in 0..MAX_IMPORT_DEPTH {
-            let module_id = self.find_module(&qualifier.resolved_path)?;
-            let module = &self.modules[module_id.index()];
-
-            let name = match &qualifier.symbol {
-                ImportSymbol::Default => "default",
-                ImportSymbol::Named(name) => name.text(),
-                ImportSymbol::All => {
-                    // Create a `ResolvedTypeId` that resolves to a
-                    // `TypeData::ImportNamespace` variant.
-                    return Some(ResolvedTypeId::new(
-                        TypeResolverLevel::Import,
-                        TypeId::new(module_id.index()),
-                    ));
-                }
-            };
-
-            let export = match module.exports.get(name) {
-                Some(JsExport::Own(export) | JsExport::OwnType(export)) => export,
-                Some(JsExport::Reexport(reexport)) => {
-                    qualifier = Cow::Owned(TypeImportQualifier {
-                        symbol: reexport.import.symbol.clone(),
-                        resolved_path: reexport.import.resolved_path.clone(),
-                        type_only: false,
-                    });
-                    continue;
-                }
-                Some(JsExport::ReexportType(reexport)) => {
-                    qualifier = Cow::Owned(TypeImportQualifier {
-                        symbol: reexport.import.symbol.clone(),
-                        resolved_path: reexport.import.resolved_path.clone(),
-                        type_only: true,
-                    });
-                    continue;
-                }
-                None => {
-                    // TODO: Follow blanket reexports.
-                    return None;
-                }
-            };
-
-            match resolve_from_export(module_id, module, export) {
-                ResolveFromExportResult::Resolved(resolved) => return resolved,
-                ResolveFromExportResult::FollowImport(import) => {
-                    qualifier = Cow::Borrowed(import);
-                }
-            }
-        }
-
-        None
+        let module_id = self.find_module(&qualifier.resolved_path)?;
+        self.resolve_import_internal(
+            module_id,
+            Cow::Borrowed(&qualifier.symbol),
+            qualifier.type_only,
+            BTreeSet::new(),
+        )
     }
 
     fn resolve_import_namespace_member(
@@ -343,33 +367,15 @@ impl TypeResolver for ModuleResolver {
         module_id: ModuleId,
         name: &str,
     ) -> Option<ResolvedTypeId> {
-        let module = &self.modules[module_id.index()];
-        let export = match module.exports.get(name) {
-            Some(JsExport::Own(export) | JsExport::OwnType(export)) => export,
-            Some(JsExport::Reexport(reexport)) => {
-                return self.resolve_import(&TypeImportQualifier {
-                    symbol: reexport.import.symbol.clone(),
-                    resolved_path: reexport.import.resolved_path.clone(),
-                    type_only: false,
-                });
-            }
-            Some(JsExport::ReexportType(reexport)) => {
-                return self.resolve_import(&TypeImportQualifier {
-                    symbol: reexport.import.symbol.clone(),
-                    resolved_path: reexport.import.resolved_path.clone(),
-                    type_only: true,
-                });
-            }
-            None => {
-                // TODO: Follow blanket reexports.
-                return None;
-            }
-        };
-
-        match resolve_from_export(module_id, module, export) {
-            ResolveFromExportResult::Resolved(resolved) => resolved,
-            ResolveFromExportResult::FollowImport(import) => self.resolve_import(import),
-        }
+        self.resolve_import_internal(
+            module_id,
+            Cow::Owned(ImportSymbol::Named(Text::Borrowed(TokenText::new_raw(
+                RawSyntaxKind(0),
+                name,
+            )))),
+            false,
+            BTreeSet::new(),
+        )
     }
 
     fn resolve_qualifier(&self, _qualifier: &TypeReferenceQualifier) -> Option<ResolvedTypeId> {
