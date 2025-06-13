@@ -93,6 +93,13 @@ impl Format<FormatTypeContext> for TypeData {
             Self::Symbol => write!(f, [text("symbol")]),
             Self::Undefined => write!(f, [text("undefined")]),
             Self::Conditional => write!(f, [text("conditional")]),
+            Self::ImportNamespace(module_id) => write!(
+                f,
+                [dynamic_text(
+                    &std::format!("namespace for {module_id:?}"),
+                    TextSize::default()
+                )]
+            ),
             Self::Class(class) => write!(f, [&class.as_ref()]),
             Self::Constructor(ty) => write!(f, [FmtVerbatim(ty.as_ref())]),
             Self::Function(function) => write!(f, [&function.as_ref()]),

@@ -402,6 +402,14 @@ fn flattened_expression(
                         }
                     }
 
+                    TypeData::ImportNamespace(module_id) => {
+                        let resolved_id =
+                            resolver.resolve_import_namespace_member(*module_id, &expr.member)?;
+                        return resolver
+                            .get_by_resolved_id(resolved_id)
+                            .map(ResolvedTypeData::to_data);
+                    }
+
                     TypeData::Intersection(intersection) => {
                         let types: Vec<_> = intersection
                             .types()

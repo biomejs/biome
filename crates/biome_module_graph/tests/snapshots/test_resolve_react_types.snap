@@ -21597,17 +21597,11 @@ Module TypeId(2548) => instanceof Promise<Module(0) TypeId(99)>
 ## Registered types
 
 ```
-Full TypeId(0) => Module(1) TypeId(956)
+Full TypeId(0) => namespace for ModuleId(1)
 
-Full TypeId(1) => instanceof Promise
+Full TypeId(1) => Module(1) TypeId(956)
 
-Full TypeId(2) => async Function {
-  accepts: {
-    params: []
-    type_args: []
-  }
-  returns: Module(0) TypeId(1)
-}
+Full TypeId(2) => instanceof Promise
 
 Full TypeId(3) => async Function {
   accepts: {
@@ -21617,13 +21611,7 @@ Full TypeId(3) => async Function {
   returns: Module(0) TypeId(1)
 }
 
-Full TypeId(4) => Module(0) TypeId(3)
-
-Full TypeId(5) => instanceof Promise
-
-Full TypeId(6) => Module(1) TypeId(956)
-
-Full TypeId(7) => async Function {
+Full TypeId(4) => async Function {
   accepts: {
     params: []
     type_args: []
@@ -21631,5 +21619,19 @@ Full TypeId(7) => async Function {
   returns: Module(0) TypeId(1)
 }
 
-Full TypeId(8) => instanceof Promise
+Full TypeId(5) => Module(0) TypeId(3)
+
+Full TypeId(6) => instanceof Promise
+
+Full TypeId(7) => Module(1) TypeId(956)
+
+Full TypeId(8) => async Function {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: Module(0) TypeId(1)
+}
+
+Full TypeId(9) => instanceof Promise
 ```

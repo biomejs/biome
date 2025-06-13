@@ -20,9 +20,11 @@ use biome_js_type_info_macros::Resolvable;
 use biome_resolver::ResolvedPath;
 use biome_rowan::Text;
 
-use crate::globals::{GLOBAL_PROMISE_ID, GLOBAL_STRING_ID, GLOBAL_UNKNOWN_ID};
+use crate::globals::{GLOBAL_NUMBER_ID, GLOBAL_PROMISE_ID, GLOBAL_STRING_ID, GLOBAL_UNKNOWN_ID};
 use crate::type_info::literal::{BooleanLiteral, NumberLiteral, StringLiteral};
-use crate::{GLOBAL_RESOLVER, Resolvable, ResolvedTypeData, ResolvedTypeId, TypeResolver};
+use crate::{
+    GLOBAL_RESOLVER, ModuleId, Resolvable, ResolvedTypeData, ResolvedTypeId, TypeResolver,
+};
 
 const UNKNOWN: TypeData = TypeData::Reference(TypeReference::Resolved(GLOBAL_UNKNOWN_ID));
 
@@ -126,6 +128,16 @@ impl Type {
         }
     }
 
+    /// Returns whether this type is a number or a literal number.
+    pub fn is_number(&self) -> bool {
+        self.id == GLOBAL_NUMBER_ID
+            || self.as_raw_data().is_some_and(|ty| match ty {
+                TypeData::Number => true,
+                TypeData::Literal(literal) => matches!(literal.as_ref(), Literal::Number(_)),
+                _ => false,
+            })
+    }
+
     /// Returns whether this type is the `Promise` class.
     pub fn is_promise(&self) -> bool {
         self.id == GLOBAL_PROMISE_ID
@@ -217,6 +229,10 @@ pub enum TypeData {
     ///
     /// An example is the return value of the callback to `Array#filter()`.
     Conditional,
+
+    /// Special type used to represent a module for which an ad-hoc namespace is
+    /// created through `import * as namespace` syntax.
+    ImportNamespace(ModuleId),
 
     // Complex types
     Class(Box<Class>),

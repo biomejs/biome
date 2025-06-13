@@ -7,9 +7,9 @@ expression: content
 ## Source
 
 ```ts
-import { foo } from "./foo.ts";
+import * as fooNs from "./foo.ts";
 
-const result = bar(foo());
+const result = fooNs.foo();
 ```
 
 ## Module Info
@@ -19,10 +19,10 @@ Exports {
   No exports
 }
 Imports {
-  "foo" => {
+  "fooNs" => {
     Specifier: "./foo.ts"
     Resolved path: "/src/foo.ts"
-    Import Symbol: foo
+    Import Symbol: All
   }
 }
 ```
@@ -30,13 +30,11 @@ Imports {
 ## Registered types
 
 ```
-Module TypeId(0) => unresolved reference "bar" (scope ID: 0)
+Module TypeId(0) => Import Symbol: All from "/src/foo.ts"
 
-Module TypeId(1) => Import Symbol: foo from "/src/foo.ts"
+Module TypeId(1) => Module(0) TypeId(0).foo
 
 Module TypeId(2) => Call Module(0) TypeId(1)(No parameters)
-
-Module TypeId(3) => Call Module(0) TypeId(0)(Module(0) TypeId(2))
 ```
 
 # `/src/foo.ts` (Module 1)
@@ -44,7 +42,9 @@ Module TypeId(3) => Call Module(0) TypeId(0)(Module(0) TypeId(2))
 ## Source
 
 ```ts
-export function foo(): Type {}
+export function foo(): number {
+	return 1;
+}
 ```
 
 ## Module Info
@@ -73,14 +73,14 @@ BindingId(0) => JsBindingData {
 ## Registered types
 
 ```
-Module TypeId(0) => instanceof unresolved reference "Type" (scope ID: 1)
+Module TypeId(0) => value: 1
 
 Module TypeId(1) => sync Function "foo" {
   accepts: {
     params: []
     type_args: []
   }
-  returns: Module(0) TypeId(0)
+  returns: number
 }
 ```
 
@@ -91,15 +91,15 @@ Module TypeId(1) => sync Function "foo" {
 ```
 Full TypeId(0) => namespace for ModuleId(1)
 
-Full TypeId(1) => unresolved reference "bar" (scope ID: 0)
+Full TypeId(1) => Import TypeId(1)
 
-Full TypeId(2) => Module(1) TypeId(1)
+Full TypeId(2) => sync Function "foo" {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: number
+}
 
-Full TypeId(3) => instanceof unknown reference
-
-Full TypeId(4) => Call Module(0) TypeId(0)(Module(0) TypeId(2))
-
-Full TypeId(5) => Module(1) TypeId(1)
-
-Full TypeId(6) => instanceof unknown reference
+Full TypeId(3) => number
 ```
