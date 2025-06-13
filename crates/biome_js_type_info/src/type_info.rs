@@ -128,7 +128,7 @@ impl Type {
         }
     }
 
-    /// Returns whether this type is a string.
+    /// Returns whether this type is a number or a literal number.
     pub fn is_number(&self) -> bool {
         self.id == GLOBAL_NUMBER_ID
             || self.as_raw_data().is_some_and(|ty| match ty {
