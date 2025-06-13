@@ -15,3 +15,5 @@ const returnVal = await promise;
 while (await promise) {
   // Do something
 }
+
+const maybePromise = 1 == 2 ? promise : undefined;
