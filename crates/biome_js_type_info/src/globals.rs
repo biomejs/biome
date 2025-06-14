@@ -14,6 +14,7 @@ use crate::{
     Class, Function, FunctionParameter, GenericTypeParameter, Literal, Resolvable,
     ResolvedTypeData, ResolvedTypeId, ReturnType, ScopeId, TypeData, TypeId, TypeMember,
     TypeMemberKind, TypeReference, TypeReferenceQualifier, TypeResolver, TypeResolverLevel,
+    TypeStore,
 };
 
 const GLOBAL_LEVEL: TypeResolverLevel = TypeResolverLevel::Global;
@@ -155,9 +156,8 @@ pub fn global_type_name(id: TypeId) -> &'static str {
 /// This resolver does not check whether qualifiers that are being resolved have
 /// been shadowed by local declarations, so it should generally only be used
 /// after all other resolvers have failed.
-#[derive(Clone)]
 pub struct GlobalsResolver {
-    types: Vec<TypeData>,
+    types: TypeStore,
 }
 
 impl Default for GlobalsResolver {
@@ -327,7 +327,9 @@ impl Default for GlobalsResolver {
             }),
         ];
 
-        Self { types }
+        Self {
+            types: TypeStore::from_types(types),
+        }
     }
 }
 
@@ -340,9 +342,12 @@ impl GlobalsResolver {
     pub fn resolve_all(&mut self) {
         let mut i = NUM_PREDEFINED_TYPES;
         while i < self.types.len() {
-            // First take the type to satisfy the borrow checker:
-            let ty = std::mem::take(&mut self.types[i]);
-            self.types[i] = ty.resolved(self);
+            // SAFETY: We immediately reinsert after taking.
+            unsafe {
+                let ty = self.types.take_from_index_temporarily(i);
+                let ty = ty.resolved(self);
+                self.types.reinsert_temporarily_taken_data(i, ty);
+            }
             i += 1;
         }
     }
@@ -350,9 +355,12 @@ impl GlobalsResolver {
     fn flatten_all(&mut self) {
         let mut i = NUM_PREDEFINED_TYPES;
         while i < self.types.len() {
-            // First take the type to satisfy the borrow checker:
-            let ty = std::mem::take(&mut self.types[i]);
-            self.types[i] = ty.flattened(self);
+            // SAFETY: We immediately reinsert after taking.
+            unsafe {
+                let ty = self.types.take_from_index_temporarily(i);
+                let ty = ty.flattened(self);
+                self.types.reinsert_temporarily_taken_data(i, ty);
+            }
             i += 1;
         }
     }
@@ -364,14 +372,11 @@ impl TypeResolver for GlobalsResolver {
     }
 
     fn find_type(&self, type_data: &TypeData) -> Option<TypeId> {
-        self.types
-            .iter()
-            .position(|data| data == type_data)
-            .map(TypeId::new)
+        self.types.find_type(type_data)
     }
 
     fn get_by_id(&self, id: TypeId) -> &TypeData {
-        &self.types[id.index()]
+        self.types.get_by_id(id)
     }
 
     fn get_by_resolved_id(&self, id: ResolvedTypeId) -> Option<ResolvedTypeData> {
@@ -379,20 +384,7 @@ impl TypeResolver for GlobalsResolver {
     }
 
     fn register_type(&mut self, type_data: Cow<TypeData>) -> TypeId {
-        // Searching linearly may potentially become quite expensive, but it
-        // should be outweighed by index lookups quite heavily.
-        match self
-            .types
-            .iter()
-            .position(|data| data == type_data.as_ref())
-        {
-            Some(index) => TypeId::new(index),
-            None => {
-                let id = TypeId::new(self.types.len());
-                self.types.push(type_data.into_owned());
-                id
-            }
-        }
+        self.types.register_type(type_data)
     }
 
     fn resolve_reference(&self, ty: &TypeReference) -> Option<ResolvedTypeId> {
@@ -431,6 +423,6 @@ impl TypeResolver for GlobalsResolver {
     }
 
     fn registered_types(&self) -> &[TypeData] {
-        &self.types[NUM_PREDEFINED_TYPES..]
+        &self.types.as_slice()[NUM_PREDEFINED_TYPES..]
     }
 }
