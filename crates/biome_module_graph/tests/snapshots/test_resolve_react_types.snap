@@ -21623,9 +21623,7 @@ Full TypeId(5) => Module(0) TypeId(3)
 
 Full TypeId(6) => instanceof Promise
 
-Full TypeId(7) => Module(1) TypeId(956)
-
-Full TypeId(8) => async Function {
+Full TypeId(7) => async Function {
   accepts: {
     params: []
     type_args: []
@@ -21633,5 +21631,5 @@ Full TypeId(8) => async Function {
   returns: Module(0) TypeId(1)
 }
 
-Full TypeId(9) => instanceof Promise
+Full TypeId(8) => instanceof Promise
 ```
