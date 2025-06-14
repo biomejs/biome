@@ -1,0 +1,148 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 134
+expression: valid.ts
+---
+# Input
+```ts
+/* should not generate diagnostics */
+
+class Example1 {
+	readonly #prop0: number = 42;
+	private readonly prop1: number = 42;
+	protected prop2: string;
+	public prop3: string;
+}
+
+class Example2 {
+	constructor(
+		private readonly prop1: number,
+		public prop2: string,
+		protected prop3: string,
+	) {
+	}
+}
+
+class Example3 {
+	readonly #prop0: number = 42;
+	private readonly prop1: number = 42;
+	protected prop2: number;
+	public prop3: number;
+
+	constructor(prop0: number, prop1: number, prop2: number, prop3: number) {
+		this.#prop0 = prop0;
+		this.prop1 = prop1;
+		this.prop2 = prop2;
+		this.prop3 = prop3;
+	}
+}
+
+// with some getters/ reads do not affect readonly
+class Example4 {
+	readonly #prop0: number = 42;
+	private readonly prop1: number = 42;
+	protected prop2: number;
+	public prop3: number;
+
+	constructor(prop0: number, prop1: number, prop2: number, prop3: number) {
+		this.#prop0 = prop0;
+		this.prop1 = prop1;
+		this.prop2 = prop2;
+		this.prop3 = prop3;
+	}
+
+	getProp0(): number {
+		return this.#prop0;
+	}
+
+	getProp1(): number {
+		return this.prop1;
+	}
+
+	getProp2(): number {
+		return this.prop2;
+	}
+
+	getProp3(): number {
+		return this.prop3;
+	}
+}
+
+class Example4 {
+	#prop0: number = 42;
+	private prop1: number = 42;
+	protected prop2: number;
+	public prop3: number;
+
+	constructor(prop0: number, prop1: number, prop2: number, prop3: number) {
+		this.#prop0 = prop0;
+		this.prop1 = prop1;
+		this.prop2 = prop2;
+		this.prop3 = prop3;
+	}
+
+	modifyProp() {
+		this.#prop0 = 1;
+		this.prop1 = 2;
+	}
+}
+
+class Example4 {
+	#prop0: number = 42;
+	private prop1: number = 42;
+	protected prop2: number;
+	public prop3: number;
+
+	constructor(prop0: number, prop1: number, prop2: number, prop3: number) {
+		this.#prop0 = prop0;
+		this.prop1 = prop1;
+		this.prop2 = prop2;
+		this.prop3 = prop3;
+	}
+
+	modifyProp() {
+		this.#prop0 = 1;
+		this.prop1 = 2;
+	}
+}
+
+class Example5 {
+	constructor(
+		private prop1: number,
+		public prop2: string,
+		protected prop3: string,
+	) {
+	}
+
+	modifyProp() {
+		this.prop1 = 1;
+	}
+}
+
+class Example6 {
+	#prop0: number = 42;
+	private prop1: number = 42;
+	protected prop2: number;
+	public prop3: number;
+
+	modifyProp() {
+		Example6.prototype.#prop0 = 1;
+		Example6.prototype.prop1 = 2;
+	}
+}
+
+class Example7 {
+	#prop0: number = 42;
+	private prop1: number = 42;
+	private prop2: number = 45;
+	private prop3: number = 57;
+
+	modifyProp() {
+		Example6.prototype.#prop0++;
+		--Example6.prototype.prop1;
+		this.prop2 += 2;
+		this.prop3 -= 2;
+	}
+}
+
+```
