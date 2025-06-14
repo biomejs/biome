@@ -1,7 +1,6 @@
 use crate::JsRuleAction;
-use crate::services::typed::Typed;
 use biome_analyze::{
-    FixKind, Rule, RuleAction, RuleDiagnostic, RuleDomain, RuleSource, context::RuleContext,
+    Ast, FixKind, Rule, RuleAction, RuleDiagnostic, RuleSource, context::RuleContext,
     declare_lint_rule,
 };
 use biome_console::markup;
@@ -79,13 +78,12 @@ declare_lint_rule! {
         language: "ts",
         recommended: false,
         sources: &[RuleSource::EslintTypeScript("unified-signatures")],
-        domains: &[RuleDomain::Project],
         fix_kind: FixKind::Unsafe,
     }
 }
 
 impl Rule for UseUnifiedTypeSignature {
-    type Query = Typed<AnyPotentialTsOverloadSignature>;
+    type Query = Ast<AnyPotentialTsOverloadSignature>;
     type State = MergeOverloadSignaturesInfo;
     type Signals = Option<Self::State>;
     type Options = ();
