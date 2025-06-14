@@ -154,6 +154,7 @@ define_categories! {
     "lint/nursery/noDestructuredProps": "https://biomejs.dev/linter/rules/no-destructured-props",
     "lint/nursery/noDoneCallback": "https://biomejs.dev/linter/rules/no-done-callback",
     "lint/nursery/noDuplicateAtImportRules": "https://biomejs.dev/linter/rules/no-duplicate-at-import-rules",
+    "lint/nursery/noExcessiveLinesPerFunction": "https://biomejs.dev/linter/rules/no-excessive-lines-per-function",
     "lint/nursery/noFloatingPromises": "https://biomejs.dev/linter/rules/no-floating-promises",
     "lint/nursery/noGlobalDirnameFilename": "https://biomejs.dev/linter/rules/no-global-dirname-filename",
     "lint/nursery/noImportCycles": "https://biomejs.dev/linter/rules/no-import-cycles",
