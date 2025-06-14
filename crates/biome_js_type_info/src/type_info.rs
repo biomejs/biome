@@ -1068,6 +1068,21 @@ impl TypeReference {
         }
     }
 
+    pub fn set_module_id(&mut self, module_id: ModuleId) {
+        match self {
+            Self::Qualifier(_) => {
+                // When we assign a module ID in order to store a type in the
+                // scoped resolver, we also clear out qualifiers to avoid
+                // resolving from an incorrect scope.
+                *self = Self::Unknown;
+            }
+            Self::Resolved(resolved_id) => {
+                *resolved_id = resolved_id.with_module_id(module_id);
+            }
+            _ => {}
+        }
+    }
+
     pub fn with_excluded_binding_id(self, binding_id: BindingId) -> Self {
         match self {
             Self::Qualifier(qualifier) => {

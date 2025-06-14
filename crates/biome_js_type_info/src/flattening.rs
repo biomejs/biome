@@ -84,49 +84,58 @@ fn flattened(mut ty: TypeData, resolver: &mut dyn TypeResolver, depth: usize) ->
                     _ => return ty,
                 }
             }
-            TypeData::InstanceOf(instance_of) => match resolver.resolve_and_get(&instance_of.ty) {
-                Some(resolved) => match resolved.as_raw_data() {
-                    TypeData::InstanceOf(resolved_instance) => {
-                        return resolved.apply_module_id_to_data(TypeData::instance_of(
-                            TypeInstance {
-                                ty: resolved_instance.ty.clone(),
-                                type_parameters: TypeReference::merge_parameters(
-                                    &resolved_instance.type_parameters,
-                                    &instance_of.type_parameters,
-                                ),
-                            },
-                        ));
-                    }
-                    TypeData::Reference(reference) => {
-                        return resolved.apply_module_id_to_data(TypeData::instance_of(
-                            TypeInstance {
-                                ty: reference.clone(),
-                                type_parameters: instance_of.type_parameters.clone(),
-                            },
-                        ));
-                    }
-                    TypeData::Global
-                    | TypeData::Function(_)
-                    | TypeData::Literal(_)
-                    | TypeData::Object(_) => ty = resolved.to_data(),
-                    _ => return ty,
+            TypeData::InstanceOf(instance_of) => match &instance_of.ty {
+                TypeReference::Unknown => return TypeData::Unknown,
+                reference => match resolver.resolve_and_get(reference) {
+                    Some(resolved) => match resolved.as_raw_data() {
+                        TypeData::InstanceOf(resolved_instance) => {
+                            return resolved.apply_module_id_to_data(TypeData::instance_of(
+                                TypeInstance {
+                                    ty: resolved_instance.ty.clone(),
+                                    type_parameters: TypeReference::merge_parameters(
+                                        &resolved_instance.type_parameters,
+                                        &instance_of.type_parameters,
+                                    ),
+                                },
+                            ));
+                        }
+                        TypeData::Reference(reference) => {
+                            return match reference {
+                                TypeReference::Unknown => TypeData::Unknown,
+                                _ => resolved.apply_module_id_to_data(TypeData::instance_of(
+                                    TypeInstance {
+                                        ty: reference.clone(),
+                                        type_parameters: instance_of.type_parameters.clone(),
+                                    },
+                                )),
+                            };
+                        }
+                        TypeData::Global
+                        | TypeData::Function(_)
+                        | TypeData::Literal(_)
+                        | TypeData::Object(_) => ty = resolved.to_data(),
+                        _ => return ty,
+                    },
+                    None => return ty,
                 },
-                None => return ty,
             },
-            TypeData::Reference(reference) => match resolver.resolve_and_get(reference) {
-                Some(reference) => match reference.as_raw_data() {
-                    TypeData::InstanceOf(instance_of) => {
-                        ty = reference
-                            .apply_module_id_to_data(TypeData::InstanceOf(instance_of.clone()));
-                    }
-                    TypeData::Reference(target) => {
-                        ty = TypeData::Reference(
-                            reference.apply_module_id_to_reference(target).into_owned(),
-                        );
-                    }
-                    _ => return ty,
+            TypeData::Reference(reference) => match reference {
+                TypeReference::Unknown => return TypeData::Unknown,
+                _ => match resolver.resolve_and_get(reference) {
+                    Some(reference) => match reference.as_raw_data() {
+                        TypeData::InstanceOf(instance_of) => {
+                            ty = reference
+                                .apply_module_id_to_data(TypeData::InstanceOf(instance_of.clone()));
+                        }
+                        TypeData::Reference(target) => {
+                            ty = TypeData::Reference(
+                                reference.apply_module_id_to_reference(target).into_owned(),
+                            );
+                        }
+                        _ => return ty,
+                    },
+                    None => return ty,
                 },
-                None => return ty,
             },
             TypeData::TypeofExpression(expr) => match flattened_expression(expr, resolver, depth) {
                 Some(flattened_ty) => {

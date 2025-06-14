@@ -65,7 +65,7 @@ BindingId(0) => JsBindingData {
 
 BindingId(3) => JsBindingData {
   Name: superComputer,
-  Type: Module(0) TypeId(7),
+  Type: Module(0) TypeId(6),
   Declaration kind: Value
 }
 ```
@@ -77,19 +77,17 @@ Module TypeId(0) => value: 42
 
 Module TypeId(1) => Module(0) TypeId(0)
 
-Module TypeId(2) => Module(0) TypeId(0)
+Module TypeId(2) => number
 
-Module TypeId(3) => number
+Module TypeId(3) => unknown
 
-Module TypeId(4) => unknown
+Module TypeId(4) => value: Life, The Universe, and Everything
 
-Module TypeId(5) => value: Life, The Universe, and Everything
+Module TypeId(5) => Module(0) TypeId(11)
 
-Module TypeId(6) => Module(0) TypeId(12)
+Module TypeId(6) => instanceof Module(0) TypeId(5)
 
-Module TypeId(7) => instanceof Module(0) TypeId(6)
-
-Module TypeId(8) => sync Function "answerMe" {
+Module TypeId(7) => sync Function "answerMe" {
   accepts: {
     params: []
     type_args: []
@@ -97,7 +95,7 @@ Module TypeId(8) => sync Function "answerMe" {
   returns: number
 }
 
-Module TypeId(9) => sync Function "giveMeABiggerAnswer" {
+Module TypeId(8) => sync Function "giveMeABiggerAnswer" {
   accepts: {
     params: [
       required delta: number (bindings: delta:number)
@@ -107,17 +105,17 @@ Module TypeId(9) => sync Function "giveMeABiggerAnswer" {
   returns: unknown reference
 }
 
-Module TypeId(10) => unknown
+Module TypeId(9) => unknown
 
-Module TypeId(11) => sync Function "whatWasTheUltimateQuestion" {
+Module TypeId(10) => sync Function "whatWasTheUltimateQuestion" {
   accepts: {
     params: []
     type_args: []
   }
-  returns: Module(0) TypeId(10)
+  returns: Module(0) TypeId(9)
 }
 
-Module TypeId(12) => class "DeepThought" {
+Module TypeId(11) => class "DeepThought" {
   extends: none
   implements: []
   type_args: []

@@ -1,12 +1,13 @@
 use std::{
     borrow::Cow,
     hash::{Hash, Hasher},
+    num::NonZeroU32,
 };
 
 use hashbrown::{HashTable, hash_table::Entry};
 use rustc_hash::FxHasher;
 
-use crate::{TypeData, TypeId};
+use crate::{Resolvable, ResolvedTypeId, TypeData, TypeId, TypeReference, TypeResolverLevel};
 
 /// Type store with efficient lookup mechanism.
 ///
@@ -31,19 +32,13 @@ pub struct TypeStore {
 
 impl TypeStore {
     pub fn from_types(types: Vec<TypeData>) -> Self {
-        let mut table = HashTable::new();
+        let mut table = HashTable::with_capacity(types.len());
         for (i, data) in types.iter().enumerate() {
-            let mut hash = FxHasher::default();
-            data.hash(&mut hash);
-            let hash = hash.finish();
-
-            table.insert_unique(hash, i, |i| {
-                let mut hash = FxHasher::default();
-                types[*i].hash(&mut hash);
-                hash.finish()
+            let hash = hash_data(data);
+            table.insert_unique(hash, i, |_| {
+                unreachable!("we should've reserved sufficient capacity")
             });
         }
-
         Self { types, table }
     }
 
@@ -51,11 +46,102 @@ impl TypeStore {
         &self.types
     }
 
+    /// Deduplicates all types in the store.
+    ///
+    /// Warning: Any `TypeId`s (including `ResolvedTypeId`s) that reference this
+    ///          store may become invalidated. The return value gives you a
+    ///          callback that can be used for updating `ResolvedTypeId`s.
+    ///
+    /// Returns `None` if there were no duplicate types.
+    pub fn deduplicate(
+        &mut self,
+        level: TypeResolverLevel,
+    ) -> Option<impl Fn(&mut ResolvedTypeId)> {
+        struct MapEntry {
+            mapped_index: Option<NonZeroU32>,
+            num_removed_types_up_to_here: u32,
+        }
+
+        // First find all duplicates and create a map where the "original" can
+        // be found. Whichever index the hash table points at is considered the
+        // original.
+        //
+        // While populating the map, we also track how many types have been
+        // removed at a given index. We need this for compensating the resolved
+        // IDs.
+        let mut num_removed_types = 0;
+        let map: Vec<MapEntry> = self
+            .types
+            .iter()
+            .enumerate()
+            .map(|(i, data)| {
+                let hash = hash_data(data);
+                let expected_index = self.table.find(hash, |i| self.types[*i] == *data);
+
+                let mapped_index = if expected_index.is_none_or(|index| *index == i) {
+                    None
+                } else {
+                    num_removed_types += 1;
+                    expected_index
+                        // SAFETY: Index is already unsigned, so adding 1 is
+                        //         guaranteed to make it non-zero. We also know
+                        //         there can't be an overflow, since we don't
+                        //         process files over 2GB in size.
+                        .map(|index| unsafe { NonZeroU32::new_unchecked(*index as u32 + 1) })
+                };
+
+                MapEntry {
+                    mapped_index,
+                    num_removed_types_up_to_here: num_removed_types,
+                }
+            })
+            .collect();
+
+        if num_removed_types == 0 {
+            return None;
+        }
+
+        // Now filter all types so only the "originals" remain.
+        self.types = std::mem::take(&mut self.types)
+            .into_iter()
+            .enumerate()
+            .filter_map(|(i, data)| map[i].mapped_index.is_none().then_some(data))
+            .collect();
+
+        let update_resolved_id = move |resolved_id: &mut ResolvedTypeId| {
+            if resolved_id.level() == level {
+                let old_index = resolved_id.index();
+                let new_index = map[old_index]
+                    .mapped_index
+                    .map_or(old_index as u32, |index| index.get() - 1);
+                let new_index = new_index - map[new_index as usize].num_removed_types_up_to_here;
+                *resolved_id = ResolvedTypeId::new(level, TypeId::new(new_index as usize));
+            }
+        };
+
+        // Update all references and the hash table.
+        self.table.clear();
+        self.table
+            .shrink_to(self.types.len(), |_| unreachable!("table should be empty"));
+        for (i, data) in self.types.iter_mut().enumerate() {
+            data.update_all_references(|reference| {
+                if let TypeReference::Resolved(resolved_id) = reference {
+                    update_resolved_id(resolved_id)
+                }
+            });
+
+            let hash = hash_data(data);
+            self.table.insert_unique(hash, i, |_| {
+                unreachable!("we should've reserved sufficient capacity")
+            });
+        }
+
+        Some(update_resolved_id)
+    }
+
     /// Returns the `TypeId` of the given `data`, if it is registered.
     pub fn find_type(&self, data: &TypeData) -> Option<TypeId> {
-        let mut hash = FxHasher::default();
-        data.hash(&mut hash);
-        let hash = hash.finish();
+        let hash = hash_data(data);
 
         self.table
             .find(hash, |i| self.types[*i] == *data)
@@ -79,18 +165,10 @@ impl TypeStore {
     /// Returns the `TypeId` of the newly registered data, or the `TypeId` of
     /// an already registered equivalent type.
     pub fn register_type(&mut self, data: Cow<TypeData>) -> TypeId {
-        let mut hash = FxHasher::default();
-        data.hash(&mut hash);
-        let hash = hash.finish();
-
         let entry = self.table.entry(
-            hash,
+            hash_data(&data),
             |i| &self.types[*i] == data.as_ref(),
-            |i| {
-                let mut hash = FxHasher::default();
-                self.types[*i].hash(&mut hash);
-                hash.finish()
-            },
+            |i| hash_data(&self.types[*i]),
         );
         match entry {
             Entry::Occupied(entry) => TypeId::new(*entry.get()),
@@ -120,9 +198,7 @@ impl TypeStore {
     pub unsafe fn take_from_index_temporarily(&mut self, index: usize) -> TypeData {
         let data = std::mem::take(&mut self.types[index]);
 
-        let mut hash = FxHasher::default();
-        data.hash(&mut hash);
-        let hash = hash.finish();
+        let hash = hash_data(&data);
 
         if let Ok(occupied) = self.table.find_entry(hash, |i| self.types[*i] == data) {
             occupied.remove();
@@ -140,22 +216,83 @@ impl TypeStore {
     /// [`Self::take_from_index_temporarily()`] with the same index, before any
     /// lookups are performed.
     pub unsafe fn reinsert_temporarily_taken_data(&mut self, index: usize, data: TypeData) {
-        let mut hash = FxHasher::default();
-        data.hash(&mut hash);
-        let hash = hash.finish();
-
+        let hash = hash_data(&data);
         self.types[index] = data;
-
-        self.table.insert_unique(hash, index, |i| {
-            let mut hash = FxHasher::default();
-            self.types[*i].hash(&mut hash);
-            hash.finish()
-        });
+        self.table
+            .insert_unique(hash, index, |i| hash_data(&self.types[*i]));
     }
 }
 
 impl From<TypeStore> for Box<[TypeData]> {
     fn from(store: TypeStore) -> Self {
         store.types.into()
+    }
+}
+
+#[inline(always)]
+fn hash_data(data: &TypeData) -> u64 {
+    let mut hash = FxHasher::default();
+    data.hash(&mut hash);
+    hash.finish()
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_deduplication() {
+        let mut store = TypeStore::from_types(vec![
+            TypeData::String,
+            TypeData::Number,
+            TypeData::String,
+            TypeData::Reference(TypeReference::Resolved(ResolvedTypeId::new(
+                TypeResolverLevel::Thin,
+                TypeId::new(2),
+            ))),
+        ]);
+        store.deduplicate(TypeResolverLevel::Thin);
+
+        let expected = &[
+            TypeData::String,
+            TypeData::Number,
+            TypeData::Reference(TypeReference::Resolved(ResolvedTypeId::new(
+                TypeResolverLevel::Thin,
+                TypeId::new(0),
+            ))),
+        ];
+        assert_eq!(store.as_slice(), expected);
+
+        let mut store = TypeStore::from_types(vec![
+            TypeData::String,
+            TypeData::Number,
+            TypeData::String,
+            TypeData::Reference(TypeReference::Resolved(ResolvedTypeId::new(
+                TypeResolverLevel::Thin,
+                TypeId::new(2),
+            ))),
+            TypeData::Reference(TypeReference::Resolved(ResolvedTypeId::new(
+                TypeResolverLevel::Thin,
+                TypeId::new(6),
+            ))),
+            TypeData::Number,
+            TypeData::Null,
+        ]);
+        store.deduplicate(TypeResolverLevel::Thin);
+
+        let expected = &[
+            TypeData::String,
+            TypeData::Number,
+            TypeData::Reference(TypeReference::Resolved(ResolvedTypeId::new(
+                TypeResolverLevel::Thin,
+                TypeId::new(0),
+            ))),
+            TypeData::Reference(TypeReference::Resolved(ResolvedTypeId::new(
+                TypeResolverLevel::Thin,
+                TypeId::new(4),
+            ))),
+            TypeData::Null,
+        ];
+        assert_eq!(store.as_slice(), expected);
     }
 }

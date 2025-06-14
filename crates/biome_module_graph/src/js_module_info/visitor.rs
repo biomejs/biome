@@ -40,13 +40,13 @@ impl<'a> JsModuleVisitor<'a> {
         for event in iter {
             match event {
                 WalkEvent::Enter(node) => {
-                    collector.push_node(&node);
-
                     if let Some(import) = AnyJsImportLike::cast_ref(&node) {
                         self.visit_import(import, &mut collector);
                     } else if let Some(export) = biome_js_syntax::JsExport::cast_ref(&node) {
                         self.visit_export(export, &mut collector);
                     }
+
+                    collector.push_node(&node);
                 }
                 WalkEvent::Leave(node) => {
                     collector.leave_node(&node);
@@ -54,9 +54,7 @@ impl<'a> JsModuleVisitor<'a> {
             }
         }
 
-        let scope_by_range = collector.finalise();
-
-        JsModuleInfo::new(collector, scope_by_range)
+        JsModuleInfo::new(collector)
     }
 
     fn visit_import(&self, node: AnyJsImportLike, collector: &mut JsModuleInfoCollector) {

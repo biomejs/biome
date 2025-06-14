@@ -203,7 +203,7 @@ impl ModuleResolver {
             })
             .collect();
 
-        for (range, resolved_id) in &self.modules[0].expressions {
+        for (range, resolved_id) in &module.expressions {
             self.expressions
                 .insert(*range, self.mapped_resolved_id(*resolved_id));
         }
