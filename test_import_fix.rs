@@ -5,19 +5,14 @@ use biome_grit_patterns::{
 use biome_js_parser::{JsParserOptions, parse};
 use biome_js_syntax::JsFileSource;
 
-// Use this test to quickly execute a Grit query against a source snippet.
-#[test]
-fn test_query() {
+fn main() {
     // Test our import pattern fix
     let parse_grit_result = parse_grit(
         r#"language js
 
-pattern test_import() {
-    `import $imports from "foo"`
-}
-
-test_import()"#,
+import $imports from "foo""#,
     );
+    
     if !parse_grit_result.diagnostics().is_empty() {
         panic!("Cannot parse query:\n{:?}", parse_grit_result.diagnostics());
     }
@@ -34,7 +29,7 @@ test_import()"#,
         println!("Diagnostics from compiling query:\n{:?}", query.diagnostics);
     }
 
-    // Test different import types that should now match
+    // Test different import types
     let test_cases = vec![
         ("Default import", r#"import bar from "foo";"#),
         ("Named import", r#"import { baz } from "foo";"#),
@@ -45,18 +40,15 @@ test_import()"#,
         ("Different source (should not match)", r#"import something from "different";"#),
     ];
 
-    for (description, body) in test_cases {
-        println!("\n=== Testing: {} ===", description);
-        println!("Code: {}", body);
-        
-        // Parse and print the AST structure to understand what we're working with
-        let parsed = parse(body, JsFileSource::tsx(), JsParserOptions::default());
-        println!("AST Debug: {:#?}", parsed.syntax());
+    for (description, code) in test_cases {
+        println!("\nTesting: {}", description);
+        println!("Code: {}", code);
         
         let file = GritTargetFile::new(
             "test.js",
-            parsed.into(),
+            parse(code, JsFileSource::tsx(), JsParserOptions::default()).into(),
         );
+        
         let GritQueryResult { effects, logs, .. } =
             query.execute(file).expect("could not execute query");
 
@@ -64,22 +56,13 @@ test_import()"#,
             println!("❌ No matches found");
         } else {
             println!("✅ Found {} match(es)", effects.len());
+            for effect in effects {
+                println!("  Effect: {:#?}", effect);
+            }
         }
-        
-        println!("Effects: {effects:#?}");
 
         if !logs.is_empty() {
-            println!(
-                "\n## Logs\n\n{}",
-                logs.iter()
-                    .map(|log| format!(
-                        "Message: {}Syntax: {}",
-                        log.message,
-                        log.syntax_tree.as_deref().unwrap_or_default()
-                    ))
-                    .collect::<Vec<_>>()
-                    .join("\n")
-            );
+            println!("Logs: {:#?}", logs);
         }
     }
-}
+} 
