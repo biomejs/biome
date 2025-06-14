@@ -3,7 +3,9 @@ use biome_analyze::{
     RuleMetadata, ServiceBag, ServicesDiagnostic, SyntaxVisitor, Visitor, VisitorContext,
     VisitorFinishContext,
 };
-use biome_js_semantic::{SemanticEventExtractor, SemanticModel, SemanticModelBuilder};
+use biome_js_semantic::{
+    SemanticEventExtractor, SemanticFlavor, SemanticModel, SemanticModelBuilder,
+};
 use biome_js_syntax::{AnyJsRoot, JsLanguage, JsSyntaxNode, TextRange, WalkEvent};
 use biome_rowan::AstNode;
 
@@ -95,9 +97,9 @@ pub struct SemanticModelBuilderVisitor {
 }
 
 impl SemanticModelBuilderVisitor {
-    pub(crate) fn new(root: &AnyJsRoot) -> Self {
+    pub(crate) fn new(root: &AnyJsRoot, flavor: SemanticFlavor) -> Self {
         Self {
-            extractor: SemanticEventExtractor::default(),
+            extractor: SemanticEventExtractor::default().with_flavor(flavor),
             builder: SemanticModelBuilder::new(root.clone()),
         }
     }
