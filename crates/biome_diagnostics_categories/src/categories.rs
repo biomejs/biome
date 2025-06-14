@@ -207,6 +207,7 @@ define_categories! {
     "lint/nursery/useNumericSeparators": "https://biomejs.dev/linter/rules/use-numeric-separators",
     "lint/nursery/useObjectSpread": "https://biomejs.dev/linter/rules/use-object-spread",
     "lint/nursery/useParseIntRadix": "https://biomejs.dev/linter/rules/use-parse-int-radix",
+    "lint/nursery/useReadonlyClassProperties": "https://biomejs.dev/linter/rules/use-readonly-class-properties",
     "lint/nursery/useSingleJsDocAsterisk": "https://biomejs.dev/linter/rules/use-single-js-doc-asterisk",
     "lint/nursery/useSortedClasses": "https://biomejs.dev/linter/rules/use-sorted-classes",
     "lint/nursery/useSortedProperties": "https://biomejs.dev/linter/rules/use-sorted-properties",

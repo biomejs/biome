@@ -1,0 +1,131 @@
+/* should not generate diagnostics */
+
+class Example1 {
+	readonly #prop0: number = 42;
+	private readonly prop1: number = 42;
+	protected readonly prop2: string;
+	public readonly prop3: string;
+	readonly prop4: string;
+}
+
+class Example2 {
+	constructor(
+		private readonly prop1: number,
+		public readonly prop2: string,
+		protected readonly prop3: string,
+		prop4: string, // this is not treated as class member prop IF it does not have access modifier
+	) {
+	}
+}
+
+class Example3 {
+	readonly #prop0: number = 42;
+	private readonly prop1: number = 42;
+	protected readonly prop2: number;
+	public readonly prop3: number;
+	readonly prop4: number;
+
+	constructor(p0: number, p1: number, p2: number, p3: number, p4: number) {
+		this.#prop0 = p0;
+		this.prop1 = p1;
+		this.prop2 = p2;
+		this.prop3 = p3;
+		this.prop4 = p4;
+	}
+}
+
+// with some getters/ reads do not affect readonly
+class Example4 {
+	readonly #prop0: number = 42;
+	private readonly prop1: number = 42;
+	protected readonly prop2: number;
+	public readonly prop3: number;
+	readonly prop4: number;
+
+	constructor(p0: number, p1: number, p2: number, p3: number, p4: number) {
+		this.#prop0 = p0;
+		this.prop1 = p1;
+		this.prop2 = p2;
+		this.prop3 = p3;
+		this.prop4 = p4;
+	}
+
+	getProp0(): number {
+		return this.#prop0;
+	}
+
+	getProp1(): number {
+		return this.prop1;
+	}
+
+	getProp2(): number {
+		return this.prop2;
+	}
+
+	getProp3(): number {
+		return this.prop3;
+	}
+
+	getProp4(): number {
+		return this.prop4;
+	}
+}
+
+class Example4 {
+	readonly #prop0: number = 42;
+	private readonly prop1: number = 42;
+	protected readonly prop2: number;
+	public readonly prop3: number;
+	readonly prop4: number;
+
+	constructor(prop0: number, prop1: number, prop2: number, prop3: number, public readonly prop5: number, protected readonly prop6: number) {
+		this.#prop0 = prop0;
+		this.prop1 = prop1;
+		this.prop2 = prop2;
+		this.prop3 = prop3;
+	}
+}
+
+class Example5 {
+	constructor(
+		private prop1: number,
+		public prop2: number,
+		protected prop3: number,
+	) {
+	}
+
+	modifyProp() {
+		this.prop1 = 1;
+		this.prop2 = 2;
+		this.prop3 = 3;
+	}
+}
+
+class Example6 {
+	#prop0: number = 42;
+	private prop1: number = 42;
+	protected prop2: number;
+	public prop3: number;
+
+	modifyProp() {
+		Example6.prototype.#prop0 = 0;
+		Example6.prototype.prop1 = 1;
+		Example6.prototype.prop2 = 2;
+		Example6.prototype.prop3 = 3;
+	}
+}
+
+
+class Example7 {
+	#prop0: number = 42;
+	private prop1: number = 42;
+	protected prop2: number = 5;
+	public prop3: number = 6;
+
+	modifyProp() {
+		Example6.prototype.#prop0++;
+		--Example6.prototype.prop1;
+		--Example6.prototype.prop2;
+		Example6.prototype.prop3++;
+	}
+}
