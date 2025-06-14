@@ -1693,6 +1693,10 @@ export interface Nursery {
 	 */
 	useParseIntRadix?: RuleFixConfiguration_for_Null;
 	/**
+	 * Enforce marking members as readonly if they are never modified outside the constructor.
+	 */
+	useReadonlyClassProperties?: RuleFixConfiguration_for_ReadonlyClassPropertiesOptions;
+	/**
 	 * Enforce JSDoc comment lines to start with a single asterisk, except for the first one.
 	 */
 	useSingleJsDocAsterisk?: RuleFixConfiguration_for_Null;
@@ -2439,6 +2443,9 @@ export type RuleConfiguration_for_NoSecretsOptions =
 export type RuleFixConfiguration_for_UseConsistentObjectDefinitionOptions =
 	| RulePlainConfiguration
 	| RuleWithFixOptions_for_UseConsistentObjectDefinitionOptions;
+export type RuleFixConfiguration_for_ReadonlyClassPropertiesOptions =
+	| RulePlainConfiguration
+	| RuleWithFixOptions_for_ReadonlyClassPropertiesOptions;
 export type RuleFixConfiguration_for_UtilityClassSortingOptions =
 	| RulePlainConfiguration
 	| RuleWithFixOptions_for_UtilityClassSortingOptions;
@@ -2704,6 +2711,20 @@ export interface RuleWithFixOptions_for_UseConsistentObjectDefinitionOptions {
 	 * Rule's options
 	 */
 	options: UseConsistentObjectDefinitionOptions;
+}
+export interface RuleWithFixOptions_for_ReadonlyClassPropertiesOptions {
+	/**
+	 * The kind of the code actions emitted by the rule
+	 */
+	fix?: FixKind;
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: ReadonlyClassPropertiesOptions;
 }
 export interface RuleWithFixOptions_for_UtilityClassSortingOptions {
 	/**
@@ -3044,6 +3065,15 @@ export interface UseConsistentObjectDefinitionOptions {
 	 * The preferred syntax to enforce.
 	 */
 	syntax?: ObjectPropertySyntax;
+}
+/**
+ * Rule's options
+ */
+export interface ReadonlyClassPropertiesOptions {
+	/**
+	 * When `true`, the keywords `public`, `protected`, and `private` are analyzed by the rule.
+	 */
+	checkAllProperties: boolean;
 }
 export interface UtilityClassSortingOptions {
 	/**
@@ -3588,6 +3618,7 @@ export type Category =
 	| "lint/nursery/useNumericSeparators"
 	| "lint/nursery/useObjectSpread"
 	| "lint/nursery/useParseIntRadix"
+	| "lint/nursery/useReadonlyClassProperties"
 	| "lint/nursery/useSingleJsDocAsterisk"
 	| "lint/nursery/useSortedClasses"
 	| "lint/nursery/useSortedProperties"
