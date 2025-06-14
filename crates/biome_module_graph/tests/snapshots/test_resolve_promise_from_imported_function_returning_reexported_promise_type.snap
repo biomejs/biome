@@ -216,7 +216,5 @@ Full TypeId(3) => Module(1) TypeId(8)
 
 Full TypeId(4) => instanceof Promise<Module(3) TypeId(3)>
 
-Full TypeId(5) => Module(1) TypeId(8)
-
-Full TypeId(6) => instanceof Promise<Module(3) TypeId(3)>
+Full TypeId(5) => instanceof Promise<Module(3) TypeId(3)>
 ```

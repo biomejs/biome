@@ -193,26 +193,19 @@ impl ModuleResolver {
     }
 
     fn resolve_all(&mut self) {
-        self.type_id_map = self.modules[0]
+        let module = self.modules[0].clone();
+        self.type_id_map = module
             .types
             .iter()
-            .map(|ty| self.types.register_type(Cow::Borrowed(ty)))
+            .map(|ty| {
+                let ty = ty.resolved(self);
+                self.types.register_type(Cow::Owned(ty))
+            })
             .collect();
 
         for (range, resolved_id) in &self.modules[0].expressions {
             self.expressions
                 .insert(*range, self.mapped_resolved_id(*resolved_id));
-        }
-
-        let mut i = 0;
-        while i < self.types.len() {
-            // SAFETY: We reinsert before anyone got a chance to do lookups.
-            unsafe {
-                let ty = self.types.take_from_index_temporarily(i);
-                let ty = ty.resolved(self);
-                self.types.reinsert_temporarily_taken_data(i, ty);
-            }
-            i += 1;
         }
     }
 
