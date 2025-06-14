@@ -10,7 +10,6 @@ impl FormatRule<AnyHtmlElement> for FormatAnyHtmlElement {
         match node {
             AnyHtmlElement::HtmlBogusElement(node) => node.format().fmt(f),
             AnyHtmlElement::HtmlCdataSection(node) => node.format().fmt(f),
-            AnyHtmlElement::HtmlComment(node) => node.format().fmt(f),
             AnyHtmlElement::HtmlContent(node) => node.format().fmt(f),
             AnyHtmlElement::HtmlElement(node) => node.format().fmt(f),
             AnyHtmlElement::HtmlSelfClosingElement(node) => node.format().fmt(f),

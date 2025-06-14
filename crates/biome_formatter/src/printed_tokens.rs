@@ -31,7 +31,10 @@ impl PrintedTokens {
         let range = token.text_trimmed_range();
 
         if !self.offsets.insert(range.start()) {
-            panic!("You tried to print the token '{token:?}' twice, and this is not valid.");
+            panic!(
+                "You tried to print the token '{token:?}' twice, and this is not valid.\
+                \nYou may need to memoize the token if you are writing it to multiple buffers at the same time."
+            );
         }
     }
 
