@@ -890,7 +890,13 @@ export type TrailingCommas2 = "none" | "all";
 /**
  * Rule domains
  */
-export type RuleDomain = "react" | "test" | "solid" | "next" | "project";
+export type RuleDomain =
+	| "react"
+	| "test"
+	| "solid"
+	| "next"
+	| "vue"
+	| "project";
 export type RuleDomainValue = "all" | "none" | "recommended";
 export type SeverityOrGroup_for_A11y = GroupPlainConfiguration | A11y;
 export type SeverityOrGroup_for_Complexity =

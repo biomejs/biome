@@ -3446,6 +3446,11 @@
 					"enum": ["next"]
 				},
 				{
+					"description": "Vue.js framework rules",
+					"type": "string",
+					"enum": ["vue"]
+				},
+				{
 					"description": "For rules that require querying multiple files inside a project",
 					"type": "string",
 					"enum": ["project"]
