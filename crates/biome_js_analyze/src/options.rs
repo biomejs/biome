@@ -455,6 +455,7 @@ pub type UseTopLevelRegex =
     <lint::performance::use_top_level_regex::UseTopLevelRegex as biome_analyze::Rule>::Options;
 pub type UseTrimStartEnd =
     <lint::style::use_trim_start_end::UseTrimStartEnd as biome_analyze::Rule>::Options;
+pub type UseUnifiedTypeSignature = < lint :: nursery :: use_unified_type_signature :: UseUnifiedTypeSignature as biome_analyze :: Rule > :: Options ;
 pub type UseUniqueElementIds =
     <lint::nursery::use_unique_element_ids::UseUniqueElementIds as biome_analyze::Rule>::Options;
 pub type UseValidAnchor =

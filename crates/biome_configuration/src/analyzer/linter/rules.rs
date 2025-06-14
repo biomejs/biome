@@ -405,6 +405,7 @@ pub enum RuleName {
     UseThrowOnlyError,
     UseTopLevelRegex,
     UseTrimStartEnd,
+    UseUnifiedTypeSignature,
     UseUniqueElementIds,
     UseValidAnchor,
     UseValidAriaProps,
@@ -740,6 +741,7 @@ impl RuleName {
             Self::UseThrowOnlyError => "useThrowOnlyError",
             Self::UseTopLevelRegex => "useTopLevelRegex",
             Self::UseTrimStartEnd => "useTrimStartEnd",
+            Self::UseUnifiedTypeSignature => "useUnifiedTypeSignature",
             Self::UseUniqueElementIds => "useUniqueElementIds",
             Self::UseValidAnchor => "useValidAnchor",
             Self::UseValidAriaProps => "useValidAriaProps",
@@ -1043,7 +1045,7 @@ impl RuleName {
             Self::UseMediaCaption => RuleGroup::A11y,
             Self::UseNamedOperation => RuleGroup::Nursery,
             Self::UseNamespaceKeyword => RuleGroup::Suspicious,
-            Self::UseNamingConvention => RuleGroup::Style,
+            Self::UseNamingConvention => RuleGroup::Nursery,
             Self::UseNodeAssertStrict => RuleGroup::Style,
             Self::UseNodejsImportProtocol => RuleGroup::Style,
             Self::UseNumberNamespace => RuleGroup::Style,
@@ -1071,6 +1073,7 @@ impl RuleName {
             Self::UseThrowOnlyError => RuleGroup::Style,
             Self::UseTopLevelRegex => RuleGroup::Performance,
             Self::UseTrimStartEnd => RuleGroup::Style,
+            Self::UseUnifiedTypeSignature => RuleGroup::Nursery,
             Self::UseUniqueElementIds => RuleGroup::Nursery,
             Self::UseValidAnchor => RuleGroup::A11y,
             Self::UseValidAriaProps => RuleGroup::A11y,
@@ -1411,6 +1414,7 @@ impl std::str::FromStr for RuleName {
             "useThrowOnlyError" => Ok(Self::UseThrowOnlyError),
             "useTopLevelRegex" => Ok(Self::UseTopLevelRegex),
             "useTrimStartEnd" => Ok(Self::UseTrimStartEnd),
+            "useUnifiedTypeSignature" => Ok(Self::UseUnifiedTypeSignature),
             "useUniqueElementIds" => Ok(Self::UseUniqueElementIds),
             "useValidAnchor" => Ok(Self::UseValidAnchor),
             "useValidAriaProps" => Ok(Self::UseValidAriaProps),
@@ -4888,6 +4892,10 @@ pub struct Nursery {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub use_symbol_description:
         Option<RuleConfiguration<biome_js_analyze::options::UseSymbolDescription>>,
+    #[doc = "Disallow overload signatures that can be unified into a single signature."]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub use_unified_type_signature:
+        Option<RuleFixConfiguration<biome_js_analyze::options::UseUnifiedTypeSignature>>,
     #[doc = "Prevent the usage of static string literal id attribute on elements."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub use_unique_element_ids:
@@ -4940,6 +4948,7 @@ impl Nursery {
         "useSingleJsDocAsterisk",
         "useSortedClasses",
         "useSymbolDescription",
+        "useUnifiedTypeSignature",
         "useUniqueElementIds",
     ];
     const RECOMMENDED_RULES_AS_FILTERS: &'static [RuleFilter<'static>] = &[
@@ -4999,6 +5008,7 @@ impl Nursery {
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[42]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[43]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[44]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[45]),
     ];
 }
 impl RuleGroupExt for Nursery {
@@ -5230,9 +5240,14 @@ impl RuleGroupExt for Nursery {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[43]));
             }
         }
-        if let Some(rule) = self.use_unique_element_ids.as_ref() {
+        if let Some(rule) = self.use_unified_type_signature.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[44]));
+            }
+        }
+        if let Some(rule) = self.use_unique_element_ids.as_ref() {
+            if rule.is_enabled() {
+                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[45]));
             }
         }
         index_set
@@ -5459,9 +5474,14 @@ impl RuleGroupExt for Nursery {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[43]));
             }
         }
-        if let Some(rule) = self.use_unique_element_ids.as_ref() {
+        if let Some(rule) = self.use_unified_type_signature.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[44]));
+            }
+        }
+        if let Some(rule) = self.use_unique_element_ids.as_ref() {
+            if rule.is_disabled() {
+                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[45]));
             }
         }
         index_set
@@ -5670,6 +5690,10 @@ impl RuleGroupExt for Nursery {
                 .use_symbol_description
                 .as_ref()
                 .map(|conf| (conf.level(), conf.get_options())),
+            "useUnifiedTypeSignature" => self
+                .use_unified_type_signature
+                .as_ref()
+                .map(|conf| (conf.level(), conf.get_options())),
             "useUniqueElementIds" => self
                 .use_unique_element_ids
                 .as_ref()
@@ -5726,6 +5750,7 @@ impl From<GroupPlainConfiguration> for Nursery {
             use_single_js_doc_asterisk: Some(value.into()),
             use_sorted_classes: Some(value.into()),
             use_symbol_description: Some(value.into()),
+            use_unified_type_signature: Some(value.into()),
             use_unique_element_ids: Some(value.into()),
         }
     }

@@ -3068,6 +3068,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useUnifiedTypeSignature": {
+					"description": "Disallow overload signatures that can be unified into a single signature.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleFixConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useUniqueElementIds": {
 					"description": "Prevent the usage of static string literal id attribute on elements.",
 					"anyOf": [
