@@ -30,6 +30,23 @@ pub struct TypeStore {
 }
 
 impl TypeStore {
+    pub fn from_types(types: Vec<TypeData>) -> Self {
+        let mut table = HashTable::new();
+        for (i, data) in types.iter().enumerate() {
+            let mut hash = FxHasher::default();
+            data.hash(&mut hash);
+            let hash = hash.finish();
+
+            table.insert_unique(hash, i, |i| {
+                let mut hash = FxHasher::default();
+                types[*i].hash(&mut hash);
+                hash.finish()
+            });
+        }
+
+        Self { types, table }
+    }
+
     pub fn as_slice(&self) -> &[TypeData] {
         &self.types
     }
