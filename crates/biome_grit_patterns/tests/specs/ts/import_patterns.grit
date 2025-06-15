@@ -1,0 +1,5 @@
+language js
+
+pattern test_import() {
+    `import $imports from "foo"`
+} 

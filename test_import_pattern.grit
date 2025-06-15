@@ -1,0 +1,5 @@
+language js
+
+// This pattern should now match all types of imports from "foo"
+// Previously it only matched default imports
+import $imports from "foo" 
