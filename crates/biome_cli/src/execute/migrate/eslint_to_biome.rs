@@ -1,5 +1,8 @@
+use std::collections::BTreeSet;
+
 use biome_configuration::analyzer::SeverityOrGroup;
 use biome_configuration::{self as biome_config};
+use biome_console::markup;
 use biome_deserialize::Merge;
 use biome_js_analyze::lint::style::no_restricted_globals;
 use rustc_hash::FxHashMap;
@@ -24,8 +27,177 @@ pub(crate) struct MigrationOptions {
 
 #[derive(Debug, Default)]
 pub(crate) struct MigrationResults {
+    /// Path to the migrated ESlint configuration
+    pub(crate) eslint_path: Option<Box<str>>,
+    /// Is the Biome configuration updated?
+    pub(crate) write: bool,
     // Contains inspired rules that were not migrated because `include_inspired` is disabled
-    pub(crate) has_inspired_rules: bool,
+    pub(crate) inspired: BTreeSet<EslintRuleName>,
+    pub(crate) nursery: BTreeSet<EslintRuleName>,
+    pub(crate) migrated: BTreeSet<EslintRuleName>,
+    pub(crate) unsupported: BTreeSet<EslintRuleName>,
+}
+impl MigrationResults {
+    pub(crate) fn add(&mut self, sourced_rule: &str, status: RuleMigrationResult) {
+        let sourced = EslintRuleName::from_str(sourced_rule);
+        match status {
+            RuleMigrationResult::Migrated => {
+                self.migrated.insert(sourced);
+            }
+            RuleMigrationResult::Inspired => {
+                self.inspired.insert(sourced);
+            }
+            RuleMigrationResult::Nursery => {
+                self.nursery.insert(sourced);
+            }
+            RuleMigrationResult::Unsupported => {
+                self.unsupported.insert(sourced);
+            }
+        }
+    }
+}
+impl biome_diagnostics::Diagnostic for MigrationResults {
+    fn category(&self) -> Option<&'static biome_diagnostics::Category> {
+        Some(biome_diagnostics::category!("migrate"))
+    }
+
+    fn severity(&self) -> biome_diagnostics::Severity {
+        biome_diagnostics::Severity::Information
+    }
+
+    fn location(&self) -> biome_diagnostics::Location<'_> {
+        if let Some(path) = &self.eslint_path {
+            biome_diagnostics::Location {
+                resource: Some(biome_diagnostics::Resource::File(path)),
+                span: None,
+                source_code: None,
+            }
+        } else {
+            biome_diagnostics::Location::default()
+        }
+    }
+
+    fn message(&self, fmt: &mut biome_console::fmt::Formatter<'_>) -> std::io::Result<()> {
+        let count =
+            self.migrated.len() + self.inspired.len() + self.nursery.len() + self.unsupported.len();
+        if count != 0 {
+            let migrated_count = self.migrated.len()
+                + if self.write {
+                    0
+                } else {
+                    self.inspired.len() + self.nursery.len()
+                };
+            let migrated_percent = migrated_count * 100 / count;
+            let verb = if self.write { "have been" } else { "can be" };
+            fmt.write_markup(markup! { {migrated_percent}"% ("{migrated_count}"/"{count}") of the rules "{verb}" migrated." })
+        } else {
+            fmt.write_markup(markup! { "No rules to migrate." })
+        }
+    }
+
+    fn advices(&self, visitor: &mut dyn biome_diagnostics::Visit) -> std::io::Result<()> {
+        if !self.migrated.is_empty() {
+            visitor.record_log(
+                biome_diagnostics::LogCategory::Info,
+                &if self.write {
+                    markup! { "Migrated rules:" }
+                } else {
+                    markup! { "Rules that can be migrated:" }
+                },
+            )?;
+            let list: Vec<_> = self
+                .migrated
+                .iter()
+                .map(|item| item as &dyn biome_console::fmt::Display)
+                .collect();
+            visitor.record_list(list.as_slice())?;
+        }
+        if !self.inspired.is_empty() {
+            visitor.record_log(
+                biome_diagnostics::LogCategory::Info,
+                &markup! { "Rules that can be migrated to an inspired rule using "<Emphasis>"--include-inspired"</Emphasis>":" },
+            )?;
+            let list: Vec<_> = self
+                .inspired
+                .iter()
+                .map(|item| item as &dyn biome_console::fmt::Display)
+                .collect();
+            visitor.record_list(list.as_slice())?;
+        }
+        if !self.inspired.is_empty() {
+            visitor.record_log(
+                biome_diagnostics::LogCategory::Info,
+                &markup! { "Rules that can be migrated to a nursery rule using "<Emphasis>"--include-nursery"</Emphasis>":" },
+            )?;
+            let list: Vec<_> = self
+                .nursery
+                .iter()
+                .map(|item| item as &dyn biome_console::fmt::Display)
+                .collect();
+            visitor.record_list(list.as_slice())?;
+        }
+        if !self.unsupported.is_empty() {
+            visitor.record_log(
+                biome_diagnostics::LogCategory::Info,
+                &markup! { "Unsupported rules:" },
+            )?;
+            let list: Vec<_> = self
+                .unsupported
+                .iter()
+                .map(|item| item as &dyn biome_console::fmt::Display)
+                .collect();
+            visitor.record_list(list.as_slice())?;
+        }
+        Ok(())
+    }
+}
+
+#[derive(Debug, Eq, PartialEq)]
+pub(crate) enum RuleMigrationResult {
+    /// A rule that has been migrated.
+    Migrated,
+    /// A rule that could be migrated if `--include-inspired` was passed
+    Inspired,
+    /// A rule that could be migrated if `--include-nursery` was passed
+    Nursery,
+    /// An unsupported rule
+    Unsupported,
+}
+
+#[derive(Debug, Eq, PartialEq, Ord, PartialOrd, Hash)]
+pub(crate) struct EslintRuleName {
+    plugin_name: Option<Box<str>>,
+    rule_name: Box<str>,
+}
+impl EslintRuleName {
+    fn from_str(s: &str) -> Self {
+        if let Some((plugin_name, rule_name)) = s.split_once('/') {
+            Self {
+                plugin_name: Some(plugin_name.into()),
+                rule_name: rule_name.into(),
+            }
+        } else {
+            Self {
+                plugin_name: None,
+                rule_name: s.into(),
+            }
+        }
+    }
+}
+impl std::fmt::Display for EslintRuleName {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let rule_name = &self.rule_name;
+        if let Some(plugin_name) = &self.plugin_name {
+            f.write_fmt(format_args!("{plugin_name}/{rule_name}"))
+        } else {
+            f.write_str(rule_name)
+        }
+    }
+}
+impl biome_console::fmt::Display for EslintRuleName {
+    fn fmt(&self, fmt: &mut biome_console::fmt::Formatter) -> std::io::Result<()> {
+        fmt.write_fmt(format_args!("{self}"))
+    }
 }
 
 impl eslint_eslint::AnyConfigData {
@@ -358,10 +530,13 @@ fn to_biome_includes(
     let mut includes: Vec<biome_glob::NormalizedGlob> = Vec::new();
     if !files.is_empty() {
         includes.extend(files.iter().filter_map(|glob| glob.as_ref().parse().ok()));
-    } else if let Ok(glob) = "**".parse() {
-        includes.push(glob);
     }
     if !ignores.is_empty() {
+        if includes.is_empty() {
+            if let Ok(glob) = "**".parse() {
+                includes.push(glob);
+            }
+        }
         includes.extend(ignores.iter().filter_map(|glob| {
             // ESLint supports negation: https://eslint.org/docs/latest/use/configure/ignore#unignoring-files-and-directories
             if let Some(rest) = glob.as_ref().strip_prefix('!') {
