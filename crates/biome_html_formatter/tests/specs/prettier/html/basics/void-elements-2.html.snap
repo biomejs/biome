@@ -29,7 +29,7 @@ info: html/basics/void-elements-2.html
 ```diff
 --- Prettier
 +++ Biome
-@@ -1,12 +1,17 @@
+@@ -1,12 +1,16 @@
  <video controls width="250">
    <source src="/media/examples/flower.webm" type="video/webm" />
 -  <source src="/media/examples/flower.mp4" type="video/mp4" /></video
@@ -44,8 +44,7 @@ info: html/basics/void-elements-2.html
 -  <param name="autoplay" value="true" /></object
 ->1
 +  <param name="autoplay" value="true" />
-+</object>
-+1
++</object>1
  
 -<span><img src="1.png" /><img src="1.png" /></span>1
 +<span
@@ -67,8 +66,7 @@ text after
 <object data="horse.wav">
   <param name="autoplay" value="true" />
   <param name="autoplay" value="true" />
-</object>
-1
+</object>1
 
 <span
   ><img src="1.png" />
