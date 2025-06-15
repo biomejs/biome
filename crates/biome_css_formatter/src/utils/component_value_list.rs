@@ -231,12 +231,13 @@ where
         name.to_ascii_lowercase_cow() == "font-family"
     });
 
-    let is_first_minus_operator_in_font_family = list.iter().next().map_or(false, |x| {
+    let is_first_minus_operator_in_font_family = list.iter().next().is_some_and(|x| {
         let text = x.syntax().text_trimmed();
         text.starts_with("-")
     });
 
-    let minus_prefixed_count = list.iter()
+    let minus_prefixed_count = list
+        .iter()
         .filter(|x| x.syntax().text_trimmed().starts_with("-"))
         .count();
 
