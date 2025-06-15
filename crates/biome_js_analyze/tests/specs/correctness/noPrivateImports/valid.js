@@ -1,6 +1,6 @@
 /* should not generate diagnostics */
 
-import { unknown } from "external-package";
+import { privateExport } from "external-package";
 
 // Importing a package-private symbol within the same package is allowed.
 import { fooPackageVariable } from "./foo.js";
