@@ -68,7 +68,6 @@ use regex::Regex;
 use serde::{Deserialize, Serialize};
 use std::cmp::Ordering;
 use std::fmt::Debug;
-use std::num::NonZeroU64;
 use std::str::FromStr;
 use std::sync::LazyLock;
 use vcs::VcsClientKind;
@@ -79,11 +78,6 @@ pub const VERSION: &str = match option_env!("BIOME_VERSION") {
 };
 
 pub type RootEnabled = Bool<true>;
-
-/// Limit the size of files to 1.0 MiB by default
-pub const DEFAULT_FILE_SIZE_LIMIT: NonZeroU64 =
-    // SAFETY: This constant is initialized with a non-zero value
-    NonZeroU64::new(1024 * 1024).unwrap();
 
 /// The configuration that is contained inside the file `biome.json`
 #[derive(

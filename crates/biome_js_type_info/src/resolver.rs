@@ -156,9 +156,13 @@ impl ResolverId {
 
     /// Applies the module ID of `self` to the given `data`.
     #[inline]
-    pub fn apply_module_id_to_data(self, data: TypeData) -> TypeData {
+    pub fn apply_module_id_to_data(self, mut data: TypeData) -> TypeData {
         match self.level() {
-            TypeResolverLevel::Thin => data.with_module_id(self.module_id()),
+            TypeResolverLevel::Thin => {
+                let module_id = self.module_id();
+                data.update_all_references(|reference| reference.set_module_id(module_id));
+                data
+            }
             _ => data,
         }
     }
@@ -362,7 +366,12 @@ impl<'a> ResolvedTypeData<'a> {
     /// the [`ResolverId`] applied to all its references.
     pub fn to_data(self) -> TypeData {
         match self.id.level() {
-            TypeResolverLevel::Thin => self.data.clone().with_module_id(self.id.module_id()),
+            TypeResolverLevel::Thin => {
+                let mut data = self.data.clone();
+                let module_id = self.id.module_id();
+                data.update_all_references(|reference| reference.set_module_id(module_id));
+                data
+            }
             _ => self.data.clone(),
         }
     }
@@ -428,7 +437,12 @@ impl<'a> ResolvedTypeMember<'a> {
     /// module ID from the [`ResolverId`] applied to all its references.
     pub fn to_member(self) -> TypeMember {
         match self.id.level() {
-            TypeResolverLevel::Thin => self.member.clone().with_module_id(self.id.module_id()),
+            TypeResolverLevel::Thin => {
+                let mut member = self.member.clone();
+                let module_id = self.id.module_id();
+                member.update_all_references(|reference| reference.set_module_id(module_id));
+                member
+            }
             _ => self.member.clone(),
         }
     }
@@ -649,32 +663,8 @@ pub trait Resolvable: Sized {
     /// Returns the resolved version of this type.
     fn resolved(&self, resolver: &mut dyn TypeResolver) -> Self;
 
-    /// Returns the resolved version of this type, and applies a custom mapper
-    /// function on all instances of [`TypeReference`].
-    fn resolved_with_mapped_references(
-        &self,
-        map: impl Copy + Fn(TypeReference, &mut dyn TypeResolver) -> TypeReference,
-        resolver: &mut dyn TypeResolver,
-    ) -> Self;
-
-    /// Returns the resolved version of this type, and applies the given
-    /// `module_id` to any returned module-level type references.
-    fn resolved_with_module_id(
-        &self,
-        module_id: ModuleId,
-        resolver: &mut dyn TypeResolver,
-    ) -> Self {
-        self.resolved_with_mapped_references(
-            |reference, _| reference.with_module_id(module_id),
-            resolver,
-        )
-    }
-
-    /// Returns the instance with all module-level references augmented with the
-    /// given `module_id`.
-    ///
-    /// Does not perform any resolving in the process.
-    fn with_module_id(self, module_id: ModuleId) -> Self;
+    /// Updates all references using the given callback.
+    fn update_all_references(&mut self, updater: impl Copy + Fn(&mut TypeReference));
 }
 
 impl Resolvable for TypeReference {
@@ -735,27 +725,8 @@ impl Resolvable for TypeReference {
         }
     }
 
-    fn resolved_with_mapped_references(
-        &self,
-        map: impl Copy + Fn(Self, &mut dyn TypeResolver) -> Self,
-        resolver: &mut dyn TypeResolver,
-    ) -> Self {
-        map(self.resolved(resolver), resolver)
-    }
-
-    fn with_module_id(self, module_id: ModuleId) -> Self {
-        match self {
-            Self::Qualifier(_) => {
-                // When we assign a module ID in order to store a type in the
-                // scoped resolver, we also clear out qualifiers to avoid
-                // resolving from an incorrect scope.
-                Self::Unknown
-            }
-            Self::Resolved(resolved_type_id) => {
-                Self::Resolved(resolved_type_id.with_module_id(module_id))
-            }
-            other => other,
-        }
+    fn update_all_references(&mut self, updater: impl Copy + Fn(&mut Self)) {
+        updater(self)
     }
 }
 
@@ -777,34 +748,8 @@ impl Resolvable for TypeofValue {
         }
     }
 
-    fn resolved_with_mapped_references(
-        &self,
-        map: impl Copy + Fn(TypeReference, &mut dyn TypeResolver) -> TypeReference,
-        resolver: &mut dyn TypeResolver,
-    ) -> Self {
-        let Self {
-            identifier,
-            ty,
-            scope_id,
-        } = self.resolved(resolver);
-        Self {
-            identifier,
-            ty: map(ty, resolver),
-            scope_id,
-        }
-    }
-
-    fn with_module_id(self, module_id: ModuleId) -> Self {
-        let Self {
-            identifier,
-            ty,
-            scope_id,
-        } = self;
-        Self {
-            identifier,
-            ty: ty.with_module_id(module_id),
-            scope_id,
-        }
+    fn update_all_references(&mut self, updater: impl Copy + Fn(&mut TypeReference)) {
+        updater(&mut self.ty)
     }
 }
 
@@ -815,17 +760,7 @@ macro_rules! derive_primitive_resolved {
                 *self
             }
 
-            fn resolved_with_mapped_references(
-                &self,
-                _map: impl Copy + Fn(TypeReference, &mut dyn TypeResolver) -> TypeReference,
-                _resolver: &mut dyn TypeResolver,
-            ) -> Self {
-                *self
-            }
-
-            fn with_module_id(self, _module_id: ModuleId) -> Self {
-                self
-            }
+            fn update_all_references(&mut self, _updater: impl Copy + Fn(&mut TypeReference)) {}
         })+
     };
 }
