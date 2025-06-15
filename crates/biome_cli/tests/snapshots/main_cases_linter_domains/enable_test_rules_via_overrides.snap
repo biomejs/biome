@@ -48,6 +48,22 @@ describe("foo", () => {
 # Emitted Messages
 
 ```block
+test1.js:1:1 lint/nursery/useExplicitTestAssertions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Missing assertion in test body.
+  
+  > 1 │ describe.only("bar", () => {});
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    2 │ 
+  
+  i This could cause false positives where the test always passes but isn’t testing anything.
+  
+  i Add an expect() (Vitest/Jest) or assert() (node:assert) assertion to this test.
+  
+
+```
+
+```block
 test1.js:1:10 lint/suspicious/noFocusedTests  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Don't focus the test.
