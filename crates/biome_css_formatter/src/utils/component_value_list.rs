@@ -227,9 +227,9 @@ where
         .and_then(|parent| parent.name().ok())
         .and_then(|name| name.as_css_identifier().map(|name| name.to_trimmed_text()));
 
-    let is_font_family = css_property.as_ref().is_some_and(|name| {
-        name.to_ascii_lowercase_cow() == "font-family"
-    });
+    let is_font_family = css_property
+        .as_ref()
+        .is_some_and(|name| name.to_ascii_lowercase_cow() == "font-family");
 
     let is_first_minus_operator_in_font_family = list.iter().next().is_some_and(|x| {
         let text = x.syntax().text_trimmed();
