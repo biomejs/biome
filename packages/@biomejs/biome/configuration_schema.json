@@ -2995,6 +2995,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useReadonlyClassProperties": {
+					"description": "Enforce marking members as readonly if they are never modified outside the constructor.",
+					"anyOf": [
+						{ "$ref": "#/definitions/ReadonlyClassPropertiesConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useSingleJsDocAsterisk": {
 					"description": "Enforce JSDoc comment lines to start with a single asterisk, except for the first one.",
 					"anyOf": [
@@ -3330,6 +3337,23 @@
 		},
 		"QuoteProperties": { "type": "string", "enum": ["asNeeded", "preserve"] },
 		"QuoteStyle": { "type": "string", "enum": ["double", "single"] },
+		"ReadonlyClassPropertiesConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{ "$ref": "#/definitions/RuleWithReadonlyClassPropertiesOptions" }
+			]
+		},
+		"ReadonlyClassPropertiesOptions": {
+			"description": "Rule's options",
+			"type": "object",
+			"properties": {
+				"checkAllProperties": {
+					"description": "When `true`, the keywords `public`, `protected`, and `private` are analyzed by the rule.",
+					"type": "boolean"
+				}
+			},
+			"additionalProperties": false
+		},
 		"Regex": { "type": "string" },
 		"RestrictedGlobalsConfiguration": {
 			"anyOf": [
@@ -3876,6 +3900,25 @@
 				"options": {
 					"description": "Rule's options",
 					"allOf": [{ "$ref": "#/definitions/NoUnusedVariablesOptions" }]
+				}
+			},
+			"additionalProperties": false
+		},
+		"RuleWithReadonlyClassPropertiesOptions": {
+			"type": "object",
+			"required": ["level"],
+			"properties": {
+				"fix": {
+					"description": "The kind of the code actions emitted by the rule",
+					"anyOf": [{ "$ref": "#/definitions/FixKind" }, { "type": "null" }]
+				},
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [{ "$ref": "#/definitions/ReadonlyClassPropertiesOptions" }]
 				}
 			},
 			"additionalProperties": false

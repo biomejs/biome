@@ -385,6 +385,7 @@ pub enum RuleName {
     UseObjectSpread,
     UseOptionalChain,
     UseParseIntRadix,
+    UseReadonlyClassProperties,
     UseRegexLiterals,
     UseSelfClosingElements,
     UseSemanticElements,
@@ -717,6 +718,7 @@ impl RuleName {
             Self::UseObjectSpread => "useObjectSpread",
             Self::UseOptionalChain => "useOptionalChain",
             Self::UseParseIntRadix => "useParseIntRadix",
+            Self::UseReadonlyClassProperties => "useReadonlyClassProperties",
             Self::UseRegexLiterals => "useRegexLiterals",
             Self::UseSelfClosingElements => "useSelfClosingElements",
             Self::UseSemanticElements => "useSemanticElements",
@@ -1035,7 +1037,7 @@ impl RuleName {
             Self::UseMediaCaption => RuleGroup::A11y,
             Self::UseNamedOperation => RuleGroup::Nursery,
             Self::UseNamespaceKeyword => RuleGroup::Suspicious,
-            Self::UseNamingConvention => RuleGroup::Style,
+            Self::UseNamingConvention => RuleGroup::Nursery,
             Self::UseNodeAssertStrict => RuleGroup::Style,
             Self::UseNodejsImportProtocol => RuleGroup::Style,
             Self::UseNumberNamespace => RuleGroup::Style,
@@ -1045,6 +1047,7 @@ impl RuleName {
             Self::UseObjectSpread => RuleGroup::Nursery,
             Self::UseOptionalChain => RuleGroup::Complexity,
             Self::UseParseIntRadix => RuleGroup::Nursery,
+            Self::UseReadonlyClassProperties => RuleGroup::Nursery,
             Self::UseRegexLiterals => RuleGroup::Complexity,
             Self::UseSelfClosingElements => RuleGroup::Style,
             Self::UseSemanticElements => RuleGroup::A11y,
@@ -1382,6 +1385,7 @@ impl std::str::FromStr for RuleName {
             "useObjectSpread" => Ok(Self::UseObjectSpread),
             "useOptionalChain" => Ok(Self::UseOptionalChain),
             "useParseIntRadix" => Ok(Self::UseParseIntRadix),
+            "useReadonlyClassProperties" => Ok(Self::UseReadonlyClassProperties),
             "useRegexLiterals" => Ok(Self::UseRegexLiterals),
             "useSelfClosingElements" => Ok(Self::UseSelfClosingElements),
             "useSemanticElements" => Ok(Self::UseSemanticElements),
@@ -4852,6 +4856,10 @@ pub struct Nursery {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub use_parse_int_radix:
         Option<RuleFixConfiguration<biome_js_analyze::options::UseParseIntRadix>>,
+    #[doc = "Enforce marking members as readonly if they are never modified outside the constructor."]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub use_readonly_class_properties:
+        Option<RuleFixConfiguration<biome_js_analyze::options::UseReadonlyClassProperties>>,
     #[doc = "Enforce JSDoc comment lines to start with a single asterisk, except for the first one."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub use_single_js_doc_asterisk:
@@ -4910,6 +4918,7 @@ impl Nursery {
         "useNumericSeparators",
         "useObjectSpread",
         "useParseIntRadix",
+        "useReadonlyClassProperties",
         "useSingleJsDocAsterisk",
         "useSortedClasses",
         "useSymbolDescription",
@@ -4969,6 +4978,7 @@ impl Nursery {
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[39]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[40]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[41]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[42]),
     ];
 }
 impl RuleGroupExt for Nursery {
@@ -5170,24 +5180,29 @@ impl RuleGroupExt for Nursery {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[37]));
             }
         }
-        if let Some(rule) = self.use_single_js_doc_asterisk.as_ref() {
+        if let Some(rule) = self.use_readonly_class_properties.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[38]));
             }
         }
-        if let Some(rule) = self.use_sorted_classes.as_ref() {
+        if let Some(rule) = self.use_single_js_doc_asterisk.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[39]));
             }
         }
-        if let Some(rule) = self.use_symbol_description.as_ref() {
+        if let Some(rule) = self.use_sorted_classes.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[40]));
             }
         }
-        if let Some(rule) = self.use_unique_element_ids.as_ref() {
+        if let Some(rule) = self.use_symbol_description.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[41]));
+            }
+        }
+        if let Some(rule) = self.use_unique_element_ids.as_ref() {
+            if rule.is_enabled() {
+                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[42]));
             }
         }
         index_set
@@ -5384,24 +5399,29 @@ impl RuleGroupExt for Nursery {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[37]));
             }
         }
-        if let Some(rule) = self.use_single_js_doc_asterisk.as_ref() {
+        if let Some(rule) = self.use_readonly_class_properties.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[38]));
             }
         }
-        if let Some(rule) = self.use_sorted_classes.as_ref() {
+        if let Some(rule) = self.use_single_js_doc_asterisk.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[39]));
             }
         }
-        if let Some(rule) = self.use_symbol_description.as_ref() {
+        if let Some(rule) = self.use_sorted_classes.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[40]));
             }
         }
-        if let Some(rule) = self.use_unique_element_ids.as_ref() {
+        if let Some(rule) = self.use_symbol_description.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[41]));
+            }
+        }
+        if let Some(rule) = self.use_unique_element_ids.as_ref() {
+            if rule.is_disabled() {
+                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[42]));
             }
         }
         index_set
@@ -5586,6 +5606,10 @@ impl RuleGroupExt for Nursery {
                 .use_parse_int_radix
                 .as_ref()
                 .map(|conf| (conf.level(), conf.get_options())),
+            "useReadonlyClassProperties" => self
+                .use_readonly_class_properties
+                .as_ref()
+                .map(|conf| (conf.level(), conf.get_options())),
             "useSingleJsDocAsterisk" => self
                 .use_single_js_doc_asterisk
                 .as_ref()
@@ -5648,6 +5672,7 @@ impl From<GroupPlainConfiguration> for Nursery {
             use_numeric_separators: Some(value.into()),
             use_object_spread: Some(value.into()),
             use_parse_int_radix: Some(value.into()),
+            use_readonly_class_properties: Some(value.into()),
             use_single_js_doc_asterisk: Some(value.into()),
             use_sorted_classes: Some(value.into()),
             use_symbol_description: Some(value.into()),
