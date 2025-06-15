@@ -614,6 +614,7 @@ pub(crate) struct CodeActionsParams<'a> {
     pub(crate) suppression_reason: Option<String>,
     pub(crate) enabled_rules: Vec<RuleSelector>,
     pub(crate) plugins: AnalyzerPluginVec,
+    pub(crate) categories: RuleCategories,
 }
 
 type Lint = fn(LintParams) -> LintResults;

@@ -26,10 +26,10 @@ pub(crate) struct ConsoleReporter {
 impl Reporter for ConsoleReporter {
     fn write(self, visitor: &mut dyn ReporterVisitor) -> io::Result<()> {
         visitor.report_diagnostics(&self.execution, self.diagnostics_payload, self.verbose)?;
-        visitor.report_summary(&self.execution, self.summary, self.verbose)?;
         if self.verbose {
             visitor.report_handled_paths(self.evaluated_paths, self.working_directory)?;
         }
+        visitor.report_summary(&self.execution, self.summary, self.verbose)?;
         Ok(())
     }
 }

@@ -4,6 +4,8 @@ expression: default_package.js
 ---
 # Input
 ```js
+import { unknown } from "external-package";
+
 // Importing a symbol without any visibility from sub package is NOT allowed when the default visibility is package.
 import { fooDefaultVariable } from "./sub/foo.js";
 
@@ -23,15 +25,15 @@ import { fooPrivateVariable as subPrivate } from "./sub/foo.js";
 
 # Diagnostics
 ```
-default_package.js:2:10 lint/correctness/noPrivateImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+default_package.js:4:10 lint/correctness/noPrivateImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! You may not import a symbol with package visibility from here.
   
-    1 │ // Importing a symbol without any visibility from sub package is NOT allowed when the default visibility is package.
-  > 2 │ import { fooDefaultVariable } from "./sub/foo.js";
+    3 │ // Importing a symbol without any visibility from sub package is NOT allowed when the default visibility is package.
+  > 4 │ import { fooDefaultVariable } from "./sub/foo.js";
       │          ^^^^^^^^^^^^^^^^^^
-    3 │ 
-    4 │ // Re-exporting widens the allowed import scope for package private, so this is allowed:
+    5 │ 
+    6 │ // Re-exporting widens the allowed import scope for package private, so this is allowed:
   
   i You may need to import an alternative symbol, or relax the visibility of this symbol.
   
@@ -41,15 +43,15 @@ default_package.js:2:10 lint/correctness/noPrivateImports ━━━━━━━�
 ```
 
 ```
-default_package.js:13:10 lint/correctness/noPrivateImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+default_package.js:15:10 lint/correctness/noPrivateImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! You may not import a symbol with package visibility from here.
   
-    12 │ // Tighter visibility also takes precedence, so these imports are NOT allowed.
-  > 13 │ import { fooPackageVariable as subPackage } from "./sub/foo.js";
+    14 │ // Tighter visibility also takes precedence, so these imports are NOT allowed.
+  > 15 │ import { fooPackageVariable as subPackage } from "./sub/foo.js";
        │          ^^^^^^^^^^^^^^^^^^
-    14 │ import { fooPrivateVariable as subPrivate } from "./sub/foo.js";
-    15 │ 
+    16 │ import { fooPrivateVariable as subPrivate } from "./sub/foo.js";
+    17 │ 
   
   i You may need to import an alternative symbol, or relax the visibility of this symbol.
   
@@ -59,15 +61,15 @@ default_package.js:13:10 lint/correctness/noPrivateImports ━━━━━━━
 ```
 
 ```
-default_package.js:14:10 lint/correctness/noPrivateImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+default_package.js:16:10 lint/correctness/noPrivateImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! You may not import a symbol with private visibility from here.
   
-    12 │ // Tighter visibility also takes precedence, so these imports are NOT allowed.
-    13 │ import { fooPackageVariable as subPackage } from "./sub/foo.js";
-  > 14 │ import { fooPrivateVariable as subPrivate } from "./sub/foo.js";
+    14 │ // Tighter visibility also takes precedence, so these imports are NOT allowed.
+    15 │ import { fooPackageVariable as subPackage } from "./sub/foo.js";
+  > 16 │ import { fooPrivateVariable as subPrivate } from "./sub/foo.js";
        │          ^^^^^^^^^^^^^^^^^^
-    15 │ 
+    17 │ 
   
   i You may need to import an alternative symbol, or relax the visibility of this symbol.
   

@@ -51,7 +51,7 @@ use biome_js_syntax::{
     JsLanguage, JsSyntaxNode, JsVariableDeclarator, LanguageVariant, TextRange, TextSize,
     TokenAtOffset,
 };
-use biome_js_type_info::{GlobalsResolver, TypeData, TypeResolver};
+use biome_js_type_info::{GlobalsResolver, ScopeId, TypeData, TypeResolver};
 use biome_module_graph::ModuleGraph;
 use biome_parser::AnyParse;
 use biome_rowan::{AstNode, BatchMutationExt, Direction, NodeCache, WalkEvent};
@@ -662,29 +662,34 @@ fn debug_type_info(
     let preorder = tree.syntax().preorder();
 
     let mut resolver = GlobalsResolver::default();
+    let scope_id = ScopeId::GLOBAL;
 
     for event in preorder {
         match event {
             WalkEvent::Enter(node) => {
                 if let Some(node) = JsVariableDeclarator::cast_ref(&node) {
-                    if let Some(ty) = TypeData::from_js_variable_declarator(&mut resolver, &node) {
+                    if let Some(ty) =
+                        TypeData::from_js_variable_declarator(&mut resolver, scope_id, &node)
+                    {
                         result.push_str(&ty.to_string());
                         result.push('\n');
                     }
                 } else if let Some(function) = JsFunctionDeclaration::cast_ref(&node) {
                     result.push_str(
-                        &TypeData::from_js_function_declaration(&mut resolver, &function)
+                        &TypeData::from_js_function_declaration(&mut resolver, scope_id, &function)
                             .to_string(),
                     );
                     result.push('\n');
                 } else if let Some(class) = JsClassDeclaration::cast_ref(&node) {
                     result.push_str(
-                        &TypeData::from_js_class_declaration(&mut resolver, &class).to_string(),
+                        &TypeData::from_js_class_declaration(&mut resolver, scope_id, &class)
+                            .to_string(),
                     );
                     result.push('\n');
                 } else if let Some(expression) = JsClassExpression::cast_ref(&node) {
                     result.push_str(
-                        &TypeData::from_js_class_expression(&mut resolver, &expression).to_string(),
+                        &TypeData::from_js_class_expression(&mut resolver, scope_id, &expression)
+                            .to_string(),
                     );
                     result.push('\n');
                 }
@@ -702,17 +707,19 @@ fn debug_registered_types(_path: &BiomePath, parse: AnyParse) -> Result<String, 
     let preorder = tree.syntax().preorder();
 
     let mut resolver = GlobalsResolver::default();
+    let scope_id = ScopeId::GLOBAL;
+
     for event in preorder {
         match event {
             WalkEvent::Enter(node) => {
                 if let Some(node) = JsVariableDeclarator::cast_ref(&node) {
-                    TypeData::from_js_variable_declarator(&mut resolver, &node);
+                    TypeData::from_js_variable_declarator(&mut resolver, scope_id, &node);
                 } else if let Some(function) = JsFunctionDeclaration::cast_ref(&node) {
-                    TypeData::from_js_function_declaration(&mut resolver, &function);
+                    TypeData::from_js_function_declaration(&mut resolver, scope_id, &function);
                 } else if let Some(class) = JsClassDeclaration::cast_ref(&node) {
-                    TypeData::from_js_class_declaration(&mut resolver, &class);
+                    TypeData::from_js_class_declaration(&mut resolver, scope_id, &class);
                 } else if let Some(expression) = JsClassExpression::cast_ref(&node) {
-                    TypeData::from_js_class_expression(&mut resolver, &expression);
+                    TypeData::from_js_class_expression(&mut resolver, scope_id, &expression);
                 }
             }
             WalkEvent::Leave(_) => {}
@@ -799,6 +806,7 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
         suppression_reason,
         enabled_rules: rules,
         plugins,
+        categories,
     } = params;
     let _ = debug_span!("Code actions JavaScript", range =? range, path =? path).entered();
     let tree = parse.tree();
@@ -815,11 +823,7 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
             .with_project_layout(project_layout.clone())
             .finish();
     let filter = AnalysisFilter {
-        categories: RuleCategoriesBuilder::default()
-            .with_syntax()
-            .with_lint()
-            .with_assist()
-            .build(),
+        categories,
         enabled_rules: Some(enabled_rules.as_slice()),
         disabled_rules: &disabled_rules,
         range,

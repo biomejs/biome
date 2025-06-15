@@ -1,5 +1,6 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 134
 expression: missingDependenciesInvalid.jsx
 ---
 # Input
@@ -174,6 +175,25 @@ function MissingFunctionDeclaration() {
 
   return <>{value}</>
 }
+
+function HoistedDeclaration() {
+	useEffect(() => {
+		console.log(a);
+	}, []);
+
+	let a = 1;
+}
+
+
+function HoistedDeclarations() {
+	useEffect(() => {
+		console.log(a, b);
+	}, []);
+
+	let a = 1;
+	let b = a + 1;
+}
+
 
 ```
 
@@ -990,5 +1010,92 @@ missingDependenciesInvalid.jsx:165:3 lint/correctness/useExhaustiveDependencies 
   
     167 │ ··},·[func])
         │       ++++  
+
+```
+
+```
+missingDependenciesInvalid.jsx:173:2 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━━━━━━━━
+
+  × This hook does not specify all of its dependencies: a
+  
+    172 │ function HoistedDeclaration() {
+  > 173 │ 	useEffect(() => {
+        │ 	^^^^^^^^^
+    174 │ 		console.log(a);
+    175 │ 	}, []);
+  
+  i This dependency is not specified in the hook dependency list.
+  
+    172 │ function HoistedDeclaration() {
+    173 │ 	useEffect(() => {
+  > 174 │ 		console.log(a);
+        │ 		            ^
+    175 │ 	}, []);
+    176 │ 
+  
+  i Either include it or remove the dependency array
+  
+  i Unsafe fix: Add the missing dependencies to the list.
+  
+    175 │ → },·[a]);
+        │       +   
+
+```
+
+```
+missingDependenciesInvalid.jsx:182:2 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━━━━━━━━
+
+  × This hook does not specify all of its dependencies: a
+  
+    181 │ function HoistedDeclarations() {
+  > 182 │ 	useEffect(() => {
+        │ 	^^^^^^^^^
+    183 │ 		console.log(a, b);
+    184 │ 	}, []);
+  
+  i This dependency is not specified in the hook dependency list.
+  
+    181 │ function HoistedDeclarations() {
+    182 │ 	useEffect(() => {
+  > 183 │ 		console.log(a, b);
+        │ 		            ^
+    184 │ 	}, []);
+    185 │ 
+  
+  i Either include it or remove the dependency array
+  
+  i Unsafe fix: Add the missing dependencies to the list.
+  
+    184 │ → },·[a]);
+        │       +   
+
+```
+
+```
+missingDependenciesInvalid.jsx:182:2 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━━━━━━━━
+
+  × This hook does not specify all of its dependencies: b
+  
+    181 │ function HoistedDeclarations() {
+  > 182 │ 	useEffect(() => {
+        │ 	^^^^^^^^^
+    183 │ 		console.log(a, b);
+    184 │ 	}, []);
+  
+  i This dependency is not specified in the hook dependency list.
+  
+    181 │ function HoistedDeclarations() {
+    182 │ 	useEffect(() => {
+  > 183 │ 		console.log(a, b);
+        │ 		               ^
+    184 │ 	}, []);
+    185 │ 
+  
+  i Either include it or remove the dependency array
+  
+  i Unsafe fix: Add the missing dependencies to the list.
+  
+    184 │ → },·[b]);
+        │       +   
 
 ```

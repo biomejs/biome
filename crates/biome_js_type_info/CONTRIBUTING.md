@@ -245,15 +245,12 @@ we have _type resolvers_. There's a `TypeResolver` trait, defined in
   because at least so far that's all we need to determine types of exports
   (we don't determine the return type of functions without annotations yet, and
   it's not yet decided when or if we'll do this).
-* **`ScopeRestrictedRegistrationResolver`** may sound impressive, but is but a
-  helper for `ScopedResolver` to conveniently set the correct scope ID on
-  certain references, so that when the time comes for the `ScopedResolver` to
-  resolve it, it will still know which scope should be used for resolving it.
 
 I've mentioned before that types are stored in vectors. Those type vectors are
-stored inside the structures that implement `TypeResolver`, and with the
-exception of `ScopeRestrictedRegistrationResolver`, they all have their own
-internal storage for types.
+stored inside `TypeStore` structures which are kept inside the various
+`TypeResolver` implementations. The nice thing about `TypeStore` is that it
+provides lookups that are as fast as a vector when the `TypeId` is known, while
+also maintaining a hash table for when the `TypeId` is not known.
 
 ## Flattening
 

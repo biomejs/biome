@@ -1,11 +1,11 @@
 use std::{borrow::Cow, fmt::Debug};
 
+use biome_js_syntax::AnyJsExpression;
 use biome_rowan::Text;
 
 use crate::{
-    Class, DestructureField, GenericTypeParameter, NUM_PREDEFINED_TYPES, ScopeId, TypeData, TypeId,
-    TypeImportQualifier, TypeInstance, TypeMember, TypeReference, TypeReferenceQualifier,
-    TypeofDestructureExpression, TypeofExpression, TypeofValue, Union,
+    NUM_PREDEFINED_TYPES, ScopeId, TypeData, TypeId, TypeImportQualifier, TypeInstance, TypeMember,
+    TypeReference, TypeReferenceQualifier, TypeofValue, Union,
     globals::{GLOBAL_UNDEFINED_ID, global_type_name},
 };
 
@@ -82,6 +82,11 @@ impl ResolvedTypeId {
     #[inline]
     pub const fn module_id(self) -> ModuleId {
         self.0.module_id()
+    }
+
+    #[inline]
+    pub const fn resolver_id(self) -> ResolverId {
+        self.0
     }
 
     #[inline]
@@ -253,7 +258,7 @@ impl TypeResolverLevel {
 }
 
 /// Identifier that indicates which module a type is defined in.
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
 pub struct ModuleId(u32);
 
 impl ModuleId {
@@ -464,11 +469,23 @@ pub trait TypeResolver {
 
     /// Returns a reference to the given type data, registering the data if
     /// necessary.
-    fn reference_to_registered_data(&mut self, type_data: TypeData) -> TypeReference {
-        match self.reference_to_data(&type_data) {
-            Some(type_data) => type_data,
-            None => {
-                let id = self.register_type(type_data);
+    fn reference_to_registered_data(&mut self, type_data: &TypeData) -> TypeReference {
+        match type_data {
+            TypeData::Reference(reference) => reference.clone(),
+            _ => {
+                let id = self.register_type(Cow::Borrowed(type_data));
+                self.reference_to_id(id)
+            }
+        }
+    }
+
+    /// Returns a reference to the given owned type data, registering the data
+    /// in the process.
+    fn reference_to_owned_data(&mut self, type_data: TypeData) -> TypeReference {
+        match type_data {
+            TypeData::Reference(reference) => reference,
+            _ => {
+                let id = self.register_type(Cow::Owned(type_data));
                 self.reference_to_id(id)
             }
         }
@@ -478,12 +495,12 @@ pub trait TypeResolver {
     ///
     /// If the given `type_data` is already registered, this may return an
     /// existing [`TypeId`].
-    fn register_type(&mut self, type_data: TypeData) -> TypeId;
+    fn register_type(&mut self, type_data: Cow<TypeData>) -> TypeId;
 
     /// Registers a type within the level handled by this resolver, and
     /// immediately returns the [`TypeData`].
     fn register_and_get(&mut self, type_data: TypeData) -> &TypeData {
-        let type_id = self.register_type(type_data);
+        let type_id = self.register_type(Cow::Owned(type_data));
         self.get_by_id(type_id)
     }
 
@@ -493,7 +510,7 @@ pub trait TypeResolver {
         match type_data {
             TypeData::Reference(TypeReference::Resolved(resolved)) => resolved,
             type_data => {
-                let type_id = self.register_type(type_data);
+                let type_id = self.register_type(Cow::Owned(type_data));
                 ResolvedTypeId::new(self.level(), type_id)
             }
         }
@@ -529,9 +546,19 @@ pub trait TypeResolver {
 
     /// Resolves the given import qualifier, registering the result into this
     /// resolver's type array if necessary.
-    fn resolve_import(&mut self, _qualifier: &TypeImportQualifier) -> Option<ResolvedTypeId> {
+    fn resolve_import(&self, _qualifier: &TypeImportQualifier) -> Option<ResolvedTypeId> {
         None
     }
+
+    /// Resolves the given `expression` in the given `scope_id` to a type.
+    ///
+    /// Depending on the resolver, this may return owned type data based on
+    /// local inference, or a reference to previously resolved type data.
+    fn resolve_expression(
+        &mut self,
+        scope_id: ScopeId,
+        expression: &AnyJsExpression,
+    ) -> Cow<TypeData>;
 
     /// Resolves a type reference.
     fn resolve_reference(&self, ty: &TypeReference) -> Option<ResolvedTypeId>;
@@ -556,65 +583,11 @@ pub trait TypeResolver {
 
     // #region Registration utilities
 
-    fn assign_type_parameters(
-        &mut self,
-        type_data: &TypeData,
-        type_parameters: &[TypeReference],
-    ) -> Option<TypeId> {
-        match type_data {
-            TypeData::Class(class) => Some(
-                self.register_type(TypeData::Class(Box::new(Class {
-                    type_parameters: class
-                        .type_parameters
-                        .iter()
-                        .enumerate()
-                        .map(|(i, param)| GenericTypeParameter {
-                            name: param.name.clone(),
-                            ty: type_parameters
-                                .get(i)
-                                .cloned()
-                                .unwrap_or_else(|| param.ty.clone()),
-                        })
-                        .collect(),
-                    ..class.as_ref().clone()
-                }))),
-            ),
-            // TODO: Which other types do we need to handle here?
-            _ => None,
-        }
-    }
-
-    fn destructuring_of(
-        &mut self,
-        ty: TypeReference,
-        destructure_field: DestructureField,
-    ) -> TypeData {
-        self.register_and_get(TypeData::TypeofExpression(Box::new(
-            TypeofExpression::Destructure(TypeofDestructureExpression {
-                ty,
-                destructure_field,
-            }),
-        )))
-        .clone()
-    }
-
     fn optional(&mut self, ty: TypeReference) -> TypeId {
-        self.register_type(TypeData::Union(Box::new(Union(Box::new([
+        self.register_type(Cow::Owned(TypeData::Union(Box::new(Union(Box::new([
             ty,
             GLOBAL_UNDEFINED_ID.into(),
-        ])))))
-    }
-
-    fn undefined(&mut self) -> TypeId {
-        self.register_type(TypeData::Undefined)
-    }
-
-    fn unknown(&mut self) -> TypeId {
-        self.register_type(TypeData::Unknown)
-    }
-
-    fn void(&mut self) -> TypeId {
-        self.register_type(TypeData::VoidKeyword)
+        ]))))))
     }
 
     // #endregion
@@ -651,12 +624,6 @@ pub trait Resolvable: Sized {
     ///
     /// Does not perform any resolving in the process.
     fn with_module_id(self, module_id: ModuleId) -> Self;
-
-    /// Returns the instance with all scoped references augmented with the
-    /// given `scope_id`.
-    ///
-    /// Does not perform any resolving in the process.
-    fn with_scope_id(self, scope_id: ScopeId) -> Self;
 }
 
 impl Resolvable for TypeReference {
@@ -686,7 +653,7 @@ impl Resolvable for TypeReference {
                                 let resolved_id: ResolvedTypeId = resolver.register_and_resolve(
                                     TypeData::instance_of(TypeInstance {
                                         ty: resolved_id.into(),
-                                        type_parameters: GenericTypeParameter::merge_types(
+                                        type_parameters: Self::merge_parameters(
                                             parameters,
                                             &qualifier.type_parameters,
                                         ),
@@ -727,16 +694,15 @@ impl Resolvable for TypeReference {
 
     fn with_module_id(self, module_id: ModuleId) -> Self {
         match self {
+            Self::Qualifier(_) => {
+                // When we assign a module ID in order to store a type in the
+                // scoped resolver, we also clear out qualifiers to avoid
+                // resolving from an incorrect scope.
+                Self::Unknown
+            }
             Self::Resolved(resolved_type_id) => {
                 Self::Resolved(resolved_type_id.with_module_id(module_id))
             }
-            other => other,
-        }
-    }
-
-    fn with_scope_id(self, scope_id: ScopeId) -> Self {
-        match self {
-            Self::Qualifier(qualifier) => Self::from(qualifier.with_scope_id(scope_id)),
             other => other,
         }
     }
@@ -789,13 +755,6 @@ impl Resolvable for TypeofValue {
             scope_id,
         }
     }
-
-    fn with_scope_id(self, scope_id: ScopeId) -> Self {
-        Self {
-            scope_id: Some(scope_id),
-            ..self
-        }
-    }
 }
 
 macro_rules! derive_primitive_resolved {
@@ -814,10 +773,6 @@ macro_rules! derive_primitive_resolved {
             }
 
             fn with_module_id(self, _module_id: ModuleId) -> Self {
-                self
-            }
-
-            fn with_scope_id(self, _scope_id: ScopeId) -> Self {
                 self
             }
         })+

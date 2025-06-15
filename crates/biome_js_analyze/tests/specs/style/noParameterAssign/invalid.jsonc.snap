@@ -1,5 +1,6 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 134
 expression: invalid.jsonc
 ---
 # Input
@@ -11,7 +12,7 @@ function foo(bar) { bar = 13; }
 ```
 invalid.jsonc:1:21 lint/style/noParameterAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Reassigning a function parameter is confusing.
+  ! Assigning a function parameter is confusing.
   
   > 1 │ function foo(bar) { bar = 13; }
       │                     ^^^
@@ -21,7 +22,7 @@ invalid.jsonc:1:21 lint/style/noParameterAssign ━━━━━━━━━━�
   > 1 │ function foo(bar) { bar = 13; }
       │              ^^^
   
-  i Use a local variable instead.
+  i Developers usually expect function parameters to be readonly. To align with this expectation, use a local variable instead.
   
 
 ```
@@ -35,7 +36,7 @@ function foo(bar) { bar += 13; }
 ```
 invalid.jsonc:1:21 lint/style/noParameterAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Reassigning a function parameter is confusing.
+  ! Assigning a function parameter is confusing.
   
   > 1 │ function foo(bar) { bar += 13; }
       │                     ^^^
@@ -45,7 +46,7 @@ invalid.jsonc:1:21 lint/style/noParameterAssign ━━━━━━━━━━�
   > 1 │ function foo(bar) { bar += 13; }
       │              ^^^
   
-  i Use a local variable instead.
+  i Developers usually expect function parameters to be readonly. To align with this expectation, use a local variable instead.
   
 
 ```
@@ -59,7 +60,7 @@ function foo(bar) { (function() { bar = 13; })(); }
 ```
 invalid.jsonc:1:35 lint/style/noParameterAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Reassigning a function parameter is confusing.
+  ! Assigning a function parameter is confusing.
   
   > 1 │ function foo(bar) { (function() { bar = 13; })(); }
       │                                   ^^^
@@ -69,7 +70,7 @@ invalid.jsonc:1:35 lint/style/noParameterAssign ━━━━━━━━━━�
   > 1 │ function foo(bar) { (function() { bar = 13; })(); }
       │              ^^^
   
-  i Use a local variable instead.
+  i Developers usually expect function parameters to be readonly. To align with this expectation, use a local variable instead.
   
 
 ```
@@ -83,7 +84,7 @@ function foo(bar) { ++bar; }
 ```
 invalid.jsonc:1:23 lint/style/noParameterAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Reassigning a function parameter is confusing.
+  ! Assigning a function parameter is confusing.
   
   > 1 │ function foo(bar) { ++bar; }
       │                       ^^^
@@ -93,7 +94,7 @@ invalid.jsonc:1:23 lint/style/noParameterAssign ━━━━━━━━━━�
   > 1 │ function foo(bar) { ++bar; }
       │              ^^^
   
-  i Use a local variable instead.
+  i Developers usually expect function parameters to be readonly. To align with this expectation, use a local variable instead.
   
 
 ```
@@ -107,7 +108,7 @@ function foo(bar) { ++bar; }
 ```
 invalid.jsonc:1:23 lint/style/noParameterAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Reassigning a function parameter is confusing.
+  ! Assigning a function parameter is confusing.
   
   > 1 │ function foo(bar) { ++bar; }
       │                       ^^^
@@ -117,7 +118,7 @@ invalid.jsonc:1:23 lint/style/noParameterAssign ━━━━━━━━━━�
   > 1 │ function foo(bar) { ++bar; }
       │              ^^^
   
-  i Use a local variable instead.
+  i Developers usually expect function parameters to be readonly. To align with this expectation, use a local variable instead.
   
 
 ```
@@ -131,7 +132,7 @@ function foo(bar) { --bar; }
 ```
 invalid.jsonc:1:23 lint/style/noParameterAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Reassigning a function parameter is confusing.
+  ! Assigning a function parameter is confusing.
   
   > 1 │ function foo(bar) { --bar; }
       │                       ^^^
@@ -141,7 +142,7 @@ invalid.jsonc:1:23 lint/style/noParameterAssign ━━━━━━━━━━�
   > 1 │ function foo(bar) { --bar; }
       │              ^^^
   
-  i Use a local variable instead.
+  i Developers usually expect function parameters to be readonly. To align with this expectation, use a local variable instead.
   
 
 ```
@@ -155,7 +156,7 @@ function foo(bar) { bar--; }
 ```
 invalid.jsonc:1:21 lint/style/noParameterAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Reassigning a function parameter is confusing.
+  ! Assigning a function parameter is confusing.
   
   > 1 │ function foo(bar) { bar--; }
       │                     ^^^
@@ -165,7 +166,7 @@ invalid.jsonc:1:21 lint/style/noParameterAssign ━━━━━━━━━━�
   > 1 │ function foo(bar) { bar--; }
       │              ^^^
   
-  i Use a local variable instead.
+  i Developers usually expect function parameters to be readonly. To align with this expectation, use a local variable instead.
   
 
 ```
@@ -179,7 +180,7 @@ function foo(bar) { bar--; }
 ```
 invalid.jsonc:1:21 lint/style/noParameterAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Reassigning a function parameter is confusing.
+  ! Assigning a function parameter is confusing.
   
   > 1 │ function foo(bar) { bar--; }
       │                     ^^^
@@ -189,7 +190,7 @@ invalid.jsonc:1:21 lint/style/noParameterAssign ━━━━━━━━━━�
   > 1 │ function foo(bar) { bar--; }
       │              ^^^
   
-  i Use a local variable instead.
+  i Developers usually expect function parameters to be readonly. To align with this expectation, use a local variable instead.
   
 
 ```
@@ -203,7 +204,7 @@ function foo(bar) { bar--; }
 ```
 invalid.jsonc:1:21 lint/style/noParameterAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Reassigning a function parameter is confusing.
+  ! Assigning a function parameter is confusing.
   
   > 1 │ function foo(bar) { bar--; }
       │                     ^^^
@@ -213,7 +214,7 @@ invalid.jsonc:1:21 lint/style/noParameterAssign ━━━━━━━━━━�
   > 1 │ function foo(bar) { bar--; }
       │              ^^^
   
-  i Use a local variable instead.
+  i Developers usually expect function parameters to be readonly. To align with this expectation, use a local variable instead.
   
 
 ```
@@ -227,7 +228,7 @@ function foo(bar) { ({bar} = {}); }
 ```
 invalid.jsonc:1:23 lint/style/noParameterAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Reassigning a function parameter is confusing.
+  ! Assigning a function parameter is confusing.
   
   > 1 │ function foo(bar) { ({bar} = {}); }
       │                       ^^^
@@ -237,7 +238,7 @@ invalid.jsonc:1:23 lint/style/noParameterAssign ━━━━━━━━━━�
   > 1 │ function foo(bar) { ({bar} = {}); }
       │              ^^^
   
-  i Use a local variable instead.
+  i Developers usually expect function parameters to be readonly. To align with this expectation, use a local variable instead.
   
 
 ```
@@ -251,7 +252,7 @@ function foo(bar) { ({x: [, bar = 0]} = {}); }
 ```
 invalid.jsonc:1:29 lint/style/noParameterAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Reassigning a function parameter is confusing.
+  ! Assigning a function parameter is confusing.
   
   > 1 │ function foo(bar) { ({x: [, bar = 0]} = {}); }
       │                             ^^^
@@ -261,7 +262,7 @@ invalid.jsonc:1:29 lint/style/noParameterAssign ━━━━━━━━━━�
   > 1 │ function foo(bar) { ({x: [, bar = 0]} = {}); }
       │              ^^^
   
-  i Use a local variable instead.
+  i Developers usually expect function parameters to be readonly. To align with this expectation, use a local variable instead.
   
 
 ```
@@ -275,7 +276,7 @@ function foo(bar) { for (bar in baz); }
 ```
 invalid.jsonc:1:26 lint/style/noParameterAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Reassigning a function parameter is confusing.
+  ! Assigning a function parameter is confusing.
   
   > 1 │ function foo(bar) { for (bar in baz); }
       │                          ^^^
@@ -285,7 +286,7 @@ invalid.jsonc:1:26 lint/style/noParameterAssign ━━━━━━━━━━�
   > 1 │ function foo(bar) { for (bar in baz); }
       │              ^^^
   
-  i Use a local variable instead.
+  i Developers usually expect function parameters to be readonly. To align with this expectation, use a local variable instead.
   
 
 ```
@@ -299,7 +300,7 @@ function foo(bar) { for (bar of baz); }
 ```
 invalid.jsonc:1:26 lint/style/noParameterAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Reassigning a function parameter is confusing.
+  ! Assigning a function parameter is confusing.
   
   > 1 │ function foo(bar) { for (bar of baz); }
       │                          ^^^
@@ -309,7 +310,7 @@ invalid.jsonc:1:26 lint/style/noParameterAssign ━━━━━━━━━━�
   > 1 │ function foo(bar) { for (bar of baz); }
       │              ^^^
   
-  i Use a local variable instead.
+  i Developers usually expect function parameters to be readonly. To align with this expectation, use a local variable instead.
   
 
 ```
@@ -323,7 +324,7 @@ function foo(a) { ({a} = obj); }
 ```
 invalid.jsonc:1:21 lint/style/noParameterAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Reassigning a function parameter is confusing.
+  ! Assigning a function parameter is confusing.
   
   > 1 │ function foo(a) { ({a} = obj); }
       │                     ^
@@ -333,7 +334,7 @@ invalid.jsonc:1:21 lint/style/noParameterAssign ━━━━━━━━━━�
   > 1 │ function foo(a) { ({a} = obj); }
       │              ^
   
-  i Use a local variable instead.
+  i Developers usually expect function parameters to be readonly. To align with this expectation, use a local variable instead.
   
 
 ```
@@ -347,7 +348,7 @@ function foo(a) { ([...a] = obj); }
 ```
 invalid.jsonc:1:24 lint/style/noParameterAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Reassigning a function parameter is confusing.
+  ! Assigning a function parameter is confusing.
   
   > 1 │ function foo(a) { ([...a] = obj); }
       │                        ^
@@ -357,7 +358,7 @@ invalid.jsonc:1:24 lint/style/noParameterAssign ━━━━━━━━━━�
   > 1 │ function foo(a) { ([...a] = obj); }
       │              ^
   
-  i Use a local variable instead.
+  i Developers usually expect function parameters to be readonly. To align with this expectation, use a local variable instead.
   
 
 ```
@@ -371,7 +372,7 @@ function foo(a) { ({...a} = obj); }
 ```
 invalid.jsonc:1:24 lint/style/noParameterAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Reassigning a function parameter is confusing.
+  ! Assigning a function parameter is confusing.
   
   > 1 │ function foo(a) { ({...a} = obj); }
       │                        ^
@@ -381,7 +382,7 @@ invalid.jsonc:1:24 lint/style/noParameterAssign ━━━━━━━━━━�
   > 1 │ function foo(a) { ({...a} = obj); }
       │              ^
   
-  i Use a local variable instead.
+  i Developers usually expect function parameters to be readonly. To align with this expectation, use a local variable instead.
   
 
 ```
@@ -395,7 +396,7 @@ function foo(a) { a &&= b; }
 ```
 invalid.jsonc:1:19 lint/style/noParameterAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Reassigning a function parameter is confusing.
+  ! Assigning a function parameter is confusing.
   
   > 1 │ function foo(a) { a &&= b; }
       │                   ^
@@ -405,7 +406,7 @@ invalid.jsonc:1:19 lint/style/noParameterAssign ━━━━━━━━━━�
   > 1 │ function foo(a) { a &&= b; }
       │              ^
   
-  i Use a local variable instead.
+  i Developers usually expect function parameters to be readonly. To align with this expectation, use a local variable instead.
   
 
 ```
@@ -419,7 +420,7 @@ function foo(a) { a ||= b; }
 ```
 invalid.jsonc:1:19 lint/style/noParameterAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Reassigning a function parameter is confusing.
+  ! Assigning a function parameter is confusing.
   
   > 1 │ function foo(a) { a ||= b; }
       │                   ^
@@ -429,7 +430,7 @@ invalid.jsonc:1:19 lint/style/noParameterAssign ━━━━━━━━━━�
   > 1 │ function foo(a) { a ||= b; }
       │              ^
   
-  i Use a local variable instead.
+  i Developers usually expect function parameters to be readonly. To align with this expectation, use a local variable instead.
   
 
 ```
@@ -443,7 +444,7 @@ function foo(a) { a ??= b; }
 ```
 invalid.jsonc:1:19 lint/style/noParameterAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Reassigning a function parameter is confusing.
+  ! Assigning a function parameter is confusing.
   
   > 1 │ function foo(a) { a ??= b; }
       │                   ^
@@ -453,7 +454,7 @@ invalid.jsonc:1:19 lint/style/noParameterAssign ━━━━━━━━━━�
   > 1 │ function foo(a) { a ??= b; }
       │              ^
   
-  i Use a local variable instead.
+  i Developers usually expect function parameters to be readonly. To align with this expectation, use a local variable instead.
   
 
 ```
@@ -467,7 +468,7 @@ const doSomething = req => { req = {}; };
 ```
 invalid.jsonc:1:30 lint/style/noParameterAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Reassigning a function parameter is confusing.
+  ! Assigning a function parameter is confusing.
   
   > 1 │ const doSomething = req => { req = {}; };
       │                              ^^^
@@ -477,7 +478,7 @@ invalid.jsonc:1:30 lint/style/noParameterAssign ━━━━━━━━━━�
   > 1 │ const doSomething = req => { req = {}; };
       │                     ^^^
   
-  i Use a local variable instead.
+  i Developers usually expect function parameters to be readonly. To align with this expectation, use a local variable instead.
   
 
 ```

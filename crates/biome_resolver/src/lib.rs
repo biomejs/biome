@@ -192,7 +192,7 @@ fn resolve_module_with_package_json(
     }
 
     if let Some(package_name) = &package_json.name {
-        if specifier.starts_with(package_name)
+        if specifier.starts_with(package_name.as_ref())
             && specifier
                 .as_bytes()
                 .get(package_name.len())
@@ -581,7 +581,7 @@ fn resolve_path_info(
     }
 }
 
-fn is_relative_specifier(specifier: &str) -> bool {
+pub fn is_relative_specifier(specifier: &str) -> bool {
     specifier == "." || specifier.starts_with("./") || specifier.starts_with("../")
 }
 

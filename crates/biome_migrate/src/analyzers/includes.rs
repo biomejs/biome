@@ -252,10 +252,10 @@ fn validate_globs(member: &JsonMember) -> Box<[(TextRange, biome_glob::GlobError
 }
 
 fn to_biome_glob(glob: &str, is_exception: bool) -> String {
-    // Globs without any path separators are likely general globs that must be applied at every directory level.
     let mut result = glob.to_string();
     let mut bytes = glob.bytes().enumerate();
-    let mut escaped_count = 0;
+    let mut offset = 0;
+    let mut prev_byte = None;
     while let Some((index, byte)) = bytes.next() {
         match byte {
             b'\\' => {
@@ -264,11 +264,20 @@ fn to_biome_glob(glob: &str, is_exception: bool) -> String {
             }
             b'[' | b']' => {
                 // Escape `[` and `]`.
-                result.insert(index + escaped_count, '\\');
-                escaped_count += 1;
+                result.insert(index + offset, '\\');
+                offset += 1;
+            }
+            b'/' if prev_byte != Some(b'*') => {
+                let mut look_ahead = bytes.clone().map(|(_, byte)| byte);
+                if look_ahead.next() == Some(b'*') && look_ahead.next() != Some(b'*') {
+                    // Convert `/*` to `**/*`
+                    result.insert_str(index + offset, "/**");
+                    offset += 3;
+                }
             }
             _ => {}
         }
+        prev_byte = Some(byte);
     }
     let result = if let Some(tail) = result.strip_prefix("./") {
         // Biome globs doesn't support `./`
@@ -304,7 +313,7 @@ fn test_to_biome_glob() {
     assert_eq!(to_biome_glob("./src", false), "src/**");
     assert_eq!(to_biome_glob("src/file.js", false), "**/src/file.js");
     assert_eq!(to_biome_glob("src/**", false), "**/src/**");
-    assert_eq!(to_biome_glob("src/*", false), "**/src/*");
+    assert_eq!(to_biome_glob("src/*", false), "**/src/**/*");
     assert_eq!(to_biome_glob("**", false), "**");
     assert_eq!(to_biome_glob("**/*", false), "**/*");
     assert_eq!(to_biome_glob("**/src", false), "**/src/**");
@@ -314,7 +323,7 @@ fn test_to_biome_glob() {
     assert_eq!(to_biome_glob("./src", true), "!src");
     assert_eq!(to_biome_glob("src/file.js", true), "!**/src/file.js");
     assert_eq!(to_biome_glob("src/**", true), "!**/src/**");
-    assert_eq!(to_biome_glob("src/*", true), "!**/src/*");
+    assert_eq!(to_biome_glob("src/*", true), "!**/src/**/*");
     assert_eq!(to_biome_glob("**", true), "!**");
     assert_eq!(to_biome_glob("**/*", true), "!**/*");
     assert_eq!(to_biome_glob("**/src", true), "!**/src");
