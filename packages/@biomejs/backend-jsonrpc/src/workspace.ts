@@ -646,6 +646,10 @@ export interface JsFormatterConfiguration {
 	 */
 	lineWidth?: LineWidth;
 	/**
+	 * When breaking binary expressions into multiple lines, whether to break them before or after the binary operator. Defaults to "after".
+	 */
+	operatorLinebreak?: OperatorLinebreak;
+	/**
 	 * When properties in objects are quoted. Defaults to asNeeded.
 	 */
 	quoteProperties?: QuoteProperties;
@@ -880,6 +884,7 @@ Note that this is only necessary for inline elements. Block elements do not have
 	 */
 export type WhitespaceSensitivity = "css" | "strict" | "ignore";
 export type ArrowParentheses = "always" | "asNeeded";
+export type OperatorLinebreak = "after" | "before";
 export type QuoteProperties = "asNeeded" | "preserve";
 export type Semicolons = "always" | "asNeeded";
 /**
