@@ -42,6 +42,7 @@ biome_json_value   = { workspace = true }
 biome_test_utils   = { workspace = true }
 criterion          = { package = "codspeed-criterion-compat", version = "*" }
 insta              = { workspace = true }
+walkdir            = { workspace = true }
 
 [target.'cfg(target_os = "windows")'.dev-dependencies]
 mimalloc = { workspace = true }

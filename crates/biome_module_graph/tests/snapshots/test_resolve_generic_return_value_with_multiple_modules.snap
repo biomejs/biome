@@ -186,13 +186,4 @@ Full TypeId(8) => Object {
   prototype: No prototype
   members: ["bar": Module(1) TypeId(0)]
 }
-
-Full TypeId(9) => Module(1) TypeId(0)
-
-Full TypeId(10) => value: bar
-
-Full TypeId(11) => Object {
-  prototype: No prototype
-  members: ["bar": Module(1) TypeId(0)]
-}
 ```
