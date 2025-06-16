@@ -27,6 +27,10 @@ use std::ffi::c_int;
 use std::fmt::Write;
 use std::sync::{Arc, Once};
 
+mod bench_case;
+
+pub use bench_case::BenchCase;
+
 pub fn scripts_from_json(extension: &str, input_code: &str) -> Option<Vec<String>> {
     if extension == "json" || extension == "jsonc" {
         let input_code = StripComments::new(input_code.as_bytes());

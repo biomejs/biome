@@ -1,0 +1,6 @@
+{
+    "name": "no-private-imports",
+    "dependencies": {
+        "external-package": "0.0.1"
+    }
+}

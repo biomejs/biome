@@ -11,7 +11,7 @@ type A = string;
 ```
 invalidType.ts:1:6 lint/correctness/noUnusedVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This type alias is unused.
+  ! This type alias A is unused.
   
   > 1 │ type A = string;
       │      ^

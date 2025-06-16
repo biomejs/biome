@@ -2991,3 +2991,49 @@ fn check_plugin_suppressions() {
         result,
     ));
 }
+
+#[test]
+fn doesnt_check_file_when_assist_is_disabled() {
+    let mut fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    fs.insert(
+        "biome.json".into(),
+        br#"{
+    "assist": {
+        "actions": {
+            "source": {
+                "useSortedKeys": "on"
+            }
+        },
+        "includes": [
+            "**",
+            "!**/src/file.json"
+        ]
+    }
+}"#,
+    );
+
+    let file_path = Utf8Path::new("src/file.json");
+    fs.insert(
+        file_path.into(),
+        r#"{ "z": 1, "b": 2 }
+"#
+        .as_bytes(),
+    );
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["check", "--verbose", file_path.as_str()].as_slice()),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "doesnt_check_file_when_assist_is_disabled",
+        fs,
+        console,
+        result,
+    ));
+}

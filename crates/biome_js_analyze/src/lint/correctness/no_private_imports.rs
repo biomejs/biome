@@ -8,6 +8,7 @@ use biome_fs::BiomePath;
 use biome_js_syntax::{
     AnyJsImportClause, AnyJsImportLike, AnyJsNamedImportSpecifier, JsModuleSource, JsSyntaxToken,
 };
+use biome_jsdoc_comment::JsdocComment;
 use biome_module_graph::{JsModuleInfo, ModuleGraph, ResolvedPath};
 use biome_rowan::{AstNode, SyntaxResult, Text, TextRange};
 use camino::{Utf8Path, Utf8PathBuf};
@@ -227,9 +228,9 @@ impl Rule for NoPrivateImports {
             .is_static_import()
             .then(|| node.inner_string_text())
             .flatten()
-            .filter(|specifier| !BiomePath::new(specifier.text()).is_dependency())
             .and_then(|specifier| module_info.static_import_paths.get(specifier.text()))
             .and_then(ResolvedPath::as_path)
+            .filter(|path| !BiomePath::new(path).is_dependency())
         else {
             return Vec::new();
         };
@@ -418,8 +419,9 @@ fn get_restricted_import_visibility(
 ) -> Option<Visibility> {
     let visibility = options
         .target_info
-        .find_exported_symbol(options.module_graph, import_name.text())
-        .and_then(|export| export.jsdoc_comment.as_deref().and_then(parse_visibility))
+        .find_jsdoc_for_exported_symbol(options.module_graph, import_name.text())
+        .as_ref()
+        .and_then(parse_visibility)
         .unwrap_or(options.default_visibility);
 
     let is_restricted = match visibility {
@@ -434,7 +436,7 @@ fn get_restricted_import_visibility(
 /// Searches JSDoc comments to find the first `@public`, `@package`, `@private`,
 /// or `@access` tag, and maps it to one of the supported [Visibility] values,
 /// if possible.
-fn parse_visibility(jsdoc_comment: &str) -> Option<Visibility> {
+fn parse_visibility(jsdoc_comment: &JsdocComment) -> Option<Visibility> {
     jsdoc_comment.lines().find_map(|line| {
         line.strip_prefix('@')
             .map(|tag| tag.strip_prefix("access ").unwrap_or(tag))

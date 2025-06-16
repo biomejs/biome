@@ -1,9 +1,11 @@
+use std::collections::BTreeSet;
+
 use biome_fs::MemoryFileSystem;
 use biome_js_formatter::context::JsFormatOptions;
 use biome_js_formatter::format_node;
 use biome_js_parser::{JsParserOptions, parse};
 use biome_js_syntax::JsFileSource;
-use biome_module_graph::{ModuleGraph, ScopedResolver};
+use biome_module_graph::{JsExport, JsOwnExport, ModuleGraph, ScopedResolver};
 use biome_resolver::ResolvedPath;
 use biome_rowan::AstNode;
 use biome_test_utils::dump_registered_types;
@@ -84,14 +86,35 @@ impl<'a> ModuleGraphSnapshot<'a> {
             content.push_str(formatted.as_code().trim());
             content.push_str("\n```");
 
-            let data = dependency_data.get(file_name.as_path()).unwrap().clone();
+            if let Some(data) = dependency_data.get(file_name.as_path()) {
+                content.push_str("\n\n## Module Info\n\n");
+                content.push_str("```\n");
+                content.push_str(&data.to_string());
+                content.push_str("\n```\n\n");
 
-            content.push_str("\n\n## Module Info\n\n");
-            content.push_str("```\n");
-            content.push_str(&data.to_string());
-            content.push_str("\n```\n\n");
+                let exported_binding_ids: BTreeSet<_> = data
+                    .exports
+                    .values()
+                    .filter_map(JsExport::as_own_export)
+                    .filter_map(|export| match export {
+                        JsOwnExport::Binding(binding_id) => Some(*binding_id),
+                        JsOwnExport::Type(_) => None,
+                    })
+                    .collect();
+                if !exported_binding_ids.is_empty() {
+                    content.push_str("## Exported Bindings\n\n");
+                    content.push_str("```");
+                    for binding_id in exported_binding_ids {
+                        content.push_str(&format!(
+                            "\n{binding_id:?} => {}\n",
+                            data.binding(binding_id)
+                        ));
+                    }
+                    content.push_str("```\n\n");
+                }
 
-            dump_registered_types(&mut content, data.as_resolver());
+                dump_registered_types(&mut content, data.as_resolver());
+            }
         }
 
         if let Some(resolver) = self.resolver {

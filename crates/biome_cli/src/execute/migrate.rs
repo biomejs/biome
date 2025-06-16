@@ -23,6 +23,7 @@ use biome_service::workspace::{
 };
 use camino::Utf8PathBuf;
 use std::borrow::Cow;
+use std::collections::BTreeSet;
 
 mod eslint;
 mod eslint_any_rule_to_biome;
@@ -56,9 +57,9 @@ pub(crate) fn run(migrate_payload: MigratePayload) -> Result<(), CliDiagnostic> 
     let workspace = &*session.app.workspace;
     let console = session.app.console;
 
-    let mut configuration_list = vec![configuration_file_path.into()];
+    let mut configuration_list = BTreeSet::default();
+    configuration_list.insert(configuration_file_path.into());
     configuration_list.extend(nested_configuration_files);
-
     let mut diagnostic_result = MigrationResultDiagnostic::default();
 
     for configuration_file_path in configuration_list {

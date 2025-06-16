@@ -67,40 +67,22 @@ export const codes: {
 ```
 Exports {
   "CountryInfo" => {
-    ExportOwnExport => JsOwnExport(
-      Module(0) TypeId(22)
-      Local name: CountryInfo
-    )
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(22))
   }
   "SubdivisionInfo" => {
-    ExportOwnExport => JsOwnExport(
-      Module(0) TypeId(23)
-      Local name: SubdivisionInfo
-    )
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(23))
   }
   "codes" => {
-    ExportOwnExport => JsOwnExport(
-      Module(0) TypeId(20)
-      Local name: codes
-    )
+    ExportOwnExport => JsOwnExport::Binding(18)
   }
   "country" => {
-    ExportOwnExport => JsOwnExport(
-      Module(0) TypeId(17)
-      Local name: country
-    )
+    ExportOwnExport => JsOwnExport::Binding(15)
   }
   "data" => {
-    ExportOwnExport => JsOwnExport(
-      Module(0) TypeId(18)
-      Local name: data
-    )
+    ExportOwnExport => JsOwnExport::Binding(17)
   }
   "subdivision" => {
-    ExportOwnExport => JsOwnExport(
-      Module(0) TypeId(14)
-      Local name: subdivision
-    )
+    ExportOwnExport => JsOwnExport::Binding(12)
   }
 }
 Imports {
@@ -108,10 +90,50 @@ Imports {
 }
 ```
 
+## Exported Bindings
+
+```
+BindingId(12) => JsBindingData {
+  Name: subdivision,
+  Type: Module(0) TypeId(18),
+  Declaration kind: HoistedValue
+}
+
+BindingId(15) => JsBindingData {
+  Name: country,
+  Type: Module(0) TypeId(21),
+  Declaration kind: HoistedValue
+}
+
+BindingId(17) => JsBindingData {
+  Name: data,
+  Type: Module(0) TypeId(0),
+  Declaration kind: Value
+}
+
+BindingId(18) => JsBindingData {
+  Name: codes,
+  Type: Module(0) TypeId(2),
+  Declaration kind: Value
+}
+```
+
 ## Registered types
 
 ```
-Module TypeId(0) => Namespace {
+Module TypeId(0) => instanceof Module(0) TypeId(8)
+
+Module TypeId(1) => Object {
+  prototype: No prototype
+  members: []
+}
+
+Module TypeId(2) => Object {
+  prototype: No prototype
+  members: []
+}
+
+Module TypeId(3) => Namespace {
     path: [
         Borrowed(
             "CountryInfo",
@@ -126,7 +148,7 @@ Module TypeId(0) => Namespace {
             ),
             is_static: true,
             ty: Resolved(
-                Module(0) TypeId(2),
+                Module(0) TypeId(5),
             ),
         },
         TypeMember {
@@ -137,7 +159,7 @@ Module TypeId(0) => Namespace {
             ),
             is_static: true,
             ty: Resolved(
-                Module(0) TypeId(4),
+                Module(0) TypeId(7),
             ),
         },
         TypeMember {
@@ -148,37 +170,37 @@ Module TypeId(0) => Namespace {
             ),
             is_static: true,
             ty: Resolved(
-                Module(0) TypeId(5),
+                Module(0) TypeId(8),
             ),
         },
     ],
 }
 
-Module TypeId(1) => instanceof unresolved reference "SubdivisionInfo.Map"
+Module TypeId(4) => instanceof Module(0) TypeId(8)
 
-Module TypeId(2) => interface "Partial" {
+Module TypeId(5) => interface "Partial" {
   extends: []
   type_args: []
-  members: ["name": string, "sub": Module(0) TypeId(1)]
+  members: ["name": string, "sub": Module(0) TypeId(4)]
 }
 
-Module TypeId(3) => instanceof unresolved reference "Partial"
+Module TypeId(6) => instanceof Module(0) TypeId(5)
 
-Module TypeId(4) => interface "Full" {
-  extends: [Module(0) TypeId(3)]
+Module TypeId(7) => interface "Full" {
+  extends: [Module(0) TypeId(6)]
   type_args: []
   members: ["code": string]
 }
 
-Module TypeId(5) => interface "Map" {
+Module TypeId(8) => interface "Map" {
   extends: []
   type_args: []
   members: []
 }
 
-Module TypeId(6) => instanceof Module(0) TypeId(4)
+Module TypeId(9) => instanceof Module(0) TypeId(7)
 
-Module TypeId(7) => Namespace {
+Module TypeId(10) => Namespace {
     path: [
         Borrowed(
             "SubdivisionInfo",
@@ -193,7 +215,7 @@ Module TypeId(7) => Namespace {
             ),
             is_static: true,
             ty: Resolved(
-                Module(0) TypeId(8),
+                Module(0) TypeId(11),
             ),
         },
         TypeMember {
@@ -204,7 +226,7 @@ Module TypeId(7) => Namespace {
             ),
             is_static: true,
             ty: Resolved(
-                Module(0) TypeId(9),
+                Module(0) TypeId(13),
             ),
         },
         TypeMember {
@@ -215,20 +237,22 @@ Module TypeId(7) => Namespace {
             ),
             is_static: true,
             ty: Resolved(
-                Module(0) TypeId(5),
+                Module(0) TypeId(8),
             ),
         },
     ],
 }
 
-Module TypeId(8) => interface "Partial" {
+Module TypeId(11) => interface "Partial" {
   extends: []
   type_args: []
   members: ["type": string, "name": string]
 }
 
-Module TypeId(9) => interface "Full" {
-  extends: [Module(0) TypeId(3)]
+Module TypeId(12) => instanceof Module(0) TypeId(11)
+
+Module TypeId(13) => interface "Full" {
+  extends: [Module(0) TypeId(12)]
   type_args: []
   members: [
     "countryName": string,
@@ -238,15 +262,15 @@ Module TypeId(9) => interface "Full" {
   ]
 }
 
-Module TypeId(10) => instanceof Module(0) TypeId(9)
+Module TypeId(14) => instanceof Module(0) TypeId(13)
 
-Module TypeId(11) => instanceof Module(0) TypeId(7)
+Module TypeId(15) => instanceof Module(0) TypeId(10)
 
-Module TypeId(12) => value: null
+Module TypeId(16) => value: null
 
-Module TypeId(13) => Module(0) TypeId(11) | Module(0) TypeId(12)
+Module TypeId(17) => Module(0) TypeId(15) | Module(0) TypeId(16)
 
-Module TypeId(14) => sync Function "subdivision" {
+Module TypeId(18) => sync Function "subdivision" {
   accepts: {
     params: [
       required countryCodeOrFullSubdivisionCode: string (bindings: countryCodeOrFullSubdivisionCode:string)
@@ -254,38 +278,24 @@ Module TypeId(14) => sync Function "subdivision" {
     ]
     type_args: []
   }
-  returns: Module(0) TypeId(13)
+  returns: Module(0) TypeId(17)
 }
 
-Module TypeId(15) => instanceof Module(0) TypeId(0)
+Module TypeId(19) => instanceof Module(0) TypeId(3)
 
-Module TypeId(16) => Module(0) TypeId(15) | Module(0) TypeId(12)
+Module TypeId(20) => Module(0) TypeId(19) | Module(0) TypeId(16)
 
-Module TypeId(17) => sync Function "country" {
+Module TypeId(21) => sync Function "country" {
   accepts: {
     params: [
       required countryCodeOrName: string (bindings: countryCodeOrName:string)
     ]
     type_args: []
   }
-  returns: Module(0) TypeId(16)
+  returns: Module(0) TypeId(20)
 }
 
-Module TypeId(18) => instanceof Module(0) TypeId(5)
+Module TypeId(22) => (type: Module(0) TypeId(9), value: Module(0) TypeId(3), namespace: Module(0) TypeId(3))
 
-Module TypeId(19) => Object {
-  prototype: No prototype
-  members: []
-}
-
-Module TypeId(20) => Object {
-  prototype: No prototype
-  members: []
-}
-
-Module TypeId(21) => unknown
-
-Module TypeId(22) => (type: Module(0) TypeId(6), value: Module(0) TypeId(0), namespace: Module(0) TypeId(0))
-
-Module TypeId(23) => (type: Module(0) TypeId(10), value: Module(0) TypeId(7), namespace: Module(0) TypeId(7))
+Module TypeId(23) => (type: Module(0) TypeId(14), value: Module(0) TypeId(10), namespace: Module(0) TypeId(10))
 ```

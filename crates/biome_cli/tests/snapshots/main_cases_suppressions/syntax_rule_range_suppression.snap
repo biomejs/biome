@@ -46,7 +46,7 @@ file.ts:4:13 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━━━
 ```block
 file.ts:7:10 lint/correctness/noUnusedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This function is unused.
+  ! This function sommething is unused.
   
     5 │ // biome-ignore-end syntax/correctness/noTypeOnlyImportAttributes: bug
     6 │ 

@@ -44,7 +44,7 @@ file.js:1:1 lint/style/useConst  FIXABLE  ━━━━━━━━━━━━�
 ```block
 file.js:1:5 lint/correctness/noUnusedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This variable is unused.
+  ! This variable a is unused.
   
   > 1 │ let a = !b || !c
       │     ^

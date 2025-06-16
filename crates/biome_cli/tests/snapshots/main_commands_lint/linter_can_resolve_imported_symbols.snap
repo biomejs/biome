@@ -1,0 +1,56 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `biome.json`
+
+```json
+{
+  "linter": {
+    "rules": {
+      "nursery": {
+        "noFloatingPromises": "on"
+      }
+    }
+  }
+}
+```
+
+## `src/foo.ts`
+
+```ts
+export function foo(): Foo {}
+
+export async function bar() {}
+```
+
+## `src/index.ts`
+
+```ts
+import { foo, bar } from "./foo.ts";
+
+fn(foo());
+
+bar();
+```
+
+# Emitted Messages
+
+```block
+src/index.ts:5:1 lint/nursery/noFloatingPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i A "floating" Promise was found, meaning it is not properly handled and could lead to ignored errors or unexpected behavior.
+  
+    3 │ fn(foo());
+    4 │ 
+  > 5 │ bar();
+      │ ^^^^^^
+  
+  i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
+  
+
+```
+
+```block
+Checked 1 file in <TIME>. No fixes applied.
+```

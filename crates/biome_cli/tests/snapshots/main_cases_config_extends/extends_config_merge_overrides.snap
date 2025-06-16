@@ -49,7 +49,7 @@ lint ━━━━━━━━━━━━━━━━━━━━━━━━━
 ```block
 test.js:1:17 lint/correctness/noUnusedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × This variable is unused.
+  × This variable a is unused.
   
   > 1 │ debugger; const a = 0;
       │                 ^

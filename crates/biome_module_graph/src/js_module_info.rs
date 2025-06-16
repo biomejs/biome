@@ -4,9 +4,9 @@ mod scope;
 mod scoped_resolver;
 mod visitor;
 
-use std::{collections::BTreeMap, ops::Deref, sync::Arc};
+use std::{borrow::Cow, collections::BTreeMap, ops::Deref, sync::Arc};
 
-use biome_js_syntax::AnyJsImportLike;
+use biome_js_syntax::{AnyJsExpression, AnyJsImportLike};
 use biome_js_type_info::{
     BindingId, GLOBAL_RESOLVER, GLOBAL_UNKNOWN_ID, ImportSymbol, ResolvedTypeData, ResolvedTypeId,
     ScopeId, TypeData, TypeId, TypeReference, TypeReferenceQualifier, TypeResolver,
@@ -14,13 +14,15 @@ use biome_js_type_info::{
 };
 use biome_jsdoc_comment::JsdocComment;
 use biome_resolver::ResolvedPath;
-use biome_rowan::{Text, TextRange, TokenText};
+use biome_rowan::{AstNode, Text, TextRange};
+use rust_lapper::Lapper;
+use rustc_hash::FxHashMap;
 
 use crate::ModuleGraph;
 
-use binding::JsBindingData;
 use scope::{JsScope, JsScopeData, TsBindingReference};
 
+pub(super) use binding::JsBindingData;
 pub use scoped_resolver::ScopedResolver;
 pub(crate) use visitor::JsModuleVisitor;
 
@@ -62,6 +64,17 @@ impl JsModuleInfo {
         module_graph.find_exported_symbol(self, name)
     }
 
+    /// Finds an exported symbol by `name`, using the `module_graph` to
+    /// lookup re-exports if necessary.
+    #[inline]
+    pub fn find_jsdoc_for_exported_symbol(
+        &self,
+        module_graph: &ModuleGraph,
+        name: &str,
+    ) -> Option<JsdocComment> {
+        module_graph.find_jsdoc_for_exported_symbol(self, name)
+    }
+
     /// Returns the module's global scope.
     pub fn global_scope(&self) -> JsScope {
         JsScope {
@@ -74,21 +87,8 @@ impl JsModuleInfo {
     pub fn scope_for_range(&self, range: TextRange) -> JsScope {
         JsScope {
             info: self.0.clone(),
-            id: self.scope_id_for_range(range),
+            id: scope_id_for_range(&self.0.scope_by_range, range),
         }
-    }
-
-    pub fn scope_id_for_range(&self, range: TextRange) -> ScopeId {
-        let start = range.start().into();
-        let end = range.end().into();
-        self.0
-            .scope_by_range
-            .find(start, end)
-            .filter(|interval| !(start < interval.start || end > interval.stop))
-            .max_by_key(|interval| interval.val)
-            .map_or(ScopeId::GLOBAL, |interval| {
-                ScopeId::new(interval.val.index())
-            })
     }
 }
 
@@ -148,13 +148,16 @@ pub struct JsModuleInfoInner {
     /// Collection of all the declarations in the module.
     pub(crate) bindings: Box<[JsBindingData]>,
 
+    /// Parsed expressions, mapped from their range to their type ID.
+    pub(crate) expressions: FxHashMap<TextRange, TypeId>,
+
     /// All scopes in this module.
     ///
     /// The first entry is expected to be the global scope.
     pub(crate) scopes: Box<[JsScopeData]>,
 
     /// Lookup tree to find scopes by text range.
-    pub(crate) scope_by_range: rust_lapper::Lapper<u32, ScopeId>,
+    pub(crate) scope_by_range: Lapper<u32, ScopeId>,
 
     /// Collection of all types in the module.
     pub(crate) types: Box<[TypeData]>,
@@ -185,7 +188,8 @@ static_assertions::assert_impl_all!(JsModuleInfo: Send, Sync);
 
 impl JsModuleInfoInner {
     /// Returns one of the bindings by ID.
-    pub(crate) fn binding(&self, binding_id: BindingId) -> &JsBindingData {
+    #[inline]
+    pub fn binding(&self, binding_id: BindingId) -> &JsBindingData {
         &self.bindings[binding_id.index()]
     }
 
@@ -246,7 +250,7 @@ impl TypeResolver for JsModuleInfoInner {
         }
     }
 
-    fn register_type(&mut self, _type_data: TypeData) -> TypeId {
+    fn register_type(&mut self, _type_data: Cow<TypeData>) -> TypeId {
         panic!("Cannot register new types after the module has been constructed");
     }
 
@@ -267,7 +271,12 @@ impl TypeResolver for JsModuleInfoInner {
         if let Some(export) = self.exports.get(&qualifier.path[0]) {
             export
                 .as_own_export()
-                .and_then(|own_export| self.resolve_reference(&own_export.ty))
+                .and_then(|own_export| match own_export {
+                    JsOwnExport::Binding(binding_id) => {
+                        self.resolve_reference(&self.bindings[binding_id.index()].ty)
+                    }
+                    JsOwnExport::Type(type_id) => Some(*type_id),
+                })
         } else {
             GLOBAL_RESOLVER.resolve_qualifier(qualifier)
         }
@@ -277,10 +286,22 @@ impl TypeResolver for JsModuleInfoInner {
         if let Some(export) = self.exports.get(identifier) {
             export
                 .as_own_export()
-                .and_then(|own_export| self.resolve_reference(&own_export.ty))
+                .and_then(|own_export| match own_export {
+                    JsOwnExport::Binding(binding_id) => {
+                        self.resolve_reference(&self.bindings[binding_id.index()].ty)
+                    }
+                    JsOwnExport::Type(type_id) => Some(*type_id),
+                })
         } else {
             GLOBAL_RESOLVER.resolve_type_of(identifier, scope_id)
         }
+    }
+
+    fn resolve_expression(&mut self, _scope_id: ScopeId, expr: &AnyJsExpression) -> Cow<TypeData> {
+        self.expressions.get(&expr.range()).map_or_else(
+            || Cow::Owned(TypeData::unknown()),
+            |id| Cow::Borrowed(self.get_by_id(*id)),
+        )
     }
 
     fn registered_types(&self) -> &[TypeData] {
@@ -352,16 +373,13 @@ pub struct JsImport {
 }
 
 /// Information tracked for every "own" export.
+///
+/// Exports can reference bindings, types of expressions or other references for
+/// which no binding exists, or namespaces defined by exports of another module.
 #[derive(Clone, Debug, PartialEq)]
-pub struct JsOwnExport {
-    /// Optional JSDoc comment associated with the symbol being exported.
-    pub jsdoc_comment: Option<JsdocComment>,
-
-    /// Name of the binding in the module's global scope.
-    pub local_name: Option<TokenText>,
-
-    /// Type of the exported symbol.
-    pub ty: TypeReference,
+pub enum JsOwnExport {
+    Binding(BindingId),
+    Type(ResolvedTypeId),
 }
 
 /// Information about an export statement that re-exports all symbols from
@@ -394,4 +412,16 @@ impl Iterator for ImportPathIterator {
                 .map(|(_identifier, path)| path)
         }
     }
+}
+
+fn scope_id_for_range(scope_by_range: &Lapper<u32, ScopeId>, range: TextRange) -> ScopeId {
+    let start = range.start().into();
+    let end = range.end().into();
+    scope_by_range
+        .find(start, end)
+        .filter(|interval| !(start < interval.start || end > interval.stop))
+        .max_by_key(|interval| interval.val)
+        .map_or(ScopeId::GLOBAL, |interval| {
+            ScopeId::new(interval.val.index())
+        })
 }

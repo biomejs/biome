@@ -4,7 +4,7 @@
 
 Add an `ignoreRestSiblings` option into [`noUnusedVariables`](https://biomejs.dev/linter/rules/no-unused-variables).
 
-When this option is set to `true`, the rule will ignore variables that created using the rest pattern:
+When this option is set to `false`, the rule will **not** ignore variables that created using the rest pattern:
 
 ```json
 {
@@ -14,7 +14,7 @@ When this option is set to `true`, the rule will ignore variables that created u
         "noUnusedVariables": {
           "level": "error",
           "options": {
-            "ignoreRestSiblings": true
+            "ignoreRestSiblings": false
           }
         }
       }
@@ -24,6 +24,6 @@ When this option is set to `true`, the rule will ignore variables that created u
 ```
 
 ```js
-const { lorem, ...test } = bar; // the variable "test" won't trigger the rule
+const { lorem, ...test } = bar; // the variable "test" will trigger the rule
 console.log(lorem)
 ```

@@ -15,7 +15,7 @@ export type TestUnionType<T> = T extends (infer B)[] | infer B ? number : never;
 ```
 invalidTypeParam.ts:1:19 lint/correctness/noUnusedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This type parameter is unused.
+  ! This type parameter T is unused.
   
   > 1 │ export function f<T>() {}
       │                   ^
@@ -37,7 +37,7 @@ invalidTypeParam.ts:1:19 lint/correctness/noUnusedVariables  FIXABLE  ━━━�
 ```
 invalidTypeParam.ts:2:16 lint/correctness/noUnusedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This type parameter is unused.
+  ! This type parameter T is unused.
   
     1 │ export function f<T>() {}
   > 2 │ export class C<T> {}
@@ -61,7 +61,7 @@ invalidTypeParam.ts:2:16 lint/correctness/noUnusedVariables  FIXABLE  ━━━�
 ```
 invalidTypeParam.ts:3:19 lint/correctness/noUnusedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This type parameter is unused.
+  ! This type parameter T is unused.
   
     1 │ export function f<T>() {}
     2 │ export class C<T> {}
@@ -87,7 +87,7 @@ invalidTypeParam.ts:3:19 lint/correctness/noUnusedVariables  FIXABLE  ━━━�
 ```
 invalidTypeParam.ts:4:44 lint/correctness/noUnusedVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This variable is unused.
+  ! This variable I is unused.
   
     2 │ export class C<T> {}
     3 │ export type Alias<T> = number
@@ -103,7 +103,7 @@ invalidTypeParam.ts:4:44 lint/correctness/noUnusedVariables ━━━━━━�
 ```
 invalidTypeParam.ts:5:62 lint/correctness/noUnusedVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This variable is unused.
+  ! This variable B is unused.
   
     3 │ export type Alias<T> = number
     4 │ export type Inferred<T> = T extends (infer I)[] ? number : never;

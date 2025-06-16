@@ -1,0 +1,222 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `packages/lib/biome.json`
+
+```json
+{ "extends": "//" }
+```
+
+## `biome.json`
+
+```json
+{
+  "root": true,
+  "vcs": {
+    "enabled": true,
+    "clientKind": "git",
+    "useIgnoreFile": true
+  }
+}
+```
+
+## `.gitignore`
+
+```gitignore
+.next
+```
+
+## `.next/file.json`
+
+```json
+[
+
+
+
+]
+```
+
+## `file.js`
+
+```js
+function f() { const lorem_and_ipsum = 'lorem ipsum'; }
+```
+
+## `packages/lib/.gitignore`
+
+```gitignore
+.next
+```
+
+## `packages/lib/.next/file.json`
+
+```json
+[
+
+
+
+]
+```
+
+## `packages/lib/file.js`
+
+```js
+function f() { const lorem_and_ipsum = 'lorem ipsum'; }
+```
+
+# Termination Message
+
+```block
+check ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Some errors were emitted while running checks.
+  
+
+
+```
+
+# Emitted Messages
+
+```block
+file.js:1:10 lint/correctness/noUnusedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This function f is unused.
+  
+  > 1 │ function f() { const lorem_and_ipsum = 'lorem ipsum'; }
+      │          ^
+  
+  i Unused variables are often the result of an incomplete refactoring, typos, or other sources of bugs.
+  
+  i Unsafe fix: If this is intentional, prepend f with an underscore.
+  
+  - function·f()·{·const·lorem_and_ipsum·=·'lorem·ipsum';·}
+  + function·_f()·{·const·lorem_and_ipsum·=·'lorem·ipsum';·}
+  
+
+```
+
+```block
+file.js:1:22 lint/correctness/noUnusedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This variable lorem_and_ipsum is unused.
+  
+  > 1 │ function f() { const lorem_and_ipsum = 'lorem ipsum'; }
+      │                      ^^^^^^^^^^^^^^^
+  
+  i Unused variables are often the result of an incomplete refactoring, typos, or other sources of bugs.
+  
+  i Unsafe fix: If this is intentional, prepend lorem_and_ipsum with an underscore.
+  
+  - function·f()·{·const·lorem_and_ipsum·=·'lorem·ipsum';·}
+  + function·f()·{·const·_lorem_and_ipsum·=·'lorem·ipsum';·}
+  
+
+```
+
+```block
+packages/lib/file.js:1:10 lint/correctness/noUnusedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This function f is unused.
+  
+  > 1 │ function f() { const lorem_and_ipsum = 'lorem ipsum'; }
+      │          ^
+  
+  i Unused variables are often the result of an incomplete refactoring, typos, or other sources of bugs.
+  
+  i Unsafe fix: If this is intentional, prepend f with an underscore.
+  
+  - function·f()·{·const·lorem_and_ipsum·=·'lorem·ipsum';·}
+  + function·_f()·{·const·lorem_and_ipsum·=·'lorem·ipsum';·}
+  
+
+```
+
+```block
+packages/lib/file.js:1:22 lint/correctness/noUnusedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This variable lorem_and_ipsum is unused.
+  
+  > 1 │ function f() { const lorem_and_ipsum = 'lorem ipsum'; }
+      │                      ^^^^^^^^^^^^^^^
+  
+  i Unused variables are often the result of an incomplete refactoring, typos, or other sources of bugs.
+  
+  i Unsafe fix: If this is intentional, prepend lorem_and_ipsum with an underscore.
+  
+  - function·f()·{·const·lorem_and_ipsum·=·'lorem·ipsum';·}
+  + function·f()·{·const·_lorem_and_ipsum·=·'lorem·ipsum';·}
+  
+
+```
+
+```block
+biome.json format ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Formatter would have printed the following content:
+  
+     1   │ - 
+     2 1 │   {
+     3   │ - ····"root":·true,
+     4   │ - ····"vcs":·{
+     5   │ - ········"enabled":·true,
+     6   │ - ········"clientKind":·"git",
+     7   │ - ········"useIgnoreFile":·true
+     8   │ - ····}
+       2 │ + → "root":·true,
+       3 │ + → "vcs":·{
+       4 │ + → → "enabled":·true,
+       5 │ + → → "clientKind":·"git",
+       6 │ + → → "useIgnoreFile":·true
+       7 │ + → }
+     9 8 │   }
+    10 9 │   
+  
+
+```
+
+```block
+file.js format ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Formatter would have printed the following content:
+  
+    1   │ - function·f()·{·const·lorem_and_ipsum·=·'lorem·ipsum';·}
+      1 │ + function·f()·{
+      2 │ + → const·lorem_and_ipsum·=·"lorem·ipsum";
+      3 │ + }
+      4 │ + 
+  
+
+```
+
+```block
+packages/lib/biome.json format ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Formatter would have printed the following content:
+  
+    1   │ - {·"extends":·"//"·}
+      1 │ + {·"extends":·"//"·}
+      2 │ + 
+  
+
+```
+
+```block
+packages/lib/file.js format ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Formatter would have printed the following content:
+  
+    1   │ - function·f()·{·const·lorem_and_ipsum·=·'lorem·ipsum';·}
+      1 │ + function·f()·{
+      2 │ + → const·lorem_and_ipsum·=·"lorem·ipsum";
+      3 │ + }
+      4 │ + 
+  
+
+```
+
+```block
+Checked 4 files in <TIME>. No fixes applied.
+Found 4 errors.
+Found 4 warnings.
+```

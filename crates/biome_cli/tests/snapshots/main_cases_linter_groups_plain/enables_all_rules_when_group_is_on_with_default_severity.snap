@@ -40,7 +40,7 @@ test1.js:1:28 lint/complexity/noArguments ━━━━━━━━━━━━�
 ```block
 test1.js:1:10 lint/correctness/noUnusedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This function is unused.
+  ! This function f is unused.
   
   > 1 │ function f() { console.log(arguments); }
       │          ^

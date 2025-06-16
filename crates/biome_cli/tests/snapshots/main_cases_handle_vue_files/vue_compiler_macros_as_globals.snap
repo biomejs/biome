@@ -49,7 +49,7 @@ file.vue:17:36 lint/suspicious/noExplicitAny ━━━━━━━━━━━�
 ```block
 file.vue:16:7 lint/correctness/noUnusedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This variable is unused.
+  ! This variable slots is unused.
   
     14 │ })
     15 │ 

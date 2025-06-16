@@ -28,39 +28,27 @@ use serde::{Deserialize, Serialize};
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct NoUnusedVariablesOptions {
-    /// Whether to ignore unused variables from an object destructuring with a spread
-    /// (i.e.: whether `a` and `b` in `const { a, b, ...rest } = obj` should be ignored by this rule).
-    #[serde(default)]
+    /// Whether to ignore unused variables from an object destructuring with a spread.
+    #[serde(default = "ignore_rest_siblings")]
     ignore_rest_siblings: bool,
+}
+
+const fn ignore_rest_siblings() -> bool {
+    true
 }
 
 declare_lint_rule! {
     /// Disallow unused variables.
     ///
-    /// There is an exception to this rule:
-    /// variables that starts with underscore, e.g. `let _something;`.
+    /// There is an exception to this rule: variables that start with underscore, e.g. `let _something;`.
     ///
-    /// The pattern of having an underscore as prefix of a name of variable is a very diffuse
-    /// pattern among programmers, and Biome decided to follow it.
+    /// The pattern of having an underscore as a prefix of a variable is a very diffuse
+    /// pattern among programmers, and Biome follows it.
     ///
     /// This rule won't report unused imports.
     /// If you want to report unused imports,
     /// enable [noUnusedImports](https://biomejs.dev/linter/rules/no-unused-imports/).
     ///
-    ///
-    /// ## Options
-    ///
-    /// The rule supports the following options:
-    ///
-    /// ```json,options
-    /// {
-    ///   "options": {
-    ///     "ignoreRestSiblings": true
-    ///   }
-    /// }
-    /// ```
-    ///
-    /// - `ignoreRestSiblings`: Whether to ignore unused variables from an object destructuring with a spread (i.e.: whether `a` and `b` in `const { a, b, ...rest } = obj` should be ignored by this rule). Defaults to `false`.
     ///
     /// ## Examples
     ///
@@ -92,10 +80,7 @@ declare_lint_rule! {
     /// ```
     ///
     /// ```js,expect_diagnostic
-    /// // With `ignoreRestSiblings: false`
-    /// const car = { brand: "Tesla", year: 2019, countryCode: "US" };
-    /// const { brand, ...other } = car;
-    /// console.log(other);
+    /// const { brand } = car;
     /// ```
     ///
     /// ### Valid
@@ -121,17 +106,32 @@ declare_lint_rule! {
     /// ```
     ///
     /// ```js
-    /// // With `ignoreRestSiblings: false`
     /// const car = { brand: "Tesla", year: 2019, countryCode: "US" };
-    /// const { brand: _brand, ...other } = car;
-    /// console.log(other);
+    /// const { brand, ...rest } = car;
+    /// console.log(brand, rest);
     /// ```
     ///
-    /// ```js,use_options
-    /// // With `ignoreRestSiblings: true`
-    /// const car = { brand: "Tesla", year: 2019, countryCode: "US" };
+    /// ## Options
+    ///
+    /// The rule has the following options
+    ///
+    /// ### `ignoreRestSiblings`
+    ///
+    /// Whether to ignore unused variables from an object destructuring with a spread (i.e.: `a` and `b` in `const { a, b, ...rest } = obj` should be ignored by this rule).
+    ///
+    /// Defaults to `true`.
+    ///
+    /// ```json,options
+    /// {
+    ///   "options": {
+    ///     "ignoreRestSiblings": false
+    ///   }
+    /// }
+    /// ```
+    ///
+    /// ```js,expect_diagnostic,use_options
     /// const { brand, ...other } = car;
-    /// console.log(other);
+    /// console.log(brand);
     /// ```
     pub NoUnusedVariables {
         version: "1.0.0",
@@ -339,11 +339,18 @@ impl Rule for NoUnusedVariables {
             _ => "variable",
         };
 
+        let binding_name = match binding {
+            AnyJsIdentifierBinding::JsIdentifierBinding(node) => node.name_token().ok()?,
+            AnyJsIdentifierBinding::TsIdentifierBinding(node) => node.name_token().ok()?,
+            AnyJsIdentifierBinding::TsTypeParameterName(node) => node.ident_token().ok()?,
+            AnyJsIdentifierBinding::TsLiteralEnumMemberName(node) => node.value().ok()?,
+        };
+
         let diag = RuleDiagnostic::new(
             rule_category!(),
             binding.syntax().text_trimmed_range(),
             markup! {
-                "This " {symbol_type} " is unused."
+                "This "{symbol_type}" "<Emphasis>{binding_name.text_trimmed()}</Emphasis>" is unused."
             },
         );
 
@@ -355,7 +362,7 @@ impl Rule for NoUnusedVariables {
         if let Some(decl) = binding.declaration() {
             if is_rest_spread_sibling(&decl) {
                 diag = diag.note(
-                    markup! {"You can use the 'ignoreRestSiblings' option to ignore unused variables in an object destructuring with a spread."},
+                    markup! {"You can use the "<Emphasis>"ignoreRestSiblings"</Emphasis>" option to ignore unused variables in an object destructuring with a spread."},
                 );
             }
         }

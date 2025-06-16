@@ -11,7 +11,6 @@ use biome_json_value::{JsonObject, JsonValue};
 use biome_text_size::TextRange;
 use camino::Utf8Path;
 use node_semver::{Range, SemverError};
-use rustc_hash::{FxBuildHasher, FxHashMap};
 use std::panic::catch_unwind;
 use std::{ops::Deref, str::FromStr};
 
@@ -23,19 +22,19 @@ pub struct PackageJson {
     /// using its name.
     ///
     /// <https://nodejs.org/api/packages.html#name>
-    pub name: Option<Text>,
+    pub name: Option<Box<str>>,
 
     /// The "type" field.
     ///
     /// <https://nodejs.org/api/packages.html#type>
     pub r#type: Option<PackageType>,
 
-    pub version: Option<Text>,
+    pub version: Option<Box<str>>,
     pub dependencies: Dependencies,
     pub dev_dependencies: Dependencies,
     pub peer_dependencies: Dependencies,
     pub optional_dependencies: Dependencies,
-    pub license: Option<(Text, TextRange)>,
+    pub license: Option<(Box<str>, TextRange)>,
 
     pub(crate) raw_json: JsonObject,
 }
@@ -43,7 +42,7 @@ pub struct PackageJson {
 static_assertions::assert_impl_all!(PackageJson: Send, Sync);
 
 impl PackageJson {
-    pub fn new(name: impl Into<Text>) -> Self {
+    pub fn new(name: impl Into<Box<str>>) -> Self {
         Self {
             name: Some(name.into()),
             r#type: Some(PackageType::Module),
@@ -51,9 +50,9 @@ impl PackageJson {
         }
     }
 
-    pub fn with_version(self, version: Text) -> Self {
+    pub fn with_version(self, version: impl Into<Box<str>>) -> Self {
         Self {
-            version: Some(version),
+            version: Some(version.into()),
             ..self
         }
     }
@@ -89,8 +88,8 @@ impl PackageJson {
             .chain(self.dev_dependencies.iter())
             .chain(self.peer_dependencies.iter());
         for (dependency_name, dependency_version) in iter {
-            if dependency_name == specifier
-                && Version::from(dependency_version.as_str()).satisfies(range)
+            if dependency_name.as_ref() == specifier
+                && Version::from(dependency_version.as_ref()).satisfies(range)
             {
                 return true;
             }
@@ -131,21 +130,64 @@ impl Manifest for PackageJson {
     }
 }
 
-#[derive(Debug, Default, Clone, biome_deserialize_macros::Deserializable)]
-pub struct Dependencies(FxHashMap<String, String>);
+#[derive(Debug, Default, Clone)]
+pub struct Dependencies(pub Box<[(Box<str>, Box<str>)]>);
 
-impl<const N: usize> From<[(String, String); N]> for Dependencies {
-    fn from(dependencies: [(String, String); N]) -> Self {
-        let mut map = FxHashMap::with_capacity_and_hasher(N, FxBuildHasher);
-        for (dependency, version) in dependencies {
-            map.insert(dependency, version);
+impl Deserializable for Dependencies {
+    fn deserialize(
+        ctx: &mut impl DeserializationContext,
+        value: &impl DeserializableValue,
+        name: &str,
+    ) -> Option<Self> {
+        struct Visitor;
+        impl DeserializationVisitor for Visitor {
+            type Output = Dependencies;
+            const EXPECTED_TYPE: DeserializableTypes = DeserializableTypes::MAP;
+
+            fn visit_map(
+                self,
+                ctx: &mut impl DeserializationContext,
+                members: impl Iterator<
+                    Item = Option<(impl DeserializableValue, impl DeserializableValue)>,
+                >,
+                _range: TextRange,
+                name: &str,
+            ) -> Option<Self::Output> {
+                let result = members
+                    .filter_map(|value| {
+                        if let Some((key, value)) = value {
+                            let key: Box<str> = Deserializable::deserialize(ctx, &key, name)?;
+                            let value: Box<str> = Deserializable::deserialize(ctx, &value, name)?;
+                            Some((key, value))
+                        } else {
+                            None
+                        }
+                    })
+                    .collect::<Vec<_>>();
+
+                Some(Dependencies(result.into_boxed_slice()))
+            }
         }
-        Self(map)
+
+        value.deserialize(ctx, Visitor, name)
+        // let result = Vec::<(Box<str>, Box<str>)>::deserialize(ctx, value, name)
+        //     .map(|v| v.into_boxed_slice())
+
+        // .map(Self)
     }
 }
 
+// impl<const N: usize> From<[(Box<str>, Box<str>); N]> for Dependencies {
+//     fn from(dependencies: [(Box<str>, Box<str>); N]) -> Self {
+//         for (dependency, version) in dependencies {
+//             map.insert(dependency.as_str().into(), version.as_str().into());
+//         }
+//         Self(dependencies)
+//     }
+// }
+
 impl Deref for Dependencies {
-    type Target = FxHashMap<String, String>;
+    type Target = Box<[(Box<str>, Box<str>)]>;
 
     fn deref(&self) -> &Self::Target {
         &self.0
@@ -153,16 +195,8 @@ impl Deref for Dependencies {
 }
 
 impl Dependencies {
-    pub fn to_keys(&self) -> Vec<String> {
-        self.0.keys().cloned().collect()
-    }
-
     pub fn contains(&self, specifier: &str) -> bool {
-        self.0.contains_key(specifier)
-    }
-
-    pub fn add(&mut self, dependency: impl Into<String>, version: impl Into<String>) {
-        self.0.insert(dependency.into(), version.into());
+        self.0.iter().any(|(k, _)| k.as_ref() == specifier)
     }
 }
 

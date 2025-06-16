@@ -1,0 +1,115 @@
+---
+source: crates/biome_module_graph/tests/snap/mod.rs
+expression: content
+---
+# `/src/index.ts` (Not imported by resolver)
+
+## Source
+
+```ts
+import { foo } from "./foo.ts";
+
+const result = bar(foo());
+```
+
+## Module Info
+
+```
+Exports {
+  No exports
+}
+Imports {
+  "foo" => {
+    Specifier: "./foo.ts"
+    Resolved path: "/src/foo.ts"
+    Import Symbol: foo
+  }
+}
+```
+
+## Registered types
+
+```
+Module TypeId(0) => Call Import Symbol: foo from "/src/foo.ts"(No parameters)
+
+Module TypeId(1) => Call unresolved reference "bar" (scope ID: 0)(Module(0) TypeId(0))
+
+Module TypeId(2) => unresolved reference "bar" (scope ID: 0)
+
+Module TypeId(3) => Import Symbol: foo from "/src/foo.ts"
+```
+
+# `/src/foo.ts` (Module 1)
+
+## Source
+
+```ts
+export function foo(): Type {}
+```
+
+## Module Info
+
+```
+Exports {
+  "foo" => {
+    ExportOwnExport => JsOwnExport::Binding(0)
+  }
+}
+Imports {
+  No imports
+}
+```
+
+## Exported Bindings
+
+```
+BindingId(0) => JsBindingData {
+  Name: foo,
+  Type: Module(0) TypeId(1),
+  Declaration kind: HoistedValue
+}
+```
+
+## Registered types
+
+```
+Module TypeId(0) => instanceof unresolved reference "Type" (scope ID: 1)
+
+Module TypeId(1) => sync Function "foo" {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: Module(0) TypeId(0)
+}
+```
+
+# Scoped Type Resolver
+
+## Registered types
+
+```
+Scope TypeId(0) => instanceof unknown reference
+
+Scope TypeId(1) => Call unresolved reference "bar" (scope ID: 0)(Module(0) TypeId(0))
+
+Scope TypeId(2) => unresolved reference "bar" (scope ID: 0)
+
+Scope TypeId(3) => sync Function "foo" {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: Module(1) TypeId(0)
+}
+
+Scope TypeId(4) => instanceof unknown reference
+
+Scope TypeId(5) => sync Function "foo" {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: Module(1) TypeId(0)
+}
+```

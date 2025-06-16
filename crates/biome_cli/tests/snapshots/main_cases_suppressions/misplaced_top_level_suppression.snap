@@ -113,7 +113,7 @@ file.js:2:1 lint/style/useConst  FIXABLE  ━━━━━━━━━━━━�
 ```block
 file.js:2:5 lint/correctness/noUnusedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This variable is unused.
+  ! This variable foo is unused.
   
   > 2 │ let foo = 2;
       │     ^^^
@@ -163,7 +163,7 @@ file.js:8:1 lint/style/useConst  FIXABLE  ━━━━━━━━━━━━�
 ```block
 file.js:8:5 lint/correctness/noUnusedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This variable is unused.
+  ! This variable bar is unused.
   
     6 │ */
     7 │ debugger

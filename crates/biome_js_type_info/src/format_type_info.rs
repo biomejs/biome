@@ -100,6 +100,7 @@ impl Format<FormatTypeContext> for TypeData {
             Self::Namespace(ty) => write!(f, [FmtVerbatim(ty.as_ref())]),
             Self::Object(object) => write!(f, [object.as_ref()]),
             Self::Tuple(ty) => write!(f, [FmtVerbatim(&ty.as_ref())]),
+            Self::Generic(generic) => write!(f, [&generic.as_ref()]),
             Self::Intersection(ty) => write!(f, [FmtVerbatim(&ty.as_ref())]),
             Self::Union(union) => write!(f, [&union.as_ref()]),
             Self::TypeOperator(ty) => write!(f, [FmtVerbatim(&ty.as_ref())]),
@@ -205,7 +206,7 @@ impl Format<FormatTypeContext> for Function {
                         hard_line_break(),
                         text("type_args:"),
                         space(),
-                        FmtGenericTypeParameters(&self.type_parameters),
+                        FmtTypeReferences(&self.type_parameters),
                     ])),
                     text("}"),
                     hard_line_break(),
@@ -428,14 +429,27 @@ impl Format<FormatTypeContext> for TypeofExpression {
 
 impl Format<FormatTypeContext> for GenericTypeParameter {
     fn fmt(&self, f: &mut Formatter<FormatTypeContext>) -> FormatResult<()> {
+        let constraint = format_with(|f| {
+            if self.constraint.is_known() {
+                write!(f, [space(), text("extends"), space(), &self.constraint])
+            } else {
+                Ok(())
+            }
+        });
+
+        let default = format_with(|f| {
+            if self.default.is_known() {
+                write!(f, [space(), text("="), space(), &self.constraint])
+            } else {
+                Ok(())
+            }
+        });
+
         write!(
             f,
             [&format_args![
                 dynamic_text(&self.name, TextSize::default()),
-                space(),
-                text("="),
-                space(),
-                &self.ty
+                constraint, default
             ]]
         )
     }
@@ -518,6 +532,19 @@ impl Format<FormatTypeContext> for TypeReferenceQualifier {
             }
         });
 
+        let scope_id = format_with(|f| {
+            write!(
+                f,
+                [&format_args![
+                    space(),
+                    dynamic_text(
+                        &std::format!("(scope ID: {})", self.scope_id.index()),
+                        TextSize::default()
+                    )
+                ]]
+            )
+        });
+
         write!(f, [text("\"")])?;
         for (index, part) in self.path.iter().enumerate() {
             write!(f, [dynamic_text(part, TextSize::default())])?;
@@ -525,7 +552,7 @@ impl Format<FormatTypeContext> for TypeReferenceQualifier {
                 write!(f, [text(".")])?;
             }
         }
-        write!(f, [text("\""), type_args])?;
+        write!(f, [text("\""), type_args, scope_id])?;
         Ok(())
     }
 }
@@ -612,7 +639,7 @@ impl Format<FormatTypeContext> for Class {
                     hard_line_break(),
                     text("type_args:"),
                     space(),
-                    FmtGenericTypeParameters(&self.type_parameters),
+                    FmtTypeReferences(&self.type_parameters),
                 ])),
                 text("}")
             ]]
@@ -637,7 +664,7 @@ impl Format<FormatTypeContext> for Interface {
                     hard_line_break(),
                     text("type_args:"),
                     space(),
-                    FmtGenericTypeParameters(&self.type_parameters),
+                    FmtTypeReferences(&self.type_parameters),
                     hard_line_break(),
                     text("members:"),
                     space(),
@@ -801,33 +828,6 @@ impl Format<FormatTypeContext> for FmtFunctionParameterBindings<'_> {
             joiner.finish()
         });
         write!(f, [&function_parameters])
-    }
-}
-
-struct FmtGenericTypeParameters<'a>(&'a [GenericTypeParameter]);
-
-impl Format<FormatTypeContext> for FmtGenericTypeParameters<'_> {
-    fn fmt(&self, f: &mut Formatter<FormatTypeContext>) -> FormatResult<()> {
-        if self.0.is_empty() {
-            return write!(f, [text("[]")]);
-        }
-
-        let type_parameters = format_with(|f| {
-            let separator = format_with(|f| write!(f, [&format_args![text(","), space()]]));
-            let mut joiner = f.join_with(separator);
-            for part in self.0 {
-                joiner.entry(&format_args![part]);
-            }
-            joiner.finish()
-        });
-        write!(
-            f,
-            [&format_args![
-                text("["),
-                &group(&soft_block_indent(&type_parameters)),
-                text("]")
-            ]]
-        )
     }
 }
 

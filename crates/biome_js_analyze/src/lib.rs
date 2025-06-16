@@ -10,7 +10,7 @@ use biome_analyze::{
 use biome_aria::AriaRoles;
 use biome_diagnostics::Error as DiagnosticError;
 use biome_js_syntax::{JsFileSource, JsLanguage};
-use biome_module_graph::ModuleGraph;
+use biome_module_graph::{ModuleGraph, ScopedResolver};
 use biome_project_layout::ProjectLayout;
 use biome_rowan::TextRange;
 use biome_suppression::{SuppressionDiagnostic, parse_suppression_comment};
@@ -146,15 +146,27 @@ where
         analyzer.add_visitor(phase, visitor);
     }
 
+    let file_path = options.file_path.clone();
+
+    let node_manifest = project_layout
+        .find_node_manifest_for_path(file_path.as_ref())
+        .map(|(path, manifest)| (path, Arc::new(manifest)));
+
+    let type_resolver = module_graph
+        .module_info_for_path(file_path.as_ref())
+        .map(|module_info| {
+            let mut resolver = ScopedResolver::from_global_scope(module_info, module_graph.clone());
+            resolver.run_inference();
+            resolver
+        })
+        .map(Arc::new);
+
     services.insert_service(Arc::new(AriaRoles));
     services.insert_service(source_type);
     services.insert_service(module_graph);
-    services.insert_service(options.file_path.clone());
-    services.insert_service(
-        project_layout
-            .find_node_manifest_for_path(options.file_path.as_ref())
-            .map(|(path, manifest)| (path, Arc::new(manifest))),
-    );
+    services.insert_service(node_manifest);
+    services.insert_service(file_path);
+    services.insert_service(type_resolver);
     services.insert_service(project_layout);
 
     (

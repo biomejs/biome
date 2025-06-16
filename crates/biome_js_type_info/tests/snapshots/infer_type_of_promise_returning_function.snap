@@ -26,5 +26,5 @@ sync Function "returnsPromise" {
 ## Registered types
 
 ```
-Global TypeId(0) => instanceof unresolved reference "Promise"<number>
+Global TypeId(0) => instanceof unresolved reference "Promise"<number> (scope ID: 0)
 ```

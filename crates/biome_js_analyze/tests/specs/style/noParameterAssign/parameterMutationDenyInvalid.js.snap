@@ -1,0 +1,159 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 134
+expression: parameterMutationDenyInvalid.js
+---
+# Input
+```js
+// Test case: Direct property assignment on a parameter
+function directPropertyAssignment(param) {
+	param.key = "value"; // Should trigger a diagnostic
+}
+
+// Test case: Nested property assignment on a parameter
+function nestedPropertyAssignment(param) {
+	param.nested.key = "value"; // Should trigger a diagnostic
+}
+
+// Test case: Property assignment inside a loop
+function propertyAssignmentInLoop(param) {
+	for (let i = 0; i < 5; i++) {
+		param.key = i; // Should trigger a diagnostic
+	}
+}
+
+// Test case: Property assignment inside a conditional block
+function propertyAssignmentInConditional(param) {
+	if (param.condition) {
+		param.key = "value"; // Should trigger a diagnostic
+	}
+}
+
+// Test case: Property assignment using a computed property
+function computedPropertyAssignment(param) {
+	param["key"] = "value"; // Should trigger a diagnostic
+}
+
+// Test case: Property assignment via a function call
+function assignProperty(param) {
+	param.key = "mutatedValue"; // Mutates the parameter by assigning a property
+}
+
+function propertyAssignmentViaFunction(param) {
+	assignProperty(param); // Should trigger a diagnostic if `assignProperty` mutates `param`
+}
+
+// Test case: Property assignment with a postfix increment
+function propertyPostfixIncrement(param) {
+	param.count++; // Should trigger a diagnostic
+}
+
+// Test case: Property assignment with a prefix decrement
+function propertyPrefixDecrement(param) {
+	--param.count; // Should trigger a diagnostic
+}
+
+```
+
+# Diagnostics
+```
+parameterMutationDenyInvalid.js:3:2 lint/style/noParameterAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Assigning to a property of a function parameter is confusing.
+  
+    1 │ // Test case: Direct property assignment on a parameter
+    2 │ function directPropertyAssignment(param) {
+  > 3 │ 	param.key = "value"; // Should trigger a diagnostic
+      │ 	^^^^^
+    4 │ }
+    5 │ 
+  
+  i Function callers usually don't expect the parameters they pass in to be modified. To avoid mutation, create a new instance and return it to the caller.
+  
+
+```
+
+```
+parameterMutationDenyInvalid.js:8:2 lint/style/noParameterAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Assigning to a property of a function parameter is confusing.
+  
+     6 │ // Test case: Nested property assignment on a parameter
+     7 │ function nestedPropertyAssignment(param) {
+   > 8 │ 	param.nested.key = "value"; // Should trigger a diagnostic
+       │ 	^^^^^^^^^^^^
+     9 │ }
+    10 │ 
+  
+  i Function callers usually don't expect the parameters they pass in to be modified. To avoid mutation, create a new instance and return it to the caller.
+  
+
+```
+
+```
+parameterMutationDenyInvalid.js:14:3 lint/style/noParameterAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Assigning to a property of a function parameter is confusing.
+  
+    12 │ function propertyAssignmentInLoop(param) {
+    13 │ 	for (let i = 0; i < 5; i++) {
+  > 14 │ 		param.key = i; // Should trigger a diagnostic
+       │ 		^^^^^
+    15 │ 	}
+    16 │ }
+  
+  i Function callers usually don't expect the parameters they pass in to be modified. To avoid mutation, create a new instance and return it to the caller.
+  
+
+```
+
+```
+parameterMutationDenyInvalid.js:21:3 lint/style/noParameterAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Assigning to a property of a function parameter is confusing.
+  
+    19 │ function propertyAssignmentInConditional(param) {
+    20 │ 	if (param.condition) {
+  > 21 │ 		param.key = "value"; // Should trigger a diagnostic
+       │ 		^^^^^
+    22 │ 	}
+    23 │ }
+  
+  i Function callers usually don't expect the parameters they pass in to be modified. To avoid mutation, create a new instance and return it to the caller.
+  
+
+```
+
+```
+parameterMutationDenyInvalid.js:27:2 lint/style/noParameterAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Assigning to a property of a function parameter is confusing.
+  
+    25 │ // Test case: Property assignment using a computed property
+    26 │ function computedPropertyAssignment(param) {
+  > 27 │ 	param["key"] = "value"; // Should trigger a diagnostic
+       │ 	^^^^^
+    28 │ }
+    29 │ 
+  
+  i Function callers usually don't expect the parameters they pass in to be modified. To avoid mutation, create a new instance and return it to the caller.
+  
+
+```
+
+```
+parameterMutationDenyInvalid.js:32:2 lint/style/noParameterAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Assigning to a property of a function parameter is confusing.
+  
+    30 │ // Test case: Property assignment via a function call
+    31 │ function assignProperty(param) {
+  > 32 │ 	param.key = "mutatedValue"; // Mutates the parameter by assigning a property
+       │ 	^^^^^
+    33 │ }
+    34 │ 
+  
+  i Function callers usually don't expect the parameters they pass in to be modified. To avoid mutation, create a new instance and return it to the caller.
+  
+
+```

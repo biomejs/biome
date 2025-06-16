@@ -44,7 +44,7 @@ lint ━━━━━━━━━━━━━━━━━━━━━━━━━
 ```block
 test.jsx:4:10 lint/correctness/noUnusedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This function is unused.
+  ! This function Component2 is unused.
   
     2 │ import { useCallback } from "react";
     3 │ 
@@ -70,7 +70,7 @@ test.jsx:4:10 lint/correctness/noUnusedVariables  FIXABLE  ━━━━━━━
 ```block
 test.jsx:5:18 lint/correctness/noUnusedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This variable is unused.
+  ! This variable SetLocal is unused.
   
     4 │ function Component2() {
   > 5 │     const [local,SetLocal] = useState(0);
@@ -95,7 +95,7 @@ test.jsx:5:18 lint/correctness/noUnusedVariables  FIXABLE  ━━━━━━━
 ```block
 test.jsx:6:11 lint/correctness/noUnusedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This variable is unused.
+  ! This variable handle is unused.
   
     4 │ function Component2() {
     5 │     const [local,SetLocal] = useState(0);

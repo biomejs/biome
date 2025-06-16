@@ -476,13 +476,13 @@ impl AnyJsFunctionOrMethodDeclaration {
                 .ok(),
             Self::JsMethodClassMember(method) => method
                 .name()
-                .unwrap()
+                .ok()?
                 .as_js_literal_member_name()?
                 .value()
                 .ok(),
             Self::JsMethodObjectMember(method) => method
                 .name()
-                .unwrap()
+                .ok()?
                 .as_js_literal_member_name()?
                 .value()
                 .ok(),

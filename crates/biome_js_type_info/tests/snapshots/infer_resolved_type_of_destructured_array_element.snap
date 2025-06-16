@@ -23,5 +23,5 @@ Global TypeId(0) => instanceof Global TypeId(2)
 
 Global TypeId(1) => Global TypeId(0)[0]
 
-Global TypeId(2) => instanceof Array<T = string>
+Global TypeId(2) => instanceof Array<string>
 ```

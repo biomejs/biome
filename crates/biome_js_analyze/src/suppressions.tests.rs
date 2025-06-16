@@ -18,8 +18,7 @@ fn quick_test() {
     let options = AnalyzerOptions::default();
     let rule_filter = RuleFilter::Rule("nursery", "useExplicitType");
 
-    let mut dependencies = Dependencies::default();
-    dependencies.add("buffer", "latest");
+    let dependencies = Dependencies(Box::new([("buffer".into(), "latest".into())]));
 
     let services = crate::JsAnalyzerServices::from((
         Default::default(),
