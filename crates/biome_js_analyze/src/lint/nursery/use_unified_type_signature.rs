@@ -225,7 +225,7 @@ impl Rule for UseUnifiedTypeSignature {
                         first_parameter_operation,
                         Some(MergeParameterOperation::CombineTypeWithParameter(_))
                     ) {
-                        "Combine overloads by using type union."
+                        "Combine overloads using a type union."
                     } else if matches!(
                         first_parameter_operation,
                         Some(MergeParameterOperation::MakeOptional)
