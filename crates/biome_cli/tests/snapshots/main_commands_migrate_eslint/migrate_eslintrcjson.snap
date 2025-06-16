@@ -79,15 +79,6 @@ migrate ━━━━━━━━━━━━━━━━━━━━━━━━
 
   i 100% (6/6) of the rules can be migrated.
   
-  i Rules that can be migrated:
-  
-  - default-param-last
-  - dot-notation
-  - eqeqeq
-  - getter-return
-  - no-eval
-  - no-extra-label
-  
 
 ```
 

@@ -67,15 +67,6 @@ migrate ━━━━━━━━━━━━━━━━━━━━━━━━
 
   i 100% (6/6) of the rules have been migrated.
   
-  i Migrated rules:
-  
-  - default-param-last
-  - dot-notation
-  - eqeqeq
-  - getter-return
-  - no-eval
-  - no-extra-label
-  
 
 ```
 

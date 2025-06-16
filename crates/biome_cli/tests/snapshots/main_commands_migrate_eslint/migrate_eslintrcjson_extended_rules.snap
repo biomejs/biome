@@ -49,13 +49,6 @@ migrate ━━━━━━━━━━━━━━━━━━━━━━━━
 
   i 100% (4/4) of the rules can be migrated.
   
-  i Rules that can be migrated:
-  
-  - dot-notation
-  - no-dupe-class-members
-  - @typescript-eslint/dot-notation
-  - @typescript-eslint/no-dupe-class-members
-  
 
 ```
 

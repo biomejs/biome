@@ -6,9 +6,9 @@ Enhanced the command `migrate eslint`. Now the command shows which ESLint rules 
 and which rules aren't supported yet.
 
 ```
-/eslint.config.js migrate ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+./eslint.config.js migrate ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ℹ 50% (3/6) of the rules have been migrated.
+  ℹ 42% (3/7) of the rules have been migrated.
 
   ℹ Migrated rules:
 
@@ -24,13 +24,17 @@ and which rules aren't supported yet.
 
   - @typescript-eslint/switch-exhaustiveness-check
 
+  ℹ Stylistic rules that the formatter may support (manual migration required):
+  
+  - semi
+
   ℹ Unsupported rules:
 
-  - semi
+  - block-scoped-var
 
 configuration ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ℹ Migration results:
 
-  - /biome.json: configuration successfully migrated.
+  - ./biome.json: configuration successfully migrated.
 ```

@@ -229,15 +229,6 @@ migrate ━━━━━━━━━━━━━━━━━━━━━━━━
 
   i 100% (6/6) of the rules can be migrated.
   
-  i Rules that can be migrated:
-  
-  - no-restricted-globals
-  - @typescript-eslint/array-type
-  - @typescript-eslint/consistent-type-imports
-  - @typescript-eslint/naming-convention
-  - jsx-a11y/aria-role
-  - unicorn/filename-case
-  
 
 ```
 

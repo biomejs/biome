@@ -25,6 +25,86 @@ pub(crate) struct MigrationOptions {
     pub(crate) include_nursery: bool,
 }
 
+/// Sorted ESlint stylistic rules.
+/// The array is sorted to allow binary search.
+const ESLINT_STYLISTIC_RULES: &[&str] = &[
+    "array-bracket-newline",
+    "array-bracket-spacing",
+    "array-element-newline",
+    "arrow-body-style",
+    "arrow-parens",
+    "arrow-spacing",
+    "block-spacing",
+    "brace-style",
+    "capitalized-comments",
+    "comma-dangle",
+    "comma-spacing",
+    "comma-style",
+    "computed-property-spacing",
+    "dot-location",
+    "eol-last",
+    "func-call-spacing",
+    "function-call-argument-newline",
+    "function-paren-newline",
+    "generator-star-spacing",
+    "implicit-arrow-linebreak",
+    "indent",
+    "indent-legacy",
+    "jsx-quotes",
+    "key-spacing",
+    "keyword-spacing",
+    "line-comment-position",
+    "linebreak-style",
+    "lines-around-comment",
+    "lines-around-directive",
+    "lines-between-class-members",
+    "max-len",
+    "max-statements-per-line",
+    "multiline-comment-style",
+    "multiline-ternary",
+    "new-parens",
+    "newline-after-var",
+    "newline-before-return",
+    "newline-per-chained-call",
+    "no-confusing-arrow",
+    "no-extra-parens",
+    "no-extra-semi",
+    "no-floating-decimal",
+    "no-mixed-operators",
+    "no-mixed-spaces-and-tabs",
+    "no-multiple-empty-lines",
+    "no-spaced-func",
+    "no-tabs",
+    "no-trailing-spaces",
+    "no-whitespace-before-property",
+    "nonblock-statement-body-position",
+    "object-curly-newline",
+    "object-curly-spacing",
+    "object-property-newline",
+    "one-var-declaration-per-line",
+    "operator-linebreak",
+    "padded-blocks",
+    "padding-line-between-statements",
+    "quote-props",
+    "quotes",
+    "rest-spread-spacing",
+    "semi",
+    "semi-spacing",
+    "semi-style",
+    "space-before-blocks",
+    "space-before-function-paren",
+    "space-in-parens",
+    "space-infix-ops",
+    "space-unary-ops",
+    "spaced-comment",
+    "switch-colon-spacing",
+    "template-curly-spacing",
+    "template-tag-spacing",
+    "wrap-iife",
+    "wrap-regex",
+    "yield-star-spacing",
+];
+
 #[derive(Debug, Default)]
 pub(crate) struct MigrationResults {
     /// Path to the migrated ESlint configuration
@@ -35,6 +115,8 @@ pub(crate) struct MigrationResults {
     pub(crate) inspired: BTreeSet<EslintRuleName>,
     pub(crate) nursery: BTreeSet<EslintRuleName>,
     pub(crate) migrated: BTreeSet<EslintRuleName>,
+    /// Stylistic rules that are not supported on purpose.
+    pub(crate) stylistic: BTreeSet<EslintRuleName>,
     pub(crate) unsupported: BTreeSet<EslintRuleName>,
 }
 impl MigrationResults {
@@ -51,9 +133,26 @@ impl MigrationResults {
                 self.nursery.insert(sourced);
             }
             RuleMigrationResult::Unsupported => {
-                self.unsupported.insert(sourced);
+                if sourced.rule_name.starts_with("@stylistic/")
+                    || (sourced.plugin_name.is_none()
+                        && ESLINT_STYLISTIC_RULES
+                            .binary_search(&sourced.rule_name.as_ref())
+                            .is_ok())
+                {
+                    self.stylistic.insert(sourced);
+                } else {
+                    self.unsupported.insert(sourced);
+                };
             }
         }
+    }
+
+    pub(crate) fn rule_count(&self) -> usize {
+        self.migrated.len()
+            + self.inspired.len()
+            + self.nursery.len()
+            + self.stylistic.len()
+            + self.unsupported.len()
     }
 }
 impl biome_diagnostics::Diagnostic for MigrationResults {
@@ -74,8 +173,7 @@ impl biome_diagnostics::Diagnostic for MigrationResults {
     }
 
     fn message(&self, fmt: &mut biome_console::fmt::Formatter<'_>) -> std::io::Result<()> {
-        let count =
-            self.migrated.len() + self.inspired.len() + self.nursery.len() + self.unsupported.len();
+        let count = self.rule_count();
         if count != 0 {
             let migrated_count = self.migrated.len()
                 + if self.write {
@@ -92,7 +190,7 @@ impl biome_diagnostics::Diagnostic for MigrationResults {
     }
 
     fn advices(&self, visitor: &mut dyn biome_diagnostics::Visit) -> std::io::Result<()> {
-        if !self.migrated.is_empty() {
+        if !self.migrated.is_empty() && self.migrated.len() != self.rule_count() {
             visitor.record_log(
                 biome_diagnostics::LogCategory::Info,
                 &if self.write {
@@ -127,6 +225,18 @@ impl biome_diagnostics::Diagnostic for MigrationResults {
             )?;
             let list: Vec<_> = self
                 .nursery
+                .iter()
+                .map(|item| item as &dyn biome_console::fmt::Display)
+                .collect();
+            visitor.record_list(list.as_slice())?;
+        }
+        if !self.stylistic.is_empty() {
+            visitor.record_log(
+                biome_diagnostics::LogCategory::Info,
+                &markup! { "Stylistic rules that the formatter may support (manual migration required):" },
+            )?;
+            let list: Vec<_> = self
+                .stylistic
                 .iter()
                 .map(|item| item as &dyn biome_console::fmt::Display)
                 .collect();
@@ -554,6 +664,11 @@ mod tests {
     use biome_configuration::OverrideGlobs;
     use eslint_eslint::*;
     use std::borrow::Cow;
+
+    #[test]
+    fn test_eslint_stylistic_rules_order() {
+        assert!(ESLINT_STYLISTIC_RULES.is_sorted());
+    }
 
     #[test]
     fn flat_config_single_config_object() {
