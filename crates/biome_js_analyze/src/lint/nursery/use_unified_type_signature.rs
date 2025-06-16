@@ -96,9 +96,8 @@ impl Rule for UseUnifiedTypeSignature {
         // Yes, this is a O(n^2) algorithm, but we need to compare all overload signatures
         // with each other. This shouldn't be a problem in practice,
         // since the number of overloads is usually relatively small.
-        for (i, overload1) in overload_info.overload_signatures.iter().enumate() {
+        for (i, overload1) in overload_info.overload_signatures.iter().enumerate() {
             for overload2 in &overload_info.overload_signatures[i + 1..] {
-
                 if !overload1
                     .type_parameters()
                     .is_type_equal(&overload2.type_parameters())

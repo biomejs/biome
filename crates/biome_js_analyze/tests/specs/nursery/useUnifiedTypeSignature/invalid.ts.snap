@@ -183,7 +183,7 @@ invalid.ts:1:1 lint/nursery/useUnifiedTypeSignature  FIXABLE  ━━━━━━
     2 │ function f1(b: string): void;
     3 │ function f1(a: number | string): void {}
   
-  i Unsafe fix: Combine overloads by using type union.
+  i Unsafe fix: Combine overloads using a type union.
   
       1     │ - function·f1(a:·number):·void;
       2     │ - function·f1(b:·string):·void;
@@ -207,7 +207,7 @@ invalid.ts:5:1 lint/nursery/useUnifiedTypeSignature  FIXABLE  ━━━━━━
     6 │ function f2(x: any): void;
     7 │ function f2(x: any): any {
   
-  i Unsafe fix: Combine overloads by using type union.
+  i Unsafe fix: Combine overloads using a type union.
   
       2   2 │   function f1(b: string): void;
       3   3 │   function f1(a: number | string): void {}
@@ -233,7 +233,7 @@ invalid.ts:11:1 lint/nursery/useUnifiedTypeSignature  FIXABLE  ━━━━━�
     12 │ function f3(x: string): void;
     13 │ function f3(x: any): any {
   
-  i Unsafe fix: Combine overloads by using type union.
+  i Unsafe fix: Combine overloads using a type union.
   
       8   8 │       return x;
       9   9 │   }
@@ -333,7 +333,7 @@ invalid.ts:33:1 lint/nursery/useUnifiedTypeSignature  FIXABLE  ━━━━━�
     34 │ export function f4(a: string): void;
     35 │ export function f4(a: unknown): void {
   
-  i Unsafe fix: Combine overloads by using type union.
+  i Unsafe fix: Combine overloads using a type union.
   
      29  29 │       a1(x: number): void;
      30  30 │   }
@@ -361,7 +361,7 @@ invalid.ts:40:1 lint/nursery/useUnifiedTypeSignature  FIXABLE  ━━━━━�
     41 │ export default function f5(a: string): void;
     42 │ export default function f5(a: unknown): void {
   
-  i Unsafe fix: Combine overloads by using type union.
+  i Unsafe fix: Combine overloads using a type union.
   
      36  36 │       return;
      37  37 │   }
@@ -438,7 +438,7 @@ invalid.ts:60:5 lint/nursery/useUnifiedTypeSignature  FIXABLE  ━━━━━�
     61 │     c2(x?: string): void;
     62 │ }
   
-  i Unsafe fix: Combine overloads by using type union.
+  i Unsafe fix: Combine overloads using a type union.
   
      58  58 │   // Both parameters are optional.
      59  59 │   interface I5 {
@@ -462,7 +462,7 @@ invalid.ts:65:5 lint/nursery/useUnifiedTypeSignature  FIXABLE  ━━━━━�
     66 │     d(x: string): void;
     67 │ }
   
-  i Unsafe fix: Combine overloads by using type union.
+  i Unsafe fix: Combine overloads using a type union.
   
      63  63 │   
      64  64 │   interface I6 {
@@ -585,7 +585,7 @@ invalid.ts:95:5 lint/nursery/useUnifiedTypeSignature  FIXABLE  ━━━━━�
     96 │     f(x: string | boolean);
     97 │ }
   
-  i Unsafe fix: Combine overloads by using type union.
+  i Unsafe fix: Combine overloads using a type union.
   
      93  93 │   // Supports unions.
      94  94 │   interface I8 {
@@ -610,7 +610,7 @@ invalid.ts:101:5 lint/nursery/useUnifiedTypeSignature  FIXABLE  ━━━━━�
     102 │     f(x: [string, boolean]);
     103 │ }
   
-  i Unsafe fix: Combine overloads by using type union.
+  i Unsafe fix: Combine overloads using a type union.
   
      99  99 │   // Supports tuples.
     100 100 │   interface I9 {
@@ -635,7 +635,7 @@ invalid.ts:107:5 lint/nursery/useUnifiedTypeSignature  FIXABLE  ━━━━━�
     108 │     y(x: T): void;
     109 │ }
   
-  i Unsafe fix: Combine overloads by using type union.
+  i Unsafe fix: Combine overloads using a type union.
   
     105 105 │   // Supports generics.
     106 106 │   interface Generic<T> {
@@ -659,7 +659,7 @@ invalid.ts:112:1 lint/nursery/useUnifiedTypeSignature  FIXABLE  ━━━━━�
     113 │ function f6<T extends number>(x: T): void;
     114 │ function f6(x: unknown): void {}
   
-  i Unsafe fix: Combine overloads by using type union.
+  i Unsafe fix: Combine overloads using a type union.
   
     108 108 │       y(x: T): void;
     109 109 │   }
@@ -688,7 +688,7 @@ invalid.ts:118:5 lint/nursery/useUnifiedTypeSignature  FIXABLE  ━━━━━�
     119 │     public abstract f(x: string): void;
     120 │ }
   
-  i Unsafe fix: Combine overloads by using type union.
+  i Unsafe fix: Combine overloads using a type union.
   
     116 116 │   // Supports abstract methods.
     117 117 │   abstract class Foo {
@@ -713,7 +713,7 @@ invalid.ts:124:5 lint/nursery/useUnifiedTypeSignature  FIXABLE  ━━━━━�
     125 │     'f'(x: number): void;
     126 │ }
   
-  i Unsafe fix: Combine overloads by using type union.
+  i Unsafe fix: Combine overloads using a type union.
   
     122 122 │   // Supports literal names.
     123 123 │   interface I10 {
@@ -738,7 +738,7 @@ invalid.ts:130:5 lint/nursery/useUnifiedTypeSignature  FIXABLE  ━━━━━�
     131 │     new (x: number): Foo;
     132 │ }
   
-  i Unsafe fix: Combine overloads by using type union.
+  i Unsafe fix: Combine overloads using a type union.
   
     128 128 │   // Supports constructor signatures.
     129 129 │   interface Foo {
@@ -763,7 +763,7 @@ invalid.ts:136:5 lint/nursery/useUnifiedTypeSignature  FIXABLE  ━━━━━�
     137 │     ['name'](x: number): void;
     138 │ }
   
-  i Unsafe fix: Combine overloads by using type union.
+  i Unsafe fix: Combine overloads using a type union.
   
     134 134 │   // Supports computed property names.
     135 135 │   interface IFoo {
@@ -810,7 +810,7 @@ invalid.ts:145:1 lint/nursery/useUnifiedTypeSignature  FIXABLE  ━━━━━�
     146 │ declare function f7(x: number): void;
     147 │ declare function f7(x: boolean): void;
   
-  i Unsafe fix: Combine overloads by using type union.
+  i Unsafe fix: Combine overloads using a type union.
   
     142 142 │       export default function (foo: number, bar?: string): string[];
     143 143 │   }
@@ -836,7 +836,7 @@ invalid.ts:151:1 lint/nursery/useUnifiedTypeSignature  FIXABLE  ━━━━━�
     152 │ /** JsDoc 2 */
     153 │ declare function f8(x: number): void;
   
-  i Unsafe fix: Combine overloads by using type union.
+  i Unsafe fix: Combine overloads using a type union.
   
     146 146 │   declare function f7(x: number): void;
     147 147 │   declare function f7(x: boolean): void;
@@ -868,7 +868,7 @@ invalid.ts:157:1 lint/nursery/useUnifiedTypeSignature  FIXABLE  ━━━━━�
     158 │ declare function f9(x: boolean): boolean;
     159 │ /** JsDoc 2 */
   
-  i Unsafe fix: Combine overloads by using type union.
+  i Unsafe fix: Combine overloads using a type union.
   
     152 152 │   /** JsDoc 2 */
     153 153 │   declare function f8(x: number): void;
@@ -900,7 +900,7 @@ invalid.ts:163:1 lint/nursery/useUnifiedTypeSignature  FIXABLE  ━━━━━�
     164 │ declare function f10(this: number): void;
     165 │ 
   
-  i Unsafe fix: Combine overloads by using type union.
+  i Unsafe fix: Combine overloads using a type union.
   
     159 159 │   /** JsDoc 2 */
     160 160 │   declare function f9(x: number): void;
