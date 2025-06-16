@@ -12,7 +12,7 @@ use biome_rowan::{AstNode, TokenText, WalkEvent};
 use camino::Utf8Path;
 
 use crate::{
-    JsImport, JsModuleInfo, JsReexport, SUPPORTED_TYPE_EXTENSIONS,
+    JsImport, JsModuleInfo, JsReexport, SUPPORTED_EXTENSIONS,
     js_module_info::collector::JsCollectedExport, module_graph::ModuleGraphFsProxy,
 };
 
@@ -413,9 +413,9 @@ impl<'a> JsModuleVisitor<'a> {
 
     fn resolved_path_from_specifier(&self, specifier: &str) -> ResolvedPath {
         let options = ResolveOptions {
-            condition_names: &["types", "default"],
+            condition_names: &["types", "import", "default"],
             default_files: &["index"],
-            extensions: SUPPORTED_TYPE_EXTENSIONS,
+            extensions: SUPPORTED_EXTENSIONS,
             resolve_node_builtins: true,
             resolve_types: true,
             ..Default::default()
