@@ -66,9 +66,11 @@ impl biome_diagnostics::Diagnostic for MigrationResults {
     }
 
     fn location(&self) -> biome_diagnostics::Location<'_> {
-        Location::builder()
-            .resource(&self.eslint_path.as_deref())
-            .build()
+        let mut builder = Location::builder();
+        if let Some(path) = self.eslint_path.as_ref() {
+            builder = builder.resource(path);
+        }
+        builder.build()
     }
 
     fn message(&self, fmt: &mut biome_console::fmt::Formatter<'_>) -> std::io::Result<()> {
