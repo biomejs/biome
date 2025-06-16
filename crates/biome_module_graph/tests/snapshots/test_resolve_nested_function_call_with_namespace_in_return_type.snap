@@ -98,6 +98,4 @@ Full TypeId(2) => Module(1) TypeId(1)
 Full TypeId(3) => unknown
 
 Full TypeId(4) => Call Module(0) TypeId(0)(Module(0) TypeId(2))
-
-Full TypeId(5) => unknown
 ```
