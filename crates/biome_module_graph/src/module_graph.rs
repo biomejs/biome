@@ -25,11 +25,7 @@ use crate::{JsExport, JsModuleInfo, JsOwnExport, js_module_info::JsModuleVisitor
 pub(crate) use fs_proxy::ModuleGraphFsProxy;
 
 pub const SUPPORTED_EXTENSIONS: &[&str] = &[
-    "js", "jsx", "mjs", "cjs", "ts", "tsx", "mts", "cts", "json", "node",
-];
-
-pub const SUPPORTED_TYPE_EXTENSIONS: &[&str] = &[
-    "d.ts", "d.mts", "d.cts", "js", "jsx", "mjs", "cjs", "ts", "tsx", "mts", "cts", "json",
+    "ts", "tsx", "mts", "cts", "js", "jsx", "mjs", "cjs", "json", "node",
 ];
 
 /// Data structure for tracking imports and exports across files.

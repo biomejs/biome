@@ -2,12 +2,13 @@
 
 mod snap;
 
+use std::fs::read_link;
 use std::ops::Deref;
 use std::sync::Arc;
 
 use crate::snap::ModuleGraphSnapshot;
 use biome_deserialize::json::deserialize_from_json_str;
-use biome_fs::{BiomePath, FileSystem, MemoryFileSystem, OsFileSystem};
+use biome_fs::{BiomePath, FileSystem, MemoryFileSystem, OsFileSystem, normalize_path};
 use biome_js_type_info::{ScopeId, TypeResolver};
 use biome_jsdoc_comment::JsdocComment;
 use biome_json_parser::{JsonParserOptions, parse_json};
@@ -1424,8 +1425,17 @@ fn test_resolve_swr_types() {
         .into_deserialized()
         .expect("package.json must parse")
     });
-    project_layout.insert_node_manifest(format!("{fixtures_path}/node_modules/swr").into(), {
-        let path = Utf8PathBuf::from(format!("{fixtures_path}/node_modules/swr/package.json"));
+    // Bloody symlinks...
+    let swr_path = {
+        let swr_path = format!("{fixtures_path}/node_modules/swr");
+        let symlink = read_link(swr_path).expect("cannot read symlink");
+        let symlink = Utf8PathBuf::from_path_buf(symlink).expect("non-UTF8 path");
+        normalize_path(Utf8Path::new(&format!(
+            "{fixtures_path}/node_modules/{symlink}"
+        )))
+    };
+    project_layout.insert_node_manifest(swr_path.clone(), {
+        let path = Utf8PathBuf::from(format!("{swr_path}/package.json"));
         deserialize_from_json_str::<PackageJson>(
             &fs.read_file_from_path(&path)
                 .expect("package.json must be readable"),
@@ -1439,10 +1449,9 @@ fn test_resolve_swr_types() {
     let mut added_paths = vec![BiomePath::new(format!(
         "{fixtures_path}/frontend/src/index.ts"
     ))];
-    for path in find_files_recursively_in_directory(
-        Utf8Path::new(&format!("{fixtures_path}/node_modules/swr")),
-        |path| path.extension().is_some_and(|ext| ext != "json"),
-    ) {
+    for path in find_files_recursively_in_directory(&swr_path, |path| {
+        path.extension().is_some_and(|ext| ext != "json")
+    }) {
         added_paths.push(BiomePath::new(path));
     }
     let added_paths = get_added_paths(&fs, &added_paths);
@@ -1455,17 +1464,36 @@ fn test_resolve_swr_types() {
             "{fixtures_path}/frontend/src/index.ts"
         )))
         .expect("module must exist");
+    assert_eq!(
+        index_module.static_import_paths.get("swr"),
+        Some(&ResolvedPath::from_path(format!(
+            "{swr_path}/dist/index/index.d.mts"
+        )))
+    );
+
+    let swr_index_module = module_graph
+        .module_info_for_path(Utf8Path::new(&format!("{swr_path}/dist/index/index.d.mts")))
+        .expect("module must exist");
+    assert_eq!(
+        swr_index_module
+            .static_import_paths
+            .get("../_internal/index.mjs"),
+        Some(&ResolvedPath::from_path(format!(
+            "{swr_path}/dist/_internal/index.d.mts"
+        )))
+    );
+
     let mut resolver = ModuleResolver::for_module(index_module, module_graph.clone());
     resolver.run_inference();
     let resolver = Arc::new(resolver);
 
-    let mutate_result_id = resolver
-        .resolve_type_of(&Text::Static("mutateResult"), ScopeId::GLOBAL)
-        .expect("mutateResult variable not found");
+    let mutate_id = resolver
+        .resolve_type_of(&Text::Static("mutate"), ScopeId::GLOBAL)
+        .expect("mutate variable not found");
 
-    let ty = resolver.resolved_type_for_id(mutate_result_id);
-    let _ty_string = format!("{:?}", ty.deref()); // for debugging
-    // FIXME: assert!(ty.is_promise_instance());
+    let mutate_ty = resolver.resolved_type_for_id(mutate_id);
+    let _mutate_ty_string = format!("{:?}", mutate_ty.deref()); // for debugging
+    //assert!(mutate_ty.is_function_with_return_type(|ty| ty.is_promise_instance()));
 }
 
 fn find_files_recursively_in_directory(
