@@ -59,7 +59,7 @@ schema = [
 ]
 
 [dev-dependencies]
-criterion    = { package = "codspeed-criterion-compat", version = "*" }
+criterion    = { package = "codspeed-criterion-compat", version = "=2.10.1" }
 insta        = { workspace = true }
 tests_macros = { workspace = true }
 
