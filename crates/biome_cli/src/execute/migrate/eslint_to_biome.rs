@@ -1,13 +1,13 @@
 use std::collections::BTreeSet;
 
+use super::{eslint_any_rule_to_biome::migrate_eslint_any_rule, eslint_eslint, eslint_typescript};
 use biome_configuration::analyzer::SeverityOrGroup;
 use biome_configuration::{self as biome_config};
 use biome_console::markup;
 use biome_deserialize::Merge;
+use biome_diagnostics::Location;
 use biome_js_analyze::lint::style::no_restricted_globals;
 use rustc_hash::FxHashMap;
-
-use super::{eslint_any_rule_to_biome::migrate_eslint_any_rule, eslint_eslint, eslint_typescript};
 
 /// This modules includes implementations for converting an ESLint config to a Biome config.
 ///
@@ -66,15 +66,9 @@ impl biome_diagnostics::Diagnostic for MigrationResults {
     }
 
     fn location(&self) -> biome_diagnostics::Location<'_> {
-        if let Some(path) = &self.eslint_path {
-            biome_diagnostics::Location {
-                resource: Some(biome_diagnostics::Resource::File(path)),
-                span: None,
-                source_code: None,
-            }
-        } else {
-            biome_diagnostics::Location::default()
-        }
+        Location::builder()
+            .resource(&self.eslint_path.as_deref())
+            .build()
     }
 
     fn message(&self, fmt: &mut biome_console::fmt::Formatter<'_>) -> std::io::Result<()> {
