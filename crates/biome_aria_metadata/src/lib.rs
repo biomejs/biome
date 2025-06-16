@@ -20,7 +20,7 @@ pub const ISO_COUNTRIES: [&str; 233] = [
     "UZ", "VU", "VE", "VN", "WF", "EH", "YE", "ZM", "ZW",
 ];
 
-pub const ISO_LANGUAGES: [&str; 150] = [
+pub const ISO_LANGUAGES: [&str; 152] = [
     "ab", "aa", "af", "sq", "am", "ar", "an", "hy", "as", "ay", "az", "ba", "eu", "bn", "dz", "bh",
     "bi", "br", "bg", "my", "be", "km", "ca", "zh", "zh-Hans", "zh-Hant", "co", "hr", "cs", "da",
     "nl", "en", "eo", "et", "fo", "fa", "fj", "fi", "fr", "fy", "gl", "gd", "gv", "ka", "de", "el",
