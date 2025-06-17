@@ -56,9 +56,7 @@ jobs:
     if: needs.changesets.outputs.hasChangesets == 'false'
     outputs:
       cli-version: ${{ steps.cli-version-changed.outputs.version }}
-      cli-version-changed: ${{ steps.cli-version-changed.outputs.version != "" }}
       js-api-version: ${{ steps.js-api-version-changed.outputs.version }}
-      js-api-version-changed: ${{ steps.js-api-version-changed.outputs.version != "" }}
 
     steps:
       - name: Check CLI version changes
@@ -77,7 +75,7 @@ jobs:
 
   build-binaries:
     needs: version
-    if: needs.version.cli-version-changed == 'true'
+    if: needs.version.cli-version
     outputs:
       version: ${{ needs.version.cli-version }}
     strategy:
@@ -160,7 +158,7 @@ jobs:
   # Build GNU/Linux binaries in Docker, using Debian 11 (bullseye), to support older versions of glibc.
   build-binaries-gnu:
     needs: version
-    if: needs.cli-version-changed == 'true'
+    if: needs.cli-version
     strategy:
       matrix:
         include:
@@ -212,7 +210,7 @@ jobs:
     name: Build WASM
     runs-on: depot-ubuntu-24.04-arm-16
     needs: version
-    if: needs.cli-version-changed == 'true'
+    if: needs.cli-version
     steps:
       - name: Checkout repository
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
@@ -241,7 +239,7 @@ jobs:
     name: Package JavaScript APIs
     runs-on: depot-ubuntu-24.04-arm-16
     needs: version
-    if: needs.js-api-version-changed == 'true'
+    if: needs.js-api-version
     steps:
       - name: Checkout repository
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
