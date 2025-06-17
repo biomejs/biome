@@ -83,9 +83,9 @@ jobs:
 
   build-binaries:
     needs: version
-    if: needs.version.cli-version
+    if: needs.version.outputs.cli-version
     outputs:
-      version: ${{ needs.version.cli-version }}
+      version: ${{ needs.version.outputs.cli-version }}
     strategy:
       matrix:
         include:
@@ -141,7 +141,7 @@ jobs:
           # Strip all debug symbols from the resulting binaries
           RUSTFLAGS: "-C strip=symbols -C codegen-units=1"
           # Inline the version of the npm package in the CLI binary
-          BIOME_VERSION: ${{ needs.version.cli-version }}
+          BIOME_VERSION: ${{ needs.version.outputs.cli-version }}
 
       # Copy the CLI binary and rename it to include the name of the target platform
       - name: Copy CLI binary
@@ -166,7 +166,7 @@ jobs:
   # Build GNU/Linux binaries in Docker, using Debian 11 (bullseye), to support older versions of glibc.
   build-binaries-gnu:
     needs: version
-    if: needs.cli-version
+    if: needs.version.outputs.cli-version
     strategy:
       matrix:
         include:
@@ -198,7 +198,7 @@ jobs:
           # Strip all debug symbols from the resulting binaries
           RUSTFLAGS: "-C strip=symbols -C codegen-units=1"
           # Inline the version of the npm package in the CLI binary
-          BIOME_VERSION: ${{ needs.version.cli-version }}
+          BIOME_VERSION: ${{ needs.version.outputs.cli-version }}
 
       # Copy the CLI binary and rename it to include the name of the target platform
       - name: Copy CLI binary
@@ -218,7 +218,7 @@ jobs:
     name: Build WASM
     runs-on: depot-ubuntu-24.04-arm-16
     needs: version
-    if: needs.cli-version
+    if: needs.version.outputs.cli-version
     steps:
       - name: Checkout repository
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
@@ -247,7 +247,7 @@ jobs:
     name: Package JavaScript APIs
     runs-on: depot-ubuntu-24.04-arm-16
     needs: version
-    if: needs.js-api-version
+    if: needs.version.outputs.js-api-version
     steps:
       - name: Checkout repository
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
@@ -335,7 +335,7 @@ jobs:
       - name: Upload assets to the latest tag
         run: |
           files=$(ls biome-* | tr '\n' ' ')
-          gh release upload @biomejs/biome@${{ needs.build-binaries.version }} $files
+          gh release upload @biomejs/biome@${{ needs.build-binaries.outputs.version }} $files
 
   publish-js-api:
     name: Publish
