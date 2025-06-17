@@ -53,7 +53,7 @@ declare_lint_rule! {
         name: "noAlert",
         language: "js",
         sources: &[RuleSource::Eslint("no-alert")],
-        recommended: true,
+        recommended: false,
     }
 }
 
