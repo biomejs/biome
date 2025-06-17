@@ -1,8 +1,15 @@
 use crate::services::semantic::Semantic;
 use biome_analyze::{Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule};
 use biome_console::markup;
-use biome_js_syntax::{AnyJsExpression, AnyJsLiteralExpression, JsCallExpression, global_identifier};
+use biome_js_semantic::SemanticModel;
+use biome_js_syntax::{
+    AnyJsExpression, AnyJsLiteralExpression, JsCallExpression, JsComputedMemberExpression,
+    JsStaticMemberExpression, global_identifier,
+};
 use biome_rowan::AstNode;
+
+const FORBIDDEN_FUNCTIONS: &[&str] = &["alert", "confirm", "prompt"];
+const GLOBAL_OBJECTS: &[&str] = &["window", "globalThis"];
 
 declare_lint_rule! {
     /// Disallow the use of `alert`, `confirm`, and `prompt`.
@@ -68,106 +75,7 @@ impl Rule for NoAlert {
         let model = ctx.model();
         let callee = call.callee().ok()?;
 
-        match &callee {
-            // Handle direct calls: alert(), confirm(), prompt()
-            AnyJsExpression::JsIdentifierExpression(_) => {
-                let (reference, name) = global_identifier(&callee)?;
-                let name_text = name.text();
-
-                if matches!(name_text, "alert" | "confirm" | "prompt") {
-                    // Check if this is actually a global function call (not a local variable)
-                    if model.binding(&reference).is_none() {
-                        return Some(name_text.to_string());
-                    }
-                }
-            }
-            // Handle member calls: window.alert(), globalThis.confirm(), etc.
-            AnyJsExpression::JsStaticMemberExpression(member_expr) => {
-                let object = member_expr.object().ok()?;
-                if let Some((reference, object_name)) = global_identifier(&object) {
-                    let object_name_text = object_name.text();
-
-                    // Check if it's a call on a global object
-                    if matches!(object_name_text, "window" | "globalThis")
-                        && model.binding(&reference).is_none()
-                    {
-                        let member_name = member_expr.member().ok()?;
-                        let member_token = member_name.value_token().ok()?;
-                        let member_name_text = member_token.text_trimmed();
-
-                        if matches!(member_name_text, "alert" | "confirm" | "prompt") {
-                            return Some(member_name_text.to_string());
-                        }
-                    }
-                }
-            }
-            // Handle bracket notation calls: window["alert"](), etc.
-            AnyJsExpression::JsComputedMemberExpression(computed_member_expr) => {
-                let object = computed_member_expr.object().ok()?;
-                if let Some((reference, object_name)) = global_identifier(&object) {
-                    let object_name_text = object_name.text();
-
-                    // Check if it's a call on a global object
-                    if matches!(object_name_text, "window" | "globalThis")
-                        && model.binding(&reference).is_none()
-                    {
-                        let member_expr = computed_member_expr.member().ok()?;
-                        if let AnyJsExpression::AnyJsLiteralExpression(AnyJsLiteralExpression::JsStringLiteralExpression(string_literal)) = member_expr {
-                            let string_token = string_literal.value_token().ok()?;
-                            let string_text = string_token.text_trimmed();
-                            // Remove quotes from the string literal
-                            let member_name = string_text.trim_matches('"').trim_matches('\'');
-
-                            if matches!(member_name, "alert" | "confirm" | "prompt") {
-                                return Some(member_name.to_string());
-                            }
-                        }
-                    }
-                }
-            }
-            // Handle parenthesized expressions: (alert)(), (window.alert)(), etc.
-            AnyJsExpression::JsParenthesizedExpression(paren_expr) => {
-                let inner_expr = paren_expr.expression().ok()?;
-                
-                // Recursively check the inner expression
-                match &inner_expr {
-                    AnyJsExpression::JsIdentifierExpression(_) => {
-                        let (reference, name) = global_identifier(&inner_expr)?;
-                        let name_text = name.text();
-
-                        if matches!(name_text, "alert" | "confirm" | "prompt") {
-                            // Check if this is actually a global function call (not a local variable)
-                            if model.binding(&reference).is_none() {
-                                return Some(name_text.to_string());
-                            }
-                        }
-                    }
-                    AnyJsExpression::JsStaticMemberExpression(member_expr) => {
-                        let object = member_expr.object().ok()?;
-                        if let Some((reference, object_name)) = global_identifier(&object) {
-                            let object_name_text = object_name.text();
-
-                            // Check if it's a call on a global object
-                            if matches!(object_name_text, "window" | "globalThis")
-                                && model.binding(&reference).is_none()
-                            {
-                                let member_name = member_expr.member().ok()?;
-                                let member_token = member_name.value_token().ok()?;
-                                let member_name_text = member_token.text_trimmed();
-
-                                if matches!(member_name_text, "alert" | "confirm" | "prompt") {
-                                    return Some(member_name_text.to_string());
-                                }
-                            }
-                        }
-                    }
-                    _ => {}
-                }
-            }
-            _ => {}
-        }
-
-        None
+        check_expression(&callee, model)
     }
 
     fn diagnostic(ctx: &RuleContext<Self>, function_name: &Self::State) -> Option<RuleDiagnostic> {
@@ -186,4 +94,94 @@ impl Rule for NoAlert {
             }),
         )
     }
+}
+
+fn check_expression(expr: &AnyJsExpression, model: &SemanticModel) -> Option<String> {
+    match expr {
+        AnyJsExpression::JsIdentifierExpression(_) => check_global_identifier(expr, model),
+        AnyJsExpression::JsStaticMemberExpression(member_expr) => {
+            check_static_member_expression(member_expr, model)
+        }
+        AnyJsExpression::JsComputedMemberExpression(computed_member_expr) => {
+            check_computed_member_expression(computed_member_expr, model)
+        }
+        AnyJsExpression::JsParenthesizedExpression(paren_expr) => {
+            let inner_expr = paren_expr.expression().ok()?;
+            check_expression(&inner_expr, model)
+        }
+        _ => None,
+    }
+}
+
+fn check_global_identifier(expr: &AnyJsExpression, model: &SemanticModel) -> Option<String> {
+    let (reference, name) = global_identifier(expr)?;
+    let name_text = name.text();
+
+    if is_forbidden_function(name_text) && model.binding(&reference).is_none() {
+        Some(name_text.to_string())
+    } else {
+        None
+    }
+}
+
+fn check_static_member_expression(
+    member_expr: &JsStaticMemberExpression,
+    model: &SemanticModel,
+) -> Option<String> {
+    let object = member_expr.object().ok()?;
+    let (reference, object_name) = global_identifier(&object)?;
+    let object_name_text = object_name.text();
+
+    if is_global_object(object_name_text) && model.binding(&reference).is_none() {
+        let member_name = member_expr.member().ok()?;
+        let member_token = member_name.value_token().ok()?;
+        let member_name_text = member_token.text_trimmed();
+
+        if is_forbidden_function(member_name_text) {
+            Some(member_name_text.to_string())
+        } else {
+            None
+        }
+    } else {
+        None
+    }
+}
+
+fn check_computed_member_expression(
+    computed_member_expr: &JsComputedMemberExpression,
+    model: &SemanticModel,
+) -> Option<String> {
+    let object = computed_member_expr.object().ok()?;
+    let (reference, object_name) = global_identifier(&object)?;
+    let object_name_text = object_name.text();
+
+    if is_global_object(object_name_text) && model.binding(&reference).is_none() {
+        let member_expr = computed_member_expr.member().ok()?;
+        if let AnyJsExpression::AnyJsLiteralExpression(
+            AnyJsLiteralExpression::JsStringLiteralExpression(string_literal),
+        ) = member_expr
+        {
+            let string_token = string_literal.value_token().ok()?;
+            let string_text = string_token.text_trimmed();
+            let member_name = string_text.trim_matches('"').trim_matches('\'');
+
+            if is_forbidden_function(member_name) {
+                Some(member_name.to_string())
+            } else {
+                None
+            }
+        } else {
+            None
+        }
+    } else {
+        None
+    }
+}
+
+fn is_forbidden_function(name: &str) -> bool {
+    FORBIDDEN_FUNCTIONS.contains(&name)
+}
+
+fn is_global_object(name: &str) -> bool {
+    GLOBAL_OBJECTS.contains(&name)
 }
