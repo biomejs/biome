@@ -1427,7 +1427,7 @@
   });
   ```
 
-- Added the new rule [`noReactPropAssign`](https://biomejs.dev/linter/rules/no_react_prop_assign), based on the react-hooks rule [react-hooks/react-compiler](https://www.npmjs.com/package/eslint-plugin-react-hooks)
+- Added the new rule [`noReactPropAssign`](https://biomejs.dev/linter/rules/no-react-prop-assign), based on the react-hooks rule [react-hooks/react-compiler](https://www.npmjs.com/package/eslint-plugin-react-hooks)
 
   The following code is now reported as invalid:
 
@@ -1763,7 +1763,7 @@
 
   This rule enforces usage of Solid's `<For />` component for mapping an array to JSX elements.
 
-- Added new lint rule [`noShadow`](http://biome.dev/linter/rules/no-shadow), a port of eslint's `no-shadow`.
+- Added new lint rule [`noShadow`](http://biomejs.dev/linter/rules/no-shadow), a port of eslint's `no-shadow`.
 
   This rule disallows variable declarations from shadowing variables declared in an outer scope. For example:
 
