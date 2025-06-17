@@ -1,0 +1,146 @@
+---
+source: crates/biome_js_parser/tests/spec_test.rs
+expression: snapshot
+snapshot_kind: text
+---
+## Input
+
+```js
+let b = {
+ set foo() {
+    return 5;
+ }
+}
+
+```
+
+
+## AST
+
+```
+JsModule {
+    bom_token: missing (optional),
+    interpreter_token: missing (optional),
+    directives: JsDirectiveList [],
+    items: JsModuleItemList [
+        JsVariableStatement {
+            declaration: JsVariableDeclaration {
+                await_token: missing (optional),
+                kind: LET_KW@0..4 "let" [] [Whitespace(" ")],
+                declarators: JsVariableDeclaratorList [
+                    JsVariableDeclarator {
+                        id: JsIdentifierBinding {
+                            name_token: IDENT@4..6 "b" [] [Whitespace(" ")],
+                        },
+                        variable_annotation: missing (optional),
+                        initializer: JsInitializerClause {
+                            eq_token: EQ@6..8 "=" [] [Whitespace(" ")],
+                            expression: JsObjectExpression {
+                                l_curly_token: L_CURLY@8..9 "{" [] [],
+                                members: JsObjectMemberList [
+                                    JsSetterObjectMember {
+                                        set_token: SET_KW@9..15 "set" [Newline("\n"), Whitespace(" ")] [Whitespace(" ")],
+                                        name: JsLiteralMemberName {
+                                            value: IDENT@15..18 "foo" [] [],
+                                        },
+                                        l_paren_token: L_PAREN@18..19 "(" [] [],
+                                        parameter: missing (required),
+                                        comma_token: missing (optional),
+                                        r_paren_token: R_PAREN@19..21 ")" [] [Whitespace(" ")],
+                                        body: JsFunctionBody {
+                                            l_curly_token: L_CURLY@21..22 "{" [] [],
+                                            directives: JsDirectiveList [],
+                                            statements: JsStatementList [
+                                                JsReturnStatement {
+                                                    return_token: RETURN_KW@22..34 "return" [Newline("\n"), Whitespace("    ")] [Whitespace(" ")],
+                                                    argument: JsNumberLiteralExpression {
+                                                        value_token: JS_NUMBER_LITERAL@34..35 "5" [] [],
+                                                    },
+                                                    semicolon_token: SEMICOLON@35..36 ";" [] [],
+                                                },
+                                            ],
+                                            r_curly_token: R_CURLY@36..39 "}" [Newline("\n"), Whitespace(" ")] [],
+                                        },
+                                    },
+                                ],
+                                r_curly_token: R_CURLY@39..41 "}" [Newline("\n")] [],
+                            },
+                        },
+                    },
+                ],
+            },
+            semicolon_token: missing (optional),
+        },
+    ],
+    eof_token: EOF@41..42 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: JS_MODULE@0..42
+  0: (empty)
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..41
+    0: JS_VARIABLE_STATEMENT@0..41
+      0: JS_VARIABLE_DECLARATION@0..41
+        0: (empty)
+        1: LET_KW@0..4 "let" [] [Whitespace(" ")]
+        2: JS_VARIABLE_DECLARATOR_LIST@4..41
+          0: JS_VARIABLE_DECLARATOR@4..41
+            0: JS_IDENTIFIER_BINDING@4..6
+              0: IDENT@4..6 "b" [] [Whitespace(" ")]
+            1: (empty)
+            2: JS_INITIALIZER_CLAUSE@6..41
+              0: EQ@6..8 "=" [] [Whitespace(" ")]
+              1: JS_OBJECT_EXPRESSION@8..41
+                0: L_CURLY@8..9 "{" [] []
+                1: JS_OBJECT_MEMBER_LIST@9..39
+                  0: JS_SETTER_OBJECT_MEMBER@9..39
+                    0: SET_KW@9..15 "set" [Newline("\n"), Whitespace(" ")] [Whitespace(" ")]
+                    1: JS_LITERAL_MEMBER_NAME@15..18
+                      0: IDENT@15..18 "foo" [] []
+                    2: L_PAREN@18..19 "(" [] []
+                    3: (empty)
+                    4: (empty)
+                    5: R_PAREN@19..21 ")" [] [Whitespace(" ")]
+                    6: JS_FUNCTION_BODY@21..39
+                      0: L_CURLY@21..22 "{" [] []
+                      1: JS_DIRECTIVE_LIST@22..22
+                      2: JS_STATEMENT_LIST@22..36
+                        0: JS_RETURN_STATEMENT@22..36
+                          0: RETURN_KW@22..34 "return" [Newline("\n"), Whitespace("    ")] [Whitespace(" ")]
+                          1: JS_NUMBER_LITERAL_EXPRESSION@34..35
+                            0: JS_NUMBER_LITERAL@34..35 "5" [] []
+                          2: SEMICOLON@35..36 ";" [] []
+                      3: R_CURLY@36..39 "}" [Newline("\n"), Whitespace(" ")] []
+                2: R_CURLY@39..41 "}" [Newline("\n")] []
+      1: (empty)
+  4: EOF@41..42 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+object_expr_setter.js:2:10 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a parameter but instead found ')'.
+  
+    1 │ let b = {
+  > 2 │  set foo() {
+      │          ^
+    3 │     return 5;
+    4 │  }
+  
+  i Expected a parameter here.
+  
+    1 │ let b = {
+  > 2 │  set foo() {
+      │          ^
+    3 │     return 5;
+    4 │  }
+  
+```

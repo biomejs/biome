@@ -1,52 +1,47 @@
-<p align="center">
-    <picture>
-        <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/biomejs/resources/main/svg/slogan-dark-transparent.svg">
-        <source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/biomejs/resources/main/svg/slogan-light-transparent.svg">
-        <img alt="Shows the banner of Biome, with its logo and the phrase 'Biome - Toolchain of the web'." src="https://raw.githubusercontent.com/biomejs/resources/main/svg/slogan-light-transparent.svg" width="700">
-    </picture>
-</p>
-
 <div align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/biomejs/resources/main/svg/slogan-dark-transparent.svg">
+    <source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/biomejs/resources/main/svg/slogan-light-transparent.svg">
+    <img alt="Shows the banner of Biome, with its logo and the phrase 'Biome - Toolchain of the web'." src="https://raw.githubusercontent.com/biomejs/resources/main/svg/slogan-light-transparent.svg" width="700">
+  </picture>
 
-[![CI on main][ci-badge]][ci-url]
-[![Discord chat][discord-badge]][discord-url]
-[![npm version][npm-badge]][npm-url]
-[![VSCode version][vscode-badge]][vscode-url]
-[![Open VSX version][open-vsx-badge]][open-vsx-url]
-[![Polar bounties][polar-badge]][polar-url]
+  <br>
+  <br>
 
-[ci-badge]: https://github.com/biomejs/biome/actions/workflows/main.yml/badge.svg
-[ci-url]: https://github.com/biomejs/biome/actions/workflows/main.yml
-[discord-badge]: https://badgen.net/discord/online-members/BypW39g6Yc?icon=discord&label=discord&color=60a5fa
-[discord-url]: https://biomejs.dev/chat
-[npm-badge]: https://badgen.net/npm/v/@biomejs/biome?icon=npm&color=60a5fa&label=%40biomejs%2Fbiome
-[npm-url]: https://www.npmjs.com/package/@biomejs/biome/v/latest
-[vscode-badge]: https://badgen.net/vs-marketplace/v/biomejs.biome?label=vscode&icon=visualstudio&color=60a5fa
-[vscode-url]: https://marketplace.visualstudio.com/items?itemName=biomejs.biome
-[open-vsx-badge]: https://badgen.net/open-vsx/version/biomejs/biome?label=open-vsx&color=60a5fa
-[open-vsx-url]: https://open-vsx.org/extension/biomejs/biome
-[polar-badge]: https://polar.sh/embed/seeks-funding-shield.svg?org=biomejs
-[polar-url]: https://polar.sh/biomejs
+  [![CI on main][ci-badge]][ci-url]
+  [![Discord chat][discord-badge]][discord-url]
+  [![npm version][npm-badge]][npm-url]
+  [![VSCode version][vscode-badge]][vscode-url]
+  [![Open VSX version][open-vsx-badge]][open-vsx-url]
 
-</div>
+  [ci-badge]: https://github.com/biomejs/biome/actions/workflows/main.yml/badge.svg
+  [ci-url]: https://github.com/biomejs/biome/actions/workflows/main.yml
+  [discord-badge]: https://badgen.net/discord/online-members/BypW39g6Yc?icon=discord&label=discord&color=60a5fa
+  [discord-url]: https://biomejs.dev/chat
+  [npm-badge]: https://badgen.net/npm/v/@biomejs/biome?icon=npm&color=60a5fa&label=%40biomejs%2Fbiome
+  [npm-url]: https://www.npmjs.com/package/@biomejs/biome/v/latest
+  [vscode-badge]: https://badgen.net/vs-marketplace/v/biomejs.biome?label=vscode&icon=visualstudio&color=60a5fa
+  [vscode-url]: https://marketplace.visualstudio.com/items?itemName=biomejs.biome
+  [open-vsx-badge]: https://badgen.net/open-vsx/version/biomejs/biome?label=open-vsx&color=60a5fa
+  [open-vsx-url]: https://open-vsx.org/extension/biomejs/biome
 
 <!-- Insert new entries lexicographically by language code.
      For example given below is the same order as these files appear on page:
-     https://github.com/biomejs/biome/tree/main/packages/%40biomejs/biome -->
-<div align="center">
+     https://github.com/biomejs/biome/tree/main/packages/@biomejs/biome -->
 
-[हिन्दी](https://github.com/biomejs/biome/blob/main/packages/%40biomejs/biome/README.hi.md) | English | [繁體中文](https://github.com/biomejs/biome/blob/main/packages/%40biomejs/biome/README.zh-TW.md) | [简体中文](https://github.com/biomejs/biome/blob/main/packages/%40biomejs/biome/README.zh-CN.md) | [日本語](https://github.com/biomejs/biome/blob/main/packages/%40biomejs/biome/README.ja.md) | [Português do Brasil](https://github.com/biomejs/biome/blob/main/packages/%40biomejs/biome/README.pt-BR.md) | [한글](https://github.com/biomejs/biome/blob/main/packages/%40biomejs/biome/README.kr.md)
-
+  [हिन्दी](https://github.com/biomejs/biome/blob/main/packages/%40biomejs/biome/README.hi.md) | English | [Français](https://github.com/biomejs/biome/blob/main/packages/%40biomejs/biome/README.fr.md) | [繁體中文](https://github.com/biomejs/biome/blob/main/packages/%40biomejs/biome/README.zh-TW.md) | [简体中文](https://github.com/biomejs/biome/blob/main/packages/%40biomejs/biome/README.zh-CN.md) | [日本語](https://github.com/biomejs/biome/blob/main/packages/%40biomejs/biome/README.ja.md) | [Português do Brasil](https://github.com/biomejs/biome/blob/main/packages/%40biomejs/biome/README.pt-BR.md) | [한국어](https://github.com/biomejs/biome/blob/main/packages/%40biomejs/biome/README.kr.md) | [Русский](https://github.com/biomejs/biome/blob/main/packages/%40biomejs/biome/README.ru.md) | [Українська](https://github.com/biomejs/biome/blob/main/packages/%40biomejs/biome/README.uk.md)
 </div>
+
+<br>
 
 **Biome** is a performant toolchain for web projects, it aims to provide developer tools to maintain the health of said projects.
 
 **Biome is a [fast formatter](./benchmark#formatting)** for _JavaScript_, _TypeScript_, _JSX_, _JSON_, _CSS_ and _GraphQL_ that scores **[97% compatibility with _Prettier_](https://console.algora.io/challenges/prettier)**.
 
-**Biome is a [performant linter](https://github.com/biomejs/biome/tree/main/benchmark#linting)** for _JavaScript_, _TypeScript_, _JSX_, _CSS_ and _GraphQL_ that features **[more than 270 rules](https://biomejs.dev/linter/rules/)** from ESLint, typescript-eslint, and [other sources](https://github.com/biomejs/biome/discussions/3).
+**Biome is a [performant linter](https://github.com/biomejs/biome/tree/main/benchmark#linting)** for _JavaScript_, _TypeScript_, _JSX_, _JSON_, _CSS_, and _GraphQL_ that features **[more than 300 rules](https://biomejs.dev/linter/rules/)** from ESLint, typescript-eslint, and [other sources](https://github.com/biomejs/biome/discussions/3).
 It **outputs detailed and contextualized diagnostics** that help you to improve your code and become a better programmer!
 
-**Biome** is designed from the start to be used [interactively within an editor](https://biomejs.dev/guides/integrate-in-editor/).
+**Biome** is designed from the start to be used [interactively within an editor](https://biomejs.dev/guides/editors/first-party-extensions/).
 It can format and lint malformed code as you are writing it.
 
 ### Installation
@@ -59,16 +54,16 @@ npm install --save-dev --save-exact @biomejs/biome
 
 ```shell
 # format files
-npx @biomejs/biome format --write ./src
+npx @biomejs/biome format --write
 
 # lint files and apply the safe fixes
-npx @biomejs/biome lint --write ./src
+npx @biomejs/biome lint --write
 
 # run format, lint, etc. and apply the safe fixes
-npx @biomejs/biome check --write ./src
+npx @biomejs/biome check --write
 
 # check all files against format, lint, etc. in CI environments
-npx @biomejs/biome ci ./src
+npx @biomejs/biome ci
 ```
 
 If you want to give Biome a run without installing it, use the [online playground](https://biomejs.dev/playground/), compiled to WebAssembly.
@@ -88,7 +83,9 @@ or directly head to the [Getting Started guide][getting-started] to start using 
 
 **Biome** has first-class LSP support, with a sophisticated parser that represents the source text in full fidelity and top-notch error recovery.
 
-**Biome** unifies functionality that has previously been separate tools. Building upon a shared base allows us to provide a cohesive experience for processing code, displaying errors, parallelize work, caching, and configuration.
+**Biome** wants to offer a high-quality *Developer Experience*, with descriptive diagnostics and great performance.
+
+**Biome** unifies functionalities that have previously been separate tools. Building upon a shared base allows us to provide a cohesive experience for processing code, displaying errors, parallelize work, caching, and configuration.
 
 Read more about our [project philosophy][biome-philosophy].
 
@@ -104,12 +101,45 @@ You can sponsor or fund the project via [Open collective](https://opencollective
 
 Biome offers a simple sponsorship program that allows companies to get visibility and recognition among various developers.
 
-### Issue funding
-
-We use [Polar.sh](https://polar.sh/biomejs) to up-vote and promote specific features that you would like to see and implement. Check our backlog and help us:
-
+Biome offers [enterprise support](https://biomejs.dev/enterprise), where Core Contributors can be employed to work on company-focused projects.
 
 ## Sponsors
+
+### Platinum Sponsors
+
+<table>
+  <tbody>
+    <tr>
+      <td align="center" valign="middle">
+        <a href="https://vercel.com/?utm_source=biome&utm_medium=readme" target="_blank">
+          <picture>
+            <source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/biomejs/resources/refs/heads/main/sponsors/vercel-dark.png" />
+            <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/biomejs/resources/refs/heads/main/sponsors/vercel-light.png" />
+            <img src="https://raw.githubusercontent.com/biomejs/resources/refs/heads/main/sponsors/vercel-light.png" width="500" alt="Vercel logo" />
+          </picture>
+        </a>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+### Gold Sponsors
+
+<table>
+  <tbody>
+    <tr>
+      <td align="center" valign="middle">
+        <a href="https://depot.dev/?utm_source=biome&utm_medium=readme" target="_blank">
+          <picture>
+            <source media="(prefers-color-scheme: light)" srcset="https://depot.dev/assets/brand/1693758816/depot-logo-horizontal-on-light@3x.png" />
+            <source media="(prefers-color-scheme: dark)" srcset="https://depot.dev/assets/brand/1693758816/depot-logo-horizontal-on-dark@3x.png" />
+            <img src="https://depot.dev/assets/brand/1693758816/depot-logo-horizontal-on-light@3x.png" width="400" alt="Depot logo" />
+          </picture>
+        </a>
+      </td>
+    </tr>
+  </tbody>
+</table>
 
 ### Silver Sponsors
 
@@ -117,10 +147,13 @@ We use [Polar.sh](https://polar.sh/biomejs) to up-vote and promote specific feat
   <tbody>
     <tr>
       <td align="center" valign="middle">
-        <a href="https://l2beat.com/" target="_blank"><img src="https://images.opencollective.com/l2beat/c2b2a27/logo/256.png" height="100"></a>
+        <a href="https://l2beat.com/?utm_source=biome&utm_medium=readme" target="_blank"><img src="https://images.opencollective.com/l2beat/c2b2a27/logo/256.png" height="100" alt="L2BEAT logo"></a>
       </td>
       <td align="center" valign="middle">
-        <a href="https://www.phoenixlabs.dev/" target="_blank"><img src="https://images.opencollective.com/phoenix-labs/2824ed4/logo/100.png?height=100" height="100"></a>
+        <a href="https://www.phoenixlabs.dev/?utm_source=biome&utm_medium=readme" target="_blank"><img src="https://images.opencollective.com/phoenix-labs/2824ed4/logo/100.png?height=100" height="100" alt="Phoenix Labs logo"></a>
+      </td>
+      <td align="center" valign="middle">
+        <a href="https://lokalise.com/?utm_source=biome&utm_medium=readme" target="_blank"><img src="https://avatars.githubusercontent.com/u/14294501?s=200&v=4" height="100" alt="Lokalise logo"></a>
       </td>
     </tr>
   </tbody>
@@ -132,22 +165,25 @@ We use [Polar.sh](https://polar.sh/biomejs) to up-vote and promote specific feat
   <tbody>
     <tr>
       <td align="center" valign="middle">
-        <a href="https://www.kanamekey.com" target="_blank"><img src="https://images.opencollective.com/kaname/d15fd98/logo/256.png?height=80" width="80"></a>
+        <a href="https://nanabit.dev/?utm_source=biome&utm_medium=readme" target="_blank"><img src="https://images.opencollective.com/nanabit/d15fd98/logo/256.png?height=80" width="80" alt="Nanabit logo"></a>
       </td>
       <td align="center" valign="middle">
-        <a href="https://nanabit.dev/" target="_blank"><img src="https://images.opencollective.com/nanabit/d15fd98/logo/256.png?height=80" width="80"></a>
+        <a href="https://vital.io/?utm_source=biome&utm_medium=readme" target="_blank"><img src="https://avatars.githubusercontent.com/u/25357309?s=200" width="80" alt="Vital logo"></a>
       </td>
       <td align="center" valign="middle">
-        <a href="https://vital.io/" target="_blank"><img src="https://avatars.githubusercontent.com/u/25357309?s=200" width="80"></a>
+        <a href="https://coderabbit.ai/?utm_source=biome&utm_medium=readme" target="_blank"><img src="https://avatars.githubusercontent.com/u/132028505?s=200&v=4" width="80" alt="CodeRabbit logo"></a>
       </td>
       <td align="center" valign="middle">
-        <a href="https://coderabbit.ai/" target="_blank"><img src="https://avatars.githubusercontent.com/u/132028505?s=200&v=4" width="80"></a>
+        <a href="https://forge42.dev/?utm_source=biome&utm_medium=readme" target="_blank"><img src="https://avatars.githubusercontent.com/u/161314831?s=200&v=4" width="80" alt="Forge42 logo"></a>
       </td>
       <td align="center" valign="middle">
-        <a href="https://forge42.dev/" target="_blank"><img src="https://avatars.githubusercontent.com/u/161314831?s=200&v=4" width="80"></a>
+        <a href="http://rstudio.org/?utm_source=biome&utm_medium=readme" target="_blank"><img src="https://avatars.githubusercontent.com/u/513560?s=200&v=4" width="80" alt="RStudio logo"></a>
       </td>
       <td align="center" valign="middle">
-        <a href="https://transloadit.com/" target="_blank"><img src="https://avatars.githubusercontent.com/u/125754?s=200&v=4" width="80"></a>
+        <a href="https://pennylane.com/?utm_source=biome&utm_medium=readme" target="_blank"><img src="https://avatars.githubusercontent.com/u/57875210?s=200&v=4" width="80" alt="Pennylane logo"></a>
+      </td>
+      <td align="center" valign="middle">
+        <a href="https://jetbrains.com/?utm_source=biome&utm_medium=readme" target="_blank"><img src="https://resources.jetbrains.com/storage/products/company/brand/logos/jetbrains.png" width="100" alt="JetBrains logo"></a>
       </td>
     </tr>
   </tbody>

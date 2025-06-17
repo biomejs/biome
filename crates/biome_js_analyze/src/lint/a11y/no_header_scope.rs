@@ -1,8 +1,7 @@
 use biome_analyze::context::RuleContext;
-use biome_analyze::{
-    declare_lint_rule, ActionCategory, Ast, FixKind, Rule, RuleDiagnostic, RuleSource,
-};
+use biome_analyze::{Ast, FixKind, Rule, RuleDiagnostic, RuleSource, declare_lint_rule};
 use biome_console::markup;
+use biome_diagnostics::Severity;
 use biome_js_syntax::jsx_ext::AnyJsxElement;
 use biome_rowan::{AstNode, BatchMutationExt};
 
@@ -44,6 +43,7 @@ declare_lint_rule! {
         language: "jsx",
         sources: &[RuleSource::EslintJsxA11y("scope")],
         recommended: true,
+        severity: Severity::Error,
         fix_kind: FixKind::Unsafe,
     }
 }
@@ -58,7 +58,7 @@ impl Rule for NoHeaderScope {
         let element = ctx.query();
 
         if element.is_element()
-            && element.name_value_token()?.text_trimmed() != "th"
+            && element.name_value_token().ok()?.text_trimmed() != "th"
             && element.has_truthy_attribute("scope")
         {
             return Some(());
@@ -96,7 +96,7 @@ impl Rule for NoHeaderScope {
         mutation.remove_node(scope_node);
 
         Some(JsRuleAction::new(
-            ActionCategory::QuickFix,
+            ctx.metadata().action_category(ctx.category(), ctx.group()),
             ctx.metadata().applicability(),
             markup! { "Remove the "<Emphasis>"scope"</Emphasis>" attribute." }.to_owned(),
             mutation,

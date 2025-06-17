@@ -2,10 +2,10 @@
 
 use super::module::parse_module_body;
 use super::stmt::parse_statements;
+use crate::JsParser;
 use crate::prelude::*;
 use crate::state::{ChangeParserState, EnableStrictMode};
 use crate::syntax::stmt::parse_directives;
-use crate::JsParser;
 use biome_js_syntax::JsSyntaxKind::*;
 use biome_js_syntax::ModuleKind;
 
@@ -26,7 +26,14 @@ pub(crate) fn parse(p: &mut JsParser) -> CompletedMarker {
         }
         ModuleKind::Module => {
             parse_module_body(p, statement_list);
-            m.complete(p, JS_MODULE)
+            m.complete(
+                p,
+                if p.source_type().language().is_definition_file() {
+                    TS_DECLARATION_MODULE
+                } else {
+                    JS_MODULE
+                },
+            )
         }
     };
 

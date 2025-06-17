@@ -1,16 +1,17 @@
 use biome_analyze::{AnalysisFilter, AnalyzerAction, ControlFlow, Never, RuleFilter};
 use biome_diagnostics::advice::CodeSuggestionAdvice;
-use biome_diagnostics::{DiagnosticExt, Severity};
 use biome_graphql_parser::parse_graphql;
 use biome_graphql_syntax::{GraphqlFileSource, GraphqlLanguage};
 use biome_rowan::AstNode;
 use biome_test_utils::{
-    assert_errors_are_absent, code_fix_to_string, create_analyzer_options, diagnostic_to_string,
+    CheckActionType, assert_diagnostics_expectation_comment, assert_errors_are_absent,
+    code_fix_to_string, create_analyzer_options, diagnostic_to_string,
     has_bogus_nodes_or_empty_slots, parse_test_path, register_leak_checker, scripts_from_json,
-    write_analyzer_snapshot, CheckActionType,
+    write_analyzer_snapshot,
 };
+use camino::Utf8Path;
 use std::ops::Deref;
-use std::{ffi::OsStr, fs::read_to_string, path::Path, slice};
+use std::{fs::read_to_string, slice};
 
 tests_macros::gen_tests! {"tests/specs/**/*.{graphql,json,jsonc}", crate::run_test, "module"}
 tests_macros::gen_tests! {"tests/suppression/**/*.{graphql,json,jsonc}", crate::run_suppression_test, "module"}
@@ -18,8 +19,8 @@ tests_macros::gen_tests! {"tests/suppression/**/*.{graphql,json,jsonc}", crate::
 fn run_test(input: &'static str, _: &str, _: &str, _: &str) {
     register_leak_checker();
 
-    let input_file = Path::new(input);
-    let file_name = input_file.file_name().and_then(OsStr::to_str).unwrap();
+    let input_file = Utf8Path::new(input);
+    let file_name = input_file.file_name().unwrap();
 
     let (group, rule) = parse_test_path(input_file);
     if rule == "specs" || rule == "suppression" {
@@ -47,7 +48,8 @@ fn run_test(input: &'static str, _: &str, _: &str, _: &str) {
 
     let input_code = read_to_string(input_file)
         .unwrap_or_else(|err| panic!("failed to read {input_file:?}: {err:?}"));
-    let quantity_diagnostics = if let Some(scripts) = scripts_from_json(extension, &input_code) {
+
+    if let Some(scripts) = scripts_from_json(extension, &input_code) {
         for script in scripts {
             analyze_and_snap(
                 &mut snapshot,
@@ -59,8 +61,6 @@ fn run_test(input: &'static str, _: &str, _: &str, _: &str) {
                 CheckActionType::Lint,
             );
         }
-
-        0
     } else {
         let Ok(source_type) = input_file.try_into() else {
             return;
@@ -73,7 +73,7 @@ fn run_test(input: &'static str, _: &str, _: &str, _: &str) {
             file_name,
             input_file,
             CheckActionType::Lint,
-        )
+        );
     };
 
     insta::with_settings!({
@@ -82,22 +82,17 @@ fn run_test(input: &'static str, _: &str, _: &str, _: &str) {
     }, {
         insta::assert_snapshot!(file_name, snapshot, file_name);
     });
-
-    if input_code.contains("/* should not generate diagnostics */") && quantity_diagnostics > 0 {
-        panic!("This test should not generate diagnostics");
-    }
 }
 
-#[allow(clippy::too_many_arguments)]
 pub(crate) fn analyze_and_snap(
     snapshot: &mut String,
     input_code: &str,
     source_type: GraphqlFileSource,
     filter: AnalysisFilter,
     file_name: &str,
-    input_file: &Path,
+    input_file: &Utf8Path,
     check_action_type: CheckActionType,
-) -> usize {
+) {
     let parsed = parse_graphql(input_code);
     let root = parsed.tree();
 
@@ -119,8 +114,7 @@ pub(crate) fn analyze_and_snap(
                 }
             }
 
-            let error = diag.with_severity(Severity::Warning);
-            diagnostics.push(diagnostic_to_string(file_name, input_code, error));
+            diagnostics.push(diagnostic_to_string(file_name, input_code, diag.into()));
             return ControlFlow::Continue(());
         }
 
@@ -151,11 +145,11 @@ pub(crate) fn analyze_and_snap(
         "graphql",
     );
 
-    diagnostics.len()
+    assert_diagnostics_expectation_comment(input_file, root.syntax(), diagnostics.len());
 }
 
 fn check_code_action(
-    path: &Path,
+    path: &Utf8Path,
     source: &str,
     _source_type: GraphqlFileSource,
     action: &AnalyzerAction<GraphqlLanguage>,
@@ -189,11 +183,11 @@ fn check_code_action(
     assert_errors_are_absent(re_parse.tree().syntax(), re_parse.diagnostics(), path);
 }
 
-pub(crate) fn _run_suppression_test(input: &'static str, _: &str, _: &str, _: &str) {
+pub(crate) fn run_suppression_test(input: &'static str, _: &str, _: &str, _: &str) {
     register_leak_checker();
 
-    let input_file = Path::new(input);
-    let file_name = input_file.file_name().and_then(OsStr::to_str).unwrap();
+    let input_file = Utf8Path::new(input);
+    let file_name = input_file.file_name().unwrap();
     let input_code = read_to_string(input_file)
         .unwrap_or_else(|err| panic!("failed to read {input_file:?}: {err:?}"));
 

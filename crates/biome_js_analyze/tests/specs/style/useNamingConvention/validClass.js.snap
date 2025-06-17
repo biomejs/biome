@@ -3,7 +3,8 @@ source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: validClass.js
 ---
 # Input
-```jsx
+```js
+/* should not generate diagnostics */
 class C {}
 
 class _C {}
@@ -17,5 +18,3 @@ export default class DefaultClass {}
 const x = class ClassExpression {}
 
 ```
-
-

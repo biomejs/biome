@@ -1,6 +1,6 @@
+use crate::JsParser;
 use crate::lexer::{JsSyntaxKind, T};
 use crate::prelude::*;
-use crate::JsParser;
 use biome_parser::diagnostic::ParseDiagnostic;
 
 /// This struct contains the information needed to the parser to recover from a certain error
@@ -20,7 +20,7 @@ pub(crate) struct SingleTokenParseRecovery {
     bogus_node_kind: JsSyntaxKind,
 }
 
-#[allow(deprecated)]
+#[expect(deprecated)]
 impl SingleTokenParseRecovery {
     pub fn new(recovery: TokenSet<JsSyntaxKind>, bogus_node_kind: JsSyntaxKind) -> Self {
         Self {

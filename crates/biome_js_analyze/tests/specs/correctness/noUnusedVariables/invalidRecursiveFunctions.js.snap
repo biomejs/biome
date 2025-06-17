@@ -3,7 +3,7 @@ source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalidRecursiveFunctions.js
 ---
 # Input
-```jsx
+```js
 function f() {
     f();
 }
@@ -20,16 +20,25 @@ const h = function() {
 
 # Diagnostics
 ```
-invalidRecursiveFunctions.js:1:10 lint/correctness/noUnusedVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalidRecursiveFunctions.js:1:10 lint/correctness/noUnusedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
 
-  ! This function is unused.
+  ! This function f is unused.
   
   > 1 │ function f() {
       │          ^
     2 │     f();
     3 │ }
   
-  i Unused variables usually are result of incomplete refactoring, typos and other source of bugs.
+  i Unused variables are often the result of an incomplete refactoring, typos, or other sources of bugs.
+  
+  i Unsafe fix: If this is intentional, prepend f with an underscore.
+  
+     1    │ - function·f()·{
+     2    │ - ····f();
+        1 │ + function·_f()·{
+        2 │ + ····_f();
+     3  3 │   }
+     4  4 │   
   
 
 ```
@@ -37,7 +46,7 @@ invalidRecursiveFunctions.js:1:10 lint/correctness/noUnusedVariables ━━━�
 ```
 invalidRecursiveFunctions.js:5:7 lint/correctness/noUnusedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This variable is unused.
+  ! This variable g is unused.
   
     3 │ }
     4 │ 
@@ -46,7 +55,7 @@ invalidRecursiveFunctions.js:5:7 lint/correctness/noUnusedVariables  FIXABLE  �
     6 │     g();
     7 │ }
   
-  i Unused variables usually are result of incomplete refactoring, typos and other source of bugs.
+  i Unused variables are often the result of an incomplete refactoring, typos, or other sources of bugs.
   
   i Unsafe fix: If this is intentional, prepend g with an underscore.
   
@@ -65,7 +74,7 @@ invalidRecursiveFunctions.js:5:7 lint/correctness/noUnusedVariables  FIXABLE  �
 ```
 invalidRecursiveFunctions.js:9:7 lint/correctness/noUnusedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This variable is unused.
+  ! This variable h is unused.
   
      7 │ }
      8 │ 
@@ -74,7 +83,7 @@ invalidRecursiveFunctions.js:9:7 lint/correctness/noUnusedVariables  FIXABLE  �
     10 │     h();
     11 │ }
   
-  i Unused variables usually are result of incomplete refactoring, typos and other source of bugs.
+  i Unused variables are often the result of an incomplete refactoring, typos, or other sources of bugs.
   
   i Unsafe fix: If this is intentional, prepend h with an underscore.
   
@@ -89,5 +98,3 @@ invalidRecursiveFunctions.js:9:7 lint/correctness/noUnusedVariables  FIXABLE  �
   
 
 ```
-
-

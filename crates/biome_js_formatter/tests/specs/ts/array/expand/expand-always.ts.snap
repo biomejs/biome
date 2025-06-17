@@ -1,0 +1,161 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: ts/array/expand/expand-always.ts
+---
+# Input
+
+```ts
+type A = [
+	"value1",
+	"value2",
+];
+
+const a: A = [
+	"value1",
+	"value2",
+];
+
+type B = [ "value1",
+	"value2",
+];
+
+const b: B = [ "value1",
+	"value2",
+];
+
+type C = [
+	"value1", "value2",
+];
+
+const c: C = [
+	"value1", "value2",
+];
+
+type D = [
+	"value1", "value2", ];
+
+const d: D = [
+	"value1", "value2", ];
+
+type E = [ "value1", "value2", ];
+
+const e: E = [ "value1", "value2", ];
+
+```
+
+
+=============================
+
+# Outputs
+
+## Output 1
+
+-----
+Indent style: Tab
+Indent width: 2
+Line ending: LF
+Line width: 80
+Quote style: Double Quotes
+JSX quote style: Double Quotes
+Quote properties: As needed
+Trailing commas: All
+Semicolons: Always
+Arrow parentheses: Always
+Bracket spacing: true
+Bracket same line: false
+Attribute Position: Auto
+Expand lists: Auto
+-----
+
+```ts
+type A = ["value1", "value2"];
+
+const a: A = ["value1", "value2"];
+
+type B = ["value1", "value2"];
+
+const b: B = ["value1", "value2"];
+
+type C = ["value1", "value2"];
+
+const c: C = ["value1", "value2"];
+
+type D = ["value1", "value2"];
+
+const d: D = ["value1", "value2"];
+
+type E = ["value1", "value2"];
+
+const e: E = ["value1", "value2"];
+```
+
+## Output 1
+
+-----
+Indent style: Tab
+Indent width: 2
+Line ending: LF
+Line width: 80
+Quote style: Double Quotes
+JSX quote style: Double Quotes
+Quote properties: As needed
+Trailing commas: All
+Semicolons: Always
+Arrow parentheses: Always
+Bracket spacing: true
+Bracket same line: false
+Attribute Position: Auto
+Expand lists: Always
+-----
+
+```ts
+type A = [
+	"value1",
+	"value2",
+];
+
+const a: A = [
+	"value1",
+	"value2",
+];
+
+type B = [
+	"value1",
+	"value2",
+];
+
+const b: B = [
+	"value1",
+	"value2",
+];
+
+type C = [
+	"value1",
+	"value2",
+];
+
+const c: C = [
+	"value1",
+	"value2",
+];
+
+type D = [
+	"value1",
+	"value2",
+];
+
+const d: D = [
+	"value1",
+	"value2",
+];
+
+type E = [
+	"value1",
+	"value2",
+];
+
+const e: E = [
+	"value1",
+	"value2",
+];
+```

@@ -1,0 +1,363 @@
+---
+source: crates/biome_js_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```ts
+({
+    x<>(maybeA: any): maybeA is A { return true },
+    async *id<>(param: Promise<R>): AsyncIterableIterator<R> { yield await param },
+})
+
+```
+
+
+## AST
+
+```
+JsModule {
+    bom_token: missing (optional),
+    interpreter_token: missing (optional),
+    directives: JsDirectiveList [],
+    items: JsModuleItemList [
+        JsExpressionStatement {
+            expression: JsParenthesizedExpression {
+                l_paren_token: L_PAREN@0..1 "(" [] [],
+                expression: JsObjectExpression {
+                    l_curly_token: L_CURLY@1..2 "{" [] [],
+                    members: JsObjectMemberList [
+                        JsMethodObjectMember {
+                            async_token: missing (optional),
+                            star_token: missing (optional),
+                            name: JsLiteralMemberName {
+                                value: IDENT@2..8 "x" [Newline("\n"), Whitespace("    ")] [],
+                            },
+                            type_parameters: TsTypeParameters {
+                                l_angle_token: L_ANGLE@8..9 "<" [] [],
+                                items: TsTypeParameterList [],
+                                r_angle_token: R_ANGLE@9..10 ">" [] [],
+                            },
+                            parameters: JsParameters {
+                                l_paren_token: L_PAREN@10..11 "(" [] [],
+                                items: JsParameterList [
+                                    JsFormalParameter {
+                                        decorators: JsDecoratorList [],
+                                        binding: JsIdentifierBinding {
+                                            name_token: IDENT@11..17 "maybeA" [] [],
+                                        },
+                                        question_mark_token: missing (optional),
+                                        type_annotation: TsTypeAnnotation {
+                                            colon_token: COLON@17..19 ":" [] [Whitespace(" ")],
+                                            ty: TsAnyType {
+                                                any_token: ANY_KW@19..22 "any" [] [],
+                                            },
+                                        },
+                                        initializer: missing (optional),
+                                    },
+                                ],
+                                r_paren_token: R_PAREN@22..23 ")" [] [],
+                            },
+                            return_type_annotation: TsReturnTypeAnnotation {
+                                colon_token: COLON@23..25 ":" [] [Whitespace(" ")],
+                                ty: TsPredicateReturnType {
+                                    parameter_name: JsReferenceIdentifier {
+                                        value_token: IDENT@25..32 "maybeA" [] [Whitespace(" ")],
+                                    },
+                                    is_token: IS_KW@32..35 "is" [] [Whitespace(" ")],
+                                    ty: TsReferenceType {
+                                        name: JsReferenceIdentifier {
+                                            value_token: IDENT@35..37 "A" [] [Whitespace(" ")],
+                                        },
+                                        type_arguments: missing (optional),
+                                    },
+                                },
+                            },
+                            body: JsFunctionBody {
+                                l_curly_token: L_CURLY@37..39 "{" [] [Whitespace(" ")],
+                                directives: JsDirectiveList [],
+                                statements: JsStatementList [
+                                    JsReturnStatement {
+                                        return_token: RETURN_KW@39..46 "return" [] [Whitespace(" ")],
+                                        argument: JsBooleanLiteralExpression {
+                                            value_token: TRUE_KW@46..51 "true" [] [Whitespace(" ")],
+                                        },
+                                        semicolon_token: missing (optional),
+                                    },
+                                ],
+                                r_curly_token: R_CURLY@51..52 "}" [] [],
+                            },
+                        },
+                        COMMA@52..53 "," [] [],
+                        JsMethodObjectMember {
+                            async_token: ASYNC_KW@53..64 "async" [Newline("\n"), Whitespace("    ")] [Whitespace(" ")],
+                            star_token: STAR@64..65 "*" [] [],
+                            name: JsLiteralMemberName {
+                                value: IDENT@65..67 "id" [] [],
+                            },
+                            type_parameters: TsTypeParameters {
+                                l_angle_token: L_ANGLE@67..68 "<" [] [],
+                                items: TsTypeParameterList [],
+                                r_angle_token: R_ANGLE@68..69 ">" [] [],
+                            },
+                            parameters: JsParameters {
+                                l_paren_token: L_PAREN@69..70 "(" [] [],
+                                items: JsParameterList [
+                                    JsFormalParameter {
+                                        decorators: JsDecoratorList [],
+                                        binding: JsIdentifierBinding {
+                                            name_token: IDENT@70..75 "param" [] [],
+                                        },
+                                        question_mark_token: missing (optional),
+                                        type_annotation: TsTypeAnnotation {
+                                            colon_token: COLON@75..77 ":" [] [Whitespace(" ")],
+                                            ty: TsReferenceType {
+                                                name: JsReferenceIdentifier {
+                                                    value_token: IDENT@77..84 "Promise" [] [],
+                                                },
+                                                type_arguments: TsTypeArguments {
+                                                    l_angle_token: L_ANGLE@84..85 "<" [] [],
+                                                    ts_type_argument_list: TsTypeArgumentList [
+                                                        TsReferenceType {
+                                                            name: JsReferenceIdentifier {
+                                                                value_token: IDENT@85..86 "R" [] [],
+                                                            },
+                                                            type_arguments: missing (optional),
+                                                        },
+                                                    ],
+                                                    r_angle_token: R_ANGLE@86..87 ">" [] [],
+                                                },
+                                            },
+                                        },
+                                        initializer: missing (optional),
+                                    },
+                                ],
+                                r_paren_token: R_PAREN@87..88 ")" [] [],
+                            },
+                            return_type_annotation: TsReturnTypeAnnotation {
+                                colon_token: COLON@88..90 ":" [] [Whitespace(" ")],
+                                ty: TsReferenceType {
+                                    name: JsReferenceIdentifier {
+                                        value_token: IDENT@90..111 "AsyncIterableIterator" [] [],
+                                    },
+                                    type_arguments: TsTypeArguments {
+                                        l_angle_token: L_ANGLE@111..112 "<" [] [],
+                                        ts_type_argument_list: TsTypeArgumentList [
+                                            TsReferenceType {
+                                                name: JsReferenceIdentifier {
+                                                    value_token: IDENT@112..113 "R" [] [],
+                                                },
+                                                type_arguments: missing (optional),
+                                            },
+                                        ],
+                                        r_angle_token: R_ANGLE@113..115 ">" [] [Whitespace(" ")],
+                                    },
+                                },
+                            },
+                            body: JsFunctionBody {
+                                l_curly_token: L_CURLY@115..117 "{" [] [Whitespace(" ")],
+                                directives: JsDirectiveList [],
+                                statements: JsStatementList [
+                                    JsExpressionStatement {
+                                        expression: JsYieldExpression {
+                                            yield_token: YIELD_KW@117..123 "yield" [] [Whitespace(" ")],
+                                            argument: JsYieldArgument {
+                                                star_token: missing (optional),
+                                                expression: JsAwaitExpression {
+                                                    await_token: AWAIT_KW@123..129 "await" [] [Whitespace(" ")],
+                                                    argument: JsIdentifierExpression {
+                                                        name: JsReferenceIdentifier {
+                                                            value_token: IDENT@129..135 "param" [] [Whitespace(" ")],
+                                                        },
+                                                    },
+                                                },
+                                            },
+                                        },
+                                        semicolon_token: missing (optional),
+                                    },
+                                ],
+                                r_curly_token: R_CURLY@135..136 "}" [] [],
+                            },
+                        },
+                        COMMA@136..137 "," [] [],
+                    ],
+                    r_curly_token: R_CURLY@137..139 "}" [Newline("\n")] [],
+                },
+                r_paren_token: R_PAREN@139..140 ")" [] [],
+            },
+            semicolon_token: missing (optional),
+        },
+    ],
+    eof_token: EOF@140..141 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: JS_MODULE@0..141
+  0: (empty)
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..140
+    0: JS_EXPRESSION_STATEMENT@0..140
+      0: JS_PARENTHESIZED_EXPRESSION@0..140
+        0: L_PAREN@0..1 "(" [] []
+        1: JS_OBJECT_EXPRESSION@1..139
+          0: L_CURLY@1..2 "{" [] []
+          1: JS_OBJECT_MEMBER_LIST@2..137
+            0: JS_METHOD_OBJECT_MEMBER@2..52
+              0: (empty)
+              1: (empty)
+              2: JS_LITERAL_MEMBER_NAME@2..8
+                0: IDENT@2..8 "x" [Newline("\n"), Whitespace("    ")] []
+              3: TS_TYPE_PARAMETERS@8..10
+                0: L_ANGLE@8..9 "<" [] []
+                1: TS_TYPE_PARAMETER_LIST@9..9
+                2: R_ANGLE@9..10 ">" [] []
+              4: JS_PARAMETERS@10..23
+                0: L_PAREN@10..11 "(" [] []
+                1: JS_PARAMETER_LIST@11..22
+                  0: JS_FORMAL_PARAMETER@11..22
+                    0: JS_DECORATOR_LIST@11..11
+                    1: JS_IDENTIFIER_BINDING@11..17
+                      0: IDENT@11..17 "maybeA" [] []
+                    2: (empty)
+                    3: TS_TYPE_ANNOTATION@17..22
+                      0: COLON@17..19 ":" [] [Whitespace(" ")]
+                      1: TS_ANY_TYPE@19..22
+                        0: ANY_KW@19..22 "any" [] []
+                    4: (empty)
+                2: R_PAREN@22..23 ")" [] []
+              5: TS_RETURN_TYPE_ANNOTATION@23..37
+                0: COLON@23..25 ":" [] [Whitespace(" ")]
+                1: TS_PREDICATE_RETURN_TYPE@25..37
+                  0: JS_REFERENCE_IDENTIFIER@25..32
+                    0: IDENT@25..32 "maybeA" [] [Whitespace(" ")]
+                  1: IS_KW@32..35 "is" [] [Whitespace(" ")]
+                  2: TS_REFERENCE_TYPE@35..37
+                    0: JS_REFERENCE_IDENTIFIER@35..37
+                      0: IDENT@35..37 "A" [] [Whitespace(" ")]
+                    1: (empty)
+              6: JS_FUNCTION_BODY@37..52
+                0: L_CURLY@37..39 "{" [] [Whitespace(" ")]
+                1: JS_DIRECTIVE_LIST@39..39
+                2: JS_STATEMENT_LIST@39..51
+                  0: JS_RETURN_STATEMENT@39..51
+                    0: RETURN_KW@39..46 "return" [] [Whitespace(" ")]
+                    1: JS_BOOLEAN_LITERAL_EXPRESSION@46..51
+                      0: TRUE_KW@46..51 "true" [] [Whitespace(" ")]
+                    2: (empty)
+                3: R_CURLY@51..52 "}" [] []
+            1: COMMA@52..53 "," [] []
+            2: JS_METHOD_OBJECT_MEMBER@53..136
+              0: ASYNC_KW@53..64 "async" [Newline("\n"), Whitespace("    ")] [Whitespace(" ")]
+              1: STAR@64..65 "*" [] []
+              2: JS_LITERAL_MEMBER_NAME@65..67
+                0: IDENT@65..67 "id" [] []
+              3: TS_TYPE_PARAMETERS@67..69
+                0: L_ANGLE@67..68 "<" [] []
+                1: TS_TYPE_PARAMETER_LIST@68..68
+                2: R_ANGLE@68..69 ">" [] []
+              4: JS_PARAMETERS@69..88
+                0: L_PAREN@69..70 "(" [] []
+                1: JS_PARAMETER_LIST@70..87
+                  0: JS_FORMAL_PARAMETER@70..87
+                    0: JS_DECORATOR_LIST@70..70
+                    1: JS_IDENTIFIER_BINDING@70..75
+                      0: IDENT@70..75 "param" [] []
+                    2: (empty)
+                    3: TS_TYPE_ANNOTATION@75..87
+                      0: COLON@75..77 ":" [] [Whitespace(" ")]
+                      1: TS_REFERENCE_TYPE@77..87
+                        0: JS_REFERENCE_IDENTIFIER@77..84
+                          0: IDENT@77..84 "Promise" [] []
+                        1: TS_TYPE_ARGUMENTS@84..87
+                          0: L_ANGLE@84..85 "<" [] []
+                          1: TS_TYPE_ARGUMENT_LIST@85..86
+                            0: TS_REFERENCE_TYPE@85..86
+                              0: JS_REFERENCE_IDENTIFIER@85..86
+                                0: IDENT@85..86 "R" [] []
+                              1: (empty)
+                          2: R_ANGLE@86..87 ">" [] []
+                    4: (empty)
+                2: R_PAREN@87..88 ")" [] []
+              5: TS_RETURN_TYPE_ANNOTATION@88..115
+                0: COLON@88..90 ":" [] [Whitespace(" ")]
+                1: TS_REFERENCE_TYPE@90..115
+                  0: JS_REFERENCE_IDENTIFIER@90..111
+                    0: IDENT@90..111 "AsyncIterableIterator" [] []
+                  1: TS_TYPE_ARGUMENTS@111..115
+                    0: L_ANGLE@111..112 "<" [] []
+                    1: TS_TYPE_ARGUMENT_LIST@112..113
+                      0: TS_REFERENCE_TYPE@112..113
+                        0: JS_REFERENCE_IDENTIFIER@112..113
+                          0: IDENT@112..113 "R" [] []
+                        1: (empty)
+                    2: R_ANGLE@113..115 ">" [] [Whitespace(" ")]
+              6: JS_FUNCTION_BODY@115..136
+                0: L_CURLY@115..117 "{" [] [Whitespace(" ")]
+                1: JS_DIRECTIVE_LIST@117..117
+                2: JS_STATEMENT_LIST@117..135
+                  0: JS_EXPRESSION_STATEMENT@117..135
+                    0: JS_YIELD_EXPRESSION@117..135
+                      0: YIELD_KW@117..123 "yield" [] [Whitespace(" ")]
+                      1: JS_YIELD_ARGUMENT@123..135
+                        0: (empty)
+                        1: JS_AWAIT_EXPRESSION@123..135
+                          0: AWAIT_KW@123..129 "await" [] [Whitespace(" ")]
+                          1: JS_IDENTIFIER_EXPRESSION@129..135
+                            0: JS_REFERENCE_IDENTIFIER@129..135
+                              0: IDENT@129..135 "param" [] [Whitespace(" ")]
+                    1: (empty)
+                3: R_CURLY@135..136 "}" [] []
+            3: COMMA@136..137 "," [] []
+          2: R_CURLY@137..139 "}" [Newline("\n")] []
+        2: R_PAREN@139..140 ")" [] []
+      1: (empty)
+  4: EOF@140..141 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+ts_method_object_member_body_error.ts:2:7 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a type parameter but instead found '>'.
+  
+    1 │ ({
+  > 2 │     x<>(maybeA: any): maybeA is A { return true },
+      │       ^
+    3 │     async *id<>(param: Promise<R>): AsyncIterableIterator<R> { yield await param },
+    4 │ })
+  
+  i Expected a type parameter here.
+  
+    1 │ ({
+  > 2 │     x<>(maybeA: any): maybeA is A { return true },
+      │       ^
+    3 │     async *id<>(param: Promise<R>): AsyncIterableIterator<R> { yield await param },
+    4 │ })
+  
+ts_method_object_member_body_error.ts:3:15 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a type parameter but instead found '>'.
+  
+    1 │ ({
+    2 │     x<>(maybeA: any): maybeA is A { return true },
+  > 3 │     async *id<>(param: Promise<R>): AsyncIterableIterator<R> { yield await param },
+      │               ^
+    4 │ })
+    5 │ 
+  
+  i Expected a type parameter here.
+  
+    1 │ ({
+    2 │     x<>(maybeA: any): maybeA is A { return true },
+  > 3 │     async *id<>(param: Promise<R>): AsyncIterableIterator<R> { yield await param },
+      │               ^
+    4 │ })
+    5 │ 
+  
+```

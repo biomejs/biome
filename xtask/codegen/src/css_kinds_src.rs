@@ -241,6 +241,8 @@ pub const CSS_KINDS_SRC: KindsSrc = KindsSrc {
         "value",
         "as",
         "composes",
+        "position-try",
+        "view-transition",
         //
         "font-face",
         // Don't add to the end of this list, add new keywords above the "HERE"
@@ -288,6 +290,7 @@ pub const CSS_KINDS_SRC: KindsSrc = KindsSrc {
         "CSS_DECLARATION_OR_AT_RULE_LIST",
         "CSS_DECLARATION_WITH_SEMICOLON",
         "CSS_DECLARATION",
+        "CSS_EMPTY_DECLARATION",
         "CSS_IDENTIFIER",
         "CSS_NUMBER",
         "CSS_PARAMETER",
@@ -441,6 +444,7 @@ pub const CSS_KINDS_SRC: KindsSrc = KindsSrc {
         "CSS_PAGE_SELECTOR_PSEUDO",
         "CSS_PAGE_AT_RULE_BLOCK",
         "CSS_PAGE_AT_RULE_ITEM_LIST",
+        "CSS_POSITION_TRY_AT_RULE",
         "CSS_MARGIN_AT_RULE",
         "CSS_LAYER_AT_RULE",
         "CSS_LAYER_REFERENCE",
@@ -477,6 +481,7 @@ pub const CSS_KINDS_SRC: KindsSrc = KindsSrc {
         "CSS_VALUE_AT_RULE_DECLARATION_CLAUSE",
         "CSS_VALUE_AT_RULE_GENERIC_PROPERTY",
         "CSS_VALUE_AT_RULE_GENERIC_VALUE",
+        "CSS_VIEW_TRANSITION_AT_RULE",
         "CSS_UNKNOWN_BLOCK_AT_RULE",
         "CSS_UNKNOWN_VALUE_AT_RULE",
         "CSS_UNKNOWN_AT_RULE_COMPONENT_LIST",
@@ -506,6 +511,7 @@ pub const CSS_KINDS_SRC: KindsSrc = KindsSrc {
         "CSS_BOGUS_CUSTOM_IDENTIFIER",
         "CSS_BOGUS_KEYFRAMES_NAME",
         "CSS_BOGUS_UNICODE_RANGE_VALUE",
+        "CSS_BOGUS_SUPPORTS_CONDITION",
         // Grit metavariable
         "CSS_METAVARIABLE",
     ],

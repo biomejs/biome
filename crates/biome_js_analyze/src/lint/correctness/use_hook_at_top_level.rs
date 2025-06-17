@@ -1,29 +1,32 @@
-use crate::react::hooks::{is_react_component, is_react_hook, is_react_hook_call};
+use crate::react::hooks::{is_react_hook_call, is_react_hook_name};
 use crate::services::semantic::{SemanticModelBuilderVisitor, SemanticServices};
-use biome_analyze::RuleSource;
 use biome_analyze::{
-    context::RuleContext, declare_lint_rule, AddVisitor, FromServices, MissingServicesDiagnostic,
-    Phase, Phases, QueryMatch, Queryable, Rule, RuleDiagnostic, RuleKey, ServiceBag, Visitor,
-    VisitorContext, VisitorFinishContext,
+    AddVisitor, FromServices, Phase, Phases, QueryMatch, Queryable, Rule, RuleDiagnostic, RuleKey,
+    RuleMetadata, ServiceBag, ServicesDiagnostic, Visitor, VisitorContext, VisitorFinishContext,
+    context::RuleContext, declare_lint_rule,
 };
+use biome_analyze::{RuleDomain, RuleSource};
 use biome_console::markup;
 use biome_deserialize::{
-    Deserializable, DeserializableTypes, DeserializableValue, DeserializationDiagnostic,
-    DeserializationVisitor, Text,
+    Deserializable, DeserializableTypes, DeserializableValue, DeserializationContext,
+    DeserializationDiagnostic, DeserializationVisitor, Text,
 };
 use biome_js_semantic::{CallsExtensions, SemanticModel};
 use biome_js_syntax::{
-    AnyFunctionLike, AnyJsBinding, AnyJsExpression, AnyJsFunction, AnyJsObjectMemberName,
-    JsArrayAssignmentPatternElement, JsArrayBindingPatternElement, JsCallExpression,
-    JsConditionalExpression, JsIfStatement, JsLanguage, JsLogicalExpression, JsMethodObjectMember,
-    JsObjectBindingPatternShorthandProperty, JsReturnStatement, JsSyntaxKind, JsSyntaxNode,
-    JsTryFinallyStatement, TextRange,
+    AnyFunctionLike, AnyJsBinding, AnyJsClassMemberName, AnyJsExpression, AnyJsFunction,
+    AnyJsObjectMemberName, JsArrayAssignmentPatternElement, JsArrayBindingPatternElement,
+    JsCallExpression, JsConditionalExpression, JsGetterClassMember, JsGetterObjectMember,
+    JsIfStatement, JsLanguage, JsLogicalExpression, JsMethodClassMember, JsMethodObjectMember,
+    JsObjectBindingPatternShorthandProperty, JsReturnStatement, JsSetterClassMember,
+    JsSetterObjectMember, JsSyntaxKind, JsSyntaxNode, JsTryFinallyStatement, TextRange,
 };
-use biome_rowan::{declare_node_union, AstNode, Language, SyntaxNode, WalkEvent};
+use biome_rowan::{AstNode, Language, SyntaxNode, WalkEvent, declare_node_union};
 use rustc_hash::FxHashMap;
 use serde::{Deserialize, Serialize};
 use std::ops::{Deref, DerefMut};
 
+use crate::react::components::ReactComponentInfo;
+use biome_diagnostics::Severity;
 #[cfg(feature = "schemars")]
 use schemars::JsonSchema;
 
@@ -69,33 +72,44 @@ declare_lint_rule! {
         name: "useHookAtTopLevel",
         language: "jsx",
         sources: &[RuleSource::EslintReactHooks("rules-of-hooks")],
-        recommended: false,
+        recommended: true,
+        severity: Severity::Error,
+        domains: &[RuleDomain::React, RuleDomain::Next],
     }
 }
 
 declare_node_union! {
-    pub AnyJsFunctionOrMethod = AnyJsFunction | JsMethodObjectMember
+    pub AnyJsFunctionOrMethod = AnyJsFunction | JsMethodClassMember | JsMethodObjectMember
 }
 
 impl AnyJsFunctionOrMethod {
     fn is_react_component_or_hook(&self) -> bool {
+        if ReactComponentInfo::from_function(self.syntax()).is_some() {
+            return true;
+        }
         if let Some(name) = self.name() {
-            if is_react_component(&name) || is_react_hook(&name) {
-                return true;
-            }
+            return is_react_hook_name(&name);
         }
 
         false
     }
 
-    fn name(&self) -> Option<String> {
+    fn name(&self) -> Option<Text> {
         match self {
-            AnyJsFunctionOrMethod::AnyJsFunction(function) => {
-                function.binding().as_ref().map(AnyJsBinding::text)
-            }
-            AnyJsFunctionOrMethod::JsMethodObjectMember(method) => {
-                method.name().ok().as_ref().map(AnyJsObjectMemberName::text)
-            }
+            Self::AnyJsFunction(function) => function
+                .binding()
+                .as_ref()
+                .map(AnyJsBinding::to_trimmed_text),
+            Self::JsMethodClassMember(method) => method
+                .name()
+                .ok()
+                .as_ref()
+                .map(AnyJsClassMemberName::to_trimmed_text),
+            Self::JsMethodObjectMember(method) => method
+                .name()
+                .ok()
+                .as_ref()
+                .map(AnyJsObjectMemberName::to_trimmed_text),
         }
     }
 }
@@ -278,20 +292,24 @@ impl Visitor for EarlyReturnDetectionVisitor {
     ) {
         match event {
             WalkEvent::Enter(node) => {
-                if AnyFunctionLike::can_cast(node.kind()) {
+                if AnyFunctionLike::can_cast(node.kind())
+                    || AnyPropertyAccessor::can_cast(node.kind())
+                {
                     self.stack
                         .push(EarlyReturnDetectionVisitorStackEntry::default());
                 }
             }
             WalkEvent::Leave(node) => {
-                if AnyFunctionLike::can_cast(node.kind()) {
+                if AnyFunctionLike::can_cast(node.kind())
+                    || AnyPropertyAccessor::can_cast(node.kind())
+                {
                     self.stack.pop();
                     return;
                 }
 
                 if let Some(entry) = self.stack.last_mut() {
                     if JsReturnStatement::can_cast(node.kind()) {
-                        entry.early_return = Some(node.text_range());
+                        entry.early_return = Some(node.text_range_with_trivia());
                     } else if let Some(call) = JsCallExpression::cast_ref(node) {
                         if let Some(early_return) = entry.early_return {
                             self.early_returns.insert(call.clone(), early_return);
@@ -305,6 +323,14 @@ impl Visitor for EarlyReturnDetectionVisitor {
     fn finish(self: Box<Self>, ctx: VisitorFinishContext<JsLanguage>) {
         ctx.services.insert_service(self.early_returns);
     }
+}
+
+declare_node_union! {
+    AnyPropertyAccessor =
+        JsGetterObjectMember
+        | JsSetterObjectMember
+        | JsGetterClassMember
+        | JsSetterClassMember
 }
 
 #[derive(Default)]
@@ -347,14 +373,15 @@ impl FunctionCallServices {
 impl FromServices for FunctionCallServices {
     fn from_services(
         rule_key: &RuleKey,
+        rule_metadata: &RuleMetadata,
         services: &ServiceBag,
-    ) -> Result<Self, MissingServicesDiagnostic> {
-        let early_returns: &EarlyReturnsModel = services.get_service().ok_or_else(|| {
-            MissingServicesDiagnostic::new(rule_key.rule_name(), &["EarlyReturnsModel"])
-        })?;
+    ) -> Result<Self, ServicesDiagnostic> {
+        let early_returns: &EarlyReturnsModel = services
+            .get_service()
+            .ok_or_else(|| ServicesDiagnostic::new(rule_key.rule_name(), &["EarlyReturnsModel"]))?;
         Ok(Self {
             early_returns: early_returns.clone(),
-            semantic_services: SemanticServices::from_services(rule_key, services)?,
+            semantic_services: SemanticServices::from_services(rule_key, rule_metadata, services)?,
         })
     }
 }
@@ -428,7 +455,7 @@ impl Rule for UseHookAtTopLevel {
         let mut calls = vec![root];
 
         while let Some(CallPath { call, path }) = calls.pop() {
-            let range = call.syntax().text_range();
+            let range = call.syntax().text_range_with_trivia();
 
             let mut path = path.clone();
             path.push(range);
@@ -558,11 +585,11 @@ pub struct DeprecatedHooksOptions {}
 
 impl Deserializable for DeprecatedHooksOptions {
     fn deserialize(
+        ctx: &mut impl DeserializationContext,
         value: &impl DeserializableValue,
         name: &str,
-        diagnostics: &mut Vec<DeserializationDiagnostic>,
     ) -> Option<Self> {
-        value.deserialize(DeprecatedHooksOptionsVisitor, name, diagnostics)
+        value.deserialize(ctx, DeprecatedHooksOptionsVisitor, name)
     }
 }
 
@@ -575,19 +602,19 @@ impl DeserializationVisitor for DeprecatedHooksOptionsVisitor {
 
     fn visit_map(
         self,
+        ctx: &mut impl DeserializationContext,
         members: impl Iterator<Item = Option<(impl DeserializableValue, impl DeserializableValue)>>,
         _range: TextRange,
         _name: &str,
-        diagnostics: &mut Vec<DeserializationDiagnostic>,
     ) -> Option<Self::Output> {
         const ALLOWED_KEYS: &[&str] = &["hooks"];
         for (key, value) in members.flatten() {
-            let Some(key_text) = Text::deserialize(&key, "", diagnostics) else {
+            let Some(key_text) = Text::deserialize(ctx, &key, "") else {
                 continue;
             };
             match key_text.text() {
                 "hooks" => {
-                    diagnostics.push(
+                    ctx.report(
                         DeserializationDiagnostic::new_deprecated(
                             key_text.text(),
                             value.range()
@@ -597,7 +624,7 @@ impl DeserializationVisitor for DeprecatedHooksOptionsVisitor {
                         })
                     );
                 }
-                text => diagnostics.push(DeserializationDiagnostic::new_unknown_key(
+                text => ctx.report(DeserializationDiagnostic::new_unknown_key(
                     text,
                     key.range(),
                     ALLOWED_KEYS,

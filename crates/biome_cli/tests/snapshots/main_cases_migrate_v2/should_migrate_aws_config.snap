@@ -1,0 +1,72 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `biome.json`
+
+```json
+{
+  "root": false,
+  "$schema": "https://biomejs.dev/schemas/0.0.0/schema.json",
+  "files": {
+    "maxSize": 5242880,
+    "includes": ["**", "!**/__fixtures__/**", "!**/package.json"]
+  },
+  "formatter": {
+    "enabled": true,
+    "indentStyle": "space",
+    "lineWidth": 100
+  },
+  "linter": {
+    "rules": {
+      "recommended": true,
+      "complexity": {
+        "noForEach": "off"
+      },
+      "correctness": {
+        "noUndeclaredVariables": "error",
+        "noUnusedVariables": "error",
+        "noInvalidBuiltinInstantiation": "error"
+      },
+      "style": {
+        "noNamespace": "error",
+        "useConsistentArrayType": {
+          "level": "error",
+          "options": { "syntax": "shorthand" }
+        },
+        "noParameterAssign": "error",
+        "useAsConstAssertion": "error",
+        "useDefaultParameterLast": "error",
+        "useEnumInitializers": "error",
+        "useSelfClosingElements": "error",
+        "useSingleVarDeclarator": "error",
+        "noUnusedTemplateLiteral": "error",
+        "useNumberNamespace": "error",
+        "noInferrableTypes": "error",
+        "noUselessElse": "error"
+      },
+      "suspicious": {
+        "noEmptyBlockStatements": "error"
+      }
+    }
+  },
+  "javascript": { "formatter": { "trailingCommas": "es5" } },
+  "vcs": {
+    "enabled": true,
+    "clientKind": "git",
+    "useIgnoreFile": true
+  }
+}
+```
+
+# Emitted Messages
+
+```block
+configuration ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Migration results:
+  
+  - biome.json: configuration successfully migrated.
+  
+
+```

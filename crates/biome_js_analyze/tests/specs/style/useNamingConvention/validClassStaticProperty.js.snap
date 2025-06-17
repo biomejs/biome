@@ -3,7 +3,8 @@ source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: validClassStaticProperty.js
 ---
 # Input
-```jsx
+```js
+/* should not generate diagnostics */
 export default class {
     static p
 
@@ -50,5 +51,3 @@ export default class {
     static #CLASS_CONSTANT = 0
 }
 ```
-
-

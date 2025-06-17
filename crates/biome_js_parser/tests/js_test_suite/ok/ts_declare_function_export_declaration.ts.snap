@@ -1,0 +1,130 @@
+---
+source: crates/biome_js_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```ts
+declare module 'x' {
+  export function test(option: any): void
+}
+
+```
+
+
+## AST
+
+```
+JsModule {
+    bom_token: missing (optional),
+    interpreter_token: missing (optional),
+    directives: JsDirectiveList [],
+    items: JsModuleItemList [
+        TsDeclareStatement {
+            declare_token: DECLARE_KW@0..8 "declare" [] [Whitespace(" ")],
+            declaration: TsExternalModuleDeclaration {
+                module_token: MODULE_KW@8..15 "module" [] [Whitespace(" ")],
+                source: JsModuleSource {
+                    value_token: JS_STRING_LITERAL@15..19 "'x'" [] [Whitespace(" ")],
+                },
+                body: TsModuleBlock {
+                    l_curly_token: L_CURLY@19..20 "{" [] [],
+                    items: JsModuleItemList [
+                        JsExport {
+                            decorators: JsDecoratorList [],
+                            export_token: EXPORT_KW@20..30 "export" [Newline("\n"), Whitespace("  ")] [Whitespace(" ")],
+                            export_clause: TsDeclareFunctionDeclaration {
+                                async_token: missing (optional),
+                                function_token: FUNCTION_KW@30..39 "function" [] [Whitespace(" ")],
+                                id: JsIdentifierBinding {
+                                    name_token: IDENT@39..43 "test" [] [],
+                                },
+                                type_parameters: missing (optional),
+                                parameters: JsParameters {
+                                    l_paren_token: L_PAREN@43..44 "(" [] [],
+                                    items: JsParameterList [
+                                        JsFormalParameter {
+                                            decorators: JsDecoratorList [],
+                                            binding: JsIdentifierBinding {
+                                                name_token: IDENT@44..50 "option" [] [],
+                                            },
+                                            question_mark_token: missing (optional),
+                                            type_annotation: TsTypeAnnotation {
+                                                colon_token: COLON@50..52 ":" [] [Whitespace(" ")],
+                                                ty: TsAnyType {
+                                                    any_token: ANY_KW@52..55 "any" [] [],
+                                                },
+                                            },
+                                            initializer: missing (optional),
+                                        },
+                                    ],
+                                    r_paren_token: R_PAREN@55..56 ")" [] [],
+                                },
+                                return_type_annotation: TsReturnTypeAnnotation {
+                                    colon_token: COLON@56..58 ":" [] [Whitespace(" ")],
+                                    ty: TsVoidType {
+                                        void_token: VOID_KW@58..62 "void" [] [],
+                                    },
+                                },
+                                semicolon_token: missing (optional),
+                            },
+                        },
+                    ],
+                    r_curly_token: R_CURLY@62..64 "}" [Newline("\n")] [],
+                },
+            },
+        },
+    ],
+    eof_token: EOF@64..65 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: JS_MODULE@0..65
+  0: (empty)
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..64
+    0: TS_DECLARE_STATEMENT@0..64
+      0: DECLARE_KW@0..8 "declare" [] [Whitespace(" ")]
+      1: TS_EXTERNAL_MODULE_DECLARATION@8..64
+        0: MODULE_KW@8..15 "module" [] [Whitespace(" ")]
+        1: JS_MODULE_SOURCE@15..19
+          0: JS_STRING_LITERAL@15..19 "'x'" [] [Whitespace(" ")]
+        2: TS_MODULE_BLOCK@19..64
+          0: L_CURLY@19..20 "{" [] []
+          1: JS_MODULE_ITEM_LIST@20..62
+            0: JS_EXPORT@20..62
+              0: JS_DECORATOR_LIST@20..20
+              1: EXPORT_KW@20..30 "export" [Newline("\n"), Whitespace("  ")] [Whitespace(" ")]
+              2: TS_DECLARE_FUNCTION_DECLARATION@30..62
+                0: (empty)
+                1: FUNCTION_KW@30..39 "function" [] [Whitespace(" ")]
+                2: JS_IDENTIFIER_BINDING@39..43
+                  0: IDENT@39..43 "test" [] []
+                3: (empty)
+                4: JS_PARAMETERS@43..56
+                  0: L_PAREN@43..44 "(" [] []
+                  1: JS_PARAMETER_LIST@44..55
+                    0: JS_FORMAL_PARAMETER@44..55
+                      0: JS_DECORATOR_LIST@44..44
+                      1: JS_IDENTIFIER_BINDING@44..50
+                        0: IDENT@44..50 "option" [] []
+                      2: (empty)
+                      3: TS_TYPE_ANNOTATION@50..55
+                        0: COLON@50..52 ":" [] [Whitespace(" ")]
+                        1: TS_ANY_TYPE@52..55
+                          0: ANY_KW@52..55 "any" [] []
+                      4: (empty)
+                  2: R_PAREN@55..56 ")" [] []
+                5: TS_RETURN_TYPE_ANNOTATION@56..62
+                  0: COLON@56..58 ":" [] [Whitespace(" ")]
+                  1: TS_VOID_TYPE@58..62
+                    0: VOID_KW@58..62 "void" [] []
+                6: (empty)
+          2: R_CURLY@62..64 "}" [Newline("\n")] []
+  4: EOF@64..65 "" [Newline("\n")] []
+
+```

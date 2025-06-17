@@ -13,9 +13,10 @@ pub use crate::format_element::document::Document;
 pub use crate::format_element::tag::{LabelId, Tag, TagKind};
 pub use crate::verbatim::{
     format_bogus_node, format_or_verbatim, format_suppressed_node, format_verbatim_node,
+    format_verbatim_skipped,
 };
 
 pub use crate::{
-    best_fitting, dbg_write, format, format_args, write, Buffer as _, BufferExtensions, Format,
-    Format as _, FormatResult, FormatRule, FormatWithRule as _, SimpleFormatContext,
+    Buffer as _, BufferExtensions, Format, Format as _, FormatResult, FormatRule,
+    FormatWithRule as _, SimpleFormatContext, best_fitting, dbg_write, format, format_args, write,
 };

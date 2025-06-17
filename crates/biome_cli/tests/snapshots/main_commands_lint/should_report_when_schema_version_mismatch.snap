@@ -1,0 +1,65 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `biome.json`
+
+```json
+{
+  "$schema": "https://biomejs.dev/schemas/0.0.1/schema.json"
+}
+```
+
+# Termination Message
+
+```block
+check ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Some errors were emitted while running checks.
+  
+
+
+```
+
+# Emitted Messages
+
+```block
+biome.json:2:16 deserialize ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The configuration schema version does not match the CLI version 0.0.0
+  
+    1 │ {
+  > 2 │     "$schema": "https://biomejs.dev/schemas/0.0.1/schema.json"
+      │                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    3 │ }
+    4 │         
+  
+  i   Expected:                     0.0.0
+      Found:                        0.0.1
+  
+  
+  i Run the command biome migrate to migrate the configuration file.
+  
+
+```
+
+```block
+biome.json format ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Formatter would have printed the following content:
+  
+    1 1 │   {
+    2   │ - ····"$schema":·"https://biomejs.dev/schemas/0.0.1/schema.json"
+      2 │ + → "$schema":·"https://biomejs.dev/schemas/0.0.1/schema.json"
+    3 3 │   }
+    4   │ - ········
+      4 │ + 
+  
+
+```
+
+```block
+Checked 1 file in <TIME>. No fixes applied.
+Found 1 error.
+Found 1 warning.
+```

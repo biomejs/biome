@@ -1,6 +1,7 @@
 use biome_analyze::RuleSource;
-use biome_analyze::{context::RuleContext, declare_lint_rule, Ast, Rule, RuleDiagnostic};
+use biome_analyze::{Ast, Rule, RuleDiagnostic, context::RuleContext, declare_lint_rule};
 use biome_console::markup;
+use biome_diagnostics::Severity;
 use biome_js_syntax::parameter_ext::{AnyJsParameterList, AnyJsParameters, AnyParameter};
 use biome_js_syntax::{
     AnyJsArrayBindingPatternElement, AnyJsBinding, AnyJsBindingPattern,
@@ -43,6 +44,7 @@ declare_lint_rule! {
         language: "js",
         sources: &[RuleSource::Eslint("no-dupe-args")],
         recommended: true,
+        severity: Severity::Error,
     }
 }
 
@@ -133,7 +135,7 @@ fn traverse_binding(
                         traverse_binding(pattern, tracked_bindings)
                     }
                 }
-            })
+            });
         }
 
         AnyJsBindingPattern::JsObjectBindingPattern(pattern) => {
@@ -166,7 +168,7 @@ fn traverse_binding(
                     AnyJsObjectBindingPatternMember::JsBogusBinding(_)
                     | AnyJsObjectBindingPatternMember::JsMetavariable(_) => None,
                 }
-            })
+            });
         }
     }
     None
@@ -179,7 +181,7 @@ fn track_binding(
     id_binding: &JsIdentifierBinding,
     tracked_bindings: &mut FxHashSet<String>,
 ) -> bool {
-    let binding_text = id_binding.text();
+    let binding_text = id_binding.to_trimmed_string();
     if tracked_bindings.contains(&binding_text) {
         true
     } else {

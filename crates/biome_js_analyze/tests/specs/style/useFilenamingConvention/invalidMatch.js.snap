@@ -1,0 +1,34 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidMatch.js
+snapshot_kind: text
+---
+# Input
+```js
+{
+	"$schema": "../../../../../../packages/@biomejs/biome/configuration_schema.json",
+	"linter": {
+		"rules": {
+			"style": {
+				"useFilenamingConvention": {
+					"level": "error",
+					"options": {
+						"match": "%(.+)[.](.+)",
+						"filenameCases": ["camelCase"]
+					}
+				}
+			}
+		}
+	}
+}
+
+```
+
+# Diagnostics
+```
+invalidMatch.js lint/style/useFilenamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This filename should match the following regex /[^i].*/.
+  
+
+```

@@ -1,6 +1,7 @@
 use crate::utils::is_node_equal;
 use biome_analyze::context::RuleContext;
-use biome_analyze::{declare_lint_rule, Ast, Rule, RuleDiagnostic, RuleSource};
+use biome_analyze::{Ast, Rule, RuleDiagnostic, RuleSource, declare_lint_rule};
+use biome_diagnostics::Severity;
 use biome_js_syntax::{AnyJsExpression, AnyJsSwitchClause, JsSwitchStatement};
 use biome_rowan::{AstNode, TextRange};
 
@@ -86,6 +87,7 @@ declare_lint_rule! {
         language: "js",
         sources: &[RuleSource::Eslint("no-duplicate-case")],
         recommended: true,
+        severity: Severity::Error,
     }
 }
 

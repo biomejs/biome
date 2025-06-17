@@ -1,7 +1,6 @@
 //! Generated file, do not edit by hand, see `xtask/codegen`
 
 #![allow(clippy::redundant_closure)]
-#![allow(clippy::too_many_arguments)]
 use biome_grit_syntax::{
     GritSyntaxElement as SyntaxElement, GritSyntaxNode as SyntaxNode,
     GritSyntaxToken as SyntaxToken, *,
@@ -88,17 +87,17 @@ pub fn grit_bubble(
     GritBubbleBuilder {
         bubble_token,
         pattern,
-        variables: None,
+        scope: None,
     }
 }
 pub struct GritBubbleBuilder {
     bubble_token: SyntaxToken,
     pattern: AnyGritMaybeCurlyPattern,
-    variables: Option<GritBubbleScope>,
+    scope: Option<GritBubbleScope>,
 }
 impl GritBubbleBuilder {
-    pub fn with_variables(mut self, variables: GritBubbleScope) -> Self {
-        self.variables = Some(variables);
+    pub fn with_scope(mut self, scope: GritBubbleScope) -> Self {
+        self.scope = Some(scope);
         self
     }
     pub fn build(self) -> GritBubble {
@@ -106,7 +105,7 @@ impl GritBubbleBuilder {
             GritSyntaxKind::GRIT_BUBBLE,
             [
                 Some(SyntaxElement::Token(self.bubble_token)),
-                self.variables
+                self.scope
                     .map(|token| SyntaxElement::Node(token.into_syntax())),
                 Some(SyntaxElement::Node(self.pattern.into_syntax())),
             ],
@@ -143,20 +142,6 @@ pub fn grit_curly_pattern(
         [
             Some(SyntaxElement::Token(l_curly_token)),
             Some(SyntaxElement::Node(pattern.into_syntax())),
-            Some(SyntaxElement::Token(r_curly_token)),
-        ],
-    ))
-}
-pub fn grit_curly_predicate_list(
-    l_curly_token: SyntaxToken,
-    predicates: GritPredicateList,
-    r_curly_token: SyntaxToken,
-) -> GritCurlyPredicateList {
-    GritCurlyPredicateList::unwrap_cast(SyntaxNode::new_detached(
-        GritSyntaxKind::GRIT_CURLY_PREDICATE_LIST,
-        [
-            Some(SyntaxElement::Token(l_curly_token)),
-            Some(SyntaxElement::Node(predicates.into_syntax())),
             Some(SyntaxElement::Token(r_curly_token)),
         ],
     ))
@@ -213,6 +198,12 @@ pub fn grit_double_literal(value_token: SyntaxToken) -> GritDoubleLiteral {
         [Some(SyntaxElement::Token(value_token))],
     ))
 }
+pub fn grit_engine_name(engine_kind_token: SyntaxToken) -> GritEngineName {
+    GritEngineName::unwrap_cast(SyntaxNode::new_detached(
+        GritSyntaxKind::GRIT_ENGINE_NAME,
+        [Some(SyntaxElement::Token(engine_kind_token))],
+    ))
+}
 pub fn grit_every(every_token: SyntaxToken, pattern: AnyGritMaybeCurlyPattern) -> GritEvery {
     GritEvery::unwrap_cast(SyntaxNode::new_detached(
         GritSyntaxKind::GRIT_EVERY,
@@ -244,7 +235,7 @@ pub fn grit_function_definition(
     l_paren_token: SyntaxToken,
     args: GritVariableList,
     r_paren_token: SyntaxToken,
-    body: GritCurlyPredicateList,
+    body: GritPredicateCurly,
 ) -> GritFunctionDefinition {
     GritFunctionDefinition::unwrap_cast(SyntaxNode::new_detached(
         GritSyntaxKind::GRIT_FUNCTION_DEFINITION,
@@ -264,9 +255,39 @@ pub fn grit_int_literal(value_token: SyntaxToken) -> GritIntLiteral {
         [Some(SyntaxElement::Token(value_token))],
     ))
 }
+pub fn grit_javascript_body_wrapper(value_token: SyntaxToken) -> GritJavascriptBodyWrapper {
+    GritJavascriptBodyWrapper::unwrap_cast(SyntaxNode::new_detached(
+        GritSyntaxKind::GRIT_JAVASCRIPT_BODY_WRAPPER,
+        [Some(SyntaxElement::Token(value_token))],
+    ))
+}
+pub fn grit_javascript_function_definition(
+    function_token: SyntaxToken,
+    name: GritName,
+    l_paren_token: SyntaxToken,
+    args: GritVariableList,
+    r_paren_token: SyntaxToken,
+    js_token: SyntaxToken,
+    grit_javascript_body_wrapper: GritJavascriptBodyWrapper,
+) -> GritJavascriptFunctionDefinition {
+    GritJavascriptFunctionDefinition::unwrap_cast(SyntaxNode::new_detached(
+        GritSyntaxKind::GRIT_JAVASCRIPT_FUNCTION_DEFINITION,
+        [
+            Some(SyntaxElement::Token(function_token)),
+            Some(SyntaxElement::Node(name.into_syntax())),
+            Some(SyntaxElement::Token(l_paren_token)),
+            Some(SyntaxElement::Node(args.into_syntax())),
+            Some(SyntaxElement::Token(r_paren_token)),
+            Some(SyntaxElement::Token(js_token)),
+            Some(SyntaxElement::Node(
+                grit_javascript_body_wrapper.into_syntax(),
+            )),
+        ],
+    ))
+}
 pub fn grit_language_declaration(
     language_token: SyntaxToken,
-    name: GritLanguageName,
+    name: AnyGritLanguageName,
 ) -> GritLanguageDeclarationBuilder {
     GritLanguageDeclarationBuilder {
         language_token,
@@ -277,7 +298,7 @@ pub fn grit_language_declaration(
 }
 pub struct GritLanguageDeclarationBuilder {
     language_token: SyntaxToken,
-    name: GritLanguageName,
+    name: AnyGritLanguageName,
     flavor: Option<GritLanguageFlavor>,
     semicolon_token: Option<SyntaxToken>,
 }
@@ -331,7 +352,7 @@ pub fn grit_language_name(language_kind_token: SyntaxToken) -> GritLanguageName 
     ))
 }
 pub fn grit_language_specific_snippet(
-    language: GritLanguageName,
+    language: AnyGritLanguageName,
     snippet_token: SyntaxToken,
 ) -> GritLanguageSpecificSnippet {
     GritLanguageSpecificSnippet::unwrap_cast(SyntaxNode::new_detached(
@@ -621,12 +642,6 @@ pub fn grit_pattern_any(
         ],
     ))
 }
-pub fn grit_pattern_arg_list(grit_variable_list: GritVariableList) -> GritPatternArgList {
-    GritPatternArgList::unwrap_cast(SyntaxNode::new_detached(
-        GritSyntaxKind::GRIT_PATTERN_ARG_LIST,
-        [Some(SyntaxElement::Node(grit_variable_list.into_syntax()))],
-    ))
-}
 pub fn grit_pattern_as(
     pattern: AnyGritPattern,
     as_token: SyntaxToken,
@@ -666,10 +681,10 @@ pub fn grit_pattern_contains(
 pub struct GritPatternContainsBuilder {
     contains_token: SyntaxToken,
     contains: AnyGritMaybeCurlyPattern,
-    until_clause: Option<GritPatternContainsUntilClause>,
+    until_clause: Option<GritPatternUntilClause>,
 }
 impl GritPatternContainsBuilder {
-    pub fn with_until_clause(mut self, until_clause: GritPatternContainsUntilClause) -> Self {
+    pub fn with_until_clause(mut self, until_clause: GritPatternUntilClause) -> Self {
         self.until_clause = Some(until_clause);
         self
     }
@@ -685,23 +700,11 @@ impl GritPatternContainsBuilder {
         ))
     }
 }
-pub fn grit_pattern_contains_until_clause(
-    until_token: SyntaxToken,
-    until: AnyGritPattern,
-) -> GritPatternContainsUntilClause {
-    GritPatternContainsUntilClause::unwrap_cast(SyntaxNode::new_detached(
-        GritSyntaxKind::GRIT_PATTERN_CONTAINS_UNTIL_CLAUSE,
-        [
-            Some(SyntaxElement::Token(until_token)),
-            Some(SyntaxElement::Node(until.into_syntax())),
-        ],
-    ))
-}
 pub fn grit_pattern_definition(
     pattern_token: SyntaxToken,
     name: GritName,
     l_paren_token: SyntaxToken,
-    args: GritPatternArgList,
+    args: GritVariableList,
     r_paren_token: SyntaxToken,
     body: GritPatternDefinitionBody,
 ) -> GritPatternDefinitionBuilder {
@@ -720,7 +723,7 @@ pub struct GritPatternDefinitionBuilder {
     pattern_token: SyntaxToken,
     name: GritName,
     l_paren_token: SyntaxToken,
-    args: GritPatternArgList,
+    args: GritVariableList,
     r_paren_token: SyntaxToken,
     body: GritPatternDefinitionBody,
     visibility_token: Option<SyntaxToken>,
@@ -902,6 +905,18 @@ pub fn grit_pattern_or_else(
         ],
     ))
 }
+pub fn grit_pattern_until_clause(
+    until_token: SyntaxToken,
+    until: AnyGritPattern,
+) -> GritPatternUntilClause {
+    GritPatternUntilClause::unwrap_cast(SyntaxNode::new_detached(
+        GritSyntaxKind::GRIT_PATTERN_UNTIL_CLAUSE,
+        [
+            Some(SyntaxElement::Token(until_token)),
+            Some(SyntaxElement::Node(until.into_syntax())),
+        ],
+    ))
+}
 pub fn grit_pattern_where(
     pattern: AnyGritPattern,
     where_token: SyntaxToken,
@@ -1011,13 +1026,27 @@ pub fn grit_predicate_call(
         ],
     ))
 }
+pub fn grit_predicate_curly(
+    l_curly_token: SyntaxToken,
+    predicates: GritPredicateList,
+    r_curly_token: SyntaxToken,
+) -> GritPredicateCurly {
+    GritPredicateCurly::unwrap_cast(SyntaxNode::new_detached(
+        GritSyntaxKind::GRIT_PREDICATE_CURLY,
+        [
+            Some(SyntaxElement::Token(l_curly_token)),
+            Some(SyntaxElement::Node(predicates.into_syntax())),
+            Some(SyntaxElement::Token(r_curly_token)),
+        ],
+    ))
+}
 pub fn grit_predicate_definition(
     predicate_token: SyntaxToken,
     name: GritName,
     l_paren_token: SyntaxToken,
-    args: GritPatternArgList,
+    args: GritVariableList,
     r_paren_token: SyntaxToken,
-    body: GritCurlyPredicateList,
+    body: GritPredicateCurly,
 ) -> GritPredicateDefinition {
     GritPredicateDefinition::unwrap_cast(SyntaxNode::new_detached(
         GritSyntaxKind::GRIT_PREDICATE_DEFINITION,
@@ -1312,7 +1341,7 @@ impl GritRegexPatternBuilder {
 }
 pub fn grit_regex_pattern_variables(
     l_paren_token: SyntaxToken,
-    args: GritPatternArgList,
+    args: GritVariableList,
     r_paren_token: SyntaxToken,
 ) -> GritRegexPatternVariables {
     GritRegexPatternVariables::unwrap_cast(SyntaxNode::new_detached(
@@ -1475,7 +1504,7 @@ pub fn grit_variable(value_token: SyntaxToken) -> GritVariable {
 }
 pub fn grit_version(
     engine_token: SyntaxToken,
-    biome_token: SyntaxToken,
+    engine_name: GritEngineName,
     l_paren_token: SyntaxToken,
     version: GritDoubleLiteral,
     r_paren_token: SyntaxToken,
@@ -1484,21 +1513,44 @@ pub fn grit_version(
         GritSyntaxKind::GRIT_VERSION,
         [
             Some(SyntaxElement::Token(engine_token)),
-            Some(SyntaxElement::Token(biome_token)),
+            Some(SyntaxElement::Node(engine_name.into_syntax())),
             Some(SyntaxElement::Token(l_paren_token)),
             Some(SyntaxElement::Node(version.into_syntax())),
             Some(SyntaxElement::Token(r_paren_token)),
         ],
     ))
 }
-pub fn grit_within(within_token: SyntaxToken, pattern: AnyGritMaybeCurlyPattern) -> GritWithin {
-    GritWithin::unwrap_cast(SyntaxNode::new_detached(
-        GritSyntaxKind::GRIT_WITHIN,
-        [
-            Some(SyntaxElement::Token(within_token)),
-            Some(SyntaxElement::Node(pattern.into_syntax())),
-        ],
-    ))
+pub fn grit_within(
+    within_token: SyntaxToken,
+    pattern: AnyGritMaybeCurlyPattern,
+) -> GritWithinBuilder {
+    GritWithinBuilder {
+        within_token,
+        pattern,
+        until_clause: None,
+    }
+}
+pub struct GritWithinBuilder {
+    within_token: SyntaxToken,
+    pattern: AnyGritMaybeCurlyPattern,
+    until_clause: Option<GritPatternUntilClause>,
+}
+impl GritWithinBuilder {
+    pub fn with_until_clause(mut self, until_clause: GritPatternUntilClause) -> Self {
+        self.until_clause = Some(until_clause);
+        self
+    }
+    pub fn build(self) -> GritWithin {
+        GritWithin::unwrap_cast(SyntaxNode::new_detached(
+            GritSyntaxKind::GRIT_WITHIN,
+            [
+                Some(SyntaxElement::Token(self.within_token)),
+                Some(SyntaxElement::Node(self.pattern.into_syntax())),
+                self.until_clause
+                    .map(|token| SyntaxElement::Node(token.into_syntax())),
+            ],
+        ))
+    }
 }
 pub fn grit_definition_list<I, S>(items: I, separators: S) -> GritDefinitionList
 where
@@ -1712,6 +1764,16 @@ where
 {
     GritBogusLanguageFlavorKind::unwrap_cast(SyntaxNode::new_detached(
         GritSyntaxKind::GRIT_BOGUS_LANGUAGE_FLAVOR_KIND,
+        slots,
+    ))
+}
+pub fn grit_bogus_language_name<I>(slots: I) -> GritBogusLanguageName
+where
+    I: IntoIterator<Item = Option<SyntaxElement>>,
+    I::IntoIter: ExactSizeIterator,
+{
+    GritBogusLanguageName::unwrap_cast(SyntaxNode::new_detached(
+        GritSyntaxKind::GRIT_BOGUS_LANGUAGE_NAME,
         slots,
     ))
 }

@@ -1,9 +1,10 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid.js
+snapshot_kind: text
 ---
 # Input
-```jsx
+```js
 class WithDocs {
     /**
      * A documented constructor.
@@ -23,7 +24,7 @@ class WithComments {
 ```
 invalid.js:5:5 lint/complexity/noUselessConstructor  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This constructor is unnecessary.
+  i This constructor is unnecessary.
   
     3 │      * A documented constructor.
     4 │      */
@@ -48,7 +49,7 @@ invalid.js:5:5 lint/complexity/noUselessConstructor  FIXABLE  ━━━━━━
 ```
 invalid.js:9:5 lint/complexity/noUselessConstructor  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This constructor is unnecessary.
+  i This constructor is unnecessary.
   
      8 │ class WithComments {
    > 9 │     constructor() {
@@ -71,5 +72,3 @@ invalid.js:9:5 lint/complexity/noUselessConstructor  FIXABLE  ━━━━━━
   
 
 ```
-
-

@@ -1,0 +1,93 @@
+---
+source: crates/biome_js_parser/tests/spec_test.rs
+expression: snapshot
+snapshot_kind: text
+---
+## Input
+
+```js
+1, 2, , 4
+
+```
+
+
+## AST
+
+```
+JsModule {
+    bom_token: missing (optional),
+    interpreter_token: missing (optional),
+    directives: JsDirectiveList [],
+    items: JsModuleItemList [
+        JsExpressionStatement {
+            expression: JsSequenceExpression {
+                left: JsSequenceExpression {
+                    left: JsSequenceExpression {
+                        left: JsNumberLiteralExpression {
+                            value_token: JS_NUMBER_LITERAL@0..1 "1" [] [],
+                        },
+                        comma_token: COMMA@1..3 "," [] [Whitespace(" ")],
+                        right: JsNumberLiteralExpression {
+                            value_token: JS_NUMBER_LITERAL@3..4 "2" [] [],
+                        },
+                    },
+                    comma_token: COMMA@4..6 "," [] [Whitespace(" ")],
+                    right: missing (required),
+                },
+                comma_token: COMMA@6..8 "," [] [Whitespace(" ")],
+                right: JsNumberLiteralExpression {
+                    value_token: JS_NUMBER_LITERAL@8..9 "4" [] [],
+                },
+            },
+            semicolon_token: missing (optional),
+        },
+    ],
+    eof_token: EOF@9..10 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: JS_MODULE@0..10
+  0: (empty)
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..9
+    0: JS_EXPRESSION_STATEMENT@0..9
+      0: JS_SEQUENCE_EXPRESSION@0..9
+        0: JS_SEQUENCE_EXPRESSION@0..6
+          0: JS_SEQUENCE_EXPRESSION@0..4
+            0: JS_NUMBER_LITERAL_EXPRESSION@0..1
+              0: JS_NUMBER_LITERAL@0..1 "1" [] []
+            1: COMMA@1..3 "," [] [Whitespace(" ")]
+            2: JS_NUMBER_LITERAL_EXPRESSION@3..4
+              0: JS_NUMBER_LITERAL@3..4 "2" [] []
+          1: COMMA@4..6 "," [] [Whitespace(" ")]
+          2: (empty)
+        1: COMMA@6..8 "," [] [Whitespace(" ")]
+        2: JS_NUMBER_LITERAL_EXPRESSION@8..9
+          0: JS_NUMBER_LITERAL@8..9 "4" [] []
+      1: (empty)
+  4: EOF@9..10 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+sequence_expr.js:1:7 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected an expression but instead found ','.
+  
+  > 1 │ 1, 2, , 4
+      │       ^
+    2 │ 
+  
+  i Expected an expression here.
+  
+  > 1 │ 1, 2, , 4
+      │       ^
+    2 │ 
+  
+```

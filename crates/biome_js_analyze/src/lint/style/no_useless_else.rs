@@ -1,15 +1,16 @@
 use std::borrow::Cow;
 
 use biome_analyze::{
-    context::RuleContext, declare_lint_rule, ActionCategory, Ast, FixKind, Rule, RuleDiagnostic,
-    RuleSource, RuleSourceKind,
+    Ast, FixKind, Rule, RuleDiagnostic, RuleSource, RuleSourceKind, context::RuleContext,
+    declare_lint_rule,
 };
 use biome_console::markup;
+use biome_diagnostics::Severity;
 use biome_js_factory::make;
 use biome_js_syntax::{AnyJsStatement, JsIfStatement, JsStatementList, JsSyntaxKind};
 use biome_rowan::{
-    chain_trivia_pieces, trim_leading_trivia_pieces, AstNode, AstNodeList, BatchMutationExt,
-    SyntaxNodeOptionExt,
+    AstNode, AstNodeList, BatchMutationExt, SyntaxNodeOptionExt, chain_trivia_pieces,
+    trim_leading_trivia_pieces,
 };
 
 use crate::JsRuleAction;
@@ -90,11 +91,12 @@ declare_lint_rule! {
         language: "js",
         sources: &[
             RuleSource::Eslint("no-else-return"),
-            RuleSource::Clippy("redundant_else 	"),
+            RuleSource::Clippy("redundant_else"),
         ],
         source_kind: RuleSourceKind::Inspired,
-        recommended: true,
-        fix_kind: FixKind::Unsafe,
+        recommended: false,
+        severity: Severity::Information,
+        fix_kind: FixKind::Safe,
     }
 }
 
@@ -177,7 +179,7 @@ impl Rule for NoUselessElse {
             let mut mutation = ctx.root().begin();
             mutation.replace_node_discard_trivia(stmts_list, new_stmts_list);
             return Some(JsRuleAction::new(
-                ActionCategory::QuickFix,
+                ctx.metadata().action_category(ctx.category(), ctx.group()),
                 ctx.metadata().applicability(),
                 markup! { "Omit the "<Emphasis>"else"</Emphasis>" clause." }.to_owned(),
                 mutation,

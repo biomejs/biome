@@ -1,11 +1,11 @@
+use crate::JsFormatter;
 use crate::prelude::*;
 use crate::utils::jsx::{
-    is_meaningful_jsx_text, is_whitespace_jsx_expression, jsx_split_children, JsxChild,
-    JsxChildrenIterator, JsxRawSpace, JsxSpace,
+    JsxChild, JsxChildrenIterator, JsxRawSpace, JsxSpace, is_meaningful_jsx_text,
+    is_whitespace_jsx_expression, jsx_split_children,
 };
-use crate::JsFormatter;
 use biome_formatter::format_element::tag::{GroupMode, Tag};
-use biome_formatter::{format_args, write, CstFormatContext, FormatRuleWithOptions, VecBuffer};
+use biome_formatter::{CstFormatContext, FormatRuleWithOptions, VecBuffer, format_args, write};
 use biome_js_syntax::{AnyJsxChild, JsxChildList};
 use std::cell::RefCell;
 
@@ -130,7 +130,7 @@ impl FormatJsxChildList {
                         None => None,
                     };
 
-                    child_breaks = separator.map_or(false, |separator| separator.will_break());
+                    child_breaks = separator.is_some_and(|separator| separator.will_break());
 
                     flat.write(&format_args![word, separator], f);
 
@@ -152,8 +152,7 @@ impl FormatJsxChildList {
                     // <div>a
                     // {' '}</div>
                     // ```
-                    let is_after_line_break =
-                        last.as_ref().map_or(false, |last| last.is_any_line());
+                    let is_after_line_break = last.as_ref().is_some_and(|last| last.is_any_line());
 
                     // `<div>aaa </div>` or `<div> </div>`
                     let is_trailing_or_only_whitespace = children_iter.peek().is_none();
@@ -296,7 +295,7 @@ impl FormatJsxChildList {
                         None => None,
                     };
 
-                    child_breaks = line_mode.map_or(false, |mode| mode.is_hard());
+                    child_breaks = line_mode.is_some_and(|mode| mode.is_hard());
 
                     let format_separator = line_mode.map(|mode| {
                         format_with(move |f| f.write_element(FormatElement::Line(mode)))
@@ -354,8 +353,8 @@ impl FormatJsxChildList {
     /// [JsxText] and [JsxExpressionChild] and instead, formats the nodes itself.
     #[cfg(debug_assertions)]
     fn disarm_debug_assertions(&self, node: &JsxChildList, f: &mut JsFormatter) {
-        use biome_js_syntax::{AnyJsExpression, AnyJsLiteralExpression};
         use AnyJsxChild::*;
+        use biome_js_syntax::{AnyJsExpression, AnyJsLiteralExpression};
 
         for child in node {
             match child {
@@ -393,9 +392,7 @@ impl FormatJsxChildList {
                         .comments()
                         .mark_suppression_checked(text.syntax());
                 }
-                _ => {
-                    continue;
-                }
+                _ => {}
             }
         }
     }
@@ -439,7 +436,7 @@ impl FormatJsxChildList {
                     meta.meaningful_text = meta.meaningful_text
                         || text
                             .value_token()
-                            .map_or(false, |token| is_meaningful_jsx_text(token.text()));
+                            .is_ok_and(|token| is_meaningful_jsx_text(token.text()));
                 }
                 _ => {}
             }
@@ -461,7 +458,7 @@ pub enum JsxChildListLayout {
 
 impl JsxChildListLayout {
     const fn is_multiline(&self) -> bool {
-        matches!(self, JsxChildListLayout::Multiline)
+        matches!(self, Self::Multiline)
     }
 }
 
@@ -516,7 +513,7 @@ impl WordSeparator {
     fn will_break(&self) -> bool {
         matches!(
             self,
-            WordSeparator::EndOfText {
+            Self::EndOfText {
                 is_soft_line_break: false,
             }
         )
@@ -526,8 +523,8 @@ impl WordSeparator {
 impl Format<JsFormatContext> for WordSeparator {
     fn fmt(&self, f: &mut Formatter<JsFormatContext>) -> FormatResult<()> {
         match self {
-            WordSeparator::BetweenWords => soft_line_break_or_space().fmt(f),
-            WordSeparator::EndOfText { is_soft_line_break } => {
+            Self::BetweenWords => soft_line_break_or_space().fmt(f),
+            Self::EndOfText { is_soft_line_break } => {
                 if *is_soft_line_break {
                     soft_line_break().fmt(f)
                 }
@@ -740,7 +737,10 @@ impl FlatBuilder {
     }
 
     fn finish(self) -> FormatResult<FormatFlatChildren> {
-        assert!(!self.disabled, "The flat builder has been disabled and thus, does no longer store any elements. Make sure you don't call disable if you later intend to format the flat content.");
+        assert!(
+            !self.disabled,
+            "The flat builder has been disabled and thus, does no longer store any elements. Make sure you don't call disable if you later intend to format the flat content."
+        );
 
         Ok(FormatFlatChildren {
             elements: RefCell::new(self.result?),

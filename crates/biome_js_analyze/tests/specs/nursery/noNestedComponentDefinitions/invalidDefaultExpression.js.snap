@@ -1,0 +1,36 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 134
+expression: invalidDefaultExpression.js
+---
+# Input
+```js
+export default memo(() => {
+    function ComponentAsFunctionDeclaration() {}
+});
+
+```
+
+# Diagnostics
+```
+invalidDefaultExpression.js:2:14 lint/nursery/noNestedComponentDefinitions ━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Components should not be defined inside other components.
+  
+    1 │ export default memo(() => {
+  > 2 │     function ComponentAsFunctionDeclaration() {}
+      │              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    3 │ });
+    4 │ 
+  
+  i Move it outside of the parent component or pass it as a prop.
+  
+  > 1 │ export default memo(() => {
+      │                     ^
+    2 │     function ComponentAsFunctionDeclaration() {}
+    3 │ });
+  
+  i Component definitions inside other components cause them to be recreated on every render, which can lead to performance issues and unexpected behavior.
+  
+
+```

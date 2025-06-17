@@ -1,6 +1,6 @@
 ---
 source: crates/biome_cli/tests/snap_test.rs
-expression: content
+expression: redactor(content)
 ---
 ## `fix.js`
 
@@ -11,14 +11,6 @@ console.log(a);
 ```
 
 # Emitted Messages
-
-```block
-internalError/fs  DEPRECATED  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! The argument --apply-unsafe is deprecated, it will be removed in the next major release. Use --write --unsafe instead.
-  
-
-```
 
 ```block
 Checked 1 file in <TIME>. Fixed 1 file.

@@ -1,6 +1,7 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: inJsx.jsx
+snapshot_kind: text
 ---
 # Input
 ```jsx
@@ -31,7 +32,7 @@ expression: inJsx.jsx
 ```
 inJsx.jsx:3:5 lint/a11y/useButtonType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Provide an explicit type prop for the button element.
+  × Provide an explicit type prop for the button element.
   
     1 │ // invalid
     2 │ <>
@@ -50,7 +51,7 @@ inJsx.jsx:3:5 lint/a11y/useButtonType ━━━━━━━━━━━━━━
 ```
 inJsx.jsx:4:18 lint/a11y/useButtonType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Provide a valid type prop for the button element.
+  × Provide a valid type prop for the button element.
   
     2 │ <>
     3 │     <button>do something</button>
@@ -69,7 +70,7 @@ inJsx.jsx:4:18 lint/a11y/useButtonType ━━━━━━━━━━━━━�
 ```
 inJsx.jsx:5:13 lint/a11y/useButtonType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Provide a valid type prop for the button element.
+  × Provide a valid type prop for the button element.
   
     3 │     <button>do something</button>
     4 │     <button type="bar">do something</button>
@@ -88,7 +89,7 @@ inJsx.jsx:5:13 lint/a11y/useButtonType ━━━━━━━━━━━━━�
 ```
 inJsx.jsx:6:5 lint/a11y/useButtonType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Provide an explicit type prop for the button element.
+  × Provide an explicit type prop for the button element.
   
     4 │     <button type="bar">do something</button>
     5 │     <button type>do something</button>
@@ -107,7 +108,7 @@ inJsx.jsx:6:5 lint/a11y/useButtonType ━━━━━━━━━━━━━━
 ```
 inJsx.jsx:7:18 lint/a11y/useButtonType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Provide a valid type prop for the button element.
+  × Provide a valid type prop for the button element.
   
     5 │     <button type>do something</button>
     6 │     <button/>
@@ -126,7 +127,7 @@ inJsx.jsx:7:18 lint/a11y/useButtonType ━━━━━━━━━━━━━�
 ```
 inJsx.jsx:8:13 lint/a11y/useButtonType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Provide a valid type prop for the button element.
+  × Provide a valid type prop for the button element.
   
      6 │     <button/>
      7 │     <button type="bar"/>
@@ -145,7 +146,7 @@ inJsx.jsx:8:13 lint/a11y/useButtonType ━━━━━━━━━━━━━�
 ```
 inJsx.jsx:9:5 lint/a11y/useButtonType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Provide an explicit type prop for the button element.
+  × Provide an explicit type prop for the button element.
   
      7 │     <button type="bar"/>
      8 │     <button type/>
@@ -164,7 +165,7 @@ inJsx.jsx:9:5 lint/a11y/useButtonType ━━━━━━━━━━━━━━
 ```
 inJsx.jsx:10:5 lint/a11y/useButtonType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Provide an explicit type prop for the button element.
+  × Provide an explicit type prop for the button element.
   
      8 │     <button type/>
      9 │     <button onClick={null}>test</button>

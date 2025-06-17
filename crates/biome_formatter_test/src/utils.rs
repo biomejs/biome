@@ -1,8 +1,7 @@
 use crate::diff_report::DiffReport;
+use camino::Utf8Path;
 use similar::TextDiff;
-use std::ffi::OsStr;
 use std::fs::{read_to_string, remove_file};
-use std::path::Path;
 
 struct StripPlaceholders {
     cursor: String,
@@ -18,7 +17,7 @@ impl StripPlaceholders {
         range_start_placeholder: String,
         range_end_placeholder: String,
     ) -> Self {
-        StripPlaceholders {
+        Self {
             cursor,
             range_start_placeholder,
             range_end_placeholder,
@@ -106,11 +105,11 @@ pub enum PrettierDiff {
 }
 
 pub fn get_prettier_diff(
-    input_file: &Path,
+    input_file: &Utf8Path,
     relative_file_name: &'static str,
     formatted: &str,
 ) -> PrettierDiff {
-    let input_extension = input_file.extension().and_then(OsStr::to_str);
+    let input_extension = input_file.extension();
 
     let prettier_snapshot_path = input_extension
         .map(|ext| input_file.with_extension(format!("{ext}.prettier-snap")))

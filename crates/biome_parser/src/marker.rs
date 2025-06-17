@@ -1,7 +1,7 @@
+use crate::Parser;
 use crate::event::Event;
 use crate::event::Event::Token;
 use crate::token_source::TokenSource;
-use crate::Parser;
 
 use biome_rowan::{SyntaxKind, TextRange, TextSize};
 use drop_bomb::DebugDropBomb;
@@ -21,13 +21,15 @@ pub struct Marker {
 }
 
 impl Marker {
-    pub fn new(pos: u32, start: TextSize) -> Marker {
-        Marker {
+    pub fn new(pos: u32, start: TextSize) -> Self {
+        Self {
             pos,
             start,
             old_start: pos,
             child_idx: None,
-            bomb: DebugDropBomb::new("Marker must either be `completed` or `abandoned` to avoid that children are implicitly attached to a marker's parent."),
+            bomb: DebugDropBomb::new(
+                "Marker must either be `completed` or `abandoned` to avoid that children are implicitly attached to a marker's parent.",
+            ),
         }
     }
 
@@ -112,7 +114,7 @@ pub struct CompletedMarker {
 
 impl CompletedMarker {
     pub fn new(start_pos: u32, finish_pos: u32, offset: TextSize) -> Self {
-        CompletedMarker {
+        Self {
             start_pos,
             offset,
             old_start: start_pos,
@@ -230,7 +232,7 @@ impl CompletedMarker {
             _ => unreachable!(),
         }
         match events[finish_idx] {
-            ref mut slot @ Event::Finish { .. } => *slot = Event::tombstone(),
+            ref mut slot @ Event::Finish => *slot = Event::tombstone(),
             _ => unreachable!(),
         }
         Marker::new(self.start_pos, self.offset)

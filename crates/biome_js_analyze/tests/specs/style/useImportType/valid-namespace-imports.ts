@@ -1,3 +1,4 @@
+/* should not generate diagnostics */
 import * as A from "";
 export { A }
 const Inner = A.Inner;

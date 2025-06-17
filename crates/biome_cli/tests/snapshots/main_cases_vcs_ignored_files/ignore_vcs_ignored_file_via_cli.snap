@@ -1,0 +1,45 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `.gitignore`
+
+```gitignore
+
+file2.js
+
+```
+
+## `file1.js`
+
+```js
+array.map(sentence => sentence.split(' ')).flat();
+```
+
+## `file2.js`
+
+```js
+foo.call(); bar.call();
+```
+
+# Emitted Messages
+
+```block
+file1.js:1:1 lint/complexity/useFlatMap  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The call chain .map().flat() can be replaced with a single .flatMap() call.
+  
+  > 1 │ array.map(sentence => sentence.split(' ')).flat();
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  
+  i Safe fix: Replace the chain with .flatMap().
+  
+  - array.map(sentence·=>·sentence.split('·')).flat();
+  + array.flatMap(sentence·=>·sentence.split('·'));
+  
+
+```
+
+```block
+Checked 1 file in <TIME>. No fixes applied.
+```

@@ -1,9 +1,9 @@
 //! Provides factory function to create common diagnostics for the JavaScript syntax
 
-use crate::prelude::*;
-use crate::span::Span;
 use crate::JsParser;
 use crate::JsSyntaxFeature::TypeScript;
+use crate::prelude::*;
+use crate::span::Span;
 use biome_js_syntax::TextRange;
 use biome_parser::diagnostic::{expected_any, expected_node};
 
@@ -129,6 +129,10 @@ pub(crate) fn expected_named_import(p: &JsParser, range: TextRange) -> ParseDiag
 
 pub(crate) fn expected_namespace_import(p: &JsParser, range: TextRange) -> ParseDiagnostic {
     expected_any(&["namespace imports"], range, p)
+}
+
+pub(crate) fn expected_declare_statement(p: &JsParser, range: TextRange) -> ParseDiagnostic {
+    expected_node("declare statement", range, p)
 }
 
 pub(crate) fn expected_namespace_or_named_import(

@@ -1,3 +1,4 @@
+/* should not generate diagnostics */
 var x = NaN;
 isNaN(NaN) === true;
 isNaN(123) !== true;

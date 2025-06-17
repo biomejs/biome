@@ -1,0 +1,5 @@
+---
+source: crates/biome_service/src/workspace.tests.rs
+expression: result.unwrap()
+---
+TypeId(0) => instanceof unresolved reference "Person" (scope ID: 0)

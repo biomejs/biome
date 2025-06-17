@@ -1,0 +1,132 @@
+---
+source: crates/biome_migrate/tests/spec_tests.rs
+expression: valid_existing_not_related_group.json
+---
+# Input
+```json
+{
+  "linter": {
+    "rules": {
+      "style": {
+        "useImportType": "off",
+        "useLiteralEnumMembers": "error",
+        "useShorthandFunctionType": "error",
+        "useExportType": "error",
+        "useDefaultParameterLast": "error",
+        "useSingleVarDeclarator": "error",
+        "useConst": "error",
+        "noInferrableTypes": "error",
+        "noUselessElse": "error",
+        "useSelfClosingElements": "error",
+        "useNumberNamespace": "error",
+        "useAsConstAssertion": "error",
+        "noUnusedTemplateLiteral": "error",
+        "useTemplate": "error",
+        "useEnumInitializers": "error"
+      },
+      "nursery": {
+        "noRestrictedImports": {
+          "level": "error",
+          "options": {
+            "paths": {
+              "node:path": "Please use src/util/path.js instead.",
+              "path": "Please use src/util/path.js instead."
+            }
+          }
+        }
+      },
+      "complexity": {
+        "useLiteralKeys": "off"
+      },
+      "suspicious": {
+        "noConsoleLog": "off"
+      },
+      "correctness": {
+        "noUnusedVariables": "off",
+        "noUnusedImports": "off"
+      }
+    }
+  },
+  "overrides": [
+    {
+      "include": ["*.astro"],
+      "linter": {
+        "rules": {
+          "correctness": {
+            "noUnusedVariables": "off",
+            "noUnusedImports": "off"
+          }
+        }
+      }
+    },
+    {
+      "include": [
+        "packages/docs",
+        "packages/knip/scripts",
+        "packages/knip/src/cli.ts",
+        "packages/knip/src/reporters",
+        "packages/knip/src/util/cli-arguments.ts",
+        "packages/knip/src/util/debug.ts"
+      ],
+      "linter": {
+        "rules": {
+          "suspicious": {
+            "noConsoleLog": "off"
+          }
+        }
+      }
+    },
+    {
+      "include": ["packages/knip/fixtures"],
+      "organizeImports": {
+        "enabled": false
+      },
+      "linter": {
+        "rules": {
+          "correctness": {
+            "noUnusedVariables": "off",
+            "noUnusedImports": "off"
+          },
+          "style": {
+            "useImportType": "off"
+          }
+        }
+      }
+    }
+  ]
+}
+
+```
+
+# Diagnostics
+```
+valid_existing_not_related_group.json:1:1 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Biome style rule noParameterAssign isn't recommended anymore.
+  
+   > 1 │ {
+       │ ^
+   > 2 │   "linter": {
+   > 3 │     "rules": {
+   > 4 │       "style": {
+        ...
+  > 89 │     }
+  > 90 │   ]
+  > 91 │ }
+       │ ^
+    92 │ 
+  
+  i To avoid regressions with your code base, Biome will update the configuration file to maintain the compatibility with your current setup.
+  
+  i Safe fix: Update the configuration to enable these rules.
+  
+    17 17 │           "noUnusedTemplateLiteral": "error",
+    18 18 │           "useTemplate": "error",
+    19    │ - ········"useEnumInitializers":·"error"
+       19 │ + ········"useEnumInitializers":·"error",
+       20 │ + ········"noParameterAssign":·"error"
+    20 21 │         },
+    21 22 │         "nursery": {
+  
+
+```

@@ -1,25 +1,19 @@
+# To keep it as emergency workflow until preview, beta and changesets releases are stable
 name: Release JavaScript API
 on:
   workflow_dispatch:
-  schedule:
-    - cron: '0 0 * * 2-6'
-  push:
-    branches:
-      - main
-    paths:
-      - packages/@biomejs/js-api/package.json
 
 jobs:
   check:
     name: Check version
-    runs-on: ubuntu-latest
+    runs-on: depot-ubuntu-24.04-arm-16
     outputs:
       version: ${{ env.version }}
       prerelease: ${{ env.prerelease }}
       nightly: ${{ env.nightly }}
       version_changed: ${{ steps.version.outputs.changed }}
     steps:
-      - uses: actions/checkout@eef61447b9ff4aafe5dcd4e0bbf5d482be7e7871 # v4.2.1
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
 
       - name: Check nightly status
         id: nightly
@@ -48,7 +42,7 @@ jobs:
 
   build:
     name: Package JavaScript APIs
-    runs-on: ubuntu-latest
+    runs-on: depot-ubuntu-24.04-arm-16
 
     needs: check
     if: needs.check.outputs.version_changed == 'true' || needs.check.outputs.nightly == 'true'
@@ -58,10 +52,10 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@eef61447b9ff4aafe5dcd4e0bbf5d482be7e7871 # v4.2.1
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
 
       - name: Install Node.js
-        uses: actions/setup-node@0a44ba7841725637a19e28fa30b79a866c81b0a6 # v4.0.4
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
           node-version: 20
 
@@ -69,13 +63,13 @@ jobs:
         run: curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
 
       - name: Cache pnpm modules
-        uses: actions/cache@3624ceb22c1c5a301c8db4169662070a689d9ea8 # v4.1.1
+        uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3
         with:
           path: ~/.pnpm-store
           key: ${{ runner.os }}-${{ hashFiles('**/pnpm-lock.yaml') }}
           restore-keys: |
             ${{ runner.os }}-
-      - uses: pnpm/action-setup@fe02b34f77f8bc703788d5817da081398fad5dd2 # v4.0.0
+      - uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda # v4.1.0
 
       - name: Set release infos
         if: needs.check.outputs.prerelease == 'true'
@@ -102,7 +96,7 @@ jobs:
           pnpm --filter @biomejs/js-api run build
 
       - name: Upload JS API artifact
-        uses: actions/upload-artifact@b4b15b8c7c6ac21ea08fcf65892d2ee8f75cf882 # v4.4.3
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: js-api
           path: |
@@ -111,23 +105,23 @@ jobs:
 
   publish:
     name: Publish
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs: build
     environment: npm-publish
     permissions:
       contents: write
       id-token: write
     steps:
-      - uses: actions/checkout@eef61447b9ff4aafe5dcd4e0bbf5d482be7e7871 # v4.2.1
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
 
       - name: Download package artifact
-        uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16 # v4.1.8
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
         with:
           name: js-api
           path: packages/@biomejs/js-api/dist
 
       - name: Install Node.js
-        uses: actions/setup-node@0a44ba7841725637a19e28fa30b79a866c81b0a6 # v4.0.4
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
           node-version: 20
           registry-url: 'https://registry.npmjs.org'
@@ -151,7 +145,7 @@ jobs:
         run: |
           bash scripts/print-changelog.sh ${{ needs.build.outputs.version }} >| ${{ github.workspace }}/RELEASE_NOTES
       - name: Create GitHub release and tag
-        uses: softprops/action-gh-release@c062e08bd532815e2082a85e87e3ef29c3e6d191 # v2.0.8
+        uses: softprops/action-gh-release@da05d552573ad5aba039eaac05058a918a7bf631 # v2.2.2
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:

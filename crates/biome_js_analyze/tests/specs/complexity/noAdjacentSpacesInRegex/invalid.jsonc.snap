@@ -1,0 +1,651 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.jsonc
+---
+# Input
+```cjs
+/   /;
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:2 lint/complexity/noAdjacentSpacesInRegex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This regular expression contains unclear uses of consecutive spaces.
+  
+  > 1 │ /   /;
+      │  ^^^
+  
+  i It's hard to visually count the amount of spaces.
+  
+  i Safe fix: Use a quantifier instead.
+  
+  - /···/;
+  + /·{3}/;
+  
+
+```
+
+# Input
+```cjs
+/  foo/;
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:2 lint/complexity/noAdjacentSpacesInRegex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This regular expression contains unclear uses of consecutive spaces.
+  
+  > 1 │ /  foo/;
+      │  ^^
+  
+  i It's hard to visually count the amount of spaces.
+  
+  i Safe fix: Use a quantifier instead.
+  
+  - /··foo/;
+  + /·{2}foo/;
+  
+
+```
+
+# Input
+```cjs
+/foo   /;
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:5 lint/complexity/noAdjacentSpacesInRegex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This regular expression contains unclear uses of consecutive spaces.
+  
+  > 1 │ /foo   /;
+      │     ^^^
+  
+  i It's hard to visually count the amount of spaces.
+  
+  i Safe fix: Use a quantifier instead.
+  
+  - /foo···/;
+  + /foo·{3}/;
+  
+
+```
+
+# Input
+```cjs
+/foo  bar/;
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:5 lint/complexity/noAdjacentSpacesInRegex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This regular expression contains unclear uses of consecutive spaces.
+  
+  > 1 │ /foo  bar/;
+      │     ^^
+  
+  i It's hard to visually count the amount of spaces.
+  
+  i Safe fix: Use a quantifier instead.
+  
+  - /foo··bar/;
+  + /foo·{2}bar/;
+  
+
+```
+
+# Input
+```cjs
+/foo   bar    baz/;
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:5 lint/complexity/noAdjacentSpacesInRegex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This regular expression contains unclear uses of consecutive spaces.
+  
+  > 1 │ /foo   bar    baz/;
+      │     ^^^^^^^^^^
+  
+  i It's hard to visually count the amount of spaces.
+  
+  i Safe fix: Use a quantifier instead.
+  
+  - /foo···bar····baz/;
+  + /foo·{3}bar·{4}baz/;
+  
+
+```
+
+# Input
+```cjs
+/foo [ba]r  b(a|z)/;
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:11 lint/complexity/noAdjacentSpacesInRegex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This regular expression contains unclear uses of consecutive spaces.
+  
+  > 1 │ /foo [ba]r  b(a|z)/;
+      │           ^^
+  
+  i It's hard to visually count the amount of spaces.
+  
+  i Safe fix: Use a quantifier instead.
+  
+  - /foo·[ba]r··b(a|z)/;
+  + /foo·[ba]r·{2}b(a|z)/;
+  
+
+```
+
+# Input
+```cjs
+/foo  +/;
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:5 lint/complexity/noAdjacentSpacesInRegex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This regular expression contains unclear uses of consecutive spaces.
+  
+  > 1 │ /foo  +/;
+      │     ^^
+  
+  i It's hard to visually count the amount of spaces.
+  
+  i Safe fix: Use a quantifier instead.
+  
+  - /foo··+/;
+  + /foo·{2,}/;
+  
+
+```
+
+# Input
+```cjs
+/foo  +?/;
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:5 lint/complexity/noAdjacentSpacesInRegex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This regular expression contains unclear uses of consecutive spaces.
+  
+  > 1 │ /foo  +?/;
+      │     ^^
+  
+  i It's hard to visually count the amount of spaces.
+  
+  i Safe fix: Use a quantifier instead.
+  
+  - /foo··+?/;
+  + /foo·{2,}?/;
+  
+
+```
+
+# Input
+```cjs
+/foo  */;
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:5 lint/complexity/noAdjacentSpacesInRegex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This regular expression contains unclear uses of consecutive spaces.
+  
+  > 1 │ /foo  */;
+      │     ^^
+  
+  i It's hard to visually count the amount of spaces.
+  
+  i Safe fix: Use a quantifier instead.
+  
+  - /foo··*/;
+  + /foo·+/;
+  
+
+```
+
+# Input
+```cjs
+/foo  *?/;
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:5 lint/complexity/noAdjacentSpacesInRegex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This regular expression contains unclear uses of consecutive spaces.
+  
+  > 1 │ /foo  *?/;
+      │     ^^
+  
+  i It's hard to visually count the amount of spaces.
+  
+  i Safe fix: Use a quantifier instead.
+  
+  - /foo··*?/;
+  + /foo·+?/;
+  
+
+```
+
+# Input
+```cjs
+/foo   */;
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:5 lint/complexity/noAdjacentSpacesInRegex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This regular expression contains unclear uses of consecutive spaces.
+  
+  > 1 │ /foo   */;
+      │     ^^^
+  
+  i It's hard to visually count the amount of spaces.
+  
+  i Safe fix: Use a quantifier instead.
+  
+  - /foo···*/;
+  + /foo·{2,}/;
+  
+
+```
+
+# Input
+```cjs
+/foo  ?/;
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:5 lint/complexity/noAdjacentSpacesInRegex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This regular expression contains unclear uses of consecutive spaces.
+  
+  > 1 │ /foo  ?/;
+      │     ^^
+  
+  i It's hard to visually count the amount of spaces.
+  
+  i Safe fix: Use a quantifier instead.
+  
+  - /foo··?/;
+  + /foo·{1,2}/;
+  
+
+```
+
+# Input
+```cjs
+/foo  {2}/;
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:5 lint/complexity/noAdjacentSpacesInRegex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This regular expression contains unclear uses of consecutive spaces.
+  
+  > 1 │ /foo  {2}/;
+      │     ^^
+  
+  i It's hard to visually count the amount of spaces.
+  
+  i Safe fix: Use a quantifier instead.
+  
+  - /foo··{2}/;
+  + /foo·{3}/;
+  
+
+```
+
+# Input
+```cjs
+/foo  {2}a{1,2}/;
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:5 lint/complexity/noAdjacentSpacesInRegex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This regular expression contains unclear uses of consecutive spaces.
+  
+  > 1 │ /foo  {2}a{1,2}/;
+      │     ^^
+  
+  i It's hard to visually count the amount of spaces.
+  
+  i Safe fix: Use a quantifier instead.
+  
+  - /foo··{2}a{1,2}/;
+  + /foo·{3}a{1,2}/;
+  
+
+```
+
+# Input
+```cjs
+/foo  {2,}/;
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:5 lint/complexity/noAdjacentSpacesInRegex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This regular expression contains unclear uses of consecutive spaces.
+  
+  > 1 │ /foo  {2,}/;
+      │     ^^
+  
+  i It's hard to visually count the amount of spaces.
+  
+  i Safe fix: Use a quantifier instead.
+  
+  - /foo··{2,}/;
+  + /foo·{3,}/;
+  
+
+```
+
+# Input
+```cjs
+/foo  {,2}/;
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:5 lint/complexity/noAdjacentSpacesInRegex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This regular expression contains unclear uses of consecutive spaces.
+  
+  > 1 │ /foo  {,2}/;
+      │     ^^
+  
+  i It's hard to visually count the amount of spaces.
+  
+  i Safe fix: Use a quantifier instead.
+  
+  - /foo··{,2}/;
+  + /foo·{2}{,2}/;
+  
+
+```
+
+# Input
+```cjs
+/foo  {2,3}/;
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:5 lint/complexity/noAdjacentSpacesInRegex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This regular expression contains unclear uses of consecutive spaces.
+  
+  > 1 │ /foo  {2,3}/;
+      │     ^^
+  
+  i It's hard to visually count the amount of spaces.
+  
+  i Safe fix: Use a quantifier instead.
+  
+  - /foo··{2,3}/;
+  + /foo·{3,4}/;
+  
+
+```
+
+# Input
+```cjs
+/foo  +  *   *   {2,}/;
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:5 lint/complexity/noAdjacentSpacesInRegex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This regular expression contains unclear uses of consecutive spaces.
+  
+  > 1 │ /foo  +  *   *   {2,}/;
+      │     ^^^^^^^^^^^^^
+  
+  i It's hard to visually count the amount of spaces.
+  
+  i Safe fix: Use a quantifier instead.
+  
+  - /foo··+··*···*···{2,}/;
+  + /foo·{2,}·+·{2,}·{4,}/;
+  
+
+```
+
+# Input
+```cjs
+/foo  {}/;
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:5 lint/complexity/noAdjacentSpacesInRegex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This regular expression contains unclear uses of consecutive spaces.
+  
+  > 1 │ /foo  {}/;
+      │     ^^
+  
+  i It's hard to visually count the amount of spaces.
+  
+  i Safe fix: Use a quantifier instead.
+  
+  - /foo··{}/;
+  + /foo·{2}{}/;
+  
+
+```
+
+# Input
+```cjs
+/foo  {,}/;
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:5 lint/complexity/noAdjacentSpacesInRegex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This regular expression contains unclear uses of consecutive spaces.
+  
+  > 1 │ /foo  {,}/;
+      │     ^^
+  
+  i It's hard to visually count the amount of spaces.
+  
+  i Safe fix: Use a quantifier instead.
+  
+  - /foo··{,}/;
+  + /foo·{2}{,}/;
+  
+
+```
+
+# Input
+```cjs
+/foo  {,2}/;
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:5 lint/complexity/noAdjacentSpacesInRegex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This regular expression contains unclear uses of consecutive spaces.
+  
+  > 1 │ /foo  {,2}/;
+      │     ^^
+  
+  i It's hard to visually count the amount of spaces.
+  
+  i Safe fix: Use a quantifier instead.
+  
+  - /foo··{,2}/;
+  + /foo·{2}{,2}/;
+  
+
+```
+
+# Input
+```cjs
+/foo  {1 2}/;
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:5 lint/complexity/noAdjacentSpacesInRegex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This regular expression contains unclear uses of consecutive spaces.
+  
+  > 1 │ /foo  {1 2}/;
+      │     ^^
+  
+  i It's hard to visually count the amount of spaces.
+  
+  i Safe fix: Use a quantifier instead.
+  
+  - /foo··{1·2}/;
+  + /foo·{2}{1·2}/;
+  
+
+```
+
+# Input
+```cjs
+/foo  {1/;
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:5 lint/complexity/noAdjacentSpacesInRegex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This regular expression contains unclear uses of consecutive spaces.
+  
+  > 1 │ /foo  {1/;
+      │     ^^
+  
+  i It's hard to visually count the amount of spaces.
+  
+  i Safe fix: Use a quantifier instead.
+  
+  - /foo··{1/;
+  + /foo·{2}{1/;
+  
+
+```
+
+# Input
+```cjs
+/foo  {1,2/;
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:5 lint/complexity/noAdjacentSpacesInRegex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This regular expression contains unclear uses of consecutive spaces.
+  
+  > 1 │ /foo  {1,2/;
+      │     ^^
+  
+  i It's hard to visually count the amount of spaces.
+  
+  i Safe fix: Use a quantifier instead.
+  
+  - /foo··{1,2/;
+  + /foo·{2}{1,2/;
+  
+
+```
+
+# Input
+```cjs
+/‎⁦⁩   /gu;
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:5 lint/complexity/noAdjacentSpacesInRegex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This regular expression contains unclear uses of consecutive spaces.
+  
+  > 1 │ /���   /gu;
+      │  ^^^
+  
+  i It's hard to visually count the amount of spaces.
+  
+  i Safe fix: Use a quantifier instead.
+  
+  - /���···/gu;
+  + /���·{3}/gu;
+  
+
+```
+
+# Input
+```cjs
+/foo😀  ?/;
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:6 lint/complexity/noAdjacentSpacesInRegex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This regular expression contains unclear uses of consecutive spaces.
+  
+  > 1 │ /foo😀  ?/;
+      │       ^^
+  
+  i It's hard to visually count the amount of spaces.
+  
+  i Safe fix: Use a quantifier instead.
+  
+  - /foo😀··?/;
+  + /foo😀·{1,2}/;
+  
+
+```
+
+# Input
+```cjs
+/foo  😀/;
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:5 lint/complexity/noAdjacentSpacesInRegex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This regular expression contains unclear uses of consecutive spaces.
+  
+  > 1 │ /foo  😀/;
+      │     ^^
+  
+  i It's hard to visually count the amount of spaces.
+  
+  i Safe fix: Use a quantifier instead.
+  
+  - /foo··😀/;
+  + /foo·{2}😀/;
+  
+
+```

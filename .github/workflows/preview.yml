@@ -1,0 +1,249 @@
+name: Preview releases
+on:
+  workflow_dispatch:
+  schedule:
+    # This cron schedule runs the workflow at midnight (00:00) on Tuesdays and Saturdays.
+    - cron: '0 0 * * 2,6'
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  version:
+    name: Generate version
+    runs-on: depot-ubuntu-24.04-arm-16
+    outputs:
+      version: ${{ env.version }}
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - name: Set version
+        run: |
+          echo "version=$(node packages/@biomejs/biome/scripts/update-preview-version.mjs)" >> $GITHUB_ENV
+
+  build-binaries:
+    needs: version
+    strategy:
+      matrix:
+        include:
+          - os: depot-windows-2022
+            target: x86_64-pc-windows-msvc
+            code-target: win32-x64
+          - os: depot-windows-2022
+            target: aarch64-pc-windows-msvc
+            code-target: win32-arm64
+          - os: depot-ubuntu-24.04
+            target: x86_64-unknown-linux-musl
+            code-target: linux-x64-musl
+          - os: depot-ubuntu-24.04-arm
+            target: aarch64-unknown-linux-musl
+            code-target: linux-arm64-musl
+          - os: depot-macos-14
+            target: x86_64-apple-darwin
+            code-target: darwin-x64
+          - os: depot-macos-14
+            target: aarch64-apple-darwin
+            code-target: darwin-arm64
+
+    name: Package ${{ matrix.code-target }}
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - name: Install Rust toolchain
+        run: rustup target add ${{ matrix.target }}
+
+      - name: Install musl toolchain
+        if: matrix.code-target == 'linux-x64-musl' || matrix.code-target == 'linux-arm64-musl'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y musl-tools
+
+      - name: Install cargo-audit
+        uses: taiki-e/install-action@92f69c195229fe62d58b4d697ab4bc75def98e76 # v2.52.7
+        if: matrix.code-target == 'linux-x64-musl'
+        with:
+          tool: cargo-audit
+
+      - name: Audit crates.io dependencies
+        if: matrix.code-target == 'linux-x64-musl'
+        run: cargo audit
+
+      # Build the CLI binary
+      - name: Build binaries
+        run: cargo build -p biome_cli --release --target ${{ matrix.target }}
+        env:
+          # Strip all debug symbols from the resulting binaries
+          RUSTFLAGS: "-C strip=symbols -C codegen-units=1"
+          # Inline the version of the npm package in the CLI binary
+          BIOME_VERSION: ${{ env.cli-version }}
+
+      # Copy the CLI binary and rename it to include the name of the target platform
+      - name: Copy CLI binary
+        if: matrix.os == 'depot-windows-2022'
+        run: |
+          mkdir dist
+          cp target/${{ matrix.target }}/release/biome.exe ./dist/biome-${{ matrix.code-target }}.exe
+      - name: Copy CLI binary
+        if: matrix.os != 'depot-windows-2022'
+        run: |
+          mkdir dist
+          cp target/${{ matrix.target }}/release/biome ./dist/biome-${{ matrix.code-target }}
+
+      # Upload the CLI binary as a build artifact
+      - name: Upload CLI artifact
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: cli-${{ matrix.target }}
+          path: ./dist/biome-*
+          if-no-files-found: error
+
+  # Build GNU/Linux binaries in Docker, using Debian 11 (bullseye), to support older versions of glibc.
+  build-binaries-gnu:
+    needs: version
+    strategy:
+      matrix:
+        include:
+          - os: depot-ubuntu-24.04
+            target: x86_64-unknown-linux-gnu
+            code-target: linux-x64
+          - os: depot-ubuntu-24.04-arm
+            target: aarch64-unknown-linux-gnu
+            code-target: linux-arm64
+
+    name: Package ${{ matrix.code-target }}
+    runs-on: ${{ matrix.os }}
+    container:
+      image: rust:1.87.0-bullseye@sha256:af1a29a166198e1295ca667007e95d2e70c866e3928ba9b25f3907035581c39e
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - name: Set jemalloc page size for linux-arm64
+        if: matrix.code-target == 'linux-arm64'
+        run: |
+          echo "JEMALLOC_SYS_WITH_LG_PAGE=16" >> $GITHUB_ENV
+
+      # Build the CLI binary
+      - name: Build binaries
+        run: cargo build -p biome_cli --release --target ${{ matrix.target }}
+        env:
+          # Strip all debug symbols from the resulting binaries
+          RUSTFLAGS: "-C strip=symbols -C codegen-units=1"
+          # Inline the version of the npm package in the CLI binary
+          BIOME_VERSION: ${{ env.cli-version }}
+
+      # Copy the CLI binary and rename it to include the name of the target platform
+      - name: Copy CLI binary
+        run: |
+          mkdir dist
+          cp target/${{ matrix.target }}/release/biome ./dist/biome-${{ matrix.code-target }}
+
+      # Upload the CLI binary as a build artifact
+      - name: Upload CLI artifact
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: cli-${{ matrix.target }}
+          path: ./dist/biome-*
+          if-no-files-found: error
+
+  build-wasm:
+    name: Build WASM
+    runs-on: depot-ubuntu-24.04-arm-16
+    needs: version
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - name: Install wasm-pack
+        run: curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
+
+      - name: Build WASM module for bundlers
+        run: wasm-pack build --out-dir ../../packages/@biomejs/wasm-bundler --target bundler --release --scope biomejs crates/biome_wasm
+      - name: Build WASM module for node.js
+        run: wasm-pack build --out-dir ../../packages/@biomejs/wasm-nodejs --target nodejs --release --scope biomejs crates/biome_wasm
+      - name: Build WASM module for the web
+        run: wasm-pack build --out-dir ../../packages/@biomejs/wasm-web --target web --release --scope biomejs crates/biome_wasm
+
+      - name: Upload WASM artifact
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: wasm-${{ matrix.target }}
+          path: |
+            ./packages/@biomejs/wasm-bundler
+            ./packages/@biomejs/wasm-nodejs
+            ./packages/@biomejs/wasm-web
+          if-no-files-found: error
+
+  publish:
+    name: Publish
+    runs-on: ubuntu-24.04
+    needs:
+      - build-binaries
+      - build-binaries-gnu
+      - build-wasm
+    permissions:
+      contents: write
+      id-token: write
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - name: Download CLI artifacts
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          pattern: cli-*
+          merge-multiple: true
+      - name: Download WASM artifacts
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          pattern: wasm-*
+          merge-multiple: true
+          path: packages/@biomejs
+
+      - name: Install Node.js
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: 20
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Pin Corepack 0.20
+        run: |
+          echo "Before: corepack => $(corepack --version || echo 'not installed')"
+          npm install -g corepack@0.20
+          echo "After : corepack => $(corepack --version)"
+          corepack enable
+          pnpm --version
+
+      - name: Generate npm packages
+        run: node packages/@biomejs/biome/scripts/generate-packages.mjs
+
+      - name: Publish version
+        run: |
+          pnpx pkg-pr-new publish --compact \
+          './packages/@biomejs/biome' \
+          './packages/@biomejs/cli-*' \
+          './packages/@biomejs/wasm-*' \
+          --json output.json --comment=off
+
+      - name: Read published version
+        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7.0.1
+        id: version-msg
+        with:
+          script: |
+            const fs = require('fs');
+            const output = JSON.parse(fs.readFileSync('output.json', 'utf8'));
+            const biomePackage = output.packages
+              .find((p) => p.name === "@biomejs/biome");
+
+            return "New preview release available for `@biomejs/biome`. Install it using the following command:\n ```bash\n npm i " + biomePackage.url + "\n```";
+
+          result-encoding: string
+
+      - name: Send Discord message
+        uses: tsickert/discord-webhook@b217a69502f52803de774ded2b1ab7c282e99645 # v7.0.0
+        with:
+          webhook-url: ${{ secrets.DISCORD_PREVIEW_RELEASES_HOOK }}
+          content: ${{ steps.version-msg.outputs.result }}

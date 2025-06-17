@@ -8,24 +8,24 @@ use crate::syntax::class::{
     empty_decorator_list, parse_initializer_clause, parse_parameter_decorators,
 };
 use crate::syntax::expr::{
-    is_nth_at_identifier, parse_assignment_expression_or_higher, ExpressionContext,
+    ExpressionContext, is_nth_at_identifier, parse_assignment_expression_or_higher,
 };
 use crate::syntax::js_parse_error;
 use crate::syntax::js_parse_error::{
     decorators_not_allowed, expected_binding, expected_parameter, expected_parameters,
 };
-use crate::syntax::stmt::{is_semi, parse_block_impl, semi, StatementContext};
+use crate::syntax::stmt::{StatementContext, is_semi, parse_block_impl, semi};
 use crate::syntax::typescript::ts_parse_error::ts_only_syntax_error;
 use crate::syntax::typescript::{
-    is_nth_at_type_parameter_modifier, parse_ts_return_type_annotation, parse_ts_type_annotation,
-    parse_ts_type_parameters, try_parse, TypeContext,
+    TypeContext, is_nth_at_type_parameter_modifier, parse_ts_return_type_annotation,
+    parse_ts_type_annotation, parse_ts_type_parameters, try_parse,
 };
 
 use crate::JsSyntaxFeature::TypeScript;
 use crate::ParsedSyntax::{Absent, Present};
 use crate::{JsParser, JsSyntaxFeature, ParseRecoveryTokenSet};
 use biome_js_syntax::JsSyntaxKind::*;
-use biome_js_syntax::{JsSyntaxKind, TextRange, T};
+use biome_js_syntax::{JsSyntaxKind, T, TextRange};
 use biome_parser::ParserProgress;
 use biome_rowan::SyntaxKind;
 
@@ -150,7 +150,7 @@ enum AmbientFunctionKind {
 
 impl AmbientFunctionKind {
     const fn is_export_default(&self) -> bool {
-        matches!(self, AmbientFunctionKind::ExportDefault)
+        matches!(self, Self::ExportDefault)
     }
 }
 
@@ -166,21 +166,21 @@ enum FunctionKind {
 
 impl FunctionKind {
     const fn is_export_default(&self) -> bool {
-        matches!(self, FunctionKind::ExportDefault)
+        matches!(self, Self::ExportDefault)
     }
 
     fn is_id_optional(&self) -> bool {
-        matches!(self, FunctionKind::Expression | FunctionKind::ExportDefault)
+        matches!(self, Self::Expression | Self::ExportDefault)
     }
 
     fn is_expression(&self) -> bool {
-        matches!(self, FunctionKind::Expression)
+        matches!(self, Self::Expression)
     }
 
     fn is_in_single_statement_context(&self) -> bool {
         matches!(
             self,
-            FunctionKind::Declaration {
+            Self::Declaration {
                 single_statement_context: true
             }
         )
@@ -519,7 +519,7 @@ pub(crate) enum Ambiguity {
 
 impl Ambiguity {
     fn is_disallowed(&self) -> bool {
-        matches!(self, Ambiguity::Disallowed)
+        matches!(self, Self::Disallowed)
     }
 }
 
@@ -1072,15 +1072,15 @@ impl ParameterContext {
     }
 
     pub fn is_setter(&self) -> bool {
-        self == &ParameterContext::Setter
+        self == &Self::Setter
     }
 
     pub fn is_class_setter(&self) -> bool {
-        self == &ParameterContext::ClassSetter
+        self == &Self::ClassSetter
     }
 
     pub fn is_class_method_implementation(&self) -> bool {
-        self == &ParameterContext::ClassImplementation
+        self == &Self::ClassImplementation
     }
 
     pub fn is_any_class_method(&self) -> bool {
@@ -1088,11 +1088,11 @@ impl ParameterContext {
     }
 
     pub fn is_parameter_property(&self) -> bool {
-        self == &ParameterContext::ParameterProperty
+        self == &Self::ParameterProperty
     }
 
     pub fn is_arrow_function(&self) -> bool {
-        self == &ParameterContext::Arrow
+        self == &Self::Arrow
     }
 }
 

@@ -56,7 +56,7 @@ impl<'fmt, Context> Argument<'fmt, Context> {
     }
 }
 
-impl<'fmt, Context> Format<Context> for Argument<'fmt, Context> {
+impl<Context> Format<Context> for Argument<'_, Context> {
     #[inline(always)]
     fn fmt(&self, f: &mut Formatter<Context>) -> FormatResult<()> {
         self.format(f)
@@ -130,7 +130,7 @@ impl<'fmt, Context> From<&'fmt Argument<'fmt, Context>> for Arguments<'fmt, Cont
 mod tests {
     use crate::format_element::tag::Tag;
     use crate::prelude::*;
-    use crate::{format_args, write, FormatState, VecBuffer};
+    use crate::{FormatState, VecBuffer, format_args, write};
 
     #[test]
     fn test_nesting() {

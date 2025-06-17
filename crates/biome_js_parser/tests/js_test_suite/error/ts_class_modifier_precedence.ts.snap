@@ -1,0 +1,884 @@
+---
+source: crates/biome_js_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```ts
+class Base { base1; base2; base3; base4;}
+abstract class Test extends Base {
+    // Accessibility
+    readonly private a: string;
+    override protected base1;
+    static private b: string;
+    abstract protected d: string;
+    // Static
+    readonly static c: string;
+    accessor static d: string;
+    override static base2: string;
+    // Accessor
+    readonly accessor e: string;
+    override accessor f: string;
+    // abstract
+    override abstract base3: string;
+    // override
+    readonly override base4: string;
+}
+
+```
+
+
+## AST
+
+```
+JsModule {
+    bom_token: missing (optional),
+    interpreter_token: missing (optional),
+    directives: JsDirectiveList [],
+    items: JsModuleItemList [
+        JsClassDeclaration {
+            decorators: JsDecoratorList [],
+            abstract_token: missing (optional),
+            class_token: CLASS_KW@0..6 "class" [] [Whitespace(" ")],
+            id: JsIdentifierBinding {
+                name_token: IDENT@6..11 "Base" [] [Whitespace(" ")],
+            },
+            type_parameters: missing (optional),
+            extends_clause: missing (optional),
+            implements_clause: missing (optional),
+            l_curly_token: L_CURLY@11..13 "{" [] [Whitespace(" ")],
+            members: JsClassMemberList [
+                JsPropertyClassMember {
+                    modifiers: JsPropertyModifierList [],
+                    name: JsLiteralMemberName {
+                        value: IDENT@13..18 "base1" [] [],
+                    },
+                    property_annotation: missing (optional),
+                    value: missing (optional),
+                    semicolon_token: SEMICOLON@18..20 ";" [] [Whitespace(" ")],
+                },
+                JsPropertyClassMember {
+                    modifiers: JsPropertyModifierList [],
+                    name: JsLiteralMemberName {
+                        value: IDENT@20..25 "base2" [] [],
+                    },
+                    property_annotation: missing (optional),
+                    value: missing (optional),
+                    semicolon_token: SEMICOLON@25..27 ";" [] [Whitespace(" ")],
+                },
+                JsPropertyClassMember {
+                    modifiers: JsPropertyModifierList [],
+                    name: JsLiteralMemberName {
+                        value: IDENT@27..32 "base3" [] [],
+                    },
+                    property_annotation: missing (optional),
+                    value: missing (optional),
+                    semicolon_token: SEMICOLON@32..34 ";" [] [Whitespace(" ")],
+                },
+                JsPropertyClassMember {
+                    modifiers: JsPropertyModifierList [],
+                    name: JsLiteralMemberName {
+                        value: IDENT@34..39 "base4" [] [],
+                    },
+                    property_annotation: missing (optional),
+                    value: missing (optional),
+                    semicolon_token: SEMICOLON@39..40 ";" [] [],
+                },
+            ],
+            r_curly_token: R_CURLY@40..41 "}" [] [],
+        },
+        JsClassDeclaration {
+            decorators: JsDecoratorList [],
+            abstract_token: ABSTRACT_KW@41..51 "abstract" [Newline("\n")] [Whitespace(" ")],
+            class_token: CLASS_KW@51..57 "class" [] [Whitespace(" ")],
+            id: JsIdentifierBinding {
+                name_token: IDENT@57..62 "Test" [] [Whitespace(" ")],
+            },
+            type_parameters: missing (optional),
+            extends_clause: JsExtendsClause {
+                extends_token: EXTENDS_KW@62..70 "extends" [] [Whitespace(" ")],
+                super_class: JsIdentifierExpression {
+                    name: JsReferenceIdentifier {
+                        value_token: IDENT@70..75 "Base" [] [Whitespace(" ")],
+                    },
+                },
+                type_arguments: missing (optional),
+            },
+            implements_clause: missing (optional),
+            l_curly_token: L_CURLY@75..76 "{" [] [],
+            members: JsClassMemberList [
+                JsBogusMember {
+                    items: [
+                        JsPropertyModifierList [
+                            TsReadonlyModifier {
+                                modifier_token: READONLY_KW@76..111 "readonly" [Newline("\n"), Whitespace("    "), Comments("// Accessibility"), Newline("\n"), Whitespace("    ")] [Whitespace(" ")],
+                            },
+                            TsAccessibilityModifier {
+                                modifier_token: PRIVATE_KW@111..119 "private" [] [Whitespace(" ")],
+                            },
+                        ],
+                        JsLiteralMemberName {
+                            value: IDENT@119..120 "a" [] [],
+                        },
+                        TsTypeAnnotation {
+                            colon_token: COLON@120..122 ":" [] [Whitespace(" ")],
+                            ty: TsStringType {
+                                string_token: STRING_KW@122..128 "string" [] [],
+                            },
+                        },
+                        SEMICOLON@128..129 ";" [] [],
+                    ],
+                },
+                JsBogusMember {
+                    items: [
+                        JsPropertyModifierList [
+                            TsOverrideModifier {
+                                modifier_token: OVERRIDE_KW@129..143 "override" [Newline("\n"), Whitespace("    ")] [Whitespace(" ")],
+                            },
+                            TsAccessibilityModifier {
+                                modifier_token: PROTECTED_KW@143..153 "protected" [] [Whitespace(" ")],
+                            },
+                        ],
+                        JsLiteralMemberName {
+                            value: IDENT@153..158 "base1" [] [],
+                        },
+                        SEMICOLON@158..159 ";" [] [],
+                    ],
+                },
+                JsBogusMember {
+                    items: [
+                        JsPropertyModifierList [
+                            JsStaticModifier {
+                                modifier_token: STATIC_KW@159..171 "static" [Newline("\n"), Whitespace("    ")] [Whitespace(" ")],
+                            },
+                            TsAccessibilityModifier {
+                                modifier_token: PRIVATE_KW@171..179 "private" [] [Whitespace(" ")],
+                            },
+                        ],
+                        JsLiteralMemberName {
+                            value: IDENT@179..180 "b" [] [],
+                        },
+                        TsTypeAnnotation {
+                            colon_token: COLON@180..182 ":" [] [Whitespace(" ")],
+                            ty: TsStringType {
+                                string_token: STRING_KW@182..188 "string" [] [],
+                            },
+                        },
+                        SEMICOLON@188..189 ";" [] [],
+                    ],
+                },
+                JsBogusMember {
+                    items: [
+                        TsPropertySignatureModifierList [
+                            TsAbstractModifier {
+                                modifier_token: ABSTRACT_KW@189..203 "abstract" [Newline("\n"), Whitespace("    ")] [Whitespace(" ")],
+                            },
+                            TsAccessibilityModifier {
+                                modifier_token: PROTECTED_KW@203..213 "protected" [] [Whitespace(" ")],
+                            },
+                        ],
+                        JsLiteralMemberName {
+                            value: IDENT@213..214 "d" [] [],
+                        },
+                        TsTypeAnnotation {
+                            colon_token: COLON@214..216 ":" [] [Whitespace(" ")],
+                            ty: TsStringType {
+                                string_token: STRING_KW@216..222 "string" [] [],
+                            },
+                        },
+                        SEMICOLON@222..223 ";" [] [],
+                    ],
+                },
+                JsBogusMember {
+                    items: [
+                        JsPropertyModifierList [
+                            TsReadonlyModifier {
+                                modifier_token: READONLY_KW@223..251 "readonly" [Newline("\n"), Whitespace("    "), Comments("// Static"), Newline("\n"), Whitespace("    ")] [Whitespace(" ")],
+                            },
+                            JsStaticModifier {
+                                modifier_token: STATIC_KW@251..258 "static" [] [Whitespace(" ")],
+                            },
+                        ],
+                        JsLiteralMemberName {
+                            value: IDENT@258..259 "c" [] [],
+                        },
+                        TsTypeAnnotation {
+                            colon_token: COLON@259..261 ":" [] [Whitespace(" ")],
+                            ty: TsStringType {
+                                string_token: STRING_KW@261..267 "string" [] [],
+                            },
+                        },
+                        SEMICOLON@267..268 ";" [] [],
+                    ],
+                },
+                JsBogusMember {
+                    items: [
+                        JsPropertyModifierList [
+                            JsAccessorModifier {
+                                modifier_token: ACCESSOR_KW@268..282 "accessor" [Newline("\n"), Whitespace("    ")] [Whitespace(" ")],
+                            },
+                            JsStaticModifier {
+                                modifier_token: STATIC_KW@282..289 "static" [] [Whitespace(" ")],
+                            },
+                        ],
+                        JsLiteralMemberName {
+                            value: IDENT@289..290 "d" [] [],
+                        },
+                        TsTypeAnnotation {
+                            colon_token: COLON@290..292 ":" [] [Whitespace(" ")],
+                            ty: TsStringType {
+                                string_token: STRING_KW@292..298 "string" [] [],
+                            },
+                        },
+                        SEMICOLON@298..299 ";" [] [],
+                    ],
+                },
+                JsBogusMember {
+                    items: [
+                        JsPropertyModifierList [
+                            TsOverrideModifier {
+                                modifier_token: OVERRIDE_KW@299..313 "override" [Newline("\n"), Whitespace("    ")] [Whitespace(" ")],
+                            },
+                            JsStaticModifier {
+                                modifier_token: STATIC_KW@313..320 "static" [] [Whitespace(" ")],
+                            },
+                        ],
+                        JsLiteralMemberName {
+                            value: IDENT@320..325 "base2" [] [],
+                        },
+                        TsTypeAnnotation {
+                            colon_token: COLON@325..327 ":" [] [Whitespace(" ")],
+                            ty: TsStringType {
+                                string_token: STRING_KW@327..333 "string" [] [],
+                            },
+                        },
+                        SEMICOLON@333..334 ";" [] [],
+                    ],
+                },
+                JsBogusMember {
+                    items: [
+                        JsPropertyModifierList [
+                            TsReadonlyModifier {
+                                modifier_token: READONLY_KW@334..364 "readonly" [Newline("\n"), Whitespace("    "), Comments("// Accessor"), Newline("\n"), Whitespace("    ")] [Whitespace(" ")],
+                            },
+                            JsAccessorModifier {
+                                modifier_token: ACCESSOR_KW@364..373 "accessor" [] [Whitespace(" ")],
+                            },
+                        ],
+                        JsLiteralMemberName {
+                            value: IDENT@373..374 "e" [] [],
+                        },
+                        TsTypeAnnotation {
+                            colon_token: COLON@374..376 ":" [] [Whitespace(" ")],
+                            ty: TsStringType {
+                                string_token: STRING_KW@376..382 "string" [] [],
+                            },
+                        },
+                        SEMICOLON@382..383 ";" [] [],
+                    ],
+                },
+                JsBogusMember {
+                    items: [
+                        JsPropertyModifierList [
+                            TsOverrideModifier {
+                                modifier_token: OVERRIDE_KW@383..397 "override" [Newline("\n"), Whitespace("    ")] [Whitespace(" ")],
+                            },
+                            JsAccessorModifier {
+                                modifier_token: ACCESSOR_KW@397..406 "accessor" [] [Whitespace(" ")],
+                            },
+                        ],
+                        JsLiteralMemberName {
+                            value: IDENT@406..407 "f" [] [],
+                        },
+                        TsTypeAnnotation {
+                            colon_token: COLON@407..409 ":" [] [Whitespace(" ")],
+                            ty: TsStringType {
+                                string_token: STRING_KW@409..415 "string" [] [],
+                            },
+                        },
+                        SEMICOLON@415..416 ";" [] [],
+                    ],
+                },
+                JsBogusMember {
+                    items: [
+                        TsPropertySignatureModifierList [
+                            TsOverrideModifier {
+                                modifier_token: OVERRIDE_KW@416..446 "override" [Newline("\n"), Whitespace("    "), Comments("// abstract"), Newline("\n"), Whitespace("    ")] [Whitespace(" ")],
+                            },
+                            TsAbstractModifier {
+                                modifier_token: ABSTRACT_KW@446..455 "abstract" [] [Whitespace(" ")],
+                            },
+                        ],
+                        JsLiteralMemberName {
+                            value: IDENT@455..460 "base3" [] [],
+                        },
+                        TsTypeAnnotation {
+                            colon_token: COLON@460..462 ":" [] [Whitespace(" ")],
+                            ty: TsStringType {
+                                string_token: STRING_KW@462..468 "string" [] [],
+                            },
+                        },
+                        SEMICOLON@468..469 ";" [] [],
+                    ],
+                },
+                JsBogusMember {
+                    items: [
+                        JsPropertyModifierList [
+                            TsReadonlyModifier {
+                                modifier_token: READONLY_KW@469..499 "readonly" [Newline("\n"), Whitespace("    "), Comments("// override"), Newline("\n"), Whitespace("    ")] [Whitespace(" ")],
+                            },
+                            TsOverrideModifier {
+                                modifier_token: OVERRIDE_KW@499..508 "override" [] [Whitespace(" ")],
+                            },
+                        ],
+                        JsLiteralMemberName {
+                            value: IDENT@508..513 "base4" [] [],
+                        },
+                        TsTypeAnnotation {
+                            colon_token: COLON@513..515 ":" [] [Whitespace(" ")],
+                            ty: TsStringType {
+                                string_token: STRING_KW@515..521 "string" [] [],
+                            },
+                        },
+                        SEMICOLON@521..522 ";" [] [],
+                    ],
+                },
+            ],
+            r_curly_token: R_CURLY@522..524 "}" [Newline("\n")] [],
+        },
+    ],
+    eof_token: EOF@524..525 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: JS_MODULE@0..525
+  0: (empty)
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..524
+    0: JS_CLASS_DECLARATION@0..41
+      0: JS_DECORATOR_LIST@0..0
+      1: (empty)
+      2: CLASS_KW@0..6 "class" [] [Whitespace(" ")]
+      3: JS_IDENTIFIER_BINDING@6..11
+        0: IDENT@6..11 "Base" [] [Whitespace(" ")]
+      4: (empty)
+      5: (empty)
+      6: (empty)
+      7: L_CURLY@11..13 "{" [] [Whitespace(" ")]
+      8: JS_CLASS_MEMBER_LIST@13..40
+        0: JS_PROPERTY_CLASS_MEMBER@13..20
+          0: JS_PROPERTY_MODIFIER_LIST@13..13
+          1: JS_LITERAL_MEMBER_NAME@13..18
+            0: IDENT@13..18 "base1" [] []
+          2: (empty)
+          3: (empty)
+          4: SEMICOLON@18..20 ";" [] [Whitespace(" ")]
+        1: JS_PROPERTY_CLASS_MEMBER@20..27
+          0: JS_PROPERTY_MODIFIER_LIST@20..20
+          1: JS_LITERAL_MEMBER_NAME@20..25
+            0: IDENT@20..25 "base2" [] []
+          2: (empty)
+          3: (empty)
+          4: SEMICOLON@25..27 ";" [] [Whitespace(" ")]
+        2: JS_PROPERTY_CLASS_MEMBER@27..34
+          0: JS_PROPERTY_MODIFIER_LIST@27..27
+          1: JS_LITERAL_MEMBER_NAME@27..32
+            0: IDENT@27..32 "base3" [] []
+          2: (empty)
+          3: (empty)
+          4: SEMICOLON@32..34 ";" [] [Whitespace(" ")]
+        3: JS_PROPERTY_CLASS_MEMBER@34..40
+          0: JS_PROPERTY_MODIFIER_LIST@34..34
+          1: JS_LITERAL_MEMBER_NAME@34..39
+            0: IDENT@34..39 "base4" [] []
+          2: (empty)
+          3: (empty)
+          4: SEMICOLON@39..40 ";" [] []
+      9: R_CURLY@40..41 "}" [] []
+    1: JS_CLASS_DECLARATION@41..524
+      0: JS_DECORATOR_LIST@41..41
+      1: ABSTRACT_KW@41..51 "abstract" [Newline("\n")] [Whitespace(" ")]
+      2: CLASS_KW@51..57 "class" [] [Whitespace(" ")]
+      3: JS_IDENTIFIER_BINDING@57..62
+        0: IDENT@57..62 "Test" [] [Whitespace(" ")]
+      4: (empty)
+      5: JS_EXTENDS_CLAUSE@62..75
+        0: EXTENDS_KW@62..70 "extends" [] [Whitespace(" ")]
+        1: JS_IDENTIFIER_EXPRESSION@70..75
+          0: JS_REFERENCE_IDENTIFIER@70..75
+            0: IDENT@70..75 "Base" [] [Whitespace(" ")]
+        2: (empty)
+      6: (empty)
+      7: L_CURLY@75..76 "{" [] []
+      8: JS_CLASS_MEMBER_LIST@76..522
+        0: JS_BOGUS_MEMBER@76..129
+          0: JS_PROPERTY_MODIFIER_LIST@76..119
+            0: TS_READONLY_MODIFIER@76..111
+              0: READONLY_KW@76..111 "readonly" [Newline("\n"), Whitespace("    "), Comments("// Accessibility"), Newline("\n"), Whitespace("    ")] [Whitespace(" ")]
+            1: TS_ACCESSIBILITY_MODIFIER@111..119
+              0: PRIVATE_KW@111..119 "private" [] [Whitespace(" ")]
+          1: JS_LITERAL_MEMBER_NAME@119..120
+            0: IDENT@119..120 "a" [] []
+          2: TS_TYPE_ANNOTATION@120..128
+            0: COLON@120..122 ":" [] [Whitespace(" ")]
+            1: TS_STRING_TYPE@122..128
+              0: STRING_KW@122..128 "string" [] []
+          3: SEMICOLON@128..129 ";" [] []
+        1: JS_BOGUS_MEMBER@129..159
+          0: JS_PROPERTY_MODIFIER_LIST@129..153
+            0: TS_OVERRIDE_MODIFIER@129..143
+              0: OVERRIDE_KW@129..143 "override" [Newline("\n"), Whitespace("    ")] [Whitespace(" ")]
+            1: TS_ACCESSIBILITY_MODIFIER@143..153
+              0: PROTECTED_KW@143..153 "protected" [] [Whitespace(" ")]
+          1: JS_LITERAL_MEMBER_NAME@153..158
+            0: IDENT@153..158 "base1" [] []
+          2: SEMICOLON@158..159 ";" [] []
+        2: JS_BOGUS_MEMBER@159..189
+          0: JS_PROPERTY_MODIFIER_LIST@159..179
+            0: JS_STATIC_MODIFIER@159..171
+              0: STATIC_KW@159..171 "static" [Newline("\n"), Whitespace("    ")] [Whitespace(" ")]
+            1: TS_ACCESSIBILITY_MODIFIER@171..179
+              0: PRIVATE_KW@171..179 "private" [] [Whitespace(" ")]
+          1: JS_LITERAL_MEMBER_NAME@179..180
+            0: IDENT@179..180 "b" [] []
+          2: TS_TYPE_ANNOTATION@180..188
+            0: COLON@180..182 ":" [] [Whitespace(" ")]
+            1: TS_STRING_TYPE@182..188
+              0: STRING_KW@182..188 "string" [] []
+          3: SEMICOLON@188..189 ";" [] []
+        3: JS_BOGUS_MEMBER@189..223
+          0: TS_PROPERTY_SIGNATURE_MODIFIER_LIST@189..213
+            0: TS_ABSTRACT_MODIFIER@189..203
+              0: ABSTRACT_KW@189..203 "abstract" [Newline("\n"), Whitespace("    ")] [Whitespace(" ")]
+            1: TS_ACCESSIBILITY_MODIFIER@203..213
+              0: PROTECTED_KW@203..213 "protected" [] [Whitespace(" ")]
+          1: JS_LITERAL_MEMBER_NAME@213..214
+            0: IDENT@213..214 "d" [] []
+          2: TS_TYPE_ANNOTATION@214..222
+            0: COLON@214..216 ":" [] [Whitespace(" ")]
+            1: TS_STRING_TYPE@216..222
+              0: STRING_KW@216..222 "string" [] []
+          3: SEMICOLON@222..223 ";" [] []
+        4: JS_BOGUS_MEMBER@223..268
+          0: JS_PROPERTY_MODIFIER_LIST@223..258
+            0: TS_READONLY_MODIFIER@223..251
+              0: READONLY_KW@223..251 "readonly" [Newline("\n"), Whitespace("    "), Comments("// Static"), Newline("\n"), Whitespace("    ")] [Whitespace(" ")]
+            1: JS_STATIC_MODIFIER@251..258
+              0: STATIC_KW@251..258 "static" [] [Whitespace(" ")]
+          1: JS_LITERAL_MEMBER_NAME@258..259
+            0: IDENT@258..259 "c" [] []
+          2: TS_TYPE_ANNOTATION@259..267
+            0: COLON@259..261 ":" [] [Whitespace(" ")]
+            1: TS_STRING_TYPE@261..267
+              0: STRING_KW@261..267 "string" [] []
+          3: SEMICOLON@267..268 ";" [] []
+        5: JS_BOGUS_MEMBER@268..299
+          0: JS_PROPERTY_MODIFIER_LIST@268..289
+            0: JS_ACCESSOR_MODIFIER@268..282
+              0: ACCESSOR_KW@268..282 "accessor" [Newline("\n"), Whitespace("    ")] [Whitespace(" ")]
+            1: JS_STATIC_MODIFIER@282..289
+              0: STATIC_KW@282..289 "static" [] [Whitespace(" ")]
+          1: JS_LITERAL_MEMBER_NAME@289..290
+            0: IDENT@289..290 "d" [] []
+          2: TS_TYPE_ANNOTATION@290..298
+            0: COLON@290..292 ":" [] [Whitespace(" ")]
+            1: TS_STRING_TYPE@292..298
+              0: STRING_KW@292..298 "string" [] []
+          3: SEMICOLON@298..299 ";" [] []
+        6: JS_BOGUS_MEMBER@299..334
+          0: JS_PROPERTY_MODIFIER_LIST@299..320
+            0: TS_OVERRIDE_MODIFIER@299..313
+              0: OVERRIDE_KW@299..313 "override" [Newline("\n"), Whitespace("    ")] [Whitespace(" ")]
+            1: JS_STATIC_MODIFIER@313..320
+              0: STATIC_KW@313..320 "static" [] [Whitespace(" ")]
+          1: JS_LITERAL_MEMBER_NAME@320..325
+            0: IDENT@320..325 "base2" [] []
+          2: TS_TYPE_ANNOTATION@325..333
+            0: COLON@325..327 ":" [] [Whitespace(" ")]
+            1: TS_STRING_TYPE@327..333
+              0: STRING_KW@327..333 "string" [] []
+          3: SEMICOLON@333..334 ";" [] []
+        7: JS_BOGUS_MEMBER@334..383
+          0: JS_PROPERTY_MODIFIER_LIST@334..373
+            0: TS_READONLY_MODIFIER@334..364
+              0: READONLY_KW@334..364 "readonly" [Newline("\n"), Whitespace("    "), Comments("// Accessor"), Newline("\n"), Whitespace("    ")] [Whitespace(" ")]
+            1: JS_ACCESSOR_MODIFIER@364..373
+              0: ACCESSOR_KW@364..373 "accessor" [] [Whitespace(" ")]
+          1: JS_LITERAL_MEMBER_NAME@373..374
+            0: IDENT@373..374 "e" [] []
+          2: TS_TYPE_ANNOTATION@374..382
+            0: COLON@374..376 ":" [] [Whitespace(" ")]
+            1: TS_STRING_TYPE@376..382
+              0: STRING_KW@376..382 "string" [] []
+          3: SEMICOLON@382..383 ";" [] []
+        8: JS_BOGUS_MEMBER@383..416
+          0: JS_PROPERTY_MODIFIER_LIST@383..406
+            0: TS_OVERRIDE_MODIFIER@383..397
+              0: OVERRIDE_KW@383..397 "override" [Newline("\n"), Whitespace("    ")] [Whitespace(" ")]
+            1: JS_ACCESSOR_MODIFIER@397..406
+              0: ACCESSOR_KW@397..406 "accessor" [] [Whitespace(" ")]
+          1: JS_LITERAL_MEMBER_NAME@406..407
+            0: IDENT@406..407 "f" [] []
+          2: TS_TYPE_ANNOTATION@407..415
+            0: COLON@407..409 ":" [] [Whitespace(" ")]
+            1: TS_STRING_TYPE@409..415
+              0: STRING_KW@409..415 "string" [] []
+          3: SEMICOLON@415..416 ";" [] []
+        9: JS_BOGUS_MEMBER@416..469
+          0: TS_PROPERTY_SIGNATURE_MODIFIER_LIST@416..455
+            0: TS_OVERRIDE_MODIFIER@416..446
+              0: OVERRIDE_KW@416..446 "override" [Newline("\n"), Whitespace("    "), Comments("// abstract"), Newline("\n"), Whitespace("    ")] [Whitespace(" ")]
+            1: TS_ABSTRACT_MODIFIER@446..455
+              0: ABSTRACT_KW@446..455 "abstract" [] [Whitespace(" ")]
+          1: JS_LITERAL_MEMBER_NAME@455..460
+            0: IDENT@455..460 "base3" [] []
+          2: TS_TYPE_ANNOTATION@460..468
+            0: COLON@460..462 ":" [] [Whitespace(" ")]
+            1: TS_STRING_TYPE@462..468
+              0: STRING_KW@462..468 "string" [] []
+          3: SEMICOLON@468..469 ";" [] []
+        10: JS_BOGUS_MEMBER@469..522
+          0: JS_PROPERTY_MODIFIER_LIST@469..508
+            0: TS_READONLY_MODIFIER@469..499
+              0: READONLY_KW@469..499 "readonly" [Newline("\n"), Whitespace("    "), Comments("// override"), Newline("\n"), Whitespace("    ")] [Whitespace(" ")]
+            1: TS_OVERRIDE_MODIFIER@499..508
+              0: OVERRIDE_KW@499..508 "override" [] [Whitespace(" ")]
+          1: JS_LITERAL_MEMBER_NAME@508..513
+            0: IDENT@508..513 "base4" [] []
+          2: TS_TYPE_ANNOTATION@513..521
+            0: COLON@513..515 ":" [] [Whitespace(" ")]
+            1: TS_STRING_TYPE@515..521
+              0: STRING_KW@515..521 "string" [] []
+          3: SEMICOLON@521..522 ";" [] []
+      9: R_CURLY@522..524 "}" [Newline("\n")] []
+  4: EOF@524..525 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+ts_class_modifier_precedence.ts:4:14 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × 'private' must precede 'readonly'
+  
+    2 │ abstract class Test extends Base {
+    3 │     // Accessibility
+  > 4 │     readonly private a: string;
+      │              ^^^^^^^
+    5 │     override protected base1;
+    6 │     static private b: string;
+  
+  i move this modifier
+  
+    2 │ abstract class Test extends Base {
+    3 │     // Accessibility
+  > 4 │     readonly private a: string;
+      │              ^^^^^^^
+    5 │     override protected base1;
+    6 │     static private b: string;
+  
+  i before this modifier
+  
+    2 │ abstract class Test extends Base {
+    3 │     // Accessibility
+  > 4 │     readonly private a: string;
+      │     ^^^^^^^^
+    5 │     override protected base1;
+    6 │     static private b: string;
+  
+ts_class_modifier_precedence.ts:5:14 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × 'protected' must precede 'override'
+  
+    3 │     // Accessibility
+    4 │     readonly private a: string;
+  > 5 │     override protected base1;
+      │              ^^^^^^^^^
+    6 │     static private b: string;
+    7 │     abstract protected d: string;
+  
+  i move this modifier
+  
+    3 │     // Accessibility
+    4 │     readonly private a: string;
+  > 5 │     override protected base1;
+      │              ^^^^^^^^^
+    6 │     static private b: string;
+    7 │     abstract protected d: string;
+  
+  i before this modifier
+  
+    3 │     // Accessibility
+    4 │     readonly private a: string;
+  > 5 │     override protected base1;
+      │     ^^^^^^^^
+    6 │     static private b: string;
+    7 │     abstract protected d: string;
+  
+ts_class_modifier_precedence.ts:6:12 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × 'private' must precede 'static'
+  
+    4 │     readonly private a: string;
+    5 │     override protected base1;
+  > 6 │     static private b: string;
+      │            ^^^^^^^
+    7 │     abstract protected d: string;
+    8 │     // Static
+  
+  i move this modifier
+  
+    4 │     readonly private a: string;
+    5 │     override protected base1;
+  > 6 │     static private b: string;
+      │            ^^^^^^^
+    7 │     abstract protected d: string;
+    8 │     // Static
+  
+  i before this modifier
+  
+    4 │     readonly private a: string;
+    5 │     override protected base1;
+  > 6 │     static private b: string;
+      │     ^^^^^^
+    7 │     abstract protected d: string;
+    8 │     // Static
+  
+ts_class_modifier_precedence.ts:7:14 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × 'protected' must precede 'abstract'
+  
+    5 │     override protected base1;
+    6 │     static private b: string;
+  > 7 │     abstract protected d: string;
+      │              ^^^^^^^^^
+    8 │     // Static
+    9 │     readonly static c: string;
+  
+  i move this modifier
+  
+    5 │     override protected base1;
+    6 │     static private b: string;
+  > 7 │     abstract protected d: string;
+      │              ^^^^^^^^^
+    8 │     // Static
+    9 │     readonly static c: string;
+  
+  i before this modifier
+  
+    5 │     override protected base1;
+    6 │     static private b: string;
+  > 7 │     abstract protected d: string;
+      │     ^^^^^^^^
+    8 │     // Static
+    9 │     readonly static c: string;
+  
+ts_class_modifier_precedence.ts:9:14 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × 'static' must precede 'readonly'
+  
+     7 │     abstract protected d: string;
+     8 │     // Static
+   > 9 │     readonly static c: string;
+       │              ^^^^^^
+    10 │     accessor static d: string;
+    11 │     override static base2: string;
+  
+  i move this modifier
+  
+     7 │     abstract protected d: string;
+     8 │     // Static
+   > 9 │     readonly static c: string;
+       │              ^^^^^^
+    10 │     accessor static d: string;
+    11 │     override static base2: string;
+  
+  i before this modifier
+  
+     7 │     abstract protected d: string;
+     8 │     // Static
+   > 9 │     readonly static c: string;
+       │     ^^^^^^^^
+    10 │     accessor static d: string;
+    11 │     override static base2: string;
+  
+ts_class_modifier_precedence.ts:10:14 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × 'static' must precede 'accessor'
+  
+     8 │     // Static
+     9 │     readonly static c: string;
+  > 10 │     accessor static d: string;
+       │              ^^^^^^
+    11 │     override static base2: string;
+    12 │     // Accessor
+  
+  i move this modifier
+  
+     8 │     // Static
+     9 │     readonly static c: string;
+  > 10 │     accessor static d: string;
+       │              ^^^^^^
+    11 │     override static base2: string;
+    12 │     // Accessor
+  
+  i before this modifier
+  
+     8 │     // Static
+     9 │     readonly static c: string;
+  > 10 │     accessor static d: string;
+       │     ^^^^^^^^
+    11 │     override static base2: string;
+    12 │     // Accessor
+  
+ts_class_modifier_precedence.ts:11:14 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × 'static' must precede 'override'
+  
+     9 │     readonly static c: string;
+    10 │     accessor static d: string;
+  > 11 │     override static base2: string;
+       │              ^^^^^^
+    12 │     // Accessor
+    13 │     readonly accessor e: string;
+  
+  i move this modifier
+  
+     9 │     readonly static c: string;
+    10 │     accessor static d: string;
+  > 11 │     override static base2: string;
+       │              ^^^^^^
+    12 │     // Accessor
+    13 │     readonly accessor e: string;
+  
+  i before this modifier
+  
+     9 │     readonly static c: string;
+    10 │     accessor static d: string;
+  > 11 │     override static base2: string;
+       │     ^^^^^^^^
+    12 │     // Accessor
+    13 │     readonly accessor e: string;
+  
+ts_class_modifier_precedence.ts:13:14 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × 'accessor' must precede 'readonly'
+  
+    11 │     override static base2: string;
+    12 │     // Accessor
+  > 13 │     readonly accessor e: string;
+       │              ^^^^^^^^
+    14 │     override accessor f: string;
+    15 │     // abstract
+  
+  i move this modifier
+  
+    11 │     override static base2: string;
+    12 │     // Accessor
+  > 13 │     readonly accessor e: string;
+       │              ^^^^^^^^
+    14 │     override accessor f: string;
+    15 │     // abstract
+  
+  i before this modifier
+  
+    11 │     override static base2: string;
+    12 │     // Accessor
+  > 13 │     readonly accessor e: string;
+       │     ^^^^^^^^
+    14 │     override accessor f: string;
+    15 │     // abstract
+  
+ts_class_modifier_precedence.ts:14:14 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × 'accessor' cannot be used with 'override' modifier.
+  
+    12 │     // Accessor
+    13 │     readonly accessor e: string;
+  > 14 │     override accessor f: string;
+       │              ^^^^^^^^
+    15 │     // abstract
+    16 │     override abstract base3: string;
+  
+  i 'accessor' modifier
+  
+    12 │     // Accessor
+    13 │     readonly accessor e: string;
+  > 14 │     override accessor f: string;
+       │              ^^^^^^^^
+    15 │     // abstract
+    16 │     override abstract base3: string;
+  
+  i 'override' modifier
+  
+    12 │     // Accessor
+    13 │     readonly accessor e: string;
+  > 14 │     override accessor f: string;
+       │     ^^^^^^^^
+    15 │     // abstract
+    16 │     override abstract base3: string;
+  
+ts_class_modifier_precedence.ts:16:14 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × 'abstract' must precede 'override'
+  
+    14 │     override accessor f: string;
+    15 │     // abstract
+  > 16 │     override abstract base3: string;
+       │              ^^^^^^^^
+    17 │     // override
+    18 │     readonly override base4: string;
+  
+  i move this modifier
+  
+    14 │     override accessor f: string;
+    15 │     // abstract
+  > 16 │     override abstract base3: string;
+       │              ^^^^^^^^
+    17 │     // override
+    18 │     readonly override base4: string;
+  
+  i before this modifier
+  
+    14 │     override accessor f: string;
+    15 │     // abstract
+  > 16 │     override abstract base3: string;
+       │     ^^^^^^^^
+    17 │     // override
+    18 │     readonly override base4: string;
+  
+ts_class_modifier_precedence.ts:18:14 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × 'override' must precede 'readonly'
+  
+    16 │     override abstract base3: string;
+    17 │     // override
+  > 18 │     readonly override base4: string;
+       │              ^^^^^^^^
+    19 │ }
+    20 │ 
+  
+  i move this modifier
+  
+    16 │     override abstract base3: string;
+    17 │     // override
+  > 18 │     readonly override base4: string;
+       │              ^^^^^^^^
+    19 │ }
+    20 │ 
+  
+  i before this modifier
+  
+    16 │     override abstract base3: string;
+    17 │     // override
+  > 18 │     readonly override base4: string;
+       │     ^^^^^^^^
+    19 │ }
+    20 │ 
+  
+```

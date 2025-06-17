@@ -1,0 +1,123 @@
+---
+source: crates/biome_js_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```ts
+@decorator
+export default async function foo() { }
+
+```
+
+
+## AST
+
+```
+JsModule {
+    bom_token: missing (optional),
+    interpreter_token: missing (optional),
+    directives: JsDirectiveList [],
+    items: JsModuleItemList [
+        JsBogusStatement {
+            items: [
+                JsDecorator {
+                    at_token: AT@0..1 "@" [] [],
+                    expression: JsIdentifierExpression {
+                        name: JsReferenceIdentifier {
+                            value_token: IDENT@1..10 "decorator" [] [],
+                        },
+                    },
+                },
+            ],
+        },
+        JsExport {
+            decorators: JsDecoratorList [],
+            export_token: EXPORT_KW@10..18 "export" [Newline("\n")] [Whitespace(" ")],
+            export_clause: JsExportDefaultDeclarationClause {
+                default_token: DEFAULT_KW@18..26 "default" [] [Whitespace(" ")],
+                declaration: JsFunctionExportDefaultDeclaration {
+                    async_token: ASYNC_KW@26..32 "async" [] [Whitespace(" ")],
+                    function_token: FUNCTION_KW@32..41 "function" [] [Whitespace(" ")],
+                    star_token: missing (optional),
+                    id: JsIdentifierBinding {
+                        name_token: IDENT@41..44 "foo" [] [],
+                    },
+                    type_parameters: missing (optional),
+                    parameters: JsParameters {
+                        l_paren_token: L_PAREN@44..45 "(" [] [],
+                        items: JsParameterList [],
+                        r_paren_token: R_PAREN@45..47 ")" [] [Whitespace(" ")],
+                    },
+                    return_type_annotation: missing (optional),
+                    body: JsFunctionBody {
+                        l_curly_token: L_CURLY@47..49 "{" [] [Whitespace(" ")],
+                        directives: JsDirectiveList [],
+                        statements: JsStatementList [],
+                        r_curly_token: R_CURLY@49..50 "}" [] [],
+                    },
+                },
+                semicolon_token: missing (optional),
+            },
+        },
+    ],
+    eof_token: EOF@50..51 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: JS_MODULE@0..51
+  0: (empty)
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..50
+    0: JS_BOGUS_STATEMENT@0..10
+      0: JS_DECORATOR@0..10
+        0: AT@0..1 "@" [] []
+        1: JS_IDENTIFIER_EXPRESSION@1..10
+          0: JS_REFERENCE_IDENTIFIER@1..10
+            0: IDENT@1..10 "decorator" [] []
+    1: JS_EXPORT@10..50
+      0: JS_DECORATOR_LIST@10..10
+      1: EXPORT_KW@10..18 "export" [Newline("\n")] [Whitespace(" ")]
+      2: JS_EXPORT_DEFAULT_DECLARATION_CLAUSE@18..50
+        0: DEFAULT_KW@18..26 "default" [] [Whitespace(" ")]
+        1: JS_FUNCTION_EXPORT_DEFAULT_DECLARATION@26..50
+          0: ASYNC_KW@26..32 "async" [] [Whitespace(" ")]
+          1: FUNCTION_KW@32..41 "function" [] [Whitespace(" ")]
+          2: (empty)
+          3: JS_IDENTIFIER_BINDING@41..44
+            0: IDENT@41..44 "foo" [] []
+          4: (empty)
+          5: JS_PARAMETERS@44..47
+            0: L_PAREN@44..45 "(" [] []
+            1: JS_PARAMETER_LIST@45..45
+            2: R_PAREN@45..47 ")" [] [Whitespace(" ")]
+          6: (empty)
+          7: JS_FUNCTION_BODY@47..50
+            0: L_CURLY@47..49 "{" [] [Whitespace(" ")]
+            1: JS_DIRECTIVE_LIST@49..49
+            2: JS_STATEMENT_LIST@49..49
+            3: R_CURLY@49..50 "}" [] []
+        2: (empty)
+  4: EOF@50..51 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+decorator_async_function_export_default_declaration_clause.ts:1:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Decorators are not valid here.
+  
+  > 1 │ @decorator
+      │ ^^^^^^^^^^
+    2 │ export default async function foo() { }
+    3 │ 
+  
+  i Decorators are only valid on class declarations, class expressions, and class methods.
+  
+```

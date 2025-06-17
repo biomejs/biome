@@ -1,6 +1,6 @@
 ---
 source: crates/biome_cli/tests/snap_test.rs
-expression: content
+expression: redactor(content)
 ---
 ## `biome.json`
 
@@ -24,7 +24,13 @@ statement2();
 ```block
 check ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Some errors were emitted while running checks.
+  × No files were processed in the specified paths.
+  
+  i Check your biome.json or biome.jsonc to ensure the paths are not ignored by the configuration.
+  
+  i These paths were provided but ignored:
+  
+  - check.js
   
 
 
@@ -33,46 +39,14 @@ check ━━━━━━━━━━━━━━━━━━━━━━━━�
 # Emitted Messages
 
 ```block
-check.js lint ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+check.js check ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Size of check.js is 27 B which exceeds configured maximum of 16 B for this project.
-    The file size limit exists to prevent us inadvertently slowing down and loading large files that we shouldn't.
-    Use the `files.maxSize` configuration to change the maximum size of files processed.
+  i The size of the file is 27 B, which exceeds the configured maximum of 16 B for this project.
+    Use the `files.maxSize` configuration to change the maximum size of files processed, or `files.ignore` to ignore the file.
   
 
 ```
 
 ```block
-check.js organizeImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Size of check.js is 27 B which exceeds configured maximum of 16 B for this project.
-    The file size limit exists to prevent us inadvertently slowing down and loading large files that we shouldn't.
-    Use the `files.maxSize` configuration to change the maximum size of files processed.
-  
-
-```
-
-```block
-check.js assists ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Size of check.js is 27 B which exceeds configured maximum of 16 B for this project.
-    The file size limit exists to prevent us inadvertently slowing down and loading large files that we shouldn't.
-    Use the `files.maxSize` configuration to change the maximum size of files processed.
-  
-
-```
-
-```block
-check.js format ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Size of check.js is 27 B which exceeds configured maximum of 16 B for this project.
-    The file size limit exists to prevent us inadvertently slowing down and loading large files that we shouldn't.
-    Use the `files.maxSize` configuration to change the maximum size of files processed.
-  
-
-```
-
-```block
-Checked 1 file in <TIME>. No fixes applied.
-Found 1 error.
+Checked 0 files in <TIME>. No fixes applied.
 ```

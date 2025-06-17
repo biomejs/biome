@@ -1,8 +1,9 @@
 use biome_analyze::{
-    context::RuleContext, declare_lint_rule, AddVisitor, Phases, QueryMatch, Queryable, Rule,
-    RuleDiagnostic, RuleSource, RuleSourceKind, ServiceBag, Visitor, VisitorContext,
+    AddVisitor, Phases, QueryMatch, Queryable, Rule, RuleDiagnostic, RuleDomain, RuleSource,
+    RuleSourceKind, ServiceBag, Visitor, VisitorContext, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
+use biome_diagnostics::Severity;
 use biome_js_syntax::{JsCallExpression, JsLanguage, JsStaticMemberExpression};
 use biome_rowan::{AstNode, Language, SyntaxNode, SyntaxNodeOptionExt, TextRange, WalkEvent};
 
@@ -55,9 +56,11 @@ declare_lint_rule! {
         version: "1.6.0",
         name: "noExcessiveNestedTestSuites",
         language: "js",
-        recommended: true,
-        sources: &[RuleSource::EslintJest("max-nested-describe")],
+        recommended: false,
+        severity: Severity::Information,
+        sources: &[RuleSource::EslintJest("max-nested-describe"), RuleSource::EslintVitest("max-nested-describe")],
         source_kind: RuleSourceKind::SameLogic,
+        domains: &[RuleDomain::Test],
     }
 }
 
@@ -151,11 +154,11 @@ fn is_member(call: &JsCallExpression) -> bool {
     call.syntax()
         .parent()
         .kind()
-        .map_or(false, JsStaticMemberExpression::can_cast)
+        .is_some_and(JsStaticMemberExpression::can_cast)
         || call
             .callee()
             .map(|callee| callee.syntax().kind())
-            .map_or(false, JsStaticMemberExpression::can_cast)
+            .is_ok_and(JsStaticMemberExpression::can_cast)
 }
 
 // Declare a query match struct type containing a JavaScript function node

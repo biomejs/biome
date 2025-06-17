@@ -1,7 +1,10 @@
+#![deny(clippy::use_self)]
+
 use biome_graphql_syntax::GraphqlLanguage;
 use biome_rowan::TreeBuilder;
 
 mod generated;
+pub mod make;
 pub use crate::generated::GraphqlSyntaxFactory;
 
 // Re-exported for tests

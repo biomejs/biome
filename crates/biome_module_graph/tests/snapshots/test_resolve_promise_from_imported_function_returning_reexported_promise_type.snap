@@ -1,0 +1,240 @@
+---
+source: crates/biome_module_graph/tests/snap/mod.rs
+expression: content
+---
+# `/src/reexport.ts` (Module 2)
+
+## Source
+
+```ts
+export { PromisedResult } from "./promisedResult.ts";
+```
+
+## Module Info
+
+```
+Exports {
+  "PromisedResult" => {
+    ExportReexport => Reexport(
+      Specifier: "./promisedResult.ts"
+      Resolved path: "/src/promisedResult.ts"
+      Import Symbol: PromisedResult
+    )
+  }
+}
+Imports {
+  No imports
+}
+```
+
+
+# `/src/index.ts` (Not imported by resolver)
+
+## Source
+
+```ts
+import { returnPromiseResult } from "./returnPromiseResult.ts";
+
+const promise = returnPromiseResult();
+```
+
+## Module Info
+
+```
+Exports {
+  No exports
+}
+Imports {
+  "returnPromiseResult" => {
+    Specifier: "./returnPromiseResult.ts"
+    Resolved path: "/src/returnPromiseResult.ts"
+    Import Symbol: returnPromiseResult
+  }
+}
+```
+
+## Registered types
+
+```
+Module TypeId(0) => Call Import Symbol: returnPromiseResult from "/src/returnPromiseResult.ts"(
+  No parameters
+)
+
+Module TypeId(1) => Import Symbol: returnPromiseResult from "/src/returnPromiseResult.ts"
+```
+
+# `/src/promisedResult.ts` (Module 3)
+
+## Source
+
+```ts
+export type PromisedResult = Promise<{ result: true | false }>;
+```
+
+## Module Info
+
+```
+Exports {
+  "PromisedResult" => {
+    ExportOwnExport => JsOwnExport::Binding(0)
+  }
+}
+Imports {
+  No imports
+}
+```
+
+## Exported Bindings
+
+```
+BindingId(0) => JsBindingData {
+  Name: PromisedResult,
+  Type: Module(0) TypeId(4),
+  Declaration kind: Type
+}
+```
+
+## Registered types
+
+```
+Module TypeId(0) => value: true
+
+Module TypeId(1) => value: false
+
+Module TypeId(2) => Module(0) TypeId(0) | Module(0) TypeId(1)
+
+Module TypeId(3) => Object {
+  prototype: No prototype
+  members: ["result": Module(0) TypeId(2)]
+}
+
+Module TypeId(4) => instanceof Promise<Module(0) TypeId(3)>
+
+Module TypeId(5) => instanceof Promise<Module(0) TypeId(3)>
+```
+
+# `/src/returnPromiseResult.ts` (Module 1)
+
+## Source
+
+```ts
+import type { PromisedResult } from "./reexport.ts";
+
+function returnPromiseResult(): PromisedResult {
+	return new Promise((resolve) => resolve({ result: true }));
+}
+
+export { returnPromiseResult };
+```
+
+## Module Info
+
+```
+Exports {
+  "returnPromiseResult" => {
+    ExportOwnExport => JsOwnExport::Binding(1)
+  }
+}
+Imports {
+  "PromisedResult" => {
+    Specifier: "./reexport.ts"
+    Resolved path: "/src/reexport.ts"
+    Import Symbol: PromisedResult
+  }
+}
+```
+
+## Exported Bindings
+
+```
+BindingId(1) => JsBindingData {
+  Name: returnPromiseResult,
+  Type: Module(0) TypeId(8),
+  Declaration kind: HoistedValue
+}
+```
+
+## Registered types
+
+```
+Module TypeId(0) => sync Function {
+  accepts: {
+    params: [
+      required resolve: unknown reference (bindings: resolve:unknown reference)
+    ]
+    type_args: []
+  }
+  returns: unknown reference
+}
+
+Module TypeId(1) => instanceof Promise
+
+Module TypeId(2) => class "Promise" {
+  extends: none
+  implements: []
+  type_args: [T]
+}
+
+Module TypeId(3) => value: true
+
+Module TypeId(4) => Object {
+  prototype: No prototype
+  members: ["result": Module(0) TypeId(3)]
+}
+
+Module TypeId(5) => instanceof Import Symbol: PromisedResult from "/src/reexport.ts"
+
+Module TypeId(6) => sync Function "returnPromiseResult" {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: Module(0) TypeId(9)
+}
+
+Module TypeId(7) => instanceof Import Symbol: PromisedResult from "/src/reexport.ts"
+
+Module TypeId(8) => sync Function "returnPromiseResult" {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: Module(0) TypeId(7)
+}
+
+Module TypeId(9) => instanceof Import Symbol: PromisedResult from "/src/reexport.ts"
+
+Module TypeId(10) => sync Function "returnPromiseResult" {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: Module(0) TypeId(9)
+}
+```
+
+# Scoped Type Resolver
+
+## Registered types
+
+```
+Scope TypeId(0) => instanceof Promise<Module(3) TypeId(3)>
+
+Scope TypeId(1) => sync Function "returnPromiseResult" {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: Module(1) TypeId(7)
+}
+
+Scope TypeId(2) => instanceof Promise<Module(3) TypeId(3)>
+
+Scope TypeId(3) => sync Function "returnPromiseResult" {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: Module(1) TypeId(7)
+}
+```

@@ -1,5 +1,5 @@
-use super::{compilation_context::NodeCompilationContext, PatternCompiler};
-use crate::{grit_context::GritQueryContext, util::TextRangeGritExt, CompileError};
+use super::{PatternCompiler, compilation_context::NodeCompilationContext};
+use crate::{CompileError, grit_context::GritQueryContext, util::TextRangeGritExt};
 use biome_grit_syntax::GritBubble;
 use biome_rowan::AstNode;
 use grit_pattern_matcher::pattern::{Bubble, Pattern, PatternDefinition};
@@ -19,7 +19,7 @@ impl BubbleCompiler {
         // that parameters are registered first
 
         let parameters: Vec<_> = node
-            .variables()
+            .scope()
             .into_iter()
             .map(|node| {
                 let syntax = node.syntax();

@@ -3,18 +3,19 @@ mod literals;
 mod parse_error;
 mod patterns;
 mod predicates;
+mod tests;
 
 use crate::constants::*;
 use crate::token_source::GritTokenSource;
 use biome_grit_syntax::GritSyntaxKind::{self, *};
 use biome_grit_syntax::T;
+use biome_parser::ParserContext;
 use biome_parser::diagnostic::merge_diagnostics;
 use biome_parser::event::Event;
 use biome_parser::parse_lists::{ParseNodeList, ParseSeparatedList};
 use biome_parser::parse_recovery::ParseRecoveryTokenSet;
 use biome_parser::prelude::{ParsedSyntax::*, *};
 use biome_parser::token_source::Trivia;
-use biome_parser::ParserContext;
 use biome_rowan::TextRange;
 use definitions::DefinitionList;
 use literals::parse_double_literal;
@@ -104,7 +105,8 @@ fn parse_version(p: &mut GritParser) -> ParsedSyntax {
     let mut is_supported = true;
 
     let engine_range = p.cur_range();
-    if p.eat(T![biome]) {
+
+    if parse_engine_name(p) != Absent {
         if p.eat(T!['(']) {
             match parse_double_literal(p) {
                 Present(_) => {
@@ -142,6 +144,16 @@ fn parse_version(p: &mut GritParser) -> ParsedSyntax {
             GRIT_BOGUS_VERSION
         },
     ))
+}
+
+fn parse_engine_name(p: &mut GritParser) -> ParsedSyntax {
+    if !p.at_ts(SUPPORTED_ENGINE_SET) {
+        return Absent;
+    }
+
+    let m = p.start();
+    p.bump_ts(SUPPORTED_ENGINE_SET);
+    Present(m.complete(p, GRIT_ENGINE_NAME))
 }
 
 fn parse_language_declaration(p: &mut GritParser) -> ParsedSyntax {
@@ -222,7 +234,10 @@ impl ParseSeparatedList for LanguageFlavorList {
 
 fn parse_language_name(p: &mut GritParser) -> ParsedSyntax {
     if !p.at_ts(SUPPORTED_LANGUAGE_SET) {
-        return Absent;
+        let m = p.start();
+        p.error(expected_language_name(p, p.cur_range()));
+        p.bump_any();
+        return Present(m.complete(p, GRIT_BOGUS_LANGUAGE_NAME));
     }
 
     let m = p.start();
@@ -285,10 +300,8 @@ fn parse_not(p: &mut GritParser) -> ParsedSyntax {
 }
 
 #[inline]
-fn parse_pattern_arg_list(p: &mut GritParser) -> ParsedSyntax {
-    let m = p.start();
+fn parse_variable_list(p: &mut GritParser) {
     VariableList.parse_list(p);
-    Present(m.complete(p, GRIT_PATTERN_ARG_LIST))
 }
 
 #[inline]

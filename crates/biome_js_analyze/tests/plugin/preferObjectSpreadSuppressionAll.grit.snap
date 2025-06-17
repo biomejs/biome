@@ -1,0 +1,28 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: preferObjectSpreadSuppressionAll.grit
+---
+# Input
+```js
+// biome-ignore-all lint/plugin/preferObjectSpreadSuppressionAll: reason
+
+console.log("foo");
+
+Object.assign({ foo: 'bar'}, baz);
+
+```
+
+# Diagnostics
+```
+preferObjectSpreadSuppressionAll.grit:5:15 plugin ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Prefer object spread instead of `Object.assign()`
+  
+    3 │ console.log("foo");
+    4 │ 
+  > 5 │ Object.assign({ foo: 'bar'}, baz);
+      │               ^^^^^^^^^^^^^^^^^^
+    6 │ 
+  
+
+```

@@ -1,7 +1,7 @@
 use crate::prelude::*;
 use biome_formatter::prelude::tag::Tag;
 use biome_formatter::{
-    format_args, write, CstFormatContext, FormatRuleWithOptions, RemoveSoftLinesBuffer,
+    CstFormatContext, FormatRuleWithOptions, RemoveSoftLinesBuffer, format_args, write,
 };
 
 use crate::context::TabWidth;
@@ -10,7 +10,7 @@ use crate::js::lists::template_element_list::TemplateElementIndention;
 use biome_js_syntax::{
     AnyJsExpression, JsSyntaxNode, JsSyntaxToken, JsTemplateElement, TsTemplateElement,
 };
-use biome_rowan::{declare_node_union, AstNode, NodeOrToken, SyntaxResult};
+use biome_rowan::{AstNode, NodeOrToken, SyntaxResult, declare_node_union};
 
 enum TemplateElementLayout {
     /// Tries to format the expression on a single line regardless of the print width.
@@ -187,33 +187,29 @@ impl Format<JsFormatContext> for FormatTemplateElement {
 impl AnyTemplateElement {
     fn dollar_curly_token(&self) -> SyntaxResult<JsSyntaxToken> {
         match self {
-            AnyTemplateElement::JsTemplateElement(template) => template.dollar_curly_token(),
-            AnyTemplateElement::TsTemplateElement(template) => template.dollar_curly_token(),
+            Self::JsTemplateElement(template) => template.dollar_curly_token(),
+            Self::TsTemplateElement(template) => template.dollar_curly_token(),
         }
     }
 
     fn inner_syntax(&self) -> SyntaxResult<JsSyntaxNode> {
         match self {
-            AnyTemplateElement::JsTemplateElement(template) => {
-                template.expression().map(AstNode::into_syntax)
-            }
-            AnyTemplateElement::TsTemplateElement(template) => {
-                template.ty().map(AstNode::into_syntax)
-            }
+            Self::JsTemplateElement(template) => template.expression().map(AstNode::into_syntax),
+            Self::TsTemplateElement(template) => template.ty().map(AstNode::into_syntax),
         }
     }
 
     fn expression(&self) -> Option<AnyJsExpression> {
         match self {
-            AnyTemplateElement::JsTemplateElement(template) => template.expression().ok(),
-            AnyTemplateElement::TsTemplateElement(_) => None,
+            Self::JsTemplateElement(template) => template.expression().ok(),
+            Self::TsTemplateElement(_) => None,
         }
     }
 
     fn r_curly_token(&self) -> SyntaxResult<JsSyntaxToken> {
         match self {
-            AnyTemplateElement::JsTemplateElement(template) => template.r_curly_token(),
-            AnyTemplateElement::TsTemplateElement(template) => template.r_curly_token(),
+            Self::JsTemplateElement(template) => template.r_curly_token(),
+            Self::TsTemplateElement(template) => template.r_curly_token(),
         }
     }
 

@@ -1,6 +1,5 @@
 ---
 source: crates/biome_formatter_test/src/snapshot_builder.rs
-assertion_line: 212
 info: jsx/bracket_same_line/bracket_same_line.jsx
 ---
 # Input
@@ -37,6 +36,16 @@ const a = <div></div>;
 	Hi
 </Foo>;
 
+<Foo
+	className={style}
+	reallyLongAttributeName1={longComplexValue}
+	reallyLongAttributeName2={anotherLongValue}
+	// comment
+	reallyLongAttributeName3={yetAnotherLongValue}
+>
+	Hi
+</Foo>;
+
 <div className="hi" />;
 <div className="hi"></div>;
 
@@ -63,6 +72,7 @@ Arrow parentheses: Always
 Bracket spacing: true
 Bracket same line: false
 Attribute Position: Auto
+Expand lists: Auto
 -----
 
 ```jsx
@@ -97,6 +107,16 @@ const a = <div></div>;
 	Hi
 </Foo>;
 
+<Foo
+	className={style}
+	reallyLongAttributeName1={longComplexValue}
+	reallyLongAttributeName2={anotherLongValue}
+	// comment
+	reallyLongAttributeName3={yetAnotherLongValue}
+>
+	Hi
+</Foo>;
+
 <div className="hi" />;
 <div className="hi"></div>;
 ```
@@ -117,6 +137,7 @@ Arrow parentheses: Always
 Bracket spacing: true
 Bracket same line: true
 Attribute Position: Auto
+Expand lists: Auto
 -----
 
 ```jsx
@@ -147,6 +168,15 @@ const a = <div></div>;
 	reallyLongAttributeName2={anotherLongValue}
 	// comment
 >
+	Hi
+</Foo>;
+
+<Foo
+	className={style}
+	reallyLongAttributeName1={longComplexValue}
+	reallyLongAttributeName2={anotherLongValue}
+	// comment
+	reallyLongAttributeName3={yetAnotherLongValue}>
 	Hi
 </Foo>;
 

@@ -2,7 +2,7 @@ use super::{
     compilation_context::NodeCompilationContext, container_compiler::ContainerCompiler,
     list_compiler::ListCompiler,
 };
-use crate::{grit_context::GritQueryContext, CompileError};
+use crate::{CompileError, grit_context::GritQueryContext};
 use biome_grit_syntax::{AnyGritListAccessorSubject, AnyGritListIndex, GritListAccessor};
 use grit_pattern_matcher::pattern::{ContainerOrIndex, ListIndex, ListOrContainer};
 

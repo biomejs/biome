@@ -3,7 +3,8 @@ source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: valid.js
 ---
 # Input
-```jsx
+```js
+/* should not generate diagnostics */
 Number.isNaN(Number.NaN);
 
 globalThis.Number.isNaN(Number.NaN);
@@ -20,5 +21,3 @@ function localVar() {
 localIsNaN(Number.isNaN);
 
 ```
-
-

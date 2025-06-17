@@ -1,0 +1,38 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: grit/map.grit
+snapshot_kind: text
+---
+# Input
+
+```grit
+`const capital = $val` where {
+  $capitals = { england: `london`, ours: $val },
+  $capitals.ours <: `paris`,
+  $val => $capitals.england,
+}
+
+```
+
+
+=============================
+
+# Outputs
+
+## Output 1
+
+-----
+Indent style: Tab
+Indent width: 2
+Line ending: LF
+Line width: 80
+Attribute Position: Auto
+-----
+
+```grit
+`const capital = $val` where {
+	$capitals = { england: `london` , ours: $val },
+	$capitals.ours <: `paris`,
+	$val => $capitals.england
+}
+```

@@ -3,7 +3,7 @@ source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: stableResultInvalid.js
 ---
 # Input
-```jsx
+```js
 import { useCallback } from "react";
 import { useDispatch } from "react-redux";
 
@@ -16,9 +16,9 @@ function MyComponent25() {
 
 # Diagnostics
 ```
-stableResultInvalid.js:6:22 lint/correctness/useExhaustiveDependencies ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+stableResultInvalid.js:6:22 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━━━━━━━━━━━━━━━━━
 
-  ! This hook does not specify all of its dependencies: dispatch
+  × This hook does not specify all of its dependencies: dispatch
   
     4 │ function MyComponent25() {
     5 │     const dispatch = useDispatch();
@@ -38,5 +38,9 @@ stableResultInvalid.js:6:22 lint/correctness/useExhaustiveDependencies ━━━
   
   i Either include it or remove the dependency array
   
+  i Unsafe fix: Add the missing dependencies to the list.
+  
+    6 │ ····const·doAction·=·useCallback(()·=>·dispatch(someAction()),·[dispatch]);
+      │                                                                 ++++++++   
 
 ```

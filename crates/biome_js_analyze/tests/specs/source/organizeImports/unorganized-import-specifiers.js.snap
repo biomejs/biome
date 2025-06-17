@@ -1,0 +1,33 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: unorganized-import-specifiers.js
+snapshot_kind: text
+---
+# Input
+```js
+import D, { B, A } from "a";
+import { Y, X } from "x";
+
+```
+
+# Diagnostics
+```
+unorganized-import-specifiers.js:1:1 assist/source/organizeImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The imports and exports are not sorted.
+  
+  > 1 │ import D, { B, A } from "a";
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    2 │ import { Y, X } from "x";
+    3 │ 
+  
+  i Safe fix: Organize Imports (Biome)
+  
+    1   │ - import·D,·{·B,·A·}·from·"a";
+    2   │ - import·{·Y,·X·}·from·"x";
+      1 │ + import·D,·{·A,·B·}·from·"a";
+      2 │ + import·{·X,·Y·}·from·"x";
+    3 3 │   
+  
+
+```

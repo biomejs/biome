@@ -35,9 +35,9 @@ use crate::syntax::is_at_identifier;
 use crate::syntax::parse_error::expected_any_pseudo_class;
 use biome_css_syntax::CssSyntaxKind::*;
 use biome_css_syntax::T;
+use biome_parser::Parser;
 use biome_parser::prelude::ParsedSyntax;
 use biome_parser::prelude::ParsedSyntax::{Absent, Present};
-use biome_parser::Parser;
 use function_compound_selector::{
     is_at_pseudo_class_function_compound_selector, parse_pseudo_class_function_compound_selector,
 };

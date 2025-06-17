@@ -1,12 +1,13 @@
 use biome_analyze::context::RuleContext;
-use biome_analyze::{declare_lint_rule, Ast, Rule, RuleDiagnostic, RuleSource};
+use biome_analyze::{Ast, Rule, RuleDiagnostic, RuleSource, declare_lint_rule};
 use biome_console::markup;
+use biome_diagnostics::Severity;
 use biome_js_syntax::jsx_ext::AnyJsxElement;
 use biome_js_syntax::{
     AnyJsExpression, AnyJsLiteralExpression, AnyJsTemplateElement, AnyJsxAttributeValue,
 };
 use biome_rowan::AstNode;
-use biome_string_case::StrOnlyExtension;
+use biome_string_case::StrLikeExtension;
 
 declare_lint_rule! {
     /// Enforce `img` alt prop does not contain the word "image", "picture", or "photo".
@@ -46,6 +47,7 @@ declare_lint_rule! {
         language: "jsx",
         sources: &[RuleSource::EslintJsxA11y("img-redundant-alt")],
         recommended: true,
+        severity: Severity::Error,
     }
 }
 
@@ -57,7 +59,7 @@ impl Rule for NoRedundantAlt {
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
-        if node.name_value_token()?.text_trimmed() != "img" {
+        if node.name_value_token().ok()?.text_trimmed() != "img" {
             return None;
         }
         let aria_hidden_attribute = node.find_attribute_by_name("aria-hidden");
@@ -103,7 +105,7 @@ impl Rule for NoRedundantAlt {
                             expr.elements().into_iter().any(|template_element| {
                                 match template_element {
                                     AnyJsTemplateElement::JsTemplateChunkElement(node) => {
-                                        node.template_chunk_token().ok().map_or(false, |token| {
+                                        node.template_chunk_token().ok().is_some_and(|token| {
                                             is_redundant_alt(token.text_trimmed())
                                         })
                                     }
@@ -143,7 +145,8 @@ impl Rule for NoRedundantAlt {
 const REDUNDANT_WORDS: [&str; 3] = ["image", "photo", "picture"];
 
 fn is_redundant_alt(alt: &str) -> bool {
-    REDUNDANT_WORDS
-        .into_iter()
-        .any(|word| alt.split_whitespace().any(|x| x.to_lowercase_cow() == word))
+    REDUNDANT_WORDS.into_iter().any(|word| {
+        alt.split_whitespace()
+            .any(|x| x.to_ascii_lowercase_cow() == word)
+    })
 }

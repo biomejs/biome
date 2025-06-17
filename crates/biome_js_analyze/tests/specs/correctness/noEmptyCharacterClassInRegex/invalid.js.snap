@@ -1,9 +1,10 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid.js
+snapshot_kind: text
 ---
 # Input
-```jsx
+```js
 /^abc[]/;
 /foo[]bar/;
 if (foo.match(/^abc[]/)) {}
@@ -31,7 +32,7 @@ if (/^abc[]/.test(foo)) {}
 ```
 invalid.js:1:6 lint/correctness/noEmptyCharacterClassInRegex ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The regular expression includes this empty character class.
+  × The regular expression includes this empty character class.
   
   > 1 │ /^abc[]/;
       │      ^^
@@ -48,7 +49,7 @@ invalid.js:1:6 lint/correctness/noEmptyCharacterClassInRegex ━━━━━━�
 ```
 invalid.js:2:5 lint/correctness/noEmptyCharacterClassInRegex ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The regular expression includes this empty character class.
+  × The regular expression includes this empty character class.
   
     1 │ /^abc[]/;
   > 2 │ /foo[]bar/;
@@ -66,7 +67,7 @@ invalid.js:2:5 lint/correctness/noEmptyCharacterClassInRegex ━━━━━━�
 ```
 invalid.js:3:20 lint/correctness/noEmptyCharacterClassInRegex ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The regular expression includes this empty character class.
+  × The regular expression includes this empty character class.
   
     1 │ /^abc[]/;
     2 │ /foo[]bar/;
@@ -85,7 +86,7 @@ invalid.js:3:20 lint/correctness/noEmptyCharacterClassInRegex ━━━━━━
 ```
 invalid.js:4:10 lint/correctness/noEmptyCharacterClassInRegex ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The regular expression includes this empty character class.
+  × The regular expression includes this empty character class.
   
     2 │ /foo[]bar/;
     3 │ if (foo.match(/^abc[]/)) {}
@@ -104,7 +105,7 @@ invalid.js:4:10 lint/correctness/noEmptyCharacterClassInRegex ━━━━━━
 ```
 invalid.js:5:2 lint/correctness/noEmptyCharacterClassInRegex ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The regular expression includes this empty character class.
+  × The regular expression includes this empty character class.
   
     3 │ if (foo.match(/^abc[]/)) {}
     4 │ if (/^abc[]/.test(foo)) {}
@@ -123,7 +124,7 @@ invalid.js:5:2 lint/correctness/noEmptyCharacterClassInRegex ━━━━━━�
 ```
 invalid.js:6:4 lint/correctness/noEmptyCharacterClassInRegex ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The regular expression includes this empty character class.
+  × The regular expression includes this empty character class.
   
     4 │ if (/^abc[]/.test(foo)) {}
     5 │ /[]]/;
@@ -142,7 +143,7 @@ invalid.js:6:4 lint/correctness/noEmptyCharacterClassInRegex ━━━━━━�
 ```
 invalid.js:7:11 lint/correctness/noEmptyCharacterClassInRegex ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The regular expression includes this empty character class.
+  × The regular expression includes this empty character class.
   
     5 │ /[]]/;
     6 │ /\[[]/;
@@ -161,7 +162,7 @@ invalid.js:7:11 lint/correctness/noEmptyCharacterClassInRegex ━━━━━━
 ```
 invalid.js:8:2 lint/correctness/noEmptyCharacterClassInRegex ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The regular expression includes this empty character class.
+  × The regular expression includes this empty character class.
   
      6 │ /\[[]/;
      7 │ /\[\[\]a-z[]/;
@@ -180,7 +181,7 @@ invalid.js:8:2 lint/correctness/noEmptyCharacterClassInRegex ━━━━━━�
 ```
 invalid.js:9:11 lint/correctness/noEmptyCharacterClassInRegex ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The regular expression includes this empty character class.
+  × The regular expression includes this empty character class.
   
      7 │ /\[\[\]a-z[]/;
      8 │ /[]]/d;
@@ -199,7 +200,7 @@ invalid.js:9:11 lint/correctness/noEmptyCharacterClassInRegex ━━━━━━
 ```
 invalid.js:10:2 lint/correctness/noEmptyCharacterClassInRegex ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The regular expression includes this empty character class.
+  × The regular expression includes this empty character class.
   
      8 │ /[]]/d;
      9 │ /[(]\u{0}*[]/u;
@@ -218,7 +219,7 @@ invalid.js:10:2 lint/correctness/noEmptyCharacterClassInRegex ━━━━━━
 ```
 invalid.js:11:3 lint/correctness/noEmptyCharacterClassInRegex ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The regular expression includes this empty character class.
+  × The regular expression includes this empty character class.
   
      9 │ /[(]\u{0}*[]/u;
     10 │ /[]/v;
@@ -237,7 +238,7 @@ invalid.js:11:3 lint/correctness/noEmptyCharacterClassInRegex ━━━━━━
 ```
 invalid.js:12:6 lint/correctness/noEmptyCharacterClassInRegex ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The regular expression includes this empty character class.
+  × The regular expression includes this empty character class.
   
     10 │ /[]/v;
     11 │ /[[]]/v;
@@ -256,7 +257,7 @@ invalid.js:12:6 lint/correctness/noEmptyCharacterClassInRegex ━━━━━━
 ```
 invalid.js:13:7 lint/correctness/noEmptyCharacterClassInRegex ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The regular expression includes this empty character class.
+  × The regular expression includes this empty character class.
   
     11 │ /[[]]/v;
     12 │ /[[a][]]/v;
@@ -275,7 +276,7 @@ invalid.js:13:7 lint/correctness/noEmptyCharacterClassInRegex ━━━━━━
 ```
 invalid.js:14:6 lint/correctness/noEmptyCharacterClassInRegex ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The regular expression includes this empty character class.
+  × The regular expression includes this empty character class.
   
     12 │ /[[a][]]/v;
     13 │ /[a[[b[]c]]d]/v;
@@ -294,7 +295,7 @@ invalid.js:14:6 lint/correctness/noEmptyCharacterClassInRegex ━━━━━━
 ```
 invalid.js:15:3 lint/correctness/noEmptyCharacterClassInRegex ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The regular expression includes this empty character class.
+  × The regular expression includes this empty character class.
   
     13 │ /[a[[b[]c]]d]/v;
     14 │ /[a--[]]/v;
@@ -313,7 +314,7 @@ invalid.js:15:3 lint/correctness/noEmptyCharacterClassInRegex ━━━━━━
 ```
 invalid.js:16:6 lint/correctness/noEmptyCharacterClassInRegex ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The regular expression includes this empty character class.
+  × The regular expression includes this empty character class.
   
     14 │ /[a--[]]/v;
     15 │ /[[]--b]/v;
@@ -332,7 +333,7 @@ invalid.js:16:6 lint/correctness/noEmptyCharacterClassInRegex ━━━━━━
 ```
 invalid.js:17:3 lint/correctness/noEmptyCharacterClassInRegex ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The regular expression includes this empty character class.
+  × The regular expression includes this empty character class.
   
     15 │ /[[]--b]/v;
     16 │ /[a&&[]]/v;
@@ -351,7 +352,7 @@ invalid.js:17:3 lint/correctness/noEmptyCharacterClassInRegex ━━━━━━
 ```
 invalid.js:19:2 lint/correctness/noEmptyCharacterClassInRegex ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The regular expression includes this negated empty character class.
+  × The regular expression includes this negated empty character class.
   
     17 │ /[[]&&b]/v;
     18 │ // negated empty class
@@ -370,7 +371,7 @@ invalid.js:19:2 lint/correctness/noEmptyCharacterClassInRegex ━━━━━━
 ```
 invalid.js:20:5 lint/correctness/noEmptyCharacterClassInRegex ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The regular expression includes this negated empty character class.
+  × The regular expression includes this negated empty character class.
   
     18 │ // negated empty class
     19 │ /[^]/;
@@ -388,7 +389,7 @@ invalid.js:20:5 lint/correctness/noEmptyCharacterClassInRegex ━━━━━━
 ```
 invalid.js:21:23 lint/correctness/noEmptyCharacterClassInRegex ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The regular expression includes this empty character class.
+  × The regular expression includes this empty character class.
   
     19 │ /[^]/;
     20 │ /\[][^]/;
@@ -401,5 +402,3 @@ invalid.js:21:23 lint/correctness/noEmptyCharacterClassInRegex ━━━━━�
   
 
 ```
-
-

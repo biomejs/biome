@@ -1,16 +1,15 @@
 use biome_analyze::context::RuleContext;
-use biome_analyze::{
-    declare_lint_rule, ActionCategory, Ast, FixKind, Rule, RuleDiagnostic, RuleSource,
-};
+use biome_analyze::{Ast, FixKind, Rule, RuleDiagnostic, RuleSource, declare_lint_rule};
 use biome_console::markup;
+use biome_diagnostics::Severity;
 
 use biome_js_factory::make;
 use biome_js_syntax::{
-    AnyTsType, JsFileSource, JsSyntaxKind, TsTypeConstraintClause, TsTypeParameter,
-    TsTypeParameterList, T,
+    AnyTsType, JsFileSource, JsSyntaxKind, T, TsTypeConstraintClause, TsTypeParameter,
+    TsTypeParameterList,
 };
 use biome_rowan::{
-    trim_leading_trivia_pieces, AstNode, AstSeparatedList, BatchMutationExt, SyntaxNodeOptionExt,
+    AstNode, AstSeparatedList, BatchMutationExt, SyntaxNodeOptionExt, trim_leading_trivia_pieces,
 };
 
 use crate::JsRuleAction;
@@ -83,6 +82,7 @@ declare_lint_rule! {
         language: "ts",
         sources: &[RuleSource::EslintTypeScript("no-unnecessary-type-constraint")],
         recommended: true,
+        severity: Severity::Information,
         fix_kind: FixKind::Safe,
     }
 }
@@ -152,7 +152,7 @@ impl Rule for NoUselessTypeConstraint {
             mutation.remove_node(node.clone());
         }
         Some(JsRuleAction::new(
-            ActionCategory::QuickFix,
+            ctx.metadata().action_category(ctx.category(), ctx.group()),
             ctx.metadata().applicability(),
             markup! { "Remove the constraint." }.to_owned(),
             mutation,

@@ -1,9 +1,10 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid.js
+snapshot_kind: text
 ---
 # Input
-```jsx
+```js
 let test1,
 	test2 = undefined;
 var c = undefined,
@@ -27,7 +28,7 @@ let g
 ```
 invalid.js:2:8 lint/complexity/noUselessUndefinedInitialization  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! It's not necessary to initialize test2 to undefined.
+  i It's not necessary to initialize test2 to undefined.
   
     1 │ let test1,
   > 2 │ 	test2 = undefined;
@@ -47,7 +48,7 @@ invalid.js:2:8 lint/complexity/noUselessUndefinedInitialization  FIXABLE  ━━
 ```
 invalid.js:3:7 lint/complexity/noUselessUndefinedInitialization  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! It's not necessary to initialize c to undefined.
+  i It's not necessary to initialize c to undefined.
   
     1 │ let test1,
     2 │ 	test2 = undefined;
@@ -68,7 +69,7 @@ invalid.js:3:7 lint/complexity/noUselessUndefinedInitialization  FIXABLE  ━━
 ```
 invalid.js:4:4 lint/complexity/noUselessUndefinedInitialization  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! It's not necessary to initialize o to undefined.
+  i It's not necessary to initialize o to undefined.
   
     2 │ 	test2 = undefined;
     3 │ var c = undefined,
@@ -89,7 +90,7 @@ invalid.js:4:4 lint/complexity/noUselessUndefinedInitialization  FIXABLE  ━━
 ```
 invalid.js:7:8 lint/complexity/noUselessUndefinedInitialization  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! It's not necessary to initialize i to undefined.
+  i It's not necessary to initialize i to undefined.
   
     6 │ for (let i = 0; i < 100; i++) {
   > 7 │ 	let i = undefined;
@@ -109,7 +110,7 @@ invalid.js:7:8 lint/complexity/noUselessUndefinedInitialization  FIXABLE  ━━
 ```
 invalid.js:10:14 lint/complexity/noUselessUndefinedInitialization  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! It's not necessary to initialize y to undefined.
+  i It's not necessary to initialize y to undefined.
   
      8 │ }
      9 │ 
@@ -135,7 +136,7 @@ invalid.js:10:14 lint/complexity/noUselessUndefinedInitialization  FIXABLE  ━�
 ```
 invalid.js:12:20 lint/complexity/noUselessUndefinedInitialization  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! It's not necessary to initialize d to undefined.
+  i It's not necessary to initialize d to undefined.
   
     10 │ let x = 1, y = undefined /* comment here */, z = 40
     11 │ 
@@ -156,7 +157,7 @@ invalid.js:12:20 lint/complexity/noUselessUndefinedInitialization  FIXABLE  ━�
 ```
 invalid.js:14:7 lint/complexity/noUselessUndefinedInitialization  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! It's not necessary to initialize e to undefined.
+  i It's not necessary to initialize e to undefined.
   
     12 │ let /* comment */d = undefined;
     13 │ 
@@ -182,7 +183,7 @@ invalid.js:14:7 lint/complexity/noUselessUndefinedInitialization  FIXABLE  ━�
 ```
 invalid.js:15:7 lint/complexity/noUselessUndefinedInitialization  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! It's not necessary to initialize f to undefined.
+  i It's not necessary to initialize f to undefined.
   
     14 │ let e = undefined/**/ ;
   > 15 │ let f = /**/undefined/**/ ;
@@ -207,7 +208,7 @@ invalid.js:15:7 lint/complexity/noUselessUndefinedInitialization  FIXABLE  ━�
 ```
 invalid.js:17:7 lint/complexity/noUselessUndefinedInitialization  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! It's not necessary to initialize g to undefined.
+  i It's not necessary to initialize g to undefined.
   
     15 │ let f = /**/undefined/**/ ;
     16 │ let g·

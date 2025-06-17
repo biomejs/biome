@@ -3,6 +3,7 @@ source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: filename.valid-kebab-extension.js
 ---
 # Input
-```jsx
+```js
+/* should not generate diagnostics */
 
 ```

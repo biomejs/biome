@@ -1,10 +1,12 @@
-use crate::parser::rewrite_parser::{RewriteMarker, RewriteParser, RewriteToken};
+use crate::JsParser;
+use crate::ParsedSyntax::{Absent, Present};
 use crate::parser::JsParserCheckpoint;
+use crate::parser::rewrite_parser::{RewriteMarker, RewriteParser, RewriteToken};
 use crate::prelude::*;
-use crate::rewrite::{rewrite_events, RewriteParseEvents};
+use crate::rewrite::{RewriteParseEvents, rewrite_events};
 use crate::syntax::class::parse_initializer_clause;
 use crate::syntax::expr::{
-    is_at_identifier, parse_conditional_expr, parse_unary_expr, ExpressionContext,
+    ExpressionContext, is_at_identifier, parse_conditional_expr, parse_unary_expr,
 };
 use crate::syntax::js_parse_error::{
     expected_assignment_target, expected_identifier, expected_object_member_name,
@@ -12,10 +14,9 @@ use crate::syntax::js_parse_error::{
 };
 use crate::syntax::object::{is_at_object_member_name, parse_object_member_name};
 use crate::syntax::pattern::{ParseArrayPattern, ParseObjectPattern, ParseWithDefaultPattern};
-use crate::JsParser;
-use crate::ParsedSyntax::{Absent, Present};
 use biome_js_syntax::{JsSyntaxKind::*, *};
 use biome_parser::diagnostic::expected_any;
+use biome_parser::parse_recovery::ParseRecoveryTokenSet;
 use biome_rowan::AstNode;
 
 use super::metavariable::is_at_metavariable;
@@ -82,17 +83,17 @@ pub(crate) fn expression_to_assignment_pattern(
     p: &mut JsParser,
     target: CompletedMarker,
     checkpoint: JsParserCheckpoint,
-) -> CompletedMarker {
+) -> ParsedSyntax {
     match target.kind(p) {
         JS_OBJECT_EXPRESSION => {
             p.rewind(checkpoint);
-            ObjectAssignmentPattern.parse_object_pattern(p).unwrap()
+            ObjectAssignmentPattern.parse_object_pattern(p)
         }
         JS_ARRAY_EXPRESSION => {
             p.rewind(checkpoint);
-            ArrayAssignmentPattern.parse_array_pattern(p).unwrap()
+            ArrayAssignmentPattern.parse_array_pattern(p)
         }
-        _ => expression_to_assignment(p, target, checkpoint),
+        _ => ParsedSyntax::Present(expression_to_assignment(p, target, checkpoint)),
     }
 }
 
@@ -118,7 +119,7 @@ pub(crate) fn parse_assignment_pattern(p: &mut JsParser) -> ParsedSyntax {
     let assignment_expression = parse_conditional_expr(p, ExpressionContext::default());
 
     assignment_expression
-        .map(|expression| expression_to_assignment_pattern(p, expression, checkpoint))
+        .and_then(|expression| expression_to_assignment_pattern(p, expression, checkpoint))
 }
 
 /// Re-parses an expression as an assignment.
@@ -152,8 +153,8 @@ pub(crate) enum AssignmentExprPrecedence {
 impl AssignmentExprPrecedence {
     fn parse_expression(&self, p: &mut JsParser, context: ExpressionContext) -> ParsedSyntax {
         match self {
-            AssignmentExprPrecedence::Unary => parse_unary_expr(p, context),
-            AssignmentExprPrecedence::Conditional => parse_conditional_expr(p, context),
+            Self::Unary => parse_unary_expr(p, context),
+            Self::Conditional => parse_conditional_expr(p, context),
         }
     }
 }
@@ -302,7 +303,17 @@ impl ParseObjectPattern for ObjectAssignmentPattern {
             .or_add_diagnostic(p, expected_identifier);
             JS_OBJECT_ASSIGNMENT_PATTERN_SHORTHAND_PROPERTY
         } else if is_at_object_member_name(p) || p.at(T![:]) || p.nth_at(1, T![:]) {
-            parse_object_member_name(p).or_add_diagnostic(p, expected_object_member_name);
+            // If the parser is at an object member name, parse it and look for the colon token next.
+            // If `p.nth_at(1, T![:])` is true, it indicates an invalid object member name before the colon,
+            // such as `{%: 1}`. In this case, attempt to recover by finding the next colon token.
+            parse_object_member_name(p)
+                .or_recover_with_token_set(
+                    p,
+                    &ParseRecoveryTokenSet::new(JS_BOGUS, token_set![T![:]])
+                        .enable_recovery_on_line_break(),
+                    expected_object_member_name,
+                )
+                .ok();
             p.expect(T![:]);
             parse_assignment_pattern(p).or_add_diagnostic(p, expected_assignment_target);
             JS_OBJECT_ASSIGNMENT_PATTERN_PROPERTY

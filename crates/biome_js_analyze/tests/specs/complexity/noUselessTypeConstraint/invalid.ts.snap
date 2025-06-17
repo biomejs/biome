@@ -1,6 +1,7 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid.ts
+snapshot_kind: text
 ---
 # Input
 ```ts
@@ -31,7 +32,7 @@ const B = <T extends unknown = unknown>() => {}
 ```
 invalid.ts:1:21 lint/complexity/noUselessTypeConstraint  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Constraining a type parameter to any or unknown is useless.
+  i Constraining a type parameter to any or unknown is useless.
   
   > 1 │ interface FooAny1<T extends any> {
       │                     ^^^^^^^^^^^
@@ -50,7 +51,7 @@ invalid.ts:1:21 lint/complexity/noUselessTypeConstraint  FIXABLE  ━━━━�
 ```
 invalid.ts:5:21 lint/complexity/noUselessTypeConstraint  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Constraining a type parameter to any or unknown is useless.
+  i Constraining a type parameter to any or unknown is useless.
   
     3 │ }
     4 │ 
@@ -71,7 +72,7 @@ invalid.ts:5:21 lint/complexity/noUselessTypeConstraint  FIXABLE  ━━━━�
 ```
 invalid.ts:9:16 lint/complexity/noUselessTypeConstraint  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Constraining a type parameter to any or unknown is useless.
+  i Constraining a type parameter to any or unknown is useless.
   
      7 │ }
      8 │ 
@@ -92,7 +93,7 @@ invalid.ts:9:16 lint/complexity/noUselessTypeConstraint  FIXABLE  ━━━━�
 ```
 invalid.ts:10:12 lint/complexity/noUselessTypeConstraint  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Constraining a type parameter to any or unknown is useless.
+  i Constraining a type parameter to any or unknown is useless.
   
      9 │ class BazAny<T extends any> {
   > 10 │   quxAny<U extends any>() {}
@@ -112,7 +113,7 @@ invalid.ts:10:12 lint/complexity/noUselessTypeConstraint  FIXABLE  ━━━━�
 ```
 invalid.ts:13:20 lint/complexity/noUselessTypeConstraint  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Constraining a type parameter to any or unknown is useless.
+  i Constraining a type parameter to any or unknown is useless.
   
     11 │ }
     12 │ 
@@ -133,7 +134,7 @@ invalid.ts:13:20 lint/complexity/noUselessTypeConstraint  FIXABLE  ━━━━�
 ```
 invalid.ts:15:20 lint/complexity/noUselessTypeConstraint  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Constraining a type parameter to any or unknown is useless.
+  i Constraining a type parameter to any or unknown is useless.
   
     13 │ const QuuxAny = <T extends any>() => {};
     14 │ 
@@ -154,7 +155,7 @@ invalid.ts:15:20 lint/complexity/noUselessTypeConstraint  FIXABLE  ━━━━�
 ```
 invalid.ts:17:28 lint/complexity/noUselessTypeConstraint  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Constraining a type parameter to any or unknown is useless.
+  i Constraining a type parameter to any or unknown is useless.
   
     15 │ function QuuzAny<T extends any>() {}
     16 │ 
@@ -175,7 +176,7 @@ invalid.ts:17:28 lint/complexity/noUselessTypeConstraint  FIXABLE  ━━━━�
 ```
 invalid.ts:19:14 lint/complexity/noUselessTypeConstraint  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Constraining a type parameter to any or unknown is useless.
+  i Constraining a type parameter to any or unknown is useless.
   
     17 │ function commented<T /*a*/ extends /*b*/ any /*c*/>() {}
     18 │ 
@@ -196,7 +197,7 @@ invalid.ts:19:14 lint/complexity/noUselessTypeConstraint  FIXABLE  ━━━━�
 ```
 invalid.ts:20:14 lint/complexity/noUselessTypeConstraint  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Constraining a type parameter to any or unknown is useless.
+  i Constraining a type parameter to any or unknown is useless.
   
     19 │ const A = <T extends unknown>() => {}
   > 20 │ const B = <T extends unknown = unknown>() => {}
@@ -211,5 +212,3 @@ invalid.ts:20:14 lint/complexity/noUselessTypeConstraint  FIXABLE  ━━━━�
        │              ----------------                  
 
 ```
-
-

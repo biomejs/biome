@@ -26,6 +26,11 @@ const biome = await Biome.create({
 	distribution: Distribution.NODE, // Or BUNDLER / WEB depending on the distribution package you've installed
 });
 
+const projectKey = biome.openProject('path/to/project/dir');
+
+// Optionally apply a Biome configuration (instead of biome.json)
+biome.applyConfiguration(projectKey, {...});
+
 const formatted = biome.formatContent("function f   (a, b) { return a == b; }", {
 	filePath: "example.js",
 });

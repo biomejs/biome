@@ -1,7 +1,8 @@
 use biome_analyze::{
-    context::RuleContext, declare_lint_rule, Ast, Rule, RuleDiagnostic, RuleSource,
+    Ast, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
+use biome_diagnostics::Severity;
 use biome_js_syntax::{
     AnyJsAssignmentPattern, AnyJsBindingPattern, AnyJsOptionalChainExpression,
     JsArrayAssignmentPatternElement, JsAssignmentExpression, JsAwaitExpression, JsCallExpression,
@@ -11,7 +12,7 @@ use biome_js_syntax::{
     JsParenthesizedExpression, JsSequenceExpression, JsSpread, JsStaticMemberExpression,
     JsTemplateExpression, JsVariableDeclarator, JsWithStatement,
 };
-use biome_rowan::{declare_node_union, AstNode, TextRange};
+use biome_rowan::{AstNode, TextRange, declare_node_union};
 
 declare_lint_rule! {
     /// Disallow the use of optional chaining in contexts where the undefined value is not allowed.
@@ -69,6 +70,7 @@ declare_lint_rule! {
         language: "js",
         sources: &[RuleSource::Eslint("no-unsafe-optional-chaining")],
         recommended: true,
+        severity: Severity::Error,
     }
 }
 
@@ -334,16 +336,16 @@ declare_node_union! {
 }
 
 impl From<AnyJsOptionalChainExpression> for RuleNode {
-    fn from(node: AnyJsOptionalChainExpression) -> RuleNode {
+    fn from(node: AnyJsOptionalChainExpression) -> Self {
         match node {
             AnyJsOptionalChainExpression::JsCallExpression(expression) => {
-                RuleNode::JsCallExpression(expression)
+                Self::JsCallExpression(expression)
             }
             AnyJsOptionalChainExpression::JsStaticMemberExpression(expression) => {
-                RuleNode::JsStaticMemberExpression(expression)
+                Self::JsStaticMemberExpression(expression)
             }
             AnyJsOptionalChainExpression::JsComputedMemberExpression(expression) => {
-                RuleNode::JsComputedMemberExpression(expression)
+                Self::JsComputedMemberExpression(expression)
             }
         }
     }

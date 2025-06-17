@@ -1,0 +1,70 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: html/script/babel.html
+---
+# Input
+
+```html
+<script type="text/babel" data-presets="react" data-type="module">
+import { h, 
+         render } from 'https://unpkg.com/preact?module';
+render(
+<h1>Hello World!</h1>,
+         document.body
+);
+</script>
+
+<script type="text/babel">
+<!--
+alert(1)
+-->
+</script>
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,10 +1,14 @@
+ <script type="text/babel" data-presets="react" data-type="module">
+-  import { h, render } from "https://unpkg.com/preact?module";
+-  render(<h1>Hello World!</h1>, document.body);
++import { h, 
++         render } from 'https://unpkg.com/preact?module';
++render(
++<h1>Hello World!</h1>,
++         document.body
++);
+ </script>
+ 
+ <script type="text/babel">
+-  <!--
+-  alert(1);
+-  -->
++<!--
++alert(1)
++-->
+ </script>
+```
+
+# Output
+
+```html
+<script type="text/babel" data-presets="react" data-type="module">
+import { h, 
+         render } from 'https://unpkg.com/preact?module';
+render(
+<h1>Hello World!</h1>,
+         document.body
+);
+</script>
+
+<script type="text/babel">
+<!--
+alert(1)
+-->
+</script>
+```

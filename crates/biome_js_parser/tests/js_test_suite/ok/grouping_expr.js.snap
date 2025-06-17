@@ -1,0 +1,90 @@
+---
+source: crates/biome_js_parser/tests/spec_test.rs
+expression: snapshot
+snapshot_kind: text
+---
+## Input
+
+```js
+((foo))
+(foo)
+
+```
+
+
+## AST
+
+```
+JsModule {
+    bom_token: missing (optional),
+    interpreter_token: missing (optional),
+    directives: JsDirectiveList [],
+    items: JsModuleItemList [
+        JsExpressionStatement {
+            expression: JsCallExpression {
+                callee: JsParenthesizedExpression {
+                    l_paren_token: L_PAREN@0..1 "(" [] [],
+                    expression: JsParenthesizedExpression {
+                        l_paren_token: L_PAREN@1..2 "(" [] [],
+                        expression: JsIdentifierExpression {
+                            name: JsReferenceIdentifier {
+                                value_token: IDENT@2..5 "foo" [] [],
+                            },
+                        },
+                        r_paren_token: R_PAREN@5..6 ")" [] [],
+                    },
+                    r_paren_token: R_PAREN@6..7 ")" [] [],
+                },
+                optional_chain_token: missing (optional),
+                type_arguments: missing (optional),
+                arguments: JsCallArguments {
+                    l_paren_token: L_PAREN@7..9 "(" [Newline("\n")] [],
+                    args: JsCallArgumentList [
+                        JsIdentifierExpression {
+                            name: JsReferenceIdentifier {
+                                value_token: IDENT@9..12 "foo" [] [],
+                            },
+                        },
+                    ],
+                    r_paren_token: R_PAREN@12..13 ")" [] [],
+                },
+            },
+            semicolon_token: missing (optional),
+        },
+    ],
+    eof_token: EOF@13..14 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: JS_MODULE@0..14
+  0: (empty)
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..13
+    0: JS_EXPRESSION_STATEMENT@0..13
+      0: JS_CALL_EXPRESSION@0..13
+        0: JS_PARENTHESIZED_EXPRESSION@0..7
+          0: L_PAREN@0..1 "(" [] []
+          1: JS_PARENTHESIZED_EXPRESSION@1..6
+            0: L_PAREN@1..2 "(" [] []
+            1: JS_IDENTIFIER_EXPRESSION@2..5
+              0: JS_REFERENCE_IDENTIFIER@2..5
+                0: IDENT@2..5 "foo" [] []
+            2: R_PAREN@5..6 ")" [] []
+          2: R_PAREN@6..7 ")" [] []
+        1: (empty)
+        2: (empty)
+        3: JS_CALL_ARGUMENTS@7..13
+          0: L_PAREN@7..9 "(" [Newline("\n")] []
+          1: JS_CALL_ARGUMENT_LIST@9..12
+            0: JS_IDENTIFIER_EXPRESSION@9..12
+              0: JS_REFERENCE_IDENTIFIER@9..12
+                0: IDENT@9..12 "foo" [] []
+          2: R_PAREN@12..13 ")" [] []
+      1: (empty)
+  4: EOF@13..14 "" [Newline("\n")] []
+
+```

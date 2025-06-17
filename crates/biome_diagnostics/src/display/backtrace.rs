@@ -20,7 +20,7 @@ impl Default for Backtrace {
     // backtrace is printed
     #[inline(never)]
     fn default() -> Self {
-        Self::capture(Backtrace::default as usize)
+        Self::capture(Self::default as usize)
     }
 }
 
@@ -97,8 +97,8 @@ impl schemars::JsonSchema for Backtrace {
         String::from("Backtrace")
     }
 
-    fn json_schema(gen: &mut schemars::gen::SchemaGenerator) -> schemars::schema::Schema {
-        <Vec<SerializedFrame>>::json_schema(gen)
+    fn json_schema(generator: &mut schemars::r#gen::SchemaGenerator) -> schemars::schema::Schema {
+        <Vec<SerializedFrame>>::json_schema(generator)
     }
 }
 
@@ -113,8 +113,7 @@ enum BacktraceKind {
 #[cfg(test)]
 impl PartialEq for BacktraceKind {
     fn eq(&self, _other: &Self) -> bool {
-        if let (BacktraceKind::Serialized(this), BacktraceKind::Serialized(other)) = (self, _other)
-        {
+        if let (Self::Serialized(this), Self::Serialized(other)) = (self, _other) {
             return this == other;
         }
 
@@ -159,7 +158,7 @@ impl NativeBacktrace {
             frame.symbols().iter().any(|symbol| {
                 symbol
                     .addr()
-                    .map_or(false, |addr| addr as usize == self.top_frame)
+                    .is_some_and(|addr| addr as usize == self.top_frame)
             })
         });
 
@@ -173,7 +172,7 @@ impl NativeBacktrace {
             frame.symbols().iter().any(|symbol| {
                 symbol
                     .addr()
-                    .map_or(false, |addr| addr as usize == self.bottom_frame)
+                    .is_some_and(|addr| addr as usize == self.bottom_frame)
             })
         });
 
@@ -209,7 +208,7 @@ thread_local! {
 /// On the main thread:
 /// ```
 /// # use biome_diagnostics::set_bottom_frame;
-/// # #[allow(clippy::needless_doctest_main)]
+/// # #[expect(clippy::needless_doctest_main)]
 /// pub fn main() {
 ///     set_bottom_frame(main as usize);
 ///

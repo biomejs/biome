@@ -4,6 +4,7 @@ expression: valid.ts
 ---
 # Input
 ```ts
+/* should not generate diagnostics */
 interface Foo {}
 class Bar implements Foo {}
 
@@ -49,5 +50,3 @@ export declare namespace A {
 }
 
 ```
-
-

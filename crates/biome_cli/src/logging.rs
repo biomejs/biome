@@ -1,41 +1,78 @@
 use std::fmt::{Display, Formatter};
+use std::fs::File;
 use std::str::FromStr;
-use tracing::subscriber::Interest;
+
 use tracing::Metadata;
+use tracing::subscriber::Interest;
 use tracing_subscriber::filter::LevelFilter;
+use tracing_subscriber::fmt::format::FmtSpan;
 use tracing_subscriber::layer::{Context, Filter, SubscriberExt};
 use tracing_subscriber::util::SubscriberInitExt;
-use tracing_subscriber::{registry, Layer};
+use tracing_subscriber::{Layer as _, registry};
 
-pub fn setup_cli_subscriber(level: LoggingLevel, kind: LoggingKind) {
+pub fn setup_cli_subscriber(file: Option<&str>, level: LoggingLevel, kind: LoggingKind) {
     if level == LoggingLevel::None {
         return;
     }
-    let format = tracing_subscriber::fmt::layer()
+
+    let mut format = tracing_subscriber::fmt::layer()
         .with_level(true)
         .with_target(false)
         .with_thread_names(true)
         .with_file(true)
         .with_ansi(true);
-    match kind {
-        LoggingKind::Pretty => {
-            let format = format.pretty();
-            registry()
-                .with(format.with_filter(LoggingFilter { level }))
-                .init()
-        }
-        LoggingKind::Compact => {
-            let format = format.compact();
-            registry()
-                .with(format.with_filter(LoggingFilter { level }))
-                .init()
-        }
-        LoggingKind::Json => {
-            let format = format.json().flatten_event(true);
 
-            registry()
-                .with(format.with_filter(LoggingFilter { level }))
-                .init()
+    if level == LoggingLevel::Tracing {
+        format = format.with_span_events(FmtSpan::CLOSE);
+    }
+
+    // FIXME: I hate the duplication here, and I tried to make a function that
+    //        could take `impl Layer<Registry>` so the compiler could expand
+    //        this for us... but I got dragged into a horrible swamp of generic
+    //        constraints...
+    if let Some(file) = file {
+        let file = File::create(file).expect("Failed to create log file");
+        let format = format.with_writer(file);
+        match kind {
+            LoggingKind::Pretty => {
+                let format = format.compact();
+                registry()
+                    .with(format.with_filter(LoggingFilter { level }))
+                    .init()
+            }
+            LoggingKind::Compact => {
+                let format = format.compact();
+                registry()
+                    .with(format.with_filter(LoggingFilter { level }))
+                    .init()
+            }
+            LoggingKind::Json => {
+                let format = format.json().flatten_event(true);
+                registry()
+                    .with(format.with_filter(LoggingFilter { level }))
+                    .init()
+            }
+        }
+    } else {
+        match kind {
+            LoggingKind::Pretty => {
+                let format = format.compact();
+                registry()
+                    .with(format.with_filter(LoggingFilter { level }))
+                    .init()
+            }
+            LoggingKind::Compact => {
+                let format = format.compact();
+                registry()
+                    .with(format.with_filter(LoggingFilter { level }))
+                    .init()
+            }
+            LoggingKind::Json => {
+                let format = format.json().flatten_event(true);
+                registry()
+                    .with(format.with_filter(LoggingFilter { level }))
+                    .init()
+            }
         }
     };
 }
@@ -45,6 +82,7 @@ pub enum LoggingLevel {
     /// No logs should be shown
     #[default]
     None,
+    Tracing,
     Debug,
     Info,
     Warn,
@@ -54,11 +92,12 @@ pub enum LoggingLevel {
 impl LoggingLevel {
     fn to_filter_level(self) -> Option<LevelFilter> {
         match self {
-            LoggingLevel::None => None,
-            LoggingLevel::Info => Some(LevelFilter::INFO),
-            LoggingLevel::Warn => Some(LevelFilter::WARN),
-            LoggingLevel::Error => Some(LevelFilter::ERROR),
-            LoggingLevel::Debug => Some(LevelFilter::DEBUG),
+            Self::None => None,
+            Self::Tracing => Some(LevelFilter::TRACE),
+            Self::Debug => Some(LevelFilter::DEBUG),
+            Self::Info => Some(LevelFilter::INFO),
+            Self::Warn => Some(LevelFilter::WARN),
+            Self::Error => Some(LevelFilter::ERROR),
         }
     }
 }
@@ -68,10 +107,11 @@ impl FromStr for LoggingLevel {
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         match s {
             "none" => Ok(Self::None),
+            "tracing" => Ok(Self::Tracing),
+            "debug" => Ok(Self::Debug),
             "info" => Ok(Self::Info),
             "warn" => Ok(Self::Warn),
             "error" => Ok(Self::Error),
-            "debug" => Ok(Self::Debug),
             _ => Err("Unexpected value".to_string()),
         }
     }
@@ -80,11 +120,12 @@ impl FromStr for LoggingLevel {
 impl Display for LoggingLevel {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         match self {
-            LoggingLevel::None => write!(f, "none"),
-            LoggingLevel::Debug => write!(f, "debug"),
-            LoggingLevel::Info => write!(f, "info"),
-            LoggingLevel::Warn => write!(f, "warn"),
-            LoggingLevel::Error => write!(f, "error"),
+            Self::None => write!(f, "none"),
+            Self::Tracing => write!(f, "tracing"),
+            Self::Debug => write!(f, "debug"),
+            Self::Info => write!(f, "info"),
+            Self::Warn => write!(f, "warn"),
+            Self::Error => write!(f, "error"),
         }
     }
 }
@@ -152,9 +193,9 @@ pub enum LoggingKind {
 impl Display for LoggingKind {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         match self {
-            LoggingKind::Pretty => write!(f, "pretty"),
-            LoggingKind::Compact => write!(f, "compact"),
-            LoggingKind::Json => write!(f, "json"),
+            Self::Pretty => write!(f, "pretty"),
+            Self::Compact => write!(f, "compact"),
+            Self::Json => write!(f, "json"),
         }
     }
 }

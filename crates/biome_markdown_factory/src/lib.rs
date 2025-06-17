@@ -1,3 +1,5 @@
+#![deny(clippy::use_self)]
+
 use biome_markdown_syntax::MarkdownLanguage;
 use biome_rowan::TreeBuilder;
 

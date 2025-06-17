@@ -1,0 +1,202 @@
+---
+source: crates/biome_js_parser/tests/spec_test.rs
+expression: snapshot
+snapshot_kind: text
+---
+## Input
+
+```js
+(([zAgRvz=[=(e{V{
+
+```
+
+
+## AST
+
+```
+JsModule {
+    bom_token: missing (optional),
+    interpreter_token: missing (optional),
+    directives: JsDirectiveList [],
+    items: JsModuleItemList [
+        JsExpressionStatement {
+            expression: JsParenthesizedExpression {
+                l_paren_token: L_PAREN@0..1 "(" [] [],
+                expression: JsParenthesizedExpression {
+                    l_paren_token: L_PAREN@1..2 "(" [] [],
+                    expression: JsArrayExpression {
+                        l_brack_token: L_BRACK@2..3 "[" [] [],
+                        elements: JsArrayElementList [
+                            JsAssignmentExpression {
+                                left: JsIdentifierAssignment {
+                                    name_token: IDENT@3..9 "zAgRvz" [] [],
+                                },
+                                operator_token: EQ@9..10 "=" [] [],
+                                right: JsArrayExpression {
+                                    l_brack_token: L_BRACK@10..11 "[" [] [],
+                                    elements: JsArrayElementList [
+                                        JsBogusExpression {
+                                            items: [
+                                                EQ@11..12 "=" [] [],
+                                            ],
+                                        },
+                                        missing separator,
+                                        JsParenthesizedExpression {
+                                            l_paren_token: L_PAREN@12..13 "(" [] [],
+                                            expression: JsIdentifierExpression {
+                                                name: JsReferenceIdentifier {
+                                                    value_token: IDENT@13..14 "e" [] [],
+                                                },
+                                            },
+                                            r_paren_token: missing (required),
+                                        },
+                                        missing separator,
+                                        JsObjectExpression {
+                                            l_curly_token: L_CURLY@14..15 "{" [] [],
+                                            members: JsObjectMemberList [
+                                                JsShorthandPropertyObjectMember {
+                                                    name: JsReferenceIdentifier {
+                                                        value_token: IDENT@15..16 "V" [] [],
+                                                    },
+                                                },
+                                                missing separator,
+                                                JsBogusMember {
+                                                    items: [
+                                                        L_CURLY@16..17 "{" [] [],
+                                                    ],
+                                                },
+                                            ],
+                                            r_curly_token: missing (required),
+                                        },
+                                    ],
+                                    r_brack_token: missing (required),
+                                },
+                            },
+                        ],
+                        r_brack_token: missing (required),
+                    },
+                    r_paren_token: missing (required),
+                },
+                r_paren_token: missing (required),
+            },
+            semicolon_token: missing (optional),
+        },
+    ],
+    eof_token: EOF@17..18 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: JS_MODULE@0..18
+  0: (empty)
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..17
+    0: JS_EXPRESSION_STATEMENT@0..17
+      0: JS_PARENTHESIZED_EXPRESSION@0..17
+        0: L_PAREN@0..1 "(" [] []
+        1: JS_PARENTHESIZED_EXPRESSION@1..17
+          0: L_PAREN@1..2 "(" [] []
+          1: JS_ARRAY_EXPRESSION@2..17
+            0: L_BRACK@2..3 "[" [] []
+            1: JS_ARRAY_ELEMENT_LIST@3..17
+              0: JS_ASSIGNMENT_EXPRESSION@3..17
+                0: JS_IDENTIFIER_ASSIGNMENT@3..9
+                  0: IDENT@3..9 "zAgRvz" [] []
+                1: EQ@9..10 "=" [] []
+                2: JS_ARRAY_EXPRESSION@10..17
+                  0: L_BRACK@10..11 "[" [] []
+                  1: JS_ARRAY_ELEMENT_LIST@11..17
+                    0: JS_BOGUS_EXPRESSION@11..12
+                      0: EQ@11..12 "=" [] []
+                    1: (empty)
+                    2: JS_PARENTHESIZED_EXPRESSION@12..14
+                      0: L_PAREN@12..13 "(" [] []
+                      1: JS_IDENTIFIER_EXPRESSION@13..14
+                        0: JS_REFERENCE_IDENTIFIER@13..14
+                          0: IDENT@13..14 "e" [] []
+                      2: (empty)
+                    3: (empty)
+                    4: JS_OBJECT_EXPRESSION@14..17
+                      0: L_CURLY@14..15 "{" [] []
+                      1: JS_OBJECT_MEMBER_LIST@15..17
+                        0: JS_SHORTHAND_PROPERTY_OBJECT_MEMBER@15..16
+                          0: JS_REFERENCE_IDENTIFIER@15..16
+                            0: IDENT@15..16 "V" [] []
+                        1: (empty)
+                        2: JS_BOGUS_MEMBER@16..17
+                          0: L_CURLY@16..17 "{" [] []
+                      2: (empty)
+                  2: (empty)
+            2: (empty)
+          2: (empty)
+        2: (empty)
+      1: (empty)
+  4: EOF@17..18 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+js_rewind_at_eof_token.js:1:12 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a property, an expression, or a method but instead found '='.
+  
+  > 1 │ (([zAgRvz=[=(e{V{
+      │            ^
+    2 │ 
+  
+  i Expected a property, an expression, or a method here.
+  
+  > 1 │ (([zAgRvz=[=(e{V{
+      │            ^
+    2 │ 
+  
+js_rewind_at_eof_token.js:1:13 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `(`
+  
+  > 1 │ (([zAgRvz=[=(e{V{
+      │             ^
+    2 │ 
+  
+  i Remove (
+  
+js_rewind_at_eof_token.js:1:15 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `)` but instead found `{`
+  
+  > 1 │ (([zAgRvz=[=(e{V{
+      │               ^
+    2 │ 
+  
+  i Remove {
+  
+js_rewind_at_eof_token.js:1:17 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `{`
+  
+  > 1 │ (([zAgRvz=[=(e{V{
+      │                 ^
+    2 │ 
+  
+  i Remove {
+  
+js_rewind_at_eof_token.js:2:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `}` but instead the file ends
+  
+    1 │ (([zAgRvz=[=(e{V{
+  > 2 │ 
+      │ 
+  
+  i the file ends here
+  
+    1 │ (([zAgRvz=[=(e{V{
+  > 2 │ 
+      │ 
+  
+```

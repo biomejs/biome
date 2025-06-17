@@ -1,0 +1,74 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `package.json`
+
+```json
+{
+    "dependencies": {
+        "next": ">=14.0.0"
+    }
+}
+```
+
+## `test.jsx`
+
+```jsx
+import React from 'react';
+
+function IndexPage() {
+    return (
+        <div>
+            <img alt="Foo" />
+            <p>Some content</p>
+        </div>
+    );
+}
+
+export default IndexPage;
+
+```
+
+# Emitted Messages
+
+```block
+test.jsx:6:13 lint/performance/noImgElement ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Don't use <img> element.
+  
+    4 │     return (
+    5 │         <div>
+  > 6 │             <img alt="Foo" />
+      │             ^^^^^^^^^^^^^^^^^
+    7 │             <p>Some content</p>
+    8 │         </div>
+  
+  i Using the <img> can lead to slower LCP and higher bandwidth. Consider using <Image /> from next/image to automatically optimize images.
+  
+
+```
+
+```block
+test.jsx:1:8 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This import is unused.
+  
+  > 1 │ import React from 'react';
+      │        ^^^^^
+    2 │ 
+    3 │ function IndexPage() {
+  
+  i Unused imports might be the result of an incomplete refactoring.
+  
+  i Unsafe fix: Remove the unused imports.
+  
+    1 │ import·React·from·'react';
+      │ --------------------------
+
+```
+
+```block
+Checked 2 files in <TIME>. No fixes applied.
+Found 2 warnings.
+```

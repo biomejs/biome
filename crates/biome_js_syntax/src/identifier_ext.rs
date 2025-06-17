@@ -1,10 +1,9 @@
 use crate::{
-    inner_string_text, AnyJsExportNamedSpecifier, AnyJsName, JsIdentifierAssignment,
-    JsLiteralExportName, JsReferenceIdentifier, JsSyntaxKind, JsSyntaxToken,
-    JsxReferenceIdentifier,
+    AnyJsExportNamedSpecifier, AnyJsName, JsIdentifierAssignment, JsLiteralExportName,
+    JsReferenceIdentifier, JsSyntaxKind, JsSyntaxToken, JsxReferenceIdentifier, inner_string_text,
 };
 use biome_rowan::{
-    declare_node_union, AstNode, SyntaxError, SyntaxNodeOptionExt, SyntaxResult, TokenText,
+    AstNode, SyntaxError, SyntaxNodeOptionExt, SyntaxResult, TokenText, declare_node_union,
 };
 
 declare_node_union! {
@@ -14,16 +13,16 @@ declare_node_union! {
 impl AnyJsIdentifierUsage {
     pub fn value_token(&self) -> SyntaxResult<JsSyntaxToken> {
         match self {
-            AnyJsIdentifierUsage::JsReferenceIdentifier(node) => node.value_token(),
-            AnyJsIdentifierUsage::JsIdentifierAssignment(node) => node.name_token(),
-            AnyJsIdentifierUsage::JsxReferenceIdentifier(node) => node.value_token(),
+            Self::JsReferenceIdentifier(node) => node.value_token(),
+            Self::JsIdentifierAssignment(node) => node.name_token(),
+            Self::JsxReferenceIdentifier(node) => node.value_token(),
         }
     }
 
     /// returns `true` if the identifier is only used as a type.
     pub fn is_only_type(&self) -> bool {
         match self {
-            AnyJsIdentifierUsage::JsReferenceIdentifier(_) => {
+            Self::JsReferenceIdentifier(_) => {
                 self.parent::<AnyJsExportNamedSpecifier>()
                     .is_some_and(|specifier| specifier.exports_only_types())
                     || matches!(
@@ -35,8 +34,7 @@ impl AnyJsIdentifierUsage {
                         Some(JsSyntaxKind::TS_REFERENCE_TYPE | JsSyntaxKind::TS_TYPEOF_TYPE)
                     )
             }
-            AnyJsIdentifierUsage::JsxReferenceIdentifier(_)
-            | AnyJsIdentifierUsage::JsIdentifierAssignment(_) => false,
+            Self::JsxReferenceIdentifier(_) | Self::JsIdentifierAssignment(_) => false,
         }
     }
 }
@@ -94,9 +92,9 @@ impl AnyJsName {
     /// ```
     pub fn value_token(&self) -> SyntaxResult<JsSyntaxToken> {
         match self {
-            AnyJsName::JsName(name) => name.value_token(),
-            AnyJsName::JsPrivateName(name) => name.value_token(),
-            AnyJsName::JsMetavariable(_) => Err(SyntaxError::UnexpectedMetavariable),
+            Self::JsName(name) => name.value_token(),
+            Self::JsPrivateName(name) => name.value_token(),
+            Self::JsMetavariable(_) => Err(SyntaxError::UnexpectedMetavariable),
         }
     }
 }

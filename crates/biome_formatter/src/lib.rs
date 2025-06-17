@@ -7,10 +7,10 @@
 //!
 //! * [Format]: Implemented by objects that can be formatted.
 //! * [FormatRule]: Rule that knows how to format an object of another type. Necessary in the situation where
-//!     it's necessary to implement [Format] on an object from another crate. This module defines the
-//!     [FormatRefWithRule] and [FormatOwnedWithRule] structs to pass an item with its corresponding rule.
+//!   it's necessary to implement [Format] on an object from another crate. This module defines the
+//!   [FormatRefWithRule] and [FormatOwnedWithRule] structs to pass an item with its corresponding rule.
 //! * [FormatWithRule] implemented by objects that know how to format another type. Useful for implementing
-//!     some reusable formatting logic inside of this module if the type itself doesn't implement [Format]
+//!   some reusable formatting logic inside of this module if the type itself doesn't implement [Format]
 //!
 //! ## Formatting Macros
 //!
@@ -19,6 +19,7 @@
 //! * [`format_args!`]: Concatenates a sequence of Format objects.
 //! * [`write!`]: Writes a sequence of formatable objects into an output buffer.
 
+#![deny(clippy::use_self)]
 #![deny(rustdoc::broken_intra_doc_links)]
 
 mod arguments;
@@ -58,7 +59,8 @@ use crate::trivia::{format_skipped_token_trivia, format_trimmed_token};
 pub use arguments::{Argument, Arguments};
 use biome_console::markup;
 use biome_deserialize::{
-    Deserializable, DeserializableValue, DeserializationDiagnostic, TextNumber,
+    Deserializable, DeserializableValue, DeserializationContext, DeserializationDiagnostic,
+    TextNumber,
 };
 use biome_deserialize_macros::Deserializable;
 use biome_deserialize_macros::Merge;
@@ -71,7 +73,7 @@ pub use buffer::{
     VecBuffer,
 };
 pub use builders::BestFitting;
-pub use format_element::{normalize_newlines, FormatElement, LINE_TERMINATORS};
+pub use format_element::{FormatElement, LINE_TERMINATORS, normalize_newlines};
 pub use group_id::GroupId;
 pub use source_map::{TransformSourceMap, TransformSourceMapBuilder};
 use std::marker::PhantomData;
@@ -82,9 +84,10 @@ use token::string::Quote;
 #[derive(Debug, Default, Clone, Copy, Deserializable, Eq, Hash, Merge, PartialEq)]
 #[cfg_attr(
     feature = "serde",
-    derive(serde::Serialize, serde::Deserialize, schemars::JsonSchema),
+    derive(serde::Serialize, serde::Deserialize),
     serde(rename_all = "camelCase")
 )]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 pub enum IndentStyle {
     /// Tab
     #[default]
@@ -98,12 +101,12 @@ impl IndentStyle {
 
     /// Returns `true` if this is an [IndentStyle::Tab].
     pub const fn is_tab(&self) -> bool {
-        matches!(self, IndentStyle::Tab)
+        matches!(self, Self::Tab)
     }
 
     /// Returns `true` if this is an [IndentStyle::Space].
     pub const fn is_space(&self) -> bool {
-        matches!(self, IndentStyle::Space)
+        matches!(self, Self::Space)
     }
 }
 
@@ -123,8 +126,8 @@ impl FromStr for IndentStyle {
 impl Display for IndentStyle {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            IndentStyle::Tab => std::write!(f, "Tab"),
-            IndentStyle::Space => std::write!(f, "Space"),
+            Self::Tab => std::write!(f, "Tab"),
+            Self::Space => std::write!(f, "Space"),
         }
     }
 }
@@ -132,9 +135,10 @@ impl Display for IndentStyle {
 #[derive(Clone, Copy, Debug, Deserializable, Eq, Hash, Merge, PartialEq)]
 #[cfg_attr(
     feature = "serde",
-    derive(serde::Serialize, serde::Deserialize, schemars::JsonSchema),
+    derive(serde::Serialize, serde::Deserialize),
     serde(rename_all = "camelCase")
 )]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[derive(Default)]
 pub enum LineEnding {
     ///  Line Feed only (\n), common on Linux and macOS as well as inside git repos
@@ -152,25 +156,25 @@ impl LineEnding {
     #[inline]
     pub const fn as_str(&self) -> &'static str {
         match self {
-            LineEnding::Lf => "\n",
-            LineEnding::Crlf => "\r\n",
-            LineEnding::Cr => "\r",
+            Self::Lf => "\n",
+            Self::Crlf => "\r\n",
+            Self::Cr => "\r",
         }
     }
 
     /// Returns `true` if this is a [LineEnding::Lf].
     pub const fn is_line_feed(&self) -> bool {
-        matches!(self, LineEnding::Lf)
+        matches!(self, Self::Lf)
     }
 
     /// Returns `true` if this is a [LineEnding::Crlf].
     pub const fn is_carriage_return_line_feed(&self) -> bool {
-        matches!(self, LineEnding::Crlf)
+        matches!(self, Self::Crlf)
     }
 
     /// Returns `true` if this is a [LineEnding::Cr].
     pub const fn is_carriage_return(&self) -> bool {
-        matches!(self, LineEnding::Cr)
+        matches!(self, Self::Cr)
     }
 }
 
@@ -191,9 +195,9 @@ impl FromStr for LineEnding {
 impl std::fmt::Display for LineEnding {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            LineEnding::Lf => std::write!(f, "LF"),
-            LineEnding::Crlf => std::write!(f, "CRLF"),
-            LineEnding::Cr => std::write!(f, "CR"),
+            Self::Lf => std::write!(f, "LF"),
+            Self::Crlf => std::write!(f, "CRLF"),
+            Self::Cr => std::write!(f, "CR"),
         }
     }
 }
@@ -201,9 +205,10 @@ impl std::fmt::Display for LineEnding {
 #[derive(Clone, Copy, Eq, Merge, Hash, PartialEq)]
 #[cfg_attr(
     feature = "serde",
-    derive(serde::Serialize, schemars::JsonSchema),
+    derive(serde::Serialize),
     serde(rename_all = "camelCase")
 )]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 pub struct IndentWidth(u8);
 
 impl IndentWidth {
@@ -225,15 +230,15 @@ impl Default for IndentWidth {
 
 impl Deserializable for IndentWidth {
     fn deserialize(
+        ctx: &mut impl DeserializationContext,
         value: &impl DeserializableValue,
         name: &str,
-        diagnostics: &mut Vec<DeserializationDiagnostic>,
     ) -> Option<Self> {
-        let value_text = TextNumber::deserialize(value, name, diagnostics)?;
+        let value_text = TextNumber::deserialize(ctx, value, name)?;
         if let Ok(value) = value_text.parse::<Self>() {
             return Some(value);
         }
-        diagnostics.push(DeserializationDiagnostic::new_out_of_bound_integer(
+        ctx.report(DeserializationDiagnostic::new_out_of_bound_integer(
             Self::MIN,
             Self::MAX,
             value.range(),
@@ -249,7 +254,7 @@ impl<'de> serde::Deserialize<'de> for IndentWidth {
         D: serde::Deserializer<'de>,
     {
         let value: u8 = serde::Deserialize::deserialize(deserializer)?;
-        let indent_width = IndentWidth::try_from(value).map_err(serde::de::Error::custom)?;
+        let indent_width = Self::try_from(value).map_err(serde::de::Error::custom)?;
         Ok(indent_width)
     }
 }
@@ -301,9 +306,10 @@ impl Debug for IndentWidth {
 #[derive(Clone, Copy, Eq, Merge, PartialEq)]
 #[cfg_attr(
     feature = "serde",
-    derive(serde::Serialize, schemars::JsonSchema),
+    derive(serde::Serialize),
     serde(rename_all = "camelCase")
 )]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 pub struct LineWidth(u16);
 
 impl LineWidth {
@@ -326,15 +332,15 @@ impl Default for LineWidth {
 
 impl Deserializable for LineWidth {
     fn deserialize(
+        ctx: &mut impl DeserializationContext,
         value: &impl DeserializableValue,
         name: &str,
-        diagnostics: &mut Vec<DeserializationDiagnostic>,
     ) -> Option<Self> {
-        let value_text = TextNumber::deserialize(value, name, diagnostics)?;
+        let value_text = TextNumber::deserialize(ctx, value, name)?;
         if let Ok(value) = value_text.parse::<Self>() {
             return Some(value);
         }
-        diagnostics.push(DeserializationDiagnostic::new_out_of_bound_integer(
+        ctx.report(DeserializationDiagnostic::new_out_of_bound_integer(
             Self::MIN,
             Self::MAX,
             value.range(),
@@ -350,7 +356,7 @@ impl<'de> serde::Deserialize<'de> for LineWidth {
         D: serde::Deserializer<'de>,
     {
         let value: u16 = serde::Deserialize::deserialize(deserializer)?;
-        let line_width = LineWidth::try_from(value).map_err(serde::de::Error::custom)?;
+        let line_width = Self::try_from(value).map_err(serde::de::Error::custom)?;
         Ok(line_width)
     }
 }
@@ -380,7 +386,7 @@ pub enum ParseFormatNumberError {
     ParseError(ParseIntError),
     /// The `u16` value of the string is not a valid [LineWidth]
     TryFromU16Error(LineWidthFromIntError),
-    /// The `u8 value of the string is not a valid [IndentWidth]
+    /// The `u8` value of the string is not a valid [IndentWidth]
     TryFromU8Error(IndentWidthFromIntError),
 }
 
@@ -408,12 +414,14 @@ impl Debug for ParseFormatNumberError {
     }
 }
 
+impl std::error::Error for ParseFormatNumberError {}
+
 impl std::fmt::Display for ParseFormatNumberError {
     fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            ParseFormatNumberError::ParseError(err) => std::fmt::Display::fmt(err, fmt),
-            ParseFormatNumberError::TryFromU16Error(err) => std::fmt::Display::fmt(err, fmt),
-            ParseFormatNumberError::TryFromU8Error(err) => std::fmt::Display::fmt(err, fmt),
+            Self::ParseError(err) => std::fmt::Display::fmt(err, fmt),
+            Self::TryFromU16Error(err) => std::fmt::Display::fmt(err, fmt),
+            Self::TryFromU8Error(err) => std::fmt::Display::fmt(err, fmt),
         }
     }
 }
@@ -448,12 +456,15 @@ impl std::fmt::Display for IndentWidthFromIntError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         writeln!(
             f,
-            "The indent width should be between {} and {}",
+            "The indent width should be between {} and {}, got {}",
             LineWidth::MIN,
             LineWidth::MAX,
+            self.0,
         )
     }
 }
+
+impl std::error::Error for IndentWidthFromIntError {}
 
 /// Error type returned when converting a u16 to a [LineWidth] fails
 #[derive(Clone, Copy, Debug)]
@@ -463,12 +474,15 @@ impl std::fmt::Display for LineWidthFromIntError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         writeln!(
             f,
-            "The line width should be between {} and {}",
+            "The line width should be between {} and {}, got {}",
             LineWidth::MIN,
             LineWidth::MAX,
+            self.0,
         )
     }
 }
+
+impl std::error::Error for LineWidthFromIntError {}
 
 impl From<LineWidth> for u16 {
     fn from(value: LineWidth) -> Self {
@@ -479,9 +493,10 @@ impl From<LineWidth> for u16 {
 #[derive(Clone, Copy, Debug, Default, Deserializable, Eq, Hash, Merge, PartialEq)]
 #[cfg_attr(
     feature = "serde",
-    derive(serde::Serialize, serde::Deserialize, schemars::JsonSchema),
+    derive(serde::Serialize, serde::Deserialize),
     serde(rename_all = "camelCase")
 )]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 pub enum QuoteStyle {
     #[default]
     Double,
@@ -489,10 +504,18 @@ pub enum QuoteStyle {
 }
 
 impl QuoteStyle {
+    pub fn from_byte(byte: u8) -> Option<Self> {
+        match byte {
+            b'"' => Some(Self::Double),
+            b'\'' => Some(Self::Single),
+            _ => None,
+        }
+    }
+
     pub fn as_char(&self) -> char {
         match self {
-            QuoteStyle::Double => '"',
-            QuoteStyle::Single => '\'',
+            Self::Double => '"',
+            Self::Single => '\'',
         }
     }
 
@@ -503,16 +526,16 @@ impl QuoteStyle {
     /// Returns the quote in HTML entity
     pub fn as_html_entity(&self) -> &str {
         match self {
-            QuoteStyle::Double => "&quot;",
-            QuoteStyle::Single => "&apos;",
+            Self::Double => "&quot;",
+            Self::Single => "&apos;",
         }
     }
 
     /// Given the current quote, it returns the other one
     pub fn other(&self) -> Self {
         match self {
-            QuoteStyle::Double => QuoteStyle::Single,
-            QuoteStyle::Single => QuoteStyle::Double,
+            Self::Double => Self::Single,
+            Self::Single => Self::Double,
         }
     }
 
@@ -526,8 +549,8 @@ impl FromStr for QuoteStyle {
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         match s {
-            "double" | "Double" => Ok(Self::Double),
-            "single" | "Single" => Ok(Self::Single),
+            "double" => Ok(Self::Double),
+            "single" => Ok(Self::Single),
             // TODO: replace this error with a diagnostic
             _ => Err("Value not supported for QuoteStyle"),
         }
@@ -537,8 +560,8 @@ impl FromStr for QuoteStyle {
 impl std::fmt::Display for QuoteStyle {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            QuoteStyle::Double => std::write!(f, "Double Quotes"),
-            QuoteStyle::Single => std::write!(f, "Single Quotes"),
+            Self::Double => std::write!(f, "Double Quotes"),
+            Self::Single => std::write!(f, "Single Quotes"),
         }
     }
 }
@@ -555,9 +578,10 @@ impl From<QuoteStyle> for Quote {
 #[derive(Clone, Copy, Debug, Deserializable, Eq, Hash, Merge, PartialEq)]
 #[cfg_attr(
     feature = "serde",
-    derive(serde::Serialize, serde::Deserialize, schemars::JsonSchema),
+    derive(serde::Serialize, serde::Deserialize),
     serde(rename_all = "camelCase")
 )]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 pub struct BracketSpacing(bool);
 
 impl BracketSpacing {
@@ -581,7 +605,13 @@ impl From<bool> for BracketSpacing {
 
 impl std::fmt::Display for BracketSpacing {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        std::write!(f, "{}", self.value())
+        std::write!(f, "{:?}", self.value())
+    }
+}
+
+impl biome_console::fmt::Display for BracketSpacing {
+    fn fmt(&self, fmt: &mut biome_console::fmt::Formatter) -> std::io::Result<()> {
+        fmt.write_str(&self.0.to_string())
     }
 }
 
@@ -603,9 +633,10 @@ impl FromStr for BracketSpacing {
 #[derive(Clone, Copy, Debug, Default, Deserializable, Eq, Hash, Merge, PartialEq)]
 #[cfg_attr(
     feature = "serde",
-    derive(serde::Serialize, serde::Deserialize, schemars::JsonSchema),
+    derive(serde::Serialize, serde::Deserialize),
     serde(rename_all = "camelCase")
 )]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 pub enum AttributePosition {
     #[default]
     Auto,
@@ -615,8 +646,8 @@ pub enum AttributePosition {
 impl std::fmt::Display for AttributePosition {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            AttributePosition::Auto => std::write!(f, "Auto"),
-            AttributePosition::Multiline => std::write!(f, "Multiline"),
+            Self::Auto => std::write!(f, "Auto"),
+            Self::Multiline => std::write!(f, "Multiline"),
         }
     }
 }
@@ -626,9 +657,93 @@ impl FromStr for AttributePosition {
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         match s {
-            "multiline" | "Multiline" => Ok(Self::Multiline),
-            "auto" | "Auto" => Ok(Self::Auto),
-            _ => Err("Value not supported for attribute_position. Supported values are 'auto' and 'multiline'."),
+            "multiline" => Ok(Self::Multiline),
+            "auto" => Ok(Self::Auto),
+            _ => Err(
+                "Value not supported for attribute_position. Supported values are 'auto' and 'multiline'.",
+            ),
+        }
+    }
+}
+
+/// Put the `>` of a multi-line HTML or JSX element at the end of the last line instead of being alone on the next line (does not apply to self closing elements).
+#[derive(Clone, Copy, Debug, Default, Deserializable, Eq, Hash, Merge, PartialEq)]
+#[cfg_attr(
+    feature = "serde",
+    derive(serde::Serialize, serde::Deserialize),
+    serde(rename_all = "camelCase")
+)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+pub struct BracketSameLine(bool);
+
+impl BracketSameLine {
+    /// Return the boolean value for this [BracketSameLine]
+    pub fn value(&self) -> bool {
+        self.0
+    }
+}
+
+impl From<bool> for BracketSameLine {
+    fn from(value: bool) -> Self {
+        Self(value)
+    }
+}
+
+impl std::fmt::Display for BracketSameLine {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::write!(f, "{}", self.value())
+    }
+}
+
+impl FromStr for BracketSameLine {
+    type Err = &'static str;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match bool::from_str(s) {
+            Ok(value) => Ok(Self(value)),
+            Err(_) => Err(
+                "Value not supported for BracketSameLine. Supported values are 'true' and 'false'.",
+            ),
+        }
+    }
+}
+
+#[derive(Clone, Copy, Debug, Default, Eq, Hash, Deserializable, Merge, PartialEq)]
+#[cfg_attr(
+    feature = "serde",
+    derive(serde::Serialize, serde::Deserialize),
+    serde(rename_all = "camelCase")
+)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+pub enum Expand {
+    /// Objects are expanded when the first property has a leading newline. Arrays are always
+    /// expanded if they are shorter than the line width.
+    #[default]
+    Auto,
+    /// Objects and arrays are always expanded.
+    Always,
+    /// Objects and arrays are never expanded, if they are shorter than the line width.
+    Never,
+}
+
+impl FromStr for Expand {
+    type Err = String;
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s {
+            "auto" => Ok(Self::Auto),
+            "always" => Ok(Self::Always),
+            "never" => Ok(Self::Never),
+            _ => Err(std::format!("unknown expand literal: {}", s)),
+        }
+    }
+}
+
+impl fmt::Display for Expand {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match self {
+            Self::Auto => std::write!(f, "Auto"),
+            Self::Always => std::write!(f, "Always"),
+            Self::Never => std::write!(f, "Never"),
         }
     }
 }
@@ -649,6 +764,11 @@ pub trait FormatContext {
 }
 
 /// Options customizing how the source code should be formatted.
+///
+/// **Note**: This trait should **only** contain the essential abstractions required for the printing phase.
+/// For example, do not add a `fn bracket_spacing(&self) -> BracketSpacing` method here,
+/// as the [BracketSpacing] option is not needed during the printing phase
+/// and enforcing its implementation for all structs using this trait is unnecessary.
 pub trait FormatOptions {
     /// The indent style.
     fn indent_style(&self) -> IndentStyle;
@@ -661,12 +781,6 @@ pub trait FormatOptions {
 
     /// The type of line ending.
     fn line_ending(&self) -> LineEnding;
-
-    /// The attribute position.
-    fn attribute_position(&self) -> AttributePosition;
-
-    /// Whether to insert spaces around brackets in object literals. Defaults to true.
-    fn bracket_spacing(&self) -> BracketSpacing;
 
     /// Derives the print options from the these format options
     fn as_print_options(&self) -> PrinterOptions;
@@ -716,8 +830,6 @@ pub struct SimpleFormatOptions {
     pub indent_width: IndentWidth,
     pub line_width: LineWidth,
     pub line_ending: LineEnding,
-    pub attribute_position: AttributePosition,
-    pub bracket_spacing: BracketSpacing,
 }
 
 impl FormatOptions for SimpleFormatOptions {
@@ -737,22 +849,12 @@ impl FormatOptions for SimpleFormatOptions {
         self.line_ending
     }
 
-    fn attribute_position(&self) -> AttributePosition {
-        self.attribute_position
-    }
-
-    fn bracket_spacing(&self) -> BracketSpacing {
-        self.bracket_spacing
-    }
-
     fn as_print_options(&self) -> PrinterOptions {
         PrinterOptions::default()
             .with_indent_style(self.indent_style)
             .with_indent_width(self.indent_width)
             .with_print_width(self.line_width.into())
             .with_line_ending(self.line_ending)
-            .with_attribute_position(self.attribute_position)
-            .with_bracket_spacing(self.bracket_spacing)
     }
 }
 
@@ -764,10 +866,8 @@ impl Display for SimpleFormatOptions {
 
 /// Lightweight sourcemap marker between source and output tokens
 #[derive(Debug, Copy, Clone, Eq, PartialEq)]
-#[cfg_attr(
-    feature = "serde",
-    derive(serde::Serialize, serde::Deserialize, schemars::JsonSchema)
-)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 pub struct SourceMarker {
     /// Position of the marker in the original source
     pub source: TextSize,
@@ -836,8 +936,10 @@ pub type PrintResult<T> = Result<T, PrintError>;
 #[derive(Debug, Clone, Eq, PartialEq)]
 #[cfg_attr(
     feature = "serde",
-    derive(serde::Serialize, serde::Deserialize, schemars::JsonSchema)
+    derive(serde::Serialize, serde::Deserialize),
+    serde(rename_all = "camelCase")
 )]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 pub struct Printed {
     code: String,
     range: Option<TextRange>,
@@ -1364,72 +1466,71 @@ pub fn format_node<L: FormatLanguage>(
     root: &SyntaxNode<L::SyntaxLanguage>,
     language: L,
 ) -> FormatResult<Formatted<L::Context>> {
-    tracing::trace_span!("format_node").in_scope(move || {
-        let (root, source_map) = match language.transform(&root.clone()) {
-            Some((transformed, source_map)) => {
-                // we don't need to insert the node back if it has the same offset
-                if &transformed == root {
-                    (transformed, Some(source_map))
-                } else {
-                    match root
-                        .ancestors()
-                        // ancestors() always returns self as the first element of the iterator.
-                        .skip(1)
-                        .last()
-                    {
-                        // current root node is the topmost node we don't need to insert the transformed node back
-                        None => (transformed, Some(source_map)),
-                        Some(top_root) => {
-                            // we have to return transformed node back into subtree
-                            let transformed_range = transformed.text_range();
-                            let root_range = root.text_range();
+    let _ = tracing::trace_span!("format_node").entered();
+    let (root, source_map) = match language.transform(&root.clone()) {
+        Some((transformed, source_map)) => {
+            // we don't need to insert the node back if it has the same offset
+            if &transformed == root {
+                (transformed, Some(source_map))
+            } else {
+                match root
+                    .ancestors()
+                    // ancestors() always returns self as the first element of the iterator.
+                    .skip(1)
+                    .last()
+                {
+                    // current root node is the topmost node we don't need to insert the transformed node back
+                    None => (transformed, Some(source_map)),
+                    Some(top_root) => {
+                        // we have to return transformed node back into subtree
+                        let transformed_range = transformed.text_range_with_trivia();
+                        let root_range = root.text_range_with_trivia();
 
-                            let transformed_root = top_root
-                                .replace_child(root.clone().into(), transformed.into())
-                                // SAFETY: Calling `unwrap` is safe because we know that `root` is part of the `top_root` subtree.
-                                .unwrap();
-                            let transformed = transformed_root.covering_element(TextRange::new(
-                                root_range.start(),
-                                root_range.start() + transformed_range.len(),
-                            ));
+                        let transformed_root = top_root
+                            .replace_child(root.clone().into(), transformed.into())
+                            // SAFETY: Calling `unwrap` is safe because we know that `root` is part of the `top_root` subtree.
+                            .unwrap();
+                        let transformed = transformed_root.covering_element(TextRange::new(
+                            root_range.start(),
+                            root_range.start() + transformed_range.len(),
+                        ));
 
-                            let node = match transformed {
-                                NodeOrToken::Node(node) => node,
-                                NodeOrToken::Token(token) => {
-                                    // if we get a token we need to get the parent node
-                                    token.parent().unwrap_or(transformed_root)
-                                }
-                            };
+                        let node = match transformed {
+                            NodeOrToken::Node(node) => node,
+                            NodeOrToken::Token(token) => {
+                                // if we get a token we need to get the parent node
+                                token.parent().unwrap_or(transformed_root)
+                            }
+                        };
 
-                            (node, Some(source_map))
-                        }
+                        (node, Some(source_map))
                     }
                 }
             }
-            None => (root.clone(), None),
-        };
+        }
+        None => (root.clone(), None),
+    };
 
-        let context = language.create_context(&root, source_map);
-        let format_node = FormatRefWithRule::new(&root, L::FormatRule::default());
+    let context = language.create_context(&root, source_map);
+    let format_node = FormatRefWithRule::new(&root, L::FormatRule::default());
 
-        let mut state = FormatState::new(context);
-        let mut buffer = VecBuffer::new(&mut state);
+    let mut state = FormatState::new(context);
+    let mut buffer = VecBuffer::new(&mut state);
 
-        write!(buffer, [format_node])?;
+    write!(buffer, [format_node])?;
 
-        let mut document = Document::from(buffer.into_vec());
-        document.propagate_expand();
+    let mut document = Document::from(buffer.into_vec());
+    document.propagate_expand();
 
-        state.assert_formatted_all_tokens(&root);
+    state.assert_formatted_all_tokens(&root);
 
-        let context = state.into_context();
-        let comments = context.comments();
+    let context = state.into_context();
+    let comments = context.comments();
 
-        comments.assert_checked_all_suppressions(&root);
-        comments.assert_formatted_all_comments();
+    comments.assert_checked_all_suppressions(&root);
+    comments.assert_formatted_all_comments();
 
-        Ok(Formatted::new(document, context))
-    })
+    Ok(Formatted::new(document, context))
 }
 
 /// Returns the [TextRange] for this [SyntaxElement] with the leading and
@@ -1495,7 +1596,7 @@ pub fn format_range<Language: FormatLanguage>(
         ));
     }
 
-    let root_range = root.text_range();
+    let root_range = root.text_range_with_trivia();
     if range.start() < root_range.start() || range.end() > root_range.end() {
         return Err(FormatError::RangeError {
             input: range,
@@ -1591,18 +1692,20 @@ pub fn format_range<Language: FormatLanguage>(
         // from the ancestors of the start and end nodes (this is roughly the
         // same algorithm as the findSiblingAncestors function in Prettier, see
         // https://github.com/prettier/prettier/blob/cae195187f524dd74e60849e0a4392654423415b/src/main/range-util.js#L36)
-        let start_node_start = start_node.text_range().start();
-        let end_node_end = end_node.text_range().end();
+        let start_node_start = start_node.text_range_with_trivia().start();
+        let end_node_end = end_node.text_range_with_trivia().end();
 
         let result_end_node = end_node
             .ancestors()
-            .take_while(|end_parent| end_parent.text_range().start() >= start_node_start)
+            .take_while(|end_parent| {
+                end_parent.text_range_with_trivia().start() >= start_node_start
+            })
             .last()
             .unwrap_or(end_node);
 
         let result_start_node = start_node
             .ancestors()
-            .take_while(|start_parent| start_parent.text_range().end() <= end_node_end)
+            .take_while(|start_parent| start_parent.text_range_with_trivia().end() <= end_node_end)
             .last()
             .unwrap_or(start_node);
 
@@ -1614,9 +1717,9 @@ pub fn format_range<Language: FormatLanguage>(
         // nodes and iterating along the two paths at once to find the first
         // divergence (the ancestors have to be collected into vectors first
         // since the ancestor iterator isn't double ended)
-        #[allow(clippy::needless_collect)]
+        #[expect(clippy::needless_collect)]
         let start_to_root: Vec<_> = result_start_node.ancestors().collect();
-        #[allow(clippy::needless_collect)]
+        #[expect(clippy::needless_collect)]
         let end_to_root: Vec<_> = result_end_node.ancestors().collect();
 
         start_to_root
@@ -1708,12 +1811,15 @@ pub fn format_range<Language: FormatLanguage>(
     // the start/end marker default to the start/end of the input
     let (start_source, start_dest) = match range_start {
         Some(start_marker) => (start_marker.source, start_marker.dest),
-        None => (common_root.text_range().start(), TextSize::from(0)),
+        None => (
+            common_root.text_range_with_trivia().start(),
+            TextSize::from(0),
+        ),
     };
     let (end_source, end_dest) = match range_end {
         Some(end_marker) => (end_marker.source, end_marker.dest),
         None => (
-            common_root.text_range().end(),
+            common_root.text_range_with_trivia().end(),
             TextSize::try_from(printed.as_code().len()).expect("code length out of bounds"),
         ),
     };
@@ -1801,7 +1907,7 @@ pub fn format_sub_tree<L: FormatLanguage>(
 
     Ok(Printed::new(
         printed.into_code(),
-        Some(root.text_range()),
+        Some(root.text_range_with_trivia()),
         sourcemap,
         verbatim_ranges,
     ))
@@ -1887,14 +1993,15 @@ impl<Context> FormatState<Context> {
         self.group_id_builder.group_id(debug_name)
     }
 
-    /// Tracks the given token as formatted
+    #[cfg(not(debug_assertions))]
     #[inline]
-    pub fn track_token<L: Language>(&mut self, #[allow(unused_variables)] token: &SyntaxToken<L>) {
-        cfg_if::cfg_if! {
-            if #[cfg(debug_assertions)] {
-                self.printed_tokens.track_token(token);
-            }
-        }
+    pub fn track_token<L: Language>(&mut self, _token: &SyntaxToken<L>) {}
+
+    /// Tracks the given token as formatted
+    #[cfg(debug_assertions)]
+    #[inline]
+    pub fn track_token<L: Language>(&mut self, token: &SyntaxToken<L>) {
+        self.printed_tokens.track_token(token);
     }
 
     #[cfg(not(debug_assertions))]
@@ -1921,17 +2028,15 @@ impl<Context> FormatState<Context> {
         self.printed_tokens.is_disabled()
     }
 
-    /// Asserts in debug builds that all tokens have been printed.
+    #[cfg(not(debug_assertions))]
     #[inline]
-    pub fn assert_formatted_all_tokens<L: Language>(
-        &self,
-        #[allow(unused_variables)] root: &SyntaxNode<L>,
-    ) {
-        cfg_if::cfg_if! {
-            if #[cfg(debug_assertions)] {
-                self.printed_tokens.assert_all_tracked(root);
-            }
-        }
+    pub fn assert_formatted_all_tokens<L: Language>(&self, _root: &SyntaxNode<L>) {}
+
+    /// Asserts in debug builds that all tokens have been printed.
+    #[cfg(debug_assertions)]
+    #[inline]
+    pub fn assert_formatted_all_tokens<L: Language>(&self, root: &SyntaxNode<L>) {
+        self.printed_tokens.assert_all_tracked(root);
     }
 }
 
@@ -1989,7 +2094,7 @@ mod tests {
             }
         }
 
-        impl<'a> std::fmt::Display for DiagnosticPrinter<'a> {
+        impl std::fmt::Display for DiagnosticPrinter<'_> {
             fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
                 for diagnostic in self.diagnostics {
                     diagnostic.description(f)?;

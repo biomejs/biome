@@ -50,11 +50,11 @@
 //!    The reason why we want to promote this pattern is because we want to make explicit when a token/node is excluded;
 //! 3. Use the APIs provided by `builders.rs`, `formatter` and `format_extensions.rs`.
 //!    1. `builders.rs` exposes a series of utilities to craft the formatter IR; please refer to their internal
-//!         documentation to understand what the utilities are for;
+//!       documentation to understand what the utilities are for;
 //!    2. `formatter` exposes a set of functions to help to format some recurring patterns; please refer to their internal
-//!         documentation to understand how to use them and when;
+//!       documentation to understand how to use them and when;
 //!    3. `format_extensions.rs`: with these traits, we give the ability to nodes and tokens to implements certain methods
-//!         that are exposed based on its type. If you have a good IDE support, this feature will help you. For example:
+//!       that are exposed based on its type. If you have a good IDE support, this feature will help you. For example:
 //!
 //!    ```rust,ignore
 //!    #[derive(Debug, Clone, Default)]
@@ -83,11 +83,11 @@
 //!    ```
 //!
 //! 4. Use the [playground](https://biomejs.dev/playground/) to inspect the code that you want to format.
-//!     It helps you to understand which nodes need to be implemented/modified
-//!     in order to implement formatting. Alternatively, you can locally run the playground by following
-//!     the [playground instructions](https://github.com/biomejs/biome/blob/main/website/README.md).
+//!    It helps you to understand which nodes need to be implemented/modified
+//!    in order to implement formatting. Alternatively, you can locally run the playground by following
+//!    the [playground instructions](https://github.com/biomejs/biome/blob/main/website/README.md).
 //! 5. Use the `quick_test.rs` file in `tests/` directory.
-//!     Function to test you snippet straight from your IDE, without running the whole test suite. The test is ignored on purpose, so you won't need to worry about the CI breaking.
+//!    Function to test you snippet straight from your IDE, without running the whole test suite. The test is ignored on purpose, so you won't need to worry about the CI breaking.
 //!
 //! ## Testing
 //!
@@ -154,14 +154,16 @@
 //! There are four cases when a test is not correct:
 //! - you try to print/format the same token multiple times; the formatter will check at runtime when a test is run;
 //! - some tokens haven't been printed; usually you will have this information inside the snapshot, under a section
-//!     called `"Unimplemented tokens/nodes"`; a test, in order to be valid, can't have that section;
+//!   called `"Unimplemented tokens/nodes"`; a test, in order to be valid, can't have that section;
 //!
 //! If removing a token is the actual behaviour (removing some parenthesis or a semicolon), then the correct way
 //! to do it by using the formatter API [biome_formatter::trivia::format_removed];
 //! - the emitted code is not a valid program anymore, the test suite will parse again the emitted code and it will
-//!     fail if there are syntax errors;
+//!   fail if there are syntax errors;
 //! - the emitted code, when formatted again, differs from the original; this usually happens when removing/adding new
-//!     elements, and the grouping is not correctly set;
+//!   elements, and the grouping is not correctly set;
+
+#![deny(clippy::use_self)]
 
 mod cst;
 mod js;
@@ -180,11 +182,11 @@ mod syntax_rewriter;
 
 use biome_formatter::format_element::tag::Label;
 use biome_formatter::prelude::*;
-use biome_formatter::{
-    comments::Comments, write, CstFormatContext, Format, FormatLanguage, FormatToken,
-    TransformSourceMap,
-};
 use biome_formatter::{Buffer, FormatOwnedWithRule, FormatRefWithRule, Formatted, Printed};
+use biome_formatter::{
+    CstFormatContext, Format, FormatLanguage, FormatToken, TransformSourceMap, comments::Comments,
+    write,
+};
 use biome_js_syntax::{
     AnyJsDeclaration, AnyJsStatement, JsLanguage, JsSyntaxKind, JsSyntaxNode, JsSyntaxToken,
 };
@@ -211,7 +213,10 @@ impl<T, C> AsFormat<C> for &T
 where
     T: AsFormat<C>,
 {
-    type Format<'a> = T::Format<'a> where Self: 'a;
+    type Format<'a>
+        = T::Format<'a>
+    where
+        Self: 'a;
 
     fn format(&self) -> Self::Format<'_> {
         AsFormat::format(&**self)
@@ -225,7 +230,10 @@ impl<T, C> AsFormat<C> for biome_rowan::SyntaxResult<T>
 where
     T: AsFormat<C>,
 {
-    type Format<'a> = biome_rowan::SyntaxResult<T::Format<'a>> where Self: 'a;
+    type Format<'a>
+        = biome_rowan::SyntaxResult<T::Format<'a>>
+    where
+        Self: 'a;
 
     fn format(&self) -> Self::Format<'_> {
         match self {
@@ -242,7 +250,10 @@ impl<T, C> AsFormat<C> for Option<T>
 where
     T: AsFormat<C>,
 {
-    type Format<'a> = Option<T::Format<'a>> where Self: 'a;
+    type Format<'a>
+        = Option<T::Format<'a>>
+    where
+        Self: 'a;
 
     fn format(&self) -> Self::Format<'_> {
         self.as_ref().map(|value| value.format())
@@ -427,7 +438,7 @@ where
 pub(crate) type FormatJsSyntaxToken = FormatToken<JsFormatContext>;
 
 impl AsFormat<JsFormatContext> for JsSyntaxToken {
-    type Format<'a> = FormatRefWithRule<'a, JsSyntaxToken, FormatJsSyntaxToken>;
+    type Format<'a> = FormatRefWithRule<'a, Self, FormatJsSyntaxToken>;
 
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(self, FormatJsSyntaxToken::default())
@@ -435,7 +446,7 @@ impl AsFormat<JsFormatContext> for JsSyntaxToken {
 }
 
 impl IntoFormat<JsFormatContext> for JsSyntaxToken {
-    type Format = FormatOwnedWithRule<JsSyntaxToken, FormatJsSyntaxToken>;
+    type Format = FormatOwnedWithRule<Self, FormatJsSyntaxToken>;
 
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(self, FormatJsSyntaxToken::default())
@@ -549,7 +560,7 @@ impl Label for JsLabels {
 
     fn debug_name(&self) -> &'static str {
         match self {
-            JsLabels::MemberChain => "MemberChain",
+            Self::MemberChain => "MemberChain",
         }
     }
 }
@@ -561,7 +572,7 @@ mod tests {
 
     use crate::context::JsFormatOptions;
     use biome_formatter::IndentStyle;
-    use biome_js_parser::{parse, parse_script, JsParserOptions};
+    use biome_js_parser::{JsParserOptions, parse, parse_script};
     use biome_js_syntax::JsFileSource;
     use biome_rowan::{TextRange, TextSize};
 

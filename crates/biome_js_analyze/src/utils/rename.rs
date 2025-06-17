@@ -4,9 +4,9 @@ use biome_diagnostics::{Diagnostic, Location, Severity};
 use biome_js_factory::make;
 use biome_js_semantic::{ReferencesExtensions, SemanticModel};
 use biome_js_syntax::{
-    binding_ext::AnyJsIdentifierBinding, AnyJsIdentifierUsage, JsIdentifierAssignment,
-    JsIdentifierBinding, JsLanguage, JsReferenceIdentifier, JsSyntaxKind, JsSyntaxNode, TextRange,
-    TsIdentifierBinding, T,
+    AnyJsIdentifierUsage, JsIdentifierAssignment, JsIdentifierBinding, JsLanguage,
+    JsReferenceIdentifier, JsSyntaxKind, JsSyntaxNode, T, TextRange, TsIdentifierBinding,
+    binding_ext::AnyJsIdentifierBinding,
 };
 use biome_rowan::{AstNode, BatchMutation, SyntaxNodeCast, TriviaPieceKind};
 use serde::{Deserialize, Serialize};
@@ -56,18 +56,10 @@ pub enum AnyJsRenamableDeclaration {
 impl RenamableNode for AnyJsRenamableDeclaration {
     fn binding(&self, model: &SemanticModel) -> Option<JsSyntaxNode> {
         match self {
-            AnyJsRenamableDeclaration::JsIdentifierBinding(node) => {
-                RenamableNode::binding(node, model)
-            }
-            AnyJsRenamableDeclaration::JsReferenceIdentifier(node) => {
-                RenamableNode::binding(node, model)
-            }
-            AnyJsRenamableDeclaration::JsIdentifierAssignment(node) => {
-                RenamableNode::binding(node, model)
-            }
-            AnyJsRenamableDeclaration::TsIdentifierBinding(node) => {
-                RenamableNode::binding(node, model)
-            }
+            Self::JsIdentifierBinding(node) => RenamableNode::binding(node, model),
+            Self::JsReferenceIdentifier(node) => RenamableNode::binding(node, model),
+            Self::JsIdentifierAssignment(node) => RenamableNode::binding(node, model),
+            Self::TsIdentifierBinding(node) => RenamableNode::binding(node, model),
         }
     }
 }
@@ -85,7 +77,7 @@ pub enum RenameError {
 impl std::fmt::Display for RenameError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            RenameError::CannotBeRenamed {
+            Self::CannotBeRenamed {
                 original_name,
                 new_name,
                 ..
@@ -95,7 +87,7 @@ impl std::fmt::Display for RenameError {
                     "encountered an error while renaming the symbol \"{original_name}\" to \"{new_name}\""
                 )
             }
-            RenameError::CannotFindDeclaration(_) => {
+            Self::CannotFindDeclaration(_) => {
                 write!(
                     f,
                     "encountered an error finding a declaration at the specified position"
@@ -112,12 +104,12 @@ impl Diagnostic for RenameError {
 
     fn message(&self, fmt: &mut Formatter<'_>) -> std::io::Result<()> {
         match self {
-            RenameError::CannotFindDeclaration(node) => {
+            Self::CannotFindDeclaration(node) => {
                 fmt.write_markup(
                     markup! { "Can't find the declaration. Found node "{{node}} }
                 )
             }
-            RenameError::CannotBeRenamed { original_name, new_name, .. } => {
+            Self::CannotBeRenamed { original_name, new_name, .. } => {
                 fmt.write_markup(
                     markup! { "Can't rename from "<Emphasis>{{original_name}}</Emphasis>" to "<Emphasis>{{new_name}}</Emphasis>"" }
                 )
@@ -127,7 +119,7 @@ impl Diagnostic for RenameError {
 
     fn location(&self) -> Location<'_> {
         let location = Location::builder();
-        if let RenameError::CannotBeRenamed { original_range, .. } = self {
+        if let Self::CannotBeRenamed { original_range, .. } = self {
             location.span(original_range).build()
         } else {
             location.build()
@@ -312,7 +304,7 @@ impl RenameSymbolExtensions for BatchMutation<JsLanguage> {
 mod tests {
     use crate::utils::rename::RenameError;
     use crate::{assert_rename_nok, assert_rename_ok};
-    use biome_diagnostics::{print_diagnostic_to_string, DiagnosticExt, Error};
+    use biome_diagnostics::{DiagnosticExt, Error, print_diagnostic_to_string};
     use biome_js_syntax::TextRange;
 
     assert_rename_ok! {

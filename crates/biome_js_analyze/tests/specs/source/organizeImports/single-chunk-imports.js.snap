@@ -1,0 +1,63 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: single-chunk-imports.js
+snapshot_kind: text
+---
+# Input
+```js
+import { Bun } from "bun:test";
+// URL
+import { URL } from "https://example.org";
+import { Relative } from ".";
+import { Parent } from "..";
+import { GrandParent } from "../..";
+import { A9 } from "a9";
+import { A10 } from "a10";
+import { C } from "c";
+import { B } from "b";
+// This is a scoped package
+import { ScopedPackage } from "@scope/package";
+
+```
+
+# Diagnostics
+```
+single-chunk-imports.js:1:1 assist/source/organizeImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The imports and exports are not sorted.
+  
+  > 1 │ import { Bun } from "bun:test";
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    2 │ // URL
+    3 │ import { URL } from "https://example.org";
+  
+  i Safe fix: Organize Imports (Biome)
+  
+     1    │ - import·{·Bun·}·from·"bun:test";
+     2    │ - //·URL
+     3    │ - import·{·URL·}·from·"https://example.org";
+     4    │ - import·{·Relative·}·from·".";
+     5    │ - import·{·Parent·}·from·"..";
+     6    │ - import·{·GrandParent·}·from·"../..";
+     7    │ - import·{·A9·}·from·"a9";
+     8    │ - import·{·A10·}·from·"a10";
+     9    │ - import·{·C·}·from·"c";
+    10    │ - import·{·B·}·from·"b";
+    11    │ - //·This·is·a·scoped·package
+    12    │ - import·{·ScopedPackage·}·from·"@scope/package";
+        1 │ + //·URL
+        2 │ + import·{·URL·}·from·"https://example.org";
+        3 │ + import·{·Bun·}·from·"bun:test";
+        4 │ + //·This·is·a·scoped·package
+        5 │ + import·{·ScopedPackage·}·from·"@scope/package";
+        6 │ + import·{·A9·}·from·"a9";
+        7 │ + import·{·A10·}·from·"a10";
+        8 │ + import·{·B·}·from·"b";
+        9 │ + import·{·C·}·from·"c";
+       10 │ + import·{·GrandParent·}·from·"../..";
+       11 │ + import·{·Parent·}·from·"..";
+       12 │ + import·{·Relative·}·from·".";
+    13 13 │   
+  
+
+```

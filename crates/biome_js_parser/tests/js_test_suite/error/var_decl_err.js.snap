@@ -1,0 +1,184 @@
+---
+source: crates/biome_js_parser/tests/spec_test.rs
+expression: snapshot
+snapshot_kind: text
+---
+## Input
+
+```js
+var a =;
+const b = 5 let c = 5;
+
+```
+
+
+## AST
+
+```
+JsModule {
+    bom_token: missing (optional),
+    interpreter_token: missing (optional),
+    directives: JsDirectiveList [],
+    items: JsModuleItemList [
+        JsVariableStatement {
+            declaration: JsVariableDeclaration {
+                await_token: missing (optional),
+                kind: VAR_KW@0..4 "var" [] [Whitespace(" ")],
+                declarators: JsVariableDeclaratorList [
+                    JsVariableDeclarator {
+                        id: JsIdentifierBinding {
+                            name_token: IDENT@4..6 "a" [] [Whitespace(" ")],
+                        },
+                        variable_annotation: missing (optional),
+                        initializer: JsInitializerClause {
+                            eq_token: EQ@6..7 "=" [] [],
+                            expression: missing (required),
+                        },
+                    },
+                ],
+            },
+            semicolon_token: SEMICOLON@7..8 ";" [] [],
+        },
+        JsVariableStatement {
+            declaration: JsVariableDeclaration {
+                await_token: missing (optional),
+                kind: CONST_KW@8..15 "const" [Newline("\n")] [Whitespace(" ")],
+                declarators: JsVariableDeclaratorList [
+                    JsVariableDeclarator {
+                        id: JsIdentifierBinding {
+                            name_token: IDENT@15..17 "b" [] [Whitespace(" ")],
+                        },
+                        variable_annotation: missing (optional),
+                        initializer: JsInitializerClause {
+                            eq_token: EQ@17..19 "=" [] [Whitespace(" ")],
+                            expression: JsNumberLiteralExpression {
+                                value_token: JS_NUMBER_LITERAL@19..21 "5" [] [Whitespace(" ")],
+                            },
+                        },
+                    },
+                ],
+            },
+            semicolon_token: missing (optional),
+        },
+        JsVariableStatement {
+            declaration: JsVariableDeclaration {
+                await_token: missing (optional),
+                kind: LET_KW@21..25 "let" [] [Whitespace(" ")],
+                declarators: JsVariableDeclaratorList [
+                    JsVariableDeclarator {
+                        id: JsIdentifierBinding {
+                            name_token: IDENT@25..27 "c" [] [Whitespace(" ")],
+                        },
+                        variable_annotation: missing (optional),
+                        initializer: JsInitializerClause {
+                            eq_token: EQ@27..29 "=" [] [Whitespace(" ")],
+                            expression: JsNumberLiteralExpression {
+                                value_token: JS_NUMBER_LITERAL@29..30 "5" [] [],
+                            },
+                        },
+                    },
+                ],
+            },
+            semicolon_token: SEMICOLON@30..31 ";" [] [],
+        },
+    ],
+    eof_token: EOF@31..32 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: JS_MODULE@0..32
+  0: (empty)
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..31
+    0: JS_VARIABLE_STATEMENT@0..8
+      0: JS_VARIABLE_DECLARATION@0..7
+        0: (empty)
+        1: VAR_KW@0..4 "var" [] [Whitespace(" ")]
+        2: JS_VARIABLE_DECLARATOR_LIST@4..7
+          0: JS_VARIABLE_DECLARATOR@4..7
+            0: JS_IDENTIFIER_BINDING@4..6
+              0: IDENT@4..6 "a" [] [Whitespace(" ")]
+            1: (empty)
+            2: JS_INITIALIZER_CLAUSE@6..7
+              0: EQ@6..7 "=" [] []
+              1: (empty)
+      1: SEMICOLON@7..8 ";" [] []
+    1: JS_VARIABLE_STATEMENT@8..21
+      0: JS_VARIABLE_DECLARATION@8..21
+        0: (empty)
+        1: CONST_KW@8..15 "const" [Newline("\n")] [Whitespace(" ")]
+        2: JS_VARIABLE_DECLARATOR_LIST@15..21
+          0: JS_VARIABLE_DECLARATOR@15..21
+            0: JS_IDENTIFIER_BINDING@15..17
+              0: IDENT@15..17 "b" [] [Whitespace(" ")]
+            1: (empty)
+            2: JS_INITIALIZER_CLAUSE@17..21
+              0: EQ@17..19 "=" [] [Whitespace(" ")]
+              1: JS_NUMBER_LITERAL_EXPRESSION@19..21
+                0: JS_NUMBER_LITERAL@19..21 "5" [] [Whitespace(" ")]
+      1: (empty)
+    2: JS_VARIABLE_STATEMENT@21..31
+      0: JS_VARIABLE_DECLARATION@21..30
+        0: (empty)
+        1: LET_KW@21..25 "let" [] [Whitespace(" ")]
+        2: JS_VARIABLE_DECLARATOR_LIST@25..30
+          0: JS_VARIABLE_DECLARATOR@25..30
+            0: JS_IDENTIFIER_BINDING@25..27
+              0: IDENT@25..27 "c" [] [Whitespace(" ")]
+            1: (empty)
+            2: JS_INITIALIZER_CLAUSE@27..30
+              0: EQ@27..29 "=" [] [Whitespace(" ")]
+              1: JS_NUMBER_LITERAL_EXPRESSION@29..30
+                0: JS_NUMBER_LITERAL@29..30 "5" [] []
+      1: SEMICOLON@30..31 ";" [] []
+  4: EOF@31..32 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+var_decl_err.js:1:8 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected an expression, or an assignment but instead found ';'.
+  
+  > 1 │ var a =;
+      │        ^
+    2 │ const b = 5 let c = 5;
+    3 │ 
+  
+  i Expected an expression, or an assignment here.
+  
+  > 1 │ var a =;
+      │        ^
+    2 │ const b = 5 let c = 5;
+    3 │ 
+  
+var_decl_err.js:2:13 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a semicolon or an implicit semicolon after a statement, but found none
+  
+    1 │ var a =;
+  > 2 │ const b = 5 let c = 5;
+      │             ^^^
+    3 │ 
+  
+  i An explicit or implicit semicolon is expected here...
+  
+    1 │ var a =;
+  > 2 │ const b = 5 let c = 5;
+      │             ^^^
+    3 │ 
+  
+  i ...Which is required to end this statement
+  
+    1 │ var a =;
+  > 2 │ const b = 5 let c = 5;
+      │ ^^^^^^^^^^^^
+    3 │ 
+  
+```

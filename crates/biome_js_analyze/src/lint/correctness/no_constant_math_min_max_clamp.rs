@@ -1,18 +1,18 @@
 use std::{cmp::Ordering, str::FromStr};
 
 use biome_analyze::{
-    context::RuleContext, declare_lint_rule, ActionCategory, FixKind, Rule, RuleDiagnostic,
-    RuleSource,
+    FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
+use biome_diagnostics::Severity;
 use biome_js_semantic::SemanticModel;
 use biome_js_syntax::{
-    global_identifier, AnyJsExpression, AnyJsLiteralExpression, AnyJsMemberExpression,
-    JsCallExpression, JsNumberLiteralExpression,
+    AnyJsExpression, AnyJsLiteralExpression, AnyJsMemberExpression, JsCallExpression,
+    JsNumberLiteralExpression, global_identifier,
 };
 use biome_rowan::{AstNode, BatchMutationExt};
 
-use crate::{services::semantic::Semantic, JsRuleAction};
+use crate::{JsRuleAction, services::semantic::Semantic};
 
 declare_lint_rule! {
     /// Disallow the use of `Math.min` and `Math.max` to clamp a value where the result itself is constant.
@@ -39,7 +39,8 @@ declare_lint_rule! {
         name: "noConstantMathMinMaxClamp",
         language: "js",
         sources: &[RuleSource::Clippy("min_max")],
-        recommended: false,
+        recommended: true,
+        severity: Severity::Error,
         fix_kind: FixKind::Unsafe,
     }
 }
@@ -95,7 +96,7 @@ impl Rule for NoConstantMathMinMaxClamp {
             ).detail(
                 state.0.range(),
                 markup! {
-                    "It always evaluates to "<Emphasis>{state.0.text()}</Emphasis>"."
+                    "It always evaluates to "<Emphasis>{state.0.to_trimmed_text().text()}</Emphasis>"."
                 }
             )
         )
@@ -108,9 +109,9 @@ impl Rule for NoConstantMathMinMaxClamp {
         mutation.replace_node(state.1.clone(), state.0.clone());
 
         Some(JsRuleAction::new(
-            ActionCategory::QuickFix,
+            ctx.metadata().action_category(ctx.category(), ctx.group()),
             ctx.metadata().applicability(),
-            markup! {"Swap "<Emphasis>{state.0.text()}</Emphasis>" with "<Emphasis>{state.1.text()}</Emphasis>"."}
+            markup! {"Swap "<Emphasis>{state.0.to_trimmed_text().text()}</Emphasis>" with "<Emphasis>{state.1.to_trimmed_text().text()}</Emphasis>"."}
             .to_owned(),
             mutation,
         ))
@@ -128,8 +129,8 @@ impl FromStr for MinMaxKind {
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         match s {
-            "min" => Ok(MinMaxKind::Min),
-            "max" => Ok(MinMaxKind::Max),
+            "min" => Ok(Self::Min),
+            "max" => Ok(Self::Max),
             _ => Err("Value not supported for math min max kind"),
         }
     }

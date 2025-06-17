@@ -1,15 +1,16 @@
 use crate::{
-    AnalyzerOptions, AnalyzerSignal, Phases, QueryMatch, Rule, RuleFilter, RuleGroup, ServiceBag,
-    SuppressionAction,
+    AnalyzerOptions, AnalyzerSignal, Phases, QueryMatch, Rule, RuleCategory, RuleFilter, RuleGroup,
+    ServiceBag, SuppressionAction,
 };
 use biome_rowan::{Language, TextRange};
+use std::fmt::Display;
 use std::{
     any::{Any, TypeId},
     cmp::Ordering,
     collections::BinaryHeap,
 };
 
-/// The [QueryMatcher] trait is responsible of running lint rules on
+/// The [QueryMatcher] trait is responsible for running lint rules on
 /// [QueryMatch](crate::QueryMatch) instances emitted by the various
 /// [Visitor](crate::Visitor) and push signals wrapped in [SignalEntry]
 /// to the signal queue
@@ -98,6 +99,12 @@ pub struct RuleKey {
     rule: &'static str,
 }
 
+impl Display for RuleKey {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}/{}", self.group, self.rule)
+    }
+}
+
 impl RuleKey {
     pub fn new(group: &'static str, rule: &'static str) -> Self {
         Self { group, rule }
@@ -141,24 +148,26 @@ pub struct SignalEntry<'phase, L: Language> {
     pub instances: Box<[Box<str>]>,
     /// Text range in the document this signal covers
     pub text_range: TextRange,
+    /// The category of the rule emitted by this signal
+    pub category: RuleCategory,
 }
 
 // SignalEntry is ordered based on the starting point of its `text_range`
-impl<'phase, L: Language> Ord for SignalEntry<'phase, L> {
+impl<L: Language> Ord for SignalEntry<'_, L> {
     fn cmp(&self, other: &Self) -> Ordering {
         other.text_range.start().cmp(&self.text_range.start())
     }
 }
 
-impl<'phase, L: Language> PartialOrd for SignalEntry<'phase, L> {
+impl<L: Language> PartialOrd for SignalEntry<'_, L> {
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
         Some(self.cmp(other))
     }
 }
 
-impl<'phase, L: Language> Eq for SignalEntry<'phase, L> {}
+impl<L: Language> Eq for SignalEntry<'_, L> {}
 
-impl<'phase, L: Language> PartialEq for SignalEntry<'phase, L> {
+impl<L: Language> PartialEq for SignalEntry<'_, L> {
     fn eq(&self, other: &Self) -> bool {
         self.text_range.start() == other.text_range.start()
     }
@@ -200,16 +209,16 @@ where
 mod tests {
     use super::MatchQueryParams;
     use crate::{
-        signals::DiagnosticSignal, Analyzer, AnalyzerContext, AnalyzerSignal, ApplySuppression,
-        ControlFlow, MetadataRegistry, Never, Phases, QueryMatcher, RuleKey, ServiceBag,
-        SignalEntry, SuppressionAction, SyntaxVisitor,
+        Analyzer, AnalyzerContext, AnalyzerSignal, ApplySuppression, ControlFlow, MetadataRegistry,
+        Never, Phases, QueryMatcher, RuleCategories, RuleCategory, RuleKey, ServiceBag,
+        SignalEntry, SuppressionAction, SyntaxVisitor, signals::DiagnosticSignal,
     };
-    use crate::{AnalyzerOptions, SuppressionKind};
-    use biome_diagnostics::{category, DiagnosticExt};
+    use crate::{AnalyzerOptions, AnalyzerSuppression};
     use biome_diagnostics::{Diagnostic, Severity};
+    use biome_diagnostics::{DiagnosticExt, category};
     use biome_rowan::{
-        raw_language::{RawLanguage, RawLanguageKind, RawLanguageRoot, RawSyntaxTreeBuilder},
         AstNode, BatchMutation, SyntaxNode, SyntaxToken, TextRange, TextSize, TriviaPiece,
+        raw_language::{RawLanguage, RawLanguageKind, RawLanguageRoot, RawSyntaxTreeBuilder},
     };
     use std::convert::Infallible;
 
@@ -237,6 +246,7 @@ mod tests {
                 rule: RuleKey::new("group", "rule"),
                 instances: Default::default(),
                 text_range: span,
+                category: RuleCategory::Lint,
             });
         }
     }
@@ -350,12 +360,22 @@ mod tests {
         };
 
         fn parse_suppression_comment(
-            comment: &'_ str,
-        ) -> Vec<Result<SuppressionKind<'_>, Infallible>> {
+            comment: &str,
+            _piece_range: TextRange,
+        ) -> Vec<Result<AnalyzerSuppression, Infallible>> {
             comment
                 .trim_start_matches("//")
                 .split(' ')
-                .map(SuppressionKind::Rule)
+                .map(|rule_str| {
+                    AnalyzerSuppression::rule(
+                        RuleCategory::Lint,
+                        rule_str,
+                        (
+                            "",
+                            TextRange::new(TextSize::of(rule_str), TextSize::of(rule_str)),
+                        ),
+                    )
+                })
                 .map(Ok)
                 .collect()
         }
@@ -368,19 +388,33 @@ mod tests {
         impl SuppressionAction for TestAction {
             type Language = RawLanguage;
 
-            fn find_token_to_apply_suppression(
+            fn find_token_for_inline_suppression(
                 &self,
                 _: SyntaxToken<Self::Language>,
             ) -> Option<ApplySuppression<Self::Language>> {
                 None
             }
 
-            fn apply_suppression(
+            fn apply_inline_suppression(
                 &self,
                 _: &mut BatchMutation<Self::Language>,
                 _: ApplySuppression<Self::Language>,
                 _: &str,
+                _: &str,
             ) {
+                unreachable!("")
+            }
+
+            fn apply_top_level_suppression(
+                &self,
+                _: &mut BatchMutation<Self::Language>,
+                _: SyntaxToken<Self::Language>,
+                _: &str,
+            ) {
+                unreachable!("")
+            }
+
+            fn suppression_top_level_comment(&self, _suppression_text: &str) -> String {
                 unreachable!("")
             }
         }
@@ -391,6 +425,7 @@ mod tests {
             parse_suppression_comment,
             Box::new(TestAction),
             &mut emit_signal,
+            RuleCategories::all(),
         );
 
         analyzer.add_visitor(Phases::Syntax, Box::<SyntaxVisitor<RawLanguage>>::default());
@@ -408,17 +443,18 @@ mod tests {
         assert_eq!(
             diagnostics.as_slice(),
             &[
+                // Suppression errors first since we check suppressions before syntax rules
                 (
                     category!("suppressions/unknownGroup"),
                     TextRange::new(TextSize::from(47), TextSize::from(62))
                 ),
                 (
-                    category!("args/fileNotFound"),
-                    TextRange::new(TextSize::from(63), TextSize::from(74))
-                ),
-                (
                     category!("suppressions/unknownRule"),
                     TextRange::new(TextSize::from(76), TextSize::from(96))
+                ),
+                (
+                    category!("args/fileNotFound"),
+                    TextRange::new(TextSize::from(63), TextSize::from(74))
                 ),
                 (
                     category!("args/fileNotFound"),

@@ -1,7 +1,10 @@
+use biome_configuration::{Configuration, HtmlConfiguration, html::HtmlFormatterConfiguration};
 use biome_formatter_test::spec::{SpecSnapshot, SpecTestFile};
-use biome_html_formatter::{context::HtmlFormatOptions, HtmlFormatLanguage};
+use biome_fs::BiomePath;
+use biome_html_formatter::{HtmlFormatLanguage, context::HtmlFormatOptions};
 use biome_html_syntax::HtmlFileSource;
-use std::path::Path;
+use biome_service::workspace::UpdateSettingsParams;
+use camino::Utf8Path;
 
 mod language {
     include!("language.rs");
@@ -25,9 +28,24 @@ mod language {
 /// * `json/null` -> input: `tests/specs/json/null.json`, expected output: `tests/specs/json/null.json.snap`
 /// * `null` -> input: `tests/specs/null.json`, expected output: `tests/specs/null.json.snap`
 pub fn run(spec_input_file: &str, _expected_file: &str, test_directory: &str, _file_type: &str) {
-    let root_path = Path::new(concat!(env!("CARGO_MANIFEST_DIR"), "/tests/specs/html"));
+    let root_path = Utf8Path::new(concat!(env!("CARGO_MANIFEST_DIR"), "/tests/specs/html"));
 
-    let Some(test_file) = SpecTestFile::try_from_file(spec_input_file, root_path, None) else {
+    let Some(test_file) = SpecTestFile::try_from_file(spec_input_file, root_path, |project_key| {
+        Some(UpdateSettingsParams {
+            configuration: Configuration {
+                html: Some(HtmlConfiguration {
+                    formatter: Some(HtmlFormatterConfiguration {
+                        enabled: Some(true.into()),
+                        ..Default::default()
+                    }),
+                    ..Default::default()
+                }),
+                ..Default::default()
+            },
+            project_key,
+            workspace_directory: Some(BiomePath::new(test_directory)),
+        })
+    }) else {
         panic!("Failed to set up snapshot test");
     };
 

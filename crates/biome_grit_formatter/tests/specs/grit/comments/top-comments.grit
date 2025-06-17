@@ -1,0 +1,8 @@
+// this is a comment
+engine biome (1.0)
+
+// this is a comment
+`var $x = [$names]` => `var coolPeople = [$names]` where {
+	// this is a comment
+  $names <: every any {`"andrew"`, `"alex"`}
+}

@@ -1,7 +1,8 @@
 use biome_analyze::{
-    context::RuleContext, declare_lint_rule, Ast, Rule, RuleDiagnostic, RuleSource,
+    Ast, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
+use biome_diagnostics::Severity;
 use biome_js_syntax::{
     AnyJsArrowFunctionParameters, AnyJsBinding, AnyJsExpression, JsCallExpression, JsParameters,
     JsTemplateExpression,
@@ -48,7 +49,8 @@ declare_lint_rule! {
         name: "noDoneCallback",
         language: "js",
         recommended: false,
-        sources: &[RuleSource::EslintJest("no-done-callback")],
+        severity: Severity::Information,
+        sources: &[RuleSource::EslintJest("no-done-callback"), RuleSource::EslintVitest("no-done-callback")],
     }
 }
 
@@ -65,7 +67,7 @@ impl Rule for NoDoneCallback {
 
         let is_test_each = callee
             .get_callee_member_name()
-            .map_or(false, |m| m.text_trimmed() == "each");
+            .is_some_and(|m| m.text_trimmed() == "each");
 
         if is_test_each && !JsTemplateExpression::can_cast(callee.syntax().kind()) {
             return None;
@@ -98,7 +100,7 @@ impl Rule for NoDoneCallback {
                         return Some(text_range);
                     }
                     AnyJsArrowFunctionParameters::JsParameters(js_parameters) => {
-                        return analyze_js_parameters(&js_parameters, is_test_each)
+                        return analyze_js_parameters(&js_parameters, is_test_each);
                     }
                 }
             }

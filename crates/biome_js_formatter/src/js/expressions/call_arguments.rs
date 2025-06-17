@@ -2,20 +2,20 @@ use crate::context::trailing_commas::FormatTrailingCommas;
 use crate::js::bindings::parameters::has_only_simple_parameters;
 use crate::js::declarations::function_declaration::FormatFunctionOptions;
 use crate::js::expressions::arrow_function_expression::{
-    is_multiline_template_starting_on_same_line, FormatJsArrowFunctionExpressionOptions,
+    FormatJsArrowFunctionExpressionOptions, is_multiline_template_starting_on_same_line,
 };
 use crate::js::lists::array_element_list::can_concisely_print_array_list;
 use crate::prelude::*;
 use crate::utils::function_body::FunctionBodyCacheMode;
 use crate::utils::member_chain::SimpleArgument;
 use crate::utils::{is_long_curried_call, write_arguments_multi_line};
-use biome_formatter::{format_args, format_element, write, VecBuffer};
+use biome_formatter::{VecBuffer, format_args, format_element, write};
 use biome_js_syntax::{
     AnyJsCallArgument, AnyJsExpression, AnyJsFunctionBody, AnyJsLiteralExpression, AnyJsStatement,
     AnyTsReturnType, AnyTsType, JsBinaryExpressionFields, JsCallArgumentList, JsCallArguments,
     JsCallArgumentsFields, JsCallExpression, JsExpressionStatement, JsFunctionExpression,
-    JsImportCallExpression, JsLanguage, JsLogicalExpressionFields, TsAsExpressionFields,
-    TsSatisfiesExpressionFields,
+    JsImportCallExpression, JsLanguage, JsLogicalExpressionFields, JsSyntaxKind,
+    TsAsExpressionFields, TsSatisfiesExpressionFields,
 };
 use biome_rowan::{AstSeparatedElement, AstSeparatedList, SyntaxResult};
 
@@ -53,10 +53,23 @@ impl FormatNodeRule<JsCallArguments> for FormatJsCallArguments {
                     )
                 });
 
+        let is_first_arg_string_literal_or_template = if args.len() != 2 {
+            true
+        } else {
+            matches!(
+            args.iter().next(),
+            Some(Ok(AnyJsCallArgument::AnyJsExpression(first)))
+                if matches!(
+                    first.syntax().kind(),
+                    JsSyntaxKind::JS_STRING_LITERAL_EXPRESSION | JsSyntaxKind::JS_TEMPLATE_EXPRESSION
+                )
+            )
+        };
+
         if is_commonjs_or_amd_call?
             || is_multiline_template_only_args(node)
             || is_react_hook_with_deps_array(node, f.comments())
-            || is_test_call?
+            || (is_test_call? && is_first_arg_string_literal_or_template)
         {
             return write!(
                 f,
@@ -173,7 +186,7 @@ impl FormatCallArgument {
     /// Returns `true` if this argument contains any content that forces a group to [`break`](FormatElements::will_break).
     fn will_break(&mut self, f: &mut JsFormatter) -> bool {
         match &self {
-            FormatCallArgument::Default {
+            Self::Default {
                 element,
                 leading_lines,
                 ..
@@ -185,18 +198,18 @@ impl FormatCallArgument {
                     _ => false,
                 };
 
-                *self = FormatCallArgument::Inspected {
+                *self = Self::Inspected {
                     content: interned,
                     element: element.clone(),
                     leading_lines: *leading_lines,
                 };
                 breaks
             }
-            FormatCallArgument::Inspected {
+            Self::Inspected {
                 content: Ok(Some(result)),
                 ..
             } => result.will_break(),
-            FormatCallArgument::Inspected { .. } => false,
+            Self::Inspected { .. } => false,
         }
     }
 
@@ -209,7 +222,7 @@ impl FormatCallArgument {
     /// If [`cache_function_body`](Self::cache_function_body) or [`will_break`](Self::will_break) has been called on this argument before.
     fn cache_function_body(&mut self, f: &mut JsFormatter) {
         match &self {
-            FormatCallArgument::Default {
+            Self::Default {
                 element,
                 leading_lines,
                 ..
@@ -219,13 +232,13 @@ impl FormatCallArgument {
                     Ok(())
                 }));
 
-                *self = FormatCallArgument::Inspected {
+                *self = Self::Inspected {
                     content: interned,
                     element: element.clone(),
                     leading_lines: *leading_lines,
                 };
             }
-            FormatCallArgument::Inspected { .. } => {
+            Self::Inspected { .. } => {
                 panic!("`cache` must be called before inspecting or formatting the element.");
             }
         }
@@ -238,14 +251,14 @@ impl FormatCallArgument {
     ) -> FormatResult<()> {
         match self {
             // Re-use the cached formatted output if there is any.
-            FormatCallArgument::Inspected { content, .. } => match content.clone()? {
+            Self::Inspected { content, .. } => match content.clone()? {
                 Some(element) => {
                     f.write_element(element)?;
                     Ok(())
                 }
                 None => Ok(()),
             },
-            FormatCallArgument::Default {
+            Self::Default {
                 element, is_last, ..
             } => {
                 match element.node()? {
@@ -294,16 +307,16 @@ impl FormatCallArgument {
     /// Returns the number of leading lines before the argument's node
     fn leading_lines(&self) -> usize {
         match self {
-            FormatCallArgument::Default { leading_lines, .. } => *leading_lines,
-            FormatCallArgument::Inspected { leading_lines, .. } => *leading_lines,
+            Self::Default { leading_lines, .. } => *leading_lines,
+            Self::Inspected { leading_lines, .. } => *leading_lines,
         }
     }
 
     /// Returns the [`separated element`](AstSeparatedElement) of this argument.
     fn element(&self) -> &AstSeparatedElement<JsLanguage, AnyJsCallArgument> {
         match self {
-            FormatCallArgument::Default { element, .. } => element,
-            FormatCallArgument::Inspected { element, .. } => element,
+            Self::Default { element, .. } => element,
+            Self::Inspected { element, .. } => element,
         }
     }
 }
@@ -711,7 +724,7 @@ struct FormatAllArgsBrokenOut<'a> {
     node: &'a JsCallArguments,
 }
 
-impl<'a> Format<JsFormatContext> for FormatAllArgsBrokenOut<'a> {
+impl Format<JsFormatContext> for FormatAllArgsBrokenOut<'_> {
     fn fmt(&self, f: &mut Formatter<JsFormatContext>) -> FormatResult<()> {
         let is_inside_import = self.node.parent::<JsImportCallExpression>().is_some();
 
@@ -1060,29 +1073,28 @@ fn can_group_expression_argument(
             //     (type: ObjectType): Provider<Opts> => {}
             //   );
             // }
-            let can_group_type =
-                return_type_annotation
-                    .and_then(|rty| rty.ty().ok())
-                    .map_or(true, |any_type| match any_type {
-                        AnyTsReturnType::AnyTsType(AnyTsType::TsReferenceType(_)) => match &body {
-                            AnyJsFunctionBody::JsFunctionBody(body) => {
-                                body.statements().iter().any(|statement| match statement {
-                                    AnyJsStatement::JsEmptyStatement(s) => {
-                                        // When the body contains an empty statement, comments in
-                                        // the body will get attached to that statement rather than
-                                        // the body itself, so they need to be checked for comments
-                                        // as well to ensure that the body is still considered
-                                        // groupable when those empty statements are removed by the
-                                        // printer.
-                                        comments.has_comments(s.syntax())
-                                    }
-                                    _ => true,
-                                }) || comments.has_dangling_comments(body.syntax())
-                            }
-                            _ => false,
-                        },
-                        _ => true,
-                    });
+            let can_group_type = return_type_annotation
+                .and_then(|rty| rty.ty().ok())
+                .is_none_or(|any_type| match any_type {
+                    AnyTsReturnType::AnyTsType(AnyTsType::TsReferenceType(_)) => match &body {
+                        AnyJsFunctionBody::JsFunctionBody(body) => {
+                            body.statements().iter().any(|statement| match statement {
+                                AnyJsStatement::JsEmptyStatement(s) => {
+                                    // When the body contains an empty statement, comments in
+                                    // the body will get attached to that statement rather than
+                                    // the body itself, so they need to be checked for comments
+                                    // as well to ensure that the body is still considered
+                                    // groupable when those empty statements are removed by the
+                                    // printer.
+                                    comments.has_comments(s.syntax())
+                                }
+                                _ => true,
+                            }) || comments.has_dangling_comments(body.syntax())
+                        }
+                        _ => false,
+                    },
+                    _ => true,
+                });
 
             let can_group_body = match &body {
                 AnyJsFunctionBody::JsFunctionBody(_)
@@ -1205,21 +1217,28 @@ fn is_multiline_template_only_args(arguments: &JsCallArguments) -> bool {
 /// useMemo(() => {}, [])
 /// ```
 fn is_react_hook_with_deps_array(arguments: &JsCallArguments, comments: &JsComments) -> bool {
+    if arguments.args().len() > 3 || arguments.args().len() < 2 {
+        return false;
+    };
+
     use AnyJsExpression::*;
     let mut args = arguments.args().iter();
+    if arguments.args().len() == 3 {
+        args.next();
+    }
 
     match (args.next(), args.next()) {
         (
             Some(Ok(AnyJsCallArgument::AnyJsExpression(JsArrowFunctionExpression(callback)))),
             Some(Ok(AnyJsCallArgument::AnyJsExpression(JsArrayExpression(deps)))),
-        ) if arguments.args().len() == 2 => {
+        ) => {
             if comments.has_comments(callback.syntax()) || comments.has_comments(deps.syntax()) {
                 return false;
             }
 
             if !callback
                 .parameters()
-                .map_or(false, |parameters| parameters.is_empty())
+                .is_ok_and(|parameters| parameters.is_empty())
             {
                 return false;
             }
@@ -1258,7 +1277,7 @@ fn is_function_composition_args(arguments: &JsCallArguments) -> bool {
                 has_seen_function_like = true;
             }
             AnyJsCallArgument::AnyJsExpression(JsCallExpression(call)) => {
-                if call.arguments().map_or(false, |call_arguments| {
+                if call.arguments().is_ok_and(|call_arguments| {
                     call_arguments.args().iter().flatten().any(|arg| {
                         matches!(
                             arg,
@@ -1271,9 +1290,7 @@ fn is_function_composition_args(arguments: &JsCallArguments) -> bool {
                     return true;
                 }
             }
-            _ => {
-                continue;
-            }
+            _ => {}
         }
     }
 

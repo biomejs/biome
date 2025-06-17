@@ -1,6 +1,7 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid.ts
+snapshot_kind: text
 ---
 # Input
 ```ts
@@ -17,7 +18,7 @@ declare module outer {
 ```
 invalid.ts:1:11 lint/suspicious/useNamespaceKeyword  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use the namespace keyword instead of the outdated module keyword.
+  × Use the namespace keyword instead of the outdated module keyword.
   
   > 1 │ /*before*/module/*after*/ foo {}
       │           ^^^^^^
@@ -39,7 +40,7 @@ invalid.ts:1:11 lint/suspicious/useNamespaceKeyword  FIXABLE  ━━━━━━
 ```
 invalid.ts:3:9 lint/suspicious/useNamespaceKeyword  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use the namespace keyword instead of the outdated module keyword.
+  × Use the namespace keyword instead of the outdated module keyword.
   
     1 │ /*before*/module/*after*/ foo {}
     2 │ 
@@ -65,7 +66,7 @@ invalid.ts:3:9 lint/suspicious/useNamespaceKeyword  FIXABLE  ━━━━━━�
 ```
 invalid.ts:5:9 lint/suspicious/useNamespaceKeyword  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use the namespace keyword instead of the outdated module keyword.
+  × Use the namespace keyword instead of the outdated module keyword.
   
     3 │ declare module bar {}
     4 │ 
@@ -91,7 +92,7 @@ invalid.ts:5:9 lint/suspicious/useNamespaceKeyword  FIXABLE  ━━━━━━�
 ```
 invalid.ts:6:9 lint/suspicious/useNamespaceKeyword  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use the namespace keyword instead of the outdated module keyword.
+  × Use the namespace keyword instead of the outdated module keyword.
   
     5 │ declare module outer {
   > 6 │ 	export module inner {}
@@ -110,5 +111,3 @@ invalid.ts:6:9 lint/suspicious/useNamespaceKeyword  FIXABLE  ━━━━━━�
   
 
 ```
-
-

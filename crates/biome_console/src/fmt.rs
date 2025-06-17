@@ -1,7 +1,7 @@
 use std::{borrow::Cow, fmt, io, time::Duration};
 
-pub use crate::write::{Termcolor, Write, HTML};
-use crate::{markup, Markup, MarkupElement};
+pub use crate::write::{HTML, Termcolor, Write};
+use crate::{Markup, MarkupElement, markup};
 
 /// A stack-allocated linked-list of [MarkupElement] slices
 #[derive(Clone, Copy)]
@@ -137,6 +137,16 @@ where
 {
     fn fmt(&self, fmt: &mut Formatter) -> io::Result<()> {
         T::fmt(self, fmt)
+    }
+}
+
+// Blanket implementations of Display for boxed values
+impl<T> Display for Box<T>
+where
+    T: Display + ?Sized,
+{
+    fn fmt(&self, fmt: &mut Formatter) -> io::Result<()> {
+        T::fmt(&**self, fmt)
     }
 }
 

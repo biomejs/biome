@@ -1,0 +1,56 @@
+---
+source: crates/biome_module_graph/tests/snap/mod.rs
+expression: content
+---
+# `/src/index.ts`
+
+## Source
+
+```ts
+/**
+ * @public
+ * @returns {JSX.Element}
+ */
+export default function Component(): JSX.Element {}
+```
+
+## Module Info
+
+```
+Exports {
+  "default" => {
+    ExportOwnExport => JsOwnExport::Binding(0)
+  }
+}
+Imports {
+  No imports
+}
+```
+
+## Exported Bindings
+
+```
+BindingId(0) => JsBindingData {
+  Name: Component,
+  Type: Module(0) TypeId(1),
+  JSDoc comment: JsDoc(
+    @public
+    @returns {JSX.Element}
+  ),
+  Declaration kind: Unknown
+}
+```
+
+## Registered types
+
+```
+Module TypeId(0) => instanceof unresolved reference "JSX.Element" (scope ID: 1)
+
+Module TypeId(1) => sync Function "Component" {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: Module(0) TypeId(0)
+}
+```

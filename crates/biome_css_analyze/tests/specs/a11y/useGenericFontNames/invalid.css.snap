@@ -1,6 +1,7 @@
 ---
 source: crates/biome_css_analyze/tests/spec_tests.rs
 expression: invalid.css
+snapshot_kind: text
 ---
 # Input
 ```css
@@ -17,7 +18,7 @@ a { font: 1em Lucida Grande, Arial, "sans-serif" }
 ```
 invalid.css:1:18 lint/a11y/useGenericFontNames ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Generic font family missing.
+  × Generic font family missing.
   
   > 1 │ a { font-family: Arial; }
       │                  ^^^^^
@@ -39,7 +40,7 @@ invalid.css:1:18 lint/a11y/useGenericFontNames ━━━━━━━━━━━
 ```
 invalid.css:2:44 lint/a11y/useGenericFontNames ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Generic font family missing.
+  × Generic font family missing.
   
     1 │ a { font-family: Arial; }
   > 2 │ a { font-family: 'Arial', "Lucida Grande", Arial; }
@@ -62,7 +63,7 @@ invalid.css:2:44 lint/a11y/useGenericFontNames ━━━━━━━━━━━
 ```
 invalid.css:3:18 lint/a11y/useGenericFontNames ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Generic font family missing.
+  × Generic font family missing.
   
     1 │ a { font-family: Arial; }
     2 │ a { font-family: 'Arial', "Lucida Grande", Arial; }
@@ -86,7 +87,7 @@ invalid.css:3:18 lint/a11y/useGenericFontNames ━━━━━━━━━━━
 ```
 invalid.css:4:18 lint/a11y/useGenericFontNames ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Generic font family missing.
+  × Generic font family missing.
   
     2 │ a { font-family: 'Arial', "Lucida Grande", Arial; }
     3 │ a { fOnT-fAmIlY: '  Lucida Grande '; }
@@ -110,7 +111,7 @@ invalid.css:4:18 lint/a11y/useGenericFontNames ━━━━━━━━━━━
 ```
 invalid.css:5:39 lint/a11y/useGenericFontNames ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Generic font family missing.
+  × Generic font family missing.
   
     3 │ a { fOnT-fAmIlY: '  Lucida Grande '; }
     4 │ a { font-family: Times; }
@@ -134,7 +135,7 @@ invalid.css:5:39 lint/a11y/useGenericFontNames ━━━━━━━━━━━
 ```
 invalid.css:6:43 lint/a11y/useGenericFontNames ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Generic font family missing.
+  × Generic font family missing.
   
     4 │ a { font-family: Times; }
     5 │ a { FONT: italic 300 16px/30px Arial, " Arial"; }
@@ -157,7 +158,7 @@ invalid.css:6:43 lint/a11y/useGenericFontNames ━━━━━━━━━━━
 ```
 invalid.css:7:37 lint/a11y/useGenericFontNames ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Generic font family missing.
+  × Generic font family missing.
   
     5 │ a { FONT: italic 300 16px/30px Arial, " Arial"; }
     6 │ a { font: normal 14px/32px -apple-system, BlinkMacSystemFont; }

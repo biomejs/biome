@@ -4,6 +4,7 @@ expression: validLocal.tsx
 ---
 # Input
 ```tsx
+/* should not generate diagnostics */
 function render() { }
 const ReactDOM = { render };
 
@@ -34,5 +35,3 @@ function render1() {
 }
 
 ```
-
-

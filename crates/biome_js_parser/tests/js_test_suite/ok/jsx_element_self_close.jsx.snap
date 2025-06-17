@@ -1,0 +1,105 @@
+---
+source: crates/biome_js_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```jsx
+function f() {
+    return <div />
+}
+
+```
+
+
+## AST
+
+```
+JsModule {
+    bom_token: missing (optional),
+    interpreter_token: missing (optional),
+    directives: JsDirectiveList [],
+    items: JsModuleItemList [
+        JsFunctionDeclaration {
+            async_token: missing (optional),
+            function_token: FUNCTION_KW@0..9 "function" [] [Whitespace(" ")],
+            star_token: missing (optional),
+            id: JsIdentifierBinding {
+                name_token: IDENT@9..10 "f" [] [],
+            },
+            type_parameters: missing (optional),
+            parameters: JsParameters {
+                l_paren_token: L_PAREN@10..11 "(" [] [],
+                items: JsParameterList [],
+                r_paren_token: R_PAREN@11..13 ")" [] [Whitespace(" ")],
+            },
+            return_type_annotation: missing (optional),
+            body: JsFunctionBody {
+                l_curly_token: L_CURLY@13..14 "{" [] [],
+                directives: JsDirectiveList [],
+                statements: JsStatementList [
+                    JsReturnStatement {
+                        return_token: RETURN_KW@14..26 "return" [Newline("\n"), Whitespace("    ")] [Whitespace(" ")],
+                        argument: JsxTagExpression {
+                            tag: JsxSelfClosingElement {
+                                l_angle_token: L_ANGLE@26..27 "<" [] [],
+                                name: JsxName {
+                                    value_token: JSX_IDENT@27..31 "div" [] [Whitespace(" ")],
+                                },
+                                type_arguments: missing (optional),
+                                attributes: JsxAttributeList [],
+                                slash_token: SLASH@31..32 "/" [] [],
+                                r_angle_token: R_ANGLE@32..33 ">" [] [],
+                            },
+                        },
+                        semicolon_token: missing (optional),
+                    },
+                ],
+                r_curly_token: R_CURLY@33..35 "}" [Newline("\n")] [],
+            },
+        },
+    ],
+    eof_token: EOF@35..36 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: JS_MODULE@0..36
+  0: (empty)
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..35
+    0: JS_FUNCTION_DECLARATION@0..35
+      0: (empty)
+      1: FUNCTION_KW@0..9 "function" [] [Whitespace(" ")]
+      2: (empty)
+      3: JS_IDENTIFIER_BINDING@9..10
+        0: IDENT@9..10 "f" [] []
+      4: (empty)
+      5: JS_PARAMETERS@10..13
+        0: L_PAREN@10..11 "(" [] []
+        1: JS_PARAMETER_LIST@11..11
+        2: R_PAREN@11..13 ")" [] [Whitespace(" ")]
+      6: (empty)
+      7: JS_FUNCTION_BODY@13..35
+        0: L_CURLY@13..14 "{" [] []
+        1: JS_DIRECTIVE_LIST@14..14
+        2: JS_STATEMENT_LIST@14..33
+          0: JS_RETURN_STATEMENT@14..33
+            0: RETURN_KW@14..26 "return" [Newline("\n"), Whitespace("    ")] [Whitespace(" ")]
+            1: JSX_TAG_EXPRESSION@26..33
+              0: JSX_SELF_CLOSING_ELEMENT@26..33
+                0: L_ANGLE@26..27 "<" [] []
+                1: JSX_NAME@27..31
+                  0: JSX_IDENT@27..31 "div" [] [Whitespace(" ")]
+                2: (empty)
+                3: JSX_ATTRIBUTE_LIST@31..31
+                4: SLASH@31..32 "/" [] []
+                5: R_ANGLE@32..33 ">" [] []
+            2: (empty)
+        3: R_CURLY@33..35 "}" [Newline("\n")] []
+  4: EOF@35..36 "" [Newline("\n")] []
+
+```

@@ -1,0 +1,310 @@
+---
+source: crates/biome_js_parser/tests/spec_test.rs
+expression: snapshot
+snapshot_kind: text
+---
+## Input
+
+```js
+import()
+import(...["foo"])
+import("foo", { assert: { type: 'json' } }, "bar")
+import("foo", { with: { type: 'json' } }, "bar")
+
+```
+
+
+## AST
+
+```
+JsModule {
+    bom_token: missing (optional),
+    interpreter_token: missing (optional),
+    directives: JsDirectiveList [],
+    items: JsModuleItemList [
+        JsExpressionStatement {
+            expression: JsImportCallExpression {
+                import_token: IMPORT_KW@0..6 "import" [] [],
+                arguments: JsCallArguments {
+                    l_paren_token: L_PAREN@6..7 "(" [] [],
+                    args: JsCallArgumentList [],
+                    r_paren_token: R_PAREN@7..8 ")" [] [],
+                },
+            },
+            semicolon_token: missing (optional),
+        },
+        JsExpressionStatement {
+            expression: JsBogusExpression {
+                items: [
+                    IMPORT_KW@8..15 "import" [Newline("\n")] [],
+                    JsBogus {
+                        items: [
+                            L_PAREN@15..16 "(" [] [],
+                            JsBogus {
+                                items: [
+                                    JsBogusMember {
+                                        items: [
+                                            DOT3@16..19 "..." [] [],
+                                            JsArrayExpression {
+                                                l_brack_token: L_BRACK@19..20 "[" [] [],
+                                                elements: JsArrayElementList [
+                                                    JsStringLiteralExpression {
+                                                        value_token: JS_STRING_LITERAL@20..25 "\"foo\"" [] [],
+                                                    },
+                                                ],
+                                                r_brack_token: R_BRACK@25..26 "]" [] [],
+                                            },
+                                        ],
+                                    },
+                                ],
+                            },
+                            R_PAREN@26..27 ")" [] [],
+                        ],
+                    },
+                ],
+            },
+            semicolon_token: missing (optional),
+        },
+        JsExpressionStatement {
+            expression: JsImportCallExpression {
+                import_token: IMPORT_KW@27..34 "import" [Newline("\n")] [],
+                arguments: JsCallArguments {
+                    l_paren_token: L_PAREN@34..35 "(" [] [],
+                    args: JsCallArgumentList [
+                        JsStringLiteralExpression {
+                            value_token: JS_STRING_LITERAL@35..40 "\"foo\"" [] [],
+                        },
+                        COMMA@40..42 "," [] [Whitespace(" ")],
+                        JsObjectExpression {
+                            l_curly_token: L_CURLY@42..44 "{" [] [Whitespace(" ")],
+                            members: JsObjectMemberList [
+                                JsPropertyObjectMember {
+                                    name: JsLiteralMemberName {
+                                        value: IDENT@44..50 "assert" [] [],
+                                    },
+                                    colon_token: COLON@50..52 ":" [] [Whitespace(" ")],
+                                    value: JsObjectExpression {
+                                        l_curly_token: L_CURLY@52..54 "{" [] [Whitespace(" ")],
+                                        members: JsObjectMemberList [
+                                            JsPropertyObjectMember {
+                                                name: JsLiteralMemberName {
+                                                    value: IDENT@54..58 "type" [] [],
+                                                },
+                                                colon_token: COLON@58..60 ":" [] [Whitespace(" ")],
+                                                value: JsStringLiteralExpression {
+                                                    value_token: JS_STRING_LITERAL@60..67 "'json'" [] [Whitespace(" ")],
+                                                },
+                                            },
+                                        ],
+                                        r_curly_token: R_CURLY@67..69 "}" [] [Whitespace(" ")],
+                                    },
+                                },
+                            ],
+                            r_curly_token: R_CURLY@69..70 "}" [] [],
+                        },
+                        COMMA@70..72 "," [] [Whitespace(" ")],
+                        JsStringLiteralExpression {
+                            value_token: JS_STRING_LITERAL@72..77 "\"bar\"" [] [],
+                        },
+                    ],
+                    r_paren_token: R_PAREN@77..78 ")" [] [],
+                },
+            },
+            semicolon_token: missing (optional),
+        },
+        JsExpressionStatement {
+            expression: JsImportCallExpression {
+                import_token: IMPORT_KW@78..85 "import" [Newline("\n")] [],
+                arguments: JsCallArguments {
+                    l_paren_token: L_PAREN@85..86 "(" [] [],
+                    args: JsCallArgumentList [
+                        JsStringLiteralExpression {
+                            value_token: JS_STRING_LITERAL@86..91 "\"foo\"" [] [],
+                        },
+                        COMMA@91..93 "," [] [Whitespace(" ")],
+                        JsObjectExpression {
+                            l_curly_token: L_CURLY@93..95 "{" [] [Whitespace(" ")],
+                            members: JsObjectMemberList [
+                                JsPropertyObjectMember {
+                                    name: JsLiteralMemberName {
+                                        value: IDENT@95..99 "with" [] [],
+                                    },
+                                    colon_token: COLON@99..101 ":" [] [Whitespace(" ")],
+                                    value: JsObjectExpression {
+                                        l_curly_token: L_CURLY@101..103 "{" [] [Whitespace(" ")],
+                                        members: JsObjectMemberList [
+                                            JsPropertyObjectMember {
+                                                name: JsLiteralMemberName {
+                                                    value: IDENT@103..107 "type" [] [],
+                                                },
+                                                colon_token: COLON@107..109 ":" [] [Whitespace(" ")],
+                                                value: JsStringLiteralExpression {
+                                                    value_token: JS_STRING_LITERAL@109..116 "'json'" [] [Whitespace(" ")],
+                                                },
+                                            },
+                                        ],
+                                        r_curly_token: R_CURLY@116..118 "}" [] [Whitespace(" ")],
+                                    },
+                                },
+                            ],
+                            r_curly_token: R_CURLY@118..119 "}" [] [],
+                        },
+                        COMMA@119..121 "," [] [Whitespace(" ")],
+                        JsStringLiteralExpression {
+                            value_token: JS_STRING_LITERAL@121..126 "\"bar\"" [] [],
+                        },
+                    ],
+                    r_paren_token: R_PAREN@126..127 ")" [] [],
+                },
+            },
+            semicolon_token: missing (optional),
+        },
+    ],
+    eof_token: EOF@127..128 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: JS_MODULE@0..128
+  0: (empty)
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..127
+    0: JS_EXPRESSION_STATEMENT@0..8
+      0: JS_IMPORT_CALL_EXPRESSION@0..8
+        0: IMPORT_KW@0..6 "import" [] []
+        1: JS_CALL_ARGUMENTS@6..8
+          0: L_PAREN@6..7 "(" [] []
+          1: JS_CALL_ARGUMENT_LIST@7..7
+          2: R_PAREN@7..8 ")" [] []
+      1: (empty)
+    1: JS_EXPRESSION_STATEMENT@8..27
+      0: JS_BOGUS_EXPRESSION@8..27
+        0: IMPORT_KW@8..15 "import" [Newline("\n")] []
+        1: JS_BOGUS@15..27
+          0: L_PAREN@15..16 "(" [] []
+          1: JS_BOGUS@16..26
+            0: JS_BOGUS_MEMBER@16..26
+              0: DOT3@16..19 "..." [] []
+              1: JS_ARRAY_EXPRESSION@19..26
+                0: L_BRACK@19..20 "[" [] []
+                1: JS_ARRAY_ELEMENT_LIST@20..25
+                  0: JS_STRING_LITERAL_EXPRESSION@20..25
+                    0: JS_STRING_LITERAL@20..25 "\"foo\"" [] []
+                2: R_BRACK@25..26 "]" [] []
+          2: R_PAREN@26..27 ")" [] []
+      1: (empty)
+    2: JS_EXPRESSION_STATEMENT@27..78
+      0: JS_IMPORT_CALL_EXPRESSION@27..78
+        0: IMPORT_KW@27..34 "import" [Newline("\n")] []
+        1: JS_CALL_ARGUMENTS@34..78
+          0: L_PAREN@34..35 "(" [] []
+          1: JS_CALL_ARGUMENT_LIST@35..77
+            0: JS_STRING_LITERAL_EXPRESSION@35..40
+              0: JS_STRING_LITERAL@35..40 "\"foo\"" [] []
+            1: COMMA@40..42 "," [] [Whitespace(" ")]
+            2: JS_OBJECT_EXPRESSION@42..70
+              0: L_CURLY@42..44 "{" [] [Whitespace(" ")]
+              1: JS_OBJECT_MEMBER_LIST@44..69
+                0: JS_PROPERTY_OBJECT_MEMBER@44..69
+                  0: JS_LITERAL_MEMBER_NAME@44..50
+                    0: IDENT@44..50 "assert" [] []
+                  1: COLON@50..52 ":" [] [Whitespace(" ")]
+                  2: JS_OBJECT_EXPRESSION@52..69
+                    0: L_CURLY@52..54 "{" [] [Whitespace(" ")]
+                    1: JS_OBJECT_MEMBER_LIST@54..67
+                      0: JS_PROPERTY_OBJECT_MEMBER@54..67
+                        0: JS_LITERAL_MEMBER_NAME@54..58
+                          0: IDENT@54..58 "type" [] []
+                        1: COLON@58..60 ":" [] [Whitespace(" ")]
+                        2: JS_STRING_LITERAL_EXPRESSION@60..67
+                          0: JS_STRING_LITERAL@60..67 "'json'" [] [Whitespace(" ")]
+                    2: R_CURLY@67..69 "}" [] [Whitespace(" ")]
+              2: R_CURLY@69..70 "}" [] []
+            3: COMMA@70..72 "," [] [Whitespace(" ")]
+            4: JS_STRING_LITERAL_EXPRESSION@72..77
+              0: JS_STRING_LITERAL@72..77 "\"bar\"" [] []
+          2: R_PAREN@77..78 ")" [] []
+      1: (empty)
+    3: JS_EXPRESSION_STATEMENT@78..127
+      0: JS_IMPORT_CALL_EXPRESSION@78..127
+        0: IMPORT_KW@78..85 "import" [Newline("\n")] []
+        1: JS_CALL_ARGUMENTS@85..127
+          0: L_PAREN@85..86 "(" [] []
+          1: JS_CALL_ARGUMENT_LIST@86..126
+            0: JS_STRING_LITERAL_EXPRESSION@86..91
+              0: JS_STRING_LITERAL@86..91 "\"foo\"" [] []
+            1: COMMA@91..93 "," [] [Whitespace(" ")]
+            2: JS_OBJECT_EXPRESSION@93..119
+              0: L_CURLY@93..95 "{" [] [Whitespace(" ")]
+              1: JS_OBJECT_MEMBER_LIST@95..118
+                0: JS_PROPERTY_OBJECT_MEMBER@95..118
+                  0: JS_LITERAL_MEMBER_NAME@95..99
+                    0: IDENT@95..99 "with" [] []
+                  1: COLON@99..101 ":" [] [Whitespace(" ")]
+                  2: JS_OBJECT_EXPRESSION@101..118
+                    0: L_CURLY@101..103 "{" [] [Whitespace(" ")]
+                    1: JS_OBJECT_MEMBER_LIST@103..116
+                      0: JS_PROPERTY_OBJECT_MEMBER@103..116
+                        0: JS_LITERAL_MEMBER_NAME@103..107
+                          0: IDENT@103..107 "type" [] []
+                        1: COLON@107..109 ":" [] [Whitespace(" ")]
+                        2: JS_STRING_LITERAL_EXPRESSION@109..116
+                          0: JS_STRING_LITERAL@109..116 "'json'" [] [Whitespace(" ")]
+                    2: R_CURLY@116..118 "}" [] [Whitespace(" ")]
+              2: R_CURLY@118..119 "}" [] []
+            3: COMMA@119..121 "," [] [Whitespace(" ")]
+            4: JS_STRING_LITERAL_EXPRESSION@121..126
+              0: JS_STRING_LITERAL@121..126 "\"bar\"" [] []
+          2: R_PAREN@126..127 ")" [] []
+      1: (empty)
+  4: EOF@127..128 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+import_invalid_args.js:1:8 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × `import()` requires exactly one or two arguments. 
+  
+  > 1 │ import()
+      │        ^
+    2 │ import(...["foo"])
+    3 │ import("foo", { assert: { type: 'json' } }, "bar")
+  
+import_invalid_args.js:2:8 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × `...` is not allowed in `import()`
+  
+    1 │ import()
+  > 2 │ import(...["foo"])
+      │        ^^^^^^^^^^
+    3 │ import("foo", { assert: { type: 'json' } }, "bar")
+    4 │ import("foo", { with: { type: 'json' } }, "bar")
+  
+import_invalid_args.js:3:45 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × `import()` requires exactly one or two arguments. 
+  
+    1 │ import()
+    2 │ import(...["foo"])
+  > 3 │ import("foo", { assert: { type: 'json' } }, "bar")
+      │                                             ^^^^^^
+    4 │ import("foo", { with: { type: 'json' } }, "bar")
+    5 │ 
+  
+import_invalid_args.js:4:43 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × `import()` requires exactly one or two arguments. 
+  
+    2 │ import(...["foo"])
+    3 │ import("foo", { assert: { type: 'json' } }, "bar")
+  > 4 │ import("foo", { with: { type: 'json' } }, "bar")
+      │                                           ^^^^^^
+    5 │ 
+  
+```

@@ -1,6 +1,7 @@
 ---
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: js/module/statement/return_verbatim_argument.js
+snapshot_kind: text
 ---
 # Input
 
@@ -9,23 +10,23 @@ info: js/module/statement/return_verbatim_argument.js
 
 function supported1(){
 	return (
-		// rome-ignore format: Work around https://github.com/rome/tools/issues/3734
-		// rome-ignore lint/style/useOptionalChain: Optional chaining creates more complicated ES2019 code
+		// biome-ignore format: Work around https://github.com/rome/tools/issues/3734
+		// biome-ignore lint/style/useOptionalChain: Optional chaining creates more complicated ES2019 code
 		a && b
 	);
 }
 
 function supported2(){
 	return !(
-		// rome-ignore format: Work around https://github.com/rome/tools/issues/3734
-		// rome-ignore lint/style/useOptionalChain: Optional chaining creates more complicated ES2019 code
+		// biome-ignore format: Work around https://github.com/rome/tools/issues/3734
+		// biome-ignore lint/style/useOptionalChain: Optional chaining creates more complicated ES2019 code
 		a && b
 	);
 }
 
 function supported3(){
 	return (
-		// rome-ignore format:
+		// biome-ignore format: test
 		aVeryLongLogicalExpression &&
 		thatBreaksOverMultipleLines
 	);
@@ -54,6 +55,7 @@ Arrow parentheses: Always
 Bracket spacing: true
 Bracket same line: false
 Attribute Position: Auto
+Expand lists: Auto
 -----
 
 ```js
@@ -61,23 +63,23 @@ Attribute Position: Auto
 
 function supported1() {
 	return (
-		// rome-ignore format: Work around https://github.com/rome/tools/issues/3734
-		// rome-ignore lint/style/useOptionalChain: Optional chaining creates more complicated ES2019 code
+		// biome-ignore format: Work around https://github.com/rome/tools/issues/3734
+		// biome-ignore lint/style/useOptionalChain: Optional chaining creates more complicated ES2019 code
 		a && b
 	);
 }
 
 function supported2() {
 	return !(
-		// rome-ignore format: Work around https://github.com/rome/tools/issues/3734
-		// rome-ignore lint/style/useOptionalChain: Optional chaining creates more complicated ES2019 code
+		// biome-ignore format: Work around https://github.com/rome/tools/issues/3734
+		// biome-ignore lint/style/useOptionalChain: Optional chaining creates more complicated ES2019 code
 		a && b
 	);
 }
 
 function supported3() {
 	return (
-		// rome-ignore format:
+		// biome-ignore format: test
 		aVeryLongLogicalExpression &&
 		thatBreaksOverMultipleLines
 	);
@@ -86,6 +88,6 @@ function supported3() {
 
 # Lines exceeding max width of 80 characters
 ```
-    6: 		// rome-ignore lint/style/useOptionalChain: Optional chaining creates more complicated ES2019 code
-   14: 		// rome-ignore lint/style/useOptionalChain: Optional chaining creates more complicated ES2019 code
+    6: 		// biome-ignore lint/style/useOptionalChain: Optional chaining creates more complicated ES2019 code
+   14: 		// biome-ignore lint/style/useOptionalChain: Optional chaining creates more complicated ES2019 code
 ```

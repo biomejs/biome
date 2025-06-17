@@ -1,0 +1,266 @@
+---
+source: crates/biome_js_parser/tests/spec_test.rs
+expression: snapshot
+snapshot_kind: text
+---
+## Input
+
+```js
+// here we have an invalid object member name '%'
+({%: y} = {})
+
+// here we have invalid object member name
+({
+	params: { [paramName: string]: number } = {}
+})
+
+```
+
+
+## AST
+
+```
+JsModule {
+    bom_token: missing (optional),
+    interpreter_token: missing (optional),
+    directives: JsDirectiveList [],
+    items: JsModuleItemList [
+        JsExpressionStatement {
+            expression: JsCallExpression {
+                callee: JsParenthesizedExpression {
+                    l_paren_token: L_PAREN@0..51 "(" [Comments("// here we have an in ..."), Newline("\n")] [],
+                    expression: JsBogusExpression {
+                        items: [
+                            JsBogus {
+                                items: [
+                                    L_CURLY@51..52 "{" [] [],
+                                    JsBogus {
+                                        items: [
+                                            JsBogus {
+                                                items: [
+                                                    JsBogus {
+                                                        items: [
+                                                            PERCENT@52..53 "%" [] [],
+                                                        ],
+                                                    },
+                                                    COLON@53..55 ":" [] [Whitespace(" ")],
+                                                    JsIdentifierAssignment {
+                                                        name_token: IDENT@55..56 "y" [] [],
+                                                    },
+                                                ],
+                                            },
+                                        ],
+                                    },
+                                    R_CURLY@56..58 "}" [] [Whitespace(" ")],
+                                ],
+                            },
+                            EQ@58..60 "=" [] [Whitespace(" ")],
+                            JsObjectExpression {
+                                l_curly_token: L_CURLY@60..61 "{" [] [],
+                                members: JsObjectMemberList [],
+                                r_curly_token: R_CURLY@61..62 "}" [] [],
+                            },
+                        ],
+                    },
+                    r_paren_token: R_PAREN@62..63 ")" [] [],
+                },
+                optional_chain_token: missing (optional),
+                type_arguments: missing (optional),
+                arguments: JsCallArguments {
+                    l_paren_token: L_PAREN@63..109 "(" [Newline("\n"), Newline("\n"), Comments("// here we have inval ..."), Newline("\n")] [],
+                    args: JsCallArgumentList [
+                        JsObjectExpression {
+                            l_curly_token: L_CURLY@109..110 "{" [] [],
+                            members: JsObjectMemberList [
+                                JsPropertyObjectMember {
+                                    name: JsLiteralMemberName {
+                                        value: IDENT@110..118 "params" [Newline("\n"), Whitespace("\t")] [],
+                                    },
+                                    colon_token: COLON@118..120 ":" [] [Whitespace(" ")],
+                                    value: JsBogusExpression {
+                                        items: [
+                                            JsBogus {
+                                                items: [
+                                                    L_CURLY@120..122 "{" [] [Whitespace(" ")],
+                                                    JsBogus {
+                                                        items: [
+                                                            JsObjectAssignmentPatternProperty {
+                                                                member: JsComputedMemberName {
+                                                                    l_brack_token: L_BRACK@122..123 "[" [] [],
+                                                                    expression: JsIdentifierExpression {
+                                                                        name: JsReferenceIdentifier {
+                                                                            value_token: IDENT@123..132 "paramName" [] [],
+                                                                        },
+                                                                    },
+                                                                    r_brack_token: missing (required),
+                                                                },
+                                                                colon_token: COLON@132..134 ":" [] [Whitespace(" ")],
+                                                                pattern: JsIdentifierAssignment {
+                                                                    name_token: IDENT@134..140 "string" [] [],
+                                                                },
+                                                                init: missing (optional),
+                                                            },
+                                                            JsBogus {
+                                                                items: [
+                                                                    JsBogus {
+                                                                        items: [
+                                                                            R_BRACK@140..141 "]" [] [],
+                                                                        ],
+                                                                    },
+                                                                    COLON@141..143 ":" [] [Whitespace(" ")],
+                                                                    JsIdentifierAssignment {
+                                                                        name_token: IDENT@143..150 "number" [] [Whitespace(" ")],
+                                                                    },
+                                                                ],
+                                                            },
+                                                        ],
+                                                    },
+                                                    R_CURLY@150..152 "}" [] [Whitespace(" ")],
+                                                ],
+                                            },
+                                            EQ@152..154 "=" [] [Whitespace(" ")],
+                                            JsObjectExpression {
+                                                l_curly_token: L_CURLY@154..155 "{" [] [],
+                                                members: JsObjectMemberList [],
+                                                r_curly_token: R_CURLY@155..156 "}" [] [],
+                                            },
+                                        ],
+                                    },
+                                },
+                            ],
+                            r_curly_token: R_CURLY@156..158 "}" [Newline("\n")] [],
+                        },
+                    ],
+                    r_paren_token: R_PAREN@158..159 ")" [] [],
+                },
+            },
+            semicolon_token: missing (optional),
+        },
+    ],
+    eof_token: EOF@159..160 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: JS_MODULE@0..160
+  0: (empty)
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..159
+    0: JS_EXPRESSION_STATEMENT@0..159
+      0: JS_CALL_EXPRESSION@0..159
+        0: JS_PARENTHESIZED_EXPRESSION@0..63
+          0: L_PAREN@0..51 "(" [Comments("// here we have an in ..."), Newline("\n")] []
+          1: JS_BOGUS_EXPRESSION@51..62
+            0: JS_BOGUS@51..58
+              0: L_CURLY@51..52 "{" [] []
+              1: JS_BOGUS@52..56
+                0: JS_BOGUS@52..56
+                  0: JS_BOGUS@52..53
+                    0: PERCENT@52..53 "%" [] []
+                  1: COLON@53..55 ":" [] [Whitespace(" ")]
+                  2: JS_IDENTIFIER_ASSIGNMENT@55..56
+                    0: IDENT@55..56 "y" [] []
+              2: R_CURLY@56..58 "}" [] [Whitespace(" ")]
+            1: EQ@58..60 "=" [] [Whitespace(" ")]
+            2: JS_OBJECT_EXPRESSION@60..62
+              0: L_CURLY@60..61 "{" [] []
+              1: JS_OBJECT_MEMBER_LIST@61..61
+              2: R_CURLY@61..62 "}" [] []
+          2: R_PAREN@62..63 ")" [] []
+        1: (empty)
+        2: (empty)
+        3: JS_CALL_ARGUMENTS@63..159
+          0: L_PAREN@63..109 "(" [Newline("\n"), Newline("\n"), Comments("// here we have inval ..."), Newline("\n")] []
+          1: JS_CALL_ARGUMENT_LIST@109..158
+            0: JS_OBJECT_EXPRESSION@109..158
+              0: L_CURLY@109..110 "{" [] []
+              1: JS_OBJECT_MEMBER_LIST@110..156
+                0: JS_PROPERTY_OBJECT_MEMBER@110..156
+                  0: JS_LITERAL_MEMBER_NAME@110..118
+                    0: IDENT@110..118 "params" [Newline("\n"), Whitespace("\t")] []
+                  1: COLON@118..120 ":" [] [Whitespace(" ")]
+                  2: JS_BOGUS_EXPRESSION@120..156
+                    0: JS_BOGUS@120..152
+                      0: L_CURLY@120..122 "{" [] [Whitespace(" ")]
+                      1: JS_BOGUS@122..150
+                        0: JS_OBJECT_ASSIGNMENT_PATTERN_PROPERTY@122..140
+                          0: JS_COMPUTED_MEMBER_NAME@122..132
+                            0: L_BRACK@122..123 "[" [] []
+                            1: JS_IDENTIFIER_EXPRESSION@123..132
+                              0: JS_REFERENCE_IDENTIFIER@123..132
+                                0: IDENT@123..132 "paramName" [] []
+                            2: (empty)
+                          1: COLON@132..134 ":" [] [Whitespace(" ")]
+                          2: JS_IDENTIFIER_ASSIGNMENT@134..140
+                            0: IDENT@134..140 "string" [] []
+                          3: (empty)
+                        1: JS_BOGUS@140..150
+                          0: JS_BOGUS@140..141
+                            0: R_BRACK@140..141 "]" [] []
+                          1: COLON@141..143 ":" [] [Whitespace(" ")]
+                          2: JS_IDENTIFIER_ASSIGNMENT@143..150
+                            0: IDENT@143..150 "number" [] [Whitespace(" ")]
+                      2: R_CURLY@150..152 "}" [] [Whitespace(" ")]
+                    1: EQ@152..154 "=" [] [Whitespace(" ")]
+                    2: JS_OBJECT_EXPRESSION@154..156
+                      0: L_CURLY@154..155 "{" [] []
+                      1: JS_OBJECT_MEMBER_LIST@155..155
+                      2: R_CURLY@155..156 "}" [] []
+              2: R_CURLY@156..158 "}" [Newline("\n")] []
+          2: R_PAREN@158..159 ")" [] []
+      1: (empty)
+  4: EOF@159..160 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+property_assignment_target_err_1.js:2:3 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected an identifier, a string literal, a number literal, or a computed property but instead found '%'.
+  
+    1 │ // here we have an invalid object member name '%'
+  > 2 │ ({%: y} = {})
+      │   ^
+    3 │ 
+    4 │ // here we have invalid object member name
+  
+  i Expected an identifier, a string literal, a number literal, or a computed property here.
+  
+    1 │ // here we have an invalid object member name '%'
+  > 2 │ ({%: y} = {})
+      │   ^
+    3 │ 
+    4 │ // here we have invalid object member name
+  
+property_assignment_target_err_1.js:6:22 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `]` but instead found `:`
+  
+    4 │ // here we have invalid object member name
+    5 │ ({
+  > 6 │ 	params: { [paramName: string]: number } = {}
+      │ 	                    ^
+    7 │ })
+    8 │ 
+  
+  i Remove :
+  
+property_assignment_target_err_1.js:6:30 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `]`
+  
+    4 │ // here we have invalid object member name
+    5 │ ({
+  > 6 │ 	params: { [paramName: string]: number } = {}
+      │ 	                            ^
+    7 │ })
+    8 │ 
+  
+  i Remove ]
+  
+```

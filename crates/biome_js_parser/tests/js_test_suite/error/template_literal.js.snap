@@ -1,0 +1,196 @@
+---
+source: crates/biome_js_parser/tests/spec_test.rs
+expression: snapshot
+snapshot_kind: text
+---
+## Input
+
+```js
+let a = `foo ${}`
+let b = `${a a}`
+
+```
+
+
+## AST
+
+```
+JsModule {
+    bom_token: missing (optional),
+    interpreter_token: missing (optional),
+    directives: JsDirectiveList [],
+    items: JsModuleItemList [
+        JsVariableStatement {
+            declaration: JsVariableDeclaration {
+                await_token: missing (optional),
+                kind: LET_KW@0..4 "let" [] [Whitespace(" ")],
+                declarators: JsVariableDeclaratorList [
+                    JsVariableDeclarator {
+                        id: JsIdentifierBinding {
+                            name_token: IDENT@4..6 "a" [] [Whitespace(" ")],
+                        },
+                        variable_annotation: missing (optional),
+                        initializer: JsInitializerClause {
+                            eq_token: EQ@6..8 "=" [] [Whitespace(" ")],
+                            expression: JsTemplateExpression {
+                                tag: missing (optional),
+                                type_arguments: missing (optional),
+                                l_tick_token: BACKTICK@8..9 "`" [] [],
+                                elements: JsTemplateElementList [
+                                    JsTemplateChunkElement {
+                                        template_chunk_token: TEMPLATE_CHUNK@9..13 "foo " [] [],
+                                    },
+                                    JsTemplateElement {
+                                        dollar_curly_token: DOLLAR_CURLY@13..15 "${" [] [],
+                                        expression: missing (required),
+                                        r_curly_token: R_CURLY@15..16 "}" [] [],
+                                    },
+                                ],
+                                r_tick_token: BACKTICK@16..17 "`" [] [],
+                            },
+                        },
+                    },
+                ],
+            },
+            semicolon_token: missing (optional),
+        },
+        JsVariableStatement {
+            declaration: JsVariableDeclaration {
+                await_token: missing (optional),
+                kind: LET_KW@17..22 "let" [Newline("\n")] [Whitespace(" ")],
+                declarators: JsVariableDeclaratorList [
+                    JsVariableDeclarator {
+                        id: JsIdentifierBinding {
+                            name_token: IDENT@22..24 "b" [] [Whitespace(" ")],
+                        },
+                        variable_annotation: missing (optional),
+                        initializer: JsInitializerClause {
+                            eq_token: EQ@24..26 "=" [] [Whitespace(" ")],
+                            expression: JsBogusExpression {
+                                items: [
+                                    BACKTICK@26..27 "`" [] [],
+                                    JsBogus {
+                                        items: [
+                                            JsBogus {
+                                                items: [
+                                                    DOLLAR_CURLY@27..29 "${" [] [],
+                                                    JsIdentifierExpression {
+                                                        name: JsReferenceIdentifier {
+                                                            value_token: IDENT@29..31 "a" [] [Whitespace(" ")],
+                                                        },
+                                                    },
+                                                    JsBogus {
+                                                        items: [
+                                                            IDENT@31..32 "a" [] [],
+                                                        ],
+                                                    },
+                                                    R_CURLY@32..33 "}" [] [],
+                                                ],
+                                            },
+                                        ],
+                                    },
+                                    BACKTICK@33..34 "`" [] [],
+                                ],
+                            },
+                        },
+                    },
+                ],
+            },
+            semicolon_token: missing (optional),
+        },
+    ],
+    eof_token: EOF@34..35 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: JS_MODULE@0..35
+  0: (empty)
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..34
+    0: JS_VARIABLE_STATEMENT@0..17
+      0: JS_VARIABLE_DECLARATION@0..17
+        0: (empty)
+        1: LET_KW@0..4 "let" [] [Whitespace(" ")]
+        2: JS_VARIABLE_DECLARATOR_LIST@4..17
+          0: JS_VARIABLE_DECLARATOR@4..17
+            0: JS_IDENTIFIER_BINDING@4..6
+              0: IDENT@4..6 "a" [] [Whitespace(" ")]
+            1: (empty)
+            2: JS_INITIALIZER_CLAUSE@6..17
+              0: EQ@6..8 "=" [] [Whitespace(" ")]
+              1: JS_TEMPLATE_EXPRESSION@8..17
+                0: (empty)
+                1: (empty)
+                2: BACKTICK@8..9 "`" [] []
+                3: JS_TEMPLATE_ELEMENT_LIST@9..16
+                  0: JS_TEMPLATE_CHUNK_ELEMENT@9..13
+                    0: TEMPLATE_CHUNK@9..13 "foo " [] []
+                  1: JS_TEMPLATE_ELEMENT@13..16
+                    0: DOLLAR_CURLY@13..15 "${" [] []
+                    1: (empty)
+                    2: R_CURLY@15..16 "}" [] []
+                4: BACKTICK@16..17 "`" [] []
+      1: (empty)
+    1: JS_VARIABLE_STATEMENT@17..34
+      0: JS_VARIABLE_DECLARATION@17..34
+        0: (empty)
+        1: LET_KW@17..22 "let" [Newline("\n")] [Whitespace(" ")]
+        2: JS_VARIABLE_DECLARATOR_LIST@22..34
+          0: JS_VARIABLE_DECLARATOR@22..34
+            0: JS_IDENTIFIER_BINDING@22..24
+              0: IDENT@22..24 "b" [] [Whitespace(" ")]
+            1: (empty)
+            2: JS_INITIALIZER_CLAUSE@24..34
+              0: EQ@24..26 "=" [] [Whitespace(" ")]
+              1: JS_BOGUS_EXPRESSION@26..34
+                0: BACKTICK@26..27 "`" [] []
+                1: JS_BOGUS@27..33
+                  0: JS_BOGUS@27..33
+                    0: DOLLAR_CURLY@27..29 "${" [] []
+                    1: JS_IDENTIFIER_EXPRESSION@29..31
+                      0: JS_REFERENCE_IDENTIFIER@29..31
+                        0: IDENT@29..31 "a" [] [Whitespace(" ")]
+                    2: JS_BOGUS@31..32
+                      0: IDENT@31..32 "a" [] []
+                    3: R_CURLY@32..33 "}" [] []
+                2: BACKTICK@33..34 "`" [] []
+      1: (empty)
+  4: EOF@34..35 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+template_literal.js:1:16 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected an expression but instead found '}'.
+  
+  > 1 │ let a = `foo ${}`
+      │                ^
+    2 │ let b = `${a a}`
+    3 │ 
+  
+  i Expected an expression here.
+  
+  > 1 │ let a = `foo ${}`
+      │                ^
+    2 │ let b = `${a a}`
+    3 │ 
+  
+template_literal.js:2:14 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `}` but instead found `a`
+  
+    1 │ let a = `foo ${}`
+  > 2 │ let b = `${a a}`
+      │              ^
+    3 │ 
+  
+  i Remove a
+  
+```

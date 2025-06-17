@@ -1,0 +1,142 @@
+---
+source: crates/biome_js_parser/tests/spec_test.rs
+expression: snapshot
+snapshot_kind: text
+---
+## Input
+
+```js
+eval.foo = 10
+arguments[1] = "baz"
+eval[2] = "Chungking Express"
+
+```
+
+
+## AST
+
+```
+JsModule {
+    bom_token: missing (optional),
+    interpreter_token: missing (optional),
+    directives: JsDirectiveList [],
+    items: JsModuleItemList [
+        JsExpressionStatement {
+            expression: JsAssignmentExpression {
+                left: JsStaticMemberAssignment {
+                    object: JsIdentifierExpression {
+                        name: JsReferenceIdentifier {
+                            value_token: IDENT@0..4 "eval" [] [],
+                        },
+                    },
+                    dot_token: DOT@4..5 "." [] [],
+                    member: JsName {
+                        value_token: IDENT@5..9 "foo" [] [Whitespace(" ")],
+                    },
+                },
+                operator_token: EQ@9..11 "=" [] [Whitespace(" ")],
+                right: JsNumberLiteralExpression {
+                    value_token: JS_NUMBER_LITERAL@11..13 "10" [] [],
+                },
+            },
+            semicolon_token: missing (optional),
+        },
+        JsExpressionStatement {
+            expression: JsAssignmentExpression {
+                left: JsComputedMemberAssignment {
+                    object: JsIdentifierExpression {
+                        name: JsReferenceIdentifier {
+                            value_token: IDENT@13..23 "arguments" [Newline("\n")] [],
+                        },
+                    },
+                    l_brack_token: L_BRACK@23..24 "[" [] [],
+                    member: JsNumberLiteralExpression {
+                        value_token: JS_NUMBER_LITERAL@24..25 "1" [] [],
+                    },
+                    r_brack_token: R_BRACK@25..27 "]" [] [Whitespace(" ")],
+                },
+                operator_token: EQ@27..29 "=" [] [Whitespace(" ")],
+                right: JsStringLiteralExpression {
+                    value_token: JS_STRING_LITERAL@29..34 "\"baz\"" [] [],
+                },
+            },
+            semicolon_token: missing (optional),
+        },
+        JsExpressionStatement {
+            expression: JsAssignmentExpression {
+                left: JsComputedMemberAssignment {
+                    object: JsIdentifierExpression {
+                        name: JsReferenceIdentifier {
+                            value_token: IDENT@34..39 "eval" [Newline("\n")] [],
+                        },
+                    },
+                    l_brack_token: L_BRACK@39..40 "[" [] [],
+                    member: JsNumberLiteralExpression {
+                        value_token: JS_NUMBER_LITERAL@40..41 "2" [] [],
+                    },
+                    r_brack_token: R_BRACK@41..43 "]" [] [Whitespace(" ")],
+                },
+                operator_token: EQ@43..45 "=" [] [Whitespace(" ")],
+                right: JsStringLiteralExpression {
+                    value_token: JS_STRING_LITERAL@45..64 "\"Chungking Express\"" [] [],
+                },
+            },
+            semicolon_token: missing (optional),
+        },
+    ],
+    eof_token: EOF@64..65 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: JS_MODULE@0..65
+  0: (empty)
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..64
+    0: JS_EXPRESSION_STATEMENT@0..13
+      0: JS_ASSIGNMENT_EXPRESSION@0..13
+        0: JS_STATIC_MEMBER_ASSIGNMENT@0..9
+          0: JS_IDENTIFIER_EXPRESSION@0..4
+            0: JS_REFERENCE_IDENTIFIER@0..4
+              0: IDENT@0..4 "eval" [] []
+          1: DOT@4..5 "." [] []
+          2: JS_NAME@5..9
+            0: IDENT@5..9 "foo" [] [Whitespace(" ")]
+        1: EQ@9..11 "=" [] [Whitespace(" ")]
+        2: JS_NUMBER_LITERAL_EXPRESSION@11..13
+          0: JS_NUMBER_LITERAL@11..13 "10" [] []
+      1: (empty)
+    1: JS_EXPRESSION_STATEMENT@13..34
+      0: JS_ASSIGNMENT_EXPRESSION@13..34
+        0: JS_COMPUTED_MEMBER_ASSIGNMENT@13..27
+          0: JS_IDENTIFIER_EXPRESSION@13..23
+            0: JS_REFERENCE_IDENTIFIER@13..23
+              0: IDENT@13..23 "arguments" [Newline("\n")] []
+          1: L_BRACK@23..24 "[" [] []
+          2: JS_NUMBER_LITERAL_EXPRESSION@24..25
+            0: JS_NUMBER_LITERAL@24..25 "1" [] []
+          3: R_BRACK@25..27 "]" [] [Whitespace(" ")]
+        1: EQ@27..29 "=" [] [Whitespace(" ")]
+        2: JS_STRING_LITERAL_EXPRESSION@29..34
+          0: JS_STRING_LITERAL@29..34 "\"baz\"" [] []
+      1: (empty)
+    2: JS_EXPRESSION_STATEMENT@34..64
+      0: JS_ASSIGNMENT_EXPRESSION@34..64
+        0: JS_COMPUTED_MEMBER_ASSIGNMENT@34..43
+          0: JS_IDENTIFIER_EXPRESSION@34..39
+            0: JS_REFERENCE_IDENTIFIER@34..39
+              0: IDENT@34..39 "eval" [Newline("\n")] []
+          1: L_BRACK@39..40 "[" [] []
+          2: JS_NUMBER_LITERAL_EXPRESSION@40..41
+            0: JS_NUMBER_LITERAL@40..41 "2" [] []
+          3: R_BRACK@41..43 "]" [] [Whitespace(" ")]
+        1: EQ@43..45 "=" [] [Whitespace(" ")]
+        2: JS_STRING_LITERAL_EXPRESSION@45..64
+          0: JS_STRING_LITERAL@45..64 "\"Chungking Express\"" [] []
+      1: (empty)
+  4: EOF@64..65 "" [Newline("\n")] []
+
+```

@@ -227,19 +227,19 @@ pub struct Closure {
 }
 
 impl Closure {
-    pub(super) fn from_node(data: Rc<SemanticModelData>, node: &impl HasClosureAstNode) -> Closure {
+    pub(super) fn from_node(data: Rc<SemanticModelData>, node: &impl HasClosureAstNode) -> Self {
         let closure_range = node.node_text_range();
         let scope_id = data.scope(closure_range);
 
-        Closure { data, scope_id }
+        Self { data, scope_id }
     }
 
-    pub(super) fn from_scope(data: Rc<SemanticModelData>, scope_id: ScopeId) -> Option<Closure> {
+    pub(super) fn from_scope(data: Rc<SemanticModelData>, scope_id: ScopeId) -> Option<Self> {
         let node = &data.scope_node_by_range[&data.scopes[scope_id.index()].range];
         match node.kind() {
             JsSyntaxKind::JS_FUNCTION_DECLARATION
             | JsSyntaxKind::JS_FUNCTION_EXPRESSION
-            | JsSyntaxKind::JS_ARROW_FUNCTION_EXPRESSION => Some(Closure { data, scope_id }),
+            | JsSyntaxKind::JS_ARROW_FUNCTION_EXPRESSION => Some(Self { data, scope_id }),
             _ => None,
         }
     }
@@ -249,8 +249,26 @@ impl Closure {
         self.data.scopes[self.scope_id.index()].range
     }
 
+    /// Checks if a given reference is within the specified scope range.
+    fn is_reference_within_scope(
+        &self,
+        scope: &SemanticModelScopeData,
+        reference: &ReferenceId,
+    ) -> bool {
+        let binding_id = reference.binding_id();
+        let binding = self.data.binding(binding_id);
+        binding
+            .references
+            .iter()
+            .any(|semantic_reference| scope.range.contains(semantic_reference.range_start))
+    }
+
     /// Return all [Reference] this closure captures, not taking into
-    /// consideration any capture of children closures
+    /// consideration any capture of children closures.
+    /// It includes references from the current scope and any
+    /// parent scope that are within the range of this closure.
+    /// Ensures that references from the parent scope are
+    /// included only if they are within the range of this closure.
     ///
     /// ```rust,ignore
     /// let inner_function = "let a, b;
@@ -262,13 +280,31 @@ impl Closure {
     /// }";
     /// assert!(model.closure(function_f).all_captures(), &["a"]);
     /// ```
-    pub fn all_captures(&self) -> impl Iterator<Item = Capture> {
+    pub fn all_captures(&self) -> impl Iterator<Item = Capture> + use<> {
         let scope = &self.data.scopes[self.scope_id.index()];
 
         let scopes = scope.children.clone();
-
         let mut references = scope.read_references.clone();
+
         references.extend(scope.write_references.iter().copied());
+
+        if let Some(parent) = scope.parent {
+            let parent_scope = &self.data.scopes[parent.index()];
+
+            let parent_read_references: Vec<_> = parent_scope
+                .read_references
+                .iter()
+                .filter(|reference| self.is_reference_within_scope(scope, reference))
+                .collect();
+            let parent_write_references: Vec<_> = parent_scope
+                .write_references
+                .iter()
+                .filter(|reference| self.is_reference_within_scope(scope, reference))
+                .collect();
+
+            references.extend(parent_read_references.iter().copied());
+            references.extend(parent_write_references.iter().copied());
+        }
 
         AllCapturesIter {
             data: self.data.clone(),
@@ -292,7 +328,7 @@ impl Closure {
     /// }";
     /// assert!(model.closure(function_f).children(), &["g"]);
     /// ```
-    pub fn children(&self) -> impl Iterator<Item = Closure> {
+    pub fn children(&self) -> impl Iterator<Item = Self> + use<> {
         let scope = &self.data.scopes[self.scope_id.index()];
         ChildrenIter {
             data: self.data.clone(),
@@ -315,7 +351,7 @@ impl Closure {
     /// }";
     /// assert!(model.closure(function_f).descendents(), &["f", "g", "h"]);
     /// ```
-    pub fn descendents(&self) -> impl Iterator<Item = Closure> {
+    pub fn descendents(&self) -> impl Iterator<Item = Self> + use<> {
         let scopes = vec![self.scope_id];
         DescendentsIter {
             data: self.data.clone(),

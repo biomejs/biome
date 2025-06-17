@@ -1,0 +1,149 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+snapshot_kind: text
+---
+# Input
+```js
+// head
+/**
+ * head comment
+ */
+const c = process.env;
+
+const d = process;
+
+const e = process.env.e;
+
+// A copyright notice
+const f = process.env;
+
+function main() {
+    const local = process.env;
+}
+
+```
+
+# Diagnostics
+```
+invalid.js:5:11 lint/nursery/noProcessGlobal  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Usage of the `process` global is discouraged.
+  
+    3 │  * head comment
+    4 │  */
+  > 5 │ const c = process.env;
+      │           ^^^^^^^
+    6 │ 
+    7 │ const d = process;
+  
+  i `process` global is hard for tools to statically analyze, so code should not assume they are available.
+  
+  i Safe fix: Add `import process from "node:process";` to this file's imports.
+  
+     3  3 │    * head comment
+     4  4 │    */
+        5 │ + import·process·from·"node:process";
+     5  6 │   const c = process.env;
+     6  7 │   
+  
+
+```
+
+```
+invalid.js:7:11 lint/nursery/noProcessGlobal  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Usage of the `process` global is discouraged.
+  
+    5 │ const c = process.env;
+    6 │ 
+  > 7 │ const d = process;
+      │           ^^^^^^^
+    8 │ 
+    9 │ const e = process.env.e;
+  
+  i `process` global is hard for tools to statically analyze, so code should not assume they are available.
+  
+  i Safe fix: Add `import process from "node:process";` to this file's imports.
+  
+     3  3 │    * head comment
+     4  4 │    */
+        5 │ + import·process·from·"node:process";
+     5  6 │   const c = process.env;
+     6  7 │   
+  
+
+```
+
+```
+invalid.js:9:11 lint/nursery/noProcessGlobal  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Usage of the `process` global is discouraged.
+  
+     7 │ const d = process;
+     8 │ 
+   > 9 │ const e = process.env.e;
+       │           ^^^^^^^
+    10 │ 
+    11 │ // A copyright notice
+  
+  i `process` global is hard for tools to statically analyze, so code should not assume they are available.
+  
+  i Safe fix: Add `import process from "node:process";` to this file's imports.
+  
+     3  3 │    * head comment
+     4  4 │    */
+        5 │ + import·process·from·"node:process";
+     5  6 │   const c = process.env;
+     6  7 │   
+  
+
+```
+
+```
+invalid.js:12:11 lint/nursery/noProcessGlobal  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Usage of the `process` global is discouraged.
+  
+    11 │ // A copyright notice
+  > 12 │ const f = process.env;
+       │           ^^^^^^^
+    13 │ 
+    14 │ function main() {
+  
+  i `process` global is hard for tools to statically analyze, so code should not assume they are available.
+  
+  i Safe fix: Add `import process from "node:process";` to this file's imports.
+  
+     3  3 │    * head comment
+     4  4 │    */
+        5 │ + import·process·from·"node:process";
+     5  6 │   const c = process.env;
+     6  7 │   
+  
+
+```
+
+```
+invalid.js:15:19 lint/nursery/noProcessGlobal  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Usage of the `process` global is discouraged.
+  
+    14 │ function main() {
+  > 15 │     const local = process.env;
+       │                   ^^^^^^^
+    16 │ }
+    17 │ 
+  
+  i `process` global is hard for tools to statically analyze, so code should not assume they are available.
+  
+  i Safe fix: Add `import process from "node:process";` to this file's imports.
+  
+     3  3 │    * head comment
+     4  4 │    */
+        5 │ + import·process·from·"node:process";
+     5  6 │   const c = process.env;
+     6  7 │   
+  
+
+```

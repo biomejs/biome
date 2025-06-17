@@ -1,0 +1,281 @@
+---
+source: crates/biome_js_parser/tests/spec_test.rs
+expression: snapshot
+snapshot_kind: text
+---
+## Input
+
+```js
+class {}
+class extends bar {}
+class foo { set {} }
+class extends {}
+
+```
+
+
+## AST
+
+```
+JsModule {
+    bom_token: missing (optional),
+    interpreter_token: missing (optional),
+    directives: JsDirectiveList [],
+    items: JsModuleItemList [
+        JsClassDeclaration {
+            decorators: JsDecoratorList [],
+            abstract_token: missing (optional),
+            class_token: CLASS_KW@0..6 "class" [] [Whitespace(" ")],
+            id: missing (required),
+            type_parameters: missing (optional),
+            extends_clause: missing (optional),
+            implements_clause: missing (optional),
+            l_curly_token: L_CURLY@6..7 "{" [] [],
+            members: JsClassMemberList [],
+            r_curly_token: R_CURLY@7..8 "}" [] [],
+        },
+        JsClassDeclaration {
+            decorators: JsDecoratorList [],
+            abstract_token: missing (optional),
+            class_token: CLASS_KW@8..15 "class" [Newline("\n")] [Whitespace(" ")],
+            id: missing (required),
+            type_parameters: missing (optional),
+            extends_clause: JsExtendsClause {
+                extends_token: EXTENDS_KW@15..23 "extends" [] [Whitespace(" ")],
+                super_class: JsIdentifierExpression {
+                    name: JsReferenceIdentifier {
+                        value_token: IDENT@23..27 "bar" [] [Whitespace(" ")],
+                    },
+                },
+                type_arguments: missing (optional),
+            },
+            implements_clause: missing (optional),
+            l_curly_token: L_CURLY@27..28 "{" [] [],
+            members: JsClassMemberList [],
+            r_curly_token: R_CURLY@28..29 "}" [] [],
+        },
+        JsClassDeclaration {
+            decorators: JsDecoratorList [],
+            abstract_token: missing (optional),
+            class_token: CLASS_KW@29..36 "class" [Newline("\n")] [Whitespace(" ")],
+            id: JsIdentifierBinding {
+                name_token: IDENT@36..40 "foo" [] [Whitespace(" ")],
+            },
+            type_parameters: missing (optional),
+            extends_clause: missing (optional),
+            implements_clause: missing (optional),
+            l_curly_token: L_CURLY@40..42 "{" [] [Whitespace(" ")],
+            members: JsClassMemberList [
+                JsPropertyClassMember {
+                    modifiers: JsPropertyModifierList [],
+                    name: JsLiteralMemberName {
+                        value: IDENT@42..46 "set" [] [Whitespace(" ")],
+                    },
+                    property_annotation: missing (optional),
+                    value: missing (optional),
+                    semicolon_token: missing (optional),
+                },
+                JsBogusMember {
+                    items: [
+                        L_CURLY@46..47 "{" [] [],
+                    ],
+                },
+            ],
+            r_curly_token: R_CURLY@47..49 "}" [] [Whitespace(" ")],
+        },
+        JsBogusStatement {
+            items: [
+                R_CURLY@49..50 "}" [] [],
+            ],
+        },
+        JsClassDeclaration {
+            decorators: JsDecoratorList [],
+            abstract_token: missing (optional),
+            class_token: CLASS_KW@50..57 "class" [Newline("\n")] [Whitespace(" ")],
+            id: missing (required),
+            type_parameters: missing (optional),
+            extends_clause: JsExtendsClause {
+                extends_token: EXTENDS_KW@57..65 "extends" [] [Whitespace(" ")],
+                super_class: missing (required),
+                type_arguments: missing (optional),
+            },
+            implements_clause: missing (optional),
+            l_curly_token: L_CURLY@65..66 "{" [] [],
+            members: JsClassMemberList [],
+            r_curly_token: R_CURLY@66..67 "}" [] [],
+        },
+    ],
+    eof_token: EOF@67..68 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: JS_MODULE@0..68
+  0: (empty)
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..67
+    0: JS_CLASS_DECLARATION@0..8
+      0: JS_DECORATOR_LIST@0..0
+      1: (empty)
+      2: CLASS_KW@0..6 "class" [] [Whitespace(" ")]
+      3: (empty)
+      4: (empty)
+      5: (empty)
+      6: (empty)
+      7: L_CURLY@6..7 "{" [] []
+      8: JS_CLASS_MEMBER_LIST@7..7
+      9: R_CURLY@7..8 "}" [] []
+    1: JS_CLASS_DECLARATION@8..29
+      0: JS_DECORATOR_LIST@8..8
+      1: (empty)
+      2: CLASS_KW@8..15 "class" [Newline("\n")] [Whitespace(" ")]
+      3: (empty)
+      4: (empty)
+      5: JS_EXTENDS_CLAUSE@15..27
+        0: EXTENDS_KW@15..23 "extends" [] [Whitespace(" ")]
+        1: JS_IDENTIFIER_EXPRESSION@23..27
+          0: JS_REFERENCE_IDENTIFIER@23..27
+            0: IDENT@23..27 "bar" [] [Whitespace(" ")]
+        2: (empty)
+      6: (empty)
+      7: L_CURLY@27..28 "{" [] []
+      8: JS_CLASS_MEMBER_LIST@28..28
+      9: R_CURLY@28..29 "}" [] []
+    2: JS_CLASS_DECLARATION@29..49
+      0: JS_DECORATOR_LIST@29..29
+      1: (empty)
+      2: CLASS_KW@29..36 "class" [Newline("\n")] [Whitespace(" ")]
+      3: JS_IDENTIFIER_BINDING@36..40
+        0: IDENT@36..40 "foo" [] [Whitespace(" ")]
+      4: (empty)
+      5: (empty)
+      6: (empty)
+      7: L_CURLY@40..42 "{" [] [Whitespace(" ")]
+      8: JS_CLASS_MEMBER_LIST@42..47
+        0: JS_PROPERTY_CLASS_MEMBER@42..46
+          0: JS_PROPERTY_MODIFIER_LIST@42..42
+          1: JS_LITERAL_MEMBER_NAME@42..46
+            0: IDENT@42..46 "set" [] [Whitespace(" ")]
+          2: (empty)
+          3: (empty)
+          4: (empty)
+        1: JS_BOGUS_MEMBER@46..47
+          0: L_CURLY@46..47 "{" [] []
+      9: R_CURLY@47..49 "}" [] [Whitespace(" ")]
+    3: JS_BOGUS_STATEMENT@49..50
+      0: R_CURLY@49..50 "}" [] []
+    4: JS_CLASS_DECLARATION@50..67
+      0: JS_DECORATOR_LIST@50..50
+      1: (empty)
+      2: CLASS_KW@50..57 "class" [Newline("\n")] [Whitespace(" ")]
+      3: (empty)
+      4: (empty)
+      5: JS_EXTENDS_CLAUSE@57..65
+        0: EXTENDS_KW@57..65 "extends" [] [Whitespace(" ")]
+        1: (empty)
+        2: (empty)
+      6: (empty)
+      7: L_CURLY@65..66 "{" [] []
+      8: JS_CLASS_MEMBER_LIST@66..66
+      9: R_CURLY@66..67 "}" [] []
+  4: EOF@67..68 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+class_decl_err.js:1:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × class declarations must have a name
+  
+  > 1 │ class {}
+      │ ^^^^^^
+    2 │ class extends bar {}
+    3 │ class foo { set {} }
+  
+class_decl_err.js:2:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × class declarations must have a name
+  
+    1 │ class {}
+  > 2 │ class extends bar {}
+      │ ^^^^^^
+    3 │ class foo { set {} }
+    4 │ class extends {}
+  
+class_decl_err.js:3:13 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected a semicolon to end the class property, but found none
+  
+    1 │ class {}
+    2 │ class extends bar {}
+  > 3 │ class foo { set {} }
+      │             ^^^
+    4 │ class extends {}
+    5 │ 
+  
+class_decl_err.js:3:17 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected an identifier, a string literal, a number literal, a private field name, or a computed name but instead found '{'.
+  
+    1 │ class {}
+    2 │ class extends bar {}
+  > 3 │ class foo { set {} }
+      │                 ^
+    4 │ class extends {}
+    5 │ 
+  
+  i Expected an identifier, a string literal, a number literal, a private field name, or a computed name here.
+  
+    1 │ class {}
+    2 │ class extends bar {}
+  > 3 │ class foo { set {} }
+      │                 ^
+    4 │ class extends {}
+    5 │ 
+  
+class_decl_err.js:3:20 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a statement but instead found '}'.
+  
+    1 │ class {}
+    2 │ class extends bar {}
+  > 3 │ class foo { set {} }
+      │                    ^
+    4 │ class extends {}
+    5 │ 
+  
+  i Expected a statement here.
+  
+    1 │ class {}
+    2 │ class extends bar {}
+  > 3 │ class foo { set {} }
+      │                    ^
+    4 │ class extends {}
+    5 │ 
+  
+class_decl_err.js:4:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × class declarations must have a name
+  
+    2 │ class extends bar {}
+    3 │ class foo { set {} }
+  > 4 │ class extends {}
+      │ ^^^^^^
+    5 │ 
+  
+class_decl_err.js:4:14 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × 'extends' list cannot be empty.
+  
+    2 │ class extends bar {}
+    3 │ class foo { set {} }
+  > 4 │ class extends {}
+      │              
+    5 │ 
+  
+```

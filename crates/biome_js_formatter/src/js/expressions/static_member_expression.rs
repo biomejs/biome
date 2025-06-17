@@ -1,5 +1,5 @@
-use crate::prelude::*;
 use crate::JsLabels;
+use crate::prelude::*;
 
 use biome_formatter::{format_args, write};
 use biome_js_syntax::parentheses::NeedsParentheses;
@@ -8,7 +8,7 @@ use biome_js_syntax::{
     JsAssignmentExpression, JsInitializerClause, JsStaticMemberAssignment,
     JsStaticMemberExpression, JsSyntaxToken,
 };
-use biome_rowan::{declare_node_union, AstNode, SyntaxResult};
+use biome_rowan::{AstNode, SyntaxResult, declare_node_union};
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatJsStaticMemberExpression;
@@ -84,24 +84,22 @@ impl Format<JsFormatContext> for AnyJsStaticMemberLike {
 impl AnyJsStaticMemberLike {
     fn object(&self) -> SyntaxResult<AnyJsExpression> {
         match self {
-            AnyJsStaticMemberLike::JsStaticMemberExpression(expression) => expression.object(),
-            AnyJsStaticMemberLike::JsStaticMemberAssignment(assignment) => assignment.object(),
+            Self::JsStaticMemberExpression(expression) => expression.object(),
+            Self::JsStaticMemberAssignment(assignment) => assignment.object(),
         }
     }
 
     fn operator_token(&self) -> SyntaxResult<JsSyntaxToken> {
         match self {
-            AnyJsStaticMemberLike::JsStaticMemberExpression(expression) => {
-                expression.operator_token()
-            }
-            AnyJsStaticMemberLike::JsStaticMemberAssignment(assignment) => assignment.dot_token(),
+            Self::JsStaticMemberExpression(expression) => expression.operator_token(),
+            Self::JsStaticMemberAssignment(assignment) => assignment.dot_token(),
         }
     }
 
     fn member(&self) -> SyntaxResult<AnyJsName> {
         match self {
-            AnyJsStaticMemberLike::JsStaticMemberExpression(expression) => expression.member(),
-            AnyJsStaticMemberLike::JsStaticMemberAssignment(assignment) => assignment.member(),
+            Self::JsStaticMemberExpression(expression) => expression.member(),
+            Self::JsStaticMemberAssignment(assignment) => assignment.member(),
         }
     }
 
@@ -134,8 +132,7 @@ impl AnyJsStaticMemberLike {
                     }
                 }
 
-                AnyJsStaticMemberLike::can_cast(parent.kind())
-                    || AnyJsComputedMember::can_cast(parent.kind())
+                Self::can_cast(parent.kind()) || AnyJsComputedMember::can_cast(parent.kind())
             }
             None => false,
         };
@@ -145,8 +142,7 @@ impl AnyJsStaticMemberLike {
         }
 
         let first_non_static_member_ancestor = self.syntax().ancestors().find(|parent| {
-            !(AnyJsStaticMemberLike::can_cast(parent.kind())
-                || AnyJsComputedMember::can_cast(parent.kind()))
+            !(Self::can_cast(parent.kind()) || AnyJsComputedMember::can_cast(parent.kind()))
         });
 
         let layout = match first_non_static_member_ancestor.and_then(AnyJsExpression::cast) {

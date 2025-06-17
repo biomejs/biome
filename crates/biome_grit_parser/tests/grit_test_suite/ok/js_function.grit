@@ -1,0 +1,31 @@
+language js
+
+// define a javascript function
+function simple_js($string) js {
+    return "this is code";
+}
+
+// a native function now
+function native_gritql($string) {
+    return `code here`
+}
+
+// another javascript function, with nested braces
+function nested_js($string) js {
+	while (1 < 0) {
+		console.log("hello")
+	}
+	return "hello world";
+}
+
+// a javascript function with a line comment
+function line_comment_js($string) js {
+	// this is a line comment where we do {
+	while (1 < 0) {
+		console.log("hello")
+	}
+	return "hello world";
+}
+
+
+`console.log("hello")` => `console.log("world")`

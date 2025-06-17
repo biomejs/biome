@@ -1,6 +1,6 @@
 ---
 source: crates/biome_cli/tests/snap_test.rs
-expression: content
+expression: redactor(content)
 ---
 ## `biome.json`
 
@@ -8,15 +8,17 @@ expression: content
 {
   "formatter": {
     "enabled": true,
-    "useEditorconfig": true,
     "formatWithErrors": false,
     "indentStyle": "space",
     "indentWidth": 2,
     "lineEnding": "lf",
     "lineWidth": 80,
     "attributePosition": "auto",
+    "bracketSameLine": false,
     "bracketSpacing": true,
-    "ignore": ["dist/**", "node_modules/**", "generated/*.spec.js"]
+    "expand": "auto",
+    "useEditorconfig": true,
+    "includes": ["**", "!dist/**", "!node_modules/**", "!generated/*.spec.js"]
   },
   "linter": { "enabled": true },
   "javascript": {
@@ -31,7 +33,8 @@ expression: content
       "attributePosition": "auto",
       "bracketSpacing": true
     }
-  }
+  },
+  "html": { "formatter": { "selfCloseVoidElements": "always" } }
 }
 ```
 
@@ -62,4 +65,14 @@ generated/*.spec.js
 
 ```block
 .prettierrc has been successfully migrated.
+```
+
+```block
+configuration ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Migration results:
+  
+  - biome.json: configuration successfully migrated.
+  
+
 ```

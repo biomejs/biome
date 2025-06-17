@@ -1,0 +1,110 @@
+---
+source: crates/biome_js_parser/tests/spec_test.rs
+expression: snapshot
+snapshot_kind: text
+---
+## Input
+
+```js
+class B { static constructor() {} }
+
+```
+
+
+## AST
+
+```
+JsModule {
+    bom_token: missing (optional),
+    interpreter_token: missing (optional),
+    directives: JsDirectiveList [],
+    items: JsModuleItemList [
+        JsClassDeclaration {
+            decorators: JsDecoratorList [],
+            abstract_token: missing (optional),
+            class_token: CLASS_KW@0..6 "class" [] [Whitespace(" ")],
+            id: JsIdentifierBinding {
+                name_token: IDENT@6..8 "B" [] [Whitespace(" ")],
+            },
+            type_parameters: missing (optional),
+            extends_clause: missing (optional),
+            implements_clause: missing (optional),
+            l_curly_token: L_CURLY@8..10 "{" [] [Whitespace(" ")],
+            members: JsClassMemberList [
+                JsMethodClassMember {
+                    modifiers: JsMethodModifierList [
+                        JsStaticModifier {
+                            modifier_token: STATIC_KW@10..17 "static" [] [Whitespace(" ")],
+                        },
+                    ],
+                    async_token: missing (optional),
+                    star_token: missing (optional),
+                    name: JsLiteralMemberName {
+                        value: IDENT@17..28 "constructor" [] [],
+                    },
+                    question_mark_token: missing (optional),
+                    type_parameters: missing (optional),
+                    parameters: JsParameters {
+                        l_paren_token: L_PAREN@28..29 "(" [] [],
+                        items: JsParameterList [],
+                        r_paren_token: R_PAREN@29..31 ")" [] [Whitespace(" ")],
+                    },
+                    return_type_annotation: missing (optional),
+                    body: JsFunctionBody {
+                        l_curly_token: L_CURLY@31..32 "{" [] [],
+                        directives: JsDirectiveList [],
+                        statements: JsStatementList [],
+                        r_curly_token: R_CURLY@32..34 "}" [] [Whitespace(" ")],
+                    },
+                },
+            ],
+            r_curly_token: R_CURLY@34..35 "}" [] [],
+        },
+    ],
+    eof_token: EOF@35..36 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: JS_MODULE@0..36
+  0: (empty)
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..35
+    0: JS_CLASS_DECLARATION@0..35
+      0: JS_DECORATOR_LIST@0..0
+      1: (empty)
+      2: CLASS_KW@0..6 "class" [] [Whitespace(" ")]
+      3: JS_IDENTIFIER_BINDING@6..8
+        0: IDENT@6..8 "B" [] [Whitespace(" ")]
+      4: (empty)
+      5: (empty)
+      6: (empty)
+      7: L_CURLY@8..10 "{" [] [Whitespace(" ")]
+      8: JS_CLASS_MEMBER_LIST@10..34
+        0: JS_METHOD_CLASS_MEMBER@10..34
+          0: JS_METHOD_MODIFIER_LIST@10..17
+            0: JS_STATIC_MODIFIER@10..17
+              0: STATIC_KW@10..17 "static" [] [Whitespace(" ")]
+          1: (empty)
+          2: (empty)
+          3: JS_LITERAL_MEMBER_NAME@17..28
+            0: IDENT@17..28 "constructor" [] []
+          4: (empty)
+          5: (empty)
+          6: JS_PARAMETERS@28..31
+            0: L_PAREN@28..29 "(" [] []
+            1: JS_PARAMETER_LIST@29..29
+            2: R_PAREN@29..31 ")" [] [Whitespace(" ")]
+          7: (empty)
+          8: JS_FUNCTION_BODY@31..34
+            0: L_CURLY@31..32 "{" [] []
+            1: JS_DIRECTIVE_LIST@32..32
+            2: JS_STATEMENT_LIST@32..32
+            3: R_CURLY@32..34 "}" [] [Whitespace(" ")]
+      9: R_CURLY@34..35 "}" [] []
+  4: EOF@35..36 "" [Newline("\n")] []
+
+```

@@ -11,19 +11,19 @@ expression: invalid.jsonc
 ```
 invalid.jsonc:1:4 lint/suspicious/noDuplicateObjectKeys  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This property value named a is later overwritten by an object member with the same name.
+  × This property is later overwritten by an object member with the same name.
   
   > 1 │ ({ a: 1, a: 2 });
       │    ^^^^
   
-  i Overwritten with this value.
+  i Overwritten with this property.
   
   > 1 │ ({ a: 1, a: 2 });
       │          ^^^^
   
   i If an object property with the same name is defined multiple times (except when combining a getter with a setter), only the last definition makes it into the object and previous definitions are ignored.
   
-  i Unsafe fix: Remove this property value named a
+  i Unsafe fix: Remove this property.
   
     1 │ ({·a:·1,·a:·2·});
       │    ------        
@@ -39,19 +39,19 @@ invalid.jsonc:1:4 lint/suspicious/noDuplicateObjectKeys  FIXABLE  ━━━━�
 ```
 invalid.jsonc:1:4 lint/suspicious/noDuplicateObjectKeys  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This property value named a is later overwritten by an object member with the same name.
+  × This property is later overwritten by an object member with the same name.
   
   > 1 │ ({ a: 1, a: 2, a: 3 });
       │    ^^^^
   
-  i Overwritten with this value.
+  i Overwritten with this property.
   
   > 1 │ ({ a: 1, a: 2, a: 3 });
       │                ^^^^
   
   i If an object property with the same name is defined multiple times (except when combining a getter with a setter), only the last definition makes it into the object and previous definitions are ignored.
   
-  i Unsafe fix: Remove this property value named a
+  i Unsafe fix: Remove this property.
   
     1 │ ({·a:·1,·a:·2,·a:·3·});
       │    ------              
@@ -61,19 +61,19 @@ invalid.jsonc:1:4 lint/suspicious/noDuplicateObjectKeys  FIXABLE  ━━━━�
 ```
 invalid.jsonc:1:10 lint/suspicious/noDuplicateObjectKeys  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This property value named a is later overwritten by an object member with the same name.
+  × This property is later overwritten by an object member with the same name.
   
   > 1 │ ({ a: 1, a: 2, a: 3 });
       │          ^^^^
   
-  i Overwritten with this value.
+  i Overwritten with this property.
   
   > 1 │ ({ a: 1, a: 2, a: 3 });
       │                ^^^^
   
   i If an object property with the same name is defined multiple times (except when combining a getter with a setter), only the last definition makes it into the object and previous definitions are ignored.
   
-  i Unsafe fix: Remove this property value named a
+  i Unsafe fix: Remove this property.
   
     1 │ ({·a:·1,·a:·2,·a:·3·});
       │          ------        
@@ -89,19 +89,19 @@ invalid.jsonc:1:10 lint/suspicious/noDuplicateObjectKeys  FIXABLE  ━━━━�
 ```
 invalid.jsonc:1:4 lint/suspicious/noDuplicateObjectKeys  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This property value named  is later overwritten by an object member with the same name.
+  × This property is later overwritten by an object member with the same name.
   
   > 1 │ ({ '': 1, '': 2 });
       │    ^^^^^
   
-  i Overwritten with this value.
+  i Overwritten with this property.
   
   > 1 │ ({ '': 1, '': 2 });
       │           ^^^^^
   
   i If an object property with the same name is defined multiple times (except when combining a getter with a setter), only the last definition makes it into the object and previous definitions are ignored.
   
-  i Unsafe fix: Remove this property value named 
+  i Unsafe fix: Remove this property.
   
     1 │ ({·'':·1,·'':·2·});
       │    -------         
@@ -117,19 +117,19 @@ invalid.jsonc:1:4 lint/suspicious/noDuplicateObjectKeys  FIXABLE  ━━━━�
 ```
 invalid.jsonc:1:4 lint/suspicious/noDuplicateObjectKeys  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This property value named z is later overwritten by an object member with the same name.
+  × This property is later overwritten by an object member with the same name.
   
   > 1 │ ({ z: 1, z: 2 });
       │    ^^^^
   
-  i Overwritten with this value.
+  i Overwritten with this property.
   
   > 1 │ ({ z: 1, z: 2 });
       │          ^^^^
   
   i If an object property with the same name is defined multiple times (except when combining a getter with a setter), only the last definition makes it into the object and previous definitions are ignored.
   
-  i Unsafe fix: Remove this property value named z
+  i Unsafe fix: Remove this property.
   
     1 │ ({·z:·1,·z:·2·});
       │    ------        
@@ -145,7 +145,7 @@ invalid.jsonc:1:4 lint/suspicious/noDuplicateObjectKeys  FIXABLE  ━━━━�
 ```
 invalid.jsonc:1:4 lint/suspicious/noDuplicateObjectKeys  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This getter named a is later overwritten by an object member with the same name.
+  × This getter is later overwritten by an object member with the same name.
   
   > 1 │ ({ get a() {}, get a() {} });
       │    ^^^^^^^^^^
@@ -157,7 +157,7 @@ invalid.jsonc:1:4 lint/suspicious/noDuplicateObjectKeys  FIXABLE  ━━━━�
   
   i If an object property with the same name is defined multiple times (except when combining a getter with a setter), only the last definition makes it into the object and previous definitions are ignored.
   
-  i Unsafe fix: Remove this getter named a
+  i Unsafe fix: Remove this getter.
   
     1 │ ({·get·a()·{},·get·a()·{}·});
       │    ------------              
@@ -173,7 +173,7 @@ invalid.jsonc:1:4 lint/suspicious/noDuplicateObjectKeys  FIXABLE  ━━━━�
 ```
 invalid.jsonc:1:4 lint/suspicious/noDuplicateObjectKeys  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This setter named a is later overwritten by an object member with the same name.
+  × This setter is later overwritten by an object member with the same name.
   
   > 1 │ ({ set a(v) {}, set a(v) {} });
       │    ^^^^^^^^^^^
@@ -185,7 +185,7 @@ invalid.jsonc:1:4 lint/suspicious/noDuplicateObjectKeys  FIXABLE  ━━━━�
   
   i If an object property with the same name is defined multiple times (except when combining a getter with a setter), only the last definition makes it into the object and previous definitions are ignored.
   
-  i Unsafe fix: Remove this setter named a
+  i Unsafe fix: Remove this setter.
   
     1 │ ({·set·a(v)·{},·set·a(v)·{}·});
       │    -------------               
@@ -201,7 +201,7 @@ invalid.jsonc:1:4 lint/suspicious/noDuplicateObjectKeys  FIXABLE  ━━━━�
 ```
 invalid.jsonc:1:4 lint/suspicious/noDuplicateObjectKeys  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This property value named a is later overwritten by an object member with the same name.
+  × This property is later overwritten by an object member with the same name.
   
   > 1 │ ({ a: 1, get a() {} });
       │    ^^^^
@@ -213,7 +213,7 @@ invalid.jsonc:1:4 lint/suspicious/noDuplicateObjectKeys  FIXABLE  ━━━━�
   
   i If an object property with the same name is defined multiple times (except when combining a getter with a setter), only the last definition makes it into the object and previous definitions are ignored.
   
-  i Unsafe fix: Remove this property value named a
+  i Unsafe fix: Remove this property.
   
     1 │ ({·a:·1,·get·a()·{}·});
       │    ------              
@@ -229,7 +229,7 @@ invalid.jsonc:1:4 lint/suspicious/noDuplicateObjectKeys  FIXABLE  ━━━━�
 ```
 invalid.jsonc:1:4 lint/suspicious/noDuplicateObjectKeys  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This property value named a is later overwritten by an object member with the same name.
+  × This property is later overwritten by an object member with the same name.
   
   > 1 │ ({ a: 1, set a(v) {} });
       │    ^^^^
@@ -241,7 +241,7 @@ invalid.jsonc:1:4 lint/suspicious/noDuplicateObjectKeys  FIXABLE  ━━━━�
   
   i If an object property with the same name is defined multiple times (except when combining a getter with a setter), only the last definition makes it into the object and previous definitions are ignored.
   
-  i Unsafe fix: Remove this property value named a
+  i Unsafe fix: Remove this property.
   
     1 │ ({·a:·1,·set·a(v)·{}·});
       │    ------               
@@ -257,19 +257,19 @@ invalid.jsonc:1:4 lint/suspicious/noDuplicateObjectKeys  FIXABLE  ━━━━�
 ```
 invalid.jsonc:1:4 lint/suspicious/noDuplicateObjectKeys  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This getter named a is later overwritten by an object member with the same name.
+  × This getter is later overwritten by an object member with the same name.
   
   > 1 │ ({ get a() {}, a: 1 });
       │    ^^^^^^^^^^
   
-  i Overwritten with this value.
+  i Overwritten with this property.
   
   > 1 │ ({ get a() {}, a: 1 });
       │                ^^^^
   
   i If an object property with the same name is defined multiple times (except when combining a getter with a setter), only the last definition makes it into the object and previous definitions are ignored.
   
-  i Unsafe fix: Remove this getter named a
+  i Unsafe fix: Remove this getter.
   
     1 │ ({·get·a()·{},·a:·1·});
       │    ------------        
@@ -285,19 +285,19 @@ invalid.jsonc:1:4 lint/suspicious/noDuplicateObjectKeys  FIXABLE  ━━━━�
 ```
 invalid.jsonc:1:4 lint/suspicious/noDuplicateObjectKeys  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This setter named a is later overwritten by an object member with the same name.
+  × This setter is later overwritten by an object member with the same name.
   
   > 1 │ ({ set a(v) {}, a: 1 });
       │    ^^^^^^^^^^^
   
-  i Overwritten with this value.
+  i Overwritten with this property.
   
   > 1 │ ({ set a(v) {}, a: 1 });
       │                 ^^^^
   
   i If an object property with the same name is defined multiple times (except when combining a getter with a setter), only the last definition makes it into the object and previous definitions are ignored.
   
-  i Unsafe fix: Remove this setter named a
+  i Unsafe fix: Remove this setter.
   
     1 │ ({·set·a(v)·{},·a:·1·});
       │    -------------        
@@ -313,7 +313,7 @@ invalid.jsonc:1:4 lint/suspicious/noDuplicateObjectKeys  FIXABLE  ━━━━�
 ```
 invalid.jsonc:1:4 lint/suspicious/noDuplicateObjectKeys  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This property value named a is later overwritten by an object member with the same name.
+  × This property is later overwritten by an object member with the same name.
   
   > 1 │ ({ a: 1, get a() {}, set a(v) {} });
       │    ^^^^
@@ -325,7 +325,7 @@ invalid.jsonc:1:4 lint/suspicious/noDuplicateObjectKeys  FIXABLE  ━━━━�
   
   i If an object property with the same name is defined multiple times (except when combining a getter with a setter), only the last definition makes it into the object and previous definitions are ignored.
   
-  i Unsafe fix: Remove this property value named a
+  i Unsafe fix: Remove this property.
   
     1 │ ({·a:·1,·get·a()·{},·set·a(v)·{}·});
       │    ------                           
@@ -341,7 +341,7 @@ invalid.jsonc:1:4 lint/suspicious/noDuplicateObjectKeys  FIXABLE  ━━━━�
 ```
 invalid.jsonc:1:16 lint/suspicious/noDuplicateObjectKeys  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This property value named a is later overwritten by an object member with the same name.
+  × This property is later overwritten by an object member with the same name.
   
   > 1 │ ({ get a() {}, a: 1, set a(v) {} });
       │                ^^^^
@@ -353,7 +353,7 @@ invalid.jsonc:1:16 lint/suspicious/noDuplicateObjectKeys  FIXABLE  ━━━━�
   
   i If an object property with the same name is defined multiple times (except when combining a getter with a setter), only the last definition makes it into the object and previous definitions are ignored.
   
-  i Unsafe fix: Remove this property value named a
+  i Unsafe fix: Remove this property.
   
     1 │ ({·get·a()·{},·a:·1,·set·a(v)·{}·});
       │                ------               
@@ -369,19 +369,19 @@ invalid.jsonc:1:16 lint/suspicious/noDuplicateObjectKeys  FIXABLE  ━━━━�
 ```
 invalid.jsonc:1:4 lint/suspicious/noDuplicateObjectKeys  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This getter named a is later overwritten by an object member with the same name.
+  × This getter is later overwritten by an object member with the same name.
   
   > 1 │ ({ get a() {}, set a(v) {}, a: 1 });
       │    ^^^^^^^^^^
   
-  i Overwritten with this value.
+  i Overwritten with this property.
   
   > 1 │ ({ get a() {}, set a(v) {}, a: 1 });
       │                             ^^^^
   
   i If an object property with the same name is defined multiple times (except when combining a getter with a setter), only the last definition makes it into the object and previous definitions are ignored.
   
-  i Unsafe fix: Remove this getter named a
+  i Unsafe fix: Remove this getter.
   
     1 │ ({·get·a()·{},·set·a(v)·{},·a:·1·});
       │    ------------                     
@@ -391,21 +391,49 @@ invalid.jsonc:1:4 lint/suspicious/noDuplicateObjectKeys  FIXABLE  ━━━━�
 ```
 invalid.jsonc:1:16 lint/suspicious/noDuplicateObjectKeys  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This setter named a is later overwritten by an object member with the same name.
+  × This setter is later overwritten by an object member with the same name.
   
   > 1 │ ({ get a() {}, set a(v) {}, a: 1 });
       │                ^^^^^^^^^^^
   
-  i Overwritten with this value.
+  i Overwritten with this property.
   
   > 1 │ ({ get a() {}, set a(v) {}, a: 1 });
       │                             ^^^^
   
   i If an object property with the same name is defined multiple times (except when combining a getter with a setter), only the last definition makes it into the object and previous definitions are ignored.
   
-  i Unsafe fix: Remove this setter named a
+  i Unsafe fix: Remove this setter.
   
     1 │ ({·get·a()·{},·set·a(v)·{},·a:·1·});
       │                -------------        
+
+```
+
+# Input
+```cjs
+({ a: 1, ['a']: 1 });
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:4 lint/suspicious/noDuplicateObjectKeys  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This property is later overwritten by an object member with the same name.
+  
+  > 1 │ ({ a: 1, ['a']: 1 });
+      │    ^^^^
+  
+  i Overwritten with this property.
+  
+  > 1 │ ({ a: 1, ['a']: 1 });
+      │          ^^^^^^^^
+  
+  i If an object property with the same name is defined multiple times (except when combining a getter with a setter), only the last definition makes it into the object and previous definitions are ignored.
+  
+  i Unsafe fix: Remove this property.
+  
+    1 │ ({·a:·1,·['a']:·1·});
+      │    ------            
 
 ```

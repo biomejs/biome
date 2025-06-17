@@ -1,0 +1,181 @@
+---
+source: crates/biome_js_parser/tests/spec_test.rs
+expression: snapshot
+snapshot_kind: text
+---
+## Input
+
+```js
+function a(x: string) {}
+function b(x?) {}
+
+```
+
+
+## AST
+
+```
+JsModule {
+    bom_token: missing (optional),
+    interpreter_token: missing (optional),
+    directives: JsDirectiveList [],
+    items: JsModuleItemList [
+        JsFunctionDeclaration {
+            async_token: missing (optional),
+            function_token: FUNCTION_KW@0..9 "function" [] [Whitespace(" ")],
+            star_token: missing (optional),
+            id: JsIdentifierBinding {
+                name_token: IDENT@9..10 "a" [] [],
+            },
+            type_parameters: missing (optional),
+            parameters: JsParameters {
+                l_paren_token: L_PAREN@10..11 "(" [] [],
+                items: JsParameterList [
+                    JsBogusParameter {
+                        items: [
+                            JsDecoratorList [],
+                            JsIdentifierBinding {
+                                name_token: IDENT@11..12 "x" [] [],
+                            },
+                            JsBogus {
+                                items: [
+                                    COLON@12..14 ":" [] [Whitespace(" ")],
+                                    TsStringType {
+                                        string_token: STRING_KW@14..20 "string" [] [],
+                                    },
+                                ],
+                            },
+                        ],
+                    },
+                ],
+                r_paren_token: R_PAREN@20..22 ")" [] [Whitespace(" ")],
+            },
+            return_type_annotation: missing (optional),
+            body: JsFunctionBody {
+                l_curly_token: L_CURLY@22..23 "{" [] [],
+                directives: JsDirectiveList [],
+                statements: JsStatementList [],
+                r_curly_token: R_CURLY@23..24 "}" [] [],
+            },
+        },
+        JsFunctionDeclaration {
+            async_token: missing (optional),
+            function_token: FUNCTION_KW@24..34 "function" [Newline("\n")] [Whitespace(" ")],
+            star_token: missing (optional),
+            id: JsIdentifierBinding {
+                name_token: IDENT@34..35 "b" [] [],
+            },
+            type_parameters: missing (optional),
+            parameters: JsParameters {
+                l_paren_token: L_PAREN@35..36 "(" [] [],
+                items: JsParameterList [
+                    JsBogusParameter {
+                        items: [
+                            JsDecoratorList [],
+                            JsIdentifierBinding {
+                                name_token: IDENT@36..37 "x" [] [],
+                            },
+                            QUESTION@37..38 "?" [] [],
+                        ],
+                    },
+                ],
+                r_paren_token: R_PAREN@38..40 ")" [] [Whitespace(" ")],
+            },
+            return_type_annotation: missing (optional),
+            body: JsFunctionBody {
+                l_curly_token: L_CURLY@40..41 "{" [] [],
+                directives: JsDirectiveList [],
+                statements: JsStatementList [],
+                r_curly_token: R_CURLY@41..42 "}" [] [],
+            },
+        },
+    ],
+    eof_token: EOF@42..43 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: JS_MODULE@0..43
+  0: (empty)
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..42
+    0: JS_FUNCTION_DECLARATION@0..24
+      0: (empty)
+      1: FUNCTION_KW@0..9 "function" [] [Whitespace(" ")]
+      2: (empty)
+      3: JS_IDENTIFIER_BINDING@9..10
+        0: IDENT@9..10 "a" [] []
+      4: (empty)
+      5: JS_PARAMETERS@10..22
+        0: L_PAREN@10..11 "(" [] []
+        1: JS_PARAMETER_LIST@11..20
+          0: JS_BOGUS_PARAMETER@11..20
+            0: JS_DECORATOR_LIST@11..11
+            1: JS_IDENTIFIER_BINDING@11..12
+              0: IDENT@11..12 "x" [] []
+            2: JS_BOGUS@12..20
+              0: COLON@12..14 ":" [] [Whitespace(" ")]
+              1: TS_STRING_TYPE@14..20
+                0: STRING_KW@14..20 "string" [] []
+        2: R_PAREN@20..22 ")" [] [Whitespace(" ")]
+      6: (empty)
+      7: JS_FUNCTION_BODY@22..24
+        0: L_CURLY@22..23 "{" [] []
+        1: JS_DIRECTIVE_LIST@23..23
+        2: JS_STATEMENT_LIST@23..23
+        3: R_CURLY@23..24 "}" [] []
+    1: JS_FUNCTION_DECLARATION@24..42
+      0: (empty)
+      1: FUNCTION_KW@24..34 "function" [Newline("\n")] [Whitespace(" ")]
+      2: (empty)
+      3: JS_IDENTIFIER_BINDING@34..35
+        0: IDENT@34..35 "b" [] []
+      4: (empty)
+      5: JS_PARAMETERS@35..40
+        0: L_PAREN@35..36 "(" [] []
+        1: JS_PARAMETER_LIST@36..38
+          0: JS_BOGUS_PARAMETER@36..38
+            0: JS_DECORATOR_LIST@36..36
+            1: JS_IDENTIFIER_BINDING@36..37
+              0: IDENT@36..37 "x" [] []
+            2: QUESTION@37..38 "?" [] []
+        2: R_PAREN@38..40 ")" [] [Whitespace(" ")]
+      6: (empty)
+      7: JS_FUNCTION_BODY@40..42
+        0: L_CURLY@40..41 "{" [] []
+        1: JS_DIRECTIVE_LIST@41..41
+        2: JS_STATEMENT_LIST@41..41
+        3: R_CURLY@41..42 "}" [] []
+  4: EOF@42..43 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+js_formal_parameter_error.js:1:13 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Type annotations are a TypeScript only feature. Convert your file to a TypeScript file or remove the syntax.
+  
+  > 1 │ function a(x: string) {}
+      │             ^^^^^^^^
+    2 │ function b(x?) {}
+    3 │ 
+  
+  i TypeScript only syntax
+  
+js_formal_parameter_error.js:2:13 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × optional parameters are a TypeScript only feature. Convert your file to a TypeScript file or remove the syntax.
+  
+    1 │ function a(x: string) {}
+  > 2 │ function b(x?) {}
+      │             ^
+    3 │ 
+  
+  i TypeScript only syntax
+  
+```

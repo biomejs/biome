@@ -1,9 +1,10 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: logicalAndCases1.js
+snapshot_kind: text
 ---
 # Input
-```jsx
+```js
 // base cases
 
 // chained members
@@ -780,5 +781,3 @@ logicalAndCases1.js:59:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━
   
 
 ```
-
-

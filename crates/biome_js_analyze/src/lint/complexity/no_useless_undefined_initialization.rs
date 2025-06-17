@@ -1,12 +1,12 @@
 use biome_analyze::{
-    context::RuleContext, declare_lint_rule, ActionCategory, Ast, FixKind, Rule, RuleDiagnostic,
-    RuleSource,
+    Ast, FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
+use biome_diagnostics::Severity;
 use biome_js_factory::make::js_variable_declarator_list;
 use biome_js_syntax::{JsLanguage, JsSyntaxToken, JsVariableDeclarator, JsVariableStatement};
-use biome_rowan::{chain_trivia_pieces, SyntaxTriviaPiece};
 use biome_rowan::{AstNode, BatchMutationExt, TextRange};
+use biome_rowan::{SyntaxTriviaPiece, chain_trivia_pieces};
 
 use crate::JsRuleAction;
 
@@ -54,7 +54,8 @@ declare_lint_rule! {
         language: "js",
         sources: &[RuleSource::Eslint("no-undef-init")],
         fix_kind: FixKind::Safe,
-        recommended: false,
+        recommended: true,
+        severity: Severity::Information,
     }
 }
 
@@ -95,10 +96,10 @@ impl Rule for NoUselessUndefinedInitialization {
 
             if keyword.is_undefined() {
                 let decl_range = initializer.range();
-                let Some(binding_name) = decl.id().ok().map(|id| id.text()) else {
+                let Some(binding_name) = decl.id().ok().map(|id| id.to_trimmed_text()) else {
                     continue;
                 };
-                signals.push((binding_name.into(), decl_range));
+                signals.push((binding_name.text().into(), decl_range));
             }
         }
 
@@ -192,7 +193,7 @@ impl Rule for NoUselessUndefinedInitialization {
         mutation.replace_node_discard_trivia(assignment_statement, new_node);
 
         Some(JsRuleAction::new(
-            ActionCategory::QuickFix,
+            ctx.metadata().action_category(ctx.category(), ctx.group()),
             ctx.metadata().applicability(),
             markup! { "Remove undefined initialization." }.to_owned(),
             mutation,

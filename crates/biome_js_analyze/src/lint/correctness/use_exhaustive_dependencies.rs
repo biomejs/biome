@@ -1,20 +1,29 @@
-use crate::react::hooks::*;
-use crate::services::semantic::Semantic;
-use biome_analyze::RuleSource;
-use biome_analyze::{context::RuleContext, declare_lint_rule, Rule, RuleDiagnostic};
+use std::collections::BTreeMap;
+
+use biome_analyze::{FixKind, RuleSource};
+use biome_analyze::{Rule, RuleDiagnostic, RuleDomain, context::RuleContext, declare_lint_rule};
 use biome_console::markup;
-use biome_deserialize::{non_empty, DeserializableValidator, DeserializationDiagnostic};
+use biome_deserialize::{
+    DeserializableValidator, DeserializationContext, DeserializationDiagnostic, non_empty,
+};
 use biome_deserialize_macros::Deserializable;
+use biome_diagnostics::Severity;
+use biome_js_factory::make;
 use biome_js_semantic::{Capture, SemanticModel};
 use biome_js_syntax::{
-    binding_ext::AnyJsBindingDeclaration, JsCallExpression, JsSyntaxKind, JsSyntaxNode,
-    JsVariableDeclaration, TextRange,
+    AnyJsArrayElement, AnyJsExpression, AnyJsMemberExpression, JsArrayExpression, T, TsTypeofType,
 };
-use biome_js_syntax::{AnyJsExpression, AnyJsMemberExpression, TsTypeofType};
-use biome_rowan::{AstNode, SyntaxNodeCast};
+use biome_js_syntax::{
+    JsCallExpression, JsSyntaxKind, JsSyntaxNode, JsVariableDeclaration, TextRange,
+    binding_ext::AnyJsBindingDeclaration,
+};
+use biome_rowan::{AstNode, AstSeparatedList, BatchMutationExt, SyntaxNodeCast, TriviaPieceKind};
 use rustc_hash::{FxHashMap, FxHashSet};
 use serde::{Deserialize, Serialize};
-use std::collections::BTreeMap;
+
+use crate::JsRuleAction;
+use crate::react::hooks::*;
+use crate::services::semantic::Semantic;
 
 #[cfg(feature = "schemars")]
 use schemars::JsonSchema;
@@ -152,7 +161,7 @@ declare_lint_rule! {
     ///
     /// function component() {
     ///     let a = 1;
-    ///     // biome-ignore lint/correctness/useExhaustiveDependencies(a): <explanation>
+    ///     // biome-ignore lint/correctness/useExhaustiveDependencies(a): suppress dependency a
     ///     useEffect(() => {
     ///         console.log(a);
     ///     }, []);
@@ -164,7 +173,7 @@ declare_lint_rule! {
     ///
     /// ## Options
     ///
-    /// Allows to specify custom hooks - from libraries or internal projects -
+    /// Allows specifying custom hooks - from libraries or internal projects -
     /// for which dependencies should be checked and/or which are known to have
     /// stable return values.
     ///
@@ -176,9 +185,8 @@ declare_lint_rule! {
     ///
     /// #### Example
     ///
-    /// ```json
+    /// ```json, options
     /// {
-    ///     "//": "...",
     ///     "options": {
     ///         "hooks": [
     ///             { "name": "useLocation", "closureIndex": 0, "dependenciesIndex": 1},
@@ -218,7 +226,6 @@ declare_lint_rule! {
     ///
     /// ```json
     /// {
-    ///     "//": "...",
     ///     "options": {
     ///         "hooks": [
     ///             { "name": "useDispatch", "stableResult": true }
@@ -246,25 +253,29 @@ declare_lint_rule! {
         language: "jsx",
         sources: &[RuleSource::EslintReactHooks("exhaustive-deps")],
         recommended: true,
+        severity: Severity::Error,
+        domains: &[RuleDomain::React, RuleDomain::Next],
+        fix_kind: FixKind::Unsafe,
     }
 }
 
 #[derive(Debug, Clone)]
 pub struct HookConfigMaps {
-    pub(crate) hooks_config: FxHashMap<String, ReactHookConfiguration>,
+    pub(crate) hooks_config: FxHashMap<Box<str>, ReactHookConfiguration>,
     pub(crate) stable_config: FxHashSet<StableReactHookConfiguration>,
 }
 
 impl Default for HookConfigMaps {
     fn default() -> Self {
-        let hooks_config = FxHashMap::from_iter([
-            ("useEffect".to_string(), (0, 1, true).into()),
-            ("useLayoutEffect".to_string(), (0, 1, true).into()),
-            ("useInsertionEffect".to_string(), (0, 1, true).into()),
-            ("useCallback".to_string(), (0, 1, true).into()),
-            ("useMemo".to_string(), (0, 1, true).into()),
-            ("useImperativeHandle".to_string(), (1, 2, true).into()),
-        ]);
+        let hooks_config: std::collections::HashMap<Box<str>, _, rustc_hash::FxBuildHasher> =
+            FxHashMap::from_iter([
+                ("useEffect".into(), (0, 1, true).into()),
+                ("useLayoutEffect".into(), (0, 1, true).into()),
+                ("useInsertionEffect".into(), (0, 1, true).into()),
+                ("useCallback".into(), (0, 1, true).into()),
+                ("useMemo".into(), (0, 1, true).into()),
+                ("useImperativeHandle".into(), (1, 2, true).into()),
+            ]);
 
         let stable_config = FxHashSet::from_iter([
             StableReactHookConfiguration::new("useState", StableHookResult::Indices(vec![1]), true),
@@ -328,7 +339,7 @@ fn report_unnecessary_dependencies_default() -> bool {
 pub struct Hook {
     /// The name of the hook.
     #[deserializable(validate = "non_empty")]
-    pub name: String,
+    pub name: Box<str>,
 
     /// The "position" of the closure function, starting from zero.
     ///
@@ -354,15 +365,15 @@ pub struct Hook {
 impl DeserializableValidator for Hook {
     fn validate(
         &mut self,
+        ctx: &mut impl DeserializationContext,
         _name: &str,
-        range: biome_rowan::TextRange,
-        diagnostics: &mut Vec<DeserializationDiagnostic>,
+        range: TextRange,
     ) -> bool {
         match (self.closure_index, self.dependencies_index) {
             (Some(closure_index), Some(dependencies_index))
                 if closure_index == dependencies_index =>
             {
-                diagnostics.push(
+                ctx.report(
                     DeserializationDiagnostic::new(markup! {
                         <Emphasis>"closureIndex"</Emphasis>" and "<Emphasis>"dependenciesIndex"</Emphasis>" may not be the same"
                     })
@@ -381,7 +392,7 @@ impl DeserializableValidator for Hook {
 
 impl HookConfigMaps {
     pub fn new(hooks: &UseExhaustiveDependenciesOptions) -> Self {
-        let mut result = HookConfigMaps::default();
+        let mut result = Self::default();
         for hook in &hooks.hooks {
             if let Some(stable_result) = &hook.stable_result {
                 if *stable_result != StableHookResult::None {
@@ -414,17 +425,20 @@ impl HookConfigMaps {
 pub enum Fix {
     /// When the entire dependencies array is missing
     MissingDependenciesArray { function_name_range: TextRange },
+    /// When the dependency array is not an array literal node.
+    NonLiteralDependenciesArray { expr: AnyJsExpression },
     /// When a dependency needs to be added.
     AddDependency {
         function_name_range: TextRange,
-        captures: (Box<str>, Box<[TextRange]>),
-        dependencies_len: usize,
+        captures: (Box<str>, Box<[JsSyntaxNode]>),
+        dependencies_array: JsArrayExpression,
     },
     /// When a dependency needs to be removed.
     RemoveDependency {
         function_name_range: TextRange,
         component_function: JsSyntaxNode,
         dependencies: Box<[AnyJsExpression]>,
+        dependencies_array: JsArrayExpression,
     },
     /// When a dependency is too unstable (changes every render).
     DependencyTooUnstable {
@@ -501,6 +515,7 @@ fn capture_needs_to_be_in_the_dependency_list(
         | AnyJsBindingDeclaration::TsEnumDeclaration(_)
         | AnyJsBindingDeclaration::TsTypeAliasDeclaration(_)
         | AnyJsBindingDeclaration::TsInterfaceDeclaration(_)
+        | AnyJsBindingDeclaration::TsExternalModuleDeclaration(_)
         | AnyJsBindingDeclaration::TsModuleDeclaration(_)
         | AnyJsBindingDeclaration::TsInferType(_)
         | AnyJsBindingDeclaration::TsMappedType(_)
@@ -508,12 +523,12 @@ fn capture_needs_to_be_in_the_dependency_list(
         | AnyJsBindingDeclaration::TsEnumMember(_) => false,
         // Function declarations are stable if ...
         AnyJsBindingDeclaration::JsFunctionDeclaration(declaration) => {
-            let declaration_range = declaration.syntax().text_range();
+            let declaration_range = declaration.syntax().text_range_with_trivia();
 
             // ... they are declared outside of the component function
             if component_function_range
                 .intersect(declaration_range)
-                .map_or(true, TextRange::is_empty)
+                .is_none_or(TextRange::is_empty)
             {
                 return false;
             }
@@ -544,12 +559,12 @@ fn capture_needs_to_be_in_the_dependency_list(
             else {
                 return false;
             };
-            let declaration_range = declaration.syntax().text_range();
+            let declaration_range = declaration.syntax().text_range_with_trivia();
 
             // ... they are declared outside of the component function
             if component_function_range
                 .intersect(declaration_range)
-                .map_or(true, TextRange::is_empty)
+                .is_none_or(TextRange::is_empty)
             {
                 return false;
             }
@@ -559,7 +574,7 @@ fn capture_needs_to_be_in_the_dependency_list(
                 if declarator
                     .initializer()
                     .and_then(|initializer| initializer.expression().ok())
-                    .map_or(true, |expr| model.is_constant(&expr))
+                    .is_none_or(|expr| model.is_constant(&expr))
                 {
                     return false;
                 }
@@ -599,18 +614,14 @@ fn capture_needs_to_be_in_the_dependency_list(
         | AnyJsBindingDeclaration::JsArrayBindingPatternRestElement(_)
         | AnyJsBindingDeclaration::JsObjectBindingPatternProperty(_)
         | AnyJsBindingDeclaration::JsObjectBindingPatternRest(_)
-        | AnyJsBindingDeclaration::JsObjectBindingPatternShorthandProperty(_) => {
-            unreachable!("The declaration should be resolved to its prent declaration")
-        }
+        | AnyJsBindingDeclaration::JsObjectBindingPatternShorthandProperty(_) => false,
 
         // This should be unreachable because of the test if the capture is imported
         AnyJsBindingDeclaration::JsShorthandNamedImportSpecifier(_)
         | AnyJsBindingDeclaration::JsNamedImportSpecifier(_)
         | AnyJsBindingDeclaration::JsBogusNamedImportSpecifier(_)
         | AnyJsBindingDeclaration::JsDefaultImportSpecifier(_)
-        | AnyJsBindingDeclaration::JsNamespaceImportSpecifier(_) => {
-            unreachable!()
-        }
+        | AnyJsBindingDeclaration::JsNamespaceImportSpecifier(_) => false,
     }
 }
 
@@ -686,7 +697,7 @@ fn determine_unstable_dependency(
     }
 }
 
-fn into_member_iter(node: &JsSyntaxNode) -> impl Iterator<Item = String> {
+fn into_member_iter(node: &JsSyntaxNode) -> impl Iterator<Item = String> + use<> {
     let mut vec = vec![];
     let mut next = Some(node.clone());
 
@@ -755,18 +766,25 @@ impl Rule for UseExhaustiveDependencies {
                 return Vec::new().into_boxed_slice();
             };
 
-            if result.dependencies_node.is_none() {
-                if options.report_missing_dependencies_array {
-                    return vec![Fix::MissingDependenciesArray {
-                        function_name_range: result.function_name_range,
-                    }]
-                    .into_boxed_slice();
-                } else {
-                    return Vec::new().into_boxed_slice();
+            let dependencies_array = match &result.dependencies_node {
+                Some(AnyJsExpression::JsArrayExpression(dependencies_array)) => dependencies_array,
+                Some(expr) => {
+                    return vec![Fix::NonLiteralDependenciesArray { expr: expr.clone() }]
+                        .into_boxed_slice();
                 }
-            }
+                None => {
+                    return if options.report_missing_dependencies_array {
+                        vec![Fix::MissingDependenciesArray {
+                            function_name_range: result.function_name_range,
+                        }]
+                        .into_boxed_slice()
+                    } else {
+                        Vec::new().into_boxed_slice()
+                    };
+                }
+            };
 
-            let component_function_range = component_function.text_range();
+            let component_function_range = component_function.text_range_with_trivia();
 
             let captures: Vec<_> = result
                 .all_captures(model)
@@ -779,35 +797,21 @@ impl Rule for UseExhaustiveDependencies {
                     )
                 })
                 .map(|capture| {
-                    let path = get_whole_static_member_expression(capture.node());
-
-                    match path {
-                        Some(path) => (
-                            path.syntax().text_trimmed().to_string(),
-                            path.syntax().text_trimmed_range(),
-                            path.syntax().clone(),
-                        ),
-                        None => (
-                            capture.node().text_trimmed().to_string(),
-                            capture.node().text_trimmed_range(),
-                            capture.node().clone(),
-                        ),
-                    }
+                    get_whole_static_member_expression(capture.node())
+                        .map_or_else(|| capture.node().clone(), |path| path.syntax().clone())
                 })
                 .collect();
 
             let deps: Vec<_> = result.all_dependencies().collect();
-            let dependencies_len = deps.len();
-
-            let mut add_deps: BTreeMap<Box<str>, Vec<TextRange>> = BTreeMap::new();
+            let mut add_deps: BTreeMap<Box<str>, Vec<JsSyntaxNode>> = BTreeMap::new();
 
             // Evaluate all the captures
-            for (capture_text, capture_range, capture_path) in captures.iter() {
+            for capture in &captures {
                 let mut suggested_fix = None;
                 let mut is_captured_covered = false;
-                for dep in deps.iter() {
+                for dep in &deps {
                     let (capture_contains_dep, dep_contains_capture) =
-                        compare_member_depth(capture_path, dep.syntax());
+                        compare_member_depth(capture, dep.syntax());
 
                     match (capture_contains_dep, dep_contains_capture) {
                         // capture == dependency
@@ -835,9 +839,9 @@ impl Rule for UseExhaustiveDependencies {
                             // in the dependency list
                             suggested_fix = Some(Fix::DependencyTooDeep {
                                 function_name_range: result.function_name_range,
-                                capture_range: *capture_range,
+                                capture_range: capture.text_trimmed_range(),
                                 dependency_range: dep.syntax().text_trimmed_range(),
-                                dependency_text: dep.syntax().text_trimmed().to_string().into(),
+                                dependency_text: dep.syntax().text_trimmed().into_text().into(),
                             });
                         }
                         _ => {}
@@ -849,17 +853,22 @@ impl Rule for UseExhaustiveDependencies {
                 }
 
                 if !is_captured_covered {
-                    let captures = add_deps.entry(capture_text.clone().into()).or_default();
-                    captures.push(*capture_range);
+                    let captures = add_deps
+                        .entry(capture.text_trimmed().into_text().into())
+                        .or_default();
+
+                    if !captures.iter().any(|existing| existing == capture) {
+                        captures.push(capture.clone());
+                    }
                 }
             }
 
             // Split deps into correctly specified ones and unnecessary ones.
             let (correct_deps, excessive_deps): (Vec<_>, Vec<_>) =
                 deps.into_iter().partition(|dep| {
-                    captures.iter().any(|(_, _, capture_path)| {
+                    captures.iter().any(|capture| {
                         let (capture_contains_dep, dep_contains_capture) =
-                            compare_member_depth(capture_path, dep.syntax());
+                            compare_member_depth(capture, dep.syntax());
                         capture_contains_dep || dep_contains_capture
                     })
                 });
@@ -874,6 +883,7 @@ impl Rule for UseExhaustiveDependencies {
                             function_name_range: result.function_name_range,
                             component_function: component_function.clone(),
                             dependencies: vec![dep.clone()].into_boxed_slice(),
+                            dependencies_array: dependencies_array.clone(),
                         });
                         continue;
                     }
@@ -888,11 +898,11 @@ impl Rule for UseExhaustiveDependencies {
             });
 
             // Generate signals
-            for (name, ranges) in add_deps {
+            for (name, nodes) in add_deps {
                 signals.push(Fix::AddDependency {
                     function_name_range: result.function_name_range,
-                    captures: (name, ranges.into_boxed_slice()),
-                    dependencies_len,
+                    captures: (name, nodes.into_boxed_slice()),
+                    dependencies_array: dependencies_array.clone(),
                 });
             }
 
@@ -901,6 +911,7 @@ impl Rule for UseExhaustiveDependencies {
                     function_name_range: result.function_name_range,
                     component_function,
                     dependencies: excessive_deps.into_boxed_slice(),
+                    dependencies_array: dependencies_array.clone(),
                 });
             }
 
@@ -918,13 +929,12 @@ impl Rule for UseExhaustiveDependencies {
 
     fn instances_for_signal(signal: &Self::State) -> Box<[Box<str>]> {
         match signal {
-            Fix::MissingDependenciesArray {
-                function_name_range: _,
-            } => vec![].into_boxed_slice(),
+            Fix::MissingDependenciesArray { .. } => vec![].into_boxed_slice(),
+            Fix::NonLiteralDependenciesArray { .. } => vec![].into_boxed_slice(),
             Fix::AddDependency { captures, .. } => vec![captures.0.clone()].into(),
             Fix::RemoveDependency { dependencies, .. } => dependencies
                 .iter()
-                .map(|dep| dep.syntax().text_trimmed().to_string().into_boxed_str())
+                .map(|dep| dep.syntax().text_trimmed().into_text().into())
                 .collect::<Vec<_>>()
                 .into_boxed_slice(),
             Fix::DependencyTooUnstable {
@@ -940,17 +950,25 @@ impl Rule for UseExhaustiveDependencies {
         match dep {
             Fix::MissingDependenciesArray {
                 function_name_range,
-            } => {
-                return Some(RuleDiagnostic::new(
+            } => Some(RuleDiagnostic::new(
+                rule_category!(),
+                function_name_range,
+                markup! {"This hook does not have a dependencies array"},
+            )),
+            Fix::NonLiteralDependenciesArray { expr } => Some(
+                RuleDiagnostic::new(
                     rule_category!(),
-                    function_name_range,
-                    markup! {"This hook does not have a dependencies array"},
-                ))
-            }
+                    expr.range(),
+                    markup! {"This dependencies list is not an array literal."},
+                )
+                .note(markup! {"Biome can't statically verify whether you've passed the correct dependencies."})
+                .note(markup! { "Replace with an array literal and list your dependencies within it."})
+            ),
             Fix::AddDependency {
                 function_name_range,
                 captures,
-                dependencies_len,
+                dependencies_array,
+                ..
             } => {
                 let (capture_text, captures_range) = captures;
                 let mut diag = RuleDiagnostic::new(
@@ -961,12 +979,12 @@ impl Rule for UseExhaustiveDependencies {
 
                 for range in captures_range {
                     diag = diag.detail(
-                        range,
+                        range.text_trimmed_range(),
                         "This dependency is not specified in the hook dependency list.",
                     );
                 }
 
-                if *dependencies_len == 0 {
+                if dependencies_array.elements().len() == 0 {
                     diag = if captures_range.len() == 1 {
                         diag.note("Either include it or remove the dependency array")
                     } else {
@@ -980,11 +998,12 @@ impl Rule for UseExhaustiveDependencies {
                 function_name_range,
                 dependencies,
                 component_function,
+                ..
             } => {
                 let deps_joined_with_comma = dependencies
                     .iter()
-                    .map(|dep| dep.syntax().text_trimmed().to_string())
-                    .collect::<Vec<String>>()
+                    .map(|dep| dep.syntax().text_trimmed().into_text().into())
+                    .collect::<Vec<Box<str>>>()
                     .join(", ");
                 let mut diag = RuleDiagnostic::new(
                     rule_category!(),
@@ -1052,4 +1071,77 @@ impl Rule for UseExhaustiveDependencies {
             }
         }
     }
+
+    fn action(ctx: &RuleContext<Self>, state: &Self::State) -> Option<JsRuleAction> {
+        let mut mutation = ctx.root().begin();
+
+        let message = match state {
+            Fix::AddDependency {
+                captures: (_, nodes),
+                dependencies_array,
+                ..
+            } => {
+                let elements = dependencies_array.elements();
+                let elements = elements
+                    .elements()
+                    .flat_map(|element| element.into_node())
+                    .chain(nodes.iter().filter_map(|node| {
+                        node.ancestors()
+                            .find_map(|node| node.cast::<AnyJsExpression>()?.trim_trivia())
+                            .map(AnyJsArrayElement::AnyJsExpression)
+                    }))
+                    .collect::<Vec<_>>();
+
+                mutation.replace_node(
+                    dependencies_array.clone(),
+                    recreate_array(dependencies_array, elements),
+                );
+
+                markup! { "Add the missing dependencies to the list." }
+            }
+            Fix::RemoveDependency {
+                dependencies,
+                dependencies_array,
+                ..
+            } => {
+                let elements = dependencies_array.elements();
+                let elements = elements.elements()
+                    .flat_map(|element| element.into_node())
+                    .filter(|node| {
+                        matches!(node, AnyJsArrayElement::AnyJsExpression(expr) if !dependencies.contains(expr))
+                    })
+                    .collect::<Vec<_>>();
+
+                mutation.replace_node(
+                    dependencies_array.clone(),
+                    recreate_array(dependencies_array, elements),
+                );
+
+                markup! { "Remove the extra dependencies from the list." }
+            }
+            _ => return None,
+        };
+
+        Some(JsRuleAction::new(
+            ctx.metadata().action_category(ctx.category(), ctx.group()),
+            ctx.metadata().applicability(),
+            message,
+            mutation,
+        ))
+    }
+}
+
+fn recreate_array<E, I>(current: &JsArrayExpression, elements: E) -> JsArrayExpression
+where
+    E: IntoIterator<Item = AnyJsArrayElement, IntoIter = I>,
+    I: ExactSizeIterator<Item = AnyJsArrayElement>,
+{
+    let elements = elements.into_iter();
+    let separators = (0..elements.len().saturating_sub(1))
+        .map(|_| make::token(T![,]).with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")]))
+        .collect::<Vec<_>>();
+
+    current
+        .clone()
+        .with_elements(make::js_array_element_list(elements, separators))
 }

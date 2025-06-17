@@ -1,0 +1,96 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `file.js`
+
+```js
+/**
+* biome-ignore-all lint/style/useConst: reason
+*/
+
+
+let foo = 2;
+/**
+* biome-ignore lint/style/useConst: reason
+*/
+let bar = 33;
+```
+
+# Emitted Messages
+
+```block
+file.js:6:5 lint/correctness/noUnusedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This variable foo is unused.
+  
+  > 6 │ let foo = 2;
+      │     ^^^
+    7 │ /**
+    8 │ * biome-ignore lint/style/useConst: reason
+  
+  i Unused variables are often the result of an incomplete refactoring, typos, or other sources of bugs.
+  
+  i Unsafe fix: If this is intentional, prepend foo with an underscore.
+  
+     4  4 │   
+     5  5 │   
+     6    │ - let·foo·=·2;
+        6 │ + let·_foo·=·2;
+     7  7 │   /**
+     8  8 │   * biome-ignore lint/style/useConst: reason
+  
+
+```
+
+```block
+file.js:10:5 lint/correctness/noUnusedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This variable bar is unused.
+  
+     8 │ * biome-ignore lint/style/useConst: reason
+     9 │ */
+  > 10 │ let bar = 33;
+       │     ^^^
+  
+  i Unused variables are often the result of an incomplete refactoring, typos, or other sources of bugs.
+  
+  i Unsafe fix: If this is intentional, prepend bar with an underscore.
+  
+     8  8 │   * biome-ignore lint/style/useConst: reason
+     9  9 │   */
+    10    │ - let·bar·=·33;
+       10 │ + let·_bar·=·33;
+  
+
+```
+
+```block
+file.js:7:1 suppressions/unused ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Suppression comment has no effect because another suppression comment suppresses the same rule.
+  
+     6 │ let foo = 2;
+   > 7 │ /**
+       │ ^^^
+   > 8 │ * biome-ignore lint/style/useConst: reason
+   > 9 │ */
+       │ ^^
+    10 │ let bar = 33;
+  
+  i This is the suppression comment that was used.
+  
+  > 1 │ /**
+      │ ^^^
+  > 2 │ * biome-ignore-all lint/style/useConst: reason
+  > 3 │ */
+      │ ^^
+    4 │ 
+  
+
+```
+
+```block
+Checked 1 file in <TIME>. No fixes applied.
+Found 3 warnings.
+```

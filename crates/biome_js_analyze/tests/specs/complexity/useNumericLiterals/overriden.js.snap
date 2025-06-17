@@ -1,0 +1,16 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: overriden.js
+snapshot_kind: text
+---
+# Input
+```js
+function parseInt() { }
+
+class Number {
+    parseInt() { }
+}
+
+parseInt('01', 2);
+Number.parseInt('67', 8)
+```

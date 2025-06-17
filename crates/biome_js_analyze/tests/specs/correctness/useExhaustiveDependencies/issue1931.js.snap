@@ -3,7 +3,7 @@ source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: issue1931.js
 ---
 # Input
-```jsx
+```js
 import { useEffect, useState } from 'library-reexporting-react';
 import * as ReactReexport from 'library-reexporting-react';
 
@@ -35,9 +35,9 @@ function MyComponent26() {
 
 # Diagnostics
 ```
-issue1931.js:9:5 lint/correctness/useExhaustiveDependencies ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+issue1931.js:9:5 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This hook does not specify all of its dependencies: calc
+  × This hook does not specify all of its dependencies: calc
   
      7 │     // they're imported from the "react" library. Explicitly configuring them
      8 │     // in the hooks array (as if they are user-provided hooks) overrides this.
@@ -57,13 +57,17 @@ issue1931.js:9:5 lint/correctness/useExhaustiveDependencies ━━━━━━�
   
   i Either include it or remove the dependency array
   
+  i Unsafe fix: Add the missing dependencies to the list.
+  
+    13 │ ····},·[calc]);
+       │         ++++   
 
 ```
 
 ```
-issue1931.js:21:19 lint/correctness/useExhaustiveDependencies ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+issue1931.js:21:19 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This hook does not specify all of its dependencies: calc
+  × This hook does not specify all of its dependencies: calc
   
     19 │     // they're imported from the "react" library. Explicitly configuring them
     20 │     // in the hooks array (as if they are user-provided hooks) overrides this.
@@ -83,5 +87,9 @@ issue1931.js:21:19 lint/correctness/useExhaustiveDependencies ━━━━━━
   
   i Either include it or remove the dependency array
   
+  i Unsafe fix: Add the missing dependencies to the list.
+  
+    25 │ ····},·[calc]);
+       │         ++++   
 
 ```

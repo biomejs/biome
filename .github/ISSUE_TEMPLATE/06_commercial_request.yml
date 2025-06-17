@@ -1,0 +1,26 @@
+name: 💳 Commercial Support Request
+description: A request for Commercial Support with Biome. We will try to bring you into contact with a freelancer who can help you.
+title: "💳 <TITLE> "
+type: Enterprise
+body:
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: A detailed description of the request. What would you like to see implemented? What requirements need to be fulfilled for the contract to be considered Done?
+    validations:
+      required: true
+  - type: input
+    id: country
+    attributes:
+      label: Country
+      description: Country from which the freelancer would be hired
+    validations:
+      required: true
+  - type: input
+    id: timeframe
+    attributes:
+      label: Timeframe
+      description: How urgent is your request?
+    validations:
+      required: true

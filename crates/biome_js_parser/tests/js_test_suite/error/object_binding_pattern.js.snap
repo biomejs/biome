@@ -1,0 +1,475 @@
+---
+source: crates/biome_js_parser/tests/spec_test.rs
+expression: snapshot
+snapshot_kind: text
+---
+## Input
+
+```js
+let { 5 } } = { eval: "foo" };
+let { eval } = { eval: "foo" };
+let { 5, 6 } = { eval: "foo" };
+let { default , eval: } = {};
+
+```
+
+
+## AST
+
+```
+JsModule {
+    bom_token: missing (optional),
+    interpreter_token: missing (optional),
+    directives: JsDirectiveList [],
+    items: JsModuleItemList [
+        JsVariableStatement {
+            declaration: JsVariableDeclaration {
+                await_token: missing (optional),
+                kind: LET_KW@0..4 "let" [] [Whitespace(" ")],
+                declarators: JsVariableDeclaratorList [
+                    JsVariableDeclarator {
+                        id: JsObjectBindingPattern {
+                            l_curly_token: L_CURLY@4..6 "{" [] [Whitespace(" ")],
+                            properties: JsObjectBindingPatternPropertyList [
+                                JsObjectBindingPatternProperty {
+                                    member: JsLiteralMemberName {
+                                        value: JS_NUMBER_LITERAL@6..8 "5" [] [Whitespace(" ")],
+                                    },
+                                    colon_token: missing (required),
+                                    pattern: missing (required),
+                                    init: missing (optional),
+                                },
+                            ],
+                            r_curly_token: R_CURLY@8..10 "}" [] [Whitespace(" ")],
+                        },
+                        variable_annotation: missing (optional),
+                        initializer: missing (optional),
+                    },
+                ],
+            },
+            semicolon_token: missing (optional),
+        },
+        JsBogusStatement {
+            items: [
+                R_CURLY@10..12 "}" [] [Whitespace(" ")],
+                EQ@12..14 "=" [] [Whitespace(" ")],
+            ],
+        },
+        JsBlockStatement {
+            l_curly_token: L_CURLY@14..16 "{" [] [Whitespace(" ")],
+            statements: JsStatementList [
+                JsLabeledStatement {
+                    label: JsLabel {
+                        value_token: IDENT@16..20 "eval" [] [],
+                    },
+                    colon_token: COLON@20..22 ":" [] [Whitespace(" ")],
+                    body: JsExpressionStatement {
+                        expression: JsStringLiteralExpression {
+                            value_token: JS_STRING_LITERAL@22..28 "\"foo\"" [] [Whitespace(" ")],
+                        },
+                        semicolon_token: missing (optional),
+                    },
+                },
+            ],
+            r_curly_token: R_CURLY@28..29 "}" [] [],
+        },
+        JsEmptyStatement {
+            semicolon_token: SEMICOLON@29..30 ";" [] [],
+        },
+        JsVariableStatement {
+            declaration: JsVariableDeclaration {
+                await_token: missing (optional),
+                kind: LET_KW@30..35 "let" [Newline("\n")] [Whitespace(" ")],
+                declarators: JsVariableDeclaratorList [
+                    JsVariableDeclarator {
+                        id: JsObjectBindingPattern {
+                            l_curly_token: L_CURLY@35..37 "{" [] [Whitespace(" ")],
+                            properties: JsObjectBindingPatternPropertyList [
+                                JsObjectBindingPatternShorthandProperty {
+                                    identifier: JsBogusBinding {
+                                        items: [
+                                            IDENT@37..42 "eval" [] [Whitespace(" ")],
+                                        ],
+                                    },
+                                    init: missing (optional),
+                                },
+                            ],
+                            r_curly_token: R_CURLY@42..44 "}" [] [Whitespace(" ")],
+                        },
+                        variable_annotation: missing (optional),
+                        initializer: JsInitializerClause {
+                            eq_token: EQ@44..46 "=" [] [Whitespace(" ")],
+                            expression: JsObjectExpression {
+                                l_curly_token: L_CURLY@46..48 "{" [] [Whitespace(" ")],
+                                members: JsObjectMemberList [
+                                    JsPropertyObjectMember {
+                                        name: JsLiteralMemberName {
+                                            value: IDENT@48..52 "eval" [] [],
+                                        },
+                                        colon_token: COLON@52..54 ":" [] [Whitespace(" ")],
+                                        value: JsStringLiteralExpression {
+                                            value_token: JS_STRING_LITERAL@54..60 "\"foo\"" [] [Whitespace(" ")],
+                                        },
+                                    },
+                                ],
+                                r_curly_token: R_CURLY@60..61 "}" [] [],
+                            },
+                        },
+                    },
+                ],
+            },
+            semicolon_token: SEMICOLON@61..62 ";" [] [],
+        },
+        JsVariableStatement {
+            declaration: JsVariableDeclaration {
+                await_token: missing (optional),
+                kind: LET_KW@62..67 "let" [Newline("\n")] [Whitespace(" ")],
+                declarators: JsVariableDeclaratorList [
+                    JsVariableDeclarator {
+                        id: JsObjectBindingPattern {
+                            l_curly_token: L_CURLY@67..69 "{" [] [Whitespace(" ")],
+                            properties: JsObjectBindingPatternPropertyList [
+                                JsObjectBindingPatternProperty {
+                                    member: JsLiteralMemberName {
+                                        value: JS_NUMBER_LITERAL@69..70 "5" [] [],
+                                    },
+                                    colon_token: missing (required),
+                                    pattern: missing (required),
+                                    init: missing (optional),
+                                },
+                                COMMA@70..72 "," [] [Whitespace(" ")],
+                                JsObjectBindingPatternProperty {
+                                    member: JsLiteralMemberName {
+                                        value: JS_NUMBER_LITERAL@72..74 "6" [] [Whitespace(" ")],
+                                    },
+                                    colon_token: missing (required),
+                                    pattern: missing (required),
+                                    init: missing (optional),
+                                },
+                            ],
+                            r_curly_token: R_CURLY@74..76 "}" [] [Whitespace(" ")],
+                        },
+                        variable_annotation: missing (optional),
+                        initializer: JsInitializerClause {
+                            eq_token: EQ@76..78 "=" [] [Whitespace(" ")],
+                            expression: JsObjectExpression {
+                                l_curly_token: L_CURLY@78..80 "{" [] [Whitespace(" ")],
+                                members: JsObjectMemberList [
+                                    JsPropertyObjectMember {
+                                        name: JsLiteralMemberName {
+                                            value: IDENT@80..84 "eval" [] [],
+                                        },
+                                        colon_token: COLON@84..86 ":" [] [Whitespace(" ")],
+                                        value: JsStringLiteralExpression {
+                                            value_token: JS_STRING_LITERAL@86..92 "\"foo\"" [] [Whitespace(" ")],
+                                        },
+                                    },
+                                ],
+                                r_curly_token: R_CURLY@92..93 "}" [] [],
+                            },
+                        },
+                    },
+                ],
+            },
+            semicolon_token: SEMICOLON@93..94 ";" [] [],
+        },
+        JsVariableStatement {
+            declaration: JsVariableDeclaration {
+                await_token: missing (optional),
+                kind: LET_KW@94..99 "let" [Newline("\n")] [Whitespace(" ")],
+                declarators: JsVariableDeclaratorList [
+                    JsVariableDeclarator {
+                        id: JsObjectBindingPattern {
+                            l_curly_token: L_CURLY@99..101 "{" [] [Whitespace(" ")],
+                            properties: JsObjectBindingPatternPropertyList [
+                                JsObjectBindingPatternProperty {
+                                    member: JsLiteralMemberName {
+                                        value: IDENT@101..109 "default" [] [Whitespace(" ")],
+                                    },
+                                    colon_token: missing (required),
+                                    pattern: missing (required),
+                                    init: missing (optional),
+                                },
+                                COMMA@109..111 "," [] [Whitespace(" ")],
+                                JsObjectBindingPatternProperty {
+                                    member: JsLiteralMemberName {
+                                        value: IDENT@111..115 "eval" [] [],
+                                    },
+                                    colon_token: COLON@115..117 ":" [] [Whitespace(" ")],
+                                    pattern: missing (required),
+                                    init: missing (optional),
+                                },
+                            ],
+                            r_curly_token: R_CURLY@117..119 "}" [] [Whitespace(" ")],
+                        },
+                        variable_annotation: missing (optional),
+                        initializer: JsInitializerClause {
+                            eq_token: EQ@119..121 "=" [] [Whitespace(" ")],
+                            expression: JsObjectExpression {
+                                l_curly_token: L_CURLY@121..122 "{" [] [],
+                                members: JsObjectMemberList [],
+                                r_curly_token: R_CURLY@122..123 "}" [] [],
+                            },
+                        },
+                    },
+                ],
+            },
+            semicolon_token: SEMICOLON@123..124 ";" [] [],
+        },
+    ],
+    eof_token: EOF@124..125 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: JS_MODULE@0..125
+  0: (empty)
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..124
+    0: JS_VARIABLE_STATEMENT@0..10
+      0: JS_VARIABLE_DECLARATION@0..10
+        0: (empty)
+        1: LET_KW@0..4 "let" [] [Whitespace(" ")]
+        2: JS_VARIABLE_DECLARATOR_LIST@4..10
+          0: JS_VARIABLE_DECLARATOR@4..10
+            0: JS_OBJECT_BINDING_PATTERN@4..10
+              0: L_CURLY@4..6 "{" [] [Whitespace(" ")]
+              1: JS_OBJECT_BINDING_PATTERN_PROPERTY_LIST@6..8
+                0: JS_OBJECT_BINDING_PATTERN_PROPERTY@6..8
+                  0: JS_LITERAL_MEMBER_NAME@6..8
+                    0: JS_NUMBER_LITERAL@6..8 "5" [] [Whitespace(" ")]
+                  1: (empty)
+                  2: (empty)
+                  3: (empty)
+              2: R_CURLY@8..10 "}" [] [Whitespace(" ")]
+            1: (empty)
+            2: (empty)
+      1: (empty)
+    1: JS_BOGUS_STATEMENT@10..14
+      0: R_CURLY@10..12 "}" [] [Whitespace(" ")]
+      1: EQ@12..14 "=" [] [Whitespace(" ")]
+    2: JS_BLOCK_STATEMENT@14..29
+      0: L_CURLY@14..16 "{" [] [Whitespace(" ")]
+      1: JS_STATEMENT_LIST@16..28
+        0: JS_LABELED_STATEMENT@16..28
+          0: JS_LABEL@16..20
+            0: IDENT@16..20 "eval" [] []
+          1: COLON@20..22 ":" [] [Whitespace(" ")]
+          2: JS_EXPRESSION_STATEMENT@22..28
+            0: JS_STRING_LITERAL_EXPRESSION@22..28
+              0: JS_STRING_LITERAL@22..28 "\"foo\"" [] [Whitespace(" ")]
+            1: (empty)
+      2: R_CURLY@28..29 "}" [] []
+    3: JS_EMPTY_STATEMENT@29..30
+      0: SEMICOLON@29..30 ";" [] []
+    4: JS_VARIABLE_STATEMENT@30..62
+      0: JS_VARIABLE_DECLARATION@30..61
+        0: (empty)
+        1: LET_KW@30..35 "let" [Newline("\n")] [Whitespace(" ")]
+        2: JS_VARIABLE_DECLARATOR_LIST@35..61
+          0: JS_VARIABLE_DECLARATOR@35..61
+            0: JS_OBJECT_BINDING_PATTERN@35..44
+              0: L_CURLY@35..37 "{" [] [Whitespace(" ")]
+              1: JS_OBJECT_BINDING_PATTERN_PROPERTY_LIST@37..42
+                0: JS_OBJECT_BINDING_PATTERN_SHORTHAND_PROPERTY@37..42
+                  0: JS_BOGUS_BINDING@37..42
+                    0: IDENT@37..42 "eval" [] [Whitespace(" ")]
+                  1: (empty)
+              2: R_CURLY@42..44 "}" [] [Whitespace(" ")]
+            1: (empty)
+            2: JS_INITIALIZER_CLAUSE@44..61
+              0: EQ@44..46 "=" [] [Whitespace(" ")]
+              1: JS_OBJECT_EXPRESSION@46..61
+                0: L_CURLY@46..48 "{" [] [Whitespace(" ")]
+                1: JS_OBJECT_MEMBER_LIST@48..60
+                  0: JS_PROPERTY_OBJECT_MEMBER@48..60
+                    0: JS_LITERAL_MEMBER_NAME@48..52
+                      0: IDENT@48..52 "eval" [] []
+                    1: COLON@52..54 ":" [] [Whitespace(" ")]
+                    2: JS_STRING_LITERAL_EXPRESSION@54..60
+                      0: JS_STRING_LITERAL@54..60 "\"foo\"" [] [Whitespace(" ")]
+                2: R_CURLY@60..61 "}" [] []
+      1: SEMICOLON@61..62 ";" [] []
+    5: JS_VARIABLE_STATEMENT@62..94
+      0: JS_VARIABLE_DECLARATION@62..93
+        0: (empty)
+        1: LET_KW@62..67 "let" [Newline("\n")] [Whitespace(" ")]
+        2: JS_VARIABLE_DECLARATOR_LIST@67..93
+          0: JS_VARIABLE_DECLARATOR@67..93
+            0: JS_OBJECT_BINDING_PATTERN@67..76
+              0: L_CURLY@67..69 "{" [] [Whitespace(" ")]
+              1: JS_OBJECT_BINDING_PATTERN_PROPERTY_LIST@69..74
+                0: JS_OBJECT_BINDING_PATTERN_PROPERTY@69..70
+                  0: JS_LITERAL_MEMBER_NAME@69..70
+                    0: JS_NUMBER_LITERAL@69..70 "5" [] []
+                  1: (empty)
+                  2: (empty)
+                  3: (empty)
+                1: COMMA@70..72 "," [] [Whitespace(" ")]
+                2: JS_OBJECT_BINDING_PATTERN_PROPERTY@72..74
+                  0: JS_LITERAL_MEMBER_NAME@72..74
+                    0: JS_NUMBER_LITERAL@72..74 "6" [] [Whitespace(" ")]
+                  1: (empty)
+                  2: (empty)
+                  3: (empty)
+              2: R_CURLY@74..76 "}" [] [Whitespace(" ")]
+            1: (empty)
+            2: JS_INITIALIZER_CLAUSE@76..93
+              0: EQ@76..78 "=" [] [Whitespace(" ")]
+              1: JS_OBJECT_EXPRESSION@78..93
+                0: L_CURLY@78..80 "{" [] [Whitespace(" ")]
+                1: JS_OBJECT_MEMBER_LIST@80..92
+                  0: JS_PROPERTY_OBJECT_MEMBER@80..92
+                    0: JS_LITERAL_MEMBER_NAME@80..84
+                      0: IDENT@80..84 "eval" [] []
+                    1: COLON@84..86 ":" [] [Whitespace(" ")]
+                    2: JS_STRING_LITERAL_EXPRESSION@86..92
+                      0: JS_STRING_LITERAL@86..92 "\"foo\"" [] [Whitespace(" ")]
+                2: R_CURLY@92..93 "}" [] []
+      1: SEMICOLON@93..94 ";" [] []
+    6: JS_VARIABLE_STATEMENT@94..124
+      0: JS_VARIABLE_DECLARATION@94..123
+        0: (empty)
+        1: LET_KW@94..99 "let" [Newline("\n")] [Whitespace(" ")]
+        2: JS_VARIABLE_DECLARATOR_LIST@99..123
+          0: JS_VARIABLE_DECLARATOR@99..123
+            0: JS_OBJECT_BINDING_PATTERN@99..119
+              0: L_CURLY@99..101 "{" [] [Whitespace(" ")]
+              1: JS_OBJECT_BINDING_PATTERN_PROPERTY_LIST@101..117
+                0: JS_OBJECT_BINDING_PATTERN_PROPERTY@101..109
+                  0: JS_LITERAL_MEMBER_NAME@101..109
+                    0: IDENT@101..109 "default" [] [Whitespace(" ")]
+                  1: (empty)
+                  2: (empty)
+                  3: (empty)
+                1: COMMA@109..111 "," [] [Whitespace(" ")]
+                2: JS_OBJECT_BINDING_PATTERN_PROPERTY@111..117
+                  0: JS_LITERAL_MEMBER_NAME@111..115
+                    0: IDENT@111..115 "eval" [] []
+                  1: COLON@115..117 ":" [] [Whitespace(" ")]
+                  2: (empty)
+                  3: (empty)
+              2: R_CURLY@117..119 "}" [] [Whitespace(" ")]
+            1: (empty)
+            2: JS_INITIALIZER_CLAUSE@119..123
+              0: EQ@119..121 "=" [] [Whitespace(" ")]
+              1: JS_OBJECT_EXPRESSION@121..123
+                0: L_CURLY@121..122 "{" [] []
+                1: JS_OBJECT_MEMBER_LIST@122..122
+                2: R_CURLY@122..123 "}" [] []
+      1: SEMICOLON@123..124 ";" [] []
+  4: EOF@124..125 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+object_binding_pattern.js:1:9 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `:` but instead found `}`
+  
+  > 1 │ let { 5 } } = { eval: "foo" };
+      │         ^
+    2 │ let { eval } = { eval: "foo" };
+    3 │ let { 5, 6 } = { eval: "foo" };
+  
+  i Remove }
+  
+object_binding_pattern.js:1:5 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Object and Array patterns require initializers.
+  
+  > 1 │ let { 5 } } = { eval: "foo" };
+      │     ^^^^^
+    2 │ let { eval } = { eval: "foo" };
+    3 │ let { 5, 6 } = { eval: "foo" };
+  
+  i This pattern is declared, but it is not given an initialized value.
+  
+object_binding_pattern.js:1:11 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a statement but instead found '} ='.
+  
+  > 1 │ let { 5 } } = { eval: "foo" };
+      │           ^^^
+    2 │ let { eval } = { eval: "foo" };
+    3 │ let { 5, 6 } = { eval: "foo" };
+  
+  i Expected a statement here.
+  
+  > 1 │ let { 5 } } = { eval: "foo" };
+      │           ^^^
+    2 │ let { eval } = { eval: "foo" };
+    3 │ let { 5, 6 } = { eval: "foo" };
+  
+object_binding_pattern.js:2:7 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Illegal use of `eval` as an identifier in strict mode
+  
+    1 │ let { 5 } } = { eval: "foo" };
+  > 2 │ let { eval } = { eval: "foo" };
+      │       ^^^^
+    3 │ let { 5, 6 } = { eval: "foo" };
+    4 │ let { default , eval: } = {};
+  
+object_binding_pattern.js:3:8 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `:` but instead found `,`
+  
+    1 │ let { 5 } } = { eval: "foo" };
+    2 │ let { eval } = { eval: "foo" };
+  > 3 │ let { 5, 6 } = { eval: "foo" };
+      │        ^
+    4 │ let { default , eval: } = {};
+    5 │ 
+  
+  i Remove ,
+  
+object_binding_pattern.js:3:12 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `:` but instead found `}`
+  
+    1 │ let { 5 } } = { eval: "foo" };
+    2 │ let { eval } = { eval: "foo" };
+  > 3 │ let { 5, 6 } = { eval: "foo" };
+      │            ^
+    4 │ let { default , eval: } = {};
+    5 │ 
+  
+  i Remove }
+  
+object_binding_pattern.js:4:15 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `:` but instead found `,`
+  
+    2 │ let { eval } = { eval: "foo" };
+    3 │ let { 5, 6 } = { eval: "foo" };
+  > 4 │ let { default , eval: } = {};
+      │               ^
+    5 │ 
+  
+  i Remove ,
+  
+object_binding_pattern.js:4:23 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected an identifier, an array pattern, or an object pattern but instead found '}'.
+  
+    2 │ let { eval } = { eval: "foo" };
+    3 │ let { 5, 6 } = { eval: "foo" };
+  > 4 │ let { default , eval: } = {};
+      │                       ^
+    5 │ 
+  
+  i Expected an identifier, an array pattern, or an object pattern here.
+  
+    2 │ let { eval } = { eval: "foo" };
+    3 │ let { 5, 6 } = { eval: "foo" };
+  > 4 │ let { default , eval: } = {};
+      │                       ^
+    5 │ 
+  
+```

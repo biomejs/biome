@@ -1,0 +1,1643 @@
+{
+  "permalink": "https://www.w3.org/TR/2017/REC-dpub-aria-1.0-20171214/",
+  "url": "https://www.w3.org/TR/dpub-aria-1.0/",
+  "version": "1.0",
+  "roles": {
+    "doc-abstract": {
+      "description": "A short summary of the principle ideas, concepts and conclusions of the work, or of a section or excerpt within it.",
+      "isAbstract": false,
+      "superclassRoles": [
+        "section"
+      ],
+      "relatedConcepts": [
+        {
+          "type": "text",
+          "name": "EPUB abstract [EPUB-SSV]"
+        }
+      ],
+      "inheritedAttributes": [
+        "aria-atomic",
+        "aria-busy",
+        "aria-controls",
+        "aria-current",
+        "aria-describedby",
+        "aria-details",
+        "aria-disabled",
+        "aria-dropeffect",
+        "aria-errormessage",
+        "aria-expanded",
+        "aria-flowto",
+        "aria-grabbed",
+        "aria-haspopup",
+        "aria-hidden",
+        "aria-invalid",
+        "aria-keyshortcuts",
+        "aria-label",
+        "aria-labelledby",
+        "aria-live",
+        "aria-owns",
+        "aria-relevant",
+        "aria-roledescription"
+      ],
+      "nameFrom": [
+        "author"
+      ],
+      "isAccessibleNameRequired": false,
+      "hasPresentationalChildren": false
+    },
+    "doc-acknowledgments": {
+      "description": "A section or statement that acknowledges significant contributions by persons, organizations, governments and other entities to the realization of the work.",
+      "isAbstract": false,
+      "superclassRoles": [
+        "landmark"
+      ],
+      "relatedConcepts": [
+        {
+          "type": "text",
+          "name": "EPUB acknowledgments [EPUB-SSV]"
+        }
+      ],
+      "inheritedAttributes": [
+        "aria-atomic",
+        "aria-busy",
+        "aria-controls",
+        "aria-current",
+        "aria-describedby",
+        "aria-details",
+        "aria-disabled",
+        "aria-dropeffect",
+        "aria-errormessage",
+        "aria-expanded",
+        "aria-flowto",
+        "aria-grabbed",
+        "aria-haspopup",
+        "aria-hidden",
+        "aria-invalid",
+        "aria-keyshortcuts",
+        "aria-label",
+        "aria-labelledby",
+        "aria-live",
+        "aria-owns",
+        "aria-relevant",
+        "aria-roledescription"
+      ],
+      "nameFrom": [
+        "author"
+      ],
+      "isAccessibleNameRequired": false,
+      "hasPresentationalChildren": false
+    },
+    "doc-afterword": {
+      "description": "A closing statement from the author or a person of importance, typically providing insight into how the content came to be written, its significance, or related events that have transpired since its timeline.",
+      "isAbstract": false,
+      "superclassRoles": [
+        "landmark"
+      ],
+      "relatedConcepts": [
+        {
+          "type": "text",
+          "name": "EPUB afterword [EPUB-SSV]"
+        }
+      ],
+      "inheritedAttributes": [
+        "aria-atomic",
+        "aria-busy",
+        "aria-controls",
+        "aria-current",
+        "aria-describedby",
+        "aria-details",
+        "aria-disabled",
+        "aria-dropeffect",
+        "aria-errormessage",
+        "aria-expanded",
+        "aria-flowto",
+        "aria-grabbed",
+        "aria-haspopup",
+        "aria-hidden",
+        "aria-invalid",
+        "aria-keyshortcuts",
+        "aria-label",
+        "aria-labelledby",
+        "aria-live",
+        "aria-owns",
+        "aria-relevant",
+        "aria-roledescription"
+      ],
+      "nameFrom": [
+        "author"
+      ],
+      "isAccessibleNameRequired": false,
+      "hasPresentationalChildren": false
+    },
+    "doc-appendix": {
+      "description": "A section of supplemental information located after the primary content that informs the content but is not central to it.",
+      "isAbstract": false,
+      "superclassRoles": [
+        "landmark"
+      ],
+      "relatedConcepts": [
+        {
+          "type": "text",
+          "name": "EPUB appendix [EPUB-SSV]"
+        }
+      ],
+      "inheritedAttributes": [
+        "aria-atomic",
+        "aria-busy",
+        "aria-controls",
+        "aria-current",
+        "aria-describedby",
+        "aria-details",
+        "aria-disabled",
+        "aria-dropeffect",
+        "aria-errormessage",
+        "aria-expanded",
+        "aria-flowto",
+        "aria-grabbed",
+        "aria-haspopup",
+        "aria-hidden",
+        "aria-invalid",
+        "aria-keyshortcuts",
+        "aria-label",
+        "aria-labelledby",
+        "aria-live",
+        "aria-owns",
+        "aria-relevant",
+        "aria-roledescription"
+      ],
+      "nameFrom": [
+        "author"
+      ],
+      "isAccessibleNameRequired": false,
+      "hasPresentationalChildren": false
+    },
+    "doc-backlink": {
+      "description": "A link that allows the user to return to a related location in the content (e.g., from a footnote to its reference or from a glossary definition to where a term is used).",
+      "isAbstract": false,
+      "superclassRoles": [
+        "link"
+      ],
+      "relatedConcepts": [
+        {
+          "type": "text",
+          "name": "EPUB referrer [EPUB-SSV]"
+        }
+      ],
+      "inheritedAttributes": [
+        "aria-atomic",
+        "aria-busy",
+        "aria-controls",
+        "aria-current",
+        "aria-describedby",
+        "aria-details",
+        "aria-disabled",
+        "aria-dropeffect",
+        "aria-errormessage",
+        "aria-expanded",
+        "aria-flowto",
+        "aria-grabbed",
+        "aria-haspopup",
+        "aria-hidden",
+        "aria-invalid",
+        "aria-keyshortcuts",
+        "aria-label",
+        "aria-labelledby",
+        "aria-live",
+        "aria-owns",
+        "aria-relevant",
+        "aria-roledescription"
+      ],
+      "nameFrom": [
+        "contents",
+        "author"
+      ],
+      "isAccessibleNameRequired": true,
+      "hasPresentationalChildren": false
+    },
+    "doc-biblioentry": {
+      "description": "A single reference to an external source in a bibliography. A biblioentry typically provides more detailed\t\t\t\t\tinformation than its reference(s) in the content (e.g., full title, author(s), publisher, publication date, etc.).",
+      "isAbstract": false,
+      "superclassRoles": [
+        "listitem"
+      ],
+      "relatedConcepts": [
+        {
+          "type": "text",
+          "name": "EPUB biblioentry [EPUB-SSV]"
+        }
+      ],
+      "requiredParentRoles": [
+        "doc-bibliography"
+      ],
+      "inheritedAttributes": [
+        "aria-atomic",
+        "aria-busy",
+        "aria-controls",
+        "aria-current",
+        "aria-describedby",
+        "aria-details",
+        "aria-disabled",
+        "aria-dropeffect",
+        "aria-errormessage",
+        "aria-expanded",
+        "aria-flowto",
+        "aria-grabbed",
+        "aria-haspopup",
+        "aria-hidden",
+        "aria-invalid",
+        "aria-keyshortcuts",
+        "aria-label",
+        "aria-labelledby",
+        "aria-level",
+        "aria-live",
+        "aria-owns",
+        "aria-posinset",
+        "aria-relevant",
+        "aria-roledescription",
+        "aria-setsize"
+      ],
+      "nameFrom": [
+        "author"
+      ],
+      "isAccessibleNameRequired": true,
+      "hasPresentationalChildren": false
+    },
+    "doc-bibliography": {
+      "description": "A list of external references cited in the work, which may be to print or digital sources.",
+      "isAbstract": false,
+      "superclassRoles": [
+        "landmark"
+      ],
+      "relatedConcepts": [
+        {
+          "type": "text",
+          "name": "EPUB bibliography [EPUB-SSV]"
+        }
+      ],
+      "allowedChildRoles": [
+        "doc-biblioentry"
+      ],
+      "inheritedAttributes": [
+        "aria-atomic",
+        "aria-busy",
+        "aria-controls",
+        "aria-current",
+        "aria-describedby",
+        "aria-details",
+        "aria-disabled",
+        "aria-dropeffect",
+        "aria-errormessage",
+        "aria-expanded",
+        "aria-flowto",
+        "aria-grabbed",
+        "aria-haspopup",
+        "aria-hidden",
+        "aria-invalid",
+        "aria-keyshortcuts",
+        "aria-label",
+        "aria-labelledby",
+        "aria-live",
+        "aria-owns",
+        "aria-relevant",
+        "aria-roledescription"
+      ],
+      "nameFrom": [
+        "author"
+      ],
+      "isAccessibleNameRequired": false,
+      "hasPresentationalChildren": false
+    },
+    "doc-biblioref": {
+      "description": "A reference to a bibliography entry.",
+      "isAbstract": false,
+      "superclassRoles": [
+        "link"
+      ],
+      "relatedConcepts": [
+        {
+          "type": "text",
+          "name": "EPUB biblioref [EPUB-SSV]"
+        }
+      ],
+      "inheritedAttributes": [
+        "aria-atomic",
+        "aria-busy",
+        "aria-controls",
+        "aria-current",
+        "aria-describedby",
+        "aria-details",
+        "aria-disabled",
+        "aria-dropeffect",
+        "aria-errormessage",
+        "aria-expanded",
+        "aria-flowto",
+        "aria-grabbed",
+        "aria-haspopup",
+        "aria-hidden",
+        "aria-invalid",
+        "aria-keyshortcuts",
+        "aria-label",
+        "aria-labelledby",
+        "aria-live",
+        "aria-owns",
+        "aria-relevant",
+        "aria-roledescription"
+      ],
+      "nameFrom": [
+        "contents",
+        "author"
+      ],
+      "isAccessibleNameRequired": true,
+      "hasPresentationalChildren": false
+    },
+    "doc-chapter": {
+      "description": "A major thematic section of content in a work.",
+      "isAbstract": false,
+      "superclassRoles": [
+        "landmark"
+      ],
+      "relatedConcepts": [
+        {
+          "type": "text",
+          "name": "EPUB chapter [EPUB-SSV]"
+        }
+      ],
+      "inheritedAttributes": [
+        "aria-atomic",
+        "aria-busy",
+        "aria-controls",
+        "aria-current",
+        "aria-describedby",
+        "aria-details",
+        "aria-disabled",
+        "aria-dropeffect",
+        "aria-errormessage",
+        "aria-expanded",
+        "aria-flowto",
+        "aria-grabbed",
+        "aria-haspopup",
+        "aria-hidden",
+        "aria-invalid",
+        "aria-keyshortcuts",
+        "aria-label",
+        "aria-labelledby",
+        "aria-live",
+        "aria-owns",
+        "aria-relevant",
+        "aria-roledescription"
+      ],
+      "nameFrom": [
+        "author"
+      ],
+      "isAccessibleNameRequired": false,
+      "hasPresentationalChildren": false
+    },
+    "doc-colophon": {
+      "description": "A short section of production notes particular to the edition (e.g., describing the typeface used), often located at the end of a work.",
+      "isAbstract": false,
+      "superclassRoles": [
+        "section"
+      ],
+      "relatedConcepts": [
+        {
+          "type": "text",
+          "name": "EPUB colophon [EPUB-SSV]"
+        }
+      ],
+      "inheritedAttributes": [
+        "aria-atomic",
+        "aria-busy",
+        "aria-controls",
+        "aria-current",
+        "aria-describedby",
+        "aria-details",
+        "aria-disabled",
+        "aria-dropeffect",
+        "aria-errormessage",
+        "aria-expanded",
+        "aria-flowto",
+        "aria-grabbed",
+        "aria-haspopup",
+        "aria-hidden",
+        "aria-invalid",
+        "aria-keyshortcuts",
+        "aria-label",
+        "aria-labelledby",
+        "aria-live",
+        "aria-owns",
+        "aria-relevant",
+        "aria-roledescription"
+      ],
+      "nameFrom": [
+        "author"
+      ],
+      "isAccessibleNameRequired": false,
+      "hasPresentationalChildren": false
+    },
+    "doc-conclusion": {
+      "description": "A concluding section or statement that summarizes the work or wraps up the narrative.",
+      "isAbstract": false,
+      "superclassRoles": [
+        "landmark"
+      ],
+      "relatedConcepts": [
+        {
+          "type": "text",
+          "name": "EPUB conclusion [EPUB-SSV]"
+        }
+      ],
+      "inheritedAttributes": [
+        "aria-atomic",
+        "aria-busy",
+        "aria-controls",
+        "aria-current",
+        "aria-describedby",
+        "aria-details",
+        "aria-disabled",
+        "aria-dropeffect",
+        "aria-errormessage",
+        "aria-expanded",
+        "aria-flowto",
+        "aria-grabbed",
+        "aria-haspopup",
+        "aria-hidden",
+        "aria-invalid",
+        "aria-keyshortcuts",
+        "aria-label",
+        "aria-labelledby",
+        "aria-live",
+        "aria-owns",
+        "aria-relevant",
+        "aria-roledescription"
+      ],
+      "nameFrom": [
+        "author"
+      ],
+      "isAccessibleNameRequired": false,
+      "hasPresentationalChildren": false
+    },
+    "doc-cover": {
+      "description": "An image that sets the mood or tone for the work and typically includes the title and author.",
+      "isAbstract": false,
+      "superclassRoles": [
+        "img"
+      ],
+      "relatedConcepts": [
+        {
+          "type": "text",
+          "name": "EPUB cover [EPUB-SSV]"
+        }
+      ],
+      "inheritedAttributes": [
+        "aria-atomic",
+        "aria-busy",
+        "aria-controls",
+        "aria-current",
+        "aria-describedby",
+        "aria-details",
+        "aria-disabled",
+        "aria-dropeffect",
+        "aria-errormessage",
+        "aria-expanded",
+        "aria-flowto",
+        "aria-grabbed",
+        "aria-haspopup",
+        "aria-hidden",
+        "aria-invalid",
+        "aria-keyshortcuts",
+        "aria-label",
+        "aria-labelledby",
+        "aria-live",
+        "aria-owns",
+        "aria-relevant",
+        "aria-roledescription"
+      ],
+      "nameFrom": [
+        "author"
+      ],
+      "isAccessibleNameRequired": false,
+      "hasPresentationalChildren": false
+    },
+    "doc-credit": {
+      "description": "An acknowledgment of the source of integrated content from third-party sources, such as photos. Typically identifies the creator, copyright and any restrictions on reuse.",
+      "isAbstract": false,
+      "superclassRoles": [
+        "section"
+      ],
+      "relatedConcepts": [
+        {
+          "type": "text",
+          "name": "EPUB credit [EPUB-SSV]"
+        }
+      ],
+      "inheritedAttributes": [
+        "aria-atomic",
+        "aria-busy",
+        "aria-controls",
+        "aria-current",
+        "aria-describedby",
+        "aria-details",
+        "aria-disabled",
+        "aria-dropeffect",
+        "aria-errormessage",
+        "aria-expanded",
+        "aria-flowto",
+        "aria-grabbed",
+        "aria-haspopup",
+        "aria-hidden",
+        "aria-invalid",
+        "aria-keyshortcuts",
+        "aria-label",
+        "aria-labelledby",
+        "aria-live",
+        "aria-owns",
+        "aria-relevant",
+        "aria-roledescription"
+      ],
+      "nameFrom": [
+        "author"
+      ],
+      "isAccessibleNameRequired": false,
+      "hasPresentationalChildren": false
+    },
+    "doc-credits": {
+      "description": "A collection of credits.",
+      "isAbstract": false,
+      "superclassRoles": [
+        "landmark"
+      ],
+      "relatedConcepts": [
+        {
+          "type": "text",
+          "name": "EPUB credits [EPUB-SSV]"
+        }
+      ],
+      "inheritedAttributes": [
+        "aria-atomic",
+        "aria-busy",
+        "aria-controls",
+        "aria-current",
+        "aria-describedby",
+        "aria-details",
+        "aria-disabled",
+        "aria-dropeffect",
+        "aria-errormessage",
+        "aria-expanded",
+        "aria-flowto",
+        "aria-grabbed",
+        "aria-haspopup",
+        "aria-hidden",
+        "aria-invalid",
+        "aria-keyshortcuts",
+        "aria-label",
+        "aria-labelledby",
+        "aria-live",
+        "aria-owns",
+        "aria-relevant",
+        "aria-roledescription"
+      ],
+      "nameFrom": [
+        "author"
+      ],
+      "isAccessibleNameRequired": false,
+      "hasPresentationalChildren": false
+    },
+    "doc-dedication": {
+      "description": "An inscription at the front of the work, typically addressed in tribute to one or more persons close to the author.",
+      "isAbstract": false,
+      "superclassRoles": [
+        "section"
+      ],
+      "relatedConcepts": [
+        {
+          "type": "text",
+          "name": "EPUB dedication [EPUB-SSV]"
+        }
+      ],
+      "inheritedAttributes": [
+        "aria-atomic",
+        "aria-busy",
+        "aria-controls",
+        "aria-current",
+        "aria-describedby",
+        "aria-details",
+        "aria-disabled",
+        "aria-dropeffect",
+        "aria-errormessage",
+        "aria-expanded",
+        "aria-flowto",
+        "aria-grabbed",
+        "aria-haspopup",
+        "aria-hidden",
+        "aria-invalid",
+        "aria-keyshortcuts",
+        "aria-label",
+        "aria-labelledby",
+        "aria-live",
+        "aria-owns",
+        "aria-relevant",
+        "aria-roledescription"
+      ],
+      "nameFrom": [
+        "author"
+      ],
+      "isAccessibleNameRequired": false,
+      "hasPresentationalChildren": false
+    },
+    "doc-endnote": {
+      "description": "One of a collection of notes that occur at the end of a work, or a section within it,\t\t\t\t\tthat provides additional context to a referenced passage of text.",
+      "isAbstract": false,
+      "superclassRoles": [
+        "listitem"
+      ],
+      "relatedConcepts": [
+        {
+          "type": "text",
+          "name": "EPUB rearnote [EPUB-SSV]"
+        }
+      ],
+      "requiredParentRoles": [
+        "doc-endnotes"
+      ],
+      "inheritedAttributes": [
+        "aria-atomic",
+        "aria-busy",
+        "aria-controls",
+        "aria-current",
+        "aria-describedby",
+        "aria-details",
+        "aria-disabled",
+        "aria-dropeffect",
+        "aria-errormessage",
+        "aria-expanded",
+        "aria-flowto",
+        "aria-grabbed",
+        "aria-haspopup",
+        "aria-hidden",
+        "aria-invalid",
+        "aria-keyshortcuts",
+        "aria-label",
+        "aria-labelledby",
+        "aria-level",
+        "aria-live",
+        "aria-owns",
+        "aria-posinset",
+        "aria-relevant",
+        "aria-roledescription",
+        "aria-setsize"
+      ],
+      "nameFrom": [
+        "author"
+      ],
+      "isAccessibleNameRequired": false,
+      "hasPresentationalChildren": false
+    },
+    "doc-endnotes": {
+      "description": "A collection of notes at the end of a work or a section within it.",
+      "isAbstract": false,
+      "superclassRoles": [
+        "landmark"
+      ],
+      "relatedConcepts": [
+        {
+          "type": "text",
+          "name": "EPUB rearnotes [EPUB-SSV]"
+        }
+      ],
+      "allowedChildRoles": [
+        "doc-endnote"
+      ],
+      "inheritedAttributes": [
+        "aria-atomic",
+        "aria-busy",
+        "aria-controls",
+        "aria-current",
+        "aria-describedby",
+        "aria-details",
+        "aria-disabled",
+        "aria-dropeffect",
+        "aria-errormessage",
+        "aria-expanded",
+        "aria-flowto",
+        "aria-grabbed",
+        "aria-haspopup",
+        "aria-hidden",
+        "aria-invalid",
+        "aria-keyshortcuts",
+        "aria-label",
+        "aria-labelledby",
+        "aria-live",
+        "aria-owns",
+        "aria-relevant",
+        "aria-roledescription"
+      ],
+      "nameFrom": [
+        "author"
+      ],
+      "isAccessibleNameRequired": false,
+      "hasPresentationalChildren": false
+    },
+    "doc-epigraph": {
+      "description": "A quotation set at the start of the work or a section that establishes the theme or sets the mood.",
+      "isAbstract": false,
+      "superclassRoles": [
+        "section"
+      ],
+      "relatedConcepts": [
+        {
+          "type": "text",
+          "name": "EPUB epigraph [EPUB-SSV]"
+        }
+      ],
+      "inheritedAttributes": [
+        "aria-atomic",
+        "aria-busy",
+        "aria-controls",
+        "aria-current",
+        "aria-describedby",
+        "aria-details",
+        "aria-disabled",
+        "aria-dropeffect",
+        "aria-errormessage",
+        "aria-expanded",
+        "aria-flowto",
+        "aria-grabbed",
+        "aria-haspopup",
+        "aria-hidden",
+        "aria-invalid",
+        "aria-keyshortcuts",
+        "aria-label",
+        "aria-labelledby",
+        "aria-live",
+        "aria-owns",
+        "aria-relevant",
+        "aria-roledescription"
+      ],
+      "nameFrom": [
+        "author"
+      ],
+      "isAccessibleNameRequired": false,
+      "hasPresentationalChildren": false
+    },
+    "doc-epilogue": {
+      "description": "A concluding section of narrative that wraps up or comments on the actions and events of the work, typically from a future perspective.",
+      "isAbstract": false,
+      "superclassRoles": [
+        "landmark"
+      ],
+      "relatedConcepts": [
+        {
+          "type": "text",
+          "name": "EPUB epilogue [EPUB-SSV]"
+        }
+      ],
+      "inheritedAttributes": [
+        "aria-atomic",
+        "aria-busy",
+        "aria-controls",
+        "aria-current",
+        "aria-describedby",
+        "aria-details",
+        "aria-disabled",
+        "aria-dropeffect",
+        "aria-errormessage",
+        "aria-expanded",
+        "aria-flowto",
+        "aria-grabbed",
+        "aria-haspopup",
+        "aria-hidden",
+        "aria-invalid",
+        "aria-keyshortcuts",
+        "aria-label",
+        "aria-labelledby",
+        "aria-live",
+        "aria-owns",
+        "aria-relevant",
+        "aria-roledescription"
+      ],
+      "nameFrom": [
+        "author"
+      ],
+      "isAccessibleNameRequired": false,
+      "hasPresentationalChildren": false
+    },
+    "doc-errata": {
+      "description": "A set of corrections discovered after initial publication of the work, sometimes referred to as corrigenda.",
+      "isAbstract": false,
+      "superclassRoles": [
+        "landmark"
+      ],
+      "relatedConcepts": [
+        {
+          "type": "text",
+          "name": "EPUB errata [EPUB-SSV]"
+        }
+      ],
+      "inheritedAttributes": [
+        "aria-atomic",
+        "aria-busy",
+        "aria-controls",
+        "aria-current",
+        "aria-describedby",
+        "aria-details",
+        "aria-disabled",
+        "aria-dropeffect",
+        "aria-errormessage",
+        "aria-expanded",
+        "aria-flowto",
+        "aria-grabbed",
+        "aria-haspopup",
+        "aria-hidden",
+        "aria-invalid",
+        "aria-keyshortcuts",
+        "aria-label",
+        "aria-labelledby",
+        "aria-live",
+        "aria-owns",
+        "aria-relevant",
+        "aria-roledescription"
+      ],
+      "nameFrom": [
+        "author"
+      ],
+      "isAccessibleNameRequired": false,
+      "hasPresentationalChildren": false
+    },
+    "doc-example": {
+      "description": "An illustratration of a key concept of the work, such as a code listing, case study or problem.",
+      "isAbstract": false,
+      "superclassRoles": [
+        "section"
+      ],
+      "inheritedAttributes": [
+        "aria-atomic",
+        "aria-busy",
+        "aria-controls",
+        "aria-current",
+        "aria-describedby",
+        "aria-details",
+        "aria-disabled",
+        "aria-dropeffect",
+        "aria-errormessage",
+        "aria-expanded",
+        "aria-flowto",
+        "aria-grabbed",
+        "aria-haspopup",
+        "aria-hidden",
+        "aria-invalid",
+        "aria-keyshortcuts",
+        "aria-label",
+        "aria-labelledby",
+        "aria-live",
+        "aria-owns",
+        "aria-relevant",
+        "aria-roledescription"
+      ],
+      "nameFrom": [
+        "author"
+      ],
+      "isAccessibleNameRequired": false,
+      "hasPresentationalChildren": false
+    },
+    "doc-footnote": {
+      "description": "Ancillary information, such as a citation or commentary, that provides additional context to a referenced passage of text.",
+      "isAbstract": false,
+      "superclassRoles": [
+        "section"
+      ],
+      "relatedConcepts": [
+        {
+          "type": "text",
+          "name": "EPUB footnote [EPUB-SSV]"
+        }
+      ],
+      "inheritedAttributes": [
+        "aria-atomic",
+        "aria-busy",
+        "aria-controls",
+        "aria-current",
+        "aria-describedby",
+        "aria-details",
+        "aria-disabled",
+        "aria-dropeffect",
+        "aria-errormessage",
+        "aria-expanded",
+        "aria-flowto",
+        "aria-grabbed",
+        "aria-haspopup",
+        "aria-hidden",
+        "aria-invalid",
+        "aria-keyshortcuts",
+        "aria-label",
+        "aria-labelledby",
+        "aria-live",
+        "aria-owns",
+        "aria-relevant",
+        "aria-roledescription"
+      ],
+      "nameFrom": [
+        "author"
+      ],
+      "isAccessibleNameRequired": false,
+      "hasPresentationalChildren": false
+    },
+    "doc-foreword": {
+      "description": "An introductory section that precedes the work, typically not written by the author of the work.",
+      "isAbstract": false,
+      "superclassRoles": [
+        "landmark"
+      ],
+      "relatedConcepts": [
+        {
+          "type": "text",
+          "name": "EPUB foreword [EPUB-SSV]"
+        }
+      ],
+      "inheritedAttributes": [
+        "aria-atomic",
+        "aria-busy",
+        "aria-controls",
+        "aria-current",
+        "aria-describedby",
+        "aria-details",
+        "aria-disabled",
+        "aria-dropeffect",
+        "aria-errormessage",
+        "aria-expanded",
+        "aria-flowto",
+        "aria-grabbed",
+        "aria-haspopup",
+        "aria-hidden",
+        "aria-invalid",
+        "aria-keyshortcuts",
+        "aria-label",
+        "aria-labelledby",
+        "aria-live",
+        "aria-owns",
+        "aria-relevant",
+        "aria-roledescription"
+      ],
+      "nameFrom": [
+        "author"
+      ],
+      "isAccessibleNameRequired": false,
+      "hasPresentationalChildren": false
+    },
+    "doc-glossary": {
+      "description": "A brief dictionary of new, uncommon or specialized terms used in the content.",
+      "isAbstract": false,
+      "superclassRoles": [
+        "landmark"
+      ],
+      "relatedConcepts": [
+        {
+          "type": "text",
+          "name": "EPUB glossary [EPUB-SSV]"
+        }
+      ],
+      "allowedChildRoles": [
+        "term",
+        "definition"
+      ],
+      "inheritedAttributes": [
+        "aria-atomic",
+        "aria-busy",
+        "aria-controls",
+        "aria-current",
+        "aria-describedby",
+        "aria-details",
+        "aria-disabled",
+        "aria-dropeffect",
+        "aria-errormessage",
+        "aria-expanded",
+        "aria-flowto",
+        "aria-grabbed",
+        "aria-haspopup",
+        "aria-hidden",
+        "aria-invalid",
+        "aria-keyshortcuts",
+        "aria-label",
+        "aria-labelledby",
+        "aria-live",
+        "aria-owns",
+        "aria-relevant",
+        "aria-roledescription"
+      ],
+      "nameFrom": [
+        "author"
+      ],
+      "isAccessibleNameRequired": false,
+      "hasPresentationalChildren": false
+    },
+    "doc-glossref": {
+      "description": "A reference to a glossary definition.",
+      "isAbstract": false,
+      "superclassRoles": [
+        "link"
+      ],
+      "relatedConcepts": [
+        {
+          "type": "text",
+          "name": "EPUB glossref [EPUB-SSV]"
+        }
+      ],
+      "inheritedAttributes": [
+        "aria-atomic",
+        "aria-busy",
+        "aria-controls",
+        "aria-current",
+        "aria-describedby",
+        "aria-details",
+        "aria-disabled",
+        "aria-dropeffect",
+        "aria-errormessage",
+        "aria-expanded",
+        "aria-flowto",
+        "aria-grabbed",
+        "aria-haspopup",
+        "aria-hidden",
+        "aria-invalid",
+        "aria-keyshortcuts",
+        "aria-label",
+        "aria-labelledby",
+        "aria-live",
+        "aria-owns",
+        "aria-relevant",
+        "aria-roledescription"
+      ],
+      "nameFrom": [
+        "contents",
+        "author"
+      ],
+      "isAccessibleNameRequired": true,
+      "hasPresentationalChildren": false
+    },
+    "doc-index": {
+      "description": "A navigational aid that provides a detailed list of links to key subjects, names and other important topics covered in the work.",
+      "isAbstract": false,
+      "superclassRoles": [
+        "navigation"
+      ],
+      "relatedConcepts": [
+        {
+          "type": "text",
+          "name": "EPUB index [EPUB-SSV]"
+        }
+      ],
+      "inheritedAttributes": [
+        "aria-atomic",
+        "aria-busy",
+        "aria-controls",
+        "aria-current",
+        "aria-describedby",
+        "aria-details",
+        "aria-disabled",
+        "aria-dropeffect",
+        "aria-errormessage",
+        "aria-expanded",
+        "aria-flowto",
+        "aria-grabbed",
+        "aria-haspopup",
+        "aria-hidden",
+        "aria-invalid",
+        "aria-keyshortcuts",
+        "aria-label",
+        "aria-labelledby",
+        "aria-live",
+        "aria-owns",
+        "aria-relevant",
+        "aria-roledescription"
+      ],
+      "nameFrom": [
+        "author"
+      ],
+      "isAccessibleNameRequired": false,
+      "hasPresentationalChildren": false
+    },
+    "doc-introduction": {
+      "description": "A preliminary section that typically introduces the scope or nature of the work.",
+      "isAbstract": false,
+      "superclassRoles": [
+        "landmark"
+      ],
+      "relatedConcepts": [
+        {
+          "type": "text",
+          "name": "EPUB introduction [EPUB-SSV]"
+        }
+      ],
+      "inheritedAttributes": [
+        "aria-atomic",
+        "aria-busy",
+        "aria-controls",
+        "aria-current",
+        "aria-describedby",
+        "aria-details",
+        "aria-disabled",
+        "aria-dropeffect",
+        "aria-errormessage",
+        "aria-expanded",
+        "aria-flowto",
+        "aria-grabbed",
+        "aria-haspopup",
+        "aria-hidden",
+        "aria-invalid",
+        "aria-keyshortcuts",
+        "aria-label",
+        "aria-labelledby",
+        "aria-live",
+        "aria-owns",
+        "aria-relevant",
+        "aria-roledescription"
+      ],
+      "nameFrom": [
+        "author"
+      ],
+      "isAccessibleNameRequired": false,
+      "hasPresentationalChildren": false
+    },
+    "doc-noteref": {
+      "description": "A reference to a footnote or endnote, typically appearing as a superscripted number or symbol in the main body of text.",
+      "isAbstract": false,
+      "superclassRoles": [
+        "link"
+      ],
+      "relatedConcepts": [
+        {
+          "type": "text",
+          "name": "EPUB noteref [EPUB-SSV]"
+        }
+      ],
+      "inheritedAttributes": [
+        "aria-atomic",
+        "aria-busy",
+        "aria-controls",
+        "aria-current",
+        "aria-describedby",
+        "aria-details",
+        "aria-disabled",
+        "aria-dropeffect",
+        "aria-errormessage",
+        "aria-expanded",
+        "aria-flowto",
+        "aria-grabbed",
+        "aria-haspopup",
+        "aria-hidden",
+        "aria-invalid",
+        "aria-keyshortcuts",
+        "aria-label",
+        "aria-labelledby",
+        "aria-live",
+        "aria-owns",
+        "aria-relevant",
+        "aria-roledescription"
+      ],
+      "nameFrom": [
+        "contents",
+        "author"
+      ],
+      "isAccessibleNameRequired": true,
+      "hasPresentationalChildren": false
+    },
+    "doc-notice": {
+      "description": "Notifies the user of consequences that might arise from an action or event. Examples include warnings, cautions and dangers.",
+      "isAbstract": false,
+      "superclassRoles": [
+        "note"
+      ],
+      "relatedConcepts": [
+        {
+          "type": "text",
+          "name": "EPUB notice [EPUB-SSV]"
+        }
+      ],
+      "inheritedAttributes": [
+        "aria-atomic",
+        "aria-busy",
+        "aria-controls",
+        "aria-current",
+        "aria-describedby",
+        "aria-details",
+        "aria-disabled",
+        "aria-dropeffect",
+        "aria-errormessage",
+        "aria-expanded",
+        "aria-flowto",
+        "aria-grabbed",
+        "aria-haspopup",
+        "aria-hidden",
+        "aria-invalid",
+        "aria-keyshortcuts",
+        "aria-label",
+        "aria-labelledby",
+        "aria-live",
+        "aria-owns",
+        "aria-relevant",
+        "aria-roledescription"
+      ],
+      "nameFrom": [
+        "author"
+      ],
+      "isAccessibleNameRequired": false,
+      "hasPresentationalChildren": false
+    },
+    "doc-pagebreak": {
+      "description": "A separator denoting the position before which a break occurs between two contiguous pages in a statically paginated version of the content.",
+      "isAbstract": false,
+      "superclassRoles": [
+        "separator"
+      ],
+      "relatedConcepts": [
+        {
+          "type": "text",
+          "name": "EPUB pagebreak [EPUB-SSV]"
+        }
+      ],
+      "inheritedAttributes": [
+        "aria-atomic",
+        "aria-busy",
+        "aria-controls",
+        "aria-current",
+        "aria-describedby",
+        "aria-details",
+        "aria-disabled",
+        "aria-dropeffect",
+        "aria-errormessage",
+        "aria-expanded",
+        "aria-flowto",
+        "aria-grabbed",
+        "aria-haspopup",
+        "aria-hidden",
+        "aria-invalid",
+        "aria-keyshortcuts",
+        "aria-label",
+        "aria-labelledby",
+        "aria-live",
+        "aria-orientation",
+        "aria-owns",
+        "aria-relevant",
+        "aria-roledescription"
+      ],
+      "nameFrom": [
+        "author"
+      ],
+      "isAccessibleNameRequired": true,
+      "hasPresentationalChildren": true
+    },
+    "doc-pagelist": {
+      "description": "A navigational aid that provides a list of links to the pagebreaks in the content.",
+      "isAbstract": false,
+      "superclassRoles": [
+        "navigation"
+      ],
+      "relatedConcepts": [
+        {
+          "type": "text",
+          "name": "EPUB page-list [EPUB-SSV]"
+        }
+      ],
+      "inheritedAttributes": [
+        "aria-atomic",
+        "aria-busy",
+        "aria-controls",
+        "aria-current",
+        "aria-describedby",
+        "aria-details",
+        "aria-disabled",
+        "aria-dropeffect",
+        "aria-errormessage",
+        "aria-expanded",
+        "aria-flowto",
+        "aria-grabbed",
+        "aria-haspopup",
+        "aria-hidden",
+        "aria-invalid",
+        "aria-keyshortcuts",
+        "aria-label",
+        "aria-labelledby",
+        "aria-live",
+        "aria-owns",
+        "aria-relevant",
+        "aria-roledescription"
+      ],
+      "nameFrom": [
+        "author"
+      ],
+      "isAccessibleNameRequired": false,
+      "hasPresentationalChildren": false
+    },
+    "doc-part": {
+      "description": "A major structural division in a work that contains a set of related sections dealing with a particular subject, narrative arc or similar encapsulated theme.",
+      "isAbstract": false,
+      "superclassRoles": [
+        "landmark"
+      ],
+      "relatedConcepts": [
+        {
+          "type": "text",
+          "name": "EPUB part [EPUB-SSV]"
+        }
+      ],
+      "inheritedAttributes": [
+        "aria-atomic",
+        "aria-busy",
+        "aria-controls",
+        "aria-current",
+        "aria-describedby",
+        "aria-details",
+        "aria-disabled",
+        "aria-dropeffect",
+        "aria-errormessage",
+        "aria-expanded",
+        "aria-flowto",
+        "aria-grabbed",
+        "aria-haspopup",
+        "aria-hidden",
+        "aria-invalid",
+        "aria-keyshortcuts",
+        "aria-label",
+        "aria-labelledby",
+        "aria-live",
+        "aria-owns",
+        "aria-relevant",
+        "aria-roledescription"
+      ],
+      "nameFrom": [
+        "author"
+      ],
+      "isAccessibleNameRequired": true,
+      "hasPresentationalChildren": false
+    },
+    "doc-preface": {
+      "description": "An introductory section that precedes the work, typically written by the author of the work.",
+      "isAbstract": false,
+      "superclassRoles": [
+        "landmark"
+      ],
+      "relatedConcepts": [
+        {
+          "type": "text",
+          "name": "EPUB preface [EPUB-SSV]"
+        }
+      ],
+      "inheritedAttributes": [
+        "aria-atomic",
+        "aria-busy",
+        "aria-controls",
+        "aria-current",
+        "aria-describedby",
+        "aria-details",
+        "aria-disabled",
+        "aria-dropeffect",
+        "aria-errormessage",
+        "aria-expanded",
+        "aria-flowto",
+        "aria-grabbed",
+        "aria-haspopup",
+        "aria-hidden",
+        "aria-invalid",
+        "aria-keyshortcuts",
+        "aria-label",
+        "aria-labelledby",
+        "aria-live",
+        "aria-owns",
+        "aria-relevant",
+        "aria-roledescription"
+      ],
+      "nameFrom": [
+        "author"
+      ],
+      "isAccessibleNameRequired": false,
+      "hasPresentationalChildren": false
+    },
+    "doc-prologue": {
+      "description": "An introductory section that sets the background to a work, typically part of the narrative.",
+      "isAbstract": false,
+      "superclassRoles": [
+        "landmark"
+      ],
+      "relatedConcepts": [
+        {
+          "type": "text",
+          "name": "EPUB prologue [EPUB-SSV]"
+        }
+      ],
+      "inheritedAttributes": [
+        "aria-atomic",
+        "aria-busy",
+        "aria-controls",
+        "aria-current",
+        "aria-describedby",
+        "aria-details",
+        "aria-disabled",
+        "aria-dropeffect",
+        "aria-errormessage",
+        "aria-expanded",
+        "aria-flowto",
+        "aria-grabbed",
+        "aria-haspopup",
+        "aria-hidden",
+        "aria-invalid",
+        "aria-keyshortcuts",
+        "aria-label",
+        "aria-labelledby",
+        "aria-live",
+        "aria-owns",
+        "aria-relevant",
+        "aria-roledescription"
+      ],
+      "nameFrom": [
+        "author"
+      ],
+      "isAccessibleNameRequired": false,
+      "hasPresentationalChildren": false
+    },
+    "doc-pullquote": {
+      "description": "A distinctively placed or highlighted quotation from the current content designed to draw attention to a topic or highlight a key point.",
+      "isAbstract": false,
+      "superclassRoles": [
+        "none"
+      ],
+      "relatedConcepts": [
+        {
+          "type": "text",
+          "name": "EPUB pullquote [EPUB-SSV]"
+        }
+      ],
+      "nameFrom": [
+        "author"
+      ],
+      "isAccessibleNameRequired": false,
+      "hasPresentationalChildren": false
+    },
+    "doc-qna": {
+      "description": "A section of content structured as a series of questions and answers, such as an interview or list of frequently asked questions.",
+      "isAbstract": false,
+      "superclassRoles": [
+        "section"
+      ],
+      "relatedConcepts": [
+        {
+          "type": "text",
+          "name": "EPUB qna [EPUB-SSV]"
+        }
+      ],
+      "inheritedAttributes": [
+        "aria-atomic",
+        "aria-busy",
+        "aria-controls",
+        "aria-current",
+        "aria-describedby",
+        "aria-details",
+        "aria-disabled",
+        "aria-dropeffect",
+        "aria-errormessage",
+        "aria-expanded",
+        "aria-flowto",
+        "aria-grabbed",
+        "aria-haspopup",
+        "aria-hidden",
+        "aria-invalid",
+        "aria-keyshortcuts",
+        "aria-label",
+        "aria-labelledby",
+        "aria-live",
+        "aria-owns",
+        "aria-relevant",
+        "aria-roledescription"
+      ],
+      "nameFrom": [
+        "author"
+      ],
+      "isAccessibleNameRequired": false,
+      "hasPresentationalChildren": false
+    },
+    "doc-subtitle": {
+      "description": "An explanatory or alternate title for the work, or a section or component within it.",
+      "isAbstract": false,
+      "superclassRoles": [
+        "sectionhead"
+      ],
+      "relatedConcepts": [
+        {
+          "type": "text",
+          "name": "EPUB subtitle [EPUB-SSV]"
+        }
+      ],
+      "inheritedAttributes": [
+        "aria-atomic",
+        "aria-busy",
+        "aria-controls",
+        "aria-current",
+        "aria-describedby",
+        "aria-details",
+        "aria-disabled",
+        "aria-dropeffect",
+        "aria-errormessage",
+        "aria-expanded",
+        "aria-flowto",
+        "aria-grabbed",
+        "aria-haspopup",
+        "aria-hidden",
+        "aria-invalid",
+        "aria-keyshortcuts",
+        "aria-label",
+        "aria-labelledby",
+        "aria-live",
+        "aria-owns",
+        "aria-relevant",
+        "aria-roledescription"
+      ],
+      "nameFrom": [
+        "author"
+      ],
+      "isAccessibleNameRequired": false,
+      "hasPresentationalChildren": false
+    },
+    "doc-tip": {
+      "description": "Helpful information that clarifies some aspect of the content or assists in its comprehension.",
+      "isAbstract": false,
+      "superclassRoles": [
+        "note"
+      ],
+      "relatedConcepts": [
+        {
+          "type": "text",
+          "name": "EPUB help [EPUB-SSV]"
+        }
+      ],
+      "inheritedAttributes": [
+        "aria-atomic",
+        "aria-busy",
+        "aria-controls",
+        "aria-current",
+        "aria-describedby",
+        "aria-details",
+        "aria-disabled",
+        "aria-dropeffect",
+        "aria-errormessage",
+        "aria-expanded",
+        "aria-flowto",
+        "aria-grabbed",
+        "aria-haspopup",
+        "aria-hidden",
+        "aria-invalid",
+        "aria-keyshortcuts",
+        "aria-label",
+        "aria-labelledby",
+        "aria-live",
+        "aria-owns",
+        "aria-relevant",
+        "aria-roledescription"
+      ],
+      "nameFrom": [
+        "author"
+      ],
+      "isAccessibleNameRequired": false,
+      "hasPresentationalChildren": false
+    },
+    "doc-toc": {
+      "description": "A navigational aid that provides an ordered list of links to the major sectional headings in the content. A table of contents may cover an entire work, or only a smaller section of it.",
+      "isAbstract": false,
+      "superclassRoles": [
+        "navigation"
+      ],
+      "relatedConcepts": [
+        {
+          "type": "text",
+          "name": "EPUB toc [EPUB-SSV]"
+        }
+      ],
+      "inheritedAttributes": [
+        "aria-atomic",
+        "aria-busy",
+        "aria-controls",
+        "aria-current",
+        "aria-describedby",
+        "aria-details",
+        "aria-disabled",
+        "aria-dropeffect",
+        "aria-errormessage",
+        "aria-expanded",
+        "aria-flowto",
+        "aria-grabbed",
+        "aria-haspopup",
+        "aria-hidden",
+        "aria-invalid",
+        "aria-keyshortcuts",
+        "aria-label",
+        "aria-labelledby",
+        "aria-live",
+        "aria-owns",
+        "aria-relevant",
+        "aria-roledescription"
+      ],
+      "nameFrom": [
+        "author"
+      ],
+      "isAccessibleNameRequired": false,
+      "hasPresentationalChildren": false
+    }
+  },
+  "attributes": {}
+}

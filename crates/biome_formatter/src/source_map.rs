@@ -77,7 +77,12 @@ impl TransformSourceMap {
             self.source_offset(transformed_range.end(), RangePosition::End),
         );
 
-        debug_assert!(range.end() <= self.source_text.text.text_len() - self.source_text.offset, "Mapped range {:?} exceeds the length of the source document {:?}. Please check if the passed `transformed_range` is a range of the transformed tree and not of the source tree, and that it belongs to the tree for which the source map was created for.", range, self.source_text.text.text_len() - self.source_text.offset);
+        debug_assert!(
+            range.end() <= self.source_text.text.text_len() - self.source_text.offset,
+            "Mapped range {:?} exceeds the length of the source document {:?}. Please check if the passed `transformed_range` is a range of the transformed tree and not of the source tree, and that it belongs to the tree for which the source map was created for.",
+            range,
+            self.source_text.text.text_len() - self.source_text.offset
+        );
         range
     }
 
@@ -232,7 +237,7 @@ impl TransformSourceMap {
             // It can, therefore, be necessary to navigate backwards again.
             // In this case, do a binary search for the index of the next deleted range (`O(log(n)`).
             let out_of_order_marker =
-                previous_marker.map_or(false, |previous| previous.source > marker.source);
+                previous_marker.is_some_and(|previous| previous.source > marker.source);
 
             if out_of_order_marker {
                 let index = self
@@ -379,7 +384,12 @@ struct DeletedRange {
 
 impl DeletedRange {
     fn new(source_range: TextRange, total_length_preceding_deleted_ranges: TextSize) -> Self {
-        debug_assert!(source_range.start() >= total_length_preceding_deleted_ranges, "The total number of deleted bytes ({:?}) can not exceed the offset from the start in the source document ({:?}). This is a bug in the source map implementation.", total_length_preceding_deleted_ranges, source_range.start());
+        debug_assert!(
+            source_range.start() >= total_length_preceding_deleted_ranges,
+            "The total number of deleted bytes ({:?}) can not exceed the offset from the start in the source document ({:?}). This is a bug in the source map implementation.",
+            total_length_preceding_deleted_ranges,
+            source_range.start()
+        );
 
         Self {
             source_range,
@@ -606,7 +616,7 @@ mod tests {
         let root = cst_builder.finish();
 
         let mut builder = TransformSourceMapBuilder::new();
-        builder.push_source_text(&root.text().to_string());
+        builder.push_source_text(&root.text_with_trivia().to_string());
 
         // Add mappings for all removed parentheses.
 
@@ -692,7 +702,7 @@ mod tests {
 
         let root = cst_builder.finish();
 
-        assert_eq!(&root.text(), "((a));");
+        assert_eq!(&root.text_with_trivia(), "((a));");
 
         let mut bogus = root
             .descendants()
@@ -711,7 +721,7 @@ mod tests {
             .unwrap();
 
         let mut builder = TransformSourceMapBuilder::new();
-        builder.push_source_text(&root.text().to_string());
+        builder.push_source_text(&root.text_with_trivia().to_string());
 
         // Add mappings for all removed parentheses.
         builder.add_deleted_range(TextRange::new(TextSize::from(0), TextSize::from(2)));
@@ -754,7 +764,7 @@ mod tests {
         let root = cst_builder.finish();
 
         let mut builder = TransformSourceMapBuilder::new();
-        builder.push_source_text(&root.text().to_string());
+        builder.push_source_text(&root.text_with_trivia().to_string());
 
         // Add mappings for all removed parentheses.
 

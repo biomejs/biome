@@ -1,9 +1,9 @@
 use biome_markdown_syntax::MarkdownSyntaxKind;
+use biome_parser::ParserContext;
 use biome_parser::event::Event;
 use biome_parser::prelude::*;
 use biome_parser::token_source::Trivia;
-use biome_parser::ParserContext;
-use biome_parser::{diagnostic::merge_diagnostics, ParserContextCheckpoint};
+use biome_parser::{ParserContextCheckpoint, diagnostic::merge_diagnostics};
 
 use crate::token_source::{MarkdownTokenSource, MarkdownTokenSourceCheckpoint};
 
@@ -19,7 +19,7 @@ impl<'source> MarkdownParser<'source> {
             source: MarkdownTokenSource::from_str(source),
         }
     }
-    #[allow(dead_code)]
+
     pub fn checkpoint(&self) -> MarkdownParserCheckpoint {
         MarkdownParserCheckpoint {
             context: self.context.checkpoint(),
@@ -31,7 +31,6 @@ impl<'source> MarkdownParser<'source> {
         self.source.before_whitespace_count()
     }
 
-    #[allow(dead_code)]
     pub fn rewind(&mut self, checkpoint: MarkdownParserCheckpoint) {
         let MarkdownParserCheckpoint { context, source } = checkpoint;
 
@@ -76,7 +75,6 @@ impl<'source> Parser for MarkdownParser<'source> {
     }
 }
 
-#[allow(dead_code)]
 pub struct MarkdownParserCheckpoint {
     pub(super) context: ParserContextCheckpoint,
     pub(super) source: MarkdownTokenSourceCheckpoint,

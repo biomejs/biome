@@ -1,10 +1,25 @@
 use crate::prelude::*;
-use biome_grit_syntax::GritPredicateNotEqual;
-use biome_rowan::AstNode;
+use biome_formatter::write;
+use biome_grit_syntax::{GritPredicateNotEqual, GritPredicateNotEqualFields};
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatGritPredicateNotEqual;
 impl FormatNodeRule<GritPredicateNotEqual> for FormatGritPredicateNotEqual {
     fn fmt_fields(&self, node: &GritPredicateNotEqual, f: &mut GritFormatter) -> FormatResult<()> {
-        format_verbatim_node(node.syntax()).fmt(f)
+        let GritPredicateNotEqualFields {
+            right,
+            left,
+            inequality_token,
+        } = node.as_fields();
+
+        write!(
+            f,
+            [
+                left.format(),
+                space(),
+                inequality_token.format(),
+                space(),
+                right.format()
+            ]
+        )
     }
 }

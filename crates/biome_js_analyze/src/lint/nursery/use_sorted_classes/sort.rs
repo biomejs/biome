@@ -4,14 +4,14 @@ use std::cmp::Ordering;
 
 use super::{
     any_class_string_like::AnyClassStringLike,
-    class_info::{get_class_info, ClassInfo},
+    class_info::{ClassInfo, get_class_info},
     sort_config::SortConfig,
 };
 
 impl ClassInfo {
     /// Compare based on the existence of variants. Classes with variants go last.
     /// Returns `None` if both or none of the classes has variants.
-    fn cmp_variants_weight_existence(&self, other: &ClassInfo) -> Option<Ordering> {
+    fn cmp_variants_weight_existence(&self, other: &Self) -> Option<Ordering> {
         match (&self.variant_weight, &other.variant_weight) {
             (Some(_), Some(_)) => None,
             (Some(_), _) => Some(Ordering::Greater),
@@ -22,7 +22,7 @@ impl ClassInfo {
 
     /// Compare based on layer indexes. Classes with lower indexes go first.
     /// Returns `None` if the indexes are equal.
-    fn cmp_layers(&self, other: &ClassInfo) -> Option<Ordering> {
+    fn cmp_layers(&self, other: &Self) -> Option<Ordering> {
         let result = self.layer_index.cmp(&other.layer_index);
         if result != Ordering::Equal {
             return Some(result);
@@ -33,7 +33,7 @@ impl ClassInfo {
     /// Compare based on variants weight. Classes with lower weight go first.
     /// First compare variants weight length. Only if their equal compare their actual weight.
     /// Returns `None` if they have the same weight.
-    fn cmp_variants_weight(&self, other: &ClassInfo) -> Option<Ordering> {
+    fn cmp_variants_weight(&self, other: &Self) -> Option<Ordering> {
         let current_weight = self.variant_weight.as_ref()?;
         let other_weight = other.variant_weight.as_ref()?;
 
@@ -50,7 +50,7 @@ impl ClassInfo {
 
     /// Compare based on the existence of arbitrary variants. Classes with arbitrary variants go last.
     /// Returns `None` if both or none of the classes has arbitrary variants.
-    fn cmp_arbitrary_variants_existence(&self, other: &ClassInfo) -> Option<Ordering> {
+    fn cmp_arbitrary_variants_existence(&self, other: &Self) -> Option<Ordering> {
         match (&self.arbitrary_variants, &other.arbitrary_variants) {
             (Some(_), Some(_)) => None,
             (Some(_), _) => Some(Ordering::Greater),
@@ -60,7 +60,7 @@ impl ClassInfo {
     }
 
     /// Compare arbitrary variants based on their length and then lexicographically
-    fn cmp_arbitrary_variants(&self, other: &ClassInfo) -> Option<Ordering> {
+    fn cmp_arbitrary_variants(&self, other: &Self) -> Option<Ordering> {
         let a = self.arbitrary_variants.as_ref()?;
         let b = other.arbitrary_variants.as_ref()?;
 
@@ -77,7 +77,7 @@ impl ClassInfo {
 
     /// Compare based on utility index. Classes with lower indexes go first.
     /// Returns `None` if the indexes are equal.
-    fn cmp_utilities(&self, other: &ClassInfo) -> Option<Ordering> {
+    fn cmp_utilities(&self, other: &Self) -> Option<Ordering> {
         let result = self.utility_index.cmp(&other.utility_index);
         if result != Ordering::Equal {
             return Some(result);
@@ -180,7 +180,7 @@ pub fn sort_class_name(
     sorted_classes.extend(
         classes_info
             .iter()
-            .map(|class_info| class_info.text.as_str()),
+            .map(|class_info| class_info.text.as_ref()),
     );
 
     // Add the first class back if it was ignored.
@@ -195,7 +195,7 @@ pub fn sort_class_name(
 
     let mut result = sorted_classes.join(" ");
 
-    if classes_len > 0 {
+    if classes_len > 0 || ignore_postfix || ignore_prefix {
         // restore front space
         if class_name.starts_with(' ') {
             result.insert(0, ' ');
@@ -237,16 +237,15 @@ pub fn get_sort_class_name_range(
 pub fn should_ignore_prefix(node: &AnyClassStringLike) -> bool {
     if let Some(value) = node.value() {
         // For example, for <div class={`${variable}mx-2 m-5`} />, we should ignore "${variable}mx-2" as a sorting item because it is an indivisible whole.
-        let ignore_prefix = if let AnyClassStringLike::JsTemplateChunkElement(_template) = node {
+        if let AnyClassStringLike::JsTemplateChunkElement(_template) = node {
             !value.starts_with(' ')
                 && node
                     .syntax()
                     .prev_sibling()
-                    .map_or(false, |sibling| JsTemplateElement::can_cast(sibling.kind()))
+                    .is_some_and(|sibling| JsTemplateElement::can_cast(sibling.kind()))
         } else {
             false
-        };
-        ignore_prefix
+        }
     } else {
         false
     }
@@ -256,16 +255,15 @@ pub fn should_ignore_prefix(node: &AnyClassStringLike) -> bool {
 pub fn should_ignore_postfix(node: &AnyClassStringLike) -> bool {
     if let Some(value) = node.value() {
         // For example, for <div class={`mx-2 m-5${variable}`} />, we should ignore "m-5${variable}" as a sorting item because it is an indivisible whole.
-        let ignore_postfix = if let AnyClassStringLike::JsTemplateChunkElement(_template) = node {
+        if let AnyClassStringLike::JsTemplateChunkElement(_template) = node {
             !value.ends_with(' ')
                 && node
                     .syntax()
                     .next_sibling()
-                    .map_or(false, |sibling| JsTemplateElement::can_cast(sibling.kind()))
+                    .is_some_and(|sibling| JsTemplateElement::can_cast(sibling.kind()))
         } else {
             false
-        };
-        ignore_postfix
+        }
     } else {
         false
     }

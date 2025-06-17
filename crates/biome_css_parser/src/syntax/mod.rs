@@ -14,9 +14,9 @@ use crate::syntax::parse_error::{expected_any_rule, expected_non_css_wide_keywor
 use crate::syntax::property::color::{is_at_color, parse_color};
 use crate::syntax::property::unicode_range::{is_at_unicode_range, parse_unicode_range};
 use crate::syntax::property::{is_at_any_property, parse_any_property};
-use crate::syntax::selector::is_nth_at_selector;
-use crate::syntax::selector::relative_selector::{is_at_relative_selector, RelativeSelectorList};
 use crate::syntax::selector::SelectorList;
+use crate::syntax::selector::is_nth_at_selector;
+use crate::syntax::selector::relative_selector::{RelativeSelectorList, is_at_relative_selector};
 use crate::syntax::value::function::BINARY_OPERATION_TOKEN;
 use biome_css_syntax::CssSyntaxKind::*;
 use biome_css_syntax::{CssSyntaxKind, T};
@@ -24,7 +24,7 @@ use biome_parser::parse_lists::{ParseNodeList, ParseSeparatedList};
 use biome_parser::parse_recovery::{ParseRecovery, ParseRecoveryTokenSet, RecoveryResult};
 use biome_parser::prelude::ParsedSyntax;
 use biome_parser::prelude::ParsedSyntax::{Absent, Present};
-use biome_parser::{token_set, Parser};
+use biome_parser::{Parser, token_set};
 use value::dimension::{is_at_any_dimension, parse_any_dimension};
 use value::function::{is_at_any_function, parse_any_function};
 
@@ -233,8 +233,24 @@ pub(crate) fn parse_declaration_with_semicolon(p: &mut CssParser) -> ParsedSynta
 }
 
 #[inline]
+pub(crate) fn parse_empty_declaration(p: &mut CssParser) -> ParsedSyntax {
+    if p.at(T![;]) {
+        let m = p.start();
+        p.bump_any(); // bump ;
+        m.complete(p, CSS_EMPTY_DECLARATION).into()
+    } else {
+        Absent
+    }
+}
+
+#[inline]
 fn is_at_declaration_important(p: &mut CssParser) -> bool {
     p.at(T![!]) && p.nth_at(1, T![important])
+}
+
+#[inline]
+pub(crate) fn is_at_declaration_semicolon(p: &mut CssParser) -> bool {
+    p.at(T![;]) && (p.nth_at(1, T![;]) || p.nth_at(1, T!['}']))
 }
 
 #[inline]
@@ -570,7 +586,6 @@ impl ParseRecovery for BracketedValueListRecovery {
 /// preserved. If parsing fails, this function rewinds the parser back to
 /// where it was before attempting the parse and the `Err` value is returned.
 #[must_use = "The result of try_parse contains information about whether the parse succeeded and should not be ignored"]
-#[allow(dead_code)]
 pub(crate) fn try_parse<T, E>(
     p: &mut CssParser,
     func: impl FnOnce(&mut CssParser) -> Result<T, E>,
@@ -590,10 +605,10 @@ pub(crate) fn try_parse<T, E>(
 
 #[cfg(test)]
 mod tests {
-    use crate::{parser::CssParser, CssParserOptions};
+    use crate::{CssParserOptions, parser::CssParser};
     use biome_css_syntax::{CssSyntaxKind, T};
-    use biome_parser::prelude::ParsedSyntax::{Absent, Present};
     use biome_parser::Parser;
+    use biome_parser::prelude::ParsedSyntax::{Absent, Present};
 
     use super::{parse_regular_identifier, parse_regular_number, try_parse};
 

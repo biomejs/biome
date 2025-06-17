@@ -7,7 +7,7 @@ use colored::Colorize;
 use indicatif::ProgressBar;
 use serde_json::Value;
 use std::collections::HashMap;
-use std::io::{stdout, IsTerminal, Write};
+use std::io::{IsTerminal, Write, stdout};
 use std::str::FromStr;
 use std::time::Instant;
 
@@ -122,23 +122,25 @@ impl FromStr for SummaryDetailLevel {
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         Ok(match s {
-            "coverage" => SummaryDetailLevel::Coverage,
-            "failing" => SummaryDetailLevel::Failing,
-            "debug" => SummaryDetailLevel::Debug,
-            _ => return Err(String::from(
-                "Unknown summary detail level. Valid values are: 'coverage', 'failing, and 'rast'.",
-            )),
+            "coverage" => Self::Coverage,
+            "failing" => Self::Failing,
+            "debug" => Self::Debug,
+            _ => {
+                return Err(String::from(
+                    "Unknown summary detail level. Valid values are: 'coverage', 'failing, and 'rast'.",
+                ));
+            }
         })
     }
 }
 
 impl SummaryDetailLevel {
     fn is_coverage_only(&self) -> bool {
-        matches!(self, SummaryDetailLevel::Coverage)
+        matches!(self, Self::Coverage)
     }
 
     fn is_debug(&self) -> bool {
-        matches!(self, SummaryDetailLevel::Debug)
+        matches!(self, Self::Debug)
     }
 }
 
@@ -159,26 +161,26 @@ pub(crate) enum OutputTarget {
 
 impl OutputTarget {
     pub fn stdout() -> Self {
-        OutputTarget::Stdout(std::io::stdout())
+        Self::Stdout(std::io::stdout())
     }
 
     pub fn stderr() -> Self {
-        OutputTarget::Stderr(std::io::stderr())
+        Self::Stderr(std::io::stderr())
     }
 }
 
 impl Write for OutputTarget {
     fn write(&mut self, buf: &[u8]) -> std::io::Result<usize> {
         match self {
-            OutputTarget::Stderr(stderr) => stderr.write(buf),
-            OutputTarget::Stdout(stdout) => stdout.write(buf),
+            Self::Stderr(stderr) => stderr.write(buf),
+            Self::Stdout(stdout) => stdout.write(buf),
         }
     }
 
     fn flush(&mut self) -> std::io::Result<()> {
         match self {
-            OutputTarget::Stderr(stderr) => stderr.flush(),
-            OutputTarget::Stdout(stdout) => stdout.flush(),
+            Self::Stderr(stderr) => stderr.flush(),
+            Self::Stdout(stdout) => stdout.flush(),
         }
     }
 }

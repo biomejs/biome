@@ -1,0 +1,488 @@
+---
+source: crates/biome_js_parser/tests/spec_test.rs
+expression: snapshot
+snapshot_kind: text
+---
+## Input
+
+```js
+var a = 5;
+let { foo, bar } = 5;
+let bar2, foo2;
+const b = 5;
+const { foo5: [bar11], baz6 } = {};
+let foo6 = "lorem", bar7 = "ipsum", third8 = "value", fourth = 6;
+var q, w, e, r, t;
+
+```
+
+
+## AST
+
+```
+JsModule {
+    bom_token: missing (optional),
+    interpreter_token: missing (optional),
+    directives: JsDirectiveList [],
+    items: JsModuleItemList [
+        JsVariableStatement {
+            declaration: JsVariableDeclaration {
+                await_token: missing (optional),
+                kind: VAR_KW@0..4 "var" [] [Whitespace(" ")],
+                declarators: JsVariableDeclaratorList [
+                    JsVariableDeclarator {
+                        id: JsIdentifierBinding {
+                            name_token: IDENT@4..6 "a" [] [Whitespace(" ")],
+                        },
+                        variable_annotation: missing (optional),
+                        initializer: JsInitializerClause {
+                            eq_token: EQ@6..8 "=" [] [Whitespace(" ")],
+                            expression: JsNumberLiteralExpression {
+                                value_token: JS_NUMBER_LITERAL@8..9 "5" [] [],
+                            },
+                        },
+                    },
+                ],
+            },
+            semicolon_token: SEMICOLON@9..10 ";" [] [],
+        },
+        JsVariableStatement {
+            declaration: JsVariableDeclaration {
+                await_token: missing (optional),
+                kind: LET_KW@10..15 "let" [Newline("\n")] [Whitespace(" ")],
+                declarators: JsVariableDeclaratorList [
+                    JsVariableDeclarator {
+                        id: JsObjectBindingPattern {
+                            l_curly_token: L_CURLY@15..17 "{" [] [Whitespace(" ")],
+                            properties: JsObjectBindingPatternPropertyList [
+                                JsObjectBindingPatternShorthandProperty {
+                                    identifier: JsIdentifierBinding {
+                                        name_token: IDENT@17..20 "foo" [] [],
+                                    },
+                                    init: missing (optional),
+                                },
+                                COMMA@20..22 "," [] [Whitespace(" ")],
+                                JsObjectBindingPatternShorthandProperty {
+                                    identifier: JsIdentifierBinding {
+                                        name_token: IDENT@22..26 "bar" [] [Whitespace(" ")],
+                                    },
+                                    init: missing (optional),
+                                },
+                            ],
+                            r_curly_token: R_CURLY@26..28 "}" [] [Whitespace(" ")],
+                        },
+                        variable_annotation: missing (optional),
+                        initializer: JsInitializerClause {
+                            eq_token: EQ@28..30 "=" [] [Whitespace(" ")],
+                            expression: JsNumberLiteralExpression {
+                                value_token: JS_NUMBER_LITERAL@30..31 "5" [] [],
+                            },
+                        },
+                    },
+                ],
+            },
+            semicolon_token: SEMICOLON@31..32 ";" [] [],
+        },
+        JsVariableStatement {
+            declaration: JsVariableDeclaration {
+                await_token: missing (optional),
+                kind: LET_KW@32..37 "let" [Newline("\n")] [Whitespace(" ")],
+                declarators: JsVariableDeclaratorList [
+                    JsVariableDeclarator {
+                        id: JsIdentifierBinding {
+                            name_token: IDENT@37..41 "bar2" [] [],
+                        },
+                        variable_annotation: missing (optional),
+                        initializer: missing (optional),
+                    },
+                    COMMA@41..43 "," [] [Whitespace(" ")],
+                    JsVariableDeclarator {
+                        id: JsIdentifierBinding {
+                            name_token: IDENT@43..47 "foo2" [] [],
+                        },
+                        variable_annotation: missing (optional),
+                        initializer: missing (optional),
+                    },
+                ],
+            },
+            semicolon_token: SEMICOLON@47..48 ";" [] [],
+        },
+        JsVariableStatement {
+            declaration: JsVariableDeclaration {
+                await_token: missing (optional),
+                kind: CONST_KW@48..55 "const" [Newline("\n")] [Whitespace(" ")],
+                declarators: JsVariableDeclaratorList [
+                    JsVariableDeclarator {
+                        id: JsIdentifierBinding {
+                            name_token: IDENT@55..57 "b" [] [Whitespace(" ")],
+                        },
+                        variable_annotation: missing (optional),
+                        initializer: JsInitializerClause {
+                            eq_token: EQ@57..59 "=" [] [Whitespace(" ")],
+                            expression: JsNumberLiteralExpression {
+                                value_token: JS_NUMBER_LITERAL@59..60 "5" [] [],
+                            },
+                        },
+                    },
+                ],
+            },
+            semicolon_token: SEMICOLON@60..61 ";" [] [],
+        },
+        JsVariableStatement {
+            declaration: JsVariableDeclaration {
+                await_token: missing (optional),
+                kind: CONST_KW@61..68 "const" [Newline("\n")] [Whitespace(" ")],
+                declarators: JsVariableDeclaratorList [
+                    JsVariableDeclarator {
+                        id: JsObjectBindingPattern {
+                            l_curly_token: L_CURLY@68..70 "{" [] [Whitespace(" ")],
+                            properties: JsObjectBindingPatternPropertyList [
+                                JsObjectBindingPatternProperty {
+                                    member: JsLiteralMemberName {
+                                        value: IDENT@70..74 "foo5" [] [],
+                                    },
+                                    colon_token: COLON@74..76 ":" [] [Whitespace(" ")],
+                                    pattern: JsArrayBindingPattern {
+                                        l_brack_token: L_BRACK@76..77 "[" [] [],
+                                        elements: JsArrayBindingPatternElementList [
+                                            JsArrayBindingPatternElement {
+                                                pattern: JsIdentifierBinding {
+                                                    name_token: IDENT@77..82 "bar11" [] [],
+                                                },
+                                                init: missing (optional),
+                                            },
+                                        ],
+                                        r_brack_token: R_BRACK@82..83 "]" [] [],
+                                    },
+                                    init: missing (optional),
+                                },
+                                COMMA@83..85 "," [] [Whitespace(" ")],
+                                JsObjectBindingPatternShorthandProperty {
+                                    identifier: JsIdentifierBinding {
+                                        name_token: IDENT@85..90 "baz6" [] [Whitespace(" ")],
+                                    },
+                                    init: missing (optional),
+                                },
+                            ],
+                            r_curly_token: R_CURLY@90..92 "}" [] [Whitespace(" ")],
+                        },
+                        variable_annotation: missing (optional),
+                        initializer: JsInitializerClause {
+                            eq_token: EQ@92..94 "=" [] [Whitespace(" ")],
+                            expression: JsObjectExpression {
+                                l_curly_token: L_CURLY@94..95 "{" [] [],
+                                members: JsObjectMemberList [],
+                                r_curly_token: R_CURLY@95..96 "}" [] [],
+                            },
+                        },
+                    },
+                ],
+            },
+            semicolon_token: SEMICOLON@96..97 ";" [] [],
+        },
+        JsVariableStatement {
+            declaration: JsVariableDeclaration {
+                await_token: missing (optional),
+                kind: LET_KW@97..102 "let" [Newline("\n")] [Whitespace(" ")],
+                declarators: JsVariableDeclaratorList [
+                    JsVariableDeclarator {
+                        id: JsIdentifierBinding {
+                            name_token: IDENT@102..107 "foo6" [] [Whitespace(" ")],
+                        },
+                        variable_annotation: missing (optional),
+                        initializer: JsInitializerClause {
+                            eq_token: EQ@107..109 "=" [] [Whitespace(" ")],
+                            expression: JsStringLiteralExpression {
+                                value_token: JS_STRING_LITERAL@109..116 "\"lorem\"" [] [],
+                            },
+                        },
+                    },
+                    COMMA@116..118 "," [] [Whitespace(" ")],
+                    JsVariableDeclarator {
+                        id: JsIdentifierBinding {
+                            name_token: IDENT@118..123 "bar7" [] [Whitespace(" ")],
+                        },
+                        variable_annotation: missing (optional),
+                        initializer: JsInitializerClause {
+                            eq_token: EQ@123..125 "=" [] [Whitespace(" ")],
+                            expression: JsStringLiteralExpression {
+                                value_token: JS_STRING_LITERAL@125..132 "\"ipsum\"" [] [],
+                            },
+                        },
+                    },
+                    COMMA@132..134 "," [] [Whitespace(" ")],
+                    JsVariableDeclarator {
+                        id: JsIdentifierBinding {
+                            name_token: IDENT@134..141 "third8" [] [Whitespace(" ")],
+                        },
+                        variable_annotation: missing (optional),
+                        initializer: JsInitializerClause {
+                            eq_token: EQ@141..143 "=" [] [Whitespace(" ")],
+                            expression: JsStringLiteralExpression {
+                                value_token: JS_STRING_LITERAL@143..150 "\"value\"" [] [],
+                            },
+                        },
+                    },
+                    COMMA@150..152 "," [] [Whitespace(" ")],
+                    JsVariableDeclarator {
+                        id: JsIdentifierBinding {
+                            name_token: IDENT@152..159 "fourth" [] [Whitespace(" ")],
+                        },
+                        variable_annotation: missing (optional),
+                        initializer: JsInitializerClause {
+                            eq_token: EQ@159..161 "=" [] [Whitespace(" ")],
+                            expression: JsNumberLiteralExpression {
+                                value_token: JS_NUMBER_LITERAL@161..162 "6" [] [],
+                            },
+                        },
+                    },
+                ],
+            },
+            semicolon_token: SEMICOLON@162..163 ";" [] [],
+        },
+        JsVariableStatement {
+            declaration: JsVariableDeclaration {
+                await_token: missing (optional),
+                kind: VAR_KW@163..168 "var" [Newline("\n")] [Whitespace(" ")],
+                declarators: JsVariableDeclaratorList [
+                    JsVariableDeclarator {
+                        id: JsIdentifierBinding {
+                            name_token: IDENT@168..169 "q" [] [],
+                        },
+                        variable_annotation: missing (optional),
+                        initializer: missing (optional),
+                    },
+                    COMMA@169..171 "," [] [Whitespace(" ")],
+                    JsVariableDeclarator {
+                        id: JsIdentifierBinding {
+                            name_token: IDENT@171..172 "w" [] [],
+                        },
+                        variable_annotation: missing (optional),
+                        initializer: missing (optional),
+                    },
+                    COMMA@172..174 "," [] [Whitespace(" ")],
+                    JsVariableDeclarator {
+                        id: JsIdentifierBinding {
+                            name_token: IDENT@174..175 "e" [] [],
+                        },
+                        variable_annotation: missing (optional),
+                        initializer: missing (optional),
+                    },
+                    COMMA@175..177 "," [] [Whitespace(" ")],
+                    JsVariableDeclarator {
+                        id: JsIdentifierBinding {
+                            name_token: IDENT@177..178 "r" [] [],
+                        },
+                        variable_annotation: missing (optional),
+                        initializer: missing (optional),
+                    },
+                    COMMA@178..180 "," [] [Whitespace(" ")],
+                    JsVariableDeclarator {
+                        id: JsIdentifierBinding {
+                            name_token: IDENT@180..181 "t" [] [],
+                        },
+                        variable_annotation: missing (optional),
+                        initializer: missing (optional),
+                    },
+                ],
+            },
+            semicolon_token: SEMICOLON@181..182 ";" [] [],
+        },
+    ],
+    eof_token: EOF@182..183 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: JS_MODULE@0..183
+  0: (empty)
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..182
+    0: JS_VARIABLE_STATEMENT@0..10
+      0: JS_VARIABLE_DECLARATION@0..9
+        0: (empty)
+        1: VAR_KW@0..4 "var" [] [Whitespace(" ")]
+        2: JS_VARIABLE_DECLARATOR_LIST@4..9
+          0: JS_VARIABLE_DECLARATOR@4..9
+            0: JS_IDENTIFIER_BINDING@4..6
+              0: IDENT@4..6 "a" [] [Whitespace(" ")]
+            1: (empty)
+            2: JS_INITIALIZER_CLAUSE@6..9
+              0: EQ@6..8 "=" [] [Whitespace(" ")]
+              1: JS_NUMBER_LITERAL_EXPRESSION@8..9
+                0: JS_NUMBER_LITERAL@8..9 "5" [] []
+      1: SEMICOLON@9..10 ";" [] []
+    1: JS_VARIABLE_STATEMENT@10..32
+      0: JS_VARIABLE_DECLARATION@10..31
+        0: (empty)
+        1: LET_KW@10..15 "let" [Newline("\n")] [Whitespace(" ")]
+        2: JS_VARIABLE_DECLARATOR_LIST@15..31
+          0: JS_VARIABLE_DECLARATOR@15..31
+            0: JS_OBJECT_BINDING_PATTERN@15..28
+              0: L_CURLY@15..17 "{" [] [Whitespace(" ")]
+              1: JS_OBJECT_BINDING_PATTERN_PROPERTY_LIST@17..26
+                0: JS_OBJECT_BINDING_PATTERN_SHORTHAND_PROPERTY@17..20
+                  0: JS_IDENTIFIER_BINDING@17..20
+                    0: IDENT@17..20 "foo" [] []
+                  1: (empty)
+                1: COMMA@20..22 "," [] [Whitespace(" ")]
+                2: JS_OBJECT_BINDING_PATTERN_SHORTHAND_PROPERTY@22..26
+                  0: JS_IDENTIFIER_BINDING@22..26
+                    0: IDENT@22..26 "bar" [] [Whitespace(" ")]
+                  1: (empty)
+              2: R_CURLY@26..28 "}" [] [Whitespace(" ")]
+            1: (empty)
+            2: JS_INITIALIZER_CLAUSE@28..31
+              0: EQ@28..30 "=" [] [Whitespace(" ")]
+              1: JS_NUMBER_LITERAL_EXPRESSION@30..31
+                0: JS_NUMBER_LITERAL@30..31 "5" [] []
+      1: SEMICOLON@31..32 ";" [] []
+    2: JS_VARIABLE_STATEMENT@32..48
+      0: JS_VARIABLE_DECLARATION@32..47
+        0: (empty)
+        1: LET_KW@32..37 "let" [Newline("\n")] [Whitespace(" ")]
+        2: JS_VARIABLE_DECLARATOR_LIST@37..47
+          0: JS_VARIABLE_DECLARATOR@37..41
+            0: JS_IDENTIFIER_BINDING@37..41
+              0: IDENT@37..41 "bar2" [] []
+            1: (empty)
+            2: (empty)
+          1: COMMA@41..43 "," [] [Whitespace(" ")]
+          2: JS_VARIABLE_DECLARATOR@43..47
+            0: JS_IDENTIFIER_BINDING@43..47
+              0: IDENT@43..47 "foo2" [] []
+            1: (empty)
+            2: (empty)
+      1: SEMICOLON@47..48 ";" [] []
+    3: JS_VARIABLE_STATEMENT@48..61
+      0: JS_VARIABLE_DECLARATION@48..60
+        0: (empty)
+        1: CONST_KW@48..55 "const" [Newline("\n")] [Whitespace(" ")]
+        2: JS_VARIABLE_DECLARATOR_LIST@55..60
+          0: JS_VARIABLE_DECLARATOR@55..60
+            0: JS_IDENTIFIER_BINDING@55..57
+              0: IDENT@55..57 "b" [] [Whitespace(" ")]
+            1: (empty)
+            2: JS_INITIALIZER_CLAUSE@57..60
+              0: EQ@57..59 "=" [] [Whitespace(" ")]
+              1: JS_NUMBER_LITERAL_EXPRESSION@59..60
+                0: JS_NUMBER_LITERAL@59..60 "5" [] []
+      1: SEMICOLON@60..61 ";" [] []
+    4: JS_VARIABLE_STATEMENT@61..97
+      0: JS_VARIABLE_DECLARATION@61..96
+        0: (empty)
+        1: CONST_KW@61..68 "const" [Newline("\n")] [Whitespace(" ")]
+        2: JS_VARIABLE_DECLARATOR_LIST@68..96
+          0: JS_VARIABLE_DECLARATOR@68..96
+            0: JS_OBJECT_BINDING_PATTERN@68..92
+              0: L_CURLY@68..70 "{" [] [Whitespace(" ")]
+              1: JS_OBJECT_BINDING_PATTERN_PROPERTY_LIST@70..90
+                0: JS_OBJECT_BINDING_PATTERN_PROPERTY@70..83
+                  0: JS_LITERAL_MEMBER_NAME@70..74
+                    0: IDENT@70..74 "foo5" [] []
+                  1: COLON@74..76 ":" [] [Whitespace(" ")]
+                  2: JS_ARRAY_BINDING_PATTERN@76..83
+                    0: L_BRACK@76..77 "[" [] []
+                    1: JS_ARRAY_BINDING_PATTERN_ELEMENT_LIST@77..82
+                      0: JS_ARRAY_BINDING_PATTERN_ELEMENT@77..82
+                        0: JS_IDENTIFIER_BINDING@77..82
+                          0: IDENT@77..82 "bar11" [] []
+                        1: (empty)
+                    2: R_BRACK@82..83 "]" [] []
+                  3: (empty)
+                1: COMMA@83..85 "," [] [Whitespace(" ")]
+                2: JS_OBJECT_BINDING_PATTERN_SHORTHAND_PROPERTY@85..90
+                  0: JS_IDENTIFIER_BINDING@85..90
+                    0: IDENT@85..90 "baz6" [] [Whitespace(" ")]
+                  1: (empty)
+              2: R_CURLY@90..92 "}" [] [Whitespace(" ")]
+            1: (empty)
+            2: JS_INITIALIZER_CLAUSE@92..96
+              0: EQ@92..94 "=" [] [Whitespace(" ")]
+              1: JS_OBJECT_EXPRESSION@94..96
+                0: L_CURLY@94..95 "{" [] []
+                1: JS_OBJECT_MEMBER_LIST@95..95
+                2: R_CURLY@95..96 "}" [] []
+      1: SEMICOLON@96..97 ";" [] []
+    5: JS_VARIABLE_STATEMENT@97..163
+      0: JS_VARIABLE_DECLARATION@97..162
+        0: (empty)
+        1: LET_KW@97..102 "let" [Newline("\n")] [Whitespace(" ")]
+        2: JS_VARIABLE_DECLARATOR_LIST@102..162
+          0: JS_VARIABLE_DECLARATOR@102..116
+            0: JS_IDENTIFIER_BINDING@102..107
+              0: IDENT@102..107 "foo6" [] [Whitespace(" ")]
+            1: (empty)
+            2: JS_INITIALIZER_CLAUSE@107..116
+              0: EQ@107..109 "=" [] [Whitespace(" ")]
+              1: JS_STRING_LITERAL_EXPRESSION@109..116
+                0: JS_STRING_LITERAL@109..116 "\"lorem\"" [] []
+          1: COMMA@116..118 "," [] [Whitespace(" ")]
+          2: JS_VARIABLE_DECLARATOR@118..132
+            0: JS_IDENTIFIER_BINDING@118..123
+              0: IDENT@118..123 "bar7" [] [Whitespace(" ")]
+            1: (empty)
+            2: JS_INITIALIZER_CLAUSE@123..132
+              0: EQ@123..125 "=" [] [Whitespace(" ")]
+              1: JS_STRING_LITERAL_EXPRESSION@125..132
+                0: JS_STRING_LITERAL@125..132 "\"ipsum\"" [] []
+          3: COMMA@132..134 "," [] [Whitespace(" ")]
+          4: JS_VARIABLE_DECLARATOR@134..150
+            0: JS_IDENTIFIER_BINDING@134..141
+              0: IDENT@134..141 "third8" [] [Whitespace(" ")]
+            1: (empty)
+            2: JS_INITIALIZER_CLAUSE@141..150
+              0: EQ@141..143 "=" [] [Whitespace(" ")]
+              1: JS_STRING_LITERAL_EXPRESSION@143..150
+                0: JS_STRING_LITERAL@143..150 "\"value\"" [] []
+          5: COMMA@150..152 "," [] [Whitespace(" ")]
+          6: JS_VARIABLE_DECLARATOR@152..162
+            0: JS_IDENTIFIER_BINDING@152..159
+              0: IDENT@152..159 "fourth" [] [Whitespace(" ")]
+            1: (empty)
+            2: JS_INITIALIZER_CLAUSE@159..162
+              0: EQ@159..161 "=" [] [Whitespace(" ")]
+              1: JS_NUMBER_LITERAL_EXPRESSION@161..162
+                0: JS_NUMBER_LITERAL@161..162 "6" [] []
+      1: SEMICOLON@162..163 ";" [] []
+    6: JS_VARIABLE_STATEMENT@163..182
+      0: JS_VARIABLE_DECLARATION@163..181
+        0: (empty)
+        1: VAR_KW@163..168 "var" [Newline("\n")] [Whitespace(" ")]
+        2: JS_VARIABLE_DECLARATOR_LIST@168..181
+          0: JS_VARIABLE_DECLARATOR@168..169
+            0: JS_IDENTIFIER_BINDING@168..169
+              0: IDENT@168..169 "q" [] []
+            1: (empty)
+            2: (empty)
+          1: COMMA@169..171 "," [] [Whitespace(" ")]
+          2: JS_VARIABLE_DECLARATOR@171..172
+            0: JS_IDENTIFIER_BINDING@171..172
+              0: IDENT@171..172 "w" [] []
+            1: (empty)
+            2: (empty)
+          3: COMMA@172..174 "," [] [Whitespace(" ")]
+          4: JS_VARIABLE_DECLARATOR@174..175
+            0: JS_IDENTIFIER_BINDING@174..175
+              0: IDENT@174..175 "e" [] []
+            1: (empty)
+            2: (empty)
+          5: COMMA@175..177 "," [] [Whitespace(" ")]
+          6: JS_VARIABLE_DECLARATOR@177..178
+            0: JS_IDENTIFIER_BINDING@177..178
+              0: IDENT@177..178 "r" [] []
+            1: (empty)
+            2: (empty)
+          7: COMMA@178..180 "," [] [Whitespace(" ")]
+          8: JS_VARIABLE_DECLARATOR@180..181
+            0: JS_IDENTIFIER_BINDING@180..181
+              0: IDENT@180..181 "t" [] []
+            1: (empty)
+            2: (empty)
+      1: SEMICOLON@181..182 ";" [] []
+  4: EOF@182..183 "" [Newline("\n")] []
+
+```

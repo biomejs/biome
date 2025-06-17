@@ -1,8 +1,9 @@
 use biome_analyze::{
-    context::RuleContext, declare_lint_rule, ActionCategory, Ast, FixKind, Rule, RuleDiagnostic,
-    RuleSource, RuleSourceKind,
+    Ast, FixKind, Rule, RuleDiagnostic, RuleSource, RuleSourceKind, context::RuleContext,
+    declare_lint_rule,
 };
 use biome_console::markup;
+use biome_diagnostics::Severity;
 use biome_js_factory::make;
 use biome_js_syntax::{
     AnyJsLiteralExpression, AnyJsxAttributeValue, JsSyntaxKind, JsxAttribute, JsxAttributeFields, T,
@@ -49,6 +50,7 @@ declare_lint_rule! {
         language: "jsx",
         sources: &[RuleSource::EslintReact("jsx-boolean-value")],
         recommended: false,
+        severity: Severity::Information,
         fix_kind: FixKind::Safe,
         source_kind: RuleSourceKind::Inspired,
     }
@@ -127,7 +129,7 @@ impl Rule for NoImplicitBoolean {
         mutation.replace_node(n.clone(), next_attr);
 
         Some(JsRuleAction::new(
-            ActionCategory::QuickFix,
+            ctx.metadata().action_category(ctx.category(), ctx.group()),
             ctx.metadata().applicability(),
             markup! { "Add explicit `true` literal for this attribute" }.to_owned(),
             mutation,

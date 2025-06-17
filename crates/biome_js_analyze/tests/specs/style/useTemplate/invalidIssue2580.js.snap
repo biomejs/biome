@@ -3,7 +3,7 @@ source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalidIssue2580.js
 ---
 # Input
-```jsx
+```js
 // Issue https://github.com/biomejs/biome/issues/2580
 '```ts\n' + x + '\n```';
 ```
@@ -12,7 +12,7 @@ expression: invalidIssue2580.js
 ```
 invalidIssue2580.js:2:1 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Template literals are preferred over string concatenation.
+  i Template literals are preferred over string concatenation.
   
     1 │ // Issue https://github.com/biomejs/biome/issues/2580
   > 2 │ '```ts\n' + x + '\n```';

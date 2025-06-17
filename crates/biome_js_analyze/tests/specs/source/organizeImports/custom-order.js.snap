@@ -1,0 +1,47 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: custom-order.js
+snapshot_kind: text
+---
+# Input
+```js
+import { test as testBun } from "bun:test"
+import { test as testNode } from "node:test"
+import { test as testNode } from "@scopeX/special/subpath"
+import { test as testNode } from "@scopeX/special"
+import { test as testNode } from "@scopeX/lib"
+import { test as testNode } from "@scopeA/lib"
+import { test as testNode } from "@scopeB/lib"
+
+```
+
+# Diagnostics
+```
+custom-order.js:1:1 assist/source/organizeImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The imports and exports are not sorted.
+  
+  > 1 │ import { test as testBun } from "bun:test"
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    2 │ import { test as testNode } from "node:test"
+    3 │ import { test as testNode } from "@scopeX/special/subpath"
+  
+  i Safe fix: Organize Imports (Biome)
+  
+    1 1 │   import { test as testBun } from "bun:test"
+    2 2 │   import { test as testNode } from "node:test"
+    3   │ - import·{·test·as·testNode·}·from·"@scopeX/special/subpath"
+    4   │ - import·{·test·as·testNode·}·from·"@scopeX/special"
+    5   │ - import·{·test·as·testNode·}·from·"@scopeX/lib"
+    6   │ - import·{·test·as·testNode·}·from·"@scopeA/lib"
+    7   │ - import·{·test·as·testNode·}·from·"@scopeB/lib"
+      3 │ + import·{·test·as·testNode·}·from·"@scopeX/lib"
+      4 │ + 
+      5 │ + import·{·test·as·testNode·}·from·"@scopeB/lib"
+      6 │ + import·{·test·as·testNode·}·from·"@scopeA/lib"
+      7 │ + import·{·test·as·testNode·}·from·"@scopeX/special"
+      8 │ + import·{·test·as·testNode·}·from·"@scopeX/special/subpath"
+    8 9 │   
+  
+
+```

@@ -1,6 +1,6 @@
 use crate::parser::HtmlParser;
 use biome_html_syntax::TextRange;
-use biome_parser::diagnostic::{expect_one_of, expected_node, ParseDiagnostic};
+use biome_parser::diagnostic::{ParseDiagnostic, expect_one_of, expected_node};
 use biome_parser::prelude::ToDiagnostic;
 
 pub(crate) fn expected_attribute(p: &HtmlParser, range: TextRange) -> ParseDiagnostic {
@@ -55,4 +55,11 @@ pub(crate) fn void_element_should_not_have_closing_tag(
     range: TextRange,
 ) -> ParseDiagnostic {
     ParseDiagnostic::new("Void elements should not have a closing tag.", range)
+}
+
+pub(crate) fn closing_tag_should_not_have_attributes(
+    _p: &HtmlParser,
+    range: TextRange,
+) -> ParseDiagnostic {
+    ParseDiagnostic::new("Closing tags should not have attributes.", range)
 }

@@ -1,0 +1,118 @@
+---
+source: crates/biome_service/src/workspace.tests.rs
+expression: result.diagnostics
+---
+[
+    Diagnostic {
+        category: Some(
+            Category {
+                name: "lint/correctness/noUnusedVariables",
+                link: Some(
+                    "https://biomejs.dev/linter/rules/no-unused-variables",
+                ),
+            },
+        ),
+        severity: Warning,
+        description: "This variable a is unused.",
+        message: "This variable "<Emphasis>"a"</Emphasis>" is unused.",
+        advices: Advices {
+            advices: [
+                Log(
+                    Info,
+                    "Unused variables are often the result of an incomplete refactoring, typos, or other sources of bugs.",
+                ),
+                Log(
+                    Info,
+                    "Unsafe fix: If this is intentional, prepend "<Emphasis>"a"</Emphasis>" with an underscore.",
+                ),
+                Diff(
+                    TextEdit {
+                        dictionary: "const a_a = Object.assign({ foo: 'bar' });",
+                        ops: [
+                            DiffOp(
+                                Equal {
+                                    range: 0..6,
+                                },
+                            ),
+                            DiffOp(
+                                Delete {
+                                    range: 6..7,
+                                },
+                            ),
+                            DiffOp(
+                                Insert {
+                                    range: 7..9,
+                                },
+                            ),
+                            DiffOp(
+                                Equal {
+                                    range: 9..10,
+                                },
+                            ),
+                            DiffOp(
+                                Equal {
+                                    range: 10..42,
+                                },
+                            ),
+                        ],
+                    },
+                ),
+            ],
+        },
+        verbose_advices: Advices {
+            advices: [],
+        },
+        location: Location {
+            path: Some(
+                File(
+                    "/project/a.ts",
+                ),
+            ),
+            span: Some(
+                6..7,
+            ),
+            source_code: None,
+        },
+        tags: DiagnosticTags(
+            BitFlags<DiagnosticTag> {
+                bits: 0b1,
+                flags: Fixable,
+            },
+        ),
+        source: None,
+    },
+    Diagnostic {
+        category: Some(
+            Category {
+                name: "plugin",
+                link: None,
+            },
+        ),
+        severity: Error,
+        description: "Prefer object spread instead of `Object.assign()`",
+        message: "Prefer object spread instead of `Object.assign()`",
+        advices: Advices {
+            advices: [],
+        },
+        verbose_advices: Advices {
+            advices: [],
+        },
+        location: Location {
+            path: Some(
+                File(
+                    "/project/a.ts",
+                ),
+            ),
+            span: Some(
+                24..38,
+            ),
+            source_code: None,
+        },
+        tags: DiagnosticTags(
+            BitFlags<DiagnosticTag> {
+                bits: 0b0,
+            },
+        ),
+        source: None,
+    },
+]

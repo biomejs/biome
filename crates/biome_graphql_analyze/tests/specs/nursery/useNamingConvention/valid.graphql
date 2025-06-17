@@ -1,0 +1,5 @@
+# should not generate diagnostics
+enum Status {
+	ACTIVE
+	INACTIVE
+}

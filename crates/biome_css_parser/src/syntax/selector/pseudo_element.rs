@@ -11,7 +11,7 @@ use biome_css_syntax::CssSyntaxKind::*;
 use biome_css_syntax::{CssSyntaxKind, T};
 use biome_parser::prelude::ParsedSyntax;
 use biome_parser::prelude::ParsedSyntax::{Absent, Present};
-use biome_parser::{token_set, Parser, TokenSet};
+use biome_parser::{Parser, TokenSet, token_set};
 
 #[inline]
 pub(crate) fn parse_pseudo_element_selector(p: &mut CssParser) -> ParsedSyntax {

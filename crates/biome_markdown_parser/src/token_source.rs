@@ -14,14 +14,11 @@ pub(crate) struct MarkdownTokenSource<'source> {
     pub(super) trivia_list: Vec<Trivia>,
 }
 
-#[allow(dead_code)]
 pub(crate) type MarkdownTokenSourceCheckpoint = TokenSourceCheckpoint<MarkdownSyntaxKind>;
 
 impl<'source> MarkdownTokenSource<'source> {
     /// Creates a new token source.
-    pub(crate) fn new(
-        lexer: BufferedLexer<MarkdownSyntaxKind, MarkdownLexer<'source>>,
-    ) -> MarkdownTokenSource<'source> {
+    pub(crate) fn new(lexer: BufferedLexer<MarkdownSyntaxKind, MarkdownLexer<'source>>) -> Self {
         MarkdownTokenSource {
             lexer,
             trivia_list: vec![],
@@ -86,13 +83,12 @@ impl<'source> MarkdownTokenSource<'source> {
         })
     }
 
-    #[allow(dead_code)]
+    #[expect(dead_code)]
     pub fn re_lex(&mut self, mode: MarkdownReLexContext) -> MarkdownSyntaxKind {
         self.lexer.re_lex(mode)
     }
 
     /// Creates a checkpoint to which it can later return using [Self::rewind].
-    #[allow(dead_code)]
     pub fn checkpoint(&self) -> MarkdownTokenSourceCheckpoint {
         MarkdownTokenSourceCheckpoint {
             trivia_len: self.trivia_list.len() as u32,
@@ -101,7 +97,6 @@ impl<'source> MarkdownTokenSource<'source> {
     }
 
     /// Restores the token source to a previous state
-    #[allow(dead_code)]
     pub fn rewind(&mut self, checkpoint: MarkdownTokenSourceCheckpoint) {
         assert!(self.trivia_list.len() >= checkpoint.trivia_len as usize);
         self.trivia_list.truncate(checkpoint.trivia_len as usize);
@@ -109,7 +104,7 @@ impl<'source> MarkdownTokenSource<'source> {
     }
 }
 
-impl<'source> TokenSource for MarkdownTokenSource<'source> {
+impl TokenSource for MarkdownTokenSource<'_> {
     type Kind = MarkdownSyntaxKind;
 
     fn current(&self) -> Self::Kind {
@@ -141,7 +136,7 @@ impl<'source> TokenSource for MarkdownTokenSource<'source> {
     }
 }
 
-impl<'source> BumpWithContext for MarkdownTokenSource<'source> {
+impl BumpWithContext for MarkdownTokenSource<'_> {
     type Context = MarkdownLexContext;
 
     fn bump_with_context(&mut self, context: Self::Context) {

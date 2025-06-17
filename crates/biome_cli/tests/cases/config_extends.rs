@@ -1,37 +1,36 @@
 use crate::run_cli;
-use crate::snap_test::{assert_cli_snapshot, SnapshotPayload};
+use crate::snap_test::{SnapshotPayload, assert_cli_snapshot};
 use biome_console::BufferConsole;
 use biome_formatter::LineWidth;
 use biome_fs::MemoryFileSystem;
-use biome_service::DynRef;
 use bpaf::Args;
-use std::path::Path;
+use camino::Utf8Path;
 
 #[test]
 fn extends_config_ok_formatter_no_linter() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    let rome_json = Path::new("biome.json");
+    let biome_json = Utf8Path::new("biome.json");
     fs.insert(
-        rome_json.into(),
+        biome_json.into(),
         r#"{ "extends": ["format.json", "linter.json"] }"#,
     );
-    let format = Path::new("format.json");
+    let format = Utf8Path::new("format.json");
     fs.insert(
         format.into(),
         r#"{ "javascript": { "formatter": { "quoteStyle": "single" } } }"#,
     );
-    let lint = Path::new("linter.json");
+    let lint = Utf8Path::new("linter.json");
     fs.insert(lint.into(), r#"{ "linter": { "enabled": false } }"#);
 
-    let test_file = Path::new("test.js");
+    let test_file = Utf8Path::new("test.js");
     fs.insert(test_file.into(), r#"debugger; console.log("string"); "#);
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
-        Args::from([("check"), test_file.as_os_str().to_str().unwrap()].as_slice()),
+        Args::from(["check", test_file.as_str()].as_slice()),
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
@@ -46,24 +45,143 @@ fn extends_config_ok_formatter_no_linter() {
 }
 
 #[test]
+fn extends_config_ok_from_npm_package() {
+    let mut fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let biome_json = Utf8Path::new("biome.json");
+    fs.insert(
+        biome_json.into(),
+        r#"{ "extends": ["@shared/format/biome", "@shared/linter/biome"] }"#,
+    );
+
+    fs.insert(
+        "node_modules/@shared/format/biome.json".into(),
+        r#"{ "javascript": { "formatter": { "quoteStyle": "single" } } }"#,
+    );
+    fs.insert(
+        "node_modules/@shared/format/package.json".into(),
+        r#"{
+    "name": "@shared/format",
+    "exports": {
+        "./biome": "./biome.json"
+    }
+}"#,
+    );
+
+    fs.insert(
+        "node_modules/@shared/linter/biome.jsonc".into(),
+        r#"{ "linter": { "enabled": false, } }"#,
+    );
+    fs.insert(
+        "node_modules/@shared/linter/package.json".into(),
+        r#"{
+    "name": "@shared/linter",
+    "exports": {
+        "./biome": "./biome.jsonc"
+    }
+}"#,
+    );
+
+    let test_file = Utf8Path::new("test.js");
+    fs.insert(test_file.into(), r#"debugger; console.log("string"); "#);
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["check", test_file.as_str()].as_slice()),
+    );
+
+    assert!(result.is_err(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "extends_config_ok_from_npm_package",
+        fs,
+        console,
+        result,
+    ));
+}
+
+// See: https://github.com/biomejs/biome/issues/6217
+#[test]
+fn extends_config_ok_from_npm_package_with_author_field() {
+    let mut fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let biome_json = Utf8Path::new("biome.json");
+    fs.insert(
+        biome_json.into(),
+        r#"{ "extends": ["@shared/format/biome", "@shared/linter/biome"] }"#,
+    );
+
+    fs.insert(
+        "node_modules/@shared/format/biome.json".into(),
+        r#"{ "javascript": { "formatter": { "quoteStyle": "single" } } }"#,
+    );
+    fs.insert(
+        "node_modules/@shared/format/package.json".into(),
+        r#"{
+    "name": "@shared/format",
+    "author": "this breaks extending biome",
+    "exports": {
+        "./biome": "./biome.json"
+    }
+}"#,
+    );
+
+    fs.insert(
+        "node_modules/@shared/linter/biome.jsonc".into(),
+        r#"{ "linter": { "enabled": false, } }"#,
+    );
+    fs.insert(
+        "node_modules/@shared/linter/package.json".into(),
+        r#"{
+    "name": "@shared/linter",
+    "exports": {
+        "./biome": "./biome.jsonc"
+    }
+}"#,
+    );
+
+    let test_file = Utf8Path::new("test.js");
+    fs.insert(test_file.into(), r#"debugger; console.log("string"); "#);
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["check", test_file.as_str()].as_slice()),
+    );
+
+    assert!(result.is_err(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "extends_config_ok_from_npm_package_with_author_field",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
 fn extends_config_ok_linter_not_formatter() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    let rome_json = Path::new("biome.json");
+    let biome_json = Utf8Path::new("biome.json");
     fs.insert(
-        rome_json.into(),
+        biome_json.into(),
         r#"{ "extends": ["format.json", "linter.json"] }"#,
     );
-    let format = Path::new("format.json");
+    let format = Utf8Path::new("format.json");
     fs.insert(format.into(), r#"{ "formatter": { "enabled": true } }"#);
-    let lint = Path::new("linter.json");
+    let lint = Utf8Path::new("linter.json");
     fs.insert(
         lint.into(),
         r#"{
   "linter": {
     "rules": {
-      "all": false,
       "suspicious": {
         "noDebugger": "warn"
       }
@@ -73,13 +191,13 @@ fn extends_config_ok_linter_not_formatter() {
         "#,
     );
 
-    let test_file = Path::new("test.js");
+    let test_file = Utf8Path::new("test.js");
     fs.insert(test_file.into(), r#"debugger; console.log("string"); "#);
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
-        Args::from([("check"), test_file.as_os_str().to_str().unwrap()].as_slice()),
+        Args::from(["check", test_file.as_str()].as_slice()),
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
@@ -98,26 +216,26 @@ fn extends_should_raise_an_error_for_unresolved_configuration() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    let rome_json = Path::new("biome.json");
+    let biome_json = Utf8Path::new("biome.json");
     fs.insert(
-        rome_json.into(),
+        biome_json.into(),
         r#"{ "extends": ["formatTYPO.json", "linter.json"] }"#,
     );
-    let format = Path::new("format.json");
+    let format = Utf8Path::new("format.json");
     fs.insert(
         format.into(),
         r#"{ "javascript": { "formatter": { "quoteStyle": "single" } } }"#,
     );
-    let lint = Path::new("linter.json");
+    let lint = Utf8Path::new("linter.json");
     fs.insert(lint.into(), r#"{ "linter": { "enabled": false } }"#);
 
-    let test_file = Path::new("test.js");
+    let test_file = Utf8Path::new("test.js");
     fs.insert(test_file.into(), r#"debugger; console.log("string"); "#);
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
-        Args::from([("check"), test_file.as_os_str().to_str().unwrap()].as_slice()),
+        Args::from(["check", test_file.as_str()].as_slice()),
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
@@ -136,33 +254,26 @@ fn extends_should_raise_an_error_for_unresolved_configuration_and_show_verbose()
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    let rome_json = Path::new("biome.json");
+    let biome_json = Utf8Path::new("biome.json");
     fs.insert(
-        rome_json.into(),
+        biome_json.into(),
         r#"{ "extends": ["formatTYPO.json", "linter.json"] }"#,
     );
-    let format = Path::new("format.json");
+    let format = Utf8Path::new("format.json");
     fs.insert(
         format.into(),
         r#"{ "javascript": { "formatter": { "quoteStyle": "single" } } }"#,
     );
-    let lint = Path::new("linter.json");
+    let lint = Utf8Path::new("linter.json");
     fs.insert(lint.into(), r#"{ "linter": { "enabled": false } }"#);
 
-    let test_file = Path::new("test.js");
+    let test_file = Utf8Path::new("test.js");
     fs.insert(test_file.into(), r#"debugger; console.log("string"); "#);
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
-        Args::from(
-            [
-                ("check"),
-                "--verbose",
-                test_file.as_os_str().to_str().unwrap(),
-            ]
-            .as_slice(),
-        ),
+        Args::from(["check", "--verbose", test_file.as_str()].as_slice()),
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
@@ -181,33 +292,26 @@ fn extends_resolves_when_using_config_path() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    let rome_json = Path::new("config/biome.json");
+    let biome_json = Utf8Path::new("config/biome.json");
     fs.insert(
-        rome_json.into(),
+        biome_json.into(),
         r#"{ "extends": ["format.json", "linter.json"] }"#,
     );
-    let format = Path::new("config/format.json");
+    let format = Utf8Path::new("config/format.json");
     fs.insert(
         format.into(),
         r#"{ "javascript": { "formatter": { "quoteStyle": "single" } } }"#,
     );
-    let lint = Path::new("config/linter.json");
+    let lint = Utf8Path::new("config/linter.json");
     fs.insert(lint.into(), r#"{ "linter": { "enabled": true } }"#);
 
-    let test_file = Path::new("test.js");
+    let test_file = Utf8Path::new("test.js");
     fs.insert(test_file.into(), r#"debugger; console.log("string"); "#);
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
-        Args::from(
-            [
-                ("check"),
-                "--config-path=config/",
-                test_file.as_os_str().to_str().unwrap(),
-            ]
-            .as_slice(),
-        ),
+        Args::from(["check", "--config-path=config/", test_file.as_str()].as_slice()),
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
@@ -226,35 +330,28 @@ fn applies_extended_values_in_current_config() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    let format = Path::new("format.json");
+    let format = Utf8Path::new("format.json");
     fs.insert(
         format.into(),
         r#"{ "javascript": { "formatter": { "quoteStyle": "single" } } }"#,
     );
 
-    let rome_json = Path::new("biome.json");
+    let biome_json = Utf8Path::new("biome.json");
     fs.insert(
-        rome_json.into(),
+        biome_json.into(),
         r#"{ "extends": ["format.json"], "formatter": { "lineWidth": 20 } }"#,
     );
 
-    let test_file = Path::new("test.js");
+    let test_file = Utf8Path::new("test.js");
     fs.insert(
         test_file.into(),
         r#"debugger; const a = ["lorem", "ipsum"]; "#,
     );
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
-        Args::from(
-            [
-                ("format"),
-                "--write",
-                test_file.as_os_str().to_str().unwrap(),
-            ]
-            .as_slice(),
-        ),
+        Args::from(["format", "--write", test_file.as_str()].as_slice()),
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -273,32 +370,25 @@ fn respects_unaffected_values_from_extended_config() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    let format = Path::new("format.json");
+    let format = Utf8Path::new("format.json");
     fs.insert(format.into(), r#"{ "formatter": { "lineWidth": 20 } }"#);
 
-    let rome_json = Path::new("biome.json");
+    let biome_json = Utf8Path::new("biome.json");
     fs.insert(
-        rome_json.into(),
+        biome_json.into(),
         r#"{ "extends": ["format.json"], "formatter": { "indentStyle": "space", "indentWidth": 2 } }"#,
     );
 
-    let test_file = Path::new("test.js");
+    let test_file = Utf8Path::new("test.js");
     fs.insert(
         test_file.into(),
         r#"debugger; const a = ["lorem", "ipsum"]; "#,
     );
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
-        Args::from(
-            [
-                ("format"),
-                "--write",
-                test_file.as_os_str().to_str().unwrap(),
-            ]
-            .as_slice(),
-        ),
+        Args::from(["format", "--write", test_file.as_str()].as_slice()),
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -317,35 +407,28 @@ fn allows_reverting_fields_in_extended_config_to_default() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    let format = Path::new("format.json");
+    let format = Utf8Path::new("format.json");
     fs.insert(format.into(), r#"{ "formatter": { "lineWidth": 20 } }"#);
 
-    let rome_json = Path::new("biome.json");
+    let biome_json = Utf8Path::new("biome.json");
     fs.insert(
-        rome_json.into(),
+        biome_json.into(),
         format!(
             r#"{{ "extends": ["format.json"], "formatter": {{ "lineWidth": {} }} }}"#,
             LineWidth::default().value()
         ),
     );
 
-    let test_file = Path::new("test.js");
+    let test_file = Utf8Path::new("test.js");
     fs.insert(
         test_file.into(),
         r#"debugger; const a = ["lorem", "ipsum"]; "#,
     );
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
-        Args::from(
-            [
-                ("format"),
-                "--write",
-                test_file.as_os_str().to_str().unwrap(),
-            ]
-            .as_slice(),
-        ),
+        Args::from(["format", "--write", test_file.as_str()].as_slice()),
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -364,36 +447,36 @@ fn extends_config_merge_overrides() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    let shared = Path::new("shared.json");
+    let shared = Utf8Path::new("shared.json");
     fs.insert(
         shared.into(),
         r#"{
             "overrides": [{
-                "include": ["**/*.js"],
+                "includes": ["**/*.js"],
                 "linter": { "rules": { "suspicious": { "noDebugger": "off" } } }
             }]
         }"#,
     );
 
-    let biome_json = Path::new("biome.json");
+    let biome_json = Utf8Path::new("biome.json");
     fs.insert(
         biome_json.into(),
         r#"{
             "extends": ["shared.json"],
             "overrides": [{
-                "include": ["**/*.js"],
+                "includes": ["**/*.js"],
                 "linter": { "rules": { "correctness": { "noUnusedVariables": "error" } } }
             }]
         }"#,
     );
 
-    let test_file = Path::new("test.js");
+    let test_file = Utf8Path::new("test.js");
     fs.insert(test_file.into(), "debugger; const a = 0;");
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
-        Args::from(["lint", test_file.as_os_str().to_str().unwrap()].as_slice()),
+        Args::from(["lint", test_file.as_str()].as_slice()),
     );
 
     assert_cli_snapshot(SnapshotPayload::new(

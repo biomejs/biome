@@ -1,9 +1,10 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid_with_default_export.js
+snapshot_kind: text
 ---
 # Input
-```jsx
+```js
 export default {};
 export {}
 ```
@@ -12,7 +13,7 @@ export {}
 ```
 invalid_with_default_export.js:2:1 lint/complexity/noUselessEmptyExport  FIXABLE  ━━━━━━━━━━━━━━━━━━
 
-  ! This empty export is useless because there's another export or import.
+  i This empty export is useless because there's another export or import.
   
     1 │ export default {};
   > 2 │ export {}
@@ -31,5 +32,3 @@ invalid_with_default_export.js:2:1 lint/complexity/noUselessEmptyExport  FIXABLE
   
 
 ```
-
-

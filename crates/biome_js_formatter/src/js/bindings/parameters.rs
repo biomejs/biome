@@ -1,15 +1,15 @@
 use crate::prelude::*;
-use biome_formatter::{write, CstFormatContext};
+use biome_formatter::{CstFormatContext, write};
 
 use crate::js::expressions::arrow_function_expression::can_avoid_parentheses;
 use crate::js::lists::parameter_list::FormatJsAnyParameterList;
 use biome_js_syntax::parameter_ext::{AnyJsParameterList, AnyParameter};
 use biome_js_syntax::{
-    is_test_call_argument, AnyJsBinding, AnyJsBindingPattern, AnyJsConstructorParameter,
-    AnyJsExpression, AnyJsFormalParameter, AnyJsParameter, AnyTsType, JsArrowFunctionExpression,
-    JsConstructorParameters, JsParameters, JsSyntaxNode, JsSyntaxToken,
+    AnyJsBinding, AnyJsBindingPattern, AnyJsConstructorParameter, AnyJsExpression,
+    AnyJsFormalParameter, AnyJsParameter, AnyTsType, JsArrowFunctionExpression,
+    JsConstructorParameters, JsParameters, JsSyntaxNode, JsSyntaxToken, is_test_call_argument,
 };
-use biome_rowan::{declare_node_union, AstNode, SyntaxResult};
+use biome_rowan::{AstNode, SyntaxResult, declare_node_union};
 
 #[derive(Debug, Copy, Clone, Default)]
 pub(crate) struct FormatJsParameters();
@@ -35,7 +35,7 @@ impl Format<JsFormatContext> for FormatAnyJsParameters {
 
         let parentheses_not_needed = self
             .as_arrow_function_expression()
-            .map_or(false, |expression| can_avoid_parentheses(&expression, f));
+            .is_some_and(|expression| can_avoid_parentheses(&expression, f));
         let has_any_decorated_parameter = list.has_any_decorated_parameter();
 
         let can_hug =
@@ -117,19 +117,15 @@ impl Format<JsFormatContext> for FormatAnyJsParameters {
 impl FormatAnyJsParameters {
     fn l_paren_token(&self) -> SyntaxResult<JsSyntaxToken> {
         match self {
-            FormatAnyJsParameters::JsParameters(parameters) => parameters.l_paren_token(),
-            FormatAnyJsParameters::JsConstructorParameters(parameters) => {
-                parameters.l_paren_token()
-            }
+            Self::JsParameters(parameters) => parameters.l_paren_token(),
+            Self::JsConstructorParameters(parameters) => parameters.l_paren_token(),
         }
     }
 
     fn list(&self) -> AnyJsParameterList {
         match self {
-            FormatAnyJsParameters::JsParameters(parameters) => {
-                AnyJsParameterList::from(parameters.items())
-            }
-            FormatAnyJsParameters::JsConstructorParameters(parameters) => {
+            Self::JsParameters(parameters) => AnyJsParameterList::from(parameters.items()),
+            Self::JsConstructorParameters(parameters) => {
                 AnyJsParameterList::from(parameters.parameters())
             }
         }
@@ -137,21 +133,19 @@ impl FormatAnyJsParameters {
 
     fn r_paren_token(&self) -> SyntaxResult<JsSyntaxToken> {
         match self {
-            FormatAnyJsParameters::JsParameters(parameters) => parameters.r_paren_token(),
-            FormatAnyJsParameters::JsConstructorParameters(parameters) => {
-                parameters.r_paren_token()
-            }
+            Self::JsParameters(parameters) => parameters.r_paren_token(),
+            Self::JsConstructorParameters(parameters) => parameters.r_paren_token(),
         }
     }
 
     /// Returns `true` for function parameters if the function is an argument of a [test `CallExpression`](is_test_call_expression).
     fn is_in_test_call(&self) -> SyntaxResult<bool> {
         let result = match self {
-            FormatAnyJsParameters::JsParameters(parameters) => match parameters.syntax().parent() {
+            Self::JsParameters(parameters) => match parameters.syntax().parent() {
                 Some(function) => is_test_call_argument(&function)?,
                 None => false,
             },
-            FormatAnyJsParameters::JsConstructorParameters(_) => false,
+            Self::JsConstructorParameters(_) => false,
         };
 
         Ok(result)
@@ -159,18 +153,18 @@ impl FormatAnyJsParameters {
 
     fn as_arrow_function_expression(&self) -> Option<JsArrowFunctionExpression> {
         match self {
-            FormatAnyJsParameters::JsParameters(parameters) => parameters
+            Self::JsParameters(parameters) => parameters
                 .syntax()
                 .parent()
                 .and_then(JsArrowFunctionExpression::cast),
-            FormatAnyJsParameters::JsConstructorParameters(_) => None,
+            Self::JsConstructorParameters(_) => None,
         }
     }
 
     fn syntax(&self) -> &JsSyntaxNode {
         match self {
-            FormatAnyJsParameters::JsParameters(parameters) => parameters.syntax(),
-            FormatAnyJsParameters::JsConstructorParameters(parameters) => parameters.syntax(),
+            Self::JsParameters(parameters) => parameters.syntax(),
+            Self::JsConstructorParameters(parameters) => parameters.syntax(),
         }
     }
 }
@@ -243,14 +237,12 @@ pub(crate) fn should_hug_function_parameters(
                                 if should_hug_formal_parameter {
                                     true
                                 } else {
-                                    parameter
-                                        .type_annotation()
-                                        .map_or(false, |type_annotation| {
-                                            matches!(
-                                                type_annotation.ty(),
-                                                Ok(AnyTsType::TsObjectType(_))
-                                            )
-                                        })
+                                    parameter.type_annotation().is_some_and(|type_annotation| {
+                                        matches!(
+                                            type_annotation.ty(),
+                                            Ok(AnyTsType::TsObjectType(_))
+                                        )
+                                    })
                                 }
                             }
                             AnyJsBindingPattern::AnyJsBinding(AnyJsBinding::JsBogusBinding(_)) => {
@@ -282,7 +274,7 @@ pub(crate) fn should_hug_function_parameters(
                 }
             }
             AnyJsFormalParameter::JsBogusParameter(_) | AnyJsFormalParameter::JsMetavariable(_) => {
-                return Err(FormatError::SyntaxError)
+                return Err(FormatError::SyntaxError);
             }
         };
 
@@ -313,7 +305,7 @@ pub(crate) fn should_hug_function_parameters(
             }
             AnyJsParameter::JsRestParameter(_) => false,
             AnyJsParameter::TsThisParameter(this) => {
-                this.type_annotation().map_or(false, |type_annotation| {
+                this.type_annotation().is_some_and(|type_annotation| {
                     matches!(type_annotation.ty(), Ok(AnyTsType::TsObjectType(_)))
                 })
             }

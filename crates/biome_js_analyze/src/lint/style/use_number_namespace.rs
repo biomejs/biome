@@ -1,13 +1,13 @@
-use crate::{services::semantic::Semantic, JsRuleAction};
+use crate::{JsRuleAction, services::semantic::Semantic};
 use biome_analyze::{
-    context::RuleContext, declare_lint_rule, ActionCategory, FixKind, Rule, RuleDiagnostic,
-    RuleSource,
+    FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
+use biome_diagnostics::Severity;
 use biome_js_factory::make;
 use biome_js_syntax::{
-    global_identifier, static_value::StaticValue, AnyJsExpression, JsUnaryExpression,
-    JsUnaryOperator, T,
+    AnyJsExpression, JsUnaryExpression, JsUnaryOperator, T, global_identifier,
+    static_value::StaticValue,
 };
 use biome_rowan::{AstNode, BatchMutationExt};
 
@@ -70,7 +70,8 @@ declare_lint_rule! {
         name: "useNumberNamespace",
         language: "js",
         sources: &[RuleSource::EslintUnicorn("prefer-number-properties")],
-        recommended: true,
+        recommended: false,
+        severity: Severity::Information,
         fix_kind: FixKind::Safe,
     }
 }
@@ -130,11 +131,11 @@ impl Rule for UseNumberNamespace {
         let node = ctx.query();
         let (old_node, new_node) = match node {
             AnyJsExpression::JsIdentifierExpression(expression) => {
-                let name = expression.name().ok()?.text();
-                if !GLOBAL_NUMBER_PROPERTIES.contains(&name.as_str()) {
+                let name = expression.name().ok()?.to_trimmed_text();
+                if !GLOBAL_NUMBER_PROPERTIES.contains(&name.text()) {
                     return None;
                 }
-                let (old_node, replacement) = match name.as_str() {
+                let (old_node, replacement) = match name.text() {
                     "Infinity" => {
                         if let Some(parent) = node.parent::<JsUnaryExpression>() {
                             match parent.operator().ok()? {
@@ -152,7 +153,7 @@ impl Rule for UseNumberNamespace {
                             (node.clone(), "POSITIVE_INFINITY")
                         }
                     }
-                    _ => (node.clone(), name.as_str()),
+                    _ => (node.clone(), name.text()),
                 };
                 (
                     old_node,
@@ -167,12 +168,12 @@ impl Rule for UseNumberNamespace {
                 )
             }
             AnyJsExpression::JsStaticMemberExpression(expression) => {
-                let name = expression.member().ok()?.text();
+                let name = expression.member().ok()?.to_trimmed_text();
 
-                if !GLOBAL_NUMBER_PROPERTIES.contains(&name.as_str()) {
+                if !GLOBAL_NUMBER_PROPERTIES.contains(&name.text()) {
                     return None;
                 }
-                let (old_node, replacement) = match name.as_str() {
+                let (old_node, replacement) = match name.text() {
                     "Infinity" => {
                         if let Some(parent) = node.parent::<JsUnaryExpression>() {
                             match parent.operator().ok()? {
@@ -190,7 +191,7 @@ impl Rule for UseNumberNamespace {
                             (node.clone(), "POSITIVE_INFINITY")
                         }
                     }
-                    _ => (node.clone(), name.as_str()),
+                    _ => (node.clone(), name.text()),
                 };
                 (
                     old_node,
@@ -237,7 +238,7 @@ impl Rule for UseNumberNamespace {
         };
 
         Some(JsRuleAction::new(
-            ActionCategory::QuickFix,
+            ctx.metadata().action_category(ctx.category(), ctx.group()),
             ctx.metadata().applicability(),
             markup! {
                 "Use "<Emphasis>"Number."{equivalent_property}</Emphasis>" instead."

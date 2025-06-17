@@ -1,7 +1,7 @@
 use biome_formatter_test::spec::{SpecSnapshot, SpecTestFile};
-use biome_js_formatter::{context::JsFormatOptions, JsFormatLanguage};
-use biome_js_syntax::{JsFileSource, ModuleKind};
-use std::path::Path;
+use biome_js_formatter::{JsFormatLanguage, context::JsFormatOptions};
+use biome_js_syntax::{JsFileSource, LanguageVariant, ModuleKind};
+use camino::Utf8Path;
 
 mod language {
     include!("language.rs");
@@ -25,15 +25,18 @@ mod language {
 /// * `json/null` -> input: `tests/specs/json/null.json`, expected output: `tests/specs/json/null.json.snap`
 /// * `null` -> input: `tests/specs/null.json`, expected output: `tests/specs/null.json.snap`
 pub fn run(spec_input_file: &str, _expected_file: &str, test_directory: &str, file_type: &str) {
-    let root_path = Path::new(concat!(env!("CARGO_MANIFEST_DIR"), "/tests/specs/"));
+    let root_path = Utf8Path::new(concat!(env!("CARGO_MANIFEST_DIR"), "/tests/specs/"));
 
-    let Some(test_file) = SpecTestFile::try_from_file(spec_input_file, root_path, None) else {
+    let Some(test_file) = SpecTestFile::try_from_file(spec_input_file, root_path, |_| None) else {
         return;
     };
 
     let mut source_type: JsFileSource = test_file.input_file().as_path().try_into().unwrap();
     if file_type != "module" {
         source_type = source_type.with_module_kind(ModuleKind::Script);
+    }
+    if !source_type.is_typescript() {
+        source_type.set_variant(LanguageVariant::Jsx);
     }
 
     let options = JsFormatOptions::new(source_type);

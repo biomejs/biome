@@ -3,12 +3,11 @@ source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: validInnerUsed.js
 ---
 # Input
-```jsx
+```js
+/* should not generate diagnostics */
 // https://github.com/biomejs/biome/issues/105
 
 const tid = setInterval(() => {
     clearInterval(tid);
 });
 ```
-
-

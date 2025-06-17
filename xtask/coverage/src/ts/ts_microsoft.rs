@@ -1,11 +1,12 @@
 use crate::check_file_encoding;
 use crate::runner::{
-    create_bogus_node_in_tree_diagnostic, TestCase, TestCaseFiles, TestRunOutcome, TestSuite,
+    TestCase, TestCaseFiles, TestRunOutcome, TestSuite, create_bogus_node_in_tree_diagnostic,
 };
 use biome_js_parser::JsParserOptions;
 use biome_js_syntax::{JsFileSource, ModuleKind};
 use biome_rowan::{AstNode, SyntaxKind};
 use biome_string_case::StrOnlyExtension;
+use camino::Utf8Path;
 use regex::Regex;
 use std::borrow::Cow;
 use std::convert::TryFrom;
@@ -195,7 +196,7 @@ fn extract_metadata(code: &str, path: &str) -> TestCaseMetadata {
 }
 
 fn add_file_if_supported(files: &mut TestCaseFiles, name: String, content: String) {
-    let path = Path::new(&name);
+    let path = Utf8Path::new(&name);
     // Skip files that aren't JS/TS files (JSON, CSS...)
     if let Ok(mut source_type) = JsFileSource::try_from(path) {
         let is_module_regex = Regex::new("(import|export)\\s").unwrap();

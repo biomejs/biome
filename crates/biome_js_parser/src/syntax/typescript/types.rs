@@ -4,22 +4,21 @@ use crate::parser::{RecoveryError, RecoveryResult};
 use crate::prelude::*;
 use crate::state::{EnterType, SignatureFlags};
 use crate::syntax::expr::{
-    is_at_binary_operator, is_at_expression, is_at_identifier, is_nth_at_identifier,
-    is_nth_at_identifier_or_keyword, parse_assignment_expression_or_higher,
-    parse_big_int_literal_expression, parse_identifier, parse_literal_expression, parse_name,
-    parse_number_literal_expression, parse_reference_identifier, parse_template_elements,
-    ExpressionContext,
+    ExpressionContext, is_at_binary_operator, is_at_expression, is_at_identifier,
+    is_nth_at_identifier, is_nth_at_identifier_or_keyword, parse_big_int_literal_expression,
+    parse_identifier, parse_literal_expression, parse_name, parse_number_literal_expression,
+    parse_reference_identifier, parse_template_elements,
 };
 use crate::syntax::function::{
-    parse_formal_parameter, parse_parameter_list, skip_parameter_start, ParameterContext,
+    ParameterContext, parse_formal_parameter, parse_parameter_list, skip_parameter_start,
 };
-use crate::syntax::js_parse_error;
 use crate::syntax::js_parse_error::{
     decorators_not_allowed, expected_identifier, expected_object_member_name, expected_parameter,
     expected_parameters, expected_property_or_signature, modifier_already_seen,
     modifier_must_precede_modifier,
 };
 use crate::syntax::metavariable::parse_metavariable;
+use crate::syntax::module::ImportAssertionList;
 use crate::syntax::object::{
     is_at_object_member_name, is_nth_at_type_member_name, parse_object_member_name,
 };
@@ -31,20 +30,20 @@ use crate::syntax::typescript::ts_parse_error::{
     ts_in_out_modifier_cannot_appear_on_a_type_parameter,
 };
 use biome_parser::parse_lists::{ParseNodeList, ParseSeparatedList};
-use biome_parser::ParserProgress;
-use enumflags2::{bitflags, make_bitflags, BitFlags};
+use enumflags2::{BitFlags, bitflags, make_bitflags};
 use smallvec::SmallVec;
 
+use crate::JsSyntaxFeature::TypeScript;
 use crate::lexer::{JsLexContext, JsReLexContext};
 use crate::span::Span;
 use crate::syntax::class::parse_decorators;
-use crate::JsSyntaxFeature::TypeScript;
 use crate::{Absent, JsParser, ParseRecoveryTokenSet, ParsedSyntax, Present};
 use biome_js_syntax::JsSyntaxKind::TS_TYPE_ANNOTATION;
 use biome_js_syntax::T;
 use biome_js_syntax::{JsSyntaxKind::*, *};
 
-use super::{expect_ts_index_signature_member, is_at_ts_index_signature_member, MemberParent};
+use super::ts_parse_error::expected_ts_import_type_with_arguments;
+use super::{MemberParent, expect_ts_index_signature_member, is_at_ts_index_signature_member};
 
 #[derive(Debug, Copy, Clone, Eq, PartialEq)]
 #[bitflags]
@@ -86,57 +85,53 @@ impl TypeContext {
     pub const TYPE_OR_INTERFACE_DECLARATION: Self =
         Self(make_bitflags!(ContextFlag::{TypeOrInterfaceDeclaration}));
 
-    pub fn contains(&self, other: impl Into<TypeContext>) -> bool {
+    pub fn contains(&self, other: impl Into<Self>) -> bool {
         self.0.contains(other.into().0)
     }
 
     pub(crate) fn and_allow_conditional_types(self, allow: bool) -> Self {
-        self.and(TypeContext::DISALLOW_CONDITIONAL_TYPES, !allow)
+        self.and(Self::DISALLOW_CONDITIONAL_TYPES, !allow)
     }
 
     pub(crate) fn and_allow_in_out_modifier(self, allow: bool) -> Self {
-        self.and(TypeContext::ALLOW_IN_OUT_MODIFIER, allow)
+        self.and(Self::ALLOW_IN_OUT_MODIFIER, allow)
     }
 
     pub(crate) fn and_allow_const_modifier(self, allow: bool) -> Self {
-        self.and(TypeContext::ALLOW_CONST_MODIFIER, allow)
+        self.and(Self::ALLOW_CONST_MODIFIER, allow)
     }
 
     pub(crate) fn and_in_conditional_extends(self, allow: bool) -> Self {
-        self.and(TypeContext::IN_CONDITIONAL_EXTENDS, allow)
+        self.and(Self::IN_CONDITIONAL_EXTENDS, allow)
     }
 
     pub(crate) fn and_type_or_interface_declaration(self, allow: bool) -> Self {
-        self.and(TypeContext::TYPE_OR_INTERFACE_DECLARATION, allow)
+        self.and(Self::TYPE_OR_INTERFACE_DECLARATION, allow)
     }
 
     pub(crate) fn is_conditional_type_allowed(&self) -> bool {
-        !self.contains(TypeContext::DISALLOW_CONDITIONAL_TYPES)
+        !self.contains(Self::DISALLOW_CONDITIONAL_TYPES)
     }
 
     pub(crate) fn is_in_out_modifier_allowed(&self) -> bool {
-        self.contains(TypeContext::ALLOW_IN_OUT_MODIFIER)
+        self.contains(Self::ALLOW_IN_OUT_MODIFIER)
     }
 
     pub(crate) fn is_const_modifier_allowed(&self) -> bool {
-        self.contains(TypeContext::ALLOW_CONST_MODIFIER)
+        self.contains(Self::ALLOW_CONST_MODIFIER)
     }
 
     pub(crate) fn in_conditional_extends(&self) -> bool {
-        self.contains(TypeContext::IN_CONDITIONAL_EXTENDS)
+        self.contains(Self::IN_CONDITIONAL_EXTENDS)
     }
 
     pub(crate) fn is_in_type_or_interface_declaration(&self) -> bool {
-        self.contains(TypeContext::TYPE_OR_INTERFACE_DECLARATION)
+        self.contains(Self::TYPE_OR_INTERFACE_DECLARATION)
     }
 
     /// Adds the `flag` if `set` is `true`, otherwise removes the `flag`
-    fn and(self, flag: TypeContext, set: bool) -> Self {
-        if set {
-            self | flag
-        } else {
-            self - flag
-        }
+    fn and(self, flag: Self, set: bool) -> Self {
+        if set { self | flag } else { self - flag }
     }
 }
 
@@ -646,32 +641,32 @@ impl IntersectionOrUnionType {
     #[inline]
     fn operator(&self) -> JsSyntaxKind {
         match self {
-            IntersectionOrUnionType::Union => T![|],
-            IntersectionOrUnionType::Intersection => T![&],
+            Self::Union => T![|],
+            Self::Intersection => T![&],
         }
     }
 
     #[inline]
     fn list_kind(&self) -> JsSyntaxKind {
         match self {
-            IntersectionOrUnionType::Union => TS_UNION_TYPE_VARIANT_LIST,
-            IntersectionOrUnionType::Intersection => TS_INTERSECTION_TYPE_ELEMENT_LIST,
+            Self::Union => TS_UNION_TYPE_VARIANT_LIST,
+            Self::Intersection => TS_INTERSECTION_TYPE_ELEMENT_LIST,
         }
     }
 
     #[inline]
     fn kind(&self) -> JsSyntaxKind {
         match self {
-            IntersectionOrUnionType::Union => TS_UNION_TYPE,
-            IntersectionOrUnionType::Intersection => TS_INTERSECTION_TYPE,
+            Self::Union => TS_UNION_TYPE,
+            Self::Intersection => TS_INTERSECTION_TYPE,
         }
     }
 
     #[inline]
     fn parse_element(&self, p: &mut JsParser, context: TypeContext) -> ParsedSyntax {
         match self {
-            IntersectionOrUnionType::Union => parse_ts_intersection_type_or_higher(p, context),
-            IntersectionOrUnionType::Intersection => parse_ts_primary_type(p, context),
+            Self::Union => parse_ts_intersection_type_or_higher(p, context),
+            Self::Intersection => parse_ts_primary_type(p, context),
         }
     }
 }
@@ -1166,42 +1161,9 @@ fn parse_ts_import_type(p: &mut JsParser, context: TypeContext) -> ParsedSyntax 
     let m = p.start();
     p.eat(T![typeof]);
     p.expect(T![import]);
-    let args = p.start();
-    p.expect(T!['(']);
-    let args_list = p.start();
 
-    let mut progress = ParserProgress::default();
-    let mut error_range_start = p.cur_range().start();
-    let mut args_count = 0;
-
-    while !p.at(EOF) && !p.at(T![')']) {
-        progress.assert_progressing(p);
-        args_count += 1;
-
-        if args_count == 3 {
-            error_range_start = p.cur_range().start();
-        }
-
-        parse_assignment_expression_or_higher(p, ExpressionContext::default())
-            .or_add_diagnostic(p, js_parse_error::expected_expression_assignment);
-
-        if p.at(T![,]) {
-            p.bump_any();
-        } else {
-            break;
-        }
-    }
-    args_list.complete(p, JS_CALL_ARGUMENT_LIST);
-
-    if args_count == 0 || args_count > 2 {
-        let err = p.err_builder(
-            "`typeof import()` requires exactly one or two arguments. ",
-            error_range_start..p.cur_range().end(),
-        );
-        p.error(err);
-    }
-    p.expect(T![')']);
-    args.complete(p, JS_CALL_ARGUMENTS);
+    parse_ts_import_type_arguments(p, context)
+        .or_add_diagnostic(p, expected_ts_import_type_with_arguments);
 
     if p.at(T![.]) {
         let qualifier = p.start();
@@ -1433,6 +1395,9 @@ fn parse_ts_getter_signature_type_member(p: &mut JsParser, context: TypeContext)
 // type C = { set(a) }
 // type D = { set: number }
 // type E = { set }
+// type F = { set(b: number,) }
+// type G = {set a(b,)}
+// type H = {set(a, ) }
 fn parse_ts_setter_signature_type_member(p: &mut JsParser, context: TypeContext) -> ParsedSyntax {
     if !p.at(T![set]) {
         return Absent;
@@ -1464,6 +1429,11 @@ fn parse_ts_setter_signature_type_member(p: &mut JsParser, context: TypeContext)
         context,
     )
     .or_add_diagnostic(p, expected_parameter);
+
+    if p.at(T![,]) {
+        p.bump_any();
+    }
+
     p.expect(T![')']);
     parse_ts_type_member_semi(p);
     Present(m.complete(p, TS_SETTER_SIGNATURE_TYPE_MEMBER))
@@ -1699,6 +1669,88 @@ fn parse_ts_constructor_type(p: &mut JsParser, context: TypeContext) -> ParsedSy
     p.expect(T![=>]);
     parse_ts_type(p, context).or_add_diagnostic(p, expected_ts_type);
     Present(m.complete(p, TS_CONSTRUCTOR_TYPE))
+}
+
+fn parse_ts_import_type_assertion(p: &mut JsParser) -> ParsedSyntax {
+    if !p.at(T![assert]) && !p.at(T![with]) {
+        return Absent;
+    }
+
+    let m = p.start();
+    match p.cur() {
+        T![assert] => {
+            p.expect(T![assert]);
+        }
+        T![with] => {
+            p.expect(T![with]);
+        }
+        _ => {
+            m.abandon(p);
+            return Absent;
+        }
+    };
+
+    // bump assert or with
+    p.expect(T![:]);
+    p.expect(T!['{']);
+    ImportAssertionList::default().parse_list(p);
+
+    p.expect(T!['}']);
+
+    Present(m.complete(p, TS_IMPORT_TYPE_ASSERTION))
+}
+
+fn parse_ts_import_type_assertion_block(p: &mut JsParser) -> ParsedSyntax {
+    if !p.at(T!['{']) {
+        return Absent;
+    }
+
+    let m = p.start();
+
+    if p.at(T!['{']) {
+        p.bump(T!['{']);
+        if p.at(T!['}']) {
+            p.error(
+                p.err_builder(
+                    "Missing import type assertion keyword 'with'",
+                    p.cur_range(),
+                )
+                .with_detail(p.cur_range(), "'with' expected."),
+            );
+        }
+    }
+
+    parse_ts_import_type_assertion(p).ok();
+
+    p.expect(T!['}']);
+
+    Present(m.complete(p, TS_IMPORT_TYPE_ASSERTION_BLOCK))
+}
+
+fn parse_ts_import_type_arguments(p: &mut JsParser, context: TypeContext) -> ParsedSyntax {
+    if !p.at(T!['(']) {
+        return Absent;
+    }
+    let m = p.start();
+    p.bump(T!('('));
+    parse_ts_type(p, context).or_add_diagnostic(p, expected_ts_type);
+    if p.at(T![,]) {
+        if p.nth_at(1, T![')']) {
+            p.error(
+                p.err_builder(
+                    "ts import type may not have a trailing comma",
+                    p.cur_range(),
+                )
+                .with_detail(p.cur_range(), "Remove the trailing comma here"),
+            );
+        }
+        p.bump(T![,]);
+        parse_ts_import_type_assertion_block(p).ok();
+    }
+
+    p.expect(T![')']);
+
+    Present(m.complete(p, TS_IMPORT_TYPE_ARGUMENTS))
 }
 
 fn is_at_constructor_type(p: &mut JsParser) -> bool {

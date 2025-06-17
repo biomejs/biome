@@ -16,7 +16,7 @@ class C<T> extends (Math.pow(a, b)) implements Foo, Bar<T> {}
 ```
 invalidClass.ts:2:20 lint/style/useExponentiationOperator  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use the '**' operator instead of 'Math.pow'.
+  i Use the '**' operator instead of 'Math.pow'.
   
     1 │ // @ts-nocheck
   > 2 │ class C<T> extends Math.pow(a, b) implements Foo<T> {}
@@ -24,7 +24,7 @@ invalidClass.ts:2:20 lint/style/useExponentiationOperator  FIXABLE  ━━━━
     3 │ (class A extends Math.pow(a, b) implements Foo {})
     4 │ (class A<T> extends (Math.pow(a, b)) {})
   
-  i Unsafe fix: Use the '**' operator instead of 'Math.pow'.
+  i Safe fix: Use the '**' operator instead of 'Math.pow'.
   
     1 1 │   // @ts-nocheck
     2   │ - class·C<T>·extends·Math.pow(a,·b)·implements·Foo<T>·{}
@@ -38,7 +38,7 @@ invalidClass.ts:2:20 lint/style/useExponentiationOperator  FIXABLE  ━━━━
 ```
 invalidClass.ts:3:18 lint/style/useExponentiationOperator  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use the '**' operator instead of 'Math.pow'.
+  i Use the '**' operator instead of 'Math.pow'.
   
     1 │ // @ts-nocheck
     2 │ class C<T> extends Math.pow(a, b) implements Foo<T> {}
@@ -47,7 +47,7 @@ invalidClass.ts:3:18 lint/style/useExponentiationOperator  FIXABLE  ━━━━
     4 │ (class A<T> extends (Math.pow(a, b)) {})
     5 │ class C<T> extends (Math.pow(a, b)) implements Foo, Bar<T> {}
   
-  i Unsafe fix: Use the '**' operator instead of 'Math.pow'.
+  i Safe fix: Use the '**' operator instead of 'Math.pow'.
   
     1 1 │   // @ts-nocheck
     2 2 │   class C<T> extends Math.pow(a, b) implements Foo<T> {}
@@ -62,7 +62,7 @@ invalidClass.ts:3:18 lint/style/useExponentiationOperator  FIXABLE  ━━━━
 ```
 invalidClass.ts:4:22 lint/style/useExponentiationOperator  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use the '**' operator instead of 'Math.pow'.
+  i Use the '**' operator instead of 'Math.pow'.
   
     2 │ class C<T> extends Math.pow(a, b) implements Foo<T> {}
     3 │ (class A extends Math.pow(a, b) implements Foo {})
@@ -71,7 +71,7 @@ invalidClass.ts:4:22 lint/style/useExponentiationOperator  FIXABLE  ━━━━
     5 │ class C<T> extends (Math.pow(a, b)) implements Foo, Bar<T> {}
     6 │ 
   
-  i Unsafe fix: Use the '**' operator instead of 'Math.pow'.
+  i Safe fix: Use the '**' operator instead of 'Math.pow'.
   
     2 2 │   class C<T> extends Math.pow(a, b) implements Foo<T> {}
     3 3 │   (class A extends Math.pow(a, b) implements Foo {})
@@ -86,7 +86,7 @@ invalidClass.ts:4:22 lint/style/useExponentiationOperator  FIXABLE  ━━━━
 ```
 invalidClass.ts:5:21 lint/style/useExponentiationOperator  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use the '**' operator instead of 'Math.pow'.
+  i Use the '**' operator instead of 'Math.pow'.
   
     3 │ (class A extends Math.pow(a, b) implements Foo {})
     4 │ (class A<T> extends (Math.pow(a, b)) {})
@@ -94,7 +94,7 @@ invalidClass.ts:5:21 lint/style/useExponentiationOperator  FIXABLE  ━━━━
       │                     ^^^^^^^^^^^^^^
     6 │ 
   
-  i Unsafe fix: Use the '**' operator instead of 'Math.pow'.
+  i Safe fix: Use the '**' operator instead of 'Math.pow'.
   
     3 3 │   (class A extends Math.pow(a, b) implements Foo {})
     4 4 │   (class A<T> extends (Math.pow(a, b)) {})
@@ -104,5 +104,3 @@ invalidClass.ts:5:21 lint/style/useExponentiationOperator  FIXABLE  ━━━━
   
 
 ```
-
-

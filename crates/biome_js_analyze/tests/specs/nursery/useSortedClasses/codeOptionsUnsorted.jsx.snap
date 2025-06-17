@@ -1,6 +1,7 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: codeOptionsUnsorted.jsx
+snapshot_kind: text
 ---
 # Input
 ```jsx
@@ -63,7 +64,7 @@ clsx({
 ```
 codeOptionsUnsorted.jsx:4:13 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! These CSS classes should be sorted.
+  i These CSS classes should be sorted.
   
     2 │ 	{/* attributes */}
     3 │ 	{/* SHOULD emit diagnostics (class/className attributes supported by default) */}
@@ -87,7 +88,7 @@ codeOptionsUnsorted.jsx:4:13 lint/nursery/useSortedClasses  FIXABLE  ━━━�
 ```
 codeOptionsUnsorted.jsx:5:17 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! These CSS classes should be sorted.
+  i These CSS classes should be sorted.
   
     3 │ 	{/* SHOULD emit diagnostics (class/className attributes supported by default) */}
     4 │ 	<div class="px-2 foo p-4 bar" />
@@ -111,7 +112,7 @@ codeOptionsUnsorted.jsx:5:17 lint/nursery/useSortedClasses  FIXABLE  ━━━�
 ```
 codeOptionsUnsorted.jsx:7:28 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! These CSS classes should be sorted.
+  i These CSS classes should be sorted.
   
     5 │ 	<div className="px-2 foo p-4 bar" />
     6 │ 	{/* SHOULD emit diagnostics (customClassAttribute attribute specified in options) */}
@@ -135,7 +136,7 @@ codeOptionsUnsorted.jsx:7:28 lint/nursery/useSortedClasses  FIXABLE  ━━━�
 ```
 codeOptionsUnsorted.jsx:12:13 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! These CSS classes should be sorted.
+  i These CSS classes should be sorted.
   
     10 │ 	{/* utility sorting */}
     11 │ 	{/* SHOULD emit diagnostics (class attribute supported by default) */}
@@ -159,7 +160,7 @@ codeOptionsUnsorted.jsx:12:13 lint/nursery/useSortedClasses  FIXABLE  ━━━�
 ```
 codeOptionsUnsorted.jsx:13:13 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! These CSS classes should be sorted.
+  i These CSS classes should be sorted.
   
     11 │ 	{/* SHOULD emit diagnostics (class attribute supported by default) */}
     12 │ 	<div class="text-center custom-style1 p-4 bg-blue-500 text-white foo rounded-lg shadow-lg" />
@@ -183,7 +184,7 @@ codeOptionsUnsorted.jsx:13:13 lint/nursery/useSortedClasses  FIXABLE  ━━━�
 ```
 codeOptionsUnsorted.jsx:14:13 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! These CSS classes should be sorted.
+  i These CSS classes should be sorted.
   
     12 │ 	<div class="text-center custom-style1 p-4 bg-blue-500 text-white foo rounded-lg shadow-lg" />
     13 │ 	<div class="flex custom-layout items-center justify-center h-screen bg-gray-200 bar text-lg font-bold" />
@@ -207,7 +208,7 @@ codeOptionsUnsorted.jsx:14:13 lint/nursery/useSortedClasses  FIXABLE  ━━━�
 ```
 codeOptionsUnsorted.jsx:15:13 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! These CSS classes should be sorted.
+  i These CSS classes should be sorted.
   
     13 │ 	<div class="flex custom-layout items-center justify-center h-screen bg-gray-200 bar text-lg font-bold" />
     14 │ 	<div class="grid custom-grid grid-cols-3 gap-4 p-6 m-6 border border-gray-300 shadow-md rounded-md" />
@@ -231,7 +232,7 @@ codeOptionsUnsorted.jsx:15:13 lint/nursery/useSortedClasses  FIXABLE  ━━━�
 ```
 codeOptionsUnsorted.jsx:16:13 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! These CSS classes should be sorted.
+  i These CSS classes should be sorted.
   
     14 │ 	<div class="grid custom-grid grid-cols-3 gap-4 p-6 m-6 border border-gray-300 shadow-md rounded-md" />
     15 │ 	<div class="absolute top-0 right-0 m-4 p-2 text-sm bg-red-600 text-white rounded-full custom-alert" />
@@ -255,7 +256,7 @@ codeOptionsUnsorted.jsx:16:13 lint/nursery/useSortedClasses  FIXABLE  ━━━�
 ```
 codeOptionsUnsorted.jsx:17:13 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! These CSS classes should be sorted.
+  i These CSS classes should be sorted.
   
     15 │ 	<div class="absolute top-0 right-0 m-4 p-2 text-sm bg-red-600 text-white rounded-full custom-alert" />
     16 │ 	<div class="inline-block bar bg-green-300 text-green-800 p-2 rounded border border-green-500 custom-button" />
@@ -279,7 +280,7 @@ codeOptionsUnsorted.jsx:17:13 lint/nursery/useSortedClasses  FIXABLE  ━━━�
 ```
 codeOptionsUnsorted.jsx:18:13 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! These CSS classes should be sorted.
+  i These CSS classes should be sorted.
   
     16 │ 	<div class="inline-block bar bg-green-300 text-green-800 p-2 rounded border border-green-500 custom-button" />
     17 │ 	<div class="flex-col custom-list space-y-4 p-6 bg-white shadow-md rounded-lg divide-y divide-gray-200" />
@@ -303,7 +304,7 @@ codeOptionsUnsorted.jsx:18:13 lint/nursery/useSortedClasses  FIXABLE  ━━━�
 ```
 codeOptionsUnsorted.jsx:19:13 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! These CSS classes should be sorted.
+  i These CSS classes should be sorted.
   
     17 │ 	<div class="flex-col custom-list space-y-4 p-6 bg-white shadow-md rounded-lg divide-y divide-gray-200" />
     18 │ 	<div class="relative overflow-hidden custom-background bg-no-repeat bg-cover h-64 w-full foo m-2" />
@@ -327,7 +328,7 @@ codeOptionsUnsorted.jsx:19:13 lint/nursery/useSortedClasses  FIXABLE  ━━━�
 ```
 codeOptionsUnsorted.jsx:20:13 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! These CSS classes should be sorted.
+  i These CSS classes should be sorted.
   
     18 │ 	<div class="relative overflow-hidden custom-background bg-no-repeat bg-cover h-64 w-full foo m-2" />
     19 │ 	<div class="underline custom-text foo text-2xl font-semibold my-2" />
@@ -351,7 +352,7 @@ codeOptionsUnsorted.jsx:20:13 lint/nursery/useSortedClasses  FIXABLE  ━━━�
 ```
 codeOptionsUnsorted.jsx:21:13 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! These CSS classes should be sorted.
+  i These CSS classes should be sorted.
   
     19 │ 	<div class="underline custom-text foo text-2xl font-semibold my-2" />
     20 │ 	<div class="flex-wrap custom-container justify-between items-start bar bg-purple-200 p-5 text-purple-700" />
@@ -375,7 +376,7 @@ codeOptionsUnsorted.jsx:21:13 lint/nursery/useSortedClasses  FIXABLE  ━━━�
 ```
 codeOptionsUnsorted.jsx:26:6 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! These CSS classes should be sorted.
+  i These CSS classes should be sorted.
   
     24 │ // functions
     25 │ /* SHOULD emit diagnostics (functions specified in options) */
@@ -399,7 +400,7 @@ codeOptionsUnsorted.jsx:26:6 lint/nursery/useSortedClasses  FIXABLE  ━━━�
 ```
 codeOptionsUnsorted.jsx:27:4 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! These CSS classes should be sorted.
+  i These CSS classes should be sorted.
   
     25 │ /* SHOULD emit diagnostics (functions specified in options) */
     26 │ clsx("px-2 foo p-4 bar");
@@ -423,7 +424,7 @@ codeOptionsUnsorted.jsx:27:4 lint/nursery/useSortedClasses  FIXABLE  ━━━�
 ```
 codeOptionsUnsorted.jsx:35:13 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! These CSS classes should be sorted.
+  i These CSS classes should be sorted.
   
     33 │ // nested values
     34 │ /* SHOULD emit diagnostics (class attribute supported by default) */
@@ -447,7 +448,7 @@ codeOptionsUnsorted.jsx:35:13 lint/nursery/useSortedClasses  FIXABLE  ━━━�
 ```
 codeOptionsUnsorted.jsx:36:14 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! These CSS classes should be sorted.
+  i These CSS classes should be sorted.
   
     34 │ /* SHOULD emit diagnostics (class attribute supported by default) */
     35 │ <div class={"px-2 foo p-4 bar"} />;
@@ -471,7 +472,7 @@ codeOptionsUnsorted.jsx:36:14 lint/nursery/useSortedClasses  FIXABLE  ━━━�
 ```
 codeOptionsUnsorted.jsx:39:3 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! These CSS classes should be sorted.
+  i These CSS classes should be sorted.
   
     37 │ <div
     38 │ 	class={{
@@ -495,7 +496,7 @@ codeOptionsUnsorted.jsx:39:3 lint/nursery/useSortedClasses  FIXABLE  ━━━�
 ```
 codeOptionsUnsorted.jsx:40:4 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! These CSS classes should be sorted.
+  i These CSS classes should be sorted.
   
     38 │ 	class={{
     39 │ 		"px-2 foo p-4 bar": [
@@ -519,7 +520,7 @@ codeOptionsUnsorted.jsx:40:4 lint/nursery/useSortedClasses  FIXABLE  ━━━�
 ```
 codeOptionsUnsorted.jsx:41:6 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! These CSS classes should be sorted.
+  i These CSS classes should be sorted.
   
     39 │ 		"px-2 foo p-4 bar": [
     40 │ 			"px-2 foo p-4 bar",
@@ -543,7 +544,7 @@ codeOptionsUnsorted.jsx:41:6 lint/nursery/useSortedClasses  FIXABLE  ━━━�
 ```
 codeOptionsUnsorted.jsx:41:26 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! These CSS classes should be sorted.
+  i These CSS classes should be sorted.
   
     39 │ 		"px-2 foo p-4 bar": [
     40 │ 			"px-2 foo p-4 bar",
@@ -567,7 +568,7 @@ codeOptionsUnsorted.jsx:41:26 lint/nursery/useSortedClasses  FIXABLE  ━━━�
 ```
 codeOptionsUnsorted.jsx:41:55 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! These CSS classes should be sorted.
+  i These CSS classes should be sorted.
   
     39 │ 		"px-2 foo p-4 bar": [
     40 │ 			"px-2 foo p-4 bar",
@@ -591,7 +592,7 @@ codeOptionsUnsorted.jsx:41:55 lint/nursery/useSortedClasses  FIXABLE  ━━━�
 ```
 codeOptionsUnsorted.jsx:46:7 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! These CSS classes should be sorted.
+  i These CSS classes should be sorted.
   
     44 │ />;
     45 │ /* SHOULD emit diagnostics (clsx function specified in options) */
@@ -615,7 +616,7 @@ codeOptionsUnsorted.jsx:46:7 lint/nursery/useSortedClasses  FIXABLE  ━━━�
 ```
 codeOptionsUnsorted.jsx:48:2 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! These CSS classes should be sorted.
+  i These CSS classes should be sorted.
   
     46 │ clsx(["px-2 foo p-4 bar"]);
     47 │ clsx({
@@ -639,7 +640,7 @@ codeOptionsUnsorted.jsx:48:2 lint/nursery/useSortedClasses  FIXABLE  ━━━�
 ```
 codeOptionsUnsorted.jsx:49:3 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! These CSS classes should be sorted.
+  i These CSS classes should be sorted.
   
     47 │ clsx({
     48 │ 	"px-2 foo p-4 bar": [
@@ -663,7 +664,7 @@ codeOptionsUnsorted.jsx:49:3 lint/nursery/useSortedClasses  FIXABLE  ━━━�
 ```
 codeOptionsUnsorted.jsx:50:5 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! These CSS classes should be sorted.
+  i These CSS classes should be sorted.
   
     48 │ 	"px-2 foo p-4 bar": [
     49 │ 		"px-2 foo p-4 bar",
@@ -687,7 +688,7 @@ codeOptionsUnsorted.jsx:50:5 lint/nursery/useSortedClasses  FIXABLE  ━━━�
 ```
 codeOptionsUnsorted.jsx:50:25 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! These CSS classes should be sorted.
+  i These CSS classes should be sorted.
   
     48 │ 	"px-2 foo p-4 bar": [
     49 │ 		"px-2 foo p-4 bar",
@@ -711,7 +712,7 @@ codeOptionsUnsorted.jsx:50:25 lint/nursery/useSortedClasses  FIXABLE  ━━━�
 ```
 codeOptionsUnsorted.jsx:50:54 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! These CSS classes should be sorted.
+  i These CSS classes should be sorted.
   
     48 │ 	"px-2 foo p-4 bar": [
     49 │ 		"px-2 foo p-4 bar",

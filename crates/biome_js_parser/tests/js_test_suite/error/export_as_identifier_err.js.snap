@@ -1,0 +1,91 @@
+---
+source: crates/biome_js_parser/tests/spec_test.rs
+expression: snapshot
+snapshot_kind: text
+---
+## Input
+
+```js
+export { as c }
+
+```
+
+
+## AST
+
+```
+JsModule {
+    bom_token: missing (optional),
+    interpreter_token: missing (optional),
+    directives: JsDirectiveList [],
+    items: JsModuleItemList [
+        JsExport {
+            decorators: JsDecoratorList [],
+            export_token: EXPORT_KW@0..7 "export" [] [Whitespace(" ")],
+            export_clause: JsExportNamedClause {
+                type_token: missing (optional),
+                l_curly_token: L_CURLY@7..9 "{" [] [Whitespace(" ")],
+                specifiers: JsExportNamedSpecifierList [
+                    JsExportNamedSpecifier {
+                        type_token: missing (optional),
+                        local_name: missing (required),
+                        as_token: AS_KW@9..12 "as" [] [Whitespace(" ")],
+                        exported_name: JsLiteralExportName {
+                            value: IDENT@12..14 "c" [] [Whitespace(" ")],
+                        },
+                    },
+                ],
+                r_curly_token: R_CURLY@14..15 "}" [] [],
+                semicolon_token: missing (optional),
+            },
+        },
+    ],
+    eof_token: EOF@15..16 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: JS_MODULE@0..16
+  0: (empty)
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..15
+    0: JS_EXPORT@0..15
+      0: JS_DECORATOR_LIST@0..0
+      1: EXPORT_KW@0..7 "export" [] [Whitespace(" ")]
+      2: JS_EXPORT_NAMED_CLAUSE@7..15
+        0: (empty)
+        1: L_CURLY@7..9 "{" [] [Whitespace(" ")]
+        2: JS_EXPORT_NAMED_SPECIFIER_LIST@9..14
+          0: JS_EXPORT_NAMED_SPECIFIER@9..14
+            0: (empty)
+            1: (empty)
+            2: AS_KW@9..12 "as" [] [Whitespace(" ")]
+            3: JS_LITERAL_EXPORT_NAME@12..14
+              0: IDENT@12..14 "c" [] [Whitespace(" ")]
+        3: R_CURLY@14..15 "}" [] []
+        4: (empty)
+  4: EOF@15..16 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+export_as_identifier_err.js:1:10 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected an identifier but instead found ''.
+  
+  > 1 │ export { as c }
+      │          
+    2 │ 
+  
+  i Expected an identifier here.
+  
+  > 1 │ export { as c }
+      │          
+    2 │ 
+  
+```

@@ -1,6 +1,0 @@
-/* should not generate diagnostics */
-query {
-  member @deprecated(reason: "Use `members` instead") {
-		id
-	}
-}

@@ -1,16 +1,14 @@
 use biome_analyze::{
-    context::RuleContext, declare_lint_rule, Ast, Rule, RuleDiagnostic, RuleSource,
+    Ast, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
-use biome_js_syntax::{
-    static_value::StaticValue, AnyJsExpression, JsCallArguments, JsCallExpression, JsNewExpression,
-    JsRegexLiteralExpression,
-};
-use biome_rowan::{declare_node_union, AstNode, AstSeparatedList, TextRange, TextSize};
+use biome_diagnostics::Severity;
+use biome_js_syntax::JsRegexLiteralExpression;
+use biome_rowan::{AstNode, TextRange, TextSize};
 use core::str;
 
 declare_lint_rule! {
-    /// Prevents from having control characters and some escape sequences that match control characters in regular expressions.
+    /// Prevents from having control characters and some escape sequences that match control characters in regular expression literals.
     ///
     /// Control characters are hidden special characters that are numbered from 0 to 31 in the ASCII system.
     /// They're not commonly used in JavaScript text. So, if you see them in a pattern (called a regular expression), it's probably a mistake.
@@ -42,12 +40,6 @@ declare_lint_rule! {
     /// ```js,expect_diagnostic
     ///  var pattern5 = /\u{C}/u;
     /// ```
-    /// ```js,expect_diagnostic
-    ///  var pattern7 = new RegExp("\x0C");
-    /// ```
-    /// ```js,expect_diagnostic
-    ///  var pattern7 = new RegExp("\\x0C");
-    /// ```
     ///
     /// ### Valid
     /// ```js
@@ -56,7 +48,6 @@ declare_lint_rule! {
     /// var pattern3 = /\u{20}/u;
     /// var pattern4 = /\t/;
     /// var pattern5 = /\n/;
-    /// var pattern6 = new RegExp("\x20");
     /// ```
     ///
     pub NoControlCharactersInRegex {
@@ -65,11 +56,8 @@ declare_lint_rule! {
         language: "js",
         sources: &[RuleSource::Eslint("no-control-regex")],
         recommended: true,
+        severity: Severity::Error,
     }
-}
-
-declare_node_union! {
-    pub AnyRegexExpression = JsNewExpression | JsCallExpression | JsRegexLiteralExpression
 }
 
 fn decode_hex(digits: &[u8]) -> Option<u32> {
@@ -122,11 +110,13 @@ fn collect_control_characters(
                                 continue;
                             };
                             (decode_hex(&bytes[hex_index..end]), end + 1)
-                        } else {
+                        } else if (hex_index + 4) <= bytes.len() {
                             (
                                 decode_hex(&bytes[hex_index..(hex_index + 4)]),
                                 hex_index + 4,
                             )
+                        } else {
+                            continue;
                         }
                     }
                     b'u' if (hex_index + 4) <= bytes.len() => (
@@ -160,70 +150,21 @@ fn collect_control_characters(
     Some(control_chars)
 }
 
-fn collect_control_characters_from_expression(
-    callee: &AnyJsExpression,
-    js_call_arguments: &JsCallArguments,
-) -> Vec<TextRange> {
-    if callee
-        .as_js_reference_identifier()
-        .is_some_and(|name| name.has_name("RegExp"))
-    {
-        let mut args = js_call_arguments.args().iter();
-        let Some(static_value) = args
-            .next()
-            .and_then(|arg| arg.ok()?.as_any_js_expression()?.as_static_value())
-        else {
-            return Default::default();
-        };
-        let Some(pattern) = static_value.as_string_constant() else {
-            return Default::default();
-        };
-        let pattern_start = static_value.range().start() + TextSize::from(1);
-        let flags = args
-            .next()
-            .and_then(|arg| arg.ok()?.as_any_js_expression()?.as_static_value());
-        let flags = if let Some(StaticValue::String(flags)) = &flags {
-            flags.text()
-        } else {
-            ""
-        };
-        collect_control_characters(pattern_start, pattern, flags, true).unwrap_or_default()
-    } else {
-        Vec::new()
-    }
-}
-
 impl Rule for NoControlCharactersInRegex {
-    type Query = Ast<AnyRegexExpression>;
+    type Query = Ast<JsRegexLiteralExpression>;
     type State = TextRange;
     type Signals = Box<[Self::State]>;
     type Options = ();
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
-        match node {
-            AnyRegexExpression::JsNewExpression(new_expr) => {
-                let (Ok(callee), Some(args)) = (new_expr.callee(), new_expr.arguments()) else {
-                    return Default::default();
-                };
-                collect_control_characters_from_expression(&callee, &args)
-            }
-            AnyRegexExpression::JsCallExpression(call_expr) => {
-                let (Ok(callee), Ok(args)) = (call_expr.callee(), call_expr.arguments()) else {
-                    return Default::default();
-                };
-                collect_control_characters_from_expression(&callee, &args)
-            }
-            AnyRegexExpression::JsRegexLiteralExpression(regex_literal_expr) => {
-                let Ok((pattern, flags)) = regex_literal_expr.decompose() else {
-                    return Default::default();
-                };
-                let pattern_start = regex_literal_expr.range().start() + TextSize::from(1);
-                collect_control_characters(pattern_start, pattern.text(), flags.text(), false)
-                    .unwrap_or_default()
-            }
-        }
-        .into_boxed_slice()
+        let Ok((pattern, flags)) = node.decompose() else {
+            return Default::default();
+        };
+        let pattern_start = node.range().start() + TextSize::from(1);
+        collect_control_characters(pattern_start, pattern.text(), flags.text(), false)
+            .unwrap_or_default()
+            .into_boxed_slice()
     }
 
     fn diagnostic(_: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {

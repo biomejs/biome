@@ -18,7 +18,7 @@ use crate::syntax::{
     parse_identifier, parse_regular_identifier,
 };
 use biome_css_syntax::CssSyntaxKind::*;
-use biome_css_syntax::{CssSyntaxKind, TextRange, T};
+use biome_css_syntax::{CssSyntaxKind, T, TextRange};
 use biome_parser::diagnostic::ToDiagnostic;
 use biome_parser::parse_lists::{ParseNodeList, ParseSeparatedList};
 use biome_parser::parse_recovery::{
@@ -26,7 +26,7 @@ use biome_parser::parse_recovery::{
 };
 use biome_parser::prelude::ParsedSyntax;
 use biome_parser::prelude::ParsedSyntax::{Absent, Present};
-use biome_parser::{token_set, CompletedMarker, Parser, ParserProgress, TokenSet};
+use biome_parser::{CompletedMarker, Parser, ParserProgress, TokenSet, token_set};
 
 use super::{is_nth_at_metavariable, parse_metavariable};
 
@@ -56,7 +56,7 @@ pub(crate) struct SelectorList {
 
 impl Default for SelectorList {
     fn default() -> Self {
-        SelectorList {
+        Self {
             end_kind_ts: token_set!(T!['{']),
             recovery_ts: token_set![T!['{']],
             is_recovery_disabled: false,
@@ -138,7 +138,7 @@ struct SelectorListParseRecovery {
 
 impl SelectorListParseRecovery {
     fn new(recovery_ts: TokenSet<CssSyntaxKind>) -> Self {
-        SelectorListParseRecovery { recovery_ts }
+        Self { recovery_ts }
     }
 }
 

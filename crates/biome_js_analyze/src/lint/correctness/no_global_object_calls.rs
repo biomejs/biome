@@ -1,8 +1,9 @@
 use crate::services::semantic::Semantic;
-use biome_analyze::{context::RuleContext, declare_lint_rule, Rule, RuleDiagnostic, RuleSource};
+use biome_analyze::{Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule};
 use biome_console::markup;
-use biome_js_syntax::{global_identifier, AnyJsExpression, JsCallExpression, JsNewExpression};
-use biome_rowan::{declare_node_union, SyntaxResult, TextRange};
+use biome_diagnostics::Severity;
+use biome_js_syntax::{AnyJsExpression, JsCallExpression, JsNewExpression, global_identifier};
+use biome_rowan::{SyntaxResult, TextRange, declare_node_union};
 use std::{fmt::Display, str::FromStr};
 
 declare_lint_rule! {
@@ -89,6 +90,7 @@ declare_lint_rule! {
         language: "js",
         sources: &[RuleSource::Eslint("no-obj-calls")],
         recommended: true,
+        severity: Severity::Error,
     }
 }
 
@@ -132,8 +134,8 @@ declare_node_union! {
 impl QueryNode {
     fn callee(&self) -> SyntaxResult<AnyJsExpression> {
         match self {
-            QueryNode::JsNewExpression(expression) => expression.callee(),
-            QueryNode::JsCallExpression(expression) => expression.callee(),
+            Self::JsNewExpression(expression) => expression.callee(),
+            Self::JsCallExpression(expression) => expression.callee(),
         }
     }
 }
@@ -151,11 +153,11 @@ impl FromStr for NonCallableGlobals {
     type Err = String;
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         match s {
-            "Atomics" => Ok(NonCallableGlobals::Atomics),
-            "JSON" => Ok(NonCallableGlobals::Json),
-            "Math" => Ok(NonCallableGlobals::Math),
-            "Reflect" => Ok(NonCallableGlobals::Reflect),
-            "Intl" => Ok(NonCallableGlobals::Intl),
+            "Atomics" => Ok(Self::Atomics),
+            "JSON" => Ok(Self::Json),
+            "Math" => Ok(Self::Math),
+            "Reflect" => Ok(Self::Reflect),
+            "Intl" => Ok(Self::Intl),
             _ => Err("non callable globals not implemented".to_string()),
         }
     }
@@ -164,11 +166,11 @@ impl FromStr for NonCallableGlobals {
 impl Display for NonCallableGlobals {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let repr = match self {
-            NonCallableGlobals::Atomics => "Atomics",
-            NonCallableGlobals::Json => "Json",
-            NonCallableGlobals::Math => "Math",
-            NonCallableGlobals::Reflect => "Reflect",
-            NonCallableGlobals::Intl => "Intl",
+            Self::Atomics => "Atomics",
+            Self::Json => "Json",
+            Self::Math => "Math",
+            Self::Reflect => "Reflect",
+            Self::Intl => "Intl",
         };
         write!(f, "{repr}")
     }

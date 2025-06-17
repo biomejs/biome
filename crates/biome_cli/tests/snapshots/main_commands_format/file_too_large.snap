@@ -1,13 +1,19 @@
 ---
 source: crates/biome_cli/tests/snap_test.rs
-expression: content
+expression: redactor(content)
 ---
 # Termination Message
 
 ```block
-internalError/io ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+format ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × No files were processed in the specified paths.
+  
+  i Check your biome.json or biome.jsonc to ensure the paths are not ignored by the configuration.
+  
+  i These paths were provided but ignored:
+  
+  - format.js
   
 
 
@@ -18,13 +24,12 @@ internalError/io ━━━━━━━━━━━━━━━━━━━━━
 ```block
 format.js format ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Size of format.js is 1.0 MiB which exceeds configured maximum of 1.0 MiB for this project.
-    The file size limit exists to prevent us inadvertently slowing down and loading large files that we shouldn't.
-    Use the `files.maxSize` configuration to change the maximum size of files processed.
+  i The size of the file is 1.0 MiB, which exceeds the configured maximum of 1.0 MiB for this project.
+    Use the `files.maxSize` configuration to change the maximum size of files processed, or `files.ignore` to ignore the file.
   
 
 ```
 
 ```block
-Formatted 1 file in <TIME>. No fixes applied.
+Formatted 0 files in <TIME>. No fixes applied.
 ```

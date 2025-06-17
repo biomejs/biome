@@ -1,0 +1,78 @@
+# Jobs run on pull request for Node.js APIs
+name: Pull request Node.js
+on:
+  pull_request:
+    branches:
+      - main
+    paths: # Only run when changes are made to Rust crates or Node.js packages
+      - "crates/**"
+      - "packages/@biomejs/**"
+      - "Cargo.toml"
+      - "Cargo.lock"
+      - "package.json"
+      - "pnpm-lock.yaml"
+      - "rust-toolchain.toml"
+      - ".github/workflows/pull_request_node.yml"
+
+# Cancel jobs when the PR is updated
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.sha }}
+  cancel-in-progress: true
+
+env:
+  RUST_LOG: info
+  RUST_BACKTRACE: 1
+
+jobs:
+  test-node-api:
+    name: Test Node.js API
+    runs-on: depot-ubuntu-24.04-arm-16
+    steps:
+      - name: Checkout PR branch
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - name: Free Disk Space
+        uses: ./.github/actions/free-disk-space
+      - name: Install toolchain
+        uses: moonrepo/setup-rust@ede6de059f8046a5e236c94046823e2af11ca670 # v1.2.2
+        with:
+          cache-target: release
+          cache-base: main
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Build main binary
+        run: cargo build -p biome_cli --release
+      - name: Install Node.js
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: 20
+      - name: Cache pnpm modules
+        uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3
+        with:
+          path: ~/.pnpm-store
+          key: ${{ runner.os }}-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-
+      - uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda # v4.1.0
+      - name: Install wasm-pack
+        run: curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
+
+      - name: Build TypeScript code
+        # We use the `*-dev` builds below because release builds take very long.
+        # The main difference is that release builds run `wasm-opt`, which is
+        # responsible for the majority of the time of these builds, but regular
+        # PRs of ours don't influence that process anyway, so it feels like a
+        # waste of time to run on every PR. It does mean that if `wasm-opt`
+        # breaks something, we'll discover it later, possibly when creating a
+        # prerelease.
+        run: |
+          pnpm --filter @biomejs/backend-jsonrpc i
+          pnpm --filter @biomejs/backend-jsonrpc run build
+          pnpm --filter @biomejs/js-api run build:wasm-bundler-dev
+          pnpm --filter @biomejs/js-api run build:wasm-node-dev
+          pnpm --filter @biomejs/js-api run build:wasm-web-dev
+          pnpm --filter @biomejs/js-api i
+          pnpm --filter @biomejs/js-api run build
+      - name: Run JS tests
+        run: |
+          pnpm --filter @biomejs/backend-jsonrpc run test:ci
+          pnpm --filter @biomejs/js-api run test:ci

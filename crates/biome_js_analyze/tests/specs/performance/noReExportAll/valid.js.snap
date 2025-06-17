@@ -1,11 +1,9 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
-assertion_line: 83
 expression: valid.js
 ---
 # Input
-```jsx
+```js
+/* should not generate diagnostics */
 export { foo } from "foo";
 ```
-
-

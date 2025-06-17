@@ -1,0 +1,11 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: suppressed-unsorted.js
+---
+# Input
+```js
+// biome-ignore assist/source/organizeImports: desc
+import B from "b";
+import A from "a";
+
+```

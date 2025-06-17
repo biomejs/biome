@@ -1,0 +1,52 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: unsorted-same-source.ts
+snapshot_kind: text
+---
+# Input
+```ts
+import { A, B } from "source";
+import Json from "source" with { "type": "json "};
+import G, * as H from "source";
+import D, { E, F } from "source";
+import * as N from "source";
+import { m1, m2 } from "source" with { "type": "macro "};
+import * as macros from "source" with { "type": "macro "};
+import type { T1, T2 } from "source";
+import type * as types from "source";
+
+```
+
+# Diagnostics
+```
+unsorted-same-source.ts:1:1 assist/source/organizeImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The imports and exports are not sorted.
+  
+  > 1 │ import { A, B } from "source";
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    2 │ import Json from "source" with { "type": "json "};
+    3 │ import G, * as H from "source";
+  
+  i Safe fix: Organize Imports (Biome)
+  
+     1   │ - import·{·A,·B·}·from·"source";
+       1 │ + import·*·as·macros·from·"source"·with·{·"type":·"macro·"};
+     2 2 │   import Json from "source" with { "type": "json "};
+     3   │ - import·G,·*·as·H·from·"source";
+     4   │ - import·D,·{·E,·F·}·from·"source";
+     5   │ - import·*·as·N·from·"source";
+     6   │ - import·{·m1,·m2·}·from·"source"·with·{·"type":·"macro·"};
+     7   │ - import·*·as·macros·from·"source"·with·{·"type":·"macro·"};
+     8   │ - import·type·{·T1,·T2·}·from·"source";
+     9   │ - import·type·*·as·types·from·"source";
+       3 │ + import·{·m1,·m2·}·from·"source"·with·{·"type":·"macro·"};
+       4 │ + import·type·*·as·types·from·"source";
+       5 │ + import·type·{·T1,·T2·}·from·"source";
+       6 │ + import·*·as·N·from·"source";
+       7 │ + import·G,·*·as·H·from·"source";
+       8 │ + import·D,·{·A,·B,·E,·F·}·from·"source";
+    10 9 │   
+  
+
+```

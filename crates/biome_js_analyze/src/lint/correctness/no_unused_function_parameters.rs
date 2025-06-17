@@ -1,15 +1,14 @@
-use biome_analyze::{
-    context::RuleContext, declare_lint_rule, ActionCategory, FixKind, Rule, RuleDiagnostic,
-};
+use biome_analyze::{FixKind, Rule, RuleDiagnostic, context::RuleContext, declare_lint_rule};
 use biome_console::markup;
+use biome_diagnostics::Severity;
 use biome_js_semantic::ReferencesExtensions;
 use biome_js_syntax::{
-    binding_ext::{AnyJsBindingDeclaration, AnyJsParameterParentFunction},
     JsIdentifierBinding, JsSyntaxKind,
+    binding_ext::{AnyJsBindingDeclaration, AnyJsParameterParentFunction},
 };
 use biome_rowan::{AstNode, BatchMutationExt, Direction};
 
-use crate::{services::semantic::Semantic, utils::rename::RenameSymbolExtensions, JsRuleAction};
+use crate::{JsRuleAction, services::semantic::Semantic, utils::rename::RenameSymbolExtensions};
 
 declare_lint_rule! {
     /// Disallow unused function parameters.
@@ -50,7 +49,8 @@ declare_lint_rule! {
         version: "1.8.0",
         name: "noUnusedFunctionParameters",
         language: "js",
-        recommended: false,
+        recommended: true,
+        severity: Severity::Warning,
         fix_kind: FixKind::Unsafe,
     }
 }
@@ -131,7 +131,7 @@ impl Rule for NoUnusedFunctionParameters {
             AnyJsBindingDeclaration::JsFormalParameter(parameter) => parameter.parent_function(),
             AnyJsBindingDeclaration::JsRestParameter(parameter) => parameter.parent_function(),
             AnyJsBindingDeclaration::JsBogusParameter(_) => {
-                return Some(SuggestedFix::NoSuggestion)
+                return Some(SuggestedFix::NoSuggestion);
             }
             _ => return None,
         };
@@ -180,7 +180,7 @@ impl Rule for NoUnusedFunctionParameters {
                 mutation.rename_node_declaration(model, binding, &new_name);
 
                 Some(JsRuleAction::new(
-                    ActionCategory::QuickFix,
+                    ctx.metadata().action_category(ctx.category(), ctx.group()),
                     ctx.metadata().applicability(),
                     markup! { "If this is intentional, prepend "<Emphasis>{name_trimmed}</Emphasis>" with an underscore." }
                     .to_owned(),

@@ -1,6 +1,7 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalidTypeSetter.ts
+snapshot_kind: text
 ---
 # Input
 ```ts
@@ -21,7 +22,7 @@ export interface X {
 ```
 invalidTypeSetter.ts:2:9 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This setter name should be in camelCase.
+  i This setter name should be in camelCase.
   
     1 │ export interface X {
   > 2 │     set X(x: unknown )
@@ -35,7 +36,7 @@ invalidTypeSetter.ts:2:9 lint/style/useNamingConvention ━━━━━━━━
 ```
 invalidTypeSetter.ts:4:9 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This setter name should be in camelCase.
+  i This setter name should be in camelCase.
   
     2 │     set X(x: unknown )
     3 │ 
@@ -50,7 +51,7 @@ invalidTypeSetter.ts:4:9 lint/style/useNamingConvention ━━━━━━━━
 ```
 invalidTypeSetter.ts:6:9 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This setter name should be in camelCase.
+  i This setter name should be in camelCase.
   
     4 │     set PROPERTY(x: unknown )
     5 │ 
@@ -65,7 +66,7 @@ invalidTypeSetter.ts:6:9 lint/style/useNamingConvention ━━━━━━━━
 ```
 invalidTypeSetter.ts:8:9 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This setter name should be in camelCase.
+  i This setter name should be in camelCase.
   
      6 │     set SpecialProperty(x: unknown )
      7 │ 
@@ -80,7 +81,7 @@ invalidTypeSetter.ts:8:9 lint/style/useNamingConvention ━━━━━━━━
 ```
 invalidTypeSetter.ts:10:9 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This setter name should be in camelCase.
+  i This setter name should be in camelCase.
   
      8 │     set special_property(x: unknown )
      9 │ 

@@ -1,0 +1,124 @@
+---
+source: crates/biome_js_parser/tests/spec_test.rs
+expression: snapshot
+snapshot_kind: text
+---
+## Input
+
+```js
+export default function test(a, b) {}
+
+```
+
+
+## AST
+
+```
+JsModule {
+    bom_token: missing (optional),
+    interpreter_token: missing (optional),
+    directives: JsDirectiveList [],
+    items: JsModuleItemList [
+        JsExport {
+            decorators: JsDecoratorList [],
+            export_token: EXPORT_KW@0..7 "export" [] [Whitespace(" ")],
+            export_clause: JsExportDefaultDeclarationClause {
+                default_token: DEFAULT_KW@7..15 "default" [] [Whitespace(" ")],
+                declaration: JsFunctionExportDefaultDeclaration {
+                    async_token: missing (optional),
+                    function_token: FUNCTION_KW@15..24 "function" [] [Whitespace(" ")],
+                    star_token: missing (optional),
+                    id: JsIdentifierBinding {
+                        name_token: IDENT@24..28 "test" [] [],
+                    },
+                    type_parameters: missing (optional),
+                    parameters: JsParameters {
+                        l_paren_token: L_PAREN@28..29 "(" [] [],
+                        items: JsParameterList [
+                            JsFormalParameter {
+                                decorators: JsDecoratorList [],
+                                binding: JsIdentifierBinding {
+                                    name_token: IDENT@29..30 "a" [] [],
+                                },
+                                question_mark_token: missing (optional),
+                                type_annotation: missing (optional),
+                                initializer: missing (optional),
+                            },
+                            COMMA@30..32 "," [] [Whitespace(" ")],
+                            JsFormalParameter {
+                                decorators: JsDecoratorList [],
+                                binding: JsIdentifierBinding {
+                                    name_token: IDENT@32..33 "b" [] [],
+                                },
+                                question_mark_token: missing (optional),
+                                type_annotation: missing (optional),
+                                initializer: missing (optional),
+                            },
+                        ],
+                        r_paren_token: R_PAREN@33..35 ")" [] [Whitespace(" ")],
+                    },
+                    return_type_annotation: missing (optional),
+                    body: JsFunctionBody {
+                        l_curly_token: L_CURLY@35..36 "{" [] [],
+                        directives: JsDirectiveList [],
+                        statements: JsStatementList [],
+                        r_curly_token: R_CURLY@36..37 "}" [] [],
+                    },
+                },
+                semicolon_token: missing (optional),
+            },
+        },
+    ],
+    eof_token: EOF@37..38 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: JS_MODULE@0..38
+  0: (empty)
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..37
+    0: JS_EXPORT@0..37
+      0: JS_DECORATOR_LIST@0..0
+      1: EXPORT_KW@0..7 "export" [] [Whitespace(" ")]
+      2: JS_EXPORT_DEFAULT_DECLARATION_CLAUSE@7..37
+        0: DEFAULT_KW@7..15 "default" [] [Whitespace(" ")]
+        1: JS_FUNCTION_EXPORT_DEFAULT_DECLARATION@15..37
+          0: (empty)
+          1: FUNCTION_KW@15..24 "function" [] [Whitespace(" ")]
+          2: (empty)
+          3: JS_IDENTIFIER_BINDING@24..28
+            0: IDENT@24..28 "test" [] []
+          4: (empty)
+          5: JS_PARAMETERS@28..35
+            0: L_PAREN@28..29 "(" [] []
+            1: JS_PARAMETER_LIST@29..33
+              0: JS_FORMAL_PARAMETER@29..30
+                0: JS_DECORATOR_LIST@29..29
+                1: JS_IDENTIFIER_BINDING@29..30
+                  0: IDENT@29..30 "a" [] []
+                2: (empty)
+                3: (empty)
+                4: (empty)
+              1: COMMA@30..32 "," [] [Whitespace(" ")]
+              2: JS_FORMAL_PARAMETER@32..33
+                0: JS_DECORATOR_LIST@32..32
+                1: JS_IDENTIFIER_BINDING@32..33
+                  0: IDENT@32..33 "b" [] []
+                2: (empty)
+                3: (empty)
+                4: (empty)
+            2: R_PAREN@33..35 ")" [] [Whitespace(" ")]
+          6: (empty)
+          7: JS_FUNCTION_BODY@35..37
+            0: L_CURLY@35..36 "{" [] []
+            1: JS_DIRECTIVE_LIST@36..36
+            2: JS_STATEMENT_LIST@36..36
+            3: R_CURLY@36..37 "}" [] []
+        2: (empty)
+  4: EOF@37..38 "" [Newline("\n")] []
+
+```

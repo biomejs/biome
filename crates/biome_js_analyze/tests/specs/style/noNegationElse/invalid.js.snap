@@ -1,9 +1,10 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid.js
+snapshot_kind: text
 ---
 # Input
-```jsx
+```js
 // Comment
 if (!true) { // a
 	consequent;
@@ -33,7 +34,7 @@ if (!true) something(); else {
 ```
 invalid.js:2:1 lint/style/noNegationElse  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Invert blocks when performing a negation test.
+  i Invert blocks when performing a negation test.
   
     1 │ // Comment
   > 2 │ if (!true) { // a
@@ -66,7 +67,7 @@ invalid.js:2:1 lint/style/noNegationElse  FIXABLE  ━━━━━━━━━�
 ```
 invalid.js:8:1 lint/style/noNegationElse  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Invert blocks when performing a negation test.
+  i Invert blocks when performing a negation test.
   
      6 │ }
      7 │ 
@@ -90,7 +91,7 @@ invalid.js:8:1 lint/style/noNegationElse  FIXABLE  ━━━━━━━━━�
 ```
 invalid.js:10:9 lint/style/noNegationElse  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Invert blocks when performing a negation test.
+  i Invert blocks when performing a negation test.
   
      8 │ !condition ? consequent : alternate;
      9 │ 
@@ -114,7 +115,7 @@ invalid.js:10:9 lint/style/noNegationElse  FIXABLE  ━━━━━━━━━�
 ```
 invalid.js:12:1 lint/style/noNegationElse  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Invert blocks when performing a negation test.
+  i Invert blocks when performing a negation test.
   
     10 │ let a = !test ? c : d;
     11 │ 
@@ -144,7 +145,7 @@ invalid.js:12:1 lint/style/noNegationElse  FIXABLE  ━━━━━━━━━�
 ```
 invalid.js:16:1 lint/style/noNegationElse  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Invert blocks when performing a negation test.
+  i Invert blocks when performing a negation test.
   
     14 │ } else something();
     15 │ 
@@ -174,7 +175,7 @@ invalid.js:16:1 lint/style/noNegationElse  FIXABLE  ━━━━━━━━━�
 ```
 invalid.js:20:1 lint/style/noNegationElse  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Invert blocks when performing a negation test.
+  i Invert blocks when performing a negation test.
   
     18 │ }
     19 │ 
@@ -198,7 +199,7 @@ invalid.js:20:1 lint/style/noNegationElse  FIXABLE  ━━━━━━━━━�
 ```
 invalid.js:22:6 lint/style/noNegationElse  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Invert blocks when performing a negation test.
+  i Invert blocks when performing a negation test.
   
     20 │ !-a ? b : c
     21 │ 
@@ -216,5 +217,3 @@ invalid.js:22:6 lint/style/noNegationElse  FIXABLE  ━━━━━━━━━�
   
 
 ```
-
-

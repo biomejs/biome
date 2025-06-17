@@ -1,11 +1,12 @@
 use biome_analyze::{
-    context::RuleContext, declare_lint_rule, Ast, Rule, RuleDiagnostic, RuleSource,
+    Ast, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
 use biome_css_syntax::{CssFunction, CssParameter};
+use biome_diagnostics::Severity;
 use biome_rowan::AstNode;
 use biome_rowan::AstSeparatedList;
-use biome_string_case::StrOnlyExtension;
+use biome_string_case::StrLikeExtension;
 use regex::Regex;
 use std::sync::LazyLock;
 
@@ -43,10 +44,11 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoInvalidDirectionInLinearGradient {
-        version: "1.9.9",
+        version: "1.9.0",
         name: "noInvalidDirectionInLinearGradient",
         language: "css",
         recommended: true,
+        severity: Severity::Error,
         sources: &[RuleSource::Stylelint("function-linear-gradient-no-nonstandard-direction")],
     }
 }
@@ -75,7 +77,7 @@ impl Rule for NoInvalidDirectionInLinearGradient {
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
-        let node_name = node.name().ok()?.text();
+        let node_name = node.name().ok()?.to_trimmed_text();
         let linear_gradient_property = [
             "linear-gradient",
             "-webkit-linear-gradient",
@@ -83,13 +85,13 @@ impl Rule for NoInvalidDirectionInLinearGradient {
             "-o-linear-gradient",
             "-ms-linear-gradient",
         ];
-        if !linear_gradient_property.contains(&node_name.to_lowercase_cow().as_ref()) {
+        if !linear_gradient_property.contains(&node_name.to_ascii_lowercase_cow().as_ref()) {
             return None;
         }
         let css_parameter = node.items();
 
         let first_css_parameter = css_parameter.first()?.ok()?;
-        let first_css_parameter_text = first_css_parameter.text();
+        let first_css_parameter_text = first_css_parameter.to_trimmed_text();
         if IN_KEYWORD.is_match(&first_css_parameter_text) {
             return None;
         }
@@ -104,7 +106,7 @@ impl Rule for NoInvalidDirectionInLinearGradient {
         let direction_property = ["top", "left", "bottom", "right"];
         if !direction_property.iter().any(|&keyword| {
             first_css_parameter_text
-                .to_lowercase_cow()
+                .to_ascii_lowercase_cow()
                 .contains(keyword)
         }) {
             return None;

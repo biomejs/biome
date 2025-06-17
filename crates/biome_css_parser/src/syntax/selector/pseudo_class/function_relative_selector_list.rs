@@ -8,7 +8,7 @@ use biome_css_syntax::{CssSyntaxKind, T};
 use biome_parser::parse_lists::ParseSeparatedList;
 use biome_parser::parsed_syntax::ParsedSyntax;
 use biome_parser::parsed_syntax::ParsedSyntax::{Absent, Present};
-use biome_parser::{token_set, Parser, TokenSet};
+use biome_parser::{Parser, TokenSet, token_set};
 
 const PSEUDO_CLASS_FUNCTION_RELATIVE_SELECTOR_LIST_SET: TokenSet<CssSyntaxKind> =
     token_set![T![has]];

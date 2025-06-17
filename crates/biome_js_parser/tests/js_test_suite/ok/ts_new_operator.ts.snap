@@ -1,0 +1,267 @@
+---
+source: crates/biome_js_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```ts
+var c2 = new T<string>;  // Ok
+var x1 = new SS<number>(); // OK
+var x3 = new SS();         // OK
+var x4 = new SS;           // OK
+
+```
+
+
+## AST
+
+```
+JsModule {
+    bom_token: missing (optional),
+    interpreter_token: missing (optional),
+    directives: JsDirectiveList [],
+    items: JsModuleItemList [
+        JsVariableStatement {
+            declaration: JsVariableDeclaration {
+                await_token: missing (optional),
+                kind: VAR_KW@0..4 "var" [] [Whitespace(" ")],
+                declarators: JsVariableDeclaratorList [
+                    JsVariableDeclarator {
+                        id: JsIdentifierBinding {
+                            name_token: IDENT@4..7 "c2" [] [Whitespace(" ")],
+                        },
+                        variable_annotation: missing (optional),
+                        initializer: JsInitializerClause {
+                            eq_token: EQ@7..9 "=" [] [Whitespace(" ")],
+                            expression: JsNewExpression {
+                                new_token: NEW_KW@9..13 "new" [] [Whitespace(" ")],
+                                callee: JsIdentifierExpression {
+                                    name: JsReferenceIdentifier {
+                                        value_token: IDENT@13..14 "T" [] [],
+                                    },
+                                },
+                                type_arguments: TsTypeArguments {
+                                    l_angle_token: L_ANGLE@14..15 "<" [] [],
+                                    ts_type_argument_list: TsTypeArgumentList [
+                                        TsStringType {
+                                            string_token: STRING_KW@15..21 "string" [] [],
+                                        },
+                                    ],
+                                    r_angle_token: R_ANGLE@21..22 ">" [] [],
+                                },
+                                arguments: missing (optional),
+                            },
+                        },
+                    },
+                ],
+            },
+            semicolon_token: SEMICOLON@22..30 ";" [] [Whitespace("  "), Comments("// Ok")],
+        },
+        JsVariableStatement {
+            declaration: JsVariableDeclaration {
+                await_token: missing (optional),
+                kind: VAR_KW@30..35 "var" [Newline("\n")] [Whitespace(" ")],
+                declarators: JsVariableDeclaratorList [
+                    JsVariableDeclarator {
+                        id: JsIdentifierBinding {
+                            name_token: IDENT@35..38 "x1" [] [Whitespace(" ")],
+                        },
+                        variable_annotation: missing (optional),
+                        initializer: JsInitializerClause {
+                            eq_token: EQ@38..40 "=" [] [Whitespace(" ")],
+                            expression: JsNewExpression {
+                                new_token: NEW_KW@40..44 "new" [] [Whitespace(" ")],
+                                callee: JsIdentifierExpression {
+                                    name: JsReferenceIdentifier {
+                                        value_token: IDENT@44..46 "SS" [] [],
+                                    },
+                                },
+                                type_arguments: TsTypeArguments {
+                                    l_angle_token: L_ANGLE@46..47 "<" [] [],
+                                    ts_type_argument_list: TsTypeArgumentList [
+                                        TsNumberType {
+                                            number_token: NUMBER_KW@47..53 "number" [] [],
+                                        },
+                                    ],
+                                    r_angle_token: R_ANGLE@53..54 ">" [] [],
+                                },
+                                arguments: JsCallArguments {
+                                    l_paren_token: L_PAREN@54..55 "(" [] [],
+                                    args: JsCallArgumentList [],
+                                    r_paren_token: R_PAREN@55..56 ")" [] [],
+                                },
+                            },
+                        },
+                    },
+                ],
+            },
+            semicolon_token: SEMICOLON@56..63 ";" [] [Whitespace(" "), Comments("// OK")],
+        },
+        JsVariableStatement {
+            declaration: JsVariableDeclaration {
+                await_token: missing (optional),
+                kind: VAR_KW@63..68 "var" [Newline("\n")] [Whitespace(" ")],
+                declarators: JsVariableDeclaratorList [
+                    JsVariableDeclarator {
+                        id: JsIdentifierBinding {
+                            name_token: IDENT@68..71 "x3" [] [Whitespace(" ")],
+                        },
+                        variable_annotation: missing (optional),
+                        initializer: JsInitializerClause {
+                            eq_token: EQ@71..73 "=" [] [Whitespace(" ")],
+                            expression: JsNewExpression {
+                                new_token: NEW_KW@73..77 "new" [] [Whitespace(" ")],
+                                callee: JsIdentifierExpression {
+                                    name: JsReferenceIdentifier {
+                                        value_token: IDENT@77..79 "SS" [] [],
+                                    },
+                                },
+                                type_arguments: missing (optional),
+                                arguments: JsCallArguments {
+                                    l_paren_token: L_PAREN@79..80 "(" [] [],
+                                    args: JsCallArgumentList [],
+                                    r_paren_token: R_PAREN@80..81 ")" [] [],
+                                },
+                            },
+                        },
+                    },
+                ],
+            },
+            semicolon_token: SEMICOLON@81..96 ";" [] [Whitespace("         "), Comments("// OK")],
+        },
+        JsVariableStatement {
+            declaration: JsVariableDeclaration {
+                await_token: missing (optional),
+                kind: VAR_KW@96..101 "var" [Newline("\n")] [Whitespace(" ")],
+                declarators: JsVariableDeclaratorList [
+                    JsVariableDeclarator {
+                        id: JsIdentifierBinding {
+                            name_token: IDENT@101..104 "x4" [] [Whitespace(" ")],
+                        },
+                        variable_annotation: missing (optional),
+                        initializer: JsInitializerClause {
+                            eq_token: EQ@104..106 "=" [] [Whitespace(" ")],
+                            expression: JsNewExpression {
+                                new_token: NEW_KW@106..110 "new" [] [Whitespace(" ")],
+                                callee: JsIdentifierExpression {
+                                    name: JsReferenceIdentifier {
+                                        value_token: IDENT@110..112 "SS" [] [],
+                                    },
+                                },
+                                type_arguments: missing (optional),
+                                arguments: missing (optional),
+                            },
+                        },
+                    },
+                ],
+            },
+            semicolon_token: SEMICOLON@112..129 ";" [] [Whitespace("           "), Comments("// OK")],
+        },
+    ],
+    eof_token: EOF@129..130 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: JS_MODULE@0..130
+  0: (empty)
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..129
+    0: JS_VARIABLE_STATEMENT@0..30
+      0: JS_VARIABLE_DECLARATION@0..22
+        0: (empty)
+        1: VAR_KW@0..4 "var" [] [Whitespace(" ")]
+        2: JS_VARIABLE_DECLARATOR_LIST@4..22
+          0: JS_VARIABLE_DECLARATOR@4..22
+            0: JS_IDENTIFIER_BINDING@4..7
+              0: IDENT@4..7 "c2" [] [Whitespace(" ")]
+            1: (empty)
+            2: JS_INITIALIZER_CLAUSE@7..22
+              0: EQ@7..9 "=" [] [Whitespace(" ")]
+              1: JS_NEW_EXPRESSION@9..22
+                0: NEW_KW@9..13 "new" [] [Whitespace(" ")]
+                1: JS_IDENTIFIER_EXPRESSION@13..14
+                  0: JS_REFERENCE_IDENTIFIER@13..14
+                    0: IDENT@13..14 "T" [] []
+                2: TS_TYPE_ARGUMENTS@14..22
+                  0: L_ANGLE@14..15 "<" [] []
+                  1: TS_TYPE_ARGUMENT_LIST@15..21
+                    0: TS_STRING_TYPE@15..21
+                      0: STRING_KW@15..21 "string" [] []
+                  2: R_ANGLE@21..22 ">" [] []
+                3: (empty)
+      1: SEMICOLON@22..30 ";" [] [Whitespace("  "), Comments("// Ok")]
+    1: JS_VARIABLE_STATEMENT@30..63
+      0: JS_VARIABLE_DECLARATION@30..56
+        0: (empty)
+        1: VAR_KW@30..35 "var" [Newline("\n")] [Whitespace(" ")]
+        2: JS_VARIABLE_DECLARATOR_LIST@35..56
+          0: JS_VARIABLE_DECLARATOR@35..56
+            0: JS_IDENTIFIER_BINDING@35..38
+              0: IDENT@35..38 "x1" [] [Whitespace(" ")]
+            1: (empty)
+            2: JS_INITIALIZER_CLAUSE@38..56
+              0: EQ@38..40 "=" [] [Whitespace(" ")]
+              1: JS_NEW_EXPRESSION@40..56
+                0: NEW_KW@40..44 "new" [] [Whitespace(" ")]
+                1: JS_IDENTIFIER_EXPRESSION@44..46
+                  0: JS_REFERENCE_IDENTIFIER@44..46
+                    0: IDENT@44..46 "SS" [] []
+                2: TS_TYPE_ARGUMENTS@46..54
+                  0: L_ANGLE@46..47 "<" [] []
+                  1: TS_TYPE_ARGUMENT_LIST@47..53
+                    0: TS_NUMBER_TYPE@47..53
+                      0: NUMBER_KW@47..53 "number" [] []
+                  2: R_ANGLE@53..54 ">" [] []
+                3: JS_CALL_ARGUMENTS@54..56
+                  0: L_PAREN@54..55 "(" [] []
+                  1: JS_CALL_ARGUMENT_LIST@55..55
+                  2: R_PAREN@55..56 ")" [] []
+      1: SEMICOLON@56..63 ";" [] [Whitespace(" "), Comments("// OK")]
+    2: JS_VARIABLE_STATEMENT@63..96
+      0: JS_VARIABLE_DECLARATION@63..81
+        0: (empty)
+        1: VAR_KW@63..68 "var" [Newline("\n")] [Whitespace(" ")]
+        2: JS_VARIABLE_DECLARATOR_LIST@68..81
+          0: JS_VARIABLE_DECLARATOR@68..81
+            0: JS_IDENTIFIER_BINDING@68..71
+              0: IDENT@68..71 "x3" [] [Whitespace(" ")]
+            1: (empty)
+            2: JS_INITIALIZER_CLAUSE@71..81
+              0: EQ@71..73 "=" [] [Whitespace(" ")]
+              1: JS_NEW_EXPRESSION@73..81
+                0: NEW_KW@73..77 "new" [] [Whitespace(" ")]
+                1: JS_IDENTIFIER_EXPRESSION@77..79
+                  0: JS_REFERENCE_IDENTIFIER@77..79
+                    0: IDENT@77..79 "SS" [] []
+                2: (empty)
+                3: JS_CALL_ARGUMENTS@79..81
+                  0: L_PAREN@79..80 "(" [] []
+                  1: JS_CALL_ARGUMENT_LIST@80..80
+                  2: R_PAREN@80..81 ")" [] []
+      1: SEMICOLON@81..96 ";" [] [Whitespace("         "), Comments("// OK")]
+    3: JS_VARIABLE_STATEMENT@96..129
+      0: JS_VARIABLE_DECLARATION@96..112
+        0: (empty)
+        1: VAR_KW@96..101 "var" [Newline("\n")] [Whitespace(" ")]
+        2: JS_VARIABLE_DECLARATOR_LIST@101..112
+          0: JS_VARIABLE_DECLARATOR@101..112
+            0: JS_IDENTIFIER_BINDING@101..104
+              0: IDENT@101..104 "x4" [] [Whitespace(" ")]
+            1: (empty)
+            2: JS_INITIALIZER_CLAUSE@104..112
+              0: EQ@104..106 "=" [] [Whitespace(" ")]
+              1: JS_NEW_EXPRESSION@106..112
+                0: NEW_KW@106..110 "new" [] [Whitespace(" ")]
+                1: JS_IDENTIFIER_EXPRESSION@110..112
+                  0: JS_REFERENCE_IDENTIFIER@110..112
+                    0: IDENT@110..112 "SS" [] []
+                2: (empty)
+                3: (empty)
+      1: SEMICOLON@112..129 ";" [] [Whitespace("           "), Comments("// OK")]
+  4: EOF@129..130 "" [Newline("\n")] []
+
+```

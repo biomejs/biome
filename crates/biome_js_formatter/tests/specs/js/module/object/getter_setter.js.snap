@@ -10,6 +10,7 @@ let a = {
 }
 let b = {
 	set foo(a) {}
+	set bar(a, ) {}
 }
 
 ```
@@ -35,6 +36,7 @@ Arrow parentheses: Always
 Bracket spacing: true
 Bracket same line: false
 Attribute Position: Auto
+Expand lists: Auto
 -----
 
 ```js
@@ -42,6 +44,7 @@ let a = {
 	get foo() {},
 };
 let b = {
-	set foo(a) {},
-};
+	set foo(a) {}
+	set bar(a, ) {}
+}
 ```

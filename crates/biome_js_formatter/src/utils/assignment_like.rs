@@ -5,7 +5,7 @@ use crate::ts::bindings::type_parameters::FormatTsTypeParametersOptions;
 use crate::utils::member_chain::is_member_call_chain;
 use crate::utils::object::write_member_name;
 use crate::utils::{FormatLiteralStringToken, StringLiteralParentKind};
-use biome_formatter::{format_args, write, CstFormatContext, FormatOptions, VecBuffer};
+use biome_formatter::{CstFormatContext, FormatOptions, VecBuffer, format_args, write};
 use biome_js_syntax::binary_like_expression::AnyJsBinaryLikeExpression;
 use biome_js_syntax::{
     AnyJsAssignmentPattern, AnyJsBindingPattern, AnyJsCallArgument, AnyJsClassMemberName,
@@ -20,7 +20,7 @@ use biome_js_syntax::{
     TsTypeArguments, TsUnionType,
 };
 use biome_js_syntax::{AnyJsLiteralExpression, JsUnaryExpression};
-use biome_rowan::{declare_node_union, AstNode, SyntaxNodeOptionExt, SyntaxResult};
+use biome_rowan::{AstNode, SyntaxNodeOptionExt, SyntaxResult, declare_node_union};
 use std::iter;
 
 declare_node_union! {
@@ -77,7 +77,7 @@ impl AnyObjectPattern {
     ///
     fn is_complex(&self) -> bool {
         match self {
-            AnyObjectPattern::JsObjectAssignmentPattern(assignment_pattern) => {
+            Self::JsObjectAssignmentPattern(assignment_pattern) => {
                 use AnyJsObjectAssignmentPatternMember::*;
 
                 if assignment_pattern.properties().len() <= 2 {
@@ -94,7 +94,7 @@ impl AnyObjectPattern {
                         _ => false,
                     })
             }
-            AnyObjectPattern::JsObjectBindingPattern(binding_pattern) => {
+            Self::JsObjectBindingPattern(binding_pattern) => {
                 use AnyJsObjectBindingPatternMember::*;
 
                 if binding_pattern.properties().len() <= 2 {
@@ -121,10 +121,10 @@ impl LeftAssignmentLike {
         use AnyJsBindingPattern::*;
 
         match self {
-            LeftAssignmentLike::AnyJsAssignmentPattern(JsObjectAssignmentPattern(node)) => {
+            Self::AnyJsAssignmentPattern(JsObjectAssignmentPattern(node)) => {
                 Some(AnyObjectPattern::from(node))
             }
-            LeftAssignmentLike::AnyJsBindingPattern(JsObjectBindingPattern(node)) => {
+            Self::AnyJsBindingPattern(JsObjectBindingPattern(node)) => {
                 Some(AnyObjectPattern::from(node))
             }
             _ => None,
@@ -157,14 +157,12 @@ pub(crate) fn is_complex_type_annotation(
                             return true;
                         }
 
-                        let is_complex_type = argument
+                        argument
                             .as_ts_reference_type()
                             .and_then(|reference_type| reference_type.type_arguments())
-                            .map_or(false, |type_arguments| {
+                            .is_some_and(|type_arguments| {
                                 type_arguments.ts_type_argument_list().len() > 0
-                            });
-
-                        is_complex_type
+                            })
                     });
                 Some(has_at_least_a_complex_type)
             }
@@ -178,10 +176,10 @@ pub(crate) fn is_complex_type_annotation(
 impl RightAssignmentLike {
     fn as_expression(&self) -> Option<AnyJsExpression> {
         match self {
-            RightAssignmentLike::AnyJsExpression(expression) => Some(expression.clone()),
-            RightAssignmentLike::JsInitializerClause(initializer) => initializer.expression().ok(),
-            RightAssignmentLike::AnyJsAssignmentPattern(_) => None,
-            RightAssignmentLike::AnyTsType(_) => None,
+            Self::AnyJsExpression(expression) => Some(expression.clone()),
+            Self::JsInitializerClause(initializer) => initializer.expression().ok(),
+            Self::AnyJsAssignmentPattern(_) => None,
+            Self::AnyTsType(_) => None,
         }
     }
 }
@@ -189,16 +187,16 @@ impl RightAssignmentLike {
 impl Format<JsFormatContext> for RightAssignmentLike {
     fn fmt(&self, f: &mut Formatter<JsFormatContext>) -> FormatResult<()> {
         match self {
-            RightAssignmentLike::AnyJsExpression(expression) => {
+            Self::AnyJsExpression(expression) => {
                 write!(f, [expression.format()])
             }
-            RightAssignmentLike::AnyJsAssignmentPattern(assignment) => {
+            Self::AnyJsAssignmentPattern(assignment) => {
                 write!(f, [assignment.format()])
             }
-            RightAssignmentLike::JsInitializerClause(initializer) => {
+            Self::JsInitializerClause(initializer) => {
                 write!(f, [space(), initializer.format()])
             }
-            RightAssignmentLike::AnyTsType(ty) => {
+            Self::AnyTsType(ty) => {
                 write!(f, [space(), ty.format()])
             }
         }
@@ -323,26 +321,28 @@ const MIN_OVERLAP_FOR_BREAK: u8 = 3;
 impl AnyJsAssignmentLike {
     fn right(&self) -> SyntaxResult<RightAssignmentLike> {
         let right = match self {
-            AnyJsAssignmentLike::JsPropertyObjectMember(property) => property.value()?.into(),
-            AnyJsAssignmentLike::JsAssignmentExpression(assignment) => assignment.right()?.into(),
-            AnyJsAssignmentLike::JsObjectAssignmentPatternProperty(assignment_pattern) => {
+            Self::JsPropertyObjectMember(property) => property.value()?.into(),
+            Self::JsAssignmentExpression(assignment) => assignment.right()?.into(),
+            Self::JsObjectAssignmentPatternProperty(assignment_pattern) => {
                 assignment_pattern.pattern()?.into()
             }
-            AnyJsAssignmentLike::JsVariableDeclarator(variable_declarator) => {
+            Self::JsVariableDeclarator(variable_declarator) => {
                 // SAFETY: Calling `unwrap` here is safe because we check `has_only_left_hand_side` variant at the beginning of the `layout` function
                 variable_declarator.initializer().unwrap().into()
             }
-            AnyJsAssignmentLike::TsTypeAliasDeclaration(type_alias_declaration) => {
+            Self::TsTypeAliasDeclaration(type_alias_declaration) => {
                 type_alias_declaration.ty()?.into()
             }
-            AnyJsAssignmentLike::JsPropertyClassMember(n) => {
+            Self::JsPropertyClassMember(n) => {
                 // SAFETY: Calling `unwrap` here is safe because we check `has_only_left_hand_side` variant at the beginning of the `layout` function
                 n.value().unwrap().into()
             }
-            AnyJsAssignmentLike::TsPropertySignatureClassMember(_) => {
-                unreachable!("TsPropertySignatureClassMember doesn't have any right side. If you're here, `has_only_left_hand_side` hasn't been called")
+            Self::TsPropertySignatureClassMember(_) => {
+                unreachable!(
+                    "TsPropertySignatureClassMember doesn't have any right side. If you're here, `has_only_left_hand_side` hasn't been called"
+                )
             }
-            AnyJsAssignmentLike::TsInitializedPropertySignatureClassMember(n) => {
+            Self::TsInitializedPropertySignatureClassMember(n) => {
                 // SAFETY: Calling `unwrap` here is safe because we check `has_only_left_hand_side` variant at the beginning of the `layout` function
                 n.value().unwrap().into()
             }
@@ -353,34 +353,28 @@ impl AnyJsAssignmentLike {
 
     fn left(&self) -> SyntaxResult<LeftAssignmentLike> {
         match self {
-            AnyJsAssignmentLike::JsPropertyObjectMember(property) => Ok(property.name()?.into()),
-            AnyJsAssignmentLike::JsAssignmentExpression(assignment) => {
-                Ok(assignment.left()?.into())
-            }
-            AnyJsAssignmentLike::JsObjectAssignmentPatternProperty(property) => {
-                Ok(property.pattern()?.into())
-            }
-            AnyJsAssignmentLike::JsVariableDeclarator(variable_declarator) => {
-                Ok(variable_declarator.id()?.into())
-            }
-            AnyJsAssignmentLike::TsTypeAliasDeclaration(type_alias_declaration) => {
+            Self::JsPropertyObjectMember(property) => Ok(property.name()?.into()),
+            Self::JsAssignmentExpression(assignment) => Ok(assignment.left()?.into()),
+            Self::JsObjectAssignmentPatternProperty(property) => Ok(property.pattern()?.into()),
+            Self::JsVariableDeclarator(variable_declarator) => Ok(variable_declarator.id()?.into()),
+            Self::TsTypeAliasDeclaration(type_alias_declaration) => {
                 Ok(type_alias_declaration.binding_identifier()?.into())
             }
-            AnyJsAssignmentLike::JsPropertyClassMember(property_class_member) => {
+            Self::JsPropertyClassMember(property_class_member) => {
                 Ok(property_class_member.name()?.into())
             }
-            AnyJsAssignmentLike::TsPropertySignatureClassMember(
-                property_signature_class_member,
-            ) => Ok(property_signature_class_member.name()?.into()),
-            AnyJsAssignmentLike::TsInitializedPropertySignatureClassMember(
-                property_signature_class_member,
-            ) => Ok(property_signature_class_member.name()?.into()),
+            Self::TsPropertySignatureClassMember(property_signature_class_member) => {
+                Ok(property_signature_class_member.name()?.into())
+            }
+            Self::TsInitializedPropertySignatureClassMember(property_signature_class_member) => {
+                Ok(property_signature_class_member.name()?.into())
+            }
         }
     }
 
     fn annotation(&self) -> Option<AnyTsVariableAnnotation> {
         match self {
-            AnyJsAssignmentLike::JsVariableDeclarator(variable_declarator) => {
+            Self::JsVariableDeclarator(variable_declarator) => {
                 variable_declarator.variable_annotation()
             }
             _ => None,
@@ -389,7 +383,7 @@ impl AnyJsAssignmentLike {
 
     fn write_left(&self, f: &mut JsFormatter) -> FormatResult<bool> {
         match self {
-            AnyJsAssignmentLike::JsPropertyObjectMember(property) => {
+            Self::JsPropertyObjectMember(property) => {
                 let name = property.name()?;
 
                 // It's safe to mark the name as checked here because it is at the beginning of the property
@@ -404,12 +398,12 @@ impl AnyJsAssignmentLike {
                     (u8::from(f.options().tab_width()) + MIN_OVERLAP_FOR_BREAK) as usize;
                 Ok(width < text_width_for_break)
             }
-            AnyJsAssignmentLike::JsAssignmentExpression(assignment) => {
+            Self::JsAssignmentExpression(assignment) => {
                 let left = assignment.left()?;
                 write!(f, [&left.format()])?;
                 Ok(false)
             }
-            AnyJsAssignmentLike::JsObjectAssignmentPatternProperty(property) => {
+            Self::JsObjectAssignmentPatternProperty(property) => {
                 let member_name = property.member()?;
 
                 // It's safe to mark the name as checked here because it is at the beginning of the property
@@ -424,14 +418,14 @@ impl AnyJsAssignmentLike {
                     (u8::from(f.options().tab_width()) + MIN_OVERLAP_FOR_BREAK) as usize;
                 Ok(width < text_width_for_break)
             }
-            AnyJsAssignmentLike::JsVariableDeclarator(variable_declarator) => {
+            Self::JsVariableDeclarator(variable_declarator) => {
                 let id = variable_declarator.id()?;
                 let variable_annotation = variable_declarator.variable_annotation();
 
                 write!(f, [id.format(), variable_annotation.format()])?;
                 Ok(false)
             }
-            AnyJsAssignmentLike::TsTypeAliasDeclaration(type_alias_declaration) => {
+            Self::TsTypeAliasDeclaration(type_alias_declaration) => {
                 let binding_identifier = type_alias_declaration.binding_identifier()?;
                 let type_parameters = type_alias_declaration.type_parameters();
 
@@ -449,7 +443,7 @@ impl AnyJsAssignmentLike {
                 }
                 Ok(false)
             }
-            AnyJsAssignmentLike::JsPropertyClassMember(property_class_member) => {
+            Self::JsPropertyClassMember(property_class_member) => {
                 let JsPropertyClassMemberFields {
                     modifiers,
                     name,
@@ -471,9 +465,7 @@ impl AnyJsAssignmentLike {
 
                 Ok(false)
             }
-            AnyJsAssignmentLike::TsPropertySignatureClassMember(
-                property_signature_class_member,
-            ) => {
+            Self::TsPropertySignatureClassMember(property_signature_class_member) => {
                 let TsPropertySignatureClassMemberFields {
                     modifiers,
                     name,
@@ -490,9 +482,7 @@ impl AnyJsAssignmentLike {
                     (u8::from(f.options().tab_width()) + MIN_OVERLAP_FOR_BREAK) as usize;
                 Ok(width < text_width_for_break)
             }
-            AnyJsAssignmentLike::TsInitializedPropertySignatureClassMember(
-                property_signature_class_member,
-            ) => {
+            Self::TsInitializedPropertySignatureClassMember(property_signature_class_member) => {
                 let TsInitializedPropertySignatureClassMemberFields {
                     modifiers,
                     name,
@@ -515,30 +505,30 @@ impl AnyJsAssignmentLike {
 
     fn write_operator(&self, f: &mut JsFormatter) -> FormatResult<()> {
         match self {
-            AnyJsAssignmentLike::JsPropertyObjectMember(property) => {
+            Self::JsPropertyObjectMember(property) => {
                 let colon_token = property.colon_token()?;
                 write!(f, [colon_token.format()])
             }
-            AnyJsAssignmentLike::JsAssignmentExpression(assignment) => {
+            Self::JsAssignmentExpression(assignment) => {
                 let operator_token = assignment.operator_token()?;
                 write!(f, [space(), operator_token.format()])
             }
-            AnyJsAssignmentLike::JsObjectAssignmentPatternProperty(property) => {
+            Self::JsObjectAssignmentPatternProperty(property) => {
                 let colon_token = property.colon_token()?;
                 write!(f, [colon_token.format()])
             }
-            AnyJsAssignmentLike::JsVariableDeclarator(variable_declarator) => {
+            Self::JsVariableDeclarator(variable_declarator) => {
                 if let Some(initializer) = variable_declarator.initializer() {
                     let eq_token = initializer.eq_token()?;
                     write!(f, [space(), eq_token.format()])?
                 }
                 Ok(())
             }
-            AnyJsAssignmentLike::TsTypeAliasDeclaration(type_alias_declaration) => {
+            Self::TsTypeAliasDeclaration(type_alias_declaration) => {
                 let eq_token = type_alias_declaration.eq_token()?;
                 write!(f, [space(), eq_token.format()])
             }
-            AnyJsAssignmentLike::JsPropertyClassMember(property_class_member) => {
+            Self::JsPropertyClassMember(property_class_member) => {
                 if let Some(initializer) = property_class_member.value() {
                     let eq_token = initializer.eq_token()?;
                     write!(f, [space(), eq_token.format()])?
@@ -546,10 +536,8 @@ impl AnyJsAssignmentLike {
                 Ok(())
             }
             // this variant doesn't have any operator
-            AnyJsAssignmentLike::TsPropertySignatureClassMember(_) => Ok(()),
-            AnyJsAssignmentLike::TsInitializedPropertySignatureClassMember(
-                property_class_member,
-            ) => {
+            Self::TsPropertySignatureClassMember(_) => Ok(()),
+            Self::TsInitializedPropertySignatureClassMember(property_class_member) => {
                 let initializer = property_class_member.value()?;
                 let eq_token = initializer.eq_token()?;
                 write!(f, [space(), eq_token.format()])
@@ -559,15 +547,15 @@ impl AnyJsAssignmentLike {
 
     fn write_right(&self, f: &mut JsFormatter, layout: AssignmentLikeLayout) -> FormatResult<()> {
         match self {
-            AnyJsAssignmentLike::JsPropertyObjectMember(property) => {
+            Self::JsPropertyObjectMember(property) => {
                 let value = property.value()?;
                 write!(f, [with_assignment_layout(&value, Some(layout))])
             }
-            AnyJsAssignmentLike::JsAssignmentExpression(assignment) => {
+            Self::JsAssignmentExpression(assignment) => {
                 let right = assignment.right()?;
                 write!(f, [space(), with_assignment_layout(&right, Some(layout))])
             }
-            AnyJsAssignmentLike::JsObjectAssignmentPatternProperty(property) => {
+            Self::JsObjectAssignmentPatternProperty(property) => {
                 let pattern = property.pattern()?;
                 let init = property.init();
                 write!(f, [pattern.format()])?;
@@ -585,7 +573,7 @@ impl AnyJsAssignmentLike {
                 }
                 Ok(())
             }
-            AnyJsAssignmentLike::JsVariableDeclarator(variable_declarator) => {
+            Self::JsVariableDeclarator(variable_declarator) => {
                 if let Some(initializer) = variable_declarator.initializer() {
                     let expression = initializer.expression()?;
                     write!(
@@ -600,11 +588,11 @@ impl AnyJsAssignmentLike {
                 }
                 Ok(())
             }
-            AnyJsAssignmentLike::TsTypeAliasDeclaration(type_alias_declaration) => {
+            Self::TsTypeAliasDeclaration(type_alias_declaration) => {
                 let ty = type_alias_declaration.ty()?;
                 write!(f, [space(), ty.format()])
             }
-            AnyJsAssignmentLike::JsPropertyClassMember(property_class_member) => {
+            Self::JsPropertyClassMember(property_class_member) => {
                 if let Some(initializer) = property_class_member.value() {
                     let expression = initializer.expression()?;
                     write!(
@@ -620,10 +608,8 @@ impl AnyJsAssignmentLike {
                 Ok(())
             }
             // this variant doesn't have any right part
-            AnyJsAssignmentLike::TsPropertySignatureClassMember(_) => Ok(()),
-            AnyJsAssignmentLike::TsInitializedPropertySignatureClassMember(
-                property_class_member,
-            ) => {
+            Self::TsPropertySignatureClassMember(_) => Ok(()),
+            Self::TsInitializedPropertySignatureClassMember(property_class_member) => {
                 let initializer = property_class_member.value()?;
                 let expression = initializer.expression()?;
                 write!(
@@ -641,19 +627,17 @@ impl AnyJsAssignmentLike {
 
     fn write_suppressed_initializer(&self, f: &mut JsFormatter) -> FormatResult<()> {
         let initializer = match self {
-            AnyJsAssignmentLike::JsPropertyClassMember(class_member) => class_member.value(),
-            AnyJsAssignmentLike::TsInitializedPropertySignatureClassMember(class_member) => {
+            Self::JsPropertyClassMember(class_member) => class_member.value(),
+            Self::TsInitializedPropertySignatureClassMember(class_member) => {
                 Some(class_member.value()?)
             }
-            AnyJsAssignmentLike::JsVariableDeclarator(variable_declarator) => {
-                variable_declarator.initializer()
-            }
+            Self::JsVariableDeclarator(variable_declarator) => variable_declarator.initializer(),
 
-            AnyJsAssignmentLike::JsPropertyObjectMember(_)
-            | AnyJsAssignmentLike::JsAssignmentExpression(_)
-            | AnyJsAssignmentLike::JsObjectAssignmentPatternProperty(_)
-            | AnyJsAssignmentLike::TsTypeAliasDeclaration(_)
-            | AnyJsAssignmentLike::TsPropertySignatureClassMember(_) => {
+            Self::JsPropertyObjectMember(_)
+            | Self::JsAssignmentExpression(_)
+            | Self::JsObjectAssignmentPatternProperty(_)
+            | Self::TsTypeAliasDeclaration(_)
+            | Self::TsPropertySignatureClassMember(_) => {
                 unreachable!("These variants have no initializer")
             }
         };
@@ -690,7 +674,7 @@ impl AnyJsAssignmentLike {
         }
 
         if let Some(AnyJsExpression::JsCallExpression(call_expression)) = &right_expression {
-            if call_expression.callee()?.syntax().text() == "require" {
+            if call_expression.callee()?.syntax().text_with_trivia() == "require" {
                 return Ok(AssignmentLikeLayout::NeverBreakAfterOperator);
             }
         }
@@ -760,12 +744,12 @@ impl AnyJsAssignmentLike {
     /// Checks that a [JsAnyAssignmentLike] consists only of the left part
     /// usually, when a [variable declarator](JsVariableDeclarator) doesn't have initializer
     fn has_only_left_hand_side(&self) -> bool {
-        if let AnyJsAssignmentLike::JsVariableDeclarator(declarator) = self {
+        if let Self::JsVariableDeclarator(declarator) = self {
             declarator.initializer().is_none()
-        } else if let AnyJsAssignmentLike::JsPropertyClassMember(class_member) = self {
+        } else if let Self::JsPropertyClassMember(class_member) = self {
             class_member.value().is_none()
         } else {
-            matches!(self, AnyJsAssignmentLike::TsPropertySignatureClassMember(_))
+            matches!(self, Self::TsPropertySignatureClassMember(_))
         }
     }
 
@@ -784,8 +768,8 @@ impl AnyJsAssignmentLike {
         // are correctly met.
         let upper_chain_is_eligible =
             // First, we check if the current node is an assignment expression
-            if let AnyJsAssignmentLike::JsAssignmentExpression(assignment) = self {
-                assignment.syntax().parent().map_or(false, |parent| {
+            if let Self::JsAssignmentExpression(assignment) = self {
+                assignment.syntax().parent().is_some_and(|parent| {
                     // Then we check if the parent is assignment expression or variable declarator
                     if matches!(
                         parent.kind(),
@@ -846,9 +830,7 @@ impl AnyJsAssignmentLike {
     }
 
     fn is_complex_type_alias(&self) -> SyntaxResult<bool> {
-        let result = if let AnyJsAssignmentLike::TsTypeAliasDeclaration(type_alias_declaration) =
-            self
-        {
+        let result = if let Self::TsTypeAliasDeclaration(type_alias_declaration) = self {
             let type_parameters = type_alias_declaration.type_parameters();
 
             if let Some(type_parameters) = type_parameters {
@@ -880,7 +862,7 @@ impl AnyJsAssignmentLike {
         let is_complex_destructuring = self
             .left()?
             .into_object_pattern()
-            .map_or(false, |pattern| pattern.is_complex());
+            .is_some_and(|pattern| pattern.is_complex());
 
         let has_complex_type_annotation = self
             .annotation()
@@ -889,9 +871,9 @@ impl AnyJsAssignmentLike {
 
         let is_complex_type_alias = self.is_complex_type_alias()?;
 
-        let is_right_arrow_func = self.right().map_or(false, |right| match right {
+        let is_right_arrow_func = self.right().is_ok_and(|right| match right {
             RightAssignmentLike::JsInitializerClause(init) => {
-                init.expression().map_or(false, |expression| {
+                init.expression().is_ok_and(|expression| {
                     matches!(expression, AnyJsExpression::JsArrowFunctionExpression(_))
                 })
             }
@@ -985,9 +967,7 @@ pub(crate) fn should_break_after_operator(
 
         AnyJsExpression::JsConditionalExpression(conditional) => {
             AnyJsBinaryLikeExpression::cast(conditional.test()?.into_syntax())
-                .map_or(false, |expression| {
-                    !expression.should_inline_logical_expression()
-                })
+                .is_some_and(|expression| !expression.should_inline_logical_expression())
         }
 
         AnyJsExpression::JsClassExpression(class) => !class.decorators().is_empty(),
@@ -1317,19 +1297,18 @@ fn is_complex_type_arguments(type_arguments: TsTypeArguments) -> SyntaxResult<bo
         return Ok(true);
     }
 
-    let is_first_argument_complex =
-        ts_type_argument_list
-            .iter()
-            .next()
-            .transpose()?
-            .map_or(false, |first_argument| {
-                matches!(
-                    first_argument,
-                    AnyTsType::TsUnionType(_)
-                        | AnyTsType::TsIntersectionType(_)
-                        | AnyTsType::TsObjectType(_)
-                )
-            });
+    let is_first_argument_complex = ts_type_argument_list
+        .iter()
+        .next()
+        .transpose()?
+        .is_some_and(|first_argument| {
+            matches!(
+                first_argument,
+                AnyTsType::TsUnionType(_)
+                    | AnyTsType::TsIntersectionType(_)
+                    | AnyTsType::TsObjectType(_)
+            )
+        });
 
     if is_first_argument_complex {
         return Ok(true);
@@ -1362,12 +1341,10 @@ fn is_annotation_breakable(annotation: AnyTsVariableAnnotation) -> SyntaxResult<
     let is_breakable = annotation
         .type_annotation()?
         .and_then(|type_annotation| type_annotation.ty().ok())
-        .map_or(false, |ty| match ty {
-            AnyTsType::TsReferenceType(reference_type) => {
-                reference_type.type_arguments().map_or(false, |type_args| {
-                    type_args.ts_type_argument_list().len() > 0
-                })
-            }
+        .is_some_and(|ty| match ty {
+            AnyTsType::TsReferenceType(reference_type) => reference_type
+                .type_arguments()
+                .is_some_and(|type_args| type_args.ts_type_argument_list().len() > 0),
             _ => false,
         });
 

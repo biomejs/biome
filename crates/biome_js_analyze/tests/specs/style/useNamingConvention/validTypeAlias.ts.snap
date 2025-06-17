@@ -4,6 +4,7 @@ expression: validTypeAlias.ts
 ---
 # Input
 ```ts
+/* should not generate diagnostics */
 export type X = {}
 
 export type PascalCase = {}
@@ -14,5 +15,3 @@ export type _ = {}
 
 export type $ = {}
 ```
-
-

@@ -1,45 +1,32 @@
-use std::str::FromStr;
+#![deny(clippy::use_self)]
 
-pub mod iso;
-mod macros;
-pub mod properties;
 pub mod roles;
 
-pub use biome_aria_metadata::{AriaPropertiesEnum, AriaPropertyTypeEnum};
-pub use properties::AriaProperties;
-pub(crate) use roles::AriaRoleDefinition;
 pub use roles::AriaRoles;
 
-/// It checks if an ARIA property is valid
-///
-/// ## Examples
-///
-/// ```
-/// use biome_aria::is_aria_property_valid;
-///
-/// assert!(!is_aria_property_valid("aria-blabla"));
-/// assert!(is_aria_property_valid("aria-checked"));
-/// ```
-pub fn is_aria_property_valid(property: &str) -> bool {
-    AriaPropertiesEnum::from_str(property).is_ok()
+pub trait Element {
+    /// Name of the current element or `None` if it cannot be retrieved.
+    fn name(&self) -> Option<impl AsRef<str>>;
+
+    /// Attributes set on the current element.
+    fn attributes(&self) -> impl Iterator<Item = impl Attribute>;
+
+    /// returns the first attribute with a name that matches `matcher`.
+    fn find_attribute_by_name(&self, matcher: impl Fn(&str) -> bool) -> Option<impl Attribute> {
+        self.attributes().find_map(|attribute| {
+            if matcher(attribute.name()?.as_ref()) {
+                Some(attribute)
+            } else {
+                None
+            }
+        })
+    }
 }
 
-#[cfg(test)]
-mod test {
-    use crate::roles::AriaRoles;
+pub trait Attribute {
+    /// Name of the current attribute or `None` if it cannot be retrieved.
+    fn name(&self) -> Option<impl AsRef<str>>;
 
-    #[test]
-    fn property_is_required() {
-        let roles = AriaRoles;
-
-        let role = roles.get_role("checkbox");
-
-        assert!(role.is_some());
-
-        let role = role.unwrap();
-
-        assert!(role.is_property_required("aria-checked"));
-        assert!(!role.is_property_required("aria-sort"));
-        assert!(!role.is_property_required("aria-bnlabla"));
-    }
+    /// Value of the current attribute or `None` if it cannot be retrieved.
+    fn value(&self) -> Option<impl AsRef<str>>;
 }

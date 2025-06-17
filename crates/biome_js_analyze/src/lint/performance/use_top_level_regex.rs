@@ -1,5 +1,6 @@
-use biome_analyze::{context::RuleContext, declare_lint_rule, Ast, Rule, RuleDiagnostic};
+use biome_analyze::{Ast, Rule, RuleDiagnostic, context::RuleContext, declare_lint_rule};
 use biome_console::markup;
+use biome_diagnostics::Severity;
 use biome_js_syntax::{AnyJsPropertyModifier, JsPropertyClassMember, JsRegexLiteralExpression};
 use biome_rowan::{AstNode, AstNodeList};
 
@@ -46,6 +47,7 @@ declare_lint_rule! {
         name: "useTopLevelRegex",
         language: "js",
         recommended: false,
+        severity: Severity::Warning,
     }
 }
 
@@ -88,11 +90,7 @@ impl Rule for UseTopLevelRegex {
                         }
                     }
                 });
-        if found_all_allowed {
-            None
-        } else {
-            Some(())
-        }
+        if found_all_allowed { None } else { Some(()) }
     }
 
     fn diagnostic(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<RuleDiagnostic> {

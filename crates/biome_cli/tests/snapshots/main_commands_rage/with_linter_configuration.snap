@@ -45,6 +45,7 @@ Environment:
   BIOME_LOG_PATH:               **PLACEHOLDER**
   BIOME_LOG_PREFIX_NAME:        unset
   BIOME_CONFIG_PATH:            unset
+  BIOME_THREADS:                unset
   NO_COLOR:                     **PLACEHOLDER**
   TERM:                         **PLACEHOLDER**
   JS_RUNTIME_VERSION:           unset
@@ -53,46 +54,52 @@ Environment:
 
 Biome Configuration:
   Status:                       Loaded successfully
-  Formatter disabled:           false
-  Linter disabled:              false
-  Organize imports disabled:    false
-  VCS disabled:                 true
+  Path:                         biome.json
+  Formatter enabled:            true
+  Linter enabled:               true
+  Assist enabled:               true
+  VCS enabled:                  false
 
 Linter:
-  JavaScript enabled:           true
-  JSON enabled:                 true
-  CSS enabled:                  true
-  GraphQL enabled:              false
+  JavaScript enabled:           unset
+  JSON enabled:                 unset
+  CSS enabled:                  unset
+  GraphQL enabled:              unset
   Recommended:                  false
-  All:                          false
   Enabled rules:
-  complexity/noBannedTypes
-  complexity/noThisInStatic
-  complexity/noUselessConstructor
-  complexity/useLiteralKeys
-  complexity/useOptionalChain
-  complexity/noMultipleSpacesInRegularExpressionLiterals
-  complexity/noUselessLoneBlockStatements
-  complexity/noUselessEmptyExport
-  complexity/noUselessSwitchCase
-  complexity/noStaticOnlyClass
-  complexity/noUselessTypeConstraint
-  complexity/noWith
-  complexity/useRegexLiterals
-  complexity/useArrowFunction
-  complexity/noExtraBooleanCast
-  complexity/noEmptyTypeParameters
-  complexity/useSimpleNumberKeys
-  suspicious/noCommentText
-  complexity/noExcessiveNestedTestSuites
-  complexity/noUselessLabel
-  complexity/noUselessCatch
-  complexity/noUselessFragments
-  complexity/noUselessTernary
-  complexity/noForEach
-  complexity/useFlatMap
-  complexity/noUselessRename
-  complexity/noUselessThisAlias
+    complexity/noAdjacentSpacesInRegex
+    complexity/noArguments
+    complexity/noBannedTypes
+    complexity/noCommaOperator
+    complexity/noEmptyTypeParameters
+    complexity/noExtraBooleanCast
+    complexity/noFlatMapIdentity
+    complexity/noStaticOnlyClass
+    complexity/noThisInStatic
+    complexity/noUselessCatch
+    complexity/noUselessConstructor
+    complexity/noUselessContinue
+    complexity/noUselessEmptyExport
+    complexity/noUselessEscapeInRegex
+    complexity/noUselessFragments
+    complexity/noUselessLabel
+    complexity/noUselessLoneBlockStatements
+    complexity/noUselessRename
+    complexity/noUselessStringRaw
+    complexity/noUselessSwitchCase
+    complexity/noUselessTernary
+    complexity/noUselessThisAlias
+    complexity/noUselessTypeConstraint
+    complexity/noUselessUndefinedInitialization
+    complexity/useArrowFunction
+    complexity/useDateNow
+    complexity/useFlatMap
+    complexity/useLiteralKeys
+    complexity/useNumericLiterals
+    complexity/useOptionalChain
+    complexity/useRegexLiterals
+    complexity/useSimpleNumberKeys
+    suspicious/noCommentText
 
 Server:
   Version:                      0.0.0

@@ -1,25 +1,32 @@
-use biome_analyze::{AnalysisFilter, AnalyzerAction, ControlFlow, Never, RuleFilter};
-use biome_css_parser::{parse_css, CssParserOptions};
+use biome_analyze::{
+    AnalysisFilter, AnalyzerAction, AnalyzerPluginSlice, ControlFlow, Never, RuleFilter,
+};
+use biome_css_parser::{CssParserOptions, parse_css};
 use biome_css_syntax::{CssFileSource, CssLanguage};
 use biome_diagnostics::advice::CodeSuggestionAdvice;
-use biome_diagnostics::{DiagnosticExt, Severity};
+use biome_fs::OsFileSystem;
+use biome_plugin_loader::AnalyzerGritPlugin;
 use biome_rowan::AstNode;
 use biome_test_utils::{
-    assert_errors_are_absent, code_fix_to_string, create_analyzer_options, diagnostic_to_string,
+    CheckActionType, assert_diagnostics_expectation_comment, assert_errors_are_absent,
+    code_fix_to_string, create_analyzer_options, diagnostic_to_string,
     has_bogus_nodes_or_empty_slots, parse_test_path, register_leak_checker, scripts_from_json,
-    write_analyzer_snapshot, CheckActionType,
+    write_analyzer_snapshot,
 };
+use camino::Utf8Path;
 use std::ops::Deref;
-use std::{ffi::OsStr, fs::read_to_string, path::Path, slice};
+use std::sync::Arc;
+use std::{fs::read_to_string, slice};
 
 tests_macros::gen_tests! {"tests/specs/**/*.{css,json,jsonc}", crate::run_test, "module"}
 tests_macros::gen_tests! {"tests/suppression/**/*.{css,json,jsonc}", crate::run_suppression_test, "module"}
+tests_macros::gen_tests! {"tests/plugin/*.grit", crate::run_plugin_test, "module"}
 
 fn run_test(input: &'static str, _: &str, _: &str, _: &str) {
     register_leak_checker();
 
-    let input_file = Path::new(input);
-    let file_name = input_file.file_name().and_then(OsStr::to_str).unwrap();
+    let input_file = Utf8Path::new(input);
+    let file_name = input_file.file_name().unwrap();
 
     let (group, rule) = parse_test_path(input_file);
     if rule == "specs" || rule == "suppression" {
@@ -56,7 +63,8 @@ fn run_test(input: &'static str, _: &str, _: &str, _: &str) {
 
     let input_code = read_to_string(input_file)
         .unwrap_or_else(|err| panic!("failed to read {input_file:?}: {err:?}"));
-    let quantity_diagnostics = if let Some(scripts) = scripts_from_json(extension, &input_code) {
+
+    if let Some(scripts) = scripts_from_json(extension, &input_code) {
         for script in scripts {
             analyze_and_snap(
                 &mut snapshot,
@@ -67,10 +75,9 @@ fn run_test(input: &'static str, _: &str, _: &str, _: &str) {
                 input_file,
                 CheckActionType::Lint,
                 parser_options,
+                &[],
             );
         }
-
-        0
     } else {
         let Ok(source_type) = input_file.try_into() else {
             return;
@@ -84,7 +91,8 @@ fn run_test(input: &'static str, _: &str, _: &str, _: &str) {
             input_file,
             CheckActionType::Lint,
             parser_options,
-        )
+            &[],
+        );
     };
 
     insta::with_settings!({
@@ -93,23 +101,20 @@ fn run_test(input: &'static str, _: &str, _: &str, _: &str) {
     }, {
         insta::assert_snapshot!(file_name, snapshot, file_name);
     });
-
-    if input_code.contains("/* should not generate diagnostics */") && quantity_diagnostics > 0 {
-        panic!("This test should not generate diagnostics");
-    }
 }
 
-#[allow(clippy::too_many_arguments)]
+#[expect(clippy::too_many_arguments)]
 pub(crate) fn analyze_and_snap(
     snapshot: &mut String,
     input_code: &str,
     source_type: CssFileSource,
     filter: AnalysisFilter,
     file_name: &str,
-    input_file: &Path,
+    input_file: &Utf8Path,
     check_action_type: CheckActionType,
     parser_options: CssParserOptions,
-) -> usize {
+    plugins: AnalyzerPluginSlice,
+) {
     let parsed = parse_css(input_code, parser_options);
     let root = parsed.tree();
 
@@ -117,7 +122,7 @@ pub(crate) fn analyze_and_snap(
     let mut code_fixes = Vec::new();
     let options = create_analyzer_options(input_file, &mut diagnostics);
 
-    let (_, errors) = biome_css_analyze::analyze(&root, filter, &options, |event| {
+    let (_, errors) = biome_css_analyze::analyze(&root, filter, &options, plugins, |event| {
         if let Some(mut diag) = event.diagnostic() {
             for action in event.actions() {
                 if check_action_type.is_suppression() {
@@ -137,8 +142,7 @@ pub(crate) fn analyze_and_snap(
                 }
             }
 
-            let error = diag.with_severity(Severity::Warning);
-            diagnostics.push(diagnostic_to_string(file_name, input_code, error));
+            diagnostics.push(diagnostic_to_string(file_name, input_code, diag.into()));
             return ControlFlow::Continue(());
         }
 
@@ -169,11 +173,11 @@ pub(crate) fn analyze_and_snap(
         "css",
     );
 
-    diagnostics.len()
+    assert_diagnostics_expectation_comment(input_file, root.syntax(), diagnostics.len());
 }
 
 fn check_code_action(
-    path: &Path,
+    path: &Utf8Path,
     source: &str,
     _source_type: CssFileSource,
     action: &AnalyzerAction<CssLanguage>,
@@ -211,8 +215,8 @@ fn check_code_action(
 pub(crate) fn run_suppression_test(input: &'static str, _: &str, _: &str, _: &str) {
     register_leak_checker();
 
-    let input_file = Path::new(input);
-    let file_name = input_file.file_name().and_then(OsStr::to_str).unwrap();
+    let input_file = Utf8Path::new(input);
+    let file_name = input_file.file_name().unwrap();
     let input_code = read_to_string(input_file)
         .unwrap_or_else(|err| panic!("failed to read {input_file:?}: {err:?}"));
 
@@ -234,11 +238,59 @@ pub(crate) fn run_suppression_test(input: &'static str, _: &str, _: &str, _: &st
         input_file,
         CheckActionType::Suppression,
         CssParserOptions::default(),
+        &[],
     );
 
     insta::with_settings!({
         prepend_module_to_snapshot => false,
         snapshot_path => input_file.parent().unwrap(),
+    }, {
+        insta::assert_snapshot!(file_name, snapshot, file_name);
+    });
+}
+
+fn run_plugin_test(input: &'static str, _: &str, _: &str, _: &str) {
+    register_leak_checker();
+
+    let plugin_path = Utf8Path::new(input);
+    let file_name = plugin_path.file_name().unwrap();
+    let input_path = plugin_path.with_extension("css");
+
+    let plugin = match AnalyzerGritPlugin::load(
+        &OsFileSystem::new(plugin_path.to_owned()),
+        Utf8Path::new(plugin_path),
+    ) {
+        Ok(plugin) => plugin,
+        Err(err) => panic!("Cannot load plugin: {err:?}"),
+    };
+
+    let filter = AnalysisFilter {
+        enabled_rules: Some(&[]),
+        ..AnalysisFilter::default()
+    };
+
+    let mut snapshot = String::new();
+
+    let input_code = read_to_string(&input_path)
+        .unwrap_or_else(|err| panic!("failed to read {input_path:?}: {err:?}"));
+    let Ok(source_type) = input_path.as_path().try_into() else {
+        return;
+    };
+    analyze_and_snap(
+        &mut snapshot,
+        &input_code,
+        source_type,
+        filter,
+        file_name,
+        &input_path,
+        CheckActionType::Lint,
+        CssParserOptions::default(),
+        &[Arc::new(Box::new(plugin))],
+    );
+
+    insta::with_settings!({
+        prepend_module_to_snapshot => false,
+        snapshot_path => plugin_path.parent().unwrap(),
     }, {
         insta::assert_snapshot!(file_name, snapshot, file_name);
     });

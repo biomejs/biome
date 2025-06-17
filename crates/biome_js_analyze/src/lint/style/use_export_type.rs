@@ -1,17 +1,18 @@
-use crate::{services::semantic::Semantic, JsRuleAction};
+use crate::{JsRuleAction, services::semantic::Semantic};
 use biome_analyze::{
-    context::RuleContext, declare_lint_rule, ActionCategory, FixKind, Rule, RuleDiagnostic,
-    RuleSource, RuleSourceKind,
+    FixKind, Rule, RuleDiagnostic, RuleSource, RuleSourceKind, context::RuleContext,
+    declare_lint_rule,
 };
 use biome_console::markup;
+use biome_diagnostics::Severity;
 use biome_js_factory::make;
 use biome_js_syntax::{
     AnyJsExportNamedSpecifier, JsExportNamedClause, JsExportNamedFromClause, JsFileSource,
     JsSyntaxToken, T,
 };
 use biome_rowan::{
-    chain_trivia_pieces, declare_node_union, trim_leading_trivia_pieces, AstNode, AstSeparatedList,
-    BatchMutationExt, TriviaPieceKind,
+    AstNode, AstSeparatedList, BatchMutationExt, TriviaPieceKind, chain_trivia_pieces,
+    declare_node_union, trim_leading_trivia_pieces,
 };
 
 declare_lint_rule! {
@@ -67,6 +68,7 @@ declare_lint_rule! {
         sources: &[RuleSource::EslintTypeScript("consistent-type-exports")],
         source_kind: RuleSourceKind::Inspired,
         recommended: true,
+        severity: Severity::Warning,
         fix_kind: FixKind::Safe,
     }
 }
@@ -79,7 +81,7 @@ impl Rule for UseExportType {
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let source_type = ctx.source_type::<JsFileSource>();
-        if !source_type.language().is_typescript() {
+        if !source_type.language().is_typescript() || source_type.language().is_definition_file() {
             return None;
         }
         let export_named_clause = ctx.query();
@@ -117,10 +119,19 @@ impl Rule for UseExportType {
                             continue;
                         }
                         let model = ctx.model();
-                        let binding = model.binding(&ref_name)?;
-                        let binding = binding.tree();
-                        if binding.is_type_only() {
-                            specifiers_requiring_type_marker.push(specifier);
+
+                        // In TypeScript, an identifier can have multiple bindings.
+                        // e.g. `let Foo` and `type Foo` can be exported via a single identifier.
+                        let is_type_only = model
+                            .global_scope()
+                            .bindings()
+                            .filter(|binding| {
+                                binding.syntax().text_trimmed() == ref_name.syntax().text_trimmed()
+                            })
+                            .all(|binding| binding.tree().is_type_only());
+
+                        if is_type_only {
+                            specifiers_requiring_type_marker.push(specifier.clone());
                         } else {
                             exports_only_types = false;
                         }
@@ -289,7 +300,7 @@ impl Rule for UseExportType {
                     }
                 }
                 JsRuleAction::new(
-                    ActionCategory::QuickFix,
+                    ctx.metadata().action_category(ctx.category(), ctx.group()),
                     ctx.metadata().applicability(),
                     markup! { "Use "<Emphasis>"export type"</Emphasis>"." }.to_owned(),
                     mutation,
@@ -312,7 +323,7 @@ impl Rule for UseExportType {
                     );
                 }
                 JsRuleAction::new(
-                    ActionCategory::QuickFix,
+                    ctx.metadata().action_category(ctx.category(), ctx.group()),
                     ctx.metadata().applicability(),
                     markup! { "Add inline "<Emphasis>"type"</Emphasis>" keywords." }.to_owned(),
                     mutation,
@@ -323,7 +334,7 @@ impl Rule for UseExportType {
                     mutation.remove_token(type_token.clone());
                 }
                 JsRuleAction::new(
-                    ActionCategory::QuickFix,
+                    ctx.metadata().action_category(ctx.category(), ctx.group()),
                     ctx.metadata().applicability(),
                     markup! { "Remove useless inline "<Emphasis>"type"</Emphasis>" keywords." }
                         .to_owned(),

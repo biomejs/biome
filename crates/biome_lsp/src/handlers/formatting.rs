@@ -1,19 +1,18 @@
-use crate::converters::{from_proto, to_proto};
 use crate::diagnostics::LspError;
 use crate::session::Session;
+use crate::utils::text_edit;
 use anyhow::Context;
 use biome_fs::BiomePath;
-use biome_rowan::{TextRange, TextSize};
+use biome_lsp_converters::from_proto;
+use biome_rowan::{TextLen, TextRange, TextSize};
 use biome_service::file_handlers::{AstroFileHandler, SvelteFileHandler, VueFileHandler};
 use biome_service::workspace::{
-    FeaturesBuilder, FileFeaturesResult, FormatFileParams, FormatOnTypeParams, FormatRangeParams,
-    GetFileContentParams, SupportsFeatureParams,
+    CheckFileSizeParams, FeaturesBuilder, FileFeaturesResult, FormatFileParams, FormatOnTypeParams,
+    FormatRangeParams, GetFileContentParams, IsPathIgnoredParams, SupportsFeatureParams,
 };
-use biome_service::{extension_error, WorkspaceError};
-use std::ffi::OsStr;
-use std::ops::{Add, Sub};
-use tower_lsp::lsp_types::*;
-use tracing::debug;
+use biome_service::{WorkspaceError, extension_error};
+use std::ops::Sub;
+use tower_lsp_server::lsp_types::*;
 
 #[tracing::instrument(level = "debug", skip(session), err)]
 pub(crate) fn format(
@@ -21,59 +20,74 @@ pub(crate) fn format(
     params: DocumentFormattingParams,
 ) -> Result<Option<Vec<TextEdit>>, LspError> {
     let url = params.text_document.uri;
-    let biome_path = session.file_path(&url)?;
+    let path = session.file_path(&url)?;
+    let Some(doc) = session.document(&url) else {
+        return Ok(None);
+    };
+    let features = FeaturesBuilder::new().with_formatter().build();
 
-    let doc = session.document(&url)?;
-
+    if session.workspace.is_path_ignored(IsPathIgnoredParams {
+        path: path.clone(),
+        project_key: doc.project_key,
+        features,
+    })? {
+        return Ok(None);
+    }
+    let features = FeaturesBuilder::new().with_formatter().build();
     let file_features = session.workspace.file_features(SupportsFeatureParams {
-        path: biome_path.clone(),
-        features: FeaturesBuilder::new().with_formatter().build(),
+        project_key: doc.project_key,
+        path: path.clone(),
+        features,
     })?;
 
-    if file_features.supports_format() {
-        debug!("Formatting...");
+    if file_features.supports_format()
+        && !session.workspace.is_path_ignored(IsPathIgnoredParams {
+            path: path.clone(),
+            project_key: doc.project_key,
+            features,
+        })?
+    {
+        let size_limit_result = session.workspace.check_file_size(CheckFileSizeParams {
+            project_key: doc.project_key,
+            path: path.clone(),
+        })?;
+        if size_limit_result.is_too_large() {
+            return Ok(None);
+        }
+
         let printed = session.workspace.format_file(FormatFileParams {
-            path: biome_path.clone(),
+            project_key: doc.project_key,
+            path: path.clone(),
         })?;
 
         let mut output = printed.into_code();
         let input = session.workspace.get_file_content(GetFileContentParams {
-            path: biome_path.clone(),
+            project_key: doc.project_key,
+            path: path.clone(),
         })?;
         if output.is_empty() {
             return Ok(None);
         }
-        match biome_path.extension().map(OsStr::as_encoded_bytes) {
-            Some(b"astro") => {
+        match path.extension() {
+            Some("astro") => {
                 output = AstroFileHandler::output(input.as_str(), output.as_str());
             }
-            Some(b"vue") => {
+            Some("vue") => {
                 output = VueFileHandler::output(input.as_str(), output.as_str());
             }
-            Some(b"svelte") => {
+            Some("svelte") => {
                 output = SvelteFileHandler::output(input.as_str(), output.as_str());
             }
             _ => {}
         }
 
-        let num_lines: u32 = doc.line_index.len();
-
-        let range = Range {
-            start: Position::default(),
-            end: Position {
-                line: num_lines,
-                character: 0,
-            },
-        };
-
-        let edits = vec![TextEdit {
-            range,
-            new_text: output,
-        }];
+        let indels = biome_text_edit::TextEdit::from_unicode_words(input.as_str(), output.as_str());
+        let position_encoding = session.position_encoding();
+        let edits = text_edit(&doc.line_index, indels, position_encoding, None)?;
 
         Ok(Some(edits))
     } else {
-        notify_user(file_features, biome_path)
+        notify_user(file_features, path)
     }
 }
 
@@ -83,31 +97,59 @@ pub(crate) fn format_range(
     params: DocumentRangeFormattingParams,
 ) -> Result<Option<Vec<TextEdit>>, LspError> {
     let url = params.text_document.uri;
-    let biome_path = session.file_path(&url)?;
+    let path = session.file_path(&url)?;
+    let Some(doc) = session.document(&url) else {
+        return Err(extension_error(&path).into());
+    };
+    let features = FeaturesBuilder::new().with_formatter().build();
 
+    if session.workspace.is_path_ignored(IsPathIgnoredParams {
+        path: path.clone(),
+        project_key: doc.project_key,
+        features,
+    })? {
+        return Ok(None);
+    }
+
+    let features = FeaturesBuilder::new().with_formatter().build();
     let file_features = session.workspace.file_features(SupportsFeatureParams {
-        path: biome_path.clone(),
-        features: FeaturesBuilder::new().with_formatter().build(),
+        project_key: doc.project_key,
+        path: path.clone(),
+        features,
     })?;
 
-    if file_features.supports_format() {
-        let doc = session.document(&url)?;
+    if file_features.supports_format()
+        && !session.workspace.is_path_ignored(IsPathIgnoredParams {
+            path: path.clone(),
+            project_key: doc.project_key,
+            features,
+        })?
+    {
+        let size_limit_result = session.workspace.check_file_size(CheckFileSizeParams {
+            project_key: doc.project_key,
+            path: path.clone(),
+        })?;
+        if size_limit_result.is_too_large() {
+            return Ok(None);
+        }
 
         let position_encoding = session.position_encoding();
         let format_range = from_proto::text_range(&doc.line_index, params.range, position_encoding)
             .with_context(|| {
                 format!(
-                    "failed to convert range {:?} in document {url}",
-                    params.range.end
+                    "failed to convert range {:?} in document {}",
+                    params.range.end,
+                    url.as_str()
                 )
             })?;
         let content = session.workspace.get_file_content(GetFileContentParams {
-            path: biome_path.clone(),
+            project_key: doc.project_key,
+            path: path.clone(),
         })?;
-        let offset = match biome_path.extension().map(OsStr::as_encoded_bytes) {
-            Some(b"vue") => VueFileHandler::start(content.as_str()),
-            Some(b"astro") => AstroFileHandler::start(content.as_str()),
-            Some(b"svelte") => SvelteFileHandler::start(content.as_str()),
+        let offset = match path.extension() {
+            Some("vue") => VueFileHandler::start(content.as_str()),
+            Some("astro") => AstroFileHandler::start(content.as_str()),
+            Some("svelte") => SvelteFileHandler::start(content.as_str()),
             _ => None,
         };
         let format_range = if let Some(offset) = offset {
@@ -124,39 +166,29 @@ pub(crate) fn format_range(
         };
 
         let formatted = session.workspace.format_range(FormatRangeParams {
-            path: biome_path,
+            project_key: doc.project_key,
+            path: path.clone(),
             range: format_range,
         })?;
 
-        // Recalculate the actual range that was reformatted from the formatter result
-        let formatted_range = match formatted.range() {
-            Some(range) => {
-                let position_encoding = session.position_encoding();
-                let range = if let Some(offset) = offset {
-                    TextRange::new(
-                        range.start().add(TextSize::from(offset)),
-                        range.end().add(TextSize::from(offset)),
-                    )
-                } else {
-                    range
-                };
-                to_proto::range(&doc.line_index, range, position_encoding)?
-            }
-            None => Range {
-                start: Position::default(),
-                end: Position {
-                    line: doc.line_index.len(),
-                    character: 0,
-                },
-            },
-        };
+        let formatted_range = formatted
+            .range()
+            .unwrap_or_else(|| TextRange::up_to(content.text_len()));
+        let indels = biome_text_edit::TextEdit::from_unicode_words(
+            &content.as_str()[formatted_range],
+            formatted.as_code(),
+        );
+        let position_encoding = session.position_encoding();
+        let edits = text_edit(
+            &doc.line_index,
+            indels,
+            position_encoding,
+            Some(formatted_range.start().into()),
+        )?;
 
-        Ok(Some(vec![TextEdit {
-            range: formatted_range,
-            new_text: formatted.into_code(),
-        }]))
+        Ok(Some(edits))
     } else {
-        notify_user(file_features, biome_path)
+        notify_user(file_features, path)
     }
 }
 
@@ -167,61 +199,84 @@ pub(crate) fn format_on_type(
 ) -> Result<Option<Vec<TextEdit>>, LspError> {
     let url = params.text_document_position.text_document.uri;
     let position = params.text_document_position.position;
-
-    let biome_path = session.file_path(&url)?;
-
+    let path = session.file_path(&url)?;
+    let Some(doc) = session.document(&url) else {
+        return Err(extension_error(&path).into());
+    };
+    let features = FeaturesBuilder::new().with_formatter().build();
     let file_features = session.workspace.file_features(SupportsFeatureParams {
-        path: biome_path.clone(),
-        features: FeaturesBuilder::new().with_formatter().build(),
+        project_key: doc.project_key,
+        path: path.clone(),
+        features,
     })?;
 
-    if file_features.supports_format() {
-        let doc = session.document(&url)?;
+    if session.workspace.is_path_ignored(IsPathIgnoredParams {
+        path: path.clone(),
+        project_key: doc.project_key,
+        features,
+    })? {
+        return notify_user(file_features, path);
+    }
+
+    if file_features.supports_format()
+        && !session.workspace.is_path_ignored(IsPathIgnoredParams {
+            path: path.clone(),
+            project_key: doc.project_key,
+            features,
+        })?
+    {
+        let size_limit_result = session.workspace.check_file_size(CheckFileSizeParams {
+            project_key: doc.project_key,
+            path: path.clone(),
+        })?;
+        if size_limit_result.is_too_large() {
+            return Ok(None);
+        }
 
         let position_encoding = session.position_encoding();
         let offset = from_proto::offset(&doc.line_index, position, position_encoding)
-            .with_context(|| format!("failed to access position {position:?} in document {url}"))?;
+            .with_context(|| {
+                format!(
+                    "failed to access position {position:?} in document {}",
+                    url.as_str()
+                )
+            })?;
 
         let formatted = session.workspace.format_on_type(FormatOnTypeParams {
-            path: biome_path,
+            project_key: doc.project_key,
+            path: path.clone(),
             offset,
         })?;
 
-        // Recalculate the actual range that was reformatted from the formatter result
-        let formatted_range = match formatted.range() {
-            Some(range) => {
-                let position_encoding = session.position_encoding();
-                let start_loc =
-                    to_proto::position(&doc.line_index, range.start(), position_encoding)?;
-                let end_loc = to_proto::position(&doc.line_index, range.end(), position_encoding)?;
-                Range {
-                    start: start_loc,
-                    end: end_loc,
-                }
-            }
-            None => Range {
-                start: Position::default(),
-                end: Position {
-                    line: doc.line_index.len(),
-                    character: 0,
-                },
-            },
-        };
+        let content = session.workspace.get_file_content(GetFileContentParams {
+            project_key: doc.project_key,
+            path: path.clone(),
+        })?;
 
-        Ok(Some(vec![TextEdit {
-            range: formatted_range,
-            new_text: formatted.into_code(),
-        }]))
+        let formatted_range = formatted
+            .range()
+            .unwrap_or_else(|| TextRange::up_to(content.text_len()));
+        let indels = biome_text_edit::TextEdit::from_unicode_words(
+            &content.as_str()[formatted_range],
+            formatted.as_code(),
+        );
+        let edits = text_edit(
+            &doc.line_index,
+            indels,
+            position_encoding,
+            Some(formatted_range.start().into()),
+        )?;
+        Ok(Some(edits))
     } else {
-        notify_user(file_features, biome_path)
+        notify_user(file_features, path)
     }
 }
 
 fn notify_user<T>(file_features: FileFeaturesResult, biome_path: BiomePath) -> Result<T, LspError> {
     let error = if file_features.is_ignored() {
-        WorkspaceError::file_ignored(biome_path.display().to_string())
+        WorkspaceError::file_ignored(biome_path.to_string())
     } else if file_features.is_protected() {
-        WorkspaceError::protected_file(biome_path.display().to_string())
+        WorkspaceError::protected_file(biome_path.to_string())
     } else {
         extension_error(&biome_path)
     };

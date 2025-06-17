@@ -1,5 +1,5 @@
+use proc_macro_error2::*;
 use proc_macro2::{Ident, Span, TokenStream};
-use proc_macro_error::*;
 use quote::quote;
 
 use crate::parse::{
@@ -8,8 +8,8 @@ use crate::parse::{
 
 pub(crate) fn generate_diagnostic(input: DeriveInput) -> TokenStream {
     match input {
-        DeriveInput::DeriveStructInput(input) => generate_struct_diagnostic(input),
-        DeriveInput::DeriveEnumInput(input) => generate_enum_diagnostic(input),
+        DeriveInput::DeriveStructInput(input) => generate_struct_diagnostic(*input),
+        DeriveInput::DeriveEnumInput(input) => generate_enum_diagnostic(*input),
     }
 }
 
@@ -187,11 +187,14 @@ fn generate_advices(input: &DeriveStructInput) -> TokenStream {
         return quote!();
     }
 
-    let advices = input.advices.iter();
+    let advices = input.advices.iter().map(|advice| match advice {
+        StaticOrDynamic::Static(literal) => quote! { #literal },
+        StaticOrDynamic::Dynamic(token_stream) => quote! { &self.#token_stream },
+    });
 
     quote! {
         fn advices(&self, visitor: &mut dyn biome_diagnostics::Visit) -> ::std::io::Result<()> {
-            #( biome_diagnostics::Advices::record(&self.#advices, visitor)?; )*
+            #( biome_diagnostics::Advices::record(#advices, visitor)?; )*
             Ok(())
         }
     }

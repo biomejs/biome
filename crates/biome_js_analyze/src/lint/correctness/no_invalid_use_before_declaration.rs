@@ -1,9 +1,10 @@
 use crate::{services::control_flow::AnyJsControlFlowRoot, services::semantic::SemanticServices};
-use biome_analyze::{context::RuleContext, declare_lint_rule, Rule, RuleDiagnostic, RuleSource};
+use biome_analyze::{Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule};
 use biome_console::markup;
+use biome_diagnostics::Severity;
 use biome_js_syntax::{
-    binding_ext::{AnyJsBindingDeclaration, AnyJsIdentifierBinding},
     AnyJsExportNamedSpecifier, AnyJsIdentifierUsage,
+    binding_ext::{AnyJsBindingDeclaration, AnyJsIdentifierBinding},
 };
 use biome_rowan::{AstNode, SyntaxNodeOptionExt, TextRange};
 
@@ -66,6 +67,7 @@ declare_lint_rule! {
             RuleSource::EslintTypeScript("no-use-before-define"),
         ],
         recommended: true,
+        severity: Severity::Error,
     }
 }
 
@@ -203,18 +205,18 @@ impl TryFrom<&AnyJsBindingDeclaration> for DeclarationKind {
 
     fn try_from(value: &AnyJsBindingDeclaration) -> Result<Self, Self::Error> {
         match value {
-            AnyJsBindingDeclaration::TsEnumMember(_) => Ok(DeclarationKind::EnumMember),
+            AnyJsBindingDeclaration::TsEnumMember(_) => Ok(Self::EnumMember),
             // Variable declaration
             AnyJsBindingDeclaration::JsArrayBindingPatternElement(_)
             | AnyJsBindingDeclaration::JsArrayBindingPatternRestElement(_)
             | AnyJsBindingDeclaration::JsObjectBindingPatternProperty(_)
             | AnyJsBindingDeclaration::JsObjectBindingPatternRest(_)
             | AnyJsBindingDeclaration::JsObjectBindingPatternShorthandProperty(_)
-            | AnyJsBindingDeclaration::JsVariableDeclarator(_) => Ok(DeclarationKind::Variable),
+            | AnyJsBindingDeclaration::JsVariableDeclarator(_) => Ok(Self::Variable),
             // Parameters
             AnyJsBindingDeclaration::JsFormalParameter(_)
             | AnyJsBindingDeclaration::JsRestParameter(_)
-            | AnyJsBindingDeclaration::TsPropertyParameter(_) => Ok(DeclarationKind::Parameter),
+            | AnyJsBindingDeclaration::TsPropertyParameter(_) => Ok(Self::Parameter),
             // Other declarations allow use before definition
             AnyJsBindingDeclaration::JsArrowFunctionExpression(_)
             | AnyJsBindingDeclaration::JsBogusParameter(_)
@@ -230,6 +232,7 @@ impl TryFrom<&AnyJsBindingDeclaration> for DeclarationKind {
             | AnyJsBindingDeclaration::TsInterfaceDeclaration(_)
             | AnyJsBindingDeclaration::TsTypeAliasDeclaration(_)
             | AnyJsBindingDeclaration::TsEnumDeclaration(_)
+            | AnyJsBindingDeclaration::TsExternalModuleDeclaration(_)
             | AnyJsBindingDeclaration::TsModuleDeclaration(_)
             | AnyJsBindingDeclaration::JsShorthandNamedImportSpecifier(_)
             | AnyJsBindingDeclaration::JsNamedImportSpecifier(_)

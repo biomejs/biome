@@ -1,20 +1,20 @@
 use super::compilation_context::NodeCompilationContext;
 use crate::{
+    CompileError, GritTargetLanguage,
     grit_code_snippet::GritCodeSnippet,
     grit_context::GritQueryContext,
     grit_node_patterns::{GritLeafNodePattern, GritNodePattern, GritNodePatternArg},
     grit_target_node::{GritSyntaxSlot, GritTargetNode, GritTargetSyntaxKind},
     grit_tree::GritTargetTree,
-    CompileError, GritTargetLanguage,
 };
 use grit_pattern_matcher::{
     constants::GLOBAL_VARS_SCOPE_INDEX,
     pattern::{
-        is_reserved_metavariable, DynamicPattern, DynamicSnippet, DynamicSnippetPart, List,
-        Pattern, RegexLike, RegexPattern, Variable, VariableSource,
+        DynamicPattern, DynamicSnippet, DynamicSnippetPart, List, Pattern, RegexLike, RegexPattern,
+        Variable, VariableSource, is_reserved_metavariable,
     },
 };
-use grit_util::{traverse, Ast, AstNode, ByteRange, GritMetaValue, Language, Order, SnippetTree};
+use grit_util::{Ast, AstNode, ByteRange, GritMetaValue, Language, Order, SnippetTree, traverse};
 use std::{borrow::Cow, collections::BTreeMap};
 
 pub(crate) fn parse_snippet_content(
@@ -433,9 +433,9 @@ enum SnippetValue {
 impl From<SnippetValue> for Pattern<GritQueryContext> {
     fn from(value: SnippetValue) -> Self {
         match value {
-            SnippetValue::Dots => Pattern::Dots,
-            SnippetValue::Underscore => Pattern::Underscore,
-            SnippetValue::Variable(v) => Pattern::Variable(v),
+            SnippetValue::Dots => Self::Dots,
+            SnippetValue::Underscore => Self::Underscore,
+            SnippetValue::Variable(v) => Self::Variable(v),
         }
     }
 }
@@ -488,8 +488,8 @@ fn unescape(raw_string: &str) -> String {
 mod tests {
     use super::*;
     use crate::{
-        grit_built_in_functions::BuiltIns, grit_js_parser::GritJsParser,
-        pattern_compiler::compilation_context::CompilationContext, JsTargetLanguage,
+        JsTargetLanguage, grit_built_in_functions::BuiltIns, grit_js_parser::GritJsParser,
+        pattern_compiler::compilation_context::CompilationContext,
     };
     use grit_util::Parser;
     use regex::Regex;
@@ -796,7 +796,7 @@ mod tests {
             .unwrap()
             .replace_all(&formatted, "normalizer: [address redacted]");
 
-        insta::assert_snapshot!(&snapshot, @r###"
+        insta::assert_snapshot!(&snapshot, @r#"
         CodeSnippet(
             GritCodeSnippet {
                 patterns: [
@@ -1114,32 +1114,6 @@ mod tests {
                     ),
                     (
                         JsSyntaxKind(
-                            JSX_TEXT,
-                        ),
-                        AstNode(
-                            GritNodePattern {
-                                kind: JsSyntaxKind(
-                                    JSX_TEXT,
-                                ),
-                                args: [
-                                    GritNodePatternArg {
-                                        slot_index: 0,
-                                        pattern: AstLeafNode(
-                                            GritLeafNodePattern {
-                                                kind: JsSyntaxKind(
-                                                    JSX_TEXT_LITERAL,
-                                                ),
-                                                equivalence_class: None,
-                                                text: "µfn && µfn()",
-                                            },
-                                        ),
-                                    },
-                                ],
-                            },
-                        ),
-                    ),
-                    (
-                        JsSyntaxKind(
                             JS_PROPERTY_OBJECT_MEMBER,
                         ),
                         AstNode(
@@ -1329,6 +1303,6 @@ mod tests {
                 ),
             },
         )
-        "###);
+        "#);
     }
 }

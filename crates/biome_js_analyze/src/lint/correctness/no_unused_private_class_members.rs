@@ -1,20 +1,20 @@
 use biome_analyze::{
-    context::RuleContext, declare_lint_rule, ActionCategory, Ast, FixKind, Rule, RuleDiagnostic,
-    RuleSource,
+    Ast, FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
+use biome_diagnostics::Severity;
 use biome_js_syntax::{
     AnyJsClassMember, AnyJsClassMemberName, AnyJsFormalParameter, AnyJsName,
     JsAssignmentExpression, JsAssignmentOperator, JsClassDeclaration, JsSyntaxKind, JsSyntaxNode,
     TsAccessibilityModifier, TsPropertyParameter,
 };
 use biome_rowan::{
-    declare_node_union, AstNode, AstNodeList, AstSeparatedList, BatchMutationExt,
-    SyntaxNodeOptionExt, TextRange,
+    AstNode, AstNodeList, AstSeparatedList, BatchMutationExt, SyntaxNodeOptionExt, TextRange,
+    declare_node_union,
 };
 use rustc_hash::FxHashSet;
 
-use crate::{utils::is_node_equal, JsRuleAction};
+use crate::{JsRuleAction, utils::is_node_equal};
 
 declare_lint_rule! {
     /// Disallow unused private class members
@@ -65,7 +65,8 @@ declare_lint_rule! {
         name: "noUnusedPrivateClassMembers",
         language: "js",
         sources: &[RuleSource::Eslint("no-unused-private-class-members")],
-        recommended: false,
+        recommended: true,
+        severity: Severity::Warning,
         fix_kind: FixKind::Unsafe,
     }
 }
@@ -107,7 +108,7 @@ impl Rule for NoUnusedPrivateClassMembers {
         mutation.remove_node(state.clone());
 
         Some(JsRuleAction::new(
-            ActionCategory::QuickFix,
+            ctx.metadata().action_category(ctx.category(), ctx.group()),
             ctx.metadata().applicability(),
             markup! { "Remove unused declaration." }.to_owned(),
             mutation,
@@ -150,7 +151,7 @@ fn traverse_members_usage(
                     }
                 }
             }
-            biome_rowan::WalkEvent::Leave(_) => continue,
+            biome_rowan::WalkEvent::Leave(_) => {}
         }
     }
 
@@ -256,7 +257,7 @@ impl AnyMember {
 
     fn is_private(&self) -> Option<bool> {
         match self {
-            AnyMember::AnyJsClassMember(member) => {
+            Self::AnyJsClassMember(member) => {
                 let is_es_private = matches!(
                     member.name().ok()??,
                     AnyJsClassMemberName::JsPrivateClassMemberName(_)
@@ -287,7 +288,7 @@ impl AnyMember {
 
                 Some(is_es_private || is_ts_private)
             }
-            AnyMember::TsPropertyParameter(param) => Some(
+            Self::TsPropertyParameter(param) => Some(
                 param
                     .modifiers()
                     .iter()
@@ -299,7 +300,7 @@ impl AnyMember {
 
     fn property_range(&self) -> Option<TextRange> {
         match self {
-            AnyMember::AnyJsClassMember(member) => match member {
+            Self::AnyJsClassMember(member) => match member {
                 AnyJsClassMember::JsGetterClassMember(member) => Some(member.name().ok()?.range()),
                 AnyJsClassMember::JsMethodClassMember(member) => Some(member.name().ok()?.range()),
                 AnyJsClassMember::JsPropertyClassMember(member) => {
@@ -308,22 +309,20 @@ impl AnyMember {
                 AnyJsClassMember::JsSetterClassMember(member) => Some(member.name().ok()?.range()),
                 _ => None,
             },
-            AnyMember::TsPropertyParameter(ts_property) => {
-                match ts_property.formal_parameter().ok()? {
-                    AnyJsFormalParameter::JsBogusParameter(_)
-                    | AnyJsFormalParameter::JsMetavariable(_) => None,
-                    AnyJsFormalParameter::JsFormalParameter(param) => Some(
-                        param
-                            .binding()
-                            .ok()?
-                            .as_any_js_binding()?
-                            .as_js_identifier_binding()?
-                            .name_token()
-                            .ok()?
-                            .text_range(),
-                    ),
-                }
-            }
+            Self::TsPropertyParameter(ts_property) => match ts_property.formal_parameter().ok()? {
+                AnyJsFormalParameter::JsBogusParameter(_)
+                | AnyJsFormalParameter::JsMetavariable(_) => None,
+                AnyJsFormalParameter::JsFormalParameter(param) => Some(
+                    param
+                        .binding()
+                        .ok()?
+                        .as_any_js_binding()?
+                        .as_js_identifier_binding()?
+                        .name_token()
+                        .ok()?
+                        .text_range(),
+                ),
+            },
         }
     }
 
@@ -332,7 +331,7 @@ impl AnyMember {
         let token = value_token.text_trimmed();
 
         match self {
-            AnyMember::AnyJsClassMember(member) => match member {
+            Self::AnyJsClassMember(member) => match member {
                 AnyJsClassMember::JsGetterClassMember(member) => {
                     Some(member.name().ok()?.name()?.text() == token)
                 }
@@ -347,23 +346,21 @@ impl AnyMember {
                 }
                 _ => None,
             },
-            AnyMember::TsPropertyParameter(ts_property) => {
-                match ts_property.formal_parameter().ok()? {
-                    AnyJsFormalParameter::JsBogusParameter(_)
-                    | AnyJsFormalParameter::JsMetavariable(_) => None,
-                    AnyJsFormalParameter::JsFormalParameter(param) => Some(
-                        param
-                            .binding()
-                            .ok()?
-                            .as_any_js_binding()?
-                            .as_js_identifier_binding()?
-                            .name_token()
-                            .ok()?
-                            .text_trimmed()
-                            == token,
-                    ),
-                }
-            }
+            Self::TsPropertyParameter(ts_property) => match ts_property.formal_parameter().ok()? {
+                AnyJsFormalParameter::JsBogusParameter(_)
+                | AnyJsFormalParameter::JsMetavariable(_) => None,
+                AnyJsFormalParameter::JsFormalParameter(param) => Some(
+                    param
+                        .binding()
+                        .ok()?
+                        .as_any_js_binding()?
+                        .as_js_identifier_binding()?
+                        .name_token()
+                        .ok()?
+                        .text_trimmed()
+                        == token,
+                ),
+            },
         }
     }
 }

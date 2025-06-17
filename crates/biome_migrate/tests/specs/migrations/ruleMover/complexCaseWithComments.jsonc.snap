@@ -1,0 +1,137 @@
+---
+source: crates/biome_migrate/tests/spec_tests.rs
+expression: complexCaseWithComments.jsonc
+---
+# Input
+```json
+{
+  "linter": {
+    "rules": {
+      "nursery": {
+        // Comment 1
+        "noConsole": "off",
+        // Comment 2
+        "noDoneCallback": "off",
+        // Comment 3
+        "useImportRestrictions": "off",
+        // Comment 4
+        "useTopLevelRegex": "off",
+      },
+      // Comment 6
+      "style": {
+        // Comment 7
+        "useForOf": "off",
+      },
+    }
+  }
+}
+
+```
+
+# Diagnostics
+```
+complexCaseWithComments.jsonc:6:9 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This lint rule has been promoted to suspicious/noConsole.
+  
+    4 │       "nursery": {
+    5 │         // Comment 1
+  > 6 │         "noConsole": "off",
+      │         ^^^^^^^^^^^
+    7 │         // Comment 2
+    8 │         "noDoneCallback": "off",
+  
+  i Safe fix: Move the lint rule.
+  
+     3  3 │       "rules": {
+     4  4 │         "nursery": {
+     5    │ - ········//·Comment·1
+     6    │ - ········"noConsole":·"off",
+     7    │ - ········//·Comment·2
+        5 │ + ········//·Comment·2
+     8  6 │           "noDoneCallback": "off",
+     9  7 │           // Comment 3
+    ····· │ 
+    16 14 │           // Comment 7
+    17 15 │           "useForOf": "off",
+    18    │ - ······},
+       16 │ + ······},
+       17 │ + ······"suspicious":·{·
+       18 │ + ········//·Comment·1
+       19 │ + ········"noConsole":·"off",··},
+    19 20 │       }
+    20 21 │     }
+  
+
+```
+
+```
+complexCaseWithComments.jsonc:8:9 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This lint rule has been promoted to style/noDoneCallback.
+  
+     6 │         "noConsole": "off",
+     7 │         // Comment 2
+   > 8 │         "noDoneCallback": "off",
+       │         ^^^^^^^^^^^^^^^^
+     9 │         // Comment 3
+    10 │         "useImportRestrictions": "off",
+  
+  i Safe fix: Move the lint rule.
+  
+     5  5 │           // Comment 1
+     6  6 │           "noConsole": "off",
+     7    │ - ········//·Comment·2
+     8    │ - ········"noDoneCallback":·"off",
+     9    │ - ········//·Comment·3
+        7 │ + ········//·Comment·3
+    10  8 │           "useImportRestrictions": "off",
+    11  9 │           // Comment 4
+    ····· │ 
+    16 14 │           // Comment 7
+    17 15 │           "useForOf": "off",
+       16 │ + ········//·Comment·2
+       17 │ + ········"noDoneCallback":·"off",
+    18 18 │         },
+    19 19 │       }
+  
+
+```
+
+```
+complexCaseWithComments.jsonc:12:9 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This lint rule has been promoted to performance/useTopLevelRegex.
+  
+    10 │         "useImportRestrictions": "off",
+    11 │         // Comment 4
+  > 12 │         "useTopLevelRegex": "off",
+       │         ^^^^^^^^^^^^^^^^^^
+    13 │       },
+    14 │       // Comment 6
+  
+  i Safe fix: Move the lint rule.
+  
+     9  9 │           // Comment 3
+    10 10 │           "useImportRestrictions": "off",
+    11    │ - ········//·Comment·4
+    12    │ - ········"useTopLevelRegex":·"off",
+       11 │ + ······},
+       12 │ + ······//·Comment·6
+       13 │ + ······"style":·{
+       14 │ + ········//·Comment·7
+       15 │ + ········"useForOf":·"off",
+    13 16 │         },
+    14    │ - ······//·Comment·6
+    15    │ - ······"style":·{
+    16    │ - ········//·Comment·7
+    17    │ - ········"useForOf":·"off",
+    18    │ - ······},
+       17 │ + ······"performance":·{·
+       18 │ + ········//·Comment·4
+       19 │ + ········"useTopLevelRegex":·"off",··},
+    19 20 │       }
+    20 21 │     }
+  
+
+```

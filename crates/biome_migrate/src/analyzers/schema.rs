@@ -1,12 +1,17 @@
-use crate::version_services::Version;
-use crate::{declare_migration, MigrationAction};
+use crate::{MigrationAction, declare_migration};
 use biome_analyze::context::RuleContext;
-use biome_analyze::{ActionCategory, Rule, RuleAction, RuleDiagnostic};
+use biome_analyze::{Ast, Rule, RuleAction, RuleDiagnostic};
 use biome_console::markup;
-use biome_diagnostics::{category, Applicability};
+use biome_diagnostics::{Applicability, category};
 use biome_json_factory::make::{ident, json_string_value};
 use biome_json_syntax::{JsonMember, TextRange};
 use biome_rowan::{AstNode, BatchMutationExt};
+use std::env;
+
+pub(crate) const BIOME_VERSION: &str = match option_env!("BIOME_VERSION") {
+    Some(version) => version,
+    None => env!("CARGO_PKG_VERSION"),
+};
 
 declare_migration! {
     pub(crate) Schema {
@@ -16,14 +21,13 @@ declare_migration! {
 }
 
 impl Rule for Schema {
-    type Query = Version<JsonMember>;
+    type Query = Ast<JsonMember>;
     type State = TextRange;
     type Signals = Option<Self::State>;
     type Options = ();
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
-        let version = ctx.version();
 
         let node_text = node.name().ok()?.inner_string_text().ok()?;
         let member_value = node.value().ok()?;
@@ -36,7 +40,7 @@ impl Rule for Schema {
                 .strip_suffix("/schema.json");
 
             if let Some(current_version) = value {
-                if current_version != version {
+                if current_version != BIOME_VERSION {
                     return Some(string_value.range());
                 }
             }
@@ -61,8 +65,7 @@ impl Rule for Schema {
     fn action(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<MigrationAction> {
         let node = ctx.query();
         let mut mutation = ctx.root().begin();
-        let version = ctx.version();
-        let schema = format!("\"https://biomejs.dev/schemas/{version}/schema.json\"");
+        let schema = format!("\"https://biomejs.dev/schemas/{BIOME_VERSION}/schema.json\"");
 
         let new_node = json_string_value(ident(&schema));
         let member_value = node.value().ok()?;
@@ -70,7 +73,7 @@ impl Rule for Schema {
         mutation.replace_node(member_value.clone(), new_node);
 
         Some(RuleAction::new(
-            ActionCategory::QuickFix,
+            ctx.metadata().action_category(ctx.category(), ctx.group()),
             Applicability::Always,
             markup! {
                 "Update the URL."

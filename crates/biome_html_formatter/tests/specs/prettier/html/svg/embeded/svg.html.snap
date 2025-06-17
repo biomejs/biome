@@ -1,0 +1,128 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: html/svg/embeded/svg.html
+---
+# Input
+
+```html
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>SVG</title>
+  </head>
+  <body>
+<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+<script>
+document.addEventListener(
+'DOMContentLoaded', () => {
+  const element = document.getElementById('foo')
+   if (element) {
+element.fillStyle = 'currentColor'
+}
+});
+</script>
+<style >
+    polygon { fill: black }
+
+    div {
+  color: white;
+      font:18px serif;
+      height: 100%;
+      overflow: auto;
+    }
+  </style>
+</svg>
+  </body>
+</html>
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,4 +1,4 @@
+-<!doctype html>
++<!DOCTYPE html>
+ <html>
+   <head>
+     <title>SVG</title>
+@@ -6,25 +6,24 @@
+   <body>
+     <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+       <script>
+-        document.addEventListener("DOMContentLoaded", () => {
+-          const element = document.getElementById("foo");
+-          if (element) {
+-            element.fillStyle = "currentColor";
+-          }
+-        });
+-      </script>
++document.addEventListener(
++'DOMContentLoaded', () => {
++  const element = document.getElementById('foo')
++   if (element) {
++element.fillStyle = 'currentColor'
++}
++});
++</script>
+       <style>
+-        polygon {
+-          fill: black;
+-        }
++    polygon { fill: black }
+ 
+-        div {
+-          color: white;
+-          font: 18px serif;
+-          height: 100%;
+-          overflow: auto;
+-        }
+-      </style>
++    div {
++  color: white;
++      font:18px serif;
++      height: 100%;
++      overflow: auto;
++    }
++  </style>
+     </svg>
+   </body>
+ </html>
+```
+
+# Output
+
+```html
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>SVG</title>
+  </head>
+  <body>
+    <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+      <script>
+document.addEventListener(
+'DOMContentLoaded', () => {
+  const element = document.getElementById('foo')
+   if (element) {
+element.fillStyle = 'currentColor'
+}
+});
+</script>
+      <style>
+    polygon { fill: black }
+
+    div {
+  color: white;
+      font:18px serif;
+      height: 100%;
+      overflow: auto;
+    }
+  </style>
+    </svg>
+  </body>
+</html>
+```

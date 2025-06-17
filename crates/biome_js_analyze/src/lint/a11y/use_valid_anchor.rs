@@ -1,6 +1,7 @@
 use biome_analyze::context::RuleContext;
-use biome_analyze::{declare_lint_rule, Ast, Rule, RuleDiagnostic, RuleSource};
-use biome_console::{markup, MarkupBuf};
+use biome_analyze::{Ast, Rule, RuleDiagnostic, RuleSource, declare_lint_rule};
+use biome_console::{MarkupBuf, markup};
+use biome_diagnostics::Severity;
 use biome_js_syntax::jsx_ext::AnyJsxElement;
 use biome_rowan::{AstNode, TextRange};
 
@@ -77,6 +78,7 @@ declare_lint_rule! {
         language: "jsx",
         sources: &[RuleSource::EslintJsxA11y("anchor-is-valid")],
         recommended: true,
+        severity: Severity::Error,
     }
 }
 
@@ -95,17 +97,17 @@ pub enum UseValidAnchorState {
 impl UseValidAnchorState {
     fn message(&self) -> MarkupBuf {
         match self {
-            UseValidAnchorState::MissingHrefAttribute(_) => {
+            Self::MissingHrefAttribute(_) => {
                 (markup! {
                     "Provide a "<Emphasis>"href"</Emphasis>" attribute for the "<Emphasis>"a"</Emphasis>" element."
                 }).to_owned()
             },
-            UseValidAnchorState::IncorrectHref(_) => {
+            Self::IncorrectHref(_) => {
                 (markup! {
                     "Provide a valid value for the attribute "<Emphasis>"href"</Emphasis>"."
                 }).to_owned()
             }
-            UseValidAnchorState::CantBeAnchor(_) => {
+            Self::CantBeAnchor(_) => {
                 (markup! {
                     "Use a "<Emphasis>"button"</Emphasis>" element instead of an "<Emphasis>"a"</Emphasis>" element."
                 }).to_owned()
@@ -115,15 +117,15 @@ impl UseValidAnchorState {
 
     fn note(&self) -> MarkupBuf {
         match self {
-            UseValidAnchorState::MissingHrefAttribute(_) => (markup! {
+            Self::MissingHrefAttribute(_) => (markup! {
                 "An anchor element should always have a "<Emphasis>"href"</Emphasis>""
             })
             .to_owned(),
-            UseValidAnchorState::IncorrectHref(_) => (markup! {
+            Self::IncorrectHref(_) => (markup! {
                 "The href attribute should be a valid a URL"
             })
             .to_owned(),
-            UseValidAnchorState::CantBeAnchor(_) => (markup! {
+            Self::CantBeAnchor(_) => (markup! {
                 "Anchor elements should only be used for default sections or page navigation"
             })
             .to_owned(),
@@ -132,9 +134,9 @@ impl UseValidAnchorState {
 
     fn range(&self) -> &TextRange {
         match self {
-            UseValidAnchorState::MissingHrefAttribute(range)
-            | UseValidAnchorState::CantBeAnchor(range)
-            | UseValidAnchorState::IncorrectHref(range) => range,
+            Self::MissingHrefAttribute(range)
+            | Self::CantBeAnchor(range)
+            | Self::IncorrectHref(range) => range,
         }
     }
 }
@@ -147,7 +149,7 @@ impl Rule for UseValidAnchor {
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
-        let name = node.name().ok()?.name_value_token()?;
+        let name = node.name().ok()?.name_value_token().ok()?;
 
         if name.text_trimmed() == "a" {
             let anchor_attribute = node.find_attribute_by_name("href");
@@ -160,7 +162,7 @@ impl Rule for UseValidAnchor {
                     }
 
                     let static_value = anchor_attribute.as_static_value()?;
-                    if static_value.as_string_constant().map_or(true, |const_str| {
+                    if static_value.as_string_constant().is_none_or(|const_str| {
                         const_str.is_empty()
                             || const_str.contains('#')
                             || const_str.contains("javascript:")
@@ -174,7 +176,7 @@ impl Rule for UseValidAnchor {
                     }
 
                     let static_value = anchor_attribute.as_static_value()?;
-                    if static_value.as_string_constant().map_or(true, |const_str| {
+                    if static_value.as_string_constant().is_none_or(|const_str| {
                         const_str.is_empty()
                             || const_str == "#"
                             || const_str.contains("javascript:")
@@ -185,7 +187,7 @@ impl Rule for UseValidAnchor {
                 (None, Some(on_click_attribute)) => {
                     return Some(UseValidAnchorState::CantBeAnchor(
                         on_click_attribute.range(),
-                    ))
+                    ));
                 }
                 (None, None) => {
                     if !node.has_spread_prop() {

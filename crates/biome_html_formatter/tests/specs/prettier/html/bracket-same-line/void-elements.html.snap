@@ -1,0 +1,50 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: html/bracket-same-line/void-elements.html
+---
+# Input
+
+```html
+<img long_long_attribute="long_long_long_long_long_long_long_long_long_long_long_value" src="./1.jpg"/>
+<img src="./1.jpg"/><img src="./1.jpg"/><img src="./1.jpg"/><img src="./1.jpg"/><img src="./1.jpg"/>
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -2,6 +2,8 @@
+   long_long_attribute="long_long_long_long_long_long_long_long_long_long_long_value"
+   src="./1.jpg"
+ />
+-<img src="./1.jpg" /><img src="./1.jpg" /><img src="./1.jpg" /><img
+-  src="./1.jpg"
+-/><img src="./1.jpg" />
++<img src="./1.jpg" />
++<img src="./1.jpg" />
++<img src="./1.jpg" />
++<img src="./1.jpg" />
++<img src="./1.jpg" />
+```
+
+# Output
+
+```html
+<img
+  long_long_attribute="long_long_long_long_long_long_long_long_long_long_long_value"
+  src="./1.jpg"
+/>
+<img src="./1.jpg" />
+<img src="./1.jpg" />
+<img src="./1.jpg" />
+<img src="./1.jpg" />
+<img src="./1.jpg" />
+```
+
+# Lines exceeding max width of 80 characters
+```
+    2:   long_long_attribute="long_long_long_long_long_long_long_long_long_long_long_value"
+```

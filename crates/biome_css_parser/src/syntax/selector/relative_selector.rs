@@ -7,7 +7,7 @@ use biome_parser::parse_lists::ParseSeparatedList;
 use biome_parser::parse_recovery::{ParseRecovery, RecoveryError, RecoveryResult};
 use biome_parser::parsed_syntax::ParsedSyntax;
 use biome_parser::parsed_syntax::ParsedSyntax::{Absent, Present};
-use biome_parser::{token_set, Parser, TokenSet};
+use biome_parser::{Parser, TokenSet, token_set};
 
 /// Represents a list of relative CSS selectors with support for error recovery.
 ///
@@ -37,7 +37,7 @@ impl RelativeSelectorList {
     ///
     /// * `end_kind` - A `CssSyntaxKind` that indicates the end of the selector list.
     pub(crate) fn new(end_kind: CssSyntaxKind) -> Self {
-        RelativeSelectorList {
+        Self {
             end_kind,
             is_recovery_disabled: false,
         }
@@ -71,7 +71,7 @@ impl RelativeSelectorListParseRecovery {
     ///
     /// * `end_kind` - A `CssSyntaxKind` used to determine the recovery point.
     pub(crate) fn new(end_kind: CssSyntaxKind) -> Self {
-        RelativeSelectorListParseRecovery { end_kind }
+        Self { end_kind }
     }
 }
 

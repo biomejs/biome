@@ -1,0 +1,58 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: html/whitespace/fill.html
+---
+# Input
+
+```html
+<p>
+  <img
+    src="/images/pansies.jpg"
+    alt="about fedco bottom image"
+    style="float: left;"
+  /><strong>We are a cooperative</strong>, one of the few seed companies so organized
+  in the United States. Because we do not have an individual owner or beneficiary,
+  profit is not our primary goal. Consumers own 60% of the cooperative and worker
+  members 40%. Consumer and worker members share proportionately in the cooperative&#8217;s
+  profits through our annual patronage dividends.
+</p>
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -2,8 +2,9 @@
+   <img
+     src="/images/pansies.jpg"
+     alt="about fedco bottom image"
+-    style="float: left"
+-  /><strong>We are a cooperative</strong>, one of the few seed companies so
++    style="float: left;"
++  />
++  <strong>We are a cooperative</strong>, one of the few seed companies so
+   organized in the United States. Because we do not have an individual owner or
+   beneficiary, profit is not our primary goal. Consumers own 60% of the
+   cooperative and worker members 40%. Consumer and worker members share
+```
+
+# Output
+
+```html
+<p>
+  <img
+    src="/images/pansies.jpg"
+    alt="about fedco bottom image"
+    style="float: left;"
+  />
+  <strong>We are a cooperative</strong>, one of the few seed companies so
+  organized in the United States. Because we do not have an individual owner or
+  beneficiary, profit is not our primary goal. Consumers own 60% of the
+  cooperative and worker members 40%. Consumer and worker members share
+  proportionately in the cooperative&#8217;s profits through our annual
+  patronage dividends.
+</p>
+```

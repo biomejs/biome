@@ -1,0 +1,185 @@
+---
+source: crates/biome_js_parser/tests/spec_test.rs
+expression: snapshot
+snapshot_kind: text
+---
+## Input
+
+```js
+export let a;
+export const b = 3;
+export var c, d, e = 3;
+
+```
+
+
+## AST
+
+```
+JsModule {
+    bom_token: missing (optional),
+    interpreter_token: missing (optional),
+    directives: JsDirectiveList [],
+    items: JsModuleItemList [
+        JsExport {
+            decorators: JsDecoratorList [],
+            export_token: EXPORT_KW@0..7 "export" [] [Whitespace(" ")],
+            export_clause: JsVariableDeclarationClause {
+                declaration: JsVariableDeclaration {
+                    await_token: missing (optional),
+                    kind: LET_KW@7..11 "let" [] [Whitespace(" ")],
+                    declarators: JsVariableDeclaratorList [
+                        JsVariableDeclarator {
+                            id: JsIdentifierBinding {
+                                name_token: IDENT@11..12 "a" [] [],
+                            },
+                            variable_annotation: missing (optional),
+                            initializer: missing (optional),
+                        },
+                    ],
+                },
+                semicolon_token: SEMICOLON@12..13 ";" [] [],
+            },
+        },
+        JsExport {
+            decorators: JsDecoratorList [],
+            export_token: EXPORT_KW@13..21 "export" [Newline("\n")] [Whitespace(" ")],
+            export_clause: JsVariableDeclarationClause {
+                declaration: JsVariableDeclaration {
+                    await_token: missing (optional),
+                    kind: CONST_KW@21..27 "const" [] [Whitespace(" ")],
+                    declarators: JsVariableDeclaratorList [
+                        JsVariableDeclarator {
+                            id: JsIdentifierBinding {
+                                name_token: IDENT@27..29 "b" [] [Whitespace(" ")],
+                            },
+                            variable_annotation: missing (optional),
+                            initializer: JsInitializerClause {
+                                eq_token: EQ@29..31 "=" [] [Whitespace(" ")],
+                                expression: JsNumberLiteralExpression {
+                                    value_token: JS_NUMBER_LITERAL@31..32 "3" [] [],
+                                },
+                            },
+                        },
+                    ],
+                },
+                semicolon_token: SEMICOLON@32..33 ";" [] [],
+            },
+        },
+        JsExport {
+            decorators: JsDecoratorList [],
+            export_token: EXPORT_KW@33..41 "export" [Newline("\n")] [Whitespace(" ")],
+            export_clause: JsVariableDeclarationClause {
+                declaration: JsVariableDeclaration {
+                    await_token: missing (optional),
+                    kind: VAR_KW@41..45 "var" [] [Whitespace(" ")],
+                    declarators: JsVariableDeclaratorList [
+                        JsVariableDeclarator {
+                            id: JsIdentifierBinding {
+                                name_token: IDENT@45..46 "c" [] [],
+                            },
+                            variable_annotation: missing (optional),
+                            initializer: missing (optional),
+                        },
+                        COMMA@46..48 "," [] [Whitespace(" ")],
+                        JsVariableDeclarator {
+                            id: JsIdentifierBinding {
+                                name_token: IDENT@48..49 "d" [] [],
+                            },
+                            variable_annotation: missing (optional),
+                            initializer: missing (optional),
+                        },
+                        COMMA@49..51 "," [] [Whitespace(" ")],
+                        JsVariableDeclarator {
+                            id: JsIdentifierBinding {
+                                name_token: IDENT@51..53 "e" [] [Whitespace(" ")],
+                            },
+                            variable_annotation: missing (optional),
+                            initializer: JsInitializerClause {
+                                eq_token: EQ@53..55 "=" [] [Whitespace(" ")],
+                                expression: JsNumberLiteralExpression {
+                                    value_token: JS_NUMBER_LITERAL@55..56 "3" [] [],
+                                },
+                            },
+                        },
+                    ],
+                },
+                semicolon_token: SEMICOLON@56..57 ";" [] [],
+            },
+        },
+    ],
+    eof_token: EOF@57..58 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: JS_MODULE@0..58
+  0: (empty)
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..57
+    0: JS_EXPORT@0..13
+      0: JS_DECORATOR_LIST@0..0
+      1: EXPORT_KW@0..7 "export" [] [Whitespace(" ")]
+      2: JS_VARIABLE_DECLARATION_CLAUSE@7..13
+        0: JS_VARIABLE_DECLARATION@7..12
+          0: (empty)
+          1: LET_KW@7..11 "let" [] [Whitespace(" ")]
+          2: JS_VARIABLE_DECLARATOR_LIST@11..12
+            0: JS_VARIABLE_DECLARATOR@11..12
+              0: JS_IDENTIFIER_BINDING@11..12
+                0: IDENT@11..12 "a" [] []
+              1: (empty)
+              2: (empty)
+        1: SEMICOLON@12..13 ";" [] []
+    1: JS_EXPORT@13..33
+      0: JS_DECORATOR_LIST@13..13
+      1: EXPORT_KW@13..21 "export" [Newline("\n")] [Whitespace(" ")]
+      2: JS_VARIABLE_DECLARATION_CLAUSE@21..33
+        0: JS_VARIABLE_DECLARATION@21..32
+          0: (empty)
+          1: CONST_KW@21..27 "const" [] [Whitespace(" ")]
+          2: JS_VARIABLE_DECLARATOR_LIST@27..32
+            0: JS_VARIABLE_DECLARATOR@27..32
+              0: JS_IDENTIFIER_BINDING@27..29
+                0: IDENT@27..29 "b" [] [Whitespace(" ")]
+              1: (empty)
+              2: JS_INITIALIZER_CLAUSE@29..32
+                0: EQ@29..31 "=" [] [Whitespace(" ")]
+                1: JS_NUMBER_LITERAL_EXPRESSION@31..32
+                  0: JS_NUMBER_LITERAL@31..32 "3" [] []
+        1: SEMICOLON@32..33 ";" [] []
+    2: JS_EXPORT@33..57
+      0: JS_DECORATOR_LIST@33..33
+      1: EXPORT_KW@33..41 "export" [Newline("\n")] [Whitespace(" ")]
+      2: JS_VARIABLE_DECLARATION_CLAUSE@41..57
+        0: JS_VARIABLE_DECLARATION@41..56
+          0: (empty)
+          1: VAR_KW@41..45 "var" [] [Whitespace(" ")]
+          2: JS_VARIABLE_DECLARATOR_LIST@45..56
+            0: JS_VARIABLE_DECLARATOR@45..46
+              0: JS_IDENTIFIER_BINDING@45..46
+                0: IDENT@45..46 "c" [] []
+              1: (empty)
+              2: (empty)
+            1: COMMA@46..48 "," [] [Whitespace(" ")]
+            2: JS_VARIABLE_DECLARATOR@48..49
+              0: JS_IDENTIFIER_BINDING@48..49
+                0: IDENT@48..49 "d" [] []
+              1: (empty)
+              2: (empty)
+            3: COMMA@49..51 "," [] [Whitespace(" ")]
+            4: JS_VARIABLE_DECLARATOR@51..56
+              0: JS_IDENTIFIER_BINDING@51..53
+                0: IDENT@51..53 "e" [] [Whitespace(" ")]
+              1: (empty)
+              2: JS_INITIALIZER_CLAUSE@53..56
+                0: EQ@53..55 "=" [] [Whitespace(" ")]
+                1: JS_NUMBER_LITERAL_EXPRESSION@55..56
+                  0: JS_NUMBER_LITERAL@55..56 "3" [] []
+        1: SEMICOLON@56..57 ";" [] []
+  4: EOF@57..58 "" [Newline("\n")] []
+
+```

@@ -1,5 +1,6 @@
 //! Generated file, do not edit by hand, see `xtask/codegen`
 
+#![allow(unused_mut)]
 use biome_css_syntax::{CssSyntaxKind, CssSyntaxKind::*, T, *};
 use biome_rowan::{
     AstNode, ParsedChildren, RawNodeSlots, RawSyntaxNode, SyntaxFactory, SyntaxKind,
@@ -8,7 +9,6 @@ use biome_rowan::{
 pub struct CssSyntaxFactory;
 impl SyntaxFactory for CssSyntaxFactory {
     type Kind = CssSyntaxKind;
-    #[allow(unused_mut)]
     fn make_syntax(
         kind: Self::Kind,
         children: ParsedChildren<Self::Kind>,
@@ -36,6 +36,7 @@ impl SyntaxFactory for CssSyntaxFactory {
             | CSS_BOGUS_SCOPE_RANGE
             | CSS_BOGUS_SELECTOR
             | CSS_BOGUS_SUB_SELECTOR
+            | CSS_BOGUS_SUPPORTS_CONDITION
             | CSS_BOGUS_UNICODE_RANGE_VALUE
             | CSS_BOGUS_URL_MODIFIER
             | CSS_UNKNOWN_AT_RULE_COMPONENT_LIST
@@ -1193,7 +1194,7 @@ impl SyntaxFactory for CssSyntaxFactory {
                 }
                 slots.next_slot();
                 if let Some(element) = &current_element {
-                    if CssString::can_cast(element.kind()) {
+                    if AnyCssUrlValue::can_cast(element.kind()) {
                         slots.mark_present();
                         current_element = elements.next();
                     }
@@ -1213,6 +1214,25 @@ impl SyntaxFactory for CssSyntaxFactory {
                     );
                 }
                 slots.into_node(CSS_DOCUMENT_CUSTOM_MATCHER, children)
+            }
+            CSS_EMPTY_DECLARATION => {
+                let mut elements = (&children).into_iter();
+                let mut slots: RawNodeSlots<1usize> = RawNodeSlots::default();
+                let mut current_element = elements.next();
+                if let Some(element) = &current_element {
+                    if element.kind() == T ! [;] {
+                        slots.mark_present();
+                        current_element = elements.next();
+                    }
+                }
+                slots.next_slot();
+                if current_element.is_some() {
+                    return RawSyntaxNode::new(
+                        CSS_EMPTY_DECLARATION.to_bogus(),
+                        children.into_iter().map(Some),
+                    );
+                }
+                slots.into_node(CSS_EMPTY_DECLARATION, children)
             }
             CSS_FONT_FACE_AT_RULE => {
                 let mut elements = (&children).into_iter();
@@ -2738,6 +2758,39 @@ impl SyntaxFactory for CssSyntaxFactory {
                 }
                 slots.into_node(CSS_PERCENTAGE, children)
             }
+            CSS_POSITION_TRY_AT_RULE => {
+                let mut elements = (&children).into_iter();
+                let mut slots: RawNodeSlots<3usize> = RawNodeSlots::default();
+                let mut current_element = elements.next();
+                if let Some(element) = &current_element {
+                    if element.kind() == T![position_try] {
+                        slots.mark_present();
+                        current_element = elements.next();
+                    }
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element {
+                    if CssDashedIdentifier::can_cast(element.kind()) {
+                        slots.mark_present();
+                        current_element = elements.next();
+                    }
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element {
+                    if AnyCssDeclarationBlock::can_cast(element.kind()) {
+                        slots.mark_present();
+                        current_element = elements.next();
+                    }
+                }
+                slots.next_slot();
+                if current_element.is_some() {
+                    return RawSyntaxNode::new(
+                        CSS_POSITION_TRY_AT_RULE.to_bogus(),
+                        children.into_iter().map(Some),
+                    );
+                }
+                slots.into_node(CSS_POSITION_TRY_AT_RULE, children)
+            }
             CSS_PROPERTY_AT_RULE => {
                 let mut elements = (&children).into_iter();
                 let mut slots: RawNodeSlots<3usize> = RawNodeSlots::default();
@@ -4240,7 +4293,7 @@ impl SyntaxFactory for CssSyntaxFactory {
                 let mut slots: RawNodeSlots<2usize> = RawNodeSlots::default();
                 let mut current_element = elements.next();
                 if let Some(element) = &current_element {
-                    if element.kind() == T![U+] {
+                    if element.kind() == T!["U+"] {
                         slots.mark_present();
                         current_element = elements.next();
                     }
@@ -4685,6 +4738,32 @@ impl SyntaxFactory for CssSyntaxFactory {
                     );
                 }
                 slots.into_node(CSS_VALUE_AT_RULE_NAMED_IMPORT_SPECIFIER, children)
+            }
+            CSS_VIEW_TRANSITION_AT_RULE => {
+                let mut elements = (&children).into_iter();
+                let mut slots: RawNodeSlots<2usize> = RawNodeSlots::default();
+                let mut current_element = elements.next();
+                if let Some(element) = &current_element {
+                    if element.kind() == T![view_transition] {
+                        slots.mark_present();
+                        current_element = elements.next();
+                    }
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element {
+                    if AnyCssDeclarationBlock::can_cast(element.kind()) {
+                        slots.mark_present();
+                        current_element = elements.next();
+                    }
+                }
+                slots.next_slot();
+                if current_element.is_some() {
+                    return RawSyntaxNode::new(
+                        CSS_VIEW_TRANSITION_AT_RULE.to_bogus(),
+                        children.into_iter().map(Some),
+                    );
+                }
+                slots.into_node(CSS_VIEW_TRANSITION_AT_RULE, children)
             }
             CSS_BRACKETED_VALUE_LIST => {
                 Self::make_node_list_syntax(kind, children, AnyCssCustomIdentifier::can_cast)

@@ -1,0 +1,29 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `.editorconfig`
+
+```editorconfig
+
+[*
+indent_style = space
+indent_size = 8
+
+```
+
+# Termination Message
+
+```block
+.editorconfig:2:1 configuration ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × A section must be closed with `]`.
+  
+  > 2 │ [*
+      │ ^^
+    3 │ indent_style = space
+    4 │ indent_size = 8
+  
+
+
+```

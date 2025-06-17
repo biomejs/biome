@@ -24,11 +24,5 @@ Attribute Position: Auto
 -----
 
 ```grit
-file(body = contains `console.$method` => `println`)
+file(body=contains `console.$method` => `println`)
 ```
-
-
-
-## Unimplemented nodes/tokens
-
-"file(body = contains `console.$method` => `println`)" => 0..52

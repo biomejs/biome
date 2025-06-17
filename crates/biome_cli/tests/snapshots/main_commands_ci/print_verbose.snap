@@ -1,6 +1,6 @@
 ---
 source: crates/biome_cli/tests/snap_test.rs
-expression: content
+expression: redactor(content)
 ---
 ## `ci.js`
 
@@ -21,26 +21,6 @@ ci ━━━━━━━━━━━━━━━━━━━━━━━━━�
 ```
 
 # Emitted Messages
-
-```block
-ci.js:1:1 lint/style/useWhile  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Use a while loop instead of a for loop.
-  
-  > 1 │ for(;true;);
-      │ ^^^^^^^^^^^
-    2 │ 
-  
-  i Prefer a while loop over a for loop without initialization and update.
-  
-  i Safe fix: Use a while loop.
-  
-    1   │ - for(;true;);
-      1 │ + while(true);
-    2 2 │   
-  
-
-```
 
 ```block
 ci.js:1:6 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -65,11 +45,6 @@ ci.js format ━━━━━━━━━━━━━━━━━━━━━━�
 ```
 
 ```block
-Checked 1 file in <TIME>. No fixes applied.
-Found 3 errors.
-```
-
-```block
  VERBOSE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Files processed:
@@ -87,4 +62,10 @@ Found 3 errors.
   ! The list is empty.
   
 
+```
+
+```block
+Scanned project folder in <TIME>.
+Checked 1 file in <TIME>. No fixes applied.
+Found 2 errors.
 ```

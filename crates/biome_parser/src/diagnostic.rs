@@ -1,7 +1,7 @@
 use crate::token_source::TokenSource;
-use crate::Parser;
+use crate::{EOF_STR, Parser};
 use biome_diagnostics::console::fmt::Display;
-use biome_diagnostics::console::{markup, MarkupBuf};
+use biome_diagnostics::console::{MarkupBuf, markup};
 use biome_diagnostics::location::AsSpan;
 use biome_diagnostics::{Advices, Diagnostic, Location, LogCategory, MessageAndDescription, Visit};
 use biome_rowan::{SyntaxKind, TextLen, TextRange};
@@ -390,6 +390,15 @@ where
                 p.cur_range(),
             )
             .with_detail(p.cur_range(), "the file ends here")
+        } else if self.0 == EOF_STR {
+            p.err_builder(
+                format!(
+                    "expected the file to end but instead found an excess `{}`",
+                    p.cur_text()
+                ),
+                p.cur_range(),
+            )
+            .with_hint(format!("Remove {}", p.cur_text()))
         } else {
             p.err_builder(
                 format!("expected `{}` but instead found `{}`", self.0, p.cur_text()),

@@ -3,7 +3,7 @@ source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid.js
 ---
 # Input
-```jsx
+```js
 function foo() {}
 
 const bar = () => {};
@@ -396,5 +396,3 @@ invalid.js:66:13 lint/suspicious/noEmptyBlockStatements ━━━━━━━━
   
 
 ```
-
-

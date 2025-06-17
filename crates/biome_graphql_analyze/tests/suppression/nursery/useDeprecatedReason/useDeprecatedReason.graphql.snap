@@ -1,0 +1,27 @@
+---
+source: crates/biome_graphql_analyze/tests/spec_tests.rs
+expression: useDeprecatedReason.graphql
+---
+# Input
+```graphql
+query {
+  member @deprecated {
+		id
+	}
+}
+
+query {
+  member @deprecated()
+}
+
+query {
+  member
+  @deprecated(abc: 123)
+}
+
+query {
+  member @deprecated()
+}
+
+
+```

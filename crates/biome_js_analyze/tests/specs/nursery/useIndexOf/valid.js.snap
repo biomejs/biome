@@ -1,0 +1,43 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 134
+expression: valid.js
+---
+# Input
+```js
+/** should not generate diagnostics */
+const list = ['foo', 'bar', 'baz'];
+const isValid = () => true;
+const getBar = () => 'bar';
+const a = 'foo';
+const y = {a};
+
+list.findIndex((x, index) => x === index);
+list.findIndex(x => (x === 'foo') && isValid());
+list.findIndex(x => a === 'foo');
+list.findIndex(x => y.a === 'foo');
+list.findIndex(x => {
+	const bar = getBar();
+	return x === bar;
+});
+list.findIndex(x => {
+	const bar = getBar();
+	if (x === 'foo') {
+		return true;
+	}
+	
+	return x === bar;
+});
+list.lastIndexOf('foo');
+list.findLastIndex(x => x !== 'foo');
+list.findLastIndex((x, index) => x === index);
+list.findLastIndex(x => (x === 'foo') && isValid());
+list.findLastIndex(x => a === 'foo');
+list.findLastIndex(x => y.a === 'foo');
+list.findLastIndex(x => {
+	const bar = getBar();
+	return x === bar;
+});
+
+
+```

@@ -1,0 +1,29 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: unorganized-export-attributes.js
+snapshot_kind: text
+---
+# Input
+```js
+export { A, B } from "" with { "k2": "", "k1": "" };
+
+```
+
+# Diagnostics
+```
+unorganized-export-attributes.js:1:1 assist/source/organizeImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The imports and exports are not sorted.
+  
+  > 1 │ export { A, B } from "" with { "k2": "", "k1": "" };
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    2 │ 
+  
+  i Safe fix: Organize Imports (Biome)
+  
+    1   │ - export·{·A,·B·}·from·""·with·{·"k2":·"",·"k1":·""·};
+      1 │ + export·{·A,·B·}·from·""·with·{·"k1":·"",·"k2":·""·};
+    2 2 │   
+  
+
+```

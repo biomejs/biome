@@ -1,9 +1,10 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid.js
+snapshot_kind: text
 ---
 # Input
-```jsx
+```js
 function case12() {
 	class A { }
 	A = 0;
@@ -52,7 +53,7 @@ function case18() {
 ```
 invalid.js:3:2 lint/suspicious/noClassAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! 'A' is a class.
+  × 'A' is a class.
   
     1 │ function case12() {
     2 │ 	class A { }
@@ -75,7 +76,7 @@ invalid.js:3:2 lint/suspicious/noClassAssign ━━━━━━━━━━━�
 ```
 invalid.js:8:4 lint/suspicious/noClassAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! 'B' is a class.
+  × 'B' is a class.
   
      6 │ function case13() {
      7 │ 	class B { }
@@ -98,7 +99,7 @@ invalid.js:8:4 lint/suspicious/noClassAssign ━━━━━━━━━━━�
 ```
 invalid.js:13:7 lint/suspicious/noClassAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! 'C' is a class.
+  × 'C' is a class.
   
     11 │ function case14() {
     12 │ 	class C { }
@@ -121,7 +122,7 @@ invalid.js:13:7 lint/suspicious/noClassAssign ━━━━━━━━━━━�
 ```
 invalid.js:17:2 lint/suspicious/noClassAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! 'D' is a class.
+  × 'D' is a class.
   
     16 │ function case15() {
   > 17 │ 	D = 0;
@@ -144,7 +145,7 @@ invalid.js:17:2 lint/suspicious/noClassAssign ━━━━━━━━━━━�
 ```
 invalid.js:24:4 lint/suspicious/noClassAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! 'E' is a class.
+  × 'E' is a class.
   
     22 │ 	class E {
     23 │ 		b() {
@@ -167,7 +168,7 @@ invalid.js:24:4 lint/suspicious/noClassAssign ━━━━━━━━━━━�
 ```
 invalid.js:32:4 lint/suspicious/noClassAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! 'F' is a class.
+  × 'F' is a class.
   
     30 │ 	let F = class F {
     31 │ 		b() {
@@ -190,7 +191,7 @@ invalid.js:32:4 lint/suspicious/noClassAssign ━━━━━━━━━━━�
 ```
 invalid.js:39:2 lint/suspicious/noClassAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! 'G' is a class.
+  × 'G' is a class.
   
     37 │ function case18() {
     38 │ 	class G { }
@@ -213,7 +214,7 @@ invalid.js:39:2 lint/suspicious/noClassAssign ━━━━━━━━━━━�
 ```
 invalid.js:40:2 lint/suspicious/noClassAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! 'G' is a class.
+  × 'G' is a class.
   
     38 │ 	class G { }
     39 │ 	G = 0;
@@ -232,5 +233,3 @@ invalid.js:40:2 lint/suspicious/noClassAssign ━━━━━━━━━━━�
   
 
 ```
-
-

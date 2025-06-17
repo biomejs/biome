@@ -1,0 +1,193 @@
+---
+source: crates/biome_js_parser/tests/spec_test.rs
+expression: snapshot
+snapshot_kind: text
+---
+## Input
+
+```js
+export let a = ;
+export const b;
+export let d, c;
+
+```
+
+
+## AST
+
+```
+JsModule {
+    bom_token: missing (optional),
+    interpreter_token: missing (optional),
+    directives: JsDirectiveList [],
+    items: JsModuleItemList [
+        JsExport {
+            decorators: JsDecoratorList [],
+            export_token: EXPORT_KW@0..7 "export" [] [Whitespace(" ")],
+            export_clause: JsVariableDeclarationClause {
+                declaration: JsVariableDeclaration {
+                    await_token: missing (optional),
+                    kind: LET_KW@7..11 "let" [] [Whitespace(" ")],
+                    declarators: JsVariableDeclaratorList [
+                        JsVariableDeclarator {
+                            id: JsIdentifierBinding {
+                                name_token: IDENT@11..13 "a" [] [Whitespace(" ")],
+                            },
+                            variable_annotation: missing (optional),
+                            initializer: JsInitializerClause {
+                                eq_token: EQ@13..15 "=" [] [Whitespace(" ")],
+                                expression: missing (required),
+                            },
+                        },
+                    ],
+                },
+                semicolon_token: SEMICOLON@15..16 ";" [] [],
+            },
+        },
+        JsExport {
+            decorators: JsDecoratorList [],
+            export_token: EXPORT_KW@16..24 "export" [Newline("\n")] [Whitespace(" ")],
+            export_clause: JsVariableDeclarationClause {
+                declaration: JsVariableDeclaration {
+                    await_token: missing (optional),
+                    kind: CONST_KW@24..30 "const" [] [Whitespace(" ")],
+                    declarators: JsVariableDeclaratorList [
+                        JsVariableDeclarator {
+                            id: JsIdentifierBinding {
+                                name_token: IDENT@30..31 "b" [] [],
+                            },
+                            variable_annotation: missing (optional),
+                            initializer: missing (optional),
+                        },
+                    ],
+                },
+                semicolon_token: SEMICOLON@31..32 ";" [] [],
+            },
+        },
+        JsExport {
+            decorators: JsDecoratorList [],
+            export_token: EXPORT_KW@32..40 "export" [Newline("\n")] [Whitespace(" ")],
+            export_clause: JsVariableDeclarationClause {
+                declaration: JsVariableDeclaration {
+                    await_token: missing (optional),
+                    kind: LET_KW@40..44 "let" [] [Whitespace(" ")],
+                    declarators: JsVariableDeclaratorList [
+                        JsVariableDeclarator {
+                            id: JsIdentifierBinding {
+                                name_token: IDENT@44..45 "d" [] [],
+                            },
+                            variable_annotation: missing (optional),
+                            initializer: missing (optional),
+                        },
+                        COMMA@45..47 "," [] [Whitespace(" ")],
+                        JsVariableDeclarator {
+                            id: JsIdentifierBinding {
+                                name_token: IDENT@47..48 "c" [] [],
+                            },
+                            variable_annotation: missing (optional),
+                            initializer: missing (optional),
+                        },
+                    ],
+                },
+                semicolon_token: SEMICOLON@48..49 ";" [] [],
+            },
+        },
+    ],
+    eof_token: EOF@49..50 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: JS_MODULE@0..50
+  0: (empty)
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..49
+    0: JS_EXPORT@0..16
+      0: JS_DECORATOR_LIST@0..0
+      1: EXPORT_KW@0..7 "export" [] [Whitespace(" ")]
+      2: JS_VARIABLE_DECLARATION_CLAUSE@7..16
+        0: JS_VARIABLE_DECLARATION@7..15
+          0: (empty)
+          1: LET_KW@7..11 "let" [] [Whitespace(" ")]
+          2: JS_VARIABLE_DECLARATOR_LIST@11..15
+            0: JS_VARIABLE_DECLARATOR@11..15
+              0: JS_IDENTIFIER_BINDING@11..13
+                0: IDENT@11..13 "a" [] [Whitespace(" ")]
+              1: (empty)
+              2: JS_INITIALIZER_CLAUSE@13..15
+                0: EQ@13..15 "=" [] [Whitespace(" ")]
+                1: (empty)
+        1: SEMICOLON@15..16 ";" [] []
+    1: JS_EXPORT@16..32
+      0: JS_DECORATOR_LIST@16..16
+      1: EXPORT_KW@16..24 "export" [Newline("\n")] [Whitespace(" ")]
+      2: JS_VARIABLE_DECLARATION_CLAUSE@24..32
+        0: JS_VARIABLE_DECLARATION@24..31
+          0: (empty)
+          1: CONST_KW@24..30 "const" [] [Whitespace(" ")]
+          2: JS_VARIABLE_DECLARATOR_LIST@30..31
+            0: JS_VARIABLE_DECLARATOR@30..31
+              0: JS_IDENTIFIER_BINDING@30..31
+                0: IDENT@30..31 "b" [] []
+              1: (empty)
+              2: (empty)
+        1: SEMICOLON@31..32 ";" [] []
+    2: JS_EXPORT@32..49
+      0: JS_DECORATOR_LIST@32..32
+      1: EXPORT_KW@32..40 "export" [Newline("\n")] [Whitespace(" ")]
+      2: JS_VARIABLE_DECLARATION_CLAUSE@40..49
+        0: JS_VARIABLE_DECLARATION@40..48
+          0: (empty)
+          1: LET_KW@40..44 "let" [] [Whitespace(" ")]
+          2: JS_VARIABLE_DECLARATOR_LIST@44..48
+            0: JS_VARIABLE_DECLARATOR@44..45
+              0: JS_IDENTIFIER_BINDING@44..45
+                0: IDENT@44..45 "d" [] []
+              1: (empty)
+              2: (empty)
+            1: COMMA@45..47 "," [] [Whitespace(" ")]
+            2: JS_VARIABLE_DECLARATOR@47..48
+              0: JS_IDENTIFIER_BINDING@47..48
+                0: IDENT@47..48 "c" [] []
+              1: (empty)
+              2: (empty)
+        1: SEMICOLON@48..49 ";" [] []
+  4: EOF@49..50 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+export_variable_clause_error.js:1:16 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected an expression, or an assignment but instead found ';'.
+  
+  > 1 │ export let a = ;
+      │                ^
+    2 │ export const b;
+    3 │ export let d, c;
+  
+  i Expected an expression, or an assignment here.
+  
+  > 1 │ export let a = ;
+      │                ^
+    2 │ export const b;
+    3 │ export let d, c;
+  
+export_variable_clause_error.js:2:14 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Const declarations must have an initialized value.
+  
+    1 │ export let a = ;
+  > 2 │ export const b;
+      │              ^
+    3 │ export let d, c;
+    4 │ 
+  
+  i This variable needs to be initialized.
+  
+```

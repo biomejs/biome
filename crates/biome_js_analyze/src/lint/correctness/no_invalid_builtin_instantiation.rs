@@ -1,15 +1,15 @@
-use crate::{services::semantic::Semantic, JsRuleAction};
+use crate::{JsRuleAction, services::semantic::Semantic};
 use biome_analyze::{
-    context::RuleContext, declare_lint_rule, ActionCategory, FixKind, Rule, RuleDiagnostic,
-    RuleSource,
+    FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
+use biome_diagnostics::Severity;
 use biome_js_factory::make;
 use biome_js_syntax::{
-    global_identifier, static_value::StaticValue, AnyJsExpression, JsCallExpression,
-    JsNewExpression, JsNewOrCallExpression,
+    AnyJsExpression, JsCallExpression, JsNewExpression, JsNewOrCallExpression, global_identifier,
+    static_value::StaticValue,
 };
-use biome_rowan::{chain_trivia_pieces, AstNode, BatchMutationExt};
+use biome_rowan::{AstNode, BatchMutationExt, chain_trivia_pieces};
 
 use crate::lint::style::use_throw_new_error::convert_call_expression_to_new_expression;
 
@@ -80,6 +80,7 @@ declare_lint_rule! {
             RuleSource::Eslint("no-new-native-nonconstructor"),
         ],
         recommended: true,
+        severity: Severity::Error,
         fix_kind: FixKind::Unsafe,
     }
 }
@@ -139,7 +140,7 @@ impl Rule for NoInvalidBuiltinInstantiation {
                 mutation
                     .replace_node::<AnyJsExpression>(node.clone().into(), call_expression.into());
                 Some(JsRuleAction::new(
-                    ActionCategory::QuickFix,
+                    ctx.metadata().action_category(ctx.category(), ctx.group()),
                     ctx.metadata().applicability(),
                     markup! { "Remove "<Emphasis>"new"</Emphasis>" keyword." }.to_owned(),
                     mutation,
@@ -151,7 +152,7 @@ impl Rule for NoInvalidBuiltinInstantiation {
                 mutation
                     .replace_node::<AnyJsExpression>(node.clone().into(), new_expression.into());
                 Some(JsRuleAction::new(
-                    ActionCategory::QuickFix,
+                    ctx.metadata().action_category(ctx.category(), ctx.group()),
                     ctx.metadata().applicability(),
                     markup! { "Add "<Emphasis>"new"</Emphasis>" keyword." }.to_owned(),
                     mutation,
@@ -198,8 +199,8 @@ enum BuiltinCreationRule {
 impl BuiltinCreationRule {
     const fn forbidden_builtins_list(&self) -> &[&str] {
         match self {
-            BuiltinCreationRule::MustUseNew => BUILTINS_REQUIRING_NEW,
-            BuiltinCreationRule::MustNotUseNew => BUILTINS_REQUIRING_NO_NEW,
+            Self::MustUseNew => BUILTINS_REQUIRING_NEW,
+            Self::MustNotUseNew => BUILTINS_REQUIRING_NO_NEW,
         }
     }
 }

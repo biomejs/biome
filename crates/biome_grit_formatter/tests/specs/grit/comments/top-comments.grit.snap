@@ -1,0 +1,46 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: grit/comments/top-comments.grit
+---
+# Input
+
+```grit
+// this is a comment
+engine biome (1.0)
+
+// this is a comment
+`var $x = [$names]` => `var coolPeople = [$names]` where {
+	// this is a comment
+  $names <: every any {`"andrew"`, `"alex"`}
+}
+
+```
+
+
+=============================
+
+# Outputs
+
+## Output 1
+
+-----
+Indent style: Tab
+Indent width: 2
+Line ending: LF
+Line width: 80
+Attribute Position: Auto
+-----
+
+```grit
+// this is a comment
+engine biome(1.0)
+
+// this is a comment
+`var $x = [$names]` => `var coolPeople = [$names]` where {
+	// this is a comment
+	$names <: every any {
+		`"andrew"`,
+		`"alex"`
+	}
+}
+```

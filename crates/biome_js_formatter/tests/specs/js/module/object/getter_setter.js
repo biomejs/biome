@@ -3,4 +3,5 @@ let a = {
 }
 let b = {
 	set foo(a) {}
+	set bar(a, ) {}
 }

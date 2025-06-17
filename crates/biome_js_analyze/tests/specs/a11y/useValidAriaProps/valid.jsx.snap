@@ -4,6 +4,7 @@ expression: valid.jsx
 ---
 # Input
 ```jsx
+/* should not generate diagnostics */
 var a = <div />;
 var a = <div></div>;
 var a = <div aria="wee"></div>;
@@ -14,5 +15,3 @@ var a = <input type="text" aria-errormessage="foobar" />;
 var a = <div type="text" aria-atomic="true" />;
 
 ```
-
-

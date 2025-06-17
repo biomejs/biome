@@ -3,7 +3,7 @@ source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid.js
 ---
 # Input
-```jsx
+```js
 try { } catch (e) { e; e = 10; }
 try {
 
@@ -88,5 +88,3 @@ invalid.js:7:5 lint/suspicious/noCatchAssign ━━━━━━━━━━━�
   
 
 ```
-
-

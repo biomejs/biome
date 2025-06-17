@@ -1,14 +1,14 @@
-use crate::{services::semantic::Semantic, JsRuleAction};
+use crate::{JsRuleAction, services::semantic::Semantic};
 use biome_analyze::{
-    context::RuleContext, declare_lint_rule, ActionCategory, FixKind, Rule, RuleDiagnostic,
-    RuleSource,
+    FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
+use biome_diagnostics::Severity;
 use biome_js_factory::make;
 use biome_js_syntax::{
-    global_identifier, AnyJsCallArgument, AnyJsExpression, JsInstanceofExpression, T,
+    AnyJsCallArgument, AnyJsExpression, JsInstanceofExpression, T, global_identifier,
 };
-use biome_rowan::{trim_leading_trivia_pieces, AstNode, BatchMutationExt};
+use biome_rowan::{AstNode, BatchMutationExt, trim_leading_trivia_pieces};
 
 declare_lint_rule! {
     /// Use `Array.isArray()` instead of `instanceof Array`.
@@ -42,6 +42,7 @@ declare_lint_rule! {
         language: "js",
         sources: &[RuleSource::EslintUnicorn("no-instanceof-array")],
         recommended: true,
+        severity: Severity::Warning,
         fix_kind: FixKind::Unsafe,
     }
 }
@@ -103,7 +104,7 @@ impl Rule for UseIsArray {
             call.into(),
         );
         Some(JsRuleAction::new(
-            ActionCategory::QuickFix,
+            ctx.metadata().action_category(ctx.category(), ctx.group()),
             ctx.metadata().applicability(),
             markup! {
                 "Use "<Emphasis>"Array.isArray()"</Emphasis>" instead."

@@ -1,10 +1,11 @@
 use biome_analyze::{
-    context::RuleContext, declare_lint_rule, Ast, Rule, RuleDiagnostic, RuleSource,
+    Ast, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
 use biome_css_syntax::{
     AnyCssPseudoClassNth, CssPseudoClassFunctionSelectorList, CssPseudoClassNthSelector,
 };
+use biome_diagnostics::Severity;
 use biome_rowan::{AstNode, SyntaxNodeCast};
 
 declare_lint_rule! {
@@ -57,6 +58,7 @@ declare_lint_rule! {
         name: "noUnmatchableAnbSelector",
         language: "css",
         recommended: true,
+        severity: Severity::Error,
         sources: &[RuleSource::Stylelint("selector-anb-no-unmatchable")],
     }
 }
@@ -103,12 +105,12 @@ fn is_unmatchable(nth: &AnyCssPseudoClassNth) -> bool {
             let constant = nth.offset().and_then(|offset| offset.value().ok());
 
             match (coefficient, constant) {
-                (Some(a), Some(b)) => a.text() == "0" && b.text() == "0",
-                (Some(a), None) => a.text() == "0",
+                (Some(a), Some(b)) => a.to_trimmed_text() == "0" && b.to_trimmed_text() == "0",
+                (Some(a), None) => a.to_trimmed_text() == "0",
                 _ => false,
             }
         }
-        AnyCssPseudoClassNth::CssPseudoClassNthNumber(nth) => nth.text() == "0",
+        AnyCssPseudoClassNth::CssPseudoClassNthNumber(nth) => nth.to_trimmed_text() == "0",
     }
 }
 

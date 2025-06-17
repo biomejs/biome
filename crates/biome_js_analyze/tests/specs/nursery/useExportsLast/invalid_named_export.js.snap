@@ -1,0 +1,28 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid_named_export.js
+snapshot_kind: text
+---
+# Input
+```js
+export const foo = 1;
+
+const bar = 2;
+
+```
+
+# Diagnostics
+```
+invalid_named_export.js:1:1 lint/nursery/useExportsLast ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i All exports should be declared after all non-export statements.
+  
+  > 1 │ export const foo = 1;
+      │ ^^^^^^^^^^^^^^^^^^^^^
+    2 │ 
+    3 │ const bar = 2;
+  
+  i Move this statement before the export statements to keep all exports at the end of the module.
+  
+
+```

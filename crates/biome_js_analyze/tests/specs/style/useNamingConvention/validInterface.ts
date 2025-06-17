@@ -1,3 +1,4 @@
+/* should not generate diagnostics */
 export interface X {}
 
 export interface PascalCase {}

@@ -1,9 +1,8 @@
-use biome_analyze::{context::RuleContext, declare_lint_rule, Rule, RuleDiagnostic};
 use biome_analyze::{Ast, RuleSource, RuleSourceKind};
+use biome_analyze::{Rule, RuleDiagnostic, context::RuleContext, declare_lint_rule};
 use biome_console::markup;
-use biome_js_syntax::{
-    JsExport, JsExportFromClause, JsExportNamedFromClause, JsFileSource, JsModule,
-};
+use biome_diagnostics::Severity;
+use biome_js_syntax::{JsExport, JsExportFromClause, JsExportNamedFromClause, JsModule};
 use biome_rowan::AstNode;
 
 declare_lint_rule! {
@@ -46,6 +45,7 @@ declare_lint_rule! {
         name: "noBarrelFile",
         language: "js",
         recommended: false,
+        severity: Severity::Warning,
         sources: &[RuleSource::EslintBarrelFiles("avoid-barrel-files")],
         source_kind: RuleSourceKind::Inspired,
     }
@@ -58,15 +58,7 @@ impl Rule for NoBarrelFile {
     type Options = ();
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
-        if ctx
-            .source_type::<JsFileSource>()
-            .language()
-            .is_definition_file()
-        {
-            return None;
-        }
         let items = ctx.query().items();
-
         for item in items {
             if let Some(export) = JsExport::cast(item.into()) {
                 if let Ok(export_from_clause) = export.export_clause() {
@@ -93,7 +85,6 @@ impl Rule for NoBarrelFile {
                             return Some(export);
                         }
                     }
-                    continue;
                 }
             }
         }

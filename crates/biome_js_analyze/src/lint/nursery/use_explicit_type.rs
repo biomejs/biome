@@ -1,29 +1,40 @@
 use biome_analyze::{
-    context::RuleContext, declare_lint_rule, Ast, Rule, RuleDiagnostic, RuleSource,
+    Ast, Rule, RuleDiagnostic, RuleSource, RuleSourceKind, context::RuleContext, declare_lint_rule,
 };
-use biome_console::markup;
+use biome_console::{Markup, markup};
+use biome_diagnostics::Severity;
 use biome_js_semantic::HasClosureAstNode;
 use biome_js_syntax::{
-    AnyJsBinding, AnyJsExpression, AnyJsFunctionBody, AnyJsStatement, AnyTsType, JsCallExpression,
-    JsFileSource, JsFormalParameter, JsInitializerClause, JsLanguage, JsObjectExpression,
-    JsParenthesizedExpression, JsPropertyClassMember, JsPropertyObjectMember, JsStatementList,
-    JsSyntaxKind, JsVariableDeclarator,
+    AnyJsArrowFunctionParameters, AnyJsBinding, AnyJsExpression, AnyJsFunction, AnyJsFunctionBody,
+    AnyJsLiteralExpression, AnyJsObjectMember, AnyJsStatement, AnyTsType,
+    JsArrowFunctionExpression, JsCallExpression, JsConstructorClassMember, JsFileSource,
+    JsFormalParameter, JsFunctionDeclaration, JsGetterClassMember, JsGetterObjectMember,
+    JsInitializerClause, JsLanguage, JsMethodClassMember, JsMethodObjectMember, JsModuleItemList,
+    JsObjectExpression, JsParameters, JsParenthesizedExpression, JsPropertyClassMember,
+    JsPropertyObjectMember, JsReturnStatement, JsSetterClassMember, JsSetterObjectMember,
+    JsStatementList, JsSyntaxKind, JsVariableDeclaration, JsVariableDeclarationClause,
+    JsVariableDeclarator, JsVariableDeclaratorList, JsVariableStatement, TsCallSignatureTypeMember,
+    TsDeclareFunctionDeclaration, TsDeclareFunctionExportDefaultDeclaration,
+    TsGetterSignatureClassMember, TsMethodSignatureClassMember, TsMethodSignatureTypeMember,
+    static_value::StaticValue,
 };
-use biome_js_syntax::{
-    AnyJsFunction, JsGetterClassMember, JsGetterObjectMember, JsMethodClassMember,
-    JsMethodObjectMember,
+use biome_rowan::{
+    AstNode, AstSeparatedList, SyntaxNode, SyntaxNodeOptionExt, TextRange, declare_node_union,
 };
-use biome_rowan::{declare_node_union, AstNode, SyntaxNode, SyntaxNodeOptionExt, TextRange};
 
 declare_lint_rule! {
-    /// Require explicit return types on functions and class methods.
+    /// Enforce types in functions, methods, variables, and parameters.
     ///
     /// Functions in TypeScript often don't need to be given an explicit return type annotation.
     /// Leaving off the return type is less code to read or write and allows the compiler to infer it from the contents of the function.
     ///
-    /// However, explicit return types do make it visually more clear what type is returned by a function.
-    /// They can also speed up TypeScript type checking performance in large codebases with many large functions.
+    /// However, explicit return types do make it visually clearer what type is returned by a function.
+    /// They can also speed up TypeScript type-checking performance in large codebases with many large functions.
     /// Explicit return types also reduce the chance of bugs by asserting the return type, and it avoids surprising "action at a distance," where changing the body of one function may cause failures inside another function.
+    ///
+    /// Annotating module-level variables serves a similar purpose. This rule only allows assignment of literals and some objects to untyped variables.
+    /// Objects that are allowed must not contain spread syntax and values that aren't literals.
+    /// Additionally, `let` and `var` variables with `null` or `undefined` as value require explicit annotation.
     ///
     /// This rule enforces that functions do have an explicit return type annotation.
     ///
@@ -68,22 +79,43 @@ declare_lint_rule! {
     ///
     /// ```ts,expect_diagnostic
     /// // Should use const assertions
-    /// const func = (value: number) => ({ type: 'X', value }) as any;
-    /// ```
-    ///
-    /// The following pattern is considered incorrect code for a higher-order function, as the returned function does not specify a return type:
-    ///
-    /// ```ts,expect_diagnostic
-    /// const arrowFn = () => () => {};
+    /// var func = (value: number) => ({ type: 'X', value }) as any;
     /// ```
     ///
     /// ```ts,expect_diagnostic
-    /// const arrowFn = () => {
+    /// // Unspecified variable type
+    /// function fn(): string {
+    ///     return "Not inline";
+    /// }
+    /// const direct = fn();
+    /// ```
+    ///
+    /// ```ts,expect_diagnostic
+    /// // Unspecified object member type
+    /// function fn(): string {
+    ///     return "Not inline";
+    /// }
+    /// const nested = { result: fn() };
+    /// ```
+    ///
+    /// ```ts,expect_diagnostic
+    /// // let bindings of null and undefined are usually overwritten by other code
+    /// let foo = null;
+    /// ```
+    ///
+    /// The following example is considered incorrect for a higher-order function, as the returned function does not specify a return type:
+    ///
+    /// ```ts,expect_diagnostic
+    /// var arrowFn = () => () => {};
+    /// ```
+    ///
+    /// ```ts,expect_diagnostic
+    /// var arrowFn = () => {
     ///   return () => { };
     /// }
     /// ```
     ///
-    /// The following pattern is considered incorrect code for a higher-order function because the function body contains multiple statements. We only check whether the first statement is a function return.
+    /// The following example is considered incorrect for a higher-order function because the function body contains multiple statements. We only check whether the first statement is a function return.
     ///
     /// ```ts,expect_diagnostic
     /// // A function has multiple statements in the body
@@ -103,6 +135,68 @@ declare_lint_rule! {
     ///     str;
     ///   }
     /// }
+    /// ```
+    ///
+    /// ```ts,expect_diagnostic
+    /// // A function has multiple statements in the body
+    /// function f() {
+    ///   let str = "test";
+    /// }
+    /// ```
+    ///
+    /// The following example is considered incorrect for an interface method without a return type:
+    ///
+    /// ```ts,expect_diagnostic
+    /// interface Array<Type> {
+    ///   method();
+    /// }
+    /// ```
+    ///
+    /// The following example is considered incorrect for a type declaration of a function without a return type:
+    ///
+    /// ```ts,expect_diagnostic
+    /// type MyObject = {
+    ///   (input: string);
+    ///   propertyName: string;
+    /// };
+    /// ```
+    ///
+    /// The following example is considered incorrect for an abstract class method without a return type:
+    ///
+    /// ```ts,expect_diagnostic
+    /// abstract class MyClass {
+    ///   public abstract method();
+    /// }
+    /// ```
+    ///
+    /// The following example is considered incorrect for an abstract class getter without a return type:
+    ///
+    /// ```ts,expect_diagnostic
+    /// abstract class P<T> {
+    ///   abstract get poke();
+    /// }
+    /// ```
+    ///
+    /// The following example is considered incorrect for a function declaration in a namespace without a return type:
+    ///
+    /// ```ts,expect_diagnostic
+    /// declare namespace myLib {
+    ///   function makeGreeting(s: string);
+    /// }
+    /// ```
+    ///
+    /// The following example is considered incorrect for a module function export without a return type:
+    ///
+    /// ```ts,expect_diagnostic
+    /// declare module "foo" {
+    ///   export default function bar();
+    /// }
+    /// ```
+    ///
+    /// The following example is considered incorrect because `arg` has `any` type.
+    ///
+    /// ```ts,expect_diagnostic
+    /// var arrowFn = (arg: any): string => `test ${arg}`;
     /// ```
     ///
     /// ### Valid
@@ -126,6 +220,19 @@ declare_lint_rule! {
     /// ```
     ///
     /// ```ts
+    /// // A literal value
+    /// const PREFIX = "/prefix";
+    /// ```
+    ///
+    /// ```ts
+    /// // Explicit variable annotation
+    /// function func(): string {
+    ///     return "";
+    /// }
+    /// let something: string = func();
+    /// ```
+    ///
+    /// ```ts
     /// class Test {
     ///   // No return value should be expected (void)
     ///   method(): void {
@@ -134,64 +241,75 @@ declare_lint_rule! {
     /// }
     /// ```
     ///
-    /// The following patterns are considered correct code for a function immediately returning a value with `as const`:
+    /// The following example is considered correct code for a function immediately returning a value with `as const`:
     ///
     /// ```ts
-    /// const func = (value: number) => ({ foo: 'bar', value }) as const;
+    /// var func = (value: number) => ({ foo: 'bar', value }) as const;
     /// ```
     ///
-    /// The following patterns are considered correct code for a function allowed within specific expression contexts, such as an IIFE, a function passed as an argument, or a function inside an array:
+    /// The following example is considered correct code for a value assigned using type assertion:
+    ///
+    /// ```ts
+    /// function fn(): string {
+    ///     return "Not inline";
+    /// }
+    /// const direct = fn() as string;
+    /// const nested = { result: fn() as string };
+    /// ```
+    ///
+    /// The following examples are considered correct code for a function allowed within specific expression contexts, such as an IIFE, a function passed as an argument, or a function inside an array:
     ///
     /// ```ts
     /// // Callbacks without return types
     /// setTimeout(function() { console.log("Hello!"); }, 1000);
     /// ```
+    ///
+    /// ```ts
+    /// // Callbacks without argument types (immediately nested in a function call)
+    /// new Promise((resolve) => resolve(1));
+    /// ```
+    ///
     /// ```ts
     /// // IIFE
     /// (() => {})();
     /// ```
     ///
-    /// ```ts
-    /// // a function inside an array
-    /// [function () {}, () => {}];
-    /// ```
-    ///
-    /// The following pattern is considered correct code for a higher-order function, where the returned function explicitly specifies a return type and the function body contains only one statement:
+    /// The following example is considered correct code for a higher-order function, where the returned function explicitly specifies a return type and the function body contains only one statement:
     ///
     /// ```ts
     /// // the outer function returns an inner function that has a `void` return type
-    /// const arrowFn = () => (): void => {};
+    /// var arrowFn = () => (): void => {};
     /// ```
     ///
     /// ```ts
     /// // the outer function returns an inner function that has a `void` return type
-    /// const arrowFn = () => {
+    /// var arrowFn = () => {
     ///   return (): void => { };
     /// }
     /// ```
     ///
-    /// The following patterns are considered correct for type annotations on variables in function expressions:
+    /// The following examples are considered correct for type annotations on variables in function expressions:
     ///
     /// ```ts
     /// // A function with a type assertion using `as`
-    /// const asTyped = (() => '') as () => string;
+    /// var asTyped = (() => '') as () => string;
     /// ```
     ///
     /// ```ts
     /// // A function with a type assertion using `<>`
-    /// const castTyped = <() => string>(() => '');
+    /// var castTyped = <() => string>(() => '');
     /// ```
     ///
     /// ```ts
     /// // A variable declarator with a type annotation.
     /// type FuncType = () => string;
-    /// const arrowFn: FuncType = () => 'test';
+    /// var arrowFn: FuncType = () => 'test';
     /// ```
     ///
     /// ```ts
     /// // A function is a default parameter with a type annotation
     /// type CallBack = () => void;
-    /// const f = (gotcha: CallBack = () => { }): void => { };
+    /// var f = (gotcha: CallBack = () => { }): void => { };
     /// ```
     ///
     /// ```ts
@@ -207,17 +325,93 @@ declare_lint_rule! {
         name: "useExplicitType",
         language: "ts",
         recommended: false,
-        sources: &[RuleSource::EslintTypeScript("explicit-function-return-type")],
+        severity: Severity::Error,
+        sources: &[RuleSource::EslintTypeScript("explicit-function-return-type"), RuleSource::EslintTypeScript("explicit-module-boundary-types")],
+        source_kind: RuleSourceKind::Inspired,
     }
 }
 
 declare_node_union! {
-    pub AnyJsFunctionWithReturnType = AnyJsFunction | JsMethodClassMember | JsMethodObjectMember | JsGetterClassMember | JsGetterObjectMember
+    pub AnyEntityWithTypes =
+        AnyJsFunction
+        | JsMethodClassMember
+        | JsMethodObjectMember
+        | JsGetterClassMember
+        | JsGetterObjectMember
+        | TsMethodSignatureTypeMember
+        | TsCallSignatureTypeMember
+        | TsMethodSignatureClassMember
+        | TsGetterSignatureClassMember
+        | TsDeclareFunctionDeclaration
+        | TsDeclareFunctionExportDefaultDeclaration
+        | JsConstructorClassMember
+        | JsSetterObjectMember
+        | JsSetterClassMember
+        | JsVariableDeclarator
 }
 
+pub enum ViolationKind {
+    UntypedParameter,
+    AnyParameter,
+    UntypedFunction,
+    UntypedMember,
+    UntypedDeclaration,
+    UntypedVariable,
+}
+
+impl ViolationKind {
+    fn as_message(&self) -> Markup {
+        match self {
+            Self::UntypedParameter => markup! {
+                "The parameter doesn't have a type defined."
+            },
+            Self::AnyParameter => markup! {
+                "The parameter has an "<Emphasis>"any"</Emphasis>" type."
+            },
+            Self::UntypedVariable => markup! {
+                "The variable doesn't have a type defined."
+            },
+            Self::UntypedFunction => markup! {
+                "Missing return type on function."
+            },
+            Self::UntypedMember => markup! {
+                "Missing return type on member."
+            },
+            Self::UntypedDeclaration => markup! {
+                "Missing return type on function declaration."
+            },
+        }
+    }
+
+    fn as_advice(&self) -> Markup {
+        match self {
+            Self::UntypedParameter => markup! {
+                "Add a type to the parameter."
+            },
+            Self::AnyParameter => markup! {
+                "Replace "<Emphasis>"any"</Emphasis>" with "<Emphasis>"unknown"</Emphasis>" or a more specific type."
+            },
+            Self::UntypedVariable => markup! {
+                "Add a type to the variable."
+            },
+            Self::UntypedFunction => markup! {
+                "Add a return type to the function."
+            },
+            Self::UntypedMember => markup! {
+                "Add a return type to the member."
+            },
+            Self::UntypedDeclaration => markup! {
+                "Add a return type to the function declaration."
+            },
+        }
+    }
+}
+
+type State = (TextRange, ViolationKind);
+
 impl Rule for UseExplicitType {
-    type Query = Ast<AnyJsFunctionWithReturnType>;
-    type State = TextRange;
+    type Query = Ast<AnyEntityWithTypes>;
+    type State = State;
     type Signals = Option<Self::State>;
     type Options = ();
 
@@ -229,87 +423,174 @@ impl Rule for UseExplicitType {
 
         let node = ctx.query();
         match node {
-            AnyJsFunctionWithReturnType::AnyJsFunction(func) => {
-                if func.return_type_annotation().is_some() {
+            AnyEntityWithTypes::AnyJsFunction(func) => {
+                if is_function_used_in_argument(func) {
+                    // Inline callbacks are usually inferred
                     return None;
                 }
+                if let Some(state) = handle_any_function(func) {
+                    Some(state)
+                } else {
+                    let parameters = func.parameters().ok()?;
 
-                if is_direct_const_assertion_in_arrow_functions(func) {
-                    return None;
+                    match parameters {
+                        AnyJsArrowFunctionParameters::AnyJsBinding(binding) => {
+                            // a binding as an argument can't have a type, so we need to raise a diagnostic
+                            return Some((binding.range(), ViolationKind::UntypedParameter));
+                        }
+                        AnyJsArrowFunctionParameters::JsParameters(parameters) => {
+                            if let Some(state) = has_untyped_parameter(&parameters) {
+                                return Some(state);
+                            }
+                        }
+                    }
+
+                    None
                 }
-
-                if is_iife(func) {
-                    return None;
-                }
-
-                if is_function_used_in_argument_or_array(func) {
-                    return None;
-                }
-
-                if is_higher_order_function(func) {
-                    return None;
-                }
-
-                if is_typed_function_expressions(func) {
-                    return None;
-                }
-
-                let func_range = func.syntax().text_range();
-                if let Ok(Some(AnyJsBinding::JsIdentifierBinding(id))) = func.id() {
-                    return Some(TextRange::new(
-                        func_range.start(),
-                        id.syntax().text_range().end(),
-                    ));
-                }
-
-                Some(func_range)
             }
-            AnyJsFunctionWithReturnType::JsMethodClassMember(method) => {
+            AnyEntityWithTypes::JsMethodClassMember(method) => {
                 if method.return_type_annotation().is_some() {
+                    let parameters = method.parameters().ok()?;
+                    if let Some(state) = has_untyped_parameter(&parameters) {
+                        return Some(state);
+                    }
                     return None;
                 }
-
-                Some(method.node_text_range())
+                Some((method.node_text_range(), ViolationKind::UntypedMember))
             }
-            AnyJsFunctionWithReturnType::JsGetterClassMember(getter) => {
+            AnyEntityWithTypes::JsGetterClassMember(getter) => {
                 if getter.return_type().is_some() {
                     return None;
                 }
 
-                Some(getter.node_text_range())
+                Some((getter.node_text_range(), ViolationKind::UntypedMember))
             }
-            AnyJsFunctionWithReturnType::JsMethodObjectMember(method) => {
+            AnyEntityWithTypes::JsMethodObjectMember(method) => {
                 if method.return_type_annotation().is_some() {
+                    let parameters = method.parameters().ok()?;
+
+                    if let Some(state) = has_untyped_parameter(&parameters) {
+                        return Some(state);
+                    }
                     return None;
                 }
 
-                Some(method.node_text_range())
+                Some((method.node_text_range(), ViolationKind::UntypedMember))
             }
-            AnyJsFunctionWithReturnType::JsGetterObjectMember(getter) => {
+            AnyEntityWithTypes::JsGetterObjectMember(getter) => {
                 if getter.return_type().is_some() {
                     return None;
                 }
 
-                Some(getter.node_text_range())
+                Some((getter.node_text_range(), ViolationKind::UntypedMember))
+            }
+            AnyEntityWithTypes::TsMethodSignatureTypeMember(member) => {
+                if member.return_type_annotation().is_some() {
+                    let parameters = member.parameters().ok()?;
+                    if let Some(state) = has_untyped_parameter(&parameters) {
+                        return Some(state);
+                    }
+                    return None;
+                }
+
+                Some((member.range(), ViolationKind::UntypedMember))
+            }
+            AnyEntityWithTypes::TsCallSignatureTypeMember(member) => {
+                if member.return_type_annotation().is_some() {
+                    let parameters = member.parameters().ok()?;
+                    if let Some(state) = has_untyped_parameter(&parameters) {
+                        return Some(state);
+                    }
+
+                    return None;
+                }
+                Some((member.range(), ViolationKind::UntypedMember))
+            }
+            AnyEntityWithTypes::TsMethodSignatureClassMember(member) => {
+                if member.return_type_annotation().is_some() {
+                    return None;
+                }
+                Some((member.range(), ViolationKind::UntypedMember))
+            }
+            AnyEntityWithTypes::TsGetterSignatureClassMember(member) => {
+                if member.return_type().is_some() {
+                    return None;
+                }
+                Some((member.range(), ViolationKind::UntypedMember))
+            }
+            AnyEntityWithTypes::TsDeclareFunctionDeclaration(decl) => {
+                if decl.return_type_annotation().is_some() {
+                    return None;
+                }
+                Some((decl.range(), ViolationKind::UntypedDeclaration))
+            }
+            AnyEntityWithTypes::TsDeclareFunctionExportDefaultDeclaration(decl) => {
+                if decl.return_type_annotation().is_some() {
+                    let parameters = decl.parameters().ok()?;
+                    if let Some(state) = has_untyped_parameter(&parameters) {
+                        return Some(state);
+                    }
+                    return None;
+                }
+                Some((decl.range(), ViolationKind::UntypedDeclaration))
+            }
+            AnyEntityWithTypes::JsVariableDeclarator(declarator) => {
+                handle_variable_declarator(declarator)
+            }
+            AnyEntityWithTypes::JsConstructorClassMember(constructor) => {
+                let parameters = constructor.parameters().ok()?;
+
+                let parameters = parameters
+                    .parameters()
+                    .iter()
+                    .flatten()
+                    .filter_map(|parameter| parameter.as_any_js_formal_parameter().cloned())
+                    .filter_map(|parameter| parameter.as_js_formal_parameter().cloned());
+                for parameter in parameters {
+                    if let Some(state) = parameter_has_not_type(&parameter) {
+                        return Some(state);
+                    }
+                }
+
+                None
+            }
+            AnyEntityWithTypes::JsSetterObjectMember(setter) => {
+                let parameter = setter.parameter().ok()?;
+                let parameter = parameter.as_js_formal_parameter()?;
+                if let Some(state) = parameter_has_not_type(parameter) {
+                    return Some(state);
+                }
+                None
+            }
+            AnyEntityWithTypes::JsSetterClassMember(setter) => {
+                let parameter = setter.parameter().ok()?;
+                let parameter = parameter.as_js_formal_parameter()?;
+                if let Some(state) = parameter_has_not_type(parameter) {
+                    return Some(state);
+                }
+                None
             }
         }
     }
 
-    fn diagnostic(_: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
+    fn text_range(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<TextRange> {
+        Some(ctx.query().syntax().first_token()?.text_trimmed_range())
+    }
+
+    fn diagnostic(
+        _ctx: &RuleContext<Self>,
+        (range, violation): &Self::State,
+    ) -> Option<RuleDiagnostic> {
         Some(
             RuleDiagnostic::new(
                 rule_category!(),
-                state,
-                markup! {
-                    "Missing return type on function."
-                },
+                range,
+                violation.as_message(),
             )
             .note(markup! {
-                "Declaring the return type makes the code self-documenting and can speed up TypeScript type checking."
+                "Declaring the type makes the code self-documented and can speed up TypeScript type checking."
             })
-            .note(markup! {
-                "Add a return type annotation."
-            }),
+            .note(violation.as_advice()),
         )
     }
 }
@@ -339,7 +620,7 @@ fn is_direct_const_assertion_in_arrow_functions(func: &AnyJsFunction) -> bool {
         return false;
     };
 
-    ts_ref.text() == "const"
+    ts_ref.to_trimmed_text().text() == "const"
 }
 
 /// Checks if a function is allowed within specific expression contexts.
@@ -355,11 +636,93 @@ fn is_direct_const_assertion_in_arrow_functions(func: &AnyJsFunction) -> bool {
 /// JS_ARRAY_ELEMENT_LIST:
 /// - `[function () {}, () => {}];`
 ///
-fn is_function_used_in_argument_or_array(func: &AnyJsFunction) -> bool {
+fn is_function_used_in_argument(func: &AnyJsFunction) -> bool {
     matches!(
         func.syntax().parent().kind(),
-        Some(JsSyntaxKind::JS_CALL_ARGUMENT_LIST | JsSyntaxKind::JS_ARRAY_ELEMENT_LIST)
+        Some(JsSyntaxKind::JS_CALL_ARGUMENT_LIST)
     )
+}
+
+/// Checks whether a function can be inlined without being tagged with a type.
+///
+/// # Examples
+///
+/// ```ts
+/// const x: Type = { prop: () => {} }
+/// f({ prop: () => {} })
+/// ```
+///
+fn can_inline_function(func: &AnyJsFunction) -> bool {
+    let object_expression = func.syntax().ancestors().find_map(JsObjectExpression::cast);
+
+    let Some(object_expression) = object_expression else {
+        return false;
+    };
+
+    for ancestor in object_expression.syntax().ancestors() {
+        if let Some(declarator) = JsVariableDeclarator::cast_ref(&ancestor) {
+            if declarator.variable_annotation().is_some() {
+                return true;
+            }
+        }
+
+        if JsCallExpression::can_cast(ancestor.kind()) {
+            return true;
+        }
+    }
+
+    false
+}
+
+/// Checks where the arrow function is inlined inside a typed return statement or arrow function
+///
+/// # Examples
+///
+/// ```ts
+/// function getObjectWithFunction(): Behavior {
+///   return {
+///     attribute: 'value',
+///     func: function myFunc(): string { return "value" },
+///     arrowFunc: () => {},
+///   }
+/// }
+/// ```
+///
+/// ```ts
+/// const getObjectWithFunction1 = (): Behavior => {
+///   return {
+///     namedFunc: function myFunc(): string { return "value" },
+///     arrowFunc: () => {},
+///   }
+/// }
+/// ```
+fn is_function_inside_typed_return(func: &AnyJsFunction) -> bool {
+    let return_statement = func.syntax().ancestors().find_map(JsReturnStatement::cast);
+
+    let Some(return_statement) = return_statement else {
+        return false;
+    };
+
+    for ancestor in return_statement.syntax().ancestors() {
+        if let Some(function_declaration) = JsFunctionDeclaration::cast_ref(&ancestor) {
+            if function_declaration.return_type_annotation().is_some() {
+                return true;
+            }
+        }
+
+        if let Some(function_expression) = JsArrowFunctionExpression::cast_ref(&ancestor) {
+            if function_expression.return_type_annotation().is_some() {
+                return true;
+            }
+        }
+    }
+
+    false
+}
+
+/// Check if a function is an arrow function
+fn is_arrow_func(func: &AnyJsFunction) -> bool {
+    matches!(func, AnyJsFunction::JsArrowFunctionExpression(_))
 }
 
 /// Checks if a function is an IIFE (Immediately Invoked Function Expressions)
@@ -468,7 +831,7 @@ fn is_variable_declarator_with_type_annotation(syntax: &SyntaxNode<JsLanguage>) 
 
 /// Checks if a function is a default parameter with a type annotation.
 ///
-/// # Examples
+/// ## Example
 ///
 /// ```typescript
 /// type CallBack = () => void;
@@ -533,20 +896,212 @@ fn is_property_of_object_with_type(syntax: &SyntaxNode<JsLanguage>) -> bool {
 /// const castTyped = <() => string>(() => '');
 /// ```
 fn is_type_assertion(syntax: &SyntaxNode<JsLanguage>) -> bool {
-    fn is_assertion_kind(kind: JsSyntaxKind) -> bool {
+    fn is_attribute_kind(kind: JsSyntaxKind) -> bool {
         matches!(
             kind,
             JsSyntaxKind::TS_AS_EXPRESSION | JsSyntaxKind::TS_TYPE_ASSERTION_EXPRESSION
         )
     }
 
-    syntax.parent().map_or(false, |parent| {
+    syntax.parent().is_some_and(|parent| {
         if parent.kind() == JsSyntaxKind::JS_PARENTHESIZED_EXPRESSION {
             parent
                 .parent()
-                .is_some_and(|grandparent| is_assertion_kind(grandparent.kind()))
+                .is_some_and(|grandparent| is_attribute_kind(grandparent.kind()))
         } else {
-            is_assertion_kind(parent.kind())
+            is_attribute_kind(parent.kind())
         }
     })
+}
+
+fn handle_any_function(func: &AnyJsFunction) -> Option<State> {
+    if func.return_type_annotation().is_some() {
+        return None;
+    }
+
+    if is_direct_const_assertion_in_arrow_functions(func) {
+        return None;
+    }
+
+    if is_iife(func) {
+        return None;
+    }
+
+    // TODO: why only arrow functions are ignored inside typed return?
+    // see getObjectWithFunction in valid.ts test
+    if is_arrow_func(func) && (can_inline_function(func) || is_function_inside_typed_return(func)) {
+        return None;
+    }
+
+    if is_higher_order_function(func) {
+        return None;
+    }
+
+    if is_typed_function_expressions(func) {
+        return None;
+    }
+
+    let func_range = func.syntax().text_trimmed_range();
+    if let Ok(Some(AnyJsBinding::JsIdentifierBinding(id))) = func.id() {
+        return Some((
+            TextRange::new(func_range.start(), id.syntax().text_trimmed_range().end()),
+            ViolationKind::UntypedFunction,
+        ));
+    }
+
+    Some((func_range, ViolationKind::UntypedFunction))
+}
+
+/// Checks if a variable declarator needs to have an explicit type.
+fn handle_variable_declarator(declarator: &JsVariableDeclarator) -> Option<State> {
+    // Explicit annotation is always sufficient
+    let has_explicit_type = declarator
+        .variable_annotation()
+        .is_some_and(|ty| ty.as_ts_type_annotation().is_some_and(|ty| ty.ty().is_ok()));
+    if has_explicit_type {
+        return None;
+    }
+
+    let variable_declaration = declarator
+        .parent::<JsVariableDeclaratorList>()?
+        .parent::<JsVariableDeclaration>()?;
+    let is_top_level = declarator
+        .syntax()
+        .ancestors()
+        .find_map(JsVariableStatement::cast)
+        .is_some_and(|statement| {
+            statement
+                .syntax()
+                .parent()
+                .is_some_and(|parent| JsModuleItemList::can_cast(parent.kind()))
+        })
+        || variable_declaration
+            .parent::<JsVariableDeclarationClause>()
+            .is_some();
+
+    if !is_top_level {
+        return None;
+    }
+
+    let initializer_expression = declarator
+        .initializer()
+        .and_then(|init| init.expression().ok())
+        .map(|expr| expr.omit_parentheses());
+
+    let is_const = variable_declaration.is_const();
+
+    if let Some(initializer_expression) = initializer_expression {
+        if is_allowed_in_untyped_expression(&initializer_expression, is_const) {
+            return None;
+        }
+    } else if is_const {
+        // `const` without RHS is invalid anyway and should be reported elsewhere.
+        return None;
+    }
+
+    Some((
+        declarator.id().ok()?.syntax().text_trimmed_range(),
+        ViolationKind::UntypedVariable,
+    ))
+}
+
+/// Checks if an expression can be part of an untyped expression or will be checked separately.
+///
+/// This returns true for constructs that are trivially understood by the reader and the compiler
+/// without following any other definitions, such as literals and objects built of literals,
+/// as well as type assertions.
+///
+/// If `allow_placeholders` is false, excludes `null` and `undefined`.
+fn is_allowed_in_untyped_expression(expr: &AnyJsExpression, allow_placeholders: bool) -> bool {
+    // `undefined` is not a trivially inferrable type for some reason
+    let is_undefined_literal = matches!(expr.as_static_value(), Some(StaticValue::Undefined(_)));
+    let rhs_is_null = matches!(
+        expr,
+        AnyJsExpression::AnyJsLiteralExpression(AnyJsLiteralExpression::JsNullLiteralExpression(_))
+    );
+    let is_trivial_rhs = expr.has_trivially_inferrable_type()
+        || matches!(
+            expr,
+            // Casts are already fine, no less clear than annotations.
+            AnyJsExpression::TsAsExpression(_) | AnyJsExpression::TsTypeAssertionExpression(_)
+        );
+
+    if matches!(
+        expr,
+        AnyJsExpression::JsArrowFunctionExpression(_) | AnyJsExpression::JsFunctionExpression(_)
+    ) {
+        // We'll check functions separately
+        return true;
+    }
+
+    // Allow assignment of some trivial object literals.
+    if let AnyJsExpression::JsObjectExpression(object_expr) = expr {
+        let has_only_allowed_members = object_expr.members().iter().all(|member| {
+            let Ok(member) = member else { return true };
+            match member {
+                // Functions are checked separately, do not produce a bogus
+                // diagnostic that will be resolved by adding types to that function
+                AnyJsObjectMember::JsGetterObjectMember(_)
+                | AnyJsObjectMember::JsSetterObjectMember(_)
+                | AnyJsObjectMember::JsMethodObjectMember(_) => true,
+                AnyJsObjectMember::JsBogusMember(_) => true,
+                AnyJsObjectMember::JsPropertyObjectMember(prop) => match prop.value() {
+                    // Recurse into regular properties
+                    Ok(value) => is_allowed_in_untyped_expression(&value, allow_placeholders),
+                    Err(_) => true,
+                },
+                // Anything else is too complicated to mentally parse without types
+                _ => false,
+            }
+        });
+        if has_only_allowed_members {
+            return true;
+        }
+    }
+
+    // Const assignments of trivial expressions such as literals
+    // can remain unannotated.
+    // Let assignments are slightly different: init-less, null and
+    // undefined usually indicate "we'll assign this value elsewhere".
+    // Require types in those cases, but still allow other literals
+    // as assignments of other types to those won't compile.
+    if allow_placeholders {
+        is_trivial_rhs || is_undefined_literal
+    } else {
+        is_trivial_rhs && !rhs_is_null
+    }
+}
+
+fn has_untyped_parameter(parameters: &JsParameters) -> Option<State> {
+    let parameters = parameters
+        .items()
+        .iter()
+        .flatten()
+        .filter_map(|parameter| parameter.as_any_js_formal_parameter().cloned())
+        .filter_map(|parameter| parameter.as_js_formal_parameter().cloned());
+    for parameter in parameters {
+        if let Some(state) = parameter_has_not_type(&parameter) {
+            return Some(state);
+        }
+    }
+
+    None
+}
+
+/// The formal parameter is triggered if:
+/// - it doesn't have any type
+/// - it its type is `any`
+fn parameter_has_not_type(parameter: &JsFormalParameter) -> Option<State> {
+    let ty = parameter.type_annotation();
+
+    if let Some(ty) = ty {
+        let ty = ty.ty().ok()?;
+        if matches!(ty, AnyTsType::TsAnyType(_)) {
+            Some((ty.range(), ViolationKind::AnyParameter))
+        } else {
+            None
+        }
+    } else {
+        Some((parameter.range(), ViolationKind::UntypedParameter))
+    }
 }

@@ -1,8 +1,8 @@
 use biome_analyze::{
-    context::RuleContext, declare_lint_rule, ActionCategory, Ast, FixKind, Rule, RuleDiagnostic,
-    RuleSource,
+    Ast, FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
+use biome_diagnostics::Severity;
 use biome_js_factory::make;
 use biome_js_syntax::{AnyJsTryStatement, JsStatementList, TextRange};
 use biome_rowan::{AstNode, AstNodeList, BatchMutationExt};
@@ -70,6 +70,7 @@ declare_lint_rule! {
         language: "js",
         sources: &[RuleSource::Eslint("no-useless-catch")],
         recommended: true,
+        severity: Severity::Information,
         fix_kind: FixKind::Unsafe,
     }
 }
@@ -99,7 +100,7 @@ impl Rule for NoUselessCatch {
             .as_js_identifier_binding()?
             .name_token()
             .ok()?;
-        let catch_err_name = catch_binding_err.text();
+        let catch_err_name = catch_binding_err.text_trimmed();
 
         let first_statement = catch_body_statements.first()?;
         let js_throw_statement = first_statement.as_js_throw_statement()?;
@@ -107,9 +108,9 @@ impl Rule for NoUselessCatch {
             .argument()
             .ok()?
             .as_js_identifier_expression()?
-            .text();
+            .to_trimmed_text();
 
-        if throw_ident.eq(catch_err_name) {
+        if throw_ident.text().eq(catch_err_name) {
             Some(js_throw_statement.syntax().text_trimmed_range())
         } else {
             None
@@ -154,7 +155,7 @@ impl Rule for NoUselessCatch {
         };
 
         Some(JsRuleAction::new(
-            ActionCategory::QuickFix,
+            ctx.metadata().action_category(ctx.category(), ctx.group()),
             ctx.metadata().applicability(),
             markup!("Remove the "<Emphasis>{note}</Emphasis>" clause.").to_owned(),
             mutation,

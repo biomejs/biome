@@ -1,0 +1,54 @@
+---
+source: crates/biome_module_graph/tests/snap/mod.rs
+expression: content
+---
+# `/src/index.ts`
+
+## Source
+
+```ts
+/**
+ * @returns {string}
+ */
+function foo() {}
+
+export { foo };
+```
+
+## Module Info
+
+```
+Exports {
+  "foo" => {
+    ExportOwnExport => JsOwnExport::Binding(0)
+  }
+}
+Imports {
+  No imports
+}
+```
+
+## Exported Bindings
+
+```
+BindingId(0) => JsBindingData {
+  Name: foo,
+  Type: Module(0) TypeId(0),
+  JSDoc comment: JsDoc(
+    @returns {string}
+  ),
+  Declaration kind: HoistedValue
+}
+```
+
+## Registered types
+
+```
+Module TypeId(0) => sync Function "foo" {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: unknown reference
+}
+```

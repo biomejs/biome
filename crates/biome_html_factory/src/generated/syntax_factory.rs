@@ -1,5 +1,6 @@
 //! Generated file, do not edit by hand, see `xtask/codegen`
 
+#![allow(unused_mut)]
 use biome_html_syntax::{HtmlSyntaxKind, HtmlSyntaxKind::*, T, *};
 use biome_rowan::{
     AstNode, ParsedChildren, RawNodeSlots, RawSyntaxNode, SyntaxFactory, SyntaxKind,
@@ -8,7 +9,6 @@ use biome_rowan::{
 pub struct HtmlSyntaxFactory;
 impl SyntaxFactory for HtmlSyntaxFactory {
     type Kind = HtmlSyntaxKind;
-    #[allow(unused_mut)]
     fn make_syntax(
         kind: Self::Kind,
         children: ParsedChildren<Self::Kind>,
@@ -22,7 +22,7 @@ impl SyntaxFactory for HtmlSyntaxFactory {
                 let mut slots: RawNodeSlots<2usize> = RawNodeSlots::default();
                 let mut current_element = elements.next();
                 if let Some(element) = &current_element {
-                    if HtmlName::can_cast(element.kind()) {
+                    if HtmlAttributeName::can_cast(element.kind()) {
                         slots.mark_present();
                         current_element = elements.next();
                     }
@@ -69,6 +69,58 @@ impl SyntaxFactory for HtmlSyntaxFactory {
                 }
                 slots.into_node(HTML_ATTRIBUTE_INITIALIZER_CLAUSE, children)
             }
+            HTML_ATTRIBUTE_NAME => {
+                let mut elements = (&children).into_iter();
+                let mut slots: RawNodeSlots<1usize> = RawNodeSlots::default();
+                let mut current_element = elements.next();
+                if let Some(element) = &current_element {
+                    if element.kind() == HTML_LITERAL {
+                        slots.mark_present();
+                        current_element = elements.next();
+                    }
+                }
+                slots.next_slot();
+                if current_element.is_some() {
+                    return RawSyntaxNode::new(
+                        HTML_ATTRIBUTE_NAME.to_bogus(),
+                        children.into_iter().map(Some),
+                    );
+                }
+                slots.into_node(HTML_ATTRIBUTE_NAME, children)
+            }
+            HTML_CDATA_SECTION => {
+                let mut elements = (&children).into_iter();
+                let mut slots: RawNodeSlots<3usize> = RawNodeSlots::default();
+                let mut current_element = elements.next();
+                if let Some(element) = &current_element {
+                    if element.kind() == T!["<![CDATA["] {
+                        slots.mark_present();
+                        current_element = elements.next();
+                    }
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element {
+                    if element.kind() == HTML_LITERAL {
+                        slots.mark_present();
+                        current_element = elements.next();
+                    }
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element {
+                    if element.kind() == T!["]]>"] {
+                        slots.mark_present();
+                        current_element = elements.next();
+                    }
+                }
+                slots.next_slot();
+                if current_element.is_some() {
+                    return RawSyntaxNode::new(
+                        HTML_CDATA_SECTION.to_bogus(),
+                        children.into_iter().map(Some),
+                    );
+                }
+                slots.into_node(HTML_CDATA_SECTION, children)
+            }
             HTML_CLOSING_ELEMENT => {
                 let mut elements = (&children).into_iter();
                 let mut slots: RawNodeSlots<4usize> = RawNodeSlots::default();
@@ -88,7 +140,7 @@ impl SyntaxFactory for HtmlSyntaxFactory {
                 }
                 slots.next_slot();
                 if let Some(element) = &current_element {
-                    if HtmlName::can_cast(element.kind()) {
+                    if HtmlTagName::can_cast(element.kind()) {
                         slots.mark_present();
                         current_element = elements.next();
                     }
@@ -262,25 +314,6 @@ impl SyntaxFactory for HtmlSyntaxFactory {
                 }
                 slots.into_node(HTML_ELEMENT, children)
             }
-            HTML_NAME => {
-                let mut elements = (&children).into_iter();
-                let mut slots: RawNodeSlots<1usize> = RawNodeSlots::default();
-                let mut current_element = elements.next();
-                if let Some(element) = &current_element {
-                    if element.kind() == HTML_LITERAL {
-                        slots.mark_present();
-                        current_element = elements.next();
-                    }
-                }
-                slots.next_slot();
-                if current_element.is_some() {
-                    return RawSyntaxNode::new(
-                        HTML_NAME.to_bogus(),
-                        children.into_iter().map(Some),
-                    );
-                }
-                slots.into_node(HTML_NAME, children)
-            }
             HTML_OPENING_ELEMENT => {
                 let mut elements = (&children).into_iter();
                 let mut slots: RawNodeSlots<4usize> = RawNodeSlots::default();
@@ -293,7 +326,7 @@ impl SyntaxFactory for HtmlSyntaxFactory {
                 }
                 slots.next_slot();
                 if let Some(element) = &current_element {
-                    if HtmlName::can_cast(element.kind()) {
+                    if HtmlTagName::can_cast(element.kind()) {
                         slots.mark_present();
                         current_element = elements.next();
                     }
@@ -373,7 +406,7 @@ impl SyntaxFactory for HtmlSyntaxFactory {
                 }
                 slots.next_slot();
                 if let Some(element) = &current_element {
-                    if HtmlName::can_cast(element.kind()) {
+                    if HtmlTagName::can_cast(element.kind()) {
                         slots.mark_present();
                         current_element = elements.next();
                     }
@@ -426,6 +459,25 @@ impl SyntaxFactory for HtmlSyntaxFactory {
                     );
                 }
                 slots.into_node(HTML_STRING, children)
+            }
+            HTML_TAG_NAME => {
+                let mut elements = (&children).into_iter();
+                let mut slots: RawNodeSlots<1usize> = RawNodeSlots::default();
+                let mut current_element = elements.next();
+                if let Some(element) = &current_element {
+                    if element.kind() == HTML_LITERAL {
+                        slots.mark_present();
+                        current_element = elements.next();
+                    }
+                }
+                slots.next_slot();
+                if current_element.is_some() {
+                    return RawSyntaxNode::new(
+                        HTML_TAG_NAME.to_bogus(),
+                        children.into_iter().map(Some),
+                    );
+                }
+                slots.into_node(HTML_TAG_NAME, children)
             }
             HTML_ATTRIBUTE_LIST => {
                 Self::make_node_list_syntax(kind, children, AnyHtmlAttribute::can_cast)

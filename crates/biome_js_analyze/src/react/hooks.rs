@@ -1,22 +1,24 @@
-use crate::react::{is_react_call_api, ReactLibrary};
+use crate::react::{ReactLibrary, is_react_call_api};
 
 use biome_console::markup;
 use biome_deserialize::{
-    DeserializableTypes, DeserializableValue, DeserializationDiagnostic, DeserializationVisitor,
+    DeserializableTypes, DeserializableValue, DeserializationContext, DeserializationDiagnostic,
+    DeserializationVisitor,
 };
 use biome_diagnostics::Severity;
 use biome_js_semantic::{Capture, Closure, ClosureExtensions, SemanticModel};
 use biome_js_syntax::binding_ext::AnyJsBindingDeclaration;
 use biome_js_syntax::{
-    binding_ext::AnyJsIdentifierBinding, static_value::StaticValue, AnyJsExpression,
-    AnyJsMemberExpression, JsArrowFunctionExpression, JsCallExpression, JsFunctionExpression,
-    TextRange,
+    AnyJsExpression, AnyJsMemberExpression, JsArrowFunctionExpression, JsCallExpression,
+    JsFunctionExpression, TextRange, binding_ext::AnyJsIdentifierBinding,
+    static_value::StaticValue,
 };
 use biome_js_syntax::{JsArrayBindingPatternElement, JsSyntaxToken};
 use biome_rowan::AstNode;
 use rustc_hash::{FxHashMap, FxHashSet};
 use serde::{Deserialize, Serialize};
 
+use biome_analyze::QueryMatch;
 #[cfg(feature = "schemars")]
 use schemars::JsonSchema;
 
@@ -61,7 +63,7 @@ impl TryFrom<AnyJsExpression> for AnyJsFunctionExpression {
 impl ReactCallWithDependencyResult {
     /// Returns all [Reference] captured by the closure argument of the React hook.
     /// See [react_hook_with_dependency].
-    pub fn all_captures(&self, model: &SemanticModel) -> impl Iterator<Item = Capture> {
+    pub fn all_captures(&self, model: &SemanticModel) -> impl Iterator<Item = Capture> + use<> {
         self.closure_node
             .as_ref()
             .and_then(|node| AnyJsFunctionExpression::try_from(node.clone()).ok())
@@ -71,7 +73,10 @@ impl ReactCallWithDependencyResult {
                 closure
                     .descendents()
                     .flat_map(|closure| closure.all_captures())
-                    .filter(move |capture| !range.contains(capture.declaration_range().start()))
+                    .filter(move |capture| {
+                        !range.contains(capture.declaration_range().start())
+                            && range.contains(capture.node().text_range().start())
+                    })
             })
             .into_iter()
             .flatten()
@@ -79,7 +84,7 @@ impl ReactCallWithDependencyResult {
 
     /// Returns all dependencies of a React hook.
     /// See [react_hook_with_dependency]
-    pub fn all_dependencies(&self) -> impl Iterator<Item = AnyJsExpression> {
+    pub fn all_dependencies(&self) -> impl Iterator<Item = AnyJsExpression> + use<> {
         self.dependencies_node
             .as_ref()
             .and_then(|x| Some(x.as_js_array_expression()?.elements().into_iter()))
@@ -124,21 +129,12 @@ fn get_untrimmed_callee_name(call: &JsCallExpression) -> Option<JsSyntaxToken> {
     None
 }
 
-/// Checks whether the given function name belongs to a React component, based
-/// on the official convention for React component naming: React component names
-/// must start with a capital letter.
-///
-/// Source: https://react.dev/learn/reusing-logic-with-custom-hooks#hook-names-always-start-with-use
-pub(crate) fn is_react_component(name: &str) -> bool {
-    name.chars().next().is_some_and(char::is_uppercase)
-}
-
 /// Checks whether the given function name belongs to a React hook, based on the
 /// official convention for React hook naming: Hook names must start with `use`
 /// followed by a capital letter.
 ///
 /// Source: https://react.dev/learn/reusing-logic-with-custom-hooks#hook-names-always-start-with-use
-pub(crate) fn is_react_hook(name: &str) -> bool {
+pub(crate) fn is_react_hook_name(name: &str) -> bool {
     name.starts_with("use") && name.chars().nth(3).is_some_and(char::is_uppercase)
 }
 
@@ -146,7 +142,7 @@ pub(crate) fn is_react_hook(name: &str) -> bool {
 /// official convention for React hook naming: Hook names must start with `use`
 /// followed by a capital letter.
 ///
-/// See [is_react_hook()].
+/// See [is_react_hook_name()].
 pub(crate) fn is_react_hook_call(call: &JsCallExpression) -> bool {
     let Some(name) = get_untrimmed_callee_name(call) else {
         return false;
@@ -167,7 +163,7 @@ pub(crate) fn is_react_hook_call(call: &JsCallExpression) -> bool {
         }
     }
 
-    is_react_hook(name.text_trimmed())
+    is_react_hook_name(name.text_trimmed())
 }
 
 /// Returns the [TextRange] of the hook name; the node of the
@@ -186,7 +182,7 @@ pub(crate) fn is_react_hook_call(call: &JsCallExpression) -> bool {
 /// of all function that are considered hooks. See [ReactHookConfiguration].
 pub(crate) fn react_hook_with_dependency(
     call: &JsCallExpression,
-    hooks: &FxHashMap<String, ReactHookConfiguration>,
+    hooks: &FxHashMap<Box<str>, ReactHookConfiguration>,
     model: &SemanticModel,
 ) -> Option<ReactCallWithDependencyResult> {
     let expression = call.callee().ok()?.omit_parentheses();
@@ -226,7 +222,7 @@ pub(crate) fn react_hook_with_dependency(
 #[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub struct StableReactHookConfiguration {
     /// Name of the React hook
-    pub(crate) hook_name: String,
+    pub(crate) hook_name: Box<str>,
 
     /// The kind of (stable) result returned by the hook.
     pub(crate) result: StableHookResult,
@@ -274,7 +270,7 @@ impl JsonSchema for StableHookResult {
         "StableHookResult".to_owned()
     }
 
-    fn json_schema(_gen: &mut schemars::gen::SchemaGenerator) -> schemars::schema::Schema {
+    fn json_schema(_generator: &mut schemars::r#gen::SchemaGenerator) -> schemars::schema::Schema {
         use schemars::schema::*;
         Schema::Object(SchemaObject {
             subschemas: Some(Box::new(SubschemaValidation {
@@ -319,11 +315,11 @@ impl JsonSchema for StableHookResult {
 
 impl biome_deserialize::Deserializable for StableHookResult {
     fn deserialize(
+        ctx: &mut impl DeserializationContext,
         value: &impl DeserializableValue,
         name: &str,
-        diagnostics: &mut Vec<biome_deserialize::DeserializationDiagnostic>,
     ) -> Option<Self> {
-        value.deserialize(StableResultVisitor, name, diagnostics)
+        value.deserialize(ctx, StableResultVisitor, name)
     }
 }
 
@@ -337,14 +333,14 @@ impl DeserializationVisitor for StableResultVisitor {
 
     fn visit_array(
         self,
+        ctx: &mut impl DeserializationContext,
         items: impl Iterator<Item = Option<impl DeserializableValue>>,
         _range: TextRange,
         _name: &str,
-        diagnostics: &mut Vec<DeserializationDiagnostic>,
     ) -> Option<Self::Output> {
         let indices: Vec<u8> = items
             .filter_map(|value| {
-                DeserializableValue::deserialize(&value?, StableResultIndexVisitor, "", diagnostics)
+                DeserializableValue::deserialize(&value?, ctx, StableResultIndexVisitor, "")
             })
             .collect();
 
@@ -357,15 +353,15 @@ impl DeserializationVisitor for StableResultVisitor {
 
     fn visit_bool(
         self,
+        ctx: &mut impl DeserializationContext,
         value: bool,
         range: TextRange,
         _name: &str,
-        diagnostics: &mut Vec<DeserializationDiagnostic>,
     ) -> Option<Self::Output> {
         match value {
             true => Some(StableHookResult::Identity),
             false => {
-                diagnostics.push(
+                ctx.report(
                     DeserializationDiagnostic::new(
                         markup! { "This hook is configured to not have a stable result" },
                     )
@@ -379,19 +375,13 @@ impl DeserializationVisitor for StableResultVisitor {
 
     fn visit_number(
         self,
+        ctx: &mut impl DeserializationContext,
         value: biome_deserialize::TextNumber,
         range: TextRange,
         name: &str,
-        diagnostics: &mut Vec<DeserializationDiagnostic>,
     ) -> Option<Self::Output> {
-        StableResultIndexVisitor::visit_number(
-            StableResultIndexVisitor,
-            value,
-            range,
-            name,
-            diagnostics,
-        )
-        .map(|index| StableHookResult::Indices(vec![index]))
+        StableResultIndexVisitor::visit_number(StableResultIndexVisitor, ctx, value, range, name)
+            .map(|index| StableHookResult::Indices(vec![index]))
     }
 }
 
@@ -403,15 +393,15 @@ impl DeserializationVisitor for StableResultIndexVisitor {
 
     fn visit_number(
         self,
+        ctx: &mut impl DeserializationContext,
         value: biome_deserialize::TextNumber,
         range: TextRange,
         _name: &str,
-        diagnostics: &mut Vec<DeserializationDiagnostic>,
     ) -> Option<Self::Output> {
         match value.parse::<u8>() {
             Ok(index) => Some(index),
             Err(_) => {
-                diagnostics.push(DeserializationDiagnostic::new_out_of_bound_integer(
+                ctx.report(DeserializationDiagnostic::new_out_of_bound_integer(
                     0, 255, range,
                 ));
                 None
@@ -452,7 +442,7 @@ pub fn is_binding_react_stable(
     let Some(callee) = declarator
         .initializer()
         .and_then(|initializer| initializer.expression().ok())
-        .and_then(|initializer| initializer.as_js_call_expression()?.callee().ok())
+        .and_then(|initializer| unwrap_to_call_expression(initializer)?.callee().ok())
     else {
         return false;
     };
@@ -461,7 +451,7 @@ pub fn is_binding_react_stable(
     };
     let function_name = function_name.text_trimmed();
     stable_config.iter().any(|config| {
-        if !config.builtin && config.hook_name.as_str() != function_name {
+        if !config.builtin && config.hook_name.as_ref() != function_name {
             return false;
         }
 
@@ -479,12 +469,38 @@ pub fn is_binding_react_stable(
     })
 }
 
+/// Unwrap the expression to a call expression without changing the result of the expression,
+/// such as type assertions.
+fn unwrap_to_call_expression(mut expression: AnyJsExpression) -> Option<JsCallExpression> {
+    loop {
+        match expression {
+            AnyJsExpression::JsCallExpression(expr) => return Some(expr),
+            AnyJsExpression::JsParenthesizedExpression(expr) => {
+                expression = expr.expression().ok()?;
+            }
+            AnyJsExpression::JsSequenceExpression(expr) => {
+                expression = expr.right().ok()?;
+            }
+            AnyJsExpression::TsAsExpression(expr) => {
+                expression = expr.expression().ok()?;
+            }
+            AnyJsExpression::TsSatisfiesExpression(expr) => {
+                expression = expr.expression().ok()?;
+            }
+            AnyJsExpression::TsNonNullAssertionExpression(expr) => {
+                expression = expr.expression().ok()?;
+            }
+            _ => return None,
+        }
+    }
+}
+
 #[cfg(test)]
 mod test {
     use super::*;
     use crate::react::hooks::is_react_hook_call;
     use biome_js_parser::JsParserOptions;
-    use biome_js_semantic::{semantic_model, SemanticModelOptions};
+    use biome_js_semantic::{SemanticModelOptions, semantic_model};
     use biome_js_syntax::JsFileSource;
 
     #[test]

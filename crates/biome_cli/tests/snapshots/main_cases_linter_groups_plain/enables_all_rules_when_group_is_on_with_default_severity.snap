@@ -1,0 +1,63 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `biome.json`
+
+```json
+{
+  "linter": {
+    "rules": {
+      "style": "on"
+    }
+  }
+}
+```
+
+## `test1.js`
+
+```js
+function f() { console.log(arguments); }
+
+```
+
+# Emitted Messages
+
+```block
+test1.js:1:28 lint/complexity/noArguments ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use the rest parameters instead of arguments.
+  
+  > 1 │ function f() { console.log(arguments); }
+      │                            ^^^^^^^^^
+    2 │ 
+  
+  i arguments does not have Array.prototype methods and can be inconvenient to use.
+  
+
+```
+
+```block
+test1.js:1:10 lint/correctness/noUnusedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This function f is unused.
+  
+  > 1 │ function f() { console.log(arguments); }
+      │          ^
+    2 │ 
+  
+  i Unused variables are often the result of an incomplete refactoring, typos, or other sources of bugs.
+  
+  i Unsafe fix: If this is intentional, prepend f with an underscore.
+  
+    1   │ - function·f()·{·console.log(arguments);·}
+      1 │ + function·_f()·{·console.log(arguments);·}
+    2 2 │   
+  
+
+```
+
+```block
+Checked 1 file in <TIME>. No fixes applied.
+Found 2 warnings.
+```

@@ -1,0 +1,669 @@
+---
+source: crates/biome_css_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```css
+/*
+  ERROR CASE 1: Missing parentheses after "not"
+  - "not" must be immediately followed by "("
+*/
+@container name style(not) {
+}
+
+/*
+  ERROR CASE 2: Empty parentheses
+  - "not()" is missing a valid query or declaration inside
+*/
+@container name style(not()) {
+}
+
+/*
+  ERROR CASE 3: Extra closing parenthesis
+  - The "(...)) )" leads to unbalanced parentheses
+*/
+@container name style(not((color: red)) ) ) {
+}
+
+/*
+  ERROR CASE 4: Incomplete logical operator
+  - "and" is started but no query follows
+*/
+@container name style(not((color: red) and )) {
+}
+
+/*
+  ERROR CASE 5: Unexpected token
+  - "???" doesn't fit a valid property or query expression
+*/
+@container name style(not((color: red) ??? (background: blue))) {
+}
+
+/*
+  ERROR CASE 6: Missing colon in declaration
+  - "not((color red))" should be "not((color: red))"
+*/
+@container name style(not((color red))) {
+}
+
+```
+
+
+## AST
+
+```
+CssRoot {
+    bom_token: missing (optional),
+    rules: CssRuleList [
+        CssAtRule {
+            at_token: AT@0..101 "@" [Comments("/*\n  ERROR CASE 1: Mi ..."), Newline("\n")] [],
+            rule: CssContainerAtRule {
+                container_token: CONTAINER_KW@101..111 "container" [] [Whitespace(" ")],
+                name: CssCustomIdentifier {
+                    value_token: IDENT@111..116 "name" [] [Whitespace(" ")],
+                },
+                query: CssContainerStyleQueryInParens {
+                    style_token: STYLE_KW@116..121 "style" [] [],
+                    l_paren_token: L_PAREN@121..122 "(" [] [],
+                    query: CssContainerStyleNotQuery {
+                        not_token: NOT_KW@122..125 "not" [] [],
+                        query: missing (required),
+                    },
+                    r_paren_token: R_PAREN@125..127 ")" [] [Whitespace(" ")],
+                },
+                block: CssRuleBlock {
+                    l_curly_token: L_CURLY@127..128 "{" [] [],
+                    rules: CssRuleList [],
+                    r_curly_token: R_CURLY@128..130 "}" [Newline("\n")] [],
+                },
+            },
+        },
+        CssAtRule {
+            at_token: AT@130..232 "@" [Newline("\n"), Newline("\n"), Comments("/*\n  ERROR CASE 2: Em ..."), Newline("\n")] [],
+            rule: CssContainerAtRule {
+                container_token: CONTAINER_KW@232..242 "container" [] [Whitespace(" ")],
+                name: CssCustomIdentifier {
+                    value_token: IDENT@242..247 "name" [] [Whitespace(" ")],
+                },
+                query: CssContainerStyleQueryInParens {
+                    style_token: STYLE_KW@247..252 "style" [] [],
+                    l_paren_token: L_PAREN@252..253 "(" [] [],
+                    query: CssContainerStyleNotQuery {
+                        not_token: NOT_KW@253..256 "not" [] [],
+                        query: CssContainerStyleInParens {
+                            l_paren_token: L_PAREN@256..257 "(" [] [],
+                            query: missing (required),
+                            r_paren_token: R_PAREN@257..258 ")" [] [],
+                        },
+                    },
+                    r_paren_token: R_PAREN@258..260 ")" [] [Whitespace(" ")],
+                },
+                block: CssRuleBlock {
+                    l_curly_token: L_CURLY@260..261 "{" [] [],
+                    rules: CssRuleList [],
+                    r_curly_token: R_CURLY@261..263 "}" [Newline("\n")] [],
+                },
+            },
+        },
+        CssAtRule {
+            at_token: AT@263..365 "@" [Newline("\n"), Newline("\n"), Comments("/*\n  ERROR CASE 3: Ex ..."), Newline("\n")] [],
+            rule: CssContainerAtRule {
+                container_token: CONTAINER_KW@365..375 "container" [] [Whitespace(" ")],
+                name: CssCustomIdentifier {
+                    value_token: IDENT@375..380 "name" [] [Whitespace(" ")],
+                },
+                query: CssContainerStyleQueryInParens {
+                    style_token: STYLE_KW@380..385 "style" [] [],
+                    l_paren_token: L_PAREN@385..386 "(" [] [],
+                    query: CssContainerStyleNotQuery {
+                        not_token: NOT_KW@386..389 "not" [] [],
+                        query: CssContainerStyleInParens {
+                            l_paren_token: L_PAREN@389..390 "(" [] [],
+                            query: CssContainerStyleInParens {
+                                l_paren_token: L_PAREN@390..391 "(" [] [],
+                                query: CssDeclaration {
+                                    property: CssGenericProperty {
+                                        name: CssIdentifier {
+                                            value_token: IDENT@391..396 "color" [] [],
+                                        },
+                                        colon_token: COLON@396..398 ":" [] [Whitespace(" ")],
+                                        value: CssGenericComponentValueList [
+                                            CssIdentifier {
+                                                value_token: IDENT@398..401 "red" [] [],
+                                            },
+                                        ],
+                                    },
+                                    important: missing (optional),
+                                },
+                                r_paren_token: R_PAREN@401..402 ")" [] [],
+                            },
+                            r_paren_token: R_PAREN@402..404 ")" [] [Whitespace(" ")],
+                        },
+                    },
+                    r_paren_token: R_PAREN@404..406 ")" [] [Whitespace(" ")],
+                },
+                block: CssBogusBlock {
+                    items: [],
+                },
+            },
+        },
+        CssBogusRule {
+            items: [
+                R_PAREN@406..408 ")" [] [Whitespace(" ")],
+                L_CURLY@408..409 "{" [] [],
+                R_CURLY@409..411 "}" [Newline("\n")] [],
+            ],
+        },
+        CssAtRule {
+            at_token: AT@411..506 "@" [Newline("\n"), Newline("\n"), Comments("/*\n  ERROR CASE 4: In ..."), Newline("\n")] [],
+            rule: CssContainerAtRule {
+                container_token: CONTAINER_KW@506..516 "container" [] [Whitespace(" ")],
+                name: CssCustomIdentifier {
+                    value_token: IDENT@516..521 "name" [] [Whitespace(" ")],
+                },
+                query: CssContainerStyleQueryInParens {
+                    style_token: STYLE_KW@521..526 "style" [] [],
+                    l_paren_token: L_PAREN@526..527 "(" [] [],
+                    query: CssContainerStyleNotQuery {
+                        not_token: NOT_KW@527..530 "not" [] [],
+                        query: CssContainerStyleInParens {
+                            l_paren_token: L_PAREN@530..531 "(" [] [],
+                            query: CssContainerStyleAndQuery {
+                                left: CssContainerStyleInParens {
+                                    l_paren_token: L_PAREN@531..532 "(" [] [],
+                                    query: CssDeclaration {
+                                        property: CssGenericProperty {
+                                            name: CssIdentifier {
+                                                value_token: IDENT@532..537 "color" [] [],
+                                            },
+                                            colon_token: COLON@537..539 ":" [] [Whitespace(" ")],
+                                            value: CssGenericComponentValueList [
+                                                CssIdentifier {
+                                                    value_token: IDENT@539..542 "red" [] [],
+                                                },
+                                            ],
+                                        },
+                                        important: missing (optional),
+                                    },
+                                    r_paren_token: R_PAREN@542..544 ")" [] [Whitespace(" ")],
+                                },
+                                and_token: AND_KW@544..548 "and" [] [Whitespace(" ")],
+                                right: missing (required),
+                            },
+                            r_paren_token: R_PAREN@548..549 ")" [] [],
+                        },
+                    },
+                    r_paren_token: R_PAREN@549..551 ")" [] [Whitespace(" ")],
+                },
+                block: CssRuleBlock {
+                    l_curly_token: L_CURLY@551..552 "{" [] [],
+                    rules: CssRuleList [],
+                    r_curly_token: R_CURLY@552..554 "}" [Newline("\n")] [],
+                },
+            },
+        },
+        CssAtRule {
+            at_token: AT@554..655 "@" [Newline("\n"), Newline("\n"), Comments("/*\n  ERROR CASE 5: Un ..."), Newline("\n")] [],
+            rule: CssContainerAtRule {
+                container_token: CONTAINER_KW@655..665 "container" [] [Whitespace(" ")],
+                name: CssCustomIdentifier {
+                    value_token: IDENT@665..670 "name" [] [Whitespace(" ")],
+                },
+                query: CssContainerStyleQueryInParens {
+                    style_token: STYLE_KW@670..675 "style" [] [],
+                    l_paren_token: L_PAREN@675..676 "(" [] [],
+                    query: CssContainerStyleNotQuery {
+                        not_token: NOT_KW@676..679 "not" [] [],
+                        query: CssContainerStyleInParens {
+                            l_paren_token: L_PAREN@679..680 "(" [] [],
+                            query: CssContainerStyleInParens {
+                                l_paren_token: L_PAREN@680..681 "(" [] [],
+                                query: CssDeclaration {
+                                    property: CssGenericProperty {
+                                        name: CssIdentifier {
+                                            value_token: IDENT@681..686 "color" [] [],
+                                        },
+                                        colon_token: COLON@686..688 ":" [] [Whitespace(" ")],
+                                        value: CssGenericComponentValueList [
+                                            CssIdentifier {
+                                                value_token: IDENT@688..691 "red" [] [],
+                                            },
+                                        ],
+                                    },
+                                    important: missing (optional),
+                                },
+                                r_paren_token: R_PAREN@691..693 ")" [] [Whitespace(" ")],
+                            },
+                            r_paren_token: missing (required),
+                        },
+                    },
+                    r_paren_token: missing (required),
+                },
+                block: CssBogusBlock {
+                    items: [],
+                },
+            },
+        },
+        CssBogusRule {
+            items: [
+                ERROR_TOKEN@693..694 "?" [] [],
+                ERROR_TOKEN@694..695 "?" [] [],
+                ERROR_TOKEN@695..697 "?" [] [Whitespace(" ")],
+                L_PAREN@697..698 "(" [] [],
+            ],
+        },
+        CssQualifiedRule {
+            prelude: CssSelectorList [
+                CssCompoundSelector {
+                    nesting_selectors: CssNestedSelectorList [],
+                    simple_selector: CssTypeSelector {
+                        namespace: missing (optional),
+                        ident: CssIdentifier {
+                            value_token: IDENT@698..708 "background" [] [],
+                        },
+                    },
+                    sub_selectors: CssSubSelectorList [
+                        CssPseudoClassSelector {
+                            colon_token: COLON@708..710 ":" [] [Whitespace(" ")],
+                            class: CssPseudoClassIdentifier {
+                                name: CssIdentifier {
+                                    value_token: IDENT@710..714 "blue" [] [],
+                                },
+                            },
+                        },
+                    ],
+                },
+                missing separator,
+                CssBogusSelector {
+                    items: [
+                        R_PAREN@714..715 ")" [] [],
+                        R_PAREN@715..716 ")" [] [],
+                        R_PAREN@716..718 ")" [] [Whitespace(" ")],
+                    ],
+                },
+            ],
+            block: CssDeclarationOrRuleBlock {
+                l_curly_token: L_CURLY@718..719 "{" [] [],
+                items: CssDeclarationOrRuleList [],
+                r_curly_token: R_CURLY@719..721 "}" [Newline("\n")] [],
+            },
+        },
+        CssAtRule {
+            at_token: AT@721..828 "@" [Newline("\n"), Newline("\n"), Comments("/*\n  ERROR CASE 6: Mi ..."), Newline("\n")] [],
+            rule: CssBogusAtRule {
+                items: [
+                    CONTAINER_KW@828..838 "container" [] [Whitespace(" ")],
+                    CssCustomIdentifier {
+                        value_token: IDENT@838..843 "name" [] [Whitespace(" ")],
+                    },
+                    CssBogus {
+                        items: [
+                            STYLE_KW@843..848 "style" [] [],
+                            L_PAREN@848..849 "(" [] [],
+                            CssBogus {
+                                items: [
+                                    NOT_KW@849..852 "not" [] [],
+                                    CssBogus {
+                                        items: [
+                                            L_PAREN@852..853 "(" [] [],
+                                            CssBogus {
+                                                items: [
+                                                    L_PAREN@853..854 "(" [] [],
+                                                    CssBogus {
+                                                        items: [
+                                                            IDENT@854..860 "color" [] [Whitespace(" ")],
+                                                            IDENT@860..863 "red" [] [],
+                                                        ],
+                                                    },
+                                                    R_PAREN@863..864 ")" [] [],
+                                                ],
+                                            },
+                                            R_PAREN@864..865 ")" [] [],
+                                        ],
+                                    },
+                                ],
+                            },
+                            R_PAREN@865..867 ")" [] [Whitespace(" ")],
+                        ],
+                    },
+                    CssRuleBlock {
+                        l_curly_token: L_CURLY@867..868 "{" [] [],
+                        rules: CssRuleList [],
+                        r_curly_token: R_CURLY@868..870 "}" [Newline("\n")] [],
+                    },
+                ],
+            },
+        },
+    ],
+    eof_token: EOF@870..871 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: CSS_ROOT@0..871
+  0: (empty)
+  1: CSS_RULE_LIST@0..870
+    0: CSS_AT_RULE@0..130
+      0: AT@0..101 "@" [Comments("/*\n  ERROR CASE 1: Mi ..."), Newline("\n")] []
+      1: CSS_CONTAINER_AT_RULE@101..130
+        0: CONTAINER_KW@101..111 "container" [] [Whitespace(" ")]
+        1: CSS_CUSTOM_IDENTIFIER@111..116
+          0: IDENT@111..116 "name" [] [Whitespace(" ")]
+        2: CSS_CONTAINER_STYLE_QUERY_IN_PARENS@116..127
+          0: STYLE_KW@116..121 "style" [] []
+          1: L_PAREN@121..122 "(" [] []
+          2: CSS_CONTAINER_STYLE_NOT_QUERY@122..125
+            0: NOT_KW@122..125 "not" [] []
+            1: (empty)
+          3: R_PAREN@125..127 ")" [] [Whitespace(" ")]
+        3: CSS_RULE_BLOCK@127..130
+          0: L_CURLY@127..128 "{" [] []
+          1: CSS_RULE_LIST@128..128
+          2: R_CURLY@128..130 "}" [Newline("\n")] []
+    1: CSS_AT_RULE@130..263
+      0: AT@130..232 "@" [Newline("\n"), Newline("\n"), Comments("/*\n  ERROR CASE 2: Em ..."), Newline("\n")] []
+      1: CSS_CONTAINER_AT_RULE@232..263
+        0: CONTAINER_KW@232..242 "container" [] [Whitespace(" ")]
+        1: CSS_CUSTOM_IDENTIFIER@242..247
+          0: IDENT@242..247 "name" [] [Whitespace(" ")]
+        2: CSS_CONTAINER_STYLE_QUERY_IN_PARENS@247..260
+          0: STYLE_KW@247..252 "style" [] []
+          1: L_PAREN@252..253 "(" [] []
+          2: CSS_CONTAINER_STYLE_NOT_QUERY@253..258
+            0: NOT_KW@253..256 "not" [] []
+            1: CSS_CONTAINER_STYLE_IN_PARENS@256..258
+              0: L_PAREN@256..257 "(" [] []
+              1: (empty)
+              2: R_PAREN@257..258 ")" [] []
+          3: R_PAREN@258..260 ")" [] [Whitespace(" ")]
+        3: CSS_RULE_BLOCK@260..263
+          0: L_CURLY@260..261 "{" [] []
+          1: CSS_RULE_LIST@261..261
+          2: R_CURLY@261..263 "}" [Newline("\n")] []
+    2: CSS_AT_RULE@263..406
+      0: AT@263..365 "@" [Newline("\n"), Newline("\n"), Comments("/*\n  ERROR CASE 3: Ex ..."), Newline("\n")] []
+      1: CSS_CONTAINER_AT_RULE@365..406
+        0: CONTAINER_KW@365..375 "container" [] [Whitespace(" ")]
+        1: CSS_CUSTOM_IDENTIFIER@375..380
+          0: IDENT@375..380 "name" [] [Whitespace(" ")]
+        2: CSS_CONTAINER_STYLE_QUERY_IN_PARENS@380..406
+          0: STYLE_KW@380..385 "style" [] []
+          1: L_PAREN@385..386 "(" [] []
+          2: CSS_CONTAINER_STYLE_NOT_QUERY@386..404
+            0: NOT_KW@386..389 "not" [] []
+            1: CSS_CONTAINER_STYLE_IN_PARENS@389..404
+              0: L_PAREN@389..390 "(" [] []
+              1: CSS_CONTAINER_STYLE_IN_PARENS@390..402
+                0: L_PAREN@390..391 "(" [] []
+                1: CSS_DECLARATION@391..401
+                  0: CSS_GENERIC_PROPERTY@391..401
+                    0: CSS_IDENTIFIER@391..396
+                      0: IDENT@391..396 "color" [] []
+                    1: COLON@396..398 ":" [] [Whitespace(" ")]
+                    2: CSS_GENERIC_COMPONENT_VALUE_LIST@398..401
+                      0: CSS_IDENTIFIER@398..401
+                        0: IDENT@398..401 "red" [] []
+                  1: (empty)
+                2: R_PAREN@401..402 ")" [] []
+              2: R_PAREN@402..404 ")" [] [Whitespace(" ")]
+          3: R_PAREN@404..406 ")" [] [Whitespace(" ")]
+        3: CSS_BOGUS_BLOCK@406..406
+    3: CSS_BOGUS_RULE@406..411
+      0: R_PAREN@406..408 ")" [] [Whitespace(" ")]
+      1: L_CURLY@408..409 "{" [] []
+      2: R_CURLY@409..411 "}" [Newline("\n")] []
+    4: CSS_AT_RULE@411..554
+      0: AT@411..506 "@" [Newline("\n"), Newline("\n"), Comments("/*\n  ERROR CASE 4: In ..."), Newline("\n")] []
+      1: CSS_CONTAINER_AT_RULE@506..554
+        0: CONTAINER_KW@506..516 "container" [] [Whitespace(" ")]
+        1: CSS_CUSTOM_IDENTIFIER@516..521
+          0: IDENT@516..521 "name" [] [Whitespace(" ")]
+        2: CSS_CONTAINER_STYLE_QUERY_IN_PARENS@521..551
+          0: STYLE_KW@521..526 "style" [] []
+          1: L_PAREN@526..527 "(" [] []
+          2: CSS_CONTAINER_STYLE_NOT_QUERY@527..549
+            0: NOT_KW@527..530 "not" [] []
+            1: CSS_CONTAINER_STYLE_IN_PARENS@530..549
+              0: L_PAREN@530..531 "(" [] []
+              1: CSS_CONTAINER_STYLE_AND_QUERY@531..548
+                0: CSS_CONTAINER_STYLE_IN_PARENS@531..544
+                  0: L_PAREN@531..532 "(" [] []
+                  1: CSS_DECLARATION@532..542
+                    0: CSS_GENERIC_PROPERTY@532..542
+                      0: CSS_IDENTIFIER@532..537
+                        0: IDENT@532..537 "color" [] []
+                      1: COLON@537..539 ":" [] [Whitespace(" ")]
+                      2: CSS_GENERIC_COMPONENT_VALUE_LIST@539..542
+                        0: CSS_IDENTIFIER@539..542
+                          0: IDENT@539..542 "red" [] []
+                    1: (empty)
+                  2: R_PAREN@542..544 ")" [] [Whitespace(" ")]
+                1: AND_KW@544..548 "and" [] [Whitespace(" ")]
+                2: (empty)
+              2: R_PAREN@548..549 ")" [] []
+          3: R_PAREN@549..551 ")" [] [Whitespace(" ")]
+        3: CSS_RULE_BLOCK@551..554
+          0: L_CURLY@551..552 "{" [] []
+          1: CSS_RULE_LIST@552..552
+          2: R_CURLY@552..554 "}" [Newline("\n")] []
+    5: CSS_AT_RULE@554..693
+      0: AT@554..655 "@" [Newline("\n"), Newline("\n"), Comments("/*\n  ERROR CASE 5: Un ..."), Newline("\n")] []
+      1: CSS_CONTAINER_AT_RULE@655..693
+        0: CONTAINER_KW@655..665 "container" [] [Whitespace(" ")]
+        1: CSS_CUSTOM_IDENTIFIER@665..670
+          0: IDENT@665..670 "name" [] [Whitespace(" ")]
+        2: CSS_CONTAINER_STYLE_QUERY_IN_PARENS@670..693
+          0: STYLE_KW@670..675 "style" [] []
+          1: L_PAREN@675..676 "(" [] []
+          2: CSS_CONTAINER_STYLE_NOT_QUERY@676..693
+            0: NOT_KW@676..679 "not" [] []
+            1: CSS_CONTAINER_STYLE_IN_PARENS@679..693
+              0: L_PAREN@679..680 "(" [] []
+              1: CSS_CONTAINER_STYLE_IN_PARENS@680..693
+                0: L_PAREN@680..681 "(" [] []
+                1: CSS_DECLARATION@681..691
+                  0: CSS_GENERIC_PROPERTY@681..691
+                    0: CSS_IDENTIFIER@681..686
+                      0: IDENT@681..686 "color" [] []
+                    1: COLON@686..688 ":" [] [Whitespace(" ")]
+                    2: CSS_GENERIC_COMPONENT_VALUE_LIST@688..691
+                      0: CSS_IDENTIFIER@688..691
+                        0: IDENT@688..691 "red" [] []
+                  1: (empty)
+                2: R_PAREN@691..693 ")" [] [Whitespace(" ")]
+              2: (empty)
+          3: (empty)
+        3: CSS_BOGUS_BLOCK@693..693
+    6: CSS_BOGUS_RULE@693..698
+      0: ERROR_TOKEN@693..694 "?" [] []
+      1: ERROR_TOKEN@694..695 "?" [] []
+      2: ERROR_TOKEN@695..697 "?" [] [Whitespace(" ")]
+      3: L_PAREN@697..698 "(" [] []
+    7: CSS_QUALIFIED_RULE@698..721
+      0: CSS_SELECTOR_LIST@698..718
+        0: CSS_COMPOUND_SELECTOR@698..714
+          0: CSS_NESTED_SELECTOR_LIST@698..698
+          1: CSS_TYPE_SELECTOR@698..708
+            0: (empty)
+            1: CSS_IDENTIFIER@698..708
+              0: IDENT@698..708 "background" [] []
+          2: CSS_SUB_SELECTOR_LIST@708..714
+            0: CSS_PSEUDO_CLASS_SELECTOR@708..714
+              0: COLON@708..710 ":" [] [Whitespace(" ")]
+              1: CSS_PSEUDO_CLASS_IDENTIFIER@710..714
+                0: CSS_IDENTIFIER@710..714
+                  0: IDENT@710..714 "blue" [] []
+        1: (empty)
+        2: CSS_BOGUS_SELECTOR@714..718
+          0: R_PAREN@714..715 ")" [] []
+          1: R_PAREN@715..716 ")" [] []
+          2: R_PAREN@716..718 ")" [] [Whitespace(" ")]
+      1: CSS_DECLARATION_OR_RULE_BLOCK@718..721
+        0: L_CURLY@718..719 "{" [] []
+        1: CSS_DECLARATION_OR_RULE_LIST@719..719
+        2: R_CURLY@719..721 "}" [Newline("\n")] []
+    8: CSS_AT_RULE@721..870
+      0: AT@721..828 "@" [Newline("\n"), Newline("\n"), Comments("/*\n  ERROR CASE 6: Mi ..."), Newline("\n")] []
+      1: CSS_BOGUS_AT_RULE@828..870
+        0: CONTAINER_KW@828..838 "container" [] [Whitespace(" ")]
+        1: CSS_CUSTOM_IDENTIFIER@838..843
+          0: IDENT@838..843 "name" [] [Whitespace(" ")]
+        2: CSS_BOGUS@843..867
+          0: STYLE_KW@843..848 "style" [] []
+          1: L_PAREN@848..849 "(" [] []
+          2: CSS_BOGUS@849..865
+            0: NOT_KW@849..852 "not" [] []
+            1: CSS_BOGUS@852..865
+              0: L_PAREN@852..853 "(" [] []
+              1: CSS_BOGUS@853..864
+                0: L_PAREN@853..854 "(" [] []
+                1: CSS_BOGUS@854..863
+                  0: IDENT@854..860 "color" [] [Whitespace(" ")]
+                  1: IDENT@860..863 "red" [] []
+                2: R_PAREN@863..864 ")" [] []
+              2: R_PAREN@864..865 ")" [] []
+          3: R_PAREN@865..867 ")" [] [Whitespace(" ")]
+        3: CSS_RULE_BLOCK@867..870
+          0: L_CURLY@867..868 "{" [] []
+          1: CSS_RULE_LIST@868..868
+          2: R_CURLY@868..870 "}" [Newline("\n")] []
+  2: EOF@870..871 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+at_rule_container_style_not_query.css:5:26 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected value or character.
+  
+    3 │   - "not" must be immediately followed by "("
+    4 │ */
+  > 5 │ @container name style(not) {
+      │                          ^
+    6 │ }
+    7 │ 
+  
+  i Expected one of:
+  
+  - ( <style-query> )
+  - ( <style-feature> )
+  
+at_rule_container_style_not_query.css:12:27 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected value or character.
+  
+    10 │   - "not()" is missing a valid query or declaration inside
+    11 │ */
+  > 12 │ @container name style(not()) {
+       │                           ^
+    13 │ }
+    14 │ 
+  
+  i Expected one of:
+  
+  - not <style-in-parens>
+  - <style-in-parens>
+  - <style-in-parens> and <style-in-parens>
+  - <style-in-parens> or <style-in-parens>
+  - <style-feature>
+  
+at_rule_container_style_not_query.css:19:43 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `{` but instead found `)`
+  
+    17 │   - The "(...)) )" leads to unbalanced parentheses
+    18 │ */
+  > 19 │ @container name style(not((color: red)) ) ) {
+       │                                           ^
+    20 │ }
+    21 │ 
+  
+  i Remove )
+  
+at_rule_container_style_not_query.css:26:44 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected value or character.
+  
+    24 │   - "and" is started but no query follows
+    25 │ */
+  > 26 │ @container name style(not((color: red) and )) {
+       │                                            ^
+    27 │ }
+    28 │ 
+  
+  i Expected one of:
+  
+  - ( <style-query> )
+  - ( <style-feature> )
+  
+at_rule_container_style_not_query.css:33:40 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × unexpected character `?`
+  
+    31 │   - "???" doesn't fit a valid property or query expression
+    32 │ */
+  > 33 │ @container name style(not((color: red) ??? (background: blue))) {
+       │                                        ^
+    34 │ }
+    35 │ 
+  
+at_rule_container_style_not_query.css:33:41 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × unexpected character `?`
+  
+    31 │   - "???" doesn't fit a valid property or query expression
+    32 │ */
+  > 33 │ @container name style(not((color: red) ??? (background: blue))) {
+       │                                         ^
+    34 │ }
+    35 │ 
+  
+at_rule_container_style_not_query.css:33:42 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × unexpected character `?`
+  
+    31 │   - "???" doesn't fit a valid property or query expression
+    32 │ */
+  > 33 │ @container name style(not((color: red) ??? (background: blue))) {
+       │                                          ^
+    34 │ }
+    35 │ 
+  
+at_rule_container_style_not_query.css:33:61 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `)`
+  
+    31 │   - "???" doesn't fit a valid property or query expression
+    32 │ */
+  > 33 │ @container name style(not((color: red) ??? (background: blue))) {
+       │                                                             ^
+    34 │ }
+    35 │ 
+  
+  i Remove )
+  
+at_rule_container_style_not_query.css:40:28 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected value or character.
+  
+    38 │   - "not((color red))" should be "not((color: red))"
+    39 │ */
+  > 40 │ @container name style(not((color red))) {
+       │                            ^^^^^^^^^
+    41 │ }
+    42 │ 
+  
+  i Expected one of:
+  
+  - not <style-in-parens>
+  - <style-in-parens>
+  - <style-in-parens> and <style-in-parens>
+  - <style-in-parens> or <style-in-parens>
+  - <style-feature>
+  
+```

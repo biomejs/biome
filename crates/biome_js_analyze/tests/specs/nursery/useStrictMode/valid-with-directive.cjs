@@ -1,2 +1,0 @@
-"use server";
-"use strict";

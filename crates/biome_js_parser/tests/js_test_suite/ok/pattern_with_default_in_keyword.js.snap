@@ -1,0 +1,108 @@
+---
+source: crates/biome_js_parser/tests/spec_test.rs
+expression: snapshot
+snapshot_kind: text
+---
+## Input
+
+```js
+for ([a = "a" in {}] in []) {}
+
+```
+
+
+## AST
+
+```
+JsModule {
+    bom_token: missing (optional),
+    interpreter_token: missing (optional),
+    directives: JsDirectiveList [],
+    items: JsModuleItemList [
+        JsForInStatement {
+            for_token: FOR_KW@0..4 "for" [] [Whitespace(" ")],
+            l_paren_token: L_PAREN@4..5 "(" [] [],
+            initializer: JsArrayAssignmentPattern {
+                l_brack_token: L_BRACK@5..6 "[" [] [],
+                elements: JsArrayAssignmentPatternElementList [
+                    JsArrayAssignmentPatternElement {
+                        pattern: JsIdentifierAssignment {
+                            name_token: IDENT@6..8 "a" [] [Whitespace(" ")],
+                        },
+                        init: JsInitializerClause {
+                            eq_token: EQ@8..10 "=" [] [Whitespace(" ")],
+                            expression: JsInExpression {
+                                property: JsStringLiteralExpression {
+                                    value_token: JS_STRING_LITERAL@10..14 "\"a\"" [] [Whitespace(" ")],
+                                },
+                                in_token: IN_KW@14..17 "in" [] [Whitespace(" ")],
+                                object: JsObjectExpression {
+                                    l_curly_token: L_CURLY@17..18 "{" [] [],
+                                    members: JsObjectMemberList [],
+                                    r_curly_token: R_CURLY@18..19 "}" [] [],
+                                },
+                            },
+                        },
+                    },
+                ],
+                r_brack_token: R_BRACK@19..21 "]" [] [Whitespace(" ")],
+            },
+            in_token: IN_KW@21..24 "in" [] [Whitespace(" ")],
+            expression: JsArrayExpression {
+                l_brack_token: L_BRACK@24..25 "[" [] [],
+                elements: JsArrayElementList [],
+                r_brack_token: R_BRACK@25..26 "]" [] [],
+            },
+            r_paren_token: R_PAREN@26..28 ")" [] [Whitespace(" ")],
+            body: JsBlockStatement {
+                l_curly_token: L_CURLY@28..29 "{" [] [],
+                statements: JsStatementList [],
+                r_curly_token: R_CURLY@29..30 "}" [] [],
+            },
+        },
+    ],
+    eof_token: EOF@30..31 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: JS_MODULE@0..31
+  0: (empty)
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..30
+    0: JS_FOR_IN_STATEMENT@0..30
+      0: FOR_KW@0..4 "for" [] [Whitespace(" ")]
+      1: L_PAREN@4..5 "(" [] []
+      2: JS_ARRAY_ASSIGNMENT_PATTERN@5..21
+        0: L_BRACK@5..6 "[" [] []
+        1: JS_ARRAY_ASSIGNMENT_PATTERN_ELEMENT_LIST@6..19
+          0: JS_ARRAY_ASSIGNMENT_PATTERN_ELEMENT@6..19
+            0: JS_IDENTIFIER_ASSIGNMENT@6..8
+              0: IDENT@6..8 "a" [] [Whitespace(" ")]
+            1: JS_INITIALIZER_CLAUSE@8..19
+              0: EQ@8..10 "=" [] [Whitespace(" ")]
+              1: JS_IN_EXPRESSION@10..19
+                0: JS_STRING_LITERAL_EXPRESSION@10..14
+                  0: JS_STRING_LITERAL@10..14 "\"a\"" [] [Whitespace(" ")]
+                1: IN_KW@14..17 "in" [] [Whitespace(" ")]
+                2: JS_OBJECT_EXPRESSION@17..19
+                  0: L_CURLY@17..18 "{" [] []
+                  1: JS_OBJECT_MEMBER_LIST@18..18
+                  2: R_CURLY@18..19 "}" [] []
+        2: R_BRACK@19..21 "]" [] [Whitespace(" ")]
+      3: IN_KW@21..24 "in" [] [Whitespace(" ")]
+      4: JS_ARRAY_EXPRESSION@24..26
+        0: L_BRACK@24..25 "[" [] []
+        1: JS_ARRAY_ELEMENT_LIST@25..25
+        2: R_BRACK@25..26 "]" [] []
+      5: R_PAREN@26..28 ")" [] [Whitespace(" ")]
+      6: JS_BLOCK_STATEMENT@28..30
+        0: L_CURLY@28..29 "{" [] []
+        1: JS_STATEMENT_LIST@29..29
+        2: R_CURLY@29..30 "}" [] []
+  4: EOF@30..31 "" [Newline("\n")] []
+
+```

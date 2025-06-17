@@ -11,9 +11,10 @@ repository.workspace = true
 version              = "0.5.7"
 
 [dependencies]
+biome_formatter = { workspace = true }
 biome_js_syntax = { workspace = true }
 biome_rowan     = { workspace = true }
-rust-lapper     = "1.1.0"
+rust-lapper     = { workspace = true }
 rustc-hash      = { workspace = true }
 smallvec        = { workspace = true }
 

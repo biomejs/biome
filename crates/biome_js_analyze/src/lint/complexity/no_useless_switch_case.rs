@@ -1,8 +1,7 @@
 use biome_analyze::context::RuleContext;
-use biome_analyze::{
-    declare_lint_rule, ActionCategory, Ast, FixKind, Rule, RuleDiagnostic, RuleSource,
-};
+use biome_analyze::{Ast, FixKind, Rule, RuleDiagnostic, RuleSource, declare_lint_rule};
 use biome_console::markup;
+use biome_diagnostics::Severity;
 use biome_js_syntax::{AnyJsSwitchClause, JsCaseClause, JsDefaultClause};
 use biome_rowan::{AstNode, AstNodeList, BatchMutationExt, Direction};
 
@@ -64,6 +63,7 @@ declare_lint_rule! {
         language: "js",
         sources: &[RuleSource::EslintUnicorn("no-useless-switch-case")],
         recommended: true,
+        severity: Severity::Information,
         fix_kind: FixKind::Unsafe,
     }
 }
@@ -155,7 +155,7 @@ impl Rule for NoUselessSwitchCase {
             mutation.remove_node(useless_case);
         }
         Some(JsRuleAction::new(
-            ActionCategory::QuickFix,
+            ctx.metadata().action_category(ctx.category(), ctx.group()),
             ctx.metadata().applicability(),
             markup! {"Remove the useless "<Emphasis>"case"</Emphasis>"."}.to_owned(),
             mutation,

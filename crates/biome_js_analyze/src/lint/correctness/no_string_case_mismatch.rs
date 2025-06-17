@@ -1,13 +1,12 @@
 use std::borrow::Cow;
 
 use biome_analyze::context::RuleContext;
-use biome_analyze::{
-    declare_lint_rule, ActionCategory, Ast, FixKind, Rule, RuleDiagnostic, RuleSource,
-};
+use biome_analyze::{Ast, FixKind, Rule, RuleDiagnostic, RuleSource, declare_lint_rule};
 use biome_console::markup;
+use biome_diagnostics::Severity;
 use biome_js_factory::make;
 use biome_js_syntax::*;
-use biome_rowan::{declare_node_union, AstNode, AstSeparatedList, BatchMutationExt};
+use biome_rowan::{AstNode, AstSeparatedList, BatchMutationExt, declare_node_union};
 use biome_string_case::StrOnlyExtension;
 
 use crate::JsRuleAction;
@@ -41,6 +40,7 @@ declare_lint_rule! {
         language: "js",
         sources: &[RuleSource::Clippy("match_str_case_mismatch")],
         recommended: true,
+        severity: Severity::Error,
         fix_kind: FixKind::Unsafe,
     }
 }
@@ -77,7 +77,6 @@ impl Rule for NoStringCaseMismatch {
             ),
         };
         diagnostic = diagnostic
-            .description("This expression always returns false, because the string is converted and will never match")
             .detail(
                 state.call.range(),
                 markup! {
@@ -111,7 +110,7 @@ impl Rule for NoStringCaseMismatch {
             ),
         );
         Some(JsRuleAction::new(
-            ActionCategory::QuickFix,
+            ctx.metadata().action_category(ctx.category(), ctx.group()),
             ctx.metadata().applicability(),
             markup! {"Use "<Emphasis>{state.expected_case.description()}</Emphasis>" string value."}.to_owned(),
             mutation,
@@ -202,15 +201,15 @@ impl StringCase {
 
     fn convert<'a>(&self, s: &'a str) -> Cow<'a, str> {
         match self {
-            StringCase::Upper => Cow::Owned(s.to_uppercase()),
-            StringCase::Lower => s.to_lowercase_cow(),
+            Self::Upper => Cow::Owned(s.to_uppercase()),
+            Self::Lower => s.to_lowercase_cow(),
         }
     }
 
     fn description(&self) -> &str {
         match self {
-            StringCase::Upper => "upper case",
-            StringCase::Lower => "lower case",
+            Self::Upper => "upper case",
+            Self::Lower => "lower case",
         }
     }
 }
@@ -223,7 +222,7 @@ impl<'a> CharCaseIterator<'a> {
         CharCaseIterator { iter: s.chars() }
     }
 }
-impl<'a> Iterator for CharCaseIterator<'a> {
+impl Iterator for CharCaseIterator<'_> {
     type Item = StringCase;
     fn next(&mut self) -> Option<Self::Item> {
         while let Some(c) = self.iter.next() {

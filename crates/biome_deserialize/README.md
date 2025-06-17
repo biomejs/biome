@@ -6,7 +6,7 @@ It provides a framework by which these two groups interact with each other,
 allowing any supported data structure to be deserialized using any supported data format.
 
 This crate inspired by [serde](https://serde.rs/).
-0ne of the main difference is the fault-tolerant behavior of `biome_deserialize`.
+One of the main difference is the fault-tolerant behavior of `biome_deserialize`.
 _Serde_ uses a fast-fail strategy, while `biome_deserialize` deserialize as much as possible
 and report several diagnostics (errors, warning, deprecation messages, ...).
 Also, `biome_deserialize` is intended to deserialize textual data formats.
@@ -56,7 +56,7 @@ let json = "false";
 let Deserialized {
     deserialized,
     diagnostics,
-} = deserialize_from_json_str::<bool>(&source, JsonParserOptions::default());
+} = deserialize_from_json_str::<bool>(&source, JsonParserOptions::default(), "path/to.json");
 assert_eq!(deserialized, Some(false));
 assert!(diagnostics.is_empty());
 
@@ -64,7 +64,7 @@ let json = "[0, 1]";
 let Deserialized {
     deserialized,
     diagnostics,
-} = deserialize_from_json_str::<Vec<u8>>(&source, JsonParserOptions::default());
+} = deserialize_from_json_str::<Vec<u8>>(&source, JsonParserOptions::default(), "path/to.json");
 assert_eq!(deserialized, Some(vec![0, 1]));
 assert!(diagnostics.is_empty());
 
@@ -73,7 +73,7 @@ let json = r#"{ "a": 0, "b": 1 }"#;
 let Deserialized {
     deserialized,
     diagnostics,
-} = deserialize_from_json_str::<HashMap<String, u8>>(&source, JsonParserOptions::default());
+} = deserialize_from_json_str::<HashMap<String, u8>>(&source, JsonParserOptions::default(), "path/to.json");
 assert_eq!(deserialized, Some(HashMap::from([("a".to_string(), 0), ("b".to_string(), 1)])));
 assert!(diagnostics.is_empty());
 ```
@@ -111,20 +111,23 @@ outside the limitations above, you'll need to implement it manually. See below f
 `biome_deserialize` requires that every data format supports arrays and maps.
 A map and an array can be deserialized into several types in Rust.
 
-`biome_deserialize` is able to deserialize an array into a `Vec`, a `HashSet`, or a `IndexSet`.
+`biome_deserialize` is able to deserialize an array into a `Vec`, a Box<[_]>, a `HashSet`, a `BTreeSet`, or a `IndexSet`, `BtreeSet`.
 
-- `Vec` preserves the insertion order and allows the repetition of values;
+- `Vec` and `Box<[_]>` preserve the insertion order and allows the repetition of values;
 - `HashSet` **doesn't preserve the insertion order** and disallows the repetition of values;
 - `IndexSet` preserves the insertion order and disallows the repetition of values.
+- `BTreeSet` sorts values and disallows the repetition of values.
 
 `biome_deserialize` is able to deserialize a map into a `HashMap`, a `BTreeMap`, or a `IndexMap`.
 
-- `HashMap` and `BTreeMap` **don't preserve the insertion order**;
+- `HashMap` **doesn't preserve the insertion order**;
 - `IndexMap` preserves the insertion order.
+- `BTreeMap` sorts key-value pairs according to the key.
 
-If you hesitate between a collection that preserves the insertion order and one that doesn't,
-chooses the collection that preserves the insertion order.
-This often outputs less surprising behavior.
+> [!NOTE]
+> If you hesitate between a collection that preserves the insertion order and one that doesn't,
+> chooses the collection that preserves the insertion order.
+> This often outputs less surprising behavior.
 
 ## Implementing a custom deserializer
 
@@ -190,16 +193,16 @@ impl FromStr for Day {
 
 impl Deserializable for Day {
     fn deserialize(
+        ctx: &mut impl DeserializationContext,
         value: &impl DeserializableValue,
         name: &str,
-        diagnostics: &mut Vec<DeserializationDiagnostic>,
     ) -> Option<Self> {
         // We deserialize the value into a number represented as a string.
-        let value_text = TextNumber::deserialize(value, name, diagnostics)?;
+        let value_text = TextNumber::deserialize(ctx, value, name)?;
         // We attempt to convert the string into a `Day`.
         value_text.parse::<Day>().map_err(|error| {
             // If the conversion failed, then we report the error.
-            diagnostics.push(DeserializationDiagnostic::new(error).with_range(value.range()));
+            ctx.report(DeserializationDiagnostic::new(error).with_range(value.range()));
         }).ok()
     }
 }
@@ -212,7 +215,7 @@ let json = "42";
 let Deserialized {
     deserialized,
     diagnostics,
-} = deserialize_from_json_str::<Day>(&source, JsonParserOptions::default());
+} = deserialize_from_json_str::<Day>(&source, JsonParserOptions::default(), "path/to.json");
 assert_eq!(deserialized, Some(Day(42)));
 assert!(diagnostics.is_empty());
 
@@ -220,7 +223,7 @@ let json = "999";
 let Deserialized {
     deserialized,
     diagnostics,
-} = deserialize_from_json_str::<Day>(&source, JsonParserOptions::default());
+} = deserialize_from_json_str::<Day>(&source, JsonParserOptions::default(), "path/to.json");
 assert_eq!(deserialized, None);
 assert_eq!(diagnostics..len(), 1);
 ```
@@ -234,7 +237,7 @@ In this case, we'll need to inspect the type of the `DeserializableValue` to kno
 to use:
 
 ```rust
-use biome_deserialize::{DeserializationDiagnostic, Deserializable, DeserializableValue, DeserializationVisitor, Text, DeserializableTypes};
+use biome_deserialize::{DeserializationDiagnostic, Deserializable, DeserializationContext, DeserializableValue, DeserializationVisitor, Text, DeserializableTypes};
 use biome_rowan::TextRange;
 
 #[derive(Debug, Eq, PartialEq)]
@@ -245,15 +248,15 @@ enum Union {
 
 impl Deserializable for Union {
     fn deserialize(
+        ctx: &mut impl DeserializationContext,
         value: &impl DeserializableValue,
         name: &str,
-        diagnostics: &mut Vec<DeserializationDiagnostic>,
     ) -> Option<Self> {
         if value.visitable_type()? == DeserializableType::Bool {
-            biome_deserialize::Deserializable::deserialize(value, name, diagnostics)
+            biome_deserialize::Deserializable::deserialize(ctx, value, name)
                 .map(Self::Bool)
         } else {
-            biome_deserialize::Deserializable::deserialize(value, name, diagnostics)
+            biome_deserialize::Deserializable::deserialize(ctx, value, name)
                 .map(Self::Str)
         }
     }
@@ -263,12 +266,12 @@ use biome_deserialize::json::deserialize_from_json_str;
 use biome_json_parser::JsonParserOptions;
 
 let source = r#" "string" "#;
-let deserialized = deserialize_from_json_str::<Union>(&source, JsonParserOptions::default());
+let deserialized = deserialize_from_json_str::<Union>(&source, JsonParserOptions::default(), "path/to.json");
 assert!(!deserialized.has_errors());
 assert_eq!(deserialized.into_deserialized(), Some(Union::Str("string".to_string())));
 
 let source = "true";
-let deserialized = deserialize_from_json_str::<Union>(&source, JsonParserOptions::default());
+let deserialized = deserialize_from_json_str::<Union>(&source, JsonParserOptions::default(), "path/to.json");
 assert!(!deserialized.has_errors());
 assert_eq!(deserialized.into_deserialized(), Some(Union::Bool(true)));
 ```
@@ -293,12 +296,12 @@ The full example:
 ```rust
 impl Deserializable for Union {
     fn deserialize(
+        ctx: &mut impl DeserializationContext,
         value: &impl DeserializableValue,
         name: &str,
-        diagnostics: &mut Vec<DeserializationDiagnostic>,
     ) -> Option<Self> {
         // Delegate deserialization to `UnionVisitor`
-        value.deserialize(UnionVisitor, name, diagnostics)
+        value.deserialize(ctx, UnionVisitor, name)
     }
 }
 
@@ -312,10 +315,10 @@ impl DeserializationVisitor for UnionVisitor {
     // Because we expect a `bool` or a `str`, we have to implement the associated method `visit_bool`.
     fn visit_bool(
         self,
+        _ctx: &mut impl DeserializationContext,
         value: bool,
         range: TextRange,
         _name: &str,
-        diagnostics: &mut Vec<DeserializationDiagnostic>,
     ) -> Option<Self::Output> {
         Some(Union::Bool(value))
     }
@@ -323,10 +326,10 @@ impl DeserializationVisitor for UnionVisitor {
     // Because we expect a `bool` or a `str`, we have to implement the associated method `visit_str`.
     fn visit_str(
         self,
+        _ctx: &mut impl DeserializationContext,
         value: Text,
         range: TextRange,
         _name: &str,
-        diagnostics: &mut Vec<DeserializationDiagnostic>,
     ) -> Option<Self::Output> {
         Some(Union::Str(value.text().to_string()))
     }
@@ -345,23 +348,23 @@ Our implementation attempts to deserialize a string and creates the correspondin
 If the variant is not known, we report a diagnostic.
 
 ```rust
-use biome_deserialize::{Deserializable, DeserializableValue, DeserializationDiagnostic};
+use biome_deserialize::{Deserializable, DeserializationContext, DeserializableValue, DeserializationDiagnostic};
 
 #[derive(Debug, Copy, Clone, Eq, PartialEq, Hash, Ord, PartialOrd)]
 pub enum Variant { A, B }
 
 impl Deserializable for Variant {
     fn deserialize(
+        ctx: &mut impl DeserializationContext,
         value: &impl DeserializableValue,
         name: &str,
-        diagnostics: &mut Vec<DeserializationDiagnostic>,
     ) -> Option<Self> {
-        match String::deserialize(value, name, diagnostics)? {
+        match String::deserialize(ctx, value, name)? {
             "A" => Some(Variant::A),
             "B" => Some(Variant::B),
             unknown_variant => {
                 const ALLOWED_VARIANTS: &[&str] = &["A", "B"];
-                diagnostics.push(DeserializationDiagnostic::new_unknown_value(
+                ctx.report(DeserializationDiagnostic::new_unknown_value(
                     unknown_variant,
                     value.range(),
                     ALLOWED_VARIANTS,
@@ -380,7 +383,7 @@ let json = "\"A\"";
 let Deserialized {
     deserialized,
     diagnostics,
-} = deserialize_from_json_str::<Day>(&source, JsonParserOptions::default());
+} = deserialize_from_json_str::<Day>(&source, JsonParserOptions::default(), "path/to.json");
 assert_eq!(deserialized, Some(Variant::A));
 assert!(diagnostics.is_empty());
 ```
@@ -390,23 +393,23 @@ To do this, we use `Text` instead of `String`.
 Internally `Text` borrows a slice of the source.
 
 ```rust
-use biome_deserialize::{Deserializable, DeserializableValue, DeserializationDiagnostic, Text};
+use biome_deserialize::{Deserializable, DeserializationContext, DeserializableValue, DeserializationDiagnostic, Text};
 
 #[derive(Debug, Copy, Clone, Eq, PartialEq, Hash, Ord, PartialOrd)]
 pub enum Variant { A, B }
 
 impl Deserializable for Variant {
     fn deserialize(
+        ctx: &mut impl DeserializationContext,
         value: &impl DeserializableValue,
         name: &str,
-        diagnostics: &mut Vec<DeserializationDiagnostic>,
     ) -> Option<Self> {
-        match Text::deserialize(value, name, diagnostics)?.text() {
+        match Text::deserialize(ctx, value, name)?.text() {
             "A" => Some(Variant::A),
             "B" => Some(Variant::B),
             unknown_variant => {
                 const ALLOWED_VARIANTS: &[&str] = &["A", "B"];
-                diagnostics.push(DeserializationDiagnostic::new_unknown_value(
+                ctx.report(DeserializationDiagnostic::new_unknown_value(
                     unknown_variant,
                     value.range(),
                     ALLOWED_VARIANTS,
@@ -449,7 +452,7 @@ Note that if you use _Serde_ in tandem with `biome_deserialize`, you have to dis
 Thus, instead of using `String::deserialize` and `u8::deserialize`, you should use `Deserialize::deserialize`.
 
 ```rust
-use biome_deserialize::{DeserializationDiagnostic, Deserializable, DeserializableValue, DeserializationVisitor, Text, DeserializableTypes};
+use biome_deserialize::{DeserializationDiagnostic, Deserializable, DeserializationContext, DeserializableValue, DeserializationVisitor, Text, DeserializableTypes};
 use biome_rowan::TextRange;
 
 #[derive(Debug, Default, Eq, PartialEq, Clone)]
@@ -457,13 +460,13 @@ pub struct Person { name: String, age: u8 }
 
 impl Deserializable for Person {
     fn deserialize(
+        ctx: &mut impl DeserializationContext,
         value: &impl DeserializableValue,
         name: &str,
-        diagnostics: &mut Vec<DeserializationDiagnostic>,
     ) -> Option<Self> {
         // Delegate the deserialization to `PersonVisitor`.
         // `value` will call the `PersonVisitor::viist_` method that corresponds to its type.
-        value.deserialize(PersonVisitor, name, diagnostics)
+        value.deserialize(ctx, PersonVisitor, name)
     }
 }
 
@@ -478,35 +481,35 @@ impl DeserializationVisitor for PersonVisitor {
     // Because we expect a `map`, we have to implement the associated method `visit_map`.
     fn visit_map(
         self,
+        ctx: &mut impl DeserializationContext,
         // Iterator of key-value pairs.
         members: impl Iterator<Item = Option<(impl DeserializableValue, impl DeserializableValue)>>,
         // range of the map in the source text.
         range: TextRange,
         _name: &str,
-        diagnostics: &mut Vec<DeserializationDiagnostic>,
     ) -> Option<Self::Output> {
         let mut result = Person::default();
         for (key, value) in members.flatten() {
             // Try to deserialize the key as a string.
             // We use `Text` to avoid an heap-allocation.
-            let Some(key_text) = Text::deserialize(&key, "", diagnostics) else {
+            let Some(key_text) = Text::deserialize(ctx, &key, "") else {
                 // If this failed, then pass to the next key-value pair.
                 continue;
             };
             match key_text.text() {
                 "name" => {
-                    if let Some(name) = String::deserialize(&value, &key_text, diagnostics) {
+                    if let Some(name) = String::deserialize(ctx, &value, &key_text) {
                         result.name = name;
                     }
                 },
                 "age" => {
-                    if let Some(age) = u8::deserialize(&value, &key_text, diagnostics) {
+                    if let Some(age) = u8::deserialize(ctx, &value, &key_text) {
                         result.age = age;
                     }
                 },
                 unknown_key => {
                     const ALLOWED_KEYS: &[&str] = &["name"];
-                    diagnostics.push(DeserializationDiagnostic::new_unknown_key(
+                    ctx.report(DeserializationDiagnostic::new_unknown_key(
                         unknown_key,
                         key.range(),
                         ALLOWED_KEYS,
@@ -522,7 +525,7 @@ use biome_deserialize::json::deserialize_from_json_str;
 use biome_json_parser::JsonParserOptions;
 
 let source = r#"{ "name": "Isaac Asimov" }"#;
-let deserialized = deserialize_from_json_str::<Person>(&source, JsonParserOptions::default());
+let deserialized = deserialize_from_json_str::<Person>(&source, JsonParserOptions::default(), "path/to.json");
 assert!(!deserialized.has_errors());
 assert_eq!(deserialized.into_deserialized(), Some(Person { name: "Isaac Asimov".to_string() }));
 ```

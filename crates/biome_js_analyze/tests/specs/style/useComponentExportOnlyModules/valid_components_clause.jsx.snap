@@ -1,0 +1,20 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid_components_clause.jsx
+---
+# Input
+```jsx
+/* should not generate diagnostics */
+const SampleComponentA = () => <></>
+const SampleComponentB = () => <></>
+function Hoge () {
+  return <></>
+}
+class Fuga extends React.Component {
+  render() {
+    return <></>
+  }
+}
+export {SampleComponentA, SampleComponentB, Hoge, Fuga}
+
+```

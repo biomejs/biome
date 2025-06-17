@@ -1,9 +1,10 @@
 use biome_analyze::{
-    AddVisitor, FromServices, MissingServicesDiagnostic, Phase, Phases, QueryKey, QueryMatch,
-    Queryable, RuleKey, ServiceBag, SyntaxVisitor, Visitor, VisitorContext, VisitorFinishContext,
+    AddVisitor, FromServices, Phase, Phases, QueryKey, QueryMatch, Queryable, RuleKey,
+    RuleMetadata, ServiceBag, ServicesDiagnostic, SyntaxVisitor, Visitor, VisitorContext,
+    VisitorFinishContext,
 };
 use biome_css_semantic::builder::SemanticModelBuilder;
-use biome_css_semantic::{model::SemanticModel, SemanticEventExtractor};
+use biome_css_semantic::{SemanticEventExtractor, model::SemanticModel};
 use biome_css_syntax::{CssLanguage, CssRoot, CssSyntaxNode};
 use biome_rowan::{AstNode, TextRange, WalkEvent};
 
@@ -16,7 +17,6 @@ use biome_rowan::{AstNode, TextRange, WalkEvent};
 ///    type State = ();
 ///    type Signals = Option<Self::State>;
 ///    type Options = ();
-
 ///    fn run(ctx: &RuleContext<Self>) -> Self::Signals {
 ///     let node = ctx.query();
 ///     for n in node.rules() {
@@ -39,11 +39,12 @@ impl SemanticServices {
 impl FromServices for SemanticServices {
     fn from_services(
         rule_key: &RuleKey,
+        _rule_metadata: &RuleMetadata,
         services: &ServiceBag,
-    ) -> Result<Self, MissingServicesDiagnostic> {
-        let model: &SemanticModel = services.get_service().ok_or_else(|| {
-            MissingServicesDiagnostic::new(rule_key.rule_name(), &["SemanticModel"])
-        })?;
+    ) -> Result<Self, ServicesDiagnostic> {
+        let model: &SemanticModel = services
+            .get_service()
+            .ok_or_else(|| ServicesDiagnostic::new(rule_key.rule_name(), &["SemanticModel"]))?;
         Ok(Self {
             model: model.clone(),
         })
@@ -133,7 +134,7 @@ impl Visitor for SemanticModelVisitor {
             WalkEvent::Leave(_) => return,
         };
 
-        let text_range = root.text_range();
+        let text_range = root.text_range_with_trivia();
         ctx.match_query(SemanticModelEvent(text_range));
     }
 }
@@ -154,7 +155,6 @@ impl QueryMatch for SemanticModelEvent {
 ///    type State = ();
 ///    type Signals = Option<Self::State>;
 ///    type Options = ();
-
 ///    fn run(ctx: &RuleContext<Self>) -> Self::Signals {
 ///     let node = ctx.query();
 ///     // The model holds all information about the semantic.

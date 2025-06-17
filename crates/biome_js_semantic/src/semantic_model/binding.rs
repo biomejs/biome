@@ -1,5 +1,5 @@
 use super::*;
-use biome_js_syntax::{binding_ext::AnyJsIdentifierBinding, TextRange, TsTypeParameterName};
+use biome_js_syntax::{TextRange, TsTypeParameterName, binding_ext::AnyJsIdentifierBinding};
 
 /// Internal type with all the semantic data of a specific binding
 #[derive(Debug)]
@@ -120,8 +120,9 @@ impl Binding {
     }
 
     /// Returns all exports of the binding.
-    /// The node kind is either an identifier binding (tehd eclaration is self exported)
-    /// or an identifier usage.
+    ///
+    /// The node kind is either an identifier binding (if the declaration is
+    /// itself an `export` statement) or an identifier usage.
     pub fn exports(&self) -> impl Iterator<Item = JsSyntaxNode> + '_ {
         let binding = self.data.binding(self.id);
         binding
@@ -132,6 +133,18 @@ impl Binding {
 
     pub fn is_imported(&self) -> bool {
         super::is_imported(self.syntax())
+    }
+}
+
+impl PartialEq for Binding {
+    fn eq(&self, other: &Self) -> bool {
+        self.id == other.id
+    }
+}
+impl Eq for Binding {}
+impl std::hash::Hash for Binding {
+    fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
+        self.id.hash(state);
     }
 }
 

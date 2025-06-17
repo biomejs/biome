@@ -1,9 +1,11 @@
-use biome_console::fmt::Display;
+use biome_console::fmt::Formatter;
 use biome_console::markup;
-use biome_diagnostics::adapters::{BpafError, IoError, SerdeJsonError};
+use biome_diagnostics::advice::ListAdvice;
 use biome_diagnostics::{
     Advices, Category, Diagnostic, Error, LogCategory, MessageAndDescription, Severity, Visit,
+    category,
 };
+use biome_diagnostics::{BpafError, IoError, SerdeJsonError};
 use biome_service::WorkspaceError;
 use std::process::{ExitCode, Termination};
 use std::{env::current_exe, fmt::Debug};
@@ -228,11 +230,18 @@ pub struct IncompatibleEndConfiguration {
 
 #[derive(Debug, Diagnostic)]
 #[diagnostic(
-    category = "internalError/io",
     severity = Error,
-    message = "No files were processed in the specified paths."
+    message = "No files were processed in the specified paths.",
+    advice = "Check your biome.json or biome.jsonc to ensure the paths are not ignored by the configuration.",
+    advice = "These paths were provided but ignored:",
 )]
-pub struct NoFilesWereProcessed;
+pub struct NoFilesWereProcessed {
+    #[category]
+    category: &'static Category,
+
+    #[advice]
+    paths: ListAdvice<String>,
+}
 
 #[derive(Debug, Diagnostic)]
 #[diagnostic(
@@ -256,14 +265,6 @@ pub struct MigrationDiagnostic {
 pub struct DeprecatedArgument {
     #[message]
     pub message: MessageAndDescription,
-}
-
-impl DeprecatedArgument {
-    pub fn new(message: impl Display) -> Self {
-        Self {
-            message: MessageAndDescription::from(markup! {{message}}.to_owned()),
-        }
-    }
 }
 
 #[derive(Debug, Diagnostic)]
@@ -342,8 +343,11 @@ impl CliDiagnostic {
     }
 
     /// When no files were processed while traversing the file system
-    pub fn no_files_processed() -> Self {
-        Self::NoFilesWereProcessed(NoFilesWereProcessed)
+    pub fn no_files_processed(category: &'static Category, paths: impl Into<Vec<String>>) -> Self {
+        Self::NoFilesWereProcessed(NoFilesWereProcessed {
+            category,
+            paths: ListAdvice { list: paths.into() },
+        })
     }
 
     /// Returned when the CLI  doesn't recognize a command line argument
@@ -417,10 +421,6 @@ impl CliDiagnostic {
         })
     }
 
-    pub fn stdin() -> Self {
-        Self::Stdin(StdinDiagnostic::default())
-    }
-
     /// Emitted when the server is not running
     pub fn server_not_running() -> Self {
         Self::ServerNotRunning(ServerNotRunning)
@@ -454,13 +454,19 @@ impl CliDiagnostic {
 
 impl From<WorkspaceError> for CliDiagnostic {
     fn from(error: WorkspaceError) -> Self {
-        CliDiagnostic::workspace_error(error)
+        Self::workspace_error(error)
     }
 }
 
 impl From<std::io::Error> for CliDiagnostic {
     fn from(error: std::io::Error) -> Self {
-        CliDiagnostic::io_error(error)
+        Self::io_error(error)
+    }
+}
+
+impl From<StdinDiagnostic> for CliDiagnostic {
+    fn from(error: StdinDiagnostic) -> Self {
+        Self::Stdin(error)
     }
 }
 
@@ -475,33 +481,44 @@ impl Termination for CliDiagnostic {
     }
 }
 
-#[derive(Debug, Diagnostic)]
-#[diagnostic(
-category = "internalError/fs",
-    severity = Warning,
-    message(
-        description = "The configuration file {path} is deprecated. Use biome.json instead.",
-        message("The configuration file "<Emphasis>{self.path}</Emphasis>" is deprecated. Use "<Emphasis>"biome.json"</Emphasis>" instead."),
-    )
-)]
-pub struct DeprecatedConfigurationFile {
-    #[location(resource)]
-    pub path: String,
+#[derive(Debug)]
+pub enum StdinDiagnostic {
+    NotFormatted,
+    NoExtension,
 }
 
-impl DeprecatedConfigurationFile {
-    pub fn new(path: impl Into<String>) -> Self {
-        Self { path: path.into() }
+impl StdinDiagnostic {
+    pub(crate) fn new_not_formatted() -> Self {
+        Self::NotFormatted
+    }
+
+    pub(crate) fn new_no_extension() -> Self {
+        Self::NoExtension
     }
 }
 
-#[derive(Debug, Default, Diagnostic)]
-#[diagnostic(
-    severity = Error,
-    category = "stdin",
-    message = "The contents aren't fixed. Use the `--fix` flag to fix them."
-)]
-pub struct StdinDiagnostic {}
+impl Diagnostic for StdinDiagnostic {
+    fn category(&self) -> Option<&'static Category> {
+        Some(category!("stdin"))
+    }
+
+    fn severity(&self) -> Severity {
+        Severity::Error
+    }
+
+    fn message(&self, fmt: &mut Formatter<'_>) -> std::io::Result<()> {
+        match self {
+            Self::NotFormatted => {
+                fmt.write_str("The contents aren't fixed. Use the `--write` flag to fix them.")
+            },
+            Self::NoExtension => {
+                fmt.write_markup(markup!{
+                    "The file passed via "<Emphasis>"--stdin-file-path"</Emphasis>" doesn't have an extension. Biome needs a file extension to know how handle the file."
+                })
+            }
+        }
+    }
+}
 
 #[cfg(test)]
 mod test {

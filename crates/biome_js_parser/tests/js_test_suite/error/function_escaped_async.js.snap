@@ -1,0 +1,94 @@
+---
+source: crates/biome_js_parser/tests/spec_test.rs
+expression: snapshot
+snapshot_kind: text
+---
+## Input
+
+```js
+void \u0061sync function f(){}
+
+```
+
+
+## AST
+
+```
+JsModule {
+    bom_token: missing (optional),
+    interpreter_token: missing (optional),
+    directives: JsDirectiveList [],
+    items: JsModuleItemList [
+        JsExpressionStatement {
+            expression: JsUnaryExpression {
+                operator_token: VOID_KW@0..5 "void" [] [Whitespace(" ")],
+                argument: JsBogusExpression {
+                    items: [
+                        ERROR_TOKEN@5..16 "\\u0061sync" [] [Whitespace(" ")],
+                        FUNCTION_KW@16..25 "function" [] [Whitespace(" ")],
+                        JsIdentifierBinding {
+                            name_token: IDENT@25..26 "f" [] [],
+                        },
+                        JsParameters {
+                            l_paren_token: L_PAREN@26..27 "(" [] [],
+                            items: JsParameterList [],
+                            r_paren_token: R_PAREN@27..28 ")" [] [],
+                        },
+                        JsFunctionBody {
+                            l_curly_token: L_CURLY@28..29 "{" [] [],
+                            directives: JsDirectiveList [],
+                            statements: JsStatementList [],
+                            r_curly_token: R_CURLY@29..30 "}" [] [],
+                        },
+                    ],
+                },
+            },
+            semicolon_token: missing (optional),
+        },
+    ],
+    eof_token: EOF@30..31 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: JS_MODULE@0..31
+  0: (empty)
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..30
+    0: JS_EXPRESSION_STATEMENT@0..30
+      0: JS_UNARY_EXPRESSION@0..30
+        0: VOID_KW@0..5 "void" [] [Whitespace(" ")]
+        1: JS_BOGUS_EXPRESSION@5..30
+          0: ERROR_TOKEN@5..16 "\\u0061sync" [] [Whitespace(" ")]
+          1: FUNCTION_KW@16..25 "function" [] [Whitespace(" ")]
+          2: JS_IDENTIFIER_BINDING@25..26
+            0: IDENT@25..26 "f" [] []
+          3: JS_PARAMETERS@26..28
+            0: L_PAREN@26..27 "(" [] []
+            1: JS_PARAMETER_LIST@27..27
+            2: R_PAREN@27..28 ")" [] []
+          4: JS_FUNCTION_BODY@28..30
+            0: L_CURLY@28..29 "{" [] []
+            1: JS_DIRECTIVE_LIST@29..29
+            2: JS_STATEMENT_LIST@29..29
+            3: R_CURLY@29..30 "}" [] []
+      1: (empty)
+  4: EOF@30..31 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+function_escaped_async.js:1:6 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × 'async' keyword cannot contain escape character.
+  
+  > 1 │ void \u0061sync function f(){}
+      │      ^^^^^^^^^^
+    2 │ 
+  
+```

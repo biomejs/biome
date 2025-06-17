@@ -1,11 +1,15 @@
-use crate::execute::{Execution, TraversalMode};
-use crate::reporter::{DiagnosticsPayload, ReporterVisitor, TraversalSummary};
 use crate::Reporter;
+use crate::execute::{Execution, TraversalMode};
+use crate::reporter::{
+    DiagnosticsPayload, EvaluatedPathsDiagnostic, FixedPathsDiagnostic, ReporterVisitor,
+    TraversalSummary,
+};
 use biome_console::fmt::Formatter;
-use biome_console::{fmt, markup, Console, ConsoleExt};
+use biome_console::{Console, ConsoleExt, fmt, markup};
+use biome_diagnostics::PrintDiagnostic;
 use biome_diagnostics::advice::ListAdvice;
-use biome_diagnostics::{Diagnostic, PrintDiagnostic};
 use biome_fs::BiomePath;
+use camino::Utf8PathBuf;
 use std::collections::BTreeSet;
 use std::io;
 use std::time::Duration;
@@ -15,77 +19,70 @@ pub(crate) struct ConsoleReporter {
     pub(crate) diagnostics_payload: DiagnosticsPayload,
     pub(crate) execution: Execution,
     pub(crate) evaluated_paths: BTreeSet<BiomePath>,
+    pub(crate) working_directory: Option<Utf8PathBuf>,
+    pub(crate) verbose: bool,
 }
 
 impl Reporter for ConsoleReporter {
     fn write(self, visitor: &mut dyn ReporterVisitor) -> io::Result<()> {
-        let verbose = self.diagnostics_payload.verbose;
-        visitor.report_diagnostics(&self.execution, self.diagnostics_payload)?;
-        visitor.report_summary(&self.execution, self.summary)?;
-        if verbose {
-            visitor.report_handled_paths(self.evaluated_paths)?;
+        visitor.report_diagnostics(&self.execution, self.diagnostics_payload, self.verbose)?;
+        if self.verbose {
+            visitor.report_handled_paths(self.evaluated_paths, self.working_directory)?;
         }
+        visitor.report_summary(&self.execution, self.summary, self.verbose)?;
         Ok(())
     }
 }
 
-#[derive(Debug, Diagnostic)]
-#[diagnostic(
-    tags(VERBOSE),
-    severity = Information,
-    message = "Files processed:"
-)]
-struct EvaluatedPathsDiagnostic {
-    #[advice]
-    advice: ListAdvice<String>,
-}
-
-#[derive(Debug, Diagnostic)]
-#[diagnostic(
-    tags(VERBOSE),
-    severity = Information,
-    message = "Files fixed:"
-)]
-struct FixedPathsDiagnostic {
-    #[advice]
-    advice: ListAdvice<String>,
-}
-
 pub(crate) struct ConsoleReporterVisitor<'a>(pub(crate) &'a mut dyn Console);
 
-impl<'a> ReporterVisitor for ConsoleReporterVisitor<'a> {
+impl ReporterVisitor for ConsoleReporterVisitor<'_> {
     fn report_summary(
         &mut self,
         execution: &Execution,
         summary: TraversalSummary,
+        verbose: bool,
     ) -> io::Result<()> {
         if execution.is_check() && summary.suggested_fixes_skipped > 0 {
             self.0.log(markup! {
                 <Warn>"Skipped "{summary.suggested_fixes_skipped}" suggested fixes.\n"</Warn>
-                <Info>"If you wish to apply the suggested (unsafe) fixes, use the command "<Emphasis>"biome check --fix --unsafe\n"</Emphasis></Info>
+                <Info>"If you wish to apply the suggested (unsafe) fixes, use the command "<Emphasis>"biome check --write --unsafe\n"</Emphasis></Info>
             })
         }
 
         if !execution.is_ci() && summary.diagnostics_not_printed > 0 {
             self.0.log(markup! {
-                <Warn>"The number of diagnostics exceeds the number allowed by Biome.\n"</Warn>
+                <Warn>"The number of diagnostics exceeds the limit allowed. Use "<Emphasis>"--max-diagnostics"</Emphasis>" to increase it.\n"</Warn>
                 <Info>"Diagnostics not shown: "</Info><Emphasis>{summary.diagnostics_not_printed}</Emphasis><Info>"."</Info>
             })
         }
 
         self.0.log(markup! {
-            {ConsoleTraversalSummary(execution.traversal_mode(), &summary)}
+            {ConsoleTraversalSummary(execution.traversal_mode(), &summary, verbose)}
         });
 
         Ok(())
     }
 
-    fn report_handled_paths(&mut self, evaluated_paths: BTreeSet<BiomePath>) -> io::Result<()> {
+    fn report_handled_paths(
+        &mut self,
+        evaluated_paths: BTreeSet<BiomePath>,
+        working_directory: Option<Utf8PathBuf>,
+    ) -> io::Result<()> {
         let evaluated_paths_diagnostic = EvaluatedPathsDiagnostic {
             advice: ListAdvice {
                 list: evaluated_paths
                     .iter()
-                    .map(|p| p.display().to_string())
+                    .map(|p| {
+                        working_directory
+                            .as_ref()
+                            .and_then(|wd| {
+                                p.strip_prefix(wd.as_str())
+                                    .map(|path| path.to_string())
+                                    .ok()
+                            })
+                            .unwrap_or(p.to_string())
+                    })
                     .collect(),
             },
         };
@@ -95,7 +92,16 @@ impl<'a> ReporterVisitor for ConsoleReporterVisitor<'a> {
                 list: evaluated_paths
                     .iter()
                     .filter(|p| p.was_written())
-                    .map(|p| p.display().to_string())
+                    .map(|p| {
+                        working_directory
+                            .as_ref()
+                            .and_then(|wd| {
+                                p.strip_prefix(wd.as_str())
+                                    .map(|path| path.to_string())
+                                    .ok()
+                            })
+                            .unwrap_or(p.to_string())
+                    })
                     .collect(),
             },
         };
@@ -114,6 +120,7 @@ impl<'a> ReporterVisitor for ConsoleReporterVisitor<'a> {
         &mut self,
         execution: &Execution,
         diagnostics_payload: DiagnosticsPayload,
+        verbose: bool,
     ) -> io::Result<()> {
         for diagnostic in &diagnostics_payload.diagnostics {
             if execution.is_search() {
@@ -122,7 +129,7 @@ impl<'a> ReporterVisitor for ConsoleReporterVisitor<'a> {
             }
 
             if diagnostic.severity() >= diagnostics_payload.diagnostic_level {
-                if diagnostic.tags().is_verbose() && diagnostics_payload.verbose {
+                if diagnostic.tags().is_verbose() && verbose {
                     self.0
                         .error(markup! {{PrintDiagnostic::verbose(diagnostic)}});
                 } else {
@@ -151,15 +158,16 @@ impl fmt::Display for Files {
 
 struct SummaryDetail<'a>(pub(crate) &'a TraversalMode, usize);
 
-impl<'a> fmt::Display for SummaryDetail<'a> {
+impl fmt::Display for SummaryDetail<'_> {
     fn fmt(&self, fmt: &mut Formatter) -> io::Result<()> {
-        if let TraversalMode::Search { .. } = self.0 {
+        let Self(mode, files) = self;
+        if let TraversalMode::Search { .. } = mode {
             return Ok(());
         }
 
-        if self.1 > 0 {
+        if *files > 0 {
             fmt.write_markup(markup! {
-                " Fixed "{Files(self.1)}"."
+                " Fixed "{Files(*files)}"."
             })
         } else {
             fmt.write_markup(markup! {
@@ -168,25 +176,37 @@ impl<'a> fmt::Display for SummaryDetail<'a> {
         }
     }
 }
+
+struct ScanSummary<'a>(&'a Duration);
+
+impl fmt::Display for ScanSummary<'_> {
+    fn fmt(&self, fmt: &mut Formatter) -> io::Result<()> {
+        fmt.write_markup(markup! {
+            "Scanned project folder in "{self.0}"."
+        })
+    }
+}
+
 struct SummaryTotal<'a>(&'a TraversalMode, usize, &'a Duration);
 
-impl<'a> fmt::Display for SummaryTotal<'a> {
+impl fmt::Display for SummaryTotal<'_> {
     fn fmt(&self, fmt: &mut Formatter) -> io::Result<()> {
-        let files = Files(self.1);
-        match self.0 {
+        let Self(mode, files, duration) = self;
+        let files = Files(*files);
+        match mode {
             TraversalMode::Check { .. } | TraversalMode::Lint { .. } | TraversalMode::CI { .. } => {
                 fmt.write_markup(markup! {
-                    "Checked "{files}" in "{self.2}"."
+                    "Checked "{files}" in "{duration}"."
                 })
             }
             TraversalMode::Format { write, .. } => {
                 if *write {
                     fmt.write_markup(markup! {
-                        "Formatted "{files}" in "{self.2}"."
+                        "Formatted "{files}" in "{duration}"."
                     })
                 } else {
                     fmt.write_markup(markup! {
-                        "Checked "{files}" in "{self.2}"."
+                        "Checked "{files}" in "{duration}"."
                     })
                 }
             }
@@ -194,17 +214,17 @@ impl<'a> fmt::Display for SummaryTotal<'a> {
             TraversalMode::Migrate { write, .. } => {
                 if *write {
                     fmt.write_markup(markup! {
-                      "Migrated your configuration file in "{self.2}"."
+                      "Migrated your configuration file in "{duration}"."
                     })
                 } else {
                     fmt.write_markup(markup! {
-                        "Checked your configuration file in "{self.2}"."
+                        "Checked your configuration file in "{duration}"."
                     })
                 }
             }
 
             TraversalMode::Search { .. } => fmt.write_markup(markup! {
-                "Searched "{files}" in "{self.2}"."
+                "Searched "{files}" in "{duration}"."
             }),
         }
     }
@@ -213,33 +233,45 @@ impl<'a> fmt::Display for SummaryTotal<'a> {
 pub(crate) struct ConsoleTraversalSummary<'a>(
     pub(crate) &'a TraversalMode,
     pub(crate) &'a TraversalSummary,
+    pub(crate) bool,
 );
-impl<'a> fmt::Display for ConsoleTraversalSummary<'a> {
+impl fmt::Display for ConsoleTraversalSummary<'_> {
     fn fmt(&self, fmt: &mut Formatter) -> io::Result<()> {
-        let summary = SummaryTotal(self.0, self.1.changed + self.1.unchanged, &self.1.duration);
-        let detail = SummaryDetail(self.0, self.1.changed);
-        fmt.write_markup(markup!(<Info>{summary}{detail}</Info>))?;
+        let Self(mode, summary, verbose) = *self;
+        let mut duration = summary.duration;
+        if !verbose {
+            if let Some(scanner_duration) = summary.scanner_duration {
+                duration += scanner_duration;
+            }
+        } else if let Some(scanner_duration) = summary.scanner_duration {
+            let scanned = ScanSummary(&scanner_duration);
+            fmt.write_markup(markup!(<Info>{scanned}</Info>))?;
+            fmt.write_str("\n")?;
+        }
+        let total = SummaryTotal(mode, summary.changed + summary.unchanged, &duration);
+        let detail = SummaryDetail(mode, summary.changed);
+        fmt.write_markup(markup!(<Info>{total}{detail}</Info>))?;
 
-        if self.1.errors > 0 {
-            if self.1.errors == 1 {
-                fmt.write_markup(markup!("\n"<Error>"Found "{self.1.errors}" error."</Error>))?;
+        if summary.errors > 0 {
+            if summary.errors == 1 {
+                fmt.write_markup(markup!("\n"<Error>"Found "{summary.errors}" error."</Error>))?;
             } else {
-                fmt.write_markup(markup!("\n"<Error>"Found "{self.1.errors}" errors."</Error>))?;
+                fmt.write_markup(markup!("\n"<Error>"Found "{summary.errors}" errors."</Error>))?;
             }
         }
-        if self.1.warnings > 0 {
-            if self.1.warnings == 1 {
-                fmt.write_markup(markup!("\n"<Warn>"Found "{self.1.warnings}" warning."</Warn>))?;
+        if summary.warnings > 0 {
+            if summary.warnings == 1 {
+                fmt.write_markup(markup!("\n"<Warn>"Found "{summary.warnings}" warning."</Warn>))?;
             } else {
-                fmt.write_markup(markup!("\n"<Warn>"Found "{self.1.warnings}" warnings."</Warn>))?;
+                fmt.write_markup(markup!("\n"<Warn>"Found "{summary.warnings}" warnings."</Warn>))?;
             }
         }
 
-        if let TraversalMode::Search { .. } = self.0 {
-            if self.1.matches == 1 {
-                fmt.write_markup(markup!(" "<Info>"Found "{self.1.matches}" match."</Info>))?
+        if let TraversalMode::Search { .. } = mode {
+            if summary.matches == 1 {
+                fmt.write_markup(markup!(" "<Info>"Found "{summary.matches}" match."</Info>))?
             } else {
-                fmt.write_markup(markup!(" "<Info>"Found "{self.1.matches}" matches."</Info>))?
+                fmt.write_markup(markup!(" "<Info>"Found "{summary.matches}" matches."</Info>))?
             };
         };
         Ok(())

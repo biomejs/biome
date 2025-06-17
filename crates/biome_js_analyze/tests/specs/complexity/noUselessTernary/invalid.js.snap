@@ -1,9 +1,10 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid.js
+snapshot_kind: text
 ---
 # Input
-```jsx
+```js
 var a = x ? true : true;
 var a = x ? false : false;
 
@@ -30,7 +31,7 @@ var a = 'make' in car ? false : true;
 ```
 invalid.js:1:9 lint/complexity/noUselessTernary  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unnecessary use of boolean literals in conditional expression.
+  i Unnecessary use of boolean literals in conditional expression.
   
   > 1 │ var a = x ? true : true;
       │         ^^^^^^^^^^^^^^^
@@ -52,7 +53,7 @@ invalid.js:1:9 lint/complexity/noUselessTernary  FIXABLE  ━━━━━━━�
 ```
 invalid.js:2:9 lint/complexity/noUselessTernary  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unnecessary use of boolean literals in conditional expression.
+  i Unnecessary use of boolean literals in conditional expression.
   
     1 │ var a = x ? true : true;
   > 2 │ var a = x ? false : false;
@@ -75,7 +76,7 @@ invalid.js:2:9 lint/complexity/noUselessTernary  FIXABLE  ━━━━━━━�
 ```
 invalid.js:4:9 lint/complexity/noUselessTernary  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unnecessary use of boolean literals in conditional expression.
+  i Unnecessary use of boolean literals in conditional expression.
   
     2 │ var a = x ? false : false;
     3 │ 
@@ -104,7 +105,7 @@ invalid.js:4:9 lint/complexity/noUselessTernary  FIXABLE  ━━━━━━━�
 ```
 invalid.js:5:9 lint/complexity/noUselessTernary  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unnecessary use of boolean literals in conditional expression.
+  i Unnecessary use of boolean literals in conditional expression.
   
     4 │ var a = foo() ? false : true;
   > 5 │ var a = foo ? false : true;
@@ -132,7 +133,7 @@ invalid.js:5:9 lint/complexity/noUselessTernary  FIXABLE  ━━━━━━━�
 ```
 invalid.js:6:9 lint/complexity/noUselessTernary  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unnecessary use of boolean literals in conditional expression.
+  i Unnecessary use of boolean literals in conditional expression.
   
     4 │ var a = foo() ? false : true;
     5 │ var a = foo ? false : true;
@@ -161,7 +162,7 @@ invalid.js:6:9 lint/complexity/noUselessTernary  FIXABLE  ━━━━━━━�
 ```
 invalid.js:7:9 lint/complexity/noUselessTernary  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unnecessary use of boolean literals in conditional expression.
+  i Unnecessary use of boolean literals in conditional expression.
   
     5 │ var a = foo ? false : true;
     6 │ var a = foo === 1 ? false : true;
@@ -190,7 +191,7 @@ invalid.js:7:9 lint/complexity/noUselessTernary  FIXABLE  ━━━━━━━�
 ```
 invalid.js:9:9 lint/complexity/noUselessTernary  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unnecessary use of boolean literals in conditional expression.
+  i Unnecessary use of boolean literals in conditional expression.
   
      7 │ var a = foo + 1 ? false : true;
      8 │ 
@@ -219,7 +220,7 @@ invalid.js:9:9 lint/complexity/noUselessTernary  FIXABLE  ━━━━━━━�
 ```
 invalid.js:10:9 lint/complexity/noUselessTernary  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unnecessary use of boolean literals in conditional expression.
+  i Unnecessary use of boolean literals in conditional expression.
   
      9 │ var a = foo() ? true : false;
   > 10 │ var a = foo ? true : false;
@@ -247,7 +248,7 @@ invalid.js:10:9 lint/complexity/noUselessTernary  FIXABLE  ━━━━━━━
 ```
 invalid.js:11:9 lint/complexity/noUselessTernary  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unnecessary use of boolean literals in conditional expression.
+  i Unnecessary use of boolean literals in conditional expression.
   
      9 │ var a = foo() ? true : false;
     10 │ var a = foo ? true : false;
@@ -276,7 +277,7 @@ invalid.js:11:9 lint/complexity/noUselessTernary  FIXABLE  ━━━━━━━
 ```
 invalid.js:12:9 lint/complexity/noUselessTernary  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unnecessary use of boolean literals in conditional expression.
+  i Unnecessary use of boolean literals in conditional expression.
   
     10 │ var a = foo ? true : false;
     11 │ var a = foo === 1 ? true : false;
@@ -305,7 +306,7 @@ invalid.js:12:9 lint/complexity/noUselessTernary  FIXABLE  ━━━━━━━
 ```
 invalid.js:14:8 lint/complexity/noUselessTernary  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unnecessary use of boolean literals in conditional expression.
+  i Unnecessary use of boolean literals in conditional expression.
   
     12 │ var a = foo + 1 ? true : false;
     13 │ 
@@ -329,7 +330,7 @@ invalid.js:14:8 lint/complexity/noUselessTernary  FIXABLE  ━━━━━━━
 ```
 invalid.js:16:9 lint/complexity/noUselessTernary  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unnecessary use of boolean literals in conditional expression.
+  i Unnecessary use of boolean literals in conditional expression.
   
     14 │ var a= !foo? true : false;
     15 │ 
@@ -358,7 +359,7 @@ invalid.js:16:9 lint/complexity/noUselessTernary  FIXABLE  ━━━━━━━
 ```
 invalid.js:17:9 lint/complexity/noUselessTernary  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unnecessary use of boolean literals in conditional expression.
+  i Unnecessary use of boolean literals in conditional expression.
   
     16 │ var a = x instanceof foo ? false : true;
   > 17 │ var a = x instanceof foo ? true : false;
@@ -386,7 +387,7 @@ invalid.js:17:9 lint/complexity/noUselessTernary  FIXABLE  ━━━━━━━
 ```
 invalid.js:19:9 lint/complexity/noUselessTernary  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unnecessary use of boolean literals in conditional expression.
+  i Unnecessary use of boolean literals in conditional expression.
   
     17 │ var a = x instanceof foo ? true : false;
     18 │ 
@@ -413,7 +414,7 @@ invalid.js:19:9 lint/complexity/noUselessTernary  FIXABLE  ━━━━━━━
 ```
 invalid.js:20:9 lint/complexity/noUselessTernary  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unnecessary use of boolean literals in conditional expression.
+  i Unnecessary use of boolean literals in conditional expression.
   
     19 │ var a = 'make' in car ? true : false;
   > 20 │ var a = 'make' in car ? false : true;

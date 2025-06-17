@@ -16,6 +16,7 @@ biome_console            = { workspace = true }
 biome_deserialize        = { workspace = true }
 biome_deserialize_macros = { workspace = true }
 biome_diagnostics        = { workspace = true }
+biome_graphql_factory    = { workspace = true }
 biome_graphql_syntax     = { workspace = true }
 biome_rowan              = { workspace = true }
 biome_string_case        = { workspace = true }
@@ -26,11 +27,12 @@ serde                    = { workspace = true, features = ["derive"] }
 [dev-dependencies]
 biome_graphql_parser = { path = "../biome_graphql_parser" }
 biome_test_utils     = { path = "../biome_test_utils" }
+camino               = { workspace = true }
 insta                = { workspace = true, features = ["glob"] }
 tests_macros         = { path = "../tests_macros" }
 
 [features]
-schema = ["schemars", "biome_deserialize/schema"]
+schema = ["schemars"]
 
 [lints]
 workspace = true

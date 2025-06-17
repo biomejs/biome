@@ -1,0 +1,183 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+expression: invalid.css
+---
+# Input
+```css
+unknown {
+}
+
+ul unknown {
+}
+
+unknown ul {
+}
+
+li > hoge {
+}
+
+fuga > li {
+}
+
+table,
+unknown {
+}
+
+unknown,
+article {
+}
+
+x-Foo {
+}
+
+```
+
+# Diagnostics
+```
+invalid.css:1:1 lint/correctness/noUnknownTypeSelector ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unknown type selector is not allowed.
+  
+  > 1 │ unknown {
+      │ ^^^^^^^
+    2 │ }
+    3 │ 
+  
+  i See MDN web docs for more details.
+  
+  i Consider replacing the unknown type selector with valid one.
+  
+
+```
+
+```
+invalid.css:4:4 lint/correctness/noUnknownTypeSelector ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unknown type selector is not allowed.
+  
+    2 │ }
+    3 │ 
+  > 4 │ ul unknown {
+      │    ^^^^^^^
+    5 │ }
+    6 │ 
+  
+  i See MDN web docs for more details.
+  
+  i Consider replacing the unknown type selector with valid one.
+  
+
+```
+
+```
+invalid.css:7:1 lint/correctness/noUnknownTypeSelector ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unknown type selector is not allowed.
+  
+    5 │ }
+    6 │ 
+  > 7 │ unknown ul {
+      │ ^^^^^^^
+    8 │ }
+    9 │ 
+  
+  i See MDN web docs for more details.
+  
+  i Consider replacing the unknown type selector with valid one.
+  
+
+```
+
+```
+invalid.css:10:6 lint/correctness/noUnknownTypeSelector ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unknown type selector is not allowed.
+  
+     8 │ }
+     9 │ 
+  > 10 │ li > hoge {
+       │      ^^^^
+    11 │ }
+    12 │ 
+  
+  i See MDN web docs for more details.
+  
+  i Consider replacing the unknown type selector with valid one.
+  
+
+```
+
+```
+invalid.css:13:1 lint/correctness/noUnknownTypeSelector ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unknown type selector is not allowed.
+  
+    11 │ }
+    12 │ 
+  > 13 │ fuga > li {
+       │ ^^^^
+    14 │ }
+    15 │ 
+  
+  i See MDN web docs for more details.
+  
+  i Consider replacing the unknown type selector with valid one.
+  
+
+```
+
+```
+invalid.css:17:1 lint/correctness/noUnknownTypeSelector ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unknown type selector is not allowed.
+  
+    16 │ table,
+  > 17 │ unknown {
+       │ ^^^^^^^
+    18 │ }
+    19 │ 
+  
+  i See MDN web docs for more details.
+  
+  i Consider replacing the unknown type selector with valid one.
+  
+
+```
+
+```
+invalid.css:20:1 lint/correctness/noUnknownTypeSelector ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unknown type selector is not allowed.
+  
+    18 │ }
+    19 │ 
+  > 20 │ unknown,
+       │ ^^^^^^^
+    21 │ article {
+    22 │ }
+  
+  i See MDN web docs for more details.
+  
+  i Consider replacing the unknown type selector with valid one.
+  
+
+```
+
+```
+invalid.css:24:1 lint/correctness/noUnknownTypeSelector ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unknown type selector is not allowed.
+  
+    22 │ }
+    23 │ 
+  > 24 │ x-Foo {
+       │ ^^^^^
+    25 │ }
+    26 │ 
+  
+  i See MDN web docs for more details.
+  
+  i Consider replacing the unknown type selector with valid one.
+  
+
+```

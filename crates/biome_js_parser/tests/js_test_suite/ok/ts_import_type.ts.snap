@@ -1,0 +1,808 @@
+---
+source: crates/biome_js_parser/tests/spec_test.rs
+expression: snapshot
+snapshot_kind: text
+---
+## Input
+
+```ts
+type A = typeof import("test");
+type B = import("test");
+type C = typeof import("test").a.b.c.d.e.f;
+type D = import("test")<string>;
+type E = import("test").C<string>;
+type F = typeof import("test", { with: { "resolution-mode": "import" } });
+type G = import("test", { with: { "resolution-mode": "import" } }).TypeFromImport;
+type H = import("test", { with: { "resolution-mode": "import" } })<string>;
+type I = import("test", { with: { "resolution-mode": "require" } }).C<string>;
+type J = typeof import("test", { with: { "resolution-mode": "require" } }).a.b.c.d.e.f;
+
+```
+
+
+## AST
+
+```
+JsModule {
+    bom_token: missing (optional),
+    interpreter_token: missing (optional),
+    directives: JsDirectiveList [],
+    items: JsModuleItemList [
+        TsTypeAliasDeclaration {
+            type_token: TYPE_KW@0..5 "type" [] [Whitespace(" ")],
+            binding_identifier: TsIdentifierBinding {
+                name_token: IDENT@5..7 "A" [] [Whitespace(" ")],
+            },
+            type_parameters: missing (optional),
+            eq_token: EQ@7..9 "=" [] [Whitespace(" ")],
+            ty: TsImportType {
+                typeof_token: TYPEOF_KW@9..16 "typeof" [] [Whitespace(" ")],
+                import_token: IMPORT_KW@16..22 "import" [] [],
+                arguments: TsImportTypeArguments {
+                    l_paren_token: L_PAREN@22..23 "(" [] [],
+                    argument: TsStringLiteralType {
+                        literal_token: JS_STRING_LITERAL@23..29 "\"test\"" [] [],
+                    },
+                    comma_token: missing (optional),
+                    ts_import_type_assertion_block: missing (optional),
+                    r_paren_token: R_PAREN@29..30 ")" [] [],
+                },
+                qualifier_clause: missing (optional),
+                type_arguments: missing (optional),
+            },
+            semicolon_token: SEMICOLON@30..31 ";" [] [],
+        },
+        TsTypeAliasDeclaration {
+            type_token: TYPE_KW@31..37 "type" [Newline("\n")] [Whitespace(" ")],
+            binding_identifier: TsIdentifierBinding {
+                name_token: IDENT@37..39 "B" [] [Whitespace(" ")],
+            },
+            type_parameters: missing (optional),
+            eq_token: EQ@39..41 "=" [] [Whitespace(" ")],
+            ty: TsImportType {
+                typeof_token: missing (optional),
+                import_token: IMPORT_KW@41..47 "import" [] [],
+                arguments: TsImportTypeArguments {
+                    l_paren_token: L_PAREN@47..48 "(" [] [],
+                    argument: TsStringLiteralType {
+                        literal_token: JS_STRING_LITERAL@48..54 "\"test\"" [] [],
+                    },
+                    comma_token: missing (optional),
+                    ts_import_type_assertion_block: missing (optional),
+                    r_paren_token: R_PAREN@54..55 ")" [] [],
+                },
+                qualifier_clause: missing (optional),
+                type_arguments: missing (optional),
+            },
+            semicolon_token: SEMICOLON@55..56 ";" [] [],
+        },
+        TsTypeAliasDeclaration {
+            type_token: TYPE_KW@56..62 "type" [Newline("\n")] [Whitespace(" ")],
+            binding_identifier: TsIdentifierBinding {
+                name_token: IDENT@62..64 "C" [] [Whitespace(" ")],
+            },
+            type_parameters: missing (optional),
+            eq_token: EQ@64..66 "=" [] [Whitespace(" ")],
+            ty: TsImportType {
+                typeof_token: TYPEOF_KW@66..73 "typeof" [] [Whitespace(" ")],
+                import_token: IMPORT_KW@73..79 "import" [] [],
+                arguments: TsImportTypeArguments {
+                    l_paren_token: L_PAREN@79..80 "(" [] [],
+                    argument: TsStringLiteralType {
+                        literal_token: JS_STRING_LITERAL@80..86 "\"test\"" [] [],
+                    },
+                    comma_token: missing (optional),
+                    ts_import_type_assertion_block: missing (optional),
+                    r_paren_token: R_PAREN@86..87 ")" [] [],
+                },
+                qualifier_clause: TsImportTypeQualifier {
+                    dot_token: DOT@87..88 "." [] [],
+                    right: TsQualifiedName {
+                        left: TsQualifiedName {
+                            left: TsQualifiedName {
+                                left: TsQualifiedName {
+                                    left: TsQualifiedName {
+                                        left: JsReferenceIdentifier {
+                                            value_token: IDENT@88..89 "a" [] [],
+                                        },
+                                        dot_token: DOT@89..90 "." [] [],
+                                        right: JsName {
+                                            value_token: IDENT@90..91 "b" [] [],
+                                        },
+                                    },
+                                    dot_token: DOT@91..92 "." [] [],
+                                    right: JsName {
+                                        value_token: IDENT@92..93 "c" [] [],
+                                    },
+                                },
+                                dot_token: DOT@93..94 "." [] [],
+                                right: JsName {
+                                    value_token: IDENT@94..95 "d" [] [],
+                                },
+                            },
+                            dot_token: DOT@95..96 "." [] [],
+                            right: JsName {
+                                value_token: IDENT@96..97 "e" [] [],
+                            },
+                        },
+                        dot_token: DOT@97..98 "." [] [],
+                        right: JsName {
+                            value_token: IDENT@98..99 "f" [] [],
+                        },
+                    },
+                },
+                type_arguments: missing (optional),
+            },
+            semicolon_token: SEMICOLON@99..100 ";" [] [],
+        },
+        TsTypeAliasDeclaration {
+            type_token: TYPE_KW@100..106 "type" [Newline("\n")] [Whitespace(" ")],
+            binding_identifier: TsIdentifierBinding {
+                name_token: IDENT@106..108 "D" [] [Whitespace(" ")],
+            },
+            type_parameters: missing (optional),
+            eq_token: EQ@108..110 "=" [] [Whitespace(" ")],
+            ty: TsImportType {
+                typeof_token: missing (optional),
+                import_token: IMPORT_KW@110..116 "import" [] [],
+                arguments: TsImportTypeArguments {
+                    l_paren_token: L_PAREN@116..117 "(" [] [],
+                    argument: TsStringLiteralType {
+                        literal_token: JS_STRING_LITERAL@117..123 "\"test\"" [] [],
+                    },
+                    comma_token: missing (optional),
+                    ts_import_type_assertion_block: missing (optional),
+                    r_paren_token: R_PAREN@123..124 ")" [] [],
+                },
+                qualifier_clause: missing (optional),
+                type_arguments: TsTypeArguments {
+                    l_angle_token: L_ANGLE@124..125 "<" [] [],
+                    ts_type_argument_list: TsTypeArgumentList [
+                        TsStringType {
+                            string_token: STRING_KW@125..131 "string" [] [],
+                        },
+                    ],
+                    r_angle_token: R_ANGLE@131..132 ">" [] [],
+                },
+            },
+            semicolon_token: SEMICOLON@132..133 ";" [] [],
+        },
+        TsTypeAliasDeclaration {
+            type_token: TYPE_KW@133..139 "type" [Newline("\n")] [Whitespace(" ")],
+            binding_identifier: TsIdentifierBinding {
+                name_token: IDENT@139..141 "E" [] [Whitespace(" ")],
+            },
+            type_parameters: missing (optional),
+            eq_token: EQ@141..143 "=" [] [Whitespace(" ")],
+            ty: TsImportType {
+                typeof_token: missing (optional),
+                import_token: IMPORT_KW@143..149 "import" [] [],
+                arguments: TsImportTypeArguments {
+                    l_paren_token: L_PAREN@149..150 "(" [] [],
+                    argument: TsStringLiteralType {
+                        literal_token: JS_STRING_LITERAL@150..156 "\"test\"" [] [],
+                    },
+                    comma_token: missing (optional),
+                    ts_import_type_assertion_block: missing (optional),
+                    r_paren_token: R_PAREN@156..157 ")" [] [],
+                },
+                qualifier_clause: TsImportTypeQualifier {
+                    dot_token: DOT@157..158 "." [] [],
+                    right: JsReferenceIdentifier {
+                        value_token: IDENT@158..159 "C" [] [],
+                    },
+                },
+                type_arguments: TsTypeArguments {
+                    l_angle_token: L_ANGLE@159..160 "<" [] [],
+                    ts_type_argument_list: TsTypeArgumentList [
+                        TsStringType {
+                            string_token: STRING_KW@160..166 "string" [] [],
+                        },
+                    ],
+                    r_angle_token: R_ANGLE@166..167 ">" [] [],
+                },
+            },
+            semicolon_token: SEMICOLON@167..168 ";" [] [],
+        },
+        TsTypeAliasDeclaration {
+            type_token: TYPE_KW@168..174 "type" [Newline("\n")] [Whitespace(" ")],
+            binding_identifier: TsIdentifierBinding {
+                name_token: IDENT@174..176 "F" [] [Whitespace(" ")],
+            },
+            type_parameters: missing (optional),
+            eq_token: EQ@176..178 "=" [] [Whitespace(" ")],
+            ty: TsImportType {
+                typeof_token: TYPEOF_KW@178..185 "typeof" [] [Whitespace(" ")],
+                import_token: IMPORT_KW@185..191 "import" [] [],
+                arguments: TsImportTypeArguments {
+                    l_paren_token: L_PAREN@191..192 "(" [] [],
+                    argument: TsStringLiteralType {
+                        literal_token: JS_STRING_LITERAL@192..198 "\"test\"" [] [],
+                    },
+                    comma_token: COMMA@198..200 "," [] [Whitespace(" ")],
+                    ts_import_type_assertion_block: TsImportTypeAssertionBlock {
+                        l_curly_token: L_CURLY@200..202 "{" [] [Whitespace(" ")],
+                        type_assertion: TsImportTypeAssertion {
+                            with_token: WITH_KW@202..206 "with" [] [],
+                            colon_token: COLON@206..208 ":" [] [Whitespace(" ")],
+                            l_curly_token: L_CURLY@208..210 "{" [] [Whitespace(" ")],
+                            assertions: JsImportAssertionEntryList [
+                                JsImportAssertionEntry {
+                                    key: JS_STRING_LITERAL@210..227 "\"resolution-mode\"" [] [],
+                                    colon_token: COLON@227..229 ":" [] [Whitespace(" ")],
+                                    value_token: JS_STRING_LITERAL@229..238 "\"import\"" [] [Whitespace(" ")],
+                                },
+                            ],
+                            r_curly_token: R_CURLY@238..240 "}" [] [Whitespace(" ")],
+                        },
+                        r_curly_token: R_CURLY@240..241 "}" [] [],
+                    },
+                    r_paren_token: R_PAREN@241..242 ")" [] [],
+                },
+                qualifier_clause: missing (optional),
+                type_arguments: missing (optional),
+            },
+            semicolon_token: SEMICOLON@242..243 ";" [] [],
+        },
+        TsTypeAliasDeclaration {
+            type_token: TYPE_KW@243..249 "type" [Newline("\n")] [Whitespace(" ")],
+            binding_identifier: TsIdentifierBinding {
+                name_token: IDENT@249..251 "G" [] [Whitespace(" ")],
+            },
+            type_parameters: missing (optional),
+            eq_token: EQ@251..253 "=" [] [Whitespace(" ")],
+            ty: TsImportType {
+                typeof_token: missing (optional),
+                import_token: IMPORT_KW@253..259 "import" [] [],
+                arguments: TsImportTypeArguments {
+                    l_paren_token: L_PAREN@259..260 "(" [] [],
+                    argument: TsStringLiteralType {
+                        literal_token: JS_STRING_LITERAL@260..266 "\"test\"" [] [],
+                    },
+                    comma_token: COMMA@266..268 "," [] [Whitespace(" ")],
+                    ts_import_type_assertion_block: TsImportTypeAssertionBlock {
+                        l_curly_token: L_CURLY@268..270 "{" [] [Whitespace(" ")],
+                        type_assertion: TsImportTypeAssertion {
+                            with_token: WITH_KW@270..274 "with" [] [],
+                            colon_token: COLON@274..276 ":" [] [Whitespace(" ")],
+                            l_curly_token: L_CURLY@276..278 "{" [] [Whitespace(" ")],
+                            assertions: JsImportAssertionEntryList [
+                                JsImportAssertionEntry {
+                                    key: JS_STRING_LITERAL@278..295 "\"resolution-mode\"" [] [],
+                                    colon_token: COLON@295..297 ":" [] [Whitespace(" ")],
+                                    value_token: JS_STRING_LITERAL@297..306 "\"import\"" [] [Whitespace(" ")],
+                                },
+                            ],
+                            r_curly_token: R_CURLY@306..308 "}" [] [Whitespace(" ")],
+                        },
+                        r_curly_token: R_CURLY@308..309 "}" [] [],
+                    },
+                    r_paren_token: R_PAREN@309..310 ")" [] [],
+                },
+                qualifier_clause: TsImportTypeQualifier {
+                    dot_token: DOT@310..311 "." [] [],
+                    right: JsReferenceIdentifier {
+                        value_token: IDENT@311..325 "TypeFromImport" [] [],
+                    },
+                },
+                type_arguments: missing (optional),
+            },
+            semicolon_token: SEMICOLON@325..326 ";" [] [],
+        },
+        TsTypeAliasDeclaration {
+            type_token: TYPE_KW@326..332 "type" [Newline("\n")] [Whitespace(" ")],
+            binding_identifier: TsIdentifierBinding {
+                name_token: IDENT@332..334 "H" [] [Whitespace(" ")],
+            },
+            type_parameters: missing (optional),
+            eq_token: EQ@334..336 "=" [] [Whitespace(" ")],
+            ty: TsImportType {
+                typeof_token: missing (optional),
+                import_token: IMPORT_KW@336..342 "import" [] [],
+                arguments: TsImportTypeArguments {
+                    l_paren_token: L_PAREN@342..343 "(" [] [],
+                    argument: TsStringLiteralType {
+                        literal_token: JS_STRING_LITERAL@343..349 "\"test\"" [] [],
+                    },
+                    comma_token: COMMA@349..351 "," [] [Whitespace(" ")],
+                    ts_import_type_assertion_block: TsImportTypeAssertionBlock {
+                        l_curly_token: L_CURLY@351..353 "{" [] [Whitespace(" ")],
+                        type_assertion: TsImportTypeAssertion {
+                            with_token: WITH_KW@353..357 "with" [] [],
+                            colon_token: COLON@357..359 ":" [] [Whitespace(" ")],
+                            l_curly_token: L_CURLY@359..361 "{" [] [Whitespace(" ")],
+                            assertions: JsImportAssertionEntryList [
+                                JsImportAssertionEntry {
+                                    key: JS_STRING_LITERAL@361..378 "\"resolution-mode\"" [] [],
+                                    colon_token: COLON@378..380 ":" [] [Whitespace(" ")],
+                                    value_token: JS_STRING_LITERAL@380..389 "\"import\"" [] [Whitespace(" ")],
+                                },
+                            ],
+                            r_curly_token: R_CURLY@389..391 "}" [] [Whitespace(" ")],
+                        },
+                        r_curly_token: R_CURLY@391..392 "}" [] [],
+                    },
+                    r_paren_token: R_PAREN@392..393 ")" [] [],
+                },
+                qualifier_clause: missing (optional),
+                type_arguments: TsTypeArguments {
+                    l_angle_token: L_ANGLE@393..394 "<" [] [],
+                    ts_type_argument_list: TsTypeArgumentList [
+                        TsStringType {
+                            string_token: STRING_KW@394..400 "string" [] [],
+                        },
+                    ],
+                    r_angle_token: R_ANGLE@400..401 ">" [] [],
+                },
+            },
+            semicolon_token: SEMICOLON@401..402 ";" [] [],
+        },
+        TsTypeAliasDeclaration {
+            type_token: TYPE_KW@402..408 "type" [Newline("\n")] [Whitespace(" ")],
+            binding_identifier: TsIdentifierBinding {
+                name_token: IDENT@408..410 "I" [] [Whitespace(" ")],
+            },
+            type_parameters: missing (optional),
+            eq_token: EQ@410..412 "=" [] [Whitespace(" ")],
+            ty: TsImportType {
+                typeof_token: missing (optional),
+                import_token: IMPORT_KW@412..418 "import" [] [],
+                arguments: TsImportTypeArguments {
+                    l_paren_token: L_PAREN@418..419 "(" [] [],
+                    argument: TsStringLiteralType {
+                        literal_token: JS_STRING_LITERAL@419..425 "\"test\"" [] [],
+                    },
+                    comma_token: COMMA@425..427 "," [] [Whitespace(" ")],
+                    ts_import_type_assertion_block: TsImportTypeAssertionBlock {
+                        l_curly_token: L_CURLY@427..429 "{" [] [Whitespace(" ")],
+                        type_assertion: TsImportTypeAssertion {
+                            with_token: WITH_KW@429..433 "with" [] [],
+                            colon_token: COLON@433..435 ":" [] [Whitespace(" ")],
+                            l_curly_token: L_CURLY@435..437 "{" [] [Whitespace(" ")],
+                            assertions: JsImportAssertionEntryList [
+                                JsImportAssertionEntry {
+                                    key: JS_STRING_LITERAL@437..454 "\"resolution-mode\"" [] [],
+                                    colon_token: COLON@454..456 ":" [] [Whitespace(" ")],
+                                    value_token: JS_STRING_LITERAL@456..466 "\"require\"" [] [Whitespace(" ")],
+                                },
+                            ],
+                            r_curly_token: R_CURLY@466..468 "}" [] [Whitespace(" ")],
+                        },
+                        r_curly_token: R_CURLY@468..469 "}" [] [],
+                    },
+                    r_paren_token: R_PAREN@469..470 ")" [] [],
+                },
+                qualifier_clause: TsImportTypeQualifier {
+                    dot_token: DOT@470..471 "." [] [],
+                    right: JsReferenceIdentifier {
+                        value_token: IDENT@471..472 "C" [] [],
+                    },
+                },
+                type_arguments: TsTypeArguments {
+                    l_angle_token: L_ANGLE@472..473 "<" [] [],
+                    ts_type_argument_list: TsTypeArgumentList [
+                        TsStringType {
+                            string_token: STRING_KW@473..479 "string" [] [],
+                        },
+                    ],
+                    r_angle_token: R_ANGLE@479..480 ">" [] [],
+                },
+            },
+            semicolon_token: SEMICOLON@480..481 ";" [] [],
+        },
+        TsTypeAliasDeclaration {
+            type_token: TYPE_KW@481..487 "type" [Newline("\n")] [Whitespace(" ")],
+            binding_identifier: TsIdentifierBinding {
+                name_token: IDENT@487..489 "J" [] [Whitespace(" ")],
+            },
+            type_parameters: missing (optional),
+            eq_token: EQ@489..491 "=" [] [Whitespace(" ")],
+            ty: TsImportType {
+                typeof_token: TYPEOF_KW@491..498 "typeof" [] [Whitespace(" ")],
+                import_token: IMPORT_KW@498..504 "import" [] [],
+                arguments: TsImportTypeArguments {
+                    l_paren_token: L_PAREN@504..505 "(" [] [],
+                    argument: TsStringLiteralType {
+                        literal_token: JS_STRING_LITERAL@505..511 "\"test\"" [] [],
+                    },
+                    comma_token: COMMA@511..513 "," [] [Whitespace(" ")],
+                    ts_import_type_assertion_block: TsImportTypeAssertionBlock {
+                        l_curly_token: L_CURLY@513..515 "{" [] [Whitespace(" ")],
+                        type_assertion: TsImportTypeAssertion {
+                            with_token: WITH_KW@515..519 "with" [] [],
+                            colon_token: COLON@519..521 ":" [] [Whitespace(" ")],
+                            l_curly_token: L_CURLY@521..523 "{" [] [Whitespace(" ")],
+                            assertions: JsImportAssertionEntryList [
+                                JsImportAssertionEntry {
+                                    key: JS_STRING_LITERAL@523..540 "\"resolution-mode\"" [] [],
+                                    colon_token: COLON@540..542 ":" [] [Whitespace(" ")],
+                                    value_token: JS_STRING_LITERAL@542..552 "\"require\"" [] [Whitespace(" ")],
+                                },
+                            ],
+                            r_curly_token: R_CURLY@552..554 "}" [] [Whitespace(" ")],
+                        },
+                        r_curly_token: R_CURLY@554..555 "}" [] [],
+                    },
+                    r_paren_token: R_PAREN@555..556 ")" [] [],
+                },
+                qualifier_clause: TsImportTypeQualifier {
+                    dot_token: DOT@556..557 "." [] [],
+                    right: TsQualifiedName {
+                        left: TsQualifiedName {
+                            left: TsQualifiedName {
+                                left: TsQualifiedName {
+                                    left: TsQualifiedName {
+                                        left: JsReferenceIdentifier {
+                                            value_token: IDENT@557..558 "a" [] [],
+                                        },
+                                        dot_token: DOT@558..559 "." [] [],
+                                        right: JsName {
+                                            value_token: IDENT@559..560 "b" [] [],
+                                        },
+                                    },
+                                    dot_token: DOT@560..561 "." [] [],
+                                    right: JsName {
+                                        value_token: IDENT@561..562 "c" [] [],
+                                    },
+                                },
+                                dot_token: DOT@562..563 "." [] [],
+                                right: JsName {
+                                    value_token: IDENT@563..564 "d" [] [],
+                                },
+                            },
+                            dot_token: DOT@564..565 "." [] [],
+                            right: JsName {
+                                value_token: IDENT@565..566 "e" [] [],
+                            },
+                        },
+                        dot_token: DOT@566..567 "." [] [],
+                        right: JsName {
+                            value_token: IDENT@567..568 "f" [] [],
+                        },
+                    },
+                },
+                type_arguments: missing (optional),
+            },
+            semicolon_token: SEMICOLON@568..569 ";" [] [],
+        },
+    ],
+    eof_token: EOF@569..570 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: JS_MODULE@0..570
+  0: (empty)
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..569
+    0: TS_TYPE_ALIAS_DECLARATION@0..31
+      0: TYPE_KW@0..5 "type" [] [Whitespace(" ")]
+      1: TS_IDENTIFIER_BINDING@5..7
+        0: IDENT@5..7 "A" [] [Whitespace(" ")]
+      2: (empty)
+      3: EQ@7..9 "=" [] [Whitespace(" ")]
+      4: TS_IMPORT_TYPE@9..30
+        0: TYPEOF_KW@9..16 "typeof" [] [Whitespace(" ")]
+        1: IMPORT_KW@16..22 "import" [] []
+        2: TS_IMPORT_TYPE_ARGUMENTS@22..30
+          0: L_PAREN@22..23 "(" [] []
+          1: TS_STRING_LITERAL_TYPE@23..29
+            0: JS_STRING_LITERAL@23..29 "\"test\"" [] []
+          2: (empty)
+          3: (empty)
+          4: R_PAREN@29..30 ")" [] []
+        3: (empty)
+        4: (empty)
+      5: SEMICOLON@30..31 ";" [] []
+    1: TS_TYPE_ALIAS_DECLARATION@31..56
+      0: TYPE_KW@31..37 "type" [Newline("\n")] [Whitespace(" ")]
+      1: TS_IDENTIFIER_BINDING@37..39
+        0: IDENT@37..39 "B" [] [Whitespace(" ")]
+      2: (empty)
+      3: EQ@39..41 "=" [] [Whitespace(" ")]
+      4: TS_IMPORT_TYPE@41..55
+        0: (empty)
+        1: IMPORT_KW@41..47 "import" [] []
+        2: TS_IMPORT_TYPE_ARGUMENTS@47..55
+          0: L_PAREN@47..48 "(" [] []
+          1: TS_STRING_LITERAL_TYPE@48..54
+            0: JS_STRING_LITERAL@48..54 "\"test\"" [] []
+          2: (empty)
+          3: (empty)
+          4: R_PAREN@54..55 ")" [] []
+        3: (empty)
+        4: (empty)
+      5: SEMICOLON@55..56 ";" [] []
+    2: TS_TYPE_ALIAS_DECLARATION@56..100
+      0: TYPE_KW@56..62 "type" [Newline("\n")] [Whitespace(" ")]
+      1: TS_IDENTIFIER_BINDING@62..64
+        0: IDENT@62..64 "C" [] [Whitespace(" ")]
+      2: (empty)
+      3: EQ@64..66 "=" [] [Whitespace(" ")]
+      4: TS_IMPORT_TYPE@66..99
+        0: TYPEOF_KW@66..73 "typeof" [] [Whitespace(" ")]
+        1: IMPORT_KW@73..79 "import" [] []
+        2: TS_IMPORT_TYPE_ARGUMENTS@79..87
+          0: L_PAREN@79..80 "(" [] []
+          1: TS_STRING_LITERAL_TYPE@80..86
+            0: JS_STRING_LITERAL@80..86 "\"test\"" [] []
+          2: (empty)
+          3: (empty)
+          4: R_PAREN@86..87 ")" [] []
+        3: TS_IMPORT_TYPE_QUALIFIER@87..99
+          0: DOT@87..88 "." [] []
+          1: TS_QUALIFIED_NAME@88..99
+            0: TS_QUALIFIED_NAME@88..97
+              0: TS_QUALIFIED_NAME@88..95
+                0: TS_QUALIFIED_NAME@88..93
+                  0: TS_QUALIFIED_NAME@88..91
+                    0: JS_REFERENCE_IDENTIFIER@88..89
+                      0: IDENT@88..89 "a" [] []
+                    1: DOT@89..90 "." [] []
+                    2: JS_NAME@90..91
+                      0: IDENT@90..91 "b" [] []
+                  1: DOT@91..92 "." [] []
+                  2: JS_NAME@92..93
+                    0: IDENT@92..93 "c" [] []
+                1: DOT@93..94 "." [] []
+                2: JS_NAME@94..95
+                  0: IDENT@94..95 "d" [] []
+              1: DOT@95..96 "." [] []
+              2: JS_NAME@96..97
+                0: IDENT@96..97 "e" [] []
+            1: DOT@97..98 "." [] []
+            2: JS_NAME@98..99
+              0: IDENT@98..99 "f" [] []
+        4: (empty)
+      5: SEMICOLON@99..100 ";" [] []
+    3: TS_TYPE_ALIAS_DECLARATION@100..133
+      0: TYPE_KW@100..106 "type" [Newline("\n")] [Whitespace(" ")]
+      1: TS_IDENTIFIER_BINDING@106..108
+        0: IDENT@106..108 "D" [] [Whitespace(" ")]
+      2: (empty)
+      3: EQ@108..110 "=" [] [Whitespace(" ")]
+      4: TS_IMPORT_TYPE@110..132
+        0: (empty)
+        1: IMPORT_KW@110..116 "import" [] []
+        2: TS_IMPORT_TYPE_ARGUMENTS@116..124
+          0: L_PAREN@116..117 "(" [] []
+          1: TS_STRING_LITERAL_TYPE@117..123
+            0: JS_STRING_LITERAL@117..123 "\"test\"" [] []
+          2: (empty)
+          3: (empty)
+          4: R_PAREN@123..124 ")" [] []
+        3: (empty)
+        4: TS_TYPE_ARGUMENTS@124..132
+          0: L_ANGLE@124..125 "<" [] []
+          1: TS_TYPE_ARGUMENT_LIST@125..131
+            0: TS_STRING_TYPE@125..131
+              0: STRING_KW@125..131 "string" [] []
+          2: R_ANGLE@131..132 ">" [] []
+      5: SEMICOLON@132..133 ";" [] []
+    4: TS_TYPE_ALIAS_DECLARATION@133..168
+      0: TYPE_KW@133..139 "type" [Newline("\n")] [Whitespace(" ")]
+      1: TS_IDENTIFIER_BINDING@139..141
+        0: IDENT@139..141 "E" [] [Whitespace(" ")]
+      2: (empty)
+      3: EQ@141..143 "=" [] [Whitespace(" ")]
+      4: TS_IMPORT_TYPE@143..167
+        0: (empty)
+        1: IMPORT_KW@143..149 "import" [] []
+        2: TS_IMPORT_TYPE_ARGUMENTS@149..157
+          0: L_PAREN@149..150 "(" [] []
+          1: TS_STRING_LITERAL_TYPE@150..156
+            0: JS_STRING_LITERAL@150..156 "\"test\"" [] []
+          2: (empty)
+          3: (empty)
+          4: R_PAREN@156..157 ")" [] []
+        3: TS_IMPORT_TYPE_QUALIFIER@157..159
+          0: DOT@157..158 "." [] []
+          1: JS_REFERENCE_IDENTIFIER@158..159
+            0: IDENT@158..159 "C" [] []
+        4: TS_TYPE_ARGUMENTS@159..167
+          0: L_ANGLE@159..160 "<" [] []
+          1: TS_TYPE_ARGUMENT_LIST@160..166
+            0: TS_STRING_TYPE@160..166
+              0: STRING_KW@160..166 "string" [] []
+          2: R_ANGLE@166..167 ">" [] []
+      5: SEMICOLON@167..168 ";" [] []
+    5: TS_TYPE_ALIAS_DECLARATION@168..243
+      0: TYPE_KW@168..174 "type" [Newline("\n")] [Whitespace(" ")]
+      1: TS_IDENTIFIER_BINDING@174..176
+        0: IDENT@174..176 "F" [] [Whitespace(" ")]
+      2: (empty)
+      3: EQ@176..178 "=" [] [Whitespace(" ")]
+      4: TS_IMPORT_TYPE@178..242
+        0: TYPEOF_KW@178..185 "typeof" [] [Whitespace(" ")]
+        1: IMPORT_KW@185..191 "import" [] []
+        2: TS_IMPORT_TYPE_ARGUMENTS@191..242
+          0: L_PAREN@191..192 "(" [] []
+          1: TS_STRING_LITERAL_TYPE@192..198
+            0: JS_STRING_LITERAL@192..198 "\"test\"" [] []
+          2: COMMA@198..200 "," [] [Whitespace(" ")]
+          3: TS_IMPORT_TYPE_ASSERTION_BLOCK@200..241
+            0: L_CURLY@200..202 "{" [] [Whitespace(" ")]
+            1: TS_IMPORT_TYPE_ASSERTION@202..240
+              0: WITH_KW@202..206 "with" [] []
+              1: COLON@206..208 ":" [] [Whitespace(" ")]
+              2: L_CURLY@208..210 "{" [] [Whitespace(" ")]
+              3: JS_IMPORT_ASSERTION_ENTRY_LIST@210..238
+                0: JS_IMPORT_ASSERTION_ENTRY@210..238
+                  0: JS_STRING_LITERAL@210..227 "\"resolution-mode\"" [] []
+                  1: COLON@227..229 ":" [] [Whitespace(" ")]
+                  2: JS_STRING_LITERAL@229..238 "\"import\"" [] [Whitespace(" ")]
+              4: R_CURLY@238..240 "}" [] [Whitespace(" ")]
+            2: R_CURLY@240..241 "}" [] []
+          4: R_PAREN@241..242 ")" [] []
+        3: (empty)
+        4: (empty)
+      5: SEMICOLON@242..243 ";" [] []
+    6: TS_TYPE_ALIAS_DECLARATION@243..326
+      0: TYPE_KW@243..249 "type" [Newline("\n")] [Whitespace(" ")]
+      1: TS_IDENTIFIER_BINDING@249..251
+        0: IDENT@249..251 "G" [] [Whitespace(" ")]
+      2: (empty)
+      3: EQ@251..253 "=" [] [Whitespace(" ")]
+      4: TS_IMPORT_TYPE@253..325
+        0: (empty)
+        1: IMPORT_KW@253..259 "import" [] []
+        2: TS_IMPORT_TYPE_ARGUMENTS@259..310
+          0: L_PAREN@259..260 "(" [] []
+          1: TS_STRING_LITERAL_TYPE@260..266
+            0: JS_STRING_LITERAL@260..266 "\"test\"" [] []
+          2: COMMA@266..268 "," [] [Whitespace(" ")]
+          3: TS_IMPORT_TYPE_ASSERTION_BLOCK@268..309
+            0: L_CURLY@268..270 "{" [] [Whitespace(" ")]
+            1: TS_IMPORT_TYPE_ASSERTION@270..308
+              0: WITH_KW@270..274 "with" [] []
+              1: COLON@274..276 ":" [] [Whitespace(" ")]
+              2: L_CURLY@276..278 "{" [] [Whitespace(" ")]
+              3: JS_IMPORT_ASSERTION_ENTRY_LIST@278..306
+                0: JS_IMPORT_ASSERTION_ENTRY@278..306
+                  0: JS_STRING_LITERAL@278..295 "\"resolution-mode\"" [] []
+                  1: COLON@295..297 ":" [] [Whitespace(" ")]
+                  2: JS_STRING_LITERAL@297..306 "\"import\"" [] [Whitespace(" ")]
+              4: R_CURLY@306..308 "}" [] [Whitespace(" ")]
+            2: R_CURLY@308..309 "}" [] []
+          4: R_PAREN@309..310 ")" [] []
+        3: TS_IMPORT_TYPE_QUALIFIER@310..325
+          0: DOT@310..311 "." [] []
+          1: JS_REFERENCE_IDENTIFIER@311..325
+            0: IDENT@311..325 "TypeFromImport" [] []
+        4: (empty)
+      5: SEMICOLON@325..326 ";" [] []
+    7: TS_TYPE_ALIAS_DECLARATION@326..402
+      0: TYPE_KW@326..332 "type" [Newline("\n")] [Whitespace(" ")]
+      1: TS_IDENTIFIER_BINDING@332..334
+        0: IDENT@332..334 "H" [] [Whitespace(" ")]
+      2: (empty)
+      3: EQ@334..336 "=" [] [Whitespace(" ")]
+      4: TS_IMPORT_TYPE@336..401
+        0: (empty)
+        1: IMPORT_KW@336..342 "import" [] []
+        2: TS_IMPORT_TYPE_ARGUMENTS@342..393
+          0: L_PAREN@342..343 "(" [] []
+          1: TS_STRING_LITERAL_TYPE@343..349
+            0: JS_STRING_LITERAL@343..349 "\"test\"" [] []
+          2: COMMA@349..351 "," [] [Whitespace(" ")]
+          3: TS_IMPORT_TYPE_ASSERTION_BLOCK@351..392
+            0: L_CURLY@351..353 "{" [] [Whitespace(" ")]
+            1: TS_IMPORT_TYPE_ASSERTION@353..391
+              0: WITH_KW@353..357 "with" [] []
+              1: COLON@357..359 ":" [] [Whitespace(" ")]
+              2: L_CURLY@359..361 "{" [] [Whitespace(" ")]
+              3: JS_IMPORT_ASSERTION_ENTRY_LIST@361..389
+                0: JS_IMPORT_ASSERTION_ENTRY@361..389
+                  0: JS_STRING_LITERAL@361..378 "\"resolution-mode\"" [] []
+                  1: COLON@378..380 ":" [] [Whitespace(" ")]
+                  2: JS_STRING_LITERAL@380..389 "\"import\"" [] [Whitespace(" ")]
+              4: R_CURLY@389..391 "}" [] [Whitespace(" ")]
+            2: R_CURLY@391..392 "}" [] []
+          4: R_PAREN@392..393 ")" [] []
+        3: (empty)
+        4: TS_TYPE_ARGUMENTS@393..401
+          0: L_ANGLE@393..394 "<" [] []
+          1: TS_TYPE_ARGUMENT_LIST@394..400
+            0: TS_STRING_TYPE@394..400
+              0: STRING_KW@394..400 "string" [] []
+          2: R_ANGLE@400..401 ">" [] []
+      5: SEMICOLON@401..402 ";" [] []
+    8: TS_TYPE_ALIAS_DECLARATION@402..481
+      0: TYPE_KW@402..408 "type" [Newline("\n")] [Whitespace(" ")]
+      1: TS_IDENTIFIER_BINDING@408..410
+        0: IDENT@408..410 "I" [] [Whitespace(" ")]
+      2: (empty)
+      3: EQ@410..412 "=" [] [Whitespace(" ")]
+      4: TS_IMPORT_TYPE@412..480
+        0: (empty)
+        1: IMPORT_KW@412..418 "import" [] []
+        2: TS_IMPORT_TYPE_ARGUMENTS@418..470
+          0: L_PAREN@418..419 "(" [] []
+          1: TS_STRING_LITERAL_TYPE@419..425
+            0: JS_STRING_LITERAL@419..425 "\"test\"" [] []
+          2: COMMA@425..427 "," [] [Whitespace(" ")]
+          3: TS_IMPORT_TYPE_ASSERTION_BLOCK@427..469
+            0: L_CURLY@427..429 "{" [] [Whitespace(" ")]
+            1: TS_IMPORT_TYPE_ASSERTION@429..468
+              0: WITH_KW@429..433 "with" [] []
+              1: COLON@433..435 ":" [] [Whitespace(" ")]
+              2: L_CURLY@435..437 "{" [] [Whitespace(" ")]
+              3: JS_IMPORT_ASSERTION_ENTRY_LIST@437..466
+                0: JS_IMPORT_ASSERTION_ENTRY@437..466
+                  0: JS_STRING_LITERAL@437..454 "\"resolution-mode\"" [] []
+                  1: COLON@454..456 ":" [] [Whitespace(" ")]
+                  2: JS_STRING_LITERAL@456..466 "\"require\"" [] [Whitespace(" ")]
+              4: R_CURLY@466..468 "}" [] [Whitespace(" ")]
+            2: R_CURLY@468..469 "}" [] []
+          4: R_PAREN@469..470 ")" [] []
+        3: TS_IMPORT_TYPE_QUALIFIER@470..472
+          0: DOT@470..471 "." [] []
+          1: JS_REFERENCE_IDENTIFIER@471..472
+            0: IDENT@471..472 "C" [] []
+        4: TS_TYPE_ARGUMENTS@472..480
+          0: L_ANGLE@472..473 "<" [] []
+          1: TS_TYPE_ARGUMENT_LIST@473..479
+            0: TS_STRING_TYPE@473..479
+              0: STRING_KW@473..479 "string" [] []
+          2: R_ANGLE@479..480 ">" [] []
+      5: SEMICOLON@480..481 ";" [] []
+    9: TS_TYPE_ALIAS_DECLARATION@481..569
+      0: TYPE_KW@481..487 "type" [Newline("\n")] [Whitespace(" ")]
+      1: TS_IDENTIFIER_BINDING@487..489
+        0: IDENT@487..489 "J" [] [Whitespace(" ")]
+      2: (empty)
+      3: EQ@489..491 "=" [] [Whitespace(" ")]
+      4: TS_IMPORT_TYPE@491..568
+        0: TYPEOF_KW@491..498 "typeof" [] [Whitespace(" ")]
+        1: IMPORT_KW@498..504 "import" [] []
+        2: TS_IMPORT_TYPE_ARGUMENTS@504..556
+          0: L_PAREN@504..505 "(" [] []
+          1: TS_STRING_LITERAL_TYPE@505..511
+            0: JS_STRING_LITERAL@505..511 "\"test\"" [] []
+          2: COMMA@511..513 "," [] [Whitespace(" ")]
+          3: TS_IMPORT_TYPE_ASSERTION_BLOCK@513..555
+            0: L_CURLY@513..515 "{" [] [Whitespace(" ")]
+            1: TS_IMPORT_TYPE_ASSERTION@515..554
+              0: WITH_KW@515..519 "with" [] []
+              1: COLON@519..521 ":" [] [Whitespace(" ")]
+              2: L_CURLY@521..523 "{" [] [Whitespace(" ")]
+              3: JS_IMPORT_ASSERTION_ENTRY_LIST@523..552
+                0: JS_IMPORT_ASSERTION_ENTRY@523..552
+                  0: JS_STRING_LITERAL@523..540 "\"resolution-mode\"" [] []
+                  1: COLON@540..542 ":" [] [Whitespace(" ")]
+                  2: JS_STRING_LITERAL@542..552 "\"require\"" [] [Whitespace(" ")]
+              4: R_CURLY@552..554 "}" [] [Whitespace(" ")]
+            2: R_CURLY@554..555 "}" [] []
+          4: R_PAREN@555..556 ")" [] []
+        3: TS_IMPORT_TYPE_QUALIFIER@556..568
+          0: DOT@556..557 "." [] []
+          1: TS_QUALIFIED_NAME@557..568
+            0: TS_QUALIFIED_NAME@557..566
+              0: TS_QUALIFIED_NAME@557..564
+                0: TS_QUALIFIED_NAME@557..562
+                  0: TS_QUALIFIED_NAME@557..560
+                    0: JS_REFERENCE_IDENTIFIER@557..558
+                      0: IDENT@557..558 "a" [] []
+                    1: DOT@558..559 "." [] []
+                    2: JS_NAME@559..560
+                      0: IDENT@559..560 "b" [] []
+                  1: DOT@560..561 "." [] []
+                  2: JS_NAME@561..562
+                    0: IDENT@561..562 "c" [] []
+                1: DOT@562..563 "." [] []
+                2: JS_NAME@563..564
+                  0: IDENT@563..564 "d" [] []
+              1: DOT@564..565 "." [] []
+              2: JS_NAME@565..566
+                0: IDENT@565..566 "e" [] []
+            1: DOT@566..567 "." [] []
+            2: JS_NAME@567..568
+              0: IDENT@567..568 "f" [] []
+        4: (empty)
+      5: SEMICOLON@568..569 ";" [] []
+  4: EOF@569..570 "" [Newline("\n")] []
+
+```

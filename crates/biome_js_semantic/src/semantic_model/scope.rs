@@ -41,15 +41,19 @@ impl PartialEq for Scope {
 impl Eq for Scope {}
 
 impl Scope {
+    pub fn is_global_scope(&self) -> bool {
+        self.id.index() == 0
+    }
+
     /// Returns all parents of this scope. Starting with the current
     /// [Scope].
-    pub fn ancestors(&self) -> impl Iterator<Item = Scope> {
+    pub fn ancestors(&self) -> impl Iterator<Item = Self> + use<> {
         std::iter::successors(Some(self.clone()), |scope| scope.parent())
     }
 
     /// Returns all descendents of this scope in breadth-first order. Starting with the current
     /// [Scope].
-    pub fn descendents(&self) -> impl Iterator<Item = Scope> {
+    pub fn descendents(&self) -> impl Iterator<Item = Self> + use<> {
         let mut q = VecDeque::new();
         q.push_back(self.id);
 
@@ -60,16 +64,26 @@ impl Scope {
     }
 
     /// Returns this scope parent.
-    pub fn parent(&self) -> Option<Scope> {
+    pub fn parent(&self) -> Option<Self> {
         // id will always be a valid scope because
         // it was created by [SemanticModel::scope] method.
         debug_assert!((self.id.index()) < self.data.scopes.len());
 
         let parent = self.data.scopes[self.id.index()].parent?;
-        Some(Scope {
+        Some(Self {
             data: self.data.clone(),
             id: parent,
         })
+    }
+
+    /// Returns all the immediate children of this [Scope].
+    /// This does not include the descendents of the children.
+    pub fn children(&self) -> impl Iterator<Item = Self> + use<> {
+        ScopeChildrenIter {
+            data: self.data.clone(),
+            scope_id: self.id,
+            child_index: 0,
+        }
     }
 
     /// Returns all bindings that were bound in this scope. It **does
@@ -82,7 +96,7 @@ impl Scope {
         }
     }
 
-    /// Returns a binding by its name, like it appears on code.  It **does
+    /// Returns a [Binding] by its name, like it appears on code.  It **does
     /// not** returns bindings of parent scopes.
     pub fn get_binding(&self, name: impl AsRef<str>) -> Option<Binding> {
         let data = &self.data.scopes[self.id.index()];
@@ -103,7 +117,7 @@ impl Scope {
     /// ```rust,ignore
     /// assert!(scope.is_ancestor_of(scope));
     /// ```
-    pub fn is_ancestor_of(&self, other: &Scope) -> bool {
+    pub fn is_ancestor_of(&self, other: &Self) -> bool {
         other.ancestors().any(|s| s == *self)
     }
 
@@ -147,6 +161,35 @@ impl Iterator for ScopeDescendentsIter {
 }
 
 impl FusedIterator for ScopeDescendentsIter {}
+
+pub struct ScopeChildrenIter {
+    data: Rc<SemanticModelData>,
+    scope_id: ScopeId,
+    child_index: u32,
+}
+
+impl Iterator for ScopeChildrenIter {
+    type Item = Scope;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        // scope_id will always be a valid scope because
+        // it was created by [Scope::children] method.
+        debug_assert!(self.scope_id.index() < self.data.scopes.len());
+
+        let id = *self.data.scopes[self.scope_id.index()]
+            .children
+            .get(self.child_index as usize)?;
+
+        self.child_index += 1;
+
+        Some(Scope {
+            data: self.data.clone(),
+            id,
+        })
+    }
+}
+
+impl FusedIterator for ScopeChildrenIter {}
 
 /// Iterate all bindings that were bound in a given scope. It **does
 /// not** Returns bindings of parent scopes.

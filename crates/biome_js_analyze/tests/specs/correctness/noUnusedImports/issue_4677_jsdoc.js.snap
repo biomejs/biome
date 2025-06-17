@@ -1,0 +1,90 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: issue_4677_jsdoc.js
+---
+# Input
+```js
+// See https://github.com/biomejs/biome/issues/4677
+
+// some types for the different locations
+import TypeOnFunctionParam from "mod";
+import TypeOnClassMethodParam from "mod";
+import TypeOnClassConstructorParam from "mod";
+import TypeOnClassField from "mod";
+import TypeOnGlobalVariable from "mod";
+import TypeOnFunctionVariable from "mod";
+import TypeOnTypeDef from "mod";
+
+/**
+ * @typedef {TypeOnTypeDef} TestTypeOnTypeDef 
+ */
+
+/**
+ * @param {TypeOnFunctionParam} param
+ */
+function testTypeOnFunction(param) {}
+
+class TestTypeOnClassMethodParam {
+	/**
+	 * @param {TypeOnClassMethodParam} param
+	 */
+	method(param) {}
+}
+
+class TestTypeOnClassConstructorParam {
+	/**
+	 * @param {TypeOnClassConstructorParam} param
+	 */
+	constructor(param) {}
+}
+
+class TestTypeOnClassField {
+	constructor(param) {
+        /**
+         * @type {TypeOnClassField}
+         */
+        this.var = 10;
+    }
+}
+
+/**
+ * @type {TypeOnGlobalVariable}
+ */
+let testTypeOnGlobalVariable;
+
+function testTypeOnFunctionVariable() {
+	/**
+	 * @type {TypeOnFunctionVariable}
+	 */
+	let testTypeOnFunctionVariable;
+}
+
+
+
+```
+
+# Diagnostics
+```
+issue_4677_jsdoc.js:7:8 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This import is unused.
+  
+    5 │ import TypeOnClassMethodParam from "mod";
+    6 │ import TypeOnClassConstructorParam from "mod";
+  > 7 │ import TypeOnClassField from "mod";
+      │        ^^^^^^^^^^^^^^^^
+    8 │ import TypeOnGlobalVariable from "mod";
+    9 │ import TypeOnFunctionVariable from "mod";
+  
+  i Unused imports might be the result of an incomplete refactoring.
+  
+  i Unsafe fix: Remove the unused imports.
+  
+     5  5 │   import TypeOnClassMethodParam from "mod";
+     6  6 │   import TypeOnClassConstructorParam from "mod";
+     7    │ - import·TypeOnClassField·from·"mod";
+     8  7 │   import TypeOnGlobalVariable from "mod";
+     9  8 │   import TypeOnFunctionVariable from "mod";
+  
+
+```

@@ -1,3 +1,5 @@
+#![deny(clippy::use_self)]
+
 use std::{
     hash::{Hash, Hasher},
     str::FromStr,

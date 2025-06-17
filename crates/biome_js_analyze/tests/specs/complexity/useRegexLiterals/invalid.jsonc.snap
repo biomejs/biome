@@ -581,7 +581,7 @@ invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━�
   i Safe fix: Use a literal notation instead.
   
   - new·RegExp(String.raw`\\d`,·`g`);
-  + /\d/g;
+  + /\\d/g;
   
 
 ```
@@ -605,7 +605,7 @@ invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━�
   i Safe fix: Use a literal notation instead.
   
   - new·RegExp(String['raw']`\\d`,·`g`);
-  + /\d/g;
+  + /\\d/g;
   
 
 ```
@@ -629,7 +629,7 @@ invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━�
   i Safe fix: Use a literal notation instead.
   
   - new·RegExp(String["raw"]`\\d`,·`g`);
-  + /\d/g;
+  + /\\d/g;
   
 
 ```
@@ -3731,7 +3731,7 @@ invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━�
   i Safe fix: Use a literal notation instead.
   
   - new·RegExp("\.")
-  + /\./
+  + /./
   
 
 ```
@@ -3951,5 +3951,3 @@ invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━�
   
 
 ```
-
-

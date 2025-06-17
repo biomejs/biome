@@ -1,10 +1,10 @@
 use crate::runner::{
-    create_bogus_node_in_tree_diagnostic, TestCase, TestCaseFiles, TestRunOutcome, TestSuite,
+    TestCase, TestCaseFiles, TestRunOutcome, TestSuite, create_bogus_node_in_tree_diagnostic,
 };
-use biome_js_parser::{parse, JsParserOptions};
+use biome_js_parser::{JsParserOptions, parse};
 use biome_js_syntax::JsFileSource;
-use biome_rowan::syntax::SyntaxKind;
 use biome_rowan::AstNode;
+use biome_rowan::syntax::SyntaxKind;
 use regex::Regex;
 use serde::Deserialize;
 use std::io;
@@ -196,7 +196,7 @@ impl TestSuite for Test262TestSuite {
         if !meta
             .negative
             .as_ref()
-            .map_or(true, |negative| negative.phase == Phase::Parse)
+            .is_none_or(|negative| negative.phase == Phase::Parse)
         {
             None
         } else {
@@ -206,15 +206,11 @@ impl TestSuite for Test262TestSuite {
 }
 
 fn read_metadata(code: &str) -> io::Result<MetaData> {
-    use once_cell::sync::Lazy;
+    // Regular expression to retrieve the metadata of a test.
+    let meta_regex = Regex::new(r"/\*\-{3}((?:.|\n)*)\-{3}\*/")
+        .expect("could not compile metadata regular expression");
 
-    /// Regular expression to retrieve the metadata of a test.
-    static META_REGEX: Lazy<Regex> = Lazy::new(|| {
-        Regex::new(r"/\*\-{3}((?:.|\n)*)\-{3}\*/")
-            .expect("could not compile metadata regular expression")
-    });
-
-    let yaml = META_REGEX
+    let yaml = meta_regex
         .captures(code)
         .ok_or_else(|| io::Error::new(io::ErrorKind::InvalidData, "no metadata found"))?
         .get(1)
@@ -225,9 +221,5 @@ fn read_metadata(code: &str) -> io::Result<MetaData> {
 }
 
 fn merge_outcomes(l: TestRunOutcome, r: TestRunOutcome) -> TestRunOutcome {
-    if l.is_failed() {
-        l
-    } else {
-        r
-    }
+    if l.is_failed() { l } else { r }
 }

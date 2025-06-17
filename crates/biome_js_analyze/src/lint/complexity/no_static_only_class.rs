@@ -1,7 +1,8 @@
 use biome_analyze::{
-    context::RuleContext, declare_lint_rule, Ast, Rule, RuleDiagnostic, RuleSource,
+    Ast, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
+use biome_diagnostics::Severity;
 use biome_js_syntax::{
     AnyJsClass, AnyJsClassMember, JsGetterClassMember, JsMethodClassMember, JsPropertyClassMember,
     JsSetterClassMember, TsGetterSignatureClassMember, TsIndexSignatureClassMember,
@@ -99,6 +100,7 @@ declare_lint_rule! {
             RuleSource::EslintUnicorn("no-static-only-class"),
         ],
         recommended: true,
+        severity: Severity::Warning,
     }
 }
 
@@ -180,11 +182,7 @@ impl Rule for NoStaticOnlyClass {
             })
             .all(|is_static| is_static);
 
-        if all_members_static {
-            Some(())
-        } else {
-            None
-        }
+        if all_members_static { Some(()) } else { None }
     }
 
     fn diagnostic(ctx: &RuleContext<Self>, _: &Self::State) -> Option<RuleDiagnostic> {

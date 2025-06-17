@@ -1,3 +1,4 @@
+/* should not generate diagnostics */
 
 let i: I;
 interface I {}

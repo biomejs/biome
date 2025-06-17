@@ -4,10 +4,9 @@ expression: validEnumMemberConstantCase.ts
 ---
 # Input
 ```ts
+/* should not generate diagnostics */
 enum Status {
     OPEN,
     CLOSE,
 }
 ```
-
-

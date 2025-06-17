@@ -1,3 +1,4 @@
+/* should not generate diagnostics */
 const X0 = {
 	foo: false,
 	bar() {}

@@ -1,9 +1,10 @@
 use std::ops::Not;
 
 use biome_analyze::{
-    context::RuleContext, declare_lint_rule, Ast, Rule, RuleDiagnostic, RuleSource,
+    Ast, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
+use biome_diagnostics::Severity;
 use biome_js_syntax::JsSwitchStatement;
 use biome_rowan::AstNode;
 
@@ -44,6 +45,7 @@ declare_lint_rule! {
         language: "js",
         sources: &[RuleSource::Eslint("default-case")],
         recommended: false,
+        severity: Severity::Warning,
     }
 }
 

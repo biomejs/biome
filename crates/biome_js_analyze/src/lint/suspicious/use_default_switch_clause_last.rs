@@ -1,6 +1,7 @@
 use biome_analyze::context::RuleContext;
-use biome_analyze::{declare_lint_rule, Ast, Rule, RuleDiagnostic, RuleSource};
+use biome_analyze::{Ast, Rule, RuleDiagnostic, RuleSource, declare_lint_rule};
 use biome_console::markup;
+use biome_diagnostics::Severity;
 use biome_js_syntax::{JsCaseClause, JsDefaultClause};
 use biome_rowan::{AstNode, Direction};
 
@@ -75,6 +76,7 @@ declare_lint_rule! {
         language: "js",
         sources: &[RuleSource::Eslint("default-case-last")],
         recommended: true,
+        severity: Severity::Warning,
     }
 }
 
@@ -86,11 +88,10 @@ impl Rule for UseDefaultSwitchClauseLast {
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let default_clause = ctx.query();
-        let next_case = default_clause
+        default_clause
             .syntax()
             .siblings(Direction::Next)
-            .find_map(JsCaseClause::cast);
-        next_case
+            .find_map(JsCaseClause::cast)
     }
 
     fn diagnostic(ctx: &RuleContext<Self>, next_case: &Self::State) -> Option<RuleDiagnostic> {

@@ -1,6 +1,6 @@
 use crate::prelude::*;
 use biome_formatter::FormatError::SyntaxError;
-use biome_formatter::{format_args, write, FormatRuleWithOptions, GroupId};
+use biome_formatter::{FormatRuleWithOptions, GroupId, format_args, write};
 use biome_js_syntax::{TsTypeParameters, TsTypeParametersFields};
 
 #[derive(Debug, Copy, Clone, Default)]

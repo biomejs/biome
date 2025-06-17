@@ -19,11 +19,11 @@ pub(crate) fn generate_migrate_eslint(mode: Mode) -> Result<()> {
         let group_ident = format_ident!("{group_name}");
         let is_inspuired = rule_metadata
             .source_kind
-            .map_or(false, |source_kind| source_kind.is_inspired());
+            .is_some_and(|source_kind| source_kind.is_inspired());
         let check_inspired = if is_inspuired {
             quote! {
                 if !options.include_inspired {
-                    results.has_inspired_rules = true;
+                    results.add(eslint_name, eslint_to_biome::RuleMigrationResult::Inspired);
                     return false;
                 }
             }
@@ -33,6 +33,7 @@ pub(crate) fn generate_migrate_eslint(mode: Mode) -> Result<()> {
         let check_nursery = if group_name == "nursery" {
             quote! {
                 if !options.include_nursery {
+                    results.add(eslint_name, eslint_to_biome::RuleMigrationResult::Nursery);
                     return false;
                 }
             }
@@ -44,8 +45,8 @@ pub(crate) fn generate_migrate_eslint(mode: Mode) -> Result<()> {
                 #check_inspired
                 #check_nursery
                 let group = rules.#group_ident.get_or_insert_with(Default::default);
-                let rule = group.#name_ident.get_or_insert(Default::default());
-                rule.set_level(rule_severity.into());
+                let rule = group.unwrap_group_as_mut().#name_ident.get_or_insert(Default::default());
+                rule.set_level(rule.level().max(rule_severity.into()));
             }
         });
     }
@@ -61,9 +62,11 @@ pub(crate) fn generate_migrate_eslint(mode: Mode) -> Result<()> {
             match eslint_name {
                 #( #lines )*
                 _ => {
+                    results.add(eslint_name, eslint_to_biome::RuleMigrationResult::Unsupported);
                     return false;
                 }
             }
+            results.add(eslint_name, eslint_to_biome::RuleMigrationResult::Migrated);
             true
         }
     });

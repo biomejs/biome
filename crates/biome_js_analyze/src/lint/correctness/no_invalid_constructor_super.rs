@@ -1,6 +1,7 @@
 use biome_analyze::context::RuleContext;
-use biome_analyze::{declare_lint_rule, Ast, Rule, RuleDiagnostic, RuleSource};
-use biome_console::{markup, MarkupBuf};
+use biome_analyze::{Ast, Rule, RuleDiagnostic, RuleSource, declare_lint_rule};
+use biome_console::{MarkupBuf, markup};
+use biome_diagnostics::Severity;
 use biome_js_syntax::{
     AnyJsClass, AnyJsExpression, JsAssignmentOperator, JsConstructorClassMember, JsLogicalOperator,
 };
@@ -51,6 +52,7 @@ declare_lint_rule! {
         language: "js",
         sources: &[RuleSource::Eslint("constructor-super")],
         recommended: true,
+        severity: Severity::Error,
     }
 }
 
@@ -65,18 +67,18 @@ pub enum NoInvalidConstructorSuperState {
 impl NoInvalidConstructorSuperState {
     fn range(&self) -> &TextRange {
         match self {
-            NoInvalidConstructorSuperState::UnexpectedSuper(range) => range,
-            NoInvalidConstructorSuperState::BadExtends { super_range, .. } => super_range,
+            Self::UnexpectedSuper(range) => range,
+            Self::BadExtends { super_range, .. } => super_range,
         }
     }
 
     fn message(&self) -> MarkupBuf {
         match self {
-            NoInvalidConstructorSuperState::UnexpectedSuper(_) => {
+            Self::UnexpectedSuper(_) => {
                 (markup! { "This class should not have a "<Emphasis>"super()"</Emphasis>" call. You should remove it." }).to_owned()
             }
 
-            NoInvalidConstructorSuperState::BadExtends { .. } => {
+            Self::BadExtends { .. } => {
                 (markup! { "This class calls "<Emphasis>"super()"</Emphasis>", but the class extends from a non-constructor." }).to_owned()
             }
         }
@@ -84,7 +86,7 @@ impl NoInvalidConstructorSuperState {
 
     fn detail(&self) -> Option<(&TextRange, MarkupBuf)> {
         match self {
-            NoInvalidConstructorSuperState::BadExtends { extends_range, .. } => Some((
+            Self::BadExtends { extends_range, .. } => Some((
                 extends_range,
                 markup! { "This is where the non-constructor is used." }.to_owned(),
             )),

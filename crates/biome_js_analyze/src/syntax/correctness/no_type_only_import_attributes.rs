@@ -1,32 +1,62 @@
-use biome_analyze::{context::RuleContext, declare_syntax_rule, Ast, Rule, RuleDiagnostic};
+use biome_analyze::{Rule, RuleDiagnostic, context::RuleContext, declare_syntax_rule};
 use biome_console::markup;
 use biome_js_syntax::{
-    AnyJsExportClause, AnyJsImportClause, AnyJsModuleItem, JsNamedImportSpecifiers, JsSyntaxToken,
+    AnyJsExportClause, AnyJsImportClause, AnyJsModuleItem, JsFileSource, JsNamedImportSpecifiers,
+    JsSyntaxToken,
 };
 use biome_rowan::{AstNode, AstSeparatedList, TextRange};
+
+use crate::services::manifest::Manifest;
 
 declare_syntax_rule! {
     /// Disallow type-only imports and exports with import attributes.
     ///
+    /// There is one exception: TypeScript 5.3 and above allow this in CommonJS files, e.g. files ending with the `.cts` extension.
+    /// See the [TypeScript docs](https://www.typescriptlang.org/docs/handbook/release-notes/typescript-5-3.html#stable-support-resolution-mode-in-import-types).
+    ///
     /// ## Examples
     ///
-    /// ```js
+    /// ### Invalid
+    ///
+    /// ```ts
     /// import type { A } from "./a.json" with { type: "json" };
     /// ```
+    ///
+    /// ### Valid
+    ///
+    /// ```cts
+    /// import type { A } from "./a.json" with { "resolution-mode": "require" };
+    /// ```
+    ///
     pub NoTypeOnlyImportAttributes {
         version: "1.5.0",
         name: "noTypeOnlyImportAttributes",
-        language: "js",
+        language: "ts",
     }
 }
 
 impl Rule for NoTypeOnlyImportAttributes {
-    type Query = Ast<AnyJsModuleItem>;
+    type Query = Manifest<AnyJsModuleItem>;
     type State = RuleState;
     type Signals = Option<Self::State>;
     type Options = ();
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
+        let source_type = ctx.source_type::<JsFileSource>().language();
+        if !source_type.is_typescript() {
+            // Ignore non-TypeScript files
+            return None;
+        }
+        let is_commonjs = ctx
+            .manifest
+            .as_ref()
+            .is_some_and(|package_json| package_json.r#type.is_some_and(|ty| ty.is_commonjs()));
+        let extension = ctx.file_path().extension()?;
+        let extension = extension.as_bytes();
+        if (is_commonjs && extension != b"mts") || extension == b"cts" {
+            // Ignore CommonJS and `*.cts`
+            return None;
+        }
         let module_item = ctx.query();
         match module_item {
             AnyJsModuleItem::AnyJsStatement(_) => None,

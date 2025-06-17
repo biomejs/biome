@@ -1,6 +1,7 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid.jsonc
+snapshot_kind: text
 ---
 # Input
 ```cjs
@@ -11,7 +12,7 @@ for (var i = 0; i < 10; i--) {}
 ```
 invalid.jsonc:1:5 lint/correctness/useValidForDirection ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The update clause in this loop moves the variable in the wrong direction.
+  × The update clause in this loop moves the variable in the wrong direction.
   
   > 1 │ for (var i = 0; i < 10; i--) {}
       │     ^^^^^^^^^^^^^^^^^^^^^^^^
@@ -28,7 +29,7 @@ for (var i = 0; i <= 10; i--) {}
 ```
 invalid.jsonc:1:5 lint/correctness/useValidForDirection ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The update clause in this loop moves the variable in the wrong direction.
+  × The update clause in this loop moves the variable in the wrong direction.
   
   > 1 │ for (var i = 0; i <= 10; i--) {}
       │     ^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -45,7 +46,7 @@ for (var i = 10; i > 10; i++) {}
 ```
 invalid.jsonc:1:5 lint/correctness/useValidForDirection ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The update clause in this loop moves the variable in the wrong direction.
+  × The update clause in this loop moves the variable in the wrong direction.
   
   > 1 │ for (var i = 10; i > 10; i++) {}
       │     ^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -62,7 +63,7 @@ for (var i = 10; i >= 0; i++) {}
 ```
 invalid.jsonc:1:5 lint/correctness/useValidForDirection ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The update clause in this loop moves the variable in the wrong direction.
+  × The update clause in this loop moves the variable in the wrong direction.
   
   > 1 │ for (var i = 10; i >= 0; i++) {}
       │     ^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -79,7 +80,7 @@ for (var i = 0; i < 10; i -= 1) {}
 ```
 invalid.jsonc:1:5 lint/correctness/useValidForDirection ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The update clause in this loop moves the variable in the wrong direction.
+  × The update clause in this loop moves the variable in the wrong direction.
   
   > 1 │ for (var i = 0; i < 10; i -= 1) {}
       │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -96,7 +97,7 @@ for (var i = 0; i <= 10; i -= 1) {}
 ```
 invalid.jsonc:1:5 lint/correctness/useValidForDirection ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The update clause in this loop moves the variable in the wrong direction.
+  × The update clause in this loop moves the variable in the wrong direction.
   
   > 1 │ for (var i = 0; i <= 10; i -= 1) {}
       │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -113,7 +114,7 @@ for (var i = 10; i > 10; i += 1) {}
 ```
 invalid.jsonc:1:5 lint/correctness/useValidForDirection ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The update clause in this loop moves the variable in the wrong direction.
+  × The update clause in this loop moves the variable in the wrong direction.
   
   > 1 │ for (var i = 10; i > 10; i += 1) {}
       │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -130,7 +131,7 @@ for (var i = 10; i >= 0; i += 1) {}
 ```
 invalid.jsonc:1:5 lint/correctness/useValidForDirection ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The update clause in this loop moves the variable in the wrong direction.
+  × The update clause in this loop moves the variable in the wrong direction.
   
   > 1 │ for (var i = 10; i >= 0; i += 1) {}
       │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -147,7 +148,7 @@ for (var i = 0; i < 10; i += -1) {}
 ```
 invalid.jsonc:1:5 lint/correctness/useValidForDirection ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The update clause in this loop moves the variable in the wrong direction.
+  × The update clause in this loop moves the variable in the wrong direction.
   
   > 1 │ for (var i = 0; i < 10; i += -1) {}
       │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -164,7 +165,7 @@ for (var i = 0; i <= 10; i += -1) {}
 ```
 invalid.jsonc:1:5 lint/correctness/useValidForDirection ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The update clause in this loop moves the variable in the wrong direction.
+  × The update clause in this loop moves the variable in the wrong direction.
   
   > 1 │ for (var i = 0; i <= 10; i += -1) {}
       │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -181,7 +182,7 @@ for (var i = 10; i > 10; i -= -1) {}
 ```
 invalid.jsonc:1:5 lint/correctness/useValidForDirection ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The update clause in this loop moves the variable in the wrong direction.
+  × The update clause in this loop moves the variable in the wrong direction.
   
   > 1 │ for (var i = 10; i > 10; i -= -1) {}
       │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -198,12 +199,10 @@ for (var i = 10; i >= 0; i -= -1) {}
 ```
 invalid.jsonc:1:5 lint/correctness/useValidForDirection ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The update clause in this loop moves the variable in the wrong direction.
+  × The update clause in this loop moves the variable in the wrong direction.
   
   > 1 │ for (var i = 10; i >= 0; i -= -1) {}
       │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   
 
 ```
-
-

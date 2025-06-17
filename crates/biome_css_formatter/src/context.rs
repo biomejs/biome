@@ -1,9 +1,9 @@
 use crate::CssCommentStyle;
-use biome_formatter::{prelude::*, AttributePosition, BracketSpacing, IndentWidth, QuoteStyle};
 use biome_formatter::{
     CstFormatContext, FormatContext, FormatOptions, IndentStyle, LineEnding, LineWidth,
     TransformSourceMap,
 };
+use biome_formatter::{IndentWidth, QuoteStyle, prelude::*};
 
 use crate::comments::{CssComments, FormatCssLeadingComment};
 use biome_css_syntax::{CssFileSource, CssLanguage};
@@ -142,14 +142,6 @@ impl FormatOptions for CssFormatOptions {
 
     fn line_ending(&self) -> LineEnding {
         self.line_ending
-    }
-
-    fn attribute_position(&self) -> AttributePosition {
-        AttributePosition::default()
-    }
-
-    fn bracket_spacing(&self) -> BracketSpacing {
-        BracketSpacing::default()
     }
 
     fn as_print_options(&self) -> PrinterOptions {

@@ -1,6 +1,7 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid.ts
+snapshot_kind: text
 ---
 # Input
 ```ts
@@ -47,7 +48,7 @@ interface I {
 ```
 invalid.ts:2:3 lint/suspicious/noMisleadingInstantiator ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Don't use the new method in interfaces.
+  × Don't use the new method in interfaces.
   
     1 │ interface I {
   > 2 │   new (): I;
@@ -63,7 +64,7 @@ invalid.ts:2:3 lint/suspicious/noMisleadingInstantiator ━━━━━━━━
 ```
 invalid.ts:6:2 lint/suspicious/noMisleadingInstantiator ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Don't use the constructor method in interfaces.
+  × Don't use the constructor method in interfaces.
   
     5 │ interface I {
   > 6 │ 	constructor(): void;
@@ -79,7 +80,7 @@ invalid.ts:6:2 lint/suspicious/noMisleadingInstantiator ━━━━━━━━
 ```
 invalid.ts:11:3 lint/suspicious/noMisleadingInstantiator ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Don't use the new method in interfaces.
+  × Don't use the new method in interfaces.
   
      9 │ // Works for generic type.
     10 │ interface G {
@@ -96,7 +97,7 @@ invalid.ts:11:3 lint/suspicious/noMisleadingInstantiator ━━━━━━━�
 ```
 invalid.ts:15:3 lint/suspicious/noMisleadingInstantiator ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Don't use the constructor method in type aliases.
+  × Don't use the constructor method in type aliases.
   
     14 │ type T = {
   > 15 │   constructor(): void;
@@ -112,7 +113,7 @@ invalid.ts:15:3 lint/suspicious/noMisleadingInstantiator ━━━━━━━�
 ```
 invalid.ts:19:3 lint/suspicious/noMisleadingInstantiator ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Don't use the new method in classes.
+  × Don't use the new method in classes.
   
     18 │ class C {
   > 19 │   new(): C;
@@ -128,7 +129,7 @@ invalid.ts:19:3 lint/suspicious/noMisleadingInstantiator ━━━━━━━�
 ```
 invalid.ts:23:3 lint/suspicious/noMisleadingInstantiator ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Don't use the new method in classes.
+  × Don't use the new method in classes.
   
     22 │ class C {
   > 23 │   new(): this;
@@ -144,7 +145,7 @@ invalid.ts:23:3 lint/suspicious/noMisleadingInstantiator ━━━━━━━�
 ```
 invalid.ts:27:3 lint/suspicious/noMisleadingInstantiator ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Don't use the new method in classes.
+  × Don't use the new method in classes.
   
     26 │ declare abstract class C {
   > 27 │   new(): C;
@@ -160,7 +161,7 @@ invalid.ts:27:3 lint/suspicious/noMisleadingInstantiator ━━━━━━━�
 ```
 invalid.ts:27:3 lint/suspicious/noMisleadingInstantiator ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Don't use the new method in classes.
+  × Don't use the new method in classes.
   
     26 │ declare abstract class C {
   > 27 │   new(): C;
@@ -176,7 +177,7 @@ invalid.ts:27:3 lint/suspicious/noMisleadingInstantiator ━━━━━━━�
 ```
 invalid.ts:31:3 lint/suspicious/noMisleadingInstantiator ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Don't use the constructor method in interfaces.
+  × Don't use the constructor method in interfaces.
   
     30 │ interface I {
   > 31 │   constructor(): '';
@@ -192,7 +193,7 @@ invalid.ts:31:3 lint/suspicious/noMisleadingInstantiator ━━━━━━━�
 ```
 invalid.ts:35:3 lint/suspicious/noMisleadingInstantiator ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Don't use the new method in interfaces.
+  × Don't use the new method in interfaces.
   
     34 │ interface I {
   > 35 │   new(): this;
@@ -204,5 +205,3 @@ invalid.ts:35:3 lint/suspicious/noMisleadingInstantiator ━━━━━━━�
   
 
 ```
-
-

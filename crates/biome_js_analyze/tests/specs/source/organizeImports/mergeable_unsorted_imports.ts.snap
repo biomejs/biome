@@ -1,0 +1,88 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: mergeable_unsorted_imports.ts
+---
+# Input
+```ts
+// File header comment
+import type { T1, T2 } from "mod";
+// Comment 2
+import type { U1 } from "package";
+// Comment 3
+import type { T3, T4 } from "mod";
+// Comment 4
+import { A, B } from "mod";
+// Comment 5
+import { X } from "package";
+// Comment 6
+import { C, D } from "mod";
+// Comment 7
+import { Y } from "package";
+// Comment 8
+import type { U2 } from "package";
+
+// Chunk 2
+
+// Comment 9
+import type { U3 } from "package";
+// Comment 10
+import { E } from "mod";
+
+```
+
+# Diagnostics
+```
+mergeable_unsorted_imports.ts:2:1 assist/source/organizeImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The imports and exports are not sorted.
+  
+    1 │ // File header comment
+  > 2 │ import type { T1, T2 } from "mod";
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    3 │ // Comment 2
+    4 │ import type { U1 } from "package";
+  
+  i Safe fix: Organize Imports (Biome)
+  
+     1  1 │   // File header comment
+     2    │ - import·type·{·T1,·T2·}·from·"mod";
+     3    │ - //·Comment·2
+     4    │ - import·type·{·U1·}·from·"package";
+     5    │ - //·Comment·3
+     6    │ - import·type·{·T3,·T4·}·from·"mod";
+     7    │ - //·Comment·4
+     8    │ - import·{·A,·B·}·from·"mod";
+     9    │ - //·Comment·5
+    10    │ - import·{·X·}·from·"package";
+    11    │ - //·Comment·6
+    12    │ - import·{·C,·D·}·from·"mod";
+    13    │ - //·Comment·7
+    14    │ - import·{·Y·}·from·"package";
+    15    │ - //·Comment·8
+    16    │ - import·type·{·U2·}·from·"package";
+        2 │ + //·Comment·3
+        3 │ + import·type·{·T1,·T2,·T3,·T4·}·from·"mod";
+        4 │ + //·Comment·4
+        5 │ + //·Comment·6
+        6 │ + import·{·A,·B,·C,·D·}·from·"mod";
+        7 │ + //·Comment·2
+        8 │ + //·Comment·8
+        9 │ + import·type·{·U1,·U2·}·from·"package";
+       10 │ + //·Comment·5
+       11 │ + //·Comment·7
+       12 │ + import·{·X,·Y·}·from·"package";
+    17 13 │   
+    18 14 │   // Chunk 2
+    19 15 │   
+    20    │ - //·Comment·9
+    21    │ - import·type·{·U3·}·from·"package";
+    22    │ - //·Comment·10
+    23    │ - import·{·E·}·from·"mod";
+       16 │ + //·Comment·10
+       17 │ + import·{·E·}·from·"mod";
+       18 │ + //·Comment·9
+       19 │ + import·type·{·U3·}·from·"package";
+    24 20 │   
+  
+
+```

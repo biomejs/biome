@@ -1,0 +1,127 @@
+---
+source: crates/biome_js_parser/tests/spec_test.rs
+expression: snapshot
+snapshot_kind: text
+---
+## Input
+
+```js
+class A {
+	# test;
+}
+
+```
+
+
+## AST
+
+```
+JsModule {
+    bom_token: missing (optional),
+    interpreter_token: missing (optional),
+    directives: JsDirectiveList [],
+    items: JsModuleItemList [
+        JsClassDeclaration {
+            decorators: JsDecoratorList [],
+            abstract_token: missing (optional),
+            class_token: CLASS_KW@0..6 "class" [] [Whitespace(" ")],
+            id: JsIdentifierBinding {
+                name_token: IDENT@6..8 "A" [] [Whitespace(" ")],
+            },
+            type_parameters: missing (optional),
+            extends_clause: missing (optional),
+            implements_clause: missing (optional),
+            l_curly_token: L_CURLY@8..9 "{" [] [],
+            members: JsClassMemberList [
+                JsPropertyClassMember {
+                    modifiers: JsPropertyModifierList [],
+                    name: JsPrivateClassMemberName {
+                        hash_token: HASH@9..13 "#" [Newline("\n"), Whitespace("\t")] [Whitespace(" ")],
+                        id_token: missing (required),
+                    },
+                    property_annotation: missing (optional),
+                    value: missing (optional),
+                    semicolon_token: missing (optional),
+                },
+                JsPropertyClassMember {
+                    modifiers: JsPropertyModifierList [],
+                    name: JsLiteralMemberName {
+                        value: IDENT@13..17 "test" [] [],
+                    },
+                    property_annotation: missing (optional),
+                    value: missing (optional),
+                    semicolon_token: SEMICOLON@17..18 ";" [] [],
+                },
+            ],
+            r_curly_token: R_CURLY@18..20 "}" [Newline("\n")] [],
+        },
+    ],
+    eof_token: EOF@20..21 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: JS_MODULE@0..21
+  0: (empty)
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..20
+    0: JS_CLASS_DECLARATION@0..20
+      0: JS_DECORATOR_LIST@0..0
+      1: (empty)
+      2: CLASS_KW@0..6 "class" [] [Whitespace(" ")]
+      3: JS_IDENTIFIER_BINDING@6..8
+        0: IDENT@6..8 "A" [] [Whitespace(" ")]
+      4: (empty)
+      5: (empty)
+      6: (empty)
+      7: L_CURLY@8..9 "{" [] []
+      8: JS_CLASS_MEMBER_LIST@9..18
+        0: JS_PROPERTY_CLASS_MEMBER@9..13
+          0: JS_PROPERTY_MODIFIER_LIST@9..9
+          1: JS_PRIVATE_CLASS_MEMBER_NAME@9..13
+            0: HASH@9..13 "#" [Newline("\n"), Whitespace("\t")] [Whitespace(" ")]
+            1: (empty)
+          2: (empty)
+          3: (empty)
+          4: (empty)
+        1: JS_PROPERTY_CLASS_MEMBER@13..18
+          0: JS_PROPERTY_MODIFIER_LIST@13..13
+          1: JS_LITERAL_MEMBER_NAME@13..17
+            0: IDENT@13..17 "test" [] []
+          2: (empty)
+          3: (empty)
+          4: SEMICOLON@17..18 ";" [] []
+      9: R_CURLY@18..20 "}" [Newline("\n")] []
+  4: EOF@20..21 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+private_name_with_space.js:2:3 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected space or comment between `#` and identifier
+  
+    1 │ class A {
+  > 2 │ 	# test;
+      │ 	 ^
+    3 │ }
+    4 │ 
+  
+  i remove the space here
+  
+private_name_with_space.js:2:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected a semicolon to end the class property, but found none
+  
+    1 │ class A {
+  > 2 │ 	# test;
+      │ 	^
+    3 │ }
+    4 │ 
+  
+```

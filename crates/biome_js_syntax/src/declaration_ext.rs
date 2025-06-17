@@ -1,6 +1,41 @@
 use biome_rowan::AstNode;
 
-use crate::{JsClassDeclaration, JsSyntaxKind, JsSyntaxNode, TsEnumDeclaration};
+use crate::{
+    AnyJsDeclaration, AnyJsDeclarationClause, JsClassDeclaration, JsSyntaxKind, JsSyntaxNode,
+    TsEnumDeclaration,
+};
+
+impl AnyJsDeclarationClause {
+    pub fn into_declaration(self) -> Option<AnyJsDeclaration> {
+        match self {
+            Self::JsClassDeclaration(decl) => Some(AnyJsDeclaration::JsClassDeclaration(decl)),
+            Self::JsFunctionDeclaration(decl) => {
+                Some(AnyJsDeclaration::JsFunctionDeclaration(decl))
+            }
+            Self::JsVariableDeclarationClause(decl) => Some(
+                AnyJsDeclaration::JsVariableDeclaration(decl.declaration().ok()?),
+            ),
+            Self::TsDeclareFunctionDeclaration(decl) => {
+                Some(AnyJsDeclaration::TsDeclareFunctionDeclaration(decl))
+            }
+            Self::TsEnumDeclaration(decl) => Some(AnyJsDeclaration::TsEnumDeclaration(decl)),
+            Self::TsExternalModuleDeclaration(decl) => {
+                Some(AnyJsDeclaration::TsExternalModuleDeclaration(decl))
+            }
+            Self::TsGlobalDeclaration(decl) => Some(AnyJsDeclaration::TsGlobalDeclaration(decl)),
+            Self::TsImportEqualsDeclaration(decl) => {
+                Some(AnyJsDeclaration::TsImportEqualsDeclaration(decl))
+            }
+            Self::TsInterfaceDeclaration(decl) => {
+                Some(AnyJsDeclaration::TsInterfaceDeclaration(decl))
+            }
+            Self::TsModuleDeclaration(decl) => Some(AnyJsDeclaration::TsModuleDeclaration(decl)),
+            Self::TsTypeAliasDeclaration(decl) => {
+                Some(AnyJsDeclaration::TsTypeAliasDeclaration(decl))
+            }
+        }
+    }
+}
 
 impl TsEnumDeclaration {
     /// Returns `true` if this enum is an ambient enum or in an ambient context.

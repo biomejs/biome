@@ -1,13 +1,12 @@
 use crate::JsRuleAction;
-use biome_analyze::{
-    context::RuleContext, declare_lint_rule, ActionCategory, Ast, FixKind, Rule, RuleDiagnostic,
-};
+use biome_analyze::{Ast, FixKind, Rule, RuleDiagnostic, context::RuleContext, declare_lint_rule};
 use biome_console::markup;
+use biome_diagnostics::Severity;
 use biome_js_syntax::{
     AnyJsClass, JsDirective, JsDirectiveList, JsFileSource, JsFunctionBody, JsModule, JsScript,
 };
 
-use biome_rowan::{declare_node_union, AstNode, AstNodeList, BatchMutationExt};
+use biome_rowan::{AstNode, AstNodeList, BatchMutationExt, declare_node_union};
 
 declare_lint_rule! {
  /// Prevents from having redundant `"use strict"`.
@@ -86,6 +85,7 @@ declare_lint_rule! {
         name: "noRedundantUseStrict",
         language: "js",
         recommended: true,
+        severity: Severity::Warning,
         fix_kind: FixKind::Safe,
     }
 }
@@ -94,13 +94,13 @@ declare_node_union! { AnyNodeWithDirectives = JsFunctionBody | JsScript }
 impl AnyNodeWithDirectives {
     fn directives(&self) -> JsDirectiveList {
         match self {
-            AnyNodeWithDirectives::JsFunctionBody(node) => node.directives(),
-            AnyNodeWithDirectives::JsScript(script) => script.directives(),
+            Self::JsFunctionBody(node) => node.directives(),
+            Self::JsScript(script) => script.directives(),
         }
     }
 
     const fn is_script(&self) -> bool {
-        matches!(self, AnyNodeWithDirectives::JsScript(_))
+        matches!(self, Self::JsScript(_))
     }
 }
 declare_node_union! { pub AnyJsStrictModeNode = AnyJsClass | JsModule | JsDirective  }
@@ -196,7 +196,7 @@ impl Rule for NoRedundantUseStrict {
         // which is intended
         mutation.remove_node(node.clone());
         Some(JsRuleAction::new(
-            ActionCategory::QuickFix,
+            ctx.metadata().action_category(ctx.category(), ctx.group()),
             ctx.metadata().applicability(),
             markup! { "Remove the redundant "<Emphasis>"use strict"</Emphasis>" directive." }
                 .to_owned(),

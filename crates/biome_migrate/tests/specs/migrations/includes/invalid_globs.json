@@ -1,0 +1,5 @@
+{
+  "files": {
+    "include": ["valid", "invalid?.js", "invalid[0-9].js"]
+  }
+}

@@ -3,7 +3,8 @@ source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: valid.js
 ---
 # Input
-```jsx
+```js
+/* should not generate diagnostics */
 // not Math.pow()
 Object.pow(a, b)
 Math.max(a, b)
@@ -22,5 +23,3 @@ globalThis.Math.max(a, b)
 class C { #pow; foo() { Math.#pow(a, b); } }
 
 ```
-
-

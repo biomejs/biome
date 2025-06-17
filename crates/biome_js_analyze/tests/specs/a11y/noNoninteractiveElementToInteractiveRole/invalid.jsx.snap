@@ -1,6 +1,7 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid.jsx
+snapshot_kind: text
 ---
 # Input
 ```jsx
@@ -22,7 +23,6 @@ let a = <caption role="button" />;
 let a = <dd role="button" />;
 let a = <details role="button" />;
 let a = <dir role="button" />;
-let a = <dl role="button" />;
 let a = <dfn role="button" />;
 let a = <dt role="button" />;
 let a = <fieldset role="button" />;
@@ -93,7 +93,7 @@ let a = <thead role="menuitem" />;
 ```
 invalid.jsx:1:13 lint/a11y/noNoninteractiveElementToInteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The HTML element h1 is non-interactive and should not have an interactive role.
+  × The HTML element h1 is non-interactive and should not have an interactive role.
   
   > 1 │ let a = <h1 role="checkbox"></h1>;
       │             ^^^^^^^^^^^^^^^
@@ -112,7 +112,7 @@ invalid.jsx:1:13 lint/a11y/noNoninteractiveElementToInteractiveRole  FIXABLE  �
 ```
 invalid.jsx:2:13 lint/a11y/noNoninteractiveElementToInteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The HTML element h1 is non-interactive and should not have an interactive role.
+  × The HTML element h1 is non-interactive and should not have an interactive role.
   
     1 │ let a = <h1 role="checkbox"></h1>;
   > 2 │ let a = <h1 role="radio"></h1>;
@@ -132,7 +132,7 @@ invalid.jsx:2:13 lint/a11y/noNoninteractiveElementToInteractiveRole  FIXABLE  �
 ```
 invalid.jsx:3:13 lint/a11y/noNoninteractiveElementToInteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The HTML element h1 is non-interactive and should not have an interactive role.
+  × The HTML element h1 is non-interactive and should not have an interactive role.
   
     1 │ let a = <h1 role="checkbox"></h1>;
     2 │ let a = <h1 role="radio"></h1>;
@@ -153,7 +153,7 @@ invalid.jsx:3:13 lint/a11y/noNoninteractiveElementToInteractiveRole  FIXABLE  �
 ```
 invalid.jsx:4:13 lint/a11y/noNoninteractiveElementToInteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The HTML element h1 is non-interactive and should not have an interactive role.
+  × The HTML element h1 is non-interactive and should not have an interactive role.
   
     2 │ let a = <h1 role="radio"></h1>;
     3 │ let a = <h1 role="button"></h1>;
@@ -174,7 +174,7 @@ invalid.jsx:4:13 lint/a11y/noNoninteractiveElementToInteractiveRole  FIXABLE  �
 ```
 invalid.jsx:5:13 lint/a11y/noNoninteractiveElementToInteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The HTML element h1 is non-interactive and should not have an interactive role.
+  × The HTML element h1 is non-interactive and should not have an interactive role.
   
     3 │ let a = <h1 role="button"></h1>;
     4 │ let a = <h1 role="combobox"></h1>;
@@ -195,7 +195,7 @@ invalid.jsx:5:13 lint/a11y/noNoninteractiveElementToInteractiveRole  FIXABLE  �
 ```
 invalid.jsx:6:13 lint/a11y/noNoninteractiveElementToInteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The HTML element h1 is non-interactive and should not have an interactive role.
+  × The HTML element h1 is non-interactive and should not have an interactive role.
   
     4 │ let a = <h1 role="combobox"></h1>;
     5 │ let a = <h1 role="scrollbar"></h1>;
@@ -216,7 +216,7 @@ invalid.jsx:6:13 lint/a11y/noNoninteractiveElementToInteractiveRole  FIXABLE  �
 ```
 invalid.jsx:7:13 lint/a11y/noNoninteractiveElementToInteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The HTML element h1 is non-interactive and should not have an interactive role.
+  × The HTML element h1 is non-interactive and should not have an interactive role.
   
     5 │ let a = <h1 role="scrollbar"></h1>;
     6 │ let a = <h1 role={"scrollbar"}></h1>;
@@ -237,7 +237,7 @@ invalid.jsx:7:13 lint/a11y/noNoninteractiveElementToInteractiveRole  FIXABLE  �
 ```
 invalid.jsx:8:13 lint/a11y/noNoninteractiveElementToInteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The HTML element ol is non-interactive and should not have an interactive role.
+  × The HTML element ol is non-interactive and should not have an interactive role.
   
      6 │ let a = <h1 role={"scrollbar"}></h1>;
      7 │ let a = <h1 role={`scrollbar`}></h1>;
@@ -258,7 +258,7 @@ invalid.jsx:8:13 lint/a11y/noNoninteractiveElementToInteractiveRole  FIXABLE  �
 ```
 invalid.jsx:9:15 lint/a11y/noNoninteractiveElementToInteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The HTML element main is non-interactive and should not have an interactive role.
+  × The HTML element main is non-interactive and should not have an interactive role.
   
      7 │ let a = <h1 role={`scrollbar`}></h1>;
      8 │ let a = <ol role="menuitem" />;
@@ -279,7 +279,7 @@ invalid.jsx:9:15 lint/a11y/noNoninteractiveElementToInteractiveRole  FIXABLE  �
 ```
 invalid.jsx:10:18 lint/a11y/noNoninteractiveElementToInteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
 
-  ! The HTML element article is non-interactive and should not have an interactive role.
+  × The HTML element article is non-interactive and should not have an interactive role.
   
      8 │ let a = <ol role="menuitem" />;
      9 │ let a = <main role="button" />;
@@ -300,7 +300,7 @@ invalid.jsx:10:18 lint/a11y/noNoninteractiveElementToInteractiveRole  FIXABLE  �
 ```
 invalid.jsx:11:16 lint/a11y/noNoninteractiveElementToInteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
 
-  ! The HTML element aside is non-interactive and should not have an interactive role.
+  × The HTML element aside is non-interactive and should not have an interactive role.
   
      9 │ let a = <main role="button" />;
     10 │ let a = <article role="button" />;
@@ -321,7 +321,7 @@ invalid.jsx:11:16 lint/a11y/noNoninteractiveElementToInteractiveRole  FIXABLE  �
 ```
 invalid.jsx:12:21 lint/a11y/noNoninteractiveElementToInteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
 
-  ! The HTML element blockquote is non-interactive and should not have an interactive role.
+  × The HTML element blockquote is non-interactive and should not have an interactive role.
   
     10 │ let a = <article role="button" />;
     11 │ let a = <aside role="button" />;
@@ -342,7 +342,7 @@ invalid.jsx:12:21 lint/a11y/noNoninteractiveElementToInteractiveRole  FIXABLE  �
 ```
 invalid.jsx:13:15 lint/a11y/noNoninteractiveElementToInteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
 
-  ! The HTML element body is non-interactive and should not have an interactive role.
+  × The HTML element body is non-interactive and should not have an interactive role.
   
     11 │ let a = <aside role="button" />;
     12 │ let a = <blockquote role="button" />;
@@ -363,7 +363,7 @@ invalid.jsx:13:15 lint/a11y/noNoninteractiveElementToInteractiveRole  FIXABLE  �
 ```
 invalid.jsx:14:13 lint/a11y/noNoninteractiveElementToInteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
 
-  ! The HTML element br is non-interactive and should not have an interactive role.
+  × The HTML element br is non-interactive and should not have an interactive role.
   
     12 │ let a = <blockquote role="button" />;
     13 │ let a = <body role="button" />;
@@ -384,7 +384,7 @@ invalid.jsx:14:13 lint/a11y/noNoninteractiveElementToInteractiveRole  FIXABLE  �
 ```
 invalid.jsx:15:18 lint/a11y/noNoninteractiveElementToInteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
 
-  ! The HTML element caption is non-interactive and should not have an interactive role.
+  × The HTML element caption is non-interactive and should not have an interactive role.
   
     13 │ let a = <body role="button" />;
     14 │ let a = <br role="button" />;
@@ -405,7 +405,7 @@ invalid.jsx:15:18 lint/a11y/noNoninteractiveElementToInteractiveRole  FIXABLE  �
 ```
 invalid.jsx:16:13 lint/a11y/noNoninteractiveElementToInteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
 
-  ! The HTML element dd is non-interactive and should not have an interactive role.
+  × The HTML element dd is non-interactive and should not have an interactive role.
   
     14 │ let a = <br role="button" />;
     15 │ let a = <caption role="button" />;
@@ -426,14 +426,14 @@ invalid.jsx:16:13 lint/a11y/noNoninteractiveElementToInteractiveRole  FIXABLE  �
 ```
 invalid.jsx:17:18 lint/a11y/noNoninteractiveElementToInteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
 
-  ! The HTML element details is non-interactive and should not have an interactive role.
+  × The HTML element details is non-interactive and should not have an interactive role.
   
     15 │ let a = <caption role="button" />;
     16 │ let a = <dd role="button" />;
   > 17 │ let a = <details role="button" />;
        │                  ^^^^^^^^^^^^^
     18 │ let a = <dir role="button" />;
-    19 │ let a = <dl role="button" />;
+    19 │ let a = <dfn role="button" />;
   
   i Replace details with a div or a span.
   
@@ -447,14 +447,14 @@ invalid.jsx:17:18 lint/a11y/noNoninteractiveElementToInteractiveRole  FIXABLE  �
 ```
 invalid.jsx:18:14 lint/a11y/noNoninteractiveElementToInteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
 
-  ! The HTML element dir is non-interactive and should not have an interactive role.
+  × The HTML element dir is non-interactive and should not have an interactive role.
   
     16 │ let a = <dd role="button" />;
     17 │ let a = <details role="button" />;
   > 18 │ let a = <dir role="button" />;
        │              ^^^^^^^^^^^^^
-    19 │ let a = <dl role="button" />;
-    20 │ let a = <dfn role="button" />;
+    19 │ let a = <dfn role="button" />;
+    20 │ let a = <dt role="button" />;
   
   i Replace dir with a div or a span.
   
@@ -466,211 +466,211 @@ invalid.jsx:18:14 lint/a11y/noNoninteractiveElementToInteractiveRole  FIXABLE  �
 ```
 
 ```
-invalid.jsx:19:13 lint/a11y/noNoninteractiveElementToInteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:19:14 lint/a11y/noNoninteractiveElementToInteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
 
-  ! The HTML element dl is non-interactive and should not have an interactive role.
+  × The HTML element dfn is non-interactive and should not have an interactive role.
   
     17 │ let a = <details role="button" />;
     18 │ let a = <dir role="button" />;
-  > 19 │ let a = <dl role="button" />;
-       │             ^^^^^^^^^^^^^
-    20 │ let a = <dfn role="button" />;
-    21 │ let a = <dt role="button" />;
-  
-  i Replace dl with a div or a span.
-  
-  i Unsafe fix: Remove the role attribute.
-  
-    19 │ let·a·=·<dl·role="button"·/>;
-       │             --------------   
-
-```
-
-```
-invalid.jsx:20:14 lint/a11y/noNoninteractiveElementToInteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
-
-  ! The HTML element dfn is non-interactive and should not have an interactive role.
-  
-    18 │ let a = <dir role="button" />;
-    19 │ let a = <dl role="button" />;
-  > 20 │ let a = <dfn role="button" />;
+  > 19 │ let a = <dfn role="button" />;
        │              ^^^^^^^^^^^^^
-    21 │ let a = <dt role="button" />;
-    22 │ let a = <fieldset role="button" />;
+    20 │ let a = <dt role="button" />;
+    21 │ let a = <fieldset role="button" />;
   
   i Replace dfn with a div or a span.
   
   i Unsafe fix: Remove the role attribute.
   
-    20 │ let·a·=·<dfn·role="button"·/>;
+    19 │ let·a·=·<dfn·role="button"·/>;
        │              --------------   
 
 ```
 
 ```
-invalid.jsx:21:13 lint/a11y/noNoninteractiveElementToInteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:20:13 lint/a11y/noNoninteractiveElementToInteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
 
-  ! The HTML element dt is non-interactive and should not have an interactive role.
+  × The HTML element dt is non-interactive and should not have an interactive role.
   
-    19 │ let a = <dl role="button" />;
-    20 │ let a = <dfn role="button" />;
-  > 21 │ let a = <dt role="button" />;
+    18 │ let a = <dir role="button" />;
+    19 │ let a = <dfn role="button" />;
+  > 20 │ let a = <dt role="button" />;
        │             ^^^^^^^^^^^^^
-    22 │ let a = <fieldset role="button" />;
-    23 │ let a = <figcaption role="button" />;
+    21 │ let a = <fieldset role="button" />;
+    22 │ let a = <figcaption role="button" />;
   
   i Replace dt with a div or a span.
   
   i Unsafe fix: Remove the role attribute.
   
-    21 │ let·a·=·<dt·role="button"·/>;
+    20 │ let·a·=·<dt·role="button"·/>;
        │             --------------   
 
 ```
 
 ```
-invalid.jsx:22:19 lint/a11y/noNoninteractiveElementToInteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:21:19 lint/a11y/noNoninteractiveElementToInteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
 
-  ! The HTML element fieldset is non-interactive and should not have an interactive role.
+  × The HTML element fieldset is non-interactive and should not have an interactive role.
   
-    20 │ let a = <dfn role="button" />;
-    21 │ let a = <dt role="button" />;
-  > 22 │ let a = <fieldset role="button" />;
+    19 │ let a = <dfn role="button" />;
+    20 │ let a = <dt role="button" />;
+  > 21 │ let a = <fieldset role="button" />;
        │                   ^^^^^^^^^^^^^
-    23 │ let a = <figcaption role="button" />;
-    24 │ let a = <figure role="button" />;
+    22 │ let a = <figcaption role="button" />;
+    23 │ let a = <figure role="button" />;
   
   i Replace fieldset with a div or a span.
   
   i Unsafe fix: Remove the role attribute.
   
-    22 │ let·a·=·<fieldset·role="button"·/>;
+    21 │ let·a·=·<fieldset·role="button"·/>;
        │                   --------------   
 
 ```
 
 ```
-invalid.jsx:23:21 lint/a11y/noNoninteractiveElementToInteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:22:21 lint/a11y/noNoninteractiveElementToInteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
 
-  ! The HTML element figcaption is non-interactive and should not have an interactive role.
+  × The HTML element figcaption is non-interactive and should not have an interactive role.
   
-    21 │ let a = <dt role="button" />;
-    22 │ let a = <fieldset role="button" />;
-  > 23 │ let a = <figcaption role="button" />;
+    20 │ let a = <dt role="button" />;
+    21 │ let a = <fieldset role="button" />;
+  > 22 │ let a = <figcaption role="button" />;
        │                     ^^^^^^^^^^^^^
-    24 │ let a = <figure role="button" />;
-    25 │ let a = <footer role="button" />;
+    23 │ let a = <figure role="button" />;
+    24 │ let a = <footer role="button" />;
   
   i Replace figcaption with a div or a span.
   
   i Unsafe fix: Remove the role attribute.
   
-    23 │ let·a·=·<figcaption·role="button"·/>;
+    22 │ let·a·=·<figcaption·role="button"·/>;
        │                     --------------   
+
+```
+
+```
+invalid.jsx:23:17 lint/a11y/noNoninteractiveElementToInteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
+
+  × The HTML element figure is non-interactive and should not have an interactive role.
+  
+    21 │ let a = <fieldset role="button" />;
+    22 │ let a = <figcaption role="button" />;
+  > 23 │ let a = <figure role="button" />;
+       │                 ^^^^^^^^^^^^^
+    24 │ let a = <footer role="button" />;
+    25 │ let a = <form role="button" />;
+  
+  i Replace figure with a div or a span.
+  
+  i Unsafe fix: Remove the role attribute.
+  
+    23 │ let·a·=·<figure·role="button"·/>;
+       │                 --------------   
 
 ```
 
 ```
 invalid.jsx:24:17 lint/a11y/noNoninteractiveElementToInteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
 
-  ! The HTML element figure is non-interactive and should not have an interactive role.
+  × The HTML element footer is non-interactive and should not have an interactive role.
   
-    22 │ let a = <fieldset role="button" />;
-    23 │ let a = <figcaption role="button" />;
-  > 24 │ let a = <figure role="button" />;
+    22 │ let a = <figcaption role="button" />;
+    23 │ let a = <figure role="button" />;
+  > 24 │ let a = <footer role="button" />;
        │                 ^^^^^^^^^^^^^
-    25 │ let a = <footer role="button" />;
-    26 │ let a = <form role="button" />;
-  
-  i Replace figure with a div or a span.
-  
-  i Unsafe fix: Remove the role attribute.
-  
-    24 │ let·a·=·<figure·role="button"·/>;
-       │                 --------------   
-
-```
-
-```
-invalid.jsx:25:17 lint/a11y/noNoninteractiveElementToInteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
-
-  ! The HTML element footer is non-interactive and should not have an interactive role.
-  
-    23 │ let a = <figcaption role="button" />;
-    24 │ let a = <figure role="button" />;
-  > 25 │ let a = <footer role="button" />;
-       │                 ^^^^^^^^^^^^^
-    26 │ let a = <form role="button" />;
-    27 │ let a = <frame role="button" />;
+    25 │ let a = <form role="button" />;
+    26 │ let a = <frame role="button" />;
   
   i Replace footer with a div or a span.
   
   i Unsafe fix: Remove the role attribute.
   
-    25 │ let·a·=·<footer·role="button"·/>;
+    24 │ let·a·=·<footer·role="button"·/>;
        │                 --------------   
 
 ```
 
 ```
-invalid.jsx:26:15 lint/a11y/noNoninteractiveElementToInteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:25:15 lint/a11y/noNoninteractiveElementToInteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
 
-  ! The HTML element form is non-interactive and should not have an interactive role.
+  × The HTML element form is non-interactive and should not have an interactive role.
   
-    24 │ let a = <figure role="button" />;
-    25 │ let a = <footer role="button" />;
-  > 26 │ let a = <form role="button" />;
+    23 │ let a = <figure role="button" />;
+    24 │ let a = <footer role="button" />;
+  > 25 │ let a = <form role="button" />;
        │               ^^^^^^^^^^^^^
-    27 │ let a = <frame role="button" />;
-    28 │ let a = <h1 role="button" />;
+    26 │ let a = <frame role="button" />;
+    27 │ let a = <h1 role="button" />;
   
   i Replace form with a div or a span.
   
   i Unsafe fix: Remove the role attribute.
   
-    26 │ let·a·=·<form·role="button"·/>;
+    25 │ let·a·=·<form·role="button"·/>;
        │               --------------   
 
 ```
 
 ```
-invalid.jsx:27:16 lint/a11y/noNoninteractiveElementToInteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:26:16 lint/a11y/noNoninteractiveElementToInteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
 
-  ! The HTML element frame is non-interactive and should not have an interactive role.
+  × The HTML element frame is non-interactive and should not have an interactive role.
   
-    25 │ let a = <footer role="button" />;
-    26 │ let a = <form role="button" />;
-  > 27 │ let a = <frame role="button" />;
+    24 │ let a = <footer role="button" />;
+    25 │ let a = <form role="button" />;
+  > 26 │ let a = <frame role="button" />;
        │                ^^^^^^^^^^^^^
-    28 │ let a = <h1 role="button" />;
-    29 │ let a = <h2 role="button" />;
+    27 │ let a = <h1 role="button" />;
+    28 │ let a = <h2 role="button" />;
   
   i Replace frame with a div or a span.
   
   i Unsafe fix: Remove the role attribute.
   
-    27 │ let·a·=·<frame·role="button"·/>;
+    26 │ let·a·=·<frame·role="button"·/>;
        │                --------------   
+
+```
+
+```
+invalid.jsx:27:13 lint/a11y/noNoninteractiveElementToInteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
+
+  × The HTML element h1 is non-interactive and should not have an interactive role.
+  
+    25 │ let a = <form role="button" />;
+    26 │ let a = <frame role="button" />;
+  > 27 │ let a = <h1 role="button" />;
+       │             ^^^^^^^^^^^^^
+    28 │ let a = <h2 role="button" />;
+    29 │ let a = <h3 role="button" />;
+  
+  i Replace h1 with a div or a span.
+  
+  i Unsafe fix: Remove the role attribute.
+  
+    27 │ let·a·=·<h1·role="button"·/>;
+       │             --------------   
 
 ```
 
 ```
 invalid.jsx:28:13 lint/a11y/noNoninteractiveElementToInteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
 
-  ! The HTML element h1 is non-interactive and should not have an interactive role.
+  × The HTML element h2 is non-interactive and should not have an interactive role.
   
-    26 │ let a = <form role="button" />;
-    27 │ let a = <frame role="button" />;
-  > 28 │ let a = <h1 role="button" />;
+    26 │ let a = <frame role="button" />;
+    27 │ let a = <h1 role="button" />;
+  > 28 │ let a = <h2 role="button" />;
        │             ^^^^^^^^^^^^^
-    29 │ let a = <h2 role="button" />;
-    30 │ let a = <h3 role="button" />;
+    29 │ let a = <h3 role="button" />;
+    30 │ let a = <h4 role="button" />;
   
-  i Replace h1 with a div or a span.
+  i Replace h2 with a div or a span.
   
   i Unsafe fix: Remove the role attribute.
   
-    28 │ let·a·=·<h1·role="button"·/>;
+    28 │ let·a·=·<h2·role="button"·/>;
        │             --------------   
 
 ```
@@ -678,20 +678,20 @@ invalid.jsx:28:13 lint/a11y/noNoninteractiveElementToInteractiveRole  FIXABLE  �
 ```
 invalid.jsx:29:13 lint/a11y/noNoninteractiveElementToInteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
 
-  ! The HTML element h2 is non-interactive and should not have an interactive role.
+  × The HTML element h3 is non-interactive and should not have an interactive role.
   
-    27 │ let a = <frame role="button" />;
-    28 │ let a = <h1 role="button" />;
-  > 29 │ let a = <h2 role="button" />;
+    27 │ let a = <h1 role="button" />;
+    28 │ let a = <h2 role="button" />;
+  > 29 │ let a = <h3 role="button" />;
        │             ^^^^^^^^^^^^^
-    30 │ let a = <h3 role="button" />;
-    31 │ let a = <h4 role="button" />;
+    30 │ let a = <h4 role="button" />;
+    31 │ let a = <h5 role="button" />;
   
-  i Replace h2 with a div or a span.
+  i Replace h3 with a div or a span.
   
   i Unsafe fix: Remove the role attribute.
   
-    29 │ let·a·=·<h2·role="button"·/>;
+    29 │ let·a·=·<h3·role="button"·/>;
        │             --------------   
 
 ```
@@ -699,20 +699,20 @@ invalid.jsx:29:13 lint/a11y/noNoninteractiveElementToInteractiveRole  FIXABLE  �
 ```
 invalid.jsx:30:13 lint/a11y/noNoninteractiveElementToInteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
 
-  ! The HTML element h3 is non-interactive and should not have an interactive role.
+  × The HTML element h4 is non-interactive and should not have an interactive role.
   
-    28 │ let a = <h1 role="button" />;
-    29 │ let a = <h2 role="button" />;
-  > 30 │ let a = <h3 role="button" />;
+    28 │ let a = <h2 role="button" />;
+    29 │ let a = <h3 role="button" />;
+  > 30 │ let a = <h4 role="button" />;
        │             ^^^^^^^^^^^^^
-    31 │ let a = <h4 role="button" />;
-    32 │ let a = <h5 role="button" />;
+    31 │ let a = <h5 role="button" />;
+    32 │ let a = <h6 role="button" />;
   
-  i Replace h3 with a div or a span.
+  i Replace h4 with a div or a span.
   
   i Unsafe fix: Remove the role attribute.
   
-    30 │ let·a·=·<h3·role="button"·/>;
+    30 │ let·a·=·<h4·role="button"·/>;
        │             --------------   
 
 ```
@@ -720,20 +720,20 @@ invalid.jsx:30:13 lint/a11y/noNoninteractiveElementToInteractiveRole  FIXABLE  �
 ```
 invalid.jsx:31:13 lint/a11y/noNoninteractiveElementToInteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
 
-  ! The HTML element h4 is non-interactive and should not have an interactive role.
+  × The HTML element h5 is non-interactive and should not have an interactive role.
   
-    29 │ let a = <h2 role="button" />;
-    30 │ let a = <h3 role="button" />;
-  > 31 │ let a = <h4 role="button" />;
+    29 │ let a = <h3 role="button" />;
+    30 │ let a = <h4 role="button" />;
+  > 31 │ let a = <h5 role="button" />;
        │             ^^^^^^^^^^^^^
-    32 │ let a = <h5 role="button" />;
-    33 │ let a = <h6 role="button" />;
+    32 │ let a = <h6 role="button" />;
+    33 │ let a = <iframe role="button" />;
   
-  i Replace h4 with a div or a span.
+  i Replace h5 with a div or a span.
   
   i Unsafe fix: Remove the role attribute.
   
-    31 │ let·a·=·<h4·role="button"·/>;
+    31 │ let·a·=·<h5·role="button"·/>;
        │             --------------   
 
 ```
@@ -741,734 +741,734 @@ invalid.jsx:31:13 lint/a11y/noNoninteractiveElementToInteractiveRole  FIXABLE  �
 ```
 invalid.jsx:32:13 lint/a11y/noNoninteractiveElementToInteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
 
-  ! The HTML element h5 is non-interactive and should not have an interactive role.
+  × The HTML element h6 is non-interactive and should not have an interactive role.
   
-    30 │ let a = <h3 role="button" />;
-    31 │ let a = <h4 role="button" />;
-  > 32 │ let a = <h5 role="button" />;
+    30 │ let a = <h4 role="button" />;
+    31 │ let a = <h5 role="button" />;
+  > 32 │ let a = <h6 role="button" />;
        │             ^^^^^^^^^^^^^
-    33 │ let a = <h6 role="button" />;
-    34 │ let a = <iframe role="button" />;
-  
-  i Replace h5 with a div or a span.
-  
-  i Unsafe fix: Remove the role attribute.
-  
-    32 │ let·a·=·<h5·role="button"·/>;
-       │             --------------   
-
-```
-
-```
-invalid.jsx:33:13 lint/a11y/noNoninteractiveElementToInteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
-
-  ! The HTML element h6 is non-interactive and should not have an interactive role.
-  
-    31 │ let a = <h4 role="button" />;
-    32 │ let a = <h5 role="button" />;
-  > 33 │ let a = <h6 role="button" />;
-       │             ^^^^^^^^^^^^^
-    34 │ let a = <iframe role="button" />;
-    35 │ let a = <img role="button" />;
+    33 │ let a = <iframe role="button" />;
+    34 │ let a = <img role="button" />;
   
   i Replace h6 with a div or a span.
   
   i Unsafe fix: Remove the role attribute.
   
-    33 │ let·a·=·<h6·role="button"·/>;
+    32 │ let·a·=·<h6·role="button"·/>;
        │             --------------   
 
 ```
 
 ```
-invalid.jsx:34:17 lint/a11y/noNoninteractiveElementToInteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:33:17 lint/a11y/noNoninteractiveElementToInteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
 
-  ! The HTML element iframe is non-interactive and should not have an interactive role.
+  × The HTML element iframe is non-interactive and should not have an interactive role.
   
-    32 │ let a = <h5 role="button" />;
-    33 │ let a = <h6 role="button" />;
-  > 34 │ let a = <iframe role="button" />;
+    31 │ let a = <h5 role="button" />;
+    32 │ let a = <h6 role="button" />;
+  > 33 │ let a = <iframe role="button" />;
        │                 ^^^^^^^^^^^^^
-    35 │ let a = <img role="button" />;
-    36 │ let a = <label role="button" />;
+    34 │ let a = <img role="button" />;
+    35 │ let a = <label role="button" />;
   
   i Replace iframe with a div or a span.
   
   i Unsafe fix: Remove the role attribute.
   
-    34 │ let·a·=·<iframe·role="button"·/>;
+    33 │ let·a·=·<iframe·role="button"·/>;
        │                 --------------   
 
 ```
 
 ```
-invalid.jsx:35:14 lint/a11y/noNoninteractiveElementToInteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:34:14 lint/a11y/noNoninteractiveElementToInteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
 
-  ! The HTML element img is non-interactive and should not have an interactive role.
+  × The HTML element img is non-interactive and should not have an interactive role.
   
-    33 │ let a = <h6 role="button" />;
-    34 │ let a = <iframe role="button" />;
-  > 35 │ let a = <img role="button" />;
+    32 │ let a = <h6 role="button" />;
+    33 │ let a = <iframe role="button" />;
+  > 34 │ let a = <img role="button" />;
        │              ^^^^^^^^^^^^^
-    36 │ let a = <label role="button" />;
-    37 │ let a = <legend role="button" />;
+    35 │ let a = <label role="button" />;
+    36 │ let a = <legend role="button" />;
   
   i Replace img with a div or a span.
   
   i Unsafe fix: Remove the role attribute.
   
-    35 │ let·a·=·<img·role="button"·/>;
+    34 │ let·a·=·<img·role="button"·/>;
        │              --------------   
 
 ```
 
 ```
-invalid.jsx:36:16 lint/a11y/noNoninteractiveElementToInteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:35:16 lint/a11y/noNoninteractiveElementToInteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
 
-  ! The HTML element label is non-interactive and should not have an interactive role.
+  × The HTML element label is non-interactive and should not have an interactive role.
   
-    34 │ let a = <iframe role="button" />;
-    35 │ let a = <img role="button" />;
-  > 36 │ let a = <label role="button" />;
+    33 │ let a = <iframe role="button" />;
+    34 │ let a = <img role="button" />;
+  > 35 │ let a = <label role="button" />;
        │                ^^^^^^^^^^^^^
-    37 │ let a = <legend role="button" />;
-    38 │ let a = <li role="button" />;
+    36 │ let a = <legend role="button" />;
+    37 │ let a = <li role="button" />;
   
   i Replace label with a div or a span.
   
   i Unsafe fix: Remove the role attribute.
   
-    36 │ let·a·=·<label·role="button"·/>;
+    35 │ let·a·=·<label·role="button"·/>;
        │                --------------   
 
 ```
 
 ```
-invalid.jsx:37:17 lint/a11y/noNoninteractiveElementToInteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:36:17 lint/a11y/noNoninteractiveElementToInteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
 
-  ! The HTML element legend is non-interactive and should not have an interactive role.
+  × The HTML element legend is non-interactive and should not have an interactive role.
   
-    35 │ let a = <img role="button" />;
-    36 │ let a = <label role="button" />;
-  > 37 │ let a = <legend role="button" />;
+    34 │ let a = <img role="button" />;
+    35 │ let a = <label role="button" />;
+  > 36 │ let a = <legend role="button" />;
        │                 ^^^^^^^^^^^^^
-    38 │ let a = <li role="button" />;
-    39 │ let a = <mark role="button" />;
+    37 │ let a = <li role="button" />;
+    38 │ let a = <mark role="button" />;
   
   i Replace legend with a div or a span.
   
   i Unsafe fix: Remove the role attribute.
   
-    37 │ let·a·=·<legend·role="button"·/>;
+    36 │ let·a·=·<legend·role="button"·/>;
        │                 --------------   
 
 ```
 
 ```
-invalid.jsx:38:13 lint/a11y/noNoninteractiveElementToInteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:37:13 lint/a11y/noNoninteractiveElementToInteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
 
-  ! The HTML element li is non-interactive and should not have an interactive role.
+  × The HTML element li is non-interactive and should not have an interactive role.
   
-    36 │ let a = <label role="button" />;
-    37 │ let a = <legend role="button" />;
-  > 38 │ let a = <li role="button" />;
+    35 │ let a = <label role="button" />;
+    36 │ let a = <legend role="button" />;
+  > 37 │ let a = <li role="button" />;
        │             ^^^^^^^^^^^^^
-    39 │ let a = <mark role="button" />;
-    40 │ let a = <marquee role="button" />;
+    38 │ let a = <mark role="button" />;
+    39 │ let a = <marquee role="button" />;
   
   i Replace li with a div or a span.
   
   i Unsafe fix: Remove the role attribute.
   
-    38 │ let·a·=·<li·role="button"·/>;
+    37 │ let·a·=·<li·role="button"·/>;
        │             --------------   
 
 ```
 
 ```
-invalid.jsx:39:15 lint/a11y/noNoninteractiveElementToInteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:38:15 lint/a11y/noNoninteractiveElementToInteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
 
-  ! The HTML element mark is non-interactive and should not have an interactive role.
+  × The HTML element mark is non-interactive and should not have an interactive role.
   
-    37 │ let a = <legend role="button" />;
-    38 │ let a = <li role="button" />;
-  > 39 │ let a = <mark role="button" />;
+    36 │ let a = <legend role="button" />;
+    37 │ let a = <li role="button" />;
+  > 38 │ let a = <mark role="button" />;
        │               ^^^^^^^^^^^^^
-    40 │ let a = <marquee role="button" />;
-    41 │ let a = <menu role="button" />;
+    39 │ let a = <marquee role="button" />;
+    40 │ let a = <menu role="button" />;
   
   i Replace mark with a div or a span.
   
   i Unsafe fix: Remove the role attribute.
   
-    39 │ let·a·=·<mark·role="button"·/>;
+    38 │ let·a·=·<mark·role="button"·/>;
        │               --------------   
 
 ```
 
 ```
-invalid.jsx:40:18 lint/a11y/noNoninteractiveElementToInteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:39:18 lint/a11y/noNoninteractiveElementToInteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
 
-  ! The HTML element marquee is non-interactive and should not have an interactive role.
+  × The HTML element marquee is non-interactive and should not have an interactive role.
   
-    38 │ let a = <li role="button" />;
-    39 │ let a = <mark role="button" />;
-  > 40 │ let a = <marquee role="button" />;
+    37 │ let a = <li role="button" />;
+    38 │ let a = <mark role="button" />;
+  > 39 │ let a = <marquee role="button" />;
        │                  ^^^^^^^^^^^^^
-    41 │ let a = <menu role="button" />;
-    42 │ let a = <meter role="button" />;
+    40 │ let a = <menu role="button" />;
+    41 │ let a = <meter role="button" />;
   
   i Replace marquee with a div or a span.
   
   i Unsafe fix: Remove the role attribute.
   
-    40 │ let·a·=·<marquee·role="button"·/>;
+    39 │ let·a·=·<marquee·role="button"·/>;
        │                  --------------   
 
 ```
 
 ```
-invalid.jsx:41:15 lint/a11y/noNoninteractiveElementToInteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:40:15 lint/a11y/noNoninteractiveElementToInteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
 
-  ! The HTML element menu is non-interactive and should not have an interactive role.
+  × The HTML element menu is non-interactive and should not have an interactive role.
   
-    39 │ let a = <mark role="button" />;
-    40 │ let a = <marquee role="button" />;
-  > 41 │ let a = <menu role="button" />;
+    38 │ let a = <mark role="button" />;
+    39 │ let a = <marquee role="button" />;
+  > 40 │ let a = <menu role="button" />;
        │               ^^^^^^^^^^^^^
-    42 │ let a = <meter role="button" />;
-    43 │ let a = <nav role="button" />;
+    41 │ let a = <meter role="button" />;
+    42 │ let a = <nav role="button" />;
   
   i Replace menu with a div or a span.
   
   i Unsafe fix: Remove the role attribute.
   
-    41 │ let·a·=·<menu·role="button"·/>;
+    40 │ let·a·=·<menu·role="button"·/>;
        │               --------------   
 
 ```
 
 ```
-invalid.jsx:42:16 lint/a11y/noNoninteractiveElementToInteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:41:16 lint/a11y/noNoninteractiveElementToInteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
 
-  ! The HTML element meter is non-interactive and should not have an interactive role.
+  × The HTML element meter is non-interactive and should not have an interactive role.
   
-    40 │ let a = <marquee role="button" />;
-    41 │ let a = <menu role="button" />;
-  > 42 │ let a = <meter role="button" />;
+    39 │ let a = <marquee role="button" />;
+    40 │ let a = <menu role="button" />;
+  > 41 │ let a = <meter role="button" />;
        │                ^^^^^^^^^^^^^
-    43 │ let a = <nav role="button" />;
-    44 │ let a = <ol role="button" />;
+    42 │ let a = <nav role="button" />;
+    43 │ let a = <ol role="button" />;
   
   i Replace meter with a div or a span.
   
   i Unsafe fix: Remove the role attribute.
   
-    42 │ let·a·=·<meter·role="button"·/>;
+    41 │ let·a·=·<meter·role="button"·/>;
        │                --------------   
 
 ```
 
 ```
-invalid.jsx:43:14 lint/a11y/noNoninteractiveElementToInteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:42:14 lint/a11y/noNoninteractiveElementToInteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
 
-  ! The HTML element nav is non-interactive and should not have an interactive role.
+  × The HTML element nav is non-interactive and should not have an interactive role.
   
-    41 │ let a = <menu role="button" />;
-    42 │ let a = <meter role="button" />;
-  > 43 │ let a = <nav role="button" />;
+    40 │ let a = <menu role="button" />;
+    41 │ let a = <meter role="button" />;
+  > 42 │ let a = <nav role="button" />;
        │              ^^^^^^^^^^^^^
-    44 │ let a = <ol role="button" />;
-    45 │ let a = <optgroup role="button" />;
+    43 │ let a = <ol role="button" />;
+    44 │ let a = <optgroup role="button" />;
   
   i Replace nav with a div or a span.
   
   i Unsafe fix: Remove the role attribute.
   
-    43 │ let·a·=·<nav·role="button"·/>;
+    42 │ let·a·=·<nav·role="button"·/>;
        │              --------------   
 
 ```
 
 ```
-invalid.jsx:44:13 lint/a11y/noNoninteractiveElementToInteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:43:13 lint/a11y/noNoninteractiveElementToInteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
 
-  ! The HTML element ol is non-interactive and should not have an interactive role.
+  × The HTML element ol is non-interactive and should not have an interactive role.
   
-    42 │ let a = <meter role="button" />;
-    43 │ let a = <nav role="button" />;
-  > 44 │ let a = <ol role="button" />;
+    41 │ let a = <meter role="button" />;
+    42 │ let a = <nav role="button" />;
+  > 43 │ let a = <ol role="button" />;
        │             ^^^^^^^^^^^^^
-    45 │ let a = <optgroup role="button" />;
-    46 │ let a = <output role="button" />;
+    44 │ let a = <optgroup role="button" />;
+    45 │ let a = <output role="button" />;
   
   i Replace ol with a div or a span.
   
   i Unsafe fix: Remove the role attribute.
   
-    44 │ let·a·=·<ol·role="button"·/>;
+    43 │ let·a·=·<ol·role="button"·/>;
        │             --------------   
 
 ```
 
 ```
-invalid.jsx:45:19 lint/a11y/noNoninteractiveElementToInteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:44:19 lint/a11y/noNoninteractiveElementToInteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
 
-  ! The HTML element optgroup is non-interactive and should not have an interactive role.
+  × The HTML element optgroup is non-interactive and should not have an interactive role.
   
-    43 │ let a = <nav role="button" />;
-    44 │ let a = <ol role="button" />;
-  > 45 │ let a = <optgroup role="button" />;
+    42 │ let a = <nav role="button" />;
+    43 │ let a = <ol role="button" />;
+  > 44 │ let a = <optgroup role="button" />;
        │                   ^^^^^^^^^^^^^
-    46 │ let a = <output role="button" />;
-    47 │ let a = <pre role="button" />;
+    45 │ let a = <output role="button" />;
+    46 │ let a = <pre role="button" />;
   
   i Replace optgroup with a div or a span.
   
   i Unsafe fix: Remove the role attribute.
   
-    45 │ let·a·=·<optgroup·role="button"·/>;
+    44 │ let·a·=·<optgroup·role="button"·/>;
        │                   --------------   
 
 ```
 
 ```
-invalid.jsx:46:17 lint/a11y/noNoninteractiveElementToInteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:45:17 lint/a11y/noNoninteractiveElementToInteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
 
-  ! The HTML element output is non-interactive and should not have an interactive role.
+  × The HTML element output is non-interactive and should not have an interactive role.
   
-    44 │ let a = <ol role="button" />;
-    45 │ let a = <optgroup role="button" />;
-  > 46 │ let a = <output role="button" />;
+    43 │ let a = <ol role="button" />;
+    44 │ let a = <optgroup role="button" />;
+  > 45 │ let a = <output role="button" />;
        │                 ^^^^^^^^^^^^^
-    47 │ let a = <pre role="button" />;
-    48 │ let a = <progress role="button" />;
+    46 │ let a = <pre role="button" />;
+    47 │ let a = <progress role="button" />;
   
   i Replace output with a div or a span.
   
   i Unsafe fix: Remove the role attribute.
   
-    46 │ let·a·=·<output·role="button"·/>;
+    45 │ let·a·=·<output·role="button"·/>;
        │                 --------------   
 
 ```
 
 ```
-invalid.jsx:47:14 lint/a11y/noNoninteractiveElementToInteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:46:14 lint/a11y/noNoninteractiveElementToInteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
 
-  ! The HTML element pre is non-interactive and should not have an interactive role.
+  × The HTML element pre is non-interactive and should not have an interactive role.
   
-    45 │ let a = <optgroup role="button" />;
-    46 │ let a = <output role="button" />;
-  > 47 │ let a = <pre role="button" />;
+    44 │ let a = <optgroup role="button" />;
+    45 │ let a = <output role="button" />;
+  > 46 │ let a = <pre role="button" />;
        │              ^^^^^^^^^^^^^
-    48 │ let a = <progress role="button" />;
-    49 │ let a = <ruby role="button" />;
+    47 │ let a = <progress role="button" />;
+    48 │ let a = <ruby role="button" />;
   
   i Replace pre with a div or a span.
   
   i Unsafe fix: Remove the role attribute.
   
-    47 │ let·a·=·<pre·role="button"·/>;
+    46 │ let·a·=·<pre·role="button"·/>;
        │              --------------   
 
 ```
 
 ```
-invalid.jsx:48:19 lint/a11y/noNoninteractiveElementToInteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:47:19 lint/a11y/noNoninteractiveElementToInteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
 
-  ! The HTML element progress is non-interactive and should not have an interactive role.
+  × The HTML element progress is non-interactive and should not have an interactive role.
   
-    46 │ let a = <output role="button" />;
-    47 │ let a = <pre role="button" />;
-  > 48 │ let a = <progress role="button" />;
+    45 │ let a = <output role="button" />;
+    46 │ let a = <pre role="button" />;
+  > 47 │ let a = <progress role="button" />;
        │                   ^^^^^^^^^^^^^
-    49 │ let a = <ruby role="button" />;
-    50 │ let a = <table role="button" />;
+    48 │ let a = <ruby role="button" />;
+    49 │ let a = <table role="button" />;
   
   i Replace progress with a div or a span.
   
   i Unsafe fix: Remove the role attribute.
   
-    48 │ let·a·=·<progress·role="button"·/>;
+    47 │ let·a·=·<progress·role="button"·/>;
        │                   --------------   
 
 ```
 
 ```
-invalid.jsx:49:15 lint/a11y/noNoninteractiveElementToInteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:48:15 lint/a11y/noNoninteractiveElementToInteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
 
-  ! The HTML element ruby is non-interactive and should not have an interactive role.
+  × The HTML element ruby is non-interactive and should not have an interactive role.
   
-    47 │ let a = <pre role="button" />;
-    48 │ let a = <progress role="button" />;
-  > 49 │ let a = <ruby role="button" />;
+    46 │ let a = <pre role="button" />;
+    47 │ let a = <progress role="button" />;
+  > 48 │ let a = <ruby role="button" />;
        │               ^^^^^^^^^^^^^
-    50 │ let a = <table role="button" />;
-    51 │ let a = <tbody role="button" />;
+    49 │ let a = <table role="button" />;
+    50 │ let a = <tbody role="button" />;
   
   i Replace ruby with a div or a span.
   
   i Unsafe fix: Remove the role attribute.
   
-    49 │ let·a·=·<ruby·role="button"·/>;
+    48 │ let·a·=·<ruby·role="button"·/>;
        │               --------------   
+
+```
+
+```
+invalid.jsx:49:16 lint/a11y/noNoninteractiveElementToInteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
+
+  × The HTML element table is non-interactive and should not have an interactive role.
+  
+    47 │ let a = <progress role="button" />;
+    48 │ let a = <ruby role="button" />;
+  > 49 │ let a = <table role="button" />;
+       │                ^^^^^^^^^^^^^
+    50 │ let a = <tbody role="button" />;
+    51 │ let a = <td role="button" />;
+  
+  i Replace table with a div or a span.
+  
+  i Unsafe fix: Remove the role attribute.
+  
+    49 │ let·a·=·<table·role="button"·/>;
+       │                --------------   
 
 ```
 
 ```
 invalid.jsx:50:16 lint/a11y/noNoninteractiveElementToInteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
 
-  ! The HTML element table is non-interactive and should not have an interactive role.
+  × The HTML element tbody is non-interactive and should not have an interactive role.
   
-    48 │ let a = <progress role="button" />;
-    49 │ let a = <ruby role="button" />;
-  > 50 │ let a = <table role="button" />;
+    48 │ let a = <ruby role="button" />;
+    49 │ let a = <table role="button" />;
+  > 50 │ let a = <tbody role="button" />;
        │                ^^^^^^^^^^^^^
-    51 │ let a = <tbody role="button" />;
-    52 │ let a = <td role="button" />;
-  
-  i Replace table with a div or a span.
-  
-  i Unsafe fix: Remove the role attribute.
-  
-    50 │ let·a·=·<table·role="button"·/>;
-       │                --------------   
-
-```
-
-```
-invalid.jsx:51:16 lint/a11y/noNoninteractiveElementToInteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
-
-  ! The HTML element tbody is non-interactive and should not have an interactive role.
-  
-    49 │ let a = <ruby role="button" />;
-    50 │ let a = <table role="button" />;
-  > 51 │ let a = <tbody role="button" />;
-       │                ^^^^^^^^^^^^^
-    52 │ let a = <td role="button" />;
-    53 │ let a = <tfoot role="button" />;
+    51 │ let a = <td role="button" />;
+    52 │ let a = <tfoot role="button" />;
   
   i Replace tbody with a div or a span.
   
   i Unsafe fix: Remove the role attribute.
   
-    51 │ let·a·=·<tbody·role="button"·/>;
+    50 │ let·a·=·<tbody·role="button"·/>;
        │                --------------   
 
 ```
 
 ```
-invalid.jsx:52:13 lint/a11y/noNoninteractiveElementToInteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:51:13 lint/a11y/noNoninteractiveElementToInteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
 
-  ! The HTML element td is non-interactive and should not have an interactive role.
+  × The HTML element td is non-interactive and should not have an interactive role.
   
-    50 │ let a = <table role="button" />;
-    51 │ let a = <tbody role="button" />;
-  > 52 │ let a = <td role="button" />;
+    49 │ let a = <table role="button" />;
+    50 │ let a = <tbody role="button" />;
+  > 51 │ let a = <td role="button" />;
        │             ^^^^^^^^^^^^^
-    53 │ let a = <tfoot role="button" />;
-    54 │ let a = <thead role="button" />;
+    52 │ let a = <tfoot role="button" />;
+    53 │ let a = <thead role="button" />;
   
   i Replace td with a div or a span.
   
   i Unsafe fix: Remove the role attribute.
   
-    52 │ let·a·=·<td·role="button"·/>;
+    51 │ let·a·=·<td·role="button"·/>;
        │             --------------   
+
+```
+
+```
+invalid.jsx:52:16 lint/a11y/noNoninteractiveElementToInteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
+
+  × The HTML element tfoot is non-interactive and should not have an interactive role.
+  
+    50 │ let a = <tbody role="button" />;
+    51 │ let a = <td role="button" />;
+  > 52 │ let a = <tfoot role="button" />;
+       │                ^^^^^^^^^^^^^
+    53 │ let a = <thead role="button" />;
+    54 │ let a = <time role="button" />;
+  
+  i Replace tfoot with a div or a span.
+  
+  i Unsafe fix: Remove the role attribute.
+  
+    52 │ let·a·=·<tfoot·role="button"·/>;
+       │                --------------   
 
 ```
 
 ```
 invalid.jsx:53:16 lint/a11y/noNoninteractiveElementToInteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
 
-  ! The HTML element tfoot is non-interactive and should not have an interactive role.
+  × The HTML element thead is non-interactive and should not have an interactive role.
   
-    51 │ let a = <tbody role="button" />;
-    52 │ let a = <td role="button" />;
-  > 53 │ let a = <tfoot role="button" />;
+    51 │ let a = <td role="button" />;
+    52 │ let a = <tfoot role="button" />;
+  > 53 │ let a = <thead role="button" />;
        │                ^^^^^^^^^^^^^
-    54 │ let a = <thead role="button" />;
-    55 │ let a = <time role="button" />;
-  
-  i Replace tfoot with a div or a span.
-  
-  i Unsafe fix: Remove the role attribute.
-  
-    53 │ let·a·=·<tfoot·role="button"·/>;
-       │                --------------   
-
-```
-
-```
-invalid.jsx:54:16 lint/a11y/noNoninteractiveElementToInteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
-
-  ! The HTML element thead is non-interactive and should not have an interactive role.
-  
-    52 │ let a = <td role="button" />;
-    53 │ let a = <tfoot role="button" />;
-  > 54 │ let a = <thead role="button" />;
-       │                ^^^^^^^^^^^^^
-    55 │ let a = <time role="button" />;
-    56 │ let a = <ul role="button" />;
+    54 │ let a = <time role="button" />;
+    55 │ let a = <ul role="button" />;
   
   i Replace thead with a div or a span.
   
   i Unsafe fix: Remove the role attribute.
   
-    54 │ let·a·=·<thead·role="button"·/>;
+    53 │ let·a·=·<thead·role="button"·/>;
        │                --------------   
 
 ```
 
 ```
-invalid.jsx:55:15 lint/a11y/noNoninteractiveElementToInteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:54:15 lint/a11y/noNoninteractiveElementToInteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
 
-  ! The HTML element time is non-interactive and should not have an interactive role.
+  × The HTML element time is non-interactive and should not have an interactive role.
   
-    53 │ let a = <tfoot role="button" />;
-    54 │ let a = <thead role="button" />;
-  > 55 │ let a = <time role="button" />;
+    52 │ let a = <tfoot role="button" />;
+    53 │ let a = <thead role="button" />;
+  > 54 │ let a = <time role="button" />;
        │               ^^^^^^^^^^^^^
-    56 │ let a = <ul role="button" />;
-    57 │ let a = <main role="menuitem" />;
+    55 │ let a = <ul role="button" />;
+    56 │ let a = <main role="menuitem" />;
   
   i Replace time with a div or a span.
   
   i Unsafe fix: Remove the role attribute.
   
-    55 │ let·a·=·<time·role="button"·/>;
+    54 │ let·a·=·<time·role="button"·/>;
        │               --------------   
 
 ```
 
 ```
-invalid.jsx:56:13 lint/a11y/noNoninteractiveElementToInteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:55:13 lint/a11y/noNoninteractiveElementToInteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
 
-  ! The HTML element ul is non-interactive and should not have an interactive role.
+  × The HTML element ul is non-interactive and should not have an interactive role.
   
-    54 │ let a = <thead role="button" />;
-    55 │ let a = <time role="button" />;
-  > 56 │ let a = <ul role="button" />;
+    53 │ let a = <thead role="button" />;
+    54 │ let a = <time role="button" />;
+  > 55 │ let a = <ul role="button" />;
        │             ^^^^^^^^^^^^^
-    57 │ let a = <main role="menuitem" />;
-    58 │ let a = <article role="menuitem" />;
+    56 │ let a = <main role="menuitem" />;
+    57 │ let a = <article role="menuitem" />;
   
   i Replace ul with a div or a span.
   
   i Unsafe fix: Remove the role attribute.
   
-    56 │ let·a·=·<ul·role="button"·/>;
+    55 │ let·a·=·<ul·role="button"·/>;
        │             --------------   
 
 ```
 
 ```
-invalid.jsx:57:15 lint/a11y/noNoninteractiveElementToInteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:56:15 lint/a11y/noNoninteractiveElementToInteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
 
-  ! The HTML element main is non-interactive and should not have an interactive role.
+  × The HTML element main is non-interactive and should not have an interactive role.
   
-    55 │ let a = <time role="button" />;
-    56 │ let a = <ul role="button" />;
-  > 57 │ let a = <main role="menuitem" />;
+    54 │ let a = <time role="button" />;
+    55 │ let a = <ul role="button" />;
+  > 56 │ let a = <main role="menuitem" />;
        │               ^^^^^^^^^^^^^^^
-    58 │ let a = <article role="menuitem" />;
-    59 │ let a = <dd role="menuitem" />;
+    57 │ let a = <article role="menuitem" />;
+    58 │ let a = <dd role="menuitem" />;
   
   i Replace main with a div or a span.
   
   i Unsafe fix: Remove the role attribute.
   
-    57 │ let·a·=·<main·role="menuitem"·/>;
+    56 │ let·a·=·<main·role="menuitem"·/>;
        │               ----------------   
 
 ```
 
 ```
-invalid.jsx:58:18 lint/a11y/noNoninteractiveElementToInteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:57:18 lint/a11y/noNoninteractiveElementToInteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
 
-  ! The HTML element article is non-interactive and should not have an interactive role.
+  × The HTML element article is non-interactive and should not have an interactive role.
   
-    56 │ let a = <ul role="button" />;
-    57 │ let a = <main role="menuitem" />;
-  > 58 │ let a = <article role="menuitem" />;
+    55 │ let a = <ul role="button" />;
+    56 │ let a = <main role="menuitem" />;
+  > 57 │ let a = <article role="menuitem" />;
        │                  ^^^^^^^^^^^^^^^
-    59 │ let a = <dd role="menuitem" />;
-    60 │ let a = <dfn role="menuitem" />;
+    58 │ let a = <dd role="menuitem" />;
+    59 │ let a = <dfn role="menuitem" />;
   
   i Replace article with a div or a span.
   
   i Unsafe fix: Remove the role attribute.
   
-    58 │ let·a·=·<article·role="menuitem"·/>;
+    57 │ let·a·=·<article·role="menuitem"·/>;
        │                  ----------------   
 
 ```
 
 ```
-invalid.jsx:59:13 lint/a11y/noNoninteractiveElementToInteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:58:13 lint/a11y/noNoninteractiveElementToInteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
 
-  ! The HTML element dd is non-interactive and should not have an interactive role.
+  × The HTML element dd is non-interactive and should not have an interactive role.
   
-    57 │ let a = <main role="menuitem" />;
-    58 │ let a = <article role="menuitem" />;
-  > 59 │ let a = <dd role="menuitem" />;
+    56 │ let a = <main role="menuitem" />;
+    57 │ let a = <article role="menuitem" />;
+  > 58 │ let a = <dd role="menuitem" />;
        │             ^^^^^^^^^^^^^^^
-    60 │ let a = <dfn role="menuitem" />;
-    61 │ let a = <dt role="menuitem" />;
+    59 │ let a = <dfn role="menuitem" />;
+    60 │ let a = <dt role="menuitem" />;
   
   i Replace dd with a div or a span.
   
   i Unsafe fix: Remove the role attribute.
   
-    59 │ let·a·=·<dd·role="menuitem"·/>;
+    58 │ let·a·=·<dd·role="menuitem"·/>;
        │             ----------------   
 
 ```
 
 ```
-invalid.jsx:60:14 lint/a11y/noNoninteractiveElementToInteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:59:14 lint/a11y/noNoninteractiveElementToInteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
 
-  ! The HTML element dfn is non-interactive and should not have an interactive role.
+  × The HTML element dfn is non-interactive and should not have an interactive role.
   
-    58 │ let a = <article role="menuitem" />;
-    59 │ let a = <dd role="menuitem" />;
-  > 60 │ let a = <dfn role="menuitem" />;
+    57 │ let a = <article role="menuitem" />;
+    58 │ let a = <dd role="menuitem" />;
+  > 59 │ let a = <dfn role="menuitem" />;
        │              ^^^^^^^^^^^^^^^
-    61 │ let a = <dt role="menuitem" />;
-    62 │ let a = <fieldset role="menuitem" />;
+    60 │ let a = <dt role="menuitem" />;
+    61 │ let a = <fieldset role="menuitem" />;
   
   i Replace dfn with a div or a span.
   
   i Unsafe fix: Remove the role attribute.
   
-    60 │ let·a·=·<dfn·role="menuitem"·/>;
+    59 │ let·a·=·<dfn·role="menuitem"·/>;
        │              ----------------   
 
 ```
 
 ```
-invalid.jsx:61:13 lint/a11y/noNoninteractiveElementToInteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:60:13 lint/a11y/noNoninteractiveElementToInteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
 
-  ! The HTML element dt is non-interactive and should not have an interactive role.
+  × The HTML element dt is non-interactive and should not have an interactive role.
   
-    59 │ let a = <dd role="menuitem" />;
-    60 │ let a = <dfn role="menuitem" />;
-  > 61 │ let a = <dt role="menuitem" />;
+    58 │ let a = <dd role="menuitem" />;
+    59 │ let a = <dfn role="menuitem" />;
+  > 60 │ let a = <dt role="menuitem" />;
        │             ^^^^^^^^^^^^^^^
-    62 │ let a = <fieldset role="menuitem" />;
-    63 │ let a = <figure role="menuitem" />;
+    61 │ let a = <fieldset role="menuitem" />;
+    62 │ let a = <figure role="menuitem" />;
   
   i Replace dt with a div or a span.
   
   i Unsafe fix: Remove the role attribute.
   
-    61 │ let·a·=·<dt·role="menuitem"·/>;
+    60 │ let·a·=·<dt·role="menuitem"·/>;
        │             ----------------   
 
 ```
 
 ```
-invalid.jsx:62:19 lint/a11y/noNoninteractiveElementToInteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:61:19 lint/a11y/noNoninteractiveElementToInteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
 
-  ! The HTML element fieldset is non-interactive and should not have an interactive role.
+  × The HTML element fieldset is non-interactive and should not have an interactive role.
   
-    60 │ let a = <dfn role="menuitem" />;
-    61 │ let a = <dt role="menuitem" />;
-  > 62 │ let a = <fieldset role="menuitem" />;
+    59 │ let a = <dfn role="menuitem" />;
+    60 │ let a = <dt role="menuitem" />;
+  > 61 │ let a = <fieldset role="menuitem" />;
        │                   ^^^^^^^^^^^^^^^
-    63 │ let a = <figure role="menuitem" />;
-    64 │ let a = <form role="menuitem" />;
+    62 │ let a = <figure role="menuitem" />;
+    63 │ let a = <form role="menuitem" />;
   
   i Replace fieldset with a div or a span.
   
   i Unsafe fix: Remove the role attribute.
   
-    62 │ let·a·=·<fieldset·role="menuitem"·/>;
+    61 │ let·a·=·<fieldset·role="menuitem"·/>;
        │                   ----------------   
 
 ```
 
 ```
-invalid.jsx:63:17 lint/a11y/noNoninteractiveElementToInteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:62:17 lint/a11y/noNoninteractiveElementToInteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
 
-  ! The HTML element figure is non-interactive and should not have an interactive role.
+  × The HTML element figure is non-interactive and should not have an interactive role.
   
-    61 │ let a = <dt role="menuitem" />;
-    62 │ let a = <fieldset role="menuitem" />;
-  > 63 │ let a = <figure role="menuitem" />;
+    60 │ let a = <dt role="menuitem" />;
+    61 │ let a = <fieldset role="menuitem" />;
+  > 62 │ let a = <figure role="menuitem" />;
        │                 ^^^^^^^^^^^^^^^
-    64 │ let a = <form role="menuitem" />;
-    65 │ let a = <frame role="menuitem" />;
+    63 │ let a = <form role="menuitem" />;
+    64 │ let a = <frame role="menuitem" />;
   
   i Replace figure with a div or a span.
   
   i Unsafe fix: Remove the role attribute.
   
-    63 │ let·a·=·<figure·role="menuitem"·/>;
+    62 │ let·a·=·<figure·role="menuitem"·/>;
        │                 ----------------   
 
 ```
 
 ```
-invalid.jsx:64:15 lint/a11y/noNoninteractiveElementToInteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:63:15 lint/a11y/noNoninteractiveElementToInteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
 
-  ! The HTML element form is non-interactive and should not have an interactive role.
+  × The HTML element form is non-interactive and should not have an interactive role.
   
-    62 │ let a = <fieldset role="menuitem" />;
-    63 │ let a = <figure role="menuitem" />;
-  > 64 │ let a = <form role="menuitem" />;
+    61 │ let a = <fieldset role="menuitem" />;
+    62 │ let a = <figure role="menuitem" />;
+  > 63 │ let a = <form role="menuitem" />;
        │               ^^^^^^^^^^^^^^^
-    65 │ let a = <frame role="menuitem" />;
-    66 │ let a = <h1 role="menuitem" />;
+    64 │ let a = <frame role="menuitem" />;
+    65 │ let a = <h1 role="menuitem" />;
   
   i Replace form with a div or a span.
   
   i Unsafe fix: Remove the role attribute.
   
-    64 │ let·a·=·<form·role="menuitem"·/>;
+    63 │ let·a·=·<form·role="menuitem"·/>;
        │               ----------------   
 
 ```
 
 ```
-invalid.jsx:65:16 lint/a11y/noNoninteractiveElementToInteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:64:16 lint/a11y/noNoninteractiveElementToInteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
 
-  ! The HTML element frame is non-interactive and should not have an interactive role.
+  × The HTML element frame is non-interactive and should not have an interactive role.
   
-    63 │ let a = <figure role="menuitem" />;
-    64 │ let a = <form role="menuitem" />;
-  > 65 │ let a = <frame role="menuitem" />;
+    62 │ let a = <figure role="menuitem" />;
+    63 │ let a = <form role="menuitem" />;
+  > 64 │ let a = <frame role="menuitem" />;
        │                ^^^^^^^^^^^^^^^
-    66 │ let a = <h1 role="menuitem" />;
-    67 │ let a = <h2 role="menuitem" />;
+    65 │ let a = <h1 role="menuitem" />;
+    66 │ let a = <h2 role="menuitem" />;
   
   i Replace frame with a div or a span.
   
   i Unsafe fix: Remove the role attribute.
   
-    65 │ let·a·=·<frame·role="menuitem"·/>;
+    64 │ let·a·=·<frame·role="menuitem"·/>;
        │                ----------------   
+
+```
+
+```
+invalid.jsx:65:13 lint/a11y/noNoninteractiveElementToInteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
+
+  × The HTML element h1 is non-interactive and should not have an interactive role.
+  
+    63 │ let a = <form role="menuitem" />;
+    64 │ let a = <frame role="menuitem" />;
+  > 65 │ let a = <h1 role="menuitem" />;
+       │             ^^^^^^^^^^^^^^^
+    66 │ let a = <h2 role="menuitem" />;
+    67 │ let a = <h3 role="menuitem" />;
+  
+  i Replace h1 with a div or a span.
+  
+  i Unsafe fix: Remove the role attribute.
+  
+    65 │ let·a·=·<h1·role="menuitem"·/>;
+       │             ----------------   
 
 ```
 
 ```
 invalid.jsx:66:13 lint/a11y/noNoninteractiveElementToInteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
 
-  ! The HTML element h1 is non-interactive and should not have an interactive role.
+  × The HTML element h2 is non-interactive and should not have an interactive role.
   
-    64 │ let a = <form role="menuitem" />;
-    65 │ let a = <frame role="menuitem" />;
-  > 66 │ let a = <h1 role="menuitem" />;
+    64 │ let a = <frame role="menuitem" />;
+    65 │ let a = <h1 role="menuitem" />;
+  > 66 │ let a = <h2 role="menuitem" />;
        │             ^^^^^^^^^^^^^^^
-    67 │ let a = <h2 role="menuitem" />;
-    68 │ let a = <h3 role="menuitem" />;
+    67 │ let a = <h3 role="menuitem" />;
+    68 │ let a = <h4 role="menuitem" />;
   
-  i Replace h1 with a div or a span.
+  i Replace h2 with a div or a span.
   
   i Unsafe fix: Remove the role attribute.
   
-    66 │ let·a·=·<h1·role="menuitem"·/>;
+    66 │ let·a·=·<h2·role="menuitem"·/>;
        │             ----------------   
 
 ```
@@ -1476,20 +1476,20 @@ invalid.jsx:66:13 lint/a11y/noNoninteractiveElementToInteractiveRole  FIXABLE  �
 ```
 invalid.jsx:67:13 lint/a11y/noNoninteractiveElementToInteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
 
-  ! The HTML element h2 is non-interactive and should not have an interactive role.
+  × The HTML element h3 is non-interactive and should not have an interactive role.
   
-    65 │ let a = <frame role="menuitem" />;
-    66 │ let a = <h1 role="menuitem" />;
-  > 67 │ let a = <h2 role="menuitem" />;
+    65 │ let a = <h1 role="menuitem" />;
+    66 │ let a = <h2 role="menuitem" />;
+  > 67 │ let a = <h3 role="menuitem" />;
        │             ^^^^^^^^^^^^^^^
-    68 │ let a = <h3 role="menuitem" />;
-    69 │ let a = <h4 role="menuitem" />;
+    68 │ let a = <h4 role="menuitem" />;
+    69 │ let a = <h5 role="menuitem" />;
   
-  i Replace h2 with a div or a span.
+  i Replace h3 with a div or a span.
   
   i Unsafe fix: Remove the role attribute.
   
-    67 │ let·a·=·<h2·role="menuitem"·/>;
+    67 │ let·a·=·<h3·role="menuitem"·/>;
        │             ----------------   
 
 ```
@@ -1497,20 +1497,20 @@ invalid.jsx:67:13 lint/a11y/noNoninteractiveElementToInteractiveRole  FIXABLE  �
 ```
 invalid.jsx:68:13 lint/a11y/noNoninteractiveElementToInteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
 
-  ! The HTML element h3 is non-interactive and should not have an interactive role.
+  × The HTML element h4 is non-interactive and should not have an interactive role.
   
-    66 │ let a = <h1 role="menuitem" />;
-    67 │ let a = <h2 role="menuitem" />;
-  > 68 │ let a = <h3 role="menuitem" />;
+    66 │ let a = <h2 role="menuitem" />;
+    67 │ let a = <h3 role="menuitem" />;
+  > 68 │ let a = <h4 role="menuitem" />;
        │             ^^^^^^^^^^^^^^^
-    69 │ let a = <h4 role="menuitem" />;
-    70 │ let a = <h5 role="menuitem" />;
+    69 │ let a = <h5 role="menuitem" />;
+    70 │ let a = <h6 role="menuitem" />;
   
-  i Replace h3 with a div or a span.
+  i Replace h4 with a div or a span.
   
   i Unsafe fix: Remove the role attribute.
   
-    68 │ let·a·=·<h3·role="menuitem"·/>;
+    68 │ let·a·=·<h4·role="menuitem"·/>;
        │             ----------------   
 
 ```
@@ -1518,20 +1518,20 @@ invalid.jsx:68:13 lint/a11y/noNoninteractiveElementToInteractiveRole  FIXABLE  �
 ```
 invalid.jsx:69:13 lint/a11y/noNoninteractiveElementToInteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
 
-  ! The HTML element h4 is non-interactive and should not have an interactive role.
+  × The HTML element h5 is non-interactive and should not have an interactive role.
   
-    67 │ let a = <h2 role="menuitem" />;
-    68 │ let a = <h3 role="menuitem" />;
-  > 69 │ let a = <h4 role="menuitem" />;
+    67 │ let a = <h3 role="menuitem" />;
+    68 │ let a = <h4 role="menuitem" />;
+  > 69 │ let a = <h5 role="menuitem" />;
        │             ^^^^^^^^^^^^^^^
-    70 │ let a = <h5 role="menuitem" />;
-    71 │ let a = <h6 role="menuitem" />;
+    70 │ let a = <h6 role="menuitem" />;
+    71 │ // The <hr> element can be a widget, so there is no need to warn against using it.
   
-  i Replace h4 with a div or a span.
+  i Replace h5 with a div or a span.
   
   i Unsafe fix: Remove the role attribute.
   
-    69 │ let·a·=·<h4·role="menuitem"·/>;
+    69 │ let·a·=·<h5·role="menuitem"·/>;
        │             ----------------   
 
 ```
@@ -1539,231 +1539,208 @@ invalid.jsx:69:13 lint/a11y/noNoninteractiveElementToInteractiveRole  FIXABLE  �
 ```
 invalid.jsx:70:13 lint/a11y/noNoninteractiveElementToInteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
 
-  ! The HTML element h5 is non-interactive and should not have an interactive role.
+  × The HTML element h6 is non-interactive and should not have an interactive role.
   
-    68 │ let a = <h3 role="menuitem" />;
-    69 │ let a = <h4 role="menuitem" />;
-  > 70 │ let a = <h5 role="menuitem" />;
+    68 │ let a = <h4 role="menuitem" />;
+    69 │ let a = <h5 role="menuitem" />;
+  > 70 │ let a = <h6 role="menuitem" />;
        │             ^^^^^^^^^^^^^^^
-    71 │ let a = <h6 role="menuitem" />;
-    72 │ // The <hr> element can be a widget, so there is no need to warn against using it.
-  
-  i Replace h5 with a div or a span.
-  
-  i Unsafe fix: Remove the role attribute.
-  
-    70 │ let·a·=·<h5·role="menuitem"·/>;
-       │             ----------------   
-
-```
-
-```
-invalid.jsx:71:13 lint/a11y/noNoninteractiveElementToInteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
-
-  ! The HTML element h6 is non-interactive and should not have an interactive role.
-  
-    69 │ let a = <h4 role="menuitem" />;
-    70 │ let a = <h5 role="menuitem" />;
-  > 71 │ let a = <h6 role="menuitem" />;
-       │             ^^^^^^^^^^^^^^^
-    72 │ // The <hr> element can be a widget, so there is no need to warn against using it.
-    73 │ // let a = <hr role="menuitem" />;
+    71 │ // The <hr> element can be a widget, so there is no need to warn against using it.
+    72 │ // let a = <hr role="menuitem" />;
   
   i Replace h6 with a div or a span.
   
   i Unsafe fix: Remove the role attribute.
   
-    71 │ let·a·=·<h6·role="menuitem"·/>;
+    70 │ let·a·=·<h6·role="menuitem"·/>;
        │             ----------------   
+
+```
+
+```
+invalid.jsx:73:14 lint/a11y/noNoninteractiveElementToInteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
+
+  × The HTML element img is non-interactive and should not have an interactive role.
+  
+    71 │ // The <hr> element can be a widget, so there is no need to warn against using it.
+    72 │ // let a = <hr role="menuitem" />;
+  > 73 │ let a = <img role="menuitem" />;
+       │              ^^^^^^^^^^^^^^^
+    74 │ let a = <nav role="menuitem" />;
+    75 │ let a = <ol role="menuitem" />;
+  
+  i Replace img with a div or a span.
+  
+  i Unsafe fix: Remove the role attribute.
+  
+    73 │ let·a·=·<img·role="menuitem"·/>;
+       │              ----------------   
 
 ```
 
 ```
 invalid.jsx:74:14 lint/a11y/noNoninteractiveElementToInteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
 
-  ! The HTML element img is non-interactive and should not have an interactive role.
+  × The HTML element nav is non-interactive and should not have an interactive role.
   
-    72 │ // The <hr> element can be a widget, so there is no need to warn against using it.
-    73 │ // let a = <hr role="menuitem" />;
-  > 74 │ let a = <img role="menuitem" />;
+    72 │ // let a = <hr role="menuitem" />;
+    73 │ let a = <img role="menuitem" />;
+  > 74 │ let a = <nav role="menuitem" />;
        │              ^^^^^^^^^^^^^^^
-    75 │ let a = <nav role="menuitem" />;
-    76 │ let a = <ol role="menuitem" />;
-  
-  i Replace img with a div or a span.
-  
-  i Unsafe fix: Remove the role attribute.
-  
-    74 │ let·a·=·<img·role="menuitem"·/>;
-       │              ----------------   
-
-```
-
-```
-invalid.jsx:75:14 lint/a11y/noNoninteractiveElementToInteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
-
-  ! The HTML element nav is non-interactive and should not have an interactive role.
-  
-    73 │ // let a = <hr role="menuitem" />;
-    74 │ let a = <img role="menuitem" />;
-  > 75 │ let a = <nav role="menuitem" />;
-       │              ^^^^^^^^^^^^^^^
-    76 │ let a = <ol role="menuitem" />;
-    77 │ let a = <p role="button" />;
+    75 │ let a = <ol role="menuitem" />;
+    76 │ let a = <p role="button" />;
   
   i Replace nav with a div or a span.
   
   i Unsafe fix: Remove the role attribute.
   
-    75 │ let·a·=·<nav·role="menuitem"·/>;
+    74 │ let·a·=·<nav·role="menuitem"·/>;
        │              ----------------   
 
 ```
 
 ```
-invalid.jsx:76:13 lint/a11y/noNoninteractiveElementToInteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:75:13 lint/a11y/noNoninteractiveElementToInteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
 
-  ! The HTML element ol is non-interactive and should not have an interactive role.
+  × The HTML element ol is non-interactive and should not have an interactive role.
   
-    74 │ let a = <img role="menuitem" />;
-    75 │ let a = <nav role="menuitem" />;
-  > 76 │ let a = <ol role="menuitem" />;
+    73 │ let a = <img role="menuitem" />;
+    74 │ let a = <nav role="menuitem" />;
+  > 75 │ let a = <ol role="menuitem" />;
        │             ^^^^^^^^^^^^^^^
-    77 │ let a = <p role="button" />;
-    78 │ let a = <section role="button" aria-label="Aardletk" />;
+    76 │ let a = <p role="button" />;
+    77 │ let a = <section role="button" aria-label="Aardletk" />;
   
   i Replace ol with a div or a span.
   
   i Unsafe fix: Remove the role attribute.
   
-    76 │ let·a·=·<ol·role="menuitem"·/>;
+    75 │ let·a·=·<ol·role="menuitem"·/>;
        │             ----------------   
 
 ```
 
 ```
-invalid.jsx:77:12 lint/a11y/noNoninteractiveElementToInteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:76:12 lint/a11y/noNoninteractiveElementToInteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
 
-  ! The HTML element p is non-interactive and should not have an interactive role.
+  × The HTML element p is non-interactive and should not have an interactive role.
   
-    75 │ let a = <nav role="menuitem" />;
-    76 │ let a = <ol role="menuitem" />;
-  > 77 │ let a = <p role="button" />;
+    74 │ let a = <nav role="menuitem" />;
+    75 │ let a = <ol role="menuitem" />;
+  > 76 │ let a = <p role="button" />;
        │            ^^^^^^^^^^^^^
-    78 │ let a = <section role="button" aria-label="Aardletk" />;
-    79 │ let a = <tbody role="menuitem" />;
+    77 │ let a = <section role="button" aria-label="Aardletk" />;
+    78 │ let a = <tbody role="menuitem" />;
   
   i Replace p with a div or a span.
   
   i Unsafe fix: Remove the role attribute.
   
-    77 │ let·a·=·<p·role="button"·/>;
+    76 │ let·a·=·<p·role="button"·/>;
        │            --------------   
 
 ```
 
 ```
-invalid.jsx:78:18 lint/a11y/noNoninteractiveElementToInteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:77:18 lint/a11y/noNoninteractiveElementToInteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
 
-  ! The HTML element section is non-interactive and should not have an interactive role.
+  × The HTML element section is non-interactive and should not have an interactive role.
   
-    76 │ let a = <ol role="menuitem" />;
-    77 │ let a = <p role="button" />;
-  > 78 │ let a = <section role="button" aria-label="Aardletk" />;
+    75 │ let a = <ol role="menuitem" />;
+    76 │ let a = <p role="button" />;
+  > 77 │ let a = <section role="button" aria-label="Aardletk" />;
        │                  ^^^^^^^^^^^^^
-    79 │ let a = <tbody role="menuitem" />;
-    80 │ let a = <td role="menuitem" />;
+    78 │ let a = <tbody role="menuitem" />;
+    79 │ let a = <td role="menuitem" />;
   
   i Replace section with a div or a span.
   
   i Unsafe fix: Remove the role attribute.
   
-    78 │ let·a·=·<section·role="button"·aria-label="Aardletk"·/>;
+    77 │ let·a·=·<section·role="button"·aria-label="Aardletk"·/>;
        │                  --------------                         
 
 ```
 
 ```
-invalid.jsx:79:16 lint/a11y/noNoninteractiveElementToInteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:78:16 lint/a11y/noNoninteractiveElementToInteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
 
-  ! The HTML element tbody is non-interactive and should not have an interactive role.
+  × The HTML element tbody is non-interactive and should not have an interactive role.
   
-    77 │ let a = <p role="button" />;
-    78 │ let a = <section role="button" aria-label="Aardletk" />;
-  > 79 │ let a = <tbody role="menuitem" />;
+    76 │ let a = <p role="button" />;
+    77 │ let a = <section role="button" aria-label="Aardletk" />;
+  > 78 │ let a = <tbody role="menuitem" />;
        │                ^^^^^^^^^^^^^^^
-    80 │ let a = <td role="menuitem" />;
-    81 │ let a = <tfoot role="menuitem" />;
+    79 │ let a = <td role="menuitem" />;
+    80 │ let a = <tfoot role="menuitem" />;
   
   i Replace tbody with a div or a span.
   
   i Unsafe fix: Remove the role attribute.
   
-    79 │ let·a·=·<tbody·role="menuitem"·/>;
+    78 │ let·a·=·<tbody·role="menuitem"·/>;
        │                ----------------   
 
 ```
 
 ```
-invalid.jsx:80:13 lint/a11y/noNoninteractiveElementToInteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:79:13 lint/a11y/noNoninteractiveElementToInteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
 
-  ! The HTML element td is non-interactive and should not have an interactive role.
+  × The HTML element td is non-interactive and should not have an interactive role.
   
-    78 │ let a = <section role="button" aria-label="Aardletk" />;
-    79 │ let a = <tbody role="menuitem" />;
-  > 80 │ let a = <td role="menuitem" />;
+    77 │ let a = <section role="button" aria-label="Aardletk" />;
+    78 │ let a = <tbody role="menuitem" />;
+  > 79 │ let a = <td role="menuitem" />;
        │             ^^^^^^^^^^^^^^^
-    81 │ let a = <tfoot role="menuitem" />;
-    82 │ let a = <thead role="menuitem" />;
+    80 │ let a = <tfoot role="menuitem" />;
+    81 │ let a = <thead role="menuitem" />;
   
   i Replace td with a div or a span.
   
   i Unsafe fix: Remove the role attribute.
   
-    80 │ let·a·=·<td·role="menuitem"·/>;
+    79 │ let·a·=·<td·role="menuitem"·/>;
        │             ----------------   
+
+```
+
+```
+invalid.jsx:80:16 lint/a11y/noNoninteractiveElementToInteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
+
+  × The HTML element tfoot is non-interactive and should not have an interactive role.
+  
+    78 │ let a = <tbody role="menuitem" />;
+    79 │ let a = <td role="menuitem" />;
+  > 80 │ let a = <tfoot role="menuitem" />;
+       │                ^^^^^^^^^^^^^^^
+    81 │ let a = <thead role="menuitem" />;
+    82 │ 
+  
+  i Replace tfoot with a div or a span.
+  
+  i Unsafe fix: Remove the role attribute.
+  
+    80 │ let·a·=·<tfoot·role="menuitem"·/>;
+       │                ----------------   
 
 ```
 
 ```
 invalid.jsx:81:16 lint/a11y/noNoninteractiveElementToInteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
 
-  ! The HTML element tfoot is non-interactive and should not have an interactive role.
+  × The HTML element thead is non-interactive and should not have an interactive role.
   
-    79 │ let a = <tbody role="menuitem" />;
-    80 │ let a = <td role="menuitem" />;
-  > 81 │ let a = <tfoot role="menuitem" />;
+    79 │ let a = <td role="menuitem" />;
+    80 │ let a = <tfoot role="menuitem" />;
+  > 81 │ let a = <thead role="menuitem" />;
        │                ^^^^^^^^^^^^^^^
-    82 │ let a = <thead role="menuitem" />;
-    83 │ 
-  
-  i Replace tfoot with a div or a span.
-  
-  i Unsafe fix: Remove the role attribute.
-  
-    81 │ let·a·=·<tfoot·role="menuitem"·/>;
-       │                ----------------   
-
-```
-
-```
-invalid.jsx:82:16 lint/a11y/noNoninteractiveElementToInteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
-
-  ! The HTML element thead is non-interactive and should not have an interactive role.
-  
-    80 │ let a = <td role="menuitem" />;
-    81 │ let a = <tfoot role="menuitem" />;
-  > 82 │ let a = <thead role="menuitem" />;
-       │                ^^^^^^^^^^^^^^^
-    83 │ 
+    82 │ 
   
   i Replace thead with a div or a span.
   
   i Unsafe fix: Remove the role attribute.
   
-    82 │ let·a·=·<thead·role="menuitem"·/>;
+    81 │ let·a·=·<thead·role="menuitem"·/>;
        │                ----------------   
 
 ```
-
-

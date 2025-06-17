@@ -8,8 +8,9 @@ impl FormatNodeRule<HtmlString> for FormatHtmlString {
         let HtmlStringFields { value_token } = node.as_fields();
 
         // Prettier always uses double quotes for HTML strings, regardless of configuration.
+        // Unless the string contains a double quote, in which case it uses single quotes.
         if let Ok(value) = value_token.as_ref() {
-            let value_text = value.text().trim();
+            let value_text = value.text_trimmed();
 
             if !(value_text.starts_with('"') && value_text.ends_with('"')) {
                 let contains_double_quote = value_text.contains('"');
@@ -18,9 +19,12 @@ impl FormatNodeRule<HtmlString> for FormatHtmlString {
                     && value_text.ends_with('\'')
                     && !contains_double_quote
                 {
-                    value.text_range().add_start(1.into()).sub_end(1.into())
+                    value
+                        .text_trimmed_range()
+                        .add_start(1.into())
+                        .sub_end(1.into())
                 } else {
-                    value.text_range()
+                    value.text_trimmed_range()
                 };
 
                 if !contains_double_quote {

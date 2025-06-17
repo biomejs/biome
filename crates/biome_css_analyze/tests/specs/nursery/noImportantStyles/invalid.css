@@ -1,0 +1,11 @@
+.style {
+	color: red !important;
+}
+
+.style1 {
+	color: red !important /* some comment */;
+}
+
+.style1 {
+	color: red!important /* some comment */;
+}

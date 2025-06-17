@@ -1,11 +1,8 @@
 {
   "name": "@biomejs/biome",
-  "version": "1.9.4",
+  "version": "2.0.0",
   "bin": {
     "biome": "bin/biome"
-  },
-  "scripts": {
-    "postinstall": "node scripts/postinstall.js"
   },
   "homepage": "https://biomejs.dev",
   "repository": {
@@ -19,7 +16,6 @@
   "description": "Biome is a toolchain for the web: formatter, linter and more",
   "files": [
     "bin/biome",
-    "scripts/postinstall.js",
     "configuration_schema.json",
     "README.md",
     "LICENSE-APACHE",
@@ -50,13 +46,13 @@
     "provenance": true
   },
   "optionalDependencies": {
-    "@biomejs/cli-win32-x64": "1.9.3",
-    "@biomejs/cli-win32-arm64": "1.9.3",
-    "@biomejs/cli-darwin-x64": "1.9.3",
-    "@biomejs/cli-darwin-arm64": "1.9.3",
-    "@biomejs/cli-linux-x64": "1.9.3",
-    "@biomejs/cli-linux-arm64": "1.9.3",
-    "@biomejs/cli-linux-x64-musl": "1.9.3",
-    "@biomejs/cli-linux-arm64-musl": "1.9.3"
+    "@biomejs/cli-win32-x64": "2.0.0",
+    "@biomejs/cli-win32-arm64": "2.0.0",
+    "@biomejs/cli-darwin-x64": "2.0.0",
+    "@biomejs/cli-darwin-arm64": "2.0.0",
+    "@biomejs/cli-linux-x64": "2.0.0",
+    "@biomejs/cli-linux-arm64": "2.0.0",
+    "@biomejs/cli-linux-x64-musl": "2.0.0",
+    "@biomejs/cli-linux-arm64-musl": "2.0.0"
   }
 }

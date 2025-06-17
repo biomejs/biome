@@ -2,8 +2,9 @@ use crate::globals::is_js_global;
 
 use crate::services::semantic::SemanticServices;
 use biome_analyze::RuleSource;
-use biome_analyze::{context::RuleContext, declare_lint_rule, Rule, RuleDiagnostic};
+use biome_analyze::{Rule, RuleDiagnostic, context::RuleContext, declare_lint_rule};
 use biome_console::markup;
+use biome_diagnostics::Severity;
 use biome_js_syntax::{JsSyntaxKind, TextRange};
 
 declare_lint_rule! {
@@ -44,6 +45,7 @@ declare_lint_rule! {
         language: "js",
         sources: &[RuleSource::Eslint("no-global-assign")],
         recommended: true,
+        severity: Severity::Error,
     }
 }
 

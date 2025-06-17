@@ -1,4 +1,5 @@
 use crate::parser::{
+    GraphqlParser,
     directive::DirectiveList,
     parse_description,
     parse_error::{
@@ -6,15 +7,14 @@ use crate::parser::{
         expected_schema_extension,
     },
     r#type::parse_named_type,
-    GraphqlParser,
 };
 use biome_graphql_syntax::{
     GraphqlSyntaxKind::{self, *},
     T,
 };
 use biome_parser::{
-    parse_lists::ParseNodeList, parse_recovery::ParseRecovery, parsed_syntax::ParsedSyntax,
-    prelude::ParsedSyntax::*, token_source::TokenSource, CompletedMarker, Parser,
+    CompletedMarker, Parser, parse_lists::ParseNodeList, parse_recovery::ParseRecovery,
+    parsed_syntax::ParsedSyntax, prelude::ParsedSyntax::*, token_source::TokenSource,
 };
 
 use super::{is_at_definition, operation::OPERATION_TYPE};

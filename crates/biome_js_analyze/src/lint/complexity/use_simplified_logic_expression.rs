@@ -1,8 +1,7 @@
 use crate::JsRuleAction;
-use biome_analyze::{
-    context::RuleContext, declare_lint_rule, ActionCategory, Ast, FixKind, Rule, RuleDiagnostic,
-};
+use biome_analyze::{Ast, FixKind, Rule, RuleDiagnostic, context::RuleContext, declare_lint_rule};
 use biome_console::markup;
+use biome_diagnostics::Severity;
 use biome_js_factory::make;
 use biome_js_syntax::{
     AnyJsExpression, AnyJsLiteralExpression, JsBooleanLiteralExpression, JsLogicalExpression,
@@ -52,7 +51,8 @@ declare_lint_rule! {
         name: "useSimplifiedLogicExpression",
         language: "js",
         recommended: false,
-        fix_kind: FixKind::Unsafe,
+        severity: Severity::Information,
+        fix_kind: FixKind::Safe,
     }
 }
 
@@ -154,7 +154,7 @@ impl Rule for UseSimplifiedLogicExpression {
         };
 
         Some(JsRuleAction::new(
-            ActionCategory::QuickFix,
+            ctx.metadata().action_category(ctx.category(), ctx.group()),
             ctx.metadata().applicability(),
             markup! { ""{message}"" }.to_owned(),
             mutation,

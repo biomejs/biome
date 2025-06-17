@@ -1,0 +1,12 @@
+{
+  "linter": {
+    "rules": {
+      "correctness": {
+        "noUnnecessaryContinue": "on"
+      },
+      "complexity": {
+        "noMultipleSpacesInRegularExpressionLiterals": "on"
+      }
+    }
+  }
+}

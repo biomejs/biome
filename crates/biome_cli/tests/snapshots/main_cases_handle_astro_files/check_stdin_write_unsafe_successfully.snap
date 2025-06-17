@@ -1,6 +1,6 @@
 ---
 source: crates/biome_cli/tests/snap_test.rs
-expression: content
+expression: redactor(content)
 ---
 # Input messages
 
@@ -19,10 +19,8 @@ var foo: string = "";
 
 ```block
 ---
-import { something } from "file.astro";
-import { a } from "mod";
 statement();
-const foo = "";
+var _foo: string = "";
 ---
 <div></div>
 ```

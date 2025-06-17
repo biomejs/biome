@@ -1,0 +1,117 @@
+---
+source: crates/biome_js_parser/tests/spec_test.rs
+expression: snapshot
+snapshot_kind: text
+---
+## Input
+
+```js
+{
+"name": "troublesome-lib",
+"typings": "lib/index.d.ts",
+"version": "0.0.1"
+}
+
+```
+
+
+## AST
+
+```
+JsModule {
+    bom_token: missing (optional),
+    interpreter_token: missing (optional),
+    directives: JsDirectiveList [],
+    items: JsModuleItemList [
+        JsBlockStatement {
+            l_curly_token: L_CURLY@0..1 "{" [] [],
+            statements: JsStatementList [
+                JsExpressionStatement {
+                    expression: JsStringLiteralExpression {
+                        value_token: JS_STRING_LITERAL@1..8 "\"name\"" [Newline("\n")] [],
+                    },
+                    semicolon_token: missing (optional),
+                },
+                JsBogusStatement {
+                    items: [
+                        COLON@8..10 ":" [] [Whitespace(" ")],
+                        JS_STRING_LITERAL@10..27 "\"troublesome-lib\"" [] [],
+                        COMMA@27..28 "," [] [],
+                        JS_STRING_LITERAL@28..38 "\"typings\"" [Newline("\n")] [],
+                        COLON@38..40 ":" [] [Whitespace(" ")],
+                        JS_STRING_LITERAL@40..56 "\"lib/index.d.ts\"" [] [],
+                        COMMA@56..57 "," [] [],
+                        JS_STRING_LITERAL@57..67 "\"version\"" [Newline("\n")] [],
+                        COLON@67..69 ":" [] [Whitespace(" ")],
+                        JS_STRING_LITERAL@69..76 "\"0.0.1\"" [] [],
+                    ],
+                },
+            ],
+            r_curly_token: R_CURLY@76..78 "}" [Newline("\n")] [],
+        },
+    ],
+    eof_token: EOF@78..79 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: JS_MODULE@0..79
+  0: (empty)
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..78
+    0: JS_BLOCK_STATEMENT@0..78
+      0: L_CURLY@0..1 "{" [] []
+      1: JS_STATEMENT_LIST@1..76
+        0: JS_EXPRESSION_STATEMENT@1..8
+          0: JS_STRING_LITERAL_EXPRESSION@1..8
+            0: JS_STRING_LITERAL@1..8 "\"name\"" [Newline("\n")] []
+          1: (empty)
+        1: JS_BOGUS_STATEMENT@8..76
+          0: COLON@8..10 ":" [] [Whitespace(" ")]
+          1: JS_STRING_LITERAL@10..27 "\"troublesome-lib\"" [] []
+          2: COMMA@27..28 "," [] []
+          3: JS_STRING_LITERAL@28..38 "\"typings\"" [Newline("\n")] []
+          4: COLON@38..40 ":" [] [Whitespace(" ")]
+          5: JS_STRING_LITERAL@40..56 "\"lib/index.d.ts\"" [] []
+          6: COMMA@56..57 "," [] []
+          7: JS_STRING_LITERAL@57..67 "\"version\"" [Newline("\n")] []
+          8: COLON@67..69 ":" [] [Whitespace(" ")]
+          9: JS_STRING_LITERAL@69..76 "\"0.0.1\"" [] []
+      2: R_CURLY@76..78 "}" [Newline("\n")] []
+  4: EOF@78..79 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+statements_closing_curly.js:2:7 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a semicolon or an implicit semicolon after a statement, but found none
+  
+    1 │ {
+  > 2 │ "name": "troublesome-lib",
+      │       ^
+    3 │ "typings": "lib/index.d.ts",
+    4 │ "version": "0.0.1"
+  
+  i An explicit or implicit semicolon is expected here...
+  
+    1 │ {
+  > 2 │ "name": "troublesome-lib",
+      │       ^
+    3 │ "typings": "lib/index.d.ts",
+    4 │ "version": "0.0.1"
+  
+  i ...Which is required to end this statement
+  
+    1 │ {
+  > 2 │ "name": "troublesome-lib",
+      │ ^^^^^^^
+    3 │ "typings": "lib/index.d.ts",
+    4 │ "version": "0.0.1"
+  
+```

@@ -1,0 +1,45 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: elements/normalize-tag-casing.html
+snapshot_kind: text
+---
+# Input
+
+```html
+<HTML>
+	<Body>
+		<DIV></DIV>
+		<SPAN></SPAN>
+		<Component>should keep casing</Component>
+	</Body>
+</HTML>
+```
+
+
+=============================
+
+# Outputs
+
+## Output 1
+
+-----
+Indent style: Tab
+Indent width: 2
+Line ending: LF
+Line width: 80
+Attribute Position: Auto
+Bracket same line: false
+Whitespace sensitivity: css
+Indent script and style: false
+Self close void elements: never
+-----
+
+```html
+<html>
+	<body>
+		<div></div>
+		<span></span>
+		<Component>should keep casing</Component>
+	</body>
+</html>
+```

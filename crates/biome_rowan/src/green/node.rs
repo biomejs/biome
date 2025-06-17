@@ -12,21 +12,21 @@ use std::{
 #[cfg(target_pointer_width = "64")]
 use crate::utility_types::static_assert;
 
-use countme::Count;
-
 use crate::{
+    GreenToken, NodeOrToken, TextRange, TextSize,
     arc::{Arc, HeaderSlice, ThinArc},
     green::{GreenElement, GreenElementRef, RawSyntaxKind},
-    GreenToken, NodeOrToken, TextRange, TextSize,
 };
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub(super) struct GreenNodeHead {
     kind: RawSyntaxKind,
     text_len: TextSize,
-    _c: Count<GreenNode>,
+    #[cfg(feature = "countme")]
+    _c: countme::Count<GreenNode>,
 }
 
+#[cfg(feature = "countme")]
 pub(crate) fn has_live() -> bool {
     countme::get::<GreenNode>().live > 0
 }
@@ -50,9 +50,9 @@ pub(crate) enum Slot {
 impl std::fmt::Display for Slot {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
         match self {
-            Slot::Empty { .. } => write!(f, "∅"),
-            Slot::Node { node, .. } => std::fmt::Display::fmt(node, f),
-            Slot::Token { token, .. } => std::fmt::Display::fmt(token, f),
+            Self::Empty { .. } => write!(f, "∅"),
+            Self::Node { node, .. } => std::fmt::Display::fmt(node, f),
+            Self::Token { token, .. } => std::fmt::Display::fmt(token, f),
         }
     }
 }
@@ -232,7 +232,6 @@ impl ops::Deref for GreenNode {
     fn deref(&self) -> &GreenNodeData {
         unsafe {
             let repr: &Repr = &self.ptr;
-            #[allow(invalid_reference_casting)]
             let repr: &ReprThin = &*(repr as *const Repr as *const ReprThin);
             mem::transmute::<&ReprThin, &GreenNodeData>(repr)
         }
@@ -242,7 +241,7 @@ impl ops::Deref for GreenNode {
 impl GreenNode {
     /// Creates new Node.
     #[inline]
-    pub fn new<I>(kind: RawSyntaxKind, slots: I) -> GreenNode
+    pub fn new<I>(kind: RawSyntaxKind, slots: I) -> Self
     where
         I: IntoIterator<Item = Option<GreenElement>>,
         I::IntoIter: ExactSizeIterator,
@@ -266,7 +265,8 @@ impl GreenNode {
             GreenNodeHead {
                 kind,
                 text_len: 0.into(),
-                _c: Count::new(),
+                #[cfg(feature = "countme")]
+                _c: countme::Count::new(),
             },
             slots,
         );
@@ -279,7 +279,7 @@ impl GreenNode {
             Arc::into_thin(data)
         };
 
-        GreenNode { ptr: data }
+        Self { ptr: data }
     }
 
     #[inline]
@@ -290,10 +290,12 @@ impl GreenNode {
     }
 
     #[inline]
-    pub(crate) unsafe fn from_raw(ptr: ptr::NonNull<GreenNodeData>) -> GreenNode {
-        let arc = Arc::from_raw(&ptr.as_ref().data as *const ReprThin);
-        let arc = mem::transmute::<Arc<ReprThin>, ThinArc<GreenNodeHead, Slot>>(arc);
-        GreenNode { ptr: arc }
+    pub(crate) unsafe fn from_raw(ptr: ptr::NonNull<GreenNodeData>) -> Self {
+        let arc = unsafe {
+            let arc = Arc::from_raw(&ptr.as_ref().data as *const ReprThin);
+            mem::transmute::<Arc<ReprThin>, ThinArc<GreenNodeHead, Slot>>(arc)
+        };
+        Self { ptr: arc }
     }
 }
 
@@ -301,17 +303,17 @@ impl Slot {
     #[inline]
     pub(crate) fn as_ref(&self) -> Option<GreenElementRef> {
         match self {
-            Slot::Node { node, .. } => Some(NodeOrToken::Node(node)),
-            Slot::Token { token, .. } => Some(NodeOrToken::Token(token)),
-            Slot::Empty { .. } => None,
+            Self::Node { node, .. } => Some(NodeOrToken::Node(node)),
+            Self::Token { token, .. } => Some(NodeOrToken::Token(token)),
+            Self::Empty { .. } => None,
         }
     }
     #[inline]
     pub(crate) fn rel_offset(&self) -> TextSize {
         match self {
-            Slot::Node { rel_offset, .. }
-            | Slot::Token { rel_offset, .. }
-            | Slot::Empty { rel_offset } => *rel_offset,
+            Self::Node { rel_offset, .. }
+            | Self::Token { rel_offset, .. }
+            | Self::Empty { rel_offset } => *rel_offset,
         }
     }
     #[inline]
@@ -385,7 +387,7 @@ impl<'a> Iterator for Slots<'a> {
     }
 }
 
-impl<'a> DoubleEndedIterator for Slots<'a> {
+impl DoubleEndedIterator for Slots<'_> {
     #[inline]
     fn next_back(&mut self) -> Option<Self::Item> {
         self.raw.next_back()
@@ -473,7 +475,7 @@ impl<'a> Iterator for Children<'a> {
     }
 }
 
-impl<'a> DoubleEndedIterator for Children<'a> {
+impl DoubleEndedIterator for Children<'_> {
     fn next_back(&mut self) -> Option<Self::Item> {
         loop {
             let next = self.slots.next_back()?;
@@ -489,8 +491,8 @@ impl FusedIterator for Children<'_> {}
 
 #[cfg(test)]
 mod tests {
-    use crate::raw_language::{RawLanguageKind, RawSyntaxTreeBuilder};
     use crate::GreenNode;
+    use crate::raw_language::{RawLanguageKind, RawSyntaxTreeBuilder};
 
     fn build_test_list() -> GreenNode {
         let mut builder: RawSyntaxTreeBuilder = RawSyntaxTreeBuilder::new();

@@ -1,9 +1,10 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid.js
+snapshot_kind: text
 ---
 # Input
-```jsx
+```js
 if ("red" == value) {}
 if (true === value) {}
 if (5 != value) {}
@@ -42,7 +43,7 @@ false <= ((x)) in foo
 ```
 invalid.js:1:5 lint/style/noYodaExpression  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Avoid the use of yoda expressions.
+  i Avoid the use of yoda expressions.
   
   > 1 │ if ("red" == value) {}
       │     ^^^^^^^^^^^^^^
@@ -64,7 +65,7 @@ invalid.js:1:5 lint/style/noYodaExpression  FIXABLE  ━━━━━━━━━
 ```
 invalid.js:2:5 lint/style/noYodaExpression  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Avoid the use of yoda expressions.
+  i Avoid the use of yoda expressions.
   
     1 │ if ("red" == value) {}
   > 2 │ if (true === value) {}
@@ -88,7 +89,7 @@ invalid.js:2:5 lint/style/noYodaExpression  FIXABLE  ━━━━━━━━━
 ```
 invalid.js:3:5 lint/style/noYodaExpression  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Avoid the use of yoda expressions.
+  i Avoid the use of yoda expressions.
   
     1 │ if ("red" == value) {}
     2 │ if (true === value) {}
@@ -114,7 +115,7 @@ invalid.js:3:5 lint/style/noYodaExpression  FIXABLE  ━━━━━━━━━
 ```
 invalid.js:4:5 lint/style/noYodaExpression  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Avoid the use of yoda expressions.
+  i Avoid the use of yoda expressions.
   
     2 │ if (true === value) {}
     3 │ if (5 != value) {}
@@ -140,7 +141,7 @@ invalid.js:4:5 lint/style/noYodaExpression  FIXABLE  ━━━━━━━━━
 ```
 invalid.js:5:5 lint/style/noYodaExpression  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Avoid the use of yoda expressions.
+  i Avoid the use of yoda expressions.
   
     3 │ if (5 != value) {}
     4 │ if (5n != value) {}
@@ -166,7 +167,7 @@ invalid.js:5:5 lint/style/noYodaExpression  FIXABLE  ━━━━━━━━━
 ```
 invalid.js:6:5 lint/style/noYodaExpression  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Avoid the use of yoda expressions.
+  i Avoid the use of yoda expressions.
   
     4 │ if (5n != value) {}
     5 │ if (null !== value) {}
@@ -192,7 +193,7 @@ invalid.js:6:5 lint/style/noYodaExpression  FIXABLE  ━━━━━━━━━
 ```
 invalid.js:7:5 lint/style/noYodaExpression  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Avoid the use of yoda expressions.
+  i Avoid the use of yoda expressions.
   
     5 │ if (null !== value) {}
     6 │ if ("red" <= value) {}
@@ -218,7 +219,7 @@ invalid.js:7:5 lint/style/noYodaExpression  FIXABLE  ━━━━━━━━━
 ```
 invalid.js:8:5 lint/style/noYodaExpression  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Avoid the use of yoda expressions.
+  i Avoid the use of yoda expressions.
   
      6 │ if ("red" <= value) {}
      7 │ if (`red` <= value) {}
@@ -244,7 +245,7 @@ invalid.js:8:5 lint/style/noYodaExpression  FIXABLE  ━━━━━━━━━
 ```
 invalid.js:9:5 lint/style/noYodaExpression  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Avoid the use of yoda expressions.
+  i Avoid the use of yoda expressions.
   
      7 │ if (`red` <= value) {}
      8 │ if (`red` <= `${foo}`) {}
@@ -270,7 +271,7 @@ invalid.js:9:5 lint/style/noYodaExpression  FIXABLE  ━━━━━━━━━
 ```
 invalid.js:10:5 lint/style/noYodaExpression  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Avoid the use of yoda expressions.
+  i Avoid the use of yoda expressions.
   
      8 │ if (`red` <= `${foo}`) {}
      9 │ if (`red` <= `${"red"}`) {}
@@ -296,7 +297,7 @@ invalid.js:10:5 lint/style/noYodaExpression  FIXABLE  ━━━━━━━━�
 ```
 invalid.js:11:12 lint/style/noYodaExpression  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Avoid the use of yoda expressions.
+  i Avoid the use of yoda expressions.
   
      9 │ if (`red` <= `${"red"}`) {}
     10 │ if (true >= value) {}
@@ -322,7 +323,7 @@ invalid.js:11:12 lint/style/noYodaExpression  FIXABLE  ━━━━━━━━�
 ```
 invalid.js:12:26 lint/style/noYodaExpression  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Avoid the use of yoda expressions.
+  i Avoid the use of yoda expressions.
   
     10 │ if (true >= value) {}
     11 │ var foo = (5 < value) ? true : false
@@ -348,7 +349,7 @@ invalid.js:12:26 lint/style/noYodaExpression  FIXABLE  ━━━━━━━━�
 ```
 invalid.js:13:5 lint/style/noYodaExpression  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Avoid the use of yoda expressions.
+  i Avoid the use of yoda expressions.
   
     11 │ var foo = (5 < value) ? true : false
     12 │ function foo() { return (null > value); }
@@ -374,7 +375,7 @@ invalid.js:13:5 lint/style/noYodaExpression  FIXABLE  ━━━━━━━━�
 ```
 invalid.js:14:14 lint/style/noYodaExpression  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Avoid the use of yoda expressions.
+  i Avoid the use of yoda expressions.
   
     12 │ function foo() { return (null > value); }
     13 │ if (-1 < str.indexOf(substr)) {}
@@ -400,7 +401,7 @@ invalid.js:14:14 lint/style/noYodaExpression  FIXABLE  ━━━━━━━━�
 ```
 invalid.js:15:5 lint/style/noYodaExpression  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Avoid the use of yoda expressions.
+  i Avoid the use of yoda expressions.
   
     13 │ if (-1 < str.indexOf(substr)) {}
     14 │ if ( /* a */ 0 /* b */ < /* c */ foo /* d */ ) {}
@@ -426,7 +427,7 @@ invalid.js:15:5 lint/style/noYodaExpression  FIXABLE  ━━━━━━━━�
 ```
 invalid.js:16:8 lint/style/noYodaExpression  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Avoid the use of yoda expressions.
+  i Avoid the use of yoda expressions.
   
     14 │ if ( /* a */ 0 /* b */ < /* c */ foo /* d */ ) {}
     15 │ if (((((((5)))))) === ((((((((((foo))))))))))) {}
@@ -452,7 +453,7 @@ invalid.js:16:8 lint/style/noYodaExpression  FIXABLE  ━━━━━━━━�
 ```
 invalid.js:17:8 lint/style/noYodaExpression  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Avoid the use of yoda expressions.
+  i Avoid the use of yoda expressions.
   
     15 │ if (((((((5)))))) === ((((((((((foo))))))))))) {}
     16 │ while (0 === (a));
@@ -478,7 +479,7 @@ invalid.js:17:8 lint/style/noYodaExpression  FIXABLE  ━━━━━━━━�
 ```
 invalid.js:18:31 lint/style/noYodaExpression  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Avoid the use of yoda expressions.
+  i Avoid the use of yoda expressions.
   
     16 │ while (0 === (a));
     17 │ while (0 === (a = b));
@@ -504,7 +505,7 @@ invalid.js:18:31 lint/style/noYodaExpression  FIXABLE  ━━━━━━━━�
 ```
 invalid.js:19:24 lint/style/noYodaExpression  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Avoid the use of yoda expressions.
+  i Avoid the use of yoda expressions.
   
     17 │ while (0 === (a = b));
     18 │ async function foo() { return 1 < await bar() }
@@ -530,7 +531,7 @@ invalid.js:19:24 lint/style/noYodaExpression  FIXABLE  ━━━━━━━━�
 ```
 invalid.js:20:24 lint/style/noYodaExpression  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Avoid the use of yoda expressions.
+  i Avoid the use of yoda expressions.
   
     18 │ async function foo() { return 1 < await bar() }
     19 │ function *foo() { yield(1) < a }
@@ -556,7 +557,7 @@ invalid.js:20:24 lint/style/noYodaExpression  FIXABLE  ━━━━━━━━�
 ```
 invalid.js:21:25 lint/style/noYodaExpression  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Avoid the use of yoda expressions.
+  i Avoid the use of yoda expressions.
   
     19 │ function *foo() { yield(1) < a }
     20 │ function *foo() { yield((1)) < a }
@@ -582,7 +583,7 @@ invalid.js:21:25 lint/style/noYodaExpression  FIXABLE  ━━━━━━━━�
 ```
 invalid.js:22:28 lint/style/noYodaExpression  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Avoid the use of yoda expressions.
+  i Avoid the use of yoda expressions.
   
     20 │ function *foo() { yield((1)) < a }
     21 │ function *foo() { yield 1 < a }
@@ -608,7 +609,7 @@ invalid.js:22:28 lint/style/noYodaExpression  FIXABLE  ━━━━━━━━�
 ```
 invalid.js:23:24 lint/style/noYodaExpression  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Avoid the use of yoda expressions.
+  i Avoid the use of yoda expressions.
   
     21 │ function *foo() { yield 1 < a }
     22 │ function *foo() { yield/**/1 < a }
@@ -634,7 +635,7 @@ invalid.js:23:24 lint/style/noYodaExpression  FIXABLE  ━━━━━━━━�
 ```
 invalid.js:24:24 lint/style/noYodaExpression  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Avoid the use of yoda expressions.
+  i Avoid the use of yoda expressions.
   
     22 │ function *foo() { yield/**/1 < a }
     23 │ function *foo() { yield(1) < ++a }
@@ -660,7 +661,7 @@ invalid.js:24:24 lint/style/noYodaExpression  FIXABLE  ━━━━━━━━�
 ```
 invalid.js:25:3 lint/style/noYodaExpression  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Avoid the use of yoda expressions.
+  i Avoid the use of yoda expressions.
   
     23 │ function *foo() { yield(1) < ++a }
     24 │ function *foo() { yield(1) < (a) }
@@ -686,7 +687,7 @@ invalid.js:25:3 lint/style/noYodaExpression  FIXABLE  ━━━━━━━━�
 ```
 invalid.js:26:1 lint/style/noYodaExpression  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Avoid the use of yoda expressions.
+  i Avoid the use of yoda expressions.
   
     24 │ function *foo() { yield(1) < (a) }
     25 │ x=1 < a
@@ -712,7 +713,7 @@ invalid.js:26:1 lint/style/noYodaExpression  FIXABLE  ━━━━━━━━�
 ```
 invalid.js:27:1 lint/style/noYodaExpression  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Avoid the use of yoda expressions.
+  i Avoid the use of yoda expressions.
   
     25 │ x=1 < a
     26 │ 0 < f()in obj
@@ -738,7 +739,7 @@ invalid.js:27:1 lint/style/noYodaExpression  FIXABLE  ━━━━━━━━�
 ```
 invalid.js:28:1 lint/style/noYodaExpression  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Avoid the use of yoda expressions.
+  i Avoid the use of yoda expressions.
   
     26 │ 0 < f()in obj
     27 │ 1 > x++instanceof foo
@@ -764,7 +765,7 @@ invalid.js:28:1 lint/style/noYodaExpression  FIXABLE  ━━━━━━━━�
 ```
 invalid.js:29:1 lint/style/noYodaExpression  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Avoid the use of yoda expressions.
+  i Avoid the use of yoda expressions.
   
     27 │ 1 > x++instanceof foo
     28 │ false <= ((x))in foo
@@ -790,7 +791,7 @@ invalid.js:29:1 lint/style/noYodaExpression  FIXABLE  ━━━━━━━━�
 ```
 invalid.js:30:1 lint/style/noYodaExpression  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Avoid the use of yoda expressions.
+  i Avoid the use of yoda expressions.
   
     28 │ false <= ((x))in foo
     29 │ false <= ((x)) in foo
@@ -816,7 +817,7 @@ invalid.js:30:1 lint/style/noYodaExpression  FIXABLE  ━━━━━━━━�
 ```
 invalid.js:31:1 lint/style/noYodaExpression  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Avoid the use of yoda expressions.
+  i Avoid the use of yoda expressions.
   
     29 │ false <= ((x)) in foo
     30 │ 1 > x===foo

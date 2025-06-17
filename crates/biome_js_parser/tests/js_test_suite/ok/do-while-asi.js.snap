@@ -1,0 +1,193 @@
+---
+source: crates/biome_js_parser/tests/spec_test.rs
+expression: snapshot
+snapshot_kind: text
+---
+## Input
+
+```js
+do do do ; while (x) while (x) while (x) x = 39;
+do do ; while (x); while (x) x = 39
+
+```
+
+
+## AST
+
+```
+JsModule {
+    bom_token: missing (optional),
+    interpreter_token: missing (optional),
+    directives: JsDirectiveList [],
+    items: JsModuleItemList [
+        JsDoWhileStatement {
+            do_token: DO_KW@0..3 "do" [] [Whitespace(" ")],
+            body: JsDoWhileStatement {
+                do_token: DO_KW@3..6 "do" [] [Whitespace(" ")],
+                body: JsDoWhileStatement {
+                    do_token: DO_KW@6..9 "do" [] [Whitespace(" ")],
+                    body: JsEmptyStatement {
+                        semicolon_token: SEMICOLON@9..11 ";" [] [Whitespace(" ")],
+                    },
+                    while_token: WHILE_KW@11..17 "while" [] [Whitespace(" ")],
+                    l_paren_token: L_PAREN@17..18 "(" [] [],
+                    test: JsIdentifierExpression {
+                        name: JsReferenceIdentifier {
+                            value_token: IDENT@18..19 "x" [] [],
+                        },
+                    },
+                    r_paren_token: R_PAREN@19..21 ")" [] [Whitespace(" ")],
+                    semicolon_token: missing (optional),
+                },
+                while_token: WHILE_KW@21..27 "while" [] [Whitespace(" ")],
+                l_paren_token: L_PAREN@27..28 "(" [] [],
+                test: JsIdentifierExpression {
+                    name: JsReferenceIdentifier {
+                        value_token: IDENT@28..29 "x" [] [],
+                    },
+                },
+                r_paren_token: R_PAREN@29..31 ")" [] [Whitespace(" ")],
+                semicolon_token: missing (optional),
+            },
+            while_token: WHILE_KW@31..37 "while" [] [Whitespace(" ")],
+            l_paren_token: L_PAREN@37..38 "(" [] [],
+            test: JsIdentifierExpression {
+                name: JsReferenceIdentifier {
+                    value_token: IDENT@38..39 "x" [] [],
+                },
+            },
+            r_paren_token: R_PAREN@39..41 ")" [] [Whitespace(" ")],
+            semicolon_token: missing (optional),
+        },
+        JsExpressionStatement {
+            expression: JsAssignmentExpression {
+                left: JsIdentifierAssignment {
+                    name_token: IDENT@41..43 "x" [] [Whitespace(" ")],
+                },
+                operator_token: EQ@43..45 "=" [] [Whitespace(" ")],
+                right: JsNumberLiteralExpression {
+                    value_token: JS_NUMBER_LITERAL@45..47 "39" [] [],
+                },
+            },
+            semicolon_token: SEMICOLON@47..48 ";" [] [],
+        },
+        JsDoWhileStatement {
+            do_token: DO_KW@48..52 "do" [Newline("\n")] [Whitespace(" ")],
+            body: JsDoWhileStatement {
+                do_token: DO_KW@52..55 "do" [] [Whitespace(" ")],
+                body: JsEmptyStatement {
+                    semicolon_token: SEMICOLON@55..57 ";" [] [Whitespace(" ")],
+                },
+                while_token: WHILE_KW@57..63 "while" [] [Whitespace(" ")],
+                l_paren_token: L_PAREN@63..64 "(" [] [],
+                test: JsIdentifierExpression {
+                    name: JsReferenceIdentifier {
+                        value_token: IDENT@64..65 "x" [] [],
+                    },
+                },
+                r_paren_token: R_PAREN@65..66 ")" [] [],
+                semicolon_token: SEMICOLON@66..68 ";" [] [Whitespace(" ")],
+            },
+            while_token: WHILE_KW@68..74 "while" [] [Whitespace(" ")],
+            l_paren_token: L_PAREN@74..75 "(" [] [],
+            test: JsIdentifierExpression {
+                name: JsReferenceIdentifier {
+                    value_token: IDENT@75..76 "x" [] [],
+                },
+            },
+            r_paren_token: R_PAREN@76..78 ")" [] [Whitespace(" ")],
+            semicolon_token: missing (optional),
+        },
+        JsExpressionStatement {
+            expression: JsAssignmentExpression {
+                left: JsIdentifierAssignment {
+                    name_token: IDENT@78..80 "x" [] [Whitespace(" ")],
+                },
+                operator_token: EQ@80..82 "=" [] [Whitespace(" ")],
+                right: JsNumberLiteralExpression {
+                    value_token: JS_NUMBER_LITERAL@82..84 "39" [] [],
+                },
+            },
+            semicolon_token: missing (optional),
+        },
+    ],
+    eof_token: EOF@84..85 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: JS_MODULE@0..85
+  0: (empty)
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..84
+    0: JS_DO_WHILE_STATEMENT@0..41
+      0: DO_KW@0..3 "do" [] [Whitespace(" ")]
+      1: JS_DO_WHILE_STATEMENT@3..31
+        0: DO_KW@3..6 "do" [] [Whitespace(" ")]
+        1: JS_DO_WHILE_STATEMENT@6..21
+          0: DO_KW@6..9 "do" [] [Whitespace(" ")]
+          1: JS_EMPTY_STATEMENT@9..11
+            0: SEMICOLON@9..11 ";" [] [Whitespace(" ")]
+          2: WHILE_KW@11..17 "while" [] [Whitespace(" ")]
+          3: L_PAREN@17..18 "(" [] []
+          4: JS_IDENTIFIER_EXPRESSION@18..19
+            0: JS_REFERENCE_IDENTIFIER@18..19
+              0: IDENT@18..19 "x" [] []
+          5: R_PAREN@19..21 ")" [] [Whitespace(" ")]
+          6: (empty)
+        2: WHILE_KW@21..27 "while" [] [Whitespace(" ")]
+        3: L_PAREN@27..28 "(" [] []
+        4: JS_IDENTIFIER_EXPRESSION@28..29
+          0: JS_REFERENCE_IDENTIFIER@28..29
+            0: IDENT@28..29 "x" [] []
+        5: R_PAREN@29..31 ")" [] [Whitespace(" ")]
+        6: (empty)
+      2: WHILE_KW@31..37 "while" [] [Whitespace(" ")]
+      3: L_PAREN@37..38 "(" [] []
+      4: JS_IDENTIFIER_EXPRESSION@38..39
+        0: JS_REFERENCE_IDENTIFIER@38..39
+          0: IDENT@38..39 "x" [] []
+      5: R_PAREN@39..41 ")" [] [Whitespace(" ")]
+      6: (empty)
+    1: JS_EXPRESSION_STATEMENT@41..48
+      0: JS_ASSIGNMENT_EXPRESSION@41..47
+        0: JS_IDENTIFIER_ASSIGNMENT@41..43
+          0: IDENT@41..43 "x" [] [Whitespace(" ")]
+        1: EQ@43..45 "=" [] [Whitespace(" ")]
+        2: JS_NUMBER_LITERAL_EXPRESSION@45..47
+          0: JS_NUMBER_LITERAL@45..47 "39" [] []
+      1: SEMICOLON@47..48 ";" [] []
+    2: JS_DO_WHILE_STATEMENT@48..78
+      0: DO_KW@48..52 "do" [Newline("\n")] [Whitespace(" ")]
+      1: JS_DO_WHILE_STATEMENT@52..68
+        0: DO_KW@52..55 "do" [] [Whitespace(" ")]
+        1: JS_EMPTY_STATEMENT@55..57
+          0: SEMICOLON@55..57 ";" [] [Whitespace(" ")]
+        2: WHILE_KW@57..63 "while" [] [Whitespace(" ")]
+        3: L_PAREN@63..64 "(" [] []
+        4: JS_IDENTIFIER_EXPRESSION@64..65
+          0: JS_REFERENCE_IDENTIFIER@64..65
+            0: IDENT@64..65 "x" [] []
+        5: R_PAREN@65..66 ")" [] []
+        6: SEMICOLON@66..68 ";" [] [Whitespace(" ")]
+      2: WHILE_KW@68..74 "while" [] [Whitespace(" ")]
+      3: L_PAREN@74..75 "(" [] []
+      4: JS_IDENTIFIER_EXPRESSION@75..76
+        0: JS_REFERENCE_IDENTIFIER@75..76
+          0: IDENT@75..76 "x" [] []
+      5: R_PAREN@76..78 ")" [] [Whitespace(" ")]
+      6: (empty)
+    3: JS_EXPRESSION_STATEMENT@78..84
+      0: JS_ASSIGNMENT_EXPRESSION@78..84
+        0: JS_IDENTIFIER_ASSIGNMENT@78..80
+          0: IDENT@78..80 "x" [] [Whitespace(" ")]
+        1: EQ@80..82 "=" [] [Whitespace(" ")]
+        2: JS_NUMBER_LITERAL_EXPRESSION@82..84
+          0: JS_NUMBER_LITERAL@82..84 "39" [] []
+      1: (empty)
+  4: EOF@84..85 "" [Newline("\n")] []
+
+```

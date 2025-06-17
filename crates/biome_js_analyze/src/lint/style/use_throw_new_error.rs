@@ -1,8 +1,8 @@
 use biome_analyze::{
-    context::RuleContext, declare_lint_rule, ActionCategory, Ast, FixKind, Rule, RuleDiagnostic,
-    RuleSource,
+    Ast, FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
+use biome_diagnostics::Severity;
 use biome_js_factory::make;
 use biome_js_syntax::{
     AnyJsExpression, JsCallExpression, JsNewExpression, JsParenthesizedExpression, JsSyntaxKind, T,
@@ -50,6 +50,7 @@ declare_lint_rule! {
         language: "js",
         sources: &[RuleSource::EslintUnicorn("throw-new-error")],
         recommended: false,
+        severity: Severity::Information,
         fix_kind: FixKind::Unsafe,
     }
 }
@@ -119,7 +120,7 @@ impl Rule for UseThrowNewError {
         mutation.replace_node::<AnyJsExpression>(node.clone().into(), new_expression.into());
 
         Some(JsRuleAction::new(
-            ActionCategory::QuickFix,
+            ctx.metadata().action_category(ctx.category(), ctx.group()),
             ctx.metadata().applicability(),
             markup! { "Add "<Emphasis>"new"</Emphasis>" keyword." }.to_owned(),
             mutation,

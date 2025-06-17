@@ -1,0 +1,440 @@
+---
+source: crates/biome_js_parser/tests/spec_test.rs
+expression: snapshot
+snapshot_kind: text
+---
+## Input
+
+```ts
+type A = typeof import("a.json",{});
+type B = typeof import("a.json",{with:{[a]:"1"}});
+type C = typeof import("a.json",{with:{}}, 1);
+type D = import("a",);
+type E = import;
+type F = typeof import;
+
+```
+
+
+## AST
+
+```
+JsModule {
+    bom_token: missing (optional),
+    interpreter_token: missing (optional),
+    directives: JsDirectiveList [],
+    items: JsModuleItemList [
+        TsTypeAliasDeclaration {
+            type_token: TYPE_KW@0..5 "type" [] [Whitespace(" ")],
+            binding_identifier: TsIdentifierBinding {
+                name_token: IDENT@5..7 "A" [] [Whitespace(" ")],
+            },
+            type_parameters: missing (optional),
+            eq_token: EQ@7..9 "=" [] [Whitespace(" ")],
+            ty: TsImportType {
+                typeof_token: TYPEOF_KW@9..16 "typeof" [] [Whitespace(" ")],
+                import_token: IMPORT_KW@16..22 "import" [] [],
+                arguments: TsImportTypeArguments {
+                    l_paren_token: L_PAREN@22..23 "(" [] [],
+                    argument: TsStringLiteralType {
+                        literal_token: JS_STRING_LITERAL@23..31 "\"a.json\"" [] [],
+                    },
+                    comma_token: COMMA@31..32 "," [] [],
+                    ts_import_type_assertion_block: TsImportTypeAssertionBlock {
+                        l_curly_token: L_CURLY@32..33 "{" [] [],
+                        type_assertion: missing (required),
+                        r_curly_token: R_CURLY@33..34 "}" [] [],
+                    },
+                    r_paren_token: R_PAREN@34..35 ")" [] [],
+                },
+                qualifier_clause: missing (optional),
+                type_arguments: missing (optional),
+            },
+            semicolon_token: SEMICOLON@35..36 ";" [] [],
+        },
+        TsTypeAliasDeclaration {
+            type_token: TYPE_KW@36..42 "type" [Newline("\n")] [Whitespace(" ")],
+            binding_identifier: TsIdentifierBinding {
+                name_token: IDENT@42..44 "B" [] [Whitespace(" ")],
+            },
+            type_parameters: missing (optional),
+            eq_token: EQ@44..46 "=" [] [Whitespace(" ")],
+            ty: TsImportType {
+                typeof_token: TYPEOF_KW@46..53 "typeof" [] [Whitespace(" ")],
+                import_token: IMPORT_KW@53..59 "import" [] [],
+                arguments: TsImportTypeArguments {
+                    l_paren_token: L_PAREN@59..60 "(" [] [],
+                    argument: TsStringLiteralType {
+                        literal_token: JS_STRING_LITERAL@60..68 "\"a.json\"" [] [],
+                    },
+                    comma_token: COMMA@68..69 "," [] [],
+                    ts_import_type_assertion_block: TsImportTypeAssertionBlock {
+                        l_curly_token: L_CURLY@69..70 "{" [] [],
+                        type_assertion: TsImportTypeAssertion {
+                            with_token: WITH_KW@70..74 "with" [] [],
+                            colon_token: COLON@74..75 ":" [] [],
+                            l_curly_token: L_CURLY@75..76 "{" [] [],
+                            assertions: JsImportAssertionEntryList [
+                                JsBogusImportAssertionEntry {
+                                    items: [
+                                        L_BRACK@76..77 "[" [] [],
+                                        IDENT@77..78 "a" [] [],
+                                        R_BRACK@78..79 "]" [] [],
+                                        COLON@79..80 ":" [] [],
+                                        JS_STRING_LITERAL@80..83 "\"1\"" [] [],
+                                    ],
+                                },
+                            ],
+                            r_curly_token: R_CURLY@83..84 "}" [] [],
+                        },
+                        r_curly_token: R_CURLY@84..85 "}" [] [],
+                    },
+                    r_paren_token: R_PAREN@85..86 ")" [] [],
+                },
+                qualifier_clause: missing (optional),
+                type_arguments: missing (optional),
+            },
+            semicolon_token: SEMICOLON@86..87 ";" [] [],
+        },
+        TsTypeAliasDeclaration {
+            type_token: TYPE_KW@87..93 "type" [Newline("\n")] [Whitespace(" ")],
+            binding_identifier: TsIdentifierBinding {
+                name_token: IDENT@93..95 "C" [] [Whitespace(" ")],
+            },
+            type_parameters: missing (optional),
+            eq_token: EQ@95..97 "=" [] [Whitespace(" ")],
+            ty: TsImportType {
+                typeof_token: TYPEOF_KW@97..104 "typeof" [] [Whitespace(" ")],
+                import_token: IMPORT_KW@104..110 "import" [] [],
+                arguments: TsImportTypeArguments {
+                    l_paren_token: L_PAREN@110..111 "(" [] [],
+                    argument: TsStringLiteralType {
+                        literal_token: JS_STRING_LITERAL@111..119 "\"a.json\"" [] [],
+                    },
+                    comma_token: COMMA@119..120 "," [] [],
+                    ts_import_type_assertion_block: TsImportTypeAssertionBlock {
+                        l_curly_token: L_CURLY@120..121 "{" [] [],
+                        type_assertion: TsImportTypeAssertion {
+                            with_token: WITH_KW@121..125 "with" [] [],
+                            colon_token: COLON@125..126 ":" [] [],
+                            l_curly_token: L_CURLY@126..127 "{" [] [],
+                            assertions: JsImportAssertionEntryList [],
+                            r_curly_token: R_CURLY@127..128 "}" [] [],
+                        },
+                        r_curly_token: R_CURLY@128..129 "}" [] [],
+                    },
+                    r_paren_token: missing (required),
+                },
+                qualifier_clause: missing (optional),
+                type_arguments: missing (optional),
+            },
+            semicolon_token: missing (optional),
+        },
+        JsBogusStatement {
+            items: [
+                COMMA@129..131 "," [] [Whitespace(" ")],
+                JS_NUMBER_LITERAL@131..132 "1" [] [],
+                R_PAREN@132..133 ")" [] [],
+            ],
+        },
+        JsEmptyStatement {
+            semicolon_token: SEMICOLON@133..134 ";" [] [],
+        },
+        TsTypeAliasDeclaration {
+            type_token: TYPE_KW@134..140 "type" [Newline("\n")] [Whitespace(" ")],
+            binding_identifier: TsIdentifierBinding {
+                name_token: IDENT@140..142 "D" [] [Whitespace(" ")],
+            },
+            type_parameters: missing (optional),
+            eq_token: EQ@142..144 "=" [] [Whitespace(" ")],
+            ty: TsImportType {
+                typeof_token: missing (optional),
+                import_token: IMPORT_KW@144..150 "import" [] [],
+                arguments: TsImportTypeArguments {
+                    l_paren_token: L_PAREN@150..151 "(" [] [],
+                    argument: TsStringLiteralType {
+                        literal_token: JS_STRING_LITERAL@151..154 "\"a\"" [] [],
+                    },
+                    comma_token: COMMA@154..155 "," [] [],
+                    ts_import_type_assertion_block: missing (optional),
+                    r_paren_token: R_PAREN@155..156 ")" [] [],
+                },
+                qualifier_clause: missing (optional),
+                type_arguments: missing (optional),
+            },
+            semicolon_token: SEMICOLON@156..157 ";" [] [],
+        },
+        TsTypeAliasDeclaration {
+            type_token: TYPE_KW@157..163 "type" [Newline("\n")] [Whitespace(" ")],
+            binding_identifier: TsIdentifierBinding {
+                name_token: IDENT@163..165 "E" [] [Whitespace(" ")],
+            },
+            type_parameters: missing (optional),
+            eq_token: EQ@165..167 "=" [] [Whitespace(" ")],
+            ty: TsImportType {
+                typeof_token: missing (optional),
+                import_token: IMPORT_KW@167..173 "import" [] [],
+                arguments: missing (required),
+                qualifier_clause: missing (optional),
+                type_arguments: missing (optional),
+            },
+            semicolon_token: SEMICOLON@173..174 ";" [] [],
+        },
+        TsTypeAliasDeclaration {
+            type_token: TYPE_KW@174..180 "type" [Newline("\n")] [Whitespace(" ")],
+            binding_identifier: TsIdentifierBinding {
+                name_token: IDENT@180..182 "F" [] [Whitespace(" ")],
+            },
+            type_parameters: missing (optional),
+            eq_token: EQ@182..184 "=" [] [Whitespace(" ")],
+            ty: TsImportType {
+                typeof_token: TYPEOF_KW@184..191 "typeof" [] [Whitespace(" ")],
+                import_token: IMPORT_KW@191..197 "import" [] [],
+                arguments: missing (required),
+                qualifier_clause: missing (optional),
+                type_arguments: missing (optional),
+            },
+            semicolon_token: SEMICOLON@197..198 ";" [] [],
+        },
+    ],
+    eof_token: EOF@198..199 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: JS_MODULE@0..199
+  0: (empty)
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..198
+    0: TS_TYPE_ALIAS_DECLARATION@0..36
+      0: TYPE_KW@0..5 "type" [] [Whitespace(" ")]
+      1: TS_IDENTIFIER_BINDING@5..7
+        0: IDENT@5..7 "A" [] [Whitespace(" ")]
+      2: (empty)
+      3: EQ@7..9 "=" [] [Whitespace(" ")]
+      4: TS_IMPORT_TYPE@9..35
+        0: TYPEOF_KW@9..16 "typeof" [] [Whitespace(" ")]
+        1: IMPORT_KW@16..22 "import" [] []
+        2: TS_IMPORT_TYPE_ARGUMENTS@22..35
+          0: L_PAREN@22..23 "(" [] []
+          1: TS_STRING_LITERAL_TYPE@23..31
+            0: JS_STRING_LITERAL@23..31 "\"a.json\"" [] []
+          2: COMMA@31..32 "," [] []
+          3: TS_IMPORT_TYPE_ASSERTION_BLOCK@32..34
+            0: L_CURLY@32..33 "{" [] []
+            1: (empty)
+            2: R_CURLY@33..34 "}" [] []
+          4: R_PAREN@34..35 ")" [] []
+        3: (empty)
+        4: (empty)
+      5: SEMICOLON@35..36 ";" [] []
+    1: TS_TYPE_ALIAS_DECLARATION@36..87
+      0: TYPE_KW@36..42 "type" [Newline("\n")] [Whitespace(" ")]
+      1: TS_IDENTIFIER_BINDING@42..44
+        0: IDENT@42..44 "B" [] [Whitespace(" ")]
+      2: (empty)
+      3: EQ@44..46 "=" [] [Whitespace(" ")]
+      4: TS_IMPORT_TYPE@46..86
+        0: TYPEOF_KW@46..53 "typeof" [] [Whitespace(" ")]
+        1: IMPORT_KW@53..59 "import" [] []
+        2: TS_IMPORT_TYPE_ARGUMENTS@59..86
+          0: L_PAREN@59..60 "(" [] []
+          1: TS_STRING_LITERAL_TYPE@60..68
+            0: JS_STRING_LITERAL@60..68 "\"a.json\"" [] []
+          2: COMMA@68..69 "," [] []
+          3: TS_IMPORT_TYPE_ASSERTION_BLOCK@69..85
+            0: L_CURLY@69..70 "{" [] []
+            1: TS_IMPORT_TYPE_ASSERTION@70..84
+              0: WITH_KW@70..74 "with" [] []
+              1: COLON@74..75 ":" [] []
+              2: L_CURLY@75..76 "{" [] []
+              3: JS_IMPORT_ASSERTION_ENTRY_LIST@76..83
+                0: JS_BOGUS_IMPORT_ASSERTION_ENTRY@76..83
+                  0: L_BRACK@76..77 "[" [] []
+                  1: IDENT@77..78 "a" [] []
+                  2: R_BRACK@78..79 "]" [] []
+                  3: COLON@79..80 ":" [] []
+                  4: JS_STRING_LITERAL@80..83 "\"1\"" [] []
+              4: R_CURLY@83..84 "}" [] []
+            2: R_CURLY@84..85 "}" [] []
+          4: R_PAREN@85..86 ")" [] []
+        3: (empty)
+        4: (empty)
+      5: SEMICOLON@86..87 ";" [] []
+    2: TS_TYPE_ALIAS_DECLARATION@87..129
+      0: TYPE_KW@87..93 "type" [Newline("\n")] [Whitespace(" ")]
+      1: TS_IDENTIFIER_BINDING@93..95
+        0: IDENT@93..95 "C" [] [Whitespace(" ")]
+      2: (empty)
+      3: EQ@95..97 "=" [] [Whitespace(" ")]
+      4: TS_IMPORT_TYPE@97..129
+        0: TYPEOF_KW@97..104 "typeof" [] [Whitespace(" ")]
+        1: IMPORT_KW@104..110 "import" [] []
+        2: TS_IMPORT_TYPE_ARGUMENTS@110..129
+          0: L_PAREN@110..111 "(" [] []
+          1: TS_STRING_LITERAL_TYPE@111..119
+            0: JS_STRING_LITERAL@111..119 "\"a.json\"" [] []
+          2: COMMA@119..120 "," [] []
+          3: TS_IMPORT_TYPE_ASSERTION_BLOCK@120..129
+            0: L_CURLY@120..121 "{" [] []
+            1: TS_IMPORT_TYPE_ASSERTION@121..128
+              0: WITH_KW@121..125 "with" [] []
+              1: COLON@125..126 ":" [] []
+              2: L_CURLY@126..127 "{" [] []
+              3: JS_IMPORT_ASSERTION_ENTRY_LIST@127..127
+              4: R_CURLY@127..128 "}" [] []
+            2: R_CURLY@128..129 "}" [] []
+          4: (empty)
+        3: (empty)
+        4: (empty)
+      5: (empty)
+    3: JS_BOGUS_STATEMENT@129..133
+      0: COMMA@129..131 "," [] [Whitespace(" ")]
+      1: JS_NUMBER_LITERAL@131..132 "1" [] []
+      2: R_PAREN@132..133 ")" [] []
+    4: JS_EMPTY_STATEMENT@133..134
+      0: SEMICOLON@133..134 ";" [] []
+    5: TS_TYPE_ALIAS_DECLARATION@134..157
+      0: TYPE_KW@134..140 "type" [Newline("\n")] [Whitespace(" ")]
+      1: TS_IDENTIFIER_BINDING@140..142
+        0: IDENT@140..142 "D" [] [Whitespace(" ")]
+      2: (empty)
+      3: EQ@142..144 "=" [] [Whitespace(" ")]
+      4: TS_IMPORT_TYPE@144..156
+        0: (empty)
+        1: IMPORT_KW@144..150 "import" [] []
+        2: TS_IMPORT_TYPE_ARGUMENTS@150..156
+          0: L_PAREN@150..151 "(" [] []
+          1: TS_STRING_LITERAL_TYPE@151..154
+            0: JS_STRING_LITERAL@151..154 "\"a\"" [] []
+          2: COMMA@154..155 "," [] []
+          3: (empty)
+          4: R_PAREN@155..156 ")" [] []
+        3: (empty)
+        4: (empty)
+      5: SEMICOLON@156..157 ";" [] []
+    6: TS_TYPE_ALIAS_DECLARATION@157..174
+      0: TYPE_KW@157..163 "type" [Newline("\n")] [Whitespace(" ")]
+      1: TS_IDENTIFIER_BINDING@163..165
+        0: IDENT@163..165 "E" [] [Whitespace(" ")]
+      2: (empty)
+      3: EQ@165..167 "=" [] [Whitespace(" ")]
+      4: TS_IMPORT_TYPE@167..173
+        0: (empty)
+        1: IMPORT_KW@167..173 "import" [] []
+        2: (empty)
+        3: (empty)
+        4: (empty)
+      5: SEMICOLON@173..174 ";" [] []
+    7: TS_TYPE_ALIAS_DECLARATION@174..198
+      0: TYPE_KW@174..180 "type" [Newline("\n")] [Whitespace(" ")]
+      1: TS_IDENTIFIER_BINDING@180..182
+        0: IDENT@180..182 "F" [] [Whitespace(" ")]
+      2: (empty)
+      3: EQ@182..184 "=" [] [Whitespace(" ")]
+      4: TS_IMPORT_TYPE@184..197
+        0: TYPEOF_KW@184..191 "typeof" [] [Whitespace(" ")]
+        1: IMPORT_KW@191..197 "import" [] []
+        2: (empty)
+        3: (empty)
+        4: (empty)
+      5: SEMICOLON@197..198 ";" [] []
+  4: EOF@198..199 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+import_type_error.ts:1:34 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Missing import type assertion keyword 'with'
+  
+  > 1 │ type A = typeof import("a.json",{});
+      │                                  ^
+    2 │ type B = typeof import("a.json",{with:{[a]:"1"}});
+    3 │ type C = typeof import("a.json",{with:{}}, 1);
+  
+  i 'with' expected.
+  
+  > 1 │ type A = typeof import("a.json",{});
+      │                                  ^
+    2 │ type B = typeof import("a.json",{with:{[a]:"1"}});
+    3 │ type C = typeof import("a.json",{with:{}}, 1);
+  
+import_type_error.ts:2:40 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected an import attribute entry but instead found '[a]:"1"'.
+  
+    1 │ type A = typeof import("a.json",{});
+  > 2 │ type B = typeof import("a.json",{with:{[a]:"1"}});
+      │                                        ^^^^^^^
+    3 │ type C = typeof import("a.json",{with:{}}, 1);
+    4 │ type D = import("a",);
+  
+  i Expected an import attribute entry here.
+  
+    1 │ type A = typeof import("a.json",{});
+  > 2 │ type B = typeof import("a.json",{with:{[a]:"1"}});
+      │                                        ^^^^^^^
+    3 │ type C = typeof import("a.json",{with:{}}, 1);
+    4 │ type D = import("a",);
+  
+import_type_error.ts:3:42 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `)` but instead found `,`
+  
+    1 │ type A = typeof import("a.json",{});
+    2 │ type B = typeof import("a.json",{with:{[a]:"1"}});
+  > 3 │ type C = typeof import("a.json",{with:{}}, 1);
+      │                                          ^
+    4 │ type D = import("a",);
+    5 │ type E = import;
+  
+  i Remove ,
+  
+import_type_error.ts:4:20 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × ts import type may not have a trailing comma
+  
+    2 │ type B = typeof import("a.json",{with:{[a]:"1"}});
+    3 │ type C = typeof import("a.json",{with:{}}, 1);
+  > 4 │ type D = import("a",);
+      │                    ^
+    5 │ type E = import;
+    6 │ type F = typeof import;
+  
+  i Remove the trailing comma here
+  
+    2 │ type B = typeof import("a.json",{with:{[a]:"1"}});
+    3 │ type C = typeof import("a.json",{with:{}}, 1);
+  > 4 │ type D = import("a",);
+      │                    ^
+    5 │ type E = import;
+    6 │ type F = typeof import;
+  
+import_type_error.ts:5:16 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected '(', but got ';' here
+  
+    3 │ type C = typeof import("a.json",{with:{}}, 1);
+    4 │ type D = import("a",);
+  > 5 │ type E = import;
+      │                ^
+    6 │ type F = typeof import;
+    7 │ 
+  
+import_type_error.ts:6:23 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected '(', but got ';' here
+  
+    4 │ type D = import("a",);
+    5 │ type E = import;
+  > 6 │ type F = typeof import;
+      │                       ^
+    7 │ 
+  
+```

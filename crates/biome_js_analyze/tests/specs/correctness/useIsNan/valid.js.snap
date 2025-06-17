@@ -3,7 +3,8 @@ source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: valid.js
 ---
 # Input
-```jsx
+```js
+/* should not generate diagnostics */
 var x = NaN;
 isNaN(NaN) === true;
 isNaN(123) !== true;
@@ -58,5 +59,3 @@ switch(foo) { case foo.Number.NaN: break }
 
 
 ```
-
-

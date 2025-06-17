@@ -3,7 +3,7 @@ source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: ignoredDependencies.js
 ---
 # Input
-```jsx
+```js
 import { useEffect } from "react";
 
 // Make sure disabling a single dependency doesn't disable all.
@@ -29,9 +29,9 @@ function IgnoredDependencies2() {
 
 # Diagnostics
 ```
-ignoredDependencies.js:8:5 lint/correctness/useExhaustiveDependencies ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ignoredDependencies.js:8:5 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━━━━━━━━━━━━━━━━━━
 
-  ! This hook does not specify all of its dependencies: a
+  × This hook does not specify all of its dependencies: a
   
      6 │     let b = 2;
      7 │     // biome-ignore lint/correctness/useExhaustiveDependencies(b): `b` is ignored, but there should still be a diagnostic for `a`
@@ -51,6 +51,10 @@ ignoredDependencies.js:8:5 lint/correctness/useExhaustiveDependencies ━━━�
   
   i Either include it or remove the dependency array
   
+  i Unsafe fix: Add the missing dependencies to the list.
+  
+    10 │ ····},·[a]);
+       │         +   
 
 ```
 

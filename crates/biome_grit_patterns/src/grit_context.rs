@@ -7,7 +7,9 @@ use crate::grit_resolved_pattern::GritResolvedPattern;
 use crate::grit_target_language::GritTargetLanguage;
 use crate::grit_target_node::GritTargetNode;
 use crate::grit_tree::GritTargetTree;
+use biome_analyze::RuleDiagnostic;
 use biome_parser::AnyParse;
+use camino::Utf8PathBuf;
 use grit_pattern_matcher::constants::{GLOBAL_VARS_SCOPE_INDEX, NEW_FILES_INDEX};
 use grit_pattern_matcher::context::{ExecContext, QueryContext};
 use grit_pattern_matcher::file_owners::{FileOwner, FileOwners};
@@ -16,9 +18,10 @@ use grit_pattern_matcher::pattern::{
     PredicateDefinition, ResolvedPattern, State,
 };
 use grit_util::error::GritPatternError;
-use grit_util::{error::GritResult, AnalysisLogs, FileOrigin, InputRanges, MatchRanges};
+use grit_util::{AnalysisLogs, FileOrigin, InputRanges, MatchRanges, error::GritResult};
 use path_absolutize::Absolutize;
 use std::path::PathBuf;
+use std::sync::{Arc, Mutex};
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct GritQueryContext;
@@ -49,6 +52,29 @@ pub struct GritExecContext<'a> {
     pub functions: &'a [GritFunctionDefinition<GritQueryContext>],
     pub patterns: &'a [PatternDefinition<GritQueryContext>],
     pub predicates: &'a [PredicateDefinition<GritQueryContext>],
+
+    pub diagnostics: Mutex<Vec<RuleDiagnostic>>,
+}
+
+impl GritExecContext<'_> {
+    pub fn add_diagnostic(&self, diagnostic: RuleDiagnostic) {
+        let mut diagnostics = self.diagnostics.lock().unwrap();
+        // Make sure we don't add multiple messages for the same span.
+        // I think this happens when a node and its child(ren) both match the
+        // same predicate, and this seems like the easiest way to avoid the
+        // problem. Alternatively we may need to hack something deep into the
+        // Grit pattern matcher.
+        if diagnostics
+            .last()
+            .is_none_or(|last| last.span() != diagnostic.span())
+        {
+            diagnostics.push(diagnostic);
+        }
+    }
+
+    pub fn into_diagnostics(self) -> Vec<RuleDiagnostic> {
+        self.diagnostics.into_inner().unwrap()
+    }
 }
 
 impl<'a> ExecContext<'a, GritQueryContext> for GritExecContext<'a> {
@@ -221,7 +247,7 @@ impl<'a> ExecContext<'a, GritQueryContext> for GritExecContext<'a> {
                 // TODO: Verify the workspace's maximum file size.
 
                 let file = file_owner_from_matches(
-                    &file.path,
+                    file.path.as_ref(),
                     &file.parse,
                     None,
                     FileOrigin::Fresh,
@@ -299,6 +325,27 @@ fn new_file_owner(
 /// that can use the Biome workspace.
 #[derive(Clone, Debug)]
 pub struct GritTargetFile {
-    pub path: PathBuf,
+    pub path: Arc<Utf8PathBuf>,
     pub parse: AnyParse,
+}
+
+impl GritTargetFile {
+    pub fn new(path: impl Into<Utf8PathBuf>, parse: AnyParse) -> Self {
+        Self {
+            path: Arc::new(path.into()),
+            parse,
+        }
+    }
+
+    pub fn parse(
+        source: &str,
+        path: impl Into<Utf8PathBuf>,
+        target_language: GritTargetLanguage,
+    ) -> Self {
+        let path = path.into();
+        let parser = target_language.get_parser();
+        let parse = parser.parse_with_path(source, path.as_ref());
+
+        Self::new(path, parse)
+    }
 }

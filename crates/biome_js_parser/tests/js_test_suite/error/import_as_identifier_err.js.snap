@@ -1,0 +1,101 @@
+---
+source: crates/biome_js_parser/tests/spec_test.rs
+expression: snapshot
+snapshot_kind: text
+---
+## Input
+
+```js
+import { as c } from "test";
+
+```
+
+
+## AST
+
+```
+JsModule {
+    bom_token: missing (optional),
+    interpreter_token: missing (optional),
+    directives: JsDirectiveList [],
+    items: JsModuleItemList [
+        JsImport {
+            import_token: IMPORT_KW@0..7 "import" [] [Whitespace(" ")],
+            import_clause: JsImportNamedClause {
+                type_token: missing (optional),
+                named_specifiers: JsNamedImportSpecifiers {
+                    l_curly_token: L_CURLY@7..9 "{" [] [Whitespace(" ")],
+                    specifiers: JsNamedImportSpecifierList [
+                        JsNamedImportSpecifier {
+                            type_token: missing (optional),
+                            name: missing (required),
+                            as_token: AS_KW@9..12 "as" [] [Whitespace(" ")],
+                            local_name: JsIdentifierBinding {
+                                name_token: IDENT@12..14 "c" [] [Whitespace(" ")],
+                            },
+                        },
+                    ],
+                    r_curly_token: R_CURLY@14..16 "}" [] [Whitespace(" ")],
+                },
+                from_token: FROM_KW@16..21 "from" [] [Whitespace(" ")],
+                source: JsModuleSource {
+                    value_token: JS_STRING_LITERAL@21..27 "\"test\"" [] [],
+                },
+                assertion: missing (optional),
+            },
+            semicolon_token: SEMICOLON@27..28 ";" [] [],
+        },
+    ],
+    eof_token: EOF@28..29 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: JS_MODULE@0..29
+  0: (empty)
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..28
+    0: JS_IMPORT@0..28
+      0: IMPORT_KW@0..7 "import" [] [Whitespace(" ")]
+      1: JS_IMPORT_NAMED_CLAUSE@7..27
+        0: (empty)
+        1: JS_NAMED_IMPORT_SPECIFIERS@7..16
+          0: L_CURLY@7..9 "{" [] [Whitespace(" ")]
+          1: JS_NAMED_IMPORT_SPECIFIER_LIST@9..14
+            0: JS_NAMED_IMPORT_SPECIFIER@9..14
+              0: (empty)
+              1: (empty)
+              2: AS_KW@9..12 "as" [] [Whitespace(" ")]
+              3: JS_IDENTIFIER_BINDING@12..14
+                0: IDENT@12..14 "c" [] [Whitespace(" ")]
+          2: R_CURLY@14..16 "}" [] [Whitespace(" ")]
+        2: FROM_KW@16..21 "from" [] [Whitespace(" ")]
+        3: JS_MODULE_SOURCE@21..27
+          0: JS_STRING_LITERAL@21..27 "\"test\"" [] []
+        4: (empty)
+      2: SEMICOLON@27..28 ";" [] []
+  4: EOF@28..29 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+import_as_identifier_err.js:1:10 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a string literal, or an identifier but instead found ''.
+  
+  > 1 │ import { as c } from "test";
+      │          
+    2 │ 
+  
+  i Expected a string literal, or an identifier here.
+  
+  > 1 │ import { as c } from "test";
+      │          
+    2 │ 
+  
+```

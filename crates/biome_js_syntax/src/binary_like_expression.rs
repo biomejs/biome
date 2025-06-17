@@ -11,7 +11,7 @@ use crate::{
     JsSyntaxNode, JsSyntaxToken, JsWhileStatement, OperatorPrecedence,
 };
 
-use biome_rowan::{declare_node_union, AstNode, AstSeparatedList, SyntaxResult};
+use biome_rowan::{AstNode, AstSeparatedList, SyntaxResult, declare_node_union};
 use std::fmt::Debug;
 use std::hash::Hash;
 
@@ -77,7 +77,7 @@ impl AnyJsBinaryLikeExpression {
     /// switch (a + b) {} // true
     /// ```
     pub fn is_inside_condition(&self, parent: Option<&JsSyntaxNode>) -> bool {
-        parent.map_or(false, |parent| {
+        parent.is_some_and(|parent| {
             let test = match parent.kind() {
                 JsSyntaxKind::JS_IF_STATEMENT => JsIfStatement::unwrap_cast(parent.clone()).test(),
                 JsSyntaxKind::JS_DO_WHILE_STATEMENT => {
@@ -91,7 +91,7 @@ impl AnyJsBinaryLikeExpression {
                 }
                 _ => return false,
             };
-            test.map_or(false, |test| test.syntax() == self.syntax())
+            test.is_ok_and(|test| test.syntax() == self.syntax())
         })
     }
 
@@ -100,7 +100,7 @@ impl AnyJsBinaryLikeExpression {
     pub fn can_flatten(&self) -> SyntaxResult<bool> {
         let left = self.left()?.into_expression();
         let left_expression = left.map(|expression| expression.into_syntax());
-        if let Some(left_binary_like) = left_expression.and_then(AnyJsBinaryLikeExpression::cast) {
+        if let Some(left_binary_like) = left_expression.and_then(Self::cast) {
             Ok(should_flatten(
                 self.operator()?,
                 left_binary_like.operator()?,
@@ -112,14 +112,12 @@ impl AnyJsBinaryLikeExpression {
 
     pub fn should_inline_logical_expression(&self) -> bool {
         match self {
-            AnyJsBinaryLikeExpression::JsLogicalExpression(logical) => {
-                logical.right().map_or(false, |right| match right {
-                    AnyJsExpression::JsObjectExpression(object) => !object.members().is_empty(),
-                    AnyJsExpression::JsArrayExpression(array) => !array.elements().is_empty(),
-                    AnyJsExpression::JsxTagExpression(_) => true,
-                    _ => false,
-                })
-            }
+            Self::JsLogicalExpression(logical) => logical.right().is_ok_and(|right| match right {
+                AnyJsExpression::JsObjectExpression(object) => !object.members().is_empty(),
+                AnyJsExpression::JsArrayExpression(array) => !array.elements().is_empty(),
+                AnyJsExpression::JsxTagExpression(_) => true,
+                _ => false,
+            }),
             _ => false,
         }
     }
@@ -129,10 +127,7 @@ impl AnyJsBinaryLikeExpression {
     /// There are some cases where the indentation is done by the parent, so if the parent is already doing
     /// the indentation, then there's no need to do a second indentation.
     /// [Prettier applies]: <https://github.com/prettier/prettier/blob/b0201e01ef99db799eb3716f15b7dfedb0a2e62b/src/language-js/print/binaryish.js#L122-L125>
-    pub fn should_not_indent_if_parent_indents(
-        self: &AnyJsBinaryLikeExpression,
-        parent: Option<JsSyntaxNode>,
-    ) -> bool {
+    pub fn should_not_indent_if_parent_indents(&self, parent: Option<JsSyntaxNode>) -> bool {
         parent.is_some_and(|parent| match parent.kind() {
             JsSyntaxKind::JS_RETURN_STATEMENT | JsSyntaxKind::JS_THROW_STATEMENT => true,
             JsSyntaxKind::JSX_EXPRESSION_ATTRIBUTE_VALUE => true,

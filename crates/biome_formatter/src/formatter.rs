@@ -289,12 +289,12 @@ impl<Context> Buffer for Formatter<'_, Context> {
     }
 }
 
-/// Snapshot of the formatter state  used to handle backtracking if
+/// Snapshot of the formatter state used to handle backtracking if
 /// errors are encountered in the formatting process and the formatter
-/// has to fallback to printing raw tokens
+/// has to fall back to printing raw tokens
 ///
 /// In practice this only saves the set of printed tokens in debug
-/// mode and compiled to nothing in release mode
+/// mode and compiles to nothing in release mode
 pub struct FormatterSnapshot {
     buffer: BufferSnapshot,
     state: FormatStateSnapshot,

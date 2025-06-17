@@ -1,0 +1,118 @@
+---
+source: crates/biome_js_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```ts
+function a(@dec x) {}
+
+```
+
+
+## AST
+
+```
+JsModule {
+    bom_token: missing (optional),
+    interpreter_token: missing (optional),
+    directives: JsDirectiveList [],
+    items: JsModuleItemList [
+        JsFunctionDeclaration {
+            async_token: missing (optional),
+            function_token: FUNCTION_KW@0..9 "function" [] [Whitespace(" ")],
+            star_token: missing (optional),
+            id: JsIdentifierBinding {
+                name_token: IDENT@9..10 "a" [] [],
+            },
+            type_parameters: missing (optional),
+            parameters: JsParameters {
+                l_paren_token: L_PAREN@10..11 "(" [] [],
+                items: JsParameterList [
+                    JsBogusParameter {
+                        items: [
+                            JsBogus {
+                                items: [
+                                    JsDecorator {
+                                        at_token: AT@11..12 "@" [] [],
+                                        expression: JsIdentifierExpression {
+                                            name: JsReferenceIdentifier {
+                                                value_token: IDENT@12..16 "dec" [] [Whitespace(" ")],
+                                            },
+                                        },
+                                    },
+                                ],
+                            },
+                            JsIdentifierBinding {
+                                name_token: IDENT@16..17 "x" [] [],
+                            },
+                        ],
+                    },
+                ],
+                r_paren_token: R_PAREN@17..19 ")" [] [Whitespace(" ")],
+            },
+            return_type_annotation: missing (optional),
+            body: JsFunctionBody {
+                l_curly_token: L_CURLY@19..20 "{" [] [],
+                directives: JsDirectiveList [],
+                statements: JsStatementList [],
+                r_curly_token: R_CURLY@20..21 "}" [] [],
+            },
+        },
+    ],
+    eof_token: EOF@21..22 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: JS_MODULE@0..22
+  0: (empty)
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..21
+    0: JS_FUNCTION_DECLARATION@0..21
+      0: (empty)
+      1: FUNCTION_KW@0..9 "function" [] [Whitespace(" ")]
+      2: (empty)
+      3: JS_IDENTIFIER_BINDING@9..10
+        0: IDENT@9..10 "a" [] []
+      4: (empty)
+      5: JS_PARAMETERS@10..19
+        0: L_PAREN@10..11 "(" [] []
+        1: JS_PARAMETER_LIST@11..17
+          0: JS_BOGUS_PARAMETER@11..17
+            0: JS_BOGUS@11..16
+              0: JS_DECORATOR@11..16
+                0: AT@11..12 "@" [] []
+                1: JS_IDENTIFIER_EXPRESSION@12..16
+                  0: JS_REFERENCE_IDENTIFIER@12..16
+                    0: IDENT@12..16 "dec" [] [Whitespace(" ")]
+            1: JS_IDENTIFIER_BINDING@16..17
+              0: IDENT@16..17 "x" [] []
+        2: R_PAREN@17..19 ")" [] [Whitespace(" ")]
+      6: (empty)
+      7: JS_FUNCTION_BODY@19..21
+        0: L_CURLY@19..20 "{" [] []
+        1: JS_DIRECTIVE_LIST@20..20
+        2: JS_STATEMENT_LIST@20..20
+        3: R_CURLY@20..21 "}" [] []
+  4: EOF@21..22 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+ts_formal_parameter_decorator.ts:1:12 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Decorators are not valid here.
+  
+  > 1 │ function a(@dec x) {}
+      │            ^^^^
+    2 │ 
+  
+  i Decorators are only valid on class declarations, class expressions, and class methods.
+  
+```

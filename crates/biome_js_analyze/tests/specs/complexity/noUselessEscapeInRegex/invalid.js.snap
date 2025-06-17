@@ -1,0 +1,1003 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```js
+/\ /;
+/[\-ab]/;
+/[ab\?]/;
+/[ab\.]/;
+/[a\|b]/;
+/\-/;
+/[\-]/;
+/[\-]/;
+/[\(paren]/;
+/[\[]/;
+/[\/]/; // A character class containing '/'
+/[\B]/;
+/[a][\-b]/;
+/\-[]/;
+/[a\^]/;
+/[^\^]/;
+/[^\^]/u;
+/[\$]/v;
+/[\&\&]/v;
+/[\!\!]/v;
+/[\#\#]/v;
+/[\#\#]/v;
+/[\*\*]/v;
+/[\+\+]/v;
+/[\,\,]/v;
+/[\,\,]/v;
+/[\:\:]/v;
+/[\;\;]/v;
+/[\<\<]/v;
+/[\=\=]/v;
+/[\>\>]/v;
+/[\?\?]/v;
+/[\@\@]/v;
+/[\`\`]/v;
+/[\~\~]/v;
+/[^\^\^]/v;
+/[_\^\^]/v;
+/[\&\&&\&]/v;
+/[\p{ASCII}--\.]/v;
+/[\p{ASCII}&&\.]/v;
+/[\.--[.&]]/v;
+/[\.&&[.&]]/v;
+/[\.--\.--\.]/v;
+/[\.&&\.&&\.]/v;
+/[[\.&]--[\.&]]/v;
+/[[\.&]&&[\.&]]/v;
+
+// Unlike ESLint, we report `\k` when it is not in a unicode-aware regex
+/(?<a>)\k<a>/;
+
+// A test with unicode characters that take more than one byte
+/😀\😀/
+```
+
+# Diagnostics
+```
+invalid.js:1:2 lint/complexity/noUselessEscapeInRegex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The character doesn't need to be escaped.
+  
+  > 1 │ /\ /;
+      │  ^^
+    2 │ /[\-ab]/;
+    3 │ /[ab\?]/;
+  
+  i Safe fix: Unescape the character.
+  
+    1 │ /\·/;
+      │  -   
+
+```
+
+```
+invalid.js:2:3 lint/complexity/noUselessEscapeInRegex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The character doesn't need to be escaped.
+  
+    1 │ /\ /;
+  > 2 │ /[\-ab]/;
+      │   ^^
+    3 │ /[ab\?]/;
+    4 │ /[ab\.]/;
+  
+  i The character should only be escaped if it appears in the middle of the character class or under the `v` flag.
+  
+  i Safe fix: Unescape the character.
+  
+    2 │ /[\-ab]/;
+      │   -      
+
+```
+
+```
+invalid.js:3:5 lint/complexity/noUselessEscapeInRegex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The character doesn't need to be escaped.
+  
+    1 │ /\ /;
+    2 │ /[\-ab]/;
+  > 3 │ /[ab\?]/;
+      │     ^^
+    4 │ /[ab\.]/;
+    5 │ /[a\|b]/;
+  
+  i The character should only be escaped if it is outside a character class.
+  
+  i Safe fix: Unescape the character.
+  
+    3 │ /[ab\?]/;
+      │     -    
+
+```
+
+```
+invalid.js:4:5 lint/complexity/noUselessEscapeInRegex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The character doesn't need to be escaped.
+  
+    2 │ /[\-ab]/;
+    3 │ /[ab\?]/;
+  > 4 │ /[ab\.]/;
+      │     ^^
+    5 │ /[a\|b]/;
+    6 │ /\-/;
+  
+  i The character should only be escaped if it is outside a character class.
+  
+  i Safe fix: Unescape the character.
+  
+    4 │ /[ab\.]/;
+      │     -    
+
+```
+
+```
+invalid.js:5:4 lint/complexity/noUselessEscapeInRegex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The character doesn't need to be escaped.
+  
+    3 │ /[ab\?]/;
+    4 │ /[ab\.]/;
+  > 5 │ /[a\|b]/;
+      │    ^^
+    6 │ /\-/;
+    7 │ /[\-]/;
+  
+  i The character should only be escaped if it is outside a character class or under the `v` flag.
+  
+  i Safe fix: Unescape the character.
+  
+    5 │ /[a\|b]/;
+      │    -     
+
+```
+
+```
+invalid.js:6:2 lint/complexity/noUselessEscapeInRegex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The character doesn't need to be escaped.
+  
+    4 │ /[ab\.]/;
+    5 │ /[a\|b]/;
+  > 6 │ /\-/;
+      │  ^^
+    7 │ /[\-]/;
+    8 │ /[\-]/;
+  
+  i Safe fix: Unescape the character.
+  
+    6 │ /\-/;
+      │  -   
+
+```
+
+```
+invalid.js:7:3 lint/complexity/noUselessEscapeInRegex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The character doesn't need to be escaped.
+  
+    5 │ /[a\|b]/;
+    6 │ /\-/;
+  > 7 │ /[\-]/;
+      │   ^^
+    8 │ /[\-]/;
+    9 │ /[\(paren]/;
+  
+  i The character should only be escaped if it appears in the middle of the character class or under the `v` flag.
+  
+  i Safe fix: Unescape the character.
+  
+    7 │ /[\-]/;
+      │   -    
+
+```
+
+```
+invalid.js:8:3 lint/complexity/noUselessEscapeInRegex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The character doesn't need to be escaped.
+  
+     6 │ /\-/;
+     7 │ /[\-]/;
+   > 8 │ /[\-]/;
+       │   ^^
+     9 │ /[\(paren]/;
+    10 │ /[\[]/;
+  
+  i The character should only be escaped if it appears in the middle of the character class or under the `v` flag.
+  
+  i Safe fix: Unescape the character.
+  
+    8 │ /[\-]/;
+      │   -    
+
+```
+
+```
+invalid.js:9:3 lint/complexity/noUselessEscapeInRegex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The character doesn't need to be escaped.
+  
+     7 │ /[\-]/;
+     8 │ /[\-]/;
+   > 9 │ /[\(paren]/;
+       │   ^^
+    10 │ /[\[]/;
+    11 │ /[\/]/; // A character class containing '/'
+  
+  i The character should only be escaped if it is outside a character class or under the `v` flag.
+  
+  i Safe fix: Unescape the character.
+  
+    9 │ /[\(paren]/;
+      │   -         
+
+```
+
+```
+invalid.js:10:3 lint/complexity/noUselessEscapeInRegex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The character doesn't need to be escaped.
+  
+     8 │ /[\-]/;
+     9 │ /[\(paren]/;
+  > 10 │ /[\[]/;
+       │   ^^
+    11 │ /[\/]/; // A character class containing '/'
+    12 │ /[\B]/;
+  
+  i The character should only be escaped if it is outside a character class or under the `v` flag.
+  
+  i Safe fix: Unescape the character.
+  
+    10 │ /[\[]/;
+       │   -    
+
+```
+
+```
+invalid.js:11:3 lint/complexity/noUselessEscapeInRegex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The character doesn't need to be escaped.
+  
+     9 │ /[\(paren]/;
+    10 │ /[\[]/;
+  > 11 │ /[\/]/; // A character class containing '/'
+       │   ^^
+    12 │ /[\B]/;
+    13 │ /[a][\-b]/;
+  
+  i The character should only be escaped if it is outside a character class or under the `v` flag.
+  
+  i Safe fix: Unescape the character.
+  
+    11 │ /[\/]/;·//·A·character·class·containing·'/'
+       │   -                                        
+
+```
+
+```
+invalid.js:12:3 lint/complexity/noUselessEscapeInRegex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The character doesn't need to be escaped.
+  
+    10 │ /[\[]/;
+    11 │ /[\/]/; // A character class containing '/'
+  > 12 │ /[\B]/;
+       │   ^^
+    13 │ /[a][\-b]/;
+    14 │ /\-[]/;
+  
+  i The escape sequence only has meaning outside a character class.
+  
+  i Safe fix: Unescape the character.
+  
+    12 │ /[\B]/;
+       │   -    
+
+```
+
+```
+invalid.js:13:6 lint/complexity/noUselessEscapeInRegex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The character doesn't need to be escaped.
+  
+    11 │ /[\/]/; // A character class containing '/'
+    12 │ /[\B]/;
+  > 13 │ /[a][\-b]/;
+       │      ^^
+    14 │ /\-[]/;
+    15 │ /[a\^]/;
+  
+  i The character should only be escaped if it appears in the middle of the character class or under the `v` flag.
+  
+  i Safe fix: Unescape the character.
+  
+    13 │ /[a][\-b]/;
+       │      -     
+
+```
+
+```
+invalid.js:14:2 lint/complexity/noUselessEscapeInRegex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The character doesn't need to be escaped.
+  
+    12 │ /[\B]/;
+    13 │ /[a][\-b]/;
+  > 14 │ /\-[]/;
+       │  ^^
+    15 │ /[a\^]/;
+    16 │ /[^\^]/;
+  
+  i Safe fix: Unescape the character.
+  
+    14 │ /\-[]/;
+       │  -     
+
+```
+
+```
+invalid.js:15:4 lint/complexity/noUselessEscapeInRegex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The character doesn't need to be escaped.
+  
+    13 │ /[a][\-b]/;
+    14 │ /\-[]/;
+  > 15 │ /[a\^]/;
+       │    ^^
+    16 │ /[^\^]/;
+    17 │ /[^\^]/u;
+  
+  i The character should only be escaped if it is the first character of the class.
+  
+  i Safe fix: Unescape the character.
+  
+    15 │ /[a\^]/;
+       │    -    
+
+```
+
+```
+invalid.js:16:4 lint/complexity/noUselessEscapeInRegex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The character doesn't need to be escaped.
+  
+    14 │ /\-[]/;
+    15 │ /[a\^]/;
+  > 16 │ /[^\^]/;
+       │    ^^
+    17 │ /[^\^]/u;
+    18 │ /[\$]/v;
+  
+  i The character should only be escaped if it is the first character of the class.
+  
+  i Safe fix: Unescape the character.
+  
+    16 │ /[^\^]/;
+       │    -    
+
+```
+
+```
+invalid.js:17:4 lint/complexity/noUselessEscapeInRegex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The character doesn't need to be escaped.
+  
+    15 │ /[a\^]/;
+    16 │ /[^\^]/;
+  > 17 │ /[^\^]/u;
+       │    ^^
+    18 │ /[\$]/v;
+    19 │ /[\&\&]/v;
+  
+  i The character should only be escaped if it is the first character of the class.
+  
+  i Safe fix: Unescape the character.
+  
+    17 │ /[^\^]/u;
+       │    -     
+
+```
+
+```
+invalid.js:18:3 lint/complexity/noUselessEscapeInRegex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The character doesn't need to be escaped.
+  
+    16 │ /[^\^]/;
+    17 │ /[^\^]/u;
+  > 18 │ /[\$]/v;
+       │   ^^
+    19 │ /[\&\&]/v;
+    20 │ /[\!\!]/v;
+  
+  i The character should only be escaped if it is outside a character class.
+  
+  i Safe fix: Unescape the character.
+  
+    18 │ /[\$]/v;
+       │   -     
+
+```
+
+```
+invalid.js:19:3 lint/complexity/noUselessEscapeInRegex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The character doesn't need to be escaped.
+  
+    17 │ /[^\^]/u;
+    18 │ /[\$]/v;
+  > 19 │ /[\&\&]/v;
+       │   ^^
+    20 │ /[\!\!]/v;
+    21 │ /[\#\#]/v;
+  
+  i Safe fix: Unescape the character.
+  
+    19 │ /[\&\&]/v;
+       │   -       
+
+```
+
+```
+invalid.js:20:3 lint/complexity/noUselessEscapeInRegex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The character doesn't need to be escaped.
+  
+    18 │ /[\$]/v;
+    19 │ /[\&\&]/v;
+  > 20 │ /[\!\!]/v;
+       │   ^^
+    21 │ /[\#\#]/v;
+    22 │ /[\#\#]/v;
+  
+  i Safe fix: Unescape the character.
+  
+    20 │ /[\!\!]/v;
+       │   -       
+
+```
+
+```
+invalid.js:21:3 lint/complexity/noUselessEscapeInRegex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The character doesn't need to be escaped.
+  
+    19 │ /[\&\&]/v;
+    20 │ /[\!\!]/v;
+  > 21 │ /[\#\#]/v;
+       │   ^^
+    22 │ /[\#\#]/v;
+    23 │ /[\*\*]/v;
+  
+  i Safe fix: Unescape the character.
+  
+    21 │ /[\#\#]/v;
+       │   -       
+
+```
+
+```
+invalid.js:22:3 lint/complexity/noUselessEscapeInRegex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The character doesn't need to be escaped.
+  
+    20 │ /[\!\!]/v;
+    21 │ /[\#\#]/v;
+  > 22 │ /[\#\#]/v;
+       │   ^^
+    23 │ /[\*\*]/v;
+    24 │ /[\+\+]/v;
+  
+  i Safe fix: Unescape the character.
+  
+    22 │ /[\#\#]/v;
+       │   -       
+
+```
+
+```
+invalid.js:23:3 lint/complexity/noUselessEscapeInRegex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The character doesn't need to be escaped.
+  
+    21 │ /[\#\#]/v;
+    22 │ /[\#\#]/v;
+  > 23 │ /[\*\*]/v;
+       │   ^^
+    24 │ /[\+\+]/v;
+    25 │ /[\,\,]/v;
+  
+  i The character should only be escaped if it is outside a character class.
+  
+  i Safe fix: Unescape the character.
+  
+    23 │ /[\*\*]/v;
+       │   -       
+
+```
+
+```
+invalid.js:24:3 lint/complexity/noUselessEscapeInRegex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The character doesn't need to be escaped.
+  
+    22 │ /[\#\#]/v;
+    23 │ /[\*\*]/v;
+  > 24 │ /[\+\+]/v;
+       │   ^^
+    25 │ /[\,\,]/v;
+    26 │ /[\,\,]/v;
+  
+  i The character should only be escaped if it is outside a character class.
+  
+  i Safe fix: Unescape the character.
+  
+    24 │ /[\+\+]/v;
+       │   -       
+
+```
+
+```
+invalid.js:25:3 lint/complexity/noUselessEscapeInRegex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The character doesn't need to be escaped.
+  
+    23 │ /[\*\*]/v;
+    24 │ /[\+\+]/v;
+  > 25 │ /[\,\,]/v;
+       │   ^^
+    26 │ /[\,\,]/v;
+    27 │ /[\:\:]/v;
+  
+  i Safe fix: Unescape the character.
+  
+    25 │ /[\,\,]/v;
+       │   -       
+
+```
+
+```
+invalid.js:26:3 lint/complexity/noUselessEscapeInRegex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The character doesn't need to be escaped.
+  
+    24 │ /[\+\+]/v;
+    25 │ /[\,\,]/v;
+  > 26 │ /[\,\,]/v;
+       │   ^^
+    27 │ /[\:\:]/v;
+    28 │ /[\;\;]/v;
+  
+  i Safe fix: Unescape the character.
+  
+    26 │ /[\,\,]/v;
+       │   -       
+
+```
+
+```
+invalid.js:27:3 lint/complexity/noUselessEscapeInRegex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The character doesn't need to be escaped.
+  
+    25 │ /[\,\,]/v;
+    26 │ /[\,\,]/v;
+  > 27 │ /[\:\:]/v;
+       │   ^^
+    28 │ /[\;\;]/v;
+    29 │ /[\<\<]/v;
+  
+  i Safe fix: Unescape the character.
+  
+    27 │ /[\:\:]/v;
+       │   -       
+
+```
+
+```
+invalid.js:28:3 lint/complexity/noUselessEscapeInRegex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The character doesn't need to be escaped.
+  
+    26 │ /[\,\,]/v;
+    27 │ /[\:\:]/v;
+  > 28 │ /[\;\;]/v;
+       │   ^^
+    29 │ /[\<\<]/v;
+    30 │ /[\=\=]/v;
+  
+  i Safe fix: Unescape the character.
+  
+    28 │ /[\;\;]/v;
+       │   -       
+
+```
+
+```
+invalid.js:29:3 lint/complexity/noUselessEscapeInRegex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The character doesn't need to be escaped.
+  
+    27 │ /[\:\:]/v;
+    28 │ /[\;\;]/v;
+  > 29 │ /[\<\<]/v;
+       │   ^^
+    30 │ /[\=\=]/v;
+    31 │ /[\>\>]/v;
+  
+  i Safe fix: Unescape the character.
+  
+    29 │ /[\<\<]/v;
+       │   -       
+
+```
+
+```
+invalid.js:30:3 lint/complexity/noUselessEscapeInRegex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The character doesn't need to be escaped.
+  
+    28 │ /[\;\;]/v;
+    29 │ /[\<\<]/v;
+  > 30 │ /[\=\=]/v;
+       │   ^^
+    31 │ /[\>\>]/v;
+    32 │ /[\?\?]/v;
+  
+  i Safe fix: Unescape the character.
+  
+    30 │ /[\=\=]/v;
+       │   -       
+
+```
+
+```
+invalid.js:31:3 lint/complexity/noUselessEscapeInRegex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The character doesn't need to be escaped.
+  
+    29 │ /[\<\<]/v;
+    30 │ /[\=\=]/v;
+  > 31 │ /[\>\>]/v;
+       │   ^^
+    32 │ /[\?\?]/v;
+    33 │ /[\@\@]/v;
+  
+  i Safe fix: Unescape the character.
+  
+    31 │ /[\>\>]/v;
+       │   -       
+
+```
+
+```
+invalid.js:32:3 lint/complexity/noUselessEscapeInRegex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The character doesn't need to be escaped.
+  
+    30 │ /[\=\=]/v;
+    31 │ /[\>\>]/v;
+  > 32 │ /[\?\?]/v;
+       │   ^^
+    33 │ /[\@\@]/v;
+    34 │ /[\`\`]/v;
+  
+  i The character should only be escaped if it is outside a character class.
+  
+  i Safe fix: Unescape the character.
+  
+    32 │ /[\?\?]/v;
+       │   -       
+
+```
+
+```
+invalid.js:33:3 lint/complexity/noUselessEscapeInRegex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The character doesn't need to be escaped.
+  
+    31 │ /[\>\>]/v;
+    32 │ /[\?\?]/v;
+  > 33 │ /[\@\@]/v;
+       │   ^^
+    34 │ /[\`\`]/v;
+    35 │ /[\~\~]/v;
+  
+  i Safe fix: Unescape the character.
+  
+    33 │ /[\@\@]/v;
+       │   -       
+
+```
+
+```
+invalid.js:34:3 lint/complexity/noUselessEscapeInRegex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The character doesn't need to be escaped.
+  
+    32 │ /[\?\?]/v;
+    33 │ /[\@\@]/v;
+  > 34 │ /[\`\`]/v;
+       │   ^^
+    35 │ /[\~\~]/v;
+    36 │ /[^\^\^]/v;
+  
+  i Safe fix: Unescape the character.
+  
+    34 │ /[\`\`]/v;
+       │   -       
+
+```
+
+```
+invalid.js:35:3 lint/complexity/noUselessEscapeInRegex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The character doesn't need to be escaped.
+  
+    33 │ /[\@\@]/v;
+    34 │ /[\`\`]/v;
+  > 35 │ /[\~\~]/v;
+       │   ^^
+    36 │ /[^\^\^]/v;
+    37 │ /[_\^\^]/v;
+  
+  i Safe fix: Unescape the character.
+  
+    35 │ /[\~\~]/v;
+       │   -       
+
+```
+
+```
+invalid.js:36:4 lint/complexity/noUselessEscapeInRegex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The character doesn't need to be escaped.
+  
+    34 │ /[\`\`]/v;
+    35 │ /[\~\~]/v;
+  > 36 │ /[^\^\^]/v;
+       │    ^^
+    37 │ /[_\^\^]/v;
+    38 │ /[\&\&&\&]/v;
+  
+  i The character should only be escaped if it is the first character of the class.
+  
+  i Safe fix: Unescape the character.
+  
+    36 │ /[^\^\^]/v;
+       │    -       
+
+```
+
+```
+invalid.js:37:4 lint/complexity/noUselessEscapeInRegex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The character doesn't need to be escaped.
+  
+    35 │ /[\~\~]/v;
+    36 │ /[^\^\^]/v;
+  > 37 │ /[_\^\^]/v;
+       │    ^^
+    38 │ /[\&\&&\&]/v;
+    39 │ /[\p{ASCII}--\.]/v;
+  
+  i The character should only be escaped if it is the first character of the class.
+  
+  i Safe fix: Unescape the character.
+  
+    37 │ /[_\^\^]/v;
+       │    -       
+
+```
+
+```
+invalid.js:38:3 lint/complexity/noUselessEscapeInRegex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The character doesn't need to be escaped.
+  
+    36 │ /[^\^\^]/v;
+    37 │ /[_\^\^]/v;
+  > 38 │ /[\&\&&\&]/v;
+       │   ^^
+    39 │ /[\p{ASCII}--\.]/v;
+    40 │ /[\p{ASCII}&&\.]/v;
+  
+  i Safe fix: Unescape the character.
+  
+    38 │ /[\&\&&\&]/v;
+       │   -          
+
+```
+
+```
+invalid.js:39:14 lint/complexity/noUselessEscapeInRegex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The character doesn't need to be escaped.
+  
+    37 │ /[_\^\^]/v;
+    38 │ /[\&\&&\&]/v;
+  > 39 │ /[\p{ASCII}--\.]/v;
+       │              ^^
+    40 │ /[\p{ASCII}&&\.]/v;
+    41 │ /[\.--[.&]]/v;
+  
+  i The character should only be escaped if it is outside a character class.
+  
+  i Safe fix: Unescape the character.
+  
+    39 │ /[\p{ASCII}--\.]/v;
+       │              -     
+
+```
+
+```
+invalid.js:40:14 lint/complexity/noUselessEscapeInRegex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The character doesn't need to be escaped.
+  
+    38 │ /[\&\&&\&]/v;
+    39 │ /[\p{ASCII}--\.]/v;
+  > 40 │ /[\p{ASCII}&&\.]/v;
+       │              ^^
+    41 │ /[\.--[.&]]/v;
+    42 │ /[\.&&[.&]]/v;
+  
+  i The character should only be escaped if it is outside a character class.
+  
+  i Safe fix: Unescape the character.
+  
+    40 │ /[\p{ASCII}&&\.]/v;
+       │              -     
+
+```
+
+```
+invalid.js:41:3 lint/complexity/noUselessEscapeInRegex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The character doesn't need to be escaped.
+  
+    39 │ /[\p{ASCII}--\.]/v;
+    40 │ /[\p{ASCII}&&\.]/v;
+  > 41 │ /[\.--[.&]]/v;
+       │   ^^
+    42 │ /[\.&&[.&]]/v;
+    43 │ /[\.--\.--\.]/v;
+  
+  i The character should only be escaped if it is outside a character class.
+  
+  i Safe fix: Unescape the character.
+  
+    41 │ /[\.--[.&]]/v;
+       │   -           
+
+```
+
+```
+invalid.js:42:3 lint/complexity/noUselessEscapeInRegex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The character doesn't need to be escaped.
+  
+    40 │ /[\p{ASCII}&&\.]/v;
+    41 │ /[\.--[.&]]/v;
+  > 42 │ /[\.&&[.&]]/v;
+       │   ^^
+    43 │ /[\.--\.--\.]/v;
+    44 │ /[\.&&\.&&\.]/v;
+  
+  i The character should only be escaped if it is outside a character class.
+  
+  i Safe fix: Unescape the character.
+  
+    42 │ /[\.&&[.&]]/v;
+       │   -           
+
+```
+
+```
+invalid.js:43:3 lint/complexity/noUselessEscapeInRegex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The character doesn't need to be escaped.
+  
+    41 │ /[\.--[.&]]/v;
+    42 │ /[\.&&[.&]]/v;
+  > 43 │ /[\.--\.--\.]/v;
+       │   ^^
+    44 │ /[\.&&\.&&\.]/v;
+    45 │ /[[\.&]--[\.&]]/v;
+  
+  i The character should only be escaped if it is outside a character class.
+  
+  i Safe fix: Unescape the character.
+  
+    43 │ /[\.--\.--\.]/v;
+       │   -             
+
+```
+
+```
+invalid.js:44:3 lint/complexity/noUselessEscapeInRegex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The character doesn't need to be escaped.
+  
+    42 │ /[\.&&[.&]]/v;
+    43 │ /[\.--\.--\.]/v;
+  > 44 │ /[\.&&\.&&\.]/v;
+       │   ^^
+    45 │ /[[\.&]--[\.&]]/v;
+    46 │ /[[\.&]&&[\.&]]/v;
+  
+  i The character should only be escaped if it is outside a character class.
+  
+  i Safe fix: Unescape the character.
+  
+    44 │ /[\.&&\.&&\.]/v;
+       │   -             
+
+```
+
+```
+invalid.js:45:4 lint/complexity/noUselessEscapeInRegex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The character doesn't need to be escaped.
+  
+    43 │ /[\.--\.--\.]/v;
+    44 │ /[\.&&\.&&\.]/v;
+  > 45 │ /[[\.&]--[\.&]]/v;
+       │    ^^
+    46 │ /[[\.&]&&[\.&]]/v;
+    47 │ 
+  
+  i The character should only be escaped if it is outside a character class.
+  
+  i Safe fix: Unescape the character.
+  
+    45 │ /[[\.&]--[\.&]]/v;
+       │    -              
+
+```
+
+```
+invalid.js:46:4 lint/complexity/noUselessEscapeInRegex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The character doesn't need to be escaped.
+  
+    44 │ /[\.&&\.&&\.]/v;
+    45 │ /[[\.&]--[\.&]]/v;
+  > 46 │ /[[\.&]&&[\.&]]/v;
+       │    ^^
+    47 │ 
+    48 │ // Unlike ESLint, we report `\k` when it is not in a unicode-aware regex
+  
+  i The character should only be escaped if it is outside a character class.
+  
+  i Safe fix: Unescape the character.
+  
+    46 │ /[[\.&]&&[\.&]]/v;
+       │    -              
+
+```
+
+```
+invalid.js:52:3 lint/complexity/noUselessEscapeInRegex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The character doesn't need to be escaped.
+  
+    51 │ // A test with unicode characters that take more than one byte
+  > 52 │ /😀\😀/
+       │    ^^^
+  
+  i Safe fix: Unescape the character.
+  
+    52 │ /😀\😀/
+       │    -   
+
+```

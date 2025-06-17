@@ -3,7 +3,8 @@ source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: validLocalVariable.js
 ---
 # Input
-```jsx
+```js
+/* should not generate diagnostics */
 export default function () {
     const x = 0
 

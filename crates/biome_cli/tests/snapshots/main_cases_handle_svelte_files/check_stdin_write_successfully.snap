@@ -1,6 +1,6 @@
 ---
 source: crates/biome_cli/tests/snap_test.rs
-expression: content
+expression: redactor(content)
 ---
 # Input messages
 
@@ -21,9 +21,10 @@ var foo: string = "";
 <script context="module" lang="ts">
 import Button from "./components/Button.svelte";
 import { Form } from "./components/Form.svelte";
+
 debugger;
 statement();
-var foo = "";
+var foo: string = "";
 </script>
 <div></div>
 ```

@@ -20,14 +20,14 @@ expression: invalid.tsx
 ```
 invalid.tsx:1:1 lint/style/useSelfClosingElements  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! JSX elements without children should be marked as self-closing. In JSX, it is valid for any element to be self-closing.
+  i JSX elements without children should be marked as self-closing. In JSX, it is valid for any element to be self-closing.
   
   > 1 │ <div               ></div>;
       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^
     2 │ <Component></Component>;
     3 │ <Foo.bar></Foo.bar>;
   
-  i Unsafe fix: Use a SelfClosingElement instead
+  i Safe fix: Use a self-closing element instead.
   
     1 │ <div···············></div>;
       │                    -- ---  
@@ -37,7 +37,7 @@ invalid.tsx:1:1 lint/style/useSelfClosingElements  FIXABLE  ━━━━━━�
 ```
 invalid.tsx:2:1 lint/style/useSelfClosingElements  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! JSX elements without children should be marked as self-closing. In JSX, it is valid for any element to be self-closing.
+  i JSX elements without children should be marked as self-closing. In JSX, it is valid for any element to be self-closing.
   
     1 │ <div               ></div>;
   > 2 │ <Component></Component>;
@@ -45,7 +45,7 @@ invalid.tsx:2:1 lint/style/useSelfClosingElements  FIXABLE  ━━━━━━�
     3 │ <Foo.bar></Foo.bar>;
     4 │ <div
   
-  i Unsafe fix: Use a SelfClosingElement instead
+  i Safe fix: Use a self-closing element instead.
   
      1  1 │   <div               ></div>;
      2    │ - <Component></Component>;
@@ -59,7 +59,7 @@ invalid.tsx:2:1 lint/style/useSelfClosingElements  FIXABLE  ━━━━━━�
 ```
 invalid.tsx:3:1 lint/style/useSelfClosingElements  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! JSX elements without children should be marked as self-closing. In JSX, it is valid for any element to be self-closing.
+  i JSX elements without children should be marked as self-closing. In JSX, it is valid for any element to be self-closing.
   
     1 │ <div               ></div>;
     2 │ <Component></Component>;
@@ -68,7 +68,7 @@ invalid.tsx:3:1 lint/style/useSelfClosingElements  FIXABLE  ━━━━━━�
     4 │ <div
     5 │ 
   
-  i Unsafe fix: Use a SelfClosingElement instead
+  i Safe fix: Use a self-closing element instead.
   
      1  1 │   <div               ></div>;
      2  2 │   <Component></Component>;
@@ -83,7 +83,7 @@ invalid.tsx:3:1 lint/style/useSelfClosingElements  FIXABLE  ━━━━━━�
 ```
 invalid.tsx:4:1 lint/style/useSelfClosingElements  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! JSX elements without children should be marked as self-closing. In JSX, it is valid for any element to be self-closing.
+  i JSX elements without children should be marked as self-closing. In JSX, it is valid for any element to be self-closing.
   
     2 │ <Component></Component>;
     3 │ <Foo.bar></Foo.bar>;
@@ -95,7 +95,7 @@ invalid.tsx:4:1 lint/style/useSelfClosingElements  FIXABLE  ━━━━━━�
     7 │ 
     8 │ <div ></div> /* comment */;
   
-  i Unsafe fix: Use a SelfClosingElement instead
+  i Safe fix: Use a self-closing element instead.
   
     6 │ ></div>;
       │ -- ---  
@@ -105,7 +105,7 @@ invalid.tsx:4:1 lint/style/useSelfClosingElements  FIXABLE  ━━━━━━�
 ```
 invalid.tsx:8:1 lint/style/useSelfClosingElements  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! JSX elements without children should be marked as self-closing. In JSX, it is valid for any element to be self-closing.
+  i JSX elements without children should be marked as self-closing. In JSX, it is valid for any element to be self-closing.
   
      6 │ ></div>;
      7 │ 
@@ -114,7 +114,7 @@ invalid.tsx:8:1 lint/style/useSelfClosingElements  FIXABLE  ━━━━━━�
      9 │ /* comment */ <div ></div>;
     10 │ <Generic<true>></Generic>;
   
-  i Unsafe fix: Use a SelfClosingElement instead
+  i Safe fix: Use a self-closing element instead.
   
     8 │ <div·></div>·/*·comment·*/;
       │      -- ---                
@@ -124,14 +124,14 @@ invalid.tsx:8:1 lint/style/useSelfClosingElements  FIXABLE  ━━━━━━�
 ```
 invalid.tsx:9:15 lint/style/useSelfClosingElements  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! JSX elements without children should be marked as self-closing. In JSX, it is valid for any element to be self-closing.
+  i JSX elements without children should be marked as self-closing. In JSX, it is valid for any element to be self-closing.
   
      8 │ <div ></div> /* comment */;
    > 9 │ /* comment */ <div ></div>;
        │               ^^^^^^^^^^^^
     10 │ <Generic<true>></Generic>;
   
-  i Unsafe fix: Use a SelfClosingElement instead
+  i Safe fix: Use a self-closing element instead.
   
     9 │ /*·comment·*/·<div·></div>;
       │                    -- ---  
@@ -141,14 +141,14 @@ invalid.tsx:9:15 lint/style/useSelfClosingElements  FIXABLE  ━━━━━━�
 ```
 invalid.tsx:10:1 lint/style/useSelfClosingElements  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! JSX elements without children should be marked as self-closing. In JSX, it is valid for any element to be self-closing.
+  i JSX elements without children should be marked as self-closing. In JSX, it is valid for any element to be self-closing.
   
      8 │ <div ></div> /* comment */;
      9 │ /* comment */ <div ></div>;
   > 10 │ <Generic<true>></Generic>;
        │ ^^^^^^^^^^^^^^^^^^^^^^^^^
   
-  i Unsafe fix: Use a SelfClosingElement instead
+  i Safe fix: Use a self-closing element instead.
   
      8  8 │   <div ></div> /* comment */;
      9  9 │   /* comment */ <div ></div>;
@@ -157,5 +157,3 @@ invalid.tsx:10:1 lint/style/useSelfClosingElements  FIXABLE  ━━━━━━�
   
 
 ```
-
-

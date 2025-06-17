@@ -1,0 +1,143 @@
+---
+source: crates/biome_js_parser/tests/spec_test.rs
+expression: snapshot
+snapshot_kind: text
+---
+## Input
+
+```js
+(a,;
+(a, b, c;
+
+```
+
+
+## AST
+
+```
+JsModule {
+    bom_token: missing (optional),
+    interpreter_token: missing (optional),
+    directives: JsDirectiveList [],
+    items: JsModuleItemList [
+        JsExpressionStatement {
+            expression: JsParenthesizedExpression {
+                l_paren_token: L_PAREN@0..1 "(" [] [],
+                expression: JsSequenceExpression {
+                    left: JsIdentifierExpression {
+                        name: JsReferenceIdentifier {
+                            value_token: IDENT@1..2 "a" [] [],
+                        },
+                    },
+                    comma_token: COMMA@2..3 "," [] [],
+                    right: missing (required),
+                },
+                r_paren_token: missing (required),
+            },
+            semicolon_token: SEMICOLON@3..4 ";" [] [],
+        },
+        JsExpressionStatement {
+            expression: JsParenthesizedExpression {
+                l_paren_token: L_PAREN@4..6 "(" [Newline("\n")] [],
+                expression: JsSequenceExpression {
+                    left: JsSequenceExpression {
+                        left: JsIdentifierExpression {
+                            name: JsReferenceIdentifier {
+                                value_token: IDENT@6..7 "a" [] [],
+                            },
+                        },
+                        comma_token: COMMA@7..9 "," [] [Whitespace(" ")],
+                        right: JsIdentifierExpression {
+                            name: JsReferenceIdentifier {
+                                value_token: IDENT@9..10 "b" [] [],
+                            },
+                        },
+                    },
+                    comma_token: COMMA@10..12 "," [] [Whitespace(" ")],
+                    right: JsIdentifierExpression {
+                        name: JsReferenceIdentifier {
+                            value_token: IDENT@12..13 "c" [] [],
+                        },
+                    },
+                },
+                r_paren_token: missing (required),
+            },
+            semicolon_token: SEMICOLON@13..14 ";" [] [],
+        },
+    ],
+    eof_token: EOF@14..15 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: JS_MODULE@0..15
+  0: (empty)
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..14
+    0: JS_EXPRESSION_STATEMENT@0..4
+      0: JS_PARENTHESIZED_EXPRESSION@0..3
+        0: L_PAREN@0..1 "(" [] []
+        1: JS_SEQUENCE_EXPRESSION@1..3
+          0: JS_IDENTIFIER_EXPRESSION@1..2
+            0: JS_REFERENCE_IDENTIFIER@1..2
+              0: IDENT@1..2 "a" [] []
+          1: COMMA@2..3 "," [] []
+          2: (empty)
+        2: (empty)
+      1: SEMICOLON@3..4 ";" [] []
+    1: JS_EXPRESSION_STATEMENT@4..14
+      0: JS_PARENTHESIZED_EXPRESSION@4..13
+        0: L_PAREN@4..6 "(" [Newline("\n")] []
+        1: JS_SEQUENCE_EXPRESSION@6..13
+          0: JS_SEQUENCE_EXPRESSION@6..10
+            0: JS_IDENTIFIER_EXPRESSION@6..7
+              0: JS_REFERENCE_IDENTIFIER@6..7
+                0: IDENT@6..7 "a" [] []
+            1: COMMA@7..9 "," [] [Whitespace(" ")]
+            2: JS_IDENTIFIER_EXPRESSION@9..10
+              0: JS_REFERENCE_IDENTIFIER@9..10
+                0: IDENT@9..10 "b" [] []
+          1: COMMA@10..12 "," [] [Whitespace(" ")]
+          2: JS_IDENTIFIER_EXPRESSION@12..13
+            0: JS_REFERENCE_IDENTIFIER@12..13
+              0: IDENT@12..13 "c" [] []
+        2: (empty)
+      1: SEMICOLON@13..14 ";" [] []
+  4: EOF@14..15 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+incomplete_parenthesized_sequence_expression.js:1:4 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected an expression but instead found ';'.
+  
+  > 1 │ (a,;
+      │    ^
+    2 │ (a, b, c;
+    3 │ 
+  
+  i Expected an expression here.
+  
+  > 1 │ (a,;
+      │    ^
+    2 │ (a, b, c;
+    3 │ 
+  
+incomplete_parenthesized_sequence_expression.js:2:9 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `)` but instead found `;`
+  
+    1 │ (a,;
+  > 2 │ (a, b, c;
+      │         ^
+    3 │ 
+  
+  i Remove ;
+  
+```

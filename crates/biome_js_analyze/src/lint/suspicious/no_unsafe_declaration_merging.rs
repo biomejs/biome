@@ -1,7 +1,8 @@
 use crate::services::semantic::Semantic;
-use biome_analyze::{context::RuleContext, declare_lint_rule, Rule, RuleDiagnostic, RuleSource};
+use biome_analyze::{Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule};
 use biome_console::markup;
-use biome_js_syntax::{binding_ext::AnyJsBindingDeclaration, TsInterfaceDeclaration};
+use biome_diagnostics::Severity;
+use biome_js_syntax::{TsInterfaceDeclaration, binding_ext::AnyJsBindingDeclaration};
 use biome_rowan::{AstNode, TextRange};
 
 declare_lint_rule! {
@@ -46,6 +47,7 @@ declare_lint_rule! {
         language: "ts",
         sources: &[RuleSource::EslintTypeScript("no-unsafe-declaration-merging")],
         recommended: true,
+        severity: Severity::Error,
     }
 }
 

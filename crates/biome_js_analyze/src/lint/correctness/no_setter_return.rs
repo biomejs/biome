@@ -1,8 +1,9 @@
 use biome_analyze::context::RuleContext;
-use biome_analyze::{declare_lint_rule, Ast, Rule, RuleDiagnostic, RuleSource};
+use biome_analyze::{Ast, Rule, RuleDiagnostic, RuleSource, declare_lint_rule};
 use biome_console::markup;
+use biome_diagnostics::Severity;
 use biome_js_syntax::{JsReturnStatement, JsSetterClassMember, JsSetterObjectMember};
-use biome_rowan::{declare_node_union, AstNode};
+use biome_rowan::{AstNode, declare_node_union};
 
 use crate::services::control_flow::AnyJsControlFlowRoot;
 
@@ -70,6 +71,7 @@ declare_lint_rule! {
         language: "js",
         sources: &[RuleSource::Eslint("no-setter-return")],
         recommended: true,
+        severity: Severity::Error,
     }
 }
 
@@ -87,12 +89,10 @@ impl Rule for NoSetterReturn {
         let ret = ctx.query();
         // Do not take arg-less returns into account
         let _arg = ret.argument()?;
-        let setter = ret
-            .syntax()
+        ret.syntax()
             .ancestors()
             .find(|x| AnyJsControlFlowRoot::can_cast(x.kind()))
-            .and_then(JsSetterMember::cast);
-        setter
+            .and_then(JsSetterMember::cast)
     }
 
     fn diagnostic(ctx: &RuleContext<Self>, setter: &Self::State) -> Option<RuleDiagnostic> {

@@ -4,7 +4,7 @@
 mod tests;
 
 use crate::constants::SUPPORTED_LANGUAGE_SET_STR;
-use biome_grit_syntax::{GritSyntaxKind, GritSyntaxKind::*, TextLen, TextRange, TextSize, T};
+use biome_grit_syntax::{GritSyntaxKind, GritSyntaxKind::*, T, TextLen, TextRange, TextSize};
 use biome_parser::diagnostic::ParseDiagnostic;
 use biome_parser::lexer::{Lexer, LexerCheckpoint};
 use biome_rowan::SyntaxKind;
@@ -30,6 +30,10 @@ pub(crate) struct GritLexer<'src> {
     /// `true` if there has been a line break between the last non-trivia token
     /// and the next non-trivia token.
     after_newline: bool,
+
+    /// `true` if the last thing we parsed was a `js` keyword
+    /// This is used to flip into the js lexer when we see a `js` keyword
+    in_js: bool,
 
     diagnostics: Vec<ParseDiagnostic>,
 }
@@ -74,6 +78,7 @@ impl<'src> Lexer<'src> for GritLexer<'src> {
 
         if !kind.is_trivia() {
             self.after_newline = false;
+            self.in_js = matches!(kind, GritSyntaxKind::JS_KW);
         }
 
         kind
@@ -124,6 +129,7 @@ impl<'src> GritLexer<'src> {
             current_start: TextSize::from(0),
             after_newline: false,
             diagnostics: Vec::new(),
+            in_js: false,
         }
     }
 
@@ -174,7 +180,7 @@ impl<'src> GritLexer<'src> {
     fn lex_token(&mut self, current: u8) -> GritSyntaxKind {
         match current {
             b'\n' | b'\r' => {
-                debug_assert!(self.consume_newline());
+                self.consume_newline();
                 NEWLINE
             }
             b'\t' | b' ' => self.consume_whitespaces(),
@@ -193,7 +199,13 @@ impl<'src> GritLexer<'src> {
             b'%' => self.consume_byte(T![%]),
             b'[' => self.consume_byte(T!['[']),
             b']' => self.consume_byte(T![']']),
-            b'{' => self.consume_byte(T!['{']),
+            b'{' => {
+                if self.in_js {
+                    self.consume_js_body()
+                } else {
+                    self.consume_byte(T!['{'])
+                }
+            }
             b'}' => self.consume_byte(T!['}']),
             b'(' => self.consume_byte(T!['(']),
             b')' => self.consume_byte(T![')']),
@@ -575,6 +587,57 @@ impl<'src> GritLexer<'src> {
         }
     }
 
+    fn consume_js_body(&mut self) -> GritSyntaxKind {
+        self.assert_current_char_boundary();
+        let start = self.text_position();
+
+        self.advance(1); // Skip over the opening brace
+        let mut state = LexJavaScriptBody::InBody;
+        let mut brace_depth = 0;
+
+        while let Some(chr) = self.current_byte() {
+            match chr {
+                b'}' => {
+                    self.advance(1);
+                    if matches!(state, LexJavaScriptBody::InBody) {
+                        if brace_depth == 0 {
+                            state = LexJavaScriptBody::Terminated;
+                            break;
+                        } else {
+                            brace_depth -= 1;
+                        }
+                    }
+                }
+                b'{' => {
+                    self.advance(1);
+                    if matches!(state, LexJavaScriptBody::InBody) {
+                        brace_depth += 1;
+                    }
+                }
+                b'/' => {
+                    // Consume the comment without using it.
+                    let _comment = self.consume_comment_or_slash();
+                }
+                _ => self.advance_char_unchecked(),
+            }
+        }
+
+        match state {
+            LexJavaScriptBody::Terminated => GRIT_JAVASCRIPT_BODY,
+            LexJavaScriptBody::InBody => {
+                let unterminated =
+                    ParseDiagnostic::new("Missing closing brace", start..self.text_position())
+                        .with_detail(
+                            self.source.text_len()..self.source.text_len(),
+                            "file ends here",
+                        );
+                self.diagnostics.push(unterminated);
+
+                ERROR_TOKEN
+            }
+        }
+    }
+
     fn consume_backtick_snippet(&mut self) -> GritSyntaxKind {
         self.assert_current_char_boundary();
         let start = self.text_position();
@@ -777,6 +840,7 @@ impl<'src> GritLexer<'src> {
             b"multifile" => MULTIFILE_KW,
             b"engine" => ENGINE_KW,
             b"biome" => BIOME_KW,
+            b"marzano" => MARZANO_KW,
             b"language" => LANGUAGE_KW,
             b"js" => JS_KW,
             b"css" => CSS_KW,
@@ -808,7 +872,14 @@ impl<'src> GritLexer<'src> {
             b"private" => PRIVATE_KW,
             b"pattern" => PATTERN_KW,
             b"predicate" => PREDICATE_KW,
-            b"function" => FUNCTION_KW,
+            b"function" => {
+                // Function is also an AST node name, so we need to check if the next token is a `(`
+                if self.current_byte() == Some(b'(') {
+                    GRIT_NAME
+                } else {
+                    FUNCTION_KW
+                }
+            }
             b"true" => TRUE_KW,
             b"false" => FALSE_KW,
             b"undefined" => UNDEFINED_KW,
@@ -1035,6 +1106,15 @@ enum LexBacktickSnippet {
     InvalidEscapeSequence,
 
     /// Properly terminated snippet.
+    Terminated,
+}
+
+#[derive(Copy, Clone, Debug)]
+enum LexJavaScriptBody {
+    /// Inside a js body
+    InBody,
+
+    /// Properly terminated body
     Terminated,
 }
 

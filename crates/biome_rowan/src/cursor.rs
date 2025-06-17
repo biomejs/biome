@@ -47,32 +47,33 @@ mod trivia;
 use std::{iter, ops};
 use std::{ptr, rc::Rc};
 
-use countme::Count;
 pub(crate) use trivia::{SyntaxTrivia, SyntaxTriviaPiecesIterator};
 
 use crate::cursor::node::Siblings;
 pub(crate) use crate::cursor::token::SyntaxToken;
 use crate::green::{self, GreenElement, GreenNodeData, GreenTokenData};
 use crate::{
-    green::{GreenElementRef, RawSyntaxKind},
     NodeOrToken, TextRange, TextSize,
+    green::{GreenElementRef, RawSyntaxKind},
 };
 pub(crate) use element::SyntaxElement;
 pub(crate) use node::{
-    Preorder, PreorderWithTokens, SyntaxElementChildren, SyntaxNode, SyntaxNodeChildren,
-    SyntaxSlot, SyntaxSlots,
+    Preorder, PreorderTokens, PreorderWithTokens, SyntaxElementChildren, SyntaxNode,
+    SyntaxNodeChildren, SyntaxSlot, SyntaxSlots,
 };
 
 #[derive(Debug)]
 struct _SyntaxElement;
 
+#[cfg(feature = "countme")]
 pub(crate) fn has_live() -> bool {
     countme::get::<_SyntaxElement>().live > 0
 }
 
 #[derive(Debug)]
 struct NodeData {
-    _c: Count<_SyntaxElement>,
+    #[cfg(feature = "countme")]
+    _c: countme::Count<_SyntaxElement>,
 
     kind: NodeKind,
     slot: u32,
@@ -124,28 +125,25 @@ impl WeakGreenElement {
 
     fn as_deref(&self) -> GreenElementRef {
         match self {
-            WeakGreenElement::Node { ptr } => GreenElementRef::Node(unsafe { ptr.as_ref() }),
-            WeakGreenElement::Token { ptr } => GreenElementRef::Token(unsafe { ptr.as_ref() }),
+            Self::Node { ptr } => GreenElementRef::Node(unsafe { ptr.as_ref() }),
+            Self::Token { ptr } => GreenElementRef::Token(unsafe { ptr.as_ref() }),
         }
     }
 
     fn to_owned(&self) -> GreenElement {
         match self {
-            WeakGreenElement::Node { ptr } => {
-                GreenElement::Node(unsafe { ptr.as_ref().to_owned() })
-            }
-            WeakGreenElement::Token { ptr } => {
-                GreenElement::Token(unsafe { ptr.as_ref().to_owned() })
-            }
+            Self::Node { ptr } => GreenElement::Node(unsafe { ptr.as_ref().to_owned() }),
+            Self::Token { ptr } => GreenElement::Token(unsafe { ptr.as_ref().to_owned() }),
         }
     }
 }
 
 impl NodeData {
     #[inline]
-    fn new(kind: NodeKind, slot: u32, offset: TextSize) -> Rc<NodeData> {
-        let res = NodeData {
-            _c: Count::new(),
+    fn new(kind: NodeKind, slot: u32, offset: TextSize) -> Rc<Self> {
+        let res = Self {
+            #[cfg(feature = "countme")]
+            _c: countme::Count::new(),
             kind,
             slot,
             offset,
@@ -182,7 +180,7 @@ impl NodeData {
     }
 
     #[inline]
-    fn parent(&self) -> Option<&NodeData> {
+    fn parent(&self) -> Option<&Self> {
         match &self.kind {
             NodeKind::Child { parent, .. } => Some(&**parent),
             NodeKind::Root { .. } => None,

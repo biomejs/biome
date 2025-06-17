@@ -1,0 +1,179 @@
+---
+source: crates/biome_js_parser/tests/spec_test.rs
+expression: snapshot
+snapshot_kind: text
+---
+## Input
+
+```js
+foo ?? * 2;
+!foo && bar;
+foo(foo ||)
+
+```
+
+
+## AST
+
+```
+JsModule {
+    bom_token: missing (optional),
+    interpreter_token: missing (optional),
+    directives: JsDirectiveList [],
+    items: JsModuleItemList [
+        JsExpressionStatement {
+            expression: JsLogicalExpression {
+                left: JsIdentifierExpression {
+                    name: JsReferenceIdentifier {
+                        value_token: IDENT@0..4 "foo" [] [Whitespace(" ")],
+                    },
+                },
+                operator_token: QUESTION2@4..7 "??" [] [Whitespace(" ")],
+                right: JsBinaryExpression {
+                    left: missing (required),
+                    operator_token: STAR@7..9 "*" [] [Whitespace(" ")],
+                    right: JsNumberLiteralExpression {
+                        value_token: JS_NUMBER_LITERAL@9..10 "2" [] [],
+                    },
+                },
+            },
+            semicolon_token: SEMICOLON@10..11 ";" [] [],
+        },
+        JsExpressionStatement {
+            expression: JsLogicalExpression {
+                left: JsUnaryExpression {
+                    operator_token: BANG@11..13 "!" [Newline("\n")] [],
+                    argument: JsIdentifierExpression {
+                        name: JsReferenceIdentifier {
+                            value_token: IDENT@13..17 "foo" [] [Whitespace(" ")],
+                        },
+                    },
+                },
+                operator_token: AMP2@17..20 "&&" [] [Whitespace(" ")],
+                right: JsIdentifierExpression {
+                    name: JsReferenceIdentifier {
+                        value_token: IDENT@20..23 "bar" [] [],
+                    },
+                },
+            },
+            semicolon_token: SEMICOLON@23..24 ";" [] [],
+        },
+        JsExpressionStatement {
+            expression: JsCallExpression {
+                callee: JsIdentifierExpression {
+                    name: JsReferenceIdentifier {
+                        value_token: IDENT@24..28 "foo" [Newline("\n")] [],
+                    },
+                },
+                optional_chain_token: missing (optional),
+                type_arguments: missing (optional),
+                arguments: JsCallArguments {
+                    l_paren_token: L_PAREN@28..29 "(" [] [],
+                    args: JsCallArgumentList [
+                        JsLogicalExpression {
+                            left: JsIdentifierExpression {
+                                name: JsReferenceIdentifier {
+                                    value_token: IDENT@29..33 "foo" [] [Whitespace(" ")],
+                                },
+                            },
+                            operator_token: PIPE2@33..35 "||" [] [],
+                            right: missing (required),
+                        },
+                    ],
+                    r_paren_token: R_PAREN@35..36 ")" [] [],
+                },
+            },
+            semicolon_token: missing (optional),
+        },
+    ],
+    eof_token: EOF@36..37 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: JS_MODULE@0..37
+  0: (empty)
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..36
+    0: JS_EXPRESSION_STATEMENT@0..11
+      0: JS_LOGICAL_EXPRESSION@0..10
+        0: JS_IDENTIFIER_EXPRESSION@0..4
+          0: JS_REFERENCE_IDENTIFIER@0..4
+            0: IDENT@0..4 "foo" [] [Whitespace(" ")]
+        1: QUESTION2@4..7 "??" [] [Whitespace(" ")]
+        2: JS_BINARY_EXPRESSION@7..10
+          0: (empty)
+          1: STAR@7..9 "*" [] [Whitespace(" ")]
+          2: JS_NUMBER_LITERAL_EXPRESSION@9..10
+            0: JS_NUMBER_LITERAL@9..10 "2" [] []
+      1: SEMICOLON@10..11 ";" [] []
+    1: JS_EXPRESSION_STATEMENT@11..24
+      0: JS_LOGICAL_EXPRESSION@11..23
+        0: JS_UNARY_EXPRESSION@11..17
+          0: BANG@11..13 "!" [Newline("\n")] []
+          1: JS_IDENTIFIER_EXPRESSION@13..17
+            0: JS_REFERENCE_IDENTIFIER@13..17
+              0: IDENT@13..17 "foo" [] [Whitespace(" ")]
+        1: AMP2@17..20 "&&" [] [Whitespace(" ")]
+        2: JS_IDENTIFIER_EXPRESSION@20..23
+          0: JS_REFERENCE_IDENTIFIER@20..23
+            0: IDENT@20..23 "bar" [] []
+      1: SEMICOLON@23..24 ";" [] []
+    2: JS_EXPRESSION_STATEMENT@24..36
+      0: JS_CALL_EXPRESSION@24..36
+        0: JS_IDENTIFIER_EXPRESSION@24..28
+          0: JS_REFERENCE_IDENTIFIER@24..28
+            0: IDENT@24..28 "foo" [Newline("\n")] []
+        1: (empty)
+        2: (empty)
+        3: JS_CALL_ARGUMENTS@28..36
+          0: L_PAREN@28..29 "(" [] []
+          1: JS_CALL_ARGUMENT_LIST@29..35
+            0: JS_LOGICAL_EXPRESSION@29..35
+              0: JS_IDENTIFIER_EXPRESSION@29..33
+                0: JS_REFERENCE_IDENTIFIER@29..33
+                  0: IDENT@29..33 "foo" [] [Whitespace(" ")]
+              1: PIPE2@33..35 "||" [] []
+              2: (empty)
+          2: R_PAREN@35..36 ")" [] []
+      1: (empty)
+  4: EOF@36..37 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+logical_expressions_err.js:1:8 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected an expression for the left hand side of the `*` operator.
+  
+  > 1 │ foo ?? * 2;
+      │        ^
+    2 │ !foo && bar;
+    3 │ foo(foo ||)
+  
+  i This operator requires a left hand side value
+  
+logical_expressions_err.js:3:11 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected an expression but instead found ')'.
+  
+    1 │ foo ?? * 2;
+    2 │ !foo && bar;
+  > 3 │ foo(foo ||)
+      │           ^
+    4 │ 
+  
+  i Expected an expression here.
+  
+    1 │ foo ?? * 2;
+    2 │ !foo && bar;
+  > 3 │ foo(foo ||)
+      │           ^
+    4 │ 
+  
+```

@@ -1,0 +1,42 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: issue4568.js
+snapshot_kind: text
+---
+# Input
+```js
+import type {Point} fom '.geomet';
+import {useEffect, seRef} 'react';
+
+xpor function ueCanvasn(
+) {
+  useEffect( => {on late Point},[c
+
+```
+
+# Diagnostics
+```
+issue4568.js:6:3 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This hook specifies more dependencies than necessary: c
+  
+    4 │ xpor function ueCanvasn(
+    5 │ ) {
+  > 6 │   useEffect( => {on late Point},[c
+      │   ^^^^^^^^^
+    7 │ 
+  
+  i This dependency can be removed from the list.
+  
+    4 │ xpor function ueCanvasn(
+    5 │ ) {
+  > 6 │   useEffect( => {on late Point},[c
+      │                                  ^
+    7 │ 
+  
+  i Unsafe fix: Remove the extra dependencies from the list.
+  
+    6 │ ··useEffect(·=>·{on·late·Point},[c
+      │                                  -
+
+```

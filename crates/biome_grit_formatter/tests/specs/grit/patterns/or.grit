@@ -1,0 +1,4 @@
+`var $x = [$names]` => `var coolPeople = [$names]` where {
+  $names <: every or {`"andrew"`, `"alex"`},
+	$names <: not contains `"sam"`
+}

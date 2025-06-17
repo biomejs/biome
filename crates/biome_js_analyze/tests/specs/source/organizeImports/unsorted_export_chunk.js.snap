@@ -1,0 +1,63 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: unsorted_export_chunk.js
+snapshot_kind: text
+---
+# Input
+```js
+// File header comment to keep at the top
+export { A, B } from "y";
+// Attached comment X
+export * from "x";
+// Detached comment
+
+// Attached comment S
+export * as S from "s";
+// Attached S
+export { R } from "r";
+function f() {}
+export { A } from "a";
+
+```
+
+# Diagnostics
+```
+unsorted_export_chunk.js:2:1 assist/source/organizeImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The imports and exports are not sorted.
+  
+    1 │ // File header comment to keep at the top
+  > 2 │ export { A, B } from "y";
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^
+    3 │ // Attached comment X
+    4 │ export * from "x";
+  
+  i Safe fix: Organize Imports (Biome)
+  
+     1  1 │   // File header comment to keep at the top
+     2    │ - export·{·A,·B·}·from·"y";
+     3    │ - //·Attached·comment·X
+     4    │ - export·*·from·"x";
+        2 │ + 
+        3 │ + //·Attached·comment·X
+        4 │ + export·*·from·"x";
+        5 │ + export·{·A,·B·}·from·"y";
+        6 │ + 
+     5  7 │   // Detached comment
+     6  8 │   
+     7    │ - //·Attached·comment·S
+     8    │ - export·*·as·S·from·"s";
+     9    │ - //·Attached·S
+    10    │ - export·{·R·}·from·"r";
+        9 │ + //·Attached·S
+       10 │ + export·{·R·}·from·"r";
+       11 │ + //·Attached·comment·S
+       12 │ + export·*·as·S·from·"s";
+       13 │ + 
+    11 14 │   function f() {}
+       15 │ + 
+    12 16 │   export { A } from "a";
+    13 17 │   
+  
+
+```

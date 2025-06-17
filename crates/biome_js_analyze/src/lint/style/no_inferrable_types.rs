@@ -1,16 +1,14 @@
 use crate::JsRuleAction;
 use biome_analyze::RuleSource;
-use biome_analyze::{
-    context::RuleContext, declare_lint_rule, ActionCategory, Ast, FixKind, Rule, RuleDiagnostic,
-};
+use biome_analyze::{Ast, FixKind, Rule, RuleDiagnostic, context::RuleContext, declare_lint_rule};
 use biome_console::markup;
+use biome_diagnostics::Severity;
+use biome_js_syntax::AnyJsLiteralExpression;
 use biome_js_syntax::{
     AnyJsExpression, AnyTsPropertyAnnotation, AnyTsVariableAnnotation, JsFormalParameter,
-    JsInitializerClause, JsPropertyClassMember, JsSyntaxKind, JsVariableDeclaration,
-    JsVariableDeclarator, JsVariableDeclaratorList, TsPropertyParameter, TsReadonlyModifier,
-    TsTypeAnnotation,
+    JsInitializerClause, JsPropertyClassMember, JsVariableDeclaration, JsVariableDeclarator,
+    JsVariableDeclaratorList, TsPropertyParameter, TsReadonlyModifier, TsTypeAnnotation,
 };
-use biome_js_syntax::{AnyJsLiteralExpression, AnyTsType};
 use biome_rowan::AstNode;
 use biome_rowan::BatchMutationExt;
 
@@ -99,7 +97,8 @@ declare_lint_rule! {
         name: "noInferrableTypes",
         language: "ts",
         sources: &[RuleSource::EslintTypeScript("no-inferrable-types")],
-        recommended: true,
+        recommended: false,
+        severity: Severity::Information,
         fix_kind: FixKind::Safe,
     }
 }
@@ -113,7 +112,7 @@ impl Rule for NoInferrableTypes {
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let init = ctx.query();
         let init_expr = init.expression().ok()?.omit_parentheses();
-        if has_trivially_inferrable_type(&init_expr).is_some() {
+        if init_expr.has_trivially_inferrable_type() {
             // `is_const` signals a const context (const declarations, readonly properties)
             // non const contexts are other situations (let/var declarations, mutable properties, formal parameters)
             let mut is_const = false;
@@ -158,7 +157,7 @@ impl Rule for NoInferrableTypes {
                 //
                 // However, we ignore the case where <literal> is `null`,
                 // because in unsafe null mode, it is possible to assign `null` and `undefined` to any type.
-                if (is_const && is_non_null_literal_type(&ty))
+                if (is_const && ty.is_non_null_literal_type())
                     || (!is_const
                         && ty.is_primitive_type()
                         && !matches!(
@@ -198,37 +197,10 @@ impl Rule for NoInferrableTypes {
         mutation.replace_token_discard_trivia(next_token, new_next_token);
         mutation.remove_node(annotation.clone());
         Some(JsRuleAction::new(
-            ActionCategory::QuickFix,
+            ctx.metadata().action_category(ctx.category(), ctx.group()),
             ctx.metadata().applicability(),
             markup! { "Remove the type annotation." }.to_owned(),
             mutation,
         ))
     }
-}
-
-fn has_trivially_inferrable_type(expr: &AnyJsExpression) -> Option<()> {
-    match expr {
-        AnyJsExpression::AnyJsLiteralExpression(_) => Some(()),
-        AnyJsExpression::JsTemplateExpression(tpl_expr) => tpl_expr.tag().is_none().then_some(()),
-        AnyJsExpression::JsUnaryExpression(unary_exp) => {
-            match unary_exp.operator_token().ok()?.kind() {
-                JsSyntaxKind::BANG
-                | JsSyntaxKind::MINUS
-                | JsSyntaxKind::PLUS
-                | JsSyntaxKind::VOID_KW => Some(()),
-                _ => None,
-            }
-        }
-        _ => None,
-    }
-}
-
-fn is_non_null_literal_type(ty: &AnyTsType) -> bool {
-    matches!(
-        ty,
-        AnyTsType::TsBooleanLiteralType(_)
-            | AnyTsType::TsBigintLiteralType(_)
-            | AnyTsType::TsNumberLiteralType(_)
-            | AnyTsType::TsStringLiteralType(_)
-    )
 }

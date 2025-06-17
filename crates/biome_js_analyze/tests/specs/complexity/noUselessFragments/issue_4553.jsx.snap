@@ -1,0 +1,51 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: issue_4553.jsx
+snapshot_kind: text
+---
+# Input
+```jsx
+<Suspense
+    fallback={
+        <>
+            <span>Loading...</span>
+        </>
+    }
+>
+    {children}
+</Suspense>;
+
+```
+
+# Diagnostics
+```
+issue_4553.jsx:3:9 lint/complexity/noUselessFragments  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This fragment is unnecessary.
+  
+    1 │ <Suspense
+    2 │     fallback={
+  > 3 │         <>
+      │         ^^
+  > 4 │             <span>Loading...</span>
+  > 5 │         </>
+      │         ^^^
+    6 │     }
+    7 │ >
+  
+  i A fragment is redundant if it contains only one child, or if it is the child of a html element, and is not a keyed fragment.
+  
+  i Unsafe fix: Remove the Fragment
+  
+     1 1 │   <Suspense
+     2   │ - ····fallback={
+     3   │ - ········<>
+     4   │ - ············<span>Loading...</span>
+     5   │ - ········</>
+     6   │ - ····}
+       2 │ + ····fallback={<span>Loading...</span>}
+     7 3 │   >
+     8 4 │       {children}
+  
+
+```

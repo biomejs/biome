@@ -1,10 +1,10 @@
 use biome_rowan::{AstNode, AstSeparatedList};
 
 use crate::{
-    parentheses::NeedsParentheses, type_ext::AnyTsFunctionType, AnyTsReturnType, AnyTsType,
-    JsSyntaxKind, JsSyntaxNode, TsConditionalType, TsConstructorType, TsFunctionType,
-    TsIndexedAccessType, TsInferType, TsIntersectionType, TsIntersectionTypeElementList,
-    TsTypeOperatorType, TsTypeofType, TsUnionType, TsUnionTypeVariantList,
+    AnyTsReturnType, AnyTsType, JsSyntaxKind, JsSyntaxNode, TsConditionalType, TsConstructorType,
+    TsFunctionType, TsIndexedAccessType, TsInferType, TsIntersectionType,
+    TsIntersectionTypeElementList, TsTypeOperatorType, TsTypeofType, TsUnionType,
+    TsUnionTypeVariantList, parentheses::NeedsParentheses, type_ext::AnyTsFunctionType,
 };
 
 impl NeedsParentheses for TsConditionalType {
@@ -14,7 +14,7 @@ impl NeedsParentheses for TsConditionalType {
         };
         match parent.kind() {
             JsSyntaxKind::TS_CONDITIONAL_TYPE => {
-                let conditional = TsConditionalType::unwrap_cast(parent.clone());
+                let conditional = Self::unwrap_cast(parent.clone());
                 let is_extends_type = conditional
                     .extends_type()
                     .is_ok_and(|extends_type| extends_type.syntax() == self.syntax());

@@ -1,0 +1,7 @@
+/* should not generate diagnostics */
+.a::after {
+    content: "\""
+}
+.b::after {
+    content: "\t"
+}

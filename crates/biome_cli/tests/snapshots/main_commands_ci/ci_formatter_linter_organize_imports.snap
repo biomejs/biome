@@ -1,6 +1,6 @@
 ---
 source: crates/biome_cli/tests/snap_test.rs
-expression: content
+expression: redactor(content)
 ---
 ## `biome.json`
 
@@ -12,7 +12,7 @@ expression: content
       "recommended": true
     }
   },
-  "organizeImports": {
+  "assist": {
     "enabled": true
   }
 }
@@ -44,9 +44,62 @@ ci ━━━━━━━━━━━━━━━━━━━━━━━━━�
 # Emitted Messages
 
 ```block
-file.js organizeImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+file.js:2:8 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Import statements differs from the output
+  ! This import is unused.
+  
+  > 2 │ import { B, C } from "b.js"
+      │        ^^^^^^^^
+    3 │ import A from "a.js"
+    4 │ 
+  
+  i Unused imports might be the result of an incomplete refactoring.
+  
+  i Unsafe fix: Remove the unused imports.
+  
+    1   │ - 
+    2   │ - import·{·B,·C·}·from·"b.js"
+      1 │ + 
+    3 2 │   import A from "a.js"
+    4 3 │   
+  
+
+```
+
+```block
+file.js:3:8 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This import is unused.
+  
+    2 │ import { B, C } from "b.js"
+  > 3 │ import A from "a.js"
+      │        ^
+    4 │ 
+  
+  i Unused imports might be the result of an incomplete refactoring.
+  
+  i Unsafe fix: Remove the unused imports.
+  
+    1 1 │   
+    2 2 │   import { B, C } from "b.js"
+    3   │ - import·A·from·"a.js"
+    4 3 │   
+    5 4 │   
+  
+
+```
+
+```block
+file.js:2:1 assist/source/organizeImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The imports and exports are not sorted.
+  
+  > 2 │ import { B, C } from "b.js"
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    3 │ import A from "a.js"
+    4 │ 
+  
+  i Safe fix: Organize Imports (Biome)
   
     1 1 │   
     2   │ - import·{·B,·C·}·from·"b.js"
@@ -82,4 +135,5 @@ file.js format ━━━━━━━━━━━━━━━━━━━━━�
 ```block
 Checked 1 file in <TIME>. No fixes applied.
 Found 2 errors.
+Found 2 warnings.
 ```

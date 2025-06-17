@@ -1,6 +1,7 @@
 use biome_analyze::context::RuleContext;
-use biome_analyze::{declare_lint_rule, Ast, Rule, RuleDiagnostic, RuleSource};
+use biome_analyze::{Ast, Rule, RuleDiagnostic, RuleSource, declare_lint_rule};
 use biome_console::markup;
+use biome_diagnostics::Severity;
 use biome_js_syntax::jsx_ext::AnyJsxElement;
 use biome_js_syntax::{AnyJsxAttribute, JsxAttribute};
 use biome_rowan::AstNode;
@@ -36,24 +37,25 @@ declare_lint_rule! {
         language: "jsx",
         sources: &[RuleSource::EslintReact("jsx-no-duplicate-props")],
         recommended: true,
+        severity: Severity::Error,
     }
 }
 
 impl Rule for NoDuplicateJsxProps {
     type Query = Ast<AnyJsxElement>;
-    type State = (String, Vec<JsxAttribute>);
-    type Signals = FxHashMap<String, Vec<JsxAttribute>>;
+    type State = (Box<str>, Vec<JsxAttribute>);
+    type Signals = FxHashMap<Box<str>, Vec<JsxAttribute>>;
     type Options = ();
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
 
-        let mut defined_attributes: FxHashMap<String, Vec<JsxAttribute>> = FxHashMap::default();
+        let mut defined_attributes: FxHashMap<Box<str>, Vec<JsxAttribute>> = FxHashMap::default();
         for attribute in node.attributes() {
             if let AnyJsxAttribute::JsxAttribute(attr) = attribute {
                 if let Ok(name) = attr.name() {
                     defined_attributes
-                        .entry(name.text())
+                        .entry(name.to_trimmed_text().text().into())
                         .or_default()
                         .push(attr);
                 }

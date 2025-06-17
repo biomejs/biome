@@ -2,7 +2,7 @@ use crate::prelude::*;
 use biome_formatter::write;
 
 use biome_js_syntax::{JsSyntaxToken, JsTemplateChunkElement, TsTemplateChunkElement};
-use biome_rowan::{declare_node_union, SyntaxResult};
+use biome_rowan::{SyntaxResult, declare_node_union};
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatJsTemplateChunkElement;
@@ -24,8 +24,8 @@ declare_node_union! {
 impl AnyTemplateChunkElement {
     pub(crate) fn template_chunk_token(&self) -> SyntaxResult<JsSyntaxToken> {
         match self {
-            AnyTemplateChunkElement::JsTemplateChunkElement(chunk) => chunk.template_chunk_token(),
-            AnyTemplateChunkElement::TsTemplateChunkElement(chunk) => chunk.template_chunk_token(),
+            Self::JsTemplateChunkElement(chunk) => chunk.template_chunk_token(),
+            Self::TsTemplateChunkElement(chunk) => chunk.template_chunk_token(),
         }
     }
 }

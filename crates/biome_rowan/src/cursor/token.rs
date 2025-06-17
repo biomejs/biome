@@ -1,6 +1,6 @@
 use crate::cursor::{NodeData, SyntaxElement, SyntaxNode, SyntaxTrivia};
 use crate::green::GreenElementRef;
-use crate::{green, Direction, GreenToken, GreenTokenData, RawSyntaxKind, TokenText, WalkEvent};
+use crate::{Direction, GreenToken, GreenTokenData, RawSyntaxKind, TokenText, WalkEvent, green};
 use biome_text_size::{TextRange, TextSize};
 use std::hash::{Hash, Hasher};
 use std::ptr::NonNull;
@@ -20,8 +20,8 @@ impl SyntaxToken {
         parent: SyntaxNode,
         index: u32,
         offset: TextSize,
-    ) -> SyntaxToken {
-        SyntaxToken {
+    ) -> Self {
+        Self {
             ptr: NodeData::new(
                 NodeKind::Child {
                     green: WeakGreenElement::new(GreenElementRef::Token(green)),
@@ -33,8 +33,8 @@ impl SyntaxToken {
         }
     }
 
-    pub(crate) fn new_detached(green: GreenToken) -> SyntaxToken {
-        SyntaxToken {
+    pub(crate) fn new_detached(green: GreenToken) -> Self {
+        Self {
             ptr: NodeData::new(
                 NodeKind::Root {
                     green: GreenElement::Token(green),
@@ -126,7 +126,7 @@ impl SyntaxToken {
     }
 
     #[inline]
-    pub fn ancestors(&self) -> impl Iterator<Item = SyntaxNode> {
+    pub fn ancestors(&self) -> impl Iterator<Item = SyntaxNode> + use<> {
         std::iter::successors(self.parent(), SyntaxNode::parent)
     }
 
@@ -141,7 +141,7 @@ impl SyntaxToken {
     pub fn siblings_with_tokens(
         &self,
         direction: Direction,
-    ) -> impl Iterator<Item = SyntaxElement> {
+    ) -> impl Iterator<Item = SyntaxElement> + use<> {
         let next = move |el: &SyntaxElement| match direction {
             Direction::Next => el.next_sibling_or_token(),
             Direction::Prev => el.prev_sibling_or_token(),
@@ -152,16 +152,16 @@ impl SyntaxToken {
         iter::successors(next(&me), next)
     }
 
-    pub fn next_token(&self) -> Option<SyntaxToken> {
+    pub fn next_token(&self) -> Option<Self> {
         self.next_token_impl(Direction::Next)
     }
 
-    pub fn prev_token(&self) -> Option<SyntaxToken> {
+    pub fn prev_token(&self) -> Option<Self> {
         self.next_token_impl(Direction::Prev)
     }
 
     /// Returns the token preceding or following this token depending on the passed `direction`.
-    fn next_token_impl(&self, direction: Direction) -> Option<SyntaxToken> {
+    fn next_token_impl(&self, direction: Direction) -> Option<Self> {
         let mut current: WalkEvent<SyntaxElement> =
             WalkEvent::Leave(SyntaxElement::Token(self.clone()));
 
@@ -235,7 +235,7 @@ impl SyntaxToken {
 // Identity semantics for hash & eq
 impl PartialEq for SyntaxToken {
     #[inline]
-    fn eq(&self, other: &SyntaxToken) -> bool {
+    fn eq(&self, other: &Self) -> bool {
         self.data().key() == other.data().key()
     }
 }

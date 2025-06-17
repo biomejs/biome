@@ -4,6 +4,7 @@ expression: valid.jsx
 ---
 # Input
 ```jsx
+/* should not generate diagnostics */
 <>
   <div role="button"></div>
   <div role={role}></div>
@@ -19,5 +20,3 @@ expression: valid.jsx
   <div role="tabpanel row" />
 </>
 ```
-
-

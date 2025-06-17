@@ -1,6 +1,6 @@
 ---
 source: crates/biome_formatter_test/src/snapshot_builder.rs
-info: js/module/array/trailing-comma/es5/array_trailing_comma.js
+info: js/module/array/trailing-commas/es5/array_trailing_commas.js
 ---
 # Input
 
@@ -39,6 +39,7 @@ Arrow parentheses: Always
 Bracket spacing: true
 Bracket same line: false
 Attribute Position: Auto
+Expand lists: Auto
 -----
 
 ```js
@@ -72,6 +73,7 @@ Arrow parentheses: Always
 Bracket spacing: true
 Bracket same line: false
 Attribute Position: Auto
+Expand lists: Auto
 -----
 
 ```js

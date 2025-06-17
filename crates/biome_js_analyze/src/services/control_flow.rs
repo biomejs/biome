@@ -10,8 +10,8 @@ pub(crate) type FunctionBuilder = biome_control_flow::builder::FunctionBuilder<J
 mod nodes;
 mod visitor;
 
-pub(crate) use self::visitor::make_visitor;
 pub(crate) use self::visitor::AnyJsControlFlowRoot;
+pub(crate) use self::visitor::make_visitor;
 
 pub struct ControlFlowGraph {
     pub graph: JsControlFlowGraph,
@@ -24,7 +24,7 @@ impl QueryMatch for ControlFlowGraph {
 }
 
 impl Queryable for ControlFlowGraph {
-    type Input = ControlFlowGraph;
+    type Input = Self;
     type Output = JsControlFlowGraph;
 
     type Language = JsLanguage;
@@ -34,7 +34,7 @@ impl Queryable for ControlFlowGraph {
         analyzer.add_visitor(Phases::Syntax, make_visitor);
     }
 
-    fn unwrap_match(_: &ServiceBag, query: &ControlFlowGraph) -> Self::Output {
+    fn unwrap_match(_: &ServiceBag, query: &Self) -> Self::Output {
         query.graph.clone()
     }
 }

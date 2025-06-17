@@ -1,23 +1,37 @@
+#![deny(clippy::use_self)]
+
 use biome_analyze::options::{JsxRuntime, PreferredQuote};
-use biome_analyze::{AnalyzerAction, AnalyzerConfiguration, AnalyzerOptions, AnalyzerRules};
-use biome_configuration::PartialConfiguration;
+use biome_analyze::{AnalyzerAction, AnalyzerConfiguration, AnalyzerOptions};
+use biome_configuration::Configuration;
 use biome_console::fmt::{Formatter, Termcolor};
 use biome_console::markup;
 use biome_diagnostics::termcolor::Buffer;
 use biome_diagnostics::{DiagnosticExt, Error, PrintDiagnostic};
+use biome_fs::{BiomePath, FileSystem, OsFileSystem};
+use biome_js_parser::{AnyJsRoot, JsFileSource, JsParserOptions};
+use biome_js_type_info::TypeResolver;
 use biome_json_parser::{JsonParserOptions, ParseDiagnostic};
-use biome_project::PackageJson;
-use biome_rowan::{SyntaxKind, SyntaxNode, SyntaxSlot};
+use biome_module_graph::ModuleGraph;
+use biome_package::PackageJson;
+use biome_project_layout::ProjectLayout;
+use biome_rowan::{Direction, Language, SyntaxKind, SyntaxNode, SyntaxSlot};
 use biome_service::configuration::to_analyzer_rules;
-use biome_service::settings::{ServiceLanguage, Settings};
+use biome_service::file_handlers::DocumentFileSource;
+use biome_service::projects::Projects;
+use biome_service::settings::{ServiceLanguage, Settings, WorkspaceSettingsHandle};
+use biome_string_case::StrLikeExtension;
+use camino::{Utf8Path, Utf8PathBuf};
 use json_comments::StripComments;
-use similar::TextDiff;
-use std::ffi::{c_int, OsStr};
+use similar::{DiffableStr, TextDiff};
+use std::ffi::c_int;
 use std::fmt::Write;
-use std::path::Path;
-use std::sync::Once;
+use std::sync::{Arc, Once};
 
-pub fn scripts_from_json(extension: &OsStr, input_code: &str) -> Option<Vec<String>> {
+mod bench_case;
+
+pub use bench_case::BenchCase;
+
+pub fn scripts_from_json(extension: &str, input_code: &str) -> Option<Vec<String>> {
     if extension == "json" || extension == "jsonc" {
         let input_code = StripComments::new(input_code.as_bytes());
         let scripts: Vec<String> = serde_json::from_reader(input_code).ok()?;
@@ -28,47 +42,40 @@ pub fn scripts_from_json(extension: &OsStr, input_code: &str) -> Option<Vec<Stri
 }
 
 pub fn create_analyzer_options(
-    input_file: &Path,
+    input_file: &Utf8Path,
     diagnostics: &mut Vec<String>,
 ) -> AnalyzerOptions {
-    let options = AnalyzerOptions {
-        file_path: input_file.to_path_buf(),
-        ..Default::default()
-    };
+    let options = AnalyzerOptions::default().with_file_path(input_file.to_path_buf());
     // We allow a test file to configure its rule using a special
     // file with the same name as the test but with extension ".options.json"
     // that configures that specific rule.
-    let mut analyzer_configuration = AnalyzerConfiguration {
-        rules: AnalyzerRules::default(),
-        globals: vec![],
-        preferred_quote: PreferredQuote::Double,
-        jsx_runtime: Some(JsxRuntime::Transparent),
-    };
+    let mut analyzer_configuration = AnalyzerConfiguration::default()
+        .with_preferred_quote(PreferredQuote::Double)
+        .with_jsx_runtime(JsxRuntime::Transparent);
     let options_file = input_file.with_extension("options.json");
-    if let Ok(json) = std::fs::read_to_string(options_file.clone()) {
-        let deserialized = biome_deserialize::json::deserialize_from_json_str::<PartialConfiguration>(
-            json.as_str(),
-            JsonParserOptions::default(),
-            "",
+    let Ok(json) = std::fs::read_to_string(options_file.clone()) else {
+        return options.with_configuration(analyzer_configuration);
+    };
+    let deserialized = biome_deserialize::json::deserialize_from_json_str::<Configuration>(
+        json.as_str(),
+        JsonParserOptions::default(),
+        "",
+    );
+    if deserialized.has_errors() {
+        diagnostics.extend(
+            deserialized
+                .into_diagnostics()
+                .into_iter()
+                .map(|diagnostic| {
+                    diagnostic_to_string(options_file.file_stem().unwrap(), &json, diagnostic)
+                })
+                .collect::<Vec<_>>(),
         );
-        if deserialized.has_errors() {
-            diagnostics.extend(
-                deserialized
-                    .into_diagnostics()
-                    .into_iter()
-                    .map(|diagnostic| {
-                        diagnostic_to_string(
-                            options_file.file_stem().unwrap().to_str().unwrap(),
-                            &json,
-                            diagnostic,
-                        )
-                    })
-                    .collect::<Vec<_>>(),
-            );
-        } else {
-            let configuration = deserialized.into_deserialized().unwrap_or_default();
-            let mut settings = Settings::default();
-            analyzer_configuration.preferred_quote = configuration
+    } else {
+        let configuration = deserialized.into_deserialized().unwrap_or_default();
+        let mut settings = Settings::default();
+        analyzer_configuration = analyzer_configuration.with_preferred_quote(
+            configuration
                 .javascript
                 .as_ref()
                 .and_then(|js| js.formatter.as_ref())
@@ -81,19 +88,23 @@ pub fn create_analyzer_options(
                         }
                     })
                 })
-                .unwrap_or_default();
+                .unwrap_or_default(),
+        );
 
-            use biome_configuration::javascript::JsxRuntime::*;
-            analyzer_configuration.jsx_runtime = match configuration
+        use biome_configuration::javascript::JsxRuntime::*;
+        analyzer_configuration = analyzer_configuration.with_jsx_runtime(
+            match configuration
                 .javascript
                 .as_ref()
                 .and_then(|js| js.jsx_runtime)
                 .unwrap_or_default()
             {
-                ReactClassic => Some(JsxRuntime::ReactClassic),
-                Transparent => Some(JsxRuntime::Transparent),
-            };
-            analyzer_configuration.globals = configuration
+                ReactClassic => JsxRuntime::ReactClassic,
+                Transparent => JsxRuntime::Transparent,
+            },
+        );
+        analyzer_configuration = analyzer_configuration.with_globals(
+            configuration
                 .javascript
                 .as_ref()
                 .and_then(|js| {
@@ -101,22 +112,133 @@ pub fn create_analyzer_options(
                         .as_ref()
                         .map(|globals| globals.iter().cloned().collect())
                 })
-                .unwrap_or_default();
+                .unwrap_or_default(),
+        );
 
-            settings
-                .merge_with_configuration(configuration, None, None, &[])
-                .unwrap();
-            analyzer_configuration.rules = to_analyzer_rules(&settings, input_file);
-        }
+        settings
+            .merge_with_configuration(configuration, None)
+            .unwrap();
+
+        analyzer_configuration =
+            analyzer_configuration.with_rules(to_analyzer_rules(&settings, input_file));
     }
+    options.with_configuration(analyzer_configuration)
+}
 
-    AnalyzerOptions {
-        configuration: analyzer_configuration,
-        ..options
+pub fn create_formatting_options<L>(
+    input_file: &Utf8Path,
+    diagnostics: &mut Vec<String>,
+) -> L::FormatOptions
+where
+    L: ServiceLanguage,
+{
+    let projects = Projects::default();
+    let key = projects.insert_project(Utf8PathBuf::from(""));
+
+    let options_file = input_file.with_extension("options.json");
+    let Ok(json) = std::fs::read_to_string(options_file.clone()) else {
+        return Default::default();
+    };
+    let deserialized = biome_deserialize::json::deserialize_from_json_str::<Configuration>(
+        json.as_str(),
+        JsonParserOptions::default(),
+        "",
+    );
+    if deserialized.has_errors() {
+        diagnostics.extend(
+            deserialized
+                .into_diagnostics()
+                .into_iter()
+                .map(|diagnostic| {
+                    diagnostic_to_string(options_file.file_stem().unwrap(), &json, diagnostic)
+                })
+                .collect::<Vec<_>>(),
+        );
+
+        Default::default()
+    } else {
+        let configuration = deserialized.into_deserialized().unwrap_or_default();
+        let mut settings = projects.get_root_settings(key).unwrap_or_default();
+        settings
+            .merge_with_configuration(configuration, None)
+            .unwrap();
+
+        let handle = WorkspaceSettingsHandle::from(settings);
+        let document_file_source = DocumentFileSource::from_path(input_file);
+        handle.format_options::<L>(&input_file.into(), &document_file_source)
     }
 }
 
-pub fn load_manifest(input_file: &Path, diagnostics: &mut Vec<String>) -> Option<PackageJson> {
+/// Creates a module graph that is initialized for the given `input_file`.
+///
+/// It uses an [OsFileSystem] initialized for the directory in which the test
+/// file resides and inserts all files from that directory, so that files
+/// importing each other within that directory will be picked up correctly.
+///
+/// The `project_layout` should be initialized in advance if you want any
+/// manifest files to be discovered.
+pub fn module_graph_for_test_file(
+    input_file: &Utf8Path,
+    project_layout: &ProjectLayout,
+) -> Arc<ModuleGraph> {
+    let module_graph = ModuleGraph::default();
+
+    let dir = input_file.parent().unwrap().to_path_buf();
+    let paths = get_js_like_paths_in_dir(&dir);
+    let fs = OsFileSystem::new(dir);
+    let paths = get_added_paths(&fs, &paths);
+
+    module_graph.update_graph_for_js_paths(&fs, project_layout, &paths, &[]);
+
+    Arc::new(module_graph)
+}
+
+/// Loads and parses files from the file system to pass them to service methods.
+pub fn get_added_paths<'a>(
+    fs: &dyn FileSystem,
+    paths: &'a [BiomePath],
+) -> Vec<(&'a BiomePath, AnyJsRoot)> {
+    paths
+        .iter()
+        .filter_map(|path| {
+            let root = fs.read_file_from_path(path).ok().and_then(|content| {
+                let file_source = JsFileSource::try_from(path.as_path()).unwrap_or_default();
+                let parsed =
+                    biome_js_parser::parse(&content, file_source, JsParserOptions::default());
+                let diagnostics = parsed.diagnostics();
+                assert!(
+                    diagnostics.is_empty(),
+                    "Unexpected diagnostics: {diagnostics:?}"
+                );
+                parsed.try_tree()
+            })?;
+            Some((path, root))
+        })
+        .collect()
+}
+
+fn get_js_like_paths_in_dir(dir: &Utf8Path) -> Vec<BiomePath> {
+    std::fs::read_dir(dir)
+        .unwrap()
+        .flat_map(|path| {
+            let path = Utf8PathBuf::try_from(path.unwrap().path()).unwrap();
+            if path.is_dir() {
+                get_js_like_paths_in_dir(&path)
+            } else {
+                DocumentFileSource::from_well_known(&path)
+                    .is_javascript_like()
+                    .then(|| BiomePath::new(path))
+                    .into_iter()
+                    .collect()
+            }
+        })
+        .collect()
+}
+
+pub fn project_layout_with_node_manifest(
+    input_file: &Utf8Path,
+    diagnostics: &mut Vec<String>,
+) -> Arc<ProjectLayout> {
     let options_file = input_file.with_extension("package.json");
     if let Ok(json) = std::fs::read_to_string(options_file.clone()) {
         let deserialized = biome_deserialize::json::deserialize_from_json_str::<PackageJson>(
@@ -130,28 +252,30 @@ pub fn load_manifest(input_file: &Path, diagnostics: &mut Vec<String>) -> Option
                     .into_diagnostics()
                     .into_iter()
                     .map(|diagnostic| {
-                        diagnostic_to_string(
-                            options_file.file_stem().unwrap().to_str().unwrap(),
-                            &json,
-                            diagnostic,
-                        )
+                        diagnostic_to_string(options_file.file_stem().unwrap(), &json, diagnostic)
                     })
                     .collect::<Vec<_>>(),
             );
         } else {
-            return deserialized.into_deserialized();
+            let project_layout = ProjectLayout::default();
+            project_layout.insert_node_manifest(
+                input_file
+                    .parent()
+                    .map(|dir_path| dir_path.to_path_buf())
+                    .unwrap_or_default(),
+                deserialized.into_deserialized().unwrap_or_default(),
+            );
+            return Arc::new(project_layout);
         }
     }
-    None
+    Default::default()
 }
 
 pub fn diagnostic_to_string(name: &str, source: &str, diag: Error) -> String {
     let error = diag.with_file_path(name).with_file_source_code(source);
-    let text = markup_to_string(biome_console::markup! {
+    markup_to_string(biome_console::markup! {
         {PrintDiagnostic::verbose(&error)}
-    });
-
-    text
+    })
 }
 
 fn markup_to_string(markup: biome_console::Markup) -> String {
@@ -164,16 +288,37 @@ fn markup_to_string(markup: biome_console::Markup) -> String {
     String::from_utf8(buffer).unwrap()
 }
 
+pub fn dump_registered_types(content: &mut String, resolver: &dyn TypeResolver) {
+    let mut registered_types = String::new();
+    let mut resolver = Some(resolver);
+    while let Some(current_resolver) = resolver {
+        for (i, ty) in current_resolver.registered_types().iter().enumerate() {
+            let level = current_resolver.level();
+            registered_types.push_str(&format!("\n{level:?} TypeId({i}) => {ty}\n"));
+        }
+
+        resolver = current_resolver.fallback_resolver();
+    }
+
+    if !registered_types.is_empty() {
+        content.push_str("## Registered types\n\n");
+
+        content.push_str("```");
+        content.push_str(&registered_types);
+        content.push_str("```\n");
+    }
+}
+
 // Check that all red / green nodes have correctly been released on exit
-extern "C" fn check_leaks() {
+unsafe extern "C" fn check_leaks() {
     if let Some(report) = biome_rowan::check_live() {
         panic!("\n{report}")
     }
 }
 pub fn register_leak_checker() {
     // Import the atexit function from libc
-    extern "C" {
-        fn atexit(f: extern "C" fn()) -> c_int;
+    unsafe extern "C" {
+        fn atexit(f: unsafe extern "C" fn()) -> c_int;
     }
 
     // Use an atomic Once to register the check_leaks function to be called
@@ -186,7 +331,7 @@ pub fn register_leak_checker() {
 }
 
 pub fn code_fix_to_string<L: ServiceLanguage>(source: &str, action: AnalyzerAction<L>) -> String {
-    let (_, text_edit) = action.mutation.as_text_range_and_edit().unwrap_or_default();
+    let (_, text_edit) = action.mutation.to_text_range_and_edit().unwrap_or_default();
 
     let output = text_edit.new_string(source);
 
@@ -201,19 +346,19 @@ pub fn code_fix_to_string<L: ServiceLanguage>(source: &str, action: AnalyzerActi
 /// The test runner for the analyzer is currently designed to have a
 /// one-to-one mapping between test case and analyzer rules.
 /// So each testing file will be run through the analyzer with only the rule
-/// corresponding to the directory name. E.g., `style/useWhile/test.js`
-/// will be analyzed with just the `style/useWhile` rule.
-pub fn parse_test_path(file: &Path) -> (&str, &str) {
+/// corresponding to the directory name. E.g., `complexity/useWhile/test.js`
+/// will be analyzed with just the `complexity/useWhile` rule.
+pub fn parse_test_path(file: &Utf8Path) -> (&str, &str) {
     let mut group_name = "";
     let mut rule_name = "";
 
     for component in file.iter().rev() {
-        if component == "specs" || component == "suppression" {
+        if component == "specs" || component == "suppression" || component == "plugin" {
             break;
         }
 
         rule_name = group_name;
-        group_name = component.to_str().unwrap_or_default();
+        group_name = DiffableStr::as_str(component).unwrap_or_default();
     }
 
     (group_name, rule_name)
@@ -245,7 +390,7 @@ pub fn has_bogus_nodes_or_empty_slots<L: biome_rowan::Language>(node: &SyntaxNod
 pub fn assert_errors_are_absent<L: ServiceLanguage>(
     program: &SyntaxNode<L>,
     diagnostics: &[ParseDiagnostic],
-    path: &Path,
+    path: &Utf8Path,
 ) {
     let debug_tree = format!("{program:?}");
     let has_missing_children = debug_tree.contains("missing (required)");
@@ -258,7 +403,7 @@ pub fn assert_errors_are_absent<L: ServiceLanguage>(
     for diagnostic in diagnostics {
         let error = diagnostic
             .clone()
-            .with_file_path(path.to_str().unwrap())
+            .with_file_path(path.as_str())
             .with_file_source_code(program.to_string());
         Formatter::new(&mut Termcolor(&mut buffer))
             .write_markup(markup! {
@@ -267,11 +412,12 @@ pub fn assert_errors_are_absent<L: ServiceLanguage>(
             .unwrap();
     }
 
-    panic!("There should be no errors in the file {:?} but the following errors where present:\n{}\n\nParsed tree:\n{:#?}\nPrinted tree:\n{}",
-           path.display(),
-           std::str::from_utf8(buffer.as_slice()).unwrap(),
-           &program,
-           &program.to_string()
+    panic!(
+        "There should be no errors in the file {:?} but the following errors where present:\n{}\n\nParsed tree:\n{:#?}\nPrinted tree:\n{}",
+        path,
+        std::str::from_utf8(buffer.as_slice()).unwrap(),
+        &program,
+        &program.to_string()
     );
 }
 
@@ -340,5 +486,110 @@ pub enum CheckActionType {
 impl CheckActionType {
     pub const fn is_suppression(&self) -> bool {
         matches!(self, Self::Suppression)
+    }
+}
+
+/// Validator to run in our parser's spec tests to make sure no excess data
+/// is collected in the EOF token.
+pub fn validate_eof_token<L: Language>(syntax: SyntaxNode<L>) {
+    let last_token = syntax.last_token().expect("no tokens parsed");
+    assert_eq!(
+        last_token.kind(),
+        L::Kind::EOF,
+        "the syntax tree's last token must be an EOF token"
+    );
+    assert!(
+        last_token.token_text_trimmed().is_empty(),
+        "the EOF token may not contain any data except trailing whitespace"
+    );
+}
+
+/// Asserts whether test files containing comments:
+/// - `should not generate diagnostics` emit no diagnostics
+/// - `should generate diagnostics` emit diagnostics
+///
+/// Additionally it checks that valid test files contain
+/// comment enforcing no diagnostics.
+///
+/// ## Examples
+///
+/// `valid.js` file
+/// ```js
+/// /** should not generate diagnostics */
+/// ```
+/// `valid.yml` file
+/// ```yaml
+/// # should not generate diagnostics
+/// ```
+///
+/// `in+valid.js` file
+/// ```js
+/// /** should generate diagnostics */
+/// ```
+///
+pub fn assert_diagnostics_expectation_comment<L: Language>(
+    file_path: &Utf8Path,
+    syntax: &SyntaxNode<L>,
+    diagnostics_quantity: usize,
+) {
+    let no_diagnostics_comment_text = "should not generate diagnostics";
+    let diagnostics_comment_text = "should generate diagnostics";
+
+    let is_valid_test_file = match file_path.extension().unwrap_or_default() {
+        // Excluded files types which cannot contain comment in the source code
+        "snap" | "json" | "jsonc" | "svelte" | "vue" | "astro" | "html" => false,
+        _ => {
+            let name = file_path.file_name().unwrap().to_ascii_lowercase_cow();
+            // We can't know all the valid file names, but this should catch most common cases.
+            name.contains("valid") && !name.contains("invalid")
+        }
+    };
+
+    enum Diagnostics {
+        ShouldGenerateDiagnostics,
+        ShouldNotGenerateDiagnostics,
+    }
+
+    let diagnostic_comment = syntax.preorder_tokens(Direction::Next).find_map(|token| {
+        for piece in token.leading_trivia().pieces() {
+            if let Some(comment) = piece.as_comments() {
+                let text = comment.text();
+
+                if text.contains(no_diagnostics_comment_text) {
+                    return Some(Diagnostics::ShouldNotGenerateDiagnostics);
+                }
+
+                if text.contains(diagnostics_comment_text) {
+                    return Some(Diagnostics::ShouldGenerateDiagnostics);
+                }
+            }
+        }
+
+        None
+    });
+
+    let has_diagnostics = diagnostics_quantity > 0;
+    match diagnostic_comment {
+        Some(Diagnostics::ShouldNotGenerateDiagnostics) => {
+            if has_diagnostics {
+                panic!(
+                    "This test should not generate diagnostics\nFile: {}",
+                    file_path
+                );
+            }
+        }
+        Some(Diagnostics::ShouldGenerateDiagnostics) => {
+            if !has_diagnostics {
+                panic!("This test should generate diagnostics\nFile: {}", file_path);
+            }
+        }
+        None => {
+            if is_valid_test_file {
+                panic!(
+                    "Valid test files should contain comment `{}`\nFile: {}",
+                    no_diagnostics_comment_text, file_path
+                );
+            }
+        }
     }
 }

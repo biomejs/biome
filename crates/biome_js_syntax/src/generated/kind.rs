@@ -1,6 +1,5 @@
 //! Generated file, do not edit by hand, see `xtask/codegen`
 
-#![allow(clippy::all)]
 #![allow(bad_style, missing_docs, unreachable_pub)]
 #[doc = r" The kind of syntax node, e.g. `IDENT`, `FUNCTION_KW`, or `FOR_STMT`."]
 #[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Debug)]
@@ -154,6 +153,7 @@ pub enum JsSyntaxKind {
     OF_KW,
     OUT_KW,
     USING_KW,
+    META_KW,
     JS_NUMBER_LITERAL,
     JS_BIGINT_LITERAL,
     JS_STRING_LITERAL,
@@ -177,6 +177,7 @@ pub enum JsSyntaxKind {
     JS_MODULE,
     JS_MODULE_ITEM_LIST,
     JS_SCRIPT,
+    TS_DECLARATION_MODULE,
     JS_EXPRESSION_SNIPPED,
     JS_DIRECTIVE,
     JS_DIRECTIVE_LIST,
@@ -419,6 +420,9 @@ pub enum JsSyntaxKind {
     TS_SETTER_SIGNATURE_TYPE_MEMBER,
     TS_INDEX_SIGNATURE_TYPE_MEMBER,
     TS_IMPORT_TYPE,
+    TS_IMPORT_TYPE_ARGUMENTS,
+    TS_IMPORT_TYPE_ASSERTION,
+    TS_IMPORT_TYPE_ASSERTION_BLOCK,
     TS_IMPORT_TYPE_QUALIFIER,
     TS_ARRAY_TYPE,
     TS_INDEXED_ACCESS_TYPE,
@@ -518,70 +522,126 @@ pub enum JsSyntaxKind {
 use self::JsSyntaxKind::*;
 impl JsSyntaxKind {
     pub const fn is_punct(self) -> bool {
-        match self {
-            SEMICOLON | COMMA | L_PAREN | R_PAREN | L_CURLY | R_CURLY | L_BRACK | R_BRACK
-            | L_ANGLE | R_ANGLE | TILDE | QUESTION | QUESTION2 | QUESTIONDOT | AMP | PIPE
-            | PLUS | PLUS2 | STAR | STAR2 | SLASH | CARET | PERCENT | DOT | DOT3 | COLON | EQ
-            | EQ2 | EQ3 | FAT_ARROW | BANG | NEQ | NEQ2 | MINUS | MINUS2 | LTEQ | GTEQ | PLUSEQ
-            | MINUSEQ | PIPEEQ | AMPEQ | CARETEQ | SLASHEQ | STAREQ | PERCENTEQ | AMP2 | PIPE2
-            | SHL | SHR | USHR | SHLEQ | SHREQ | USHREQ | AMP2EQ | PIPE2EQ | STAR2EQ
-            | QUESTION2EQ | AT | BACKTICK => true,
-            _ => false,
-        }
+        matches!(
+            self,
+            SEMICOLON
+                | COMMA
+                | L_PAREN
+                | R_PAREN
+                | L_CURLY
+                | R_CURLY
+                | L_BRACK
+                | R_BRACK
+                | L_ANGLE
+                | R_ANGLE
+                | TILDE
+                | QUESTION
+                | QUESTION2
+                | QUESTIONDOT
+                | AMP
+                | PIPE
+                | PLUS
+                | PLUS2
+                | STAR
+                | STAR2
+                | SLASH
+                | CARET
+                | PERCENT
+                | DOT
+                | DOT3
+                | COLON
+                | EQ
+                | EQ2
+                | EQ3
+                | FAT_ARROW
+                | BANG
+                | NEQ
+                | NEQ2
+                | MINUS
+                | MINUS2
+                | LTEQ
+                | GTEQ
+                | PLUSEQ
+                | MINUSEQ
+                | PIPEEQ
+                | AMPEQ
+                | CARETEQ
+                | SLASHEQ
+                | STAREQ
+                | PERCENTEQ
+                | AMP2
+                | PIPE2
+                | SHL
+                | SHR
+                | USHR
+                | SHLEQ
+                | SHREQ
+                | USHREQ
+                | AMP2EQ
+                | PIPE2EQ
+                | STAR2EQ
+                | QUESTION2EQ
+                | AT
+                | BACKTICK
+        )
     }
     pub const fn is_literal(self) -> bool {
-        match self {
-            JS_NUMBER_LITERAL | JS_BIGINT_LITERAL | JS_STRING_LITERAL | JS_REGEX_LITERAL
-            | JSX_TEXT_LITERAL | JSX_STRING_LITERAL => true,
-            _ => false,
-        }
+        matches!(
+            self,
+            JS_NUMBER_LITERAL
+                | JS_BIGINT_LITERAL
+                | JS_STRING_LITERAL
+                | JS_REGEX_LITERAL
+                | JSX_TEXT_LITERAL
+                | JSX_STRING_LITERAL
+        )
     }
     pub const fn is_list(self) -> bool {
-        match self {
+        matches!(
+            self,
             JS_MODULE_ITEM_LIST
-            | JS_DIRECTIVE_LIST
-            | JS_STATEMENT_LIST
-            | JS_VARIABLE_DECLARATOR_LIST
-            | JS_SWITCH_CASE_LIST
-            | JS_PARAMETER_LIST
-            | TS_PROPERTY_PARAMETER_MODIFIER_LIST
-            | JS_ARRAY_ELEMENT_LIST
-            | JS_OBJECT_MEMBER_LIST
-            | JS_CALL_ARGUMENT_LIST
-            | JS_TEMPLATE_ELEMENT_LIST
-            | JS_ARRAY_BINDING_PATTERN_ELEMENT_LIST
-            | JS_OBJECT_BINDING_PATTERN_PROPERTY_LIST
-            | JS_CLASS_MEMBER_LIST
-            | JS_CONSTRUCTOR_MODIFIER_LIST
-            | JS_CONSTRUCTOR_PARAMETER_LIST
-            | JS_PROPERTY_MODIFIER_LIST
-            | JS_METHOD_MODIFIER_LIST
-            | JS_ARRAY_ASSIGNMENT_PATTERN_ELEMENT_LIST
-            | JS_OBJECT_ASSIGNMENT_PATTERN_PROPERTY_LIST
-            | JS_NAMED_IMPORT_SPECIFIER_LIST
-            | JS_IMPORT_ASSERTION_ENTRY_LIST
-            | JS_EXPORT_NAMED_SPECIFIER_LIST
-            | JS_EXPORT_NAMED_FROM_SPECIFIER_LIST
-            | JS_DECORATOR_LIST
-            | TS_UNION_TYPE_VARIANT_LIST
-            | TS_INTERSECTION_TYPE_ELEMENT_LIST
-            | TS_TYPE_MEMBER_LIST
-            | TS_TUPLE_TYPE_ELEMENT_LIST
-            | TS_TYPE_PARAMETER_LIST
-            | TS_TYPE_PARAMETER_MODIFIER_LIST
-            | TS_TEMPLATE_ELEMENT_LIST
-            | TS_TYPE_ARGUMENT_LIST
-            | TS_TYPE_LIST
-            | TS_ENUM_MEMBER_LIST
-            | TS_PROPERTY_SIGNATURE_MODIFIER_LIST
-            | TS_METHOD_SIGNATURE_MODIFIER_LIST
-            | TS_INDEX_SIGNATURE_MODIFIER_LIST
-            | JSX_ATTRIBUTE_LIST
-            | JSX_CHILD_LIST => true,
-            _ => false,
-        }
+                | JS_DIRECTIVE_LIST
+                | JS_STATEMENT_LIST
+                | JS_VARIABLE_DECLARATOR_LIST
+                | JS_SWITCH_CASE_LIST
+                | JS_PARAMETER_LIST
+                | TS_PROPERTY_PARAMETER_MODIFIER_LIST
+                | JS_ARRAY_ELEMENT_LIST
+                | JS_OBJECT_MEMBER_LIST
+                | JS_CALL_ARGUMENT_LIST
+                | JS_TEMPLATE_ELEMENT_LIST
+                | JS_ARRAY_BINDING_PATTERN_ELEMENT_LIST
+                | JS_OBJECT_BINDING_PATTERN_PROPERTY_LIST
+                | JS_CLASS_MEMBER_LIST
+                | JS_CONSTRUCTOR_MODIFIER_LIST
+                | JS_CONSTRUCTOR_PARAMETER_LIST
+                | JS_PROPERTY_MODIFIER_LIST
+                | JS_METHOD_MODIFIER_LIST
+                | JS_ARRAY_ASSIGNMENT_PATTERN_ELEMENT_LIST
+                | JS_OBJECT_ASSIGNMENT_PATTERN_PROPERTY_LIST
+                | JS_NAMED_IMPORT_SPECIFIER_LIST
+                | JS_IMPORT_ASSERTION_ENTRY_LIST
+                | JS_EXPORT_NAMED_SPECIFIER_LIST
+                | JS_EXPORT_NAMED_FROM_SPECIFIER_LIST
+                | JS_DECORATOR_LIST
+                | TS_UNION_TYPE_VARIANT_LIST
+                | TS_INTERSECTION_TYPE_ELEMENT_LIST
+                | TS_TYPE_MEMBER_LIST
+                | TS_TUPLE_TYPE_ELEMENT_LIST
+                | TS_TYPE_PARAMETER_LIST
+                | TS_TYPE_PARAMETER_MODIFIER_LIST
+                | TS_TEMPLATE_ELEMENT_LIST
+                | TS_TYPE_ARGUMENT_LIST
+                | TS_TYPE_LIST
+                | TS_ENUM_MEMBER_LIST
+                | TS_PROPERTY_SIGNATURE_MODIFIER_LIST
+                | TS_METHOD_SIGNATURE_MODIFIER_LIST
+                | TS_INDEX_SIGNATURE_MODIFIER_LIST
+                | JSX_ATTRIBUTE_LIST
+                | JSX_CHILD_LIST
+        )
     }
-    pub fn from_keyword(ident: &str) -> Option<JsSyntaxKind> {
+    pub fn from_keyword(ident: &str) -> Option<Self> {
         let kw = match ident {
             "break" => BREAK_KW,
             "case" => CASE_KW,
@@ -665,6 +725,7 @@ impl JsSyntaxKind {
             "of" => OF_KW,
             "out" => OUT_KW,
             "using" => USING_KW,
+            "meta" => META_KW,
             _ => return None,
         };
         Some(kw)
@@ -812,6 +873,8 @@ impl JsSyntaxKind {
             OF_KW => "of",
             OUT_KW => "out",
             USING_KW => "using",
+            META_KW => "meta",
+            EOF => "EOF",
             JS_STRING_LITERAL => "string literal",
             _ => return None,
         };
@@ -820,4 +883,4 @@ impl JsSyntaxKind {
 }
 #[doc = r" Utility macro for creating a SyntaxKind through simple macro syntax"]
 #[macro_export]
-macro_rules ! T { [;] => { $ crate :: JsSyntaxKind :: SEMICOLON } ; [,] => { $ crate :: JsSyntaxKind :: COMMA } ; ['('] => { $ crate :: JsSyntaxKind :: L_PAREN } ; [')'] => { $ crate :: JsSyntaxKind :: R_PAREN } ; ['{'] => { $ crate :: JsSyntaxKind :: L_CURLY } ; ['}'] => { $ crate :: JsSyntaxKind :: R_CURLY } ; ['['] => { $ crate :: JsSyntaxKind :: L_BRACK } ; [']'] => { $ crate :: JsSyntaxKind :: R_BRACK } ; [<] => { $ crate :: JsSyntaxKind :: L_ANGLE } ; [>] => { $ crate :: JsSyntaxKind :: R_ANGLE } ; [~] => { $ crate :: JsSyntaxKind :: TILDE } ; [?] => { $ crate :: JsSyntaxKind :: QUESTION } ; [??] => { $ crate :: JsSyntaxKind :: QUESTION2 } ; [?.] => { $ crate :: JsSyntaxKind :: QUESTIONDOT } ; [&] => { $ crate :: JsSyntaxKind :: AMP } ; [|] => { $ crate :: JsSyntaxKind :: PIPE } ; [+] => { $ crate :: JsSyntaxKind :: PLUS } ; [++] => { $ crate :: JsSyntaxKind :: PLUS2 } ; [*] => { $ crate :: JsSyntaxKind :: STAR } ; [**] => { $ crate :: JsSyntaxKind :: STAR2 } ; [/] => { $ crate :: JsSyntaxKind :: SLASH } ; [^] => { $ crate :: JsSyntaxKind :: CARET } ; [%] => { $ crate :: JsSyntaxKind :: PERCENT } ; [.] => { $ crate :: JsSyntaxKind :: DOT } ; [...] => { $ crate :: JsSyntaxKind :: DOT3 } ; [:] => { $ crate :: JsSyntaxKind :: COLON } ; [=] => { $ crate :: JsSyntaxKind :: EQ } ; [==] => { $ crate :: JsSyntaxKind :: EQ2 } ; [===] => { $ crate :: JsSyntaxKind :: EQ3 } ; [=>] => { $ crate :: JsSyntaxKind :: FAT_ARROW } ; [!] => { $ crate :: JsSyntaxKind :: BANG } ; [!=] => { $ crate :: JsSyntaxKind :: NEQ } ; [!==] => { $ crate :: JsSyntaxKind :: NEQ2 } ; [-] => { $ crate :: JsSyntaxKind :: MINUS } ; [--] => { $ crate :: JsSyntaxKind :: MINUS2 } ; [<=] => { $ crate :: JsSyntaxKind :: LTEQ } ; [>=] => { $ crate :: JsSyntaxKind :: GTEQ } ; [+=] => { $ crate :: JsSyntaxKind :: PLUSEQ } ; [-=] => { $ crate :: JsSyntaxKind :: MINUSEQ } ; [|=] => { $ crate :: JsSyntaxKind :: PIPEEQ } ; [&=] => { $ crate :: JsSyntaxKind :: AMPEQ } ; [^=] => { $ crate :: JsSyntaxKind :: CARETEQ } ; [/=] => { $ crate :: JsSyntaxKind :: SLASHEQ } ; [*=] => { $ crate :: JsSyntaxKind :: STAREQ } ; [%=] => { $ crate :: JsSyntaxKind :: PERCENTEQ } ; [&&] => { $ crate :: JsSyntaxKind :: AMP2 } ; [||] => { $ crate :: JsSyntaxKind :: PIPE2 } ; [<<] => { $ crate :: JsSyntaxKind :: SHL } ; [>>] => { $ crate :: JsSyntaxKind :: SHR } ; [>>>] => { $ crate :: JsSyntaxKind :: USHR } ; [<<=] => { $ crate :: JsSyntaxKind :: SHLEQ } ; [>>=] => { $ crate :: JsSyntaxKind :: SHREQ } ; [>>>=] => { $ crate :: JsSyntaxKind :: USHREQ } ; [&&=] => { $ crate :: JsSyntaxKind :: AMP2EQ } ; [||=] => { $ crate :: JsSyntaxKind :: PIPE2EQ } ; [**=] => { $ crate :: JsSyntaxKind :: STAR2EQ } ; [??=] => { $ crate :: JsSyntaxKind :: QUESTION2EQ } ; [@] => { $ crate :: JsSyntaxKind :: AT } ; ['`'] => { $ crate :: JsSyntaxKind :: BACKTICK } ; [break] => { $ crate :: JsSyntaxKind :: BREAK_KW } ; [case] => { $ crate :: JsSyntaxKind :: CASE_KW } ; [catch] => { $ crate :: JsSyntaxKind :: CATCH_KW } ; [class] => { $ crate :: JsSyntaxKind :: CLASS_KW } ; [const] => { $ crate :: JsSyntaxKind :: CONST_KW } ; [continue] => { $ crate :: JsSyntaxKind :: CONTINUE_KW } ; [debugger] => { $ crate :: JsSyntaxKind :: DEBUGGER_KW } ; [default] => { $ crate :: JsSyntaxKind :: DEFAULT_KW } ; [delete] => { $ crate :: JsSyntaxKind :: DELETE_KW } ; [do] => { $ crate :: JsSyntaxKind :: DO_KW } ; [else] => { $ crate :: JsSyntaxKind :: ELSE_KW } ; [enum] => { $ crate :: JsSyntaxKind :: ENUM_KW } ; [export] => { $ crate :: JsSyntaxKind :: EXPORT_KW } ; [extends] => { $ crate :: JsSyntaxKind :: EXTENDS_KW } ; [false] => { $ crate :: JsSyntaxKind :: FALSE_KW } ; [finally] => { $ crate :: JsSyntaxKind :: FINALLY_KW } ; [for] => { $ crate :: JsSyntaxKind :: FOR_KW } ; [function] => { $ crate :: JsSyntaxKind :: FUNCTION_KW } ; [if] => { $ crate :: JsSyntaxKind :: IF_KW } ; [in] => { $ crate :: JsSyntaxKind :: IN_KW } ; [instanceof] => { $ crate :: JsSyntaxKind :: INSTANCEOF_KW } ; [import] => { $ crate :: JsSyntaxKind :: IMPORT_KW } ; [new] => { $ crate :: JsSyntaxKind :: NEW_KW } ; [null] => { $ crate :: JsSyntaxKind :: NULL_KW } ; [return] => { $ crate :: JsSyntaxKind :: RETURN_KW } ; [super] => { $ crate :: JsSyntaxKind :: SUPER_KW } ; [switch] => { $ crate :: JsSyntaxKind :: SWITCH_KW } ; [this] => { $ crate :: JsSyntaxKind :: THIS_KW } ; [throw] => { $ crate :: JsSyntaxKind :: THROW_KW } ; [try] => { $ crate :: JsSyntaxKind :: TRY_KW } ; [true] => { $ crate :: JsSyntaxKind :: TRUE_KW } ; [typeof] => { $ crate :: JsSyntaxKind :: TYPEOF_KW } ; [var] => { $ crate :: JsSyntaxKind :: VAR_KW } ; [void] => { $ crate :: JsSyntaxKind :: VOID_KW } ; [while] => { $ crate :: JsSyntaxKind :: WHILE_KW } ; [with] => { $ crate :: JsSyntaxKind :: WITH_KW } ; [implements] => { $ crate :: JsSyntaxKind :: IMPLEMENTS_KW } ; [interface] => { $ crate :: JsSyntaxKind :: INTERFACE_KW } ; [let] => { $ crate :: JsSyntaxKind :: LET_KW } ; [package] => { $ crate :: JsSyntaxKind :: PACKAGE_KW } ; [private] => { $ crate :: JsSyntaxKind :: PRIVATE_KW } ; [protected] => { $ crate :: JsSyntaxKind :: PROTECTED_KW } ; [public] => { $ crate :: JsSyntaxKind :: PUBLIC_KW } ; [static] => { $ crate :: JsSyntaxKind :: STATIC_KW } ; [yield] => { $ crate :: JsSyntaxKind :: YIELD_KW } ; [abstract] => { $ crate :: JsSyntaxKind :: ABSTRACT_KW } ; [accessor] => { $ crate :: JsSyntaxKind :: ACCESSOR_KW } ; [as] => { $ crate :: JsSyntaxKind :: AS_KW } ; [satisfies] => { $ crate :: JsSyntaxKind :: SATISFIES_KW } ; [asserts] => { $ crate :: JsSyntaxKind :: ASSERTS_KW } ; [assert] => { $ crate :: JsSyntaxKind :: ASSERT_KW } ; [any] => { $ crate :: JsSyntaxKind :: ANY_KW } ; [async] => { $ crate :: JsSyntaxKind :: ASYNC_KW } ; [await] => { $ crate :: JsSyntaxKind :: AWAIT_KW } ; [boolean] => { $ crate :: JsSyntaxKind :: BOOLEAN_KW } ; [constructor] => { $ crate :: JsSyntaxKind :: CONSTRUCTOR_KW } ; [declare] => { $ crate :: JsSyntaxKind :: DECLARE_KW } ; [get] => { $ crate :: JsSyntaxKind :: GET_KW } ; [infer] => { $ crate :: JsSyntaxKind :: INFER_KW } ; [is] => { $ crate :: JsSyntaxKind :: IS_KW } ; [keyof] => { $ crate :: JsSyntaxKind :: KEYOF_KW } ; [module] => { $ crate :: JsSyntaxKind :: MODULE_KW } ; [namespace] => { $ crate :: JsSyntaxKind :: NAMESPACE_KW } ; [never] => { $ crate :: JsSyntaxKind :: NEVER_KW } ; [readonly] => { $ crate :: JsSyntaxKind :: READONLY_KW } ; [require] => { $ crate :: JsSyntaxKind :: REQUIRE_KW } ; [number] => { $ crate :: JsSyntaxKind :: NUMBER_KW } ; [object] => { $ crate :: JsSyntaxKind :: OBJECT_KW } ; [set] => { $ crate :: JsSyntaxKind :: SET_KW } ; [string] => { $ crate :: JsSyntaxKind :: STRING_KW } ; [symbol] => { $ crate :: JsSyntaxKind :: SYMBOL_KW } ; [type] => { $ crate :: JsSyntaxKind :: TYPE_KW } ; [undefined] => { $ crate :: JsSyntaxKind :: UNDEFINED_KW } ; [unique] => { $ crate :: JsSyntaxKind :: UNIQUE_KW } ; [unknown] => { $ crate :: JsSyntaxKind :: UNKNOWN_KW } ; [from] => { $ crate :: JsSyntaxKind :: FROM_KW } ; [global] => { $ crate :: JsSyntaxKind :: GLOBAL_KW } ; [bigint] => { $ crate :: JsSyntaxKind :: BIGINT_KW } ; [override] => { $ crate :: JsSyntaxKind :: OVERRIDE_KW } ; [of] => { $ crate :: JsSyntaxKind :: OF_KW } ; [out] => { $ crate :: JsSyntaxKind :: OUT_KW } ; [using] => { $ crate :: JsSyntaxKind :: USING_KW } ; [ident] => { $ crate :: JsSyntaxKind :: IDENT } ; [EOF] => { $ crate :: JsSyntaxKind :: EOF } ; [UNICODE_BOM] => { $ crate :: JsSyntaxKind :: UNICODE_BOM } ; [#] => { $ crate :: JsSyntaxKind :: HASH } ; }
+macro_rules ! T { [;] => { $ crate :: JsSyntaxKind :: SEMICOLON } ; [,] => { $ crate :: JsSyntaxKind :: COMMA } ; ['('] => { $ crate :: JsSyntaxKind :: L_PAREN } ; [')'] => { $ crate :: JsSyntaxKind :: R_PAREN } ; ['{'] => { $ crate :: JsSyntaxKind :: L_CURLY } ; ['}'] => { $ crate :: JsSyntaxKind :: R_CURLY } ; ['['] => { $ crate :: JsSyntaxKind :: L_BRACK } ; [']'] => { $ crate :: JsSyntaxKind :: R_BRACK } ; [<] => { $ crate :: JsSyntaxKind :: L_ANGLE } ; [>] => { $ crate :: JsSyntaxKind :: R_ANGLE } ; [~] => { $ crate :: JsSyntaxKind :: TILDE } ; [?] => { $ crate :: JsSyntaxKind :: QUESTION } ; [??] => { $ crate :: JsSyntaxKind :: QUESTION2 } ; [?.] => { $ crate :: JsSyntaxKind :: QUESTIONDOT } ; [&] => { $ crate :: JsSyntaxKind :: AMP } ; [|] => { $ crate :: JsSyntaxKind :: PIPE } ; [+] => { $ crate :: JsSyntaxKind :: PLUS } ; [++] => { $ crate :: JsSyntaxKind :: PLUS2 } ; [*] => { $ crate :: JsSyntaxKind :: STAR } ; [**] => { $ crate :: JsSyntaxKind :: STAR2 } ; [/] => { $ crate :: JsSyntaxKind :: SLASH } ; [^] => { $ crate :: JsSyntaxKind :: CARET } ; [%] => { $ crate :: JsSyntaxKind :: PERCENT } ; [.] => { $ crate :: JsSyntaxKind :: DOT } ; [...] => { $ crate :: JsSyntaxKind :: DOT3 } ; [:] => { $ crate :: JsSyntaxKind :: COLON } ; [=] => { $ crate :: JsSyntaxKind :: EQ } ; [==] => { $ crate :: JsSyntaxKind :: EQ2 } ; [===] => { $ crate :: JsSyntaxKind :: EQ3 } ; [=>] => { $ crate :: JsSyntaxKind :: FAT_ARROW } ; [!] => { $ crate :: JsSyntaxKind :: BANG } ; [!=] => { $ crate :: JsSyntaxKind :: NEQ } ; [!==] => { $ crate :: JsSyntaxKind :: NEQ2 } ; [-] => { $ crate :: JsSyntaxKind :: MINUS } ; [--] => { $ crate :: JsSyntaxKind :: MINUS2 } ; [<=] => { $ crate :: JsSyntaxKind :: LTEQ } ; [>=] => { $ crate :: JsSyntaxKind :: GTEQ } ; [+=] => { $ crate :: JsSyntaxKind :: PLUSEQ } ; [-=] => { $ crate :: JsSyntaxKind :: MINUSEQ } ; [|=] => { $ crate :: JsSyntaxKind :: PIPEEQ } ; [&=] => { $ crate :: JsSyntaxKind :: AMPEQ } ; [^=] => { $ crate :: JsSyntaxKind :: CARETEQ } ; [/=] => { $ crate :: JsSyntaxKind :: SLASHEQ } ; [*=] => { $ crate :: JsSyntaxKind :: STAREQ } ; [%=] => { $ crate :: JsSyntaxKind :: PERCENTEQ } ; [&&] => { $ crate :: JsSyntaxKind :: AMP2 } ; [||] => { $ crate :: JsSyntaxKind :: PIPE2 } ; [<<] => { $ crate :: JsSyntaxKind :: SHL } ; [>>] => { $ crate :: JsSyntaxKind :: SHR } ; [>>>] => { $ crate :: JsSyntaxKind :: USHR } ; [<<=] => { $ crate :: JsSyntaxKind :: SHLEQ } ; [>>=] => { $ crate :: JsSyntaxKind :: SHREQ } ; [>>>=] => { $ crate :: JsSyntaxKind :: USHREQ } ; [&&=] => { $ crate :: JsSyntaxKind :: AMP2EQ } ; [||=] => { $ crate :: JsSyntaxKind :: PIPE2EQ } ; [**=] => { $ crate :: JsSyntaxKind :: STAR2EQ } ; [??=] => { $ crate :: JsSyntaxKind :: QUESTION2EQ } ; [@] => { $ crate :: JsSyntaxKind :: AT } ; ['`'] => { $ crate :: JsSyntaxKind :: BACKTICK } ; [break] => { $ crate :: JsSyntaxKind :: BREAK_KW } ; [case] => { $ crate :: JsSyntaxKind :: CASE_KW } ; [catch] => { $ crate :: JsSyntaxKind :: CATCH_KW } ; [class] => { $ crate :: JsSyntaxKind :: CLASS_KW } ; [const] => { $ crate :: JsSyntaxKind :: CONST_KW } ; [continue] => { $ crate :: JsSyntaxKind :: CONTINUE_KW } ; [debugger] => { $ crate :: JsSyntaxKind :: DEBUGGER_KW } ; [default] => { $ crate :: JsSyntaxKind :: DEFAULT_KW } ; [delete] => { $ crate :: JsSyntaxKind :: DELETE_KW } ; [do] => { $ crate :: JsSyntaxKind :: DO_KW } ; [else] => { $ crate :: JsSyntaxKind :: ELSE_KW } ; [enum] => { $ crate :: JsSyntaxKind :: ENUM_KW } ; [export] => { $ crate :: JsSyntaxKind :: EXPORT_KW } ; [extends] => { $ crate :: JsSyntaxKind :: EXTENDS_KW } ; [false] => { $ crate :: JsSyntaxKind :: FALSE_KW } ; [finally] => { $ crate :: JsSyntaxKind :: FINALLY_KW } ; [for] => { $ crate :: JsSyntaxKind :: FOR_KW } ; [function] => { $ crate :: JsSyntaxKind :: FUNCTION_KW } ; [if] => { $ crate :: JsSyntaxKind :: IF_KW } ; [in] => { $ crate :: JsSyntaxKind :: IN_KW } ; [instanceof] => { $ crate :: JsSyntaxKind :: INSTANCEOF_KW } ; [import] => { $ crate :: JsSyntaxKind :: IMPORT_KW } ; [new] => { $ crate :: JsSyntaxKind :: NEW_KW } ; [null] => { $ crate :: JsSyntaxKind :: NULL_KW } ; [return] => { $ crate :: JsSyntaxKind :: RETURN_KW } ; [super] => { $ crate :: JsSyntaxKind :: SUPER_KW } ; [switch] => { $ crate :: JsSyntaxKind :: SWITCH_KW } ; [this] => { $ crate :: JsSyntaxKind :: THIS_KW } ; [throw] => { $ crate :: JsSyntaxKind :: THROW_KW } ; [try] => { $ crate :: JsSyntaxKind :: TRY_KW } ; [true] => { $ crate :: JsSyntaxKind :: TRUE_KW } ; [typeof] => { $ crate :: JsSyntaxKind :: TYPEOF_KW } ; [var] => { $ crate :: JsSyntaxKind :: VAR_KW } ; [void] => { $ crate :: JsSyntaxKind :: VOID_KW } ; [while] => { $ crate :: JsSyntaxKind :: WHILE_KW } ; [with] => { $ crate :: JsSyntaxKind :: WITH_KW } ; [implements] => { $ crate :: JsSyntaxKind :: IMPLEMENTS_KW } ; [interface] => { $ crate :: JsSyntaxKind :: INTERFACE_KW } ; [let] => { $ crate :: JsSyntaxKind :: LET_KW } ; [package] => { $ crate :: JsSyntaxKind :: PACKAGE_KW } ; [private] => { $ crate :: JsSyntaxKind :: PRIVATE_KW } ; [protected] => { $ crate :: JsSyntaxKind :: PROTECTED_KW } ; [public] => { $ crate :: JsSyntaxKind :: PUBLIC_KW } ; [static] => { $ crate :: JsSyntaxKind :: STATIC_KW } ; [yield] => { $ crate :: JsSyntaxKind :: YIELD_KW } ; [abstract] => { $ crate :: JsSyntaxKind :: ABSTRACT_KW } ; [accessor] => { $ crate :: JsSyntaxKind :: ACCESSOR_KW } ; [as] => { $ crate :: JsSyntaxKind :: AS_KW } ; [satisfies] => { $ crate :: JsSyntaxKind :: SATISFIES_KW } ; [asserts] => { $ crate :: JsSyntaxKind :: ASSERTS_KW } ; [assert] => { $ crate :: JsSyntaxKind :: ASSERT_KW } ; [any] => { $ crate :: JsSyntaxKind :: ANY_KW } ; [async] => { $ crate :: JsSyntaxKind :: ASYNC_KW } ; [await] => { $ crate :: JsSyntaxKind :: AWAIT_KW } ; [boolean] => { $ crate :: JsSyntaxKind :: BOOLEAN_KW } ; [constructor] => { $ crate :: JsSyntaxKind :: CONSTRUCTOR_KW } ; [declare] => { $ crate :: JsSyntaxKind :: DECLARE_KW } ; [get] => { $ crate :: JsSyntaxKind :: GET_KW } ; [infer] => { $ crate :: JsSyntaxKind :: INFER_KW } ; [is] => { $ crate :: JsSyntaxKind :: IS_KW } ; [keyof] => { $ crate :: JsSyntaxKind :: KEYOF_KW } ; [module] => { $ crate :: JsSyntaxKind :: MODULE_KW } ; [namespace] => { $ crate :: JsSyntaxKind :: NAMESPACE_KW } ; [never] => { $ crate :: JsSyntaxKind :: NEVER_KW } ; [readonly] => { $ crate :: JsSyntaxKind :: READONLY_KW } ; [require] => { $ crate :: JsSyntaxKind :: REQUIRE_KW } ; [number] => { $ crate :: JsSyntaxKind :: NUMBER_KW } ; [object] => { $ crate :: JsSyntaxKind :: OBJECT_KW } ; [set] => { $ crate :: JsSyntaxKind :: SET_KW } ; [string] => { $ crate :: JsSyntaxKind :: STRING_KW } ; [symbol] => { $ crate :: JsSyntaxKind :: SYMBOL_KW } ; [type] => { $ crate :: JsSyntaxKind :: TYPE_KW } ; [undefined] => { $ crate :: JsSyntaxKind :: UNDEFINED_KW } ; [unique] => { $ crate :: JsSyntaxKind :: UNIQUE_KW } ; [unknown] => { $ crate :: JsSyntaxKind :: UNKNOWN_KW } ; [from] => { $ crate :: JsSyntaxKind :: FROM_KW } ; [global] => { $ crate :: JsSyntaxKind :: GLOBAL_KW } ; [bigint] => { $ crate :: JsSyntaxKind :: BIGINT_KW } ; [override] => { $ crate :: JsSyntaxKind :: OVERRIDE_KW } ; [of] => { $ crate :: JsSyntaxKind :: OF_KW } ; [out] => { $ crate :: JsSyntaxKind :: OUT_KW } ; [using] => { $ crate :: JsSyntaxKind :: USING_KW } ; [meta] => { $ crate :: JsSyntaxKind :: META_KW } ; [ident] => { $ crate :: JsSyntaxKind :: IDENT } ; [EOF] => { $ crate :: JsSyntaxKind :: EOF } ; [UNICODE_BOM] => { $ crate :: JsSyntaxKind :: UNICODE_BOM } ; [#] => { $ crate :: JsSyntaxKind :: HASH } ; }

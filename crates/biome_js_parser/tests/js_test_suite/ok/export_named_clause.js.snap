@@ -1,0 +1,177 @@
+---
+source: crates/biome_js_parser/tests/spec_test.rs
+expression: snapshot
+snapshot_kind: text
+---
+## Input
+
+```js
+export { a };
+export { a as z, b as "y", c as default }
+export { as };
+
+```
+
+
+## AST
+
+```
+JsModule {
+    bom_token: missing (optional),
+    interpreter_token: missing (optional),
+    directives: JsDirectiveList [],
+    items: JsModuleItemList [
+        JsExport {
+            decorators: JsDecoratorList [],
+            export_token: EXPORT_KW@0..7 "export" [] [Whitespace(" ")],
+            export_clause: JsExportNamedClause {
+                type_token: missing (optional),
+                l_curly_token: L_CURLY@7..9 "{" [] [Whitespace(" ")],
+                specifiers: JsExportNamedSpecifierList [
+                    JsExportNamedShorthandSpecifier {
+                        type_token: missing (optional),
+                        name: JsReferenceIdentifier {
+                            value_token: IDENT@9..11 "a" [] [Whitespace(" ")],
+                        },
+                    },
+                ],
+                r_curly_token: R_CURLY@11..12 "}" [] [],
+                semicolon_token: SEMICOLON@12..13 ";" [] [],
+            },
+        },
+        JsExport {
+            decorators: JsDecoratorList [],
+            export_token: EXPORT_KW@13..21 "export" [Newline("\n")] [Whitespace(" ")],
+            export_clause: JsExportNamedClause {
+                type_token: missing (optional),
+                l_curly_token: L_CURLY@21..23 "{" [] [Whitespace(" ")],
+                specifiers: JsExportNamedSpecifierList [
+                    JsExportNamedSpecifier {
+                        type_token: missing (optional),
+                        local_name: JsReferenceIdentifier {
+                            value_token: IDENT@23..25 "a" [] [Whitespace(" ")],
+                        },
+                        as_token: AS_KW@25..28 "as" [] [Whitespace(" ")],
+                        exported_name: JsLiteralExportName {
+                            value: IDENT@28..29 "z" [] [],
+                        },
+                    },
+                    COMMA@29..31 "," [] [Whitespace(" ")],
+                    JsExportNamedSpecifier {
+                        type_token: missing (optional),
+                        local_name: JsReferenceIdentifier {
+                            value_token: IDENT@31..33 "b" [] [Whitespace(" ")],
+                        },
+                        as_token: AS_KW@33..36 "as" [] [Whitespace(" ")],
+                        exported_name: JsLiteralExportName {
+                            value: JS_STRING_LITERAL@36..39 "\"y\"" [] [],
+                        },
+                    },
+                    COMMA@39..41 "," [] [Whitespace(" ")],
+                    JsExportNamedSpecifier {
+                        type_token: missing (optional),
+                        local_name: JsReferenceIdentifier {
+                            value_token: IDENT@41..43 "c" [] [Whitespace(" ")],
+                        },
+                        as_token: AS_KW@43..46 "as" [] [Whitespace(" ")],
+                        exported_name: JsLiteralExportName {
+                            value: IDENT@46..54 "default" [] [Whitespace(" ")],
+                        },
+                    },
+                ],
+                r_curly_token: R_CURLY@54..55 "}" [] [],
+                semicolon_token: missing (optional),
+            },
+        },
+        JsExport {
+            decorators: JsDecoratorList [],
+            export_token: EXPORT_KW@55..63 "export" [Newline("\n")] [Whitespace(" ")],
+            export_clause: JsExportNamedClause {
+                type_token: missing (optional),
+                l_curly_token: L_CURLY@63..65 "{" [] [Whitespace(" ")],
+                specifiers: JsExportNamedSpecifierList [
+                    JsExportNamedShorthandSpecifier {
+                        type_token: missing (optional),
+                        name: JsReferenceIdentifier {
+                            value_token: IDENT@65..68 "as" [] [Whitespace(" ")],
+                        },
+                    },
+                ],
+                r_curly_token: R_CURLY@68..69 "}" [] [],
+                semicolon_token: SEMICOLON@69..70 ";" [] [],
+            },
+        },
+    ],
+    eof_token: EOF@70..71 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: JS_MODULE@0..71
+  0: (empty)
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..70
+    0: JS_EXPORT@0..13
+      0: JS_DECORATOR_LIST@0..0
+      1: EXPORT_KW@0..7 "export" [] [Whitespace(" ")]
+      2: JS_EXPORT_NAMED_CLAUSE@7..13
+        0: (empty)
+        1: L_CURLY@7..9 "{" [] [Whitespace(" ")]
+        2: JS_EXPORT_NAMED_SPECIFIER_LIST@9..11
+          0: JS_EXPORT_NAMED_SHORTHAND_SPECIFIER@9..11
+            0: (empty)
+            1: JS_REFERENCE_IDENTIFIER@9..11
+              0: IDENT@9..11 "a" [] [Whitespace(" ")]
+        3: R_CURLY@11..12 "}" [] []
+        4: SEMICOLON@12..13 ";" [] []
+    1: JS_EXPORT@13..55
+      0: JS_DECORATOR_LIST@13..13
+      1: EXPORT_KW@13..21 "export" [Newline("\n")] [Whitespace(" ")]
+      2: JS_EXPORT_NAMED_CLAUSE@21..55
+        0: (empty)
+        1: L_CURLY@21..23 "{" [] [Whitespace(" ")]
+        2: JS_EXPORT_NAMED_SPECIFIER_LIST@23..54
+          0: JS_EXPORT_NAMED_SPECIFIER@23..29
+            0: (empty)
+            1: JS_REFERENCE_IDENTIFIER@23..25
+              0: IDENT@23..25 "a" [] [Whitespace(" ")]
+            2: AS_KW@25..28 "as" [] [Whitespace(" ")]
+            3: JS_LITERAL_EXPORT_NAME@28..29
+              0: IDENT@28..29 "z" [] []
+          1: COMMA@29..31 "," [] [Whitespace(" ")]
+          2: JS_EXPORT_NAMED_SPECIFIER@31..39
+            0: (empty)
+            1: JS_REFERENCE_IDENTIFIER@31..33
+              0: IDENT@31..33 "b" [] [Whitespace(" ")]
+            2: AS_KW@33..36 "as" [] [Whitespace(" ")]
+            3: JS_LITERAL_EXPORT_NAME@36..39
+              0: JS_STRING_LITERAL@36..39 "\"y\"" [] []
+          3: COMMA@39..41 "," [] [Whitespace(" ")]
+          4: JS_EXPORT_NAMED_SPECIFIER@41..54
+            0: (empty)
+            1: JS_REFERENCE_IDENTIFIER@41..43
+              0: IDENT@41..43 "c" [] [Whitespace(" ")]
+            2: AS_KW@43..46 "as" [] [Whitespace(" ")]
+            3: JS_LITERAL_EXPORT_NAME@46..54
+              0: IDENT@46..54 "default" [] [Whitespace(" ")]
+        3: R_CURLY@54..55 "}" [] []
+        4: (empty)
+    2: JS_EXPORT@55..70
+      0: JS_DECORATOR_LIST@55..55
+      1: EXPORT_KW@55..63 "export" [Newline("\n")] [Whitespace(" ")]
+      2: JS_EXPORT_NAMED_CLAUSE@63..70
+        0: (empty)
+        1: L_CURLY@63..65 "{" [] [Whitespace(" ")]
+        2: JS_EXPORT_NAMED_SPECIFIER_LIST@65..68
+          0: JS_EXPORT_NAMED_SHORTHAND_SPECIFIER@65..68
+            0: (empty)
+            1: JS_REFERENCE_IDENTIFIER@65..68
+              0: IDENT@65..68 "as" [] [Whitespace(" ")]
+        3: R_CURLY@68..69 "}" [] []
+        4: SEMICOLON@69..70 ";" [] []
+  4: EOF@70..71 "" [Newline("\n")] []
+
+```

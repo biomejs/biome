@@ -1,5 +1,5 @@
 use biome_analyze::context::RuleContext;
-use biome_analyze::{declare_syntax_rule, Ast, Rule, RuleDiagnostic};
+use biome_analyze::{Ast, Rule, RuleDiagnostic, declare_syntax_rule};
 use biome_console::markup;
 use biome_js_syntax::{JsClassDeclaration, JsClassExpression, JsSuperExpression};
 use biome_rowan::AstNode;
@@ -11,10 +11,10 @@ declare_syntax_rule! {
     ///
     /// ```js
     /// class A {
-    //     constructor() {
-    //         super()
-    //     }
-    // }
+    ///     constructor() {
+    ///         super()
+    ///     }
+    /// }
     /// ```
     pub NoSuperWithoutExtends {
         version: "1.0.0",

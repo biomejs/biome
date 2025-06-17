@@ -3,12 +3,12 @@ use std::{
     io, slice,
 };
 
-use biome_console::{fmt, markup, MarkupElement};
+use biome_console::{MarkupElement, fmt, markup};
 use biome_text_edit::{ChangeTag, CompressedOp, TextEdit};
 
 use super::frame::{
-    calculate_print_width, print_invisibles, text_width, IntoIter, OneIndexed,
-    PrintInvisiblesOptions, CODE_FRAME_CONTEXT_LINES,
+    CODE_FRAME_CONTEXT_LINES, IntoIter, OneIndexed, PrintInvisiblesOptions, calculate_print_width,
+    print_invisibles, text_width,
 };
 
 const MAX_PATCH_LINES: usize = 150;
@@ -49,11 +49,7 @@ pub(super) fn print_diff(fmt: &mut fmt::Formatter<'_>, diff: &TextEdit) -> io::R
                     matches!(tag, ChangeTag::Delete | ChangeTag::Insert) && !text.is_empty()
                 });
 
-            if has_edits {
-                Some((key, line))
-            } else {
-                None
-            }
+            if has_edits { Some((key, line)) } else { None }
         });
 
         iter.next().and_then(|(key, line)| {
@@ -103,11 +99,11 @@ pub(super) fn print_diff(fmt: &mut fmt::Formatter<'_>, diff: &TextEdit) -> io::R
 /// This function scans the list of DiffOps that make up the `diff` and derives
 /// the following data structures:
 /// - `modified_lines` is the set of [LineKey] that contain at least one insert
-///     or delete operation
+///   or delete operation
 /// - `inserted_lines` maps a [LineKey] to the list of diff operations that
-///     happen on the corresponding line
+///   happen on the corresponding line
 /// - `before_line_to_after` maps line numbers in the old revision of the text
-///     to line numbers in the new revision
+///   to line numbers in the new revision
 /// - `after_line` counts the number of lines in the new revision of the document
 /// - `before_line` counts the number of lines in the old revision of the document
 fn process_diff_ops<'diff>(
@@ -669,7 +665,7 @@ impl<W: fmt::Write + ?Sized> fmt::Write for ElementWrapper<'_, W> {
 #[cfg(test)]
 mod tests {
     use super::print_diff;
-    use biome_console::{fmt, markup, MarkupBuf};
+    use biome_console::{MarkupBuf, fmt, markup};
     use biome_text_edit::TextEdit;
     use termcolor::Buffer;
 

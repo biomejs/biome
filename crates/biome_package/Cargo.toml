@@ -1,0 +1,56 @@
+[package]
+authors.workspace    = true
+categories.workspace = true
+description          = "Workspace package handler"
+edition.workspace    = true
+homepage.workspace   = true
+keywords.workspace   = true
+license.workspace    = true
+name                 = "biome_package"
+publish              = true
+repository.workspace = true
+version              = "0.5.7"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+biome_console            = { workspace = true }
+biome_deserialize        = { workspace = true, features = ["camino", "indexmap"] }
+biome_deserialize_macros = { workspace = true }
+biome_diagnostics        = { workspace = true }
+biome_fs                 = { workspace = true }
+biome_json_parser        = { workspace = true }
+biome_json_syntax        = { workspace = true }
+biome_json_value         = { workspace = true }
+biome_parser             = { workspace = true }
+biome_rowan              = { workspace = true }
+biome_text_size          = { workspace = true }
+camino                   = { workspace = true }
+indexmap                 = { workspace = true }
+node-semver              = "2.2.0"
+rustc-hash               = { workspace = true }
+serde                    = { workspace = true }
+static_assertions        = { workspace = true }
+
+[dev-dependencies]
+criterion    = { package = "codspeed-criterion-compat", version = "=2.10.1" }
+insta        = { workspace = true }
+tests_macros = { path = "../tests_macros" }
+
+[target.'cfg(target_os = "windows")'.dev-dependencies]
+mimalloc = { workspace = true }
+
+[target.'cfg(all(target_family="unix", not(all(target_arch = "aarch64", target_env = "musl"))))'.dev-dependencies]
+tikv-jemallocator = { workspace = true }
+
+[lints]
+workspace = true
+
+[[bench]]
+harness = false
+name    = "package_json"
+
+
+[[bench]]
+harness = false
+name    = "tsconfig_json"

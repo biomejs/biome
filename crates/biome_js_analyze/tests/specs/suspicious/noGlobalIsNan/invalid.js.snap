@@ -3,7 +3,7 @@ source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid.js
 ---
 # Input
-```jsx
+```js
 isNaN({});
 
 (isNaN)({});
@@ -248,5 +248,3 @@ invalid.js:19:12 lint/suspicious/noGlobalIsNan  FIXABLE  ━━━━━━━�
   
 
 ```
-
-

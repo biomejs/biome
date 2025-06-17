@@ -1,0 +1,27 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: one-liner.js
+snapshot_kind: text
+---
+# Input
+```js
+import { B } from "b"; import { A } from "a"; function f() {}
+```
+
+# Diagnostics
+```
+one-liner.js:1:1 assist/source/organizeImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The imports and exports are not sorted.
+  
+  > 1 │ import { B } from "b"; import { A } from "a"; function f() {}
+      │ ^^^^^^^^^^^^^^^^^^^^^^
+  
+  i Safe fix: Organize Imports (Biome)
+  
+    1   │ - import·{·B·}·from·"b";·import·{·A·}·from·"a";·function·f()·{}
+      1 │ + import·{·A·}·from·"a";·
+      2 │ + import·{·B·}·from·"b";·function·f()·{}
+  
+
+```

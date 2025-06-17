@@ -4,5 +4,5 @@ expression: 0_start_with_digit.ts
 ---
 # Input
 ```ts
-
+/* should not generate diagnostics */
 ```

@@ -9,7 +9,7 @@ use std::{
     process::{Command, Stdio},
 };
 
-use anyhow::{bail, Context, Result};
+use anyhow::{Context, Result, bail};
 
 pub mod fs2 {
     use std::{fs, path::Path};
@@ -177,7 +177,7 @@ struct Env {
 }
 
 impl Env {
-    fn with<F: FnOnce(&mut Env) -> T, T>(f: F) -> T {
+    fn with<F: FnOnce(&mut Self) -> T, T>(f: F) -> T {
         thread_local! {
             static ENV: RefCell<Env> = RefCell::new(Env {
                 pushd_stack: vec![env::current_dir().unwrap()],
@@ -198,13 +198,13 @@ impl Env {
     }
     fn pushenv(&mut self, var: OsString, value: OsString) {
         self.pushenv_stack.push((var.clone(), env::var_os(&var)));
-        env::set_var(var, value)
+        unsafe { env::set_var(var, value) }
     }
     fn popenv(&mut self) {
         let (var, value) = self.pushenv_stack.pop().unwrap();
         match value {
-            None => env::remove_var(var),
-            Some(value) => env::set_var(var, value),
+            None => unsafe { env::remove_var(var) },
+            Some(value) => unsafe { env::set_var(var, value) },
         }
     }
     fn cwd(&self) -> &Path {

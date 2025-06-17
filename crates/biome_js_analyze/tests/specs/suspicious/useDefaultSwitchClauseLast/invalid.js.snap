@@ -3,7 +3,7 @@ source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid.js
 ---
 # Input
-```jsx
+```js
 switch (foo) {
 	default:
 		break;
@@ -151,5 +151,3 @@ invalid.js:27:2 lint/suspicious/useDefaultSwitchClauseLast ━━━━━━━
   
 
 ```
-
-

@@ -1,0 +1,21 @@
+{
+  "linter": {
+    "rules": {
+      "nursery": {
+        // Comment 1
+        "noConsole": "off",
+        // Comment 2
+        "noDoneCallback": "off",
+        // Comment 3
+        "useImportRestrictions": "off",
+        // Comment 4
+        "useTopLevelRegex": "off",
+      },
+      // Comment 6
+      "style": {
+        // Comment 7
+        "useForOf": "off",
+      },
+    }
+  }
+}

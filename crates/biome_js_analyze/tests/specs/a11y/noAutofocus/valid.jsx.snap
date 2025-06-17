@@ -4,6 +4,7 @@ expression: valid.jsx
 ---
 # Input
 ```jsx
+/* should not generate diagnostics */
 <>
     <div />
     <button />
@@ -11,8 +12,7 @@ expression: valid.jsx
     <div autofocus />
     <input autofocus="true" />
     <MyComponent autoFocus={true} />
+    <div popover><input autoFocus />></div>
+    <dialog><input autoFocus />></dialog>
 </>
-
 ```
-
-

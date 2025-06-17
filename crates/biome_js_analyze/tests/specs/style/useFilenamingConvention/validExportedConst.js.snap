@@ -3,9 +3,8 @@ source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: validExportedConst.js
 ---
 # Input
-```jsx
+```js
+/* should not generate diagnostics */
 export const a = 0, { validExportedConst } = {};
 
 ```
-
-

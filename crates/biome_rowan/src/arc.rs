@@ -4,7 +4,7 @@ use std::{
     cmp::Ordering,
     hash::{Hash, Hasher},
     marker::PhantomData,
-    mem::{self, offset_of, ManuallyDrop},
+    mem::{self, ManuallyDrop, offset_of},
     ops::Deref,
     ptr::{self, NonNull},
     sync::atomic::{
@@ -53,11 +53,14 @@ impl<T> Arc<T> {
     /// It is recommended to use OffsetArc for this
     #[inline]
     pub(crate) unsafe fn from_raw(ptr: *const T) -> Self {
-        // To find the corresponding pointer to the `ArcInner` we need
-        // to subtract the offset of the `data` field from the pointer.
-        let ptr = (ptr as *const u8).sub(offset_of!(ArcInner<T>, data));
-        Arc {
-            p: ptr::NonNull::new_unchecked(ptr as *mut ArcInner<T>),
+        let ptr = unsafe {
+            // To find the corresponding pointer to the `ArcInner` we need
+            // to subtract the offset of the `data` field from the pointer.
+            let ptr = (ptr as *const u8).sub(offset_of!(ArcInner<T>, data));
+            NonNull::new_unchecked(ptr as *mut ArcInner<T>)
+        };
+        Self {
+            p: ptr,
             phantom: PhantomData,
         }
     }
@@ -77,7 +80,7 @@ impl<T: ?Sized> Arc<T> {
     // Non-inlined part of `drop`. Just invokes the destructor.
     #[inline(never)]
     unsafe fn drop_slow(&mut self) {
-        let _ = Box::from_raw(self.ptr());
+        let _ = unsafe { Box::from_raw(self.ptr()) };
     }
 
     /// Test pointer equality between the two Arcs, i.e. they must be the _same_
@@ -129,7 +132,7 @@ impl<T: ?Sized> Clone for Arc<T> {
         }
 
         unsafe {
-            Arc {
+            Self {
                 p: ptr::NonNull::new_unchecked(self.ptr()),
                 phantom: PhantomData,
             }
@@ -207,35 +210,35 @@ impl<T: ?Sized> Drop for Arc<T> {
 }
 
 impl<T: ?Sized + PartialEq> PartialEq for Arc<T> {
-    fn eq(&self, other: &Arc<T>) -> bool {
+    fn eq(&self, other: &Self) -> bool {
         Self::ptr_eq(self, other) || *(*self) == *(*other)
     }
 }
 
 impl<T: ?Sized + PartialOrd> PartialOrd for Arc<T> {
-    fn partial_cmp(&self, other: &Arc<T>) -> Option<Ordering> {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
         (**self).partial_cmp(&**other)
     }
 
-    fn lt(&self, other: &Arc<T>) -> bool {
+    fn lt(&self, other: &Self) -> bool {
         *(*self) < *(*other)
     }
 
-    fn le(&self, other: &Arc<T>) -> bool {
+    fn le(&self, other: &Self) -> bool {
         *(*self) <= *(*other)
     }
 
-    fn gt(&self, other: &Arc<T>) -> bool {
+    fn gt(&self, other: &Self) -> bool {
         *(*self) > *(*other)
     }
 
-    fn ge(&self, other: &Arc<T>) -> bool {
+    fn ge(&self, other: &Self) -> bool {
         *(*self) >= *(*other)
     }
 }
 
 impl<T: ?Sized + Ord> Ord for Arc<T> {
-    fn cmp(&self, other: &Arc<T>) -> Ordering {
+    fn cmp(&self, other: &Self) -> Ordering {
         (**self).cmp(&**other)
     }
 }
@@ -417,7 +420,7 @@ impl<H, T> ThinArc<H, T> {
             );
         }
 
-        ThinArc {
+        Self {
             ptr: unsafe { ptr::NonNull::new_unchecked(ptr) },
             phantom: PhantomData,
         }
@@ -436,14 +439,14 @@ impl<H, T> Deref for ThinArc<H, T> {
 impl<H, T> Clone for ThinArc<H, T> {
     #[inline]
     fn clone(&self) -> Self {
-        ThinArc::with_arc(self, |a| Arc::into_thin(a.clone()))
+        Self::with_arc(self, |a| Arc::into_thin(a.clone()))
     }
 }
 
 impl<H, T> Drop for ThinArc<H, T> {
     #[inline]
     fn drop(&mut self) {
-        let _ = Arc::from_thin(ThinArc {
+        let _ = Arc::from_thin(Self {
             ptr: self.ptr,
             phantom: PhantomData,
         });
@@ -478,7 +481,7 @@ impl<H, T> Arc<HeaderSlice<H, [T]>> {
         let ptr = thin_to_thick(a.ptr.as_ptr());
         mem::forget(a);
         unsafe {
-            Arc {
+            Self {
                 p: ptr::NonNull::new_unchecked(ptr),
                 phantom: PhantomData,
             }
@@ -488,7 +491,7 @@ impl<H, T> Arc<HeaderSlice<H, [T]>> {
 
 impl<H: PartialEq, T: PartialEq> PartialEq for ThinArc<H, T> {
     #[inline]
-    fn eq(&self, other: &ThinArc<H, T>) -> bool {
+    fn eq(&self, other: &Self) -> bool {
         **self == **other
     }
 }

@@ -1,0 +1,443 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+expression: invalid.css
+---
+# Input
+```css
+.not-sorted-basic {
+  color: red;
+  display: block;
+}
+
+.multiple-properties {
+  margin: 1px;
+  transition:cubic-bezier(1, 0, 0, 1);
+  color: red;
+  display: block;
+}
+
+/* leading comment above rule */
+.comments {
+  /* leading for z-index */
+  z-index: 1; /* trailing for z-index */
+  /* leading for margin */
+  margin: 1px; /* trailing for margin*/
+} /* trailing comment after rule */
+
+.oneline { color: red; display: block; }
+
+.nested-rules {
+  display: block;
+  .nested {}
+  color: red;
+  .nested {}
+  margin: 1px;
+}
+
+.at-rules {
+  display: block;
+  @media (min-width: 100px) {}
+  color: red;
+  @media (min-width: 100px) {}
+  margin: 1px;
+}
+
+.mixed-rules {
+  display: block;
+  @media (min-width: 100px) {}
+  color: red;
+  .nested {}
+  margin: 1px;
+}
+
+.vendor-prefixes {
+  margin: 1px;
+  -moz-margin: 1px;
+  -webkit-margin: 1px;
+}
+
+.case-insensitive {
+  color: red;
+  DISPLAY: block;
+}
+
+.nested-with-content {
+  .nested {
+    color: red;
+    display: block;
+  }
+}
+
+.shorthand-after-longhand-not-ignored-if-different-vendor-prefix {
+  padding: 5px;
+  -webkit-padding-right: 10px;
+  -moz-padding: 20px;
+}
+
+.example-from-doc-comment {
+  transition: opactity 1s ease;
+  border: 1px solid black;
+  pointer-events: none;
+  color: black;
+  margin: 8px;
+  display: block;
+  --custom: 100;
+}
+
+```
+
+# Diagnostics
+```
+invalid.css:1:19 assist/source/useSortedProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The properties are not sorted.
+  
+  > 1 │ .not-sorted-basic {
+      │                   ^
+  > 2 │   color: red;
+  > 3 │   display: block;
+  > 4 │ }
+      │ ^
+    5 │ 
+    6 │ .multiple-properties {
+  
+  i Safe fix: Sort these properties
+  
+     1  1 │   .not-sorted-basic {
+     2    │ - ··color:·red;
+     3    │ - ··display:·block;
+        2 │ + ··display:·block;
+        3 │ + ··color:·red;
+     4  4 │   }
+     5  5 │   
+  
+
+```
+
+```
+invalid.css:6:22 assist/source/useSortedProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The properties are not sorted.
+  
+     4 │ }
+     5 │ 
+   > 6 │ .multiple-properties {
+       │                      ^
+   > 7 │   margin: 1px;
+   > 8 │   transition:cubic-bezier(1, 0, 0, 1);
+   > 9 │   color: red;
+  > 10 │   display: block;
+  > 11 │ }
+       │ ^
+    12 │ 
+    13 │ /* leading comment above rule */
+  
+  i Safe fix: Sort these properties
+  
+     5  5 │   
+     6  6 │   .multiple-properties {
+     7    │ - ··margin:·1px;
+     8    │ - ··transition:cubic-bezier(1,·0,·0,·1);
+     9    │ - ··color:·red;
+    10    │ - ··display:·block;
+        7 │ + ··display:·block;
+        8 │ + ··margin:·1px;
+        9 │ + ··color:·red;
+       10 │ + ··transition:cubic-bezier(1,·0,·0,·1);
+    11 11 │   }
+    12 12 │   
+  
+
+```
+
+```
+invalid.css:21:10 assist/source/useSortedProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The properties are not sorted.
+  
+    19 │ } /* trailing comment after rule */
+    20 │ 
+  > 21 │ .oneline { color: red; display: block; }
+       │          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    22 │ 
+    23 │ .nested-rules {
+  
+  i Safe fix: Sort these properties
+  
+    19 19 │   } /* trailing comment after rule */
+    20 20 │   
+    21    │ - .oneline·{·color:·red;·display:·block;·}
+       21 │ + .oneline·{·display:·block;·color:·red;·}
+    22 22 │   
+    23 23 │   .nested-rules {
+  
+
+```
+
+```
+invalid.css:23:15 assist/source/useSortedProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The properties are not sorted.
+  
+    21 │ .oneline { color: red; display: block; }
+    22 │ 
+  > 23 │ .nested-rules {
+       │               ^
+  > 24 │   display: block;
+        ...
+  > 28 │   margin: 1px;
+  > 29 │ }
+       │ ^
+    30 │ 
+    31 │ .at-rules {
+  
+  i Safe fix: Sort these properties
+  
+    23 23 │   .nested-rules {
+    24 24 │     display: block;
+    25    │ - ··.nested·{}
+       25 │ + ··margin:·1px;
+    26 26 │     color: red;
+    27 27 │     .nested {}
+    28    │ - ··margin:·1px;
+       28 │ + ··.nested·{}
+    29 29 │   }
+    30 30 │   
+  
+
+```
+
+```
+invalid.css:31:11 assist/source/useSortedProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The properties are not sorted.
+  
+    29 │ }
+    30 │ 
+  > 31 │ .at-rules {
+       │           ^
+  > 32 │   display: block;
+        ...
+  > 36 │   margin: 1px;
+  > 37 │ }
+       │ ^
+    38 │ 
+    39 │ .mixed-rules {
+  
+  i Safe fix: Sort these properties
+  
+    31 31 │   .at-rules {
+    32 32 │     display: block;
+    33    │ - ··@media·(min-width:·100px)·{}
+    34    │ - ··color:·red;
+    35    │ - ··@media·(min-width:·100px)·{}
+    36    │ - ··margin:·1px;
+       33 │ + ··margin:·1px;
+       34 │ + ··color:·red;
+       35 │ + ··@media·(min-width:·100px)·{}
+       36 │ + ··@media·(min-width:·100px)·{}
+    37 37 │   }
+    38 38 │   
+  
+
+```
+
+```
+invalid.css:39:14 assist/source/useSortedProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The properties are not sorted.
+  
+    37 │ }
+    38 │ 
+  > 39 │ .mixed-rules {
+       │              ^
+  > 40 │   display: block;
+        ...
+  > 44 │   margin: 1px;
+  > 45 │ }
+       │ ^
+    46 │ 
+    47 │ .vendor-prefixes {
+  
+  i Safe fix: Sort these properties
+  
+    39 39 │   .mixed-rules {
+    40 40 │     display: block;
+    41    │ - ··@media·(min-width:·100px)·{}
+    42    │ - ··color:·red;
+    43    │ - ··.nested·{}
+    44    │ - ··margin:·1px;
+       41 │ + ··margin:·1px;
+       42 │ + ··color:·red;
+       43 │ + ··@media·(min-width:·100px)·{}
+       44 │ + ··.nested·{}
+    45 45 │   }
+    46 46 │   
+  
+
+```
+
+```
+invalid.css:47:18 assist/source/useSortedProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The properties are not sorted.
+  
+    45 │ }
+    46 │ 
+  > 47 │ .vendor-prefixes {
+       │                  ^
+  > 48 │   margin: 1px;
+  > 49 │   -moz-margin: 1px;
+  > 50 │   -webkit-margin: 1px;
+  > 51 │ }
+       │ ^
+    52 │ 
+    53 │ .case-insensitive {
+  
+  i Safe fix: Sort these properties
+  
+    46 46 │   
+    47 47 │   .vendor-prefixes {
+    48    │ - ··margin:·1px;
+    49    │ - ··-moz-margin:·1px;
+    50    │ - ··-webkit-margin:·1px;
+       48 │ + ··-moz-margin:·1px;
+       49 │ + ··-webkit-margin:·1px;
+       50 │ + ··margin:·1px;
+    51 51 │   }
+    52 52 │   
+  
+
+```
+
+```
+invalid.css:53:19 assist/source/useSortedProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The properties are not sorted.
+  
+    51 │ }
+    52 │ 
+  > 53 │ .case-insensitive {
+       │                   ^
+  > 54 │   color: red;
+  > 55 │   DISPLAY: block;
+  > 56 │ }
+       │ ^
+    57 │ 
+    58 │ .nested-with-content {
+  
+  i Safe fix: Sort these properties
+  
+    52 52 │   
+    53 53 │   .case-insensitive {
+    54    │ - ··color:·red;
+    55    │ - ··DISPLAY:·block;
+       54 │ + ··DISPLAY:·block;
+       55 │ + ··color:·red;
+    56 56 │   }
+    57 57 │   
+  
+
+```
+
+```
+invalid.css:59:11 assist/source/useSortedProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The properties are not sorted.
+  
+    58 │ .nested-with-content {
+  > 59 │   .nested {
+       │           ^
+  > 60 │     color: red;
+  > 61 │     display: block;
+  > 62 │   }
+       │   ^
+    63 │ }
+    64 │ 
+  
+  i Safe fix: Sort these properties
+  
+    58 58 │   .nested-with-content {
+    59 59 │     .nested {
+    60    │ - ····color:·red;
+    61    │ - ····display:·block;
+       60 │ + ····display:·block;
+       61 │ + ····color:·red;
+    62 62 │     }
+    63 63 │   }
+  
+
+```
+
+```
+invalid.css:65:66 assist/source/useSortedProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The properties are not sorted.
+  
+    63 │ }
+    64 │ 
+  > 65 │ .shorthand-after-longhand-not-ignored-if-different-vendor-prefix {
+       │                                                                  ^
+  > 66 │   padding: 5px;
+  > 67 │   -webkit-padding-right: 10px;
+  > 68 │   -moz-padding: 20px;
+  > 69 │ }
+       │ ^
+    70 │ 
+    71 │ .example-from-doc-comment {
+  
+  i Safe fix: Sort these properties
+  
+    64 64 │   
+    65 65 │   .shorthand-after-longhand-not-ignored-if-different-vendor-prefix {
+    66    │ - ··padding:·5px;
+    67    │ - ··-webkit-padding-right:·10px;
+    68    │ - ··-moz-padding:·20px;
+       66 │ + ··-moz-padding:·20px;
+       67 │ + ··padding:·5px;
+       68 │ + ··-webkit-padding-right:·10px;
+    69 69 │   }
+    70 70 │   
+  
+
+```
+
+```
+invalid.css:71:27 assist/source/useSortedProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The properties are not sorted.
+  
+    69 │ }
+    70 │ 
+  > 71 │ .example-from-doc-comment {
+       │                           ^
+  > 72 │   transition: opactity 1s ease;
+        ...
+  > 77 │   display: block;
+  > 78 │   --custom: 100;
+  > 79 │ }
+       │ ^
+    80 │ 
+  
+  i Safe fix: Sort these properties
+  
+    70 70 │   
+    71 71 │   .example-from-doc-comment {
+    72    │ - ··transition:·opactity·1s·ease;
+    73    │ - ··border:·1px·solid·black;
+    74    │ - ··pointer-events:·none;
+       72 │ + ··--custom:·100;
+       73 │ + ··display:·block;
+       74 │ + ··margin:·8px;
+    75 75 │     color: black;
+    76    │ - ··margin:·8px;
+    77    │ - ··display:·block;
+    78    │ - ··--custom:·100;
+       76 │ + ··pointer-events:·none;
+       77 │ + ··border:·1px·solid·black;
+       78 │ + ··transition:·opactity·1s·ease;
+    79 79 │   }
+    80 80 │   
+  
+
+```

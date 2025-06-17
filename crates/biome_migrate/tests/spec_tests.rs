@@ -1,25 +1,26 @@
-use biome_analyze::{AnalyzerAction, ControlFlow, Never};
+use biome_analyze::{AnalysisFilter, AnalyzerAction, ControlFlow, Never, RuleFilter};
 use biome_diagnostics::advice::CodeSuggestionAdvice;
 use biome_diagnostics::{DiagnosticExt, Severity};
-use biome_json_parser::{parse_json, JsonParserOptions};
+use biome_json_parser::{JsonParserOptions, parse_json};
 use biome_json_syntax::JsonLanguage;
 use biome_rowan::AstNode;
 use biome_test_utils::{
-    assert_errors_are_absent, code_fix_to_string, diagnostic_to_string,
-    has_bogus_nodes_or_empty_slots, parse_test_path, register_leak_checker,
+    assert_diagnostics_expectation_comment, assert_errors_are_absent, code_fix_to_string,
+    diagnostic_to_string, has_bogus_nodes_or_empty_slots, parse_test_path, register_leak_checker,
     write_analyzer_snapshot,
 };
-use std::ffi::OsStr;
+use camino::Utf8Path;
 use std::fs::read_to_string;
-use std::path::Path;
+use std::path::PathBuf;
+use std::{env, slice};
 
-tests_macros::gen_tests! {"tests/specs/**/*.json", crate::run_test, "module"}
+tests_macros::gen_tests! {"tests/specs/**/*.{json,jsonc}", crate::run_test, "module"}
 
-fn run_test(input: &'static str, _: &str, _: &str, _: &str) {
+fn run_test(input: &'static str, _: &str, directory_path: &str, _: &str) {
     register_leak_checker();
 
-    let input_file = Path::new(input);
-    let file_name = input_file.file_name().and_then(OsStr::to_str).unwrap();
+    let input_file = Utf8Path::new(input);
+    let file_name = input_file.file_name().unwrap();
 
     let (group, rule) = parse_test_path(input_file);
     if rule == "specs" || rule == "suppression" {
@@ -34,7 +35,13 @@ fn run_test(input: &'static str, _: &str, _: &str, _: &str) {
     let input_code = read_to_string(input_file)
         .unwrap_or_else(|err| panic!("failed to read {input_file:?}: {err:?}"));
 
-    let quantity_diagnostics = analyze_and_snap(&mut snapshot, &input_code, file_name, input_file);
+    analyze_and_snap(
+        &mut snapshot,
+        &input_code,
+        file_name,
+        input_file,
+        PathBuf::from(directory_path),
+    );
 
     insta::with_settings!({
         prepend_module_to_snapshot => false,
@@ -42,30 +49,39 @@ fn run_test(input: &'static str, _: &str, _: &str, _: &str) {
     }, {
         insta::assert_snapshot!(file_name, snapshot, file_name);
     });
-
-    if input_code.contains("/* should not generate diagnostics */") && quantity_diagnostics > 0 {
-        panic!("This test should not generate diagnostics");
-    }
 }
 
 pub(crate) fn analyze_and_snap(
     snapshot: &mut String,
     input_code: &str,
     file_name: &str,
-    input_file: &Path,
-) -> usize {
-    let parsed = parse_json(input_code, JsonParserOptions::default());
+    input_file: &Utf8Path,
+    directory_path: PathBuf,
+) {
+    let parse_options = if file_name.ends_with(".jsonc") {
+        JsonParserOptions::default()
+            .with_allow_comments()
+            .with_allow_trailing_commas()
+    } else {
+        JsonParserOptions::default()
+    };
+    let parsed = parse_json(input_code, parse_options);
     let root = parsed.tree();
 
     let mut diagnostics = Vec::new();
     let mut code_fixes = Vec::new();
-    let version = "1.5.0";
+    let rule_name = directory_path.file_name().unwrap().to_str().unwrap();
+    let rule_filter = RuleFilter::Rule("migrations", rule_name);
+    let filter = AnalysisFilter {
+        enabled_rules: Some(slice::from_ref(&rule_filter)),
+        ..Default::default()
+    };
     let (_, errors) =
-        biome_migrate::migrate_configuration(&root, input_file, version.to_string(), |event| {
+        biome_migrate::migrate_configuration(&root, filter, input_file, true, |event| {
             if let Some(mut diag) = event.diagnostic() {
                 for action in event.actions() {
                     if !action.is_suppression() {
-                        check_code_action(input_file, input_code, &action);
+                        check_code_action(input_file, input_code, &action, parse_options);
                         diag = diag.add_code_suggestion(CodeSuggestionAdvice::from(action));
                     }
                 }
@@ -77,7 +93,7 @@ pub(crate) fn analyze_and_snap(
 
             for action in event.actions() {
                 if !action.is_suppression() {
-                    check_code_action(input_file, input_code, &action);
+                    check_code_action(input_file, input_code, &action, parse_options);
                     code_fixes.push(code_fix_to_string(input_code, action));
                 }
             }
@@ -96,10 +112,15 @@ pub(crate) fn analyze_and_snap(
         "json",
     );
 
-    diagnostics.len()
+    assert_diagnostics_expectation_comment(input_file, root.syntax(), diagnostics.len());
 }
 
-fn check_code_action(path: &Path, source: &str, action: &AnalyzerAction<JsonLanguage>) {
+fn check_code_action(
+    path: &Utf8Path,
+    source: &str,
+    action: &AnalyzerAction<JsonLanguage>,
+    parse_options: JsonParserOptions,
+) {
     let (new_tree, text_edit) = match action
         .mutation
         .clone()
@@ -125,6 +146,6 @@ fn check_code_action(path: &Path, source: &str, action: &AnalyzerAction<JsonLang
     }
 
     // Re-parse the modified code and panic if the resulting tree has syntax errors
-    let re_parse = parse_json(&output, JsonParserOptions::default());
+    let re_parse = parse_json(&output, parse_options);
     assert_errors_are_absent(re_parse.tree().syntax(), re_parse.diagnostics(), path);
 }

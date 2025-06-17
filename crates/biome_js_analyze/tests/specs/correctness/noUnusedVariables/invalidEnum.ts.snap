@@ -22,16 +22,14 @@ export {}
 ```
 invalidEnum.ts:1:6 lint/correctness/noUnusedVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This variable is unused.
+  ! This variable Status is unused.
   
   > 1 │ enum Status {
       │      ^^^^^^
     2 │     Open = 0,
     3 │     Close = 1,
   
-  i Unused variables usually are result of incomplete refactoring, typos and other source of bugs.
+  i Unused variables are often the result of an incomplete refactoring, typos, or other sources of bugs.
   
 
 ```
-
-

@@ -1,6 +1,7 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid.jsx
+snapshot_kind: text
 ---
 # Input
 ```jsx
@@ -21,7 +22,7 @@ function Component() {
 ```
 invalid.jsx:4:39 lint/correctness/useHookAtTopLevel ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This hook is being called from a nested function, but all hooks must be called unconditionally from the top-level component.
+  × This hook is being called from a nested function, but all hooks must be called unconditionally from the top-level component.
   
     2 │     return (
     3 │         <div onClick={function onClick() {
@@ -36,5 +37,3 @@ invalid.jsx:4:39 lint/correctness/useHookAtTopLevel ━━━━━━━━━�
   
 
 ```
-
-

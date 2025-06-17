@@ -1,6 +1,6 @@
 use biome_grit_syntax::GritSyntaxKind::{self, *};
 use biome_grit_syntax::T;
-use biome_parser::{token_set, TokenSet};
+use biome_parser::{TokenSet, token_set};
 
 // See the precedence rules defined in the Grit grammar:
 //   https://github.com/getgrit/tree-sitter-gritql/blob/main/grammar.js#L7
@@ -49,6 +49,10 @@ pub(crate) const CONTAINER_SET: TokenSet<GritSyntaxKind> =
 pub(crate) const NOT_SET: TokenSet<GritSyntaxKind> = token_set![NOT_KW, T![!]];
 
 pub(crate) const REGEX_SET: TokenSet<GritSyntaxKind> = token_set![GRIT_REGEX, GRIT_SNIPPET_REGEX];
+
+// Engine names we can parse for formatting purposes
+pub(crate) const SUPPORTED_ENGINE_SET: TokenSet<GritSyntaxKind> =
+    token_set![T![biome], T![marzano]];
 
 pub(crate) const SUPPORTED_LANGUAGE_SET: TokenSet<GritSyntaxKind> =
     token_set![T![js], T![json], T![css], T![grit], T![html]];

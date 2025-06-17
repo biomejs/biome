@@ -74,17 +74,17 @@ impl Tag {
     pub const fn is_start(&self) -> bool {
         matches!(
             self,
-            Tag::StartIndent
-                | Tag::StartAlign(_)
-                | Tag::StartDedent(_)
-                | Tag::StartGroup { .. }
-                | Tag::StartConditionalContent(_)
-                | Tag::StartIndentIfGroupBreaks(_)
-                | Tag::StartFill
-                | Tag::StartEntry
-                | Tag::StartLineSuffix
-                | Tag::StartVerbatim(_)
-                | Tag::StartLabelled(_)
+            Self::StartIndent
+                | Self::StartAlign(_)
+                | Self::StartDedent(_)
+                | Self::StartGroup { .. }
+                | Self::StartConditionalContent(_)
+                | Self::StartIndentIfGroupBreaks(_)
+                | Self::StartFill
+                | Self::StartEntry
+                | Self::StartLineSuffix
+                | Self::StartVerbatim(_)
+                | Self::StartLabelled(_)
         )
     }
 
@@ -146,7 +146,7 @@ pub enum GroupMode {
 
 impl GroupMode {
     pub const fn is_flat(&self) -> bool {
-        matches!(self, GroupMode::Flat)
+        matches!(self, Self::Flat)
     }
 }
 
@@ -250,7 +250,10 @@ impl PartialEq for LabelId {
         #[cfg(debug_assertions)]
         {
             if is_equal {
-                assert_eq!(self.name, other.name, "Two `LabelId`s with different names have the same `value`. Are you mixing labels of two different `LabelDefinition` or are the values returned by the `LabelDefinition` not unique?");
+                assert_eq!(
+                    self.name, other.name,
+                    "Two `LabelId`s with different names have the same `value`. Are you mixing labels of two different `LabelDefinition` or are the values returned by the `LabelDefinition` not unique?"
+                );
             }
         }
 
@@ -282,6 +285,8 @@ pub trait Label {
 pub enum VerbatimKind {
     Bogus,
     Suppressed,
+    /// This was intentionally skipped, not as a result of suppression.
+    Skipped,
     Verbatim {
         /// the length of the formatted node
         length: TextSize,
@@ -290,6 +295,6 @@ pub enum VerbatimKind {
 
 impl VerbatimKind {
     pub const fn is_bogus(&self) -> bool {
-        matches!(self, VerbatimKind::Bogus)
+        matches!(self, Self::Bogus)
     }
 }

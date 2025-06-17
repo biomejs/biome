@@ -1,0 +1,66 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: grit/multifile.grit
+---
+# Input
+
+```grit
+language js
+
+multifile {
+  bubble($prop, $source_file, $new_prop) file($body) where $body <: contains `type $prop = $_` where {
+    $source_file <: undefined,
+    $prop <: `Props`,
+    $new_prop = `New$prop`,
+    $prop => $new_prop,
+    $source_file = $filename
+  },
+  bubble($prop, $source_file, $new_prop) file($body) where {
+    $body <: contains `$prop` where {
+      $prop <: imported_from(from=includes $source_file),
+    },
+    $body <: contains `$prop` => $new_prop,
+  }
+}
+
+```
+
+
+=============================
+
+# Outputs
+
+## Output 1
+
+-----
+Indent style: Tab
+Indent width: 2
+Line ending: LF
+Line width: 80
+Attribute Position: Auto
+-----
+
+```grit
+language js
+
+multifile {
+	bubble($prop, $source_file, $new_prop) file($body) where $body <: contains `type $prop = $_` where {
+		$source_file <: undefined,
+		$prop <: `Props`,
+		$new_prop = `New$prop`,
+		$prop => $new_prop,
+		$source_file = $filename
+	},
+	bubble($prop, $source_file, $new_prop) file($body) where {
+		$body <: contains `$prop` where {
+			$prop <: imported_from(from=includes $source_file)
+		},
+		$body <: contains `$prop` => $new_prop
+	}
+}
+```
+
+# Lines exceeding max width of 80 characters
+```
+    4: 	bubble($prop, $source_file, $new_prop) file($body) where $body <: contains `type $prop = $_` where {
+```

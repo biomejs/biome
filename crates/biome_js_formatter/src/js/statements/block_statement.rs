@@ -1,5 +1,5 @@
 use crate::prelude::*;
-use biome_formatter::{write, Buffer, CstFormatContext};
+use biome_formatter::{Buffer, CstFormatContext, write};
 use biome_js_syntax::JsBlockStatement;
 use biome_js_syntax::{AnyJsStatement, JsEmptyStatement};
 

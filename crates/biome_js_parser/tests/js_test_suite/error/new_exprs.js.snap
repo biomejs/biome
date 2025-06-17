@@ -1,0 +1,72 @@
+---
+source: crates/biome_js_parser/tests/spec_test.rs
+expression: snapshot
+snapshot_kind: text
+---
+## Input
+
+```js
+new;
+
+```
+
+
+## AST
+
+```
+JsModule {
+    bom_token: missing (optional),
+    interpreter_token: missing (optional),
+    directives: JsDirectiveList [],
+    items: JsModuleItemList [
+        JsExpressionStatement {
+            expression: JsNewExpression {
+                new_token: NEW_KW@0..3 "new" [] [],
+                callee: missing (required),
+                type_arguments: missing (optional),
+                arguments: missing (optional),
+            },
+            semicolon_token: SEMICOLON@3..4 ";" [] [],
+        },
+    ],
+    eof_token: EOF@4..5 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: JS_MODULE@0..5
+  0: (empty)
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..4
+    0: JS_EXPRESSION_STATEMENT@0..4
+      0: JS_NEW_EXPRESSION@0..3
+        0: NEW_KW@0..3 "new" [] []
+        1: (empty)
+        2: (empty)
+        3: (empty)
+      1: SEMICOLON@3..4 ";" [] []
+  4: EOF@4..5 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+new_exprs.js:1:4 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected an expression but instead found ';'.
+  
+  > 1 │ new;
+      │    ^
+    2 │ 
+  
+  i Expected an expression here.
+  
+  > 1 │ new;
+      │    ^
+    2 │ 
+  
+```

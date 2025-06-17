@@ -1,22 +1,22 @@
 use std::io;
 
-use biome_console::{fmt, markup, MarkupBuf};
+use biome_console::{MarkupBuf, fmt, markup};
 use biome_rowan::TextSize;
 use biome_text_edit::TextEdit;
 use biome_text_size::TextRange;
 use serde::{
-    de::{self, SeqAccess},
     Deserialize, Deserializer, Serialize, Serializer,
+    de::{self, SeqAccess},
 };
 
 use crate::{
-    diagnostic::internal::AsDiagnostic, diagnostic::DiagnosticTag, Advices as _, Backtrace,
-    Category, DiagnosticTags, LogCategory, Resource, Severity, SourceCode, Visit,
+    Advices as _, Backtrace, Category, DiagnosticTags, LogCategory, Resource, Severity, SourceCode,
+    Visit, diagnostic::DiagnosticTag, diagnostic::internal::AsDiagnostic,
 };
 
 /// Serializable representation for a [Diagnostic](super::Diagnostic).
 #[derive(Clone, Debug, Serialize, Deserialize)]
-#[cfg_attr(not(target_arch = "wasm32"), serde(rename_all = "camelCase"))]
+#[serde(rename_all = "camelCase")]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[cfg_attr(test, derive(Eq, PartialEq))]
 pub struct Diagnostic {
@@ -139,7 +139,7 @@ impl<D: super::Diagnostic + ?Sized> std::fmt::Display for PrintDescription<'_, D
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
-#[cfg_attr(not(target_arch = "wasm32"), serde(rename_all = "camelCase"))]
+#[serde(rename_all = "camelCase")]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[cfg_attr(test, derive(Eq, PartialEq))]
 struct Location {
@@ -225,7 +225,7 @@ impl Visit for Advices {
         title: &dyn fmt::Display,
         advice: &dyn super::Advices,
     ) -> io::Result<()> {
-        let mut advices = Advices::new();
+        let mut advices = Self::new();
         advice.record(&mut advices)?;
 
         self.advices
@@ -265,13 +265,13 @@ enum Advice {
 impl super::Advices for Advice {
     fn record(&self, visitor: &mut dyn Visit) -> io::Result<()> {
         match self {
-            Advice::Log(category, text) => visitor.record_log(*category, text),
-            Advice::List(list) => {
+            Self::Log(category, text) => visitor.record_log(*category, text),
+            Self::List(list) => {
                 let as_display: Vec<&dyn fmt::Display> =
                     list.iter().map(|item| item as &dyn fmt::Display).collect();
                 visitor.record_list(&as_display)
             }
-            Advice::Frame(location) => visitor.record_frame(super::Location {
+            Self::Frame(location) => visitor.record_frame(super::Location {
                 resource: location.path.as_ref().map(super::Resource::as_deref),
                 span: location.span,
                 source_code: location.source_code.as_deref().map(|text| SourceCode {
@@ -279,10 +279,10 @@ impl super::Advices for Advice {
                     line_starts: None,
                 }),
             }),
-            Advice::Diff(diff) => visitor.record_diff(diff),
-            Advice::Backtrace(title, backtrace) => visitor.record_backtrace(title, backtrace),
-            Advice::Command(command) => visitor.record_command(command),
-            Advice::Group(title, advice) => visitor.record_group(title, advice),
+            Self::Diff(diff) => visitor.record_diff(diff),
+            Self::Backtrace(title, backtrace) => visitor.record_backtrace(title, backtrace),
+            Self::Command(command) => visitor.record_command(command),
+            Self::Group(title, advice) => visitor.record_group(title, advice),
         }
     }
 }
@@ -290,11 +290,11 @@ impl super::Advices for Advice {
 impl From<DiagnosticTag> for DiagnosticTags {
     fn from(tag: DiagnosticTag) -> Self {
         match tag {
-            DiagnosticTag::Fixable => DiagnosticTags::FIXABLE,
-            DiagnosticTag::Internal => DiagnosticTags::INTERNAL,
-            DiagnosticTag::UnnecessaryCode => DiagnosticTags::UNNECESSARY_CODE,
-            DiagnosticTag::DeprecatedCode => DiagnosticTags::DEPRECATED_CODE,
-            DiagnosticTag::Verbose => DiagnosticTags::VERBOSE,
+            DiagnosticTag::Fixable => Self::FIXABLE,
+            DiagnosticTag::Internal => Self::INTERNAL,
+            DiagnosticTag::UnnecessaryCode => Self::UNNECESSARY_CODE,
+            DiagnosticTag::DeprecatedCode => Self::DEPRECATED_CODE,
+            DiagnosticTag::Verbose => Self::VERBOSE,
         }
     }
 }
@@ -365,8 +365,8 @@ impl schemars::JsonSchema for DiagnosticTags {
         String::from("DiagnosticTags")
     }
 
-    fn json_schema(gen: &mut schemars::gen::SchemaGenerator) -> schemars::schema::Schema {
-        <Vec<DiagnosticTag>>::json_schema(gen)
+    fn json_schema(generator: &mut schemars::r#gen::SchemaGenerator) -> schemars::schema::Schema {
+        <Vec<DiagnosticTag>>::json_schema(generator)
     }
 }
 
@@ -375,7 +375,7 @@ mod tests {
     use std::io;
 
     use biome_text_size::{TextRange, TextSize};
-    use serde_json::{from_value, json, to_value, Value};
+    use serde_json::{Value, from_value, json, to_value};
 
     use crate::{
         self as biome_diagnostics, {Advices, LogCategory, Visit},
@@ -407,7 +407,7 @@ mod tests {
 
     impl Default for TestDiagnostic {
         fn default() -> Self {
-            TestDiagnostic {
+            Self {
                 path: String::from("path"),
                 span: TextRange::new(TextSize::from(0), TextSize::from(6)),
                 source_code: String::from("source_code"),

@@ -4,7 +4,7 @@ use crate::utils::StringLiteralParentKind;
 use biome_formatter::write;
 use biome_js_syntax::JsSyntaxKind::JS_STRING_LITERAL;
 use biome_js_syntax::{AnyJsClassMemberName, AnyJsObjectMemberName};
-use biome_rowan::{declare_node_union, AstNode};
+use biome_rowan::{AstNode, declare_node_union};
 use unicode_width::UnicodeWidthStr;
 
 declare_node_union! {
@@ -55,7 +55,7 @@ pub(crate) fn write_member_name(
         }
         name => {
             write!(f, [&name])?;
-            Ok(name.text().width())
+            Ok(name.to_trimmed_string().width())
         }
     }
 }

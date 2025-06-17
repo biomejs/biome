@@ -1,0 +1,32 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: grit/patterns/like.grit
+---
+# Input
+
+```grit
+language js
+like (0.9) { `const foo = 1;` } => `console.log('hello')`
+
+```
+
+
+=============================
+
+# Outputs
+
+## Output 1
+
+-----
+Indent style: Tab
+Indent width: 2
+Line ending: LF
+Line width: 80
+Attribute Position: Auto
+-----
+
+```grit
+language js
+
+like (0.9) { `const foo = 1;` } => `console.log('hello')`
+```

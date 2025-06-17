@@ -1,9 +1,9 @@
 use crate::prelude::*;
-use crate::utils::{should_hug_type, FormatTypeMemberSeparator};
+use crate::utils::{FormatTypeMemberSeparator, should_hug_type};
 
-use biome_formatter::{format_args, write, Buffer};
-use biome_js_syntax::parentheses::NeedsParentheses;
+use biome_formatter::{Buffer, format_args, write};
 use biome_js_syntax::TsUnionTypeFields;
+use biome_js_syntax::parentheses::NeedsParentheses;
 use biome_js_syntax::{JsSyntaxKind, JsSyntaxToken, TsTupleTypeElementList, TsUnionType};
 use biome_rowan::SyntaxNodeOptionExt;
 
@@ -113,7 +113,7 @@ impl FormatNodeRule<TsUnionType> for FormatTsUnionType {
 
             let is_inside_complex_tuple_type = node
                 .parent::<TsTupleTypeElementList>()
-                .map_or(false, |tuple| tuple.len() > 1);
+                .is_some_and(|tuple| tuple.len() > 1);
 
             if is_inside_complex_tuple_type {
                 write!(

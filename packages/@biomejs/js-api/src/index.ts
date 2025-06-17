@@ -1,15 +1,16 @@
 import type {
 	BiomePath,
+	Configuration,
 	Diagnostic,
 	FixFileMode,
-	PartialConfiguration,
+	OpenProjectResult,
+	ProjectKey,
 	Workspace,
 } from "@biomejs/wasm-nodejs";
-import { Distribution, type WasmModule, loadModule, wrapError } from "./wasm";
+import { Distribution, loadModule, type WasmModule, wrapError } from "./wasm";
 
 // Re-export of some useful types for users
-export type Configuration = PartialConfiguration;
-export type { Diagnostic };
+export type { Diagnostic, Configuration };
 export { Distribution };
 
 export interface FormatContentDebugOptions extends FormatContentOptions {
@@ -101,7 +102,7 @@ export class Biome {
 		const module = await loadModule(options.distribution);
 		const workspace = new module.Workspace();
 		const biome = new Biome(module, workspace);
-		biome.registerProjectFolder();
+		biome.openProject();
 		return biome;
 	}
 
@@ -120,25 +121,33 @@ export class Biome {
 	 *
 	 * If fails when the configuration is incorrect.
 	 *
-	 * @param configuration
+	 * @param {ProjectKey} projectKey The identifier of the project
+	 * @param {Configuration} configuration
 	 */
-	applyConfiguration(configuration: Configuration): void {
+	applyConfiguration(
+		projectKey: ProjectKey,
+		configuration: Configuration,
+	): void {
 		try {
 			this.workspace.updateSettings({
+				projectKey,
 				configuration,
-				gitignore_matches: [],
-				workspace_directory: "./",
+				workspaceDirectory: "./",
 			});
 		} catch (e) {
 			throw wrapError(e);
 		}
 	}
 
-	registerProjectFolder(): void;
-	registerProjectFolder(path?: string): void {
-		this.workspace.registerProjectFolder({
-			path,
-			setAsCurrentWorkspace: true,
+	/**
+	 * Open a possible workspace project folder. Returns the key of said project. Use this key when you want to switch to different projects.
+	 *
+	 * @param {string} [path]
+	 */
+	openProject(path?: string): OpenProjectResult {
+		return this.workspace.openProject({
+			path: path || "",
+			openUninitialized: true,
 		});
 	}
 
@@ -151,35 +160,36 @@ export class Biome {
 	}
 
 	private withFile<T>(
+		projectKey: ProjectKey,
 		path: string,
 		content: string,
 		func: (path: BiomePath) => T,
 	): T {
 		return this.tryCatchWrapper(() => {
-			const biomePath: BiomePath = {
-				path,
-				was_written: false,
-				kind: ["Handleable"],
-			};
-
 			this.workspace.openFile({
-				content,
-				version: 0,
-				path: biomePath,
+				projectKey,
+				content: { type: "fromClient", content, version: 0 },
+				path,
 			});
 
 			try {
-				return func(biomePath);
+				return func(path);
 			} finally {
 				this.workspace.closeFile({
-					path: biomePath,
+					projectKey,
+					path,
 				});
 			}
 		});
 	}
 
-	formatContent(content: string, options: FormatContentOptions): FormatResult;
 	formatContent(
+		projectKey: ProjectKey,
+		content: string,
+		options: FormatContentOptions,
+	): FormatResult;
+	formatContent(
+		projectKey: ProjectKey,
 		content: string,
 		options: FormatContentDebugOptions,
 	): FormatDebugResult;
@@ -187,22 +197,25 @@ export class Biome {
 	/**
 	 * If formats some content.
 	 *
+	 * @param {ProjectKey} projectKey The identifier of the project
 	 * @param {String} content The content to format
 	 * @param {FormatContentOptions | FormatContentDebugOptions} options Options needed when formatting some content
 	 */
 	formatContent(
+		projectKey: ProjectKey,
 		content: string,
 		options: FormatContentOptions | FormatContentDebugOptions,
 	): FormatResult | FormatDebugResult {
-		return this.withFile(options.filePath, content, (path) => {
+		return this.withFile(projectKey, options.filePath, content, (path) => {
 			let code = content;
 
 			const { diagnostics } = this.workspace.pullDiagnostics({
+				projectKey,
 				path,
-				categories: ["Syntax"],
-				max_diagnostics: Number.MAX_SAFE_INTEGER,
+				categories: ["syntax"],
 				only: [],
 				skip: [],
+				pullCodeActions: false,
 			});
 
 			const hasErrors = diagnostics.some(
@@ -211,12 +224,14 @@ export class Biome {
 			if (!hasErrors) {
 				if (options.range) {
 					const result = this.workspace.formatRange({
+						projectKey,
 						path,
 						range: options.range,
 					});
 					code = result.code;
 				} else {
 					const result = this.workspace.formatFile({
+						projectKey,
 						path,
 					});
 					code = result.code;
@@ -224,6 +239,7 @@ export class Biome {
 
 				if (isFormatContentDebug(options)) {
 					const ir = this.workspace.getFormatterIr({
+						projectKey,
 						path,
 					});
 
@@ -245,24 +261,27 @@ export class Biome {
 	/**
 	 * Lint the content of a file.
 	 *
+	 * @param {ProjectKey} projectKey The identifier of the project
 	 * @param {String} content The content to lint
 	 * @param {LintContentOptions} options Options needed when linting some content
 	 */
 	lintContent(
+		projectKey: ProjectKey,
 		content: string,
 		{ filePath, fixFileMode }: LintContentOptions,
 	): LintResult {
 		const maybeFixedContent = fixFileMode
-			? this.withFile(filePath, content, (path) => {
+			? this.withFile(projectKey, filePath, content, (path) => {
 					let code = content;
 
 					const result = this.workspace.fixFile({
+						projectKey,
 						path,
-						fix_file_mode: fixFileMode,
-						should_format: false,
+						fixFileMode: fixFileMode,
+						shouldFormat: false,
 						only: [],
 						skip: [],
-						rule_categories: ["Syntax", "Lint"],
+						ruleCategories: ["syntax", "lint", "action"],
 					});
 
 					code = result.code;
@@ -271,13 +290,14 @@ export class Biome {
 				})
 			: content;
 
-		return this.withFile(filePath, maybeFixedContent, (path) => {
+		return this.withFile(projectKey, filePath, maybeFixedContent, (path) => {
 			const { diagnostics } = this.workspace.pullDiagnostics({
+				projectKey,
 				path,
-				categories: ["Syntax", "Lint"],
-				max_diagnostics: Number.MAX_SAFE_INTEGER,
+				categories: ["syntax", "lint", "action"],
 				only: [],
 				skip: [],
+				pullCodeActions: false,
 			});
 
 			return {

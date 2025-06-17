@@ -1,8 +1,8 @@
 use biome_analyze::{
-    context::RuleContext, declare_lint_rule, ActionCategory, Ast, FixKind, Rule, RuleDiagnostic,
-    RuleSource,
+    Ast, FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
+use biome_diagnostics::Severity;
 use biome_js_factory::make;
 use biome_js_syntax::{
     AnyJsExpression, JsAssignmentOperator, JsBinaryOperator, JsCallExpression, JsNewExpression,
@@ -58,7 +58,8 @@ declare_lint_rule! {
         name: "useDateNow",
         language: "js",
         sources: &[RuleSource::EslintUnicorn("prefer-date-now")],
-        recommended: false,
+        recommended: true,
+        severity: Severity::Warning,
         fix_kind: FixKind::Unsafe,
     }
 }
@@ -93,7 +94,7 @@ impl Rule for UseDateNow {
             },
         ).note(
             markup! {
-                <Emphasis>"Date.now()"</Emphasis>" is more readable and also avoids unnecessary instantiation of "<Emphasis>"Date"</Emphasis>"object."
+                <Emphasis>"Date.now()"</Emphasis>" is more readable and also avoids unnecessary instantiation of "<Emphasis>"Date"</Emphasis>" object."
             }
             .to_owned(),
         ))
@@ -133,7 +134,7 @@ impl Rule for UseDateNow {
         mutation.replace_node_discard_trivia::<AnyJsExpression>(node.clone(), new_call_expr.into());
 
         Some(JsRuleAction::new(
-            ActionCategory::QuickFix,
+            ctx.metadata().action_category(ctx.category(), ctx.group()),
             ctx.metadata().applicability(),
             markup! {
                 "Replace with "<Emphasis>"Date.now()"</Emphasis>"."

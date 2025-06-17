@@ -1,0 +1,13 @@
+---
+source: crates/biome_configuration/tests/spec_tests.rs
+expression: wrong_extends_type.json
+---
+wrong_extends_type.json:2:13 deserialize ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The `extends` field must be either `//` or an array of paths.
+  
+    1 │ {
+  > 2 │ 	"extends": "something"
+      │ 	           ^^^^^^^^^^^
+    3 │ }
+    4 │

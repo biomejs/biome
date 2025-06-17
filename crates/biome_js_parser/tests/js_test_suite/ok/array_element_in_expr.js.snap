@@ -1,0 +1,92 @@
+---
+source: crates/biome_js_parser/tests/spec_test.rs
+expression: snapshot
+snapshot_kind: text
+---
+## Input
+
+```js
+for(["a" in {}];;) {}
+
+```
+
+
+## AST
+
+```
+JsModule {
+    bom_token: missing (optional),
+    interpreter_token: missing (optional),
+    directives: JsDirectiveList [],
+    items: JsModuleItemList [
+        JsForStatement {
+            for_token: FOR_KW@0..3 "for" [] [],
+            l_paren_token: L_PAREN@3..4 "(" [] [],
+            initializer: JsArrayExpression {
+                l_brack_token: L_BRACK@4..5 "[" [] [],
+                elements: JsArrayElementList [
+                    JsInExpression {
+                        property: JsStringLiteralExpression {
+                            value_token: JS_STRING_LITERAL@5..9 "\"a\"" [] [Whitespace(" ")],
+                        },
+                        in_token: IN_KW@9..12 "in" [] [Whitespace(" ")],
+                        object: JsObjectExpression {
+                            l_curly_token: L_CURLY@12..13 "{" [] [],
+                            members: JsObjectMemberList [],
+                            r_curly_token: R_CURLY@13..14 "}" [] [],
+                        },
+                    },
+                ],
+                r_brack_token: R_BRACK@14..15 "]" [] [],
+            },
+            first_semi_token: SEMICOLON@15..16 ";" [] [],
+            test: missing (optional),
+            second_semi_token: SEMICOLON@16..17 ";" [] [],
+            update: missing (optional),
+            r_paren_token: R_PAREN@17..19 ")" [] [Whitespace(" ")],
+            body: JsBlockStatement {
+                l_curly_token: L_CURLY@19..20 "{" [] [],
+                statements: JsStatementList [],
+                r_curly_token: R_CURLY@20..21 "}" [] [],
+            },
+        },
+    ],
+    eof_token: EOF@21..22 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: JS_MODULE@0..22
+  0: (empty)
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..21
+    0: JS_FOR_STATEMENT@0..21
+      0: FOR_KW@0..3 "for" [] []
+      1: L_PAREN@3..4 "(" [] []
+      2: JS_ARRAY_EXPRESSION@4..15
+        0: L_BRACK@4..5 "[" [] []
+        1: JS_ARRAY_ELEMENT_LIST@5..14
+          0: JS_IN_EXPRESSION@5..14
+            0: JS_STRING_LITERAL_EXPRESSION@5..9
+              0: JS_STRING_LITERAL@5..9 "\"a\"" [] [Whitespace(" ")]
+            1: IN_KW@9..12 "in" [] [Whitespace(" ")]
+            2: JS_OBJECT_EXPRESSION@12..14
+              0: L_CURLY@12..13 "{" [] []
+              1: JS_OBJECT_MEMBER_LIST@13..13
+              2: R_CURLY@13..14 "}" [] []
+        2: R_BRACK@14..15 "]" [] []
+      3: SEMICOLON@15..16 ";" [] []
+      4: (empty)
+      5: SEMICOLON@16..17 ";" [] []
+      6: (empty)
+      7: R_PAREN@17..19 ")" [] [Whitespace(" ")]
+      8: JS_BLOCK_STATEMENT@19..21
+        0: L_CURLY@19..20 "{" [] []
+        1: JS_STATEMENT_LIST@20..20
+        2: R_CURLY@20..21 "}" [] []
+  4: EOF@21..22 "" [Newline("\n")] []
+
+```

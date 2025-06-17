@@ -1,5 +1,5 @@
 #[derive(Copy, Clone, Debug)]
-#[allow(dead_code)]
+#[expect(dead_code)]
 pub(crate) enum Color {
     Red,
     Green,
@@ -13,14 +13,14 @@ pub(crate) enum Color {
 impl std::fmt::Display for Color {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match *self {
-            Color::Black => write!(f, "30"),
-            Color::Red => write!(f, "31"),
-            Color::Green => write!(f, "32"),
-            Color::Yellow => write!(f, "33"),
-            Color::Blue => write!(f, "34"),
-            Color::Purple => write!(f, "35"),
-            Color::Cyan => write!(f, "36"),
-            Color::White => write!(f, "37"),
+            Self::Black => write!(f, "30"),
+            Self::Red => write!(f, "31"),
+            Self::Green => write!(f, "32"),
+            Self::Yellow => write!(f, "33"),
+            Self::Blue => write!(f, "34"),
+            Self::Purple => write!(f, "35"),
+            Self::Cyan => write!(f, "36"),
+            Self::White => write!(f, "37"),
         }
     }
 }

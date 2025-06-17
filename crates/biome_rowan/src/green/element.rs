@@ -1,6 +1,6 @@
 use crate::{
-    green::{GreenNode, GreenToken, RawSyntaxKind},
     GreenNodeData, NodeOrToken, TextSize,
+    green::{GreenNode, GreenToken, RawSyntaxKind},
 };
 use std::borrow::Cow;
 
@@ -11,35 +11,35 @@ pub(crate) type GreenElementRef<'a> = NodeOrToken<&'a GreenNodeData, &'a GreenTo
 
 impl From<GreenNode> for GreenElement {
     #[inline]
-    fn from(node: GreenNode) -> GreenElement {
-        NodeOrToken::Node(node)
+    fn from(node: GreenNode) -> Self {
+        Self::Node(node)
     }
 }
 
 impl<'a> From<&'a GreenNode> for GreenElementRef<'a> {
     #[inline]
-    fn from(node: &'a GreenNode) -> GreenElementRef<'a> {
+    fn from(node: &'a GreenNode) -> Self {
         NodeOrToken::Node(node)
     }
 }
 
 impl From<GreenToken> for GreenElement {
     #[inline]
-    fn from(token: GreenToken) -> GreenElement {
-        NodeOrToken::Token(token)
+    fn from(token: GreenToken) -> Self {
+        Self::Token(token)
     }
 }
 
 impl From<Cow<'_, GreenNodeData>> for GreenElement {
     #[inline]
     fn from(cow: Cow<'_, GreenNodeData>) -> Self {
-        NodeOrToken::Node(cow.into_owned())
+        Self::Node(cow.into_owned())
     }
 }
 
 impl<'a> From<&'a GreenToken> for GreenElementRef<'a> {
     #[inline]
-    fn from(token: &'a GreenToken) -> GreenElementRef<'a> {
+    fn from(token: &'a GreenToken) -> Self {
         NodeOrToken::Token(token)
     }
 }
@@ -58,8 +58,8 @@ impl GreenElement {
     #[inline]
     pub fn kind(&self) -> RawSyntaxKind {
         match self {
-            NodeOrToken::Node(node) => node.kind(),
-            NodeOrToken::Token(token) => token.kind(),
+            Self::Node(node) => node.kind(),
+            Self::Token(token) => token.kind(),
         }
     }
 
@@ -67,8 +67,8 @@ impl GreenElement {
     #[inline]
     pub fn text_len(&self) -> TextSize {
         match self {
-            NodeOrToken::Token(token) => token.text_len(),
-            NodeOrToken::Node(node) => node.text_len(),
+            Self::Token(token) => token.text_len(),
+            Self::Node(node) => node.text_len(),
         }
     }
 }

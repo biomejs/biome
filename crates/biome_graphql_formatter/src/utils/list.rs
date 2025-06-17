@@ -1,9 +1,9 @@
+use crate::GraphqlFormatter;
 use crate::context::GraphqlFormatContext;
 use crate::prelude::*;
-use crate::GraphqlFormatter;
+use biome_formatter::FormatResult;
 use biome_formatter::prelude::{soft_line_break_or_space, space};
 use biome_formatter::write;
-use biome_formatter::FormatResult;
 use biome_graphql_syntax::GraphqlLanguage;
 use biome_rowan::{AstNode, AstSeparatedList};
 
@@ -19,7 +19,7 @@ where
         let node = element.node();
 
         if index != 0 {
-            if node.map_or(false, |node| node.syntax().has_leading_comments()) {
+            if node.is_ok_and(|node| node.syntax().has_leading_comments()) {
                 write!(f, [soft_line_break_or_space()])?;
             } else {
                 write!(f, [space()])?;

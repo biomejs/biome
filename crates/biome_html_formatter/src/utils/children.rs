@@ -4,12 +4,12 @@ use std::{
 };
 
 use biome_formatter::{
-    format_args, prelude::*, write, Buffer, Format, FormatElement, FormatResult,
+    Buffer, Format, FormatElement, FormatResult, format_args, prelude::*, write,
 };
 use biome_html_syntax::AnyHtmlElement;
 use biome_rowan::{SyntaxResult, TextLen, TextRange, TextSize, TokenText};
 
-use crate::{comments::HtmlComments, context::HtmlFormatContext, HtmlFormatter};
+use crate::{HtmlFormatter, comments::HtmlComments, context::HtmlFormatContext};
 
 pub(crate) static HTML_WHITESPACE_CHARS: [u8; 4] = [b' ', b'\n', b'\t', b'\r'];
 
@@ -50,7 +50,7 @@ pub(crate) struct HtmlWord {
 
 impl HtmlWord {
     fn new(text: TokenText, source_position: TextSize) -> Self {
-        HtmlWord {
+        Self {
             text,
             source_position,
         }
@@ -121,7 +121,7 @@ pub(crate) enum HtmlChild {
 impl HtmlChild {
     #[expect(dead_code)]
     pub(crate) const fn is_any_line(&self) -> bool {
-        matches!(self, HtmlChild::EmptyLine | HtmlChild::Newline)
+        matches!(self, Self::EmptyLine | Self::Newline)
     }
 }
 
@@ -296,7 +296,7 @@ struct HtmlSplitChildrenBuilder {
 
 impl HtmlSplitChildrenBuilder {
     fn new() -> Self {
-        HtmlSplitChildrenBuilder { buffer: vec![] }
+        Self { buffer: vec![] }
     }
 
     fn entry(&mut self, child: HtmlChild) {

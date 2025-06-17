@@ -1,7 +1,5 @@
-use super::{
-    compilation_context::NodeCompilationContext, log_compiler::LogCompiler, PatternCompiler,
-};
-use crate::{grit_context::GritQueryContext, CompileError, NodeLikeArgumentError};
+use super::{PatternCompiler, compilation_context::NodeCompilationContext};
+use crate::{CompileError, NodeLikeArgumentError, grit_context::GritQueryContext};
 use biome_grit_syntax::{
     AnyGritMaybeNamedArg, AnyGritPattern, GritNamedArgList, GritNodeLike, GritSyntaxKind,
 };
@@ -20,11 +18,6 @@ pub(super) fn call_pattern_from_node_with_name(
     context: &mut NodeCompilationContext,
     is_rhs: bool,
 ) -> Result<Pattern<GritQueryContext>, CompileError> {
-    if name == "log" {
-        return LogCompiler::from_named_args(node.named_args(), context)
-            .map(|log| Pattern::Log(Box::new(log)));
-    }
-
     let named_args = named_args_from_node(node, &name, context)?;
     let mut args = named_args_to_map(named_args, context)?;
     let named_args_count = node.named_args().into_iter().count();
@@ -53,15 +46,8 @@ pub(super) fn call_pattern_from_node_with_name(
             .map_or(Pattern::Underscore, |p| p.1);
         let body = args.remove_entry("$body").map_or(Pattern::Top, |p| p.1);
         Ok(Pattern::File(Box::new(FilePattern::new(name, body))))
-    } else if let Some((index, built_in)) = context
-        .compilation
-        .built_ins
-        .get_built_ins()
-        .iter()
-        .enumerate()
-        .find(|(_, built_in)| built_in.name == name)
-    {
-        if !is_rhs {
+    } else if let Some((index, built_in)) = context.compilation.built_ins.get_with_index(&name) {
+        if !is_rhs || !built_in.position.is_pattern() {
             return Err(CompileError::UnexpectedBuiltinCall(name));
         }
 
@@ -131,7 +117,7 @@ pub(super) fn named_args_from_node(
     let expected_params = if let Some(built_in) = context
         .compilation
         .built_ins
-        .get_built_ins()
+        .as_slice()
         .iter()
         .find(|built_in| built_in.name == name)
     {
@@ -193,11 +179,11 @@ pub(super) fn node_to_args_pairs(
                     })?,
                 };
 
-                let name = var.text();
+                let name = var.to_trimmed_string();
                 let name = name
                     .strip_prefix(lang.metavariable_prefix())
                     .filter(|stripped| {
-                        expected_params.as_ref().map_or(true, |expected| {
+                        expected_params.as_ref().is_none_or(|expected| {
                             expected.iter().any(|exp| exp == &name || exp == stripped)
                         })
                     })
@@ -226,7 +212,7 @@ pub(super) fn node_to_args_pairs(
             Ok(AnyGritMaybeNamedArg::GritNamedArg(named_arg)) => {
                 let name = named_arg.name()?;
                 let pattern = named_arg.pattern()?;
-                Ok((name.text(), pattern))
+                Ok((name.to_trimmed_string(), pattern))
             }
             Ok(AnyGritMaybeNamedArg::GritBogusNamedArg(_)) => Err(CompileError::UnexpectedKind(
                 GritSyntaxKind::GRIT_BOGUS_NAMED_ARG.into(),

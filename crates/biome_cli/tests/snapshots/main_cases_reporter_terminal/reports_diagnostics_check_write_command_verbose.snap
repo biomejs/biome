@@ -1,0 +1,205 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `index.css`
+
+```css
+
+
+.brokenStyle { color: f( }
+
+.style {
+                color:
+                fakeFunction()
+}
+
+```
+
+## `index.ts`
+
+```ts
+import { a, b, z } from "lodash";
+import { z } from "z";
+
+a == b;
+a == b;
+a == b;
+a == b;
+
+debugger;
+debugger;
+debugger;
+debugger;
+
+let f;
+let f;
+let f;
+let f;
+let f;
+let f;
+
+```
+
+## `main.ts`
+
+```ts
+import { a, b, z } from "lodash";
+import { z } from "z";
+
+a == b;
+a == b;
+a == b;
+a == b;
+
+debugger;
+debugger;
+debugger;
+debugger;
+
+let f;
+let f;
+let f;
+let f;
+let f;
+let f;
+
+```
+
+# Termination Message
+
+```block
+check ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Some errors were emitted while applying fixes.
+  
+
+
+```
+
+# Emitted Messages
+
+```block
+index.css:3:26 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a declaration item but instead found '}'.
+  
+  > 3 │ .brokenStyle { color: f( }
+      │                          ^
+    4 │ 
+    5 │ .style {
+  
+  i Expected a declaration item here.
+  
+  > 3 │ .brokenStyle { color: f( }
+      │                          ^
+    4 │ 
+    5 │ .style {
+  
+
+```
+
+```block
+index.css:3:23 lint/correctness/noUnknownFunction ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected unknown function: f
+  
+  > 3 │ .brokenStyle { color: f( }
+      │                       ^
+    4 │ 
+    5 │ .style {
+  
+  i Use a known function instead.
+  
+  i See MDN web docs for more details.
+  
+
+```
+
+```block
+index.css:7:17 lint/correctness/noUnknownFunction ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected unknown function: fakeFunction
+  
+    5 │ .style {
+    6 │                 color:
+  > 7 │                 fakeFunction()
+      │                 ^^^^^^^^^^^^
+    8 │ }
+    9 │ 
+  
+  i Use a known function instead.
+  
+  i See MDN web docs for more details.
+  
+
+```
+
+```block
+index.css:3:26 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a declaration item but instead found '}'.
+  
+  > 3 │ .brokenStyle { color: f( }
+      │                          ^
+    4 │ 
+    5 │ .style {
+  
+  i Expected a declaration item here.
+  
+  > 3 │ .brokenStyle { color: f( }
+      │                          ^
+    4 │ 
+    5 │ .style {
+  
+
+```
+
+```block
+index.css format ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Code formatting aborted due to parsing errors. To format code with errors, enable the 'formatter.formatWithErrors' option.
+  
+
+```
+
+```block
+ VERBOSE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Files processed:
+  
+  - index.css
+  - index.ts
+  - main.ts
+  
+
+```
+
+```block
+ VERBOSE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Files fixed:
+  
+  - index.ts
+  - main.ts
+  
+
+```
+
+```block
+Skipped 32 suggested fixes.
+If you wish to apply the suggested (unsafe) fixes, use the command biome check --write --unsafe
+
+```
+
+```block
+The number of diagnostics exceeds the limit allowed. Use --max-diagnostics to increase it.
+Diagnostics not shown: 56.
+```
+
+```block
+Scanned project folder in <TIME>.
+Checked 3 files in <TIME>. Fixed 2 files.
+Found 45 errors.
+Found 16 warnings.
+```

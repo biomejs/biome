@@ -1,0 +1,48 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.jsx
+---
+# Input
+```jsx
+<>
+	<img alt="Foo" />
+
+	<div>
+		<img alt="Foo" />
+	</div>
+</>
+
+```
+
+# Diagnostics
+```
+invalid.jsx:2:2 lint/performance/noImgElement ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Don't use <img> element.
+  
+    1 │ <>
+  > 2 │ 	<img alt="Foo" />
+      │ 	^^^^^^^^^^^^^^^^^
+    3 │ 
+    4 │ 	<div>
+  
+  i Using the <img> can lead to slower LCP and higher bandwidth. Consider using <Image /> from next/image to automatically optimize images.
+  
+
+```
+
+```
+invalid.jsx:5:3 lint/performance/noImgElement ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Don't use <img> element.
+  
+    4 │ 	<div>
+  > 5 │ 		<img alt="Foo" />
+      │ 		^^^^^^^^^^^^^^^^^
+    6 │ 	</div>
+    7 │ </>
+  
+  i Using the <img> can lead to slower LCP and higher bandwidth. Consider using <Image /> from next/image to automatically optimize images.
+  
+
+```

@@ -1,3 +1,4 @@
+/* should not generate diagnostics */
 A: {
 	if (foo()) {
 		break A;

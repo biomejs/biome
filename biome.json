@@ -1,13 +1,15 @@
 {
   "$schema": "./packages/@biomejs/biome/configuration_schema.json",
-  "assists": {
+  "assist": {
     "enabled": true,
-    "ignore": [
-      "./packages/@biomejs/biome/configuration_schema.json"
+    "includes": [
+      "**",
+      "!./packages/@biomejs/biome/configuration_schema.json"
     ],
     "actions": {
       "source": {
-        "useSortedKeys": "off"
+        "useSortedKeys": "off",
+        "organizeImports": "on"
       }
     }
   },
@@ -17,29 +19,30 @@
     }
   },
   "files": {
-    "ignore": [
-      "crates/**",
-      "dist/**",
-      ".astro/**",
-      "assets/**",
-      "packages/@biomejs/backend-jsonrpc/src/workspace.ts",
-      "public/**",
-      "**/__snapshots__",
-      "**/undefined/**",
-      "_fonts/**",
-      "packages/@biomejs/wasm-*",
-      "benchmark/target/**"
+    "includes": [
+      "**/packages/aria-data/*.js",
+      "**/packages/@biomejs/**",
+      "**/packages/tailwindcss-config-analyzer/**",
+      "**/benchmark/**",
+      "scripts/**",
+      "!**/crates/**",
+      "!**/dist/**",
+      "!**/packages/@biomejs/backend-jsonrpc/src/workspace.ts",
+      "!**/__snapshots__",
+      "!**/undefined/**",
+      "!**/benchmark/target/**",
+      "!**/benches/**"
     ],
-    "include": [
-      "packages/aria-data/*.js",
-      "packages/@biomejs/**",
-      "packages/tailwindcss-config-analyzer/**",
-      "benchmark/**"
+    "experimentalScannerIgnores": [
+      ".cargo",
+      ".git",
+      "target"
     ]
   },
   "formatter": {
-    "ignore": [
-      "configuration_schema.json"
+    "includes": [
+      "**",
+      "!**/configuration_schema.json"
     ]
   },
   "json": {
@@ -51,15 +54,35 @@
   "linter": {
     "enabled": true,
     "rules": {
-      "recommended": true,
       "style": {
-        "noNonNullAssertion": "off"
+        "noParameterAssign": "error",
+        "useDefaultParameterLast": "error",
+        "useSingleVarDeclarator": "error",
+        "useConst": "error",
+        "noInferrableTypes": "error",
+        "noUselessElse": "error",
+        "useSelfClosingElements": "error",
+        "useNumberNamespace": "error",
+        "useAsConstAssertion": "error",
+        "noUnusedTemplateLiteral": "error",
+        "useTemplate": "error",
+        "useEnumInitializers": "error"
+      },
+      "correctness": {
+        "noUndeclaredDependencies": "error"
+      },
+      "suspicious": {
+        "noVar": "on"
+      },
+      "nursery": {
+        "noFloatingPromises": "error",
+        "noImportCycles": "error"
       }
     }
   },
-  "organizeImports": {
-    "enabled": true
-  },
+  "plugins": [
+    "plugins/no-object-assign.grit"
+  ],
   "vcs": {
     "clientKind": "git",
     "enabled": true,

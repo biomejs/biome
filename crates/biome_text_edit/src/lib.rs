@@ -2,38 +2,49 @@
 //!
 //! This is taken from [rust-analyzer's text_edit crate](https://rust-analyzer.github.io/rust-analyzer/text_edit/index.html)
 
+#![deny(clippy::use_self)]
 #![warn(
     rust_2018_idioms,
     unused_lifetimes,
     semicolon_in_expressions_from_macros
 )]
 
+use biome_text_size::{TextRange, TextSize};
+pub use similar::ChangeTag;
+use similar::{TextDiff, utils::TextDiffRemapper};
 use std::{cmp::Ordering, num::NonZeroU32};
 
-use biome_text_size::{TextRange, TextSize};
-use serde::{Deserialize, Serialize};
-pub use similar::ChangeTag;
-use similar::{utils::TextDiffRemapper, TextDiff};
-
-#[derive(Default, Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
-#[cfg_attr(feature = "schemars", derive(schemars::JsonSchema))]
-#[serde(rename_all = "camelCase")]
+#[derive(Default, Debug, Clone, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[cfg_attr(
+    feature = "serde",
+    derive(serde::Serialize, serde::Deserialize),
+    serde(rename_all = "camelCase")
+)]
 pub struct TextEdit {
     dictionary: String,
     ops: Vec<CompressedOp>,
 }
 
-#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
-#[cfg_attr(feature = "schemars", derive(schemars::JsonSchema))]
-#[serde(rename_all = "camelCase")]
+#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[cfg_attr(
+    feature = "serde",
+    derive(serde::Serialize, serde::Deserialize),
+    serde(rename_all = "camelCase")
+)]
 pub enum CompressedOp {
     DiffOp(DiffOp),
     EqualLines { line_count: NonZeroU32 },
 }
 
-#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
-#[cfg_attr(feature = "schemars", derive(schemars::JsonSchema))]
-#[serde(rename_all = "camelCase")]
+#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[cfg_attr(
+    feature = "serde",
+    derive(serde::Serialize, serde::Deserialize),
+    serde(rename_all = "camelCase")
+)]
 pub enum DiffOp {
     Equal { range: TextRange },
     Insert { range: TextRange },
@@ -43,17 +54,17 @@ pub enum DiffOp {
 impl DiffOp {
     pub fn tag(self) -> ChangeTag {
         match self {
-            DiffOp::Equal { .. } => ChangeTag::Equal,
-            DiffOp::Insert { .. } => ChangeTag::Insert,
-            DiffOp::Delete { .. } => ChangeTag::Delete,
+            Self::Equal { .. } => ChangeTag::Equal,
+            Self::Insert { .. } => ChangeTag::Insert,
+            Self::Delete { .. } => ChangeTag::Delete,
         }
     }
 
     pub fn text(self, diff: &TextEdit) -> &str {
         let range = match self {
-            DiffOp::Equal { range } => range,
-            DiffOp::Insert { range } => range,
-            DiffOp::Delete { range } => range,
+            Self::Equal { range } => range,
+            Self::Insert { range } => range,
+            Self::Delete { range } => range,
         };
 
         diff.get_text(range)
@@ -170,7 +181,7 @@ impl TextEditBuilder {
 
             for (lhs, rhs) in entry.iter().zip(value_bytes) {
                 match lhs.cmp(rhs) {
-                    Ordering::Equal => continue,
+                    Ordering::Equal => {}
                     ordering => return ordering,
                 }
             }
@@ -309,7 +320,7 @@ fn compress_equal_op(text: &str) -> Option<(&str, NonZeroU32, &str)> {
 mod tests {
     use std::num::NonZeroU32;
 
-    use crate::{compress_equal_op, TextEdit};
+    use crate::{TextEdit, compress_equal_op};
 
     #[test]
     fn compress_short() {

@@ -1,10 +1,12 @@
 use crate::prelude::*;
-use biome_grit_syntax::GritPredicateNot;
-use biome_rowan::AstNode;
+use biome_formatter::write;
+use biome_grit_syntax::{GritPredicateNot, GritPredicateNotFields};
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatGritPredicateNot;
 impl FormatNodeRule<GritPredicateNot> for FormatGritPredicateNot {
     fn fmt_fields(&self, node: &GritPredicateNot, f: &mut GritFormatter) -> FormatResult<()> {
-        format_verbatim_node(node.syntax()).fmt(f)
+        let GritPredicateNotFields { not, predicate } = node.as_fields();
+
+        write!(f, [not.format(), predicate.format()])
     }
 }

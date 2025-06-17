@@ -3,7 +3,7 @@ source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: preactHooks.js
 ---
 # Input
-```jsx
+```js
 import { useCallback } from 'preact/compat';
 import { useState } from 'preact/hooks';
 
@@ -19,9 +19,9 @@ function useCounter() {
 
 # Diagnostics
 ```
-preactHooks.js:6:23 lint/correctness/useExhaustiveDependencies ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+preactHooks.js:6:23 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This hook does not specify all of its dependencies: value
+  × This hook does not specify all of its dependencies: value
   
     4 │ function useCounter() {
     5 │     const [value, setValue] = useState(0);
@@ -41,5 +41,9 @@ preactHooks.js:6:23 lint/correctness/useExhaustiveDependencies ━━━━━�
   
   i Either include it or remove the dependency array
   
+  i Unsafe fix: Add the missing dependencies to the list.
+  
+    8 │ ····},·[value]);
+      │         +++++   
 
 ```

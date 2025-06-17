@@ -1,0 +1,90 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `check.js`
+
+```js
+import { lorem, foom, bar } from "foo";
+import * as something from "../something";
+
+```
+
+# Termination Message
+
+```block
+check ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Some errors were emitted while running checks.
+  
+
+
+```
+
+# Emitted Messages
+
+```block
+check.js:1:8 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This import is unused.
+  
+  > 1 │ import { lorem, foom, bar } from "foo";
+      │        ^^^^^^^^^^^^^^^^^^^^
+    2 │ import * as something from "../something";
+    3 │ 
+  
+  i Unused imports might be the result of an incomplete refactoring.
+  
+  i Unsafe fix: Remove the unused imports.
+  
+    1 │ import·{·lorem,·foom,·bar·}·from·"foo";
+      │ ---------------------------------------
+
+```
+
+```block
+check.js:2:13 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This import is unused.
+  
+    1 │ import { lorem, foom, bar } from "foo";
+  > 2 │ import * as something from "../something";
+      │             ^^^^^^^^^
+    3 │ 
+  
+  i Unused imports might be the result of an incomplete refactoring.
+  
+  i Unsafe fix: Remove the unused imports.
+  
+    1 1 │   import { lorem, foom, bar } from "foo";
+    2   │ - import·*·as·something·from·"../something";
+    3 2 │   
+  
+
+```
+
+```block
+check.js:1:1 assist/source/organizeImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The imports and exports are not sorted.
+  
+  > 1 │ import { lorem, foom, bar } from "foo";
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    2 │ import * as something from "../something";
+    3 │ 
+  
+  i Safe fix: Organize Imports (Biome)
+  
+    1   │ - import·{·lorem,·foom,·bar·}·from·"foo";
+      1 │ + import·{·bar,·foom,·lorem·}·from·"foo";
+    2 2 │   import * as something from "../something";
+    3 3 │   
+  
+
+```
+
+```block
+Checked 1 file in <TIME>. No fixes applied.
+Found 1 error.
+Found 2 warnings.
+```

@@ -57,6 +57,21 @@ const staticMember = function(a) {}.bind(null, 0);
 const computedMember = function(a) {}["bind"](null, 0);
 const logical = false || function () {};
 const binary = false + function () {};
+
+const withDirective = function () {
+	"use server";
+	return 0;
+}
+
+// https://github.com/biomejs/biome/issues/4967
+const needsParentheses1 = function () {
+	return { foo: "bar" }["foo"];
+}
+
+const needsParentheses2 = function () {
+	return { foo: "bar" }.foo;
+}
+
 ```
 
 # Diagnostics
@@ -520,6 +535,7 @@ invalid.ts:52:26 lint/complexity/useArrowFunction  FIXABLE  ━━━━━━�
   > 52 │ const logical = false || function () {};
        │                          ^^^^^^^^^^^^^^
     53 │ const binary = false + function () {};
+    54 │ 
   
   i Function expressions that don't use this can be turned into arrow functions.
   
@@ -530,6 +546,7 @@ invalid.ts:52:26 lint/complexity/useArrowFunction  FIXABLE  ━━━━━━�
     52    │ - const·logical·=·false·||·function·()·{};
        52 │ + const·logical·=·false·||·(()·=>·{});
     53 53 │   const binary = false + function () {};
+    54 54 │   
   
 
 ```
@@ -543,6 +560,8 @@ invalid.ts:53:24 lint/complexity/useArrowFunction  FIXABLE  ━━━━━━�
     52 │ const logical = false || function () {};
   > 53 │ const binary = false + function () {};
        │                        ^^^^^^^^^^^^^^
+    54 │ 
+    55 │ const withDirective = function () {
   
   i Function expressions that don't use this can be turned into arrow functions.
   
@@ -552,8 +571,97 @@ invalid.ts:53:24 lint/complexity/useArrowFunction  FIXABLE  ━━━━━━�
     52 52 │   const logical = false || function () {};
     53    │ - const·binary·=·false·+·function·()·{};
        53 │ + const·binary·=·false·+·(()·=>·{});
+    54 54 │   
+    55 55 │   const withDirective = function () {
   
 
 ```
 
+```
+invalid.ts:55:23 lint/complexity/useArrowFunction  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
+  ! This function expression can be turned into an arrow function.
+  
+    53 │ const binary = false + function () {};
+    54 │ 
+  > 55 │ const withDirective = function () {
+       │                       ^^^^^^^^^^^^^
+  > 56 │ 	"use server";
+  > 57 │ 	return 0;
+  > 58 │ }
+       │ ^
+    59 │ 
+    60 │ // https://github.com/biomejs/biome/issues/4967
+  
+  i Function expressions that don't use this can be turned into arrow functions.
+  
+  i Safe fix: Use an arrow function instead.
+  
+    53 53 │   const binary = false + function () {};
+    54 54 │   
+    55    │ - const·withDirective·=·function·()·{
+       55 │ + const·withDirective·=·()·=>·{
+    56 56 │   	"use server";
+    57 57 │   	return 0;
+  
+
+```
+
+```
+invalid.ts:61:27 lint/complexity/useArrowFunction  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This function expression can be turned into an arrow function.
+  
+    60 │ // https://github.com/biomejs/biome/issues/4967
+  > 61 │ const needsParentheses1 = function () {
+       │                           ^^^^^^^^^^^^^
+  > 62 │ 	return { foo: "bar" }["foo"];
+  > 63 │ }
+       │ ^
+    64 │ 
+    65 │ const needsParentheses2 = function () {
+  
+  i Function expressions that don't use this can be turned into arrow functions.
+  
+  i Safe fix: Use an arrow function instead.
+  
+    59 59 │   
+    60 60 │   // https://github.com/biomejs/biome/issues/4967
+    61    │ - const·needsParentheses1·=·function·()·{
+    62    │ - → return·{·foo:·"bar"·}["foo"];
+    63    │ - }
+       61 │ + const·needsParentheses1·=·()·=>·({·foo:·"bar"·}["foo"])
+    64 62 │   
+    65 63 │   const needsParentheses2 = function () {
+  
+
+```
+
+```
+invalid.ts:65:27 lint/complexity/useArrowFunction  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This function expression can be turned into an arrow function.
+  
+    63 │ }
+    64 │ 
+  > 65 │ const needsParentheses2 = function () {
+       │                           ^^^^^^^^^^^^^
+  > 66 │ 	return { foo: "bar" }.foo;
+  > 67 │ }
+       │ ^
+    68 │ 
+  
+  i Function expressions that don't use this can be turned into arrow functions.
+  
+  i Safe fix: Use an arrow function instead.
+  
+    63 63 │   }
+    64 64 │   
+    65    │ - const·needsParentheses2·=·function·()·{
+    66    │ - → return·{·foo:·"bar"·}.foo;
+    67    │ - }
+       65 │ + const·needsParentheses2·=·()·=>·({·foo:·"bar"·}.foo)
+    68 66 │   
+  
+
+```

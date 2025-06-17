@@ -2,11 +2,11 @@ use crate::prelude::*;
 
 use crate::jsx::lists::child_list::{FormatChildrenResult, FormatJsxChildList, JsxChildListLayout};
 use crate::utils::jsx::{is_jsx_suppressed, is_meaningful_jsx_text};
-use biome_formatter::{format_args, write, CstFormatContext, FormatResult, FormatRuleWithOptions};
+use biome_formatter::{CstFormatContext, FormatResult, FormatRuleWithOptions, format_args, write};
 use biome_js_syntax::{
     AnyJsExpression, AnyJsxChild, JsxChildList, JsxElement, JsxExpressionChild, JsxFragment,
 };
-use biome_rowan::{declare_node_union, SyntaxResult};
+use biome_rowan::{SyntaxResult, declare_node_union};
 
 #[derive(Debug, Clone, Default)]
 pub struct FormatJsxElement;
@@ -70,10 +70,8 @@ impl Format<JsFormatContext> for AnyJsxTagWithChildren {
                 let opening_breaks = format_opening.inspect(f)?.will_break();
 
                 let multiple_attributes = match self {
-                    AnyJsxTagWithChildren::JsxElement(element) => {
-                        element.opening_element()?.attributes().len() > 1
-                    }
-                    AnyJsxTagWithChildren::JsxFragment(_) => false,
+                    Self::JsxElement(element) => element.opening_element()?.attributes().len() > 1,
+                    Self::JsxFragment(_) => false,
                 };
 
                 let list_layout = if multiple_attributes || opening_breaks {
@@ -113,10 +111,10 @@ impl Format<JsFormatContext> for AnyJsxTagWithChildren {
 impl AnyJsxTagWithChildren {
     fn fmt_opening(&self, f: &mut JsFormatter) -> FormatResult<()> {
         match self {
-            AnyJsxTagWithChildren::JsxElement(element) => {
+            Self::JsxElement(element) => {
                 write!(f, [element.opening_element().format()])
             }
-            AnyJsxTagWithChildren::JsxFragment(fragment) => {
+            Self::JsxFragment(fragment) => {
                 write!(f, [fragment.opening_fragment().format()])
             }
         }
@@ -124,10 +122,10 @@ impl AnyJsxTagWithChildren {
 
     fn fmt_closing(&self, f: &mut JsFormatter) -> FormatResult<()> {
         match self {
-            AnyJsxTagWithChildren::JsxElement(element) => {
+            Self::JsxElement(element) => {
                 write!(f, [element.closing_element().format()])
             }
-            AnyJsxTagWithChildren::JsxFragment(fragment) => {
+            Self::JsxFragment(fragment) => {
                 write!(f, [fragment.closing_fragment().format()])
             }
         }
@@ -135,8 +133,8 @@ impl AnyJsxTagWithChildren {
 
     fn children(&self) -> JsxChildList {
         match self {
-            AnyJsxTagWithChildren::JsxElement(element) => element.children(),
-            AnyJsxTagWithChildren::JsxFragment(fragment) => fragment.children(),
+            Self::JsxElement(element) => element.children(),
+            Self::JsxFragment(fragment) => fragment.children(),
         }
     }
 

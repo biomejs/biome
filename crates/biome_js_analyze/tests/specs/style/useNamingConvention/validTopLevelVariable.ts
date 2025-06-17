@@ -1,3 +1,4 @@
+/* should not generate diagnostics */
 export const CONSTANT_CASE = 0
 
 export const camelCase = 0

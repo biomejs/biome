@@ -1,15 +1,16 @@
-use crate::react::{is_react_call_api, ReactLibrary};
+use crate::react::{ReactLibrary, is_react_call_api};
 use crate::services::semantic::Semantic;
 use biome_analyze::context::RuleContext;
-use biome_analyze::{declare_lint_rule, Rule, RuleDiagnostic, RuleSource};
+use biome_analyze::{Rule, RuleDiagnostic, RuleSource, declare_lint_rule};
 use biome_console::markup;
+use biome_diagnostics::Severity;
 use biome_js_syntax::{
     AnyJsExpression, AnyJsFunction, AnyJsMemberExpression, AnyJsTemplateElement,
     JsBinaryExpression, JsCallArgumentList, JsCallArguments, JsCallExpression, JsFormalParameter,
     JsObjectExpression, JsObjectMemberList, JsParameterList, JsParameters, JsPropertyObjectMember,
     JsReferenceIdentifier, JsxAttribute,
 };
-use biome_rowan::{declare_node_union, AstNode, TextRange};
+use biome_rowan::{AstNode, TextRange, declare_node_union};
 
 declare_lint_rule! {
     /// Discourage the usage of Array index in keys.
@@ -69,6 +70,7 @@ declare_lint_rule! {
         language: "jsx",
         sources: &[RuleSource::EslintReact("no-array-index-key")],
         recommended: true,
+        severity: Severity::Error,
     }
 }
 
@@ -78,18 +80,18 @@ declare_node_union! {
 
 impl NoArrayIndexKeyQuery {
     const fn is_property_object_member(&self) -> bool {
-        matches!(self, NoArrayIndexKeyQuery::JsPropertyObjectMember(_))
+        matches!(self, Self::JsPropertyObjectMember(_))
     }
 
     fn is_key_property(&self) -> Option<bool> {
         Some(match self {
-            NoArrayIndexKeyQuery::JsxAttribute(attribute) => {
+            Self::JsxAttribute(attribute) => {
                 let attribute_name = attribute.name().ok()?;
                 let name = attribute_name.as_jsx_name()?;
                 let name_token = name.value_token().ok()?;
                 name_token.text_trimmed() == "key"
             }
-            NoArrayIndexKeyQuery::JsPropertyObjectMember(object_member) => {
+            Self::JsPropertyObjectMember(object_member) => {
                 let object_member_name = object_member.name().ok()?;
                 let name = object_member_name.as_js_literal_member_name()?;
                 let name = name.value().ok()?;
@@ -101,16 +103,14 @@ impl NoArrayIndexKeyQuery {
     /// Extracts the reference from the possible invalid prop
     fn as_js_expression(&self) -> Option<AnyJsExpression> {
         match self {
-            NoArrayIndexKeyQuery::JsxAttribute(attribute) => attribute
+            Self::JsxAttribute(attribute) => attribute
                 .initializer()?
                 .value()
                 .ok()?
                 .as_jsx_expression_attribute_value()?
                 .expression()
                 .ok(),
-            NoArrayIndexKeyQuery::JsPropertyObjectMember(object_member) => {
-                object_member.value().ok()
-            }
+            Self::JsPropertyObjectMember(object_member) => object_member.value().ok(),
         }
     }
 }

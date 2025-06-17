@@ -1,0 +1,44 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: custom-order-mixed-glob-groups.js
+snapshot_kind: text
+---
+# Input
+```js
+import { A } from "@my/lib";
+import { B } from "@my/lib/subpath";
+import alias from "@/alias";
+import alias from "@scoped/package";
+import path from "./path";
+
+```
+
+# Diagnostics
+```
+custom-order-mixed-glob-groups.js:1:1 assist/source/organizeImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━
+
+  i The imports and exports are not sorted.
+  
+  > 1 │ import { A } from "@my/lib";
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    2 │ import { B } from "@my/lib/subpath";
+    3 │ import alias from "@/alias";
+  
+  i Safe fix: Organize Imports (Biome)
+  
+    1   │ - import·{·A·}·from·"@my/lib";
+    2   │ - import·{·B·}·from·"@my/lib/subpath";
+    3   │ - import·alias·from·"@/alias";
+    4   │ - import·alias·from·"@scoped/package";
+    5   │ - import·path·from·"./path";
+      1 │ + import·alias·from·"@scoped/package";
+      2 │ + 
+      3 │ + import·{·A·}·from·"@my/lib";
+      4 │ + import·{·B·}·from·"@my/lib/subpath";
+      5 │ + import·path·from·"./path";
+      6 │ + 
+      7 │ + import·alias·from·"@/alias";
+    6 8 │   
+  
+
+```

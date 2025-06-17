@@ -1,13 +1,19 @@
 ---
 source: crates/biome_cli/tests/snap_test.rs
-expression: content
+expression: redactor(content)
 ---
 # Termination Message
 
 ```block
 ci ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Some errors were emitted while running checks.
+  × No files were processed in the specified paths.
+  
+  i Check your biome.json or biome.jsonc to ensure the paths are not ignored by the configuration.
+  
+  i These paths were provided but ignored:
+  
+  - ci.js
   
 
 
@@ -16,46 +22,14 @@ ci ━━━━━━━━━━━━━━━━━━━━━━━━━�
 # Emitted Messages
 
 ```block
-ci.js lint ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ci.js ci ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Size of ci.js is 1.0 MiB which exceeds configured maximum of 1.0 MiB for this project.
-    The file size limit exists to prevent us inadvertently slowing down and loading large files that we shouldn't.
-    Use the `files.maxSize` configuration to change the maximum size of files processed.
+  i The size of the file is 1.0 MiB, which exceeds the configured maximum of 1.0 MiB for this project.
+    Use the `files.maxSize` configuration to change the maximum size of files processed, or `files.ignore` to ignore the file.
   
 
 ```
 
 ```block
-ci.js organizeImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Size of ci.js is 1.0 MiB which exceeds configured maximum of 1.0 MiB for this project.
-    The file size limit exists to prevent us inadvertently slowing down and loading large files that we shouldn't.
-    Use the `files.maxSize` configuration to change the maximum size of files processed.
-  
-
-```
-
-```block
-ci.js assists ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Size of ci.js is 1.0 MiB which exceeds configured maximum of 1.0 MiB for this project.
-    The file size limit exists to prevent us inadvertently slowing down and loading large files that we shouldn't.
-    Use the `files.maxSize` configuration to change the maximum size of files processed.
-  
-
-```
-
-```block
-ci.js format ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Size of ci.js is 1.0 MiB which exceeds configured maximum of 1.0 MiB for this project.
-    The file size limit exists to prevent us inadvertently slowing down and loading large files that we shouldn't.
-    Use the `files.maxSize` configuration to change the maximum size of files processed.
-  
-
-```
-
-```block
-Checked 1 file in <TIME>. No fixes applied.
-Found 1 error.
+Checked 0 files in <TIME>. No fixes applied.
 ```

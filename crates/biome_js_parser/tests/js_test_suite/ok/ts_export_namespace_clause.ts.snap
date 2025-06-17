@@ -1,0 +1,125 @@
+---
+source: crates/biome_js_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```ts
+export function isPrime(x: number): boolean;
+export as namespace mathLib;
+
+```
+
+
+## AST
+
+```
+JsModule {
+    bom_token: missing (optional),
+    interpreter_token: missing (optional),
+    directives: JsDirectiveList [],
+    items: JsModuleItemList [
+        JsExport {
+            decorators: JsDecoratorList [],
+            export_token: EXPORT_KW@0..7 "export" [] [Whitespace(" ")],
+            export_clause: TsDeclareFunctionDeclaration {
+                async_token: missing (optional),
+                function_token: FUNCTION_KW@7..16 "function" [] [Whitespace(" ")],
+                id: JsIdentifierBinding {
+                    name_token: IDENT@16..23 "isPrime" [] [],
+                },
+                type_parameters: missing (optional),
+                parameters: JsParameters {
+                    l_paren_token: L_PAREN@23..24 "(" [] [],
+                    items: JsParameterList [
+                        JsFormalParameter {
+                            decorators: JsDecoratorList [],
+                            binding: JsIdentifierBinding {
+                                name_token: IDENT@24..25 "x" [] [],
+                            },
+                            question_mark_token: missing (optional),
+                            type_annotation: TsTypeAnnotation {
+                                colon_token: COLON@25..27 ":" [] [Whitespace(" ")],
+                                ty: TsNumberType {
+                                    number_token: NUMBER_KW@27..33 "number" [] [],
+                                },
+                            },
+                            initializer: missing (optional),
+                        },
+                    ],
+                    r_paren_token: R_PAREN@33..34 ")" [] [],
+                },
+                return_type_annotation: TsReturnTypeAnnotation {
+                    colon_token: COLON@34..36 ":" [] [Whitespace(" ")],
+                    ty: TsBooleanType {
+                        boolean_token: BOOLEAN_KW@36..43 "boolean" [] [],
+                    },
+                },
+                semicolon_token: SEMICOLON@43..44 ";" [] [],
+            },
+        },
+        JsExport {
+            decorators: JsDecoratorList [],
+            export_token: EXPORT_KW@44..52 "export" [Newline("\n")] [Whitespace(" ")],
+            export_clause: TsExportAsNamespaceClause {
+                as_token: AS_KW@52..55 "as" [] [Whitespace(" ")],
+                namespace_token: NAMESPACE_KW@55..65 "namespace" [] [Whitespace(" ")],
+                name: JsName {
+                    value_token: IDENT@65..72 "mathLib" [] [],
+                },
+                semicolon_token: SEMICOLON@72..73 ";" [] [],
+            },
+        },
+    ],
+    eof_token: EOF@73..74 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: JS_MODULE@0..74
+  0: (empty)
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..73
+    0: JS_EXPORT@0..44
+      0: JS_DECORATOR_LIST@0..0
+      1: EXPORT_KW@0..7 "export" [] [Whitespace(" ")]
+      2: TS_DECLARE_FUNCTION_DECLARATION@7..44
+        0: (empty)
+        1: FUNCTION_KW@7..16 "function" [] [Whitespace(" ")]
+        2: JS_IDENTIFIER_BINDING@16..23
+          0: IDENT@16..23 "isPrime" [] []
+        3: (empty)
+        4: JS_PARAMETERS@23..34
+          0: L_PAREN@23..24 "(" [] []
+          1: JS_PARAMETER_LIST@24..33
+            0: JS_FORMAL_PARAMETER@24..33
+              0: JS_DECORATOR_LIST@24..24
+              1: JS_IDENTIFIER_BINDING@24..25
+                0: IDENT@24..25 "x" [] []
+              2: (empty)
+              3: TS_TYPE_ANNOTATION@25..33
+                0: COLON@25..27 ":" [] [Whitespace(" ")]
+                1: TS_NUMBER_TYPE@27..33
+                  0: NUMBER_KW@27..33 "number" [] []
+              4: (empty)
+          2: R_PAREN@33..34 ")" [] []
+        5: TS_RETURN_TYPE_ANNOTATION@34..43
+          0: COLON@34..36 ":" [] [Whitespace(" ")]
+          1: TS_BOOLEAN_TYPE@36..43
+            0: BOOLEAN_KW@36..43 "boolean" [] []
+        6: SEMICOLON@43..44 ";" [] []
+    1: JS_EXPORT@44..73
+      0: JS_DECORATOR_LIST@44..44
+      1: EXPORT_KW@44..52 "export" [Newline("\n")] [Whitespace(" ")]
+      2: TS_EXPORT_AS_NAMESPACE_CLAUSE@52..73
+        0: AS_KW@52..55 "as" [] [Whitespace(" ")]
+        1: NAMESPACE_KW@55..65 "namespace" [] [Whitespace(" ")]
+        2: JS_NAME@65..72
+          0: IDENT@65..72 "mathLib" [] []
+        3: SEMICOLON@72..73 ";" [] []
+  4: EOF@73..74 "" [Newline("\n")] []
+
+```

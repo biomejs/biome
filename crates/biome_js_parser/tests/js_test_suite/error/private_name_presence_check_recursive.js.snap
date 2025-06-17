@@ -1,0 +1,278 @@
+---
+source: crates/biome_js_parser/tests/spec_test.rs
+expression: snapshot
+snapshot_kind: text
+---
+## Input
+
+```js
+class A {
+	#prop;
+	test() {
+   #prop in #prop in this;
+   5 + #prop;
+   #prop
+   #prop + 5;
+ }
+}
+
+```
+
+
+## AST
+
+```
+JsModule {
+    bom_token: missing (optional),
+    interpreter_token: missing (optional),
+    directives: JsDirectiveList [],
+    items: JsModuleItemList [
+        JsClassDeclaration {
+            decorators: JsDecoratorList [],
+            abstract_token: missing (optional),
+            class_token: CLASS_KW@0..6 "class" [] [Whitespace(" ")],
+            id: JsIdentifierBinding {
+                name_token: IDENT@6..8 "A" [] [Whitespace(" ")],
+            },
+            type_parameters: missing (optional),
+            extends_clause: missing (optional),
+            implements_clause: missing (optional),
+            l_curly_token: L_CURLY@8..9 "{" [] [],
+            members: JsClassMemberList [
+                JsPropertyClassMember {
+                    modifiers: JsPropertyModifierList [],
+                    name: JsPrivateClassMemberName {
+                        hash_token: HASH@9..12 "#" [Newline("\n"), Whitespace("\t")] [],
+                        id_token: IDENT@12..16 "prop" [] [],
+                    },
+                    property_annotation: missing (optional),
+                    value: missing (optional),
+                    semicolon_token: SEMICOLON@16..17 ";" [] [],
+                },
+                JsMethodClassMember {
+                    modifiers: JsMethodModifierList [],
+                    async_token: missing (optional),
+                    star_token: missing (optional),
+                    name: JsLiteralMemberName {
+                        value: IDENT@17..23 "test" [Newline("\n"), Whitespace("\t")] [],
+                    },
+                    question_mark_token: missing (optional),
+                    type_parameters: missing (optional),
+                    parameters: JsParameters {
+                        l_paren_token: L_PAREN@23..24 "(" [] [],
+                        items: JsParameterList [],
+                        r_paren_token: R_PAREN@24..26 ")" [] [Whitespace(" ")],
+                    },
+                    return_type_annotation: missing (optional),
+                    body: JsFunctionBody {
+                        l_curly_token: L_CURLY@26..27 "{" [] [],
+                        directives: JsDirectiveList [],
+                        statements: JsStatementList [
+                            JsExpressionStatement {
+                                expression: JsInExpression {
+                                    property: JsInExpression {
+                                        property: JsPrivateName {
+                                            hash_token: HASH@27..32 "#" [Newline("\n"), Whitespace("   ")] [],
+                                            value_token: IDENT@32..37 "prop" [] [Whitespace(" ")],
+                                        },
+                                        in_token: IN_KW@37..40 "in" [] [Whitespace(" ")],
+                                        object: JsBogusExpression {
+                                            items: [
+                                                HASH@40..41 "#" [] [],
+                                                IDENT@41..46 "prop" [] [Whitespace(" ")],
+                                            ],
+                                        },
+                                    },
+                                    in_token: IN_KW@46..49 "in" [] [Whitespace(" ")],
+                                    object: JsThisExpression {
+                                        this_token: THIS_KW@49..53 "this" [] [],
+                                    },
+                                },
+                                semicolon_token: SEMICOLON@53..54 ";" [] [],
+                            },
+                            JsExpressionStatement {
+                                expression: JsBinaryExpression {
+                                    left: JsNumberLiteralExpression {
+                                        value_token: JS_NUMBER_LITERAL@54..60 "5" [Newline("\n"), Whitespace("   ")] [Whitespace(" ")],
+                                    },
+                                    operator_token: PLUS@60..62 "+" [] [Whitespace(" ")],
+                                    right: JsBogusExpression {
+                                        items: [
+                                            HASH@62..63 "#" [] [],
+                                            IDENT@63..67 "prop" [] [],
+                                        ],
+                                    },
+                                },
+                                semicolon_token: SEMICOLON@67..68 ";" [] [],
+                            },
+                            JsExpressionStatement {
+                                expression: JsBogusExpression {
+                                    items: [
+                                        HASH@68..73 "#" [Newline("\n"), Whitespace("   ")] [],
+                                        IDENT@73..77 "prop" [] [],
+                                    ],
+                                },
+                                semicolon_token: missing (optional),
+                            },
+                            JsExpressionStatement {
+                                expression: JsBinaryExpression {
+                                    left: JsBogusExpression {
+                                        items: [
+                                            HASH@77..82 "#" [Newline("\n"), Whitespace("   ")] [],
+                                            IDENT@82..87 "prop" [] [Whitespace(" ")],
+                                        ],
+                                    },
+                                    operator_token: PLUS@87..89 "+" [] [Whitespace(" ")],
+                                    right: JsNumberLiteralExpression {
+                                        value_token: JS_NUMBER_LITERAL@89..90 "5" [] [],
+                                    },
+                                },
+                                semicolon_token: SEMICOLON@90..91 ";" [] [],
+                            },
+                        ],
+                        r_curly_token: R_CURLY@91..94 "}" [Newline("\n"), Whitespace(" ")] [],
+                    },
+                },
+            ],
+            r_curly_token: R_CURLY@94..96 "}" [Newline("\n")] [],
+        },
+    ],
+    eof_token: EOF@96..97 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: JS_MODULE@0..97
+  0: (empty)
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..96
+    0: JS_CLASS_DECLARATION@0..96
+      0: JS_DECORATOR_LIST@0..0
+      1: (empty)
+      2: CLASS_KW@0..6 "class" [] [Whitespace(" ")]
+      3: JS_IDENTIFIER_BINDING@6..8
+        0: IDENT@6..8 "A" [] [Whitespace(" ")]
+      4: (empty)
+      5: (empty)
+      6: (empty)
+      7: L_CURLY@8..9 "{" [] []
+      8: JS_CLASS_MEMBER_LIST@9..94
+        0: JS_PROPERTY_CLASS_MEMBER@9..17
+          0: JS_PROPERTY_MODIFIER_LIST@9..9
+          1: JS_PRIVATE_CLASS_MEMBER_NAME@9..16
+            0: HASH@9..12 "#" [Newline("\n"), Whitespace("\t")] []
+            1: IDENT@12..16 "prop" [] []
+          2: (empty)
+          3: (empty)
+          4: SEMICOLON@16..17 ";" [] []
+        1: JS_METHOD_CLASS_MEMBER@17..94
+          0: JS_METHOD_MODIFIER_LIST@17..17
+          1: (empty)
+          2: (empty)
+          3: JS_LITERAL_MEMBER_NAME@17..23
+            0: IDENT@17..23 "test" [Newline("\n"), Whitespace("\t")] []
+          4: (empty)
+          5: (empty)
+          6: JS_PARAMETERS@23..26
+            0: L_PAREN@23..24 "(" [] []
+            1: JS_PARAMETER_LIST@24..24
+            2: R_PAREN@24..26 ")" [] [Whitespace(" ")]
+          7: (empty)
+          8: JS_FUNCTION_BODY@26..94
+            0: L_CURLY@26..27 "{" [] []
+            1: JS_DIRECTIVE_LIST@27..27
+            2: JS_STATEMENT_LIST@27..91
+              0: JS_EXPRESSION_STATEMENT@27..54
+                0: JS_IN_EXPRESSION@27..53
+                  0: JS_IN_EXPRESSION@27..46
+                    0: JS_PRIVATE_NAME@27..37
+                      0: HASH@27..32 "#" [Newline("\n"), Whitespace("   ")] []
+                      1: IDENT@32..37 "prop" [] [Whitespace(" ")]
+                    1: IN_KW@37..40 "in" [] [Whitespace(" ")]
+                    2: JS_BOGUS_EXPRESSION@40..46
+                      0: HASH@40..41 "#" [] []
+                      1: IDENT@41..46 "prop" [] [Whitespace(" ")]
+                  1: IN_KW@46..49 "in" [] [Whitespace(" ")]
+                  2: JS_THIS_EXPRESSION@49..53
+                    0: THIS_KW@49..53 "this" [] []
+                1: SEMICOLON@53..54 ";" [] []
+              1: JS_EXPRESSION_STATEMENT@54..68
+                0: JS_BINARY_EXPRESSION@54..67
+                  0: JS_NUMBER_LITERAL_EXPRESSION@54..60
+                    0: JS_NUMBER_LITERAL@54..60 "5" [Newline("\n"), Whitespace("   ")] [Whitespace(" ")]
+                  1: PLUS@60..62 "+" [] [Whitespace(" ")]
+                  2: JS_BOGUS_EXPRESSION@62..67
+                    0: HASH@62..63 "#" [] []
+                    1: IDENT@63..67 "prop" [] []
+                1: SEMICOLON@67..68 ";" [] []
+              2: JS_EXPRESSION_STATEMENT@68..77
+                0: JS_BOGUS_EXPRESSION@68..77
+                  0: HASH@68..73 "#" [Newline("\n"), Whitespace("   ")] []
+                  1: IDENT@73..77 "prop" [] []
+                1: (empty)
+              3: JS_EXPRESSION_STATEMENT@77..91
+                0: JS_BINARY_EXPRESSION@77..90
+                  0: JS_BOGUS_EXPRESSION@77..87
+                    0: HASH@77..82 "#" [Newline("\n"), Whitespace("   ")] []
+                    1: IDENT@82..87 "prop" [] [Whitespace(" ")]
+                  1: PLUS@87..89 "+" [] [Whitespace(" ")]
+                  2: JS_NUMBER_LITERAL_EXPRESSION@89..90
+                    0: JS_NUMBER_LITERAL@89..90 "5" [] []
+                1: SEMICOLON@90..91 ";" [] []
+            3: R_CURLY@91..94 "}" [Newline("\n"), Whitespace(" ")] []
+      9: R_CURLY@94..96 "}" [Newline("\n")] []
+  4: EOF@96..97 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+private_name_presence_check_recursive.js:4:13 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Private names are only allowed on the left side of a 'in' expression
+  
+    2 │ 	#prop;
+    3 │ 	test() {
+  > 4 │    #prop in #prop in this;
+      │             ^^^^^
+    5 │    5 + #prop;
+    6 │    #prop
+  
+private_name_presence_check_recursive.js:5:8 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Private names are only allowed on the left side of a 'in' expression
+  
+    3 │ 	test() {
+    4 │    #prop in #prop in this;
+  > 5 │    5 + #prop;
+      │        ^^^^^
+    6 │    #prop
+    7 │    #prop + 5;
+  
+private_name_presence_check_recursive.js:6:4 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Private names are only allowed on the left side of a 'in' expression
+  
+    4 │    #prop in #prop in this;
+    5 │    5 + #prop;
+  > 6 │    #prop
+      │    ^^^^^
+    7 │    #prop + 5;
+    8 │  }
+  
+private_name_presence_check_recursive.js:7:4 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Private names are only allowed on the left side of a 'in' expression
+  
+    5 │    5 + #prop;
+    6 │    #prop
+  > 7 │    #prop + 5;
+      │    ^^^^^
+    8 │  }
+    9 │ }
+  
+```

@@ -1,0 +1,22 @@
+
+[package]
+authors.workspace    = true
+categories.workspace = true
+description          = "Data structure for tracking projects and their packages"
+edition.workspace    = true
+homepage.workspace   = true
+keywords.workspace   = true
+license.workspace    = true
+name                 = "biome_project_layout"
+repository.workspace = true
+version              = "0.0.1"
+
+[lints]
+workspace = true
+
+[dependencies]
+biome_package = { workspace = true }
+biome_parser  = { workspace = true }
+camino        = { workspace = true }
+papaya        = { workspace = true }
+rustc-hash    = { workspace = true }

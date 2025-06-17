@@ -1,0 +1,47 @@
+---
+source: crates/biome_migrate/tests/spec_tests.rs
+expression: invalid.json
+---
+# Input
+```json
+{
+  "linter": {
+    "rules": {
+      "style": {
+        "useNamingConvention": {
+          "level": "on",
+          "options": {
+            "enumMemberCase": "PascalCase"
+          }
+        }
+      }
+    }
+  }
+}
+
+```
+
+# Diagnostics
+```
+invalid.json:8:13 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The option enumMemberCase has ben removed.
+  
+     6 │           "level": "on",
+     7 │           "options": {
+   > 8 │             "enumMemberCase": "PascalCase"
+       │             ^^^^^^^^^^^^^^^^
+     9 │           }
+    10 │         }
+  
+  i Safe fix: Use conventions instead of enumMemberCase.
+  
+     6  6 │             "level": "on",
+     7  7 │             "options": {
+     8    │ - ············"enumMemberCase":·"PascalCase"
+        8 │ + ············"conventions":[{"selector":{"kind":"enumMember"},"formats":["PascalCase"]}]
+     9  9 │             }
+    10 10 │           }
+  
+
+```

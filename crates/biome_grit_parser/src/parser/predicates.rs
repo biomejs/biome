@@ -1,8 +1,8 @@
 use super::literals::{parse_boolean_literal, parse_literal};
 use super::parse_name;
 use super::patterns::{parse_container, parse_pattern};
+use super::{GritParser, parse_not};
 use super::{parse_error::*, parse_maybe_named_arg};
-use super::{parse_not, GritParser};
 use crate::constants::*;
 use biome_grit_syntax::GritSyntaxKind::{self, *};
 use biome_grit_syntax::T;

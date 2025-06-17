@@ -1,8 +1,7 @@
 use super::{compilation_context::NodeCompilationContext, variable_compiler::VariableCompiler};
 use crate::{
-    diagnostics::CompilerDiagnostic, grit_context::GritQueryContext,
+    CompileError, diagnostics::CompilerDiagnostic, grit_context::GritQueryContext,
     pattern_compiler::snippet_compiler::parse_snippet_content, util::TextRangeGritExt,
-    CompileError,
 };
 use biome_grit_syntax::{AnyGritRegex, GritRegexPattern};
 use grit_pattern_matcher::pattern::{RegexLike, RegexPattern};
@@ -54,10 +53,9 @@ impl RegexCompiler {
 
         let variables: Vec<_> = node
             .variables()
-            .and_then(|variables| variables.args().ok())
+            .map(|variables| variables.args())
             .map(|args| {
-                args.grit_variable_list()
-                    .into_iter()
+                args.into_iter()
                     .filter_map(Result::ok)
                     .map(|variable| VariableCompiler::from_node(&variable, context))
                     .collect()

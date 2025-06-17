@@ -1,6 +1,7 @@
 ---
 source: crates/biome_css_analyze/tests/spec_tests.rs
 expression: invalidBetweenImport.css
+snapshot_kind: text
 ---
 # Input
 ```css
@@ -18,7 +19,7 @@ a {}
 ```
 invalidBetweenImport.css:3:2 lint/correctness/noInvalidPositionAtImportRule ━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This @import is in the wrong position.
+  × This @import is in the wrong position.
   
     1 │ @import 'foo.css';
     2 │ a {}
@@ -37,7 +38,7 @@ invalidBetweenImport.css:3:2 lint/correctness/noInvalidPositionAtImportRule ━�
 ```
 invalidBetweenImport.css:4:2 lint/correctness/noInvalidPositionAtImportRule ━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This @import is in the wrong position.
+  × This @import is in the wrong position.
   
     2 │ a {}
     3 │ @import 'bar1.css';
@@ -56,7 +57,7 @@ invalidBetweenImport.css:4:2 lint/correctness/noInvalidPositionAtImportRule ━�
 ```
 invalidBetweenImport.css:6:2 lint/correctness/noInvalidPositionAtImportRule ━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This @import is in the wrong position.
+  × This @import is in the wrong position.
   
     4 │ @import 'bar2.css';
     5 │ a {}
@@ -75,7 +76,7 @@ invalidBetweenImport.css:6:2 lint/correctness/noInvalidPositionAtImportRule ━�
 ```
 invalidBetweenImport.css:7:2 lint/correctness/noInvalidPositionAtImportRule ━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This @import is in the wrong position.
+  × This @import is in the wrong position.
   
     5 │ a {}
     6 │ @import 'bar3.css';

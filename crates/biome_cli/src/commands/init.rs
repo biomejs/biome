@@ -1,12 +1,12 @@
 use crate::{CliDiagnostic, CliSession};
-use biome_configuration::PartialConfiguration;
-use biome_console::{markup, ConsoleExt};
+use biome_configuration::Configuration;
+use biome_console::{ConsoleExt, markup};
 use biome_fs::ConfigName;
 use biome_service::configuration::create_config;
 
-pub(crate) fn init(mut session: CliSession, emit_jsonc: bool) -> Result<(), CliDiagnostic> {
-    let fs = &mut session.app.fs;
-    create_config(fs, PartialConfiguration::init(), emit_jsonc)?;
+pub(crate) fn init(session: CliSession, emit_jsonc: bool) -> Result<(), CliDiagnostic> {
+    let fs = session.app.workspace.fs();
+    create_config(fs, Configuration::init(), emit_jsonc)?;
     let file_created = if emit_jsonc {
         ConfigName::biome_jsonc()
     } else {
@@ -25,7 +25,7 @@ Welcome to Biome! Let's get you started...
 
   "<Dim>"1."</Dim>" "<Emphasis>"Setup an editor extension"</Emphasis>"
      Get live errors as you type and format when you save.
-     Learn more at "<Hyperlink href="https://biomejs.dev/guides/integrate-in-editor/">"https://biomejs.dev/guides/integrate-in-editor/"</Hyperlink>"
+     Learn more at "<Hyperlink href="https://biomejs.dev/guides/editors/first-party-extensions/">"https://biomejs.dev/guides/editors/first-party-extensions/"</Hyperlink>"
 
   "<Dim>"2."</Dim>" "<Emphasis>"Try a command"</Emphasis>"
      "<Italic>"biome check"</Italic>"  checks formatting, import sorting, and lint rules.

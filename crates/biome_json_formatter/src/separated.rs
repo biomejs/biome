@@ -1,9 +1,9 @@
-use crate::prelude::*;
 use crate::FormatJsonSyntaxToken;
+use crate::prelude::*;
+use biome_formatter::FormatRefWithRule;
 use biome_formatter::separated::{
     FormatSeparatedElementRule, FormatSeparatedIter, TrailingSeparator,
 };
-use biome_formatter::FormatRefWithRule;
 use biome_json_syntax::{JsonLanguage, JsonSyntaxToken};
 use biome_rowan::{AstNode, AstSeparatedList, AstSeparatedListElementsIterator};
 use std::marker::PhantomData;

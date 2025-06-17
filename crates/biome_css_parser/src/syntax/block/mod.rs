@@ -7,7 +7,7 @@ mod rule_block;
 use crate::parser::CssParser;
 use biome_css_syntax::CssSyntaxKind::*;
 use biome_css_syntax::{CssSyntaxKind, T};
-use biome_parser::diagnostic::{expected_node, ParseDiagnostic};
+use biome_parser::diagnostic::{ParseDiagnostic, expected_node};
 use biome_parser::{CompletedMarker, Parser};
 use biome_rowan::TextRange;
 
@@ -37,13 +37,16 @@ pub(crate) trait ParseBlockBody {
 
         let is_open_brace_missing = !p.expect(T!['{']);
 
-        if is_open_brace_missing && (!self.is_at_element(p) || p.state().speculative_parsing) {
+        // skip parsing if we are not at the start of a element or a closing brace
+        // or if we are in a speculative parsing state
+        if is_open_brace_missing
+            && (!self.is_at_element(p) && !p.at(T!['}']) || p.state().speculative_parsing)
+        {
             p.error(expected_block(p, p.cur_range()));
             return m.complete(p, CSS_BOGUS_BLOCK);
         }
 
         let old_nesting_block = std::mem::replace(&mut p.state_mut().is_nesting_block, true);
-
         self.parse_list(p);
 
         let is_close_brace_missing = !p.expect(T!['}']);

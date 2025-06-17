@@ -1,9 +1,9 @@
-use std::{env, path::Path};
-
 use biome_formatter::{IndentStyle, IndentWidth};
 use biome_formatter_test::test_prettier_snapshot::{PrettierSnapshot, PrettierTestFile};
-use biome_js_formatter::{context::JsFormatOptions, JsFormatLanguage};
+use biome_js_formatter::{JsFormatLanguage, context::JsFormatOptions};
 use biome_js_syntax::{JsFileSource, LanguageVariant, ModuleKind};
+use camino::Utf8Path;
+use std::env;
 
 mod language;
 
@@ -12,7 +12,7 @@ tests_macros::gen_tests! {"tests/specs/prettier/{js,typescript,jsx}/**/*.{js,ts,
 fn test_snapshot(input: &'static str, _: &str, _: &str, _: &str) {
     countme::enable(true);
 
-    let root_path = Path::new(concat!(
+    let root_path = Utf8Path::new(concat!(
         env!("CARGO_MANIFEST_DIR"),
         "/tests/specs/prettier/"
     ));
@@ -50,7 +50,7 @@ fn test_snapshot(input: &'static str, _: &str, _: &str, _: &str) {
     snapshot.test()
 }
 
-fn is_non_strict_mode(root_path: &Path, file_path: &Path) -> bool {
+fn is_non_strict_mode(root_path: &Utf8Path, file_path: &Utf8Path) -> bool {
     let test_cases_paths = ["js/with/", "js/sloppy-mode/", "js/identifier/"];
 
     test_cases_paths.iter().any(|path| {
@@ -60,7 +60,7 @@ fn is_non_strict_mode(root_path: &Path, file_path: &Path) -> bool {
     })
 }
 
-fn is_restricted_typescript(root_path: &Path, file_path: &Path) -> bool {
+fn is_restricted_typescript(root_path: &Utf8Path, file_path: &Utf8Path) -> bool {
     let test_cases_paths = [
         "typescript/arrows/type_params.ts",
         "typescript/compiler/contextualSignatureInstantiation2.ts",

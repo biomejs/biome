@@ -1,3 +1,4 @@
+/* should not generate diagnostics */
 a[""];
 a["b" + 1];
 a["c" + "d"];

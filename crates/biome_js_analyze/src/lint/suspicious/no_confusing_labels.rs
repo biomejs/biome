@@ -1,7 +1,10 @@
 use biome_analyze::context::RuleContext;
-use biome_analyze::{declare_lint_rule, Ast, Rule, RuleDiagnostic, RuleSource, RuleSourceKind};
+use biome_analyze::{Ast, Rule, RuleDiagnostic, RuleSource, RuleSourceKind, declare_lint_rule};
 use biome_console::markup;
+use biome_deserialize_macros::Deserializable;
+use biome_diagnostics::Severity;
 use biome_js_syntax::{AnyJsStatement, JsFileSource, JsLabeledStatement};
+use serde::{Deserialize, Serialize};
 
 declare_lint_rule! {
     /// Disallow labeled statements that are not loops.
@@ -55,6 +58,26 @@ declare_lint_rule! {
     /// $: { /* reactive block */ }
     /// </script>
     /// ```
+    /// ## Options
+    ///
+    /// Use the options to allow specific labels in your code.
+    /// Labels can be used to mark code that should be removed under certain conditions,
+    /// such as in production builds.
+    /// Some bundlers, such as [esbuild](https://esbuild.github.io/api/#drop-labels) and Vite,
+    /// can be configured to remove labeled statements.
+    ///
+    /// ```json,options
+    /// {
+    ///     "options": {
+    ///         "allowedLabels": ["DEV"]
+    ///     }
+    /// }
+    /// ```
+    ///
+    /// ```js,use_options
+    /// DEV: assertSomeCondition();
+    /// ```
+    ///
     pub NoConfusingLabels {
         version: "1.0.0",
         name: "noConfusingLabels",
@@ -62,19 +85,32 @@ declare_lint_rule! {
         sources: &[RuleSource::Eslint("no-labels")],
         source_kind: RuleSourceKind::Inspired,
         recommended: true,
+        severity: Severity::Warning,
     }
+}
+
+/// Options for the rule `noConfusingLabels`
+#[derive(Clone, Debug, Default, Deserialize, Deserializable, Eq, PartialEq, Serialize)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[serde(rename_all = "camelCase", deny_unknown_fields, default)]
+pub struct NoConfusingLabelsOptions {
+    /// A list of (non-confusing) labels that should be allowed
+    #[serde(skip_serializing_if = "<[_]>::is_empty")]
+    pub allowed_labels: Box<[Box<str>]>,
 }
 
 impl Rule for NoConfusingLabels {
     type Query = Ast<JsLabeledStatement>;
     type State = ();
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = Box<NoConfusingLabelsOptions>;
 
     fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
         let labeled_stmt = ctx.query();
         let label = labeled_stmt.label_token().ok()?;
         let label = label.text_trimmed();
+
+        // Allow $ label which marks reactive statements in Svelte
         if label == "$"
             && ctx
                 .source_type::<JsFileSource>()
@@ -83,6 +119,18 @@ impl Rule for NoConfusingLabels {
         {
             return None;
         }
+
+        // Allow custom allowed labels
+        if ctx
+            .options()
+            .allowed_labels
+            .iter()
+            .any(|s| s.as_ref() == label)
+        {
+            return None;
+        }
+
+        // Allow labels in loops
         match labeled_stmt.body().ok()? {
             AnyJsStatement::JsDoWhileStatement(_)
             | AnyJsStatement::JsForInStatement(_)
@@ -95,6 +143,14 @@ impl Rule for NoConfusingLabels {
 
     fn diagnostic(ctx: &RuleContext<Self>, _: &Self::State) -> Option<RuleDiagnostic> {
         let labeled_stmt = ctx.query();
+        let allowed_labels = &ctx.options().allowed_labels;
+
+        let message = if allowed_labels.is_empty() {
+            "Only loops should be labeled.\nThe use of labels for other statements is suspicious and unfamiliar."
+        } else {
+            "Some labels are explicitly allowed, but this one is not.\nOtherwise, only loops should be labeled."
+        };
+
         Some(
             RuleDiagnostic::new(
                 rule_category!(),
@@ -103,7 +159,7 @@ impl Rule for NoConfusingLabels {
                     "Unexpected "<Emphasis>"label"</Emphasis>"."
                 },
             )
-            .note("Only loops should be labeled.\nThe use of labels for other statements is suspicious and unfamiliar."),
+            .note(message),
         )
     }
 }

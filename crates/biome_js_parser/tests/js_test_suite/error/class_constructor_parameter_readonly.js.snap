@@ -1,0 +1,139 @@
+---
+source: crates/biome_js_parser/tests/spec_test.rs
+expression: snapshot
+snapshot_kind: text
+---
+## Input
+
+```js
+class B { constructor(readonly b) {} }
+
+```
+
+
+## AST
+
+```
+JsModule {
+    bom_token: missing (optional),
+    interpreter_token: missing (optional),
+    directives: JsDirectiveList [],
+    items: JsModuleItemList [
+        JsClassDeclaration {
+            decorators: JsDecoratorList [],
+            abstract_token: missing (optional),
+            class_token: CLASS_KW@0..6 "class" [] [Whitespace(" ")],
+            id: JsIdentifierBinding {
+                name_token: IDENT@6..8 "B" [] [Whitespace(" ")],
+            },
+            type_parameters: missing (optional),
+            extends_clause: missing (optional),
+            implements_clause: missing (optional),
+            l_curly_token: L_CURLY@8..10 "{" [] [Whitespace(" ")],
+            members: JsClassMemberList [
+                JsConstructorClassMember {
+                    modifiers: JsConstructorModifierList [],
+                    name: JsLiteralMemberName {
+                        value: IDENT@10..21 "constructor" [] [],
+                    },
+                    parameters: JsConstructorParameters {
+                        l_paren_token: L_PAREN@21..22 "(" [] [],
+                        parameters: JsConstructorParameterList [
+                            JsBogusParameter {
+                                items: [
+                                    JsDecoratorList [],
+                                    TsPropertyParameterModifierList [
+                                        TsReadonlyModifier {
+                                            modifier_token: READONLY_KW@22..31 "readonly" [] [Whitespace(" ")],
+                                        },
+                                    ],
+                                    JsFormalParameter {
+                                        decorators: JsDecoratorList [],
+                                        binding: JsIdentifierBinding {
+                                            name_token: IDENT@31..32 "b" [] [],
+                                        },
+                                        question_mark_token: missing (optional),
+                                        type_annotation: missing (optional),
+                                        initializer: missing (optional),
+                                    },
+                                ],
+                            },
+                        ],
+                        r_paren_token: R_PAREN@32..34 ")" [] [Whitespace(" ")],
+                    },
+                    body: JsFunctionBody {
+                        l_curly_token: L_CURLY@34..35 "{" [] [],
+                        directives: JsDirectiveList [],
+                        statements: JsStatementList [],
+                        r_curly_token: R_CURLY@35..37 "}" [] [Whitespace(" ")],
+                    },
+                },
+            ],
+            r_curly_token: R_CURLY@37..38 "}" [] [],
+        },
+    ],
+    eof_token: EOF@38..39 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: JS_MODULE@0..39
+  0: (empty)
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..38
+    0: JS_CLASS_DECLARATION@0..38
+      0: JS_DECORATOR_LIST@0..0
+      1: (empty)
+      2: CLASS_KW@0..6 "class" [] [Whitespace(" ")]
+      3: JS_IDENTIFIER_BINDING@6..8
+        0: IDENT@6..8 "B" [] [Whitespace(" ")]
+      4: (empty)
+      5: (empty)
+      6: (empty)
+      7: L_CURLY@8..10 "{" [] [Whitespace(" ")]
+      8: JS_CLASS_MEMBER_LIST@10..37
+        0: JS_CONSTRUCTOR_CLASS_MEMBER@10..37
+          0: JS_CONSTRUCTOR_MODIFIER_LIST@10..10
+          1: JS_LITERAL_MEMBER_NAME@10..21
+            0: IDENT@10..21 "constructor" [] []
+          2: JS_CONSTRUCTOR_PARAMETERS@21..34
+            0: L_PAREN@21..22 "(" [] []
+            1: JS_CONSTRUCTOR_PARAMETER_LIST@22..32
+              0: JS_BOGUS_PARAMETER@22..32
+                0: JS_DECORATOR_LIST@22..22
+                1: TS_PROPERTY_PARAMETER_MODIFIER_LIST@22..31
+                  0: TS_READONLY_MODIFIER@22..31
+                    0: READONLY_KW@22..31 "readonly" [] [Whitespace(" ")]
+                2: JS_FORMAL_PARAMETER@31..32
+                  0: JS_DECORATOR_LIST@31..31
+                  1: JS_IDENTIFIER_BINDING@31..32
+                    0: IDENT@31..32 "b" [] []
+                  2: (empty)
+                  3: (empty)
+                  4: (empty)
+            2: R_PAREN@32..34 ")" [] [Whitespace(" ")]
+          3: JS_FUNCTION_BODY@34..37
+            0: L_CURLY@34..35 "{" [] []
+            1: JS_DIRECTIVE_LIST@35..35
+            2: JS_STATEMENT_LIST@35..35
+            3: R_CURLY@35..37 "}" [] [Whitespace(" ")]
+      9: R_CURLY@37..38 "}" [] []
+  4: EOF@38..39 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+class_constructor_parameter_readonly.js:1:23 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × 'readonly' modifier can only be used in TypeScript files
+  
+  > 1 │ class B { constructor(readonly b) {} }
+      │                       ^^^^^^^^
+    2 │ 
+  
+```

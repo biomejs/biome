@@ -1,6 +1,7 @@
 ---
 source: crates/biome_grit_parser/tests/spec_test.rs
 expression: snapshot
+snapshot_kind: text
 ---
 ## Input
 ```grit
@@ -25,9 +26,7 @@ GritRoot {
                 value_token: GRIT_NAME@16..38 "this_pattern_is_hidden" [] [],
             },
             l_paren_token: L_PAREN@38..39 "(" [] [],
-            args: GritPatternArgList {
-                grit_variable_list: GritVariableList [],
-            },
+            args: GritVariableList [],
             r_paren_token: R_PAREN@39..41 ")" [] [Whitespace(" ")],
             language: missing (optional),
             body: GritPatternDefinitionBody {
@@ -61,8 +60,7 @@ GritRoot {
       2: GRIT_NAME@16..38
         0: GRIT_NAME@16..38 "this_pattern_is_hidden" [] []
       3: L_PAREN@38..39 "(" [] []
-      4: GRIT_PATTERN_ARG_LIST@39..39
-        0: GRIT_VARIABLE_LIST@39..39
+      4: GRIT_VARIABLE_LIST@39..39
       5: R_PAREN@39..41 ")" [] [Whitespace(" ")]
       6: (empty)
       7: GRIT_PATTERN_DEFINITION_BODY@41..56

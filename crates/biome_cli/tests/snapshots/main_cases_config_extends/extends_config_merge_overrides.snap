@@ -1,6 +1,6 @@
 ---
 source: crates/biome_cli/tests/snap_test.rs
-expression: content
+expression: redactor(content)
 ---
 ## `biome.json`
 
@@ -9,7 +9,7 @@ expression: content
   "extends": ["shared.json"],
   "overrides": [
     {
-      "include": ["**/*.js"],
+      "includes": ["**/*.js"],
       "linter": { "rules": { "correctness": { "noUnusedVariables": "error" } } }
     }
   ]
@@ -21,7 +21,7 @@ expression: content
 ```json
 {
             "overrides": [{
-                "include": ["**/*.js"],
+                "includes": ["**/*.js"],
                 "linter": { "rules": { "suspicious": { "noDebugger": "off" } } }
             }]
         }
@@ -49,12 +49,12 @@ lint ━━━━━━━━━━━━━━━━━━━━━━━━━
 ```block
 test.js:1:17 lint/correctness/noUnusedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × This variable is unused.
+  × This variable a is unused.
   
   > 1 │ debugger; const a = 0;
       │                 ^
   
-  i Unused variables usually are result of incomplete refactoring, typos and other source of bugs.
+  i Unused variables are often the result of an incomplete refactoring, typos, or other sources of bugs.
   
   i Unsafe fix: If this is intentional, prepend a with an underscore.
   

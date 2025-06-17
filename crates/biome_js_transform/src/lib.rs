@@ -1,3 +1,5 @@
+#![deny(clippy::use_self)]
+
 mod declare_transformation;
 mod registry;
 mod transformers;
@@ -43,7 +45,7 @@ where
     let mut registry = RuleRegistry::builder(&filter, root);
     visit_transformation_registry(&mut registry);
 
-    let (registry, mut services, diagnostics, visitors) = registry.build();
+    let (registry, mut services, diagnostics, visitors, categories) = registry.build();
 
     // Bail if we can't parse a rule option
     if !diagnostics.is_empty() {
@@ -54,28 +56,43 @@ where
     impl SuppressionAction for TestAction {
         type Language = JsLanguage;
 
-        fn find_token_to_apply_suppression(
+        fn find_token_for_inline_suppression(
             &self,
             _: SyntaxToken<Self::Language>,
         ) -> Option<ApplySuppression<Self::Language>> {
             None
         }
 
-        fn apply_suppression(
+        fn apply_top_level_suppression(
+            &self,
+            _: &mut BatchMutation<Self::Language>,
+            _: SyntaxToken<Self::Language>,
+            _: &str,
+        ) {
+            unreachable!("")
+        }
+
+        fn apply_inline_suppression(
             &self,
             _: &mut BatchMutation<Self::Language>,
             _: ApplySuppression<Self::Language>,
             _: &str,
+            _: &str,
         ) {
+            unreachable!("")
+        }
+
+        fn suppression_top_level_comment(&self, _suppression_text: &str) -> String {
             unreachable!("")
         }
     }
     let mut analyzer = Analyzer::new(
         METADATA.deref(),
         InspectMatcher::new(registry, inspect_matcher),
-        |_| -> Vec<Result<_, Infallible>> { unreachable!() },
+        |_, _| -> Vec<Result<_, Infallible>> { unreachable!() },
         Box::new(TestAction),
         &mut emit_signal,
+        categories,
     );
 
     for ((phase, _), visitor) in visitors {
@@ -116,11 +133,11 @@ pub(crate) type JsBatchMutation = BatchMutation<JsLanguage>;
 #[cfg(test)]
 mod tests {
     use biome_analyze::{AnalyzerOptions, Never, RuleCategoriesBuilder, RuleFilter};
-    use biome_js_parser::{parse, JsParserOptions};
+    use biome_js_parser::{JsParserOptions, parse};
     use biome_js_syntax::JsFileSource;
     use std::slice;
 
-    use crate::{transform, AnalysisFilter, ControlFlow};
+    use crate::{AnalysisFilter, ControlFlow, transform};
 
     #[ignore]
     #[test]
@@ -152,7 +169,5 @@ mod tests {
                 ControlFlow::<Never>::Continue(())
             },
         );
-
-        // assert_eq!(error_ranges.as_slice(), &[]);
     }
 }

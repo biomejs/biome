@@ -1,0 +1,7 @@
+`$fn($args)` where {
+    $fn <: `Object.assign`,
+    register_diagnostic(
+        span = $fn,
+        message = "Prefer object spread instead of `Object.assign()`"
+    )
+}

@@ -1,0 +1,86 @@
+---
+source: crates/biome_js_parser/tests/spec_test.rs
+expression: snapshot
+snapshot_kind: text
+---
+## Input
+
+```js
+import e, { f } from "b";
+
+```
+
+
+## AST
+
+```
+JsModule {
+    bom_token: missing (optional),
+    interpreter_token: missing (optional),
+    directives: JsDirectiveList [],
+    items: JsModuleItemList [
+        JsImport {
+            import_token: IMPORT_KW@0..7 "import" [] [Whitespace(" ")],
+            import_clause: JsImportCombinedClause {
+                default_specifier: JsDefaultImportSpecifier {
+                    local_name: JsIdentifierBinding {
+                        name_token: IDENT@7..8 "e" [] [],
+                    },
+                },
+                comma_token: COMMA@8..10 "," [] [Whitespace(" ")],
+                specifier: JsNamedImportSpecifiers {
+                    l_curly_token: L_CURLY@10..12 "{" [] [Whitespace(" ")],
+                    specifiers: JsNamedImportSpecifierList [
+                        JsShorthandNamedImportSpecifier {
+                            type_token: missing (optional),
+                            local_name: JsIdentifierBinding {
+                                name_token: IDENT@12..14 "f" [] [Whitespace(" ")],
+                            },
+                        },
+                    ],
+                    r_curly_token: R_CURLY@14..16 "}" [] [Whitespace(" ")],
+                },
+                from_token: FROM_KW@16..21 "from" [] [Whitespace(" ")],
+                source: JsModuleSource {
+                    value_token: JS_STRING_LITERAL@21..24 "\"b\"" [] [],
+                },
+                assertion: missing (optional),
+            },
+            semicolon_token: SEMICOLON@24..25 ";" [] [],
+        },
+    ],
+    eof_token: EOF@25..26 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: JS_MODULE@0..26
+  0: (empty)
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..25
+    0: JS_IMPORT@0..25
+      0: IMPORT_KW@0..7 "import" [] [Whitespace(" ")]
+      1: JS_IMPORT_COMBINED_CLAUSE@7..24
+        0: JS_DEFAULT_IMPORT_SPECIFIER@7..8
+          0: JS_IDENTIFIER_BINDING@7..8
+            0: IDENT@7..8 "e" [] []
+        1: COMMA@8..10 "," [] [Whitespace(" ")]
+        2: JS_NAMED_IMPORT_SPECIFIERS@10..16
+          0: L_CURLY@10..12 "{" [] [Whitespace(" ")]
+          1: JS_NAMED_IMPORT_SPECIFIER_LIST@12..14
+            0: JS_SHORTHAND_NAMED_IMPORT_SPECIFIER@12..14
+              0: (empty)
+              1: JS_IDENTIFIER_BINDING@12..14
+                0: IDENT@12..14 "f" [] [Whitespace(" ")]
+          2: R_CURLY@14..16 "}" [] [Whitespace(" ")]
+        3: FROM_KW@16..21 "from" [] [Whitespace(" ")]
+        4: JS_MODULE_SOURCE@21..24
+          0: JS_STRING_LITERAL@21..24 "\"b\"" [] []
+        5: (empty)
+      2: SEMICOLON@24..25 ";" [] []
+  4: EOF@25..26 "" [Newline("\n")] []
+
+```

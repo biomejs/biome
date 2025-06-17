@@ -1,6 +1,7 @@
 ---
 source: crates/biome_json_analyze/tests/spec_tests.rs
 expression: invalid.json
+snapshot_kind: text
 ---
 # Input
 ```json
@@ -22,7 +23,7 @@ expression: invalid.json
 ```
 invalid.json:2:2 lint/suspicious/noDuplicateObjectKeys ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The key foo was already declared.
+  × The key foo was already declared.
   
     1 │ {
   > 2 │ 	"foo": "",
@@ -65,7 +66,7 @@ invalid.json:2:2 lint/suspicious/noDuplicateObjectKeys ━━━━━━━━�
 ```
 invalid.json:7:3 lint/suspicious/noDuplicateObjectKeys ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The key lorem was already declared.
+  × The key lorem was already declared.
   
     5 │ 	"foo": "",
     6 │ 	"new": {

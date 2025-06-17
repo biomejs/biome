@@ -1,0 +1,220 @@
+---
+source: crates/biome_js_parser/tests/spec_test.rs
+expression: snapshot
+snapshot_kind: text
+---
+## Input
+
+```js
+class A extends bar extends foo {}
+class B extends bar, foo {}
+class C implements B {}
+
+```
+
+
+## AST
+
+```
+JsModule {
+    bom_token: missing (optional),
+    interpreter_token: missing (optional),
+    directives: JsDirectiveList [],
+    items: JsModuleItemList [
+        JsBogusStatement {
+            items: [
+                JsDecoratorList [],
+                CLASS_KW@0..6 "class" [] [Whitespace(" ")],
+                JsIdentifierBinding {
+                    name_token: IDENT@6..8 "A" [] [Whitespace(" ")],
+                },
+                JsExtendsClause {
+                    extends_token: EXTENDS_KW@8..16 "extends" [] [Whitespace(" ")],
+                    super_class: JsIdentifierExpression {
+                        name: JsReferenceIdentifier {
+                            value_token: IDENT@16..20 "bar" [] [Whitespace(" ")],
+                        },
+                    },
+                    type_arguments: missing (optional),
+                },
+                JsExtendsClause {
+                    extends_token: EXTENDS_KW@20..28 "extends" [] [Whitespace(" ")],
+                    super_class: JsIdentifierExpression {
+                        name: JsReferenceIdentifier {
+                            value_token: IDENT@28..32 "foo" [] [Whitespace(" ")],
+                        },
+                    },
+                    type_arguments: missing (optional),
+                },
+                L_CURLY@32..33 "{" [] [],
+                JsClassMemberList [],
+                R_CURLY@33..34 "}" [] [],
+            ],
+        },
+        JsBogusStatement {
+            items: [
+                JsDecoratorList [],
+                CLASS_KW@34..41 "class" [Newline("\n")] [Whitespace(" ")],
+                JsIdentifierBinding {
+                    name_token: IDENT@41..43 "B" [] [Whitespace(" ")],
+                },
+                JsBogus {
+                    items: [
+                        EXTENDS_KW@43..51 "extends" [] [Whitespace(" ")],
+                        JsIdentifierExpression {
+                            name: JsReferenceIdentifier {
+                                value_token: IDENT@51..54 "bar" [] [],
+                            },
+                        },
+                        COMMA@54..56 "," [] [Whitespace(" ")],
+                        JsBogus {
+                            items: [
+                                JsIdentifierExpression {
+                                    name: JsReferenceIdentifier {
+                                        value_token: IDENT@56..60 "foo" [] [Whitespace(" ")],
+                                    },
+                                },
+                            ],
+                        },
+                    ],
+                },
+                L_CURLY@60..61 "{" [] [],
+                JsClassMemberList [],
+                R_CURLY@61..62 "}" [] [],
+            ],
+        },
+        JsBogusStatement {
+            items: [
+                JsDecoratorList [],
+                CLASS_KW@62..69 "class" [Newline("\n")] [Whitespace(" ")],
+                JsIdentifierBinding {
+                    name_token: IDENT@69..71 "C" [] [Whitespace(" ")],
+                },
+                JsBogus {
+                    items: [
+                        IMPLEMENTS_KW@71..82 "implements" [] [Whitespace(" ")],
+                        TsTypeList [
+                            TsReferenceType {
+                                name: JsReferenceIdentifier {
+                                    value_token: IDENT@82..84 "B" [] [Whitespace(" ")],
+                                },
+                                type_arguments: missing (optional),
+                            },
+                        ],
+                    ],
+                },
+                L_CURLY@84..85 "{" [] [],
+                JsClassMemberList [],
+                R_CURLY@85..86 "}" [] [],
+            ],
+        },
+    ],
+    eof_token: EOF@86..87 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: JS_MODULE@0..87
+  0: (empty)
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..86
+    0: JS_BOGUS_STATEMENT@0..34
+      0: JS_DECORATOR_LIST@0..0
+      1: CLASS_KW@0..6 "class" [] [Whitespace(" ")]
+      2: JS_IDENTIFIER_BINDING@6..8
+        0: IDENT@6..8 "A" [] [Whitespace(" ")]
+      3: JS_EXTENDS_CLAUSE@8..20
+        0: EXTENDS_KW@8..16 "extends" [] [Whitespace(" ")]
+        1: JS_IDENTIFIER_EXPRESSION@16..20
+          0: JS_REFERENCE_IDENTIFIER@16..20
+            0: IDENT@16..20 "bar" [] [Whitespace(" ")]
+        2: (empty)
+      4: JS_EXTENDS_CLAUSE@20..32
+        0: EXTENDS_KW@20..28 "extends" [] [Whitespace(" ")]
+        1: JS_IDENTIFIER_EXPRESSION@28..32
+          0: JS_REFERENCE_IDENTIFIER@28..32
+            0: IDENT@28..32 "foo" [] [Whitespace(" ")]
+        2: (empty)
+      5: L_CURLY@32..33 "{" [] []
+      6: JS_CLASS_MEMBER_LIST@33..33
+      7: R_CURLY@33..34 "}" [] []
+    1: JS_BOGUS_STATEMENT@34..62
+      0: JS_DECORATOR_LIST@34..34
+      1: CLASS_KW@34..41 "class" [Newline("\n")] [Whitespace(" ")]
+      2: JS_IDENTIFIER_BINDING@41..43
+        0: IDENT@41..43 "B" [] [Whitespace(" ")]
+      3: JS_BOGUS@43..60
+        0: EXTENDS_KW@43..51 "extends" [] [Whitespace(" ")]
+        1: JS_IDENTIFIER_EXPRESSION@51..54
+          0: JS_REFERENCE_IDENTIFIER@51..54
+            0: IDENT@51..54 "bar" [] []
+        2: COMMA@54..56 "," [] [Whitespace(" ")]
+        3: JS_BOGUS@56..60
+          0: JS_IDENTIFIER_EXPRESSION@56..60
+            0: JS_REFERENCE_IDENTIFIER@56..60
+              0: IDENT@56..60 "foo" [] [Whitespace(" ")]
+      4: L_CURLY@60..61 "{" [] []
+      5: JS_CLASS_MEMBER_LIST@61..61
+      6: R_CURLY@61..62 "}" [] []
+    2: JS_BOGUS_STATEMENT@62..86
+      0: JS_DECORATOR_LIST@62..62
+      1: CLASS_KW@62..69 "class" [Newline("\n")] [Whitespace(" ")]
+      2: JS_IDENTIFIER_BINDING@69..71
+        0: IDENT@69..71 "C" [] [Whitespace(" ")]
+      3: JS_BOGUS@71..84
+        0: IMPLEMENTS_KW@71..82 "implements" [] [Whitespace(" ")]
+        1: TS_TYPE_LIST@82..84
+          0: TS_REFERENCE_TYPE@82..84
+            0: JS_REFERENCE_IDENTIFIER@82..84
+              0: IDENT@82..84 "B" [] [Whitespace(" ")]
+            1: (empty)
+      4: L_CURLY@84..85 "{" [] []
+      5: JS_CLASS_MEMBER_LIST@85..85
+      6: R_CURLY@85..86 "}" [] []
+  4: EOF@86..87 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+class_extends_err.js:1:21 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × 'extends' clause already seen.
+  
+  > 1 │ class A extends bar extends foo {}
+      │                     ^^^^^^^^^^^
+    2 │ class B extends bar, foo {}
+    3 │ class C implements B {}
+  
+  i first 'extends' clause
+  
+  > 1 │ class A extends bar extends foo {}
+      │         ^^^^^^^^^^^
+    2 │ class B extends bar, foo {}
+    3 │ class C implements B {}
+  
+class_extends_err.js:2:22 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Classes can only extend a single class.
+  
+    1 │ class A extends bar extends foo {}
+  > 2 │ class B extends bar, foo {}
+      │                      ^^^
+    3 │ class C implements B {}
+    4 │ 
+  
+class_extends_err.js:3:9 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × classes can only implement interfaces in TypeScript files
+  
+    1 │ class A extends bar extends foo {}
+    2 │ class B extends bar, foo {}
+  > 3 │ class C implements B {}
+      │         ^^^^^^^^^^^^
+    4 │ 
+  
+```

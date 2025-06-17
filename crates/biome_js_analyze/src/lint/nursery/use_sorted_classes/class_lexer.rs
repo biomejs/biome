@@ -5,8 +5,8 @@
 //! - `sm:hover:px-2`: variant `sm`, variant `hover`, utility `px-2`.
 //! - `hover:[mask:circle]`: variant `hover`, utility `[mask:circle]` (arbitrary).
 //! - `[&:nth-child(3)]:px-2`: variant `[&:nth-child(3)]` (arbitrary), utility `px-2`.
-//!     The results of the lexer are then used to process classes into `ClassInfo` structs, which are, in
-//!     turn, used to sort the classes.
+//!   The results of the lexer are then used to process classes into `ClassInfo` structs, which are, in
+//!   turn, used to sort the classes.
 
 /// Splits a string into segments based on a list of indexes. The characters at the indexes are not
 /// included in the segments, as they are considered delimiters.
@@ -63,11 +63,11 @@ enum Quote {
 }
 
 impl Quote {
-    fn from_char(c: char) -> Option<Quote> {
+    fn from_char(c: char) -> Option<Self> {
         match c {
-            '\'' => Some(Quote::Single),
-            '"' => Some(Quote::Double),
-            '`' => Some(Quote::Backtick),
+            '\'' => Some(Self::Single),
+            '"' => Some(Self::Double),
+            '`' => Some(Self::Backtick),
             _ => None,
         }
     }
@@ -84,7 +84,7 @@ enum CharKind {
 #[derive(Debug, Eq, PartialEq)]
 pub struct ClassSegmentStructure {
     pub arbitrary: bool,
-    pub text: String,
+    pub text: Box<str>,
 }
 
 /// Information about the structure of a CSS class.
@@ -175,7 +175,7 @@ pub fn tokenize_class(class_name: &str) -> Option<ClassStructure> {
         .iter()
         .map(|&s| ClassSegmentStructure {
             arbitrary: s.starts_with('['),
-            text: s.to_string(),
+            text: s.into(),
         })
         .collect();
     let utility = variants.pop()?;
@@ -195,7 +195,7 @@ mod tests_tokenize_class {
                 variants: Vec::new(),
                 utility: ClassSegmentStructure {
                     arbitrary: false,
-                    text: "px-2".to_string(),
+                    text: "px-2".into(),
                 },
             })
         );
@@ -204,11 +204,11 @@ mod tests_tokenize_class {
             Some(ClassStructure {
                 variants: vec![ClassSegmentStructure {
                     arbitrary: false,
-                    text: "hover".to_string(),
+                    text: "hover".into(),
                 }],
                 utility: ClassSegmentStructure {
                     arbitrary: false,
-                    text: "px-2".to_string(),
+                    text: "px-2".into(),
                 },
             })
         );
@@ -218,16 +218,16 @@ mod tests_tokenize_class {
                 variants: vec![
                     ClassSegmentStructure {
                         arbitrary: false,
-                        text: "sm".to_string(),
+                        text: "sm".into(),
                     },
                     ClassSegmentStructure {
                         arbitrary: false,
-                        text: "hover".to_string(),
+                        text: "hover".into(),
                     },
                 ],
                 utility: ClassSegmentStructure {
                     arbitrary: false,
-                    text: "px-2".to_string(),
+                    text: "px-2".into(),
                 },
             })
         );
@@ -236,11 +236,11 @@ mod tests_tokenize_class {
             Some(ClassStructure {
                 variants: vec![ClassSegmentStructure {
                     arbitrary: false,
-                    text: "hover".to_string(),
+                    text: "hover".into(),
                 }],
                 utility: ClassSegmentStructure {
                     arbitrary: true,
-                    text: "[mask:circle]".to_string(),
+                    text: "[mask:circle]".into(),
                 },
             })
         );
@@ -249,11 +249,11 @@ mod tests_tokenize_class {
             Some(ClassStructure {
                 variants: vec![ClassSegmentStructure {
                     arbitrary: true,
-                    text: "[&:nth-child(3)]".to_string(),
+                    text: "[&:nth-child(3)]".into(),
                 }],
                 utility: ClassSegmentStructure {
                     arbitrary: false,
-                    text: "px-2".to_string(),
+                    text: "px-2".into(),
                 },
             })
         );
@@ -262,11 +262,11 @@ mod tests_tokenize_class {
             Some(ClassStructure {
                 variants: vec![ClassSegmentStructure {
                     arbitrary: false,
-                    text: "hover".to_string(),
+                    text: "hover".into(),
                 },],
                 utility: ClassSegmentStructure {
                     arbitrary: true,
-                    text: "[mask:circle]".to_string(),
+                    text: "[mask:circle]".into(),
                 },
             })
         );
@@ -275,11 +275,11 @@ mod tests_tokenize_class {
             Some(ClassStructure {
                 variants: vec![ClassSegmentStructure {
                     arbitrary: false,
-                    text: "has-[:checked]".to_string(),
+                    text: "has-[:checked]".into(),
                 },],
                 utility: ClassSegmentStructure {
                     arbitrary: false,
-                    text: "bg-red-500".to_string(),
+                    text: "bg-red-500".into(),
                 },
             })
         );
@@ -288,11 +288,11 @@ mod tests_tokenize_class {
             Some(ClassStructure {
                 variants: vec![ClassSegmentStructure {
                     arbitrary: true,
-                    text: "[&:nth-child(3)]".to_string(),
+                    text: "[&:nth-child(3)]".into(),
                 },],
                 utility: ClassSegmentStructure {
                     arbitrary: true,
-                    text: "[mask:circle]".to_string(),
+                    text: "[mask:circle]".into(),
                 },
             })
         );
@@ -301,11 +301,11 @@ mod tests_tokenize_class {
             Some(ClassStructure {
                 variants: vec![ClassSegmentStructure {
                     arbitrary: false,
-                    text: "font-[Roboto]".to_string(),
+                    text: "font-[Roboto]".into(),
                 },],
                 utility: ClassSegmentStructure {
                     arbitrary: true,
-                    text: "[mask:circle]".to_string(),
+                    text: "[mask:circle]".into(),
                 },
             })
         );
@@ -314,11 +314,11 @@ mod tests_tokenize_class {
             Some(ClassStructure {
                 variants: vec![ClassSegmentStructure {
                     arbitrary: false,
-                    text: "font-['Roboto']".to_string(),
+                    text: "font-['Roboto']".into(),
                 },],
                 utility: ClassSegmentStructure {
                     arbitrary: true,
-                    text: "[mask:circle]".to_string(),
+                    text: "[mask:circle]".into(),
                 },
             })
         );
@@ -327,11 +327,11 @@ mod tests_tokenize_class {
             Some(ClassStructure {
                 variants: vec![ClassSegmentStructure {
                     arbitrary: false,
-                    text: "quotes-['Ro'b\"`oto']".to_string(),
+                    text: "quotes-['Ro'b\"`oto']".into(),
                 },],
                 utility: ClassSegmentStructure {
                     arbitrary: false,
-                    text: "block".to_string(),
+                    text: "block".into(),
                 },
             })
         );
@@ -340,11 +340,11 @@ mod tests_tokenize_class {
             Some(ClassStructure {
                 variants: vec![ClassSegmentStructure {
                     arbitrary: false,
-                    text: "quotes-[']']".to_string(),
+                    text: "quotes-[']']".into(),
                 },],
                 utility: ClassSegmentStructure {
                     arbitrary: false,
-                    text: "block".to_string(),
+                    text: "block".into(),
                 },
             })
         );
@@ -354,7 +354,7 @@ mod tests_tokenize_class {
                 variants: Vec::new(),
                 utility: ClassSegmentStructure {
                     arbitrary: false,
-                    text: "quotes-[\"]\"]".to_string(),
+                    text: "quotes-[\"]\"]".into(),
                 },
             })
         );
@@ -364,7 +364,7 @@ mod tests_tokenize_class {
                 variants: Vec::new(),
                 utility: ClassSegmentStructure {
                     arbitrary: false,
-                    text: "quotes-[`]`]".to_string(),
+                    text: "quotes-[`]`]".into(),
                 },
             })
         );
@@ -375,7 +375,7 @@ mod tests_tokenize_class {
                 variants: Vec::new(),
                 utility: ClassSegmentStructure {
                     arbitrary: false,
-                    text: "escaped-quotes-[']\\']:block".to_string(),
+                    text: "escaped-quotes-[']\\']:block".into(),
                 },
             })
         );
@@ -384,11 +384,11 @@ mod tests_tokenize_class {
             Some(ClassStructure {
                 variants: vec![ClassSegmentStructure {
                     arbitrary: false,
-                    text: "double-escaped-quotes-[']\\\\']".to_string(),
+                    text: "double-escaped-quotes-[']\\\\']".into(),
                 },],
                 utility: ClassSegmentStructure {
                     arbitrary: false,
-                    text: "block".to_string(),
+                    text: "block".into(),
                 },
             })
         );
@@ -398,7 +398,7 @@ mod tests_tokenize_class {
                 variants: Vec::new(),
                 utility: ClassSegmentStructure {
                     arbitrary: false,
-                    text: "triple-escaped-quotes-[']\\\\\\']:block".to_string(),
+                    text: "triple-escaped-quotes-[']\\\\\\']:block".into(),
                 },
             })
         );

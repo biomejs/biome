@@ -5,17 +5,17 @@ use crate::prelude::*;
 use biome_css_syntax::CssLanguage;
 use biome_css_syntax::CssSyntaxKind::{CSS_STRING_LITERAL, CSS_URL_VALUE_RAW_LITERAL, IDENT};
 use biome_css_syntax::CssSyntaxToken;
-use biome_formatter::token::string::normalize_string;
 use biome_formatter::QuoteStyle;
+use biome_formatter::token::string::normalize_string;
 use biome_formatter::{
+    Format, FormatResult,
     prelude::{dynamic_text, write},
     trivia::format_replaced,
-    Format, FormatResult,
 };
 use biome_rowan::SyntaxToken;
-use biome_string_case::StrOnlyExtension;
+use biome_string_case::StrLikeExtension;
 
-use crate::{prelude::CssFormatContext, AsFormat, CssFormatter};
+use crate::{AsFormat, CssFormatter, prelude::CssFormatContext};
 
 pub(crate) struct FormatTokenAsLowercase {
     token: SyntaxToken<CssLanguage>,
@@ -43,17 +43,29 @@ impl Format<CssFormatContext> for FormatTokenAsLowercase {
     }
 }
 
+#[derive(Eq, PartialEq, Debug)]
+pub(crate) enum StringLiteralParentKind {
+    /// Variants to track tokens that are inside a CssCharasetRule
+    /// @charset must always have double quotes: https://www.w3.org/TR/css-syntax-3/#determine-the-fallback-encoding
+    CharsetAtRule,
+    /// other types, will add more later
+    Others,
+}
+
 /// Data structure of convenience to format string literals. This is copied
 /// from the JS formatter, but should eventually have the logic made generic
 /// and reusable since many languages will have the same needs.
 pub(crate) struct FormatLiteralStringToken<'token> {
     /// The current token
     token: &'token CssSyntaxToken,
+
+    // The parent that holds the token
+    parent_kind: StringLiteralParentKind,
 }
 
 impl<'token> FormatLiteralStringToken<'token> {
-    pub fn new(token: &'token CssSyntaxToken) -> Self {
-        Self { token }
+    pub fn new(token: &'token CssSyntaxToken, parent_kind: StringLiteralParentKind) -> Self {
+        Self { token, parent_kind }
     }
 
     fn token(&self) -> &'token CssSyntaxToken {
@@ -113,6 +125,8 @@ impl Format<CssFormatContext> for FormatLiteralStringToken<'_> {
 /// Data structure of convenience to store some information about the
 /// string that has been processed
 struct StringInformation {
+    /// Currently used quote or `None` if it is not a string
+    current_quote: Option<QuoteStyle>,
     /// This is the quote that the is calculated and eventually used inside the string.
     /// It could be different from the one inside the formatter options
     preferred_quote: QuoteStyle,
@@ -150,6 +164,7 @@ impl FormatLiteralStringToken<'_> {
         // preferred quote style without having to check the content.
         if !matches!(self.token().kind(), CSS_STRING_LITERAL) {
             return StringInformation {
+                current_quote: None,
                 preferred_quote: chosen_quote,
             };
         }
@@ -173,7 +188,10 @@ impl FormatLiteralStringToken<'_> {
             },
         );
 
+        let current_quote = literal.bytes().next().and_then(QuoteStyle::from_byte);
+
         StringInformation {
+            current_quote,
             preferred_quote: if chosen_quote_count > alternate_quote_count {
                 alternate_quote
             } else {
@@ -204,18 +222,27 @@ impl<'token> LiteralStringNormaliser<'token> {
     }
 
     fn normalise_text(&mut self) -> Cow<'token, str> {
-        let string_information = self
-            .token
-            .compute_string_information(self.chosen_quote_style);
+        match self.token.parent_kind {
+            StringLiteralParentKind::CharsetAtRule => {
+                // `@charset` should use double quotes.
+                // However, Prettier preserve single quotes.
+                Cow::Borrowed(self.get_token().text_trimmed())
+            }
+            StringLiteralParentKind::Others => {
+                let string_information = self
+                    .token
+                    .compute_string_information(self.chosen_quote_style);
 
-        // Normalize string token and non-string token.
-        //
-        // Add the chosen quotes to any non-string tokensto normalize them into strings.
-        //
-        // CSS has various places where "string-like" tokens can be used without quotes, but the
-        // semantics aren't affected by whether they are present or not. This function lets those
-        // tokens become string literals by safely adding quotes around them.
-        self.normalise_tokens(string_information)
+                // Normalize string token and non-string token.
+                //
+                // Add the chosen quotes to any non-string tokensto normalize them into strings.
+                //
+                // CSS has various places where "string-like" tokens can be used without quotes, but the
+                // semantics aren't affected by whether they are present or not. This function lets those
+                // tokens become string literals by safely adding quotes around them.
+                self.normalise_tokens(string_information)
+            }
+        }
     }
 
     fn get_token(&self) -> &'token CssSyntaxToken {
@@ -224,7 +251,11 @@ impl<'token> LiteralStringNormaliser<'token> {
 
     fn normalise_tokens(&self, string_information: StringInformation) -> Cow<'token, str> {
         let preferred_quote = string_information.preferred_quote;
-        let polished_raw_content = self.normalize_string(&string_information);
+        let polished_raw_content = normalize_string(
+            self.raw_content(),
+            string_information.preferred_quote.into(),
+            string_information.current_quote != Some(string_information.preferred_quote),
+        );
 
         match polished_raw_content {
             Cow::Borrowed(raw_content) => self.swap_quotes(raw_content, &string_information),
@@ -236,12 +267,6 @@ impl<'token> LiteralStringNormaliser<'token> {
                 Cow::Owned(s)
             }
         }
-    }
-
-    fn normalize_string(&self, string_information: &StringInformation) -> Cow<'token, str> {
-        let raw_content = self.raw_content();
-
-        normalize_string(raw_content, string_information.preferred_quote.into(), true)
     }
 
     fn raw_content(&self) -> &'token str {
@@ -267,10 +292,7 @@ impl<'token> LiteralStringNormaliser<'token> {
             Cow::Borrowed(original)
         } else {
             Cow::Owned(std::format!(
-                "{}{}{}",
-                preferred_quote,
-                content_to_use,
-                preferred_quote,
+                "{preferred_quote}{content_to_use}{preferred_quote}",
             ))
         }
     }

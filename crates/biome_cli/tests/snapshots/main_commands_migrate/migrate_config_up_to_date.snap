@@ -1,6 +1,6 @@
 ---
 source: crates/biome_cli/tests/snap_test.rs
-expression: content
+expression: redactor(content)
 ---
 ## `biome.json`
 
@@ -11,7 +11,41 @@ expression: content
 # Emitted Messages
 
 ```block
-Your configuration file is up to date.
+biome.json migrate ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Configuration file can be updated.
+  
+    1    │ - {·"linter":·{·"enabled":·true·}·}
+       1 │ + {·"root":·false,"linter":·{"enabled":·true·,
+       2 │ + ····"rules":·{
+       3 │ + ······"style":·{
+       4 │ + ········"noParameterAssign":·"error",
+       5 │ + ········"useAsConstAssertion":·"error",
+       6 │ + ········"useDefaultParameterLast":·"error",
+       7 │ + ········"useEnumInitializers":·"error",
+       8 │ + ········"useSelfClosingElements":·"error",
+       9 │ + ········"useSingleVarDeclarator":·"error",
+      10 │ + ········"noUnusedTemplateLiteral":·"error",
+      11 │ + ········"useNumberNamespace":·"error",
+      12 │ + ········"noInferrableTypes":·"error",
+      13 │ + ········"noUselessElse":·"error"
+      14 │ + ······}
+      15 │ + ····}
+      16 │ + ··}·}
+  
+
 ```
 
+```block
+configuration ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
+  i Migration results:
+  
+  - biome.json: configuration needs migration.
+  
+  i Use --write to apply the changes.
+  
+  $ biome migrate --write
+  
+
+```

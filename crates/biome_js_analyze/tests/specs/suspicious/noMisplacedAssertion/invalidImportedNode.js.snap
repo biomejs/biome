@@ -3,7 +3,7 @@ source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalidImportedNode.js
 ---
 # Input
-```jsx
+```js
 import assert from "node:assert";
 import { describe } from "node:test";
 

@@ -1,14 +1,14 @@
 use biome_analyze::{
-    context::RuleContext, declare_lint_rule, ActionCategory, Ast, FixKind, Rule, RuleDiagnostic,
-    RuleSource,
+    Ast, FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
+use biome_diagnostics::Severity;
 use biome_js_factory::make;
 use biome_js_syntax::{
-    is_in_boolean_context, is_negation, AnyJsExpression, AnyJsLiteralExpression,
-    JsBinaryExpression, JsBinaryOperator, JsCallArgumentList, JsCallArguments, JsCallExpression,
-    JsLogicalExpression, JsLogicalOperator, JsStaticMemberExpression, JsSyntaxKind, JsSyntaxNode,
-    JsUnaryExpression, JsUnaryOperator, T,
+    AnyJsExpression, AnyJsLiteralExpression, JsBinaryExpression, JsBinaryOperator,
+    JsCallArgumentList, JsCallArguments, JsCallExpression, JsLogicalExpression, JsLogicalOperator,
+    JsStaticMemberExpression, JsSyntaxKind, JsSyntaxNode, JsUnaryExpression, JsUnaryOperator, T,
+    is_in_boolean_context, is_negation,
 };
 use biome_rowan::{AstNode, AstSeparatedList, BatchMutationExt, TokenText};
 
@@ -129,6 +129,7 @@ declare_lint_rule! {
         name: "useExplicitLengthCheck",
         language: "js",
         recommended: false,
+        severity: Severity::Information,
         sources: &[RuleSource::EslintUnicorn("explicit-length-check")],
         fix_kind: FixKind::Unsafe,
     }
@@ -289,7 +290,7 @@ impl Rule for UseExplicitLengthCheck {
         };
         let member_name = state.member_name.text();
         Some(JsRuleAction::new(
-            ActionCategory::QuickFix,
+            ctx.metadata().action_category(ctx.category(), ctx.group()),
             ctx.metadata().applicability(),
              markup! { "Replace "<Emphasis>"."{member_name}</Emphasis>" with "<Emphasis>"."{member_name}" "{code}</Emphasis> }.to_owned(),
             mutation,
@@ -320,8 +321,8 @@ enum LengthCheck {
 impl LengthCheck {
     fn opposite(&self) -> Self {
         match self {
-            LengthCheck::Zero => LengthCheck::NonZero,
-            LengthCheck::NonZero => LengthCheck::Zero,
+            Self::Zero => Self::NonZero,
+            Self::NonZero => Self::Zero,
         }
     }
 }

@@ -1,15 +1,26 @@
-use crate::analyzers::indent_size::IndentSize;
-use crate::analyzers::nursery_rules::NurseryRules;
+use crate::analyzers::all::RulesAll;
+use crate::analyzers::includes::Includes;
+use crate::analyzers::monorepo::Monorepo;
+use crate::analyzers::no_restriected_globals::NoRestrictedGlobals;
+use crate::analyzers::organize_imports::OrganizeImports;
+use crate::analyzers::rule_mover::RuleMover;
 use crate::analyzers::schema::Schema;
+use crate::analyzers::style_rules::StyleRules;
 use crate::analyzers::trailing_comma::TrailingComma;
-
+use crate::analyzers::use_naming_convention_enum_member_case::UseNamingConventionEnumMemberCase;
 use biome_analyze::{GroupCategory, RegistryVisitor, RuleCategory, RuleGroup};
 use biome_json_syntax::JsonLanguage;
 
-mod indent_size;
-mod nursery_rules;
+mod all;
+mod includes;
+mod monorepo;
+mod no_restriected_globals;
+mod organize_imports;
+mod rule_mover;
 mod schema;
+mod style_rules;
 mod trailing_comma;
+mod use_naming_convention_enum_member_case;
 
 pub(crate) struct MigrationGroup;
 pub(crate) struct MigrationCategory;
@@ -21,14 +32,18 @@ impl RuleGroup for MigrationGroup {
 
     fn record_rules<V: RegistryVisitor<Self::Language> + ?Sized>(registry: &mut V) {
         // Order here is important, rules should be added from the most old, to the most recent
-        // v1.3.0
-        registry.record_rule::<IndentSize>();
         // v1.5.0
         registry.record_rule::<Schema>();
-        // v1.8.0
+        // v2.0.0
+        registry.record_rule::<RulesAll>();
+        registry.record_rule::<StyleRules>();
+        registry.record_rule::<OrganizeImports>();
+        registry.record_rule::<RuleMover>();
+        registry.record_rule::<Includes>();
         registry.record_rule::<TrailingComma>();
-        // v1.8.0
-        registry.record_rule::<NurseryRules>();
+        registry.record_rule::<UseNamingConventionEnumMemberCase>();
+        registry.record_rule::<NoRestrictedGlobals>();
+        registry.record_rule::<Monorepo>();
     }
 }
 

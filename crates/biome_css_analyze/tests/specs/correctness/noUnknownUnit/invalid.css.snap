@@ -1,6 +1,7 @@
 ---
 source: crates/biome_css_analyze/tests/spec_tests.rs
 expression: invalid.css
+snapshot_kind: text
 ---
 # Input
 ```css
@@ -38,7 +39,7 @@ a { unicode-range: U+0100-024F; }
 ```
 invalid.css:1:18 lint/correctness/noUnknownUnit ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected unknown unit: pp
+  × Unexpected unknown unit: pp
   
   > 1 │ a { font-size: 13pp; }
       │                  ^^
@@ -60,7 +61,7 @@ invalid.css:1:18 lint/correctness/noUnknownUnit ━━━━━━━━━━�
 ```
 invalid.css:2:15 lint/correctness/noUnknownUnit ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected unknown unit: xpx
+  × Unexpected unknown unit: xpx
   
     1 │ a { font-size: 13pp; }
   > 2 │ a { margin: 13xpx; }
@@ -83,7 +84,7 @@ invalid.css:2:15 lint/correctness/noUnknownUnit ━━━━━━━━━━�
 ```
 invalid.css:3:18 lint/correctness/noUnknownUnit ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected unknown unit: remm
+  × Unexpected unknown unit: remm
   
     1 │ a { font-size: 13pp; }
     2 │ a { margin: 13xpx; }
@@ -107,7 +108,7 @@ invalid.css:3:18 lint/correctness/noUnknownUnit ━━━━━━━━━━�
 ```
 invalid.css:4:19 lint/correctness/noUnknownUnit ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected unknown unit: remm
+  × Unexpected unknown unit: remm
   
     2 │ a { margin: 13xpx; }
     3 │ a { font-size: .5remm; }
@@ -131,7 +132,7 @@ invalid.css:4:19 lint/correctness/noUnknownUnit ━━━━━━━━━━�
 ```
 invalid.css:5:19 lint/correctness/noUnknownUnit ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected unknown unit: pix
+  × Unexpected unknown unit: pix
   
     3 │ a { font-size: .5remm; }
     4 │ a { font-size: 0.5remm; }
@@ -155,7 +156,7 @@ invalid.css:5:19 lint/correctness/noUnknownUnit ━━━━━━━━━━�
 ```
 invalid.css:6:19 lint/correctness/noUnknownUnit ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected unknown unit: pix
+  × Unexpected unknown unit: pix
   
     4 │ a { font-size: 0.5remm; }
     5 │ a { color: rgb(255pix, 0, 51); }
@@ -179,7 +180,7 @@ invalid.css:6:19 lint/correctness/noUnknownUnit ━━━━━━━━━━�
 ```
 invalid.css:7:20 lint/correctness/noUnknownUnit ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected unknown unit: pix
+  × Unexpected unknown unit: pix
   
     5 │ a { color: rgb(255pix, 0, 51); }
     6 │ a { color: hsl(255pix, 0, 51); }
@@ -203,7 +204,7 @@ invalid.css:7:20 lint/correctness/noUnknownUnit ━━━━━━━━━━�
 ```
 invalid.css:8:20 lint/correctness/noUnknownUnit ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected unknown unit: pix
+  × Unexpected unknown unit: pix
   
      6 │ a { color: hsl(255pix, 0, 51); }
      7 │ a { color: rgba(255pix, 0, 51, 1); }
@@ -227,7 +228,7 @@ invalid.css:8:20 lint/correctness/noUnknownUnit ━━━━━━━━━━�
 ```
 invalid.css:9:20 lint/correctness/noUnknownUnit ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected unknown unit: pix
+  × Unexpected unknown unit: pix
   
      7 │ a { color: rgba(255pix, 0, 51, 1); }
      8 │ a { color: hsla(255pix, 0, 51, 1); }
@@ -251,7 +252,7 @@ invalid.css:9:20 lint/correctness/noUnknownUnit ━━━━━━━━━━�
 ```
 invalid.css:10:20 lint/correctness/noUnknownUnit ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected unknown unit: pix
+  × Unexpected unknown unit: pix
   
      8 │ a { color: hsla(255pix, 0, 51, 1); }
      9 │ a { margin: calc(13pix + 10px); }
@@ -275,7 +276,7 @@ invalid.css:10:20 lint/correctness/noUnknownUnit ━━━━━━━━━━�
 ```
 invalid.css:11:22 lint/correctness/noUnknownUnit ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected unknown unit: pix
+  × Unexpected unknown unit: pix
   
      9 │ a { margin: calc(13pix + 10px); }
     10 │ a { margin: calc(10pix*2); }
@@ -299,7 +300,7 @@ invalid.css:11:22 lint/correctness/noUnknownUnit ━━━━━━━━━━�
 ```
 invalid.css:12:33 lint/correctness/noUnknownUnit ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected unknown unit: pix
+  × Unexpected unknown unit: pix
   
     10 │ a { margin: calc(10pix*2); }
     11 │ a { margin: calc(2*10pix); }
@@ -323,7 +324,7 @@ invalid.css:12:33 lint/correctness/noUnknownUnit ━━━━━━━━━━�
 ```
 invalid.css:13:28 lint/correctness/noUnknownUnit ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected unknown unit: pix
+  × Unexpected unknown unit: pix
   
     11 │ a { margin: calc(2*10pix); }
     12 │ a { -webkit-transition-delay: 10pix; }
@@ -347,7 +348,7 @@ invalid.css:13:28 lint/correctness/noUnknownUnit ━━━━━━━━━━�
 ```
 invalid.css:14:29 lint/correctness/noUnknownUnit ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected unknown unit: pix
+  × Unexpected unknown unit: pix
   
     12 │ a { -webkit-transition-delay: 10pix; }
     13 │ a { margin: -webkit-calc(13pix + 10px); }
@@ -371,7 +372,7 @@ invalid.css:14:29 lint/correctness/noUnknownUnit ━━━━━━━━━━�
 ```
 invalid.css:15:20 lint/correctness/noUnknownUnit ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected unknown unit: pix
+  × Unexpected unknown unit: pix
   
     13 │ a { margin: -webkit-calc(13pix + 10px); }
     14 │ a { margin: some-function(13pix + 10px); }
@@ -395,7 +396,7 @@ invalid.css:15:20 lint/correctness/noUnknownUnit ━━━━━━━━━━�
 ```
 invalid.css:16:22 lint/correctness/noUnknownUnit ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected unknown unit: pix
+  × Unexpected unknown unit: pix
   
     14 │ a { margin: some-function(13pix + 10px); }
     15 │ root { --margin: 10pix; }
@@ -419,7 +420,7 @@ invalid.css:16:22 lint/correctness/noUnknownUnit ━━━━━━━━━━�
 ```
 invalid.css:17:47 lint/correctness/noUnknownUnit ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected unknown unit: PIX
+  × Unexpected unknown unit: PIX
   
     15 │ root { --margin: 10pix; }
     16 │ @media (min-width: 13pix) {}
@@ -443,7 +444,7 @@ invalid.css:17:47 lint/correctness/noUnknownUnit ━━━━━━━━━━�
 ```
 invalid.css:18:22 lint/correctness/noUnknownUnit ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected unknown unit: REMS
+  × Unexpected unknown unit: REMS
   
     16 │ @media (min-width: 13pix) {}
     17 │ @media (min-width: 10px)\n  and (max-width: 20PIX) {}
@@ -467,7 +468,7 @@ invalid.css:18:22 lint/correctness/noUnknownUnit ━━━━━━━━━━�
 ```
 invalid.css:19:15 lint/correctness/noUnknownUnit ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected unknown unit: pz
+  × Unexpected unknown unit: pz
   
     17 │ @media (min-width: 10px)\n  and (max-width: 20PIX) {}
     18 │ @media (width < 10.01REMS) {}
@@ -491,7 +492,7 @@ invalid.css:19:15 lint/correctness/noUnknownUnit ━━━━━━━━━━�
 ```
 invalid.css:20:14 lint/correctness/noUnknownUnit ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected unknown unit: r9
+  × Unexpected unknown unit: r9
   
     18 │ @media (width < 10.01REMS) {}
     19 │ a { width: 1e4pz; }
@@ -515,7 +516,7 @@ invalid.css:20:14 lint/correctness/noUnknownUnit ━━━━━━━━━━�
 ```
 invalid.css:21:15 lint/correctness/noUnknownUnit ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected unknown unit: x
+  × Unexpected unknown unit: x
   
     19 │ a { width: 1e4pz; }
     20 │ a { flex: 0 9r9 auto; }
@@ -539,7 +540,7 @@ invalid.css:21:15 lint/correctness/noUnknownUnit ━━━━━━━━━━�
 ```
 invalid.css:22:44 lint/correctness/noUnknownUnit ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected unknown unit: x
+  × Unexpected unknown unit: x
   
     20 │ a { flex: 0 9r9 auto; }
     21 │ a { width: 400x; }
@@ -563,7 +564,7 @@ invalid.css:22:44 lint/correctness/noUnknownUnit ━━━━━━━━━━�
 ```
 invalid.css:23:60 lint/correctness/noUnknownUnit ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected unknown unit: x
+  × Unexpected unknown unit: x
   
     21 │ a { width: 400x; }
     22 │ @media (resolution: 2x) and (min-width: 200x) {}
@@ -587,7 +588,7 @@ invalid.css:23:60 lint/correctness/noUnknownUnit ━━━━━━━━━━�
 ```
 invalid.css:24:66 lint/correctness/noUnknownUnit ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected unknown unit: x
+  × Unexpected unknown unit: x
   
     22 │ @media (resolution: 2x) and (min-width: 200x) {}
     23 │ @media ( resolution: /* comment */ 2x ) and (min-width: 200x) {}
@@ -611,7 +612,7 @@ invalid.css:24:66 lint/correctness/noUnknownUnit ━━━━━━━━━━�
 ```
 invalid.css:25:80 lint/correctness/noUnknownUnit ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected unknown unit: x
+  × Unexpected unknown unit: x
   
     23 │ @media ( resolution: /* comment */ 2x ) and (min-width: 200x) {}
     24 │ a { background: image-set('img1x.png' 1x, 'img2x.png' 2x) left 20x / 15% 60% repeat-x; }
@@ -635,7 +636,7 @@ invalid.css:25:80 lint/correctness/noUnknownUnit ━━━━━━━━━━�
 ```
 invalid.css:26:46 lint/correctness/noUnknownUnit ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected unknown unit: pix
+  × Unexpected unknown unit: pix
   
     24 │ a { background: image-set('img1x.png' 1x, 'img2x.png' 2x) left 20x / 15% 60% repeat-x; }
     25 │ a { background: /* comment */ image-set('img1x.png' 1x, 'img2x.png' 2x) left 20x / 15% 60% repeat-x; }

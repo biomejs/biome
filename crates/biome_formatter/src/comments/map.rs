@@ -1,4 +1,3 @@
-use countme::Count;
 use rustc_hash::FxHashMap;
 use std::fmt::{Debug, Formatter};
 use std::iter::FusedIterator;
@@ -195,7 +194,8 @@ impl<K: std::hash::Hash + Eq, V> CommentsMap<K, V> {
 
                 *entry = Entry::OutOfOrder(OutOfOrderEntry {
                     leading_index: index,
-                    _count: Count::new(),
+                    #[cfg(feature = "countme")]
+                    _count: countme::Count::new(),
                 });
 
                 match entry {
@@ -248,7 +248,7 @@ impl<K: std::hash::Hash + Eq, V> CommentsMap<K, V> {
     }
 
     /// Returns an iterator over the parts of all keys.
-    #[allow(unused)]
+    #[cfg(debug_assertions)]
     pub fn all_parts(&self) -> impl Iterator<Item = &V> {
         self.index
             .values()
@@ -474,39 +474,43 @@ struct InOrderEntry {
     /// Index into the [CommentsMap::parts] vector where the trailing parts of this entry end
     trailing_end: Option<PartIndex>,
 
-    _count: Count<InOrderEntry>,
+    #[cfg(feature = "countme")]
+    _count: countme::Count<InOrderEntry>,
 }
 
 impl InOrderEntry {
     fn leading(range: Range<usize>) -> Self {
-        InOrderEntry {
+        Self {
             leading_start: PartIndex::from_len(range.start),
             dangling_start: PartIndex::from_len(range.end),
             trailing_start: None,
             trailing_end: None,
-            _count: Count::new(),
+            #[cfg(feature = "countme")]
+            _count: countme::Count::new(),
         }
     }
 
     fn dangling(range: Range<usize>) -> Self {
         let start = PartIndex::from_len(range.start);
-        InOrderEntry {
+        Self {
             leading_start: start,
             dangling_start: start,
             trailing_start: Some(PartIndex::from_len(range.end)),
             trailing_end: None,
-            _count: Count::new(),
+            #[cfg(feature = "countme")]
+            _count: countme::Count::new(),
         }
     }
 
     fn trailing(range: Range<usize>) -> Self {
         let start = PartIndex::from_len(range.start);
-        InOrderEntry {
+        Self {
             leading_start: start,
             dangling_start: start,
             trailing_start: Some(start),
             trailing_end: Some(PartIndex::from_len(range.end)),
-            _count: Count::new(),
+            #[cfg(feature = "countme")]
+            _count: countme::Count::new(),
         }
     }
 
@@ -587,7 +591,8 @@ impl InOrderEntry {
 struct OutOfOrderEntry {
     /// Index into the [CommentsMap::out_of_order] vector at which offset the leaading vec is stored.
     leading_index: usize,
-    _count: Count<OutOfOrderEntry>,
+    #[cfg(feature = "countme")]
+    _count: countme::Count<OutOfOrderEntry>,
 }
 
 impl OutOfOrderEntry {
@@ -629,8 +634,8 @@ impl PartIndex {
         *self = self.incremented();
     }
 
-    fn incremented(&self) -> PartIndex {
-        PartIndex(NonZeroU32::new(self.0.get() + 1).unwrap())
+    fn incremented(&self) -> Self {
+        Self(NonZeroU32::new(self.0.get() + 1).unwrap())
     }
 }
 

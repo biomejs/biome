@@ -1,7 +1,4 @@
-use crate::{
-    AttributePosition, BracketSpacing, FormatOptions, IndentStyle, IndentWidth, LineEnding,
-    LineWidth,
-};
+use crate::{FormatOptions, IndentStyle, IndentWidth, LineEnding, LineWidth};
 
 /// Options that affect how the [crate::Printer] prints the format tokens
 #[derive(Clone, Debug, Eq, PartialEq)]
@@ -18,12 +15,6 @@ pub struct PrinterOptions {
 
     /// Whether the printer should use tabs or spaces to indent code and if spaces, by how many.
     pub indent_style: IndentStyle,
-
-    /// The attribute position style
-    pub attribute_position: AttributePosition,
-
-    /// Whether to insert spaces around brackets in object literals. Defaults to true.
-    pub bracket_spacing: BracketSpacing,
 }
 
 #[derive(Debug, Copy, Clone, Eq, PartialEq)]
@@ -49,7 +40,7 @@ impl From<LineWidth> for PrintWidth {
 
 impl From<PrintWidth> for usize {
     fn from(width: PrintWidth) -> Self {
-        width.0 as usize
+        width.0 as Self
     }
 }
 
@@ -58,12 +49,11 @@ where
     O: FormatOptions,
 {
     fn from(options: &'a O) -> Self {
-        PrinterOptions::default()
+        Self::default()
             .with_indent_style(options.indent_style())
             .with_indent_width(options.indent_width())
             .with_print_width(options.line_width().into())
             .with_line_ending(options.line_ending())
-            .with_bracket_spacing(options.bracket_spacing())
     }
 }
 
@@ -91,18 +81,6 @@ impl PrinterOptions {
         self
     }
 
-    pub fn with_attribute_position(mut self, attribute_position: AttributePosition) -> Self {
-        self.attribute_position = attribute_position;
-
-        self
-    }
-
-    pub fn with_bracket_spacing(mut self, bracket_spacing: BracketSpacing) -> Self {
-        self.bracket_spacing = bracket_spacing;
-
-        self
-    }
-
     pub(crate) fn indent_style(&self) -> IndentStyle {
         self.indent_style
     }
@@ -112,31 +90,19 @@ impl PrinterOptions {
         self.indent_width
     }
 
-    #[allow(dead_code)]
+    #[expect(dead_code)]
     pub(super) const fn line_ending(&self) -> LineEnding {
         self.line_ending
-    }
-
-    #[allow(dead_code)]
-    pub(crate) fn attribute_position(&self) -> AttributePosition {
-        self.attribute_position
-    }
-
-    #[allow(dead_code)]
-    pub(crate) fn bracket_spacing(&self) -> BracketSpacing {
-        self.bracket_spacing
     }
 }
 
 impl Default for PrinterOptions {
     fn default() -> Self {
-        PrinterOptions {
+        Self {
             indent_width: IndentWidth::default(),
             print_width: PrintWidth::default(),
             indent_style: Default::default(),
             line_ending: LineEnding::Lf,
-            attribute_position: AttributePosition::default(),
-            bracket_spacing: BracketSpacing::default(),
         }
     }
 }

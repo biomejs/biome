@@ -1,4 +1,4 @@
-use biome_analyze::{context::RuleContext, declare_syntax_rule, Ast, Rule, RuleDiagnostic};
+use biome_analyze::{Ast, Rule, RuleDiagnostic, context::RuleContext, declare_syntax_rule};
 use biome_js_syntax::{JsVariableDeclarator, TextRange, TsDefiniteVariableAnnotation};
 use biome_rowan::AstNode;
 
@@ -7,7 +7,7 @@ declare_syntax_rule! {
     ///
     /// ## Examples
     ///
-    /// ```js
+    /// ```ts
     /// let foo!: string = "bar";
     /// ```
     pub NoInitializerWithDefinite {
@@ -27,7 +27,7 @@ impl Rule for NoInitializerWithDefinite {
         let node = ctx.query();
         node.parent::<JsVariableDeclarator>()
             .and_then(|var_declarator| var_declarator.initializer())
-            .map(|init| init.into_syntax().text_range())
+            .map(|init| init.into_syntax().text_range_with_trivia())
     }
 
     fn diagnostic(_: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {

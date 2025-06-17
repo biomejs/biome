@@ -1,6 +1,6 @@
 use {
     crate::{TextRange, TextSize},
-    serde::{de, Deserialize, Deserializer, Serialize, Serializer},
+    serde::{Deserialize, Deserializer, Serialize, Serializer, de},
 };
 
 impl Serialize for TextSize {
@@ -17,7 +17,7 @@ impl<'de> Deserialize<'de> for TextSize {
     where
         D: Deserializer<'de>,
     {
-        u32::deserialize(deserializer).map(TextSize::from)
+        u32::deserialize(deserializer).map(Self::from)
     }
 }
 
@@ -31,7 +31,7 @@ impl Serialize for TextRange {
 }
 
 impl<'de> Deserialize<'de> for TextRange {
-    #[allow(clippy::nonminimal_bool)]
+    #[expect(clippy::nonminimal_bool)]
     fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
     where
         D: Deserializer<'de>,
@@ -42,6 +42,6 @@ impl<'de> Deserialize<'de> for TextRange {
                 "invalid range: {start:?}..{end:?}"
             )));
         }
-        Ok(TextRange::new(start, end))
+        Ok(Self::new(start, end))
     }
 }

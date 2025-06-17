@@ -4,12 +4,13 @@ use crate::syntax::function::parse_function_declaration;
 use crate::syntax::js_parse_error::decorators_not_allowed;
 use crate::syntax::module::parse_import_or_import_equals_declaration;
 use crate::syntax::stmt::{
-    is_nth_at_variable_declarations, parse_variable_declaration, semi, StatementContext,
-    VariableDeclarationParent,
+    StatementContext, VariableDeclarationParent, is_nth_at_variable_declarations,
+    parse_variable_declaration, semi,
 };
 use crate::syntax::typescript::{
-    is_nth_at_any_ts_namespace_declaration, parse_any_ts_namespace_declaration_clause,
-    parse_ts_enum_declaration, parse_ts_interface_declaration, parse_ts_type_alias_declaration,
+    is_nth_at_any_ts_namespace_declaration, is_nth_at_ts_interface_declaration,
+    parse_any_ts_namespace_declaration_clause, parse_ts_enum_declaration,
+    parse_ts_interface_declaration, parse_ts_type_alias_declaration,
 };
 use crate::{Absent, JsParser, ParsedSyntax};
 use biome_js_syntax::JsSyntaxKind::{JS_BOGUS_STATEMENT, JS_VARIABLE_DECLARATION_CLAUSE};
@@ -59,7 +60,7 @@ pub(crate) fn is_nth_at_declaration_clause(p: &mut JsParser, n: usize) -> bool {
         return true;
     }
 
-    if p.nth_at(n, T![interface]) {
+    if is_nth_at_ts_interface_declaration(p, n) {
         return true;
     }
 

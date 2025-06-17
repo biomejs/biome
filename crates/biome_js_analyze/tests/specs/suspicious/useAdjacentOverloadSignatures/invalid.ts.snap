@@ -1,0 +1,273 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.ts
+---
+# Input
+```ts
+declare namespace Foo {
+  export function foo_declare(s: string): void;
+  export function bar_declare(): void;
+  export function foo_declare(n: number): void;
+  export function foo_declare(sn: string | number): void;
+}
+
+type Foo = {
+  foo_type(s: string): void;
+  foo_type(n: number): void;
+  bar_type(): void;
+  foo_type(sn: string | number): void;
+};
+
+interface Foo {
+  foo_interface(s: string): void;
+  foo_interface(n: number): void;
+  bar_interface(): void;
+  foo_interface(sn: string | number): void;
+}
+
+class A {
+  fooA(s: string): void;
+  fooA(n: number): void;
+  barA(): void {};
+  fooA(sn: string | number): void {};
+}
+
+class B {
+  fooB(s: string): void;
+  barB(): void {};
+  fooB(n: number): void;
+  fooB(sn: string | number): void {};
+}
+
+class C {
+  barC(): void {};
+  fooC(s: string): void;
+  fooC(s: string): void;
+  barC(): void {};
+  fooC(s: string): void;
+  fooC(sn: string | number): void {};
+  barC(): void {};
+}
+
+class D {
+  fooD(s: string): void;
+  fooD(s: string): void;
+  barD(): void {};
+  fooD(n: number): void;
+  fooD(sn: string | number): void {};
+  fooD(sn: string | number): void {};
+}
+
+export function foo(s: string): void;
+export function foo(n: number): void;
+export function bar(): void;
+export function foo(sn: string | number): void;
+
+function f() {
+  interface Inner {
+    interfaceA(x: boolean): boolean
+    interfaceB()
+    interfaceA(x: number): number
+  }
+}
+
+function g() {
+  type InnerType = {
+    typeMethodA(x: boolean): boolean;
+    typeMethodB(): void;
+    typeMethodA(x: number): number;
+  };
+}
+
+function h (): {
+  functionA(x: boolean): boolean,
+  functionB(),
+  functionA(x: number): number,
+} {
+}
+
+```
+
+# Diagnostics
+```
+invalid.ts:4:19 lint/suspicious/useAdjacentOverloadSignatures ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! All foo_declare signatures must be adjacent.
+  
+    2 │   export function foo_declare(s: string): void;
+    3 │   export function bar_declare(): void;
+  > 4 │   export function foo_declare(n: number): void;
+      │                   ^^^^^^^^^^^
+    5 │   export function foo_declare(sn: string | number): void;
+    6 │ }
+  
+
+```
+
+```
+invalid.ts:12:3 lint/suspicious/useAdjacentOverloadSignatures ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! All foo_type signatures must be adjacent.
+  
+    10 │   foo_type(n: number): void;
+    11 │   bar_type(): void;
+  > 12 │   foo_type(sn: string | number): void;
+       │   ^^^^^^^^
+    13 │ };
+    14 │ 
+  
+
+```
+
+```
+invalid.ts:19:3 lint/suspicious/useAdjacentOverloadSignatures ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! All foo_interface signatures must be adjacent.
+  
+    17 │   foo_interface(n: number): void;
+    18 │   bar_interface(): void;
+  > 19 │   foo_interface(sn: string | number): void;
+       │   ^^^^^^^^^^^^^
+    20 │ }
+    21 │ 
+  
+
+```
+
+```
+invalid.ts:26:3 lint/suspicious/useAdjacentOverloadSignatures ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! All fooA signatures must be adjacent.
+  
+    24 │   fooA(n: number): void;
+    25 │   barA(): void {};
+  > 26 │   fooA(sn: string | number): void {};
+       │   ^^^^
+    27 │ }
+    28 │ 
+  
+
+```
+
+```
+invalid.ts:32:3 lint/suspicious/useAdjacentOverloadSignatures ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! All fooB signatures must be adjacent.
+  
+    30 │   fooB(s: string): void;
+    31 │   barB(): void {};
+  > 32 │   fooB(n: number): void;
+       │   ^^^^
+    33 │   fooB(sn: string | number): void {};
+    34 │ }
+  
+
+```
+
+```
+invalid.ts:40:3 lint/suspicious/useAdjacentOverloadSignatures ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! All barC signatures must be adjacent.
+  
+    38 │   fooC(s: string): void;
+    39 │   fooC(s: string): void;
+  > 40 │   barC(): void {};
+       │   ^^^^
+    41 │   fooC(s: string): void;
+    42 │   fooC(sn: string | number): void {};
+  
+  i All fooC signatures must be adjacent.
+  
+    39 │   fooC(s: string): void;
+    40 │   barC(): void {};
+  > 41 │   fooC(s: string): void;
+       │   ^^^^
+    42 │   fooC(sn: string | number): void {};
+    43 │   barC(): void {};
+  
+  i All barC signatures must be adjacent.
+  
+    41 │   fooC(s: string): void;
+    42 │   fooC(sn: string | number): void {};
+  > 43 │   barC(): void {};
+       │   ^^^^
+    44 │ }
+    45 │ 
+  
+
+```
+
+```
+invalid.ts:50:3 lint/suspicious/useAdjacentOverloadSignatures ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! All fooD signatures must be adjacent.
+  
+    48 │   fooD(s: string): void;
+    49 │   barD(): void {};
+  > 50 │   fooD(n: number): void;
+       │   ^^^^
+    51 │   fooD(sn: string | number): void {};
+    52 │   fooD(sn: string | number): void {};
+  
+
+```
+
+```
+invalid.ts:58:17 lint/suspicious/useAdjacentOverloadSignatures ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! All foo signatures must be adjacent.
+  
+    56 │ export function foo(n: number): void;
+    57 │ export function bar(): void;
+  > 58 │ export function foo(sn: string | number): void;
+       │                 ^^^
+    59 │ 
+    60 │ function f() {
+  
+
+```
+
+```
+invalid.ts:64:5 lint/suspicious/useAdjacentOverloadSignatures ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! All interfaceA signatures must be adjacent.
+  
+    62 │     interfaceA(x: boolean): boolean
+    63 │     interfaceB()
+  > 64 │     interfaceA(x: number): number
+       │     ^^^^^^^^^^
+    65 │   }
+    66 │ }
+  
+
+```
+
+```
+invalid.ts:72:5 lint/suspicious/useAdjacentOverloadSignatures ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! All typeMethodA signatures must be adjacent.
+  
+    70 │     typeMethodA(x: boolean): boolean;
+    71 │     typeMethodB(): void;
+  > 72 │     typeMethodA(x: number): number;
+       │     ^^^^^^^^^^^
+    73 │   };
+    74 │ }
+  
+
+```
+
+```
+invalid.ts:79:3 lint/suspicious/useAdjacentOverloadSignatures ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! All functionA signatures must be adjacent.
+  
+    77 │   functionA(x: boolean): boolean,
+    78 │   functionB(),
+  > 79 │   functionA(x: number): number,
+       │   ^^^^^^^^^
+    80 │ } {
+    81 │ }
+  
+
+```

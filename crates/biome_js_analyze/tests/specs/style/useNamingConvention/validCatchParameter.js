@@ -1,3 +1,4 @@
+/* should not generate diagnostics */
 try {} catch(e) {}
 
 try {} catch(_e) {}

@@ -1,9 +1,10 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid.js
+snapshot_kind: text
 ---
 # Input
-```jsx
+```js
 Atomics();
 JSON();
 Math();
@@ -122,7 +123,7 @@ new globalThis['Intl'];
 ```
 invalid.js:1:1 lint/correctness/noGlobalObjectCalls ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Atomics is not a function.
+  × Atomics is not a function.
   
   > 1 │ Atomics();
       │ ^^^^^^^
@@ -135,7 +136,7 @@ invalid.js:1:1 lint/correctness/noGlobalObjectCalls ━━━━━━━━━�
 ```
 invalid.js:2:1 lint/correctness/noGlobalObjectCalls ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Json is not a function.
+  × Json is not a function.
   
     1 │ Atomics();
   > 2 │ JSON();
@@ -149,7 +150,7 @@ invalid.js:2:1 lint/correctness/noGlobalObjectCalls ━━━━━━━━━�
 ```
 invalid.js:3:1 lint/correctness/noGlobalObjectCalls ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Math is not a function.
+  × Math is not a function.
   
     1 │ Atomics();
     2 │ JSON();
@@ -164,7 +165,7 @@ invalid.js:3:1 lint/correctness/noGlobalObjectCalls ━━━━━━━━━�
 ```
 invalid.js:4:1 lint/correctness/noGlobalObjectCalls ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Reflect is not a function.
+  × Reflect is not a function.
   
     2 │ JSON();
     3 │ Math();
@@ -179,7 +180,7 @@ invalid.js:4:1 lint/correctness/noGlobalObjectCalls ━━━━━━━━━�
 ```
 invalid.js:5:1 lint/correctness/noGlobalObjectCalls ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Intl is not a function.
+  × Intl is not a function.
   
     3 │ Math();
     4 │ Reflect();
@@ -194,7 +195,7 @@ invalid.js:5:1 lint/correctness/noGlobalObjectCalls ━━━━━━━━━�
 ```
 invalid.js:7:2 lint/correctness/noGlobalObjectCalls ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Atomics is not a function.
+  × Atomics is not a function.
   
     5 │ Intl();
     6 │ 
@@ -209,7 +210,7 @@ invalid.js:7:2 lint/correctness/noGlobalObjectCalls ━━━━━━━━━�
 ```
 invalid.js:8:2 lint/correctness/noGlobalObjectCalls ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Json is not a function.
+  × Json is not a function.
   
      7 │ (Atomics)();
    > 8 │ (JSON)();
@@ -223,7 +224,7 @@ invalid.js:8:2 lint/correctness/noGlobalObjectCalls ━━━━━━━━━�
 ```
 invalid.js:9:2 lint/correctness/noGlobalObjectCalls ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Math is not a function.
+  × Math is not a function.
   
      7 │ (Atomics)();
      8 │ (JSON)();
@@ -238,7 +239,7 @@ invalid.js:9:2 lint/correctness/noGlobalObjectCalls ━━━━━━━━━�
 ```
 invalid.js:10:2 lint/correctness/noGlobalObjectCalls ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Reflect is not a function.
+  × Reflect is not a function.
   
      8 │ (JSON)();
      9 │ (Math)();
@@ -253,7 +254,7 @@ invalid.js:10:2 lint/correctness/noGlobalObjectCalls ━━━━━━━━━
 ```
 invalid.js:11:2 lint/correctness/noGlobalObjectCalls ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Intl is not a function.
+  × Intl is not a function.
   
      9 │ (Math)();
     10 │ (Reflect)();
@@ -268,7 +269,7 @@ invalid.js:11:2 lint/correctness/noGlobalObjectCalls ━━━━━━━━━
 ```
 invalid.js:13:5 lint/correctness/noGlobalObjectCalls ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Atomics is not a function.
+  × Atomics is not a function.
   
     11 │ (Intl)();
     12 │ 
@@ -283,7 +284,7 @@ invalid.js:13:5 lint/correctness/noGlobalObjectCalls ━━━━━━━━━
 ```
 invalid.js:14:5 lint/correctness/noGlobalObjectCalls ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Json is not a function.
+  × Json is not a function.
   
     13 │ new Atomics();
   > 14 │ new JSON();
@@ -297,7 +298,7 @@ invalid.js:14:5 lint/correctness/noGlobalObjectCalls ━━━━━━━━━
 ```
 invalid.js:15:5 lint/correctness/noGlobalObjectCalls ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Math is not a function.
+  × Math is not a function.
   
     13 │ new Atomics();
     14 │ new JSON();
@@ -312,7 +313,7 @@ invalid.js:15:5 lint/correctness/noGlobalObjectCalls ━━━━━━━━━
 ```
 invalid.js:16:5 lint/correctness/noGlobalObjectCalls ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Reflect is not a function.
+  × Reflect is not a function.
   
     14 │ new JSON();
     15 │ new Math();
@@ -327,7 +328,7 @@ invalid.js:16:5 lint/correctness/noGlobalObjectCalls ━━━━━━━━━
 ```
 invalid.js:17:5 lint/correctness/noGlobalObjectCalls ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Intl is not a function.
+  × Intl is not a function.
   
     15 │ new Math();
     16 │ new Reflect();
@@ -342,7 +343,7 @@ invalid.js:17:5 lint/correctness/noGlobalObjectCalls ━━━━━━━━━
 ```
 invalid.js:19:6 lint/correctness/noGlobalObjectCalls ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Atomics is not a function.
+  × Atomics is not a function.
   
     17 │ new Intl();
     18 │ 
@@ -357,7 +358,7 @@ invalid.js:19:6 lint/correctness/noGlobalObjectCalls ━━━━━━━━━
 ```
 invalid.js:20:6 lint/correctness/noGlobalObjectCalls ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Json is not a function.
+  × Json is not a function.
   
     19 │ new (Atomics)();
   > 20 │ new (JSON)();
@@ -371,7 +372,7 @@ invalid.js:20:6 lint/correctness/noGlobalObjectCalls ━━━━━━━━━
 ```
 invalid.js:21:6 lint/correctness/noGlobalObjectCalls ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Math is not a function.
+  × Math is not a function.
   
     19 │ new (Atomics)();
     20 │ new (JSON)();
@@ -386,7 +387,7 @@ invalid.js:21:6 lint/correctness/noGlobalObjectCalls ━━━━━━━━━
 ```
 invalid.js:22:6 lint/correctness/noGlobalObjectCalls ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Reflect is not a function.
+  × Reflect is not a function.
   
     20 │ new (JSON)();
     21 │ new (Math)();
@@ -401,7 +402,7 @@ invalid.js:22:6 lint/correctness/noGlobalObjectCalls ━━━━━━━━━
 ```
 invalid.js:23:6 lint/correctness/noGlobalObjectCalls ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Intl is not a function.
+  × Intl is not a function.
   
     21 │ new (Math)();
     22 │ new (Reflect)();
@@ -416,7 +417,7 @@ invalid.js:23:6 lint/correctness/noGlobalObjectCalls ━━━━━━━━━
 ```
 invalid.js:25:5 lint/correctness/noGlobalObjectCalls ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Atomics is not a function.
+  × Atomics is not a function.
   
     23 │ new (Intl)();
     24 │ 
@@ -431,7 +432,7 @@ invalid.js:25:5 lint/correctness/noGlobalObjectCalls ━━━━━━━━━
 ```
 invalid.js:26:5 lint/correctness/noGlobalObjectCalls ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Json is not a function.
+  × Json is not a function.
   
     25 │ new Atomics;
   > 26 │ new JSON;
@@ -445,7 +446,7 @@ invalid.js:26:5 lint/correctness/noGlobalObjectCalls ━━━━━━━━━
 ```
 invalid.js:27:5 lint/correctness/noGlobalObjectCalls ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Math is not a function.
+  × Math is not a function.
   
     25 │ new Atomics;
     26 │ new JSON;
@@ -460,7 +461,7 @@ invalid.js:27:5 lint/correctness/noGlobalObjectCalls ━━━━━━━━━
 ```
 invalid.js:28:5 lint/correctness/noGlobalObjectCalls ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Reflect is not a function.
+  × Reflect is not a function.
   
     26 │ new JSON;
     27 │ new Math;
@@ -475,7 +476,7 @@ invalid.js:28:5 lint/correctness/noGlobalObjectCalls ━━━━━━━━━
 ```
 invalid.js:29:5 lint/correctness/noGlobalObjectCalls ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Intl is not a function.
+  × Intl is not a function.
   
     27 │ new Math;
     28 │ new Reflect;
@@ -490,7 +491,7 @@ invalid.js:29:5 lint/correctness/noGlobalObjectCalls ━━━━━━━━━
 ```
 invalid.js:32:12 lint/correctness/noGlobalObjectCalls ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Atomics is not a function.
+  × Atomics is not a function.
   
     31 │ // globalThis static member
   > 32 │ globalThis.Atomics();
@@ -504,7 +505,7 @@ invalid.js:32:12 lint/correctness/noGlobalObjectCalls ━━━━━━━━�
 ```
 invalid.js:33:12 lint/correctness/noGlobalObjectCalls ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Json is not a function.
+  × Json is not a function.
   
     31 │ // globalThis static member
     32 │ globalThis.Atomics();
@@ -519,7 +520,7 @@ invalid.js:33:12 lint/correctness/noGlobalObjectCalls ━━━━━━━━�
 ```
 invalid.js:34:12 lint/correctness/noGlobalObjectCalls ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Math is not a function.
+  × Math is not a function.
   
     32 │ globalThis.Atomics();
     33 │ globalThis.JSON();
@@ -534,7 +535,7 @@ invalid.js:34:12 lint/correctness/noGlobalObjectCalls ━━━━━━━━�
 ```
 invalid.js:35:12 lint/correctness/noGlobalObjectCalls ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Reflect is not a function.
+  × Reflect is not a function.
   
     33 │ globalThis.JSON();
     34 │ globalThis.Math();
@@ -549,7 +550,7 @@ invalid.js:35:12 lint/correctness/noGlobalObjectCalls ━━━━━━━━�
 ```
 invalid.js:36:12 lint/correctness/noGlobalObjectCalls ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Intl is not a function.
+  × Intl is not a function.
   
     34 │ globalThis.Math();
     35 │ globalThis.Reflect();
@@ -564,7 +565,7 @@ invalid.js:36:12 lint/correctness/noGlobalObjectCalls ━━━━━━━━�
 ```
 invalid.js:38:14 lint/correctness/noGlobalObjectCalls ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Atomics is not a function.
+  × Atomics is not a function.
   
     36 │ globalThis.Intl();
     37 │ 
@@ -579,7 +580,7 @@ invalid.js:38:14 lint/correctness/noGlobalObjectCalls ━━━━━━━━�
 ```
 invalid.js:39:14 lint/correctness/noGlobalObjectCalls ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Json is not a function.
+  × Json is not a function.
   
     38 │ (globalThis).Atomics();
   > 39 │ (globalThis).JSON();
@@ -593,7 +594,7 @@ invalid.js:39:14 lint/correctness/noGlobalObjectCalls ━━━━━━━━�
 ```
 invalid.js:40:14 lint/correctness/noGlobalObjectCalls ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Math is not a function.
+  × Math is not a function.
   
     38 │ (globalThis).Atomics();
     39 │ (globalThis).JSON();
@@ -608,7 +609,7 @@ invalid.js:40:14 lint/correctness/noGlobalObjectCalls ━━━━━━━━�
 ```
 invalid.js:41:14 lint/correctness/noGlobalObjectCalls ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Reflect is not a function.
+  × Reflect is not a function.
   
     39 │ (globalThis).JSON();
     40 │ (globalThis).Math();
@@ -623,7 +624,7 @@ invalid.js:41:14 lint/correctness/noGlobalObjectCalls ━━━━━━━━�
 ```
 invalid.js:42:14 lint/correctness/noGlobalObjectCalls ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Intl is not a function.
+  × Intl is not a function.
   
     40 │ (globalThis).Math();
     41 │ (globalThis).Reflect();
@@ -638,7 +639,7 @@ invalid.js:42:14 lint/correctness/noGlobalObjectCalls ━━━━━━━━�
 ```
 invalid.js:44:13 lint/correctness/noGlobalObjectCalls ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Atomics is not a function.
+  × Atomics is not a function.
   
     42 │ (globalThis).Intl();
     43 │ 
@@ -653,7 +654,7 @@ invalid.js:44:13 lint/correctness/noGlobalObjectCalls ━━━━━━━━�
 ```
 invalid.js:45:13 lint/correctness/noGlobalObjectCalls ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Json is not a function.
+  × Json is not a function.
   
     44 │ (globalThis.Atomics)();
   > 45 │ (globalThis.JSON)();
@@ -667,7 +668,7 @@ invalid.js:45:13 lint/correctness/noGlobalObjectCalls ━━━━━━━━�
 ```
 invalid.js:46:13 lint/correctness/noGlobalObjectCalls ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Math is not a function.
+  × Math is not a function.
   
     44 │ (globalThis.Atomics)();
     45 │ (globalThis.JSON)();
@@ -682,7 +683,7 @@ invalid.js:46:13 lint/correctness/noGlobalObjectCalls ━━━━━━━━�
 ```
 invalid.js:47:13 lint/correctness/noGlobalObjectCalls ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Reflect is not a function.
+  × Reflect is not a function.
   
     45 │ (globalThis.JSON)();
     46 │ (globalThis.Math)();
@@ -697,7 +698,7 @@ invalid.js:47:13 lint/correctness/noGlobalObjectCalls ━━━━━━━━�
 ```
 invalid.js:48:13 lint/correctness/noGlobalObjectCalls ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Intl is not a function.
+  × Intl is not a function.
   
     46 │ (globalThis.Math)();
     47 │ (globalThis.Reflect)();
@@ -712,7 +713,7 @@ invalid.js:48:13 lint/correctness/noGlobalObjectCalls ━━━━━━━━�
 ```
 invalid.js:50:16 lint/correctness/noGlobalObjectCalls ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Atomics is not a function.
+  × Atomics is not a function.
   
     48 │ (globalThis.Intl)();
     49 │ 
@@ -727,7 +728,7 @@ invalid.js:50:16 lint/correctness/noGlobalObjectCalls ━━━━━━━━�
 ```
 invalid.js:51:16 lint/correctness/noGlobalObjectCalls ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Json is not a function.
+  × Json is not a function.
   
     50 │ new globalThis.Atomics();
   > 51 │ new globalThis.JSON();
@@ -741,7 +742,7 @@ invalid.js:51:16 lint/correctness/noGlobalObjectCalls ━━━━━━━━�
 ```
 invalid.js:52:16 lint/correctness/noGlobalObjectCalls ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Math is not a function.
+  × Math is not a function.
   
     50 │ new globalThis.Atomics();
     51 │ new globalThis.JSON();
@@ -756,7 +757,7 @@ invalid.js:52:16 lint/correctness/noGlobalObjectCalls ━━━━━━━━�
 ```
 invalid.js:53:16 lint/correctness/noGlobalObjectCalls ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Reflect is not a function.
+  × Reflect is not a function.
   
     51 │ new globalThis.JSON();
     52 │ new globalThis.Math();
@@ -771,7 +772,7 @@ invalid.js:53:16 lint/correctness/noGlobalObjectCalls ━━━━━━━━�
 ```
 invalid.js:54:16 lint/correctness/noGlobalObjectCalls ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Intl is not a function.
+  × Intl is not a function.
   
     52 │ new globalThis.Math();
     53 │ new globalThis.Reflect();
@@ -786,7 +787,7 @@ invalid.js:54:16 lint/correctness/noGlobalObjectCalls ━━━━━━━━�
 ```
 invalid.js:56:17 lint/correctness/noGlobalObjectCalls ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Atomics is not a function.
+  × Atomics is not a function.
   
     54 │ new globalThis.Intl();
     55 │ 
@@ -801,7 +802,7 @@ invalid.js:56:17 lint/correctness/noGlobalObjectCalls ━━━━━━━━�
 ```
 invalid.js:57:17 lint/correctness/noGlobalObjectCalls ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Json is not a function.
+  × Json is not a function.
   
     56 │ new (globalThis.Atomics)();
   > 57 │ new (globalThis.JSON)();
@@ -815,7 +816,7 @@ invalid.js:57:17 lint/correctness/noGlobalObjectCalls ━━━━━━━━�
 ```
 invalid.js:58:17 lint/correctness/noGlobalObjectCalls ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Math is not a function.
+  × Math is not a function.
   
     56 │ new (globalThis.Atomics)();
     57 │ new (globalThis.JSON)();
@@ -830,7 +831,7 @@ invalid.js:58:17 lint/correctness/noGlobalObjectCalls ━━━━━━━━�
 ```
 invalid.js:59:17 lint/correctness/noGlobalObjectCalls ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Reflect is not a function.
+  × Reflect is not a function.
   
     57 │ new (globalThis.JSON)();
     58 │ new (globalThis.Math)();
@@ -845,7 +846,7 @@ invalid.js:59:17 lint/correctness/noGlobalObjectCalls ━━━━━━━━�
 ```
 invalid.js:60:17 lint/correctness/noGlobalObjectCalls ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Intl is not a function.
+  × Intl is not a function.
   
     58 │ new (globalThis.Math)();
     59 │ new (globalThis.Reflect)();
@@ -860,7 +861,7 @@ invalid.js:60:17 lint/correctness/noGlobalObjectCalls ━━━━━━━━�
 ```
 invalid.js:62:16 lint/correctness/noGlobalObjectCalls ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Atomics is not a function.
+  × Atomics is not a function.
   
     60 │ new (globalThis.Intl)();
     61 │ 
@@ -875,7 +876,7 @@ invalid.js:62:16 lint/correctness/noGlobalObjectCalls ━━━━━━━━�
 ```
 invalid.js:63:16 lint/correctness/noGlobalObjectCalls ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Json is not a function.
+  × Json is not a function.
   
     62 │ new globalThis.Atomics;
   > 63 │ new globalThis.JSON;
@@ -889,7 +890,7 @@ invalid.js:63:16 lint/correctness/noGlobalObjectCalls ━━━━━━━━�
 ```
 invalid.js:64:16 lint/correctness/noGlobalObjectCalls ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Math is not a function.
+  × Math is not a function.
   
     62 │ new globalThis.Atomics;
     63 │ new globalThis.JSON;
@@ -904,7 +905,7 @@ invalid.js:64:16 lint/correctness/noGlobalObjectCalls ━━━━━━━━�
 ```
 invalid.js:65:16 lint/correctness/noGlobalObjectCalls ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Reflect is not a function.
+  × Reflect is not a function.
   
     63 │ new globalThis.JSON;
     64 │ new globalThis.Math;
@@ -919,7 +920,7 @@ invalid.js:65:16 lint/correctness/noGlobalObjectCalls ━━━━━━━━�
 ```
 invalid.js:66:16 lint/correctness/noGlobalObjectCalls ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Intl is not a function.
+  × Intl is not a function.
   
     64 │ new globalThis.Math;
     65 │ new globalThis.Reflect;
@@ -934,7 +935,7 @@ invalid.js:66:16 lint/correctness/noGlobalObjectCalls ━━━━━━━━�
 ```
 invalid.js:69:12 lint/correctness/noGlobalObjectCalls ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Atomics is not a function.
+  × Atomics is not a function.
   
     68 │ // globalThis computed member
   > 69 │ globalThis['Atomics']();
@@ -948,7 +949,7 @@ invalid.js:69:12 lint/correctness/noGlobalObjectCalls ━━━━━━━━�
 ```
 invalid.js:70:12 lint/correctness/noGlobalObjectCalls ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Json is not a function.
+  × Json is not a function.
   
     68 │ // globalThis computed member
     69 │ globalThis['Atomics']();
@@ -963,7 +964,7 @@ invalid.js:70:12 lint/correctness/noGlobalObjectCalls ━━━━━━━━�
 ```
 invalid.js:71:12 lint/correctness/noGlobalObjectCalls ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Math is not a function.
+  × Math is not a function.
   
     69 │ globalThis['Atomics']();
     70 │ globalThis['JSON']();
@@ -978,7 +979,7 @@ invalid.js:71:12 lint/correctness/noGlobalObjectCalls ━━━━━━━━�
 ```
 invalid.js:72:12 lint/correctness/noGlobalObjectCalls ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Reflect is not a function.
+  × Reflect is not a function.
   
     70 │ globalThis['JSON']();
     71 │ globalThis['Math']();
@@ -993,7 +994,7 @@ invalid.js:72:12 lint/correctness/noGlobalObjectCalls ━━━━━━━━�
 ```
 invalid.js:73:12 lint/correctness/noGlobalObjectCalls ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Intl is not a function.
+  × Intl is not a function.
   
     71 │ globalThis['Math']();
     72 │ globalThis['Reflect']();
@@ -1008,7 +1009,7 @@ invalid.js:73:12 lint/correctness/noGlobalObjectCalls ━━━━━━━━�
 ```
 invalid.js:75:14 lint/correctness/noGlobalObjectCalls ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Atomics is not a function.
+  × Atomics is not a function.
   
     73 │ globalThis['Intl']();
     74 │ 
@@ -1023,7 +1024,7 @@ invalid.js:75:14 lint/correctness/noGlobalObjectCalls ━━━━━━━━�
 ```
 invalid.js:76:14 lint/correctness/noGlobalObjectCalls ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Json is not a function.
+  × Json is not a function.
   
     75 │ (globalThis)['Atomics']();
   > 76 │ (globalThis)['JSON']();
@@ -1037,7 +1038,7 @@ invalid.js:76:14 lint/correctness/noGlobalObjectCalls ━━━━━━━━�
 ```
 invalid.js:77:14 lint/correctness/noGlobalObjectCalls ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Math is not a function.
+  × Math is not a function.
   
     75 │ (globalThis)['Atomics']();
     76 │ (globalThis)['JSON']();
@@ -1052,7 +1053,7 @@ invalid.js:77:14 lint/correctness/noGlobalObjectCalls ━━━━━━━━�
 ```
 invalid.js:78:14 lint/correctness/noGlobalObjectCalls ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Reflect is not a function.
+  × Reflect is not a function.
   
     76 │ (globalThis)['JSON']();
     77 │ (globalThis)['Math']();
@@ -1067,7 +1068,7 @@ invalid.js:78:14 lint/correctness/noGlobalObjectCalls ━━━━━━━━�
 ```
 invalid.js:79:14 lint/correctness/noGlobalObjectCalls ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Intl is not a function.
+  × Intl is not a function.
   
     77 │ (globalThis)['Math']();
     78 │ (globalThis)['Reflect']();
@@ -1082,7 +1083,7 @@ invalid.js:79:14 lint/correctness/noGlobalObjectCalls ━━━━━━━━�
 ```
 invalid.js:81:13 lint/correctness/noGlobalObjectCalls ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Atomics is not a function.
+  × Atomics is not a function.
   
     79 │ (globalThis)['Intl']();
     80 │ 
@@ -1097,7 +1098,7 @@ invalid.js:81:13 lint/correctness/noGlobalObjectCalls ━━━━━━━━�
 ```
 invalid.js:82:13 lint/correctness/noGlobalObjectCalls ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Json is not a function.
+  × Json is not a function.
   
     81 │ (globalThis['Atomics'])();
   > 82 │ (globalThis['JSON'])();
@@ -1111,7 +1112,7 @@ invalid.js:82:13 lint/correctness/noGlobalObjectCalls ━━━━━━━━�
 ```
 invalid.js:83:13 lint/correctness/noGlobalObjectCalls ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Math is not a function.
+  × Math is not a function.
   
     81 │ (globalThis['Atomics'])();
     82 │ (globalThis['JSON'])();
@@ -1126,7 +1127,7 @@ invalid.js:83:13 lint/correctness/noGlobalObjectCalls ━━━━━━━━�
 ```
 invalid.js:84:13 lint/correctness/noGlobalObjectCalls ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Reflect is not a function.
+  × Reflect is not a function.
   
     82 │ (globalThis['JSON'])();
     83 │ (globalThis['Math'])();
@@ -1141,7 +1142,7 @@ invalid.js:84:13 lint/correctness/noGlobalObjectCalls ━━━━━━━━�
 ```
 invalid.js:85:13 lint/correctness/noGlobalObjectCalls ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Intl is not a function.
+  × Intl is not a function.
   
     83 │ (globalThis['Math'])();
     84 │ (globalThis['Reflect'])();
@@ -1156,7 +1157,7 @@ invalid.js:85:13 lint/correctness/noGlobalObjectCalls ━━━━━━━━�
 ```
 invalid.js:87:14 lint/correctness/noGlobalObjectCalls ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Atomics is not a function.
+  × Atomics is not a function.
   
     85 │ (globalThis['Intl'])();
     86 │ 
@@ -1171,7 +1172,7 @@ invalid.js:87:14 lint/correctness/noGlobalObjectCalls ━━━━━━━━�
 ```
 invalid.js:88:14 lint/correctness/noGlobalObjectCalls ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Json is not a function.
+  × Json is not a function.
   
     87 │ (globalThis[('Atomics')])();
   > 88 │ (globalThis[('JSON')])();
@@ -1185,7 +1186,7 @@ invalid.js:88:14 lint/correctness/noGlobalObjectCalls ━━━━━━━━�
 ```
 invalid.js:89:14 lint/correctness/noGlobalObjectCalls ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Math is not a function.
+  × Math is not a function.
   
     87 │ (globalThis[('Atomics')])();
     88 │ (globalThis[('JSON')])();
@@ -1200,7 +1201,7 @@ invalid.js:89:14 lint/correctness/noGlobalObjectCalls ━━━━━━━━�
 ```
 invalid.js:90:14 lint/correctness/noGlobalObjectCalls ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Reflect is not a function.
+  × Reflect is not a function.
   
     88 │ (globalThis[('JSON')])();
     89 │ (globalThis[('Math')])();
@@ -1215,7 +1216,7 @@ invalid.js:90:14 lint/correctness/noGlobalObjectCalls ━━━━━━━━�
 ```
 invalid.js:91:14 lint/correctness/noGlobalObjectCalls ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Intl is not a function.
+  × Intl is not a function.
   
     89 │ (globalThis[('Math')])();
     90 │ (globalThis[('Reflect')])();
@@ -1230,7 +1231,7 @@ invalid.js:91:14 lint/correctness/noGlobalObjectCalls ━━━━━━━━�
 ```
 invalid.js:93:16 lint/correctness/noGlobalObjectCalls ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Atomics is not a function.
+  × Atomics is not a function.
   
     91 │ (globalThis[('Intl')])();
     92 │ 
@@ -1245,7 +1246,7 @@ invalid.js:93:16 lint/correctness/noGlobalObjectCalls ━━━━━━━━�
 ```
 invalid.js:94:16 lint/correctness/noGlobalObjectCalls ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Json is not a function.
+  × Json is not a function.
   
     93 │ new globalThis['Atomics']();
   > 94 │ new globalThis['JSON']();
@@ -1259,7 +1260,7 @@ invalid.js:94:16 lint/correctness/noGlobalObjectCalls ━━━━━━━━�
 ```
 invalid.js:95:16 lint/correctness/noGlobalObjectCalls ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Math is not a function.
+  × Math is not a function.
   
     93 │ new globalThis['Atomics']();
     94 │ new globalThis['JSON']();
@@ -1274,7 +1275,7 @@ invalid.js:95:16 lint/correctness/noGlobalObjectCalls ━━━━━━━━�
 ```
 invalid.js:96:16 lint/correctness/noGlobalObjectCalls ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Reflect is not a function.
+  × Reflect is not a function.
   
     94 │ new globalThis['JSON']();
     95 │ new globalThis['Math']();
@@ -1289,7 +1290,7 @@ invalid.js:96:16 lint/correctness/noGlobalObjectCalls ━━━━━━━━�
 ```
 invalid.js:97:16 lint/correctness/noGlobalObjectCalls ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Intl is not a function.
+  × Intl is not a function.
   
     95 │ new globalThis['Math']();
     96 │ new globalThis['Reflect']();
@@ -1304,7 +1305,7 @@ invalid.js:97:16 lint/correctness/noGlobalObjectCalls ━━━━━━━━�
 ```
 invalid.js:99:17 lint/correctness/noGlobalObjectCalls ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Atomics is not a function.
+  × Atomics is not a function.
   
      97 │ new globalThis['Intl']();
      98 │ 
@@ -1319,7 +1320,7 @@ invalid.js:99:17 lint/correctness/noGlobalObjectCalls ━━━━━━━━�
 ```
 invalid.js:100:17 lint/correctness/noGlobalObjectCalls ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Json is not a function.
+  × Json is not a function.
   
      99 │ new (globalThis['Atomics'])();
   > 100 │ new (globalThis['JSON'])();
@@ -1333,7 +1334,7 @@ invalid.js:100:17 lint/correctness/noGlobalObjectCalls ━━━━━━━━�
 ```
 invalid.js:101:17 lint/correctness/noGlobalObjectCalls ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Math is not a function.
+  × Math is not a function.
   
      99 │ new (globalThis['Atomics'])();
     100 │ new (globalThis['JSON'])();
@@ -1348,7 +1349,7 @@ invalid.js:101:17 lint/correctness/noGlobalObjectCalls ━━━━━━━━�
 ```
 invalid.js:102:17 lint/correctness/noGlobalObjectCalls ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Reflect is not a function.
+  × Reflect is not a function.
   
     100 │ new (globalThis['JSON'])();
     101 │ new (globalThis['Math'])();
@@ -1363,7 +1364,7 @@ invalid.js:102:17 lint/correctness/noGlobalObjectCalls ━━━━━━━━�
 ```
 invalid.js:103:17 lint/correctness/noGlobalObjectCalls ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Intl is not a function.
+  × Intl is not a function.
   
     101 │ new (globalThis['Math'])();
     102 │ new (globalThis['Reflect'])();
@@ -1378,7 +1379,7 @@ invalid.js:103:17 lint/correctness/noGlobalObjectCalls ━━━━━━━━�
 ```
 invalid.js:105:16 lint/correctness/noGlobalObjectCalls ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Atomics is not a function.
+  × Atomics is not a function.
   
     103 │ new (globalThis['Intl'])();
     104 │ 
@@ -1393,7 +1394,7 @@ invalid.js:105:16 lint/correctness/noGlobalObjectCalls ━━━━━━━━�
 ```
 invalid.js:106:16 lint/correctness/noGlobalObjectCalls ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Json is not a function.
+  × Json is not a function.
   
     105 │ new globalThis['Atomics'];
   > 106 │ new globalThis['JSON'];
@@ -1407,7 +1408,7 @@ invalid.js:106:16 lint/correctness/noGlobalObjectCalls ━━━━━━━━�
 ```
 invalid.js:107:16 lint/correctness/noGlobalObjectCalls ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Math is not a function.
+  × Math is not a function.
   
     105 │ new globalThis['Atomics'];
     106 │ new globalThis['JSON'];
@@ -1422,7 +1423,7 @@ invalid.js:107:16 lint/correctness/noGlobalObjectCalls ━━━━━━━━�
 ```
 invalid.js:108:16 lint/correctness/noGlobalObjectCalls ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Reflect is not a function.
+  × Reflect is not a function.
   
     106 │ new globalThis['JSON'];
     107 │ new globalThis['Math'];
@@ -1437,7 +1438,7 @@ invalid.js:108:16 lint/correctness/noGlobalObjectCalls ━━━━━━━━�
 ```
 invalid.js:109:16 lint/correctness/noGlobalObjectCalls ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Intl is not a function.
+  × Intl is not a function.
   
     107 │ new globalThis['Math'];
     108 │ new globalThis['Reflect'];
@@ -1447,5 +1448,3 @@ invalid.js:109:16 lint/correctness/noGlobalObjectCalls ━━━━━━━━�
   
 
 ```
-
-

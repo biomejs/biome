@@ -17,7 +17,7 @@ export function foo() {
 ```
 noAssignInExpressions.ts:3:10 lint/suspicious/noAssignInExpressions  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The assignment should not be in an expression.
+  × The assignment should not be in an expression.
   
     1 │ export function foo() {
     2 │ 	let x: number;
@@ -29,7 +29,7 @@ noAssignInExpressions.ts:3:10 lint/suspicious/noAssignInExpressions  FIXABLE  �
   i The use of assignments in expressions is confusing.
     Expressions are often considered as side-effect free.
   
-  i Safe fix: Suppress rule lint/suspicious/noAssignInExpressions
+  i Safe fix: Suppress rule lint/suspicious/noAssignInExpressions for this line.
   
     1 1 │   export function foo() {
     2 2 │   	let x: number;
@@ -39,7 +39,11 @@ noAssignInExpressions.ts:3:10 lint/suspicious/noAssignInExpressions  FIXABLE  �
     4 5 │   		console.log(x);
     5 6 │   	}
   
+  i Safe fix: Suppress rule lint/suspicious/noAssignInExpressions for the whole file.
+  
+      1 │ + /**·biome-ignore-all·lint/suspicious/noAssignInExpressions:·<explanation>·*/
+    1 2 │   export function foo() {
+    2 3 │   	let x: number;
+  
 
 ```
-
-

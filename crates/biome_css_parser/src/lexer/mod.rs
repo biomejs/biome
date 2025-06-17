@@ -3,15 +3,15 @@
 mod tests;
 
 use crate::CssParserOptions;
-use biome_css_syntax::{CssSyntaxKind, CssSyntaxKind::*, TextLen, TextSize, T};
+use biome_css_syntax::{CssSyntaxKind, CssSyntaxKind::*, T, TextLen, TextSize};
 use biome_parser::diagnostic::ParseDiagnostic;
 use biome_parser::lexer::{
     LexContext, Lexer, LexerCheckpoint, LexerWithCheckpoint, ReLexer, TokenFlags,
 };
 use biome_rowan::SyntaxKind;
 use biome_unicode_table::{
-    is_css_non_ascii, lookup_byte,
     Dispatch::{self, *},
+    is_css_non_ascii, lookup_byte,
 };
 use std::char::REPLACEMENT_CHARACTER;
 
@@ -48,14 +48,14 @@ pub enum CssLexContext {
 impl LexContext for CssLexContext {
     /// Returns true if this is [CssLexContext::Regular]
     fn is_regular(&self) -> bool {
-        matches!(self, CssLexContext::Regular)
+        matches!(self, Self::Regular)
     }
 }
 
 /// Context in which the [CssLexContext]'s current should be re-lexed.
 #[derive(Debug, Copy, Clone, Eq, PartialEq)]
 pub enum CssReLexContext {
-    #[allow(dead_code)]
+    #[expect(dead_code)]
     Regular,
     /// See [CssLexContext::UnicodeRange]
     UnicodeRange,
@@ -257,16 +257,14 @@ impl<'src> CssLexer<'src> {
                     .get_unchecked((self.position + offset)..),
             )
         };
-        let chr = if let Some(chr) = string.chars().next() {
+        if let Some(chr) = string.chars().next() {
             chr
         } else {
             // Safety: we always call this when we are at a valid char, so this branch is completely unreachable
             unsafe {
                 core::hint::unreachable_unchecked();
             }
-        };
-
-        chr
+        }
     }
 
     /// Check if the lexer is at a valid escape. U+005C REVERSE SOLIDUS (\)
@@ -396,7 +394,7 @@ impl<'src> CssLexer<'src> {
         match current {
             b'u' | b'U' if matches!(self.peek_byte(), Some(b'+')) => {
                 self.advance(1);
-                self.consume_byte(T![U+])
+                self.consume_byte(T!["U+"])
             }
             b'0'..=b'9' | b'a'..=b'f' | b'A'..=b'F' | b'?' => self.consume_unicode_range(),
             b'-' => self.consume_byte(T![-]),
@@ -655,7 +653,7 @@ impl<'src> CssLexer<'src> {
             // U+002E FULL STOP (.) followed by a digit...
             if self
                 .current_byte()
-                .map_or(false, |byte| byte.is_ascii_digit())
+                .is_some_and(|byte| byte.is_ascii_digit())
             {
                 // While the next input code point is a digit, consume it.
                 self.consume_number_sequence();
@@ -922,6 +920,8 @@ impl<'src> CssLexer<'src> {
             b"value" => VALUE_KW,
             b"as" => AS_KW,
             b"composes" => COMPOSES_KW,
+            b"position-try" => POSITION_TRY_KW,
+            b"view-transition" => VIEW_TRANSITION_KW,
             _ => IDENT,
         }
     }
@@ -937,8 +937,8 @@ impl<'src> CssLexer<'src> {
     /// # Arguments
     ///
     /// * `buf` - A mutable reference to a byte array where the identifier characters
-    ///           will be appended. This buffer should be pre-allocated and have enough
-    ///           space to hold the expected identifier.
+    ///   will be appended. This buffer should be pre-allocated and have enough
+    ///   space to hold the expected identifier.
     ///
     /// # Returns
     ///
@@ -1242,7 +1242,7 @@ impl<'src> CssLexer<'src> {
                 Some(byte) if byte.is_ascii_digit() => true,
                 // Otherwise, if the second code point is a U+002E FULL STOP (.) and the
                 // third code point is a digit, return true.
-                Some(b'.') if self.byte_at(2).map_or(false, |byte| byte.is_ascii_digit()) => true,
+                Some(b'.') if self.byte_at(2).is_some_and(|byte| byte.is_ascii_digit()) => true,
                 _ => false,
             },
             Some(b'.') => match self.peek_byte() {

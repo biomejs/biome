@@ -1,5 +1,5 @@
 use std::borrow::Cow;
-use std::char::{decode_utf16, DecodeUtf16Error};
+use std::char::{DecodeUtf16Error, decode_utf16};
 
 pub(crate) fn decode_maybe_utf16_string(mut content: &[u8]) -> Result<Cow<str>, DecodeUtf16Error> {
     enum FileEncoding {

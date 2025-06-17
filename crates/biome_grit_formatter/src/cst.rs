@@ -1,6 +1,6 @@
 use crate::prelude::*;
 use biome_formatter::{FormatOwnedWithRule, FormatRefWithRule, FormatResult, FormatToken};
-use biome_grit_syntax::{map_syntax_node, GritSyntaxNode, GritSyntaxToken};
+use biome_grit_syntax::{GritSyntaxNode, GritSyntaxToken, map_syntax_node};
 
 #[derive(Debug, Copy, Clone, Default)]
 pub struct FormatGritSyntaxNode;
@@ -14,7 +14,7 @@ impl FormatRule<GritSyntaxNode> for FormatGritSyntaxNode {
 }
 
 impl AsFormat<GritFormatContext> for GritSyntaxNode {
-    type Format<'a> = FormatRefWithRule<'a, GritSyntaxNode, FormatGritSyntaxNode>;
+    type Format<'a> = FormatRefWithRule<'a, Self, FormatGritSyntaxNode>;
 
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(self, FormatGritSyntaxNode)
@@ -22,7 +22,7 @@ impl AsFormat<GritFormatContext> for GritSyntaxNode {
 }
 
 impl IntoFormat<GritFormatContext> for GritSyntaxNode {
-    type Format = FormatOwnedWithRule<GritSyntaxNode, FormatGritSyntaxNode>;
+    type Format = FormatOwnedWithRule<Self, FormatGritSyntaxNode>;
 
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(self, FormatGritSyntaxNode)
@@ -33,7 +33,7 @@ impl IntoFormat<GritFormatContext> for GritSyntaxNode {
 pub(crate) type FormatGritSyntaxToken = FormatToken<GritFormatContext>;
 
 impl AsFormat<GritFormatContext> for GritSyntaxToken {
-    type Format<'a> = FormatRefWithRule<'a, GritSyntaxToken, FormatGritSyntaxToken>;
+    type Format<'a> = FormatRefWithRule<'a, Self, FormatGritSyntaxToken>;
 
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(self, FormatGritSyntaxToken::default())
@@ -41,7 +41,7 @@ impl AsFormat<GritFormatContext> for GritSyntaxToken {
 }
 
 impl IntoFormat<GritFormatContext> for GritSyntaxToken {
-    type Format = FormatOwnedWithRule<GritSyntaxToken, FormatGritSyntaxToken>;
+    type Format = FormatOwnedWithRule<Self, FormatGritSyntaxToken>;
 
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(self, FormatGritSyntaxToken::default())

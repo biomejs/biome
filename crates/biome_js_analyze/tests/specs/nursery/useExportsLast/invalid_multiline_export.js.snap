@@ -1,0 +1,33 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid_multiline_export.js
+snapshot_kind: text
+---
+# Input
+```js
+export const greet = (name) => {
+	return `Hello, ${name}!`;
+};
+
+const foo = 1;
+
+```
+
+# Diagnostics
+```
+invalid_multiline_export.js:1:1 lint/nursery/useExportsLast ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i All exports should be declared after all non-export statements.
+  
+  > 1 │ export const greet = (name) => {
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 2 │ 	return `Hello, ${name}!`;
+  > 3 │ };
+      │ ^^
+    4 │ 
+    5 │ const foo = 1;
+  
+  i Move this statement before the export statements to keep all exports at the end of the module.
+  
+
+```

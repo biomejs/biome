@@ -1,0 +1,1064 @@
+---
+source: crates/biome_js_parser/tests/spec_test.rs
+expression: snapshot
+snapshot_kind: text
+---
+## Input
+
+```js
+import "foo" assert { type, "json" };
+import "bar" \u{61}ssert { type: "json" };
+import { foo } assert { type: "json" };
+import "lorem"
+assert { type: "json" }
+import foo2 from "foo.json" assert { "type": "json", type: "html", "type": "js" };
+import "x" assert;
+import ipsum from "ipsum.json" assert { type: "json", lazy: true, startAtLine: 1 };
+import { a } from "a.json" assert
+
+```
+
+
+## AST
+
+```
+JsModule {
+    bom_token: missing (optional),
+    interpreter_token: missing (optional),
+    directives: JsDirectiveList [],
+    items: JsModuleItemList [
+        JsImport {
+            import_token: IMPORT_KW@0..7 "import" [] [Whitespace(" ")],
+            import_clause: JsImportBareClause {
+                source: JsModuleSource {
+                    value_token: JS_STRING_LITERAL@7..13 "\"foo\"" [] [Whitespace(" ")],
+                },
+                assertion: missing (optional),
+            },
+            semicolon_token: missing (optional),
+        },
+        JsExpressionStatement {
+            expression: JsIdentifierExpression {
+                name: JsReferenceIdentifier {
+                    value_token: IDENT@13..20 "assert" [] [Whitespace(" ")],
+                },
+            },
+            semicolon_token: missing (optional),
+        },
+        JsBlockStatement {
+            l_curly_token: L_CURLY@20..22 "{" [] [Whitespace(" ")],
+            statements: JsStatementList [
+                JsExpressionStatement {
+                    expression: JsSequenceExpression {
+                        left: JsIdentifierExpression {
+                            name: JsReferenceIdentifier {
+                                value_token: IDENT@22..26 "type" [] [],
+                            },
+                        },
+                        comma_token: COMMA@26..28 "," [] [Whitespace(" ")],
+                        right: JsStringLiteralExpression {
+                            value_token: JS_STRING_LITERAL@28..35 "\"json\"" [] [Whitespace(" ")],
+                        },
+                    },
+                    semicolon_token: missing (optional),
+                },
+            ],
+            r_curly_token: R_CURLY@35..36 "}" [] [],
+        },
+        JsEmptyStatement {
+            semicolon_token: SEMICOLON@36..37 ";" [] [],
+        },
+        JsImport {
+            import_token: IMPORT_KW@37..45 "import" [Newline("\n")] [Whitespace(" ")],
+            import_clause: JsImportBareClause {
+                source: JsModuleSource {
+                    value_token: JS_STRING_LITERAL@45..51 "\"bar\"" [] [Whitespace(" ")],
+                },
+                assertion: missing (optional),
+            },
+            semicolon_token: missing (optional),
+        },
+        JsExpressionStatement {
+            expression: JsIdentifierExpression {
+                name: JsReferenceIdentifier {
+                    value_token: IDENT@51..63 "\\u{61}ssert" [] [Whitespace(" ")],
+                },
+            },
+            semicolon_token: missing (optional),
+        },
+        JsBlockStatement {
+            l_curly_token: L_CURLY@63..65 "{" [] [Whitespace(" ")],
+            statements: JsStatementList [
+                JsLabeledStatement {
+                    label: JsLabel {
+                        value_token: IDENT@65..69 "type" [] [],
+                    },
+                    colon_token: COLON@69..71 ":" [] [Whitespace(" ")],
+                    body: JsExpressionStatement {
+                        expression: JsStringLiteralExpression {
+                            value_token: JS_STRING_LITERAL@71..78 "\"json\"" [] [Whitespace(" ")],
+                        },
+                        semicolon_token: missing (optional),
+                    },
+                },
+            ],
+            r_curly_token: R_CURLY@78..79 "}" [] [],
+        },
+        JsEmptyStatement {
+            semicolon_token: SEMICOLON@79..80 ";" [] [],
+        },
+        JsImport {
+            import_token: IMPORT_KW@80..88 "import" [Newline("\n")] [Whitespace(" ")],
+            import_clause: JsImportNamedClause {
+                type_token: missing (optional),
+                named_specifiers: JsNamedImportSpecifiers {
+                    l_curly_token: L_CURLY@88..90 "{" [] [Whitespace(" ")],
+                    specifiers: JsNamedImportSpecifierList [
+                        JsShorthandNamedImportSpecifier {
+                            type_token: missing (optional),
+                            local_name: JsIdentifierBinding {
+                                name_token: IDENT@90..94 "foo" [] [Whitespace(" ")],
+                            },
+                        },
+                    ],
+                    r_curly_token: R_CURLY@94..96 "}" [] [Whitespace(" ")],
+                },
+                from_token: missing (required),
+                source: missing (required),
+                assertion: missing (optional),
+            },
+            semicolon_token: missing (optional),
+        },
+        JsExpressionStatement {
+            expression: JsIdentifierExpression {
+                name: JsReferenceIdentifier {
+                    value_token: IDENT@96..103 "assert" [] [Whitespace(" ")],
+                },
+            },
+            semicolon_token: missing (optional),
+        },
+        JsBlockStatement {
+            l_curly_token: L_CURLY@103..105 "{" [] [Whitespace(" ")],
+            statements: JsStatementList [
+                JsLabeledStatement {
+                    label: JsLabel {
+                        value_token: IDENT@105..109 "type" [] [],
+                    },
+                    colon_token: COLON@109..111 ":" [] [Whitespace(" ")],
+                    body: JsExpressionStatement {
+                        expression: JsStringLiteralExpression {
+                            value_token: JS_STRING_LITERAL@111..118 "\"json\"" [] [Whitespace(" ")],
+                        },
+                        semicolon_token: missing (optional),
+                    },
+                },
+            ],
+            r_curly_token: R_CURLY@118..119 "}" [] [],
+        },
+        JsEmptyStatement {
+            semicolon_token: SEMICOLON@119..120 ";" [] [],
+        },
+        JsImport {
+            import_token: IMPORT_KW@120..128 "import" [Newline("\n")] [Whitespace(" ")],
+            import_clause: JsImportBareClause {
+                source: JsModuleSource {
+                    value_token: JS_STRING_LITERAL@128..135 "\"lorem\"" [] [],
+                },
+                assertion: missing (optional),
+            },
+            semicolon_token: missing (optional),
+        },
+        JsExpressionStatement {
+            expression: JsIdentifierExpression {
+                name: JsReferenceIdentifier {
+                    value_token: IDENT@135..143 "assert" [Newline("\n")] [Whitespace(" ")],
+                },
+            },
+            semicolon_token: missing (optional),
+        },
+        JsBlockStatement {
+            l_curly_token: L_CURLY@143..145 "{" [] [Whitespace(" ")],
+            statements: JsStatementList [
+                JsLabeledStatement {
+                    label: JsLabel {
+                        value_token: IDENT@145..149 "type" [] [],
+                    },
+                    colon_token: COLON@149..151 ":" [] [Whitespace(" ")],
+                    body: JsExpressionStatement {
+                        expression: JsStringLiteralExpression {
+                            value_token: JS_STRING_LITERAL@151..158 "\"json\"" [] [Whitespace(" ")],
+                        },
+                        semicolon_token: missing (optional),
+                    },
+                },
+            ],
+            r_curly_token: R_CURLY@158..159 "}" [] [],
+        },
+        JsImport {
+            import_token: IMPORT_KW@159..167 "import" [Newline("\n")] [Whitespace(" ")],
+            import_clause: JsImportDefaultClause {
+                type_token: missing (optional),
+                default_specifier: JsDefaultImportSpecifier {
+                    local_name: JsIdentifierBinding {
+                        name_token: IDENT@167..172 "foo2" [] [Whitespace(" ")],
+                    },
+                },
+                from_token: FROM_KW@172..177 "from" [] [Whitespace(" ")],
+                source: JsModuleSource {
+                    value_token: JS_STRING_LITERAL@177..188 "\"foo.json\"" [] [Whitespace(" ")],
+                },
+                assertion: missing (optional),
+            },
+            semicolon_token: missing (optional),
+        },
+        JsExpressionStatement {
+            expression: JsIdentifierExpression {
+                name: JsReferenceIdentifier {
+                    value_token: IDENT@188..195 "assert" [] [Whitespace(" ")],
+                },
+            },
+            semicolon_token: missing (optional),
+        },
+        JsBlockStatement {
+            l_curly_token: L_CURLY@195..197 "{" [] [Whitespace(" ")],
+            statements: JsStatementList [
+                JsExpressionStatement {
+                    expression: JsStringLiteralExpression {
+                        value_token: JS_STRING_LITERAL@197..203 "\"type\"" [] [],
+                    },
+                    semicolon_token: missing (optional),
+                },
+                JsBogusStatement {
+                    items: [
+                        COLON@203..205 ":" [] [Whitespace(" ")],
+                        JS_STRING_LITERAL@205..211 "\"json\"" [] [],
+                        COMMA@211..213 "," [] [Whitespace(" ")],
+                    ],
+                },
+                JsLabeledStatement {
+                    label: JsLabel {
+                        value_token: IDENT@213..217 "type" [] [],
+                    },
+                    colon_token: COLON@217..219 ":" [] [Whitespace(" ")],
+                    body: JsExpressionStatement {
+                        expression: JsSequenceExpression {
+                            left: JsStringLiteralExpression {
+                                value_token: JS_STRING_LITERAL@219..225 "\"html\"" [] [],
+                            },
+                            comma_token: COMMA@225..227 "," [] [Whitespace(" ")],
+                            right: JsStringLiteralExpression {
+                                value_token: JS_STRING_LITERAL@227..233 "\"type\"" [] [],
+                            },
+                        },
+                        semicolon_token: missing (optional),
+                    },
+                },
+                JsBogusStatement {
+                    items: [
+                        COLON@233..235 ":" [] [Whitespace(" ")],
+                        JS_STRING_LITERAL@235..240 "\"js\"" [] [Whitespace(" ")],
+                    ],
+                },
+            ],
+            r_curly_token: R_CURLY@240..241 "}" [] [],
+        },
+        JsEmptyStatement {
+            semicolon_token: SEMICOLON@241..242 ";" [] [],
+        },
+        JsImport {
+            import_token: IMPORT_KW@242..250 "import" [Newline("\n")] [Whitespace(" ")],
+            import_clause: JsImportBareClause {
+                source: JsModuleSource {
+                    value_token: JS_STRING_LITERAL@250..254 "\"x\"" [] [Whitespace(" ")],
+                },
+                assertion: missing (optional),
+            },
+            semicolon_token: missing (optional),
+        },
+        JsExpressionStatement {
+            expression: JsIdentifierExpression {
+                name: JsReferenceIdentifier {
+                    value_token: IDENT@254..260 "assert" [] [],
+                },
+            },
+            semicolon_token: SEMICOLON@260..261 ";" [] [],
+        },
+        JsImport {
+            import_token: IMPORT_KW@261..269 "import" [Newline("\n")] [Whitespace(" ")],
+            import_clause: JsImportDefaultClause {
+                type_token: missing (optional),
+                default_specifier: JsDefaultImportSpecifier {
+                    local_name: JsIdentifierBinding {
+                        name_token: IDENT@269..275 "ipsum" [] [Whitespace(" ")],
+                    },
+                },
+                from_token: FROM_KW@275..280 "from" [] [Whitespace(" ")],
+                source: JsModuleSource {
+                    value_token: JS_STRING_LITERAL@280..293 "\"ipsum.json\"" [] [Whitespace(" ")],
+                },
+                assertion: missing (optional),
+            },
+            semicolon_token: missing (optional),
+        },
+        JsExpressionStatement {
+            expression: JsIdentifierExpression {
+                name: JsReferenceIdentifier {
+                    value_token: IDENT@293..300 "assert" [] [Whitespace(" ")],
+                },
+            },
+            semicolon_token: missing (optional),
+        },
+        JsBlockStatement {
+            l_curly_token: L_CURLY@300..302 "{" [] [Whitespace(" ")],
+            statements: JsStatementList [
+                JsLabeledStatement {
+                    label: JsLabel {
+                        value_token: IDENT@302..306 "type" [] [],
+                    },
+                    colon_token: COLON@306..308 ":" [] [Whitespace(" ")],
+                    body: JsExpressionStatement {
+                        expression: JsSequenceExpression {
+                            left: JsStringLiteralExpression {
+                                value_token: JS_STRING_LITERAL@308..314 "\"json\"" [] [],
+                            },
+                            comma_token: COMMA@314..316 "," [] [Whitespace(" ")],
+                            right: JsIdentifierExpression {
+                                name: JsReferenceIdentifier {
+                                    value_token: IDENT@316..320 "lazy" [] [],
+                                },
+                            },
+                        },
+                        semicolon_token: missing (optional),
+                    },
+                },
+                JsBogusStatement {
+                    items: [
+                        COLON@320..322 ":" [] [Whitespace(" ")],
+                        TRUE_KW@322..326 "true" [] [],
+                        COMMA@326..328 "," [] [Whitespace(" ")],
+                        IDENT@328..339 "startAtLine" [] [],
+                        COLON@339..341 ":" [] [Whitespace(" ")],
+                        JS_NUMBER_LITERAL@341..343 "1" [] [Whitespace(" ")],
+                    ],
+                },
+            ],
+            r_curly_token: R_CURLY@343..344 "}" [] [],
+        },
+        JsEmptyStatement {
+            semicolon_token: SEMICOLON@344..345 ";" [] [],
+        },
+        JsImport {
+            import_token: IMPORT_KW@345..353 "import" [Newline("\n")] [Whitespace(" ")],
+            import_clause: JsImportNamedClause {
+                type_token: missing (optional),
+                named_specifiers: JsNamedImportSpecifiers {
+                    l_curly_token: L_CURLY@353..355 "{" [] [Whitespace(" ")],
+                    specifiers: JsNamedImportSpecifierList [
+                        JsShorthandNamedImportSpecifier {
+                            type_token: missing (optional),
+                            local_name: JsIdentifierBinding {
+                                name_token: IDENT@355..357 "a" [] [Whitespace(" ")],
+                            },
+                        },
+                    ],
+                    r_curly_token: R_CURLY@357..359 "}" [] [Whitespace(" ")],
+                },
+                from_token: FROM_KW@359..364 "from" [] [Whitespace(" ")],
+                source: JsModuleSource {
+                    value_token: JS_STRING_LITERAL@364..373 "\"a.json\"" [] [Whitespace(" ")],
+                },
+                assertion: missing (optional),
+            },
+            semicolon_token: missing (optional),
+        },
+        JsExpressionStatement {
+            expression: JsIdentifierExpression {
+                name: JsReferenceIdentifier {
+                    value_token: IDENT@373..379 "assert" [] [],
+                },
+            },
+            semicolon_token: missing (optional),
+        },
+    ],
+    eof_token: EOF@379..380 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: JS_MODULE@0..380
+  0: (empty)
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..379
+    0: JS_IMPORT@0..13
+      0: IMPORT_KW@0..7 "import" [] [Whitespace(" ")]
+      1: JS_IMPORT_BARE_CLAUSE@7..13
+        0: JS_MODULE_SOURCE@7..13
+          0: JS_STRING_LITERAL@7..13 "\"foo\"" [] [Whitespace(" ")]
+        1: (empty)
+      2: (empty)
+    1: JS_EXPRESSION_STATEMENT@13..20
+      0: JS_IDENTIFIER_EXPRESSION@13..20
+        0: JS_REFERENCE_IDENTIFIER@13..20
+          0: IDENT@13..20 "assert" [] [Whitespace(" ")]
+      1: (empty)
+    2: JS_BLOCK_STATEMENT@20..36
+      0: L_CURLY@20..22 "{" [] [Whitespace(" ")]
+      1: JS_STATEMENT_LIST@22..35
+        0: JS_EXPRESSION_STATEMENT@22..35
+          0: JS_SEQUENCE_EXPRESSION@22..35
+            0: JS_IDENTIFIER_EXPRESSION@22..26
+              0: JS_REFERENCE_IDENTIFIER@22..26
+                0: IDENT@22..26 "type" [] []
+            1: COMMA@26..28 "," [] [Whitespace(" ")]
+            2: JS_STRING_LITERAL_EXPRESSION@28..35
+              0: JS_STRING_LITERAL@28..35 "\"json\"" [] [Whitespace(" ")]
+          1: (empty)
+      2: R_CURLY@35..36 "}" [] []
+    3: JS_EMPTY_STATEMENT@36..37
+      0: SEMICOLON@36..37 ";" [] []
+    4: JS_IMPORT@37..51
+      0: IMPORT_KW@37..45 "import" [Newline("\n")] [Whitespace(" ")]
+      1: JS_IMPORT_BARE_CLAUSE@45..51
+        0: JS_MODULE_SOURCE@45..51
+          0: JS_STRING_LITERAL@45..51 "\"bar\"" [] [Whitespace(" ")]
+        1: (empty)
+      2: (empty)
+    5: JS_EXPRESSION_STATEMENT@51..63
+      0: JS_IDENTIFIER_EXPRESSION@51..63
+        0: JS_REFERENCE_IDENTIFIER@51..63
+          0: IDENT@51..63 "\\u{61}ssert" [] [Whitespace(" ")]
+      1: (empty)
+    6: JS_BLOCK_STATEMENT@63..79
+      0: L_CURLY@63..65 "{" [] [Whitespace(" ")]
+      1: JS_STATEMENT_LIST@65..78
+        0: JS_LABELED_STATEMENT@65..78
+          0: JS_LABEL@65..69
+            0: IDENT@65..69 "type" [] []
+          1: COLON@69..71 ":" [] [Whitespace(" ")]
+          2: JS_EXPRESSION_STATEMENT@71..78
+            0: JS_STRING_LITERAL_EXPRESSION@71..78
+              0: JS_STRING_LITERAL@71..78 "\"json\"" [] [Whitespace(" ")]
+            1: (empty)
+      2: R_CURLY@78..79 "}" [] []
+    7: JS_EMPTY_STATEMENT@79..80
+      0: SEMICOLON@79..80 ";" [] []
+    8: JS_IMPORT@80..96
+      0: IMPORT_KW@80..88 "import" [Newline("\n")] [Whitespace(" ")]
+      1: JS_IMPORT_NAMED_CLAUSE@88..96
+        0: (empty)
+        1: JS_NAMED_IMPORT_SPECIFIERS@88..96
+          0: L_CURLY@88..90 "{" [] [Whitespace(" ")]
+          1: JS_NAMED_IMPORT_SPECIFIER_LIST@90..94
+            0: JS_SHORTHAND_NAMED_IMPORT_SPECIFIER@90..94
+              0: (empty)
+              1: JS_IDENTIFIER_BINDING@90..94
+                0: IDENT@90..94 "foo" [] [Whitespace(" ")]
+          2: R_CURLY@94..96 "}" [] [Whitespace(" ")]
+        2: (empty)
+        3: (empty)
+        4: (empty)
+      2: (empty)
+    9: JS_EXPRESSION_STATEMENT@96..103
+      0: JS_IDENTIFIER_EXPRESSION@96..103
+        0: JS_REFERENCE_IDENTIFIER@96..103
+          0: IDENT@96..103 "assert" [] [Whitespace(" ")]
+      1: (empty)
+    10: JS_BLOCK_STATEMENT@103..119
+      0: L_CURLY@103..105 "{" [] [Whitespace(" ")]
+      1: JS_STATEMENT_LIST@105..118
+        0: JS_LABELED_STATEMENT@105..118
+          0: JS_LABEL@105..109
+            0: IDENT@105..109 "type" [] []
+          1: COLON@109..111 ":" [] [Whitespace(" ")]
+          2: JS_EXPRESSION_STATEMENT@111..118
+            0: JS_STRING_LITERAL_EXPRESSION@111..118
+              0: JS_STRING_LITERAL@111..118 "\"json\"" [] [Whitespace(" ")]
+            1: (empty)
+      2: R_CURLY@118..119 "}" [] []
+    11: JS_EMPTY_STATEMENT@119..120
+      0: SEMICOLON@119..120 ";" [] []
+    12: JS_IMPORT@120..135
+      0: IMPORT_KW@120..128 "import" [Newline("\n")] [Whitespace(" ")]
+      1: JS_IMPORT_BARE_CLAUSE@128..135
+        0: JS_MODULE_SOURCE@128..135
+          0: JS_STRING_LITERAL@128..135 "\"lorem\"" [] []
+        1: (empty)
+      2: (empty)
+    13: JS_EXPRESSION_STATEMENT@135..143
+      0: JS_IDENTIFIER_EXPRESSION@135..143
+        0: JS_REFERENCE_IDENTIFIER@135..143
+          0: IDENT@135..143 "assert" [Newline("\n")] [Whitespace(" ")]
+      1: (empty)
+    14: JS_BLOCK_STATEMENT@143..159
+      0: L_CURLY@143..145 "{" [] [Whitespace(" ")]
+      1: JS_STATEMENT_LIST@145..158
+        0: JS_LABELED_STATEMENT@145..158
+          0: JS_LABEL@145..149
+            0: IDENT@145..149 "type" [] []
+          1: COLON@149..151 ":" [] [Whitespace(" ")]
+          2: JS_EXPRESSION_STATEMENT@151..158
+            0: JS_STRING_LITERAL_EXPRESSION@151..158
+              0: JS_STRING_LITERAL@151..158 "\"json\"" [] [Whitespace(" ")]
+            1: (empty)
+      2: R_CURLY@158..159 "}" [] []
+    15: JS_IMPORT@159..188
+      0: IMPORT_KW@159..167 "import" [Newline("\n")] [Whitespace(" ")]
+      1: JS_IMPORT_DEFAULT_CLAUSE@167..188
+        0: (empty)
+        1: JS_DEFAULT_IMPORT_SPECIFIER@167..172
+          0: JS_IDENTIFIER_BINDING@167..172
+            0: IDENT@167..172 "foo2" [] [Whitespace(" ")]
+        2: FROM_KW@172..177 "from" [] [Whitespace(" ")]
+        3: JS_MODULE_SOURCE@177..188
+          0: JS_STRING_LITERAL@177..188 "\"foo.json\"" [] [Whitespace(" ")]
+        4: (empty)
+      2: (empty)
+    16: JS_EXPRESSION_STATEMENT@188..195
+      0: JS_IDENTIFIER_EXPRESSION@188..195
+        0: JS_REFERENCE_IDENTIFIER@188..195
+          0: IDENT@188..195 "assert" [] [Whitespace(" ")]
+      1: (empty)
+    17: JS_BLOCK_STATEMENT@195..241
+      0: L_CURLY@195..197 "{" [] [Whitespace(" ")]
+      1: JS_STATEMENT_LIST@197..240
+        0: JS_EXPRESSION_STATEMENT@197..203
+          0: JS_STRING_LITERAL_EXPRESSION@197..203
+            0: JS_STRING_LITERAL@197..203 "\"type\"" [] []
+          1: (empty)
+        1: JS_BOGUS_STATEMENT@203..213
+          0: COLON@203..205 ":" [] [Whitespace(" ")]
+          1: JS_STRING_LITERAL@205..211 "\"json\"" [] []
+          2: COMMA@211..213 "," [] [Whitespace(" ")]
+        2: JS_LABELED_STATEMENT@213..233
+          0: JS_LABEL@213..217
+            0: IDENT@213..217 "type" [] []
+          1: COLON@217..219 ":" [] [Whitespace(" ")]
+          2: JS_EXPRESSION_STATEMENT@219..233
+            0: JS_SEQUENCE_EXPRESSION@219..233
+              0: JS_STRING_LITERAL_EXPRESSION@219..225
+                0: JS_STRING_LITERAL@219..225 "\"html\"" [] []
+              1: COMMA@225..227 "," [] [Whitespace(" ")]
+              2: JS_STRING_LITERAL_EXPRESSION@227..233
+                0: JS_STRING_LITERAL@227..233 "\"type\"" [] []
+            1: (empty)
+        3: JS_BOGUS_STATEMENT@233..240
+          0: COLON@233..235 ":" [] [Whitespace(" ")]
+          1: JS_STRING_LITERAL@235..240 "\"js\"" [] [Whitespace(" ")]
+      2: R_CURLY@240..241 "}" [] []
+    18: JS_EMPTY_STATEMENT@241..242
+      0: SEMICOLON@241..242 ";" [] []
+    19: JS_IMPORT@242..254
+      0: IMPORT_KW@242..250 "import" [Newline("\n")] [Whitespace(" ")]
+      1: JS_IMPORT_BARE_CLAUSE@250..254
+        0: JS_MODULE_SOURCE@250..254
+          0: JS_STRING_LITERAL@250..254 "\"x\"" [] [Whitespace(" ")]
+        1: (empty)
+      2: (empty)
+    20: JS_EXPRESSION_STATEMENT@254..261
+      0: JS_IDENTIFIER_EXPRESSION@254..260
+        0: JS_REFERENCE_IDENTIFIER@254..260
+          0: IDENT@254..260 "assert" [] []
+      1: SEMICOLON@260..261 ";" [] []
+    21: JS_IMPORT@261..293
+      0: IMPORT_KW@261..269 "import" [Newline("\n")] [Whitespace(" ")]
+      1: JS_IMPORT_DEFAULT_CLAUSE@269..293
+        0: (empty)
+        1: JS_DEFAULT_IMPORT_SPECIFIER@269..275
+          0: JS_IDENTIFIER_BINDING@269..275
+            0: IDENT@269..275 "ipsum" [] [Whitespace(" ")]
+        2: FROM_KW@275..280 "from" [] [Whitespace(" ")]
+        3: JS_MODULE_SOURCE@280..293
+          0: JS_STRING_LITERAL@280..293 "\"ipsum.json\"" [] [Whitespace(" ")]
+        4: (empty)
+      2: (empty)
+    22: JS_EXPRESSION_STATEMENT@293..300
+      0: JS_IDENTIFIER_EXPRESSION@293..300
+        0: JS_REFERENCE_IDENTIFIER@293..300
+          0: IDENT@293..300 "assert" [] [Whitespace(" ")]
+      1: (empty)
+    23: JS_BLOCK_STATEMENT@300..344
+      0: L_CURLY@300..302 "{" [] [Whitespace(" ")]
+      1: JS_STATEMENT_LIST@302..343
+        0: JS_LABELED_STATEMENT@302..320
+          0: JS_LABEL@302..306
+            0: IDENT@302..306 "type" [] []
+          1: COLON@306..308 ":" [] [Whitespace(" ")]
+          2: JS_EXPRESSION_STATEMENT@308..320
+            0: JS_SEQUENCE_EXPRESSION@308..320
+              0: JS_STRING_LITERAL_EXPRESSION@308..314
+                0: JS_STRING_LITERAL@308..314 "\"json\"" [] []
+              1: COMMA@314..316 "," [] [Whitespace(" ")]
+              2: JS_IDENTIFIER_EXPRESSION@316..320
+                0: JS_REFERENCE_IDENTIFIER@316..320
+                  0: IDENT@316..320 "lazy" [] []
+            1: (empty)
+        1: JS_BOGUS_STATEMENT@320..343
+          0: COLON@320..322 ":" [] [Whitespace(" ")]
+          1: TRUE_KW@322..326 "true" [] []
+          2: COMMA@326..328 "," [] [Whitespace(" ")]
+          3: IDENT@328..339 "startAtLine" [] []
+          4: COLON@339..341 ":" [] [Whitespace(" ")]
+          5: JS_NUMBER_LITERAL@341..343 "1" [] [Whitespace(" ")]
+      2: R_CURLY@343..344 "}" [] []
+    24: JS_EMPTY_STATEMENT@344..345
+      0: SEMICOLON@344..345 ";" [] []
+    25: JS_IMPORT@345..373
+      0: IMPORT_KW@345..353 "import" [Newline("\n")] [Whitespace(" ")]
+      1: JS_IMPORT_NAMED_CLAUSE@353..373
+        0: (empty)
+        1: JS_NAMED_IMPORT_SPECIFIERS@353..359
+          0: L_CURLY@353..355 "{" [] [Whitespace(" ")]
+          1: JS_NAMED_IMPORT_SPECIFIER_LIST@355..357
+            0: JS_SHORTHAND_NAMED_IMPORT_SPECIFIER@355..357
+              0: (empty)
+              1: JS_IDENTIFIER_BINDING@355..357
+                0: IDENT@355..357 "a" [] [Whitespace(" ")]
+          2: R_CURLY@357..359 "}" [] [Whitespace(" ")]
+        2: FROM_KW@359..364 "from" [] [Whitespace(" ")]
+        3: JS_MODULE_SOURCE@364..373
+          0: JS_STRING_LITERAL@364..373 "\"a.json\"" [] [Whitespace(" ")]
+        4: (empty)
+      2: (empty)
+    26: JS_EXPRESSION_STATEMENT@373..379
+      0: JS_IDENTIFIER_EXPRESSION@373..379
+        0: JS_REFERENCE_IDENTIFIER@373..379
+          0: IDENT@373..379 "assert" [] []
+      1: (empty)
+  4: EOF@379..380 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+import_assertion_err.js:1:14 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a semicolon or an implicit semicolon after a statement, but found none
+  
+  > 1 │ import "foo" assert { type, "json" };
+      │              ^^^^^^
+    2 │ import "bar" \u{61}ssert { type: "json" };
+    3 │ import { foo } assert { type: "json" };
+  
+  i An explicit or implicit semicolon is expected here...
+  
+  > 1 │ import "foo" assert { type, "json" };
+      │              ^^^^^^
+    2 │ import "bar" \u{61}ssert { type: "json" };
+    3 │ import { foo } assert { type: "json" };
+  
+  i ...Which is required to end this statement
+  
+  > 1 │ import "foo" assert { type, "json" };
+      │ ^^^^^^^^^^^^^
+    2 │ import "bar" \u{61}ssert { type: "json" };
+    3 │ import { foo } assert { type: "json" };
+  
+import_assertion_err.js:1:21 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a semicolon or an implicit semicolon after a statement, but found none
+  
+  > 1 │ import "foo" assert { type, "json" };
+      │                     ^
+    2 │ import "bar" \u{61}ssert { type: "json" };
+    3 │ import { foo } assert { type: "json" };
+  
+  i An explicit or implicit semicolon is expected here...
+  
+  > 1 │ import "foo" assert { type, "json" };
+      │                     ^
+    2 │ import "bar" \u{61}ssert { type: "json" };
+    3 │ import { foo } assert { type: "json" };
+  
+  i ...Which is required to end this statement
+  
+  > 1 │ import "foo" assert { type, "json" };
+      │              ^^^^^^^^
+    2 │ import "bar" \u{61}ssert { type: "json" };
+    3 │ import { foo } assert { type: "json" };
+  
+import_assertion_err.js:2:14 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a semicolon or an implicit semicolon after a statement, but found none
+  
+    1 │ import "foo" assert { type, "json" };
+  > 2 │ import "bar" \u{61}ssert { type: "json" };
+      │              ^^^^^^^^^^^
+    3 │ import { foo } assert { type: "json" };
+    4 │ import "lorem"
+  
+  i An explicit or implicit semicolon is expected here...
+  
+    1 │ import "foo" assert { type, "json" };
+  > 2 │ import "bar" \u{61}ssert { type: "json" };
+      │              ^^^^^^^^^^^
+    3 │ import { foo } assert { type: "json" };
+    4 │ import "lorem"
+  
+  i ...Which is required to end this statement
+  
+    1 │ import "foo" assert { type, "json" };
+  > 2 │ import "bar" \u{61}ssert { type: "json" };
+      │ ^^^^^^^^^^^^^
+    3 │ import { foo } assert { type: "json" };
+    4 │ import "lorem"
+  
+import_assertion_err.js:2:26 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a semicolon or an implicit semicolon after a statement, but found none
+  
+    1 │ import "foo" assert { type, "json" };
+  > 2 │ import "bar" \u{61}ssert { type: "json" };
+      │                          ^
+    3 │ import { foo } assert { type: "json" };
+    4 │ import "lorem"
+  
+  i An explicit or implicit semicolon is expected here...
+  
+    1 │ import "foo" assert { type, "json" };
+  > 2 │ import "bar" \u{61}ssert { type: "json" };
+      │                          ^
+    3 │ import { foo } assert { type: "json" };
+    4 │ import "lorem"
+  
+  i ...Which is required to end this statement
+  
+    1 │ import "foo" assert { type, "json" };
+  > 2 │ import "bar" \u{61}ssert { type: "json" };
+      │              ^^^^^^^^^^^^^
+    3 │ import { foo } assert { type: "json" };
+    4 │ import "lorem"
+  
+import_assertion_err.js:3:16 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `from` but instead found `assert`
+  
+    1 │ import "foo" assert { type, "json" };
+    2 │ import "bar" \u{61}ssert { type: "json" };
+  > 3 │ import { foo } assert { type: "json" };
+      │                ^^^^^^
+    4 │ import "lorem"
+    5 │ assert { type: "json" }
+  
+  i Remove assert
+  
+import_assertion_err.js:3:23 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a semicolon or an implicit semicolon after a statement, but found none
+  
+    1 │ import "foo" assert { type, "json" };
+    2 │ import "bar" \u{61}ssert { type: "json" };
+  > 3 │ import { foo } assert { type: "json" };
+      │                       ^
+    4 │ import "lorem"
+    5 │ assert { type: "json" }
+  
+  i An explicit or implicit semicolon is expected here...
+  
+    1 │ import "foo" assert { type, "json" };
+    2 │ import "bar" \u{61}ssert { type: "json" };
+  > 3 │ import { foo } assert { type: "json" };
+      │                       ^
+    4 │ import "lorem"
+    5 │ assert { type: "json" }
+  
+  i ...Which is required to end this statement
+  
+    1 │ import "foo" assert { type, "json" };
+    2 │ import "bar" \u{61}ssert { type: "json" };
+  > 3 │ import { foo } assert { type: "json" };
+      │                ^^^^^^^^
+    4 │ import "lorem"
+    5 │ assert { type: "json" }
+  
+import_assertion_err.js:5:8 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a semicolon or an implicit semicolon after a statement, but found none
+  
+    3 │ import { foo } assert { type: "json" };
+    4 │ import "lorem"
+  > 5 │ assert { type: "json" }
+      │        ^
+    6 │ import foo2 from "foo.json" assert { "type": "json", type: "html", "type": "js" };
+    7 │ import "x" assert;
+  
+  i An explicit or implicit semicolon is expected here...
+  
+    3 │ import { foo } assert { type: "json" };
+    4 │ import "lorem"
+  > 5 │ assert { type: "json" }
+      │        ^
+    6 │ import foo2 from "foo.json" assert { "type": "json", type: "html", "type": "js" };
+    7 │ import "x" assert;
+  
+  i ...Which is required to end this statement
+  
+    3 │ import { foo } assert { type: "json" };
+    4 │ import "lorem"
+  > 5 │ assert { type: "json" }
+      │ ^^^^^^^^
+    6 │ import foo2 from "foo.json" assert { "type": "json", type: "html", "type": "js" };
+    7 │ import "x" assert;
+  
+import_assertion_err.js:6:29 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a semicolon or an implicit semicolon after a statement, but found none
+  
+    4 │ import "lorem"
+    5 │ assert { type: "json" }
+  > 6 │ import foo2 from "foo.json" assert { "type": "json", type: "html", "type": "js" };
+      │                             ^^^^^^
+    7 │ import "x" assert;
+    8 │ import ipsum from "ipsum.json" assert { type: "json", lazy: true, startAtLine: 1 };
+  
+  i An explicit or implicit semicolon is expected here...
+  
+    4 │ import "lorem"
+    5 │ assert { type: "json" }
+  > 6 │ import foo2 from "foo.json" assert { "type": "json", type: "html", "type": "js" };
+      │                             ^^^^^^
+    7 │ import "x" assert;
+    8 │ import ipsum from "ipsum.json" assert { type: "json", lazy: true, startAtLine: 1 };
+  
+  i ...Which is required to end this statement
+  
+    4 │ import "lorem"
+    5 │ assert { type: "json" }
+  > 6 │ import foo2 from "foo.json" assert { "type": "json", type: "html", "type": "js" };
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    7 │ import "x" assert;
+    8 │ import ipsum from "ipsum.json" assert { type: "json", lazy: true, startAtLine: 1 };
+  
+import_assertion_err.js:6:36 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a semicolon or an implicit semicolon after a statement, but found none
+  
+    4 │ import "lorem"
+    5 │ assert { type: "json" }
+  > 6 │ import foo2 from "foo.json" assert { "type": "json", type: "html", "type": "js" };
+      │                                    ^
+    7 │ import "x" assert;
+    8 │ import ipsum from "ipsum.json" assert { type: "json", lazy: true, startAtLine: 1 };
+  
+  i An explicit or implicit semicolon is expected here...
+  
+    4 │ import "lorem"
+    5 │ assert { type: "json" }
+  > 6 │ import foo2 from "foo.json" assert { "type": "json", type: "html", "type": "js" };
+      │                                    ^
+    7 │ import "x" assert;
+    8 │ import ipsum from "ipsum.json" assert { type: "json", lazy: true, startAtLine: 1 };
+  
+  i ...Which is required to end this statement
+  
+    4 │ import "lorem"
+    5 │ assert { type: "json" }
+  > 6 │ import foo2 from "foo.json" assert { "type": "json", type: "html", "type": "js" };
+      │                             ^^^^^^^^
+    7 │ import "x" assert;
+    8 │ import ipsum from "ipsum.json" assert { type: "json", lazy: true, startAtLine: 1 };
+  
+import_assertion_err.js:6:44 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a semicolon or an implicit semicolon after a statement, but found none
+  
+    4 │ import "lorem"
+    5 │ assert { type: "json" }
+  > 6 │ import foo2 from "foo.json" assert { "type": "json", type: "html", "type": "js" };
+      │                                            ^
+    7 │ import "x" assert;
+    8 │ import ipsum from "ipsum.json" assert { type: "json", lazy: true, startAtLine: 1 };
+  
+  i An explicit or implicit semicolon is expected here...
+  
+    4 │ import "lorem"
+    5 │ assert { type: "json" }
+  > 6 │ import foo2 from "foo.json" assert { "type": "json", type: "html", "type": "js" };
+      │                                            ^
+    7 │ import "x" assert;
+    8 │ import ipsum from "ipsum.json" assert { type: "json", lazy: true, startAtLine: 1 };
+  
+  i ...Which is required to end this statement
+  
+    4 │ import "lorem"
+    5 │ assert { type: "json" }
+  > 6 │ import foo2 from "foo.json" assert { "type": "json", type: "html", "type": "js" };
+      │                                      ^^^^^^^
+    7 │ import "x" assert;
+    8 │ import ipsum from "ipsum.json" assert { type: "json", lazy: true, startAtLine: 1 };
+  
+import_assertion_err.js:6:74 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a semicolon or an implicit semicolon after a statement, but found none
+  
+    4 │ import "lorem"
+    5 │ assert { type: "json" }
+  > 6 │ import foo2 from "foo.json" assert { "type": "json", type: "html", "type": "js" };
+      │                                                                          ^
+    7 │ import "x" assert;
+    8 │ import ipsum from "ipsum.json" assert { type: "json", lazy: true, startAtLine: 1 };
+  
+  i An explicit or implicit semicolon is expected here...
+  
+    4 │ import "lorem"
+    5 │ assert { type: "json" }
+  > 6 │ import foo2 from "foo.json" assert { "type": "json", type: "html", "type": "js" };
+      │                                                                          ^
+    7 │ import "x" assert;
+    8 │ import ipsum from "ipsum.json" assert { type: "json", lazy: true, startAtLine: 1 };
+  
+  i ...Which is required to end this statement
+  
+    4 │ import "lorem"
+    5 │ assert { type: "json" }
+  > 6 │ import foo2 from "foo.json" assert { "type": "json", type: "html", "type": "js" };
+      │                                                            ^^^^^^^^^^^^^^^
+    7 │ import "x" assert;
+    8 │ import ipsum from "ipsum.json" assert { type: "json", lazy: true, startAtLine: 1 };
+  
+import_assertion_err.js:7:12 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a semicolon or an implicit semicolon after a statement, but found none
+  
+    5 │ assert { type: "json" }
+    6 │ import foo2 from "foo.json" assert { "type": "json", type: "html", "type": "js" };
+  > 7 │ import "x" assert;
+      │            ^^^^^^
+    8 │ import ipsum from "ipsum.json" assert { type: "json", lazy: true, startAtLine: 1 };
+    9 │ import { a } from "a.json" assert
+  
+  i An explicit or implicit semicolon is expected here...
+  
+    5 │ assert { type: "json" }
+    6 │ import foo2 from "foo.json" assert { "type": "json", type: "html", "type": "js" };
+  > 7 │ import "x" assert;
+      │            ^^^^^^
+    8 │ import ipsum from "ipsum.json" assert { type: "json", lazy: true, startAtLine: 1 };
+    9 │ import { a } from "a.json" assert
+  
+  i ...Which is required to end this statement
+  
+    5 │ assert { type: "json" }
+    6 │ import foo2 from "foo.json" assert { "type": "json", type: "html", "type": "js" };
+  > 7 │ import "x" assert;
+      │ ^^^^^^^^^^^
+    8 │ import ipsum from "ipsum.json" assert { type: "json", lazy: true, startAtLine: 1 };
+    9 │ import { a } from "a.json" assert
+  
+import_assertion_err.js:8:32 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a semicolon or an implicit semicolon after a statement, but found none
+  
+     6 │ import foo2 from "foo.json" assert { "type": "json", type: "html", "type": "js" };
+     7 │ import "x" assert;
+   > 8 │ import ipsum from "ipsum.json" assert { type: "json", lazy: true, startAtLine: 1 };
+       │                                ^^^^^^
+     9 │ import { a } from "a.json" assert
+    10 │ 
+  
+  i An explicit or implicit semicolon is expected here...
+  
+     6 │ import foo2 from "foo.json" assert { "type": "json", type: "html", "type": "js" };
+     7 │ import "x" assert;
+   > 8 │ import ipsum from "ipsum.json" assert { type: "json", lazy: true, startAtLine: 1 };
+       │                                ^^^^^^
+     9 │ import { a } from "a.json" assert
+    10 │ 
+  
+  i ...Which is required to end this statement
+  
+     6 │ import foo2 from "foo.json" assert { "type": "json", type: "html", "type": "js" };
+     7 │ import "x" assert;
+   > 8 │ import ipsum from "ipsum.json" assert { type: "json", lazy: true, startAtLine: 1 };
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+     9 │ import { a } from "a.json" assert
+    10 │ 
+  
+import_assertion_err.js:8:39 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a semicolon or an implicit semicolon after a statement, but found none
+  
+     6 │ import foo2 from "foo.json" assert { "type": "json", type: "html", "type": "js" };
+     7 │ import "x" assert;
+   > 8 │ import ipsum from "ipsum.json" assert { type: "json", lazy: true, startAtLine: 1 };
+       │                                       ^
+     9 │ import { a } from "a.json" assert
+    10 │ 
+  
+  i An explicit or implicit semicolon is expected here...
+  
+     6 │ import foo2 from "foo.json" assert { "type": "json", type: "html", "type": "js" };
+     7 │ import "x" assert;
+   > 8 │ import ipsum from "ipsum.json" assert { type: "json", lazy: true, startAtLine: 1 };
+       │                                       ^
+     9 │ import { a } from "a.json" assert
+    10 │ 
+  
+  i ...Which is required to end this statement
+  
+     6 │ import foo2 from "foo.json" assert { "type": "json", type: "html", "type": "js" };
+     7 │ import "x" assert;
+   > 8 │ import ipsum from "ipsum.json" assert { type: "json", lazy: true, startAtLine: 1 };
+       │                                ^^^^^^^^
+     9 │ import { a } from "a.json" assert
+    10 │ 
+  
+import_assertion_err.js:8:59 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a semicolon or an implicit semicolon after a statement, but found none
+  
+     6 │ import foo2 from "foo.json" assert { "type": "json", type: "html", "type": "js" };
+     7 │ import "x" assert;
+   > 8 │ import ipsum from "ipsum.json" assert { type: "json", lazy: true, startAtLine: 1 };
+       │                                                           ^
+     9 │ import { a } from "a.json" assert
+    10 │ 
+  
+  i An explicit or implicit semicolon is expected here...
+  
+     6 │ import foo2 from "foo.json" assert { "type": "json", type: "html", "type": "js" };
+     7 │ import "x" assert;
+   > 8 │ import ipsum from "ipsum.json" assert { type: "json", lazy: true, startAtLine: 1 };
+       │                                                           ^
+     9 │ import { a } from "a.json" assert
+    10 │ 
+  
+  i ...Which is required to end this statement
+  
+     6 │ import foo2 from "foo.json" assert { "type": "json", type: "html", "type": "js" };
+     7 │ import "x" assert;
+   > 8 │ import ipsum from "ipsum.json" assert { type: "json", lazy: true, startAtLine: 1 };
+       │                                               ^^^^^^^^^^^^^
+     9 │ import { a } from "a.json" assert
+    10 │ 
+  
+import_assertion_err.js:9:28 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a semicolon or an implicit semicolon after a statement, but found none
+  
+     7 │ import "x" assert;
+     8 │ import ipsum from "ipsum.json" assert { type: "json", lazy: true, startAtLine: 1 };
+   > 9 │ import { a } from "a.json" assert
+       │                            ^^^^^^
+    10 │ 
+  
+  i An explicit or implicit semicolon is expected here...
+  
+     7 │ import "x" assert;
+     8 │ import ipsum from "ipsum.json" assert { type: "json", lazy: true, startAtLine: 1 };
+   > 9 │ import { a } from "a.json" assert
+       │                            ^^^^^^
+    10 │ 
+  
+  i ...Which is required to end this statement
+  
+     7 │ import "x" assert;
+     8 │ import ipsum from "ipsum.json" assert { type: "json", lazy: true, startAtLine: 1 };
+   > 9 │ import { a } from "a.json" assert
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    10 │ 
+  
+```

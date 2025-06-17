@@ -10,7 +10,7 @@ use biome_parser::lexer::{
     LexContext, Lexer, LexerCheckpoint, LexerWithCheckpoint, ReLexer, TokenFlags,
 };
 use biome_rowan::{SyntaxKind, TextSize};
-use biome_unicode_table::{lookup_byte, Dispatch::*};
+use biome_unicode_table::{Dispatch::*, lookup_byte};
 
 #[derive(Debug, Copy, Clone, Eq, PartialEq, Default)]
 pub enum MarkdownLexContext {
@@ -21,14 +21,14 @@ pub enum MarkdownLexContext {
 impl LexContext for MarkdownLexContext {
     /// Returns true if this is [MarkdownLexContext::Regular]
     fn is_regular(&self) -> bool {
-        matches!(self, MarkdownLexContext::Regular)
+        matches!(self, Self::Regular)
     }
 }
 
 /// Context in which the [MarkdownLexContext]'s current should be re-lexed.
 #[derive(Debug, Copy, Clone, Eq, PartialEq)]
 pub enum MarkdownReLexContext {
-    #[allow(dead_code)]
+    #[expect(dead_code)]
     Regular,
     // UnicodeRange,
 }
@@ -190,7 +190,7 @@ impl<'src> MarkdownLexer<'src> {
     }
 
     /// Bumps the current byte and creates a lexed token of the passed in kind
-    #[allow(dead_code)]
+    #[expect(dead_code)]
     fn eat_byte(&mut self, tok: MarkdownSyntaxKind) -> MarkdownSyntaxKind {
         self.advance(1);
         tok
@@ -309,16 +309,14 @@ impl<'src> MarkdownLexer<'src> {
         let string = unsafe {
             std::str::from_utf8_unchecked(self.source.as_bytes().get_unchecked(self.position..))
         };
-        let chr = if let Some(chr) = string.chars().next() {
+        if let Some(chr) = string.chars().next() {
             chr
         } else {
             // Safety: we always call this when we are at a valid char, so this branch is completely unreachable
             unsafe {
                 core::hint::unreachable_unchecked();
             }
-        };
-
-        chr
+        }
     }
 
     /// Gets the current byte.

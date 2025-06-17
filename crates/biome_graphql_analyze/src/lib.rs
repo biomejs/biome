@@ -1,3 +1,5 @@
+#![deny(clippy::use_self)]
+
 mod lint;
 pub mod options;
 mod registry;
@@ -6,14 +8,18 @@ mod suppression_action;
 pub use crate::registry::visit_registry;
 use crate::suppression_action::GraphqlSuppressionAction;
 use biome_analyze::{
-    AnalysisFilter, AnalyzerOptions, AnalyzerSignal, ControlFlow, LanguageRoot, MatchQueryParams,
-    MetadataRegistry, RuleRegistry, SuppressionKind,
+    AnalysisFilter, AnalyzerOptions, AnalyzerSignal, AnalyzerSuppression, ControlFlow,
+    LanguageRoot, MatchQueryParams, MetadataRegistry, RuleAction, RuleRegistry,
+    to_analyzer_suppressions,
 };
-use biome_diagnostics::{category, Error};
+use biome_deserialize::TextRange;
+use biome_diagnostics::Error;
 use biome_graphql_syntax::GraphqlLanguage;
-use biome_suppression::{parse_suppression_comment, SuppressionDiagnostic};
+use biome_suppression::{SuppressionDiagnostic, parse_suppression_comment};
 use std::ops::Deref;
 use std::sync::LazyLock;
+
+pub(crate) type GraphqlRuleAction = RuleAction<GraphqlLanguage>;
 
 pub static METADATA: LazyLock<MetadataRegistry> = LazyLock::new(|| {
     let mut metadata = MetadataRegistry::default();
@@ -57,37 +63,25 @@ where
 {
     fn parse_linter_suppression_comment(
         text: &str,
-    ) -> Vec<Result<SuppressionKind, SuppressionDiagnostic>> {
+        piece_range: TextRange,
+    ) -> Vec<Result<AnalyzerSuppression, SuppressionDiagnostic>> {
         let mut result = Vec::new();
 
-        for comment in parse_suppression_comment(text) {
-            let categories = match comment {
-                Ok(comment) => {
-                    if comment.is_legacy {
-                        result.push(Ok(SuppressionKind::Deprecated));
-                    }
-                    comment.categories
-                }
+        for suppression in parse_suppression_comment(text) {
+            let suppression = match suppression {
+                Ok(suppression) => suppression,
                 Err(err) => {
                     result.push(Err(err));
                     continue;
                 }
             };
 
-            for (key, value) in categories {
-                if key == category!("lint") {
-                    if let Some(value) = value {
-                        result.push(Ok(SuppressionKind::MaybeLegacy(value)));
-                    } else {
-                        result.push(Ok(SuppressionKind::Everything));
-                    }
-                } else {
-                    let category = key.name();
-                    if let Some(rule) = category.strip_prefix("lint/") {
-                        result.push(Ok(SuppressionKind::Rule(rule)));
-                    }
-                }
-            }
+            let analyzer_suppressions: Vec<_> = to_analyzer_suppressions(suppression, piece_range)
+                .into_iter()
+                .map(Ok)
+                .collect();
+
+            result.extend(analyzer_suppressions)
         }
 
         result
@@ -96,7 +90,7 @@ where
     let mut registry = RuleRegistry::builder(&filter, root);
     visit_registry(&mut registry);
 
-    let (registry, services, diagnostics, visitors) = registry.build();
+    let (registry, services, diagnostics, visitors, categories) = registry.build();
 
     // Bail if we can't parse a rule option
     if !diagnostics.is_empty() {
@@ -109,6 +103,7 @@ where
         parse_linter_suppression_comment,
         Box::new(GraphqlSuppressionAction),
         &mut emit_signal,
+        categories,
     );
 
     for ((phase, _), visitor) in visitors {
@@ -131,7 +126,7 @@ mod tests {
     use crate::analyze;
     use biome_analyze::{AnalysisFilter, AnalyzerOptions, ControlFlow, Never, RuleFilter};
     use biome_console::fmt::{Formatter, Termcolor};
-    use biome_console::{markup, Markup};
+    use biome_console::{Markup, markup};
     use biome_diagnostics::termcolor::NoColor;
     use biome_diagnostics::{Diagnostic, DiagnosticExt, PrintDiagnostic, Severity};
     use biome_graphql_parser::parse_graphql;

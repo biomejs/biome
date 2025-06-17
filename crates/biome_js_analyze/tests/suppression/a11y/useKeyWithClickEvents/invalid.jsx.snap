@@ -8,6 +8,17 @@ expression: invalid.jsx
     <div onClick={() => {}} />
     <div  {...spread} onClick={() => {}} />
     <div  {...spread} onClick={() => {}}>foo</div>
+    <div onClick={() => void 0} role={undefined} />
+    <div onClick={() => void 0} {...props} />
+    <section onClick={() => void 0} />
+    <main onClick={() => void 0} />
+    <article onClick={() => void 0} />
+    <header onClick={() => void 0} />
+    <footer onClick={() => void 0} />
+    <div onClick={() => void 0} aria-hidden={false} />
+    {/* TODO:  */}
+    {/* <a onClick={() => void 0} /> */}
+    {/* <a tabIndex="0" onClick={() => void 0} /> */}
 </>
 ```
 
@@ -15,7 +26,7 @@ expression: invalid.jsx
 ```
 invalid.jsx:2:5 lint/a11y/useKeyWithClickEvents  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Enforce to have the onClick mouse event with the onKeyUp, the onKeyDown, or the onKeyPress keyboard event.
+  × Enforce to have the onClick mouse event with the onKeyUp, the onKeyDown, or the onKeyPress keyboard event.
   
     1 │ <>
   > 2 │     <div onClick={() => {}} />
@@ -25,16 +36,317 @@ invalid.jsx:2:5 lint/a11y/useKeyWithClickEvents  FIXABLE  ━━━━━━━�
   
   i Actions triggered using mouse events should have corresponding keyboard events to account for keyboard-only navigation.
   
-  i Safe fix: Suppress rule lint/a11y/useKeyWithClickEvents
+  i Safe fix: Suppress rule lint/a11y/useKeyWithClickEvents for this line.
   
-    1 1 │   <>
-    2   │ - ····<div·onClick={()·=>·{}}·/>
-      2 │ + ····{/*·biome-ignore·lint/a11y/useKeyWithClickEvents:·<explanation>·*/}
-      3 │ + ····<div·onClick={()·=>·{}}·/>
-    3 4 │       <div  {...spread} onClick={() => {}} />
-    4 5 │       <div  {...spread} onClick={() => {}}>foo</div>
+     1  1 │   <>
+     2    │ - ····<div·onClick={()·=>·{}}·/>
+        2 │ + ····{/**·biome-ignore·lint/a11y/useKeyWithClickEvents:·<explanation>·*/}
+        3 │ + ····<div·onClick={()·=>·{}}·/>
+     3  4 │       <div  {...spread} onClick={() => {}} />
+     4  5 │       <div  {...spread} onClick={() => {}}>foo</div>
+  
+  i Safe fix: Suppress rule lint/a11y/useKeyWithClickEvents for the whole file.
+  
+        1 │ + /**·biome-ignore-all·lint/a11y/useKeyWithClickEvents:·<explanation>·*/
+     1  2 │   <>
+     2  3 │       <div onClick={() => {}} />
   
 
 ```
 
+```
+invalid.jsx:3:5 lint/a11y/useKeyWithClickEvents  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
+  × Enforce to have the onClick mouse event with the onKeyUp, the onKeyDown, or the onKeyPress keyboard event.
+  
+    1 │ <>
+    2 │     <div onClick={() => {}} />
+  > 3 │     <div  {...spread} onClick={() => {}} />
+      │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    4 │     <div  {...spread} onClick={() => {}}>foo</div>
+    5 │     <div onClick={() => void 0} role={undefined} />
+  
+  i Actions triggered using mouse events should have corresponding keyboard events to account for keyboard-only navigation.
+  
+  i Safe fix: Suppress rule lint/a11y/useKeyWithClickEvents for this line.
+  
+     1  1 │   <>
+     2  2 │       <div onClick={() => {}} />
+     3    │ - ····<div··{...spread}·onClick={()·=>·{}}·/>
+        3 │ + ····{/**·biome-ignore·lint/a11y/useKeyWithClickEvents:·<explanation>·*/}
+        4 │ + ····<div··{...spread}·onClick={()·=>·{}}·/>
+     4  5 │       <div  {...spread} onClick={() => {}}>foo</div>
+     5  6 │       <div onClick={() => void 0} role={undefined} />
+  
+  i Safe fix: Suppress rule lint/a11y/useKeyWithClickEvents for the whole file.
+  
+        1 │ + /**·biome-ignore-all·lint/a11y/useKeyWithClickEvents:·<explanation>·*/
+     1  2 │   <>
+     2  3 │       <div onClick={() => {}} />
+  
+
+```
+
+```
+invalid.jsx:4:5 lint/a11y/useKeyWithClickEvents  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Enforce to have the onClick mouse event with the onKeyUp, the onKeyDown, or the onKeyPress keyboard event.
+  
+    2 │     <div onClick={() => {}} />
+    3 │     <div  {...spread} onClick={() => {}} />
+  > 4 │     <div  {...spread} onClick={() => {}}>foo</div>
+      │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    5 │     <div onClick={() => void 0} role={undefined} />
+    6 │     <div onClick={() => void 0} {...props} />
+  
+  i Actions triggered using mouse events should have corresponding keyboard events to account for keyboard-only navigation.
+  
+  i Safe fix: Suppress rule lint/a11y/useKeyWithClickEvents for this line.
+  
+     2  2 │       <div onClick={() => {}} />
+     3  3 │       <div  {...spread} onClick={() => {}} />
+     4    │ - ····<div··{...spread}·onClick={()·=>·{}}>foo</div>
+        4 │ + ····{/**·biome-ignore·lint/a11y/useKeyWithClickEvents:·<explanation>·*/}
+        5 │ + ····<div··{...spread}·onClick={()·=>·{}}>foo</div>
+     5  6 │       <div onClick={() => void 0} role={undefined} />
+     6  7 │       <div onClick={() => void 0} {...props} />
+  
+  i Safe fix: Suppress rule lint/a11y/useKeyWithClickEvents for the whole file.
+  
+        1 │ + /**·biome-ignore-all·lint/a11y/useKeyWithClickEvents:·<explanation>·*/
+     1  2 │   <>
+     2  3 │       <div onClick={() => {}} />
+  
+
+```
+
+```
+invalid.jsx:5:5 lint/a11y/useKeyWithClickEvents  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Enforce to have the onClick mouse event with the onKeyUp, the onKeyDown, or the onKeyPress keyboard event.
+  
+    3 │     <div  {...spread} onClick={() => {}} />
+    4 │     <div  {...spread} onClick={() => {}}>foo</div>
+  > 5 │     <div onClick={() => void 0} role={undefined} />
+      │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    6 │     <div onClick={() => void 0} {...props} />
+    7 │     <section onClick={() => void 0} />
+  
+  i Actions triggered using mouse events should have corresponding keyboard events to account for keyboard-only navigation.
+  
+  i Safe fix: Suppress rule lint/a11y/useKeyWithClickEvents for this line.
+  
+     3  3 │       <div  {...spread} onClick={() => {}} />
+     4  4 │       <div  {...spread} onClick={() => {}}>foo</div>
+     5    │ - ····<div·onClick={()·=>·void·0}·role={undefined}·/>
+        5 │ + ····{/**·biome-ignore·lint/a11y/useKeyWithClickEvents:·<explanation>·*/}
+        6 │ + ····<div·onClick={()·=>·void·0}·role={undefined}·/>
+     6  7 │       <div onClick={() => void 0} {...props} />
+     7  8 │       <section onClick={() => void 0} />
+  
+  i Safe fix: Suppress rule lint/a11y/useKeyWithClickEvents for the whole file.
+  
+        1 │ + /**·biome-ignore-all·lint/a11y/useKeyWithClickEvents:·<explanation>·*/
+     1  2 │   <>
+     2  3 │       <div onClick={() => {}} />
+  
+
+```
+
+```
+invalid.jsx:6:5 lint/a11y/useKeyWithClickEvents  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Enforce to have the onClick mouse event with the onKeyUp, the onKeyDown, or the onKeyPress keyboard event.
+  
+    4 │     <div  {...spread} onClick={() => {}}>foo</div>
+    5 │     <div onClick={() => void 0} role={undefined} />
+  > 6 │     <div onClick={() => void 0} {...props} />
+      │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    7 │     <section onClick={() => void 0} />
+    8 │     <main onClick={() => void 0} />
+  
+  i Actions triggered using mouse events should have corresponding keyboard events to account for keyboard-only navigation.
+  
+  i Safe fix: Suppress rule lint/a11y/useKeyWithClickEvents for this line.
+  
+     4  4 │       <div  {...spread} onClick={() => {}}>foo</div>
+     5  5 │       <div onClick={() => void 0} role={undefined} />
+     6    │ - ····<div·onClick={()·=>·void·0}·{...props}·/>
+        6 │ + ····{/**·biome-ignore·lint/a11y/useKeyWithClickEvents:·<explanation>·*/}
+        7 │ + ····<div·onClick={()·=>·void·0}·{...props}·/>
+     7  8 │       <section onClick={() => void 0} />
+     8  9 │       <main onClick={() => void 0} />
+  
+  i Safe fix: Suppress rule lint/a11y/useKeyWithClickEvents for the whole file.
+  
+        1 │ + /**·biome-ignore-all·lint/a11y/useKeyWithClickEvents:·<explanation>·*/
+     1  2 │   <>
+     2  3 │       <div onClick={() => {}} />
+  
+
+```
+
+```
+invalid.jsx:7:5 lint/a11y/useKeyWithClickEvents  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Enforce to have the onClick mouse event with the onKeyUp, the onKeyDown, or the onKeyPress keyboard event.
+  
+    5 │     <div onClick={() => void 0} role={undefined} />
+    6 │     <div onClick={() => void 0} {...props} />
+  > 7 │     <section onClick={() => void 0} />
+      │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    8 │     <main onClick={() => void 0} />
+    9 │     <article onClick={() => void 0} />
+  
+  i Actions triggered using mouse events should have corresponding keyboard events to account for keyboard-only navigation.
+  
+  i Safe fix: Suppress rule lint/a11y/useKeyWithClickEvents for this line.
+  
+     5  5 │       <div onClick={() => void 0} role={undefined} />
+     6  6 │       <div onClick={() => void 0} {...props} />
+     7    │ - ····<section·onClick={()·=>·void·0}·/>
+        7 │ + ····{/**·biome-ignore·lint/a11y/useKeyWithClickEvents:·<explanation>·*/}
+        8 │ + ····<section·onClick={()·=>·void·0}·/>
+     8  9 │       <main onClick={() => void 0} />
+     9 10 │       <article onClick={() => void 0} />
+  
+  i Safe fix: Suppress rule lint/a11y/useKeyWithClickEvents for the whole file.
+  
+        1 │ + /**·biome-ignore-all·lint/a11y/useKeyWithClickEvents:·<explanation>·*/
+     1  2 │   <>
+     2  3 │       <div onClick={() => {}} />
+  
+
+```
+
+```
+invalid.jsx:8:5 lint/a11y/useKeyWithClickEvents  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Enforce to have the onClick mouse event with the onKeyUp, the onKeyDown, or the onKeyPress keyboard event.
+  
+     6 │     <div onClick={() => void 0} {...props} />
+     7 │     <section onClick={() => void 0} />
+   > 8 │     <main onClick={() => void 0} />
+       │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+     9 │     <article onClick={() => void 0} />
+    10 │     <header onClick={() => void 0} />
+  
+  i Actions triggered using mouse events should have corresponding keyboard events to account for keyboard-only navigation.
+  
+  i Safe fix: Suppress rule lint/a11y/useKeyWithClickEvents for this line.
+  
+     6  6 │       <div onClick={() => void 0} {...props} />
+     7  7 │       <section onClick={() => void 0} />
+     8    │ - ····<main·onClick={()·=>·void·0}·/>
+        8 │ + ····{/**·biome-ignore·lint/a11y/useKeyWithClickEvents:·<explanation>·*/}
+        9 │ + ····<main·onClick={()·=>·void·0}·/>
+     9 10 │       <article onClick={() => void 0} />
+    10 11 │       <header onClick={() => void 0} />
+  
+  i Safe fix: Suppress rule lint/a11y/useKeyWithClickEvents for the whole file.
+  
+        1 │ + /**·biome-ignore-all·lint/a11y/useKeyWithClickEvents:·<explanation>·*/
+     1  2 │   <>
+     2  3 │       <div onClick={() => {}} />
+  
+
+```
+
+```
+invalid.jsx:9:5 lint/a11y/useKeyWithClickEvents  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Enforce to have the onClick mouse event with the onKeyUp, the onKeyDown, or the onKeyPress keyboard event.
+  
+     7 │     <section onClick={() => void 0} />
+     8 │     <main onClick={() => void 0} />
+   > 9 │     <article onClick={() => void 0} />
+       │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    10 │     <header onClick={() => void 0} />
+    11 │     <footer onClick={() => void 0} />
+  
+  i Actions triggered using mouse events should have corresponding keyboard events to account for keyboard-only navigation.
+  
+  i Safe fix: Suppress rule lint/a11y/useKeyWithClickEvents for this line.
+  
+     7  7 │       <section onClick={() => void 0} />
+     8  8 │       <main onClick={() => void 0} />
+     9    │ - ····<article·onClick={()·=>·void·0}·/>
+        9 │ + ····{/**·biome-ignore·lint/a11y/useKeyWithClickEvents:·<explanation>·*/}
+       10 │ + ····<article·onClick={()·=>·void·0}·/>
+    10 11 │       <header onClick={() => void 0} />
+    11 12 │       <footer onClick={() => void 0} />
+  
+  i Safe fix: Suppress rule lint/a11y/useKeyWithClickEvents for the whole file.
+  
+        1 │ + /**·biome-ignore-all·lint/a11y/useKeyWithClickEvents:·<explanation>·*/
+     1  2 │   <>
+     2  3 │       <div onClick={() => {}} />
+  
+
+```
+
+```
+invalid.jsx:11:5 lint/a11y/useKeyWithClickEvents  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Enforce to have the onClick mouse event with the onKeyUp, the onKeyDown, or the onKeyPress keyboard event.
+  
+     9 │     <article onClick={() => void 0} />
+    10 │     <header onClick={() => void 0} />
+  > 11 │     <footer onClick={() => void 0} />
+       │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    12 │     <div onClick={() => void 0} aria-hidden={false} />
+    13 │     {/* TODO:  */}
+  
+  i Actions triggered using mouse events should have corresponding keyboard events to account for keyboard-only navigation.
+  
+  i Safe fix: Suppress rule lint/a11y/useKeyWithClickEvents for this line.
+  
+     9  9 │       <article onClick={() => void 0} />
+    10 10 │       <header onClick={() => void 0} />
+    11    │ - ····<footer·onClick={()·=>·void·0}·/>
+       11 │ + ····{/**·biome-ignore·lint/a11y/useKeyWithClickEvents:·<explanation>·*/}
+       12 │ + ····<footer·onClick={()·=>·void·0}·/>
+    12 13 │       <div onClick={() => void 0} aria-hidden={false} />
+    13 14 │       {/* TODO:  */}
+  
+  i Safe fix: Suppress rule lint/a11y/useKeyWithClickEvents for the whole file.
+  
+        1 │ + /**·biome-ignore-all·lint/a11y/useKeyWithClickEvents:·<explanation>·*/
+     1  2 │   <>
+     2  3 │       <div onClick={() => {}} />
+  
+
+```
+
+```
+invalid.jsx:12:5 lint/a11y/useKeyWithClickEvents  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Enforce to have the onClick mouse event with the onKeyUp, the onKeyDown, or the onKeyPress keyboard event.
+  
+    10 │     <header onClick={() => void 0} />
+    11 │     <footer onClick={() => void 0} />
+  > 12 │     <div onClick={() => void 0} aria-hidden={false} />
+       │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    13 │     {/* TODO:  */}
+    14 │     {/* <a onClick={() => void 0} /> */}
+  
+  i Actions triggered using mouse events should have corresponding keyboard events to account for keyboard-only navigation.
+  
+  i Safe fix: Suppress rule lint/a11y/useKeyWithClickEvents for this line.
+  
+    10 10 │       <header onClick={() => void 0} />
+    11 11 │       <footer onClick={() => void 0} />
+    12    │ - ····<div·onClick={()·=>·void·0}·aria-hidden={false}·/>
+       12 │ + ····{/**·biome-ignore·lint/a11y/useKeyWithClickEvents:·<explanation>·*/}
+       13 │ + ····<div·onClick={()·=>·void·0}·aria-hidden={false}·/>
+    13 14 │       {/* TODO:  */}
+    14 15 │       {/* <a onClick={() => void 0} /> */}
+  
+  i Safe fix: Suppress rule lint/a11y/useKeyWithClickEvents for the whole file.
+  
+        1 │ + /**·biome-ignore-all·lint/a11y/useKeyWithClickEvents:·<explanation>·*/
+     1  2 │   <>
+     2  3 │       <div onClick={() => {}} />
+  
+
+```

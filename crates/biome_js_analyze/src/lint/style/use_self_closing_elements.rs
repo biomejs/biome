@@ -1,16 +1,22 @@
 use biome_analyze::{
-    context::RuleContext, declare_lint_rule, ActionCategory, Ast, FixKind, Rule, RuleDiagnostic,
-    RuleSource,
+    Ast, FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
+use biome_deserialize_macros::Deserializable;
+use biome_diagnostics::Severity;
 use biome_js_factory::make;
 use biome_js_syntax::{AnyJsxTag, JsSyntaxToken, JsxElement, JsxOpeningElementFields, T};
 use biome_rowan::{AstNode, AstNodeList, BatchMutationExt, TriviaPiece};
+#[cfg(feature = "schemars")]
+use schemars::JsonSchema;
+use serde::{Deserialize, Serialize};
 
 use crate::JsRuleAction;
 
 declare_lint_rule! {
-    /// Prevent extra closing tags for components without children
+    /// Prevent extra closing tags for components without children.
+    ///
+    /// JSX elements without children should be marked as self-closing. In JSX, it is valid for any element to be self-closing.
     ///
     /// ## Examples
     ///
@@ -30,36 +36,62 @@ declare_lint_rule! {
     ///
     /// ### Valid
     ///
-    /// ```js
+    /// ```jsx
     /// <div />
     ///```
     ///
-    /// ```js
+    /// ```jsx
     /// <div>child</div>
     ///```
     ///
-    /// ```js
+    /// ```jsx
     /// <Component />
     ///```
     ///
-    /// ```js
+    /// ```jsx
     /// <Component>child</Component>
     ///```
     ///
-    /// ```js
+    /// ```jsx
     /// <Foo.bar />
     ///```
     ///
-    /// ```js
+    /// ```jsx
     /// <Foo.bar>child</Foo.bar>
     ///```
+    ///
+    /// ## Options
+    ///
+    /// ### `ignoreHtmlElements`
+    ///
+    /// Default: `false`
+    ///
+    /// This option allows you to specify whether to ignore checking native HTML elements.
+    ///
+    /// In the following example, when the option is set to "true", it will not self close native HTML elements.
+    ///
+    /// ```json
+    /// {
+    ///     "//":"...",
+    ///     "options": {
+    ///         "ignoreHtmlElements": true
+    ///     }
+    /// }
+    /// ```
+    ///
+    /// ```jsx,ignore
+    /// <div></div>
+    /// ```
+    ///
+    ///
     pub UseSelfClosingElements {
         version: "1.0.0",
         name: "useSelfClosingElements",
         language: "js",
         sources: &[RuleSource::EslintStylistic("jsx-self-closing-comp")],
-        recommended: true,
-        fix_kind: FixKind::Unsafe,
+        recommended: false,
+        severity: Severity::Information,
+        fix_kind: FixKind::Safe,
     }
 }
 
@@ -67,10 +99,15 @@ impl Rule for UseSelfClosingElements {
     type Query = Ast<JsxElement>;
     type State = ();
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = Box<UseSelfClosingElementsOptions>;
 
     fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
-        if ctx.query().children().is_empty() {
+        let node = ctx.query();
+        let is_html_element = node
+            .opening_element()
+            .is_ok_and(|node| node.name().is_ok_and(|name| name.as_jsx_name().is_some()));
+
+        if node.children().is_empty() && !(ctx.options().ignore_html_elements && is_html_element) {
             Some(())
         } else {
             None
@@ -112,7 +149,7 @@ impl Rule for UseSelfClosingElements {
         let prev_token = r_angle_token.prev_token();
         let need_extra_whitespace = prev_token
             .as_ref()
-            .map_or(true, |token| !token.trailing_trivia().text().ends_with(' '));
+            .is_none_or(|token| !token.trailing_trivia().text().ends_with(' '));
 
         // drop the leading trivia of `r_angle_token`
         r_angle_token = r_angle_token.with_leading_trivia([]);
@@ -141,10 +178,19 @@ impl Rule for UseSelfClosingElements {
             AnyJsxTag::JsxSelfClosingElement(self_closing_element),
         );
         Some(JsRuleAction::new(
-            ActionCategory::QuickFix,
+            ctx.metadata().action_category(ctx.category(), ctx.group()),
             ctx.metadata().applicability(),
-            markup! { "Use a SelfClosingElement instead" }.to_owned(),
+            markup! { "Use a self-closing element instead." }.to_owned(),
             mutation,
         ))
     }
+}
+
+/// Options for the `useSelfClosingElements` rule.
+#[derive(Clone, Debug, Default, Deserialize, Deserializable, Eq, PartialEq, Serialize)]
+#[cfg_attr(feature = "schemars", derive(JsonSchema))]
+#[serde(rename_all = "camelCase", deny_unknown_fields, default)]
+pub struct UseSelfClosingElementsOptions {
+    // Whether or not to ignore checking native HTML elements. Default is false.
+    pub ignore_html_elements: bool,
 }

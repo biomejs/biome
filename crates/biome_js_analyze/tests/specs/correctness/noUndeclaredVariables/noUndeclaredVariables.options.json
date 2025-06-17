@@ -1,0 +1,14 @@
+{
+    "linter": {
+        "rules": {
+            "correctness": {
+                "noUndeclaredVariables": {
+                    "level": "on",
+                    "options": {
+                        "checkTypes": true
+                    }
+                }
+            }
+        }
+    }
+}

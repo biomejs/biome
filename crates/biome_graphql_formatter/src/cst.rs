@@ -1,6 +1,6 @@
 use crate::prelude::*;
 use biome_formatter::{FormatOwnedWithRule, FormatRefWithRule, FormatResult};
-use biome_graphql_syntax::{map_syntax_node, GraphqlSyntaxNode};
+use biome_graphql_syntax::{GraphqlSyntaxNode, map_syntax_node};
 
 #[derive(Debug, Copy, Clone, Default)]
 pub struct FormatGraphqlSyntaxNode;
@@ -14,7 +14,7 @@ impl FormatRule<GraphqlSyntaxNode> for FormatGraphqlSyntaxNode {
 }
 
 impl AsFormat<GraphqlFormatContext> for GraphqlSyntaxNode {
-    type Format<'a> = FormatRefWithRule<'a, GraphqlSyntaxNode, FormatGraphqlSyntaxNode>;
+    type Format<'a> = FormatRefWithRule<'a, Self, FormatGraphqlSyntaxNode>;
 
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(self, FormatGraphqlSyntaxNode)
@@ -22,7 +22,7 @@ impl AsFormat<GraphqlFormatContext> for GraphqlSyntaxNode {
 }
 
 impl IntoFormat<GraphqlFormatContext> for GraphqlSyntaxNode {
-    type Format = FormatOwnedWithRule<GraphqlSyntaxNode, FormatGraphqlSyntaxNode>;
+    type Format = FormatOwnedWithRule<Self, FormatGraphqlSyntaxNode>;
 
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(self, FormatGraphqlSyntaxNode)

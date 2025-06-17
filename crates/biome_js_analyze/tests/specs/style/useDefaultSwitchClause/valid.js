@@ -1,3 +1,4 @@
+/* should not generate diagnostics */
 switch (a) {
 	case 1:
 		break;

@@ -1,9 +1,9 @@
 use crate::options::{JsxRuntime, PreferredQuote};
-use crate::RuleMetadata;
-use crate::{registry::RuleRoot, FromServices, Queryable, Rule, RuleKey, ServiceBag};
+use crate::{FromServices, Queryable, Rule, RuleKey, ServiceBag, registry::RuleRoot};
+use crate::{GroupCategory, RuleCategory, RuleGroup, RuleMetadata};
 use biome_diagnostics::{Error, Result};
+use camino::Utf8Path;
 use std::ops::Deref;
-use std::path::Path;
 
 type RuleQueryResult<R> = <<R as Rule>::Query as Queryable>::Output;
 type RuleServiceBag<R> = <<R as Rule>::Query as Queryable>::Services;
@@ -14,43 +14,59 @@ pub struct RuleContext<'a, R: Rule> {
     bag: &'a ServiceBag,
     services: RuleServiceBag<R>,
     globals: &'a [&'a str],
-    file_path: &'a Path,
+    file_path: &'a Utf8Path,
     options: &'a R::Options,
     preferred_quote: &'a PreferredQuote,
+    preferred_jsx_quote: &'a PreferredQuote,
     jsx_runtime: Option<JsxRuntime>,
+    css_modules: bool,
 }
 
 impl<'a, R> RuleContext<'a, R>
 where
     R: Rule + Sized + 'static,
 {
-    #[allow(clippy::too_many_arguments)]
+    #[expect(clippy::too_many_arguments)]
     pub fn new(
         query_result: &'a RuleQueryResult<R>,
         root: &'a RuleRoot<R>,
         services: &'a ServiceBag,
         globals: &'a [&'a str],
-        file_path: &'a Path,
+        file_path: &'a Utf8Path,
         options: &'a R::Options,
         preferred_quote: &'a PreferredQuote,
+        preferred_jsx_quote: &'a PreferredQuote,
         jsx_runtime: Option<JsxRuntime>,
+        css_modules: bool,
     ) -> Result<Self, Error> {
         let rule_key = RuleKey::rule::<R>();
         Ok(Self {
             query_result,
             root,
             bag: services,
-            services: FromServices::from_services(&rule_key, services)?,
+            services: FromServices::from_services(&rule_key, &R::METADATA, services)?,
             globals,
             file_path,
             options,
             preferred_quote,
+            preferred_jsx_quote,
             jsx_runtime,
+            css_modules,
         })
     }
 
     pub fn query(&self) -> &RuleQueryResult<R> {
         self.query_result
+    }
+
+    /// Returns the group that belongs to the current rule
+    pub fn group(&self) -> &'static str {
+        <R::Group as RuleGroup>::NAME
+    }
+
+    /// Returns the category that belongs to the current rule
+    pub fn category(&self) -> RuleCategory {
+        <<R::Group as RuleGroup>::Category as GroupCategory>::CATEGORY
     }
 
     /// Returns a clone of the AST root
@@ -149,13 +165,22 @@ where
     }
 
     /// The file path of the current file
-    pub fn file_path(&self) -> &Path {
+    pub fn file_path(&self) -> &Utf8Path {
         self.file_path
     }
 
     /// Returns the preferred quote that should be used when providing code actions
     pub fn as_preferred_quote(&self) -> &PreferredQuote {
         self.preferred_quote
+    }
+
+    /// Returns the preferred JSX quote that should be used when providing code actions
+    pub fn as_preferred_jsx_quote(&self) -> &PreferredQuote {
+        self.preferred_jsx_quote
+    }
+
+    pub fn is_css_modules(&self) -> bool {
+        self.css_modules
     }
 
     /// Attempts to retrieve a service from the current context
@@ -168,7 +193,7 @@ where
     }
 }
 
-impl<'a, R> Deref for RuleContext<'a, R>
+impl<R> Deref for RuleContext<'_, R>
 where
     R: Rule,
 {

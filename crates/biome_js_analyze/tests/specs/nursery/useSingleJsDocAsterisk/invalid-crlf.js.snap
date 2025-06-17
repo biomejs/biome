@@ -1,0 +1,183 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-crlf.js
+---
+# Input
+```js
+/**
+ * End of comment double asterisk
+ **/
+
+/**
+ *
+ ** Middle
+ */
+
+/**
+ *
+ **
+ *
+ */
+
+/**
+ *
+ * *Asterisk right next to the text
+ */
+
+/**
+ * Desc.
+ *
+ abc * **/
+
+/** @someTag SameLine2 Double **/
+
+/** SameLine DoubleWithSpace * */
+
+```
+
+# Diagnostics
+```
+invalid-crlf.js:3:1 lint/nursery/useSingleJsDocAsterisk  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i JSDoc comment line should end with a single asterisk.
+  
+    1 │ /**
+    2 │  * End of comment double asterisk
+  > 3 │  **/
+      │ ^^^^
+    4 │ 
+    5 │ /**
+  
+  i In JSDoc comments, extra asterisks beyond the first are unnecessary and are often added by mistake.
+  
+  i Unsafe fix: Remove additional asterisks.
+  
+    3 │ ·**/
+      │   - 
+
+```
+
+```
+invalid-crlf.js:7:1 lint/nursery/useSingleJsDocAsterisk  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i JSDoc comment line should start with a single asterisk.
+  
+    5 │ /**
+    6 │  *
+  > 7 │  ** Middle
+      │ ^^^^^^^^^^
+    8 │  */
+    9 │ 
+  
+  i In JSDoc comments, extra asterisks beyond the first are unnecessary and are often added by mistake.
+  
+  i Unsafe fix: Remove additional asterisks.
+  
+    7 │ ·**·Middle
+      │   -       
+
+```
+
+```
+invalid-crlf.js:12:1 lint/nursery/useSingleJsDocAsterisk  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i JSDoc comment line should start with a single asterisk.
+  
+    10 │ /**
+    11 │  *
+  > 12 │  **
+       │ ^^^
+    13 │  *
+    14 │  */
+  
+  i In JSDoc comments, extra asterisks beyond the first are unnecessary and are often added by mistake.
+  
+  i Unsafe fix: Remove additional asterisks.
+  
+    12 │ ·**
+       │   -
+
+```
+
+```
+invalid-crlf.js:18:1 lint/nursery/useSingleJsDocAsterisk  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i JSDoc comment line should start with a single asterisk.
+  
+    16 │ /**
+    17 │  *
+  > 18 │  * *Asterisk right next to the text
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    19 │  */
+    20 │ 
+  
+  i In JSDoc comments, extra asterisks beyond the first are unnecessary and are often added by mistake.
+  
+  i Unsafe fix: Remove additional asterisks.
+  
+    18 │ ·*·*Asterisk·right·next·to·the·text
+       │   --                               
+
+```
+
+```
+invalid-crlf.js:24:1 lint/nursery/useSingleJsDocAsterisk  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i JSDoc comment line should end with a single asterisk.
+  
+    22 │  * Desc.
+    23 │  *
+  > 24 │  abc * **/
+       │ ^^^^^^^^^^
+    25 │ 
+    26 │ /** @someTag SameLine2 Double **/
+  
+  i In JSDoc comments, extra asterisks beyond the first are unnecessary and are often added by mistake.
+  
+  i Unsafe fix: Remove additional asterisks.
+  
+    24 │ ·abc·*·**/
+       │       --- 
+
+```
+
+```
+invalid-crlf.js:26:1 lint/nursery/useSingleJsDocAsterisk  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i JSDoc comment line should end with a single asterisk.
+  
+    24 │  abc * **/
+    25 │ 
+  > 26 │ /** @someTag SameLine2 Double **/
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    27 │ 
+    28 │ /** SameLine DoubleWithSpace * */
+  
+  i In JSDoc comments, extra asterisks beyond the first are unnecessary and are often added by mistake.
+  
+  i Unsafe fix: Remove additional asterisks.
+  
+    26 │ /**·@someTag·SameLine2·Double·**/
+       │                                - 
+
+```
+
+```
+invalid-crlf.js:28:1 lint/nursery/useSingleJsDocAsterisk  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i JSDoc comment line should end with a single asterisk.
+  
+    26 │ /** @someTag SameLine2 Double **/
+    27 │ 
+  > 28 │ /** SameLine DoubleWithSpace * */
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    29 │ 
+  
+  i In JSDoc comments, extra asterisks beyond the first are unnecessary and are often added by mistake.
+  
+  i Unsafe fix: Remove additional asterisks.
+  
+    28 │ /**·SameLine·DoubleWithSpace·*·*/
+       │                               -- 
+
+```

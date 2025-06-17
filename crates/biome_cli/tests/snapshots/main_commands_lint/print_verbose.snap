@@ -1,6 +1,6 @@
 ---
 source: crates/biome_cli/tests/snap_test.rs
-expression: content
+expression: redactor(content)
 ---
 ## `check.js`
 
@@ -23,26 +23,6 @@ lint ━━━━━━━━━━━━━━━━━━━━━━━━━
 # Emitted Messages
 
 ```block
-check.js:1:1 lint/style/useWhile  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Use a while loop instead of a for loop.
-  
-  > 1 │ for(;true;);
-      │ ^^^^^^^^^^^
-    2 │ 
-  
-  i Prefer a while loop over a for loop without initialization and update.
-  
-  i Safe fix: Use a while loop.
-  
-    1   │ - for(;true;);
-      1 │ + while(true);
-    2 2 │   
-  
-
-```
-
-```block
 check.js:1:6 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Unexpected constant condition.
@@ -52,11 +32,6 @@ check.js:1:6 lint/correctness/noConstantCondition ━━━━━━━━━━
     2 │ 
   
 
-```
-
-```block
-Checked 1 file in <TIME>. No fixes applied.
-Found 2 errors.
 ```
 
 ```block
@@ -77,4 +52,10 @@ Found 2 errors.
   ! The list is empty.
   
 
+```
+
+```block
+Scanned project folder in <TIME>.
+Checked 1 file in <TIME>. No fixes applied.
+Found 1 error.
 ```

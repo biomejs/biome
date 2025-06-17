@@ -1,11 +1,11 @@
-use biome_console::MarkupBuf;
+use biome_console::{MarkupBuf, markup};
 use biome_diagnostics::{
-    advice::CodeSuggestionAdvice, category, Advices, Category, Diagnostic, DiagnosticExt,
-    DiagnosticTags, Error, Location, Severity, Visit,
+    Advices, Category, Diagnostic, DiagnosticExt, DiagnosticTags, Error, Location, LogCategory,
+    MessageAndDescription, Severity, Visit, advice::CodeSuggestionAdvice, category,
 };
 use biome_rowan::TextRange;
 use std::borrow::Cow;
-use std::fmt::{Debug, Display, Formatter};
+use std::fmt::{Debug, Formatter};
 
 use crate::rule::RuleDiagnostic;
 
@@ -26,7 +26,7 @@ pub struct AnalyzerDiagnostic {
 impl From<RuleDiagnostic> for AnalyzerDiagnostic {
     fn from(rule_diagnostic: RuleDiagnostic) -> Self {
         Self {
-            kind: DiagnosticKind::Rule(rule_diagnostic),
+            kind: DiagnosticKind::Rule(Box::new(rule_diagnostic)),
             code_suggestion_list: vec![],
         }
     }
@@ -35,7 +35,7 @@ impl From<RuleDiagnostic> for AnalyzerDiagnostic {
 #[derive(Debug)]
 enum DiagnosticKind {
     /// It holds various info related to diagnostics emitted by the rules
-    Rule(RuleDiagnostic),
+    Rule(Box<RuleDiagnostic>),
     /// We have raw information to create a basic [Diagnostic]
     Raw(Error),
 }
@@ -65,7 +65,7 @@ impl Diagnostic for AnalyzerDiagnostic {
 
     fn severity(&self) -> Severity {
         match &self.kind {
-            DiagnosticKind::Rule { .. } => Severity::Error,
+            DiagnosticKind::Rule(diagnostic) => diagnostic.severity(),
             DiagnosticKind::Raw(error) => error.severity(),
         }
     }
@@ -141,35 +141,93 @@ impl AnalyzerDiagnostic {
 
 #[derive(Debug, Diagnostic, Clone)]
 #[diagnostic(severity = Warning)]
-pub struct SuppressionDiagnostic {
+pub struct AnalyzerSuppressionDiagnostic {
     #[category]
     category: &'static Category,
     #[location(span)]
     range: TextRange,
     #[message]
     #[description]
-    message: String,
+    message: MessageAndDescription,
     #[tags]
     tags: DiagnosticTags,
+
+    #[advice]
+    advice: SuppressionAdvice,
 }
 
-impl SuppressionDiagnostic {
+impl AnalyzerSuppressionDiagnostic {
     pub(crate) fn new(
         category: &'static Category,
         range: TextRange,
-        message: impl Display,
+        message: impl biome_console::fmt::Display,
     ) -> Self {
         Self {
             category,
             range,
-            message: message.to_string(),
+            message: MessageAndDescription::from(markup! { {message} }.to_owned()),
             tags: DiagnosticTags::empty(),
+            advice: SuppressionAdvice::default(),
         }
     }
 
-    pub(crate) fn with_tags(mut self, tags: DiagnosticTags) -> Self {
-        self.tags |= tags;
+    pub(crate) fn note(mut self, message: MarkupBuf, range: impl Into<TextRange>) -> Self {
+        self.advice.messages.push((message, Some(range.into())));
         self
+    }
+
+    pub(crate) fn hint(mut self, message: MarkupBuf) -> Self {
+        self.advice.messages.push((message, None));
+        self
+    }
+
+    pub(crate) fn new_unknown_lint_rule(group: &str, rule: &str, range: TextRange) -> Self {
+        Self::new(
+            category!("suppressions/unknownRule"),
+            range,
+            format_args!("Unknown lint rule {group}/{rule} in suppression comment"),
+        )
+    }
+
+    pub(crate) fn new_unknown_lint_group(group: &str, range: TextRange) -> Self {
+        Self::new(
+            category!("suppressions/unknownGroup"),
+            range,
+            format_args!("Unknown lint group {group} in suppression comment"),
+        )
+    }
+
+    pub(crate) fn new_unknown_assist_group(group: &str, range: TextRange) -> Self {
+        Self::new(
+            category!("suppressions/unknownGroup"),
+            range,
+            format_args!("Unknown assist group {group} in suppression comment"),
+        )
+    }
+
+    pub(crate) fn new_unknown_assist_action(group: &str, action: &str, range: TextRange) -> Self {
+        Self::new(
+            category!("suppressions/unknownAction"),
+            range,
+            format_args!("Unknown assist action {group}/{action} in suppression comment"),
+        )
+    }
+}
+
+#[derive(Debug, Default, Clone)]
+struct SuppressionAdvice {
+    messages: Vec<(MarkupBuf, Option<TextRange>)>,
+}
+
+impl Advices for SuppressionAdvice {
+    fn record(&self, visitor: &mut dyn Visit) -> std::io::Result<()> {
+        for (message, range) in &self.messages {
+            visitor.record_log(LogCategory::Info, &markup! {{message}})?;
+            let location = Location::builder().span(range);
+
+            visitor.record_frame(location.build())?
+        }
+        Ok(())
     }
 }
 
@@ -189,7 +247,7 @@ impl Diagnostic for RuleError {}
 impl std::fmt::Display for RuleError {
     fn fmt(&self, fmt: &mut std::fmt::Formatter) -> std::fmt::Result {
         match self {
-            RuleError::ReplacedRootWithNonRootError {
+            Self::ReplacedRootWithNonRootError {
                 rule_name: Some((group, rule)),
             } => {
                 std::write!(
@@ -197,7 +255,7 @@ impl std::fmt::Display for RuleError {
                     "the rule '{group}/{rule}' replaced the root of the file with a non-root node."
                 )
             }
-            RuleError::ReplacedRootWithNonRootError { rule_name: None } => {
+            Self::ReplacedRootWithNonRootError { rule_name: None } => {
                 std::write!(
                     fmt,
                     "a code action replaced the root of the file with a non-root node."
@@ -210,7 +268,7 @@ impl std::fmt::Display for RuleError {
 impl biome_console::fmt::Display for RuleError {
     fn fmt(&self, fmt: &mut biome_console::fmt::Formatter) -> std::io::Result<()> {
         match self {
-            RuleError::ReplacedRootWithNonRootError {
+            Self::ReplacedRootWithNonRootError {
                 rule_name: Some((group, rule)),
             } => {
                 std::write!(
@@ -218,7 +276,7 @@ impl biome_console::fmt::Display for RuleError {
                     "the rule '{group}/{rule}' replaced the root of the file with a non-root node."
                 )
             }
-            RuleError::ReplacedRootWithNonRootError { rule_name: None } => {
+            Self::ReplacedRootWithNonRootError { rule_name: None } => {
                 std::write!(
                     fmt,
                     "a code action replaced the root of the file with a non-root node."

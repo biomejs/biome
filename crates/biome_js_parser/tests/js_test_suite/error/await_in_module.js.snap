@@ -1,0 +1,152 @@
+---
+source: crates/biome_js_parser/tests/spec_test.rs
+expression: snapshot
+snapshot_kind: text
+---
+## Input
+
+```js
+let await = 10;
+console.log(await);
+
+```
+
+
+## AST
+
+```
+JsModule {
+    bom_token: missing (optional),
+    interpreter_token: missing (optional),
+    directives: JsDirectiveList [],
+    items: JsModuleItemList [
+        JsVariableStatement {
+            declaration: JsVariableDeclaration {
+                await_token: missing (optional),
+                kind: LET_KW@0..4 "let" [] [Whitespace(" ")],
+                declarators: JsVariableDeclaratorList [
+                    JsVariableDeclarator {
+                        id: JsBogusBinding {
+                            items: [
+                                IDENT@4..10 "await" [] [Whitespace(" ")],
+                            ],
+                        },
+                        variable_annotation: missing (optional),
+                        initializer: JsInitializerClause {
+                            eq_token: EQ@10..12 "=" [] [Whitespace(" ")],
+                            expression: JsNumberLiteralExpression {
+                                value_token: JS_NUMBER_LITERAL@12..14 "10" [] [],
+                            },
+                        },
+                    },
+                ],
+            },
+            semicolon_token: SEMICOLON@14..15 ";" [] [],
+        },
+        JsExpressionStatement {
+            expression: JsCallExpression {
+                callee: JsStaticMemberExpression {
+                    object: JsIdentifierExpression {
+                        name: JsReferenceIdentifier {
+                            value_token: IDENT@15..23 "console" [Newline("\n")] [],
+                        },
+                    },
+                    operator_token: DOT@23..24 "." [] [],
+                    member: JsName {
+                        value_token: IDENT@24..27 "log" [] [],
+                    },
+                },
+                optional_chain_token: missing (optional),
+                type_arguments: missing (optional),
+                arguments: JsCallArguments {
+                    l_paren_token: L_PAREN@27..28 "(" [] [],
+                    args: JsCallArgumentList [
+                        JsAwaitExpression {
+                            await_token: AWAIT_KW@28..33 "await" [] [],
+                            argument: missing (required),
+                        },
+                    ],
+                    r_paren_token: R_PAREN@33..34 ")" [] [],
+                },
+            },
+            semicolon_token: SEMICOLON@34..35 ";" [] [],
+        },
+    ],
+    eof_token: EOF@35..36 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: JS_MODULE@0..36
+  0: (empty)
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..35
+    0: JS_VARIABLE_STATEMENT@0..15
+      0: JS_VARIABLE_DECLARATION@0..14
+        0: (empty)
+        1: LET_KW@0..4 "let" [] [Whitespace(" ")]
+        2: JS_VARIABLE_DECLARATOR_LIST@4..14
+          0: JS_VARIABLE_DECLARATOR@4..14
+            0: JS_BOGUS_BINDING@4..10
+              0: IDENT@4..10 "await" [] [Whitespace(" ")]
+            1: (empty)
+            2: JS_INITIALIZER_CLAUSE@10..14
+              0: EQ@10..12 "=" [] [Whitespace(" ")]
+              1: JS_NUMBER_LITERAL_EXPRESSION@12..14
+                0: JS_NUMBER_LITERAL@12..14 "10" [] []
+      1: SEMICOLON@14..15 ";" [] []
+    1: JS_EXPRESSION_STATEMENT@15..35
+      0: JS_CALL_EXPRESSION@15..34
+        0: JS_STATIC_MEMBER_EXPRESSION@15..27
+          0: JS_IDENTIFIER_EXPRESSION@15..23
+            0: JS_REFERENCE_IDENTIFIER@15..23
+              0: IDENT@15..23 "console" [Newline("\n")] []
+          1: DOT@23..24 "." [] []
+          2: JS_NAME@24..27
+            0: IDENT@24..27 "log" [] []
+        1: (empty)
+        2: (empty)
+        3: JS_CALL_ARGUMENTS@27..34
+          0: L_PAREN@27..28 "(" [] []
+          1: JS_CALL_ARGUMENT_LIST@28..33
+            0: JS_AWAIT_EXPRESSION@28..33
+              0: AWAIT_KW@28..33 "await" [] []
+              1: (empty)
+          2: R_PAREN@33..34 ")" [] []
+      1: SEMICOLON@34..35 ";" [] []
+  4: EOF@35..36 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+await_in_module.js:1:5 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Illegal use of `await` as an identifier in an async context
+  
+  > 1 │ let await = 10;
+      │     ^^^^^
+    2 │ console.log(await);
+    3 │ 
+  
+await_in_module.js:2:18 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected an unary expression but instead found ')'.
+  
+    1 │ let await = 10;
+  > 2 │ console.log(await);
+      │                  ^
+    3 │ 
+  
+  i Expected an unary expression here.
+  
+    1 │ let await = 10;
+  > 2 │ console.log(await);
+      │                  ^
+    3 │ 
+  
+```

@@ -6,7 +6,7 @@ info: js/module/assignment/assignment_ignore.js
 
 ```js
 let {
-	/* rome-ignore format: Test that the property doesn't get formatted */
+	/* biome-ignore format: Test that the property doesn't get formatted */
 	someProperty:    alias
 } = { someProperty: 20 };
 
@@ -33,11 +33,12 @@ Arrow parentheses: Always
 Bracket spacing: true
 Bracket same line: false
 Attribute Position: Auto
+Expand lists: Auto
 -----
 
 ```js
 let {
-	/* rome-ignore format: Test that the property doesn't get formatted */
+	/* biome-ignore format: Test that the property doesn't get formatted */
 	someProperty:    alias,
 } = { someProperty: 20 };
 ```

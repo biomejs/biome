@@ -6,9 +6,10 @@ use biome_parser::diagnostic::expected_token;
 use biome_parser::parse_lists::ParseNodeList;
 use biome_rowan::TextRange;
 
+use crate::JsSyntaxFeature::TypeScript;
 use crate::lexer::{JsLexContext, JsReLexContext, JsSyntaxKind, T};
 use crate::syntax::expr::{
-    is_nth_at_identifier_or_keyword, parse_expression, parse_name, ExpressionContext,
+    ExpressionContext, is_nth_at_identifier_or_keyword, parse_expression, parse_name,
 };
 use crate::syntax::js_parse_error::{expected_expression, expected_identifier};
 use crate::syntax::jsx::jsx_parse_errors::{
@@ -16,10 +17,10 @@ use crate::syntax::jsx::jsx_parse_errors::{
     jsx_expected_closing_tag,
 };
 use crate::syntax::typescript::TypeContext;
-use crate::JsSyntaxFeature::TypeScript;
-use crate::{parser::RecoveryResult, JsParser, ParseRecoveryTokenSet, ParsedSyntax};
 use crate::{Absent, Present};
+use crate::{JsParser, ParseRecoveryTokenSet, ParsedSyntax, parser::RecoveryResult};
 
+use super::metavariable::{is_at_metavariable, is_nth_at_metavariable, parse_metavariable};
 use super::typescript::parse_ts_type_arguments;
 
 // test jsx jsx_element_on_return
@@ -52,7 +53,10 @@ pub(crate) fn parse_jsx_tag_expression(p: &mut JsParser) -> ParsedSyntax {
         return Absent;
     }
 
-    if !p.nth_at(1, T![>]) && !is_nth_at_identifier_or_keyword(p, 1) {
+    if !p.nth_at(1, T![>])
+        && !is_nth_at_identifier_or_keyword(p, 1)
+        && !is_nth_at_metavariable(p, 1)
+    {
         return Absent;
     }
 
@@ -314,6 +318,7 @@ impl ParseNodeList for JsxChildrenList {
             // </a>
             T![<] => parse_any_jsx_tag(p, false),
             T!['{'] => parse_jsx_expression_child(p),
+            JsSyntaxKind::GRIT_METAVARIABLE => parse_metavariable(p),
             // test jsx jsx_text
             // <a>test</a>;
             // <a>   whitespace handling </a>;
@@ -471,6 +476,8 @@ fn parse_jsx_name(p: &mut JsParser) -> ParsedSyntax {
         let name = p.start();
         p.bump(JSX_IDENT);
         Present(name.complete(p, JSX_NAME))
+    } else if is_at_metavariable(p) {
+        parse_metavariable(p)
     } else {
         Absent
     }
@@ -494,6 +501,8 @@ impl ParseNodeList for JsxAttributeList {
     fn parse_element(&mut self, p: &mut JsParser) -> ParsedSyntax {
         if matches!(p.cur(), T!['{'] | T![...]) {
             parse_jsx_spread_attribute(p)
+        } else if is_at_metavariable(p) {
+            parse_metavariable(p)
         } else {
             parse_jsx_attribute(p)
         }

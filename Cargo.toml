@@ -1,7 +1,7 @@
 [workspace]
 # Use the newer version of the cargo resolver
 # https://doc.rust-lang.org/cargo/reference/resolver.html#resolver-versions
-members  = ["crates/*", "xtask/bench", "xtask/codegen", "xtask/coverage", "xtask/libs_bench", "xtask/rules_check"]
+members  = ["crates/*", "xtask/codegen", "xtask/coverage", "xtask/rules_check"]
 resolver = "2"
 
 [workspace.lints.rust]
@@ -13,6 +13,7 @@ unused_lifetimes                       = "warn"
 unused_macro_rules                     = "warn"
 
 [workspace.lints.clippy]
+allow_attributes        = "deny"
 cargo_common_metadata   = "allow"
 empty_docs              = "allow" # there are some false positives inside biome_wasm
 multiple_crate_versions = "allow"
@@ -85,7 +86,7 @@ verbose_file_reads                = "warn"
 [workspace.package]
 authors    = ["Biome Developers and Contributors"]
 categories = ["development-tools", "web-programming"]
-edition    = "2021"
+edition    = "2024"
 homepage   = "https://biomejs.dev/"
 keywords   = ["parser", "linter", "formatter"]
 license    = "MIT OR Apache-2.0"
@@ -115,6 +116,7 @@ biome_diagnostics_categories = { version = "0.5.7", path = "./crates/biome_diagn
 biome_diagnostics_macros     = { version = "0.5.7", path = "./crates/biome_diagnostics_macros" }
 biome_formatter              = { version = "0.5.7", path = "./crates/biome_formatter" }
 biome_fs                     = { version = "0.5.7", path = "./crates/biome_fs" }
+biome_glob                   = { version = "0.1.0", path = "./crates/biome_glob" }
 biome_graphql_analyze        = { version = "0.0.1", path = "./crates/biome_graphql_analyze" }
 biome_graphql_factory        = { version = "0.1.0", path = "./crates/biome_graphql_factory" }
 biome_graphql_formatter      = { version = "0.1.0", path = "./crates/biome_graphql_formatter" }
@@ -136,21 +138,31 @@ biome_js_formatter           = { version = "0.5.7", path = "./crates/biome_js_fo
 biome_js_parser              = { version = "0.5.7", path = "./crates/biome_js_parser" }
 biome_js_semantic            = { version = "0.5.7", path = "./crates/biome_js_semantic" }
 biome_js_syntax              = { version = "0.5.7", path = "./crates/biome_js_syntax" }
+biome_js_type_info           = { version = "0.0.1", path = "./crates/biome_js_type_info" }
+biome_js_type_info_macros    = { version = "0.0.1", path = "./crates/biome_js_type_info_macros" }
+biome_jsdoc_comment          = { version = "0.0.1", path = "./crates/biome_jsdoc_comment" }
 biome_json_analyze           = { version = "0.5.7", path = "./crates/biome_json_analyze" }
 biome_json_factory           = { version = "0.5.7", path = "./crates/biome_json_factory" }
 biome_json_formatter         = { version = "0.5.7", path = "./crates/biome_json_formatter" }
 biome_json_parser            = { version = "0.5.7", path = "./crates/biome_json_parser" }
 biome_json_syntax            = { version = "0.5.7", path = "./crates/biome_json_syntax" }
+biome_json_value             = { version = "0.1.0", path = "./crates/biome_json_value" }
+biome_lsp_converters         = { version = "0.1.0", path = "./crates/biome_lsp_converters" }
 biome_markdown_factory       = { version = "0.0.1", path = "./crates/biome_markdown_factory" }
 biome_markdown_parser        = { version = "0.0.1", path = "./crates/biome_markdown_parser" }
 biome_markdown_syntax        = { version = "0.0.1", path = "./crates/biome_markdown_syntax" }
+biome_module_graph           = { version = "0.0.1", path = "./crates/biome_module_graph" }
+biome_plugin_loader          = { version = "0.0.1", path = "./crates/biome_plugin_loader" }
+biome_project_layout         = { version = "0.0.1", path = "./crates/biome_project_layout" }
+biome_resolver               = { version = "0.1.0", path = "./crates/biome_resolver" }
+biome_ungrammar              = { version = "0.3.1", path = "./crates/biome_ungrammar" }
 biome_yaml_factory           = { version = "0.0.1", path = "./crates/biome_yaml_factory" }
 biome_yaml_parser            = { version = "0.0.1", path = "./crates/biome_yaml_parser" }
 biome_yaml_syntax            = { version = "0.0.1", path = "./crates/biome_yaml_syntax" }
 
 biome_markup        = { version = "0.5.7", path = "./crates/biome_markup" }
+biome_package       = { version = "0.5.7", path = "./crates/biome_package" }
 biome_parser        = { version = "0.5.7", path = "./crates/biome_parser" }
-biome_project       = { version = "0.5.7", path = "./crates/biome_project" }
 biome_rowan         = { version = "0.5.7", path = "./crates/biome_rowan" }
 biome_string_case   = { version = "0.5.7", path = "./crates/biome_string_case" }
 biome_suppression   = { version = "0.5.7", path = "./crates/biome_suppression" }
@@ -167,43 +179,57 @@ biome_lsp            = { path = "./crates/biome_lsp" }
 biome_migrate        = { path = "./crates/biome_migrate" }
 biome_service        = { path = "./crates/biome_service" }
 biome_test_utils     = { path = "./crates/biome_test_utils" }
-biome_ungrammar      = { path = "./crates/biome_ungrammar" }
 tests_macros         = { path = "./crates/tests_macros" }
 
 # Crates needed in the workspace
-anyhow             = "1.0.89"
-bpaf               = { version = "0.9.15", features = ["derive"] }
-countme            = "3.0.1"
-crossbeam          = "0.8.4"
-dashmap            = "6.1.0"
-enumflags2         = "0.7.10"
-getrandom          = "0.2.15"
-ignore             = "0.4.23"
-indexmap           = { version = "2.6.0", features = ["serde"] }
-insta              = "1.40.0"
-natord             = "1.0.9"
-oxc_resolver       = "1.12.0"
-proc-macro2        = "1.0.86"
-quickcheck         = "1.0.3"
-quickcheck_macros  = "1.0.0"
-quote              = "1.0.37"
-rayon              = "1.10.0"
-regex              = "1.11.0"
-rustc-hash         = "1.1.0"
-schemars           = { version = "0.8.21", features = ["indexmap2", "smallvec"] }
-serde              = { version = "1.0.210", features = ["derive"] }
-serde_ini          = "0.2.0"
-serde_json         = "1.0.128"
-similar            = "2.6.0"
-slotmap            = "1.0.7"
-smallvec           = { version = "1.13.2", features = ["union", "const_new", "serde"] }
-syn                = "1.0.109"
-termcolor          = "1.4.1"
-tokio              = "1.40.0"
-tracing            = { version = "0.1.40", default-features = false, features = ["std"] }
-tracing-subscriber = "0.3.18"
-unicode-bom        = "2.0.3"
-unicode-width      = "0.1.12"
+anyhow               = "1.0.98"
+bpaf                 = { version = "0.9.20", features = ["derive"] }
+camino               = "1.1.10"
+cfg-if               = "1.0.1"
+countme              = "3.0.1"
+crossbeam            = "0.8.4"
+dashmap              = "6.1.0"
+enumflags2           = "0.7.12"
+getrandom            = "0.2.15"
+globset              = "0.4.16"
+grit-pattern-matcher = "0.5.1"
+grit-util            = "0.5.1"
+hashbrown            = { version = "0.15.4", default-features = false }
+ignore               = "0.4.23"
+indexmap             = { version = "2.9.0" }
+insta                = "1.43.1"
+mimalloc             = "0.1.46"
+papaya               = "0.2"
+path-absolutize      = { version = "3.1.1", optional = false, features = ["use_unix_paths_on_wasm"] }
+proc-macro-error2    = { version = "2.0.1", default-features = false }
+proc-macro2          = "1.0.95"
+quickcheck           = "1.0.3"
+quickcheck_macros    = "1.1.0"
+quote                = "1.0.40"
+rayon                = "1.10.0"
+regex                = "1.11.1"
+rust-lapper          = "1.1.0"
+rustc-hash           = "2.1.1"
+schemars             = { version = "0.8.22", features = ["indexmap2", "smallvec"] }
+serde                = { version = "1.0.219", features = ["derive"] }
+serde_json           = "1.0.140"
+similar              = "2.7.0"
+smallvec             = { version = "1.15.1", features = ["union", "const_new", "serde"] }
+static_assertions    = "1.1"
+syn                  = "1.0.109"
+termcolor            = "1.4.1"
+terminal_size        = "0.4.2"
+tikv-jemallocator    = "0.6.0"
+tokio                = "1.45.1"
+tower                = "0.5.2"
+tower-lsp-server     = "0.21.1"
+tracing              = { version = "0.1.41", default-features = false, features = ["std", "attributes"] }
+tracing-subscriber   = "0.3.19"
+unicode-bom          = "2.0.3"
+unicode-width        = "0.1.12"
+ureq                 = "3.0.11"
+url                  = "2.5.4"
+
 [profile.dev.package.biome_wasm]
 debug     = true
 opt-level = "s"

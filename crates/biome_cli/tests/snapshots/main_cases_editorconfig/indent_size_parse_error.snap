@@ -1,0 +1,29 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+snapshot_kind: text
+---
+## `.editorconfig`
+
+```editorconfig
+
+  [*]
+  indent_size = 1000
+
+```
+
+# Termination Message
+
+```block
+.editorconfig:3:17 configuration ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × number too large to fit in target type
+  
+    2 │   [*]
+  > 3 │   indent_size = 1000
+      │                 ^^^^
+    4 │ 
+  
+
+
+```

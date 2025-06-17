@@ -2,7 +2,7 @@
 //! Based on the rust analyzer parser and ast definitions
 
 use crate::kind_src::KindsSrc;
-use crate::language_kind::{LanguageKind, LANGUAGE_PREFIXES};
+use crate::language_kind::{LANGUAGE_PREFIXES, LanguageKind};
 use quote::format_ident;
 use std::collections::BTreeMap;
 
@@ -155,6 +155,7 @@ pub const JS_KINDS_SRC: KindsSrc = KindsSrc {
         "of",
         "out",
         "using",
+        "meta",
     ],
     literals: &[
         "JS_NUMBER_LITERAL",
@@ -184,6 +185,7 @@ pub const JS_KINDS_SRC: KindsSrc = KindsSrc {
         "JS_MODULE",
         "JS_MODULE_ITEM_LIST",
         "JS_SCRIPT",
+        "TS_DECLARATION_MODULE",
         "JS_EXPRESSION_SNIPPED",
         "JS_DIRECTIVE",
         "JS_DIRECTIVE_LIST",
@@ -427,6 +429,9 @@ pub const JS_KINDS_SRC: KindsSrc = KindsSrc {
         "TS_SETTER_SIGNATURE_TYPE_MEMBER",
         "TS_INDEX_SIGNATURE_TYPE_MEMBER",
         "TS_IMPORT_TYPE",
+        "TS_IMPORT_TYPE_ARGUMENTS",
+        "TS_IMPORT_TYPE_ASSERTION",
+        "TS_IMPORT_TYPE_ASSERTION_BLOCK",
         "TS_IMPORT_TYPE_QUALIFIER",
         "TS_ARRAY_TYPE",
         "TS_INDEXED_ACCESS_TYPE",
@@ -576,7 +581,7 @@ pub struct AstListSeparatorConfiguration {
 
 #[derive(Debug)]
 pub struct AstNodeSrc {
-    #[allow(dead_code)]
+    #[expect(dead_code)]
     pub documentation: Vec<String>,
     pub name: String,
     // pub traits: Vec<String>,
@@ -610,7 +615,7 @@ pub enum Field {
 
 #[derive(Debug, Clone)]
 pub struct AstEnumSrc {
-    #[allow(dead_code)]
+    #[expect(dead_code)]
     pub documentation: Vec<String>,
     pub name: String,
     // pub traits: Vec<String>,
@@ -620,7 +625,7 @@ pub struct AstEnumSrc {
 impl Field {
     pub fn method_name(&self, language_kind: LanguageKind) -> proc_macro2::Ident {
         match self {
-            Field::Token { name, .. } => {
+            Self::Token { name, .. } => {
                 let name = match (name.as_str(), language_kind) {
                     (";", _) => "semicolon",
                     ("'{'", _) => "l_curly",
@@ -690,6 +695,8 @@ impl Field {
                     ("---", LanguageKind::Yaml) => "dashdashdash",
                     ("<!--", LanguageKind::Html) => "comment_start",
                     ("-->", LanguageKind::Html) => "comment_end",
+                    ("<![CDATA[", LanguageKind::Html) => "cdata_start",
+                    ("]]>", LanguageKind::Html) => "cdata_end",
                     _ => name,
                 };
 
@@ -703,7 +710,7 @@ impl Field {
                     format_ident!("{}_token", name)
                 }
             }
-            Field::Node { name, .. } => {
+            Self::Node { name, .. } => {
                 let (prefix, tail) = name.split_once('_').unwrap_or(("", name));
                 let final_name = if LANGUAGE_PREFIXES.contains(&prefix) {
                     tail
@@ -721,25 +728,25 @@ impl Field {
             }
         }
     }
-    #[allow(dead_code)]
+
     pub fn ty(&self) -> proc_macro2::Ident {
         match self {
-            Field::Token { .. } => format_ident!("SyntaxToken"),
-            Field::Node { ty, .. } => format_ident!("{}", ty),
+            Self::Token { .. } => format_ident!("SyntaxToken"),
+            Self::Node { ty, .. } => format_ident!("{}", ty),
         }
     }
 
     pub fn is_optional(&self) -> bool {
         match self {
-            Field::Node { optional, .. } => *optional,
-            Field::Token { optional, .. } => *optional,
+            Self::Node { optional, .. } => *optional,
+            Self::Token { optional, .. } => *optional,
         }
     }
 
     pub fn is_unordered(&self) -> bool {
         match self {
-            Field::Node { unordered, .. } => *unordered,
-            Field::Token { unordered, .. } => *unordered,
+            Self::Node { unordered, .. } => *unordered,
+            Self::Token { unordered, .. } => *unordered,
         }
     }
 }

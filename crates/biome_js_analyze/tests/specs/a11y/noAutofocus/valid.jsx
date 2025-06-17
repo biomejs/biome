@@ -1,3 +1,4 @@
+/* should not generate diagnostics */
 <>
     <div />
     <button />
@@ -5,4 +6,6 @@
     <div autofocus />
     <input autofocus="true" />
     <MyComponent autoFocus={true} />
+    <div popover><input autoFocus />></div>
+    <dialog><input autoFocus />></dialog>
 </>

@@ -1,8 +1,9 @@
 use biome_analyze::{
-    context::RuleContext, declare_lint_rule, AddVisitor, Phases, QueryMatch, Queryable, Rule,
-    RuleDiagnostic, RuleSource, ServiceBag, Visitor, VisitorContext,
+    AddVisitor, Phases, QueryMatch, Queryable, Rule, RuleDiagnostic, RuleSource, ServiceBag,
+    Visitor, VisitorContext, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
+use biome_diagnostics::Severity;
 use biome_js_syntax::{
     AnyFunctionLike, JsAwaitExpression, JsForOfStatement, JsLanguage, TextRange, WalkEvent,
 };
@@ -54,6 +55,7 @@ declare_lint_rule! {
             RuleSource::EslintTypeScript("require-await"),
         ],
         recommended: false,
+        severity: Severity::Warning,
     }
 }
 
@@ -89,12 +91,12 @@ impl Visitor for MissingAwaitVisitor {
             }
             WalkEvent::Leave(node) => {
                 if let Some(node) = AnyFunctionLike::cast_ref(node) {
-                    if let Some((function_start_range, has_await)) = self.stack.pop() {
-                        if function_start_range == node.range().start()
-                            && !has_await
-                            && node.is_async()
-                        {
-                            ctx.match_query(MissingAwait(node));
+                    if let Some((function_start_range, has_await)) = self.stack.last().copied() {
+                        if function_start_range == node.range().start() {
+                            self.stack.pop();
+                            if !has_await && node.is_async() {
+                                ctx.match_query(MissingAwait(node));
+                            }
                         }
                     }
                 }

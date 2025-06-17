@@ -1,8 +1,9 @@
 use biome_analyze::{
-    context::RuleContext, declare_lint_rule, Ast, Rule, RuleDiagnostic, RuleSource,
+    Ast, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
 use biome_css_syntax::CssFunction;
+use biome_diagnostics::Severity;
 use biome_rowan::{AstNode, TextRange};
 
 use crate::utils::{is_custom_function, is_function_keyword};
@@ -36,12 +37,13 @@ declare_lint_rule! {
         name: "noUnknownFunction",
         language: "css",
         recommended: true,
+        severity: Severity::Error,
         sources: &[RuleSource::Stylelint("function-no-unknown")],
     }
 }
 
 pub struct NoUnknownFunctionState {
-    function_name: String,
+    function_name: Box<str>,
     span: TextRange,
 }
 
@@ -53,20 +55,21 @@ impl Rule for NoUnknownFunction {
 
     fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
         let node = ctx.query();
-        let function_name = node.name().ok()?.text();
+        let binding = node.name().ok()?.value_token().ok()?;
+        let function_name = binding.text_trimmed();
 
         // We don't have a semantic model yet, so we can't determine if functions are defined elsewhere.
         // Therefore, we ignore these custom functions to prevent false detections.
-        if is_custom_function(&function_name) {
+        if is_custom_function(function_name) {
             return None;
         }
 
-        if is_function_keyword(&function_name) {
+        if is_function_keyword(function_name) {
             return None;
         }
 
         Some(NoUnknownFunctionState {
-            function_name,
+            function_name: function_name.into(),
             span: node.name().ok()?.range(),
         })
     }

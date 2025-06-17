@@ -1,13 +1,13 @@
 use std::collections::BTreeMap;
 
 use crate::{
+    CompileError,
     grit_context::GritQueryContext,
     pattern_compiler::{
-        compilation_context::{DefinitionInfo, NodeCompilationContext},
         FunctionDefinitionCompiler, PatternDefinitionCompiler, PredicateDefinitionCompiler,
+        compilation_context::{DefinitionInfo, NodeCompilationContext},
     },
     util::TextRangeGritExt,
-    CompileError,
 };
 use biome_grit_syntax::{AnyGritDefinition, GritDefinitionList, GritVariableList};
 use biome_rowan::AstNode;
@@ -35,7 +35,7 @@ pub fn compile_definitions(
     let mut functions = Vec::new();
     for definition in definitions {
         match definition? {
-            AnyGritDefinition::AnyGritPattern(_) => continue, // Handled separately.
+            AnyGritDefinition::AnyGritPattern(_) => {} // Handled separately.
             AnyGritDefinition::GritPatternDefinition(node) => {
                 patterns.push(PatternDefinitionCompiler::from_node(node, context)?);
             }
@@ -45,7 +45,8 @@ pub fn compile_definitions(
             AnyGritDefinition::GritFunctionDefinition(node) => {
                 functions.push(FunctionDefinitionCompiler::from_node(node, context)?);
             }
-            AnyGritDefinition::GritBogusDefinition(_) => {
+            AnyGritDefinition::GritJavascriptFunctionDefinition(_)
+            | AnyGritDefinition::GritBogusDefinition(_) => {
                 unreachable!(); // Should be handled in `scan_definitions()`.
             }
         }
@@ -80,9 +81,9 @@ pub fn scan_definitions(
 
     for definition in definitions {
         match definition? {
-            AnyGritDefinition::AnyGritPattern(_) => continue, // Handled separately.
+            AnyGritDefinition::AnyGritPattern(_) => {} // Handled separately.
             AnyGritDefinition::GritPatternDefinition(node) => {
-                let name = node.name()?.text();
+                let name = node.name()?.to_trimmed_string();
                 let name = name.trim();
                 if pattern_definition_info.contains_key(name) {
                     return Err(CompileError::DuplicatePatternDefinition(name.to_owned()));
@@ -92,14 +93,14 @@ pub fn scan_definitions(
                     name.to_owned(),
                     DefinitionInfo {
                         index: pattern_index,
-                        parameters: collect_variables(node.args()?.grit_variable_list())?,
+                        parameters: collect_variables(node.args())?,
                     },
                 );
 
                 pattern_index += 1;
             }
             AnyGritDefinition::GritPredicateDefinition(node) => {
-                let name = node.name()?.text();
+                let name = node.name()?.to_trimmed_string();
                 let name = name.trim();
                 if predicate_definition_info.contains_key(name) {
                     return Err(CompileError::DuplicatePredicateDefinition(name.to_owned()));
@@ -109,14 +110,14 @@ pub fn scan_definitions(
                     name.to_owned(),
                     DefinitionInfo {
                         index: predicate_index,
-                        parameters: collect_variables(node.args()?.grit_variable_list())?,
+                        parameters: collect_variables(node.args())?,
                     },
                 );
 
                 predicate_index += 1;
             }
             AnyGritDefinition::GritFunctionDefinition(node) => {
-                let name = node.name()?.text();
+                let name = node.name()?.to_trimmed_string();
                 let name = name.trim();
                 if function_definition_info.contains_key(name) {
                     return Err(CompileError::DuplicateFunctionDefinition(name.to_owned()));
@@ -131,6 +132,11 @@ pub fn scan_definitions(
                 );
 
                 function_index += 1;
+            }
+            AnyGritDefinition::GritJavascriptFunctionDefinition(func) => {
+                return Err(CompileError::UnsupportedFunctionDefinition(
+                    func.name()?.to_trimmed_string().trim().to_owned(),
+                ));
             }
             AnyGritDefinition::GritBogusDefinition(bogus) => {
                 return Err(CompileError::UnexpectedKind(

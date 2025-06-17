@@ -1,0 +1,143 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `biome.json`
+
+```json
+{
+  "organizeImports": {
+    "enabled": true
+  }
+}
+```
+
+## `lorem/biome.json`
+
+```json
+{
+  "organizeImports": {
+    "enabled": true
+  }
+}
+```
+
+## `ipsum/biome.json`
+
+```json
+{
+  "organizeImports": {
+    "enabled": true
+  }
+}
+```
+
+# Emitted Messages
+
+```block
+<TEMP_DIR>/missing_configuration_file/biome.json migrate ━━━━━━━━━━━━━━━━━━━━
+
+  i Configuration file can be updated.
+  
+    1  1 │   {
+    2    │ - ····"organizeImports":·{
+    3    │ - ········"enabled":·true
+       2 │ + ····"assist":·{·"actions":·{·"source":·{·"organizeImports":·"on"·}·}·},
+       3 │ + ··"linter":·{
+       4 │ + ····"rules":·{
+       5 │ + ······"style":·{
+       6 │ + ········"noParameterAssign":·"error",
+       7 │ + ········"useAsConstAssertion":·"error",
+       8 │ + ········"useDefaultParameterLast":·"error",
+       9 │ + ········"useEnumInitializers":·"error",
+      10 │ + ········"useSelfClosingElements":·"error",
+      11 │ + ········"useSingleVarDeclarator":·"error",
+      12 │ + ········"noUnusedTemplateLiteral":·"error",
+      13 │ + ········"useNumberNamespace":·"error",
+      14 │ + ········"noInferrableTypes":·"error",
+      15 │ + ········"noUselessElse":·"error"
+      16 │ + ······}
+    4 17 │       }
+      18 │ + ··}
+    5 19 │   }
+  
+
+```
+
+```block
+<TEMP_DIR>/missing_configuration_file/ipsum/biome.json migrate ━━━━━━━━━━━━━━━━━━━━
+
+  i Configuration file can be updated.
+  
+    1  1 │   {
+    2    │ - ····"organizeImports":·{
+    3    │ - ········"enabled":·true
+       2 │ + ····"root":·false,
+       3 │ + ····"assist":·{·"actions":·{·"source":·{·"organizeImports":·"on"·}·}·},
+       4 │ + ··"linter":·{
+       5 │ + ····"rules":·{
+       6 │ + ······"style":·{
+       7 │ + ········"noParameterAssign":·"error",
+       8 │ + ········"useAsConstAssertion":·"error",
+       9 │ + ········"useDefaultParameterLast":·"error",
+      10 │ + ········"useEnumInitializers":·"error",
+      11 │ + ········"useSelfClosingElements":·"error",
+      12 │ + ········"useSingleVarDeclarator":·"error",
+      13 │ + ········"noUnusedTemplateLiteral":·"error",
+      14 │ + ········"useNumberNamespace":·"error",
+      15 │ + ········"noInferrableTypes":·"error",
+      16 │ + ········"noUselessElse":·"error"
+      17 │ + ······}
+    4 18 │       }
+      19 │ + ··}
+    5 20 │   }
+  
+
+```
+
+```block
+<TEMP_DIR>/missing_configuration_file/lorem/biome.json migrate ━━━━━━━━━━━━━━━━━━━━
+
+  i Configuration file can be updated.
+  
+    1  1 │   {
+    2    │ - ····"organizeImports":·{
+    3    │ - ········"enabled":·true
+       2 │ + ····"root":·false,
+       3 │ + ····"assist":·{·"actions":·{·"source":·{·"organizeImports":·"on"·}·}·},
+       4 │ + ··"linter":·{
+       5 │ + ····"rules":·{
+       6 │ + ······"style":·{
+       7 │ + ········"noParameterAssign":·"error",
+       8 │ + ········"useAsConstAssertion":·"error",
+       9 │ + ········"useDefaultParameterLast":·"error",
+      10 │ + ········"useEnumInitializers":·"error",
+      11 │ + ········"useSelfClosingElements":·"error",
+      12 │ + ········"useSingleVarDeclarator":·"error",
+      13 │ + ········"noUnusedTemplateLiteral":·"error",
+      14 │ + ········"useNumberNamespace":·"error",
+      15 │ + ········"noInferrableTypes":·"error",
+      16 │ + ········"noUselessElse":·"error"
+      17 │ + ······}
+    4 18 │       }
+      19 │ + ··}
+    5 20 │   }
+  
+
+```
+
+```block
+configuration ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Migration results:
+  
+  - <TEMP_DIR>/missing_configuration_file/biome.json: configuration needs migration.
+  - <TEMP_DIR>/missing_configuration_file/ipsum/biome.json: configuration needs migration.
+  - <TEMP_DIR>/missing_configuration_file/lorem/biome.json: configuration needs migration.
+  
+  i Use --write to apply the changes.
+  
+  $ biome migrate --write
+  
+
+```

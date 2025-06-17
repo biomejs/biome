@@ -1,0 +1,199 @@
+---
+source: crates/biome_js_parser/tests/spec_test.rs
+expression: snapshot
+snapshot_kind: text
+---
+## Input
+
+```js
+5
+true
+false
+5n
+"foo"
+'bar'
+null
+0, 0.0, 0n, 0e00
+"test\
+new-line";
+/^[يفمئامئ‍ئاسۆند]/i; //regex with unicode
+/[\p{Control}--[\t\n]]/v;
+/\’/; // regex with escaped non-ascii chars (issue #1941)
+
+```
+
+
+## AST
+
+```
+JsModule {
+    bom_token: missing (optional),
+    interpreter_token: missing (optional),
+    directives: JsDirectiveList [],
+    items: JsModuleItemList [
+        JsExpressionStatement {
+            expression: JsNumberLiteralExpression {
+                value_token: JS_NUMBER_LITERAL@0..1 "5" [] [],
+            },
+            semicolon_token: missing (optional),
+        },
+        JsExpressionStatement {
+            expression: JsBooleanLiteralExpression {
+                value_token: TRUE_KW@1..6 "true" [Newline("\n")] [],
+            },
+            semicolon_token: missing (optional),
+        },
+        JsExpressionStatement {
+            expression: JsBooleanLiteralExpression {
+                value_token: FALSE_KW@6..12 "false" [Newline("\n")] [],
+            },
+            semicolon_token: missing (optional),
+        },
+        JsExpressionStatement {
+            expression: JsBigintLiteralExpression {
+                value_token: JS_BIGINT_LITERAL@12..15 "5n" [Newline("\n")] [],
+            },
+            semicolon_token: missing (optional),
+        },
+        JsExpressionStatement {
+            expression: JsStringLiteralExpression {
+                value_token: JS_STRING_LITERAL@15..21 "\"foo\"" [Newline("\n")] [],
+            },
+            semicolon_token: missing (optional),
+        },
+        JsExpressionStatement {
+            expression: JsStringLiteralExpression {
+                value_token: JS_STRING_LITERAL@21..27 "'bar'" [Newline("\n")] [],
+            },
+            semicolon_token: missing (optional),
+        },
+        JsExpressionStatement {
+            expression: JsNullLiteralExpression {
+                value_token: NULL_KW@27..32 "null" [Newline("\n")] [],
+            },
+            semicolon_token: missing (optional),
+        },
+        JsExpressionStatement {
+            expression: JsSequenceExpression {
+                left: JsSequenceExpression {
+                    left: JsSequenceExpression {
+                        left: JsNumberLiteralExpression {
+                            value_token: JS_NUMBER_LITERAL@32..34 "0" [Newline("\n")] [],
+                        },
+                        comma_token: COMMA@34..36 "," [] [Whitespace(" ")],
+                        right: JsNumberLiteralExpression {
+                            value_token: JS_NUMBER_LITERAL@36..39 "0.0" [] [],
+                        },
+                    },
+                    comma_token: COMMA@39..41 "," [] [Whitespace(" ")],
+                    right: JsBigintLiteralExpression {
+                        value_token: JS_BIGINT_LITERAL@41..43 "0n" [] [],
+                    },
+                },
+                comma_token: COMMA@43..45 "," [] [Whitespace(" ")],
+                right: JsNumberLiteralExpression {
+                    value_token: JS_NUMBER_LITERAL@45..49 "0e00" [] [],
+                },
+            },
+            semicolon_token: missing (optional),
+        },
+        JsExpressionStatement {
+            expression: JsStringLiteralExpression {
+                value_token: JS_STRING_LITERAL@49..66 "\"test\\\nnew-line\"" [Newline("\n")] [],
+            },
+            semicolon_token: SEMICOLON@66..67 ";" [] [],
+        },
+        JsExpressionStatement {
+            expression: JsRegexLiteralExpression {
+                value_token: JS_REGEX_LITERAL@67..103 "/^[يفمئامئ\u{200d}ئاسۆند]/i" [Newline("\n")] [],
+            },
+            semicolon_token: SEMICOLON@103..125 ";" [] [Whitespace(" "), Comments("//regex with unicode")],
+        },
+        JsExpressionStatement {
+            expression: JsRegexLiteralExpression {
+                value_token: JS_REGEX_LITERAL@125..150 "/[\\p{Control}--[\\t\\n]]/v" [Newline("\n")] [],
+            },
+            semicolon_token: SEMICOLON@150..151 ";" [] [],
+        },
+        JsExpressionStatement {
+            expression: JsRegexLiteralExpression {
+                value_token: JS_REGEX_LITERAL@151..158 "/\\’/" [Newline("\n")] [],
+            },
+            semicolon_token: SEMICOLON@158..211 ";" [] [Whitespace(" "), Comments("// regex with escaped ...")],
+        },
+    ],
+    eof_token: EOF@211..212 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: JS_MODULE@0..212
+  0: (empty)
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..211
+    0: JS_EXPRESSION_STATEMENT@0..1
+      0: JS_NUMBER_LITERAL_EXPRESSION@0..1
+        0: JS_NUMBER_LITERAL@0..1 "5" [] []
+      1: (empty)
+    1: JS_EXPRESSION_STATEMENT@1..6
+      0: JS_BOOLEAN_LITERAL_EXPRESSION@1..6
+        0: TRUE_KW@1..6 "true" [Newline("\n")] []
+      1: (empty)
+    2: JS_EXPRESSION_STATEMENT@6..12
+      0: JS_BOOLEAN_LITERAL_EXPRESSION@6..12
+        0: FALSE_KW@6..12 "false" [Newline("\n")] []
+      1: (empty)
+    3: JS_EXPRESSION_STATEMENT@12..15
+      0: JS_BIGINT_LITERAL_EXPRESSION@12..15
+        0: JS_BIGINT_LITERAL@12..15 "5n" [Newline("\n")] []
+      1: (empty)
+    4: JS_EXPRESSION_STATEMENT@15..21
+      0: JS_STRING_LITERAL_EXPRESSION@15..21
+        0: JS_STRING_LITERAL@15..21 "\"foo\"" [Newline("\n")] []
+      1: (empty)
+    5: JS_EXPRESSION_STATEMENT@21..27
+      0: JS_STRING_LITERAL_EXPRESSION@21..27
+        0: JS_STRING_LITERAL@21..27 "'bar'" [Newline("\n")] []
+      1: (empty)
+    6: JS_EXPRESSION_STATEMENT@27..32
+      0: JS_NULL_LITERAL_EXPRESSION@27..32
+        0: NULL_KW@27..32 "null" [Newline("\n")] []
+      1: (empty)
+    7: JS_EXPRESSION_STATEMENT@32..49
+      0: JS_SEQUENCE_EXPRESSION@32..49
+        0: JS_SEQUENCE_EXPRESSION@32..43
+          0: JS_SEQUENCE_EXPRESSION@32..39
+            0: JS_NUMBER_LITERAL_EXPRESSION@32..34
+              0: JS_NUMBER_LITERAL@32..34 "0" [Newline("\n")] []
+            1: COMMA@34..36 "," [] [Whitespace(" ")]
+            2: JS_NUMBER_LITERAL_EXPRESSION@36..39
+              0: JS_NUMBER_LITERAL@36..39 "0.0" [] []
+          1: COMMA@39..41 "," [] [Whitespace(" ")]
+          2: JS_BIGINT_LITERAL_EXPRESSION@41..43
+            0: JS_BIGINT_LITERAL@41..43 "0n" [] []
+        1: COMMA@43..45 "," [] [Whitespace(" ")]
+        2: JS_NUMBER_LITERAL_EXPRESSION@45..49
+          0: JS_NUMBER_LITERAL@45..49 "0e00" [] []
+      1: (empty)
+    8: JS_EXPRESSION_STATEMENT@49..67
+      0: JS_STRING_LITERAL_EXPRESSION@49..66
+        0: JS_STRING_LITERAL@49..66 "\"test\\\nnew-line\"" [Newline("\n")] []
+      1: SEMICOLON@66..67 ";" [] []
+    9: JS_EXPRESSION_STATEMENT@67..125
+      0: JS_REGEX_LITERAL_EXPRESSION@67..103
+        0: JS_REGEX_LITERAL@67..103 "/^[يفمئامئ\u{200d}ئاسۆند]/i" [Newline("\n")] []
+      1: SEMICOLON@103..125 ";" [] [Whitespace(" "), Comments("//regex with unicode")]
+    10: JS_EXPRESSION_STATEMENT@125..151
+      0: JS_REGEX_LITERAL_EXPRESSION@125..150
+        0: JS_REGEX_LITERAL@125..150 "/[\\p{Control}--[\\t\\n]]/v" [Newline("\n")] []
+      1: SEMICOLON@150..151 ";" [] []
+    11: JS_EXPRESSION_STATEMENT@151..211
+      0: JS_REGEX_LITERAL_EXPRESSION@151..158
+        0: JS_REGEX_LITERAL@151..158 "/\\’/" [Newline("\n")] []
+      1: SEMICOLON@158..211 ";" [] [Whitespace(" "), Comments("// regex with escaped ...")]
+  4: EOF@211..212 "" [Newline("\n")] []
+
+```

@@ -6,11 +6,11 @@ use crate::state::{
 };
 use crate::syntax::binding::parse_binding;
 use crate::syntax::expr::{
-    parse_assignment_expression_or_higher, parse_lhs_expr, parse_private_name, ExpressionContext,
+    ExpressionContext, parse_assignment_expression_or_higher, parse_lhs_expr, parse_private_name,
 };
 use crate::syntax::function::{
-    parse_any_parameter, parse_formal_parameter, parse_function_body, parse_parameter_list,
-    parse_parameters_list, parse_ts_type_annotation_or_error, ParameterContext,
+    ParameterContext, parse_any_parameter, parse_formal_parameter, parse_function_body,
+    parse_parameter_list, parse_parameters_list, parse_ts_type_annotation_or_error,
 };
 use crate::syntax::js_parse_error;
 use crate::syntax::js_parse_error::{
@@ -21,7 +21,7 @@ use crate::syntax::js_parse_error::{
 use crate::syntax::object::{
     is_at_literal_member_name, parse_computed_member_name, parse_literal_member_name,
 };
-use crate::syntax::stmt::{optional_semi, parse_statements, StatementContext};
+use crate::syntax::stmt::{StatementContext, optional_semi, parse_statements};
 use crate::syntax::typescript::ts_parse_error::{
     ts_accessibility_modifier_already_seen, ts_accessor_type_parameters_error,
     ts_constructor_type_parameters_error, ts_modifier_cannot_appear_on_a_constructor_declaration,
@@ -29,8 +29,9 @@ use crate::syntax::typescript::ts_parse_error::{
     ts_set_accessor_return_type_error,
 };
 use crate::syntax::typescript::{
-    is_reserved_type_name, parse_ts_implements_clause, parse_ts_return_type_annotation,
-    parse_ts_type_annotation, parse_ts_type_arguments, parse_ts_type_parameters, TypeContext,
+    TypeContext, is_reserved_type_name, parse_ts_implements_clause,
+    parse_ts_return_type_annotation, parse_ts_type_annotation, parse_ts_type_arguments,
+    parse_ts_type_parameters,
 };
 
 use crate::JsSyntaxFeature::TypeScript;
@@ -39,12 +40,12 @@ use crate::{JsParser, StrictMode};
 use biome_js_syntax::JsSyntaxKind::*;
 use biome_js_syntax::TextSize;
 use biome_js_syntax::{JsSyntaxKind, T};
+use biome_parser::ParserProgress;
 use biome_parser::parse_lists::ParseNodeList;
 use biome_parser::parse_recovery::ParseRecoveryTokenSet;
-use biome_parser::ParserProgress;
 use biome_rowan::{SyntaxKind, TextRange};
 use drop_bomb::DebugDropBomb;
-use enumflags2::{bitflags, make_bitflags, BitFlags};
+use enumflags2::{BitFlags, bitflags, make_bitflags};
 use smallvec::SmallVec;
 use std::fmt::Debug;
 use std::ops::{Add, BitOr, BitOrAssign};
@@ -55,7 +56,7 @@ use super::js_parse_error::unexpected_body_inside_ambient_context;
 use super::metavariable::{is_at_metavariable, parse_metavariable};
 use super::typescript::ts_parse_error::{self, unexpected_abstract_member_with_body};
 use super::typescript::{
-    expect_ts_index_signature_member, is_at_ts_index_signature_member, MemberParent,
+    MemberParent, expect_ts_index_signature_member, is_at_ts_index_signature_member,
 };
 
 pub(crate) fn is_at_ts_abstract_class_declaration(
@@ -118,6 +119,7 @@ pub(super) fn parse_class_expression(
 //     abstract display();
 //     abstract get my_name();
 //     abstract set my_name(val);
+//     abstract set my_age(age,);
 // }
 
 // test_err ts typescript_abstract_classes_incomplete
@@ -207,7 +209,7 @@ enum ClassKind {
 
 impl ClassKind {
     fn is_id_optional(&self) -> bool {
-        matches!(self, ClassKind::Expression | ClassKind::ExportDefault)
+        matches!(self, Self::Expression | Self::ExportDefault)
     }
 }
 
@@ -578,9 +580,11 @@ fn parse_class_member(p: &mut JsParser, inside_abstract_class: bool) -> ParsedSy
         }
         Absent => {
             // If the modifier list contains a modifier other than a decorator, such modifiers can also be valid member names.
-            debug_assert!(!modifiers
-                .flags
-                .contains(ModifierFlags::ALL_MODIFIERS_EXCEPT_DECORATOR));
+            debug_assert!(
+                !modifiers
+                    .flags
+                    .contains(ModifierFlags::ALL_MODIFIERS_EXCEPT_DECORATOR)
+            );
 
             // test_err ts ts_broken_class_member_modifiers
             // class C {
@@ -711,11 +715,14 @@ fn parse_class_member_impl(
     // test js setter_class_member
     // class Setters {
     //   set foo(a) {}
+    //   set bax(a,) {}
     //   set static(a) {}
     //   static set bar(a) {}
+    //   static set baz(a,) {}
     //   set "baz"(a) {}
     //   set ["a" + "b"](a) {}
     //   set 5(a) {}
+    //   set 6(a,) {}
     //   set #private(a) {}
     // }
     // class NotSetters {
@@ -789,6 +796,11 @@ fn parse_class_member_impl(
                 )
             })
             .or_add_diagnostic(p, js_parse_error::expected_parameter);
+
+            if p.at(T![,]) {
+                p.bump_any();
+            }
+
             p.expect(T![')']);
 
             // test_err ts ts_setter_return_type_annotation
@@ -1333,34 +1345,34 @@ enum MemberKind {
 
 impl MemberKind {
     const fn is_signature(&self) -> bool {
-        matches!(self, MemberKind::Signature)
+        matches!(self, Self::Signature)
     }
 
     const fn as_method_syntax_kind(&self) -> JsSyntaxKind {
         match self {
-            MemberKind::Signature => TS_METHOD_SIGNATURE_CLASS_MEMBER,
-            MemberKind::Declaration => JS_METHOD_CLASS_MEMBER,
+            Self::Signature => TS_METHOD_SIGNATURE_CLASS_MEMBER,
+            Self::Declaration => JS_METHOD_CLASS_MEMBER,
         }
     }
 
     const fn as_constructor_syntax_kind(&self) -> JsSyntaxKind {
         match self {
-            MemberKind::Signature => TS_CONSTRUCTOR_SIGNATURE_CLASS_MEMBER,
-            MemberKind::Declaration => JS_CONSTRUCTOR_CLASS_MEMBER,
+            Self::Signature => TS_CONSTRUCTOR_SIGNATURE_CLASS_MEMBER,
+            Self::Declaration => JS_CONSTRUCTOR_CLASS_MEMBER,
         }
     }
 
     const fn as_setter_syntax_kind(&self) -> JsSyntaxKind {
         match self {
-            MemberKind::Signature => TS_SETTER_SIGNATURE_CLASS_MEMBER,
-            MemberKind::Declaration => JS_SETTER_CLASS_MEMBER,
+            Self::Signature => TS_SETTER_SIGNATURE_CLASS_MEMBER,
+            Self::Declaration => JS_SETTER_CLASS_MEMBER,
         }
     }
 
     const fn as_getter_syntax_kind(&self) -> JsSyntaxKind {
         match self {
-            MemberKind::Signature => TS_GETTER_SIGNATURE_CLASS_MEMBER,
-            MemberKind::Declaration => JS_GETTER_CLASS_MEMBER,
+            Self::Signature => TS_GETTER_SIGNATURE_CLASS_MEMBER,
+            Self::Declaration => JS_GETTER_CLASS_MEMBER,
         }
     }
 }
@@ -1386,21 +1398,18 @@ impl ClassMethodMemberKind {
     /// }
     /// ```
     const fn is_body_optional(&self) -> bool {
-        matches!(
-            self,
-            ClassMethodMemberKind::Method(_) | ClassMethodMemberKind::Constructor
-        )
+        matches!(self, Self::Method(_) | Self::Constructor)
     }
 
     const fn is_constructor(&self) -> bool {
-        matches!(self, ClassMethodMemberKind::Constructor)
+        matches!(self, Self::Constructor)
     }
 
     const fn signature_flags(&self) -> SignatureFlags {
         match self {
-            ClassMethodMemberKind::Method(flags) => *flags,
-            ClassMethodMemberKind::Constructor => SignatureFlags::CONSTRUCTOR,
-            ClassMethodMemberKind::Accessor => SignatureFlags::empty(),
+            Self::Method(flags) => *flags,
+            Self::Constructor => SignatureFlags::CONSTRUCTOR,
+            Self::Accessor => SignatureFlags::empty(),
         }
     }
 }
@@ -1937,15 +1946,15 @@ impl ModifierFlags {
         Self(BitFlags::EMPTY)
     }
 
-    pub fn contains(&self, other: impl Into<ModifierFlags>) -> bool {
+    pub fn contains(&self, other: impl Into<Self>) -> bool {
         self.0.contains(other.into().0)
     }
 
-    pub fn intersects(&self, other: impl Into<ModifierFlags>) -> bool {
+    pub fn intersects(&self, other: impl Into<Self>) -> bool {
         self.0.intersects(other.into().0)
     }
 
-    pub fn set(&mut self, other: impl Into<ModifierFlags>, cond: bool) {
+    pub fn set(&mut self, other: impl Into<Self>, cond: bool) {
         self.0.set(other.into().0, cond)
     }
 }
@@ -1954,7 +1963,7 @@ impl BitOr for ModifierFlags {
     type Output = Self;
 
     fn bitor(self, rhs: Self) -> Self::Output {
-        ModifierFlags(self.0 | rhs.0)
+        Self(self.0 | rhs.0)
     }
 }
 
@@ -1981,39 +1990,34 @@ enum ModifierKind {
 
 impl ModifierKind {
     const fn is_ts_modifier(&self) -> bool {
-        !matches!(
-            self,
-            ModifierKind::Static | ModifierKind::Accessor | ModifierKind::Decorator
-        )
+        !matches!(self, Self::Static | Self::Accessor | Self::Decorator)
     }
 
     const fn as_syntax_kind(&self) -> JsSyntaxKind {
         match self {
-            ModifierKind::Declare => TS_DECLARE_MODIFIER,
-            ModifierKind::Abstract => TS_ABSTRACT_MODIFIER,
-            ModifierKind::Private | ModifierKind::Protected | ModifierKind::Public => {
-                TS_ACCESSIBILITY_MODIFIER
-            }
-            ModifierKind::Static => JS_STATIC_MODIFIER,
-            ModifierKind::Accessor => JS_ACCESSOR_MODIFIER,
-            ModifierKind::Readonly => TS_READONLY_MODIFIER,
-            ModifierKind::Override => TS_OVERRIDE_MODIFIER,
-            ModifierKind::Decorator => JS_DECORATOR,
+            Self::Declare => TS_DECLARE_MODIFIER,
+            Self::Abstract => TS_ABSTRACT_MODIFIER,
+            Self::Private | Self::Protected | Self::Public => TS_ACCESSIBILITY_MODIFIER,
+            Self::Static => JS_STATIC_MODIFIER,
+            Self::Accessor => JS_ACCESSOR_MODIFIER,
+            Self::Readonly => TS_READONLY_MODIFIER,
+            Self::Override => TS_OVERRIDE_MODIFIER,
+            Self::Decorator => JS_DECORATOR,
         }
     }
 
     const fn as_flags(&self) -> ModifierFlags {
         match self {
-            ModifierKind::Declare => ModifierFlags::DECLARE,
-            ModifierKind::Abstract => ModifierFlags::ABSTRACT,
-            ModifierKind::Private => ModifierFlags::PRIVATE,
-            ModifierKind::Protected => ModifierFlags::PROTECTED,
-            ModifierKind::Public => ModifierFlags::PUBLIC,
-            ModifierKind::Static => ModifierFlags::STATIC,
-            ModifierKind::Accessor => ModifierFlags::ACCESSOR,
-            ModifierKind::Readonly => ModifierFlags::READONLY,
-            ModifierKind::Override => ModifierFlags::OVERRIDE,
-            ModifierKind::Decorator => ModifierFlags::DECORATOR,
+            Self::Declare => ModifierFlags::DECLARE,
+            Self::Abstract => ModifierFlags::ABSTRACT,
+            Self::Private => ModifierFlags::PRIVATE,
+            Self::Protected => ModifierFlags::PROTECTED,
+            Self::Public => ModifierFlags::PUBLIC,
+            Self::Static => ModifierFlags::STATIC,
+            Self::Accessor => ModifierFlags::ACCESSOR,
+            Self::Readonly => ModifierFlags::READONLY,
+            Self::Override => ModifierFlags::OVERRIDE,
+            Self::Decorator => ModifierFlags::DECORATOR,
         }
     }
 }
@@ -2076,7 +2080,9 @@ impl ClassMemberModifiers {
             modifiers,
             list_marker,
             flags,
-            bomb: DebugDropBomb::new("list must either be 'completed' or 'abandoned' by calling 'complete' or 'abandon'.")
+            bomb: DebugDropBomb::new(
+                "list must either be 'completed' or 'abandoned' by calling 'complete' or 'abandon'.",
+            ),
         }
     }
 

@@ -3,7 +3,7 @@ use crate::js::lists::template_element_list::TemplateElementIndention;
 use crate::prelude::*;
 use biome_formatter::printer::Printer;
 use biome_formatter::{
-    format_args, write, CstFormatContext, FormatOptions, RemoveSoftLinesBuffer, VecBuffer,
+    CstFormatContext, FormatOptions, RemoveSoftLinesBuffer, VecBuffer, format_args, write,
 };
 use biome_js_syntax::{AnyJsTemplateElement, JsTemplateElementList};
 use biome_text_size::{TextRange, TextSize};
@@ -36,7 +36,7 @@ impl EachTemplateColumn {
         let width = TextSize::try_from(text.width())
             .expect("integer overflow while converting a text width to `TextSize`");
 
-        EachTemplateColumn {
+        Self {
             text,
             width,
             range,
@@ -58,7 +58,7 @@ struct EachTemplateTableBuilder {
 
 impl EachTemplateTableBuilder {
     fn new() -> Self {
-        EachTemplateTableBuilder {
+        Self {
             current_row: EachTemplateCurrentRow::new(),
             rows: Vec::new(),
             columns_width: Vec::new(),
@@ -145,7 +145,7 @@ struct EachTemplateCurrentRow {
 
 impl EachTemplateCurrentRow {
     fn new() -> Self {
-        EachTemplateCurrentRow {
+        Self {
             column_widths: Vec::new(),
             has_line_break_column: false,
         }

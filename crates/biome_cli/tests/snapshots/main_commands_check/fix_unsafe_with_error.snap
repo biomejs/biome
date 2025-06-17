@@ -1,13 +1,13 @@
 ---
 source: crates/biome_cli/tests/snap_test.rs
-expression: content
+expression: redactor(content)
 ---
 ## `test1.js`
 
 ```js
 const a = 4;
 console.log(a);
-function f() {
+function _f() {
 	arguments;
 }
 
@@ -18,34 +18,23 @@ function f() {
 ```js
 const a = 4;
 console.log(a);
-function f() {
+function _f() {
 	arguments;
 }
-
-```
-
-# Termination Message
-
-```block
-check ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Some errors were emitted while running checks.
-  
-
 
 ```
 
 # Emitted Messages
 
 ```block
-test1.js:3:16 lint/style/noArguments ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+test1.js:3:17 lint/complexity/noArguments ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Use the rest parameters instead of arguments.
+  ! Use the rest parameters instead of arguments.
   
     1 │ const a = 4;
     2 │ console.log(a);
-  > 3 │ function f() { arguments; }
-      │                ^^^^^^^^^
+  > 3 │ function _f() { arguments; }
+      │                 ^^^^^^^^^
     4 │ 
   
   i arguments does not have Array.prototype methods and can be inconvenient to use.
@@ -54,14 +43,14 @@ test1.js:3:16 lint/style/noArguments ━━━━━━━━━━━━━━�
 ```
 
 ```block
-test2.js:3:16 lint/style/noArguments ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+test2.js:3:17 lint/complexity/noArguments ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Use the rest parameters instead of arguments.
+  ! Use the rest parameters instead of arguments.
   
     1 │ const a = 4;
     2 │ console.log(a);
-  > 3 │ function f() { arguments; }
-      │                ^^^^^^^^^
+  > 3 │ function _f() { arguments; }
+      │                 ^^^^^^^^^
     4 │ 
   
   i arguments does not have Array.prototype methods and can be inconvenient to use.
@@ -71,5 +60,5 @@ test2.js:3:16 lint/style/noArguments ━━━━━━━━━━━━━━�
 
 ```block
 Checked 2 files in <TIME>. Fixed 2 files.
-Found 2 errors.
+Found 2 warnings.
 ```

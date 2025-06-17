@@ -3,6 +3,8 @@
     "rules": {
       "recommended": false,
       "complexity": {
+        "noArguments": "error",
+        "noCommaOperator": "error",
         "noExtraBooleanCast": "error",
         "noMultipleSpacesInRegularExpressionLiterals": "error",
         "noStaticOnlyClass": "error",
@@ -15,6 +17,7 @@
         "noVoid": "error",
         "noWith": "error",
         "useArrowFunction": "error",
+        "useNumericLiterals": "error",
         "useRegexLiterals": "error"
       },
       "correctness": {
@@ -51,8 +54,6 @@
         "noGlobalEval": "error"
       },
       "style": {
-        "noArguments": "error",
-        "noCommaOperator": "error",
         "noInferrableTypes": "error",
         "noNamespace": "error",
         "noNonNullAssertion": "error",
@@ -68,7 +69,6 @@
         "useExponentiationOperator": "error",
         "useForOf": "error",
         "useLiteralEnumMembers": "error",
-        "useNumericLiterals": "error",
         "useShorthandFunctionType": "error",
         "useSingleVarDeclarator": "error",
         "useTemplate": "error"

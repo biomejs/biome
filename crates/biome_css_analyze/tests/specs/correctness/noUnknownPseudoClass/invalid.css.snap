@@ -1,0 +1,241 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+expression: invalid.css
+---
+# Input
+```css
+a:unknown { }
+a:Unknown { }
+a:uNkNoWn { }
+a:UNKNOWN { }
+a:pseudo-class { }
+body:not(div):noot(span) {}
+a:unknown::before { }
+a,
+b > .foo:error { }
+::-webkit-scrollbar-button:horizontal:unknown {}
+:first { }
+:slotted {}
+:placeholder {}
+@page :blank:unknown { }
+@page foo:unknown { }
+:horizontal:decrement {}
+
+```
+
+# Diagnostics
+```
+invalid.css:1:3 lint/correctness/noUnknownPseudoClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected unknown pseudo-class unknown 
+  
+  > 1 │ a:unknown { }
+      │   ^^^^^^^
+    2 │ a:Unknown { }
+    3 │ a:uNkNoWn { }
+  
+  i See MDN web docs for more details.
+  
+
+```
+
+```
+invalid.css:2:3 lint/correctness/noUnknownPseudoClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected unknown pseudo-class Unknown 
+  
+    1 │ a:unknown { }
+  > 2 │ a:Unknown { }
+      │   ^^^^^^^
+    3 │ a:uNkNoWn { }
+    4 │ a:UNKNOWN { }
+  
+  i See MDN web docs for more details.
+  
+
+```
+
+```
+invalid.css:3:3 lint/correctness/noUnknownPseudoClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected unknown pseudo-class uNkNoWn 
+  
+    1 │ a:unknown { }
+    2 │ a:Unknown { }
+  > 3 │ a:uNkNoWn { }
+      │   ^^^^^^^
+    4 │ a:UNKNOWN { }
+    5 │ a:pseudo-class { }
+  
+  i See MDN web docs for more details.
+  
+
+```
+
+```
+invalid.css:4:3 lint/correctness/noUnknownPseudoClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected unknown pseudo-class UNKNOWN 
+  
+    2 │ a:Unknown { }
+    3 │ a:uNkNoWn { }
+  > 4 │ a:UNKNOWN { }
+      │   ^^^^^^^
+    5 │ a:pseudo-class { }
+    6 │ body:not(div):noot(span) {}
+  
+  i See MDN web docs for more details.
+  
+
+```
+
+```
+invalid.css:5:3 lint/correctness/noUnknownPseudoClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected unknown pseudo-class pseudo-class 
+  
+    3 │ a:uNkNoWn { }
+    4 │ a:UNKNOWN { }
+  > 5 │ a:pseudo-class { }
+      │   ^^^^^^^^^^^^
+    6 │ body:not(div):noot(span) {}
+    7 │ a:unknown::before { }
+  
+  i See MDN web docs for more details.
+  
+
+```
+
+```
+invalid.css:6:15 lint/correctness/noUnknownPseudoClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected unknown pseudo-class noot 
+  
+    4 │ a:UNKNOWN { }
+    5 │ a:pseudo-class { }
+  > 6 │ body:not(div):noot(span) {}
+      │               ^^^^
+    7 │ a:unknown::before { }
+    8 │ a,
+  
+  i See MDN web docs for more details.
+  
+
+```
+
+```
+invalid.css:7:3 lint/correctness/noUnknownPseudoClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected unknown pseudo-class unknown 
+  
+    5 │ a:pseudo-class { }
+    6 │ body:not(div):noot(span) {}
+  > 7 │ a:unknown::before { }
+      │   ^^^^^^^
+    8 │ a,
+    9 │ b > .foo:error { }
+  
+  i See MDN web docs for more details.
+  
+
+```
+
+```
+invalid.css:9:10 lint/correctness/noUnknownPseudoClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected unknown pseudo-class error 
+  
+     7 │ a:unknown::before { }
+     8 │ a,
+   > 9 │ b > .foo:error { }
+       │          ^^^^^
+    10 │ ::-webkit-scrollbar-button:horizontal:unknown {}
+    11 │ :first { }
+  
+  i See MDN web docs for more details.
+  
+
+```
+
+```
+invalid.css:10:39 lint/correctness/noUnknownPseudoClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected unknown pseudo-class unknown 
+  
+     8 │ a,
+     9 │ b > .foo:error { }
+  > 10 │ ::-webkit-scrollbar-button:horizontal:unknown {}
+       │                                       ^^^^^^^
+    11 │ :first { }
+    12 │ :slotted {}
+  
+  i See MDN web docs for more details.
+  
+
+```
+
+```
+invalid.css:11:2 lint/correctness/noUnknownPseudoClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected unknown pseudo-class first 
+  
+     9 │ b > .foo:error { }
+    10 │ ::-webkit-scrollbar-button:horizontal:unknown {}
+  > 11 │ :first { }
+       │  ^^^^^
+    12 │ :slotted {}
+    13 │ :placeholder {}
+  
+  i See MDN web docs for more details.
+  
+
+```
+
+```
+invalid.css:13:2 lint/correctness/noUnknownPseudoClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected unknown pseudo-class placeholder 
+  
+    11 │ :first { }
+    12 │ :slotted {}
+  > 13 │ :placeholder {}
+       │  ^^^^^^^^^^^
+    14 │ @page :blank:unknown { }
+    15 │ @page foo:unknown { }
+  
+  i See MDN web docs for more details.
+  
+
+```
+
+```
+invalid.css:16:2 lint/correctness/noUnknownPseudoClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected unknown pseudo-class horizontal 
+  
+    14 │ @page :blank:unknown { }
+    15 │ @page foo:unknown { }
+  > 16 │ :horizontal:decrement {}
+       │  ^^^^^^^^^^
+    17 │ 
+  
+  i See MDN web docs for more details.
+  
+
+```
+
+```
+invalid.css:16:13 lint/correctness/noUnknownPseudoClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected unknown pseudo-class decrement 
+  
+    14 │ @page :blank:unknown { }
+    15 │ @page foo:unknown { }
+  > 16 │ :horizontal:decrement {}
+       │             ^^^^^^^^^
+    17 │ 
+  
+  i See MDN web docs for more details.
+  
+
+```

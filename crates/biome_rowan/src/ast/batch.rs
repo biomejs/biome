@@ -1,6 +1,6 @@
 use crate::syntax::SyntaxKind;
 use crate::{
-    chain_trivia_pieces, AstNode, Language, SyntaxElement, SyntaxNode, SyntaxSlot, SyntaxToken,
+    AstNode, Language, SyntaxElement, SyntaxNode, SyntaxSlot, SyntaxToken, chain_trivia_pieces,
 };
 use biome_text_edit::{TextEdit, TextEditBuilder};
 use biome_text_size::TextRange;
@@ -9,7 +9,6 @@ use std::{
     collections::BinaryHeap,
     iter::{empty, once},
 };
-use tracing::debug;
 
 pub trait BatchMutationExt<L>: AstNode<Language = L>
 where
@@ -25,7 +24,6 @@ where
     L: Language,
     T: AstNode<Language = L>,
 {
-    #[must_use = "This method consumes the node and return the BatchMutation api that returns the new SyntaxNode on commit"]
     fn begin(self) -> BatchMutation<L> {
         BatchMutation::new(self.into_syntax())
     }
@@ -293,12 +291,11 @@ where
         let new_node_slot = prev_element.index();
         let parent = prev_element.parent();
         let parent_range: Option<(u32, u32)> = parent.as_ref().map(|p| {
-            let range = p.text_range();
+            let range = p.text_range_with_trivia();
             (range.start().into(), range.end().into())
         });
         let parent_depth = parent.as_ref().map(|p| p.ancestors().count()).unwrap_or(0);
 
-        debug!("pushing change...");
         self.changes.push(CommitChange {
             parent_depth,
             parent,
@@ -315,7 +312,7 @@ where
     ///
     /// If the new tree is also required,
     /// please use `commit_with_text_range_and_edit`
-    pub fn as_text_range_and_edit(self) -> Option<(TextRange, TextEdit)> {
+    pub fn to_text_range_and_edit(self) -> Option<(TextRange, TextEdit)> {
         self.commit_with_text_range_and_edit(true).1
     }
 
@@ -359,10 +356,10 @@ where
         self,
         with_text_range_and_edit: bool,
     ) -> (SyntaxNode<L>, Option<(TextRange, TextEdit)>) {
-        let BatchMutation { root, mut changes } = self;
+        let Self { root, mut changes } = self;
 
         // Ordered text mutation list sorted by text range
-        let mut text_mutation_list: Vec<(TextRange, Option<String>)> =
+        let mut text_mutation_list: Vec<(TextRange, Option<SyntaxElement<L>>)> =
             // SAFETY: this is safe bacause changes from actions can only
             // overwrite each other, so the total number of the finalized
             // text mutations will only be less.
@@ -383,7 +380,7 @@ where
                 // because we need nodes that are still valid in the old tree
                 let curr_grand_parent = curr_parent.parent();
                 let curr_grand_parent_range = curr_grand_parent.as_ref().map(|g| {
-                    let range = g.text_range();
+                    let range = g.text_range_with_trivia();
                     (range.start().into(), range.end().into())
                 });
                 let curr_parent_slot = curr_parent.index();
@@ -396,7 +393,7 @@ where
                 while changes
                     .peek()
                     .and_then(|c| c.parent.as_ref())
-                    .map_or(false, |p| *p == curr_parent)
+                    .is_some_and(|p| *p == curr_parent)
                 {
                     // SAFETY: We can .pop().unwrap() because we .peek() above
                     let CommitChange {
@@ -426,27 +423,24 @@ where
                             continue;
                         }
                         let deleted_text_range = match curr_parent.slots().nth(*new_node_slot) {
-                            Some(SyntaxSlot::Node(node)) => node.text_range(),
+                            Some(SyntaxSlot::Node(node)) => node.text_range_with_trivia(),
                             Some(SyntaxSlot::Token(token)) => token.text_range(),
                             Some(SyntaxSlot::Empty { index }) => {
                                 TextRange::new(index.into(), index.into())
                             }
                             None => continue,
                         };
-                        let optional_inserted_text = new_node.as_ref().map(|n| n.to_string());
-
                         // We use binary search to keep the text mutations in order
                         match text_mutation_list
                             .binary_search_by(|(range, _)| range.ordering(deleted_text_range))
                         {
                             // Overwrite the text mutation with an overlapping text range
                             Ok(pos) => {
-                                text_mutation_list[pos] =
-                                    (deleted_text_range, optional_inserted_text)
+                                text_mutation_list[pos] = (deleted_text_range, new_node.clone())
                             }
                             // Insert the text mutation at the correct position
                             Err(pos) => text_mutation_list
-                                .insert(pos, (deleted_text_range, optional_inserted_text)),
+                                .insert(pos, (deleted_text_range, new_node.clone())),
                         }
                     }
                 }
@@ -455,7 +449,7 @@ where
                 // and push a pending change to its parent
                 let mut current_parent = curr_parent.detach();
                 let is_list = current_parent.kind().is_list();
-                for (new_node_slot, new_node, ..) in modifications {
+                for (new_node_slot, new_node, ..) in modifications.clone() {
                     current_parent = if is_list && new_node.is_none() {
                         current_parent.splice_slots(new_node_slot..=new_node_slot, empty())
                     } else {
@@ -485,12 +479,8 @@ where
 
                     if curr_is_from_action {
                         text_mutation_list = vec![(
-                            document_root.text_range(),
-                            Some(
-                                curr_new_node
-                                    .as_ref()
-                                    .map_or(String::new(), |n| n.to_string()),
-                            ),
+                            document_root.text_range_with_trivia(),
+                            curr_new_node.clone(),
                         )];
                     }
 
@@ -511,9 +501,22 @@ where
                             }
 
                             let old = &root_string[range_start..range_end];
-                            let new = &optional_inserted_text.map_or(String::new(), |t| t);
 
-                            text_edit_builder.with_unicode_words_diff(old, new);
+                            match optional_inserted_text {
+                                None => {
+                                    text_edit_builder.with_unicode_words_diff(old, "");
+                                }
+                                Some(element) => match element {
+                                    SyntaxElement::Node(node) => {
+                                        text_edit_builder
+                                            .with_unicode_words_diff(old, &node.to_string());
+                                    }
+                                    SyntaxElement::Token(token) => {
+                                        text_edit_builder
+                                            .with_unicode_words_diff(old, token.text());
+                                    }
+                                },
+                            }
 
                             pointer = range_end;
                         }
@@ -557,8 +560,8 @@ where
 #[cfg(test)]
 pub mod test {
     use crate::{
-        raw_language::{LiteralExpression, RawLanguageKind, RawLanguageRoot, RawSyntaxTreeBuilder},
         AstNode, BatchMutationExt, SyntaxNodeCast,
+        raw_language::{LiteralExpression, RawLanguageKind, RawLanguageRoot, RawSyntaxTreeBuilder},
     };
 
     /// ```

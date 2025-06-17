@@ -1,0 +1,349 @@
+---
+source: crates/biome_js_parser/tests/spec_test.rs
+expression: snapshot
+snapshot_kind: text
+---
+## Input
+
+```js
+export { default as "b" };
+export { "a" as b };
+export { as b };
+export { a as 5 };
+export { a b c };
+
+```
+
+
+## AST
+
+```
+JsModule {
+    bom_token: missing (optional),
+    interpreter_token: missing (optional),
+    directives: JsDirectiveList [],
+    items: JsModuleItemList [
+        JsBogusStatement {
+            items: [
+                JsDecoratorList [],
+                EXPORT_KW@0..7 "export" [] [Whitespace(" ")],
+                JsBogus {
+                    items: [
+                        L_CURLY@7..9 "{" [] [Whitespace(" ")],
+                        JsBogus {
+                            items: [
+                                JsBogus {
+                                    items: [
+                                        JsLiteralExportName {
+                                            value: IDENT@9..17 "default" [] [Whitespace(" ")],
+                                        },
+                                        AS_KW@17..20 "as" [] [Whitespace(" ")],
+                                        JsLiteralExportName {
+                                            value: JS_STRING_LITERAL@20..24 "\"b\"" [] [Whitespace(" ")],
+                                        },
+                                    ],
+                                },
+                            ],
+                        },
+                        R_CURLY@24..25 "}" [] [],
+                        SEMICOLON@25..26 ";" [] [],
+                    ],
+                },
+            ],
+        },
+        JsBogusStatement {
+            items: [
+                JsDecoratorList [],
+                EXPORT_KW@26..34 "export" [Newline("\n")] [Whitespace(" ")],
+                JsBogus {
+                    items: [
+                        L_CURLY@34..36 "{" [] [Whitespace(" ")],
+                        JsBogus {
+                            items: [
+                                JsBogus {
+                                    items: [
+                                        JsLiteralExportName {
+                                            value: JS_STRING_LITERAL@36..40 "\"a\"" [] [Whitespace(" ")],
+                                        },
+                                        AS_KW@40..43 "as" [] [Whitespace(" ")],
+                                        JsLiteralExportName {
+                                            value: IDENT@43..45 "b" [] [Whitespace(" ")],
+                                        },
+                                    ],
+                                },
+                            ],
+                        },
+                        R_CURLY@45..46 "}" [] [],
+                        SEMICOLON@46..47 ";" [] [],
+                    ],
+                },
+            ],
+        },
+        JsExport {
+            decorators: JsDecoratorList [],
+            export_token: EXPORT_KW@47..55 "export" [Newline("\n")] [Whitespace(" ")],
+            export_clause: JsExportNamedClause {
+                type_token: missing (optional),
+                l_curly_token: L_CURLY@55..57 "{" [] [Whitespace(" ")],
+                specifiers: JsExportNamedSpecifierList [
+                    JsExportNamedSpecifier {
+                        type_token: missing (optional),
+                        local_name: missing (required),
+                        as_token: AS_KW@57..60 "as" [] [Whitespace(" ")],
+                        exported_name: JsLiteralExportName {
+                            value: IDENT@60..62 "b" [] [Whitespace(" ")],
+                        },
+                    },
+                ],
+                r_curly_token: R_CURLY@62..63 "}" [] [],
+                semicolon_token: SEMICOLON@63..64 ";" [] [],
+            },
+        },
+        JsBogusStatement {
+            items: [
+                JsDecoratorList [],
+                EXPORT_KW@64..72 "export" [Newline("\n")] [Whitespace(" ")],
+                JsBogus {
+                    items: [
+                        L_CURLY@72..74 "{" [] [Whitespace(" ")],
+                        JsBogus {
+                            items: [
+                                JsExportNamedSpecifier {
+                                    type_token: missing (optional),
+                                    local_name: JsReferenceIdentifier {
+                                        value_token: IDENT@74..76 "a" [] [Whitespace(" ")],
+                                    },
+                                    as_token: AS_KW@76..79 "as" [] [Whitespace(" ")],
+                                    exported_name: missing (required),
+                                },
+                                JsBogus {
+                                    items: [
+                                        JS_NUMBER_LITERAL@79..81 "5" [] [Whitespace(" ")],
+                                    ],
+                                },
+                            ],
+                        },
+                        R_CURLY@81..82 "}" [] [],
+                        SEMICOLON@82..83 ";" [] [],
+                    ],
+                },
+            ],
+        },
+        JsExport {
+            decorators: JsDecoratorList [],
+            export_token: EXPORT_KW@83..91 "export" [Newline("\n")] [Whitespace(" ")],
+            export_clause: JsExportNamedClause {
+                type_token: missing (optional),
+                l_curly_token: L_CURLY@91..93 "{" [] [Whitespace(" ")],
+                specifiers: JsExportNamedSpecifierList [
+                    JsExportNamedShorthandSpecifier {
+                        type_token: missing (optional),
+                        name: JsReferenceIdentifier {
+                            value_token: IDENT@93..95 "a" [] [Whitespace(" ")],
+                        },
+                    },
+                    missing separator,
+                    JsExportNamedShorthandSpecifier {
+                        type_token: missing (optional),
+                        name: JsReferenceIdentifier {
+                            value_token: IDENT@95..97 "b" [] [Whitespace(" ")],
+                        },
+                    },
+                    missing separator,
+                    JsExportNamedShorthandSpecifier {
+                        type_token: missing (optional),
+                        name: JsReferenceIdentifier {
+                            value_token: IDENT@97..99 "c" [] [Whitespace(" ")],
+                        },
+                    },
+                ],
+                r_curly_token: R_CURLY@99..100 "}" [] [],
+                semicolon_token: SEMICOLON@100..101 ";" [] [],
+            },
+        },
+    ],
+    eof_token: EOF@101..102 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: JS_MODULE@0..102
+  0: (empty)
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..101
+    0: JS_BOGUS_STATEMENT@0..26
+      0: JS_DECORATOR_LIST@0..0
+      1: EXPORT_KW@0..7 "export" [] [Whitespace(" ")]
+      2: JS_BOGUS@7..26
+        0: L_CURLY@7..9 "{" [] [Whitespace(" ")]
+        1: JS_BOGUS@9..24
+          0: JS_BOGUS@9..24
+            0: JS_LITERAL_EXPORT_NAME@9..17
+              0: IDENT@9..17 "default" [] [Whitespace(" ")]
+            1: AS_KW@17..20 "as" [] [Whitespace(" ")]
+            2: JS_LITERAL_EXPORT_NAME@20..24
+              0: JS_STRING_LITERAL@20..24 "\"b\"" [] [Whitespace(" ")]
+        2: R_CURLY@24..25 "}" [] []
+        3: SEMICOLON@25..26 ";" [] []
+    1: JS_BOGUS_STATEMENT@26..47
+      0: JS_DECORATOR_LIST@26..26
+      1: EXPORT_KW@26..34 "export" [Newline("\n")] [Whitespace(" ")]
+      2: JS_BOGUS@34..47
+        0: L_CURLY@34..36 "{" [] [Whitespace(" ")]
+        1: JS_BOGUS@36..45
+          0: JS_BOGUS@36..45
+            0: JS_LITERAL_EXPORT_NAME@36..40
+              0: JS_STRING_LITERAL@36..40 "\"a\"" [] [Whitespace(" ")]
+            1: AS_KW@40..43 "as" [] [Whitespace(" ")]
+            2: JS_LITERAL_EXPORT_NAME@43..45
+              0: IDENT@43..45 "b" [] [Whitespace(" ")]
+        2: R_CURLY@45..46 "}" [] []
+        3: SEMICOLON@46..47 ";" [] []
+    2: JS_EXPORT@47..64
+      0: JS_DECORATOR_LIST@47..47
+      1: EXPORT_KW@47..55 "export" [Newline("\n")] [Whitespace(" ")]
+      2: JS_EXPORT_NAMED_CLAUSE@55..64
+        0: (empty)
+        1: L_CURLY@55..57 "{" [] [Whitespace(" ")]
+        2: JS_EXPORT_NAMED_SPECIFIER_LIST@57..62
+          0: JS_EXPORT_NAMED_SPECIFIER@57..62
+            0: (empty)
+            1: (empty)
+            2: AS_KW@57..60 "as" [] [Whitespace(" ")]
+            3: JS_LITERAL_EXPORT_NAME@60..62
+              0: IDENT@60..62 "b" [] [Whitespace(" ")]
+        3: R_CURLY@62..63 "}" [] []
+        4: SEMICOLON@63..64 ";" [] []
+    3: JS_BOGUS_STATEMENT@64..83
+      0: JS_DECORATOR_LIST@64..64
+      1: EXPORT_KW@64..72 "export" [Newline("\n")] [Whitespace(" ")]
+      2: JS_BOGUS@72..83
+        0: L_CURLY@72..74 "{" [] [Whitespace(" ")]
+        1: JS_BOGUS@74..81
+          0: JS_EXPORT_NAMED_SPECIFIER@74..79
+            0: (empty)
+            1: JS_REFERENCE_IDENTIFIER@74..76
+              0: IDENT@74..76 "a" [] [Whitespace(" ")]
+            2: AS_KW@76..79 "as" [] [Whitespace(" ")]
+            3: (empty)
+          1: JS_BOGUS@79..81
+            0: JS_NUMBER_LITERAL@79..81 "5" [] [Whitespace(" ")]
+        2: R_CURLY@81..82 "}" [] []
+        3: SEMICOLON@82..83 ";" [] []
+    4: JS_EXPORT@83..101
+      0: JS_DECORATOR_LIST@83..83
+      1: EXPORT_KW@83..91 "export" [Newline("\n")] [Whitespace(" ")]
+      2: JS_EXPORT_NAMED_CLAUSE@91..101
+        0: (empty)
+        1: L_CURLY@91..93 "{" [] [Whitespace(" ")]
+        2: JS_EXPORT_NAMED_SPECIFIER_LIST@93..99
+          0: JS_EXPORT_NAMED_SHORTHAND_SPECIFIER@93..95
+            0: (empty)
+            1: JS_REFERENCE_IDENTIFIER@93..95
+              0: IDENT@93..95 "a" [] [Whitespace(" ")]
+          1: (empty)
+          2: JS_EXPORT_NAMED_SHORTHAND_SPECIFIER@95..97
+            0: (empty)
+            1: JS_REFERENCE_IDENTIFIER@95..97
+              0: IDENT@95..97 "b" [] [Whitespace(" ")]
+          3: (empty)
+          4: JS_EXPORT_NAMED_SHORTHAND_SPECIFIER@97..99
+            0: (empty)
+            1: JS_REFERENCE_IDENTIFIER@97..99
+              0: IDENT@97..99 "c" [] [Whitespace(" ")]
+        3: R_CURLY@99..100 "}" [] []
+        4: SEMICOLON@100..101 ";" [] []
+  4: EOF@101..102 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+export_named_clause_err.js:1:10 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × "default" can only be used with "export ... from ..."
+  
+  > 1 │ export { default as "b" };
+      │          ^^^^^^^
+    2 │ export { "a" as b };
+    3 │ export { as b };
+  
+export_named_clause_err.js:2:10 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × A string literal cannot be used as an export binding without `from`.
+  
+    1 │ export { default as "b" };
+  > 2 │ export { "a" as b };
+      │          ^^^
+    3 │ export { as b };
+    4 │ export { a as 5 };
+  
+export_named_clause_err.js:3:10 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected an identifier but instead found ''.
+  
+    1 │ export { default as "b" };
+    2 │ export { "a" as b };
+  > 3 │ export { as b };
+      │          
+    4 │ export { a as 5 };
+    5 │ export { a b c };
+  
+  i Expected an identifier here.
+  
+    1 │ export { default as "b" };
+    2 │ export { "a" as b };
+  > 3 │ export { as b };
+      │          
+    4 │ export { a as 5 };
+    5 │ export { a b c };
+  
+export_named_clause_err.js:4:15 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a string literal, or an identifier but instead found '5'.
+  
+    2 │ export { "a" as b };
+    3 │ export { as b };
+  > 4 │ export { a as 5 };
+      │               ^
+    5 │ export { a b c };
+    6 │ 
+  
+  i Expected a string literal, or an identifier here.
+  
+    2 │ export { "a" as b };
+    3 │ export { as b };
+  > 4 │ export { a as 5 };
+      │               ^
+    5 │ export { a b c };
+    6 │ 
+  
+export_named_clause_err.js:5:12 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `b`
+  
+    3 │ export { as b };
+    4 │ export { a as 5 };
+  > 5 │ export { a b c };
+      │            ^
+    6 │ 
+  
+  i Remove b
+  
+export_named_clause_err.js:5:14 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `c`
+  
+    3 │ export { as b };
+    4 │ export { a as 5 };
+  > 5 │ export { a b c };
+      │              ^
+    6 │ 
+  
+  i Remove c
+  
+```

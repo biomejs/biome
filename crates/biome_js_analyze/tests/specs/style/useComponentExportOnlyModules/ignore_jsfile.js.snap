@@ -1,0 +1,11 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: ignore_jsfile.js
+snapshot_kind: text
+---
+# Input
+```js
+export const CONSTANT = 3
+export const Foo = () => {}
+
+```

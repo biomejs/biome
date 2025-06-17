@@ -10,7 +10,7 @@ use biome_parser::parse_lists::ParseNodeList;
 use biome_parser::parse_recovery::{ParseRecovery, RecoveryResult};
 use biome_parser::parsed_syntax::ParsedSyntax;
 use biome_parser::parsed_syntax::ParsedSyntax::{Absent, Present};
-use biome_parser::{token_set, Parser, TokenSet};
+use biome_parser::{Parser, TokenSet, token_set};
 
 const URL_SET: TokenSet<CssSyntaxKind> = token_set![T![url], T![src]];
 

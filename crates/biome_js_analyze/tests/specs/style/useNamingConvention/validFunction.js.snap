@@ -3,7 +3,8 @@ source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: validFunction.js
 ---
 # Input
-```jsx
+```js
+/* should not generate diagnostics */
 function Person() {}
 
 function f() {}
@@ -24,5 +25,3 @@ function $() {}
 
 const g = function g() {}
 ```
-
-

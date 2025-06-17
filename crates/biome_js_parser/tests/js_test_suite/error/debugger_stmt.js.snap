@@ -1,0 +1,163 @@
+---
+source: crates/biome_js_parser/tests/spec_test.rs
+expression: snapshot
+snapshot_kind: text
+---
+## Input
+
+```js
+function foo() {
+  debugger {
+    var something = "lorem";
+  }
+}
+
+```
+
+
+## AST
+
+```
+JsModule {
+    bom_token: missing (optional),
+    interpreter_token: missing (optional),
+    directives: JsDirectiveList [],
+    items: JsModuleItemList [
+        JsFunctionDeclaration {
+            async_token: missing (optional),
+            function_token: FUNCTION_KW@0..9 "function" [] [Whitespace(" ")],
+            star_token: missing (optional),
+            id: JsIdentifierBinding {
+                name_token: IDENT@9..12 "foo" [] [],
+            },
+            type_parameters: missing (optional),
+            parameters: JsParameters {
+                l_paren_token: L_PAREN@12..13 "(" [] [],
+                items: JsParameterList [],
+                r_paren_token: R_PAREN@13..15 ")" [] [Whitespace(" ")],
+            },
+            return_type_annotation: missing (optional),
+            body: JsFunctionBody {
+                l_curly_token: L_CURLY@15..16 "{" [] [],
+                directives: JsDirectiveList [],
+                statements: JsStatementList [
+                    JsDebuggerStatement {
+                        debugger_token: DEBUGGER_KW@16..28 "debugger" [Newline("\n"), Whitespace("  ")] [Whitespace(" ")],
+                        semicolon_token: missing (optional),
+                    },
+                    JsBlockStatement {
+                        l_curly_token: L_CURLY@28..29 "{" [] [],
+                        statements: JsStatementList [
+                            JsVariableStatement {
+                                declaration: JsVariableDeclaration {
+                                    await_token: missing (optional),
+                                    kind: VAR_KW@29..38 "var" [Newline("\n"), Whitespace("    ")] [Whitespace(" ")],
+                                    declarators: JsVariableDeclaratorList [
+                                        JsVariableDeclarator {
+                                            id: JsIdentifierBinding {
+                                                name_token: IDENT@38..48 "something" [] [Whitespace(" ")],
+                                            },
+                                            variable_annotation: missing (optional),
+                                            initializer: JsInitializerClause {
+                                                eq_token: EQ@48..50 "=" [] [Whitespace(" ")],
+                                                expression: JsStringLiteralExpression {
+                                                    value_token: JS_STRING_LITERAL@50..57 "\"lorem\"" [] [],
+                                                },
+                                            },
+                                        },
+                                    ],
+                                },
+                                semicolon_token: SEMICOLON@57..58 ";" [] [],
+                            },
+                        ],
+                        r_curly_token: R_CURLY@58..62 "}" [Newline("\n"), Whitespace("  ")] [],
+                    },
+                ],
+                r_curly_token: R_CURLY@62..64 "}" [Newline("\n")] [],
+            },
+        },
+    ],
+    eof_token: EOF@64..65 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: JS_MODULE@0..65
+  0: (empty)
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..64
+    0: JS_FUNCTION_DECLARATION@0..64
+      0: (empty)
+      1: FUNCTION_KW@0..9 "function" [] [Whitespace(" ")]
+      2: (empty)
+      3: JS_IDENTIFIER_BINDING@9..12
+        0: IDENT@9..12 "foo" [] []
+      4: (empty)
+      5: JS_PARAMETERS@12..15
+        0: L_PAREN@12..13 "(" [] []
+        1: JS_PARAMETER_LIST@13..13
+        2: R_PAREN@13..15 ")" [] [Whitespace(" ")]
+      6: (empty)
+      7: JS_FUNCTION_BODY@15..64
+        0: L_CURLY@15..16 "{" [] []
+        1: JS_DIRECTIVE_LIST@16..16
+        2: JS_STATEMENT_LIST@16..62
+          0: JS_DEBUGGER_STATEMENT@16..28
+            0: DEBUGGER_KW@16..28 "debugger" [Newline("\n"), Whitespace("  ")] [Whitespace(" ")]
+            1: (empty)
+          1: JS_BLOCK_STATEMENT@28..62
+            0: L_CURLY@28..29 "{" [] []
+            1: JS_STATEMENT_LIST@29..58
+              0: JS_VARIABLE_STATEMENT@29..58
+                0: JS_VARIABLE_DECLARATION@29..57
+                  0: (empty)
+                  1: VAR_KW@29..38 "var" [Newline("\n"), Whitespace("    ")] [Whitespace(" ")]
+                  2: JS_VARIABLE_DECLARATOR_LIST@38..57
+                    0: JS_VARIABLE_DECLARATOR@38..57
+                      0: JS_IDENTIFIER_BINDING@38..48
+                        0: IDENT@38..48 "something" [] [Whitespace(" ")]
+                      1: (empty)
+                      2: JS_INITIALIZER_CLAUSE@48..57
+                        0: EQ@48..50 "=" [] [Whitespace(" ")]
+                        1: JS_STRING_LITERAL_EXPRESSION@50..57
+                          0: JS_STRING_LITERAL@50..57 "\"lorem\"" [] []
+                1: SEMICOLON@57..58 ";" [] []
+            2: R_CURLY@58..62 "}" [Newline("\n"), Whitespace("  ")] []
+        3: R_CURLY@62..64 "}" [Newline("\n")] []
+  4: EOF@64..65 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+debugger_stmt.js:2:12 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a semicolon or an implicit semicolon after a statement, but found none
+  
+    1 │ function foo() {
+  > 2 │   debugger {
+      │            ^
+    3 │     var something = "lorem";
+    4 │   }
+  
+  i An explicit or implicit semicolon is expected here...
+  
+    1 │ function foo() {
+  > 2 │   debugger {
+      │            ^
+    3 │     var something = "lorem";
+    4 │   }
+  
+  i ...Which is required to end this statement
+  
+    1 │ function foo() {
+  > 2 │   debugger {
+      │   ^^^^^^^^
+    3 │     var something = "lorem";
+    4 │   }
+  
+```

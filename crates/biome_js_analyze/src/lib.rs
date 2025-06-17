@@ -1,23 +1,28 @@
+#![deny(clippy::use_self)]
 #![warn(clippy::needless_pass_by_value)]
 
 use crate::suppression_action::JsSuppressionAction;
 use biome_analyze::{
-    AnalysisFilter, Analyzer, AnalyzerContext, AnalyzerOptions, AnalyzerSignal, ControlFlow,
-    InspectMatcher, LanguageRoot, MatchQueryParams, MetadataRegistry, RuleAction, RuleRegistry,
-    SuppressionKind,
+    AnalysisFilter, Analyzer, AnalyzerContext, AnalyzerOptions, AnalyzerPluginSlice,
+    AnalyzerSignal, AnalyzerSuppression, ControlFlow, InspectMatcher, LanguageRoot,
+    MatchQueryParams, MetadataRegistry, RuleAction, RuleRegistry, to_analyzer_suppressions,
 };
-use biome_aria::{AriaProperties, AriaRoles};
-use biome_diagnostics::{category, Error as DiagnosticError};
+use biome_aria::AriaRoles;
+use biome_diagnostics::Error as DiagnosticError;
 use biome_js_syntax::{JsFileSource, JsLanguage};
-use biome_project::PackageJson;
-use biome_suppression::{parse_suppression_comment, SuppressionDiagnostic};
+use biome_module_graph::{ModuleGraph, ScopedResolver};
+use biome_project_layout::ProjectLayout;
+use biome_rowan::TextRange;
+use biome_suppression::{SuppressionDiagnostic, parse_suppression_comment};
 use std::ops::Deref;
 use std::sync::{Arc, LazyLock};
 
-mod assists;
+mod a11y;
+pub mod assist;
 mod ast_utils;
 pub mod globals;
 pub mod lint;
+mod nextjs;
 pub mod options;
 mod react;
 mod registry;
@@ -37,6 +42,29 @@ pub static METADATA: LazyLock<MetadataRegistry> = LazyLock::new(|| {
     metadata
 });
 
+#[derive(Default)]
+pub struct JsAnalyzerServices {
+    module_graph: Arc<ModuleGraph>,
+    project_layout: Arc<ProjectLayout>,
+    source_type: JsFileSource,
+}
+
+impl From<(Arc<ModuleGraph>, Arc<ProjectLayout>, JsFileSource)> for JsAnalyzerServices {
+    fn from(
+        (module_graph, project_layout, source_type): (
+            Arc<ModuleGraph>,
+            Arc<ProjectLayout>,
+            JsFileSource,
+        ),
+    ) -> Self {
+        Self {
+            module_graph,
+            project_layout,
+            source_type,
+        }
+    }
+}
+
 /// Run the analyzer on the provided `root`: this process will use the given `filter`
 /// to selectively restrict analysis to specific rules / a specific source range,
 /// then call `emit_signal` when an analysis rule emits a diagnostic or action.
@@ -48,8 +76,8 @@ pub fn analyze_with_inspect_matcher<'a, V, F, B>(
     filter: AnalysisFilter,
     inspect_matcher: V,
     options: &'a AnalyzerOptions,
-    source_type: JsFileSource,
-    manifest: Option<PackageJson>,
+    plugins: AnalyzerPluginSlice<'a>,
+    services: JsAnalyzerServices,
     mut emit_signal: F,
 ) -> (Option<B>, Vec<DiagnosticError>)
 where
@@ -59,41 +87,25 @@ where
 {
     fn parse_linter_suppression_comment(
         text: &str,
-    ) -> Vec<Result<SuppressionKind, SuppressionDiagnostic>> {
+        piece_range: TextRange,
+    ) -> Vec<Result<AnalyzerSuppression, SuppressionDiagnostic>> {
         let mut result = Vec::new();
 
         for comment in parse_suppression_comment(text) {
-            let categories = match comment {
-                Ok(comment) => {
-                    if comment.is_legacy {
-                        result.push(Ok(SuppressionKind::Deprecated));
-                    }
-                    comment.categories
-                }
+            let suppression = match comment {
+                Ok(suppression) => suppression,
                 Err(err) => {
                     result.push(Err(err));
                     continue;
                 }
             };
 
-            for (key, value) in categories {
-                if key == category!("lint") {
-                    if let Some(value) = value {
-                        result.push(Ok(SuppressionKind::MaybeLegacy(value)));
-                    } else {
-                        result.push(Ok(SuppressionKind::Everything));
-                    }
-                } else {
-                    let category = key.name();
-                    if let Some(rule) = category.strip_prefix("lint/") {
-                        if let Some(instance) = value {
-                            result.push(Ok(SuppressionKind::RuleInstance(rule, instance)));
-                        } else {
-                            result.push(Ok(SuppressionKind::Rule(rule)));
-                        }
-                    }
-                }
-            }
+            let analyzer_suppressions: Vec<_> = to_analyzer_suppressions(suppression, piece_range)
+                .into_iter()
+                .map(Ok)
+                .collect();
+
+            result.extend(analyzer_suppressions)
         }
 
         result
@@ -102,7 +114,13 @@ where
     let mut registry = RuleRegistry::builder(&filter, root);
     visit_registry(&mut registry);
 
-    let (registry, mut services, diagnostics, visitors) = registry.build();
+    let JsAnalyzerServices {
+        module_graph,
+        project_layout,
+        source_type,
+    } = services;
+
+    let (registry, mut services, diagnostics, visitors, categories) = registry.build();
 
     // Bail if we can't parse a rule option
     if !diagnostics.is_empty() {
@@ -115,16 +133,42 @@ where
         parse_linter_suppression_comment,
         Box::new(JsSuppressionAction),
         &mut emit_signal,
+        categories,
     );
+
+    for plugin in plugins {
+        if plugin.supports_js() {
+            analyzer.add_plugin(plugin.clone());
+        }
+    }
 
     for ((phase, _), visitor) in visitors {
         analyzer.add_visitor(phase, visitor);
     }
 
+    let file_path = options.file_path.clone();
+
+    let node_manifest = project_layout
+        .find_node_manifest_for_path(file_path.as_ref())
+        .map(|(path, manifest)| (path, Arc::new(manifest)));
+
+    let type_resolver = module_graph
+        .module_info_for_path(file_path.as_ref())
+        .map(|module_info| {
+            let mut resolver = ScopedResolver::from_global_scope(module_info, module_graph.clone());
+            resolver.run_inference();
+            resolver
+        })
+        .map(Arc::new);
+
     services.insert_service(Arc::new(AriaRoles));
-    services.insert_service(Arc::new(AriaProperties));
-    services.insert_service(Arc::new(manifest));
     services.insert_service(source_type);
+    services.insert_service(module_graph);
+    services.insert_service(node_manifest);
+    services.insert_service(file_path);
+    services.insert_service(type_resolver);
+    services.insert_service(project_layout);
+
     (
         analyzer.run(AnalyzerContext {
             root: root.clone(),
@@ -143,8 +187,8 @@ pub fn analyze<'a, F, B>(
     root: &LanguageRoot<JsLanguage>,
     filter: AnalysisFilter,
     options: &'a AnalyzerOptions,
-    source_type: JsFileSource,
-    manifest: Option<PackageJson>,
+    plugins: AnalyzerPluginSlice<'a>,
+    services: JsAnalyzerServices,
     emit_signal: F,
 ) -> (Option<B>, Vec<DiagnosticError>)
 where
@@ -156,249 +200,12 @@ where
         filter,
         |_| {},
         options,
-        source_type,
-        manifest,
+        plugins,
+        services,
         emit_signal,
     )
 }
 
 #[cfg(test)]
-mod tests {
-    use biome_analyze::{AnalyzerOptions, Never, RuleCategoriesBuilder, RuleFilter};
-    use biome_console::fmt::{Formatter, Termcolor};
-    use biome_console::{markup, Markup};
-    use biome_diagnostics::category;
-    use biome_diagnostics::termcolor::NoColor;
-    use biome_diagnostics::{Diagnostic, DiagnosticExt, PrintDiagnostic, Severity};
-    use biome_js_parser::{parse, JsParserOptions};
-    use biome_js_syntax::{JsFileSource, TextRange, TextSize};
-    use biome_project::{Dependencies, PackageJson};
-    use std::slice;
-
-    use crate::{analyze, AnalysisFilter, ControlFlow};
-
-    #[ignore]
-    #[test]
-    fn quick_test() {
-        fn markup_to_string(markup: Markup) -> String {
-            let mut buffer = Vec::new();
-            let mut write = Termcolor(NoColor::new(&mut buffer));
-            let mut fmt = Formatter::new(&mut write);
-            fmt.write_markup(markup).unwrap();
-
-            String::from_utf8(buffer).unwrap()
-        }
-
-        const SOURCE: &str = r#"import buffer from "buffer"; "#;
-
-        let parsed = parse(SOURCE, JsFileSource::tsx(), JsParserOptions::default());
-
-        let mut error_ranges: Vec<TextRange> = Vec::new();
-        let options = AnalyzerOptions::default();
-        let rule_filter = RuleFilter::Rule("style", "useNodejsImportProtocol");
-
-        let mut dependencies = Dependencies::default();
-        dependencies.add("buffer", "latest");
-        analyze(
-            &parsed.tree(),
-            AnalysisFilter {
-                enabled_rules: Some(slice::from_ref(&rule_filter)),
-                ..AnalysisFilter::default()
-            },
-            &options,
-            JsFileSource::tsx(),
-            Some(PackageJson {
-                dependencies,
-                ..Default::default()
-            }),
-            |signal| {
-                if let Some(diag) = signal.diagnostic() {
-                    error_ranges.push(diag.location().span.unwrap());
-                    let error = diag
-                        .with_severity(Severity::Warning)
-                        .with_file_path("dummyFile")
-                        .with_file_source_code(SOURCE);
-                    let text = markup_to_string(markup! {
-                        {PrintDiagnostic::verbose(&error)}
-                    });
-                    eprintln!("{text}");
-                }
-
-                for action in signal.actions() {
-                    let new_code = action.mutation.commit();
-                    eprintln!("new code!!!");
-                    eprintln!("{new_code}");
-                }
-
-                ControlFlow::<Never>::Continue(())
-            },
-        );
-
-        // assert_eq!(error_ranges.as_slice(), &[]);
-    }
-
-    #[test]
-    fn suppression() {
-        const SOURCE: &str = "
-            function checkSuppressions1(a, b) {
-                a == b;
-                // biome-ignore lint/suspicious:whole group
-                a == b;
-                // biome-ignore lint/suspicious/noDoubleEquals: single rule
-                a == b;
-                /* biome-ignore lint/style/useWhile: multiple block comments */ /* biome-ignore lint/suspicious/noDoubleEquals: multiple block comments */
-                a == b;
-                // biome-ignore lint/style/useWhile: multiple line comments
-                // biome-ignore lint/suspicious/noDoubleEquals: multiple line comments
-                a == b;
-                a == b;
-            }
-
-            // biome-ignore lint/suspicious/noDoubleEquals: do not suppress warning for the whole function
-            function checkSuppressions2(a, b) {
-                a == b;
-            }
-
-            function checkSuppressions3(a, b) {
-                a == b;
-                // rome-ignore lint/suspicious: whole group
-                a == b;
-                // rome-ignore lint/suspicious/noDoubleEquals: single rule
-                a == b;
-                /* rome-ignore lint/style/useWhile: multiple block comments */ /* rome-ignore lint(suspicious/noDoubleEquals): multiple block comments */
-                a == b;
-                // rome-ignore lint/style/useWhile: multiple line comments
-                // rome-ignore lint/suspicious/noDoubleEquals: multiple line comments
-                a == b;
-                a == b;
-            }
-
-            // biome-ignore lint(suspicious/noDoubleEquals): do not suppress warning for the whole function
-            function checkSuppressions4(a, b) {
-                a == b;
-            }
-
-            function checkSuppressions5() {
-                // biome-ignore format explanation
-                // biome-ignore format(:
-                // biome-ignore (value): explanation
-                // biome-ignore unknown: explanation
-            }
-        ";
-
-        let parsed = parse(
-            SOURCE,
-            JsFileSource::js_module(),
-            JsParserOptions::default(),
-        );
-
-        let mut lint_ranges: Vec<TextRange> = Vec::new();
-        let mut parse_ranges: Vec<TextRange> = Vec::new();
-        let mut warn_ranges: Vec<TextRange> = Vec::new();
-
-        let options = AnalyzerOptions::default();
-        analyze(
-            &parsed.tree(),
-            AnalysisFilter::default(),
-            &options,
-            JsFileSource::js_module(),
-            None,
-            |signal| {
-                if let Some(diag) = signal.diagnostic() {
-                    let span = diag.get_span();
-                    let error = diag
-                        .with_severity(Severity::Warning)
-                        .with_file_path("example.js")
-                        .with_file_source_code(SOURCE);
-
-                    let code = error.category().unwrap();
-                    if code == category!("lint/suspicious/noDoubleEquals") {
-                        lint_ranges.push(span.unwrap());
-                    }
-
-                    if code == category!("suppressions/parse") {
-                        parse_ranges.push(span.unwrap());
-                    }
-
-                    if code == category!("suppressions/deprecatedSuppressionComment") {
-                        warn_ranges.push(span.unwrap());
-                    }
-                }
-
-                ControlFlow::<Never>::Continue(())
-            },
-        );
-        assert_eq!(
-            lint_ranges.as_slice(),
-            &[
-                TextRange::new(TextSize::from(67), TextSize::from(69)),
-                TextRange::new(TextSize::from(641), TextSize::from(643)),
-                TextRange::new(TextSize::from(835), TextSize::from(837)),
-                TextRange::new(TextSize::from(922), TextSize::from(924)),
-                TextRange::new(TextSize::from(1492), TextSize::from(1494)),
-                TextRange::new(TextSize::from(1687), TextSize::from(1689)),
-            ]
-        );
-
-        assert_eq!(
-            parse_ranges.as_slice(),
-            &[
-                TextRange::new(TextSize::from(1791), TextSize::from(1802)),
-                TextRange::new(TextSize::from(1842), TextSize::from(1843)),
-                TextRange::new(TextSize::from(1876), TextSize::from(1877)),
-                TextRange::new(TextSize::from(1929), TextSize::from(1936)),
-            ]
-        );
-
-        assert_eq!(
-            warn_ranges.as_slice(),
-            &[
-                TextRange::new(TextSize::from(944), TextSize::from(987)),
-                TextRange::new(TextSize::from(1028), TextSize::from(1086)),
-                TextRange::new(TextSize::from(1127), TextSize::from(1189)),
-                TextRange::new(TextSize::from(1190), TextSize::from(1264)),
-                TextRange::new(TextSize::from(1305), TextSize::from(1363)),
-                TextRange::new(TextSize::from(1380), TextSize::from(1449)),
-                TextRange::new(TextSize::from(1525), TextSize::from(1620)),
-            ]
-        );
-    }
-
-    #[test]
-    fn suppression_syntax() {
-        const SOURCE: &str = "
-            // biome-ignore lint/suspicious/noDoubleEquals: single rule
-            a == b;
-        ";
-
-        let parsed = parse(
-            SOURCE,
-            JsFileSource::js_module(),
-            JsParserOptions::default(),
-        );
-
-        let filter = AnalysisFilter {
-            categories: RuleCategoriesBuilder::default().with_syntax().build(),
-            ..AnalysisFilter::default()
-        };
-
-        let options = AnalyzerOptions::default();
-        analyze(
-            &parsed.tree(),
-            filter,
-            &options,
-            JsFileSource::js_module(),
-            None,
-            |signal| {
-                if let Some(diag) = signal.diagnostic() {
-                    let code = diag.category().unwrap();
-                    if code != category!("suppressions/unused") {
-                        panic!("unexpected diagnostic {code:?}");
-                    }
-                }
-
-                ControlFlow::<Never>::Continue(())
-            },
-        );
-    }
-}
+#[path = "suppressions.tests.rs"]
+mod tests;

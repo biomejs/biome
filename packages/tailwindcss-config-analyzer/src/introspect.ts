@@ -1,8 +1,10 @@
 import type { Config } from "tailwindcss";
-import { createContext } from "tailwindcss/lib/lib/setupContextUtils";
+// @ts-expect-error
+import pkg from "tailwindcss/lib/lib/setupContextUtils.js";
 import resolveConfig from "tailwindcss/resolveConfig.js";
 import type { TailwindContext } from "./types.js";
 
+const { createContext } = pkg;
 const DEFAULT_CONFIG: Config = { content: [] };
 
 function createContextFromConfig(config: Partial<Config>) {
@@ -54,7 +56,7 @@ function introspectVariants(context: TailwindContext): Set<VariantSpec> {
 	const variantOffsets = context.offsets.variantOffsets;
 
 	// TODO: Handle isArbitrary like `has-[]` or `group-has-[]`
-	for (const { name, isArbitrary, values } of configVariants) {
+	for (const { name, values } of configVariants) {
 		const offset = variantOffsets.get(name);
 		if (!offset) continue;
 

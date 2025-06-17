@@ -123,8 +123,27 @@ postcss-nested-props.css:10:29 parse ━━━━━━━━━━━━━━�
      9 │ .funky {
   > 10 │     font: 20px/24px fantasy {
        │                             ^
+    11 │         weight: bold;
+    12 │     }
+  
+  i Expected one of:
+  
+  - identifier
+  - string
+  - number
+  - dimension
+  - ratio
+  - custom property
+  - function
+  
+postcss-nested-props.css:11:15 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected value or character.
+  
+     9 │ .funky {
+    10 │     font: 20px/24px fantasy {
   > 11 │         weight: bold;
-       │         ^^^^^^^^^^^^
+       │               ^^^^^^
     12 │     }
     13 │ }
   

@@ -1,6 +1,6 @@
 ---
 source: crates/biome_cli/tests/snap_test.rs
-expression: content
+expression: redactor(content)
 ---
 ## `biome.json`
 
@@ -48,7 +48,6 @@ biome.json:6:13 deserialize ━━━━━━━━━━━━━━━━━�
   i Known keys:
   
   - recommended
-  - all
   - noChildrenProp
   - noConstAssign
   - noConstantCondition
@@ -56,20 +55,19 @@ biome.json:6:13 deserialize ━━━━━━━━━━━━━━━━━�
   - noConstructorReturn
   - noEmptyCharacterClassInRegex
   - noEmptyPattern
-  - noFlatMapIdentity
   - noGlobalObjectCalls
   - noInnerDeclarations
   - noInvalidBuiltinInstantiation
   - noInvalidConstructorSuper
   - noInvalidDirectionInLinearGradient
   - noInvalidGridAreas
-  - noInvalidNewBuiltin
   - noInvalidPositionAtImportRule
   - noInvalidUseBeforeDeclaration
-  - noNewSymbol
+  - noMissingVarFunction
   - noNodejsModules
   - noNonoctalDecimalEscape
   - noPrecisionLoss
+  - noPrivateImports
   - noRenderReturnValue
   - noSelfAssign
   - noSetterReturn
@@ -80,9 +78,11 @@ biome.json:6:13 deserialize ━━━━━━━━━━━━━━━━━�
   - noUnknownFunction
   - noUnknownMediaFeatureName
   - noUnknownProperty
+  - noUnknownPseudoClass
+  - noUnknownPseudoElement
+  - noUnknownTypeSelector
   - noUnknownUnit
   - noUnmatchableAnbSelector
-  - noUnnecessaryContinue
   - noUnreachable
   - noUnreachableSuper
   - noUnsafeFinally
@@ -94,13 +94,13 @@ biome.json:6:13 deserialize ━━━━━━━━━━━━━━━━━�
   - noUnusedVariables
   - noVoidElementsWithChildren
   - noVoidTypeReturn
-  - useArrayLiterals
   - useExhaustiveDependencies
   - useHookAtTopLevel
   - useImportExtensions
   - useIsNan
   - useJsxKeyInIterable
   - useValidForDirection
+  - useValidTypeof
   - useYield
   
 
@@ -121,33 +121,46 @@ biome.json:9:13 deserialize ━━━━━━━━━━━━━━━━━�
   i Known keys:
   
   - recommended
-  - all
-  - noArguments
-  - noCommaOperator
+  - noCommonJs
   - noDefaultExport
+  - noDescendingSpecificity
   - noDoneCallback
+  - noEnum
+  - noExportedImports
+  - noHeadElement
   - noImplicitBoolean
   - noInferrableTypes
   - noNamespace
-  - noNamespaceImport
   - noNegationElse
+  - noNestedTernary
   - noNonNullAssertion
   - noParameterAssign
   - noParameterProperties
+  - noProcessEnv
   - noRestrictedGlobals
+  - noRestrictedImports
+  - noRestrictedTypes
   - noShoutyConstants
+  - noSubstr
   - noUnusedTemplateLiteral
   - noUselessElse
-  - noVar
+  - noValueAtRule
   - noYodaExpression
+  - useArrayLiterals
   - useAsConstAssertion
+  - useAtIndex
   - useBlockStatements
   - useCollapsedElseIf
+  - useCollapsedIf
+  - useComponentExportOnlyModules
   - useConsistentArrayType
   - useConsistentBuiltinInstantiation
+  - useConsistentCurlyBraces
+  - useConsistentMemberAccessibility
   - useConst
   - useDefaultParameterLast
   - useDefaultSwitchClause
+  - useDeprecatedReason
   - useEnumInitializers
   - useExplicitLengthCheck
   - useExponentiationOperator
@@ -161,17 +174,14 @@ biome.json:9:13 deserialize ━━━━━━━━━━━━━━━━━�
   - useNodeAssertStrict
   - useNodejsImportProtocol
   - useNumberNamespace
-  - useNumericLiterals
   - useSelfClosingElements
-  - useShorthandArrayType
   - useShorthandAssign
   - useShorthandFunctionType
-  - useSingleCaseStatement
   - useSingleVarDeclarator
   - useTemplate
   - useThrowNewError
   - useThrowOnlyError
-  - useWhile
+  - useTrimStartEnd
   
 
 ```

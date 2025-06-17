@@ -3,7 +3,8 @@ source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: validRange.js
 ---
 # Input
-```jsx
+```js
+/* should not generate diagnostics */
 if ("a" < x && x < MAX ) {}
 while ("a" < x && x < MAX ) {}
 if (1 < x && x < MAX ) {}

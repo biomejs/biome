@@ -2,69 +2,24 @@
 //!
 //! Tests of these implementations are available in [biome_deserialize::json::tests] module.
 use crate::{
-    diagnostics::DeserializableTypes, Deserializable, DeserializableValue,
-    DeserializationDiagnostic, DeserializationVisitor,
+    Deserializable, DeserializableValue, DeserializationContext, DeserializationDiagnostic,
+    DeserializationVisitor, diagnostics::DeserializableTypes,
 };
-use biome_rowan::{TextRange, TokenText};
-use indexmap::{IndexMap, IndexSet};
+use biome_rowan::{Text, TextRange, TokenText};
 use std::{
-    collections::{BTreeMap, HashMap, HashSet},
+    collections::{BTreeMap, BTreeSet, HashMap, HashSet},
     hash::{BuildHasher, Hash},
     marker::PhantomData,
-    num::{NonZeroU16, NonZeroU32, NonZeroU64, NonZeroU8, NonZeroUsize},
+    num::{NonZeroU8, NonZeroU16, NonZeroU32, NonZeroU64, NonZeroUsize},
     ops::Deref,
     path::PathBuf,
 };
 
-/// Type that allows deserializing a string without heap-allocation when possible.
-/// This is analog to [std::borrow::Cow]:
-#[derive(Debug, Eq, PartialEq, Hash, Clone)]
-pub enum Text {
-    Borrowed(TokenText),
-    Owned(String),
-}
-impl Text {
-    pub fn text(&self) -> &str {
-        match self {
-            Text::Borrowed(token_text) => token_text.text(),
-            Text::Owned(string) => string,
-        }
-    }
-}
-impl From<Text> for String {
-    fn from(value: Text) -> Self {
-        match value {
-            Text::Borrowed(token_text) => token_text.text().to_string(),
-            Text::Owned(string) => string,
-        }
-    }
-}
-impl PartialOrd for Text {
-    fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
-        Some(self.cmp(other))
-    }
-}
-impl Ord for Text {
-    fn cmp(&self, other: &Self) -> std::cmp::Ordering {
-        self.text().cmp(other.text())
-    }
-}
-impl Deref for Text {
-    type Target = str;
-    fn deref(&self) -> &Self::Target {
-        self.text()
-    }
-}
-impl std::fmt::Display for Text {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}", self.text())
-    }
-}
 impl Deserializable for Text {
     fn deserialize(
+        ctx: &mut impl DeserializationContext,
         value: &impl DeserializableValue,
         name: &str,
-        diagnostics: &mut Vec<DeserializationDiagnostic>,
     ) -> Option<Self> {
         struct Visitor;
         impl DeserializationVisitor for Visitor {
@@ -72,15 +27,15 @@ impl Deserializable for Text {
             const EXPECTED_TYPE: DeserializableTypes = DeserializableTypes::STR;
             fn visit_str(
                 self,
+                _ctx: &mut impl DeserializationContext,
                 value: Text,
                 _range: TextRange,
                 _name: &str,
-                _diagnostics: &mut Vec<DeserializationDiagnostic>,
             ) -> Option<Self::Output> {
                 Some(value)
             }
         }
-        value.deserialize(Visitor, name, diagnostics)
+        value.deserialize(ctx, Visitor, name)
     }
 }
 
@@ -106,9 +61,9 @@ impl std::fmt::Display for TextNumber {
 }
 impl Deserializable for TextNumber {
     fn deserialize(
+        ctx: &mut impl DeserializationContext,
         value: &impl DeserializableValue,
         name: &str,
-        diagnostics: &mut Vec<DeserializationDiagnostic>,
     ) -> Option<Self> {
         struct Visitor;
         impl DeserializationVisitor for Visitor {
@@ -116,38 +71,38 @@ impl Deserializable for TextNumber {
             const EXPECTED_TYPE: DeserializableTypes = DeserializableTypes::NUMBER;
             fn visit_number(
                 self,
+                _ctx: &mut impl DeserializationContext,
                 value: TextNumber,
                 _range: TextRange,
                 _name: &str,
-                _diagnostics: &mut Vec<DeserializationDiagnostic>,
             ) -> Option<Self::Output> {
                 Some(value)
             }
         }
-        value.deserialize(Visitor, name, diagnostics)
+        value.deserialize(ctx, Visitor, name)
     }
 }
 
 impl Deserializable for () {
     fn deserialize(
+        ctx: &mut impl DeserializationContext,
         value: &impl DeserializableValue,
         name: &str,
-        diagnostics: &mut Vec<DeserializationDiagnostic>,
     ) -> Option<Self> {
         struct Visitor;
         impl DeserializationVisitor for Visitor {
             type Output = ();
             const EXPECTED_TYPE: DeserializableTypes = DeserializableTypes::empty();
         }
-        value.deserialize(Visitor, name, diagnostics)
+        value.deserialize(ctx, Visitor, name)
     }
 }
 
 impl Deserializable for bool {
     fn deserialize(
+        ctx: &mut impl DeserializationContext,
         value: &impl DeserializableValue,
         name: &str,
-        diagnostics: &mut Vec<DeserializationDiagnostic>,
     ) -> Option<Self> {
         struct Visitor;
         impl DeserializationVisitor for Visitor {
@@ -155,65 +110,65 @@ impl Deserializable for bool {
             const EXPECTED_TYPE: DeserializableTypes = DeserializableTypes::BOOL;
             fn visit_bool(
                 self,
+                _ctx: &mut impl DeserializationContext,
                 value: bool,
                 _range: TextRange,
                 _name: &str,
-                _diagnostics: &mut Vec<DeserializationDiagnostic>,
             ) -> Option<Self::Output> {
                 Some(value)
             }
         }
-        value.deserialize(Visitor, name, diagnostics)
+        value.deserialize(ctx, Visitor, name)
     }
 }
 
 impl Deserializable for f32 {
     fn deserialize(
+        ctx: &mut impl DeserializationContext,
         value: &impl DeserializableValue,
         name: &str,
-        diagnostics: &mut Vec<DeserializationDiagnostic>,
     ) -> Option<Self> {
-        let value_text = TextNumber::deserialize(value, name, diagnostics)?;
+        let value_text = TextNumber::deserialize(ctx, value, name)?;
         if let Ok(value) = value_text.parse::<Self>() {
             return Some(value);
         }
         let diagnostic =
             DeserializationDiagnostic::new("The number should be a float representable on 32 bits")
                 .with_range(value.range());
-        diagnostics.push(diagnostic);
+        ctx.report(diagnostic);
         None
     }
 }
 
 impl Deserializable for f64 {
     fn deserialize(
+        ctx: &mut impl DeserializationContext,
         value: &impl DeserializableValue,
         name: &str,
-        diagnostics: &mut Vec<DeserializationDiagnostic>,
     ) -> Option<Self> {
-        let value_text = TextNumber::deserialize(value, name, diagnostics)?;
+        let value_text = TextNumber::deserialize(ctx, value, name)?;
         if let Ok(value) = value_text.parse::<Self>() {
             return Some(value);
         }
         let diagnostic =
             DeserializationDiagnostic::new("The number should be a float representable on 64 bits")
                 .with_range(value.range());
-        diagnostics.push(diagnostic);
+        ctx.report(diagnostic);
         None
     }
 }
 
 impl Deserializable for i8 {
     fn deserialize(
+        ctx: &mut impl DeserializationContext,
         value: &impl DeserializableValue,
         name: &str,
-        diagnostics: &mut Vec<DeserializationDiagnostic>,
     ) -> Option<Self> {
-        let value_text = TextNumber::deserialize(value, name, diagnostics)?;
+        let value_text = TextNumber::deserialize(ctx, value, name)?;
         if let Ok(value) = value_text.parse::<Self>() {
             return Some(value);
         }
-        diagnostics.push(DeserializationDiagnostic::new_out_of_bound_integer(
+        ctx.report(DeserializationDiagnostic::new_out_of_bound_integer(
             Self::MIN,
             Self::MAX,
             value.range(),
@@ -224,15 +179,15 @@ impl Deserializable for i8 {
 
 impl Deserializable for i16 {
     fn deserialize(
+        ctx: &mut impl DeserializationContext,
         value: &impl DeserializableValue,
         name: &str,
-        diagnostics: &mut Vec<DeserializationDiagnostic>,
     ) -> Option<Self> {
-        let value_text = TextNumber::deserialize(value, name, diagnostics)?;
+        let value_text = TextNumber::deserialize(ctx, value, name)?;
         if let Ok(value) = value_text.parse::<Self>() {
             return Some(value);
         }
-        diagnostics.push(DeserializationDiagnostic::new_out_of_bound_integer(
+        ctx.report(DeserializationDiagnostic::new_out_of_bound_integer(
             Self::MIN,
             Self::MAX,
             value.range(),
@@ -243,15 +198,15 @@ impl Deserializable for i16 {
 
 impl Deserializable for i32 {
     fn deserialize(
+        ctx: &mut impl DeserializationContext,
         value: &impl DeserializableValue,
         name: &str,
-        diagnostics: &mut Vec<DeserializationDiagnostic>,
     ) -> Option<Self> {
-        let value_text = TextNumber::deserialize(value, name, diagnostics)?;
+        let value_text = TextNumber::deserialize(ctx, value, name)?;
         if let Ok(value) = value_text.parse::<Self>() {
             return Some(value);
         }
-        diagnostics.push(DeserializationDiagnostic::new_out_of_bound_integer(
+        ctx.report(DeserializationDiagnostic::new_out_of_bound_integer(
             Self::MIN,
             Self::MAX,
             value.range(),
@@ -262,15 +217,15 @@ impl Deserializable for i32 {
 
 impl Deserializable for isize {
     fn deserialize(
+        ctx: &mut impl DeserializationContext,
         value: &impl DeserializableValue,
         name: &str,
-        diagnostics: &mut Vec<DeserializationDiagnostic>,
     ) -> Option<Self> {
-        let value_text = TextNumber::deserialize(value, name, diagnostics)?;
+        let value_text = TextNumber::deserialize(ctx, value, name)?;
         if let Ok(value) = value_text.parse::<Self>() {
             return Some(value);
         }
-        diagnostics.push(DeserializationDiagnostic::new_out_of_bound_integer(
+        ctx.report(DeserializationDiagnostic::new_out_of_bound_integer(
             Self::MIN,
             Self::MAX,
             value.range(),
@@ -281,15 +236,15 @@ impl Deserializable for isize {
 
 impl Deserializable for i64 {
     fn deserialize(
+        ctx: &mut impl DeserializationContext,
         value: &impl DeserializableValue,
         name: &str,
-        diagnostics: &mut Vec<DeserializationDiagnostic>,
     ) -> Option<Self> {
-        let value_text = TextNumber::deserialize(value, name, diagnostics)?;
+        let value_text = TextNumber::deserialize(ctx, value, name)?;
         if let Ok(value) = value_text.parse::<Self>() {
             return Some(value);
         }
-        diagnostics.push(DeserializationDiagnostic::new_out_of_bound_integer(
+        ctx.report(DeserializationDiagnostic::new_out_of_bound_integer(
             Self::MIN,
             Self::MAX,
             value.range(),
@@ -300,15 +255,15 @@ impl Deserializable for i64 {
 
 impl Deserializable for u8 {
     fn deserialize(
+        ctx: &mut impl DeserializationContext,
         value: &impl DeserializableValue,
         name: &str,
-        diagnostics: &mut Vec<DeserializationDiagnostic>,
     ) -> Option<Self> {
-        let value_text = TextNumber::deserialize(value, name, diagnostics)?;
+        let value_text = TextNumber::deserialize(ctx, value, name)?;
         if let Ok(value) = value_text.parse::<Self>() {
             return Some(value);
         }
-        diagnostics.push(DeserializationDiagnostic::new_out_of_bound_integer(
+        ctx.report(DeserializationDiagnostic::new_out_of_bound_integer(
             Self::MIN,
             Self::MAX,
             value.range(),
@@ -319,15 +274,15 @@ impl Deserializable for u8 {
 
 impl Deserializable for u16 {
     fn deserialize(
+        ctx: &mut impl DeserializationContext,
         value: &impl DeserializableValue,
         name: &str,
-        diagnostics: &mut Vec<DeserializationDiagnostic>,
     ) -> Option<Self> {
-        let value_text = TextNumber::deserialize(value, name, diagnostics)?;
+        let value_text = TextNumber::deserialize(ctx, value, name)?;
         if let Ok(value) = value_text.parse::<Self>() {
             return Some(value);
         }
-        diagnostics.push(DeserializationDiagnostic::new_out_of_bound_integer(
+        ctx.report(DeserializationDiagnostic::new_out_of_bound_integer(
             Self::MIN,
             Self::MAX,
             value.range(),
@@ -338,15 +293,15 @@ impl Deserializable for u16 {
 
 impl Deserializable for u32 {
     fn deserialize(
+        ctx: &mut impl DeserializationContext,
         value: &impl DeserializableValue,
         name: &str,
-        diagnostics: &mut Vec<DeserializationDiagnostic>,
     ) -> Option<Self> {
-        let value_text = TextNumber::deserialize(value, name, diagnostics)?;
+        let value_text = TextNumber::deserialize(ctx, value, name)?;
         if let Ok(value) = value_text.parse::<Self>() {
             return Some(value);
         }
-        diagnostics.push(DeserializationDiagnostic::new_out_of_bound_integer(
+        ctx.report(DeserializationDiagnostic::new_out_of_bound_integer(
             Self::MIN,
             Self::MAX,
             value.range(),
@@ -357,15 +312,15 @@ impl Deserializable for u32 {
 
 impl Deserializable for usize {
     fn deserialize(
+        ctx: &mut impl DeserializationContext,
         value: &impl DeserializableValue,
         name: &str,
-        diagnostics: &mut Vec<DeserializationDiagnostic>,
     ) -> Option<Self> {
-        let value_text = TextNumber::deserialize(value, name, diagnostics)?;
+        let value_text = TextNumber::deserialize(ctx, value, name)?;
         if let Ok(value) = value_text.parse::<Self>() {
             return Some(value);
         }
-        diagnostics.push(DeserializationDiagnostic::new_out_of_bound_integer(
+        ctx.report(DeserializationDiagnostic::new_out_of_bound_integer(
             Self::MIN,
             Self::MAX,
             value.range(),
@@ -376,15 +331,15 @@ impl Deserializable for usize {
 
 impl Deserializable for u64 {
     fn deserialize(
+        ctx: &mut impl DeserializationContext,
         value: &impl DeserializableValue,
         name: &str,
-        diagnostics: &mut Vec<DeserializationDiagnostic>,
     ) -> Option<Self> {
-        let value_text = TextNumber::deserialize(value, name, diagnostics)?;
+        let value_text = TextNumber::deserialize(ctx, value, name)?;
         if let Ok(value) = value_text.parse::<Self>() {
             return Some(value);
         }
-        diagnostics.push(DeserializationDiagnostic::new_out_of_bound_integer(
+        ctx.report(DeserializationDiagnostic::new_out_of_bound_integer(
             Self::MIN,
             Self::MAX,
             value.range(),
@@ -395,15 +350,15 @@ impl Deserializable for u64 {
 
 impl Deserializable for NonZeroU8 {
     fn deserialize(
+        ctx: &mut impl DeserializationContext,
         value: &impl DeserializableValue,
         name: &str,
-        diagnostics: &mut Vec<DeserializationDiagnostic>,
     ) -> Option<Self> {
-        let value_text = TextNumber::deserialize(value, name, diagnostics)?;
+        let value_text = TextNumber::deserialize(ctx, value, name)?;
         if let Ok(value) = value_text.parse::<Self>() {
             return Some(value);
         }
-        diagnostics.push(DeserializationDiagnostic::new_out_of_bound_integer(
+        ctx.report(DeserializationDiagnostic::new_out_of_bound_integer(
             Self::MIN.get(),
             Self::MAX.get(),
             value.range(),
@@ -414,15 +369,15 @@ impl Deserializable for NonZeroU8 {
 
 impl Deserializable for NonZeroU16 {
     fn deserialize(
+        ctx: &mut impl DeserializationContext,
         value: &impl DeserializableValue,
         name: &str,
-        diagnostics: &mut Vec<DeserializationDiagnostic>,
     ) -> Option<Self> {
-        let value_text = TextNumber::deserialize(value, name, diagnostics)?;
+        let value_text = TextNumber::deserialize(ctx, value, name)?;
         if let Ok(value) = value_text.parse::<Self>() {
             return Some(value);
         }
-        diagnostics.push(DeserializationDiagnostic::new_out_of_bound_integer(
+        ctx.report(DeserializationDiagnostic::new_out_of_bound_integer(
             Self::MIN.get(),
             Self::MAX.get(),
             value.range(),
@@ -433,15 +388,15 @@ impl Deserializable for NonZeroU16 {
 
 impl Deserializable for NonZeroU32 {
     fn deserialize(
+        ctx: &mut impl DeserializationContext,
         value: &impl DeserializableValue,
         name: &str,
-        diagnostics: &mut Vec<DeserializationDiagnostic>,
     ) -> Option<Self> {
-        let value_text = TextNumber::deserialize(value, name, diagnostics)?;
+        let value_text = TextNumber::deserialize(ctx, value, name)?;
         if let Ok(value) = value_text.parse::<Self>() {
             return Some(value);
         }
-        diagnostics.push(DeserializationDiagnostic::new_out_of_bound_integer(
+        ctx.report(DeserializationDiagnostic::new_out_of_bound_integer(
             Self::MIN.get(),
             Self::MAX.get(),
             value.range(),
@@ -452,15 +407,15 @@ impl Deserializable for NonZeroU32 {
 
 impl Deserializable for NonZeroUsize {
     fn deserialize(
+        ctx: &mut impl DeserializationContext,
         value: &impl DeserializableValue,
         name: &str,
-        diagnostics: &mut Vec<DeserializationDiagnostic>,
     ) -> Option<Self> {
-        let value_text = TextNumber::deserialize(value, name, diagnostics)?;
+        let value_text = TextNumber::deserialize(ctx, value, name)?;
         if let Ok(value) = value_text.parse::<Self>() {
             return Some(value);
         }
-        diagnostics.push(DeserializationDiagnostic::new_out_of_bound_integer(
+        ctx.report(DeserializationDiagnostic::new_out_of_bound_integer(
             Self::MIN.get(),
             Self::MAX.get(),
             value.range(),
@@ -471,15 +426,15 @@ impl Deserializable for NonZeroUsize {
 
 impl Deserializable for NonZeroU64 {
     fn deserialize(
+        ctx: &mut impl DeserializationContext,
         value: &impl DeserializableValue,
         name: &str,
-        diagnostics: &mut Vec<DeserializationDiagnostic>,
     ) -> Option<Self> {
-        let value_text = TextNumber::deserialize(value, name, diagnostics)?;
+        let value_text = TextNumber::deserialize(ctx, value, name)?;
         if let Ok(value) = value_text.parse::<Self>() {
             return Some(value);
         }
-        diagnostics.push(DeserializationDiagnostic::new_out_of_bound_integer(
+        ctx.report(DeserializationDiagnostic::new_out_of_bound_integer(
             Self::MIN.get(),
             Self::MAX.get(),
             value.range(),
@@ -490,59 +445,63 @@ impl Deserializable for NonZeroU64 {
 
 impl Deserializable for String {
     fn deserialize(
+        ctx: &mut impl DeserializationContext,
         value: &impl DeserializableValue,
         name: &str,
-        diagnostics: &mut Vec<DeserializationDiagnostic>,
     ) -> Option<Self> {
-        Text::deserialize(value, name, diagnostics).map(|value| value.into())
+        Text::deserialize(ctx, value, name).map(|value| value.into())
     }
 }
 
 impl Deserializable for Box<str> {
     fn deserialize(
+        ctx: &mut impl DeserializationContext,
         value: &impl DeserializableValue,
         name: &str,
-        diagnostics: &mut Vec<DeserializationDiagnostic>,
     ) -> Option<Self> {
-        String::deserialize(value, name, diagnostics).map(|s| s.into_boxed_str())
+        String::deserialize(ctx, value, name).map(|s| s.into_boxed_str())
     }
 }
 
 impl Deserializable for PathBuf {
     fn deserialize(
+        ctx: &mut impl DeserializationContext,
         value: &impl DeserializableValue,
         name: &str,
-        diagnostics: &mut Vec<DeserializationDiagnostic>,
     ) -> Option<Self> {
-        String::deserialize(value, name, diagnostics).map(PathBuf::from)
+        String::deserialize(ctx, value, name).map(Self::from)
     }
 }
 
 impl<T: Deserializable> Deserializable for Box<T> {
     fn deserialize(
+        ctx: &mut impl DeserializationContext,
         value: &impl DeserializableValue,
         name: &str,
-        diagnostics: &mut Vec<DeserializationDiagnostic>,
     ) -> Option<Self> {
-        T::deserialize(value, name, diagnostics).map(Box::new)
+        T::deserialize(ctx, value, name).map(Self::new)
     }
 }
 
 impl<T: Deserializable> Deserializable for Option<T> {
     fn deserialize(
+        ctx: &mut impl DeserializationContext,
         value: &impl DeserializableValue,
         name: &str,
-        diagnostics: &mut Vec<DeserializationDiagnostic>,
     ) -> Option<Self> {
-        T::deserialize(value, name, diagnostics).map(Option::Some)
+        if value.visitable_type() == Some(crate::DeserializableType::Null) {
+            None
+        } else {
+            T::deserialize(ctx, value, name).map(Option::Some)
+        }
     }
 }
 
 impl<T: Deserializable> Deserializable for Vec<T> {
     fn deserialize(
+        ctx: &mut impl DeserializationContext,
         value: &impl DeserializableValue,
         name: &str,
-        diagnostics: &mut Vec<DeserializationDiagnostic>,
     ) -> Option<Self> {
         struct Visitor<T>(PhantomData<T>);
         impl<T: Deserializable> DeserializationVisitor for Visitor<T> {
@@ -550,38 +509,38 @@ impl<T: Deserializable> Deserializable for Vec<T> {
             const EXPECTED_TYPE: DeserializableTypes = DeserializableTypes::ARRAY;
             fn visit_array(
                 self,
+                ctx: &mut impl DeserializationContext,
                 values: impl Iterator<Item = Option<impl DeserializableValue>>,
                 _range: TextRange,
                 _name: &str,
-                diagnostics: &mut Vec<DeserializationDiagnostic>,
             ) -> Option<Self::Output> {
                 Some(
                     values
-                        .filter_map(|value| Deserializable::deserialize(&value?, "", diagnostics))
+                        .filter_map(|value| Deserializable::deserialize(ctx, &value?, ""))
                         .collect(),
                 )
             }
         }
-        value.deserialize(Visitor(PhantomData), name, diagnostics)
+        value.deserialize(ctx, Visitor(PhantomData), name)
     }
 }
 
 impl<T: Deserializable> Deserializable for Box<[T]> {
     fn deserialize(
+        ctx: &mut impl DeserializationContext,
         value: &impl DeserializableValue,
         name: &str,
-        diagnostics: &mut Vec<DeserializationDiagnostic>,
     ) -> Option<Self> {
-        Deserializable::deserialize(value, name, diagnostics).map(Vec::into_boxed_slice)
+        Deserializable::deserialize(ctx, value, name).map(Vec::into_boxed_slice)
     }
 }
 
 #[cfg(feature = "smallvec")]
 impl<T: Deserializable, const L: usize> Deserializable for smallvec::SmallVec<[T; L]> {
     fn deserialize(
+        ctx: &mut impl DeserializationContext,
         value: &impl DeserializableValue,
         name: &str,
-        diagnostics: &mut Vec<DeserializationDiagnostic>,
     ) -> Option<Self> {
         struct Visitor<T, const L: usize>(PhantomData<T>);
         impl<T: Deserializable, const L: usize> DeserializationVisitor for Visitor<T, L> {
@@ -589,27 +548,27 @@ impl<T: Deserializable, const L: usize> Deserializable for smallvec::SmallVec<[T
             const EXPECTED_TYPE: DeserializableTypes = DeserializableTypes::ARRAY;
             fn visit_array(
                 self,
+                ctx: &mut impl DeserializationContext,
                 values: impl Iterator<Item = Option<impl DeserializableValue>>,
                 _range: TextRange,
                 _name: &str,
-                diagnostics: &mut Vec<DeserializationDiagnostic>,
             ) -> Option<Self::Output> {
                 Some(
                     values
-                        .filter_map(|value| Deserializable::deserialize(&value?, "", diagnostics))
+                        .filter_map(|value| Deserializable::deserialize(ctx, &value?, ""))
                         .collect(),
                 )
             }
         }
-        value.deserialize(Visitor(PhantomData), name, diagnostics)
+        value.deserialize(ctx, Visitor(PhantomData), name)
     }
 }
 
 impl<T: Deserializable + Eq + Hash, S: BuildHasher + Default> Deserializable for HashSet<T, S> {
     fn deserialize(
+        ctx: &mut impl DeserializationContext,
         value: &impl DeserializableValue,
         name: &str,
-        diagnostics: &mut Vec<DeserializationDiagnostic>,
     ) -> Option<Self> {
         struct Visitor<T, S>(PhantomData<(T, S)>);
         impl<T: Deserializable + Eq + Hash, S: BuildHasher + Default> DeserializationVisitor
@@ -619,47 +578,76 @@ impl<T: Deserializable + Eq + Hash, S: BuildHasher + Default> Deserializable for
             const EXPECTED_TYPE: DeserializableTypes = DeserializableTypes::ARRAY;
             fn visit_array(
                 self,
+                ctx: &mut impl DeserializationContext,
                 values: impl Iterator<Item = Option<impl DeserializableValue>>,
                 _range: TextRange,
                 _name: &str,
-                diagnostics: &mut Vec<DeserializationDiagnostic>,
             ) -> Option<Self::Output> {
                 Some(
                     values
-                        .filter_map(|value| Deserializable::deserialize(&value?, "", diagnostics))
+                        .filter_map(|value| Deserializable::deserialize(ctx, &value?, ""))
                         .collect(),
                 )
             }
         }
-        value.deserialize(Visitor(PhantomData), name, diagnostics)
+        value.deserialize(ctx, Visitor(PhantomData), name)
     }
 }
 
-impl<T: Hash + Eq + Deserializable> Deserializable for IndexSet<T> {
+impl<T: Ord + Deserializable> Deserializable for BTreeSet<T> {
     fn deserialize(
+        ctx: &mut impl DeserializationContext,
         value: &impl DeserializableValue,
         name: &str,
-        diagnostics: &mut Vec<DeserializationDiagnostic>,
     ) -> Option<Self> {
         struct Visitor<T>(PhantomData<T>);
-        impl<T: Hash + Eq + Deserializable> DeserializationVisitor for Visitor<T> {
-            type Output = IndexSet<T>;
+        impl<T: Ord + Deserializable> DeserializationVisitor for Visitor<T> {
+            type Output = BTreeSet<T>;
             const EXPECTED_TYPE: DeserializableTypes = DeserializableTypes::ARRAY;
             fn visit_array(
                 self,
+                ctx: &mut impl DeserializationContext,
                 values: impl Iterator<Item = Option<impl DeserializableValue>>,
                 _range: TextRange,
                 _name: &str,
-                diagnostics: &mut Vec<DeserializationDiagnostic>,
             ) -> Option<Self::Output> {
                 Some(
                     values
-                        .filter_map(|value| Deserializable::deserialize(&value?, "", diagnostics))
+                        .filter_map(|value| Deserializable::deserialize(ctx, &value?, ""))
                         .collect(),
                 )
             }
         }
-        value.deserialize(Visitor(PhantomData), name, diagnostics)
+        value.deserialize(ctx, Visitor(PhantomData), name)
+    }
+}
+
+#[cfg(feature = "indexmap")]
+impl<T: Hash + Eq + Deserializable> Deserializable for indexmap::IndexSet<T> {
+    fn deserialize(
+        ctx: &mut impl DeserializationContext,
+        value: &impl DeserializableValue,
+        name: &str,
+    ) -> Option<Self> {
+        struct Visitor<T>(PhantomData<T>);
+        impl<T: Hash + Eq + Deserializable> DeserializationVisitor for Visitor<T> {
+            type Output = indexmap::IndexSet<T>;
+            const EXPECTED_TYPE: DeserializableTypes = DeserializableTypes::ARRAY;
+            fn visit_array(
+                self,
+                ctx: &mut impl DeserializationContext,
+                values: impl Iterator<Item = Option<impl DeserializableValue>>,
+                _range: TextRange,
+                _name: &str,
+            ) -> Option<Self::Output> {
+                Some(
+                    values
+                        .filter_map(|value| Deserializable::deserialize(ctx, &value?, ""))
+                        .collect(),
+                )
+            }
+        }
+        value.deserialize(ctx, Visitor(PhantomData), name)
     }
 }
 
@@ -667,9 +655,9 @@ impl<K: Hash + Eq + Deserializable, V: Deserializable, S: Default + BuildHasher>
     for HashMap<K, V, S>
 {
     fn deserialize(
+        ctx: &mut impl DeserializationContext,
         value: &impl DeserializableValue,
         name: &str,
-        diagnostics: &mut Vec<DeserializationDiagnostic>,
     ) -> Option<Self> {
         struct Visitor<K, V, S>(PhantomData<(K, V, S)>);
         impl<K: Hash + Eq + Deserializable, V: Deserializable, S: Default + BuildHasher>
@@ -679,17 +667,17 @@ impl<K: Hash + Eq + Deserializable, V: Deserializable, S: Default + BuildHasher>
             const EXPECTED_TYPE: DeserializableTypes = DeserializableTypes::MAP;
             fn visit_map(
                 self,
+                ctx: &mut impl DeserializationContext,
                 members: impl Iterator<
                     Item = Option<(impl DeserializableValue, impl DeserializableValue)>,
                 >,
                 _range: TextRange,
                 _name: &str,
-                diagnostics: &mut Vec<DeserializationDiagnostic>,
             ) -> Option<Self::Output> {
                 let mut result = Self::Output::default();
                 for (key, value) in members.flatten() {
-                    let key = Deserializable::deserialize(&key, "", diagnostics);
-                    let value = Deserializable::deserialize(&value, "", diagnostics);
+                    let key = Deserializable::deserialize(ctx, &key, "");
+                    let value = Deserializable::deserialize(ctx, &value, "");
                     if let (Some(key), Some(value)) = (key, value) {
                         result.insert(key, value);
                     }
@@ -697,15 +685,15 @@ impl<K: Hash + Eq + Deserializable, V: Deserializable, S: Default + BuildHasher>
                 Some(result)
             }
         }
-        value.deserialize(Visitor(PhantomData), name, diagnostics)
+        value.deserialize(ctx, Visitor(PhantomData), name)
     }
 }
 
 impl<K: Ord + Deserializable, V: Deserializable> Deserializable for BTreeMap<K, V> {
     fn deserialize(
+        ctx: &mut impl DeserializationContext,
         value: &impl DeserializableValue,
         name: &str,
-        diagnostics: &mut Vec<DeserializationDiagnostic>,
     ) -> Option<Self> {
         struct Visitor<K, V>(PhantomData<(K, V)>);
         impl<K: Ord + Deserializable, V: Deserializable> DeserializationVisitor for Visitor<K, V> {
@@ -713,17 +701,17 @@ impl<K: Ord + Deserializable, V: Deserializable> Deserializable for BTreeMap<K, 
             const EXPECTED_TYPE: DeserializableTypes = DeserializableTypes::MAP;
             fn visit_map(
                 self,
+                ctx: &mut impl DeserializationContext,
                 members: impl Iterator<
                     Item = Option<(impl DeserializableValue, impl DeserializableValue)>,
                 >,
                 _range: TextRange,
                 _name: &str,
-                diagnostics: &mut Vec<DeserializationDiagnostic>,
             ) -> Option<Self::Output> {
                 let mut result = Self::Output::default();
                 for (key, value) in members.flatten() {
-                    let key = Deserializable::deserialize(&key, "", diagnostics);
-                    let value = Deserializable::deserialize(&value, "", diagnostics);
+                    let key = Deserializable::deserialize(ctx, &key, "");
+                    let value = Deserializable::deserialize(ctx, &value, "");
                     if let (Some(key), Some(value)) = (key, value) {
                         result.insert(key, value);
                     }
@@ -731,37 +719,38 @@ impl<K: Ord + Deserializable, V: Deserializable> Deserializable for BTreeMap<K, 
                 Some(result)
             }
         }
-        value.deserialize(Visitor(PhantomData), name, diagnostics)
+        value.deserialize(ctx, Visitor(PhantomData), name)
     }
 }
 
+#[cfg(feature = "indexmap")]
 impl<K: Hash + Eq + Deserializable, V: Deserializable, S: Default + BuildHasher> Deserializable
-    for IndexMap<K, V, S>
+    for indexmap::IndexMap<K, V, S>
 {
     fn deserialize(
+        ctx: &mut impl DeserializationContext,
         value: &impl DeserializableValue,
         name: &str,
-        diagnostics: &mut Vec<DeserializationDiagnostic>,
     ) -> Option<Self> {
         struct Visitor<K, V, S>(PhantomData<(K, V, S)>);
         impl<K: Hash + Eq + Deserializable, V: Deserializable, S: Default + BuildHasher>
             DeserializationVisitor for Visitor<K, V, S>
         {
-            type Output = IndexMap<K, V, S>;
+            type Output = indexmap::IndexMap<K, V, S>;
             const EXPECTED_TYPE: DeserializableTypes = DeserializableTypes::MAP;
             fn visit_map(
                 self,
+                ctx: &mut impl DeserializationContext,
                 members: impl Iterator<
                     Item = Option<(impl DeserializableValue, impl DeserializableValue)>,
                 >,
                 _range: TextRange,
                 _name: &str,
-                diagnostics: &mut Vec<DeserializationDiagnostic>,
             ) -> Option<Self::Output> {
                 let mut result = Self::Output::default();
                 for (key, value) in members.flatten() {
-                    let key = Deserializable::deserialize(&key, "", diagnostics);
-                    let value = Deserializable::deserialize(&value, "", diagnostics);
+                    let key = Deserializable::deserialize(ctx, &key, "");
+                    let value = Deserializable::deserialize(ctx, &value, "");
                     if let (Some(key), Some(value)) = (key, value) {
                         result.insert(key, value);
                     }
@@ -769,6 +758,17 @@ impl<K: Hash + Eq + Deserializable, V: Deserializable, S: Default + BuildHasher>
                 Some(result)
             }
         }
-        value.deserialize(Visitor(PhantomData), name, diagnostics)
+        value.deserialize(ctx, Visitor(PhantomData), name)
+    }
+}
+
+#[cfg(feature = "camino")]
+impl Deserializable for camino::Utf8PathBuf {
+    fn deserialize(
+        ctx: &mut impl DeserializationContext,
+        value: &impl DeserializableValue,
+        name: &str,
+    ) -> Option<Self> {
+        String::deserialize(ctx, value, name).map(Self::from)
     }
 }

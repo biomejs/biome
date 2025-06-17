@@ -64,13 +64,13 @@ pub fn main() -> io::Result<()> {
             }
         }
 
-        #[cfg(feature = "schemars")]
+        #[cfg(feature = "schema")]
         impl schemars::JsonSchema for &'static Category {
             fn schema_name() -> String {
                 String::from("Category")
             }
 
-            fn json_schema(_gen: &mut schemars::gen::SchemaGenerator) -> schemars::schema::Schema {
+            fn json_schema(_gen: &mut schemars::r#gen::SchemaGenerator) -> schemars::schema::Schema {
                 schemars::schema::Schema::Object(schemars::schema::SchemaObject {
                     instance_type: Some(schemars::schema::InstanceType::String.into()),
                     enum_values: Some(vec![#( #enum_variants.into() ),*]),

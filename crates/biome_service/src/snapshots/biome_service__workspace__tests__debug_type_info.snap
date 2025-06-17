@@ -1,0 +1,19 @@
+---
+source: crates/biome_service/src/workspace.tests.rs
+expression: result.unwrap()
+---
+sync Function "foo" {
+  accepts: {
+    params: [
+      required name: string (bindings: name:string)
+      required age: number (bindings: age:number)
+    ]
+    type_args: []
+  }
+  returns: Global TypeId(0)
+}
+class "Person" {
+  extends: none
+  implements: []
+  type_args: []
+}

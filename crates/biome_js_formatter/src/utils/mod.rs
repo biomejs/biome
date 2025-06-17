@@ -18,13 +18,13 @@ mod quickcheck_utils;
 pub(crate) mod test_each_template;
 mod typescript;
 
-use crate::context::trailing_commas::FormatTrailingCommas;
 use crate::context::Semicolons;
+use crate::context::trailing_commas::FormatTrailingCommas;
 use crate::prelude::*;
 pub(crate) use assignment_like::{
-    with_assignment_layout, AnyJsAssignmentLike, AssignmentLikeLayout,
+    AnyJsAssignmentLike, AssignmentLikeLayout, with_assignment_layout,
 };
-use biome_formatter::{format_args, write, Buffer};
+use biome_formatter::{Buffer, format_args, write};
 use biome_js_syntax::{
     AnyJsExpression, AnyJsStatement, JsCallExpression, JsInitializerClause, JsLanguage, Modifier,
 };
@@ -257,13 +257,13 @@ impl Format<JsFormatContext> for FormatSemicolon<'_> {
         match self.semicolon {
             Some(semicolon) => semicolon.format().fmt(f),
             None => {
-                let is_after_bogus = f.elements().start_tag(TagKind::Verbatim).map_or(
-                    false,
-                    |signal| match signal {
-                        Tag::StartVerbatim(kind) => kind.is_bogus(),
-                        _ => unreachable!(),
-                    },
-                );
+                let is_after_bogus =
+                    f.elements()
+                        .start_tag(TagKind::Verbatim)
+                        .is_some_and(|signal| match signal {
+                            Tag::StartVerbatim(kind) => kind.is_bogus(),
+                            _ => unreachable!(),
+                        });
 
                 if !is_after_bogus {
                     write!(f, [text(";")])?;

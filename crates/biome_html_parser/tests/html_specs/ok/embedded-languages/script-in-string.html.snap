@@ -20,7 +20,7 @@ HtmlRoot {
         HtmlElement {
             opening_element: HtmlOpeningElement {
                 l_angle_token: L_ANGLE@0..1 "<" [] [],
-                name: HtmlName {
+                name: HtmlTagName {
                     value_token: HTML_LITERAL@1..7 "script" [] [],
                 },
                 attributes: HtmlAttributeList [],
@@ -34,7 +34,7 @@ HtmlRoot {
             closing_element: HtmlClosingElement {
                 l_angle_token: L_ANGLE@97..98 "<" [] [],
                 slash_token: SLASH@98..99 "/" [] [],
-                name: HtmlName {
+                name: HtmlTagName {
                     value_token: HTML_LITERAL@99..105 "script" [] [],
                 },
                 r_angle_token: R_ANGLE@105..106 ">" [] [],
@@ -55,7 +55,7 @@ HtmlRoot {
     0: HTML_ELEMENT@0..106
       0: HTML_OPENING_ELEMENT@0..8
         0: L_ANGLE@0..1 "<" [] []
-        1: HTML_NAME@1..7
+        1: HTML_TAG_NAME@1..7
           0: HTML_LITERAL@1..7 "script" [] []
         2: HTML_ATTRIBUTE_LIST@7..7
         3: R_ANGLE@7..8 ">" [] []
@@ -65,7 +65,7 @@ HtmlRoot {
       2: HTML_CLOSING_ELEMENT@97..106
         0: L_ANGLE@97..98 "<" [] []
         1: SLASH@98..99 "/" [] []
-        2: HTML_NAME@99..105
+        2: HTML_TAG_NAME@99..105
           0: HTML_LITERAL@99..105 "script" [] []
         3: R_ANGLE@105..106 ">" [] []
   3: EOF@106..107 "" [Newline("\n")] []

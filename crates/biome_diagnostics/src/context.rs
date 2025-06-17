@@ -2,9 +2,9 @@ use biome_console::fmt;
 
 use crate::context::internal::{SeverityDiagnostic, TagsDiagnostic};
 use crate::{
+    Category, DiagnosticTags, Error, Resource, Severity, SourceCode,
     diagnostic::internal::AsDiagnostic,
     location::{AsResource, AsSourceCode, AsSpan},
-    Category, DiagnosticTags, Error, Resource, Severity, SourceCode,
 };
 
 /// This trait is implemented for all types implementing [Diagnostic](super::Diagnostic)
@@ -254,9 +254,9 @@ mod internal {
     use biome_text_edit::TextEdit;
 
     use crate::{
-        diagnostic::internal::AsDiagnostic, Advices, Backtrace, Category, Diagnostic,
-        DiagnosticTags, LineIndex, LineIndexBuf, Location, LogCategory, Resource, Severity,
-        SourceCode, Visit,
+        Advices, Backtrace, Category, Diagnostic, DiagnosticTags, LineIndex, LineIndexBuf,
+        Location, LogCategory, Resource, Severity, SourceCode, Visit,
+        diagnostic::internal::AsDiagnostic,
     };
 
     /// This trait is inherited by `DiagnosticExt` and `Context`, since it's
@@ -344,9 +344,7 @@ mod internal {
 
     impl fmt::Write for DisplayMarkup<'_, '_> {
         fn write_str(&mut self, _: &fmt::MarkupElements<'_>, content: &str) -> io::Result<()> {
-            self.0
-                .write_str(content)
-                .map_err(|error| io::Error::new(io::ErrorKind::Other, error))
+            self.0.write_str(content).map_err(io::Error::other)
         }
 
         fn write_fmt(
@@ -354,9 +352,7 @@ mod internal {
             _: &fmt::MarkupElements<'_>,
             content: std::fmt::Arguments<'_>,
         ) -> io::Result<()> {
-            self.0
-                .write_fmt(content)
-                .map_err(|error| io::Error::new(io::ErrorKind::Other, error))
+            self.0.write_fmt(content).map_err(io::Error::other)
         }
     }
 

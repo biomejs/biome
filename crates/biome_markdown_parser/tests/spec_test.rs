@@ -1,11 +1,11 @@
 use biome_console::fmt::{Formatter, Termcolor};
 use biome_console::markup;
+use biome_diagnostics::DiagnosticExt;
 use biome_diagnostics::display::PrintDiagnostic;
 use biome_diagnostics::termcolor;
-use biome_diagnostics::DiagnosticExt;
 use biome_markdown_parser::parse_markdown;
 use biome_rowan::SyntaxKind;
-use biome_test_utils::has_bogus_nodes_or_empty_slots;
+use biome_test_utils::{has_bogus_nodes_or_empty_slots, validate_eof_token};
 use std::fmt::Write;
 use std::fs;
 use std::path::Path;
@@ -37,6 +37,8 @@ pub fn run(test_case: &str, _snapshot_name: &str, test_directory: &str, outcome_
         .expect("Expected test path to be a readable file in UTF8 encoding");
 
     let parsed = parse_markdown(&content);
+    validate_eof_token(parsed.syntax());
+
     let formatted_ast = format!("{:#?}", parsed.tree());
 
     let mut snapshot = String::new();
@@ -84,7 +86,9 @@ pub fn run(test_case: &str, _snapshot_name: &str, test_directory: &str, outcome_
             std::str::from_utf8(diagnostics_buffer.as_slice()).expect("non utf8 in error buffer");
 
         if matches!(outcome, ExpectedOutcome::Pass) {
-            panic!("Expected no errors to be present in a test case that is expected to pass but the following diagnostics are present:\n{formatted_diagnostics}")
+            panic!(
+                "Expected no errors to be present in a test case that is expected to pass but the following diagnostics are present:\n{formatted_diagnostics}"
+            )
         }
 
         writeln!(snapshot, "## Diagnostics\n\n```").unwrap();
@@ -102,7 +106,9 @@ pub fn run(test_case: &str, _snapshot_name: &str, test_directory: &str, outcome_
                     .descendants()
                     .any(|node| node.kind().is_bogus())
             {
-                panic!("Parsed tree of a 'OK' test case should not contain any missing required children or bogus nodes: \n {formatted_ast:#?} \n\n {formatted_ast}");
+                panic!(
+                    "Parsed tree of a 'OK' test case should not contain any missing required children or bogus nodes: \n {formatted_ast:#?} \n\n {formatted_ast}"
+                );
             }
 
             let syntax = parsed.syntax();

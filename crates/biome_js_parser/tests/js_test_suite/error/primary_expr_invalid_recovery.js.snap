@@ -1,0 +1,122 @@
+---
+source: crates/biome_js_parser/tests/spec_test.rs
+expression: snapshot
+snapshot_kind: text
+---
+## Input
+
+```js
+let a = \; foo();
+
+```
+
+
+## AST
+
+```
+JsModule {
+    bom_token: missing (optional),
+    interpreter_token: missing (optional),
+    directives: JsDirectiveList [],
+    items: JsModuleItemList [
+        JsBogusStatement {
+            items: [
+                JsBogus {
+                    items: [
+                        LET_KW@0..4 "let" [] [Whitespace(" ")],
+                        JsBogus {
+                            items: [
+                                JsBogus {
+                                    items: [
+                                        JsIdentifierBinding {
+                                            name_token: IDENT@4..6 "a" [] [Whitespace(" ")],
+                                        },
+                                        JsBogus {
+                                            items: [
+                                                EQ@6..8 "=" [] [Whitespace(" ")],
+                                                JsBogus {
+                                                    items: [
+                                                        ERROR_TOKEN@8..9 "\\" [] [],
+                                                    ],
+                                                },
+                                            ],
+                                        },
+                                    ],
+                                },
+                            ],
+                        },
+                    ],
+                },
+                SEMICOLON@9..11 ";" [] [Whitespace(" ")],
+            ],
+        },
+        JsExpressionStatement {
+            expression: JsCallExpression {
+                callee: JsIdentifierExpression {
+                    name: JsReferenceIdentifier {
+                        value_token: IDENT@11..14 "foo" [] [],
+                    },
+                },
+                optional_chain_token: missing (optional),
+                type_arguments: missing (optional),
+                arguments: JsCallArguments {
+                    l_paren_token: L_PAREN@14..15 "(" [] [],
+                    args: JsCallArgumentList [],
+                    r_paren_token: R_PAREN@15..16 ")" [] [],
+                },
+            },
+            semicolon_token: SEMICOLON@16..17 ";" [] [],
+        },
+    ],
+    eof_token: EOF@17..18 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: JS_MODULE@0..18
+  0: (empty)
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..17
+    0: JS_BOGUS_STATEMENT@0..11
+      0: JS_BOGUS@0..9
+        0: LET_KW@0..4 "let" [] [Whitespace(" ")]
+        1: JS_BOGUS@4..9
+          0: JS_BOGUS@4..9
+            0: JS_IDENTIFIER_BINDING@4..6
+              0: IDENT@4..6 "a" [] [Whitespace(" ")]
+            1: JS_BOGUS@6..9
+              0: EQ@6..8 "=" [] [Whitespace(" ")]
+              1: JS_BOGUS@8..9
+                0: ERROR_TOKEN@8..9 "\\" [] []
+      1: SEMICOLON@9..11 ";" [] [Whitespace(" ")]
+    1: JS_EXPRESSION_STATEMENT@11..17
+      0: JS_CALL_EXPRESSION@11..16
+        0: JS_IDENTIFIER_EXPRESSION@11..14
+          0: JS_REFERENCE_IDENTIFIER@11..14
+            0: IDENT@11..14 "foo" [] []
+        1: (empty)
+        2: (empty)
+        3: JS_CALL_ARGUMENTS@14..16
+          0: L_PAREN@14..15 "(" [] []
+          1: JS_CALL_ARGUMENT_LIST@15..15
+          2: R_PAREN@15..16 ")" [] []
+      1: SEMICOLON@16..17 ";" [] []
+  4: EOF@17..18 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+primary_expr_invalid_recovery.js:1:9 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × unexpected token `\`
+  
+  > 1 │ let a = \; foo();
+      │         ^
+    2 │ 
+  
+```

@@ -1,11 +1,11 @@
 use crate::prelude::*;
 use biome_json_syntax::JsonSyntaxKind;
 use biome_json_syntax::JsonSyntaxKind::*;
+use biome_parser::ParserProgress;
 use biome_parser::diagnostic::{expected_any, expected_node};
 use biome_parser::parse_recovery::ParseRecoveryTokenSet;
 use biome_parser::parsed_syntax::ParsedSyntax::Absent;
 use biome_parser::prelude::ParsedSyntax::Present;
-use biome_parser::ParserProgress;
 use biome_rowan::TextRange;
 
 const VALUE_START: TokenSet<JsonSyntaxKind> = token_set![
@@ -100,29 +100,29 @@ enum SequenceKind {
 impl SequenceKind {
     const fn node_kind(&self) -> JsonSyntaxKind {
         match self {
-            SequenceKind::Array => JSON_ARRAY_VALUE,
-            SequenceKind::Object => JSON_OBJECT_VALUE,
+            Self::Array => JSON_ARRAY_VALUE,
+            Self::Object => JSON_OBJECT_VALUE,
         }
     }
 
     const fn list_kind(&self) -> JsonSyntaxKind {
         match self {
-            SequenceKind::Array => JSON_ARRAY_ELEMENT_LIST,
-            SequenceKind::Object => JSON_MEMBER_LIST,
+            Self::Array => JSON_ARRAY_ELEMENT_LIST,
+            Self::Object => JSON_MEMBER_LIST,
         }
     }
 
     const fn open_paren(&self) -> JsonSyntaxKind {
         match self {
-            SequenceKind::Array => T!['['],
-            SequenceKind::Object => T!['{'],
+            Self::Array => T!['['],
+            Self::Object => T!['{'],
         }
     }
 
     const fn close_paren(&self) -> JsonSyntaxKind {
         match self {
-            SequenceKind::Array => T![']'],
-            SequenceKind::Object => T!['}'],
+            Self::Array => T![']'],
+            Self::Object => T!['}'],
         }
     }
 }

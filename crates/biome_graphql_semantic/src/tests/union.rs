@@ -7,9 +7,9 @@ use biome_graphql_syntax::GraphqlUnionTypeExtension;
 use biome_rowan::AstNode;
 use biome_rowan::SyntaxNodeCast;
 
-use crate::semantic_model;
 use crate::HasDeclarationAstNode;
 use crate::SemanticModel;
+use crate::semantic_model;
 
 use super::assert_nodes_eq;
 use super::extract_binding_definition;

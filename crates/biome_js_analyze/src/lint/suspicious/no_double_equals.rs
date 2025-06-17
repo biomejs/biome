@@ -1,9 +1,8 @@
 use biome_analyze::RuleSource;
-use biome_analyze::{
-    context::RuleContext, declare_lint_rule, ActionCategory, Ast, FixKind, Rule, RuleDiagnostic,
-};
+use biome_analyze::{Ast, FixKind, Rule, RuleDiagnostic, context::RuleContext, declare_lint_rule};
 use biome_console::markup;
 use biome_deserialize_macros::Deserializable;
+use biome_diagnostics::Severity;
 use biome_js_factory::make;
 use biome_js_syntax::{AnyJsExpression, AnyJsLiteralExpression, JsBinaryExpression, T};
 use biome_js_syntax::{JsSyntaxKind::*, JsSyntaxToken};
@@ -81,6 +80,7 @@ declare_lint_rule! {
         language: "js",
         sources: &[RuleSource::Eslint("eqeqeq")],
         recommended: true,
+        severity: Severity::Error,
         fix_kind: FixKind::Unsafe,
     }
 }
@@ -111,28 +111,21 @@ impl Rule for NoDoubleEquals {
 
     fn diagnostic(ctx: &RuleContext<Self>, op: &Self::State) -> Option<RuleDiagnostic> {
         let text_trimmed = op.text_trimmed();
-        let suggestion = if op.kind() == EQ2 { "===" } else { "!==" };
         let diagnostic = RuleDiagnostic::new(
             rule_category!(),
             op.text_trimmed_range(),
             markup! {
-                "Use "<Emphasis>{suggestion}</Emphasis>" instead of "<Emphasis>{text_trimmed}</Emphasis>
+                "Using "<Emphasis>{text_trimmed}</Emphasis>" may be unsafe if you are relying on type coercion."
             },
-        ).note(markup! {
-            "Using "<Emphasis>{text_trimmed}</Emphasis>" may be unsafe if you are relying on type coercion"
-        });
+        );
 
         Some(if ctx.options().ignore_null {
             diagnostic
-                .detail(
-                op.text_trimmed_range(), markup! {
-                    <Emphasis>{text_trimmed}</Emphasis>" is only allowed when comparing against "<Emphasis>"null"</Emphasis>
-                })        .description(
-             format!(
-            "Use {suggestion} instead of {text_trimmed}. {text_trimmed} is only allowed when comparing against `null`"
-             ))
+                .note(markup! {
+                    <Emphasis>{text_trimmed}</Emphasis>" is only allowed when comparing against "<Emphasis>"null"</Emphasis>"."
+                })
         } else {
-            diagnostic.description(format!("Use {suggestion} instead of {text_trimmed}."))
+            diagnostic
         })
     }
 
@@ -143,11 +136,11 @@ impl Rule for NoDoubleEquals {
         mutation.replace_token(op.clone(), make::token(suggestion));
 
         Some(JsRuleAction::new(
-            ActionCategory::QuickFix,
+            ctx.metadata().action_category(ctx.category(), ctx.group()),
             ctx.metadata().applicability(),
             // SAFETY: `suggestion` can only be JsSyntaxKind::EQ3 or JsSyntaxKind::NEQ2,
             // the implementation of `to_string` for these two variants always returns Some
-            markup! { "Use "<Emphasis>{suggestion.to_string()?}</Emphasis> }.to_owned(),
+            markup! { "Use "<Emphasis>{suggestion.to_string()?}</Emphasis>" instead." }.to_owned(),
             mutation,
         ))
     }

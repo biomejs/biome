@@ -1,0 +1,144 @@
+---
+source: crates/biome_grit_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+```grit
+engine marzano(0.1)
+language js
+
+file($x) where {
+	$x <: contains bubble { `foo` }
+}
+
+```
+
+## AST
+
+```
+GritRoot {
+    bom_token: missing (optional),
+    version: GritVersion {
+        engine_token: ENGINE_KW@0..7 "engine" [] [Whitespace(" ")],
+        engine_name: GritEngineName {
+            engine_kind: MARZANO_KW@7..14 "marzano" [] [],
+        },
+        l_paren_token: L_PAREN@14..15 "(" [] [],
+        version: GritDoubleLiteral {
+            value_token: GRIT_DOUBLE@15..18 "0.1" [] [],
+        },
+        r_paren_token: R_PAREN@18..19 ")" [] [],
+    },
+    language: GritLanguageDeclaration {
+        language_token: LANGUAGE_KW@19..29 "language" [Newline("\n")] [Whitespace(" ")],
+        name: GritLanguageName {
+            language_kind: JS_KW@29..31 "js" [] [],
+        },
+        flavor: missing (optional),
+        semicolon_token: missing (optional),
+    },
+    definitions: GritDefinitionList [
+        GritPatternWhere {
+            pattern: GritNodeLike {
+                name: GritName {
+                    value_token: GRIT_NAME@31..37 "file" [Newline("\n"), Newline("\n")] [],
+                },
+                l_paren_token: L_PAREN@37..38 "(" [] [],
+                named_args: GritNamedArgList [
+                    GritVariable {
+                        value_token: GRIT_VARIABLE@38..40 "$x" [] [],
+                    },
+                ],
+                r_paren_token: R_PAREN@40..42 ")" [] [Whitespace(" ")],
+            },
+            where_token: WHERE_KW@42..48 "where" [] [Whitespace(" ")],
+            side_condition: GritPredicateAnd {
+                and_token: missing (optional),
+                l_curly_token: L_CURLY@48..49 "{" [] [],
+                predicates: GritPredicateList [
+                    GritPredicateMatch {
+                        left: GritVariable {
+                            value_token: GRIT_VARIABLE@49..54 "$x" [Newline("\n"), Whitespace("\t")] [Whitespace(" ")],
+                        },
+                        match_token: MATCH@54..57 "<:" [] [Whitespace(" ")],
+                        right: GritPatternContains {
+                            contains_token: CONTAINS_KW@57..66 "contains" [] [Whitespace(" ")],
+                            contains: GritBubble {
+                                bubble_token: BUBBLE_KW@66..73 "bubble" [] [Whitespace(" ")],
+                                scope: missing (optional),
+                                pattern: GritCurlyPattern {
+                                    l_curly_token: L_CURLY@73..75 "{" [] [Whitespace(" ")],
+                                    pattern: GritCodeSnippet {
+                                        source: GritBacktickSnippetLiteral {
+                                            value_token: GRIT_BACKTICK_SNIPPET@75..81 "`foo`" [] [Whitespace(" ")],
+                                        },
+                                    },
+                                    r_curly_token: R_CURLY@81..82 "}" [] [],
+                                },
+                            },
+                            until_clause: missing (optional),
+                        },
+                    },
+                ],
+                r_curly_token: R_CURLY@82..84 "}" [Newline("\n")] [],
+            },
+        },
+    ],
+    eof_token: EOF@84..85 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: GRIT_ROOT@0..85
+  0: (empty)
+  1: GRIT_VERSION@0..19
+    0: ENGINE_KW@0..7 "engine" [] [Whitespace(" ")]
+    1: GRIT_ENGINE_NAME@7..14
+      0: MARZANO_KW@7..14 "marzano" [] []
+    2: L_PAREN@14..15 "(" [] []
+    3: GRIT_DOUBLE_LITERAL@15..18
+      0: GRIT_DOUBLE@15..18 "0.1" [] []
+    4: R_PAREN@18..19 ")" [] []
+  2: GRIT_LANGUAGE_DECLARATION@19..31
+    0: LANGUAGE_KW@19..29 "language" [Newline("\n")] [Whitespace(" ")]
+    1: GRIT_LANGUAGE_NAME@29..31
+      0: JS_KW@29..31 "js" [] []
+    2: (empty)
+    3: (empty)
+  3: GRIT_DEFINITION_LIST@31..84
+    0: GRIT_PATTERN_WHERE@31..84
+      0: GRIT_NODE_LIKE@31..42
+        0: GRIT_NAME@31..37
+          0: GRIT_NAME@31..37 "file" [Newline("\n"), Newline("\n")] []
+        1: L_PAREN@37..38 "(" [] []
+        2: GRIT_NAMED_ARG_LIST@38..40
+          0: GRIT_VARIABLE@38..40
+            0: GRIT_VARIABLE@38..40 "$x" [] []
+        3: R_PAREN@40..42 ")" [] [Whitespace(" ")]
+      1: WHERE_KW@42..48 "where" [] [Whitespace(" ")]
+      2: GRIT_PREDICATE_AND@48..84
+        0: (empty)
+        1: L_CURLY@48..49 "{" [] []
+        2: GRIT_PREDICATE_LIST@49..82
+          0: GRIT_PREDICATE_MATCH@49..82
+            0: GRIT_VARIABLE@49..54
+              0: GRIT_VARIABLE@49..54 "$x" [Newline("\n"), Whitespace("\t")] [Whitespace(" ")]
+            1: MATCH@54..57 "<:" [] [Whitespace(" ")]
+            2: GRIT_PATTERN_CONTAINS@57..82
+              0: CONTAINS_KW@57..66 "contains" [] [Whitespace(" ")]
+              1: GRIT_BUBBLE@66..82
+                0: BUBBLE_KW@66..73 "bubble" [] [Whitespace(" ")]
+                1: (empty)
+                2: GRIT_CURLY_PATTERN@73..82
+                  0: L_CURLY@73..75 "{" [] [Whitespace(" ")]
+                  1: GRIT_CODE_SNIPPET@75..81
+                    0: GRIT_BACKTICK_SNIPPET_LITERAL@75..81
+                      0: GRIT_BACKTICK_SNIPPET@75..81 "`foo`" [] [Whitespace(" ")]
+                  2: R_CURLY@81..82 "}" [] []
+              2: (empty)
+        3: R_CURLY@82..84 "}" [Newline("\n")] []
+  4: EOF@84..85 "" [Newline("\n")] []
+
+```

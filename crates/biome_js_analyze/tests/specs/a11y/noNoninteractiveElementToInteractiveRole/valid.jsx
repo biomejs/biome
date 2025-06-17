@@ -1,3 +1,4 @@
+/* should not generate diagnostics */
 let a = <span role="button"></span>;
 let a = <span role={`scroll${a}bar`}></span>;
 let a = <TestComponent onClick={doFoo} />;
@@ -107,3 +108,4 @@ let a = <tr role="tabpanel" />;
 let a = <tr role="tree" />;
 let a = <tr role="treegrid" />;
 let a = <tr role="treeitem" />;
+let a = <li role="treeitem" />;

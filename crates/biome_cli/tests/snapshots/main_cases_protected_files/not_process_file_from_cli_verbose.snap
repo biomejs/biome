@@ -1,6 +1,6 @@
 ---
 source: crates/biome_cli/tests/snap_test.rs
-expression: content
+expression: redactor(content)
 ---
 ## `package-lock.json`
 
@@ -11,9 +11,15 @@ expression: content
 # Termination Message
 
 ```block
-internalError/io ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+format ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × No files were processed in the specified paths.
+  
+  i Check your biome.json or biome.jsonc to ensure the paths are not ignored by the configuration.
+  
+  i These paths were provided but ignored:
+  
+  - package-lock.json
   
 
 
@@ -34,10 +40,6 @@ package-lock.json project  VERBOSE  ━━━━━━━━━━━━━━�
 ```
 
 ```block
-Checked 0 files in <TIME>. No fixes applied.
-```
-
-```block
  VERBOSE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Files processed:
@@ -55,4 +57,9 @@ Checked 0 files in <TIME>. No fixes applied.
   ! The list is empty.
   
 
+```
+
+```block
+Scanned project folder in <TIME>.
+Checked 0 files in <TIME>. No fixes applied.
 ```

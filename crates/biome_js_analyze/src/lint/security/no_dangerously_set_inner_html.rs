@@ -1,10 +1,11 @@
 use crate::react::ReactCreateElementCall;
 use crate::services::semantic::Semantic;
 use biome_analyze::context::RuleContext;
-use biome_analyze::{declare_lint_rule, Rule, RuleDiagnostic, RuleSource};
+use biome_analyze::{Rule, RuleDiagnostic, RuleSource, declare_lint_rule};
 use biome_console::markup;
+use biome_diagnostics::Severity;
 use biome_js_syntax::{AnyJsxAttributeName, JsCallExpression, JsxAttribute};
-use biome_rowan::{declare_node_union, AstNode, TextRange};
+use biome_rowan::{AstNode, TextRange, declare_node_union};
 
 declare_lint_rule! {
     /// Prevent the usage of dangerous JSX props
@@ -31,6 +32,7 @@ declare_lint_rule! {
         language: "jsx",
         sources: &[RuleSource::EslintReact("no-danger")],
         recommended: true,
+        severity: Severity::Error,
     }
 }
 
@@ -46,7 +48,7 @@ pub enum NoDangerState {
 impl NoDangerState {
     fn range(&self) -> TextRange {
         match self {
-            NoDangerState::Attribute(range) | NoDangerState::Property(range) => *range,
+            Self::Attribute(range) | Self::Property(range) => *range,
         }
     }
 }

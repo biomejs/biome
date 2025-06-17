@@ -1,0 +1,116 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `biome.json`
+
+```json
+{
+  "linter": {
+    "rules": {
+      "style": {
+        "noVar": "on"
+      }
+    }
+  }
+}
+```
+
+## `file1.js`
+
+```js
+var name = 'tobias'
+```
+
+# Termination Message
+
+```block
+configuration ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Biome exited because the configuration resulted in errors. Please fix them.
+  
+
+
+```
+
+# Emitted Messages
+
+```block
+biome.json:5:17 deserialize ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Found an unknown key `noVar`.
+  
+    3 │         "rules": {
+    4 │             "style": {
+  > 5 │                 "noVar": "on"
+      │                 ^^^^^^^
+    6 │             }
+    7 │         }
+  
+  i Known keys:
+  
+  - recommended
+  - noCommonJs
+  - noDefaultExport
+  - noDescendingSpecificity
+  - noDoneCallback
+  - noEnum
+  - noExportedImports
+  - noHeadElement
+  - noImplicitBoolean
+  - noInferrableTypes
+  - noNamespace
+  - noNegationElse
+  - noNestedTernary
+  - noNonNullAssertion
+  - noParameterAssign
+  - noParameterProperties
+  - noProcessEnv
+  - noRestrictedGlobals
+  - noRestrictedImports
+  - noRestrictedTypes
+  - noShoutyConstants
+  - noSubstr
+  - noUnusedTemplateLiteral
+  - noUselessElse
+  - noValueAtRule
+  - noYodaExpression
+  - useArrayLiterals
+  - useAsConstAssertion
+  - useAtIndex
+  - useBlockStatements
+  - useCollapsedElseIf
+  - useCollapsedIf
+  - useComponentExportOnlyModules
+  - useConsistentArrayType
+  - useConsistentBuiltinInstantiation
+  - useConsistentCurlyBraces
+  - useConsistentMemberAccessibility
+  - useConst
+  - useDefaultParameterLast
+  - useDefaultSwitchClause
+  - useDeprecatedReason
+  - useEnumInitializers
+  - useExplicitLengthCheck
+  - useExponentiationOperator
+  - useExportType
+  - useFilenamingConvention
+  - useForOf
+  - useFragmentSyntax
+  - useImportType
+  - useLiteralEnumMembers
+  - useNamingConvention
+  - useNodeAssertStrict
+  - useNodejsImportProtocol
+  - useNumberNamespace
+  - useSelfClosingElements
+  - useShorthandAssign
+  - useShorthandFunctionType
+  - useSingleVarDeclarator
+  - useTemplate
+  - useThrowNewError
+  - useThrowOnlyError
+  - useTrimStartEnd
+  
+
+```

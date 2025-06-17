@@ -42,7 +42,7 @@ impl<'a> FormatCssBlockLike<'a> {
     }
 }
 
-impl<'a> Format<CssFormatContext> for FormatCssBlockLike<'a> {
+impl Format<CssFormatContext> for FormatCssBlockLike<'_> {
     fn fmt(&self, f: &mut Formatter<CssFormatContext>) -> FormatResult<()> {
         write!(f, [self.block.l_curly_token().format()])?;
 

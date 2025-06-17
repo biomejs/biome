@@ -83,16 +83,16 @@ impl<K: SyntaxKind> RawSyntaxElement<K> {
     #[inline]
     pub fn kind(&self) -> K {
         match self {
-            NodeOrToken::Node(node) => node.kind(),
-            NodeOrToken::Token(token) => token.kind(),
+            Self::Node(node) => node.kind(),
+            Self::Token(token) => token.kind(),
         }
     }
 
     #[inline]
     fn into_green(self) -> GreenElement {
         match self {
-            NodeOrToken::Node(node) => NodeOrToken::Node(node.raw),
-            NodeOrToken::Token(token) => NodeOrToken::Token(token.raw),
+            Self::Node(node) => NodeOrToken::Node(node.raw),
+            Self::Token(token) => NodeOrToken::Token(token.raw),
         }
     }
 }
@@ -101,8 +101,8 @@ impl<K: SyntaxKind> From<GreenElement> for RawSyntaxElement<K> {
     #[inline]
     fn from(element: GreenElement) -> Self {
         match element {
-            NodeOrToken::Node(node) => NodeOrToken::Node(RawSyntaxNode::from(node)),
-            NodeOrToken::Token(token) => NodeOrToken::Token(RawSyntaxToken::from(token)),
+            NodeOrToken::Node(node) => Self::Node(RawSyntaxNode::from(node)),
+            NodeOrToken::Token(token) => Self::Token(RawSyntaxToken::from(token)),
         }
     }
 }
@@ -114,7 +114,7 @@ pub struct RawSyntaxNodeRef<'a, K: SyntaxKind> {
     ph: PhantomData<K>,
 }
 
-impl<'a, K: SyntaxKind> RawSyntaxNodeRef<'a, K> {
+impl<K: SyntaxKind> RawSyntaxNodeRef<'_, K> {
     #[inline]
     pub fn kind(&self) -> K {
         K::from_raw(self.raw.kind())
@@ -138,7 +138,7 @@ pub struct RawSyntaxTokenRef<'a, K: SyntaxKind> {
     ph: PhantomData<K>,
 }
 
-impl<'a, K: SyntaxKind> RawSyntaxTokenRef<'a, K> {
+impl<K: SyntaxKind> RawSyntaxTokenRef<'_, K> {
     #[inline]
     pub fn kind(&self) -> K {
         K::from_raw(self.raw.kind())
@@ -158,7 +158,7 @@ impl<'a, K: SyntaxKind> From<&'a GreenToken> for RawSyntaxTokenRef<'a, K> {
 pub type RawSyntaxElementRef<'a, K> =
     NodeOrToken<RawSyntaxNodeRef<'a, K>, RawSyntaxTokenRef<'a, K>>;
 
-impl<'a, K: SyntaxKind> RawSyntaxElementRef<'a, K> {
+impl<K: SyntaxKind> RawSyntaxElementRef<'_, K> {
     #[inline]
     pub fn kind(&self) -> K {
         match self {

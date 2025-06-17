@@ -1,3 +1,4 @@
+/* should not generate diagnostics */
 interface FooAny0<T> {
 	field: T;
 }

@@ -1,0 +1,68 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: chunks.js
+snapshot_kind: text
+---
+# Input
+```js
+// Header file comment to keep at the top
+import { D } from "d";
+import { B } from "b";
+
+// Detached comment (Start of Chunk 2)
+
+// Attached C
+import { C } from "c";
+
+// Attached A
+import { A3, A1, A2 } from "a" with { "k2": "", "k1": "" };
+
+// Attached E
+import { E } from "e";
+
+// Detached comment (Start of Chunk 3)
+
+import { D } from "d";
+
+import { G } from "g";
+
+```
+
+# Diagnostics
+```
+chunks.js:2:1 assist/source/organizeImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The imports and exports are not sorted.
+  
+    1 │ // Header file comment to keep at the top
+  > 2 │ import { D } from "d";
+      │ ^^^^^^^^^^^^^^^^^^^^^^
+    3 │ import { B } from "b";
+    4 │ 
+  
+  i Safe fix: Organize Imports (Biome)
+  
+     1  1 │   // Header file comment to keep at the top
+     2    │ - import·{·D·}·from·"d";
+     3    │ - import·{·B·}·from·"b";
+        2 │ + 
+        3 │ + import·{·B·}·from·"b";
+        4 │ + import·{·D·}·from·"d";
+     4  5 │   
+     5  6 │   // Detached comment (Start of Chunk 2)
+     6  7 │   
+     7    │ - //·Attached·C
+     8    │ - import·{·C·}·from·"c";
+     9    │ - 
+    10    │ - //·Attached·A
+    11    │ - import·{·A3,·A1,·A2·}·from·"a"·with·{·"k2":·"",·"k1":·""·};
+        8 │ + 
+        9 │ + //·Attached·A
+       10 │ + import·{·A1,·A2,·A3·}·from·"a"·with·{·"k1":·"",·"k2":·""·};
+       11 │ + //·Attached·C
+       12 │ + import·{·C·}·from·"c";
+    12 13 │   
+    13 14 │   // Attached E
+  
+
+```

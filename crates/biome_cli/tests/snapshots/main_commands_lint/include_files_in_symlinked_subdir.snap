@@ -1,6 +1,6 @@
 ---
 source: crates/biome_cli/tests/snap_test.rs
-expression: content
+expression: redactor(content)
 ---
 # Termination Message
 
@@ -16,30 +16,9 @@ lint ━━━━━━━━━━━━━━━━━━━━━━━━━
 # Emitted Messages
 
 ```block
-<TEMP_DIR>/include_files_in_symlinked_subdir/symlinked/file.js:2:1 lint/suspicious/noDebugger  FIXABLE  ━━━━━━━━━━━━━━━━━━━━
+symlinked/file.js:1:1 lint/style/useConst  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × This is an unexpected use of the debugger statement.
-  
-    1 │ let a = 4;
-  > 2 │ debugger;
-      │ ^^^^^^^^^
-    3 │ console.log(a);
-    4 │ 
-  
-  i Unsafe fix: Remove debugger statement
-  
-    1 1 │   let a = 4;
-    2   │ - debugger;
-    3 2 │   console.log(a);
-    4 3 │   
-  
-
-```
-
-```block
-<TEMP_DIR>/include_files_in_symlinked_subdir/symlinked/file.js:1:1 lint/style/useConst  FIXABLE  ━━━━━━━━━━━━━━━━━━━━
-
-  × This let declares a variable that is only assigned once.
+  ! This let declares a variable that is only assigned once.
   
   > 1 │ let a = 4;
       │ ^^^
@@ -64,6 +43,28 @@ lint ━━━━━━━━━━━━━━━━━━━━━━━━━
 ```
 
 ```block
+symlinked/file.js:2:1 lint/suspicious/noDebugger  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This is an unexpected use of the debugger statement.
+  
+    1 │ let a = 4;
+  > 2 │ debugger;
+      │ ^^^^^^^^^
+    3 │ console.log(a);
+    4 │ 
+  
+  i Unsafe fix: Remove debugger statement
+  
+    1 1 │   let a = 4;
+    2   │ - debugger;
+    3 2 │   console.log(a);
+    4 3 │   
+  
+
+```
+
+```block
 Checked 2 files in <TIME>. No fixes applied.
-Found 2 errors.
+Found 1 error.
+Found 1 warning.
 ```

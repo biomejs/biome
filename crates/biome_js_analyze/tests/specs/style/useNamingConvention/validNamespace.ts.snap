@@ -4,6 +4,7 @@ expression: validNamespace.ts
 ---
 # Input
 ```ts
+/* should not generate diagnostics */
 export namespace X {}
 
 export namespace PascalCase {}
@@ -14,5 +15,3 @@ export namespace _PascalCase {}
 
 export namespace _camelCase {}
 ```
-
-

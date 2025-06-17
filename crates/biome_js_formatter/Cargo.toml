@@ -24,30 +24,45 @@ biome_string_case            = { workspace = true }
 biome_suppression            = { workspace = true }
 biome_text_size              = { workspace = true }
 biome_unicode_table          = { workspace = true }
+camino                       = { workspace = true }
 schemars                     = { workspace = true, optional = true }
 serde                        = { workspace = true, features = ["derive"], optional = true }
 smallvec                     = { workspace = true }
 unicode-width                = { workspace = true }
 
 [dev-dependencies]
+biome_formatter      = { workspace = true, features = ["countme"] }
 biome_formatter_test = { path = "../biome_formatter_test" }
 biome_fs             = { path = "../biome_fs" }
 biome_js_factory     = { path = "../biome_js_factory" }
 biome_js_parser      = { path = "../biome_js_parser" }
 biome_parser         = { path = "../biome_parser" }
 biome_service        = { path = "../biome_service" }
+biome_test_utils     = { path = "../biome_test_utils" }
 countme              = { workspace = true, features = ["enable"] }
+criterion            = { package = "codspeed-criterion-compat", version = "=2.10.1" }
 quickcheck           = { workspace = true }
 serde                = { workspace = true, features = ["derive"] }
 serde_json           = { workspace = true }
 tests_macros         = { path = "../tests_macros" }
 
+[target.'cfg(target_os = "windows")'.dev-dependencies]
+mimalloc = { workspace = true }
+
+[target.'cfg(all(target_family="unix", not(all(target_arch = "aarch64", target_env = "musl"))))'.dev-dependencies]
+tikv-jemallocator = { workspace = true }
+
 [features]
-serde = ["dep:serde", "schemars"]
+schema = ["dep:schemars", "serde"]
+serde  = ["dep:serde"]
 
 # cargo-workspaces metadata
 [package.metadata.workspaces]
 independent = true
+
+[[bench]]
+harness = false
+name    = "js_formatter"
 
 [lints]
 workspace = true

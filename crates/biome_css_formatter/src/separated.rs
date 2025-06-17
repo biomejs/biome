@@ -1,5 +1,5 @@
-use crate::prelude::*;
 use crate::FormatCssSyntaxToken;
+use crate::prelude::*;
 use biome_css_syntax::{CssIdentifier, CssLanguage, CssSyntaxToken};
 use biome_formatter::separated::{
     FormatSeparatedElementRule, FormatSeparatedIter, TrailingSeparator,
@@ -101,7 +101,7 @@ type CssFormatSeparatedIterWithOptions<Node, Options> = FormatSeparatedIter<
 >;
 
 /// AST Separated list formatting extension methods with options
-#[allow(dead_code)]
+#[expect(dead_code)]
 pub(crate) trait FormatAstSeparatedListWithOptionsExtension<O>:
     AstSeparatedList<Language = CssLanguage>
 {

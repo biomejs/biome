@@ -1,9 +1,10 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: reactCreateElementInvalid.js
+snapshot_kind: text
 ---
 # Input
-```jsx
+```js
 React.createElement("div", { tabIndex: '1' })
 React.createElement("div", { tabIndex: 1 })
 React.createElement("div", { tabIndex: +1 })
@@ -15,7 +16,7 @@ React.createElement("div", { tabIndex: +0o1 })
 ```
 reactCreateElementInvalid.js:1:40 lint/a11y/noPositiveTabindex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Avoid positive values for the tabIndex prop.
+  × Avoid positive values for the tabIndex prop.
   
   > 1 │ React.createElement("div", { tabIndex: '1' })
       │                                        ^^^
@@ -39,7 +40,7 @@ reactCreateElementInvalid.js:1:40 lint/a11y/noPositiveTabindex  FIXABLE  ━━�
 ```
 reactCreateElementInvalid.js:2:40 lint/a11y/noPositiveTabindex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Avoid positive values for the tabIndex prop.
+  × Avoid positive values for the tabIndex prop.
   
     1 │ React.createElement("div", { tabIndex: '1' })
   > 2 │ React.createElement("div", { tabIndex: 1 })
@@ -65,7 +66,7 @@ reactCreateElementInvalid.js:2:40 lint/a11y/noPositiveTabindex  FIXABLE  ━━�
 ```
 reactCreateElementInvalid.js:3:40 lint/a11y/noPositiveTabindex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Avoid positive values for the tabIndex prop.
+  × Avoid positive values for the tabIndex prop.
   
     1 │ React.createElement("div", { tabIndex: '1' })
     2 │ React.createElement("div", { tabIndex: 1 })
@@ -89,5 +90,3 @@ reactCreateElementInvalid.js:3:40 lint/a11y/noPositiveTabindex  FIXABLE  ━━�
   
 
 ```
-
-

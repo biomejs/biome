@@ -6,7 +6,7 @@ pub mod ts_parse_error;
 mod types;
 
 use self::types::parse_ts_reference_type;
-use crate::syntax::expr::{parse_identifier, parse_unary_expr, ExpressionContext};
+use crate::syntax::expr::{ExpressionContext, parse_identifier, parse_unary_expr};
 use crate::syntax::js_parse_error::expected_expression;
 
 use crate::syntax::typescript::ts_parse_error::expected_ts_type;
@@ -34,8 +34,8 @@ pub(crate) enum TsIdentifierContext {
 impl TsIdentifierContext {
     fn is_reserved_word(&self, name: &str) -> bool {
         match self {
-            TsIdentifierContext::Module => is_reserved_module_name(name),
-            TsIdentifierContext::Type => is_reserved_type_name(name),
+            Self::Module => is_reserved_module_name(name),
+            Self::Type => is_reserved_type_name(name),
         }
     }
 }

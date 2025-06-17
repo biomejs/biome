@@ -1,0 +1,33 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: unsorted-imports-empty-header.js
+snapshot_kind: text
+---
+# Input
+```js
+import {} from "b"
+import {} from "a"
+
+```
+
+# Diagnostics
+```
+unsorted-imports-empty-header.js:1:1 assist/source/organizeImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The imports and exports are not sorted.
+  
+  > 1 │ import {} from "b"
+      │ ^^^^^^^^^^^^^^^^^^
+    2 │ import {} from "a"
+    3 │ 
+  
+  i Safe fix: Organize Imports (Biome)
+  
+    1   │ - import·{}·from·"b"
+    2   │ - import·{}·from·"a"
+      1 │ + import·{}·from·"a"
+      2 │ + import·{}·from·"b"
+    3 3 │   
+  
+
+```

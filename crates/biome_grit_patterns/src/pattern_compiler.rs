@@ -45,7 +45,6 @@ mod limit_compiler;
 mod list_compiler;
 mod list_index_compiler;
 mod literal_compiler;
-mod log_compiler;
 mod map_accessor_compiler;
 mod map_compiler;
 mod match_compiler;
@@ -91,7 +90,7 @@ use self::{
     subtract_compiler::SubtractCompiler, variable_compiler::VariableCompiler,
     where_compiler::WhereCompiler, within_compiler::WithinCompiler,
 };
-use crate::{grit_context::GritQueryContext, CompileError};
+use crate::{CompileError, grit_context::GritQueryContext};
 use as_compiler::AsCompiler;
 use biome_grit_syntax::{AnyGritMaybeCurlyPattern, AnyGritPattern, GritSyntaxKind};
 use biome_rowan::AstNode as _;

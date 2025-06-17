@@ -1,9 +1,8 @@
 use crate::JsRuleAction;
 use biome_analyze::context::RuleContext;
-use biome_analyze::{
-    declare_lint_rule, ActionCategory, Ast, FixKind, Rule, RuleDiagnostic, RuleSource,
-};
+use biome_analyze::{Ast, FixKind, Rule, RuleDiagnostic, RuleSource, declare_lint_rule};
 use biome_console::markup;
+use biome_diagnostics::Severity;
 use biome_js_factory::make;
 use biome_js_syntax::{AnyJsExpression, AnyJsLiteralExpression, JsSyntaxKind, TsEnumDeclaration};
 use biome_rowan::{AstNode, BatchMutationExt};
@@ -70,7 +69,8 @@ declare_lint_rule! {
         name: "useEnumInitializers",
         language: "ts",
         sources: &[RuleSource::EslintTypeScript("prefer-enum-initializers")],
-        recommended: true,
+        recommended: false,
+        severity: Severity::Warning,
         fix_kind: FixKind::Safe,
     }
 }
@@ -194,7 +194,7 @@ impl Rule for UseEnumInitializers {
 
         if has_mutations {
             return Some(JsRuleAction::new(
-                ActionCategory::QuickFix,
+                ctx.metadata().action_category(ctx.category(), ctx.group()),
                 ctx.metadata().applicability(),
                 markup! { "Initialize all enum members." }.to_owned(),
                 mutation,

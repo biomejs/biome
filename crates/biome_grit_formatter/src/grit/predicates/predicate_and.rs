@@ -12,17 +12,16 @@ impl FormatNodeRule<GritPredicateAnd> for FormatGritPredicateAnd {
             predicates,
             r_curly_token,
         } = node.as_fields();
+        write!(f, [and_token.format(), space(), l_curly_token.format()])?;
+        let should_insert_space_around_brackets = f.options().bracket_spacing().value();
         write!(
             f,
-            [
-                l_curly_token.format(),
-                hard_line_break(),
-                and_token.format(),
-                hard_line_break(),
-                soft_block_indent(&predicates.format()),
-                hard_line_break(),
-                r_curly_token.format()
-            ]
-        )
+            [group(&soft_block_indent_with_maybe_space(
+                &predicates.format(),
+                should_insert_space_around_brackets
+            ),)]
+        )?;
+
+        write!(f, [r_curly_token.format()])
     }
 }

@@ -1,8 +1,8 @@
 use super::{
-    auto_wrap::wrap_pattern_in_before_and_after_each_file,
-    compilation_context::NodeCompilationContext, PatternCompiler,
+    PatternCompiler, auto_wrap::wrap_pattern_in_before_and_after_each_file,
+    compilation_context::NodeCompilationContext,
 };
-use crate::{diagnostics::CompilerDiagnostic, grit_context::GritQueryContext, CompileError};
+use crate::{CompileError, diagnostics::CompilerDiagnostic, grit_context::GritQueryContext};
 use biome_grit_syntax::AnyGritPattern;
 use biome_rowan::AstNode;
 use grit_pattern_matcher::pattern::{Pattern, Step};
@@ -60,7 +60,6 @@ impl StepCompiler {
             | Pattern::CodeSnippet(_)
             | Pattern::Variable(_)
             | Pattern::Rewrite(_)
-            | Pattern::Log(_)
             | Pattern::Range(_)
             | Pattern::Within(_)
             | Pattern::After(_)

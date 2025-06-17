@@ -3,7 +3,8 @@ source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: valid.js
 ---
 # Input
-```jsx
+```js
+/* should not generate diagnostics */
 var foo2 = `bar
 has newline`;
 var foo3 = `\"bar\"`
@@ -15,5 +16,3 @@ var foo = tag`backtick`;
 var foo = `something 
 else`;
 ```
-
-

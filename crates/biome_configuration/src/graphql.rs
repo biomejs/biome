@@ -1,4 +1,5 @@
-use biome_deserialize_macros::{Deserializable, Merge, Partial};
+use crate::bool::Bool;
+use biome_deserialize_macros::{Deserializable, Merge};
 use biome_formatter::{
     BracketSpacing, IndentStyle, IndentWidth, LineEnding, LineWidth, QuoteStyle,
 };
@@ -6,120 +7,116 @@ use bpaf::Bpaf;
 use serde::{Deserialize, Serialize};
 
 /// Options applied to GraphQL files
-#[derive(Clone, Default, Debug, Deserialize, Eq, Partial, PartialEq, Serialize)]
-#[partial(derive(Bpaf, Clone, Deserializable, Eq, Merge, PartialEq))]
-#[partial(cfg_attr(feature = "schema", derive(schemars::JsonSchema)))]
-#[partial(serde(rename_all = "camelCase", default, deny_unknown_fields))]
+#[derive(
+    Bpaf, Clone, Default, Debug, Deserializable, Deserialize, Eq, Merge, PartialEq, Serialize,
+)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[serde(rename_all = "camelCase", default, deny_unknown_fields)]
 pub struct GraphqlConfiguration {
     /// GraphQL formatter options
-    #[partial(type, bpaf(external(partial_graphql_formatter), optional))]
-    pub formatter: GraphqlFormatter,
+    #[bpaf(external(graphql_formatter_configuration), optional)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub formatter: Option<GraphqlFormatterConfiguration>,
 
     // GraphQL linter options
-    #[partial(type, bpaf(external(partial_graphql_linter), optional))]
-    pub linter: GraphqlLinter,
+    #[bpaf(external(graphql_linter_configuration), optional)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub linter: Option<GraphqlLinterConfiguration>,
+
+    /// Assist options
+    #[bpaf(external(graphql_assist_configuration), optional)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub assist: Option<GraphqlAssistConfiguration>,
 }
 
+pub type GraphqlFormatterEnabled = Bool<true>;
+
 /// Options that changes how the GraphQL formatter behaves
-#[derive(Clone, Debug, Deserialize, Eq, Partial, PartialEq, Serialize)]
-#[partial(derive(Bpaf, Clone, Deserializable, Eq, Merge, PartialEq))]
-#[partial(cfg_attr(feature = "schema", derive(schemars::JsonSchema)))]
-#[partial(serde(rename_all = "camelCase", default, deny_unknown_fields))]
-pub struct GraphqlFormatter {
+#[derive(
+    Bpaf, Clone, Debug, Default, Deserializable, Deserialize, Eq, Merge, PartialEq, Serialize,
+)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[serde(rename_all = "camelCase", default, deny_unknown_fields)]
+pub struct GraphqlFormatterConfiguration {
     /// Control the formatter for GraphQL files.
-    #[partial(bpaf(long("graphql-formatter-enabled"), argument("true|false"), optional))]
-    pub enabled: Option<bool>,
+    #[bpaf(long("graphql-formatter-enabled"), argument("true|false"))]
+    pub enabled: Option<GraphqlFormatterEnabled>,
 
     /// The indent style applied to GraphQL files.
-    #[partial(bpaf(
-        long("graphql-formatter-indent-style"),
-        argument("tab|space"),
-        optional
-    ))]
+    #[bpaf(long("graphql-formatter-indent-style"), argument("tab|space"))]
     pub indent_style: Option<IndentStyle>,
 
     /// The size of the indentation applied to GraphQL files. Default to 2.
-    #[partial(bpaf(long("graphql-formatter-indent-width"), argument("NUMBER"), optional))]
+    #[bpaf(long("graphql-formatter-indent-width"), argument("NUMBER"))]
     pub indent_width: Option<IndentWidth>,
 
     /// The type of line ending applied to GraphQL files.
-    #[partial(bpaf(
-        long("graphql-formatter-line-ending"),
-        argument("lf|crlf|cr"),
-        optional
-    ))]
+    #[bpaf(long("graphql-formatter-line-ending"), argument("lf|crlf|cr"))]
     pub line_ending: Option<LineEnding>,
 
     /// What's the max width of a line applied to GraphQL files. Defaults to 80.
-    #[partial(bpaf(long("graphql-formatter-line-width"), argument("NUMBER"), optional))]
+    #[bpaf(long("graphql-formatter-line-width"), argument("NUMBER"))]
     pub line_width: Option<LineWidth>,
 
     /// The type of quotes used in GraphQL code. Defaults to double.
-    #[partial(bpaf(
-        long("graphql-formatter-quote-style"),
-        argument("double|single"),
-        optional
-    ))]
+    #[bpaf(long("graphql-formatter-quote-style"), argument("double|single"))]
     pub quote_style: Option<QuoteStyle>,
 
     // it's also a top-level configurable property.
     /// Whether to insert spaces around brackets in object literals. Defaults to true.
-    #[partial(bpaf(long("bracket-spacing"), argument("true|false"), optional))]
+    #[bpaf(long("bracket-spacing"), argument("true|false"))]
     pub bracket_spacing: Option<BracketSpacing>,
 }
 
-impl Default for GraphqlFormatter {
-    fn default() -> Self {
-        Self {
-            enabled: Some(false),
-            indent_style: Default::default(),
-            indent_width: Default::default(),
-            line_ending: Default::default(),
-            line_width: Default::default(),
-            quote_style: Default::default(),
-            bracket_spacing: Default::default(),
-        }
+impl GraphqlFormatterConfiguration {
+    pub fn is_enabled(&self) -> bool {
+        self.enabled.unwrap_or_default().into()
+    }
+
+    pub fn quote_style_resolved(&self) -> QuoteStyle {
+        self.quote_style.unwrap_or_default()
     }
 }
 
-impl PartialGraphqlFormatter {
-    pub fn get_formatter_configuration(&self) -> GraphqlFormatter {
-        GraphqlFormatter {
-            enabled: self.enabled,
-            indent_style: self.indent_style,
-            indent_width: self.indent_width,
-            line_ending: self.line_ending,
-            line_width: self.line_width,
-            quote_style: self.quote_style,
-            bracket_spacing: self.bracket_spacing,
-        }
-    }
+pub type GraphqlLinterEnabled = Bool<true>;
+
+/// Options that change how the GraphQL linter behaves.
+#[derive(
+    Bpaf, Clone, Debug, Default, Deserializable, Deserialize, Eq, Merge, PartialEq, Serialize,
+)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[serde(rename_all = "camelCase", default, deny_unknown_fields)]
+pub struct GraphqlLinterConfiguration {
+    /// Control the formatter for GraphQL files.
+    #[bpaf(long("graphql-linter-enabled"), argument("true|false"))]
+    pub enabled: Option<GraphqlLinterEnabled>,
 }
+
+pub type GraphqlAssistEnabled = Bool<false>;
 
 /// Options that changes how the GraphQL linter behaves
-#[derive(Clone, Debug, Default, Deserialize, Eq, Partial, PartialEq, Serialize)]
-#[partial(derive(Bpaf, Clone, Deserializable, Eq, Merge, PartialEq))]
-#[partial(cfg_attr(feature = "schema", derive(schemars::JsonSchema)))]
-#[partial(serde(rename_all = "camelCase", default, deny_unknown_fields))]
-pub struct GraphqlLinter {
+#[derive(
+    Bpaf, Clone, Debug, Default, Deserializable, Deserialize, Eq, Merge, PartialEq, Serialize,
+)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[serde(rename_all = "camelCase", default, deny_unknown_fields)]
+pub struct GraphqlAssistConfiguration {
     /// Control the formatter for GraphQL files.
-    #[partial(bpaf(long("graphql-linter-enabled"), argument("true|false"), optional))]
-    pub enabled: bool,
+    #[bpaf(long("graphql-assist-enabled"), argument("true|false"))]
+    pub enabled: Option<GraphqlAssistEnabled>,
 }
 
-impl PartialGraphqlLinter {
-    pub fn get_linter_configuration(&self) -> GraphqlLinter {
-        GraphqlLinter {
-            enabled: self.enabled.unwrap_or_default(),
-        }
+impl GraphqlLinterConfiguration {
+    pub fn is_enabled(&self) -> bool {
+        self.enabled.unwrap_or_default().into()
     }
 }
 
 #[test]
 fn default_graphql_formatter() {
-    let graphql_configuration = GraphqlFormatter::default();
+    let graphql_configuration = GraphqlFormatterConfiguration::default();
 
-    assert_eq!(graphql_configuration.enabled, Some(false));
+    assert!(graphql_configuration.is_enabled());
     assert_eq!(graphql_configuration.indent_style, None);
     assert_eq!(graphql_configuration.indent_width, None);
     assert_eq!(graphql_configuration.line_ending, None);
@@ -129,7 +126,7 @@ fn default_graphql_formatter() {
 
 #[test]
 fn default_graphql_linter() {
-    let graphql_configuration = GraphqlLinter::default();
+    let graphql_configuration = GraphqlLinterConfiguration::default();
 
-    assert!(!graphql_configuration.enabled);
+    assert!(graphql_configuration.is_enabled());
 }

@@ -1,7 +1,7 @@
-use biome_diagnostics::adapters::{IoError, StdError};
 use biome_diagnostics::{
     Advices, Category, Diagnostic, DiagnosticExt, DiagnosticTags, Error, Visit,
 };
+use biome_diagnostics::{IoError, StdError};
 use biome_text_edit::TextEdit;
 use std::io;
 
@@ -12,31 +12,6 @@ use std::io;
     severity = Error
 )]
 pub(crate) struct CIFormatDiffDiagnostic {
-    #[location(resource)]
-    pub(crate) file_name: String,
-    #[advice]
-    pub(crate) diff: ContentDiffAdvice,
-}
-
-#[derive(Debug, Diagnostic)]
-#[diagnostic(
-    category = "organizeImports",
-    message = "Import statements differs from the output"
-)]
-pub(crate) struct CIOrganizeImportsDiffDiagnostic {
-    #[location(resource)]
-    pub(crate) file_name: String,
-    #[advice]
-    pub(crate) diff: ContentDiffAdvice,
-}
-#[derive(Debug, Diagnostic)]
-#[diagnostic(
-    category = "assists",
-    message = "Applied assists differs from the output"
-)]
-pub(crate) struct CIAssistsDiffDiagnostic {
-    #[location(resource)]
-    pub(crate) file_name: String,
     #[advice]
     pub(crate) diff: ContentDiffAdvice,
 }
@@ -48,34 +23,6 @@ pub(crate) struct CIAssistsDiffDiagnostic {
     message = "Formatter would have printed the following content:"
 )]
 pub(crate) struct FormatDiffDiagnostic {
-    #[location(resource)]
-    pub(crate) file_name: String,
-    #[advice]
-    pub(crate) diff: ContentDiffAdvice,
-}
-
-#[derive(Debug, Diagnostic)]
-#[diagnostic(
-	category = "organizeImports",
-	severity = Error,
-	message = "Import statements could be sorted:"
-)]
-pub(crate) struct OrganizeImportsDiffDiagnostic {
-    #[location(resource)]
-    pub(crate) file_name: String,
-    #[advice]
-    pub(crate) diff: ContentDiffAdvice,
-}
-
-#[derive(Debug, Diagnostic)]
-#[diagnostic(
-    category = "assists",
-    severity = Error,
-    message = "Not all assists were applied:"
-)]
-pub(crate) struct AssistsDiffDiagnostic {
-    #[location(resource)]
-    pub(crate) file_name: String,
     #[advice]
     pub(crate) diff: ContentDiffAdvice,
 }
@@ -124,7 +71,11 @@ pub(crate) struct PanicDiagnostic {
 pub(crate) struct UnhandledDiagnostic;
 
 #[derive(Debug, Diagnostic)]
-#[diagnostic(category = "parse", message = "Skipped file with syntax errors")]
+#[diagnostic(
+    category = "parse",
+    message = "Skipped file with syntax errors",
+    severity = Information,
+)]
 pub(crate) struct SkippedDiagnostic;
 
 #[derive(Debug, Diagnostic)]

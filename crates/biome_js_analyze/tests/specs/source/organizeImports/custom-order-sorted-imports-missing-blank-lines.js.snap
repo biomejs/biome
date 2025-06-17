@@ -1,0 +1,35 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: custom-order-sorted-imports-missing-blank-lines.js
+snapshot_kind: text
+---
+# Input
+```js
+import { test as testBun } from "bun:test"
+import { test as testNode } from "node:test"
+import bare from "bare"
+
+```
+
+# Diagnostics
+```
+custom-order-sorted-imports-missing-blank-lines.js:1:1 assist/source/organizeImports  FIXABLE  ━━━━━━━━━━
+
+  i The imports and exports are not sorted.
+  
+  > 1 │ import { test as testBun } from "bun:test"
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    2 │ import { test as testNode } from "node:test"
+    3 │ import bare from "bare"
+  
+  i Safe fix: Organize Imports (Biome)
+  
+    1 1 │   import { test as testBun } from "bun:test"
+      2 │ + 
+    2 3 │   import { test as testNode } from "node:test"
+      4 │ + 
+    3 5 │   import bare from "bare"
+    4 6 │   
+  
+
+```

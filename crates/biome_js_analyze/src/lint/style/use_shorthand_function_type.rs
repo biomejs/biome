@@ -1,15 +1,14 @@
 use crate::JsRuleAction;
 use biome_analyze::RuleSource;
-use biome_analyze::{
-    context::RuleContext, declare_lint_rule, ActionCategory, Ast, FixKind, Rule, RuleDiagnostic,
-};
+use biome_analyze::{Ast, FixKind, Rule, RuleDiagnostic, context::RuleContext, declare_lint_rule};
 use biome_console::markup;
+use biome_diagnostics::Severity;
 use biome_js_factory::make;
 use biome_js_factory::make::ts_type_alias_declaration;
 use biome_js_syntax::AnyTsType::TsThisType;
 use biome_js_syntax::{
-    AnyJsDeclarationClause, AnyTsReturnType, AnyTsType, JsSyntaxKind, TsCallSignatureTypeMember,
-    TsFunctionType, TsInterfaceDeclaration, TsObjectType, TsTypeMemberList, T,
+    AnyJsDeclarationClause, AnyTsReturnType, AnyTsType, JsSyntaxKind, T, TsCallSignatureTypeMember,
+    TsFunctionType, TsInterfaceDeclaration, TsObjectType, TsTypeMemberList,
 };
 use biome_rowan::{AstNode, AstNodeList, BatchMutationExt, SyntaxNodeOptionExt, TriviaPieceKind};
 
@@ -83,6 +82,7 @@ declare_lint_rule! {
         language: "ts",
         sources: &[RuleSource::EslintTypeScript("prefer-function-type")],
         recommended: true,
+        severity: Severity::Information,
         fix_kind: FixKind::Safe,
     }
 }
@@ -153,7 +153,7 @@ impl Rule for UseShorthandFunctionType {
                 AnyJsDeclarationClause::from(type_alias_declaration),
             );
             return Some(JsRuleAction::new(
-                ActionCategory::QuickFix,
+                ctx.metadata().action_category(ctx.category(), ctx.group()),
                 ctx.metadata().applicability(),
                  markup! { "Alias a function type instead of using an interface with a call signature." }.to_owned(),
                 mutation,
@@ -195,7 +195,7 @@ impl Rule for UseShorthandFunctionType {
 
             mutation.replace_node(AnyTsType::from(ts_object_type), new_function_type);
             return Some(JsRuleAction::new(
-                ActionCategory::QuickFix,
+                ctx.metadata().action_category(ctx.category(), ctx.group()),
                 ctx.metadata().applicability(),
                 markup! { "Use a function type instead of an object type with a call signature." }
                     .to_owned(),

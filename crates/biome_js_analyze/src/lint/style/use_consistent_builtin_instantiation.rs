@@ -1,14 +1,15 @@
 use crate::{
+    JsRuleAction,
     lint::correctness::no_invalid_builtin_instantiation::convert_new_expression_to_call_expression,
-    services::semantic::Semantic, JsRuleAction,
+    services::semantic::Semantic,
 };
 use biome_analyze::{
-    context::RuleContext, declare_lint_rule, ActionCategory, FixKind, Rule, RuleDiagnostic,
-    RuleSource,
+    FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
+use biome_diagnostics::Severity;
 use biome_js_syntax::{
-    global_identifier, static_value::StaticValue, AnyJsExpression, JsNewOrCallExpression,
+    AnyJsExpression, JsNewOrCallExpression, global_identifier, static_value::StaticValue,
 };
 use biome_rowan::{AstNode, BatchMutationExt};
 
@@ -78,6 +79,7 @@ declare_lint_rule! {
             //RuleSource::Eslint("no-new-native-nonconstructor"),
         ],
         recommended: false,
+        severity: Severity::Information,
         fix_kind: FixKind::Unsafe,
     }
 }
@@ -137,7 +139,7 @@ impl Rule for UseConsistentBuiltinInstantiation {
                 mutation
                     .replace_node::<AnyJsExpression>(node.clone().into(), call_expression.into());
                 Some(JsRuleAction::new(
-                    ActionCategory::QuickFix,
+                    ctx.metadata().action_category(ctx.category(), ctx.group()),
                     ctx.metadata().applicability(),
                     markup! { "Remove "<Emphasis>"new"</Emphasis>" keyword." }.to_owned(),
                     mutation,
@@ -149,7 +151,7 @@ impl Rule for UseConsistentBuiltinInstantiation {
                 mutation
                     .replace_node::<AnyJsExpression>(node.clone().into(), new_expression.into());
                 Some(JsRuleAction::new(
-                    ActionCategory::QuickFix,
+                    ctx.metadata().action_category(ctx.category(), ctx.group()),
                     ctx.metadata().applicability(),
                     markup! { "Add "<Emphasis>"new"</Emphasis>" keyword." }.to_owned(),
                     mutation,
@@ -187,8 +189,8 @@ enum BuiltinCreationRule {
 impl BuiltinCreationRule {
     fn forbidden_builtins_list(&self) -> &[&str] {
         match self {
-            BuiltinCreationRule::MustUseNew => BUILTINS_REQUIRING_NEW,
-            BuiltinCreationRule::MustNotUseNew => BUILTINS_NOT_REQUIRING_NEW,
+            Self::MustUseNew => BUILTINS_REQUIRING_NEW,
+            Self::MustNotUseNew => BUILTINS_NOT_REQUIRING_NEW,
         }
     }
 }

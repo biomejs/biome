@@ -24,8 +24,8 @@ biome_fs             = { path = "../biome_fs" }
 biome_grit_factory   = { path = "../biome_grit_factory" }
 biome_grit_parser    = { path = "../biome_grit_parser" }
 biome_parser         = { path = "../biome_parser" }
-biome_service        = { path = "../biome_service", features = ["experimental-grit"] }
-countme              = { workspace = true, features = ["enable"] }
+biome_service        = { path = "../biome_service" }
+camino               = { workspace = true }
 serde                = { workspace = true, features = ["derive"] }
 serde_json           = { workspace = true }
 tests_macros         = { path = "../tests_macros" }

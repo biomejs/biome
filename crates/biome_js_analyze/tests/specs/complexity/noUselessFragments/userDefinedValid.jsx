@@ -1,3 +1,4 @@
+/* should not generate diagnostics */
 function Fragment() {}
 let React = { Fragment };
 <>

@@ -1,0 +1,52 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `biome.json`
+
+```json
+{ "files": { "includes": ["**/*"] } }
+```
+
+## `package.json`
+
+```json
+{ "type": "commonjs" }
+```
+
+## `src/file.mjs`
+
+```mjs
+import { foo } from "foo";
+var a = foo;
+
+```
+
+# Emitted Messages
+
+```block
+src/file.mjs:2:5 lint/correctness/noUnusedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This variable a is unused.
+  
+    1 │ import { foo } from "foo";
+  > 2 │ var a = foo;
+      │     ^
+    3 │ 
+  
+  i Unused variables are often the result of an incomplete refactoring, typos, or other sources of bugs.
+  
+  i Unsafe fix: If this is intentional, prepend a with an underscore.
+  
+    1 1 │   import { foo } from "foo";
+    2   │ - var·a·=·foo;
+      2 │ + var·_a·=·foo;
+    3 3 │   
+  
+
+```
+
+```block
+Checked 3 files in <TIME>. No fixes applied.
+Found 1 warning.
+```

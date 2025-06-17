@@ -1,0 +1,241 @@
+---
+source: crates/biome_js_parser/tests/spec_test.rs
+expression: snapshot
+snapshot_kind: text
+---
+## Input
+
+```js
+let a = { /: 6, /: /foo/ }
+let b = {{}}
+
+```
+
+
+## AST
+
+```
+JsModule {
+    bom_token: missing (optional),
+    interpreter_token: missing (optional),
+    directives: JsDirectiveList [],
+    items: JsModuleItemList [
+        JsVariableStatement {
+            declaration: JsVariableDeclaration {
+                await_token: missing (optional),
+                kind: LET_KW@0..4 "let" [] [Whitespace(" ")],
+                declarators: JsVariableDeclaratorList [
+                    JsVariableDeclarator {
+                        id: JsIdentifierBinding {
+                            name_token: IDENT@4..6 "a" [] [Whitespace(" ")],
+                        },
+                        variable_annotation: missing (optional),
+                        initializer: JsInitializerClause {
+                            eq_token: EQ@6..8 "=" [] [Whitespace(" ")],
+                            expression: JsObjectExpression {
+                                l_curly_token: L_CURLY@8..10 "{" [] [Whitespace(" ")],
+                                members: JsObjectMemberList [
+                                    JsBogusMember {
+                                        items: [
+                                            JsBogus {
+                                                items: [
+                                                    SLASH@10..11 "/" [] [],
+                                                ],
+                                            },
+                                            COLON@11..13 ":" [] [Whitespace(" ")],
+                                            JsNumberLiteralExpression {
+                                                value_token: JS_NUMBER_LITERAL@13..14 "6" [] [],
+                                            },
+                                        ],
+                                    },
+                                    COMMA@14..16 "," [] [Whitespace(" ")],
+                                    JsBogusMember {
+                                        items: [
+                                            JsBogus {
+                                                items: [
+                                                    SLASH@16..17 "/" [] [],
+                                                ],
+                                            },
+                                            COLON@17..19 ":" [] [Whitespace(" ")],
+                                            JsRegexLiteralExpression {
+                                                value_token: JS_REGEX_LITERAL@19..25 "/foo/" [] [Whitespace(" ")],
+                                            },
+                                        ],
+                                    },
+                                ],
+                                r_curly_token: R_CURLY@25..26 "}" [] [],
+                            },
+                        },
+                    },
+                ],
+            },
+            semicolon_token: missing (optional),
+        },
+        JsVariableStatement {
+            declaration: JsVariableDeclaration {
+                await_token: missing (optional),
+                kind: LET_KW@26..31 "let" [Newline("\n")] [Whitespace(" ")],
+                declarators: JsVariableDeclaratorList [
+                    JsVariableDeclarator {
+                        id: JsIdentifierBinding {
+                            name_token: IDENT@31..33 "b" [] [Whitespace(" ")],
+                        },
+                        variable_annotation: missing (optional),
+                        initializer: JsInitializerClause {
+                            eq_token: EQ@33..35 "=" [] [Whitespace(" ")],
+                            expression: JsObjectExpression {
+                                l_curly_token: L_CURLY@35..36 "{" [] [],
+                                members: JsObjectMemberList [
+                                    JsBogusMember {
+                                        items: [
+                                            L_CURLY@36..37 "{" [] [],
+                                        ],
+                                    },
+                                ],
+                                r_curly_token: R_CURLY@37..38 "}" [] [],
+                            },
+                        },
+                    },
+                ],
+            },
+            semicolon_token: missing (optional),
+        },
+        JsBogusStatement {
+            items: [
+                R_CURLY@38..39 "}" [] [],
+            ],
+        },
+    ],
+    eof_token: EOF@39..40 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: JS_MODULE@0..40
+  0: (empty)
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..39
+    0: JS_VARIABLE_STATEMENT@0..26
+      0: JS_VARIABLE_DECLARATION@0..26
+        0: (empty)
+        1: LET_KW@0..4 "let" [] [Whitespace(" ")]
+        2: JS_VARIABLE_DECLARATOR_LIST@4..26
+          0: JS_VARIABLE_DECLARATOR@4..26
+            0: JS_IDENTIFIER_BINDING@4..6
+              0: IDENT@4..6 "a" [] [Whitespace(" ")]
+            1: (empty)
+            2: JS_INITIALIZER_CLAUSE@6..26
+              0: EQ@6..8 "=" [] [Whitespace(" ")]
+              1: JS_OBJECT_EXPRESSION@8..26
+                0: L_CURLY@8..10 "{" [] [Whitespace(" ")]
+                1: JS_OBJECT_MEMBER_LIST@10..25
+                  0: JS_BOGUS_MEMBER@10..14
+                    0: JS_BOGUS@10..11
+                      0: SLASH@10..11 "/" [] []
+                    1: COLON@11..13 ":" [] [Whitespace(" ")]
+                    2: JS_NUMBER_LITERAL_EXPRESSION@13..14
+                      0: JS_NUMBER_LITERAL@13..14 "6" [] []
+                  1: COMMA@14..16 "," [] [Whitespace(" ")]
+                  2: JS_BOGUS_MEMBER@16..25
+                    0: JS_BOGUS@16..17
+                      0: SLASH@16..17 "/" [] []
+                    1: COLON@17..19 ":" [] [Whitespace(" ")]
+                    2: JS_REGEX_LITERAL_EXPRESSION@19..25
+                      0: JS_REGEX_LITERAL@19..25 "/foo/" [] [Whitespace(" ")]
+                2: R_CURLY@25..26 "}" [] []
+      1: (empty)
+    1: JS_VARIABLE_STATEMENT@26..38
+      0: JS_VARIABLE_DECLARATION@26..38
+        0: (empty)
+        1: LET_KW@26..31 "let" [Newline("\n")] [Whitespace(" ")]
+        2: JS_VARIABLE_DECLARATOR_LIST@31..38
+          0: JS_VARIABLE_DECLARATOR@31..38
+            0: JS_IDENTIFIER_BINDING@31..33
+              0: IDENT@31..33 "b" [] [Whitespace(" ")]
+            1: (empty)
+            2: JS_INITIALIZER_CLAUSE@33..38
+              0: EQ@33..35 "=" [] [Whitespace(" ")]
+              1: JS_OBJECT_EXPRESSION@35..38
+                0: L_CURLY@35..36 "{" [] []
+                1: JS_OBJECT_MEMBER_LIST@36..37
+                  0: JS_BOGUS_MEMBER@36..37
+                    0: L_CURLY@36..37 "{" [] []
+                2: R_CURLY@37..38 "}" [] []
+      1: (empty)
+    2: JS_BOGUS_STATEMENT@38..39
+      0: R_CURLY@38..39 "}" [] []
+  4: EOF@39..40 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+object_expr_error_prop_name.js:1:11 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a property, a shorthand property, a getter, a setter, or a method but instead found '/'.
+  
+  > 1 │ let a = { /: 6, /: /foo/ }
+      │           ^
+    2 │ let b = {{}}
+    3 │ 
+  
+  i Expected a property, a shorthand property, a getter, a setter, or a method here.
+  
+  > 1 │ let a = { /: 6, /: /foo/ }
+      │           ^
+    2 │ let b = {{}}
+    3 │ 
+  
+object_expr_error_prop_name.js:1:17 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a property, a shorthand property, a getter, a setter, or a method but instead found '/'.
+  
+  > 1 │ let a = { /: 6, /: /foo/ }
+      │                 ^
+    2 │ let b = {{}}
+    3 │ 
+  
+  i Expected a property, a shorthand property, a getter, a setter, or a method here.
+  
+  > 1 │ let a = { /: 6, /: /foo/ }
+      │                 ^
+    2 │ let b = {{}}
+    3 │ 
+  
+object_expr_error_prop_name.js:2:10 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a property, a shorthand property, a getter, a setter, or a method but instead found '{'.
+  
+    1 │ let a = { /: 6, /: /foo/ }
+  > 2 │ let b = {{}}
+      │          ^
+    3 │ 
+  
+  i Expected a property, a shorthand property, a getter, a setter, or a method here.
+  
+    1 │ let a = { /: 6, /: /foo/ }
+  > 2 │ let b = {{}}
+      │          ^
+    3 │ 
+  
+object_expr_error_prop_name.js:2:12 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a statement but instead found '}'.
+  
+    1 │ let a = { /: 6, /: /foo/ }
+  > 2 │ let b = {{}}
+      │            ^
+    3 │ 
+  
+  i Expected a statement here.
+  
+    1 │ let a = { /: 6, /: /foo/ }
+  > 2 │ let b = {{}}
+      │            ^
+    3 │ 
+  
+```

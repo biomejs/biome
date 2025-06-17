@@ -1,8 +1,7 @@
 use biome_analyze::RuleSource;
-use biome_analyze::{
-    context::RuleContext, declare_lint_rule, ActionCategory, Ast, FixKind, Rule, RuleDiagnostic,
-};
+use biome_analyze::{Ast, FixKind, Rule, RuleDiagnostic, context::RuleContext, declare_lint_rule};
 use biome_console::markup;
+use biome_diagnostics::Severity;
 use biome_js_factory::make;
 use biome_js_syntax::AnyJsTemplateElement;
 use biome_js_syntax::{
@@ -52,6 +51,7 @@ declare_lint_rule! {
         language: "js",
         sources: &[RuleSource::Eslint("prefer-template")],
         recommended: true,
+        severity: Severity::Information,
         fix_kind: FixKind::Unsafe,
     }
 }
@@ -98,7 +98,7 @@ impl Rule for UseTemplate {
             AnyJsExpression::JsTemplateExpression(template),
         );
         Some(JsRuleAction::new(
-            ActionCategory::QuickFix,
+            ctx.metadata().action_category(ctx.category(), ctx.group()),
             ctx.metadata().applicability(),
             markup! { "Use a "<Emphasis>"template literal"</Emphasis>"." }.to_owned(),
             mutation,
@@ -121,38 +121,47 @@ fn can_be_template_literal(node: &JsBinaryExpression) -> Option<bool> {
     let mut has_interpolated_string_constituent = false;
     let mut has_non_constant_string_constituent = false;
     while let Some(walk) = iter.next() {
-        if let WalkEvent::Enter(node) = walk {
-            let expression = AnyJsExpression::cast(node)?;
-            match &expression {
-                AnyJsExpression::JsParenthesizedExpression(_) => continue,
-                AnyJsExpression::JsBinaryExpression(binary)
-                    if binary.operator() == Ok(JsBinaryOperator::Plus) =>
-                {
-                    continue
-                }
-                AnyJsExpression::JsTemplateExpression(template) if template.is_constant() => {
-                    has_constant_string_constituent = true;
-                }
-                AnyJsExpression::JsTemplateExpression(template) if template.tag().is_none() => {
-                    has_interpolated_string_constituent = true;
-                }
-                AnyJsExpression::AnyJsLiteralExpression(
-                    AnyJsLiteralExpression::JsStringLiteralExpression(_),
-                ) => {
-                    has_constant_string_constituent = true;
-                }
-                _ => {
-                    has_non_constant_string_constituent = true;
-                }
-            }
-            if (has_constant_string_constituent
-                && (has_non_constant_string_constituent || has_interpolated_string_constituent))
-                || (has_interpolated_string_constituent && has_non_constant_string_constituent)
+        let WalkEvent::Enter(node) = walk else {
+            continue;
+        };
+        let expression = AnyJsExpression::cast(node)?;
+        match &expression {
+            AnyJsExpression::JsParenthesizedExpression(_) => continue,
+            AnyJsExpression::JsBinaryExpression(binary)
+                if binary.operator() == Ok(JsBinaryOperator::Plus) =>
             {
-                return Some(true);
+                // Long literals can be split to multiline using `+`, so let's ignore that.
+                // see https://github.com/biomejs/biome/issues/4947
+                if binary.operator_token().ok()?.has_leading_newline()
+                    || binary.right().ok()?.syntax().has_leading_newline()
+                {
+                    return Some(false);
+                }
+
+                continue;
             }
-            iter.skip_subtree();
+            AnyJsExpression::JsTemplateExpression(template) if template.is_constant() => {
+                has_constant_string_constituent = true;
+            }
+            AnyJsExpression::JsTemplateExpression(template) if template.tag().is_none() => {
+                has_interpolated_string_constituent = true;
+            }
+            AnyJsExpression::AnyJsLiteralExpression(
+                AnyJsLiteralExpression::JsStringLiteralExpression(_),
+            ) => {
+                has_constant_string_constituent = true;
+            }
+            _ => {
+                has_non_constant_string_constituent = true;
+            }
         }
+        if (has_constant_string_constituent
+            && (has_non_constant_string_constituent || has_interpolated_string_constituent))
+            || (has_interpolated_string_constituent && has_non_constant_string_constituent)
+        {
+            return Some(true);
+        }
+        iter.skip_subtree();
     }
     Some(false)
 }
@@ -189,7 +198,7 @@ fn template_expression_from_binary_expression(
                     // Skip parenthesized expressions, because they would be added twice to
                     // `left_expressions_stack` or `template_elements` (see the last match arm):
                     // First the contained expression and then the parenthesized expression itself.
-                    AnyJsExpression::JsParenthesizedExpression(_) => continue,
+                    AnyJsExpression::JsParenthesizedExpression(_) => {}
                     AnyJsExpression::JsBinaryExpression(binary)
                         if binary.operator() == Ok(JsBinaryOperator::Plus) =>
                     {

@@ -554,7 +554,7 @@ B
  }
  
  @supports selector(:focus-visible) {
-@@ -195,32 +198,28 @@
+@@ -195,28 +198,22 @@
  @supports selector(:not(.a, .b)) {
  }
  
@@ -592,14 +592,7 @@ B
  }
  @supports selector(.parent > .child) {
  }
--@supports selector(> .child-one) {
-+@supports selector(
-+>
-+.child-one){
- }
- @supports selector(.parent ~ .child) {
- }
-@@ -234,20 +233,21 @@
+@@ -234,20 +231,21 @@
  }
  @supports selector(|*) {
  }
@@ -632,7 +625,7 @@ B
  @supports not (transform-origin: 10em 10em 10em) {
  }
  @supports not (not (transform-origin: 2px)) {
-@@ -256,20 +256,23 @@
+@@ -256,20 +254,23 @@
  }
  @supports (display: table-cell) and (display: list-item) and (display: run-in) {
  }
@@ -887,9 +880,7 @@ B
 }
 @supports selector(.parent > .child) {
 }
-@supports selector(
->
-.child-one){
+@supports selector(> .child-one) {
 }
 @supports selector(.parent ~ .child) {
 }
@@ -1009,6 +1000,24 @@ supports.css:311:25 parse ━━━━━━━━━━━━━━━━━━
   
   i Remove )
   
+supports.css:314:20 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a selector but instead found ')'.
+  
+    313 │ }
+  > 314 │ @supports selector(){
+        │                    ^
+    315 │ 
+    316 │ }
+  
+  i Expected a selector here.
+  
+    313 │ }
+  > 314 │ @supports selector(){
+        │                    ^
+    315 │ 
+    316 │ }
+  
 supports.css:331:31 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × expected `)` but instead found `,`
@@ -1089,29 +1098,23 @@ supports.css:348:96 parse ━━━━━━━━━━━━━━━━━━
   
 supports.css:352:20 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected `)` but instead found `>`
+  × Expected a selector but instead found '> .child-one'.
   
     350 │ @supports selector(.parent>.child ){
     351 │ }
   > 352 │ @supports selector(> .child-one){
-        │                    ^
+        │                    ^^^^^^^^^^^^
     353 │ }
     354 │ @supports selector(.parent  ~  .child){
   
-  i Remove >
-  
-supports.css:352:32 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `,` but instead found `)`
+  i Expected a selector here.
   
     350 │ @supports selector(.parent>.child ){
     351 │ }
   > 352 │ @supports selector(> .child-one){
-        │                                ^
+        │                    ^^^^^^^^^^^^
     353 │ }
     354 │ @supports selector(.parent  ~  .child){
-  
-  i Remove )
   
 supports.css:366:22 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 

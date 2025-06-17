@@ -3,7 +3,7 @@ use biome_formatter::write;
 
 use crate::utils::FormatInitializerClause;
 
-use crate::js::bindings::parameters::{should_hug_function_parameters, FormatAnyJsParameters};
+use crate::js::bindings::parameters::{FormatAnyJsParameters, should_hug_function_parameters};
 use biome_js_syntax::JsFormalParameter;
 use biome_js_syntax::JsFormalParameterFields;
 
@@ -35,7 +35,7 @@ impl FormatNodeRule<JsFormalParameter> for FormatJsFormalParameter {
             .syntax()
             .grand_parent()
             .and_then(FormatAnyJsParameters::cast)
-            .map_or(false, |parameters| {
+            .is_some_and(|parameters| {
                 should_hug_function_parameters(&parameters, f.comments(), false).unwrap_or(false)
             });
 

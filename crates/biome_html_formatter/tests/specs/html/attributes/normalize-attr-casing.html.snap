@@ -1,0 +1,40 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: attributes/normalize-attr-casing.html
+snapshot_kind: text
+---
+# Input
+
+```html
+<div Unknown>should keep casing for unknown attributes</div>
+<div class="text-lg">should lowercase known attributes</div>
+<h1 id="head">should lowercase known attributes</h1>
+<Component CLASS="text-lg">should not touch custom elements</Component>
+
+```
+
+
+=============================
+
+# Outputs
+
+## Output 1
+
+-----
+Indent style: Tab
+Indent width: 2
+Line ending: LF
+Line width: 80
+Attribute Position: Auto
+Bracket same line: false
+Whitespace sensitivity: css
+Indent script and style: false
+Self close void elements: never
+-----
+
+```html
+<div Unknown>should keep casing for unknown attributes</div>
+<div class="text-lg">should lowercase known attributes</div>
+<h1 id="head">should lowercase known attributes</h1>
+<Component CLASS="text-lg">should not touch custom elements</Component>
+```

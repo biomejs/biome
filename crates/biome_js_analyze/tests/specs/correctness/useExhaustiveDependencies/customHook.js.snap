@@ -3,7 +3,7 @@ source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: customHook.js
 ---
 # Input
-```jsx
+```js
 import { useEffect } from "react";
 
 function MyComponent() {
@@ -25,9 +25,9 @@ function MyComponent() {
 
 # Diagnostics
 ```
-customHook.js:5:5 lint/correctness/useExhaustiveDependencies ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+customHook.js:5:5 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This hook does not specify all of its dependencies: a
+  × This hook does not specify all of its dependencies: a
   
     3 │ function MyComponent() {
     4 │     let a = 1;
@@ -47,13 +47,17 @@ customHook.js:5:5 lint/correctness/useExhaustiveDependencies ━━━━━━�
   
   i Either include it or remove the dependency array
   
+  i Unsafe fix: Add the missing dependencies to the list.
+  
+    7 │ ····},·[a]);
+      │         +   
 
 ```
 
 ```
-customHook.js:9:5 lint/correctness/useExhaustiveDependencies ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+customHook.js:9:5 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This hook does not specify all of its dependencies: a
+  × This hook does not specify all of its dependencies: a
   
      7 │     }, []);
      8 │ 
@@ -72,7 +76,9 @@ customHook.js:9:5 lint/correctness/useExhaustiveDependencies ━━━━━━�
   
   i Either include it or remove the dependency array
   
+  i Unsafe fix: Add the missing dependencies to the list.
+  
+    11 │ ····},·[a]);
+       │         +   
 
 ```
-
-

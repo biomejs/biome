@@ -1,0 +1,586 @@
+---
+source: crates/biome_js_parser/tests/spec_test.rs
+expression: snapshot
+snapshot_kind: text
+---
+## Input
+
+```js
+function() {}
+function foo {}
+function {}
+function *() {}
+async function() {}
+async function *() {}
+function *foo2() {}
+yield foo3;
+function test2(): number {}
+function foo4(await) {}
+function foo5(yield) {}
+
+```
+
+
+## AST
+
+```
+JsModule {
+    bom_token: missing (optional),
+    interpreter_token: missing (optional),
+    directives: JsDirectiveList [],
+    items: JsModuleItemList [
+        JsFunctionDeclaration {
+            async_token: missing (optional),
+            function_token: FUNCTION_KW@0..8 "function" [] [],
+            star_token: missing (optional),
+            id: missing (required),
+            type_parameters: missing (optional),
+            parameters: JsParameters {
+                l_paren_token: L_PAREN@8..9 "(" [] [],
+                items: JsParameterList [],
+                r_paren_token: R_PAREN@9..11 ")" [] [Whitespace(" ")],
+            },
+            return_type_annotation: missing (optional),
+            body: JsFunctionBody {
+                l_curly_token: L_CURLY@11..12 "{" [] [],
+                directives: JsDirectiveList [],
+                statements: JsStatementList [],
+                r_curly_token: R_CURLY@12..13 "}" [] [],
+            },
+        },
+        JsFunctionDeclaration {
+            async_token: missing (optional),
+            function_token: FUNCTION_KW@13..23 "function" [Newline("\n")] [Whitespace(" ")],
+            star_token: missing (optional),
+            id: JsIdentifierBinding {
+                name_token: IDENT@23..27 "foo" [] [Whitespace(" ")],
+            },
+            type_parameters: missing (optional),
+            parameters: missing (required),
+            return_type_annotation: missing (optional),
+            body: JsFunctionBody {
+                l_curly_token: L_CURLY@27..28 "{" [] [],
+                directives: JsDirectiveList [],
+                statements: JsStatementList [],
+                r_curly_token: R_CURLY@28..29 "}" [] [],
+            },
+        },
+        JsFunctionDeclaration {
+            async_token: missing (optional),
+            function_token: FUNCTION_KW@29..39 "function" [Newline("\n")] [Whitespace(" ")],
+            star_token: missing (optional),
+            id: missing (required),
+            type_parameters: missing (optional),
+            parameters: missing (required),
+            return_type_annotation: missing (optional),
+            body: JsFunctionBody {
+                l_curly_token: L_CURLY@39..40 "{" [] [],
+                directives: JsDirectiveList [],
+                statements: JsStatementList [],
+                r_curly_token: R_CURLY@40..41 "}" [] [],
+            },
+        },
+        JsFunctionDeclaration {
+            async_token: missing (optional),
+            function_token: FUNCTION_KW@41..51 "function" [Newline("\n")] [Whitespace(" ")],
+            star_token: STAR@51..52 "*" [] [],
+            id: missing (required),
+            type_parameters: missing (optional),
+            parameters: JsParameters {
+                l_paren_token: L_PAREN@52..53 "(" [] [],
+                items: JsParameterList [],
+                r_paren_token: R_PAREN@53..55 ")" [] [Whitespace(" ")],
+            },
+            return_type_annotation: missing (optional),
+            body: JsFunctionBody {
+                l_curly_token: L_CURLY@55..56 "{" [] [],
+                directives: JsDirectiveList [],
+                statements: JsStatementList [],
+                r_curly_token: R_CURLY@56..57 "}" [] [],
+            },
+        },
+        JsFunctionDeclaration {
+            async_token: ASYNC_KW@57..64 "async" [Newline("\n")] [Whitespace(" ")],
+            function_token: FUNCTION_KW@64..72 "function" [] [],
+            star_token: missing (optional),
+            id: missing (required),
+            type_parameters: missing (optional),
+            parameters: JsParameters {
+                l_paren_token: L_PAREN@72..73 "(" [] [],
+                items: JsParameterList [],
+                r_paren_token: R_PAREN@73..75 ")" [] [Whitespace(" ")],
+            },
+            return_type_annotation: missing (optional),
+            body: JsFunctionBody {
+                l_curly_token: L_CURLY@75..76 "{" [] [],
+                directives: JsDirectiveList [],
+                statements: JsStatementList [],
+                r_curly_token: R_CURLY@76..77 "}" [] [],
+            },
+        },
+        JsFunctionDeclaration {
+            async_token: ASYNC_KW@77..84 "async" [Newline("\n")] [Whitespace(" ")],
+            function_token: FUNCTION_KW@84..93 "function" [] [Whitespace(" ")],
+            star_token: STAR@93..94 "*" [] [],
+            id: missing (required),
+            type_parameters: missing (optional),
+            parameters: JsParameters {
+                l_paren_token: L_PAREN@94..95 "(" [] [],
+                items: JsParameterList [],
+                r_paren_token: R_PAREN@95..97 ")" [] [Whitespace(" ")],
+            },
+            return_type_annotation: missing (optional),
+            body: JsFunctionBody {
+                l_curly_token: L_CURLY@97..98 "{" [] [],
+                directives: JsDirectiveList [],
+                statements: JsStatementList [],
+                r_curly_token: R_CURLY@98..99 "}" [] [],
+            },
+        },
+        JsFunctionDeclaration {
+            async_token: missing (optional),
+            function_token: FUNCTION_KW@99..109 "function" [Newline("\n")] [Whitespace(" ")],
+            star_token: STAR@109..110 "*" [] [],
+            id: JsIdentifierBinding {
+                name_token: IDENT@110..114 "foo2" [] [],
+            },
+            type_parameters: missing (optional),
+            parameters: JsParameters {
+                l_paren_token: L_PAREN@114..115 "(" [] [],
+                items: JsParameterList [],
+                r_paren_token: R_PAREN@115..117 ")" [] [Whitespace(" ")],
+            },
+            return_type_annotation: missing (optional),
+            body: JsFunctionBody {
+                l_curly_token: L_CURLY@117..118 "{" [] [],
+                directives: JsDirectiveList [],
+                statements: JsStatementList [],
+                r_curly_token: R_CURLY@118..119 "}" [] [],
+            },
+        },
+        JsExpressionStatement {
+            expression: JsBogusExpression {
+                items: [
+                    YIELD_KW@119..126 "yield" [Newline("\n")] [Whitespace(" ")],
+                    JsYieldArgument {
+                        star_token: missing (optional),
+                        expression: JsIdentifierExpression {
+                            name: JsReferenceIdentifier {
+                                value_token: IDENT@126..130 "foo3" [] [],
+                            },
+                        },
+                    },
+                ],
+            },
+            semicolon_token: SEMICOLON@130..131 ";" [] [],
+        },
+        JsBogusStatement {
+            items: [
+                FUNCTION_KW@131..141 "function" [Newline("\n")] [Whitespace(" ")],
+                JsIdentifierBinding {
+                    name_token: IDENT@141..146 "test2" [] [],
+                },
+                JsParameters {
+                    l_paren_token: L_PAREN@146..147 "(" [] [],
+                    items: JsParameterList [],
+                    r_paren_token: R_PAREN@147..148 ")" [] [],
+                },
+                JsBogus {
+                    items: [
+                        COLON@148..150 ":" [] [Whitespace(" ")],
+                        TsNumberType {
+                            number_token: NUMBER_KW@150..157 "number" [] [Whitespace(" ")],
+                        },
+                    ],
+                },
+                JsFunctionBody {
+                    l_curly_token: L_CURLY@157..158 "{" [] [],
+                    directives: JsDirectiveList [],
+                    statements: JsStatementList [],
+                    r_curly_token: R_CURLY@158..159 "}" [] [],
+                },
+            ],
+        },
+        JsFunctionDeclaration {
+            async_token: missing (optional),
+            function_token: FUNCTION_KW@159..169 "function" [Newline("\n")] [Whitespace(" ")],
+            star_token: missing (optional),
+            id: JsIdentifierBinding {
+                name_token: IDENT@169..173 "foo4" [] [],
+            },
+            type_parameters: missing (optional),
+            parameters: JsParameters {
+                l_paren_token: L_PAREN@173..174 "(" [] [],
+                items: JsParameterList [
+                    JsFormalParameter {
+                        decorators: JsDecoratorList [],
+                        binding: JsBogusBinding {
+                            items: [
+                                IDENT@174..179 "await" [] [],
+                            ],
+                        },
+                        question_mark_token: missing (optional),
+                        type_annotation: missing (optional),
+                        initializer: missing (optional),
+                    },
+                ],
+                r_paren_token: R_PAREN@179..181 ")" [] [Whitespace(" ")],
+            },
+            return_type_annotation: missing (optional),
+            body: JsFunctionBody {
+                l_curly_token: L_CURLY@181..182 "{" [] [],
+                directives: JsDirectiveList [],
+                statements: JsStatementList [],
+                r_curly_token: R_CURLY@182..183 "}" [] [],
+            },
+        },
+        JsFunctionDeclaration {
+            async_token: missing (optional),
+            function_token: FUNCTION_KW@183..193 "function" [Newline("\n")] [Whitespace(" ")],
+            star_token: missing (optional),
+            id: JsIdentifierBinding {
+                name_token: IDENT@193..197 "foo5" [] [],
+            },
+            type_parameters: missing (optional),
+            parameters: JsParameters {
+                l_paren_token: L_PAREN@197..198 "(" [] [],
+                items: JsParameterList [
+                    JsFormalParameter {
+                        decorators: JsDecoratorList [],
+                        binding: JsBogusBinding {
+                            items: [
+                                IDENT@198..203 "yield" [] [],
+                            ],
+                        },
+                        question_mark_token: missing (optional),
+                        type_annotation: missing (optional),
+                        initializer: missing (optional),
+                    },
+                ],
+                r_paren_token: R_PAREN@203..205 ")" [] [Whitespace(" ")],
+            },
+            return_type_annotation: missing (optional),
+            body: JsFunctionBody {
+                l_curly_token: L_CURLY@205..206 "{" [] [],
+                directives: JsDirectiveList [],
+                statements: JsStatementList [],
+                r_curly_token: R_CURLY@206..207 "}" [] [],
+            },
+        },
+    ],
+    eof_token: EOF@207..208 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: JS_MODULE@0..208
+  0: (empty)
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..207
+    0: JS_FUNCTION_DECLARATION@0..13
+      0: (empty)
+      1: FUNCTION_KW@0..8 "function" [] []
+      2: (empty)
+      3: (empty)
+      4: (empty)
+      5: JS_PARAMETERS@8..11
+        0: L_PAREN@8..9 "(" [] []
+        1: JS_PARAMETER_LIST@9..9
+        2: R_PAREN@9..11 ")" [] [Whitespace(" ")]
+      6: (empty)
+      7: JS_FUNCTION_BODY@11..13
+        0: L_CURLY@11..12 "{" [] []
+        1: JS_DIRECTIVE_LIST@12..12
+        2: JS_STATEMENT_LIST@12..12
+        3: R_CURLY@12..13 "}" [] []
+    1: JS_FUNCTION_DECLARATION@13..29
+      0: (empty)
+      1: FUNCTION_KW@13..23 "function" [Newline("\n")] [Whitespace(" ")]
+      2: (empty)
+      3: JS_IDENTIFIER_BINDING@23..27
+        0: IDENT@23..27 "foo" [] [Whitespace(" ")]
+      4: (empty)
+      5: (empty)
+      6: (empty)
+      7: JS_FUNCTION_BODY@27..29
+        0: L_CURLY@27..28 "{" [] []
+        1: JS_DIRECTIVE_LIST@28..28
+        2: JS_STATEMENT_LIST@28..28
+        3: R_CURLY@28..29 "}" [] []
+    2: JS_FUNCTION_DECLARATION@29..41
+      0: (empty)
+      1: FUNCTION_KW@29..39 "function" [Newline("\n")] [Whitespace(" ")]
+      2: (empty)
+      3: (empty)
+      4: (empty)
+      5: (empty)
+      6: (empty)
+      7: JS_FUNCTION_BODY@39..41
+        0: L_CURLY@39..40 "{" [] []
+        1: JS_DIRECTIVE_LIST@40..40
+        2: JS_STATEMENT_LIST@40..40
+        3: R_CURLY@40..41 "}" [] []
+    3: JS_FUNCTION_DECLARATION@41..57
+      0: (empty)
+      1: FUNCTION_KW@41..51 "function" [Newline("\n")] [Whitespace(" ")]
+      2: STAR@51..52 "*" [] []
+      3: (empty)
+      4: (empty)
+      5: JS_PARAMETERS@52..55
+        0: L_PAREN@52..53 "(" [] []
+        1: JS_PARAMETER_LIST@53..53
+        2: R_PAREN@53..55 ")" [] [Whitespace(" ")]
+      6: (empty)
+      7: JS_FUNCTION_BODY@55..57
+        0: L_CURLY@55..56 "{" [] []
+        1: JS_DIRECTIVE_LIST@56..56
+        2: JS_STATEMENT_LIST@56..56
+        3: R_CURLY@56..57 "}" [] []
+    4: JS_FUNCTION_DECLARATION@57..77
+      0: ASYNC_KW@57..64 "async" [Newline("\n")] [Whitespace(" ")]
+      1: FUNCTION_KW@64..72 "function" [] []
+      2: (empty)
+      3: (empty)
+      4: (empty)
+      5: JS_PARAMETERS@72..75
+        0: L_PAREN@72..73 "(" [] []
+        1: JS_PARAMETER_LIST@73..73
+        2: R_PAREN@73..75 ")" [] [Whitespace(" ")]
+      6: (empty)
+      7: JS_FUNCTION_BODY@75..77
+        0: L_CURLY@75..76 "{" [] []
+        1: JS_DIRECTIVE_LIST@76..76
+        2: JS_STATEMENT_LIST@76..76
+        3: R_CURLY@76..77 "}" [] []
+    5: JS_FUNCTION_DECLARATION@77..99
+      0: ASYNC_KW@77..84 "async" [Newline("\n")] [Whitespace(" ")]
+      1: FUNCTION_KW@84..93 "function" [] [Whitespace(" ")]
+      2: STAR@93..94 "*" [] []
+      3: (empty)
+      4: (empty)
+      5: JS_PARAMETERS@94..97
+        0: L_PAREN@94..95 "(" [] []
+        1: JS_PARAMETER_LIST@95..95
+        2: R_PAREN@95..97 ")" [] [Whitespace(" ")]
+      6: (empty)
+      7: JS_FUNCTION_BODY@97..99
+        0: L_CURLY@97..98 "{" [] []
+        1: JS_DIRECTIVE_LIST@98..98
+        2: JS_STATEMENT_LIST@98..98
+        3: R_CURLY@98..99 "}" [] []
+    6: JS_FUNCTION_DECLARATION@99..119
+      0: (empty)
+      1: FUNCTION_KW@99..109 "function" [Newline("\n")] [Whitespace(" ")]
+      2: STAR@109..110 "*" [] []
+      3: JS_IDENTIFIER_BINDING@110..114
+        0: IDENT@110..114 "foo2" [] []
+      4: (empty)
+      5: JS_PARAMETERS@114..117
+        0: L_PAREN@114..115 "(" [] []
+        1: JS_PARAMETER_LIST@115..115
+        2: R_PAREN@115..117 ")" [] [Whitespace(" ")]
+      6: (empty)
+      7: JS_FUNCTION_BODY@117..119
+        0: L_CURLY@117..118 "{" [] []
+        1: JS_DIRECTIVE_LIST@118..118
+        2: JS_STATEMENT_LIST@118..118
+        3: R_CURLY@118..119 "}" [] []
+    7: JS_EXPRESSION_STATEMENT@119..131
+      0: JS_BOGUS_EXPRESSION@119..130
+        0: YIELD_KW@119..126 "yield" [Newline("\n")] [Whitespace(" ")]
+        1: JS_YIELD_ARGUMENT@126..130
+          0: (empty)
+          1: JS_IDENTIFIER_EXPRESSION@126..130
+            0: JS_REFERENCE_IDENTIFIER@126..130
+              0: IDENT@126..130 "foo3" [] []
+      1: SEMICOLON@130..131 ";" [] []
+    8: JS_BOGUS_STATEMENT@131..159
+      0: FUNCTION_KW@131..141 "function" [Newline("\n")] [Whitespace(" ")]
+      1: JS_IDENTIFIER_BINDING@141..146
+        0: IDENT@141..146 "test2" [] []
+      2: JS_PARAMETERS@146..148
+        0: L_PAREN@146..147 "(" [] []
+        1: JS_PARAMETER_LIST@147..147
+        2: R_PAREN@147..148 ")" [] []
+      3: JS_BOGUS@148..157
+        0: COLON@148..150 ":" [] [Whitespace(" ")]
+        1: TS_NUMBER_TYPE@150..157
+          0: NUMBER_KW@150..157 "number" [] [Whitespace(" ")]
+      4: JS_FUNCTION_BODY@157..159
+        0: L_CURLY@157..158 "{" [] []
+        1: JS_DIRECTIVE_LIST@158..158
+        2: JS_STATEMENT_LIST@158..158
+        3: R_CURLY@158..159 "}" [] []
+    9: JS_FUNCTION_DECLARATION@159..183
+      0: (empty)
+      1: FUNCTION_KW@159..169 "function" [Newline("\n")] [Whitespace(" ")]
+      2: (empty)
+      3: JS_IDENTIFIER_BINDING@169..173
+        0: IDENT@169..173 "foo4" [] []
+      4: (empty)
+      5: JS_PARAMETERS@173..181
+        0: L_PAREN@173..174 "(" [] []
+        1: JS_PARAMETER_LIST@174..179
+          0: JS_FORMAL_PARAMETER@174..179
+            0: JS_DECORATOR_LIST@174..174
+            1: JS_BOGUS_BINDING@174..179
+              0: IDENT@174..179 "await" [] []
+            2: (empty)
+            3: (empty)
+            4: (empty)
+        2: R_PAREN@179..181 ")" [] [Whitespace(" ")]
+      6: (empty)
+      7: JS_FUNCTION_BODY@181..183
+        0: L_CURLY@181..182 "{" [] []
+        1: JS_DIRECTIVE_LIST@182..182
+        2: JS_STATEMENT_LIST@182..182
+        3: R_CURLY@182..183 "}" [] []
+    10: JS_FUNCTION_DECLARATION@183..207
+      0: (empty)
+      1: FUNCTION_KW@183..193 "function" [Newline("\n")] [Whitespace(" ")]
+      2: (empty)
+      3: JS_IDENTIFIER_BINDING@193..197
+        0: IDENT@193..197 "foo5" [] []
+      4: (empty)
+      5: JS_PARAMETERS@197..205
+        0: L_PAREN@197..198 "(" [] []
+        1: JS_PARAMETER_LIST@198..203
+          0: JS_FORMAL_PARAMETER@198..203
+            0: JS_DECORATOR_LIST@198..198
+            1: JS_BOGUS_BINDING@198..203
+              0: IDENT@198..203 "yield" [] []
+            2: (empty)
+            3: (empty)
+            4: (empty)
+        2: R_PAREN@203..205 ")" [] [Whitespace(" ")]
+      6: (empty)
+      7: JS_FUNCTION_BODY@205..207
+        0: L_CURLY@205..206 "{" [] []
+        1: JS_DIRECTIVE_LIST@206..206
+        2: JS_STATEMENT_LIST@206..206
+        3: R_CURLY@206..207 "}" [] []
+  4: EOF@207..208 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+function_decl_err.js:1:9 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected a name for the function in a function declaration, but found none
+  
+  > 1 │ function() {}
+      │         ^
+    2 │ function foo {}
+    3 │ function {}
+  
+function_decl_err.js:2:14 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a parenthesis '(' but instead found '{'.
+  
+    1 │ function() {}
+  > 2 │ function foo {}
+      │              ^
+    3 │ function {}
+    4 │ function *() {}
+  
+  i Expected a parenthesis '(' here.
+  
+    1 │ function() {}
+  > 2 │ function foo {}
+      │              ^
+    3 │ function {}
+    4 │ function *() {}
+  
+function_decl_err.js:3:10 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected a name for the function in a function declaration, but found none
+  
+    1 │ function() {}
+    2 │ function foo {}
+  > 3 │ function {}
+      │          ^
+    4 │ function *() {}
+    5 │ async function() {}
+  
+function_decl_err.js:4:11 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected a name for the function in a function declaration, but found none
+  
+    2 │ function foo {}
+    3 │ function {}
+  > 4 │ function *() {}
+      │           ^
+    5 │ async function() {}
+    6 │ async function *() {}
+  
+function_decl_err.js:5:15 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected a name for the function in a function declaration, but found none
+  
+    3 │ function {}
+    4 │ function *() {}
+  > 5 │ async function() {}
+      │               ^
+    6 │ async function *() {}
+    7 │ function *foo2() {}
+  
+function_decl_err.js:6:17 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected a name for the function in a function declaration, but found none
+  
+    4 │ function *() {}
+    5 │ async function() {}
+  > 6 │ async function *() {}
+      │                 ^
+    7 │ function *foo2() {}
+    8 │ yield foo3;
+  
+function_decl_err.js:8:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × `yield` is only allowed within generator functions.
+  
+     6 │ async function *() {}
+     7 │ function *foo2() {}
+   > 8 │ yield foo3;
+       │ ^^^^^
+     9 │ function test2(): number {}
+    10 │ function foo4(await) {}
+  
+function_decl_err.js:9:17 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × return types can only be used in TypeScript files
+  
+     7 │ function *foo2() {}
+     8 │ yield foo3;
+   > 9 │ function test2(): number {}
+       │                 ^^^^^^^^
+    10 │ function foo4(await) {}
+    11 │ function foo5(yield) {}
+  
+function_decl_err.js:10:15 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Illegal use of `await` as an identifier inside of a module
+  
+     8 │ yield foo3;
+     9 │ function test2(): number {}
+  > 10 │ function foo4(await) {}
+       │               ^^^^^
+    11 │ function foo5(yield) {}
+    12 │ 
+  
+function_decl_err.js:11:15 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Illegal use of reserved keyword `yield` as an identifier in strict mode
+  
+     9 │ function test2(): number {}
+    10 │ function foo4(await) {}
+  > 11 │ function foo5(yield) {}
+       │               ^^^^^
+    12 │ 
+  
+```

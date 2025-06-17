@@ -1,13 +1,24 @@
 use super::*;
 use crate::{HasDeclarationAstNode, SemanticModel};
 use biome_js_syntax::{
-    binding_ext::AnyJsIdentifierBinding, JsIdentifierBinding, JsLanguage, JsSyntaxKind,
+    JsIdentifierBinding, JsLanguage, JsSyntaxKind, binding_ext::AnyJsIdentifierBinding,
 };
 use biome_rowan::AstNode;
 
+#[inline]
+pub fn find_import_node(node: &JsSyntaxNode) -> Option<JsSyntaxNode> {
+    node.ancestors().find(|ancestor| {
+        matches!(
+            ancestor.kind(),
+            JsSyntaxKind::JS_IMPORT
+                | JsSyntaxKind::JS_NAMED_IMPORT_SPECIFIERS
+                | JsSyntaxKind::JS_DEFAULT_IMPORT_SPECIFIER
+        )
+    })
+}
+
 pub(crate) fn is_imported(node: &JsSyntaxNode) -> bool {
-    node.ancestors()
-        .any(|x| matches!(x.kind(), JsSyntaxKind::JS_IMPORT))
+    find_import_node(node).is_some()
 }
 
 /// Marker trait that groups all "AstNode" that can be imported or

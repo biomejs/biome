@@ -1,10 +1,9 @@
 use biome_analyze::context::RuleContext;
-use biome_analyze::{
-    declare_lint_rule, ActionCategory, Ast, FixKind, Rule, RuleDiagnostic, RuleSource,
-};
+use biome_analyze::{Ast, FixKind, Rule, RuleDiagnostic, RuleSource, declare_lint_rule};
 use biome_console::markup;
-use biome_js_syntax::jsx_ext::AnyJsxElement;
+use biome_diagnostics::Severity;
 use biome_js_syntax::JsxElement;
+use biome_js_syntax::jsx_ext::AnyJsxElement;
 use biome_rowan::{AstNode, BatchMutationExt};
 
 use crate::JsRuleAction;
@@ -71,6 +70,7 @@ declare_lint_rule! {
         language: "jsx",
         sources: &[RuleSource::EslintJsxA11y("anchor-has-content")],
         recommended: true,
+        severity: Severity::Error,
         fix_kind: FixKind::Unsafe,
     }
 }
@@ -83,7 +83,7 @@ impl Rule for UseAnchorContent {
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
-        let name = node.name().ok()?.name_value_token()?;
+        let name = node.name().ok()?.name_value_token().ok()?;
 
         if name.text_trimmed() == "a" {
             if node.has_truthy_attribute("aria-hidden") {
@@ -109,9 +109,10 @@ impl Rule for UseAnchorContent {
 
     fn diagnostic(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<RuleDiagnostic> {
         let range = match ctx.query() {
-            AnyJsxElement::JsxOpeningElement(node) => {
-                node.parent::<JsxElement>()?.syntax().text_range()
-            }
+            AnyJsxElement::JsxOpeningElement(node) => node
+                .parent::<JsxElement>()?
+                .syntax()
+                .text_range_with_trivia(),
             AnyJsxElement::JsxSelfClosingElement(node) => node.syntax().text_trimmed_range(),
         };
         Some(RuleDiagnostic::new(
@@ -144,7 +145,7 @@ impl Rule for UseAnchorContent {
             mutation.remove_node(aria_hidden);
 
             return Some(JsRuleAction::new(
-                ActionCategory::QuickFix,
+                ctx.metadata().action_category(ctx.category(), ctx.group()),
                 ctx.metadata().applicability(),
                  markup! { "Remove the "<Emphasis>"aria-hidden"</Emphasis>" attribute to allow the anchor element and its content visible to assistive technologies." }.to_owned(),
                 mutation,
@@ -160,13 +161,13 @@ fn has_valid_anchor_content(node: &AnyJsxElement) -> bool {
         .is_some()
         || node
             .find_attribute_by_name("children")
-            .map_or(false, |attribute| {
+            .is_some_and(|attribute| {
                 if attribute.initializer().is_none() {
                     return false;
                 }
                 attribute
                     .as_static_value()
-                    .map_or(true, |attribute| !attribute.is_falsy())
+                    .is_none_or(|attribute| !attribute.is_falsy())
             })
         || node.has_spread_prop()
 }

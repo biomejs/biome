@@ -1,6 +1,7 @@
 ---
 source: crates/biome_cli/tests/snap_test.rs
-expression: content
+expression: redactor(content)
+snapshot_kind: text
 ---
 ## `file.svelte`
 
@@ -26,24 +27,24 @@ check ━━━━━━━━━━━━━━━━━━━━━━━━�
 # Emitted Messages
 
 ```block
-file.svelte organizeImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+file.svelte:2:1 assist/source/organizeImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Import statements could be sorted:
+  × The imports and exports are not sorted.
   
-    1 1 │   <script lang="ts">
-    2   │ - import·Button·from·"./components/Button.svelte";
-    3   │ - import·*·as·svelteUse·from·"svelte-use";
-      2 │ + import·*·as·svelteUse·from·"svelte-use";
-      3 │ + import·Button·from·"./components/Button.svelte";
-    4 4 │   </script>
-    5 5 │   <div></div>
+    1 │ <script lang="ts">
+  > 2 │ import Button from "./components/Button.svelte";
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    3 │ import * as svelteUse from "svelte-use";
+    4 │ </script>
   
-
-```
-
-```block
-Skipped 1 suggested fixes.
-If you wish to apply the suggested (unsafe) fixes, use the command biome check --fix --unsafe
+  i Safe fix: Organize Imports (Biome)
+  
+    1   │ - import·Button·from·"./components/Button.svelte";
+    2   │ - import·*·as·svelteUse·from·"svelte-use";
+      1 │ + import·*·as·svelteUse·from·"svelte-use";
+      2 │ + import·Button·from·"./components/Button.svelte";
+    3 3 │   
+  
 
 ```
 

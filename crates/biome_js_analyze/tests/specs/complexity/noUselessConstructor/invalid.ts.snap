@@ -1,6 +1,7 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid.ts
+snapshot_kind: text
 ---
 # Input
 ```ts
@@ -16,7 +17,7 @@ class B extends A {
 ```
 invalid.ts:2:5 lint/complexity/noUselessConstructor  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This constructor is unnecessary.
+  i This constructor is unnecessary.
   
     1 │ class B extends A {
   > 2 │     constructor(foo: number) {
@@ -38,5 +39,3 @@ invalid.ts:2:5 lint/complexity/noUselessConstructor  FIXABLE  ━━━━━━
   
 
 ```
-
-

@@ -1,13 +1,13 @@
 use biome_analyze::{
-    context::RuleContext, declare_lint_rule, ActionCategory, Ast, FixKind, Rule, RuleDiagnostic,
-    RuleSource,
+    Ast, FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
+use biome_diagnostics::Severity;
 use biome_js_factory::make;
 use biome_js_syntax::{
     AnyJsExpression, AnyJsStatement, JsConditionalExpression, JsIfStatement, JsUnaryOperator, T,
 };
-use biome_rowan::{declare_node_union, AstNode, BatchMutationExt};
+use biome_rowan::{AstNode, BatchMutationExt, declare_node_union};
 
 use crate::JsRuleAction;
 
@@ -52,6 +52,7 @@ declare_lint_rule! {
             RuleSource::Clippy("if_not_else"),
         ],
         recommended: false,
+        severity: Severity::Information,
         fix_kind: FixKind::Safe,
     }
 }
@@ -121,7 +122,7 @@ impl Rule for NoNegationElse {
         }
 
         Some(JsRuleAction::new(
-            ActionCategory::QuickFix,
+            ctx.metadata().action_category(ctx.category(), ctx.group()),
             ctx.metadata().applicability(),
             markup! { "Invert the condition and the blocks." }.to_owned(),
             mutation,

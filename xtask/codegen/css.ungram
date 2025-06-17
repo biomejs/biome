@@ -60,6 +60,7 @@ CssBogusFontFamilyName = SyntaxElement*
 CssBogusCustomIdentifier = SyntaxElement*
 CssBogusKeyframesName = SyntaxElement*
 CssBogusUnicodeRangeValue = SyntaxElement*
+CssBogusSupportsCondition = SyntaxElement*
 
 CssRoot =
 	bom: 'UNICODE_BOM'?
@@ -443,6 +444,7 @@ AnyCssDeclarationOrRule =
 	| CssDeclarationWithSemicolon
 	| CssBogus
 	| CssMetavariable
+	| CssEmptyDeclaration
 
 // @page :left { background: red; @media (500px <= width <= 500px) {  } }
 // 						 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -474,6 +476,9 @@ AnyCssConditionalBlock =
 CssDeclarationWithSemicolon =
     declaration: CssDeclaration
     ';'?
+
+CssEmptyDeclaration =
+    ';'
 
 AnyCssDeclarationBlock =
 	CssDeclarationBlock
@@ -611,6 +616,8 @@ AnyCssAtRule =
 	| CssDocumentAtRule
 	| CssPropertyAtRule
 	| CssValueAtRule
+	| CssPositionTryAtRule
+	| CssViewTransitionAtRule
 	| CssUnknownBlockAtRule
 	| CssUnknownValueAtRule
 	| CssBogusAtRule
@@ -1309,6 +1316,7 @@ AnyCssSupportsCondition =
 	| CssSupportsOrCondition
 	| CssSupportsAndCondition
 	| AnyCssSupportsInParens
+	| CssBogusSupportsCondition
 
 // @supports not (display: grid) {}
 //           ^^^^^^^^^^^^^^^^^^^
@@ -1346,7 +1354,6 @@ AnyCssSupportsInParens =
 	CssSupportsConditionInParens
 	| CssSupportsFeatureDeclaration
 	| CssSupportsFeatureSelector
-	| CssFunction
 	| AnyCssValue // general-enclosed
 
 // @supports (transition-property: color) or (not (animation-name: foo)) {}
@@ -1513,7 +1520,7 @@ AnyCssDocumentMatcher =
 CssDocumentCustomMatcher =
 	name: ('url-prefix' | 'domain' | 'media-document' | 'regexp')
 	'('
-	value: CssString
+	value: AnyCssUrlValue?
 	')'
 
 // https://github.com/css-modules/postcss-modules-values
@@ -1608,6 +1615,25 @@ CssUnknownValueAtRule =
 	';'
 
 CssUnknownAtRuleComponentList = SyntaxElement*
+
+// https://drafts.csswg.org/css-anchor-position-1/#at-ruledef-position-try
+// @position-try = @position-try <dashed-ident> { <declaration-list> }
+
+// @position-try --ident { }
+// ^^^^^^^^^^^^^^^^^^^^^^^^^
+CssPositionTryAtRule =
+	'position-try'
+	name: CssDashedIdentifier
+	block: AnyCssDeclarationBlock
+
+// https://drafts.csswg.org/css-view-transitions-2/#view-transition-rule
+// @view-transition = @view-transition { <declaration-list> }
+
+// @view-transition { }
+// ^^^^^^^^^^^^^^^^^^^^
+CssViewTransitionAtRule =
+	'view-transition'
+	block: AnyCssDeclarationBlock
 
 ///////////////
 // AUXILIARY

@@ -1,6 +1,7 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: noDoubleEquals.js
+snapshot_kind: text
 ---
 # Input
 ```jsx
@@ -31,7 +32,7 @@ let a = `Output of "biome rage":
 ```
 noDoubleEquals.js:3:5 lint/suspicious/noDoubleEquals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use === instead of ==
+  × Using == may be unsafe if you are relying on type coercion.
   
     1 │ const foo = `
     2 │ text
@@ -40,18 +41,9 @@ noDoubleEquals.js:3:5 lint/suspicious/noDoubleEquals  FIXABLE  ━━━━━�
     4 │ `;
     5 │ 
   
-  i == is only allowed when comparing against null
+  i == is only allowed when comparing against null.
   
-    1 │ const foo = `
-    2 │ text
-  > 3 │ ${a == b}
-      │     ^^
-    4 │ `;
-    5 │ 
-  
-  i Using == may be unsafe if you are relying on type coercion
-  
-  i Safe fix: Suppress rule lint/suspicious/noDoubleEquals
+  i Safe fix: Suppress rule lint/suspicious/noDoubleEquals for this line.
   
      1  1 │   const foo = `
      2  2 │   text
@@ -61,13 +53,19 @@ noDoubleEquals.js:3:5 lint/suspicious/noDoubleEquals  FIXABLE  ━━━━━�
      4  5 │   `;
      5  6 │   
   
+  i Safe fix: Suppress rule lint/suspicious/noDoubleEquals for the whole file.
+  
+        1 │ + /**·biome-ignore-all·lint/suspicious/noDoubleEquals:·<explanation>·*/
+     1  2 │   const foo = `
+     2  3 │   text
+  
 
 ```
 
 ```
 noDoubleEquals.js:7:3 lint/suspicious/noDoubleEquals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use === instead of ==
+  × Using == may be unsafe if you are relying on type coercion.
   
     6 │ // existing comment
   > 7 │ a == b;
@@ -75,17 +73,9 @@ noDoubleEquals.js:7:3 lint/suspicious/noDoubleEquals  FIXABLE  ━━━━━�
     8 │ 
     9 │ if (a == b) {
   
-  i == is only allowed when comparing against null
+  i == is only allowed when comparing against null.
   
-    6 │ // existing comment
-  > 7 │ a == b;
-      │   ^^
-    8 │ 
-    9 │ if (a == b) {
-  
-  i Using == may be unsafe if you are relying on type coercion
-  
-  i Safe fix: Suppress rule lint/suspicious/noDoubleEquals
+  i Safe fix: Suppress rule lint/suspicious/noDoubleEquals for this line.
   
      5  5 │   
      6  6 │   // existing comment
@@ -93,13 +83,19 @@ noDoubleEquals.js:7:3 lint/suspicious/noDoubleEquals  FIXABLE  ━━━━━�
      7  8 │   a == b;
      8  9 │   
   
+  i Safe fix: Suppress rule lint/suspicious/noDoubleEquals for the whole file.
+  
+        1 │ + /**·biome-ignore-all·lint/suspicious/noDoubleEquals:·<explanation>·*/
+     1  2 │   const foo = `
+     2  3 │   text
+  
 
 ```
 
 ```
 noDoubleEquals.js:9:7 lint/suspicious/noDoubleEquals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use === instead of ==
+  × Using == may be unsafe if you are relying on type coercion.
   
      7 │ a == b;
      8 │ 
@@ -108,18 +104,9 @@ noDoubleEquals.js:9:7 lint/suspicious/noDoubleEquals  FIXABLE  ━━━━━�
     10 │     false;
     11 │ }
   
-  i == is only allowed when comparing against null
+  i == is only allowed when comparing against null.
   
-     7 │ a == b;
-     8 │ 
-   > 9 │ if (a == b) {
-       │       ^^
-    10 │     false;
-    11 │ }
-  
-  i Using == may be unsafe if you are relying on type coercion
-  
-  i Safe fix: Suppress rule lint/suspicious/noDoubleEquals
+  i Safe fix: Suppress rule lint/suspicious/noDoubleEquals for this line.
   
      7  7 │   a == b;
      8  8 │   
@@ -127,13 +114,19 @@ noDoubleEquals.js:9:7 lint/suspicious/noDoubleEquals  FIXABLE  ━━━━━�
      9 10 │   if (a == b) {
     10 11 │       false;
   
+  i Safe fix: Suppress rule lint/suspicious/noDoubleEquals for the whole file.
+  
+        1 │ + /**·biome-ignore-all·lint/suspicious/noDoubleEquals:·<explanation>·*/
+     1  2 │   const foo = `
+     2  3 │   text
+  
 
 ```
 
 ```
 noDoubleEquals.js:14:11 lint/suspicious/noDoubleEquals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use === instead of ==
+  × Using == may be unsafe if you are relying on type coercion.
   
     13 │ if (/** some weird comment
   > 14 │     **/ a == b) {
@@ -141,17 +134,9 @@ noDoubleEquals.js:14:11 lint/suspicious/noDoubleEquals  FIXABLE  ━━━━━
     15 │ 
     16 │     }
   
-  i == is only allowed when comparing against null
+  i == is only allowed when comparing against null.
   
-    13 │ if (/** some weird comment
-  > 14 │     **/ a == b) {
-       │           ^^
-    15 │ 
-    16 │     }
-  
-  i Using == may be unsafe if you are relying on type coercion
-  
-  i Safe fix: Suppress rule lint/suspicious/noDoubleEquals
+  i Safe fix: Suppress rule lint/suspicious/noDoubleEquals for this line.
   
     12 12 │   
     13 13 │   if (/** some weird comment
@@ -161,13 +146,19 @@ noDoubleEquals.js:14:11 lint/suspicious/noDoubleEquals  FIXABLE  ━━━━━
     15 16 │   
     16 17 │       }
   
+  i Safe fix: Suppress rule lint/suspicious/noDoubleEquals for the whole file.
+  
+        1 │ + /**·biome-ignore-all·lint/suspicious/noDoubleEquals:·<explanation>·*/
+     1  2 │   const foo = `
+     2  3 │   text
+  
 
 ```
 
 ```
 noDoubleEquals.js:19:34 lint/suspicious/noDoubleEquals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use === instead of ==
+  × Using == may be unsafe if you are relying on type coercion.
   
     18 │ let a = `Output of "biome rage":
   > 19 │   formatter enabled: ${formatter == true}
@@ -175,17 +166,9 @@ noDoubleEquals.js:19:34 lint/suspicious/noDoubleEquals  FIXABLE  ━━━━━
     20 │   linter: ${linter}
     21 │ `;
   
-  i == is only allowed when comparing against null
+  i == is only allowed when comparing against null.
   
-    18 │ let a = `Output of "biome rage":
-  > 19 │   formatter enabled: ${formatter == true}
-       │                                  ^^
-    20 │   linter: ${linter}
-    21 │ `;
-  
-  i Using == may be unsafe if you are relying on type coercion
-  
-  i Safe fix: Suppress rule lint/suspicious/noDoubleEquals
+  i Safe fix: Suppress rule lint/suspicious/noDoubleEquals for this line.
   
     17 17 │   
     18 18 │   let a = `Output of "biome rage":
@@ -194,6 +177,12 @@ noDoubleEquals.js:19:34 lint/suspicious/noDoubleEquals  FIXABLE  ━━━━━
        20 │ + formatter·==·true}
     20 21 │     linter: ${linter}
     21 22 │   `;
+  
+  i Safe fix: Suppress rule lint/suspicious/noDoubleEquals for the whole file.
+  
+        1 │ + /**·biome-ignore-all·lint/suspicious/noDoubleEquals:·<explanation>·*/
+     1  2 │   const foo = `
+     2  3 │   text
   
 
 ```

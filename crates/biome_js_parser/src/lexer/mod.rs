@@ -13,10 +13,6 @@
 //! `>>` and `>>>` are not emitted as single tokens, they are emitted as multiple `>` tokens. This is because of
 //! TypeScript parsing and productions such as `T<U<N>>`
 
-#![allow(clippy::or_fun_call)]
-
-#[rustfmt::skip]
-mod errors;
 mod tests;
 
 use std::ops::{BitOr, BitOrAssign};
@@ -29,15 +25,13 @@ use biome_parser::lexer::{
 };
 use biome_rowan::SyntaxKind;
 use biome_unicode_table::{
-    is_js_id_continue, is_js_id_start, lookup_byte,
     Dispatch::{self, *},
+    is_js_id_continue, is_js_id_start, lookup_byte,
 };
 
-use enumflags2::{bitflags, make_bitflags, BitFlags};
+use enumflags2::{BitFlags, bitflags, make_bitflags};
 
 use crate::JsParserOptions;
-
-use self::errors::invalid_digits_after_unicode_escape_sequence;
 
 // The first utf8 byte of every valid unicode whitespace char, used for short circuiting whitespace checks
 const UNICODE_WHITESPACE_STARTS: [u8; 5] = [
@@ -84,7 +78,7 @@ pub enum JsLexContext {
 impl LexContext for JsLexContext {
     /// Returns true if this is [JsLexContext::Regular]
     fn is_regular(&self) -> bool {
-        matches!(self, JsLexContext::Regular)
+        matches!(self, Self::Regular)
     }
 }
 
@@ -397,6 +391,9 @@ impl<'src> JsLexer<'src> {
             b'<' => self.eat_byte(T![<]),
             // `{`: empty jsx text, directly followed by an expression
             b'{' => self.eat_byte(T!['{']),
+            _ if self.options.should_parse_metavariables() && self.is_metavariable_start() => {
+                self.consume_metavariable(GRIT_METAVARIABLE)
+            }
             _ => {
                 while let Some(chr) = self.current_byte() {
                     // but not one of: { or < or > or }
@@ -440,8 +437,11 @@ impl<'src> JsLexer<'src> {
 
         match chr {
             b'\'' | b'"' => {
-                self.consume_str_literal(true);
-                JSX_STRING_LITERAL
+                if self.consume_str_literal(true) {
+                    JSX_STRING_LITERAL
+                } else {
+                    ERROR_TOKEN
+                }
             }
             _ => self.lex_token(),
         }
@@ -514,7 +514,7 @@ impl<'src> JsLexer<'src> {
     #[inline]
     unsafe fn current_unchecked(&self) -> u8 {
         self.assert_current_char_boundary();
-        *self.source.as_bytes().get_unchecked(self.position)
+        unsafe { *self.source.as_bytes().get_unchecked(self.position) }
     }
 
     /// Advances the position by one and returns the next byte value
@@ -571,8 +571,10 @@ impl<'src> JsLexer<'src> {
             // We should not yield diagnostics on a unicode char boundary. That wont make codespan panic
             // but it may cause a panic for other crates which just consume the diagnostics
             let invalid = self.current_char_unchecked();
-            let err = ParseDiagnostic::new(  "expected hex digits for a unicode code point escape, but encountered an invalid character",
-                                             self.position..self.position + invalid.len_utf8() );
+            let err = ParseDiagnostic::new(
+                "expected hex digits for a unicode code point escape, but encountered an invalid character",
+                self.position..self.position + invalid.len_utf8(),
+            );
             self.push_diagnostic(err);
             self.position -= 1;
             return Err(());
@@ -585,10 +587,10 @@ impl<'src> JsLexer<'src> {
         // and because input to the lexer must be valid utf8
         let digits_str = unsafe {
             debug_assert!(self.source.as_bytes().get(start..self.position).is_some());
-            debug_assert!(std::str::from_utf8(
-                self.source.as_bytes().get_unchecked(start..self.position)
-            )
-            .is_ok());
+            debug_assert!(
+                std::str::from_utf8(self.source.as_bytes().get_unchecked(start..self.position))
+                    .is_ok()
+            );
 
             std::str::from_utf8_unchecked(
                 self.source.as_bytes().get_unchecked(start..self.position),
@@ -630,23 +632,32 @@ impl<'src> JsLexer<'src> {
     /// This returns a `u32` since not all escape sequences produce valid
     /// Unicode characters.
     fn read_unicode_escape(&mut self) -> Result<u32, ()> {
+        let start = self.position - 1;
         self.assert_byte(b'u');
 
         for _ in 0..4 {
             match self.next_byte_bounded() {
                 None => {
-                    let err = invalid_digits_after_unicode_escape_sequence(
-                        self.position - 1,
-                        self.position + 1,
-                    );
+                    let err = ParseDiagnostic::new(
+                        "Unterminated unicode escape sequence.",
+                        start..(self.position + 1),
+                    )
+                    .with_hint("Expected a valid unicode escape sequence.");
                     self.push_diagnostic(err);
                     return Err(());
                 }
                 Some(b) if !b.is_ascii_hexdigit() => {
-                    let err = invalid_digits_after_unicode_escape_sequence(
-                        self.position - 1,
-                        self.position + 1,
-                    );
+                    let start = self.position;
+                    // `b` can be a unicode character.
+                    // To have a correct range, we have to eat the whole character.
+                    if !b.is_ascii() {
+                        self.advance_char_unchecked();
+                    }
+                    let err = ParseDiagnostic::new(
+                        "Invalid digit in unicode escape sequence.",
+                        start..self.position,
+                    )
+                    .with_hint("Expected a valid unicode escape sequence.");
                     self.push_diagnostic(err);
                     return Err(());
                 }
@@ -1040,7 +1051,7 @@ impl<'src> JsLexer<'src> {
 
     #[inline]
     fn special_number_start<F: Fn(char) -> bool>(&mut self, func: F) -> bool {
-        if self.byte_at(2).map_or(false, |b| func(b as char)) {
+        if self.byte_at(2).is_some_and(|b| func(b as char)) {
             self.advance(1);
             true
         } else {
@@ -1440,7 +1451,6 @@ impl<'src> JsLexer<'src> {
         )
     }
     #[inline]
-    #[allow(clippy::many_single_char_names)]
     fn read_regex(&mut self) -> JsSyntaxKind {
         #[derive(Copy, Clone)]
         #[bitflags]
@@ -1472,7 +1482,7 @@ impl<'src> JsLexer<'src> {
                 Self(BitFlags::EMPTY)
             }
 
-            pub fn contains(&self, other: impl Into<RegexFlags>) -> bool {
+            pub fn contains(&self, other: impl Into<Self>) -> bool {
                 self.0.contains(other.into().0)
             }
         }
@@ -1481,7 +1491,7 @@ impl<'src> JsLexer<'src> {
             type Output = Self;
 
             fn bitor(self, rhs: Self) -> Self::Output {
-                RegexFlags(self.0 | rhs.0)
+                Self(self.0 | rhs.0)
             }
         }
 
@@ -1645,13 +1655,15 @@ impl<'src> JsLexer<'src> {
             }
         }
 
+        // If we reach EOF without finding a closing '/', this is a real error
+        // and should be treated as ERROR_TOKEN for proper error recovery
         self.push_diagnostic(
             ParseDiagnostic::new("unterminated regex literal", self.position..self.position)
                 .with_detail(self.position..self.position, "...but the file ends here")
                 .with_detail(start..start + 1, "a regex literal starts there..."),
         );
 
-        JsSyntaxKind::JS_REGEX_LITERAL
+        JsSyntaxKind::ERROR_TOKEN
     }
 
     #[inline]
@@ -1894,8 +1906,8 @@ impl<'src> JsLexer<'src> {
                                 self.current_flags |= TokenFlags::UNICODE_ESCAPE;
                                 self.resolve_identifier(chr)
                             } else {
-                                let err = ParseDiagnostic::new(  "unexpected unicode escape",
-                                                                 start..self.position).with_hint("this escape is unexpected, as it does not designate the start of an identifier");
+                                let err = ParseDiagnostic::new("unexpected unicode escape",
+                                                               start..self.position).with_hint("this escape is unexpected, as it does not designate the start of an identifier");
                                 self.push_diagnostic(err);
                                 self.next_byte();
                                 JsSyntaxKind::ERROR_TOKEN

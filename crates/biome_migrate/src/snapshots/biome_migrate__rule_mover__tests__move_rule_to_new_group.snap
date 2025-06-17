@@ -1,0 +1,36 @@
+---
+source: crates/biome_migrate/src/rule_mover.rs
+expression: buffer
+snapshot_kind: text
+---
+## Source
+
+```json
+{
+	"linter": {
+		"includes": [""],
+		"rules": {
+			"style": {
+				"noVar": "error"
+			}
+		}
+	}
+}
+
+```
+
+## Result
+
+```
+{
+	"linter": {
+		"includes": [""],
+		"rules": {
+			"suspicious": {
+				"noVar": "error"
+			}
+		}
+	}
+}
+
+```

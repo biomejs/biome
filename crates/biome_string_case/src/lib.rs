@@ -1,10 +1,12 @@
 //! Identify string case and convert to various string cases.
 
-use std::borrow::Cow;
+#![deny(clippy::use_self)]
 
-/// Represents the [Case] of a string.
+use std::{borrow::Cow, cmp::Ordering, ffi::OsStr};
+
+/// Represents the case of a string.
 ///
-/// Note that some cases are superset of others.
+/// Note that some cases are supersets of others.
 /// For example, a name in [Case::Lower] is also in [Case::Camel], [Case::Kebab] , and [Case::Snake].
 /// Thus [Case::Camel], [Case::Kebab], and [Case::Snake] are superset of [Case::Lower].
 /// `Case::Unknown` is a superset of all [Case].
@@ -32,23 +34,23 @@ pub enum Case {
     /// ASCII numbers
     Number = 1 << 0,
     /// Alphanumeric Characters that cannot be in lowercase or uppercase (numbers and syllabary)
-    Uni = Case::Number as u16 | 1 << 1,
+    Uni = Case::Number as u16 | (1 << 1),
     /// A, B1, C42
     NumberableCapital = 1 << 2,
     /// UPPERCASE
-    Upper = Case::NumberableCapital as u16 | 1 << 3,
+    Upper = Case::NumberableCapital as u16 | (1 << 3),
     // CONSTANT_CASE
-    Constant = Case::Upper as u16 | 1 << 4,
+    Constant = Case::Upper as u16 | (1 << 4),
     /// PascalCase
-    Pascal = Case::NumberableCapital as u16 | 1 << 5,
+    Pascal = Case::NumberableCapital as u16 | (1 << 5),
     /// lowercase
-    Lower = Case::Number as u16 | 1 << 6,
+    Lower = Case::Number as u16 | (1 << 6),
     /// snake_case
-    Snake = Case::Lower as u16 | 1 << 7,
+    Snake = Case::Lower as u16 | (1 << 7),
     /// kebab-case
-    Kebab = Case::Lower as u16 | 1 << 8,
+    Kebab = Case::Lower as u16 | (1 << 8),
     // camelCase
-    Camel = Case::Lower as u16 | 1 << 9,
+    Camel = Case::Lower as u16 | (1 << 9),
     /// Unknown case
     #[default]
     Unknown = Case::Camel as u16
@@ -57,7 +59,7 @@ pub enum Case {
         | Case::Pascal as u16
         | Case::Constant as u16
         | Case::Uni as u16
-        | 1 << 10,
+        | (1 << 10),
 }
 
 impl Case {
@@ -104,67 +106,67 @@ impl Case {
     /// assert_eq!(Case::identify("_", /* no effect */ true), Case::Unknown);
     /// assert_eq!(Case::identify("안녕하세요abc", /* no effect */ true), Case::Unknown);
     /// ```
-    pub fn identify(value: &str, strict: bool) -> Case {
+    pub fn identify(value: &str, strict: bool) -> Self {
         let mut chars = value.chars();
         let Some(first_char) = chars.next() else {
-            return Case::Unknown;
+            return Self::Unknown;
         };
         let mut result = if first_char.is_lowercase() {
-            Case::Lower
+            Self::Lower
         } else if first_char.is_uppercase() {
-            Case::NumberableCapital
+            Self::NumberableCapital
         } else if first_char.is_ascii_digit() {
-            Case::Number
+            Self::Number
         } else if first_char.is_alphanumeric() {
-            Case::Uni
+            Self::Uni
         } else {
-            return Case::Unknown;
+            return Self::Unknown;
         };
         let mut previous_char = first_char;
         let mut has_consecutive_uppercase = false;
         for current_char in chars {
             result = match current_char {
                 '-' => match result {
-                    Case::Kebab | Case::Lower | Case::Number if previous_char != '-' => Case::Kebab,
-                    _ => return Case::Unknown,
+                    Self::Kebab | Self::Lower | Self::Number if previous_char != '-' => Self::Kebab,
+                    _ => return Self::Unknown,
                 },
                 '_' => match result {
-                    Case::Constant | Case::Snake if previous_char != '_' => result,
-                    Case::NumberableCapital | Case::Upper => Case::Constant,
-                    Case::Lower | Case::Number => Case::Snake,
-                    _ => return Case::Unknown,
+                    Self::Constant | Self::Snake if previous_char != '_' => result,
+                    Self::NumberableCapital | Self::Upper => Self::Constant,
+                    Self::Lower | Self::Number => Self::Snake,
+                    _ => return Self::Unknown,
                 },
                 _ if current_char.is_uppercase() => {
                     has_consecutive_uppercase |= previous_char.is_uppercase();
                     match result {
-                        Case::Camel | Case::Pascal if strict && has_consecutive_uppercase => {
-                            return Case::Unknown
+                        Self::Camel | Self::Pascal if strict && has_consecutive_uppercase => {
+                            return Self::Unknown;
                         }
-                        Case::Camel | Case::Constant | Case::Pascal => result,
-                        Case::Lower | Case::Number => Case::Camel,
-                        Case::NumberableCapital | Case::Upper => Case::Upper,
-                        _ => return Case::Unknown,
+                        Self::Camel | Self::Constant | Self::Pascal => result,
+                        Self::Lower | Self::Number => Self::Camel,
+                        Self::NumberableCapital | Self::Upper => Self::Upper,
+                        _ => return Self::Unknown,
                     }
                 }
                 _ if current_char.is_lowercase() => match result {
-                    Case::Number => Case::Lower,
-                    Case::Camel | Case::Kebab | Case::Lower | Case::Snake => result,
-                    Case::Pascal | Case::NumberableCapital => Case::Pascal,
-                    Case::Upper if !strict || !has_consecutive_uppercase => Case::Pascal,
-                    _ => return Case::Unknown,
+                    Self::Number => Self::Lower,
+                    Self::Camel | Self::Kebab | Self::Lower | Self::Snake => result,
+                    Self::Pascal | Self::NumberableCapital => Self::Pascal,
+                    Self::Upper if !strict || !has_consecutive_uppercase => Self::Pascal,
+                    _ => return Self::Unknown,
                 },
                 '0'..='9' => result,
                 _ if current_char.is_alphanumeric() => match result {
-                    Case::Number | Case::Uni => Case::Uni,
-                    _ => return Case::Unknown,
+                    Self::Number | Self::Uni => Self::Uni,
+                    _ => return Self::Unknown,
                 },
-                _ => return Case::Unknown,
+                _ => return Self::Unknown,
             };
             previous_char = current_char;
         }
         // The last char cannot be a delimiter
         if matches!(previous_char, '-' | '_') {
-            return Case::Unknown;
+            return Self::Unknown;
         }
         result
     }
@@ -194,17 +196,17 @@ impl Case {
     /// assert_eq!(Case::Upper.convert("Http_SERVER"), "HTTPSERVER");
     /// ```
     pub fn convert(self, value: &str) -> String {
-        if value.is_empty() || matches!(self, Case::Unknown | Case::Number) {
+        if value.is_empty() || matches!(self, Self::Unknown | Self::Number) {
             return value.to_string();
         }
-        let mut word_separator = matches!(self, Case::Pascal);
+        let mut word_separator = matches!(self, Self::Pascal);
         let mut output = String::with_capacity(value.len());
         for ((i, current), next) in value
             .char_indices()
             .zip(value.chars().skip(1).map(Some).chain(Some(None)))
         {
             if !current.is_alphanumeric()
-                || (matches!(self, Case::Uni) && (current.is_lowercase() || current.is_uppercase()))
+                || (matches!(self, Self::Uni) && (current.is_lowercase() || current.is_uppercase()))
             {
                 word_separator = true;
                 continue;
@@ -216,39 +218,39 @@ impl Case {
             }
             if word_separator {
                 match self {
-                    Case::Camel
-                    | Case::Lower
-                    | Case::Number
-                    | Case::NumberableCapital
-                    | Case::Pascal
-                    | Case::Unknown
-                    | Case::Uni
-                    | Case::Upper => (),
-                    Case::Constant | Case::Snake => {
+                    Self::Camel
+                    | Self::Lower
+                    | Self::Number
+                    | Self::NumberableCapital
+                    | Self::Pascal
+                    | Self::Unknown
+                    | Self::Uni
+                    | Self::Upper => (),
+                    Self::Constant | Self::Snake => {
                         output.push('_');
                     }
-                    Case::Kebab => {
+                    Self::Kebab => {
                         output.push('-');
                     }
                 }
             }
             match self {
-                Case::Camel | Case::Pascal => {
+                Self::Camel | Self::Pascal => {
                     if word_separator {
                         output.extend(current.to_uppercase())
                     } else {
                         output.extend(current.to_lowercase())
                     }
                 }
-                Case::Constant | Case::Upper => output.extend(current.to_uppercase()),
-                Case::NumberableCapital => {
+                Self::Constant | Self::Upper => output.extend(current.to_uppercase()),
+                Self::NumberableCapital => {
                     if i == 0 {
                         output.extend(current.to_uppercase());
                     }
                 }
-                Case::Kebab | Case::Snake | Case::Lower => output.extend(current.to_lowercase()),
-                Case::Uni => output.extend(Some(current)),
-                Case::Number | Case::Unknown => (),
+                Self::Kebab | Self::Snake | Self::Lower => output.extend(current.to_lowercase()),
+                Self::Uni => output.extend(Some(current)),
+                Self::Number | Self::Unknown => (),
             }
             word_separator = false;
             if let Some(next) = next {
@@ -264,17 +266,17 @@ impl Case {
 impl std::fmt::Display for Case {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let repr = match self {
-            Case::Camel => "camelCase",
-            Case::Constant => "CONSTANT_CASE",
-            Case::Kebab => "kebab-case",
-            Case::Lower => "lowercase",
-            Case::Number => "number case",
-            Case::NumberableCapital => "numberable capital case",
-            Case::Pascal => "PascalCase",
-            Case::Snake => "snake_case",
-            Case::Uni => "unicase",
-            Case::Unknown => "unknown case",
-            Case::Upper => "UPPERCASE",
+            Self::Camel => "camelCase",
+            Self::Constant => "CONSTANT_CASE",
+            Self::Kebab => "kebab-case",
+            Self::Lower => "lowercase",
+            Self::Number => "number case",
+            Self::NumberableCapital => "numberable capital case",
+            Self::Pascal => "PascalCase",
+            Self::Snake => "snake_case",
+            Self::Uni => "unicase",
+            Self::Unknown => "unknown case",
+            Self::Upper => "UPPERCASE",
         };
         write!(f, "{repr}")
     }
@@ -317,7 +319,7 @@ impl Cases {
     /// assert!(camel_or_kebab.contains(Case::Camel));
     /// assert!(camel_or_kebab.contains(camel_or_kebab));
     /// ```
-    pub fn contains(self, other: impl Into<Cases>) -> bool {
+    pub fn contains(self, other: impl Into<Self>) -> bool {
         let other = other.into();
         self.0 & other.0 == other.0
     }
@@ -344,8 +346,8 @@ impl From<Case> for Cases {
     }
 }
 
-impl<Rhs: Into<Cases>> core::ops::BitOr<Rhs> for Cases {
-    type Output = Cases;
+impl<Rhs: Into<Self>> core::ops::BitOr<Rhs> for Cases {
+    type Output = Self;
     fn bitor(self, rhs: Rhs) -> Self::Output {
         Self(self.0 | rhs.into().0)
     }
@@ -356,7 +358,7 @@ impl core::ops::BitOr for Case {
         Cases::from(self) | rhs
     }
 }
-impl<Rhs: Into<Cases>> core::ops::BitOrAssign<Rhs> for Cases {
+impl<Rhs: Into<Self>> core::ops::BitOrAssign<Rhs> for Cases {
     fn bitor_assign(&mut self, rhs: Rhs) {
         self.0 |= rhs.into().0;
     }
@@ -399,7 +401,7 @@ impl Iterator for CasesIterator {
         (0, Some(6))
     }
 }
-impl std::iter::FusedIterator for CasesIterator {}
+impl core::iter::FusedIterator for CasesIterator {}
 
 const LEADING_BIT_INDEX_TO_CASE: [Case; 11] = [
     Case::Number,
@@ -415,39 +417,265 @@ const LEADING_BIT_INDEX_TO_CASE: [Case; 11] = [
     Case::Unknown,
 ];
 
+/// A collator defines an order between a set of characters.
+///
+/// This order may differ from their binary order.
+/// This is often used to provide a more natural order for humans than the binary order represents.
+pub trait Collator {
+    type Char: PartialEq;
+
+    /// Returns the weight of the character `c`.
+    ///
+    /// A character with a smaller weight than another one, is placed before in the collation order.
+    fn weight(&self, c: &Self::Char) -> impl Ord;
+
+    /// Returns the digit value if `c` is a numeric character.
+    ///
+    /// This allows the collator to compare numbers in a human way (e.g. `9` < `10`).
+    fn as_digit(&self, c: &Self::Char) -> Option<impl Ord>;
+
+    /// Returns an [Ordering] between `iter1` and `iter2`.
+    fn cmp(
+        &self,
+        iter1: impl IntoIterator<Item = Self::Char>,
+        iter2: impl IntoIterator<Item = Self::Char>,
+    ) -> Ordering {
+        let mut iter1 = iter1.into_iter();
+        let mut iter2 = iter2.into_iter();
+        let mut prev = None;
+        loop {
+            match (iter1.next(), iter2.next()) {
+                (None, None) => {
+                    // All characters of `iter1` and `iter2` are equal.
+                    return Ordering::Equal;
+                }
+                (None, Some(_)) => {
+                    // `iter1` is a prefix of `iter2`.
+                    return Ordering::Less;
+                }
+                (Some(_), None) => {
+                    // `iter2` is a prefix of `iter1`.
+                    return Ordering::Greater;
+                }
+                (Some(c1), Some(c2)) if c1 == c2 => {
+                    prev = Some(c1);
+                    // For now, all characters of `iter1` and `iter2` are equal.
+                }
+                (Some(mut c1), Some(mut c2)) => {
+                    let mut number_ordering = Ordering::Equal;
+                    // Compare numbers
+                    // We don't skip leading zeroes.
+                    loop {
+                        match (self.as_digit(&c1), self.as_digit(&c2)) {
+                            (None, None) => {
+                                if number_ordering == Ordering::Equal {
+                                    // The numbers are equal, we have to compare `c1` and `c2` that are not digits.
+                                    break;
+                                }
+                                return number_ordering;
+                            }
+                            (None, Some(_)) => {
+                                // We consider that we compare numbers if they have at least one digit.
+                                if prev.is_some_and(|c| self.as_digit(&c).is_some()) {
+                                    // right has more digits than left.
+                                    // Thus left is smaller than right.
+                                    return Ordering::Less;
+                                }
+                                break;
+                            }
+                            (Some(_), None) => {
+                                // We consider that we compare numbers if they have at least one digit.
+                                if prev.is_some_and(|c| self.as_digit(&c).is_some()) {
+                                    // left has more digits than right.
+                                    // Thus left is larger than right.
+                                    return Ordering::Greater;
+                                }
+                                break;
+                            }
+                            (Some(n1), Some(n2)) => {
+                                // Even if `number_ordering` is not `Ordering::Equal`,
+                                // we cannot return `number_ordering` because we have to check how many digits there are.
+                                // If one has more digits, then it is larger than the other regardless of `number_ordering`.
+                                // For example, `10` is larger than `9`, while `1` is smaller than `1`.
+                                number_ordering = number_ordering.then(n1.cmp(&n2));
+                            }
+                        }
+                        match (iter1.next(), iter2.next()) {
+                            (None, None) => {
+                                // left and right have the same number of digits.
+                                // Thus, the order of the first digit correspond to their order.
+                                return number_ordering;
+                            }
+                            (None, Some(c2)) => {
+                                return if self.as_digit(&c2).is_some() {
+                                    // right has more digits than left.
+                                    // Thus, left is smaller than right.
+                                    Ordering::Less
+                                } else {
+                                    // left and right have the same number of digits.
+                                    number_ordering.then(Ordering::Less)
+                                };
+                            }
+                            (Some(c1), None) => {
+                                return if self.as_digit(&c1).is_some() {
+                                    // left has more digits than right.
+                                    // Thus, left is larger than right.
+                                    Ordering::Greater
+                                } else {
+                                    // left and right have the same number of digits.
+                                    number_ordering.then(Ordering::Greater)
+                                };
+                            }
+                            (Some(next1), Some(next2)) => {
+                                prev = Some(c1);
+                                c1 = next1;
+                                c2 = next2;
+                            }
+                        }
+                    }
+                    let ordering = self.weight(&c1).cmp(&self.weight(&c2));
+                    if ordering != Ordering::Equal {
+                        return ordering;
+                    }
+                    prev = Some(c1);
+                }
+            }
+        }
+    }
+}
+
+/// An ASCII collator defines an order between ASCII characters.
+///
+/// The order is extended at any byte value.
+/// This order may differ from their binary order.
+/// This is often used to provide a more natural order for humans than the binary order represents.
+pub trait AsciiCollator {
+    /// Weight of a given byte.
+    /// The order between two bytes is defined by the order between their weights.
+    /// Usually a byte that is not a valid ASCII character is mapped to itself.
+    /// You may use [ascii_collation_weight_from] to create the weight table from the an ASCII collation table.
+    const WEIGHTS: [u8; 256];
+
+    /// Compare `s1` and `s2` using [self] as collator.
+    fn cmp_str(&self, s1: &str, s2: &str) -> Ordering
+    where
+        Self: Collator<Char = u8>,
+    {
+        self.cmp(s1.bytes(), s2.bytes())
+    }
+
+    /// Compare `s1` and `s2` using [self] as collator.
+    fn cmp_osstr(&self, s1: &OsStr, s2: &OsStr) -> Ordering
+    where
+        Self: Collator<Char = u8>,
+    {
+        self.cmp_bytes(s1.as_encoded_bytes(), s2.as_encoded_bytes())
+    }
+
+    /// Compare `s1` and `s2` using [self] as collator.
+    fn cmp_bytes(&self, s1: &[u8], s2: &[u8]) -> Ordering
+    where
+        Self: Collator<Char = u8>,
+    {
+        self.cmp(s1.iter().copied(), s2.iter().copied())
+    }
+}
+impl<C: AsciiCollator> Collator for C {
+    type Char = u8;
+
+    fn weight(&self, c: &Self::Char) -> impl Ord {
+        // SAFETY: safe indexing because [Self::WEIGHTS] has exactly `u8::MAX` items.
+        unsafe { *Self::WEIGHTS.get_unchecked(*c as usize) }
+    }
+
+    fn as_digit(&self, c: &Self::Char) -> Option<impl Ord> {
+        c.is_ascii_digit().then_some(*c)
+    }
+}
+
+/// Unicode collation for ASCII extracted from the CLDR (Common Locale Data Repository) root table.
+pub struct CldrAsciiCollator;
+impl CldrAsciiCollator {
+    /// Unicode collation for ASCII extracted from the CLDR root table:
+    /// <https://raw.githubusercontent.com/unicode-org/cldr/refs/heads/main/common/uca/allkeys_CLDR.txt>.
+    /// See also <https://www.unicode.org/reports/tr35/tr35-collation.html#CLDR_Collation_Algorithm>.
+    const COLLATION: [u8; 128] = [
+        b'\0', 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x0e, 0x0f, 0x10, 0x11, 0x12, 0x13,
+        0x14, 0x15, 0x16, 0x17, 0x18, 0x19, 0x1a, 0x1b, 0x1c, 0x1d, 0x1e, 0x1f, 0x7f, b'\t', b'\n',
+        0x0b, 0x0c, b'\r', b' ', b'_', b'-', b',', b';', b':', b'!', b'?', b'.', b'\'', b'"', b'(',
+        b')', b'[', b']', b'{', b'}', b'@', b'*', b'/', b'\\', b'&', b'#', b'%', b'`', b'^', b'+',
+        b'<', b'=', b'>', b'|', b'~', b'$', b'0', b'1', b'2', b'3', b'4', b'5', b'6', b'7', b'8',
+        b'9', b'A', b'a', b'B', b'b', b'C', b'c', b'D', b'd', b'E', b'e', b'F', b'f', b'G', b'g',
+        b'H', b'h', b'I', b'i', b'J', b'j', b'K', b'k', b'L', b'l', b'M', b'm', b'N', b'n', b'O',
+        b'o', b'P', b'p', b'Q', b'q', b'R', b'r', b'S', b's', b'T', b't', b'U', b'u', b'V', b'v',
+        b'W', b'w', b'X', b'x', b'Y', b'y', b'Z', b'z',
+    ];
+}
+impl AsciiCollator for CldrAsciiCollator {
+    const WEIGHTS: [u8; 256] = ascii_collation_weight_from(&Self::COLLATION);
+}
+
+/// Generate the collation weight table from an ASCII collation table.
+/// The last 128 bytes are mapped to themselves.
+pub const fn ascii_collation_weight_from(collation_table: &[u8; 128]) -> [u8; 256] {
+    let mut result = [0u8; 256];
+    let mut i = 0;
+    while i < collation_table.len() {
+        debug_assert!(
+            result[collation_table[i] as usize] == 0,
+            "A character appears twice in the collation table."
+        );
+        result[collation_table[i] as usize] = i as u8;
+        i += 1;
+    }
+    while i < result.len() {
+        result[i] = i as u8;
+        i += 1;
+    }
+    result
+}
+
 pub trait StrLikeExtension: ToOwned {
     /// Returns the same value as String::to_lowercase. The only difference
     /// is that this functions returns ```Cow``` and does not allocate
     /// if the string is already in lowercase.
-    fn to_ascii_lowercase_cow(&self) -> std::borrow::Cow<Self>;
+    fn to_ascii_lowercase_cow(&self) -> Cow<Self>;
+
+    /// Compare two strings using a natural ASCII order.
+    ///
+    /// Uppercase letters come first (e.g. `A` < `a` < `B` < `b`)
+    /// and number are compared in a human way (e.g. `9` < `10`).
+    fn ascii_nat_cmp(&self, other: &Self) -> Ordering;
 }
 
 pub trait StrOnlyExtension: ToOwned {
     /// Returns the same value as String::to_lowercase. The only difference
     /// is that this functions returns ```Cow``` and does not allocate
     /// if the string is already in lowercase.
-    fn to_lowercase_cow(&self) -> std::borrow::Cow<Self>;
-    /// Returns the same value as String::to_lowercase. The only difference
-    /// is that this functions returns ```Cow``` and does not allocate
-    /// if the string is already in lowercase.
-    fn to_ascii_lowercase_cow(&self) -> std::borrow::Cow<Self>;
+    fn to_lowercase_cow(&self) -> Cow<Self>;
 }
 
-impl StrOnlyExtension for str {
+impl StrLikeExtension for str {
     fn to_ascii_lowercase_cow(&self) -> Cow<Self> {
         let has_ascii_uppercase = self.bytes().any(|b| b.is_ascii_uppercase());
         if has_ascii_uppercase {
-            #[allow(clippy::disallowed_methods)]
+            #[expect(clippy::disallowed_methods)]
             Cow::Owned(self.to_ascii_lowercase())
         } else {
             Cow::Borrowed(self)
         }
     }
 
+    fn ascii_nat_cmp(&self, other: &Self) -> Ordering {
+        self.as_bytes().ascii_nat_cmp(other.as_bytes())
+    }
+}
+
+impl StrOnlyExtension for str {
     fn to_lowercase_cow(&self) -> Cow<Self> {
         let has_uppercase = self.chars().any(char::is_uppercase);
         if has_uppercase {
-            #[allow(clippy::disallowed_methods)]
+            #[expect(clippy::disallowed_methods)]
             Cow::Owned(self.to_lowercase())
         } else {
             Cow::Borrowed(self)
@@ -462,11 +690,16 @@ impl StrLikeExtension for std::ffi::OsStr {
             .iter()
             .any(|b| b.is_ascii_uppercase());
         if has_ascii_uppercase {
-            #[allow(clippy::disallowed_methods)]
+            #[expect(clippy::disallowed_methods)]
             Cow::Owned(self.to_ascii_lowercase())
         } else {
             Cow::Borrowed(self)
         }
+    }
+
+    fn ascii_nat_cmp(&self, other: &Self) -> Ordering {
+        self.as_encoded_bytes()
+            .ascii_nat_cmp(other.as_encoded_bytes())
     }
 }
 
@@ -479,15 +712,20 @@ impl StrLikeExtension for [u8] {
             Cow::Borrowed(self)
         }
     }
+
+    fn ascii_nat_cmp(&self, other: &Self) -> Ordering {
+        CldrAsciiCollator.cmp(self.iter().copied(), other.iter().copied())
+    }
 }
 
-// TODO. Once trait-alias are stabilized it would be enough to `use` this trait instead of individual ones.
+// TODO: Once trait-alias are stabilized it would be enough to `use` this trait instead of individual ones.
 // https://doc.rust-lang.org/stable/unstable-book/language-features/trait-alias.html
 pub trait StrExtension: StrOnlyExtension + StrLikeExtension {}
 impl<T: StrOnlyExtension + StrLikeExtension> StrExtension for T {}
 
 #[cfg(test)]
 mod tests {
+    use core::cmp::Ordering;
     use std::ffi::OsStr;
 
     use super::*;
@@ -530,13 +768,13 @@ mod tests {
         assert_eq!(Case::identify("100안녕하세요", no_effect), Case::Uni);
         assert_eq!(Case::identify("안녕하세요", no_effect), Case::Uni);
 
-        // don't allow identifiers that starts/ends with a delimiter
+        // Don't allow identifiers that starts/ends with a delimiter
         assert_eq!(Case::identify("-a", no_effect), Case::Unknown);
         assert_eq!(Case::identify("_a", no_effect), Case::Unknown);
         assert_eq!(Case::identify("a-", no_effect), Case::Unknown);
         assert_eq!(Case::identify("a_", no_effect), Case::Unknown);
 
-        // don't allow identifiers that use consecutive delimiters
+        // Don't allow identifiers that use consecutive delimiters
         assert_eq!(Case::identify("a--a", no_effect), Case::Unknown);
         assert_eq!(Case::identify("a__a", no_effect), Case::Unknown);
 
@@ -920,5 +1158,40 @@ mod tests {
         assert_eq!("te😀st", "te😀St".to_lowercase_cow());
 
         assert!(matches!("tešt".to_lowercase_cow(), Cow::Borrowed(_)));
+    }
+
+    #[test]
+    fn collation_weight_unique() {
+        for weight in 0..=255 {
+            assert!(CldrAsciiCollator::WEIGHTS.contains(&weight));
+        }
+    }
+
+    #[test]
+    fn ascii_nat_ord() {
+        assert_eq!("".ascii_nat_cmp(""), Ordering::Equal);
+        assert_eq!("a".ascii_nat_cmp(""), Ordering::Greater);
+        assert_eq!("".ascii_nat_cmp("a"), Ordering::Less);
+
+        assert_eq!("ab".ascii_nat_cmp("ab"), Ordering::Equal);
+        assert_eq!("abc".ascii_nat_cmp("ab"), Ordering::Greater);
+        assert_eq!("ab".ascii_nat_cmp("abc"), Ordering::Less);
+
+        assert_eq!("A".ascii_nat_cmp("a"), Ordering::Less);
+        assert_eq!("a".ascii_nat_cmp("B"), Ordering::Less);
+
+        assert_eq!("9".ascii_nat_cmp("10"), Ordering::Less);
+        assert_eq!("10".ascii_nat_cmp("10"), Ordering::Equal);
+        assert_eq!("10".ascii_nat_cmp("9"), Ordering::Greater);
+        assert_eq!("09".ascii_nat_cmp("10"), Ordering::Less);
+        assert_eq!("a00".ascii_nat_cmp("a01"), Ordering::Less);
+        assert_eq!("a00b".ascii_nat_cmp("a01b"), Ordering::Less);
+
+        assert_eq!("a10".ascii_nat_cmp("a009"), Ordering::Less);
+
+        assert_eq!("1a".ascii_nat_cmp("9"), Ordering::Less);
+        assert_eq!("9".ascii_nat_cmp("1a"), Ordering::Greater);
+
+        assert_eq!("0".ascii_nat_cmp("a"), Ordering::Less);
     }
 }

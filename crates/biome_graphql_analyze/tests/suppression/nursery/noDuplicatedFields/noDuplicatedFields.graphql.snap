@@ -1,0 +1,37 @@
+---
+source: crates/biome_graphql_analyze/tests/spec_tests.rs
+expression: noDuplicatedFields.graphql
+snapshot_kind: text
+---
+# Input
+```graphql
+query test($v: String, $t: String, $v: String) {
+  id
+}
+
+query test {
+  users(first: 100, after: 10, filter: "test", first: 50) {
+    id
+  }
+}
+
+query test {
+  users {
+    id
+    name
+    email
+    name
+  }
+}
+
+query test {
+  users {
+    id
+    name
+    email
+		# biome-ignore lint/nursery/noDuplicatedFields: testing
+    email: somethingElse
+  }
+}
+
+```

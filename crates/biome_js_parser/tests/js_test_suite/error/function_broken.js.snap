@@ -1,0 +1,151 @@
+---
+source: crates/biome_js_parser/tests/spec_test.rs
+expression: snapshot
+snapshot_kind: text
+---
+## Input
+
+```js
+function foo())})}{{{  {}
+
+```
+
+
+## AST
+
+```
+JsModule {
+    bom_token: missing (optional),
+    interpreter_token: missing (optional),
+    directives: JsDirectiveList [],
+    items: JsModuleItemList [
+        JsFunctionDeclaration {
+            async_token: missing (optional),
+            function_token: FUNCTION_KW@0..9 "function" [] [Whitespace(" ")],
+            star_token: missing (optional),
+            id: JsIdentifierBinding {
+                name_token: IDENT@9..12 "foo" [] [],
+            },
+            type_parameters: missing (optional),
+            parameters: JsParameters {
+                l_paren_token: L_PAREN@12..13 "(" [] [],
+                items: JsParameterList [],
+                r_paren_token: R_PAREN@13..14 ")" [] [],
+            },
+            return_type_annotation: missing (optional),
+            body: missing (required),
+        },
+        JsBogusStatement {
+            items: [
+                R_PAREN@14..15 ")" [] [],
+                R_CURLY@15..16 "}" [] [],
+                R_PAREN@16..17 ")" [] [],
+                R_CURLY@17..18 "}" [] [],
+            ],
+        },
+        JsBlockStatement {
+            l_curly_token: L_CURLY@18..19 "{" [] [],
+            statements: JsStatementList [
+                JsBlockStatement {
+                    l_curly_token: L_CURLY@19..20 "{" [] [],
+                    statements: JsStatementList [
+                        JsBlockStatement {
+                            l_curly_token: L_CURLY@20..23 "{" [] [Whitespace("  ")],
+                            statements: JsStatementList [
+                                JsBlockStatement {
+                                    l_curly_token: L_CURLY@23..24 "{" [] [],
+                                    statements: JsStatementList [],
+                                    r_curly_token: R_CURLY@24..25 "}" [] [],
+                                },
+                            ],
+                            r_curly_token: missing (required),
+                        },
+                    ],
+                    r_curly_token: missing (required),
+                },
+            ],
+            r_curly_token: missing (required),
+        },
+    ],
+    eof_token: EOF@25..26 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: JS_MODULE@0..26
+  0: (empty)
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..25
+    0: JS_FUNCTION_DECLARATION@0..14
+      0: (empty)
+      1: FUNCTION_KW@0..9 "function" [] [Whitespace(" ")]
+      2: (empty)
+      3: JS_IDENTIFIER_BINDING@9..12
+        0: IDENT@9..12 "foo" [] []
+      4: (empty)
+      5: JS_PARAMETERS@12..14
+        0: L_PAREN@12..13 "(" [] []
+        1: JS_PARAMETER_LIST@13..13
+        2: R_PAREN@13..14 ")" [] []
+      6: (empty)
+      7: (empty)
+    1: JS_BOGUS_STATEMENT@14..18
+      0: R_PAREN@14..15 ")" [] []
+      1: R_CURLY@15..16 "}" [] []
+      2: R_PAREN@16..17 ")" [] []
+      3: R_CURLY@17..18 "}" [] []
+    2: JS_BLOCK_STATEMENT@18..25
+      0: L_CURLY@18..19 "{" [] []
+      1: JS_STATEMENT_LIST@19..25
+        0: JS_BLOCK_STATEMENT@19..25
+          0: L_CURLY@19..20 "{" [] []
+          1: JS_STATEMENT_LIST@20..25
+            0: JS_BLOCK_STATEMENT@20..25
+              0: L_CURLY@20..23 "{" [] [Whitespace("  ")]
+              1: JS_STATEMENT_LIST@23..25
+                0: JS_BLOCK_STATEMENT@23..25
+                  0: L_CURLY@23..24 "{" [] []
+                  1: JS_STATEMENT_LIST@24..24
+                  2: R_CURLY@24..25 "}" [] []
+              2: (empty)
+          2: (empty)
+      2: (empty)
+  4: EOF@25..26 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+function_broken.js:1:15 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a function body but instead found ')'.
+  
+  > 1 │ function foo())})}{{{  {}
+      │               ^
+    2 │ 
+  
+  i Expected a function body here.
+  
+  > 1 │ function foo())})}{{{  {}
+      │               ^
+    2 │ 
+  
+function_broken.js:2:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `}` but instead the file ends
+  
+    1 │ function foo())})}{{{  {}
+  > 2 │ 
+      │ 
+  
+  i the file ends here
+  
+    1 │ function foo())})}{{{  {}
+  > 2 │ 
+      │ 
+  
+```

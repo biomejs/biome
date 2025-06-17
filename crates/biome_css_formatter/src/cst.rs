@@ -1,5 +1,5 @@
 use crate::prelude::*;
-use biome_css_syntax::{map_syntax_node, CssSyntaxNode};
+use biome_css_syntax::{CssSyntaxNode, map_syntax_node};
 use biome_formatter::{FormatOwnedWithRule, FormatRefWithRule, FormatResult};
 
 #[derive(Debug, Copy, Clone, Default)]
@@ -14,7 +14,7 @@ impl FormatRule<CssSyntaxNode> for FormatCssSyntaxNode {
 }
 
 impl AsFormat<CssFormatContext> for CssSyntaxNode {
-    type Format<'a> = FormatRefWithRule<'a, CssSyntaxNode, FormatCssSyntaxNode>;
+    type Format<'a> = FormatRefWithRule<'a, Self, FormatCssSyntaxNode>;
 
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(self, FormatCssSyntaxNode)
@@ -22,7 +22,7 @@ impl AsFormat<CssFormatContext> for CssSyntaxNode {
 }
 
 impl IntoFormat<CssFormatContext> for CssSyntaxNode {
-    type Format = FormatOwnedWithRule<CssSyntaxNode, FormatCssSyntaxNode>;
+    type Format = FormatOwnedWithRule<Self, FormatCssSyntaxNode>;
 
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(self, FormatCssSyntaxNode)

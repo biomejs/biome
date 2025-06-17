@@ -1,10 +1,9 @@
 use biome_analyze::context::RuleContext;
-use biome_analyze::{
-    declare_lint_rule, ActionCategory, Ast, FixKind, Rule, RuleDiagnostic, RuleSource,
-};
+use biome_analyze::{Ast, FixKind, Rule, RuleDiagnostic, RuleSource, declare_lint_rule};
 use biome_console::markup;
+use biome_diagnostics::Severity;
 use biome_js_syntax::{JsFormalParameter, JsInitializerClause, JsSyntaxToken, TsPropertyParameter};
-use biome_rowan::{declare_node_union, AstNode, BatchMutationExt, Direction};
+use biome_rowan::{AstNode, BatchMutationExt, Direction, declare_node_union};
 
 use crate::JsRuleAction;
 
@@ -57,7 +56,8 @@ declare_lint_rule! {
             RuleSource::Eslint("default-param-last"),
             RuleSource::EslintTypeScript("default-param-last")
         ],
-        recommended: true,
+        recommended: false,
+        severity: Severity::Warning,
         fix_kind: FixKind::Unsafe,
     }
 }
@@ -73,8 +73,8 @@ impl AnyFormalParameter {
 
     pub(crate) fn initializer(&self) -> Option<JsInitializerClause> {
         match self {
-            AnyFormalParameter::JsFormalParameter(x) => x.initializer(),
-            AnyFormalParameter::TsPropertyParameter(x) => x
+            Self::JsFormalParameter(x) => x.initializer(),
+            Self::TsPropertyParameter(x) => x
                 .formal_parameter()
                 .ok()?
                 .as_js_formal_parameter()?
@@ -84,8 +84,8 @@ impl AnyFormalParameter {
 
     pub(crate) fn question_mark_token(&self) -> Option<JsSyntaxToken> {
         match self {
-            AnyFormalParameter::JsFormalParameter(x) => x.question_mark_token(),
-            AnyFormalParameter::TsPropertyParameter(x) => x
+            Self::JsFormalParameter(x) => x.question_mark_token(),
+            Self::TsPropertyParameter(x) => x
                 .formal_parameter()
                 .ok()?
                 .as_js_formal_parameter()?
@@ -105,13 +105,12 @@ impl Rule for UseDefaultParameterLast {
         if formal_param.is_required() {
             return None;
         }
-        let last_required_param = formal_param
+        formal_param
             .syntax()
             .siblings(Direction::Next)
             .filter_map(AnyFormalParameter::cast)
             .filter(|x| x.is_required())
-            .last();
-        last_required_param
+            .last()
     }
 
     fn diagnostic(
@@ -162,7 +161,7 @@ impl Rule for UseDefaultParameterLast {
             mutation.remove_node(initializer);
         }
         Some(JsRuleAction::new(
-            ActionCategory::QuickFix,
+            ctx.metadata().action_category(ctx.category(), ctx.group()),
             ctx.metadata().applicability(),
             markup! {"Turn the parameter into a "<Emphasis>"required parameter"</Emphasis>"."}
                 .to_owned(),

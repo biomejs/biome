@@ -1,7 +1,8 @@
 use crate::services::semantic::SemanticServices;
-use biome_analyze::{context::RuleContext, Rule, RuleDiagnostic};
-use biome_analyze::{declare_lint_rule, RuleSource};
+use biome_analyze::{Rule, RuleDiagnostic, context::RuleContext};
+use biome_analyze::{RuleSource, declare_lint_rule};
 use biome_console::markup;
+use biome_diagnostics::Severity;
 use biome_js_semantic::Scope;
 use biome_js_syntax::binding_ext::AnyJsBindingDeclaration;
 use biome_js_syntax::{JsSyntaxKind, TextRange};
@@ -67,6 +68,7 @@ declare_lint_rule! {
             RuleSource::EslintTypeScript("no-redeclare"),
         ],
         recommended: true,
+        severity: Severity::Error,
     }
 }
 
@@ -115,7 +117,7 @@ impl Rule for NoRedeclare {
 }
 
 fn check_redeclarations_in_single_scope(scope: &Scope, redeclarations: &mut Vec<Redeclaration>) {
-    let mut declarations = FxHashMap::<String, (TextRange, AnyJsBindingDeclaration)>::default();
+    let mut declarations = FxHashMap::<Box<str>, (TextRange, AnyJsBindingDeclaration)>::default();
     if scope.syntax().kind() == JsSyntaxKind::JS_FUNCTION_BODY {
         // Handle cases where a variable/type redeclares a parameter or type parameter.
         // For example:
@@ -143,8 +145,11 @@ fn check_redeclarations_in_single_scope(scope: &Scope, redeclarations: &mut Vec<
                 if let Some(decl) = id_binding.declaration() {
                     // Ignore the function itself.
                     if !matches!(decl, AnyJsBindingDeclaration::JsFunctionExpression(_)) {
-                        let name = id_binding.text();
-                        declarations.insert(name, (id_binding.syntax().text_trimmed_range(), decl));
+                        let name = id_binding.to_trimmed_text();
+                        declarations.insert(
+                            name.text().into(),
+                            (id_binding.syntax().text_trimmed_range(), decl),
+                        );
                     }
                 }
             }
@@ -156,8 +161,8 @@ fn check_redeclarations_in_single_scope(scope: &Scope, redeclarations: &mut Vec<
         // We consider only binding of a declaration
         // This allows to skip function parameters, methods, ...
         if let Some(decl) = id_binding.declaration() {
-            let name = id_binding.text();
-            if let Some((first_text_range, first_decl)) = declarations.get(&name) {
+            let name = id_binding.to_trimmed_text();
+            if let Some((first_text_range, first_decl)) = declarations.get(name.text()) {
                 // Do not report:
                 // - mergeable declarations.
                 //   e.g. a `function` and a `namespace`
@@ -172,13 +177,16 @@ fn check_redeclarations_in_single_scope(scope: &Scope, redeclarations: &mut Vec<
                         && first_decl.syntax().parent() != decl.syntax().parent())
                 {
                     redeclarations.push(Redeclaration {
-                        name: name.into_boxed_str(),
+                        name: name.text().into(),
                         declaration: *first_text_range,
                         redeclaration: id_binding.syntax().text_trimmed_range(),
                     })
                 }
             } else {
-                declarations.insert(name, (id_binding.syntax().text_trimmed_range(), decl));
+                declarations.insert(
+                    name.text().into(),
+                    (id_binding.syntax().text_trimmed_range(), decl),
+                );
             }
         }
     }

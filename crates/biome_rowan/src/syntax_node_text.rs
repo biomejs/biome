@@ -1,6 +1,6 @@
 use crate::{
+    Text, TextRange, TextSize, TokenAtOffset,
     cursor::{SyntaxNode, SyntaxToken},
-    TextRange, TextSize, TokenAtOffset,
 };
 use biome_text_size::TextLen;
 use std::iter::FusedIterator;
@@ -13,13 +13,13 @@ pub struct SyntaxNodeText {
 }
 
 impl SyntaxNodeText {
-    pub(crate) fn new(node: SyntaxNode) -> SyntaxNodeText {
+    pub(crate) fn new(node: SyntaxNode) -> Self {
         let range = node.text_range();
-        SyntaxNodeText { node, range }
+        Self { node, range }
     }
 
-    pub(crate) fn with_range(node: SyntaxNode, range: TextRange) -> SyntaxNodeText {
-        SyntaxNodeText { node, range }
+    pub(crate) fn with_range(node: SyntaxNode, range: TextRange) -> Self {
+        Self { node, range }
     }
 
     pub fn len(&self) -> TextSize {
@@ -37,20 +37,20 @@ impl SyntaxNodeText {
 
     pub fn find_char(&self, c: char) -> Option<TextSize> {
         let mut acc: TextSize = 0.into();
-        let res = self.try_for_each_chunk(|chunk| {
+        self.try_for_each_chunk(|chunk| {
             if let Some(pos) = chunk.find(c) {
                 let pos: TextSize = (pos as u32).into();
                 return Err(acc + pos);
             }
             acc += TextSize::of(chunk);
             Ok(())
-        });
-        found(res)
+        })
+        .err()
     }
 
     pub fn char_at(&self, offset: TextSize) -> Option<char> {
         let mut start: TextSize = 0.into();
-        let res = self.try_for_each_chunk(|chunk| {
+        self.try_for_each_chunk(|chunk| {
             let end = start + TextSize::of(chunk);
             if start <= offset && offset < end {
                 let off: usize = u32::from(offset - start) as usize;
@@ -58,11 +58,11 @@ impl SyntaxNodeText {
             }
             start = end;
             Ok(())
-        });
-        found(res)
+        })
+        .err()
     }
 
-    pub fn slice<R: private::SyntaxTextRange>(&self, range: R) -> SyntaxNodeText {
+    pub fn slice<R: private::SyntaxTextRange>(&self, range: R) -> Self {
         let start = range.start().unwrap_or_default();
         let end = range.end().unwrap_or_else(|| self.len());
         assert!(start <= end);
@@ -82,7 +82,7 @@ impl SyntaxNodeText {
             self.range,
             range,
         );
-        SyntaxNodeText {
+        Self {
             node: self.node.clone(),
             range,
         }
@@ -140,12 +140,21 @@ impl SyntaxNodeText {
         }
     }
 
-    fn tokens_with_ranges(&self) -> impl FusedIterator<Item = (SyntaxToken, TextRange)> {
+    fn tokens_with_ranges(&self) -> impl FusedIterator<Item = (SyntaxToken, TextRange)> + use<> {
         SyntaxNodeTokenWithRanges::new(self)
     }
 
-    pub fn chars(&self) -> impl FusedIterator<Item = char> {
+    pub fn chars(&self) -> impl FusedIterator<Item = char> + use<> {
         SyntaxNodeTextChars::new(self)
+    }
+
+    /// Converts the node text into `Text`, attempting to avoid an allocation if
+    /// the node consists of a single token.
+    pub fn into_text(self) -> Text {
+        match self.node.first_token() {
+            Some(token) if token.text_range() == self.range => Text::Borrowed(token.token_text()),
+            _ => Text::Owned(self.to_string()),
+        }
     }
 }
 
@@ -246,13 +255,6 @@ impl Iterator for SyntaxNodeTextChars {
 
 impl FusedIterator for SyntaxNodeTextChars {}
 
-fn found<T>(res: Result<(), T>) -> Option<T> {
-    match res {
-        Ok(()) => None,
-        Err(it) => Some(it),
-    }
-}
-
 impl fmt::Debug for SyntaxNodeText {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         fmt::Debug::fmt(&self.to_string(), f)
@@ -266,7 +268,7 @@ impl fmt::Display for SyntaxNodeText {
 }
 
 impl From<SyntaxNodeText> for String {
-    fn from(text: SyntaxNodeText) -> String {
+    fn from(text: SyntaxNodeText) -> Self {
         text.to_string()
     }
 }
@@ -304,7 +306,7 @@ impl PartialEq<SyntaxNodeText> for &'_ str {
 }
 
 impl PartialEq for SyntaxNodeText {
-    fn eq(&self, other: &SyntaxNodeText) -> bool {
+    fn eq(&self, other: &Self) -> bool {
         if self.range.len() != other.range.len() {
             return false;
         }
@@ -351,10 +353,10 @@ mod private {
 
     impl SyntaxTextRange for TextRange {
         fn start(&self) -> Option<TextSize> {
-            Some(TextRange::start(*self))
+            Some(Self::start(*self))
         }
         fn end(&self) -> Option<TextSize> {
-            Some(TextRange::end(*self))
+            Some(Self::end(*self))
         }
     }
 
@@ -397,8 +399,8 @@ mod private {
 
 #[cfg(test)]
 mod tests {
-    use crate::raw_language::{RawLanguage, RawLanguageKind, RawSyntaxTreeBuilder};
     use crate::SyntaxNode;
+    use crate::raw_language::{RawLanguage, RawLanguageKind, RawSyntaxTreeBuilder};
 
     fn build_tree(chunks: &[&str]) -> SyntaxNode<RawLanguage> {
         let mut builder = RawSyntaxTreeBuilder::new();
@@ -413,8 +415,8 @@ mod tests {
     #[test]
     fn test_text_equality() {
         fn do_check(t1: &[&str], t2: &[&str]) {
-            let t1 = build_tree(t1).text();
-            let t2 = build_tree(t2).text();
+            let t1 = build_tree(t1).text_with_trivia();
+            let t2 = build_tree(t2).text_with_trivia();
             let expected = t1.to_string() == t2.to_string();
             let actual = t1 == t2;
             assert_eq!(expected, actual, "`{t1}` (SyntaxText) `{t2}` (SyntaxText)");
@@ -442,7 +444,7 @@ mod tests {
     #[test]
     fn test_chars() {
         fn check(t1: &[&str], expected: &str) {
-            let t1 = build_tree(t1).text();
+            let t1 = build_tree(t1).text_with_trivia();
             let actual = t1.chars().collect::<String>();
 
             assert_eq!(

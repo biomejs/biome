@@ -1,11 +1,11 @@
 use super::*;
 use crate::reporters::TestReporter;
+use biome_diagnostics::Error;
+use biome_diagnostics::PrintDiagnostic;
 use biome_diagnostics::console::fmt::{Formatter, Termcolor};
 use biome_diagnostics::console::markup;
 use biome_diagnostics::termcolor::Buffer;
-use biome_diagnostics::Error;
-use biome_diagnostics::PrintDiagnostic;
-use biome_js_parser::{parse, JsParserOptions, Parse};
+use biome_js_parser::{JsParserOptions, Parse, parse};
 use biome_js_syntax::{AnyJsRoot, JsFileSource, JsSyntaxNode};
 use biome_rowan::SyntaxKind;
 use std::fmt::Debug;
@@ -32,21 +32,21 @@ pub(crate) enum TestRunOutcome {
 
 impl TestRunOutcome {
     pub fn is_failed(&self) -> bool {
-        !matches!(self, TestRunOutcome::Passed(_))
+        !matches!(self, Self::Passed(_))
     }
 
     pub fn files(&self) -> Option<&TestCaseFiles> {
         match self {
-            TestRunOutcome::Passed(files)
-            | TestRunOutcome::IncorrectlyPassed(files)
-            | TestRunOutcome::IncorrectlyErrored { files, .. } => Some(files),
+            Self::Passed(files)
+            | Self::IncorrectlyPassed(files)
+            | Self::IncorrectlyErrored { files, .. } => Some(files),
             _ => None,
         }
     }
 
     pub fn panic_message(&self) -> Option<&str> {
         match self {
-            TestRunOutcome::Panicked(panic) => panic
+            Self::Panicked(panic) => panic
                 .downcast_ref::<String>()
                 .map(|s| s.as_str())
                 .or_else(|| panic.downcast_ref::<&'static str>().copied()),
@@ -59,11 +59,11 @@ impl TestRunOutcome {
 impl From<TestRunOutcome> for Outcome {
     fn from(run_outcome: TestRunOutcome) -> Self {
         match run_outcome {
-            TestRunOutcome::Passed(_) => Outcome::Passed,
+            TestRunOutcome::Passed(_) => Self::Passed,
             TestRunOutcome::IncorrectlyPassed(_) | TestRunOutcome::IncorrectlyErrored { .. } => {
-                Outcome::Failed
+                Self::Failed
             }
-            TestRunOutcome::Panicked(_) => Outcome::Panicked,
+            TestRunOutcome::Panicked(_) => Self::Panicked,
         }
     }
 }

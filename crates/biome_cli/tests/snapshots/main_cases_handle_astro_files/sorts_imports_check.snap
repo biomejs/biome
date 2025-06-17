@@ -1,6 +1,7 @@
 ---
 source: crates/biome_cli/tests/snap_test.rs
-expression: content
+expression: redactor(content)
+snapshot_kind: text
 ---
 ## `file.astro`
 
@@ -26,24 +27,25 @@ check ━━━━━━━━━━━━━━━━━━━━━━━━�
 # Emitted Messages
 
 ```block
-file.astro organizeImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+file.astro:2:1 assist/source/organizeImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Import statements could be sorted:
+  × The imports and exports are not sorted.
   
-    1 1 │   ---
+    1 │ ---
+  > 2 │ import { getLocale } from "astro:i18n";
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    3 │ import { Code } from "astro:components";
+    4 │ ---
+  
+  i Safe fix: Organize Imports (Biome)
+  
+    1 1 │   
     2   │ - import·{·getLocale·}·from·"astro:i18n";
     3   │ - import·{·Code·}·from·"astro:components";
       2 │ + import·{·Code·}·from·"astro:components";
       3 │ + import·{·getLocale·}·from·"astro:i18n";
-    4 4 │   ---
-    5 5 │   <div></div>
+    4 4 │   
   
-
-```
-
-```block
-Skipped 1 suggested fixes.
-If you wish to apply the suggested (unsafe) fixes, use the command biome check --fix --unsafe
 
 ```
 

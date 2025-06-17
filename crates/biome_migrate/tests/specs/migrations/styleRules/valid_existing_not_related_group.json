@@ -1,0 +1,91 @@
+{
+  "linter": {
+    "rules": {
+      "style": {
+        "useImportType": "off",
+        "useLiteralEnumMembers": "error",
+        "useShorthandFunctionType": "error",
+        "useExportType": "error",
+        "useDefaultParameterLast": "error",
+        "useSingleVarDeclarator": "error",
+        "useConst": "error",
+        "noInferrableTypes": "error",
+        "noUselessElse": "error",
+        "useSelfClosingElements": "error",
+        "useNumberNamespace": "error",
+        "useAsConstAssertion": "error",
+        "noUnusedTemplateLiteral": "error",
+        "useTemplate": "error",
+        "useEnumInitializers": "error"
+      },
+      "nursery": {
+        "noRestrictedImports": {
+          "level": "error",
+          "options": {
+            "paths": {
+              "node:path": "Please use src/util/path.js instead.",
+              "path": "Please use src/util/path.js instead."
+            }
+          }
+        }
+      },
+      "complexity": {
+        "useLiteralKeys": "off"
+      },
+      "suspicious": {
+        "noConsoleLog": "off"
+      },
+      "correctness": {
+        "noUnusedVariables": "off",
+        "noUnusedImports": "off"
+      }
+    }
+  },
+  "overrides": [
+    {
+      "include": ["*.astro"],
+      "linter": {
+        "rules": {
+          "correctness": {
+            "noUnusedVariables": "off",
+            "noUnusedImports": "off"
+          }
+        }
+      }
+    },
+    {
+      "include": [
+        "packages/docs",
+        "packages/knip/scripts",
+        "packages/knip/src/cli.ts",
+        "packages/knip/src/reporters",
+        "packages/knip/src/util/cli-arguments.ts",
+        "packages/knip/src/util/debug.ts"
+      ],
+      "linter": {
+        "rules": {
+          "suspicious": {
+            "noConsoleLog": "off"
+          }
+        }
+      }
+    },
+    {
+      "include": ["packages/knip/fixtures"],
+      "organizeImports": {
+        "enabled": false
+      },
+      "linter": {
+        "rules": {
+          "correctness": {
+            "noUnusedVariables": "off",
+            "noUnusedImports": "off"
+          },
+          "style": {
+            "useImportType": "off"
+          }
+        }
+      }
+    }
+  ]
+}

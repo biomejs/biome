@@ -1,3 +1,4 @@
+/* should not generate diagnostics */
 <TestComponent onClick={doFoo} />;
 <Button onClick={doFoo} />;
 /* Interactive elements */

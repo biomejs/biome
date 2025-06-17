@@ -4,6 +4,7 @@ expression: valid.tsx
 ---
 # Input
 ```tsx
+/* should not generate diagnostics */
 <>
     <div>{/* comment */}</div>
     <div>{/** comment */}</div>

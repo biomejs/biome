@@ -1,0 +1,20 @@
+[package]
+authors.workspace    = true
+categories.workspace = true
+description          = "JSDoc comment handling helpers"
+edition.workspace    = true
+homepage.workspace   = true
+keywords.workspace   = true
+license.workspace    = true
+name                 = "biome_jsdoc_comment"
+repository.workspace = true
+version              = "0.0.1"
+
+[lints]
+workspace = true
+
+[dependencies]
+biome_formatter    = { workspace = true }
+biome_js_syntax    = { workspace = true }
+biome_js_type_info = { workspace = true }
+biome_rowan        = { workspace = true }

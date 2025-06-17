@@ -1,0 +1,73 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `biome.json`
+
+```json
+{
+  "root": false,
+  "linter": {
+    "enabled": true,
+    "rules": {
+      "suspicious": {
+        "noDebugger": "error",
+        "noShadowRestrictedNames": "off",
+        "noExplicitAny": "off",
+        "noAsyncPromiseExecutor": "off",
+        "noEmptyInterface": "error",
+        "noAssignInExpressions": "error",
+        "noConsole": {
+          "level": "error",
+          "options": {
+            "allow": ["info", "error", "warn", "time", "timeEnd"]
+          }
+        },
+        "noPrototypeBuiltins": "error",
+        "noVar": "error"
+      },
+      "style": {
+        "useNamingConvention": {
+          "level": "error",
+          "options": {
+            "strictCase": false
+          }
+        },
+        "noDefaultExport": "error",
+        "noParameterAssign": "error",
+        "useAsConstAssertion": "error",
+        "useDefaultParameterLast": "error",
+        "useEnumInitializers": "error",
+        "useSelfClosingElements": "error",
+        "useSingleVarDeclarator": "error",
+        "noUnusedTemplateLiteral": "error",
+        "useNumberNamespace": "error",
+        "noInferrableTypes": "error",
+        "noUselessElse": "error"
+      },
+      "correctness": {
+        "noConstantCondition": "error",
+        "noInvalidConstructorSuper": "error",
+        "noUnusedVariables": "error",
+        "noUnreachable": "error",
+        "noUnsafeFinally": "error",
+        "noSwitchDeclarations": "off",
+        "noSelfAssign": "off",
+        "useValidTypeof": "error"
+      }
+    }
+  }
+}
+```
+
+# Emitted Messages
+
+```block
+configuration ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Migration results:
+  
+  - biome.json: configuration successfully migrated.
+  
+
+```

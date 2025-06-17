@@ -1,8 +1,8 @@
 //! Events emitted by the Parser which are then constructed into a syntax tree
 
-use crate::parser::rewrite_parser::{RewriteParser, RewriteToken};
-use crate::parser::JsParserCheckpoint;
 use crate::JsParser;
+use crate::parser::JsParserCheckpoint;
+use crate::parser::rewrite_parser::{RewriteParser, RewriteToken};
 use biome_js_syntax::JsSyntaxKind;
 use biome_parser::tree_sink::TreeSink;
 use biome_parser::{event::process, prelude::*};
@@ -13,7 +13,7 @@ struct RewriteParseEventsTreeSink<'r, 'p, T> {
     parser: RewriteParser<'r, 'p>,
 }
 
-impl<'r, 'p, T: RewriteParseEvents> TreeSink for RewriteParseEventsTreeSink<'r, 'p, T> {
+impl<T: RewriteParseEvents> TreeSink for RewriteParseEventsTreeSink<'_, '_, T> {
     type Kind = JsSyntaxKind;
 
     fn token(&mut self, kind: JsSyntaxKind, end: TextSize) {

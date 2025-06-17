@@ -4,13 +4,14 @@ mod configs;
 #[cfg(test)]
 mod snap_test;
 
+use biome_resolver::FsWithResolverProxy;
 #[cfg(test)]
 use snap_test::assert_cli_snapshot;
 
-use biome_cli::{biome_command, CliDiagnostic, CliSession};
-use biome_console::{markup, BufferConsole, Console, ConsoleExt};
-use biome_fs::{FileSystem, MemoryFileSystem};
-use biome_service::{App, DynRef};
+use biome_cli::{CliDiagnostic, CliSession, biome_command};
+use biome_console::{BufferConsole, Console, ConsoleExt, markup};
+use biome_fs::{MemoryFileSystem, OsFileSystem};
+use biome_service::App;
 use bpaf::ParseFailure;
 
 const UNFORMATTED: &str = "  statement(  )  ";
@@ -32,12 +33,12 @@ mod help {
     #[test]
     fn unknown_command() {
         let mut console = BufferConsole::default();
-        let mut fs = MemoryFileSystem::default();
+        let fs = MemoryFileSystem::default();
 
-        let result = run_cli(
-            DynRef::Borrowed(&mut fs),
+        let (_, result) = run_cli(
+            fs,
             &mut console,
-            Args::from([("unknown"), ("--help")].as_slice()),
+            Args::from(["unknown", "--help"].as_slice()),
         );
 
         assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -51,25 +52,21 @@ mod main {
     #[test]
     fn unknown_command() {
         let mut console = BufferConsole::default();
-        let mut fs = MemoryFileSystem::default();
+        let fs = MemoryFileSystem::default();
 
-        let result = run_cli(
-            DynRef::Borrowed(&mut fs),
-            &mut console,
-            Args::from([("unknown")].as_slice()),
-        );
+        let (_, result) = run_cli(fs, &mut console, Args::from(["unknown"].as_slice()));
         assert!(result.is_err(), "run_cli returned {result:?}");
     }
 
     #[test]
     fn unexpected_argument() {
         let mut console = BufferConsole::default();
-        let mut fs = MemoryFileSystem::default();
+        let fs = MemoryFileSystem::default();
 
-        let result = run_cli(
-            DynRef::Borrowed(&mut fs),
+        let (_, result) = run_cli(
+            fs,
             &mut console,
-            Args::from([("format"), ("--unknown"), ("file.js")].as_slice()),
+            Args::from(["format", "--unknown", "file.js"].as_slice()),
         );
 
         assert!(result.is_err(), "run_cli returned {result:?}");
@@ -78,13 +75,9 @@ mod main {
     #[test]
     fn empty_arguments() {
         let mut console = BufferConsole::default();
-        let mut fs = MemoryFileSystem::default();
+        let fs = MemoryFileSystem::default();
 
-        let result = run_cli(
-            DynRef::Borrowed(&mut fs),
-            &mut console,
-            Args::from([("format")].as_slice()),
-        );
+        let (_, result) = run_cli(fs, &mut console, Args::from(["format"].as_slice()));
 
         assert!(result.is_err(), "run_cli returned {result:?}");
     }
@@ -92,12 +85,12 @@ mod main {
     #[test]
     fn missing_argument() {
         let mut console = BufferConsole::default();
-        let mut fs = MemoryFileSystem::default();
+        let fs = MemoryFileSystem::default();
 
-        let result = run_cli(
-            DynRef::Borrowed(&mut fs),
+        let (_, result) = run_cli(
+            fs,
             &mut console,
-            Args::from([("format"), ("--write")].as_slice()),
+            Args::from(["format", "--write"].as_slice()),
         );
         assert!(result.is_err(), "run_cli returned {result:?}");
     }
@@ -105,12 +98,12 @@ mod main {
     #[test]
     fn incorrect_value() {
         let mut console = BufferConsole::default();
-        let mut fs = MemoryFileSystem::default();
+        let fs = MemoryFileSystem::default();
 
-        let result = run_cli(
-            DynRef::Borrowed(&mut fs),
+        let (_, result) = run_cli(
+            fs,
             &mut console,
-            Args::from([("check"), ("--max-diagnostics=foo")].as_slice()),
+            Args::from(["check", "--max-diagnostics=foo"].as_slice()),
         );
 
         assert!(result.is_err(), "run_cli returned {result:?}");
@@ -119,12 +112,12 @@ mod main {
     #[test]
     fn overflow_value() {
         let mut console = BufferConsole::default();
-        let mut fs = MemoryFileSystem::default();
+        let fs = MemoryFileSystem::default();
 
-        let result = run_cli(
-            DynRef::Borrowed(&mut fs),
+        let (_, result) = run_cli(
+            fs,
             &mut console,
-            Args::from([("check"), ("--max-diagnostics=500")].as_slice()),
+            Args::from(["check", "--max-diagnostics=500"].as_slice()),
         );
 
         assert!(result.is_err(), "run_cli returned {result:?}");
@@ -132,7 +125,7 @@ mod main {
     //
     // #[test]
     // fn no_colors() {
-    //     let mut args = Args::from([("--colors=off")]);
+    //     let mut args = Args::from(["--colors=off"]);
     //     let result = color_from_arguments(&mut args);
     //
     //     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -140,7 +133,7 @@ mod main {
     //
     // #[test]
     // fn force_colors() {
-    //     let mut args = Args::from([("--colors=force")]);
+    //     let mut args = Args::from(["--colors=force"]);
     //     let result = color_from_arguments(&mut args);
     //
     //     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -148,7 +141,7 @@ mod main {
     //
     // #[test]
     // fn invalid_colors() {
-    //     let mut args = Args::from([("--colors=other")]);
+    //     let mut args = Args::from(["--colors=other"]);
     //     let result = color_from_arguments(&mut args);
     //     assert!(result.is_err(), "run_cli returned {result:?}");
     // }
@@ -163,21 +156,20 @@ mod configuration {
     use crate::snap_test::SnapshotPayload;
     use biome_console::BufferConsole;
     use biome_fs::MemoryFileSystem;
-    use biome_service::DynRef;
     use bpaf::Args;
-    use std::path::Path;
+    use camino::Utf8Path;
 
     #[test]
     fn correct_root() {
         let mut fs = MemoryFileSystem::default();
         let mut console = BufferConsole::default();
-        let file_path = Path::new("biome.json");
+        let file_path = Utf8Path::new("biome.json");
         fs.insert(file_path.into(), CONFIG_ALL_FIELDS.as_bytes());
 
-        let result = run_cli(
-            DynRef::Borrowed(&mut fs),
+        let (fs, result) = run_cli(
+            fs,
             &mut console,
-            Args::from([("format"), ("file.js")].as_slice()),
+            Args::from(["format", "file.js"].as_slice()),
         );
 
         assert!(result.is_err(), "run_cli returned {result:?}");
@@ -196,13 +188,13 @@ mod configuration {
         let mut fs = MemoryFileSystem::default();
         let mut console = BufferConsole::default();
 
-        let file_path = Path::new("biome.json");
+        let file_path = Utf8Path::new("biome.json");
         fs.insert(file_path.into(), CONFIG_BAD_LINE_WIDTH.as_bytes());
 
-        let result = run_cli(
-            DynRef::Borrowed(&mut fs),
+        let (fs, result) = run_cli(
+            fs,
             &mut console,
-            Args::from([("format"), ("file.js")].as_slice()),
+            Args::from(["format", "file.js"].as_slice()),
         );
 
         assert!(result.is_err(), "run_cli returned {result:?}");
@@ -221,13 +213,13 @@ mod configuration {
         let mut fs = MemoryFileSystem::default();
         let mut console = BufferConsole::default();
 
-        let file_path = Path::new("biome.json");
+        let file_path = Utf8Path::new("biome.json");
         fs.insert(file_path.into(), CONFIG_LINTER_WRONG_RULE.as_bytes());
 
-        let result = run_cli(
-            DynRef::Borrowed(&mut fs),
+        let (fs, result) = run_cli(
+            fs,
             &mut console,
-            Args::from([("check"), ("file.js")].as_slice()),
+            Args::from(["check", "file.js"].as_slice()),
         );
 
         assert!(result.is_err(), "run_cli returned {result:?}");
@@ -246,13 +238,13 @@ mod configuration {
         let mut fs = MemoryFileSystem::default();
         let mut console = BufferConsole::default();
 
-        let file_path = Path::new("biome.json");
+        let file_path = Utf8Path::new("biome.json");
         fs.insert(file_path.into(), CONFIG_INCORRECT_GLOBALS.as_bytes());
 
-        let result = run_cli(
-            DynRef::Borrowed(&mut fs),
+        let (fs, result) = run_cli(
+            fs,
             &mut console,
-            Args::from([("check"), ("file.js")].as_slice()),
+            Args::from(["check", "file.js"].as_slice()),
         );
 
         assert!(result.is_err(), "run_cli returned {result:?}");
@@ -272,16 +264,12 @@ mod configuration {
         let mut console = BufferConsole::default();
 
         fs.insert(
-            Path::new("biome.json").into(),
+            Utf8Path::new("biome.json").into(),
             CONFIG_INCORRECT_GLOBALS_V2.as_bytes(),
         );
-        fs.insert(Path::new("file.js").into(), UNFORMATTED.as_bytes());
+        fs.insert(Utf8Path::new("file.js").into(), UNFORMATTED.as_bytes());
 
-        let result = run_cli(
-            DynRef::Borrowed(&mut fs),
-            &mut console,
-            Args::from(&["check", "file.js"]),
-        );
+        let (_, result) = run_cli(fs, &mut console, Args::from(&["check", "file.js"]));
 
         assert!(result.is_err(), "run_cli returned {result:?}");
     }
@@ -292,7 +280,7 @@ mod configuration {
         let mut console = BufferConsole::default();
 
         fs.insert(
-            Path::new("biome.json").into(),
+            Utf8Path::new("biome.json").into(),
             r#"{
                 "linter": {
                     "enabled": true,
@@ -306,7 +294,7 @@ mod configuration {
                     "globals": ["React"]
                 },
                 "overrides": [{
-                    "include": ["tests"],
+                    "includes": ["tests/**"],
                     "javascript": {
                         "globals": ["test", "it"]
                     }
@@ -315,7 +303,7 @@ mod configuration {
             .as_bytes(),
         );
         fs.insert(
-            Path::new("tests/test.js").into(),
+            Utf8Path::new("tests/test.js").into(),
             r#"test("globals", () => {
     it("uses React", () => {
         React.useMemo();
@@ -324,11 +312,7 @@ mod configuration {
                 .as_bytes(),
         );
 
-        let result = run_cli(
-            DynRef::Borrowed(&mut fs),
-            &mut console,
-            Args::from(&["lint", "tests/test.js"]),
-        );
+        let (fs, result) = run_cli(fs, &mut console, Args::from(&["lint", "tests/test.js"]));
 
         assert!(result.is_err(), "run_cli returned {result:?}");
 
@@ -344,21 +328,42 @@ mod configuration {
 
 /// Create an [App] instance using the provided [FileSystem] and [Console]
 /// instance, and using an in-process "remote" instance of the workspace
-pub(crate) fn run_cli<'app>(
-    fs: DynRef<'app, dyn FileSystem>,
-    console: &'app mut dyn Console,
+pub(crate) fn run_cli(
+    fs: MemoryFileSystem,
+    console: &mut dyn Console,
+    args: bpaf::Args,
+) -> (MemoryFileSystem, Result<(), CliDiagnostic>) {
+    let files = fs.files.clone();
+
+    let result = run_cli_with_dyn_fs(Box::new(fs), console, args);
+
+    // This is a little bit of a workaround to allow us to easily create
+    // a snapshot of the files even though the original file system was
+    // consumed by the workspace.
+    let fs = MemoryFileSystem::from_files(files);
+
+    (fs, result)
+}
+
+/// Create an [App] instance using the provided [FileSystem] and [Console]
+/// instance, and using an in-process "remote" instance of the workspace
+pub(crate) fn run_cli_with_dyn_fs(
+    fs: Box<dyn FsWithResolverProxy>,
+    console: &mut dyn Console,
     args: bpaf::Args,
 ) -> Result<(), CliDiagnostic> {
     use biome_cli::SocketTransport;
     use biome_lsp::ServerFactory;
-    use biome_service::{workspace, WorkspaceRef};
+    use biome_service::{WorkspaceRef, workspace};
     use tokio::{
         io::{duplex, split},
         runtime::Runtime,
     };
 
-    let factory = ServerFactory::default();
-    let connection = factory.create(None);
+    let factory = ServerFactory::new_with_fs(Box::new(OsFileSystem::new(
+        fs.working_directory().unwrap_or_default(),
+    )));
+    let connection = factory.create();
 
     let runtime = Runtime::new().expect("failed to create runtime");
 
@@ -369,8 +374,8 @@ pub(crate) fn run_cli<'app>(
     let (client_read, client_write) = split(client);
     let transport = SocketTransport::open(runtime, client_read, client_write);
 
-    let workspace = workspace::client(transport).unwrap();
-    let app = App::new(fs, console, WorkspaceRef::Owned(workspace));
+    let workspace = workspace::client(transport, fs).unwrap();
+    let app = App::new(console, WorkspaceRef::Owned(workspace));
 
     let mut session = CliSession { app };
     let command = biome_command().run_inner(args);
@@ -386,4 +391,41 @@ pub(crate) fn run_cli<'app>(
             }
         }
     }
+}
+
+/// Create an [App] instance using the provided [FileSystem] and [Console]
+/// instance, and using an in-process server instance of the workspace
+pub(crate) fn run_cli_with_server_workspace(
+    fs: MemoryFileSystem,
+    console: &mut dyn Console,
+    args: bpaf::Args,
+) -> (MemoryFileSystem, Result<(), CliDiagnostic>) {
+    use biome_service::{WorkspaceRef, workspace};
+
+    let files = fs.files.clone();
+
+    let workspace = workspace::server(Box::new(fs), None);
+    let app = App::new(console, WorkspaceRef::Owned(workspace));
+
+    let mut session = CliSession { app };
+    let command = biome_command().run_inner(args);
+    let result = match command {
+        Ok(command) => session.run(command),
+        Err(failure) => {
+            if let ParseFailure::Stdout(help, _) = &failure {
+                let console = &mut session.app.console;
+                console.log(markup! {{help.to_string()}});
+                Ok(())
+            } else {
+                Err(CliDiagnostic::parse_error_bpaf(failure))
+            }
+        }
+    };
+
+    // This is a little bit of a workaround to allow us to easily create
+    // a snapshot of the files even though the original file system was
+    // consumed by the workspace.
+    let fs = MemoryFileSystem::from_files(files);
+
+    (fs, result)
 }

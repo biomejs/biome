@@ -61,14 +61,15 @@ impl SemanticModelBuilder {
                 | GRAPHQL_VARIABLE_REFERENCE
                 | GRAPHQL_OPERATION_DEFINITION
         ) {
-            self.node_by_range.insert(node.text_range(), node.clone());
+            self.node_by_range
+                .insert(node.text_range_with_trivia(), node.clone());
         }
     }
 
     #[inline]
     pub fn push_event(&mut self, e: SemanticEvent) {
-        use std::collections::hash_map::Entry;
         use SemanticEvent::*;
+        use std::collections::hash_map::Entry;
         match e {
             Declaration { range } => {
                 let binding_id = self.bindings.len();

@@ -1,0 +1,74 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `file.ts`
+
+```ts
+
+// biome-ignore-all syntax/correctness/noTypeOnlyImportAttributes: bug
+import type { ChalkInstance } from "chalk" with { "resolution-mode": "import" };
+import type { ChalkInstance2 } from "chalk2" with { "resolution-mode": "import" };
+
+function sommething(chalk: ChalkInstance) {
+  console.log(chalk.yellow('we do something here'));
+}
+```
+
+# Emitted Messages
+
+```block
+file.ts:4:13 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This import is unused.
+  
+    2 │ // biome-ignore-all syntax/correctness/noTypeOnlyImportAttributes: bug
+    3 │ import type { ChalkInstance } from "chalk" with { "resolution-mode": "import" };
+  > 4 │ import type { ChalkInstance2 } from "chalk2" with { "resolution-mode": "import" };
+      │             ^^^^^^^^^^^^^^^^^^
+    5 │ 
+    6 │ function sommething(chalk: ChalkInstance) {
+  
+  i Unused imports might be the result of an incomplete refactoring.
+  
+  i Unsafe fix: Remove the unused imports.
+  
+    2 2 │   // biome-ignore-all syntax/correctness/noTypeOnlyImportAttributes: bug
+    3 3 │   import type { ChalkInstance } from "chalk" with { "resolution-mode": "import" };
+    4   │ - import·type·{·ChalkInstance2·}·from·"chalk2"·with·{·"resolution-mode":·"import"·};
+    5 4 │   
+    6 5 │   function sommething(chalk: ChalkInstance) {
+  
+
+```
+
+```block
+file.ts:6:10 lint/correctness/noUnusedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This function sommething is unused.
+  
+    4 │ import type { ChalkInstance2 } from "chalk2" with { "resolution-mode": "import" };
+    5 │ 
+  > 6 │ function sommething(chalk: ChalkInstance) {
+      │          ^^^^^^^^^^
+    7 │   console.log(chalk.yellow('we do something here'));
+    8 │ }
+  
+  i Unused variables are often the result of an incomplete refactoring, typos, or other sources of bugs.
+  
+  i Unsafe fix: If this is intentional, prepend sommething with an underscore.
+  
+    4 4 │   import type { ChalkInstance2 } from "chalk2" with { "resolution-mode": "import" };
+    5 5 │   
+    6   │ - function·sommething(chalk:·ChalkInstance)·{
+      6 │ + function·_sommething(chalk:·ChalkInstance)·{
+    7 7 │     console.log(chalk.yellow('we do something here'));
+    8 8 │   }
+  
+
+```
+
+```block
+Checked 1 file in <TIME>. No fixes applied.
+Found 2 warnings.
+```

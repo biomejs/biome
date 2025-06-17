@@ -1,0 +1,16 @@
+---
+source: crates/biome_js_type_info/tests/utils.rs
+expression: content
+---
+## Input
+
+```ts
+foo;
+
+```
+
+## Result
+
+```
+unresolved reference "foo" (scope ID: 0)
+```

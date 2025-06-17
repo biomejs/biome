@@ -1,8 +1,8 @@
 use biome_formatter_test::TestFormatLanguage;
 use biome_fs::BiomePath;
-use biome_js_formatter::context::JsFormatContext;
 use biome_js_formatter::JsFormatLanguage;
-use biome_js_parser::{parse, JsParserOptions};
+use biome_js_formatter::context::JsFormatContext;
+use biome_js_parser::{JsParserOptions, parse};
 use biome_js_syntax::{JsFileSource, JsLanguage};
 use biome_parser::AnyParse;
 use biome_service::{
@@ -16,7 +16,7 @@ pub struct JsTestFormatLanguage {
 
 impl JsTestFormatLanguage {
     pub fn new(source_type: JsFileSource) -> Self {
-        JsTestFormatLanguage { source_type }
+        Self { source_type }
     }
 }
 

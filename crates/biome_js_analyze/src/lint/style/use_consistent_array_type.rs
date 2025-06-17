@@ -1,14 +1,14 @@
 use crate::JsRuleAction;
 use biome_analyze::{
-    context::RuleContext, declare_lint_rule, ActionCategory, Ast, FixKind, Rule, RuleDiagnostic,
-    RuleSource,
+    Ast, FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
-use biome_console::{markup, Markup, MarkupBuf};
+use biome_console::{Markup, MarkupBuf, markup};
 use biome_deserialize_macros::Deserializable;
+use biome_diagnostics::Severity;
 use biome_js_factory::make;
 use biome_js_syntax::{
-    AnyTsName, AnyTsType, JsSyntaxKind, JsSyntaxToken, TriviaPieceKind, TsReferenceType,
-    TsTypeArguments, T,
+    AnyTsName, AnyTsType, JsSyntaxKind, JsSyntaxToken, T, TriviaPieceKind, TsReferenceType,
+    TsTypeArguments,
 };
 use biome_rowan::{AstNode, AstSeparatedList, BatchMutationExt, SyntaxNodeOptionExt, TriviaPiece};
 #[cfg(feature = "schemars")]
@@ -52,9 +52,8 @@ declare_lint_rule! {
     ///
     /// Use the options to specify the syntax of array declarations to use.
     ///
-    /// ```json
+    /// ```json,options
     /// {
-    ///     "//": "...",
     ///     "options": {
     ///         "syntax": "shorthand"
     ///     }
@@ -75,6 +74,7 @@ declare_lint_rule! {
         language: "ts",
         sources: &[RuleSource::EslintTypeScript("array-type")],
         recommended: false,
+        severity: Severity::Information,
         fix_kind: FixKind::Unsafe,
     }
 }
@@ -181,7 +181,7 @@ impl Rule for UseConsistentArrayType {
                 mutation.replace_node(AnyTsType::TsReferenceType(ty.clone()), state.clone());
                 if let Some(kind) = get_array_kind_by_reference(ty) {
                     return Some(JsRuleAction::new(
-                        ActionCategory::QuickFix,
+                        ctx.metadata().action_category(ctx.category(), ctx.group()),
                         ctx.metadata().applicability(),
                         get_action_message(kind),
                         mutation,
@@ -196,7 +196,7 @@ impl Rule for UseConsistentArrayType {
 
                 if let Some(kind) = get_array_kind_by_any_type(&ty) {
                     return Some(JsRuleAction::new(
-                        ActionCategory::QuickFix,
+                        ctx.metadata().action_category(ctx.category(), ctx.group()),
                         ctx.metadata().applicability(),
                         get_action_message(kind),
                         mutation,
@@ -210,7 +210,7 @@ impl Rule for UseConsistentArrayType {
             {
                 mutation.replace_node(AnyTsType::TsArrayType(ty.clone()), state.clone());
                 Some(JsRuleAction::new(
-                    ActionCategory::QuickFix,
+                    ctx.metadata().action_category(ctx.category(), ctx.group()),
                     ctx.metadata().applicability(),
                     get_action_message(TsArrayKind::Shorthand),
                     mutation,

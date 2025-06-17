@@ -1,0 +1,5 @@
+bubble($prop, $source_file, $new_prop) file($body) where {
+	$body <: contains `$prop` where {
+		$prop <: imported_from(from=includes $source_file),
+	}
+}

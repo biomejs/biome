@@ -1,12 +1,11 @@
 use biome_console::fmt::Display;
-use biome_console::{markup, MarkupBuf};
+use biome_console::{MarkupBuf, markup};
 use biome_diagnostics::location::AsSpan;
 use biome_diagnostics::{
     Advices, Diagnostic, DiagnosticTags, LogCategory, MessageAndDescription, Severity, Visit,
 };
 use biome_rowan::{SyntaxError, TextRange};
-use enumflags2::{bitflags, make_bitflags, BitFlags};
-use serde::{Deserialize, Serialize};
+use enumflags2::{BitFlags, bitflags, make_bitflags};
 
 #[derive(Debug, Copy, Clone, Eq, PartialEq)]
 #[bitflags]
@@ -25,12 +24,12 @@ impl std::fmt::Display for DeserializableType {
             fmt,
             "{}",
             match self {
-                DeserializableType::Null => "null",
-                DeserializableType::Bool => "a boolean",
-                DeserializableType::Number => "a number",
-                DeserializableType::Str => "a string",
-                DeserializableType::Array => "an array",
-                DeserializableType::Map => "an object",
+                Self::Null => "null",
+                Self::Bool => "a boolean",
+                Self::Number => "a number",
+                Self::Str => "a string",
+                Self::Array => "an array",
+                Self::Map => "an object",
             }
         )
     }
@@ -50,7 +49,7 @@ impl DeserializableTypes {
     pub const fn empty() -> Self {
         Self(BitFlags::EMPTY)
     }
-    pub fn contains(self, other: impl Into<DeserializableTypes>) -> bool {
+    pub fn contains(self, other: impl Into<Self>) -> bool {
         self.0.contains(other.into().0)
     }
     pub const fn union(self, other: Self) -> Self {
@@ -76,7 +75,8 @@ impl std::fmt::Display for DeserializableTypes {
 }
 
 /// Diagnostic emitted during the deserialization
-#[derive(Debug, Serialize, Clone, Deserialize, Diagnostic)]
+#[derive(Debug, Clone, Diagnostic)]
+#[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize))]
 #[diagnostic(category = "deserialize")]
 pub struct DeserializationDiagnostic {
     #[message]
@@ -231,11 +231,12 @@ impl DeserializationDiagnostic {
 
 impl From<SyntaxError> for DeserializationDiagnostic {
     fn from(_: SyntaxError) -> Self {
-        DeserializationDiagnostic::new("Syntax error")
+        Self::new("Syntax error")
     }
 }
 
-#[derive(Debug, Default, Clone, Deserialize, Serialize)]
+#[derive(Debug, Default, Clone)]
+#[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize))]
 pub struct DeserializationAdvice {
     notes: Vec<(MarkupBuf, Vec<MarkupBuf>)>,
 }

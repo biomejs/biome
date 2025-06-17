@@ -1,0 +1,19 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+assertion_line: 423
+expression: content
+---
+## `fix.js`
+
+```js
+// biome-ignore lint/suspicious/noCompareNegZero: ignored using `--suppress`
+(1 >= -0)
+// biome-ignore lint/suspicious/noCompareNegZero: ignored using `--suppress`
+(1 >= -0)
+```
+
+# Emitted Messages
+
+```block
+Checked 1 file in <TIME>. Fixed 1 file.
+```

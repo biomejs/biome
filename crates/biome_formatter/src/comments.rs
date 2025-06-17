@@ -80,8 +80,8 @@ mod map;
 
 use self::{builder::CommentsBuilderVisitor, map::CommentsMap};
 use crate::formatter::Formatter;
-use crate::{buffer::Buffer, write};
 use crate::{CstFormatContext, FormatResult, FormatRule, TextSize, TransformSourceMap};
+use crate::{buffer::Buffer, write};
 use biome_rowan::syntax::SyntaxElementKey;
 use biome_rowan::{Language, SyntaxNode, SyntaxToken, SyntaxTriviaPieceComments};
 use rustc_hash::FxHashSet;
@@ -124,15 +124,15 @@ pub enum CommentKind {
 
 impl CommentKind {
     pub const fn is_line(&self) -> bool {
-        matches!(self, CommentKind::Line)
+        matches!(self, Self::Line)
     }
 
     pub const fn is_block(&self) -> bool {
-        matches!(self, CommentKind::Block)
+        matches!(self, Self::Block)
     }
 
     pub const fn is_inline_block(&self) -> bool {
-        matches!(self, CommentKind::InlineBlock)
+        matches!(self, Self::InlineBlock)
     }
 
     /// Returns `true` for comments that can appear inline between any two tokens.
@@ -150,7 +150,7 @@ impl CommentKind {
     /// assert!(!CommentKind::Line.is_inline())
     /// ```
     pub const fn is_inline(&self) -> bool {
-        matches!(self, CommentKind::InlineBlock | CommentKind::Block)
+        matches!(self, Self::InlineBlock | Self::Block)
     }
 }
 
@@ -523,15 +523,15 @@ pub enum CommentTextPosition {
 
 impl CommentTextPosition {
     pub const fn is_same_line(&self) -> bool {
-        matches!(self, CommentTextPosition::SameLine)
+        matches!(self, Self::SameLine)
     }
 
     pub const fn is_own_line(&self) -> bool {
-        matches!(self, CommentTextPosition::OwnLine)
+        matches!(self, Self::OwnLine)
     }
 
     pub const fn is_end_of_line(&self) -> bool {
-        matches!(self, CommentTextPosition::EndOfLine)
+        matches!(self, Self::EndOfLine)
     }
 }
 
@@ -561,7 +561,7 @@ pub enum CommentPlacement<L: Language> {
     /// Makes the comment a...
     ///
     /// * [trailing comment] of the [`preceding_node`] if both the [`following_node`] and [`preceding_node`] are not [None]
-    ///     and the comment and [`preceding_node`] are only separated by a space (there's no token between the comment and [`preceding_node`]).
+    ///   and the comment and [`preceding_node`] are only separated by a space (there's no token between the comment and [`preceding_node`]).
     /// * [leading comment] of the [`following_node`] if the [`following_node`] is not [None]
     /// * [trailing comment] of the [`preceding_node`] if the [`preceding_node`] is not [None]
     /// * [dangling comment] of the [`enclosing_node`].
@@ -750,10 +750,10 @@ impl<L: Language> CommentPlacement<L> {
     #[inline]
     pub fn or_else<F>(self, f: F) -> Self
     where
-        F: FnOnce(DecoratedComment<L>) -> CommentPlacement<L>,
+        F: FnOnce(DecoratedComment<L>) -> Self,
     {
         match self {
-            CommentPlacement::Default(comment) => f(comment),
+            Self::Default(comment) => f(comment),
             placement => placement,
         }
     }
@@ -892,7 +892,7 @@ impl<L: Language> Comments<L> {
     pub fn leading_trailing_comments(
         &self,
         node: &SyntaxNode<L>,
-    ) -> impl Iterator<Item = &SourceComment<L>> {
+    ) -> impl Iterator<Item = &SourceComment<L>> + use<'_, L> {
         self.leading_comments(node)
             .iter()
             .chain(self.trailing_comments(node).iter())
@@ -1153,7 +1153,7 @@ pub struct FormatPlainComment<C> {
 
 impl<C> Default for FormatPlainComment<C> {
     fn default() -> Self {
-        FormatPlainComment {
+        Self {
             context: PhantomData,
         }
     }

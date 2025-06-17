@@ -1,7 +1,8 @@
 use crate::JsRuleAction;
 use biome_analyze::context::RuleContext;
-use biome_analyze::{declare_lint_rule, ActionCategory, Ast, FixKind, Rule, RuleDiagnostic};
+use biome_analyze::{Ast, FixKind, Rule, RuleDiagnostic, declare_lint_rule};
 use biome_console::markup;
+use biome_diagnostics::Severity;
 use biome_js_factory::make;
 use biome_js_syntax::{
     AnyJsExpression, AnyJsLiteralExpression, AnyJsTemplateElement, JsTemplateExpression,
@@ -41,8 +42,9 @@ declare_lint_rule! {
         version: "1.0.0",
         name: "noUnusedTemplateLiteral",
         language: "ts",
-        recommended: true,
-        fix_kind: FixKind::Unsafe,
+        recommended: false,
+        severity: Severity::Warning,
+        fix_kind: FixKind::Safe,
     }
 }
 
@@ -81,7 +83,7 @@ impl Rule for NoUnusedTemplateLiteral {
                 AnyJsTemplateElement::JsTemplateChunkElement(ele) => {
                     // Safety: if `ele.template_chunk_token()` is `Err` variant, [can_convert_to_string_lit] should return false,
                     // thus `run` will return None
-                    acc += ele.template_chunk_token().unwrap().text();
+                    acc += ele.template_chunk_token().unwrap().text_trimmed();
                     acc
                 }
                 AnyJsTemplateElement::JsTemplateElement(_) => {
@@ -105,7 +107,7 @@ impl Rule for NoUnusedTemplateLiteral {
         );
 
         Some(JsRuleAction::new(
-            ActionCategory::QuickFix,
+            ctx.metadata().action_category(ctx.category(), ctx.group()),
             ctx.metadata().applicability(),
             markup! { "Replace with string literal" }.to_owned(),
             mutation,
@@ -125,7 +127,7 @@ fn can_convert_to_string_literal(node: &JsTemplateExpression) -> bool {
                     Ok(token) => {
                         // if token text has any special character
                         token
-                            .text()
+                            .text_trimmed()
                             .bytes()
                             .any(|byte| matches!(byte, b'\n' | b'\'' | b'"'))
                     }

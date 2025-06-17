@@ -1,0 +1,75 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `file.ts`
+
+```ts
+
+// biome-ignore-start syntax/correctness/noTypeOnlyImportAttributes: bug
+import type { ChalkInstance } from "chalk" with { "resolution-mode": "import" };
+import type { ChalkInstance2 } from "chalk2" with { "resolution-mode": "import" };
+// biome-ignore-end syntax/correctness/noTypeOnlyImportAttributes: bug
+
+function sommething(chalk: ChalkInstance) {
+  console.log(chalk.yellow('we do something here'));
+}
+```
+
+# Emitted Messages
+
+```block
+file.ts:4:13 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This import is unused.
+  
+    2 │ // biome-ignore-start syntax/correctness/noTypeOnlyImportAttributes: bug
+    3 │ import type { ChalkInstance } from "chalk" with { "resolution-mode": "import" };
+  > 4 │ import type { ChalkInstance2 } from "chalk2" with { "resolution-mode": "import" };
+      │             ^^^^^^^^^^^^^^^^^^
+    5 │ // biome-ignore-end syntax/correctness/noTypeOnlyImportAttributes: bug
+    6 │ 
+  
+  i Unused imports might be the result of an incomplete refactoring.
+  
+  i Unsafe fix: Remove the unused imports.
+  
+    2 2 │   // biome-ignore-start syntax/correctness/noTypeOnlyImportAttributes: bug
+    3 3 │   import type { ChalkInstance } from "chalk" with { "resolution-mode": "import" };
+    4   │ - import·type·{·ChalkInstance2·}·from·"chalk2"·with·{·"resolution-mode":·"import"·};
+    5 4 │   // biome-ignore-end syntax/correctness/noTypeOnlyImportAttributes: bug
+    6 5 │   
+  
+
+```
+
+```block
+file.ts:7:10 lint/correctness/noUnusedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This function sommething is unused.
+  
+    5 │ // biome-ignore-end syntax/correctness/noTypeOnlyImportAttributes: bug
+    6 │ 
+  > 7 │ function sommething(chalk: ChalkInstance) {
+      │          ^^^^^^^^^^
+    8 │   console.log(chalk.yellow('we do something here'));
+    9 │ }
+  
+  i Unused variables are often the result of an incomplete refactoring, typos, or other sources of bugs.
+  
+  i Unsafe fix: If this is intentional, prepend sommething with an underscore.
+  
+    5 5 │   // biome-ignore-end syntax/correctness/noTypeOnlyImportAttributes: bug
+    6 6 │   
+    7   │ - function·sommething(chalk:·ChalkInstance)·{
+      7 │ + function·_sommething(chalk:·ChalkInstance)·{
+    8 8 │     console.log(chalk.yellow('we do something here'));
+    9 9 │   }
+  
+
+```
+
+```block
+Checked 1 file in <TIME>. No fixes applied.
+Found 2 warnings.
+```

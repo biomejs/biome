@@ -1,39 +1,41 @@
 use crate::run_cli;
-use crate::snap_test::{assert_cli_snapshot, assert_file_contents, SnapshotPayload};
+use crate::snap_test::{SnapshotPayload, assert_cli_snapshot};
 use biome_console::BufferConsole;
 use biome_fs::MemoryFileSystem;
-use biome_service::DynRef;
 use bpaf::Args;
-use std::path::Path;
+use camino::Utf8Path;
 
 #[test]
 fn should_use_editorconfig() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    let editorconfig = Path::new(".editorconfig");
+    let editorconfig = Utf8Path::new(".editorconfig");
     fs.insert(
         editorconfig.into(),
         r#"
 [*]
-max_line_length = 300
+indent_style = space
+indent_size = 8
 "#,
     );
 
-    let test_file = Path::new("test.js");
-    let contents = r#"console.log("really long string that should cause a break if the line width remains at the default 80 characters");
+    let test_file = Utf8Path::new("test.js");
+    let contents = r#"function setName(name) {
+ currentName = name;
+}
 "#;
     fs.insert(test_file.into(), contents);
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
         Args::from(
             [
-                ("format"),
-                ("--write"),
-                ("--use-editorconfig=true"),
-                test_file.as_os_str().to_str().unwrap(),
+                "format",
+                "--write",
+                "--use-editorconfig=true",
+                test_file.as_str(),
             ]
             .as_slice(),
         ),
@@ -41,10 +43,56 @@ max_line_length = 300
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
 
-    assert_file_contents(&fs, test_file, contents);
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
         "should_use_editorconfig",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn should_not_use_editorconfig() {
+    let mut fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let editorconfig = Utf8Path::new(".editorconfig");
+    fs.insert(
+        editorconfig.into(),
+        r#"
+[*]
+indent_style = space
+indent_size = 2
+"#,
+    );
+
+    let test_file = Utf8Path::new("test.js");
+    let contents = r#"function setName(name) {
+ currentName = name;
+}
+"#;
+    fs.insert(test_file.into(), contents);
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(
+            [
+                "format",
+                "--write",
+                "--use-editorconfig=false",
+                test_file.as_str(),
+            ]
+            .as_slice(),
+        ),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "should_not_use_editorconfig",
         fs,
         console,
         result,
@@ -56,16 +104,17 @@ fn should_use_editorconfig_enabled_from_biome_conf() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    let editorconfig = Path::new(".editorconfig");
+    let editorconfig = Utf8Path::new(".editorconfig");
     fs.insert(
         editorconfig.into(),
         r#"
 [*]
-max_line_length = 300
+indent_style = space
+indent_size = 8
 "#,
     );
 
-    let biomeconfig = Path::new("biome.json");
+    let biomeconfig = Utf8Path::new("biome.json");
     fs.insert(
         biomeconfig.into(),
         r#"{
@@ -76,27 +125,21 @@ max_line_length = 300
 "#,
     );
 
-    let test_file = Path::new("test.js");
-    let contents = r#"console.log("really long string that should cause a break if the line width remains at the default 80 characters");
+    let test_file = Utf8Path::new("test.js");
+    let contents = r#"function setName(name) {
+ currentName = name;
+}
 "#;
     fs.insert(test_file.into(), contents);
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
-        Args::from(
-            [
-                ("format"),
-                ("--write"),
-                test_file.as_os_str().to_str().unwrap(),
-            ]
-            .as_slice(),
-        ),
+        Args::from(["format", "--write", test_file.as_str()].as_slice()),
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
 
-    assert_file_contents(&fs, test_file, contents);
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
         "should_use_editorconfig_enabled_from_biome_conf",
@@ -111,36 +154,31 @@ fn should_use_editorconfig_check() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    let editorconfig = Path::new(".editorconfig");
+    let editorconfig = Utf8Path::new(".editorconfig");
     fs.insert(
         editorconfig.into(),
         r#"
 [*]
-max_line_length = 300
+indent_style = space
+indent_size = 8
 "#,
     );
 
-    let test_file = Path::new("test.js");
-    let contents = r#"console.log("really long string that should cause a break if the line width remains at the default 80 characters");
+    let test_file = Utf8Path::new("test.js");
+    let contents = r#"function setName(name) {
+ currentName = name;
+}
 "#;
     fs.insert(test_file.into(), contents);
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
-        Args::from(
-            [
-                ("check"),
-                ("--use-editorconfig=true"),
-                test_file.as_os_str().to_str().unwrap(),
-            ]
-            .as_slice(),
-        ),
+        Args::from(["check", "--use-editorconfig=true", test_file.as_str()].as_slice()),
     );
 
-    assert!(result.is_ok(), "run_cli returned {result:?}");
+    assert!(result.is_err(), "run_cli returned {result:?}");
 
-    assert_file_contents(&fs, test_file, contents);
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
         "should_use_editorconfig_check",
@@ -155,16 +193,17 @@ fn should_use_editorconfig_check_enabled_from_biome_conf() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    let editorconfig = Path::new(".editorconfig");
+    let editorconfig = Utf8Path::new(".editorconfig");
     fs.insert(
         editorconfig.into(),
         r#"
 [*]
-max_line_length = 300
+indent_style = space
+indent_size = 8
 "#,
     );
 
-    let biomeconfig = Path::new("biome.json");
+    let biomeconfig = Utf8Path::new("biome.json");
     fs.insert(
         biomeconfig.into(),
         r#"{
@@ -175,20 +214,21 @@ max_line_length = 300
 "#,
     );
 
-    let test_file = Path::new("test.js");
-    let contents = r#"console.log("really long string that should cause a break if the line width remains at the default 80 characters");
+    let test_file = Utf8Path::new("test.js");
+    let contents = r#"function setName(name) {
+ currentName = name;
+}
 "#;
     fs.insert(test_file.into(), contents);
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
-        Args::from([("check"), test_file.as_os_str().to_str().unwrap()].as_slice()),
+        Args::from(["check", test_file.as_str()].as_slice()),
     );
 
-    assert!(result.is_ok(), "run_cli returned {result:?}");
+    assert!(result.is_err(), "run_cli returned {result:?}");
 
-    assert_file_contents(&fs, test_file, contents);
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
         "should_use_editorconfig_check_enabled_from_biome_conf",
@@ -203,18 +243,17 @@ fn should_have_biome_override_editorconfig() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    let editorconfig = Path::new(".editorconfig");
+    let editorconfig = Utf8Path::new(".editorconfig");
     fs.insert(
         editorconfig.into(),
         r#"
 [*]
-max_line_length = 100
 indent_style = tab
 "#,
     );
-    let biomeconfig = Path::new("biome.json");
+    let biome_config_path = Utf8Path::new("biome.json");
     fs.insert(
-        biomeconfig.into(),
+        biome_config_path.into(),
         r#"
 {
     "formatter": {
@@ -224,22 +263,22 @@ indent_style = tab
 "#,
     );
 
-    let test_file = Path::new("test.js");
+    let test_file = Utf8Path::new("test.js");
     let contents = r#"console.log(
 	"really long string that should break if the line width is <=90, but not at 100",
 );
 "#;
     fs.insert(test_file.into(), contents);
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
         Args::from(
             [
-                ("format"),
-                ("--write"),
-                ("--use-editorconfig=true"),
-                test_file.as_os_str().to_str().unwrap(),
+                "format",
+                "--write",
+                "--use-editorconfig=true",
+                test_file.as_str(),
             ]
             .as_slice(),
         ),
@@ -247,10 +286,62 @@ indent_style = tab
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
 
-    assert_file_contents(&fs, test_file, contents);
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
         "should_have_biome_override_editorconfig",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn should_not_use_higher_editorconfig_when_find_biome_conf() {
+    let mut fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let editorconfig = Utf8Path::new(".editorconfig");
+    fs.insert(
+        editorconfig.into(),
+        r#"
+[*]
+indent_style = space
+indent_size = 2
+"#,
+    );
+
+    let biome_config_path = Utf8Path::new("foo/biome.json");
+    fs.insert(
+        biome_config_path.into(),
+        r#"
+{
+    "formatter": {
+        "lineWidth": 60
+    }
+}
+"#,
+    );
+    let test_file = Utf8Path::new("foo/test.js");
+    fs.insert(
+        test_file.into(),
+        r#"
+    if (foo) {
+        console.log("test 123");
+    }
+    "#,
+    );
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["format", "--write", "--config-path=foo", test_file.as_str()].as_slice()),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "should_not_use_higher_editorconfig_when_find_biome_conf",
         fs,
         console,
         result,
@@ -262,34 +353,40 @@ fn should_have_cli_override_editorconfig() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    let editorconfig = Path::new(".editorconfig");
+    let editorconfig = Utf8Path::new(".editorconfig");
     fs.insert(
         editorconfig.into(),
         r#"
 [*]
-max_line_length = 90
+indent_style = space
+indent_size = 8
 "#,
     );
 
-    let test_file = Path::new("test.js");
-    fs.insert(test_file.into(), r#"console.log("really long string that should break if the line width is <=90, but not at 100");
-"#);
+    let test_file = Utf8Path::new("test.js");
+    fs.insert(
+        test_file.into(),
+        r#"function setName(name) {
+ currentName = name;
+}
+"#,
+    );
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
         Args::from(
             [
-                ("check"),
-                ("--line-width=100"),
-                ("--use-editorconfig=true"),
-                test_file.as_os_str().to_str().unwrap(),
+                "check",
+                "--use-editorconfig=true",
+                "--indent-width=4",
+                test_file.as_str(),
             ]
             .as_slice(),
         ),
     );
 
-    assert!(result.is_ok(), "run_cli returned {result:?}");
+    assert!(result.is_err(), "run_cli returned {result:?}");
 
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
@@ -305,7 +402,7 @@ fn should_apply_path_overrides() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    let editorconfig = Path::new(".editorconfig");
+    let editorconfig = Utf8Path::new(".editorconfig");
     fs.insert(
         editorconfig.into(),
         r#"
@@ -317,7 +414,7 @@ indent_style = space
 "#,
     );
 
-    let test_file = Path::new("tabs.js");
+    let test_file = Utf8Path::new("tabs.js");
     fs.insert(
         test_file.into(),
         r#"
@@ -326,7 +423,7 @@ indent_style = space
     }
     "#,
     );
-    let test_file2 = Path::new("foo/spaces.js");
+    let test_file2 = Utf8Path::new("foo/spaces.js");
     fs.insert(
         test_file.into(),
         r#"
@@ -336,15 +433,15 @@ indent_style = space
     "#,
     );
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
         Args::from(
             [
-                ("check"),
-                ("--use-editorconfig=true"),
-                test_file.as_os_str().to_str().unwrap(),
-                test_file2.as_os_str().to_str().unwrap(),
+                "check",
+                "--use-editorconfig=true",
+                test_file.as_str(),
+                test_file2.as_str(),
             ]
             .as_slice(),
         ),
@@ -366,36 +463,31 @@ fn should_use_editorconfig_ci() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    let editorconfig = Path::new(".editorconfig");
+    let editorconfig = Utf8Path::new(".editorconfig");
     fs.insert(
         editorconfig.into(),
         r#"
 [*]
-max_line_length = 300
+indent_style = space
+indent_size = 8
 "#,
     );
 
-    let test_file = Path::new("test.js");
-    let contents = r#"console.log("really long string that should cause a break if the line width remains at the default 80 characters");
+    let test_file = Utf8Path::new("test.js");
+    let contents = r#"function setName(name) {
+ currentName = name;
+}
 "#;
     fs.insert(test_file.into(), contents);
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
-        Args::from(
-            [
-                ("ci"),
-                ("--use-editorconfig=true"),
-                test_file.as_os_str().to_str().unwrap(),
-            ]
-            .as_slice(),
-        ),
+        Args::from(["ci", "--use-editorconfig=true", test_file.as_str()].as_slice()),
     );
 
-    assert!(result.is_ok(), "run_cli returned {result:?}");
+    assert!(result.is_err(), "run_cli returned {result:?}");
 
-    assert_file_contents(&fs, test_file, contents);
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
         "should_use_editorconfig_ci",
@@ -410,16 +502,17 @@ fn should_use_editorconfig_ci_enabled_from_biome_conf() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    let editorconfig = Path::new(".editorconfig");
+    let editorconfig = Utf8Path::new(".editorconfig");
     fs.insert(
         editorconfig.into(),
         r#"
 [*]
-max_line_length = 300
+indent_style = space
+indent_size = 8
 "#,
     );
 
-    let biomeconfig = Path::new("biome.json");
+    let biomeconfig = Utf8Path::new("biome.json");
     fs.insert(
         biomeconfig.into(),
         r#"{
@@ -430,20 +523,19 @@ max_line_length = 300
 "#,
     );
 
-    let test_file = Path::new("test.js");
+    let test_file = Utf8Path::new("test.js");
     let contents = r#"console.log("really long string that should cause a break if the line width remains at the default 80 characters");
 "#;
     fs.insert(test_file.into(), contents);
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
-        Args::from([("ci"), test_file.as_os_str().to_str().unwrap()].as_slice()),
+        Args::from(["ci", test_file.as_str()].as_slice()),
     );
 
-    assert!(result.is_ok(), "run_cli returned {result:?}");
+    assert!(result.is_err(), "run_cli returned {result:?}");
 
-    assert_file_contents(&fs, test_file, contents);
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
         "should_use_editorconfig_ci_enabled_from_biome_conf",
@@ -454,44 +546,153 @@ max_line_length = 300
 }
 
 #[test]
-fn should_emit_diagnostics() {
+fn non_closed_section() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    let editorconfig = Path::new(".editorconfig");
+    let editorconfig = Utf8Path::new(".editorconfig");
+    fs.insert(
+        editorconfig.into(),
+        r#"
+[*
+indent_style = space
+indent_size = 8
+"#,
+    );
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["format", "--use-editorconfig=true"].as_slice()),
+    );
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "non_closed_section",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn root_parse_error() {
+    let mut fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let editorconfig = Utf8Path::new(".editorconfig");
+    fs.insert(
+        editorconfig.into(),
+        r#"
+root = on
+"#,
+    );
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["format", "--use-editorconfig=true"].as_slice()),
+    );
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "root_parse_error",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn end_of_line_parse_error() {
+    let mut fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let editorconfig = Utf8Path::new(".editorconfig");
     fs.insert(
         editorconfig.into(),
         r#"
 [*]
-insert_final_newline = false
+end_of_line = lfcr
 "#,
     );
 
-    let test_file = Path::new("test.js");
-    let contents = r#"console.log("foo");
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["format", "--use-editorconfig=true"].as_slice()),
+    );
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "end_of_line_parse_error",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn indent_size_parse_error() {
+    let mut fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let editorconfig = Utf8Path::new(".editorconfig");
+    fs.insert(
+        editorconfig.into(),
+        r#"
+  [*]
+  indent_size = 1000
+"#,
+    );
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["format", "--use-editorconfig=true"].as_slice()),
+    );
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "indent_size_parse_error",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn indent_size_can_set_to_tab() {
+    let mut fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let editorconfig = Utf8Path::new(".editorconfig");
+    fs.insert(
+        editorconfig.into(),
+        r#"
+        [*]
+        indent_size = tab
+        "#,
+    );
+
+    let test_file = Utf8Path::new("test.js");
+    let contents = r#"function setName(name) {
+ currentName = name;
+}
 "#;
     fs.insert(test_file.into(), contents);
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
-        Args::from(
-            [
-                ("format"),
-                ("--write"),
-                ("--use-editorconfig=true"),
-                test_file.as_os_str().to_str().unwrap(),
-            ]
-            .as_slice(),
-        ),
+        Args::from(["format", "--write", test_file.as_str()].as_slice()),
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
 
-    assert_file_contents(&fs, test_file, contents);
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
-        "should_emit_diagnostics",
+        "indent_size_can_set_to_tab",
         fs,
         console,
         result,

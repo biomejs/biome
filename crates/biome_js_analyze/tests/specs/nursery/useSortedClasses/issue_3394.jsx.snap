@@ -1,0 +1,35 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: issue_3394.jsx
+snapshot_kind: text
+---
+# Input
+```jsx
+<>
+  <div class={`${variable}-bar ${variable}`}></div>
+  <div class={`${variable}-bar    ${variable}`}></div>
+</>
+```
+
+# Diagnostics
+```
+issue_3394.jsx:3:31 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i These CSS classes should be sorted.
+  
+    1 │ <>
+    2 │   <div class={`${variable}-bar ${variable}`}></div>
+  > 3 │   <div class={`${variable}-bar    ${variable}`}></div>
+      │                               ^^^^
+    4 │ </>
+  
+  i Unsafe fix: Sort the classes.
+  
+    1 1 │   <>
+    2 2 │     <div class={`${variable}-bar ${variable}`}></div>
+    3   │ - ··<div·class={`${variable}-bar····${variable}`}></div>
+      3 │ + ··<div·class={`${variable}-bar·${variable}`}></div>
+    4 4 │   </>
+  
+
+```

@@ -1,10 +1,10 @@
-use crate::logging::LoggingKind;
 use crate::LoggingLevel;
+use crate::logging::LoggingKind;
 use biome_configuration::ConfigurationPathHint;
 use biome_diagnostics::Severity;
 use bpaf::Bpaf;
+use camino::Utf8PathBuf;
 use std::fmt::{Display, Formatter};
-use std::path::PathBuf;
 use std::str::FromStr;
 
 /// Global options applied to all commands
@@ -24,7 +24,12 @@ pub struct CliOptions {
 
     /// Set the file path to the configuration file, or the directory path to find `biome.json` or `biome.jsonc`.
     /// If used, it disables the default configuration file resolution.
-    #[bpaf(long("config-path"), argument("PATH"), optional)]
+    #[bpaf(
+        long("config-path"),
+        env("BIOME_CONFIG_PATH"),
+        argument("PATH"),
+        optional
+    )]
     pub config_path: Option<String>,
 
     /// Cap the amount of diagnostics displayed. When `none` is provided, the limit is lifted.
@@ -37,8 +42,8 @@ pub struct CliOptions {
     pub max_diagnostics: MaxDiagnostics,
 
     /// Skip over files containing syntax errors instead of emitting an error diagnostic.
-    #[bpaf(long("skip-errors"), switch)]
-    pub skip_errors: bool,
+    #[bpaf(long("skip-parse-errors"), switch)]
+    pub skip_parse_errors: bool,
 
     /// Silence errors that would be emitted in case no files were processed during the execution of the command.
     #[bpaf(long("no-errors-on-unmatched"), switch)]
@@ -56,15 +61,22 @@ pub struct CliOptions {
     )]
     pub reporter: CliReporter,
 
+    /// Optional path to redirect log messages to.
+    ///
+    /// If omitted, logs are printed to stdout.
+    #[bpaf(long("log-file"))]
+    pub log_file: Option<String>,
+
+    /// The level of logging. In order, from the most verbose to the least
+    /// verbose: debug, info, warn, error.
+    ///
+    /// The value `none` won't show any logging.
     #[bpaf(
         long("log-level"),
         argument("none|debug|info|warn|error"),
         fallback(LoggingLevel::default()),
         display_fallback
     )]
-    /// The level of logging. In order, from the most verbose to the least verbose: debug, info, warn, error.
-    ///
-    /// The value `none` won't show any logging.
     pub log_level: LoggingLevel,
 
     /// How the log should look like.
@@ -76,13 +88,13 @@ pub struct CliOptions {
     )]
     pub log_kind: LoggingKind,
 
+    /// The level of diagnostics to show. In order, from the lowest to the most important: info, warn, error. Passing `--diagnostic-level=error` will cause Biome to print only diagnostics that contain only errors.
     #[bpaf(
         long("diagnostic-level"),
         argument("info|warn|error"),
         fallback(Severity::default()),
         display_fallback
     )]
-    /// The level of diagnostics to show. In order, from the lowest to the most important: info, warn, error. Passing `--diagnostic-level=error` will cause Biome to print only diagnostics that contain only errors.
     pub diagnostic_level: Severity,
 }
 
@@ -91,7 +103,11 @@ impl CliOptions {
     pub(crate) fn as_configuration_path_hint(&self) -> ConfigurationPathHint {
         match self.config_path.as_ref() {
             None => ConfigurationPathHint::default(),
-            Some(path) => ConfigurationPathHint::FromUser(PathBuf::from(path)),
+            Some(path) => {
+                let path = Utf8PathBuf::from(path);
+                let path = path.strip_prefix("./").unwrap_or(&path);
+                ConfigurationPathHint::FromUser(path.to_path_buf())
+            }
         }
     }
 }
@@ -116,7 +132,7 @@ impl FromStr for ColorsArg {
     }
 }
 
-#[derive(Debug, Default, Clone)]
+#[derive(Debug, Default, Clone, Eq, PartialEq)]
 pub enum CliReporter {
     /// The default reporter
     #[default]
@@ -165,14 +181,14 @@ impl FromStr for CliReporter {
 impl Display for CliReporter {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         match self {
-            CliReporter::Default => f.write_str("default"),
-            CliReporter::Json => f.write_str("json"),
-            CliReporter::JsonPretty => f.write_str("json-pretty"),
-            CliReporter::Summary => f.write_str("summary"),
-            CliReporter::GitHub => f.write_str("github"),
-            CliReporter::Junit => f.write_str("junit"),
-            CliReporter::GitLab => f.write_str("gitlab"),
-            CliReporter::Checkstyle => f.write_str("checkstyle"),
+            Self::Default => f.write_str("default"),
+            Self::Json => f.write_str("json"),
+            Self::JsonPretty => f.write_str("json-pretty"),
+            Self::Summary => f.write_str("summary"),
+            Self::GitHub => f.write_str("github"),
+            Self::Junit => f.write_str("junit"),
+            Self::GitLab => f.write_str("gitlab"),
+            Self::Checkstyle => f.write_str("checkstyle"),
         }
     }
 }
@@ -186,8 +202,15 @@ pub enum MaxDiagnostics {
 impl MaxDiagnostics {
     pub fn ok(&self) -> Option<u32> {
         match self {
-            MaxDiagnostics::None => None,
-            MaxDiagnostics::Limit(value) => Some(*value),
+            Self::None => None,
+            Self::Limit(value) => Some(*value),
+        }
+    }
+
+    pub fn exceeded(&self, count: usize) -> bool {
+        match self {
+            Self::None => false,
+            Self::Limit(limit) => count as u32 > *limit,
         }
     }
 }
@@ -201,10 +224,10 @@ impl Default for MaxDiagnostics {
 impl Display for MaxDiagnostics {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         match self {
-            MaxDiagnostics::None => {
+            Self::None => {
                 write!(f, "none")
             }
-            MaxDiagnostics::Limit(value) => {
+            Self::Limit(value) => {
                 write!(f, "{value}")
             }
         }
@@ -215,12 +238,15 @@ impl FromStr for MaxDiagnostics {
     type Err = String;
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         match s {
-            "none" => Ok(MaxDiagnostics::None),
+            "none" => Ok(Self::None),
             _ => {
                 if let Ok(value) = s.parse::<u32>() {
-                    Ok(MaxDiagnostics::Limit(value))
+                    Ok(Self::Limit(value))
                 } else {
-                    Err(format!("Invalid value provided. Provide 'none' to lift the limit, or a number between 0 and {}.", u32::MAX))
+                    Err(format!(
+                        "Invalid value provided. Provide 'none' to lift the limit, or a number between 0 and {}.",
+                        u32::MAX
+                    ))
                 }
             }
         }
@@ -230,8 +256,8 @@ impl FromStr for MaxDiagnostics {
 impl From<MaxDiagnostics> for u64 {
     fn from(value: MaxDiagnostics) -> Self {
         match value {
-            MaxDiagnostics::None => u64::MAX,
-            MaxDiagnostics::Limit(value) => value as u64,
+            MaxDiagnostics::None => Self::MAX,
+            MaxDiagnostics::Limit(value) => value as Self,
         }
     }
 }
@@ -239,7 +265,7 @@ impl From<MaxDiagnostics> for u64 {
 impl From<MaxDiagnostics> for u32 {
     fn from(value: MaxDiagnostics) -> Self {
         match value {
-            MaxDiagnostics::None => u32::MAX,
+            MaxDiagnostics::None => Self::MAX,
             MaxDiagnostics::Limit(value) => value,
         }
     }

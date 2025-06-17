@@ -1,0 +1,84 @@
+---
+source: crates/biome_js_parser/tests/spec_test.rs
+expression: snapshot
+snapshot_kind: text
+---
+## Input
+
+```js
+\u0061sync () => {}
+
+```
+
+
+## AST
+
+```
+JsModule {
+    bom_token: missing (optional),
+    interpreter_token: missing (optional),
+    directives: JsDirectiveList [],
+    items: JsModuleItemList [
+        JsExpressionStatement {
+            expression: JsBogusExpression {
+                items: [
+                    ERROR_TOKEN@0..11 "\\u0061sync" [] [Whitespace(" ")],
+                    JsParameters {
+                        l_paren_token: L_PAREN@11..12 "(" [] [],
+                        items: JsParameterList [],
+                        r_paren_token: R_PAREN@12..14 ")" [] [Whitespace(" ")],
+                    },
+                    FAT_ARROW@14..17 "=>" [] [Whitespace(" ")],
+                    JsFunctionBody {
+                        l_curly_token: L_CURLY@17..18 "{" [] [],
+                        directives: JsDirectiveList [],
+                        statements: JsStatementList [],
+                        r_curly_token: R_CURLY@18..19 "}" [] [],
+                    },
+                ],
+            },
+            semicolon_token: missing (optional),
+        },
+    ],
+    eof_token: EOF@19..20 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: JS_MODULE@0..20
+  0: (empty)
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..19
+    0: JS_EXPRESSION_STATEMENT@0..19
+      0: JS_BOGUS_EXPRESSION@0..19
+        0: ERROR_TOKEN@0..11 "\\u0061sync" [] [Whitespace(" ")]
+        1: JS_PARAMETERS@11..14
+          0: L_PAREN@11..12 "(" [] []
+          1: JS_PARAMETER_LIST@12..12
+          2: R_PAREN@12..14 ")" [] [Whitespace(" ")]
+        2: FAT_ARROW@14..17 "=>" [] [Whitespace(" ")]
+        3: JS_FUNCTION_BODY@17..19
+          0: L_CURLY@17..18 "{" [] []
+          1: JS_DIRECTIVE_LIST@18..18
+          2: JS_STATEMENT_LIST@18..18
+          3: R_CURLY@18..19 "}" [] []
+      1: (empty)
+  4: EOF@19..20 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+arrow_escaped_async.js:1:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × 'async' keyword cannot contain escape character.
+  
+  > 1 │ \u0061sync () => {}
+      │ ^^^^^^^^^^
+    2 │ 
+  
+```

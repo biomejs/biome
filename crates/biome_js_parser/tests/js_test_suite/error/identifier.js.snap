@@ -1,0 +1,97 @@
+---
+source: crates/biome_js_parser/tests/spec_test.rs
+expression: snapshot
+snapshot_kind: text
+---
+## Input
+
+```js
+yield;
+await;
+
+```
+
+
+## AST
+
+```
+JsModule {
+    bom_token: missing (optional),
+    interpreter_token: missing (optional),
+    directives: JsDirectiveList [],
+    items: JsModuleItemList [
+        JsExpressionStatement {
+            expression: JsBogusExpression {
+                items: [
+                    JsBogus {
+                        items: [
+                            IDENT@0..5 "yield" [] [],
+                        ],
+                    },
+                ],
+            },
+            semicolon_token: SEMICOLON@5..6 ";" [] [],
+        },
+        JsExpressionStatement {
+            expression: JsAwaitExpression {
+                await_token: AWAIT_KW@6..12 "await" [Newline("\n")] [],
+                argument: missing (required),
+            },
+            semicolon_token: SEMICOLON@12..13 ";" [] [],
+        },
+    ],
+    eof_token: EOF@13..14 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: JS_MODULE@0..14
+  0: (empty)
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..13
+    0: JS_EXPRESSION_STATEMENT@0..6
+      0: JS_BOGUS_EXPRESSION@0..5
+        0: JS_BOGUS@0..5
+          0: IDENT@0..5 "yield" [] []
+      1: SEMICOLON@5..6 ";" [] []
+    1: JS_EXPRESSION_STATEMENT@6..13
+      0: JS_AWAIT_EXPRESSION@6..12
+        0: AWAIT_KW@6..12 "await" [Newline("\n")] []
+        1: (empty)
+      1: SEMICOLON@12..13 ";" [] []
+  4: EOF@13..14 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+identifier.js:1:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Illegal use of reserved keyword `yield` as an identifier in strict mode
+  
+  > 1 │ yield;
+      │ ^^^^^
+    2 │ await;
+    3 │ 
+  
+identifier.js:2:6 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected an unary expression but instead found ';'.
+  
+    1 │ yield;
+  > 2 │ await;
+      │      ^
+    3 │ 
+  
+  i Expected an unary expression here.
+  
+    1 │ yield;
+  > 2 │ await;
+      │      ^
+    3 │ 
+  
+```

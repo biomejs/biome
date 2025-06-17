@@ -1,16 +1,16 @@
-use crate::{services::aria::Aria, JsRuleAction};
+use crate::{JsRuleAction, services::aria::Aria};
 use biome_analyze::{
-    context::RuleContext, declare_lint_rule, ActionCategory, FixKind, Rule, RuleDiagnostic,
-    RuleSource,
+    FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
+use biome_diagnostics::Severity;
 use biome_js_factory::make::{
     jsx_attribute, jsx_attribute_initializer_clause, jsx_attribute_list, jsx_ident, jsx_name,
     jsx_string, jsx_string_literal, token,
 };
 use biome_js_syntax::{
-    jsx_ext::AnyJsxElement, AnyJsxAttribute, AnyJsxAttributeName, AnyJsxAttributeValue,
-    JsxAttributeList, T,
+    AnyJsxAttribute, AnyJsxAttributeName, AnyJsxAttributeValue, JsxAttributeList, T,
+    jsx_ext::AnyJsxElement,
 };
 use biome_rowan::{AstNode, AstNodeList, BatchMutationExt, TriviaPieceKind};
 
@@ -54,6 +54,7 @@ declare_lint_rule! {
         language: "jsx",
         sources: &[RuleSource::EslintJsxA11y("aria-activedescendant-has-tabindex")],
         recommended: true,
+        severity: Severity::Error,
         fix_kind: FixKind::Unsafe,
     }
 }
@@ -66,13 +67,9 @@ impl Rule for UseAriaActivedescendantWithTabindex {
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
-        let aria_roles = ctx.aria_roles();
-        let element_name = node.name().ok()?.as_jsx_name()?.value_token().ok()?;
-        let attributes = ctx.extract_attributes(&node.attributes());
-        let attributes = ctx.convert_all_attribute_values(attributes);
 
         if node.is_element()
-            && aria_roles.is_not_interactive_element(element_name.text_trimmed(), attributes)
+            && ctx.aria_roles().is_not_interactive_element(node)
             && node
                 .find_attribute_by_name("aria-activedescendant")
                 .is_some()
@@ -125,9 +122,9 @@ impl Rule for UseAriaActivedescendantWithTabindex {
         mutation.replace_node(old_attribute_list, jsx_attribute_list(new_attribute_list));
 
         Some(JsRuleAction::new(
-            ActionCategory::QuickFix,
+            ctx.metadata().action_category(ctx.category(), ctx.group()),
             ctx.metadata().applicability(),
-            markup! { "Add the tabIndex attribute." }.to_owned(),
+            markup! { "Add the "<Emphasis>"tabIndex"</Emphasis>" attribute." }.to_owned(),
             mutation,
         ))
     }

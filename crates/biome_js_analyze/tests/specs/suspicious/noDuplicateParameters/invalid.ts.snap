@@ -1,6 +1,7 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid.ts
+snapshot_kind: text
 ---
 # Input
 ```ts
@@ -39,7 +40,7 @@ class A {
 ```
 invalid.ts:1:18 lint/suspicious/noDuplicateParameters ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Duplicate parameter name.
+  × Duplicate parameter name.
   
   > 1 │ function b(a, b, b) {}
       │                  ^
@@ -54,7 +55,7 @@ invalid.ts:1:18 lint/suspicious/noDuplicateParameters ━━━━━━━━�
 ```
 invalid.ts:2:15 lint/suspicious/noDuplicateParameters ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Duplicate parameter name.
+  × Duplicate parameter name.
   
     1 │ function b(a, b, b) {}
   > 2 │ function c(a, a, a) {}
@@ -70,7 +71,7 @@ invalid.ts:2:15 lint/suspicious/noDuplicateParameters ━━━━━━━━�
 ```
 invalid.ts:3:18 lint/suspicious/noDuplicateParameters ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Duplicate parameter name.
+  × Duplicate parameter name.
   
     1 │ function b(a, b, b) {}
     2 │ function c(a, a, a) {}
@@ -87,7 +88,7 @@ invalid.ts:3:18 lint/suspicious/noDuplicateParameters ━━━━━━━━�
 ```
 invalid.ts:4:18 lint/suspicious/noDuplicateParameters ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Duplicate parameter name.
+  × Duplicate parameter name.
   
     2 │ function c(a, a, a) {}
     3 │ const d = (a, b, a) => {};
@@ -104,7 +105,7 @@ invalid.ts:4:18 lint/suspicious/noDuplicateParameters ━━━━━━━━�
 ```
 invalid.ts:5:25 lint/suspicious/noDuplicateParameters ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Duplicate parameter name.
+  × Duplicate parameter name.
   
     3 │ const d = (a, b, a) => {};
     4 │ function e(a, b, a, b) {}
@@ -121,7 +122,7 @@ invalid.ts:5:25 lint/suspicious/noDuplicateParameters ━━━━━━━━�
 ```
 invalid.ts:7:9 lint/suspicious/noDuplicateParameters ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Duplicate parameter name.
+  × Duplicate parameter name.
   
     5 │ var f = function (a, b, b) {};
     6 │ class G {
@@ -138,7 +139,7 @@ invalid.ts:7:9 lint/suspicious/noDuplicateParameters ━━━━━━━━━
 ```
 invalid.ts:9:39 lint/suspicious/noDuplicateParameters ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Duplicate parameter name.
+  × Duplicate parameter name.
   
      7 │ 	ggg(a, a, a) {}
      8 │ }
@@ -155,7 +156,7 @@ invalid.ts:9:39 lint/suspicious/noDuplicateParameters ━━━━━━━━�
 ```
 invalid.ts:10:25 lint/suspicious/noDuplicateParameters ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Duplicate parameter name.
+  × Duplicate parameter name.
   
      8 │ }
      9 │ let objectMethods = { method(a, b, c, c) {} };
@@ -172,7 +173,7 @@ invalid.ts:10:25 lint/suspicious/noDuplicateParameters ━━━━━━━━�
 ```
 invalid.ts:11:32 lint/suspicious/noDuplicateParameters ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Duplicate parameter name.
+  × Duplicate parameter name.
   
      9 │ let objectMethods = { method(a, b, c, c) {} };
     10 │ var h = function (a, b, a) {};
@@ -189,7 +190,7 @@ invalid.ts:11:32 lint/suspicious/noDuplicateParameters ━━━━━━━━�
 ```
 invalid.ts:12:31 lint/suspicious/noDuplicateParameters ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Duplicate parameter name.
+  × Duplicate parameter name.
   
     10 │ var h = function (a, b, a) {};
     11 │ export default function (a, b, a, a) {}
@@ -206,7 +207,7 @@ invalid.ts:12:31 lint/suspicious/noDuplicateParameters ━━━━━━━━�
 ```
 invalid.ts:13:37 lint/suspicious/noDuplicateParameters ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Duplicate parameter name.
+  × Duplicate parameter name.
   
     11 │ export default function (a, b, a, a) {}
     12 │ function f({ test: res = 3 }, res) {}
@@ -223,7 +224,7 @@ invalid.ts:13:37 lint/suspicious/noDuplicateParameters ━━━━━━━━�
 ```
 invalid.ts:15:17 lint/suspicious/noDuplicateParameters ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Duplicate parameter name.
+  × Duplicate parameter name.
   
     13 │ export function f2(a, b, c = (a, b, b) => {}) {}
     14 │ class A {
@@ -240,7 +241,7 @@ invalid.ts:15:17 lint/suspicious/noDuplicateParameters ━━━━━━━━�
 ```
 invalid.ts:18:25 lint/suspicious/noDuplicateParameters ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Duplicate parameter name.
+  × Duplicate parameter name.
   
     16 │ }
     17 │ class A {
@@ -257,7 +258,7 @@ invalid.ts:18:25 lint/suspicious/noDuplicateParameters ━━━━━━━━�
 ```
 invalid.ts:21:26 lint/suspicious/noDuplicateParameters ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Duplicate parameter name.
+  × Duplicate parameter name.
   
     19 │ }
     20 │ class A {
@@ -274,7 +275,7 @@ invalid.ts:21:26 lint/suspicious/noDuplicateParameters ━━━━━━━━�
 ```
 invalid.ts:24:33 lint/suspicious/noDuplicateParameters ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Duplicate parameter name.
+  × Duplicate parameter name.
   
     22 │ }
     23 │ class A {
@@ -291,7 +292,7 @@ invalid.ts:24:33 lint/suspicious/noDuplicateParameters ━━━━━━━━�
 ```
 invalid.ts:27:34 lint/suspicious/noDuplicateParameters ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Duplicate parameter name.
+  × Duplicate parameter name.
   
     25 │ }
     26 │ class A {
@@ -304,5 +305,3 @@ invalid.ts:27:34 lint/suspicious/noDuplicateParameters ━━━━━━━━�
   
 
 ```
-
-

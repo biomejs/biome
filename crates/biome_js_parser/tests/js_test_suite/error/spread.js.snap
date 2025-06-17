@@ -1,0 +1,78 @@
+---
+source: crates/biome_js_parser/tests/spec_test.rs
+expression: snapshot
+snapshot_kind: text
+---
+## Input
+
+```js
+[...]
+
+```
+
+
+## AST
+
+```
+JsModule {
+    bom_token: missing (optional),
+    interpreter_token: missing (optional),
+    directives: JsDirectiveList [],
+    items: JsModuleItemList [
+        JsExpressionStatement {
+            expression: JsArrayExpression {
+                l_brack_token: L_BRACK@0..1 "[" [] [],
+                elements: JsArrayElementList [
+                    JsSpread {
+                        dotdotdot_token: DOT3@1..4 "..." [] [],
+                        argument: missing (required),
+                    },
+                ],
+                r_brack_token: R_BRACK@4..5 "]" [] [],
+            },
+            semicolon_token: missing (optional),
+        },
+    ],
+    eof_token: EOF@5..6 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: JS_MODULE@0..6
+  0: (empty)
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..5
+    0: JS_EXPRESSION_STATEMENT@0..5
+      0: JS_ARRAY_EXPRESSION@0..5
+        0: L_BRACK@0..1 "[" [] []
+        1: JS_ARRAY_ELEMENT_LIST@1..4
+          0: JS_SPREAD@1..4
+            0: DOT3@1..4 "..." [] []
+            1: (empty)
+        2: R_BRACK@4..5 "]" [] []
+      1: (empty)
+  4: EOF@5..6 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+spread.js:1:5 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected an expression, or an assignment but instead found ']'.
+  
+  > 1 │ [...]
+      │     ^
+    2 │ 
+  
+  i Expected an expression, or an assignment here.
+  
+  > 1 │ [...]
+      │     ^
+    2 │ 
+  
+```

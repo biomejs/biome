@@ -3,11 +3,13 @@ source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: allowlist.js
 ---
 # Input
-```jsx
+```js
 console.log("invalid");
+console['log']("invalid");
 console.debug("invalid");
 
 console.info("ok");
+console['info']("ok");
 console.warn("ok");
 console.error("ok");
 console.assert(true, "ok");
@@ -21,9 +23,9 @@ allowlist.js:1:1 lint/suspicious/noConsole  FIXABLE  ━━━━━━━━━
   ! Don't use console.
   
   > 1 │ console.log("invalid");
-      │ ^^^^^^^^^^^^^^^^^^^^^^^
-    2 │ console.debug("invalid");
-    3 │ 
+      │ ^^^^^^^^^^^
+    2 │ console['log']("invalid");
+    3 │ console.debug("invalid");
   
   i The use of console is often reserved for debugging.
   
@@ -40,19 +42,44 @@ allowlist.js:2:1 lint/suspicious/noConsole  FIXABLE  ━━━━━━━━━
   ! Don't use console.
   
     1 │ console.log("invalid");
-  > 2 │ console.debug("invalid");
-      │ ^^^^^^^^^^^^^^^^^^^^^^^^^
-    3 │ 
-    4 │ console.info("ok");
+  > 2 │ console['log']("invalid");
+      │ ^^^^^^^^^^^^^^
+    3 │ console.debug("invalid");
+    4 │ 
   
   i The use of console is often reserved for debugging.
   
   i Unsafe fix: Remove console.
   
-    1 1 │   console.log("invalid");
-    2   │ - console.debug("invalid");
-    3 2 │   
-    4 3 │   console.info("ok");
+     1 1 │   console.log("invalid");
+     2   │ - console['log']("invalid");
+     3 2 │   console.debug("invalid");
+     4 3 │   
+  
+
+```
+
+```
+allowlist.js:3:1 lint/suspicious/noConsole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Don't use console.
+  
+    1 │ console.log("invalid");
+    2 │ console['log']("invalid");
+  > 3 │ console.debug("invalid");
+      │ ^^^^^^^^^^^^^
+    4 │ 
+    5 │ console.info("ok");
+  
+  i The use of console is often reserved for debugging.
+  
+  i Unsafe fix: Remove console.
+  
+     1 1 │   console.log("invalid");
+     2 2 │   console['log']("invalid");
+     3   │ - console.debug("invalid");
+     4 3 │   
+     5 4 │   console.info("ok");
   
 
 ```

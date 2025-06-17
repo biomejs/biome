@@ -1,6 +1,7 @@
-use biome_analyze::{context::RuleContext, declare_lint_rule, Rule, RuleDiagnostic, RuleSource};
+use biome_analyze::{Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule};
 use biome_console::markup;
-use biome_js_syntax::{global_identifier, AnyJsExpression, JsNewOrCallExpression};
+use biome_diagnostics::Severity;
+use biome_js_syntax::{AnyJsExpression, JsNewOrCallExpression, global_identifier};
 use biome_rowan::AstNode;
 
 use crate::services::semantic::Semantic;
@@ -45,6 +46,7 @@ declare_lint_rule! {
         language: "js",
         sources: &[RuleSource::EslintUnicorn("error-message")],
         recommended: false,
+        severity: Severity::Warning,
     }
 }
 

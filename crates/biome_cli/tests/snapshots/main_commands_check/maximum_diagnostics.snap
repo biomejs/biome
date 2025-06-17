@@ -1,6 +1,6 @@
 ---
 source: crates/biome_cli/tests/snap_test.rs
-expression: content
+expression: redactor(content)
 ---
 ## `check.js`
 
@@ -31,507 +31,293 @@ check ━━━━━━━━━━━━━━━━━━━━━━━━�
 # Emitted Messages
 
 ```block
-check.js:2:1 lint/style/useWhile  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+check.js:2:6 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Use a while loop instead of a for loop.
+  × Unexpected constant condition.
   
   > 2 │ for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
-      │ ^^^^^^^^^^^
+      │      ^^^^
     3 │ for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
     4 │ for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
   
-  i Prefer a while loop over a for loop without initialization and update.
-  
-  i Safe fix: Use a while loop.
-  
-     1  1 │   
-     2    │ - for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
-        2 │ + while(true);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
-     3  3 │   for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
-     4  4 │   for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
-  
 
 ```
 
 ```block
-check.js:2:13 lint/style/useWhile  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+check.js:2:18 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Use a while loop instead of a for loop.
+  × Unexpected constant condition.
   
   > 2 │ for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
-      │             ^^^^^^^^^^^
+      │                  ^^^^
     3 │ for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
     4 │ for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
   
-  i Prefer a while loop over a for loop without initialization and update.
-  
-  i Safe fix: Use a while loop.
-  
-     1  1 │   
-     2    │ - for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
-        2 │ + for(;true;);while(true);for(;true;);for(;true;);for(;true;);for(;true;);
-     3  3 │   for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
-     4  4 │   for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
-  
 
 ```
 
 ```block
-check.js:2:25 lint/style/useWhile  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+check.js:2:30 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Use a while loop instead of a for loop.
+  × Unexpected constant condition.
   
   > 2 │ for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
-      │                         ^^^^^^^^^^^
+      │                              ^^^^
     3 │ for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
     4 │ for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
   
-  i Prefer a while loop over a for loop without initialization and update.
-  
-  i Safe fix: Use a while loop.
-  
-     1  1 │   
-     2    │ - for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
-        2 │ + for(;true;);for(;true;);while(true);for(;true;);for(;true;);for(;true;);
-     3  3 │   for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
-     4  4 │   for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
-  
 
 ```
 
 ```block
-check.js:2:37 lint/style/useWhile  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+check.js:2:42 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Use a while loop instead of a for loop.
+  × Unexpected constant condition.
   
   > 2 │ for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
-      │                                     ^^^^^^^^^^^
+      │                                          ^^^^
     3 │ for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
     4 │ for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
   
-  i Prefer a while loop over a for loop without initialization and update.
-  
-  i Safe fix: Use a while loop.
-  
-     1  1 │   
-     2    │ - for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
-        2 │ + for(;true;);for(;true;);for(;true;);while(true);for(;true;);for(;true;);
-     3  3 │   for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
-     4  4 │   for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
-  
 
 ```
 
 ```block
-check.js:2:49 lint/style/useWhile  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+check.js:2:54 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Use a while loop instead of a for loop.
+  × Unexpected constant condition.
   
   > 2 │ for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
-      │                                                 ^^^^^^^^^^^
+      │                                                      ^^^^
     3 │ for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
     4 │ for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
   
-  i Prefer a while loop over a for loop without initialization and update.
-  
-  i Safe fix: Use a while loop.
-  
-     1  1 │   
-     2    │ - for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
-        2 │ + for(;true;);for(;true;);for(;true;);for(;true;);while(true);for(;true;);
-     3  3 │   for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
-     4  4 │   for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
-  
 
 ```
 
 ```block
-check.js:2:61 lint/style/useWhile  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+check.js:2:66 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Use a while loop instead of a for loop.
+  × Unexpected constant condition.
   
   > 2 │ for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
-      │                                                             ^^^^^^^^^^^
+      │                                                                  ^^^^
     3 │ for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
     4 │ for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
   
-  i Prefer a while loop over a for loop without initialization and update.
-  
-  i Safe fix: Use a while loop.
-  
-     1  1 │   
-     2    │ - for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
-        2 │ + for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);while(true);
-     3  3 │   for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
-     4  4 │   for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
-  
 
 ```
 
 ```block
-check.js:3:1 lint/style/useWhile  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+check.js:3:6 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Use a while loop instead of a for loop.
+  × Unexpected constant condition.
   
     2 │ for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
   > 3 │ for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
-      │ ^^^^^^^^^^^
+      │      ^^^^
     4 │ for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
     5 │ for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
-  
-  i Prefer a while loop over a for loop without initialization and update.
-  
-  i Safe fix: Use a while loop.
-  
-     1  1 │   
-     2  2 │   for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
-     3    │ - for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
-        3 │ + while(true);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
-     4  4 │   for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
-     5  5 │   for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
   
 
 ```
 
 ```block
-check.js:3:13 lint/style/useWhile  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+check.js:3:18 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Use a while loop instead of a for loop.
+  × Unexpected constant condition.
   
     2 │ for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
   > 3 │ for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
-      │             ^^^^^^^^^^^
+      │                  ^^^^
     4 │ for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
     5 │ for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
-  
-  i Prefer a while loop over a for loop without initialization and update.
-  
-  i Safe fix: Use a while loop.
-  
-     1  1 │   
-     2  2 │   for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
-     3    │ - for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
-        3 │ + for(;true;);while(true);for(;true;);for(;true;);for(;true;);for(;true;);
-     4  4 │   for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
-     5  5 │   for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
   
 
 ```
 
 ```block
-check.js:3:25 lint/style/useWhile  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+check.js:3:30 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Use a while loop instead of a for loop.
+  × Unexpected constant condition.
   
     2 │ for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
   > 3 │ for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
-      │                         ^^^^^^^^^^^
+      │                              ^^^^
     4 │ for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
     5 │ for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
-  
-  i Prefer a while loop over a for loop without initialization and update.
-  
-  i Safe fix: Use a while loop.
-  
-     1  1 │   
-     2  2 │   for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
-     3    │ - for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
-        3 │ + for(;true;);for(;true;);while(true);for(;true;);for(;true;);for(;true;);
-     4  4 │   for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
-     5  5 │   for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
   
 
 ```
 
 ```block
-check.js:3:37 lint/style/useWhile  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+check.js:3:42 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Use a while loop instead of a for loop.
+  × Unexpected constant condition.
   
     2 │ for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
   > 3 │ for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
-      │                                     ^^^^^^^^^^^
+      │                                          ^^^^
     4 │ for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
     5 │ for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
-  
-  i Prefer a while loop over a for loop without initialization and update.
-  
-  i Safe fix: Use a while loop.
-  
-     1  1 │   
-     2  2 │   for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
-     3    │ - for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
-        3 │ + for(;true;);for(;true;);for(;true;);while(true);for(;true;);for(;true;);
-     4  4 │   for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
-     5  5 │   for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
   
 
 ```
 
 ```block
-check.js:3:49 lint/style/useWhile  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+check.js:3:54 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Use a while loop instead of a for loop.
+  × Unexpected constant condition.
   
     2 │ for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
   > 3 │ for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
-      │                                                 ^^^^^^^^^^^
+      │                                                      ^^^^
     4 │ for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
     5 │ for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
-  
-  i Prefer a while loop over a for loop without initialization and update.
-  
-  i Safe fix: Use a while loop.
-  
-     1  1 │   
-     2  2 │   for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
-     3    │ - for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
-        3 │ + for(;true;);for(;true;);for(;true;);for(;true;);while(true);for(;true;);
-     4  4 │   for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
-     5  5 │   for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
   
 
 ```
 
 ```block
-check.js:3:61 lint/style/useWhile  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+check.js:3:66 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Use a while loop instead of a for loop.
+  × Unexpected constant condition.
   
     2 │ for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
   > 3 │ for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
-      │                                                             ^^^^^^^^^^^
+      │                                                                  ^^^^
     4 │ for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
     5 │ for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
-  
-  i Prefer a while loop over a for loop without initialization and update.
-  
-  i Safe fix: Use a while loop.
-  
-     1  1 │   
-     2  2 │   for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
-     3    │ - for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
-        3 │ + for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);while(true);
-     4  4 │   for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
-     5  5 │   for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
   
 
 ```
 
 ```block
-check.js:4:1 lint/style/useWhile  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+check.js:4:6 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Use a while loop instead of a for loop.
+  × Unexpected constant condition.
   
     2 │ for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
     3 │ for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
   > 4 │ for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
-      │ ^^^^^^^^^^^
+      │      ^^^^
     5 │ for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
     6 │ for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
-  
-  i Prefer a while loop over a for loop without initialization and update.
-  
-  i Safe fix: Use a while loop.
-  
-     2  2 │   for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
-     3  3 │   for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
-     4    │ - for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
-        4 │ + while(true);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
-     5  5 │   for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
-     6  6 │   for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
   
 
 ```
 
 ```block
-check.js:4:13 lint/style/useWhile  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+check.js:4:18 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Use a while loop instead of a for loop.
+  × Unexpected constant condition.
   
     2 │ for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
     3 │ for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
   > 4 │ for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
-      │             ^^^^^^^^^^^
+      │                  ^^^^
     5 │ for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
     6 │ for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
-  
-  i Prefer a while loop over a for loop without initialization and update.
-  
-  i Safe fix: Use a while loop.
-  
-     2  2 │   for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
-     3  3 │   for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
-     4    │ - for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
-        4 │ + for(;true;);while(true);for(;true;);for(;true;);for(;true;);for(;true;);
-     5  5 │   for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
-     6  6 │   for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
   
 
 ```
 
 ```block
-check.js:4:25 lint/style/useWhile  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+check.js:4:30 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Use a while loop instead of a for loop.
+  × Unexpected constant condition.
   
     2 │ for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
     3 │ for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
   > 4 │ for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
-      │                         ^^^^^^^^^^^
+      │                              ^^^^
     5 │ for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
     6 │ for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
-  
-  i Prefer a while loop over a for loop without initialization and update.
-  
-  i Safe fix: Use a while loop.
-  
-     2  2 │   for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
-     3  3 │   for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
-     4    │ - for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
-        4 │ + for(;true;);for(;true;);while(true);for(;true;);for(;true;);for(;true;);
-     5  5 │   for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
-     6  6 │   for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
   
 
 ```
 
 ```block
-check.js:4:37 lint/style/useWhile  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+check.js:4:42 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Use a while loop instead of a for loop.
+  × Unexpected constant condition.
   
     2 │ for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
     3 │ for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
   > 4 │ for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
-      │                                     ^^^^^^^^^^^
+      │                                          ^^^^
     5 │ for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
     6 │ for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
-  
-  i Prefer a while loop over a for loop without initialization and update.
-  
-  i Safe fix: Use a while loop.
-  
-     2  2 │   for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
-     3  3 │   for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
-     4    │ - for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
-        4 │ + for(;true;);for(;true;);for(;true;);while(true);for(;true;);for(;true;);
-     5  5 │   for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
-     6  6 │   for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
   
 
 ```
 
 ```block
-check.js:4:49 lint/style/useWhile  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+check.js:4:54 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Use a while loop instead of a for loop.
+  × Unexpected constant condition.
   
     2 │ for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
     3 │ for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
   > 4 │ for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
-      │                                                 ^^^^^^^^^^^
+      │                                                      ^^^^
     5 │ for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
     6 │ for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
-  
-  i Prefer a while loop over a for loop without initialization and update.
-  
-  i Safe fix: Use a while loop.
-  
-     2  2 │   for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
-     3  3 │   for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
-     4    │ - for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
-        4 │ + for(;true;);for(;true;);for(;true;);for(;true;);while(true);for(;true;);
-     5  5 │   for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
-     6  6 │   for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
   
 
 ```
 
 ```block
-check.js:4:61 lint/style/useWhile  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+check.js:4:66 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Use a while loop instead of a for loop.
+  × Unexpected constant condition.
   
     2 │ for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
     3 │ for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
   > 4 │ for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
-      │                                                             ^^^^^^^^^^^
+      │                                                                  ^^^^
     5 │ for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
     6 │ for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
-  
-  i Prefer a while loop over a for loop without initialization and update.
-  
-  i Safe fix: Use a while loop.
-  
-     2  2 │   for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
-     3  3 │   for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
-     4    │ - for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
-        4 │ + for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);while(true);
-     5  5 │   for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
-     6  6 │   for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
   
 
 ```
 
 ```block
-check.js:5:1 lint/style/useWhile  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+check.js:5:6 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Use a while loop instead of a for loop.
+  × Unexpected constant condition.
   
     3 │ for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
     4 │ for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
   > 5 │ for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
-      │ ^^^^^^^^^^^
+      │      ^^^^
     6 │ for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
     7 │ for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
-  
-  i Prefer a while loop over a for loop without initialization and update.
-  
-  i Safe fix: Use a while loop.
-  
-     3  3 │   for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
-     4  4 │   for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
-     5    │ - for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
-        5 │ + while(true);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
-     6  6 │   for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
-     7  7 │   for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
   
 
 ```
 
 ```block
-check.js:5:13 lint/style/useWhile  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+check.js:5:18 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Use a while loop instead of a for loop.
+  × Unexpected constant condition.
   
     3 │ for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
     4 │ for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
   > 5 │ for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
-      │             ^^^^^^^^^^^
+      │                  ^^^^
     6 │ for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
     7 │ for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
-  
-  i Prefer a while loop over a for loop without initialization and update.
-  
-  i Safe fix: Use a while loop.
-  
-     3  3 │   for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
-     4  4 │   for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
-     5    │ - for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
-        5 │ + for(;true;);while(true);for(;true;);for(;true;);for(;true;);for(;true;);
-     6  6 │   for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
-     7  7 │   for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
   
 
 ```
 
 ```block
-The number of diagnostics exceeds the number allowed by Biome.
-Diagnostics not shown: 77.
+The number of diagnostics exceeds the limit allowed. Use --max-diagnostics to increase it.
+Diagnostics not shown: 29.
 ```
 
 ```block
 Checked 1 file in <TIME>. No fixes applied.
-Found 21 errors.
+Found 49 errors.
 ```

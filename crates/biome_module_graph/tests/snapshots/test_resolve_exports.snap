@@ -1,0 +1,423 @@
+---
+source: crates/biome_module_graph/tests/snap/mod.rs
+expression: content
+---
+# `/src/index.ts`
+
+## Source
+
+```ts
+/**
+ * @returns {string}
+ */
+function foo() {}
+
+export { foo, qux };
+
+/** @package */
+export function bar() {}
+
+/** @private */
+export const quz = {};
+
+/* @ignored because of incorrect amount of asterisks */
+export async function baz() {}
+
+var qux = 1;
+
+export const {
+	a,
+	b,
+	c: [d, e],
+} = getObject();
+
+type GetObjectResult = {
+	a: string;
+	b: Array<number>;
+	c: [first: boolean, last: boolean | undefined];
+};
+
+function getObject(): GetObjectResult {
+	return {}; // We're not a type checker, so this is a-okay.
+}
+
+/**
+ * @public
+ * @returns {JSX.Element}
+ */
+export default function Component(): JSX.Element {}
+
+export * from "./reexports";
+export { ohNo as "oh\x0Ano" } from "./renamed-reexports";
+
+/**
+ * Hello, namespace 2.
+ */
+export * as renamed2 from "./renamed-reexports";
+```
+
+## Module Info
+
+```
+Exports {
+  "a" => {
+    ExportOwnExport => JsOwnExport::Binding(5)
+  }
+  "b" => {
+    ExportOwnExport => JsOwnExport::Binding(6)
+  }
+  "bar" => {
+    ExportOwnExport => JsOwnExport::Binding(1)
+  }
+  "baz" => {
+    ExportOwnExport => JsOwnExport::Binding(3)
+  }
+  "d" => {
+    ExportOwnExport => JsOwnExport::Binding(7)
+  }
+  "default" => {
+    ExportOwnExport => JsOwnExport::Binding(11)
+  }
+  "e" => {
+    ExportOwnExport => JsOwnExport::Binding(8)
+  }
+  "foo" => {
+    ExportOwnExport => JsOwnExport::Binding(0)
+  }
+  "oh\nno" => {
+    ExportReexport => Reexport(
+      Specifier: "./renamed-reexports"
+      Resolved path: "/src/renamed-reexports.ts"
+      Import Symbol: ohNo
+    )
+  }
+  "qux" => {
+    ExportOwnExport => JsOwnExport::Binding(4)
+  }
+  "quz" => {
+    ExportOwnExport => JsOwnExport::Binding(2)
+  }
+  "renamed2" => {
+    ExportReexport => Reexport(
+      Specifier: "./renamed-reexports"
+      Resolved path: "/src/renamed-reexports.ts"
+      Import Symbol: All
+      JsDoc(
+        Hello, namespace 2.
+      )
+    )
+  }
+}
+Imports {
+  No imports
+}
+```
+
+## Exported Bindings
+
+```
+BindingId(0) => JsBindingData {
+  Name: foo,
+  Type: Module(0) TypeId(9),
+  JSDoc comment: JsDoc(
+    @returns {string}
+  ),
+  Declaration kind: HoistedValue
+}
+
+BindingId(1) => JsBindingData {
+  Name: bar,
+  Type: Module(0) TypeId(10),
+  JSDoc comment: JsDoc(
+    @package
+  ),
+  Declaration kind: HoistedValue
+}
+
+BindingId(2) => JsBindingData {
+  Name: quz,
+  Type: Module(0) TypeId(0),
+  JSDoc comment: JsDoc(
+    @private
+  ),
+  Declaration kind: Value
+}
+
+BindingId(3) => JsBindingData {
+  Name: baz,
+  Type: Module(0) TypeId(12),
+  Declaration kind: HoistedValue
+}
+
+BindingId(4) => JsBindingData {
+  Name: qux,
+  Type: Module(0) TypeId(1),
+  Declaration kind: HoistedValue
+}
+
+BindingId(5) => JsBindingData {
+  Name: a,
+  Type: Module(0) TypeId(4),
+  Declaration kind: Value
+}
+
+BindingId(6) => JsBindingData {
+  Name: b,
+  Type: Module(0) TypeId(5),
+  Declaration kind: Value
+}
+
+BindingId(7) => JsBindingData {
+  Name: d,
+  Type: Module(0) TypeId(7),
+  Declaration kind: Value
+}
+
+BindingId(8) => JsBindingData {
+  Name: e,
+  Type: Module(0) TypeId(8),
+  Declaration kind: Value
+}
+
+BindingId(11) => JsBindingData {
+  Name: Component,
+  Type: Module(0) TypeId(22),
+  JSDoc comment: JsDoc(
+    @public
+    @returns {JSX.Element}
+  ),
+  Declaration kind: Unknown
+}
+```
+
+## Registered types
+
+```
+Module TypeId(0) => Object {
+  prototype: No prototype
+  members: []
+}
+
+Module TypeId(1) => value: 1
+
+Module TypeId(2) => Object {
+  prototype: No prototype
+  members: ["a": string, "b": Module(0) TypeId(13), "c": Module(0) TypeId(17)]
+}
+
+Module TypeId(3) => sync Function "getObject" {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: Module(0) TypeId(19)
+}
+
+Module TypeId(4) => string
+
+Module TypeId(5) => instanceof Array<number>
+
+Module TypeId(6) => Tuple(
+    [
+        TupleElementType {
+            ty: Resolved(
+                Module(0) TypeId(14),
+            ),
+            name: Some(
+                Borrowed(
+                    "first",
+                ),
+            ),
+            is_optional: false,
+            is_rest: false,
+        },
+        TupleElementType {
+            ty: Resolved(
+                Module(0) TypeId(16),
+            ),
+            name: Some(
+                Borrowed(
+                    "last",
+                ),
+            ),
+            is_optional: false,
+            is_rest: false,
+        },
+    ],
+)
+
+Module TypeId(7) => boolean
+
+Module TypeId(8) => Module(0) TypeId(14) | Module(0) TypeId(15)
+
+Module TypeId(9) => sync Function "foo" {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: unknown reference
+}
+
+Module TypeId(10) => sync Function "bar" {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: unknown reference
+}
+
+Module TypeId(11) => instanceof Promise
+
+Module TypeId(12) => async Function "baz" {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: Module(0) TypeId(11)
+}
+
+Module TypeId(13) => instanceof Array<number>
+
+Module TypeId(14) => boolean
+
+Module TypeId(15) => undefined
+
+Module TypeId(16) => Module(0) TypeId(14) | Module(0) TypeId(15)
+
+Module TypeId(17) => Tuple(
+    [
+        TupleElementType {
+            ty: Resolved(
+                Module(0) TypeId(14),
+            ),
+            name: Some(
+                Borrowed(
+                    "first",
+                ),
+            ),
+            is_optional: false,
+            is_rest: false,
+        },
+        TupleElementType {
+            ty: Resolved(
+                Module(0) TypeId(16),
+            ),
+            name: Some(
+                Borrowed(
+                    "last",
+                ),
+            ),
+            is_optional: false,
+            is_rest: false,
+        },
+    ],
+)
+
+Module TypeId(18) => Object {
+  prototype: No prototype
+  members: ["a": string, "b": Module(0) TypeId(13), "c": Module(0) TypeId(17)]
+}
+
+Module TypeId(19) => Object {
+  prototype: No prototype
+  members: ["a": string, "b": Module(0) TypeId(13), "c": Module(0) TypeId(17)]
+}
+
+Module TypeId(20) => sync Function "getObject" {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: Module(0) TypeId(19)
+}
+
+Module TypeId(21) => instanceof unresolved reference "JSX.Element" (scope ID: 10)
+
+Module TypeId(22) => sync Function "Component" {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: Module(0) TypeId(21)
+}
+
+Module TypeId(23) => instanceof Array<number>
+
+Module TypeId(24) => boolean
+
+Module TypeId(25) => Module(0) TypeId(14) | Module(0) TypeId(15)
+```
+
+# `/src/renamed-reexports.ts`
+
+## Source
+
+```ts
+export function ohNo() {}
+```
+
+## Module Info
+
+```
+Exports {
+  "ohNo" => {
+    ExportOwnExport => JsOwnExport::Binding(0)
+  }
+}
+Imports {
+  No imports
+}
+```
+
+## Exported Bindings
+
+```
+BindingId(0) => JsBindingData {
+  Name: ohNo,
+  Type: Module(0) TypeId(0),
+  Declaration kind: HoistedValue
+}
+```
+
+## Registered types
+
+```
+Module TypeId(0) => sync Function "ohNo" {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: unknown reference
+}
+```
+
+# `/src/reexports.ts`
+
+## Source
+
+```ts
+/**
+ * Hello, namespace 1.
+ */
+export * as renamed from "./renamed-reexports";
+```
+
+## Module Info
+
+```
+Exports {
+  "renamed" => {
+    ExportReexport => Reexport(
+      Specifier: "./renamed-reexports"
+      Resolved path: "/src/renamed-reexports.ts"
+      Import Symbol: All
+      JsDoc(
+        Hello, namespace 1.
+      )
+    )
+  }
+}
+Imports {
+  No imports
+}
+```

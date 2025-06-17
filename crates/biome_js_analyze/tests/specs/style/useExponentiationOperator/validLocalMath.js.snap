@@ -3,7 +3,8 @@ source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: validLocalMath.js
 ---
 # Input
-```jsx
+```js
+/* should not generate diagnostics */
 // not the global Math
 function case1() {
 	let Math;
@@ -31,5 +32,3 @@ function case5() {
 }
 
 ```
-
-

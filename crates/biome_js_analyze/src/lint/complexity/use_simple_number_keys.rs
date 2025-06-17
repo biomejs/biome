@@ -1,9 +1,8 @@
 use crate::JsRuleAction;
 
-use biome_analyze::{
-    context::RuleContext, declare_lint_rule, ActionCategory, Ast, FixKind, Rule, RuleDiagnostic,
-};
+use biome_analyze::{Ast, FixKind, Rule, RuleDiagnostic, context::RuleContext, declare_lint_rule};
 use biome_console::markup;
+use biome_diagnostics::Severity;
 use biome_js_factory::make;
 use biome_js_syntax::{
     AnyJsObjectMember, JsLiteralMemberName, JsObjectExpression, JsSyntaxKind, JsSyntaxToken,
@@ -13,7 +12,7 @@ use biome_rowan::{AstNode, BatchMutationExt, SyntaxResult};
 use std::str::FromStr;
 
 declare_lint_rule! {
-    /// Disallow number literal object member names which are not base10 or uses underscore as separator
+    /// Disallow number literal object member names which are not base 10 or use underscore as separator.
     ///
     /// ## Examples
     ///
@@ -49,6 +48,7 @@ declare_lint_rule! {
         name: "useSimpleNumberKeys",
         language: "js",
         recommended: true,
+        severity: Severity::Warning,
         fix_kind: FixKind::Safe,
     }
 }
@@ -169,21 +169,21 @@ impl TryFrom<AnyJsObjectMember> for NumberLiteral {
                             node: literal_member_name,
                             value: value.into_boxed_str(),
                             big_int,
-                        })
+                        });
                     }
                     Some(b'o' | b'O') => {
                         return Ok(Self::Octal {
                             node: literal_member_name,
                             value: value.into_boxed_str(),
                             big_int,
-                        })
+                        });
                     }
                     Some(b'x' | b'X') => {
                         return Ok(Self::Hexadecimal {
                             node: literal_member_name,
                             value: value.into_boxed_str(),
                             big_int,
-                        })
+                        });
                     }
                     _ => (),
                 }
@@ -353,7 +353,7 @@ impl Rule for UseSimpleNumberKeys {
         };
 
         Some(JsRuleAction::new(
-            ActionCategory::QuickFix,
+            ctx.metadata().action_category(ctx.category(), ctx.group()),
             ctx.metadata().applicability(),
             message,
             mutation,

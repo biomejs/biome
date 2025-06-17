@@ -3,6 +3,7 @@ mod color_profile;
 mod container;
 mod counter_style;
 mod document;
+mod error;
 mod feature;
 mod font_face;
 mod font_feature_values;
@@ -14,12 +15,14 @@ mod media;
 mod namespace;
 mod page;
 mod parse_error;
+mod position_try;
 mod property;
 mod scope;
 mod starting_style;
 mod supports;
 mod unknown;
 mod value;
+mod view_transition;
 
 use crate::parser::CssParser;
 use crate::syntax::at_rule::charset::parse_charset_at_rule;
@@ -36,12 +39,14 @@ use crate::syntax::at_rule::layer::parse_layer_at_rule;
 use crate::syntax::at_rule::media::parse_media_at_rule;
 use crate::syntax::at_rule::namespace::parse_namespace_at_rule;
 use crate::syntax::at_rule::page::parse_page_at_rule;
+use crate::syntax::at_rule::position_try::parse_position_try_at_rule;
 use crate::syntax::at_rule::property::parse_property_at_rule;
 use crate::syntax::at_rule::scope::parse_scope_at_rule;
 use crate::syntax::at_rule::starting_style::parse_starting_style_at_rule;
 use crate::syntax::at_rule::supports::parse_supports_at_rule;
 use crate::syntax::at_rule::unknown::{is_at_unknown_at_rule, parse_unknown_at_rule};
 use crate::syntax::at_rule::value::parse_value_at_rule;
+use crate::syntax::at_rule::view_transition::parse_view_transition_at_rule;
 use crate::syntax::parse_error::expected_any_at_rule;
 use biome_css_syntax::CssSyntaxKind::*;
 use biome_css_syntax::T;
@@ -99,6 +104,8 @@ pub(crate) fn parse_any_at_rule(p: &mut CssParser) -> ParsedSyntax {
         T![document] => parse_document_at_rule(p),
         T![property] => parse_property_at_rule(p),
         T![value] => parse_value_at_rule(p),
+        T![position_try] => parse_position_try_at_rule(p),
+        T![view_transition] => parse_view_transition_at_rule(p),
         _ if is_at_unknown_at_rule(p) => parse_unknown_at_rule(p),
         _ => Absent,
     }

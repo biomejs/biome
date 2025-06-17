@@ -1,11 +1,11 @@
-use std::collections::HashMap;
-
-use crate::converters::from_proto;
+#![expect(clippy::mutable_key_type)]
 use crate::diagnostics::LspError;
 use crate::{session::Session, utils};
 use anyhow::{Context, Result};
-use tower_lsp::lsp_types::{RenameParams, WorkspaceEdit};
-use tracing::trace;
+use biome_lsp_converters::from_proto;
+use biome_service::workspace::{FeaturesBuilder, IsPathIgnoredParams};
+use std::collections::HashMap;
+use tower_lsp_server::lsp_types::{RenameParams, WorkspaceEdit};
 
 #[tracing::instrument(level = "debug", skip(session), err)]
 pub(crate) fn rename(
@@ -13,11 +13,20 @@ pub(crate) fn rename(
     params: RenameParams,
 ) -> Result<Option<WorkspaceEdit>, LspError> {
     let url = params.text_document_position.text_document.uri;
-    let biome_path = session.file_path(&url)?;
+    let path = session.file_path(&url)?;
 
-    trace!("Renaming...");
+    let Some(doc) = session.document(&url) else {
+        return Ok(None);
+    };
+    let features = FeaturesBuilder::new().build();
 
-    let doc = session.document(&url)?;
+    if session.workspace.is_path_ignored(IsPathIgnoredParams {
+        path: path.clone(),
+        project_key: doc.project_key,
+        features,
+    })? {
+        return Ok(None);
+    }
     let position_encoding = session.position_encoding();
     let cursor_range = from_proto::offset(
         &doc.line_index,
@@ -26,15 +35,17 @@ pub(crate) fn rename(
     )
     .with_context(|| {
         format!(
-            "failed to access position {:?} in document {url}",
-            params.text_document_position.position
+            "failed to access position {:?} in document {}",
+            params.text_document_position.position,
+            url.as_str()
         )
     })?;
 
     let result = session
         .workspace
         .rename(biome_service::workspace::RenameParams {
-            path: biome_path,
+            project_key: doc.project_key,
+            path,
             symbol_at: cursor_range,
             new_name: params.new_name,
         })?;

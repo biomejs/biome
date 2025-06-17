@@ -1,0 +1,172 @@
+---
+source: crates/biome_js_parser/tests/spec_test.rs
+expression: snapshot
+snapshot_kind: text
+---
+## Input
+
+```js
+foo()?.baz[].;
+BAR`b
+
+```
+
+
+## AST
+
+```
+JsModule {
+    bom_token: missing (optional),
+    interpreter_token: missing (optional),
+    directives: JsDirectiveList [],
+    items: JsModuleItemList [
+        JsExpressionStatement {
+            expression: JsStaticMemberExpression {
+                object: JsComputedMemberExpression {
+                    object: JsStaticMemberExpression {
+                        object: JsCallExpression {
+                            callee: JsIdentifierExpression {
+                                name: JsReferenceIdentifier {
+                                    value_token: IDENT@0..3 "foo" [] [],
+                                },
+                            },
+                            optional_chain_token: missing (optional),
+                            type_arguments: missing (optional),
+                            arguments: JsCallArguments {
+                                l_paren_token: L_PAREN@3..4 "(" [] [],
+                                args: JsCallArgumentList [],
+                                r_paren_token: R_PAREN@4..5 ")" [] [],
+                            },
+                        },
+                        operator_token: QUESTIONDOT@5..7 "?." [] [],
+                        member: JsName {
+                            value_token: IDENT@7..10 "baz" [] [],
+                        },
+                    },
+                    optional_chain_token: missing (optional),
+                    l_brack_token: L_BRACK@10..11 "[" [] [],
+                    member: missing (required),
+                    r_brack_token: R_BRACK@11..12 "]" [] [],
+                },
+                operator_token: DOT@12..13 "." [] [],
+                member: missing (required),
+            },
+            semicolon_token: SEMICOLON@13..14 ";" [] [],
+        },
+        JsExpressionStatement {
+            expression: JsTemplateExpression {
+                tag: JsIdentifierExpression {
+                    name: JsReferenceIdentifier {
+                        value_token: IDENT@14..18 "BAR" [Newline("\n")] [],
+                    },
+                },
+                type_arguments: missing (optional),
+                l_tick_token: BACKTICK@18..19 "`" [] [],
+                elements: JsTemplateElementList [
+                    JsTemplateChunkElement {
+                        template_chunk_token: TEMPLATE_CHUNK@19..21 "b\n" [] [],
+                    },
+                ],
+                r_tick_token: missing (required),
+            },
+            semicolon_token: missing (optional),
+        },
+    ],
+    eof_token: EOF@21..21 "" [] [],
+}
+```
+
+## CST
+
+```
+0: JS_MODULE@0..21
+  0: (empty)
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..21
+    0: JS_EXPRESSION_STATEMENT@0..14
+      0: JS_STATIC_MEMBER_EXPRESSION@0..13
+        0: JS_COMPUTED_MEMBER_EXPRESSION@0..12
+          0: JS_STATIC_MEMBER_EXPRESSION@0..10
+            0: JS_CALL_EXPRESSION@0..5
+              0: JS_IDENTIFIER_EXPRESSION@0..3
+                0: JS_REFERENCE_IDENTIFIER@0..3
+                  0: IDENT@0..3 "foo" [] []
+              1: (empty)
+              2: (empty)
+              3: JS_CALL_ARGUMENTS@3..5
+                0: L_PAREN@3..4 "(" [] []
+                1: JS_CALL_ARGUMENT_LIST@4..4
+                2: R_PAREN@4..5 ")" [] []
+            1: QUESTIONDOT@5..7 "?." [] []
+            2: JS_NAME@7..10
+              0: IDENT@7..10 "baz" [] []
+          1: (empty)
+          2: L_BRACK@10..11 "[" [] []
+          3: (empty)
+          4: R_BRACK@11..12 "]" [] []
+        1: DOT@12..13 "." [] []
+        2: (empty)
+      1: SEMICOLON@13..14 ";" [] []
+    1: JS_EXPRESSION_STATEMENT@14..21
+      0: JS_TEMPLATE_EXPRESSION@14..21
+        0: JS_IDENTIFIER_EXPRESSION@14..18
+          0: JS_REFERENCE_IDENTIFIER@14..18
+            0: IDENT@14..18 "BAR" [Newline("\n")] []
+        1: (empty)
+        2: BACKTICK@18..19 "`" [] []
+        3: JS_TEMPLATE_ELEMENT_LIST@19..21
+          0: JS_TEMPLATE_CHUNK_ELEMENT@19..21
+            0: TEMPLATE_CHUNK@19..21 "b\n" [] []
+        4: (empty)
+      1: (empty)
+  4: EOF@21..21 "" [] []
+
+```
+
+## Diagnostics
+
+```
+subscripts_err.js:1:12 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected an expression but instead found ']'.
+  
+  > 1 │ foo()?.baz[].;
+      │            ^
+    2 │ BAR`b
+    3 │ 
+  
+  i Expected an expression here.
+  
+  > 1 │ foo()?.baz[].;
+      │            ^
+    2 │ BAR`b
+    3 │ 
+  
+subscripts_err.js:1:14 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected an identifier but instead found ';'.
+  
+  > 1 │ foo()?.baz[].;
+      │              ^
+    2 │ BAR`b
+    3 │ 
+  
+  i Expected an identifier here.
+  
+  > 1 │ foo()?.baz[].;
+      │              ^
+    2 │ BAR`b
+    3 │ 
+  
+subscripts_err.js:2:5 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × unterminated template literal
+  
+    1 │ foo()?.baz[].;
+  > 2 │ BAR`b
+      │     ^
+  > 3 │ 
+      │ 
+  
+```

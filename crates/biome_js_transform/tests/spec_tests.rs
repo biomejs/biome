@@ -1,28 +1,29 @@
 use biome_analyze::{AnalysisFilter, AnalyzerTransformation, ControlFlow, Never, RuleFilter};
 use biome_js_formatter::context::JsFormatOptions;
 use biome_js_formatter::format_node;
-use biome_js_parser::{parse, JsParserOptions};
+use biome_js_parser::{JsParserOptions, parse};
 use biome_js_syntax::{JsFileSource, JsLanguage};
 use biome_rowan::AstNode;
 use biome_test_utils::{
-    assert_errors_are_absent, create_analyzer_options, diagnostic_to_string,
-    has_bogus_nodes_or_empty_slots, register_leak_checker, scripts_from_json,
+    assert_diagnostics_expectation_comment, assert_errors_are_absent, create_analyzer_options,
+    diagnostic_to_string, has_bogus_nodes_or_empty_slots, register_leak_checker, scripts_from_json,
     write_transformation_snapshot,
 };
 
+use camino::Utf8Path;
 use std::ops::Deref;
-use std::{ffi::OsStr, fs::read_to_string, path::Path, slice};
+use std::{fs::read_to_string, slice};
 
 tests_macros::gen_tests! {"tests/specs/**/*.{cjs,js,jsx,tsx,ts,json,jsonc}", crate::run_test, "module"}
 
 fn run_test(input: &'static str, _: &str, _: &str, _: &str) {
     register_leak_checker();
 
-    let input_file = Path::new(input);
-    let file_name = input_file.file_name().and_then(OsStr::to_str).unwrap();
+    let input_file = Utf8Path::new(input);
+    let file_name = input_file.file_name().unwrap();
 
     let rule_folder = input_file.parent().unwrap();
-    let rule = rule_folder.file_name().unwrap().to_str().unwrap();
+    let rule = rule_folder.file_name().unwrap();
 
     if rule == "specs" {
         panic!("the test file must be placed in the {rule}/<group-name>/<rule-name>/ directory");
@@ -46,7 +47,8 @@ fn run_test(input: &'static str, _: &str, _: &str, _: &str) {
 
     let input_code = read_to_string(input_file)
         .unwrap_or_else(|err| panic!("failed to read {input_file:?}: {err:?}"));
-    let quantity_diagnostics = if let Some(scripts) = scripts_from_json(extension, &input_code) {
+
+    if let Some(scripts) = scripts_from_json(extension, &input_code) {
         for script in scripts {
             analyze_and_snap(
                 &mut snapshot,
@@ -58,8 +60,6 @@ fn run_test(input: &'static str, _: &str, _: &str, _: &str) {
                 JsParserOptions::default(),
             );
         }
-
-        0
     } else {
         let Ok(source_type) = input_file.try_into() else {
             return;
@@ -72,7 +72,7 @@ fn run_test(input: &'static str, _: &str, _: &str, _: &str) {
             file_name,
             input_file,
             JsParserOptions::default(),
-        )
+        );
     };
 
     insta::with_settings!({
@@ -81,22 +81,17 @@ fn run_test(input: &'static str, _: &str, _: &str, _: &str) {
     }, {
         insta::assert_snapshot!(file_name, snapshot, file_name);
     });
-
-    if input_code.contains("/* should not generate diagnostics */") && quantity_diagnostics > 0 {
-        panic!("This test should not generate diagnostics");
-    }
 }
 
-#[allow(clippy::too_many_arguments)]
 pub(crate) fn analyze_and_snap(
     snapshot: &mut String,
     input_code: &str,
     source_type: JsFileSource,
     filter: AnalysisFilter,
     file_name: &str,
-    input_file: &Path,
+    input_file: &Utf8Path,
     parser_options: JsParserOptions,
-) -> usize {
+) {
     let parsed = parse(input_code, source_type, parser_options.clone());
     let root = parsed.tree();
 
@@ -134,11 +129,11 @@ pub(crate) fn analyze_and_snap(
         source_type.file_extension(),
     );
 
-    diagnostics.len()
+    assert_diagnostics_expectation_comment(input_file, root.syntax(), diagnostics.len());
 }
 
 fn check_transformation(
-    path: &Path,
+    path: &Utf8Path,
     source: &str,
     source_type: JsFileSource,
     transformation: &AnalyzerTransformation<JsLanguage>,

@@ -1,0 +1,35 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid_multiple_separate_exports.js
+snapshot_kind: text
+---
+# Input
+```js
+const foo = 1;
+const bar = 2;
+
+export const foobar = () => foo + bar;
+
+export { foo, bar };
+export default (x) = x ** 2;
+
+const baz = 3;
+
+```
+
+# Diagnostics
+```
+invalid_multiple_separate_exports.js:7:1 lint/nursery/useExportsLast ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i All exports should be declared after all non-export statements.
+  
+    6 │ export { foo, bar };
+  > 7 │ export default (x) = x ** 2;
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    8 │ 
+    9 │ const baz = 3;
+  
+  i Move this statement before the export statements to keep all exports at the end of the module.
+  
+
+```

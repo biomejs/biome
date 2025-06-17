@@ -1,0 +1,108 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: html/svg/svg.html
+---
+# Input
+
+```html
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>SVG</title>
+  </head>
+  <body>
+    <svg width="100" height="100">
+      <circle cx="50" cy="50" r="40" stroke="green" stroke-width="4" fill="yellow" />
+    </svg>
+  </body>
+</html>
+
+<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+<defs /> 
+
+ <g>
+  <g><polygon points="5,5 195,10 185,185 10,195" />
+      <text>    Text</text></g>
+  </g>
+
+  <!-- Common use case: embed HTML text into SVG -->
+  <foreignObject x="20" y="20" width="160" height="160">
+    <!--
+      In the context of SVG embeded into HTML, the XHTML namespace could be avoided, but it is mandatory in the context of an SVG document
+    -->
+    <div xmlns="http://www.w3.org/1999/xhtml">
+    <p>
+  123
+      </p>
+      <span>
+        123
+        </span>
+    </div>
+  </foreignObject>
+</svg>
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,4 +1,4 @@
+-<!doctype html>
++<!DOCTYPE html>
+ <html>
+   <head>
+     <title>SVG</title>
+```
+
+# Output
+
+```html
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>SVG</title>
+  </head>
+  <body>
+    <svg width="100" height="100">
+      <circle
+        cx="50"
+        cy="50"
+        r="40"
+        stroke="green"
+        stroke-width="4"
+        fill="yellow"
+      />
+    </svg>
+  </body>
+</html>
+
+<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+  <defs />
+
+  <g>
+    <g>
+      <polygon points="5,5 195,10 185,185 10,195" />
+      <text>Text</text>
+    </g>
+  </g>
+
+  <!-- Common use case: embed HTML text into SVG -->
+  <foreignObject x="20" y="20" width="160" height="160">
+    <!--
+      In the context of SVG embeded into HTML, the XHTML namespace could be avoided, but it is mandatory in the context of an SVG document
+    -->
+    <div xmlns="http://www.w3.org/1999/xhtml">
+      <p>123</p>
+      <span> 123 </span>
+    </div>
+  </foreignObject>
+</svg>
+```
+
+# Lines exceeding max width of 80 characters
+```
+   33:       In the context of SVG embeded into HTML, the XHTML namespace could be avoided, but it is mandatory in the context of an SVG document
+```

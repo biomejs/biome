@@ -11,7 +11,7 @@ expression: invalid.jsonc
 ```
 invalid.jsonc:1:1 lint/complexity/useFlatMap  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The call chain .map().flat() can be replaced with a single .flatMap() call.
+  i The call chain .map().flat() can be replaced with a single .flatMap() call.
   
   > 1 │ [0, [12]].map(Number).flat();
       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -33,7 +33,7 @@ invalid.jsonc:1:1 lint/complexity/useFlatMap  FIXABLE  ━━━━━━━━�
 ```
 invalid.jsonc:1:1 lint/complexity/useFlatMap  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The call chain .map().flat() can be replaced with a single .flatMap() call.
+  i The call chain .map().flat() can be replaced with a single .flatMap() call.
   
   > 1 │ [0, [12], [[16]]].map(Number).flat(1);
       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -55,7 +55,7 @@ invalid.jsonc:1:1 lint/complexity/useFlatMap  FIXABLE  ━━━━━━━━�
 ```
 invalid.jsonc:1:1 lint/complexity/useFlatMap  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The call chain .map().flat() can be replaced with a single .flatMap() call.
+  i The call chain .map().flat() can be replaced with a single .flatMap() call.
   
   > 1 │ [0, [12], [[16]]].map((element) => {}).flat(1);
       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -77,7 +77,7 @@ invalid.jsonc:1:1 lint/complexity/useFlatMap  FIXABLE  ━━━━━━━━�
 ```
 invalid.jsonc:1:1 lint/complexity/useFlatMap  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The call chain .map().flat() can be replaced with a single .flatMap() call.
+  i The call chain .map().flat() can be replaced with a single .flatMap() call.
   
   > 1 │ [0, [12], [[16]]].map((element, index) => {}).flat(1);
       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -99,7 +99,7 @@ invalid.jsonc:1:1 lint/complexity/useFlatMap  FIXABLE  ━━━━━━━━�
 ```
 invalid.jsonc:1:1 lint/complexity/useFlatMap  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The call chain .map().flat() can be replaced with a single .flatMap() call.
+  i The call chain .map().flat() can be replaced with a single .flatMap() call.
   
   > 1 │ [0, [12], [[16]]].map((element, index, array) => {}).flat(1);
       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -111,5 +111,3 @@ invalid.jsonc:1:1 lint/complexity/useFlatMap  FIXABLE  ━━━━━━━━�
   
 
 ```
-
-

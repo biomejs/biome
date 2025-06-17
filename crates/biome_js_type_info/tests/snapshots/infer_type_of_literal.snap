@@ -1,0 +1,23 @@
+---
+source: crates/biome_js_type_info/tests/utils.rs
+expression: content
+---
+## Input
+
+```ts
+const a = 123.45;
+
+```
+
+## Result
+
+```
+a => value: 123.45
+
+```
+
+## Registered types
+
+```
+Global TypeId(0) => value: 123.45
+```

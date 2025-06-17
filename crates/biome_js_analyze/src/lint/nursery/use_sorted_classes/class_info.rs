@@ -5,7 +5,7 @@
 //! - The total variants weight that results from the combination of all the variants.
 //! - The text of the class itself.
 //! - The arbitrary variants of the class.
-//!     It is generated according to the information contained in a `SortConfig`, which includes:
+//!   It is generated according to the information contained in a `SortConfig`, which includes:
 //! - The list of layers, in order.
 //! - The list of utilities, in order, for each layer.
 //! - The list of variants, in order of importance (which is used to compute the variants weight).
@@ -16,8 +16,8 @@ use std::{cmp::Ordering, collections::HashMap};
 use bitvec::{order::Lsb0, vec::BitVec};
 
 use super::{
-    class_lexer::{tokenize_class, ClassSegmentStructure},
-    sort_config::{build_variant_weight, SortConfig, VariantsConfig},
+    class_lexer::{ClassSegmentStructure, tokenize_class},
+    sort_config::{SortConfig, VariantsConfig, build_variant_weight},
 };
 use crate::lint::nursery::use_sorted_classes::sort_config::UtilityLayer;
 
@@ -37,21 +37,21 @@ enum UtilityMatch {
 
 impl From<(&str, &str)> for UtilityMatch {
     /// Checks if a utility matches a target, and returns the result.
-    fn from((target, utility_text): (&str, &str)) -> UtilityMatch {
+    fn from((target, utility_text): (&str, &str)) -> Self {
         // If the target ends with `$`, then it's an exact target.
         if target.ends_with('$') {
             // Check if the utility matches the target (without the final `$`) exactly.
             if utility_text == &target[..target.len() - 1] {
-                return UtilityMatch::Exact;
+                return Self::Exact;
             }
-            return UtilityMatch::None;
+            return Self::None;
         }
         // Check if the utility starts with the (partial) target.
         if utility_text.starts_with(target) && utility_text != target {
-            return UtilityMatch::Partial;
+            return Self::Partial;
         }
         // If all of the above checks fail, there is no match.
-        UtilityMatch::None
+        Self::None
     }
 }
 
@@ -123,7 +123,7 @@ fn get_utility_info(
         });
     }
 
-    let utility_text = utility_data.text.as_str();
+    let utility_text = utility_data.text.as_ref();
     let mut layer: Option<&str> = None;
     let mut match_index: usize = 0;
     let mut last_size: usize = 0;
@@ -178,7 +178,7 @@ mod get_utility_info_tests {
             classes: &["px-2$"],
         }];
         let utility_data = ClassSegmentStructure {
-            text: "px-2".to_string(),
+            text: "px-2".into(),
             arbitrary: false,
         };
         assert_eq!(
@@ -189,7 +189,7 @@ mod get_utility_info_tests {
             })
         );
         let utility_data = ClassSegmentStructure {
-            text: "px-4".to_string(),
+            text: "px-4".into(),
             arbitrary: false,
         };
         assert_eq!(
@@ -205,7 +205,7 @@ mod get_utility_info_tests {
             classes: &["px-"],
         }];
         let utility_data = ClassSegmentStructure {
-            text: "px-2".to_string(),
+            text: "px-2".into(),
             arbitrary: false,
         };
         assert_eq!(
@@ -216,7 +216,7 @@ mod get_utility_info_tests {
             })
         );
         let utility_data = ClassSegmentStructure {
-            text: "not-px-2".to_string(),
+            text: "not-px-2".into(),
             arbitrary: false,
         };
         assert_eq!(
@@ -232,7 +232,7 @@ mod get_utility_info_tests {
             classes: &["border-", "border-t-"],
         }];
         let utility_data = ClassSegmentStructure {
-            text: "border-t-2".to_string(),
+            text: "border-t-2".into(),
             arbitrary: false,
         };
         assert_eq!(
@@ -251,7 +251,7 @@ mod get_utility_info_tests {
             classes: &["border-t-", "border-"],
         }];
         let utility_data = ClassSegmentStructure {
-            text: "border-t-2".to_string(),
+            text: "border-t-2".into(),
             arbitrary: false,
         };
         assert_eq!(
@@ -270,7 +270,7 @@ mod get_utility_info_tests {
             classes: &["border-t-", "border-"],
         }];
         let utility_data = ClassSegmentStructure {
-            text: "[arbitrary:css]".to_string(),
+            text: "[arbitrary:css]".into(),
             arbitrary: true,
         };
         assert_eq!(
@@ -299,10 +299,10 @@ enum VariantMatch {
 
 impl From<(&str, &str)> for VariantMatch {
     /// Checks if a variant matches a target, and returns the result.
-    fn from((target, variant_text): (&str, &str)) -> VariantMatch {
+    fn from((target, variant_text): (&str, &str)) -> Self {
         // If the target matched exactly the variant text.
         if target == variant_text {
-            return VariantMatch::Exact;
+            return Self::Exact;
         };
 
         let mut target_chars = target.bytes();
@@ -335,15 +335,15 @@ impl From<(&str, &str)> for VariantMatch {
         }
 
         if target_found && dash_found && bracket_found {
-            return VariantMatch::Exact;
+            return Self::Exact;
         }
 
         // Check if the variant starts with the (partial) target.
         if variant_text.starts_with(target) && variant_text != target {
-            return VariantMatch::Partial;
+            return Self::Partial;
         }
         // If all of the above checks fail, there is no match.
-        VariantMatch::None
+        Self::None
     }
 }
 
@@ -484,7 +484,7 @@ pub fn compute_variants_weight(
 #[derive(Debug, Eq, PartialEq)]
 pub struct ClassInfo {
     /// The full text of the class itself.
-    pub text: String,
+    pub text: Box<str>,
     /// The total variants weight that results from the combination of all the variants.
     pub variant_weight: Option<BitVec<u8, Lsb0>>,
     /// The layer the utility belongs to.
@@ -492,7 +492,7 @@ pub struct ClassInfo {
     /// The index of the utility within the layer.
     pub utility_index: usize,
     /// Arbitrary variants
-    pub arbitrary_variants: Option<Vec<String>>,
+    pub arbitrary_variants: Option<Box<[Box<str>]>>,
 }
 
 /// Computes sort-related information about a CSS class. If the class is not recognized as a utility,
@@ -507,14 +507,14 @@ pub fn get_class_info(class_name: &str, sort_config: &SortConfig) -> Option<Clas
         Vec<&ClassSegmentStructure>,
     ) = utility_data.variants.iter().partition(|el| el.arbitrary);
 
-    let arbitrary_variants: Vec<String> = arbitrary_variants
+    let arbitrary_variants: Box<[Box<str>]> = arbitrary_variants
         .iter()
         .map(|&variant| variant.text.clone())
         .collect();
 
     if let Some(utility_info) = utility_info {
         return Some(ClassInfo {
-            text: class_name.to_string(),
+            text: class_name.into(),
             variant_weight: compute_variants_weight(sort_config.variants, &current_variants),
             layer_index: *sort_config.layer_index_map.get(&utility_info.layer)?,
             utility_index: utility_info.index,
@@ -560,7 +560,7 @@ mod get_class_info_tests {
         assert_eq!(
             get_class_info("px-2", &sort_config),
             Some(ClassInfo {
-                text: "px-2".to_string(),
+                text: "px-2".into(),
                 variant_weight: None,
                 layer_index: 0,
                 utility_index: 0,
@@ -570,7 +570,7 @@ mod get_class_info_tests {
         assert_eq!(
             get_class_info("py-2", &sort_config),
             Some(ClassInfo {
-                text: "py-2".to_string(),
+                text: "py-2".into(),
                 variant_weight: None,
                 layer_index: 0,
                 utility_index: 1,
@@ -580,7 +580,7 @@ mod get_class_info_tests {
         assert_eq!(
             get_class_info("block", &sort_config),
             Some(ClassInfo {
-                text: "block".to_string(),
+                text: "block".into(),
                 variant_weight: None,
                 layer_index: 0,
                 utility_index: 2,
@@ -590,7 +590,7 @@ mod get_class_info_tests {
         assert_eq!(
             get_class_info("mx-2", &sort_config),
             Some(ClassInfo {
-                text: "mx-2".to_string(),
+                text: "mx-2".into(),
                 variant_weight: None,
                 layer_index: 1,
                 utility_index: 0,
@@ -600,7 +600,7 @@ mod get_class_info_tests {
         assert_eq!(
             get_class_info("my-2", &sort_config),
             Some(ClassInfo {
-                text: "my-2".to_string(),
+                text: "my-2".into(),
                 variant_weight: None,
                 layer_index: 1,
                 utility_index: 1,
@@ -610,7 +610,7 @@ mod get_class_info_tests {
         assert_eq!(
             get_class_info("inline", &sort_config),
             Some(ClassInfo {
-                text: "inline".to_string(),
+                text: "inline".into(),
                 variant_weight: None,
                 layer_index: 1,
                 utility_index: 2,
@@ -620,7 +620,7 @@ mod get_class_info_tests {
         assert_eq!(
             get_class_info("[arbitrary:css]", &sort_config),
             Some(ClassInfo {
-                text: "[arbitrary:css]".to_string(),
+                text: "[arbitrary:css]".into(),
                 variant_weight: None,
                 layer_index: 2,
                 utility_index: 0,
@@ -630,7 +630,7 @@ mod get_class_info_tests {
         assert_eq!(
             get_class_info("hover:bg-red-500", &sort_config),
             Some(ClassInfo {
-                text: "hover:bg-red-500".to_string(),
+                text: "hover:bg-red-500".into(),
                 variant_weight: Some(bitvec![u8, Lsb0; 1]),
                 layer_index: 0,
                 utility_index: 3,
@@ -640,7 +640,7 @@ mod get_class_info_tests {
         assert_eq!(
             get_class_info("hover:focus:bg-yellow-600", &sort_config),
             Some(ClassInfo {
-                text: "hover:focus:bg-yellow-600".to_string(),
+                text: "hover:focus:bg-yellow-600".into(),
                 variant_weight: Some(bitvec![u8, Lsb0; 1, 1]),
                 layer_index: 0,
                 utility_index: 3,
@@ -650,21 +650,21 @@ mod get_class_info_tests {
         assert_eq!(
             get_class_info("[&nth-child(2)]:bg-yellow-300", &sort_config),
             Some(ClassInfo {
-                text: "[&nth-child(2)]:bg-yellow-300".to_string(),
+                text: "[&nth-child(2)]:bg-yellow-300".into(),
                 variant_weight: None,
                 layer_index: 0,
                 utility_index: 3,
-                arbitrary_variants: Some(vec!["[&nth-child(2)]".to_string()])
+                arbitrary_variants: Some(Box::new([Box::<str>::from("[&nth-child(2)]")]))
             })
         );
         assert_eq!(
             get_class_info("[&nth-child(1)]:focus:bg-yellow-300", &sort_config),
             Some(ClassInfo {
-                text: "[&nth-child(1)]:focus:bg-yellow-300".to_string(),
+                text: "[&nth-child(1)]:focus:bg-yellow-300".into(),
                 variant_weight: Some(bitvec![u8, Lsb0; 0, 1]),
                 layer_index: 0,
                 utility_index: 3,
-                arbitrary_variants: Some(vec!["[&nth-child(1)]".to_string()])
+                arbitrary_variants: Some(Box::new([Box::<str>::from("[&nth-child(1)]")]))
             })
         );
         assert_eq!(get_class_info("unknown", &sort_config), None);

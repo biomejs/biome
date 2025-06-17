@@ -1,0 +1,29 @@
+---
+source: crates/biome_graphql_analyze/tests/spec_tests.rs
+expression: invalid.graphql
+snapshot_kind: text
+---
+# Input
+```graphql
+enum Status {
+	Active
+}
+
+```
+
+# Diagnostics
+```
+invalid.graphql:2:2 lint/nursery/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Enum values should be in all caps.
+  
+    1 │ enum Status {
+  > 2 │ 	Active
+      │ 	^^^^^^
+    3 │ }
+    4 │ 
+  
+  i Change the enum value to be in all caps.
+  
+
+```

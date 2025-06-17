@@ -20,19 +20,19 @@ impl std::error::Error for FileSourceError {}
 impl Display for FileSourceError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            FileSourceError::MissingFileName => {
+            Self::MissingFileName => {
                 write!(f, "The path has no file name")
             }
-            FileSourceError::MissingFileExtension => {
+            Self::MissingFileExtension => {
                 write!(f, "The path has no file extension")
             }
-            FileSourceError::UnknownExtension => {
+            Self::UnknownExtension => {
                 write!(f, "The parser can't parse the extension yet")
             }
-            FileSourceError::UnknownFileName => {
+            Self::UnknownFileName => {
                 write!(f, "The parser doesn't recognize the file yet")
             }
-            FileSourceError::UnknownLanguageId => {
+            Self::UnknownLanguageId => {
                 write!(f, "The parser can't parse the language yet")
             }
         }

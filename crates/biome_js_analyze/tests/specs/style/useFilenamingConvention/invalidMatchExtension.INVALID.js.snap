@@ -1,0 +1,18 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidMatchExtension.INVALID.js
+snapshot_kind: text
+---
+# Input
+```js
+
+```
+
+# Diagnostics
+```
+invalidMatchExtension.INVALID.js lint/style/useFilenamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The file extension should be in camelCase.
+  
+
+```

@@ -1,0 +1,87 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `biome.json`
+
+```json
+{
+  "root": false,
+  "$schema": "./node_modules/@biomejs/biome/configuration_schema.json",
+  "vcs": {
+    "enabled": true,
+    "clientKind": "git",
+    "useIgnoreFile": true
+  },
+  "files": {
+    "ignoreUnknown": true,
+    "includes": [
+      "**",
+      "!**/website/.next/**",
+      "!**/website/.pages/**",
+      "!**/*.css"
+    ]
+  },
+  "assist": { "actions": { "source": { "organizeImports": "on" } } },
+  "formatter": {
+    "enabled": true,
+    "indentStyle": "space"
+  },
+  "linter": {
+    "enabled": true,
+    "rules": {
+      "recommended": true,
+      "security": {
+        "noDangerouslySetInnerHtml": "off"
+      },
+      "a11y": {
+        "noSvgWithoutTitle": "off",
+        "useButtonType": "off",
+        "useAnchorContent": "off",
+        "useValidAnchor": "off",
+        "useKeyWithClickEvents": "off",
+        "noAutofocus": "off",
+        "noLabelWithoutControl": "off",
+        "useSemanticElements": "off",
+        "useFocusableInteractive": "off"
+      },
+      "suspicious": {
+        "noExplicitAny": "off",
+        "noShadowRestrictedNames": "off",
+        "noConfusingVoidType": "off",
+        "noArrayIndexKey": "off",
+        "noAssignInExpressions": "off"
+      },
+      "correctness": {
+        "useExhaustiveDependencies": "off",
+        "useJsxKeyInIterable": "off"
+      },
+      "style": {
+        "noParameterAssign": "off",
+        "noUnusedTemplateLiteral": "off",
+        "noNonNullAssertion": "off",
+        "noUselessElse": "off",
+        "useAsConstAssertion": "error",
+        "useDefaultParameterLast": "error",
+        "useEnumInitializers": "error",
+        "useSelfClosingElements": "error",
+        "useSingleVarDeclarator": "error",
+        "useNumberNamespace": "error",
+        "noInferrableTypes": "error"
+      }
+    }
+  }
+}
+```
+
+# Emitted Messages
+
+```block
+configuration ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Migration results:
+  
+  - biome.json: configuration successfully migrated.
+  
+
+```

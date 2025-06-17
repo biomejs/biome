@@ -1,13 +1,14 @@
 use biome_analyze::{
-    context::RuleContext, declare_lint_rule, ActionCategory, FixKind, Rule, RuleDiagnostic,
-    RuleSource,
+    FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
-use biome_js_syntax::{inner_string_text, AnyJsImportLike, JsSyntaxKind, JsSyntaxToken};
+use biome_diagnostics::Severity;
+use biome_js_syntax::{AnyJsImportLike, JsSyntaxKind, JsSyntaxToken, inner_string_text};
+use biome_resolver::is_builtin_node_module;
 use biome_rowan::BatchMutationExt;
 
+use crate::JsRuleAction;
 use crate::services::manifest::Manifest;
-use crate::{globals::is_node_builtin_module, JsRuleAction};
 
 declare_lint_rule! {
     /// Enforces using the `node:` protocol for Node.js builtin modules.
@@ -54,6 +55,7 @@ declare_lint_rule! {
         language: "js",
         sources: &[RuleSource::EslintUnicorn("prefer-node-protocol")],
         recommended: true,
+        severity: Severity::Information,
         fix_kind: FixKind::Unsafe,
     }
 }
@@ -110,7 +112,7 @@ impl Rule for UseNodejsImportProtocol {
         let mut mutation = ctx.root().begin();
         mutation.replace_token(module_name.clone(), new_module_name);
         Some(JsRuleAction::new(
-            ActionCategory::QuickFix,
+            ctx.metadata().action_category(ctx.category(), ctx.group()),
             ctx.metadata().applicability(),
             markup! { "Add the "<Emphasis>"node:"</Emphasis>" protocol." }.to_owned(),
             mutation,
@@ -119,5 +121,5 @@ impl Rule for UseNodejsImportProtocol {
 }
 
 fn is_node_module_without_protocol(module_name: &str) -> bool {
-    !module_name.starts_with("node:") && is_node_builtin_module(module_name)
+    !module_name.starts_with("node:") && is_builtin_node_module(module_name)
 }

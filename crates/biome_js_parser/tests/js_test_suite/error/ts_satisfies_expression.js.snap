@@ -1,0 +1,99 @@
+---
+source: crates/biome_js_parser/tests/spec_test.rs
+expression: snapshot
+snapshot_kind: text
+---
+## Input
+
+```js
+let x = "hello" satisfies string;
+
+```
+
+
+## AST
+
+```
+JsModule {
+    bom_token: missing (optional),
+    interpreter_token: missing (optional),
+    directives: JsDirectiveList [],
+    items: JsModuleItemList [
+        JsVariableStatement {
+            declaration: JsVariableDeclaration {
+                await_token: missing (optional),
+                kind: LET_KW@0..4 "let" [] [Whitespace(" ")],
+                declarators: JsVariableDeclaratorList [
+                    JsVariableDeclarator {
+                        id: JsIdentifierBinding {
+                            name_token: IDENT@4..6 "x" [] [Whitespace(" ")],
+                        },
+                        variable_annotation: missing (optional),
+                        initializer: JsInitializerClause {
+                            eq_token: EQ@6..8 "=" [] [Whitespace(" ")],
+                            expression: JsBogusExpression {
+                                items: [
+                                    JsStringLiteralExpression {
+                                        value_token: JS_STRING_LITERAL@8..16 "\"hello\"" [] [Whitespace(" ")],
+                                    },
+                                    SATISFIES_KW@16..26 "satisfies" [] [Whitespace(" ")],
+                                    TsStringType {
+                                        string_token: STRING_KW@26..32 "string" [] [],
+                                    },
+                                ],
+                            },
+                        },
+                    },
+                ],
+            },
+            semicolon_token: SEMICOLON@32..33 ";" [] [],
+        },
+    ],
+    eof_token: EOF@33..34 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: JS_MODULE@0..34
+  0: (empty)
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..33
+    0: JS_VARIABLE_STATEMENT@0..33
+      0: JS_VARIABLE_DECLARATION@0..32
+        0: (empty)
+        1: LET_KW@0..4 "let" [] [Whitespace(" ")]
+        2: JS_VARIABLE_DECLARATOR_LIST@4..32
+          0: JS_VARIABLE_DECLARATOR@4..32
+            0: JS_IDENTIFIER_BINDING@4..6
+              0: IDENT@4..6 "x" [] [Whitespace(" ")]
+            1: (empty)
+            2: JS_INITIALIZER_CLAUSE@6..32
+              0: EQ@6..8 "=" [] [Whitespace(" ")]
+              1: JS_BOGUS_EXPRESSION@8..32
+                0: JS_STRING_LITERAL_EXPRESSION@8..16
+                  0: JS_STRING_LITERAL@8..16 "\"hello\"" [] [Whitespace(" ")]
+                1: SATISFIES_KW@16..26 "satisfies" [] [Whitespace(" ")]
+                2: TS_STRING_TYPE@26..32
+                  0: STRING_KW@26..32 "string" [] []
+      1: SEMICOLON@32..33 ";" [] []
+  4: EOF@33..34 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+ts_satisfies_expression.js:1:9 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × 'satisfies' expression are a TypeScript only feature. Convert your file to a TypeScript file or remove the syntax.
+  
+  > 1 │ let x = "hello" satisfies string;
+      │         ^^^^^^^^^^^^^^^^^^^^^^^^
+    2 │ 
+  
+  i TypeScript only syntax
+  
+```

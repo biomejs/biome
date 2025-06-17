@@ -1,0 +1,211 @@
+---
+source: crates/biome_js_parser/tests/spec_test.rs
+expression: snapshot
+snapshot_kind: text
+---
+## Input
+
+```js
+while true {}
+while {}
+while (true {}
+while true) }
+
+```
+
+
+## AST
+
+```
+JsModule {
+    bom_token: missing (optional),
+    interpreter_token: missing (optional),
+    directives: JsDirectiveList [],
+    items: JsModuleItemList [
+        JsWhileStatement {
+            while_token: WHILE_KW@0..6 "while" [] [Whitespace(" ")],
+            l_paren_token: missing (required),
+            test: JsBooleanLiteralExpression {
+                value_token: TRUE_KW@6..11 "true" [] [Whitespace(" ")],
+            },
+            r_paren_token: missing (required),
+            body: JsBlockStatement {
+                l_curly_token: L_CURLY@11..12 "{" [] [],
+                statements: JsStatementList [],
+                r_curly_token: R_CURLY@12..13 "}" [] [],
+            },
+        },
+        JsWhileStatement {
+            while_token: WHILE_KW@13..20 "while" [Newline("\n")] [Whitespace(" ")],
+            l_paren_token: missing (required),
+            test: missing (required),
+            r_paren_token: missing (required),
+            body: JsBlockStatement {
+                l_curly_token: L_CURLY@20..21 "{" [] [],
+                statements: JsStatementList [],
+                r_curly_token: R_CURLY@21..22 "}" [] [],
+            },
+        },
+        JsWhileStatement {
+            while_token: WHILE_KW@22..29 "while" [Newline("\n")] [Whitespace(" ")],
+            l_paren_token: L_PAREN@29..30 "(" [] [],
+            test: JsBooleanLiteralExpression {
+                value_token: TRUE_KW@30..35 "true" [] [Whitespace(" ")],
+            },
+            r_paren_token: missing (required),
+            body: JsBlockStatement {
+                l_curly_token: L_CURLY@35..36 "{" [] [],
+                statements: JsStatementList [],
+                r_curly_token: R_CURLY@36..37 "}" [] [],
+            },
+        },
+        JsWhileStatement {
+            while_token: WHILE_KW@37..44 "while" [Newline("\n")] [Whitespace(" ")],
+            l_paren_token: missing (required),
+            test: JsBooleanLiteralExpression {
+                value_token: TRUE_KW@44..48 "true" [] [],
+            },
+            r_paren_token: R_PAREN@48..50 ")" [] [Whitespace(" ")],
+            body: missing (required),
+        },
+        JsBogusStatement {
+            items: [
+                R_CURLY@50..51 "}" [] [],
+            ],
+        },
+    ],
+    eof_token: EOF@51..52 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: JS_MODULE@0..52
+  0: (empty)
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..51
+    0: JS_WHILE_STATEMENT@0..13
+      0: WHILE_KW@0..6 "while" [] [Whitespace(" ")]
+      1: (empty)
+      2: JS_BOOLEAN_LITERAL_EXPRESSION@6..11
+        0: TRUE_KW@6..11 "true" [] [Whitespace(" ")]
+      3: (empty)
+      4: JS_BLOCK_STATEMENT@11..13
+        0: L_CURLY@11..12 "{" [] []
+        1: JS_STATEMENT_LIST@12..12
+        2: R_CURLY@12..13 "}" [] []
+    1: JS_WHILE_STATEMENT@13..22
+      0: WHILE_KW@13..20 "while" [Newline("\n")] [Whitespace(" ")]
+      1: (empty)
+      2: (empty)
+      3: (empty)
+      4: JS_BLOCK_STATEMENT@20..22
+        0: L_CURLY@20..21 "{" [] []
+        1: JS_STATEMENT_LIST@21..21
+        2: R_CURLY@21..22 "}" [] []
+    2: JS_WHILE_STATEMENT@22..37
+      0: WHILE_KW@22..29 "while" [Newline("\n")] [Whitespace(" ")]
+      1: L_PAREN@29..30 "(" [] []
+      2: JS_BOOLEAN_LITERAL_EXPRESSION@30..35
+        0: TRUE_KW@30..35 "true" [] [Whitespace(" ")]
+      3: (empty)
+      4: JS_BLOCK_STATEMENT@35..37
+        0: L_CURLY@35..36 "{" [] []
+        1: JS_STATEMENT_LIST@36..36
+        2: R_CURLY@36..37 "}" [] []
+    3: JS_WHILE_STATEMENT@37..50
+      0: WHILE_KW@37..44 "while" [Newline("\n")] [Whitespace(" ")]
+      1: (empty)
+      2: JS_BOOLEAN_LITERAL_EXPRESSION@44..48
+        0: TRUE_KW@44..48 "true" [] []
+      3: R_PAREN@48..50 ")" [] [Whitespace(" ")]
+      4: (empty)
+    4: JS_BOGUS_STATEMENT@50..51
+      0: R_CURLY@50..51 "}" [] []
+  4: EOF@51..52 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+while_stmt_err.js:1:7 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `(` but instead found `true`
+  
+  > 1 │ while true {}
+      │       ^^^^
+    2 │ while {}
+    3 │ while (true {}
+  
+  i Remove true
+  
+while_stmt_err.js:1:12 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `)` but instead found `{`
+  
+  > 1 │ while true {}
+      │            ^
+    2 │ while {}
+    3 │ while (true {}
+  
+  i Remove {
+  
+while_stmt_err.js:2:7 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `(` but instead found `{`
+  
+    1 │ while true {}
+  > 2 │ while {}
+      │       ^
+    3 │ while (true {}
+    4 │ while true) }
+  
+  i Remove {
+  
+while_stmt_err.js:3:13 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `)` but instead found `{`
+  
+    1 │ while true {}
+    2 │ while {}
+  > 3 │ while (true {}
+      │             ^
+    4 │ while true) }
+    5 │ 
+  
+  i Remove {
+  
+while_stmt_err.js:4:7 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `(` but instead found `true`
+  
+    2 │ while {}
+    3 │ while (true {}
+  > 4 │ while true) }
+      │       ^^^^
+    5 │ 
+  
+  i Remove true
+  
+while_stmt_err.js:4:13 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a statement but instead found '}'.
+  
+    2 │ while {}
+    3 │ while (true {}
+  > 4 │ while true) }
+      │             ^
+    5 │ 
+  
+  i Expected a statement here.
+  
+    2 │ while {}
+    3 │ while (true {}
+  > 4 │ while true) }
+      │             ^
+    5 │ 
+  
+```

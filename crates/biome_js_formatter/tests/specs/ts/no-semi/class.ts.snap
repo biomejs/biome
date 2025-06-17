@@ -46,6 +46,7 @@ declare module test {
 		[computed]
 
 		set setter(a: string)
+		set setter(a: string, )
 		[computed]
 
 		method()
@@ -80,6 +81,7 @@ Arrow parentheses: Always
 Bracket spacing: true
 Bracket same line: false
 Attribute Position: Auto
+Expand lists: Auto
 -----
 
 ```ts
@@ -124,6 +126,7 @@ declare module test {
 		[computed];
 
 		set setter(a: string);
+		set setter(a: string,);
 		[computed];
 
 		method();
@@ -152,6 +155,7 @@ Arrow parentheses: Always
 Bracket spacing: true
 Bracket same line: false
 Attribute Position: Auto
+Expand lists: Auto
 -----
 
 ```ts
@@ -196,6 +200,7 @@ declare module test {
 		[computed]
 
 		set setter(a: string)
+		set setter(a: string,)
 		[computed]
 
 		method()

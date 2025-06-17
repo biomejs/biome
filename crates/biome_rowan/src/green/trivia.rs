@@ -1,16 +1,17 @@
-use crate::arc::{Arc, HeaderSlice, ThinArc};
 use crate::TriviaPiece;
+use crate::arc::{Arc, HeaderSlice, ThinArc};
 use biome_text_size::TextSize;
-use countme::Count;
 use std::fmt::Formatter;
 use std::mem::ManuallyDrop;
 use std::{fmt, mem, ptr};
 
 #[derive(PartialEq, Eq, Hash)]
 pub(crate) struct GreenTriviaHead {
-    _c: Count<GreenTrivia>,
+    #[cfg(feature = "countme")]
+    _c: countme::Count<GreenTrivia>,
 }
 
+#[cfg(feature = "countme")]
 pub(crate) fn has_live() -> bool {
     countme::get::<GreenTrivia>().live > 0
 }
@@ -23,7 +24,7 @@ pub(crate) struct GreenTriviaData {
 }
 
 impl GreenTriviaData {
-    #[allow(unused)]
+    #[expect(unused)]
     #[inline]
     pub fn header(&self) -> &GreenTriviaHead {
         &self.data.header
@@ -82,15 +83,20 @@ impl GreenTrivia {
         I: IntoIterator<Item = TriviaPiece>,
         I::IntoIter: ExactSizeIterator,
     {
-        let data =
-            ThinArc::from_header_and_iter(GreenTriviaHead { _c: Count::new() }, pieces.into_iter());
+        let data = ThinArc::from_header_and_iter(
+            GreenTriviaHead {
+                #[cfg(feature = "countme")]
+                _c: countme::Count::new(),
+            },
+            pieces.into_iter(),
+        );
 
-        GreenTrivia { ptr: Some(data) }
+        Self { ptr: Some(data) }
     }
 
     /// Creates an empty trivia
     pub fn empty() -> Self {
-        GreenTrivia { ptr: None }
+        Self { ptr: None }
     }
 
     /// Returns the total length of all pieces
@@ -132,21 +138,24 @@ impl GreenTrivia {
     }
 
     pub(crate) unsafe fn from_raw(ptr: *mut GreenTriviaData) -> Self {
-        if let Some(ptr) = ptr.as_ref() {
-            let arc = Arc::from_raw(&ptr.data as *const ReprThin);
-            let arc = mem::transmute::<Arc<ReprThin>, ThinArc<GreenTriviaHead, TriviaPiece>>(arc);
-            Self { ptr: Some(arc) }
-        } else {
-            Self { ptr: None }
+        unsafe {
+            if let Some(ptr) = ptr.as_ref() {
+                let arc = Arc::from_raw(&ptr.data as *const ReprThin);
+                let arc =
+                    mem::transmute::<Arc<ReprThin>, ThinArc<GreenTriviaHead, TriviaPiece>>(arc);
+                Self { ptr: Some(arc) }
+            } else {
+                Self { ptr: None }
+            }
         }
     }
 }
 
 #[cfg(test)]
 mod tests {
+    use crate::TriviaPiece;
     use crate::green::trivia::{GreenTrivia, GreenTriviaHead};
     use crate::syntax::TriviaPieceKind;
-    use crate::TriviaPiece;
     use biome_text_size::TextSize;
 
     impl GreenTrivia {

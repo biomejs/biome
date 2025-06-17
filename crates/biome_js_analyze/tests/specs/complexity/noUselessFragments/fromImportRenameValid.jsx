@@ -1,3 +1,4 @@
+/* should not generate diagnostics */
 import AwesomeNoReact, { Fragment as AwesomeFragment } from "noReact";
 import AwesomeReact, { StrictMode as AwesomeStrictMode } from "react";
 

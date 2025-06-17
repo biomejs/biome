@@ -196,7 +196,7 @@ pub fn generate_nodes(ast: &AstSrc, language_kind: LanguageKind) -> Result<Strin
 
                     /// Construct the `slot_map` for this node by checking the `kind` of
                     /// each child of `syntax` against the defined grammar for the node.
-                    #[allow(clippy::explicit_counter_loop)]
+                    #![allow(clippy::explicit_counter_loop)]
                     pub fn build_slot_map(syntax: &SyntaxNode) -> #slot_map_type {
                         #slot_map_builder_impl
                     }
@@ -236,6 +236,27 @@ pub fn generate_nodes(ast: &AstSrc, language_kind: LanguageKind) -> Result<Strin
                 }
             } else {
                 Default::default()
+            };
+
+            let debug_fmt_impl = if fields.len() > 0 {
+                quote! {
+                    thread_local! { static DEPTH: std::cell::Cell<u8> = const { std::cell::Cell::new(0) } };
+                    let current_depth = DEPTH.get();
+                    let result = if current_depth < 16 {
+                        DEPTH.set(current_depth + 1);
+                        f.debug_struct(#string_name)
+                            #(#fields)*
+                            .finish()
+                    } else {
+                        f.debug_struct(#string_name).finish()
+                    };
+                    DEPTH.set(current_depth);
+                    result
+                }
+            } else {
+                quote! {
+                    f.debug_struct(#string_name).finish()
+                }
             };
 
             (
@@ -295,20 +316,18 @@ pub fn generate_nodes(ast: &AstSrc, language_kind: LanguageKind) -> Result<Strin
 
                     impl std::fmt::Debug for #name {
                         fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-                            f.debug_struct(#string_name)
-                                #(#fields)*
-                                .finish()
+                            #debug_fmt_impl
                         }
                     }
 
                     impl From<#name> for SyntaxNode {
-                        fn from(n: #name) -> SyntaxNode {
+                        fn from(n: #name) -> Self {
                             n.syntax
                         }
                     }
 
                     impl From<#name> for SyntaxElement {
-                        fn from(n: #name) -> SyntaxElement {
+                        fn from(n: #name) -> Self {
                             n.syntax.into()
                         }
                     }
@@ -336,7 +355,7 @@ pub fn generate_nodes(ast: &AstSrc, language_kind: LanguageKind) -> Result<Strin
                 .variants
                 .iter()
                 .map(|variant| {
-                    let variant_name = format_ident!("{}", variant);
+                    let variant_name = format_ident!("{variant}");
                     quote! {
                         #variant_name(#variant_name)
                     }
@@ -347,14 +366,14 @@ pub fn generate_nodes(ast: &AstSrc, language_kind: LanguageKind) -> Result<Strin
                 .variants
                 .iter()
                 .map(|variant| {
-                    let variant_name = format_ident!("{}", variant);
+                    let variant_name = format_ident!("{variant}");
                     let fn_name = format_ident!("as_{}", Case::Snake.convert(variant));
                     quote! {
                         pub fn #fn_name(&self) -> Option<&#variant_name> {
-                           match &self {
-                            #name::#variant_name(item) => Some(item),
-                               _ => None
-                           }
+                            match &self {
+                                Self::#variant_name(item) => Some(item),
+                                _ => None
+                            }
                         }
                     }
                 })
@@ -375,7 +394,7 @@ pub fn generate_nodes(ast: &AstSrc, language_kind: LanguageKind) -> Result<Strin
 
             let variants: Vec<_> = simple_variants
                 .iter()
-                .map(|var| format_ident!("{}", var))
+                .map(|var| format_ident!("{var}"))
                 .collect();
 
             let kinds: Vec<_> = variants
@@ -387,7 +406,7 @@ pub fn generate_nodes(ast: &AstSrc, language_kind: LanguageKind) -> Result<Strin
                 .iter()
                 .map(|current_enum| {
                     let variant_is_enum = ast.unions.iter().find(|e| &e.name == *current_enum);
-                    let variant_name = format_ident!("{}", current_enum);
+                    let variant_name = format_ident!("{current_enum}");
 
                     let variant_is_dynamic = ast
                         .nodes
@@ -411,16 +430,16 @@ pub fn generate_nodes(ast: &AstSrc, language_kind: LanguageKind) -> Result<Strin
             let vv: Vec<_> = variant_of_variants
                 .iter()
                 .enumerate()
-                .map(|(i, en)| {
-                    let variant_name = format_ident!("{}", en);
-                    let variable_name = format_ident!("{}", Case::Snake.convert(en.as_str()));
+                .map(|(i, name)| {
+                    let variant_name = format_ident!("{name}");
+                    let variable_name = format_ident!("{}", Case::Snake.convert(name.as_str()));
                     (
                         // try_cast() code
                         if i != variant_of_variants.len() - 1 {
                             quote! {
                             let syntax = match #variant_name::try_cast(syntax) {
                                 Ok(#variable_name) => {
-                                    return Some(#name::#variant_name(#variable_name));
+                                    return Some(Self::#variant_name(#variable_name));
                                 }
                                 Err(syntax) => syntax,
                             };}
@@ -428,7 +447,7 @@ pub fn generate_nodes(ast: &AstSrc, language_kind: LanguageKind) -> Result<Strin
                             // if this is the last variant, do not clone syntax
                             quote! {
                                 if let Some(#variable_name) = #variant_name::cast(syntax) {
-                                    return Some(#name::#variant_name(#variable_name));
+                                    return Some(Self::#variant_name(#variable_name));
                             }}
                         },
                         // can_cast() code
@@ -437,11 +456,11 @@ pub fn generate_nodes(ast: &AstSrc, language_kind: LanguageKind) -> Result<Strin
                         },
                         // syntax() code
                         quote! {
-                            #name::#variant_name(it) => it.syntax()
+                            Self::#variant_name(it) => it.syntax()
                         },
                         // into_syntax() code
                         quote! {
-                            #name::#variant_name(it) => it.into_syntax()
+                            Self::#variant_name(it) => it.into_syntax()
                         },
                     )
                 })
@@ -465,7 +484,7 @@ pub fn generate_nodes(ast: &AstSrc, language_kind: LanguageKind) -> Result<Strin
                 quote! {
                     let res = match syntax.kind() {
                         #(
-                            #kinds => #name::#variants(#variant_cast),
+                            #kinds => Self::#variants(#variant_cast),
                         )*
                         _ =>  {
                             #(
@@ -503,8 +522,8 @@ pub fn generate_nodes(ast: &AstSrc, language_kind: LanguageKind) -> Result<Strin
                 .variants
                 .iter()
                 .enumerate()
-                .map(|(index, v)| {
-                    let ident = format_ident!("{}", v);
+                .map(|(index, variant)| {
+                    let ident = format_ident!("{variant}");
                     if index == 0 {
                         quote!( #ident::KIND_SET )
                     } else {
@@ -530,7 +549,7 @@ pub fn generate_nodes(ast: &AstSrc, language_kind: LanguageKind) -> Result<Strin
             let all_variant_names: Vec<_> = union
                 .variants
                 .iter()
-                .map(|variant| format_ident!("{}", variant))
+                .map(|variant| format_ident!("{variant}"))
                 .collect();
 
             (
@@ -548,8 +567,8 @@ pub fn generate_nodes(ast: &AstSrc, language_kind: LanguageKind) -> Result<Strin
                 quote! {
                     #(
                     impl From<#variants> for #name {
-                        fn from(node: #variants) -> #name {
-                            #name::#variants(node)
+                        fn from(node: #variants) -> Self {
+                            Self::#variants(node)
                         }
                     }
                     )*
@@ -567,22 +586,14 @@ pub fn generate_nodes(ast: &AstSrc, language_kind: LanguageKind) -> Result<Strin
                         }
                         fn syntax(&self) -> &SyntaxNode {
                             match self {
-                                #(
-                                #name::#variants(it) => #variant_syntax,
-                                )*
-                                #(
-                                    #vv_syntax
-                                ),*
+                                #(Self::#variants(it) => #variant_syntax,)*
+                                #(#vv_syntax),*
                             }
                         }
                         fn into_syntax(self) -> SyntaxNode {
                             match self {
-                                #(
-                                #name::#variants(it) => #variant_into_syntax,
-                                )*
-                                #(
-                                    #vv_into_syntax
-                                ),*
+                                #(Self::#variants(it) => #variant_into_syntax,)*
+                                #(#vv_into_syntax),*
                             }
                         }
                     }
@@ -590,25 +601,21 @@ pub fn generate_nodes(ast: &AstSrc, language_kind: LanguageKind) -> Result<Strin
                     impl std::fmt::Debug for #name {
                         fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
                             match self {
-                            #(
-                                #name::#all_variant_names(it) => std::fmt::Debug::fmt(it, f),
-                            )*
-                        }
+                                #(Self::#all_variant_names(it) => std::fmt::Debug::fmt(it, f),)*
                             }
+                        }
                     }
 
                     impl From<#name> for SyntaxNode {
-                        fn from(n: #name) -> SyntaxNode {
+                        fn from(n: #name) -> Self {
                             match n {
-                                #(
-                                #name::#all_variant_names(it) => it.into(),
-                                )*
+                                #(#name::#all_variant_names(it) => it.into(),)*
                             }
                         }
                     }
 
                     impl From<#name> for SyntaxElement {
-                        fn from(n: #name) -> SyntaxElement {
+                        fn from(n: #name) -> Self {
                             let node: SyntaxNode = n.into();
                             node.into()
                         }
@@ -695,18 +702,41 @@ pub fn generate_nodes(ast: &AstSrc, language_kind: LanguageKind) -> Result<Strin
             }
 
             impl From<#ident> for SyntaxNode {
-                fn from(n: #ident) -> SyntaxNode {
+                fn from(n: #ident) -> Self {
                     n.syntax
                 }
             }
 
             impl From<#ident> for SyntaxElement {
-                fn from(n: #ident) -> SyntaxElement {
+                fn from(n: #ident) -> Self {
                     n.syntax.into()
                 }
             }
         }
     });
+
+    let any_bogus = {
+        let kinds = ast.bogus.iter().enumerate().map(|(i, bogus_name)| {
+            let ident = format_ident!("{bogus_name}");
+            if i == 0 {
+                quote! { #ident }
+            } else {
+                quote! { | #ident }
+            }
+        });
+        let ident = format_ident!(
+            "Any{}BogusNode",
+            ast.bogus
+                .iter()
+                .find_map(|bogus_name| bogus_name.strip_suffix("Bogus"))
+                .expect("expected a plain *Bogus node")
+        );
+        quote! {
+            biome_rowan::declare_node_union! {
+                pub #ident = #(#kinds)*
+            }
+        }
+    };
 
     let lists = ast.lists().map(|(name, list)| {
         let list_name = format_ident!("{}", name);
@@ -736,9 +766,9 @@ pub fn generate_nodes(ast: &AstSrc, language_kind: LanguageKind) -> Result<Strin
                     kind == #list_kind
                 }
 
-                fn cast(syntax: SyntaxNode) -> Option<#list_name> {
+                fn cast(syntax: SyntaxNode) -> Option<Self> {
                     if Self::can_cast(syntax.kind()) {
-                        Some(#list_name { syntax_list: syntax.into_list() })
+                        Some(Self { syntax_list: syntax.into_list() })
                     } else {
                         None
                     }
@@ -885,26 +915,23 @@ pub fn generate_nodes(ast: &AstSrc, language_kind: LanguageKind) -> Result<Strin
     };
 
     let ast = quote! {
-        #![allow(clippy::enum_variant_names)]
-        // sometimes we generate comparison of simple tokens
-        #![allow(clippy::match_like_matches_macro)]
+        #![allow(dead_code)]
+        #![allow(unused)]
         use crate::{
             macros::map_syntax_node,
             #language as Language, #syntax_element as SyntaxElement, #syntax_element_children as SyntaxElementChildren,
             #syntax_kind::{self as SyntaxKind, *},
             #syntax_list as SyntaxList, #syntax_node as SyntaxNode, #syntax_token as SyntaxToken,
         };
-        #[allow(unused)]
         use biome_rowan::{
-            AstNodeList, AstNodeListIterator,  AstNodeSlotMap, AstSeparatedList, AstSeparatedListNodesIterator
+            AstNodeList, AstNodeListIterator,  AstNodeSlotMap, AstSeparatedList, AstSeparatedListNodesIterator,
+            support, AstNode,SyntaxKindSet, RawSyntaxKind, SyntaxResult
         };
-        use biome_rowan::{support, AstNode,SyntaxKindSet, RawSyntaxKind, SyntaxResult};
         use std::fmt::{Debug, Formatter};
         #serde_import
 
         /// Sentinel value indicating a missing element in a dynamic node, where
         /// the slots are not statically known.
-        #[allow(dead_code)]
         pub(crate) const SLOT_MAP_EMPTY_VALUE: u8 = u8::MAX;
 
         #(#node_defs)*
@@ -913,6 +940,7 @@ pub fn generate_nodes(ast: &AstSrc, language_kind: LanguageKind) -> Result<Strin
         #(#union_boilerplate_impls)*
         #(#display_impls)*
         #(#bogus)*
+        #any_bogus
         #(#lists)*
 
         #[derive(Clone)]
@@ -973,9 +1001,9 @@ pub(crate) fn token_kind_to_code(name: &str, language_kind: LanguageKind) -> Tok
         let token: TokenStream = token.parse().unwrap();
         quote! { T![#token] }
     } else {
-        // $ is valid syntax in rust and it's part of macros,
+        // `$`, `[`, and `]` is valid syntax in rust and it's part of macros,
         // so we need to decorate the tokens with quotes
-        if matches!(name, "$=" | "$_") {
+        if should_token_be_quoted(name) {
             let token = Literal::string(name);
             quote! { T![#token] }
         } else {
@@ -1138,4 +1166,14 @@ pub(crate) fn group_fields_for_ordering(node: &AstNodeSrc) -> Vec<Vec<&Field>> {
 
     groups.push(current_group);
     groups
+}
+
+/// Whether or not a token should be surrounded by quotes when being printed in the generated code.
+///
+/// Some tokens need to be quoted in the `T![]` macro because they conflict with Rust syntax.
+pub fn should_token_be_quoted(token: &str) -> bool {
+    matches!(
+        token,
+        "$=" | "$_" | "U+" | "<![CDATA[" | "]]>" | "   " | "_" | "__" | "`" | "```"
+    )
 }

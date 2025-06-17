@@ -1,0 +1,107 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.jsx
+snapshot_kind: text
+---
+# Input
+```jsx
+<>
+	<link href="https://fonts.gstatic.com"/>
+	<link rel="preload" href="https://fonts.gstatic.com"/>
+	<link
+		rel="preload"
+		href="https://fonts.gstatic.com"
+	/>
+	<link
+		href="https://fonts.gstatic.com"
+	/>
+</>
+```
+
+# Diagnostics
+```
+invalid.jsx:2:2 lint/nursery/useGoogleFontPreconnect  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The attribute rel="preconnect" is missing from the Google Font.
+  
+    1 │ <>
+  > 2 │ 	<link href="https://fonts.gstatic.com"/>
+      │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    3 │ 	<link rel="preload" href="https://fonts.gstatic.com"/>
+    4 │ 	<link
+  
+  i Not using preconnect can cause slower font loading and increase latency.
+  
+  i Safe fix: Add the rel="preconnect" attribute.
+  
+    2 │ → <link·href="https://fonts.gstatic.com"·rel="preconnect"/>
+      │                                         +++++++++++++++++  
+
+```
+
+```
+invalid.jsx:3:2 lint/nursery/useGoogleFontPreconnect ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The attribute rel="preconnect" is missing from the Google Font.
+  
+    1 │ <>
+    2 │ 	<link href="https://fonts.gstatic.com"/>
+  > 3 │ 	<link rel="preload" href="https://fonts.gstatic.com"/>
+      │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    4 │ 	<link
+    5 │ 		rel="preload"
+  
+  i Not using preconnect can cause slower font loading and increase latency.
+  
+
+```
+
+```
+invalid.jsx:4:2 lint/nursery/useGoogleFontPreconnect ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The attribute rel="preconnect" is missing from the Google Font.
+  
+    2 │ 	<link href="https://fonts.gstatic.com"/>
+    3 │ 	<link rel="preload" href="https://fonts.gstatic.com"/>
+  > 4 │ 	<link
+      │ 	^^^^^
+  > 5 │ 		rel="preload"
+  > 6 │ 		href="https://fonts.gstatic.com"
+  > 7 │ 	/>
+      │ 	^^
+    8 │ 	<link
+    9 │ 		href="https://fonts.gstatic.com"
+  
+  i Not using preconnect can cause slower font loading and increase latency.
+  
+
+```
+
+```
+invalid.jsx:8:2 lint/nursery/useGoogleFontPreconnect  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The attribute rel="preconnect" is missing from the Google Font.
+  
+     6 │ 		href="https://fonts.gstatic.com"
+     7 │ 	/>
+   > 8 │ 	<link
+       │ 	^^^^^
+   > 9 │ 		href="https://fonts.gstatic.com"
+  > 10 │ 	/>
+       │ 	^^
+    11 │ </>
+  
+  i Not using preconnect can cause slower font loading and increase latency.
+  
+  i Safe fix: Add the rel="preconnect" attribute.
+  
+     7  7 │   	/>
+     8  8 │   	<link
+     9    │ - → → href="https://fonts.gstatic.com"
+        9 │ + → → href="https://fonts.gstatic.com"
+       10 │ + → → rel="preconnect"
+    10 11 │   	/>
+    11 12 │   </>
+  
+
+```

@@ -27,6 +27,7 @@ Environment:
   BIOME_LOG_PATH:               **PLACEHOLDER**
   BIOME_LOG_PREFIX_NAME:        unset
   BIOME_CONFIG_PATH:            unset
+  BIOME_THREADS:                unset
   NO_COLOR:                     **PLACEHOLDER**
   TERM:                         **PLACEHOLDER**
   JS_RUNTIME_VERSION:           unset
@@ -36,10 +37,11 @@ Environment:
 Biome Configuration:
   Error:                        Expected an array, an object, or a literal but instead found '}'.
   Status:                       Loaded with errors
-  Formatter disabled:           false
-  Linter disabled:              false
-  Organize imports disabled:    false
-  VCS disabled:                 true
+  Path:                         biome.json
+  Formatter enabled:            true
+  Linter enabled:               true
+  Assist enabled:               true
+  VCS enabled:                  false
 
 Server:
   Version:                      0.0.0

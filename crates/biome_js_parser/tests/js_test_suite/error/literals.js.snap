@@ -1,0 +1,253 @@
+---
+source: crates/biome_js_parser/tests/spec_test.rs
+expression: snapshot
+snapshot_kind: text
+---
+## Input
+
+```js
+00, 012, 08, 091, 0789 // parser errors
+01n, 0_0, 01.2 // lexer errors
+"test
+continues" // unterminated string literal
+
+```
+
+
+## AST
+
+```
+JsModule {
+    bom_token: missing (optional),
+    interpreter_token: missing (optional),
+    directives: JsDirectiveList [],
+    items: JsModuleItemList [
+        JsExpressionStatement {
+            expression: JsSequenceExpression {
+                left: JsSequenceExpression {
+                    left: JsSequenceExpression {
+                        left: JsSequenceExpression {
+                            left: JsNumberLiteralExpression {
+                                value_token: JS_NUMBER_LITERAL@0..2 "00" [] [],
+                            },
+                            comma_token: COMMA@2..4 "," [] [Whitespace(" ")],
+                            right: JsNumberLiteralExpression {
+                                value_token: JS_NUMBER_LITERAL@4..7 "012" [] [],
+                            },
+                        },
+                        comma_token: COMMA@7..9 "," [] [Whitespace(" ")],
+                        right: JsNumberLiteralExpression {
+                            value_token: JS_NUMBER_LITERAL@9..11 "08" [] [],
+                        },
+                    },
+                    comma_token: COMMA@11..13 "," [] [Whitespace(" ")],
+                    right: JsNumberLiteralExpression {
+                        value_token: JS_NUMBER_LITERAL@13..16 "091" [] [],
+                    },
+                },
+                comma_token: COMMA@16..18 "," [] [Whitespace(" ")],
+                right: JsNumberLiteralExpression {
+                    value_token: JS_NUMBER_LITERAL@18..39 "0789" [] [Whitespace(" "), Comments("// parser errors")],
+                },
+            },
+            semicolon_token: missing (optional),
+        },
+        JsExpressionStatement {
+            expression: JsSequenceExpression {
+                left: JsSequenceExpression {
+                    left: JsBigintLiteralExpression {
+                        value_token: JS_BIGINT_LITERAL@39..43 "01n" [Newline("\n")] [],
+                    },
+                    comma_token: COMMA@43..45 "," [] [Whitespace(" ")],
+                    right: JsNumberLiteralExpression {
+                        value_token: JS_NUMBER_LITERAL@45..48 "0_0" [] [],
+                    },
+                },
+                comma_token: COMMA@48..50 "," [] [Whitespace(" ")],
+                right: JsNumberLiteralExpression {
+                    value_token: JS_NUMBER_LITERAL@50..70 "01.2" [] [Whitespace(" "), Comments("// lexer errors")],
+                },
+            },
+            semicolon_token: missing (optional),
+        },
+        JsBogusStatement {
+            items: [
+                ERROR_TOKEN@70..76 "\"test" [Newline("\n")] [],
+                IDENT@76..86 "continues" [Newline("\n")] [],
+                ERROR_TOKEN@86..118 "\" // unterminated string literal" [] [],
+            ],
+        },
+    ],
+    eof_token: EOF@118..119 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: JS_MODULE@0..119
+  0: (empty)
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..118
+    0: JS_EXPRESSION_STATEMENT@0..39
+      0: JS_SEQUENCE_EXPRESSION@0..39
+        0: JS_SEQUENCE_EXPRESSION@0..16
+          0: JS_SEQUENCE_EXPRESSION@0..11
+            0: JS_SEQUENCE_EXPRESSION@0..7
+              0: JS_NUMBER_LITERAL_EXPRESSION@0..2
+                0: JS_NUMBER_LITERAL@0..2 "00" [] []
+              1: COMMA@2..4 "," [] [Whitespace(" ")]
+              2: JS_NUMBER_LITERAL_EXPRESSION@4..7
+                0: JS_NUMBER_LITERAL@4..7 "012" [] []
+            1: COMMA@7..9 "," [] [Whitespace(" ")]
+            2: JS_NUMBER_LITERAL_EXPRESSION@9..11
+              0: JS_NUMBER_LITERAL@9..11 "08" [] []
+          1: COMMA@11..13 "," [] [Whitespace(" ")]
+          2: JS_NUMBER_LITERAL_EXPRESSION@13..16
+            0: JS_NUMBER_LITERAL@13..16 "091" [] []
+        1: COMMA@16..18 "," [] [Whitespace(" ")]
+        2: JS_NUMBER_LITERAL_EXPRESSION@18..39
+          0: JS_NUMBER_LITERAL@18..39 "0789" [] [Whitespace(" "), Comments("// parser errors")]
+      1: (empty)
+    1: JS_EXPRESSION_STATEMENT@39..70
+      0: JS_SEQUENCE_EXPRESSION@39..70
+        0: JS_SEQUENCE_EXPRESSION@39..48
+          0: JS_BIGINT_LITERAL_EXPRESSION@39..43
+            0: JS_BIGINT_LITERAL@39..43 "01n" [Newline("\n")] []
+          1: COMMA@43..45 "," [] [Whitespace(" ")]
+          2: JS_NUMBER_LITERAL_EXPRESSION@45..48
+            0: JS_NUMBER_LITERAL@45..48 "0_0" [] []
+        1: COMMA@48..50 "," [] [Whitespace(" ")]
+        2: JS_NUMBER_LITERAL_EXPRESSION@50..70
+          0: JS_NUMBER_LITERAL@50..70 "01.2" [] [Whitespace(" "), Comments("// lexer errors")]
+      1: (empty)
+    2: JS_BOGUS_STATEMENT@70..118
+      0: ERROR_TOKEN@70..76 "\"test" [Newline("\n")] []
+      1: IDENT@76..86 "continues" [Newline("\n")] []
+      2: ERROR_TOKEN@86..118 "\" // unterminated string literal" [] []
+  4: EOF@118..119 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+literals.js:1:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × "0"-prefixed octal literals are deprecated; use the "0o" prefix instead.
+  
+  > 1 │ 00, 012, 08, 091, 0789 // parser errors
+      │ ^^
+    2 │ 01n, 0_0, 01.2 // lexer errors
+    3 │ "test
+  
+literals.js:1:5 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × "0"-prefixed octal literals are deprecated; use the "0o" prefix instead.
+  
+  > 1 │ 00, 012, 08, 091, 0789 // parser errors
+      │     ^^^
+    2 │ 01n, 0_0, 01.2 // lexer errors
+    3 │ "test
+  
+literals.js:1:10 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Decimals with leading zeros are not allowed in strict mode.
+  
+  > 1 │ 00, 012, 08, 091, 0789 // parser errors
+      │          ^^
+    2 │ 01n, 0_0, 01.2 // lexer errors
+    3 │ "test
+  
+literals.js:1:14 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Decimals with leading zeros are not allowed in strict mode.
+  
+  > 1 │ 00, 012, 08, 091, 0789 // parser errors
+      │              ^^^
+    2 │ 01n, 0_0, 01.2 // lexer errors
+    3 │ "test
+  
+literals.js:1:19 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Decimals with leading zeros are not allowed in strict mode.
+  
+  > 1 │ 00, 012, 08, 091, 0789 // parser errors
+      │                   ^^^^
+    2 │ 01n, 0_0, 01.2 // lexer errors
+    3 │ "test
+  
+literals.js:2:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Octal literals are not allowed for BigInts.
+  
+    1 │ 00, 012, 08, 091, 0789 // parser errors
+  > 2 │ 01n, 0_0, 01.2 // lexer errors
+      │ ^^^
+    3 │ "test
+    4 │ continues" // unterminated string literal
+  
+literals.js:2:7 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × numeric separator can not be used after leading 0
+  
+    1 │ 00, 012, 08, 091, 0789 // parser errors
+  > 2 │ 01n, 0_0, 01.2 // lexer errors
+      │       
+    3 │ "test
+    4 │ continues" // unterminated string literal
+  
+literals.js:2:11 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × unexpected number
+  
+    1 │ 00, 012, 08, 091, 0789 // parser errors
+  > 2 │ 01n, 0_0, 01.2 // lexer errors
+      │           ^^^
+    3 │ "test
+    4 │ continues" // unterminated string literal
+  
+literals.js:3:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × unterminated string literal
+  
+    1 │ 00, 012, 08, 091, 0789 // parser errors
+    2 │ 01n, 0_0, 01.2 // lexer errors
+  > 3 │ "test
+      │ ^^^^^
+    4 │ continues" // unterminated string literal
+    5 │ 
+  
+  i 
+  
+    1 │ 00, 012, 08, 091, 0789 // parser errors
+    2 │ 01n, 0_0, 01.2 // lexer errors
+  > 3 │ "test
+      │ ^^^^^
+    4 │ continues" // unterminated string literal
+    5 │ 
+  
+  i The closing quote must be on the same line.
+  
+literals.js:4:10 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × unterminated string literal
+  
+    2 │ 01n, 0_0, 01.2 // lexer errors
+    3 │ "test
+  > 4 │ continues" // unterminated string literal
+      │          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    5 │ 
+  
+  i 
+  
+    2 │ 01n, 0_0, 01.2 // lexer errors
+    3 │ "test
+  > 4 │ continues" // unterminated string literal
+      │          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    5 │ 
+  
+  i The closing quote must be on the same line.
+  
+```

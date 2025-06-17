@@ -1,0 +1,122 @@
+---
+source: crates/biome_js_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```ts
+class {}
+class implements B {}
+
+```
+
+
+## AST
+
+```
+JsModule {
+    bom_token: missing (optional),
+    interpreter_token: missing (optional),
+    directives: JsDirectiveList [],
+    items: JsModuleItemList [
+        JsClassDeclaration {
+            decorators: JsDecoratorList [],
+            abstract_token: missing (optional),
+            class_token: CLASS_KW@0..6 "class" [] [Whitespace(" ")],
+            id: missing (required),
+            type_parameters: missing (optional),
+            extends_clause: missing (optional),
+            implements_clause: missing (optional),
+            l_curly_token: L_CURLY@6..7 "{" [] [],
+            members: JsClassMemberList [],
+            r_curly_token: R_CURLY@7..8 "}" [] [],
+        },
+        JsClassDeclaration {
+            decorators: JsDecoratorList [],
+            abstract_token: missing (optional),
+            class_token: CLASS_KW@8..15 "class" [Newline("\n")] [Whitespace(" ")],
+            id: missing (required),
+            type_parameters: missing (optional),
+            extends_clause: missing (optional),
+            implements_clause: TsImplementsClause {
+                implements_token: IMPLEMENTS_KW@15..26 "implements" [] [Whitespace(" ")],
+                types: TsTypeList [
+                    TsReferenceType {
+                        name: JsReferenceIdentifier {
+                            value_token: IDENT@26..28 "B" [] [Whitespace(" ")],
+                        },
+                        type_arguments: missing (optional),
+                    },
+                ],
+            },
+            l_curly_token: L_CURLY@28..29 "{" [] [],
+            members: JsClassMemberList [],
+            r_curly_token: R_CURLY@29..30 "}" [] [],
+        },
+    ],
+    eof_token: EOF@30..31 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: JS_MODULE@0..31
+  0: (empty)
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..30
+    0: JS_CLASS_DECLARATION@0..8
+      0: JS_DECORATOR_LIST@0..0
+      1: (empty)
+      2: CLASS_KW@0..6 "class" [] [Whitespace(" ")]
+      3: (empty)
+      4: (empty)
+      5: (empty)
+      6: (empty)
+      7: L_CURLY@6..7 "{" [] []
+      8: JS_CLASS_MEMBER_LIST@7..7
+      9: R_CURLY@7..8 "}" [] []
+    1: JS_CLASS_DECLARATION@8..30
+      0: JS_DECORATOR_LIST@8..8
+      1: (empty)
+      2: CLASS_KW@8..15 "class" [Newline("\n")] [Whitespace(" ")]
+      3: (empty)
+      4: (empty)
+      5: (empty)
+      6: TS_IMPLEMENTS_CLAUSE@15..28
+        0: IMPLEMENTS_KW@15..26 "implements" [] [Whitespace(" ")]
+        1: TS_TYPE_LIST@26..28
+          0: TS_REFERENCE_TYPE@26..28
+            0: JS_REFERENCE_IDENTIFIER@26..28
+              0: IDENT@26..28 "B" [] [Whitespace(" ")]
+            1: (empty)
+      7: L_CURLY@28..29 "{" [] []
+      8: JS_CLASS_MEMBER_LIST@29..29
+      9: R_CURLY@29..30 "}" [] []
+  4: EOF@30..31 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+class_decl_no_id.ts:1:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × class declarations must have a name
+  
+  > 1 │ class {}
+      │ ^^^^^^
+    2 │ class implements B {}
+    3 │ 
+  
+class_decl_no_id.ts:2:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × class declarations must have a name
+  
+    1 │ class {}
+  > 2 │ class implements B {}
+      │ ^^^^^^
+    3 │ 
+  
+```

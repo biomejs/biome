@@ -1,6 +1,7 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid.jsx
+snapshot_kind: text
 ---
 # Input
 ```jsx
@@ -31,7 +32,7 @@ expression: invalid.jsx
 ```
 invalid.jsx:2:2 lint/a11y/useValidAnchor ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Provide a href attribute for the a element.
+  × Provide a href attribute for the a element.
   
     1 │ <>
   > 2 │ 	<a />
@@ -49,7 +50,7 @@ invalid.jsx:2:2 lint/a11y/useValidAnchor ━━━━━━━━━━━━━
 ```
 invalid.jsx:3:5 lint/a11y/useValidAnchor ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Provide a valid value for the attribute href.
+  × Provide a valid value for the attribute href.
   
     1 │ <>
     2 │ 	<a />
@@ -68,7 +69,7 @@ invalid.jsx:3:5 lint/a11y/useValidAnchor ━━━━━━━━━━━━━
 ```
 invalid.jsx:4:5 lint/a11y/useValidAnchor ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Provide a valid value for the attribute href.
+  × Provide a valid value for the attribute href.
   
     2 │ 	<a />
     3 │ 	<a href />
@@ -87,7 +88,7 @@ invalid.jsx:4:5 lint/a11y/useValidAnchor ━━━━━━━━━━━━━
 ```
 invalid.jsx:5:5 lint/a11y/useValidAnchor ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Provide a valid value for the attribute href.
+  × Provide a valid value for the attribute href.
   
     3 │ 	<a href />
     4 │ 	<a href={null} />
@@ -106,7 +107,7 @@ invalid.jsx:5:5 lint/a11y/useValidAnchor ━━━━━━━━━━━━━
 ```
 invalid.jsx:6:5 lint/a11y/useValidAnchor ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Provide a valid value for the attribute href.
+  × Provide a valid value for the attribute href.
   
     4 │ 	<a href={null} />
     5 │ 	<a href={undefined} />
@@ -125,7 +126,7 @@ invalid.jsx:6:5 lint/a11y/useValidAnchor ━━━━━━━━━━━━━
 ```
 invalid.jsx:7:5 lint/a11y/useValidAnchor ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Provide a valid value for the attribute href.
+  × Provide a valid value for the attribute href.
   
     5 │ 	<a href={undefined} />
     6 │ 	<a href="" />
@@ -144,7 +145,7 @@ invalid.jsx:7:5 lint/a11y/useValidAnchor ━━━━━━━━━━━━━
 ```
 invalid.jsx:8:5 lint/a11y/useValidAnchor ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Provide a valid value for the attribute href.
+  × Provide a valid value for the attribute href.
   
      6 │ 	<a href="" />
      7 │ 	<a href="#" />
@@ -163,7 +164,7 @@ invalid.jsx:8:5 lint/a11y/useValidAnchor ━━━━━━━━━━━━━
 ```
 invalid.jsx:9:5 lint/a11y/useValidAnchor ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Provide a valid value for the attribute href.
+  × Provide a valid value for the attribute href.
   
      7 │ 	<a href="#" />
      8 │ 	<a href={"#"} />
@@ -182,7 +183,7 @@ invalid.jsx:9:5 lint/a11y/useValidAnchor ━━━━━━━━━━━━━
 ```
 invalid.jsx:10:5 lint/a11y/useValidAnchor ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Provide a valid value for the attribute href.
+  × Provide a valid value for the attribute href.
   
      8 │ 	<a href={"#"} />
      9 │ 	<a href={`#`} />
@@ -201,7 +202,7 @@ invalid.jsx:10:5 lint/a11y/useValidAnchor ━━━━━━━━━━━━�
 ```
 invalid.jsx:11:5 lint/a11y/useValidAnchor ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Provide a valid value for the attribute href.
+  × Provide a valid value for the attribute href.
   
      9 │ 	<a href={`#`} />
     10 │ 	<a href="javascript:void(0)" />
@@ -220,7 +221,7 @@ invalid.jsx:11:5 lint/a11y/useValidAnchor ━━━━━━━━━━━━�
 ```
 invalid.jsx:12:5 lint/a11y/useValidAnchor ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Provide a valid value for the attribute href.
+  × Provide a valid value for the attribute href.
   
     10 │ 	<a href="javascript:void(0)" />
     11 │ 	<a href={"javascript:void(0)"} />
@@ -239,7 +240,7 @@ invalid.jsx:12:5 lint/a11y/useValidAnchor ━━━━━━━━━━━━�
 ```
 invalid.jsx:13:5 lint/a11y/useValidAnchor ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use a button element instead of an a element.
+  × Use a button element instead of an a element.
   
     11 │ 	<a href={"javascript:void(0)"} />
     12 │ 	<a href={`javascript:void(0)`} />
@@ -258,7 +259,7 @@ invalid.jsx:13:5 lint/a11y/useValidAnchor ━━━━━━━━━━━━�
 ```
 invalid.jsx:14:2 lint/a11y/useValidAnchor ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use a button element instead of an a element.
+  × Use a button element instead of an a element.
   
     12 │ 	<a href={`javascript:void(0)`} />
     13 │ 	<a onClick={() => void 0} />
@@ -277,7 +278,7 @@ invalid.jsx:14:2 lint/a11y/useValidAnchor ━━━━━━━━━━━━�
 ```
 invalid.jsx:15:2 lint/a11y/useValidAnchor ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use a button element instead of an a element.
+  × Use a button element instead of an a element.
   
     13 │ 	<a onClick={() => void 0} />
     14 │ 	<a href="#" onClick={() => void 0} />
@@ -296,7 +297,7 @@ invalid.jsx:15:2 lint/a11y/useValidAnchor ━━━━━━━━━━━━�
 ```
 invalid.jsx:16:2 lint/a11y/useValidAnchor ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use a button element instead of an a element.
+  × Use a button element instead of an a element.
   
     14 │ 	<a href="#" onClick={() => void 0} />
     15 │ 	<a href="javascript:void(0)" onClick={() => void 0} />
@@ -315,7 +316,7 @@ invalid.jsx:16:2 lint/a11y/useValidAnchor ━━━━━━━━━━━━�
 ```
 invalid.jsx:17:2 lint/a11y/useValidAnchor ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use a button element instead of an a element.
+  × Use a button element instead of an a element.
   
     15 │ 	<a href="javascript:void(0)" onClick={() => void 0} />
     16 │ 	<a href={"javascript:void(0)"} onClick={() => void 0} />
@@ -334,7 +335,7 @@ invalid.jsx:17:2 lint/a11y/useValidAnchor ━━━━━━━━━━━━�
 ```
 invalid.jsx:18:2 lint/a11y/useValidAnchor ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use a button element instead of an a element.
+  × Use a button element instead of an a element.
   
     16 │ 	<a href={"javascript:void(0)"} onClick={() => void 0} />
     17 │ 	<a href="" onClick="window.location.href=index.html"> Home </a>
@@ -353,7 +354,7 @@ invalid.jsx:18:2 lint/a11y/useValidAnchor ━━━━━━━━━━━━�
 ```
 invalid.jsx:19:2 lint/a11y/useValidAnchor ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use a button element instead of an a element.
+  × Use a button element instead of an a element.
   
     17 │ 	<a href="" onClick="window.location.href=index.html"> Home </a>
     18 │ 	<a href="class/html-css1/navigation/links#" onClick="window.location.href=index.html"> Home </a>
@@ -368,5 +369,3 @@ invalid.jsx:19:2 lint/a11y/useValidAnchor ━━━━━━━━━━━━�
   
 
 ```
-
-

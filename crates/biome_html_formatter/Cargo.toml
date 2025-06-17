@@ -10,20 +10,44 @@ repository.workspace = true
 version              = "0.0.0"
 
 [dependencies]
+biome_deserialize            = { workspace = true }
+biome_deserialize_macros     = { workspace = true }
 biome_diagnostics_categories = { workspace = true }
 biome_formatter              = { workspace = true }
 biome_html_syntax            = { workspace = true }
 biome_rowan                  = { workspace = true }
+biome_string_case            = { workspace = true }
 biome_suppression            = { workspace = true }
+schemars                     = { workspace = true, optional = true }
+serde                        = { workspace = true, optional = true }
 
 [dev-dependencies]
+biome_configuration  = { workspace = true }
+biome_formatter      = { workspace = true, features = ["countme"] }
 biome_formatter_test = { workspace = true }
 biome_fs             = { workspace = true }
 biome_html_parser    = { workspace = true }
 biome_parser         = { workspace = true }
-biome_service        = { workspace = true, features = ["experimental-html"] }
+biome_service        = { workspace = true }
+biome_test_utils     = { path = "../biome_test_utils" }
+camino               = { workspace = true }
 countme              = { workspace = true, features = ["enable"] }
+criterion            = { package = "codspeed-criterion-compat", version = "=2.10.1" }
 tests_macros         = { workspace = true }
+
+[target.'cfg(target_os = "windows")'.dev-dependencies]
+mimalloc = { workspace = true }
+
+[target.'cfg(all(target_family="unix", not(all(target_arch = "aarch64", target_env = "musl"))))'.dev-dependencies]
+tikv-jemallocator = { workspace = true }
+
+[features]
+schema = ["dep:schemars", "serde"]
+serde  = ["dep:serde", "biome_rowan/serde"]
 
 [lints]
 workspace = true
+
+[[bench]]
+harness = false
+name    = "html_formatter"

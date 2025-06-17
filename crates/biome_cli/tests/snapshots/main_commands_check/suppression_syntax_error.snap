@@ -1,11 +1,12 @@
 ---
 source: crates/biome_cli/tests/snap_test.rs
-expression: content
+expression: redactor(content)
+snapshot_kind: text
 ---
 ## `check.js`
 
 ```js
-// rome-ignore(:
+// biome-ignore(:
 
 ```
 
@@ -23,25 +24,33 @@ check ━━━━━━━━━━━━━━━━━━━━━━━━�
 # Emitted Messages
 
 ```block
-check.js:1:15 suppressions/parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+check.js:1:16 suppressions/parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × unexpected token, expected one of ':' or whitespace
+  × Unexpected token, expected one of ':' or whitespace.
   
-  > 1 │ // rome-ignore(:
-      │               ^
+  > 1 │ // biome-ignore(:
+      │                ^
     2 │ 
+  
+  i A category is mandatory: try lint, format, assist or plugin.
+  
+  i Example of suppression: // biome-ignore lint: reason
   
 
 ```
 
 ```block
-check.js:1:15 suppressions/parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+check.js:1:16 suppressions/parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × unexpected token, expected one of ':' or whitespace
+  × Unexpected token, expected one of ':' or whitespace.
   
-  > 1 │ // rome-ignore(:
-      │               ^
+  > 1 │ // biome-ignore(:
+      │                ^
     2 │ 
+  
+  i A category is mandatory: try lint, format, assist or plugin.
+  
+  i Example of suppression: // biome-ignore lint: reason
   
 
 ```

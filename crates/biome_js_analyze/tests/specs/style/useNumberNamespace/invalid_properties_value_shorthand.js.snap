@@ -3,7 +3,7 @@ source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid_properties_value_shorthand.js
 ---
 # Input
-```jsx
+```js
 const options = {
 	normalize: parseFloat,
 	parseInt,
@@ -16,7 +16,7 @@ run(foo, options);
 ```
 invalid_properties_value_shorthand.js:2:13 lint/style/useNumberNamespace  FIXABLE  ━━━━━━━━━━━━━━━━━
 
-  ! Use Number.parseFloat instead of the equivalent global.
+  i Use Number.parseFloat instead of the equivalent global.
   
     1 │ const options = {
   > 2 │ 	normalize: parseFloat,
@@ -36,5 +36,3 @@ invalid_properties_value_shorthand.js:2:13 lint/style/useNumberNamespace  FIXABL
   
 
 ```
-
-

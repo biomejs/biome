@@ -3,10 +3,9 @@ source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: validPartial.js
 ---
 # Input
-```jsx
+```js
+/* should not generate diagnostics */
 let {a, b} = v;
 a++;
 console.log(a);
 ```
-
-

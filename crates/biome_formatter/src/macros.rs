@@ -328,17 +328,15 @@ macro_rules! format {
 /// [`MostExpanded`]: crate::format_element::BestFittingElement::most_expanded
 #[macro_export]
 macro_rules! best_fitting {
-    ($least_expanded:expr, $($tail:expr),+ $(,)?) => {{
-        unsafe {
-            $crate::BestFitting::from_arguments_unchecked($crate::format_args!($least_expanded, $($tail),+))
-        }
-    }}
+    ($least_expanded:expr, $($tail:expr),+ $(,)?) => {
+        BestFitting::from_arguments_unchecked($crate::format_args!($least_expanded, $($tail),+))
+    };
 }
 
 #[cfg(test)]
 mod tests {
     use crate::prelude::*;
-    use crate::{write, FormatState, SimpleFormatOptions, VecBuffer};
+    use crate::{FormatState, SimpleFormatOptions, VecBuffer, write};
 
     struct TestFormat;
 
@@ -387,7 +385,7 @@ mod tests {
     #[test]
     fn best_fitting_variants_print_as_lists() {
         use crate::prelude::*;
-        use crate::{format, format_args, Formatted};
+        use crate::{Formatted, format, format_args};
 
         // The second variant below should be selected when printing at a width of 30
         let formatted_best_fitting = format!(
@@ -399,34 +397,36 @@ mod tests {
                     format_args![text(
                         "Something that will not fit on a line with 30 character print width."
                     )],
-                    format_args![group(&format_args![
-                        text("Start"),
-                        soft_line_break(),
-                        group(&soft_block_indent(&format_args![
-                            text("1,"),
-                            soft_line_break_or_space(),
-                            text("2,"),
-                            soft_line_break_or_space(),
-                            text("3"),
-                        ])),
-                        soft_line_break_or_space(),
-                        soft_block_indent(&format_args![
-                            text("1,"),
-                            soft_line_break_or_space(),
-                            text("2,"),
-                            soft_line_break_or_space(),
-                            group(&format_args!(
-                                text("A,"),
+                    format_args![
+                        group(&format_args![
+                            text("Start"),
+                            soft_line_break(),
+                            group(&soft_block_indent(&format_args![
+                                text("1,"),
                                 soft_line_break_or_space(),
-                                text("B")
-                            )),
+                                text("2,"),
+                                soft_line_break_or_space(),
+                                text("3"),
+                            ])),
                             soft_line_break_or_space(),
-                            text("3")
-                        ]),
-                        soft_line_break_or_space(),
-                        text("End")
-                    ])
-                    .should_expand(true)],
+                            soft_block_indent(&format_args![
+                                text("1,"),
+                                soft_line_break_or_space(),
+                                text("2,"),
+                                soft_line_break_or_space(),
+                                group(&format_args!(
+                                    text("A,"),
+                                    soft_line_break_or_space(),
+                                    text("B")
+                                )),
+                                soft_line_break_or_space(),
+                                text("3")
+                            ]),
+                            soft_line_break_or_space(),
+                            text("End")
+                        ])
+                        .should_expand(true)
+                    ],
                     format_args!(text("Most"), hard_line_break(), text("Expanded"))
                 ]
             ]

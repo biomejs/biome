@@ -30,11 +30,11 @@ impl StaticValue {
     /// ```
     pub fn is_falsy(&self) -> bool {
         match self {
-            StaticValue::Boolean(token) => token.text_trimmed() == "false",
-            StaticValue::Null(_) | StaticValue::Undefined(_) | StaticValue::EmptyString(_) => true,
-            StaticValue::Number(token) => token.text_trimmed() == "0",
-            StaticValue::BigInt(token) => token.text_trimmed() == "0n",
-            StaticValue::String(_) => self.text().is_empty(),
+            Self::Boolean(token) => token.text_trimmed() == "false",
+            Self::Null(_) | Self::Undefined(_) | Self::EmptyString(_) => true,
+            Self::Number(token) => token.text_trimmed() == "0",
+            Self::BigInt(token) => token.text_trimmed() == "0n",
+            Self::String(_) => self.text().is_empty(),
         }
     }
 
@@ -51,12 +51,12 @@ impl StaticValue {
     /// ```
     pub fn text(&self) -> &str {
         match self {
-            StaticValue::Boolean(token)
-            | StaticValue::Null(token)
-            | StaticValue::Undefined(token)
-            | StaticValue::Number(token)
-            | StaticValue::BigInt(token) => token.text_trimmed(),
-            StaticValue::String(token) => {
+            Self::Boolean(token)
+            | Self::Null(token)
+            | Self::Undefined(token)
+            | Self::Number(token)
+            | Self::BigInt(token) => token.text_trimmed(),
+            Self::String(token) => {
                 let text = token.text_trimmed();
                 if matches!(
                     token.kind(),
@@ -67,7 +67,7 @@ impl StaticValue {
                 }
                 text
             }
-            StaticValue::EmptyString(_) => "",
+            Self::EmptyString(_) => "",
         }
     }
 
@@ -84,13 +84,13 @@ impl StaticValue {
     /// ```
     pub fn range(&self) -> TextRange {
         match self {
-            StaticValue::Boolean(token)
-            | StaticValue::Null(token)
-            | StaticValue::Undefined(token)
-            | StaticValue::Number(token)
-            | StaticValue::BigInt(token)
-            | StaticValue::String(token) => token.text_trimmed_range(),
-            StaticValue::EmptyString(range) => *range,
+            Self::Boolean(token)
+            | Self::Null(token)
+            | Self::Undefined(token)
+            | Self::Number(token)
+            | Self::BigInt(token)
+            | Self::String(token) => token.text_trimmed_range(),
+            Self::EmptyString(range) => *range,
         }
     }
 
@@ -111,7 +111,7 @@ impl StaticValue {
     /// ```
     pub fn is_not_string_constant(&self, text: &str) -> bool {
         match self {
-            StaticValue::String(_) | StaticValue::EmptyString(_) => self.text() != text,
+            Self::String(_) | Self::EmptyString(_) => self.text() != text,
             _ => false,
         }
     }
@@ -133,7 +133,7 @@ impl StaticValue {
     /// ```
     pub fn as_string_constant(&self) -> Option<&str> {
         match self {
-            StaticValue::String(_) | StaticValue::EmptyString(_) => Some(self.text()),
+            Self::String(_) | Self::EmptyString(_) => Some(self.text()),
             _ => None,
         }
     }
@@ -150,6 +150,12 @@ impl StaticValue {
     /// assert!(StaticValue::Null(null.value_token().ok().unwrap()).is_null_or_undefined());
     /// ```
     pub fn is_null_or_undefined(&self) -> bool {
-        matches!(self, StaticValue::Null(_) | StaticValue::Undefined(_))
+        matches!(self, Self::Null(_) | Self::Undefined(_))
+    }
+}
+
+impl AsRef<str> for StaticValue {
+    fn as_ref(&self) -> &str {
+        self.text()
     }
 }

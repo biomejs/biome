@@ -1,6 +1,7 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid.tsx
+snapshot_kind: text
 ---
 # Input
 ```tsx
@@ -13,7 +14,7 @@ const A = <T extends unknown, U>() => {}
 ```
 invalid.tsx:1:14 lint/complexity/noUselessTypeConstraint  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Constraining a type parameter to any or unknown is useless.
+  i Constraining a type parameter to any or unknown is useless.
   
   > 1 │ const A = <T extends unknown>() => {}
       │              ^^^^^^^^^^^^^^^
@@ -35,7 +36,7 @@ invalid.tsx:1:14 lint/complexity/noUselessTypeConstraint  FIXABLE  ━━━━�
 ```
 invalid.tsx:2:14 lint/complexity/noUselessTypeConstraint  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Constraining a type parameter to any or unknown is useless.
+  i Constraining a type parameter to any or unknown is useless.
   
     1 │ const A = <T extends unknown>() => {}
   > 2 │ const B = <T extends unknown = unknown>() => {}
@@ -54,7 +55,7 @@ invalid.tsx:2:14 lint/complexity/noUselessTypeConstraint  FIXABLE  ━━━━�
 ```
 invalid.tsx:3:14 lint/complexity/noUselessTypeConstraint  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Constraining a type parameter to any or unknown is useless.
+  i Constraining a type parameter to any or unknown is useless.
   
     1 │ const A = <T extends unknown>() => {}
     2 │ const B = <T extends unknown = unknown>() => {}
@@ -69,5 +70,3 @@ invalid.tsx:3:14 lint/complexity/noUselessTypeConstraint  FIXABLE  ━━━━�
       │             ----------------            
 
 ```
-
-

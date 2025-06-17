@@ -1,10 +1,10 @@
-use biome_js_syntax::{inner_string_text, AnyJsExpression, JsBinaryExpression, JsSyntaxNode};
+use biome_js_syntax::{AnyJsExpression, JsBinaryExpression, JsSyntaxNode, inner_string_text};
 use biome_rowan::{AstNode, Direction, WalkEvent};
 use std::iter;
 
 pub mod batch;
-pub mod regex;
 pub mod rename;
+pub mod restricted_regex;
 #[cfg(test)]
 pub mod tests;
 
@@ -24,7 +24,7 @@ pub(crate) fn is_node_equal(a_node: &JsSyntaxNode, b_node: &JsSyntaxNode) -> boo
         let b_token = b_child.as_token();
         match (a_token, b_token) {
             // both are nodes
-            (None, None) => continue,
+            (None, None) => {}
             // one of them is a node
             (None, Some(_)) | (Some(_), None) => return false,
             // both are tokens
@@ -32,7 +32,6 @@ pub(crate) fn is_node_equal(a_node: &JsSyntaxNode, b_node: &JsSyntaxNode) -> boo
                 if inner_string_text(a) != inner_string_text(b) {
                     return false;
                 }
-                continue;
             }
         }
     }
@@ -82,8 +81,8 @@ pub(crate) fn find_variable_position(
 
 #[cfg(test)]
 mod test {
-    use crate::utils::{find_variable_position, VariablePosition};
-    use biome_js_parser::{parse, JsParserOptions};
+    use crate::utils::{VariablePosition, find_variable_position};
+    use biome_js_parser::{JsParserOptions, parse};
     use biome_js_syntax::{JsBinaryExpression, JsFileSource};
     use biome_rowan::AstNode;
 

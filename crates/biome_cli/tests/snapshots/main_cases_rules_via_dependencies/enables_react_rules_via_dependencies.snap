@@ -1,0 +1,153 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `package.json`
+
+```json
+{
+    "dependencies": {
+        "react": "^16.0.0"
+    }
+}
+
+```
+
+## `test.jsx`
+
+```jsx
+
+import { useCallback } from "react";
+
+function Component2() {
+    const [local,SetLocal] = useState(0);
+    const handle = useCallback(() => {
+      console.log(local);
+    }, [local, local]);
+}
+    
+```
+
+# Termination Message
+
+```block
+lint ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Some errors were emitted while running checks.
+  
+
+
+```
+
+# Emitted Messages
+
+```block
+test.jsx:4:10 lint/correctness/noUnusedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This function Component2 is unused.
+  
+    2 │ import { useCallback } from "react";
+    3 │ 
+  > 4 │ function Component2() {
+      │          ^^^^^^^^^^
+    5 │     const [local,SetLocal] = useState(0);
+    6 │     const handle = useCallback(() => {
+  
+  i Unused variables are often the result of an incomplete refactoring, typos, or other sources of bugs.
+  
+  i Unsafe fix: If this is intentional, prepend Component2 with an underscore.
+  
+     2  2 │   import { useCallback } from "react";
+     3  3 │   
+     4    │ - function·Component2()·{
+        4 │ + function·_Component2()·{
+     5  5 │       const [local,SetLocal] = useState(0);
+     6  6 │       const handle = useCallback(() => {
+  
+
+```
+
+```block
+test.jsx:5:18 lint/correctness/noUnusedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This variable SetLocal is unused.
+  
+    4 │ function Component2() {
+  > 5 │     const [local,SetLocal] = useState(0);
+      │                  ^^^^^^^^
+    6 │     const handle = useCallback(() => {
+    7 │       console.log(local);
+  
+  i Unused variables are often the result of an incomplete refactoring, typos, or other sources of bugs.
+  
+  i Unsafe fix: If this is intentional, prepend SetLocal with an underscore.
+  
+     3  3 │   
+     4  4 │   function Component2() {
+     5    │ - ····const·[local,SetLocal]·=·useState(0);
+        5 │ + ····const·[local,_SetLocal]·=·useState(0);
+     6  6 │       const handle = useCallback(() => {
+     7  7 │         console.log(local);
+  
+
+```
+
+```block
+test.jsx:6:11 lint/correctness/noUnusedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This variable handle is unused.
+  
+    4 │ function Component2() {
+    5 │     const [local,SetLocal] = useState(0);
+  > 6 │     const handle = useCallback(() => {
+      │           ^^^^^^
+    7 │       console.log(local);
+    8 │     }, [local, local]);
+  
+  i Unused variables are often the result of an incomplete refactoring, typos, or other sources of bugs.
+  
+  i Unsafe fix: If this is intentional, prepend handle with an underscore.
+  
+     4  4 │   function Component2() {
+     5  5 │       const [local,SetLocal] = useState(0);
+     6    │ - ····const·handle·=·useCallback(()·=>·{
+        6 │ + ····const·_handle·=·useCallback(()·=>·{
+     7  7 │         console.log(local);
+     8  8 │       }, [local, local]);
+  
+
+```
+
+```block
+test.jsx:6:20 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This hook specifies more dependencies than necessary: local
+  
+    4 │ function Component2() {
+    5 │     const [local,SetLocal] = useState(0);
+  > 6 │     const handle = useCallback(() => {
+      │                    ^^^^^^^^^^^
+    7 │       console.log(local);
+    8 │     }, [local, local]);
+  
+  i This dependency can be removed from the list.
+  
+     6 │     const handle = useCallback(() => {
+     7 │       console.log(local);
+   > 8 │     }, [local, local]);
+       │                ^^^^^
+     9 │ }
+    10 │     
+  
+  i Unsafe fix: Remove the extra dependencies from the list.
+  
+    8 │ ····},·[local,·local]);
+      │              -------   
+
+```
+
+```block
+Checked 2 files in <TIME>. No fixes applied.
+Found 1 error.
+Found 3 warnings.
+```

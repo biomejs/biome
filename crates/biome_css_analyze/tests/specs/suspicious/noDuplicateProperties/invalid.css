@@ -1,0 +1,61 @@
+a {
+    color: pink;
+    color: orange;
+}
+
+a {
+    color: pink;
+    color: pink;
+    color: pink;
+}
+
+a {
+    color: pink;
+    color: pink;
+    color: orange;
+}
+
+a {
+    color: pink;
+    background: orange;
+    color: orange;
+}
+
+a {
+    color: pink;
+    background: orange;
+    background: pink;
+}
+
+a { color: pink; { &:hover { color: orange; color: black; } } }
+
+a { color: pink; @media { color: orange; color: black; } }
+
+@media { color: orange; .foo { color: black; color: white; } }
+
+a { color: pink; @media { color: orange; &::before { color: black; color: white; } } }
+
+a { color: pink; @media { color: orange; .foo { color: black; color: white; } } }
+
+a { -webkit-border-radius: 12px; -webkit-border-radius: 10px; }
+
+a { color: red !important; color: blue; }
+
+a { color: red !important; color: blue !important; }
+
+a {
+    @supports (color: pink) {
+        color: pink;
+        color: orange;
+    }
+}
+
+a {
+    @supports (color: pink) {
+        color: pink;
+        &:hover {
+            color: orange;
+            color: black;
+        }
+    }
+}

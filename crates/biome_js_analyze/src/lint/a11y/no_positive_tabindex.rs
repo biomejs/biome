@@ -1,9 +1,10 @@
+use crate::JsRuleAction;
 use crate::react::{ReactApiCall, ReactCreateElementCall};
 use crate::services::semantic::Semantic;
-use crate::JsRuleAction;
 use biome_analyze::context::RuleContext;
-use biome_analyze::{declare_lint_rule, FixKind, Rule, RuleDiagnostic, RuleSource};
+use biome_analyze::{FixKind, Rule, RuleDiagnostic, RuleSource, declare_lint_rule};
 use biome_console::markup;
+use biome_diagnostics::Severity;
 use biome_js_factory::make;
 use biome_js_factory::make::{jsx_string, jsx_string_literal};
 use biome_js_semantic::SemanticModel;
@@ -12,7 +13,7 @@ use biome_js_syntax::{
     AnyJsLiteralExpression, AnyJsxAttributeValue, JsCallExpression, JsNumberLiteralExpression,
     JsPropertyObjectMember, JsStringLiteralExpression, JsUnaryExpression, JsxAttribute, TextRange,
 };
-use biome_rowan::{declare_node_union, AstNode, BatchMutationExt};
+use biome_rowan::{AstNode, BatchMutationExt, declare_node_union};
 
 declare_lint_rule! {
     /// Prevent the usage of positive integers on `tabIndex` property
@@ -53,6 +54,7 @@ declare_lint_rule! {
         language: "jsx",
         sources: &[RuleSource::EslintJsxA11y("tabindex-no-positive")],
         recommended: true,
+        severity: Severity::Error,
         fix_kind: FixKind::Unsafe,
     }
 }
@@ -80,10 +82,10 @@ declare_node_union! {
 impl NoPositiveTabindexQuery {
     fn find_tabindex_attribute(&self, model: &SemanticModel) -> Option<TabindexProp> {
         match self {
-            NoPositiveTabindexQuery::AnyJsxElement(jsx) => jsx
+            Self::AnyJsxElement(jsx) => jsx
                 .find_attribute_by_name("tabIndex")
                 .map(TabindexProp::from),
-            NoPositiveTabindexQuery::JsCallExpression(expression) => {
+            Self::JsCallExpression(expression) => {
                 let react_create_element =
                     ReactCreateElementCall::from_call_expression(expression, model)?;
                 react_create_element
@@ -91,29 +93,6 @@ impl NoPositiveTabindexQuery {
                     .map(TabindexProp::from)
             }
         }
-    }
-}
-
-impl AnyNumberLikeExpression {
-    /// Returns the value of a number-like expression; it returns the expression
-    /// text for literal expressions. However, for unary expressions, it only
-    /// returns the value for signed numeric expressions.
-    pub(crate) fn value(&self) -> Option<String> {
-        match self {
-            AnyNumberLikeExpression::JsStringLiteralExpression(string_literal) => {
-                return Some(string_literal.inner_string_text().ok()?.to_string());
-            }
-            AnyNumberLikeExpression::JsNumberLiteralExpression(number_literal) => {
-                return Some(number_literal.value_token().ok()?.to_string());
-            }
-            AnyNumberLikeExpression::JsUnaryExpression(unary_expression) => {
-                if unary_expression.is_signed_numeric_literal().ok()? {
-                    return Some(unary_expression.text());
-                }
-            }
-        }
-
-        None
     }
 }
 
@@ -139,9 +118,24 @@ impl Rule for NoPositiveTabindex {
             TabindexProp::JsPropertyObjectMember(js_object_member) => {
                 let expression = js_object_member.value().ok()?;
                 let range = expression.range();
-                let expression_value =
-                    AnyNumberLikeExpression::cast(expression.into_syntax())?.value()?;
-                if !is_tabindex_valid(&expression_value) {
+                let expression_value = AnyNumberLikeExpression::cast(expression.into_syntax())?;
+                let is_tabindex_valid = match expression_value {
+                    AnyNumberLikeExpression::JsStringLiteralExpression(string_literal) => {
+                        is_tabindex_valid(string_literal.inner_string_text().ok()?.text())
+                    }
+                    AnyNumberLikeExpression::JsNumberLiteralExpression(number_literal) => {
+                        is_tabindex_valid(number_literal.value_token().ok()?.text())
+                    }
+                    AnyNumberLikeExpression::JsUnaryExpression(unary_expression) => {
+                        if unary_expression.is_signed_numeric_literal().ok()? {
+                            let text = unary_expression.to_trimmed_text();
+                            is_tabindex_valid(text.text())
+                        } else {
+                            return None;
+                        }
+                    }
+                };
+                if !is_tabindex_valid {
                     return Some(range);
                 }
             }
@@ -194,7 +188,7 @@ impl Rule for NoPositiveTabindex {
         };
 
         Some(JsRuleAction::new(
-            biome_analyze::ActionCategory::QuickFix,
+            ctx.metadata().action_category(ctx.category(), ctx.group()),
             ctx.metadata().applicability(),
             markup! { "Replace the "<Emphasis>"tableIndex"</Emphasis>" prop value with 0." }
                 .to_owned(),
@@ -212,10 +206,24 @@ fn attribute_has_valid_tabindex(jsx_any_attribute_value: &AnyJsxAttributeValue) 
         }
         AnyJsxAttributeValue::JsxExpressionAttributeValue(value) => {
             let expression = value.expression().ok()?;
-            let expression_value =
-                AnyNumberLikeExpression::cast(expression.into_syntax())?.value()?;
+            let expression_value = AnyNumberLikeExpression::cast(expression.into_syntax())?;
 
-            Some(is_tabindex_valid(&expression_value))
+            Some(match expression_value {
+                AnyNumberLikeExpression::JsStringLiteralExpression(string_literal) => {
+                    is_tabindex_valid(string_literal.inner_string_text().ok()?.text())
+                }
+                AnyNumberLikeExpression::JsNumberLiteralExpression(number_literal) => {
+                    is_tabindex_valid(number_literal.value_token().ok()?.text())
+                }
+                AnyNumberLikeExpression::JsUnaryExpression(unary_expression) => {
+                    if unary_expression.is_signed_numeric_literal().ok()? {
+                        let text = unary_expression.to_trimmed_text();
+                        is_tabindex_valid(text.text())
+                    } else {
+                        return None;
+                    }
+                }
+            })
         }
         _ => None,
     }

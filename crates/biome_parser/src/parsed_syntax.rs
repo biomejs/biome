@@ -11,11 +11,11 @@ use biome_rowan::TextRange;
 /// ## Parse Rule conventions
 ///
 /// * A parse rule must return [ParsedSyntax::Present] if it is able to parse a node or at least parts of it. For example,
-///     the `parse_for_statement` should return [ParsedSyntax::Present] for `for (` even tough many of the required children are missing
-///     because it is still able to parse parts of the for statement.
+///   the `parse_for_statement` should return [ParsedSyntax::Present] for `for (` even tough many of the required children are missing
+///   because it is still able to parse parts of the for statement.
 /// * A parse rule must return [ParsedSyntax::Absent] if the expected node isn't present in the source code.
-///     In most cases, this means if the first expected token isn't present, for example,
-///     if the `for` keyword isn't present when parsing a for statement.
+///   In most cases, this means if the first expected token isn't present, for example,
+///   if the `for` keyword isn't present when parsing a for statement.
 ///
 /// However, it can be possible for rules to recover even if the first token doesn't match. One example
 /// is when parsing an assignment target that has an optional default. The rule can recover even
@@ -51,9 +51,9 @@ impl ParsedSyntax {
 
     /// Calls `op` if the syntax is present and otherwise returns [ParsedSyntax::Absent]
     #[inline]
-    pub fn and_then<F>(self, op: F) -> ParsedSyntax
+    pub fn and_then<F>(self, op: F) -> Self
     where
-        F: FnOnce(CompletedMarker) -> ParsedSyntax,
+        F: FnOnce(CompletedMarker) -> Self,
     {
         match self {
             Absent => Absent,
@@ -63,9 +63,9 @@ impl ParsedSyntax {
 
     /// Calls `op` if the syntax is absent and otherwise returns [ParsedSyntax::Present]
     #[inline]
-    pub fn or_else<F>(self, op: F) -> ParsedSyntax
+    pub fn or_else<F>(self, op: F) -> Self
     where
-        F: FnOnce() -> ParsedSyntax,
+        F: FnOnce() -> Self,
     {
         match self {
             Absent => op(),
@@ -104,7 +104,6 @@ impl ParsedSyntax {
     }
 
     /// Returns the contained [ParsedSyntax::Present] value or passed default
-    #[allow(unused)]
     #[inline]
     pub fn unwrap_or(self, default: CompletedMarker) -> CompletedMarker {
         match self {
@@ -115,7 +114,6 @@ impl ParsedSyntax {
 
     /// Returns the contained [ParsedSyntax::Present] value or computes it from a clojure.
     #[inline]
-    #[allow(unused)]
     pub fn unwrap_or_else<F>(self, default: F) -> CompletedMarker
     where
         F: FnOnce() -> CompletedMarker,
@@ -144,7 +142,7 @@ impl ParsedSyntax {
     /// leaving an [ParsedSyntax::Absent] value untouched.
     ///
     /// This function can be used to compose the results of two functions.
-    pub fn map<F>(self, mapper: F) -> ParsedSyntax
+    pub fn map<F>(self, mapper: F) -> Self
     where
         F: FnOnce(CompletedMarker) -> CompletedMarker,
     {

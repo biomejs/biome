@@ -1,13 +1,16 @@
 use crate::globals::javascript::language::ES_BUILTIN;
 use biome_analyze::{
-    context::RuleContext, declare_lint_rule, Ast, Rule, RuleDiagnostic, RuleSource,
+    Ast, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
+use biome_diagnostics::Severity;
 use biome_js_syntax::JsIdentifierBinding;
 use biome_rowan::AstNode;
 
 declare_lint_rule! {
     /// Disallow identifiers from shadowing restricted names.
+    ///
+    /// See also: [`noShadow`](http://biome.dev/linter/rules/no-shadow)
     ///
     /// ## Examples
     ///
@@ -38,11 +41,12 @@ declare_lint_rule! {
         language: "js",
         sources: &[RuleSource::Eslint("no-shadow-restricted-names")],
         recommended: true,
+        severity: Severity::Error,
     }
 }
 
 pub struct State {
-    shadowed_name: String,
+    shadowed_name: Box<str>,
 }
 
 impl Rule for NoShadowRestrictedNames {
@@ -58,7 +62,7 @@ impl Rule for NoShadowRestrictedNames {
 
         if ES_BUILTIN.contains(&name) {
             Some(State {
-                shadowed_name: name.to_string(),
+                shadowed_name: name.into(),
             })
         } else {
             None

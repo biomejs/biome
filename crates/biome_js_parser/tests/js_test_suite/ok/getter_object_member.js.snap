@@ -1,0 +1,340 @@
+---
+source: crates/biome_js_parser/tests/spec_test.rs
+expression: snapshot
+snapshot_kind: text
+---
+## Input
+
+```js
+let a = {
+  get foo() {
+    return foo;
+  },
+  get "bar"() {
+    return "bar";
+  },
+  get ["a" + "b"]() {
+    return "a" + "b"
+  },
+  get 5() {
+    return 5;
+  },
+  get() {
+   return "This is a method and not a getter";
+  }
+}
+
+```
+
+
+## AST
+
+```
+JsModule {
+    bom_token: missing (optional),
+    interpreter_token: missing (optional),
+    directives: JsDirectiveList [],
+    items: JsModuleItemList [
+        JsVariableStatement {
+            declaration: JsVariableDeclaration {
+                await_token: missing (optional),
+                kind: LET_KW@0..4 "let" [] [Whitespace(" ")],
+                declarators: JsVariableDeclaratorList [
+                    JsVariableDeclarator {
+                        id: JsIdentifierBinding {
+                            name_token: IDENT@4..6 "a" [] [Whitespace(" ")],
+                        },
+                        variable_annotation: missing (optional),
+                        initializer: JsInitializerClause {
+                            eq_token: EQ@6..8 "=" [] [Whitespace(" ")],
+                            expression: JsObjectExpression {
+                                l_curly_token: L_CURLY@8..9 "{" [] [],
+                                members: JsObjectMemberList [
+                                    JsGetterObjectMember {
+                                        get_token: GET_KW@9..16 "get" [Newline("\n"), Whitespace("  ")] [Whitespace(" ")],
+                                        name: JsLiteralMemberName {
+                                            value: IDENT@16..19 "foo" [] [],
+                                        },
+                                        l_paren_token: L_PAREN@19..20 "(" [] [],
+                                        r_paren_token: R_PAREN@20..22 ")" [] [Whitespace(" ")],
+                                        return_type: missing (optional),
+                                        body: JsFunctionBody {
+                                            l_curly_token: L_CURLY@22..23 "{" [] [],
+                                            directives: JsDirectiveList [],
+                                            statements: JsStatementList [
+                                                JsReturnStatement {
+                                                    return_token: RETURN_KW@23..35 "return" [Newline("\n"), Whitespace("    ")] [Whitespace(" ")],
+                                                    argument: JsIdentifierExpression {
+                                                        name: JsReferenceIdentifier {
+                                                            value_token: IDENT@35..38 "foo" [] [],
+                                                        },
+                                                    },
+                                                    semicolon_token: SEMICOLON@38..39 ";" [] [],
+                                                },
+                                            ],
+                                            r_curly_token: R_CURLY@39..43 "}" [Newline("\n"), Whitespace("  ")] [],
+                                        },
+                                    },
+                                    COMMA@43..44 "," [] [],
+                                    JsGetterObjectMember {
+                                        get_token: GET_KW@44..51 "get" [Newline("\n"), Whitespace("  ")] [Whitespace(" ")],
+                                        name: JsLiteralMemberName {
+                                            value: JS_STRING_LITERAL@51..56 "\"bar\"" [] [],
+                                        },
+                                        l_paren_token: L_PAREN@56..57 "(" [] [],
+                                        r_paren_token: R_PAREN@57..59 ")" [] [Whitespace(" ")],
+                                        return_type: missing (optional),
+                                        body: JsFunctionBody {
+                                            l_curly_token: L_CURLY@59..60 "{" [] [],
+                                            directives: JsDirectiveList [],
+                                            statements: JsStatementList [
+                                                JsReturnStatement {
+                                                    return_token: RETURN_KW@60..72 "return" [Newline("\n"), Whitespace("    ")] [Whitespace(" ")],
+                                                    argument: JsStringLiteralExpression {
+                                                        value_token: JS_STRING_LITERAL@72..77 "\"bar\"" [] [],
+                                                    },
+                                                    semicolon_token: SEMICOLON@77..78 ";" [] [],
+                                                },
+                                            ],
+                                            r_curly_token: R_CURLY@78..82 "}" [Newline("\n"), Whitespace("  ")] [],
+                                        },
+                                    },
+                                    COMMA@82..83 "," [] [],
+                                    JsGetterObjectMember {
+                                        get_token: GET_KW@83..90 "get" [Newline("\n"), Whitespace("  ")] [Whitespace(" ")],
+                                        name: JsComputedMemberName {
+                                            l_brack_token: L_BRACK@90..91 "[" [] [],
+                                            expression: JsBinaryExpression {
+                                                left: JsStringLiteralExpression {
+                                                    value_token: JS_STRING_LITERAL@91..95 "\"a\"" [] [Whitespace(" ")],
+                                                },
+                                                operator_token: PLUS@95..97 "+" [] [Whitespace(" ")],
+                                                right: JsStringLiteralExpression {
+                                                    value_token: JS_STRING_LITERAL@97..100 "\"b\"" [] [],
+                                                },
+                                            },
+                                            r_brack_token: R_BRACK@100..101 "]" [] [],
+                                        },
+                                        l_paren_token: L_PAREN@101..102 "(" [] [],
+                                        r_paren_token: R_PAREN@102..104 ")" [] [Whitespace(" ")],
+                                        return_type: missing (optional),
+                                        body: JsFunctionBody {
+                                            l_curly_token: L_CURLY@104..105 "{" [] [],
+                                            directives: JsDirectiveList [],
+                                            statements: JsStatementList [
+                                                JsReturnStatement {
+                                                    return_token: RETURN_KW@105..117 "return" [Newline("\n"), Whitespace("    ")] [Whitespace(" ")],
+                                                    argument: JsBinaryExpression {
+                                                        left: JsStringLiteralExpression {
+                                                            value_token: JS_STRING_LITERAL@117..121 "\"a\"" [] [Whitespace(" ")],
+                                                        },
+                                                        operator_token: PLUS@121..123 "+" [] [Whitespace(" ")],
+                                                        right: JsStringLiteralExpression {
+                                                            value_token: JS_STRING_LITERAL@123..126 "\"b\"" [] [],
+                                                        },
+                                                    },
+                                                    semicolon_token: missing (optional),
+                                                },
+                                            ],
+                                            r_curly_token: R_CURLY@126..130 "}" [Newline("\n"), Whitespace("  ")] [],
+                                        },
+                                    },
+                                    COMMA@130..131 "," [] [],
+                                    JsGetterObjectMember {
+                                        get_token: GET_KW@131..138 "get" [Newline("\n"), Whitespace("  ")] [Whitespace(" ")],
+                                        name: JsLiteralMemberName {
+                                            value: JS_NUMBER_LITERAL@138..139 "5" [] [],
+                                        },
+                                        l_paren_token: L_PAREN@139..140 "(" [] [],
+                                        r_paren_token: R_PAREN@140..142 ")" [] [Whitespace(" ")],
+                                        return_type: missing (optional),
+                                        body: JsFunctionBody {
+                                            l_curly_token: L_CURLY@142..143 "{" [] [],
+                                            directives: JsDirectiveList [],
+                                            statements: JsStatementList [
+                                                JsReturnStatement {
+                                                    return_token: RETURN_KW@143..155 "return" [Newline("\n"), Whitespace("    ")] [Whitespace(" ")],
+                                                    argument: JsNumberLiteralExpression {
+                                                        value_token: JS_NUMBER_LITERAL@155..156 "5" [] [],
+                                                    },
+                                                    semicolon_token: SEMICOLON@156..157 ";" [] [],
+                                                },
+                                            ],
+                                            r_curly_token: R_CURLY@157..161 "}" [Newline("\n"), Whitespace("  ")] [],
+                                        },
+                                    },
+                                    COMMA@161..162 "," [] [],
+                                    JsMethodObjectMember {
+                                        async_token: missing (optional),
+                                        star_token: missing (optional),
+                                        name: JsLiteralMemberName {
+                                            value: IDENT@162..168 "get" [Newline("\n"), Whitespace("  ")] [],
+                                        },
+                                        type_parameters: missing (optional),
+                                        parameters: JsParameters {
+                                            l_paren_token: L_PAREN@168..169 "(" [] [],
+                                            items: JsParameterList [],
+                                            r_paren_token: R_PAREN@169..171 ")" [] [Whitespace(" ")],
+                                        },
+                                        return_type_annotation: missing (optional),
+                                        body: JsFunctionBody {
+                                            l_curly_token: L_CURLY@171..172 "{" [] [],
+                                            directives: JsDirectiveList [],
+                                            statements: JsStatementList [
+                                                JsReturnStatement {
+                                                    return_token: RETURN_KW@172..183 "return" [Newline("\n"), Whitespace("   ")] [Whitespace(" ")],
+                                                    argument: JsStringLiteralExpression {
+                                                        value_token: JS_STRING_LITERAL@183..218 "\"This is a method and not a getter\"" [] [],
+                                                    },
+                                                    semicolon_token: SEMICOLON@218..219 ";" [] [],
+                                                },
+                                            ],
+                                            r_curly_token: R_CURLY@219..223 "}" [Newline("\n"), Whitespace("  ")] [],
+                                        },
+                                    },
+                                ],
+                                r_curly_token: R_CURLY@223..225 "}" [Newline("\n")] [],
+                            },
+                        },
+                    },
+                ],
+            },
+            semicolon_token: missing (optional),
+        },
+    ],
+    eof_token: EOF@225..226 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: JS_MODULE@0..226
+  0: (empty)
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..225
+    0: JS_VARIABLE_STATEMENT@0..225
+      0: JS_VARIABLE_DECLARATION@0..225
+        0: (empty)
+        1: LET_KW@0..4 "let" [] [Whitespace(" ")]
+        2: JS_VARIABLE_DECLARATOR_LIST@4..225
+          0: JS_VARIABLE_DECLARATOR@4..225
+            0: JS_IDENTIFIER_BINDING@4..6
+              0: IDENT@4..6 "a" [] [Whitespace(" ")]
+            1: (empty)
+            2: JS_INITIALIZER_CLAUSE@6..225
+              0: EQ@6..8 "=" [] [Whitespace(" ")]
+              1: JS_OBJECT_EXPRESSION@8..225
+                0: L_CURLY@8..9 "{" [] []
+                1: JS_OBJECT_MEMBER_LIST@9..223
+                  0: JS_GETTER_OBJECT_MEMBER@9..43
+                    0: GET_KW@9..16 "get" [Newline("\n"), Whitespace("  ")] [Whitespace(" ")]
+                    1: JS_LITERAL_MEMBER_NAME@16..19
+                      0: IDENT@16..19 "foo" [] []
+                    2: L_PAREN@19..20 "(" [] []
+                    3: R_PAREN@20..22 ")" [] [Whitespace(" ")]
+                    4: (empty)
+                    5: JS_FUNCTION_BODY@22..43
+                      0: L_CURLY@22..23 "{" [] []
+                      1: JS_DIRECTIVE_LIST@23..23
+                      2: JS_STATEMENT_LIST@23..39
+                        0: JS_RETURN_STATEMENT@23..39
+                          0: RETURN_KW@23..35 "return" [Newline("\n"), Whitespace("    ")] [Whitespace(" ")]
+                          1: JS_IDENTIFIER_EXPRESSION@35..38
+                            0: JS_REFERENCE_IDENTIFIER@35..38
+                              0: IDENT@35..38 "foo" [] []
+                          2: SEMICOLON@38..39 ";" [] []
+                      3: R_CURLY@39..43 "}" [Newline("\n"), Whitespace("  ")] []
+                  1: COMMA@43..44 "," [] []
+                  2: JS_GETTER_OBJECT_MEMBER@44..82
+                    0: GET_KW@44..51 "get" [Newline("\n"), Whitespace("  ")] [Whitespace(" ")]
+                    1: JS_LITERAL_MEMBER_NAME@51..56
+                      0: JS_STRING_LITERAL@51..56 "\"bar\"" [] []
+                    2: L_PAREN@56..57 "(" [] []
+                    3: R_PAREN@57..59 ")" [] [Whitespace(" ")]
+                    4: (empty)
+                    5: JS_FUNCTION_BODY@59..82
+                      0: L_CURLY@59..60 "{" [] []
+                      1: JS_DIRECTIVE_LIST@60..60
+                      2: JS_STATEMENT_LIST@60..78
+                        0: JS_RETURN_STATEMENT@60..78
+                          0: RETURN_KW@60..72 "return" [Newline("\n"), Whitespace("    ")] [Whitespace(" ")]
+                          1: JS_STRING_LITERAL_EXPRESSION@72..77
+                            0: JS_STRING_LITERAL@72..77 "\"bar\"" [] []
+                          2: SEMICOLON@77..78 ";" [] []
+                      3: R_CURLY@78..82 "}" [Newline("\n"), Whitespace("  ")] []
+                  3: COMMA@82..83 "," [] []
+                  4: JS_GETTER_OBJECT_MEMBER@83..130
+                    0: GET_KW@83..90 "get" [Newline("\n"), Whitespace("  ")] [Whitespace(" ")]
+                    1: JS_COMPUTED_MEMBER_NAME@90..101
+                      0: L_BRACK@90..91 "[" [] []
+                      1: JS_BINARY_EXPRESSION@91..100
+                        0: JS_STRING_LITERAL_EXPRESSION@91..95
+                          0: JS_STRING_LITERAL@91..95 "\"a\"" [] [Whitespace(" ")]
+                        1: PLUS@95..97 "+" [] [Whitespace(" ")]
+                        2: JS_STRING_LITERAL_EXPRESSION@97..100
+                          0: JS_STRING_LITERAL@97..100 "\"b\"" [] []
+                      2: R_BRACK@100..101 "]" [] []
+                    2: L_PAREN@101..102 "(" [] []
+                    3: R_PAREN@102..104 ")" [] [Whitespace(" ")]
+                    4: (empty)
+                    5: JS_FUNCTION_BODY@104..130
+                      0: L_CURLY@104..105 "{" [] []
+                      1: JS_DIRECTIVE_LIST@105..105
+                      2: JS_STATEMENT_LIST@105..126
+                        0: JS_RETURN_STATEMENT@105..126
+                          0: RETURN_KW@105..117 "return" [Newline("\n"), Whitespace("    ")] [Whitespace(" ")]
+                          1: JS_BINARY_EXPRESSION@117..126
+                            0: JS_STRING_LITERAL_EXPRESSION@117..121
+                              0: JS_STRING_LITERAL@117..121 "\"a\"" [] [Whitespace(" ")]
+                            1: PLUS@121..123 "+" [] [Whitespace(" ")]
+                            2: JS_STRING_LITERAL_EXPRESSION@123..126
+                              0: JS_STRING_LITERAL@123..126 "\"b\"" [] []
+                          2: (empty)
+                      3: R_CURLY@126..130 "}" [Newline("\n"), Whitespace("  ")] []
+                  5: COMMA@130..131 "," [] []
+                  6: JS_GETTER_OBJECT_MEMBER@131..161
+                    0: GET_KW@131..138 "get" [Newline("\n"), Whitespace("  ")] [Whitespace(" ")]
+                    1: JS_LITERAL_MEMBER_NAME@138..139
+                      0: JS_NUMBER_LITERAL@138..139 "5" [] []
+                    2: L_PAREN@139..140 "(" [] []
+                    3: R_PAREN@140..142 ")" [] [Whitespace(" ")]
+                    4: (empty)
+                    5: JS_FUNCTION_BODY@142..161
+                      0: L_CURLY@142..143 "{" [] []
+                      1: JS_DIRECTIVE_LIST@143..143
+                      2: JS_STATEMENT_LIST@143..157
+                        0: JS_RETURN_STATEMENT@143..157
+                          0: RETURN_KW@143..155 "return" [Newline("\n"), Whitespace("    ")] [Whitespace(" ")]
+                          1: JS_NUMBER_LITERAL_EXPRESSION@155..156
+                            0: JS_NUMBER_LITERAL@155..156 "5" [] []
+                          2: SEMICOLON@156..157 ";" [] []
+                      3: R_CURLY@157..161 "}" [Newline("\n"), Whitespace("  ")] []
+                  7: COMMA@161..162 "," [] []
+                  8: JS_METHOD_OBJECT_MEMBER@162..223
+                    0: (empty)
+                    1: (empty)
+                    2: JS_LITERAL_MEMBER_NAME@162..168
+                      0: IDENT@162..168 "get" [Newline("\n"), Whitespace("  ")] []
+                    3: (empty)
+                    4: JS_PARAMETERS@168..171
+                      0: L_PAREN@168..169 "(" [] []
+                      1: JS_PARAMETER_LIST@169..169
+                      2: R_PAREN@169..171 ")" [] [Whitespace(" ")]
+                    5: (empty)
+                    6: JS_FUNCTION_BODY@171..223
+                      0: L_CURLY@171..172 "{" [] []
+                      1: JS_DIRECTIVE_LIST@172..172
+                      2: JS_STATEMENT_LIST@172..219
+                        0: JS_RETURN_STATEMENT@172..219
+                          0: RETURN_KW@172..183 "return" [Newline("\n"), Whitespace("   ")] [Whitespace(" ")]
+                          1: JS_STRING_LITERAL_EXPRESSION@183..218
+                            0: JS_STRING_LITERAL@183..218 "\"This is a method and not a getter\"" [] []
+                          2: SEMICOLON@218..219 ";" [] []
+                      3: R_CURLY@219..223 "}" [Newline("\n"), Whitespace("  ")] []
+                2: R_CURLY@223..225 "}" [Newline("\n")] []
+      1: (empty)
+  4: EOF@225..226 "" [Newline("\n")] []
+
+```

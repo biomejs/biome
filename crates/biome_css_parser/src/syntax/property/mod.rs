@@ -18,7 +18,7 @@ use biome_parser::parse_lists::ParseNodeList;
 use biome_parser::parse_recovery::{ParseRecovery, ParseRecoveryTokenSet, RecoveryResult};
 use biome_parser::prelude::ParsedSyntax;
 use biome_parser::prelude::ParsedSyntax::{Absent, Present};
-use biome_parser::{token_set, Parser, TokenSet};
+use biome_parser::{Parser, TokenSet, token_set};
 
 #[inline]
 pub(crate) fn is_at_any_property(p: &mut CssParser) -> bool {
@@ -206,7 +206,8 @@ impl ParseNodeList for GenericComponentValueList {
     ) -> RecoveryResult {
         parsed_element.or_recover_with_token_set(
             p,
-            &ParseRecoveryTokenSet::new(CSS_BOGUS_PROPERTY_VALUE, END_OF_PROPERTY_VALUE_TOKEN_SET),
+            &ParseRecoveryTokenSet::new(CSS_BOGUS_PROPERTY_VALUE, END_OF_PROPERTY_VALUE_TOKEN_SET)
+                .enable_recovery_on_line_break(),
             expected_component_value,
         )
     }

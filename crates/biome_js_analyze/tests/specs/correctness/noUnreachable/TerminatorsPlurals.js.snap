@@ -1,9 +1,10 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: TerminatorsPlurals.js
+snapshot_kind: text
 ---
 # Input
-```jsx
+```js
 function TerminatorsPlural1() {
     return;
     Statement1();
@@ -63,7 +64,7 @@ function TerminatorsPlural4() {
 ```
 TerminatorsPlurals.js:3:5 lint/correctness/noUnreachable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This code will never be reached ...
+  × This code will never be reached ...
   
     1 │ function TerminatorsPlural1() {
     2 │     return;
@@ -90,7 +91,7 @@ TerminatorsPlurals.js:3:5 lint/correctness/noUnreachable ━━━━━━━�
 ```
 TerminatorsPlurals.js:16:5 lint/correctness/noUnreachable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This code will never be reached ...
+  × This code will never be reached ...
   
     14 │     }
     15 │ 
@@ -127,7 +128,7 @@ TerminatorsPlurals.js:16:5 lint/correctness/noUnreachable ━━━━━━━�
 ```
 TerminatorsPlurals.js:31:5 lint/correctness/noUnreachable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This code will never be reached ...
+  × This code will never be reached ...
   
     29 │     }
     30 │ 
@@ -173,7 +174,7 @@ TerminatorsPlurals.js:31:5 lint/correctness/noUnreachable ━━━━━━━�
 ```
 TerminatorsPlurals.js:48:5 lint/correctness/noUnreachable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This code will never be reached ...
+  × This code will never be reached ...
   
     46 │     }
     47 │ 
@@ -224,5 +225,3 @@ TerminatorsPlurals.js:48:5 lint/correctness/noUnreachable ━━━━━━━�
   
 
 ```
-
-

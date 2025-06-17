@@ -2,10 +2,11 @@ use crate::parser::CssParser;
 use crate::syntax::parse_error::expected_identifier;
 use crate::syntax::{is_at_any_value, is_at_identifier, parse_any_value, parse_regular_identifier};
 use biome_css_syntax::CssSyntaxKind::*;
-use biome_css_syntax::{CssSyntaxKind, T};
+use biome_css_syntax::{CssSyntaxKind, T, TextRange};
+use biome_parser::diagnostic::{ParseDiagnostic, ToDiagnostic, expect_one_of};
 use biome_parser::parsed_syntax::ParsedSyntax;
 use biome_parser::parsed_syntax::ParsedSyntax::{Absent, Present};
-use biome_parser::{token_set, Parser, TokenSet};
+use biome_parser::{Parser, TokenSet, token_set};
 
 #[inline]
 pub fn parse_any_query_feature(p: &mut CssParser) -> ParsedSyntax {
@@ -137,4 +138,17 @@ pub(crate) fn is_at_any_query_feature_value(p: &mut CssParser) -> bool {
 fn parse_any_query_feature_value(p: &mut CssParser) -> ParsedSyntax {
     // TODO add diagnostics if the any value is different with gramma
     parse_any_value(p)
+}
+
+pub(crate) fn expected_any_query_feature(p: &CssParser, range: TextRange) -> ParseDiagnostic {
+    expect_one_of(
+        &[
+            "<mf-plain>",
+            "<mf-boolean>",
+            "<mf-range>",
+            "<query-in-parens> or <query-in-parens>",
+        ],
+        range,
+    )
+    .into_diagnostic(p)
 }

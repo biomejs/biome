@@ -1,0 +1,77 @@
+---
+source: crates/biome_migrate/tests/spec_tests.rs
+expression: invalid2.json
+---
+# Input
+```json
+{
+  "organizeImports": {
+    "enabled": true
+  },
+  "linter": {},
+  "overrides": [
+    {
+      "includes": [],
+      "organizeImports": {
+        "enabled": false
+      }
+    }
+  ]
+}
+
+```
+
+# Diagnostics
+```
+invalid2.json:2:3 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The organizeImports configuration has been moved.
+  
+    1 │ {
+  > 2 │   "organizeImports": {
+      │   ^^^^^^^^^^^^^^^^^
+    3 │     "enabled": true
+    4 │   },
+  
+  i The import sorting was the first assist action, however Biome analyzer infrastructure wasn't mature enough, so it was exposed as a standalone tool. The infrastructure is now ready to welcome it as an assist action.
+  
+  i Safe fix: Remove the old configuration, and turn off the relative assist action.
+  
+     1  1 │   {
+     2    │ - ··"organizeImports":·{
+     3    │ - ····"enabled":·true
+     4    │ - ··},
+        2 │ + ··"assist":·{·"actions":·{·"source":·{·"organizeImports":·"on"·}·}·},
+     5  3 │     "linter": {},
+     6  4 │     "overrides": [
+  
+
+```
+
+```
+invalid2.json:9:7 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The organizeImports configuration has been moved.
+  
+     7 │     {
+     8 │       "includes": [],
+   > 9 │       "organizeImports": {
+       │       ^^^^^^^^^^^^^^^^^
+    10 │         "enabled": false
+    11 │       }
+  
+  i The import sorting was the first assist action, however Biome analyzer infrastructure wasn't mature enough, so it was exposed as a standalone tool. The infrastructure is now ready to welcome it as an assist action.
+  
+  i Safe fix: Remove the old configuration, and turn off the relative assist action.
+  
+     7  7 │       {
+     8  8 │         "includes": [],
+     9    │ - ······"organizeImports":·{
+    10    │ - ········"enabled":·false
+    11    │ - ······}
+        9 │ + ······"assist":·{·"actions":·{·"source":·{·"organizeImports":·"off"·}·}·}
+    12 10 │       }
+    13 11 │     ]
+  
+
+```

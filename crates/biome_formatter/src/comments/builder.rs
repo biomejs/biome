@@ -1,6 +1,6 @@
 use super::{
-    map::CommentsMap, CommentPlacement, CommentStyle, CommentTextPosition, DecoratedComment,
-    SourceComment, TransformSourceMap,
+    CommentPlacement, CommentStyle, CommentTextPosition, DecoratedComment, SourceComment,
+    TransformSourceMap, map::CommentsMap,
 };
 use crate::source_map::{DeletedRangeEntry, DeletedRanges};
 use crate::{TextRange, TextSize};
@@ -442,7 +442,7 @@ impl<L: Language> CommentsBuilder<L> {
                                 // a /* comment */ b;   //  Comment is a trailing comment
                                 // a, /* comment */ b;  // Comment should be a leading comment
                                 // ```
-                                if preceding.text_range().end()
+                                if preceding.text_range_with_trivia().end()
                                     == comment.piece().as_piece().token().text_range().end()
                                 {
                                     self.push_trailing_comment(&preceding, comment);
@@ -549,13 +549,12 @@ impl<'a> SourceParentheses<'a> {
     /// Must be called with offsets in increasing order.
     ///
     /// Returns the source range of the `)` if there's any `)` in the deleted range at this offset. Returns `None` otherwise
-
     fn r_paren_source_range(&mut self, offset: TextSize) -> Option<TextRange> {
         match self {
             SourceParentheses::Empty => None,
             SourceParentheses::SourceMap { next, tail, .. } => {
                 while let Some(range) = next {
-                    #[allow(clippy::comparison_chain)]
+                    #[expect(clippy::comparison_chain)]
                     if range.transformed == offset {
                         // A deleted range can contain multiple tokens. See if there's any `)` in the deleted
                         // range and compute its source range.
@@ -644,7 +643,7 @@ mod tests {
         DecoratedComment, SourceComment,
     };
     use crate::{TextSize, TransformSourceMap, TransformSourceMapBuilder};
-    use biome_js_parser::{parse_module, JsParserOptions};
+    use biome_js_parser::{JsParserOptions, parse_module};
     use biome_js_syntax::{
         JsIdentifierExpression, JsLanguage, JsParameters, JsParenthesizedExpression,
         JsPropertyObjectMember, JsReferenceIdentifier, JsSequenceExpression,
@@ -652,8 +651,8 @@ mod tests {
     };
     use biome_rowan::syntax::SyntaxElementKey;
     use biome_rowan::{
-        chain_trivia_pieces, AstNode, BatchMutation, SyntaxNode, SyntaxNodeOptionExt,
-        SyntaxTriviaPieceComments, TextRange,
+        AstNode, BatchMutation, SyntaxNode, SyntaxNodeOptionExt, SyntaxTriviaPieceComments,
+        TextRange, chain_trivia_pieces,
     };
     use std::cell::RefCell;
 
@@ -953,9 +952,11 @@ b;"#;
             .descendants()
             .find_map(JsUnaryExpression::cast)
             .unwrap();
-        assert!(!comments
-            .trailing(&unary.argument().unwrap().syntax().key())
-            .is_empty());
+        assert!(
+            !comments
+                .trailing(&unary.argument().unwrap().syntax().key())
+                .is_empty()
+        );
     }
 
     #[test]

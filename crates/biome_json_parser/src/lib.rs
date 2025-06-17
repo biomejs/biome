@@ -1,11 +1,13 @@
 //! Extremely fast, lossless, and error tolerant JSON Parser.
 
+#![deny(clippy::use_self)]
+
 use crate::parser::JsonParser;
 use crate::syntax::parse_root;
 use biome_json_factory::JsonSyntaxFactory;
 use biome_json_syntax::{JsonLanguage, JsonRoot, JsonSyntaxNode};
 pub use biome_parser::prelude::*;
-use biome_parser::{tree_sink::LosslessTreeSink, AnyParse};
+use biome_parser::{AnyParse, tree_sink::LosslessTreeSink};
 use biome_rowan::{AstNode, NodeCache};
 pub use parser::JsonParserOptions;
 
@@ -29,19 +31,17 @@ pub fn parse_json_with_cache(
     cache: &mut NodeCache,
     config: JsonParserOptions,
 ) -> JsonParse {
-    tracing::debug_span!("parse").in_scope(move || {
-        let mut parser = JsonParser::new(source, config);
+    let mut parser = JsonParser::new(source, config);
 
-        parse_root(&mut parser);
+    parse_root(&mut parser);
 
-        let (events, diagnostics, trivia) = parser.finish();
+    let (events, diagnostics, trivia) = parser.finish();
 
-        let mut tree_sink = JsonLosslessTreeSink::with_cache(source, &trivia, cache);
-        biome_parser::event::process(&mut tree_sink, events, diagnostics);
-        let (green, diagnostics) = tree_sink.finish();
+    let mut tree_sink = JsonLosslessTreeSink::with_cache(source, &trivia, cache);
+    biome_parser::event::process(&mut tree_sink, events, diagnostics);
+    let (green, diagnostics) = tree_sink.finish();
 
-        JsonParse::new(green, diagnostics)
-    })
+    JsonParse::new(green, diagnostics)
 }
 
 /// A utility struct for managing the result of a parser job
@@ -52,8 +52,8 @@ pub struct JsonParse {
 }
 
 impl JsonParse {
-    pub fn new(root: JsonSyntaxNode, diagnostics: Vec<ParseDiagnostic>) -> JsonParse {
-        JsonParse { root, diagnostics }
+    pub fn new(root: JsonSyntaxNode, diagnostics: Vec<ParseDiagnostic>) -> Self {
+        Self { root, diagnostics }
     }
 
     /// The syntax node represented by this Parse result

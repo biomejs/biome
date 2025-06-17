@@ -1,15 +1,14 @@
 use biome_analyze::context::RuleContext;
-use biome_analyze::{
-    declare_lint_rule, ActionCategory, Ast, FixKind, Rule, RuleDiagnostic, RuleSource,
-};
+use biome_analyze::{Ast, FixKind, Rule, RuleDiagnostic, RuleSource, declare_lint_rule};
 use biome_console::markup;
+use biome_diagnostics::Severity;
 use biome_js_factory::make;
 use biome_js_syntax::{
     AnyJsExportNamedSpecifier, AnyJsNamedImportSpecifier, AnyJsObjectBindingPatternMember,
     JsExportNamedFromSpecifier, JsExportNamedSpecifier, JsNamedImportSpecifier,
     JsObjectBindingPatternProperty,
 };
-use biome_rowan::{declare_node_union, trim_leading_trivia_pieces, AstNode, BatchMutationExt};
+use biome_rowan::{AstNode, BatchMutationExt, declare_node_union, trim_leading_trivia_pieces};
 
 use crate::JsRuleAction;
 
@@ -64,6 +63,7 @@ declare_lint_rule! {
         language: "js",
         sources: &[RuleSource::Eslint("no-useless-rename")],
         recommended: true,
+        severity: Severity::Information,
         fix_kind: FixKind::Safe,
     }
 }
@@ -159,7 +159,7 @@ impl Rule for NoUselessRename {
             }
         }
         Some(JsRuleAction::new(
-            ActionCategory::QuickFix,
+            ctx.metadata().action_category(ctx.category(), ctx.group()),
             ctx.metadata().applicability(),
             markup! { "Remove the renaming." }.to_owned(),
             mutation,

@@ -1,0 +1,518 @@
+---
+source: crates/biome_js_parser/tests/spec_test.rs
+expression: snapshot
+snapshot_kind: text
+---
+## Input
+
+```js
+[a a, ++b, ] = test;
+[a, c, ...rest,] = test;
+[a = , = "test"] = test;
+[[a b] [c]]= test;
+[a: b] = c
+
+```
+
+
+## AST
+
+```
+JsModule {
+    bom_token: missing (optional),
+    interpreter_token: missing (optional),
+    directives: JsDirectiveList [],
+    items: JsModuleItemList [
+        JsExpressionStatement {
+            expression: JsAssignmentExpression {
+                left: JsArrayAssignmentPattern {
+                    l_brack_token: L_BRACK@0..1 "[" [] [],
+                    elements: JsArrayAssignmentPatternElementList [
+                        JsArrayAssignmentPatternElement {
+                            pattern: JsIdentifierAssignment {
+                                name_token: IDENT@1..3 "a" [] [Whitespace(" ")],
+                            },
+                            init: missing (optional),
+                        },
+                        missing separator,
+                        JsArrayAssignmentPatternElement {
+                            pattern: JsIdentifierAssignment {
+                                name_token: IDENT@3..4 "a" [] [],
+                            },
+                            init: missing (optional),
+                        },
+                        COMMA@4..6 "," [] [Whitespace(" ")],
+                        JsArrayAssignmentPatternElement {
+                            pattern: JsBogusAssignment {
+                                items: [
+                                    PLUS2@6..8 "++" [] [],
+                                    JsIdentifierAssignment {
+                                        name_token: IDENT@8..9 "b" [] [],
+                                    },
+                                ],
+                            },
+                            init: missing (optional),
+                        },
+                        COMMA@9..11 "," [] [Whitespace(" ")],
+                    ],
+                    r_brack_token: R_BRACK@11..13 "]" [] [Whitespace(" ")],
+                },
+                operator_token: EQ@13..15 "=" [] [Whitespace(" ")],
+                right: JsIdentifierExpression {
+                    name: JsReferenceIdentifier {
+                        value_token: IDENT@15..19 "test" [] [],
+                    },
+                },
+            },
+            semicolon_token: SEMICOLON@19..20 ";" [] [],
+        },
+        JsExpressionStatement {
+            expression: JsBogusExpression {
+                items: [
+                    JsBogus {
+                        items: [
+                            L_BRACK@20..22 "[" [Newline("\n")] [],
+                            JsBogus {
+                                items: [
+                                    JsArrayAssignmentPatternElement {
+                                        pattern: JsIdentifierAssignment {
+                                            name_token: IDENT@22..23 "a" [] [],
+                                        },
+                                        init: missing (optional),
+                                    },
+                                    COMMA@23..25 "," [] [Whitespace(" ")],
+                                    JsArrayAssignmentPatternElement {
+                                        pattern: JsIdentifierAssignment {
+                                            name_token: IDENT@25..26 "c" [] [],
+                                        },
+                                        init: missing (optional),
+                                    },
+                                    COMMA@26..28 "," [] [Whitespace(" ")],
+                                    JsBogus {
+                                        items: [
+                                            DOT3@28..31 "..." [] [],
+                                            JsIdentifierAssignment {
+                                                name_token: IDENT@31..35 "rest" [] [],
+                                            },
+                                        ],
+                                    },
+                                    COMMA@35..36 "," [] [],
+                                ],
+                            },
+                            R_BRACK@36..38 "]" [] [Whitespace(" ")],
+                        ],
+                    },
+                    EQ@38..40 "=" [] [Whitespace(" ")],
+                    JsIdentifierExpression {
+                        name: JsReferenceIdentifier {
+                            value_token: IDENT@40..44 "test" [] [],
+                        },
+                    },
+                ],
+            },
+            semicolon_token: SEMICOLON@44..45 ";" [] [],
+        },
+        JsExpressionStatement {
+            expression: JsAssignmentExpression {
+                left: JsArrayAssignmentPattern {
+                    l_brack_token: L_BRACK@45..47 "[" [Newline("\n")] [],
+                    elements: JsArrayAssignmentPatternElementList [
+                        JsArrayAssignmentPatternElement {
+                            pattern: JsIdentifierAssignment {
+                                name_token: IDENT@47..49 "a" [] [Whitespace(" ")],
+                            },
+                            init: JsInitializerClause {
+                                eq_token: EQ@49..51 "=" [] [Whitespace(" ")],
+                                expression: missing (required),
+                            },
+                        },
+                        COMMA@51..53 "," [] [Whitespace(" ")],
+                    ],
+                    r_brack_token: missing (required),
+                },
+                operator_token: EQ@53..55 "=" [] [Whitespace(" ")],
+                right: JsStringLiteralExpression {
+                    value_token: JS_STRING_LITERAL@55..61 "\"test\"" [] [],
+                },
+            },
+            semicolon_token: missing (optional),
+        },
+        JsBogusStatement {
+            items: [
+                R_BRACK@61..63 "]" [] [Whitespace(" ")],
+                EQ@63..65 "=" [] [Whitespace(" ")],
+                IDENT@65..69 "test" [] [],
+            ],
+        },
+        JsEmptyStatement {
+            semicolon_token: SEMICOLON@69..70 ";" [] [],
+        },
+        JsExpressionStatement {
+            expression: JsAssignmentExpression {
+                left: JsArrayAssignmentPattern {
+                    l_brack_token: L_BRACK@70..72 "[" [Newline("\n")] [],
+                    elements: JsArrayAssignmentPatternElementList [
+                        JsArrayAssignmentPatternElement {
+                            pattern: JsComputedMemberAssignment {
+                                object: JsArrayExpression {
+                                    l_brack_token: L_BRACK@72..73 "[" [] [],
+                                    elements: JsArrayElementList [
+                                        JsIdentifierExpression {
+                                            name: JsReferenceIdentifier {
+                                                value_token: IDENT@73..75 "a" [] [Whitespace(" ")],
+                                            },
+                                        },
+                                        missing separator,
+                                        JsIdentifierExpression {
+                                            name: JsReferenceIdentifier {
+                                                value_token: IDENT@75..76 "b" [] [],
+                                            },
+                                        },
+                                    ],
+                                    r_brack_token: R_BRACK@76..78 "]" [] [Whitespace(" ")],
+                                },
+                                l_brack_token: L_BRACK@78..79 "[" [] [],
+                                member: JsIdentifierExpression {
+                                    name: JsReferenceIdentifier {
+                                        value_token: IDENT@79..80 "c" [] [],
+                                    },
+                                },
+                                r_brack_token: R_BRACK@80..81 "]" [] [],
+                            },
+                            init: missing (optional),
+                        },
+                    ],
+                    r_brack_token: R_BRACK@81..82 "]" [] [],
+                },
+                operator_token: EQ@82..84 "=" [] [Whitespace(" ")],
+                right: JsIdentifierExpression {
+                    name: JsReferenceIdentifier {
+                        value_token: IDENT@84..88 "test" [] [],
+                    },
+                },
+            },
+            semicolon_token: SEMICOLON@88..89 ";" [] [],
+        },
+        JsExpressionStatement {
+            expression: JsBogusExpression {
+                items: [
+                    JsBogus {
+                        items: [
+                            L_BRACK@89..91 "[" [Newline("\n")] [],
+                            JsBogus {
+                                items: [
+                                    JsArrayAssignmentPatternElement {
+                                        pattern: JsIdentifierAssignment {
+                                            name_token: IDENT@91..92 "a" [] [],
+                                        },
+                                        init: missing (optional),
+                                    },
+                                    JsBogusAssignment {
+                                        items: [
+                                            COLON@92..94 ":" [] [Whitespace(" ")],
+                                            IDENT@94..95 "b" [] [],
+                                        ],
+                                    },
+                                ],
+                            },
+                            R_BRACK@95..97 "]" [] [Whitespace(" ")],
+                        ],
+                    },
+                    EQ@97..99 "=" [] [Whitespace(" ")],
+                    JsIdentifierExpression {
+                        name: JsReferenceIdentifier {
+                            value_token: IDENT@99..100 "c" [] [],
+                        },
+                    },
+                ],
+            },
+            semicolon_token: missing (optional),
+        },
+    ],
+    eof_token: EOF@100..101 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: JS_MODULE@0..101
+  0: (empty)
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..100
+    0: JS_EXPRESSION_STATEMENT@0..20
+      0: JS_ASSIGNMENT_EXPRESSION@0..19
+        0: JS_ARRAY_ASSIGNMENT_PATTERN@0..13
+          0: L_BRACK@0..1 "[" [] []
+          1: JS_ARRAY_ASSIGNMENT_PATTERN_ELEMENT_LIST@1..11
+            0: JS_ARRAY_ASSIGNMENT_PATTERN_ELEMENT@1..3
+              0: JS_IDENTIFIER_ASSIGNMENT@1..3
+                0: IDENT@1..3 "a" [] [Whitespace(" ")]
+              1: (empty)
+            1: (empty)
+            2: JS_ARRAY_ASSIGNMENT_PATTERN_ELEMENT@3..4
+              0: JS_IDENTIFIER_ASSIGNMENT@3..4
+                0: IDENT@3..4 "a" [] []
+              1: (empty)
+            3: COMMA@4..6 "," [] [Whitespace(" ")]
+            4: JS_ARRAY_ASSIGNMENT_PATTERN_ELEMENT@6..9
+              0: JS_BOGUS_ASSIGNMENT@6..9
+                0: PLUS2@6..8 "++" [] []
+                1: JS_IDENTIFIER_ASSIGNMENT@8..9
+                  0: IDENT@8..9 "b" [] []
+              1: (empty)
+            5: COMMA@9..11 "," [] [Whitespace(" ")]
+          2: R_BRACK@11..13 "]" [] [Whitespace(" ")]
+        1: EQ@13..15 "=" [] [Whitespace(" ")]
+        2: JS_IDENTIFIER_EXPRESSION@15..19
+          0: JS_REFERENCE_IDENTIFIER@15..19
+            0: IDENT@15..19 "test" [] []
+      1: SEMICOLON@19..20 ";" [] []
+    1: JS_EXPRESSION_STATEMENT@20..45
+      0: JS_BOGUS_EXPRESSION@20..44
+        0: JS_BOGUS@20..38
+          0: L_BRACK@20..22 "[" [Newline("\n")] []
+          1: JS_BOGUS@22..36
+            0: JS_ARRAY_ASSIGNMENT_PATTERN_ELEMENT@22..23
+              0: JS_IDENTIFIER_ASSIGNMENT@22..23
+                0: IDENT@22..23 "a" [] []
+              1: (empty)
+            1: COMMA@23..25 "," [] [Whitespace(" ")]
+            2: JS_ARRAY_ASSIGNMENT_PATTERN_ELEMENT@25..26
+              0: JS_IDENTIFIER_ASSIGNMENT@25..26
+                0: IDENT@25..26 "c" [] []
+              1: (empty)
+            3: COMMA@26..28 "," [] [Whitespace(" ")]
+            4: JS_BOGUS@28..35
+              0: DOT3@28..31 "..." [] []
+              1: JS_IDENTIFIER_ASSIGNMENT@31..35
+                0: IDENT@31..35 "rest" [] []
+            5: COMMA@35..36 "," [] []
+          2: R_BRACK@36..38 "]" [] [Whitespace(" ")]
+        1: EQ@38..40 "=" [] [Whitespace(" ")]
+        2: JS_IDENTIFIER_EXPRESSION@40..44
+          0: JS_REFERENCE_IDENTIFIER@40..44
+            0: IDENT@40..44 "test" [] []
+      1: SEMICOLON@44..45 ";" [] []
+    2: JS_EXPRESSION_STATEMENT@45..61
+      0: JS_ASSIGNMENT_EXPRESSION@45..61
+        0: JS_ARRAY_ASSIGNMENT_PATTERN@45..53
+          0: L_BRACK@45..47 "[" [Newline("\n")] []
+          1: JS_ARRAY_ASSIGNMENT_PATTERN_ELEMENT_LIST@47..53
+            0: JS_ARRAY_ASSIGNMENT_PATTERN_ELEMENT@47..51
+              0: JS_IDENTIFIER_ASSIGNMENT@47..49
+                0: IDENT@47..49 "a" [] [Whitespace(" ")]
+              1: JS_INITIALIZER_CLAUSE@49..51
+                0: EQ@49..51 "=" [] [Whitespace(" ")]
+                1: (empty)
+            1: COMMA@51..53 "," [] [Whitespace(" ")]
+          2: (empty)
+        1: EQ@53..55 "=" [] [Whitespace(" ")]
+        2: JS_STRING_LITERAL_EXPRESSION@55..61
+          0: JS_STRING_LITERAL@55..61 "\"test\"" [] []
+      1: (empty)
+    3: JS_BOGUS_STATEMENT@61..69
+      0: R_BRACK@61..63 "]" [] [Whitespace(" ")]
+      1: EQ@63..65 "=" [] [Whitespace(" ")]
+      2: IDENT@65..69 "test" [] []
+    4: JS_EMPTY_STATEMENT@69..70
+      0: SEMICOLON@69..70 ";" [] []
+    5: JS_EXPRESSION_STATEMENT@70..89
+      0: JS_ASSIGNMENT_EXPRESSION@70..88
+        0: JS_ARRAY_ASSIGNMENT_PATTERN@70..82
+          0: L_BRACK@70..72 "[" [Newline("\n")] []
+          1: JS_ARRAY_ASSIGNMENT_PATTERN_ELEMENT_LIST@72..81
+            0: JS_ARRAY_ASSIGNMENT_PATTERN_ELEMENT@72..81
+              0: JS_COMPUTED_MEMBER_ASSIGNMENT@72..81
+                0: JS_ARRAY_EXPRESSION@72..78
+                  0: L_BRACK@72..73 "[" [] []
+                  1: JS_ARRAY_ELEMENT_LIST@73..76
+                    0: JS_IDENTIFIER_EXPRESSION@73..75
+                      0: JS_REFERENCE_IDENTIFIER@73..75
+                        0: IDENT@73..75 "a" [] [Whitespace(" ")]
+                    1: (empty)
+                    2: JS_IDENTIFIER_EXPRESSION@75..76
+                      0: JS_REFERENCE_IDENTIFIER@75..76
+                        0: IDENT@75..76 "b" [] []
+                  2: R_BRACK@76..78 "]" [] [Whitespace(" ")]
+                1: L_BRACK@78..79 "[" [] []
+                2: JS_IDENTIFIER_EXPRESSION@79..80
+                  0: JS_REFERENCE_IDENTIFIER@79..80
+                    0: IDENT@79..80 "c" [] []
+                3: R_BRACK@80..81 "]" [] []
+              1: (empty)
+          2: R_BRACK@81..82 "]" [] []
+        1: EQ@82..84 "=" [] [Whitespace(" ")]
+        2: JS_IDENTIFIER_EXPRESSION@84..88
+          0: JS_REFERENCE_IDENTIFIER@84..88
+            0: IDENT@84..88 "test" [] []
+      1: SEMICOLON@88..89 ";" [] []
+    6: JS_EXPRESSION_STATEMENT@89..100
+      0: JS_BOGUS_EXPRESSION@89..100
+        0: JS_BOGUS@89..97
+          0: L_BRACK@89..91 "[" [Newline("\n")] []
+          1: JS_BOGUS@91..95
+            0: JS_ARRAY_ASSIGNMENT_PATTERN_ELEMENT@91..92
+              0: JS_IDENTIFIER_ASSIGNMENT@91..92
+                0: IDENT@91..92 "a" [] []
+              1: (empty)
+            1: JS_BOGUS_ASSIGNMENT@92..95
+              0: COLON@92..94 ":" [] [Whitespace(" ")]
+              1: IDENT@94..95 "b" [] []
+          2: R_BRACK@95..97 "]" [] [Whitespace(" ")]
+        1: EQ@97..99 "=" [] [Whitespace(" ")]
+        2: JS_IDENTIFIER_EXPRESSION@99..100
+          0: JS_REFERENCE_IDENTIFIER@99..100
+            0: IDENT@99..100 "c" [] []
+      1: (empty)
+  4: EOF@100..101 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+array_assignment_target_err.js:1:4 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `a`
+  
+  > 1 │ [a a, ++b, ] = test;
+      │    ^
+    2 │ [a, c, ...rest,] = test;
+    3 │ [a = , = "test"] = test;
+  
+  i Remove a
+  
+array_assignment_target_err.js:1:7 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Invalid assignment to `++b`
+  
+  > 1 │ [a a, ++b, ] = test;
+      │       ^^^
+    2 │ [a, c, ...rest,] = test;
+    3 │ [a = , = "test"] = test;
+  
+  i This expression cannot be assigned to
+  
+array_assignment_target_err.js:2:15 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × rest element may not have a trailing comma
+  
+    1 │ [a a, ++b, ] = test;
+  > 2 │ [a, c, ...rest,] = test;
+      │               ^
+    3 │ [a = , = "test"] = test;
+    4 │ [[a b] [c]]= test;
+  
+  i Remove the trailing comma here
+  
+    1 │ [a a, ++b, ] = test;
+  > 2 │ [a, c, ...rest,] = test;
+      │               ^
+    3 │ [a = , = "test"] = test;
+    4 │ [[a b] [c]]= test;
+  
+  i Rest element
+  
+    1 │ [a a, ++b, ] = test;
+  > 2 │ [a, c, ...rest,] = test;
+      │        ^^^^^^^
+    3 │ [a = , = "test"] = test;
+    4 │ [[a b] [c]]= test;
+  
+array_assignment_target_err.js:3:6 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected an expression, or an assignment but instead found ','.
+  
+    1 │ [a a, ++b, ] = test;
+    2 │ [a, c, ...rest,] = test;
+  > 3 │ [a = , = "test"] = test;
+      │      ^
+    4 │ [[a b] [c]]= test;
+    5 │ [a: b] = c
+  
+  i Expected an expression, or an assignment here.
+  
+    1 │ [a a, ++b, ] = test;
+    2 │ [a, c, ...rest,] = test;
+  > 3 │ [a = , = "test"] = test;
+      │      ^
+    4 │ [[a b] [c]]= test;
+    5 │ [a: b] = c
+  
+array_assignment_target_err.js:3:8 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected an assignment target, a rest element, or a comma but instead found '='.
+  
+    1 │ [a a, ++b, ] = test;
+    2 │ [a, c, ...rest,] = test;
+  > 3 │ [a = , = "test"] = test;
+      │        ^
+    4 │ [[a b] [c]]= test;
+    5 │ [a: b] = c
+  
+  i Expected an assignment target, a rest element, or a comma here.
+  
+    1 │ [a a, ++b, ] = test;
+    2 │ [a, c, ...rest,] = test;
+  > 3 │ [a = , = "test"] = test;
+      │        ^
+    4 │ [[a b] [c]]= test;
+    5 │ [a: b] = c
+  
+array_assignment_target_err.js:3:16 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a semicolon or an implicit semicolon after a statement, but found none
+  
+    1 │ [a a, ++b, ] = test;
+    2 │ [a, c, ...rest,] = test;
+  > 3 │ [a = , = "test"] = test;
+      │                ^
+    4 │ [[a b] [c]]= test;
+    5 │ [a: b] = c
+  
+  i An explicit or implicit semicolon is expected here...
+  
+    1 │ [a a, ++b, ] = test;
+    2 │ [a, c, ...rest,] = test;
+  > 3 │ [a = , = "test"] = test;
+      │                ^
+    4 │ [[a b] [c]]= test;
+    5 │ [a: b] = c
+  
+  i ...Which is required to end this statement
+  
+    1 │ [a a, ++b, ] = test;
+    2 │ [a, c, ...rest,] = test;
+  > 3 │ [a = , = "test"] = test;
+      │ ^^^^^^^^^^^^^^^^
+    4 │ [[a b] [c]]= test;
+    5 │ [a: b] = c
+  
+array_assignment_target_err.js:4:5 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `b`
+  
+    2 │ [a, c, ...rest,] = test;
+    3 │ [a = , = "test"] = test;
+  > 4 │ [[a b] [c]]= test;
+      │     ^
+    5 │ [a: b] = c
+    6 │ 
+  
+  i Remove b
+  
+array_assignment_target_err.js:5:3 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `:`
+  
+    3 │ [a = , = "test"] = test;
+    4 │ [[a b] [c]]= test;
+  > 5 │ [a: b] = c
+      │   ^
+    6 │ 
+  
+  i Remove :
+  
+```

@@ -1,3 +1,5 @@
+#![deny(clippy::use_self)]
+
 use crate::bytes::DISPATCHER;
 use crate::tables::derived_property::{ID_Continue, ID_Start};
 

@@ -17,24 +17,24 @@ use crate::state::{
 use crate::syntax::assignment::expression_to_assignment_pattern;
 use crate::syntax::class::{parse_class_declaration, parse_decorators, parse_initializer_clause};
 use crate::syntax::expr::{
-    is_at_expression, is_at_identifier, is_nth_at_identifier,
+    ExpressionContext, is_at_expression, is_at_identifier, is_nth_at_identifier,
     parse_assignment_expression_or_higher, parse_expression_or_recover_to_next_statement,
-    parse_identifier, ExpressionContext,
+    parse_identifier,
 };
-use crate::syntax::function::{is_at_async_function, parse_function_declaration, LineBreak};
+use crate::syntax::function::{LineBreak, is_at_async_function, parse_function_declaration};
 use crate::syntax::js_parse_error;
 use crate::syntax::js_parse_error::{decorators_not_allowed, expected_binding, expected_statement};
 use crate::syntax::module::parse_import_or_import_equals_declaration;
 use crate::syntax::typescript::ts_parse_error::{expected_ts_type, ts_only_syntax_error};
 
-use crate::span::Span;
 use crate::JsSyntaxFeature::{StrictMode, TypeScript};
 use crate::ParsedSyntax::{Absent, Present};
-use crate::{parser, JsParser, JsSyntaxFeature, ParseRecoveryTokenSet};
+use crate::span::Span;
+use crate::{JsParser, JsSyntaxFeature, ParseRecoveryTokenSet, parser};
 use biome_js_syntax::{JsSyntaxKind::*, *};
+use biome_parser::ParserProgress;
 use biome_parser::diagnostic::expected_token;
 use biome_parser::parse_lists::{ParseNodeList, ParseSeparatedList};
-use biome_parser::ParserProgress;
 use biome_rowan::SyntaxKind;
 
 pub const STMT_RECOVERY_SET: TokenSet<JsSyntaxKind> = token_set![
@@ -140,11 +140,11 @@ pub(crate) enum StatementContext {
 
 impl StatementContext {
     pub(crate) fn is_single_statement(&self) -> bool {
-        !matches!(self, StatementContext::StatementList)
+        !matches!(self, Self::StatementList)
     }
 
     pub(crate) fn is_statement_list(&self) -> bool {
-        matches!(self, StatementContext::StatementList)
+        matches!(self, Self::StatementList)
     }
 }
 
@@ -1646,10 +1646,9 @@ fn parse_for_head(p: &mut JsParser, has_l_paren: bool, is_for_await: bool) -> Js
 
         if p.at(T![in]) || p.at(T![of]) {
             // for (assignment_pattern in ...
-            if let Present(assignment_expr) = init_expr {
-                let mut assignment =
-                    expression_to_assignment_pattern(p, assignment_expr, checkpoint);
-
+            if let Present(mut assignment) = init_expr.and_then(|assignment_expr| {
+                expression_to_assignment_pattern(p, assignment_expr, checkpoint)
+            }) {
                 if TypeScript.is_supported(p)
                     && p.at(T![in])
                     && matches!(

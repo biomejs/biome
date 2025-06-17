@@ -80,11 +80,11 @@ loooooooooooooooooooooooooong4 =
 	void void "looooooooooooooooooooooooooooooooooooooooooog";
 loooooooooooooooooooooooooong5 =
 	!!"looooooooooooooooooooooooooooooooooooooooooog";
-// rome-ignore format: test
+// biome-ignore format: test
 loooooooooooooooooooooooooong6       =
 	void    "looooooooooooooooooooooooooooooooooooooooooog";
 loooooooooooooooooooooooooong7    =
-	// rome-ignore format: test
+	// biome-ignore format: test
 	!     "looooooooooooooooooooooooooooooooooooooooooog";
 
 // fluid layout
@@ -141,14 +141,14 @@ a = {
 } = {}
 
 a =
-// rome-ignore format: test
+// biome-ignore format: test
 {
     a: { t: c = b }, loreum, ipsurm
 } = {}
 
 a =
     {
-// rome-ignore format: test
+// biome-ignore format: test
         a: { t: c = b       }, loreum, ipsurm
     } = {}
 

@@ -1,9 +1,10 @@
+use camino::Utf8PathBuf;
 use rustc_hash::FxHashMap;
 
 use crate::{FixKind, Rule, RuleKey};
 use std::any::{Any, TypeId};
 use std::fmt::Debug;
-use std::path::PathBuf;
+use std::sync::Arc;
 
 /// A convenient new type data structure to store the options that belong to a rule
 #[derive(Debug)]
@@ -17,7 +18,7 @@ impl RuleOptions {
 
     /// It returns the deserialized rule option
     pub fn value<O: 'static>(&self) -> &O {
-        let RuleOptions(type_id, value, _) = &self;
+        let Self(type_id, value, _) = &self;
         let current_id = TypeId::of::<O>();
         debug_assert_eq!(type_id, &current_id);
         // SAFETY: the code should fail when asserting the types.
@@ -55,36 +56,96 @@ impl AnalyzerRules {
 #[derive(Debug, Default)]
 pub struct AnalyzerConfiguration {
     /// A list of rules and their options
-    pub rules: AnalyzerRules,
+    pub(crate) rules: AnalyzerRules,
 
-    /// A collections of bindings that the analyzers should consider as "external".
+    /// A collection of bindings that the analyzers should consider as "external".
     ///
     /// For example, lint rules should ignore them.
-    pub globals: Vec<String>,
+    globals: Vec<Box<str>>,
 
-    /// Allows to choose a different quote when applying fixes inside the lint rules
-    pub preferred_quote: PreferredQuote,
+    /// Allows choosing a different quote when applying fixes inside the lint rules
+    preferred_quote: PreferredQuote,
+
+    /// Allows choosing a different JSX quote when applying fixes inside the lint rules
+    pub preferred_jsx_quote: PreferredQuote,
 
     /// Indicates the type of runtime or transformation used for interpreting JSX.
-    pub jsx_runtime: Option<JsxRuntime>,
+    jsx_runtime: Option<JsxRuntime>,
+
+    /// Whether the CSS files contain CSS Modules
+    css_modules: bool,
+}
+
+impl AnalyzerConfiguration {
+    pub fn with_rules(mut self, rules: AnalyzerRules) -> Self {
+        self.rules = rules;
+        self
+    }
+
+    pub fn with_globals(mut self, globals: Vec<Box<str>>) -> Self {
+        self.globals = globals;
+        self
+    }
+
+    pub fn with_jsx_runtime(mut self, jsx_runtime: JsxRuntime) -> Self {
+        self.jsx_runtime = Some(jsx_runtime);
+        self
+    }
+
+    pub fn with_preferred_quote(mut self, preferred_quote: PreferredQuote) -> Self {
+        self.preferred_quote = preferred_quote;
+        self
+    }
+
+    pub fn with_preferred_jsx_quote(mut self, preferred_jsx_quote: PreferredQuote) -> Self {
+        self.preferred_jsx_quote = preferred_jsx_quote;
+        self
+    }
+
+    pub fn with_css_modules(mut self, css_modules: bool) -> Self {
+        self.css_modules = css_modules;
+        self
+    }
 }
 
 /// A set of information useful to the analyzer infrastructure
 #[derive(Debug, Default)]
 pub struct AnalyzerOptions {
     /// A data structured derived from the [`biome.json`] file
-    pub configuration: AnalyzerConfiguration,
+    pub(crate) configuration: AnalyzerConfiguration,
 
     /// The file that is being analyzed
-    pub file_path: PathBuf,
+    pub file_path: Arc<Utf8PathBuf>,
+
+    /// Suppression reason used when applying a suppression code action
+    pub(crate) suppression_reason: Option<String>,
 }
 
 impl AnalyzerOptions {
+    pub fn with_file_path(mut self, file_path: impl Into<Utf8PathBuf>) -> Self {
+        self.file_path = Arc::new(file_path.into());
+        self
+    }
+
+    pub fn with_configuration(mut self, analyzer_configuration: AnalyzerConfiguration) -> Self {
+        self.configuration = analyzer_configuration;
+        self
+    }
+
+    pub fn with_suppression_reason(mut self, reason: Option<&str>) -> Self {
+        self.suppression_reason = reason.map(String::from);
+        self
+    }
+
+    pub fn push_globals(&mut self, globals: Vec<Box<str>>) {
+        self.configuration.globals.extend(globals);
+    }
+
     pub fn globals(&self) -> Vec<&str> {
         self.configuration
             .globals
             .iter()
-            .map(|global| global.as_str())
+            .map(AsRef::as_ref)
             .collect()
     }
 
@@ -113,6 +174,14 @@ impl AnalyzerOptions {
 
     pub fn preferred_quote(&self) -> &PreferredQuote {
         &self.configuration.preferred_quote
+    }
+
+    pub fn preferred_jsx_quote(&self) -> &PreferredQuote {
+        &self.configuration.preferred_jsx_quote
+    }
+
+    pub fn css_modules(&self) -> bool {
+        self.configuration.css_modules
     }
 }
 

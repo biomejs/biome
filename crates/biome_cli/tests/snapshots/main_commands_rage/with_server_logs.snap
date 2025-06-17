@@ -17,6 +17,7 @@ Environment:
   BIOME_LOG_PATH:               **PLACEHOLDER**
   BIOME_LOG_PREFIX_NAME:        unset
   BIOME_CONFIG_PATH:            unset
+  BIOME_THREADS:                unset
   NO_COLOR:                     **PLACEHOLDER**
   TERM:                         **PLACEHOLDER**
   JS_RUNTIME_VERSION:           unset
@@ -24,7 +25,8 @@ Environment:
   NODE_PACKAGE_MANAGER:         unset
 
 Biome Configuration:
-  Status:                       unset
+  Status:                       Not set
+  Path:                         unset
 
 Server:
   Version:                      0.0.0

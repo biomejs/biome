@@ -4,11 +4,34 @@ This document outlines the governance model for Biome.
 
 It describes various parts of how the project is managed as well as accepted practices for day-to-day operation:
 
-- [Contributor Model](#contributor-model)
-- [Project Direction](#project-direction)
-- [Code Review](#code-review)
-- [Financial Contributions](#financial-contributions)
-- [Moderation](#moderation)
+* [Contributor Model](#contributor-model)
+  + [Lead](#lead)
+    - [Lead nomination](#lead-nomination)
+  + [Core Contributor](#core-contributor)
+    - [Core contributor nomination](#core-contributor-nomination)
+  + [Maintainer](#maintainer)
+    - [Maintainer nomination](#maintainer-nomination)
+  + [Voting Rules](#voting-rules)
+  + [Ownership](#ownership)
+  + [Inactivity](#inactivity)
+  + [Contributions](#contributions)
+  + [Governance changes](#governance-changes)
+* [Project Direction](#project-direction)
+  + [Roadmap](#roadmap)
+* [Code review](#code-review)
+* [Financial Contributions](#financial-contributions)
+  + [Sponsorship](#sponsorship)
+  + [Community-Funded Bounties](#community-funded-bounties)
+  + [Project-Funded Bounties](#project-funded-bounties)
+  + [Paid Contracting](#paid-contracting)
+  + [Fund Allocation](#fund-allocation)
+    - [Expenses](#expenses)
+* [Moderation](#moderation)
+  + [Reporting](#reporting)
+  + [Who gets involved?](#who-gets-involved)
+  + [Review](#review)
+  + [Resolution](#resolution)
+
 
 ## Contributor Model
 
@@ -21,16 +44,18 @@ Leads are the owners of the organisation.
 Leads have additional privileges over core contributors. Leads control and maintain sensitive project assets and act as tiebreakers in the event of disagreements. In case of disagreements, only **one** lead must be involved in the resolution.
 
 These assets and responsibilities are but are not limited to:
-- Access to social accounts
-- Administration privileges of the [Biome Discord server][discord]
-- Administration privileges of the [Biome GitHub org][gh-org]
-- Website accesses (hosting platform, domain name, etc.)
-- Access to sensitive emails, such as the CoC email
+- Access to social accounts.
+- Administration privileges of the [Biome Discord server][discord].
+- Administration privileges of the [Biome GitHub org][gh-org].
+- Website credentials (hosting platform, domain name, etc.).
+- Access to sensitive emails, such as the CoC email.
 
 Also:
-- Ability to vote for new leads
-- Onboard new [core contributors](#core-contributor) and new leads;
-- Takes part in [project decisions](#project-direction-and-planning)
+- Ability to vote for new leads.
+- Onboard new [core contributors](#core-contributor) and new leads.
+- Takes part in [project decisions](#project-direction-and-planning).
+- Access to the Discord `Lead` category and channels that belong to this category.
+- Propose changes to the governance document via PR.
 
 The ownership of assets is only sometimes evenly distributed among all the leads.
 
@@ -58,6 +83,8 @@ Core Contributors are outstanding [maintainers](#maintainer), are ambassadors of
 - Ability to [vote](#maintainer-nomination) on new maintainers and [vote](#core-contributor-nomination) on new core contributors
 - Onboard new [maintainers](#maintainer)
 - Assign [pledges to issues](#bounties).
+- Access to the Discord `Core contributors` category and channels that belong to this category.
+- Propose changes to the governance document via PR.
 
 #### Core contributor nomination
 
@@ -93,7 +120,7 @@ Maintainers are those with a history of consistent contributions, including but 
 - `Maintainer` status on the [Biome Discord server][discord]
 - Ability to [vote](#voting) on project decisions
 - Ability to [vote](#maintainer-nomination) on new maintainers
-
+- Access to the Discord `Maintainers` category and channels that belong to this category.
 #### Maintainer nomination
 
 Maintainers may either be nominated by another [maintainer](#maintainer), [Core contributor](#core-contributor), [lead](#lead).
@@ -148,6 +175,10 @@ Contributions to the project aren't only limited to code. Contributions come in 
 - Support in secondary channels, e.g. StackOverflow, etc.
 - Website;
 
+### Governance changes
+
+Changes to the governance document must be approved by at least fifty percent of the Core Contributors and a majority of the Leads.
+
 ## Project Direction
 
 Project direction and planning is a shared responsibility amongst members. Core contributors are responsible for dictating high-level goals and the project scope that should be adhered to.
@@ -158,7 +189,7 @@ Leads may create a roadmap document to share with the community once the core co
 
 Roadmaps don't provide dates or deadlines; they only reflect what the core contributors decide to work on and how to spend the resources.
 
-The span of a roadmap should cover six months, but it might vary.
+The span of a roadmap should cover one year, but it might vary.
 
 ## Code review
 
@@ -168,7 +199,7 @@ We have a reasonably liberal approach to code review and merging. We value quick
 - If there are comments or suggestions after a PR is merged after the fact, allow yourself time to address them in a follow-up PR. If you don't respond in a reasonable timeframe, then create an issue to track.
 - Ensure that the PR summary is detailed, listing steps you took to verify the rationale and relevant issues and people involved in any prior discussion.
 - Ensure that PRs contain adequate tests and code comments for a future contributor to derive intent and modify your code safely.
-- You are welcome to the repos for your WIP branches. If you don't use your own fork, prepend the name of the branch with your github handle, e.g. `<handle>/experiment-code` Branches that have more than four months of inactivity will be pruned.
+- You are welcome to the repos for your WIP branches. If you don't use your own fork, prepend the name of the branch with your GitHub handle, e.g. `<handle>/experiment-code` Branches that have more than four months of inactivity will be pruned.
 - If you add a new feature, ensure it has been discussed or approved on GitHub or Discord.
 - If necessary, identify potential owners for PR review and approval.
 - All code must go through Pull Requests (PR) and pass status checks before being merged. If a PR is merged that breaks `main` due to the branch not being up-to-date, then it should either be reverted or a quick fix merged as a separate PR.
@@ -176,7 +207,9 @@ We have a reasonably liberal approach to code review and merging. We value quick
 
 ## Financial Contributions
 
-There are two ways to fund Biome and its development: sponsorship and funded bounties, although we strongly prefer and recommend sponsorship.
+There are three ways to fund Biome and its development: sponsorship, funded bounties, and paid
+contracts. We strongly prefer and recommend sponsorship, but are willing to facilitate both bounties
+and contracting under some conditions.
 
 ### Sponsorship
 
@@ -186,13 +219,12 @@ done through a one-time donation, or through recurring donations. We offer incen
 To learn more about sponsorship incentives, or to make a donation, please visit our [Open Collective page](https://opencollective.com/biome).
 You can also sponsor the project through [GitHub](https://github.com/sponsors/biomejs).
 
-### Community-Funded Bounties
+### Community-Funded Bounties (currently halted)
 
-Bounties are the second approach towards funding Biome development. Unlike a sponsorship, bounties are directed towards the implementation of a specific feature. Compared to sponsorship, bounties come with a few risks, both for Biome as a project and for the people or entities offering and collecting the bounty. To minimize these risks, we only sanction bounties under the following conditions:
+Bounties are the second approach towards funding Biome development. Unlike sponsorship, bounties are directed towards the implementation of a specific feature. Compared to sponsorship, bounties come with a few risks, both for Biome as a project and for the people or entities offering and collecting the bounty. To minimize these risks, we only sanction bounties under the following conditions:
 
-- Bounties must be pledged through Polar.sh on an issue that is opened in our issue tracker.
+- Bounties must be pledged through [...] on an issue that is opened in our issue tracker.
   - Unless otherwise specified, Biome reserves 30% of the payment amount, meaning contributors receive 70% of the pledged amount.
-  - The commission charged by Polar.sh is split accordingly.
   - We reserve the right to decide on a different split in the future.
 - Bounties cannot be opened for bug fixes. Users who wish to see bugs fixed are advised to consider [sponsorship](#sponsorship) instead, in order to give the project a better long-term ability to fix bugs as well.
 - If an issue in our issue tracker is not yet open for pledges, the person who wishes to pledge should indicate their desire in the comments of the issue, or do so through the `Community > #funding` channel on Discord. A [Core Contributor](#core-contributor) can then **accept** or **reject** the request for the bounty. Reasons for rejection include, but are not limited to:
@@ -201,10 +233,7 @@ Bounties are the second approach towards funding Biome development. Unlike a spo
   - The suggested pledge is deemed inappropriate for the amount of work involved.
 - The person making the pledge acknowledges their pledge does not come with a guarantee of work done.
 - A task is only completed when a Biome maintainer merges the pull request that closes the task. The person trying to complete the task is responsible for addressing review comments to make sure the work meets the quality standards of the Biome project.
-- There is a 6 month expiration on pledges, as managed by Polar.sh.
-- Terms and conditions of Polar.sh apply to all pledges.
-  - For the FAQ, please see: https://docs.polar.sh/maintainers/faq/
-  - For the legal terms, please see: https://polar.sh/legal/terms
+- There is a 6 month expiration on pledges
 - If you are receiving money as part of a bounty, please consider whether you need to pay taxes in your country. Core contributors and Maintainers aren't obligated to give tax advice over the money received.
 
 ### Project-Funded Bounties
@@ -213,7 +242,7 @@ In some cases, Biome funds bounties on its own issues in order to further the pr
 
 - Implementation of the task funded by Biome must advance our [roadmap](#roadmap) or help with essential infrastructure.
   - The task description must include a clear rationale for why this task is eligible for funding.
-- To avoid paying a commission on our own bounties, we do not assign funds through Polar.sh. Instead, we ask contributors to take the money directly from our Open Collective account upon completion of the task.
+- We ask contributors to take the money directly from our Open Collective account upon completion of the task.
   - Unfortunately, this means Project-Funded Bounties can only be assigned to [Core Contributors](#core-contributor) at this moment since they have access to our Open Collective account.
 
 Additionally, there is a strict process for assigning Project-Funded Bounties:
@@ -224,6 +253,39 @@ Additionally, there is a strict process for assigning Project-Funded Bounties:
   - The waiting period is optional if a Lead approves the request.
   - If an objection is raised, the request is put on hold until a Lead makes the final decision.
 - There is a maximum amount of issues with pledges someone can have assigned to them. The limit is 2 for core contributors, and 1 for anyone else. By limiting the amount of issues with pledges that someone can have assigned, we make sure the bounties remain available for others to pick up.
+
+### Paid Contracting
+
+Core Contributors may enter freelance contracts with clients to work on Biome. Such contracts are
+between the contributor and their client, so they fall mostly outside the responsibility of the
+Biome project. Nevertheless, we can explicitly endorse such contracts under the following
+conditions:
+
+- Core Contributors that are open to contracts may be advertised on the project website if they
+  please.
+- Clients that hire a Core Contributor to work on Biome for an extended period (3 months or more)
+  are eligible to the same benefits as a project sponsor. Their sponsorship benefits will be based
+  on the monthly fee paid to the Core Contributor.
+- If the work that is expected to be delivered does not contribute to Biome's last-published
+  roadmap, Biome asks for a 30% fee over the total gross amount, excluding VAT, earned through the
+  contract. This is to cover review, project upkeep and continued maintenance of the functionality
+  after merging.
+  - For work that directly benefits the Biome roadmap, no such fee is required. For work that partly
+    or indirectly benefits the roadmap, a customized fee may be negotiated.
+  - If the last-published roadmap is more than 12 months old, the Core Contributor is asked to
+    consult with the Core team about alignment with the project goals.
+  - Fee negotiation may happen either publicly in the `Community > #funding` channel, or privately
+    in the `Core > #core-team` channel.
+  - Custom fees require the approval of at least one Lead.
+- The work may not conflict with the project direction or
+  [its values](https://biomejs.dev/internals/philosophy/).
+- When a Core Contributor starts or ends a paid contract, it should be announced in the
+  `Core > #core-team` channel.
+- Biome and its members cannot be held responsible for the performance of any individual
+  contributor. We may help clients who are interested in hiring a Biome contributor for a contract
+  to get in contact with them, but we cannot guarantee their performance. It is the client's
+  responsibility to do due diligence and determine whether the contributor is suitable for the
+  assigned contract.
 
 ### Fund Allocation
 

@@ -1,3 +1,4 @@
+/* should not generate diagnostics */
 export const Component = () => (
     <div>
         hello world

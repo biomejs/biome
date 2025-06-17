@@ -1,9 +1,10 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalidClassStaticGetter.js
+snapshot_kind: text
 ---
 # Input
-```jsx
+```js
 export default class {
     static get SpecialProperty() {}
 
@@ -25,7 +26,7 @@ export default class {
 ```
 invalidClassStaticGetter.js:2:16 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This static class getter name should be in camelCase or CONSTANT_CASE.
+  i This static class getter name should be in camelCase or CONSTANT_CASE.
   
     1 │ export default class {
   > 2 │     static get SpecialProperty() {}
@@ -39,7 +40,7 @@ invalidClassStaticGetter.js:2:16 lint/style/useNamingConvention ━━━━━�
 ```
 invalidClassStaticGetter.js:4:16 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This static class getter name should be in camelCase or CONSTANT_CASE.
+  i This static class getter name should be in camelCase or CONSTANT_CASE.
   
     2 │     static get SpecialProperty() {}
     3 │ 
@@ -54,7 +55,7 @@ invalidClassStaticGetter.js:4:16 lint/style/useNamingConvention ━━━━━�
 ```
 invalidClassStaticGetter.js:6:16 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This static class getter name should be in camelCase or CONSTANT_CASE.
+  i This static class getter name should be in camelCase or CONSTANT_CASE.
   
     4 │     static get special_property() {}
     5 │ 
@@ -69,7 +70,7 @@ invalidClassStaticGetter.js:6:16 lint/style/useNamingConvention ━━━━━�
 ```
 invalidClassStaticGetter.js:10:17 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This static class getter name should be in camelCase or CONSTANT_CASE.
+  i This static class getter name should be in camelCase or CONSTANT_CASE.
   
      8 │     static get #X() {}
      9 │ 
@@ -84,7 +85,7 @@ invalidClassStaticGetter.js:10:17 lint/style/useNamingConvention ━━━━━
 ```
 invalidClassStaticGetter.js:12:17 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This static class getter name should be in camelCase or CONSTANT_CASE.
+  i This static class getter name should be in camelCase or CONSTANT_CASE.
   
     10 │     static get #SpecialProperty() {}
     11 │ 
@@ -99,7 +100,7 @@ invalidClassStaticGetter.js:12:17 lint/style/useNamingConvention ━━━━━
 ```
 invalidClassStaticGetter.js:14:17 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This static class getter name should be in camelCase or CONSTANT_CASE.
+  i This static class getter name should be in camelCase or CONSTANT_CASE.
   
     12 │     static get #special_property() {}
     13 │ 

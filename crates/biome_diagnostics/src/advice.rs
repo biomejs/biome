@@ -1,11 +1,11 @@
 use crate::Applicability;
 use crate::{
+    Location,
     display::Backtrace,
     location::{AsResource, AsSourceCode, AsSpan},
-    Location,
 };
 use biome_console::fmt::{self, Display};
-use biome_console::{markup, MarkupBuf};
+use biome_console::{MarkupBuf, markup};
 use biome_text_edit::TextEdit;
 use serde::{Deserialize, Serialize};
 use std::io;
@@ -79,6 +79,12 @@ pub trait Visit {
     ) -> io::Result<()> {
         let _ = (headers, columns, padding);
         Ok(())
+    }
+}
+
+impl Advices for str {
+    fn record(&self, visitor: &mut dyn Visit) -> io::Result<()> {
+        visitor.record_log(LogCategory::Info, &self)
     }
 }
 
@@ -195,16 +201,16 @@ where
     }
 }
 
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 /// Utility type implementing [Advices] that emits a
 /// code suggestion with the provided text
-pub struct CodeSuggestionAdvice<M> {
+pub struct CodeSuggestionAdvice<M: Clone> {
     pub applicability: Applicability,
     pub msg: M,
     pub suggestion: TextEdit,
 }
 
-impl<M> Advices for CodeSuggestionAdvice<M>
+impl<M: Clone> Advices for CodeSuggestionAdvice<M>
 where
     M: Display,
 {

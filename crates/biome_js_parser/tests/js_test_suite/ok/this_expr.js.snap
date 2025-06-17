@@ -1,0 +1,68 @@
+---
+source: crates/biome_js_parser/tests/spec_test.rs
+expression: snapshot
+snapshot_kind: text
+---
+## Input
+
+```js
+this
+this.foo
+
+```
+
+
+## AST
+
+```
+JsModule {
+    bom_token: missing (optional),
+    interpreter_token: missing (optional),
+    directives: JsDirectiveList [],
+    items: JsModuleItemList [
+        JsExpressionStatement {
+            expression: JsThisExpression {
+                this_token: THIS_KW@0..4 "this" [] [],
+            },
+            semicolon_token: missing (optional),
+        },
+        JsExpressionStatement {
+            expression: JsStaticMemberExpression {
+                object: JsThisExpression {
+                    this_token: THIS_KW@4..9 "this" [Newline("\n")] [],
+                },
+                operator_token: DOT@9..10 "." [] [],
+                member: JsName {
+                    value_token: IDENT@10..13 "foo" [] [],
+                },
+            },
+            semicolon_token: missing (optional),
+        },
+    ],
+    eof_token: EOF@13..14 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: JS_MODULE@0..14
+  0: (empty)
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..13
+    0: JS_EXPRESSION_STATEMENT@0..4
+      0: JS_THIS_EXPRESSION@0..4
+        0: THIS_KW@0..4 "this" [] []
+      1: (empty)
+    1: JS_EXPRESSION_STATEMENT@4..13
+      0: JS_STATIC_MEMBER_EXPRESSION@4..13
+        0: JS_THIS_EXPRESSION@4..9
+          0: THIS_KW@4..9 "this" [Newline("\n")] []
+        1: DOT@9..10 "." [] []
+        2: JS_NAME@10..13
+          0: IDENT@10..13 "foo" [] []
+      1: (empty)
+  4: EOF@13..14 "" [Newline("\n")] []
+
+```

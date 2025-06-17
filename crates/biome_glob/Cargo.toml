@@ -1,0 +1,27 @@
+[package]
+authors.workspace    = true
+categories.workspace = true
+description          = "<DESCRIPTION>"
+edition.workspace    = true
+homepage.workspace   = true
+keywords.workspace   = true
+license.workspace    = true
+name                 = "biome_glob"
+repository.workspace = true
+version              = "0.1.0"
+
+[lints]
+workspace = true
+
+[dependencies]
+biome_deserialize        = { workspace = true, optional = true }
+biome_deserialize_macros = { workspace = true, optional = true }
+biome_text_size          = { workspace = true, optional = true }
+globset                  = { workspace = true }
+schemars                 = { workspace = true, optional = true }
+serde                    = { workspace = true, optional = true }
+
+[features]
+biome_deserialize = ["dep:biome_deserialize", "dep:biome_deserialize_macros", "dep:biome_text_size"]
+schema            = ["dep:schemars", "serde"]
+serde             = ["dep:serde"]

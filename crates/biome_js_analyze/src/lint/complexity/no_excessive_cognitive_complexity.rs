@@ -1,9 +1,10 @@
 use biome_analyze::{
-    context::RuleContext, declare_lint_rule, AddVisitor, Phases, QueryMatch, Queryable, Rule,
-    RuleDiagnostic, RuleSource, ServiceBag, Visitor, VisitorContext,
+    AddVisitor, Phases, QueryMatch, Queryable, Rule, RuleDiagnostic, RuleSource, ServiceBag,
+    Visitor, VisitorContext, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
 use biome_deserialize_macros::Deserializable;
+use biome_diagnostics::Severity;
 use biome_js_syntax::{
     AnyFunctionLike, JsBreakStatement, JsContinueStatement, JsElseClause, JsLanguage,
     JsLogicalExpression, JsLogicalOperator, JsSyntaxNode,
@@ -58,9 +59,8 @@ declare_lint_rule! {
     ///
     /// Allows to specify the maximum allowed complexity.
     ///
-    /// ```json
+    /// ```json,options
     /// {
-    ///     "//": "...",
     ///     "options": {
     ///         "maxAllowedComplexity": 15
     ///     }
@@ -75,6 +75,7 @@ declare_lint_rule! {
         language: "js",
         sources: &[RuleSource::EslintSonarJs("cognitive-complexity")],
         recommended: false,
+        severity: Severity::Information,
     }
 }
 

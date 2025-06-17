@@ -1,5 +1,6 @@
-use biome_analyze::{context::RuleContext, declare_lint_rule, Ast, Rule, RuleDiagnostic};
+use biome_analyze::{Ast, Rule, RuleDiagnostic, context::RuleContext, declare_lint_rule};
 use biome_console::markup;
+use biome_diagnostics::Severity;
 use biome_js_syntax::{JsFileSource, JsVariableDeclaration, JsVariableDeclarator};
 
 declare_lint_rule! {
@@ -38,6 +39,7 @@ declare_lint_rule! {
         name: "noImplicitAnyLet",
         language: "ts",
         recommended: true,
+        severity: Severity::Error,
     }
 }
 
@@ -51,7 +53,7 @@ impl Rule for NoImplicitAnyLet {
         let source_type = ctx.source_type::<JsFileSource>().language();
         let node = ctx.query();
 
-        if source_type.is_definition_file() || !source_type.is_typescript() || node.is_const() {
+        if !source_type.is_typescript() || source_type.is_definition_file() || node.is_const() {
             return None;
         }
 

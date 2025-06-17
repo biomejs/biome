@@ -1,0 +1,98 @@
+---
+source: crates/biome_js_parser/tests/spec_test.rs
+expression: snapshot
+snapshot_kind: text
+---
+## Input
+
+```js
+export default a, b;
+
+```
+
+
+## AST
+
+```
+JsModule {
+    bom_token: missing (optional),
+    interpreter_token: missing (optional),
+    directives: JsDirectiveList [],
+    items: JsModuleItemList [
+        JsExport {
+            decorators: JsDecoratorList [],
+            export_token: EXPORT_KW@0..7 "export" [] [Whitespace(" ")],
+            export_clause: JsExportDefaultExpressionClause {
+                default_token: DEFAULT_KW@7..15 "default" [] [Whitespace(" ")],
+                expression: JsIdentifierExpression {
+                    name: JsReferenceIdentifier {
+                        value_token: IDENT@15..16 "a" [] [],
+                    },
+                },
+                semicolon_token: missing (optional),
+            },
+        },
+        JsBogusStatement {
+            items: [
+                COMMA@16..18 "," [] [Whitespace(" ")],
+                IDENT@18..19 "b" [] [],
+            ],
+        },
+        JsEmptyStatement {
+            semicolon_token: SEMICOLON@19..20 ";" [] [],
+        },
+    ],
+    eof_token: EOF@20..21 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: JS_MODULE@0..21
+  0: (empty)
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..20
+    0: JS_EXPORT@0..16
+      0: JS_DECORATOR_LIST@0..0
+      1: EXPORT_KW@0..7 "export" [] [Whitespace(" ")]
+      2: JS_EXPORT_DEFAULT_EXPRESSION_CLAUSE@7..16
+        0: DEFAULT_KW@7..15 "default" [] [Whitespace(" ")]
+        1: JS_IDENTIFIER_EXPRESSION@15..16
+          0: JS_REFERENCE_IDENTIFIER@15..16
+            0: IDENT@15..16 "a" [] []
+        2: (empty)
+    1: JS_BOGUS_STATEMENT@16..19
+      0: COMMA@16..18 "," [] [Whitespace(" ")]
+      1: IDENT@18..19 "b" [] []
+    2: JS_EMPTY_STATEMENT@19..20
+      0: SEMICOLON@19..20 ";" [] []
+  4: EOF@20..21 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+export_default_expression_clause_err.js:1:17 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a semicolon or an implicit semicolon after a statement, but found none
+  
+  > 1 │ export default a, b;
+      │                 ^
+    2 │ 
+  
+  i An explicit or implicit semicolon is expected here...
+  
+  > 1 │ export default a, b;
+      │                 ^
+    2 │ 
+  
+  i ...Which is required to end this statement
+  
+  > 1 │ export default a, b;
+      │        ^^^^^^^^^
+    2 │ 
+  
+```

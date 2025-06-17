@@ -1,9 +1,9 @@
 use biome_formatter::{IndentStyle, IndentWidth, LineEnding, LineWidth};
 use biome_formatter_test::TestFormatLanguage;
 use biome_fs::BiomePath;
-use biome_json_formatter::context::{JsonFormatContext, JsonFormatOptions};
 use biome_json_formatter::JsonFormatLanguage;
-use biome_json_parser::{parse_json, JsonParserOptions};
+use biome_json_formatter::context::{JsonFormatContext, JsonFormatOptions};
+use biome_json_parser::{JsonParserOptions, parse_json};
 use biome_json_syntax::{JsonFileSource, JsonLanguage};
 use biome_parser::AnyParse;
 use biome_service::settings::{ServiceLanguage, Settings};
@@ -52,8 +52,8 @@ pub enum JsonSerializableIndentStyle {
 impl From<JsonSerializableIndentStyle> for IndentStyle {
     fn from(test: JsonSerializableIndentStyle) -> Self {
         match test {
-            JsonSerializableIndentStyle::Tab => IndentStyle::Tab,
-            JsonSerializableIndentStyle::Space => IndentStyle::Space,
+            JsonSerializableIndentStyle::Tab => Self::Tab,
+            JsonSerializableIndentStyle::Space => Self::Space,
         }
     }
 }
@@ -73,9 +73,9 @@ pub enum JsonSerializableLineEnding {
 impl From<JsonSerializableLineEnding> for LineEnding {
     fn from(test: JsonSerializableLineEnding) -> Self {
         match test {
-            JsonSerializableLineEnding::Lf => LineEnding::Lf,
-            JsonSerializableLineEnding::Crlf => LineEnding::Crlf,
-            JsonSerializableLineEnding::Cr => LineEnding::Cr,
+            JsonSerializableLineEnding::Lf => Self::Lf,
+            JsonSerializableLineEnding::Crlf => Self::Crlf,
+            JsonSerializableLineEnding::Cr => Self::Cr,
         }
     }
 }
@@ -97,7 +97,7 @@ pub struct JsonSerializableFormatOptions {
 
 impl From<JsonSerializableFormatOptions> for JsonFormatOptions {
     fn from(test: JsonSerializableFormatOptions) -> Self {
-        JsonFormatOptions::default()
+        Self::default()
             .with_indent_style(test.indent_style.map(Into::into).unwrap_or_default())
             .with_indent_width(
                 test.indent_width

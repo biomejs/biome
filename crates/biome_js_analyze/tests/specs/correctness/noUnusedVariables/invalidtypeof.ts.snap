@@ -14,16 +14,14 @@ export declare const x: typeof I;
 ```
 invalidtypeof.ts:1:11 lint/correctness/noUnusedVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This interface is unused.
+  ! This interface I is unused.
   
   > 1 │ interface I {}
       │           ^
     2 │ 
     3 │ export declare const x: typeof I;
   
-  i Unused variables usually are result of incomplete refactoring, typos and other source of bugs.
+  i Unused variables are often the result of an incomplete refactoring, typos, or other sources of bugs.
   
 
 ```
-
-

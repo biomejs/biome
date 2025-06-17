@@ -1,5 +1,6 @@
 ---
 source: crates/biome_css_parser/tests/spec_test.rs
+assertion_line: 169
 expression: snapshot
 ---
 ## Input
@@ -27,6 +28,40 @@ expression: snapshot
 		article {
 			padding: 1rem 3rem;
 		}
+	}
+}
+
+@-moz-document url-prefix() {}
+
+@-moz-document url-prefix("https://www.example.com/") {}
+
+@-moz-document url-prefix() {
+	body {
+		background-color: green;
+	}
+}
+
+@-moz-document url-prefix("https://www.example.com/") {
+	body {
+		background-color: green;
+	}
+}
+
+@-moz-document url-prefix(https://example.com) {
+	body {
+		background-color: green;
+	}
+}
+
+@-moz-document url(http://www.exmaple.org/), url-prefix(https://www.example.com/test), domain(example.com) {
+	body {
+		background-color: green;
+	}
+}
+
+@-moz-document url(http://www.exmaple.org/), url-prefix(https: //www.example.com/test), domain(example.com), media-document(video) {
+	body {
+		background-color: green;
 	}
 }
 
@@ -385,17 +420,397 @@ CssRoot {
                 },
             },
         },
+        CssAtRule {
+            at_token: AT@562..565 "@" [Newline("\n"), Newline("\n")] [],
+            rule: CssDocumentAtRule {
+                document_token: DOCUMENT_KW@565..579 "-moz-document" [] [Whitespace(" ")],
+                matchers: CssDocumentMatcherList [
+                    CssDocumentCustomMatcher {
+                        name: URL_PREFIX_KW@579..589 "url-prefix" [] [],
+                        l_paren_token: L_PAREN@589..590 "(" [] [],
+                        value: missing (optional),
+                        r_paren_token: R_PAREN@590..592 ")" [] [Whitespace(" ")],
+                    },
+                ],
+                block: CssRuleBlock {
+                    l_curly_token: L_CURLY@592..593 "{" [] [],
+                    rules: CssRuleList [],
+                    r_curly_token: R_CURLY@593..594 "}" [] [],
+                },
+            },
+        },
+        CssAtRule {
+            at_token: AT@594..597 "@" [Newline("\n"), Newline("\n")] [],
+            rule: CssDocumentAtRule {
+                document_token: DOCUMENT_KW@597..611 "-moz-document" [] [Whitespace(" ")],
+                matchers: CssDocumentMatcherList [
+                    CssDocumentCustomMatcher {
+                        name: URL_PREFIX_KW@611..621 "url-prefix" [] [],
+                        l_paren_token: L_PAREN@621..622 "(" [] [],
+                        value: CssString {
+                            value_token: CSS_STRING_LITERAL@622..648 "\"https://www.example.com/\"" [] [],
+                        },
+                        r_paren_token: R_PAREN@648..650 ")" [] [Whitespace(" ")],
+                    },
+                ],
+                block: CssRuleBlock {
+                    l_curly_token: L_CURLY@650..651 "{" [] [],
+                    rules: CssRuleList [],
+                    r_curly_token: R_CURLY@651..652 "}" [] [],
+                },
+            },
+        },
+        CssAtRule {
+            at_token: AT@652..655 "@" [Newline("\n"), Newline("\n")] [],
+            rule: CssDocumentAtRule {
+                document_token: DOCUMENT_KW@655..669 "-moz-document" [] [Whitespace(" ")],
+                matchers: CssDocumentMatcherList [
+                    CssDocumentCustomMatcher {
+                        name: URL_PREFIX_KW@669..679 "url-prefix" [] [],
+                        l_paren_token: L_PAREN@679..680 "(" [] [],
+                        value: missing (optional),
+                        r_paren_token: R_PAREN@680..682 ")" [] [Whitespace(" ")],
+                    },
+                ],
+                block: CssRuleBlock {
+                    l_curly_token: L_CURLY@682..683 "{" [] [],
+                    rules: CssRuleList [
+                        CssQualifiedRule {
+                            prelude: CssSelectorList [
+                                CssCompoundSelector {
+                                    nesting_selectors: CssNestedSelectorList [],
+                                    simple_selector: CssTypeSelector {
+                                        namespace: missing (optional),
+                                        ident: CssIdentifier {
+                                            value_token: IDENT@683..690 "body" [Newline("\n"), Whitespace("\t")] [Whitespace(" ")],
+                                        },
+                                    },
+                                    sub_selectors: CssSubSelectorList [],
+                                },
+                            ],
+                            block: CssDeclarationOrRuleBlock {
+                                l_curly_token: L_CURLY@690..691 "{" [] [],
+                                items: CssDeclarationOrRuleList [
+                                    CssDeclarationWithSemicolon {
+                                        declaration: CssDeclaration {
+                                            property: CssGenericProperty {
+                                                name: CssIdentifier {
+                                                    value_token: IDENT@691..710 "background-color" [Newline("\n"), Whitespace("\t\t")] [],
+                                                },
+                                                colon_token: COLON@710..712 ":" [] [Whitespace(" ")],
+                                                value: CssGenericComponentValueList [
+                                                    CssIdentifier {
+                                                        value_token: IDENT@712..717 "green" [] [],
+                                                    },
+                                                ],
+                                            },
+                                            important: missing (optional),
+                                        },
+                                        semicolon_token: SEMICOLON@717..718 ";" [] [],
+                                    },
+                                ],
+                                r_curly_token: R_CURLY@718..721 "}" [Newline("\n"), Whitespace("\t")] [],
+                            },
+                        },
+                    ],
+                    r_curly_token: R_CURLY@721..723 "}" [Newline("\n")] [],
+                },
+            },
+        },
+        CssAtRule {
+            at_token: AT@723..726 "@" [Newline("\n"), Newline("\n")] [],
+            rule: CssDocumentAtRule {
+                document_token: DOCUMENT_KW@726..740 "-moz-document" [] [Whitespace(" ")],
+                matchers: CssDocumentMatcherList [
+                    CssDocumentCustomMatcher {
+                        name: URL_PREFIX_KW@740..750 "url-prefix" [] [],
+                        l_paren_token: L_PAREN@750..751 "(" [] [],
+                        value: CssString {
+                            value_token: CSS_STRING_LITERAL@751..777 "\"https://www.example.com/\"" [] [],
+                        },
+                        r_paren_token: R_PAREN@777..779 ")" [] [Whitespace(" ")],
+                    },
+                ],
+                block: CssRuleBlock {
+                    l_curly_token: L_CURLY@779..780 "{" [] [],
+                    rules: CssRuleList [
+                        CssQualifiedRule {
+                            prelude: CssSelectorList [
+                                CssCompoundSelector {
+                                    nesting_selectors: CssNestedSelectorList [],
+                                    simple_selector: CssTypeSelector {
+                                        namespace: missing (optional),
+                                        ident: CssIdentifier {
+                                            value_token: IDENT@780..787 "body" [Newline("\n"), Whitespace("\t")] [Whitespace(" ")],
+                                        },
+                                    },
+                                    sub_selectors: CssSubSelectorList [],
+                                },
+                            ],
+                            block: CssDeclarationOrRuleBlock {
+                                l_curly_token: L_CURLY@787..788 "{" [] [],
+                                items: CssDeclarationOrRuleList [
+                                    CssDeclarationWithSemicolon {
+                                        declaration: CssDeclaration {
+                                            property: CssGenericProperty {
+                                                name: CssIdentifier {
+                                                    value_token: IDENT@788..807 "background-color" [Newline("\n"), Whitespace("\t\t")] [],
+                                                },
+                                                colon_token: COLON@807..809 ":" [] [Whitespace(" ")],
+                                                value: CssGenericComponentValueList [
+                                                    CssIdentifier {
+                                                        value_token: IDENT@809..814 "green" [] [],
+                                                    },
+                                                ],
+                                            },
+                                            important: missing (optional),
+                                        },
+                                        semicolon_token: SEMICOLON@814..815 ";" [] [],
+                                    },
+                                ],
+                                r_curly_token: R_CURLY@815..818 "}" [Newline("\n"), Whitespace("\t")] [],
+                            },
+                        },
+                    ],
+                    r_curly_token: R_CURLY@818..820 "}" [Newline("\n")] [],
+                },
+            },
+        },
+        CssAtRule {
+            at_token: AT@820..823 "@" [Newline("\n"), Newline("\n")] [],
+            rule: CssDocumentAtRule {
+                document_token: DOCUMENT_KW@823..837 "-moz-document" [] [Whitespace(" ")],
+                matchers: CssDocumentMatcherList [
+                    CssDocumentCustomMatcher {
+                        name: URL_PREFIX_KW@837..847 "url-prefix" [] [],
+                        l_paren_token: L_PAREN@847..848 "(" [] [],
+                        value: CssUrlValueRaw {
+                            value_token: CSS_URL_VALUE_RAW_LITERAL@848..867 "https://example.com" [] [],
+                        },
+                        r_paren_token: R_PAREN@867..869 ")" [] [Whitespace(" ")],
+                    },
+                ],
+                block: CssRuleBlock {
+                    l_curly_token: L_CURLY@869..870 "{" [] [],
+                    rules: CssRuleList [
+                        CssQualifiedRule {
+                            prelude: CssSelectorList [
+                                CssCompoundSelector {
+                                    nesting_selectors: CssNestedSelectorList [],
+                                    simple_selector: CssTypeSelector {
+                                        namespace: missing (optional),
+                                        ident: CssIdentifier {
+                                            value_token: IDENT@870..877 "body" [Newline("\n"), Whitespace("\t")] [Whitespace(" ")],
+                                        },
+                                    },
+                                    sub_selectors: CssSubSelectorList [],
+                                },
+                            ],
+                            block: CssDeclarationOrRuleBlock {
+                                l_curly_token: L_CURLY@877..878 "{" [] [],
+                                items: CssDeclarationOrRuleList [
+                                    CssDeclarationWithSemicolon {
+                                        declaration: CssDeclaration {
+                                            property: CssGenericProperty {
+                                                name: CssIdentifier {
+                                                    value_token: IDENT@878..897 "background-color" [Newline("\n"), Whitespace("\t\t")] [],
+                                                },
+                                                colon_token: COLON@897..899 ":" [] [Whitespace(" ")],
+                                                value: CssGenericComponentValueList [
+                                                    CssIdentifier {
+                                                        value_token: IDENT@899..904 "green" [] [],
+                                                    },
+                                                ],
+                                            },
+                                            important: missing (optional),
+                                        },
+                                        semicolon_token: SEMICOLON@904..905 ";" [] [],
+                                    },
+                                ],
+                                r_curly_token: R_CURLY@905..908 "}" [Newline("\n"), Whitespace("\t")] [],
+                            },
+                        },
+                    ],
+                    r_curly_token: R_CURLY@908..910 "}" [Newline("\n")] [],
+                },
+            },
+        },
+        CssAtRule {
+            at_token: AT@910..913 "@" [Newline("\n"), Newline("\n")] [],
+            rule: CssDocumentAtRule {
+                document_token: DOCUMENT_KW@913..927 "-moz-document" [] [Whitespace(" ")],
+                matchers: CssDocumentMatcherList [
+                    CssUrlFunction {
+                        name: URL_KW@927..930 "url" [] [],
+                        l_paren_token: L_PAREN@930..931 "(" [] [],
+                        value: CssUrlValueRaw {
+                            value_token: CSS_URL_VALUE_RAW_LITERAL@931..954 "http://www.exmaple.org/" [] [],
+                        },
+                        modifiers: CssUrlModifierList [],
+                        r_paren_token: R_PAREN@954..955 ")" [] [],
+                    },
+                    COMMA@955..957 "," [] [Whitespace(" ")],
+                    CssDocumentCustomMatcher {
+                        name: URL_PREFIX_KW@957..967 "url-prefix" [] [],
+                        l_paren_token: L_PAREN@967..968 "(" [] [],
+                        value: CssUrlValueRaw {
+                            value_token: CSS_URL_VALUE_RAW_LITERAL@968..996 "https://www.example.com/test" [] [],
+                        },
+                        r_paren_token: R_PAREN@996..997 ")" [] [],
+                    },
+                    COMMA@997..999 "," [] [Whitespace(" ")],
+                    CssDocumentCustomMatcher {
+                        name: DOMAIN_KW@999..1005 "domain" [] [],
+                        l_paren_token: L_PAREN@1005..1006 "(" [] [],
+                        value: CssUrlValueRaw {
+                            value_token: CSS_URL_VALUE_RAW_LITERAL@1006..1017 "example.com" [] [],
+                        },
+                        r_paren_token: R_PAREN@1017..1019 ")" [] [Whitespace(" ")],
+                    },
+                ],
+                block: CssRuleBlock {
+                    l_curly_token: L_CURLY@1019..1020 "{" [] [],
+                    rules: CssRuleList [
+                        CssQualifiedRule {
+                            prelude: CssSelectorList [
+                                CssCompoundSelector {
+                                    nesting_selectors: CssNestedSelectorList [],
+                                    simple_selector: CssTypeSelector {
+                                        namespace: missing (optional),
+                                        ident: CssIdentifier {
+                                            value_token: IDENT@1020..1027 "body" [Newline("\n"), Whitespace("\t")] [Whitespace(" ")],
+                                        },
+                                    },
+                                    sub_selectors: CssSubSelectorList [],
+                                },
+                            ],
+                            block: CssDeclarationOrRuleBlock {
+                                l_curly_token: L_CURLY@1027..1028 "{" [] [],
+                                items: CssDeclarationOrRuleList [
+                                    CssDeclarationWithSemicolon {
+                                        declaration: CssDeclaration {
+                                            property: CssGenericProperty {
+                                                name: CssIdentifier {
+                                                    value_token: IDENT@1028..1047 "background-color" [Newline("\n"), Whitespace("\t\t")] [],
+                                                },
+                                                colon_token: COLON@1047..1049 ":" [] [Whitespace(" ")],
+                                                value: CssGenericComponentValueList [
+                                                    CssIdentifier {
+                                                        value_token: IDENT@1049..1054 "green" [] [],
+                                                    },
+                                                ],
+                                            },
+                                            important: missing (optional),
+                                        },
+                                        semicolon_token: SEMICOLON@1054..1055 ";" [] [],
+                                    },
+                                ],
+                                r_curly_token: R_CURLY@1055..1058 "}" [Newline("\n"), Whitespace("\t")] [],
+                            },
+                        },
+                    ],
+                    r_curly_token: R_CURLY@1058..1060 "}" [Newline("\n")] [],
+                },
+            },
+        },
+        CssAtRule {
+            at_token: AT@1060..1063 "@" [Newline("\n"), Newline("\n")] [],
+            rule: CssDocumentAtRule {
+                document_token: DOCUMENT_KW@1063..1077 "-moz-document" [] [Whitespace(" ")],
+                matchers: CssDocumentMatcherList [
+                    CssUrlFunction {
+                        name: URL_KW@1077..1080 "url" [] [],
+                        l_paren_token: L_PAREN@1080..1081 "(" [] [],
+                        value: CssUrlValueRaw {
+                            value_token: CSS_URL_VALUE_RAW_LITERAL@1081..1104 "http://www.exmaple.org/" [] [],
+                        },
+                        modifiers: CssUrlModifierList [],
+                        r_paren_token: R_PAREN@1104..1105 ")" [] [],
+                    },
+                    COMMA@1105..1107 "," [] [Whitespace(" ")],
+                    CssDocumentCustomMatcher {
+                        name: URL_PREFIX_KW@1107..1117 "url-prefix" [] [],
+                        l_paren_token: L_PAREN@1117..1118 "(" [] [],
+                        value: CssUrlValueRaw {
+                            value_token: CSS_URL_VALUE_RAW_LITERAL@1118..1147 "https: //www.example.com/test" [] [],
+                        },
+                        r_paren_token: R_PAREN@1147..1148 ")" [] [],
+                    },
+                    COMMA@1148..1150 "," [] [Whitespace(" ")],
+                    CssDocumentCustomMatcher {
+                        name: DOMAIN_KW@1150..1156 "domain" [] [],
+                        l_paren_token: L_PAREN@1156..1157 "(" [] [],
+                        value: CssUrlValueRaw {
+                            value_token: CSS_URL_VALUE_RAW_LITERAL@1157..1168 "example.com" [] [],
+                        },
+                        r_paren_token: R_PAREN@1168..1169 ")" [] [],
+                    },
+                    COMMA@1169..1171 "," [] [Whitespace(" ")],
+                    CssDocumentCustomMatcher {
+                        name: MEDIA_DOCUMENT_KW@1171..1185 "media-document" [] [],
+                        l_paren_token: L_PAREN@1185..1186 "(" [] [],
+                        value: CssUrlValueRaw {
+                            value_token: CSS_URL_VALUE_RAW_LITERAL@1186..1191 "video" [] [],
+                        },
+                        r_paren_token: R_PAREN@1191..1193 ")" [] [Whitespace(" ")],
+                    },
+                ],
+                block: CssRuleBlock {
+                    l_curly_token: L_CURLY@1193..1194 "{" [] [],
+                    rules: CssRuleList [
+                        CssQualifiedRule {
+                            prelude: CssSelectorList [
+                                CssCompoundSelector {
+                                    nesting_selectors: CssNestedSelectorList [],
+                                    simple_selector: CssTypeSelector {
+                                        namespace: missing (optional),
+                                        ident: CssIdentifier {
+                                            value_token: IDENT@1194..1201 "body" [Newline("\n"), Whitespace("\t")] [Whitespace(" ")],
+                                        },
+                                    },
+                                    sub_selectors: CssSubSelectorList [],
+                                },
+                            ],
+                            block: CssDeclarationOrRuleBlock {
+                                l_curly_token: L_CURLY@1201..1202 "{" [] [],
+                                items: CssDeclarationOrRuleList [
+                                    CssDeclarationWithSemicolon {
+                                        declaration: CssDeclaration {
+                                            property: CssGenericProperty {
+                                                name: CssIdentifier {
+                                                    value_token: IDENT@1202..1221 "background-color" [Newline("\n"), Whitespace("\t\t")] [],
+                                                },
+                                                colon_token: COLON@1221..1223 ":" [] [Whitespace(" ")],
+                                                value: CssGenericComponentValueList [
+                                                    CssIdentifier {
+                                                        value_token: IDENT@1223..1228 "green" [] [],
+                                                    },
+                                                ],
+                                            },
+                                            important: missing (optional),
+                                        },
+                                        semicolon_token: SEMICOLON@1228..1229 ";" [] [],
+                                    },
+                                ],
+                                r_curly_token: R_CURLY@1229..1232 "}" [Newline("\n"), Whitespace("\t")] [],
+                            },
+                        },
+                    ],
+                    r_curly_token: R_CURLY@1232..1234 "}" [Newline("\n")] [],
+                },
+            },
+        },
     ],
-    eof_token: EOF@562..563 "" [Newline("\n")] [],
+    eof_token: EOF@1234..1235 "" [Newline("\n")] [],
 }
 ```
 
 ## CST
 
 ```
-0: CSS_ROOT@0..563
+0: CSS_ROOT@0..1235
   0: (empty)
-  1: CSS_RULE_LIST@0..562
+  1: CSS_RULE_LIST@0..1234
     0: CSS_AT_RULE@0..70
       0: AT@0..1 "@" [] []
       1: CSS_DOCUMENT_AT_RULE@1..70
@@ -635,6 +1050,266 @@ CssRoot {
                         2: R_CURLY@553..557 "}" [Newline("\n"), Whitespace("\t\t")] []
                   2: R_CURLY@557..560 "}" [Newline("\n"), Whitespace("\t")] []
           2: R_CURLY@560..562 "}" [Newline("\n")] []
-  2: EOF@562..563 "" [Newline("\n")] []
+    6: CSS_AT_RULE@562..594
+      0: AT@562..565 "@" [Newline("\n"), Newline("\n")] []
+      1: CSS_DOCUMENT_AT_RULE@565..594
+        0: DOCUMENT_KW@565..579 "-moz-document" [] [Whitespace(" ")]
+        1: CSS_DOCUMENT_MATCHER_LIST@579..592
+          0: CSS_DOCUMENT_CUSTOM_MATCHER@579..592
+            0: URL_PREFIX_KW@579..589 "url-prefix" [] []
+            1: L_PAREN@589..590 "(" [] []
+            2: (empty)
+            3: R_PAREN@590..592 ")" [] [Whitespace(" ")]
+        2: CSS_RULE_BLOCK@592..594
+          0: L_CURLY@592..593 "{" [] []
+          1: CSS_RULE_LIST@593..593
+          2: R_CURLY@593..594 "}" [] []
+    7: CSS_AT_RULE@594..652
+      0: AT@594..597 "@" [Newline("\n"), Newline("\n")] []
+      1: CSS_DOCUMENT_AT_RULE@597..652
+        0: DOCUMENT_KW@597..611 "-moz-document" [] [Whitespace(" ")]
+        1: CSS_DOCUMENT_MATCHER_LIST@611..650
+          0: CSS_DOCUMENT_CUSTOM_MATCHER@611..650
+            0: URL_PREFIX_KW@611..621 "url-prefix" [] []
+            1: L_PAREN@621..622 "(" [] []
+            2: CSS_STRING@622..648
+              0: CSS_STRING_LITERAL@622..648 "\"https://www.example.com/\"" [] []
+            3: R_PAREN@648..650 ")" [] [Whitespace(" ")]
+        2: CSS_RULE_BLOCK@650..652
+          0: L_CURLY@650..651 "{" [] []
+          1: CSS_RULE_LIST@651..651
+          2: R_CURLY@651..652 "}" [] []
+    8: CSS_AT_RULE@652..723
+      0: AT@652..655 "@" [Newline("\n"), Newline("\n")] []
+      1: CSS_DOCUMENT_AT_RULE@655..723
+        0: DOCUMENT_KW@655..669 "-moz-document" [] [Whitespace(" ")]
+        1: CSS_DOCUMENT_MATCHER_LIST@669..682
+          0: CSS_DOCUMENT_CUSTOM_MATCHER@669..682
+            0: URL_PREFIX_KW@669..679 "url-prefix" [] []
+            1: L_PAREN@679..680 "(" [] []
+            2: (empty)
+            3: R_PAREN@680..682 ")" [] [Whitespace(" ")]
+        2: CSS_RULE_BLOCK@682..723
+          0: L_CURLY@682..683 "{" [] []
+          1: CSS_RULE_LIST@683..721
+            0: CSS_QUALIFIED_RULE@683..721
+              0: CSS_SELECTOR_LIST@683..690
+                0: CSS_COMPOUND_SELECTOR@683..690
+                  0: CSS_NESTED_SELECTOR_LIST@683..683
+                  1: CSS_TYPE_SELECTOR@683..690
+                    0: (empty)
+                    1: CSS_IDENTIFIER@683..690
+                      0: IDENT@683..690 "body" [Newline("\n"), Whitespace("\t")] [Whitespace(" ")]
+                  2: CSS_SUB_SELECTOR_LIST@690..690
+              1: CSS_DECLARATION_OR_RULE_BLOCK@690..721
+                0: L_CURLY@690..691 "{" [] []
+                1: CSS_DECLARATION_OR_RULE_LIST@691..718
+                  0: CSS_DECLARATION_WITH_SEMICOLON@691..718
+                    0: CSS_DECLARATION@691..717
+                      0: CSS_GENERIC_PROPERTY@691..717
+                        0: CSS_IDENTIFIER@691..710
+                          0: IDENT@691..710 "background-color" [Newline("\n"), Whitespace("\t\t")] []
+                        1: COLON@710..712 ":" [] [Whitespace(" ")]
+                        2: CSS_GENERIC_COMPONENT_VALUE_LIST@712..717
+                          0: CSS_IDENTIFIER@712..717
+                            0: IDENT@712..717 "green" [] []
+                      1: (empty)
+                    1: SEMICOLON@717..718 ";" [] []
+                2: R_CURLY@718..721 "}" [Newline("\n"), Whitespace("\t")] []
+          2: R_CURLY@721..723 "}" [Newline("\n")] []
+    9: CSS_AT_RULE@723..820
+      0: AT@723..726 "@" [Newline("\n"), Newline("\n")] []
+      1: CSS_DOCUMENT_AT_RULE@726..820
+        0: DOCUMENT_KW@726..740 "-moz-document" [] [Whitespace(" ")]
+        1: CSS_DOCUMENT_MATCHER_LIST@740..779
+          0: CSS_DOCUMENT_CUSTOM_MATCHER@740..779
+            0: URL_PREFIX_KW@740..750 "url-prefix" [] []
+            1: L_PAREN@750..751 "(" [] []
+            2: CSS_STRING@751..777
+              0: CSS_STRING_LITERAL@751..777 "\"https://www.example.com/\"" [] []
+            3: R_PAREN@777..779 ")" [] [Whitespace(" ")]
+        2: CSS_RULE_BLOCK@779..820
+          0: L_CURLY@779..780 "{" [] []
+          1: CSS_RULE_LIST@780..818
+            0: CSS_QUALIFIED_RULE@780..818
+              0: CSS_SELECTOR_LIST@780..787
+                0: CSS_COMPOUND_SELECTOR@780..787
+                  0: CSS_NESTED_SELECTOR_LIST@780..780
+                  1: CSS_TYPE_SELECTOR@780..787
+                    0: (empty)
+                    1: CSS_IDENTIFIER@780..787
+                      0: IDENT@780..787 "body" [Newline("\n"), Whitespace("\t")] [Whitespace(" ")]
+                  2: CSS_SUB_SELECTOR_LIST@787..787
+              1: CSS_DECLARATION_OR_RULE_BLOCK@787..818
+                0: L_CURLY@787..788 "{" [] []
+                1: CSS_DECLARATION_OR_RULE_LIST@788..815
+                  0: CSS_DECLARATION_WITH_SEMICOLON@788..815
+                    0: CSS_DECLARATION@788..814
+                      0: CSS_GENERIC_PROPERTY@788..814
+                        0: CSS_IDENTIFIER@788..807
+                          0: IDENT@788..807 "background-color" [Newline("\n"), Whitespace("\t\t")] []
+                        1: COLON@807..809 ":" [] [Whitespace(" ")]
+                        2: CSS_GENERIC_COMPONENT_VALUE_LIST@809..814
+                          0: CSS_IDENTIFIER@809..814
+                            0: IDENT@809..814 "green" [] []
+                      1: (empty)
+                    1: SEMICOLON@814..815 ";" [] []
+                2: R_CURLY@815..818 "}" [Newline("\n"), Whitespace("\t")] []
+          2: R_CURLY@818..820 "}" [Newline("\n")] []
+    10: CSS_AT_RULE@820..910
+      0: AT@820..823 "@" [Newline("\n"), Newline("\n")] []
+      1: CSS_DOCUMENT_AT_RULE@823..910
+        0: DOCUMENT_KW@823..837 "-moz-document" [] [Whitespace(" ")]
+        1: CSS_DOCUMENT_MATCHER_LIST@837..869
+          0: CSS_DOCUMENT_CUSTOM_MATCHER@837..869
+            0: URL_PREFIX_KW@837..847 "url-prefix" [] []
+            1: L_PAREN@847..848 "(" [] []
+            2: CSS_URL_VALUE_RAW@848..867
+              0: CSS_URL_VALUE_RAW_LITERAL@848..867 "https://example.com" [] []
+            3: R_PAREN@867..869 ")" [] [Whitespace(" ")]
+        2: CSS_RULE_BLOCK@869..910
+          0: L_CURLY@869..870 "{" [] []
+          1: CSS_RULE_LIST@870..908
+            0: CSS_QUALIFIED_RULE@870..908
+              0: CSS_SELECTOR_LIST@870..877
+                0: CSS_COMPOUND_SELECTOR@870..877
+                  0: CSS_NESTED_SELECTOR_LIST@870..870
+                  1: CSS_TYPE_SELECTOR@870..877
+                    0: (empty)
+                    1: CSS_IDENTIFIER@870..877
+                      0: IDENT@870..877 "body" [Newline("\n"), Whitespace("\t")] [Whitespace(" ")]
+                  2: CSS_SUB_SELECTOR_LIST@877..877
+              1: CSS_DECLARATION_OR_RULE_BLOCK@877..908
+                0: L_CURLY@877..878 "{" [] []
+                1: CSS_DECLARATION_OR_RULE_LIST@878..905
+                  0: CSS_DECLARATION_WITH_SEMICOLON@878..905
+                    0: CSS_DECLARATION@878..904
+                      0: CSS_GENERIC_PROPERTY@878..904
+                        0: CSS_IDENTIFIER@878..897
+                          0: IDENT@878..897 "background-color" [Newline("\n"), Whitespace("\t\t")] []
+                        1: COLON@897..899 ":" [] [Whitespace(" ")]
+                        2: CSS_GENERIC_COMPONENT_VALUE_LIST@899..904
+                          0: CSS_IDENTIFIER@899..904
+                            0: IDENT@899..904 "green" [] []
+                      1: (empty)
+                    1: SEMICOLON@904..905 ";" [] []
+                2: R_CURLY@905..908 "}" [Newline("\n"), Whitespace("\t")] []
+          2: R_CURLY@908..910 "}" [Newline("\n")] []
+    11: CSS_AT_RULE@910..1060
+      0: AT@910..913 "@" [Newline("\n"), Newline("\n")] []
+      1: CSS_DOCUMENT_AT_RULE@913..1060
+        0: DOCUMENT_KW@913..927 "-moz-document" [] [Whitespace(" ")]
+        1: CSS_DOCUMENT_MATCHER_LIST@927..1019
+          0: CSS_URL_FUNCTION@927..955
+            0: URL_KW@927..930 "url" [] []
+            1: L_PAREN@930..931 "(" [] []
+            2: CSS_URL_VALUE_RAW@931..954
+              0: CSS_URL_VALUE_RAW_LITERAL@931..954 "http://www.exmaple.org/" [] []
+            3: CSS_URL_MODIFIER_LIST@954..954
+            4: R_PAREN@954..955 ")" [] []
+          1: COMMA@955..957 "," [] [Whitespace(" ")]
+          2: CSS_DOCUMENT_CUSTOM_MATCHER@957..997
+            0: URL_PREFIX_KW@957..967 "url-prefix" [] []
+            1: L_PAREN@967..968 "(" [] []
+            2: CSS_URL_VALUE_RAW@968..996
+              0: CSS_URL_VALUE_RAW_LITERAL@968..996 "https://www.example.com/test" [] []
+            3: R_PAREN@996..997 ")" [] []
+          3: COMMA@997..999 "," [] [Whitespace(" ")]
+          4: CSS_DOCUMENT_CUSTOM_MATCHER@999..1019
+            0: DOMAIN_KW@999..1005 "domain" [] []
+            1: L_PAREN@1005..1006 "(" [] []
+            2: CSS_URL_VALUE_RAW@1006..1017
+              0: CSS_URL_VALUE_RAW_LITERAL@1006..1017 "example.com" [] []
+            3: R_PAREN@1017..1019 ")" [] [Whitespace(" ")]
+        2: CSS_RULE_BLOCK@1019..1060
+          0: L_CURLY@1019..1020 "{" [] []
+          1: CSS_RULE_LIST@1020..1058
+            0: CSS_QUALIFIED_RULE@1020..1058
+              0: CSS_SELECTOR_LIST@1020..1027
+                0: CSS_COMPOUND_SELECTOR@1020..1027
+                  0: CSS_NESTED_SELECTOR_LIST@1020..1020
+                  1: CSS_TYPE_SELECTOR@1020..1027
+                    0: (empty)
+                    1: CSS_IDENTIFIER@1020..1027
+                      0: IDENT@1020..1027 "body" [Newline("\n"), Whitespace("\t")] [Whitespace(" ")]
+                  2: CSS_SUB_SELECTOR_LIST@1027..1027
+              1: CSS_DECLARATION_OR_RULE_BLOCK@1027..1058
+                0: L_CURLY@1027..1028 "{" [] []
+                1: CSS_DECLARATION_OR_RULE_LIST@1028..1055
+                  0: CSS_DECLARATION_WITH_SEMICOLON@1028..1055
+                    0: CSS_DECLARATION@1028..1054
+                      0: CSS_GENERIC_PROPERTY@1028..1054
+                        0: CSS_IDENTIFIER@1028..1047
+                          0: IDENT@1028..1047 "background-color" [Newline("\n"), Whitespace("\t\t")] []
+                        1: COLON@1047..1049 ":" [] [Whitespace(" ")]
+                        2: CSS_GENERIC_COMPONENT_VALUE_LIST@1049..1054
+                          0: CSS_IDENTIFIER@1049..1054
+                            0: IDENT@1049..1054 "green" [] []
+                      1: (empty)
+                    1: SEMICOLON@1054..1055 ";" [] []
+                2: R_CURLY@1055..1058 "}" [Newline("\n"), Whitespace("\t")] []
+          2: R_CURLY@1058..1060 "}" [Newline("\n")] []
+    12: CSS_AT_RULE@1060..1234
+      0: AT@1060..1063 "@" [Newline("\n"), Newline("\n")] []
+      1: CSS_DOCUMENT_AT_RULE@1063..1234
+        0: DOCUMENT_KW@1063..1077 "-moz-document" [] [Whitespace(" ")]
+        1: CSS_DOCUMENT_MATCHER_LIST@1077..1193
+          0: CSS_URL_FUNCTION@1077..1105
+            0: URL_KW@1077..1080 "url" [] []
+            1: L_PAREN@1080..1081 "(" [] []
+            2: CSS_URL_VALUE_RAW@1081..1104
+              0: CSS_URL_VALUE_RAW_LITERAL@1081..1104 "http://www.exmaple.org/" [] []
+            3: CSS_URL_MODIFIER_LIST@1104..1104
+            4: R_PAREN@1104..1105 ")" [] []
+          1: COMMA@1105..1107 "," [] [Whitespace(" ")]
+          2: CSS_DOCUMENT_CUSTOM_MATCHER@1107..1148
+            0: URL_PREFIX_KW@1107..1117 "url-prefix" [] []
+            1: L_PAREN@1117..1118 "(" [] []
+            2: CSS_URL_VALUE_RAW@1118..1147
+              0: CSS_URL_VALUE_RAW_LITERAL@1118..1147 "https: //www.example.com/test" [] []
+            3: R_PAREN@1147..1148 ")" [] []
+          3: COMMA@1148..1150 "," [] [Whitespace(" ")]
+          4: CSS_DOCUMENT_CUSTOM_MATCHER@1150..1169
+            0: DOMAIN_KW@1150..1156 "domain" [] []
+            1: L_PAREN@1156..1157 "(" [] []
+            2: CSS_URL_VALUE_RAW@1157..1168
+              0: CSS_URL_VALUE_RAW_LITERAL@1157..1168 "example.com" [] []
+            3: R_PAREN@1168..1169 ")" [] []
+          5: COMMA@1169..1171 "," [] [Whitespace(" ")]
+          6: CSS_DOCUMENT_CUSTOM_MATCHER@1171..1193
+            0: MEDIA_DOCUMENT_KW@1171..1185 "media-document" [] []
+            1: L_PAREN@1185..1186 "(" [] []
+            2: CSS_URL_VALUE_RAW@1186..1191
+              0: CSS_URL_VALUE_RAW_LITERAL@1186..1191 "video" [] []
+            3: R_PAREN@1191..1193 ")" [] [Whitespace(" ")]
+        2: CSS_RULE_BLOCK@1193..1234
+          0: L_CURLY@1193..1194 "{" [] []
+          1: CSS_RULE_LIST@1194..1232
+            0: CSS_QUALIFIED_RULE@1194..1232
+              0: CSS_SELECTOR_LIST@1194..1201
+                0: CSS_COMPOUND_SELECTOR@1194..1201
+                  0: CSS_NESTED_SELECTOR_LIST@1194..1194
+                  1: CSS_TYPE_SELECTOR@1194..1201
+                    0: (empty)
+                    1: CSS_IDENTIFIER@1194..1201
+                      0: IDENT@1194..1201 "body" [Newline("\n"), Whitespace("\t")] [Whitespace(" ")]
+                  2: CSS_SUB_SELECTOR_LIST@1201..1201
+              1: CSS_DECLARATION_OR_RULE_BLOCK@1201..1232
+                0: L_CURLY@1201..1202 "{" [] []
+                1: CSS_DECLARATION_OR_RULE_LIST@1202..1229
+                  0: CSS_DECLARATION_WITH_SEMICOLON@1202..1229
+                    0: CSS_DECLARATION@1202..1228
+                      0: CSS_GENERIC_PROPERTY@1202..1228
+                        0: CSS_IDENTIFIER@1202..1221
+                          0: IDENT@1202..1221 "background-color" [Newline("\n"), Whitespace("\t\t")] []
+                        1: COLON@1221..1223 ":" [] [Whitespace(" ")]
+                        2: CSS_GENERIC_COMPONENT_VALUE_LIST@1223..1228
+                          0: CSS_IDENTIFIER@1223..1228
+                            0: IDENT@1223..1228 "green" [] []
+                      1: (empty)
+                    1: SEMICOLON@1228..1229 ";" [] []
+                2: R_CURLY@1229..1232 "}" [Newline("\n"), Whitespace("\t")] []
+          2: R_CURLY@1232..1234 "}" [Newline("\n")] []
+  2: EOF@1234..1235 "" [Newline("\n")] []
 
 ```

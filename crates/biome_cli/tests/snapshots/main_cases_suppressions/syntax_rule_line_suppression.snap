@@ -1,0 +1,48 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `file.ts`
+
+```ts
+
+// biome-ignore syntax/correctness/noTypeOnlyImportAttributes: bug
+import type { ChalkInstance } from "chalk" with { "resolution-mode": "import" };
+
+function sommething(chalk: ChalkInstance) {
+  console.log(chalk.yellow('we do something here'));
+}
+```
+
+# Emitted Messages
+
+```block
+file.ts:5:10 lint/correctness/noUnusedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This function sommething is unused.
+  
+    3 │ import type { ChalkInstance } from "chalk" with { "resolution-mode": "import" };
+    4 │ 
+  > 5 │ function sommething(chalk: ChalkInstance) {
+      │          ^^^^^^^^^^
+    6 │   console.log(chalk.yellow('we do something here'));
+    7 │ }
+  
+  i Unused variables are often the result of an incomplete refactoring, typos, or other sources of bugs.
+  
+  i Unsafe fix: If this is intentional, prepend sommething with an underscore.
+  
+    3 3 │   import type { ChalkInstance } from "chalk" with { "resolution-mode": "import" };
+    4 4 │   
+    5   │ - function·sommething(chalk:·ChalkInstance)·{
+      5 │ + function·_sommething(chalk:·ChalkInstance)·{
+    6 6 │     console.log(chalk.yellow('we do something here'));
+    7 7 │   }
+  
+
+```
+
+```block
+Checked 1 file in <TIME>. No fixes applied.
+Found 1 warning.
+```

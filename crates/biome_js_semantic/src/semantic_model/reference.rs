@@ -11,20 +11,20 @@ pub struct Reference {
 }
 
 impl Reference {
-    pub(crate) fn find_next(&self) -> Option<Reference> {
+    pub(crate) fn find_next(&self) -> Option<Self> {
         let id = self.data.next_reference(self.id)?;
-        Some(Reference {
+        Some(Self {
             data: self.data.clone(),
             id,
         })
     }
 
-    pub(crate) fn find_next_read(&self) -> Option<Reference> {
+    pub(crate) fn find_next_read(&self) -> Option<Self> {
         let references = &self.data.binding(self.id.binding_id()).references;
         let mut index = self.id.index() + 1;
         while index < references.len() {
             if references[index].is_read() {
-                return Some(Reference {
+                return Some(Self {
                     data: self.data.clone(),
                     id: ReferenceId::new(self.id.binding_id(), index),
                 });
@@ -35,12 +35,12 @@ impl Reference {
         None
     }
 
-    pub(crate) fn find_next_write(&self) -> Option<Reference> {
+    pub(crate) fn find_next_write(&self) -> Option<Self> {
         let references = &self.data.binding(self.id.binding_id()).references;
         let mut index = self.id.index() + 1;
         while index < references.len() {
             if references[index].is_write() {
-                return Some(Reference {
+                return Some(Self {
                     data: self.data.clone(),
                     id: ReferenceId::new(self.id.binding_id(), index),
                 });

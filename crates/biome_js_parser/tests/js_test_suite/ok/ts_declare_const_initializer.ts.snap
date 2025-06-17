@@ -1,0 +1,88 @@
+---
+source: crates/biome_js_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```ts
+declare module test { const X; }
+
+```
+
+
+## AST
+
+```
+JsModule {
+    bom_token: missing (optional),
+    interpreter_token: missing (optional),
+    directives: JsDirectiveList [],
+    items: JsModuleItemList [
+        TsDeclareStatement {
+            declare_token: DECLARE_KW@0..8 "declare" [] [Whitespace(" ")],
+            declaration: TsModuleDeclaration {
+                module_or_namespace: MODULE_KW@8..15 "module" [] [Whitespace(" ")],
+                name: TsIdentifierBinding {
+                    name_token: IDENT@15..20 "test" [] [Whitespace(" ")],
+                },
+                body: TsModuleBlock {
+                    l_curly_token: L_CURLY@20..22 "{" [] [Whitespace(" ")],
+                    items: JsModuleItemList [
+                        JsVariableStatement {
+                            declaration: JsVariableDeclaration {
+                                await_token: missing (optional),
+                                kind: CONST_KW@22..28 "const" [] [Whitespace(" ")],
+                                declarators: JsVariableDeclaratorList [
+                                    JsVariableDeclarator {
+                                        id: JsIdentifierBinding {
+                                            name_token: IDENT@28..29 "X" [] [],
+                                        },
+                                        variable_annotation: missing (optional),
+                                        initializer: missing (optional),
+                                    },
+                                ],
+                            },
+                            semicolon_token: SEMICOLON@29..31 ";" [] [Whitespace(" ")],
+                        },
+                    ],
+                    r_curly_token: R_CURLY@31..32 "}" [] [],
+                },
+            },
+        },
+    ],
+    eof_token: EOF@32..33 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: JS_MODULE@0..33
+  0: (empty)
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..32
+    0: TS_DECLARE_STATEMENT@0..32
+      0: DECLARE_KW@0..8 "declare" [] [Whitespace(" ")]
+      1: TS_MODULE_DECLARATION@8..32
+        0: MODULE_KW@8..15 "module" [] [Whitespace(" ")]
+        1: TS_IDENTIFIER_BINDING@15..20
+          0: IDENT@15..20 "test" [] [Whitespace(" ")]
+        2: TS_MODULE_BLOCK@20..32
+          0: L_CURLY@20..22 "{" [] [Whitespace(" ")]
+          1: JS_MODULE_ITEM_LIST@22..31
+            0: JS_VARIABLE_STATEMENT@22..31
+              0: JS_VARIABLE_DECLARATION@22..29
+                0: (empty)
+                1: CONST_KW@22..28 "const" [] [Whitespace(" ")]
+                2: JS_VARIABLE_DECLARATOR_LIST@28..29
+                  0: JS_VARIABLE_DECLARATOR@28..29
+                    0: JS_IDENTIFIER_BINDING@28..29
+                      0: IDENT@28..29 "X" [] []
+                    1: (empty)
+                    2: (empty)
+              1: SEMICOLON@29..31 ";" [] [Whitespace(" ")]
+          2: R_CURLY@31..32 "}" [] []
+  4: EOF@32..33 "" [Newline("\n")] []
+
+```

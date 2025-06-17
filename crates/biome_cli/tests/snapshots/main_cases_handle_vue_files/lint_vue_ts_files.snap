@@ -1,6 +1,6 @@
 ---
 source: crates/biome_cli/tests/snap_test.rs
-expression: content
+expression: redactor(content)
 ---
 ## `file.vue`
 
@@ -28,9 +28,34 @@ lint ━━━━━━━━━━━━━━━━━━━━━━━━━
 # Emitted Messages
 
 ```block
+file.vue:5:5 lint/correctness/noUnusedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This variable foo is unused.
+  
+    3 │ delete a.c;
+    4 │ 
+  > 5 │ var foo: string = "";
+      │     ^^^
+    6 │ </script>
+    7 │ <template></template>
+  
+  i Unused variables are often the result of an incomplete refactoring, typos, or other sources of bugs.
+  
+  i Unsafe fix: If this is intentional, prepend foo with an underscore.
+  
+    2 2 │   delete a.c;
+    3 3 │   
+    4   │ - var·foo:·string·=·"";
+      4 │ + var·_foo:·string·=·"";
+    5 5 │   
+  
+
+```
+
+```block
 file.vue:2:3 lint/suspicious/noDoubleEquals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Use === instead of ==
+  × Using == may be unsafe if you are relying on type coercion.
   
     1 │ <script setup lang="ts">
   > 2 │ a == b;
@@ -38,16 +63,9 @@ file.vue:2:3 lint/suspicious/noDoubleEquals  FIXABLE  ━━━━━━━━�
     3 │ delete a.c;
     4 │ 
   
-  i == is only allowed when comparing against null
+  i == is only allowed when comparing against null.
   
-  > 1 │ <script setup lang="ts">
-      │   ^^
-    2 │ a == b;
-    3 │ delete a.c;
-  
-  i Using == may be unsafe if you are relying on type coercion
-  
-  i Unsafe fix: Use ===
+  i Unsafe fix: Use === instead.
   
     1 │ a·===·b;
       │     +   
@@ -55,79 +73,7 @@ file.vue:2:3 lint/suspicious/noDoubleEquals  FIXABLE  ━━━━━━━━�
 ```
 
 ```block
-file.vue:3:1 lint/performance/noDelete  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Avoid the delete operator which can impact performance.
-  
-    1 │ <script setup lang="ts">
-    2 │ a == b;
-  > 3 │ delete a.c;
-      │ ^^^^^^^^^^
-    4 │ 
-    5 │ var foo: string = "";
-  
-  i Unsafe fix: Use an undefined assignment instead.
-  
-    1 1 │   a == b;
-    2   │ - delete·a.c;
-      2 │ + a.c·=·undefined;
-    3 3 │   
-    4 4 │   var foo: string = "";
-  
-
-```
-
-```block
-file.vue:5:8 lint/style/noInferrableTypes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × This type annotation is trivially inferred from its initialization.
-  
-    3 │ delete a.c;
-    4 │ 
-  > 5 │ var foo: string = "";
-      │        ^^^^^^^^
-    6 │ </script>
-    7 │ <template></template>
-  
-  i Safe fix: Remove the type annotation.
-  
-    2 2 │   delete a.c;
-    3 3 │   
-    4   │ - var·foo:·string·=·"";
-      4 │ + var·foo·=·"";
-    5 5 │   
-  
-
-```
-
-```block
-file.vue:5:1 lint/style/noVar  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Use let or const instead of var.
-  
-    3 │ delete a.c;
-    4 │ 
-  > 5 │ var foo: string = "";
-      │ ^^^^^^^^^^^^^^^^^^^^
-    6 │ </script>
-    7 │ <template></template>
-  
-  i A variable declared with var is accessible in the whole module. Thus, the variable can be accessed before its initialization and outside the block where it is declared.
-  
-  i See MDN web docs for more details.
-  
-  i Unsafe fix: Use 'const' instead.
-  
-    2 2 │   delete a.c;
-    3 3 │   
-    4   │ - var·foo:·string·=·"";
-      4 │ + const·foo:·string·=·"";
-    5 5 │   
-  
-
-```
-
-```block
 Checked 1 file in <TIME>. No fixes applied.
-Found 4 errors.
+Found 1 error.
+Found 1 warning.
 ```

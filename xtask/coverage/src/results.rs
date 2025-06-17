@@ -197,7 +197,7 @@ struct ReportDiff<'a> {
     pub removed_tests: Vec<&'a TestResult>,
 }
 
-impl<'a> ReportDiff<'a> {
+impl ReportDiff<'_> {
     pub fn new() -> Self {
         Self {
             regression: vec![],

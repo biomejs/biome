@@ -1,8 +1,8 @@
 use super::parse_error::{expected_definition, too_many_patterns};
-use super::patterns::{parse_pattern, PatternList};
+use super::patterns::{PatternList, parse_pattern};
 use super::predicates::PredicateList;
 use super::{
-    parse_language_declaration, parse_name, parse_pattern_arg_list, GritParser, VariableList,
+    GritParser, VariableList, parse_language_declaration, parse_name, parse_variable_list,
 };
 use crate::constants::*;
 use biome_grit_syntax::GritSyntaxKind::{self, *};
@@ -10,7 +10,7 @@ use biome_grit_syntax::T;
 use biome_parser::parse_lists::{ParseNodeList, ParseSeparatedList};
 use biome_parser::parse_recovery::ParseRecoveryTokenSet;
 use biome_parser::prelude::ParsedSyntax::*;
-use biome_parser::{parsed_syntax::ParsedSyntax, Parser};
+use biome_parser::{Parser, parsed_syntax::ParsedSyntax};
 
 pub(crate) struct DefinitionList {
     has_pattern: bool,
@@ -56,8 +56,7 @@ impl ParseNodeList for DefinitionList {
     ) -> biome_parser::parse_recovery::RecoveryResult {
         parsed_element.or_recover_with_token_set(
             p,
-            &ParseRecoveryTokenSet::new(GRIT_BOGUS_DEFINITION, DEFINITION_LIST_RECOVERY_SET)
-                .enable_recovery_on_line_break(),
+            &ParseRecoveryTokenSet::new(GRIT_BOGUS_DEFINITION, DEFINITION_LIST_RECOVERY_SET),
             expected_definition,
         )
     }
@@ -74,6 +73,17 @@ fn parse_definition(p: &mut GritParser) -> ParsedSyntax {
 }
 
 #[inline]
+fn parse_javascript_body_wrapper(p: &mut GritParser) -> ParsedSyntax {
+    if !p.at(GRIT_JAVASCRIPT_BODY) {
+        return Absent;
+    }
+
+    let m = p.start();
+    p.bump(GRIT_JAVASCRIPT_BODY);
+    Present(m.complete(p, GRIT_JAVASCRIPT_BODY_WRAPPER))
+}
+
+#[inline]
 fn parse_function_definition(p: &mut GritParser) -> ParsedSyntax {
     if !p.at(FUNCTION_KW) {
         return Absent;
@@ -86,9 +96,15 @@ fn parse_function_definition(p: &mut GritParser) -> ParsedSyntax {
     p.expect(T!['(']);
     VariableList.parse_list(p);
     p.expect(T![')']);
-    parse_curly_predicate_list(p).ok();
 
-    Present(m.complete(p, GRIT_FUNCTION_DEFINITION))
+    if p.at(JS_KW) {
+        p.bump(JS_KW);
+        parse_javascript_body_wrapper(p).ok();
+        Present(m.complete(p, GRIT_JAVASCRIPT_FUNCTION_DEFINITION))
+    } else {
+        parse_curly_predicate_list(p).ok();
+        Present(m.complete(p, GRIT_FUNCTION_DEFINITION))
+    }
 }
 
 #[inline]
@@ -103,7 +119,7 @@ fn parse_curly_predicate_list(p: &mut GritParser) -> ParsedSyntax {
     PredicateList.parse_list(p);
     p.expect(T!['}']);
 
-    Present(m.complete(p, GRIT_CURLY_PREDICATE_LIST))
+    Present(m.complete(p, GRIT_PREDICATE_CURLY))
 }
 
 #[inline]
@@ -118,7 +134,7 @@ fn parse_pattern_definition(p: &mut GritParser) -> ParsedSyntax {
     p.bump(PATTERN_KW);
     parse_name(p).ok();
     p.expect(T!['(']);
-    parse_pattern_arg_list(p).ok();
+    parse_variable_list(p);
     p.expect(T![')']);
     parse_language_declaration(p).ok();
     parse_pattern_definition_body(p).ok();
@@ -152,7 +168,7 @@ fn parse_predicate_definition(p: &mut GritParser) -> ParsedSyntax {
     p.bump(PREDICATE_KW);
     parse_name(p).ok();
     p.expect(T!['(']);
-    parse_pattern_arg_list(p).ok();
+    parse_variable_list(p);
     p.expect(T![')']);
     parse_curly_predicate_list(p).ok();
 

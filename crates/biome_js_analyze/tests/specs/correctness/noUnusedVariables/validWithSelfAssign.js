@@ -1,3 +1,4 @@
+/* should not generate diagnostics */
 let a = 1;
 
 (a += 1);

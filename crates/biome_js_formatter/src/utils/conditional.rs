@@ -1,7 +1,7 @@
 use crate::prelude::*;
 use biome_formatter::{
-    write, CstFormatContext, FormatContext, FormatOptions, FormatOwnedWithRule, FormatRefWithRule,
-    FormatRuleWithOptions,
+    CstFormatContext, FormatContext, FormatOptions, FormatOwnedWithRule, FormatRefWithRule,
+    FormatRuleWithOptions, write,
 };
 
 use crate::{AsFormat, IntoFormat};
@@ -10,14 +10,14 @@ use biome_js_syntax::{
     JsInitializerClause, JsReturnStatement, JsStaticMemberExpression, JsSyntaxKind, JsSyntaxNode,
     JsSyntaxToken, JsThrowStatement, JsUnaryExpression, JsYieldArgument, TsConditionalType,
 };
-use biome_rowan::{declare_node_union, AstNode, SyntaxResult};
+use biome_rowan::{AstNode, SyntaxResult, declare_node_union};
 
 declare_node_union! {
     pub AnyJsConditional = JsConditionalExpression | TsConditionalType
 }
 
 impl AsFormat<JsFormatContext> for AnyJsConditional {
-    type Format<'a> = FormatRefWithRule<'a, AnyJsConditional, FormatJsAnyConditionalRule>;
+    type Format<'a> = FormatRefWithRule<'a, Self, FormatJsAnyConditionalRule>;
 
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(self, FormatJsAnyConditionalRule::default())
@@ -25,7 +25,7 @@ impl AsFormat<JsFormatContext> for AnyJsConditional {
 }
 
 impl IntoFormat<JsFormatContext> for AnyJsConditional {
-    type Format = FormatOwnedWithRule<AnyJsConditional, FormatJsAnyConditionalRule>;
+    type Format = FormatOwnedWithRule<Self, FormatJsAnyConditionalRule>;
 
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(self, FormatJsAnyConditionalRule::default())
@@ -407,35 +407,32 @@ impl FormatJsAnyConditionalRule {
                 let argument = match parent.kind() {
                     JsSyntaxKind::JS_INITIALIZER_CLAUSE => {
                         let initializer = JsInitializerClause::unwrap_cast(parent);
-                        initializer.expression().ok().map(AnyJsExpression::from)
+                        initializer.expression().ok()
                     }
                     JsSyntaxKind::JS_RETURN_STATEMENT => {
                         let return_statement = JsReturnStatement::unwrap_cast(parent);
-                        return_statement.argument().map(AnyJsExpression::from)
+                        return_statement.argument()
                     }
                     JsSyntaxKind::JS_THROW_STATEMENT => {
                         let throw_statement = JsThrowStatement::unwrap_cast(parent);
-                        throw_statement.argument().ok().map(AnyJsExpression::from)
+                        throw_statement.argument().ok()
                     }
                     JsSyntaxKind::JS_UNARY_EXPRESSION => {
                         let unary_expression = JsUnaryExpression::unwrap_cast(parent);
-                        unary_expression.argument().ok().map(AnyJsExpression::from)
+                        unary_expression.argument().ok()
                     }
                     JsSyntaxKind::JS_YIELD_ARGUMENT => {
                         let yield_argument = JsYieldArgument::unwrap_cast(parent);
-                        yield_argument.expression().ok().map(AnyJsExpression::from)
+                        yield_argument.expression().ok()
                     }
                     JsSyntaxKind::JS_ASSIGNMENT_EXPRESSION => {
                         let assignment_expression = JsAssignmentExpression::unwrap_cast(parent);
-                        assignment_expression
-                            .right()
-                            .ok()
-                            .map(AnyJsExpression::from)
+                        assignment_expression.right().ok()
                     }
                     _ => None,
                 };
 
-                argument.map_or(false, |argument| argument == expression)
+                argument.is_some_and(|argument| argument == expression)
             }
         }
     }
@@ -506,8 +503,8 @@ declare_node_union! {
 impl ExpressionOrType {
     fn as_expression(&self) -> Option<&AnyJsExpression> {
         match self {
-            ExpressionOrType::AnyJsExpression(expression) => Some(expression),
-            ExpressionOrType::AnyTsType(_) => None,
+            Self::AnyJsExpression(expression) => Some(expression),
+            Self::AnyTsType(_) => None,
         }
     }
 }
@@ -515,8 +512,8 @@ impl ExpressionOrType {
 impl Format<JsFormatContext> for ExpressionOrType {
     fn fmt(&self, f: &mut Formatter<JsFormatContext>) -> FormatResult<()> {
         match self {
-            ExpressionOrType::AnyJsExpression(expression) => expression.format().fmt(f),
-            ExpressionOrType::AnyTsType(ty) => ty.format().fmt(f),
+            Self::AnyJsExpression(expression) => expression.format().fmt(f),
+            Self::AnyTsType(ty) => ty.format().fmt(f),
         }
     }
 }
@@ -606,18 +603,18 @@ pub enum ConditionalJsxChain {
 
 impl ConditionalJsxChain {
     pub const fn is_chain(&self) -> bool {
-        matches!(self, ConditionalJsxChain::Chain)
+        matches!(self, Self::Chain)
     }
     pub const fn is_no_chain(&self) -> bool {
-        matches!(self, ConditionalJsxChain::NoChain)
+        matches!(self, Self::NoChain)
     }
 }
 
 impl From<bool> for ConditionalJsxChain {
     fn from(value: bool) -> Self {
         match value {
-            true => ConditionalJsxChain::Chain,
-            false => ConditionalJsxChain::NoChain,
+            true => Self::Chain,
+            false => Self::NoChain,
         }
     }
 }
@@ -625,37 +622,37 @@ impl From<bool> for ConditionalJsxChain {
 impl ConditionalLayout {
     const fn jsx_chain(&self) -> Option<ConditionalJsxChain> {
         match self {
-            ConditionalLayout::NestedAlternate { .. }
-            | ConditionalLayout::NestedTest { .. }
-            | ConditionalLayout::NestedConsequent { .. } => None,
-            ConditionalLayout::Root { jsx_chain, .. } => Some(*jsx_chain),
+            Self::NestedAlternate { .. }
+            | Self::NestedTest { .. }
+            | Self::NestedConsequent { .. } => None,
+            Self::Root { jsx_chain, .. } => Some(*jsx_chain),
         }
     }
 
     const fn is_root(&self) -> bool {
-        matches!(self, ConditionalLayout::Root { .. })
+        matches!(self, Self::Root { .. })
     }
 
     /// Returns the parent node, if any
     fn parent(&self) -> Option<&JsSyntaxNode> {
         match self {
-            ConditionalLayout::NestedAlternate { parent, .. }
-            | ConditionalLayout::NestedTest { parent, .. }
-            | ConditionalLayout::NestedConsequent { parent, .. } => Some(parent.syntax()),
-            ConditionalLayout::Root { parent, .. } => parent.as_ref(),
+            Self::NestedAlternate { parent, .. }
+            | Self::NestedTest { parent, .. }
+            | Self::NestedConsequent { parent, .. } => Some(parent.syntax()),
+            Self::Root { parent, .. } => parent.as_ref(),
         }
     }
 
     const fn is_nested_test(&self) -> bool {
-        matches!(self, ConditionalLayout::NestedTest { .. })
+        matches!(self, Self::NestedTest { .. })
     }
 
     const fn is_nested_alternate(&self) -> bool {
-        matches!(self, ConditionalLayout::NestedAlternate { .. })
+        matches!(self, Self::NestedAlternate { .. })
     }
 
     const fn is_nested_consequent(&self) -> bool {
-        matches!(self, ConditionalLayout::NestedConsequent { .. })
+        matches!(self, Self::NestedConsequent { .. })
     }
 }
 
@@ -663,11 +660,11 @@ impl AnyJsConditional {
     /// Returns `true` if `node` is the `test` of this conditional.
     fn is_test(&self, node: &JsSyntaxNode) -> bool {
         match self {
-            AnyJsConditional::JsConditionalExpression(conditional) => conditional
+            Self::JsConditionalExpression(conditional) => conditional
                 .test()
                 .ok()
-                .map_or(false, |resolved| resolved.syntax() == node),
-            AnyJsConditional::TsConditionalType(conditional) => {
+                .is_some_and(|resolved| resolved.syntax() == node),
+            Self::TsConditionalType(conditional) => {
                 conditional.check_type().map(AstNode::into_syntax).as_ref() == Ok(node)
                     || conditional
                         .extends_type()
@@ -680,19 +677,17 @@ impl AnyJsConditional {
 
     pub(crate) fn question_mark_token(&self) -> SyntaxResult<JsSyntaxToken> {
         match self {
-            AnyJsConditional::JsConditionalExpression(conditional) => {
-                conditional.question_mark_token()
-            }
-            AnyJsConditional::TsConditionalType(conditional) => conditional.question_mark_token(),
+            Self::JsConditionalExpression(conditional) => conditional.question_mark_token(),
+            Self::TsConditionalType(conditional) => conditional.question_mark_token(),
         }
     }
 
     fn consequent(&self) -> SyntaxResult<ExpressionOrType> {
         match self {
-            AnyJsConditional::JsConditionalExpression(conditional) => {
+            Self::JsConditionalExpression(conditional) => {
                 conditional.consequent().map(ExpressionOrType::from)
             }
-            AnyJsConditional::TsConditionalType(conditional) => {
+            Self::TsConditionalType(conditional) => {
                 conditional.true_type().map(ExpressionOrType::from)
             }
         }
@@ -700,17 +695,17 @@ impl AnyJsConditional {
 
     pub(crate) fn colon_token(&self) -> SyntaxResult<JsSyntaxToken> {
         match self {
-            AnyJsConditional::JsConditionalExpression(conditional) => conditional.colon_token(),
-            AnyJsConditional::TsConditionalType(conditional) => conditional.colon_token(),
+            Self::JsConditionalExpression(conditional) => conditional.colon_token(),
+            Self::TsConditionalType(conditional) => conditional.colon_token(),
         }
     }
 
     fn alternate(&self) -> SyntaxResult<ExpressionOrType> {
         match self {
-            AnyJsConditional::JsConditionalExpression(conditional) => {
+            Self::JsConditionalExpression(conditional) => {
                 conditional.alternate().map(ExpressionOrType::from)
             }
-            AnyJsConditional::TsConditionalType(conditional) => {
+            Self::TsConditionalType(conditional) => {
                 conditional.false_type().map(ExpressionOrType::from)
             }
         }
@@ -719,10 +714,10 @@ impl AnyJsConditional {
     /// Returns `true` if the passed node is the `alternate` of this conditional expression.
     fn is_alternate(&self, node: &JsSyntaxNode) -> bool {
         let alternate = match self {
-            AnyJsConditional::JsConditionalExpression(conditional) => {
+            Self::JsConditionalExpression(conditional) => {
                 conditional.alternate().map(AstNode::into_syntax).ok()
             }
-            AnyJsConditional::TsConditionalType(ts_conditional) => {
+            Self::TsConditionalType(ts_conditional) => {
                 ts_conditional.false_type().ok().map(AstNode::into_syntax)
             }
         };
@@ -731,7 +726,7 @@ impl AnyJsConditional {
     }
 
     const fn is_conditional_expression(&self) -> bool {
-        matches!(self, AnyJsConditional::JsConditionalExpression(_))
+        matches!(self, Self::JsConditionalExpression(_))
     }
 }
 

@@ -1,0 +1,71 @@
+---
+source: crates/biome_graphql_analyze/tests/spec_tests.rs
+expression: invalid.graphql
+---
+# Input
+```graphql
+query { human }
+mutation { ...Type }
+subscription {}
+
+```
+
+# Diagnostics
+```
+invalid.graphql:1:1 lint/nursery/useNamedOperation  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Anonymous GraphQL operations are forbidden. Make sure to name your query.
+  
+  > 1 │ query { human }
+      │ ^^^^^
+    2 │ mutation { ...Type }
+    3 │ subscription {}
+  
+  i Most GraphQL client libraries use the operation name for caching purposes.
+  
+  i Unsafe fix: Rename this query to Human.
+  
+    1 │ query·Human{·human·}
+      │       +++++         
+
+```
+
+```
+invalid.graphql:2:1 lint/nursery/useNamedOperation  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Anonymous GraphQL operations are forbidden. Make sure to name your mutation.
+  
+    1 │ query { human }
+  > 2 │ mutation { ...Type }
+      │ ^^^^^^^^
+    3 │ subscription {}
+    4 │ 
+  
+  i Most GraphQL client libraries use the operation name for caching purposes.
+  
+  i Unsafe fix: Rename this mutation to Mutation.
+  
+    2 │ mutation·Mutation{·...Type·}
+      │          ++++++++           
+
+```
+
+```
+invalid.graphql:3:1 lint/nursery/useNamedOperation  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Anonymous GraphQL operations are forbidden. Make sure to name your subscription.
+  
+    1 │ query { human }
+    2 │ mutation { ...Type }
+  > 3 │ subscription {}
+      │ ^^^^^^^^^^^^
+    4 │ 
+  
+  i Most GraphQL client libraries use the operation name for caching purposes.
+  
+  i Unsafe fix: Rename this subscription to Subscription.
+  
+    3 │ subscription·Subscription{}
+      │              ++++++++++++  
+
+```

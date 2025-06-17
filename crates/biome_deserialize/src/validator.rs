@@ -1,4 +1,4 @@
-use crate::DeserializationDiagnostic;
+use crate::{DeserializationContext, DeserializationDiagnostic};
 use biome_console::markup;
 use biome_rowan::TextRange;
 
@@ -14,21 +14,21 @@ pub trait DeserializableValidator {
     /// should be rejected.
     fn validate(
         &mut self,
+        ctx: &mut impl DeserializationContext,
         name: &str,
         range: TextRange,
-        diagnostics: &mut Vec<DeserializationDiagnostic>,
     ) -> bool;
 }
 
 /// Validates whether the given value is non-empty.
 pub fn non_empty<T: IsEmpty>(
+    ctx: &mut impl DeserializationContext,
     value: &T,
     name: &str,
     range: TextRange,
-    diagnostics: &mut Vec<DeserializationDiagnostic>,
 ) -> bool {
     if value.is_empty() {
-        diagnostics.push(
+        ctx.report(
             DeserializationDiagnostic::new(markup! {
                 <Emphasis>{name}</Emphasis>" may not be empty"
             })
@@ -46,7 +46,7 @@ pub trait IsEmpty {
 
 impl IsEmpty for String {
     fn is_empty(&self) -> bool {
-        String::is_empty(self)
+        Self::is_empty(self)
     }
 }
 
@@ -58,7 +58,7 @@ impl IsEmpty for Box<str> {
 
 impl<T> IsEmpty for Vec<T> {
     fn is_empty(&self) -> bool {
-        Vec::is_empty(self)
+        Self::is_empty(self)
     }
 }
 

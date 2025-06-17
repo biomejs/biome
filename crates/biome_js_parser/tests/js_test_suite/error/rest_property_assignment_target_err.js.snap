@@ -1,0 +1,419 @@
+---
+source: crates/biome_js_parser/tests/spec_test.rs
+expression: snapshot
+snapshot_kind: text
+---
+## Input
+
+```js
+({ ... } = a);
+({ ...c = "default" } = a);
+({ ...{a} } = b);
+({ ...rest, other_assignment } = a);
+({ ...rest, } = a);
+
+```
+
+
+## AST
+
+```
+JsModule {
+    bom_token: missing (optional),
+    interpreter_token: missing (optional),
+    directives: JsDirectiveList [],
+    items: JsModuleItemList [
+        JsExpressionStatement {
+            expression: JsParenthesizedExpression {
+                l_paren_token: L_PAREN@0..1 "(" [] [],
+                expression: JsAssignmentExpression {
+                    left: JsObjectAssignmentPattern {
+                        l_curly_token: L_CURLY@1..3 "{" [] [Whitespace(" ")],
+                        properties: JsObjectAssignmentPatternPropertyList [
+                            JsObjectAssignmentPatternRest {
+                                dotdotdot_token: DOT3@3..7 "..." [] [Whitespace(" ")],
+                                target: missing (required),
+                            },
+                        ],
+                        r_curly_token: R_CURLY@7..9 "}" [] [Whitespace(" ")],
+                    },
+                    operator_token: EQ@9..11 "=" [] [Whitespace(" ")],
+                    right: JsIdentifierExpression {
+                        name: JsReferenceIdentifier {
+                            value_token: IDENT@11..12 "a" [] [],
+                        },
+                    },
+                },
+                r_paren_token: R_PAREN@12..13 ")" [] [],
+            },
+            semicolon_token: SEMICOLON@13..14 ";" [] [],
+        },
+        JsExpressionStatement {
+            expression: JsParenthesizedExpression {
+                l_paren_token: L_PAREN@14..16 "(" [Newline("\n")] [],
+                expression: JsBogusExpression {
+                    items: [
+                        JsBogus {
+                            items: [
+                                L_CURLY@16..18 "{" [] [Whitespace(" ")],
+                                JsBogus {
+                                    items: [
+                                        JsBogus {
+                                            items: [
+                                                DOT3@18..21 "..." [] [],
+                                                JsIdentifierAssignment {
+                                                    name_token: IDENT@21..23 "c" [] [Whitespace(" ")],
+                                                },
+                                                EQ@23..25 "=" [] [Whitespace(" ")],
+                                                JS_STRING_LITERAL@25..35 "\"default\"" [] [Whitespace(" ")],
+                                            ],
+                                        },
+                                    ],
+                                },
+                                R_CURLY@35..37 "}" [] [Whitespace(" ")],
+                            ],
+                        },
+                        EQ@37..39 "=" [] [Whitespace(" ")],
+                        JsIdentifierExpression {
+                            name: JsReferenceIdentifier {
+                                value_token: IDENT@39..40 "a" [] [],
+                            },
+                        },
+                    ],
+                },
+                r_paren_token: R_PAREN@40..41 ")" [] [],
+            },
+            semicolon_token: SEMICOLON@41..42 ";" [] [],
+        },
+        JsExpressionStatement {
+            expression: JsParenthesizedExpression {
+                l_paren_token: L_PAREN@42..44 "(" [Newline("\n")] [],
+                expression: JsAssignmentExpression {
+                    left: JsObjectAssignmentPattern {
+                        l_curly_token: L_CURLY@44..46 "{" [] [Whitespace(" ")],
+                        properties: JsObjectAssignmentPatternPropertyList [
+                            JsObjectAssignmentPatternRest {
+                                dotdotdot_token: DOT3@46..49 "..." [] [],
+                                target: JsBogusAssignment {
+                                    items: [
+                                        L_CURLY@49..50 "{" [] [],
+                                        JsObjectAssignmentPatternPropertyList [
+                                            JsObjectAssignmentPatternShorthandProperty {
+                                                identifier: JsIdentifierAssignment {
+                                                    name_token: IDENT@50..51 "a" [] [],
+                                                },
+                                                init: missing (optional),
+                                            },
+                                        ],
+                                        R_CURLY@51..53 "}" [] [Whitespace(" ")],
+                                    ],
+                                },
+                            },
+                        ],
+                        r_curly_token: R_CURLY@53..55 "}" [] [Whitespace(" ")],
+                    },
+                    operator_token: EQ@55..57 "=" [] [Whitespace(" ")],
+                    right: JsIdentifierExpression {
+                        name: JsReferenceIdentifier {
+                            value_token: IDENT@57..58 "b" [] [],
+                        },
+                    },
+                },
+                r_paren_token: R_PAREN@58..59 ")" [] [],
+            },
+            semicolon_token: SEMICOLON@59..60 ";" [] [],
+        },
+        JsExpressionStatement {
+            expression: JsParenthesizedExpression {
+                l_paren_token: L_PAREN@60..62 "(" [Newline("\n")] [],
+                expression: JsBogusExpression {
+                    items: [
+                        JsBogus {
+                            items: [
+                                L_CURLY@62..64 "{" [] [Whitespace(" ")],
+                                JsBogus {
+                                    items: [
+                                        JsBogus {
+                                            items: [
+                                                DOT3@64..67 "..." [] [],
+                                                JsIdentifierAssignment {
+                                                    name_token: IDENT@67..71 "rest" [] [],
+                                                },
+                                            ],
+                                        },
+                                        COMMA@71..73 "," [] [Whitespace(" ")],
+                                        JsObjectAssignmentPatternShorthandProperty {
+                                            identifier: JsIdentifierAssignment {
+                                                name_token: IDENT@73..90 "other_assignment" [] [Whitespace(" ")],
+                                            },
+                                            init: missing (optional),
+                                        },
+                                    ],
+                                },
+                                R_CURLY@90..92 "}" [] [Whitespace(" ")],
+                            ],
+                        },
+                        EQ@92..94 "=" [] [Whitespace(" ")],
+                        JsIdentifierExpression {
+                            name: JsReferenceIdentifier {
+                                value_token: IDENT@94..95 "a" [] [],
+                            },
+                        },
+                    ],
+                },
+                r_paren_token: R_PAREN@95..96 ")" [] [],
+            },
+            semicolon_token: SEMICOLON@96..97 ";" [] [],
+        },
+        JsExpressionStatement {
+            expression: JsParenthesizedExpression {
+                l_paren_token: L_PAREN@97..99 "(" [Newline("\n")] [],
+                expression: JsBogusExpression {
+                    items: [
+                        JsBogus {
+                            items: [
+                                L_CURLY@99..101 "{" [] [Whitespace(" ")],
+                                JsBogus {
+                                    items: [
+                                        JsBogus {
+                                            items: [
+                                                DOT3@101..104 "..." [] [],
+                                                JsIdentifierAssignment {
+                                                    name_token: IDENT@104..108 "rest" [] [],
+                                                },
+                                            ],
+                                        },
+                                        COMMA@108..110 "," [] [Whitespace(" ")],
+                                    ],
+                                },
+                                R_CURLY@110..112 "}" [] [Whitespace(" ")],
+                            ],
+                        },
+                        EQ@112..114 "=" [] [Whitespace(" ")],
+                        JsIdentifierExpression {
+                            name: JsReferenceIdentifier {
+                                value_token: IDENT@114..115 "a" [] [],
+                            },
+                        },
+                    ],
+                },
+                r_paren_token: R_PAREN@115..116 ")" [] [],
+            },
+            semicolon_token: SEMICOLON@116..117 ";" [] [],
+        },
+    ],
+    eof_token: EOF@117..118 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: JS_MODULE@0..118
+  0: (empty)
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..117
+    0: JS_EXPRESSION_STATEMENT@0..14
+      0: JS_PARENTHESIZED_EXPRESSION@0..13
+        0: L_PAREN@0..1 "(" [] []
+        1: JS_ASSIGNMENT_EXPRESSION@1..12
+          0: JS_OBJECT_ASSIGNMENT_PATTERN@1..9
+            0: L_CURLY@1..3 "{" [] [Whitespace(" ")]
+            1: JS_OBJECT_ASSIGNMENT_PATTERN_PROPERTY_LIST@3..7
+              0: JS_OBJECT_ASSIGNMENT_PATTERN_REST@3..7
+                0: DOT3@3..7 "..." [] [Whitespace(" ")]
+                1: (empty)
+            2: R_CURLY@7..9 "}" [] [Whitespace(" ")]
+          1: EQ@9..11 "=" [] [Whitespace(" ")]
+          2: JS_IDENTIFIER_EXPRESSION@11..12
+            0: JS_REFERENCE_IDENTIFIER@11..12
+              0: IDENT@11..12 "a" [] []
+        2: R_PAREN@12..13 ")" [] []
+      1: SEMICOLON@13..14 ";" [] []
+    1: JS_EXPRESSION_STATEMENT@14..42
+      0: JS_PARENTHESIZED_EXPRESSION@14..41
+        0: L_PAREN@14..16 "(" [Newline("\n")] []
+        1: JS_BOGUS_EXPRESSION@16..40
+          0: JS_BOGUS@16..37
+            0: L_CURLY@16..18 "{" [] [Whitespace(" ")]
+            1: JS_BOGUS@18..35
+              0: JS_BOGUS@18..35
+                0: DOT3@18..21 "..." [] []
+                1: JS_IDENTIFIER_ASSIGNMENT@21..23
+                  0: IDENT@21..23 "c" [] [Whitespace(" ")]
+                2: EQ@23..25 "=" [] [Whitespace(" ")]
+                3: JS_STRING_LITERAL@25..35 "\"default\"" [] [Whitespace(" ")]
+            2: R_CURLY@35..37 "}" [] [Whitespace(" ")]
+          1: EQ@37..39 "=" [] [Whitespace(" ")]
+          2: JS_IDENTIFIER_EXPRESSION@39..40
+            0: JS_REFERENCE_IDENTIFIER@39..40
+              0: IDENT@39..40 "a" [] []
+        2: R_PAREN@40..41 ")" [] []
+      1: SEMICOLON@41..42 ";" [] []
+    2: JS_EXPRESSION_STATEMENT@42..60
+      0: JS_PARENTHESIZED_EXPRESSION@42..59
+        0: L_PAREN@42..44 "(" [Newline("\n")] []
+        1: JS_ASSIGNMENT_EXPRESSION@44..58
+          0: JS_OBJECT_ASSIGNMENT_PATTERN@44..55
+            0: L_CURLY@44..46 "{" [] [Whitespace(" ")]
+            1: JS_OBJECT_ASSIGNMENT_PATTERN_PROPERTY_LIST@46..53
+              0: JS_OBJECT_ASSIGNMENT_PATTERN_REST@46..53
+                0: DOT3@46..49 "..." [] []
+                1: JS_BOGUS_ASSIGNMENT@49..53
+                  0: L_CURLY@49..50 "{" [] []
+                  1: JS_OBJECT_ASSIGNMENT_PATTERN_PROPERTY_LIST@50..51
+                    0: JS_OBJECT_ASSIGNMENT_PATTERN_SHORTHAND_PROPERTY@50..51
+                      0: JS_IDENTIFIER_ASSIGNMENT@50..51
+                        0: IDENT@50..51 "a" [] []
+                      1: (empty)
+                  2: R_CURLY@51..53 "}" [] [Whitespace(" ")]
+            2: R_CURLY@53..55 "}" [] [Whitespace(" ")]
+          1: EQ@55..57 "=" [] [Whitespace(" ")]
+          2: JS_IDENTIFIER_EXPRESSION@57..58
+            0: JS_REFERENCE_IDENTIFIER@57..58
+              0: IDENT@57..58 "b" [] []
+        2: R_PAREN@58..59 ")" [] []
+      1: SEMICOLON@59..60 ";" [] []
+    3: JS_EXPRESSION_STATEMENT@60..97
+      0: JS_PARENTHESIZED_EXPRESSION@60..96
+        0: L_PAREN@60..62 "(" [Newline("\n")] []
+        1: JS_BOGUS_EXPRESSION@62..95
+          0: JS_BOGUS@62..92
+            0: L_CURLY@62..64 "{" [] [Whitespace(" ")]
+            1: JS_BOGUS@64..90
+              0: JS_BOGUS@64..71
+                0: DOT3@64..67 "..." [] []
+                1: JS_IDENTIFIER_ASSIGNMENT@67..71
+                  0: IDENT@67..71 "rest" [] []
+              1: COMMA@71..73 "," [] [Whitespace(" ")]
+              2: JS_OBJECT_ASSIGNMENT_PATTERN_SHORTHAND_PROPERTY@73..90
+                0: JS_IDENTIFIER_ASSIGNMENT@73..90
+                  0: IDENT@73..90 "other_assignment" [] [Whitespace(" ")]
+                1: (empty)
+            2: R_CURLY@90..92 "}" [] [Whitespace(" ")]
+          1: EQ@92..94 "=" [] [Whitespace(" ")]
+          2: JS_IDENTIFIER_EXPRESSION@94..95
+            0: JS_REFERENCE_IDENTIFIER@94..95
+              0: IDENT@94..95 "a" [] []
+        2: R_PAREN@95..96 ")" [] []
+      1: SEMICOLON@96..97 ";" [] []
+    4: JS_EXPRESSION_STATEMENT@97..117
+      0: JS_PARENTHESIZED_EXPRESSION@97..116
+        0: L_PAREN@97..99 "(" [Newline("\n")] []
+        1: JS_BOGUS_EXPRESSION@99..115
+          0: JS_BOGUS@99..112
+            0: L_CURLY@99..101 "{" [] [Whitespace(" ")]
+            1: JS_BOGUS@101..110
+              0: JS_BOGUS@101..108
+                0: DOT3@101..104 "..." [] []
+                1: JS_IDENTIFIER_ASSIGNMENT@104..108
+                  0: IDENT@104..108 "rest" [] []
+              1: COMMA@108..110 "," [] [Whitespace(" ")]
+            2: R_CURLY@110..112 "}" [] [Whitespace(" ")]
+          1: EQ@112..114 "=" [] [Whitespace(" ")]
+          2: JS_IDENTIFIER_EXPRESSION@114..115
+            0: JS_REFERENCE_IDENTIFIER@114..115
+              0: IDENT@114..115 "a" [] []
+        2: R_PAREN@115..116 ")" [] []
+      1: SEMICOLON@116..117 ";" [] []
+  4: EOF@117..118 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+rest_property_assignment_target_err.js:1:8 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected an identifier, or an assignment target but instead found '}'.
+  
+  > 1 │ ({ ... } = a);
+      │        ^
+    2 │ ({ ...c = "default" } = a);
+    3 │ ({ ...{a} } = b);
+  
+  i Expected an identifier, or an assignment target here.
+  
+  > 1 │ ({ ... } = a);
+      │        ^
+    2 │ ({ ...c = "default" } = a);
+    3 │ ({ ...{a} } = b);
+  
+rest_property_assignment_target_err.js:2:9 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × rest element cannot have a default
+  
+    1 │ ({ ... } = a);
+  > 2 │ ({ ...c = "default" } = a);
+      │         ^^^^^^^^^^^^
+    3 │ ({ ...{a} } = b);
+    4 │ ({ ...rest, other_assignment } = a);
+  
+  i Remove the default value here
+  
+    1 │ ({ ... } = a);
+  > 2 │ ({ ...c = "default" } = a);
+      │         ^^^^^^^^^^^^
+    3 │ ({ ...{a} } = b);
+    4 │ ({ ...rest, other_assignment } = a);
+  
+  i Rest element
+  
+    1 │ ({ ... } = a);
+  > 2 │ ({ ...c = "default" } = a);
+      │    ^^^^
+    3 │ ({ ...{a} } = b);
+    4 │ ({ ...rest, other_assignment } = a);
+  
+rest_property_assignment_target_err.js:3:7 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × object and array assignment targets are not allowed in rest patterns
+  
+    1 │ ({ ... } = a);
+    2 │ ({ ...c = "default" } = a);
+  > 3 │ ({ ...{a} } = b);
+      │       ^^^
+    4 │ ({ ...rest, other_assignment } = a);
+    5 │ ({ ...rest, } = a);
+  
+rest_property_assignment_target_err.js:4:4 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × rest element must be the last element
+  
+    2 │ ({ ...c = "default" } = a);
+    3 │ ({ ...{a} } = b);
+  > 4 │ ({ ...rest, other_assignment } = a);
+      │    ^^^^^^^
+    5 │ ({ ...rest, } = a);
+    6 │ 
+  
+  i Move the rest element to the end of the pattern, right before the closing '}'
+  
+rest_property_assignment_target_err.js:5:11 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × rest element may not have a trailing comma
+  
+    3 │ ({ ...{a} } = b);
+    4 │ ({ ...rest, other_assignment } = a);
+  > 5 │ ({ ...rest, } = a);
+      │           ^
+    6 │ 
+  
+  i Remove the trailing comma here
+  
+    3 │ ({ ...{a} } = b);
+    4 │ ({ ...rest, other_assignment } = a);
+  > 5 │ ({ ...rest, } = a);
+      │           ^
+    6 │ 
+  
+  i Rest element
+  
+    3 │ ({ ...{a} } = b);
+    4 │ ({ ...rest, other_assignment } = a);
+  > 5 │ ({ ...rest, } = a);
+      │    ^^^^^^^
+    6 │ 
+  
+```

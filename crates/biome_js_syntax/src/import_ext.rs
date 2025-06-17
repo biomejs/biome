@@ -1,11 +1,12 @@
 use crate::{
-    inner_string_text, AnyJsBinding, AnyJsImportClause, AnyJsModuleSource,
+    AnyJsBinding, AnyJsCombinedSpecifier, AnyJsImportClause, AnyJsModuleSource,
     AnyJsNamedImportSpecifier, JsCallExpression, JsDefaultImportSpecifier, JsImport,
     JsImportAssertion, JsImportCallExpression, JsModuleSource, JsNamedImportSpecifier,
-    JsNamespaceImportSpecifier, JsShorthandNamedImportSpecifier, JsSyntaxKind, JsSyntaxToken,
+    JsNamedImportSpecifiers, JsNamespaceImportSpecifier, JsShorthandNamedImportSpecifier,
+    JsSyntaxKind, JsSyntaxToken, inner_string_text,
 };
 use biome_rowan::{
-    declare_node_union, AstNode, SyntaxError, SyntaxNodeOptionExt, SyntaxResult, TokenText,
+    AstNode, SyntaxError, SyntaxNodeOptionExt, SyntaxResult, TokenText, declare_node_union,
 };
 
 impl JsImport {
@@ -39,11 +40,10 @@ impl AnyJsImportClause {
     /// ```
     pub fn type_token(&self) -> Option<JsSyntaxToken> {
         match self {
-            Self::JsImportBareClause(_) => None,
             Self::JsImportDefaultClause(clause) => clause.type_token(),
             Self::JsImportNamedClause(clause) => clause.type_token(),
             Self::JsImportNamespaceClause(clause) => clause.type_token(),
-            Self::JsImportCombinedClause(_) => None,
+            Self::JsImportBareClause(_) | Self::JsImportCombinedClause(_) => None,
         }
     }
 
@@ -75,7 +75,25 @@ impl AnyJsImportClause {
         })
     }
 
-    /// Assertion of this import clause.
+    pub fn named_specifiers(&self) -> Option<JsNamedImportSpecifiers> {
+        match self {
+            Self::JsImportBareClause(_) => None,
+            Self::JsImportCombinedClause(clause) => {
+                if let Ok(AnyJsCombinedSpecifier::JsNamedImportSpecifiers(named_specifiers)) =
+                    clause.specifier()
+                {
+                    Some(named_specifiers)
+                } else {
+                    None
+                }
+            }
+            Self::JsImportDefaultClause(_) => None,
+            Self::JsImportNamedClause(clause) => clause.named_specifiers().ok(),
+            Self::JsImportNamespaceClause(_) => None,
+        }
+    }
+
+    /// Attribute of this import clause.
     ///
     /// ```
     /// use biome_js_factory::make;
@@ -88,13 +106,46 @@ impl AnyJsImportClause {
     ///
     /// assert_eq!(clause.source().unwrap().as_js_module_source().unwrap().inner_string_text().unwrap().text(), "react");
     /// ```
-    pub fn assertion(&self) -> Option<JsImportAssertion> {
+    pub fn attribute(&self) -> Option<JsImportAssertion> {
         match self {
             Self::JsImportBareClause(clause) => clause.assertion(),
             Self::JsImportDefaultClause(clause) => clause.assertion(),
             Self::JsImportNamedClause(clause) => clause.assertion(),
             Self::JsImportNamespaceClause(clause) => clause.assertion(),
             Self::JsImportCombinedClause(clause) => clause.assertion(),
+        }
+    }
+
+    /// Returns an import clause with `named_specifiers` as named specifiers
+    /// or the import clause itself if it doesn't accept any named specifiers.
+    pub fn with_named_specifiers(self, named_specifiers: JsNamedImportSpecifiers) -> Self {
+        match self {
+            Self::JsImportBareClause(_) => self,
+            Self::JsImportCombinedClause(clause) => if matches!(
+                clause.specifier(),
+                Ok(AnyJsCombinedSpecifier::JsNamedImportSpecifiers(_))
+            ) {
+                clause.with_specifier(named_specifiers.into())
+            } else {
+                clause
+            }
+            .into(),
+            Self::JsImportDefaultClause(_) => self,
+            Self::JsImportNamedClause(clause) => {
+                clause.with_named_specifiers(named_specifiers).into()
+            }
+            Self::JsImportNamespaceClause(_) => self,
+        }
+    }
+
+    /// Returns an import clause with `attribute` as import attribute.
+    pub fn with_attribute(self, attribute: Option<JsImportAssertion>) -> Self {
+        match self {
+            Self::JsImportBareClause(clause) => clause.with_assertion(attribute).into(),
+            Self::JsImportCombinedClause(clause) => clause.with_assertion(attribute).into(),
+            Self::JsImportDefaultClause(clause) => clause.with_assertion(attribute).into(),
+            Self::JsImportNamedClause(clause) => clause.with_assertion(attribute).into(),
+            Self::JsImportNamespaceClause(clause) => clause.with_assertion(attribute).into(),
         }
     }
 }
@@ -169,7 +220,7 @@ impl AnyJsNamedImportSpecifier {
         }
     }
 
-    pub fn with_type_token(self, type_token: Option<JsSyntaxToken>) -> AnyJsNamedImportSpecifier {
+    pub fn with_type_token(self, type_token: Option<JsSyntaxToken>) -> Self {
         match self {
             Self::JsBogusNamedImportSpecifier(_) => self,
             Self::JsNamedImportSpecifier(specifier) => specifier.with_type_token(type_token).into(),
@@ -228,8 +279,8 @@ impl AnyJsImportLike {
     /// ```
     pub fn inner_string_text(&self) -> Option<TokenText> {
         match self {
-            AnyJsImportLike::JsModuleSource(source) => source.inner_string_text().ok(),
-            AnyJsImportLike::JsCallExpression(expression) => {
+            Self::JsModuleSource(source) => source.inner_string_text().ok(),
+            Self::JsCallExpression(expression) => {
                 let callee = expression.callee().ok()?;
                 let name = callee.as_js_reference_identifier()?.value_token().ok()?;
                 if name.text_trimmed() == "require" {
@@ -247,7 +298,7 @@ impl AnyJsImportLike {
                     None
                 }
             }
-            AnyJsImportLike::JsImportCallExpression(import_call) => {
+            Self::JsImportCallExpression(import_call) => {
                 let [Some(argument)] = import_call.arguments().ok()?.get_arguments_by_index([0])
                 else {
                     return None;
@@ -276,8 +327,8 @@ impl AnyJsImportLike {
     /// ```
     pub fn module_name_token(&self) -> Option<JsSyntaxToken> {
         match self {
-            AnyJsImportLike::JsModuleSource(source) => source.value_token().ok(),
-            AnyJsImportLike::JsCallExpression(expression) => {
+            Self::JsModuleSource(source) => source.value_token().ok(),
+            Self::JsCallExpression(expression) => {
                 let callee = expression.callee().ok()?;
                 let name = callee.as_js_reference_identifier()?.value_token().ok()?;
                 if name.text_trimmed() == "require" {
@@ -295,7 +346,7 @@ impl AnyJsImportLike {
                     None
                 }
             }
-            AnyJsImportLike::JsImportCallExpression(import_call) => {
+            Self::JsImportCallExpression(import_call) => {
                 let [Some(argument)] = import_call.arguments().ok()?.get_arguments_by_index([0])
                 else {
                     return None;
@@ -334,11 +385,20 @@ impl AnyJsImportLike {
     /// ```
     pub fn is_in_ts_module_declaration(&self) -> bool {
         // It first has to be a JsModuleSource
-        matches!(self, AnyJsImportLike::JsModuleSource(_))
+        matches!(self, Self::JsModuleSource(_))
             && matches!(
                 self.syntax().parent().kind(),
                 Some(JsSyntaxKind::TS_EXTERNAL_MODULE_DECLARATION)
             )
+    }
+
+    /// Returns whether this is a static import.
+    ///
+    /// Static imports are those where no variables are allowed within the
+    /// module specifier. Compare this to  `import()` and `require()`
+    /// expressions, which are considered dynamic imports.
+    pub fn is_static_import(&self) -> bool {
+        matches!(self, Self::JsModuleSource(_))
     }
 }
 

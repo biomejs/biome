@@ -1,15 +1,16 @@
 use biome_analyze::context::RuleContext;
-use biome_analyze::{declare_lint_rule, ActionCategory, FixKind, Rule, RuleDiagnostic, RuleSource};
+use biome_analyze::{FixKind, Rule, RuleDiagnostic, RuleSource, declare_lint_rule};
 use biome_console::markup;
+use biome_diagnostics::Severity;
 use biome_js_factory::make;
 use biome_js_semantic::SemanticModel;
 use biome_js_syntax::{
-    global_identifier, AnyJsCallArgument, AnyJsExpression, AnyJsMemberExpression,
-    JsBinaryExpression, JsBinaryOperator, JsCaseClause, JsSwitchStatement, TextRange, T,
+    AnyJsCallArgument, AnyJsExpression, AnyJsMemberExpression, JsBinaryExpression,
+    JsBinaryOperator, JsCaseClause, JsSwitchStatement, T, TextRange, global_identifier,
 };
-use biome_rowan::{declare_node_union, AstNode, BatchMutationExt};
+use biome_rowan::{AstNode, BatchMutationExt, declare_node_union};
 
-use crate::{services::semantic::Semantic, JsRuleAction};
+use crate::{JsRuleAction, services::semantic::Semantic};
 
 declare_lint_rule! {
     /// Require calls to `isNaN()` when checking for `NaN`.
@@ -64,6 +65,7 @@ declare_lint_rule! {
         language: "js",
         sources: &[RuleSource::Eslint("use-isnan")],
         recommended: true,
+        severity: Severity::Error,
         fix_kind: FixKind::Unsafe,
     }
 }
@@ -86,10 +88,12 @@ pub struct RuleState {
 impl Message {
     fn as_str(&self) -> &str {
         match self {
-			Self::BinaryExpression => "Use the Number.isNaN function to compare with NaN.",
-			Self::CaseClause => "'case NaN' can never match. Use Number.isNaN before the switch.",
-			Self::SwitchCase => "'switch(NaN)' can never match a case clause. Use Number.isNaN instead of the switch."
-		}
+            Self::BinaryExpression => "Use the Number.isNaN function to compare with NaN.",
+            Self::CaseClause => "'case NaN' can never match. Use Number.isNaN before the switch.",
+            Self::SwitchCase => {
+                "'switch(NaN)' can never match a case clause. Use Number.isNaN instead of the switch."
+            }
+        }
     }
 }
 
@@ -181,15 +185,15 @@ impl Rule for UseIsNan {
                     call.into(),
                 );
 
-                return Some(JsRuleAction::new(
-                    ActionCategory::QuickFix,
+                Some(JsRuleAction::new(
+                    ctx.metadata().action_category(ctx.category(), ctx.group()),
                     ctx.metadata().applicability(),
                     markup! {
                         "Use "<Emphasis>"Number.isNaN()"</Emphasis>" instead."
                     }
                     .to_owned(),
                     mutation,
-                ));
+                ))
             }
             UseIsNanQuery::JsCaseClause(_) => None,
             UseIsNanQuery::JsSwitchStatement(_) => None,
@@ -233,7 +237,10 @@ fn create_is_nan_expression(nan: AnyJsExpression) -> Option<AnyJsExpression> {
                 .object()
                 .ok()?
                 .as_js_static_member_expression()
-                .is_some_and(|y| y.member().is_ok_and(|z| z.text() == "Number"));
+                .is_some_and(|y| {
+                    y.member()
+                        .is_ok_and(|z| z.to_trimmed_text().text() == "Number")
+                });
 
             if !reference.is_global_this() && !reference.has_name("window")
                 || number_identifier_exists

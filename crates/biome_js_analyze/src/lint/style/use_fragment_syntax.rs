@@ -1,9 +1,10 @@
+use crate::JsRuleAction;
 use crate::react::{jsx_member_name_is_react_fragment, jsx_reference_identifier_is_fragment};
 use crate::services::semantic::Semantic;
-use crate::JsRuleAction;
 use biome_analyze::context::RuleContext;
-use biome_analyze::{declare_lint_rule, ActionCategory, FixKind, Rule, RuleDiagnostic, RuleSource};
+use biome_analyze::{FixKind, Rule, RuleDiagnostic, RuleSource, declare_lint_rule};
 use biome_console::markup;
+use biome_diagnostics::Severity;
 use biome_js_factory::make::{
     jsx_child_list, jsx_closing_fragment, jsx_fragment, jsx_opening_fragment,
 };
@@ -32,6 +33,7 @@ declare_lint_rule! {
         language: "jsx",
         sources: &[RuleSource::EslintReact("jsx-fragments")],
         recommended: false,
+        severity: Severity::Information,
         fix_kind: FixKind::Unsafe,
     }
 }
@@ -55,7 +57,9 @@ impl Rule for UseFragmentSyntax {
             AnyJsxElementName::JsxReferenceIdentifier(identifier) => {
                 jsx_reference_identifier_is_fragment(&identifier, model)?
             }
-            AnyJsxElementName::JsxName(_) | AnyJsxElementName::JsxNamespaceName(_) => false,
+            AnyJsxElementName::JsxName(_)
+            | AnyJsxElementName::JsxNamespaceName(_)
+            | AnyJsxElementName::JsMetavariable(_) => false,
         };
 
         if maybe_invalid && opening_element.attributes().is_empty() {
@@ -90,7 +94,7 @@ impl Rule for UseFragmentSyntax {
         );
 
         Some(JsRuleAction::new(
-            ActionCategory::QuickFix,
+            ctx.metadata().action_category(ctx.category(), ctx.group()),
             ctx.metadata().applicability(),
             (markup! { "Replace "<Emphasis>"<Fragment>"</Emphasis>" with the fragment syntax" })
                 .to_owned(),

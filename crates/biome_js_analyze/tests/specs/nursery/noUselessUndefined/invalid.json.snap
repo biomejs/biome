@@ -1,0 +1,419 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.json
+snapshot_kind: text
+---
+# Input
+```cjs
+let a = undefined;
+```
+
+# Diagnostics
+```
+invalid.json:1:9 lint/nursery/noUselessUndefined  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Don't use unnecessary undefined.
+  
+  > 1 │ let a = undefined;
+      │         ^^^^^^^^^
+  
+  i undefined is the default value for new variables, parameters, return statements, etc… so specifying it doesn't make any difference.
+  
+  i Safe fix: Remove the undefined.
+  
+    1 │ let·a·=·undefined;
+      │       ----------- 
+
+```
+
+# Input
+```cjs
+let a = undefined, b = 2;
+```
+
+# Diagnostics
+```
+invalid.json:1:9 lint/nursery/noUselessUndefined  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Don't use unnecessary undefined.
+  
+  > 1 │ let a = undefined, b = 2;
+      │         ^^^^^^^^^
+  
+  i undefined is the default value for new variables, parameters, return statements, etc… so specifying it doesn't make any difference.
+  
+  i Safe fix: Remove the undefined.
+  
+    1 │ let·a·=·undefined,·b·=·2;
+      │       -----------        
+
+```
+
+# Input
+```cjs
+var a = undefined;
+```
+
+# Diagnostics
+```
+invalid.json:1:9 lint/nursery/noUselessUndefined  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Don't use unnecessary undefined.
+  
+  > 1 │ var a = undefined;
+      │         ^^^^^^^^^
+  
+  i undefined is the default value for new variables, parameters, return statements, etc… so specifying it doesn't make any difference.
+  
+  i Safe fix: Remove the undefined.
+  
+    1 │ var·a·=·undefined;
+      │       ----------- 
+
+```
+
+# Input
+```cjs
+var a = undefined, b = 2;
+```
+
+# Diagnostics
+```
+invalid.json:1:9 lint/nursery/noUselessUndefined  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Don't use unnecessary undefined.
+  
+  > 1 │ var a = undefined, b = 2;
+      │         ^^^^^^^^^
+  
+  i undefined is the default value for new variables, parameters, return statements, etc… so specifying it doesn't make any difference.
+  
+  i Safe fix: Remove the undefined.
+  
+    1 │ var·a·=·undefined,·b·=·2;
+      │       -----------        
+
+```
+
+# Input
+```cjs
+function foo() {return undefined;}
+```
+
+# Diagnostics
+```
+invalid.json:1:24 lint/nursery/noUselessUndefined  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Don't use unnecessary undefined.
+  
+  > 1 │ function foo() {return undefined;}
+      │                        ^^^^^^^^^
+  
+  i undefined is the default value for new variables, parameters, return statements, etc… so specifying it doesn't make any difference.
+  
+  i Safe fix: Remove the undefined.
+  
+    1 │ function·foo()·{return·undefined;}
+      │                        ---------  
+
+```
+
+# Input
+```cjs
+const foo = () => undefined;
+```
+
+# Diagnostics
+```
+invalid.json:1:19 lint/nursery/noUselessUndefined  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Don't use unnecessary undefined.
+  
+  > 1 │ const foo = () => undefined;
+      │                   ^^^^^^^^^
+  
+  i undefined is the default value for new variables, parameters, return statements, etc… so specifying it doesn't make any difference.
+  
+  i Safe fix: Remove the undefined.
+  
+  - const·foo·=·()·=>·undefined;
+  + const·foo·=·()·=>·{};
+  
+
+```
+
+# Input
+```cjs
+const foo = () => {return undefined;};
+```
+
+# Diagnostics
+```
+invalid.json:1:27 lint/nursery/noUselessUndefined  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Don't use unnecessary undefined.
+  
+  > 1 │ const foo = () => {return undefined;};
+      │                           ^^^^^^^^^
+  
+  i undefined is the default value for new variables, parameters, return statements, etc… so specifying it doesn't make any difference.
+  
+  i Safe fix: Remove the undefined.
+  
+    1 │ const·foo·=·()·=>·{return·undefined;};
+      │                           ---------   
+
+```
+
+# Input
+```cjs
+function foo() {return undefined;}
+```
+
+# Diagnostics
+```
+invalid.json:1:24 lint/nursery/noUselessUndefined  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Don't use unnecessary undefined.
+  
+  > 1 │ function foo() {return undefined;}
+      │                        ^^^^^^^^^
+  
+  i undefined is the default value for new variables, parameters, return statements, etc… so specifying it doesn't make any difference.
+  
+  i Safe fix: Remove the undefined.
+  
+    1 │ function·foo()·{return·undefined;}
+      │                        ---------  
+
+```
+
+# Input
+```cjs
+function foo() {return /* comment */ undefined;}
+```
+
+# Diagnostics
+```
+invalid.json:1:38 lint/nursery/noUselessUndefined  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Don't use unnecessary undefined.
+  
+  > 1 │ function foo() {return /* comment */ undefined;}
+      │                                      ^^^^^^^^^
+  
+  i undefined is the default value for new variables, parameters, return statements, etc… so specifying it doesn't make any difference.
+  
+  i Safe fix: Remove the undefined.
+  
+    1 │ function·foo()·{return·/*·comment·*/·undefined;}
+      │                                      ---------  
+
+```
+
+# Input
+```cjs
+function* foo() {yield undefined;}
+```
+
+# Diagnostics
+```
+invalid.json:1:24 lint/nursery/noUselessUndefined  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Don't use unnecessary undefined.
+  
+  > 1 │ function* foo() {yield undefined;}
+      │                        ^^^^^^^^^
+  
+  i undefined is the default value for new variables, parameters, return statements, etc… so specifying it doesn't make any difference.
+  
+  i Safe fix: Remove the undefined.
+  
+    1 │ function*·foo()·{yield·undefined;}
+      │                        ---------  
+
+```
+
+# Input
+```cjs
+function* foo() {yield undefined;}
+```
+
+# Diagnostics
+```
+invalid.json:1:24 lint/nursery/noUselessUndefined  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Don't use unnecessary undefined.
+  
+  > 1 │ function* foo() {yield undefined;}
+      │                        ^^^^^^^^^
+  
+  i undefined is the default value for new variables, parameters, return statements, etc… so specifying it doesn't make any difference.
+  
+  i Safe fix: Remove the undefined.
+  
+    1 │ function*·foo()·{yield·undefined;}
+      │                        ---------  
+
+```
+
+# Input
+```cjs
+const {foo = undefined} = {};
+```
+
+# Diagnostics
+```
+invalid.json:1:14 lint/nursery/noUselessUndefined  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Don't use unnecessary undefined.
+  
+  > 1 │ const {foo = undefined} = {};
+      │              ^^^^^^^^^
+  
+  i undefined is the default value for new variables, parameters, return statements, etc… so specifying it doesn't make any difference.
+  
+  i Safe fix: Remove the undefined.
+  
+    1 │ const·{foo·=·undefined}·=·{};
+      │            -----------       
+
+```
+
+# Input
+```cjs
+const [foo = undefined] = [];
+```
+
+# Diagnostics
+```
+invalid.json:1:14 lint/nursery/noUselessUndefined  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Don't use unnecessary undefined.
+  
+  > 1 │ const [foo = undefined] = [];
+      │              ^^^^^^^^^
+  
+  i undefined is the default value for new variables, parameters, return statements, etc… so specifying it doesn't make any difference.
+  
+  i Safe fix: Remove the undefined.
+  
+    1 │ const·[foo·=·undefined]·=·[];
+      │            -----------       
+
+```
+
+# Input
+```cjs
+function foo(bar = undefined) {}
+```
+
+# Diagnostics
+```
+invalid.json:1:20 lint/nursery/noUselessUndefined  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Don't use unnecessary undefined.
+  
+  > 1 │ function foo(bar = undefined) {}
+      │                    ^^^^^^^^^
+  
+  i undefined is the default value for new variables, parameters, return statements, etc… so specifying it doesn't make any difference.
+  
+  i Safe fix: Remove the undefined.
+  
+    1 │ function·foo(bar·=·undefined)·{}
+      │                  -----------    
+
+```
+
+# Input
+```cjs
+function foo({bar = undefined}) {}
+```
+
+# Diagnostics
+```
+invalid.json:1:21 lint/nursery/noUselessUndefined  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Don't use unnecessary undefined.
+  
+  > 1 │ function foo({bar = undefined}) {}
+      │                     ^^^^^^^^^
+  
+  i undefined is the default value for new variables, parameters, return statements, etc… so specifying it doesn't make any difference.
+  
+  i Safe fix: Remove the undefined.
+  
+    1 │ function·foo({bar·=·undefined})·{}
+      │                   -----------     
+
+```
+
+# Input
+```cjs
+function foo({bar = undefined} = {}) {}
+```
+
+# Diagnostics
+```
+invalid.json:1:21 lint/nursery/noUselessUndefined  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Don't use unnecessary undefined.
+  
+  > 1 │ function foo({bar = undefined} = {}) {}
+      │                     ^^^^^^^^^
+  
+  i undefined is the default value for new variables, parameters, return statements, etc… so specifying it doesn't make any difference.
+  
+  i Safe fix: Remove the undefined.
+  
+    1 │ function·foo({bar·=·undefined}·=·{})·{}
+      │                   -----------          
+
+```
+
+# Input
+```cjs
+function foo([bar = undefined]) {}
+```
+
+# Diagnostics
+```
+invalid.json:1:21 lint/nursery/noUselessUndefined  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Don't use unnecessary undefined.
+  
+  > 1 │ function foo([bar = undefined]) {}
+      │                     ^^^^^^^^^
+  
+  i undefined is the default value for new variables, parameters, return statements, etc… so specifying it doesn't make any difference.
+  
+  i Safe fix: Remove the undefined.
+  
+    1 │ function·foo([bar·=·undefined])·{}
+      │                   -----------     
+
+```
+
+# Input
+```cjs
+function foo([bar = undefined] = []) {}
+```
+
+# Diagnostics
+```
+invalid.json:1:21 lint/nursery/noUselessUndefined  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Don't use unnecessary undefined.
+  
+  > 1 │ function foo([bar = undefined] = []) {}
+      │                     ^^^^^^^^^
+  
+  i undefined is the default value for new variables, parameters, return statements, etc… so specifying it doesn't make any difference.
+  
+  i Safe fix: Remove the undefined.
+  
+    1 │ function·foo([bar·=·undefined]·=·[])·{}
+      │                   -----------          
+
+```

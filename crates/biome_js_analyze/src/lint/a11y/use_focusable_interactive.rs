@@ -1,7 +1,8 @@
-use biome_analyze::{context::RuleContext, declare_lint_rule, Rule, RuleDiagnostic, RuleSource};
-use biome_aria::AriaRoles;
+use biome_analyze::{Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule};
+use biome_aria_metadata::AriaRole;
 use biome_console::markup;
-use biome_js_syntax::{jsx_ext::AnyJsxElement, AnyJsxAttributeValue};
+use biome_diagnostics::Severity;
+use biome_js_syntax::{AnyJsxAttributeValue, jsx_ext::AnyJsxElement};
 use biome_rowan::AstNode;
 
 use crate::services::aria::Aria;
@@ -43,12 +44,13 @@ declare_lint_rule! {
         language: "jsx",
         sources: &[RuleSource::EslintJsxA11y("interactive-supports-focus")],
         recommended: true,
+        severity: Severity::Error,
     }
 }
 
 impl Rule for UseFocusableInteractive {
     type Query = Aria<AnyJsxElement>;
-    type State = String;
+    type State = Box<str>;
     type Signals = Option<Self::State>;
     type Options = ();
 
@@ -58,20 +60,15 @@ impl Rule for UseFocusableInteractive {
             return None;
         }
 
-        let element_name = node.name().ok()?.as_jsx_name()?.value_token().ok()?;
-        let aria_roles = ctx.aria_roles();
-        let attributes = ctx.extract_attributes(&node.attributes());
-        let attributes = ctx.convert_all_attribute_values(attributes);
-
-        if aria_roles.is_not_interactive_element(element_name.text_trimmed(), attributes) {
+        if ctx.aria_roles().is_not_interactive_element(node) {
             let role_attribute = node.find_attribute_by_name("role");
             if let Some(role_attribute) = role_attribute {
                 let tabindex_attribute = node.find_attribute_by_name("tabIndex");
                 let role_attribute_value = role_attribute.initializer()?.value().ok()?;
-                if attribute_has_interactive_role(&role_attribute_value, aria_roles)?
+                if attribute_has_interactive_role(&role_attribute_value)?
                     && tabindex_attribute.is_none()
                 {
-                    return Some(role_attribute_value.text());
+                    return Some(role_attribute_value.to_trimmed_text().text().into());
                 }
             }
         }
@@ -98,9 +95,7 @@ impl Rule for UseFocusableInteractive {
 }
 
 /// Checks if the given role attribute value is interactive or not based on ARIA roles.
-fn attribute_has_interactive_role(
-    role_attribute_value: &AnyJsxAttributeValue,
-    aria_roles: &AriaRoles,
-) -> Option<bool> {
-    Some(aria_roles.is_role_interactive(role_attribute_value.as_static_value()?.text()))
+fn attribute_has_interactive_role(role_attribute_value: &AnyJsxAttributeValue) -> Option<bool> {
+    let role = AriaRole::from_roles(role_attribute_value.as_static_value()?.text())?;
+    Some(role.is_interactive() && !role.is_composite())
 }

@@ -11,7 +11,7 @@ if (true) {
 
 
 if (true) {
-	// rome-ignore format: Tests that ignored empty statements don't get removed
+	// biome-ignore format: Tests that ignored empty statements don't get removed
 	;
 }
 
@@ -38,6 +38,7 @@ Arrow parentheses: Always
 Bracket spacing: true
 Bracket same line: false
 Attribute Position: Auto
+Expand lists: Auto
 -----
 
 ```js
@@ -45,7 +46,7 @@ if (true) {
 }
 
 if (true) {
-	// rome-ignore format: Tests that ignored empty statements don't get removed
+	// biome-ignore format: Tests that ignored empty statements don't get removed
 	;
 }
 ```

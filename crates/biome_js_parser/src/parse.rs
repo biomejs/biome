@@ -1,11 +1,11 @@
 //! Utilities for high level parsing of js code.
 
 use crate::*;
-use biome_js_syntax::{
+pub use biome_js_syntax::{
     AnyJsRoot, JsFileSource, JsLanguage, JsModule, JsScript, JsSyntaxNode, ModuleKind,
 };
 use biome_parser::token_source::Trivia;
-use biome_parser::{event::Event, AnyParse};
+use biome_parser::{AnyParse, event::Event};
 use biome_rowan::{AstNode, NodeCache};
 use std::marker::PhantomData;
 
@@ -18,16 +18,16 @@ pub struct Parse<T> {
 }
 
 impl<T> Parse<T> {
-    pub fn new_module(root: JsSyntaxNode, errors: Vec<ParseDiagnostic>) -> Parse<T> {
+    pub fn new_module(root: JsSyntaxNode, errors: Vec<ParseDiagnostic>) -> Self {
         Self::new(root, errors)
     }
 
-    pub fn new_script(root: JsSyntaxNode, errors: Vec<ParseDiagnostic>) -> Parse<T> {
+    pub fn new_script(root: JsSyntaxNode, errors: Vec<ParseDiagnostic>) -> Self {
         Self::new(root, errors)
     }
 
-    pub fn new(root: JsSyntaxNode, errors: Vec<ParseDiagnostic>) -> Parse<T> {
-        Parse {
+    pub fn new(root: JsSyntaxNode, errors: Vec<ParseDiagnostic>) -> Self {
+        Self {
             root,
             errors,
             _ty: PhantomData,
@@ -162,7 +162,7 @@ fn parse_common(
 /// let prop = dbg!(typed_ast_node.member()).unwrap();
 ///
 /// // You can then go back to an untyped SyntaxNode and get its range, text, parents, children, etc.
-/// assert_eq!(prop.syntax().text(), "2");
+/// assert_eq!(prop.syntax().text_with_trivia(), "2");
 ///
 /// // Util has a function for yielding all tokens of a node.
 /// let tokens = untyped_expr_node.descendants_tokens(Direction::Next).map(|token| token.text_trimmed().to_string()).collect::<Vec<_>>();
@@ -275,11 +275,9 @@ pub fn parse_js_with_cache(
     options: JsParserOptions,
     cache: &mut NodeCache,
 ) -> Parse<AnyJsRoot> {
-    tracing::debug_span!("parse").in_scope(move || {
-        let (events, errors, tokens) = parse_common(text, source_type, options);
-        let mut tree_sink = JsLosslessTreeSink::with_cache(text, &tokens, cache);
-        biome_parser::event::process(&mut tree_sink, events, errors);
-        let (green, parse_errors) = tree_sink.finish();
-        Parse::new(green, parse_errors)
-    })
+    let (events, errors, tokens) = parse_common(text, source_type, options);
+    let mut tree_sink = JsLosslessTreeSink::with_cache(text, &tokens, cache);
+    biome_parser::event::process(&mut tree_sink, events, errors);
+    let (green, parse_errors) = tree_sink.finish();
+    Parse::new(green, parse_errors)
 }

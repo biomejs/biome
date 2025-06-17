@@ -1,3 +1,5 @@
+#![deny(clippy::use_self)]
+
 mod comments;
 pub mod context;
 mod css;
@@ -21,12 +23,12 @@ use biome_formatter::comments::Comments;
 use biome_formatter::prelude::*;
 use biome_formatter::trivia::format_skipped_token_trivia;
 use biome_formatter::{
-    write, CstFormatContext, FormatContext, FormatLanguage, FormatOwnedWithRule, FormatRefWithRule,
-    TransformSourceMap,
+    CstFormatContext, FormatContext, FormatLanguage, FormatOwnedWithRule, FormatRefWithRule,
+    TransformSourceMap, write,
 };
 use biome_formatter::{Formatted, Printed};
 use biome_rowan::{AstNode, SyntaxNode, TextRange};
-use biome_string_case::StrOnlyExtension;
+use biome_string_case::StrLikeExtension;
 
 /// Used to get an object that knows how to format this object.
 pub(crate) trait AsFormat<Context> {
@@ -43,7 +45,10 @@ impl<T, C> AsFormat<C> for &T
 where
     T: AsFormat<C>,
 {
-    type Format<'a> = T::Format<'a> where Self: 'a;
+    type Format<'a>
+        = T::Format<'a>
+    where
+        Self: 'a;
 
     fn format(&self) -> Self::Format<'_> {
         AsFormat::format(&**self)
@@ -57,7 +62,10 @@ impl<T, C> AsFormat<C> for biome_rowan::SyntaxResult<T>
 where
     T: AsFormat<C>,
 {
-    type Format<'a> = biome_rowan::SyntaxResult<T::Format<'a>> where Self: 'a;
+    type Format<'a>
+        = biome_rowan::SyntaxResult<T::Format<'a>>
+    where
+        Self: 'a;
 
     fn format(&self) -> Self::Format<'_> {
         match self {
@@ -74,7 +82,10 @@ impl<T, C> AsFormat<C> for Option<T>
 where
     T: AsFormat<C>,
 {
-    type Format<'a> = Option<T::Format<'a>> where Self: 'a;
+    type Format<'a>
+        = Option<T::Format<'a>>
+    where
+        Self: 'a;
 
     fn format(&self) -> Self::Format<'_> {
         self.as_ref().map(|value| value.format())
@@ -311,7 +322,7 @@ impl FormatRule<CssSyntaxToken> for FormatCssSyntaxToken {
 }
 
 impl AsFormat<CssFormatContext> for CssSyntaxToken {
-    type Format<'a> = FormatRefWithRule<'a, CssSyntaxToken, FormatCssSyntaxToken>;
+    type Format<'a> = FormatRefWithRule<'a, Self, FormatCssSyntaxToken>;
 
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(self, FormatCssSyntaxToken)
@@ -319,7 +330,7 @@ impl AsFormat<CssFormatContext> for CssSyntaxToken {
 }
 
 impl IntoFormat<CssFormatContext> for CssSyntaxToken {
-    type Format = FormatOwnedWithRule<CssSyntaxToken, FormatCssSyntaxToken>;
+    type Format = FormatOwnedWithRule<Self, FormatCssSyntaxToken>;
 
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(self, FormatCssSyntaxToken)
@@ -373,7 +384,7 @@ pub fn format_sub_tree(options: CssFormatOptions, root: &CssSyntaxNode) -> Forma
 mod tests {
     use crate::context::CssFormatOptions;
     use crate::format_node;
-    use biome_css_parser::{parse_css, CssParserOptions};
+    use biome_css_parser::{CssParserOptions, parse_css};
 
     #[test]
     fn smoke_test() {

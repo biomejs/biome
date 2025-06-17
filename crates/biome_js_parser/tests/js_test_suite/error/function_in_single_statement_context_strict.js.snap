@@ -1,0 +1,215 @@
+---
+source: crates/biome_js_parser/tests/spec_test.rs
+expression: snapshot
+snapshot_kind: text
+---
+## Input
+
+```js
+if (true) function a() {}
+label1: function b() {}
+while (true) function c() {}
+
+```
+
+
+## AST
+
+```
+JsModule {
+    bom_token: missing (optional),
+    interpreter_token: missing (optional),
+    directives: JsDirectiveList [],
+    items: JsModuleItemList [
+        JsIfStatement {
+            if_token: IF_KW@0..3 "if" [] [Whitespace(" ")],
+            l_paren_token: L_PAREN@3..4 "(" [] [],
+            test: JsBooleanLiteralExpression {
+                value_token: TRUE_KW@4..8 "true" [] [],
+            },
+            r_paren_token: R_PAREN@8..10 ")" [] [Whitespace(" ")],
+            consequent: JsBogusStatement {
+                items: [
+                    FUNCTION_KW@10..19 "function" [] [Whitespace(" ")],
+                    JsIdentifierBinding {
+                        name_token: IDENT@19..20 "a" [] [],
+                    },
+                    JsParameters {
+                        l_paren_token: L_PAREN@20..21 "(" [] [],
+                        items: JsParameterList [],
+                        r_paren_token: R_PAREN@21..23 ")" [] [Whitespace(" ")],
+                    },
+                    JsFunctionBody {
+                        l_curly_token: L_CURLY@23..24 "{" [] [],
+                        directives: JsDirectiveList [],
+                        statements: JsStatementList [],
+                        r_curly_token: R_CURLY@24..25 "}" [] [],
+                    },
+                ],
+            },
+            else_clause: missing (optional),
+        },
+        JsLabeledStatement {
+            label: JsLabel {
+                value_token: IDENT@25..32 "label1" [Newline("\n")] [],
+            },
+            colon_token: COLON@32..34 ":" [] [Whitespace(" ")],
+            body: JsBogusStatement {
+                items: [
+                    FUNCTION_KW@34..43 "function" [] [Whitespace(" ")],
+                    JsIdentifierBinding {
+                        name_token: IDENT@43..44 "b" [] [],
+                    },
+                    JsParameters {
+                        l_paren_token: L_PAREN@44..45 "(" [] [],
+                        items: JsParameterList [],
+                        r_paren_token: R_PAREN@45..47 ")" [] [Whitespace(" ")],
+                    },
+                    JsFunctionBody {
+                        l_curly_token: L_CURLY@47..48 "{" [] [],
+                        directives: JsDirectiveList [],
+                        statements: JsStatementList [],
+                        r_curly_token: R_CURLY@48..49 "}" [] [],
+                    },
+                ],
+            },
+        },
+        JsWhileStatement {
+            while_token: WHILE_KW@49..56 "while" [Newline("\n")] [Whitespace(" ")],
+            l_paren_token: L_PAREN@56..57 "(" [] [],
+            test: JsBooleanLiteralExpression {
+                value_token: TRUE_KW@57..61 "true" [] [],
+            },
+            r_paren_token: R_PAREN@61..63 ")" [] [Whitespace(" ")],
+            body: JsBogusStatement {
+                items: [
+                    FUNCTION_KW@63..72 "function" [] [Whitespace(" ")],
+                    JsIdentifierBinding {
+                        name_token: IDENT@72..73 "c" [] [],
+                    },
+                    JsParameters {
+                        l_paren_token: L_PAREN@73..74 "(" [] [],
+                        items: JsParameterList [],
+                        r_paren_token: R_PAREN@74..76 ")" [] [Whitespace(" ")],
+                    },
+                    JsFunctionBody {
+                        l_curly_token: L_CURLY@76..77 "{" [] [],
+                        directives: JsDirectiveList [],
+                        statements: JsStatementList [],
+                        r_curly_token: R_CURLY@77..78 "}" [] [],
+                    },
+                ],
+            },
+        },
+    ],
+    eof_token: EOF@78..79 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: JS_MODULE@0..79
+  0: (empty)
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..78
+    0: JS_IF_STATEMENT@0..25
+      0: IF_KW@0..3 "if" [] [Whitespace(" ")]
+      1: L_PAREN@3..4 "(" [] []
+      2: JS_BOOLEAN_LITERAL_EXPRESSION@4..8
+        0: TRUE_KW@4..8 "true" [] []
+      3: R_PAREN@8..10 ")" [] [Whitespace(" ")]
+      4: JS_BOGUS_STATEMENT@10..25
+        0: FUNCTION_KW@10..19 "function" [] [Whitespace(" ")]
+        1: JS_IDENTIFIER_BINDING@19..20
+          0: IDENT@19..20 "a" [] []
+        2: JS_PARAMETERS@20..23
+          0: L_PAREN@20..21 "(" [] []
+          1: JS_PARAMETER_LIST@21..21
+          2: R_PAREN@21..23 ")" [] [Whitespace(" ")]
+        3: JS_FUNCTION_BODY@23..25
+          0: L_CURLY@23..24 "{" [] []
+          1: JS_DIRECTIVE_LIST@24..24
+          2: JS_STATEMENT_LIST@24..24
+          3: R_CURLY@24..25 "}" [] []
+      5: (empty)
+    1: JS_LABELED_STATEMENT@25..49
+      0: JS_LABEL@25..32
+        0: IDENT@25..32 "label1" [Newline("\n")] []
+      1: COLON@32..34 ":" [] [Whitespace(" ")]
+      2: JS_BOGUS_STATEMENT@34..49
+        0: FUNCTION_KW@34..43 "function" [] [Whitespace(" ")]
+        1: JS_IDENTIFIER_BINDING@43..44
+          0: IDENT@43..44 "b" [] []
+        2: JS_PARAMETERS@44..47
+          0: L_PAREN@44..45 "(" [] []
+          1: JS_PARAMETER_LIST@45..45
+          2: R_PAREN@45..47 ")" [] [Whitespace(" ")]
+        3: JS_FUNCTION_BODY@47..49
+          0: L_CURLY@47..48 "{" [] []
+          1: JS_DIRECTIVE_LIST@48..48
+          2: JS_STATEMENT_LIST@48..48
+          3: R_CURLY@48..49 "}" [] []
+    2: JS_WHILE_STATEMENT@49..78
+      0: WHILE_KW@49..56 "while" [Newline("\n")] [Whitespace(" ")]
+      1: L_PAREN@56..57 "(" [] []
+      2: JS_BOOLEAN_LITERAL_EXPRESSION@57..61
+        0: TRUE_KW@57..61 "true" [] []
+      3: R_PAREN@61..63 ")" [] [Whitespace(" ")]
+      4: JS_BOGUS_STATEMENT@63..78
+        0: FUNCTION_KW@63..72 "function" [] [Whitespace(" ")]
+        1: JS_IDENTIFIER_BINDING@72..73
+          0: IDENT@72..73 "c" [] []
+        2: JS_PARAMETERS@73..76
+          0: L_PAREN@73..74 "(" [] []
+          1: JS_PARAMETER_LIST@74..74
+          2: R_PAREN@74..76 ")" [] [Whitespace(" ")]
+        3: JS_FUNCTION_BODY@76..78
+          0: L_CURLY@76..77 "{" [] []
+          1: JS_DIRECTIVE_LIST@77..77
+          2: JS_STATEMENT_LIST@77..77
+          3: R_CURLY@77..78 "}" [] []
+  4: EOF@78..79 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+function_in_single_statement_context_strict.js:1:11 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × In strict mode code, functions can only be declared at top level or inside a block
+  
+  > 1 │ if (true) function a() {}
+      │           ^^^^^^^^^^^^^^^
+    2 │ label1: function b() {}
+    3 │ while (true) function c() {}
+  
+  i wrap the function in a block statement
+  
+function_in_single_statement_context_strict.js:2:9 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × In strict mode code, functions can only be declared at top level or inside a block
+  
+    1 │ if (true) function a() {}
+  > 2 │ label1: function b() {}
+      │         ^^^^^^^^^^^^^^^
+    3 │ while (true) function c() {}
+    4 │ 
+  
+  i wrap the function in a block statement
+  
+function_in_single_statement_context_strict.js:3:14 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × In strict mode code, functions can only be declared at top level or inside a block
+  
+    1 │ if (true) function a() {}
+    2 │ label1: function b() {}
+  > 3 │ while (true) function c() {}
+      │              ^^^^^^^^^^^^^^^
+    4 │ 
+  
+  i wrap the function in a block statement
+  
+```

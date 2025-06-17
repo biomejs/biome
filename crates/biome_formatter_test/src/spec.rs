@@ -1,8 +1,8 @@
+use crate::TestFormatLanguage;
 use crate::check_reformat::CheckReformat;
 use crate::snapshot_builder::{SnapshotBuilder, SnapshotOutput};
 use crate::utils::strip_rome_placeholders;
-use crate::TestFormatLanguage;
-use biome_configuration::PartialConfiguration;
+use biome_configuration::Configuration;
 use biome_console::EnvConsole;
 use biome_deserialize::json::deserialize_from_str;
 use biome_diagnostics::print_diagnostic_to_string;
@@ -10,19 +10,20 @@ use biome_formatter::{FormatLanguage, FormatOptions, Printed};
 use biome_fs::BiomePath;
 use biome_parser::AnyParse;
 use biome_rowan::{TextRange, TextSize};
+use biome_service::App;
+use biome_service::projects::ProjectKey;
 use biome_service::settings::Settings;
 use biome_service::workspace::{
-    DocumentFileSource, FeaturesBuilder, RegisterProjectFolderParams, SupportsFeatureParams,
-    UpdateSettingsParams,
+    DocumentFileSource, FeaturesBuilder, OpenProjectParams, OpenProjectResult,
+    SupportsFeatureParams, UpdateSettingsParams,
 };
-use biome_service::App;
+use camino::{Utf8Path, Utf8PathBuf};
 use std::ops::Range;
-use std::path::{Path, PathBuf};
 
 #[derive(Debug)]
 pub struct SpecTestFile<'a> {
     input_file: BiomePath,
-    root_path: &'a Path,
+    root_path: &'a Utf8Path,
 
     input_code: String,
 
@@ -33,34 +34,40 @@ pub struct SpecTestFile<'a> {
 impl<'a> SpecTestFile<'a> {
     pub fn try_from_file(
         input_file: &'a str,
-        root_path: &'a Path,
-        settings: Option<UpdateSettingsParams>,
-    ) -> Option<SpecTestFile<'a>> {
+        root_path: &'a Utf8Path,
+        settings_fn: impl FnOnce(ProjectKey) -> Option<UpdateSettingsParams>,
+    ) -> Option<Self> {
+        if input_file.ends_with("options.json") {
+            return None;
+        }
         let mut console = EnvConsole::default();
         let app = App::with_console(&mut console);
         let file_path = &input_file;
-        let spec_input_file = Path::new(input_file);
+        let spec_input_file = Utf8Path::new(input_file);
 
         assert!(
             spec_input_file.is_file(),
-            "The input '{}' must exist and be a file.",
-            spec_input_file.display()
+            "The input '{spec_input_file}' must exist and be a file.",
         );
 
-        app.workspace
-            .register_project_folder(RegisterProjectFolderParams {
-                set_as_current_workspace: true,
-                path: None,
+        let OpenProjectResult { project_key, .. } = app
+            .workspace
+            .open_project(OpenProjectParams {
+                path: BiomePath::new(""),
+                open_uninitialized: true,
+                only_rules: None,
+                skip_rules: None,
             })
             .unwrap();
 
-        if let Some(settings) = settings {
+        if let Some(settings) = settings_fn(project_key) {
             app.workspace.update_settings(settings).unwrap();
         }
         let mut input_file = BiomePath::new(file_path);
         let can_format = app
             .workspace
             .file_features(SupportsFeatureParams {
+                project_key,
                 path: input_file.clone(),
                 features: FeaturesBuilder::new().with_formatter().build(),
             })
@@ -90,7 +97,7 @@ impl<'a> SpecTestFile<'a> {
     }
 
     pub fn file_name(&self) -> &str {
-        self.input_file.file_name().unwrap().to_str().unwrap()
+        self.input_file.file_name().unwrap()
     }
 
     pub fn input_file(&self) -> &BiomePath {
@@ -106,8 +113,7 @@ impl<'a> SpecTestFile<'a> {
                     self.root_path, self.input_file
                 )
             })
-            .to_str()
-            .expect("failed to get relative file name")
+            .as_str()
     }
 
     fn range(&self) -> (Option<usize>, Option<usize>) {
@@ -120,7 +126,7 @@ where
     L: TestFormatLanguage,
 {
     test_file: SpecTestFile<'a>,
-    test_directory: PathBuf,
+    test_directory: Utf8PathBuf,
     language: L,
     format_language: L::FormatLanguage,
 }
@@ -135,7 +141,7 @@ where
         language: L,
         format_language: L::FormatLanguage,
     ) -> Self {
-        let test_directory = PathBuf::from(test_directory);
+        let test_directory = Utf8PathBuf::from(test_directory);
 
         SpecSnapshot {
             test_file,
@@ -241,12 +247,11 @@ where
 
             let mut settings = Settings::default();
             // SAFETY: we checked its existence already, we assume we have rights to read it
-            let (test_options, diagnostics) = deserialize_from_str::<PartialConfiguration>(
-                options_path.get_buffer_from_file().as_str(),
-            )
-            .consume();
+            let (test_options, diagnostics) =
+                deserialize_from_str::<Configuration>(options_path.get_buffer_from_file().as_str())
+                    .consume();
             settings
-                .merge_with_configuration(test_options.unwrap_or_default(), None, None, &[])
+                .merge_with_configuration(test_options.unwrap_or_default(), None)
                 .unwrap();
 
             if !diagnostics.is_empty() {

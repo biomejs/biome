@@ -1,5 +1,5 @@
 //! Simple hand-written ungrammar lexer
-use crate::error::{bail, Result};
+use crate::error::{Result, bail};
 
 #[derive(Debug, Eq, PartialEq)]
 pub(crate) enum TokenKind {
@@ -29,10 +29,10 @@ pub(crate) enum CombinatorKind {
 impl CombinatorKind {
     pub fn new(value: &TokenKind) -> Self {
         match value {
-            TokenKind::Pipe => CombinatorKind::Pipe,
-            TokenKind::DoublePipe => CombinatorKind::DoublePipe,
-            TokenKind::DoubleAmpersand => CombinatorKind::DoubleAmpersand,
-            _ => CombinatorKind::NonCombinator,
+            TokenKind::Pipe => Self::Pipe,
+            TokenKind::DoublePipe => Self::DoublePipe,
+            TokenKind::DoubleAmpersand => Self::DoubleAmpersand,
+            _ => Self::NonCombinator,
         }
     }
 }

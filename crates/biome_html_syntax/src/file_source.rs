@@ -1,13 +1,12 @@
 use biome_rowan::FileSourceError;
 use biome_string_case::StrLikeExtension;
-use std::{ffi::OsStr, path::Path};
+use camino::Utf8Path;
 
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[derive(
     Debug, Clone, Default, Copy, Eq, PartialEq, Hash, serde::Serialize, serde::Deserialize,
 )]
 pub struct HtmlFileSource {
-    #[allow(unused)]
     variant: HtmlVariant,
 }
 
@@ -34,17 +33,17 @@ impl HtmlFileSource {
     }
 
     /// Try to return the HTML file source corresponding to this file name from well-known files
-    pub fn try_from_well_known(_: &Path) -> Result<Self, FileSourceError> {
+    pub fn try_from_well_known(_: &Utf8Path) -> Result<Self, FileSourceError> {
         // TODO: to be implemented
         Err(FileSourceError::UnknownFileName)
     }
 
     /// Try to return the HTML file source corresponding to this file extension
-    pub fn try_from_extension(extension: &OsStr) -> Result<Self, FileSourceError> {
+    pub fn try_from_extension(extension: &str) -> Result<Self, FileSourceError> {
         // We assume the file extension is normalized to lowercase
-        match extension.as_encoded_bytes() {
-            b"html" => Ok(Self::html()),
-            b"astro" => Ok(Self::astro()),
+        match extension {
+            "html" => Ok(Self::html()),
+            "astro" => Ok(Self::astro()),
             _ => Err(FileSourceError::UnknownExtension),
         }
     }
@@ -67,10 +66,10 @@ impl HtmlFileSource {
     }
 }
 
-impl TryFrom<&Path> for HtmlFileSource {
+impl TryFrom<&Utf8Path> for HtmlFileSource {
     type Error = FileSourceError;
 
-    fn try_from(path: &Path) -> Result<Self, Self::Error> {
+    fn try_from(path: &Utf8Path) -> Result<Self, Self::Error> {
         if let Ok(file_source) = Self::try_from_well_known(path) {
             return Ok(file_source);
         }

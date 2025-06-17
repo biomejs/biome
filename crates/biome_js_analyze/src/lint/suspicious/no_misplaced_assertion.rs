@@ -1,9 +1,10 @@
 use crate::services::semantic::Semantic;
 use biome_analyze::{
-    context::RuleContext, declare_lint_rule, Rule, RuleDiagnostic, RuleSource, RuleSourceKind,
+    Rule, RuleDiagnostic, RuleSource, RuleSourceKind, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
 use biome_deserialize::TextRange;
+use biome_diagnostics::Severity;
 use biome_js_syntax::{AnyJsExpression, JsCallExpression, JsIdentifierBinding, JsImport};
 use biome_rowan::AstNode;
 
@@ -107,7 +108,8 @@ declare_lint_rule! {
         name: "noMisplacedAssertion",
         language: "js",
         recommended: false,
-        sources: &[RuleSource::EslintJest("no-standalone-expect")],
+        severity: Severity::Warning,
+        sources: &[RuleSource::EslintJest("no-standalone-expect"), RuleSource::EslintVitest("no-standalone-expect")],
         source_kind: RuleSourceKind::Inspired,
     }
 }
@@ -240,7 +242,7 @@ fn is_exception_for_expect(node: &AnyJsExpression) -> Option<bool> {
 
     let parent = node.syntax().parent()?;
     let last_token = parent.last_token()?;
-    let last_token_text = last_token.text();
+    let last_token_text = last_token.text_trimmed();
 
     let member = node.get_callee_member_name()?;
     let member_text = member.text_trimmed();

@@ -1,0 +1,110 @@
+---
+source: crates/biome_module_graph/tests/snap/mod.rs
+expression: content
+---
+# `/src/bar.ts` (Not imported by resolver)
+
+## Source
+
+```ts
+import type { Foo } from "./foo";
+
+let instance: Foo;
+
+// This call expression makes the `noFloatingPromises` rule work.
+instance.doSomething();
+```
+
+## Module Info
+
+```
+Exports {
+  No exports
+}
+Imports {
+  "Foo" => {
+    Specifier: "./foo"
+    Resolved path: "/src/foo.ts"
+    Import Symbol: Foo
+  }
+}
+```
+
+## Registered types
+
+```
+Module TypeId(0) => unknown
+
+Module TypeId(1) => instanceof Import Symbol: Foo from "/src/foo.ts"
+```
+
+# `/src/foo.ts` (Module 1)
+
+## Source
+
+```ts
+// Removing this fixes the problem.
+import type elliptic from "elliptic";
+
+export class Foo {
+	// Removing this also fixes the problem.
+	prop: string;
+
+	// Turning this into a method declaration also fixes the problem.
+	doSomething = (): void => {};
+}
+```
+
+## Module Info
+
+```
+Exports {
+  "Foo" => {
+    ExportOwnExport => JsOwnExport(
+      Module(0) TypeId(4)
+      Local name: Foo
+    )
+  }
+}
+Imports {
+  "elliptic" => {
+    Specifier: "elliptic"
+    Resolved path:
+    Import Symbol: Default
+  }
+}
+```
+
+## Registered types
+
+```
+Module TypeId(0) => unknown
+
+Module TypeId(1) => string
+
+Module TypeId(2) => void
+
+Module TypeId(3) => sync Function {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: Module(0) TypeId(2)
+}
+
+Module TypeId(4) => class "Foo" {
+  extends: none
+  type_args: []
+}
+```
+
+# Ad-Hoc Type Resolver
+
+## Registered types
+
+```
+Scope TypeId(0) => class "Foo" {
+  extends: none
+  type_args: []
+}
+```

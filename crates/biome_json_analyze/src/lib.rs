@@ -1,4 +1,6 @@
-mod assists;
+#![deny(clippy::use_self)]
+
+mod assist;
 mod lint;
 
 pub mod options;
@@ -9,11 +11,13 @@ pub mod utils;
 pub use crate::registry::visit_registry;
 use crate::suppression_action::JsonSuppressionAction;
 use biome_analyze::{
-    AnalysisFilter, AnalyzerOptions, AnalyzerSignal, ControlFlow, LanguageRoot, MatchQueryParams,
-    MetadataRegistry, RuleAction, RuleRegistry, SuppressionDiagnostic, SuppressionKind,
+    AnalysisFilter, AnalyzerOptions, AnalyzerSignal, AnalyzerSuppression, ControlFlow,
+    LanguageRoot, MatchQueryParams, MetadataRegistry, RuleAction, RuleRegistry,
+    to_analyzer_suppressions,
 };
 use biome_diagnostics::Error;
-use biome_json_syntax::{JsonFileSource, JsonLanguage};
+use biome_json_syntax::{JsonFileSource, JsonLanguage, TextRange};
+use biome_suppression::{SuppressionDiagnostic, parse_suppression_comment};
 use std::ops::Deref;
 use std::sync::LazyLock;
 
@@ -62,14 +66,34 @@ where
     B: 'a,
 {
     fn parse_linter_suppression_comment(
-        _text: &str,
-    ) -> Vec<Result<SuppressionKind, SuppressionDiagnostic>> {
-        vec![]
+        text: &str,
+        piece_range: TextRange,
+    ) -> Vec<Result<AnalyzerSuppression, SuppressionDiagnostic>> {
+        let mut result = Vec::new();
+
+        for suppression in parse_suppression_comment(text) {
+            let suppression = match suppression {
+                Ok(suppression) => suppression,
+                Err(err) => {
+                    result.push(Err(err));
+                    continue;
+                }
+            };
+
+            let analyzer_suppressions: Vec<_> = to_analyzer_suppressions(suppression, piece_range)
+                .into_iter()
+                .map(Ok)
+                .collect();
+
+            result.extend(analyzer_suppressions)
+        }
+
+        result
     }
     let mut registry = RuleRegistry::builder(&filter, root);
     visit_registry(&mut registry);
 
-    let (registry, mut services, diagnostics, visitors) = registry.build();
+    let (registry, mut services, diagnostics, visitors, categories) = registry.build();
 
     // Bail if we can't parse a rule option
     if !diagnostics.is_empty() {
@@ -82,6 +106,7 @@ where
         parse_linter_suppression_comment,
         Box::new(JsonSuppressionAction),
         &mut emit_signal,
+        categories,
     );
 
     for ((phase, _), visitor) in visitors {
@@ -105,14 +130,14 @@ where
 mod tests {
     use biome_analyze::{AnalyzerOptions, Never, RuleFilter};
     use biome_console::fmt::{Formatter, Termcolor};
-    use biome_console::{markup, Markup};
+    use biome_console::{Markup, markup};
     use biome_diagnostics::termcolor::NoColor;
     use biome_diagnostics::{Diagnostic, DiagnosticExt, PrintDiagnostic, Severity};
-    use biome_json_parser::{parse_json, JsonParserOptions};
+    use biome_json_parser::{JsonParserOptions, parse_json};
     use biome_json_syntax::{JsonFileSource, TextRange};
     use std::slice;
 
-    use crate::{analyze, AnalysisFilter, ControlFlow};
+    use crate::{AnalysisFilter, ControlFlow, analyze};
 
     #[ignore]
     #[test]

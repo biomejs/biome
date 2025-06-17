@@ -1,8 +1,9 @@
 use biome_analyze::{
-    context::RuleContext, declare_lint_rule, Ast, Rule, RuleDiagnostic, RuleSource,
+    Ast, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
 use biome_deserialize_macros::Deserializable;
+use biome_diagnostics::Severity;
 use biome_js_syntax::{
     AnyJsxAttribute, AnyJsxAttributeName, AnyJsxAttributeValue, AnyJsxElementName, AnyJsxTag,
     JsSyntaxKind, JsxAttribute,
@@ -13,7 +14,7 @@ use serde::{Deserialize, Serialize};
 declare_lint_rule! {
     /// Enforce that a label element or component has a text label and an associated input.
     ///
-    /// An "input" is considered one of the following elements: `input`, `meter`, `output`, `progress`, `select` or `textarea`.
+    /// An "input" is considered one of the following elements: `input`, `meter`, `output`, `progress`, `select`, `textarea` or `button`.
     ///
     /// There are two supported ways to associate a label with an input:
     /// - Wrapping an input in a label element.
@@ -73,9 +74,8 @@ declare_lint_rule! {
     ///
     /// Both options `inputComponents` and `labelComponents` don't have support for namespace components (e.g. `<Control.Input>`).
     ///
-    /// ```json
+    /// ```json,options
     /// {
-    ///     "//": "...",
     ///     "options": {
     ///         "inputComponents": ["CustomInput"],
     ///         "labelAttributes": ["label"],
@@ -90,6 +90,7 @@ declare_lint_rule! {
         language: "jsx",
         sources: &[RuleSource::EslintJsxA11y("label-has-associated-control")],
         recommended: true,
+        severity: Severity::Error,
     }
 }
 
@@ -102,7 +103,7 @@ impl Rule for NoLabelWithoutControl {
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
         let options = ctx.options();
-        let element_name = node.name()?.name_value_token()?;
+        let element_name = node.name()?.name_value_token().ok()?;
         let element_name = element_name.text_trimmed();
         let is_allowed_element = options.has_element_name(element_name)
             || DEFAULT_LABEL_COMPONENTS.contains(&element_name);
@@ -237,7 +238,7 @@ impl NoLabelWithoutControlOptions {
                             child_iter.skip_subtree();
                             continue;
                         };
-                        let Some(element_name) = element_name.name_value_token() else {
+                        let Ok(element_name) = element_name.name_value_token() else {
                             continue;
                         };
                         let element_name = element_name.text_trimmed();
@@ -271,8 +272,9 @@ pub struct NoLabelWithoutControlState {
 
 const DEFAULT_LABEL_ATTRIBUTES: [&str; 3] = ["aria-label", "aria-labelledby", "alt"];
 const DEFAULT_LABEL_COMPONENTS: [&str; 1] = ["label"];
-const DEFAULT_INPUT_COMPONENTS: [&str; 6] =
-    ["input", "meter", "output", "progress", "select", "textarea"];
+const DEFAULT_INPUT_COMPONENTS: [&str; 7] = [
+    "input", "meter", "output", "progress", "select", "textarea", "button",
+];
 
 /// Returns whether the passed `AnyJsxTag` have a `for` or `htmlFor` attribute
 fn has_for_attribute(jsx_tag: &AnyJsxTag) -> bool {
@@ -292,7 +294,7 @@ fn has_for_attribute(jsx_tag: &AnyJsxTag) -> bool {
                 }
             })
             .is_some_and(|jsx_name| for_attributes.contains(&jsx_name.text_trimmed())),
-        AnyJsxAttribute::JsxSpreadAttribute(_) => false,
+        AnyJsxAttribute::JsxSpreadAttribute(_) | AnyJsxAttribute::JsMetavariable(_) => false,
     })
 }
 

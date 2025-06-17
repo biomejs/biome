@@ -1,16 +1,16 @@
 use crate::JsRuleAction;
 use biome_analyze::{
-    context::RuleContext, declare_lint_rule, ActionCategory, Ast, FixKind, Rule, RuleDiagnostic,
-    RuleSource,
+    Ast, FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
+use biome_diagnostics::Severity;
 use biome_js_factory::make;
 use biome_js_syntax::{
     AnyJsExpression, AnyJsLiteralExpression, AnyTsName, AnyTsType, JsInitializerClause,
     JsPropertyClassMember, JsSyntaxKind, JsVariableDeclarator, TsAsExpression,
     TsTypeAssertionExpression,
 };
-use biome_rowan::{declare_node_union, AstNode, BatchMutationExt, TextRange};
+use biome_rowan::{AstNode, BatchMutationExt, TextRange, declare_node_union};
 
 declare_lint_rule! {
     /// Enforce the use of `as const` over literal type and type annotation.
@@ -49,7 +49,8 @@ declare_lint_rule! {
         name: "useAsConstAssertion",
         language: "ts",
         sources: &[RuleSource::EslintTypeScript("prefer-as-const")],
-        recommended: true,
+        recommended: false,
+        severity: Severity::Information,
         fix_kind: FixKind::Safe,
     }
 }
@@ -190,7 +191,7 @@ impl Rule for UseAsConstAssertion {
             }
         };
         Some(JsRuleAction::new(
-            ActionCategory::QuickFix,
+            ctx.metadata().action_category(ctx.category(), ctx.group()),
             ctx.metadata().applicability(),
             markup! { "Replace with "<Emphasis>"as const"</Emphasis>"." }.to_owned(),
             mutation,

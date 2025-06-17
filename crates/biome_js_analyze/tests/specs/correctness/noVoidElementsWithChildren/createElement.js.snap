@@ -1,9 +1,10 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: createElement.js
+snapshot_kind: text
 ---
 # Input
-```jsx
+```js
 
 
 React.createElement('img', {
@@ -20,7 +21,7 @@ React.createElement('img', {
 ```
 createElement.js:3:1 lint/correctness/noVoidElementsWithChildren  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! img is a void element tag and must not have children.
+  × img is a void element tag and must not have children.
   
   > 3 │ React.createElement('img', {
       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -40,7 +41,7 @@ createElement.js:3:1 lint/correctness/noVoidElementsWithChildren  FIXABLE  ━�
 ```
 createElement.js:7:1 lint/correctness/noVoidElementsWithChildren  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! img is a void element tag and must not have the dangerouslySetInnerHTML prop.
+  × img is a void element tag and must not have the dangerouslySetInnerHTML prop.
   
      5 │ }, 'child')
      6 │ 
@@ -61,5 +62,3 @@ createElement.js:7:1 lint/correctness/noVoidElementsWithChildren  FIXABLE  ━�
   
 
 ```
-
-

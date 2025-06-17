@@ -2,14 +2,14 @@ use crate::prelude::*;
 
 use crate::js::expressions::call_arguments::GroupedCallArgumentLayout;
 use crate::utils::function_body::{FormatMaybeCachedFunctionBody, FunctionBodyCacheMode};
-use biome_formatter::{write, RemoveSoftLinesBuffer};
+use biome_formatter::{RemoveSoftLinesBuffer, write};
 use biome_js_syntax::{
     AnyJsBinding, AnyTsReturnType, AnyTsType, JsFunctionBody, JsFunctionDeclaration,
     JsFunctionExportDefaultDeclaration, JsFunctionExpression, JsParameters, JsSyntaxToken,
     TsDeclareFunctionDeclaration, TsDeclareFunctionExportDefaultDeclaration,
     TsReturnTypeAnnotation, TsTypeParameters,
 };
-use biome_rowan::{declare_node_union, SyntaxResult};
+use biome_rowan::{SyntaxResult, declare_node_union};
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatJsFunctionDeclaration;
@@ -38,29 +38,21 @@ pub(crate) struct FormatFunctionOptions {
 impl FormatFunction {
     fn async_token(&self) -> Option<JsSyntaxToken> {
         match self {
-            FormatFunction::JsFunctionDeclaration(declaration) => declaration.async_token(),
-            FormatFunction::JsFunctionExpression(expression) => expression.async_token(),
-            FormatFunction::JsFunctionExportDefaultDeclaration(declaration) => {
-                declaration.async_token()
-            }
-            FormatFunction::TsDeclareFunctionDeclaration(member) => member.async_token(),
-            FormatFunction::TsDeclareFunctionExportDefaultDeclaration(member) => {
-                member.async_token()
-            }
+            Self::JsFunctionDeclaration(declaration) => declaration.async_token(),
+            Self::JsFunctionExpression(expression) => expression.async_token(),
+            Self::JsFunctionExportDefaultDeclaration(declaration) => declaration.async_token(),
+            Self::TsDeclareFunctionDeclaration(member) => member.async_token(),
+            Self::TsDeclareFunctionExportDefaultDeclaration(member) => member.async_token(),
         }
     }
 
     fn function_token(&self) -> SyntaxResult<JsSyntaxToken> {
         match self {
-            FormatFunction::JsFunctionDeclaration(declaration) => declaration.function_token(),
-            FormatFunction::JsFunctionExpression(expression) => expression.function_token(),
-            FormatFunction::JsFunctionExportDefaultDeclaration(declaration) => {
-                declaration.function_token()
-            }
-            FormatFunction::TsDeclareFunctionDeclaration(declaration) => {
-                declaration.function_token()
-            }
-            FormatFunction::TsDeclareFunctionExportDefaultDeclaration(declaration) => {
+            Self::JsFunctionDeclaration(declaration) => declaration.function_token(),
+            Self::JsFunctionExpression(expression) => expression.function_token(),
+            Self::JsFunctionExportDefaultDeclaration(declaration) => declaration.function_token(),
+            Self::TsDeclareFunctionDeclaration(declaration) => declaration.function_token(),
+            Self::TsDeclareFunctionExportDefaultDeclaration(declaration) => {
                 declaration.function_token()
             }
         }
@@ -68,39 +60,31 @@ impl FormatFunction {
 
     fn star_token(&self) -> Option<JsSyntaxToken> {
         match self {
-            FormatFunction::JsFunctionDeclaration(declaration) => declaration.star_token(),
-            FormatFunction::JsFunctionExpression(expression) => expression.star_token(),
-            FormatFunction::JsFunctionExportDefaultDeclaration(declaration) => {
-                declaration.star_token()
-            }
-            FormatFunction::TsDeclareFunctionDeclaration(_) => None,
-            FormatFunction::TsDeclareFunctionExportDefaultDeclaration(_) => None,
+            Self::JsFunctionDeclaration(declaration) => declaration.star_token(),
+            Self::JsFunctionExpression(expression) => expression.star_token(),
+            Self::JsFunctionExportDefaultDeclaration(declaration) => declaration.star_token(),
+            Self::TsDeclareFunctionDeclaration(_) => None,
+            Self::TsDeclareFunctionExportDefaultDeclaration(_) => None,
         }
     }
 
     fn id(&self) -> SyntaxResult<Option<AnyJsBinding>> {
         match self {
-            FormatFunction::JsFunctionDeclaration(declaration) => declaration.id().map(Some),
-            FormatFunction::JsFunctionExpression(expression) => Ok(expression.id()),
-            FormatFunction::JsFunctionExportDefaultDeclaration(declaration) => Ok(declaration.id()),
-            FormatFunction::TsDeclareFunctionDeclaration(declaration) => declaration.id().map(Some),
-            FormatFunction::TsDeclareFunctionExportDefaultDeclaration(declaration) => {
-                Ok(declaration.id())
-            }
+            Self::JsFunctionDeclaration(declaration) => declaration.id().map(Some),
+            Self::JsFunctionExpression(expression) => Ok(expression.id()),
+            Self::JsFunctionExportDefaultDeclaration(declaration) => Ok(declaration.id()),
+            Self::TsDeclareFunctionDeclaration(declaration) => declaration.id().map(Some),
+            Self::TsDeclareFunctionExportDefaultDeclaration(declaration) => Ok(declaration.id()),
         }
     }
 
     fn type_parameters(&self) -> Option<TsTypeParameters> {
         match self {
-            FormatFunction::JsFunctionDeclaration(declaration) => declaration.type_parameters(),
-            FormatFunction::JsFunctionExpression(expression) => expression.type_parameters(),
-            FormatFunction::JsFunctionExportDefaultDeclaration(declaration) => {
-                declaration.type_parameters()
-            }
-            FormatFunction::TsDeclareFunctionDeclaration(declaration) => {
-                declaration.type_parameters()
-            }
-            FormatFunction::TsDeclareFunctionExportDefaultDeclaration(declaration) => {
+            Self::JsFunctionDeclaration(declaration) => declaration.type_parameters(),
+            Self::JsFunctionExpression(expression) => expression.type_parameters(),
+            Self::JsFunctionExportDefaultDeclaration(declaration) => declaration.type_parameters(),
+            Self::TsDeclareFunctionDeclaration(declaration) => declaration.type_parameters(),
+            Self::TsDeclareFunctionExportDefaultDeclaration(declaration) => {
                 declaration.type_parameters()
             }
         }
@@ -108,13 +92,11 @@ impl FormatFunction {
 
     fn parameters(&self) -> SyntaxResult<JsParameters> {
         match self {
-            FormatFunction::JsFunctionDeclaration(declaration) => declaration.parameters(),
-            FormatFunction::JsFunctionExpression(expression) => expression.parameters(),
-            FormatFunction::JsFunctionExportDefaultDeclaration(declaration) => {
-                declaration.parameters()
-            }
-            FormatFunction::TsDeclareFunctionDeclaration(declaration) => declaration.parameters(),
-            FormatFunction::TsDeclareFunctionExportDefaultDeclaration(declaration) => {
+            Self::JsFunctionDeclaration(declaration) => declaration.parameters(),
+            Self::JsFunctionExpression(expression) => expression.parameters(),
+            Self::JsFunctionExportDefaultDeclaration(declaration) => declaration.parameters(),
+            Self::TsDeclareFunctionDeclaration(declaration) => declaration.parameters(),
+            Self::TsDeclareFunctionExportDefaultDeclaration(declaration) => {
                 declaration.parameters()
             }
         }
@@ -122,17 +104,13 @@ impl FormatFunction {
 
     fn return_type_annotation(&self) -> Option<TsReturnTypeAnnotation> {
         match self {
-            FormatFunction::JsFunctionDeclaration(declaration) => {
+            Self::JsFunctionDeclaration(declaration) => declaration.return_type_annotation(),
+            Self::JsFunctionExpression(expression) => expression.return_type_annotation(),
+            Self::JsFunctionExportDefaultDeclaration(declaration) => {
                 declaration.return_type_annotation()
             }
-            FormatFunction::JsFunctionExpression(expression) => expression.return_type_annotation(),
-            FormatFunction::JsFunctionExportDefaultDeclaration(declaration) => {
-                declaration.return_type_annotation()
-            }
-            FormatFunction::TsDeclareFunctionDeclaration(declaration) => {
-                declaration.return_type_annotation()
-            }
-            FormatFunction::TsDeclareFunctionExportDefaultDeclaration(declaration) => {
+            Self::TsDeclareFunctionDeclaration(declaration) => declaration.return_type_annotation(),
+            Self::TsDeclareFunctionExportDefaultDeclaration(declaration) => {
                 declaration.return_type_annotation()
             }
         }
@@ -140,13 +118,11 @@ impl FormatFunction {
 
     fn body(&self) -> SyntaxResult<Option<JsFunctionBody>> {
         Ok(match self {
-            FormatFunction::JsFunctionDeclaration(declaration) => Some(declaration.body()?),
-            FormatFunction::JsFunctionExpression(expression) => Some(expression.body()?),
-            FormatFunction::JsFunctionExportDefaultDeclaration(declaration) => {
-                Some(declaration.body()?)
-            }
-            FormatFunction::TsDeclareFunctionDeclaration(_) => None,
-            FormatFunction::TsDeclareFunctionExportDefaultDeclaration(_) => None,
+            Self::JsFunctionDeclaration(declaration) => Some(declaration.body()?),
+            Self::JsFunctionExpression(expression) => Some(expression.body()?),
+            Self::JsFunctionExportDefaultDeclaration(declaration) => Some(declaration.body()?),
+            Self::TsDeclareFunctionDeclaration(_) => None,
+            Self::TsDeclareFunctionExportDefaultDeclaration(_) => None,
         })
     }
 

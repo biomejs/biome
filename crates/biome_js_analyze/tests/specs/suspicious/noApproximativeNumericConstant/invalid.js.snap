@@ -3,7 +3,7 @@ source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid.js
 ---
 # Input
-```jsx
+```js
 const x = 3.141;
 const y = 2.302;
 const z = 2.3025;
@@ -1066,5 +1066,3 @@ invalid.js:58:5 lint/suspicious/noApproximativeNumericConstant  FIXABLE  ━━�
   
 
 ```
-
-

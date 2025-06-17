@@ -1,6 +1,6 @@
 //! Generated file, do not edit by hand, see `xtask/codegen`
 
-use crate::{generated::nodes::*, CssSyntaxToken as SyntaxToken};
+use crate::{CssSyntaxToken as SyntaxToken, generated::nodes::*};
 use biome_rowan::AstNode;
 use std::iter::once;
 impl CssAtRule {
@@ -672,16 +672,24 @@ impl CssDocumentCustomMatcher {
                 .splice_slots(1usize..=1usize, once(Some(element.into()))),
         )
     }
-    pub fn with_value(self, element: CssString) -> Self {
-        Self::unwrap_cast(
-            self.syntax
-                .splice_slots(2usize..=2usize, once(Some(element.into_syntax().into()))),
-        )
+    pub fn with_value(self, element: Option<AnyCssUrlValue>) -> Self {
+        Self::unwrap_cast(self.syntax.splice_slots(
+            2usize..=2usize,
+            once(element.map(|element| element.into_syntax().into())),
+        ))
     }
     pub fn with_r_paren_token(self, element: SyntaxToken) -> Self {
         Self::unwrap_cast(
             self.syntax
                 .splice_slots(3usize..=3usize, once(Some(element.into()))),
+        )
+    }
+}
+impl CssEmptyDeclaration {
+    pub fn with_semicolon_token(self, element: SyntaxToken) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(0usize..=0usize, once(Some(element.into()))),
         )
     }
 }
@@ -1526,6 +1534,26 @@ impl CssPercentage {
         Self::unwrap_cast(
             self.syntax
                 .splice_slots(1usize..=1usize, once(Some(element.into()))),
+        )
+    }
+}
+impl CssPositionTryAtRule {
+    pub fn with_position_try_token(self, element: SyntaxToken) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(0usize..=0usize, once(Some(element.into()))),
+        )
+    }
+    pub fn with_name(self, element: CssDashedIdentifier) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(1usize..=1usize, once(Some(element.into_syntax().into()))),
+        )
+    }
+    pub fn with_block(self, element: AnyCssDeclarationBlock) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(2usize..=2usize, once(Some(element.into_syntax().into()))),
         )
     }
 }
@@ -2656,6 +2684,20 @@ impl CssValueAtRuleNamedImportSpecifier {
         Self::unwrap_cast(
             self.syntax
                 .splice_slots(2usize..=2usize, once(Some(element.into_syntax().into()))),
+        )
+    }
+}
+impl CssViewTransitionAtRule {
+    pub fn with_view_transition_token(self, element: SyntaxToken) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(0usize..=0usize, once(Some(element.into()))),
+        )
+    }
+    pub fn with_block(self, element: AnyCssDeclarationBlock) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(1usize..=1usize, once(Some(element.into_syntax().into()))),
         )
     }
 }

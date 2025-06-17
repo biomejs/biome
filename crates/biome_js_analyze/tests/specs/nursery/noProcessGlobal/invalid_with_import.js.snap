@@ -1,0 +1,36 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid_with_import.js
+snapshot_kind: text
+---
+# Input
+```js
+// head comment
+import a from 'b';
+
+const c = process.env;
+```
+
+# Diagnostics
+```
+invalid_with_import.js:4:11 lint/nursery/noProcessGlobal  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Usage of the `process` global is discouraged.
+  
+    2 │ import a from 'b';
+    3 │ 
+  > 4 │ const c = process.env;
+      │           ^^^^^^^
+  
+  i `process` global is hard for tools to statically analyze, so code should not assume they are available.
+  
+  i Safe fix: Add `import process from "node:process";` to this file's imports.
+  
+    1 1 │   // head comment
+    2 2 │   import a from 'b';
+      3 │ + import·process·from·"node:process";
+    3 4 │   
+    4 5 │   const c = process.env;
+  
+
+```

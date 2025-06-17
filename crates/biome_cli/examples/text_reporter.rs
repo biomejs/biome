@@ -16,7 +16,7 @@ impl Reporter for TextReport {
             staged: false,
             changed: false,
         });
-        visitor.report_summary(&execution, self.summary)?;
+        visitor.report_summary(&execution, self.summary, false)?;
         Ok(())
     }
 }
@@ -26,6 +26,7 @@ impl ReporterVisitor for BufferVisitor {
         &mut self,
         _execution: &Execution,
         summary: TraversalSummary,
+        _verbose: bool,
     ) -> std::io::Result<()> {
         self.0
             .push_str(&format!("Total is {}", summary.changed + summary.unchanged));
@@ -36,12 +37,14 @@ impl ReporterVisitor for BufferVisitor {
         &mut self,
         _execution: &Execution,
         _payload: DiagnosticsPayload,
+        _verbose: bool,
     ) -> std::io::Result<()> {
         todo!()
     }
 }
 
 pub fn main() {
+    // In a real scenario, the project key is obtained from the
     let summary = TraversalSummary {
         changed: 32,
         unchanged: 28,

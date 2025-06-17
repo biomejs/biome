@@ -1,10 +1,10 @@
 use crate::green::{GreenToken, GreenTrivia};
-use crate::syntax::element::SyntaxElementKey;
 use crate::syntax::SyntaxTrivia;
+use crate::syntax::element::SyntaxElementKey;
 use crate::token_text::TokenText;
 use crate::{
-    chain_trivia_pieces, cursor, Direction, Language, NodeOrToken, SyntaxElement, SyntaxKind,
-    SyntaxNode, SyntaxTriviaPiece, TriviaPiece, TriviaPieceKind,
+    Direction, Language, NodeOrToken, SyntaxElement, SyntaxKind, SyntaxNode, SyntaxTriviaPiece,
+    TriviaPiece, TriviaPieceKind, chain_trivia_pieces, cursor,
 };
 use biome_text_size::{TextLen, TextRange, TextSize};
 use std::fmt;
@@ -152,7 +152,7 @@ impl<L: Language> SyntaxToken<L> {
         self.raw.parent().map(SyntaxNode::from)
     }
 
-    pub fn ancestors(&self) -> impl Iterator<Item = SyntaxNode<L>> {
+    pub fn ancestors(&self) -> impl Iterator<Item = SyntaxNode<L>> + use<L> {
         self.raw.ancestors().map(SyntaxNode::from)
     }
 
@@ -166,19 +166,19 @@ impl<L: Language> SyntaxToken<L> {
     pub fn siblings_with_tokens(
         &self,
         direction: Direction,
-    ) -> impl Iterator<Item = SyntaxElement<L>> {
+    ) -> impl Iterator<Item = SyntaxElement<L>> + use<L> {
         self.raw
             .siblings_with_tokens(direction)
             .map(SyntaxElement::from)
     }
 
     /// Next token in the tree (i.e, not necessary a sibling).
-    pub fn next_token(&self) -> Option<SyntaxToken<L>> {
-        self.raw.next_token().map(SyntaxToken::from)
+    pub fn next_token(&self) -> Option<Self> {
+        self.raw.next_token().map(Self::from)
     }
     /// Previous token in the tree (i.e, not necessary a sibling).
-    pub fn prev_token(&self) -> Option<SyntaxToken<L>> {
-        self.raw.prev_token().map(SyntaxToken::from)
+    pub fn prev_token(&self) -> Option<Self> {
+        self.raw.prev_token().map(Self::from)
     }
 
     /// Return a new version of this token detached from its parent node
@@ -433,7 +433,9 @@ impl<L: Language> SyntaxToken<L> {
     }
 
     /// Return whitespace that juxtapose the token until the first non-whitespace item.
-    pub fn indentation_trivia_pieces(&self) -> impl ExactSizeIterator<Item = SyntaxTriviaPiece<L>> {
+    pub fn indentation_trivia_pieces(
+        &self,
+    ) -> impl ExactSizeIterator<Item = SyntaxTriviaPiece<L>> + Clone + use<L> {
         let leading_trivia = self.leading_trivia().pieces();
         let skip_count = leading_trivia.len()
             - leading_trivia
@@ -551,14 +553,14 @@ impl<L: Language> fmt::Display for SyntaxToken<L> {
 }
 
 impl<L: Language> From<SyntaxToken<L>> for cursor::SyntaxToken {
-    fn from(token: SyntaxToken<L>) -> cursor::SyntaxToken {
+    fn from(token: SyntaxToken<L>) -> Self {
         token.raw
     }
 }
 
 impl<L: Language> From<cursor::SyntaxToken> for SyntaxToken<L> {
-    fn from(raw: cursor::SyntaxToken) -> SyntaxToken<L> {
-        SyntaxToken {
+    fn from(raw: cursor::SyntaxToken) -> Self {
+        Self {
             raw,
             _p: PhantomData,
         }

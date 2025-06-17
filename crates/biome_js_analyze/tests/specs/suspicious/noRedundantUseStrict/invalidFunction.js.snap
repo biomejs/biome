@@ -3,7 +3,7 @@ source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalidFunction.js
 ---
 # Input
-```jsx
+```js
 function test() {
 	"use strict";
 	"use strict";

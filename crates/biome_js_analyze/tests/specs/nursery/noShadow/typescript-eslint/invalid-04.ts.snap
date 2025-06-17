@@ -1,0 +1,39 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-04.ts
+---
+# Input
+```ts
+
+// In this example T gets shadowed by the type parameter of the function
+// but the `arg` bindings do NOT shadow each other.
+type T = string;
+function foo<T extends (arg: any) => void>(arg: T) {}
+
+```
+
+# Diagnostics
+```
+invalid-04.ts:5:14 lint/nursery/noShadow ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This variable shadows another variable with the same name in the outer scope.
+  
+    3 │ // but the `arg` bindings do NOT shadow each other.
+    4 │ type T = string;
+  > 5 │ function foo<T extends (arg: any) => void>(arg: T) {}
+      │              ^
+    6 │ 
+  
+  i This is the shadowed variable, which is now inaccessible in the inner scope.
+  
+    2 │ // In this example T gets shadowed by the type parameter of the function
+    3 │ // but the `arg` bindings do NOT shadow each other.
+  > 4 │ type T = string;
+      │      ^
+    5 │ function foo<T extends (arg: any) => void>(arg: T) {}
+    6 │ 
+  
+  i Consider renaming this variable. It's easy to confuse the origin of variables if they share the same name.
+  
+
+```

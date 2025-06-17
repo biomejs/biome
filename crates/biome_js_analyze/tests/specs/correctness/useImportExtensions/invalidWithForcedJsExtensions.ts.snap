@@ -1,0 +1,448 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidWithForcedJsExtensions.ts
+---
+# Input
+```ts
+import "./sub/foo";
+import "./sub/bar/";
+
+// Guaranteed resolve to 'index.js' file
+import './sub/bar/../'
+import './sub/bar/..'
+import './sub/.'
+import './sub/./'
+import './sub/'
+import './sub'
+
+import  /** A **/'./sub' /** B **/
+
+// Query and hash
+import './sub?worker'
+import './sub#hash'
+import './sub?query=string&query2#hash'
+
+// Dynamic imports
+import('./sub/foo')
+import( /** A **/'./sub/foo'/** B **/ )
+require("./sub/foo")
+
+import "./sub/styles.css"
+import "./sub/component.svg.svelte";
+import "./sub/component.svg.svelte?query=string&query2#hash";
+```
+
+# Diagnostics
+```
+invalidWithForcedJsExtensions.ts:1:8 lint/correctness/useImportExtensions  FIXABLE  ━━━━━━━━━━━━━━━━
+
+  ! Add a file extension for relative imports.
+  
+  > 1 │ import "./sub/foo";
+      │        ^^^^^^^^^^^
+    2 │ import "./sub/bar/";
+    3 │ 
+  
+  i Explicit import improves compatibility with browsers and makes file resolution in tooling faster.
+  
+  i Safe fix: Add import extension .js.
+  
+     1    │ - import·"./sub/foo";
+        1 │ + import·"./sub/foo.js";
+     2  2 │   import "./sub/bar/";
+     3  3 │   
+  
+
+```
+
+```
+invalidWithForcedJsExtensions.ts:2:8 lint/correctness/useImportExtensions  FIXABLE  ━━━━━━━━━━━━━━━━
+
+  ! Add a file extension for relative imports.
+  
+    1 │ import "./sub/foo";
+  > 2 │ import "./sub/bar/";
+      │        ^^^^^^^^^^^^
+    3 │ 
+    4 │ // Guaranteed resolve to 'index.js' file
+  
+  i Explicit import improves compatibility with browsers and makes file resolution in tooling faster.
+  
+  i Safe fix: Add import extension .js.
+  
+    2 │ import·"./sub/bar/index.js";
+      │                   ++++++++  
+
+```
+
+```
+invalidWithForcedJsExtensions.ts:5:8 lint/correctness/useImportExtensions  FIXABLE  ━━━━━━━━━━━━━━━━
+
+  ! Add a file extension for relative imports.
+  
+    4 │ // Guaranteed resolve to 'index.js' file
+  > 5 │ import './sub/bar/../'
+      │        ^^^^^^^^^^^^^^^
+    6 │ import './sub/bar/..'
+    7 │ import './sub/.'
+  
+  i Explicit import improves compatibility with browsers and makes file resolution in tooling faster.
+  
+  i Safe fix: Add import extension .js.
+  
+     3  3 │   
+     4  4 │   // Guaranteed resolve to 'index.js' file
+     5    │ - import·'./sub/bar/../'
+        5 │ + import·"./sub/bar/../index.js"
+     6  6 │   import './sub/bar/..'
+     7  7 │   import './sub/.'
+  
+
+```
+
+```
+invalidWithForcedJsExtensions.ts:6:8 lint/correctness/useImportExtensions  FIXABLE  ━━━━━━━━━━━━━━━━
+
+  ! Add a file extension for relative imports.
+  
+    4 │ // Guaranteed resolve to 'index.js' file
+    5 │ import './sub/bar/../'
+  > 6 │ import './sub/bar/..'
+      │        ^^^^^^^^^^^^^^
+    7 │ import './sub/.'
+    8 │ import './sub/./'
+  
+  i Explicit import improves compatibility with browsers and makes file resolution in tooling faster.
+  
+  i Safe fix: Add import extension .js.
+  
+     4  4 │   // Guaranteed resolve to 'index.js' file
+     5  5 │   import './sub/bar/../'
+     6    │ - import·'./sub/bar/..'
+        6 │ + import·"./sub/bar/../index.js"
+     7  7 │   import './sub/.'
+     8  8 │   import './sub/./'
+  
+
+```
+
+```
+invalidWithForcedJsExtensions.ts:7:8 lint/correctness/useImportExtensions  FIXABLE  ━━━━━━━━━━━━━━━━
+
+  ! Add a file extension for relative imports.
+  
+    5 │ import './sub/bar/../'
+    6 │ import './sub/bar/..'
+  > 7 │ import './sub/.'
+      │        ^^^^^^^^^
+    8 │ import './sub/./'
+    9 │ import './sub/'
+  
+  i Explicit import improves compatibility with browsers and makes file resolution in tooling faster.
+  
+  i Safe fix: Add import extension .js.
+  
+     5  5 │   import './sub/bar/../'
+     6  6 │   import './sub/bar/..'
+     7    │ - import·'./sub/.'
+        7 │ + import·"./sub/index.js"
+     8  8 │   import './sub/./'
+     9  9 │   import './sub/'
+  
+
+```
+
+```
+invalidWithForcedJsExtensions.ts:8:8 lint/correctness/useImportExtensions  FIXABLE  ━━━━━━━━━━━━━━━━
+
+  ! Add a file extension for relative imports.
+  
+     6 │ import './sub/bar/..'
+     7 │ import './sub/.'
+   > 8 │ import './sub/./'
+       │        ^^^^^^^^^^
+     9 │ import './sub/'
+    10 │ import './sub'
+  
+  i Explicit import improves compatibility with browsers and makes file resolution in tooling faster.
+  
+  i Safe fix: Add import extension .js.
+  
+     6  6 │   import './sub/bar/..'
+     7  7 │   import './sub/.'
+     8    │ - import·'./sub/./'
+        8 │ + import·"./sub/index.js"
+     9  9 │   import './sub/'
+    10 10 │   import './sub'
+  
+
+```
+
+```
+invalidWithForcedJsExtensions.ts:9:8 lint/correctness/useImportExtensions  FIXABLE  ━━━━━━━━━━━━━━━━
+
+  ! Add a file extension for relative imports.
+  
+     7 │ import './sub/.'
+     8 │ import './sub/./'
+   > 9 │ import './sub/'
+       │        ^^^^^^^^
+    10 │ import './sub'
+    11 │ 
+  
+  i Explicit import improves compatibility with browsers and makes file resolution in tooling faster.
+  
+  i Safe fix: Add import extension .js.
+  
+     7  7 │   import './sub/.'
+     8  8 │   import './sub/./'
+     9    │ - import·'./sub/'
+        9 │ + import·"./sub/index.js"
+    10 10 │   import './sub'
+    11 11 │   
+  
+
+```
+
+```
+invalidWithForcedJsExtensions.ts:10:8 lint/correctness/useImportExtensions  FIXABLE  ━━━━━━━━━━━━━━━
+
+  ! Add a file extension for relative imports.
+  
+     8 │ import './sub/./'
+     9 │ import './sub/'
+  > 10 │ import './sub'
+       │        ^^^^^^^
+    11 │ 
+    12 │ import  /** A **/'./sub' /** B **/
+  
+  i Explicit import improves compatibility with browsers and makes file resolution in tooling faster.
+  
+  i Safe fix: Add import extension .js.
+  
+     8  8 │   import './sub/./'
+     9  9 │   import './sub/'
+    10    │ - import·'./sub'
+       10 │ + import·"./sub/index.js"
+    11 11 │   
+    12 12 │   import  /** A **/'./sub' /** B **/
+  
+
+```
+
+```
+invalidWithForcedJsExtensions.ts:12:18 lint/correctness/useImportExtensions  FIXABLE  ━━━━━━━━━━━━━━
+
+  ! Add a file extension for relative imports.
+  
+    10 │ import './sub'
+    11 │ 
+  > 12 │ import  /** A **/'./sub' /** B **/
+       │                  ^^^^^^^
+    13 │ 
+    14 │ // Query and hash
+  
+  i Explicit import improves compatibility with browsers and makes file resolution in tooling faster.
+  
+  i Safe fix: Add import extension .js.
+  
+    10 10 │   import './sub'
+    11 11 │   
+    12    │ - import··/**·A·**/'./sub'·/**·B·**/
+       12 │ + import··/**·A·**/"./sub/index.js"·/**·B·**/
+    13 13 │   
+    14 14 │   // Query and hash
+  
+
+```
+
+```
+invalidWithForcedJsExtensions.ts:15:8 lint/correctness/useImportExtensions ━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Add a file extension for relative imports.
+  
+    14 │ // Query and hash
+  > 15 │ import './sub?worker'
+       │        ^^^^^^^^^^^^^^
+    16 │ import './sub#hash'
+    17 │ import './sub?query=string&query2#hash'
+  
+  i Explicit import improves compatibility with browsers and makes file resolution in tooling faster.
+  
+
+```
+
+```
+invalidWithForcedJsExtensions.ts:16:8 lint/correctness/useImportExtensions ━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Add a file extension for relative imports.
+  
+    14 │ // Query and hash
+    15 │ import './sub?worker'
+  > 16 │ import './sub#hash'
+       │        ^^^^^^^^^^^^
+    17 │ import './sub?query=string&query2#hash'
+    18 │ 
+  
+  i Explicit import improves compatibility with browsers and makes file resolution in tooling faster.
+  
+
+```
+
+```
+invalidWithForcedJsExtensions.ts:17:8 lint/correctness/useImportExtensions ━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Add a file extension for relative imports.
+  
+    15 │ import './sub?worker'
+    16 │ import './sub#hash'
+  > 17 │ import './sub?query=string&query2#hash'
+       │        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    18 │ 
+    19 │ // Dynamic imports
+  
+  i Explicit import improves compatibility with browsers and makes file resolution in tooling faster.
+  
+
+```
+
+```
+invalidWithForcedJsExtensions.ts:20:8 lint/correctness/useImportExtensions  FIXABLE  ━━━━━━━━━━━━━━━
+
+  ! Add a file extension for relative imports.
+  
+    19 │ // Dynamic imports
+  > 20 │ import('./sub/foo')
+       │        ^^^^^^^^^^^
+    21 │ import( /** A **/'./sub/foo'/** B **/ )
+    22 │ require("./sub/foo")
+  
+  i Explicit import improves compatibility with browsers and makes file resolution in tooling faster.
+  
+  i Safe fix: Add import extension .js.
+  
+    18 18 │   
+    19 19 │   // Dynamic imports
+    20    │ - import('./sub/foo')
+       20 │ + import("./sub/foo.js")
+    21 21 │   import( /** A **/'./sub/foo'/** B **/ )
+    22 22 │   require("./sub/foo")
+  
+
+```
+
+```
+invalidWithForcedJsExtensions.ts:21:18 lint/correctness/useImportExtensions  FIXABLE  ━━━━━━━━━━━━━━
+
+  ! Add a file extension for relative imports.
+  
+    19 │ // Dynamic imports
+    20 │ import('./sub/foo')
+  > 21 │ import( /** A **/'./sub/foo'/** B **/ )
+       │                  ^^^^^^^^^^^
+    22 │ require("./sub/foo")
+    23 │ 
+  
+  i Explicit import improves compatibility with browsers and makes file resolution in tooling faster.
+  
+  i Safe fix: Add import extension .js.
+  
+    19 19 │   // Dynamic imports
+    20 20 │   import('./sub/foo')
+    21    │ - import(·/**·A·**/'./sub/foo'/**·B·**/·)
+       21 │ + import(·/**·A·**/"./sub/foo.js"/**·B·**/·)
+    22 22 │   require("./sub/foo")
+    23 23 │   
+  
+
+```
+
+```
+invalidWithForcedJsExtensions.ts:22:9 lint/correctness/useImportExtensions  FIXABLE  ━━━━━━━━━━━━━━━
+
+  ! Add a file extension for relative imports.
+  
+    20 │ import('./sub/foo')
+    21 │ import( /** A **/'./sub/foo'/** B **/ )
+  > 22 │ require("./sub/foo")
+       │         ^^^^^^^^^^^
+    23 │ 
+    24 │ import "./sub/styles.css"
+  
+  i Explicit import improves compatibility with browsers and makes file resolution in tooling faster.
+  
+  i Safe fix: Add import extension .js.
+  
+    20 20 │   import('./sub/foo')
+    21 21 │   import( /** A **/'./sub/foo'/** B **/ )
+    22    │ - require("./sub/foo")
+       22 │ + require("./sub/foo.js")
+    23 23 │   
+    24 24 │   import "./sub/styles.css"
+  
+
+```
+
+```
+invalidWithForcedJsExtensions.ts:24:8 lint/correctness/useImportExtensions  FIXABLE  ━━━━━━━━━━━━━━━
+
+  ! Add a file extension for relative imports.
+  
+    22 │ require("./sub/foo")
+    23 │ 
+  > 24 │ import "./sub/styles.css"
+       │        ^^^^^^^^^^^^^^^^^^
+    25 │ import "./sub/component.svg.svelte";
+    26 │ import "./sub/component.svg.svelte?query=string&query2#hash";
+  
+  i Explicit import improves compatibility with browsers and makes file resolution in tooling faster.
+  
+  i Safe fix: Add import extension .js.
+  
+    22 22 │   require("./sub/foo")
+    23 23 │   
+    24    │ - import·"./sub/styles.css"
+       24 │ + import·"./sub/styles.css.js"
+    25 25 │   import "./sub/component.svg.svelte";
+    26 26 │   import "./sub/component.svg.svelte?query=string&query2#hash";
+  
+
+```
+
+```
+invalidWithForcedJsExtensions.ts:25:8 lint/correctness/useImportExtensions  FIXABLE  ━━━━━━━━━━━━━━━
+
+  ! Add a file extension for relative imports.
+  
+    24 │ import "./sub/styles.css"
+  > 25 │ import "./sub/component.svg.svelte";
+       │        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    26 │ import "./sub/component.svg.svelte?query=string&query2#hash";
+  
+  i Explicit import improves compatibility with browsers and makes file resolution in tooling faster.
+  
+  i Safe fix: Add import extension .js.
+  
+    23 23 │   
+    24 24 │   import "./sub/styles.css"
+    25    │ - import·"./sub/component.svg.svelte";
+       25 │ + import·"./sub/component.svg.svelte.js";
+    26 26 │   import "./sub/component.svg.svelte?query=string&query2#hash";
+  
+
+```
+
+```
+invalidWithForcedJsExtensions.ts:26:8 lint/correctness/useImportExtensions ━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Add a file extension for relative imports.
+  
+    24 │ import "./sub/styles.css"
+    25 │ import "./sub/component.svg.svelte";
+  > 26 │ import "./sub/component.svg.svelte?query=string&query2#hash";
+       │        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  
+  i Explicit import improves compatibility with browsers and makes file resolution in tooling faster.
+  
+
+```

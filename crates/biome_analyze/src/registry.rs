@@ -1,10 +1,10 @@
 use crate::{
+    AddVisitor, AnalysisFilter, GroupCategory, QueryMatcher, Rule, RuleCategories, RuleGroup,
+    RuleKey, RuleMetadata, ServiceBag, SignalEntry, Visitor,
     context::RuleContext,
     matcher::{GroupKey, MatchQueryParams},
     query::{QueryKey, Queryable},
     signals::RuleSignal,
-    AddVisitor, AnalysisFilter, GroupCategory, QueryMatcher, Rule, RuleGroup, RuleKey,
-    RuleMetadata, ServiceBag, SignalEntry, Visitor,
 };
 use biome_diagnostics::Error;
 use biome_rowan::{AstNode, Language, RawSyntaxKind, SyntaxKind, SyntaxNode};
@@ -95,7 +95,7 @@ impl<L: Language> RegistryVisitor<L> for MetadataRegistry {
 /// we have:
 /// - Syntax Phase: No services are offered, thus its rules can be run immediately;
 /// - Semantic Phase: Offers the semantic model, thus these rules can only run
-///     after the "SemanticModel" is ready, which demands a whole transverse of the parsed tree.
+///   after the "SemanticModel" is ready, which demands a whole transverse of the parsed tree.
 pub struct RuleRegistry<L: Language> {
     /// Holds a collection of rules for each phase.
     phase_rules: [PhaseRules<L>; 2],
@@ -109,7 +109,7 @@ impl<L: Language + Default> RuleRegistry<L> {
         RuleRegistryBuilder {
             filter,
             root,
-            registry: RuleRegistry {
+            registry: Self {
                 phase_rules: Default::default(),
             },
             visitors: BTreeMap::default(),
@@ -179,7 +179,9 @@ impl<L: Language + Default + 'static> RegistryVisitor<L> for RuleRegistryBuilder
                     .entry(TypeId::of::<SyntaxNode<L>>())
                     .or_insert_with(|| TypeRules::SyntaxRules { rules: Vec::new() })
                 else {
-                    unreachable!("the SyntaxNode type has already been registered as a TypeRules instead of a SyntaxRules, this is generally caused by an implementation of `Queryable::key` returning a `QueryKey::TypeId` with the type ID of `SyntaxNode`")
+                    unreachable!(
+                        "the SyntaxNode type has already been registered as a TypeRules instead of a SyntaxRules, this is generally caused by an implementation of `Queryable::key` returning a `QueryKey::TypeId` with the type ID of `SyntaxNode`"
+                    )
                 };
 
                 // Iterate on all the SyntaxKind variants this node can match
@@ -207,7 +209,9 @@ impl<L: Language + Default + 'static> RegistryVisitor<L> for RuleRegistryBuilder
                     .entry(key)
                     .or_insert_with(|| TypeRules::TypeRules { rules: Vec::new() })
                 else {
-                    unreachable!("the query type has already been registered as a SyntaxRules instead of a TypeRules, this is generally caused by an implementation of `Queryable::key` returning a `QueryKey::TypeId` with the type ID of `SyntaxNode`")
+                    unreachable!(
+                        "the query type has already been registered as a SyntaxRules instead of a TypeRules, this is generally caused by an implementation of `Queryable::key` returning a `QueryKey::TypeId` with the type ID of `SyntaxNode`"
+                    )
                 };
 
                 rules.push(rule);
@@ -236,6 +240,7 @@ type BuilderResult<L> = (
     ServiceBag,
     Vec<Error>,
     BTreeMap<(Phases, TypeId), Box<dyn Visitor<Language = L>>>,
+    RuleCategories,
 );
 
 impl<L: Language> RuleRegistryBuilder<'_, L> {
@@ -245,6 +250,7 @@ impl<L: Language> RuleRegistryBuilder<'_, L> {
             self.services,
             self.diagnostics,
             self.visitors,
+            self.filter.categories,
         )
     }
 }
@@ -399,21 +405,22 @@ impl<L: Language + Default> RegistryRule<L> {
             let query_result = <R::Query as Queryable>::unwrap_match(params.services, query_result);
             let globals = params.options.globals();
             let preferred_quote = params.options.preferred_quote();
+            let preferred_jsx_quote = params.options.preferred_jsx_quote();
             let jsx_runtime = params.options.jsx_runtime();
+            let css_modules = params.options.css_modules();
             let options = params.options.rule_options::<R>().unwrap_or_default();
-            let ctx = match RuleContext::new(
+            let ctx = RuleContext::new(
                 &query_result,
                 params.root,
                 params.services,
                 &globals,
-                &params.options.file_path,
+                params.options.file_path.as_path(),
                 &options,
                 preferred_quote,
+                preferred_jsx_quote,
                 jsx_runtime,
-            ) {
-                Ok(ctx) => ctx,
-                Err(error) => return Err(error),
-            };
+                css_modules,
+            )?;
 
             for result in R::run(&ctx) {
                 let text_range =
@@ -436,6 +443,7 @@ impl<L: Language + Default> RegistryRule<L> {
                     rule: RuleKey::rule::<R>(),
                     instances,
                     text_range,
+                    category: <R::Group as RuleGroup>::Category::CATEGORY,
                 });
             }
 

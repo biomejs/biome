@@ -1,7 +1,7 @@
 use super::diagnostic::ParseDiagnostic;
 use biome_rowan::{SyntaxKind, TextRange, TextSize};
-use biome_unicode_table::{lookup_byte, Dispatch::WHS};
-use enumflags2::{bitflags, make_bitflags, BitFlags};
+use biome_unicode_table::{Dispatch::WHS, lookup_byte};
+use enumflags2::{BitFlags, bitflags, make_bitflags};
 use std::collections::VecDeque;
 use std::iter::FusedIterator;
 use std::ops::{BitOr, BitOrAssign};
@@ -36,7 +36,6 @@ pub trait Lexer<'src> {
 
     /// Byte offset of the current token from the start of the source
     /// The range of the current token can be computed by `self.position - self.current_start`
-
     fn current_start(&self) -> TextSize;
 
     /// Tokenizes the next kind into a single coherent token within the given lexing context.
@@ -378,9 +377,9 @@ pub struct BufferedLexer<Kind, Lex> {
     /// That's why the [BufferedLexer] stores the following information:
     /// * `current`: `let` (information about the `current` token from the consumer perspective)
     /// * `all_checkpoints`: [WHITESPACE, IDENT: 'a', WHITESPACE, EQ]. The checkpoints that have been lexed to
-    ///    answer the "non trivia lookahead 2" request but haven't been returned yet.
+    ///   answer the "non trivia lookahead 2" request but haven't been returned yet.
     /// * `non_trivia_checkpoints`: [IDENT: 'a', EQ]. The checkpoints that have been lexed to
-    ///    answer the "non trivia lookahead 2" request but haven't been returned yet.
+    ///   answer the "non trivia lookahead 2" request but haven't been returned yet.
     /// * [Lexer::current]: Points to `=`
     lookahead: Lookahead<Kind>,
 
@@ -668,7 +667,7 @@ impl<'l, 't, Lex: Lexer<'t>> LookaheadIterator<'l, 't, Lex> {
     }
 }
 
-impl<'l, 't, Lex: LexerWithCheckpoint<'t>> Iterator for LookaheadIterator<'l, 't, Lex> {
+impl<'t, Lex: LexerWithCheckpoint<'t>> Iterator for LookaheadIterator<'_, 't, Lex> {
     type Item = LookaheadToken<Lex::Kind>;
 
     #[inline]
@@ -707,7 +706,7 @@ impl<'l, 't, Lex: LexerWithCheckpoint<'t>> Iterator for LookaheadIterator<'l, 't
     }
 }
 
-impl<'l, 't, Lex: LexerWithCheckpoint<'t>> FusedIterator for LookaheadIterator<'l, 't, Lex> {}
+impl<'t, Lex: LexerWithCheckpoint<'t>> FusedIterator for LookaheadIterator<'_, 't, Lex> {}
 
 #[derive(Debug)]
 pub struct LookaheadToken<Kind> {
@@ -727,7 +726,7 @@ impl<Kind: SyntaxKind> LookaheadToken<Kind> {
 
 impl<Kind: SyntaxKind> From<&LexerCheckpoint<Kind>> for LookaheadToken<Kind> {
     fn from(checkpoint: &LexerCheckpoint<Kind>) -> Self {
-        LookaheadToken {
+        Self {
             kind: checkpoint.current_kind,
             flags: checkpoint.current_flags,
         }
@@ -784,20 +783,20 @@ impl TokenFlags {
         Self(BitFlags::EMPTY)
     }
 
-    pub fn contains(&self, other: impl Into<TokenFlags>) -> bool {
+    pub fn contains(&self, other: impl Into<Self>) -> bool {
         self.0.contains(other.into().0)
     }
 
-    pub fn set(&mut self, other: impl Into<TokenFlags>, cond: bool) {
+    pub fn set(&mut self, other: impl Into<Self>, cond: bool) {
         self.0.set(other.into().0, cond)
     }
 
     pub fn has_preceding_line_break(&self) -> bool {
-        self.contains(TokenFlags::PRECEDING_LINE_BREAK)
+        self.contains(Self::PRECEDING_LINE_BREAK)
     }
 
     pub fn has_unicode_escape(&self) -> bool {
-        self.contains(TokenFlags::UNICODE_ESCAPE)
+        self.contains(Self::UNICODE_ESCAPE)
     }
 }
 
@@ -805,7 +804,7 @@ impl BitOr for TokenFlags {
     type Output = Self;
 
     fn bitor(self, rhs: Self) -> Self::Output {
-        TokenFlags(self.0 | rhs.0)
+        Self(self.0 | rhs.0)
     }
 }
 

@@ -1,0 +1,3 @@
+(<input />);
+(<button />);
+(<MyNS.MyComponent />);

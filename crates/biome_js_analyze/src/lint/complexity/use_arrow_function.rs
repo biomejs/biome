@@ -1,10 +1,10 @@
 use crate::JsRuleAction;
 use biome_analyze::{
-    context::RuleContext, declare_lint_rule, ActionCategory, AddVisitor, FixKind, Phases,
-    QueryMatch, Queryable, Rule, RuleDiagnostic, RuleSource, RuleSourceKind, ServiceBag, Visitor,
-    VisitorContext,
+    AddVisitor, FixKind, Phases, QueryMatch, Queryable, Rule, RuleDiagnostic, RuleSource,
+    RuleSourceKind, ServiceBag, Visitor, VisitorContext, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
+use biome_diagnostics::Severity;
 use biome_js_factory::make;
 use biome_js_syntax::{
     AnyJsExpression, AnyJsFunctionBody, AnyJsStatement, JsConstructorClassMember, JsFileSource,
@@ -14,8 +14,8 @@ use biome_js_syntax::{
     JsSetterObjectMember, JsStaticInitializationBlockClassMember, JsSyntaxKind, T,
 };
 use biome_rowan::{
-    declare_node_union, AstNode, AstNodeList, AstSeparatedList, BatchMutationExt, Language,
-    SyntaxNode, TextRange, TriviaPieceKind, WalkEvent,
+    AstNode, AstNodeList, AstSeparatedList, BatchMutationExt, Language, SyntaxNode, TextRange,
+    TriviaPieceKind, WalkEvent, declare_node_union,
 };
 
 declare_lint_rule! {
@@ -73,6 +73,7 @@ declare_lint_rule! {
         sources: &[RuleSource::Eslint("prefer-arrow-callback")],
         source_kind: RuleSourceKind::Inspired,
         recommended: true,
+        severity: Severity::Warning,
         fix_kind: FixKind::Safe,
     }
 }
@@ -123,6 +124,15 @@ impl Rule for UseArrowFunction {
             return None;
         }
         Some(())
+    }
+
+    fn text_range(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<TextRange> {
+        let node = ctx.query();
+        let AnyThisScopeMetadata { scope, .. } = node;
+        let AnyThisScope::JsFunctionExpression(function_expression) = scope else {
+            return None;
+        };
+        Some(function_expression.function_token().ok()?.text_range())
     }
 
     fn diagnostic(ctx: &RuleContext<Self>, _: &Self::State) -> Option<RuleDiagnostic> {
@@ -189,7 +199,7 @@ impl Rule for UseArrowFunction {
             arrow_function,
         );
         Some(JsRuleAction::new(
-            ActionCategory::QuickFix,
+            ctx.metadata().action_category(ctx.category(), ctx.group()),
             ctx.metadata().applicability(),
             markup! { "Use an "<Emphasis>"arrow function"</Emphasis>" instead." }.to_owned(),
             mutation,
@@ -197,7 +207,7 @@ impl Rule for UseArrowFunction {
     }
 }
 
-/// Returns `true` if `function_expr` needs parenthesis when turned into an arrow function.
+/// Returns `true` if `function_expression` needs parenthesis when turned into an arrow function.
 fn needs_parentheses(function_expression: &JsFunctionExpression) -> bool {
     function_expression.syntax().parent().is_some_and(|parent| {
         // Copied from the implementation of `NeedsParentheses` for `JsArrowFunctionExpression`
@@ -308,8 +318,7 @@ impl Visitor for AnyThisScopeVisitor {
                         scope,
                         has_this: false,
                     });
-                }
-                if matches!(
+                } else if matches!(
                     node.kind(),
                     JsSyntaxKind::JS_THIS_EXPRESSION | JsSyntaxKind::JS_NEW_TARGET_EXPRESSION
                 ) {
@@ -321,11 +330,9 @@ impl Visitor for AnyThisScopeVisitor {
                 }
             }
             WalkEvent::Leave(node) => {
-                if let Some(exit_scope) = AnyThisScope::cast_ref(node) {
+                if AnyThisScope::can_cast(node.kind()) {
                     if let Some(scope_metadata) = self.stack.pop() {
-                        if scope_metadata.scope == exit_scope {
-                            ctx.match_query(ActualThisScope(scope_metadata));
-                        }
+                        ctx.match_query(ActualThisScope(scope_metadata));
                     }
                 }
             }
@@ -335,9 +342,14 @@ impl Visitor for AnyThisScopeVisitor {
 
 /// Get a minimal arrow function body from a regular function body.
 fn to_arrow_body(body: JsFunctionBody) -> AnyJsFunctionBody {
+    let directives = body.directives();
     let body_statements = body.statements();
-    // () => { ... }
     let early_result = AnyJsFunctionBody::from(body);
+    if !directives.is_empty() {
+        // The function body has at least one directive.
+        // e.g. `function() { "directive"; return 0; }`
+        return early_result;
+    }
     let Some(AnyJsStatement::JsReturnStatement(return_statement)) = body_statements.iter().next()
     else {
         return early_result;
@@ -352,10 +364,12 @@ fn to_arrow_body(body: JsFunctionBody) -> AnyJsFunctionBody {
         // To keep comments, we keep the regular function body
         return early_result;
     }
-    if matches!(
-        return_arg,
-        AnyJsExpression::JsSequenceExpression(_) | AnyJsExpression::JsObjectExpression(_)
-    ) {
+    if matches!(return_arg, AnyJsExpression::JsSequenceExpression(_))
+        || return_arg
+            .syntax()
+            .first_token()
+            .is_some_and(|token| token.kind() == T!['{'])
+    {
         // () => (first, second)
         // () => ({ ... })
         return AnyJsFunctionBody::AnyJsExpression(make::parenthesized(return_arg).into());

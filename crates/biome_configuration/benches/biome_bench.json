@@ -1,0 +1,97 @@
+{
+  "$schema": "../../../packages/@biomejs/biome/configuration_schema.json",
+  "css": {
+    "parser": {
+      "allowWrongLineComments": true,
+      "cssModules": true
+    },
+    "assist": {
+      "enabled": true
+    },
+    "linter": {
+      "enabled": true
+    },
+    "formatter": {
+      "indentWidth": 180
+    }
+  },
+  "json": {
+    "linter": {
+      "enabled": true
+    },
+    "assist": {
+      "enabled": true
+    },
+    "parser": {
+      "allowComments": true,
+      "allowTrailingCommas": true
+    }
+  },
+  "formatter": {
+    "attributePosition": "multiline"
+  },
+  "linter": {
+    "enabled": true,
+    "rules": {
+      "a11y": {
+        "noAccessKey": "error",
+        "noAutofocus": "error",
+        "noPositiveTabindex": "error",
+        "useAltText": "error",
+        "useAnchorContent": "error",
+        "useButtonType": "error",
+        "useHeadingContent": "error",
+        "useHtmlLang": "error",
+        "useIframeTitle": "error",
+        "useKeyWithClickEvents": "error",
+        "useKeyWithMouseEvents": "error",
+        "useMediaCaption": "error",
+        "useValidAnchor": "error",
+        "useValidAriaProps": "error",
+        "useValidAriaValues": "error",
+        "useValidLang": "error"
+      },
+      "complexity": {
+        "noAdjacentSpacesInRegex": "error",
+        "noBannedTypes": "error",
+        "noArguments": "error",
+        "noCommaOperator": "error",
+        "noEmptyTypeParameters": "error",
+        "noExcessiveCognitiveComplexity": "error",
+        "noExcessiveNestedTestSuites": "error",
+        "noExtraBooleanCast": "error",
+        "noFlatMapIdentity": "error",
+        "noForEach": "error",
+        "noStaticOnlyClass": "error",
+        "noThisInStatic": "error",
+        "noUselessCatch": "error",
+        "noUselessConstructor": "error",
+        "noUselessFragments": "error",
+        "noUselessLabel": "error",
+        "noUselessRename": "error",
+        "noUselessSwitchCase": "error",
+        "noUselessThisAlias": "error",
+        "noVoid": "error",
+        "useArrowFunction": "error",
+        "useFlatMap": "error",
+        "useLiteralKeys": "error",
+        "useNumericLiterals": "error",
+        "useOptionalChain": "error",
+        "useSimplifiedLogicExpression": "error",
+        "noUselessContinue": "error",
+        "noUselessEmptyExport": "error",
+        "noUselessEscapeInRegex": "error",
+        "noUselessLoneBlockStatements": "error",
+        "noUselessStringConcat": "error",
+        "noUselessStringRaw": "error",
+        "noUselessTernary": "error",
+        "noUselessTypeConstraint": "error",
+        "noUselessUndefinedInitialization": "error",
+        "useDateNow": "error",
+        "useRegexLiterals": "error",
+        "useSimpleNumberKeys": "error",
+        "useWhile": "error"
+      }
+    }
+  }
+}
