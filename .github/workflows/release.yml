@@ -56,24 +56,22 @@ jobs:
     if: needs.changesets.outputs.hasChangesets == 'false'
     outputs:
       cli-version: ${{ steps.cli-version-changed.outputs.version }}
-      cli-version-changed: ${{ steps.cli-version-changed.outputs.changed }}
+      cli-version-changed: ${{ steps.cli-version-changed.outputs.version != "" }}
       js-api-version: ${{ steps.js-api-version-changed.outputs.version }}
-      js-api-version-changed: ${{ steps.js-api-version-changed.outputs.changed }}
+      js-api-version-changed: ${{ steps.js-api-version-changed.outputs.version != "" }}
 
     steps:
       - name: Check CLI version changes
-        uses: EndBug/version-check@36ff30f37c7deabe56a30caa043d127be658c425 # v2.1.5
         id: cli-version-changed
-        with:
-          diff-search: true
-          file-name: packages/@biomejs/biome/package.json
+        run: |
+          version=$(node --experimental-strip-types scripts/version-check.ts packages/@biomejs/biome/package.json)
+          echo "version=$version" >> $GITHUB_OUTPUT
 
       - name: Check JS API version changes
-        uses: EndBug/version-check@36ff30f37c7deabe56a30caa043d127be658c425 # v2.1.5
         id: js-api-version-changed
-        with:
-          diff-search: true
-          file-name: packages/@biomejs/js-api/package.json
+        run: |
+          version=$(node --experimental-strip-types scripts/version-check.ts packages/@biomejs/js-api/package.json)
+          echo "version=$version" >> $GITHUB_OUTPUT
 
   # Building jobs
 
