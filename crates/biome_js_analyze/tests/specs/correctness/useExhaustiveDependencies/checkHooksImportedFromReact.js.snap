@@ -31,7 +31,7 @@ function MyComponent2() {
 ```
 checkHooksImportedFromReact.js:3:9 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━━━━━━━━━━
 
-  × This hook does not specify its dependencies: a
+  × This hook does not specify its dependency: a
   
     1 │ function MyComponent1() {
     2 │   let a = 1;
@@ -40,7 +40,7 @@ checkHooksImportedFromReact.js:3:9 lint/correctness/useExhaustiveDependencies  F
     4 │       console.log(a);
     5 │   }, []);
   
-  i This dependency is being used here, but not specified in the hook dependency list.
+  i This dependency is being used here, but is not specified in the hook dependency list.
   
     2 │   let a = 1;
     3 │   React.useEffect(() => {

@@ -27,7 +27,7 @@ function MyComponent() {
 ```
 customHook.js:5:5 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × This hook does not specify its dependencies: a
+  × This hook does not specify its dependency: a
   
     3 │ function MyComponent() {
     4 │     let a = 1;
@@ -36,7 +36,7 @@ customHook.js:5:5 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━
     6 │         console.log(a);
     7 │     }, []);
   
-  i This dependency is being used here, but not specified in the hook dependency list.
+  i This dependency is being used here, but is not specified in the hook dependency list.
   
     4 │     let a = 1;
     5 │     useEffect(() => {
@@ -57,7 +57,7 @@ customHook.js:5:5 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━
 ```
 customHook.js:9:5 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × This hook does not specify its dependencies: a
+  × This hook does not specify its dependency: a
   
      7 │     }, []);
      8 │ 
@@ -66,7 +66,7 @@ customHook.js:9:5 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━
     10 │         console.log(a);
     11 │     }, []);
   
-  i This dependency is being used here, but not specified in the hook dependency list.
+  i This dependency is being used here, but is not specified in the hook dependency list.
   
      9 │     useMyEffect(() => {
   > 10 │         console.log(a);

@@ -19,7 +19,7 @@ const Comp = (myFn) => {
 ```
 issue6278.js:4:8 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × This hook does not specify its dependencies: myFn
+  × This hook does not specify its dependency: myFn
   
     3 │ const Comp = (myFn) => {
   > 4 │ 	React.useCallback(() => {
@@ -27,7 +27,7 @@ issue6278.js:4:8 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━�
     5 │ 		myFn(true);
     6 │ 		myFn(false);
   
-  i This dependency is being used here, but not specified in the hook dependency list.
+  i This dependency is being used here, but is not specified in the hook dependency list.
   
     4 │ 	React.useCallback(() => {
     5 │ 		myFn(true);
@@ -36,7 +36,7 @@ issue6278.js:4:8 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━�
     7 │ 	}, []);
     8 │ };
   
-  i This dependency is being used here, but not specified in the hook dependency list.
+  i This dependency is being used here, but is not specified in the hook dependency list.
   
     3 │ const Comp = (myFn) => {
     4 │ 	React.useCallback(() => {

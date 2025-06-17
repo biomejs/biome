@@ -974,13 +974,13 @@ impl Rule for UseExhaustiveDependencies {
                 let mut diag = RuleDiagnostic::new(
                     rule_category!(),
                     function_name_range,
-                    markup! {"This hook does not specify its dependencies: "<Emphasis>{capture_text.as_ref()}</Emphasis>""},
+                    markup! {"This hook does not specify its dependency: "<Emphasis>{capture_text.as_ref()}</Emphasis>""},
                 );
 
                 for range in captures_range {
                     diag = diag.detail(
                         range.text_trimmed_range(),
-                        "This dependency is being used here, but not specified in the hook dependency list.",
+                        "This dependency is being used here, but is not specified in the hook dependency list.",
                     );
                 }
 
