@@ -19,5 +19,8 @@
   ],
   "libc": [
     "glibc"
-  ]
+  ],
+  "publishConfig": {
+    "provenance": true
+  }
 }
