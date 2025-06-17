@@ -18,6 +18,8 @@ env:
 jobs:
   changesets:
     name: Release
+    outputs:
+      hasChangesets: ${{ steps.changesets_action.outputs.hasChangesets }}
     runs-on: depot-ubuntu-24.04-arm-16
     steps:
       - name: Checkout Repo
@@ -38,6 +40,7 @@ jobs:
         run: pnpm install
 
       - name: Create Release Pull Request
+        id: changesets_action
         uses: changesets/action@e0145edc7d9d8679003495b11f87bd8ef63c0cba # v1.5.3
         with:
           version: pnpm run version
