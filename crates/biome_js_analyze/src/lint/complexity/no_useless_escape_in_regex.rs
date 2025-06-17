@@ -86,11 +86,13 @@ impl Rule for NoUselessEscapeInRegex {
                         | b'*' | b'+' | b'?' | b'{' | b'}'
                         // Backreferences
                         | b'1'..=b'9'
+                        // Named backreferences
+                        | b'k'
                         // Groups
                         | b'(' | b')'
                         // Alternation
                         | b'|' => {}
-                        b'p' | b'P' | b'k' | b'q' if is_unicode_aware => {}
+                        b'p' | b'P' | b'q' if is_unicode_aware => {}
                         _ => {
                             return Some(State {
                                 backslash_index: index as u16,

@@ -12,11 +12,9 @@ const PLATFORMS = ["win32-%s", "darwin-%s", "linux-%s", "linux-%s-musl"];
 const ARCHITECTURES = ["x64", "arm64"];
 const WASM_TARGETS = ["bundler", "nodejs", "web"];
 
-
 const rootManifest = JSON.parse(
 	fs.readFileSync(MANIFEST_PATH).toString("utf-8"),
 );
-
 
 for (const platform of PLATFORMS) {
 	for (const arch of ARCHITECTURES) {
@@ -27,7 +25,6 @@ for (const platform of PLATFORMS) {
 for (const target of WASM_TARGETS) {
 	updateWasmPackage(target);
 }
-
 
 function getName(platform, arch, prefix = "cli") {
 	return format(`${prefix}-${platform}`, arch);
@@ -49,7 +46,7 @@ function updateOptionalDependencies(platform, arch) {
 			license,
 			repository: {
 				...repository,
-				directory: repository.directory + "/" + buildName
+				directory: `${repository.directory}/${buildName}`,
 			},
 			engines,
 			homepage,
@@ -79,10 +76,10 @@ function updateOptionalDependencies(platform, arch) {
 	const binaryTarget = resolve(packageRoot, `biome${ext}`);
 
 	if (fs.existsSync(binaryTarget)) {
-	console.log(`Copy binary ${binaryTarget}`);
+		console.log(`Copy binary ${binaryTarget}`);
 
-	fs.copyFileSync(binarySource, binaryTarget);
-	fs.chmodSync(binaryTarget, 0o755);
+		fs.copyFileSync(binarySource, binaryTarget);
+		fs.chmodSync(binaryTarget, 0o755);
 	}
 }
 
@@ -98,8 +95,8 @@ function updateWasmPackage(target) {
 	manifest.version = version;
 	manifest.repository = {
 		...repository,
-		directory: repository.directory + `/wasm-${target}`
-	}
+		directory: `${repository.directory}/wasm-${target}`,
+	};
 
 	console.log(`Update manifest ${manifestPath}`);
 	fs.writeFileSync(manifestPath, JSON.stringify(manifest, null, 2));

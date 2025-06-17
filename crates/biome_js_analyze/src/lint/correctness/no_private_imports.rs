@@ -228,9 +228,9 @@ impl Rule for NoPrivateImports {
             .is_static_import()
             .then(|| node.inner_string_text())
             .flatten()
-            .filter(|specifier| !BiomePath::new(specifier.text()).is_dependency())
             .and_then(|specifier| module_info.static_import_paths.get(specifier.text()))
             .and_then(ResolvedPath::as_path)
+            .filter(|path| !BiomePath::new(path).is_dependency())
         else {
             return Vec::new();
         };
