@@ -4807,6 +4807,13 @@
 			"description": "A list of rules that belong to this group",
 			"type": "object",
 			"properties": {
+				"noAlert": {
+					"description": "Disallow the use of alert, confirm, and prompt.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noApproximativeNumericConstant": {
 					"description": "Use standard constants instead of approximated literals.",
 					"anyOf": [

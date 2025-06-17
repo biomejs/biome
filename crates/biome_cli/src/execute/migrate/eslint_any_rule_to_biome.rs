@@ -1141,6 +1141,14 @@ pub(crate) fn migrate_eslint_any_rule(
                 .get_or_insert(Default::default());
             rule.set_level(rule.level().max(rule_severity.into()));
         }
+        "no-alert" => {
+            let group = rules.suspicious.get_or_insert_with(Default::default);
+            let rule = group
+                .unwrap_group_as_mut()
+                .no_alert
+                .get_or_insert(Default::default());
+            rule.set_level(rule.level().max(rule_severity.into()));
+        }
         "no-array-constructor" => {
             let group = rules.style.get_or_insert_with(Default::default);
             let rule = group
