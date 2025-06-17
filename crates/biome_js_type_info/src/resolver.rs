@@ -6,7 +6,7 @@ use biome_rowan::Text;
 
 use crate::{
     NUM_PREDEFINED_TYPES, ScopeId, TypeData, TypeId, TypeImportQualifier, TypeInstance, TypeMember,
-    TypeReference, TypeReferenceQualifier, TypeofValue, Union,
+    TypeMemberKind, TypeReference, TypeReferenceQualifier, TypeofValue, Union,
     globals::{GLOBAL_UNDEFINED_ID, global_type_name},
 };
 
@@ -379,16 +379,29 @@ impl<'a> ResolvedTypeData<'a> {
 
 /// [`TypeMember`] reference combined with a [`ResolverId`] to preserve the
 /// context in which the member was resolved.
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Debug)]
 pub struct ResolvedTypeMember<'a> {
     id: ResolverId,
-    member: &'a TypeMember,
+    member: Cow<'a, TypeMember>,
 }
 
 impl<'a> From<(ResolverId, &'a TypeMember)> for ResolvedTypeMember<'a> {
     #[inline]
     fn from((id, member): (ResolverId, &'a TypeMember)) -> Self {
-        Self { id, member }
+        Self {
+            id,
+            member: Cow::Borrowed(member),
+        }
+    }
+}
+
+impl From<(ResolverId, TypeMember)> for ResolvedTypeMember<'_> {
+    #[inline]
+    fn from((id, member): (ResolverId, TypeMember)) -> Self {
+        Self {
+            id,
+            member: Cow::Owned(member),
+        }
     }
 }
 
@@ -396,14 +409,17 @@ impl<'a> ResolvedTypeMember<'a> {
     /// Applies the module ID from the embedded [`ResolverId`] to the given
     /// `data`.
     #[inline]
-    pub fn apply_module_id_to_data(self, data: TypeData) -> TypeData {
+    pub fn apply_module_id_to_data(&self, data: TypeData) -> TypeData {
         self.id.apply_module_id_to_data(data)
     }
 
     /// Applies the module ID from the embedded [`ResolverId`] to the given
     /// `reference`.
     #[inline]
-    pub fn apply_module_id_to_reference(self, reference: &TypeReference) -> Cow<TypeReference> {
+    pub fn apply_module_id_to_reference<'r>(
+        &self,
+        reference: &'r TypeReference,
+    ) -> Cow<'r, TypeReference> {
         self.id.apply_module_id_to_reference(reference)
     }
 
@@ -414,22 +430,27 @@ impl<'a> ResolvedTypeMember<'a> {
     /// resolved, and further references may be resolved from the wrong context.
     /// If you wish to call the resolver on the member's data, use
     /// [`Self::to_member()`] instead.
-    pub fn as_raw_member(self) -> &'a TypeMember {
-        self.member
+    pub fn as_raw_member(&'a self) -> &'a TypeMember {
+        self.member.as_ref()
     }
 
     #[inline]
-    pub fn has_name(self, name: &str) -> bool {
+    pub fn has_name(&self, name: &str) -> bool {
         self.member.has_name(name)
     }
 
     #[inline]
-    pub fn is_static(self) -> bool {
+    pub fn is_static(&self) -> bool {
         self.member.is_static()
     }
 
     #[inline]
-    pub fn name(self) -> Option<Text> {
+    pub fn kind(&self) -> &TypeMemberKind {
+        &self.member.kind
+    }
+
+    #[inline]
+    pub fn name(&self) -> Option<Text> {
         self.member.name()
     }
 
@@ -438,12 +459,12 @@ impl<'a> ResolvedTypeMember<'a> {
     pub fn to_member(self) -> TypeMember {
         match self.id.level() {
             TypeResolverLevel::Thin => {
-                let mut member = self.member.clone();
+                let mut member = self.member.into_owned();
                 let module_id = self.id.module_id();
                 member.update_all_references(|reference| reference.set_module_id(module_id));
                 member
             }
-            _ => self.member.clone(),
+            _ => self.member.into_owned(),
         }
     }
 

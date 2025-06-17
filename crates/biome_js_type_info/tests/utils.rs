@@ -5,7 +5,9 @@ use std::borrow::Cow;
 use biome_js_formatter::context::JsFormatOptions;
 use biome_js_formatter::format_node;
 use biome_js_parser::{JsParserOptions, parse};
-use biome_js_syntax::{AnyJsExpression, JsVariableDeclaration, TsInterfaceDeclaration};
+use biome_js_syntax::{
+    AnyJsExpression, JsVariableDeclaration, TsInterfaceDeclaration, TsTypeAliasDeclaration,
+};
 use biome_js_syntax::{
     AnyJsModuleItem, AnyJsRoot, AnyJsStatement, JsFileSource, JsFunctionDeclaration,
 };
