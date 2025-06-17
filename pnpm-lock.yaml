@@ -14,6 +14,9 @@ importers:
       '@changesets/cli':
         specifier: 2.29.4
         version: 2.29.4
+      '@types/node':
+        specifier: 22.15.31
+        version: 22.15.31
 
   benchmark:
     devDependencies:

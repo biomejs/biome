@@ -15,8 +15,10 @@
   "engines": {
     "pnpm": "10.8.1"
   },
+  "type": "module",
   "devDependencies": {
+    "@changesets/changelog-github": "0.5.1",
     "@changesets/cli": "2.29.4",
-    "@changesets/changelog-github": "0.5.1"
+    "@types/node": "22.15.31"
   }
 }
