@@ -4,6 +4,7 @@ pub(crate) mod json;
 pub(crate) mod junit;
 pub(crate) mod summary;
 pub(crate) mod terminal;
+pub(crate) mod checkstyle;
 
 use crate::execute::Execution;
 use biome_diagnostics::{Error, Severity};

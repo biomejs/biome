@@ -229,6 +229,8 @@ pub enum ReportMode {
     Junit,
     /// Reports information in the [GitLab Code Quality](https://docs.gitlab.com/ee/ci/testing/code_quality.html#implement-a-custom-tool) format.
     GitLab,
+    /// Reports diagnostics in Checkstyle XML format
+    Checkstyle,
 }
 
 impl Default for ReportMode {
@@ -251,6 +253,7 @@ impl From<CliReporter> for ReportMode {
             CliReporter::GitHub => Self::GitHub,
             CliReporter::Junit => Self::Junit,
             CliReporter::GitLab => Self::GitLab {},
+            CliReporter::Checkstyle => Self::Checkstyle,
         }
     }
 }
@@ -569,6 +572,18 @@ pub fn execute_mode(
                     execution: execution.clone(),
                 };
                 reporter.write(&mut JunitReporterVisitor::new(console))?;
+            }
+            ReportMode::Checkstyle => {
+                let reporter = crate::reporter::checkstyle::CheckstyleReporter {
+                    summary,
+                    diagnostics_payload: DiagnosticsPayload {
+                        verbose: cli_options.verbose,
+                        diagnostic_level: cli_options.diagnostic_level,
+                        diagnostics,
+                    },
+                    execution: execution.clone(),
+                };
+                reporter.write(&mut crate::reporter::checkstyle::CheckstyleReporterVisitor::new(console))?;
             }
         }
 
