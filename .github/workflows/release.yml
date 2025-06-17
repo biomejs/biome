@@ -62,13 +62,13 @@ jobs:
       - name: Check CLI version changes
         id: cli-version-changed
         run: |
-          version=$(node scripts/version-check.js packages/@biomejs/biome/package.json)
+          version=$(node --experimental-strip-types scripts/version-check.ts packages/@biomejs/biome/package.json)
           echo "version=$version" >> $GITHUB_OUTPUT
 
       - name: Check JS API version changes
         id: js-api-version-changed
         run: |
-          version=$(node scripts/version-check.js packages/@biomejs/js-api/package.json)
+          version=$(node --experimental-strip-types scripts/version-check.ts packages/@biomejs/js-api/package.json)
           echo "version=$version" >> $GITHUB_OUTPUT
 
   # Building jobs

@@ -9,7 +9,7 @@ const semverReGlobal =
 
 const packageFileName = process.argv[2];
 if (!packageFileName) {
-	console.error("Usage: node scripts/version-check.js <path-to-package-json>");
+	console.error("Usage: node scripts/version-check.ts <path-to-package-json>");
 	process.exit(1);
 }
 
@@ -22,14 +22,17 @@ async function main() {
 	await processDirectory(dir, commits);
 }
 
-function readJson(file) {
+function readJson(file: string) {
 	const data = readFileSync(file, { encoding: "utf8" });
 	if (typeof data === "string") {
 		return JSON.parse(data);
 	}
 }
 
-async function processDirectory(dir, commits) {
+async function processDirectory(
+	dir: string,
+	commits: Array<LocalCommit> | Array<PartialCommitResponse>,
+) {
 	try {
 		const packageObj = readJson(join(dir, packageFileName));
 
@@ -56,7 +59,10 @@ async function processDirectory(dir, commits) {
 	}
 }
 
-async function checkCommits(commits, version) {
+async function checkCommits(
+	commits: Array<LocalCommit> | Array<PartialCommitResponse>,
+	version: string,
+) {
 	try {
 		log(
 			`Checking the diffs of ${commits.length} commit${
@@ -90,9 +96,9 @@ async function checkCommits(commits, version) {
 	}
 }
 
-function getBasicInfo(commit) {
-	let message;
-	let sha;
+function getBasicInfo(commit: LocalCommit | PartialCommitResponse) {
+	let message: string;
+	let sha: string;
 
 	if (isLocalCommit(commit)) {
 		message = commit.message;
@@ -108,7 +114,7 @@ function getBasicInfo(commit) {
 	};
 }
 
-async function checkDiff(sha, version) {
+async function checkDiff(sha: string, version: string) {
 	try {
 		const commit = await getCommit(sha);
 		const shortSha = sha.slice(0, 7);
@@ -119,7 +125,10 @@ async function checkDiff(sha, version) {
 			return false;
 		}
 
-		const versionLines = {};
+		const versionLines: {
+			added?: string;
+			deleted?: string;
+		} = {};
 
 		const rawLines = pkg.patch
 			.split("\n")
@@ -160,7 +169,7 @@ async function checkDiff(sha, version) {
 	}
 }
 
-async function getCommit(sha) {
+async function getCommit(sha: string): Promise<CommitResponse> {
 	const url = `https://api.github.com/repos/biomejs/biome/commits/${sha}`;
 	const response = await fetch(url);
 	if (!response.ok) {
@@ -169,21 +178,21 @@ async function getCommit(sha) {
 		);
 	}
 
-	return await response.json();
+	return (await response.json()) as CommitResponse;
 }
 
-function parseVersionLine(str) {
+function parseVersionLine(str: string) {
 	return (str.split('"') || []).map((s) => matchVersion(s)).find((e) => !!e);
 }
 
-function matchVersion(str) {
-	return (str.match(semverReGlobal) || [])[0];
+function matchVersion(str: string): string {
+	return (str.match(semverReGlobal) || ([] as string[]))[0];
 }
 
 class ExitError extends Error {
-	code;
+	code?: number;
 
-	constructor(code) {
+	constructor(code: number | null) {
 		super(`Command failed with code ${code}`);
 		if (typeof code === "number") this.code = code;
 	}
@@ -204,11 +213,35 @@ main().catch((err) => {
 // Use a custom log function to write to `stderr`. We don't want ordinary logs
 // to appear on `stdout`, as that will be reserved to capture the version
 // output.
-function log(message) {
+function log(message: string) {
 	process.stderr.write(`${message}\n`);
 }
 
-function isLocalCommit(value) {
+interface CommitResponse extends PartialCommitResponse {
+	files: {
+		filename: string;
+		additions: number;
+		deletions: number;
+		changes: number;
+		status: string;
+		raw_url: string;
+		blob_url: string;
+		patch: string;
+	}[];
+}
+
+interface LocalCommit {
+	id: string;
+	message: string;
+	author: {
+		name: string;
+		email: string;
+	};
+	url: string;
+	distinct: boolean;
+}
+
+function isLocalCommit(value: unknown): value is LocalCommit {
 	return (
 		!!value &&
 		typeof value === "object" &&
@@ -217,10 +250,98 @@ function isLocalCommit(value) {
 	);
 }
 
-function isLocalCommitArray(value) {
+function isLocalCommitArray(
+	value: Array<unknown>,
+): value is Array<LocalCommit> {
 	return isLocalCommit(value[0]);
 }
 
-function isPackageObj(value) {
+interface PackageObj {
+	version: string;
+}
+
+function isPackageObj(value): value is PackageObj {
 	return !!value && !!value.version;
+}
+
+interface PartialCommitResponse {
+	url: string;
+	sha: string;
+	node_id: string;
+	html_url: string;
+	comments_url: string;
+	commit: {
+		url: string;
+		author: {
+			name: string;
+			email: string;
+			date: string;
+		};
+		committer: {
+			name: string;
+			email: string;
+			date: string;
+		};
+		message: string;
+		tree: {
+			url: string;
+			sha: string;
+		};
+		comment_count: number;
+		verification: {
+			verified: boolean;
+			reason: string;
+			signature: object | null;
+			payload: object | null;
+		};
+	};
+	author: {
+		login: string;
+		id: number;
+		node_id: string;
+		avatar_url: string;
+		gravatar_id: string;
+		url: string;
+		html_url: string;
+		followers_url: string;
+		following_url: string;
+		gists_url: string;
+		starred_url: string;
+		subscriptions_url: string;
+		organizations_url: string;
+		repos_url: string;
+		events_url: string;
+		receive_events_url: string;
+		type: string;
+		site_admin: boolean;
+	};
+	committer: {
+		login: string;
+		id: number;
+		node_id: string;
+		avatar_url: string;
+		gravatar_id: string;
+		url: string;
+		html_url: string;
+		followers_url: string;
+		following_url: string;
+		gists_url: string;
+		starred_url: string;
+		subscriptions_url: string;
+		organizations_url: string;
+		repos_url: string;
+		events_url: string;
+		receive_events_url: string;
+		type: string;
+		site_admin: boolean;
+	};
+	parents: {
+		url: string;
+		sha: string;
+	}[];
+	stats: {
+		additions: number;
+		deletions: number;
+		total: number;
+	};
 }
