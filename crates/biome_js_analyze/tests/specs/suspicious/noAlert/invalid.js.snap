@@ -21,7 +21,7 @@ window.prompt("enter name");
 // Bracket notation calls (should trigger the rule)
 window["alert"]("bracket notation");
 
-// Expression calls (should trigger the rule)  
+// Expression calls (should trigger the rule)
 (alert)("wrapped in parens");
 
 // Nested in other expressions
@@ -42,15 +42,15 @@ confirm("third");
 invalid.js:2:1 lint/suspicious/noAlert ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Unexpected alert
-  
+
     1 │ // Direct function calls (should trigger the rule)
   > 2 │ alert("here!");
       │ ^^^^^^^^^^^^^^
-    3 │ 
+    3 │
     4 │ confirm("Are you sure?");
-  
+
   i The alert function is considered to be obtrusive. Replace it with a custom UI implementation.
-  
+
 
 ```
 
@@ -58,16 +58,16 @@ invalid.js:2:1 lint/suspicious/noAlert ━━━━━━━━━━━━━�
 invalid.js:4:1 lint/suspicious/noAlert ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Unexpected confirm
-  
+
     2 │ alert("here!");
-    3 │ 
+    3 │
   > 4 │ confirm("Are you sure?");
       │ ^^^^^^^^^^^^^^^^^^^^^^^^
-    5 │ 
+    5 │
     6 │ prompt("What's your name?", "John Doe");
-  
+
   i The confirm function is considered to be obtrusive. Replace it with a custom UI implementation.
-  
+
 
 ```
 
@@ -75,16 +75,16 @@ invalid.js:4:1 lint/suspicious/noAlert ━━━━━━━━━━━━━�
 invalid.js:6:1 lint/suspicious/noAlert ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Unexpected prompt
-  
+
     4 │ confirm("Are you sure?");
-    5 │ 
+    5 │
   > 6 │ prompt("What's your name?", "John Doe");
       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    7 │ 
+    7 │
     8 │ // Window object calls (should trigger the rule)
-  
+
   i The prompt function is considered to be obtrusive. Replace it with a custom UI implementation.
-  
+
 
 ```
 
@@ -92,15 +92,15 @@ invalid.js:6:1 lint/suspicious/noAlert ━━━━━━━━━━━━━�
 invalid.js:9:1 lint/suspicious/noAlert ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Unexpected alert
-  
+
      8 │ // Window object calls (should trigger the rule)
    > 9 │ window.alert("hello");
        │ ^^^^^^^^^^^^^^^^^^^^^
-    10 │ 
+    10 │
     11 │ window.confirm("proceed?");
-  
+
   i The alert function is considered to be obtrusive. Replace it with a custom UI implementation.
-  
+
 
 ```
 
@@ -108,16 +108,16 @@ invalid.js:9:1 lint/suspicious/noAlert ━━━━━━━━━━━━━�
 invalid.js:11:1 lint/suspicious/noAlert ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Unexpected confirm
-  
+
      9 │ window.alert("hello");
-    10 │ 
+    10 │
   > 11 │ window.confirm("proceed?");
        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^
-    12 │ 
+    12 │
     13 │ window.prompt("enter name");
-  
+
   i The confirm function is considered to be obtrusive. Replace it with a custom UI implementation.
-  
+
 
 ```
 
@@ -125,16 +125,48 @@ invalid.js:11:1 lint/suspicious/noAlert ━━━━━━━━━━━━━�
 invalid.js:13:1 lint/suspicious/noAlert ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Unexpected prompt
-  
+
     11 │ window.confirm("proceed?");
-    12 │ 
+    12 │
   > 13 │ window.prompt("enter name");
        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    14 │ 
+    14 │
     15 │ // Bracket notation calls (should trigger the rule)
-  
+
   i The prompt function is considered to be obtrusive. Replace it with a custom UI implementation.
-  
+
+
+```
+
+```
+invalid.js:16:1 lint/suspicious/noAlert ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected alert
+
+    15 │ // Bracket notation calls (should trigger the rule)
+  > 16 │ window["alert"]("bracket notation");
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    17 │
+    18 │ // Expression calls (should trigger the rule)··
+
+  i The alert function is considered to be obtrusive. Replace it with a custom UI implementation.
+
+
+```
+
+```
+invalid.js:19:1 lint/suspicious/noAlert ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected alert
+
+    18 │ // Expression calls (should trigger the rule)··
+  > 19 │ (alert)("wrapped in parens");
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    20 │
+    21 │ // Nested in other expressions
+
+  i The alert function is considered to be obtrusive. Replace it with a custom UI implementation.
+
 
 ```
 
@@ -142,15 +174,15 @@ invalid.js:13:1 lint/suspicious/noAlert ━━━━━━━━━━━━━�
 invalid.js:22:5 lint/suspicious/noAlert ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Unexpected confirm
-  
+
     21 │ // Nested in other expressions
   > 22 │ if (confirm("really?")) {
        │     ^^^^^^^^^^^^^^^^^^
     23 │     console.log("yes");
     24 │ }
-  
+
   i The confirm function is considered to be obtrusive. Replace it with a custom UI implementation.
-  
+
 
 ```
 
@@ -158,16 +190,16 @@ invalid.js:22:5 lint/suspicious/noAlert ━━━━━━━━━━━━━�
 invalid.js:26:16 lint/suspicious/noAlert ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Unexpected prompt
-  
+
     24 │ }
-    25 │ 
+    25 │
   > 26 │ const result = prompt("input:");
        │                ^^^^^^^^^^^^^^^^
-    27 │ 
+    27 │
     28 │ // Multiple calls
-  
+
   i The prompt function is considered to be obtrusive. Replace it with a custom UI implementation.
-  
+
 
 ```
 
@@ -175,15 +207,15 @@ invalid.js:26:16 lint/suspicious/noAlert ━━━━━━━━━━━━━
 invalid.js:29:1 lint/suspicious/noAlert ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Unexpected alert
-  
+
     28 │ // Multiple calls
   > 29 │ alert("first");
        │ ^^^^^^^^^^^^^^
     30 │ alert("second");
     31 │ confirm("third");
-  
+
   i The alert function is considered to be obtrusive. Replace it with a custom UI implementation.
-  
+
 
 ```
 
@@ -191,15 +223,15 @@ invalid.js:29:1 lint/suspicious/noAlert ━━━━━━━━━━━━━�
 invalid.js:30:1 lint/suspicious/noAlert ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Unexpected alert
-  
+
     28 │ // Multiple calls
     29 │ alert("first");
   > 30 │ alert("second");
        │ ^^^^^^^^^^^^^^^
     31 │ confirm("third");
-  
+
   i The alert function is considered to be obtrusive. Replace it with a custom UI implementation.
-  
+
 
 ```
 
@@ -207,13 +239,13 @@ invalid.js:30:1 lint/suspicious/noAlert ━━━━━━━━━━━━━�
 invalid.js:31:1 lint/suspicious/noAlert ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Unexpected confirm
-  
+
     29 │ alert("first");
     30 │ alert("second");
   > 31 │ confirm("third");
        │ ^^^^^^^^^^^^^^^^
-  
+
   i The confirm function is considered to be obtrusive. Replace it with a custom UI implementation.
-  
+
 
 ```
