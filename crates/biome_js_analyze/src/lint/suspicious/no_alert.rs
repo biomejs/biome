@@ -1,7 +1,5 @@
 use crate::services::semantic::Semantic;
-use biome_analyze::{
-    context::RuleContext, declare_lint_rule, Rule, RuleDiagnostic, RuleSource,
-};
+use biome_analyze::{Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule};
 use biome_console::markup;
 use biome_js_syntax::{AnyJsExpression, JsCallExpression, global_identifier};
 use biome_rowan::AstNode;
@@ -75,7 +73,7 @@ impl Rule for NoAlert {
             AnyJsExpression::JsIdentifierExpression(_) => {
                 let (reference, name) = global_identifier(&callee)?;
                 let name_text = name.text();
-                
+
                 if matches!(name_text, "alert" | "confirm" | "prompt") {
                     // Check if this is actually a global function call (not a local variable)
                     if model.binding(&reference).is_none() {
@@ -88,13 +86,15 @@ impl Rule for NoAlert {
                 let object = member_expr.object().ok()?;
                 if let Some((reference, object_name)) = global_identifier(&object) {
                     let object_name_text = object_name.text();
-                    
+
                     // Check if it's a call on a global object
-                    if matches!(object_name_text, "window" | "globalThis") && model.binding(&reference).is_none() {
+                    if matches!(object_name_text, "window" | "globalThis")
+                        && model.binding(&reference).is_none()
+                    {
                         let member_name = member_expr.member().ok()?;
                         let member_token = member_name.value_token().ok()?;
                         let member_name_text = member_token.text_trimmed();
-                        
+
                         if matches!(member_name_text, "alert" | "confirm" | "prompt") {
                             return Some(member_name_text.to_string());
                         }
@@ -109,7 +109,7 @@ impl Rule for NoAlert {
 
     fn diagnostic(ctx: &RuleContext<Self>, function_name: &Self::State) -> Option<RuleDiagnostic> {
         let call = ctx.query();
-        
+
         Some(
             RuleDiagnostic::new(
                 rule_category!(),
