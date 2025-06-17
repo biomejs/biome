@@ -50,7 +50,7 @@ jobs:
   version:
     runs-on: depot-ubuntu-24.04-arm-16
     needs: changesets
-    if: needs.changesets.outputs.hasChangesets == 'false' && github.head_ref == 'changeset-release/main'
+    if: needs.changesets.outputs.hasChangesets == 'false'
     outputs:
       cli-version: ${{ env.cli-version }}
       js-api-version: ${{ env.cli-js-api-version }}
