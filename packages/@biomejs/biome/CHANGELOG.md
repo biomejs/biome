@@ -448,7 +448,7 @@
 
   New rules are incubated in the nursery group.
   Once stable, we promote them to a stable group.
-  Use the `biomem igrate` command to automatically migrate nursery rules that have been promoted.
+  Use the `biome migrate` command to automatically migrate nursery rules that have been promoted.
 
   The following CSS rules have been promoted:
 
