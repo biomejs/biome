@@ -2,6 +2,9 @@
 
 Official JavaScript bindings for [Biome](https://biomejs.dev/)
 
+> [!WARNING]
+> The API is currently in alpha. It is not yet ready for production use. We appreciate your support and feedback as we work to make it ready for everyone.
+
 ## Installation
 
 ```shell
