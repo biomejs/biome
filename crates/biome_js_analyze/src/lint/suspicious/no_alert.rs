@@ -1,0 +1,126 @@
+use crate::services::semantic::Semantic;
+use biome_analyze::{
+    context::RuleContext, declare_lint_rule, Rule, RuleDiagnostic, RuleSource,
+};
+use biome_console::markup;
+use biome_js_syntax::{AnyJsExpression, JsCallExpression, global_identifier};
+use biome_rowan::AstNode;
+
+declare_lint_rule! {
+    /// Disallow the use of `alert`, `confirm`, and `prompt`.
+    ///
+    /// JavaScript's `alert`, `confirm`, and `prompt` functions are widely considered to be obtrusive
+    /// as UI elements and should be replaced by a more appropriate custom UI implementation.
+    /// Furthermore, `alert` is often used while debugging code, which should be removed before
+    /// deployment to production.
+    ///
+    /// ## Examples
+    ///
+    /// ### Invalid
+    ///
+    /// ```js,expect_diagnostic
+    /// alert("here!");
+    /// ```
+    ///
+    /// ```js,expect_diagnostic
+    /// confirm("Are you sure?");
+    /// ```
+    ///
+    /// ```js,expect_diagnostic
+    /// prompt("What's your name?", "John Doe");
+    /// ```
+    ///
+    /// ### Valid
+    ///
+    /// ```js
+    /// customAlert("Something happened!");
+    /// ```
+    ///
+    /// ```js
+    /// customConfirm("Are you sure?");
+    /// ```
+    ///
+    /// ```js
+    /// customPrompt("Who are you?");
+    /// ```
+    ///
+    /// ```js
+    /// function foo() {
+    ///     const alert = myCustomLib.customAlert;
+    ///     alert();
+    /// }
+    /// ```
+    pub NoAlert {
+        version: "1.0.0",
+        name: "noAlert",
+        language: "js",
+        sources: &[RuleSource::Eslint("no-alert")],
+        recommended: true,
+    }
+}
+
+impl Rule for NoAlert {
+    type Query = Semantic<JsCallExpression>;
+    type State = String;
+    type Signals = Option<Self::State>;
+    type Options = ();
+
+    fn run(ctx: &RuleContext<Self>) -> Self::Signals {
+        let call = ctx.query();
+        let model = ctx.model();
+        let callee = call.callee().ok()?;
+
+        match &callee {
+            // Handle direct calls: alert(), confirm(), prompt()
+            AnyJsExpression::JsIdentifierExpression(_) => {
+                let (reference, name) = global_identifier(&callee)?;
+                let name_text = name.text();
+                
+                if matches!(name_text, "alert" | "confirm" | "prompt") {
+                    // Check if this is actually a global function call (not a local variable)
+                    if model.binding(&reference).is_none() {
+                        return Some(name_text.to_string());
+                    }
+                }
+            }
+            // Handle member calls: window.alert(), globalThis.confirm(), etc.
+            AnyJsExpression::JsStaticMemberExpression(member_expr) => {
+                let object = member_expr.object().ok()?;
+                if let Some((reference, object_name)) = global_identifier(&object) {
+                    let object_name_text = object_name.text();
+                    
+                    // Check if it's a call on a global object
+                    if matches!(object_name_text, "window" | "globalThis") && model.binding(&reference).is_none() {
+                        let member_name = member_expr.member().ok()?;
+                        let member_token = member_name.value_token().ok()?;
+                        let member_name_text = member_token.text_trimmed();
+                        
+                        if matches!(member_name_text, "alert" | "confirm" | "prompt") {
+                            return Some(member_name_text.to_string());
+                        }
+                    }
+                }
+            }
+            _ => {}
+        }
+
+        None
+    }
+
+    fn diagnostic(ctx: &RuleContext<Self>, function_name: &Self::State) -> Option<RuleDiagnostic> {
+        let call = ctx.query();
+        
+        Some(
+            RuleDiagnostic::new(
+                rule_category!(),
+                call.range(),
+                markup! {
+                    "Unexpected "<Emphasis>{function_name}</Emphasis>
+                },
+            )
+            .note(markup! {
+                "The "<Emphasis>{function_name}</Emphasis>" function is considered to be obtrusive. Replace it with a custom UI implementation."
+            }),
+        )
+    }
+}

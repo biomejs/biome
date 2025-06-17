@@ -287,6 +287,7 @@ define_categories! {
     "lint/style/useThrowNewError": "https://biomejs.dev/linter/rules/use-throw-new-error",
     "lint/style/useThrowOnlyError": "https://biomejs.dev/linter/rules/use-throw-only-error",
     "lint/style/useTrimStartEnd": "https://biomejs.dev/linter/rules/use-trim-start-end",
+    "lint/suspicious/noAlert": "https://biomejs.dev/linter/rules/no-alert",
     "lint/suspicious/noApproximativeNumericConstant": "https://biomejs.dev/linter/rules/no-approximative-numeric-constant",
     "lint/suspicious/noArrayIndexKey": "https://biomejs.dev/linter/rules/no-array-index-key",
     "lint/suspicious/noAssignInExpressions": "https://biomejs.dev/linter/rules/no-assign-in-expressions",
