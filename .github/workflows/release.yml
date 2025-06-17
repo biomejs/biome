@@ -329,5 +329,5 @@ jobs:
 
       - name: Upload assets to the latest tag
         run: |
-          files=$(ls cli-* | tr '\n' ' ')
+          files=$(ls biome-* | tr '\n' ' ')
           gh release upload @biomejs/biome@${{ needs.build-binaries.outputs.version }} $files
