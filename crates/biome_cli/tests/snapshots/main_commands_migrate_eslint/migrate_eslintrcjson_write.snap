@@ -63,7 +63,11 @@ expression: redactor(content)
 # Emitted Messages
 
 ```block
-.eslintrc.json has been successfully migrated.
+migrate ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i 100% (6/6) of the rules have been migrated.
+  
+
 ```
 
 ```block

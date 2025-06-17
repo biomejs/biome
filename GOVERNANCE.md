@@ -219,13 +219,12 @@ done through a one-time donation, or through recurring donations. We offer incen
 To learn more about sponsorship incentives, or to make a donation, please visit our [Open Collective page](https://opencollective.com/biome).
 You can also sponsor the project through [GitHub](https://github.com/sponsors/biomejs).
 
-### Community-Funded Bounties
+### Community-Funded Bounties (currently halted)
 
-Bounties are the second approach towards funding Biome development. Unlike a sponsorship, bounties are directed towards the implementation of a specific feature. Compared to sponsorship, bounties come with a few risks, both for Biome as a project and for the people or entities offering and collecting the bounty. To minimize these risks, we only sanction bounties under the following conditions:
+Bounties are the second approach towards funding Biome development. Unlike sponsorship, bounties are directed towards the implementation of a specific feature. Compared to sponsorship, bounties come with a few risks, both for Biome as a project and for the people or entities offering and collecting the bounty. To minimize these risks, we only sanction bounties under the following conditions:
 
-- Bounties must be pledged through Polar.sh on an issue that is opened in our issue tracker.
+- Bounties must be pledged through [...] on an issue that is opened in our issue tracker.
   - Unless otherwise specified, Biome reserves 30% of the payment amount, meaning contributors receive 70% of the pledged amount.
-  - The commission charged by Polar.sh is split accordingly.
   - We reserve the right to decide on a different split in the future.
 - Bounties cannot be opened for bug fixes. Users who wish to see bugs fixed are advised to consider [sponsorship](#sponsorship) instead, in order to give the project a better long-term ability to fix bugs as well.
 - If an issue in our issue tracker is not yet open for pledges, the person who wishes to pledge should indicate their desire in the comments of the issue, or do so through the `Community > #funding` channel on Discord. A [Core Contributor](#core-contributor) can then **accept** or **reject** the request for the bounty. Reasons for rejection include, but are not limited to:
@@ -234,10 +233,7 @@ Bounties are the second approach towards funding Biome development. Unlike a spo
   - The suggested pledge is deemed inappropriate for the amount of work involved.
 - The person making the pledge acknowledges their pledge does not come with a guarantee of work done.
 - A task is only completed when a Biome maintainer merges the pull request that closes the task. The person trying to complete the task is responsible for addressing review comments to make sure the work meets the quality standards of the Biome project.
-- There is a 6 month expiration on pledges, as managed by Polar.sh.
-- Terms and conditions of Polar.sh apply to all pledges.
-  - For the FAQ, please see: https://docs.polar.sh/maintainers/faq/
-  - For the legal terms, please see: https://polar.sh/legal/terms
+- There is a 6 month expiration on pledges
 - If you are receiving money as part of a bounty, please consider whether you need to pay taxes in your country. Core contributors and Maintainers aren't obligated to give tax advice over the money received.
 
 ### Project-Funded Bounties
@@ -246,7 +242,7 @@ In some cases, Biome funds bounties on its own issues in order to further the pr
 
 - Implementation of the task funded by Biome must advance our [roadmap](#roadmap) or help with essential infrastructure.
   - The task description must include a clear rationale for why this task is eligible for funding.
-- To avoid paying a commission on our own bounties, we do not assign funds through Polar.sh. Instead, we ask contributors to take the money directly from our Open Collective account upon completion of the task.
+- We ask contributors to take the money directly from our Open Collective account upon completion of the task.
   - Unfortunately, this means Project-Funded Bounties can only be assigned to [Core Contributors](#core-contributor) at this moment since they have access to our Open Collective account.
 
 Additionally, there is a strict process for assigning Project-Funded Bounties:
