@@ -29,5 +29,8 @@
     "linter",
     "formatter",
     "wasm"
-  ]
+  ],
+  "publishConfig": {
+    "provenance": true
+  }
 }
