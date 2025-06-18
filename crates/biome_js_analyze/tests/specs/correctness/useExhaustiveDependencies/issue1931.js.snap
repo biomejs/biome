@@ -37,7 +37,7 @@ function MyComponent26() {
 ```
 issue1931.js:9:5 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × This hook does not specify its dependency: calc
+  × This hook does not specify its dependency on calc.
   
      7 │     // they're imported from the "react" library. Explicitly configuring them
      8 │     // in the hooks array (as if they are user-provided hooks) overrides this.
@@ -67,7 +67,7 @@ issue1931.js:9:5 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━�
 ```
 issue1931.js:21:19 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × This hook does not specify its dependency: calc
+  × This hook does not specify its dependency on calc.
   
     19 │     // they're imported from the "react" library. Explicitly configuring them
     20 │     // in the hooks array (as if they are user-provided hooks) overrides this.

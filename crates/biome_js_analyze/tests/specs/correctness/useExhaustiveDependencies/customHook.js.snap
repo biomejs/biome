@@ -27,7 +27,7 @@ function MyComponent() {
 ```
 customHook.js:5:5 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × This hook does not specify its dependency: a
+  × This hook does not specify its dependency on a.
   
     3 │ function MyComponent() {
     4 │     let a = 1;
@@ -57,7 +57,7 @@ customHook.js:5:5 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━
 ```
 customHook.js:9:5 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × This hook does not specify its dependency: a
+  × This hook does not specify its dependency on a.
   
      7 │     }, []);
      8 │ 

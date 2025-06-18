@@ -176,7 +176,7 @@ extraDependenciesInvalid.js:28:3 lint/correctness/useExhaustiveDependencies ━�
 ```
 extraDependenciesInvalid.js:28:3 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━━━━━━━━━━━━
 
-  × This hook does not specify its dependency: someObj
+  × This hook does not specify its dependency on someObj.
   
     26 │ function MyComponent1() {
     27 │   let someObj = getObj();

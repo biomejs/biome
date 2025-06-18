@@ -19,7 +19,7 @@ const Comp = (myFn) => {
 ```
 issue6278.js:4:8 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × This hook does not specify its dependency: myFn
+  × This hook does not specify its dependency on myFn.
   
     3 │ const Comp = (myFn) => {
   > 4 │ 	React.useCallback(() => {

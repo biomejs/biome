@@ -31,7 +31,7 @@ function IgnoredDependencies2() {
 ```
 ignoredDependencies.js:8:5 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━━━━━━━━━━━━━━━━━━
 
-  × This hook does not specify its dependency: a
+  × This hook does not specify its dependency on a.
   
      6 │     let b = 2;
      7 │     // biome-ignore lint/correctness/useExhaustiveDependencies(b): `b` is ignored, but there should still be a diagnostic for `a`

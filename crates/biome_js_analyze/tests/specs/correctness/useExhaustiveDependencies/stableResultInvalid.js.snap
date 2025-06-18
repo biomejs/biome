@@ -18,7 +18,7 @@ function MyComponent25() {
 ```
 stableResultInvalid.js:6:22 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━━━━━━━━━━━━━━━━━
 
-  × This hook does not specify its dependency: dispatch
+  × This hook does not specify its dependency on dispatch.
   
     4 │ function MyComponent25() {
     5 │     const dispatch = useDispatch();

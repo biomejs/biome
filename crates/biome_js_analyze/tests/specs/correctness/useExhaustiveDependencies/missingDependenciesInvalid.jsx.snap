@@ -200,7 +200,7 @@ function HoistedDeclarations() {
 ```
 missingDependenciesInvalid.jsx:18:5 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━━━━━━━━━
 
-  × This hook does not specify its dependency: a
+  × This hook does not specify its dependency on a.
   
     16 │     let a = 1;
     17 │     const b = a + 1;
@@ -230,7 +230,7 @@ missingDependenciesInvalid.jsx:18:5 lint/correctness/useExhaustiveDependencies  
 ```
 missingDependenciesInvalid.jsx:18:5 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━━━━━━━━━
 
-  × This hook does not specify its dependency: b
+  × This hook does not specify its dependency on b.
   
     16 │     let a = 1;
     17 │     const b = a + 1;
@@ -260,7 +260,7 @@ missingDependenciesInvalid.jsx:18:5 lint/correctness/useExhaustiveDependencies  
 ```
 missingDependenciesInvalid.jsx:32:3 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━━━━━━━━━
 
-  × This hook does not specify its dependency: deferredValue
+  × This hook does not specify its dependency on deferredValue.
   
     30 │   const deferredValue = useDeferredValue(value);
     31 │   const [isPending, startTransition] = useTransition();
@@ -290,7 +290,7 @@ missingDependenciesInvalid.jsx:32:3 lint/correctness/useExhaustiveDependencies  
 ```
 missingDependenciesInvalid.jsx:32:3 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━━━━━━━━━
 
-  × This hook does not specify its dependency: memoizedCallback
+  × This hook does not specify its dependency on memoizedCallback.
   
     30 │   const deferredValue = useDeferredValue(value);
     31 │   const [isPending, startTransition] = useTransition();
@@ -320,7 +320,7 @@ missingDependenciesInvalid.jsx:32:3 lint/correctness/useExhaustiveDependencies  
 ```
 missingDependenciesInvalid.jsx:32:3 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━━━━━━━━━
 
-  × This hook does not specify its dependency: state
+  × This hook does not specify its dependency on state.
   
     30 │   const deferredValue = useDeferredValue(value);
     31 │   const [isPending, startTransition] = useTransition();
@@ -350,7 +350,7 @@ missingDependenciesInvalid.jsx:32:3 lint/correctness/useExhaustiveDependencies  
 ```
 missingDependenciesInvalid.jsx:32:3 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━━━━━━━━━
 
-  × This hook does not specify its dependency: name
+  × This hook does not specify its dependency on name.
   
     30 │   const deferredValue = useDeferredValue(value);
     31 │   const [isPending, startTransition] = useTransition();
@@ -380,7 +380,7 @@ missingDependenciesInvalid.jsx:32:3 lint/correctness/useExhaustiveDependencies  
 ```
 missingDependenciesInvalid.jsx:32:3 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━━━━━━━━━
 
-  × This hook does not specify its dependency: isPending
+  × This hook does not specify its dependency on isPending.
   
     30 │   const deferredValue = useDeferredValue(value);
     31 │   const [isPending, startTransition] = useTransition();
@@ -410,7 +410,7 @@ missingDependenciesInvalid.jsx:32:3 lint/correctness/useExhaustiveDependencies  
 ```
 missingDependenciesInvalid.jsx:32:3 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━━━━━━━━━
 
-  × This hook does not specify its dependency: memoizedValue
+  × This hook does not specify its dependency on memoizedValue.
   
     30 │   const deferredValue = useDeferredValue(value);
     31 │   const [isPending, startTransition] = useTransition();
@@ -439,7 +439,7 @@ missingDependenciesInvalid.jsx:32:3 lint/correctness/useExhaustiveDependencies  
 ```
 missingDependenciesInvalid.jsx:52:3 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━━━━━━━━━
 
-  × This hook does not specify its dependency: a
+  × This hook does not specify its dependency on a.
   
     50 │ function MyComponent3() {
     51 │   let a = 1;
@@ -469,7 +469,7 @@ missingDependenciesInvalid.jsx:52:3 lint/correctness/useExhaustiveDependencies  
 ```
 missingDependenciesInvalid.jsx:53:3 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━━━━━━━━━
 
-  × This hook does not specify its dependency: a
+  × This hook does not specify its dependency on a.
   
     51 │   let a = 1;
     52 │   useEffect(() => console.log(a), []);
@@ -499,7 +499,7 @@ missingDependenciesInvalid.jsx:53:3 lint/correctness/useExhaustiveDependencies  
 ```
 missingDependenciesInvalid.jsx:54:3 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━━━━━━━━━
 
-  × This hook does not specify its dependency: a
+  × This hook does not specify its dependency on a.
   
     52 │   useEffect(() => console.log(a), []);
     53 │   useCallback(() => console.log(a), []);
@@ -529,7 +529,7 @@ missingDependenciesInvalid.jsx:54:3 lint/correctness/useExhaustiveDependencies  
 ```
 missingDependenciesInvalid.jsx:55:3 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━━━━━━━━━
 
-  × This hook does not specify its dependency: a
+  × This hook does not specify its dependency on a.
   
     53 │   useCallback(() => console.log(a), []);
     54 │   useMemo(() => console.log(a), []);
@@ -559,7 +559,7 @@ missingDependenciesInvalid.jsx:55:3 lint/correctness/useExhaustiveDependencies  
 ```
 missingDependenciesInvalid.jsx:56:3 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━━━━━━━━━
 
-  × This hook does not specify its dependency: a
+  × This hook does not specify its dependency on a.
   
     54 │   useMemo(() => console.log(a), []);
     55 │   useImperativeHandle(ref, () => console.log(a), []);
@@ -589,7 +589,7 @@ missingDependenciesInvalid.jsx:56:3 lint/correctness/useExhaustiveDependencies  
 ```
 missingDependenciesInvalid.jsx:57:3 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━━━━━━━━━
 
-  × This hook does not specify its dependency: a
+  × This hook does not specify its dependency on a.
   
     55 │   useImperativeHandle(ref, () => console.log(a), []);
     56 │   useLayoutEffect(() => console.log(a), []);
@@ -619,7 +619,7 @@ missingDependenciesInvalid.jsx:57:3 lint/correctness/useExhaustiveDependencies  
 ```
 missingDependenciesInvalid.jsx:64:3 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━━━━━━━━━
 
-  × This hook does not specify its dependency: a
+  × This hook does not specify its dependency on a.
   
     62 │ function MyComponent4() {
     63 │   let a = 1;
@@ -649,7 +649,7 @@ missingDependenciesInvalid.jsx:64:3 lint/correctness/useExhaustiveDependencies  
 ```
 missingDependenciesInvalid.jsx:73:3 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━━━━━━━━━
 
-  × This hook does not specify its dependency: a
+  × This hook does not specify its dependency on a.
   
     71 │ function MyComponent5() {
     72 │   let a = 1;
@@ -688,7 +688,7 @@ missingDependenciesInvalid.jsx:73:3 lint/correctness/useExhaustiveDependencies  
 ```
 missingDependenciesInvalid.jsx:83:3 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━━━━━━━━━
 
-  × This hook does not specify its dependency: someObj.name
+  × This hook does not specify its dependency on someObj.name.
   
     81 │ function MyComponent6() {
     82 │   let someObj = getObj();
@@ -718,7 +718,7 @@ missingDependenciesInvalid.jsx:83:3 lint/correctness/useExhaustiveDependencies  
 ```
 missingDependenciesInvalid.jsx:89:3 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━━━━━━━━━
 
-  × This hook does not specify its dependency: a
+  × This hook does not specify its dependency on a.
   
     88 │ const MyComponent7 = React.memo(function ({ a }) {
   > 89 │   useEffect(() => {
@@ -747,7 +747,7 @@ missingDependenciesInvalid.jsx:89:3 lint/correctness/useExhaustiveDependencies  
 ```
 missingDependenciesInvalid.jsx:95:3 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━━━━━━━━━
 
-  × This hook does not specify its dependency: a
+  × This hook does not specify its dependency on a.
   
     94 │ const MyComponent8 = React.memo(({ a }) => {
   > 95 │   useEffect(() => {
@@ -776,7 +776,7 @@ missingDependenciesInvalid.jsx:95:3 lint/correctness/useExhaustiveDependencies  
 ```
 missingDependenciesInvalid.jsx:103:3 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━━━━━━━━
 
-  × This hook does not specify its dependency: a
+  × This hook does not specify its dependency on a.
   
     101 │ export function MyComponent9() {
     102 │   let a = 1;
@@ -806,7 +806,7 @@ missingDependenciesInvalid.jsx:103:3 lint/correctness/useExhaustiveDependencies 
 ```
 missingDependenciesInvalid.jsx:110:3 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━━━━━━━━
 
-  × This hook does not specify its dependency: a
+  × This hook does not specify its dependency on a.
   
     108 │ export default function MyComponent10() {
     109 │   let a = 1;
@@ -836,7 +836,7 @@ missingDependenciesInvalid.jsx:110:3 lint/correctness/useExhaustiveDependencies 
 ```
 missingDependenciesInvalid.jsx:118:3 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━━━━━━━━
 
-  × This hook does not specify its dependency: a
+  × This hook does not specify its dependency on a.
   
     116 │ function MyComponent11() {
     117 │   let a = 1;
@@ -866,7 +866,7 @@ missingDependenciesInvalid.jsx:118:3 lint/correctness/useExhaustiveDependencies 
 ```
 missingDependenciesInvalid.jsx:125:3 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━━━━━━━━
 
-  × This hook does not specify its dependency: a
+  × This hook does not specify its dependency on a.
   
     123 │ function MyComponent12() {
     124 │   let a = 1;
@@ -896,7 +896,7 @@ missingDependenciesInvalid.jsx:125:3 lint/correctness/useExhaustiveDependencies 
 ```
 missingDependenciesInvalid.jsx:133:9 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━━━━━━━━
 
-  × This hook does not specify its dependency: a
+  × This hook does not specify its dependency on a.
   
     131 │ function MyComponent13() {
     132 │   let a = 1;
@@ -926,7 +926,7 @@ missingDependenciesInvalid.jsx:133:9 lint/correctness/useExhaustiveDependencies 
 ```
 missingDependenciesInvalid.jsx:141:2 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━━━━━━━━
 
-  × This hook does not specify its dependency: ref.current
+  × This hook does not specify its dependency on ref.current.
   
     139 │ function MyComponent14() {
     140 │ 	const ref = useRef();
@@ -956,7 +956,7 @@ missingDependenciesInvalid.jsx:141:2 lint/correctness/useExhaustiveDependencies 
 ```
 missingDependenciesInvalid.jsx:152:2 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━━━━━━━━
 
-  × This hook does not specify its dependency: ref.current
+  × This hook does not specify its dependency on ref.current.
   
     150 │ 	}
     151 │ 	const ref = useRef();
@@ -986,7 +986,7 @@ missingDependenciesInvalid.jsx:152:2 lint/correctness/useExhaustiveDependencies 
 ```
 missingDependenciesInvalid.jsx:165:3 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━━━━━━━━
 
-  × This hook does not specify its dependency: func
+  × This hook does not specify its dependency on func.
   
     163 │   }
     164 │ 
@@ -1015,7 +1015,7 @@ missingDependenciesInvalid.jsx:165:3 lint/correctness/useExhaustiveDependencies 
 ```
 missingDependenciesInvalid.jsx:173:2 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━━━━━━━━
 
-  × This hook does not specify its dependency: a
+  × This hook does not specify its dependency on a.
   
     172 │ function HoistedDeclaration() {
   > 173 │ 	useEffect(() => {
@@ -1044,7 +1044,7 @@ missingDependenciesInvalid.jsx:173:2 lint/correctness/useExhaustiveDependencies 
 ```
 missingDependenciesInvalid.jsx:182:2 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━━━━━━━━
 
-  × This hook does not specify its dependency: a
+  × This hook does not specify its dependency on a.
   
     181 │ function HoistedDeclarations() {
   > 182 │ 	useEffect(() => {
@@ -1073,7 +1073,7 @@ missingDependenciesInvalid.jsx:182:2 lint/correctness/useExhaustiveDependencies 
 ```
 missingDependenciesInvalid.jsx:182:2 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━━━━━━━━
 
-  × This hook does not specify its dependency: b
+  × This hook does not specify its dependency on b.
   
     181 │ function HoistedDeclarations() {
   > 182 │ 	useEffect(() => {
