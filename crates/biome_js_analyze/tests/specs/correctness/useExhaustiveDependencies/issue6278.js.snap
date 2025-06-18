@@ -1,0 +1,55 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: issue6278.js
+---
+# Input
+```js
+import React from "react";
+
+const Comp = (myFn) => {
+	React.useCallback(() => {
+		myFn(true);
+		myFn(false);
+	}, []);
+};
+
+```
+
+# Diagnostics
+```
+issue6278.js:4:8 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This hook does not specify its dependency on myFn.
+  
+    3 │ const Comp = (myFn) => {
+  > 4 │ 	React.useCallback(() => {
+      │ 	      ^^^^^^^^^^^
+    5 │ 		myFn(true);
+    6 │ 		myFn(false);
+  
+  i This dependency is being used here, but is not specified in the hook dependency list.
+  
+    4 │ 	React.useCallback(() => {
+    5 │ 		myFn(true);
+  > 6 │ 		myFn(false);
+      │ 		^^^^
+    7 │ 	}, []);
+    8 │ };
+  
+  i This dependency is being used here, but is not specified in the hook dependency list.
+  
+    3 │ const Comp = (myFn) => {
+    4 │ 	React.useCallback(() => {
+  > 5 │ 		myFn(true);
+      │ 		^^^^
+    6 │ 		myFn(false);
+    7 │ 	}, []);
+  
+  i Either include it or remove the dependency array.
+  
+  i Unsafe fix: Add the missing dependency to the list.
+  
+    7 │ → },·[myFn]);
+      │       ++++   
+
+```
