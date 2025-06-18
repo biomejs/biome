@@ -576,7 +576,7 @@ impl ExpressionExt for AnyJsExpression {
         .and_then(Self::actual_expression)
     }
 
-    fn wrap_in_type_converter(&self, name: &'static str) -> AnyJsExpression {
+    fn wrap_in_type_converter(&self, name: &'static str) -> Self {
         let clean_expression = self
             .clone()
             .with_leading_trivia_pieces([])
@@ -608,7 +608,7 @@ trait AssignmentExt {
 impl AssignmentExt for AnyJsAssignment {
     fn as_expression(&self) -> Option<AnyJsExpression> {
         match self {
-            AnyJsAssignment::JsComputedMemberAssignment(member_assignment) => Some(
+            Self::JsComputedMemberAssignment(member_assignment) => Some(
                 make::js_computed_member_expression(
                     member_assignment.object().ok()?,
                     member_assignment.l_brack_token().ok()?,
@@ -618,17 +618,17 @@ impl AssignmentExt for AnyJsAssignment {
                 .build()
                 .into(),
             ),
-            AnyJsAssignment::JsIdentifierAssignment(identifier) => Some(
+            Self::JsIdentifierAssignment(identifier) => Some(
                 make::js_identifier_expression(make::js_reference_identifier(
                     identifier.name_token().ok()?,
                 ))
                 .into(),
             ),
-            AnyJsAssignment::JsParenthesizedAssignment(parenthesized_assignment) => {
+            Self::JsParenthesizedAssignment(parenthesized_assignment) => {
                 parenthesized_assignment.assignment().ok()?.as_expression()
             }
 
-            AnyJsAssignment::JsStaticMemberAssignment(static_member_assignment) => Some(
+            Self::JsStaticMemberAssignment(static_member_assignment) => Some(
                 make::js_static_member_expression(
                     static_member_assignment.object().ok()?,
                     static_member_assignment.dot_token().ok()?,
@@ -636,7 +636,7 @@ impl AssignmentExt for AnyJsAssignment {
                 )
                 .into(),
             ),
-            AnyJsAssignment::TsAsAssignment(as_assignment) => Some(
+            Self::TsAsAssignment(as_assignment) => Some(
                 make::ts_as_expression(
                     as_assignment.assignment().ok()?.as_expression()?,
                     as_assignment.as_token().ok()?,
@@ -644,7 +644,7 @@ impl AssignmentExt for AnyJsAssignment {
                 )
                 .into(),
             ),
-            AnyJsAssignment::TsNonNullAssertionAssignment(non_null_assertion_assignment) => Some(
+            Self::TsNonNullAssertionAssignment(non_null_assertion_assignment) => Some(
                 make::ts_non_null_assertion_expression(
                     non_null_assertion_assignment
                         .assignment()
@@ -654,7 +654,7 @@ impl AssignmentExt for AnyJsAssignment {
                 )
                 .into(),
             ),
-            AnyJsAssignment::TsSatisfiesAssignment(satisfies_assignment) => Some(
+            Self::TsSatisfiesAssignment(satisfies_assignment) => Some(
                 make::ts_satisfies_expression(
                     satisfies_assignment.assignment().ok()?.as_expression()?,
                     satisfies_assignment.satisfies_token().ok()?,
@@ -662,7 +662,7 @@ impl AssignmentExt for AnyJsAssignment {
                 )
                 .into(),
             ),
-            AnyJsAssignment::TsTypeAssertionAssignment(type_assertion_assignment) => Some(
+            Self::TsTypeAssertionAssignment(type_assertion_assignment) => Some(
                 make::ts_type_assertion_expression(
                     type_assertion_assignment.l_angle_token().ok()?,
                     type_assertion_assignment.ty().ok()?,
@@ -674,7 +674,7 @@ impl AssignmentExt for AnyJsAssignment {
                 )
                 .into(),
             ),
-            AnyJsAssignment::JsBogusAssignment(_) => None,
+            Self::JsBogusAssignment(_) => None,
         }
     }
 }
