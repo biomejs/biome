@@ -361,10 +361,6 @@ impl Execution {
         matches!(self.traversal_mode, TraversalMode::Lint { .. })
     }
 
-    pub(crate) const fn is_migrate(&self) -> bool {
-        matches!(self.traversal_mode, TraversalMode::Migrate { .. })
-    }
-
     pub(crate) fn is_stdin(&self) -> bool {
         match &self.traversal_mode {
             TraversalMode::Check { stdin, .. } => stdin.is_some(),

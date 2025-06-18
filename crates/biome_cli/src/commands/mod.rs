@@ -898,9 +898,21 @@ pub(crate) trait CommandRunner: Sized {
 
         let open_project_result = workspace.open_project(params)?;
 
-        let scan_kind = get_forced_scan_kind(&execution).unwrap_or({
-            if open_project_result.scan_kind == ScanKind::None && configuration.use_ignore_file() {
-                ScanKind::KnownFiles
+        let scan_kind = get_forced_scan_kind(&execution, &configuration).unwrap_or({
+            if open_project_result.scan_kind == ScanKind::None {
+                if configuration.use_ignore_file()
+                    // The linter might be enabled in some nested project, and the linter
+                    // is the only feature that might require project features.
+                    //
+                    // We decide to scan only known files on purpose, even though we don't know
+                    // if nested configuration files enable project-wide rules.
+                    // In this case, the use must run Biome from the package, and not from the root folder.
+                    || !configuration.is_linter_enabled()
+                {
+                    ScanKind::KnownFiles
+                } else {
+                    ScanKind::None
+                }
             } else {
                 open_project_result.scan_kind
             }
