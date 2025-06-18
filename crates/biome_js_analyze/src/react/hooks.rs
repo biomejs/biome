@@ -14,7 +14,7 @@ use biome_js_syntax::{
     static_value::StaticValue,
 };
 use biome_js_syntax::{JsArrayBindingPatternElement, JsSyntaxToken};
-use biome_rowan::AstNode;
+use biome_rowan::{AstNode, Text};
 use rustc_hash::{FxHashMap, FxHashSet};
 use serde::{Deserialize, Serialize};
 
@@ -262,6 +262,10 @@ pub enum StableHookResult {
     /// For example, React's `useState()` hook returns a stable function at
     /// index 1.
     Indices(Vec<u8>),
+
+    /// Used to indicate the hook returns an object and some of its properties
+    /// have stable identities.
+    Keys(Vec<String>),
 }
 
 #[cfg(feature = "schemars")]
@@ -304,7 +308,23 @@ impl JsonSchema for StableHookResult {
                             ..Default::default()
                         })),
                         ..Default::default()
-                    })
+                    }),
+                    Schema::Object(SchemaObject {
+                        instance_type: Some(InstanceType::Array.into()),
+                        array: Some(Box::new(ArrayValidation {
+                            items: Some(SingleOrVec::Single(Box::new(Schema::Object(SchemaObject {
+                                instance_type: Some(InstanceType::String.into()),
+                                ..Default::default()
+                            })))),
+                            min_items: Some(1),
+                            ..Default::default()
+                        })),
+                        metadata: Some(Box::new(Metadata {
+                            description: Some("Used to indicate the hook returns an object and some of its properties have stable identities.".to_owned()),
+                            ..Default::default()
+                        })),
+                        ..Default::default()
+                    }),
                 ]),
                 ..Default::default()
             })),
@@ -335,20 +355,41 @@ impl DeserializationVisitor for StableResultVisitor {
         self,
         ctx: &mut impl DeserializationContext,
         items: impl Iterator<Item = Option<impl DeserializableValue>>,
-        _range: TextRange,
+        range: TextRange,
         _name: &str,
     ) -> Option<Self::Output> {
-        let indices: Vec<u8> = items
-            .filter_map(|value| {
-                DeserializableValue::deserialize(&value?, ctx, StableResultIndexVisitor, "")
-            })
-            .collect();
+        let collected_items = items.filter_map(|value| {
+            DeserializableValue::deserialize(&value?, ctx, StableResultArrayVisitor, "")
+        });
 
-        Some(if indices.is_empty() {
-            StableHookResult::None
-        } else {
-            StableHookResult::Indices(indices)
-        })
+        let mut keys: Vec<String> = Vec::new();
+        let mut indices: Vec<u8> = Vec::new();
+
+        for item in collected_items {
+            match item {
+                StableResultItem::Key(key) => keys.push(key),
+                StableResultItem::Index(index) => indices.push(index),
+            }
+        }
+
+        if !keys.is_empty() && !indices.is_empty() {
+            ctx.report(
+                DeserializationDiagnostic::new(markup! {
+                    "Expected either property key names or array indices, not a combination of both"
+                })
+                .with_range(range),
+            );
+        }
+
+        if !keys.is_empty() {
+            return Some(StableHookResult::Keys(keys));
+        }
+
+        if !indices.is_empty() {
+            return Some(StableHookResult::Indices(indices));
+        }
+
+        Some(StableHookResult::None)
     }
 
     fn visit_bool(
@@ -382,6 +423,39 @@ impl DeserializationVisitor for StableResultVisitor {
     ) -> Option<Self::Output> {
         StableResultIndexVisitor::visit_number(StableResultIndexVisitor, ctx, value, range, name)
             .map(|index| StableHookResult::Indices(vec![index]))
+    }
+}
+
+enum StableResultItem {
+    Key(String),
+    Index(u8),
+}
+
+struct StableResultArrayVisitor;
+impl DeserializationVisitor for StableResultArrayVisitor {
+    type Output = StableResultItem;
+    const EXPECTED_TYPE: DeserializableTypes =
+        DeserializableTypes::STR.union(DeserializableTypes::NUMBER);
+
+    fn visit_str(
+        self,
+        _ctx: &mut impl DeserializationContext,
+        value: Text,
+        _range: TextRange,
+        _name: &str,
+    ) -> Option<Self::Output> {
+        Some(StableResultItem::Key(value.to_string()))
+    }
+
+    fn visit_number(
+        self,
+        ctx: &mut impl DeserializationContext,
+        value: biome_deserialize::TextNumber,
+        range: TextRange,
+        name: &str,
+    ) -> Option<Self::Output> {
+        StableResultIndexVisitor::visit_number(StableResultIndexVisitor, ctx, value, range, name)
+            .map(StableResultItem::Index)
     }
 }
 
@@ -439,6 +513,10 @@ pub fn is_binding_react_stable(
         .parent::<JsArrayBindingPatternElement>()
         .map(|parent| parent.syntax().index() / 2)
         .and_then(|index| index.try_into().ok());
+    let key = binding
+        .name_token()
+        .ok()
+        .map(|token| token.text_trimmed().to_string());
     let Some(callee) = declarator
         .initializer()
         .and_then(|initializer| initializer.expression().ok())
@@ -461,10 +539,11 @@ pub fn is_binding_react_stable(
             return false;
         }
 
-        match (&config.result, index) {
-            (StableHookResult::Identity, index) => index.is_none(),
-            (StableHookResult::Indices(indices), Some(index)) => indices.contains(&index),
-            (_, _) => false,
+        match (&config.result, index, &key) {
+            (StableHookResult::Identity, None, _) => true,
+            (StableHookResult::Indices(indices), Some(i), _) => indices.contains(&i),
+            (StableHookResult::Keys(keys), _, Some(k)) => keys.contains(k),
+            _ => false,
         }
     })
 }
