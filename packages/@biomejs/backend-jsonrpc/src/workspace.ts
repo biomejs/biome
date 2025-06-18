@@ -8025,7 +8025,7 @@ export type Regex = string;
  */
 export type Style2 = "auto" | "inlineType" | "separatedType";
 export type GroupMatcher = ImportMatcher | SourceMatcher;
-export type StableHookResult = boolean | number[];
+export type StableHookResult = boolean | number[] | string[];
 export type Formats = Format[];
 export interface Selector {
 	/**
