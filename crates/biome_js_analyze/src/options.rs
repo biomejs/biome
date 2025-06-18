@@ -137,6 +137,8 @@ pub type NoImplicitAnyLet =
     <lint::suspicious::no_implicit_any_let::NoImplicitAnyLet as biome_analyze::Rule>::Options;
 pub type NoImplicitBoolean =
     <lint::style::no_implicit_boolean::NoImplicitBoolean as biome_analyze::Rule>::Options;
+pub type NoImplicitCoercion =
+    <lint::nursery::no_implicit_coercion::NoImplicitCoercion as biome_analyze::Rule>::Options;
 pub type NoImportAssign =
     <lint::suspicious::no_import_assign::NoImportAssign as biome_analyze::Rule>::Options;
 pub type NoImportCycles =
