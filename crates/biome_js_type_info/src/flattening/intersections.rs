@@ -49,6 +49,7 @@ pub(super) fn flattened_intersection(
     }
 }
 
+// TODO: We may want explicit support for arrays and tuples too.
 enum MergedType {
     Any,
     Class(Vec<TypeMember>),
@@ -74,6 +75,8 @@ enum MergedTypeKind {
 }
 
 impl MergedTypeKind {
+    /// Determines the kind of type that should be used when an intersection of
+    /// two other types is created.
     fn intersection_with(self, other: Self) -> Self {
         match (self, other) {
             (Self::Any, _) | (_, Self::Any) => Self::Any,
@@ -132,7 +135,11 @@ impl MergedType {
                 TypeData::Function(function) => MergedType::Function(function),
                 TypeData::InstanceOf(instance) => match resolver.resolve_and_get(&instance.ty) {
                     Some(resolved_data) => {
-                        from_type_with_static(resolved_data.to_data(), false, resolver)
+                        if is_static {
+                            from_type_with_static(resolved_data.to_data(), false, resolver)
+                        } else {
+                            MergedType::Unknown
+                        }
                     }
                     None => MergedType::Unknown,
                 },
