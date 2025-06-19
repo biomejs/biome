@@ -1409,6 +1409,116 @@ fn test_resolve_promise_from_imported_function_returning_reexported_promise_type
 }
 
 #[test]
+fn test_resolve_type_of_destructured_field_of_intersection_of_interfaces() {
+    let mut fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+        
+type FullConfiguration = InternalConfiguration & PublicConfiguration;
+
+type ScopedMutator<Data = any, T = Data> = (key: Arguments, data?: T | Promise<T> | MutatorCallback<T>, opts?: boolean | MutatorOptions<Data, T>) => Promise<T | undefined>;
+
+interface InternalConfiguration {
+    cache: Cache;
+    mutate: ScopedMutator;
+}
+
+interface PublicConfiguration {
+    errorRetryInterval: number;
+}
+
+declare const useSWRConfig: () => FullConfiguration;
+
+const { mutate } = useSWRConfig();
+"#,
+    );
+
+    let added_paths = [BiomePath::new("/src/index.ts")];
+    let added_paths = get_added_paths(&fs, &added_paths);
+
+    let module_graph = Arc::new(ModuleGraph::default());
+    module_graph.update_graph_for_js_paths(&fs, &ProjectLayout::default(), &added_paths, &[]);
+
+    let index_module = module_graph
+        .module_info_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+    let mut resolver = ModuleResolver::for_module(index_module, module_graph.clone());
+    resolver.run_inference();
+    let resolver = Arc::new(resolver);
+
+    let use_swr_config_id = resolver
+        .resolve_type_of(&Text::Static("useSWRConfig"), ScopeId::GLOBAL)
+        .expect("mutate variable not found");
+    let use_swr_config_ty = resolver.resolved_type_for_id(use_swr_config_id);
+    let _use_swr_config_ty_string = format!("{:?}", use_swr_config_ty.deref()); // for debugging
+    assert!(use_swr_config_ty.is_function_with_return_type(|return_ty| {
+        let _return_ty_string = format!("{:?}", return_ty.deref()); // for debugging
+        return_ty.is_instance_of(|ty| {
+            let _ty_string = format!("{:?}", ty.deref()); // for debugging
+            ty.is_interface()
+        })
+    }));
+
+    let mutate_id = resolver
+        .resolve_type_of(&Text::Static("mutate"), ScopeId::GLOBAL)
+        .expect("mutate variable not found");
+    let mutate_ty = resolver.resolved_type_for_id(mutate_id);
+    let _mutate_ty_string = format!("{:?}", mutate_ty.deref()); // for debugging
+    assert!(mutate_ty.is_function_with_return_type(|return_ty| {
+        let _return_ty_string = format!("{:?}", return_ty.deref()); // for debugging
+        return_ty.is_promise_instance()
+    }));
+
+    let snapshot =
+        ModuleGraphSnapshot::new(module_graph.as_ref(), &fs).with_resolver(resolver.as_ref());
+    snapshot
+        .assert_snapshot("test_resolve_type_of_destructured_field_of_intersection_of_interfaces");
+}
+
+#[test]
+fn test_resolve_type_of_intersection_of_interfaces() {
+    let mut fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"interface Foo {
+    foo(): string;
+}
+
+interface Bar {
+    foo(): number;
+    bar(): boolean;
+}
+    
+type Intersection = Foo & Bar;"#,
+    );
+
+    let added_paths = [BiomePath::new("/src/index.ts")];
+    let added_paths = get_added_paths(&fs, &added_paths);
+
+    let module_graph = Arc::new(ModuleGraph::default());
+    module_graph.update_graph_for_js_paths(&fs, &ProjectLayout::default(), &added_paths, &[]);
+
+    let index_module = module_graph
+        .module_info_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+    let mut resolver = ModuleResolver::for_module(index_module, module_graph.clone());
+    resolver.run_inference();
+    let resolver = Arc::new(resolver);
+
+    let intersection_id = resolver
+        .resolve_type_of(&Text::Static("Intersection"), ScopeId::GLOBAL)
+        .expect("Intersection type not found");
+    let intersection_ty = resolver.resolved_type_for_id(intersection_id);
+    let _intersection_ty = format!("{:?}", intersection_ty.deref()); // for debugging
+    assert!(intersection_ty.is_interface());
+
+    let snapshot =
+        ModuleGraphSnapshot::new(module_graph.as_ref(), &fs).with_resolver(resolver.as_ref());
+    snapshot.assert_snapshot("test_resolve_type_of_intersection_of_interfaces");
+}
+
+#[test]
 fn test_resolve_swr_types() {
     let fixtures_path = get_fixtures_path();
 
@@ -1493,7 +1603,18 @@ fn test_resolve_swr_types() {
 
     let mutate_ty = resolver.resolved_type_for_id(mutate_id);
     let _mutate_ty_string = format!("{:?}", mutate_ty.deref()); // for debugging
-    //assert!(mutate_ty.is_function_with_return_type(|ty| ty.is_promise_instance()));
+    assert!(mutate_ty.is_instance_of(|instance_ty| {
+        let _instance_ty_string = format!("{:?}", instance_ty.deref()); // for debugging
+        instance_ty.is_interface_with_member(|member| member.kind().is_call_signature())
+    }));
+
+    let mutate_result_id = resolver
+        .resolve_type_of(&Text::Static("mutateResult"), ScopeId::GLOBAL)
+        .expect("mutateResult variable not found");
+
+    let mutate_result_ty = resolver.resolved_type_for_id(mutate_result_id);
+    let _mutate_result_ty_string = format!("{:?}", mutate_result_ty.deref()); // for debugging
+    assert!(mutate_result_ty.is_promise_instance());
 }
 
 fn find_files_recursively_in_directory(

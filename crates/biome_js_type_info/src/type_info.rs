@@ -23,7 +23,8 @@ use biome_rowan::Text;
 use crate::globals::{GLOBAL_NUMBER_ID, GLOBAL_PROMISE_ID, GLOBAL_STRING_ID, GLOBAL_UNKNOWN_ID};
 use crate::type_info::literal::{BooleanLiteral, NumberLiteral, StringLiteral};
 use crate::{
-    GLOBAL_RESOLVER, ModuleId, Resolvable, ResolvedTypeData, ResolvedTypeId, TypeResolver,
+    GLOBAL_RESOLVER, ModuleId, Resolvable, ResolvedTypeData, ResolvedTypeId, ResolvedTypeMember,
+    TypeResolver,
 };
 
 const UNKNOWN: TypeData = TypeData::Reference(TypeReference::Resolved(GLOBAL_UNKNOWN_ID));
@@ -124,6 +125,35 @@ impl Type {
                 .as_type()
                 .and_then(|ty| self.resolve(ty))
                 .is_some_and(predicate),
+            _ => false,
+        }
+    }
+
+    /// Returns whether if this type is an instance of a type matching the given
+    /// `predicate`.
+    pub fn is_instance_of(&self, predicate: impl Fn(Self) -> bool) -> bool {
+        match self.as_raw_data() {
+            Some(TypeData::InstanceOf(instance)) => {
+                self.resolve(&instance.ty).is_some_and(predicate)
+            }
+            _ => false,
+        }
+    }
+
+    /// Returns whether this type is an interface.
+    pub fn is_interface(&self) -> bool {
+        matches!(self.as_raw_data(), Some(TypeData::Interface(_)))
+    }
+
+    /// Returns whether this type is an interface that has a member matching the
+    /// given `predicate`.
+    pub fn is_interface_with_member(&self, predicate: impl Fn(ResolvedTypeMember) -> bool) -> bool {
+        match self.as_raw_data() {
+            Some(TypeData::Interface(interface)) => interface
+                .members
+                .iter()
+                .map(|member| ResolvedTypeMember::from((self.id.resolver_id(), member)))
+                .any(predicate),
             _ => false,
         }
     }
@@ -315,6 +345,12 @@ pub enum TypeData {
     VoidKeyword,
 }
 
+impl From<Class> for TypeData {
+    fn from(value: Class) -> Self {
+        Self::Class(Box::new(value))
+    }
+}
+
 impl From<Constructor> for TypeData {
     fn from(value: Constructor) -> Self {
         Self::Constructor(Box::new(value))
@@ -342,6 +378,12 @@ impl From<Interface> for TypeData {
 impl From<Literal> for TypeData {
     fn from(value: Literal) -> Self {
         Self::Literal(Box::new(value))
+    }
+}
+
+impl From<Object> for TypeData {
+    fn from(value: Object) -> Self {
+        Self::Object(Box::new(value))
     }
 }
 
@@ -449,6 +491,20 @@ impl TypeData {
             Self::Reference(TypeReference::Unknown) | Self::Unknown => false,
             _ => true,
         }
+    }
+
+    /// Returns whether the given type is a primitive type.
+    pub fn is_primitive(&self) -> bool {
+        matches!(
+            self,
+            Self::BigInt
+                | Self::Boolean
+                | Self::Null
+                | Self::Number
+                | Self::String
+                | Self::Symbol
+                | Self::Undefined
+        )
     }
 
     pub fn reference(reference: impl Into<TypeReference>) -> Self {
@@ -695,6 +751,10 @@ pub struct Object {
 pub struct ObjectLiteral(pub(super) Box<[TypeMember]>);
 
 impl ObjectLiteral {
+    pub fn into_members(self) -> Box<[TypeMember]> {
+        self.0
+    }
+
     pub fn members(&self) -> &[TypeMember] {
         &self.0
     }
@@ -842,6 +902,14 @@ impl TypeMemberKind {
             Self::Constructor => name == "constructor",
             Self::Named(own_name) => *own_name == name,
         }
+    }
+
+    pub fn is_call_signature(&self) -> bool {
+        matches!(self, Self::CallSignature)
+    }
+
+    pub fn is_constructor(&self) -> bool {
+        matches!(self, Self::Constructor)
     }
 
     pub fn name(&self) -> Option<Text> {
