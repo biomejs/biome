@@ -1,4 +1,3 @@
-linkWorkspacePackages: true
 packages:
   - "packages/aria-data"
   - "packages/tailwindcss-config-analyzer"
