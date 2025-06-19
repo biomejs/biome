@@ -898,12 +898,15 @@ pub(crate) trait CommandRunner: Sized {
 
         let open_project_result = workspace.open_project(params)?;
 
-        let scan_kind = get_forced_scan_kind(&execution).unwrap_or({
-            if open_project_result.scan_kind == ScanKind::None {
-                if configuration.use_ignore_file() {
+        let scan_kind = get_forced_scan_kind(&execution, &configuration).unwrap_or({
+            if open_project_result.scan_kind == ScanKind::NoScanner {
+                // If we're here, it means we're executing `check`, `lint` or `ci`
+                // and the linter is disabled or no projects rules have been enabled.
+                // We scan known files if the configuration is a root or if the VCS integration is enabled
+                if configuration.is_root() || configuration.use_ignore_file() {
                     ScanKind::KnownFiles
                 } else {
-                    ScanKind::None
+                    ScanKind::NoScanner
                 }
             } else {
                 open_project_result.scan_kind

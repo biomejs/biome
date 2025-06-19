@@ -218,17 +218,17 @@ impl TraversalMode {
                 if stdin.is_none() {
                     ScanKind::KnownFiles
                 } else {
-                    ScanKind::None
+                    ScanKind::NoScanner
                 }
             }
             Self::Check { stdin, .. } | Self::Lint { stdin, .. } | Self::Search { stdin, .. } => {
                 if stdin.is_none() {
                     ScanKind::Project
                 } else {
-                    ScanKind::None
+                    ScanKind::NoScanner
                 }
             }
-            Self::Migrate { .. } => ScanKind::None,
+            Self::Migrate { .. } => ScanKind::NoScanner,
         }
     }
 }
