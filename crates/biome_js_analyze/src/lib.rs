@@ -154,11 +154,7 @@ where
 
     let type_resolver = module_graph
         .module_info_for_path(file_path.as_ref())
-        .map(|module_info| {
-            let mut resolver = ModuleResolver::for_module(module_info, module_graph.clone());
-            resolver.run_inference();
-            resolver
-        })
+        .map(|module_info| ModuleResolver::for_module(module_info, module_graph.clone()))
         .map(Arc::new);
 
     services.insert_service(Arc::new(AriaRoles));
