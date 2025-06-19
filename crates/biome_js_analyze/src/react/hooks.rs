@@ -158,8 +158,8 @@ pub(crate) fn is_react_hook_call(call: &JsCallExpression) -> bool {
         .and_then(|ident| ident.name().ok())
         .and_then(|name| name.value_token().ok())
     {
-        let exprTrimmed = expr.text_trimmed();
-        if exprTrimmed == "jest" || exprTrimmed == "vi" {
+        let expr_trimmed = expr.text_trimmed();
+        if expr_trimmed == "jest" || expr_trimmed == "vi" {
             return false;
         }
     }
