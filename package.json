@@ -6,7 +6,7 @@
     "check:write": "cargo biome-cli-dev check --write --unsafe",
     "check": "cargo biome-cli-dev check",
     "ci": "cargo biome-cli-dev ci",
-    "version": "changeset version && pnpm install --no-frozen-lockfile",
+    "version": "changeset version",
     "publish": "changeset publish"
   },
   "keywords": [],
