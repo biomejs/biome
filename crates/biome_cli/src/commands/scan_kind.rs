@@ -1,5 +1,4 @@
 use crate::{Execution, TraversalMode};
-use biome_configuration::Configuration;
 use biome_service::workspace::ScanKind;
 
 /// Returns a forced scan kind based on the given `execution`.
@@ -12,21 +11,16 @@ use biome_service::workspace::ScanKind;
 ///   `biome search` because we know there is no use for project analysis with
 ///   these commands.
 /// - Returns `None` otherwise.
-pub(crate) fn get_forced_scan_kind(
-    execution: &Execution,
-    configuration: &Configuration,
-) -> Option<ScanKind> {
+pub(crate) fn get_forced_scan_kind(execution: &Execution) -> Option<ScanKind> {
     // We want to keep the `match`, so if we add new traversal modes,
-    // the compiler will error and we will need to handle the new variant
+    // the compiler will error, and we will need to handle the new variant
     match execution.traversal_mode() {
         TraversalMode::Migrate { .. } => Some(ScanKind::KnownFiles),
         TraversalMode::Format { .. } | TraversalMode::Search { .. } => {
-            if configuration.use_ignore_file() || configuration.is_root() {
-                Some(ScanKind::KnownFiles)
-            } else if execution.is_stdin() {
+            if execution.is_stdin() {
                 Some(ScanKind::None)
             } else {
-                None
+                Some(ScanKind::KnownFiles)
             }
         }
         // These traversals might enable lint rules that require project rules,
@@ -42,7 +36,7 @@ mod tests {
     use biome_configuration::analyzer::RuleSelector;
 
     #[test]
-    fn should_return_known_files_for_lint_command() {
+    fn should_return_none_for_lint_command() {
         let execution = Execution::new(TraversalMode::Lint {
             fix_file_mode: None,
             stdin: None,
@@ -55,24 +49,20 @@ mod tests {
             skip_parse_errors: false,
         });
 
-        assert_eq!(
-            get_forced_scan_kind(&execution, &Configuration::default()),
-            None
-        );
+        assert_eq!(get_forced_scan_kind(&execution,), None);
     }
 
     #[test]
-    fn should_return_known_files_for_format_command() {
+    fn should_return_none_for_format_command() {
         let execution = Execution::new(TraversalMode::Format {
             skip_parse_errors: false,
             write: true,
             stdin: None,
-
             vcs_targeted: VcsTargeted::default(),
         });
 
         assert_eq!(
-            get_forced_scan_kind(&execution, &Configuration::default()),
+            get_forced_scan_kind(&execution,),
             Some(ScanKind::KnownFiles)
         );
     }
