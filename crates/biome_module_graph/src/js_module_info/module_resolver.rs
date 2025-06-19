@@ -76,21 +76,25 @@ pub struct ModuleResolver {
 
 impl ModuleResolver {
     pub fn for_module(module_info: JsModuleInfo, module_graph: Arc<ModuleGraph>) -> Self {
-        Self {
+        let num_initial_types = module_info.types.len();
+
+        let mut resolver = Self {
             module_graph,
             modules: vec![module_info],
             modules_by_path: Default::default(),
             expressions: Default::default(),
-            types: Default::default(),
+            types: TypeStore::with_capacity(num_initial_types),
             type_id_map: Default::default(),
-        }
+        };
+
+        resolver.run_inference();
+        resolver
     }
 
     /// Runs the resolver's inference.
     ///
-    /// This method must've been called before attempting to query the types of
-    /// functions or expressions.
-    pub fn run_inference(&mut self) {
+    /// This gets called once on construction of the resolver.
+    fn run_inference(&mut self) {
         self.resolve_imports_in_modules();
         self.resolve_all();
         self.flatten_all();

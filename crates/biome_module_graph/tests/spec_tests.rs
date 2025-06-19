@@ -591,9 +591,10 @@ export const promise = makePromiseCb();
     let index_module = module_graph
         .module_info_for_path(Utf8Path::new("/src/index.ts"))
         .expect("module must exist");
-    let mut resolver = ModuleResolver::for_module(index_module, module_graph.clone());
-    resolver.run_inference();
-    let resolver = Arc::new(resolver);
+    let resolver = Arc::new(ModuleResolver::for_module(
+        index_module,
+        module_graph.clone(),
+    ));
 
     let promise_id = resolver
         .resolve_type_of(&Text::Static("promise"), ScopeId::GLOBAL)
@@ -648,9 +649,10 @@ fn test_resolve_generic_return_value_with_multiple_modules() {
     let index_module = module_graph
         .module_info_for_path(Utf8Path::new("/src/index.ts"))
         .expect("module must exist");
-    let mut resolver = ModuleResolver::for_module(index_module, module_graph.clone());
-    resolver.run_inference();
-    let resolver = Arc::new(resolver);
+    let resolver = Arc::new(ModuleResolver::for_module(
+        index_module,
+        module_graph.clone(),
+    ));
 
     let result_id = resolver
         .resolve_type_of(&Text::Static("result"), ScopeId::GLOBAL)
@@ -694,9 +696,10 @@ fn test_resolve_import_as_namespace() {
     let index_module = module_graph
         .module_info_for_path(Utf8Path::new("/src/index.ts"))
         .expect("module must exist");
-    let mut resolver = ModuleResolver::for_module(index_module, module_graph.clone());
-    resolver.run_inference();
-    let resolver = Arc::new(resolver);
+    let resolver = Arc::new(ModuleResolver::for_module(
+        index_module,
+        module_graph.clone(),
+    ));
 
     let result_id = resolver
         .resolve_type_of(&Text::Static("result"), ScopeId::GLOBAL)
@@ -737,8 +740,7 @@ fn test_resolve_nested_function_call_with_namespace_in_return_type() {
     let index_module = module_graph
         .module_info_for_path(Utf8Path::new("/src/index.ts"))
         .expect("module must exist");
-    let mut resolver = ModuleResolver::for_module(index_module, module_graph.clone());
-    resolver.run_inference();
+    let resolver = ModuleResolver::for_module(index_module, module_graph.clone());
 
     let snapshot = ModuleGraphSnapshot::new(module_graph.as_ref(), &fs).with_resolver(&resolver);
     snapshot.assert_snapshot("test_resolve_nested_function_call_with_namespace_in_return_type");
@@ -1111,9 +1113,10 @@ fn test_resolve_react_types() {
     let index_module = module_graph
         .module_info_for_path(Utf8Path::new("/src/index.ts"))
         .expect("module must exist");
-    let mut resolver = ModuleResolver::for_module(index_module, module_graph.clone());
-    resolver.run_inference();
-    let resolver = Arc::new(resolver);
+    let resolver = Arc::new(ModuleResolver::for_module(
+        index_module,
+        module_graph.clone(),
+    ));
 
     let use_callback_id = resolver
         .resolve_type_of(&Text::Static("useCallback"), ScopeId::GLOBAL)
@@ -1170,9 +1173,10 @@ fn test_resolve_single_reexport() {
     let index_module = module_graph
         .module_info_for_path(Utf8Path::new("/src/index.ts"))
         .expect("module must exist");
-    let mut resolver = ModuleResolver::for_module(index_module, module_graph.clone());
-    resolver.run_inference();
-    let resolver = Arc::new(resolver);
+    let resolver = Arc::new(ModuleResolver::for_module(
+        index_module,
+        module_graph.clone(),
+    ));
 
     let result_id = resolver
         .resolve_type_of(&Text::Static("result"), ScopeId::GLOBAL)
@@ -1234,9 +1238,10 @@ fn test_resolve_multiple_reexports() {
     let index_module = module_graph
         .module_info_for_path(Utf8Path::new("/src/index.ts"))
         .expect("module must exist");
-    let mut resolver = ModuleResolver::for_module(index_module, module_graph.clone());
-    resolver.run_inference();
-    let resolver = Arc::new(resolver);
+    let resolver = Arc::new(ModuleResolver::for_module(
+        index_module,
+        module_graph.clone(),
+    ));
 
     let result1_id = resolver
         .resolve_type_of(&Text::Static("result1"), ScopeId::GLOBAL)
@@ -1326,9 +1331,10 @@ fn test_resolve_promise_from_imported_function_returning_imported_promise_type()
     let index_module = module_graph
         .module_info_for_path(Utf8Path::new("/src/index.ts"))
         .expect("module must exist");
-    let mut resolver = ModuleResolver::for_module(index_module, module_graph.clone());
-    resolver.run_inference();
-    let resolver = Arc::new(resolver);
+    let resolver = Arc::new(ModuleResolver::for_module(
+        index_module,
+        module_graph.clone(),
+    ));
 
     let resolved_id = resolver
         .resolve_type_of(&Text::Static("promise"), ScopeId::GLOBAL)
@@ -1389,9 +1395,10 @@ fn test_resolve_promise_from_imported_function_returning_reexported_promise_type
     let index_module = module_graph
         .module_info_for_path(Utf8Path::new("/src/index.ts"))
         .expect("module must exist");
-    let mut resolver = ModuleResolver::for_module(index_module, module_graph.clone());
-    resolver.run_inference();
-    let resolver = Arc::new(resolver);
+    let resolver = Arc::new(ModuleResolver::for_module(
+        index_module,
+        module_graph.clone(),
+    ));
 
     let resolved_id = resolver
         .resolve_type_of(&Text::Static("promise"), ScopeId::GLOBAL)
@@ -1443,9 +1450,10 @@ const { mutate } = useSWRConfig();
     let index_module = module_graph
         .module_info_for_path(Utf8Path::new("/src/index.ts"))
         .expect("module must exist");
-    let mut resolver = ModuleResolver::for_module(index_module, module_graph.clone());
-    resolver.run_inference();
-    let resolver = Arc::new(resolver);
+    let resolver = Arc::new(ModuleResolver::for_module(
+        index_module,
+        module_graph.clone(),
+    ));
 
     let use_swr_config_id = resolver
         .resolve_type_of(&Text::Static("useSWRConfig"), ScopeId::GLOBAL)
@@ -1502,9 +1510,10 @@ type Intersection = Foo & Bar;"#,
     let index_module = module_graph
         .module_info_for_path(Utf8Path::new("/src/index.ts"))
         .expect("module must exist");
-    let mut resolver = ModuleResolver::for_module(index_module, module_graph.clone());
-    resolver.run_inference();
-    let resolver = Arc::new(resolver);
+    let resolver = Arc::new(ModuleResolver::for_module(
+        index_module,
+        module_graph.clone(),
+    ));
 
     let intersection_id = resolver
         .resolve_type_of(&Text::Static("Intersection"), ScopeId::GLOBAL)
@@ -1593,9 +1602,10 @@ fn test_resolve_swr_types() {
         )))
     );
 
-    let mut resolver = ModuleResolver::for_module(index_module, module_graph.clone());
-    resolver.run_inference();
-    let resolver = Arc::new(resolver);
+    let resolver = Arc::new(ModuleResolver::for_module(
+        index_module,
+        module_graph.clone(),
+    ));
 
     let mutate_id = resolver
         .resolve_type_of(&Text::Static("mutate"), ScopeId::GLOBAL)

@@ -42,6 +42,13 @@ impl TypeStore {
         Self { types, table }
     }
 
+    pub fn with_capacity(capacity: usize) -> Self {
+        Self {
+            types: Vec::with_capacity(capacity),
+            table: HashTable::with_capacity(capacity),
+        }
+    }
+
     pub fn as_slice(&self) -> &[TypeData] {
         &self.types
     }
