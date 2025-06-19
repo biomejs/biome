@@ -222,21 +222,6 @@ impl LSPServer {
             },
         );
 
-        let rename = {
-            let config = self.session.extension_settings.read().ok();
-            config.is_some_and(|x| x.rename_enabled())
-        };
-
-        capabilities.add_capability(
-            "biome_rename",
-            "textDocument/rename",
-            if rename {
-                CapabilityStatus::Enable(None)
-            } else {
-                CapabilityStatus::Disable
-            },
-        );
-
         self.session.register_capabilities(capabilities).await;
     }
 
@@ -482,25 +467,6 @@ impl LanguageServer for LSPServer {
         });
 
         self.map_op_error(result).await
-    }
-
-    async fn rename(&self, params: RenameParams) -> LspResult<Option<WorkspaceEdit>> {
-        biome_diagnostics::panic::catch_unwind(move || {
-            let rename_enabled = self
-                .session
-                .extension_settings
-                .read()
-                .ok()
-                .and_then(|config| config.settings.rename)
-                .unwrap_or(false);
-
-            if rename_enabled {
-                handlers::rename::rename(&self.session, params).map_err(into_lsp_error)
-            } else {
-                Ok(None)
-            }
-        })
-        .map_err(into_lsp_error)?
     }
 }
 
