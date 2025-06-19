@@ -26,7 +26,7 @@ const biome = await Biome.create({
 	distribution: Distribution.NODE, // Or BUNDLER / WEB depending on the distribution package you've installed
 });
 
-const projectKey = biome.openProject("path/to/project/dir");
+const { projectKey } = biome.openProject("path/to/project/dir");
 
 // Optionally apply a Biome configuration (instead of biome.json)
 biome.applyConfiguration(projectKey, {...});
