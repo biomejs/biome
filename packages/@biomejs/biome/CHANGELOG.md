@@ -1,27 +1,5 @@
 # @biomejs/biome
 
-## 2.0.1
-
-### Patch Changes
-
-- [#6362](https://github.com/biomejs/biome/pull/6362) [`a56b37e`](https://github.com/biomejs/biome/commit/a56b37ea5f547f77640e75991c25b564785594e3) Thanks [@siketyan](https://github.com/siketyan)! - Fixed [#6360](https://github.com/biomejs/biome/issues/6360): The following pseudo classes and elements are no longer reported by `noUnknownPseudoClass` or `noUnknownPseudoElement` rules.
-
-  - `:open`
-  - `::details-content`
-  - `::prefix`
-  - `::search-text`
-  - `::suffix`
-
-- [#6378](https://github.com/biomejs/biome/pull/6378) [`64d3d1a`](https://github.com/biomejs/biome/commit/64d3d1a81675d3b333fd1165db9e0844b822df02) Thanks [@ematipico](https://github.com/ematipico)! - Fixed [#6357](https://github.com/biomejs/biome/issues/6357), where the boolean values weren't correctly merged when using the `extends` functionality. Now Biome correctly merges the values.
-
-- [#6342](https://github.com/biomejs/biome/pull/6342) [`46428bb`](https://github.com/biomejs/biome/commit/46428bb7f6df2215ad1f07d3f0776a9aef1258a6) Thanks [@Jentob](https://github.com/Jentob)! - Fixed [#6341](https://github.com/biomejs/biome/issues/6341): Fixed an issue where Biome would throw an error for the language tags `nb` and `nn`.
-
-- [#6323](https://github.com/biomejs/biome/pull/6323) [`04bd1a7`](https://github.com/biomejs/biome/commit/04bd1a7d68f6612ceefd93b225af91b77b79df67) Thanks [@siketyan](https://github.com/siketyan)! - Fixed [#6278](github.com/biomejs/biome/issues/6278): `useExhaustiveDependencies` no longer adds duplicated dependencies into the list.
-
-- [#6397](https://github.com/biomejs/biome/pull/6397) [`50b7fe6`](https://github.com/biomejs/biome/commit/50b7fe676f5aa4735e0868a8e9f40b57c6a5b3da) Thanks [@wojtekmaj](https://github.com/wojtekmaj)! - Fix #6396, where `vi.useFakeTimers()` and `vi.useRealTimers()` incorrectly triggered React Hooks-related rules
-
-- [#6378](https://github.com/biomejs/biome/pull/6378) [`64d3d1a`](https://github.com/biomejs/biome/commit/64d3d1a81675d3b333fd1165db9e0844b822df02) Thanks [@ematipico](https://github.com/ematipico)! - Fixed a bug where Biome didn't correctly discover nested configuration files when using the `lint` command and the linter is disabled in the root configuration.
-
 ## 2.0.0
 
 ### Major Changes
