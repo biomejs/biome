@@ -3921,7 +3921,7 @@ export interface OpenProjectResult {
 	 */
 	scanKind: ScanKind;
 }
-export type ScanKind = "none" | "knownFiles" | "project";
+export type ScanKind = "noScanner" | "knownFiles" | "project";
 export interface OpenFileParams {
 	content: FileContent;
 	documentFileSource?: DocumentFileSource;
