@@ -324,9 +324,13 @@ impl AnyJsParameterListExt for AnyJsParameterList {
             .unwrap_or(self.len());
 
         if required_self_len > other.len() + 1 {
-            // If the difference between signatures is more than 1,
-            // means those additional parameters are cross-connected,
-            // so we can't merge the signatures.
+            // If the current signature has more than one required parameter than the other,
+            // we can't merge the signatures. Example:
+            // function test(): void;
+            // function test(a: number, b: number): void;
+            // We can't merge these signatures into `test(a?: number, b?: number): void`,
+            // because the original definition says "either no parameters or two parameter",
+            // and making parameters optional would allow for one parameter.
             return None;
         }
 
