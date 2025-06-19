@@ -16,5 +16,8 @@
   ],
   "cpu": [
     "x64"
-  ]
+  ],
+  "publishConfig": {
+    "provenance": true
+  }
 }

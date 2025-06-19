@@ -37,7 +37,7 @@ jobs:
           pnpm --version
 
       - name: Install dependencies
-        run: pnpm install
+        run: pnpm install --frozen-lockfile
 
       - name: Create Release Pull Request
         id: changesets-action
@@ -292,13 +292,14 @@ jobs:
 
   # Publishing jobs
 
-  publish-cli:
+  publish:
     name: Publish
     runs-on: ubuntu-24.04
     needs:
       - build-binaries
       - build-binaries-gnu
       - build-wasm
+      - build-js-api
     environment: npm-publish
     permissions:
       contents: write
@@ -317,49 +318,16 @@ jobs:
           pattern: wasm-*
           merge-multiple: true
           path: packages/@biomejs
-
       - name: Install Node.js
         uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
           node-version: 20
           registry-url: 'https://registry.npmjs.org'
 
-      - name: Generate npm packages
-        run: node packages/@biomejs/biome/scripts/generate-packages.mjs
-
       - name: Publish npm packages as latest
-        run: for package in packages/@biomejs/*; do if [ $package != "packages/@biomejs/js-api" ]; then npm publish $package --tag latest --access public --provenance; fi; done
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: pnpm publish
 
       - name: Upload assets to the latest tag
         run: |
           files=$(ls biome-* | tr '\n' ' ')
           gh release upload @biomejs/biome@${{ needs.build-binaries.outputs.version }} $files
-
-  publish-js-api:
-    name: Publish
-    runs-on: ubuntu-24.04
-    needs: build-js-api
-    environment: npm-publish
-    permissions:
-      contents: write
-      id-token: write
-    steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
-
-      - name: Download package artifact
-        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
-        with:
-          name: js-api
-          path: packages/@biomejs/js-api/dist
-
-      - name: Install Node.js
-        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
-        with:
-          node-version: 20
-          registry-url: 'https://registry.npmjs.org'
-      - name: Publish npm package as latest
-        run: npm publish packages/@biomejs/js-api --tag latest --access public --provenance
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

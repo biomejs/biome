@@ -68,5 +68,8 @@
     "@biomejs/wasm-web": {
       "optional": true
     }
+  },
+  "publishConfig": {
+    "provenance": true
   }
 }

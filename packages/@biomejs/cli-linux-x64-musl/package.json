@@ -19,5 +19,8 @@
   ],
   "libc": [
     "musl"
-  ]
+  ],
+  "publishConfig": {
+    "provenance": true
+  }
 }
