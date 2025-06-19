@@ -32,6 +32,7 @@ const projectKey = biome.openProject("path/to/project/dir");
 biome.applyConfiguration(projectKey, {...});
 
 const formatted = biome.formatContent(
+  projectKey,
 	"function f   (a, b) { return a == b; }",
 	{
 		filePath: "example.js",
@@ -40,9 +41,13 @@ const formatted = biome.formatContent(
 
 console.log("Formatted content: ", formatted.content);
 
-const result = biome.lintContent(formatted.content, {
-	filePath: "example.js",
-});
+const result = biome.lintContent(
+  projectKey,
+  formatted.content,
+  {
+	  filePath: "example.js",
+  }
+);
 
 const html = biome.printDiagnostics(result.diagnostics, {
 	filePath: "example.js",
