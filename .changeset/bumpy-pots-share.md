@@ -2,4 +2,4 @@
 "@biomejs/biome": patch
 ---
 
-Improve error message in `lint/complexity/useDateNow` rule
+Improved error message in [`useDateNow`](https://biomejs.dev/linter/rules/use-date-now/) rule.
