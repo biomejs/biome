@@ -56,14 +56,10 @@ pub(super) struct JsModuleInfoCollector {
     extractor: SemanticEventExtractor,
 
     /// Formal parameters.
-    ///
-    /// They will get parsed when bindings from their scope are known.
-    formal_parameters: Vec<JsFormalParameter>,
+    formal_parameters: FxHashMap<JsSyntaxNode, FunctionParameter>,
 
     /// Variable declarations.
-    ///
-    /// They will get parsed when bindings from their scope are known.
-    variable_declarations: Vec<JsVariableDeclaration>,
+    variable_declarations: FxHashMap<JsSyntaxNode, Box<[(Text, TypeReference)]>>,
 
     /// Map of parsed declarations, for caching purposes.
     parsed_expressions: FxHashMap<TextRange, ResolvedTypeId>,
@@ -172,9 +168,16 @@ impl JsModuleInfoCollector {
 
             self.parsed_expressions.insert(range, resolved_id);
         } else if let Some(param) = JsFormalParameter::cast_ref(node) {
-            self.formal_parameters.push(param);
+            let scope_id = *self.scope_stack.last().expect("there must be a scope");
+            let parsed_param = FunctionParameter::from_js_formal_parameter(self, scope_id, &param);
+            self.formal_parameters
+                .insert(param.syntax().clone(), parsed_param);
         } else if let Some(decl) = JsVariableDeclaration::cast_ref(node) {
-            self.variable_declarations.push(decl);
+            let scope_id = *self.scope_stack.last().expect("there must be a scope");
+            let type_bindings =
+                TypeData::typed_bindings_from_js_variable_declaration(self, scope_id, &decl);
+            self.variable_declarations
+                .insert(decl.syntax().clone(), type_bindings);
         } else if let Some(import) = biome_js_syntax::JsImport::cast_ref(node) {
             self.push_static_import(import);
         }
@@ -529,38 +532,13 @@ impl JsModuleInfoCollector {
     }
 
     fn infer_all_types(&mut self, scope_by_range: &Lapper<u32, ScopeId>) {
-        let mut parsed_parameters = FxHashMap::default();
-        let formal_parameters = std::mem::take(&mut self.formal_parameters);
-        for param in formal_parameters {
-            let range = param.range();
-            let scope_id = scope_id_for_range(scope_by_range, range);
-            let parsed_param = FunctionParameter::from_js_formal_parameter(self, scope_id, &param);
-            parsed_parameters.insert(param.syntax().clone(), parsed_param);
-        }
-
-        let mut parsed_declarations = FxHashMap::default();
-        let variable_declarations = std::mem::take(&mut self.variable_declarations);
-        for decl in variable_declarations {
-            let range = decl.range();
-            let scope_id = scope_id_for_range(scope_by_range, range);
-            let type_bindings =
-                TypeData::typed_bindings_from_js_variable_declaration(self, scope_id, &decl);
-            parsed_declarations.insert(decl.syntax().clone(), type_bindings);
-        }
-
         for index in 0..self.bindings.len() {
             let binding_id = BindingId::new(index);
             let binding = &self.bindings[binding_id.index()];
             if let Some(node) = self.binding_node_by_start.get(&binding.range.start()) {
                 let name = binding.name.clone();
                 let scope_id = scope_id_for_range(scope_by_range, binding.range);
-                let ty = self.infer_type(
-                    &node.clone(),
-                    &name,
-                    scope_id,
-                    &parsed_declarations,
-                    &parsed_parameters,
-                );
+                let ty = self.infer_type(&node.clone(), &name, scope_id);
                 self.bindings[binding_id.index()].ty = ty;
             }
         }
@@ -571,14 +549,12 @@ impl JsModuleInfoCollector {
         node: &JsSyntaxNode,
         binding_name: &Text,
         scope_id: ScopeId,
-        parsed_declarations: &FxHashMap<JsSyntaxNode, Box<[(Text, TypeReference)]>>,
-        parsed_parameters: &FxHashMap<JsSyntaxNode, FunctionParameter>,
     ) -> TypeReference {
         for ancestor in node.ancestors() {
             if let Some(decl) = AnyJsDeclaration::cast_ref(&ancestor) {
                 return if let Some(typed_bindings) = decl
                     .as_js_variable_declaration()
-                    .and_then(|decl| parsed_declarations.get(decl.syntax()))
+                    .and_then(|decl| self.variable_declarations.get(decl.syntax()))
                 {
                     typed_bindings
                         .iter()
@@ -593,7 +569,7 @@ impl JsModuleInfoCollector {
                     TypeData::from_any_js_export_default_declaration(self, scope_id, &declaration);
                 return self.reference_to_owned_data(data);
             } else if let Some(param) = JsFormalParameter::cast_ref(&ancestor)
-                .and_then(|param| parsed_parameters.get(param.syntax()))
+                .and_then(|param| self.formal_parameters.get(param.syntax()))
             {
                 return param
                     .bindings
