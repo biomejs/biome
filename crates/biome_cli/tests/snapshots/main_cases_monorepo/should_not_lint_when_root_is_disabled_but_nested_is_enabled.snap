@@ -31,7 +31,13 @@ debugger
 ```block
 lint ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Some errors were emitted while running checks.
+  × No files were processed in the specified paths.
+  
+  i Check your biome.json or biome.jsonc to ensure the paths are not ignored by the configuration.
+  
+  i These paths were provided but ignored:
+  
+  - <TEMP_DIR>/should_not_lint_when_root_is_disabled_but_nested_is_enabled
   
 
 
@@ -40,21 +46,5 @@ lint ━━━━━━━━━━━━━━━━━━━━━━━━━
 # Emitted Messages
 
 ```block
-packages/lib/file.js:1:1 lint/suspicious/noDebugger  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × This is an unexpected use of the debugger statement.
-  
-  > 1 │ debugger
-      │ ^^^^^^^^
-  
-  i Unsafe fix: Remove debugger statement
-  
-    1 │ debugger
-      │ --------
-
-```
-
-```block
-Checked 2 files in <TIME>. No fixes applied.
-Found 1 error.
+Checked 0 files in <TIME>. No fixes applied.
 ```

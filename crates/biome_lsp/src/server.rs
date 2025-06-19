@@ -11,7 +11,7 @@ use biome_diagnostics::panic::PanicError;
 use biome_fs::{ConfigName, MemoryFileSystem, OsFileSystem};
 use biome_resolver::FsWithResolverProxy;
 use biome_service::workspace::{
-    CloseProjectParams, OpenProjectParams, RageEntry, RageParams, RageResult,
+    CloseProjectParams, OpenProjectParams, RageEntry, RageParams, RageResult, ScanKind,
     ServiceDataNotification,
 };
 use biome_service::{WatcherInstruction, WorkspaceServer};
@@ -418,11 +418,16 @@ impl LanguageServer for LSPServer {
 
                 match result {
                     Ok(result) => {
+                        let scan_kind = if result.scan_kind.is_none() {
+                            ScanKind::KnownFiles
+                        } else {
+                            result.scan_kind
+                        };
                         self.session
                             .insert_and_scan_project(
                                 result.project_key,
                                 project_path.clone(),
-                                result.scan_kind,
+                                scan_kind,
                             )
                             .await;
 
