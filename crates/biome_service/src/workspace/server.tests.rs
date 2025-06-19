@@ -9,13 +9,13 @@ fn commonjs_file_rejects_import_statement() {
     const FILE_CONTENT: &[u8] = b"import 'foo';";
     const MANIFEST_CONTENT: &[u8] = b"{ \"type\": \"commonjs\" }";
 
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     fs.insert(Utf8PathBuf::from("/project/a.js"), FILE_CONTENT);
     fs.insert(Utf8PathBuf::from("/project/package.json"), MANIFEST_CONTENT);
 
     let (watcher_tx, _) = bounded(0);
     let (service_data_tx, _) = watch::channel(ServiceDataNotification::Updated);
-    let workspace = WorkspaceServer::new(Box::new(fs), watcher_tx, service_data_tx, None);
+    let workspace = WorkspaceServer::new(Arc::new(fs), watcher_tx, service_data_tx, None);
     let result = workspace
         .open_project(OpenProjectParams {
             path: BiomePath::new("/"),
