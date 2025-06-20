@@ -72,13 +72,15 @@ class Example4 {
 ```
 invalid_checkAllPropertiesTrue.ts:2:2 lint/nursery/useReadonlyClassProperties  FIXABLE  ━━━━━━━━━━━━
 
-  i Member '#prop0' is never reassigned. Mark it as readonly.
+  i Member '#prop0' is never reassigned.
   
     1 │ class Example1 {
   > 2 │ 	#prop0: number = 42;
       │ 	^^^^^^
     3 │ 	private prop1: number = 42;
     4 │ 	protected prop2: string;
+  
+  i Using readonly improves code safety, clarity, and helps prevent unintended mutations.
   
   i Unsafe fix: Add readonly decorator.
   
@@ -90,7 +92,7 @@ invalid_checkAllPropertiesTrue.ts:2:2 lint/nursery/useReadonlyClassProperties  F
 ```
 invalid_checkAllPropertiesTrue.ts:3:10 lint/nursery/useReadonlyClassProperties  FIXABLE  ━━━━━━━━━━━
 
-  i Member 'prop1' is never reassigned. Mark it as readonly.
+  i Member 'prop1' is never reassigned.
   
     1 │ class Example1 {
     2 │ 	#prop0: number = 42;
@@ -98,6 +100,8 @@ invalid_checkAllPropertiesTrue.ts:3:10 lint/nursery/useReadonlyClassProperties  
       │ 	        ^^^^^
     4 │ 	protected prop2: string;
     5 │ 	public prop3: string;
+  
+  i Using readonly improves code safety, clarity, and helps prevent unintended mutations.
   
   i Unsafe fix: Add readonly decorator.
   
@@ -109,7 +113,7 @@ invalid_checkAllPropertiesTrue.ts:3:10 lint/nursery/useReadonlyClassProperties  
 ```
 invalid_checkAllPropertiesTrue.ts:4:12 lint/nursery/useReadonlyClassProperties  FIXABLE  ━━━━━━━━━━━
 
-  i Member 'prop2' is never reassigned. Mark it as readonly.
+  i Member 'prop2' is never reassigned.
   
     2 │ 	#prop0: number = 42;
     3 │ 	private prop1: number = 42;
@@ -117,6 +121,8 @@ invalid_checkAllPropertiesTrue.ts:4:12 lint/nursery/useReadonlyClassProperties  
       │ 	          ^^^^^
     5 │ 	public prop3: string;
     6 │ }
+  
+  i Using readonly improves code safety, clarity, and helps prevent unintended mutations.
   
   i Unsafe fix: Add readonly decorator.
   
@@ -128,7 +134,7 @@ invalid_checkAllPropertiesTrue.ts:4:12 lint/nursery/useReadonlyClassProperties  
 ```
 invalid_checkAllPropertiesTrue.ts:5:9 lint/nursery/useReadonlyClassProperties  FIXABLE  ━━━━━━━━━━━━
 
-  i Member 'prop3' is never reassigned. Mark it as readonly.
+  i Member 'prop3' is never reassigned.
   
     3 │ 	private prop1: number = 42;
     4 │ 	protected prop2: string;
@@ -136,6 +142,8 @@ invalid_checkAllPropertiesTrue.ts:5:9 lint/nursery/useReadonlyClassProperties  F
       │ 	       ^^^^^
     6 │ }
     7 │ 
+  
+  i Using readonly improves code safety, clarity, and helps prevent unintended mutations.
   
   i Unsafe fix: Add readonly decorator.
   
@@ -147,7 +155,7 @@ invalid_checkAllPropertiesTrue.ts:5:9 lint/nursery/useReadonlyClassProperties  F
 ```
 invalid_checkAllPropertiesTrue.ts:10:11 lint/nursery/useReadonlyClassProperties  FIXABLE  ━━━━━━━━━━
 
-  i Member 'prop1' is never reassigned. Mark it as readonly.
+  i Member 'prop1' is never reassigned.
   
      8 │ class Example2 {
      9 │ 	constructor(
@@ -155,6 +163,8 @@ invalid_checkAllPropertiesTrue.ts:10:11 lint/nursery/useReadonlyClassProperties 
        │ 		        ^^^^^
     11 │ 		public prop2: string,
     12 │ 		protected prop3: string,
+  
+  i Using readonly improves code safety, clarity, and helps prevent unintended mutations.
   
   i Unsafe fix: Add readonly decorator.
   
@@ -166,7 +176,7 @@ invalid_checkAllPropertiesTrue.ts:10:11 lint/nursery/useReadonlyClassProperties 
 ```
 invalid_checkAllPropertiesTrue.ts:11:10 lint/nursery/useReadonlyClassProperties  FIXABLE  ━━━━━━━━━━
 
-  i Member 'prop2' is never reassigned. Mark it as readonly.
+  i Member 'prop2' is never reassigned.
   
      9 │ 	constructor(
     10 │ 		private prop1: number,
@@ -174,6 +184,8 @@ invalid_checkAllPropertiesTrue.ts:11:10 lint/nursery/useReadonlyClassProperties 
        │ 		       ^^^^^
     12 │ 		protected prop3: string,
     13 │ 	) {
+  
+  i Using readonly improves code safety, clarity, and helps prevent unintended mutations.
   
   i Unsafe fix: Add readonly decorator.
   
@@ -185,7 +197,7 @@ invalid_checkAllPropertiesTrue.ts:11:10 lint/nursery/useReadonlyClassProperties 
 ```
 invalid_checkAllPropertiesTrue.ts:12:13 lint/nursery/useReadonlyClassProperties  FIXABLE  ━━━━━━━━━━
 
-  i Member 'prop3' is never reassigned. Mark it as readonly.
+  i Member 'prop3' is never reassigned.
   
     10 │ 		private prop1: number,
     11 │ 		public prop2: string,
@@ -193,6 +205,8 @@ invalid_checkAllPropertiesTrue.ts:12:13 lint/nursery/useReadonlyClassProperties 
        │ 		          ^^^^^
     13 │ 	) {
     14 │ 	}
+  
+  i Using readonly improves code safety, clarity, and helps prevent unintended mutations.
   
   i Unsafe fix: Add readonly decorator.
   
@@ -204,13 +218,15 @@ invalid_checkAllPropertiesTrue.ts:12:13 lint/nursery/useReadonlyClassProperties 
 ```
 invalid_checkAllPropertiesTrue.ts:18:2 lint/nursery/useReadonlyClassProperties  FIXABLE  ━━━━━━━━━━━
 
-  i Member '#prop0' is never reassigned. Mark it as readonly.
+  i Member '#prop0' is never reassigned.
   
     17 │ class Example3 {
   > 18 │ 	#prop0: number = 42;
        │ 	^^^^^^
     19 │ 	private prop1: number = 42;
     20 │ 	protected prop2: number;
+  
+  i Using readonly improves code safety, clarity, and helps prevent unintended mutations.
   
   i Unsafe fix: Add readonly decorator.
   
@@ -222,7 +238,7 @@ invalid_checkAllPropertiesTrue.ts:18:2 lint/nursery/useReadonlyClassProperties  
 ```
 invalid_checkAllPropertiesTrue.ts:19:10 lint/nursery/useReadonlyClassProperties  FIXABLE  ━━━━━━━━━━
 
-  i Member 'prop1' is never reassigned. Mark it as readonly.
+  i Member 'prop1' is never reassigned.
   
     17 │ class Example3 {
     18 │ 	#prop0: number = 42;
@@ -230,6 +246,8 @@ invalid_checkAllPropertiesTrue.ts:19:10 lint/nursery/useReadonlyClassProperties 
        │ 	        ^^^^^
     20 │ 	protected prop2: number;
     21 │ 	public prop3: number;
+  
+  i Using readonly improves code safety, clarity, and helps prevent unintended mutations.
   
   i Unsafe fix: Add readonly decorator.
   
@@ -241,7 +259,7 @@ invalid_checkAllPropertiesTrue.ts:19:10 lint/nursery/useReadonlyClassProperties 
 ```
 invalid_checkAllPropertiesTrue.ts:20:12 lint/nursery/useReadonlyClassProperties  FIXABLE  ━━━━━━━━━━
 
-  i Member 'prop2' is never reassigned. Mark it as readonly.
+  i Member 'prop2' is never reassigned.
   
     18 │ 	#prop0: number = 42;
     19 │ 	private prop1: number = 42;
@@ -249,6 +267,8 @@ invalid_checkAllPropertiesTrue.ts:20:12 lint/nursery/useReadonlyClassProperties 
        │ 	          ^^^^^
     21 │ 	public prop3: number;
     22 │ 
+  
+  i Using readonly improves code safety, clarity, and helps prevent unintended mutations.
   
   i Unsafe fix: Add readonly decorator.
   
@@ -260,7 +280,7 @@ invalid_checkAllPropertiesTrue.ts:20:12 lint/nursery/useReadonlyClassProperties 
 ```
 invalid_checkAllPropertiesTrue.ts:21:9 lint/nursery/useReadonlyClassProperties  FIXABLE  ━━━━━━━━━━━
 
-  i Member 'prop3' is never reassigned. Mark it as readonly.
+  i Member 'prop3' is never reassigned.
   
     19 │ 	private prop1: number = 42;
     20 │ 	protected prop2: number;
@@ -268,6 +288,8 @@ invalid_checkAllPropertiesTrue.ts:21:9 lint/nursery/useReadonlyClassProperties  
        │ 	       ^^^^^
     22 │ 
     23 │ 	constructor(prop0: number, prop1: number, prop2: number, prop3: number, private prop4: number, public prop5: number, protected prop6: number) {
+  
+  i Using readonly improves code safety, clarity, and helps prevent unintended mutations.
   
   i Unsafe fix: Add readonly decorator.
   
@@ -279,7 +301,7 @@ invalid_checkAllPropertiesTrue.ts:21:9 lint/nursery/useReadonlyClassProperties  
 ```
 invalid_checkAllPropertiesTrue.ts:23:82 lint/nursery/useReadonlyClassProperties  FIXABLE  ━━━━━━━━━━
 
-  i Member 'prop4' is never reassigned. Mark it as readonly.
+  i Member 'prop4' is never reassigned.
   
     21 │ 	public prop3: number;
     22 │ 
@@ -287,6 +309,8 @@ invalid_checkAllPropertiesTrue.ts:23:82 lint/nursery/useReadonlyClassProperties 
        │ 	                                                                                ^^^^^
     24 │ 		this.#prop0 = prop0;
     25 │ 		this.prop1 = prop1;
+  
+  i Using readonly improves code safety, clarity, and helps prevent unintended mutations.
   
   i Unsafe fix: Add readonly decorator.
   
@@ -298,7 +322,7 @@ invalid_checkAllPropertiesTrue.ts:23:82 lint/nursery/useReadonlyClassProperties 
 ```
 invalid_checkAllPropertiesTrue.ts:23:104 lint/nursery/useReadonlyClassProperties  FIXABLE  ━━━━━━━━━━
 
-  i Member 'prop5' is never reassigned. Mark it as readonly.
+  i Member 'prop5' is never reassigned.
   
     21 │ 	public prop3: number;
     22 │ 
@@ -306,6 +330,8 @@ invalid_checkAllPropertiesTrue.ts:23:104 lint/nursery/useReadonlyClassProperties
        │ 	                                                                                                      ^^^^^
     24 │ 		this.#prop0 = prop0;
     25 │ 		this.prop1 = prop1;
+  
+  i Using readonly improves code safety, clarity, and helps prevent unintended mutations.
   
   i Unsafe fix: Add readonly decorator.
   
@@ -317,7 +343,7 @@ invalid_checkAllPropertiesTrue.ts:23:104 lint/nursery/useReadonlyClassProperties
 ```
 invalid_checkAllPropertiesTrue.ts:23:129 lint/nursery/useReadonlyClassProperties  FIXABLE  ━━━━━━━━━━
 
-  i Member 'prop6' is never reassigned. Mark it as readonly.
+  i Member 'prop6' is never reassigned.
   
     21 │ 	public prop3: number;
     22 │ 
@@ -325,6 +351,8 @@ invalid_checkAllPropertiesTrue.ts:23:129 lint/nursery/useReadonlyClassProperties
        │ 	                                                                                                                               ^^^^^
     24 │ 		this.#prop0 = prop0;
     25 │ 		this.prop1 = prop1;
+  
+  i Using readonly improves code safety, clarity, and helps prevent unintended mutations.
   
   i Unsafe fix: Add readonly decorator.
   
@@ -336,7 +364,7 @@ invalid_checkAllPropertiesTrue.ts:23:129 lint/nursery/useReadonlyClassProperties
 ```
 invalid_checkAllPropertiesTrue.ts:33:2 lint/nursery/useReadonlyClassProperties  FIXABLE  ━━━━━━━━━━━
 
-  i Member '#prop0' is never reassigned. Mark it as readonly.
+  i Member '#prop0' is never reassigned.
   
     31 │ // with some getters/ reads do not affect readonly
     32 │ class Example4 {
@@ -344,6 +372,8 @@ invalid_checkAllPropertiesTrue.ts:33:2 lint/nursery/useReadonlyClassProperties  
        │ 	^^^^^^
     34 │ 	private prop1: number = 42;
     35 │ 	protected prop2: number;
+  
+  i Using readonly improves code safety, clarity, and helps prevent unintended mutations.
   
   i Unsafe fix: Add readonly decorator.
   
@@ -355,7 +385,7 @@ invalid_checkAllPropertiesTrue.ts:33:2 lint/nursery/useReadonlyClassProperties  
 ```
 invalid_checkAllPropertiesTrue.ts:34:10 lint/nursery/useReadonlyClassProperties  FIXABLE  ━━━━━━━━━━
 
-  i Member 'prop1' is never reassigned. Mark it as readonly.
+  i Member 'prop1' is never reassigned.
   
     32 │ class Example4 {
     33 │ 	#prop0: number = 42;
@@ -363,6 +393,8 @@ invalid_checkAllPropertiesTrue.ts:34:10 lint/nursery/useReadonlyClassProperties 
        │ 	        ^^^^^
     35 │ 	protected prop2: number;
     36 │ 	public prop3: number;
+  
+  i Using readonly improves code safety, clarity, and helps prevent unintended mutations.
   
   i Unsafe fix: Add readonly decorator.
   
@@ -374,7 +406,7 @@ invalid_checkAllPropertiesTrue.ts:34:10 lint/nursery/useReadonlyClassProperties 
 ```
 invalid_checkAllPropertiesTrue.ts:35:12 lint/nursery/useReadonlyClassProperties  FIXABLE  ━━━━━━━━━━
 
-  i Member 'prop2' is never reassigned. Mark it as readonly.
+  i Member 'prop2' is never reassigned.
   
     33 │ 	#prop0: number = 42;
     34 │ 	private prop1: number = 42;
@@ -382,6 +414,8 @@ invalid_checkAllPropertiesTrue.ts:35:12 lint/nursery/useReadonlyClassProperties 
        │ 	          ^^^^^
     36 │ 	public prop3: number;
     37 │ 
+  
+  i Using readonly improves code safety, clarity, and helps prevent unintended mutations.
   
   i Unsafe fix: Add readonly decorator.
   
@@ -393,7 +427,7 @@ invalid_checkAllPropertiesTrue.ts:35:12 lint/nursery/useReadonlyClassProperties 
 ```
 invalid_checkAllPropertiesTrue.ts:36:9 lint/nursery/useReadonlyClassProperties  FIXABLE  ━━━━━━━━━━━
 
-  i Member 'prop3' is never reassigned. Mark it as readonly.
+  i Member 'prop3' is never reassigned.
   
     34 │ 	private prop1: number = 42;
     35 │ 	protected prop2: number;
@@ -401,6 +435,8 @@ invalid_checkAllPropertiesTrue.ts:36:9 lint/nursery/useReadonlyClassProperties  
        │ 	       ^^^^^
     37 │ 
     38 │ 	constructor(prop0: number, prop1: number, prop2: number, prop3: number) {
+  
+  i Using readonly improves code safety, clarity, and helps prevent unintended mutations.
   
   i Unsafe fix: Add readonly decorator.
   

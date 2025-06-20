@@ -351,7 +351,7 @@ class TestChildClassExpressionModifiable {
 ```
 invalid.ts:23:10 lint/nursery/useReadonlyClassProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Member 'incorrectlyModifiableInline' is never reassigned. Mark it as readonly.
+  i Member 'incorrectlyModifiableInline' is never reassigned.
   
     21 │ // Nested classes with same property names
     22 │ class TestIncorrectlyModifiableInline {
@@ -359,6 +359,8 @@ invalid.ts:23:10 lint/nursery/useReadonlyClassProperties  FIXABLE  ━━━━�
        │ 	        ^^^^^^^^^^^^^^^^^^^^^^^^^^^
     24 │ 	public createConfusingChildClass() {
     25 │ 		return class {
+  
+  i Using readonly improves code safety, clarity, and helps prevent unintended mutations.
   
   i Unsafe fix: Add readonly decorator.
   
@@ -370,7 +372,7 @@ invalid.ts:23:10 lint/nursery/useReadonlyClassProperties  FIXABLE  ━━━━�
 ```
 invalid.ts:33:2 lint/nursery/useReadonlyClassProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Member '#incorrectlyModifiableInline' is never reassigned. Mark it as readonly.
+  i Member '#incorrectlyModifiableInline' is never reassigned.
   
     31 │ // Nested classes with private fields
     32 │ class TestIncorrectlyModifiableInlinePrivate {
@@ -378,6 +380,8 @@ invalid.ts:33:2 lint/nursery/useReadonlyClassProperties  FIXABLE  ━━━━�
        │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     34 │ 	public createConfusingChildClass() {
     35 │ 		return class {
+  
+  i Using readonly improves code safety, clarity, and helps prevent unintended mutations.
   
   i Unsafe fix: Add readonly decorator.
   
@@ -389,7 +393,7 @@ invalid.ts:33:2 lint/nursery/useReadonlyClassProperties  FIXABLE  ━━━━�
 ```
 invalid.ts:43:10 lint/nursery/useReadonlyClassProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Member 'incorrectlyModifiableDelayed' is never reassigned. Mark it as readonly.
+  i Member 'incorrectlyModifiableDelayed' is never reassigned.
   
     41 │ // Constructor reassignment
     42 │ class TestIncorrectlyModifiableDelayed {
@@ -397,6 +401,8 @@ invalid.ts:43:10 lint/nursery/useReadonlyClassProperties  FIXABLE  ━━━━�
        │ 	        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     44 │ 	public constructor() {
     45 │ 		this.incorrectlyModifiableDelayed = 7;
+  
+  i Using readonly improves code safety, clarity, and helps prevent unintended mutations.
   
   i Unsafe fix: Add readonly decorator.
   
@@ -408,7 +414,7 @@ invalid.ts:43:10 lint/nursery/useReadonlyClassProperties  FIXABLE  ━━━━�
 ```
 invalid.ts:51:2 lint/nursery/useReadonlyClassProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Member '#incorrectlyModifiableDelayed' is never reassigned. Mark it as readonly.
+  i Member '#incorrectlyModifiableDelayed' is never reassigned.
   
     49 │ // Constructor reassignment with private field
     50 │ class TestIncorrectlyModifiableDelayedPrivate {
@@ -416,6 +422,8 @@ invalid.ts:51:2 lint/nursery/useReadonlyClassProperties  FIXABLE  ━━━━�
        │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     52 │ 	public constructor() {
     53 │ 		this.#incorrectlyModifiableDelayed = 7;
+  
+  i Using readonly improves code safety, clarity, and helps prevent unintended mutations.
   
   i Unsafe fix: Add readonly decorator.
   
@@ -427,7 +435,7 @@ invalid.ts:51:2 lint/nursery/useReadonlyClassProperties  FIXABLE  ━━━━�
 ```
 invalid.ts:59:10 lint/nursery/useReadonlyClassProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Member 'incorrectlyModifiablePostMinus' is never reassigned. Mark it as readonly.
+  i Member 'incorrectlyModifiablePostMinus' is never reassigned.
   
     57 │ // Example 11: Subtraction operation
     58 │ class TestIncorrectlyModifiablePostMinus {
@@ -435,6 +443,8 @@ invalid.ts:59:10 lint/nursery/useReadonlyClassProperties  FIXABLE  ━━━━�
        │ 	        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     60 │ 	public mutate() {
     61 │ 		this.incorrectlyModifiablePostMinus - 1;
+  
+  i Using readonly improves code safety, clarity, and helps prevent unintended mutations.
   
   i Unsafe fix: Add readonly decorator.
   
@@ -446,7 +456,7 @@ invalid.ts:59:10 lint/nursery/useReadonlyClassProperties  FIXABLE  ━━━━�
 ```
 invalid.ts:67:2 lint/nursery/useReadonlyClassProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Member '#incorrectlyModifiablePostMinus' is never reassigned. Mark it as readonly.
+  i Member '#incorrectlyModifiablePostMinus' is never reassigned.
   
     65 │ // Example 12: Subtraction operation with private field
     66 │ class TestIncorrectlyModifiablePostMinusPrivate {
@@ -454,6 +464,8 @@ invalid.ts:67:2 lint/nursery/useReadonlyClassProperties  FIXABLE  ━━━━�
        │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     68 │ 	public mutate() {
     69 │ 		this.#incorrectlyModifiablePostMinus - 1;
+  
+  i Using readonly improves code safety, clarity, and helps prevent unintended mutations.
   
   i Unsafe fix: Add readonly decorator.
   
@@ -465,7 +477,7 @@ invalid.ts:67:2 lint/nursery/useReadonlyClassProperties  FIXABLE  ━━━━�
 ```
 invalid.ts:75:10 lint/nursery/useReadonlyClassProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Member 'incorrectlyModifiablePostPlus' is never reassigned. Mark it as readonly.
+  i Member 'incorrectlyModifiablePostPlus' is never reassigned.
   
     73 │ // Addition operation
     74 │ class TestIncorrectlyModifiablePostPlus {
@@ -473,6 +485,8 @@ invalid.ts:75:10 lint/nursery/useReadonlyClassProperties  FIXABLE  ━━━━�
        │ 	        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     76 │ 	public mutate() {
     77 │ 		this.incorrectlyModifiablePostPlus + 1;
+  
+  i Using readonly improves code safety, clarity, and helps prevent unintended mutations.
   
   i Unsafe fix: Add readonly decorator.
   
@@ -484,7 +498,7 @@ invalid.ts:75:10 lint/nursery/useReadonlyClassProperties  FIXABLE  ━━━━�
 ```
 invalid.ts:83:2 lint/nursery/useReadonlyClassProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Member '#incorrectlyModifiablePostPlus' is never reassigned. Mark it as readonly.
+  i Member '#incorrectlyModifiablePostPlus' is never reassigned.
   
     81 │ // Addition operation with private field
     82 │ class TestIncorrectlyModifiablePostPlusPrivate {
@@ -492,6 +506,8 @@ invalid.ts:83:2 lint/nursery/useReadonlyClassProperties  FIXABLE  ━━━━�
        │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     84 │ 	public mutate() {
     85 │ 		this.#incorrectlyModifiablePostPlus + 1;
+  
+  i Using readonly improves code safety, clarity, and helps prevent unintended mutations.
   
   i Unsafe fix: Add readonly decorator.
   
@@ -503,7 +519,7 @@ invalid.ts:83:2 lint/nursery/useReadonlyClassProperties  FIXABLE  ━━━━�
 ```
 invalid.ts:91:10 lint/nursery/useReadonlyClassProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Member 'incorrectlyModifiablePreMinus' is never reassigned. Mark it as readonly.
+  i Member 'incorrectlyModifiablePreMinus' is never reassigned.
   
     89 │ // Negation operation
     90 │ class TestIncorrectlyModifiablePreMinus {
@@ -511,6 +527,8 @@ invalid.ts:91:10 lint/nursery/useReadonlyClassProperties  FIXABLE  ━━━━�
        │ 	        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     92 │ 	public mutate() {
     93 │ 		-this.incorrectlyModifiablePreMinus;
+  
+  i Using readonly improves code safety, clarity, and helps prevent unintended mutations.
   
   i Unsafe fix: Add readonly decorator.
   
@@ -522,7 +540,7 @@ invalid.ts:91:10 lint/nursery/useReadonlyClassProperties  FIXABLE  ━━━━�
 ```
 invalid.ts:99:2 lint/nursery/useReadonlyClassProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Member '#incorrectlyModifiablePreMinus' is never reassigned. Mark it as readonly.
+  i Member '#incorrectlyModifiablePreMinus' is never reassigned.
   
      97 │ // Negation operation with private field
      98 │ class TestIncorrectlyModifiablePreMinusPrivate {
@@ -530,6 +548,8 @@ invalid.ts:99:2 lint/nursery/useReadonlyClassProperties  FIXABLE  ━━━━�
         │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     100 │ 	public mutate() {
     101 │ 		-this.#incorrectlyModifiablePreMinus;
+  
+  i Using readonly improves code safety, clarity, and helps prevent unintended mutations.
   
   i Unsafe fix: Add readonly decorator.
   
@@ -541,7 +561,7 @@ invalid.ts:99:2 lint/nursery/useReadonlyClassProperties  FIXABLE  ━━━━�
 ```
 invalid.ts:107:10 lint/nursery/useReadonlyClassProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Member 'incorrectlyModifiablePrePlus' is never reassigned. Mark it as readonly.
+  i Member 'incorrectlyModifiablePrePlus' is never reassigned.
   
     105 │ // Unary plus operation
     106 │ class TestIncorrectlyModifiablePrePlus {
@@ -549,6 +569,8 @@ invalid.ts:107:10 lint/nursery/useReadonlyClassProperties  FIXABLE  ━━━━
         │ 	        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     108 │ 	public mutate() {
     109 │ 		+this.incorrectlyModifiablePrePlus;
+  
+  i Using readonly improves code safety, clarity, and helps prevent unintended mutations.
   
   i Unsafe fix: Add readonly decorator.
   
@@ -560,7 +582,7 @@ invalid.ts:107:10 lint/nursery/useReadonlyClassProperties  FIXABLE  ━━━━
 ```
 invalid.ts:115:2 lint/nursery/useReadonlyClassProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Member '#incorrectlyModifiablePrePlus' is never reassigned. Mark it as readonly.
+  i Member '#incorrectlyModifiablePrePlus' is never reassigned.
   
     113 │ // Unary plus operation with private field
     114 │ class TestIncorrectlyModifiablePrePlusPrivate {
@@ -568,6 +590,8 @@ invalid.ts:115:2 lint/nursery/useReadonlyClassProperties  FIXABLE  ━━━━�
         │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     116 │ 	public mutate() {
     117 │ 		+this.#incorrectlyModifiablePrePlus;
+  
+  i Using readonly improves code safety, clarity, and helps prevent unintended mutations.
   
   i Unsafe fix: Add readonly decorator.
   
@@ -579,7 +603,7 @@ invalid.ts:115:2 lint/nursery/useReadonlyClassProperties  FIXABLE  ━━━━�
 ```
 invalid.ts:123:10 lint/nursery/useReadonlyClassProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Member 'overlappingClassVariable' is never reassigned. Mark it as readonly.
+  i Member 'overlappingClassVariable' is never reassigned.
   
     121 │ // Property with same name in different class
     122 │ class TestOverlappingClassVariable {
@@ -587,6 +611,8 @@ invalid.ts:123:10 lint/nursery/useReadonlyClassProperties  FIXABLE  ━━━━
         │ 	        ^^^^^^^^^^^^^^^^^^^^^^^^
     124 │ 	public workWithSimilarClass(other: SimilarClass) {
     125 │ 		other.overlappingClassVariable = 7;
+  
+  i Using readonly improves code safety, clarity, and helps prevent unintended mutations.
   
   i Unsafe fix: Add readonly decorator.
   
@@ -598,7 +624,7 @@ invalid.ts:123:10 lint/nursery/useReadonlyClassProperties  FIXABLE  ━━━━
 ```
 invalid.ts:134:29 lint/nursery/useReadonlyClassProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Member 'incorrectlyModifiableParameter' is never reassigned. Mark it as readonly.
+  i Member 'incorrectlyModifiableParameter' is never reassigned.
   
     132 │ // Parameter property
     133 │ class TestIncorrectlyModifiableParameter {
@@ -606,6 +632,8 @@ invalid.ts:134:29 lint/nursery/useReadonlyClassProperties  FIXABLE  ━━━━
         │ 	                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     135 │ }
     136 │ 
+  
+  i Using readonly improves code safety, clarity, and helps prevent unintended mutations.
   
   i Unsafe fix: Add readonly decorator.
   
@@ -617,7 +645,7 @@ invalid.ts:134:29 lint/nursery/useReadonlyClassProperties  FIXABLE  ━━━━
 ```
 invalid.ts:141:11 lint/nursery/useReadonlyClassProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Member 'incorrectlyModifiableParameter' is never reassigned. Mark it as readonly.
+  i Member 'incorrectlyModifiableParameter' is never reassigned.
   
     139 │ 	public constructor(
     140 │ 		public ignore: boolean,
@@ -625,6 +653,8 @@ invalid.ts:141:11 lint/nursery/useReadonlyClassProperties  FIXABLE  ━━━━
         │ 		        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     142 │ 	) {}
     143 │ }
+  
+  i Using readonly improves code safety, clarity, and helps prevent unintended mutations.
   
   i Unsafe fix: Add readonly decorator.
   
@@ -636,7 +666,7 @@ invalid.ts:141:11 lint/nursery/useReadonlyClassProperties  FIXABLE  ━━━━
 ```
 invalid.ts:147:10 lint/nursery/useReadonlyClassProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Member 'incorrectlyInlineLambda' is never reassigned. Mark it as readonly.
+  i Member 'incorrectlyInlineLambda' is never reassigned.
   
     145 │ // Inline lambda with option
     146 │ class TestCorrectlyNonInlineLambdas {
@@ -644,6 +674,8 @@ invalid.ts:147:10 lint/nursery/useReadonlyClassProperties  FIXABLE  ━━━━
         │ 	        ^^^^^^^^^^^^^^^^^^^^^^^
     148 │ }
     149 │ 
+  
+  i Using readonly improves code safety, clarity, and helps prevent unintended mutations.
   
   i Unsafe fix: Add readonly decorator.
   
@@ -655,7 +687,7 @@ invalid.ts:147:10 lint/nursery/useReadonlyClassProperties  FIXABLE  ━━━━
 ```
 invalid.ts:166:10 lint/nursery/useReadonlyClassProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Member 'testObj' is never reassigned. Mark it as readonly.
+  i Member 'testObj' is never reassigned.
   
     164 │ // Object property access
     165 │ class Test {
@@ -663,6 +695,8 @@ invalid.ts:166:10 lint/nursery/useReadonlyClassProperties  FIXABLE  ━━━━
         │ 	        ^^^^^^^
     167 │ 	public test(): void {
     168 │ 		this.testObj.prop = '';
+  
+  i Using readonly improves code safety, clarity, and helps prevent unintended mutations.
   
   i Unsafe fix: Add readonly decorator.
   
@@ -674,7 +708,7 @@ invalid.ts:166:10 lint/nursery/useReadonlyClassProperties  FIXABLE  ━━━━
 ```
 invalid.ts:176:10 lint/nursery/useReadonlyClassProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Member 'prop' is never reassigned. Mark it as readonly.
+  i Member 'prop' is never reassigned.
   
     174 │ const foo = Foo.Bar;
     175 │ class Test1 {
@@ -682,6 +716,8 @@ invalid.ts:176:10 lint/nursery/useReadonlyClassProperties  FIXABLE  ━━━━
         │ 	        ^^^^
     177 │ 	constructor() {
     178 │ 		this.prop = foo;
+  
+  i Using readonly improves code safety, clarity, and helps prevent unintended mutations.
   
   i Unsafe fix: Add readonly decorator.
   
@@ -693,7 +729,7 @@ invalid.ts:176:10 lint/nursery/useReadonlyClassProperties  FIXABLE  ━━━━
 ```
 invalid.ts:184:10 lint/nursery/useReadonlyClassProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Member 'prop' is never reassigned. Mark it as readonly.
+  i Member 'prop' is never reassigned.
   
     182 │ // Property with no constructor reassignment
     183 │ class Test2 {
@@ -701,6 +737,8 @@ invalid.ts:184:10 lint/nursery/useReadonlyClassProperties  FIXABLE  ━━━━
         │ 	        ^^^^
     185 │ }
     186 │ 
+  
+  i Using readonly improves code safety, clarity, and helps prevent unintended mutations.
   
   i Unsafe fix: Add readonly decorator.
   
@@ -712,7 +750,7 @@ invalid.ts:184:10 lint/nursery/useReadonlyClassProperties  FIXABLE  ━━━━
 ```
 invalid.ts:191:10 lint/nursery/useReadonlyClassProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Member 'prop' is never reassigned. Mark it as readonly.
+  i Member 'prop' is never reassigned.
   
     189 │ declare const foo2: Foo2;
     190 │ class Test3 {
@@ -720,6 +758,8 @@ invalid.ts:191:10 lint/nursery/useReadonlyClassProperties  FIXABLE  ━━━━
         │ 	        ^^^^
     192 │ }
     193 │ 
+  
+  i Using readonly improves code safety, clarity, and helps prevent unintended mutations.
   
   i Unsafe fix: Add readonly decorator.
   
@@ -731,7 +771,7 @@ invalid.ts:191:10 lint/nursery/useReadonlyClassProperties  FIXABLE  ━━━━
 ```
 invalid.ts:200:11 lint/nursery/useReadonlyClassProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Member 'prop' is never reassigned. Mark it as readonly.
+  i Member 'prop' is never reassigned.
   
     198 │ 	const Foo = 10;
     199 │ 	class Test4 {
@@ -739,6 +779,8 @@ invalid.ts:200:11 lint/nursery/useReadonlyClassProperties  FIXABLE  ━━━━
         │ 		        ^^^^
     201 │ 		constructor() {
     202 │ 			this.prop = bar;
+  
+  i Using readonly improves code safety, clarity, and helps prevent unintended mutations.
   
   i Unsafe fix: Add readonly decorator.
   
@@ -750,7 +792,7 @@ invalid.ts:200:11 lint/nursery/useReadonlyClassProperties  FIXABLE  ━━━━
 ```
 invalid.ts:211:11 lint/nursery/useReadonlyClassProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Member 'prop' is never reassigned. Mark it as readonly.
+  i Member 'prop' is never reassigned.
   
     209 │ 	type Foo = 10;
     210 │ 	class Test5 {
@@ -758,6 +800,8 @@ invalid.ts:211:11 lint/nursery/useReadonlyClassProperties  FIXABLE  ━━━━
         │ 		        ^^^^
     212 │ 		constructor() {
     213 │ 			this.prop = bar;
+  
+  i Using readonly improves code safety, clarity, and helps prevent unintended mutations.
   
   i Unsafe fix: Add readonly decorator.
   
@@ -769,7 +813,7 @@ invalid.ts:211:11 lint/nursery/useReadonlyClassProperties  FIXABLE  ━━━━
 ```
 invalid.ts:225:10 lint/nursery/useReadonlyClassProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Member 'prop' is never reassigned. Mark it as readonly.
+  i Member 'prop' is never reassigned.
   
     223 │ const bar2 = Bar.Bar;
     224 │ class Test6 {
@@ -777,6 +821,8 @@ invalid.ts:225:10 lint/nursery/useReadonlyClassProperties  FIXABLE  ━━━━
         │ 	        ^^^^
     226 │ 	constructor() {
     227 │ 		this.prop = bar2;
+  
+  i Using readonly improves code safety, clarity, and helps prevent unintended mutations.
   
   i Unsafe fix: Add readonly decorator.
   
@@ -788,7 +834,7 @@ invalid.ts:225:10 lint/nursery/useReadonlyClassProperties  FIXABLE  ━━━━
 ```
 invalid.ts:233:10 lint/nursery/useReadonlyClassProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Member 'prop' is never reassigned. Mark it as readonly.
+  i Member 'prop' is never reassigned.
   
     231 │ // Object property
     232 │ class Test7 {
@@ -796,6 +842,8 @@ invalid.ts:233:10 lint/nursery/useReadonlyClassProperties  FIXABLE  ━━━━
         │ 	        ^^^^
     234 │ }
     235 │ 
+  
+  i Using readonly improves code safety, clarity, and helps prevent unintended mutations.
   
   i Unsafe fix: Add readonly decorator.
   
@@ -807,7 +855,7 @@ invalid.ts:233:10 lint/nursery/useReadonlyClassProperties  FIXABLE  ━━━━
 ```
 invalid.ts:238:10 lint/nursery/useReadonlyClassProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Member 'prop' is never reassigned. Mark it as readonly.
+  i Member 'prop' is never reassigned.
   
     236 │ // Object property with constructor reassignment
     237 │ class Test8 {
@@ -815,6 +863,8 @@ invalid.ts:238:10 lint/nursery/useReadonlyClassProperties  FIXABLE  ━━━━
         │ 	        ^^^^
     239 │ 	constructor() {
     240 │ 		this.prop = { foo: 'bazz' };
+  
+  i Using readonly improves code safety, clarity, and helps prevent unintended mutations.
   
   i Unsafe fix: Add readonly decorator.
   
@@ -826,7 +876,7 @@ invalid.ts:238:10 lint/nursery/useReadonlyClassProperties  FIXABLE  ━━━━
 ```
 invalid.ts:246:10 lint/nursery/useReadonlyClassProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Member 'prop' is never reassigned. Mark it as readonly.
+  i Member 'prop' is never reassigned.
   
     244 │ // Array property
     245 │ class Test9 {
@@ -834,6 +884,8 @@ invalid.ts:246:10 lint/nursery/useReadonlyClassProperties  FIXABLE  ━━━━
         │ 	        ^^^^
     247 │ }
     248 │ 
+  
+  i Using readonly improves code safety, clarity, and helps prevent unintended mutations.
   
   i Unsafe fix: Add readonly decorator.
   
@@ -845,7 +897,7 @@ invalid.ts:246:10 lint/nursery/useReadonlyClassProperties  FIXABLE  ━━━━
 ```
 invalid.ts:251:10 lint/nursery/useReadonlyClassProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Member 'prop' is never reassigned. Mark it as readonly.
+  i Member 'prop' is never reassigned.
   
     249 │ // Array property with constructor reassignment
     250 │ class Test10 {
@@ -853,6 +905,8 @@ invalid.ts:251:10 lint/nursery/useReadonlyClassProperties  FIXABLE  ━━━━
         │ 	        ^^^^
     252 │ 	constructor() {
     253 │ 		this.prop = [1, 2, 'four'];
+  
+  i Using readonly improves code safety, clarity, and helps prevent unintended mutations.
   
   i Unsafe fix: Add readonly decorator.
   
@@ -864,7 +918,7 @@ invalid.ts:251:10 lint/nursery/useReadonlyClassProperties  FIXABLE  ━━━━
 ```
 invalid.ts:259:10 lint/nursery/useReadonlyClassProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Member '_isValid' is never reassigned. Mark it as readonly.
+  i Member '_isValid' is never reassigned.
   
     257 │ // Property used in method
     258 │ class X {
@@ -872,6 +926,8 @@ invalid.ts:259:10 lint/nursery/useReadonlyClassProperties  FIXABLE  ━━━━
         │ 	        ^^^^^^^^
     260 │ 	getIsValid = () => this._isValid;
     261 │ 	constructor(data?: {}) {
+  
+  i Using readonly improves code safety, clarity, and helps prevent unintended mutations.
   
   i Unsafe fix: Add readonly decorator.
   
@@ -883,7 +939,7 @@ invalid.ts:259:10 lint/nursery/useReadonlyClassProperties  FIXABLE  ━━━━
 ```
 invalid.ts:270:10 lint/nursery/useReadonlyClassProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Member 'prop' is never reassigned. Mark it as readonly.
+  i Member 'prop' is never reassigned.
   
     268 │ // Property with type annotation
     269 │ class Test12 {
@@ -891,6 +947,8 @@ invalid.ts:270:10 lint/nursery/useReadonlyClassProperties  FIXABLE  ━━━━
         │ 	        ^^^^
     271 │ }
     272 │ 
+  
+  i Using readonly improves code safety, clarity, and helps prevent unintended mutations.
   
   i Unsafe fix: Add readonly decorator.
   
@@ -902,7 +960,7 @@ invalid.ts:270:10 lint/nursery/useReadonlyClassProperties  FIXABLE  ━━━━
 ```
 invalid.ts:275:10 lint/nursery/useReadonlyClassProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Member 'prop' is never reassigned. Mark it as readonly.
+  i Member 'prop' is never reassigned.
   
     273 │ // Property with union type
     274 │ class Test13 {
@@ -910,6 +968,8 @@ invalid.ts:275:10 lint/nursery/useReadonlyClassProperties  FIXABLE  ━━━━
         │ 	        ^^^^
     276 │ }
     277 │ 
+  
+  i Using readonly improves code safety, clarity, and helps prevent unintended mutations.
   
   i Unsafe fix: Add readonly decorator.
   
@@ -921,7 +981,7 @@ invalid.ts:275:10 lint/nursery/useReadonlyClassProperties  FIXABLE  ━━━━
 ```
 invalid.ts:280:10 lint/nursery/useReadonlyClassProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Member 'prop' is never reassigned. Mark it as readonly.
+  i Member 'prop' is never reassigned.
   
     278 │ // Property with type but no initial value
     279 │ class Test14 {
@@ -929,6 +989,8 @@ invalid.ts:280:10 lint/nursery/useReadonlyClassProperties  FIXABLE  ━━━━
         │ 	        ^^^^
     281 │ 	constructor() {
     282 │ 		this.prop = 'hello';
+  
+  i Using readonly improves code safety, clarity, and helps prevent unintended mutations.
   
   i Unsafe fix: Add readonly decorator.
   
@@ -940,7 +1002,7 @@ invalid.ts:280:10 lint/nursery/useReadonlyClassProperties  FIXABLE  ━━━━
 ```
 invalid.ts:288:10 lint/nursery/useReadonlyClassProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Member 'prop' is never reassigned. Mark it as readonly.
+  i Member 'prop' is never reassigned.
   
     286 │ // Example 40: Property with no type annotation
     287 │ class Test15 {
@@ -948,6 +1010,8 @@ invalid.ts:288:10 lint/nursery/useReadonlyClassProperties  FIXABLE  ━━━━
         │ 	        ^^^^
     289 │ 	constructor() {
     290 │ 		this.prop = 'hello';
+  
+  i Using readonly improves code safety, clarity, and helps prevent unintended mutations.
   
   i Unsafe fix: Add readonly decorator.
   
@@ -959,7 +1023,7 @@ invalid.ts:288:10 lint/nursery/useReadonlyClassProperties  FIXABLE  ━━━━
 ```
 invalid.ts:296:10 lint/nursery/useReadonlyClassProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Member 'prop' is never reassigned. Mark it as readonly.
+  i Member 'prop' is never reassigned.
   
     294 │ // Conditional assignment in constructor
     295 │ class Test16 {
@@ -967,6 +1031,8 @@ invalid.ts:296:10 lint/nursery/useReadonlyClassProperties  FIXABLE  ━━━━
         │ 	        ^^^^
     297 │ 	constructor(x: boolean) {
     298 │ 		if (x) {
+  
+  i Using readonly improves code safety, clarity, and helps prevent unintended mutations.
   
   i Unsafe fix: Add readonly decorator.
   
@@ -978,7 +1044,7 @@ invalid.ts:296:10 lint/nursery/useReadonlyClassProperties  FIXABLE  ━━━━
 ```
 invalid.ts:308:10 lint/nursery/useReadonlyClassProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Member 'prop' is never reassigned. Mark it as readonly.
+  i Member 'prop' is never reassigned.
   
     306 │ // Null property
     307 │ class Test18 {
@@ -986,6 +1052,8 @@ invalid.ts:308:10 lint/nursery/useReadonlyClassProperties  FIXABLE  ━━━━
         │ 	        ^^^^
     309 │ }
     310 │ 
+  
+  i Using readonly improves code safety, clarity, and helps prevent unintended mutations.
   
   i Unsafe fix: Add readonly decorator.
   
@@ -997,7 +1065,7 @@ invalid.ts:308:10 lint/nursery/useReadonlyClassProperties  FIXABLE  ━━━━
 ```
 invalid.ts:313:10 lint/nursery/useReadonlyClassProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Member 'prop' is never reassigned. Mark it as readonly.
+  i Member 'prop' is never reassigned.
   
     311 │ // Null property with constructor reassignment
     312 │ class Test19 {
@@ -1005,6 +1073,8 @@ invalid.ts:313:10 lint/nursery/useReadonlyClassProperties  FIXABLE  ━━━━
         │ 	        ^^^^
     314 │ 	constructor() {
     315 │ 		this.prop = null;
+  
+  i Using readonly improves code safety, clarity, and helps prevent unintended mutations.
   
   i Unsafe fix: Add readonly decorator.
   
@@ -1016,7 +1086,7 @@ invalid.ts:313:10 lint/nursery/useReadonlyClassProperties  FIXABLE  ━━━━
 ```
 invalid.ts:321:10 lint/nursery/useReadonlyClassProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Member 'prop' is never reassigned. Mark it as readonly.
+  i Member 'prop' is never reassigned.
   
     319 │ // Property with type assertion
     320 │ class Test20 {
@@ -1024,6 +1094,8 @@ invalid.ts:321:10 lint/nursery/useReadonlyClassProperties  FIXABLE  ━━━━
         │ 	        ^^^^
     322 │ }
     323 │ 
+  
+  i Using readonly improves code safety, clarity, and helps prevent unintended mutations.
   
   i Unsafe fix: Add readonly decorator.
   
@@ -1035,7 +1107,7 @@ invalid.ts:321:10 lint/nursery/useReadonlyClassProperties  FIXABLE  ━━━━
 ```
 invalid.ts:326:10 lint/nursery/useReadonlyClassProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Member 'prop' is never reassigned. Mark it as readonly.
+  i Member 'prop' is never reassigned.
   
     324 │ // Property with Promise
     325 │ class Test21 {
@@ -1043,6 +1115,8 @@ invalid.ts:326:10 lint/nursery/useReadonlyClassProperties  FIXABLE  ━━━━
         │ 	        ^^^^
     327 │ }
     328 │ 
+  
+  i Using readonly improves code safety, clarity, and helps prevent unintended mutations.
   
   i Unsafe fix: Add readonly decorator.
   
@@ -1054,7 +1128,7 @@ invalid.ts:326:10 lint/nursery/useReadonlyClassProperties  FIXABLE  ━━━━
 ```
 invalid.ts:331:10 lint/nursery/useReadonlyClassProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Member 'childClassExpressionModifiable' is never reassigned. Mark it as readonly.
+  i Member 'childClassExpressionModifiable' is never reassigned.
   
     329 │ // this refers to the inner class instance
     330 │ class TestChildClassExpressionModifiable {
@@ -1062,6 +1136,8 @@ invalid.ts:331:10 lint/nursery/useReadonlyClassProperties  FIXABLE  ━━━━
         │ 	        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     332 │ 	public createConfusingChildClass() {
     333 │ 		return class {
+  
+  i Using readonly improves code safety, clarity, and helps prevent unintended mutations.
   
   i Unsafe fix: Add readonly decorator.
   
