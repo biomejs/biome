@@ -1,5 +1,11 @@
 # @biomejs/biome
 
+## 2.0.2
+
+### Patch Changes
+
+- [#6436](https://github.com/biomejs/biome/pull/6436) [`ec7c63d`](https://github.com/biomejs/biome/commit/ec7c63df520103b5d8ea0090c59486574e7370dd) Thanks [@ematipico](https://github.com/ematipico)! - Fixed an issue where binaries weren't copied anymore inside the `@biomejs/cli-*` packages.
+
 ## 2.0.1
 
 ### Patch Changes
