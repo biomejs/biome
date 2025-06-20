@@ -7,8 +7,7 @@
     "check": "cargo biome-cli-dev check",
     "ci": "cargo biome-cli-dev ci",
     "//": "when we create the release PR, we need to update the lock file with the new versions",
-    "version": "changeset version && pnpm i --lockfile-only",
-    "publish": "changeset publish --no-git-checks"
+    "version": "changeset version && pnpm i --lockfile-only"
   },
   "keywords": [],
   "author": "Biome Developers and Contributors",
