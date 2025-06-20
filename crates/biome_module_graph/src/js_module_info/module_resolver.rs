@@ -1,9 +1,4 @@
-use std::{
-    borrow::Cow,
-    collections::{BTreeSet, hash_map::Entry},
-    ops::Deref,
-    sync::Arc,
-};
+use std::{borrow::Cow, collections::hash_map::Entry, ops::Deref, sync::Arc};
 
 use biome_js_syntax::AnyJsExpression;
 use biome_js_type_info::{
@@ -14,7 +9,7 @@ use biome_js_type_info::{
 };
 use biome_resolver::ResolvedPath;
 use biome_rowan::{AstNode, RawSyntaxKind, Text, TextRange, TokenText};
-use rustc_hash::FxHashMap;
+use rustc_hash::{FxHashMap, FxHashSet};
 
 use crate::{
     JsExport, JsOwnExport, ModuleGraph,
@@ -245,7 +240,7 @@ impl ModuleResolver {
         mut module_id: ModuleId,
         mut symbol: Cow<'a, ImportSymbol>,
         mut type_only: bool,
-        mut seen_modules: BTreeSet<ModuleId>,
+        mut seen_modules: FxHashSet<ModuleId>,
     ) -> Option<ResolvedTypeId> {
         while seen_modules.len() < MAX_IMPORT_DEPTH {
             if !seen_modules.insert(module_id) {
@@ -362,7 +357,7 @@ impl TypeResolver for ModuleResolver {
             module_id,
             Cow::Borrowed(&qualifier.symbol),
             qualifier.type_only,
-            BTreeSet::new(),
+            FxHashSet::default(),
         )
     }
 
@@ -378,7 +373,7 @@ impl TypeResolver for ModuleResolver {
                 name,
             )))),
             false,
-            BTreeSet::new(),
+            FxHashSet::default(),
         )
     }
 
