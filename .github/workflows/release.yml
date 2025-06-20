@@ -343,9 +343,14 @@ jobs:
       - name: Publish npm packages as latest
         run: pnpm run publish
         env:
+          # To publish on npmjs
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          # To push the tags
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Upload assets to the latest tag
         run: |
           files=$(ls biome-* | tr '\n' ' ')
           gh release upload @biomejs/biome@${{ needs.build-binaries.outputs.version }} $files
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
