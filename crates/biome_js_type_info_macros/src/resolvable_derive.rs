@@ -148,11 +148,22 @@ pub(crate) fn generate_resolvable_struct(ident: Ident, fields: Vec<FieldData>) -
         let resolved_ty = resolved_type(IdentOrZero::Ident(ident), ty);
         quote! { let #ident = #resolved_ty; }
     });
-    let resolved_fields_test = fields.iter().map(|FieldData { ident, .. }| {
-        quote! { #ident.is_some() }
+    let resolved_fields_test = fields.iter().map(|FieldData { ident, ty }| {
+        if is_option(ty) {
+            quote! { #ident.as_ref().is_some_and(Option::is_some) }
+        } else {
+            quote! { #ident.is_some() }
+        }
     });
-    let resolved_result_fields = fields.iter().map(|FieldData { ident, .. }| {
-        quote! { #ident: #ident.unwrap_or_else(|| self.#ident.clone()) }
+    let resolved_result_fields = fields.iter().map(|FieldData { ident, ty }| {
+        if is_option(ty) {
+            quote! { #ident: match (#ident, self.#ident.as_ref()) {
+                (Some(new), Some(existing)) => Some(new.unwrap_or_else(|| existing.clone())),
+                (_, existing) => existing.cloned()
+            } }
+        } else {
+            quote! { #ident: #ident.unwrap_or_else(|| self.#ident.clone()) }
+        }
     });
 
     let update_all_references_fields = fields.iter().filter_map(|FieldData { ident, ty }| {
@@ -333,6 +344,15 @@ fn resolved_unit_type(ident: &Ident, ty: &Type) -> Option<TokenStream> {
             }
         },
         _ => Some(quote! { ty.resolved(resolver).map(Self::#ident) }),
+    }
+}
+
+fn is_option(ty: &Type) -> bool {
+    match ty {
+        Type::Path(path) => {
+            matches!(path.path.segments.last(), Some(segment) if segment.ident == "Option")
+        }
+        _ => false,
     }
 }
 

@@ -546,7 +546,7 @@ impl TypeData {
 }
 
 /// A class definition.
-#[derive(Clone, Eq, Hash, PartialEq, Resolvable)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq, Resolvable)]
 pub struct Class {
     /// Name of the class, if specified in the definition.
     pub name: Option<Text>,
@@ -562,16 +562,6 @@ pub struct Class {
 
     /// Class members.
     pub members: Box<[TypeMember]>,
-}
-
-impl Debug for Class {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("Class")
-            .field("name", &self.name)
-            .field("type_parameters", &self.type_parameters)
-            .field("extends", &self.extends)
-            .finish()
-    }
 }
 
 /// A constructor definition.
