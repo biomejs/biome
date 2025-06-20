@@ -1,5 +1,35 @@
 # @biomejs/biome
 
+## 2.0.1
+
+### Patch Changes
+
+- [#6425](https://github.com/biomejs/biome/pull/6425) [`00e97ad`](https://github.com/biomejs/biome/commit/00e97aded825e72e63db7827de20dc84ac8a123b) Thanks [@siketyan](https://github.com/siketyan)! - Fixed [#6391](https://github.com/biomejs/biome/issues/6391): the rule [`noUselessFragments`](https://biomejs.dev/linter/rules/no-useless-fragments/) no longer reports a fragment that contains whitespaces which aren't trimmed by the runtime.
+
+- [#6417](https://github.com/biomejs/biome/pull/6417) [`dd88565`](https://github.com/biomejs/biome/commit/dd885655b576869eb624d4a31d2d09bcb6c623a4) Thanks [@ematipico](https://github.com/ematipico)! - Fixed [#6360](https://github.com/biomejs/biome/issues/6360): The following pseudo classes and elements are no longer reported by `noUnknownPseudoClass` or `noUnknownPseudoElement` rules.
+
+  - `:open`
+  - `::details-content`
+  - `::prefix`
+  - `::search-text`
+  - `::suffix`
+
+- [#6417](https://github.com/biomejs/biome/pull/6417) [`dd88565`](https://github.com/biomejs/biome/commit/dd885655b576869eb624d4a31d2d09bcb6c623a4) Thanks [@ematipico](https://github.com/ematipico)! - Fixed [#6357](https://github.com/biomejs/biome/issues/6357), where the boolean values weren't correctly merged when using the `extends` functionality. Now Biome correctly merges the values.
+
+- [#6417](https://github.com/biomejs/biome/pull/6417) [`dd88565`](https://github.com/biomejs/biome/commit/dd885655b576869eb624d4a31d2d09bcb6c623a4) Thanks [@ematipico](https://github.com/ematipico)! - Fixed [#6341](https://github.com/biomejs/biome/issues/6341): Fixed an issue where Biome would throw an error for the language tags `nb` and `nn`.
+
+- [#6385](https://github.com/biomejs/biome/pull/6385) [`94142dd`](https://github.com/biomejs/biome/commit/94142dd84b3a4b680c08007cd4947ca7d44273a8) Thanks [@siketyan](https://github.com/siketyan)! - Fixed [#6377](https://github.com/biomejs/biome/issues/6377): The rule [noSelfCompare](https://biomejs.dev/linter/rules/no-self-compare/) now correctly compares two function calls with different arguments.
+
+- [#6417](https://github.com/biomejs/biome/pull/6417) [`dd88565`](https://github.com/biomejs/biome/commit/dd885655b576869eb624d4a31d2d09bcb6c623a4) Thanks [@ematipico](https://github.com/ematipico)! - Fixed [#6278](github.com/biomejs/biome/issues/6278): `useExhaustiveDependencies` no longer adds duplicated dependencies into the list.
+
+- [#6417](https://github.com/biomejs/biome/pull/6417) [`dd88565`](https://github.com/biomejs/biome/commit/dd885655b576869eb624d4a31d2d09bcb6c623a4) Thanks [@ematipico](https://github.com/ematipico)! - Fix #6396, where `vi.useFakeTimers()` and `vi.useRealTimers()` incorrectly triggered React Hooks-related rules
+
+- [#6417](https://github.com/biomejs/biome/pull/6417) [`dd88565`](https://github.com/biomejs/biome/commit/dd885655b576869eb624d4a31d2d09bcb6c623a4) Thanks [@ematipico](https://github.com/ematipico)! - Fixed a bug where Biome didn't correctly discover nested configuration files when using the `lint` command and the linter is disabled in the root configuration.
+
+- [#6422](https://github.com/biomejs/biome/pull/6422) [`594ec50`](https://github.com/biomejs/biome/commit/594ec5008761c6263a43f72f1cbb7e9aafaf8a46) Thanks [@ematipico](https://github.com/ematipico)! - Removed the experimental rename feature from Biome LSP, which caused some issues inside existing editors such as Zed.
+
+- [#6388](https://github.com/biomejs/biome/pull/6388) [`c6942d2`](https://github.com/biomejs/biome/commit/c6942d291297322234f9f145fc2fbf8506dc7673) Thanks [@siketyan](https://github.com/siketyan)! - Fixed [#6375](https://github.com/biomejs/biome/issues/6375): the formatter no longer inserts an extra empty line before a semicolon when it has leading comments.
+
 ## 2.0.0
 
 ### Major Changes
