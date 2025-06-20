@@ -453,7 +453,7 @@ fn collect_mutated_class_property_names(members: &JsClassMemberList) -> Vec<Text
         .collect::<Vec<_>>()
 }
 
-/// Checks recursively the assignment operand equals a reference to `this` (e.g., `this.privateProp`)
+/// Checks recursively the assignment operand equals a reference to `this` (e.g. `this.privateProp`)
 fn contains_this_or_static_member_kind(
     assignment: &JsStaticMemberAssignment,
     this_aliases: &[Text],
