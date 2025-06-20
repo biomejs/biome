@@ -22,23 +22,22 @@ fn project_layout_with_top_level_dependencies(dependencies: Dependencies) -> Arc
 }
 
 // use this test check if your snippet produces the diagnostics you wish, without using a snapshot
-// #[ignore]
+#[ignore]
 #[test]
 fn quick_test() {
     const FILENAME: &str = "dummyFile.ts";
-    const SOURCE: &str = r#"
-class TestModifiableWithinConstructorInGetAccessor {
-	private correctlyModifiableWithinConstructorInGetAccessor = 7;
-
-	public constructor() {
-		const self = this;
-
-		const confusingObject = {
-			get accessor() {
-				return (self.correctlyModifiableWithinConstructorInGetAccessor += 1);
-			},
-		};
-	}
+    const SOURCE: &str = r#"type Props = {
+	a: string;
+	returnsPromise: () => Promise<void>;
+};
+async function testDestructuringAndCallingReturnsPromiseFromRest({
+	a,
+	...rest
+}: Props) {
+	rest
+		.returnsPromise()
+		.then(() => {})
+		.finally(() => {});
 }
 "#;
 
@@ -57,7 +56,7 @@ class TestModifiableWithinConstructorInGetAccessor {
 
     let mut error_ranges: Vec<TextRange> = Vec::new();
     let options = AnalyzerOptions::default().with_file_path(file_path.clone());
-    let rule_filter = RuleFilter::Rule("nursery", "useReadonlyClassProperties");
+    let rule_filter = RuleFilter::Rule("nursery", "noFloatingPromises");
 
     let dependencies = Dependencies(Box::new([("buffer".into(), "latest".into())]));
 

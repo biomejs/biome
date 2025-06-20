@@ -185,7 +185,7 @@ impl Rule for UseReadonlyClassProperties {
             rule_category!(),
             range,
             markup! {
-                "Member "<Emphasis>"{text.text()}"</Emphasis>" is never reassigned."
+                "Member '"{text.text()}"' is never reassigned."
             },
         ).note(markup! {
                 "Using "<Emphasis>"readonly"</Emphasis>" improves code safety, clarity, and helps prevent unintended mutations."
