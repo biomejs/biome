@@ -3,4 +3,4 @@
 "@biomejs/biome": minor
 ---
 
-Adds the no-alert rule from ESLint
+Added the `no-alert` rule from ESLint.
