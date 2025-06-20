@@ -333,7 +333,7 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Publish npm packages as latest
-        run: pnpm publish
+        run: pnpm run publish
 
       - name: Upload assets to the latest tag
         run: |
