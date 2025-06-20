@@ -46,9 +46,9 @@
   "author": "Biome Developers and Contributors",
   "bugs": "https://github.com/biomejs/biome/issues",
   "devDependencies": {
-    "@biomejs/wasm-bundler": "link:../wasm-bundler",
-    "@biomejs/wasm-nodejs": "link:../wasm-nodejs",
-    "@biomejs/wasm-web": "link:../wasm-web",
+    "@biomejs/wasm-bundler": "workspace:*",
+    "@biomejs/wasm-nodejs": "workspace:*",
+    "@biomejs/wasm-web": "workspace:*",
     "typescript": "5.8.3",
     "vite": "6.3.5",
     "vitest": "3.2.3"

@@ -58,28 +58,28 @@ importers:
         version: 3.2.3(@types/node@22.15.31)(happy-dom@17.6.3)(jiti@1.21.6)
     optionalDependencies:
       '@biomejs/cli-darwin-arm64':
-        specifier: 2.0.0
+        specifier: workspace:*
         version: link:../cli-darwin-arm64
       '@biomejs/cli-darwin-x64':
-        specifier: 2.0.0
+        specifier: workspace:*
         version: link:../cli-darwin-x64
       '@biomejs/cli-linux-arm64':
-        specifier: 2.0.0
+        specifier: workspace:*
         version: link:../cli-linux-arm64
       '@biomejs/cli-linux-arm64-musl':
-        specifier: 2.0.0
+        specifier: workspace:*
         version: link:../cli-linux-arm64-musl
       '@biomejs/cli-linux-x64':
-        specifier: 2.0.0
+        specifier: workspace:*
         version: link:../cli-linux-x64
       '@biomejs/cli-linux-x64-musl':
-        specifier: 2.0.0
+        specifier: workspace:*
         version: link:../cli-linux-x64-musl
       '@biomejs/cli-win32-arm64':
-        specifier: 2.0.0
+        specifier: workspace:*
         version: link:../cli-win32-arm64
       '@biomejs/cli-win32-x64':
-        specifier: 2.0.0
+        specifier: workspace:*
         version: link:../cli-win32-x64
 
   packages/@biomejs/biome:
@@ -128,13 +128,13 @@ importers:
   packages/@biomejs/js-api:
     devDependencies:
       '@biomejs/wasm-bundler':
-        specifier: link:../wasm-bundler
+        specifier: workspace:*
         version: link:../wasm-bundler
       '@biomejs/wasm-nodejs':
-        specifier: link:../wasm-nodejs
+        specifier: workspace:*
         version: link:../wasm-nodejs
       '@biomejs/wasm-web':
-        specifier: link:../wasm-web
+        specifier: workspace:*
         version: link:../wasm-web
       typescript:
         specifier: 5.8.3
