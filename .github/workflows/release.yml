@@ -336,9 +336,9 @@ jobs:
       # The WASM job updates the package.json file, because of wasm-pack, which we need to restore
       - name: Restore packages changes
         run: |
-          git restore packages/@biome/wasm-bundler/package.json
-          git restore packages/@biome/wasm-nodejs/package.json
-          git restore packages/@biome/wasm-web/package.json
+          git restore packages/@biomejs/wasm-bundler/package.json
+          git restore packages/@biomejs/wasm-nodejs/package.json
+          git restore packages/@biomejs/wasm-web/package.json
 
       - name: Publish npm packages as latest
         run: pnpm run publish
