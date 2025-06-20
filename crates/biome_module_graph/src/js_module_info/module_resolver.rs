@@ -1,6 +1,6 @@
 use std::{
     borrow::Cow,
-    collections::{BTreeMap, BTreeSet, btree_map::Entry},
+    collections::{BTreeSet, hash_map::Entry},
     ops::Deref,
     sync::Arc,
 };
@@ -60,7 +60,7 @@ pub struct ModuleResolver {
     /// Map of module IDs keyed by their resolved paths.
     ///
     /// Module IDs are used to index the [`Self::modules`] vector.
-    pub modules_by_path: BTreeMap<ResolvedPath, ModuleId>,
+    pub modules_by_path: FxHashMap<ResolvedPath, ModuleId>,
 
     /// Parsed expressions, mapped by their starting index to the ID of their
     /// type.
