@@ -342,6 +342,8 @@ jobs:
 
       - name: Publish npm packages as latest
         run: pnpm run publish
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - name: Upload assets to the latest tag
         run: |
