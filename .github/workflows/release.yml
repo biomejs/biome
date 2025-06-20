@@ -356,15 +356,17 @@ jobs:
 
       - name: Publish release for @biomejs/biome
         run: |
-          bash scripts/print-changelog.sh ${{ needs.build-binaries.outputs.version}} >| ${{ github.workspace }}/RELEASE_NOTES
+          bash scripts/print-changelog.sh ${{ needs.build-binaries.outputs.version }} >| ${{ github.workspace }}/RELEASE_NOTES
 
       - name: Create GitHub @biomejs/biome release and tag
         uses: softprops/action-gh-release@da05d552573ad5aba039eaac05058a918a7bf631 # v2.2.2
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          name: @biomejs/biome@v${{ needs.build-binaries.outputs.version }}
-          tag_name: @biomejs/biome@v${{ needs.build-binaries.outputs.version }}
+          name: |
+            @biomejs/biome@v${{ needs.build-binaries.outputs.version }}
+          tag_name: |
+            @biomejs/biome@v${{ needs.build-binaries.outputs.version }}
           draft: false
           body_path: ${{ github.workspace }}/RELEASE_NOTES
           files: |
@@ -375,15 +377,17 @@ jobs:
 
       - name: Publish release for @biomejs/js-api
         run: |
-          bash scripts/print-changelog.sh ${{ needs.build-js-api.outputs.version}} packages/@biomejs/js-api/CHANGELOG.md  >| ${{ github.workspace }}/JS_RELEASE_NOTES
+          bash scripts/print-changelog.sh ${{ needs.build-js-api.outputs.version }} packages/@biomejs/js-api/CHANGELOG.md  >| ${{ github.workspace }}/JS_RELEASE_NOTES
 
       - name: Create GitHub @biomejs/js-api release and tag
         uses: softprops/action-gh-release@da05d552573ad5aba039eaac05058a918a7bf631 # v2.2.2
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          name: @biomejs/js-api@v${{ needs.build-js-api.outputs.version }}
-          tag_name: @biomejs/js-api@v${{ needs.build-js-api.outputs.version }}
+          name: |
+            @biomejs/js-api@v${{ needs.build-js-api.outputs.version }}
+          tag_name: |
+            @biomejs/js-api@v${{ needs.build-js-api.outputs.version }}
           draft: false
           body_path: ${{ github.workspace }}/JS_RELEASE_NOTES
           fail_on_unmatched_files: true
