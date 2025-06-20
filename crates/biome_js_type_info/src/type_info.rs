@@ -309,9 +309,6 @@ pub enum TypeData {
     /// Reference to another type through the `typeof` operator.
     TypeofType(Box<TypeReference>),
 
-    /// Reference to the type of a named JavaScript value.
-    TypeofValue(Box<TypeofValue>),
-
     /// The `any` keyword.
     ///
     /// This variant may also be used if the `any` keyword is implied.
@@ -405,12 +402,6 @@ impl From<TypeofExpression> for TypeData {
     }
 }
 
-impl From<TypeofValue> for TypeData {
-    fn from(value: TypeofValue) -> Self {
-        Self::TypeofValue(Box::new(value))
-    }
-}
-
 impl TypeData {
     pub fn array_of(scope_id: ScopeId, ty: TypeReference) -> Self {
         Self::instance_of(TypeReference::from(
@@ -458,8 +449,9 @@ impl TypeData {
 
     /// Returns the type with inference up to the level supported by the given `resolver`.
     #[inline]
-    pub fn inferred(&self, resolver: &mut dyn TypeResolver) -> Self {
-        self.resolved(resolver).flattened(resolver)
+    pub fn inferred(&self, resolver: &mut dyn TypeResolver) -> Arc<Self> {
+        let resolved = self.resolved(resolver).unwrap_or_else(|| self.clone());
+        Arc::new(resolved).flattened(resolver)
     }
 
     #[inline]
@@ -1039,23 +1031,6 @@ pub struct TypeofUnaryMinusExpression {
     pub argument: TypeReference,
 }
 
-/// Reference to the type of a named JavaScript value.
-#[derive(Clone, Debug, Eq, Hash, PartialEq)]
-pub struct TypeofValue {
-    /// Identifier of the type being referenced.
-    ///
-    /// We explicitly do not allow full expressions to be used as values,
-    /// meaning our inference needs to break down expressions into parts before
-    /// deciding the values to reference. See [TypeofExpression] for that.
-    pub identifier: Text,
-
-    /// The resolved type.
-    pub ty: TypeReference,
-
-    /// ID of the scope from which the value is being referenced.
-    pub scope_id: Option<ScopeId>,
-}
-
 #[derive(Clone, Debug, Eq, Hash, PartialEq, Resolvable)]
 pub struct TypeOperatorType {
     pub operator: TypeOperator,
@@ -1130,7 +1105,7 @@ impl TypeReference {
             Self::Qualifier(qualifier) => qualifier
                 .type_parameters
                 .iter()
-                .map(|param| param.resolved(resolver))
+                .map(|param| param.resolved(resolver).unwrap_or_else(|| param.clone()))
                 .collect(),
             _ => [].into(),
         }

@@ -2,6 +2,7 @@ use std::{
     borrow::Cow,
     hash::{Hash, Hasher},
     num::NonZeroU32,
+    sync::Arc,
 };
 
 use hashbrown::{HashTable, hash_table::Entry};
@@ -26,12 +27,13 @@ use crate::{Resolvable, ResolvedTypeId, TypeData, TypeId, TypeReference, TypeRes
 /// store both to preserve their indices.
 #[derive(Debug, Default)]
 pub struct TypeStore {
-    types: Vec<TypeData>,
+    types: Vec<Arc<TypeData>>,
     table: HashTable<usize>,
 }
 
 impl TypeStore {
-    pub fn from_types(types: Vec<TypeData>) -> Self {
+    pub fn from_types(types: impl Into<Vec<Arc<TypeData>>>) -> Self {
+        let types = types.into();
         let mut table = HashTable::with_capacity(types.len());
         for (i, data) in types.iter().enumerate() {
             let hash = hash_data(data);
@@ -49,8 +51,8 @@ impl TypeStore {
         }
     }
 
-    pub fn as_slice(&self) -> &[TypeData] {
-        &self.types
+    pub fn as_references(&self) -> Vec<&TypeData> {
+        self.types.iter().map(Arc::as_ref).collect()
     }
 
     /// Deduplicates all types in the store.
@@ -131,6 +133,7 @@ impl TypeStore {
         self.table
             .shrink_to(self.types.len(), |_| unreachable!("table should be empty"));
         for (i, data) in self.types.iter_mut().enumerate() {
+            let data = Arc::get_mut(data).expect("type data must be unique");
             data.update_all_references(|reference| {
                 if let TypeReference::Resolved(resolved_id) = reference {
                     update_resolved_id(resolved_id)
@@ -151,8 +154,12 @@ impl TypeStore {
         let hash = hash_data(data);
 
         self.table
-            .find(hash, |i| self.types[*i] == *data)
+            .find(hash, |i| self.types[*i].as_ref() == data)
             .map(|index| TypeId::new(*index))
+    }
+
+    pub fn get(&self, index: usize) -> Arc<TypeData> {
+        self.types[index].clone()
     }
 
     pub fn get_by_id(&self, id: TypeId) -> &TypeData {
@@ -174,63 +181,50 @@ impl TypeStore {
     pub fn register_type(&mut self, data: Cow<TypeData>) -> TypeId {
         let entry = self.table.entry(
             hash_data(&data),
-            |i| &self.types[*i] == data.as_ref(),
+            |i| self.types[*i].as_ref() == data.as_ref(),
             |i| hash_data(&self.types[*i]),
         );
         match entry {
             Entry::Occupied(entry) => TypeId::new(*entry.get()),
             Entry::Vacant(entry) => {
                 let index = self.types.len();
-                self.types.push(data.into_owned());
+                self.types.push(Arc::new(data.into_owned()));
                 entry.insert(index);
                 TypeId::new(index)
             }
         }
     }
 
-    /// Takes the type at the given `index` and swaps it for
-    /// `TypeData::Unknown`.
+    /// Replaces the type at the given index.
     ///
-    /// The returned type is correctly removed from the store's hash table, but
-    /// the `TypeData::Unknown` that takes its place is never registered. This
-    /// is done on the assumption that an updated type will be reinserted before
-    /// any other lookups are performed. This allows us to avoid unnecessarily
-    /// update the hash table twice, but makes the API slightly unsafe to use.
+    /// The new type should be semantically equivalent to the old one, so as not
+    /// to invalidate references pointing to the type by
+    /// `TypeId`/`ResolvedTypeId`.
     ///
-    /// # Safety
-    ///
-    /// Callers must promise to reinsert the (updated) value before new lookups
-    /// are performed. They must use
-    /// [`Self::reinsert_temporarily_taken_data()`] for this.
-    pub unsafe fn take_from_index_temporarily(&mut self, index: usize) -> TypeData {
-        let data = std::mem::take(&mut self.types[index]);
-
-        let hash = hash_data(&data);
-
-        if let Ok(occupied) = self.table.find_entry(hash, |i| self.types[*i] == data) {
-            occupied.remove();
+    /// For instance, this may be useful to update a type after it has been
+    /// resolved and/or flattened.
+    pub fn replace(&mut self, index: usize, data: Arc<TypeData>) {
+        if Arc::ptr_eq(&self.types[index], &data) {
+            return; // Nothing to do.
         }
 
-        data
-    }
+        let new_hash = hash_data(&data);
+        let old_hash = hash_data(&self.types[index]);
 
-    /// Reinserts an (updated) value that was taken using
-    /// [`Self::take_from_index_temporarily()`].
-    ///
-    /// # Safety
-    ///
-    /// Callers must only call this once after calling
-    /// [`Self::take_from_index_temporarily()`] with the same index, before any
-    /// lookups are performed.
-    pub unsafe fn reinsert_temporarily_taken_data(&mut self, index: usize, data: TypeData) {
-        let hash = hash_data(&data);
         self.types[index] = data;
-        self.table
-            .insert_unique(hash, index, |i| hash_data(&self.types[*i]));
+
+        if new_hash != old_hash {
+            if let Ok(occupied) = self.table.find_entry(old_hash, |i| *i == index) {
+                occupied.remove();
+            }
+
+            self.table
+                .insert_unique(new_hash, index, |i| hash_data(&self.types[*i]));
+        }
     }
 }
 
-impl From<TypeStore> for Box<[TypeData]> {
+impl From<TypeStore> for Box<[Arc<TypeData>]> {
     fn from(store: TypeStore) -> Self {
         store.types.into()
     }
@@ -249,18 +243,23 @@ mod tests {
 
     #[test]
     fn test_deduplication() {
-        let mut store = TypeStore::from_types(vec![
-            TypeData::String,
-            TypeData::Number,
-            TypeData::String,
-            TypeData::Reference(TypeReference::Resolved(ResolvedTypeId::new(
-                TypeResolverLevel::Thin,
-                TypeId::new(2),
-            ))),
-        ]);
+        let mut store = TypeStore::from_types(
+            vec![
+                TypeData::String,
+                TypeData::Number,
+                TypeData::String,
+                TypeData::Reference(TypeReference::Resolved(ResolvedTypeId::new(
+                    TypeResolverLevel::Thin,
+                    TypeId::new(2),
+                ))),
+            ]
+            .into_iter()
+            .map(Arc::new)
+            .collect::<Vec<_>>(),
+        );
         store.deduplicate(TypeResolverLevel::Thin);
 
-        let expected = &[
+        let expected = [
             TypeData::String,
             TypeData::Number,
             TypeData::Reference(TypeReference::Resolved(ResolvedTypeId::new(
@@ -268,26 +267,31 @@ mod tests {
                 TypeId::new(0),
             ))),
         ];
-        assert_eq!(store.as_slice(), expected);
+        assert_eq!(store.as_references(), expected.iter().collect::<Vec<_>>());
 
-        let mut store = TypeStore::from_types(vec![
-            TypeData::String,
-            TypeData::Number,
-            TypeData::String,
-            TypeData::Reference(TypeReference::Resolved(ResolvedTypeId::new(
-                TypeResolverLevel::Thin,
-                TypeId::new(2),
-            ))),
-            TypeData::Reference(TypeReference::Resolved(ResolvedTypeId::new(
-                TypeResolverLevel::Thin,
-                TypeId::new(6),
-            ))),
-            TypeData::Number,
-            TypeData::Null,
-        ]);
+        let mut store = TypeStore::from_types(
+            vec![
+                TypeData::String,
+                TypeData::Number,
+                TypeData::String,
+                TypeData::Reference(TypeReference::Resolved(ResolvedTypeId::new(
+                    TypeResolverLevel::Thin,
+                    TypeId::new(2),
+                ))),
+                TypeData::Reference(TypeReference::Resolved(ResolvedTypeId::new(
+                    TypeResolverLevel::Thin,
+                    TypeId::new(6),
+                ))),
+                TypeData::Number,
+                TypeData::Null,
+            ]
+            .into_iter()
+            .map(Arc::new)
+            .collect::<Vec<_>>(),
+        );
         store.deduplicate(TypeResolverLevel::Thin);
 
-        let expected = &[
+        let expected = [
             TypeData::String,
             TypeData::Number,
             TypeData::Reference(TypeReference::Resolved(ResolvedTypeId::new(
@@ -300,6 +304,6 @@ mod tests {
             ))),
             TypeData::Null,
         ];
-        assert_eq!(store.as_slice(), expected);
+        assert_eq!(store.as_references(), expected.iter().collect::<Vec<_>>());
     }
 }

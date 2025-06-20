@@ -15,7 +15,7 @@ fn infer_type_of_identifier() {
     let expr = get_expression(&root);
     let mut resolver = GlobalsResolver::default();
     let ty = TypeData::from_any_js_expression(&mut resolver, ScopeId::GLOBAL, &expr);
-    assert_type_data_snapshot(CODE, ty, &resolver, "infer_type_of_identifier");
+    assert_type_data_snapshot(CODE, &ty, &resolver, "infer_type_of_identifier");
 }
 
 #[test]
@@ -28,7 +28,7 @@ fn infer_type_of_object_member_expression() {
     let ty = TypeData::from_any_js_expression(&mut resolver, ScopeId::GLOBAL, &expr);
     assert_type_data_snapshot(
         CODE,
-        ty,
+        &ty,
         &resolver,
         "infer_type_of_object_member_expression",
     );
@@ -42,7 +42,7 @@ fn infer_type_of_typeof_expression() {
     let expr = get_expression(&root);
     let mut resolver = GlobalsResolver::default();
     let ty = TypeData::from_any_js_expression(&mut resolver, ScopeId::GLOBAL, &expr);
-    assert_type_data_snapshot(CODE, ty, &resolver, "infer_type_of_typeof_expression");
+    assert_type_data_snapshot(CODE, &ty, &resolver, "infer_type_of_typeof_expression");
 }
 
 #[test]
@@ -57,7 +57,7 @@ fn infer_type_of_promise_returning_function() {
     let ty = TypeData::from_js_function_declaration(&mut resolver, ScopeId::GLOBAL, &decl);
     assert_type_data_snapshot(
         CODE,
-        ty,
+        &ty,
         &resolver,
         "infer_type_of_promise_returning_function",
     );
@@ -73,7 +73,7 @@ fn infer_type_of_async_function() {
     let decl = get_function_declaration(&root);
     let mut resolver = GlobalsResolver::default();
     let ty = TypeData::from_js_function_declaration(&mut resolver, ScopeId::GLOBAL, &decl);
-    assert_type_data_snapshot(CODE, ty, &resolver, "infer_type_of_async_function");
+    assert_type_data_snapshot(CODE, &ty, &resolver, "infer_type_of_async_function");
 }
 
 #[test]
@@ -121,7 +121,7 @@ fn infer_type_of_function_with_destructured_arguments() {
     let ty = TypeData::from_js_function_declaration(&mut resolver, ScopeId::GLOBAL, &decl);
     assert_type_data_snapshot(
         CODE,
-        ty,
+        &ty,
         &resolver,
         "infer_type_of_function_with_destructured_arguments",
     );

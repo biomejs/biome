@@ -1,6 +1,7 @@
 #![allow(unused)]
 
 use std::borrow::Cow;
+use std::sync::Arc;
 
 use biome_js_formatter::context::JsFormatOptions;
 use biome_js_formatter::format_node;
@@ -20,7 +21,7 @@ use biome_test_utils::dump_registered_types;
 
 pub fn assert_type_data_snapshot(
     source_code: &str,
-    ty: TypeData,
+    ty: &TypeData,
     resolver: &dyn TypeResolver,
     test_name: &str,
 ) {
@@ -121,7 +122,7 @@ impl HardcodedSymbolResolver {
         while i < self.types.len() {
             // First take the type to satisfy the borrow checker:
             let ty = std::mem::take(&mut self.types[i]);
-            self.types[i] = ty.resolved(self);
+            self.types[i] = ty.resolved(self).unwrap_or(ty);
             i += 1;
         }
     }
@@ -131,7 +132,7 @@ impl HardcodedSymbolResolver {
         while i < self.types.len() {
             // First take the type to satisfy the borrow checker:
             let ty = std::mem::take(&mut self.types[i]);
-            self.types[i] = ty.flattened(self);
+            self.types[i] = Arc::new(ty).flattened(self).as_ref().clone();
             i += 1;
         }
     }
@@ -212,8 +213,8 @@ impl TypeResolver for HardcodedSymbolResolver {
         Some(&self.globals)
     }
 
-    fn registered_types(&self) -> &[TypeData] {
-        &self.types
+    fn registered_types(&self) -> Vec<&TypeData> {
+        self.types.iter().collect()
     }
 }
 

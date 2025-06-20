@@ -1,4 +1,7 @@
-use std::collections::{BTreeMap, btree_map::Entry};
+use std::{
+    collections::{BTreeMap, btree_map::Entry},
+    sync::Arc,
+};
 
 use biome_rowan::Text;
 
@@ -21,7 +24,7 @@ pub(super) fn flattened_expression(
     expr: &TypeofExpression,
     resolver: &mut dyn TypeResolver,
     depth: usize,
-) -> Option<TypeData> {
+) -> Option<Arc<TypeData>> {
     match expr {
         TypeofExpression::Addition(_expr) => {
             // TODO
@@ -49,27 +52,27 @@ pub(super) fn flattened_expression(
                         TypeData::String => TypeData::String,
                         _ => resolved.find_promise_type(resolver)?.to_data(),
                     };
-                    Some(flattened)
+                    Some(Arc::new(flattened))
                 })
         }
         TypeofExpression::BitwiseNot(expr) => {
-            resolver
-                .resolve_and_get(&expr.argument)
-                .map(|resolved| match resolved.as_raw_data() {
+            resolver.resolve_and_get(&expr.argument).map(|resolved| {
+                Arc::new(match resolved.as_raw_data() {
                     TypeData::BigInt => TypeData::BigInt,
                     _ => TypeData::Number,
                 })
+            })
         }
         TypeofExpression::Call(expr) => match resolver.resolve_and_get(&expr.callee) {
             Some(callee) => {
-                let callee = flattened(callee.to_data(), resolver, depth);
+                let callee = flattened(Arc::new(callee.to_data()), resolver, depth);
                 flattened_function_call(expr, callee, resolver, depth).map(
                     |(is_instance, mut ty)| {
                         if is_instance {
                             ty = ty.into_instance(resolver);
                         }
 
-                        flattened(ty, resolver, depth)
+                        flattened(Arc::new(ty), resolver, depth)
                     },
                 )
             }
@@ -78,13 +81,13 @@ pub(super) fn flattened_expression(
         TypeofExpression::Destructure(expr) => {
             match resolver.resolve_and_get(&expr.ty) {
                 Some(resolved) => match (resolved.as_raw_data(), &expr.destructure_field) {
-                    (subject, DestructureField::Index(index)) => Some(
+                    (subject, DestructureField::Index(index)) => Some(Arc::new(
                         subject
                             .clone()
                             .find_element_type_at_index(resolved.resolver_id(), resolver, *index)
                             .map_or_else(TypeData::unknown, ResolvedTypeData::to_data),
-                    ),
-                    (subject, DestructureField::RestFrom(index)) => Some(
+                    )),
+                    (subject, DestructureField::RestFrom(index)) => Some(Arc::new(
                         subject
                             .clone()
                             .find_type_of_elements_from_index(
@@ -93,26 +96,26 @@ pub(super) fn flattened_expression(
                                 *index,
                             )
                             .map_or_else(TypeData::unknown, ResolvedTypeData::to_data),
-                    ),
+                    )),
                     (TypeData::InstanceOf(subject_instance), DestructureField::Name(name)) => {
                         resolver
                             .resolve_and_get(&subject_instance.ty)
                             .map(ResolvedTypeData::to_data)
-                            .map(|type_data| flattened(type_data, resolver, depth))
+                            .map(|type_data| flattened(Arc::new(type_data), resolver, depth))
                             .and_then(|subject| {
                                 let member = ResolvedTypeData::from((
                                     ResolverId::from_level(resolver.level()),
-                                    &subject,
+                                    subject.as_ref(),
                                 ))
                                 .all_members(resolver)
                                 .find(|member| {
                                     !member.is_static() && member.has_name(name.text())
                                 })?;
-                                Some(
+                                Some(Arc::new(
                                     resolver
                                         .resolve_and_get(&member.ty())
                                         .map_or_else(TypeData::unknown, ResolvedTypeData::to_data),
-                                )
+                                ))
                             })
                     }
                     (
@@ -139,23 +142,23 @@ pub(super) fn flattened_expression(
                                         }
                                         map
                                     });
-                                TypeData::object_with_members(
+                                Arc::new(TypeData::object_with_members(
                                     members
                                         .into_values()
                                         .map(ResolvedTypeMember::to_member)
                                         .collect(),
-                                )
+                                ))
                             })
                     }
                     (TypeData::Object(_), DestructureField::Name(name)) => {
                         let member = resolved
                             .all_members(resolver)
                             .find(|member| !member.is_static() && member.has_name(name.text()))?;
-                        Some(
+                        Some(Arc::new(
                             resolver
                                 .resolve_and_get(&member.ty())
                                 .map_or_else(TypeData::unknown, ResolvedTypeData::to_data),
-                        )
+                        ))
                     }
                     (TypeData::Object(_), DestructureField::RestExcept(names)) => {
                         // We need to look up the prototype chain, which may
@@ -175,12 +178,12 @@ pub(super) fn flattened_expression(
                                 }
                                 map
                             });
-                        Some(TypeData::object_with_members(
+                        Some(Arc::new(TypeData::object_with_members(
                             members
                                 .into_values()
                                 .map(ResolvedTypeMember::to_member)
                                 .collect(),
-                        ))
+                        )))
                     }
                     (subject, DestructureField::Name(name)) => Some({
                         let member_ty = subject
@@ -190,9 +193,11 @@ pub(super) fn flattened_expression(
                             })
                             .map(|member| resolved.apply_module_id_to_reference(&member.ty))?;
                         flattened(
-                            resolver
-                                .resolve_and_get(&member_ty)
-                                .map_or_else(TypeData::unknown, ResolvedTypeData::to_data),
+                            Arc::new(
+                                resolver
+                                    .resolve_and_get(&member_ty)
+                                    .map_or_else(TypeData::unknown, ResolvedTypeData::to_data),
+                            ),
                             resolver,
                             depth,
                         )
@@ -209,18 +214,18 @@ pub(super) fn flattened_expression(
                                     .to_member()
                             })
                             .collect();
-                        TypeData::object_with_members(members)
+                        Arc::new(TypeData::object_with_members(members))
                     }),
                 },
                 None => None,
             }
         }
         TypeofExpression::New(expr) => {
-            match resolver
+            let callee = resolver
                 .resolve_and_get(&expr.callee)
                 .map(ResolvedTypeData::to_data)
-                .map(|type_data| flattened(type_data, resolver, depth))
-            {
+                .map(|type_data| flattened(Arc::new(type_data), resolver, depth));
+            match callee.as_deref() {
                 Some(TypeData::Class(class)) => Some({
                     let num_args = expr.arguments.len();
                     let constructed_ty = class
@@ -241,7 +246,7 @@ pub(super) fn flattened_expression(
                             }
                         })
                         .unwrap_or_else(|| expr.callee.clone());
-                    TypeData::instance_of(constructed_ty)
+                    Arc::new(TypeData::instance_of(constructed_ty))
                 }),
                 // TODO: Handle objects with call signatures.
                 _ => None,
@@ -259,12 +264,12 @@ pub(super) fn flattened_expression(
                                 TypeData::Intersection(_) | TypeData::Union(_)
                             )
                         }) {
-                            return Some(TypeData::TypeofExpression(Box::new(
+                            return Some(Arc::new(TypeData::TypeofExpression(Box::new(
                                 TypeofExpression::StaticMember(TypeofStaticMemberExpression {
                                     object: instance_ty.into_owned(),
                                     member: expr.member.clone(),
                                 }),
-                            )));
+                            ))));
                         } else if !resolved_instance_ty.is_some_and(ResolvedTypeData::has_members) {
                             return None;
                         }
@@ -275,7 +280,8 @@ pub(super) fn flattened_expression(
                             resolver.resolve_import_namespace_member(*module_id, &expr.member)?;
                         return resolver
                             .get_by_resolved_id(resolved_id)
-                            .map(ResolvedTypeData::to_data);
+                            .map(ResolvedTypeData::to_data)
+                            .map(Arc::new);
                     }
 
                     TypeData::Tuple(_tuple) => {
@@ -287,7 +293,9 @@ pub(super) fn flattened_expression(
                         let member = array
                             .all_members(resolver)
                             .find(|member| member.has_name(&expr.member) && !member.is_static());
-                        return member.map(|member| TypeData::reference(member.ty().into_owned()));
+                        return member
+                            .map(|member| TypeData::reference(member.ty().into_owned()))
+                            .map(Arc::new);
                     }
 
                     TypeData::Union(union) => {
@@ -302,23 +310,25 @@ pub(super) fn flattened_expression(
                             .map(|variant| {
                                 // Resolve and flatten the type member for each variant.
                                 let variant = flattened(
-                                    TypeData::TypeofExpression(Box::new(
+                                    Arc::new(TypeData::TypeofExpression(Box::new(
                                         TypeofExpression::StaticMember(
                                             TypeofStaticMemberExpression {
                                                 object: variant,
                                                 member: expr.member.clone(),
                                             },
                                         ),
-                                    )),
+                                    ))),
                                     resolver,
                                     depth,
                                 );
 
-                                resolver.reference_to_owned_data(variant)
+                                resolver.reference_to_owned_data(
+                                    Arc::into_inner(variant).expect("Arc must be unique"),
+                                )
                             })
                             .collect();
 
-                        return Some(TypeData::union_of(types));
+                        return Some(Arc::new(TypeData::union_of(types)));
                     }
 
                     _ => {}
@@ -333,50 +343,52 @@ pub(super) fn flattened_expression(
                             !member.is_static()
                         }
                 });
-                member.map(|member| TypeData::reference(member.ty().into_owned()))
+                member
+                    .map(|member| TypeData::reference(member.ty().into_owned()))
+                    .map(Arc::new)
             } else {
                 None
             }
         }
-        TypeofExpression::Super(expr) => {
-            resolver
-                .resolve_and_get(&expr.parent)
-                .map(|resolved| match resolved.as_raw_data() {
-                    TypeData::Class(class) => match class.extends.as_ref() {
-                        Some(super_class) => TypeData::instance_of(
-                            resolved
-                                .apply_module_id_to_reference(super_class)
-                                .into_owned(),
-                        ),
-                        None => TypeData::unknown(),
-                    },
-                    _ => TypeData::unknown(),
-                })
-        }
+        TypeofExpression::Super(expr) => resolver
+            .resolve_and_get(&expr.parent)
+            .map(|resolved| match resolved.as_raw_data() {
+                TypeData::Class(class) => match class.extends.as_ref() {
+                    Some(super_class) => TypeData::instance_of(
+                        resolved
+                            .apply_module_id_to_reference(super_class)
+                            .into_owned(),
+                    ),
+                    None => TypeData::unknown(),
+                },
+                _ => TypeData::unknown(),
+            })
+            .map(Arc::new),
         TypeofExpression::This(expr) => resolver
             .resolve_reference(&expr.parent)
-            .map(|class_id| TypeData::instance_of(TypeReference::from(class_id))),
+            .map(|class_id| TypeData::instance_of(TypeReference::from(class_id)))
+            .map(Arc::new),
         TypeofExpression::Typeof(expr) => resolver
             .resolve_and_get(&expr.argument)
-            .map(flattened_typeof_data),
-        TypeofExpression::UnaryMinus(expr) => {
-            resolver
-                .resolve_and_get(&expr.argument)
-                .map(|resolved| match resolved.as_raw_data() {
-                    TypeData::BigInt => TypeData::BigInt,
-                    _ => TypeData::Number,
-                })
-        }
+            .map(flattened_typeof_data)
+            .map(Arc::new),
+        TypeofExpression::UnaryMinus(expr) => resolver
+            .resolve_and_get(&expr.argument)
+            .map(|resolved| match resolved.as_raw_data() {
+                TypeData::BigInt => TypeData::BigInt,
+                _ => TypeData::Number,
+            })
+            .map(Arc::new),
     }
 }
 
 fn flattened_function_call(
     expr: &TypeofCallExpression,
-    callee: TypeData,
+    callee: Arc<TypeData>,
     resolver: &mut dyn TypeResolver,
     depth: usize,
 ) -> Option<(bool, TypeData)> {
-    match callee {
+    match callee.as_ref() {
         TypeData::Function(function) => function.return_type.as_type().and_then(|return_ty| {
             let resolved_return_ty = resolver.resolve_and_get(return_ty)?;
 
@@ -412,24 +424,26 @@ fn flattened_function_call(
         TypeData::InstanceOf(instance) => resolver
             .resolve_and_get(&instance.ty)
             .map(ResolvedTypeData::to_data)
-            .map(|type_data| flattened(type_data, resolver, depth))
+            .map(|type_data| flattened(Arc::new(type_data), resolver, depth))
             .and_then(|callee| {
-                ResolvedTypeData::from((ResolverId::from_level(resolver.level()), &callee))
+                ResolvedTypeData::from((ResolverId::from_level(resolver.level()), callee.as_ref()))
                     .all_members(resolver)
                     .find(|member| member.kind().is_call_signature())
                     .map(ResolvedTypeMember::to_member)
                     .and_then(|member| resolver.resolve_and_get(&member.ty))
                     .map(ResolvedTypeData::to_data)
-                    .and_then(|callee| flattened_function_call(expr, callee, resolver, depth))
+                    .and_then(|callee| {
+                        flattened_function_call(expr, Arc::new(callee), resolver, depth)
+                    })
             }),
         TypeData::Object(_) => {
-            ResolvedTypeData::from((ResolverId::from_level(resolver.level()), &callee))
+            ResolvedTypeData::from((ResolverId::from_level(resolver.level()), callee.as_ref()))
                 .all_members(resolver)
                 .find(|member| member.kind().is_call_signature())
                 .map(ResolvedTypeMember::to_member)
                 .and_then(|member| resolver.resolve_and_get(&member.ty))
                 .map(ResolvedTypeData::to_data)
-                .and_then(|callee| flattened_function_call(expr, callee, resolver, depth))
+                .and_then(|callee| flattened_function_call(expr, Arc::new(callee), resolver, depth))
         }
         _ => None,
     }

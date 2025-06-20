@@ -113,7 +113,7 @@ impl<'a> ModuleGraphSnapshot<'a> {
                     content.push_str("```\n\n");
                 }
 
-                dump_registered_module_types(&mut content, data.types());
+                dump_registered_module_types(&mut content, &data.types());
             }
         }
 

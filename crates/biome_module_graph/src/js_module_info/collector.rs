@@ -597,38 +597,40 @@ impl JsModuleInfoCollector {
         // First do a pass in which we populate module and namespace members:
         let mut i = 0;
         while i < self.types.len() {
-            // SAFETY: We immediately reinsert after taking.
-            let ty = unsafe { self.types.take_from_index_temporarily(i) };
-            let ty = match ty {
-                TypeData::Module(module) => match self.find_binding_for_type_index(i) {
-                    Some(module_binding) => TypeData::from(Module {
-                        name: module.name,
-                        // Populate module members:
-                        members: self.find_type_members_in_scope(module_binding.scope_id),
-                    }),
-                    None => TypeData::Module(module),
-                },
-                TypeData::Namespace(namespace) => match self.find_binding_for_type_index(i) {
-                    Some(namespace_binding) => TypeData::from(Namespace {
-                        path: namespace.path,
-                        // Populate namespace members:
-                        members: self.find_type_members_in_scope(namespace_binding.scope_id),
-                    }),
-                    None => TypeData::Namespace(namespace),
-                },
-                ty => ty,
-            };
-            // SAFETY: We reinsert before anyone got a chance to do lookups.
-            unsafe { self.types.reinsert_temporarily_taken_data(i, ty) };
+            match self.types.get(i).as_ref() {
+                TypeData::Module(module) => {
+                    if let Some(module_binding) = self.find_binding_for_type_index(i) {
+                        let ty = TypeData::from(Module {
+                            name: module.name.clone(),
+                            // Populate module members:
+                            members: self.find_type_members_in_scope(module_binding.scope_id),
+                        });
+                        self.types.replace(i, Arc::new(ty));
+                    }
+                }
+                TypeData::Namespace(namespace) => {
+                    if let Some(namespace_binding) = self.find_binding_for_type_index(i) {
+                        let ty = TypeData::from(Namespace {
+                            path: namespace.path.clone(),
+                            // Populate namespace members:
+                            members: self.find_type_members_in_scope(namespace_binding.scope_id),
+                        });
+                        self.types.replace(i, Arc::new(ty));
+                    }
+                }
+                _ => {}
+            }
             i += 1;
         }
 
         // Now perform a pass for the actual resolving:
         let mut i = 0;
         while i < self.types.len() {
-            // SAFETY: We immediately reinsert after taking.
-            let ty = unsafe { self.types.take_from_index_temporarily(i) };
-            let mut ty = ty.resolved(self);
+            let ty = self.types.get(i);
+            let mut ty = match ty.resolved(self) {
+                Some(ty) => ty,
+                None => ty.as_ref().clone(),
+            };
             ty.update_all_references(|reference| match reference {
                 TypeReference::Resolved(resolved)
                     if resolved.level() == TypeResolverLevel::Import =>
@@ -652,8 +654,7 @@ impl JsModuleInfoCollector {
                 }
                 _ => {}
             });
-            // SAFETY: We reinsert before anyone got a chance to do lookups.
-            unsafe { self.types.reinsert_temporarily_taken_data(i, ty) };
+            self.types.replace(i, Arc::new(ty));
             i += 1;
         }
     }
@@ -703,12 +704,8 @@ impl JsModuleInfoCollector {
     fn flatten_all(&mut self) {
         let mut i = 0;
         while i < self.types.len() {
-            // SAFETY: We reinsert before anyone got a chance to do lookups.
-            unsafe {
-                let ty = self.types.take_from_index_temporarily(i);
-                let ty = ty.flattened(self);
-                self.types.reinsert_temporarily_taken_data(i, ty);
-            }
+            let ty = self.types.get(i).flattened(self);
+            self.types.replace(i, ty);
             i += 1;
         }
     }
@@ -975,8 +972,8 @@ impl TypeResolver for JsModuleInfoCollector {
         Some(GLOBAL_RESOLVER.as_ref())
     }
 
-    fn registered_types(&self) -> &[TypeData] {
-        self.types.as_slice()
+    fn registered_types(&self) -> Vec<&TypeData> {
+        self.types.as_references()
     }
 }
 

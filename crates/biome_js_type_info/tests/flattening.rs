@@ -39,7 +39,7 @@ typeof foo
 
     assert_type_data_snapshot(
         CODE,
-        expr_ty,
+        expr_ty.as_ref(),
         &resolver,
         "infer_flattened_type_of_typeof_expression",
     )
@@ -59,7 +59,7 @@ fn infer_flattened_type_of_promise_returning_function() {
 
     assert_type_data_snapshot(
         CODE,
-        ty,
+        ty.as_ref(),
         &resolver,
         "infer_flattened_type_of_promise_returning_function",
     )
@@ -79,7 +79,7 @@ fn infer_flattened_type_of_async_function() {
 
     assert_type_data_snapshot(
         CODE,
-        ty,
+        ty.as_ref(),
         &resolver,
         "infer_flattened_type_of_async_function",
     )
@@ -100,13 +100,14 @@ returnsPromise()"#;
     let function_ty = function_ty.inferred(&mut resolver);
 
     let expr = get_expression(&root);
-    let mut resolver = HardcodedSymbolResolver::new("returnsPromise", function_ty, resolver);
+    let mut resolver =
+        HardcodedSymbolResolver::new("returnsPromise", function_ty.as_ref().clone(), resolver);
     let expr_ty = TypeData::from_any_js_expression(&mut resolver, ScopeId::GLOBAL, &expr);
     let expr_ty = expr_ty.inferred(&mut resolver);
 
     assert_type_data_snapshot(
         CODE,
-        expr_ty,
+        expr_ty.as_ref(),
         &resolver,
         "infer_flattened_type_from_invocation_of_promise_returning_function",
     )
@@ -135,7 +136,7 @@ returnsPromise().then(() => {})"#;
 
     assert_type_data_snapshot(
         CODE,
-        expr_ty,
+        expr_ty.as_ref(),
         &resolver,
         "infer_flattened_type_from_chained_invocation_of_promise_returning_function",
     )
@@ -164,7 +165,7 @@ returnsPromise().then(() => {}).finally(() => {})"#;
 
     assert_type_data_snapshot(
         CODE,
-        expr_ty,
+        expr_ty.as_ref(),
         &resolver,
         "infer_flattened_type_from_double_chained_invocation_of_promise_returning_function",
     )
@@ -182,7 +183,7 @@ fn infer_flattened_type_from_direct_promise_instance() {
 
     assert_type_data_snapshot(
         CODE,
-        expr_ty,
+        expr_ty.as_ref(),
         &resolver,
         "infer_flattened_type_from_direct_promise_instance",
     )
@@ -202,7 +203,7 @@ fn infer_flattened_type_from_static_promise_function() {
 
     assert_type_data_snapshot(
         CODE,
-        expr_ty,
+        expr_ty.as_ref(),
         &resolver,
         "infer_flattened_type_from_static_promise_function",
     )
@@ -257,7 +258,7 @@ function bar({ foo }: Foo) {
 
     assert_type_data_snapshot(
         CODE,
-        expr_ty,
+        expr_ty.as_ref(),
         &resolver,
         "infer_flattened_type_of_destructured_interface_field",
     )

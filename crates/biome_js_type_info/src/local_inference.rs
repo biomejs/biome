@@ -32,7 +32,7 @@ use crate::{
     TypeOperatorType, TypeReference, TypeReferenceQualifier, TypeResolver,
     TypeofBitwiseNotExpression, TypeofCallExpression, TypeofDestructureExpression,
     TypeofExpression, TypeofNewExpression, TypeofStaticMemberExpression,
-    TypeofThisOrSuperExpression, TypeofTypeofExpression, TypeofUnaryMinusExpression, TypeofValue,
+    TypeofThisOrSuperExpression, TypeofTypeofExpression, TypeofUnaryMinusExpression,
 };
 
 impl TypeData {
@@ -1805,11 +1805,9 @@ impl TypeMember {
                 .map(|name| Self {
                     kind: TypeMemberKind::Named(name.clone()),
                     is_static: false,
-                    ty: resolver.reference_to_owned_data(TypeData::from(TypeofValue {
-                        identifier: name,
-                        ty: TypeReference::Unknown,
-                        scope_id: None,
-                    })),
+                    ty: resolver.reference_to_owned_data(TypeData::reference(
+                        TypeReferenceQualifier::from_name(scope_id, name),
+                    )),
                 }),
             AnyJsObjectMember::JsSpread(_) => {
                 // TODO: Handle spread operator

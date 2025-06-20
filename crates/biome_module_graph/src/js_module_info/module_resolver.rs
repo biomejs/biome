@@ -68,23 +68,18 @@ pub struct ModuleResolver {
 
     /// Types registered within this resolver.
     types: TypeStore,
-
-    /// Maps from `TypeId` indices in module 0 to indices in our own `types`
-    /// store.
-    type_id_map: Vec<TypeId>,
 }
 
 impl ModuleResolver {
     pub fn for_module(module_info: JsModuleInfo, module_graph: Arc<ModuleGraph>) -> Self {
-        let num_initial_types = module_info.types.len();
+        let types = TypeStore::from_types(module_info.types.to_vec());
 
         let mut resolver = Self {
             module_graph,
             modules: vec![module_info],
             modules_by_path: Default::default(),
             expressions: Default::default(),
-            types: TypeStore::with_capacity(num_initial_types),
-            type_id_map: Default::default(),
+            types,
         };
 
         resolver.run_inference();
@@ -197,17 +192,15 @@ impl ModuleResolver {
     }
 
     fn resolve_all(&mut self) {
-        let module = self.modules[0].clone();
-        self.type_id_map = module
-            .types
-            .iter()
-            .map(|ty| {
-                let ty = ty.resolved(self);
-                self.types.register_type(Cow::Owned(ty))
-            })
-            .collect();
+        let mut i = 0;
+        while i < self.types.len() {
+            if let Some(ty) = self.types.get(i).resolved(self) {
+                self.types.replace(i, Arc::new(ty))
+            }
+            i += 1;
+        }
 
-        for (range, resolved_id) in &module.expressions {
+        for (range, resolved_id) in &self.modules[0].expressions {
             self.expressions
                 .insert(*range, self.mapped_resolved_id(*resolved_id));
         }
@@ -216,12 +209,8 @@ impl ModuleResolver {
     fn flatten_all(&mut self) {
         let mut i = 0;
         while i < self.types.len() {
-            // SAFETY: We reinsert before anyone got a chance to do lookups.
-            unsafe {
-                let ty = self.types.take_from_index_temporarily(i);
-                let ty = ty.flattened(self);
-                self.types.reinsert_temporarily_taken_data(i, ty);
-            }
+            let ty = self.types.get(i).flattened(self);
+            self.types.replace(i, ty);
             i += 1;
         }
     }
@@ -323,7 +312,7 @@ impl TypeResolver for ModuleResolver {
                 let module_id = id.module_id();
                 let module = &self.modules[module_id.index()];
                 if let Some(ty) = module.types.get(id.index()) {
-                    Some(ResolvedTypeData::from((id, ty)))
+                    Some(ResolvedTypeData::from((id, ty.as_ref())))
                 } else {
                     debug_assert!(false, "Invalid type reference: {id:?}");
                     None
@@ -422,10 +411,7 @@ impl TypeResolver for ModuleResolver {
     /// be mapped to the resolver's own types instead.
     fn mapped_resolved_id(&self, resolved_id: ResolvedTypeId) -> ResolvedTypeId {
         if resolved_id.resolver_id() == MODULE_0_ID {
-            ResolvedTypeId::new(
-                TypeResolverLevel::Full,
-                self.type_id_map[resolved_id.id().index()],
-            )
+            ResolvedTypeId::new(TypeResolverLevel::Full, resolved_id.id())
         } else {
             resolved_id
         }
@@ -435,8 +421,8 @@ impl TypeResolver for ModuleResolver {
         Some(GLOBAL_RESOLVER.as_ref())
     }
 
-    fn registered_types(&self) -> &[TypeData] {
-        self.types.as_slice()
+    fn registered_types(&self) -> Vec<&TypeData> {
+        self.types.as_references()
     }
 }
 

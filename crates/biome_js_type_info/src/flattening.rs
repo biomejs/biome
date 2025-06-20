@@ -1,3 +1,5 @@
+use std::sync::Arc;
+
 use crate::{TypeData, TypeInstance, TypeReference, TypeResolver};
 
 mod expressions;
@@ -47,81 +49,86 @@ impl TypeData {
     /// ```no_test
     /// TypeData::Literal(Literal::Number(1)))
     /// ```
-    pub fn flattened(self, resolver: &mut dyn TypeResolver) -> Self {
+    pub fn flattened(self: Arc<Self>, resolver: &mut dyn TypeResolver) -> Arc<Self> {
         flattened(self, resolver, 0)
     }
 }
 
-fn flattened(mut ty: TypeData, resolver: &mut dyn TypeResolver, depth: usize) -> TypeData {
+fn flattened(
+    mut ty: Arc<TypeData>,
+    resolver: &mut dyn TypeResolver,
+    depth: usize,
+) -> Arc<TypeData> {
     const MAX_FLATTEN_DEPTH: usize = 10; // Arbitrary depth, may require tweaking.
 
     for depth in depth + 1..=MAX_FLATTEN_DEPTH {
-        match &ty {
+        match ty.as_ref() {
             TypeData::MergedReference(merged) => {
                 match (&merged.ty, &merged.value_ty, &merged.namespace_ty) {
                     (Some(ty1), Some(ty2), Some(ty3)) if ty1 == ty2 && ty1 == ty3 => {
-                        ty = TypeData::Reference(ty1.clone());
+                        ty = Arc::new(TypeData::Reference(ty1.clone()));
                     }
                     (Some(ty1), Some(ty2), None)
                     | (Some(ty1), None, Some(ty2))
                     | (None, Some(ty1), Some(ty2))
                         if ty1 == ty2 =>
                     {
-                        ty = TypeData::Reference(ty1.clone());
+                        ty = Arc::new(TypeData::Reference(ty1.clone()));
                     }
                     _ => return ty,
                 }
             }
             TypeData::InstanceOf(instance_of) => match &instance_of.ty {
-                TypeReference::Unknown => return TypeData::unknown(),
+                TypeReference::Unknown => return Arc::new(TypeData::unknown()),
                 reference => match resolver.resolve_and_get(reference) {
                     Some(resolved) => match resolved.as_raw_data() {
                         TypeData::InstanceOf(resolved_instance) => {
-                            return resolved.apply_module_id_to_data(TypeData::instance_of(
-                                TypeInstance {
+                            return Arc::new(resolved.apply_module_id_to_data(
+                                TypeData::instance_of(TypeInstance {
                                     ty: resolved_instance.ty.clone(),
                                     type_parameters: TypeReference::merge_parameters(
                                         &resolved_instance.type_parameters,
                                         &instance_of.type_parameters,
                                     ),
-                                },
+                                }),
                             ));
                         }
                         TypeData::Reference(reference) => {
                             return match reference {
-                                TypeReference::Unknown => TypeData::unknown(),
-                                _ => resolved.apply_module_id_to_data(TypeData::instance_of(
-                                    TypeInstance {
+                                TypeReference::Unknown => Arc::new(TypeData::unknown()),
+                                _ => Arc::new(resolved.apply_module_id_to_data(
+                                    TypeData::instance_of(TypeInstance {
                                         ty: reference.clone(),
                                         type_parameters: instance_of.type_parameters.clone(),
-                                    },
+                                    }),
                                 )),
                             };
                         }
                         TypeData::Global
                         | TypeData::Function(_)
                         | TypeData::Literal(_)
-                        | TypeData::Object(_) => ty = resolved.to_data(),
+                        | TypeData::Object(_) => ty = Arc::new(resolved.to_data()),
                         _ => return ty,
                     },
                     None => return ty,
                 },
             },
             TypeData::Intersection(intersection) => {
-                ty = flattened_intersection(intersection, resolver);
+                ty = Arc::new(flattened_intersection(intersection, resolver));
             }
             TypeData::Reference(reference) => match reference {
-                TypeReference::Unknown => return TypeData::unknown(),
+                TypeReference::Unknown => return Arc::new(TypeData::unknown()),
                 _ => match resolver.resolve_and_get(reference) {
                     Some(reference) => match reference.as_raw_data() {
                         TypeData::InstanceOf(instance_of) => {
-                            ty = reference
-                                .apply_module_id_to_data(TypeData::InstanceOf(instance_of.clone()));
+                            ty = Arc::new(reference.apply_module_id_to_data(TypeData::InstanceOf(
+                                instance_of.clone(),
+                            )));
                         }
                         TypeData::Reference(target) => {
-                            ty = TypeData::Reference(
+                            ty = Arc::new(TypeData::Reference(
                                 reference.apply_module_id_to_reference(target).into_owned(),
-                            );
+                            ));
                         }
                         _ => return ty,
                     },
@@ -136,13 +143,7 @@ fn flattened(mut ty: TypeData, resolver: &mut dyn TypeResolver, depth: usize) ->
             },
             TypeData::TypeofType(reference) => {
                 match resolver.resolve_reference(reference.as_ref()) {
-                    Some(resolved) => ty = TypeData::reference(resolved),
-                    None => return ty,
-                }
-            }
-            TypeData::TypeofValue(value) if value.ty.is_known() => {
-                match resolver.resolve_reference(&value.ty) {
-                    Some(resolved) => ty = TypeData::reference(resolved),
+                    Some(resolved) => ty = Arc::new(TypeData::reference(resolved)),
                     None => return ty,
                 }
             }
@@ -151,5 +152,5 @@ fn flattened(mut ty: TypeData, resolver: &mut dyn TypeResolver, depth: usize) ->
     }
 
     debug_assert!(false, "max flattening depth reached");
-    TypeData::unknown()
+    Arc::new(TypeData::unknown())
 }

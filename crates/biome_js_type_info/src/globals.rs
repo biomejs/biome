@@ -327,6 +327,7 @@ impl Default for GlobalsResolver {
             }),
         ];
 
+        let types: Vec<_> = types.into_iter().map(Arc::new).collect();
         Self {
             types: TypeStore::from_types(types),
         }
@@ -342,11 +343,8 @@ impl GlobalsResolver {
     pub fn resolve_all(&mut self) {
         let mut i = NUM_PREDEFINED_TYPES;
         while i < self.types.len() {
-            // SAFETY: We immediately reinsert after taking.
-            unsafe {
-                let ty = self.types.take_from_index_temporarily(i);
-                let ty = ty.resolved(self);
-                self.types.reinsert_temporarily_taken_data(i, ty);
+            if let Some(ty) = self.types.get(i).resolved(self) {
+                self.types.replace(i, Arc::new(ty))
             }
             i += 1;
         }
@@ -355,12 +353,8 @@ impl GlobalsResolver {
     fn flatten_all(&mut self) {
         let mut i = NUM_PREDEFINED_TYPES;
         while i < self.types.len() {
-            // SAFETY: We immediately reinsert after taking.
-            unsafe {
-                let ty = self.types.take_from_index_temporarily(i);
-                let ty = ty.flattened(self);
-                self.types.reinsert_temporarily_taken_data(i, ty);
-            }
+            let ty = self.types.get(i).flattened(self);
+            self.types.replace(i, ty);
             i += 1;
         }
     }
@@ -422,7 +416,7 @@ impl TypeResolver for GlobalsResolver {
         Cow::Owned(TypeData::from_any_js_expression(self, scope_id, expr))
     }
 
-    fn registered_types(&self) -> &[TypeData] {
-        &self.types.as_slice()[NUM_PREDEFINED_TYPES..]
+    fn registered_types(&self) -> Vec<&TypeData> {
+        self.types.as_references()[NUM_PREDEFINED_TYPES..].to_vec()
     }
 }
