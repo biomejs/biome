@@ -7,9 +7,10 @@ use std::{
 
 use biome_js_syntax::AnyJsExpression;
 use biome_js_type_info::{
-    GLOBAL_RESOLVER, GLOBAL_UNKNOWN_ID, ImportSymbol, ModuleId, Resolvable, ResolvedTypeData,
-    ResolvedTypeId, ResolverId, ScopeId, Type, TypeData, TypeId, TypeImportQualifier,
-    TypeReference, TypeReferenceQualifier, TypeResolver, TypeResolverLevel, TypeStore,
+    GLOBAL_RESOLVER, GLOBAL_UNKNOWN_ID, ImportSymbol, MAX_FLATTEN_DEPTH, ModuleId, Resolvable,
+    ResolvedTypeData, ResolvedTypeId, ResolverId, ScopeId, Type, TypeData, TypeId,
+    TypeImportQualifier, TypeReference, TypeReferenceQualifier, TypeResolver, TypeResolverLevel,
+    TypeStore,
 };
 use biome_resolver::ResolvedPath;
 use biome_rowan::{AstNode, RawSyntaxKind, Text, TextRange, TokenText};
@@ -214,11 +215,21 @@ impl ModuleResolver {
     }
 
     fn flatten_all(&mut self) {
-        let mut i = 0;
-        while i < self.types.len() {
-            let ty = self.types.get(i).flattened(self);
-            self.types.replace(i, ty);
-            i += 1;
+        for _ in 0..MAX_FLATTEN_DEPTH {
+            let mut did_flatten = false;
+
+            let mut i = 0;
+            while i < self.types.len() {
+                if let Some(ty) = self.types.get(i).flattened(self) {
+                    self.types.replace(i, Arc::new(ty));
+                    did_flatten = true;
+                }
+                i += 1;
+            }
+
+            if !did_flatten {
+                break;
+            }
         }
     }
 

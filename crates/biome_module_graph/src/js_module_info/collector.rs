@@ -12,10 +12,10 @@ use biome_js_syntax::{
     TsTypeParameterName, inner_string_text,
 };
 use biome_js_type_info::{
-    BindingId, FunctionParameter, GLOBAL_RESOLVER, GLOBAL_UNKNOWN_ID, GenericTypeParameter, Module,
-    Namespace, Resolvable, ResolvedTypeData, ResolvedTypeId, ScopeId, TypeData, TypeId,
-    TypeImportQualifier, TypeMember, TypeMemberKind, TypeReference, TypeReferenceQualifier,
-    TypeResolver, TypeResolverLevel, TypeStore,
+    BindingId, FunctionParameter, GLOBAL_RESOLVER, GLOBAL_UNKNOWN_ID, GenericTypeParameter,
+    MAX_FLATTEN_DEPTH, Module, Namespace, Resolvable, ResolvedTypeData, ResolvedTypeId, ScopeId,
+    TypeData, TypeId, TypeImportQualifier, TypeMember, TypeMemberKind, TypeReference,
+    TypeReferenceQualifier, TypeResolver, TypeResolverLevel, TypeStore,
 };
 use biome_jsdoc_comment::JsdocComment;
 use biome_rowan::{AstNode, Text, TextRange, TextSize, TokenText};
@@ -702,11 +702,21 @@ impl JsModuleInfoCollector {
     }
 
     fn flatten_all(&mut self) {
-        let mut i = 0;
-        while i < self.types.len() {
-            let ty = self.types.get(i).flattened(self);
-            self.types.replace(i, ty);
-            i += 1;
+        for _ in 0..MAX_FLATTEN_DEPTH {
+            let mut did_flatten = false;
+
+            let mut i = 0;
+            while i < self.types.len() {
+                if let Some(ty) = self.types.get(i).flattened(self) {
+                    self.types.replace(i, Arc::new(ty));
+                    did_flatten = true;
+                }
+                i += 1;
+            }
+
+            if !did_flatten {
+                break;
+            }
         }
     }
 

@@ -14,7 +14,7 @@ use crate::{
     Class, Function, FunctionParameter, GenericTypeParameter, Literal, Resolvable,
     ResolvedTypeData, ResolvedTypeId, ReturnType, ScopeId, TypeData, TypeId, TypeMember,
     TypeMemberKind, TypeReference, TypeReferenceQualifier, TypeResolver, TypeResolverLevel,
-    TypeStore,
+    TypeStore, flattening::MAX_FLATTEN_DEPTH,
 };
 
 const GLOBAL_LEVEL: TypeResolverLevel = TypeResolverLevel::Global;
@@ -351,11 +351,21 @@ impl GlobalsResolver {
     }
 
     fn flatten_all(&mut self) {
-        let mut i = NUM_PREDEFINED_TYPES;
-        while i < self.types.len() {
-            let ty = self.types.get(i).flattened(self);
-            self.types.replace(i, ty);
-            i += 1;
+        for _ in 0..MAX_FLATTEN_DEPTH {
+            let mut did_flatten = false;
+
+            let mut i = NUM_PREDEFINED_TYPES;
+            while i < self.types.len() {
+                if let Some(ty) = self.types.get(i).flattened(self) {
+                    self.types.replace(i, Arc::new(ty));
+                    did_flatten = true;
+                }
+                i += 1;
+            }
+
+            if !did_flatten {
+                break;
+            }
         }
     }
 }

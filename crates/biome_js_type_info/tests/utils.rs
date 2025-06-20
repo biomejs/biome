@@ -132,7 +132,7 @@ impl HardcodedSymbolResolver {
         while i < self.types.len() {
             // First take the type to satisfy the borrow checker:
             let ty = std::mem::take(&mut self.types[i]);
-            self.types[i] = Arc::new(ty).flattened(self).as_ref().clone();
+            self.types[i] = ty.flattened(self).unwrap_or(ty);
             i += 1;
         }
     }

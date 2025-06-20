@@ -458,9 +458,12 @@ impl TypeData {
 
     /// Returns the type with inference up to the level supported by the given `resolver`.
     #[inline]
-    pub fn inferred(&self, resolver: &mut dyn TypeResolver) -> Arc<Self> {
-        let resolved = self.resolved(resolver).unwrap_or_else(|| self.clone());
-        Arc::new(resolved).flattened(resolver)
+    pub fn inferred(&self, resolver: &mut dyn TypeResolver) -> Self {
+        let inferred = match self.resolved(resolver) {
+            Some(ty) => ty.flattened(resolver),
+            None => self.flattened(resolver),
+        };
+        inferred.unwrap_or_else(|| self.clone())
     }
 
     #[inline]

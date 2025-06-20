@@ -52,7 +52,7 @@ BindingId(5) => JsBindingData {
 
 BindingId(6) => JsBindingData {
   Name: promise,
-  Type: Module(0) TypeId(9),
+  Type: Module(0) TypeId(8),
   Declaration kind: Value
 }
 ```
@@ -60,7 +60,7 @@ BindingId(6) => JsBindingData {
 ## Registered types
 
 ```
-Module TypeId(0) => instanceof Module(0) TypeId(10)
+Module TypeId(0) => instanceof Module(0) TypeId(9)
 
 Module TypeId(1) => unknown
 
@@ -75,26 +75,24 @@ Module TypeId(5) => sync Function {
     params: []
     type_args: []
   }
-  returns: Module(0) TypeId(9)
+  returns: Module(0) TypeId(8)
 }
 
-Module TypeId(6) => Module(0) TypeId(11)
+Module TypeId(6) => Module(0) TypeId(10)
 
 Module TypeId(7) => Module(0) TypeId(5)
 
-Module TypeId(8) => Module(0) TypeId(5)
+Module TypeId(8) => instanceof Promise
 
-Module TypeId(9) => instanceof Promise
+Module TypeId(9) => T extends Module(0) TypeId(1)
 
-Module TypeId(10) => T extends Module(0) TypeId(1)
-
-Module TypeId(11) => sync Function "useCallback" {
+Module TypeId(10) => sync Function "useCallback" {
   accepts: {
     params: [
       required callback: Module(0) TypeId(0) (bindings: callback:Module(0) TypeId(0))
       required deps: Module(0) TypeId(1) (bindings: deps:Module(0) TypeId(1))
     ]
-    type_args: [Module(0) TypeId(10)]
+    type_args: [Module(0) TypeId(9)]
   }
   returns: Module(0) TypeId(0)
 }
@@ -105,7 +103,7 @@ Module TypeId(11) => sync Function "useCallback" {
 ## Registered types
 
 ```
-Full TypeId(0) => instanceof Module(0) TypeId(10)
+Full TypeId(0) => instanceof Module(0) TypeId(9)
 
 Full TypeId(1) => unknown
 
@@ -120,10 +118,10 @@ Full TypeId(5) => sync Function {
     params: []
     type_args: []
   }
-  returns: Module(0) TypeId(9)
+  returns: Module(0) TypeId(8)
 }
 
-Full TypeId(6) => Module(0) TypeId(11)
+Full TypeId(6) => Module(0) TypeId(10)
 
 Full TypeId(7) => Module(0) TypeId(5)
 
@@ -137,7 +135,7 @@ Full TypeId(10) => sync Function "useCallback" {
       required callback: Module(0) TypeId(0) (bindings: callback:Module(0) TypeId(0))
       required deps: Module(0) TypeId(1) (bindings: deps:Module(0) TypeId(1))
     ]
-    type_args: [Module(0) TypeId(10)]
+    type_args: [Module(0) TypeId(9)]
   }
   returns: Module(0) TypeId(0)
 }
