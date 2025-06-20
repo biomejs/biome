@@ -344,7 +344,9 @@ jobs:
         run: node packages/@biomejs/biome/scripts/copy-binaries.mjs
 
       - name: Publish npm packages as latest
-        run: pnpm run publish
+        uses: changesets/action@e0145edc7d9d8679003495b11f87bd8ef63c0cba # v1.5.3
+        with:
+          publish: pnpm run publish
         env:
           # To publish on npmjs
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
