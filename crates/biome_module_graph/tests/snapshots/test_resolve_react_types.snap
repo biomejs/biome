@@ -13225,7 +13225,11 @@ Module TypeId(177) => Constructor {
             is_rest: false,
         },
     ],
-    return_type: None,
+    return_type: Some(
+        Resolved(
+            Module(0) TypeId(176),
+        ),
+    ),
 }
 
 Module TypeId(178) => Module(0) TypeId(175) | Module(0) TypeId(177)
@@ -13284,7 +13288,11 @@ Module TypeId(189) => Constructor {
             is_rest: false,
         },
     ],
-    return_type: None,
+    return_type: Some(
+        Resolved(
+            Module(0) TypeId(176),
+        ),
+    ),
 }
 
 Module TypeId(190) => Object {
@@ -13927,7 +13935,7 @@ Module TypeId(341) => TypeOperatorType {
 Module TypeId(342) => K extends Module(0) TypeId(341)
 
 Module TypeId(343) => class "PureComponent" {
-  extends: none
+  extends: Module(0) TypeId(94)
   implements: []
   type_args: [
     Module(0) TypeId(172),
@@ -14066,7 +14074,11 @@ Module TypeId(361) => Constructor {
             is_rest: false,
         },
     ],
-    return_type: None,
+    return_type: Some(
+        Resolved(
+            Module(0) TypeId(176),
+        ),
+    ),
 }
 
 Module TypeId(362) => Module(0) TypeId(107) | Module(0) TypeId(48)
@@ -14115,7 +14127,11 @@ Module TypeId(367) => Constructor {
             is_rest: false,
         },
     ],
-    return_type: None,
+    return_type: Some(
+        Resolved(
+            Module(0) TypeId(239),
+        ),
+    ),
 }
 
 Module TypeId(368) => sync Function "getDefaultProps" {
@@ -14167,7 +14183,11 @@ Module TypeId(373) => Constructor {
             is_rest: false,
         },
     ],
-    return_type: None,
+    return_type: Some(
+        Resolved(
+            Module(0) TypeId(372),
+        ),
+    ),
 }
 
 Module TypeId(374) => T extends Module(0) TypeId(176)
