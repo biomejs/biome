@@ -333,7 +333,6 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-
       # The WASM job updates the package.json file, because of wasm-pack, which we need to restore
       - name: Restore packages changes
         run: |
@@ -345,44 +344,20 @@ jobs:
         run: node packages/@biomejs/biome/scripts/copy-binaries.mjs
 
       - name: Publish npm packages as latest
-        id: publish
-        uses: changesets/action@e0145edc7d9d8679003495b11f87bd8ef63c0cba # v1.5.3
-        with:
-          publish: pnpm run publish
+        run: for package in packages/@biomejs/*; do if [ $package != "packages/@biomejs/js-api" ]; then npm publish $package --tag latest --access public --provenance; fi; done
         env:
-          # To publish on npmjs
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-          # To push the tags
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Check if CLI was published
-        if: steps.publish.outputs.published == 'true'
-        id: cli-published
-        run: |
-          PUBLISHED_PACKAGES='${{ steps.publish.outputs.publishedPackages }}'
-          if echo "$PUBLISHED_PACKAGES" | jq -e '.[] | select(.name == "@biomejs/biome")' > /dev/null; then
-            echo "published=true" >> $GITHUB_OUTPUT
-          else
-            echo "published=false" >> $GITHUB_OUTPUT
-          fi
-
-      - name: Check if JS API was published
-        if: steps.publish.outputs.published == 'true'
-        id: js-api-published
-        run: |
-          PUBLISHED_PACKAGES='${{ steps.publish.outputs.publishedPackages }}'
-          if echo "$PUBLISHED_PACKAGES" | jq -e '.[] | select(.name == "@biomejs/js-api")' > /dev/null; then
-            echo "published=true" >> $GITHUB_OUTPUT
-          else
-            echo "published=false" >> $GITHUB_OUTPUT
-          fi
+      - name: Publish npm package as latest
+        run: npm publish packages/@biomejs/js-api --tag latest --access public --provenance
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - name: Publish release for @biomejs/biome
-        if: ${{ steps.cli-published.outputs.published == 'true' }}
         run: |
           bash scripts/print-changelog.sh ${{ needs.version.outputs.cli-version }} >| ${{ github.workspace }}/RELEASE_NOTES
 
-      - name: Create GitHub release and tag
+      - name: Create GitHub @biomejs/biome release and tag
         uses: softprops/action-gh-release@da05d552573ad5aba039eaac05058a918a7bf631 # v2.2.2
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -398,17 +373,16 @@ jobs:
 
 
       - name: Publish release for @biomejs/js-api
-        if: ${{ steps.js-api-published.outputs.published == 'true' }}
         run: |
           bash scripts/print-changelog.sh ${{ needs.version.outputs.js-api-version }} packages/@biomejs/js-api/CHANGELOG.md  >| ${{ github.workspace }}/JS_RELEASE_NOTES
 
-      - name: Create GitHub release and tag
+      - name: Create GitHub @biomejs/js-api release and tag
         uses: softprops/action-gh-release@da05d552573ad5aba039eaac05058a918a7bf631 # v2.2.2
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          name: @biomejs/biome@v${{ needs.version.outputs.js-api-version }}
-          tag_name: @biomejs/biome@v${{ needs.version.outputs.js-api-version }}
+          name: @biomejs/js-api@v${{ needs.version.outputs.js-api-version }}
+          tag_name: @biomejs/js-api@v${{ needs.version.outputs.js-api-version }}
           draft: false
           body_path: ${{ github.workspace }}/JS_RELEASE_NOTES
           fail_on_unmatched_files: true
