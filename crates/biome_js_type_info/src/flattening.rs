@@ -32,7 +32,7 @@ impl TypeData {
     /// TypeData::TypeofValue {
     ///     identifier: "c",
     ///     ty: TypeReference::Unknown
-    /// })
+    /// }
     /// ```
     ///
     /// Once we've performed thin type resolution, this becomes:
@@ -41,7 +41,7 @@ impl TypeData {
     /// TypeData::TypeofValue {
     ///     identifier: "c",
     ///     ty: TypeReference::Resolved(<type ID of literal>)
-    /// })
+    /// }
     /// ```
     ///
     /// With flattening, we can reduce this to:
@@ -143,6 +143,12 @@ fn flattened(
             },
             TypeData::TypeofType(reference) => {
                 match resolver.resolve_reference(reference.as_ref()) {
+                    Some(resolved) => ty = Arc::new(TypeData::reference(resolved)),
+                    None => return ty,
+                }
+            }
+            TypeData::TypeofValue(value) if value.ty.is_known() => {
+                match resolver.resolve_reference(&value.ty) {
                     Some(resolved) => ty = Arc::new(TypeData::reference(resolved)),
                     None => return ty,
                 }

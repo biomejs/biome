@@ -40,19 +40,19 @@ Imports {
 ```
 BindingId(4) => JsBindingData {
   Name: makePromise,
-  Type: Module(0) TypeId(6),
+  Type: Module(0) TypeId(5),
   Declaration kind: Value
 }
 
 BindingId(5) => JsBindingData {
   Name: makePromiseCb,
-  Type: Module(0) TypeId(6),
+  Type: Module(0) TypeId(5),
   Declaration kind: Value
 }
 
 BindingId(6) => JsBindingData {
   Name: promise,
-  Type: Module(0) TypeId(5),
+  Type: Module(0) TypeId(9),
   Declaration kind: Value
 }
 ```
@@ -70,21 +70,21 @@ Module TypeId(3) => Promise.resolve
 
 Module TypeId(4) => value: 1
 
-Module TypeId(5) => instanceof Promise
-
-Module TypeId(6) => sync Function {
+Module TypeId(5) => sync Function {
   accepts: {
     params: []
     type_args: []
   }
-  returns: Module(0) TypeId(5)
+  returns: Module(0) TypeId(9)
 }
 
-Module TypeId(7) => Module(0) TypeId(11)
+Module TypeId(6) => Module(0) TypeId(11)
 
-Module TypeId(8) => Module(0) TypeId(6)
+Module TypeId(7) => Module(0) TypeId(5)
 
-Module TypeId(9) => Module(0) TypeId(6)
+Module TypeId(8) => Module(0) TypeId(5)
+
+Module TypeId(9) => instanceof Promise
 
 Module TypeId(10) => T extends Module(0) TypeId(1)
 
@@ -115,19 +115,19 @@ Full TypeId(3) => Promise.resolve
 
 Full TypeId(4) => value: 1
 
-Full TypeId(5) => instanceof Promise
-
-Full TypeId(6) => sync Function {
+Full TypeId(5) => sync Function {
   accepts: {
     params: []
     type_args: []
   }
-  returns: Module(0) TypeId(5)
+  returns: Module(0) TypeId(9)
 }
 
-Full TypeId(7) => Module(0) TypeId(11)
+Full TypeId(6) => Module(0) TypeId(11)
 
-Full TypeId(8) => Module(0) TypeId(6)
+Full TypeId(7) => Module(0) TypeId(5)
+
+Full TypeId(8) => instanceof Promise
 
 Full TypeId(9) => T extends Module(0) TypeId(1)
 

@@ -20,8 +20,6 @@ fn infer_resolved_type_of_promise_returning_function() {
     let ty = TypeData::from_js_function_declaration(&mut resolver, ScopeId::GLOBAL, &decl);
     resolver.resolve_all();
 
-    let ty = ty.resolved(&mut resolver).expect("must be resolved");
-
     assert_type_data_snapshot(
         CODE,
         &ty,
@@ -41,8 +39,6 @@ fn infer_resolved_type_of_async_function() {
     let mut resolver = GlobalsResolver::default();
     let ty = TypeData::from_js_function_declaration(&mut resolver, ScopeId::GLOBAL, &decl);
     resolver.resolve_all();
-
-    let ty = ty.resolved(&mut resolver).expect("must be resolved");
 
     assert_type_data_snapshot(
         CODE,
@@ -108,8 +104,6 @@ returnsPromise().then(() => {})"#;
     );
     resolver.resolve_all();
 
-    let expr_ty = expr_ty.resolved(&mut resolver).expect("must be resolved");
-
     assert_type_data_snapshot(
         CODE,
         &expr_ty,
@@ -140,8 +134,6 @@ returnsPromise().then(() => {}).finally(() => {})"#;
         &expr.expression().unwrap(),
     );
     resolver.resolve_all();
-
-    let expr_ty = expr_ty.resolved(&mut resolver).expect("must be resolved");
 
     assert_type_data_snapshot(
         CODE,
@@ -189,8 +181,6 @@ fn infer_resolved_type_from_static_promise_function() {
     );
     resolver.resolve_all();
 
-    let expr_ty = expr_ty.resolved(&mut resolver).expect("must be resolved");
-
     assert_type_data_snapshot(
         CODE,
         &expr_ty,
@@ -212,16 +202,6 @@ fn infer_resolved_type_of_destructured_array_element() {
         &decl,
     );
     resolver.resolve_all();
-
-    let bindings: Vec<_> = bindings
-        .into_iter()
-        .map(|(name, binding)| {
-            (
-                name,
-                binding.resolved(&mut resolver).expect("must be resolved"),
-            )
-        })
-        .collect();
 
     assert_typed_bindings_snapshot(
         CODE,

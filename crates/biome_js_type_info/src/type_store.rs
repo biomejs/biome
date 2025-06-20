@@ -150,7 +150,7 @@ impl TypeStore {
     }
 
     /// Returns the `TypeId` of the given `data`, if it is registered.
-    pub fn find_type(&self, data: &TypeData) -> Option<TypeId> {
+    pub fn find(&self, data: &TypeData) -> Option<TypeId> {
         let hash = hash_data(data);
 
         self.table
@@ -174,11 +174,32 @@ impl TypeStore {
         self.types.len()
     }
 
-    /// Registers the given `data` if it is not registered yet.
+    /// Inserts the given `data` if it is not registered yet.
     ///
     /// Returns the `TypeId` of the newly registered data, or the `TypeId` of
     /// an already registered equivalent type.
-    pub fn register_type(&mut self, data: Cow<TypeData>) -> TypeId {
+    pub fn insert_arc(&mut self, data: &Arc<TypeData>) -> TypeId {
+        let entry = self.table.entry(
+            hash_data(data.as_ref()),
+            |i| self.types[*i].as_ref() == data.as_ref(),
+            |i| hash_data(&self.types[*i]),
+        );
+        match entry {
+            Entry::Occupied(entry) => TypeId::new(*entry.get()),
+            Entry::Vacant(entry) => {
+                let index = self.types.len();
+                self.types.push(data.clone());
+                entry.insert(index);
+                TypeId::new(index)
+            }
+        }
+    }
+
+    /// Inserts the given `data` if it is not registered yet.
+    ///
+    /// Returns the `TypeId` of the newly registered data, or the `TypeId` of
+    /// an already registered equivalent type.
+    pub fn insert_cow(&mut self, data: Cow<TypeData>) -> TypeId {
         let entry = self.table.entry(
             hash_data(&data),
             |i| self.types[*i].as_ref() == data.as_ref(),

@@ -366,7 +366,7 @@ impl TypeResolver for GlobalsResolver {
     }
 
     fn find_type(&self, type_data: &TypeData) -> Option<TypeId> {
-        self.types.find_type(type_data)
+        self.types.find(type_data)
     }
 
     fn get_by_id(&self, id: TypeId) -> &TypeData {
@@ -378,7 +378,7 @@ impl TypeResolver for GlobalsResolver {
     }
 
     fn register_type(&mut self, type_data: Cow<TypeData>) -> TypeId {
-        self.types.register_type(type_data)
+        self.types.insert_cow(type_data)
     }
 
     fn resolve_reference(&self, ty: &TypeReference) -> Option<ResolvedTypeId> {

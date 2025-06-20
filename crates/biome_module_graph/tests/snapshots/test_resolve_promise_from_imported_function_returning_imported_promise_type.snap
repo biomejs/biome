@@ -119,7 +119,7 @@ Imports {
 ```
 BindingId(1) => JsBindingData {
   Name: returnPromiseResult,
-  Type: Module(0) TypeId(6),
+  Type: Module(0) TypeId(7),
   Declaration kind: HoistedValue
 }
 ```
@@ -145,27 +145,27 @@ Module TypeId(4) => sync Function {
     ]
     type_args: []
   }
-  returns: Module(0) TypeId(7)
+  returns: Module(0) TypeId(6)
 }
 
 Module TypeId(5) => instanceof Module(0) TypeId(0)
 
-Module TypeId(6) => sync Function "returnPromiseResult" {
+Module TypeId(6) => instanceof Import Symbol: PromisedResult from "/src/promisedResult.ts"
+
+Module TypeId(7) => sync Function "returnPromiseResult" {
   accepts: {
     params: []
     type_args: []
   }
-  returns: Module(0) TypeId(7)
+  returns: Module(0) TypeId(6)
 }
-
-Module TypeId(7) => instanceof Import Symbol: PromisedResult from "/src/promisedResult.ts"
 
 Module TypeId(8) => sync Function "returnPromiseResult" {
   accepts: {
     params: []
     type_args: []
   }
-  returns: Module(0) TypeId(7)
+  returns: Module(0) TypeId(6)
 }
 ```
 
@@ -178,7 +178,7 @@ Full TypeId(0) => namespace for ModuleId(1)
 
 Full TypeId(1) => namespace for ModuleId(2)
 
-Full TypeId(2) => Module(1) TypeId(6)
+Full TypeId(2) => Module(1) TypeId(7)
 
 Full TypeId(3) => instanceof Promise<Module(2) TypeId(3)>
 ```

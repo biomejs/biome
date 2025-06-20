@@ -6,7 +6,7 @@ use biome_rowan::Text;
 
 use crate::{
     NUM_PREDEFINED_TYPES, ScopeId, TypeData, TypeId, TypeImportQualifier, TypeInstance, TypeMember,
-    TypeMemberKind, TypeReference, TypeReferenceQualifier, Union,
+    TypeMemberKind, TypeReference, TypeReferenceQualifier, TypeofValue, Union,
     globals::{GLOBAL_UNDEFINED_ID, global_type_name},
 };
 
@@ -739,6 +739,28 @@ impl Resolvable for TypeReference {
 
     fn update_all_references(&mut self, updater: impl Copy + Fn(&mut Self)) {
         updater(self)
+    }
+}
+
+impl Resolvable for TypeofValue {
+    fn resolved(&self, resolver: &mut dyn TypeResolver) -> Option<Self> {
+        let ty = if self.ty == TypeReference::Unknown {
+            let resolved_id = resolver
+                .resolve_type_of(&self.identifier, self.scope_id.unwrap_or(ScopeId::GLOBAL))?;
+            TypeReference::Resolved(resolved_id)
+        } else {
+            self.ty.resolved(resolver)?
+        };
+
+        Some(Self {
+            identifier: self.identifier.clone(),
+            ty,
+            scope_id: self.scope_id,
+        })
+    }
+
+    fn update_all_references(&mut self, updater: impl Copy + Fn(&mut TypeReference)) {
+        updater(&mut self.ty)
     }
 }
 

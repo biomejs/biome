@@ -68,18 +68,23 @@ pub struct ModuleResolver {
 
     /// Types registered within this resolver.
     types: TypeStore,
+
+    /// Maps from `TypeId` indices in module 0 to indices in our own `types`
+    /// store.
+    type_id_map: Vec<TypeId>,
 }
 
 impl ModuleResolver {
     pub fn for_module(module_info: JsModuleInfo, module_graph: Arc<ModuleGraph>) -> Self {
-        let types = TypeStore::from_types(module_info.types.to_vec());
+        let num_initial_types = module_info.types.len();
 
         let mut resolver = Self {
             module_graph,
             modules: vec![module_info],
             modules_by_path: Default::default(),
             expressions: Default::default(),
-            types,
+            types: TypeStore::with_capacity(num_initial_types),
+            type_id_map: Default::default(),
         };
 
         resolver.run_inference();
@@ -169,7 +174,7 @@ impl ModuleResolver {
                 let module_id = ModuleId::new(self.modules.len());
                 self.modules.push(module_info);
                 self.types
-                    .register_type(Cow::Owned(TypeData::ImportNamespace(module_id)));
+                    .insert_cow(Cow::Owned(TypeData::ImportNamespace(module_id)));
                 Some(*entry.insert(module_id))
             }
         }
@@ -192,15 +197,17 @@ impl ModuleResolver {
     }
 
     fn resolve_all(&mut self) {
-        let mut i = 0;
-        while i < self.types.len() {
-            if let Some(ty) = self.types.get(i).resolved(self) {
-                self.types.replace(i, Arc::new(ty))
-            }
-            i += 1;
-        }
+        let module = self.modules[0].clone();
+        self.type_id_map = module
+            .types
+            .iter()
+            .map(|ty| match ty.resolved(self) {
+                Some(ty) => self.types.insert_cow(Cow::Owned(ty)),
+                None => self.types.insert_arc(ty),
+            })
+            .collect();
 
-        for (range, resolved_id) in &self.modules[0].expressions {
+        for (range, resolved_id) in &module.expressions {
             self.expressions
                 .insert(*range, self.mapped_resolved_id(*resolved_id));
         }
@@ -298,7 +305,7 @@ impl TypeResolver for ModuleResolver {
     }
 
     fn find_type(&self, type_data: &TypeData) -> Option<TypeId> {
-        self.types.find_type(type_data)
+        self.types.find(type_data)
     }
 
     fn get_by_id(&self, id: TypeId) -> &TypeData {
@@ -326,7 +333,7 @@ impl TypeResolver for ModuleResolver {
     }
 
     fn register_type(&mut self, type_data: Cow<TypeData>) -> TypeId {
-        self.types.register_type(type_data)
+        self.types.insert_cow(type_data)
     }
 
     fn resolve_reference(&self, ty: &TypeReference) -> Option<ResolvedTypeId> {
@@ -411,7 +418,10 @@ impl TypeResolver for ModuleResolver {
     /// be mapped to the resolver's own types instead.
     fn mapped_resolved_id(&self, resolved_id: ResolvedTypeId) -> ResolvedTypeId {
         if resolved_id.resolver_id() == MODULE_0_ID {
-            ResolvedTypeId::new(TypeResolverLevel::Full, resolved_id.id())
+            ResolvedTypeId::new(
+                TypeResolverLevel::Full,
+                self.type_id_map[resolved_id.id().index()],
+            )
         } else {
             resolved_id
         }

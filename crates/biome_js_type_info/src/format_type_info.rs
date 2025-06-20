@@ -126,6 +126,9 @@ impl Format<FormatTypeContext> for TypeData {
                     [&format_args![text("typeof"), space(), reference.as_ref()]]
                 )
             }
+            Self::TypeofValue(ty) => {
+                write!(f, [&format_args![text("typeof"), space(), &ty.identifier]])
+            }
             Self::AnyKeyword => write!(f, [text("any")]),
             Self::NeverKeyword => write!(f, [text("never")]),
             Self::ObjectKeyword => write!(f, [text("object")]),

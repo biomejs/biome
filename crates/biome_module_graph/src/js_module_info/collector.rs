@@ -849,7 +849,7 @@ impl TypeResolver for JsModuleInfoCollector {
     }
 
     fn find_type(&self, type_data: &TypeData) -> Option<TypeId> {
-        self.types.find_type(type_data)
+        self.types.find(type_data)
     }
 
     fn get_by_id(&self, id: TypeId) -> &TypeData {
@@ -879,9 +879,9 @@ impl TypeResolver for JsModuleInfoCollector {
             Some(id) => {
                 let reference =
                     TypeData::reference(ResolvedTypeId::new(TypeResolverLevel::Global, id));
-                self.types.register_type(Cow::Owned(reference))
+                self.types.insert_cow(Cow::Owned(reference))
             }
-            None => self.types.register_type(type_data),
+            None => self.types.insert_cow(type_data),
         }
     }
 
