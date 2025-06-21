@@ -1,11 +1,20 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 134
 expression: invalid.ts
 ---
 # Input
 ```ts
 class D {
 	f(a: D): D | undefined { return; }
+}
+
+function withOneUnused({ a, b }): unknown {
+	return b
+}
+
+function withTwoUnused({ a, b, c }): unknown {
+	return b
 }
 
 ```
@@ -26,11 +35,62 @@ invalid.ts:2:4 lint/correctness/noUnusedFunctionParameters  FIXABLE  ━━━�
   
   i Unsafe fix: If this is intentional, prepend a with an underscore.
   
-    1 1 │   class D {
-    2   │ - → f(a:·D):·D·|·undefined·{·return;·}
-      2 │ + → f(_a:·D):·D·|·undefined·{·return;·}
-    3 3 │   }
-    4 4 │   
+     1  1 │   class D {
+     2    │ - → f(a:·D):·D·|·undefined·{·return;·}
+        2 │ + → f(_a:·D):·D·|·undefined·{·return;·}
+     3  3 │   }
+     4  4 │   
+  
+
+```
+
+```
+invalid.ts:5:26 lint/correctness/noUnusedFunctionParameters ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This parameter is unused.
+  
+    3 │ }
+    4 │ 
+  > 5 │ function withOneUnused({ a, b }): unknown {
+      │                          ^
+    6 │ 	return b
+    7 │ }
+  
+  i Unused parameters might be the result of an incomplete refactoring.
+  
+
+```
+
+```
+invalid.ts:9:26 lint/correctness/noUnusedFunctionParameters ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This parameter is unused.
+  
+     7 │ }
+     8 │ 
+   > 9 │ function withTwoUnused({ a, b, c }): unknown {
+       │                          ^
+    10 │ 	return b
+    11 │ }
+  
+  i Unused parameters might be the result of an incomplete refactoring.
+  
+
+```
+
+```
+invalid.ts:9:32 lint/correctness/noUnusedFunctionParameters ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This parameter is unused.
+  
+     7 │ }
+     8 │ 
+   > 9 │ function withTwoUnused({ a, b, c }): unknown {
+       │                                ^
+    10 │ 	return b
+    11 │ }
+  
+  i Unused parameters might be the result of an incomplete refactoring.
   
 
 ```
