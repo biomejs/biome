@@ -1567,6 +1567,10 @@ export interface Nursery {
 	 */
 	noGlobalDirnameFilename?: RuleFixConfiguration_for_Null;
 	/**
+	 * Disallow shorthand type conversions.
+	 */
+	noImplicitCoercion?: RuleFixConfiguration_for_Null;
+	/**
 	 * Prevent import cycles.
 	 */
 	noImportCycles?: RuleConfiguration_for_Null;
@@ -3543,6 +3547,7 @@ export type Category =
 	| "lint/nursery/noDuplicateAtImportRules"
 	| "lint/nursery/noFloatingPromises"
 	| "lint/nursery/noGlobalDirnameFilename"
+	| "lint/nursery/noImplicitCoercion"
 	| "lint/nursery/noImportCycles"
 	| "lint/nursery/noImportantInKeyframe"
 	| "lint/nursery/noImportantStyles"
