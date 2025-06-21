@@ -178,7 +178,7 @@ impl Actions {
 #[serde(rename_all = "camelCase", default, deny_unknown_fields)]
 #[doc = r" A list of rules that belong to this group"]
 pub struct Source {
-    #[doc = r" It enables the recommended rules for this group"]
+    #[doc = r" Enables the recommended rules for this group"]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub recommended: Option<bool>,
     #[doc = "Provides a code action to sort the imports and exports in the file using a built-in or custom order."]
@@ -189,7 +189,7 @@ pub struct Source {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub use_sorted_attributes:
         Option<RuleAssistConfiguration<biome_js_analyze::options::UseSortedAttributes>>,
-    #[doc = "Sorts the keys of a JSON object in natural order"]
+    #[doc = "Sort the keys of a JSON object in natural order."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub use_sorted_keys:
         Option<RuleAssistConfiguration<biome_json_analyze::options::UseSortedKeys>>,
