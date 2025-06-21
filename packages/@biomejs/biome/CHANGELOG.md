@@ -1,5 +1,11 @@
 # @biomejs/biome
 
+## 2.0.4
+
+### Patch Changes
+
+- [#6450](https://github.com/biomejs/biome/pull/6450) [`7472d9e`](https://github.com/biomejs/biome/commit/7472d9e07fd6e8afab385276678f3d39c7497bab) Thanks [@ematipico](https://github.com/ematipico)! - Fixed an issue where the binary wasn't correctly mapped.
+
 ## 2.0.3
 
 ### Patch Changes
