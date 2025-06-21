@@ -1,5 +1,29 @@
 # @biomejs/biome
 
+## 2.0.3
+
+### Patch Changes
+
+- [#6439](https://github.com/biomejs/biome/pull/6439) [`7e4da4e`](https://github.com/biomejs/biome/commit/7e4da4edb811f9598e446c77fd26bc3802b6d3dd) Thanks [@ematipico](https://github.com/ematipico)! - Fixed an issue where the correct rights aren't added to the binary during publishing
+
+- [#6297](https://github.com/biomejs/biome/pull/6297) [`cc4b8c9`](https://github.com/biomejs/biome/commit/cc4b8c90017f9c04eab393abc60b3f94a35e3cfa) Thanks [@vladimir-ivanov](https://github.com/vladimir-ivanov)! - Added a new lint `useReadonlyClassProperties` rule.
+  This rule is a port of ESLint's [prefer-readonly](https://typescript-eslint.io/rules/prefer-readonly/) rule.
+
+  Example:
+
+  ```ts
+  class Example {
+    // All properties below can be marked as readonly
+    public constantValue = 42;
+    protected initializedInConstructor: string;
+    private privateField = true;
+
+    constructor(initializedInConstructor: string) {
+      this.initializedInConstructor = initializedInConstructor;
+    }
+  }
+  ```
+
 ## 2.0.2
 
 ### Patch Changes
