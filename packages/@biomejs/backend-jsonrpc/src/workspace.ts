@@ -3283,7 +3283,7 @@ export interface Convention {
 	selector: Selector;
 }
 export type GroupMatcher = ImportMatcher | SourceMatcher;
-export type StableHookResult = boolean | number[];
+export type StableHookResult = boolean | number[] | string[];
 export interface CustomRestrictedImportOptions {
 	/**
 	 * Names of the exported members that allowed to be not be used.
