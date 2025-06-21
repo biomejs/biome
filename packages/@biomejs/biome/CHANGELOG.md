@@ -1,5 +1,13 @@
 # @biomejs/biome
 
+## 2.0.5
+
+### Patch Changes
+
+- [#6461](https://github.com/biomejs/biome/pull/6461) [`38862e6`](https://github.com/biomejs/biome/commit/38862e645c07935f2daf52799dce38656d589d40) Thanks [@ematipico](https://github.com/ematipico)! - Fixed [#6419](https://github.com/biomejs/biome/issues/6419), a regression where stdin mode would create a temporary new file instead of using the one provided by the user. This was an intended regression.
+
+  Now Biome will use the file path passed via `--std-file-path`, and apply the configuration that matches it.
+
 ## 2.0.4
 
 ### Patch Changes
