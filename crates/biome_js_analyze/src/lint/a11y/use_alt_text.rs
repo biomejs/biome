@@ -99,14 +99,14 @@ impl Rule for UseAltText {
                             if !opening_element.has_accessible_child() {
                                 return Some((
                                     ValidatedElement::Object,
-                                    element.syntax().text_range_with_trivia(),
+                                    element.syntax().text_trimmed_range(),
                                 ));
                             }
                         }
                         AnyJsxElement::JsxSelfClosingElement(_) => {
                             return Some((
                                 ValidatedElement::Object,
-                                element.syntax().text_range_with_trivia(),
+                                element.syntax().text_trimmed_range(),
                             ));
                         }
                     }
@@ -114,17 +114,14 @@ impl Rule for UseAltText {
             }
             "img" => {
                 if !has_alt && !has_aria_label && !has_aria_labelledby && !aria_hidden {
-                    return Some((
-                        ValidatedElement::Img,
-                        element.syntax().text_range_with_trivia(),
-                    ));
+                    return Some((ValidatedElement::Img, element.syntax().text_trimmed_range()));
                 }
             }
             "area" => {
                 if !has_alt && !has_aria_label && !has_aria_labelledby && !aria_hidden {
                     return Some((
                         ValidatedElement::Area,
-                        element.syntax().text_range_with_trivia(),
+                        element.syntax().text_trimmed_range(),
                     ));
                 }
             }
@@ -137,7 +134,7 @@ impl Rule for UseAltText {
                 {
                     return Some((
                         ValidatedElement::Input,
-                        element.syntax().text_range_with_trivia(),
+                        element.syntax().text_trimmed_range(),
                     ));
                 }
             }
