@@ -102,7 +102,7 @@ Module TypeId(1) => sync Function "foo" {
 }
 ```
 
-# Scoped Type Resolver
+# Module Resolver
 
 ## Registered types
 

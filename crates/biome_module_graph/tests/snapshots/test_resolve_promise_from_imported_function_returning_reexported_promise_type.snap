@@ -195,7 +195,7 @@ Module TypeId(8) => sync Function "returnPromiseResult" {
 }
 ```
 
-# Scoped Type Resolver
+# Module Resolver
 
 ## Registered types
 

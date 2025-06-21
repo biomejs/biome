@@ -331,7 +331,6 @@ fn test_export_default_function_declaration() {
     module_graph.update_graph_for_js_paths(&fs, &ProjectLayout::default(), &added_paths, &[]);
 
     let snapshot = ModuleGraphSnapshot::new(&module_graph, &fs);
-
     snapshot.assert_snapshot("test_export_default_function_declaration");
 }
 
@@ -360,7 +359,6 @@ fn test_export_const_type_declaration_with_namespace() {
     module_graph.update_graph_for_js_paths(&fs, &ProjectLayout::default(), &added_paths, &[]);
 
     let snapshot = ModuleGraphSnapshot::new(&module_graph, &fs);
-
     snapshot.assert_snapshot("test_export_const_type_declaration_with_namespace");
 }
 
@@ -480,10 +478,6 @@ fn test_resolve_exports() {
         }))
     );
 
-    let snapshot = ModuleGraphSnapshot::new(&module_graph, &fs);
-
-    snapshot.assert_snapshot("test_resolve_exports");
-
     assert_eq!(
         data.blanket_reexports.as_ref(),
         &[JsReexport {
@@ -513,6 +507,9 @@ fn test_resolve_exports() {
             ))
         }))
     );
+
+    let snapshot = ModuleGraphSnapshot::new(&module_graph, &fs);
+    snapshot.assert_snapshot("test_resolve_exports");
 }
 
 #[test]
@@ -560,7 +557,6 @@ fn test_resolve_export_types() {
     module_graph.update_graph_for_js_paths(&fs, &ProjectLayout::default(), &added_paths, &[]);
 
     let snapshot = ModuleGraphSnapshot::new(&module_graph, &fs);
-
     snapshot.assert_snapshot("test_resolve_export_types");
 }
 
@@ -797,7 +793,6 @@ export { A, B };
     module_graph.update_graph_for_js_paths(&fs, &ProjectLayout::default(), &added_paths, &[]);
 
     let snapshot = ModuleGraphSnapshot::new(&module_graph, &fs);
-
     snapshot.assert_snapshot("test_resolve_merged_types");
 }
 
@@ -890,7 +885,6 @@ export const codes: {
     module_graph.update_graph_for_js_paths(&fs, &ProjectLayout::default(), &added_paths, &[]);
 
     let snapshot = ModuleGraphSnapshot::new(&module_graph, &fs);
-
     snapshot.assert_snapshot("test_resolve_recursive_looking_country_info");
 }
 
@@ -1070,7 +1064,6 @@ export = vfile
     module_graph.update_graph_for_js_paths(&fs, &ProjectLayout::default(), &added_paths, &[]);
 
     let snapshot = ModuleGraphSnapshot::new(&module_graph, &fs);
-
     snapshot.assert_snapshot("test_resolve_recursive_looking_vfile");
 }
 
@@ -1129,10 +1122,6 @@ fn test_resolve_react_types() {
         .expect("promise variable not found");
     let promise_ty = resolver.resolved_type_for_id(promise_id);
     assert!(promise_ty.is_promise_instance());
-
-    let snapshot =
-        ModuleGraphSnapshot::new(module_graph.as_ref(), &fs).with_resolver(resolver.as_ref());
-    snapshot.assert_snapshot("test_resolve_react_types");
 }
 
 #[test]
@@ -1288,7 +1277,6 @@ fn test_resolve_export_type_referencing_imported_type() {
     module_graph.update_graph_for_js_paths(&fs, &ProjectLayout::default(), &added_paths, &[]);
 
     let snapshot = ModuleGraphSnapshot::new(&module_graph, &fs);
-
     snapshot.assert_snapshot("test_resolve_export_type_referencing_imported_type");
 }
 

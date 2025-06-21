@@ -98,7 +98,7 @@ Module TypeId(10) => sync Function "useCallback" {
 }
 ```
 
-# Scoped Type Resolver
+# Module Resolver
 
 ## Registered types
 

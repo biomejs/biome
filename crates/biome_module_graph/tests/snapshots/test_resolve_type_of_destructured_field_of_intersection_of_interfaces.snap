@@ -126,7 +126,7 @@ Module TypeId(23) => interface "PublicConfiguration" {
 Module TypeId(24) => instanceof Promise<Module(0) TypeId(17)>
 ```
 
-# Scoped Type Resolver
+# Module Resolver
 
 ## Registered types
 
