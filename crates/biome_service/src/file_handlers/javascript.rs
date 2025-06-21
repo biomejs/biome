@@ -45,7 +45,7 @@ use biome_js_formatter::context::trailing_commas::TrailingCommas;
 use biome_js_formatter::context::{ArrowParentheses, JsFormatOptions, QuoteProperties, Semicolons};
 use biome_js_formatter::format_node;
 use biome_js_parser::JsParserOptions;
-use biome_js_semantic::{SemanticModelOptions, semantic_model};
+use biome_js_semantic::{SemanticFlavor, SemanticModelOptions, semantic_model};
 use biome_js_syntax::{
     AnyJsRoot, JsClassDeclaration, JsClassExpression, JsFileSource, JsFunctionDeclaration,
     JsLanguage, JsSyntaxNode, JsVariableDeclarator, LanguageVariant, TextRange, TextSize,
@@ -733,9 +733,13 @@ fn debug_registered_types(_path: &BiomePath, parse: AnyParse) -> Result<String, 
     Ok(result)
 }
 
-fn debug_semantic_model(_path: &BiomePath, parse: AnyParse) -> Result<String, WorkspaceError> {
+fn debug_semantic_model(path: &BiomePath, parse: AnyParse) -> Result<String, WorkspaceError> {
     let tree: AnyJsRoot = parse.tree();
-    let model = semantic_model(&tree, SemanticModelOptions::default());
+    let mut options = SemanticModelOptions::default();
+    if path.ends_with(".svelte") {
+        options.flavor = SemanticFlavor::Svelte;
+    }
+    let model = semantic_model(&tree, options);
     Ok(model.to_string())
 }
 
@@ -1094,13 +1098,17 @@ pub(crate) fn format_on_type(
 }
 
 fn rename(
-    _rome_path: &BiomePath,
+    path: &BiomePath,
     parse: AnyParse,
     symbol_at: TextSize,
     new_name: String,
 ) -> Result<RenameResult, WorkspaceError> {
     let root = parse.tree();
-    let model = semantic_model(&root, SemanticModelOptions::default());
+    let mut options = SemanticModelOptions::default();
+    if path.ends_with(".svelte") {
+        options.flavor = SemanticFlavor::Svelte;
+    }
+    let model = semantic_model(&root, options);
 
     if let Some(node) = parse
         .syntax()
