@@ -360,9 +360,9 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           name: |
-            @biomejs/biome@v${{ needs.build-binaries.outputs.version }}
+            @biomejs/biome@${{ needs.build-binaries.outputs.version }}
           tag_name: |
-            @biomejs/biome@v${{ needs.build-binaries.outputs.version }}
+            @biomejs/biome@${{ needs.build-binaries.outputs.version }}
           draft: false
           body_path: ${{ github.workspace }}/RELEASE_NOTES
           files: |
@@ -412,9 +412,9 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           name: |
-            @biomejs/js-api@v${{ needs.build-js-api.outputs.version }}
+            @biomejs/js-api@${{ needs.build-js-api.outputs.version }}
           tag_name: |
-            @biomejs/js-api@v${{ needs.build-js-api.outputs.version }}
+            @biomejs/js-api@${{ needs.build-js-api.outputs.version }}
           draft: false
           body_path: ${{ github.workspace }}/JS_RELEASE_NOTES
           fail_on_unmatched_files: true
