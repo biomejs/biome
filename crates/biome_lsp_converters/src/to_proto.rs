@@ -1,7 +1,7 @@
 use crate::PositionEncoding;
-use crate::line_index::LineIndex;
 use anyhow::{Context, Result};
-use biome_rowan::{TextRange, TextSize};
+use biome_line_index::LineIndex;
+use biome_text_size::{TextRange, TextSize};
 use tower_lsp_server::lsp_types::{Position, Range};
 
 /// The function is used to convert TextSize to a LSP position.
