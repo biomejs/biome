@@ -71,14 +71,14 @@ where
             let format_comment = FormatRefWithRule::new(comment, Context::CommentRule::default());
             write!(f, [format_comment])?;
 
-            match dbg!(comment.kind()) {
+            match comment.kind() {
                 CommentKind::Block | CommentKind::InlineBlock => {
                     match comment.lines_after() {
                         0 => {
                             let should_nestle =
                                 leading_comments_iter.peek().is_some_and(|next_comment| {
                                     should_nestle_adjacent_doc_comments(comment, next_comment)
-                                }) || comment.piece().text().starts_with("<!--"); // HACK: we don't want to do this weird behavior to HTML comments.
+                                });
 
                             write!(f, [maybe_space(!should_nestle)])?;
                         }
@@ -140,7 +140,7 @@ where
 
             let should_nestle = previous_comment.is_some_and(|previous_comment| {
                 should_nestle_adjacent_doc_comments(previous_comment, comment)
-            }) || comment.piece().text().starts_with("<!--"); // HACK: we don't want to do this weird behavior to HTML comments.
+            });
 
             // This allows comments at the end of nested structures:
             // {
