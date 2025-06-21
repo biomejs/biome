@@ -45,6 +45,12 @@ impl GritTargetLanguageImpl for JsTargetLanguage {
             "assignment_expression" => JS_ASSIGNMENT_EXPRESSION,
             "call_expression" => JS_CALL_EXPRESSION,
             "new_expression" => JS_NEW_EXPRESSION,
+            // Import-related nodes
+            "import_statement" => JS_IMPORT,
+            "import_clause" => JS_IMPORT_DEFAULT_CLAUSE, // Default to most common clause type
+            "named_imports" => JS_IMPORT_NAMED_CLAUSE,
+            "namespace_import" => JS_IMPORT_NAMESPACE_CLAUSE,
+            "import_specifier" => JS_NAMED_IMPORT_SPECIFIER,
             // TODO: Many more of these. We should probably find a way to
             // generate these impls from TS `grammar.js` files, combined with
             // our `js.ungram`.
@@ -69,6 +75,15 @@ impl GritTargetLanguageImpl for JsTargetLanguage {
             JS_ASSIGNMENT_EXPRESSION => "assignment_expression",
             JS_CALL_EXPRESSION => "call_expression",
             JS_NEW_EXPRESSION => "new_expression",
+            // Import-related nodes
+            JS_IMPORT => "import_statement",
+            JS_IMPORT_DEFAULT_CLAUSE => "import_clause",
+            JS_IMPORT_NAMED_CLAUSE => "named_imports",
+            JS_IMPORT_NAMESPACE_CLAUSE => "namespace_import",
+            JS_IMPORT_COMBINED_CLAUSE => "import_clause",
+            JS_IMPORT_BARE_CLAUSE => "import_clause",
+            JS_NAMED_IMPORT_SPECIFIER => "import_specifier",
+            JS_SHORTHAND_NAMED_IMPORT_SPECIFIER => "import_specifier",
             // TODO: Many more of these. We should probably find a way to
             // generate these impls from TS `grammar.js` files, combined with
             // our `js.ungram`.
@@ -91,6 +106,15 @@ impl GritTargetLanguageImpl for JsTargetLanguage {
             JS_ASSIGNMENT_EXPRESSION => &[],
             JS_CALL_EXPRESSION => &[("function", 0), ("type_arguments", 2), ("arguments", 3)],
             JS_NEW_EXPRESSION => &[],
+            // Import-related slots based on generated AST structure
+            JS_IMPORT => &[("import_clause", 1)],
+            JS_IMPORT_DEFAULT_CLAUSE => &[("default_specifier", 1), ("source", 3)],
+            JS_IMPORT_NAMED_CLAUSE => &[("named_specifiers", 1), ("source", 3)],
+            JS_IMPORT_NAMESPACE_CLAUSE => &[("namespace_specifier", 1), ("source", 3)],
+            JS_IMPORT_COMBINED_CLAUSE => &[("default_specifier", 0), ("specifier", 2), ("source", 4)],
+            JS_IMPORT_BARE_CLAUSE => &[("source", 0)],
+            JS_NAMED_IMPORT_SPECIFIER => &[("name", 1), ("local_name", 3)],
+            JS_SHORTHAND_NAMED_IMPORT_SPECIFIER => &[("local_name", 1)],
             // TODO: Many more of these. We should probably find a way to
             // generate these impls from TS `grammar.js` files, combined with
             // our `js.ungram`.

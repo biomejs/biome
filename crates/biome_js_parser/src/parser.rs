@@ -76,6 +76,7 @@ impl<'source> JsParser<'source> {
     /// Re-lexes the current token in the specified context. Returns the kind
     /// of the re-lexed token (can be the same as before if the context doesn't make a difference for the current token)
     pub fn re_lex(&mut self, context: JsReLexContext) -> JsSyntaxKind {
+        dbg!("23333");
         self.source_mut().re_lex(context)
     }
 

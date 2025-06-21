@@ -1,0 +1,3 @@
+language js
+
+import $imports from "foo" 

@@ -62,7 +62,7 @@ mod predicate_return_compiler;
 mod regex_compiler;
 mod rewrite_compiler;
 mod sequential_compiler;
-mod snippet_compiler;
+pub(crate) mod snippet_compiler;
 mod some_compiler;
 mod step_compiler;
 mod subtract_compiler;
