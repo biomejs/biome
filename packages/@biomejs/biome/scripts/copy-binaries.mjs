@@ -33,6 +33,9 @@ function copyBinaryToNativePackage(platform, arch) {
 			homepage,
 			os: [os],
 			cpu: [arch],
+			bin: {
+				bin: "bin/biome"
+			},
 			libc:
 				os === "linux"
 					? packageName.endsWith("musl")
