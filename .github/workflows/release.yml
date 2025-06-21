@@ -360,7 +360,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           name: |
-            @biomejs/biome@${{ needs.build-binaries.outputs.version }}
+            Biome CLI v${{ needs.build-binaries.outputs.version }}
           tag_name: |
             @biomejs/biome@${{ needs.build-binaries.outputs.version }}
           draft: false
@@ -412,10 +412,11 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           name: |
-            @biomejs/js-api@${{ needs.build-js-api.outputs.version }}
+            JavaScript APIs v${{ needs.build-js-api.outputs.version }}
           tag_name: |
             @biomejs/js-api@${{ needs.build-js-api.outputs.version }}
           draft: false
           body_path: ${{ github.workspace }}/JS_RELEASE_NOTES
           fail_on_unmatched_files: true
           generate_release_notes: true
+          make_latest: false # Keep the CLI release as latest
