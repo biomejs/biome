@@ -216,7 +216,7 @@ impl ModuleResolver {
             let mut i = 0;
             while i < self.types.len() {
                 if let Some(ty) = self.types.get(i).flattened(self) {
-                    self.types.replace(i, Arc::new(ty));
+                    self.types.replace(i, ty);
                     did_flatten = true;
                 }
                 i += 1;

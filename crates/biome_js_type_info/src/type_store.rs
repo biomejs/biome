@@ -85,7 +85,9 @@ impl TypeStore {
             .enumerate()
             .map(|(i, data)| {
                 let hash = hash_data(data);
-                let expected_index = self.table.find(hash, |i| self.types[*i] == *data);
+                let expected_index = self
+                    .table
+                    .find(hash, |i| self.types[*i].as_ref() == data.as_ref());
 
                 let mapped_index = if expected_index.is_none_or(|index| *index == i) {
                     None
@@ -224,15 +226,11 @@ impl TypeStore {
     ///
     /// For instance, this may be useful to update a type after it has been
     /// resolved and/or flattened.
-    pub fn replace(&mut self, index: usize, data: Arc<TypeData>) {
-        if Arc::ptr_eq(&self.types[index], &data) {
-            return; // Nothing to do.
-        }
-
+    pub fn replace(&mut self, index: usize, data: TypeData) {
         let new_hash = hash_data(&data);
         let old_hash = hash_data(&self.types[index]);
 
-        self.types[index] = data;
+        self.types[index] = Arc::new(data);
 
         if new_hash != old_hash {
             if let Ok(occupied) = self.table.find_entry(old_hash, |i| *i == index) {

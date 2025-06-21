@@ -344,7 +344,7 @@ impl GlobalsResolver {
         let mut i = NUM_PREDEFINED_TYPES;
         while i < self.types.len() {
             if let Some(ty) = self.types.get(i).resolved(self) {
-                self.types.replace(i, Arc::new(ty))
+                self.types.replace(i, ty)
             }
             i += 1;
         }
@@ -357,7 +357,7 @@ impl GlobalsResolver {
             let mut i = NUM_PREDEFINED_TYPES;
             while i < self.types.len() {
                 if let Some(ty) = self.types.get(i).flattened(self) {
-                    self.types.replace(i, Arc::new(ty));
+                    self.types.replace(i, ty);
                     did_flatten = true;
                 }
                 i += 1;

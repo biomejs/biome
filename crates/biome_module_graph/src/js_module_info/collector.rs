@@ -605,7 +605,7 @@ impl JsModuleInfoCollector {
                             // Populate module members:
                             members: self.find_type_members_in_scope(module_binding.scope_id),
                         });
-                        self.types.replace(i, Arc::new(ty));
+                        self.types.replace(i, ty);
                     }
                 }
                 TypeData::Namespace(namespace) => {
@@ -615,7 +615,7 @@ impl JsModuleInfoCollector {
                             // Populate namespace members:
                             members: self.find_type_members_in_scope(namespace_binding.scope_id),
                         });
-                        self.types.replace(i, Arc::new(ty));
+                        self.types.replace(i, ty);
                     }
                 }
                 _ => {}
@@ -654,7 +654,7 @@ impl JsModuleInfoCollector {
                 }
                 _ => {}
             });
-            self.types.replace(i, Arc::new(ty));
+            self.types.replace(i, ty);
             i += 1;
         }
     }
@@ -708,7 +708,7 @@ impl JsModuleInfoCollector {
             let mut i = 0;
             while i < self.types.len() {
                 if let Some(ty) = self.types.get(i).flattened(self) {
-                    self.types.replace(i, Arc::new(ty));
+                    self.types.replace(i, ty);
                     did_flatten = true;
                 }
                 i += 1;
