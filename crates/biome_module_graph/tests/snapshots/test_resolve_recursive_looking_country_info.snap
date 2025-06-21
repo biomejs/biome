@@ -107,13 +107,13 @@ BindingId(15) => JsBindingData {
 
 BindingId(17) => JsBindingData {
   Name: data,
-  Type: Module(0) TypeId(0),
+  Type: Module(0) TypeId(2),
   Declaration kind: Value
 }
 
 BindingId(18) => JsBindingData {
   Name: codes,
-  Type: Module(0) TypeId(1),
+  Type: Module(0) TypeId(0),
   Declaration kind: Value
 }
 ```
@@ -121,14 +121,12 @@ BindingId(18) => JsBindingData {
 ## Registered types
 
 ```
-Module TypeId(0) => instanceof Module(0) TypeId(6)
-
-Module TypeId(1) => Object {
+Module TypeId(0) => Object {
   prototype: No prototype
   members: []
 }
 
-Module TypeId(2) => Namespace {
+Module TypeId(1) => Namespace {
     path: [
         Borrowed(
             "CountryInfo",
@@ -171,10 +169,12 @@ Module TypeId(2) => Namespace {
     ],
 }
 
+Module TypeId(2) => instanceof Module(0) TypeId(6)
+
 Module TypeId(3) => interface "Partial" {
   extends: []
   type_args: []
-  members: ["name": string, "sub": Module(0) TypeId(0)]
+  members: ["name": string, "sub": Module(0) TypeId(2)]
 }
 
 Module TypeId(4) => instanceof Module(0) TypeId(3)
@@ -274,7 +274,7 @@ Module TypeId(16) => sync Function "subdivision" {
   returns: Module(0) TypeId(15)
 }
 
-Module TypeId(17) => instanceof Module(0) TypeId(2)
+Module TypeId(17) => instanceof Module(0) TypeId(1)
 
 Module TypeId(18) => Module(0) TypeId(17) | Module(0) TypeId(14)
 
@@ -288,7 +288,7 @@ Module TypeId(19) => sync Function "country" {
   returns: Module(0) TypeId(18)
 }
 
-Module TypeId(20) => (type: Module(0) TypeId(7), value: Module(0) TypeId(2), namespace: Module(0) TypeId(2))
+Module TypeId(20) => (type: Module(0) TypeId(7), value: Module(0) TypeId(1), namespace: Module(0) TypeId(1))
 
 Module TypeId(21) => (type: Module(0) TypeId(12), value: Module(0) TypeId(8), namespace: Module(0) TypeId(8))
 ```

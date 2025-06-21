@@ -230,16 +230,27 @@ impl TypeStore {
         let new_hash = hash_data(&data);
         let old_hash = hash_data(&self.types[index]);
 
-        self.types[index] = Arc::new(data);
-
         if new_hash != old_hash {
             if let Ok(occupied) = self.table.find_entry(old_hash, |i| *i == index) {
                 occupied.remove();
             }
 
-            self.table
-                .insert_unique(new_hash, index, |i| hash_data(&self.types[*i]));
+            let entry = self.table.entry(
+                hash_data(&data),
+                |i| self.types[*i].as_ref() == &data,
+                |i| hash_data(&self.types[*i]),
+            );
+            match entry {
+                Entry::Occupied(mut entry) => {
+                    *entry.get_mut() = index;
+                }
+                Entry::Vacant(entry) => {
+                    entry.insert(index);
+                }
+            }
         }
+
+        self.types[index] = Arc::new(data);
     }
 }
 

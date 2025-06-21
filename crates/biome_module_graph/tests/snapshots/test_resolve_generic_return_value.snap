@@ -40,19 +40,19 @@ Imports {
 ```
 BindingId(4) => JsBindingData {
   Name: makePromise,
-  Type: Module(0) TypeId(5),
+  Type: Module(0) TypeId(6),
   Declaration kind: Value
 }
 
 BindingId(5) => JsBindingData {
   Name: makePromiseCb,
-  Type: Module(0) TypeId(5),
+  Type: Module(0) TypeId(6),
   Declaration kind: Value
 }
 
 BindingId(6) => JsBindingData {
   Name: promise,
-  Type: Module(0) TypeId(8),
+  Type: Module(0) TypeId(7),
   Declaration kind: Value
 }
 ```
@@ -62,35 +62,35 @@ BindingId(6) => JsBindingData {
 ```
 Module TypeId(0) => instanceof Module(0) TypeId(9)
 
-Module TypeId(1) => unknown
+Module TypeId(1) => Promise
 
-Module TypeId(2) => Promise
+Module TypeId(2) => Promise.resolve
 
-Module TypeId(3) => Promise.resolve
+Module TypeId(3) => value: 1
 
-Module TypeId(4) => value: 1
+Module TypeId(4) => Module(0) TypeId(10)
 
-Module TypeId(5) => sync Function {
+Module TypeId(5) => Module(0) TypeId(6)
+
+Module TypeId(6) => sync Function {
   accepts: {
     params: []
     type_args: []
   }
-  returns: Module(0) TypeId(8)
+  returns: Module(0) TypeId(7)
 }
 
-Module TypeId(6) => Module(0) TypeId(10)
+Module TypeId(7) => instanceof Promise
 
-Module TypeId(7) => Module(0) TypeId(5)
+Module TypeId(8) => unknown
 
-Module TypeId(8) => instanceof Promise
-
-Module TypeId(9) => T extends Module(0) TypeId(1)
+Module TypeId(9) => T extends Module(0) TypeId(8)
 
 Module TypeId(10) => sync Function "useCallback" {
   accepts: {
     params: [
       required callback: Module(0) TypeId(0) (bindings: callback:Module(0) TypeId(0))
-      required deps: Module(0) TypeId(1) (bindings: deps:Module(0) TypeId(1))
+      required deps: Module(0) TypeId(8) (bindings: deps:Module(0) TypeId(8))
     ]
     type_args: [Module(0) TypeId(9)]
   }
@@ -105,35 +105,35 @@ Module TypeId(10) => sync Function "useCallback" {
 ```
 Full TypeId(0) => instanceof Module(0) TypeId(9)
 
-Full TypeId(1) => unknown
+Full TypeId(1) => Promise
 
-Full TypeId(2) => Promise
+Full TypeId(2) => Promise.resolve
 
-Full TypeId(3) => Promise.resolve
+Full TypeId(3) => value: 1
 
-Full TypeId(4) => value: 1
+Full TypeId(4) => Module(0) TypeId(10)
 
-Full TypeId(5) => sync Function {
+Full TypeId(5) => Module(0) TypeId(6)
+
+Full TypeId(6) => sync Function {
   accepts: {
     params: []
     type_args: []
   }
-  returns: Module(0) TypeId(8)
+  returns: Module(0) TypeId(7)
 }
 
-Full TypeId(6) => Module(0) TypeId(10)
+Full TypeId(7) => instanceof Promise
 
-Full TypeId(7) => Module(0) TypeId(5)
+Full TypeId(8) => unknown
 
-Full TypeId(8) => instanceof Promise
-
-Full TypeId(9) => T extends Module(0) TypeId(1)
+Full TypeId(9) => T extends Module(0) TypeId(8)
 
 Full TypeId(10) => sync Function "useCallback" {
   accepts: {
     params: [
       required callback: Module(0) TypeId(0) (bindings: callback:Module(0) TypeId(0))
-      required deps: Module(0) TypeId(1) (bindings: deps:Module(0) TypeId(1))
+      required deps: Module(0) TypeId(8) (bindings: deps:Module(0) TypeId(8))
     ]
     type_args: [Module(0) TypeId(9)]
   }
