@@ -247,6 +247,7 @@ jobs:
     name: Package JavaScript APIs
     runs-on: depot-ubuntu-24.04-arm-16
     needs: version
+    if: needs.version.outputs.js-api-version
     outputs:
       version: ${{ needs.version.outputs.js-api-version }}
     steps:
@@ -293,14 +294,14 @@ jobs:
 
   # Publishing jobs
 
-  publish:
-    name: Publish
+  publish-cli:
+    name: Publish CLI
     runs-on: ubuntu-24.04
     needs:
       - build-binaries
       - build-binaries-gnu
       - build-wasm
-      - build-js-api
+    if: needs.build-binaries.outputs.version
     environment: npm-publish
     permissions:
       contents: write
@@ -349,11 +350,6 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
-      - name: Publish npm package as latest
-        run: npm publish packages/@biomejs/js-api --tag latest --access public --provenance
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-
       - name: Publish release for @biomejs/biome
         run: |
           bash scripts/print-changelog.sh ${{ needs.build-binaries.outputs.version }} >| ${{ github.workspace }}/RELEASE_NOTES
@@ -374,6 +370,37 @@ jobs:
           fail_on_unmatched_files: true
           generate_release_notes: true
 
+  publish-js-api:
+    name: Publish JS API
+    runs-on: ubuntu-24.04
+    needs: build-js-api
+    if: needs.build-js-api.outputs.version
+    environment: npm-publish
+    permissions:
+      contents: write
+      id-token: write
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - name: Install Node.js
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: 20
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Install pnpm
+        run: |
+          npm install -g corepack
+          corepack enable
+          pnpm --version
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Publish npm package as latest
+        run: npm publish packages/@biomejs/js-api --tag latest --access public --provenance
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - name: Publish release for @biomejs/js-api
         run: |
