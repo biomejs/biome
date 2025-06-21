@@ -71,7 +71,7 @@ where
             let format_comment = FormatRefWithRule::new(comment, Context::CommentRule::default());
             write!(f, [format_comment])?;
 
-            match comment.kind() {
+            match dbg!(comment.kind()) {
                 CommentKind::Block | CommentKind::InlineBlock => {
                     match comment.lines_after() {
                         0 => {

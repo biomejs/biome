@@ -127,14 +127,14 @@ where
         let token_start = self.text_pos;
 
         // Every trivia up to the token (including line breaks) will be the leading trivia
-        self.eat_trivia(false);
+        self.eat_trivia(false, token_end);
         let trailing_start = self.trivia_pieces.len();
 
         self.text_pos = token_end;
 
         // Everything until the next linebreak (but not including it)
         // will be the trailing trivia...
-        self.eat_trivia(true);
+        self.eat_trivia(true, token_end);
 
         let token_range = TextRange::new(token_start, self.text_pos);
 
@@ -146,9 +146,15 @@ where
         self.trivia_pieces.clear();
     }
 
-    fn eat_trivia(&mut self, trailing: bool) {
+    fn eat_trivia(&mut self, trailing: bool, token_end: TextSize) {
         for trivia in &self.trivia_list[self.trivia_pos..] {
-            if trailing != trivia.trailing() || self.text_pos != trivia.offset() {
+            if trailing != trivia.trailing()
+                || self.text_pos != trivia.offset()
+                // Some non-trivia tokens have zero length. In that case to check whether this
+                // trivia is that token's leading trivia we also need to take into account the
+                // trivia end offset.
+                || (!trailing && trivia.end_offset() > token_end)
+            {
                 break;
             }
 

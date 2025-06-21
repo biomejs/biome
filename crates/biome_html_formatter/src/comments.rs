@@ -44,7 +44,7 @@ impl CommentStyle for HtmlCommentStyle {
     }
 
     fn get_comment_kind(_comment: &SyntaxTriviaPieceComments<HtmlLanguage>) -> CommentKind {
-        CommentKind::Block
+        CommentKind::Line
     }
 
     /// This allows us to override which comments are associated with which nodes.

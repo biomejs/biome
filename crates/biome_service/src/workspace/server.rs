@@ -718,6 +718,11 @@ impl WorkspaceServer {
         if !vcs_settings.is_enabled() {
             return Ok(());
         }
+
+        if !vcs_settings.should_use_ignore_file() {
+            return Ok(());
+        }
+
         for path in paths.iter().filter(|path| path.is_ignore()) {
             let is_in_project_path = project_path
                 .as_ref()
