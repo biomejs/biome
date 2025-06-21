@@ -11,6 +11,9 @@
     "node": ">=14.21.3"
   },
   "homepage": "https://biomejs.dev",
+  "bin": {
+    "biome": "bin/biome"
+  },
   "os": [
     "linux"
   ],

@@ -342,7 +342,7 @@ jobs:
           git restore packages/@biomejs/wasm-nodejs/package.json
           git restore packages/@biomejs/wasm-web/package.json
 
-      - name: Copy binaries
+      - name: Generate packages
         run: node packages/@biomejs/biome/scripts/copy-binaries.mjs
 
       - name: Publish npm packages as latest
