@@ -2,7 +2,7 @@
 //!
 use crate::diagnostics::StdinDiagnostic;
 use crate::execute::Execution;
-use crate::{CliDiagnostic, CliSession, TEMPORARY_INTERNAL_FILE_NAME, TraversalMode};
+use crate::{CliDiagnostic, CliSession, TraversalMode};
 use biome_analyze::RuleCategoriesBuilder;
 use biome_console::{ConsoleExt, markup};
 use biome_diagnostics::Diagnostic;
@@ -15,7 +15,6 @@ use biome_service::workspace::{
     ChangeFileParams, CloseFileParams, DropPatternParams, FeaturesBuilder, FileContent,
     FixFileParams, FormatFileParams, OpenFileParams, SupportsFeatureParams,
 };
-use camino::Utf8PathBuf;
 use std::borrow::Cow;
 
 pub(crate) fn run<'a>(
@@ -32,9 +31,7 @@ pub(crate) fn run<'a>(
 
     let std_in_file = biome_path
         .extension()
-        .map(|ext| {
-            BiomePath::new(Utf8PathBuf::from(TEMPORARY_INTERNAL_FILE_NAME).with_extension(ext))
-        })
+        .map(|_| biome_path.clone())
         .ok_or_else(|| CliDiagnostic::from(StdinDiagnostic::new_no_extension()))?;
 
     if mode.is_format() {

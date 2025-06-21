@@ -1,0 +1,20 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+# Input messages
+
+```block
+
+/*test*/ [
+
+/* some other comment*/1, 2, 3]
+	
+```
+
+# Emitted Messages
+
+```block
+/*test*/ [/* some other comment*/ 1, 2, 3]
+
+```

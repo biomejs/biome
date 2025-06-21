@@ -2298,6 +2298,37 @@ fn treat_known_json_files_as_jsonc_files() {
 }
 
 #[test]
+fn treat_known_json_files_as_jsonc_files_stdin() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    console.in_buffer.push(
+        r#"
+/*test*/ [
+
+/* some other comment*/1, 2, 3]
+	"#
+        .to_string(),
+    );
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["format", "--stdin-file-path", "files/.eslintrc.json"].as_slice()),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "treat_known_json_files_as_jsonc_files_stdin",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
 fn should_apply_different_formatting() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
