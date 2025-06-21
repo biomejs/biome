@@ -346,7 +346,7 @@ jobs:
         run: node packages/@biomejs/biome/scripts/copy-binaries.mjs
 
       - name: Publish npm packages as latest
-        run: for package in packages/@biomejs/*; do if [ $package != "packages/@biomejs/js-api" ]; then npm publish $package --tag latest --access public --provenance; fi; done
+        run: for package in packages/@biomejs/*; do if [ $package != "packages/@biomejs/js-api" ]; then pnpm publish $package  --no-git-checks--tag latest --access public --provenance; fi; done
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
@@ -398,7 +398,7 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Publish npm package as latest
-        run: npm publish packages/@biomejs/js-api --tag latest --access public --provenance
+        run: pnpm publish packages/@biomejs/js-api --no-git-checks --tag latest --access public --provenance
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
