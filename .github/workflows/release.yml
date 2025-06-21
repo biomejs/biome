@@ -342,8 +342,8 @@ jobs:
           git restore packages/@biomejs/wasm-nodejs/package.json
           git restore packages/@biomejs/wasm-web/package.json
 
-      - name: Generate packages
-        run: node packages/@biomejs/biome/scripts/copy-binaries.mjs
+      - name: Generate npm packages
+        run: node packages/@biomejs/biome/scripts/generate-packages.mjs
 
       - name: Publish npm packages as latest
         run: for package in packages/@biomejs/*; do if [ $package != "packages/@biomejs/js-api" ]; then pnpm publish $package  --no-git-checks--tag latest --access public --provenance; fi; done

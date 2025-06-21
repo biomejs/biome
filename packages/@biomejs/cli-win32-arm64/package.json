@@ -22,8 +22,5 @@
   ],
   "publishConfig": {
     "provenance": true
-  },
-  "files": [
-    "bin/biome"
-  ]
+  }
 }
