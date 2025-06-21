@@ -14,7 +14,7 @@ use crate::{
     Class, Function, FunctionParameter, GenericTypeParameter, Literal, Resolvable,
     ResolvedTypeData, ResolvedTypeId, ReturnType, ScopeId, TypeData, TypeId, TypeMember,
     TypeMemberKind, TypeReference, TypeReferenceQualifier, TypeResolver, TypeResolverLevel,
-    TypeStore,
+    TypeStore, flattening::MAX_FLATTEN_DEPTH,
 };
 
 const GLOBAL_LEVEL: TypeResolverLevel = TypeResolverLevel::Global;
@@ -327,6 +327,7 @@ impl Default for GlobalsResolver {
             }),
         ];
 
+        let types: Vec<_> = types.into_iter().map(Arc::new).collect();
         Self {
             types: TypeStore::from_types(types),
         }
@@ -342,26 +343,29 @@ impl GlobalsResolver {
     pub fn resolve_all(&mut self) {
         let mut i = NUM_PREDEFINED_TYPES;
         while i < self.types.len() {
-            // SAFETY: We immediately reinsert after taking.
-            unsafe {
-                let ty = self.types.take_from_index_temporarily(i);
-                let ty = ty.resolved(self);
-                self.types.reinsert_temporarily_taken_data(i, ty);
+            if let Some(ty) = self.types.get(i).resolved(self) {
+                self.types.replace(i, ty)
             }
             i += 1;
         }
     }
 
     fn flatten_all(&mut self) {
-        let mut i = NUM_PREDEFINED_TYPES;
-        while i < self.types.len() {
-            // SAFETY: We immediately reinsert after taking.
-            unsafe {
-                let ty = self.types.take_from_index_temporarily(i);
-                let ty = ty.flattened(self);
-                self.types.reinsert_temporarily_taken_data(i, ty);
+        for _ in 0..MAX_FLATTEN_DEPTH {
+            let mut did_flatten = false;
+
+            let mut i = NUM_PREDEFINED_TYPES;
+            while i < self.types.len() {
+                if let Some(ty) = self.types.get(i).flattened(self) {
+                    self.types.replace(i, ty);
+                    did_flatten = true;
+                }
+                i += 1;
             }
-            i += 1;
+
+            if !did_flatten {
+                break;
+            }
         }
     }
 }
@@ -372,7 +376,7 @@ impl TypeResolver for GlobalsResolver {
     }
 
     fn find_type(&self, type_data: &TypeData) -> Option<TypeId> {
-        self.types.find_type(type_data)
+        self.types.find(type_data)
     }
 
     fn get_by_id(&self, id: TypeId) -> &TypeData {
@@ -384,7 +388,7 @@ impl TypeResolver for GlobalsResolver {
     }
 
     fn register_type(&mut self, type_data: Cow<TypeData>) -> TypeId {
-        self.types.register_type(type_data)
+        self.types.insert_cow(type_data)
     }
 
     fn resolve_reference(&self, ty: &TypeReference) -> Option<ResolvedTypeId> {
@@ -422,7 +426,7 @@ impl TypeResolver for GlobalsResolver {
         Cow::Owned(TypeData::from_any_js_expression(self, scope_id, expr))
     }
 
-    fn registered_types(&self) -> &[TypeData] {
-        &self.types.as_slice()[NUM_PREDEFINED_TYPES..]
+    fn registered_types(&self) -> Vec<&TypeData> {
+        self.types.as_references()[NUM_PREDEFINED_TYPES..].to_vec()
     }
 }

@@ -175,7 +175,7 @@ export = vfile;
 ```
 Exports {
   "default" => {
-    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(43))
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(6))
   }
 }
 Imports {
@@ -195,17 +195,21 @@ Imports {
 ## Registered types
 
 ```
-Module TypeId(0) => instanceof Module(0) TypeId(42)
+Module TypeId(0) => instanceof Array<Module(0) TypeId(6)>
 
-Module TypeId(1) => Module(0) TypeId(45) | Module(0) TypeId(0) | Module(0) TypeId(46)
+Module TypeId(1) => instanceof Module(0) TypeId(45)
 
-Module TypeId(2) => Module(0) TypeId(51) | Module(0) TypeId(51) | Module(0) TypeId(51)
+Module TypeId(2) => Module(0) TypeId(47) | Module(0) TypeId(1) | Module(0) TypeId(49)
 
-Module TypeId(3) => Module(0) TypeId(51) | Module(0) TypeId(51) | Module(0) TypeId(51)
+Module TypeId(3) => Module(0) TypeId(56) | Module(0) TypeId(56) | Module(0) TypeId(56)
 
-Module TypeId(4) => Module(0) TypeId(51) | Module(0) TypeId(51) | Module(0) TypeId(51)
+Module TypeId(4) => Module(0) TypeId(56) | Module(0) TypeId(56) | Module(0) TypeId(56)
 
-Module TypeId(5) => Namespace {
+Module TypeId(5) => Module(0) TypeId(56) | Module(0) TypeId(56) | Module(0) TypeId(56)
+
+Module TypeId(6) => instanceof Module(0) TypeId(44)
+
+Module TypeId(7) => Namespace {
     path: [
         Borrowed(
             "vfile",
@@ -220,7 +224,7 @@ Module TypeId(5) => Namespace {
             ),
             is_static: true,
             ty: Resolved(
-                Module(0) TypeId(16),
+                Module(0) TypeId(18),
             ),
         },
         TypeMember {
@@ -231,7 +235,7 @@ Module TypeId(5) => Namespace {
             ),
             is_static: true,
             ty: Resolved(
-                Module(0) TypeId(18),
+                Module(0) TypeId(19),
             ),
         },
         TypeMember {
@@ -242,7 +246,7 @@ Module TypeId(5) => Namespace {
             ),
             is_static: true,
             ty: Resolved(
-                Module(0) TypeId(19),
+                Module(0) TypeId(20),
             ),
         },
         TypeMember {
@@ -253,7 +257,7 @@ Module TypeId(5) => Namespace {
             ),
             is_static: true,
             ty: Resolved(
-                Module(0) TypeId(20),
+                Module(0) TypeId(21),
             ),
         },
         TypeMember {
@@ -264,7 +268,7 @@ Module TypeId(5) => Namespace {
             ),
             is_static: true,
             ty: Resolved(
-                Module(0) TypeId(22),
+                Module(0) TypeId(26),
             ),
         },
         TypeMember {
@@ -275,7 +279,7 @@ Module TypeId(5) => Namespace {
             ),
             is_static: true,
             ty: Resolved(
-                Module(0) TypeId(24),
+                Module(0) TypeId(25),
             ),
         },
         TypeMember {
@@ -286,7 +290,7 @@ Module TypeId(5) => Namespace {
             ),
             is_static: true,
             ty: Resolved(
-                Module(0) TypeId(29),
+                Module(0) TypeId(31),
             ),
         },
         TypeMember {
@@ -297,270 +301,266 @@ Module TypeId(5) => Namespace {
             ),
             is_static: true,
             ty: Resolved(
-                Module(0) TypeId(41),
+                Module(0) TypeId(44),
             ),
         },
     ],
 }
 
-Module TypeId(6) => value: ascii
+Module TypeId(8) => value: ascii
 
-Module TypeId(7) => value: utf8
+Module TypeId(9) => value: utf8
 
-Module TypeId(8) => value: utf-8
+Module TypeId(10) => value: utf-8
 
-Module TypeId(9) => value: utf16le
+Module TypeId(11) => value: utf16le
 
-Module TypeId(10) => value: ucs2
+Module TypeId(12) => value: ucs2
 
-Module TypeId(11) => value: ucs-2
+Module TypeId(13) => value: ucs-2
 
-Module TypeId(12) => value: base64
+Module TypeId(14) => value: base64
 
-Module TypeId(13) => value: latin1
+Module TypeId(15) => value: latin1
 
-Module TypeId(14) => value: binary
+Module TypeId(16) => value: binary
 
-Module TypeId(15) => value: hex
+Module TypeId(17) => value: hex
 
-Module TypeId(16) => Module(0) TypeId(6) | Module(0) TypeId(7) | Module(0) TypeId(8) | Module(0) TypeId(9) | Module(0) TypeId(10) | Module(0) TypeId(11) | Module(0) TypeId(12) | Module(0) TypeId(13) | Module(0) TypeId(14) | Module(0) TypeId(15)
+Module TypeId(18) => Module(0) TypeId(8) | Module(0) TypeId(9) | Module(0) TypeId(10) | Module(0) TypeId(11) | Module(0) TypeId(12) | Module(0) TypeId(13) | Module(0) TypeId(14) | Module(0) TypeId(15) | Module(0) TypeId(16) | Module(0) TypeId(17)
 
-Module TypeId(17) => unknown
+Module TypeId(19) => string | Module(0) TypeId(48)
 
-Module TypeId(18) => string | Module(0) TypeId(17)
+Module TypeId(20) => Module(0) TypeId(6) | Module(0) TypeId(49) | Module(0) TypeId(47)
 
-Module TypeId(19) => Module(0) TypeId(43) | Module(0) TypeId(46) | Module(0) TypeId(45)
-
-Module TypeId(20) => interface "Settings" {
+Module TypeId(21) => interface "Settings" {
   extends: []
   type_args: []
   members: []
 }
 
-Module TypeId(21) => instanceof Module(0) TypeId(24)
+Module TypeId(22) => instanceof Array<Module(0) TypeId(6)>
 
-Module TypeId(22) => sync Function {
+Module TypeId(23) => instanceof Module(0) TypeId(25)
+
+Module TypeId(24) => instanceof Module(0) TypeId(21)
+
+Module TypeId(25) => T = unknown reference
+
+Module TypeId(26) => sync Function {
   accepts: {
     params: [
-      required files: Module(0) TypeId(57) (bindings: files:Module(0) TypeId(57))
-      required options: Module(0) TypeId(21) (bindings: options:Module(0) TypeId(21))
+      required files: Module(0) TypeId(22) (bindings: files:Module(0) TypeId(22))
+      required options: Module(0) TypeId(23) (bindings: options:Module(0) TypeId(23))
     ]
     type_args: []
   }
   returns: string
 }
 
-Module TypeId(23) => instanceof Module(0) TypeId(20)
+Module TypeId(27) => Module(0) TypeId(47) | undefined
 
-Module TypeId(24) => T = unknown reference
+Module TypeId(28) => string | undefined
 
-Module TypeId(25) => Module(0) TypeId(45) | undefined
+Module TypeId(29) => any
 
-Module TypeId(26) => string | undefined
-
-Module TypeId(27) => any
-
-Module TypeId(28) => Module(0) TypeId(27) | undefined
-
-Module TypeId(29) => interface "VFileOptions" {
-  extends: []
-  type_args: []
-  members: [
-    "contents": Module(0) TypeId(25),
-    "path": Module(0) TypeId(26),
-    "basename": Module(0) TypeId(26),
-    "stem": Module(0) TypeId(26),
-    "extname": Module(0) TypeId(26),
-    "dirname": Module(0) TypeId(26),
-    "cwd": Module(0) TypeId(26),
-    "data": Module(0) TypeId(28)
-  ]
-}
-
-Module TypeId(30) => Module(0) TypeId(45) | undefined
+Module TypeId(30) => Module(0) TypeId(29) | undefined
 
 Module TypeId(31) => interface "VFileOptions" {
   extends: []
   type_args: []
   members: [
-    "contents": Module(0) TypeId(30),
-    "path": Module(0) TypeId(26),
-    "basename": Module(0) TypeId(26),
-    "stem": Module(0) TypeId(26),
-    "extname": Module(0) TypeId(26),
-    "dirname": Module(0) TypeId(26),
-    "cwd": Module(0) TypeId(26),
-    "data": Module(0) TypeId(28)
+    "contents": Module(0) TypeId(27),
+    "path": Module(0) TypeId(28),
+    "basename": Module(0) TypeId(28),
+    "stem": Module(0) TypeId(28),
+    "extname": Module(0) TypeId(28),
+    "dirname": Module(0) TypeId(28),
+    "cwd": Module(0) TypeId(28),
+    "data": Module(0) TypeId(30)
   ]
 }
 
-Module TypeId(32) => F extends Module(0) TypeId(43)
+Module TypeId(32) => Module(0) TypeId(47) | undefined
 
-Module TypeId(33) => Module(0) TypeId(45) | Module(0) TypeId(17) | Module(0) TypeId(46)
-
-Module TypeId(34) => sync Function {
-  accepts: {
-    params: [
-      optional input: Module(0) TypeId(33) (bindings: input:Module(0) TypeId(33))
-    ]
-    type_args: [Module(0) TypeId(32)]
-  }
-  returns: Module(0) TypeId(17)
+Module TypeId(33) => interface "VFileOptions" {
+  extends: []
+  type_args: []
+  members: [
+    "contents": Module(0) TypeId(32),
+    "path": Module(0) TypeId(28),
+    "basename": Module(0) TypeId(28),
+    "stem": Module(0) TypeId(28),
+    "extname": Module(0) TypeId(28),
+    "dirname": Module(0) TypeId(28),
+    "cwd": Module(0) TypeId(28),
+    "data": Module(0) TypeId(30)
+  ]
 }
 
-Module TypeId(35) => unknown
+Module TypeId(34) => F extends Module(0) TypeId(6)
+
+Module TypeId(35) => Module(0) TypeId(47) | Module(0) TypeId(48) | Module(0) TypeId(49)
 
 Module TypeId(36) => sync Function {
   accepts: {
     params: [
-      optional encoding: Module(0) TypeId(49) (bindings: encoding:Module(0) TypeId(49))
+      optional input: Module(0) TypeId(35) (bindings: input:Module(0) TypeId(35))
+    ]
+    type_args: [Module(0) TypeId(34)]
+  }
+  returns: Module(0) TypeId(48)
+}
+
+Module TypeId(37) => unknown
+
+Module TypeId(38) => instanceof Array<Module(0) TypeId(56)>
+
+Module TypeId(39) => sync Function {
+  accepts: {
+    params: [
+      optional encoding: Module(0) TypeId(54) (bindings: encoding:Module(0) TypeId(54))
     ]
     type_args: []
   }
   returns: string
 }
 
-Module TypeId(37) => Module(0) TypeId(51) | Module(0) TypeId(51) | Module(0) TypeId(51)
+Module TypeId(40) => Module(0) TypeId(56) | Module(0) TypeId(56) | Module(0) TypeId(56)
 
-Module TypeId(38) => sync Function {
+Module TypeId(41) => sync Function {
   accepts: {
     params: [
       required reason: string (bindings: reason:string)
-      optional position: Module(0) TypeId(37) (bindings: position:Module(0) TypeId(37))
+      optional position: Module(0) TypeId(40) (bindings: position:Module(0) TypeId(40))
       optional ruleId: string (bindings: ruleId:string)
     ]
     type_args: []
   }
-  returns: Module(0) TypeId(51)
+  returns: Module(0) TypeId(56)
 }
 
-Module TypeId(39) => never
+Module TypeId(42) => never
 
-Module TypeId(40) => sync Function {
+Module TypeId(43) => sync Function {
   accepts: {
     params: [
       required reason: string (bindings: reason:string)
-      optional position: Module(0) TypeId(37) (bindings: position:Module(0) TypeId(37))
+      optional position: Module(0) TypeId(40) (bindings: position:Module(0) TypeId(40))
       optional ruleId: string (bindings: ruleId:string)
     ]
     type_args: []
   }
-  returns: Module(0) TypeId(39)
+  returns: Module(0) TypeId(42)
 }
 
-Module TypeId(41) => interface "VFile" {
+Module TypeId(44) => interface "VFile" {
   extends: []
   type_args: []
   members: [
-    (): Module(0) TypeId(34),
-    "history": Module(0) TypeId(58),
-    "data": Module(0) TypeId(35),
-    "messages": Module(0) TypeId(59),
-    "contents": Module(0) TypeId(45),
-    "path": Module(0) TypeId(26),
-    "dirname": Module(0) TypeId(26),
-    "basename": Module(0) TypeId(26),
-    "stem": Module(0) TypeId(26),
-    "extname": Module(0) TypeId(26),
+    (): Module(0) TypeId(36),
+    "history": Module(0) TypeId(52),
+    "data": Module(0) TypeId(37),
+    "messages": Module(0) TypeId(38),
+    "contents": Module(0) TypeId(47),
+    "path": Module(0) TypeId(28),
+    "dirname": Module(0) TypeId(28),
+    "basename": Module(0) TypeId(28),
+    "stem": Module(0) TypeId(28),
+    "extname": Module(0) TypeId(28),
     "cwd": string,
-    "toString": Module(0) TypeId(36),
-    "message": Module(0) TypeId(38),
-    "fail": Module(0) TypeId(40),
-    "info": Module(0) TypeId(38)
+    "toString": Module(0) TypeId(39),
+    "message": Module(0) TypeId(41),
+    "fail": Module(0) TypeId(43),
+    "info": Module(0) TypeId(41)
   ]
 }
 
-Module TypeId(42) => F extends Module(0) TypeId(43)
+Module TypeId(45) => F extends Module(0) TypeId(6)
 
-Module TypeId(43) => instanceof Module(0) TypeId(41)
+Module TypeId(46) => F extends Module(0) TypeId(6)
 
-Module TypeId(44) => F extends Module(0) TypeId(43)
+Module TypeId(47) => instanceof Module(0) TypeId(19)
 
-Module TypeId(45) => instanceof Module(0) TypeId(18)
+Module TypeId(48) => unknown
 
-Module TypeId(46) => instanceof Module(0) TypeId(29)
+Module TypeId(49) => instanceof Module(0) TypeId(31)
 
-Module TypeId(47) => Module(0) TypeId(45) | Module(0) TypeId(17) | Module(0) TypeId(46)
+Module TypeId(50) => Module(0) TypeId(47) | Module(0) TypeId(48) | Module(0) TypeId(49)
 
-Module TypeId(48) => sync Function {
+Module TypeId(51) => sync Function {
   accepts: {
     params: [
-      optional input: Module(0) TypeId(47) (bindings: input:Module(0) TypeId(47))
+      optional input: Module(0) TypeId(50) (bindings: input:Module(0) TypeId(50))
     ]
-    type_args: [Module(0) TypeId(44)]
+    type_args: [Module(0) TypeId(46)]
   }
-  returns: Module(0) TypeId(17)
+  returns: Module(0) TypeId(48)
 }
 
-Module TypeId(49) => instanceof Module(0) TypeId(16)
+Module TypeId(52) => instanceof Array<string>
 
-Module TypeId(50) => sync Function {
+Module TypeId(53) => instanceof Array<Module(0) TypeId(56)>
+
+Module TypeId(54) => instanceof Module(0) TypeId(18)
+
+Module TypeId(55) => sync Function {
   accepts: {
     params: [
-      optional encoding: Module(0) TypeId(49) (bindings: encoding:Module(0) TypeId(49))
+      optional encoding: Module(0) TypeId(54) (bindings: encoding:Module(0) TypeId(54))
     ]
     type_args: []
   }
   returns: string
 }
 
-Module TypeId(51) => instanceof Import Symbol: All from
+Module TypeId(56) => instanceof Import Symbol: All from
 
-Module TypeId(52) => Module(0) TypeId(51) | Module(0) TypeId(51) | Module(0) TypeId(51)
+Module TypeId(57) => Module(0) TypeId(56) | Module(0) TypeId(56) | Module(0) TypeId(56)
 
-Module TypeId(53) => sync Function {
+Module TypeId(58) => sync Function {
   accepts: {
     params: [
       required reason: string (bindings: reason:string)
-      optional position: Module(0) TypeId(52) (bindings: position:Module(0) TypeId(52))
+      optional position: Module(0) TypeId(57) (bindings: position:Module(0) TypeId(57))
       optional ruleId: string (bindings: ruleId:string)
     ]
     type_args: []
   }
-  returns: Module(0) TypeId(51)
+  returns: Module(0) TypeId(56)
 }
 
-Module TypeId(54) => sync Function {
+Module TypeId(59) => sync Function {
   accepts: {
     params: [
       required reason: string (bindings: reason:string)
-      optional position: Module(0) TypeId(52) (bindings: position:Module(0) TypeId(52))
+      optional position: Module(0) TypeId(57) (bindings: position:Module(0) TypeId(57))
       optional ruleId: string (bindings: ruleId:string)
     ]
     type_args: []
   }
-  returns: Module(0) TypeId(39)
+  returns: Module(0) TypeId(42)
 }
 
-Module TypeId(55) => interface "VFile" {
+Module TypeId(60) => interface "VFile" {
   extends: []
   type_args: []
   members: [
-    (): Module(0) TypeId(48),
-    "history": Module(0) TypeId(58),
-    "data": Module(0) TypeId(35),
-    "messages": Module(0) TypeId(60),
-    "contents": Module(0) TypeId(45),
-    "path": Module(0) TypeId(26),
-    "dirname": Module(0) TypeId(26),
-    "basename": Module(0) TypeId(26),
-    "stem": Module(0) TypeId(26),
-    "extname": Module(0) TypeId(26),
+    (): Module(0) TypeId(51),
+    "history": Module(0) TypeId(52),
+    "data": Module(0) TypeId(37),
+    "messages": Module(0) TypeId(53),
+    "contents": Module(0) TypeId(47),
+    "path": Module(0) TypeId(28),
+    "dirname": Module(0) TypeId(28),
+    "basename": Module(0) TypeId(28),
+    "stem": Module(0) TypeId(28),
+    "extname": Module(0) TypeId(28),
     "cwd": string,
-    "toString": Module(0) TypeId(50),
-    "message": Module(0) TypeId(53),
-    "fail": Module(0) TypeId(54),
-    "info": Module(0) TypeId(53)
+    "toString": Module(0) TypeId(55),
+    "message": Module(0) TypeId(58),
+    "fail": Module(0) TypeId(59),
+    "info": Module(0) TypeId(58)
   ]
 }
-
-Module TypeId(56) => instanceof Array<Module(0) TypeId(43)>
-
-Module TypeId(57) => instanceof Array<Module(0) TypeId(43)>
-
-Module TypeId(58) => instanceof Array<string>
-
-Module TypeId(59) => instanceof Array<Module(0) TypeId(51)>
-
-Module TypeId(60) => instanceof Array<Module(0) TypeId(51)>
 ```

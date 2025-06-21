@@ -12,10 +12,10 @@ use biome_js_syntax::{
     TsTypeParameterName, inner_string_text,
 };
 use biome_js_type_info::{
-    BindingId, FunctionParameter, GLOBAL_RESOLVER, GLOBAL_UNKNOWN_ID, GenericTypeParameter, Module,
-    Namespace, Resolvable, ResolvedTypeData, ResolvedTypeId, ScopeId, TypeData, TypeId,
-    TypeImportQualifier, TypeMember, TypeMemberKind, TypeReference, TypeReferenceQualifier,
-    TypeResolver, TypeResolverLevel, TypeStore,
+    BindingId, FunctionParameter, GLOBAL_RESOLVER, GLOBAL_UNKNOWN_ID, GenericTypeParameter,
+    MAX_FLATTEN_DEPTH, Module, Namespace, Resolvable, ResolvedTypeData, ResolvedTypeId, ScopeId,
+    TypeData, TypeId, TypeImportQualifier, TypeMember, TypeMemberKind, TypeReference,
+    TypeReferenceQualifier, TypeResolver, TypeResolverLevel, TypeStore,
 };
 use biome_jsdoc_comment::JsdocComment;
 use biome_rowan::{AstNode, Text, TextRange, TextSize, TokenText};
@@ -56,14 +56,10 @@ pub(super) struct JsModuleInfoCollector {
     extractor: SemanticEventExtractor,
 
     /// Formal parameters.
-    ///
-    /// They will get parsed when bindings from their scope are known.
-    formal_parameters: Vec<JsFormalParameter>,
+    formal_parameters: FxHashMap<JsSyntaxNode, FunctionParameter>,
 
     /// Variable declarations.
-    ///
-    /// They will get parsed when bindings from their scope are known.
-    variable_declarations: Vec<JsVariableDeclaration>,
+    variable_declarations: FxHashMap<JsSyntaxNode, Box<[(Text, TypeReference)]>>,
 
     /// Map of parsed declarations, for caching purposes.
     parsed_expressions: FxHashMap<TextRange, ResolvedTypeId>,
@@ -172,9 +168,16 @@ impl JsModuleInfoCollector {
 
             self.parsed_expressions.insert(range, resolved_id);
         } else if let Some(param) = JsFormalParameter::cast_ref(node) {
-            self.formal_parameters.push(param);
+            let scope_id = *self.scope_stack.last().expect("there must be a scope");
+            let parsed_param = FunctionParameter::from_js_formal_parameter(self, scope_id, &param);
+            self.formal_parameters
+                .insert(param.syntax().clone(), parsed_param);
         } else if let Some(decl) = JsVariableDeclaration::cast_ref(node) {
-            self.variable_declarations.push(decl);
+            let scope_id = *self.scope_stack.last().expect("there must be a scope");
+            let type_bindings =
+                TypeData::typed_bindings_from_js_variable_declaration(self, scope_id, &decl);
+            self.variable_declarations
+                .insert(decl.syntax().clone(), type_bindings);
         } else if let Some(import) = biome_js_syntax::JsImport::cast_ref(node) {
             self.push_static_import(import);
         }
@@ -529,38 +532,13 @@ impl JsModuleInfoCollector {
     }
 
     fn infer_all_types(&mut self, scope_by_range: &Lapper<u32, ScopeId>) {
-        let mut parsed_parameters = FxHashMap::default();
-        let formal_parameters = std::mem::take(&mut self.formal_parameters);
-        for param in formal_parameters {
-            let range = param.range();
-            let scope_id = scope_id_for_range(scope_by_range, range);
-            let parsed_param = FunctionParameter::from_js_formal_parameter(self, scope_id, &param);
-            parsed_parameters.insert(param.syntax().clone(), parsed_param);
-        }
-
-        let mut parsed_declarations = FxHashMap::default();
-        let variable_declarations = std::mem::take(&mut self.variable_declarations);
-        for decl in variable_declarations {
-            let range = decl.range();
-            let scope_id = scope_id_for_range(scope_by_range, range);
-            let type_bindings =
-                TypeData::typed_bindings_from_js_variable_declaration(self, scope_id, &decl);
-            parsed_declarations.insert(decl.syntax().clone(), type_bindings);
-        }
-
         for index in 0..self.bindings.len() {
             let binding_id = BindingId::new(index);
             let binding = &self.bindings[binding_id.index()];
             if let Some(node) = self.binding_node_by_start.get(&binding.range.start()) {
                 let name = binding.name.clone();
                 let scope_id = scope_id_for_range(scope_by_range, binding.range);
-                let ty = self.infer_type(
-                    &node.clone(),
-                    &name,
-                    scope_id,
-                    &parsed_declarations,
-                    &parsed_parameters,
-                );
+                let ty = self.infer_type(&node.clone(), &name, scope_id);
                 self.bindings[binding_id.index()].ty = ty;
             }
         }
@@ -571,14 +549,12 @@ impl JsModuleInfoCollector {
         node: &JsSyntaxNode,
         binding_name: &Text,
         scope_id: ScopeId,
-        parsed_declarations: &FxHashMap<JsSyntaxNode, Box<[(Text, TypeReference)]>>,
-        parsed_parameters: &FxHashMap<JsSyntaxNode, FunctionParameter>,
     ) -> TypeReference {
         for ancestor in node.ancestors() {
             if let Some(decl) = AnyJsDeclaration::cast_ref(&ancestor) {
                 return if let Some(typed_bindings) = decl
                     .as_js_variable_declaration()
-                    .and_then(|decl| parsed_declarations.get(decl.syntax()))
+                    .and_then(|decl| self.variable_declarations.get(decl.syntax()))
                 {
                     typed_bindings
                         .iter()
@@ -593,7 +569,7 @@ impl JsModuleInfoCollector {
                     TypeData::from_any_js_export_default_declaration(self, scope_id, &declaration);
                 return self.reference_to_owned_data(data);
             } else if let Some(param) = JsFormalParameter::cast_ref(&ancestor)
-                .and_then(|param| parsed_parameters.get(param.syntax()))
+                .and_then(|param| self.formal_parameters.get(param.syntax()))
             {
                 return param
                     .bindings
@@ -621,38 +597,40 @@ impl JsModuleInfoCollector {
         // First do a pass in which we populate module and namespace members:
         let mut i = 0;
         while i < self.types.len() {
-            // SAFETY: We immediately reinsert after taking.
-            let ty = unsafe { self.types.take_from_index_temporarily(i) };
-            let ty = match ty {
-                TypeData::Module(module) => match self.find_binding_for_type_index(i) {
-                    Some(module_binding) => TypeData::from(Module {
-                        name: module.name,
-                        // Populate module members:
-                        members: self.find_type_members_in_scope(module_binding.scope_id),
-                    }),
-                    None => TypeData::Module(module),
-                },
-                TypeData::Namespace(namespace) => match self.find_binding_for_type_index(i) {
-                    Some(namespace_binding) => TypeData::from(Namespace {
-                        path: namespace.path,
-                        // Populate namespace members:
-                        members: self.find_type_members_in_scope(namespace_binding.scope_id),
-                    }),
-                    None => TypeData::Namespace(namespace),
-                },
-                ty => ty,
-            };
-            // SAFETY: We reinsert before anyone got a chance to do lookups.
-            unsafe { self.types.reinsert_temporarily_taken_data(i, ty) };
+            match self.types.get(i).as_ref() {
+                TypeData::Module(module) => {
+                    if let Some(module_binding) = self.find_binding_for_type_index(i) {
+                        let ty = TypeData::from(Module {
+                            name: module.name.clone(),
+                            // Populate module members:
+                            members: self.find_type_members_in_scope(module_binding.scope_id),
+                        });
+                        self.types.replace(i, ty);
+                    }
+                }
+                TypeData::Namespace(namespace) => {
+                    if let Some(namespace_binding) = self.find_binding_for_type_index(i) {
+                        let ty = TypeData::from(Namespace {
+                            path: namespace.path.clone(),
+                            // Populate namespace members:
+                            members: self.find_type_members_in_scope(namespace_binding.scope_id),
+                        });
+                        self.types.replace(i, ty);
+                    }
+                }
+                _ => {}
+            }
             i += 1;
         }
 
         // Now perform a pass for the actual resolving:
         let mut i = 0;
         while i < self.types.len() {
-            // SAFETY: We immediately reinsert after taking.
-            let ty = unsafe { self.types.take_from_index_temporarily(i) };
-            let mut ty = ty.resolved(self);
+            let ty = self.types.get(i);
+            let mut ty = match ty.resolved(self) {
+                Some(ty) => ty,
+                None => ty.as_ref().clone(),
+            };
             ty.update_all_references(|reference| match reference {
                 TypeReference::Resolved(resolved)
                     if resolved.level() == TypeResolverLevel::Import =>
@@ -676,8 +654,7 @@ impl JsModuleInfoCollector {
                 }
                 _ => {}
             });
-            // SAFETY: We reinsert before anyone got a chance to do lookups.
-            unsafe { self.types.reinsert_temporarily_taken_data(i, ty) };
+            self.types.replace(i, ty);
             i += 1;
         }
     }
@@ -725,15 +702,21 @@ impl JsModuleInfoCollector {
     }
 
     fn flatten_all(&mut self) {
-        let mut i = 0;
-        while i < self.types.len() {
-            // SAFETY: We reinsert before anyone got a chance to do lookups.
-            unsafe {
-                let ty = self.types.take_from_index_temporarily(i);
-                let ty = ty.flattened(self);
-                self.types.reinsert_temporarily_taken_data(i, ty);
+        for _ in 0..MAX_FLATTEN_DEPTH {
+            let mut did_flatten = false;
+
+            let mut i = 0;
+            while i < self.types.len() {
+                if let Some(ty) = self.types.get(i).flattened(self) {
+                    self.types.replace(i, ty);
+                    did_flatten = true;
+                }
+                i += 1;
             }
-            i += 1;
+
+            if !did_flatten {
+                break;
+            }
         }
     }
 
@@ -876,7 +859,7 @@ impl TypeResolver for JsModuleInfoCollector {
     }
 
     fn find_type(&self, type_data: &TypeData) -> Option<TypeId> {
-        self.types.find_type(type_data)
+        self.types.find(type_data)
     }
 
     fn get_by_id(&self, id: TypeId) -> &TypeData {
@@ -906,9 +889,9 @@ impl TypeResolver for JsModuleInfoCollector {
             Some(id) => {
                 let reference =
                     TypeData::reference(ResolvedTypeId::new(TypeResolverLevel::Global, id));
-                self.types.register_type(Cow::Owned(reference))
+                self.types.insert_cow(Cow::Owned(reference))
             }
-            None => self.types.register_type(type_data),
+            None => self.types.insert_cow(type_data),
         }
     }
 
@@ -999,8 +982,8 @@ impl TypeResolver for JsModuleInfoCollector {
         Some(GLOBAL_RESOLVER.as_ref())
     }
 
-    fn registered_types(&self) -> &[TypeData] {
-        self.types.as_slice()
+    fn registered_types(&self) -> Vec<&TypeData> {
+        self.types.as_references()
     }
 }
 

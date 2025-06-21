@@ -309,7 +309,7 @@ pub fn dump_registered_types(content: &mut String, resolver: &dyn TypeResolver) 
     }
 }
 
-pub fn dump_registered_module_types(content: &mut String, types: &[TypeData]) {
+pub fn dump_registered_module_types(content: &mut String, types: &[&TypeData]) {
     if types.is_empty() {
         return;
     }

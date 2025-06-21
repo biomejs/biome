@@ -459,7 +459,11 @@ impl TypeData {
     /// Returns the type with inference up to the level supported by the given `resolver`.
     #[inline]
     pub fn inferred(&self, resolver: &mut dyn TypeResolver) -> Self {
-        self.resolved(resolver).flattened(resolver)
+        let inferred = match self.resolved(resolver) {
+            Some(ty) => ty.flattened(resolver),
+            None => self.flattened(resolver),
+        };
+        inferred.unwrap_or_else(|| self.clone())
     }
 
     #[inline]
@@ -542,7 +546,7 @@ impl TypeData {
 }
 
 /// A class definition.
-#[derive(Clone, Eq, Hash, PartialEq, Resolvable)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq, Resolvable)]
 pub struct Class {
     /// Name of the class, if specified in the definition.
     pub name: Option<Text>,
@@ -558,16 +562,6 @@ pub struct Class {
 
     /// Class members.
     pub members: Box<[TypeMember]>,
-}
-
-impl Debug for Class {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("Class")
-            .field("name", &self.name)
-            .field("type_parameters", &self.type_parameters)
-            .field("extends", &self.extends)
-            .finish()
-    }
 }
 
 /// A constructor definition.
@@ -1034,11 +1028,6 @@ pub struct TypeofTypeofExpression {
     pub argument: TypeReference,
 }
 
-#[derive(Clone, Debug, Eq, Hash, PartialEq, Resolvable)]
-pub struct TypeofUnaryMinusExpression {
-    pub argument: TypeReference,
-}
-
 /// Reference to the type of a named JavaScript value.
 #[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub struct TypeofValue {
@@ -1054,6 +1043,11 @@ pub struct TypeofValue {
 
     /// ID of the scope from which the value is being referenced.
     pub scope_id: Option<ScopeId>,
+}
+
+#[derive(Clone, Debug, Eq, Hash, PartialEq, Resolvable)]
+pub struct TypeofUnaryMinusExpression {
+    pub argument: TypeReference,
 }
 
 #[derive(Clone, Debug, Eq, Hash, PartialEq, Resolvable)]
@@ -1130,7 +1124,7 @@ impl TypeReference {
             Self::Qualifier(qualifier) => qualifier
                 .type_parameters
                 .iter()
-                .map(|param| param.resolved(resolver))
+                .map(|param| param.resolved(resolver).unwrap_or_else(|| param.clone()))
                 .collect(),
             _ => [].into(),
         }

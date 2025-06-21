@@ -1,19 +1,15 @@
-use std::{
-    borrow::Cow,
-    collections::{BTreeMap, BTreeSet, btree_map::Entry},
-    ops::Deref,
-    sync::Arc,
-};
+use std::{borrow::Cow, collections::hash_map::Entry, ops::Deref, sync::Arc};
 
 use biome_js_syntax::AnyJsExpression;
 use biome_js_type_info::{
-    GLOBAL_RESOLVER, GLOBAL_UNKNOWN_ID, ImportSymbol, ModuleId, Resolvable, ResolvedTypeData,
-    ResolvedTypeId, ResolverId, ScopeId, Type, TypeData, TypeId, TypeImportQualifier,
-    TypeReference, TypeReferenceQualifier, TypeResolver, TypeResolverLevel, TypeStore,
+    GLOBAL_RESOLVER, GLOBAL_UNKNOWN_ID, ImportSymbol, MAX_FLATTEN_DEPTH, ModuleId, Resolvable,
+    ResolvedTypeData, ResolvedTypeId, ResolverId, ScopeId, Type, TypeData, TypeId,
+    TypeImportQualifier, TypeReference, TypeReferenceQualifier, TypeResolver, TypeResolverLevel,
+    TypeStore,
 };
 use biome_resolver::ResolvedPath;
 use biome_rowan::{AstNode, RawSyntaxKind, Text, TextRange, TokenText};
-use rustc_hash::FxHashMap;
+use rustc_hash::{FxHashMap, FxHashSet};
 
 use crate::{
     JsExport, JsOwnExport, ModuleGraph,
@@ -60,7 +56,7 @@ pub struct ModuleResolver {
     /// Map of module IDs keyed by their resolved paths.
     ///
     /// Module IDs are used to index the [`Self::modules`] vector.
-    pub modules_by_path: BTreeMap<ResolvedPath, ModuleId>,
+    pub modules_by_path: FxHashMap<ResolvedPath, ModuleId>,
 
     /// Parsed expressions, mapped by their starting index to the ID of their
     /// type.
@@ -174,7 +170,7 @@ impl ModuleResolver {
                 let module_id = ModuleId::new(self.modules.len());
                 self.modules.push(module_info);
                 self.types
-                    .register_type(Cow::Owned(TypeData::ImportNamespace(module_id)));
+                    .insert_cow(Cow::Owned(TypeData::ImportNamespace(module_id)));
                 Some(*entry.insert(module_id))
             }
         }
@@ -201,9 +197,9 @@ impl ModuleResolver {
         self.type_id_map = module
             .types
             .iter()
-            .map(|ty| {
-                let ty = ty.resolved(self);
-                self.types.register_type(Cow::Owned(ty))
+            .map(|ty| match ty.resolved(self) {
+                Some(ty) => self.types.insert_cow(Cow::Owned(ty)),
+                None => self.types.insert_arc(ty),
             })
             .collect();
 
@@ -214,15 +210,21 @@ impl ModuleResolver {
     }
 
     fn flatten_all(&mut self) {
-        let mut i = 0;
-        while i < self.types.len() {
-            // SAFETY: We reinsert before anyone got a chance to do lookups.
-            unsafe {
-                let ty = self.types.take_from_index_temporarily(i);
-                let ty = ty.flattened(self);
-                self.types.reinsert_temporarily_taken_data(i, ty);
+        for _ in 0..MAX_FLATTEN_DEPTH {
+            let mut did_flatten = false;
+
+            let mut i = 0;
+            while i < self.types.len() {
+                if let Some(ty) = self.types.get(i).flattened(self) {
+                    self.types.replace(i, ty);
+                    did_flatten = true;
+                }
+                i += 1;
             }
-            i += 1;
+
+            if !did_flatten {
+                break;
+            }
         }
     }
 
@@ -238,7 +240,7 @@ impl ModuleResolver {
         mut module_id: ModuleId,
         mut symbol: Cow<'a, ImportSymbol>,
         mut type_only: bool,
-        mut seen_modules: BTreeSet<ModuleId>,
+        mut seen_modules: FxHashSet<ModuleId>,
     ) -> Option<ResolvedTypeId> {
         while seen_modules.len() < MAX_IMPORT_DEPTH {
             if !seen_modules.insert(module_id) {
@@ -309,7 +311,7 @@ impl TypeResolver for ModuleResolver {
     }
 
     fn find_type(&self, type_data: &TypeData) -> Option<TypeId> {
-        self.types.find_type(type_data)
+        self.types.find(type_data)
     }
 
     fn get_by_id(&self, id: TypeId) -> &TypeData {
@@ -323,7 +325,7 @@ impl TypeResolver for ModuleResolver {
                 let module_id = id.module_id();
                 let module = &self.modules[module_id.index()];
                 if let Some(ty) = module.types.get(id.index()) {
-                    Some(ResolvedTypeData::from((id, ty)))
+                    Some(ResolvedTypeData::from((id, ty.as_ref())))
                 } else {
                     debug_assert!(false, "Invalid type reference: {id:?}");
                     None
@@ -337,7 +339,7 @@ impl TypeResolver for ModuleResolver {
     }
 
     fn register_type(&mut self, type_data: Cow<TypeData>) -> TypeId {
-        self.types.register_type(type_data)
+        self.types.insert_cow(type_data)
     }
 
     fn resolve_reference(&self, ty: &TypeReference) -> Option<ResolvedTypeId> {
@@ -355,7 +357,7 @@ impl TypeResolver for ModuleResolver {
             module_id,
             Cow::Borrowed(&qualifier.symbol),
             qualifier.type_only,
-            BTreeSet::new(),
+            FxHashSet::default(),
         )
     }
 
@@ -371,7 +373,7 @@ impl TypeResolver for ModuleResolver {
                 name,
             )))),
             false,
-            BTreeSet::new(),
+            FxHashSet::default(),
         )
     }
 
@@ -435,8 +437,8 @@ impl TypeResolver for ModuleResolver {
         Some(GLOBAL_RESOLVER.as_ref())
     }
 
-    fn registered_types(&self) -> &[TypeData] {
-        self.types.as_slice()
+    fn registered_types(&self) -> Vec<&TypeData> {
+        self.types.as_references()
     }
 }
 

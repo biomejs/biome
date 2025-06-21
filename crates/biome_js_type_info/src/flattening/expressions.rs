@@ -15,12 +15,9 @@ use crate::{
     },
 };
 
-use super::flattened;
-
 pub(super) fn flattened_expression(
     expr: &TypeofExpression,
     resolver: &mut dyn TypeResolver,
-    depth: usize,
 ) -> Option<TypeData> {
     match expr {
         TypeofExpression::Addition(_expr) => {
@@ -62,31 +59,28 @@ pub(super) fn flattened_expression(
         }
         TypeofExpression::Call(expr) => match resolver.resolve_and_get(&expr.callee) {
             Some(callee) => {
-                let callee = flattened(callee.to_data(), resolver, depth);
-                flattened_function_call(expr, callee, resolver, depth).map(
-                    |(is_instance, mut ty)| {
-                        if is_instance {
-                            ty = ty.into_instance(resolver);
-                        }
+                let (is_instance, mut ty) =
+                    flattened_function_call(expr, callee.to_data(), resolver)?;
+                if is_instance {
+                    ty = ty.into_instance(resolver);
+                }
 
-                        flattened(ty, resolver, depth)
-                    },
-                )
+                Some(ty)
             }
             None => None,
         },
         TypeofExpression::Destructure(expr) => {
             match resolver.resolve_and_get(&expr.ty) {
                 Some(resolved) => match (resolved.as_raw_data(), &expr.destructure_field) {
-                    (subject, DestructureField::Index(index)) => Some(
-                        subject
-                            .clone()
+                    (_subject, DestructureField::Index(index)) => Some(
+                        resolved
+                            .to_data()
                             .find_element_type_at_index(resolved.resolver_id(), resolver, *index)
                             .map_or_else(TypeData::unknown, ResolvedTypeData::to_data),
                     ),
-                    (subject, DestructureField::RestFrom(index)) => Some(
-                        subject
-                            .clone()
+                    (_subject, DestructureField::RestFrom(index)) => Some(
+                        resolved
+                            .to_data()
                             .find_type_of_elements_from_index(
                                 resolved.resolver_id(),
                                 resolver,
@@ -96,31 +90,25 @@ pub(super) fn flattened_expression(
                     ),
                     (TypeData::InstanceOf(subject_instance), DestructureField::Name(name)) => {
                         resolver
-                            .resolve_and_get(&subject_instance.ty)
-                            .map(ResolvedTypeData::to_data)
-                            .map(|type_data| flattened(type_data, resolver, depth))
+                            .resolve_and_get(
+                                &resolved.apply_module_id_to_reference(&subject_instance.ty),
+                            )
                             .and_then(|subject| {
-                                let member = ResolvedTypeData::from((
-                                    ResolverId::from_level(resolver.level()),
-                                    &subject,
-                                ))
-                                .all_members(resolver)
-                                .find(|member| {
+                                subject.all_members(resolver).find(|member| {
                                     !member.is_static() && member.has_name(name.text())
-                                })?;
-                                Some(
-                                    resolver
-                                        .resolve_and_get(&member.ty())
-                                        .map_or_else(TypeData::unknown, ResolvedTypeData::to_data),
-                                )
+                                })
                             })
+                            .and_then(|member| resolver.resolve_and_get(&member.ty()))
+                            .map(ResolvedTypeData::to_data)
                     }
                     (
                         TypeData::InstanceOf(subject_instance),
                         DestructureField::RestExcept(names),
                     ) => {
                         resolver
-                            .resolve_and_get(&subject_instance.ty)
+                            .resolve_and_get(
+                                &resolved.apply_module_id_to_reference(&subject_instance.ty),
+                            )
                             .map(|subject| {
                                 // We need to look up the prototype chain, which may
                                 // yield duplicate member names. We deduplicate
@@ -151,11 +139,9 @@ pub(super) fn flattened_expression(
                         let member = resolved
                             .all_members(resolver)
                             .find(|member| !member.is_static() && member.has_name(name.text()))?;
-                        Some(
-                            resolver
-                                .resolve_and_get(&member.ty())
-                                .map_or_else(TypeData::unknown, ResolvedTypeData::to_data),
-                        )
+                        resolver
+                            .resolve_and_get(&member.ty())
+                            .map(ResolvedTypeData::to_data)
                     }
                     (TypeData::Object(_), DestructureField::RestExcept(names)) => {
                         // We need to look up the prototype chain, which may
@@ -182,22 +168,18 @@ pub(super) fn flattened_expression(
                                 .collect(),
                         ))
                     }
-                    (subject, DestructureField::Name(name)) => Some({
+                    (subject, DestructureField::Name(name)) => {
                         let member_ty = subject
                             .own_members()
                             .find(|own_member| {
                                 own_member.is_static() && own_member.has_name(name.text())
                             })
                             .map(|member| resolved.apply_module_id_to_reference(&member.ty))?;
-                        flattened(
-                            resolver
-                                .resolve_and_get(&member_ty)
-                                .map_or_else(TypeData::unknown, ResolvedTypeData::to_data),
-                            resolver,
-                            depth,
-                        )
-                    }),
-                    (subject, DestructureField::RestExcept(names)) => Some({
+                        resolver
+                            .resolve_and_get(&member_ty)
+                            .map(ResolvedTypeData::to_data)
+                    }
+                    (subject, DestructureField::RestExcept(names)) => {
                         let members = subject
                             .own_members()
                             .filter(|own_member| {
@@ -209,42 +191,38 @@ pub(super) fn flattened_expression(
                                     .to_member()
                             })
                             .collect();
-                        TypeData::object_with_members(members)
-                    }),
+                        Some(TypeData::object_with_members(members))
+                    }
                 },
                 None => None,
             }
         }
         TypeofExpression::New(expr) => {
-            match resolver
-                .resolve_and_get(&expr.callee)
-                .map(ResolvedTypeData::to_data)
-                .map(|type_data| flattened(type_data, resolver, depth))
-            {
-                Some(TypeData::Class(class)) => Some({
-                    let num_args = expr.arguments.len();
-                    let constructed_ty = class
-                        .members
-                        .iter()
-                        .find(|member| member.kind.is_constructor())
-                        .and_then(|member| {
-                            let constructor = resolver.resolve_and_get(&member.ty)?;
-                            match constructor.as_raw_data() {
-                                TypeData::Constructor(constructor) => {
-                                    // TODO: We might need to make an attempt to match
-                                    //       type signatures too.
-                                    (constructor.parameters.len() == num_args)
-                                        .then(|| constructor.return_type.clone())
-                                        .flatten()
-                                }
-                                _ => None,
+            let resolved = resolver.resolve_and_get(&expr.callee)?;
+            if let TypeData::Class(class) = resolved.as_raw_data() {
+                let num_args = expr.arguments.len();
+                let constructed_ty = class
+                    .members
+                    .iter()
+                    .find(|member| member.kind.is_constructor())
+                    .and_then(|member| {
+                        let constructor = resolver
+                            .resolve_and_get(&resolved.apply_module_id_to_reference(&member.ty))?;
+                        match constructor.to_data() {
+                            TypeData::Constructor(constructor) => {
+                                // TODO: We might need to make an attempt to match
+                                //       type signatures too.
+                                (constructor.parameters.len() == num_args)
+                                    .then_some(constructor.return_type)
+                                    .flatten()
                             }
-                        })
-                        .unwrap_or_else(|| expr.callee.clone());
-                    TypeData::instance_of(constructed_ty)
-                }),
-                // TODO: Handle objects with call signatures.
-                _ => None,
+                            _ => None,
+                        }
+                    })
+                    .unwrap_or_else(|| expr.callee.clone());
+                Some(TypeData::instance_of(constructed_ty))
+            } else {
+                None
             }
         }
         TypeofExpression::StaticMember(expr) => {
@@ -301,18 +279,12 @@ pub(super) fn flattened_expression(
                             .into_iter()
                             .map(|variant| {
                                 // Resolve and flatten the type member for each variant.
-                                let variant = flattened(
-                                    TypeData::TypeofExpression(Box::new(
-                                        TypeofExpression::StaticMember(
-                                            TypeofStaticMemberExpression {
-                                                object: variant,
-                                                member: expr.member.clone(),
-                                            },
-                                        ),
-                                    )),
-                                    resolver,
-                                    depth,
-                                );
+                                let variant = TypeData::TypeofExpression(Box::new(
+                                    TypeofExpression::StaticMember(TypeofStaticMemberExpression {
+                                        object: variant,
+                                        member: expr.member.clone(),
+                                    }),
+                                ));
 
                                 resolver.reference_to_owned_data(variant)
                             })
@@ -374,7 +346,6 @@ fn flattened_function_call(
     expr: &TypeofCallExpression,
     callee: TypeData,
     resolver: &mut dyn TypeResolver,
-    depth: usize,
 ) -> Option<(bool, TypeData)> {
     match callee {
         TypeData::Function(function) => function.return_type.as_type().and_then(|return_ty| {
@@ -409,27 +380,26 @@ fn flattened_function_call(
 
             Some((is_generic_instance, resolved_return_ty.to_data()))
         }),
-        TypeData::InstanceOf(instance) => resolver
-            .resolve_and_get(&instance.ty)
-            .map(ResolvedTypeData::to_data)
-            .map(|type_data| flattened(type_data, resolver, depth))
-            .and_then(|callee| {
+        TypeData::InstanceOf(instance) => {
+            let callee = resolver
+                .resolve_and_get(&instance.ty)
+                .and_then(|callee| {
+                    callee
+                        .all_members(resolver)
+                        .find(|member| member.kind().is_call_signature())
+                })
+                .map(ResolvedTypeMember::to_member)
+                .and_then(|member| resolver.resolve_and_get(&member.ty))?;
+            flattened_function_call(expr, callee.to_data(), resolver)
+        }
+        TypeData::Object(_) => {
+            let callee =
                 ResolvedTypeData::from((ResolverId::from_level(resolver.level()), &callee))
                     .all_members(resolver)
                     .find(|member| member.kind().is_call_signature())
                     .map(ResolvedTypeMember::to_member)
-                    .and_then(|member| resolver.resolve_and_get(&member.ty))
-                    .map(ResolvedTypeData::to_data)
-                    .and_then(|callee| flattened_function_call(expr, callee, resolver, depth))
-            }),
-        TypeData::Object(_) => {
-            ResolvedTypeData::from((ResolverId::from_level(resolver.level()), &callee))
-                .all_members(resolver)
-                .find(|member| member.kind().is_call_signature())
-                .map(ResolvedTypeMember::to_member)
-                .and_then(|member| resolver.resolve_and_get(&member.ty))
-                .map(ResolvedTypeData::to_data)
-                .and_then(|callee| flattened_function_call(expr, callee, resolver, depth))
+                    .and_then(|member| resolver.resolve_and_get(&member.ty))?;
+            flattened_function_call(expr, callee.to_data(), resolver)
         }
         _ => None,
     }

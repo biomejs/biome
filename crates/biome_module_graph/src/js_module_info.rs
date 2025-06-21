@@ -152,7 +152,7 @@ pub struct JsModuleInfoInner {
     pub(crate) scope_by_range: Lapper<u32, ScopeId>,
 
     /// Collection of all types in the module.
-    pub(crate) types: Box<[TypeData]>,
+    pub(crate) types: Box<[Arc<TypeData>]>,
 }
 
 #[derive(Debug, Default)]
@@ -217,8 +217,8 @@ impl JsModuleInfoInner {
         }
     }
 
-    pub fn types(&self) -> &[TypeData] {
-        &self.types
+    pub fn types(&self) -> Vec<&TypeData> {
+        self.types.iter().map(Arc::as_ref).collect()
     }
 }
 

@@ -23,7 +23,7 @@ export = shared;
 ```
 Exports {
   "default" => {
-    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(2))
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(3))
   }
   "foo" => {
     ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(1))
@@ -52,7 +52,9 @@ Module TypeId(2) => Object {
   members: ["foo": Module(0) TypeId(1)]
 }
 
-Module TypeId(3) => Namespace {
+Module TypeId(3) => Module(0) TypeId(2)
+
+Module TypeId(4) => Namespace {
     path: [
         Borrowed(
             "shared",
