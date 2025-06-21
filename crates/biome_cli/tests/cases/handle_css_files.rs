@@ -7,7 +7,7 @@ use camino::Utf8Path;
 
 #[test]
 fn should_not_format_files_by_default() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     let css_file_content = r#"html {}"#;
@@ -34,7 +34,7 @@ fn should_not_format_files_by_default() {
 
 #[test]
 fn should_format_files_by_when_opt_in() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     let css_file_content = r#"html {}"#;
@@ -61,7 +61,7 @@ fn should_format_files_by_when_opt_in() {
 
 #[test]
 fn should_format_write_files_by_when_opt_in() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     let css_file_content = r#"html {}"#;

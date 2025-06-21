@@ -7,7 +7,7 @@ use camino::Utf8Path;
 
 #[test]
 fn set_config_path_to_directory() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     let file_path = Utf8Path::new("src/index.js");
@@ -54,7 +54,7 @@ fn set_config_path_to_directory() {
 
 #[test]
 fn set_config_path_to_file() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     let file_path = Utf8Path::new("src/index.js");
@@ -101,7 +101,7 @@ fn set_config_path_to_file() {
 
 #[test]
 fn raises_an_error_when_the_config_file_is_not_json() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     let config_path = Utf8Path::new("biome.yml");
@@ -126,7 +126,7 @@ fn raises_an_error_when_the_config_file_is_not_json() {
 
 #[test]
 fn raises_an_error_for_no_configuration_file_found() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     let file = Utf8Path::new("file.js");

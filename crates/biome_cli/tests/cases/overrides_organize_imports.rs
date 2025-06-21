@@ -11,7 +11,7 @@ import { lorem, foom, bar } from "foo";"#;
 #[test]
 fn does_handle_included_file_and_disable_organize_imports() {
     let mut console = BufferConsole::default();
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let file_path = Utf8Path::new("biome.json");
     fs.insert(
         file_path.into(),

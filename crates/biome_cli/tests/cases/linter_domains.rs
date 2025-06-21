@@ -8,7 +8,7 @@ use camino::Utf8Path;
 #[test]
 fn does_enable_test_rules() {
     let mut console = BufferConsole::default();
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let config = Utf8Path::new("biome.json");
     fs.insert(
         config.into(),
@@ -62,7 +62,7 @@ describe("foo", () => {
 #[test]
 fn does_disable_test_rules() {
     let mut console = BufferConsole::default();
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let config = Utf8Path::new("biome.json");
     fs.insert(
         config.into(),
@@ -116,7 +116,7 @@ describe("foo", () => {
 #[test]
 fn enable_test_rules_via_overrides() {
     let mut console = BufferConsole::default();
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let config = Utf8Path::new("biome.json");
     fs.insert(
         config.into(),
@@ -176,7 +176,7 @@ describe("foo", () => {
 #[test]
 fn does_enable_test_rules_and_skip() {
     let mut console = BufferConsole::default();
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let config = Utf8Path::new("biome.json");
     fs.insert(
         config.into(),
@@ -236,7 +236,7 @@ describe("foo", () => {
 #[test]
 fn does_enable_test_rules_and_only() {
     let mut console = BufferConsole::default();
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let config = Utf8Path::new("biome.json");
     fs.insert(
         config.into(),
@@ -300,7 +300,7 @@ describe("foo", () => {
 #[test]
 fn does_enable_test_rules_when_recommended_rules_are_disabled_but_domain_is_enabled() {
     let mut console = BufferConsole::default();
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let config = Utf8Path::new("biome.json");
     fs.insert(
         config.into(),

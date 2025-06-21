@@ -75,7 +75,7 @@ const { some } = Astro.props
 
 #[test]
 fn format_astro_files() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     let astro_file_path = Utf8Path::new("file.astro");
@@ -100,7 +100,7 @@ fn format_astro_files() {
 
 #[test]
 fn format_astro_files_write() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     let astro_file_path = Utf8Path::new("file.astro");
@@ -125,7 +125,7 @@ fn format_astro_files_write() {
 
 #[test]
 fn format_empty_astro_files_write() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     let astro_file_path = Utf8Path::new("file.astro");
@@ -150,7 +150,7 @@ fn format_empty_astro_files_write() {
 
 #[test]
 fn format_astro_carriage_return_line_feed_files() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     let astro_file_path = Utf8Path::new("file.astro");
@@ -178,7 +178,7 @@ fn format_astro_carriage_return_line_feed_files() {
 
 #[test]
 fn lint_astro_files() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     let astro_file_path = Utf8Path::new("file.astro");
@@ -206,7 +206,7 @@ fn lint_astro_files() {
 
 #[test]
 fn lint_and_fix_astro_files() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     let astro_file_path = Utf8Path::new("file.astro");
@@ -234,7 +234,7 @@ fn lint_and_fix_astro_files() {
 
 #[test]
 fn sorts_imports_check() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     let astro_file_path = Utf8Path::new("file.astro");
@@ -267,7 +267,7 @@ fn sorts_imports_check() {
 
 #[test]
 fn sorts_imports_write() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     let astro_file_path = Utf8Path::new("file.astro");
@@ -301,7 +301,7 @@ fn sorts_imports_write() {
 
 #[test]
 fn does_not_throw_parse_error_for_return() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     let astro_file_path = Utf8Path::new("file.astro");
@@ -608,7 +608,7 @@ fn check_stdin_write_unsafe_successfully() {
 
 #[test]
 fn astro_global_object() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     let astro_file_path = Utf8Path::new("file.astro");

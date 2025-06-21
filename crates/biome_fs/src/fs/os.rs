@@ -463,7 +463,7 @@ impl TemporaryFs {
     /// Returns an instance of [MemoryFileSystem]. The files saved in the file system
     /// will be stripped of the working directory path, making snapshots predictable.
     pub fn create_mem(&self) -> MemoryFileSystem {
-        let mut fs = MemoryFileSystem::default();
+        let fs = MemoryFileSystem::default();
         for (path, content) in self.files.iter() {
             fs.insert(
                 path.clone()

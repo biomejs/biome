@@ -50,7 +50,7 @@ fn ci_help() {
 
 #[test]
 fn ok() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     let file_path = Utf8Path::new("ci.js");
@@ -81,7 +81,7 @@ fn ok() {
 
 #[test]
 fn formatting_error() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     let file_path = Utf8Path::new("ci.js");
@@ -106,7 +106,7 @@ fn formatting_error() {
 
 #[test]
 fn ci_parse_error() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     let file_path = Utf8Path::new("ci.js");
@@ -130,7 +130,7 @@ fn ci_parse_error() {
 
 #[test]
 fn ci_lint_error() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
 
     let file_path = Utf8Path::new("ci.js");
     fs.insert(file_path.into(), LINT_ERROR.as_bytes());
@@ -155,7 +155,7 @@ fn ci_lint_error() {
 
 #[test]
 fn ci_does_not_run_formatter() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     fs.insert(
@@ -188,7 +188,7 @@ fn ci_does_not_run_formatter() {
 
 #[test]
 fn ci_does_not_run_formatter_biome_jsonc() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     fs.insert(
@@ -221,7 +221,7 @@ fn ci_does_not_run_formatter_biome_jsonc() {
 
 #[test]
 fn ci_does_not_run_formatter_via_cli() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     let input_file = Utf8Path::new("file.js");
@@ -248,7 +248,7 @@ fn ci_does_not_run_formatter_via_cli() {
 
 #[test]
 fn ci_does_not_run_linter() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     fs.insert(
@@ -280,7 +280,7 @@ fn ci_does_not_run_linter() {
 
 #[test]
 fn ci_does_not_run_linter_via_cli() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     let file_path = Utf8Path::new("file.js");
@@ -307,7 +307,7 @@ fn ci_does_not_run_linter_via_cli() {
 
 #[test]
 fn ci_does_not_organize_imports_via_cli() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     let file_path = Utf8Path::new("file.js");
@@ -338,7 +338,7 @@ import * as something from "../something";
 
 #[test]
 fn ci_errors_for_all_disabled_checks() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     let file_path = Utf8Path::new("biome.json");
@@ -377,13 +377,13 @@ fn ci_errors_for_all_disabled_checks() {
 
 #[test]
 fn file_too_large() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     let file_path = Utf8Path::new("ci.js");
     fs.insert(file_path.into(), "statement();\n".repeat(80660).as_bytes());
 
-    let (mut fs, result) = run_cli(
+    let (fs, result) = run_cli(
         fs,
         &mut console,
         Args::from(["ci", file_path.as_str()].as_slice()),
@@ -405,7 +405,7 @@ fn file_too_large() {
 
 #[test]
 fn file_too_large_config_limit() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     fs.insert(Utf8PathBuf::from("biome.json"), CONFIG_FILE_SIZE_LIMIT);
@@ -432,7 +432,7 @@ fn file_too_large_config_limit() {
 
 #[test]
 fn file_too_large_cli_limit() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     let file_path = Utf8Path::new("ci.js");
@@ -457,7 +457,7 @@ fn file_too_large_cli_limit() {
 
 #[test]
 fn files_max_size_parse_error() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     let file_path = Utf8Path::new("ci.js");
@@ -482,7 +482,7 @@ fn files_max_size_parse_error() {
 
 #[test]
 fn ci_runs_linter_not_formatter_issue_3495() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     let file_path = Utf8Path::new("biome.json");
@@ -510,7 +510,7 @@ fn ci_runs_linter_not_formatter_issue_3495() {
 
 #[test]
 fn max_diagnostics_default() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     for i in 0..60 {
@@ -518,7 +518,7 @@ fn max_diagnostics_default() {
         fs.insert(file_path, UNFORMATTED.as_bytes());
     }
 
-    let (mut fs, result) = run_cli(fs, &mut console, Args::from(["ci", "src"].as_slice()));
+    let (fs, result) = run_cli(fs, &mut console, Args::from(["ci", "src"].as_slice()));
 
     assert!(result.is_err(), "run_cli returned {result:?}");
 
@@ -562,7 +562,7 @@ fn max_diagnostics_default() {
 
 #[test]
 fn max_diagnostics() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     for i in 0..60 {
@@ -570,7 +570,7 @@ fn max_diagnostics() {
         fs.insert(file_path, UNFORMATTED.as_bytes());
     }
 
-    let (mut fs, result) = run_cli(
+    let (fs, result) = run_cli(
         fs,
         &mut console,
         Args::from(["ci", "--max-diagnostics", "10", "src"].as_slice()),
@@ -617,7 +617,7 @@ fn max_diagnostics() {
 
 #[test]
 fn print_verbose() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
 
     let file_path = Utf8Path::new("ci.js");
     fs.insert(file_path.into(), LINT_ERROR.as_bytes());
@@ -642,7 +642,7 @@ fn print_verbose() {
 
 #[test]
 fn ci_formatter_linter_organize_imports() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     let rome_json = r#"{
@@ -700,7 +700,7 @@ something( )
 
 #[test]
 fn ignores_unknown_file() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     let file_path1 = Utf8Path::new("test.txt");
@@ -734,7 +734,7 @@ fn ignores_unknown_file() {
 
 #[test]
 fn correctly_handles_ignored_and_not_ignored_files() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     let configuration = Utf8Path::new("biome.json");
@@ -810,7 +810,7 @@ fn doesnt_error_if_no_files_were_processed() {
 #[test]
 fn does_error_with_only_warnings() {
     let mut console = BufferConsole::default();
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
 
     let file_path = Utf8Path::new("biome.json");
     fs.insert(
@@ -859,7 +859,7 @@ A = 0;
 
 #[test]
 fn does_formatting_error_without_file_paths() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     let file_path = Utf8Path::new("ci.js");
@@ -881,7 +881,7 @@ fn does_formatting_error_without_file_paths() {
 #[test]
 fn should_error_if_unchanged_files_only_with_changed_flag() {
     let mut console = BufferConsole::default();
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     // Unchanged
     fs.insert(
         Utf8Path::new("file1.js").into(),
@@ -904,7 +904,7 @@ fn should_error_if_unchanged_files_only_with_changed_flag() {
 
 #[test]
 fn ci_skip_parse_errors() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     let valid = Utf8Path::new("valid.js");

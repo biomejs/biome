@@ -8,7 +8,7 @@ use camino::Utf8Path;
 #[test]
 fn enables_all_rules_when_group_is_on_with_default_severity() {
     let mut console = BufferConsole::default();
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let config = Utf8Path::new("biome.json");
     fs.insert(
         config.into(),
@@ -51,7 +51,7 @@ fn enables_all_rules_when_group_is_on_with_default_severity() {
 #[test]
 fn enables_all_rules_when_group_is_error() {
     let mut console = BufferConsole::default();
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let config = Utf8Path::new("biome.json");
     fs.insert(
         config.into(),
@@ -93,7 +93,7 @@ fn enables_all_rules_when_group_is_error() {
 #[test]
 fn disable_all_rules_when_group_is_off() {
     let mut console = BufferConsole::default();
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let config = Utf8Path::new("biome.json");
     fs.insert(
         config.into(),

@@ -1821,7 +1821,7 @@ async fn pull_diagnostics_for_rome_json() -> Result<()> {
 
 #[tokio::test]
 async fn plugin_load_error_show_message() -> Result<()> {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let config = r#"{
         "css": {
             "linter": { "enabled": true }
@@ -1840,7 +1840,7 @@ async fn plugin_load_error_show_message() -> Result<()> {
         INVALID_PLUGIN_CONTENT,
     );
 
-    let factory = ServerFactory::new_with_fs(Box::new(fs));
+    let factory = ServerFactory::new_with_fs(Arc::new(fs));
     let (service, client) = factory.create().into_inner();
 
     let (stream, sink) = client.split();
@@ -1876,7 +1876,7 @@ async fn plugin_load_error_show_message() -> Result<()> {
 
 #[tokio::test]
 async fn pull_diagnostics_for_css_files() -> Result<()> {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let config = r#"{
         "css": {
             "linter": { "enabled": true }
@@ -1888,7 +1888,7 @@ async fn pull_diagnostics_for_css_files() -> Result<()> {
 
     fs.insert(to_utf8_file_path_buf(uri!("biome.json")), config);
 
-    let factory = ServerFactory::new_with_fs(Box::new(fs));
+    let factory = ServerFactory::new_with_fs(Arc::new(fs));
     let (service, client) = factory.create().into_inner();
 
     let (stream, sink) = client.split();
@@ -2278,7 +2278,7 @@ if(a === -0) {}
 
 #[tokio::test]
 async fn does_not_pull_action_for_disabled_rule_in_override_issue_2782() -> Result<()> {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let config = r#"{
     "$schema": "https://biomejs.dev/schemas/1.7.3/schema.json",
     "assist": { "enabled": false },
@@ -2307,7 +2307,7 @@ async fn does_not_pull_action_for_disabled_rule_in_override_issue_2782() -> Resu
 
     fs.insert(to_utf8_file_path_buf(uri!("biome.json")), config);
 
-    let factory = ServerFactory::new_with_fs(Box::new(fs));
+    let factory = ServerFactory::new_with_fs(Arc::new(fs));
     let (service, client) = factory.create().into_inner();
     let (stream, sink) = client.split();
     let mut server = Server::new(service);
@@ -2794,7 +2794,7 @@ async fn format_jsx_in_javascript_file() -> Result<()> {
 #[tokio::test]
 #[ignore = "flaky, it times out on CI"]
 async fn does_not_format_ignored_files() -> Result<()> {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let config = r#"{
         "files": {
             "includes": ["**", "!**/document.js"]
@@ -2803,7 +2803,7 @@ async fn does_not_format_ignored_files() -> Result<()> {
 
     fs.insert(to_utf8_file_path_buf(uri!("biome.json")), config);
 
-    let factory = ServerFactory::new_with_fs(Box::new(fs));
+    let factory = ServerFactory::new_with_fs(Arc::new(fs));
     let (service, client) = factory.create().into_inner();
     let (stream, sink) = client.split();
     let mut server = Server::new(service);
@@ -3104,7 +3104,7 @@ async fn multiple_projects() -> Result<()> {
 
 #[tokio::test]
 async fn pull_source_assist_action() -> Result<()> {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let config = r#"{
         "assist": {
             "enabled": true,
@@ -3118,7 +3118,7 @@ async fn pull_source_assist_action() -> Result<()> {
 
     fs.insert(to_utf8_file_path_buf(uri!("biome.json")), config);
 
-    let factory = ServerFactory::new_with_fs(Box::new(fs));
+    let factory = ServerFactory::new_with_fs(Arc::new(fs));
     let (service, client) = factory.create().into_inner();
     let (stream, sink) = client.split();
     let mut server = Server::new(service);
@@ -3710,7 +3710,7 @@ export function bar() {
 #[tokio::test]
 #[ignore]
 async fn pull_diagnostics_monorepo() -> Result<()> {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
 
     fs.insert(
         to_utf8_file_path_buf(uri!("biome.json")),
@@ -3740,7 +3740,7 @@ async fn pull_diagnostics_monorepo() -> Result<()> {
         r#"const a = 1; a = 2;"#,
     );
 
-    let factory = ServerFactory::new_with_fs(Box::new(fs));
+    let factory = ServerFactory::new_with_fs(Arc::new(fs));
     let (service, client) = factory.create().into_inner();
     let (stream, sink) = client.split();
     let mut server = Server::new(service);
