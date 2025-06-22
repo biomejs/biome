@@ -1,7 +1,6 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalidLocalVariable.js
-snapshot_kind: text
 ---
 # Input
 ```js
@@ -144,6 +143,21 @@ invalidLocalVariable.js:12:11 lint/style/useNamingConvention  FIXABLE  ━━━
        15 │ + ········a_var:·aVar·//·comment
     16 16 │       };
     17 17 │   }
+  
+
+```
+
+```
+invalidLocalVariable.js:15:9 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This object property name should be in camelCase.
+  
+    13 │     console.log(a_var);
+    14 │     return {
+  > 15 │         a_var // comment
+       │         ^^^^^
+    16 │     };
+    17 │ }
   
 
 ```
