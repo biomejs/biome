@@ -1,14 +1,55 @@
 #!/bin/bash
-set -eu
 
-# Print a changelog section (default: first section).
+# Script to extract changelog section for a specific version
+# Usage: ./print-changelog.sh [version] [changelog-file]
 
-VERSION=''
+# Default values
+VERSION=""
+CHANGELOG_FILE="packages/@biomejs/biome/CHANGELOG.md"
 
-if test -n "${1:-}" && grep -Eq "^## $1($| )" CHANGELOG.md; then
-    # The specified version has a dedicated section in the changelog
-    VERSION="$1"
+# Parse arguments
+if [ $# -eq 0 ]; then
+    exit 1
 fi
 
-# print Changelog of $VERSION
-awk -v version="$VERSION" '/^## / { if (p) { exit }; if (version == "" || $2 == version) { p=1; next} } p' CHANGELOG.md
+VERSION="$1"
+if [ $# -eq 2 ]; then
+    CHANGELOG_FILE="$2"
+fi
+
+# Check if changelog file exists
+if [ ! -f "$CHANGELOG_FILE" ]; then
+    exit 1
+fi
+
+# Extract the section for the specified version
+awk -v version="$VERSION" '
+BEGIN {
+    found = 0
+    printing = 0
+}
+
+# Found the version header
+/^## / {
+    if ($2 == version) {
+        found = 1
+        printing = 1
+        print
+        next
+    } else if (printing) {
+        # Found next version section, stop printing
+        exit
+    }
+}
+
+# Print lines when we are in the target version section
+printing {
+    print
+}
+
+END {
+    if (!found) {
+        exit 1
+    }
+}
+' "$CHANGELOG_FILE"

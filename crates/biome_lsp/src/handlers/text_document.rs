@@ -6,7 +6,7 @@ use crate::{documents::Document, session::Session};
 use biome_fs::BiomePath;
 use biome_service::workspace::{
     ChangeFileParams, CloseFileParams, DocumentFileSource, FeaturesBuilder, FileContent,
-    GetFileContentParams, IsPathIgnoredParams, OpenFileParams, OpenProjectParams,
+    GetFileContentParams, IsPathIgnoredParams, OpenFileParams, OpenProjectParams, ScanKind,
 };
 use tower_lsp_server::lsp_types;
 use tracing::{debug, error, field, info};
@@ -45,8 +45,13 @@ pub(crate) async fn did_open(
                 skip_rules: None,
                 only_rules: None,
             })?;
+            let scan_kind = if result.scan_kind.is_none() {
+                ScanKind::KnownFiles
+            } else {
+                result.scan_kind
+            };
             session
-                .insert_and_scan_project(result.project_key, parent_path, result.scan_kind)
+                .insert_and_scan_project(result.project_key, parent_path, scan_kind)
                 .await;
             result.project_key
         }

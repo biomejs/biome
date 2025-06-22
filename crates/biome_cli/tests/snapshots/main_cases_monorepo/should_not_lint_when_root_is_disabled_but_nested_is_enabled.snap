@@ -1,0 +1,60 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `packages/lib/biome.json`
+
+```json
+{ "extends": "//", "linter": { "enabled": true } }
+```
+
+## `biome.json`
+
+```json
+{ "linter": { "enabled": false } }
+```
+
+## `file.js`
+
+```js
+debugger
+```
+
+## `packages/lib/file.js`
+
+```js
+debugger
+```
+
+# Termination Message
+
+```block
+lint ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Some errors were emitted while running checks.
+  
+
+
+```
+
+# Emitted Messages
+
+```block
+packages/lib/file.js:1:1 lint/suspicious/noDebugger  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This is an unexpected use of the debugger statement.
+  
+  > 1 │ debugger
+      │ ^^^^^^^^
+  
+  i Unsafe fix: Remove debugger statement
+  
+    1 │ debugger
+      │ --------
+
+```
+
+```block
+Checked 2 files in <TIME>. No fixes applied.
+Found 1 error.
+```

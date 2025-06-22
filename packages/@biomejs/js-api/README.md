@@ -26,12 +26,13 @@ const biome = await Biome.create({
 	distribution: Distribution.NODE, // Or BUNDLER / WEB depending on the distribution package you've installed
 });
 
-const projectKey = biome.openProject("path/to/project/dir");
+const { projectKey } = biome.openProject("path/to/project/dir");
 
 // Optionally apply a Biome configuration (instead of biome.json)
 biome.applyConfiguration(projectKey, {...});
 
 const formatted = biome.formatContent(
+  projectKey,
 	"function f   (a, b) { return a == b; }",
 	{
 		filePath: "example.js",
@@ -40,9 +41,13 @@ const formatted = biome.formatContent(
 
 console.log("Formatted content: ", formatted.content);
 
-const result = biome.lintContent(formatted.content, {
-	filePath: "example.js",
-});
+const result = biome.lintContent(
+  projectKey,
+  formatted.content,
+  {
+	  filePath: "example.js",
+  }
+);
 
 const html = biome.printDiagnostics(result.diagnostics, {
 	filePath: "example.js",

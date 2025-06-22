@@ -1,0 +1,73 @@
+/* should not generate diagnostics */
+
+class Example1 {
+	readonly #prop0: number = 42;
+	private readonly prop1: number = 42;
+	protected readonly prop2: string;
+	public readonly prop3: string;
+	readonly prop4: string;
+}
+
+class Example2 {
+	constructor(
+		private readonly prop1: number,
+		public readonly prop2: string,
+		protected readonly prop3: string,
+		prop4: string, // this is not treated as class member prop IF it does not have access modifier
+	) {
+	}
+}
+
+class Example3 {
+	readonly #prop0: number = 42;
+	private readonly prop1: number = 42;
+	protected readonly prop2: number;
+	public readonly prop3: number;
+	readonly prop4: number;
+
+	constructor(p0: number, p1: number, p2: number, p3: number, p4: number) {
+		this.#prop0 = p0;
+		this.prop1 = p1;
+		this.prop2 = p2;
+		this.prop3 = p3;
+		this.prop4 = p4;
+	}
+}
+
+// with some getters/ reads do not affect readonly
+class Example4 {
+	readonly #prop0: number = 42;
+	private readonly prop1: number = 42;
+	protected readonly prop2: number;
+	public readonly prop3: number;
+	readonly prop4: number;
+
+	constructor(p0: number, p1: number, p2: number, p3: number, p4: number) {
+		this.#prop0 = p0;
+		this.prop1 = p1;
+		this.prop2 = p2;
+		this.prop3 = p3;
+		this.prop4 = p4;
+	}
+
+	getProp0(): number {
+		return this.#prop0;
+	}
+
+	getProp1(): number {
+		return this.prop1;
+	}
+
+	getProp2(): number {
+		return this.prop2;
+	}
+
+	getProp3(): number {
+		return this.prop3;
+	}
+
+	getProp4(): number {
+		return this.prop4;
+	}
+}
+

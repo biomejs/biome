@@ -768,7 +768,7 @@ impl<'a> ProjectScanComputer<'a> {
         } else {
             // There's no need to scan further known files if the VCS isn't enabled
             if !self.configuration.use_ignore_file() {
-                ScanKind::None
+                ScanKind::NoScanner
             } else {
                 ScanKind::KnownFiles
             }
@@ -856,7 +856,7 @@ mod tests {
 
         assert_eq!(
             ProjectScanComputer::new(&configuration, &[], &[]).compute(),
-            ScanKind::None
+            ScanKind::NoScanner
         );
     }
 
@@ -928,7 +928,7 @@ mod tests {
                 &[]
             )
             .compute(),
-            ScanKind::None
+            ScanKind::NoScanner
         );
     }
 

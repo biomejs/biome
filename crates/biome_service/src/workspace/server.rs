@@ -1000,7 +1000,7 @@ impl Workspace for WorkspaceServer {
                 params.only_rules.unwrap_or_default(),
                 params.skip_rules.unwrap_or_default(),
             )
-            .unwrap_or((path, ScanKind::None))
+            .unwrap_or((path, ScanKind::NoScanner))
         } else {
             self.find_project_root(
                 params.path,

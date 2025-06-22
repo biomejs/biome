@@ -1,0 +1,57 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: issue6377.js
+---
+# Input
+```js
+function sum(...args) {
+	let result = 0;
+	for (const value of args) {
+		result += value;
+	}
+	return result;
+}
+
+// False positive ❌
+sum(1) === sum(1, 2);
+sum(1) !== sum(1, 2);
+
+// True positives ✅
+sum(1) === sum(1);
+sum(1) !== sum(1);
+
+// True negatives ✅
+sum(1) === sum(2);
+sum(1) !== sum(2);
+
+```
+
+# Diagnostics
+```
+issue6377.js:14:1 lint/suspicious/noSelfCompare ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Comparing to itself is potentially pointless.
+  
+    13 │ // True positives ✅
+  > 14 │ sum(1) === sum(1);
+       │ ^^^^^^^^^^^^^^^^^
+    15 │ sum(1) !== sum(1);
+    16 │ 
+  
+
+```
+
+```
+issue6377.js:15:1 lint/suspicious/noSelfCompare ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Comparing to itself is potentially pointless.
+  
+    13 │ // True positives ✅
+    14 │ sum(1) === sum(1);
+  > 15 │ sum(1) !== sum(1);
+       │ ^^^^^^^^^^^^^^^^^
+    16 │ 
+    17 │ // True negatives ✅
+  
+
+```

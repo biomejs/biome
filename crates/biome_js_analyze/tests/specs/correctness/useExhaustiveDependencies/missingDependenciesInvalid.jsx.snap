@@ -1,6 +1,5 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
-assertion_line: 134
 expression: missingDependenciesInvalid.jsx
 ---
 # Input
@@ -201,7 +200,7 @@ function HoistedDeclarations() {
 ```
 missingDependenciesInvalid.jsx:18:5 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━━━━━━━━━
 
-  × This hook does not specify all of its dependencies: a
+  × This hook does not specify its dependency on a.
   
     16 │     let a = 1;
     17 │     const b = a + 1;
@@ -210,7 +209,7 @@ missingDependenciesInvalid.jsx:18:5 lint/correctness/useExhaustiveDependencies  
     19 │       console.log(a, b);
     20 │     }, []);
   
-  i This dependency is not specified in the hook dependency list.
+  i This dependency is being used here, but is not specified in the hook dependency list.
   
     17 │     const b = a + 1;
     18 │     useEffect(() => {
@@ -219,9 +218,9 @@ missingDependenciesInvalid.jsx:18:5 lint/correctness/useExhaustiveDependencies  
     20 │     }, []);
     21 │ }
   
-  i Either include it or remove the dependency array
+  i Either include it or remove the dependency array.
   
-  i Unsafe fix: Add the missing dependencies to the list.
+  i Unsafe fix: Add the missing dependency to the list.
   
     20 │ ····},·[a]);
        │         +   
@@ -231,7 +230,7 @@ missingDependenciesInvalid.jsx:18:5 lint/correctness/useExhaustiveDependencies  
 ```
 missingDependenciesInvalid.jsx:18:5 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━━━━━━━━━
 
-  × This hook does not specify all of its dependencies: b
+  × This hook does not specify its dependency on b.
   
     16 │     let a = 1;
     17 │     const b = a + 1;
@@ -240,7 +239,7 @@ missingDependenciesInvalid.jsx:18:5 lint/correctness/useExhaustiveDependencies  
     19 │       console.log(a, b);
     20 │     }, []);
   
-  i This dependency is not specified in the hook dependency list.
+  i This dependency is being used here, but is not specified in the hook dependency list.
   
     17 │     const b = a + 1;
     18 │     useEffect(() => {
@@ -249,9 +248,9 @@ missingDependenciesInvalid.jsx:18:5 lint/correctness/useExhaustiveDependencies  
     20 │     }, []);
     21 │ }
   
-  i Either include it or remove the dependency array
+  i Either include it or remove the dependency array.
   
-  i Unsafe fix: Add the missing dependencies to the list.
+  i Unsafe fix: Add the missing dependency to the list.
   
     20 │ ····},·[b]);
        │         +   
@@ -261,7 +260,7 @@ missingDependenciesInvalid.jsx:18:5 lint/correctness/useExhaustiveDependencies  
 ```
 missingDependenciesInvalid.jsx:32:3 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━━━━━━━━━
 
-  × This hook does not specify all of its dependencies: deferredValue
+  × This hook does not specify its dependency on deferredValue.
   
     30 │   const deferredValue = useDeferredValue(value);
     31 │   const [isPending, startTransition] = useTransition();
@@ -270,7 +269,7 @@ missingDependenciesInvalid.jsx:32:3 lint/correctness/useExhaustiveDependencies  
     33 │       console.log(name);
     34 │       setName(1);
   
-  i This dependency is not specified in the hook dependency list.
+  i This dependency is being used here, but is not specified in the hook dependency list.
   
     39 │       console.log(memoizedCallback);
     40 │       console.log(memoizedValue);
@@ -279,9 +278,9 @@ missingDependenciesInvalid.jsx:32:3 lint/correctness/useExhaustiveDependencies  
     42 │ 
     43 │       console.log(isPending);
   
-  i Either include it or remove the dependency array
+  i Either include it or remove the dependency array.
   
-  i Unsafe fix: Add the missing dependencies to the list.
+  i Unsafe fix: Add the missing dependency to the list.
   
     45 │ ··},·[deferredValue]);
        │       +++++++++++++   
@@ -291,7 +290,7 @@ missingDependenciesInvalid.jsx:32:3 lint/correctness/useExhaustiveDependencies  
 ```
 missingDependenciesInvalid.jsx:32:3 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━━━━━━━━━
 
-  × This hook does not specify all of its dependencies: memoizedCallback
+  × This hook does not specify its dependency on memoizedCallback.
   
     30 │   const deferredValue = useDeferredValue(value);
     31 │   const [isPending, startTransition] = useTransition();
@@ -300,7 +299,7 @@ missingDependenciesInvalid.jsx:32:3 lint/correctness/useExhaustiveDependencies  
     33 │       console.log(name);
     34 │       setName(1);
   
-  i This dependency is not specified in the hook dependency list.
+  i This dependency is being used here, but is not specified in the hook dependency list.
   
     37 │       dispatch(1);
     38 │ 
@@ -309,9 +308,9 @@ missingDependenciesInvalid.jsx:32:3 lint/correctness/useExhaustiveDependencies  
     40 │       console.log(memoizedValue);
     41 │       console.log(deferredValue);
   
-  i Either include it or remove the dependency array
+  i Either include it or remove the dependency array.
   
-  i Unsafe fix: Add the missing dependencies to the list.
+  i Unsafe fix: Add the missing dependency to the list.
   
     45 │ ··},·[memoizedCallback]);
        │       ++++++++++++++++   
@@ -321,7 +320,7 @@ missingDependenciesInvalid.jsx:32:3 lint/correctness/useExhaustiveDependencies  
 ```
 missingDependenciesInvalid.jsx:32:3 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━━━━━━━━━
 
-  × This hook does not specify all of its dependencies: state
+  × This hook does not specify its dependency on state.
   
     30 │   const deferredValue = useDeferredValue(value);
     31 │   const [isPending, startTransition] = useTransition();
@@ -330,7 +329,7 @@ missingDependenciesInvalid.jsx:32:3 lint/correctness/useExhaustiveDependencies  
     33 │       console.log(name);
     34 │       setName(1);
   
-  i This dependency is not specified in the hook dependency list.
+  i This dependency is being used here, but is not specified in the hook dependency list.
   
     34 │       setName(1);
     35 │ 
@@ -339,9 +338,9 @@ missingDependenciesInvalid.jsx:32:3 lint/correctness/useExhaustiveDependencies  
     37 │       dispatch(1);
     38 │ 
   
-  i Either include it or remove the dependency array
+  i Either include it or remove the dependency array.
   
-  i Unsafe fix: Add the missing dependencies to the list.
+  i Unsafe fix: Add the missing dependency to the list.
   
     45 │ ··},·[state]);
        │       +++++   
@@ -351,7 +350,7 @@ missingDependenciesInvalid.jsx:32:3 lint/correctness/useExhaustiveDependencies  
 ```
 missingDependenciesInvalid.jsx:32:3 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━━━━━━━━━
 
-  × This hook does not specify all of its dependencies: name
+  × This hook does not specify its dependency on name.
   
     30 │   const deferredValue = useDeferredValue(value);
     31 │   const [isPending, startTransition] = useTransition();
@@ -360,7 +359,7 @@ missingDependenciesInvalid.jsx:32:3 lint/correctness/useExhaustiveDependencies  
     33 │       console.log(name);
     34 │       setName(1);
   
-  i This dependency is not specified in the hook dependency list.
+  i This dependency is being used here, but is not specified in the hook dependency list.
   
     31 │   const [isPending, startTransition] = useTransition();
     32 │   useEffect(() => {
@@ -369,9 +368,9 @@ missingDependenciesInvalid.jsx:32:3 lint/correctness/useExhaustiveDependencies  
     34 │       setName(1);
     35 │ 
   
-  i Either include it or remove the dependency array
+  i Either include it or remove the dependency array.
   
-  i Unsafe fix: Add the missing dependencies to the list.
+  i Unsafe fix: Add the missing dependency to the list.
   
     45 │ ··},·[name]);
        │       ++++   
@@ -381,7 +380,7 @@ missingDependenciesInvalid.jsx:32:3 lint/correctness/useExhaustiveDependencies  
 ```
 missingDependenciesInvalid.jsx:32:3 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━━━━━━━━━
 
-  × This hook does not specify all of its dependencies: isPending
+  × This hook does not specify its dependency on isPending.
   
     30 │   const deferredValue = useDeferredValue(value);
     31 │   const [isPending, startTransition] = useTransition();
@@ -390,7 +389,7 @@ missingDependenciesInvalid.jsx:32:3 lint/correctness/useExhaustiveDependencies  
     33 │       console.log(name);
     34 │       setName(1);
   
-  i This dependency is not specified in the hook dependency list.
+  i This dependency is being used here, but is not specified in the hook dependency list.
   
     41 │       console.log(deferredValue);
     42 │ 
@@ -399,9 +398,9 @@ missingDependenciesInvalid.jsx:32:3 lint/correctness/useExhaustiveDependencies  
     44 │       startTransition();
     45 │   }, []);
   
-  i Either include it or remove the dependency array
+  i Either include it or remove the dependency array.
   
-  i Unsafe fix: Add the missing dependencies to the list.
+  i Unsafe fix: Add the missing dependency to the list.
   
     45 │ ··},·[isPending]);
        │       +++++++++   
@@ -411,7 +410,7 @@ missingDependenciesInvalid.jsx:32:3 lint/correctness/useExhaustiveDependencies  
 ```
 missingDependenciesInvalid.jsx:32:3 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━━━━━━━━━
 
-  × This hook does not specify all of its dependencies: memoizedValue
+  × This hook does not specify its dependency on memoizedValue.
   
     30 │   const deferredValue = useDeferredValue(value);
     31 │   const [isPending, startTransition] = useTransition();
@@ -420,7 +419,7 @@ missingDependenciesInvalid.jsx:32:3 lint/correctness/useExhaustiveDependencies  
     33 │       console.log(name);
     34 │       setName(1);
   
-  i This dependency is not specified in the hook dependency list.
+  i This dependency is being used here, but is not specified in the hook dependency list.
   
     39 │       console.log(memoizedCallback);
   > 40 │       console.log(memoizedValue);
@@ -428,9 +427,9 @@ missingDependenciesInvalid.jsx:32:3 lint/correctness/useExhaustiveDependencies  
     41 │       console.log(deferredValue);
     42 │ 
   
-  i Either include it or remove the dependency array
+  i Either include it or remove the dependency array.
   
-  i Unsafe fix: Add the missing dependencies to the list.
+  i Unsafe fix: Add the missing dependency to the list.
   
     45 │ ··},·[memoizedValue]);
        │       +++++++++++++   
@@ -440,7 +439,7 @@ missingDependenciesInvalid.jsx:32:3 lint/correctness/useExhaustiveDependencies  
 ```
 missingDependenciesInvalid.jsx:52:3 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━━━━━━━━━
 
-  × This hook does not specify all of its dependencies: a
+  × This hook does not specify its dependency on a.
   
     50 │ function MyComponent3() {
     51 │   let a = 1;
@@ -449,7 +448,7 @@ missingDependenciesInvalid.jsx:52:3 lint/correctness/useExhaustiveDependencies  
     53 │   useCallback(() => console.log(a), []);
     54 │   useMemo(() => console.log(a), []);
   
-  i This dependency is not specified in the hook dependency list.
+  i This dependency is being used here, but is not specified in the hook dependency list.
   
     50 │ function MyComponent3() {
     51 │   let a = 1;
@@ -458,9 +457,9 @@ missingDependenciesInvalid.jsx:52:3 lint/correctness/useExhaustiveDependencies  
     53 │   useCallback(() => console.log(a), []);
     54 │   useMemo(() => console.log(a), []);
   
-  i Either include it or remove the dependency array
+  i Either include it or remove the dependency array.
   
-  i Unsafe fix: Add the missing dependencies to the list.
+  i Unsafe fix: Add the missing dependency to the list.
   
     52 │ ··useEffect(()·=>·console.log(a),·[a]);
        │                                    +   
@@ -470,7 +469,7 @@ missingDependenciesInvalid.jsx:52:3 lint/correctness/useExhaustiveDependencies  
 ```
 missingDependenciesInvalid.jsx:53:3 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━━━━━━━━━
 
-  × This hook does not specify all of its dependencies: a
+  × This hook does not specify its dependency on a.
   
     51 │   let a = 1;
     52 │   useEffect(() => console.log(a), []);
@@ -479,7 +478,7 @@ missingDependenciesInvalid.jsx:53:3 lint/correctness/useExhaustiveDependencies  
     54 │   useMemo(() => console.log(a), []);
     55 │   useImperativeHandle(ref, () => console.log(a), []);
   
-  i This dependency is not specified in the hook dependency list.
+  i This dependency is being used here, but is not specified in the hook dependency list.
   
     51 │   let a = 1;
     52 │   useEffect(() => console.log(a), []);
@@ -488,9 +487,9 @@ missingDependenciesInvalid.jsx:53:3 lint/correctness/useExhaustiveDependencies  
     54 │   useMemo(() => console.log(a), []);
     55 │   useImperativeHandle(ref, () => console.log(a), []);
   
-  i Either include it or remove the dependency array
+  i Either include it or remove the dependency array.
   
-  i Unsafe fix: Add the missing dependencies to the list.
+  i Unsafe fix: Add the missing dependency to the list.
   
     53 │ ··useCallback(()·=>·console.log(a),·[a]);
        │                                      +   
@@ -500,7 +499,7 @@ missingDependenciesInvalid.jsx:53:3 lint/correctness/useExhaustiveDependencies  
 ```
 missingDependenciesInvalid.jsx:54:3 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━━━━━━━━━
 
-  × This hook does not specify all of its dependencies: a
+  × This hook does not specify its dependency on a.
   
     52 │   useEffect(() => console.log(a), []);
     53 │   useCallback(() => console.log(a), []);
@@ -509,7 +508,7 @@ missingDependenciesInvalid.jsx:54:3 lint/correctness/useExhaustiveDependencies  
     55 │   useImperativeHandle(ref, () => console.log(a), []);
     56 │   useLayoutEffect(() => console.log(a), []);
   
-  i This dependency is not specified in the hook dependency list.
+  i This dependency is being used here, but is not specified in the hook dependency list.
   
     52 │   useEffect(() => console.log(a), []);
     53 │   useCallback(() => console.log(a), []);
@@ -518,9 +517,9 @@ missingDependenciesInvalid.jsx:54:3 lint/correctness/useExhaustiveDependencies  
     55 │   useImperativeHandle(ref, () => console.log(a), []);
     56 │   useLayoutEffect(() => console.log(a), []);
   
-  i Either include it or remove the dependency array
+  i Either include it or remove the dependency array.
   
-  i Unsafe fix: Add the missing dependencies to the list.
+  i Unsafe fix: Add the missing dependency to the list.
   
     54 │ ··useMemo(()·=>·console.log(a),·[a]);
        │                                  +   
@@ -530,7 +529,7 @@ missingDependenciesInvalid.jsx:54:3 lint/correctness/useExhaustiveDependencies  
 ```
 missingDependenciesInvalid.jsx:55:3 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━━━━━━━━━
 
-  × This hook does not specify all of its dependencies: a
+  × This hook does not specify its dependency on a.
   
     53 │   useCallback(() => console.log(a), []);
     54 │   useMemo(() => console.log(a), []);
@@ -539,7 +538,7 @@ missingDependenciesInvalid.jsx:55:3 lint/correctness/useExhaustiveDependencies  
     56 │   useLayoutEffect(() => console.log(a), []);
     57 │   useInsertionEffect(() => console.log(a), []);
   
-  i This dependency is not specified in the hook dependency list.
+  i This dependency is being used here, but is not specified in the hook dependency list.
   
     53 │   useCallback(() => console.log(a), []);
     54 │   useMemo(() => console.log(a), []);
@@ -548,9 +547,9 @@ missingDependenciesInvalid.jsx:55:3 lint/correctness/useExhaustiveDependencies  
     56 │   useLayoutEffect(() => console.log(a), []);
     57 │   useInsertionEffect(() => console.log(a), []);
   
-  i Either include it or remove the dependency array
+  i Either include it or remove the dependency array.
   
-  i Unsafe fix: Add the missing dependencies to the list.
+  i Unsafe fix: Add the missing dependency to the list.
   
     55 │ ··useImperativeHandle(ref,·()·=>·console.log(a),·[a]);
        │                                                   +   
@@ -560,7 +559,7 @@ missingDependenciesInvalid.jsx:55:3 lint/correctness/useExhaustiveDependencies  
 ```
 missingDependenciesInvalid.jsx:56:3 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━━━━━━━━━
 
-  × This hook does not specify all of its dependencies: a
+  × This hook does not specify its dependency on a.
   
     54 │   useMemo(() => console.log(a), []);
     55 │   useImperativeHandle(ref, () => console.log(a), []);
@@ -569,7 +568,7 @@ missingDependenciesInvalid.jsx:56:3 lint/correctness/useExhaustiveDependencies  
     57 │   useInsertionEffect(() => console.log(a), []);
     58 │ }
   
-  i This dependency is not specified in the hook dependency list.
+  i This dependency is being used here, but is not specified in the hook dependency list.
   
     54 │   useMemo(() => console.log(a), []);
     55 │   useImperativeHandle(ref, () => console.log(a), []);
@@ -578,9 +577,9 @@ missingDependenciesInvalid.jsx:56:3 lint/correctness/useExhaustiveDependencies  
     57 │   useInsertionEffect(() => console.log(a), []);
     58 │ }
   
-  i Either include it or remove the dependency array
+  i Either include it or remove the dependency array.
   
-  i Unsafe fix: Add the missing dependencies to the list.
+  i Unsafe fix: Add the missing dependency to the list.
   
     56 │ ··useLayoutEffect(()·=>·console.log(a),·[a]);
        │                                          +   
@@ -590,7 +589,7 @@ missingDependenciesInvalid.jsx:56:3 lint/correctness/useExhaustiveDependencies  
 ```
 missingDependenciesInvalid.jsx:57:3 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━━━━━━━━━
 
-  × This hook does not specify all of its dependencies: a
+  × This hook does not specify its dependency on a.
   
     55 │   useImperativeHandle(ref, () => console.log(a), []);
     56 │   useLayoutEffect(() => console.log(a), []);
@@ -599,7 +598,7 @@ missingDependenciesInvalid.jsx:57:3 lint/correctness/useExhaustiveDependencies  
     58 │ }
     59 │ 
   
-  i This dependency is not specified in the hook dependency list.
+  i This dependency is being used here, but is not specified in the hook dependency list.
   
     55 │   useImperativeHandle(ref, () => console.log(a), []);
     56 │   useLayoutEffect(() => console.log(a), []);
@@ -608,9 +607,9 @@ missingDependenciesInvalid.jsx:57:3 lint/correctness/useExhaustiveDependencies  
     58 │ }
     59 │ 
   
-  i Either include it or remove the dependency array
+  i Either include it or remove the dependency array.
   
-  i Unsafe fix: Add the missing dependencies to the list.
+  i Unsafe fix: Add the missing dependency to the list.
   
     57 │ ··useInsertionEffect(()·=>·console.log(a),·[a]);
        │                                             +   
@@ -620,7 +619,7 @@ missingDependenciesInvalid.jsx:57:3 lint/correctness/useExhaustiveDependencies  
 ```
 missingDependenciesInvalid.jsx:64:3 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━━━━━━━━━
 
-  × This hook does not specify all of its dependencies: a
+  × This hook does not specify its dependency on a.
   
     62 │ function MyComponent4() {
     63 │   let a = 1;
@@ -629,7 +628,7 @@ missingDependenciesInvalid.jsx:64:3 lint/correctness/useExhaustiveDependencies  
     65 │       return () => console.log(a)
     66 │   }, []);
   
-  i This dependency is not specified in the hook dependency list.
+  i This dependency is being used here, but is not specified in the hook dependency list.
   
     63 │   let a = 1;
     64 │   useEffect(() => {
@@ -638,9 +637,9 @@ missingDependenciesInvalid.jsx:64:3 lint/correctness/useExhaustiveDependencies  
     66 │   }, []);
     67 │ }
   
-  i Either include it or remove the dependency array
+  i Either include it or remove the dependency array.
   
-  i Unsafe fix: Add the missing dependencies to the list.
+  i Unsafe fix: Add the missing dependency to the list.
   
     66 │ ··},·[a]);
        │       +   
@@ -650,7 +649,7 @@ missingDependenciesInvalid.jsx:64:3 lint/correctness/useExhaustiveDependencies  
 ```
 missingDependenciesInvalid.jsx:73:3 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━━━━━━━━━
 
-  × This hook does not specify all of its dependencies: a
+  × This hook does not specify its dependency on a.
   
     71 │ function MyComponent5() {
     72 │   let a = 1;
@@ -659,7 +658,7 @@ missingDependenciesInvalid.jsx:73:3 lint/correctness/useExhaustiveDependencies  
     74 │     console.log(a);
     75 │     return () => console.log(a);
   
-  i This dependency is not specified in the hook dependency list.
+  i This dependency is being used here, but is not specified in the hook dependency list.
   
     72 │   let a = 1;
     73 │   useEffect(() => {
@@ -668,7 +667,7 @@ missingDependenciesInvalid.jsx:73:3 lint/correctness/useExhaustiveDependencies  
     75 │     return () => console.log(a);
     76 │   }, []);
   
-  i This dependency is not specified in the hook dependency list.
+  i This dependency is being used here, but is not specified in the hook dependency list.
   
     73 │   useEffect(() => {
     74 │     console.log(a);
@@ -677,19 +676,19 @@ missingDependenciesInvalid.jsx:73:3 lint/correctness/useExhaustiveDependencies  
     76 │   }, []);
     77 │ }
   
-  i Either include them or remove the dependency array
+  i Either include it or remove the dependency array.
   
-  i Unsafe fix: Add the missing dependencies to the list.
+  i Unsafe fix: Add the missing dependency to the list.
   
-    76 │ ··},·[a,·a]);
-       │       ++++   
+    76 │ ··},·[a]);
+       │       +   
 
 ```
 
 ```
 missingDependenciesInvalid.jsx:83:3 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━━━━━━━━━
 
-  × This hook does not specify all of its dependencies: someObj.name
+  × This hook does not specify its dependency on someObj.name.
   
     81 │ function MyComponent6() {
     82 │   let someObj = getObj();
@@ -698,7 +697,7 @@ missingDependenciesInvalid.jsx:83:3 lint/correctness/useExhaustiveDependencies  
     84 │       console.log(someObj.name)
     85 │   }, []);
   
-  i This dependency is not specified in the hook dependency list.
+  i This dependency is being used here, but is not specified in the hook dependency list.
   
     82 │   let someObj = getObj();
     83 │   useEffect(() => {
@@ -707,9 +706,9 @@ missingDependenciesInvalid.jsx:83:3 lint/correctness/useExhaustiveDependencies  
     85 │   }, []);
     86 │ }
   
-  i Either include it or remove the dependency array
+  i Either include it or remove the dependency array.
   
-  i Unsafe fix: Add the missing dependencies to the list.
+  i Unsafe fix: Add the missing dependency to the list.
   
     85 │ ··},·[someObj.name]);
        │       ++++++++++++   
@@ -719,7 +718,7 @@ missingDependenciesInvalid.jsx:83:3 lint/correctness/useExhaustiveDependencies  
 ```
 missingDependenciesInvalid.jsx:89:3 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━━━━━━━━━
 
-  × This hook does not specify all of its dependencies: a
+  × This hook does not specify its dependency on a.
   
     88 │ const MyComponent7 = React.memo(function ({ a }) {
   > 89 │   useEffect(() => {
@@ -727,7 +726,7 @@ missingDependenciesInvalid.jsx:89:3 lint/correctness/useExhaustiveDependencies  
     90 │       console.log(a);
     91 │   }, []);
   
-  i This dependency is not specified in the hook dependency list.
+  i This dependency is being used here, but is not specified in the hook dependency list.
   
     88 │ const MyComponent7 = React.memo(function ({ a }) {
     89 │   useEffect(() => {
@@ -736,9 +735,9 @@ missingDependenciesInvalid.jsx:89:3 lint/correctness/useExhaustiveDependencies  
     91 │   }, []);
     92 │ });
   
-  i Either include it or remove the dependency array
+  i Either include it or remove the dependency array.
   
-  i Unsafe fix: Add the missing dependencies to the list.
+  i Unsafe fix: Add the missing dependency to the list.
   
     91 │ ··},·[a]);
        │       +   
@@ -748,7 +747,7 @@ missingDependenciesInvalid.jsx:89:3 lint/correctness/useExhaustiveDependencies  
 ```
 missingDependenciesInvalid.jsx:95:3 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━━━━━━━━━
 
-  × This hook does not specify all of its dependencies: a
+  × This hook does not specify its dependency on a.
   
     94 │ const MyComponent8 = React.memo(({ a }) => {
   > 95 │   useEffect(() => {
@@ -756,7 +755,7 @@ missingDependenciesInvalid.jsx:95:3 lint/correctness/useExhaustiveDependencies  
     96 │       console.log(a);
     97 │   }, []);
   
-  i This dependency is not specified in the hook dependency list.
+  i This dependency is being used here, but is not specified in the hook dependency list.
   
     94 │ const MyComponent8 = React.memo(({ a }) => {
     95 │   useEffect(() => {
@@ -765,9 +764,9 @@ missingDependenciesInvalid.jsx:95:3 lint/correctness/useExhaustiveDependencies  
     97 │   }, []);
     98 │ });
   
-  i Either include it or remove the dependency array
+  i Either include it or remove the dependency array.
   
-  i Unsafe fix: Add the missing dependencies to the list.
+  i Unsafe fix: Add the missing dependency to the list.
   
     97 │ ··},·[a]);
        │       +   
@@ -777,7 +776,7 @@ missingDependenciesInvalid.jsx:95:3 lint/correctness/useExhaustiveDependencies  
 ```
 missingDependenciesInvalid.jsx:103:3 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━━━━━━━━
 
-  × This hook does not specify all of its dependencies: a
+  × This hook does not specify its dependency on a.
   
     101 │ export function MyComponent9() {
     102 │   let a = 1;
@@ -786,7 +785,7 @@ missingDependenciesInvalid.jsx:103:3 lint/correctness/useExhaustiveDependencies 
     104 │       console.log(a);
     105 │   }, []);
   
-  i This dependency is not specified in the hook dependency list.
+  i This dependency is being used here, but is not specified in the hook dependency list.
   
     102 │   let a = 1;
     103 │   useEffect(() => {
@@ -795,9 +794,9 @@ missingDependenciesInvalid.jsx:103:3 lint/correctness/useExhaustiveDependencies 
     105 │   }, []);
     106 │ }
   
-  i Either include it or remove the dependency array
+  i Either include it or remove the dependency array.
   
-  i Unsafe fix: Add the missing dependencies to the list.
+  i Unsafe fix: Add the missing dependency to the list.
   
     105 │ ··},·[a]);
         │       +   
@@ -807,7 +806,7 @@ missingDependenciesInvalid.jsx:103:3 lint/correctness/useExhaustiveDependencies 
 ```
 missingDependenciesInvalid.jsx:110:3 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━━━━━━━━
 
-  × This hook does not specify all of its dependencies: a
+  × This hook does not specify its dependency on a.
   
     108 │ export default function MyComponent10() {
     109 │   let a = 1;
@@ -816,7 +815,7 @@ missingDependenciesInvalid.jsx:110:3 lint/correctness/useExhaustiveDependencies 
     111 │       console.log(a);
     112 │   }, []);
   
-  i This dependency is not specified in the hook dependency list.
+  i This dependency is being used here, but is not specified in the hook dependency list.
   
     109 │   let a = 1;
     110 │   useEffect(() => {
@@ -825,9 +824,9 @@ missingDependenciesInvalid.jsx:110:3 lint/correctness/useExhaustiveDependencies 
     112 │   }, []);
     113 │ }
   
-  i Either include it or remove the dependency array
+  i Either include it or remove the dependency array.
   
-  i Unsafe fix: Add the missing dependencies to the list.
+  i Unsafe fix: Add the missing dependency to the list.
   
     112 │ ··},·[a]);
         │       +   
@@ -837,7 +836,7 @@ missingDependenciesInvalid.jsx:110:3 lint/correctness/useExhaustiveDependencies 
 ```
 missingDependenciesInvalid.jsx:118:3 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━━━━━━━━
 
-  × This hook does not specify all of its dependencies: a
+  × This hook does not specify its dependency on a.
   
     116 │ function MyComponent11() {
     117 │   let a = 1;
@@ -846,7 +845,7 @@ missingDependenciesInvalid.jsx:118:3 lint/correctness/useExhaustiveDependencies 
     119 │       console.log(a);
     120 │   }, []);
   
-  i This dependency is not specified in the hook dependency list.
+  i This dependency is being used here, but is not specified in the hook dependency list.
   
     117 │   let a = 1;
     118 │   useEffect(function inner() {
@@ -855,9 +854,9 @@ missingDependenciesInvalid.jsx:118:3 lint/correctness/useExhaustiveDependencies 
     120 │   }, []);
     121 │ }
   
-  i Either include it or remove the dependency array
+  i Either include it or remove the dependency array.
   
-  i Unsafe fix: Add the missing dependencies to the list.
+  i Unsafe fix: Add the missing dependency to the list.
   
     120 │ ··},·[a]);
         │       +   
@@ -867,7 +866,7 @@ missingDependenciesInvalid.jsx:118:3 lint/correctness/useExhaustiveDependencies 
 ```
 missingDependenciesInvalid.jsx:125:3 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━━━━━━━━
 
-  × This hook does not specify all of its dependencies: a
+  × This hook does not specify its dependency on a.
   
     123 │ function MyComponent12() {
     124 │   let a = 1;
@@ -876,7 +875,7 @@ missingDependenciesInvalid.jsx:125:3 lint/correctness/useExhaustiveDependencies 
     126 │       console.log(a);
     127 │   }, []);
   
-  i This dependency is not specified in the hook dependency list.
+  i This dependency is being used here, but is not specified in the hook dependency list.
   
     124 │   let a = 1;
     125 │   useEffect(async function inner() {
@@ -885,9 +884,9 @@ missingDependenciesInvalid.jsx:125:3 lint/correctness/useExhaustiveDependencies 
     127 │   }, []);
     128 │ }
   
-  i Either include it or remove the dependency array
+  i Either include it or remove the dependency array.
   
-  i Unsafe fix: Add the missing dependencies to the list.
+  i Unsafe fix: Add the missing dependency to the list.
   
     127 │ ··},·[a]);
         │       +   
@@ -897,7 +896,7 @@ missingDependenciesInvalid.jsx:125:3 lint/correctness/useExhaustiveDependencies 
 ```
 missingDependenciesInvalid.jsx:133:9 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━━━━━━━━
 
-  × This hook does not specify all of its dependencies: a
+  × This hook does not specify its dependency on a.
   
     131 │ function MyComponent13() {
     132 │   let a = 1;
@@ -906,7 +905,7 @@ missingDependenciesInvalid.jsx:133:9 lint/correctness/useExhaustiveDependencies 
     134 │       console.log(a);
     135 │   }, []);
   
-  i This dependency is not specified in the hook dependency list.
+  i This dependency is being used here, but is not specified in the hook dependency list.
   
     132 │   let a = 1;
     133 │   React.useEffect(() => {
@@ -915,9 +914,9 @@ missingDependenciesInvalid.jsx:133:9 lint/correctness/useExhaustiveDependencies 
     135 │   }, []);
     136 │ }
   
-  i Either include it or remove the dependency array
+  i Either include it or remove the dependency array.
   
-  i Unsafe fix: Add the missing dependencies to the list.
+  i Unsafe fix: Add the missing dependency to the list.
   
     135 │ ··},·[a]);
         │       +   
@@ -927,7 +926,7 @@ missingDependenciesInvalid.jsx:133:9 lint/correctness/useExhaustiveDependencies 
 ```
 missingDependenciesInvalid.jsx:141:2 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━━━━━━━━
 
-  × This hook does not specify all of its dependencies: ref.current
+  × This hook does not specify its dependency on ref.current.
   
     139 │ function MyComponent14() {
     140 │ 	const ref = useRef();
@@ -936,7 +935,7 @@ missingDependenciesInvalid.jsx:141:2 lint/correctness/useExhaustiveDependencies 
     142 │ 			console.log(ref.current);
     143 │ 	}, []);
   
-  i This dependency is not specified in the hook dependency list.
+  i This dependency is being used here, but is not specified in the hook dependency list.
   
     140 │ 	const ref = useRef();
     141 │ 	useEffect(() => {
@@ -945,9 +944,9 @@ missingDependenciesInvalid.jsx:141:2 lint/correctness/useExhaustiveDependencies 
     143 │ 	}, []);
     144 │ }
   
-  i Either include it or remove the dependency array
+  i Either include it or remove the dependency array.
   
-  i Unsafe fix: Add the missing dependencies to the list.
+  i Unsafe fix: Add the missing dependency to the list.
   
     143 │ → },·[ref.current]);
         │       +++++++++++   
@@ -957,7 +956,7 @@ missingDependenciesInvalid.jsx:141:2 lint/correctness/useExhaustiveDependencies 
 ```
 missingDependenciesInvalid.jsx:152:2 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━━━━━━━━
 
-  × This hook does not specify all of its dependencies: ref.current
+  × This hook does not specify its dependency on ref.current.
   
     150 │ 	}
     151 │ 	const ref = useRef();
@@ -966,7 +965,7 @@ missingDependenciesInvalid.jsx:152:2 lint/correctness/useExhaustiveDependencies 
     153 │ 			console.log(ref.current);
     154 │ 	}, []);
   
-  i This dependency is not specified in the hook dependency list.
+  i This dependency is being used here, but is not specified in the hook dependency list.
   
     151 │ 	const ref = useRef();
     152 │ 	useEffect(() => {
@@ -975,9 +974,9 @@ missingDependenciesInvalid.jsx:152:2 lint/correctness/useExhaustiveDependencies 
     154 │ 	}, []);
     155 │ }
   
-  i Either include it or remove the dependency array
+  i Either include it or remove the dependency array.
   
-  i Unsafe fix: Add the missing dependencies to the list.
+  i Unsafe fix: Add the missing dependency to the list.
   
     154 │ → },·[ref.current]);
         │       +++++++++++   
@@ -987,7 +986,7 @@ missingDependenciesInvalid.jsx:152:2 lint/correctness/useExhaustiveDependencies 
 ```
 missingDependenciesInvalid.jsx:165:3 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━━━━━━━━
 
-  × This hook does not specify all of its dependencies: func
+  × This hook does not specify its dependency on func.
   
     163 │   }
     164 │ 
@@ -996,7 +995,7 @@ missingDependenciesInvalid.jsx:165:3 lint/correctness/useExhaustiveDependencies 
     166 │     func()
     167 │   }, [])
   
-  i This dependency is not specified in the hook dependency list.
+  i This dependency is being used here, but is not specified in the hook dependency list.
   
     165 │   useEffect(() => {
   > 166 │     func()
@@ -1004,9 +1003,9 @@ missingDependenciesInvalid.jsx:165:3 lint/correctness/useExhaustiveDependencies 
     167 │   }, [])
     168 │ 
   
-  i Either include it or remove the dependency array
+  i Either include it or remove the dependency array.
   
-  i Unsafe fix: Add the missing dependencies to the list.
+  i Unsafe fix: Add the missing dependency to the list.
   
     167 │ ··},·[func])
         │       ++++  
@@ -1016,7 +1015,7 @@ missingDependenciesInvalid.jsx:165:3 lint/correctness/useExhaustiveDependencies 
 ```
 missingDependenciesInvalid.jsx:173:2 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━━━━━━━━
 
-  × This hook does not specify all of its dependencies: a
+  × This hook does not specify its dependency on a.
   
     172 │ function HoistedDeclaration() {
   > 173 │ 	useEffect(() => {
@@ -1024,7 +1023,7 @@ missingDependenciesInvalid.jsx:173:2 lint/correctness/useExhaustiveDependencies 
     174 │ 		console.log(a);
     175 │ 	}, []);
   
-  i This dependency is not specified in the hook dependency list.
+  i This dependency is being used here, but is not specified in the hook dependency list.
   
     172 │ function HoistedDeclaration() {
     173 │ 	useEffect(() => {
@@ -1033,9 +1032,9 @@ missingDependenciesInvalid.jsx:173:2 lint/correctness/useExhaustiveDependencies 
     175 │ 	}, []);
     176 │ 
   
-  i Either include it or remove the dependency array
+  i Either include it or remove the dependency array.
   
-  i Unsafe fix: Add the missing dependencies to the list.
+  i Unsafe fix: Add the missing dependency to the list.
   
     175 │ → },·[a]);
         │       +   
@@ -1045,7 +1044,7 @@ missingDependenciesInvalid.jsx:173:2 lint/correctness/useExhaustiveDependencies 
 ```
 missingDependenciesInvalid.jsx:182:2 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━━━━━━━━
 
-  × This hook does not specify all of its dependencies: a
+  × This hook does not specify its dependency on a.
   
     181 │ function HoistedDeclarations() {
   > 182 │ 	useEffect(() => {
@@ -1053,7 +1052,7 @@ missingDependenciesInvalid.jsx:182:2 lint/correctness/useExhaustiveDependencies 
     183 │ 		console.log(a, b);
     184 │ 	}, []);
   
-  i This dependency is not specified in the hook dependency list.
+  i This dependency is being used here, but is not specified in the hook dependency list.
   
     181 │ function HoistedDeclarations() {
     182 │ 	useEffect(() => {
@@ -1062,9 +1061,9 @@ missingDependenciesInvalid.jsx:182:2 lint/correctness/useExhaustiveDependencies 
     184 │ 	}, []);
     185 │ 
   
-  i Either include it or remove the dependency array
+  i Either include it or remove the dependency array.
   
-  i Unsafe fix: Add the missing dependencies to the list.
+  i Unsafe fix: Add the missing dependency to the list.
   
     184 │ → },·[a]);
         │       +   
@@ -1074,7 +1073,7 @@ missingDependenciesInvalid.jsx:182:2 lint/correctness/useExhaustiveDependencies 
 ```
 missingDependenciesInvalid.jsx:182:2 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━━━━━━━━
 
-  × This hook does not specify all of its dependencies: b
+  × This hook does not specify its dependency on b.
   
     181 │ function HoistedDeclarations() {
   > 182 │ 	useEffect(() => {
@@ -1082,7 +1081,7 @@ missingDependenciesInvalid.jsx:182:2 lint/correctness/useExhaustiveDependencies 
     183 │ 		console.log(a, b);
     184 │ 	}, []);
   
-  i This dependency is not specified in the hook dependency list.
+  i This dependency is being used here, but is not specified in the hook dependency list.
   
     181 │ function HoistedDeclarations() {
     182 │ 	useEffect(() => {
@@ -1091,9 +1090,9 @@ missingDependenciesInvalid.jsx:182:2 lint/correctness/useExhaustiveDependencies 
     184 │ 	}, []);
     185 │ 
   
-  i Either include it or remove the dependency array
+  i Either include it or remove the dependency array.
   
-  i Unsafe fix: Add the missing dependencies to the list.
+  i Unsafe fix: Add the missing dependency to the list.
   
     184 │ → },·[b]);
         │       +   

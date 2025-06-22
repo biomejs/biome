@@ -13,7 +13,7 @@ pub struct Bool<const D: bool>(pub bool);
 
 impl<const D: bool> Merge for Bool<D> {
     fn merge_with(&mut self, other: Self) {
-        self.value().merge_with(other.value())
+        *self = other;
     }
 }
 
@@ -108,5 +108,28 @@ impl<const D: bool> schemars::JsonSchema for Bool<D> {
 
     fn json_schema(generator: &mut schemars::r#gen::SchemaGenerator) -> schemars::schema::Schema {
         bool::json_schema(generator)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn bool_merge_to_true() {
+        let true_val = Bool::<true>::default();
+        let mut false_val = Bool::<false>::default();
+
+        false_val.merge_with(true_val.into());
+
+        assert!(false_val.value(), "should be true");
+    }
+
+    #[test]
+    fn bool_merge_to_false() {
+        let mut true_val = Bool::<true>::default();
+        let false_val = Bool::<false>::default();
+        true_val.merge_with(false_val.into());
+        assert!(!true_val.value(), "should be false");
     }
 }

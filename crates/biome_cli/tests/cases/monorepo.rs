@@ -352,3 +352,36 @@ fn should_ignore_files_in_nested_projects() {
         result,
     ));
 }
+
+#[test]
+fn should_not_lint_when_root_is_disabled_but_nested_is_enabled() {
+    let mut console = BufferConsole::default();
+    let mut fs = TemporaryFs::new("should_not_lint_when_root_is_disabled_but_nested_is_enabled");
+
+    fs.create_file("biome.json", r#"{ "linter": {"enabled": false } }"#);
+
+    fs.create_file(
+        "packages/lib/biome.json",
+        r#"{ "extends": "//", "linter": {"enabled": true } }"#,
+    );
+
+    fs.create_file("file.js", "debugger");
+
+    fs.create_file("packages/lib/file.js", "debugger");
+
+    let result = run_cli_with_dyn_fs(
+        Box::new(fs.create_os()),
+        &mut console,
+        Args::from(["lint", fs.cli_path()].as_slice()),
+    );
+
+    assert!(result.is_err(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "should_not_lint_when_root_is_disabled_but_nested_is_enabled",
+        fs.create_mem(),
+        console,
+        result,
+    ));
+}
