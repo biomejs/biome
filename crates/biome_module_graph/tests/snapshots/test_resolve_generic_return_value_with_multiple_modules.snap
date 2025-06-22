@@ -89,15 +89,15 @@ Module TypeId(1) => Object {
   members: ["bar": Module(0) TypeId(0)]
 }
 
-Module TypeId(2) => Module(0) TypeId(6).bar
+Module TypeId(2) => instanceof Import Symbol: Bar from "/src/bar.ts"
 
-Module TypeId(3) => Import Symbol: foo from "/src/foo.ts"
+Module TypeId(3) => Module(0) TypeId(2).bar
 
-Module TypeId(4) => value: 1
+Module TypeId(4) => Import Symbol: foo from "/src/foo.ts"
 
-Module TypeId(5) => Call Module(0) TypeId(3)(Module(0) TypeId(2)Module(0) TypeId(4))
+Module TypeId(5) => value: 1
 
-Module TypeId(6) => instanceof Import Symbol: Bar from "/src/bar.ts"
+Module TypeId(6) => Call Module(0) TypeId(4)(Module(0) TypeId(3)Module(0) TypeId(5))
 ```
 
 # `/src/foo.ts` (Module 2)
@@ -158,7 +158,7 @@ Module TypeId(3) => sync Function "foo" {
 }
 ```
 
-# Scoped Type Resolver
+# Module Resolver
 
 ## Registered types
 
@@ -174,16 +174,16 @@ Full TypeId(3) => Object {
   members: ["bar": Module(0) TypeId(0)]
 }
 
-Full TypeId(4) => Module(1) TypeId(0)
-
-Full TypeId(5) => Module(2) TypeId(3)
-
-Full TypeId(6) => value: 1
-
-Full TypeId(7) => value: bar
-
-Full TypeId(8) => Object {
+Full TypeId(4) => Object {
   prototype: No prototype
   members: ["bar": Module(1) TypeId(0)]
 }
+
+Full TypeId(5) => Module(1) TypeId(0)
+
+Full TypeId(6) => Module(2) TypeId(3)
+
+Full TypeId(7) => value: 1
+
+Full TypeId(8) => value: bar
 ```

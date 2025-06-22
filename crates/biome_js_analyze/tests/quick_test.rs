@@ -26,9 +26,18 @@ fn project_layout_with_top_level_dependencies(dependencies: Dependencies) -> Arc
 #[test]
 fn quick_test() {
     const FILENAME: &str = "dummyFile.ts";
-    const SOURCE: &str = r#"[1, 2, 3].forEach(async value => {
-  await fetch(`/${value}`);
-});"#;
+    const SOURCE: &str = r#"class InvalidTestClassParent {
+	async returnsPromiseFromParent(): Promise<string> {
+		return "value";
+	}
+}
+class InvalidTestClass extends InvalidTestClassParent {
+	async someMethod2() {
+		this.returnsPromiseFromParent()
+			.then(() => {})
+			.finally(() => {});
+	}
+}"#;
 
     let parsed = parse(SOURCE, JsFileSource::tsx(), JsParserOptions::default());
 
@@ -39,7 +48,7 @@ fn quick_test() {
 
     let mut error_ranges: Vec<TextRange> = Vec::new();
     let options = AnalyzerOptions::default().with_file_path(file_path.clone());
-    let rule_filter = RuleFilter::Rule("nursery", "noMisusedPromises");
+    let rule_filter = RuleFilter::Rule("nursery", "noFloatingPromises");
 
     let dependencies = Dependencies(Box::new([("buffer".into(), "latest".into())]));
 

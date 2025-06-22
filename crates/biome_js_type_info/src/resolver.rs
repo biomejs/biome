@@ -663,7 +663,7 @@ pub trait TypeResolver {
     }
 
     /// Returns all types registered in this resolver.
-    fn registered_types(&self) -> &[TypeData];
+    fn registered_types(&self) -> Vec<&TypeData>;
 
     // #endregion
 
@@ -682,30 +682,26 @@ pub trait TypeResolver {
 /// Trait to be implemented by `TypeData` and its subtypes to aid the resolver.
 pub trait Resolvable: Sized {
     /// Returns the resolved version of this type.
-    fn resolved(&self, resolver: &mut dyn TypeResolver) -> Self;
+    fn resolved(&self, resolver: &mut dyn TypeResolver) -> Option<Self>;
 
     /// Updates all references using the given callback.
     fn update_all_references(&mut self, updater: impl Copy + Fn(&mut TypeReference));
 }
 
 impl Resolvable for TypeReference {
-    fn resolved(&self, resolver: &mut dyn TypeResolver) -> Self {
+    fn resolved(&self, resolver: &mut dyn TypeResolver) -> Option<Self> {
         match self {
             Self::Qualifier(qualifier) => {
                 let resolved_id = resolver.resolve_qualifier(qualifier);
                 match resolved_id {
-                    Some(resolved_id) => Self::Resolved(resolved_id),
-                    None => {
+                    Some(resolved_id) => Some(Self::Resolved(resolved_id)),
+                    None if qualifier.has_known_type_parameters() => Some({
                         // If we can't resolve the qualifier as is, attempt to
                         // resolve it without type parameters. If it can be
                         // resolved that way, we create an instantiation for it
                         // and resolve to there.
-                        qualifier
-                            .has_known_type_parameters()
-                            .then(|| {
-                                resolver.resolve_qualifier(&qualifier.without_type_parameters())
-                            })
-                            .flatten()
+                        resolver
+                            .resolve_qualifier(&qualifier.without_type_parameters())
                             .and_then(|resolved_id| {
                                 let resolved = resolver
                                     .get_by_resolved_id(resolved_id)
@@ -732,17 +728,12 @@ impl Resolvable for TypeReference {
                                     excluded_binding_id: qualifier.excluded_binding_id,
                                 })
                             })
-                    }
+                    }),
+                    None => None,
                 }
             }
-            Self::Import(import) => {
-                let resolved_id = resolver.resolve_import(import);
-                match resolved_id {
-                    Some(resolved_id) => Self::Resolved(resolved_id),
-                    None => self.clone(),
-                }
-            }
-            other => other.clone(),
+            Self::Import(import) => resolver.resolve_import(import).map(Self::Resolved),
+            _ => None,
         }
     }
 
@@ -752,21 +743,20 @@ impl Resolvable for TypeReference {
 }
 
 impl Resolvable for TypeofValue {
-    fn resolved(&self, resolver: &mut dyn TypeResolver) -> Self {
-        let identifier = self.identifier.clone();
+    fn resolved(&self, resolver: &mut dyn TypeResolver) -> Option<Self> {
         let ty = if self.ty == TypeReference::Unknown {
-            resolver
-                .resolve_type_of(&identifier, self.scope_id.unwrap_or(ScopeId::GLOBAL))
-                .map_or(TypeReference::Unknown, TypeReference::Resolved)
+            let resolved_id = resolver
+                .resolve_type_of(&self.identifier, self.scope_id.unwrap_or(ScopeId::GLOBAL))?;
+            TypeReference::Resolved(resolved_id)
         } else {
-            self.ty.resolved(resolver)
+            self.ty.resolved(resolver)?
         };
 
-        Self {
-            identifier,
+        Some(Self {
+            identifier: self.identifier.clone(),
             ty,
             scope_id: self.scope_id,
-        }
+        })
     }
 
     fn update_all_references(&mut self, updater: impl Copy + Fn(&mut TypeReference)) {
@@ -777,8 +767,8 @@ impl Resolvable for TypeofValue {
 macro_rules! derive_primitive_resolved {
     ($($ty:ty),+) => {
         $(impl Resolvable for $ty {
-            fn resolved(&self, _resolver: &mut dyn TypeResolver) -> Self {
-                *self
+            fn resolved(&self, _resolver: &mut dyn TypeResolver) -> Option<Self> {
+                None
             }
 
             fn update_all_references(&mut self, _updater: impl Copy + Fn(&mut TypeReference)) {}

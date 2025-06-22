@@ -136,12 +136,6 @@ fn verify_type_sizes() {
     );
 
     assert_eq!(
-        std::mem::size_of::<TypeofValue>(),
-        48,
-        "The size shouldn't go higher"
-    );
-
-    assert_eq!(
         std::mem::size_of::<TypeOperatorType>(),
         24,
         "The size shouldn't go higher"

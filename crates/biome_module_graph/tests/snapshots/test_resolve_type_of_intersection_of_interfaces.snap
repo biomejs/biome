@@ -84,7 +84,7 @@ Module TypeId(8) => interface "(merged)" {
 Module TypeId(9) => Module(0) TypeId(2) | Module(0) TypeId(0)
 ```
 
-# Scoped Type Resolver
+# Module Resolver
 
 ## Registered types
 

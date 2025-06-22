@@ -6,6 +6,8 @@ mod intersections;
 use expressions::flattened_expression;
 use intersections::flattened_intersection;
 
+pub const MAX_FLATTEN_DEPTH: usize = 10; // Arbitrary depth, may require tweaking.
+
 impl TypeData {
     /// Flattens the given type.
     ///
@@ -30,7 +32,7 @@ impl TypeData {
     /// TypeData::TypeofValue {
     ///     identifier: "c",
     ///     ty: TypeReference::Unknown
-    /// })
+    /// }
     /// ```
     ///
     /// Once we've performed thin type resolution, this becomes:
@@ -39,7 +41,7 @@ impl TypeData {
     /// TypeData::TypeofValue {
     ///     identifier: "c",
     ///     ty: TypeReference::Resolved(<type ID of literal>)
-    /// })
+    /// }
     /// ```
     ///
     /// With flattening, we can reduce this to:
@@ -47,109 +49,80 @@ impl TypeData {
     /// ```no_test
     /// TypeData::Literal(Literal::Number(1)))
     /// ```
-    pub fn flattened(self, resolver: &mut dyn TypeResolver) -> Self {
-        flattened(self, resolver, 0)
-    }
-}
-
-fn flattened(mut ty: TypeData, resolver: &mut dyn TypeResolver, depth: usize) -> TypeData {
-    const MAX_FLATTEN_DEPTH: usize = 10; // Arbitrary depth, may require tweaking.
-
-    for depth in depth + 1..=MAX_FLATTEN_DEPTH {
-        match &ty {
-            TypeData::MergedReference(merged) => {
+    pub fn flattened(&self, resolver: &mut dyn TypeResolver) -> Option<Self> {
+        match self {
+            Self::MergedReference(merged) => {
                 match (&merged.ty, &merged.value_ty, &merged.namespace_ty) {
                     (Some(ty1), Some(ty2), Some(ty3)) if ty1 == ty2 && ty1 == ty3 => {
-                        ty = TypeData::Reference(ty1.clone());
+                        Some(Self::Reference(ty1.clone()))
                     }
                     (Some(ty1), Some(ty2), None)
                     | (Some(ty1), None, Some(ty2))
                     | (None, Some(ty1), Some(ty2))
                         if ty1 == ty2 =>
                     {
-                        ty = TypeData::Reference(ty1.clone());
+                        Some(Self::Reference(ty1.clone()))
                     }
-                    _ => return ty,
+                    _ => None,
                 }
             }
-            TypeData::InstanceOf(instance_of) => match &instance_of.ty {
-                TypeReference::Unknown => return TypeData::unknown(),
+            Self::InstanceOf(instance_of) => match &instance_of.ty {
+                TypeReference::Unknown => Some(Self::unknown()),
                 reference => match resolver.resolve_and_get(reference) {
                     Some(resolved) => match resolved.as_raw_data() {
-                        TypeData::InstanceOf(resolved_instance) => {
-                            return resolved.apply_module_id_to_data(TypeData::instance_of(
+                        Self::InstanceOf(resolved_instance) => Some(
+                            resolved.apply_module_id_to_data(Self::instance_of(TypeInstance {
+                                ty: resolved_instance.ty.clone(),
+                                type_parameters: TypeReference::merge_parameters(
+                                    &resolved_instance.type_parameters,
+                                    &instance_of.type_parameters,
+                                ),
+                            })),
+                        ),
+                        Self::Reference(reference) => match reference {
+                            TypeReference::Unknown => Some(Self::unknown()),
+                            _ => Some(resolved.apply_module_id_to_data(Self::instance_of(
                                 TypeInstance {
-                                    ty: resolved_instance.ty.clone(),
-                                    type_parameters: TypeReference::merge_parameters(
-                                        &resolved_instance.type_parameters,
-                                        &instance_of.type_parameters,
-                                    ),
+                                    ty: reference.clone(),
+                                    type_parameters: instance_of.type_parameters.clone(),
                                 },
-                            ));
+                            ))),
+                        },
+                        Self::Global | Self::Function(_) | Self::Literal(_) | Self::Object(_) => {
+                            Some(resolved.to_data())
                         }
-                        TypeData::Reference(reference) => {
-                            return match reference {
-                                TypeReference::Unknown => TypeData::unknown(),
-                                _ => resolved.apply_module_id_to_data(TypeData::instance_of(
-                                    TypeInstance {
-                                        ty: reference.clone(),
-                                        type_parameters: instance_of.type_parameters.clone(),
-                                    },
-                                )),
-                            };
-                        }
-                        TypeData::Global
-                        | TypeData::Function(_)
-                        | TypeData::Literal(_)
-                        | TypeData::Object(_) => ty = resolved.to_data(),
-                        _ => return ty,
+                        _ => None,
                     },
-                    None => return ty,
+                    None => None,
                 },
             },
-            TypeData::Intersection(intersection) => {
-                ty = flattened_intersection(intersection, resolver);
+            Self::Intersection(intersection) => {
+                Some(flattened_intersection(intersection, resolver))
             }
-            TypeData::Reference(reference) => match reference {
-                TypeReference::Unknown => return TypeData::unknown(),
+            Self::Reference(reference) => match reference {
+                TypeReference::Unknown => Some(Self::unknown()),
                 _ => match resolver.resolve_and_get(reference) {
                     Some(reference) => match reference.as_raw_data() {
-                        TypeData::InstanceOf(instance_of) => {
-                            ty = reference
-                                .apply_module_id_to_data(TypeData::InstanceOf(instance_of.clone()));
-                        }
-                        TypeData::Reference(target) => {
-                            ty = TypeData::Reference(
-                                reference.apply_module_id_to_reference(target).into_owned(),
-                            );
-                        }
-                        _ => return ty,
+                        Self::InstanceOf(instance_of) => Some(
+                            reference
+                                .apply_module_id_to_data(Self::InstanceOf(instance_of.clone())),
+                        ),
+                        Self::Reference(target) => Some(Self::Reference(
+                            reference.apply_module_id_to_reference(target).into_owned(),
+                        )),
+                        _ => None,
                     },
-                    None => return ty,
+                    None => None,
                 },
             },
-            TypeData::TypeofExpression(expr) => match flattened_expression(expr, resolver, depth) {
-                Some(flattened_ty) => {
-                    ty = flattened_ty;
-                }
-                None => return ty,
-            },
-            TypeData::TypeofType(reference) => {
-                match resolver.resolve_reference(reference.as_ref()) {
-                    Some(resolved) => ty = TypeData::reference(resolved),
-                    None => return ty,
-                }
+            Self::TypeofExpression(expr) => flattened_expression(expr, resolver),
+            Self::TypeofType(reference) => resolver
+                .resolve_reference(reference.as_ref())
+                .map(Self::reference),
+            Self::TypeofValue(value) if value.ty.is_known() => {
+                resolver.resolve_reference(&value.ty).map(Self::reference)
             }
-            TypeData::TypeofValue(value) if value.ty.is_known() => {
-                match resolver.resolve_reference(&value.ty) {
-                    Some(resolved) => ty = TypeData::reference(resolved),
-                    None => return ty,
-                }
-            }
-            _ => return ty,
+            _ => None,
         }
     }
-
-    debug_assert!(false, "max flattening depth reached");
-    TypeData::unknown()
 }

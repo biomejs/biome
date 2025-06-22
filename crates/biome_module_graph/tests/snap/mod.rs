@@ -113,12 +113,12 @@ impl<'a> ModuleGraphSnapshot<'a> {
                     content.push_str("```\n\n");
                 }
 
-                dump_registered_module_types(&mut content, data.types());
+                dump_registered_module_types(&mut content, &data.types());
             }
         }
 
         if let Some(resolver) = self.resolver {
-            content.push_str("\n# Scoped Type Resolver\n\n");
+            content.push_str("\n# Module Resolver\n\n");
             dump_registered_types(&mut content, resolver);
         }
 
