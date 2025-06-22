@@ -79,7 +79,7 @@ declare_lint_rule! {
     ///
     ///
     pub NoUnusedFunctionParameters {
-        version: "2.1.0",
+        version: "1.8.0",
         name: "noUnusedFunctionParameters",
         language: "js",
         recommended: true,
