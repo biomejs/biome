@@ -97,10 +97,6 @@ pub struct NoUnusedFunctionParametersOptions {
     #[serde(default)]
     pub ignore_rest_siblings: bool,
 }
-//
-// fn is_default() -> bool {
-//     true
-// }
 
 impl Default for NoUnusedFunctionParametersOptions {
     fn default() -> Self {
