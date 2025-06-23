@@ -14,6 +14,8 @@ permissions:
 
 env:
   CARGO_TERM_COLOR: always
+  BIOME_WEBSITE_REPO: biomejs/website
+  BIOME_PUSH_ON_MAIN_EVENT_TYPE: biome-push-on-main-event
 
 jobs:
   changesets:
@@ -370,6 +372,15 @@ jobs:
           fail_on_unmatched_files: true
           generate_release_notes: true
 
+      - name: Dispatch event on release
+        uses: peter-evans/repository-dispatch@ff45666b9427631e3450c54a1bcbee4d9ff4d7c0 # v3
+        with:
+          token: ${{ secrets.BIOME_REPOSITORY_DISPATCH }}
+          repository: ${{ env.BIOME_WEBSITE_REPO }}
+          event-type: ${{ env.BIOME_PUSH_ON_MAIN_EVENT_TYPE }}
+          client-payload: |
+            '{ "sha": "${{ env.GITHUB_SHA }}", "tag": "@biomejs/biome@${{ needs.build-binaries.outputs.version }}", "version": "${{ needs.build-binaries.outputs.version }}" }'
+
   publish-js-api:
     name: Publish JS API
     runs-on: ubuntu-24.04
@@ -420,3 +431,5 @@ jobs:
           fail_on_unmatched_files: true
           generate_release_notes: true
           make_latest: false # Keep the CLI release as latest
+
+
