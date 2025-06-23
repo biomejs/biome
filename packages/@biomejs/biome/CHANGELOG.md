@@ -1,5 +1,41 @@
 # @biomejs/biome
 
+## 2.0.5
+
+### Patch Changes
+
+- [#6461](https://github.com/biomejs/biome/pull/6461) [`38862e6`](https://github.com/biomejs/biome/commit/38862e645c07935f2daf52799dce38656d589d40) Thanks [@ematipico](https://github.com/ematipico)! - Fixed [#6419](https://github.com/biomejs/biome/issues/6419), a regression where stdin mode would create a temporary new file instead of using the one provided by the user. This was an intended regression.
+
+  Now Biome will use the file path passed via `--std-file-path`, and apply the configuration that matches it.
+
+- [#6480](https://github.com/biomejs/biome/pull/6480) [`050047f`](https://github.com/biomejs/biome/commit/050047f4a3c1379abcf3cf57f1bfecd20bb7d8c1) Thanks [@Conaclos](https://github.com/Conaclos)! - Fixed [#6371](https://github.com/biomejs/biome/issues/6371).
+  [useNamingConvention](https://biomejs.dev/linter/rules/use-naming-convention/) now checks the string case of objects' property shorthand.
+
+- [#6477](https://github.com/biomejs/biome/pull/6477) [`b98379d`](https://github.com/biomejs/biome/commit/b98379d42d97540c3bd911263a0af1eb7bc4803e) Thanks [@ematipico](https://github.com/ematipico)! - Fixed an issue where Biome formatter didn't format consistently CSS value separated by commas.
+
+  ```diff
+  .font-heading {
+  - font-feature-settings: var(--heading-salt), var(--heading-ss06),
+  -   var(--heading-ss11), var(--heading-cv09), var(--heading-liga),
+  -   var(--heading-calt);
+
+  +  font-feature-settings:
+  +    var(--heading-salt), var(--heading-ss06), var(--heading-ss11),
+  +    var(--heading-cv09), var(--heading-liga), var(--heading-calt);
+  }
+
+  ```
+
+- [#6248](https://github.com/biomejs/biome/pull/6248) [`ec7126c`](https://github.com/biomejs/biome/commit/ec7126ca3d6777344191f3463b430a44fce02489) Thanks [@fireairforce](https://github.com/fireairforce)! - Fixed grit pattern matching for different kinds of import statements.
+
+  The grit pattern `import $imports from "foo"` will match the following code:
+
+  ```ts
+  import bar from "foo";
+  import { bar } from "foo";
+  import { bar, baz } from "foo";
+  ```
+
 ## 2.0.4
 
 ### Patch Changes
