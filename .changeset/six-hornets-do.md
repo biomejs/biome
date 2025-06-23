@@ -1,8 +1,8 @@
 ---
-"@biomejs/biome": minor
+"@biomejs/biome": patch
 ---
 
-Added the new rule [`noImplicitCoercion`](https://biomejs.dev/linter/rules/no-implicit-coercion), which disallows shorthand type conversions in favor of explicit type conversion functions.
+Added the new nursery rule [`noImplicitCoercion`](https://biomejs.dev/linter/rules/no-implicit-coercion), which disallows shorthand type conversions in favor of explicit type conversion functions.
 
 **Example (Invalid): Boolean conversion using double negation:**
 
