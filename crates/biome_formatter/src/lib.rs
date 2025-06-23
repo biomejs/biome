@@ -748,6 +748,41 @@ impl fmt::Display for Expand {
     }
 }
 
+#[derive(Clone, Copy, Debug, Default, Eq, Hash, Deserializable, Merge, PartialEq)]
+#[cfg_attr(
+    feature = "serde",
+    derive(serde::Serialize, serde::Deserialize),
+    serde(rename_all = "camelCase")
+)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+pub enum SortMode {
+    /// Use the natural sorting
+    #[default]
+    Natural,
+    /// Use string alphabetical sorting
+    Alphabetical,
+}
+
+impl FromStr for SortMode {
+    type Err = String;
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s {
+            "natural" => Ok(Self::Natural),
+            "alphabetical" => Ok(Self::Alphabetical),
+            _ => Err(std::format!("unknown expand literal: {}", s)),
+        }
+    }
+}
+
+impl fmt::Display for SortMode {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match self {
+            Self::Alphabetical => std::write!(f, "Alphabetical"),
+            Self::Natural => std::write!(f, "Natural"),
+        }
+    }
+}
+
 /// Context object storing data relevant when formatting an object.
 pub trait FormatContext {
     type Options: FormatOptions;
