@@ -88,6 +88,27 @@ declare_lint_rule! {
     }
 }
 
+<<<<<<< HEAD
+=======
+/// Rule's options
+#[derive(Clone, Debug, Deserialize, Deserializable, Eq, PartialEq, Serialize)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[serde(rename_all = "camelCase", deny_unknown_fields, default)]
+pub struct NoUnusedFunctionParametersOptions {
+    /// Whether to ignore unused variables from an object destructuring with a spread.
+    #[serde(default)]
+    pub ignore_rest_siblings: bool,
+}
+
+impl Default for NoUnusedFunctionParametersOptions {
+    fn default() -> Self {
+        Self {
+            ignore_rest_siblings: true,
+        }
+    }
+}
+
+>>>>>>> f128262717 (adds new option to rule to ignore unused function parameters - ignoreRestSiblings)
 /// Suggestion if the binding is unused
 #[derive(Debug)]
 pub enum SuggestedFix {
