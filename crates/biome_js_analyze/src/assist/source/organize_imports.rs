@@ -1,6 +1,7 @@
 use biome_analyze::{
     ActionCategory, Ast, FixKind, Rule, RuleDiagnostic, SourceActionKind, context::RuleContext,
     declare_source_rule,
+    options::SortMode,
 };
 use biome_console::markup;
 use biome_deserialize_macros::Deserializable;
@@ -689,8 +690,9 @@ impl Rule for OrganizeImports {
         let mut chunk: Option<ChunkBuilder> = None;
         let mut prev_kind: Option<JsSyntaxKind> = None;
         let mut prev_group = 0;
+        let sort_mode = ctx.as_sort_mode().clone();
         for item in root.items() {
-            if let Some((info, specifiers, attributes)) = ImportInfo::from_module_item(&item) {
+            if let Some((info, specifiers, attributes)) = ImportInfo::from_module_item(&item, sort_mode) {
                 let prev_is_distinct = prev_kind.is_some_and(|kind| kind != item.syntax().kind());
                 // A detached comment marks the start of a new chunk
                 if prev_is_distinct || has_detached_leading_comment(item.syntax()) {
@@ -705,10 +707,10 @@ impl Rule for OrganizeImports {
                 let starts_chunk = chunk.is_none();
                 let leading_newline_count = leading_newlines(item.syntax()).count();
                 let are_specifiers_unsorted =
-                    specifiers.is_some_and(|specifiers| !specifiers.are_sorted());
+                    specifiers.is_some_and(|specifiers| !specifiers.are_sorted(sort_mode));
                 let are_attributes_unsorted = attributes.is_some_and(|attributes| {
                     // Assume the attributes are sorted if there are any bogus nodes.
-                    !(are_import_attributes_sorted(&attributes).unwrap_or(true))
+                    !(are_import_attributes_sorted(&attributes, sort_mode).unwrap_or(true))
                 });
                 let newline_issue = if leading_newline_count == 1
                     // A chunk must start with a blank line (two newlines)
@@ -800,6 +802,7 @@ impl Rule for OrganizeImports {
         let mut organized_items: FxHashMap<u32, AnyJsModuleItem> = FxHashMap::default();
         let mut import_keys: Vec<KeyedItem> = Vec::new();
         let mut mutation = ctx.root().begin();
+        let sort_mode = ctx.as_sort_mode().clone();
         for issue in state {
             match issue {
                 Issue::AddLeadingNewline { slot_index } => {
@@ -831,7 +834,7 @@ impl Rule for OrganizeImports {
                                 // Sort named specifiers
                                 if let AnyJsExportClause::JsExportNamedFromClause(cast) = &clause {
                                     if let Some(sorted_specifiers) =
-                                        sort_export_specifiers(&cast.specifiers())
+                                        sort_export_specifiers(&cast.specifiers(), sort_mode)
                                     {
                                         clause =
                                             cast.clone().with_specifiers(sorted_specifiers).into();
@@ -840,7 +843,7 @@ impl Rule for OrganizeImports {
                             }
                             if *are_attributes_unsorted {
                                 // Sort import attributes
-                                let sorted_attrs = clause.attribute().and_then(sort_attributes);
+                                let sorted_attrs = clause.attribute().and_then(|attr| sort_attributes(attr, sort_mode));
                                 clause = clause.with_attribute(sorted_attrs);
                             }
                             export.with_export_clause(clause).into()
@@ -850,14 +853,14 @@ impl Rule for OrganizeImports {
                             if *are_specifiers_unsorted {
                                 // Sort named specifiers
                                 if let Some(sorted_specifiers) =
-                                    clause.named_specifiers().and_then(sort_import_specifiers)
+                                    clause.named_specifiers().and_then(|spec| sort_import_specifiers(spec, sort_mode))
                                 {
                                     clause = clause.with_named_specifiers(sorted_specifiers)
                                 }
                             }
                             if *are_attributes_unsorted {
                                 // Sort import attributes
-                                let sorted_attrs = clause.attribute().and_then(sort_attributes);
+                                let sorted_attrs = clause.attribute().and_then(|attr| sort_attributes(attr, sort_mode));
                                 clause = clause.with_attribute(sorted_attrs);
                             }
                             import.with_import_clause(clause).into()
@@ -895,7 +898,7 @@ impl Rule for OrganizeImports {
                             .skip(slot_indexes.start as usize)
                             .take(slot_indexes.len())
                             .filter_map(|item| {
-                                let info = ImportInfo::from_module_item(&item)?.0;
+                                let info = ImportInfo::from_module_item(&item, sort_mode)?.0;
                                 let item = organized_items.remove(&info.slot_index).unwrap_or(item);
                                 Some(KeyedItem {
                                     key: ImportKey::new(info, &options.groups),
@@ -919,7 +922,7 @@ impl Rule for OrganizeImports {
                         } = &import_keys[i - 1];
                         let KeyedItem { key, item, .. } = &import_keys[i];
                         if prev_key.is_mergeable(key) {
-                            if let Some(merged) = merge(prev_item.as_ref(), item.as_ref()) {
+                            if let Some(merged) = merge(prev_item.as_ref(), item.as_ref(), sort_mode) {
                                 import_keys[i - 1].was_merged = true;
                                 import_keys[i - 1].item = Some(merged);
                                 import_keys[i].item = None;
@@ -1067,6 +1070,7 @@ pub enum NewLineIssue {
 fn merge(
     item1: Option<&AnyJsModuleItem>,
     item2: Option<&AnyJsModuleItem>,
+    sort_mode: SortMode,
 ) -> Option<AnyJsModuleItem> {
     match (item1?, item2?) {
         (AnyJsModuleItem::JsExport(item1), AnyJsModuleItem::JsExport(item2)) => {
@@ -1078,7 +1082,7 @@ fn merge(
             let clause2 = clause2.as_js_export_named_from_clause()?;
             let specifiers1 = clause1.specifiers();
             let specifiers2 = clause2.specifiers();
-            if let Some(meregd_specifiers) = merge_export_specifiers(&specifiers1, &specifiers2) {
+            if let Some(meregd_specifiers) = merge_export_specifiers(&specifiers1, &specifiers2, sort_mode) {
                 let meregd_clause = clause1.with_specifiers(meregd_specifiers);
                 let merged_item = item2.clone().with_export_clause(meregd_clause.into());
 
@@ -1144,7 +1148,7 @@ fn merge(
                     };
                     let specifiers2 = clause2.named_specifiers().ok()?;
                     if let Some(meregd_specifiers) =
-                        merge_import_specifiers(specifiers1, &specifiers2)
+                        merge_import_specifiers(specifiers1, &specifiers2, sort_mode)
                     {
                         let merged_clause = clause1.with_specifier(meregd_specifiers.into());
                         let merged_item = item2.clone().with_import_clause(merged_clause.into());
@@ -1167,7 +1171,7 @@ fn merge(
                     let specifiers1 = clause1.named_specifiers().ok()?;
                     let specifiers2 = clause2.named_specifiers().ok()?;
                     if let Some(meregd_specifiers) =
-                        merge_import_specifiers(specifiers1, &specifiers2)
+                        merge_import_specifiers(specifiers1, &specifiers2, sort_mode)
                     {
                         let merged_clause = clause1.with_named_specifiers(meregd_specifiers);
                         let merged_item = item2.clone().with_import_clause(merged_clause.into());

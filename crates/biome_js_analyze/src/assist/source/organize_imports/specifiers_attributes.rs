@@ -7,6 +7,7 @@ use biome_rowan::{
     AstNode, AstSeparatedElement, AstSeparatedList, Language, SyntaxToken, TriviaPieceKind,
     chain_trivia_pieces,
 };
+use biome_analyze::options::SortMode;
 
 use super::comparable_token::ComparableToken;
 
@@ -15,11 +16,11 @@ pub enum JsNamedSpecifiers {
     JsExportNamedFromSpecifierList(JsExportNamedFromSpecifierList),
 }
 impl JsNamedSpecifiers {
-    pub fn are_sorted(&self) -> bool {
+    pub fn are_sorted(&self, sort_mode: SortMode) -> bool {
         match self {
-            Self::JsNamedImportSpecifiers(specifeirs) => are_import_specifiers_sorted(specifeirs),
+            Self::JsNamedImportSpecifiers(specifeirs) => are_import_specifiers_sorted(specifeirs, sort_mode),
             Self::JsExportNamedFromSpecifierList(specifeirs) => {
-                are_export_specifiers_sorted(specifeirs)
+                are_export_specifiers_sorted(specifeirs, sort_mode)
             }
         }
         // Assume the import is already sorted if there are any bogus nodes, otherwise the `--write`
@@ -28,7 +29,7 @@ impl JsNamedSpecifiers {
     }
 }
 
-pub fn are_import_specifiers_sorted(named_specifiers: &JsNamedImportSpecifiers) -> Option<bool> {
+pub fn are_import_specifiers_sorted(named_specifiers: &JsNamedImportSpecifiers, sort_mode: SortMode) -> Option<bool> {
     let mut is_sorted = true;
     let specifiers = named_specifiers.specifiers();
     if specifiers.len() > 1 {
@@ -44,7 +45,7 @@ pub fn are_import_specifiers_sorted(named_specifiers: &JsNamedImportSpecifiers) 
             let Some(AnyJsBinding::JsIdentifierBinding(name)) = node.local_name() else {
                 return None;
             };
-            let name = ComparableToken(name.name_token().ok()?.token_text_trimmed());
+            let name = ComparableToken::new(name.name_token().ok()?.token_text_trimmed(), sort_mode);
             if prev_node_key.is_some_and(|prev_node_key| prev_node_key > name) {
                 // We don't return early because we want to return `None` if we met any error.
                 is_sorted = false;
@@ -57,6 +58,7 @@ pub fn are_import_specifiers_sorted(named_specifiers: &JsNamedImportSpecifiers) 
 
 pub fn sort_import_specifiers(
     named_specifiers: JsNamedImportSpecifiers,
+    sort_mode: SortMode
 ) -> Option<JsNamedImportSpecifiers> {
     let list = named_specifiers.specifiers();
     let mut last_has_separator = false;
@@ -71,7 +73,7 @@ pub fn sort_import_specifiers(
         let AnyJsBinding::JsIdentifierBinding(name) = node.local_name()? else {
             return None;
         };
-        let node_key = ComparableToken(name.name_token().ok()?.token_text_trimmed());
+        let node_key = ComparableToken::new(name.name_token().ok()?.token_text_trimmed(), sort_mode);
         last_has_separator = separator.is_some();
         sorted.push((node_key, node, separator));
     }
@@ -93,6 +95,7 @@ pub fn sort_import_specifiers(
 pub fn merge_import_specifiers(
     named_specifiers1: JsNamedImportSpecifiers,
     named_specifiers2: &JsNamedImportSpecifiers,
+    sort_mode: SortMode,
 ) -> Option<JsNamedImportSpecifiers> {
     let specifiers1 = named_specifiers1.specifiers();
     let specifiers2 = named_specifiers2.specifiers();
@@ -125,10 +128,10 @@ pub fn merge_import_specifiers(
         }
     }
     let new_list = make::js_named_import_specifier_list(nodes, separators);
-    sort_import_specifiers(named_specifiers1.with_specifiers(new_list))
+    sort_import_specifiers(named_specifiers1.with_specifiers(new_list), sort_mode)
 }
 
-pub fn are_export_specifiers_sorted(specifiers: &JsExportNamedFromSpecifierList) -> Option<bool> {
+pub fn are_export_specifiers_sorted(specifiers: &JsExportNamedFromSpecifierList, sort_mode: SortMode) -> Option<bool> {
     let mut is_sorted = true;
     if specifiers.len() > 1 {
         let mut prev_node_key = None;
@@ -140,7 +143,7 @@ pub fn are_export_specifiers_sorted(specifiers: &JsExportNamedFromSpecifierList)
             // We have to check if the separator is not buggy.
             let _separator = trailing_separator.ok()?;
             let node = node.ok()?;
-            let node_key = ComparableToken(node.source_name().ok()?.inner_string_text().ok()?);
+            let node_key = ComparableToken::new(node.source_name().ok()?.inner_string_text().ok()?, sort_mode);
             if prev_node_key.is_some_and(|prev_node_key| prev_node_key > node_key) {
                 // We don't return early because we want to return `None` if we met any error.
                 is_sorted = false;
@@ -153,6 +156,7 @@ pub fn are_export_specifiers_sorted(specifiers: &JsExportNamedFromSpecifierList)
 
 pub fn sort_export_specifiers(
     named_specifiers: &JsExportNamedFromSpecifierList,
+    sort_mode: SortMode
 ) -> Option<JsExportNamedFromSpecifierList> {
     let mut last_has_separator = false;
     let mut sorted = Vec::with_capacity(named_specifiers.len());
@@ -164,7 +168,7 @@ pub fn sort_export_specifiers(
         let node = node.ok()?;
         let separator = trailing_separator.ok()?;
         let name = node.source_name().ok()?.inner_string_text().ok()?;
-        let node_key = ComparableToken(name);
+        let node_key = ComparableToken::new(name, sort_mode);
         last_has_separator = separator.is_some();
         sorted.push((node_key, node, separator));
     }
@@ -185,6 +189,7 @@ pub fn sort_export_specifiers(
 pub fn merge_export_specifiers(
     specifiers1: &JsExportNamedFromSpecifierList,
     specifiers2: &JsExportNamedFromSpecifierList,
+    sort_mode: SortMode,
 ) -> Option<JsExportNamedFromSpecifierList> {
     let mut nodes = Vec::with_capacity(specifiers1.len() + specifiers2.len());
     let mut separators = Vec::with_capacity(specifiers1.len() + specifiers2.len());
@@ -216,10 +221,10 @@ pub fn merge_export_specifiers(
     }
     sort_export_specifiers(&make::js_export_named_from_specifier_list(
         nodes, separators,
-    ))
+    ), sort_mode)
 }
 
-pub fn are_import_attributes_sorted(attributes: &JsImportAssertion) -> Option<bool> {
+pub fn are_import_attributes_sorted(attributes: &JsImportAssertion, sort_mode: SortMode) -> Option<bool> {
     let mut is_sorted = true;
     let attributes_list = attributes.assertions();
     if attributes_list.len() > 1 {
@@ -234,7 +239,7 @@ pub fn are_import_attributes_sorted(attributes: &JsImportAssertion) -> Option<bo
             };
             // We have to check if the separator is not buggy.
             let _separator = trailing_separator.ok()?;
-            let node_key = ComparableToken(inner_string_text(&node.key().ok()?));
+            let node_key = ComparableToken::new(inner_string_text(&node.key().ok()?), sort_mode);
             if prev_node_key.is_some_and(|prev_node| prev_node > node_key) {
                 // We don't return early because we want to return `None` if we met any error.
                 is_sorted = false;
@@ -245,7 +250,7 @@ pub fn are_import_attributes_sorted(attributes: &JsImportAssertion) -> Option<bo
     Some(is_sorted)
 }
 
-pub fn sort_attributes(attributes: JsImportAssertion) -> Option<JsImportAssertion> {
+pub fn sort_attributes(attributes: JsImportAssertion, sort_mode: SortMode) -> Option<JsImportAssertion> {
     let attributes_list = attributes.assertions();
     let mut last_has_separator = false;
     let mut sorted = Vec::new();
@@ -258,7 +263,7 @@ pub fn sort_attributes(attributes: JsImportAssertion) -> Option<JsImportAssertio
         let Ok(AnyJsImportAssertionEntry::JsImportAssertionEntry(node)) = node else {
             return None;
         };
-        let node_key = ComparableToken(inner_string_text(&node.key().ok()?));
+        let node_key = ComparableToken::new(inner_string_text(&node.key().ok()?), sort_mode);
         last_has_separator = separator.is_some();
         sorted.push((node_key, node, separator));
     }

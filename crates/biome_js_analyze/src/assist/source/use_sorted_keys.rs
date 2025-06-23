@@ -3,7 +3,7 @@ use std::cmp::Ordering;
 
 use biome_analyze::{
     Ast, FixKind, Rule, RuleAction, RuleDiagnostic, RuleSource, context::RuleContext,
-    declare_source_rule,
+    declare_source_rule, options::SortMode
 };
 use biome_console::markup;
 use biome_deserialize::TextRange;
@@ -91,6 +91,7 @@ impl Rule for UseSortedKeys {
         let member_list = ctx.query();
         let mut chunks = Vec::new();
         let mut current_chunk_members = Vec::with_capacity(member_list.len());
+        let sort_mode = ctx.as_sort_mode().clone();
 
         let get_name = |name: SyntaxResult<AnyJsObjectMemberName>| name.ok()?.name();
 
@@ -107,7 +108,7 @@ impl Rule for UseSortedKeys {
                     }
                 };
                 if let Some(name) = name {
-                    current_chunk_members.push(ObjectMember::new(element, name));
+                    current_chunk_members.push(ObjectMember::new(element, name, sort_mode));
                 } else {
                     // If a name cannot be extracted, then the current chunk of named properties stops here.
                     if !current_chunk_members.is_empty() && !current_chunk_members.is_sorted() {
@@ -173,10 +174,11 @@ impl Rule for UseSortedKeys {
 pub struct ObjectMember {
     member: AnyJsObjectMember,
     name: TokenText,
+    sort_mode: SortMode
 }
 impl ObjectMember {
-    fn new(member: AnyJsObjectMember, name: TokenText) -> Self {
-        Self { member, name }
+    fn new(member: AnyJsObjectMember, name: TokenText, sort_mode: SortMode) -> Self {
+        Self { member, name, sort_mode }
     }
 }
 impl Eq for ObjectMember {}
@@ -187,7 +189,10 @@ impl PartialEq for ObjectMember {
 }
 impl Ord for ObjectMember {
     fn cmp(&self, other: &Self) -> Ordering {
-        self.name.text().ascii_nat_cmp(other.name.text())
+        match self.sort_mode {
+            SortMode::Alphabetical => self.name.text().cmp(other.name.text()),
+            SortMode::Natural => self.name.text().ascii_nat_cmp(other.name.text()),
+        }
     }
 }
 impl PartialOrd for ObjectMember {

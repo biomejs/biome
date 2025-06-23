@@ -11,11 +11,7 @@ use biome_package::PackageType;
 use biome_plugin_loader::AnalyzerGritPlugin;
 use biome_rowan::AstNode;
 use biome_test_utils::{
-    CheckActionType, assert_diagnostics_expectation_comment, assert_errors_are_absent,
-    code_fix_to_string, create_analyzer_options, diagnostic_to_string,
-    has_bogus_nodes_or_empty_slots, module_graph_for_test_file, parse_test_path,
-    project_layout_with_node_manifest, register_leak_checker, scripts_from_json,
-    write_analyzer_snapshot,
+    assert_diagnostics_expectation_comment, assert_errors_are_absent, code_fix_to_string, create_analyzer_options, diagnostic_to_string, has_bogus_nodes_or_empty_slots, module_graph_for_test_file, parse_test_path, project_layout_with_node_manifest, register_leak_checker, scripts_from_json, write_analyzer_snapshot, CheckActionType
 };
 use camino::Utf8Path;
 use std::ops::Deref;
