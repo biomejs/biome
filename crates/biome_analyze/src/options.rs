@@ -74,6 +74,9 @@ pub struct AnalyzerConfiguration {
 
     /// Whether the CSS files contain CSS Modules
     css_modules: bool,
+
+    /// The sort mode for attributes and keys
+    sort_mode: SortMode,
 }
 
 impl AnalyzerConfiguration {
@@ -104,6 +107,11 @@ impl AnalyzerConfiguration {
 
     pub fn with_css_modules(mut self, css_modules: bool) -> Self {
         self.css_modules = css_modules;
+        self
+    }
+
+    pub fn with_sort_mode(mut self, sort_mode: SortMode) -> Self {
+        self.sort_mode = sort_mode;
         self
     }
 }
@@ -183,6 +191,10 @@ impl AnalyzerOptions {
     pub fn css_modules(&self) -> bool {
         self.configuration.css_modules
     }
+
+    pub fn sort_mode(&self) -> &SortMode {
+        &self.configuration.sort_mode
+    }
 }
 
 #[derive(Debug, Default)]
@@ -192,6 +204,13 @@ pub enum PreferredQuote {
     Double,
     /// Single quotes
     Single,
+}
+
+#[derive(Clone, Copy, Debug, Default, Eq, PartialEq, Ord, PartialOrd, Hash)]
+pub enum SortMode {
+    #[default]
+    Natural,
+    Alphabetical,
 }
 
 impl PreferredQuote {

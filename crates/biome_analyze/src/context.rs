@@ -1,4 +1,4 @@
-use crate::options::{JsxRuntime, PreferredQuote};
+use crate::options::{JsxRuntime, PreferredQuote, SortMode};
 use crate::{FromServices, Queryable, Rule, RuleKey, ServiceBag, registry::RuleRoot};
 use crate::{GroupCategory, RuleCategory, RuleGroup, RuleMetadata};
 use biome_diagnostics::{Error, Result};
@@ -20,6 +20,7 @@ pub struct RuleContext<'a, R: Rule> {
     preferred_jsx_quote: &'a PreferredQuote,
     jsx_runtime: Option<JsxRuntime>,
     css_modules: bool,
+    sort_mode: &'a SortMode,
 }
 
 impl<'a, R> RuleContext<'a, R>
@@ -38,6 +39,7 @@ where
         preferred_jsx_quote: &'a PreferredQuote,
         jsx_runtime: Option<JsxRuntime>,
         css_modules: bool,
+        sort_mode: &'a SortMode,
     ) -> Result<Self, Error> {
         let rule_key = RuleKey::rule::<R>();
         Ok(Self {
@@ -52,6 +54,7 @@ where
             preferred_jsx_quote,
             jsx_runtime,
             css_modules,
+            sort_mode,
         })
     }
 
@@ -177,6 +180,10 @@ where
     /// Returns the preferred JSX quote that should be used when providing code actions
     pub fn as_preferred_jsx_quote(&self) -> &PreferredQuote {
         self.preferred_jsx_quote
+    }
+
+    pub fn as_sort_mode(&self) -> &SortMode {
+        self.sort_mode
     }
 
     pub fn is_css_modules(&self) -> bool {
