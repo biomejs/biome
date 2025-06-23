@@ -3,7 +3,9 @@ use biome_analyze::{
 };
 use biome_console::markup;
 use biome_js_factory::make;
-use biome_js_syntax::{AnyJsExpression, JsExpressionStatement, JsSyntaxKind};
+use biome_js_syntax::{
+    AnyJsCallArgument, AnyJsExpression, AnyJsName, JsExpressionStatement, JsSyntaxKind, T,
+};
 use biome_rowan::{AstNode, AstSeparatedList, BatchMutationExt, TriviaPieceKind};
 
 use crate::{JsRuleAction, ast_utils::is_in_async_function, services::typed::Typed};
@@ -164,9 +166,14 @@ declare_lint_rule! {
     }
 }
 
+pub enum NoFloatingPromisesState {
+    ArrayOfPromises,
+    UnhandledPromise,
+}
+
 impl Rule for NoFloatingPromises {
     type Query = Typed<JsExpressionStatement>;
-    type State = ();
+    type State = NoFloatingPromisesState;
     type Signals = Option<Self::State>;
     type Options = ();
 
@@ -177,6 +184,10 @@ impl Rule for NoFloatingPromises {
 
         // Uncomment the following line for debugging convenience:
         //let printed = format!("type of {expression:?} = {ty:?}");
+        if ty.is_array_of(|ty| ty.is_promise_instance()) {
+            return Some(NoFloatingPromisesState::ArrayOfPromises);
+        }
+
         let is_maybe_promise =
             ty.is_promise_instance() || ty.has_variant(|ty| ty.is_promise_instance());
         if !is_maybe_promise {
@@ -187,26 +198,48 @@ impl Rule for NoFloatingPromises {
             return None;
         }
 
-        Some(())
+        Some(NoFloatingPromisesState::UnhandledPromise)
     }
 
-    fn diagnostic(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<RuleDiagnostic> {
+    fn diagnostic(ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
         let node = ctx.query();
-        Some(
-            RuleDiagnostic::new(
-                rule_category!(),
-                node.range(),
-                markup! {
-                    "A \"floating\" Promise was found, meaning it is not properly handled and could lead to ignored errors or unexpected behavior."
-                },
-            )
-            .note(markup! {
-                "This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator."
-            })
-        )
+        match state {
+            NoFloatingPromisesState::ArrayOfPromises => Some(
+                RuleDiagnostic::new(
+                    rule_category!(),
+                    node.range(),
+                    markup! {
+                        "An array of Promises was found, meaning they are not "
+                        "properly handled and could lead to ignored errors or "
+                        "unexpected behavior."
+                    },
+                )
+                .note(markup! {
+                    "This happens when an array of Promises is not wrapped "
+                    "with Promise.all() or a similar method, and is not "
+                    "explicitly ignored using the `void` operator."
+                }),
+            ),
+            NoFloatingPromisesState::UnhandledPromise => Some(
+                RuleDiagnostic::new(
+                    rule_category!(),
+                    node.range(),
+                    markup! {
+                        "A \"floating\" Promise was found, meaning it is not "
+                        "properly handled and could lead to ignored errors or "
+                        "unexpected behavior."
+                    },
+                )
+                .note(markup! {
+                    "This happens when a Promise is not awaited, lacks a "
+                    "`.catch` or `.then` rejection handler, or is not "
+                    "explicitly ignored using the `void` operator."
+                }),
+            ),
+        }
     }
 
-    fn action(ctx: &RuleContext<Self>, _: &Self::State) -> Option<JsRuleAction> {
+    fn action(ctx: &RuleContext<Self>, state: &Self::State) -> Option<JsRuleAction> {
         let node = ctx.query();
 
         if !is_in_async_function(node.syntax()) {
@@ -215,19 +248,66 @@ impl Rule for NoFloatingPromises {
 
         let expression = node.expression().ok()?;
         let mut mutation = ctx.root().begin();
-        let await_expression = AnyJsExpression::JsAwaitExpression(make::js_await_expression(
-            make::token(JsSyntaxKind::AWAIT_KW)
-                .with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")]),
-            expression.clone().trim_leading_trivia()?,
-        ));
+        match state {
+            NoFloatingPromisesState::ArrayOfPromises => {
+                let callee_expression =
+                    AnyJsExpression::JsStaticMemberExpression(make::js_static_member_expression(
+                        AnyJsExpression::JsIdentifierExpression(make::js_identifier_expression(
+                            make::js_reference_identifier(make::ident("Promise")),
+                        )),
+                        make::token(T![.]),
+                        AnyJsName::JsName(make::js_name(make::ident("all"))),
+                    ));
 
-        mutation.replace_node(expression, await_expression);
-        Some(JsRuleAction::new(
-            ctx.metadata().action_category(ctx.category(), ctx.group()),
-            ctx.metadata().applicability(),
-            markup! { "Add await operator." }.to_owned(),
-            mutation,
-        ))
+                let call_expression = AnyJsExpression::JsCallExpression(
+                    make::js_call_expression(
+                        callee_expression,
+                        make::js_call_arguments(
+                            make::token(T!['(']),
+                            make::js_call_argument_list(
+                                [AnyJsCallArgument::AnyJsExpression(
+                                    expression.clone().trim_trivia()?,
+                                )],
+                                [],
+                            ),
+                            make::token(T![')']),
+                        ),
+                    )
+                    .build(),
+                );
+
+                let await_expression =
+                    AnyJsExpression::JsAwaitExpression(make::js_await_expression(
+                        make::token(JsSyntaxKind::AWAIT_KW)
+                            .with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")]),
+                        call_expression,
+                    ));
+
+                mutation.replace_node(expression, await_expression);
+                Some(JsRuleAction::new(
+                    ctx.metadata().action_category(ctx.category(), ctx.group()),
+                    ctx.metadata().applicability(),
+                    markup! { "Wrap in Promise.all() and add await operator." }.to_owned(),
+                    mutation,
+                ))
+            }
+            NoFloatingPromisesState::UnhandledPromise => {
+                let await_expression =
+                    AnyJsExpression::JsAwaitExpression(make::js_await_expression(
+                        make::token(JsSyntaxKind::AWAIT_KW)
+                            .with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")]),
+                        expression.clone().trim_leading_trivia()?,
+                    ));
+
+                mutation.replace_node(expression, await_expression);
+                Some(JsRuleAction::new(
+                    ctx.metadata().action_category(ctx.category(), ctx.group()),
+                    ctx.metadata().applicability(),
+                    markup! { "Add await operator." }.to_owned(),
+                    mutation,
+                ))
+            }
+        }
     }
 }
 

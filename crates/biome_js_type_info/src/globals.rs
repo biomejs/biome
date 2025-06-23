@@ -12,9 +12,9 @@ use biome_rowan::Text;
 
 use crate::{
     Class, Function, FunctionParameter, GenericTypeParameter, Literal, Resolvable,
-    ResolvedTypeData, ResolvedTypeId, ReturnType, ScopeId, TypeData, TypeId, TypeMember,
-    TypeMemberKind, TypeReference, TypeReferenceQualifier, TypeResolver, TypeResolverLevel,
-    TypeStore, flattening::MAX_FLATTEN_DEPTH,
+    ResolvedTypeData, ResolvedTypeId, ReturnType, ScopeId, TypeData, TypeId, TypeInstance,
+    TypeMember, TypeMemberKind, TypeReference, TypeReferenceQualifier, TypeResolver,
+    TypeResolverLevel, TypeStore, flattening::MAX_FLATTEN_DEPTH,
 };
 
 const GLOBAL_LEVEL: TypeResolverLevel = TypeResolverLevel::Global;
@@ -39,37 +39,42 @@ pub const VOID_ID: TypeId = TypeId::new(2);
 pub const CONDITIONAL_ID: TypeId = TypeId::new(3);
 pub const NUMBER_ID: TypeId = TypeId::new(4);
 pub const STRING_ID: TypeId = TypeId::new(5);
-pub const ARRAY_ID: TypeId = TypeId::new(6);
-pub const ARRAY_FILTER_ID: TypeId = TypeId::new(7);
-pub const ARRAY_FOREACH_ID: TypeId = TypeId::new(8);
-pub const GLOBAL_ID: TypeId = TypeId::new(9);
-pub const INSTANCEOF_PROMISE_ID: TypeId = TypeId::new(10);
-pub const PROMISE_ID: TypeId = TypeId::new(11);
-pub const PROMISE_CONSTRUCTOR_ID: TypeId = TypeId::new(12);
-pub const PROMISE_CATCH_ID: TypeId = TypeId::new(13);
-pub const PROMISE_FINALLY_ID: TypeId = TypeId::new(14);
-pub const PROMISE_THEN_ID: TypeId = TypeId::new(15);
-pub const PROMISE_ALL_ID: TypeId = TypeId::new(16);
-pub const PROMISE_ALL_SETTLED_ID: TypeId = TypeId::new(17);
-pub const PROMISE_ANY_ID: TypeId = TypeId::new(18);
-pub const PROMISE_RACE_ID: TypeId = TypeId::new(19);
-pub const PROMISE_REJECT_ID: TypeId = TypeId::new(20);
-pub const PROMISE_RESOLVE_ID: TypeId = TypeId::new(21);
-pub const PROMISE_TRY_ID: TypeId = TypeId::new(22);
-pub const BIGINT_STRING_LITERAL_ID: TypeId = TypeId::new(23);
-pub const BOOLEAN_STRING_LITERAL_ID: TypeId = TypeId::new(24);
-pub const FUNCTION_STRING_LITERAL_ID: TypeId = TypeId::new(25);
-pub const NUMBER_STRING_LITERAL_ID: TypeId = TypeId::new(26);
-pub const OBJECT_STRING_LITERAL_ID: TypeId = TypeId::new(27);
-pub const STRING_STRING_LITERAL_ID: TypeId = TypeId::new(28);
-pub const SYMBOL_STRING_LITERAL_ID: TypeId = TypeId::new(29);
-pub const UNDEFINED_STRING_LITERAL_ID: TypeId = TypeId::new(30);
-pub const TYPEOF_OPERATOR_RETURN_UNION_ID: TypeId = TypeId::new(31);
-pub const T_ID: TypeId = TypeId::new(32);
-pub const CONDITIONAL_CALLBACK_ID: TypeId = TypeId::new(33);
-pub const VOID_CALLBACK_ID: TypeId = TypeId::new(34);
-pub const FETCH_ID: TypeId = TypeId::new(35);
-pub const NUM_PREDEFINED_TYPES: usize = 36; // Most be one more than the highest `TypeId` above.
+pub const INSTANCEOF_ARRAY_T_ID: TypeId = TypeId::new(6);
+pub const INSTANCEOF_ARRAY_U_ID: TypeId = TypeId::new(7);
+pub const ARRAY_ID: TypeId = TypeId::new(8);
+pub const ARRAY_FILTER_ID: TypeId = TypeId::new(9);
+pub const ARRAY_FOREACH_ID: TypeId = TypeId::new(10);
+pub const ARRAY_MAP_ID: TypeId = TypeId::new(11);
+pub const GLOBAL_ID: TypeId = TypeId::new(12);
+pub const INSTANCEOF_PROMISE_ID: TypeId = TypeId::new(13);
+pub const PROMISE_ID: TypeId = TypeId::new(14);
+pub const PROMISE_CONSTRUCTOR_ID: TypeId = TypeId::new(15);
+pub const PROMISE_CATCH_ID: TypeId = TypeId::new(16);
+pub const PROMISE_FINALLY_ID: TypeId = TypeId::new(17);
+pub const PROMISE_THEN_ID: TypeId = TypeId::new(18);
+pub const PROMISE_ALL_ID: TypeId = TypeId::new(19);
+pub const PROMISE_ALL_SETTLED_ID: TypeId = TypeId::new(20);
+pub const PROMISE_ANY_ID: TypeId = TypeId::new(21);
+pub const PROMISE_RACE_ID: TypeId = TypeId::new(22);
+pub const PROMISE_REJECT_ID: TypeId = TypeId::new(23);
+pub const PROMISE_RESOLVE_ID: TypeId = TypeId::new(24);
+pub const PROMISE_TRY_ID: TypeId = TypeId::new(25);
+pub const BIGINT_STRING_LITERAL_ID: TypeId = TypeId::new(26);
+pub const BOOLEAN_STRING_LITERAL_ID: TypeId = TypeId::new(27);
+pub const FUNCTION_STRING_LITERAL_ID: TypeId = TypeId::new(28);
+pub const NUMBER_STRING_LITERAL_ID: TypeId = TypeId::new(29);
+pub const OBJECT_STRING_LITERAL_ID: TypeId = TypeId::new(30);
+pub const STRING_STRING_LITERAL_ID: TypeId = TypeId::new(31);
+pub const SYMBOL_STRING_LITERAL_ID: TypeId = TypeId::new(32);
+pub const UNDEFINED_STRING_LITERAL_ID: TypeId = TypeId::new(33);
+pub const TYPEOF_OPERATOR_RETURN_UNION_ID: TypeId = TypeId::new(34);
+pub const T_ID: TypeId = TypeId::new(35);
+pub const U_ID: TypeId = TypeId::new(36);
+pub const CONDITIONAL_CALLBACK_ID: TypeId = TypeId::new(37);
+pub const MAP_CALLBACK_ID: TypeId = TypeId::new(38);
+pub const VOID_CALLBACK_ID: TypeId = TypeId::new(39);
+pub const FETCH_ID: TypeId = TypeId::new(40);
+pub const NUM_PREDEFINED_TYPES: usize = 41; // Must be one more than the highest `TypeId` above.
 
 pub const GLOBAL_UNKNOWN_ID: ResolvedTypeId = ResolvedTypeId::new(GLOBAL_LEVEL, UNKNOWN_ID);
 pub const GLOBAL_UNDEFINED_ID: ResolvedTypeId = ResolvedTypeId::new(GLOBAL_LEVEL, UNDEFINED_ID);
@@ -103,6 +108,7 @@ pub const GLOBAL_UNDEFINED_STRING_LITERAL_ID: ResolvedTypeId =
 pub const GLOBAL_TYPEOF_OPERATOR_RETURN_UNION_ID: ResolvedTypeId =
     ResolvedTypeId::new(GLOBAL_LEVEL, TYPEOF_OPERATOR_RETURN_UNION_ID);
 pub const GLOBAL_T_ID: ResolvedTypeId = ResolvedTypeId::new(GLOBAL_LEVEL, T_ID);
+pub const GLOBAL_U_ID: ResolvedTypeId = ResolvedTypeId::new(GLOBAL_LEVEL, U_ID);
 pub const GLOBAL_FETCH_ID: ResolvedTypeId = ResolvedTypeId::new(GLOBAL_LEVEL, FETCH_ID);
 
 /// Returns a string for formatting global IDs in test snapshots.
@@ -114,39 +120,44 @@ pub fn global_type_name(id: TypeId) -> &'static str {
         3 => "conditional",
         4 => "number",
         5 => "string",
-        6 => "Array",
-        7 => "Array.prototype.filter",
-        8 => "Array.prototype.forEach",
-        9 => "globalThis",
-        10 => "instanceof Promise",
-        11 => "Promise",
-        12 => "Promise.constructor",
-        13 => "Promise.prototype.catch",
-        14 => "Promise.prototype.finally",
-        15 => "Promise.prototype.then",
-        16 => "Promise.all",
-        17 => "Promise.allSettled",
-        18 => "Promise.any",
-        19 => "Promise.race",
-        20 => "Promise.reject",
-        21 => "Promise.resolve",
-        22 => "Promise.try",
-        23 => "\"bigint\"",
-        24 => "\"boolean\"",
-        25 => "\"function\"",
-        26 => "\"number\"",
-        27 => "\"object\"",
-        28 => "\"string\"",
-        29 => "\"symbol\"",
-        30 => "\"undefined\"",
-        31 => {
+        6 => "instanceof Array<T>",
+        7 => "instanceof Array<U>",
+        8 => "Array",
+        9 => "Array.prototype.filter",
+        10 => "Array.prototype.forEach",
+        11 => "Array.prototype.map",
+        12 => "globalThis",
+        13 => "instanceof Promise",
+        14 => "Promise",
+        15 => "Promise.constructor",
+        16 => "Promise.prototype.catch",
+        17 => "Promise.prototype.finally",
+        18 => "Promise.prototype.then",
+        19 => "Promise.all",
+        20 => "Promise.allSettled",
+        21 => "Promise.any",
+        22 => "Promise.race",
+        23 => "Promise.reject",
+        24 => "Promise.resolve",
+        25 => "Promise.try",
+        26 => "\"bigint\"",
+        27 => "\"boolean\"",
+        28 => "\"function\"",
+        29 => "\"number\"",
+        30 => "\"object\"",
+        31 => "\"string\"",
+        32 => "\"symbol\"",
+        33 => "\"undefined\"",
+        34 => {
             "\"bigint\" | \"boolean\" | \"function\" | \"number\" | \"object\" \
                 | \"string\" | \"symbol\" | \"undefined\""
         }
-        32 => "T",
-        33 => "() => conditional",
-        34 => "() => void",
-        35 => "fetch",
+        35 => "T",
+        36 => "U",
+        37 => "() => conditional",
+        38 => "<U>(item: T) => U",
+        39 => "() => void",
+        40 => "fetch",
         _ => "inferred type",
     }
 }
@@ -175,10 +186,13 @@ impl Default for GlobalsResolver {
         };
 
         let array_method_definition =
-            |id: TypeId, param_type_id: TypeId, return_type_id: TypeId| {
+            |id: TypeId,
+             param_type_id: TypeId,
+             return_type_id: TypeId,
+             type_parameters: Box<[TypeReference]>| {
                 TypeData::from(Function {
                     is_async: false,
-                    type_parameters: Default::default(),
+                    type_parameters,
                     name: Some(Text::Static(global_type_name(id))),
                     parameters: [FunctionParameter {
                         name: None,
@@ -215,6 +229,11 @@ impl Default for GlobalsResolver {
             TypeData::Conditional,
             TypeData::Number,
             TypeData::String,
+            TypeData::instance_of(TypeReference::from(GLOBAL_ARRAY_ID)),
+            TypeData::instance_of(TypeInstance {
+                ty: TypeReference::from(GLOBAL_ARRAY_ID),
+                type_parameters: [GLOBAL_U_ID.into()].into(),
+            }),
             TypeData::Class(Box::new(Class {
                 name: Some(Text::Static("Array")),
                 type_parameters: Box::new([TypeReference::from(GLOBAL_T_ID)]),
@@ -223,6 +242,7 @@ impl Default for GlobalsResolver {
                 members: Box::new([
                     method("filter", ARRAY_FILTER_ID),
                     method("forEach", ARRAY_FOREACH_ID),
+                    method("map", ARRAY_MAP_ID),
                     TypeMember {
                         kind: TypeMemberKind::Named(Text::Static("length")),
                         is_static: false,
@@ -230,8 +250,24 @@ impl Default for GlobalsResolver {
                     },
                 ]),
             })),
-            array_method_definition(ARRAY_FILTER_ID, CONDITIONAL_CALLBACK_ID, ARRAY_ID),
-            array_method_definition(ARRAY_FOREACH_ID, VOID_CALLBACK_ID, VOID_ID),
+            array_method_definition(
+                ARRAY_FILTER_ID,
+                CONDITIONAL_CALLBACK_ID,
+                INSTANCEOF_ARRAY_T_ID,
+                Default::default(),
+            ),
+            array_method_definition(
+                ARRAY_FOREACH_ID,
+                VOID_CALLBACK_ID,
+                VOID_ID,
+                Default::default(),
+            ),
+            array_method_definition(
+                ARRAY_MAP_ID,
+                MAP_CALLBACK_ID,
+                INSTANCEOF_ARRAY_U_ID,
+                [GLOBAL_U_ID.into()].into(),
+            ),
             TypeData::Global,
             TypeData::instance_of(TypeReference::from(GLOBAL_PROMISE_ID)),
             TypeData::Class(Box::new(Class {
@@ -304,12 +340,31 @@ impl Default for GlobalsResolver {
                 constraint: TypeReference::Unknown,
                 default: TypeReference::Unknown,
             }),
+            TypeData::from(GenericTypeParameter {
+                name: Text::Static("U"),
+                constraint: TypeReference::Unknown,
+                default: TypeReference::Unknown,
+            }),
             TypeData::from(Function {
                 is_async: false,
                 type_parameters: Default::default(),
                 name: Some(Text::Static(global_type_name(CONDITIONAL_CALLBACK_ID))),
                 parameters: Default::default(),
                 return_type: ReturnType::Type(GLOBAL_CONDITIONAL_ID.into()),
+            }),
+            TypeData::from(Function {
+                is_async: false,
+                type_parameters: Default::default(),
+                name: Some(Text::Static(global_type_name(MAP_CALLBACK_ID))),
+                parameters: [FunctionParameter {
+                    name: None,
+                    ty: GLOBAL_U_ID.into(),
+                    bindings: Default::default(),
+                    is_optional: false,
+                    is_rest: false,
+                }]
+                .into(),
+                return_type: ReturnType::Type(GLOBAL_U_ID.into()),
             }),
             TypeData::from(Function {
                 is_async: false,

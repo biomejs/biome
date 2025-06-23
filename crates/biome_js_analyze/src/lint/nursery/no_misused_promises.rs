@@ -94,9 +94,9 @@ declare_lint_rule! {
 
 pub enum NoMisusedPromisesState {
     Conditional,
-    ExpectedConditionalReturn,
-    ExpectedVoidReturn,
+    ConditionalReturn,
     Spread,
+    VoidReturn,
 }
 
 impl Rule for NoMisusedPromises {
@@ -133,7 +133,7 @@ impl Rule for NoMisusedPromises {
                     "You may have intended to `await` the Promise instead."
                 }),
             ),
-            NoMisusedPromisesState::ExpectedConditionalReturn => Some(
+            NoMisusedPromisesState::ConditionalReturn => Some(
                 RuleDiagnostic::new(
                     rule_category!(),
                     node.range(),
@@ -150,7 +150,7 @@ impl Rule for NoMisusedPromises {
                     "does not work inside a synchronous callback."
                 }),
             ),
-            NoMisusedPromisesState::ExpectedVoidReturn => Some(
+            NoMisusedPromisesState::VoidReturn => Some(
                 RuleDiagnostic::new(
                     rule_category!(),
                     node.range(),
@@ -182,7 +182,7 @@ impl Rule for NoMisusedPromises {
 
     fn action(ctx: &RuleContext<Self>, state: &Self::State) -> Option<JsRuleAction> {
         use NoMisusedPromisesState::*;
-        if matches!(state, ExpectedConditionalReturn | ExpectedVoidReturn) {
+        if matches!(state, ConditionalReturn | VoidReturn) {
             return None; // These cannot be automatically fixed.
         }
 
@@ -296,9 +296,9 @@ fn find_misused_promise_returning_callback(
     };
 
     if argument_ty.is_function_with_return_type(|ty| ty.is_conditional()) {
-        Some(NoMisusedPromisesState::ExpectedConditionalReturn)
+        Some(NoMisusedPromisesState::ConditionalReturn)
     } else if argument_ty.is_function_with_return_type(|ty| ty.is_void()) {
-        Some(NoMisusedPromisesState::ExpectedVoidReturn)
+        Some(NoMisusedPromisesState::VoidReturn)
     } else {
         None
     }
