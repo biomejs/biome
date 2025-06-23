@@ -20,6 +20,6 @@
   "devDependencies": {
     "@changesets/changelog-github": "0.5.1",
     "@changesets/cli": "2.29.4",
-    "@types/node": "22.15.31"
+    "@types/node": "22.15.32"
   }
 }
