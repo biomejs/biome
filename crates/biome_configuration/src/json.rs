@@ -1,6 +1,6 @@
 use crate::bool::Bool;
 use biome_deserialize_macros::{Deserializable, Merge};
-use biome_formatter::{BracketSpacing, Expand, IndentStyle, IndentWidth, LineEnding, LineWidth};
+use biome_formatter::{BracketSpacing, Expand, IndentStyle, IndentWidth, LineEnding, LineWidth, SortMode};
 use biome_json_formatter::context::TrailingCommas;
 use bpaf::Bpaf;
 use serde::{Deserialize, Serialize};
@@ -101,6 +101,11 @@ pub struct JsonFormatterConfiguration {
     #[bpaf(long("json-formatter-expand"), argument("auto|always|never"), optional)]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub expand: Option<Expand>,
+
+    /// Sorting mode used during import sorting and keys sorting
+    #[bpaf(long("sort-mode"), argument("natural|alphabetical"))]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub sort_mode: Option<SortMode>,
 
     /// Whether to insert spaces around brackets in object literals. Defaults to true.
     #[bpaf(long("json-formatter-bracket-spacing"), argument("true|false"))]

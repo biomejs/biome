@@ -2,7 +2,7 @@ use crate::bool::Bool;
 use biome_deserialize_macros::{Deserializable, Merge};
 use biome_formatter::{
     AttributePosition, BracketSameLine, BracketSpacing, Expand, IndentStyle, IndentWidth,
-    LineEnding, LineWidth, QuoteStyle,
+    LineEnding, LineWidth, QuoteStyle, SortMode,
 };
 use biome_js_formatter::context::{
     ArrowParentheses, QuoteProperties, Semicolons, trailing_commas::TrailingCommas,
@@ -116,6 +116,11 @@ pub struct JsFormatterConfiguration {
     #[bpaf(long("javascript-formatter-expand"), argument("auto|always|never"))]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub expand: Option<Expand>,
+
+    /// Sorting mode used during import sorting and keys sorting
+    #[bpaf(long("sort-mode"), argument("natural|alphabetical"))]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub sort_mode: Option<SortMode>,
 }
 
 impl JsFormatterConfiguration {
