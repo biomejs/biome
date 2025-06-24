@@ -174,6 +174,7 @@ define_categories! {
     "lint/nursery/noShadow": "https://biomejs.dev/linter/rules/no-shadow",
     "lint/nursery/noShorthandPropertyOverrides": "https://biomejs.dev/linter/rules/no-shorthand-property-overrides",
     "lint/nursery/noTsIgnore": "https://biomejs.dev/linter/rules/no-ts-ignore",
+    "lint/nursery/noUnassignedVariables": "https://biomejs.dev/linter/rules/no-unassigned-variables",
     "lint/nursery/noUndeclaredDependencies": "https://biomejs.dev/linter/rules/no-undeclared-dependencies",
     "lint/nursery/noUnknownAtRule": "https://biomejs.dev/linter/rules/no-unknown-at-rule",
     "lint/nursery/noUnknownFunction": "https://biomejs.dev/linter/rules/no-unknown-function",

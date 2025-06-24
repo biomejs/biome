@@ -2873,6 +2873,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noUnassignedVariables": {
+					"description": "Disallow let or var variables that are read but never assigned.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noUnknownAtRule": {
 					"description": "Disallow unknown at-rules.",
 					"anyOf": [
