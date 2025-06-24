@@ -776,7 +776,7 @@ impl<'a> ResolveOptions<'a> {
         self.resolve_types && matches!(self.type_roots, TypeRoots::TypesInNodeModules)
     }
 
-    /// Sets [`Self::assume_relative`] set to `true` and returns this instance.
+    /// Sets [`Self::assume_relative`] to `true` and returns this instance.
     pub const fn with_assume_relative(mut self) -> Self {
         self.assume_relative = true;
         self
@@ -809,13 +809,13 @@ impl<'a> ResolveOptions<'a> {
         self
     }
 
-    /// Sets [`Self::resolve_node_builtins`] set to `true` and returns this instance.
+    /// Sets [`Self::resolve_node_builtins`] to `true` and returns this instance.
     pub const fn with_resolve_node_builtins(mut self) -> Self {
         self.resolve_node_builtins = true;
         self
     }
 
-    /// Sets [`Self::resolve_types`] set to `true` and returns this instance.
+    /// Sets [`Self::resolve_types`] to `true` and returns this instance.
     pub const fn with_resolve_types(mut self) -> Self {
         self.resolve_types = true;
         self
