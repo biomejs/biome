@@ -1,8 +1,8 @@
 ---
-"@biomejs/biome": minor
+"@biomejs/biome": patch
 ---
 
-Added new rule [`noUnassignedVariables`](https://biomejs.dev/linter/rules/no-unassigned-variables/), which disallows `let` or `var` variables that are read but never assigned.
+Added new nursery rule [`noUnassignedVariables`](https://biomejs.dev/linter/rules/no-unassigned-variables/), which disallows `let` or `var` variables that are read but never assigned.
 
 The following code is now reported as invalid:
 

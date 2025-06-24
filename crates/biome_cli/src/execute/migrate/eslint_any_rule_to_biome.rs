@@ -1739,6 +1739,7 @@ pub(crate) fn migrate_eslint_any_rule(
         }
         "no-unassigned-vars" => {
             if !options.include_nursery {
+                results.add(eslint_name, eslint_to_biome::RuleMigrationResult::Nursery);
                 return false;
             }
             let group = rules.nursery.get_or_insert_with(Default::default);
