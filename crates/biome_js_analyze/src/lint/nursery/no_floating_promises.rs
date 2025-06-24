@@ -259,6 +259,11 @@ impl Rule for NoFloatingPromises {
 fn is_handled_promise(expression: AnyJsExpression) -> Option<bool> {
     let js_call_expression = match expression.omit_parentheses() {
         AnyJsExpression::JsCallExpression(js_call_expression) => js_call_expression,
+        AnyJsExpression::JsAssignmentExpression(_) => {
+            // We consider assignments to be handled, otherwise any attempt to
+            // assign a promise will be flagged by this rule.
+            return Some(true);
+        }
         _ => return None,
     };
 

@@ -1,0 +1,3 @@
+https://cdn.jsdelivr.net/gh/amplication/amplication@909a1a77cd52e7f362cb5e037b3928146cef2ae4/schema.graphql
+https://cdn.jsdelivr.net/gh/dgraph-io/dgraph@2a3dacd849c912643949a5ae6d78258b6c8f71ab/graphql/e2e/normal/schema.graphql
+https://cdn.jsdelivr.net/gh/superfly/flyctl@9255529e9f423e6aca6eba64457187b6aead53fa/gql/schema.graphql

@@ -136,7 +136,12 @@ test('c', () => {
 describe("foo", () => {
   beforeEach(() => jest.useFakeTimers('legacy'));
   afterEach(() => jest.useRealTimers());
-})
+});
+
+describe("bar", () => {
+  beforeEach(() => vi.useFakeTimers('legacy'));
+  afterEach(() => vi.useRealTimers());
+});
 
 class DemoMethod {
     useHook() {

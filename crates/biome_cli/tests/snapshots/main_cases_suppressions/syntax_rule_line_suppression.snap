@@ -19,7 +19,7 @@ function sommething(chalk: ChalkInstance) {
 ```block
 file.ts:5:10 lint/correctness/noUnusedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This function is unused.
+  ! This function sommething is unused.
   
     3 │ import type { ChalkInstance } from "chalk" with { "resolution-mode": "import" };
     4 │ 

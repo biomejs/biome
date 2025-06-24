@@ -18,6 +18,7 @@ use biome_rowan::AstNode;
 use rustc_hash::{FxHashMap, FxHashSet};
 use serde::{Deserialize, Serialize};
 
+use biome_analyze::QueryMatch;
 #[cfg(feature = "schemars")]
 use schemars::JsonSchema;
 
@@ -72,7 +73,10 @@ impl ReactCallWithDependencyResult {
                 closure
                     .descendents()
                     .flat_map(|closure| closure.all_captures())
-                    .filter(move |capture| !range.contains(capture.declaration_range().start()))
+                    .filter(move |capture| {
+                        !range.contains(capture.declaration_range().start())
+                            && range.contains(capture.node().text_range().start())
+                    })
             })
             .into_iter()
             .flatten()
@@ -144,7 +148,7 @@ pub(crate) fn is_react_hook_call(call: &JsCallExpression) -> bool {
         return false;
     };
 
-    // HACK: jest has some functions that start with `use` and are not hooks
+    // HACK: Jest/Vitest have some functions that start with `use` and are not hooks
     if let Some(expr) = call
         .callee()
         .ok()
@@ -154,7 +158,8 @@ pub(crate) fn is_react_hook_call(call: &JsCallExpression) -> bool {
         .and_then(|ident| ident.name().ok())
         .and_then(|name| name.value_token().ok())
     {
-        if expr.text_trimmed() == "jest" {
+        let expr_trimmed = expr.text_trimmed();
+        if expr_trimmed == "jest" || expr_trimmed == "vi" {
             return false;
         }
     }

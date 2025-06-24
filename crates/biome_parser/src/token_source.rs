@@ -38,6 +38,11 @@ impl Trivia {
         self.range.start()
     }
 
+    /// Returns the byte offset of the end of the trivia in the source text
+    pub fn end_offset(&self) -> TextSize {
+        self.range.end()
+    }
+
     /// Returns `true` if this is the trailing trivia of a non-trivia token or false otherwise.
     pub fn trailing(&self) -> bool {
         self.trailing

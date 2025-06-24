@@ -11,7 +11,7 @@ const x = 0;
 ```
 invalidFixNone.js:1:7 lint/correctness/noUnusedVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This variable is unused.
+  ! This variable x is unused.
   
   > 1 │ const x = 0;
       │       ^

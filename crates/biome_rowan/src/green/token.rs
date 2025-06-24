@@ -5,8 +5,6 @@ use std::{
     ops, ptr,
 };
 
-use countme::Count;
-
 use crate::green::trivia::GreenTrivia;
 use crate::{
     TextSize,
@@ -19,9 +17,11 @@ struct GreenTokenHead {
     kind: RawSyntaxKind,
     leading: GreenTrivia,
     trailing: GreenTrivia,
-    _c: Count<GreenToken>,
+    #[cfg(feature = "countme")]
+    _c: countme::Count<GreenToken>,
 }
 
+#[cfg(feature = "countme")]
 pub(crate) fn has_live() -> bool {
     countme::get::<GreenToken>().live > 0
 }
@@ -165,7 +165,8 @@ impl GreenToken {
             kind,
             leading,
             trailing,
-            _c: Count::new(),
+            #[cfg(feature = "countme")]
+            _c: countme::Count::new(),
         };
         let ptr = ThinArc::from_header_and_iter(head, text.bytes());
         Self { ptr }

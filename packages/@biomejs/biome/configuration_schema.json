@@ -2534,6 +2534,35 @@
 			},
 			"additionalProperties": false
 		},
+		"NoExcessiveLinesPerFunctionConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{ "$ref": "#/definitions/RuleWithNoExcessiveLinesPerFunctionOptions" }
+			]
+		},
+		"NoExcessiveLinesPerFunctionOptions": {
+			"type": "object",
+			"properties": {
+				"maxLines": {
+					"description": "The maximum number of lines allowed in a function body.",
+					"default": 50,
+					"type": "integer",
+					"format": "uint8",
+					"minimum": 1.0
+				},
+				"skipBlankLines": {
+					"description": "When this options is set to `true`, blank lines in the function body are not counted towards the maximum line limit.",
+					"default": false,
+					"type": "boolean"
+				},
+				"skipIifes": {
+					"description": "When this option is set to `true`, Immediately Invoked Function Expressions (IIFEs) are not checked for the maximum line limit.",
+					"default": false,
+					"type": "boolean"
+				}
+			},
+			"additionalProperties": false
+		},
 		"NoForEachConfiguration": {
 			"anyOf": [
 				{ "$ref": "#/definitions/RulePlainConfiguration" },
@@ -2577,6 +2606,24 @@
 					"default": [],
 					"type": "array",
 					"items": { "type": "string" }
+				}
+			},
+			"additionalProperties": false
+		},
+		"NoParameterAssignConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{ "$ref": "#/definitions/RuleWithNoParameterAssignOptions" }
+			]
+		},
+		"NoParameterAssignOptions": {
+			"description": "Options for the rule `NoParameterAssign`",
+			"type": "object",
+			"properties": {
+				"propertyAssignment": {
+					"description": "Whether to report an error when a dependency is listed in the dependencies array but isn't used. Defaults to `allow`.",
+					"default": "allow",
+					"allOf": [{ "$ref": "#/definitions/PropertyAssignmentMode" }]
 				}
 			},
 			"additionalProperties": false
@@ -2690,8 +2737,8 @@
 			"type": "object",
 			"properties": {
 				"ignoreRestSiblings": {
-					"description": "Whether to ignore unused variables from an object destructuring with a spread (i.e.: whether `a` and `b` in `const { a, b, ...rest } = obj` should be ignored by this rule).",
-					"default": false,
+					"description": "Whether to ignore unused variables from an object destructuring with a spread.",
+					"default": true,
 					"type": "boolean"
 				}
 			},
@@ -2730,6 +2777,15 @@
 					"description": "Disallow destructuring props inside JSX components in Solid projects.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noExcessiveLinesPerFunction": {
+					"description": "Restrict the number of lines of code in a function.",
+					"anyOf": [
+						{
+							"$ref": "#/definitions/NoExcessiveLinesPerFunctionConfiguration"
+						},
 						{ "type": "null" }
 					]
 				},
@@ -2981,6 +3037,13 @@
 					"description": "Enforce the consistent use of the radix argument when using parseInt().",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleFixConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"useReadonlyClassProperties": {
+					"description": "Enforce marking members as readonly if they are never modified outside the constructor.",
+					"anyOf": [
+						{ "$ref": "#/definitions/ReadonlyClassPropertiesConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -3302,8 +3365,40 @@
 			"type": "array",
 			"items": { "$ref": "#/definitions/PluginConfiguration" }
 		},
+		"PropertyAssignmentMode": {
+			"description": "Specifies whether property assignments on function parameters are allowed or denied.",
+			"oneOf": [
+				{
+					"description": "Allows property assignments on function parameters. This is the default behavior, enabling flexibility in parameter usage.",
+					"type": "string",
+					"enum": ["allow"]
+				},
+				{
+					"description": "Disallows property assignments on function parameters. Enforces stricter immutability to prevent unintended side effects.",
+					"type": "string",
+					"enum": ["deny"]
+				}
+			]
+		},
 		"QuoteProperties": { "type": "string", "enum": ["asNeeded", "preserve"] },
 		"QuoteStyle": { "type": "string", "enum": ["double", "single"] },
+		"ReadonlyClassPropertiesConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{ "$ref": "#/definitions/RuleWithReadonlyClassPropertiesOptions" }
+			]
+		},
+		"ReadonlyClassPropertiesOptions": {
+			"description": "Rule's options",
+			"type": "object",
+			"properties": {
+				"checkAllProperties": {
+					"description": "When `true`, the keywords `public`, `protected`, and `private` are analyzed by the rule.",
+					"type": "boolean"
+				}
+			},
+			"additionalProperties": false
+		},
 		"Regex": { "type": "string" },
 		"RestrictedGlobalsConfiguration": {
 			"anyOf": [
@@ -3411,6 +3506,11 @@
 					"description": "Next.js framework rules",
 					"type": "string",
 					"enum": ["next"]
+				},
+				{
+					"description": "Vue.js framework rules",
+					"type": "string",
+					"enum": ["vue"]
 				},
 				{
 					"description": "For rules that require querying multiple files inside a project",
@@ -3695,6 +3795,23 @@
 			},
 			"additionalProperties": false
 		},
+		"RuleWithNoExcessiveLinesPerFunctionOptions": {
+			"type": "object",
+			"required": ["level"],
+			"properties": {
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [
+						{ "$ref": "#/definitions/NoExcessiveLinesPerFunctionOptions" }
+					]
+				}
+			},
+			"additionalProperties": false
+		},
 		"RuleWithNoForEachOptions": {
 			"type": "object",
 			"required": ["level"],
@@ -3732,6 +3849,21 @@
 				"level": {
 					"description": "The severity of the emitted diagnostics by the rule",
 					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				}
+			},
+			"additionalProperties": false
+		},
+		"RuleWithNoParameterAssignOptions": {
+			"type": "object",
+			"required": ["level"],
+			"properties": {
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [{ "$ref": "#/definitions/NoParameterAssignOptions" }]
 				}
 			},
 			"additionalProperties": false
@@ -3830,6 +3962,25 @@
 				"options": {
 					"description": "Rule's options",
 					"allOf": [{ "$ref": "#/definitions/NoUnusedVariablesOptions" }]
+				}
+			},
+			"additionalProperties": false
+		},
+		"RuleWithReadonlyClassPropertiesOptions": {
+			"type": "object",
+			"required": ["level"],
+			"properties": {
+				"fix": {
+					"description": "The kind of the code actions emitted by the rule",
+					"anyOf": [{ "$ref": "#/definitions/FixKind" }, { "type": "null" }]
+				},
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [{ "$ref": "#/definitions/ReadonlyClassPropertiesOptions" }]
 				}
 			},
 			"additionalProperties": false
@@ -4393,7 +4544,7 @@
 				"noParameterAssign": {
 					"description": "Disallow reassigning function parameters.",
 					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "$ref": "#/definitions/NoParameterAssignConfiguration" },
 						{ "type": "null" }
 					]
 				},

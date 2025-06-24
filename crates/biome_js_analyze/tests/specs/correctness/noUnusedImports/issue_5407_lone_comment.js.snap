@@ -26,7 +26,7 @@ issue_5407_lone_comment.js:5:8 lint/correctness/noUnusedImports  FIXABLE  ━━
   
   i Unused imports might be the result of an incomplete refactoring.
   
-  i Safe fix: Remove the unused imports.
+  i Unsafe fix: Remove the unused imports.
   
     3 3 │    */
     4 4 │   

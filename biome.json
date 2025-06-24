@@ -24,12 +24,14 @@
       "**/packages/@biomejs/**",
       "**/packages/tailwindcss-config-analyzer/**",
       "**/benchmark/**",
+      "scripts/**",
       "!**/crates/**",
       "!**/dist/**",
       "!**/packages/@biomejs/backend-jsonrpc/src/workspace.ts",
       "!**/__snapshots__",
       "!**/undefined/**",
-      "!**/benchmark/target/**"
+      "!**/benchmark/target/**",
+      "!**/benches/**"
     ],
     "experimentalScannerIgnores": [
       ".cargo",

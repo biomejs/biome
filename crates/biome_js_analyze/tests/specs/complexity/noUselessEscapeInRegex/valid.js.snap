@@ -21,6 +21,9 @@ expression: valid.js
 /vi/m;
 /\B/;
 
+// https://github.com/biomejs/biome/issues/6331
+/(?<a>)\k<a>/;
+
 // https://github.com/eslint/eslint/issues/7472
 /\0/; // null character
 /\1/; // \x01 character (octal literal)

@@ -105,7 +105,7 @@ fn scan_folder(folder: &Utf8Path, ctx: ScanContext) -> (Duration, Vec<BiomePath>
     let mut ignore_paths = Vec::new();
     // We want to process files that closest to the project root first. For example, we must process
     // first the `.gitignore` at the root of the project.
-    let iter = evaluated_paths.into_iter().rev();
+    let iter = evaluated_paths.into_iter();
 
     for path in iter {
         if path.is_config() {
@@ -118,7 +118,6 @@ fn scan_folder(folder: &Utf8Path, ctx: ScanContext) -> (Duration, Vec<BiomePath>
             handleable_paths.push(path);
         }
     }
-
     fs.traversal(Box::new(|scope: &dyn TraversalScope| {
         for path in &configs {
             scope.handle(ctx_ref, path.to_path_buf());
@@ -223,7 +222,7 @@ pub(crate) struct ScanContext<'app> {
 #[serde(rename_all = "camelCase")]
 pub enum ScanKind {
     /// The scanner should not be triggered
-    None,
+    NoScanner,
     /// It targets specific files
     KnownFiles,
     /// It targets the project, so it attempts to open all the files in the project.
@@ -240,7 +239,7 @@ impl ScanKind {
     }
 
     pub const fn is_none(self) -> bool {
-        matches!(self, Self::None)
+        matches!(self, Self::NoScanner)
     }
 }
 
@@ -282,17 +281,19 @@ impl TraversalContext for ScanContext<'_> {
                     // In project mode, the scanner always scans dependencies
                     // because they're a valuable source of type information.
                     true
-                } else {
+                } else if !path.is_dependency() {
                     !self
                         .workspace
                         .is_path_ignored(IsPathIgnoredParams {
                             project_key: self.project_key,
                             path: path.clone(),
                             // The scanner only cares about the top-level
-                            // `files.includes`.
+                            // `files.includes`
                             features: FeaturesBuilder::new().build(),
                         })
                         .unwrap_or_default()
+                } else {
+                    false
                 }
             }
             Ok(PathKind::File { .. }) => match self.scan_kind {
@@ -305,7 +306,7 @@ impl TraversalContext for ScanContext<'_> {
                             || DocumentFileSource::try_from_path(path).is_ok()
                     }
                 }
-                ScanKind::None => false,
+                ScanKind::NoScanner => false,
             },
             Err(_) => {
                 // bail on fifo and socket files

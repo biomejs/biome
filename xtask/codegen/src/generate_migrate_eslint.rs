@@ -23,7 +23,7 @@ pub(crate) fn generate_migrate_eslint(mode: Mode) -> Result<()> {
         let check_inspired = if is_inspuired {
             quote! {
                 if !options.include_inspired {
-                    results.has_inspired_rules = true;
+                    results.add(eslint_name, eslint_to_biome::RuleMigrationResult::Inspired);
                     return false;
                 }
             }
@@ -33,6 +33,7 @@ pub(crate) fn generate_migrate_eslint(mode: Mode) -> Result<()> {
         let check_nursery = if group_name == "nursery" {
             quote! {
                 if !options.include_nursery {
+                    results.add(eslint_name, eslint_to_biome::RuleMigrationResult::Nursery);
                     return false;
                 }
             }
@@ -61,9 +62,11 @@ pub(crate) fn generate_migrate_eslint(mode: Mode) -> Result<()> {
             match eslint_name {
                 #( #lines )*
                 _ => {
+                    results.add(eslint_name, eslint_to_biome::RuleMigrationResult::Unsupported);
                     return false;
                 }
             }
+            results.add(eslint_name, eslint_to_biome::RuleMigrationResult::Migrated);
             true
         }
     });

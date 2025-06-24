@@ -718,6 +718,11 @@ impl WorkspaceServer {
         if !vcs_settings.is_enabled() {
             return Ok(());
         }
+
+        if !vcs_settings.should_use_ignore_file() {
+            return Ok(());
+        }
+
         for path in paths.iter().filter(|path| path.is_ignore()) {
             let is_in_project_path = project_path
                 .as_ref()
@@ -995,7 +1000,7 @@ impl Workspace for WorkspaceServer {
                 params.only_rules.unwrap_or_default(),
                 params.skip_rules.unwrap_or_default(),
             )
-            .unwrap_or((path, ScanKind::None))
+            .unwrap_or((path, ScanKind::NoScanner))
         } else {
             self.find_project_root(
                 params.path,
@@ -1442,6 +1447,7 @@ impl Workspace for WorkspaceServer {
             only,
             skip,
             enabled_rules,
+            categories,
         } = params;
         let capabilities = self.get_file_capabilities(&path);
         let code_actions = capabilities
@@ -1468,6 +1474,7 @@ impl Workspace for WorkspaceServer {
             suppression_reason: None,
             enabled_rules,
             plugins: Vec::new(),
+            categories,
         }))
     }
 

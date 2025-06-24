@@ -6,6 +6,8 @@ expression: valid.js
 ```js
 /* should not generate diagnostics */
 
+import { privateExport } from "external-package";
+
 // Importing a package-private symbol within the same package is allowed.
 import { fooPackageVariable } from "./foo.js";
 import { fooPackageVariable as fooPackage2 } from "./sub";
