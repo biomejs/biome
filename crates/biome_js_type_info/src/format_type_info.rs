@@ -323,6 +323,10 @@ impl Format<FormatTypeContext> for TypeMemberKind {
         match self {
             Self::CallSignature => write!(f, [text("()")]),
             Self::Constructor => write!(f, [text("constructor")]),
+            Self::Getter(name) => {
+                let quoted = std::format!("get \"{name}\"");
+                write!(f, [dynamic_text(&quoted, TextSize::default())])
+            }
             Self::Named(name) => {
                 let quoted = std::format!("\"{name}\"");
                 write!(f, [dynamic_text(&quoted, TextSize::default())])

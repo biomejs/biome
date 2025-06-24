@@ -90,7 +90,7 @@ pub(super) fn flattened_expression(
                                     !member.is_static() && member.has_name(name.text())
                                 })
                             })
-                            .and_then(|member| resolver.resolve_and_get(&member.ty()))
+                            .and_then(|member| resolver.resolve_and_get(&member.deref_ty(resolver)))
                             .map(ResolvedTypeData::to_data)
                     }
                     (
@@ -132,7 +132,7 @@ pub(super) fn flattened_expression(
                             .all_members(resolver)
                             .find(|member| !member.is_static() && member.has_name(name.text()))?;
                         resolver
-                            .resolve_and_get(&member.ty())
+                            .resolve_and_get(&member.deref_ty(resolver))
                             .map(ResolvedTypeData::to_data)
                     }
                     (TypeData::Object(_), DestructureField::RestExcept(names)) => {
@@ -297,7 +297,7 @@ pub(super) fn flattened_expression(
                             !member.is_static()
                         }
                 });
-                member.map(|member| TypeData::reference(member.ty().into_owned()))
+                member.map(|member| TypeData::reference(member.deref_ty(resolver).into_owned()))
             } else {
                 None
             }
@@ -354,7 +354,7 @@ fn flattened_call(
                             .find(|member| member.kind().is_call_signature())
                     })
                     .map(ResolvedTypeMember::to_member)
-                    .and_then(|member| resolver.resolve_and_get(&member.ty))?
+                    .and_then(|member| resolver.resolve_and_get(&member.deref_ty(resolver)))?
                     .to_data();
             }
             TypeData::Object(_) => {
@@ -363,7 +363,7 @@ fn flattened_call(
                         .all_members(resolver)
                         .find(|member| member.kind().is_call_signature())
                         .map(ResolvedTypeMember::to_member)
-                        .and_then(|member| resolver.resolve_and_get(&member.ty))?
+                        .and_then(|member| resolver.resolve_and_get(&member.deref_ty(resolver)))?
                         .to_data();
             }
             _ => break,

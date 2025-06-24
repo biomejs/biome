@@ -11,13 +11,13 @@ use biome_js_syntax::{
     AnyTsTypePredicateParameterName, ClassMemberName, JsArrayBindingPattern,
     JsArrowFunctionExpression, JsBinaryExpression, JsBinaryOperator, JsCallArguments,
     JsClassDeclaration, JsClassExportDefaultDeclaration, JsClassExpression, JsFormalParameter,
-    JsFunctionDeclaration, JsFunctionExpression, JsNewExpression, JsObjectBindingPattern,
-    JsObjectExpression, JsParameters, JsReferenceIdentifier, JsReturnStatement, JsSyntaxToken,
-    JsUnaryExpression, JsUnaryOperator, JsVariableDeclaration, JsVariableDeclarator,
-    TsDeclareFunctionDeclaration, TsExternalModuleDeclaration, TsInterfaceDeclaration,
-    TsModuleDeclaration, TsReferenceType, TsReturnTypeAnnotation, TsTypeAliasDeclaration,
-    TsTypeAnnotation, TsTypeArguments, TsTypeList, TsTypeParameter, TsTypeParameters, TsTypeofType,
-    inner_string_text, unescape_js_string,
+    JsFunctionBody, JsFunctionDeclaration, JsFunctionExpression, JsNewExpression,
+    JsObjectBindingPattern, JsObjectExpression, JsParameters, JsReferenceIdentifier,
+    JsReturnStatement, JsSyntaxToken, JsUnaryExpression, JsUnaryOperator, JsVariableDeclaration,
+    JsVariableDeclarator, TsDeclareFunctionDeclaration, TsExternalModuleDeclaration,
+    TsInterfaceDeclaration, TsModuleDeclaration, TsReferenceType, TsReturnTypeAnnotation,
+    TsTypeAliasDeclaration, TsTypeAnnotation, TsTypeArguments, TsTypeList, TsTypeParameter,
+    TsTypeParameters, TsTypeofType, inner_string_text, unescape_js_string,
 };
 use biome_rowan::{AstNode, SyntaxResult, Text, TokenText};
 
@@ -1672,6 +1672,28 @@ impl TypeMember {
                     Self::from_class_member_info(resolver, name, ty, is_static, is_optional)
                 })
             }
+            AnyJsClassMember::JsGetterClassMember(member) => {
+                member.name().ok().and_then(|name| name.name()).map(|name| {
+                    let name = text_from_class_member_name(name.clone());
+                    let function = Function {
+                        is_async: false,
+                        type_parameters: [].into(),
+                        name: Some(name.clone()),
+                        parameters: [].into(),
+                        return_type: ReturnType::Type(getter_return_type(
+                            resolver,
+                            scope_id,
+                            member.return_type(),
+                            member.body().ok(),
+                        )),
+                    };
+                    Self {
+                        kind: TypeMemberKind::Getter(name),
+                        is_static: false,
+                        ty: resolver.reference_to_owned_data(function.into()),
+                    }
+                })
+            }
             AnyJsClassMember::TsInitializedPropertySignatureClassMember(member) => member
                 .name()
                 .ok()
@@ -1729,9 +1751,26 @@ impl TypeMember {
     ) -> Option<Self> {
         match member {
             AnyJsObjectMember::JsBogusMember(_) => None,
-            AnyJsObjectMember::JsGetterObjectMember(_) => {
-                // TODO: Handle getters
-                None
+            AnyJsObjectMember::JsGetterObjectMember(member) => {
+                member.name().ok().and_then(|name| name.name()).map(|name| {
+                    let function = Function {
+                        is_async: false,
+                        type_parameters: [].into(),
+                        name: Some(name.clone().into()),
+                        parameters: [].into(),
+                        return_type: ReturnType::Type(getter_return_type(
+                            resolver,
+                            scope_id,
+                            member.return_type(),
+                            member.body().ok(),
+                        )),
+                    };
+                    Self {
+                        kind: TypeMemberKind::Getter(name.into()),
+                        is_static: false,
+                        ty: resolver.register_and_resolve(function.into()).into(),
+                    }
+                })
             }
             AnyJsObjectMember::JsMethodObjectMember(member) => {
                 member.name().ok().and_then(|name| name.name()).map(|name| {
@@ -1856,9 +1895,27 @@ impl TypeMember {
                     ty: ty.into(),
                 })
             }
-            AnyTsTypeMember::TsGetterSignatureTypeMember(_member) => {
-                // TODO: Handle getters
-                None
+            AnyTsTypeMember::TsGetterSignatureTypeMember(member) => {
+                member.name().ok().and_then(|name| name.name()).map(|name| {
+                    let function = Function {
+                        is_async: false,
+                        type_parameters: [].into(),
+                        name: Some(name.clone().into()),
+                        parameters: [].into(),
+                        return_type: ReturnType::Type(getter_return_type(
+                            resolver,
+                            scope_id,
+                            member.type_annotation(),
+                            None,
+                        )),
+                    };
+                    let ty = resolver.register_and_resolve(function.into()).into();
+                    Self {
+                        kind: TypeMemberKind::Getter(name.into()),
+                        is_static: false,
+                        ty: ResolvedTypeId::new(resolver.level(), resolver.optional(ty)).into(),
+                    }
+                })
             }
             AnyTsTypeMember::TsIndexSignatureTypeMember(_member) => {
                 // TODO: Handle index signatures
@@ -2166,27 +2223,7 @@ fn function_return_type(
             .resolve_expression(scope_id, &return_expr)
             .into_owned(),
         Some(AnyJsFunctionBody::JsFunctionBody(body)) => {
-            let mut return_types: Vec<_> = body
-                .syntax()
-                .descendants()
-                .filter_map(JsReturnStatement::cast)
-                .map(|return_statement| {
-                    return_statement.argument().map_or(
-                        TypeData::Reference(GLOBAL_UNDEFINED_ID.into()),
-                        |argument| TypeData::from_any_js_expression(resolver, scope_id, &argument),
-                    )
-                })
-                .collect();
-            match return_types.len() {
-                0 => TypeData::VoidKeyword,
-                1 => return_types.remove(0),
-                _ => TypeData::union_of(
-                    return_types
-                        .into_iter()
-                        .map(|ty| resolver.reference_to_owned_data(ty))
-                        .collect(),
-                ),
-            }
+            type_from_function_body(resolver, scope_id, body)
         }
         None => {
             return ReturnType::Type(match is_async {
@@ -2201,6 +2238,24 @@ fn function_return_type(
     }
 
     ReturnType::Type(resolver.reference_to_owned_data(return_ty))
+}
+
+fn getter_return_type(
+    resolver: &mut dyn TypeResolver,
+    scope_id: ScopeId,
+    annotation: Option<TsTypeAnnotation>,
+    body: Option<JsFunctionBody>,
+) -> TypeReference {
+    if let Some(return_ty) = type_from_annotation(resolver, scope_id, annotation) {
+        return return_ty;
+    }
+
+    let return_ty = match body {
+        Some(body) => type_from_function_body(resolver, scope_id, body),
+        None => return TypeReference::Unknown,
+    };
+
+    resolver.reference_to_owned_data(return_ty)
 }
 
 #[inline]
@@ -2283,6 +2338,34 @@ fn type_from_annotation(
     annotation
         .and_then(|annotation| annotation.ty().ok())
         .map(|ty| TypeReference::from_any_ts_type(resolver, scope_id, &ty))
+}
+
+fn type_from_function_body(
+    resolver: &mut dyn TypeResolver,
+    scope_id: ScopeId,
+    body: JsFunctionBody,
+) -> TypeData {
+    let mut return_types: Vec<_> = body
+        .syntax()
+        .descendants()
+        .filter_map(JsReturnStatement::cast)
+        .map(|return_statement| {
+            return_statement.argument().map_or(
+                TypeData::Reference(GLOBAL_UNDEFINED_ID.into()),
+                |argument| TypeData::from_any_js_expression(resolver, scope_id, &argument),
+            )
+        })
+        .collect();
+    match return_types.len() {
+        0 => TypeData::VoidKeyword,
+        1 => return_types.remove(0),
+        _ => TypeData::union_of(
+            return_types
+                .into_iter()
+                .map(|ty| resolver.reference_to_owned_data(ty))
+                .collect(),
+        ),
+    }
 }
 
 #[inline]
