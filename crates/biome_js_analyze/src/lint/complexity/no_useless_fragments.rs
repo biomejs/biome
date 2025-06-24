@@ -260,12 +260,11 @@ impl Rule for NoUselessFragments {
                                     // Do not report the fragment as unnecessary if the only child is JsxText with an HTML reference
                                     // or if the fragment is the only child in a JSX expression (e.g. {<>Foo</>})
                                     if let AnyJsxChild::JsxText(text) = &first {
-                                        if let Ok(value_token) = text.value_token() {
-                                            let value = value_token.token_text();
-                                            if contains_html_character_references(value.as_ref()) {
-                                                return None;
-                                            }
-                                        }
+                                        let value_token = text.value_token().ok()?
+                                        let value = value_token.token_text();
+                                        if contains_html_character_references(value.as_ref()) {
+                                            return None;
+                                        }                                        
                                     }
 
                                     Some(NoUselessFragmentsState::Child(first))
