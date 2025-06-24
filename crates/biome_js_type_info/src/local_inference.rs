@@ -607,9 +607,19 @@ impl TypeData {
                 Err(_) => Self::Unknown,
             },
             AnyTsType::TsBooleanType(_) => Self::Boolean,
-            AnyTsType::TsConditionalType(_) => {
-                // TODO: Handle conditional types (`T extends U ? V : W`).
-                Self::Unknown
+            AnyTsType::TsConditionalType(ty) => {
+                // We don't attempt to evaluate the condition, so we simply
+                // infer a union of both the possibilities.
+                let types = vec![
+                    ty.true_type()
+                        .map(|ty| TypeReference::from_any_ts_type(resolver, scope_id, &ty))
+                        .unwrap_or_default(),
+                    ty.false_type()
+                        .map(|ty| TypeReference::from_any_ts_type(resolver, scope_id, &ty))
+                        .unwrap_or_default(),
+                ];
+
+                Self::union_of(types)
             }
             AnyTsType::TsConstructorType(ty) => Self::Constructor(Box::new(Constructor {
                 type_parameters: generic_params_from_ts_type_params(
