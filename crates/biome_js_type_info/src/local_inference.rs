@@ -1009,7 +1009,6 @@ impl TypeData {
             Self::Reference(GLOBAL_UNKNOWN_ID.into()),
             |name| match name.text() {
                 "globalThis" => Self::reference(GLOBAL_GLOBAL_ID),
-                "null" => Self::Null,
                 "undefined" => Self::Undefined,
                 _ => Self::reference(TypeReference::from_name(scope_id, name)),
             },

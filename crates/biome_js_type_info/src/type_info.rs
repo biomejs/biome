@@ -537,6 +537,7 @@ impl TypeData {
         match self {
             Self::BigInt
             | Self::Boolean
+            | Self::Null
             | Self::Number
             | Self::String
             | Self::Symbol
