@@ -1005,7 +1005,9 @@ mod tests {
         LiteralExpression, RawLanguage, RawLanguageKind, RawSyntaxTreeBuilder,
         SeparatedExpressionList,
     };
-    use crate::{AstNode, AstSeparatedElement, AstSeparatedList, SyntaxResult};
+    use crate::{AstNode, AstPtr, AstSeparatedElement, AstSeparatedList, SyntaxResult};
+
+    use super::SyntaxNodePtr;
 
     /// Creates a ast separated list over a sequence of numbers separated by ",".
     /// The elements are pairs of: (value, separator).
@@ -1329,5 +1331,38 @@ mod tests {
                 todo!()
             }
         }
+    }
+
+    #[test]
+    fn syntax_ptr_roundtrip() {
+        // list(1, 2, 3, 4,)
+        let list = build_list(vec![
+            (Some(1), Some(",")),
+            (Some(2), Some(",")),
+            (Some(3), Some(",")),
+            (Some(4), Some(",")),
+        ]);
+
+        let third = list.iter().nth(2).unwrap().unwrap();
+        let third_ptr = SyntaxNodePtr::new(third.syntax());
+        assert_eq!(
+            *third.syntax(),
+            third_ptr.to_node(list.syntax_list().node())
+        );
+    }
+
+    #[test]
+    fn ast_ptr_roundtrip() {
+        // list(1, 2, 3, 4,)
+        let list = build_list(vec![
+            (Some(1), Some(",")),
+            (Some(2), Some(",")),
+            (Some(3), Some(",")),
+            (Some(4), Some(",")),
+        ]);
+
+        let third = list.iter().nth(2).unwrap().unwrap();
+        let third_ptr = AstPtr::new(&third);
+        assert_eq!(third, third_ptr.to_node(list.syntax_list().node()));
     }
 }
