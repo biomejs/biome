@@ -2,7 +2,7 @@ use crate::bool::Bool;
 use biome_deserialize_macros::{Deserializable, Merge};
 use biome_formatter::{
     AttributePosition, BracketSameLine, BracketSpacing, Expand, IndentStyle, IndentWidth,
-    LineEnding, LineWidth, SortMode
+    LineEnding, LineWidth,
 };
 use bpaf::Bpaf;
 use serde::{Deserialize, Serialize};
@@ -87,11 +87,6 @@ pub struct FormatterConfiguration {
     #[bpaf(pure(Default::default()), hide)]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub includes: Option<Vec<biome_glob::NormalizedGlob>>,
-
-    /// Sorting mode used during import sorting and keys sorting
-    #[bpaf(long("sort-mode"), argument("natural|alphabetical"))]
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub sort_mode: Option<SortMode>,
 }
 
 impl FormatterConfiguration {

@@ -6,7 +6,7 @@ use biome_formatter::printer::PrinterOptions;
 use biome_formatter::{
     AttributePosition, BracketSameLine, BracketSpacing, CstFormatContext, Expand, FormatContext,
     FormatElement, FormatOptions, IndentStyle, IndentWidth, LineEnding, LineWidth, QuoteStyle,
-    TransformSourceMap, SortMode,
+    TransformSourceMap,
 };
 use biome_js_syntax::{AnyJsFunctionBody, JsFileSource, JsLanguage};
 use std::fmt;
@@ -176,9 +176,6 @@ pub struct JsFormatOptions {
 
     /// Whether to expand object and array literals to multiple lines. Defaults to "auto".
     expand: Expand,
-
-    /// Compare string sort mode
-    sort_mode: SortMode,
 }
 
 impl JsFormatOptions {
@@ -199,7 +196,6 @@ impl JsFormatOptions {
             bracket_same_line: BracketSameLine::default(),
             attribute_position: AttributePosition::default(),
             expand: Expand::default(),
-            sort_mode: SortMode::default(),
         }
     }
 
@@ -270,11 +266,6 @@ impl JsFormatOptions {
 
     pub fn with_expand(mut self, expand: Expand) -> Self {
         self.expand = expand;
-        self
-    }
-
-    pub fn with_sort_mode(mut self, sort_mode: SortMode) -> Self {
-        self.sort_mode = sort_mode;
         self
     }
 

@@ -24,7 +24,7 @@ use biome_css_syntax::CssLanguage;
 use biome_deserialize::Merge;
 use biome_formatter::{
     AttributePosition, BracketSameLine, BracketSpacing, Expand, IndentStyle, IndentWidth,
-    LineEnding, LineWidth, SortMode,
+    LineEnding, LineWidth,
 };
 use biome_fs::BiomePath;
 use biome_graphql_formatter::context::GraphqlFormatOptions;
@@ -326,7 +326,6 @@ pub struct FormatSettings {
     pub bracket_same_line: Option<BracketSameLine>,
     pub bracket_spacing: Option<BracketSpacing>,
     pub expand: Option<Expand>,
-    pub sort_mode: Option<SortMode>,    
     /// List of included paths/files
     pub includes: Includes,
 }
@@ -1789,7 +1788,6 @@ pub fn to_format_settings(
         bracket_same_line: conf.bracket_same_line,
         bracket_spacing: conf.bracket_spacing,
         expand: conf.expand,
-        sort_mode: conf.sort_mode,
         includes: Includes::new(working_directory, conf.includes),
     })
 }
@@ -1816,7 +1814,6 @@ impl TryFrom<OverrideFormatterConfiguration> for FormatSettings {
             bracket_spacing: Some(BracketSpacing::default()),
             expand: conf.expand,
             format_with_errors: conf.format_with_errors,
-            sort_mode: conf.sort_mode,
             includes: Default::default(),
         })
     }

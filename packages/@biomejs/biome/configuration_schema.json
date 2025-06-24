@@ -1556,12 +1556,6 @@
 				"useEditorconfig": {
 					"description": "Use any `.editorconfig` files to configure the formatter. Configuration in `biome.json` will override `.editorconfig` configuration.\n\nDefault: `true`.",
 					"anyOf": [{ "$ref": "#/definitions/Bool" }, { "type": "null" }]
-				},
-				"sort_mode": {
-					"description": "Determines how tokens are are sorted. e.g. During sorting imports, sorting keys etc. Defaults to \"natural\" sorting.",
-					"default": "natural",
-					"type": "string",
-					"enum": ["natural", "alphabetical"]
 				}
 			},
 			"additionalProperties": false

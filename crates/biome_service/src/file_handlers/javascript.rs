@@ -34,7 +34,7 @@ use biome_configuration::javascript::{
 use biome_diagnostics::Applicability;
 use biome_formatter::{
     AttributePosition, BracketSameLine, BracketSpacing, Expand, FormatError, IndentStyle,
-    IndentWidth, LineEnding, LineWidth, Printed, QuoteStyle, SortMode,
+    IndentWidth, LineEnding, LineWidth, Printed, QuoteStyle,
 };
 use biome_fs::BiomePath;
 use biome_js_analyze::utils::rename::{RenameError, RenameSymbolExtensions};
@@ -80,7 +80,6 @@ pub struct JsFormatterSettings {
     pub enabled: Option<JsFormatterEnabled>,
     pub attribute_position: Option<AttributePosition>,
     pub expand: Option<Expand>,
-    pub sort_mode: Option<SortMode>,
 }
 
 impl From<JsFormatterConfiguration> for JsFormatterSettings {
@@ -101,7 +100,6 @@ impl From<JsFormatterConfiguration> for JsFormatterSettings {
             indent_style: value.indent_style,
             line_ending: value.line_ending,
             expand: value.expand,
-            sort_mode: value.sort_mode,
         }
     }
 }
@@ -256,12 +254,7 @@ impl ServiceLanguage for JsLanguage {
                 .and_then(|l| l.expand)
                 .or(global.and_then(|g| g.expand))
                 .unwrap_or_default(),
-        )
-        .with_sort_mode(            
-            language
-                .and_then(|l| l.sort_mode)
-                .or(global.and_then(|g| g.sort_mode))
-                .unwrap_or_default());
+        );
 
         if let Some(overrides) = overrides {
             overrides.override_js_format_options(path, options)

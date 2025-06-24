@@ -114,24 +114,6 @@ pub fn create_analyzer_options(
                 })
                 .unwrap_or_default(),
         );
-        analyzer_configuration = analyzer_configuration.with_sort_mode(
-            configuration
-                .formatter
-                .as_ref()
-                .and_then(|js| {
-                    match js.sort_mode {
-                        Some(biome_formatter::SortMode::Natural) => {
-                            Some(biome_analyze::options::SortMode::Natural)
-                        }
-                        Some(biome_formatter::SortMode::Alphabetical) => {
-                            Some(biome_analyze::options::SortMode::Alphabetical)
-                        }
-                        None => None,
-                    }
-                })
-                .unwrap_or_default(),
-        );
-
 
         settings
             .merge_with_configuration(configuration, None)

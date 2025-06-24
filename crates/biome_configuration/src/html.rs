@@ -1,7 +1,7 @@
 use crate::bool::Bool;
 use biome_deserialize_macros::{Deserializable, Merge};
 use biome_formatter::{
-    AttributePosition, BracketSameLine, IndentStyle, IndentWidth, LineEnding, LineWidth, SortMode,
+    AttributePosition, BracketSameLine, IndentStyle, IndentWidth, LineEnding, LineWidth,
 };
 use biome_html_formatter::context::{
     IndentScriptAndStyle, SelfCloseVoidElements, WhitespaceSensitivity,
@@ -115,10 +115,4 @@ pub struct HtmlFormatterConfiguration {
     )]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub self_close_void_elements: Option<SelfCloseVoidElements>,
-
-    /// Sorting mode used during import sorting and keys sorting
-    #[bpaf(long("sort-mode"), argument("natural|alphabetical"))]
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub sort_mode: Option<SortMode>,
-
 }
