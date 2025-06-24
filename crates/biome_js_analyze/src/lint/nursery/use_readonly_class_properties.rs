@@ -8,13 +8,17 @@ use biome_js_factory::make;
 use biome_js_syntax::{
     AnyJsAssignment, AnyJsClassMember, AnyJsClassMemberName, AnyJsConstructorParameter,
     AnyJsPropertyModifier, AnyTsPropertyParameterModifier, JsArrayAssignmentPattern,
-    JsArrowFunctionExpression, JsAssignmentExpression, JsClassDeclaration, JsClassMemberList,
-    JsConstructorClassMember, JsExpressionStatement, JsFunctionBody, JsFunctionExpression,
-    JsLanguage, JsMethodClassMember, JsMethodObjectMember, JsObjectAssignmentPattern,
+    JsArrowFunctionExpression, JsAssignmentExpression, JsBlockStatement, JsCallExpression,
+    JsClassDeclaration, JsClassMemberList, JsConditionalExpression, JsConstructorClassMember,
+    JsElseClause, JsExpressionStatement, JsFunctionBody, JsFunctionExpression,
+    JsGetterObjectMember, JsIfStatement, JsInitializerClause, JsLanguage, JsMethodClassMember,
+    JsMethodObjectMember, JsObjectAssignmentPattern, JsObjectExpression, JsObjectMemberList,
     JsParenthesizedExpression, JsPostUpdateExpression, JsPreUpdateExpression,
-    JsPropertyClassMember, JsReturnStatement, JsSetterClassMember, JsStatementList,
-    JsStaticMemberAssignment, JsStaticMemberExpression, JsSyntaxKind, JsSyntaxToken,
-    JsThisExpression, TextRange, TsAccessibilityModifier, TsPropertyParameter, TsReadonlyModifier,
+    JsPropertyClassMember, JsReturnStatement, JsSetterClassMember, JsSetterObjectMember,
+    JsStatementList, JsStaticMemberAssignment, JsStaticMemberExpression, JsSyntaxKind,
+    JsSyntaxToken, JsThisExpression, JsVariableDeclaration, JsVariableDeclarator,
+    JsVariableDeclaratorList, JsVariableStatement, TextRange, TsAccessibilityModifier,
+    TsPropertyParameter, TsReadonlyModifier,
 };
 use biome_rowan::{
     AstNode, AstNodeExt, AstNodeList, AstSeparatedList, BatchMutationExt, SyntaxNode, Text,
@@ -294,13 +298,32 @@ declare_node_union! {
 }
 
 declare_node_union! {
-    pub AnyJsClassMethodBodyElement = JsMethodClassMember | JsSetterClassMember | JsFunctionBody |
-    JsReturnStatement | JsExpressionStatement | JsParenthesizedExpression
+    pub AnyJsClassMethodBodyElement =
+    JsBlockStatement |
+    JsCallExpression |
+    JsConditionalExpression |
+    JsElseClause |
+    JsExpressionStatement |
+    JsFunctionBody |
+    JsGetterObjectMember |
+    JsIfStatement |
+    JsInitializerClause |
+    JsMethodClassMember |
+    JsObjectExpression |
+    JsParenthesizedExpression |
+    JsReturnStatement |
+    JsSetterClassMember |
+    JsSetterObjectMember |
+    JsVariableDeclaration |
+    JsVariableDeclarator |
+    JsVariableStatement
 }
 
 enum MethodBodyElementOrStatementList<'a> {
     MethodBodyElement(&'a AnyJsClassMethodBodyElement),
     StatementList(&'a JsStatementList),
+    VariableDeclaratorList(&'a JsVariableDeclaratorList),
+    ObjectMemberList(&'a JsObjectMemberList),
 }
 
 impl<'a> MethodBodyElementOrStatementList<'a> {
@@ -308,6 +331,17 @@ impl<'a> MethodBodyElementOrStatementList<'a> {
         match self {
             MethodBodyElementOrStatementList::MethodBodyElement(node) => node.syntax(),
             MethodBodyElementOrStatementList::StatementList(list) => list.syntax(),
+            MethodBodyElementOrStatementList::VariableDeclaratorList(list) => list.syntax(),
+            MethodBodyElementOrStatementList::ObjectMemberList(list) => list.syntax(),
+        }
+    }
+
+    pub fn as_js_function_body(&self) -> Option<JsFunctionBody> {
+        match self {
+            MethodBodyElementOrStatementList::MethodBodyElement(
+                AnyJsClassMethodBodyElement::JsFunctionBody(body),
+            ) => Some(body.clone()),
+            _ => None,
         }
     }
 }
@@ -533,20 +567,37 @@ fn collect_all_assignment_names(
                     return vec![name].into_iter();
                 }
                 return Vec::new().into_iter();
-            }
-
-            if let Some(allowed_child) = AnyJsClassMethodBodyElement::cast_ref(&child) {
+            } else if let Some(allowed_child) = AnyJsClassMethodBodyElement::cast_ref(&child) {
                 return collect_all_assignment_names(
                     &MethodBodyElementOrStatementList::MethodBodyElement(&allowed_child),
                     this_aliases,
                 )
                 .collect::<Vec<_>>()
                 .into_iter();
-            }
-
-            if let Some(statement_list) = JsStatementList::cast_ref(&child) {
+            } else if let Some(child) = AnyJsClassMethodBodyElement::cast_ref(&child) {
                 return collect_all_assignment_names(
-                    &MethodBodyElementOrStatementList::StatementList(&statement_list),
+                    &MethodBodyElementOrStatementList::MethodBodyElement(&child),
+                    this_aliases,
+                )
+                .collect::<Vec<_>>()
+                .into_iter();
+            } else if let Some(child) = JsVariableDeclaratorList::cast_ref(&child) {
+                return collect_all_assignment_names(
+                    &MethodBodyElementOrStatementList::VariableDeclaratorList(&child),
+                    this_aliases,
+                )
+                .collect::<Vec<_>>()
+                .into_iter();
+            } else if let Some(child) = JsObjectMemberList::cast_ref(&child) {
+                return collect_all_assignment_names(
+                    &MethodBodyElementOrStatementList::ObjectMemberList(&child),
+                    this_aliases,
+                )
+                .collect::<Vec<_>>()
+                .into_iter();
+            } else if let Some(child) = JsStatementList::cast_ref(&child) {
+                return collect_all_assignment_names(
+                    &MethodBodyElementOrStatementList::StatementList(&child),
                     this_aliases,
                 )
                 .collect::<Vec<_>>()
@@ -737,7 +788,12 @@ fn collect_class_member_props_mutations(body: &JsFunctionBody) -> Vec<Text> {
         collect_this_variable_aliases_in_immediate_body_closure(body);
 
     let all_descendants_fn_bodies_and_this_aliases: Vec<_> =
-        collect_nested_function_bodies_with_this_aliases(body.syntax(), &this_variable_aliases);
+        collect_nested_function_bodies_with_this_aliases(
+            &MethodBodyElementOrStatementList::MethodBodyElement(
+                &AnyJsClassMethodBodyElement::from(body.clone()),
+            ),
+            &this_variable_aliases,
+        );
 
     all_descendants_fn_bodies_and_this_aliases
         .iter()
@@ -762,15 +818,16 @@ struct FnBodyAndThisAliases {
 /// e.g. var self = this; var another_self = this; ends up with this_aliases: [self, another_self]
 /// Assumes to be within a single method or constructor only
 fn collect_nested_function_bodies_with_this_aliases(
-    node: &SyntaxNode<JsLanguage>,
+    method_body_element_or_statement_list: &MethodBodyElementOrStatementList,
     parent_this_aliases: &[Text],
 ) -> Vec<FnBodyAndThisAliases> {
     let mut results = Vec::new();
 
     // First check if this node itself is a function body
-    if let Some(body) = JsFunctionBody::cast(node.clone()) {
+    if let Some(body) = method_body_element_or_statement_list.as_js_function_body() {
         // Only add if it's not directly owned by a constructor
-        if node
+        if method_body_element_or_statement_list
+            .syntax()
             .parent()
             .and_then(JsConstructorClassMember::cast)
             .is_none()
@@ -789,7 +846,7 @@ fn collect_nested_function_bodies_with_this_aliases(
     }
 
     // Collect function bodies from children
-    for child in node.children() {
+    for child in method_body_element_or_statement_list.syntax().children() {
         if child.kind() == JsSyntaxKind::JS_CLASS_EXPRESSION {
             // Skip class expressions, scope of `this` changes to the nested class
             break;
@@ -828,9 +885,24 @@ fn collect_nested_function_bodies_with_this_aliases(
             }
         }
         // Recurse for other node types and append their results
-        else {
+        else if let Some(child) = AnyJsClassMethodBodyElement::cast_ref(&child) {
             results.extend(collect_nested_function_bodies_with_this_aliases(
-                &child,
+                &MethodBodyElementOrStatementList::MethodBodyElement(&child),
+                parent_this_aliases,
+            ));
+        } else if let Some(child) = JsObjectMemberList::cast_ref(&child) {
+            results.extend(collect_nested_function_bodies_with_this_aliases(
+                &MethodBodyElementOrStatementList::ObjectMemberList(&child),
+                parent_this_aliases,
+            ));
+        } else if let Some(child) = JsStatementList::cast_ref(&child) {
+            results.extend(collect_nested_function_bodies_with_this_aliases(
+                &MethodBodyElementOrStatementList::StatementList(&child),
+                parent_this_aliases,
+            ));
+        } else if let Some(child) = JsVariableDeclaratorList::cast_ref(&child) {
+            results.extend(collect_nested_function_bodies_with_this_aliases(
+                &MethodBodyElementOrStatementList::VariableDeclaratorList(&child),
                 parent_this_aliases,
             ));
         }
