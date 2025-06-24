@@ -284,7 +284,6 @@ fn type_to_string(ty: &Type) -> String {
     match ty.deref() {
         TypeData::Literal(lit) => match lit.as_ref() {
             Literal::Boolean(b) => b.as_bool().to_string(),
-            Literal::Null => "null".to_string(),
             Literal::Number(n) => n.text().to_string(),
             Literal::String(s) => format!("\"{}\"", s.as_str()),
             _ => "unknown".to_string(),
@@ -305,7 +304,6 @@ fn type_to_expression(ty: &Type) -> Option<AnyJsExpression> {
                 }))
                 .into()
             }
-            Literal::Null => make::js_null_literal_expression(make::token(T![null])).into(),
             Literal::Number(n) => {
                 let text = n.text();
                 make::js_number_literal_expression(make::js_number_literal(text)).into()

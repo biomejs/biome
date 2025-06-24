@@ -22,15 +22,16 @@ use biome_js_syntax::{
 use biome_rowan::{AstNode, SyntaxResult, Text, TokenText};
 
 use crate::globals::{
-    GLOBAL_INSTANCEOF_PROMISE_ID, GLOBAL_NUMBER_ID, GLOBAL_STRING_ID, GLOBAL_UNDEFINED_ID,
+    GLOBAL_GLOBAL_ID, GLOBAL_INSTANCEOF_PROMISE_ID, GLOBAL_NUMBER_ID, GLOBAL_STRING_ID,
+    GLOBAL_UNDEFINED_ID,
 };
 use crate::literal::{BooleanLiteral, NumberLiteral, StringLiteral};
 use crate::{
     AssertsReturnType, CallArgumentType, Class, Constructor, DestructureField, Function,
-    FunctionParameter, FunctionParameterBinding, GenericTypeParameter, Interface, Literal, Module,
-    Namespace, Object, PredicateReturnType, ResolvedTypeId, ReturnType, ScopeId, Tuple,
-    TupleElementType, TypeData, TypeInstance, TypeMember, TypeMemberKind, TypeOperator,
-    TypeOperatorType, TypeReference, TypeReferenceQualifier, TypeResolver,
+    FunctionParameter, FunctionParameterBinding, GLOBAL_UNKNOWN_ID, GenericTypeParameter,
+    Interface, Literal, Module, Namespace, Object, PredicateReturnType, ResolvedTypeId, ReturnType,
+    ScopeId, Tuple, TupleElementType, TypeData, TypeInstance, TypeMember, TypeMemberKind,
+    TypeOperator, TypeOperatorType, TypeReference, TypeReferenceQualifier, TypeResolver,
     TypeofBitwiseNotExpression, TypeofCallExpression, TypeofDestructureExpression,
     TypeofExpression, TypeofNewExpression, TypeofStaticMemberExpression,
     TypeofThisOrSuperExpression, TypeofTypeofExpression, TypeofUnaryMinusExpression, TypeofValue,
@@ -560,7 +561,7 @@ impl TypeData {
             AnyJsLiteralExpression::JsBooleanLiteralExpression(expr) => Literal::Boolean(
                 BooleanLiteral::parse(text_from_token(expr.value_token())?.text())?,
             ),
-            AnyJsLiteralExpression::JsNullLiteralExpression(_) => Literal::Null,
+            AnyJsLiteralExpression::JsNullLiteralExpression(_) => return Some(Self::Null),
             AnyJsLiteralExpression::JsNumberLiteralExpression(expr) => {
                 Literal::Number(NumberLiteral::new(text_from_token(expr.value_token())?))
             }
@@ -673,7 +674,7 @@ impl TypeData {
             }
             AnyTsType::TsNeverType(_) => Self::NeverKeyword,
             AnyTsType::TsNonPrimitiveType(_) => Self::ObjectKeyword,
-            AnyTsType::TsNullLiteralType(_) => Self::Literal(Box::new(Literal::Null)),
+            AnyTsType::TsNullLiteralType(_) => Self::Null,
             AnyTsType::TsNumberLiteralType(ty) => {
                 if ty.literal_token().is_err() {
                     return Self::unknown();
@@ -1004,13 +1005,15 @@ impl TypeData {
     }
 
     pub fn from_js_reference_identifier(scope_id: ScopeId, id: &JsReferenceIdentifier) -> Self {
-        if id.is_undefined() {
-            Self::Undefined
-        } else {
-            id.name()
-                .map(|name| Self::reference(TypeReference::from_name(scope_id, name)))
-                .unwrap_or_default()
-        }
+        id.name().map_or(
+            Self::Reference(GLOBAL_UNKNOWN_ID.into()),
+            |name| match name.text() {
+                "globalThis" => Self::reference(GLOBAL_GLOBAL_ID),
+                "null" => Self::Null,
+                "undefined" => Self::Undefined,
+                _ => Self::reference(TypeReference::from_name(scope_id, name)),
+            },
+        )
     }
 
     pub fn from_js_unary_expression(

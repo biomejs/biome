@@ -146,7 +146,6 @@ impl MergedType {
                 TypeData::Literal(literal) => match *literal {
                     Literal::BigInt(_)
                     | Literal::Boolean(_)
-                    | Literal::Null
                     | Literal::Number(_)
                     | Literal::String(_)
                     | Literal::Template(_) => MergedType::Primitive(TypeData::Literal(literal)),

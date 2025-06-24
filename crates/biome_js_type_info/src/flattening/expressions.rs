@@ -521,7 +521,7 @@ fn flattened_typeof_data(resolved: ResolvedTypeData) -> TypeData {
         TypeData::Literal(literal) => match literal.as_ref() {
             Literal::BigInt(_) => TypeData::reference(GLOBAL_BIGINT_STRING_LITERAL_ID),
             Literal::Boolean(_) => TypeData::reference(GLOBAL_BOOLEAN_STRING_LITERAL_ID),
-            Literal::Null | Literal::Object(_) | Literal::RegExp(_) => {
+            Literal::Object(_) | Literal::RegExp(_) => {
                 TypeData::reference(GLOBAL_OBJECT_STRING_LITERAL_ID)
             }
             Literal::Number(_) => TypeData::reference(GLOBAL_NUMBER_STRING_LITERAL_ID),
@@ -529,6 +529,7 @@ fn flattened_typeof_data(resolved: ResolvedTypeData) -> TypeData {
                 TypeData::reference(GLOBAL_STRING_STRING_LITERAL_ID)
             }
         },
+        TypeData::Null => TypeData::reference(GLOBAL_OBJECT_STRING_LITERAL_ID),
         TypeData::Number => TypeData::reference(GLOBAL_NUMBER_STRING_LITERAL_ID),
         TypeData::Object(_) | TypeData::Tuple(_) => {
             TypeData::reference(GLOBAL_OBJECT_STRING_LITERAL_ID)

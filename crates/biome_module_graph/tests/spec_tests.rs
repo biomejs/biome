@@ -9,7 +9,7 @@ use std::sync::Arc;
 use crate::snap::ModuleGraphSnapshot;
 use biome_deserialize::json::deserialize_from_json_str;
 use biome_fs::{BiomePath, FileSystem, MemoryFileSystem, OsFileSystem, normalize_path};
-use biome_js_type_info::{ScopeId, TypeResolver};
+use biome_js_type_info::{ScopeId, TypeData, TypeResolver};
 use biome_jsdoc_comment::JsdocComment;
 use biome_json_parser::{JsonParserOptions, parse_json};
 use biome_json_value::{JsonObject, JsonString};
@@ -777,6 +777,60 @@ fn test_resolve_nested_function_call_with_namespace_in_return_type() {
 
     let snapshot = ModuleGraphSnapshot::new(module_graph.as_ref(), &fs).with_resolver(&resolver);
     snapshot.assert_snapshot("test_resolve_nested_function_call_with_namespace_in_return_type");
+}
+
+#[test]
+fn test_resolve_return_value_of_function() {
+    let mut fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+        export function foo(input: number) {
+            switch (input) {
+                case 0: return null;
+                case 1: return "one";
+                case 2: return "two";
+                default: return "many";
+            }
+            return "many"; // Check if this one gets deduplicated.
+        }
+        "#,
+    );
+
+    let added_paths = [BiomePath::new("/src/index.ts")];
+    let added_paths = get_added_paths(&fs, &added_paths);
+
+    let module_graph = Arc::new(ModuleGraph::default());
+    module_graph.update_graph_for_js_paths(&fs, &ProjectLayout::default(), &added_paths, &[]);
+
+    let index_module = module_graph
+        .module_info_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+    let resolver = Arc::new(ModuleResolver::for_module(
+        index_module,
+        module_graph.clone(),
+    ));
+
+    let foo_id = resolver
+        .resolve_type_of(&Text::Static("foo"), ScopeId::GLOBAL)
+        .expect("foo variable not found");
+    let foo_ty = resolver.resolved_type_for_id(foo_id);
+    let _foo_string_ty = format!("{foo_ty:?}");
+    let return_ty = foo_ty
+        .as_function()
+        .expect("foo must be a function")
+        .return_type
+        .as_type()
+        .and_then(|return_ty| foo_ty.resolve(return_ty))
+        .expect("expected a resolvable return type");
+    assert!(return_ty.has_variant(|ty| ty.is_string_literal("one")));
+    assert!(return_ty.has_variant(|ty| ty.is_string_literal("two")));
+    assert!(return_ty.has_variant(|ty| ty.is_string_literal("many")));
+    assert!(return_ty.has_variant(|ty| ty.is_null()));
+    match return_ty.resolved_data().unwrap().as_raw_data() {
+        TypeData::Union(union) => assert_eq!(union.types().len(), 4),
+        _ => panic!("expected a union type"),
+    }
 }
 
 #[test]
