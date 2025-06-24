@@ -424,11 +424,11 @@ const TO_NUMBER_METHODS: &[&str] = &["Number", "parseInt", "parseFloat"];
 trait ExpressionExt {
     /// Returns the actual expression, i.e. in case of parenthesized expressions
     /// it returns the inner expression.
-    fn actual_expression(&self) -> Option<AnyJsExpression>;
+    fn inner_expression(&self) -> Option<AnyJsExpression>;
 
     /// Returns true if the expression is an empty string literal.
     fn is_empty_string(&self) -> bool {
-        let Some(expression) = self.actual_expression() else {
+        let Some(expression) = self.inner_expression() else {
             return false;
         };
         match expression {
@@ -447,12 +447,12 @@ trait ExpressionExt {
     }
 
     fn is_index_of_call(&self) -> bool {
-        let Some(expression) = self.actual_expression() else {
+        let Some(expression) = self.inner_expression() else {
             return false;
         };
         if let AnyJsExpression::JsCallExpression(call_expression) = expression {
             if let Ok(callee) = call_expression.callee() {
-                let Some(callee) = callee.actual_expression() else {
+                let Some(callee) = callee.inner_expression() else {
                     return false;
                 };
                 return callee
@@ -467,7 +467,7 @@ trait ExpressionExt {
     /// Checks if expressions is an explicit number. We don't need to check the exact type of
     /// the expression for this rule, we just want to avoid obvious problems.
     fn is_number(&self) -> bool {
-        let Some(expression) = self.actual_expression() else {
+        let Some(expression) = self.inner_expression() else {
             return false;
         };
         match expression {
@@ -479,7 +479,7 @@ trait ExpressionExt {
             AnyJsExpression::JsCallExpression(call) => {
                 if let Ok(callee) = call.callee() {
                     if let Some(AnyJsExpression::JsIdentifierExpression(ident)) =
-                        callee.actual_expression()
+                        callee.inner_expression()
                     {
                         if let Ok(name) = ident.name() {
                             if let Ok(token) = name.value_token() {
@@ -530,7 +530,7 @@ trait ExpressionExt {
     }
 
     fn is_one(&self) -> bool {
-        let Some(expression) = self.actual_expression() else {
+        let Some(expression) = self.inner_expression() else {
             return false;
         };
         if let AnyJsExpression::AnyJsLiteralExpression(
@@ -545,7 +545,7 @@ trait ExpressionExt {
     }
 
     fn is_zero(&self) -> bool {
-        let Some(expression) = self.actual_expression() else {
+        let Some(expression) = self.inner_expression() else {
             return false;
         };
         if let AnyJsExpression::AnyJsLiteralExpression(
@@ -563,7 +563,7 @@ trait ExpressionExt {
 }
 
 impl ExpressionExt for AnyJsExpression {
-    fn actual_expression(&self) -> Option<Self> {
+    fn inner_expression(&self) -> Option<Self> {
         (match self {
             Self::JsParenthesizedExpression(expression) => expression.expression().ok(),
             Self::TsAsExpression(expression) => expression.expression().ok(),
@@ -573,14 +573,21 @@ impl ExpressionExt for AnyJsExpression {
             _ => return Some(self.clone()),
         })
         .as_ref()
-        .and_then(Self::actual_expression)
+        .and_then(Self::inner_expression)
     }
 
     fn wrap_in_type_converter(&self, name: &'static str) -> Self {
         let clean_expression = self
             .clone()
             .with_leading_trivia_pieces([])
-            .and_then(|expression| expression.with_trailing_trivia_pieces([]))
+            .and_then(|expression| {
+                if let Some(last_token) = expression.syntax().last_token() {
+                    if last_token.has_trailing_comments() {
+                        return expression.trim_trailing_trivia();
+                    }
+                }
+                expression.with_trailing_trivia_pieces([])
+            })
             .unwrap_or_else(|| self.clone());
 
         Self::JsCallExpression(
@@ -712,7 +719,7 @@ trait UnaryExpressionExt {
 impl UnaryExpressionExt for JsUnaryExpression {
     fn get_arg_for_double_operation(&self) -> Option<AnyJsExpression> {
         let argument = self.argument().ok()?;
-        let nested_unary_expression = argument.actual_expression()?;
+        let nested_unary_expression = argument.inner_expression()?;
         let nested_unary_expression = nested_unary_expression.as_js_unary_expression()?;
         let operator = self.operator().ok()?;
         let nested_operator = nested_unary_expression.operator().ok()?;

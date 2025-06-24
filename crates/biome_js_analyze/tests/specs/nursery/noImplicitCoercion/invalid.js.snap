@@ -36,6 +36,7 @@ let x ='' + 1n;
 (a * 1) / 2;
 a * 1 / (b * 1);
 /* test */ a * 1 + 2;
+/* test */ x /*comment*/ * 1 + 2;
 
 ```
 
@@ -740,7 +741,7 @@ invalid.js:30:1 lint/nursery/noImplicitCoercion  FIXABLE  ━━━━━━━�
   > 30 │ a * 1 / (b * 1);
        │ ^^^^^
     31 │ /* test */ a * 1 + 2;
-    32 │ 
+    32 │ /* test */ x /*comment*/ * 1 + 2;
   
   i Unsafe fix: Use Number() call instead.
   
@@ -749,7 +750,7 @@ invalid.js:30:1 lint/nursery/noImplicitCoercion  FIXABLE  ━━━━━━━�
     30    │ - a·*·1·/·(b·*·1);
        30 │ + Number(a)·/·(b·*·1);
     31 31 │   /* test */ a * 1 + 2;
-    32 32 │   
+    32 32 │   /* test */ x /*comment*/ * 1 + 2;
   
 
 ```
@@ -764,7 +765,7 @@ invalid.js:30:10 lint/nursery/noImplicitCoercion  FIXABLE  ━━━━━━━
   > 30 │ a * 1 / (b * 1);
        │          ^^^^^
     31 │ /* test */ a * 1 + 2;
-    32 │ 
+    32 │ /* test */ x /*comment*/ * 1 + 2;
   
   i Unsafe fix: Use Number() call instead.
   
@@ -773,7 +774,7 @@ invalid.js:30:10 lint/nursery/noImplicitCoercion  FIXABLE  ━━━━━━━
     30    │ - a·*·1·/·(b·*·1);
        30 │ + a·*·1·/·(Number(b));
     31 31 │   /* test */ a * 1 + 2;
-    32 32 │   
+    32 32 │   /* test */ x /*comment*/ * 1 + 2;
   
 
 ```
@@ -787,7 +788,8 @@ invalid.js:31:12 lint/nursery/noImplicitCoercion  FIXABLE  ━━━━━━━
     30 │ a * 1 / (b * 1);
   > 31 │ /* test */ a * 1 + 2;
        │            ^^^^^
-    32 │ 
+    32 │ /* test */ x /*comment*/ * 1 + 2;
+    33 │ 
   
   i Unsafe fix: Use Number() call instead.
   
@@ -795,7 +797,30 @@ invalid.js:31:12 lint/nursery/noImplicitCoercion  FIXABLE  ━━━━━━━
     30 30 │   a * 1 / (b * 1);
     31    │ - /*·test·*/·a·*·1·+·2;
        31 │ + /*·test·*/·Number(a)·+·2;
-    32 32 │   
+    32 32 │   /* test */ x /*comment*/ * 1 + 2;
+    33 33 │   
+  
+
+```
+
+```
+invalid.js:32:12 lint/nursery/noImplicitCoercion  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Implicit type conversion is hard to read and understand.
+  
+    30 │ a * 1 / (b * 1);
+    31 │ /* test */ a * 1 + 2;
+  > 32 │ /* test */ x /*comment*/ * 1 + 2;
+       │            ^^^^^^^^^^^^^^^^^
+    33 │ 
+  
+  i Unsafe fix: Use Number() call instead.
+  
+    30 30 │   a * 1 / (b * 1);
+    31 31 │   /* test */ a * 1 + 2;
+    32    │ - /*·test·*/·x·/*comment*/·*·1·+·2;
+       32 │ + /*·test·*/·Number(x·/*comment*/)·+·2;
+    33 33 │   
   
 
 ```
