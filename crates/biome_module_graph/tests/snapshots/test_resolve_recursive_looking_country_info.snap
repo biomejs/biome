@@ -259,7 +259,7 @@ Module TypeId(12) => instanceof Module(0) TypeId(11)
 
 Module TypeId(13) => instanceof Module(0) TypeId(8)
 
-Module TypeId(14) => value: null
+Module TypeId(14) => null
 
 Module TypeId(15) => Module(0) TypeId(13) | Module(0) TypeId(14)
 

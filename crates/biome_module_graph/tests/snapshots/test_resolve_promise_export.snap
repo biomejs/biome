@@ -44,7 +44,7 @@ Module TypeId(0) => value: value
 
 Module TypeId(1) => Module(0) TypeId(3)
 
-Module TypeId(2) => instanceof Promise
+Module TypeId(2) => instanceof Promise<Module(0) TypeId(0)>
 
 Module TypeId(3) => async Function "returnsPromise" {
   accepts: {

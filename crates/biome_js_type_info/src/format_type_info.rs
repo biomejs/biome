@@ -696,7 +696,6 @@ impl Format<FormatTypeContext> for Literal {
                     TextSize::default()
                 )]
             ),
-            Self::Null => write!(f, [text("null")]),
             Self::Number(lit) => {
                 write!(f, [dynamic_text(lit.as_str(), TextSize::default())])
             }

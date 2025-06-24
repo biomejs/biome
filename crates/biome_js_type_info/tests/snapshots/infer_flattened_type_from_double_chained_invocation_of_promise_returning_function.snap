@@ -36,17 +36,19 @@ Thin TypeId(1) => instanceof Promise<number>
 
 Thin TypeId(2) => Promise.prototype.then
 
-Thin TypeId(3) => sync Function {
+Thin TypeId(3) => void
+
+Thin TypeId(4) => sync Function {
   accepts: {
     params: []
     type_args: []
   }
-  returns: unknown reference
+  returns: Module(0) TypeId(3)
 }
 
-Thin TypeId(4) => instanceof Promise
+Thin TypeId(5) => instanceof Promise
 
-Thin TypeId(5) => Promise.prototype.finally
+Thin TypeId(6) => Promise.prototype.finally
 
 Global TypeId(0) => instanceof Promise<number>
 

@@ -176,6 +176,12 @@ impl Type {
         }
     }
 
+    /// Returns whether this type is the primitive `null`.
+    pub fn is_null(&self) -> bool {
+        self.as_raw_data()
+            .is_some_and(|ty| matches!(ty, TypeData::Null))
+    }
+
     /// Returns whether this type is a number or a literal number.
     pub fn is_number(&self) -> bool {
         self.id == GLOBAL_NUMBER_ID
@@ -207,6 +213,17 @@ impl Type {
             })
     }
 
+    /// Returns whether this type is a string with the given `value`.
+    pub fn is_string_literal(&self, value: &str) -> bool {
+        self.as_raw_data().is_some_and(|ty| match ty {
+            TypeData::Literal(literal) => match literal.as_ref() {
+                Literal::String(literal) => literal.as_str() == value,
+                _ => false,
+            },
+            _ => false,
+        })
+    }
+
     /// Returns whether this type indicates the `void` keyword.
     pub fn is_void(&self) -> bool {
         matches!(self.as_raw_data(), Some(TypeData::VoidKeyword))
@@ -224,7 +241,7 @@ impl Type {
     }
 
     #[inline]
-    fn resolved_data(&self) -> Option<ResolvedTypeData> {
+    pub fn resolved_data(&self) -> Option<ResolvedTypeData> {
         self.resolver.get_by_resolved_id(self.id)
     }
 
@@ -517,16 +534,17 @@ impl TypeData {
 
     /// Returns whether the given type is a primitive type.
     pub fn is_primitive(&self) -> bool {
-        matches!(
-            self,
+        match self {
             Self::BigInt
-                | Self::Boolean
-                | Self::Null
-                | Self::Number
-                | Self::String
-                | Self::Symbol
-                | Self::Undefined
-        )
+            | Self::Boolean
+            | Self::Null
+            | Self::Number
+            | Self::String
+            | Self::Symbol
+            | Self::Undefined => true,
+            Self::Literal(literal) => literal.is_primitive(),
+            _ => false,
+        }
     }
 
     pub fn reference(reference: impl Into<TypeReference>) -> Self {
@@ -723,12 +741,25 @@ impl Intersection {
 pub enum Literal {
     BigInt(Text),
     Boolean(BooleanLiteral),
-    Null,
     Number(NumberLiteral),
     Object(ObjectLiteral),
     RegExp(Text),
     String(StringLiteral),
     Template(Text), // TODO: Custom impl of PartialEq for template literals
+}
+
+impl Literal {
+    /// Returns whether the literal is a primitive type.
+    pub fn is_primitive(&self) -> bool {
+        matches!(
+            self,
+            Self::BigInt(_)
+                | Self::Boolean(_)
+                | Self::Number(_)
+                | Self::String(_)
+                | Self::Template(_)
+        )
+    }
 }
 
 /// A module definition.
@@ -1125,10 +1156,17 @@ impl From<TypeImportQualifier> for TypeReference {
 }
 
 impl TypeReference {
+    /// Returns `true` if the reference references anything but `Unknown`.
     #[inline]
     pub fn is_known(&self) -> bool {
-        *self != Self::Unknown
+        match self {
+            Self::Import(_) => true,
+            Self::Qualifier(_) => true,
+            Self::Resolved(resolved_id) => *resolved_id != GLOBAL_UNKNOWN_ID,
+            Self::Unknown => false,
+        }
     }
+
     /// Merges the generic type parameters referenced by `incoming` into `base`.
     pub fn merge_parameters(base: &[Self], incoming: &[Self]) -> Box<[Self]> {
         base.iter()
