@@ -2534,6 +2534,35 @@
 			},
 			"additionalProperties": false
 		},
+		"NoExcessiveLinesPerFunctionConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{ "$ref": "#/definitions/RuleWithNoExcessiveLinesPerFunctionOptions" }
+			]
+		},
+		"NoExcessiveLinesPerFunctionOptions": {
+			"type": "object",
+			"properties": {
+				"maxLines": {
+					"description": "The maximum number of lines allowed in a function body.",
+					"default": 50,
+					"type": "integer",
+					"format": "uint8",
+					"minimum": 1.0
+				},
+				"skipBlankLines": {
+					"description": "When this options is set to `true`, blank lines in the function body are not counted towards the maximum line limit.",
+					"default": false,
+					"type": "boolean"
+				},
+				"skipIifes": {
+					"description": "When this option is set to `true`, Immediately Invoked Function Expressions (IIFEs) are not checked for the maximum line limit.",
+					"default": false,
+					"type": "boolean"
+				}
+			},
+			"additionalProperties": false
+		},
 		"NoForEachConfiguration": {
 			"anyOf": [
 				{ "$ref": "#/definitions/RulePlainConfiguration" },
@@ -2748,6 +2777,15 @@
 					"description": "Disallow destructuring props inside JSX components in Solid projects.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noExcessiveLinesPerFunction": {
+					"description": "Restrict the number of lines of code in a function.",
+					"anyOf": [
+						{
+							"$ref": "#/definitions/NoExcessiveLinesPerFunctionConfiguration"
+						},
 						{ "type": "null" }
 					]
 				},
@@ -3746,6 +3784,23 @@
 				"options": {
 					"description": "Rule's options",
 					"allOf": [{ "$ref": "#/definitions/NoDoubleEqualsOptions" }]
+				}
+			},
+			"additionalProperties": false
+		},
+		"RuleWithNoExcessiveLinesPerFunctionOptions": {
+			"type": "object",
+			"required": ["level"],
+			"properties": {
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [
+						{ "$ref": "#/definitions/NoExcessiveLinesPerFunctionOptions" }
+					]
 				}
 			},
 			"additionalProperties": false
