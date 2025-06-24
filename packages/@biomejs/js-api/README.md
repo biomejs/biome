@@ -20,12 +20,12 @@ You need to install one of the `@biomejs/wasm-*` package as a **peer dependency*
 ## Usage
 
 ```js
-import { Biome, Distribution } from "@biomejs/js-api";
+import { Biome } from "@biomejs/js-api/nodejs";
+// Or:
+// import { Biome, Distribution } from "@biomejs/js-api/bundler";
+// import { Biome, Distribution } from "@biomejs/js-api/web";
 
-const biome = await Biome.create({
-	distribution: Distribution.NODE, // Or BUNDLER / WEB depending on the distribution package you've installed
-});
-
+const biome = new Biome();
 const { projectKey } = biome.openProject("path/to/project/dir");
 
 // Optionally apply a Biome configuration (instead of biome.json)
@@ -33,25 +33,21 @@ biome.applyConfiguration(projectKey, {...});
 
 const formatted = biome.formatContent(
   projectKey,
-	"function f   (a, b) { return a == b; }",
-	{
-		filePath: "example.js",
-	},
+  "function f   (a, b) { return a == b; }",
+  {
+    filePath: "example.js",
+  },
 );
 
 console.log("Formatted content: ", formatted.content);
 
-const result = biome.lintContent(
-  projectKey,
-  formatted.content,
-  {
-	  filePath: "example.js",
-  }
-);
+const result = biome.lintContent(projectKey, formatted.content, {
+  filePath: "example.js",
+});
 
 const html = biome.printDiagnostics(result.diagnostics, {
-	filePath: "example.js",
-	fileSource: formatted.content,
+  filePath: "example.js",
+  fileSource: formatted.content,
 });
 
 console.log("Lint diagnostics: ", html);

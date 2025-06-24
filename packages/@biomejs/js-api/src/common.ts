@@ -1,17 +1,12 @@
 import type {
 	BiomePath,
-	Configuration,
-	Diagnostic,
 	FixFileMode,
+	Module,
 	OpenProjectResult,
 	ProjectKey,
 	Workspace,
-} from "@biomejs/wasm-nodejs";
-import { Distribution, loadModule, type WasmModule, wrapError } from "./wasm";
-
-// Re-export of some useful types for users
-export type { Diagnostic, Configuration };
-export { Distribution };
+} from "./wasm";
+import { tryCatchWrapper } from "./wasm";
 
 export interface FormatContentDebugOptions extends FormatContentOptions {
 	/**
@@ -22,8 +17,8 @@ export interface FormatContentDebugOptions extends FormatContentOptions {
 
 export interface FormatContentOptions {
 	/**
-	 * A virtual path of the file. You should add the extension,
-	 * so Biome knows how to parse the content
+	 * A virtual path of the file. You should add the extension, so Biome knows
+	 * how to parse the content
 	 */
 	filePath: string;
 	/**
@@ -32,7 +27,7 @@ export interface FormatContentOptions {
 	range?: [number, number];
 }
 
-export interface FormatResult {
+export interface FormatResult<Diagnostic> {
 	/**
 	 * The new formatted content
 	 */
@@ -43,7 +38,8 @@ export interface FormatResult {
 	diagnostics: Diagnostic[];
 }
 
-export interface FormatDebugResult extends FormatResult {
+export interface FormatDebugResult<Diagnostic>
+	extends FormatResult<Diagnostic> {
 	/**
 	 * The IR emitted by the formatter
 	 */
@@ -52,14 +48,14 @@ export interface FormatDebugResult extends FormatResult {
 
 export interface LintContentOptions {
 	/**
-	 * A virtual path of the file. You should add the extension,
-	 * so Biome knows how to parse the content
+	 * A virtual path of the file. You should add the extension, so Biome knows
+	 * how to parse the content
 	 */
 	filePath: string;
 	fixFileMode?: FixFileMode;
 }
 
-export interface LintResult {
+export interface LintResult<Diagnostic> {
 	content: string;
 	diagnostics: Diagnostic[];
 }
@@ -68,10 +64,6 @@ function isFormatContentDebug(
 	options: FormatContentOptions | FormatContentDebugOptions,
 ): options is FormatContentDebugOptions {
 	return "debug" in options && options.debug !== undefined;
-}
-
-export interface BiomeCreate {
-	distribution: Distribution;
 }
 
 export interface PrintDiagnosticsOptions {
@@ -89,21 +81,21 @@ export interface PrintDiagnosticsOptions {
 	verbose?: boolean;
 }
 
-export class Biome {
-	private constructor(
-		private readonly module: WasmModule,
-		private readonly workspace: Workspace,
-	) {}
+/**
+ * List of modules that have been initialized.
+ */
+const initialized = new WeakSet();
 
-	/**
-	 * It creates a new instance of the class {Biome}.
-	 */
-	static async create(options: BiomeCreate): Promise<Biome> {
-		const module = await loadModule(options.distribution);
-		const workspace = new module.Workspace();
-		const biome = new Biome(module, workspace);
-		biome.openProject();
-		return biome;
+export class BiomeCommon<Configuration, Diagnostic> {
+	private readonly workspace: Workspace<Configuration, Diagnostic>;
+
+	constructor(private readonly module: Module<Configuration, Diagnostic>) {
+		if (!initialized.has(module)) {
+			module.main();
+			initialized.add(module);
+		}
+
+		this.workspace = new module.Workspace();
 	}
 
 	/**
@@ -121,28 +113,26 @@ export class Biome {
 	 *
 	 * If fails when the configuration is incorrect.
 	 *
-	 * @param {ProjectKey} projectKey The identifier of the project
-	 * @param {Configuration} configuration
+	 * @param projectKey The identifier of the project
+	 * @param configuration
 	 */
 	applyConfiguration(
 		projectKey: ProjectKey,
 		configuration: Configuration,
 	): void {
-		try {
+		tryCatchWrapper(() => {
 			this.workspace.updateSettings({
 				projectKey,
 				configuration,
 				workspaceDirectory: "./",
 			});
-		} catch (e) {
-			throw wrapError(e);
-		}
+		});
 	}
 
 	/**
 	 * Open a possible workspace project folder. Returns the key of said project. Use this key when you want to switch to different projects.
 	 *
-	 * @param {string} [path]
+	 * @param [path]
 	 */
 	openProject(path?: string): OpenProjectResult {
 		return this.workspace.openProject({
@@ -151,21 +141,13 @@ export class Biome {
 		});
 	}
 
-	private tryCatchWrapper<T>(func: () => T): T {
-		try {
-			return func();
-		} catch (err) {
-			throw wrapError(err);
-		}
-	}
-
 	private withFile<T>(
 		projectKey: ProjectKey,
 		path: string,
 		content: string,
 		func: (path: BiomePath) => T,
 	): T {
-		return this.tryCatchWrapper(() => {
+		return tryCatchWrapper(() => {
 			this.workspace.openFile({
 				projectKey,
 				content: { type: "fromClient", content, version: 0 },
@@ -187,41 +169,36 @@ export class Biome {
 		projectKey: ProjectKey,
 		content: string,
 		options: FormatContentOptions,
-	): FormatResult;
+	): FormatResult<Diagnostic>;
 	formatContent(
 		projectKey: ProjectKey,
 		content: string,
 		options: FormatContentDebugOptions,
-	): FormatDebugResult;
+	): FormatDebugResult<Diagnostic>;
 
 	/**
 	 * If formats some content.
 	 *
-	 * @param {ProjectKey} projectKey The identifier of the project
-	 * @param {String} content The content to format
-	 * @param {FormatContentOptions | FormatContentDebugOptions} options Options needed when formatting some content
+	 * @param projectKey The identifier of the project
+	 * @param content The content to format
+	 * @param options Options needed when formatting some content
 	 */
 	formatContent(
 		projectKey: ProjectKey,
 		content: string,
 		options: FormatContentOptions | FormatContentDebugOptions,
-	): FormatResult | FormatDebugResult {
+	): FormatResult<Diagnostic> | FormatDebugResult<Diagnostic> {
 		return this.withFile(projectKey, options.filePath, content, (path) => {
 			let code = content;
 
-			const { diagnostics } = this.workspace.pullDiagnostics({
+			const result = this.workspace.pullDiagnostics({
 				projectKey,
 				path,
 				categories: ["syntax"],
-				only: [],
-				skip: [],
 				pullCodeActions: false,
 			});
 
-			const hasErrors = diagnostics.some(
-				(diag) => diag.severity === "fatal" || diag.severity === "error",
-			);
-			if (!hasErrors) {
+			if (0 === result.errors) {
 				if (options.range) {
 					const result = this.workspace.formatRange({
 						projectKey,
@@ -245,7 +222,7 @@ export class Biome {
 
 					return {
 						content: code,
-						diagnostics,
+						diagnostics: result.diagnostics,
 						ir,
 					};
 				}
@@ -253,7 +230,7 @@ export class Biome {
 
 			return {
 				content: code,
-				diagnostics,
+				diagnostics: result.diagnostics,
 			};
 		});
 	}
@@ -261,31 +238,24 @@ export class Biome {
 	/**
 	 * Lint the content of a file.
 	 *
-	 * @param {ProjectKey} projectKey The identifier of the project
-	 * @param {String} content The content to lint
-	 * @param {LintContentOptions} options Options needed when linting some content
+	 * @param projectKey The identifier of the project
+	 * @param content The content to lint
+	 * @param options Options needed when linting some content
 	 */
 	lintContent(
 		projectKey: ProjectKey,
 		content: string,
 		{ filePath, fixFileMode }: LintContentOptions,
-	): LintResult {
+	): LintResult<Diagnostic> {
 		const maybeFixedContent = fixFileMode
 			? this.withFile(projectKey, filePath, content, (path) => {
-					let code = content;
-
-					const result = this.workspace.fixFile({
+					const { code } = this.workspace.fixFile({
 						projectKey,
 						path,
 						fixFileMode: fixFileMode,
 						shouldFormat: false,
-						only: [],
-						skip: [],
 						ruleCategories: ["syntax", "lint", "action"],
 					});
-
-					code = result.code;
-
 					return code;
 				})
 			: content;
@@ -295,8 +265,6 @@ export class Biome {
 				projectKey,
 				path,
 				categories: ["syntax", "lint", "action"],
-				only: [],
-				skip: [],
 				pullCodeActions: false,
 			});
 
@@ -310,14 +278,14 @@ export class Biome {
 	/**
 	 * Print a list of diagnostics to an HTML string.
 	 *
-	 * @param {Diagnostic[]} diagnostics The list of diagnostics to print
-	 * @param {PrintDiagnosticsOptions} options Options needed for printing the diagnostics
+	 * @param diagnostics The list of diagnostics to print
+	 * @param options Options needed for printing the diagnostics
 	 */
 	printDiagnostics(
 		diagnostics: Diagnostic[],
 		options: PrintDiagnosticsOptions,
 	): string {
-		return this.tryCatchWrapper(() => {
+		return tryCatchWrapper(() => {
 			const printer = new this.module.DiagnosticPrinter(
 				options.filePath,
 				options.fileSource,
