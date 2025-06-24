@@ -2,7 +2,7 @@
 "@biomejs/biome": patch
 ---
 
-Added the rule [noExcessiveLinesPerFunction](https://biomejs.dev/linter/rules/no-excessive-lines-per-function/).
+Added the nursery rule [noExcessiveLinesPerFunction](https://biomejs.dev/linter/rules/no-excessive-lines-per-function/).
 This rule restrict a maximum number of lines of code in a function body.
 
 The following code is now reported as invalid when the limit of maximum lines is set to 2:
