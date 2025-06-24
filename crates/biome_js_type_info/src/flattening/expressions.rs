@@ -3,9 +3,9 @@ use std::collections::{BTreeMap, btree_map::Entry};
 use biome_rowan::Text;
 
 use crate::{
-    CallArgumentType, DestructureField, Literal, ResolvedTypeData, ResolvedTypeMember, ResolverId,
-    TypeData, TypeReference, TypeResolver, TypeofCallExpression, TypeofExpression,
-    TypeofStaticMemberExpression,
+    CallArgumentType, DestructureField, Function, FunctionParameter, Literal, MAX_FLATTEN_DEPTH,
+    Resolvable, ResolvedTypeData, ResolvedTypeMember, ResolverId, TypeData, TypeReference,
+    TypeResolver, TypeofCallExpression, TypeofExpression, TypeofStaticMemberExpression,
     globals::{
         GLOBAL_ARRAY_ID, GLOBAL_BIGINT_STRING_LITERAL_ID, GLOBAL_BOOLEAN_STRING_LITERAL_ID,
         GLOBAL_FUNCTION_STRING_LITERAL_ID, GLOBAL_NUMBER_STRING_LITERAL_ID,
@@ -58,15 +58,7 @@ pub(super) fn flattened_expression(
                 })
         }
         TypeofExpression::Call(expr) => match resolver.resolve_and_get(&expr.callee) {
-            Some(callee) => {
-                let (is_instance, mut ty) =
-                    flattened_function_call(expr, callee.to_data(), resolver)?;
-                if is_instance {
-                    ty = ty.into_instance(resolver);
-                }
-
-                Some(ty)
-            }
+            Some(callee) => flattened_call(expr, callee.to_data(), resolver),
             None => None,
         },
         TypeofExpression::Destructure(expr) => {
@@ -342,67 +334,182 @@ pub(super) fn flattened_expression(
     }
 }
 
-fn flattened_function_call(
+fn flattened_call(
     expr: &TypeofCallExpression,
     callee: TypeData,
     resolver: &mut dyn TypeResolver,
-) -> Option<(bool, TypeData)> {
-    match callee {
-        TypeData::Function(function) => function.return_type.as_type().and_then(|return_ty| {
-            let resolved_return_ty = resolver.resolve_and_get(return_ty)?;
-
-            let (is_generic_instance, mut resolved_return_ty) = match resolved_return_ty
-                .as_raw_data()
-            {
-                TypeData::InstanceOf(instance) if instance.type_parameters.is_empty() => resolver
-                    .resolve_and_get(&resolved_return_ty.apply_module_id_to_reference(&instance.ty))
-                    .filter(|resolved| resolved.is_generic())
-                    .map_or((false, resolved_return_ty), |resolved| (true, resolved)),
-                _ => (false, resolved_return_ty),
-            };
-
-            if is_generic_instance {
-                // See if we can infer the return type by looking for the
-                // generic in the input arguments.
-                let arg_index = function
-                    .parameters
-                    .iter()
-                    .position(|param| (param.ty == *return_ty))?;
-                let arg = expr.arguments.get(arg_index)?;
-                let reference = match arg {
-                    CallArgumentType::Argument(reference) => reference,
-                    CallArgumentType::Spread(_) => {
-                        return None; // TODO: Handle spread arguments
-                    }
-                };
-                resolved_return_ty = resolver.resolve_and_get(reference)?;
+) -> Option<TypeData> {
+    let mut callee = callee;
+    for _ in 0..MAX_FLATTEN_DEPTH {
+        match callee {
+            TypeData::Function(function) => {
+                return flattened_function_call(expr, &function, resolver);
             }
-
-            Some((is_generic_instance, resolved_return_ty.to_data()))
-        }),
-        TypeData::InstanceOf(instance) => {
-            let callee = resolver
-                .resolve_and_get(&instance.ty)
-                .and_then(|callee| {
-                    callee
+            TypeData::InstanceOf(instance) => {
+                callee = resolver
+                    .resolve_and_get(&instance.ty)
+                    .and_then(|callee| {
+                        callee
+                            .all_members(resolver)
+                            .find(|member| member.kind().is_call_signature())
+                    })
+                    .map(ResolvedTypeMember::to_member)
+                    .and_then(|member| resolver.resolve_and_get(&member.ty))?
+                    .to_data();
+            }
+            TypeData::Object(_) => {
+                callee =
+                    ResolvedTypeData::from((ResolverId::from_level(resolver.level()), &callee))
                         .all_members(resolver)
                         .find(|member| member.kind().is_call_signature())
-                })
-                .map(ResolvedTypeMember::to_member)
-                .and_then(|member| resolver.resolve_and_get(&member.ty))?;
-            flattened_function_call(expr, callee.to_data(), resolver)
+                        .map(ResolvedTypeMember::to_member)
+                        .and_then(|member| resolver.resolve_and_get(&member.ty))?
+                        .to_data();
+            }
+            _ => break,
         }
-        TypeData::Object(_) => {
-            let callee =
-                ResolvedTypeData::from((ResolverId::from_level(resolver.level()), &callee))
-                    .all_members(resolver)
-                    .find(|member| member.kind().is_call_signature())
-                    .map(ResolvedTypeMember::to_member)
-                    .and_then(|member| resolver.resolve_and_get(&member.ty))?;
-            flattened_function_call(expr, callee.to_data(), resolver)
-        }
-        _ => None,
     }
+
+    None
+}
+
+/*fn flattened_function_call(
+    expr: &TypeofCallExpression,
+    function: &Function,
+    resolver: &mut dyn TypeResolver,
+) -> Option<TypeData> {
+    let return_ty_reference = function.return_type.as_type()?;
+    let mut return_ty = resolver.resolve_and_get(return_ty_reference)?.to_data();
+
+    let generic_reference = match &return_ty {
+        TypeData::InstanceOf(instance) if instance.type_parameters.is_empty() => resolver
+            .resolve_and_get(&instance.ty)
+            .is_some_and(|resolved| resolved.is_generic())
+            .then(|| instance.ty.clone()),
+        _ => None,
+    };
+
+    if let Some(generic_reference) = generic_reference {
+        // See if we can infer the return type by looking for the
+        // generic in the input arguments.
+        let arg_index = function
+            .parameters
+            .iter()
+            .position(|param| (param.ty == *return_ty_reference))?;
+        let arg = expr.arguments.get(arg_index)?;
+        let concrete_reference = match arg {
+            CallArgumentType::Argument(reference) => reference,
+            CallArgumentType::Spread(_) => {
+                return None; // TODO: Handle spread arguments
+            }
+        };
+        return_ty.update_all_references(|reference| {
+            if reference == &generic_reference {
+                *reference = concrete_reference.clone();
+            }
+        });
+    }
+
+    Some(return_ty)
+}*/
+
+fn flattened_function_call(
+    expr: &TypeofCallExpression,
+    function: &Function,
+    resolver: &mut dyn TypeResolver,
+) -> Option<TypeData> {
+    let return_ty_reference = function.return_type.as_type()?;
+    let mut return_ty = resolver.resolve_and_get(return_ty_reference)?.to_data();
+
+    let generic_references = match &return_ty {
+        TypeData::InstanceOf(instance) => {
+            let mut generic_references = match resolver.resolve_and_get(&instance.ty) {
+                Some(resolved) if resolved.is_generic() => vec![instance.ty.clone()],
+                _ => Vec::new(),
+            };
+            for param in &instance.type_parameters {
+                match resolver.resolve_and_get(param) {
+                    Some(resolved) if resolved.is_generic() => {
+                        generic_references.push(param.clone())
+                    }
+                    _ => {}
+                }
+            }
+            generic_references
+        }
+        _ => Vec::new(),
+    };
+
+    // The time complexity is not great on this, but fortunately most functions
+    // have very few generics and not too many arguments either.
+    for generic_reference in generic_references {
+        for (index, param) in function.parameters.iter().enumerate() {
+            if let Some(arg) = expr.arguments.get(index) {
+                infer_generic_arg(
+                    resolver,
+                    &mut return_ty,
+                    return_ty_reference,
+                    &generic_reference,
+                    param,
+                    arg,
+                );
+            }
+        }
+    }
+
+    Some(return_ty)
+}
+
+fn infer_generic_arg(
+    resolver: &dyn TypeResolver,
+    target: &mut TypeData,
+    target_reference: &TypeReference,
+    generic_reference: &TypeReference,
+    param: &FunctionParameter,
+    arg: &CallArgumentType,
+) -> Option<()> {
+    let CallArgumentType::Argument(concrete_reference) = arg else {
+        return None; // TODO: Handle spread arguments
+    };
+
+    // If the parameter's type directly references the target, we replace all
+    // the target's references to the generic with references to the concrete
+    // argument type.
+    if param.ty == *target_reference {
+        target.update_all_references(|reference| {
+            if reference == generic_reference {
+                *reference = concrete_reference.clone();
+            }
+        });
+        return Some(());
+    }
+
+    // Otherwise, we proceed by looking into the parameter type itself...
+    let resolved_param = resolver.resolve_and_get(&param.ty)?;
+
+    // If the parameter type is a function, ie. callback, we try to infer from
+    // the callback's return type.
+    let callback_return_ty = resolved_param
+        .as_raw_data()
+        .as_function()
+        .and_then(|callback| callback.return_type.as_type())?;
+
+    // If the callback's return type references the target, we replace all the
+    // target's references to the generic with references to the concrete return
+    // type.
+    if callback_return_ty == generic_reference {
+        let concrete_ty = resolver.resolve_and_get(concrete_reference)?.to_data();
+        let concrete_callback = concrete_ty.as_function()?;
+        let concrete_return_ty = concrete_callback.return_type.as_type()?;
+        target.update_all_references(|reference| {
+            if reference == generic_reference {
+                *reference = concrete_return_ty.clone();
+            }
+        });
+        return Some(());
+    }
+
+    None
 }
 
 #[inline]

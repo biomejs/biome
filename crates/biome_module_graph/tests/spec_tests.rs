@@ -603,6 +603,43 @@ export const promise = makePromiseCb();
 }
 
 #[test]
+fn test_resolve_generic_mapped_value() {
+    let mut fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"const mapped = [1, 2, 3].map(async (x) => x + 1);
+"#,
+    );
+
+    let added_paths = [BiomePath::new("/src/index.ts")];
+    let added_paths = get_added_paths(&fs, &added_paths);
+
+    let module_graph = Arc::new(ModuleGraph::default());
+    module_graph.update_graph_for_js_paths(&fs, &ProjectLayout::default(), &added_paths, &[]);
+
+    let index_module = module_graph
+        .module_info_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+    let resolver = Arc::new(ModuleResolver::for_module(
+        index_module,
+        module_graph.clone(),
+    ));
+
+    let mapped_id = resolver
+        .resolve_type_of(&Text::Static("mapped"), ScopeId::GLOBAL)
+        .expect("mapped variable not found");
+    let mapped_ty = resolver.resolved_type_for_id(mapped_id);
+    let _mapped_ty_string = format!("{:?}", mapped_ty.deref()); // for debugging
+    assert!(mapped_ty.is_array_of(|elem_ty| {
+        let _elem_ty_string = format!("{:?}", elem_ty.deref()); // for debugging
+        elem_ty.is_promise_instance()
+    }));
+
+    let snapshot = ModuleGraphSnapshot::new(module_graph.as_ref(), &fs).with_resolver(&resolver);
+    snapshot.assert_snapshot("test_resolve_generic_mapped_value");
+}
+
+#[test]
 fn test_resolve_generic_return_value_with_multiple_modules() {
     let mut fs = MemoryFileSystem::default();
     fs.insert(

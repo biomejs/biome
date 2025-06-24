@@ -20,7 +20,9 @@ use biome_js_type_info_macros::Resolvable;
 use biome_resolver::ResolvedPath;
 use biome_rowan::Text;
 
-use crate::globals::{GLOBAL_NUMBER_ID, GLOBAL_PROMISE_ID, GLOBAL_STRING_ID, GLOBAL_UNKNOWN_ID};
+use crate::globals::{
+    GLOBAL_ARRAY_ID, GLOBAL_NUMBER_ID, GLOBAL_PROMISE_ID, GLOBAL_STRING_ID, GLOBAL_UNKNOWN_ID,
+};
 use crate::type_info::literal::{BooleanLiteral, NumberLiteral, StringLiteral};
 use crate::{
     GLOBAL_RESOLVER, ModuleId, Resolvable, ResolvedTypeData, ResolvedTypeId, ResolvedTypeMember,
@@ -102,6 +104,22 @@ impl Type {
                 .iter()
                 .filter_map(|ty| self.resolve(ty))
                 .any(predicate),
+            _ => false,
+        }
+    }
+
+    /// Returns whether if this type is an instance of a type matching the given
+    /// `predicate`.
+    pub fn is_array_of(&self, predicate: impl Fn(Self) -> bool) -> bool {
+        match self.as_raw_data() {
+            Some(TypeData::InstanceOf(instance)) => {
+                instance.ty == GLOBAL_ARRAY_ID.into()
+                    && instance
+                        .type_parameters
+                        .first()
+                        .and_then(|type_param| self.resolve(type_param))
+                        .is_some_and(predicate)
+            }
             _ => false,
         }
     }

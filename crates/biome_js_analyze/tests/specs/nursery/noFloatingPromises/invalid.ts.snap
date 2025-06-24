@@ -352,6 +352,12 @@ function returnMaybePromise(): Promise<void> | undefined {
 
 returnMaybePromise();
 
+[1, 2, 3].map(async (x) => x + 1);
+
+async function floatingArray() {
+	[1, 2, 3].map((x) => Promise.resolve(x + 1));
+}
+
 ```
 
 # Diagnostics
@@ -1631,8 +1637,46 @@ invalid.ts:347:1 lint/nursery/noFloatingPromises ━━━━━━━━━━�
   > 347 │ returnMaybePromise();
         │ ^^^^^^^^^^^^^^^^^^^^^
     348 │ 
+    349 │ [1, 2, 3].map(async (x) => x + 1);
   
   i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
   
+
+```
+
+```
+invalid.ts:349:1 lint/nursery/noFloatingPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i An array of Promises was found, meaning they are not properly handled and could lead to ignored errors or unexpected behavior.
+  
+    347 │ returnMaybePromise();
+    348 │ 
+  > 349 │ [1, 2, 3].map(async (x) => x + 1);
+        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    350 │ 
+    351 │ async function floatingArray() {
+  
+  i This happens when an array of Promises is not wrapped with Promise.all() or a similar method, and is not explicitly ignored using the `void` operator.
+  
+
+```
+
+```
+invalid.ts:352:2 lint/nursery/noFloatingPromises  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i An array of Promises was found, meaning they are not properly handled and could lead to ignored errors or unexpected behavior.
+  
+    351 │ async function floatingArray() {
+  > 352 │ 	[1, 2, 3].map((x) => Promise.resolve(x + 1));
+        │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    353 │ }
+    354 │ 
+  
+  i This happens when an array of Promises is not wrapped with Promise.all() or a similar method, and is not explicitly ignored using the `void` operator.
+  
+  i Unsafe fix: Wrap in Promise.all() and add await operator.
+  
+    352 │ → await·Promise.all([1,·2,·3].map((x)·=>·Promise.resolve(x·+·1)));
+        │   ++++++++++++++++++                                            + 
 
 ```

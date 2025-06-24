@@ -1,9 +1,9 @@
 use std::borrow::Cow;
 
 use crate::{
-    BindingId, Class, Interface, Module, Namespace, Object, ResolvedTypeData, ResolvedTypeId,
-    ResolvedTypeMember, ResolverId, TypeData, TypeInstance, TypeMember, TypeReference,
-    TypeResolver,
+    BindingId, Class, Interface, Module, Namespace, Object, Resolvable, ResolvedTypeData,
+    ResolvedTypeId, ResolvedTypeMember, ResolverId, TypeData, TypeInstance, TypeMember,
+    TypeReference, TypeResolver,
     globals::{GLOBAL_ARRAY_ID, GLOBAL_PROMISE_ID, GLOBAL_TYPE_MEMBERS},
 };
 
@@ -68,7 +68,36 @@ impl<'a> ResolvedTypeData<'a> {
         matches!(self.as_raw_data(), TypeData::Generic(_))
     }
 
-    /// Returns whether this object is an instance of the type with the given ID.
+    /// Returns whether this type data is an instance of a type matching the
+    /// given `predicate`.
+    pub fn is_instance_matching(
+        self,
+        resolver: &'a dyn TypeResolver,
+        predicate: impl Fn(TypeInstance) -> bool,
+    ) -> bool {
+        let apply_predicate = |owner: Self, instance: &TypeInstance| {
+            let mut instance = instance.clone();
+            instance.update_all_references(|reference| {
+                if let Cow::Owned(updated_reference) = owner.apply_module_id_to_reference(reference)
+                {
+                    *reference = updated_reference;
+                }
+            });
+            predicate(instance)
+        };
+
+        match self.as_raw_data() {
+            TypeData::InstanceOf(instance) => apply_predicate(self, instance),
+            TypeData::Reference(TypeReference::Resolved(resolved_id)) => resolver
+                .get_by_resolved_id(self.apply_module_id(*resolved_id))
+                .is_some_and(|resolved_data| match resolved_data.as_raw_data() {
+                    TypeData::InstanceOf(instance) => apply_predicate(resolved_data, instance),
+                    _ => false,
+                }),
+            _ => false,
+        }
+    }
+
     pub fn is_instance_of(self, resolver: &dyn TypeResolver, id: ResolvedTypeId) -> bool {
         let mut seen_types = Vec::new();
         let mut current_object = Some(self);
