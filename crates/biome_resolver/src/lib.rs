@@ -183,7 +183,9 @@ fn resolve_module_with_package_json(
         false => None,
     };
     let options = match initialise_type_roots {
-        true => &options.with_type_roots(TypeRoots::from_optional_slice(type_roots.as_deref())),
+        true => &options.with_type_roots_and_without_manifests(TypeRoots::from_optional_slice(
+            type_roots.as_deref(),
+        )),
         false => options,
     };
 
@@ -660,7 +662,6 @@ fn strip_query_and_fragment(specifier: &str) -> &str {
 }
 
 /// Options to pass to the resolver.
-#[derive(Default)]
 pub struct ResolveOptions<'a> {
     /// If `true`, specifiers are assumed to be relative paths. Resolving them
     /// as a package will still be attempted if resolving as a relative path
@@ -699,6 +700,8 @@ pub struct ResolveOptions<'a> {
     pub extensions: &'a [&'a str],
 
     /// Defines which `package.json` file should be used.
+    ///
+    /// See [`DiscoverableManifest`] for more details.
     pub package_json: DiscoverableManifest<&'a PackageJson>,
 
     /// Whether Node.js builtin modules should be resolved.
@@ -731,6 +734,8 @@ pub struct ResolveOptions<'a> {
     pub resolve_types: bool,
 
     /// Defines which `tsconfig.json` file should be used.
+    ///
+    /// See [`DiscoverableManifest`] for more details.
     pub tsconfig: DiscoverableManifest<&'a TsConfigJson>,
 
     /// Directories to check for type definitions.
@@ -743,20 +748,92 @@ pub struct ResolveOptions<'a> {
     pub type_roots: TypeRoots<'a>,
 }
 
-impl<'a> ResolveOptions<'a> {
-    fn resolve_types_in_node_modules(&self) -> bool {
-        self.resolve_types && matches!(self.type_roots, TypeRoots::TypesInNodeModules)
+impl Default for ResolveOptions<'_> {
+    fn default() -> Self {
+        Self::new()
     }
+}
 
-    /// Returns the instance with [`Self::assume_relative`] set to `true`.
-    pub fn with_assume_relative(self) -> Self {
+impl<'a> ResolveOptions<'a> {
+    /// Returns a new instance with default settings.
+    pub const fn new() -> Self {
         Self {
-            assume_relative: true,
-            ..self
+            assume_relative: false,
+            condition_names: &[],
+            default_files: &[],
+            extensions: &[],
+            package_json: DiscoverableManifest::Auto,
+            resolve_node_builtins: false,
+            resolve_types: false,
+            tsconfig: DiscoverableManifest::Auto,
+            type_roots: TypeRoots::Auto,
         }
     }
 
-    fn with_type_roots(&self, type_roots: TypeRoots<'a>) -> Self {
+    /// Returns whether the resolver should resolve types inside `node_modules`
+    /// based on these options.
+    const fn resolve_types_in_node_modules(&self) -> bool {
+        self.resolve_types && matches!(self.type_roots, TypeRoots::TypesInNodeModules)
+    }
+
+    /// Sets [`Self::assume_relative`] set to `true` and returns this instance.
+    pub const fn with_assume_relative(mut self) -> Self {
+        self.assume_relative = true;
+        self
+    }
+
+    /// Sets [`Self::condition_names`] and returns this instance.
+    pub const fn with_condition_names(mut self, condition_names: &'a [&'a str]) -> Self {
+        self.condition_names = condition_names;
+        self
+    }
+
+    /// Sets [`Self::default_files`] and returns this instance.
+    pub const fn with_default_files(mut self, default_files: &'a [&'a str]) -> Self {
+        self.default_files = default_files;
+        self
+    }
+
+    /// Sets [`Self::extensions`] and returns this instance.
+    pub const fn with_extensions(mut self, extensions: &'a [&'a str]) -> Self {
+        self.extensions = extensions;
+        self
+    }
+
+    /// Sets [`Self::package_json`] and returns this instance.
+    pub fn with_package_json(
+        mut self,
+        package_json: DiscoverableManifest<&'a PackageJson>,
+    ) -> Self {
+        self.package_json = package_json;
+        self
+    }
+
+    /// Sets [`Self::resolve_node_builtins`] set to `true` and returns this instance.
+    pub const fn with_resolve_node_builtins(mut self) -> Self {
+        self.resolve_node_builtins = true;
+        self
+    }
+
+    /// Sets [`Self::resolve_types`] set to `true` and returns this instance.
+    pub const fn with_resolve_types(mut self) -> Self {
+        self.resolve_types = true;
+        self
+    }
+
+    /// Sets [`Self::tsconfig`] and returns this instance.
+    pub fn with_tsconfig(mut self, tsconfig: DiscoverableManifest<&'a TsConfigJson>) -> Self {
+        self.tsconfig = tsconfig;
+        self
+    }
+
+    /// Sets [`Self::type_roots`] and returns this instance.
+    pub const fn with_type_roots(mut self, type_roots: TypeRoots<'a>) -> Self {
+        self.type_roots = type_roots;
+        self
+    }
+
+    fn with_type_roots_and_without_manifests(&self, type_roots: TypeRoots<'a>) -> Self {
         Self {
             assume_relative: self.assume_relative,
             condition_names: self.condition_names,
