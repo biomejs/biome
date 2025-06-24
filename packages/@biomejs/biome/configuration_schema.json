@@ -3108,6 +3108,12 @@
 				"groups": {
 					"default": [],
 					"allOf": [{ "$ref": "#/definitions/ImportGroups" }]
+				},
+				"sortMode": {
+					"description": "Determines how to sort tokens",
+					"default": "natural",
+					"type": "string",
+					"enum": ["natural", "alphabetical"]
 				}
 			},
 			"additionalProperties": false
@@ -3462,7 +3468,7 @@
 				{ "$ref": "#/definitions/RuleAssistWithOptions_for_Null" }
 			]
 		},
-		"RuleAssistConfiguration_for_Options": {
+		"OrganizeImportConfiguration": {
 			"anyOf": [
 				{ "$ref": "#/definitions/RuleAssistPlainConfiguration" },
 				{ "$ref": "#/definitions/RuleAssistWithOptions_for_Options" }
@@ -3477,7 +3483,23 @@
 					"description": "The severity of the emitted diagnostics by the rule",
 					"allOf": [{ "$ref": "#/definitions/RuleAssistPlainConfiguration" }]
 				},
-				"options": { "description": "Rule's options", "type": "null" }
+				"options": { 
+					"description": "Rule's options", 
+					"anyOf": [
+						{ "type": "null" },
+						{
+							"type": "object",
+							"properties": {
+								"sortMode": {
+									"description": "Determines how tokens are are sorted. e.g. During sorting imports, sorting keys etc. Defaults to \"natural\" sorting.",
+									"default": "natural",
+									"type": "string",
+									"enum": ["natural", "alphabetical"]	
+								}
+							}
+						}
+					]
+				}
 			},
 			"additionalProperties": false
 		},
@@ -4397,7 +4419,7 @@
 				"organizeImports": {
 					"description": "Provides a code action to sort the imports and exports in the file using a built-in or custom order.",
 					"anyOf": [
-						{ "$ref": "#/definitions/RuleAssistConfiguration_for_Options" },
+						{ "$ref": "#/definitions/OrganizeImportConfiguration" },
 						{ "type": "null" }
 					]
 				},
