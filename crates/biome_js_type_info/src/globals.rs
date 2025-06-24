@@ -27,7 +27,6 @@ pub static GLOBAL_TYPE_MEMBERS: LazyLock<Vec<TypeMember>> = LazyLock::new(|| {
         .map(TypeId::new)
         .map(|id| TypeMember {
             kind: TypeMemberKind::Named(Text::Static(global_type_name(id))),
-            is_static: false,
             ty: ResolvedTypeId::new(GLOBAL_LEVEL, id).into(),
         })
         .collect()
@@ -175,13 +174,11 @@ impl Default for GlobalsResolver {
     fn default() -> Self {
         let method = |name: &'static str, id: TypeId| TypeMember {
             kind: TypeMemberKind::Named(Text::Static(name)),
-            is_static: false,
             ty: ResolvedTypeId::new(TypeResolverLevel::Global, id).into(),
         };
 
         let static_method = |name: &'static str, id: TypeId| TypeMember {
-            kind: TypeMemberKind::Named(Text::Static(name)),
-            is_static: true,
+            kind: TypeMemberKind::NamedStatic(Text::Static(name)),
             ty: ResolvedTypeId::new(TypeResolverLevel::Global, id).into(),
         };
 
@@ -245,7 +242,6 @@ impl Default for GlobalsResolver {
                     method("map", ARRAY_MAP_ID),
                     TypeMember {
                         kind: TypeMemberKind::Named(Text::Static("length")),
-                        is_static: false,
                         ty: GLOBAL_NUMBER_ID.into(),
                     },
                 ]),
@@ -278,7 +274,6 @@ impl Default for GlobalsResolver {
                 members: Box::new([
                     TypeMember {
                         kind: TypeMemberKind::Constructor,
-                        is_static: true,
                         ty: GLOBAL_PROMISE_CONSTRUCTOR_ID.into(),
                     },
                     method("catch", PROMISE_CATCH_ID),

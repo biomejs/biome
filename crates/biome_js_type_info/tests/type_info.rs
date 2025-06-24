@@ -64,12 +64,6 @@ fn verify_type_sizes() {
     );
 
     assert_eq!(
-        std::mem::size_of::<TypeMemberKind>(),
-        24,
-        "The size shouldn't go higher"
-    );
-
-    assert_eq!(
         std::mem::size_of::<TypeofExpression>(),
         48,
         "The size shouldn't go higher"

@@ -297,18 +297,9 @@ impl Format<FormatTypeContext> for FunctionParameter {
 
 impl Format<FormatTypeContext> for TypeMember {
     fn fmt(&self, f: &mut Formatter<FormatTypeContext>) -> FormatResult<()> {
-        let format_static = format_with(|f| {
-            if self.is_static() {
-                write!(f, [text("static"), space()])
-            } else {
-                Ok(())
-            }
-        });
-
         write!(
             f,
             [&format_args![
-                format_static,
                 &self.kind,
                 text(":"),
                 space(),
@@ -329,6 +320,10 @@ impl Format<FormatTypeContext> for TypeMemberKind {
             }
             Self::Named(name) => {
                 let quoted = std::format!("\"{name}\"");
+                write!(f, [dynamic_text(&quoted, TextSize::default())])
+            }
+            Self::NamedStatic(name) => {
+                let quoted = std::format!("static \"{name}\"");
                 write!(f, [dynamic_text(&quoted, TextSize::default())])
             }
         }

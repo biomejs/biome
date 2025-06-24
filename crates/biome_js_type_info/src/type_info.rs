@@ -911,7 +911,6 @@ pub struct TupleElementType {
 #[derive(Clone, Debug, Eq, Hash, PartialEq, Resolvable)]
 pub struct TypeMember {
     pub kind: TypeMemberKind,
-    pub is_static: bool,
     pub ty: TypeReference,
 }
 
@@ -946,8 +945,9 @@ impl TypeMember {
         self.kind.is_getter()
     }
 
+    #[inline]
     pub fn is_static(&self) -> bool {
-        self.is_static
+        self.kind.is_static()
     }
 
     pub fn name(&self) -> Option<Text> {
@@ -963,6 +963,7 @@ pub enum TypeMemberKind {
     Constructor,
     Getter(Text),
     Named(Text),
+    NamedStatic(Text),
 }
 
 impl TypeMemberKind {
@@ -970,7 +971,9 @@ impl TypeMemberKind {
         match self {
             Self::CallSignature => false,
             Self::Constructor => name == "constructor",
-            Self::Getter(own_name) | Self::Named(own_name) => *own_name == name,
+            Self::Getter(own_name) | Self::Named(own_name) | Self::NamedStatic(own_name) => {
+                *own_name == name
+            }
         }
     }
 
@@ -989,11 +992,16 @@ impl TypeMemberKind {
         matches!(self, Self::Getter(_))
     }
 
+    #[inline]
+    pub fn is_static(&self) -> bool {
+        matches!(self, Self::Constructor | Self::NamedStatic(_))
+    }
+
     pub fn name(&self) -> Option<Text> {
         match self {
             Self::CallSignature => None,
             Self::Constructor => Some(Text::Static("constructor")),
-            Self::Getter(name) | Self::Named(name) => Some(name.clone()),
+            Self::Getter(name) | Self::Named(name) | Self::NamedStatic(name) => Some(name.clone()),
         }
     }
 }

@@ -217,89 +217,81 @@ Module TypeId(7) => Namespace {
     ],
     members: [
         TypeMember {
-            kind: Named(
+            kind: NamedStatic(
                 Borrowed(
                     "BufferEncoding",
                 ),
             ),
-            is_static: true,
             ty: Resolved(
                 Module(0) TypeId(18),
             ),
         },
         TypeMember {
-            kind: Named(
+            kind: NamedStatic(
                 Borrowed(
                     "VFileContents",
                 ),
             ),
-            is_static: true,
             ty: Resolved(
                 Module(0) TypeId(19),
             ),
         },
         TypeMember {
-            kind: Named(
+            kind: NamedStatic(
                 Borrowed(
                     "VFileCompatible",
                 ),
             ),
-            is_static: true,
             ty: Resolved(
                 Module(0) TypeId(20),
             ),
         },
         TypeMember {
-            kind: Named(
+            kind: NamedStatic(
                 Borrowed(
                     "Settings",
                 ),
             ),
-            is_static: true,
             ty: Resolved(
                 Module(0) TypeId(21),
             ),
         },
         TypeMember {
-            kind: Named(
+            kind: NamedStatic(
                 Borrowed(
                     "VFileReporter",
                 ),
             ),
-            is_static: true,
             ty: Resolved(
                 Module(0) TypeId(26),
             ),
         },
         TypeMember {
-            kind: Named(
+            kind: NamedStatic(
                 Borrowed(
                     "T",
                 ),
             ),
-            is_static: true,
             ty: Resolved(
                 Module(0) TypeId(25),
             ),
         },
         TypeMember {
-            kind: Named(
+            kind: NamedStatic(
                 Borrowed(
                     "VFileOptions",
                 ),
             ),
-            is_static: true,
             ty: Resolved(
                 Module(0) TypeId(31),
             ),
         },
         TypeMember {
-            kind: Named(
+            kind: NamedStatic(
                 Borrowed(
                     "VFile",
                 ),
             ),
-            is_static: true,
             ty: Resolved(
                 Module(0) TypeId(44),
             ),

@@ -134,34 +134,31 @@ Module TypeId(1) => Namespace {
     ],
     members: [
         TypeMember {
-            kind: Named(
+            kind: NamedStatic(
                 Borrowed(
                     "Partial",
                 ),
             ),
-            is_static: true,
             ty: Resolved(
                 Module(0) TypeId(3),
             ),
         },
         TypeMember {
-            kind: Named(
+            kind: NamedStatic(
                 Borrowed(
                     "Full",
                 ),
             ),
-            is_static: true,
             ty: Resolved(
                 Module(0) TypeId(5),
             ),
         },
         TypeMember {
-            kind: Named(
+            kind: NamedStatic(
                 Borrowed(
                     "Map",
                 ),
             ),
-            is_static: true,
             ty: Resolved(
                 Module(0) TypeId(6),
             ),
@@ -201,34 +198,31 @@ Module TypeId(8) => Namespace {
     ],
     members: [
         TypeMember {
-            kind: Named(
+            kind: NamedStatic(
                 Borrowed(
                     "Partial",
                 ),
             ),
-            is_static: true,
             ty: Resolved(
                 Module(0) TypeId(9),
             ),
         },
         TypeMember {
-            kind: Named(
+            kind: NamedStatic(
                 Borrowed(
                     "Full",
                 ),
             ),
-            is_static: true,
             ty: Resolved(
                 Module(0) TypeId(11),
             ),
         },
         TypeMember {
-            kind: Named(
+            kind: NamedStatic(
                 Borrowed(
                     "Map",
                 ),
             ),
-            is_static: true,
             ty: Resolved(
                 Module(0) TypeId(6),
             ),

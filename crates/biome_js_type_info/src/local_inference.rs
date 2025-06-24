@@ -1689,7 +1689,6 @@ impl TypeMember {
                     };
                     Self {
                         kind: TypeMemberKind::Getter(name),
-                        is_static: false,
                         ty: resolver.reference_to_owned_data(function.into()),
                     }
                 })
@@ -1767,7 +1766,6 @@ impl TypeMember {
                     };
                     Self {
                         kind: TypeMemberKind::Getter(name.into()),
-                        is_static: false,
                         ty: resolver.register_and_resolve(function.into()).into(),
                     }
                 })
@@ -1798,7 +1796,6 @@ impl TypeMember {
                     };
                     Self {
                         kind: TypeMemberKind::Named(name.into()),
-                        is_static: false,
                         ty: resolver.register_and_resolve(function.into()).into(),
                     }
                 })
@@ -1809,7 +1806,6 @@ impl TypeMember {
                 .and_then(|name| name.name())
                 .map(|name| Self {
                     kind: TypeMemberKind::Named(name.into()),
-                    is_static: false,
                     ty: member
                         .value()
                         .map(|value| resolver.reference_to_resolved_expression(scope_id, &value))
@@ -1825,7 +1821,6 @@ impl TypeMember {
                 .and_then(|name| text_from_token(name.value_token()))
                 .map(|name| Self {
                     kind: TypeMemberKind::Named(name.clone()),
-                    is_static: false,
                     ty: resolver.reference_to_owned_data(TypeData::from(TypeofValue {
                         identifier: name,
                         ty: TypeReference::Unknown,
@@ -1870,7 +1865,6 @@ impl TypeMember {
                 let ty = resolver.register_and_resolve(function.into());
                 Some(Self {
                     kind: TypeMemberKind::CallSignature,
-                    is_static: false,
                     ty: ty.into(),
                 })
             }
@@ -1891,7 +1885,6 @@ impl TypeMember {
                 let ty = resolver.register_and_resolve(constructor.into());
                 Some(Self {
                     kind: TypeMemberKind::Constructor,
-                    is_static: false,
                     ty: ty.into(),
                 })
             }
@@ -1912,7 +1905,6 @@ impl TypeMember {
                     let ty = resolver.register_and_resolve(function.into()).into();
                     Self {
                         kind: TypeMemberKind::Getter(name.into()),
-                        is_static: false,
                         ty: ResolvedTypeId::new(resolver.level(), resolver.optional(ty)).into(),
                     }
                 })
@@ -1973,8 +1965,11 @@ impl TypeMember {
     ) -> Self {
         let name = text_from_class_member_name(name);
         Self {
-            kind: TypeMemberKind::Named(name),
-            is_static,
+            kind: if is_static {
+                TypeMemberKind::NamedStatic(name)
+            } else {
+                TypeMemberKind::Named(name)
+            },
             ty: match is_optional {
                 true => {
                     let id = resolver.optional(ty);
@@ -1994,7 +1989,6 @@ impl TypeMember {
     ) -> Self {
         Self {
             kind: TypeMemberKind::Named(name.into()),
-            is_static: false,
             ty: match is_optional {
                 true => ResolvedTypeId::new(resolver.level(), resolver.optional(ty)).into(),
                 false => ty,
