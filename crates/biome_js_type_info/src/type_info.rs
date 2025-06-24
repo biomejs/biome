@@ -1125,10 +1125,17 @@ impl From<TypeImportQualifier> for TypeReference {
 }
 
 impl TypeReference {
+    /// Returns `true` if the reference references anything but `Unknown`.
     #[inline]
     pub fn is_known(&self) -> bool {
-        *self != Self::Unknown
+        match self {
+            Self::Import(_) => true,
+            Self::Qualifier(_) => true,
+            Self::Resolved(resolved_id) => *resolved_id != GLOBAL_UNKNOWN_ID,
+            Self::Unknown => false,
+        }
     }
+
     /// Merges the generic type parameters referenced by `incoming` into `base`.
     pub fn merge_parameters(base: &[Self], incoming: &[Self]) -> Box<[Self]> {
         base.iter()

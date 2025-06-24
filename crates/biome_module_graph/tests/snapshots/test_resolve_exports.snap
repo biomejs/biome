@@ -118,7 +118,7 @@ Imports {
 ```
 BindingId(0) => JsBindingData {
   Name: foo,
-  Type: Module(0) TypeId(9),
+  Type: Module(0) TypeId(10),
   JSDoc comment: JsDoc(
     @returns {string}
   ),
@@ -127,7 +127,7 @@ BindingId(0) => JsBindingData {
 
 BindingId(1) => JsBindingData {
   Name: bar,
-  Type: Module(0) TypeId(10),
+  Type: Module(0) TypeId(11),
   JSDoc comment: JsDoc(
     @package
   ),
@@ -145,7 +145,7 @@ BindingId(2) => JsBindingData {
 
 BindingId(3) => JsBindingData {
   Name: baz,
-  Type: Module(0) TypeId(12),
+  Type: Module(0) TypeId(13),
   Declaration kind: HoistedValue
 }
 
@@ -181,7 +181,7 @@ BindingId(8) => JsBindingData {
 
 BindingId(11) => JsBindingData {
   Name: Component,
-  Type: Module(0) TypeId(16),
+  Type: Module(0) TypeId(17),
   JSDoc comment: JsDoc(
     @public
     @returns {JSX.Element}
@@ -200,7 +200,7 @@ Module TypeId(0) => Object {
 
 Module TypeId(1) => value: 1
 
-Module TypeId(2) => Module(0) TypeId(14)
+Module TypeId(2) => Module(0) TypeId(15)
 
 Module TypeId(3) => Object {
   prototype: No prototype
@@ -242,37 +242,39 @@ Module TypeId(6) => Tuple(
 
 Module TypeId(7) => boolean
 
-Module TypeId(8) => Module(0) TypeId(7) | Module(0) TypeId(13)
+Module TypeId(8) => Module(0) TypeId(7) | Module(0) TypeId(14)
 
-Module TypeId(9) => sync Function "foo" {
+Module TypeId(9) => void
+
+Module TypeId(10) => sync Function "foo" {
   accepts: {
     params: []
     type_args: []
   }
-  returns: unknown reference
+  returns: Module(0) TypeId(9)
 }
 
-Module TypeId(10) => sync Function "bar" {
+Module TypeId(11) => sync Function "bar" {
   accepts: {
     params: []
     type_args: []
   }
-  returns: unknown reference
+  returns: Module(0) TypeId(9)
 }
 
-Module TypeId(11) => instanceof Promise
+Module TypeId(12) => instanceof Promise<Module(0) TypeId(9)>
 
-Module TypeId(12) => async Function "baz" {
+Module TypeId(13) => async Function "baz" {
   accepts: {
     params: []
     type_args: []
   }
-  returns: Module(0) TypeId(11)
+  returns: Module(0) TypeId(12)
 }
 
-Module TypeId(13) => undefined
+Module TypeId(14) => undefined
 
-Module TypeId(14) => sync Function "getObject" {
+Module TypeId(15) => sync Function "getObject" {
   accepts: {
     params: []
     type_args: []
@@ -280,19 +282,19 @@ Module TypeId(14) => sync Function "getObject" {
   returns: Module(0) TypeId(3)
 }
 
-Module TypeId(15) => unknown
+Module TypeId(16) => unknown
 
-Module TypeId(16) => sync Function "Component" {
+Module TypeId(17) => sync Function "Component" {
   accepts: {
     params: []
     type_args: []
   }
-  returns: Module(0) TypeId(15)
+  returns: Module(0) TypeId(16)
 }
 
-Module TypeId(17) => Module(0) TypeId(7)
+Module TypeId(18) => Module(0) TypeId(7)
 
-Module TypeId(18) => Module(0) TypeId(8)
+Module TypeId(19) => Module(0) TypeId(8)
 ```
 
 # `/src/renamed-reexports.ts`
@@ -321,7 +323,7 @@ Imports {
 ```
 BindingId(0) => JsBindingData {
   Name: ohNo,
-  Type: Module(0) TypeId(0),
+  Type: Module(0) TypeId(1),
   Declaration kind: HoistedValue
 }
 ```
@@ -329,12 +331,14 @@ BindingId(0) => JsBindingData {
 ## Registered types
 
 ```
-Module TypeId(0) => sync Function "ohNo" {
+Module TypeId(0) => void
+
+Module TypeId(1) => sync Function "ohNo" {
   accepts: {
     params: []
     type_args: []
   }
-  returns: unknown reference
+  returns: Module(0) TypeId(0)
 }
 ```
 
