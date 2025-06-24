@@ -215,7 +215,7 @@ impl Rule for NoUselessFragments {
                                 }
                             }
                             JsSyntaxKind::JSX_TEXT => {
-                                // We need to whitespaces and newlines from the original string.
+                                // We need to remove whitespaces and newlines from the original string.
                                 // Since in the JSX newlines aren't trivia, we require to allocate a string to trim from those characters.
                                 let original_text = child.to_trimmed_text();
                                 let trimmed_text = original_text.text().trim();
@@ -257,6 +257,17 @@ impl Rule for NoUselessFragments {
                                 if JsxText::can_cast(first.syntax().kind()) && in_jsx_attr_expr {
                                     None
                                 } else {
+                                    // Do not report the fragment as unnecessary if the only child is JsxText with an HTML reference
+                                    // or if the fragment is the only child in a JSX expression (e.g. {<>Foo</>})
+                                    if let AnyJsxChild::JsxText(text) = &first {
+                                        if let Some(value_token) = text.value_token().ok() {
+                                            let value = value_token.token_text();
+                                            if contains_html_character_references(value.as_ref()) {
+                                                return None;
+                                            }
+                                        }
+                                    }
+
                                     Some(NoUselessFragmentsState::Child(first))
                                 }
                             } else {
