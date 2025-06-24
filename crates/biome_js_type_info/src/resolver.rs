@@ -5,8 +5,9 @@ use biome_js_type_info_macros::Resolvable;
 use biome_rowan::Text;
 
 use crate::{
-    NUM_PREDEFINED_TYPES, ScopeId, TypeData, TypeId, TypeImportQualifier, TypeInstance, TypeMember,
-    TypeMemberKind, TypeReference, TypeReferenceQualifier, TypeofValue, Union,
+    GLOBAL_UNKNOWN_ID, NUM_PREDEFINED_TYPES, ScopeId, TypeData, TypeId, TypeImportQualifier,
+    TypeInstance, TypeMember, TypeMemberKind, TypeReference, TypeReferenceQualifier, TypeofValue,
+    Union,
     globals::{GLOBAL_UNDEFINED_ID, global_type_name},
 };
 
@@ -434,9 +435,38 @@ impl<'a> ResolvedTypeMember<'a> {
         self.member.as_ref()
     }
 
+    /// Returns a reference to the type of the member if we dereference it.
+    ///
+    /// This means if the member represents a getter or setter, it will
+    /// dereference to the type of the property being get or set.
+    pub fn deref_ty(&self, resolver: &dyn TypeResolver) -> Cow<TypeReference> {
+        if self.is_getter() {
+            resolver
+                .resolve_and_get(&self.ty())
+                .and_then(|resolved| match resolved.as_raw_data() {
+                    TypeData::Function(function) => {
+                        function.return_type.as_type().map(|return_ty| {
+                            resolved
+                                .apply_module_id_to_reference(return_ty)
+                                .into_owned()
+                        })
+                    }
+                    _ => None,
+                })
+                .map_or(Cow::Owned(GLOBAL_UNKNOWN_ID.into()), Cow::Owned)
+        } else {
+            self.ty()
+        }
+    }
+
     #[inline]
     pub fn has_name(&self, name: &str) -> bool {
         self.member.has_name(name)
+    }
+
+    #[inline]
+    pub fn is_getter(&self) -> bool {
+        self.member.is_getter()
     }
 
     #[inline]

@@ -834,6 +834,53 @@ fn test_resolve_return_value_of_function() {
 }
 
 #[test]
+fn test_resolve_type_of_property_with_getter() {
+    let mut fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+        class Foo {
+            get foo() {
+                if (!this.initialised) {
+                    this.initialise();
+                    return "foo";
+                }
+
+                return "foo";
+            }
+        }
+
+        const fooness = new Foo();
+        const foo = fooness.foo;
+        "#,
+    );
+
+    let added_paths = [BiomePath::new("/src/index.ts")];
+    let added_paths = get_added_paths(&fs, &added_paths);
+
+    let module_graph = Arc::new(ModuleGraph::default());
+    module_graph.update_graph_for_js_paths(&fs, &ProjectLayout::default(), &added_paths, &[]);
+
+    let index_module = module_graph
+        .module_info_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+    let resolver = Arc::new(ModuleResolver::for_module(
+        index_module,
+        module_graph.clone(),
+    ));
+
+    let foo_id = resolver
+        .resolve_type_of(&Text::Static("foo"), ScopeId::GLOBAL)
+        .expect("foo variable not found");
+    let foo_ty = resolver.resolved_type_for_id(foo_id);
+    let _foo_string_ty = format!("{foo_ty:?}");
+    assert!(foo_ty.is_string_literal("foo"));
+
+    let snapshot = ModuleGraphSnapshot::new(&module_graph, &fs);
+    snapshot.assert_snapshot("test_resolve_type_of_property_with_getter");
+}
+
+#[test]
 fn test_resolve_promise_export() {
     let mut fs = MemoryFileSystem::default();
     fs.insert(

@@ -38,12 +38,11 @@ Module TypeId(0) => Namespace {
     ],
     members: [
         TypeMember {
-            kind: Named(
+            kind: NamedStatic(
                 Borrowed(
                     "Bar",
                 ),
             ),
-            is_static: true,
             ty: Resolved(
                 Module(0) TypeId(1),
             ),

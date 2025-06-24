@@ -911,17 +911,43 @@ pub struct TupleElementType {
 #[derive(Clone, Debug, Eq, Hash, PartialEq, Resolvable)]
 pub struct TypeMember {
     pub kind: TypeMemberKind,
-    pub is_static: bool,
     pub ty: TypeReference,
 }
 
 impl TypeMember {
+    /// Returns a reference to the type of the member if we dereference it.
+    ///
+    /// This means if the member represents a getter or setter, it will
+    /// dereference to the type of the property being get or set.
+    pub fn deref_ty<'a>(&'a self, resolver: &'a dyn TypeResolver) -> Cow<'a, TypeReference> {
+        if self.is_getter() {
+            resolver
+                .resolve_and_get(&self.ty)
+                .and_then(|resolved| match resolved.as_raw_data() {
+                    TypeData::Function(function) => function
+                        .return_type
+                        .as_type()
+                        .map(|return_ty| resolved.apply_module_id_to_reference(return_ty)),
+                    _ => None,
+                })
+                .unwrap_or(Cow::Owned(TypeReference::Resolved(GLOBAL_UNKNOWN_ID)))
+        } else {
+            Cow::Borrowed(&self.ty)
+        }
+    }
+
     pub fn has_name(&self, name: &str) -> bool {
         self.kind.has_name(name)
     }
 
+    #[inline]
+    pub fn is_getter(&self) -> bool {
+        self.kind.is_getter()
+    }
+
+    #[inline]
     pub fn is_static(&self) -> bool {
-        self.is_static
+        self.kind.is_static()
     }
 
     pub fn name(&self) -> Option<Text> {
@@ -935,7 +961,9 @@ impl TypeMember {
 pub enum TypeMemberKind {
     CallSignature,
     Constructor,
+    Getter(Text),
     Named(Text),
+    NamedStatic(Text),
 }
 
 impl TypeMemberKind {
@@ -943,23 +971,37 @@ impl TypeMemberKind {
         match self {
             Self::CallSignature => false,
             Self::Constructor => name == "constructor",
-            Self::Named(own_name) => *own_name == name,
+            Self::Getter(own_name) | Self::Named(own_name) | Self::NamedStatic(own_name) => {
+                *own_name == name
+            }
         }
     }
 
+    #[inline]
     pub fn is_call_signature(&self) -> bool {
         matches!(self, Self::CallSignature)
     }
 
+    #[inline]
     pub fn is_constructor(&self) -> bool {
         matches!(self, Self::Constructor)
+    }
+
+    #[inline]
+    pub fn is_getter(&self) -> bool {
+        matches!(self, Self::Getter(_))
+    }
+
+    #[inline]
+    pub fn is_static(&self) -> bool {
+        matches!(self, Self::Constructor | Self::NamedStatic(_))
     }
 
     pub fn name(&self) -> Option<Text> {
         match self {
             Self::CallSignature => None,
             Self::Constructor => Some(Text::Static("constructor")),
-            Self::Named(name) => Some(name.clone()),
+            Self::Getter(name) | Self::Named(name) | Self::NamedStatic(name) => Some(name.clone()),
         }
     }
 }

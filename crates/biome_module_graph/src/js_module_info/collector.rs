@@ -694,8 +694,7 @@ impl JsModuleInfoCollector {
                     .is_some_and(|parent_scope_id| parent_scope_id == scope_id)
             })
             .map(|binding| TypeMember {
-                kind: TypeMemberKind::Named(binding.name.clone()),
-                is_static: true,
+                kind: TypeMemberKind::NamedStatic(binding.name.clone()),
                 ty: binding.ty.clone(),
             })
             .collect()
