@@ -1,9 +1,10 @@
-// should not trigger
 function Component2() {
-    const str = 'str';
-    return (<>{str}</>);
+	const str = "str";
+	// should trigger
+	return <>{str}</>;
 }
 
 const obj = {
-    element: <>test</>
+	// should not trigger
+	element: <>test</>,
 };

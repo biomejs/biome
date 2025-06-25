@@ -168,8 +168,7 @@ impl Rule for NoUselessFragments {
                                 .is_some_and(|parent| {
                                     matches!(
                                         parent.kind(),
-                                        JsSyntaxKind::JS_RETURN_STATEMENT
-                                            | JsSyntaxKind::JS_INITIALIZER_CLAUSE
+                                            JsSyntaxKind::JS_INITIALIZER_CLAUSE
                                             | JsSyntaxKind::JS_ARROW_FUNCTION_EXPRESSION
                                             | JsSyntaxKind::JS_FUNCTION_EXPRESSION
                                             | JsSyntaxKind::JS_FUNCTION_DECLARATION
