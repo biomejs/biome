@@ -2,7 +2,8 @@ use std::borrow::Cow;
 use std::cmp::Ordering;
 
 use biome_analyze::{
-    Ast, FixKind, Rule, RuleAction, RuleDiagnostic, context::RuleContext, declare_source_rule,
+    Ast, FixKind, Rule, RuleAction, RuleDiagnostic, RuleSource, RuleSourceKind,
+    context::RuleContext, declare_source_rule,
 };
 use biome_console::markup;
 use biome_deserialize::TextRange;
@@ -26,8 +27,6 @@ declare_source_rule! {
     /// exist.
     /// This prevents breaking the override of certain keys using spread
     /// keys.
-    ///
-    /// Source: https://perfectionist.dev/rules/sort-objects
     ///
     /// ## Examples
     ///
@@ -77,6 +76,8 @@ declare_source_rule! {
         name: "useSortedKeys",
         language: "js",
         recommended: false,
+        sources: &[RuleSource::EslintPerfectionist("sort-objects")],
+        source_kind: RuleSourceKind::Inspired,
         fix_kind: FixKind::Safe,
     }
 }
