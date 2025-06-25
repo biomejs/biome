@@ -37,6 +37,14 @@ c && Promise.reject("logical operator bypass");
 let o: object;
 o && Promise.reject("logical operator bypass");
 
+type Params = {
+    option: boolean | Nullish;
+};
+
+function functionWithParams({ option }: Params) {
+    option ?? Promise.reject("logical operator bypass");
+}
+
 ```
 
 # Diagnostics
@@ -300,6 +308,23 @@ o && Promise.reject("logical operator bypass");
   > 32 │ o && Promise.reject("logical operator bypass");
        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     33 │ 
+    34 │ type Params = {
+  
+  i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
+  
+
+```
+
+```
+13_invalid.ts:39:5 lint/nursery/noFloatingPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i A "floating" Promise was found, meaning it is not properly handled and could lead to ignored errors or unexpected behavior.
+  
+    38 │ function functionWithParams({ option }: Params) {
+  > 39 │     option ?? Promise.reject("logical operator bypass");
+       │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    40 │ }
+    41 │ 
   
   i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
   

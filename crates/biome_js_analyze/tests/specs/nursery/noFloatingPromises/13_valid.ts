@@ -31,3 +31,11 @@ c ?? Promise.reject("logical operator bypass");
 let o: object;
 o || Promise.reject("logical operator bypass");
 o ?? Promise.reject("logical operator bypass");
+
+type Params = {
+    option: false | Nullish;
+};
+
+function functionWithParams({ option }: Params) {
+    option && Promise.reject("logical operator bypass");
+}
