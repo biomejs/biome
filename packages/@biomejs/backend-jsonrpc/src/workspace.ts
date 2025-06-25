@@ -1723,6 +1723,10 @@ export interface Nursery {
 	 */
 	useSymbolDescription?: RuleConfiguration_for_Null;
 	/**
+	 * Disallow overload signatures that can be unified into a single signature.
+	 */
+	useUnifiedTypeSignature?: RuleFixConfiguration_for_Null;
+	/**
 	 * Prevent the usage of static string literal id attribute on elements.
 	 */
 	useUniqueElementIds?: RuleConfiguration_for_Null;
@@ -3666,6 +3670,7 @@ export type Category =
 	| "lint/nursery/useSortedClasses"
 	| "lint/nursery/useSortedProperties"
 	| "lint/nursery/useSymbolDescription"
+	| "lint/nursery/useUnifiedTypeSignature"
 	| "lint/nursery/useUniqueElementIds"
 	| "lint/performance/noAccumulatingSpread"
 	| "lint/performance/noBarrelFile"
