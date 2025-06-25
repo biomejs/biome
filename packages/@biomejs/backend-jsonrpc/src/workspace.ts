@@ -2055,6 +2055,10 @@ export interface Style {
  */
 export interface Suspicious {
 	/**
+	 * Disallow the use of alert, confirm, and prompt.
+	 */
+	noAlert?: RuleConfiguration_for_Null;
+	/**
 	 * Use standard constants instead of approximated literals.
 	 */
 	noApproximativeNumericConstant?: RuleFixConfiguration_for_Null;
@@ -3747,6 +3751,7 @@ export type Category =
 	| "lint/style/useThrowNewError"
 	| "lint/style/useThrowOnlyError"
 	| "lint/style/useTrimStartEnd"
+	| "lint/suspicious/noAlert"
 	| "lint/suspicious/noApproximativeNumericConstant"
 	| "lint/suspicious/noArrayIndexKey"
 	| "lint/suspicious/noAssignInExpressions"
