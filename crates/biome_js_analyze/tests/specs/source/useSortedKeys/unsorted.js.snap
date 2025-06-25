@@ -94,6 +94,32 @@ unsorted.js:3:2 assist/source/useSortedKeys  FIXABLE  ━━━━━━━━�
     11    │ - → },
        11 │ + → ba:·2,
     12 12 │   	[getProp()]: 2,
+    13 13 │   	aba: 2,
+  
+
+```
+
+```
+unsorted.js:3:2 assist/source/useSortedKeys  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The keys are not sorted.
+  
+     1 │ const obj = {
+     2 │ 	// Comment b
+   > 3 │ 	b: 1,
+       │ 	^^^^^
+   > 4 │ 	// Comment a
+        ...
+  > 19 │ 		return "";
+  > 20 │ 	},
+       │ 	^^
+    21 │ };
+    22 │ 
+  
+  i Safe fix: Sort the object properties.
+  
+    11 11 │   	},
+    12 12 │   	[getProp()]: 2,
     13    │ - → aba:·2,
     14    │ - → abc:·3,
     15    │ - → abb:·3,

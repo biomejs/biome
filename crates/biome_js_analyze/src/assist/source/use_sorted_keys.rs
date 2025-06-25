@@ -88,54 +88,45 @@ impl Rule for UseSortedKeys {
     type Options = ();
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
-        let mut members = Vec::new();
-        let mut groups = Vec::new();
+        let member_list = ctx.query();
+        let mut chunks = Vec::new();
+        let mut current_chunk_members = Vec::with_capacity(member_list.len());
 
         let get_name = |name: SyntaxResult<AnyJsObjectMemberName>| name.ok()?.name();
 
-        for element in ctx.query().elements() {
-            if let Ok(element) = element.node() {
-                match element {
-                    AnyJsObjectMember::JsSpread(_) | AnyJsObjectMember::JsBogusMember(_) => {
-                        // Keep the spread order because it's not safe to change order of it.
-                        // Logic here is similar to /crates/biome_js_analyze/src/assists/source/use_sorted_attributes.rs
-                        if !members.is_empty() && !members.is_sorted() {
-                            groups.push(members.clone());
-                        }
-                        // Reuse the same buffer
-                        members.clear();
-                        members.push(ObjectMember::new(element.clone(), None));
-                    }
-                    AnyJsObjectMember::JsPropertyObjectMember(member) => {
-                        members.push(ObjectMember::new(element.clone(), get_name(member.name())));
-                    }
-                    AnyJsObjectMember::JsGetterObjectMember(member) => {
-                        members.push(ObjectMember::new(element.clone(), get_name(member.name())));
-                    }
-                    AnyJsObjectMember::JsSetterObjectMember(member) => {
-                        members.push(ObjectMember::new(element.clone(), get_name(member.name())));
-                    }
-                    AnyJsObjectMember::JsMethodObjectMember(member) => {
-                        members.push(ObjectMember::new(element.clone(), get_name(member.name())));
-                    }
+        for (index, element) in member_list.elements().enumerate() {
+            if let Ok(element) = element.into_node() {
+                let name = match &element {
+                    AnyJsObjectMember::JsSpread(_) | AnyJsObjectMember::JsBogusMember(_) => None,
+                    AnyJsObjectMember::JsPropertyObjectMember(member) => get_name(member.name()),
+                    AnyJsObjectMember::JsGetterObjectMember(member) => get_name(member.name()),
+                    AnyJsObjectMember::JsSetterObjectMember(member) => get_name(member.name()),
+                    AnyJsObjectMember::JsMethodObjectMember(member) => get_name(member.name()),
                     AnyJsObjectMember::JsShorthandPropertyObjectMember(member) => {
-                        let name = member
-                            .name()
-                            .ok()
-                            .map(|name| name.name().ok())
-                            .unwrap_or_default();
-
-                        members.push(ObjectMember::new(element.clone(), name));
+                        member.name().and_then(|name| name.name()).ok()
+                    }
+                };
+                if let Some(name) = name {
+                    current_chunk_members.push(ObjectMember::new(element, name));
+                } else {
+                    // If a name cannot be extracted, then the current chunk of named properties stops here.
+                    if !current_chunk_members.is_empty() && !current_chunk_members.is_sorted() {
+                        chunks.push(current_chunk_members);
+                        // Create a new buffer with the number of remaining members to test
+                        current_chunk_members = Vec::with_capacity(member_list.len() - index - 1);
+                    } else {
+                        // Reuse the buffer
+                        current_chunk_members.clear();
                     }
                 }
             }
         }
 
-        if !members.is_empty() && !members.is_sorted() {
-            groups.push(members);
+        if !current_chunk_members.is_empty() && !current_chunk_members.is_sorted() {
+            chunks.push(current_chunk_members);
         }
 
-        groups.into_boxed_slice()
+        chunks.into_boxed_slice()
     }
 
     fn diagnostic(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<RuleDiagnostic> {
@@ -159,13 +150,9 @@ impl Rule for UseSortedKeys {
     fn action(ctx: &RuleContext<Self>, state: &Self::State) -> Option<JsRuleAction> {
         let mut sorted_state = state.clone();
 
-        sorted_state.sort_unstable();
-
-        // FIXME: why do we need to check it?
-        // Checking if it is sorted in `run` should be enough.
-        if &sorted_state == state {
-            return None;
-        }
+        // We use a stable sort to ensure that properties with an identical name (a getter and a setter for a property)
+        // keep their initial relative order.
+        sorted_state.sort();
 
         let mut mutation = ctx.root().begin();
 
@@ -185,10 +172,10 @@ impl Rule for UseSortedKeys {
 #[derive(Debug, Clone)]
 pub struct ObjectMember {
     member: AnyJsObjectMember,
-    name: Option<TokenText>,
+    name: TokenText,
 }
 impl ObjectMember {
-    fn new(member: AnyJsObjectMember, name: Option<TokenText>) -> Self {
+    fn new(member: AnyJsObjectMember, name: TokenText) -> Self {
         Self { member, name }
     }
 }
@@ -200,12 +187,7 @@ impl PartialEq for ObjectMember {
 }
 impl Ord for ObjectMember {
     fn cmp(&self, other: &Self) -> Ordering {
-        // If some doesn't have a name (e.g spread/calculated property) - keep the order.
-        let (Some(self_name), Some(other_name)) = (&self.name, &other.name) else {
-            return Ordering::Equal;
-        };
-
-        self_name.text().ascii_nat_cmp(other_name.text())
+        self.name.text().ascii_nat_cmp(other.name.text())
     }
 }
 impl PartialOrd for ObjectMember {
@@ -213,3 +195,6 @@ impl PartialOrd for ObjectMember {
         Some(self.cmp(other))
     }
 }
+
+#[test]
+fn test() {}
