@@ -143,7 +143,7 @@ impl Rule for NoUselessFragments {
                 let mut in_js_logical_expr = false;
                 let mut in_jsx_expr = false;
                 let mut in_jsx_list = false;
-                let mut in_return_statement = false;        
+                let mut in_return_statement = false;
                 let parents_where_fragments_must_be_preserved =
                     node.syntax().parent().is_some_and(|parent| {
                         match JsxTagExpression::try_cast(parent.clone()) {
@@ -265,11 +265,12 @@ impl Rule for NoUselessFragments {
                                     None
                                 } else if JsxElement::can_cast(first.syntax().kind()) {
                                     Some(NoUselessFragmentsState::Child(first))
-                                } else if JsxExpressionChild::can_cast(first.syntax().kind())
-                                    && in_return_statement
-                                {
-                                    // Preserve fragments with expression children in return statements
-                                    None
+                                } else if in_return_statement {
+                                    if JsxExpressionChild::can_cast(first.syntax().kind()) {
+                                        None
+                                    } else {
+                                        Some(NoUselessFragmentsState::Child(first))
+                                    }
                                 } else {
                                     // Do not report the fragment as unnecessary if the only child is JsxText with an HTML reference
                                     // or if the fragment is the only child in a JSX expression (e.g. {<>Foo</>})
