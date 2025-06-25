@@ -113,6 +113,8 @@ pub enum RuleSource {
     EslintJsxA11y(&'static str),
     /// Rules from [Eslint Plugin JSDOc](https://github.com/gajus/eslint-plugin-jsdoc)
     EslintJsDoc(&'static str),
+    /// Rules from [Eslint Plugin Perfectionist](https://perfectionist.dev/)
+    EslintPerfectionist(&'static str),
     /// Rules from [Eslint Plugin React](https://github.com/jsx-eslint/eslint-plugin-react)
     EslintReact(&'static str),
     /// Rules from [Eslint Plugin React Hooks](https://github.com/facebook/react/blob/main/packages/eslint-plugin-react-hooks/README.md)
@@ -171,6 +173,7 @@ impl std::fmt::Display for RuleSource {
             Self::EslintJest(_) => write!(f, "eslint-plugin-jest"),
             Self::EslintJsxA11y(_) => write!(f, "eslint-plugin-jsx-a11y"),
             Self::EslintJsDoc(_) => write!(f, "eslint-plugin-jsdoc"),
+            Self::EslintPerfectionist(_) => write!(f, "eslint-plugin-perfectionist"),
             Self::EslintReact(_) => write!(f, "eslint-plugin-react"),
             Self::EslintReactHooks(_) => write!(f, "eslint-plugin-react-hooks"),
             Self::EslintReactRefresh(_) => write!(f, "eslint-plugin-react-refresh"),
@@ -228,6 +231,7 @@ impl RuleSource {
             | Self::EslintJest(rule_name)
             | Self::EslintJsxA11y(rule_name)
             | Self::EslintJsDoc(rule_name)
+            | Self::EslintPerfectionist(rule_name)
             | Self::EslintReact(rule_name)
             | Self::EslintReactHooks(rule_name)
             | Self::EslintReactRefresh(rule_name)
@@ -260,6 +264,7 @@ impl RuleSource {
             Self::EslintJest(rule_name) => format!("jest/{rule_name}"),
             Self::EslintJsxA11y(rule_name) => format!("jsx-a11y/{rule_name}"),
             Self::EslintJsDoc(rule_name) => format!("jsdoc/{rule_name}"),
+            Self::EslintPerfectionist(rule_name) => format!("perfectionist/{rule_name}"),
             Self::EslintReact(rule_name) => format!("react/{rule_name}"),
             Self::EslintReactHooks(rule_name) => format!("react-hooks/{rule_name}"),
             Self::EslintReactRefresh(rule_name) => format!("react-refresh/{rule_name}"),
@@ -293,6 +298,7 @@ impl RuleSource {
             Self::EslintJest(rule_name) => format!("https://github.com/jest-community/eslint-plugin-jest/blob/main/docs/rules/{rule_name}.md"),
             Self::EslintJsxA11y(rule_name) => format!("https://github.com/jsx-eslint/eslint-plugin-jsx-a11y/blob/main/docs/rules/{rule_name}.md"),
             Self::EslintJsDoc(rule_name) => format!("https://github.com/gajus/eslint-plugin-jsdoc/blob/main/docs/rules/{rule_name}.md"),
+            Self::EslintPerfectionist(rule_name) => format!("https://perfectionist.dev/rules/{rule_name}.md"),
             Self::EslintReact(rule_name) => format!("https://github.com/jsx-eslint/eslint-plugin-react/blob/master/docs/rules/{rule_name}.md"),
             Self::EslintReactHooks(_) =>  "https://github.com/facebook/react/blob/main/packages/eslint-plugin-react-hooks/README.md".to_string(),
             Self::EslintReactRefresh(_) => "https://github.com/ArnaudBarre/eslint-plugin-react-refresh".to_string(),
