@@ -4,37 +4,16 @@ expression: issue_3668.jsx
 ---
 # Input
 ```jsx
+// should not trigger
 function Component2() {
-	const str = "str";
-	// should trigger
-	return <>{str}</>;
+    const str = 'str';
+    return (<>{str}</>);
 }
 
 const obj = {
-	// should not trigger
-	element: <>test</>,
+    element: <>test</>
 };
 
 ```
 
-# Diagnostics
-```
-issue_3668.jsx:4:9 lint/complexity/noUselessFragments  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i This fragment is unnecessary.
-  
-    2 │ 	const str = "str";
-    3 │ 	// should trigger
-  > 4 │ 	return <>{str}</>;
-      │ 	       ^^^^^^^^^^
-    5 │ }
-    6 │ 
-  
-  i A fragment is redundant if it contains only one child, or if it is the child of a html element, and is not a keyed fragment.
-  
-  i Unsafe fix: Remove the Fragment
-  
-    4 │ → return·<>{str}</>;
-      │          ---   ---- 
-
-```
