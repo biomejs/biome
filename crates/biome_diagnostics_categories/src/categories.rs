@@ -157,6 +157,7 @@ define_categories! {
     "lint/nursery/noExcessiveLinesPerFunction": "https://biomejs.dev/linter/rules/no-excessive-lines-per-function",
     "lint/nursery/noFloatingPromises": "https://biomejs.dev/linter/rules/no-floating-promises",
     "lint/nursery/noGlobalDirnameFilename": "https://biomejs.dev/linter/rules/no-global-dirname-filename",
+    "lint/nursery/noImplicitCoercion": "https://biomejs.dev/linter/rules/no-implicit-coercion",
     "lint/nursery/noImportCycles": "https://biomejs.dev/linter/rules/no-import-cycles",
     "lint/nursery/noImportantInKeyframe": "https://biomejs.dev/linter/rules/no-important-in-keyframe",
     "lint/nursery/noImportantStyles": "https://biomejs.dev/linter/rules/no-important-styles",

@@ -2803,6 +2803,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noImplicitCoercion": {
+					"description": "Disallow shorthand type conversions.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleFixConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noImportCycles": {
 					"description": "Prevent import cycles.",
 					"anyOf": [
