@@ -441,7 +441,7 @@ pub enum BiomeCommand {
     /// interpret backticks as command invocations. To avoid this, it's best to
     /// put single quotes around your Grit queries.
     ///
-    /// ## Example
+    /// ### Example
     ///
     /// ```shell
     /// biome search '`console.log($message)`' # find all `console.log` invocations
@@ -494,7 +494,7 @@ pub enum BiomeCommand {
 
     /// Shows documentation of various aspects of the CLI.
     ///
-    /// ## Examples
+    /// ### Examples
     ///
     /// ```shell
     /// biome explain noDebugger
