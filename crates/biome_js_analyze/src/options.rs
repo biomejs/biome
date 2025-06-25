@@ -95,6 +95,7 @@ pub type NoEnum = <lint::style::no_enum::NoEnum as biome_analyze::Rule>::Options
 pub type NoEvolvingTypes =
     <lint::suspicious::no_evolving_types::NoEvolvingTypes as biome_analyze::Rule>::Options;
 pub type NoExcessiveCognitiveComplexity = < lint :: complexity :: no_excessive_cognitive_complexity :: NoExcessiveCognitiveComplexity as biome_analyze :: Rule > :: Options ;
+pub type NoExcessiveLinesPerFunction = < lint :: nursery :: no_excessive_lines_per_function :: NoExcessiveLinesPerFunction as biome_analyze :: Rule > :: Options ;
 pub type NoExcessiveNestedTestSuites = < lint :: complexity :: no_excessive_nested_test_suites :: NoExcessiveNestedTestSuites as biome_analyze :: Rule > :: Options ;
 pub type NoExplicitAny =
     <lint::suspicious::no_explicit_any::NoExplicitAny as biome_analyze::Rule>::Options;
@@ -240,6 +241,8 @@ pub type NoThenProperty =
 pub type NoThisInStatic =
     <lint::complexity::no_this_in_static::NoThisInStatic as biome_analyze::Rule>::Options;
 pub type NoTsIgnore = <lint::nursery::no_ts_ignore::NoTsIgnore as biome_analyze::Rule>::Options;
+pub type NoUnassignedVariables =
+    <lint::nursery::no_unassigned_variables::NoUnassignedVariables as biome_analyze::Rule>::Options;
 pub type NoUndeclaredDependencies = < lint :: correctness :: no_undeclared_dependencies :: NoUndeclaredDependencies as biome_analyze :: Rule > :: Options ;
 pub type NoUndeclaredVariables = < lint :: correctness :: no_undeclared_variables :: NoUndeclaredVariables as biome_analyze :: Rule > :: Options ;
 pub type NoUnreachable =

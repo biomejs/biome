@@ -1011,6 +1011,12 @@ impl<'a, 'b> LintVisitor<'a, 'b> {
         L: biome_rowan::Language,
         R: Rule<Query: Queryable<Language = L, Output: Clone>> + 'static,
     {
+        let group = <R::Group as RuleGroup>::NAME;
+        // Nursery rules must be enabled only when they are enabled from the group
+        if group == "nursery" {
+            return;
+        }
+
         let path = self.path.expect("File path");
 
         let recommended_enabled = self
@@ -1057,7 +1063,11 @@ impl<'a, 'b> LintVisitor<'a, 'b> {
         R: Rule<Query: Queryable<Language = L, Output: Clone>> + 'static,
     {
         let no_only = self.only.is_some_and(|only| only.is_empty());
-
+        let group = <R::Group as RuleGroup>::NAME;
+        // Nursery rules must be enabled only when they are enabled from the group
+        if group == "nursery" {
+            return;
+        }
         if !no_only {
             return;
         }

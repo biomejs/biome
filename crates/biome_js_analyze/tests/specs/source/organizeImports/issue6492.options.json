@@ -1,0 +1,19 @@
+{
+	"$schema": "https://biomejs.dev/schemas/2.0.4/schema.json",
+	"assist": {
+		"enabled": true,
+		"actions": {
+			"source": {
+				"organizeImports": {
+					"level": "on",
+					"options": {
+						"groups": [
+							["react*", "react*/*"],
+							":BLANK_LINE:"
+						]
+					}
+				}
+			}
+		}
+	}
+}

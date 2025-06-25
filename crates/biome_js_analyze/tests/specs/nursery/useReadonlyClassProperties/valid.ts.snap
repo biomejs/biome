@@ -85,7 +85,6 @@ class TestModifiableByParameterProperty {
 	}
 }
 
-
 class TestModifiableWithinConstructor {
 	private correctlyModifiableWithinConstructor = 7;
 
@@ -535,5 +534,55 @@ class TestModifiableWithinConstructorInGetAccessor {
 		};
 	}
 }
+
+class PriceIfElse {
+	#price: string;
+
+	@Input()
+	set some(value: string | number) {
+		if (value === undefined || value === null || value === 'undefined' || value === 'null' || Number.isNaN(value)) {
+			this.#price = '';
+		} else {
+			this.#price = '' + value;
+		}
+	}
+}
+
+class PriceElse {
+	#price: string;
+
+	set some(value: string | number) {
+		if (value === undefined) {
+			consle.info("ignore undefined value");
+		} else {
+			this.#price = '' + value;
+		}
+	}
+}
+
+class PriceTernaryAllBranches {
+	#price: string;
+
+	set some(value: string | number) {
+		value !== undefined ? this.#price = value : this.#price = 2;
+	}
+}
+
+class PriceTernaryMatchBranch {
+	#price: string;
+
+	set some(value: string | number) {
+		value !== undefined ? this.#price = value : consoe.info("ignore undefined value");
+	}
+}
+
+class PriceTernaryNonMatchBranch {
+	#price: string;
+
+	set some(value: string | number) {
+		value !== undefined ? consoe.info("ignore non undefined value") : this.#price = value;
+	}
+}
+
 
 ```
