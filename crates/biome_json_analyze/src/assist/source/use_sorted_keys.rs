@@ -33,6 +33,71 @@ declare_source_rule! {
     }
 }
 
+impl Rule for UseSortedKeys {
+    type Query = Ast<JsonMemberList>;
+    type State = Members;
+    type Signals = Option<Self::State>;
+    type Options = ();
+
+    fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
+        let node = ctx.query();
+
+        if node.is_empty() {
+            return None;
+        }
+
+        let state = node
+            .iter()
+            .filter_map(|node| {
+                let node = node.ok()?;
+                Some(MemberKey { node })
+            })
+            .collect::<BTreeSet<_>>();
+
+        let state = Members(state);
+
+        if !state.is_sorted() {
+            Some(state)
+        } else {
+            None
+        }
+    }
+
+    fn diagnostic(ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
+        Some(RuleDiagnostic::new(
+            category!("assist/source/useSortedKeys"),
+            Self::text_range(ctx, state),
+            markup! {
+                "The keys are not sorted."
+            },
+        ))
+    }
+
+    fn text_range(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<TextRange> {
+        ctx.query()
+            .syntax()
+            .ancestors()
+            .find_map(JsonObjectValue::cast)
+            .map(|node| node.range())
+    }
+
+    fn action(ctx: &RuleContext<Self>, state: &Self::State) -> Option<JsonRuleAction> {
+        let list = state.to_sorted_node();
+        let mut mutation = ctx.root().begin();
+        let node = ctx.query().clone();
+        mutation.replace_node(node, list);
+
+        Some(RuleAction::new(
+            ctx.metadata().action_category(ctx.category(), ctx.group()),
+            ctx.metadata().applicability(),
+            markup! {
+                "They keys of the current object can be sorted."
+            },
+            mutation,
+        ))
+    }
+}
+
 #[derive(Debug)]
 pub struct MemberKey {
     node: JsonMember,
@@ -96,70 +161,5 @@ impl Members {
         }
 
         json_member_list(items, separators)
-    }
-}
-
-impl Rule for UseSortedKeys {
-    type Query = Ast<JsonMemberList>;
-    type State = Members;
-    type Signals = Option<Self::State>;
-    type Options = ();
-
-    fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
-        let node = ctx.query();
-
-        if node.is_empty() {
-            return None;
-        }
-
-        let state = node
-            .iter()
-            .filter_map(|node| {
-                let node = node.ok()?;
-                Some(MemberKey { node })
-            })
-            .collect::<BTreeSet<_>>();
-
-        let state = Members(state);
-
-        if !state.is_sorted() {
-            Some(state)
-        } else {
-            None
-        }
-    }
-
-    fn diagnostic(ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
-        Some(RuleDiagnostic::new(
-            category!("assist/source/useSortedKeys"),
-            Self::text_range(ctx, state),
-            markup! {
-                "The keys are not sorted."
-            },
-        ))
-    }
-
-    fn text_range(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<TextRange> {
-        ctx.query()
-            .syntax()
-            .ancestors()
-            .find_map(JsonObjectValue::cast)
-            .map(|node| node.range())
-    }
-
-    fn action(ctx: &RuleContext<Self>, state: &Self::State) -> Option<JsonRuleAction> {
-        let list = state.to_sorted_node();
-        let mut mutation = ctx.root().begin();
-        let node = ctx.query().clone();
-        mutation.replace_node(node, list);
-
-        Some(RuleAction::new(
-            ctx.metadata().action_category(ctx.category(), ctx.group()),
-            ctx.metadata().applicability(),
-            markup! {
-                "They keys of the current object can be sorted."
-            },
-            mutation,
-        ))
     }
 }
