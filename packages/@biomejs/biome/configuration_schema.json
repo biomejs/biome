@@ -3075,6 +3075,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useUnifiedTypeSignature": {
+					"description": "Disallow overload signatures that can be unified into a single signature.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleFixConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useUniqueElementIds": {
 					"description": "Prevent the usage of static string literal id attribute on elements.",
 					"anyOf": [
@@ -4919,6 +4926,13 @@
 			"description": "A list of rules that belong to this group",
 			"type": "object",
 			"properties": {
+				"noAlert": {
+					"description": "Disallow the use of alert, confirm, and prompt.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noApproximativeNumericConstant": {
 					"description": "Use standard constants instead of approximated literals.",
 					"anyOf": [

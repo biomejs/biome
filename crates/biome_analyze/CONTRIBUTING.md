@@ -4,7 +4,7 @@ The analyzer is a generic crate aimed to implement a visitor-like infrastructure
 it's possible to inspect a piece of AST and emit diagnostics or actions based on a
 static check.
 
-The analyzer allows implementors to create **four different** types of rules:
+The analyzer allows implementors to create **three different** types of rules:
 - **Syntax**: This rule checks the syntax according to the language specification and emits error diagnostics accordingly.
 - **Lint**: This rule performs static analysis of the source code to detect invalid or error-prone patterns, and emits diagnostics along with proposed fixes.
 - **Assist**: This rule detects refactoring opportunities and emits code action signals.

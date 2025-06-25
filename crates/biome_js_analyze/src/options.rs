@@ -7,6 +7,7 @@ use crate::lint;
 pub type NoAccessKey = <lint::a11y::no_access_key::NoAccessKey as biome_analyze::Rule>::Options;
 pub type NoAccumulatingSpread = < lint :: performance :: no_accumulating_spread :: NoAccumulatingSpread as biome_analyze :: Rule > :: Options ;
 pub type NoAdjacentSpacesInRegex = < lint :: complexity :: no_adjacent_spaces_in_regex :: NoAdjacentSpacesInRegex as biome_analyze :: Rule > :: Options ;
+pub type NoAlert = <lint::suspicious::no_alert::NoAlert as biome_analyze::Rule>::Options;
 pub type NoApproximativeNumericConstant = < lint :: suspicious :: no_approximative_numeric_constant :: NoApproximativeNumericConstant as biome_analyze :: Rule > :: Options ;
 pub type NoArguments =
     <lint::complexity::no_arguments::NoArguments as biome_analyze::Rule>::Options;
@@ -457,6 +458,7 @@ pub type UseTopLevelRegex =
     <lint::performance::use_top_level_regex::UseTopLevelRegex as biome_analyze::Rule>::Options;
 pub type UseTrimStartEnd =
     <lint::style::use_trim_start_end::UseTrimStartEnd as biome_analyze::Rule>::Options;
+pub type UseUnifiedTypeSignature = < lint :: nursery :: use_unified_type_signature :: UseUnifiedTypeSignature as biome_analyze :: Rule > :: Options ;
 pub type UseUniqueElementIds =
     <lint::nursery::use_unique_element_ids::UseUniqueElementIds as biome_analyze::Rule>::Options;
 pub type UseValidAnchor =
