@@ -640,6 +640,7 @@ impl ServerFactory {
         workspace_method!(builder, scan_project_folder);
         workspace_method!(builder, close_project);
         workspace_method!(builder, open_file);
+        workspace_method!(builder, file_exists);
         workspace_method!(builder, get_syntax_tree);
         workspace_method!(builder, get_control_flow_graph);
         workspace_method!(builder, get_formatter_ir);

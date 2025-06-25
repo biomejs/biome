@@ -102,7 +102,9 @@ pub(crate) async fn did_change(
     let Some(doc) = session.document(&url) else {
         return Ok(());
     };
-
+    if !session.workspace.file_exists(path.clone().into())? {
+        return Ok(());
+    }
     let features = FeaturesBuilder::new().build();
     if session.workspace.is_path_ignored(IsPathIgnoredParams {
         path: path.clone(),
