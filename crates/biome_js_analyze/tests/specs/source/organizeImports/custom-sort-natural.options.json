@@ -1,6 +1,15 @@
 {
 	"$schema": "../../../../../packages/@biomejs/biome/configuration_schema.json",
-	"formatter": {
-		"sortMode": "natural"
+	"assist": {
+		"actions": {
+			"source": {
+				"organizeImports": {
+					"level": "on",
+					"options": {
+						"sortMode": "natural"
+					}
+				}
+			}
+		}
 	}
 }

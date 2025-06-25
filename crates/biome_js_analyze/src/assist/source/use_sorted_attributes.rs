@@ -2,7 +2,7 @@ use std::{borrow::Cow, cmp::Ordering, iter::zip};
 
 use biome_analyze::{
     Ast, FixKind, Rule, RuleAction, RuleDiagnostic, RuleSource, context::RuleContext,
-    declare_source_rule, options::SortMode,
+    declare_source_rule
 };
 use biome_console::markup;
 use biome_deserialize::TextRange;
@@ -12,6 +12,7 @@ use biome_js_syntax::{
 };
 use biome_rowan::{AstNode, BatchMutationExt};
 use biome_string_case::StrLikeExtension;
+use biome_deserialize_macros::Deserializable;
 
 use crate::JsRuleAction;
 
@@ -47,17 +48,36 @@ declare_source_rule! {
     }
 }
 
+#[derive(
+    Clone, Copy, Debug, Default, Eq, PartialEq, serde::Deserialize, Deserializable, serde::Serialize,
+)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+pub enum SortMode {
+    #[default]
+    Natural,
+    Alphabetical,
+}
+#[derive(
+    Clone, Copy, Debug, Default, Eq, PartialEq, serde::Deserialize, Deserializable, serde::Serialize,
+)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[serde(rename_all = "camelCase", deny_unknown_fields, default)]
+pub struct Options {
+    sort_mode: SortMode,
+}
+
 impl Rule for UseSortedAttributes {
     type Query = Ast<JsxAttributeList>;
     type State = PropGroup;
     type Signals = Box<[Self::State]>;
-    type Options = ();
+    type Options = Options;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let props = ctx.query();
         let mut current_prop_group = PropGroup::default();
         let mut prop_groups = Vec::new();
-        let sort_mode = ctx.as_sort_mode().clone();
+        let options: &Options = ctx.options();
+        let sort_mode = options.sort_mode;
         for prop in props {
             match prop {
                 AnyJsxAttribute::JsxAttribute(attr) => {

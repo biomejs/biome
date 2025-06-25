@@ -1,7 +1,6 @@
 use biome_analyze::{
     ActionCategory, Ast, FixKind, Rule, RuleDiagnostic, SourceActionKind, context::RuleContext,
     declare_source_rule,
-    options::SortMode,
 };
 use biome_console::markup;
 use biome_deserialize_macros::Deserializable;
@@ -18,6 +17,7 @@ use specifiers_attributes::{
     are_import_attributes_sorted, merge_export_specifiers, merge_import_specifiers,
     sort_attributes, sort_export_specifiers, sort_import_specifiers,
 };
+use comparable_token::SortMode;
 
 use crate::JsRuleAction;
 use util::{attached_trivia, detached_trivia, has_detached_leading_comment, leading_newlines};
@@ -686,11 +686,11 @@ impl Rule for OrganizeImports {
 
         let root = ctx.query();
         let mut result = Vec::new();
-        let options = ctx.options();
+        let options: &Options = ctx.options();
         let mut chunk: Option<ChunkBuilder> = None;
         let mut prev_kind: Option<JsSyntaxKind> = None;
         let mut prev_group = 0;
-        let sort_mode = ctx.as_sort_mode().clone();
+        let sort_mode = options.sort_mode;
         for item in root.items() {
             if let Some((info, specifiers, attributes)) = ImportInfo::from_module_item(&item, sort_mode) {
                 let prev_is_distinct = prev_kind.is_some_and(|kind| kind != item.syntax().kind());
@@ -802,7 +802,7 @@ impl Rule for OrganizeImports {
         let mut organized_items: FxHashMap<u32, AnyJsModuleItem> = FxHashMap::default();
         let mut import_keys: Vec<KeyedItem> = Vec::new();
         let mut mutation = ctx.root().begin();
-        let sort_mode = ctx.as_sort_mode().clone();
+        let sort_mode = options.sort_mode;
         for issue in state {
             match issue {
                 Issue::AddLeadingNewline { slot_index } => {
@@ -1033,6 +1033,7 @@ impl Rule for OrganizeImports {
 #[serde(rename_all = "camelCase", deny_unknown_fields, default)]
 pub struct Options {
     groups: import_groups::ImportGroups,
+    sort_mode: SortMode,
 }
 
 #[derive(Debug)]

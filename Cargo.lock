@@ -1005,7 +1005,10 @@ version = "0.5.7"
 dependencies = [
  "biome_analyze",
  "biome_console",
+ "biome_deserialize",
+ "biome_deserialize_macros",
  "biome_diagnostics",
+ "biome_glob",
  "biome_json_factory",
  "biome_json_parser",
  "biome_json_syntax",
@@ -1018,6 +1021,8 @@ dependencies = [
  "insta",
  "mimalloc",
  "rustc-hash 2.1.1",
+ "schemars",
+ "serde",
  "tests_macros",
  "tikv-jemallocator",
 ]

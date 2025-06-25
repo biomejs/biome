@@ -2,7 +2,18 @@ use std::cmp::Ordering;
 
 use biome_rowan::TokenText;
 use biome_string_case::StrLikeExtension;
-use biome_analyze::options::SortMode;
+use biome_deserialize_macros::Deserializable;
+
+#[derive(
+    Clone, Copy, Debug, Default, Eq, PartialEq, serde::Deserialize, Deserializable, serde::Serialize,
+)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+pub enum SortMode {
+    #[default]
+    Natural,
+    Alphabetical,
+}
+
 
 /// A [TokenText] that is ordered according to the ASCII natural order.
 #[derive(Clone, Debug)]

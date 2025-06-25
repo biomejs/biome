@@ -3,10 +3,9 @@ use biome_js_syntax::{
     AnyJsModuleSource, JsExport, JsImport, JsImportAssertion,
 };
 use biome_rowan::AstNode;
-use biome_analyze::options::SortMode;
 
 use super::{
-    comparable_token::ComparableToken,
+    comparable_token::{ComparableToken, SortMode},
     import_groups::{self, ImportCandidate, ImportSourceCandidate},
     import_source,
     specifiers_attributes::JsNamedSpecifiers,

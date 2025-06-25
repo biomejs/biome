@@ -7,9 +7,8 @@ use biome_rowan::{
     AstNode, AstSeparatedElement, AstSeparatedList, Language, SyntaxToken, TriviaPieceKind,
     chain_trivia_pieces,
 };
-use biome_analyze::options::SortMode;
 
-use super::comparable_token::ComparableToken;
+use super::comparable_token::{ComparableToken, SortMode};
 
 pub enum JsNamedSpecifiers {
     JsNamedImportSpecifiers(JsNamedImportSpecifiers),
