@@ -172,7 +172,7 @@ impl Rule for NoUselessFragments {
                                         in_return_statement = true;
                                         false
                                     } else {
-                                        // Preserve fragments in other contexts
+                                        // Preserve fragments in other kinds of parent
                                         matches!(
                                             parent.kind(),
                                             JsSyntaxKind::JS_INITIALIZER_CLAUSE
@@ -266,6 +266,7 @@ impl Rule for NoUselessFragments {
                                 } else if JsxElement::can_cast(first.syntax().kind()) {
                                     Some(NoUselessFragmentsState::Child(first))
                                 } else if in_return_statement {
+                                    // Preserve flagment with only one JsxExpressionChild in return statement
                                     if JsxExpressionChild::can_cast(first.syntax().kind()) {
                                         None
                                     } else {
