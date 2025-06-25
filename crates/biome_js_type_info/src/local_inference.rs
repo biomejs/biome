@@ -11,13 +11,13 @@ use biome_js_syntax::{
     AnyTsTypePredicateParameterName, ClassMemberName, JsArrayBindingPattern,
     JsArrowFunctionExpression, JsBinaryExpression, JsBinaryOperator, JsCallArguments,
     JsClassDeclaration, JsClassExportDefaultDeclaration, JsClassExpression, JsFormalParameter,
-    JsFunctionBody, JsFunctionDeclaration, JsFunctionExpression, JsNewExpression,
-    JsObjectBindingPattern, JsObjectExpression, JsParameters, JsReferenceIdentifier,
-    JsReturnStatement, JsSyntaxToken, JsUnaryExpression, JsUnaryOperator, JsVariableDeclaration,
-    JsVariableDeclarator, TsDeclareFunctionDeclaration, TsExternalModuleDeclaration,
-    TsInterfaceDeclaration, TsModuleDeclaration, TsReferenceType, TsReturnTypeAnnotation,
-    TsTypeAliasDeclaration, TsTypeAnnotation, TsTypeArguments, TsTypeList, TsTypeParameter,
-    TsTypeParameters, TsTypeofType, inner_string_text, unescape_js_string,
+    JsFunctionBody, JsFunctionDeclaration, JsFunctionExpression, JsLogicalExpression,
+    JsLogicalOperator, JsNewExpression, JsObjectBindingPattern, JsObjectExpression, JsParameters,
+    JsReferenceIdentifier, JsReturnStatement, JsSyntaxToken, JsUnaryExpression, JsUnaryOperator,
+    JsVariableDeclaration, JsVariableDeclarator, TsDeclareFunctionDeclaration,
+    TsExternalModuleDeclaration, TsInterfaceDeclaration, TsModuleDeclaration, TsReferenceType,
+    TsReturnTypeAnnotation, TsTypeAliasDeclaration, TsTypeAnnotation, TsTypeArguments, TsTypeList,
+    TsTypeParameter, TsTypeParameters, TsTypeofType, inner_string_text, unescape_js_string,
 };
 use biome_rowan::{AstNode, SyntaxResult, Text, TokenText};
 
@@ -33,8 +33,9 @@ use crate::{
     ScopeId, Tuple, TupleElementType, TypeData, TypeInstance, TypeMember, TypeMemberKind,
     TypeOperator, TypeOperatorType, TypeReference, TypeReferenceQualifier, TypeResolver,
     TypeofBitwiseNotExpression, TypeofCallExpression, TypeofDestructureExpression,
-    TypeofExpression, TypeofNewExpression, TypeofStaticMemberExpression,
-    TypeofThisOrSuperExpression, TypeofTypeofExpression, TypeofUnaryMinusExpression, TypeofValue,
+    TypeofExpression, TypeofLogicalAndExpression, TypeofLogicalOrExpression, TypeofNewExpression,
+    TypeofNullishCoalescingExpression, TypeofStaticMemberExpression, TypeofThisOrSuperExpression,
+    TypeofTypeofExpression, TypeofUnaryMinusExpression, TypeofValue,
 };
 
 impl TypeData {
@@ -506,6 +507,9 @@ impl TypeData {
                 Self::reference(GLOBAL_INSTANCEOF_PROMISE_ID)
             }
             AnyJsExpression::JsInstanceofExpression(_expr) => Self::Boolean,
+            AnyJsExpression::JsLogicalExpression(expr) => {
+                Self::from_js_logical_expression(resolver, scope_id, expr).unwrap_or_default()
+            }
             AnyJsExpression::JsNewExpression(expr) => {
                 Self::from_js_new_expression(resolver, scope_id, expr).unwrap_or_default()
             }
@@ -620,7 +624,7 @@ impl TypeData {
                         .unwrap_or_default(),
                 ];
 
-                Self::union_of(types)
+                Self::union_of(resolver, types)
             }
             AnyTsType::TsConstructorType(ty) => Self::Constructor(Box::new(Constructor {
                 type_parameters: generic_params_from_ts_type_params(
@@ -737,13 +741,16 @@ impl TypeData {
             },
             AnyTsType::TsTypeofType(ty) => Self::from_ts_typeof_type(resolver, scope_id, ty),
             AnyTsType::TsUndefinedType(_) => Self::Undefined,
-            AnyTsType::TsUnionType(ty) => Self::union_of(
-                ty.types()
+            AnyTsType::TsUnionType(ty) => {
+                let types = ty
+                    .types()
                     .into_iter()
                     .filter_map(|ty| ty.ok())
                     .map(|ty| TypeReference::from_any_ts_type(resolver, scope_id, &ty))
-                    .collect(),
-            ),
+                    .collect();
+
+                Self::union_of(resolver, types)
+            }
             AnyTsType::TsUnknownType(_) => Self::UnknownKeyword,
             AnyTsType::TsVoidType(_) => Self::VoidKeyword,
         }
@@ -972,6 +979,37 @@ impl TypeData {
                 expr.body().ok().map(AnyJsFunctionBody::JsFunctionBody),
             ),
         }))
+    }
+
+    pub fn from_js_logical_expression(
+        resolver: &mut dyn TypeResolver,
+        scope_id: ScopeId,
+        expr: &JsLogicalExpression,
+    ) -> Option<Self> {
+        let left = expr
+            .left()
+            .map(|left| Self::from_any_js_expression(resolver, scope_id, &left))
+            .map(|left| resolver.reference_to_owned_data(left))
+            .ok()?;
+        let right = expr
+            .right()
+            .map(|right| Self::from_any_js_expression(resolver, scope_id, &right))
+            .map(|right| resolver.reference_to_owned_data(right))
+            .ok()?;
+
+        match expr.operator().ok()? {
+            JsLogicalOperator::LogicalAnd => Some(Self::from(TypeofExpression::LogicalAnd(
+                TypeofLogicalAndExpression { left, right },
+            ))),
+            JsLogicalOperator::LogicalOr => Some(Self::from(TypeofExpression::LogicalOr(
+                TypeofLogicalOrExpression { left, right },
+            ))),
+            JsLogicalOperator::NullishCoalescing => {
+                Some(Self::from(TypeofExpression::NullishCoalescing(
+                    TypeofNullishCoalescingExpression { left, right },
+                )))
+            }
+        }
     }
 
     pub fn from_js_new_expression(
@@ -2350,15 +2388,18 @@ fn type_from_function_body(
             )
         })
         .collect();
+
     match return_types.len() {
         0 => TypeData::VoidKeyword,
         1 => return_types.remove(0),
-        _ => TypeData::union_of(
-            return_types
+        _ => {
+            let return_types = return_types
                 .into_iter()
                 .map(|ty| resolver.reference_to_owned_data(ty))
-                .collect(),
-        ),
+                .collect();
+
+            TypeData::union_of(resolver, return_types)
+        }
     }
 }
 

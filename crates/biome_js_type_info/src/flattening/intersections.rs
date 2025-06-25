@@ -286,7 +286,7 @@ fn function_intersection(f1: Function, f2: Function, resolver: &mut dyn TypeReso
         return_type: match (f1.return_type, f2.return_type) {
             (ReturnType::Type(r1), ReturnType::Type(r2)) => ReturnType::Type(
                 resolver
-                    .register_and_resolve(TypeData::union_of(vec![r1, r2]))
+                    .register_and_resolve(TypeData::union_of(resolver, vec![r1, r2]))
                     .into(),
             ),
             // TODO: We could be smarter about merging other return types.
@@ -311,7 +311,7 @@ fn member_intersection(
                 if member.ty != merged_member.ty {
                     let ty = std::mem::take(&mut merged_member.ty);
                     merged_member.ty = resolver
-                        .register_and_resolve(TypeData::union_of(vec![member.ty, ty]))
+                        .register_and_resolve(TypeData::union_of(resolver, vec![member.ty, ty]))
                         .into()
                 }
             }

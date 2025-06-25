@@ -297,7 +297,7 @@ fn find_misused_promise_returning_callback(
 
     if argument_ty.is_function_with_return_type(|ty| ty.is_conditional()) {
         Some(NoMisusedPromisesState::ConditionalReturn)
-    } else if argument_ty.is_function_with_return_type(|ty| ty.is_void()) {
+    } else if argument_ty.is_function_with_return_type(|ty| ty.is_void_keyword()) {
         Some(NoMisusedPromisesState::VoidReturn)
     } else {
         None

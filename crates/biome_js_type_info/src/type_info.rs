@@ -124,16 +124,6 @@ impl Type {
         }
     }
 
-    /// Returns whether this type is used as a truthy conditional.
-    pub fn is_conditional(&self) -> bool {
-        matches!(self.as_raw_data(), Some(TypeData::Conditional))
-    }
-
-    /// Returns whether this type is a function.
-    pub fn is_function(&self) -> bool {
-        matches!(self.as_raw_data(), Some(TypeData::Function(_)))
-    }
-
     /// Returns whether `self` is a function with a return type matching the
     /// given `predicate`.
     pub fn is_function_with_return_type(&self, predicate: impl Fn(Self) -> bool) -> bool {
@@ -158,11 +148,6 @@ impl Type {
         }
     }
 
-    /// Returns whether this type is an interface.
-    pub fn is_interface(&self) -> bool {
-        matches!(self.as_raw_data(), Some(TypeData::Interface(_)))
-    }
-
     /// Returns whether this type is an interface that has a member matching the
     /// given `predicate`.
     pub fn is_interface_with_member(&self, predicate: impl Fn(ResolvedTypeMember) -> bool) -> bool {
@@ -174,12 +159,6 @@ impl Type {
                 .any(predicate),
             _ => false,
         }
-    }
-
-    /// Returns whether this type is the primitive `null`.
-    pub fn is_null(&self) -> bool {
-        self.as_raw_data()
-            .is_some_and(|ty| matches!(ty, TypeData::Null))
     }
 
     /// Returns whether this type is a number or a literal number.
@@ -224,11 +203,6 @@ impl Type {
         })
     }
 
-    /// Returns whether this type indicates the `void` keyword.
-    pub fn is_void(&self) -> bool {
-        matches!(self.as_raw_data(), Some(TypeData::VoidKeyword))
-    }
-
     pub fn resolve(&self, ty: &TypeReference) -> Option<Self> {
         self.resolver
             .resolve_reference(&self.id.apply_module_id_to_reference(ty))
@@ -236,7 +210,7 @@ impl Type {
     }
 
     #[inline]
-    fn as_raw_data(&self) -> Option<&TypeData> {
+    pub(super) fn as_raw_data(&self) -> Option<&TypeData> {
         self.resolved_data().map(ResolvedTypeData::as_raw_data)
     }
 
@@ -479,18 +453,6 @@ impl TypeData {
         Self::Boolean
     }
 
-    pub fn merged_reference(
-        ty: Option<impl Into<TypeReference>>,
-        value_ty: Option<impl Into<TypeReference>>,
-        namespace_ty: Option<impl Into<TypeReference>>,
-    ) -> Self {
-        Self::MergedReference(Box::new(MergedReference {
-            ty: ty.map(Into::into),
-            value_ty: value_ty.map(Into::into),
-            namespace_ty: namespace_ty.map(Into::into),
-        }))
-    }
-
     /// Returns the type with inference up to the level supported by the given `resolver`.
     #[inline]
     pub fn inferred(&self, resolver: &mut dyn TypeResolver) -> Self {
@@ -547,6 +509,18 @@ impl TypeData {
         }
     }
 
+    pub fn merged_reference(
+        ty: Option<impl Into<TypeReference>>,
+        value_ty: Option<impl Into<TypeReference>>,
+        namespace_ty: Option<impl Into<TypeReference>>,
+    ) -> Self {
+        Self::MergedReference(Box::new(MergedReference {
+            ty: ty.map(Into::into),
+            value_ty: value_ty.map(Into::into),
+            namespace_ty: namespace_ty.map(Into::into),
+        }))
+    }
+
     pub fn reference(reference: impl Into<TypeReference>) -> Self {
         Self::Reference(reference.into())
     }
@@ -558,20 +532,6 @@ impl TypeData {
             Self::InstanceOf(type_instance) => Some(&type_instance.type_parameters),
             Self::Interface(interface) => Some(&interface.type_parameters),
             _ => None,
-        }
-    }
-
-    /// Creates a union of type references.
-    ///
-    /// References are automatically deduplicated. If only a single type
-    /// remains, an instance of `Self::Reference` is returned instead of
-    /// `Self::Union`.
-    pub fn union_of(mut types: Vec<TypeReference>) -> Self {
-        types.dedup();
-        match types.len().cmp(&1) {
-            Ordering::Greater => Self::Union(Box::new(Union(types.into()))),
-            Ordering::Equal => Self::reference(types.remove(0)),
-            Ordering::Less => Self::unknown(),
         }
     }
 
@@ -1040,7 +1000,10 @@ pub enum TypeofExpression {
     BitwiseNot(TypeofBitwiseNotExpression),
     Call(TypeofCallExpression),
     Destructure(TypeofDestructureExpression),
+    LogicalAnd(TypeofLogicalAndExpression),
+    LogicalOr(TypeofLogicalOrExpression),
     New(TypeofNewExpression),
+    NullishCoalescing(TypeofNullishCoalescingExpression),
     StaticMember(TypeofStaticMemberExpression),
     Super(TypeofThisOrSuperExpression),
     This(TypeofThisOrSuperExpression),
@@ -1088,6 +1051,18 @@ pub enum DestructureField {
 }
 
 #[derive(Clone, Debug, Eq, Hash, PartialEq, Resolvable)]
+pub struct TypeofLogicalAndExpression {
+    pub left: TypeReference,
+    pub right: TypeReference,
+}
+
+#[derive(Clone, Debug, Eq, Hash, PartialEq, Resolvable)]
+pub struct TypeofLogicalOrExpression {
+    pub left: TypeReference,
+    pub right: TypeReference,
+}
+
+#[derive(Clone, Debug, Eq, Hash, PartialEq, Resolvable)]
 pub struct TypeofNewExpression {
     pub callee: TypeReference,
     pub arguments: Box<[CallArgumentType]>,
@@ -1097,6 +1072,12 @@ pub struct TypeofNewExpression {
 pub enum CallArgumentType {
     Argument(TypeReference),
     Spread(TypeReference),
+}
+
+#[derive(Clone, Debug, Eq, Hash, PartialEq, Resolvable)]
+pub struct TypeofNullishCoalescingExpression {
+    pub left: TypeReference,
+    pub right: TypeReference,
 }
 
 #[derive(Clone, Debug, Eq, Hash, PartialEq, Resolvable)]

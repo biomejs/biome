@@ -416,8 +416,44 @@ impl Format<FormatTypeContext> for TypeofExpression {
                     )
                 }
             },
+            Self::LogicalAnd(expr) => {
+                write!(
+                    f,
+                    [&format_args![
+                        &expr.left,
+                        space(),
+                        text("&&"),
+                        space(),
+                        &expr.right
+                    ]]
+                )
+            }
+            Self::LogicalOr(expr) => {
+                write!(
+                    f,
+                    [&format_args![
+                        &expr.left,
+                        space(),
+                        text("||"),
+                        space(),
+                        &expr.right
+                    ]]
+                )
+            }
             Self::New(expr) => {
                 write!(f, [&format_args![text("new"), space(), &expr.callee]])
+            }
+            Self::NullishCoalescing(expr) => {
+                write!(
+                    f,
+                    [&format_args![
+                        &expr.left,
+                        space(),
+                        text("??"),
+                        space(),
+                        &expr.right
+                    ]]
+                )
             }
             Self::StaticMember(expr) => {
                 write!(f, [&format_args![&expr.object, text("."), &expr.member]])

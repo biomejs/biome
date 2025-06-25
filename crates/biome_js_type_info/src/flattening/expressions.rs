@@ -61,132 +61,149 @@ pub(super) fn flattened_expression(
             Some(callee) => flattened_call(expr, callee.to_data(), resolver),
             None => None,
         },
+        TypeofExpression::LogicalAnd(expr) => {
+            if let Some(left) = resolver
+                .resolve_and_get(&expr.left)?
+                .to_data()
+                .to_falsy_value(resolver)
+            {
+                if left.is_falsy(resolver) {
+                    Some(left)
+                } else {
+                    let left = resolver.reference_to_owned_data(left);
+                    Some(TypeData::union_of(resolver, vec![left, expr.right.clone()]))
+                }
+            } else {
+                Some(TypeData::reference(expr.right.clone()))
+            }
+        }
+        TypeofExpression::LogicalOr(expr) => {
+            if let Some(left) = resolver
+                .resolve_and_get(&expr.left)?
+                .to_data()
+                .to_truthy_value(resolver)
+            {
+                if left.is_truthy(resolver) {
+                    Some(left)
+                } else {
+                    let left = resolver.reference_to_owned_data(left);
+                    Some(TypeData::union_of(resolver, vec![left, expr.right.clone()]))
+                }
+            } else {
+                Some(TypeData::reference(expr.right.clone()))
+            }
+        }
         TypeofExpression::Destructure(expr) => {
-            match resolver.resolve_and_get(&expr.ty) {
-                Some(resolved) => match (resolved.as_raw_data(), &expr.destructure_field) {
-                    (_subject, DestructureField::Index(index)) => Some(
-                        resolved
-                            .to_data()
-                            .find_element_type_at_index(resolved.resolver_id(), resolver, *index)
-                            .map_or_else(TypeData::unknown, ResolvedTypeData::to_data),
-                    ),
-                    (_subject, DestructureField::RestFrom(index)) => Some(
-                        resolved
-                            .to_data()
-                            .find_type_of_elements_from_index(
-                                resolved.resolver_id(),
-                                resolver,
-                                *index,
-                            )
-                            .map_or_else(TypeData::unknown, ResolvedTypeData::to_data),
-                    ),
-                    (TypeData::InstanceOf(subject_instance), DestructureField::Name(name)) => {
-                        resolver
-                            .resolve_and_get(
-                                &resolved.apply_module_id_to_reference(&subject_instance.ty),
-                            )
-                            .and_then(|subject| {
-                                subject.all_members(resolver).find(|member| {
-                                    !member.is_static() && member.has_name(name.text())
+            let resolved = resolver.resolve_and_get(&expr.ty)?;
+            match (resolved.as_raw_data(), &expr.destructure_field) {
+                (_subject, DestructureField::Index(index)) => Some(
+                    resolved
+                        .to_data()
+                        .find_element_type_at_index(resolved.resolver_id(), resolver, *index)
+                        .map_or_else(TypeData::unknown, ResolvedTypeData::to_data),
+                ),
+                (_subject, DestructureField::RestFrom(index)) => Some(
+                    resolved
+                        .to_data()
+                        .find_type_of_elements_from_index(resolved.resolver_id(), resolver, *index)
+                        .map_or_else(TypeData::unknown, ResolvedTypeData::to_data),
+                ),
+                (TypeData::InstanceOf(subject_instance), DestructureField::Name(name)) => resolver
+                    .resolve_and_get(&resolved.apply_module_id_to_reference(&subject_instance.ty))
+                    .and_then(|subject| {
+                        subject
+                            .all_members(resolver)
+                            .find(|member| !member.is_static() && member.has_name(name.text()))
+                    })
+                    .and_then(|member| resolver.resolve_and_get(&member.deref_ty(resolver)))
+                    .map(ResolvedTypeData::to_data),
+                (TypeData::InstanceOf(subject_instance), DestructureField::RestExcept(names)) => {
+                    resolver
+                        .resolve_and_get(
+                            &resolved.apply_module_id_to_reference(&subject_instance.ty),
+                        )
+                        .map(|subject| {
+                            // We need to look up the prototype chain, which may
+                            // yield duplicate member names. We deduplicate
+                            // using a map before constructing a new object.
+                            let members: BTreeMap<Text, ResolvedTypeMember> = subject
+                                .all_members(resolver)
+                                .filter(|member| {
+                                    !member.is_static()
+                                        && !names.iter().any(|name| member.has_name(name))
                                 })
-                            })
-                            .and_then(|member| resolver.resolve_and_get(&member.deref_ty(resolver)))
-                            .map(ResolvedTypeData::to_data)
-                    }
-                    (
-                        TypeData::InstanceOf(subject_instance),
-                        DestructureField::RestExcept(names),
-                    ) => {
-                        resolver
-                            .resolve_and_get(
-                                &resolved.apply_module_id_to_reference(&subject_instance.ty),
-                            )
-                            .map(|subject| {
-                                // We need to look up the prototype chain, which may
-                                // yield duplicate member names. We deduplicate
-                                // using a map before constructing a new object.
-                                let members: BTreeMap<Text, ResolvedTypeMember> = subject
-                                    .all_members(resolver)
-                                    .filter(|member| {
-                                        !member.is_static()
-                                            && !names.iter().any(|name| member.has_name(name))
-                                    })
-                                    .fold(BTreeMap::new(), |mut map, member| {
-                                        if let Some(name) = member.name() {
-                                            if let Entry::Vacant(entry) = map.entry(name) {
-                                                entry.insert(member);
-                                            }
+                                .fold(BTreeMap::new(), |mut map, member| {
+                                    if let Some(name) = member.name() {
+                                        if let Entry::Vacant(entry) = map.entry(name) {
+                                            entry.insert(member);
                                         }
-                                        map
-                                    });
-                                TypeData::object_with_members(
-                                    members
-                                        .into_values()
-                                        .map(ResolvedTypeMember::to_member)
-                                        .collect(),
-                                )
-                            })
-                    }
-                    (TypeData::Object(_), DestructureField::Name(name)) => {
-                        let member = resolved
-                            .all_members(resolver)
-                            .find(|member| !member.is_static() && member.has_name(name.text()))?;
-                        resolver
-                            .resolve_and_get(&member.deref_ty(resolver))
-                            .map(ResolvedTypeData::to_data)
-                    }
-                    (TypeData::Object(_), DestructureField::RestExcept(names)) => {
-                        // We need to look up the prototype chain, which may
-                        // yield duplicate member names. We deduplicate
-                        // using a map before constructing a new object.
-                        let members: BTreeMap<Text, ResolvedTypeMember> = resolved
-                            .all_members(resolver)
-                            .filter(|member| {
-                                !member.is_static()
-                                    && !names.iter().any(|name| member.has_name(name))
-                            })
-                            .fold(BTreeMap::new(), |mut map, member| {
-                                if let Some(name) = member.name() {
-                                    if let Entry::Vacant(entry) = map.entry(name) {
-                                        entry.insert(member);
                                     }
+                                    map
+                                });
+                            TypeData::object_with_members(
+                                members
+                                    .into_values()
+                                    .map(ResolvedTypeMember::to_member)
+                                    .collect(),
+                            )
+                        })
+                }
+                (TypeData::Object(_), DestructureField::Name(name)) => {
+                    let member = resolved
+                        .all_members(resolver)
+                        .find(|member| !member.is_static() && member.has_name(name.text()))?;
+                    resolver
+                        .resolve_and_get(&member.deref_ty(resolver))
+                        .map(ResolvedTypeData::to_data)
+                }
+                (TypeData::Object(_), DestructureField::RestExcept(names)) => {
+                    // We need to look up the prototype chain, which may
+                    // yield duplicate member names. We deduplicate
+                    // using a map before constructing a new object.
+                    let members: BTreeMap<Text, ResolvedTypeMember> = resolved
+                        .all_members(resolver)
+                        .filter(|member| {
+                            !member.is_static() && !names.iter().any(|name| member.has_name(name))
+                        })
+                        .fold(BTreeMap::new(), |mut map, member| {
+                            if let Some(name) = member.name() {
+                                if let Entry::Vacant(entry) = map.entry(name) {
+                                    entry.insert(member);
                                 }
-                                map
-                            });
-                        Some(TypeData::object_with_members(
-                            members
-                                .into_values()
-                                .map(ResolvedTypeMember::to_member)
-                                .collect(),
-                        ))
-                    }
-                    (subject, DestructureField::Name(name)) => {
-                        let member_ty = subject
-                            .own_members()
-                            .find(|own_member| {
-                                own_member.is_static() && own_member.has_name(name.text())
-                            })
-                            .map(|member| resolved.apply_module_id_to_reference(&member.ty))?;
-                        resolver
-                            .resolve_and_get(&member_ty)
-                            .map(ResolvedTypeData::to_data)
-                    }
-                    (subject, DestructureField::RestExcept(names)) => {
-                        let members = subject
-                            .own_members()
-                            .filter(|own_member| {
-                                own_member.is_static()
-                                    && !names.iter().any(|name| own_member.has_name(name))
-                            })
-                            .map(|member| {
-                                ResolvedTypeMember::from((resolved.resolver_id(), member))
-                                    .to_member()
-                            })
-                            .collect();
-                        Some(TypeData::object_with_members(members))
-                    }
-                },
-                None => None,
+                            }
+                            map
+                        });
+                    Some(TypeData::object_with_members(
+                        members
+                            .into_values()
+                            .map(ResolvedTypeMember::to_member)
+                            .collect(),
+                    ))
+                }
+                (subject, DestructureField::Name(name)) => {
+                    let member_ty = subject
+                        .own_members()
+                        .find(|own_member| {
+                            own_member.is_static() && own_member.has_name(name.text())
+                        })
+                        .map(|member| resolved.apply_module_id_to_reference(&member.ty))?;
+                    resolver
+                        .resolve_and_get(&member_ty)
+                        .map(ResolvedTypeData::to_data)
+                }
+                (subject, DestructureField::RestExcept(names)) => {
+                    let members = subject
+                        .own_members()
+                        .filter(|own_member| {
+                            own_member.is_static()
+                                && !names.iter().any(|name| own_member.has_name(name))
+                        })
+                        .map(|member| {
+                            ResolvedTypeMember::from((resolved.resolver_id(), member)).to_member()
+                        })
+                        .collect();
+                    Some(TypeData::object_with_members(members))
+                }
             }
         }
         TypeofExpression::New(expr) => {
@@ -215,6 +232,22 @@ pub(super) fn flattened_expression(
                 Some(TypeData::instance_of(constructed_ty))
             } else {
                 None
+            }
+        }
+        TypeofExpression::NullishCoalescing(expr) => {
+            if let Some(left) = resolver
+                .resolve_and_get(&expr.left)?
+                .to_data()
+                .to_non_nullish_value(resolver)
+            {
+                if left.is_non_nullish(resolver) {
+                    Some(left)
+                } else {
+                    let left = resolver.reference_to_owned_data(left);
+                    Some(TypeData::union_of(resolver, vec![left, expr.right.clone()]))
+                }
+            } else {
+                Some(TypeData::reference(expr.right.clone()))
             }
         }
         TypeofExpression::StaticMember(expr) => {
@@ -282,7 +315,7 @@ pub(super) fn flattened_expression(
                             })
                             .collect();
 
-                        return Some(TypeData::union_of(types));
+                        return Some(TypeData::union_of(resolver, types));
                     }
 
                     _ => {}
