@@ -456,7 +456,7 @@ impl LanguageServer for LSPServer {
         biome_diagnostics::panic::catch_unwind(move || {
             handlers::analysis::code_actions(&self.session, params).map_err(into_lsp_error)
         })
-            .map_err(into_lsp_error)?
+        .map_err(into_lsp_error)?
     }
 
     async fn formatting(

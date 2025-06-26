@@ -578,11 +578,15 @@ impl ConfigurationExt for Configuration {
                 let extend_configuration_file_path = if extend_entry_as_path.starts_with(".") {
                     relative_resolution_base_path.join(extend_entry.as_ref())
                 } else {
+                    const RESOLVE_OPTIONS: ResolveOptions = ResolveOptions::new()
+                        .with_assume_relative()
+                        .with_condition_names(&["biome", "default"]);
+
                     resolve(
                         extend_entry.as_ref(),
                         external_resolution_base_path,
                         fs,
-                        &ResolveOptions::default().with_assume_relative(),
+                        &RESOLVE_OPTIONS,
                     )
                     .map_err(|error| {
                         CantResolve::new(Utf8PathBuf::from(extend_entry), error)
@@ -768,7 +772,7 @@ impl<'a> ProjectScanComputer<'a> {
         } else {
             // There's no need to scan further known files if the VCS isn't enabled
             if !self.configuration.use_ignore_file() {
-                ScanKind::None
+                ScanKind::NoScanner
             } else {
                 ScanKind::KnownFiles
             }
@@ -856,7 +860,7 @@ mod tests {
 
         assert_eq!(
             ProjectScanComputer::new(&configuration, &[], &[]).compute(),
-            ScanKind::None
+            ScanKind::NoScanner
         );
     }
 
@@ -928,7 +932,7 @@ mod tests {
                 &[]
             )
             .compute(),
-            ScanKind::None
+            ScanKind::NoScanner
         );
     }
 

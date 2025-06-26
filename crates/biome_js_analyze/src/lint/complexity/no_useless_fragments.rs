@@ -225,16 +225,21 @@ impl Rule for NoUselessFragments {
                                 // We need to remove whitespaces and newlines from the original string.
                                 // Since in the JSX newlines aren't trivia, we require to allocate a string to trim from those characters.
                                 let original_text = child.to_trimmed_text();
-                                let child_text = original_text.text().trim();
+                                let trimmed_text = original_text.text().trim();
 
                                 if (in_jsx_expr || in_js_logical_expr)
-                                    && contains_html_character_references(child_text)
+                                    && contains_html_character_references(trimmed_text)
                                 {
                                     children_where_fragments_must_preserved = true;
                                     break;
                                 }
 
-                                if !child_text.is_empty() {
+                                // Test whether a node is a padding spaces trimmed by the React runtime.
+                                let is_only_whitespace = trimmed_text.is_empty();
+                                let is_padding_spaces =
+                                    is_only_whitespace && original_text.contains('\n');
+
+                                if !is_padding_spaces {
                                     significant_children += 1;
                                     if first_significant_child.is_none() {
                                         first_significant_child = Some(child);

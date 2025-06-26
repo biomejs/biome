@@ -1,0 +1,7 @@
+.font-heading {
+	font-family: Obviously, obviously-fallback, system-ui, sans-serif;
+	font-variation-settings: var(--heading-wdth), var(--heading-wght), var(--heading-slnt);
+	font-feature-settings:
+		var(--heading-salt), var(--heading-ss06), var(--heading-ss11), var(--heading-cv09),
+		var(--heading-liga), var(--heading-calt);
+}

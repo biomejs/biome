@@ -1,7 +1,5 @@
-use crate::{JsRuleAction, services::semantic::Semantic, utils::rename::RenameSymbolExtensions};
 use biome_analyze::{FixKind, Rule, RuleDiagnostic, context::RuleContext, declare_lint_rule};
 use biome_console::markup;
-use biome_deserialize_macros::Deserializable;
 use biome_diagnostics::Severity;
 use biome_js_semantic::ReferencesExtensions;
 use biome_js_syntax::{
@@ -9,7 +7,8 @@ use biome_js_syntax::{
     binding_ext::{AnyJsBindingDeclaration, AnyJsParameterParentFunction},
 };
 use biome_rowan::{AstNode, BatchMutationExt, Direction};
-use serde::{Deserialize, Serialize};
+
+use crate::{JsRuleAction, services::semantic::Semantic, utils::rename::RenameSymbolExtensions};
 
 declare_lint_rule! {
     /// Disallow unused function parameters.
@@ -46,67 +45,13 @@ declare_lint_rule! {
     /// }
     /// ```
     ///
-    /// ```js
-    /// function withObjectSpread({ a, ...rest }) {
-    ///	    return rest;
-    /// }
-    /// ```
-    ///
-    /// ## Options
-    ///
-    /// The rule has the following options
-    ///
-    /// ### `ignoreRestSiblings`
-    ///
-    /// Whether to ignore unused variables from an object destructuring with a spread.
-    /// Example: `a` and `b` in `function({ a, b, ...rest }) { return rest;}` should be ignored by this rule when set to false.
-    ///
-    /// Defaults to `true`.
-    ///
-    /// ```json,options
-    /// {
-    ///   "options": {
-    ///     "ignoreRestSiblings": false
-    ///   }
-    /// }
-    /// ```
-    ///
-    /// ```js,use_options,expect_diagnostic
-    /// function withObjectSpread({ b, ...rest }) {
-    ///	    return rest;
-    /// }
-    /// ```
-    ///
-    ///
     pub NoUnusedFunctionParameters {
-        version: "2.1.0",
+        version: "1.8.0",
         name: "noUnusedFunctionParameters",
         language: "js",
         recommended: true,
         severity: Severity::Warning,
         fix_kind: FixKind::Unsafe,
-    }
-}
-
-/// Rule's options
-#[derive(Clone, Debug, Deserialize, Deserializable, Eq, PartialEq, Serialize)]
-#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
-#[serde(rename_all = "camelCase", deny_unknown_fields, default)]
-pub struct NoUnusedFunctionParametersOptions {
-    /// Whether to ignore unused variables from an object destructuring with a spread.
-    #[serde(default)]
-    pub ignore_rest_siblings: bool,
-}
-//
-// fn is_default() -> bool {
-//     true
-// }
-
-impl Default for NoUnusedFunctionParametersOptions {
-    fn default() -> Self {
-        Self {
-            ignore_rest_siblings: true,
-        }
     }
 }
 
@@ -148,13 +93,11 @@ impl Rule for NoUnusedFunctionParameters {
     type Query = Semantic<JsIdentifierBinding>;
     type State = SuggestedFix;
     type Signals = Option<Self::State>;
-    type Options = NoUnusedFunctionParametersOptions;
+    type Options = ();
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let binding = ctx.query();
         let declaration = binding.declaration()?;
-
-        let ignore_rest_siblings = ctx.options().ignore_rest_siblings;
 
         let name = binding.name_token().ok()?;
         let name = name.text_trimmed();
@@ -162,29 +105,25 @@ impl Rule for NoUnusedFunctionParameters {
         if name.starts_with('_') {
             return None;
         }
-
-        if ignore_rest_siblings {
-            // Ignore object patterns with a rest spread.
-            // e.g. `{ a, ...rest }`
-            if let AnyJsBindingDeclaration::JsObjectBindingPatternShorthandProperty(_)
-            | AnyJsBindingDeclaration::JsObjectBindingPatternProperty(_) = &declaration
+        // Ignore object patterns with a rest spread.
+        // e.g. `{ a, ...rest }`
+        if let AnyJsBindingDeclaration::JsObjectBindingPatternShorthandProperty(_)
+        | AnyJsBindingDeclaration::JsObjectBindingPatternProperty(_) = &declaration
+        {
+            if declaration
+                .syntax()
+                .siblings(Direction::Next)
+                .last()
+                .is_some_and(|last_sibling| {
+                    matches!(
+                        last_sibling.kind(),
+                        JsSyntaxKind::JS_OBJECT_BINDING_PATTERN_REST
+                    )
+                })
             {
-                if declaration
-                    .syntax()
-                    .siblings(Direction::Next)
-                    .last()
-                    .is_some_and(|last_sibling| {
-                        matches!(
-                            last_sibling.kind(),
-                            JsSyntaxKind::JS_OBJECT_BINDING_PATTERN_REST
-                        )
-                    })
-                {
-                    return None;
-                }
+                return None;
             }
         }
-
         let parent_function = match declaration
             .parent_binding_pattern_declaration()
             .unwrap_or(declaration)

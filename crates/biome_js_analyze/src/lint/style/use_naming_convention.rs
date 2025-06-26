@@ -22,10 +22,11 @@ use biome_js_semantic::{CanBeImportedExported, SemanticModel};
 use biome_js_syntax::{
     AnyJsClassMember, AnyJsObjectMember, AnyJsVariableDeclaration, AnyTsTypeMember, JsFileSource,
     JsIdentifierBinding, JsLiteralExportName, JsLiteralMemberName, JsMethodModifierList,
-    JsModuleItemList, JsPrivateClassMemberName, JsPropertyModifierList, JsSyntaxKind,
-    JsSyntaxToken, JsVariableDeclarator, JsVariableKind, Modifier, TsDeclarationModule,
-    TsIdentifierBinding, TsIndexSignatureModifierList, TsLiteralEnumMemberName,
-    TsMethodSignatureModifierList, TsPropertySignatureModifierList, TsTypeParameterName,
+    JsModuleItemList, JsPrivateClassMemberName, JsPropertyModifierList,
+    JsShorthandPropertyObjectMember, JsSyntaxKind, JsSyntaxToken, JsVariableDeclarator,
+    JsVariableKind, Modifier, TsDeclarationModule, TsIdentifierBinding,
+    TsIndexSignatureModifierList, TsLiteralEnumMemberName, TsMethodSignatureModifierList,
+    TsPropertySignatureModifierList, TsTypeParameterName,
     binding_ext::{AnyJsBindingDeclaration, AnyJsIdentifierBinding},
 };
 use biome_rowan::{
@@ -1000,6 +1001,7 @@ declare_node_union! {
     pub AnyIdentifierBindingLike =
         JsIdentifierBinding |
         JsLiteralMemberName |
+        JsShorthandPropertyObjectMember |
         JsPrivateClassMemberName |
         JsLiteralExportName |
         TsIdentifierBinding |
@@ -1011,6 +1013,7 @@ impl AnyIdentifierBindingLike {
         match self {
             Self::JsIdentifierBinding(binding) => binding.name_token(),
             Self::JsLiteralMemberName(member_name) => member_name.value(),
+            Self::JsShorthandPropertyObjectMember(member_name) => member_name.name()?.value_token(),
             Self::JsPrivateClassMemberName(member_name) => member_name.id_token(),
             Self::JsLiteralExportName(export_name) => export_name.value(),
             Self::TsIdentifierBinding(binding) => binding.name_token(),
@@ -1036,6 +1039,7 @@ impl TryFrom<&AnyIdentifierBindingLike> for AnyJsIdentifierBinding {
                 Ok(Self::TsTypeParameterName(binding.clone()))
             }
             AnyIdentifierBindingLike::JsLiteralMemberName(_)
+            | AnyIdentifierBindingLike::JsShorthandPropertyObjectMember(_)
             | AnyIdentifierBindingLike::JsPrivateClassMemberName(_)
             | AnyIdentifierBindingLike::JsLiteralExportName(_) => Err(()),
         }
@@ -1355,6 +1359,9 @@ impl Selector {
                 } else {
                     None
                 }
+            }
+            AnyIdentifierBindingLike::JsShorthandPropertyObjectMember(_) => {
+                Some(Kind::ObjectLiteralProperty.into())
             }
             AnyIdentifierBindingLike::JsPrivateClassMemberName(member_name) => {
                 Self::from_class_member(&member_name.parent::<AnyJsClassMember>()?)

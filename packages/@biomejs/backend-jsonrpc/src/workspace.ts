@@ -1476,7 +1476,7 @@ export interface Correctness {
 	/**
 	 * Disallow unused function parameters.
 	 */
-	noUnusedFunctionParameters?: RuleFixConfiguration_for_NoUnusedFunctionParametersOptions;
+	noUnusedFunctionParameters?: RuleFixConfiguration_for_Null;
 	/**
 	 * Disallow unused imports.
 	 */
@@ -1582,10 +1582,6 @@ export interface Nursery {
 	 * Disallow the use of the !important style.
 	 */
 	noImportantStyles?: RuleFixConfiguration_for_Null;
-	/**
-	 * This rule detects and reports the use of "magic numbers" — numeric literals that are used directly in code without being assigned to a named constant.
-	 */
-	noMagicNumbers?: RuleConfiguration_for_Null;
 	/**
 	 * Disallows defining React components inside other components.
 	 */
@@ -2446,9 +2442,6 @@ export type RuleConfiguration_for_NoUndeclaredDependenciesOptions =
 export type RuleConfiguration_for_UndeclaredVariablesOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_UndeclaredVariablesOptions;
-export type RuleFixConfiguration_for_NoUnusedFunctionParametersOptions =
-	| RulePlainConfiguration
-	| RuleWithFixOptions_for_NoUnusedFunctionParametersOptions;
 export type RuleFixConfiguration_for_NoUnusedVariablesOptions =
 	| RulePlainConfiguration
 	| RuleWithFixOptions_for_NoUnusedVariablesOptions;
@@ -2641,20 +2634,6 @@ export interface RuleWithOptions_for_UndeclaredVariablesOptions {
 	 * Rule's options
 	 */
 	options: UndeclaredVariablesOptions;
-}
-export interface RuleWithFixOptions_for_NoUnusedFunctionParametersOptions {
-	/**
-	 * The kind of the code actions emitted by the rule
-	 */
-	fix?: FixKind;
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: NoUnusedFunctionParametersOptions;
 }
 export interface RuleWithFixOptions_for_NoUnusedVariablesOptions {
 	/**
@@ -3059,15 +3038,6 @@ export interface UndeclaredVariablesOptions {
 	 * Check undeclared types.
 	 */
 	checkTypes?: boolean;
-}
-/**
- * Rule's options
- */
-export interface NoUnusedFunctionParametersOptions {
-	/**
-	 * Whether to ignore unused variables from an object destructuring with a spread.
-	 */
-	ignoreRestSiblings?: boolean;
 }
 export interface NoUnusedVariablesOptions {
 	/**
@@ -3658,7 +3628,6 @@ export type Category =
 	| "lint/nursery/noInvalidDirectionInLinearGradient"
 	| "lint/nursery/noInvalidGridAreas"
 	| "lint/nursery/noInvalidPositionAtImportRule"
-	| "lint/nursery/noMagicNumbers"
 	| "lint/nursery/noMissingGenericFamilyKeyword"
 	| "lint/nursery/noNestedComponentDefinitions"
 	| "lint/nursery/noNoninteractiveElementInteractions"
@@ -4035,7 +4004,7 @@ export interface OpenProjectResult {
 	 */
 	scanKind: ScanKind;
 }
-export type ScanKind = "none" | "knownFiles" | "project";
+export type ScanKind = "noScanner" | "knownFiles" | "project";
 export interface OpenFileParams {
 	content: FileContent;
 	documentFileSource?: DocumentFileSource;

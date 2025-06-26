@@ -2,11 +2,11 @@
   "$schema": "../../../../../../packages/@biomejs/biome/configuration_schema.json",
   "linter": {
     "rules": {
-      "correctness": {
-        "noUnusedFunctionParameters": {
+      "nursery": {
+        "noExcessiveLinesPerFunction": {
           "level": "error",
           "options": {
-            "ignoreRestSiblings": false
+            "maxLines": 2
           }
         }
       }
