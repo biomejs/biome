@@ -45,7 +45,8 @@ declare_lint_rule! {
     pub NoMagicNumbers {
         version: "next",
         name: "noMagicNumbers",
-        language: "js",
+        sources: &[RuleSource::EslintTypeScript("no-magic-numbers").same()],
+        language: "ts",
         recommended: false,
     }
 }
