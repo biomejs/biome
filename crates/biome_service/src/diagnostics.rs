@@ -309,7 +309,7 @@ impl Diagnostic for FileTooLarge {
         fmt.write_markup(
             markup!{
                 "The size of the file is "{Bytes(self.size)}", which exceeds the configured maximum of "{Bytes(self.limit)}" for this project.
-Use the `files.maxSize` configuration to change the maximum size of files processed, or `files.ignore` to ignore the file."
+Use the `files.maxSize` configuration to change the maximum size of files processed, or `files.includes` to ignore the file."
             }
         )
     }
