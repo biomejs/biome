@@ -1489,12 +1489,7 @@ AnyCssNamespaceUrl = CssUrlFunction | CssString
 // }
 CssStartingStyleAtRule =
 	'starting-style'
-	block: AnyCssStartingStyleBlock
-
-AnyCssStartingStyleBlock =
-	CssRuleBlock
-	| CssDeclarationBlock
-	| CssBogusBlock
+	block: AnyCssConditionalBlock
 
 // https://www.w3.org/TR/2012/WD-css3-conditional-20120911/#at-document
 // @document [ <url>                   |
