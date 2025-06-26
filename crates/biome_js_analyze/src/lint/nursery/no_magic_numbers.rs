@@ -13,11 +13,9 @@ use biome_js_syntax::{
 use biome_rowan::{AstNode, SyntaxNode, declare_node_union};
 
 declare_lint_rule! {
-   /// This rule detects and reports the use of "magic numbers" — numeric literals that are used directly in code
-   /// without being assigned to a named constant.
+    /// Reports usage of "magic numbers" — numbers used directly instead of being assigned to named constants.
    ///
-   /// Its goal is to improve code maintainability and readability by encouraging developers to extract
-   /// such numbers into named constants, making their purpose explicit.
+   /// Its goal is to improve code maintainability and readability by encouraging developers to extract such numbers into named constants, making their purpose explicit.
    ///
    /// It ignores:
    /// - non-magic values (like 0, 1, 2, 10, 24, 60, and their negative or bigint forms) found anywhere, including arithmetic expressions, fn calls etc.
