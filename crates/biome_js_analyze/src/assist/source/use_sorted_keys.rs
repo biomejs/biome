@@ -1,5 +1,4 @@
 use std::borrow::Cow;
-use std::cmp::Ordering;
 
 use biome_analyze::{
     Ast, FixKind, Rule, RuleAction, RuleDiagnostic, RuleSource, context::RuleContext,
@@ -8,13 +7,18 @@ use biome_analyze::{
 use biome_console::markup;
 use biome_deserialize::TextRange;
 use biome_diagnostics::{Applicability, category};
-use biome_js_syntax::{
-    AnyJsObjectMember, AnyJsObjectMemberName, JsObjectExpression, JsObjectMemberList,
+use biome_js_factory::make;
+use biome_js_syntax::{JsObjectExpression, JsObjectMemberList, T};
+use biome_rowan::{
+    AstNode, AstSeparatedElement, AstSeparatedList, BatchMutationExt, TriviaPieceKind,
 };
-use biome_rowan::{AstNode, AstSeparatedList, BatchMutationExt, SyntaxResult, TokenText};
-use biome_string_case::StrLikeExtension;
 
-use crate::JsRuleAction;
+use crate::{
+    JsRuleAction,
+    assist::source::organize_imports::{
+        comparable_token::ComparableToken, specifiers_attributes::handle_trvia,
+    },
+};
 
 declare_source_rule! {
     /// Enforce ordering of a JS object properties.
@@ -83,50 +87,28 @@ declare_source_rule! {
 
 impl Rule for UseSortedKeys {
     type Query = Ast<JsObjectMemberList>;
-    type State = Vec<ObjectMember>;
-    type Signals = Box<[Self::State]>;
+    type State = ();
+    type Signals = Option<Self::State>;
     type Options = ();
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
-        let member_list = ctx.query();
-        let mut chunks = Vec::new();
-        let mut current_chunk_members = Vec::with_capacity(member_list.len());
-
-        let get_name = |name: SyntaxResult<AnyJsObjectMemberName>| name.ok()?.name();
-
-        for (index, element) in member_list.elements().enumerate() {
-            if let Ok(element) = element.into_node() {
-                let name = match &element {
-                    AnyJsObjectMember::JsSpread(_) | AnyJsObjectMember::JsBogusMember(_) => None,
-                    AnyJsObjectMember::JsPropertyObjectMember(member) => get_name(member.name()),
-                    AnyJsObjectMember::JsGetterObjectMember(member) => get_name(member.name()),
-                    AnyJsObjectMember::JsSetterObjectMember(member) => get_name(member.name()),
-                    AnyJsObjectMember::JsMethodObjectMember(member) => get_name(member.name()),
-                    AnyJsObjectMember::JsShorthandPropertyObjectMember(member) => {
-                        member.name().and_then(|name| name.name()).ok()
-                    }
-                };
-                if let Some(name) = name {
-                    current_chunk_members.push(ObjectMember::new(element, name));
-                } else {
-                    // If a name cannot be extracted, then the current chunk of named properties stops here.
-                    if !current_chunk_members.is_empty() && !current_chunk_members.is_sorted() {
-                        chunks.push(current_chunk_members);
-                        // Create a new buffer with the number of remaining members to test
-                        current_chunk_members = Vec::with_capacity(member_list.len() - index - 1);
-                    } else {
-                        // Reuse the buffer
-                        current_chunk_members.clear();
+        let list = ctx.query();
+        let mut previous_name: Option<ComparableToken> = None;
+        for element in list.iter() {
+            if let Some(name) = element.ok()?.name() {
+                let name = ComparableToken(name);
+                if let Some(previous_name) = previous_name {
+                    if previous_name > name {
+                        return Some(());
                     }
                 }
+                previous_name = Some(name);
+            } else {
+                // If a name cannot be extracted, then the current chunk of named properties stops here.
+                previous_name = None;
             }
         }
-
-        if !current_chunk_members.is_empty() && !current_chunk_members.is_sorted() {
-            chunks.push(current_chunk_members);
-        }
-
-        chunks.into_boxed_slice()
+        None
     }
 
     fn diagnostic(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<RuleDiagnostic> {
@@ -147,18 +129,43 @@ impl Rule for UseSortedKeys {
             .map(|object| object.range())
     }
 
-    fn action(ctx: &RuleContext<Self>, state: &Self::State) -> Option<JsRuleAction> {
-        let mut sorted_state = state.clone();
+    fn action(ctx: &RuleContext<Self>, _: &Self::State) -> Option<JsRuleAction> {
+        let list = ctx.query();
 
-        // We use a stable sort to ensure that properties with an identical name (a getter and a setter for a property)
-        // keep their initial relative order.
-        sorted_state.sort();
+        // Collect all members
+        let mut elements = Vec::with_capacity(list.len());
+        for AstSeparatedElement {
+            node,
+            trailing_separator,
+        } in list.elements()
+        {
+            let node = node.ok()?;
+            let name = node.name().map(ComparableToken);
+            let trailing_separator = trailing_separator.ok()?;
+            elements.push((name, node, trailing_separator));
+        }
+
+        // Iterate over chunks of named properties
+        for slice in elements.split_mut(|(name, _, _)| name.is_none()) {
+            let last_has_separator = slice.last().is_some_and(|(_, _, sep)| sep.is_some());
+            // Sort named properties
+            slice.sort_by(|(name1, _, _), (name2, _, _)| name1.cmp(name2));
+            handle_trvia(
+                slice.iter_mut().map(|(_, node, sep)| (node, sep)),
+                last_has_separator,
+                || make::token(T![,]).with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")]),
+            );
+        }
+
+        let separators: Vec<_> = elements
+            .iter_mut()
+            .filter_map(|(_, _, sep)| sep.take())
+            .collect();
+        let items: Vec<_> = elements.into_iter().map(|(_, node, _)| node).collect();
+        let new_list = make::js_object_member_list(items, separators);
 
         let mut mutation = ctx.root().begin();
-
-        for (unsorted, sorted) in state.iter().zip(sorted_state.iter()) {
-            mutation.replace_node_discard_trivia(unsorted.member.clone(), sorted.member.clone());
-        }
+        mutation.replace_node_discard_trivia(list.clone(), new_list);
 
         Some(RuleAction::new(
             rule_action_category!(),
@@ -168,33 +175,3 @@ impl Rule for UseSortedKeys {
         ))
     }
 }
-
-#[derive(Debug, Clone)]
-pub struct ObjectMember {
-    member: AnyJsObjectMember,
-    name: TokenText,
-}
-impl ObjectMember {
-    fn new(member: AnyJsObjectMember, name: TokenText) -> Self {
-        Self { member, name }
-    }
-}
-impl Eq for ObjectMember {}
-impl PartialEq for ObjectMember {
-    fn eq(&self, other: &Self) -> bool {
-        self.cmp(other) == Ordering::Equal
-    }
-}
-impl Ord for ObjectMember {
-    fn cmp(&self, other: &Self) -> Ordering {
-        self.name.text().ascii_nat_cmp(other.name.text())
-    }
-}
-impl PartialOrd for ObjectMember {
-    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
-        Some(self.cmp(other))
-    }
-}
-
-#[test]
-fn test() {}

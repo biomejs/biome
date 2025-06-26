@@ -278,7 +278,7 @@ pub fn sort_attributes(attributes: JsImportAssertion) -> Option<JsImportAssertio
     Some(attributes.with_assertions(make::js_import_assertion_entry_list(nodes, separators)))
 }
 
-fn handle_trvia<'a, L: Language + 'a, N: AstNode<Language = L> + 'a>(
+pub(crate) fn handle_trvia<'a, L: Language + 'a, N: AstNode<Language = L> + 'a>(
     // Mutable iterator of a list of nodes and their optional separators
     iter: impl std::iter::ExactSizeIterator<Item = (&'a mut N, &'a mut Option<SyntaxToken<L>>)>,
     needs_last_separator: bool,
