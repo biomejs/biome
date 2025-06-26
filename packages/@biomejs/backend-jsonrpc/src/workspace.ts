@@ -154,7 +154,7 @@ Examples where this may be useful:
 
 // But it's probably better to ignore a specific dependency. // For instance, one that happens to be particularly slow to // scan: "RedisCommander.d.ts", ], } } ```
 
-Please be aware that rules relying on the module graph or type inference information may be negatively affected if dependencies of your project aren't (fully) scanned.
+Please be aware that rules relying on the module graph or type inference information may be negatively affected if dependencies of your project aren't (fully) scanned. 
 	 */
 	experimentalScannerIgnores?: string[];
 	/**
@@ -3181,7 +3181,7 @@ export interface RestrictedImportsOptions {
 	/**
 	 * gitignore-style patterns that should trigger the rule.
 	 */
-	patterns?: Patterns;
+	patterns?: Patterns[];
 }
 export interface NoRestrictedTypesOptions {
 	types?: Record<string, CustomRestrictedType>;
@@ -3313,7 +3313,6 @@ export type ObjectPropertySyntax = "explicit" | "shorthand";
  * Specifies whether property assignments on function parameters are allowed or denied.
  */
 export type PropertyAssignmentMode = "allow" | "deny";
-export type CustomRestrictedImport = string | CustomRestrictedImportOptions;
 export type Paths = string | PathOptions;
 export type Patterns = PatternOptions;
 export type CustomRestrictedType = string | CustomRestrictedTypeOptions;

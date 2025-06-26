@@ -3483,7 +3483,8 @@
 				},
 				"patterns": {
 					"description": "gitignore-style patterns that should trigger the rule.",
-					"anyOf": [{ "$ref": "#/definitions/Patterns" }, { "type": "null" }]
+					"type": ["array", "null"],
+					"items": { "$ref": "#/definitions/Patterns" }
 				}
 			},
 			"additionalProperties": false
