@@ -264,7 +264,7 @@ impl Rule for NoUselessFragments {
                                         let value = value_token.token_text();
                                         if contains_html_character_references(value.as_ref()) {
                                             return None;
-                                        }                                        
+                                        }
                                     }
 
                                     Some(NoUselessFragmentsState::Child(first))
