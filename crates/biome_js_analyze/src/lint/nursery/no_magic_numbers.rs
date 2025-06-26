@@ -20,15 +20,15 @@ declare_lint_rule! {
    /// such numbers into named constants, making their purpose explicit.
    ///
    /// It ignores:
-   /// * non-magic values (like 0, 1, 2, 10, 24, 60, and their negative or bigint forms) found anywhere, including arithmetic expressions, fn calls etc.
-   /// * Array indices
-   /// * Enum values
-   /// * Initial values in variable or class property declarations
-   /// * Default values in function parameters or destructuring patterns
-   /// * Arguments to JSON.stringify and parseInt (e.g., JSON.stringify(22), parseInt("123", 10))
-   /// * Operands in bitwise operations (e.g., a & 1, a * 2)
-   /// * Values in JSX expressions (e.g., <div>{1}</div>)
-   /// * Object property values (e.g., { tax: 0.25 })
+   /// - non-magic values (like 0, 1, 2, 10, 24, 60, and their negative or bigint forms) found anywhere, including arithmetic expressions, fn calls etc.
+   /// - Array indices
+   /// - Enum values
+   /// - Initial values in variable or class property declarations
+   /// - Default values in function parameters or destructuring patterns
+   /// - Arguments to JSON.stringify and parseInt (e.g., JSON.stringify(22), parseInt("123", 10))
+   /// - Operands in bitwise operations (e.g., a & 1, a * 2)
+   /// - Values in JSX expressions (e.g., <div>{1}</div>)
+   /// - Object property values (e.g., { tax: 0.25 })
    ///
    /// ## Examples
    ///

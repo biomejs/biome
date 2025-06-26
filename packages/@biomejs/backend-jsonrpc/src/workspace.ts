@@ -1583,6 +1583,10 @@ export interface Nursery {
 	 */
 	noImportantStyles?: RuleFixConfiguration_for_Null;
 	/**
+	 * This rule detects and reports the use of "magic numbers" — numeric literals that are used directly in code without being assigned to a named constant.
+	 */
+	noMagicNumbers?: RuleConfiguration_for_Null;
+	/**
 	 * Disallows defining React components inside other components.
 	 */
 	noNestedComponentDefinitions?: RuleConfiguration_for_Null;
@@ -3628,6 +3632,7 @@ export type Category =
 	| "lint/nursery/noInvalidDirectionInLinearGradient"
 	| "lint/nursery/noInvalidGridAreas"
 	| "lint/nursery/noInvalidPositionAtImportRule"
+	| "lint/nursery/noMagicNumbers"
 	| "lint/nursery/noMissingGenericFamilyKeyword"
 	| "lint/nursery/noNestedComponentDefinitions"
 	| "lint/nursery/noNoninteractiveElementInteractions"
