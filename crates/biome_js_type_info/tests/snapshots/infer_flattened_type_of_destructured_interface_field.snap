@@ -36,7 +36,11 @@ Thin TypeId(0) => interface "Foo" {
   members: ["foo": Global TypeId(0)]
 }
 
-Thin TypeId(1) => instanceof Module(0) TypeId(0)
+Thin TypeId(1) => interface "Foo" {
+  extends: []
+  type_args: []
+  members: ["foo": Global TypeId(0)]
+}
 
 Thin TypeId(2) => sync Function "foo" {
   accepts: {

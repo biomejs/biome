@@ -39,3 +39,8 @@ type Params = {
 function functionWithParams({ option }: Params) {
     option && Promise.reject("logical operator bypass");
 }
+
+
+let maybeString: string | undefined;
+const definitelyString = maybeString ?? "string";
+definitelyString ?? Promise.reject("logical operator bypass");

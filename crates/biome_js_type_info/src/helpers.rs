@@ -1,11 +1,17 @@
-use std::{borrow::Cow, cmp::Ordering};
+use std::{
+    borrow::Cow,
+    cmp::Ordering,
+    hash::{Hash, Hasher},
+};
 
 use biome_rowan::Text;
+use hashbrown::{HashTable, hash_table::Entry};
+use rustc_hash::FxHasher;
 
 use crate::{
-    BindingId, Class, Interface, Literal, MAX_FLATTEN_DEPTH, Module, Namespace, Object, Resolvable,
-    ResolvedTypeData, ResolvedTypeId, ResolvedTypeMember, ResolverId, Type, TypeData, TypeInstance,
-    TypeMember, TypeReference, TypeResolver, Union,
+    BindingId, Class, Interface, Literal, MAX_FLATTEN_DEPTH, MergedReference, Module, Namespace,
+    Object, Resolvable, ResolvedTypeData, ResolvedTypeId, ResolvedTypeMember, ResolverId, Type,
+    TypeData, TypeInstance, TypeMember, TypeReference, TypeResolver, Union,
     globals::{GLOBAL_ARRAY_ID, GLOBAL_PROMISE_ID, GLOBAL_TYPE_MEMBERS},
 };
 
@@ -222,7 +228,7 @@ impl TypeData {
     pub fn is_falsy(&self, resolver: &dyn TypeResolver) -> bool {
         fn is_falsy(ty: &TypeData, resolver: &dyn TypeResolver, mut depth: usize) -> bool {
             depth += 1;
-            if depth == MAX_FLATTEN_DEPTH {
+            if depth > MAX_FLATTEN_DEPTH {
                 return false;
             }
 
@@ -290,7 +296,7 @@ impl TypeData {
     pub fn is_non_nullish(&self, resolver: &dyn TypeResolver) -> bool {
         fn is_non_nullish(ty: &TypeData, resolver: &dyn TypeResolver, mut depth: usize) -> bool {
             depth += 1;
-            if depth == MAX_FLATTEN_DEPTH {
+            if depth > MAX_FLATTEN_DEPTH {
                 return false;
             }
 
@@ -352,7 +358,7 @@ impl TypeData {
     pub fn is_truthy(&self, resolver: &dyn TypeResolver) -> bool {
         fn is_truthy(ty: &TypeData, resolver: &dyn TypeResolver, mut depth: usize) -> bool {
             depth += 1;
-            if depth == MAX_FLATTEN_DEPTH {
+            if depth > MAX_FLATTEN_DEPTH {
                 return false;
             }
 
@@ -444,14 +450,27 @@ impl TypeData {
             mut depth: usize,
         ) -> Option<TypeData> {
             depth += 1;
-            if depth == MAX_FLATTEN_DEPTH {
+            if depth > MAX_FLATTEN_DEPTH {
                 return Some(ty);
             }
+
+            let mut reference_to_falsy_value = |reference: &TypeReference| -> Option<TypeData> {
+                resolver
+                    .resolve_and_get(reference)
+                    .map(ResolvedTypeData::to_data)
+                    .and_then(|ty| to_falsy_value(ty, resolver, depth))
+            };
 
             let new_ty = match &ty {
                 TypeData::BigInt => Literal::BigInt(Text::Static("0n")).into(),
                 TypeData::Boolean => Literal::Boolean(false.into()).into(),
                 TypeData::Conditional => TypeData::Unknown,
+                TypeData::InstanceOf(instance) => match resolver.resolve_and_get(&instance.ty) {
+                    Some(resolved) if resolved.should_flatten_instance(instance) => {
+                        return to_falsy_value(resolved.to_data(), resolver, depth);
+                    }
+                    _ => ty,
+                },
                 TypeData::Literal(literal) => match literal.as_ref() {
                     Literal::BigInt(text) => match text.text() {
                         "0n" | "-0n" => ty,
@@ -473,6 +492,41 @@ impl TypeData {
                     },
                     Literal::Template(_) => ty,
                 },
+                TypeData::MergedReference(reference) => {
+                    let ty = reference.ty.as_ref().and_then(|reference| {
+                        let ty = resolver
+                            .resolve_and_get(reference)
+                            .map(ResolvedTypeData::to_data)
+                            .and_then(|ty| to_falsy_value(ty, resolver, depth))?;
+                        Some(resolver.reference_to_owned_data(ty))
+                    });
+                    let value_ty = reference.value_ty.as_ref().and_then(|reference| {
+                        let ty = resolver
+                            .resolve_and_get(reference)
+                            .map(ResolvedTypeData::to_data)
+                            .and_then(|ty| to_falsy_value(ty, resolver, depth))?;
+                        Some(resolver.reference_to_owned_data(ty))
+                    });
+                    let namespace_ty = reference.namespace_ty.as_ref().and_then(|reference| {
+                        let ty = resolver
+                            .resolve_and_get(reference)
+                            .map(ResolvedTypeData::to_data)
+                            .and_then(|ty| to_falsy_value(ty, resolver, depth))?;
+                        Some(resolver.reference_to_owned_data(ty))
+                    });
+                    match (ty, value_ty, namespace_ty) {
+                        (None, None, None) => None,
+                        (Some(reference), None, None)
+                        | (None, Some(reference), None)
+                        | (None, None, Some(reference)) => Some(TypeData::Reference(reference)),
+                        (ty, value_ty, namespace_ty) => Some(TypeData::from(MergedReference {
+                            ty,
+                            value_ty,
+                            namespace_ty,
+                        })),
+                    }?
+                }
+                TypeData::Reference(reference) => reference_to_falsy_value(reference)?,
                 TypeData::String => Literal::String(Text::Static("").into()).into(),
                 TypeData::Union(union) => {
                     let types = union
@@ -520,12 +574,61 @@ impl TypeData {
             mut depth: usize,
         ) -> Option<TypeData> {
             depth += 1;
-            if depth == MAX_FLATTEN_DEPTH {
+            if depth > MAX_FLATTEN_DEPTH {
                 return Some(ty);
             }
 
+            let mut reference_to_non_nullish_value =
+                |reference: &TypeReference| -> Option<TypeData> {
+                    resolver
+                        .resolve_and_get(reference)
+                        .map(ResolvedTypeData::to_data)
+                        .and_then(|ty| to_non_nullish_value(ty, resolver, depth))
+                };
+
             let new_ty = match &ty {
                 TypeData::Null | TypeData::Undefined => return None,
+                TypeData::InstanceOf(instance) => match resolver.resolve_and_get(&instance.ty) {
+                    Some(resolved) if resolved.should_flatten_instance(instance) => {
+                        return to_non_nullish_value(resolved.to_data(), resolver, depth);
+                    }
+                    _ => ty,
+                },
+                TypeData::MergedReference(reference) => {
+                    let ty = reference.ty.as_ref().and_then(|reference| {
+                        let ty = resolver
+                            .resolve_and_get(reference)
+                            .map(ResolvedTypeData::to_data)
+                            .and_then(|ty| to_non_nullish_value(ty, resolver, depth))?;
+                        Some(resolver.reference_to_owned_data(ty))
+                    });
+                    let value_ty = reference.value_ty.as_ref().and_then(|reference| {
+                        let ty = resolver
+                            .resolve_and_get(reference)
+                            .map(ResolvedTypeData::to_data)
+                            .and_then(|ty| to_non_nullish_value(ty, resolver, depth))?;
+                        Some(resolver.reference_to_owned_data(ty))
+                    });
+                    let namespace_ty = reference.namespace_ty.as_ref().and_then(|reference| {
+                        let ty = resolver
+                            .resolve_and_get(reference)
+                            .map(ResolvedTypeData::to_data)
+                            .and_then(|ty| to_non_nullish_value(ty, resolver, depth))?;
+                        Some(resolver.reference_to_owned_data(ty))
+                    });
+                    match (ty, value_ty, namespace_ty) {
+                        (None, None, None) => None,
+                        (Some(reference), None, None)
+                        | (None, Some(reference), None)
+                        | (None, None, Some(reference)) => Some(TypeData::Reference(reference)),
+                        (ty, value_ty, namespace_ty) => Some(TypeData::from(MergedReference {
+                            ty,
+                            value_ty,
+                            namespace_ty,
+                        })),
+                    }?
+                }
+                TypeData::Reference(reference) => reference_to_non_nullish_value(reference)?,
                 TypeData::Union(union) => {
                     let types = union
                         .types()
@@ -562,13 +665,26 @@ impl TypeData {
             mut depth: usize,
         ) -> Option<TypeData> {
             depth += 1;
-            if depth == MAX_FLATTEN_DEPTH {
+            if depth > MAX_FLATTEN_DEPTH {
                 return Some(ty);
             }
+
+            let mut reference_to_truthy_value = |reference: &TypeReference| -> Option<TypeData> {
+                resolver
+                    .resolve_and_get(reference)
+                    .map(ResolvedTypeData::to_data)
+                    .and_then(|ty| to_truthy_value(ty, resolver, depth))
+            };
 
             let new_data = match &ty {
                 TypeData::Boolean => Literal::Boolean(true.into()).into(),
                 TypeData::Conditional => TypeData::Unknown,
+                TypeData::InstanceOf(instance) => match resolver.resolve_and_get(&instance.ty) {
+                    Some(resolved) if resolved.should_flatten_instance(instance) => {
+                        return to_truthy_value(resolved.to_data(), resolver, depth);
+                    }
+                    _ => ty,
+                },
                 TypeData::Literal(literal) => match literal.as_ref() {
                     Literal::BigInt(text) => match text.text() {
                         "0n" | "-0n" => return None,
@@ -590,7 +706,42 @@ impl TypeData {
                     },
                     Literal::Template(_) => ty,
                 },
+                TypeData::MergedReference(reference) => {
+                    let ty = reference.ty.as_ref().and_then(|reference| {
+                        let ty = resolver
+                            .resolve_and_get(reference)
+                            .map(ResolvedTypeData::to_data)
+                            .and_then(|ty| to_truthy_value(ty, resolver, depth))?;
+                        Some(resolver.reference_to_owned_data(ty))
+                    });
+                    let value_ty = reference.value_ty.as_ref().and_then(|reference| {
+                        let ty = resolver
+                            .resolve_and_get(reference)
+                            .map(ResolvedTypeData::to_data)
+                            .and_then(|ty| to_truthy_value(ty, resolver, depth))?;
+                        Some(resolver.reference_to_owned_data(ty))
+                    });
+                    let namespace_ty = reference.namespace_ty.as_ref().and_then(|reference| {
+                        let ty = resolver
+                            .resolve_and_get(reference)
+                            .map(ResolvedTypeData::to_data)
+                            .and_then(|ty| to_truthy_value(ty, resolver, depth))?;
+                        Some(resolver.reference_to_owned_data(ty))
+                    });
+                    match (ty, value_ty, namespace_ty) {
+                        (None, None, None) => None,
+                        (Some(reference), None, None)
+                        | (None, Some(reference), None)
+                        | (None, None, Some(reference)) => Some(TypeData::Reference(reference)),
+                        (ty, value_ty, namespace_ty) => Some(TypeData::from(MergedReference {
+                            ty,
+                            value_ty,
+                            namespace_ty,
+                        })),
+                    }?
+                }
                 TypeData::Null | TypeData::Undefined | TypeData::VoidKeyword => return None,
+                TypeData::Reference(reference) => reference_to_truthy_value(reference)?,
                 TypeData::Union(union) => {
                     let types = union
                         .types()
@@ -619,28 +770,66 @@ impl TypeData {
     /// References are automatically deduplicated. If only a single type
     /// remains, an instance of `Self::Reference` is returned instead of
     /// `Self::Union`.
-    pub fn union_of(resolver: &dyn TypeResolver, mut types: Vec<TypeReference>) -> Self {
-        types.dedup();
-
-        for ty in &types {
-            if let Some(resolved) = resolver.resolve_and_get(ty) {
-                if resolved.is_any_keyword() {
-                    return Self::AnyKeyword;
+    pub fn union_of(resolver: &dyn TypeResolver, types: Box<[TypeReference]>) -> Self {
+        // We use a hash table separately of a vector to quickly check for
+        // duplicates, without messing with the original order.
+        let mut table: HashTable<usize> = HashTable::with_capacity(types.len());
+        let mut vec = Vec::with_capacity(types.len());
+        for ty in types {
+            if let Some(resolved) = resolver.resolve_and_get(&ty) {
+                match resolved.as_raw_data() {
+                    Self::AnyKeyword => {
+                        // `any` poisons the entire union.
+                        return Self::AnyKeyword;
+                    }
+                    Self::NeverKeyword => {
+                        // No point in adding `never` to the union.
+                        continue;
+                    }
+                    Self::Union(union) => {
+                        // Flatten existing union into the new one:
+                        for ty in union.types() {
+                            let entry = table.entry(
+                                hash_reference(ty),
+                                |i| &vec[*i] == ty,
+                                |i| hash_reference(&vec[*i]),
+                            );
+                            if let Entry::Vacant(entry) = entry {
+                                let index = vec.len();
+                                vec.push(ty.clone());
+                                entry.insert(index);
+                            }
+                        }
+                    }
+                    _ => {}
                 }
+            }
+
+            let entry = table.entry(
+                hash_reference(&ty),
+                |i| vec[*i] == ty,
+                |i| hash_reference(&vec[*i]),
+            );
+            if let Entry::Vacant(entry) = entry {
+                let index = vec.len();
+                vec.push(ty);
+                entry.insert(index);
             }
         }
 
-        types.retain(|ty| match resolver.resolve_and_get(ty) {
-            Some(resolved) => !resolved.is_never_keyword(),
-            None => true,
-        });
-
-        match types.len().cmp(&1) {
-            Ordering::Greater => Self::Union(Box::new(Union(types.into()))),
-            Ordering::Equal => Self::reference(types.remove(0)),
+        match vec.len().cmp(&1) {
+            Ordering::Greater => Self::Union(Box::new(Union(vec.into()))),
+            Ordering::Equal => Self::reference(vec.remove(0)),
             Ordering::Less => Self::NeverKeyword,
         }
     }
+}
+
+#[inline(always)]
+fn hash_reference(reference: &TypeReference) -> u64 {
+    let mut hash = FxHasher::default();
+    reference.hash(&mut hash);
+    hash.finish()
 }
 
 pub struct AllTypeMemberIterator<'a> {

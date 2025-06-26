@@ -419,25 +419,25 @@ impl Format<FormatTypeContext> for TypeofExpression {
             Self::LogicalAnd(expr) => {
                 write!(
                     f,
-                    [&format_args![
+                    [&format_args![&group(&format_args![
                         &expr.left,
-                        space(),
+                        soft_line_break_or_space(),
                         text("&&"),
-                        space(),
+                        soft_line_break_or_space(),
                         &expr.right
-                    ]]
+                    ])]]
                 )
             }
             Self::LogicalOr(expr) => {
                 write!(
                     f,
-                    [&format_args![
+                    [&format_args![&group(&format_args![
                         &expr.left,
-                        space(),
+                        soft_line_break_or_space(),
                         text("||"),
-                        space(),
+                        soft_line_break_or_space(),
                         &expr.right
-                    ]]
+                    ])]]
                 )
             }
             Self::New(expr) => {
@@ -446,13 +446,13 @@ impl Format<FormatTypeContext> for TypeofExpression {
             Self::NullishCoalescing(expr) => {
                 write!(
                     f,
-                    [&format_args![
+                    [&format_args![&group(&format_args![
                         &expr.left,
-                        space(),
+                        soft_line_break_or_space(),
                         text("??"),
-                        space(),
+                        soft_line_break_or_space(),
                         &expr.right
-                    ]]
+                    ])]]
                 )
             }
             Self::StaticMember(expr) => {

@@ -26,18 +26,10 @@ fn project_layout_with_top_level_dependencies(dependencies: Dependencies) -> Arc
 #[test]
 fn quick_test() {
     const FILENAME: &str = "dummyFile.ts";
-    const SOURCE: &str = r#"class InvalidTestClassParent {
-	async returnsPromiseFromParent(): Promise<string> {
-		return "value";
-	}
-}
-class InvalidTestClass extends InvalidTestClassParent {
-	async someMethod2() {
-		this.returnsPromiseFromParent()
-			.then(() => {})
-			.finally(() => {});
-	}
-}"#;
+    const SOURCE: &str = r#"let maybeString: string | undefined;
+const definitelyString = maybeString ?? "string";
+definitelyString ?? Promise.reject("logical operator bypass");
+"#;
 
     let parsed = parse(SOURCE, JsFileSource::tsx(), JsParserOptions::default());
 

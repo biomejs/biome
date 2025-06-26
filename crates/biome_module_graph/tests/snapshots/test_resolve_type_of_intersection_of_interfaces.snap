@@ -41,13 +41,7 @@ Module TypeId(0) => sync Function "foo" {
   returns: string
 }
 
-Module TypeId(1) => interface "Foo" {
-  extends: []
-  type_args: []
-  members: ["foo": Module(0) TypeId(0)]
-}
-
-Module TypeId(2) => sync Function "foo" {
+Module TypeId(1) => sync Function "foo" {
   accepts: {
     params: []
     type_args: []
@@ -55,33 +49,35 @@ Module TypeId(2) => sync Function "foo" {
   returns: number
 }
 
-Module TypeId(3) => boolean
+Module TypeId(2) => boolean
 
-Module TypeId(4) => sync Function "bar" {
+Module TypeId(3) => sync Function "bar" {
   accepts: {
     params: []
     type_args: []
   }
-  returns: Module(0) TypeId(3)
+  returns: Module(0) TypeId(2)
+}
+
+Module TypeId(4) => interface "Foo" {
+  extends: []
+  type_args: []
+  members: ["foo": Module(0) TypeId(0)]
 }
 
 Module TypeId(5) => interface "Bar" {
   extends: []
   type_args: []
-  members: ["foo": Module(0) TypeId(2), "bar": Module(0) TypeId(4)]
+  members: ["foo": Module(0) TypeId(1), "bar": Module(0) TypeId(3)]
 }
 
-Module TypeId(6) => instanceof Module(0) TypeId(1)
-
-Module TypeId(7) => instanceof Module(0) TypeId(5)
-
-Module TypeId(8) => interface "(merged)" {
+Module TypeId(6) => interface "(merged)" {
   extends: []
   type_args: []
-  members: ["foo": Module(0) TypeId(9), "bar": Module(0) TypeId(4)]
+  members: ["foo": Module(0) TypeId(7), "bar": Module(0) TypeId(3)]
 }
 
-Module TypeId(9) => Module(0) TypeId(2) | Module(0) TypeId(0)
+Module TypeId(7) => Module(0) TypeId(1) | Module(0) TypeId(0)
 ```
 
 # Module Resolver
@@ -97,13 +93,7 @@ Full TypeId(0) => sync Function "foo" {
   returns: string
 }
 
-Full TypeId(1) => interface "Foo" {
-  extends: []
-  type_args: []
-  members: ["foo": Module(0) TypeId(0)]
-}
-
-Full TypeId(2) => sync Function "foo" {
+Full TypeId(1) => sync Function "foo" {
   accepts: {
     params: []
     type_args: []
@@ -111,31 +101,33 @@ Full TypeId(2) => sync Function "foo" {
   returns: number
 }
 
-Full TypeId(3) => boolean
+Full TypeId(2) => boolean
 
-Full TypeId(4) => sync Function "bar" {
+Full TypeId(3) => sync Function "bar" {
   accepts: {
     params: []
     type_args: []
   }
-  returns: Module(0) TypeId(3)
+  returns: Module(0) TypeId(2)
+}
+
+Full TypeId(4) => interface "Foo" {
+  extends: []
+  type_args: []
+  members: ["foo": Module(0) TypeId(0)]
 }
 
 Full TypeId(5) => interface "Bar" {
   extends: []
   type_args: []
-  members: ["foo": Module(0) TypeId(2), "bar": Module(0) TypeId(4)]
+  members: ["foo": Module(0) TypeId(1), "bar": Module(0) TypeId(3)]
 }
 
-Full TypeId(6) => instanceof Module(0) TypeId(1)
-
-Full TypeId(7) => instanceof Module(0) TypeId(5)
-
-Full TypeId(8) => interface "(merged)" {
+Full TypeId(6) => interface "(merged)" {
   extends: []
   type_args: []
-  members: ["foo": Module(0) TypeId(9), "bar": Module(0) TypeId(4)]
+  members: ["foo": Module(0) TypeId(7), "bar": Module(0) TypeId(3)]
 }
 
-Full TypeId(9) => Module(0) TypeId(2) | Module(0) TypeId(0)
+Full TypeId(7) => Module(0) TypeId(1) | Module(0) TypeId(0)
 ```

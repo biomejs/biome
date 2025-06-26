@@ -390,6 +390,12 @@ impl From<Literal> for TypeData {
     }
 }
 
+impl From<MergedReference> for TypeData {
+    fn from(value: MergedReference) -> Self {
+        Self::MergedReference(Box::new(value))
+    }
+}
+
 impl From<Object> for TypeData {
     fn from(value: Object) -> Self {
         Self::Object(Box::new(value))
@@ -525,6 +531,66 @@ impl TypeData {
         Self::Reference(reference.into())
     }
 
+    /// Returns whether the given `instance` wrapper should be stripped from
+    /// this type.
+    ///
+    /// [`TypeData::InstanceOf`] exists primarily in order to distinguish
+    /// classes from their instances. When referencing members of a class, you
+    /// will access its static members, whereas when you reference members of an
+    /// instance of a class, you will access its non-static members.
+    ///
+    /// Unfortunately, before resolving has taken place, we can't know whether a
+    /// given symbol refers to a class or any other type, so we need to
+    /// defensively wrap all references with [`TypeData::InstanceOf`] in places
+    /// where an instance is expected. For most types however, this is overkill,
+    /// and we should strip these wrappers again to ease analysis elsewhere.
+    ///
+    /// Then there is a second use for [`TypeData::InstanceOf`], which is to
+    /// assign concrete types to generic type parameters. For some types,
+    /// flattening instances makes sense _unless one of the generics is set_.
+    pub fn should_flatten_instance(&self, instance: &TypeInstance) -> bool {
+        match self {
+            Self::AnyKeyword
+            | Self::BigInt
+            | Self::Boolean
+            | Self::Conditional
+            | Self::Global
+            | Self::ImportNamespace(_)
+            | Self::Literal(_)
+            | Self::Module(_)
+            | Self::Namespace(_)
+            | Self::NeverKeyword
+            | Self::Null
+            | Self::Number
+            | Self::ObjectKeyword
+            | Self::String
+            | Self::Symbol
+            | Self::ThisKeyword
+            | Self::Undefined
+            | Self::Unknown
+            | Self::UnknownKeyword
+            | Self::VoidKeyword => true,
+            Self::Constructor(_)
+            | Self::Function(_)
+            | Self::InstanceOf(_)
+            | Self::Interface(_)
+            | Self::Intersection(_)
+            | Self::Object(_)
+            | Self::Tuple(_)
+            | Self::Union(_) => instance.type_parameters.is_empty(),
+            Self::Class(_)
+            | Self::Generic(_)
+            | Self::MergedReference(_)
+            // For references, we don't know. If a reference was pointing to a
+            // class, stripping the instance would change its meaning.
+            | Self::Reference(_)
+            | Self::TypeOperator(_)
+            | Self::TypeofExpression(_)
+            | Self::TypeofType(_)
+            | Self::TypeofValue(_) => false,
+        }
+    }
+
     pub fn type_parameters(&self) -> Option<&[TypeReference]> {
         match self {
             Self::Class(class) => Some(&class.type_parameters),
@@ -537,7 +603,7 @@ impl TypeData {
 
     #[inline]
     pub fn unknown() -> Self {
-        Self::reference(GLOBAL_UNKNOWN_ID)
+        Self::Reference(TypeReference::Resolved(GLOBAL_UNKNOWN_ID))
     }
 }
 
@@ -591,6 +657,35 @@ pub struct MergedReference {
     pub ty: Option<TypeReference>,
     pub value_ty: Option<TypeReference>,
     pub namespace_ty: Option<TypeReference>,
+}
+
+impl MergedReference {
+    /// Maps the references using the given `mapper` function.
+    ///
+    /// Returns a [`TypeData::MergedReference`] if multiple mapped references
+    /// remain, and a regular [`TypeData::Reference`] if only a single reference
+    /// remains.
+    ///
+    /// Returns `None` if all references are mapped to `None`.
+    pub fn map_references(
+        &self,
+        mapper: impl Fn(&TypeReference) -> Option<TypeReference>,
+    ) -> Option<TypeData> {
+        let ty = self.ty.as_ref().and_then(&mapper);
+        let value_ty = self.value_ty.as_ref().and_then(&mapper);
+        let namespace_ty = self.namespace_ty.as_ref().and_then(&mapper);
+        match (ty, value_ty, namespace_ty) {
+            (None, None, None) => None,
+            (Some(reference), None, None)
+            | (None, Some(reference), None)
+            | (None, None, Some(reference)) => Some(TypeData::Reference(reference)),
+            (ty, value_ty, namespace_ty) => Some(TypeData::from(Self {
+                ty,
+                value_ty,
+                namespace_ty,
+            })),
+        }
+    }
 }
 
 /// A function definition.

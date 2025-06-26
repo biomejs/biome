@@ -586,7 +586,7 @@ impl TypeData {
         ty: &AnyTsType,
     ) -> Self {
         match ty {
-            AnyTsType::JsMetavariable(_) => Self::Unknown,
+            AnyTsType::JsMetavariable(_) => Self::unknown(),
             AnyTsType::TsAnyType(_) => Self::AnyKeyword,
             AnyTsType::TsArrayType(ty) => Self::array_of(
                 scope_id,
@@ -601,28 +601,28 @@ impl TypeData {
                 (None, Ok(literal_token)) => Self::Literal(Box::new(Literal::BigInt(
                     literal_token.token_text_trimmed().into(),
                 ))),
-                (_, Err(_)) => Self::Unknown,
+                (_, Err(_)) => Self::unknown(),
             },
             AnyTsType::TsBigintType(_) => Self::BigInt,
-            AnyTsType::TsBogusType(_) => Self::Unknown,
+            AnyTsType::TsBogusType(_) => Self::unknown(),
             AnyTsType::TsBooleanLiteralType(ty) => match ty.literal() {
                 Ok(token) => Self::Literal(Box::new(Literal::Boolean(
                     BooleanLiteral::parse(token.text_trimmed()).unwrap(),
                 ))),
-                Err(_) => Self::Unknown,
+                Err(_) => Self::unknown(),
             },
             AnyTsType::TsBooleanType(_) => Self::Boolean,
             AnyTsType::TsConditionalType(ty) => {
                 // We don't attempt to evaluate the condition, so we simply
                 // infer a union of both the possibilities.
-                let types = vec![
+                let types = Box::new([
                     ty.true_type()
                         .map(|ty| TypeReference::from_any_ts_type(resolver, scope_id, &ty))
                         .unwrap_or_default(),
                     ty.false_type()
                         .map(|ty| TypeReference::from_any_ts_type(resolver, scope_id, &ty))
                         .unwrap_or_default(),
-                ];
+                ]);
 
                 Self::union_of(resolver, types)
             }
@@ -655,15 +655,15 @@ impl TypeData {
             })),
             AnyTsType::TsImportType(_) => {
                 // TODO: Handle import types (`import("./module").T`).
-                Self::Unknown
+                Self::unknown()
             }
             AnyTsType::TsIndexedAccessType(_) => {
                 // TODO: Handle type indexing (`T[U]`).
-                Self::Unknown
+                Self::unknown()
             }
             AnyTsType::TsInferType(_) => {
                 // TODO: Handle `infer T` syntax.
-                Self::Unknown
+                Self::unknown()
             }
             AnyTsType::TsIntersectionType(ty) => Self::intersection_of(
                 ty.types()
@@ -674,7 +674,7 @@ impl TypeData {
             ),
             AnyTsType::TsMappedType(_) => {
                 // TODO: Handle mapped types (`type T<U> = { [K in keyof U]: V }`).
-                Self::Unknown
+                Self::unknown()
             }
             AnyTsType::TsNeverType(_) => Self::NeverKeyword,
             AnyTsType::TsNonPrimitiveType(_) => Self::ObjectKeyword,
@@ -702,7 +702,7 @@ impl TypeData {
             AnyTsType::TsReferenceType(ty) => Self::from_ts_reference_type(resolver, scope_id, ty),
             AnyTsType::TsStringLiteralType(ty) => match ty.inner_string_text() {
                 Ok(token) => Literal::String(token.text().into()).into(),
-                Err(_) => Self::Unknown,
+                Err(_) => Self::unknown(),
             },
             AnyTsType::TsStringType(_) => Self::reference(GLOBAL_STRING_ID),
             AnyTsType::TsSymbolType(_) => Self::Symbol,
@@ -724,20 +724,20 @@ impl TypeData {
                     .collect();
                 match elements {
                     Ok(elements) => Self::Tuple(Box::new(Tuple(elements))),
-                    Err(_) => Self::Unknown,
+                    Err(_) => Self::unknown(),
                 }
             }
             AnyTsType::TsTypeOperatorType(ty) => match (ty.operator_token(), ty.ty()) {
                 (Ok(operator_token), Ok(ty)) => TypeOperator::from_str(
                     operator_token.text_trimmed(),
                 )
-                .map_or(Self::Unknown, |operator| {
+                .map_or(Self::unknown(), |operator| {
                     Self::TypeOperator(Box::new(TypeOperatorType {
                         operator,
                         ty: TypeReference::from_any_ts_type(resolver, scope_id, &ty),
                     }))
                 }),
-                _ => Self::Unknown,
+                _ => Self::unknown(),
             },
             AnyTsType::TsTypeofType(ty) => Self::from_ts_typeof_type(resolver, scope_id, ty),
             AnyTsType::TsUndefinedType(_) => Self::Undefined,
