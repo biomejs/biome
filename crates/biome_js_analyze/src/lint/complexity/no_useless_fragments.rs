@@ -136,12 +136,14 @@ impl Rule for NoUselessFragments {
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
         let model = ctx.model();
-        let mut in_jsx_attr_expr = false;
-        let mut in_js_logical_expr = false;
-        let mut in_jsx_expr = false;
-        let mut in_jsx_list = false;
+
         match node {
             NoUselessFragmentsQuery::JsxFragment(fragment) => {
+                let mut in_jsx_attr_expr = false;
+                let mut in_js_logical_expr = false;
+                let mut in_jsx_expr = false;
+                let mut in_jsx_list = false;
+                let mut in_return_statement = false;
                 let parents_where_fragments_must_be_preserved =
                     node.syntax().parent().is_some_and(|parent| {
                         match JsxTagExpression::try_cast(parent.clone()) {
@@ -166,15 +168,20 @@ impl Rule for NoUselessFragments {
                                     }
                                 })
                                 .is_some_and(|parent| {
-                                    matches!(
-                                        parent.kind(),
-                                        JsSyntaxKind::JS_RETURN_STATEMENT
-                                            | JsSyntaxKind::JS_INITIALIZER_CLAUSE
-                                            | JsSyntaxKind::JS_ARROW_FUNCTION_EXPRESSION
-                                            | JsSyntaxKind::JS_FUNCTION_EXPRESSION
-                                            | JsSyntaxKind::JS_FUNCTION_DECLARATION
-                                            | JsSyntaxKind::JS_PROPERTY_OBJECT_MEMBER
-                                    )
+                                    if parent.kind() == JsSyntaxKind::JS_RETURN_STATEMENT {
+                                        in_return_statement = true;
+                                        false
+                                    } else {
+                                        // Preserve fragments in other kinds of parent
+                                        matches!(
+                                            parent.kind(),
+                                            JsSyntaxKind::JS_INITIALIZER_CLAUSE
+                                                | JsSyntaxKind::JS_ARROW_FUNCTION_EXPRESSION
+                                                | JsSyntaxKind::JS_FUNCTION_EXPRESSION
+                                                | JsSyntaxKind::JS_FUNCTION_DECLARATION
+                                                | JsSyntaxKind::JS_PROPERTY_OBJECT_MEMBER
+                                        )
+                                    }
                                 }),
                             Err(_) => {
                                 if JsxChildList::try_cast(parent.clone()).is_ok() {
@@ -256,6 +263,15 @@ impl Rule for NoUselessFragments {
                             if let Some(first) = first_significant_child {
                                 if JsxText::can_cast(first.syntax().kind()) && in_jsx_attr_expr {
                                     None
+                                } else if JsxElement::can_cast(first.syntax().kind()) {
+                                    Some(NoUselessFragmentsState::Child(first))
+                                } else if in_return_statement {
+                                    // Preserve flagment with only one JsxExpressionChild in return statement
+                                    if JsxExpressionChild::can_cast(first.syntax().kind()) {
+                                        None
+                                    } else {
+                                        Some(NoUselessFragmentsState::Child(first))
+                                    }
                                 } else {
                                     // Do not report the fragment as unnecessary if the only child is JsxText with an HTML reference
                                     // or if the fragment is the only child in a JSX expression (e.g. {<>Foo</>})
