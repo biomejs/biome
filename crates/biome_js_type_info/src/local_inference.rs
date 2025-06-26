@@ -134,7 +134,7 @@ impl TypeData {
         pattern
             .properties()
             .into_iter()
-            .filter_map(|member| member.ok())
+            .flatten()
             .filter_map(|member| {
                 let name = match &member {
                     AnyJsObjectBindingPatternMember::JsObjectBindingPatternProperty(prop) => {
@@ -516,7 +516,7 @@ impl TypeData {
             AnyJsExpression::JsObjectExpression(expr) => Self::object_with_members(
                 expr.members()
                     .into_iter()
-                    .filter_map(|member| member.ok())
+                    .flatten()
                     .filter_map(|member| {
                         TypeMember::from_any_js_object_member(resolver, scope_id, &member)
                     })
@@ -668,7 +668,7 @@ impl TypeData {
             AnyTsType::TsIntersectionType(ty) => Self::intersection_of(
                 ty.types()
                     .into_iter()
-                    .filter_map(|ty| ty.ok())
+                    .flatten()
                     .map(|ty| TypeReference::from_any_ts_type(resolver, scope_id, &ty))
                     .collect(),
             ),
@@ -745,7 +745,7 @@ impl TypeData {
                 let types = ty
                     .types()
                     .into_iter()
-                    .filter_map(|ty| ty.ok())
+                    .flatten()
                     .map(|ty| TypeReference::from_any_ts_type(resolver, scope_id, &ty))
                     .collect();
 
@@ -1280,7 +1280,7 @@ impl TypeData {
     ) -> Box<[(Text, TypeReference)]> {
         decl.declarators()
             .into_iter()
-            .filter_map(|decl| decl.ok())
+            .flatten()
             .filter_map(|decl| {
                 Self::typed_bindings_from_js_variable_declarator(resolver, scope_id, &decl)
             })
@@ -1330,13 +1330,8 @@ impl CallArgumentType {
             .map(|args| {
                 args.args()
                     .into_iter()
-                    .filter_map(|arg| {
-                        Some(Self::from_any_js_call_argument(
-                            resolver,
-                            scope_id,
-                            &arg.ok()?,
-                        ))
-                    })
+                    .flatten()
+                    .map(|arg| Self::from_any_js_call_argument(resolver, scope_id, &arg))
                     .collect()
             })
             .unwrap_or_default()
@@ -1460,11 +1455,8 @@ impl FunctionParameter {
             .as_fields()
             .items
             .into_iter()
-            .filter_map(|param| {
-                param
-                    .ok()
-                    .map(|param| Self::from_any_js_parameter(resolver, scope_id, &param))
-            })
+            .flatten()
+            .map(|param| Self::from_any_js_parameter(resolver, scope_id, &param))
             .collect()
     }
 }
@@ -1544,7 +1536,7 @@ impl GenericTypeParameter {
         params
             .items()
             .into_iter()
-            .filter_map(|param| param.ok())
+            .flatten()
             .filter_map(|param| Self::from_ts_type_parameter(resolver, scope_id, &param))
             .collect()
     }
@@ -2094,16 +2086,14 @@ impl TypeReference {
         params
             .items()
             .into_iter()
-            .map(|param| {
-                param
-                    .ok()
-                    .and_then(|param| {
-                        GenericTypeParameter::from_ts_type_parameter(resolver, scope_id, &param)
-                    })
-                    .map(|generic| {
-                        Self::from(resolver.register_and_resolve(TypeData::from(generic)))
-                    })
-                    .unwrap_or_default()
+            .map(|param| match param {
+                Ok(param) => {
+                    GenericTypeParameter::from_ts_type_parameter(resolver, scope_id, &param)
+                        .map(|generic| resolver.register_and_resolve(TypeData::from(generic)))
+                        .map(Self::from)
+                        .unwrap_or_default()
+                }
+                Err(_) => Self::Unknown,
             })
             .collect()
     }
@@ -2230,7 +2220,6 @@ fn function_params_from_js_params(
     params: SyntaxResult<JsParameters>,
 ) -> Box<[FunctionParameter]> {
     params
-        .ok()
         .map(|params| FunctionParameter::params_from_js_parameters(resolver, scope_id, &params))
         .unwrap_or_default()
 }
