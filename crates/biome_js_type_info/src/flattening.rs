@@ -66,7 +66,7 @@ impl TypeData {
                     _ => None,
                 }
             }
-            Self::InstanceOf(instance_of) => match &instance_of.ty {
+            Self::InstanceOf(instance) => match &instance.ty {
                 TypeReference::Unknown => Some(Self::unknown()),
                 reference => match resolver.resolve_and_get(reference) {
                     Some(resolved) => match resolved.as_raw_data() {
@@ -75,7 +75,7 @@ impl TypeData {
                                 ty: resolved_instance.ty.clone(),
                                 type_parameters: TypeReference::merge_parameters(
                                     &resolved_instance.type_parameters,
-                                    &instance_of.type_parameters,
+                                    &instance.type_parameters,
                                 ),
                             })),
                         ),
@@ -84,14 +84,13 @@ impl TypeData {
                             _ => Some(resolved.apply_module_id_to_data(Self::instance_of(
                                 TypeInstance {
                                     ty: reference.clone(),
-                                    type_parameters: instance_of.type_parameters.clone(),
+                                    type_parameters: instance.type_parameters.clone(),
                                 },
                             ))),
                         },
-                        Self::Global | Self::Function(_) | Self::Literal(_) | Self::Object(_) => {
-                            Some(resolved.to_data())
-                        }
-                        _ => None,
+                        _ => resolved
+                            .should_flatten_instance(instance)
+                            .then(|| resolved.to_data()),
                     },
                     None => None,
                 },

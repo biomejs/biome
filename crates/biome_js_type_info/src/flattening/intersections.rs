@@ -2,7 +2,7 @@ use biome_rowan::Text;
 
 use crate::{
     Class, Function, Interface, Intersection, Literal, Namespace, Object, ResolvedTypeData,
-    ReturnType, TypeData, TypeMember, TypeResolver,
+    ReturnType, TypeData, TypeMember, TypeMemberKind, TypeResolver,
 };
 
 pub(super) fn flattened_intersection(
@@ -43,7 +43,13 @@ pub(super) fn flattened_intersection(
             if let Some(primitive) = primitive {
                 primitive
             } else {
-                merged_ty.into_type()
+                let is_instance = merged_ty.is_instance();
+                let ty = merged_ty.into_type();
+                if is_instance {
+                    TypeData::instance_of(resolver.reference_to_owned_data(ty))
+                } else {
+                    ty
+                }
             }
         }
     }
@@ -52,7 +58,7 @@ pub(super) fn flattened_intersection(
 // TODO: We may want explicit support for arrays and tuples too.
 enum MergedType {
     Any,
-    Class(Vec<TypeMember>),
+    ClassInstance(Vec<TypeMember>),
     Function(Box<Function>),
     Interface(Vec<TypeMember>),
     Namespace(Vec<TypeMember>),
@@ -64,7 +70,7 @@ enum MergedType {
 
 enum MergedTypeKind {
     Any,
-    Class,
+    ClassInstance,
     Function,
     Interface,
     Namespace,
@@ -80,11 +86,15 @@ impl MergedTypeKind {
     fn intersection_with(self, other: Self) -> Self {
         match (self, other) {
             (Self::Any, _) | (_, Self::Any) => Self::Any,
-            (Self::Class, Self::Class) => Self::Class,
-            (Self::Class, Self::Function | Self::Interface | Self::Object | Self::Namespace)
-            | (Self::Function | Self::Interface | Self::Object | Self::Namespace, Self::Class) => {
-                Self::Class
-            }
+            (Self::ClassInstance, Self::ClassInstance) => Self::ClassInstance,
+            (
+                Self::ClassInstance,
+                Self::Function | Self::Interface | Self::Object | Self::Namespace,
+            )
+            | (
+                Self::Function | Self::Interface | Self::Object | Self::Namespace,
+                Self::ClassInstance,
+            ) => Self::ClassInstance,
             (Self::Function, Self::Function) => Self::Function,
             (Self::Interface, Self::Interface) => Self::Interface,
             (Self::Interface, Self::Function) | (Self::Function, Self::Interface) => {
@@ -111,13 +121,7 @@ impl MergedType {
             is_static: bool,
             resolver: &dyn TypeResolver,
         ) -> MergedType {
-            let filter_static = |member: &TypeMember| -> bool {
-                if is_static {
-                    member.is_static()
-                } else {
-                    !member.is_static()
-                }
-            };
+            let non_static = |member: &TypeMember| !member.is_static();
 
             // FIXME: We're throwing away info such as prototypes for now...
             match ty {
@@ -130,7 +134,25 @@ impl MergedType {
                 | TypeData::Symbol
                 | TypeData::Undefined => MergedType::Primitive(ty),
                 TypeData::Class(class) => {
-                    MergedType::Class(class.members.into_iter().filter(filter_static).collect())
+                    if is_static {
+                        MergedType::Object(
+                            class
+                                .members
+                                .into_iter()
+                                .filter_map(|member| match member.kind {
+                                    TypeMemberKind::NamedStatic(name) => Some(TypeMember {
+                                        kind: TypeMemberKind::Named(name),
+                                        ty: member.ty,
+                                    }),
+                                    _ => None,
+                                })
+                                .collect(),
+                        )
+                    } else {
+                        MergedType::ClassInstance(
+                            class.members.into_iter().filter(non_static).collect(),
+                        )
+                    }
                 }
                 TypeData::Function(function) => MergedType::Function(function),
                 TypeData::InstanceOf(instance) => match resolver.resolve_and_get(&instance.ty) {
@@ -153,24 +175,16 @@ impl MergedType {
                         object
                             .into_members()
                             .into_iter()
-                            .filter(filter_static)
+                            .filter(non_static)
                             .collect(),
                     ),
                     Literal::RegExp(_) => MergedType::Unknown, // TODO
                 },
                 TypeData::Interface(interface) => MergedType::Interface(
-                    interface
-                        .members
-                        .into_iter()
-                        .filter(filter_static)
-                        .collect(),
+                    interface.members.into_iter().filter(non_static).collect(),
                 ),
                 TypeData::Namespace(namespace) => MergedType::Namespace(
-                    namespace
-                        .members
-                        .into_iter()
-                        .filter(filter_static)
-                        .collect(),
+                    namespace.members.into_iter().filter(non_static).collect(),
                 ),
                 TypeData::NeverKeyword => MergedType::Never,
                 _ => MergedType::Unknown,
@@ -183,7 +197,7 @@ impl MergedType {
     fn from_kind_and_members(kind: MergedTypeKind, members: Vec<TypeMember>) -> Self {
         match kind {
             MergedTypeKind::Any => Self::Any,
-            MergedTypeKind::Class => Self::Class(members),
+            MergedTypeKind::ClassInstance => Self::ClassInstance(members),
             MergedTypeKind::Interface => Self::Interface(members),
             MergedTypeKind::Namespace => Self::Namespace(members),
             MergedTypeKind::Never => Self::Never,
@@ -230,7 +244,7 @@ impl MergedType {
     fn into_kind_with_members(self) -> (MergedTypeKind, Vec<TypeMember>) {
         match self {
             Self::Any => (MergedTypeKind::Any, Vec::new()),
-            Self::Class(members) => (MergedTypeKind::Any, members),
+            Self::ClassInstance(members) => (MergedTypeKind::ClassInstance, members),
             Self::Function(_) => (MergedTypeKind::Function, Vec::new()),
             Self::Interface(members) => (MergedTypeKind::Interface, members),
             Self::Namespace(members) => (MergedTypeKind::Namespace, members),
@@ -244,7 +258,7 @@ impl MergedType {
     fn into_type(self) -> TypeData {
         match self {
             Self::Any => TypeData::AnyKeyword,
-            Self::Class(members) => TypeData::from(Class {
+            Self::ClassInstance(members) => TypeData::from(Class {
                 extends: None,
                 implements: [].into(),
                 members: members.into_iter().collect(),
@@ -272,6 +286,10 @@ impl MergedType {
         }
     }
 
+    fn is_instance(&self) -> bool {
+        matches!(self, Self::ClassInstance(_))
+    }
+
     fn is_mergeable(&self) -> bool {
         !matches!(self, Self::Any | Self::Never | Self::Unknown)
     }
@@ -286,7 +304,7 @@ fn function_intersection(f1: Function, f2: Function, resolver: &mut dyn TypeReso
         return_type: match (f1.return_type, f2.return_type) {
             (ReturnType::Type(r1), ReturnType::Type(r2)) => ReturnType::Type(
                 resolver
-                    .register_and_resolve(TypeData::union_of(vec![r1, r2]))
+                    .register_and_resolve(TypeData::union_of(resolver, [r1, r2].into()))
                     .into(),
             ),
             // TODO: We could be smarter about merging other return types.
@@ -311,7 +329,7 @@ fn member_intersection(
                 if member.ty != merged_member.ty {
                     let ty = std::mem::take(&mut merged_member.ty);
                     merged_member.ty = resolver
-                        .register_and_resolve(TypeData::union_of(vec![member.ty, ty]))
+                        .register_and_resolve(TypeData::union_of(resolver, [member.ty, ty].into()))
                         .into()
                 }
             }

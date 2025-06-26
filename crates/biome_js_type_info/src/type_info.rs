@@ -124,16 +124,6 @@ impl Type {
         }
     }
 
-    /// Returns whether this type is used as a truthy conditional.
-    pub fn is_conditional(&self) -> bool {
-        matches!(self.as_raw_data(), Some(TypeData::Conditional))
-    }
-
-    /// Returns whether this type is a function.
-    pub fn is_function(&self) -> bool {
-        matches!(self.as_raw_data(), Some(TypeData::Function(_)))
-    }
-
     /// Returns whether `self` is a function with a return type matching the
     /// given `predicate`.
     pub fn is_function_with_return_type(&self, predicate: impl Fn(Self) -> bool) -> bool {
@@ -158,11 +148,6 @@ impl Type {
         }
     }
 
-    /// Returns whether this type is an interface.
-    pub fn is_interface(&self) -> bool {
-        matches!(self.as_raw_data(), Some(TypeData::Interface(_)))
-    }
-
     /// Returns whether this type is an interface that has a member matching the
     /// given `predicate`.
     pub fn is_interface_with_member(&self, predicate: impl Fn(ResolvedTypeMember) -> bool) -> bool {
@@ -174,12 +159,6 @@ impl Type {
                 .any(predicate),
             _ => false,
         }
-    }
-
-    /// Returns whether this type is the primitive `null`.
-    pub fn is_null(&self) -> bool {
-        self.as_raw_data()
-            .is_some_and(|ty| matches!(ty, TypeData::Null))
     }
 
     /// Returns whether this type is a number or a literal number.
@@ -224,11 +203,6 @@ impl Type {
         })
     }
 
-    /// Returns whether this type indicates the `void` keyword.
-    pub fn is_void(&self) -> bool {
-        matches!(self.as_raw_data(), Some(TypeData::VoidKeyword))
-    }
-
     pub fn resolve(&self, ty: &TypeReference) -> Option<Self> {
         self.resolver
             .resolve_reference(&self.id.apply_module_id_to_reference(ty))
@@ -236,7 +210,7 @@ impl Type {
     }
 
     #[inline]
-    fn as_raw_data(&self) -> Option<&TypeData> {
+    pub(super) fn as_raw_data(&self) -> Option<&TypeData> {
         self.resolved_data().map(ResolvedTypeData::as_raw_data)
     }
 
@@ -416,6 +390,12 @@ impl From<Literal> for TypeData {
     }
 }
 
+impl From<MergedReference> for TypeData {
+    fn from(value: MergedReference) -> Self {
+        Self::MergedReference(Box::new(value))
+    }
+}
+
 impl From<Object> for TypeData {
     fn from(value: Object) -> Self {
         Self::Object(Box::new(value))
@@ -479,18 +459,6 @@ impl TypeData {
         Self::Boolean
     }
 
-    pub fn merged_reference(
-        ty: Option<impl Into<TypeReference>>,
-        value_ty: Option<impl Into<TypeReference>>,
-        namespace_ty: Option<impl Into<TypeReference>>,
-    ) -> Self {
-        Self::MergedReference(Box::new(MergedReference {
-            ty: ty.map(Into::into),
-            value_ty: value_ty.map(Into::into),
-            namespace_ty: namespace_ty.map(Into::into),
-        }))
-    }
-
     /// Returns the type with inference up to the level supported by the given `resolver`.
     #[inline]
     pub fn inferred(&self, resolver: &mut dyn TypeResolver) -> Self {
@@ -547,8 +515,80 @@ impl TypeData {
         }
     }
 
+    pub fn merged_reference(
+        ty: Option<impl Into<TypeReference>>,
+        value_ty: Option<impl Into<TypeReference>>,
+        namespace_ty: Option<impl Into<TypeReference>>,
+    ) -> Self {
+        Self::MergedReference(Box::new(MergedReference {
+            ty: ty.map(Into::into),
+            value_ty: value_ty.map(Into::into),
+            namespace_ty: namespace_ty.map(Into::into),
+        }))
+    }
+
     pub fn reference(reference: impl Into<TypeReference>) -> Self {
         Self::Reference(reference.into())
+    }
+
+    /// Returns whether the given `instance` wrapper should be stripped from
+    /// this type.
+    ///
+    /// [`TypeData::InstanceOf`] exists primarily in order to distinguish
+    /// classes from their instances. When referencing members of a class, you
+    /// will access its static members, whereas when you reference members of an
+    /// instance of a class, you will access its non-static members.
+    ///
+    /// Unfortunately, before resolving has taken place, we can't know whether a
+    /// given symbol refers to a class or any other type, so we need to
+    /// defensively wrap all references with [`TypeData::InstanceOf`] in places
+    /// where an instance is expected. For most types however, this is overkill,
+    /// and we should strip these wrappers again to ease analysis elsewhere.
+    ///
+    /// Then there is a second use for [`TypeData::InstanceOf`], which is to
+    /// assign concrete types to generic type parameters. For some types,
+    /// flattening instances makes sense _unless one of the generics is set_.
+    pub fn should_flatten_instance(&self, instance: &TypeInstance) -> bool {
+        match self {
+            Self::AnyKeyword
+            | Self::BigInt
+            | Self::Boolean
+            | Self::Conditional
+            | Self::Global
+            | Self::ImportNamespace(_)
+            | Self::Literal(_)
+            | Self::Module(_)
+            | Self::Namespace(_)
+            | Self::NeverKeyword
+            | Self::Null
+            | Self::Number
+            | Self::ObjectKeyword
+            | Self::String
+            | Self::Symbol
+            | Self::ThisKeyword
+            | Self::Undefined
+            | Self::Unknown
+            | Self::UnknownKeyword
+            | Self::VoidKeyword => true,
+            Self::Constructor(_)
+            | Self::Function(_)
+            | Self::InstanceOf(_)
+            | Self::Interface(_)
+            | Self::Intersection(_)
+            | Self::Object(_)
+            | Self::Tuple(_)
+            | Self::Union(_) => instance.type_parameters.is_empty(),
+            Self::Class(_)
+            | Self::Generic(_)
+            | Self::MergedReference(_)
+            // For references, we don't know. If a reference was pointing to a
+            // class, stripping the instance would change its meaning.
+            | Self::Reference(_)
+            | Self::TypeOperator(_)
+            | Self::TypeofExpression(_)
+            | Self::TypeofType(_)
+            | Self::TypeofValue(_) => false,
+        }
     }
 
     pub fn type_parameters(&self) -> Option<&[TypeReference]> {
@@ -561,23 +601,9 @@ impl TypeData {
         }
     }
 
-    /// Creates a union of type references.
-    ///
-    /// References are automatically deduplicated. If only a single type
-    /// remains, an instance of `Self::Reference` is returned instead of
-    /// `Self::Union`.
-    pub fn union_of(mut types: Vec<TypeReference>) -> Self {
-        types.dedup();
-        match types.len().cmp(&1) {
-            Ordering::Greater => Self::Union(Box::new(Union(types.into()))),
-            Ordering::Equal => Self::reference(types.remove(0)),
-            Ordering::Less => Self::unknown(),
-        }
-    }
-
     #[inline]
     pub fn unknown() -> Self {
-        Self::reference(GLOBAL_UNKNOWN_ID)
+        Self::Reference(TypeReference::Resolved(GLOBAL_UNKNOWN_ID))
     }
 }
 
@@ -631,6 +657,35 @@ pub struct MergedReference {
     pub ty: Option<TypeReference>,
     pub value_ty: Option<TypeReference>,
     pub namespace_ty: Option<TypeReference>,
+}
+
+impl MergedReference {
+    /// Maps the references using the given `mapper` function.
+    ///
+    /// Returns a [`TypeData::MergedReference`] if multiple mapped references
+    /// remain, and a regular [`TypeData::Reference`] if only a single reference
+    /// remains.
+    ///
+    /// Returns `None` if all references are mapped to `None`.
+    pub fn map_references(
+        &self,
+        mapper: impl Fn(&TypeReference) -> Option<TypeReference>,
+    ) -> Option<TypeData> {
+        let ty = self.ty.as_ref().and_then(&mapper);
+        let value_ty = self.value_ty.as_ref().and_then(&mapper);
+        let namespace_ty = self.namespace_ty.as_ref().and_then(&mapper);
+        match (ty, value_ty, namespace_ty) {
+            (None, None, None) => None,
+            (Some(reference), None, None)
+            | (None, Some(reference), None)
+            | (None, None, Some(reference)) => Some(TypeData::Reference(reference)),
+            (ty, value_ty, namespace_ty) => Some(TypeData::from(Self {
+                ty,
+                value_ty,
+                namespace_ty,
+            })),
+        }
+    }
 }
 
 /// A function definition.
@@ -1040,7 +1095,10 @@ pub enum TypeofExpression {
     BitwiseNot(TypeofBitwiseNotExpression),
     Call(TypeofCallExpression),
     Destructure(TypeofDestructureExpression),
+    LogicalAnd(TypeofLogicalAndExpression),
+    LogicalOr(TypeofLogicalOrExpression),
     New(TypeofNewExpression),
+    NullishCoalescing(TypeofNullishCoalescingExpression),
     StaticMember(TypeofStaticMemberExpression),
     Super(TypeofThisOrSuperExpression),
     This(TypeofThisOrSuperExpression),
@@ -1088,6 +1146,18 @@ pub enum DestructureField {
 }
 
 #[derive(Clone, Debug, Eq, Hash, PartialEq, Resolvable)]
+pub struct TypeofLogicalAndExpression {
+    pub left: TypeReference,
+    pub right: TypeReference,
+}
+
+#[derive(Clone, Debug, Eq, Hash, PartialEq, Resolvable)]
+pub struct TypeofLogicalOrExpression {
+    pub left: TypeReference,
+    pub right: TypeReference,
+}
+
+#[derive(Clone, Debug, Eq, Hash, PartialEq, Resolvable)]
 pub struct TypeofNewExpression {
     pub callee: TypeReference,
     pub arguments: Box<[CallArgumentType]>,
@@ -1097,6 +1167,12 @@ pub struct TypeofNewExpression {
 pub enum CallArgumentType {
     Argument(TypeReference),
     Spread(TypeReference),
+}
+
+#[derive(Clone, Debug, Eq, Hash, PartialEq, Resolvable)]
+pub struct TypeofNullishCoalescingExpression {
+    pub left: TypeReference,
+    pub right: TypeReference,
 }
 
 #[derive(Clone, Debug, Eq, Hash, PartialEq, Resolvable)]

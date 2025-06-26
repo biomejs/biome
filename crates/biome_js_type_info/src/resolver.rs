@@ -363,6 +363,11 @@ impl<'a> ResolvedTypeData<'a> {
         self.id
     }
 
+    #[inline]
+    pub fn should_flatten_instance(self, instance: &TypeInstance) -> bool {
+        self.as_raw_data().should_flatten_instance(instance)
+    }
+
     /// Converts the resolved data to owned [`TypeData`] with the module ID from
     /// the [`ResolverId`] applied to all its references.
     pub fn to_data(self) -> TypeData {

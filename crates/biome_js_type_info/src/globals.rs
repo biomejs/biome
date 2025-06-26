@@ -14,7 +14,7 @@ use crate::{
     Class, Function, FunctionParameter, GenericTypeParameter, Literal, Resolvable,
     ResolvedTypeData, ResolvedTypeId, ReturnType, ScopeId, TypeData, TypeId, TypeInstance,
     TypeMember, TypeMemberKind, TypeReference, TypeReferenceQualifier, TypeResolver,
-    TypeResolverLevel, TypeStore, flattening::MAX_FLATTEN_DEPTH,
+    TypeResolverLevel, TypeStore, Union, flattening::MAX_FLATTEN_DEPTH,
 };
 
 const GLOBAL_LEVEL: TypeResolverLevel = TypeResolverLevel::Global;
@@ -320,7 +320,7 @@ impl Default for GlobalsResolver {
             string_literal("string"),
             string_literal("symbol"),
             string_literal("undefined"),
-            TypeData::union_of(vec![
+            TypeData::Union(Box::new(Union(Box::new([
                 GLOBAL_BIGINT_STRING_LITERAL_ID.into(),
                 GLOBAL_BOOLEAN_STRING_LITERAL_ID.into(),
                 GLOBAL_FUNCTION_STRING_LITERAL_ID.into(),
@@ -329,7 +329,7 @@ impl Default for GlobalsResolver {
                 GLOBAL_STRING_STRING_LITERAL_ID.into(),
                 GLOBAL_SYMBOL_STRING_LITERAL_ID.into(),
                 GLOBAL_UNDEFINED_STRING_LITERAL_ID.into(),
-            ]),
+            ])))),
             TypeData::from(GenericTypeParameter {
                 name: Text::Static("T"),
                 constraint: TypeReference::Unknown,

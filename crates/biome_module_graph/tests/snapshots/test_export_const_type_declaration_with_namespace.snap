@@ -37,7 +37,7 @@ Imports {
 ## Registered types
 
 ```
-Module TypeId(0) => instanceof string
+Module TypeId(0) => string
 
 Module TypeId(1) => sync Function "foo" {
   accepts: {

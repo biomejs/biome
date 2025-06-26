@@ -1588,10 +1588,7 @@ const { mutate } = useSWRConfig();
     let _use_swr_config_ty_string = format!("{:?}", use_swr_config_ty.deref()); // for debugging
     assert!(use_swr_config_ty.is_function_with_return_type(|return_ty| {
         let _return_ty_string = format!("{:?}", return_ty.deref()); // for debugging
-        return_ty.is_instance_of(|ty| {
-            let _ty_string = format!("{:?}", ty.deref()); // for debugging
-            ty.is_interface()
-        })
+        return_ty.is_interface()
     }));
 
     let mutate_id = resolver
@@ -1599,10 +1596,14 @@ const { mutate } = useSWRConfig();
         .expect("mutate variable not found");
     let mutate_ty = resolver.resolved_type_for_id(mutate_id);
     let _mutate_ty_string = format!("{:?}", mutate_ty.deref()); // for debugging
-    assert!(mutate_ty.is_function_with_return_type(|return_ty| {
-        let _return_ty_string = format!("{:?}", return_ty.deref()); // for debugging
-        return_ty.is_promise_instance()
-    }));
+    assert!(
+        mutate_ty.is_instance_of(|instance_ty| instance_ty.is_function_with_return_type(
+            |return_ty| {
+                let _return_ty_string = format!("{:?}", return_ty.deref()); // for debugging
+                return_ty.is_promise_instance()
+            }
+        ))
+    );
 
     let snapshot =
         ModuleGraphSnapshot::new(module_graph.as_ref(), &fs).with_resolver(resolver.as_ref());
@@ -1739,10 +1740,7 @@ fn test_resolve_swr_types() {
 
     let mutate_ty = resolver.resolved_type_for_id(mutate_id);
     let _mutate_ty_string = format!("{:?}", mutate_ty.deref()); // for debugging
-    assert!(mutate_ty.is_instance_of(|instance_ty| {
-        let _instance_ty_string = format!("{:?}", instance_ty.deref()); // for debugging
-        instance_ty.is_interface_with_member(|member| member.kind().is_call_signature())
-    }));
+    assert!(mutate_ty.is_interface_with_member(|member| member.kind().is_call_signature()));
 
     let mutate_result_id = resolver
         .resolve_type_of(&Text::Static("mutateResult"), ScopeId::GLOBAL)
