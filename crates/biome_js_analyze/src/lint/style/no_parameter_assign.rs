@@ -105,7 +105,7 @@ declare_lint_rule! {
     /// }
     /// ```
     ///
-    /// ```js,use_options,diagnostic
+    /// ```js,use_options,expect_diagnostic
     /// function update(obj) {
     ///     obj.key = "value"; // Diagnostic: Assignment to a property of function parameter is not allowed.
     /// }
