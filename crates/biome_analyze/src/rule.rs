@@ -36,10 +36,8 @@ pub struct RuleMetadata {
     pub recommended: bool,
     /// The kind of fix
     pub fix_kind: FixKind,
-    /// The source URL of the rule
-    pub sources: &'static [RuleSource],
-    /// The source kind of the rule
-    pub source_kind: Option<RuleSourceKind>,
+    /// The sources of the rule
+    pub sources: &'static [RuleSourceWithKind],
     /// The default severity of the rule
     pub severity: Severity,
     /// Domains applied by this rule
@@ -220,6 +218,22 @@ impl Ord for RuleSource {
 }
 
 impl RuleSource {
+    /// The rule has the same logic as the declared rule.
+    pub const fn same(self) -> RuleSourceWithKind {
+        RuleSourceWithKind {
+            kind: RuleSourceKind::SameLogic,
+            source: self,
+        }
+    }
+
+    /// The rule has been a source of inspiration for the declared rule.
+    pub const fn inspired(self) -> RuleSourceWithKind {
+        RuleSourceWithKind {
+            kind: RuleSourceKind::Inspired,
+            source: self,
+        }
+    }
+
     pub fn as_rule_name(&self) -> &'static str {
         match self {
             Self::Clippy(rule_name)
@@ -340,7 +354,7 @@ impl RuleSource {
     }
 }
 
-#[derive(Debug, Default, Clone, Copy)]
+#[derive(Debug, Default, Clone, Copy, Eq, PartialEq, Ord, PartialOrd, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize))]
 #[cfg_attr(feature = "serde", serde(rename_all = "camelCase"))]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
@@ -350,6 +364,15 @@ pub enum RuleSourceKind {
     SameLogic,
     /// The rule deviate of the logic of the source
     Inspired,
+}
+
+#[derive(Debug, Clone)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize))]
+#[cfg_attr(feature = "serde", serde(rename_all = "camelCase"))]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+pub struct RuleSourceWithKind {
+    pub kind: RuleSourceKind,
+    pub source: RuleSource,
 }
 
 impl RuleSourceKind {
@@ -472,7 +495,6 @@ impl RuleMetadata {
             recommended: false,
             fix_kind: FixKind::None,
             sources: &[],
-            source_kind: None,
             severity: Severity::Information,
             domains: &[],
         }
@@ -493,16 +515,8 @@ impl RuleMetadata {
         self
     }
 
-    pub const fn sources(mut self, sources: &'static [RuleSource]) -> Self {
+    pub const fn sources(mut self, sources: &'static [RuleSourceWithKind]) -> Self {
         self.sources = sources;
-        //if self.source_kind.is_none() {
-        //    self.source_kind = Some(RuleSourceKind::SameLogic);
-        //}
-        self
-    }
-
-    pub const fn source_kind(mut self, source_kind: RuleSourceKind) -> Self {
-        self.source_kind = Some(source_kind);
         self
     }
 

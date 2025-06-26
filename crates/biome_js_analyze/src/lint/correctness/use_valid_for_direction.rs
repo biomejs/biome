@@ -45,7 +45,7 @@ declare_lint_rule! {
         version: "1.0.0",
         name: "useValidForDirection",
         language: "js",
-        sources: &[RuleSource::Eslint("for-direction")],
+        sources: &[RuleSource::Eslint("for-direction").same()],
         recommended: true,
         severity: Severity::Error,
     }

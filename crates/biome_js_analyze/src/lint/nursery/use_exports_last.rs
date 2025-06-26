@@ -37,7 +37,7 @@ declare_lint_rule! {
         name: "useExportsLast",
         language: "js",
         recommended: false,
-        sources: &[RuleSource::EslintImport("exports-last")],
+        sources: &[RuleSource::EslintImport("exports-last").same()],
     }
 }
 

@@ -54,7 +54,7 @@ declare_lint_rule! {
         name: "useParseIntRadix",
         language: "js",
         recommended: true,
-        sources: &[RuleSource::Eslint("radix")],
+        sources: &[RuleSource::Eslint("radix").same()],
         fix_kind: FixKind::Unsafe,
     }
 }

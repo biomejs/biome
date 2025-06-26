@@ -62,7 +62,7 @@ declare_lint_rule! {
         version: "1.2.0",
         name: "noConfusingVoidType",
         language: "ts",
-        sources: &[RuleSource::EslintTypeScript("no-invalid-void-type")],
+        sources: &[RuleSource::EslintTypeScript("no-invalid-void-type").same()],
         recommended: true,
         severity: Severity::Warning,
         fix_kind: FixKind::Unsafe,

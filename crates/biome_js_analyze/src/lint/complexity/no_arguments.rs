@@ -29,7 +29,7 @@ declare_lint_rule! {
         version: "1.0.0",
         name: "noArguments",
         language: "js",
-        sources: &[RuleSource::Eslint("prefer-rest-params")],
+        sources: &[RuleSource::Eslint("prefer-rest-params").same()],
         recommended: true,
         severity: Severity::Warning,
     }

@@ -61,7 +61,7 @@ declare_lint_rule! {
         version: "1.0.0",
         name: "noUselessSwitchCase",
         language: "js",
-        sources: &[RuleSource::EslintUnicorn("no-useless-switch-case")],
+        sources: &[RuleSource::EslintUnicorn("no-useless-switch-case").same()],
         recommended: true,
         severity: Severity::Information,
         fix_kind: FixKind::Unsafe,

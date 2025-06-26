@@ -93,7 +93,7 @@ declare_lint_rule! {
         version: "1.3.0",
         name: "noUnusedImports",
         language: "js",
-        sources: &[RuleSource::EslintUnusedImports("no-unused-imports")],
+        sources: &[RuleSource::EslintUnusedImports("no-unused-imports").same()],
         recommended: true,
         severity: Severity::Warning,
         fix_kind: FixKind::Unsafe,

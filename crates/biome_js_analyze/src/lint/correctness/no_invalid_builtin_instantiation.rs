@@ -76,8 +76,8 @@ declare_lint_rule! {
         name: "noInvalidBuiltinInstantiation",
         language: "js",
         sources: &[
-            RuleSource::EslintUnicorn("new-for-builtins"),
-            RuleSource::Eslint("no-new-native-nonconstructor"),
+            RuleSource::EslintUnicorn("new-for-builtins").same(),
+            RuleSource::Eslint("no-new-native-nonconstructor").same(),
         ],
         recommended: true,
         severity: Severity::Error,

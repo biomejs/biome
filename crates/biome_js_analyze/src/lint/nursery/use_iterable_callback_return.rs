@@ -79,7 +79,7 @@ declare_lint_rule! {
         version: "2.0.0",
         name: "useIterableCallbackReturn",
         language: "js",
-        sources: &[RuleSource::Eslint("array-callback-return")],
+        sources: &[RuleSource::Eslint("array-callback-return").same()],
         severity: Severity::Error,
         recommended: true,
     }

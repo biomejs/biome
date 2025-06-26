@@ -53,8 +53,8 @@ declare_lint_rule! {
         name: "useDefaultParameterLast",
         language: "js",
         sources: &[
-            RuleSource::Eslint("default-param-last"),
-            RuleSource::EslintTypeScript("default-param-last")
+            RuleSource::Eslint("default-param-last").same(),
+            RuleSource::EslintTypeScript("default-param-last").same(),
         ],
         recommended: false,
         severity: Severity::Warning,

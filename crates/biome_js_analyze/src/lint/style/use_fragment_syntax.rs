@@ -31,7 +31,7 @@ declare_lint_rule! {
         version: "1.0.0",
         name: "useFragmentSyntax",
         language: "jsx",
-        sources: &[RuleSource::EslintReact("jsx-fragments")],
+        sources: &[RuleSource::EslintReact("jsx-fragments").same()],
         recommended: false,
         severity: Severity::Information,
         fix_kind: FixKind::Unsafe,

@@ -33,7 +33,7 @@ declare_lint_rule! {
         language: "css",
         recommended: true,
         severity: Severity::Error,
-        sources: &[RuleSource::Stylelint("no-invalid-position-at-import-rule")],
+        sources: &[RuleSource::Stylelint("no-invalid-position-at-import-rule").same()],
     }
 }
 

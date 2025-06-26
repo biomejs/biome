@@ -74,7 +74,7 @@ declare_lint_rule! {
         language: "css",
         recommended: true,
         severity: Severity::Error,
-        sources: &[RuleSource::Stylelint("declaration-block-no-shorthand-property-overrides")],
+        sources: &[RuleSource::Stylelint("declaration-block-no-shorthand-property-overrides").same()],
     }
 }
 

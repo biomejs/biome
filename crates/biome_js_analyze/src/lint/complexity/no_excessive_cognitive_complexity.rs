@@ -73,7 +73,7 @@ declare_lint_rule! {
         version: "1.0.0",
         name: "noExcessiveCognitiveComplexity",
         language: "js",
-        sources: &[RuleSource::EslintSonarJs("cognitive-complexity")],
+        sources: &[RuleSource::EslintSonarJs("cognitive-complexity").same()],
         recommended: false,
         severity: Severity::Information,
     }

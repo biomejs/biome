@@ -2,8 +2,8 @@ use std::borrow::Cow;
 use std::cmp::Ordering;
 
 use biome_analyze::{
-    Ast, FixKind, Rule, RuleAction, RuleDiagnostic, RuleSource, RuleSourceKind,
-    context::RuleContext, declare_source_rule,
+    Ast, FixKind, Rule, RuleAction, RuleDiagnostic, RuleSource, context::RuleContext,
+    declare_source_rule,
 };
 use biome_console::markup;
 use biome_deserialize::TextRange;
@@ -76,8 +76,7 @@ declare_source_rule! {
         name: "useSortedKeys",
         language: "js",
         recommended: false,
-        sources: &[RuleSource::EslintPerfectionist("sort-objects")],
-        source_kind: RuleSourceKind::Inspired,
+        sources: &[RuleSource::EslintPerfectionist("sort-objects").inspired()],
         fix_kind: FixKind::Safe,
     }
 }

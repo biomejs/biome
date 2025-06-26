@@ -48,7 +48,7 @@ declare_lint_rule! {
         version: "1.3.0",
         name: "useAsConstAssertion",
         language: "ts",
-        sources: &[RuleSource::EslintTypeScript("prefer-as-const")],
+        sources: &[RuleSource::EslintTypeScript("prefer-as-const").same()],
         recommended: false,
         severity: Severity::Information,
         fix_kind: FixKind::Safe,

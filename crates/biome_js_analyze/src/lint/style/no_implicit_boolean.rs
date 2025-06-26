@@ -1,6 +1,5 @@
 use biome_analyze::{
-    Ast, FixKind, Rule, RuleDiagnostic, RuleSource, RuleSourceKind, context::RuleContext,
-    declare_lint_rule,
+    Ast, FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
 use biome_diagnostics::Severity;
@@ -48,11 +47,10 @@ declare_lint_rule! {
         version: "1.0.0",
         name: "noImplicitBoolean",
         language: "jsx",
-        sources: &[RuleSource::EslintReact("jsx-boolean-value")],
+        sources: &[RuleSource::EslintReact("jsx-boolean-value").inspired()],
         recommended: false,
         severity: Severity::Information,
         fix_kind: FixKind::Safe,
-        source_kind: RuleSourceKind::Inspired,
     }
 }
 

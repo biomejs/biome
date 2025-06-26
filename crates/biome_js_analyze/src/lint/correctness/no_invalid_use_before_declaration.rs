@@ -63,8 +63,8 @@ declare_lint_rule! {
         name: "noInvalidUseBeforeDeclaration",
         language: "js",
         sources: &[
-            RuleSource::Eslint("no-use-before-define"),
-            RuleSource::EslintTypeScript("no-use-before-define"),
+            RuleSource::Eslint("no-use-before-define").same(),
+            RuleSource::EslintTypeScript("no-use-before-define").same(),
         ],
         recommended: true,
         severity: Severity::Error,

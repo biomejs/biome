@@ -108,7 +108,7 @@ declare_lint_rule! {
         language: "js",
         recommended: false,
         sources: &[
-            RuleSource::Eslint("no-implicit-coercion"),
+            RuleSource::Eslint("no-implicit-coercion").same(),
         ],
         fix_kind: FixKind::Unsafe,
     }

@@ -41,7 +41,7 @@ declare_lint_rule! {
         language: "js",
         recommended: true,
         severity: Severity::Information,
-        sources: &[RuleSource::Clippy("flat_map_identity")],
+        sources: &[RuleSource::Clippy("flat_map_identity").same()],
         fix_kind: FixKind::Unsafe,
     }
 }

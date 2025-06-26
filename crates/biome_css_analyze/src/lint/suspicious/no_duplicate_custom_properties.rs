@@ -40,7 +40,7 @@ declare_lint_rule! {
         language: "css",
         recommended: true,
         severity: Severity::Error,
-        sources: &[RuleSource::Stylelint("declaration-block-no-duplicate-custom-properties")],
+        sources: &[RuleSource::Stylelint("declaration-block-no-duplicate-custom-properties").same()],
     }
 }
 

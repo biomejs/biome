@@ -27,7 +27,7 @@ declare_lint_rule! {
         version: "1.0.0",
         name: "noWith",
         language: "js",
-        sources: &[RuleSource::Eslint("no-with")],
+        sources: &[RuleSource::Eslint("no-with").same()],
         recommended: true,
         severity: Severity::Error,
     }

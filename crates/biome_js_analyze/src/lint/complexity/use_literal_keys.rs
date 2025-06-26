@@ -50,9 +50,9 @@ declare_lint_rule! {
         name: "useLiteralKeys",
         language: "js",
         sources: &[
-            RuleSource::Eslint("dot-notation"),
-            RuleSource::Eslint("no-useless-computed-key"),
-            RuleSource::EslintTypeScript("dot-notation")
+            RuleSource::Eslint("dot-notation").same(),
+            RuleSource::Eslint("no-useless-computed-key").same(),
+            RuleSource::EslintTypeScript("dot-notation").same(),
         ],
         recommended: true,
         severity: Severity::Information,

@@ -10,8 +10,7 @@ use crate::{
     },
 };
 use biome_analyze::{
-    FixKind, Rule, RuleDiagnostic, RuleSource, RuleSourceKind, context::RuleContext,
-    declare_lint_rule,
+    FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
 use biome_deserialize::{
@@ -736,8 +735,7 @@ declare_lint_rule! {
         version: "1.0.0",
         name: "useNamingConvention",
         language: "ts",
-        sources: &[RuleSource::EslintTypeScript("naming-convention")],
-        source_kind: RuleSourceKind::Inspired,
+        sources: &[RuleSource::EslintTypeScript("naming-convention").inspired()],
         recommended: false,
         severity: Severity::Information,
         fix_kind: FixKind::Safe,

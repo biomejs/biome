@@ -1,7 +1,6 @@
 use crate::JsRuleAction;
 use biome_analyze::{
-    Ast, FixKind, Rule, RuleDiagnostic, RuleSource, RuleSourceKind, context::RuleContext,
-    declare_lint_rule,
+    Ast, FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
 use biome_diagnostics::Severity;
@@ -38,9 +37,8 @@ declare_lint_rule! {
         version: "2.0.0",
         name: "noTsIgnore",
         language: "js",
-        sources: &[RuleSource::EslintTypeScript("ban-ts-comment")],
+        sources: &[RuleSource::EslintTypeScript("ban-ts-comment").inspired()],
         recommended: true,
-        source_kind: RuleSourceKind::Inspired,
         fix_kind: FixKind::Safe,
         severity: Severity::Warning,
     }

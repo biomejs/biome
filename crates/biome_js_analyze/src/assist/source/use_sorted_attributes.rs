@@ -1,8 +1,8 @@
 use std::{borrow::Cow, cmp::Ordering, iter::zip};
 
 use biome_analyze::{
-    Ast, FixKind, Rule, RuleAction, RuleDiagnostic, RuleSource, RuleSourceKind,
-    context::RuleContext, declare_source_rule,
+    Ast, FixKind, Rule, RuleAction, RuleDiagnostic, RuleSource, context::RuleContext,
+    declare_source_rule,
 };
 use biome_console::markup;
 use biome_deserialize::TextRange;
@@ -42,8 +42,7 @@ declare_source_rule! {
         name: "useSortedAttributes",
         language: "jsx",
         recommended: false,
-        sources: &[RuleSource::EslintReact("jsx-sort-props")],
-        source_kind: RuleSourceKind::SameLogic,
+        sources: &[RuleSource::EslintReact("jsx-sort-props").same()],
         fix_kind: FixKind::Safe,
     }
 }

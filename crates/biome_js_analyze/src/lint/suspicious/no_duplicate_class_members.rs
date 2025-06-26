@@ -90,8 +90,8 @@ declare_lint_rule! {
         name: "noDuplicateClassMembers",
         language: "js",
         sources: &[
-            RuleSource::Eslint("no-dupe-class-members"),
-            RuleSource::EslintTypeScript("no-dupe-class-members")
+            RuleSource::Eslint("no-dupe-class-members").same(),
+            RuleSource::EslintTypeScript("no-dupe-class-members").same(),
         ],
         recommended: true,
         severity: Severity::Error,

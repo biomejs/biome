@@ -130,7 +130,7 @@ declare_lint_rule! {
         language: "js",
         recommended: false,
         severity: Severity::Information,
-        sources: &[RuleSource::EslintUnicorn("explicit-length-check")],
+        sources: &[RuleSource::EslintUnicorn("explicit-length-check").same()],
         fix_kind: FixKind::Unsafe,
     }
 }

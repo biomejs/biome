@@ -1,6 +1,6 @@
 use biome_analyze::{
     AddVisitor, Phases, QueryMatch, Queryable, Rule, RuleDiagnostic, RuleDomain, RuleSource,
-    RuleSourceKind, ServiceBag, Visitor, context::RuleContext, declare_lint_rule,
+    ServiceBag, Visitor, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
 use biome_diagnostics::Severity;
@@ -43,8 +43,7 @@ declare_lint_rule! {
         language: "js",
         recommended: true,
         severity: Severity::Error,
-        sources: &[RuleSource::EslintJest("no-export")],
-        source_kind: RuleSourceKind::Inspired,
+        sources: &[RuleSource::EslintJest("no-export").inspired()],
         domains: &[RuleDomain::Test],
     }
 }

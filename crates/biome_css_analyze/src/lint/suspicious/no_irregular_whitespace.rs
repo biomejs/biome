@@ -44,7 +44,7 @@ declare_lint_rule! {
         version: "1.9.0",
         name: "noIrregularWhitespace",
         language: "css",
-        sources: &[RuleSource::Stylelint("no-irregular-whitespace")],
+        sources: &[RuleSource::Stylelint("no-irregular-whitespace").same()],
         recommended: true,
         severity: Severity::Warning,
     }

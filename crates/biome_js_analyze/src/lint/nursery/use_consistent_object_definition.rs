@@ -1,8 +1,8 @@
 use serde::{Deserialize, Serialize};
 
 use biome_analyze::{
-    Ast, FixKind, Rule, RuleAction, RuleDiagnostic, RuleSource, RuleSourceKind,
-    context::RuleContext, declare_lint_rule,
+    Ast, FixKind, Rule, RuleAction, RuleDiagnostic, RuleSource, context::RuleContext,
+    declare_lint_rule,
 };
 use biome_console::markup;
 use biome_deserialize_macros::Deserializable;
@@ -117,8 +117,7 @@ declare_lint_rule! {
         recommended: false,
         fix_kind: FixKind::Safe,
         severity: Severity::Error,
-        sources: &[RuleSource::Eslint("object-shorthand")],
-        source_kind: RuleSourceKind::Inspired,
+        sources: &[RuleSource::Eslint("object-shorthand").inspired()],
     }
 }
 

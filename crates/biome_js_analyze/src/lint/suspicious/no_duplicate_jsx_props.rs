@@ -35,7 +35,7 @@ declare_lint_rule! {
         version: "1.0.0",
         name: "noDuplicateJsxProps",
         language: "jsx",
-        sources: &[RuleSource::EslintReact("jsx-no-duplicate-props")],
+        sources: &[RuleSource::EslintReact("jsx-no-duplicate-props").same()],
         recommended: true,
         severity: Severity::Error,
     }

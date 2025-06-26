@@ -1,5 +1,4 @@
 use biome_analyze::RuleSource;
-use biome_analyze::RuleSourceKind;
 use biome_analyze::{Ast, Rule, RuleDiagnostic, context::RuleContext, declare_lint_rule};
 use biome_console::markup;
 use biome_graphql_syntax::GraphqlEnumValueDefinition;
@@ -33,8 +32,7 @@ declare_lint_rule! {
         name: "useNamingConvention",
         language: "graphql",
         recommended: false,
-        sources: &[RuleSource::EslintGraphqlSchemaLinter("enum-values-all-caps")],
-        source_kind: RuleSourceKind::Inspired,
+        sources: &[RuleSource::EslintGraphqlSchemaLinter("enum-values-all-caps").inspired()],
     }
 }
 

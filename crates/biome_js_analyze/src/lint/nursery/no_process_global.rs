@@ -53,7 +53,7 @@ declare_lint_rule! {
         version: "2.0.0",
         name: "noProcessGlobal",
         language: "js",
-        sources: &[RuleSource::DenoLint("no-process-global")],
+        sources: &[RuleSource::DenoLint("no-process-global").same()],
         recommended: false,
         fix_kind: FixKind::Safe,
     }

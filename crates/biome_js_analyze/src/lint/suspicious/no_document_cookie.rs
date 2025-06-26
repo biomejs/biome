@@ -54,7 +54,7 @@ declare_lint_rule! {
         version: "1.9.4",
         name: "noDocumentCookie",
         language: "js",
-        sources: &[RuleSource::EslintUnicorn("no-document-cookie")],
+        sources: &[RuleSource::EslintUnicorn("no-document-cookie").same()],
         recommended: true,
         severity: Severity::Warning,
     }

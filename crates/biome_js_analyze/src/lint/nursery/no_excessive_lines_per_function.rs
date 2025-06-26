@@ -1,8 +1,6 @@
 use crate::services::semantic::Semantic;
 use ::serde::{Deserialize, Serialize};
-use biome_analyze::{
-    Rule, RuleDiagnostic, RuleSource, RuleSourceKind, context::RuleContext, declare_lint_rule,
-};
+use biome_analyze::{Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule};
 use biome_console::markup;
 use biome_deserialize_macros::Deserializable;
 use biome_js_syntax::{
@@ -133,8 +131,7 @@ declare_lint_rule! {
         name: "noExcessiveLinesPerFunction",
         language: "js",
         recommended: false,
-        sources: &[RuleSource::Eslint("max-lines-per-function")],
-        source_kind: RuleSourceKind::Inspired,
+        sources: &[RuleSource::Eslint("max-lines-per-function").inspired()],
     }
 }
 

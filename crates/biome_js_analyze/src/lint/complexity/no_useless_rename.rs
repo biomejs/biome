@@ -61,7 +61,7 @@ declare_lint_rule! {
         version: "1.0.0",
         name: "noUselessRename",
         language: "js",
-        sources: &[RuleSource::Eslint("no-useless-rename")],
+        sources: &[RuleSource::Eslint("no-useless-rename").same()],
         recommended: true,
         severity: Severity::Information,
         fix_kind: FixKind::Safe,

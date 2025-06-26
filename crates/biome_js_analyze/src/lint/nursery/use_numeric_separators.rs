@@ -1,6 +1,5 @@
 use biome_analyze::{
-    Ast, FixKind, Rule, RuleDiagnostic, RuleSource, RuleSourceKind, context::RuleContext,
-    declare_lint_rule,
+    Ast, FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
 use biome_js_syntax::{JsNumberLiteralExpression, JsSyntaxToken};
@@ -56,8 +55,7 @@ declare_lint_rule! {
         version: "2.0.0",
         name: "useNumericSeparators",
         language: "js",
-        sources: &[RuleSource::EslintUnicorn("numeric-separators-style"), RuleSource::Clippy("unreadable_literal")],
-        source_kind: RuleSourceKind::SameLogic,
+        sources: &[RuleSource::EslintUnicorn("numeric-separators-style").same(), RuleSource::Clippy("unreadable_literal").same()],
         recommended: false,
         fix_kind: FixKind::Safe,
     }

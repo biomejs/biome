@@ -114,7 +114,7 @@ declare_lint_rule! {
         version: "1.0.0",
         name: "noParameterAssign",
         language: "js",
-        sources: &[RuleSource::Eslint("no-param-reassign")],
+        sources: &[RuleSource::Eslint("no-param-reassign").same()],
         recommended: false,
         severity: Severity::Warning,
     }
