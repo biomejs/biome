@@ -1,6 +1,8 @@
-use std::collections::{BTreeMap, btree_map::Entry};
+use std::hash::{Hash, Hasher};
 
 use biome_rowan::Text;
+use hashbrown::{HashTable, hash_table::Entry};
+use rustc_hash::FxHasher;
 
 use crate::{
     CallArgumentType, DestructureField, Function, FunctionParameter, Literal, MAX_FLATTEN_DEPTH,
@@ -119,31 +121,7 @@ pub(super) fn flattened_expression(
                         .resolve_and_get(
                             &resolved.apply_module_id_to_reference(&subject_instance.ty),
                         )
-                        .map(|subject| {
-                            // We need to look up the prototype chain, which may
-                            // yield duplicate member names. We deduplicate
-                            // using a map before constructing a new object.
-                            let members: BTreeMap<Text, ResolvedTypeMember> = subject
-                                .all_members(resolver)
-                                .filter(|member| {
-                                    !member.is_static()
-                                        && !names.iter().any(|name| member.has_name(name))
-                                })
-                                .fold(BTreeMap::new(), |mut map, member| {
-                                    if let Some(name) = member.name() {
-                                        if let Entry::Vacant(entry) = map.entry(name) {
-                                            entry.insert(member);
-                                        }
-                                    }
-                                    map
-                                });
-                            TypeData::object_with_members(
-                                members
-                                    .into_values()
-                                    .map(ResolvedTypeMember::to_member)
-                                    .collect(),
-                            )
-                        })
+                        .map(|subject| flattened_rest_object(resolver, subject, names))
                 }
                 (subject @ TypeData::Class(_), DestructureField::Name(name)) => {
                     let member_ty = subject
@@ -177,27 +155,8 @@ pub(super) fn flattened_expression(
                         .resolve_and_get(&member.deref_ty(resolver))
                         .map(ResolvedTypeData::to_data)
                 }
-                (_, DestructureField::RestExcept(names)) => {
-                    // We need to look up the prototype chain, which may
-                    // yield duplicate member names. We deduplicate
-                    // using a map before constructing a new object.
-                    let members: BTreeMap<Text, ResolvedTypeMember> = resolved
-                        .all_members(resolver)
-                        .filter(|member| !names.iter().any(|name| member.has_name(name)))
-                        .fold(BTreeMap::new(), |mut map, member| {
-                            if let Some(name) = member.name() {
-                                if let Entry::Vacant(entry) = map.entry(name) {
-                                    entry.insert(member);
-                                }
-                            }
-                            map
-                        });
-                    Some(TypeData::object_with_members(
-                        members
-                            .into_values()
-                            .map(ResolvedTypeMember::to_member)
-                            .collect(),
-                    ))
+                (_, DestructureField::RestExcept(excluded_names)) => {
+                    Some(flattened_rest_object(resolver, resolved, excluded_names))
                 }
             }
         }
@@ -479,6 +438,51 @@ fn infer_generic_arg(
     }
 
     None
+}
+
+/// Creates a new object with all the non-static properties of `object`, except
+/// the given `excluded_names`.
+fn flattened_rest_object(
+    resolver: &dyn TypeResolver,
+    object: ResolvedTypeData,
+    excluded_names: &[Text],
+) -> TypeData {
+    // We need to look up the prototype chain, which may yield duplicate member
+    // names. We deduplicate using a hash table so that we can maintain the
+    // original order in a vector.
+    let mut table: HashTable<usize> = HashTable::default();
+    let mut members: Vec<TypeMember> = Vec::new();
+    for member in object.all_members(resolver) {
+        let Some(name) = &member.name() else {
+            continue;
+        };
+        if member.is_static() || excluded_names.contains(name) {
+            continue;
+        }
+
+        let entry = table.entry(
+            hash_text(name),
+            |i| members[*i].name().as_ref().is_some_and(|n| n == name),
+            |i| {
+                let name = members[*i].name();
+                let name = name.as_ref().expect("only named members may be added");
+                hash_text(name)
+            },
+        );
+        if let Entry::Vacant(entry) = entry {
+            let index = members.len();
+            members.push(member.to_member());
+            entry.insert(index);
+        }
+    }
+    TypeData::object_with_members(members.into())
+}
+
+#[inline(always)]
+fn hash_text(text: &Text) -> u64 {
+    let mut hash = FxHasher::default();
+    text.hash(&mut hash);
+    hash.finish()
 }
 
 #[inline]
