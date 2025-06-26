@@ -1386,88 +1386,6 @@ async fn pull_quick_fixes() -> Result<()> {
 }
 
 #[tokio::test]
-async fn pull_biome_quick_fixes_ignore_unsafe() -> Result<()> {
-    let factory = ServerFactory::default();
-    let (service, client) = factory.create().into_inner();
-    let (stream, sink) = client.split();
-    let mut server = Server::new(service);
-
-    let unsafe_fixable = Diagnostic {
-        range: Range {
-            start: Position {
-                line: 0,
-                character: 6,
-            },
-            end: Position {
-                line: 0,
-                character: 9,
-            },
-        },
-        severity: Some(DiagnosticSeverity::ERROR),
-        code: Some(NumberOrString::String(String::from(
-            "lint/suspicious/noDoubleEquals",
-        ))),
-        code_description: None,
-        source: Some(String::from("biome")),
-        message: String::from("Use === instead of ==."),
-        related_information: None,
-        tags: None,
-        data: None,
-    };
-
-    let (sender, _) = channel(CHANNEL_BUFFER_SIZE);
-    let reader = tokio::spawn(client_handler(stream, sink, sender));
-
-    server.initialize().await?;
-    server.initialized().await?;
-
-    server.open_document("if(a == 0) {}").await?;
-
-    let res: CodeActionResponse = server
-        .request(
-            "textDocument/codeAction",
-            "pull_code_actions",
-            CodeActionParams {
-                text_document: TextDocumentIdentifier {
-                    uri: uri!("document.js"),
-                },
-                range: Range {
-                    start: Position {
-                        line: 0,
-                        character: 6,
-                    },
-                    end: Position {
-                        line: 0,
-                        character: 6,
-                    },
-                },
-                context: CodeActionContext {
-                    diagnostics: vec![unsafe_fixable.clone()],
-                    only: Some(vec![CodeActionKind::new("quickfix.biome")]),
-                    ..Default::default()
-                },
-                work_done_progress_params: WorkDoneProgressParams {
-                    work_done_token: None,
-                },
-                partial_result_params: PartialResultParams {
-                    partial_result_token: None,
-                },
-            },
-        )
-        .await?
-        .context("codeAction returned None")?;
-
-    assert_eq!(res, vec![]);
-
-    server.close_document().await?;
-
-    server.shutdown().await?;
-    reader.abort();
-
-    Ok(())
-}
-
-#[tokio::test]
 async fn pull_biome_quick_fixes() -> Result<()> {
     let factory = ServerFactory::default();
     let (service, client) = factory.create().into_inner();
@@ -1621,7 +1539,12 @@ async fn pull_quick_fixes_include_unsafe() -> Result<()> {
                 },
                 context: CodeActionContext {
                     diagnostics: vec![unsafe_fixable.clone()],
-                    only: Some(vec![]),
+                    only: Some(
+                        DEFAULT_CODE_ACTION_CAPABILITIES
+                            .iter()
+                            .map(|s| CodeActionKind::from(*s))
+                            .collect::<Vec<_>>(),
+                    ),
                     ..Default::default()
                 },
                 work_done_progress_params: WorkDoneProgressParams {
@@ -2565,7 +2488,7 @@ async fn pull_fix_all() -> Result<()> {
     );
 
     let expected_action = CodeActionOrCommand::CodeAction(CodeAction {
-        title: String::from("Fix all auto-fixable issues"),
+        title: String::from("Apply all safe fixes (Biome)"),
         kind: Some(CodeActionKind::new("source.fixAll.biome")),
         diagnostics: Some(vec![
             fixable_diagnostic(0)?,

@@ -1,4 +1,4 @@
-use crate::capabilities::server_capabilities;
+use crate::capabilities::{DEFAULT_CODE_ACTION_CAPABILITIES, server_capabilities};
 use crate::diagnostics::{LspError, handle_lsp_error};
 use crate::requests::syntax_tree::{SYNTAX_TREE_REQUEST, SyntaxTreePayload};
 use crate::session::{
@@ -30,7 +30,7 @@ use tokio::task::spawn_blocking;
 use tower_lsp_server::jsonrpc::Result as LspResult;
 use tower_lsp_server::{ClientSocket, UriExt, lsp_types::*};
 use tower_lsp_server::{LanguageServer, LspService, Server};
-use tracing::{error, info, instrument, warn};
+use tracing::{debug, error, info, instrument, warn};
 
 pub struct LSPServer {
     pub(crate) session: SessionHandle,
@@ -219,6 +219,28 @@ impl LSPServer {
                     first_trigger_character: String::from("}"),
                     more_trigger_character: Some(vec![String::from("]"), String::from(")")]),
                 })))
+            },
+        );
+
+        let f = self.session.is_linting_and_formatting_disabled();
+        debug!("Requires configuration: {f}");
+        capabilities.add_capability(
+            "biome_code_action",
+            "textDocument/codeAction",
+            if self.session.is_linting_and_formatting_disabled() {
+                CapabilityStatus::Disable
+            } else {
+                CapabilityStatus::Enable(Some(json!(CodeActionProviderCapability::from(
+                    CodeActionOptions {
+                        code_action_kinds: Some(
+                            DEFAULT_CODE_ACTION_CAPABILITIES
+                                .iter()
+                                .map(|item| CodeActionKind::from(*item))
+                                .collect::<Vec<_>>(),
+                        ),
+                        ..Default::default()
+                    }
+                ))))
             },
         );
 

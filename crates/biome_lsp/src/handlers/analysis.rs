@@ -8,7 +8,7 @@ use biome_analyze::{
     SUPPRESSION_TOP_LEVEL_ACTION_CATEGORY, SourceActionKind,
 };
 use biome_configuration::analyzer::RuleSelector;
-use biome_diagnostics::{Applicability, Error};
+use biome_diagnostics::Error;
 use biome_fs::BiomePath;
 use biome_lsp_converters::from_proto;
 use biome_lsp_converters::line_index::LineIndex;
@@ -96,16 +96,12 @@ pub(crate) fn code_actions(
     }
 
     let mut has_fix_all = false;
-    let mut has_quick_fix = false;
     let mut filters = Vec::new();
     if let Some(filter) = &params.context.only {
         for kind in filter {
             let kind = kind.as_str();
             if FIX_ALL_CATEGORY.matches(kind) {
                 has_fix_all = true;
-            } else if ActionCategory::QuickFix(Cow::Borrowed("")).to_str() == kind {
-                // The action is a on-save quick-fixes
-                has_quick_fix = true;
             }
             filters.push(kind);
         }
@@ -190,39 +186,31 @@ pub(crate) fn code_actions(
         .actions
         .into_iter()
         .filter_map(|action| {
-            debug!("Action: {:?}", &action.category);
-            // Don't apply unsafe fixes when the code action is on-save quick-fixes
-            if has_quick_fix && action.suggestion.applicability == Applicability::MaybeIncorrect {
-                return None;
-            }
+            debug!(
+                "Action: {:?}, and applicability {:?}",
+                &action.category, &action.suggestion.applicability
+            );
             // Filter out source.organizeImports.biome action when assist is not supported.
             if action.category.matches("source.organizeImports.biome")
                 && !file_features.supports_assist()
             {
                 return None;
             }
-            // Filter out quickfix.biome action when lint is not supported.
-            if action.category.matches("quickfix.biome") && !file_features.supports_lint() {
+            // Filter out quickfix.biome action when lint and assist aren't
+            if action.category.matches("quickfix.biome")
+                && !file_features.supports_lint()
+                && !file_features.supports_assist()
+            {
                 return None;
             }
 
-            // Filter out suppressions if the linter isn't supported
+            // Filter out suppressions if the linter and assist aren't supported
             if (action.category.matches(SUPPRESSION_INLINE_ACTION_CATEGORY)
                 || action
                     .category
                     .matches(SUPPRESSION_TOP_LEVEL_ACTION_CATEGORY))
                 && !file_features.supports_lint()
-            {
-                return None;
-            }
-
-            // Filter out the suppressions if the client is requesting a fix all signal.
-            // Fix all should apply only the safe changes.
-            if has_fix_all
-                && (action.category.matches(SUPPRESSION_INLINE_ACTION_CATEGORY)
-                    || action
-                        .category
-                        .matches(SUPPRESSION_TOP_LEVEL_ACTION_CATEGORY))
+                && !file_features.supports_assist()
             {
                 return None;
             }
@@ -280,7 +268,7 @@ pub(crate) fn code_actions(
     Ok(Some(actions))
 }
 
-/// Generate a "fix all" code action for the given document
+/// Generate the code action `source.fixAll.biome` for the current document
 #[tracing::instrument(level = "debug", skip(session, url))]
 fn fix_all(
     session: &Session,
@@ -293,7 +281,7 @@ fn fix_all(
     let Some(doc) = session.document(url) else {
         return Ok(None);
     };
-    let features = FeaturesBuilder::new().with_linter().with_assist().build();
+    let analyzer_features = FeaturesBuilder::new().with_linter().with_assist().build();
 
     if !session.workspace.file_exists(path.clone().into())? {
         return Ok(None);
@@ -302,7 +290,7 @@ fn fix_all(
     if session.workspace.is_path_ignored(IsPathIgnoredParams {
         path: path.clone(),
         project_key: doc.project_key,
-        features,
+        features: analyzer_features,
     })? {
         return Ok(None);
     }
@@ -318,11 +306,10 @@ fn fix_all(
     })?;
     let should_format = file_features.supports_format();
 
-    let features = FeaturesBuilder::new().with_linter().with_assist().build();
     if session.workspace.is_path_ignored(IsPathIgnoredParams {
         path: path.clone(),
         project_key: doc.project_key,
-        features,
+        features: analyzer_features,
     })? {
         return Ok(None);
     }
@@ -424,7 +411,7 @@ fn fix_all(
     };
 
     Ok(Some(CodeActionOrCommand::CodeAction(lsp::CodeAction {
-        title: String::from("Fix all auto-fixable issues"),
+        title: String::from("Apply all safe fixes (Biome)"),
         kind: Some(fix_all_kind()),
         diagnostics: Some(diagnostics),
         edit: Some(edit),
