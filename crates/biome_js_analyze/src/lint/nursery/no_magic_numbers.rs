@@ -1,4 +1,6 @@
-use biome_analyze::{Ast, Rule, RuleDiagnostic, context::RuleContext, declare_lint_rule};
+use biome_analyze::{
+    Ast, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
+};
 use biome_console::markup;
 use biome_js_syntax::{
     JsArrayAssignmentPatternElement, JsAssignmentExpression, JsAssignmentOperator,
@@ -45,8 +47,8 @@ declare_lint_rule! {
     pub NoMagicNumbers {
         version: "next",
         name: "noMagicNumbers",
-        sources: &[RuleSource::EslintTypeScript("no-magic-numbers").same()],
         language: "ts",
+        sources: &[RuleSource::EslintTypeScript("prefer-readonly").same()],
         recommended: false,
     }
 }
