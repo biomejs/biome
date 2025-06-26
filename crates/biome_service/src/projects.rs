@@ -82,11 +82,6 @@ impl Projects {
         let projects = self.0.pin();
         let data = projects.get(&project_key)?;
 
-        debug!(
-            "Get settings for {} {}",
-            file_path.as_str(),
-            data.nested_settings.len()
-        );
         for (project_path, settings) in &data.nested_settings {
             if file_path.starts_with(project_path) {
                 return Some(settings.clone());

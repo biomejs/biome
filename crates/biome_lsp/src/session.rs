@@ -43,7 +43,7 @@ use tower_lsp_server::lsp_types::{ClientCapabilities, Diagnostic, Uri};
 use tower_lsp_server::lsp_types::{MessageType, Registration};
 use tower_lsp_server::lsp_types::{Unregistration, WorkspaceFolder};
 use tower_lsp_server::{Client, UriExt, lsp_types};
-use tracing::{error, info, instrument, warn};
+use tracing::{debug, error, info, instrument, warn};
 
 pub(crate) struct ClientInformation {
     /// The name of the client
@@ -104,6 +104,7 @@ struct InitializeParams {
     workspace_folders: Option<Vec<WorkspaceFolder>>,
 }
 
+#[derive(Debug)]
 #[repr(u8)]
 pub(crate) enum ConfigurationStatus {
     /// The configuration file was properly loaded
@@ -565,7 +566,7 @@ impl Session {
             let status = self
                 .load_biome_configuration_file(ConfigurationPathHint::FromUser(config_path))
                 .await;
-
+            debug!("Configuration status: {:?}", status);
             self.set_configuration_status(status);
         } else if let Some(folders) = self.get_workspace_folders() {
             info!("Detected workspace folder.");
@@ -582,6 +583,7 @@ impl Session {
                                 base_path,
                             ))
                             .await;
+                        debug!("Configuration status: {:?}", status);
                         self.set_configuration_status(status);
                     }
                     None => {
@@ -681,6 +683,10 @@ impl Session {
             directory_path: configuration_path,
             ..
         } = loaded_configuration;
+
+        if configuration_path.is_none() && self.requires_configuration() {
+            return ConfigurationStatus::Missing;
+        }
 
         let fs = self.workspace.fs();
         let should_use_editorconfig = fs_configuration.use_editorconfig();
@@ -848,7 +854,15 @@ impl Session {
             .store(true, Ordering::Relaxed);
     }
 
+    pub(crate) fn requires_configuration(&self) -> bool {
+        self.extension_settings
+            .read()
+            .unwrap()
+            .requires_configuration()
+    }
+
     pub(crate) fn is_linting_and_formatting_disabled(&self) -> bool {
+        debug!("configuration status {:?}", self.configuration_status());
         match self.configuration_status() {
             ConfigurationStatus::Loaded => false,
             ConfigurationStatus::Missing => self
