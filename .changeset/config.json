@@ -5,17 +5,8 @@
   "fixed": [
     [
       "@biomejs/biome",
-      "@biomejs/cli-win32-x64",
-      "@biomejs/cli-win32-arm64",
-      "@biomejs/cli-darwin-x64",
-      "@biomejs/cli-darwin-arm64",
-      "@biomejs/cli-linux-x64",
-      "@biomejs/cli-linux-arm64",
-      "@biomejs/cli-linux-x64-musl",
-      "@biomejs/cli-linux-arm64-musl",
-      "@biomejs/wasm-web",
-      "@biomejs/wasm-bundler",
-      "@biomejs/wasm-nodejs"
+      "@biomejs/cli-*",
+      "@biomejs/wasm-*"
     ]
   ],
   "linked": [],

@@ -852,7 +852,7 @@ impl Workspace for WorkspaceServer {
                 params.only_rules.unwrap_or_default(),
                 params.skip_rules.unwrap_or_default(),
             )
-            .unwrap_or((path, ScanKind::NoScanner))
+            .unwrap_or((path, ScanKind::None))
         } else {
             self.find_project_root(
                 params.path,

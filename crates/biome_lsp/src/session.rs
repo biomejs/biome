@@ -745,12 +745,6 @@ impl Session {
             }
         };
 
-        let scan_kind = if scan_kind.is_none() {
-            ScanKind::KnownFiles
-        } else {
-            scan_kind
-        };
-
         let result = self.workspace.update_settings(UpdateSettingsParams {
             project_key,
             workspace_directory: configuration_path

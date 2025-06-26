@@ -1,11 +1,11 @@
 use crate::{
-    AnyJsCallArgument, AnyJsFunction, AnyJsFunctionBody, JsCallArguments, JsConstructorClassMember,
-    JsMethodClassMember, JsMethodObjectMember, JsStatementList, JsSyntaxToken,
+    AnyJsCallArgument, AnyJsFunction, AnyJsFunctionBody, JsCallArguments, JsMethodClassMember,
+    JsMethodObjectMember, JsStatementList, JsSyntaxToken,
 };
 use biome_rowan::{AstNode, SyntaxResult, TextRange, declare_node_union};
 
 declare_node_union! {
-    pub AnyFunctionLike = AnyJsFunction | JsMethodObjectMember | JsMethodClassMember | JsConstructorClassMember
+    pub AnyFunctionLike = AnyJsFunction | JsMethodObjectMember | JsMethodClassMember
 }
 
 impl AnyFunctionLike {
@@ -16,9 +16,6 @@ impl AnyFunctionLike {
                 .body()
                 .map(AnyJsFunctionBody::JsFunctionBody),
             Self::JsMethodClassMember(js_class_method) => js_class_method
-                .body()
-                .map(AnyJsFunctionBody::JsFunctionBody),
-            Self::JsConstructorClassMember(js_class_constructor) => js_class_constructor
                 .body()
                 .map(AnyJsFunctionBody::JsFunctionBody),
         }
@@ -33,18 +30,14 @@ impl AnyFunctionLike {
                     None
                 }
             }
-            Self::JsMethodClassMember(_)
-            | Self::JsMethodObjectMember(_)
-            | Self::JsConstructorClassMember(_) => None,
+            Self::JsMethodClassMember(_) | Self::JsMethodObjectMember(_) => None,
         }
     }
 
     pub fn function_token(&self) -> Option<JsSyntaxToken> {
         match self {
             Self::AnyJsFunction(any_js_function) => any_js_function.function_token().ok().flatten(),
-            Self::JsMethodClassMember(_)
-            | Self::JsMethodObjectMember(_)
-            | Self::JsConstructorClassMember(_) => None,
+            Self::JsMethodClassMember(_) | Self::JsMethodObjectMember(_) => None,
         }
     }
 
@@ -57,7 +50,6 @@ impl AnyFunctionLike {
             Self::JsMethodObjectMember(method_obj_member) => {
                 method_obj_member.star_token().is_some()
             }
-            Self::JsConstructorClassMember(_) => false,
         }
     }
 
@@ -67,7 +59,6 @@ impl AnyFunctionLike {
             Self::JsMethodClassMember(method_class_member) => {
                 method_class_member.async_token().is_some()
             }
-            Self::JsConstructorClassMember(_) => false,
             Self::JsMethodObjectMember(method_obj_member) => {
                 method_obj_member.async_token().is_some()
             }
@@ -85,9 +76,6 @@ impl AnyFunctionLike {
             Self::JsMethodClassMember(js_class_method) => {
                 js_class_method.name().ok().map(|name| name.range())
             }
-            Self::JsConstructorClassMember(js_class_constructor) => {
-                js_class_constructor.name().ok().map(|name| name.range())
-            }
         }
     }
 
@@ -100,9 +88,6 @@ impl AnyFunctionLike {
                 .statements(),
             Self::JsMethodClassMember(method_class_member) => {
                 method_class_member.body().ok()?.statements()
-            }
-            Self::JsConstructorClassMember(js_class_constructor) => {
-                js_class_constructor.body().ok()?.statements()
             }
             Self::JsMethodObjectMember(method_obj_member) => {
                 method_obj_member.body().ok()?.statements()

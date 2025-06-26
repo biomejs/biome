@@ -1,1 +1,0 @@
-appendToLastRow(rows, <> {character.leftBracket}</>);

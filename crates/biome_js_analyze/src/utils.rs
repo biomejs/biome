@@ -14,10 +14,8 @@ pub(crate) fn is_node_equal(a_node: &JsSyntaxNode, b_node: &JsSyntaxNode) -> boo
     let a_tree = a_node.preorder_with_tokens(Direction::Next);
     let b_tree = b_node.preorder_with_tokens(Direction::Next);
     for (a_event, b_event) in iter::zip(a_tree, b_tree) {
-        let (a_child, b_child) = match (a_event, b_event) {
-            (WalkEvent::Enter(a), WalkEvent::Enter(b)) => (a, b),
-            (WalkEvent::Leave(_), WalkEvent::Leave(_)) => continue,
-            _ => return false,
+        let (WalkEvent::Enter(a_child), WalkEvent::Enter(b_child)) = (a_event, b_event) else {
+            continue;
         };
         if a_child.kind() != b_child.kind() {
             return false;

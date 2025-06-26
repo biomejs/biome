@@ -148,7 +148,7 @@ pub(crate) fn is_react_hook_call(call: &JsCallExpression) -> bool {
         return false;
     };
 
-    // HACK: Jest/Vitest have some functions that start with `use` and are not hooks
+    // HACK: jest has some functions that start with `use` and are not hooks
     if let Some(expr) = call
         .callee()
         .ok()
@@ -158,8 +158,7 @@ pub(crate) fn is_react_hook_call(call: &JsCallExpression) -> bool {
         .and_then(|ident| ident.name().ok())
         .and_then(|name| name.value_token().ok())
     {
-        let expr_trimmed = expr.text_trimmed();
-        if expr_trimmed == "jest" || expr_trimmed == "vi" {
+        if expr.text_trimmed() == "jest" {
             return false;
         }
     }

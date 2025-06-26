@@ -222,7 +222,7 @@ pub(crate) struct ScanContext<'app> {
 #[serde(rename_all = "camelCase")]
 pub enum ScanKind {
     /// The scanner should not be triggered
-    NoScanner,
+    None,
     /// It targets specific files
     KnownFiles,
     /// It targets the project, so it attempts to open all the files in the project.
@@ -239,7 +239,7 @@ impl ScanKind {
     }
 
     pub const fn is_none(self) -> bool {
-        matches!(self, Self::NoScanner)
+        matches!(self, Self::None)
     }
 }
 
@@ -306,7 +306,7 @@ impl TraversalContext for ScanContext<'_> {
                             || DocumentFileSource::try_from_path(path).is_ok()
                     }
                 }
-                ScanKind::NoScanner => false,
+                ScanKind::None => false,
             },
             Err(_) => {
                 // bail on fifo and socket files

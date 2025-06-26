@@ -5,5 +5,3 @@ packages:
   - "crates/biome_formatter_test/src/prettier"
   - "benchmark"
   - "packages/@biomejs/*"
-ignoredOptionalDependencies:
-  - "@biomejs/cli*-"

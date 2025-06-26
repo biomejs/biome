@@ -218,17 +218,17 @@ impl TraversalMode {
                 if stdin.is_none() {
                     ScanKind::KnownFiles
                 } else {
-                    ScanKind::NoScanner
+                    ScanKind::None
                 }
             }
             Self::Check { stdin, .. } | Self::Lint { stdin, .. } | Self::Search { stdin, .. } => {
                 if stdin.is_none() {
                     ScanKind::Project
                 } else {
-                    ScanKind::NoScanner
+                    ScanKind::None
                 }
             }
-            Self::Migrate { .. } => ScanKind::NoScanner,
+            Self::Migrate { .. } => ScanKind::None,
         }
     }
 }
@@ -359,6 +359,10 @@ impl Execution {
 
     pub(crate) const fn is_lint(&self) -> bool {
         matches!(self.traversal_mode, TraversalMode::Lint { .. })
+    }
+
+    pub(crate) const fn is_migrate(&self) -> bool {
+        matches!(self.traversal_mode, TraversalMode::Migrate { .. })
     }
 
     pub(crate) fn is_stdin(&self) -> bool {
