@@ -33,7 +33,7 @@ declare_lint_rule! {
         version: "1.9.3",
         name: "noOctalEscape",
         language: "js",
-        sources: &[RuleSource::Eslint("no-octal-escape")],
+        sources: &[RuleSource::Eslint("no-octal-escape").same()],
         recommended: true,
         severity: Severity::Warning,
         fix_kind: FixKind::Safe,

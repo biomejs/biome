@@ -41,7 +41,7 @@ declare_lint_rule! {
         version: "1.0.0",
         name: "useButtonType",
         language: "jsx",
-        sources: &[RuleSource::EslintReact("button-has-type")],
+        sources: &[RuleSource::EslintReact("button-has-type").same()],
         recommended: true,
         severity: Severity::Error,
     }

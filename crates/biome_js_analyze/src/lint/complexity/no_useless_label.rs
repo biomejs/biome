@@ -36,7 +36,7 @@ declare_lint_rule! {
         version: "1.0.0",
         name: "noUselessLabel",
         language: "js",
-        sources: &[RuleSource::Eslint("no-extra-label")],
+        sources: &[RuleSource::Eslint("no-extra-label").same()],
         recommended: true,
         severity: Severity::Information,
         fix_kind: FixKind::Safe,

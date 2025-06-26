@@ -56,7 +56,10 @@ declare_lint_rule! {
         version: "1.7.2",
         name: "useArrayLiterals",
         language: "js",
-        sources: &[RuleSource::Eslint("no-array-constructor"), RuleSource::EslintTypeScript("no-array-constructor")],
+        sources: &[
+            RuleSource::Eslint("no-array-constructor").same(),
+            RuleSource::EslintTypeScript("no-array-constructor").same()
+        ],
         recommended: true,
         severity: Severity::Information,
         fix_kind: FixKind::Safe,

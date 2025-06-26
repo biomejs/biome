@@ -63,7 +63,7 @@ declare_lint_rule! {
         language: "js",
         recommended: false,
         sources: &[
-            RuleSource::Eslint("no-shadow"),
+            RuleSource::Eslint("no-shadow").same(),
             // uncomment when we can handle the test cases from typescript-eslint
             // RuleSource::EslintTypeScript("no-shadow"),
         ],

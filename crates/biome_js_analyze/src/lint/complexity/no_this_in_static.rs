@@ -81,7 +81,7 @@ declare_lint_rule! {
         version: "1.3.1",
         name: "noThisInStatic",
         language: "js",
-        sources: &[RuleSource::EslintMysticatea("no-this-in-static")],
+        sources: &[RuleSource::EslintMysticatea("no-this-in-static").same()],
         recommended: true,
         severity: Severity::Warning,
         fix_kind: FixKind::Safe,

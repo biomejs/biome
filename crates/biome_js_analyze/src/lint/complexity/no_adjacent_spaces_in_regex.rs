@@ -49,7 +49,7 @@ declare_lint_rule! {
         version: "1.0.0",
         name: "noAdjacentSpacesInRegex",
         language: "js",
-        sources: &[RuleSource::Eslint("no-regex-spaces")],
+        sources: &[RuleSource::Eslint("no-regex-spaces").same()],
         recommended: true,
         severity: Severity::Warning,
         fix_kind: FixKind::Safe,

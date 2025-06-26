@@ -85,8 +85,8 @@ declare_lint_rule! {
         name: "noUselessBackrefInRegex",
         language: "js",
         sources: &[
-            RuleSource::Eslint("no-useless-backreference"),
-            RuleSource::EslintRegexp("no-useless-backreference"),
+            RuleSource::Eslint("no-useless-backreference").same(),
+            RuleSource::EslintRegexp("no-useless-backreference").same(),
         ],
         recommended: true,
         severity: Severity::Warning,

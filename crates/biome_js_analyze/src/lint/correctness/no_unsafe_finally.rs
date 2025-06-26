@@ -129,7 +129,7 @@ declare_lint_rule! {
         version: "1.0.0",
         name: "noUnsafeFinally",
         language: "js",
-        sources: &[RuleSource::Eslint("no-unsafe-finally")],
+        sources: &[RuleSource::Eslint("no-unsafe-finally").same()],
         recommended: true,
         severity: Severity::Error,
     }

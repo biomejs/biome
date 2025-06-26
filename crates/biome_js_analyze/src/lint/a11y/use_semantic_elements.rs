@@ -46,7 +46,7 @@ declare_lint_rule! {
         version: "1.8.0",
         name: "useSemanticElements",
         language: "jsx",
-        sources: &[RuleSource::EslintJsxA11y("prefer-tag-over-role")],
+        sources: &[RuleSource::EslintJsxA11y("prefer-tag-over-role").same()],
         recommended: true,
         severity: Severity::Error,
     }

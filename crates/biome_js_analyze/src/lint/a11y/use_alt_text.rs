@@ -50,7 +50,7 @@ declare_lint_rule! {
         version: "1.0.0",
         name: "useAltText",
         language: "jsx",
-        sources: &[RuleSource::EslintJsxA11y("alt-text")],
+        sources: &[RuleSource::EslintJsxA11y("alt-text").same()],
         recommended: true,
         severity: Severity::Error,
     }

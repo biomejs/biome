@@ -52,7 +52,7 @@ declare_lint_rule! {
         version: "1.3.0",
         name: "noMisrefactoredShorthandAssign",
         language: "js",
-        sources: &[RuleSource::Clippy("misrefactored_assign_op")],
+        sources: &[RuleSource::Clippy("misrefactored_assign_op").same()],
         recommended: true,
         severity: Severity::Error,
         fix_kind: FixKind::Unsafe,

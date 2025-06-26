@@ -77,7 +77,7 @@ declare_lint_rule! {
         name: "useUnifiedTypeSignature",
         language: "ts",
         recommended: false,
-        sources: &[RuleSource::EslintTypeScript("unified-signatures")],
+        sources: &[RuleSource::EslintTypeScript("unified-signatures").same()],
         fix_kind: FixKind::Unsafe,
     }
 }

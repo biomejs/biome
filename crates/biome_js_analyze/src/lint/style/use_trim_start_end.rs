@@ -50,7 +50,7 @@ declare_lint_rule! {
         name: "useTrimStartEnd",
         language: "js",
         recommended: false,
-        sources: &[RuleSource::EslintUnicorn("prefer-string-trim-start-end")],
+        sources: &[RuleSource::EslintUnicorn("prefer-string-trim-start-end").same()],
         fix_kind: FixKind::Safe,
         severity: Severity::Information,
     }

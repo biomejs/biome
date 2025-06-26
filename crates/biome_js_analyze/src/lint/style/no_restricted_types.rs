@@ -50,7 +50,7 @@ declare_lint_rule! {
         name: "noRestrictedTypes",
         language: "ts",
         sources: &[
-            RuleSource::EslintTypeScript("no-restricted-types"),
+            RuleSource::EslintTypeScript("no-restricted-types").same(),
         ],
         recommended: false,
         severity: Severity::Warning,

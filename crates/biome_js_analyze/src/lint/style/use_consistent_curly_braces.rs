@@ -1,6 +1,5 @@
 use biome_analyze::{
-    Ast, FixKind, Rule, RuleDiagnostic, RuleSource, RuleSourceKind, context::RuleContext,
-    declare_lint_rule,
+    Ast, FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
 use biome_diagnostics::Severity;
@@ -52,8 +51,7 @@ declare_lint_rule! {
         language: "jsx",
         recommended: false,
         severity: Severity::Information,
-        sources: &[RuleSource::EslintReact("jsx-curly-brace-presence")],
-        source_kind: RuleSourceKind::Inspired,
+        sources: &[RuleSource::EslintReact("jsx-curly-brace-presence").inspired()],
         fix_kind: FixKind::Unsafe,
     }
 }

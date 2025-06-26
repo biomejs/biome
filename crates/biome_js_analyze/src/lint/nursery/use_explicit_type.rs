@@ -1,5 +1,5 @@
 use biome_analyze::{
-    Ast, Rule, RuleDiagnostic, RuleSource, RuleSourceKind, context::RuleContext, declare_lint_rule,
+    Ast, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::{Markup, markup};
 use biome_diagnostics::Severity;
@@ -326,8 +326,10 @@ declare_lint_rule! {
         language: "ts",
         recommended: false,
         severity: Severity::Error,
-        sources: &[RuleSource::EslintTypeScript("explicit-function-return-type"), RuleSource::EslintTypeScript("explicit-module-boundary-types")],
-        source_kind: RuleSourceKind::Inspired,
+        sources: &[
+            RuleSource::EslintTypeScript("explicit-function-return-type").inspired(),
+            RuleSource::EslintTypeScript("explicit-module-boundary-types").inspired(),
+        ],
     }
 }
 

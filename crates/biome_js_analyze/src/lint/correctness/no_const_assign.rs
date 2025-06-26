@@ -51,7 +51,7 @@ declare_lint_rule! {
         version: "1.0.0",
         name: "noConstAssign",
         language: "js",
-        sources: &[RuleSource::Eslint("no-const-assign")],
+        sources: &[RuleSource::Eslint("no-const-assign").same()],
         recommended: true,
         severity: Severity::Error,
         fix_kind: FixKind::Unsafe,

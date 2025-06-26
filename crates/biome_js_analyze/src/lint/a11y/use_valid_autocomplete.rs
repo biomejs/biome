@@ -52,7 +52,7 @@ declare_lint_rule! {
         version: "1.9.0",
         name: "useValidAutocomplete",
         language: "js",
-        sources: &[RuleSource::EslintJsxA11y("autocomplete-valid")],
+        sources: &[RuleSource::EslintJsxA11y("autocomplete-valid").same()],
         recommended: true,
         severity: Severity::Error,
     }

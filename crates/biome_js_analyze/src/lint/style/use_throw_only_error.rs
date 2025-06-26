@@ -1,5 +1,5 @@
 use biome_analyze::{
-    Ast, Rule, RuleDiagnostic, RuleSource, RuleSourceKind, context::RuleContext, declare_lint_rule,
+    Ast, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
 use biome_diagnostics::Severity;
@@ -54,8 +54,10 @@ declare_lint_rule! {
         version: "1.8.0",
         name: "useThrowOnlyError",
         language: "js",
-        sources: &[RuleSource::Eslint("no-throw-literal"), RuleSource::EslintTypeScript("only-throw-error")],
-        source_kind: RuleSourceKind::Inspired,
+        sources: &[
+            RuleSource::Eslint("no-throw-literal").inspired(),
+            RuleSource::EslintTypeScript("only-throw-error").inspired(),
+        ],
         recommended: false,
         severity: Severity::Warning,
     }

@@ -36,8 +36,8 @@ declare_lint_rule! {
         name: "useFlatMap",
         language: "js",
         sources: &[
-            RuleSource::EslintUnicorn("prefer-array-flat-map"),
-            RuleSource::Clippy("map_flatten"),
+            RuleSource::EslintUnicorn("prefer-array-flat-map").same(),
+            RuleSource::Clippy("map_flatten").same(),
         ],
         recommended: true,
         severity: Severity::Information,

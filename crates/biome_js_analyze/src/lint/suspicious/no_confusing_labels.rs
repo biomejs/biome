@@ -1,5 +1,5 @@
 use biome_analyze::context::RuleContext;
-use biome_analyze::{Ast, Rule, RuleDiagnostic, RuleSource, RuleSourceKind, declare_lint_rule};
+use biome_analyze::{Ast, Rule, RuleDiagnostic, RuleSource, declare_lint_rule};
 use biome_console::markup;
 use biome_deserialize_macros::Deserializable;
 use biome_diagnostics::Severity;
@@ -82,8 +82,7 @@ declare_lint_rule! {
         version: "1.0.0",
         name: "noConfusingLabels",
         language: "js",
-        sources: &[RuleSource::Eslint("no-labels")],
-        source_kind: RuleSourceKind::Inspired,
+        sources: &[RuleSource::Eslint("no-labels").inspired()],
         recommended: true,
         severity: Severity::Warning,
     }

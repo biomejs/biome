@@ -69,8 +69,8 @@ declare_lint_rule! {
         name: "noSelfAssign",
         language: "js",
         sources: &[
-            RuleSource::Eslint("no-self-assign"),
-            RuleSource::Clippy("self_assignment"),
+            RuleSource::Eslint("no-self-assign").same(),
+            RuleSource::Clippy("self_assignment").same(),
         ],
         recommended: true,
         severity: Severity::Error,

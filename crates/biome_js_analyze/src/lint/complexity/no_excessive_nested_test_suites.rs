@@ -1,6 +1,6 @@
 use biome_analyze::{
     AddVisitor, Phases, QueryMatch, Queryable, Rule, RuleDiagnostic, RuleDomain, RuleSource,
-    RuleSourceKind, ServiceBag, Visitor, VisitorContext, context::RuleContext, declare_lint_rule,
+    ServiceBag, Visitor, VisitorContext, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
 use biome_diagnostics::Severity;
@@ -58,8 +58,7 @@ declare_lint_rule! {
         language: "js",
         recommended: false,
         severity: Severity::Information,
-        sources: &[RuleSource::EslintJest("max-nested-describe"), RuleSource::EslintVitest("max-nested-describe")],
-        source_kind: RuleSourceKind::SameLogic,
+        sources: &[RuleSource::EslintJest("max-nested-describe").same(), RuleSource::EslintVitest("max-nested-describe").same()],
         domains: &[RuleDomain::Test],
     }
 }

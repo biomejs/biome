@@ -53,7 +53,7 @@ declare_lint_rule! {
         language: "css",
         recommended: true,
         severity: Severity::Error,
-        sources: &[RuleSource::Stylelint("no-duplicate-at-import-rules")],
+        sources: &[RuleSource::Stylelint("no-duplicate-at-import-rules").same()],
     }
 }
 

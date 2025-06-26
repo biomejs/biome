@@ -125,7 +125,7 @@ declare_lint_rule! {
         version: "next",
         name: "useReadonlyClassProperties",
         language: "ts",
-        sources: &[RuleSource::EslintTypeScript("prefer-readonly")],
+        sources: &[RuleSource::EslintTypeScript("prefer-readonly").same()],
         recommended: false,
         fix_kind: FixKind::Unsafe,
     }

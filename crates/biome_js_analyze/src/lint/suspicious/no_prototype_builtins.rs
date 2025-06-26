@@ -57,8 +57,8 @@ declare_lint_rule! {
         name: "noPrototypeBuiltins",
         language: "js",
         sources: &[
-            RuleSource::Eslint("no-prototype-builtins"),
-            RuleSource::Eslint("prefer-object-has-own")
+            RuleSource::Eslint("no-prototype-builtins").same(),
+            RuleSource::Eslint("prefer-object-has-own").same(),
         ],
         recommended: true,
         severity: Severity::Warning,

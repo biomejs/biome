@@ -49,7 +49,7 @@ declare_lint_rule! {
         language: "css",
         recommended: true,
         severity: Severity::Warning,
-        sources: &[RuleSource::Stylelint("block-no-empty")],
+        sources: &[RuleSource::Stylelint("block-no-empty").same()],
     }
 }
 

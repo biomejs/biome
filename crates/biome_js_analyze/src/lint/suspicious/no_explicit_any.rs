@@ -56,7 +56,7 @@ declare_lint_rule! {
         version: "1.0.0",
         name: "noExplicitAny",
         language: "ts",
-        sources: &[RuleSource::EslintTypeScript("no-explicit-any")],
+        sources: &[RuleSource::EslintTypeScript("no-explicit-any").same()],
         recommended: true,
         severity: Severity::Warning,
     }

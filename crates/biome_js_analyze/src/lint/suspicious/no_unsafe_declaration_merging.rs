@@ -45,7 +45,7 @@ declare_lint_rule! {
         version: "1.0.0",
         name: "noUnsafeDeclarationMerging",
         language: "ts",
-        sources: &[RuleSource::EslintTypeScript("no-unsafe-declaration-merging")],
+        sources: &[RuleSource::EslintTypeScript("no-unsafe-declaration-merging").same()],
         recommended: true,
         severity: Severity::Error,
     }

@@ -30,8 +30,8 @@ declare_lint_rule! {
         name: "noSelfCompare",
         language: "js",
         sources: &[
-            RuleSource::Eslint("no-self-compare"),
-            RuleSource::Clippy("eq_op"),
+            RuleSource::Eslint("no-self-compare").same(),
+            RuleSource::Clippy("eq_op").same(),
         ],
         recommended: true,
         severity: Severity::Error,

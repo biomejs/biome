@@ -39,7 +39,7 @@ declare_lint_rule! {
         version: "1.0.0",
         name: "noEmptyPattern",
         language: "js",
-        sources: &[RuleSource::Eslint("no-empty-pattern")],
+        sources: &[RuleSource::Eslint("no-empty-pattern").same()],
         recommended: true,
         severity: Severity::Error,
     }

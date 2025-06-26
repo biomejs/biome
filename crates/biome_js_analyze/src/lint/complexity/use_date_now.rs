@@ -57,7 +57,7 @@ declare_lint_rule! {
         version: "1.8.0",
         name: "useDateNow",
         language: "js",
-        sources: &[RuleSource::EslintUnicorn("prefer-date-now")],
+        sources: &[RuleSource::EslintUnicorn("prefer-date-now").same()],
         recommended: true,
         severity: Severity::Warning,
         fix_kind: FixKind::Unsafe,
