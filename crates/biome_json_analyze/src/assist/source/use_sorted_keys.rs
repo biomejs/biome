@@ -181,7 +181,7 @@ pub enum SortMode {
     Alphabetical,
 }
 #[derive(
-    Clone, Copy, Debug, Default, Eq, PartialEq, serde::Deserialize, Deserializable, serde::Serialize,
+    Clone, Debug, Default, Eq, PartialEq, serde::Deserialize, Deserializable, serde::Serialize,
 )]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase", deny_unknown_fields, default)]
