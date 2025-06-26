@@ -2825,7 +2825,7 @@
 					]
 				},
 				"noMagicNumbers": {
-					"description": "This rule detects and reports the use of \"magic numbers\" — numeric literals that are used directly in code without being assigned to a named constant.",
+					"description": "Reports usage of \"magic numbers\" — numbers used directly instead of being assigned to named constants.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }

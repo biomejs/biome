@@ -4778,7 +4778,7 @@ pub struct Nursery {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_important_styles:
         Option<RuleFixConfiguration<biome_css_analyze::options::NoImportantStyles>>,
-    #[doc = "This rule detects and reports the use of \"magic numbers\" — numeric literals that are used directly in code without being assigned to a named constant."]
+    #[doc = "Reports usage of \"magic numbers\" — numbers used directly instead of being assigned to named constants."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_magic_numbers: Option<RuleConfiguration<biome_js_analyze::options::NoMagicNumbers>>,
     #[doc = "Disallows defining React components inside other components."]

@@ -1583,7 +1583,7 @@ export interface Nursery {
 	 */
 	noImportantStyles?: RuleFixConfiguration_for_Null;
 	/**
-	 * This rule detects and reports the use of "magic numbers" — numeric literals that are used directly in code without being assigned to a named constant.
+	 * Reports usage of "magic numbers" — numbers used directly instead of being assigned to named constants.
 	 */
 	noMagicNumbers?: RuleConfiguration_for_Null;
 	/**
