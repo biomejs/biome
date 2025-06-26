@@ -303,7 +303,11 @@ fn fix_all(
     let file_features = session.workspace.file_features(SupportsFeatureParams {
         project_key: doc.project_key,
         path: path.clone(),
-        features: FeaturesBuilder::new().with_formatter().build(),
+        features: FeaturesBuilder::new()
+            .with_formatter()
+            .with_linter()
+            .with_assist()
+            .build(),
     })?;
     let should_format = file_features.supports_format();
 
