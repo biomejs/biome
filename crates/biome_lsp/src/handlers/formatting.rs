@@ -24,6 +24,9 @@ pub(crate) fn format(
     let Some(doc) = session.document(&url) else {
         return Ok(None);
     };
+    if !session.workspace.file_exists(path.clone().into())? {
+        return Ok(None);
+    }
     let features = FeaturesBuilder::new().with_formatter().build();
 
     if session.workspace.is_path_ignored(IsPathIgnoredParams {
@@ -101,6 +104,9 @@ pub(crate) fn format_range(
     let Some(doc) = session.document(&url) else {
         return Err(extension_error(&path).into());
     };
+    if !session.workspace.file_exists(path.clone().into())? {
+        return Ok(None);
+    }
     let features = FeaturesBuilder::new().with_formatter().build();
 
     if session.workspace.is_path_ignored(IsPathIgnoredParams {
@@ -203,6 +209,9 @@ pub(crate) fn format_on_type(
     let Some(doc) = session.document(&url) else {
         return Err(extension_error(&path).into());
     };
+    if !session.workspace.file_exists(path.clone().into())? {
+        return Ok(None);
+    }
     let features = FeaturesBuilder::new().with_formatter().build();
     let file_features = session.workspace.file_features(SupportsFeatureParams {
         project_key: doc.project_key,

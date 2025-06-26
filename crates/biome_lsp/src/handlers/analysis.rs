@@ -57,6 +57,9 @@ pub(crate) fn code_actions(
     let Some(doc) = session.document(&url) else {
         return Ok(None);
     };
+    if !session.workspace.file_exists(path.clone().into())? {
+        return Ok(None);
+    }
 
     if session.workspace.is_path_ignored(IsPathIgnoredParams {
         path: path.clone(),
@@ -291,6 +294,10 @@ fn fix_all(
         return Ok(None);
     };
     let features = FeaturesBuilder::new().with_linter().with_assist().build();
+
+    if !session.workspace.file_exists(path.clone().into())? {
+        return Ok(None);
+    }
 
     if session.workspace.is_path_ignored(IsPathIgnoredParams {
         path: path.clone(),
