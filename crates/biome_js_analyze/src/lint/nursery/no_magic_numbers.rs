@@ -48,7 +48,7 @@ declare_lint_rule! {
         version: "next",
         name: "noMagicNumbers",
         language: "ts",
-        sources: &[RuleSource::EslintTypeScript("prefer-readonly").same()],
+        sources: &[RuleSource::EslintTypeScript("no-magic-numbers").same()],
         recommended: false,
     }
 }
