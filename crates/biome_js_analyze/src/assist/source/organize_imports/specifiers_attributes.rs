@@ -1,4 +1,4 @@
-use biome_analyze::utils::{is_separated_list_sorted_by, sort_separated_list_by};
+use biome_analyze::utils::{is_separated_list_sorted_by, sorted_separated_list_by};
 use biome_js_factory::make;
 use biome_js_syntax::{
     AnyJsBinding, AnyJsImportAssertionEntry, JsExportNamedFromSpecifierList, JsImportAssertion,
@@ -40,7 +40,7 @@ pub fn are_import_specifiers_sorted(named_specifiers: &JsNamedImportSpecifiers) 
 pub fn sort_import_specifiers(
     named_specifiers: JsNamedImportSpecifiers,
 ) -> Option<JsNamedImportSpecifiers> {
-    let (nodes, separators) = sort_separated_list_by(
+    let new_list = sorted_separated_list_by(
         &named_specifiers.specifiers(),
         |node| {
             let AnyJsBinding::JsIdentifierBinding(name) = node.local_name()? else {
@@ -53,7 +53,6 @@ pub fn sort_import_specifiers(
         || make::token(T![,]).with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")]),
     )
     .ok()?;
-    let new_list = make::js_named_import_specifier_list(nodes, separators);
     Some(named_specifiers.with_specifiers(new_list))
 }
 
@@ -109,7 +108,7 @@ pub fn are_export_specifiers_sorted(specifiers: &JsExportNamedFromSpecifierList)
 pub fn sort_export_specifiers(
     named_specifiers: &JsExportNamedFromSpecifierList,
 ) -> Option<JsExportNamedFromSpecifierList> {
-    let (nodes, separators) = sort_separated_list_by(
+    let new_list = sorted_separated_list_by(
         named_specifiers,
         |node| {
             node.source_name()
@@ -121,7 +120,7 @@ pub fn sort_export_specifiers(
         || make::token(T![,]).with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")]),
     )
     .ok()?;
-    Some(make::js_export_named_from_specifier_list(nodes, separators))
+    Some(new_list)
 }
 
 pub fn merge_export_specifiers(
@@ -172,7 +171,7 @@ pub fn are_import_attributes_sorted(attributes: &JsImportAssertion) -> Option<bo
 }
 
 pub fn sort_attributes(attributes: JsImportAssertion) -> Option<JsImportAssertion> {
-    let (nodes, separators) = sort_separated_list_by(
+    let new_list = sorted_separated_list_by(
         &attributes.assertions(),
         |node| {
             let AnyJsImportAssertionEntry::JsImportAssertionEntry(node) = node else {
@@ -183,5 +182,5 @@ pub fn sort_attributes(attributes: JsImportAssertion) -> Option<JsImportAssertio
         || make::token(T![,]).with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")]),
     )
     .ok()?;
-    Some(attributes.with_assertions(make::js_import_assertion_entry_list(nodes, separators)))
+    Some(attributes.with_assertions(new_list))
 }

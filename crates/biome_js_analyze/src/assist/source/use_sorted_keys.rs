@@ -4,7 +4,7 @@ use biome_analyze::{
     Ast, FixKind, Rule, RuleAction, RuleDiagnostic, RuleSource,
     context::RuleContext,
     declare_source_rule,
-    utils::{is_separated_list_sorted_by, sort_separated_list_by},
+    utils::{is_separated_list_sorted_by, sorted_separated_list_by},
 };
 use biome_console::markup;
 use biome_deserialize::TextRange;
@@ -115,13 +115,12 @@ impl Rule for UseSortedKeys {
     fn action(ctx: &RuleContext<Self>, _: &Self::State) -> Option<JsRuleAction> {
         let list = ctx.query();
 
-        let (items, separators) = sort_separated_list_by(
+        let new_list = sorted_separated_list_by(
             list,
             |node| node.name().map(ComparableToken::new),
             || make::token(T![,]).with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")]),
         )
         .ok()?;
-        let new_list = make::js_object_member_list(items, separators);
 
         let mut mutation = ctx.root().begin();
         mutation.replace_node_discard_trivia(list.clone(), new_list);

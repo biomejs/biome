@@ -1,5 +1,5 @@
 use biome_rowan::{
-    AstNode, AstSeparatedElement, AstSeparatedList, Language, SyntaxError, SyntaxToken,
+    AstNode, AstSeparatedElement, AstSeparatedList, Language, SyntaxError, SyntaxNode, SyntaxToken,
     chain_trivia_pieces,
 };
 
@@ -51,11 +51,15 @@ pub fn is_separated_list_sorted_by<
 /// Chunks are sorted separately.
 ///
 /// This sort is stable (i.e., does not reorder equal elements).
-pub fn sort_separated_list_by<'a, L: Language + 'a, N: AstNode<Language = L> + 'a, Key: Ord>(
-    list: &impl AstSeparatedList<Language = L, Node = N>,
-    get_key: impl Fn(&N) -> Option<Key>,
+pub fn sorted_separated_list_by<'a, L: Language + 'a, List, Node, Key: Ord>(
+    list: &List,
+    get_key: impl Fn(&Node) -> Option<Key>,
     make_separator: fn() -> SyntaxToken<L>,
-) -> Result<(Vec<N>, Vec<SyntaxToken<L>>), SyntaxError> {
+) -> Result<List, SyntaxError>
+where
+    List: AstSeparatedList<Language = L, Node = Node> + AstNode<Language = L> + 'a,
+    Node: AstNode<Language = L> + 'a,
+{
     let mut elements = Vec::with_capacity(list.len());
     for AstSeparatedElement {
         node,
@@ -82,8 +86,19 @@ pub fn sort_separated_list_by<'a, L: Language + 'a, N: AstNode<Language = L> + '
         .iter_mut()
         .filter_map(|(_, _, sep)| sep.take())
         .collect();
-    let items: Vec<_> = elements.into_iter().map(|(_, node, _)| node).collect();
-    Ok((items, separators))
+    let mut separators = separators.into_iter();
+    let mut items = elements.into_iter().map(|(_, node, _)| node);
+
+    Ok(List::unwrap_cast(SyntaxNode::new_detached(
+        list.syntax().kind(),
+        (0..list.len() + separators.len()).map(|index| {
+            if index % 2 == 0 {
+                Some(items.next()?.into_syntax().into())
+            } else {
+                Some(separators.next()?.into())
+            }
+        }),
+    )))
 }
 
 /// Fix the ordered sequence of nodes and separators adding missing separators and removing an extra separator.
@@ -97,7 +112,7 @@ pub fn sort_separated_list_by<'a, L: Language + 'a, N: AstNode<Language = L> + '
 /// It allows to add missing separators and remove an extra separator.
 /// Usually, you collect every pair of nodes and separators in a vector and then pass a mutable iterator to `fix_separators`.
 ///
-/// See [sort_separated_list_by] as a usage example.
+/// See [sorted_separated_list_by] as a usage example.
 pub fn fix_separators<'a, L: Language + 'a, N: AstNode<Language = L> + 'a>(
     // Mutable iterator of a list of nodes and their optional separators
     iter: impl std::iter::ExactSizeIterator<Item = (&'a mut N, &'a mut Option<SyntaxToken<L>>)>,

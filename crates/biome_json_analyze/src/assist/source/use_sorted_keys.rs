@@ -1,5 +1,5 @@
 use crate::JsonRuleAction;
-use biome_analyze::utils::{is_separated_list_sorted_by, sort_separated_list_by};
+use biome_analyze::utils::{is_separated_list_sorted_by, sorted_separated_list_by};
 use biome_analyze::{
     Ast, FixKind, Rule, RuleAction, RuleDiagnostic, context::RuleContext, declare_source_rule,
 };
@@ -73,7 +73,7 @@ impl Rule for UseSortedKeys {
     fn action(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<JsonRuleAction> {
         let list = ctx.query();
 
-        let (items, separators) = sort_separated_list_by(
+        let new_list = sorted_separated_list_by(
             list,
             |node| {
                 node.name()
@@ -85,7 +85,6 @@ impl Rule for UseSortedKeys {
             || make::token(T![,]),
         )
         .ok()?;
-        let new_list = make::json_member_list(items, separators);
 
         let mut mutation = ctx.root().begin();
         mutation.replace_node_discard_trivia(list.clone(), new_list);
