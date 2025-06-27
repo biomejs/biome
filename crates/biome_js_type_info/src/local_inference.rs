@@ -32,8 +32,9 @@ use crate::{
     Interface, Literal, Module, Namespace, Object, PredicateReturnType, ResolvedTypeId, ReturnType,
     ScopeId, Tuple, TupleElementType, TypeData, TypeInstance, TypeMember, TypeMemberKind,
     TypeOperator, TypeOperatorType, TypeReference, TypeReferenceQualifier, TypeResolver,
-    TypeofBitwiseNotExpression, TypeofCallExpression, TypeofDestructureExpression,
-    TypeofExpression, TypeofLogicalAndExpression, TypeofLogicalOrExpression, TypeofNewExpression,
+    TypeofAdditionExpression, TypeofBitwiseNotExpression, TypeofCallExpression,
+    TypeofConditionalExpression, TypeofDestructureExpression, TypeofExpression,
+    TypeofLogicalAndExpression, TypeofLogicalOrExpression, TypeofNewExpression,
     TypeofNullishCoalescingExpression, TypeofStaticMemberExpression, TypeofThisOrSuperExpression,
     TypeofTypeofExpression, TypeofUnaryMinusExpression, TypeofValue,
 };
@@ -496,6 +497,22 @@ impl TypeData {
                     _ => Self::unknown(),
                 }
             }
+            AnyJsExpression::JsConditionalExpression(expr) => {
+                Self::from(TypeofExpression::Conditional(TypeofConditionalExpression {
+                    test: expr
+                        .test()
+                        .map(|sub| resolver.reference_to_resolved_expression(scope_id, &sub))
+                        .unwrap_or_default(),
+                    consequent: expr
+                        .consequent()
+                        .map(|sub| resolver.reference_to_resolved_expression(scope_id, &sub))
+                        .unwrap_or_default(),
+                    alternate: expr
+                        .alternate()
+                        .map(|sub| resolver.reference_to_resolved_expression(scope_id, &sub))
+                        .unwrap_or_default(),
+                }))
+            }
             AnyJsExpression::JsFunctionExpression(expr) => {
                 Self::from_js_function_expression(resolver, scope_id, expr)
             }
@@ -827,6 +844,40 @@ impl TypeData {
         let right = resolver.resolve_expression(scope_id, &right);
 
         match operator {
+            JsBinaryOperator::BitwiseAnd
+            | JsBinaryOperator::BitwiseOr
+            | JsBinaryOperator::BitwiseXor
+            | JsBinaryOperator::Divide
+            | JsBinaryOperator::Exponent
+            | JsBinaryOperator::LeftShift
+            | JsBinaryOperator::Minus
+            | JsBinaryOperator::Times
+            | JsBinaryOperator::Remainder
+            | JsBinaryOperator::RightShift
+            | JsBinaryOperator::UnsignedRightShift => Self::number(),
+            JsBinaryOperator::Equality => match (left, right.as_ref()) {
+                (Self::Literal(left), Self::Literal(right)) if left == *right => {
+                    Literal::Boolean(true.into()).into()
+                }
+                _ => Self::boolean(),
+            },
+            JsBinaryOperator::GreaterThan
+            | JsBinaryOperator::GreaterThanOrEqual
+            | JsBinaryOperator::LessThan
+            | JsBinaryOperator::LessThanOrEqual => Self::boolean(),
+            JsBinaryOperator::Inequality => match (left, right.as_ref()) {
+                (Self::Literal(left), Self::Literal(right)) if left == *right => {
+                    Literal::Boolean(false.into()).into()
+                }
+                _ => Self::boolean(),
+            },
+            JsBinaryOperator::Plus => {
+                let right = right.into_owned();
+                Self::from(TypeofExpression::Addition(TypeofAdditionExpression {
+                    left: resolver.reference_to_owned_data(left),
+                    right: resolver.reference_to_owned_data(right),
+                }))
+            }
             JsBinaryOperator::StrictEquality => match (left, right.as_ref()) {
                 (Self::Literal(left), Self::Literal(right)) => {
                     Literal::Boolean((left == *right).into()).into()
@@ -839,7 +890,6 @@ impl TypeData {
                 }
                 _ => Self::boolean(),
             },
-            _ => Self::unknown(), // TODO
         }
     }
 

@@ -12,7 +12,6 @@
 pub mod literal;
 
 use std::borrow::Cow;
-use std::cmp::Ordering;
 use std::fmt::Debug;
 use std::{ops::Deref, str::FromStr, sync::Arc};
 
@@ -240,13 +239,12 @@ impl Type {
     }
 }
 
-#[derive(Clone, Debug, Default, Eq, Hash, PartialEq, Resolvable)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq, Resolvable)]
 pub enum TypeData {
     /// The type is unknown because inference couldn't determine a type.
     ///
     /// This is different from `UnknownKeyword`, because an explicit `unknown`
     /// should not be counted as a failure of the inference.
-    #[default]
     Unknown,
 
     /// Special type referencing the global scope, which can be explicitly
@@ -352,6 +350,12 @@ pub enum TypeData {
 
     /// The `void` keyword.
     VoidKeyword,
+}
+
+impl Default for TypeData {
+    fn default() -> Self {
+        Self::unknown()
+    }
 }
 
 impl From<Class> for TypeData {
@@ -474,20 +478,6 @@ impl TypeData {
         Self::InstanceOf(Box::new(instance.into()))
     }
 
-    /// Creates an intersection of type references.
-    ///
-    /// References are automatically deduplicated. If only a single type
-    /// remains, an instance of `Self::Reference` is returned instead of
-    /// `Self::Intersection`.
-    pub fn intersection_of(mut types: Vec<TypeReference>) -> Self {
-        types.dedup();
-        match types.len().cmp(&1) {
-            Ordering::Greater => Self::Intersection(Box::new(Intersection(types.into()))),
-            Ordering::Equal => Self::reference(types.remove(0)),
-            Ordering::Less => Self::unknown(),
-        }
-    }
-
     /// Returns whether the given type has been inferred.
     ///
     /// A type is considered inferred if it is anything except `Self::Unknown`
@@ -525,6 +515,11 @@ impl TypeData {
             value_ty: value_ty.map(Into::into),
             namespace_ty: namespace_ty.map(Into::into),
         }))
+    }
+
+    #[inline]
+    pub fn number() -> Self {
+        Self::Reference(TypeReference::Resolved(GLOBAL_NUMBER_ID))
     }
 
     pub fn reference(reference: impl Into<TypeReference>) -> Self {
@@ -589,6 +584,11 @@ impl TypeData {
             | Self::TypeofType(_)
             | Self::TypeofValue(_) => false,
         }
+    }
+
+    #[inline]
+    pub fn string() -> Self {
+        Self::Reference(TypeReference::Resolved(GLOBAL_STRING_ID))
     }
 
     pub fn type_parameters(&self) -> Option<&[TypeReference]> {
@@ -1099,6 +1099,7 @@ pub enum TypeofExpression {
     Await(TypeofAwaitExpression),
     BitwiseNot(TypeofBitwiseNotExpression),
     Call(TypeofCallExpression),
+    Conditional(TypeofConditionalExpression),
     Destructure(TypeofDestructureExpression),
     LogicalAnd(TypeofLogicalAndExpression),
     LogicalOr(TypeofLogicalOrExpression),
@@ -1131,6 +1132,14 @@ pub struct TypeofBitwiseNotExpression {
 pub struct TypeofCallExpression {
     pub callee: TypeReference,
     pub arguments: Box<[CallArgumentType]>,
+}
+
+/// Represents the type of a ternary expression.
+#[derive(Clone, Debug, Eq, Hash, PartialEq, Resolvable)]
+pub struct TypeofConditionalExpression {
+    pub test: TypeReference,
+    pub consequent: TypeReference,
+    pub alternate: TypeReference,
 }
 
 #[derive(Clone, Debug, Eq, Hash, PartialEq, Resolvable)]

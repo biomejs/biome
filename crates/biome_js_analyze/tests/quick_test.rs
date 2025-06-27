@@ -26,9 +26,8 @@ fn project_layout_with_top_level_dependencies(dependencies: Dependencies) -> Arc
 #[test]
 fn quick_test() {
     const FILENAME: &str = "dummyFile.ts";
-    const SOURCE: &str = r#"let maybeString: string | undefined;
-const definitelyString = maybeString ?? "string";
-definitelyString ?? Promise.reject("logical operator bypass");
+    const SOURCE: &str = r#"const condition = Math.random() > -1; // Always true, but dynamic to linter
+condition ? Promise.reject("ternary bypass") : null;
 "#;
 
     let parsed = parse(SOURCE, JsFileSource::tsx(), JsParserOptions::default());

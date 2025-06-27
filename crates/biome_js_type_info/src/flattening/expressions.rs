@@ -9,6 +9,10 @@ use crate::{
     Resolvable, ResolvedTypeData, ResolvedTypeMember, ResolverId, TypeData, TypeMember,
     TypeReference, TypeResolver, TypeofCallExpression, TypeofExpression,
     TypeofStaticMemberExpression,
+    flattening::conditionals::{
+        ConditionalType, reference_to_falsy_subset_of, reference_to_non_nullish_subset_of,
+        reference_to_truthy_subset_of,
+    },
     globals::{
         GLOBAL_ARRAY_ID, GLOBAL_BIGINT_STRING_LITERAL_ID, GLOBAL_BOOLEAN_STRING_LITERAL_ID,
         GLOBAL_FUNCTION_STRING_LITERAL_ID, GLOBAL_NUMBER_STRING_LITERAL_ID,
@@ -23,73 +27,132 @@ pub(super) fn flattened_expression(
     resolver: &mut dyn TypeResolver,
 ) -> Option<TypeData> {
     match expr {
-        TypeofExpression::Addition(_expr) => {
-            // TODO
-            None
+        TypeofExpression::Addition(expr) => {
+            let left = resolver.resolve_and_get(&expr.left)?;
+            let right = resolver.resolve_and_get(&expr.right)?;
+
+            let coerced_ty = |ty: &TypeData| -> Option<TypeData> {
+                match ty {
+                    TypeData::BigInt => Some(TypeData::BigInt),
+                    TypeData::Boolean | TypeData::Null | TypeData::Number | TypeData::Undefined => {
+                        Some(TypeData::Number)
+                    }
+                    TypeData::Class(_)
+                    | TypeData::InstanceOf(_)
+                    | TypeData::Interface(_)
+                    | TypeData::Object(_)
+                    | TypeData::ObjectKeyword
+                    | TypeData::String => Some(TypeData::String),
+                    TypeData::Literal(literal) => match literal.as_ref() {
+                        Literal::BigInt(_) => Some(TypeData::BigInt),
+                        Literal::Boolean(_) | Literal::Number(_) => Some(TypeData::Number),
+                        Literal::Object(_)
+                        | Literal::RegExp(_)
+                        | Literal::String(_)
+                        | Literal::Template(_) => Some(TypeData::String),
+                    },
+                    TypeData::Unknown => Some(TypeData::Unknown),
+                    _ => None,
+                }
+            };
+
+            match (
+                coerced_ty(left.as_raw_data()),
+                coerced_ty(right.as_raw_data()),
+            ) {
+                (Some(TypeData::BigInt), Some(TypeData::BigInt)) => Some(TypeData::BigInt),
+                (Some(TypeData::Number), Some(TypeData::Number)) => Some(TypeData::number()),
+                (Some(TypeData::String), _) | (_, Some(TypeData::String)) => {
+                    Some(TypeData::string())
+                }
+                (Some(TypeData::Unknown), Some(TypeData::Unknown)) => Some(TypeData::unknown()),
+                _ => None,
+            }
         }
         TypeofExpression::Await(expr) => {
-            resolver
-                .resolve_and_get(&expr.argument)
-                .and_then(|resolved| {
-                    let flattened = match resolved.as_raw_data() {
-                        TypeData::BigInt => TypeData::BigInt,
-                        TypeData::Boolean => TypeData::Boolean,
-                        TypeData::Class(class) => {
-                            resolved.apply_module_id_to_data(TypeData::Class(class.clone()))
-                        }
-                        TypeData::Function(function) => {
-                            resolved.apply_module_id_to_data(TypeData::Function(function.clone()))
-                        }
-                        TypeData::Literal(literal) => TypeData::Literal(literal.clone()),
-                        TypeData::Null => TypeData::Null,
-                        TypeData::Number => TypeData::Number,
-                        TypeData::Object(object) => {
-                            resolved.apply_module_id_to_data(TypeData::Object(object.clone()))
-                        }
-                        TypeData::String => TypeData::String,
-                        _ => resolved.find_promise_type(resolver)?.to_data(),
-                    };
-                    Some(flattened)
-                })
+            let arg = resolver.resolve_and_get(&expr.argument)?;
+            let flattened = match arg.as_raw_data() {
+                TypeData::BigInt => TypeData::BigInt,
+                TypeData::Boolean => TypeData::Boolean,
+                TypeData::Class(class) => {
+                    arg.apply_module_id_to_data(TypeData::Class(class.clone()))
+                }
+                TypeData::Function(function) => {
+                    arg.apply_module_id_to_data(TypeData::Function(function.clone()))
+                }
+                TypeData::Literal(literal) => TypeData::Literal(literal.clone()),
+                TypeData::Null => TypeData::Null,
+                TypeData::Number => TypeData::Number,
+                TypeData::Object(object) => {
+                    arg.apply_module_id_to_data(TypeData::Object(object.clone()))
+                }
+                TypeData::String => TypeData::String,
+                _ => arg.find_promise_type(resolver)?.to_data(),
+            };
+            Some(flattened)
         }
         TypeofExpression::BitwiseNot(expr) => {
             resolver
                 .resolve_and_get(&expr.argument)
-                .map(|resolved| match resolved.as_raw_data() {
-                    TypeData::BigInt => TypeData::BigInt,
-                    _ => TypeData::Number,
+                .map(|resolved| match resolved.is_big_int() {
+                    true => TypeData::BigInt,
+                    false => TypeData::Number,
                 })
         }
         TypeofExpression::Call(expr) => match resolver.resolve_and_get(&expr.callee) {
             Some(callee) => flattened_call(expr, callee.to_data(), resolver),
             None => None,
         },
+        TypeofExpression::Conditional(expr) => {
+            let test = resolver.resolve_and_get(&expr.test)?;
+            let conditional = ConditionalType::from_resolved_data(test, resolver);
+            if conditional.is_truthy() {
+                Some(TypeData::reference(expr.consequent.clone()))
+            } else if conditional.is_falsy() {
+                Some(TypeData::reference(expr.alternate.clone()))
+            } else {
+                conditional.is_inferred().then(|| {
+                    TypeData::union_of(
+                        resolver,
+                        [expr.consequent.clone(), expr.alternate.clone()].into(),
+                    )
+                })
+            }
+        }
         TypeofExpression::LogicalAnd(expr) => {
-            let left = resolver.resolve_and_get(&expr.left)?.to_data();
-            if left.is_falsy(resolver) {
-                Some(left)
-            } else if let Some(left) = left.to_falsy_value(resolver) {
-                let left = resolver.reference_to_owned_data(left);
+            let left = resolver.resolve_and_get(&expr.left)?;
+            let conditional = ConditionalType::from_resolved_data(left, resolver);
+            if conditional.is_falsy() {
+                Some(left.to_data())
+            } else if conditional.is_truthy() {
+                Some(TypeData::reference(expr.right.clone()))
+            } else if conditional.is_inferred() {
+                let left = reference_to_falsy_subset_of(&left.to_data(), resolver)
+                    .unwrap_or_else(|| expr.left.clone());
                 Some(TypeData::union_of(
                     resolver,
                     [left, expr.right.clone()].into(),
                 ))
             } else {
-                Some(TypeData::reference(expr.right.clone()))
+                None
             }
         }
         TypeofExpression::LogicalOr(expr) => {
-            let left = resolver.resolve_and_get(&expr.left)?.to_data();
-            if left.is_truthy(resolver) {
-                Some(left)
-            } else if let Some(left) = left.to_truthy_value(resolver) {
-                let left = resolver.reference_to_owned_data(left);
+            let left = resolver.resolve_and_get(&expr.left)?;
+            let conditional = ConditionalType::from_resolved_data(left, resolver);
+            if conditional.is_truthy() {
+                Some(left.to_data())
+            } else if conditional.is_falsy() {
+                Some(TypeData::reference(expr.right.clone()))
+            } else if conditional.is_inferred() {
+                let left = reference_to_truthy_subset_of(&left.to_data(), resolver)
+                    .unwrap_or_else(|| expr.left.clone());
                 Some(TypeData::union_of(
                     resolver,
                     [left, expr.right.clone()].into(),
                 ))
             } else {
-                Some(TypeData::reference(expr.right.clone()))
+                None
             }
         }
         TypeofExpression::Destructure(expr) => {
@@ -189,17 +252,21 @@ pub(super) fn flattened_expression(
             }
         }
         TypeofExpression::NullishCoalescing(expr) => {
-            let left = resolver.resolve_and_get(&expr.left)?.to_data();
-            if left.is_non_nullish(resolver) {
-                Some(left)
-            } else if let Some(left) = left.to_non_nullish_value(resolver) {
-                let left = resolver.reference_to_owned_data(left);
+            let left = resolver.resolve_and_get(&expr.left)?;
+            let conditional = ConditionalType::from_resolved_data(left, resolver);
+            if conditional.is_non_nullish() {
+                Some(left.to_data())
+            } else if conditional.is_nullish() {
+                Some(TypeData::reference(expr.right.clone()))
+            } else if conditional.is_inferred() {
+                let left = reference_to_non_nullish_subset_of(&left.to_data(), resolver)
+                    .unwrap_or_else(|| expr.left.clone());
                 Some(TypeData::union_of(
                     resolver,
                     [left, expr.right.clone()].into(),
                 ))
             } else {
-                Some(TypeData::reference(expr.right.clone()))
+                None
             }
         }
         TypeofExpression::StaticMember(expr) => {

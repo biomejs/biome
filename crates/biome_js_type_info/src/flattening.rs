@@ -1,5 +1,6 @@
 use crate::{TypeData, TypeInstance, TypeReference, TypeResolver};
 
+mod conditionals;
 mod expressions;
 mod intersections;
 
@@ -68,32 +69,7 @@ impl TypeData {
             }
             Self::InstanceOf(instance) => match &instance.ty {
                 TypeReference::Unknown => Some(Self::unknown()),
-                reference => match resolver.resolve_and_get(reference) {
-                    Some(resolved) => match resolved.as_raw_data() {
-                        Self::InstanceOf(resolved_instance) => Some(
-                            resolved.apply_module_id_to_data(Self::instance_of(TypeInstance {
-                                ty: resolved_instance.ty.clone(),
-                                type_parameters: TypeReference::merge_parameters(
-                                    &resolved_instance.type_parameters,
-                                    &instance.type_parameters,
-                                ),
-                            })),
-                        ),
-                        Self::Reference(reference) => match reference {
-                            TypeReference::Unknown => Some(Self::unknown()),
-                            _ => Some(resolved.apply_module_id_to_data(Self::instance_of(
-                                TypeInstance {
-                                    ty: reference.clone(),
-                                    type_parameters: instance.type_parameters.clone(),
-                                },
-                            ))),
-                        },
-                        _ => resolved
-                            .should_flatten_instance(instance)
-                            .then(|| resolved.to_data()),
-                    },
-                    None => None,
-                },
+                reference => flattened_instance(instance, reference, resolver),
             },
             Self::Intersection(intersection) => {
                 Some(flattened_intersection(intersection, resolver))
@@ -123,5 +99,44 @@ impl TypeData {
             }
             _ => None,
         }
+    }
+}
+
+fn flattened_instance(
+    instance: &TypeInstance,
+    reference: &TypeReference,
+    resolver: &dyn TypeResolver,
+) -> Option<TypeData> {
+    let resolved = resolver.resolve_and_get(reference)?;
+    match resolved.as_raw_data() {
+        TypeData::InstanceOf(resolved_instance) => Some(TypeData::instance_of(TypeInstance {
+            ty: resolved
+                .apply_module_id_to_reference(&resolved_instance.ty)
+                .into_owned(),
+            type_parameters: {
+                resolved_instance
+                    .type_parameters
+                    .iter()
+                    .enumerate()
+                    .map(|(i, param)| {
+                        instance.type_parameters.get(i).cloned().unwrap_or_else(|| {
+                            resolved.apply_module_id_to_reference(param).into_owned()
+                        })
+                    })
+                    .collect()
+            },
+        })),
+        TypeData::Reference(reference) => match reference {
+            TypeReference::Unknown => Some(TypeData::unknown()),
+            _ => Some(TypeData::instance_of(TypeInstance {
+                ty: resolved
+                    .apply_module_id_to_reference(reference)
+                    .into_owned(),
+                type_parameters: instance.type_parameters.clone(),
+            })),
+        },
+        _ => resolved
+            .should_flatten_instance(instance)
+            .then(|| resolved.to_data()),
     }
 }
