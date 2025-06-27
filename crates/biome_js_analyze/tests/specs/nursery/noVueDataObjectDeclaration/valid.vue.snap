@@ -1,0 +1,25 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid.vue
+---
+# Input
+```js
+<script>
+Vue.component("some-comp", {
+	data: function () {
+		return {
+			foo: "bar",
+		};
+	},
+});
+
+export default {
+	data() {
+		return {
+			foo: "bar",
+		};
+	},
+};
+</script>
+
+```

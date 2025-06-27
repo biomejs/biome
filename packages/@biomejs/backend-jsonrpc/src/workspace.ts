@@ -1631,6 +1631,10 @@ export interface Nursery {
 	 */
 	noUselessUndefined?: RuleFixConfiguration_for_Null;
 	/**
+	 * Succinct description of the rule.
+	 */
+	noVueDataObjectDeclaration?: RuleConfiguration_for_Null;
+	/**
 	 * It enables the recommended rules for this group
 	 */
 	recommended?: boolean;
@@ -3574,6 +3578,7 @@ export type Category =
 	| "lint/nursery/noUselessBackrefInRegex"
 	| "lint/nursery/noUselessEscapeInString"
 	| "lint/nursery/noUselessUndefined"
+	| "lint/nursery/noVueDataObjectDeclaration"
 	| "lint/nursery/useAdjacentGetterSetter"
 	| "lint/nursery/useBiomeSuppressionComment"
 	| "lint/nursery/useConsistentObjectDefinition"

@@ -2877,6 +2877,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noVueDataObjectDeclaration": {
+					"description": "Enforce component's data property to be a function.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"recommended": {
 					"description": "It enables the recommended rules for this group",
 					"type": ["boolean", "null"]
