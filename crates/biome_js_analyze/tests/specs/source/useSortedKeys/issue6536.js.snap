@@ -45,7 +45,7 @@ const newObj = {
 ```
 issue6536.js:2:5 assist/source/useSortedKeys  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i The keys are not sorted.
+  i The object properties are not sorted by key.
   
      1 │ const newObj = {
    > 2 │     ...obj,
@@ -59,7 +59,7 @@ issue6536.js:2:5 assist/source/useSortedKeys  FIXABLE  ━━━━━━━━�
        │     ^^^^^^^
     35 │ };
   
-  i Safe fix: Sort the object properties.
+  i Safe fix: Sort the object properties by key.
   
      2  2 │       ...obj,
      3  3 │       a: '',

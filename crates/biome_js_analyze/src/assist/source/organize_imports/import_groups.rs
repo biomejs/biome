@@ -2,11 +2,9 @@ use biome_deserialize::{Deserializable, DeserializationContext, Text};
 use biome_deserialize_macros::Deserializable;
 use biome_glob::{CandidatePath, Glob};
 use biome_resolver::is_builtin_node_module;
+use biome_string_case::comparable_token::ComparableToken;
 
-use super::{
-    comparable_token::ComparableToken,
-    import_source::{ImportSource, ImportSourceKind},
-};
+use super::import_source::{ImportSource, ImportSourceKind};
 
 #[derive(
     Clone, Debug, Default, Deserializable, Eq, PartialEq, serde::Deserialize, serde::Serialize,
@@ -435,7 +433,7 @@ impl<'a> ImportSourceCandidate<'a> {
     pub fn new(source: &'a ImportSource<ComparableToken>) -> Self {
         Self {
             source,
-            path_candidate: CandidatePath::new(source.inner().0.text()),
+            path_candidate: CandidatePath::new(source.inner().token.text()),
         }
     }
 
@@ -445,7 +443,7 @@ impl<'a> ImportSourceCandidate<'a> {
 
     /// Returns the original string of this import source.
     pub fn as_str(&self) -> &'a str {
-        self.source.inner().0.text()
+        self.source.inner().token.text()
     }
 
     /// Tests whether the current path matches `matcher`.

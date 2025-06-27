@@ -21,7 +21,6 @@ use specifiers_attributes::{
 use crate::JsRuleAction;
 use util::{attached_trivia, detached_trivia, has_detached_leading_comment, leading_newlines};
 
-pub mod comparable_token;
 pub mod import_groups;
 pub mod import_key;
 pub mod import_source;

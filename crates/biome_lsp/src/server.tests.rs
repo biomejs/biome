@@ -3175,7 +3175,7 @@ async fn pull_source_assist_action() -> Result<()> {
         ],
     );
     let expected_action = CodeActionOrCommand::CodeAction(CodeAction {
-        title: String::from("They keys of the current object can be sorted."),
+        title: String::from("Sort the members by key."),
         kind: Some(CodeActionKind::new("source.biome.useSortedKeys")),
         diagnostics: None,
         edit: Some(WorkspaceEdit {
