@@ -3697,6 +3697,113 @@ async fn pull_diagnostics_monorepo() -> Result<()> {
     Ok(())
 }
 
+#[tokio::test]
+async fn should_correctly_fix_all_astro_files() -> Result<()> {
+    let factory = ServerFactory::default();
+    let (service, client) = factory.create().into_inner();
+    let (stream, sink) = client.split();
+    let mut server = Server::new(service);
+
+    let (sender, _) = channel(CHANNEL_BUFFER_SIZE);
+    let reader = tokio::spawn(client_handler(stream, sink, sender));
+
+    server.initialize().await?;
+    server.initialized().await?;
+
+    server
+        .open_named_document(
+            r#"---
+let useConst = "Astro Test";
+---
+<!doctype html>"#,
+            uri!("document.astro"),
+            "astro",
+        )
+        .await?;
+
+    let res: CodeActionResponse = server
+        .request(
+            "textDocument/codeAction",
+            "pull_code_actions",
+            CodeActionParams {
+                text_document: TextDocumentIdentifier {
+                    uri: uri!("document.astro"),
+                },
+                range: Range {
+                    start: Position {
+                        line: 1,
+                        character: 7,
+                    },
+                    end: Position {
+                        line: 1,
+                        character: 7,
+                    },
+                },
+                context: CodeActionContext {
+                    diagnostics: vec![],
+                    only: Some(vec![CodeActionKind::new("source.fixAll.biome")]),
+                    ..Default::default()
+                },
+                work_done_progress_params: WorkDoneProgressParams {
+                    work_done_token: None,
+                },
+                partial_result_params: PartialResultParams {
+                    partial_result_token: None,
+                },
+            },
+        )
+        .await?
+        .context("codeAction returned None")?;
+
+    let mut changes = HashMap::default();
+
+    changes.insert(
+        uri!("document.astro"),
+        vec![TextEdit {
+            range: Range {
+                start: Position {
+                    line: 0,
+                    character: 0,
+                },
+                end: Position {
+                    line: 4,
+                    character: 0,
+                },
+            },
+            new_text: String::from(
+                r#"---
+const useConst = "Astro Test";
+---
+<!doctype html>"#,
+            ),
+        }],
+    );
+
+    let expected_action = CodeActionOrCommand::CodeAction(CodeAction {
+        title: String::from("Apply all safe fixes (Biome)"),
+        kind: Some(CodeActionKind::new("source.fixAll.biome")),
+        diagnostics: Some(vec![]),
+        edit: Some(WorkspaceEdit {
+            changes: Some(changes),
+            document_changes: None,
+            change_annotations: None,
+        }),
+        command: None,
+        is_preferred: Some(true),
+        disabled: None,
+        data: None,
+    });
+
+    assert_eq!(res, vec![expected_action]);
+
+    server.close_document().await?;
+
+    server.shutdown().await?;
+    reader.abort();
+
+    Ok(())
+}
+
 // #endregion
 
 // #region TEST UTILS
