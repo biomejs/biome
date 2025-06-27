@@ -164,7 +164,7 @@ biome_markup        = { version = "0.5.7", path = "./crates/biome_markup" }
 biome_package       = { version = "0.5.7", path = "./crates/biome_package" }
 biome_parser        = { version = "0.5.7", path = "./crates/biome_parser" }
 biome_rowan         = { version = "0.5.7", path = "./crates/biome_rowan" }
-biome_string_case   = { version = "0.5.7", path = "./crates/biome_string_case" }
+biome_string_case   = { version = "0.5.7", path = "./crates/biome_string_case", features = ["biome_rowan"] }
 biome_suppression   = { version = "0.5.7", path = "./crates/biome_suppression" }
 biome_text_edit     = { version = "0.5.7", path = "./crates/biome_text_edit" }
 biome_text_size     = { version = "0.5.7", path = "./crates/biome_text_size" }

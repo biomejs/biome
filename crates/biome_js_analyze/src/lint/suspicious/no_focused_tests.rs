@@ -7,7 +7,7 @@ use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_factory::make;
 use biome_js_syntax::{AnyJsExpression, JsCallExpression, JsLanguage, TextRange};
-use biome_rowan::{AstNode, BatchMutation, BatchMutationExt, NodeOrToken};
+use biome_rowan::{AstNode, BatchMutation, BatchMutationExt, NodeOrToken, TokenText};
 
 declare_lint_rule! {
     /// Disallow focused tests.
@@ -65,7 +65,7 @@ const CALLEE_NAMES: [&str; 3] = ["describe", "it", "test"];
 
 impl Rule for NoFocusedTests {
     type Query = Ast<JsCallExpression>;
-    type State = TextRange;
+    type State = FunctionNameAndRange;
     type Signals = Option<Self::State>;
     type Options = ();
 
@@ -96,17 +96,22 @@ impl Rule for NoFocusedTests {
         }
     }
 
-    fn diagnostic(_: &RuleContext<Self>, range: &Self::State) -> Option<RuleDiagnostic> {
+    fn diagnostic(
+        _: &RuleContext<Self>,
+        FunctionNameAndRange { name, text_range }: &Self::State,
+    ) -> Option<RuleDiagnostic> {
+        // if invoked in square brackets such as it["only"] computed member expression, strip quotes
+        let name = name.text().replace('"', "");
         Some(
             RuleDiagnostic::new(
                 rule_category!(),
-                range,
+                text_range,
                 markup! {
                     "Don't focus the test."
                 },
             )
-            .note("The 'only' method is often used for debugging or during implementation. It should be removed before deploying to production.")
-            .note("Consider removing 'only' to ensure all tests are executed.")
+                .note(markup! {"The "<Emphasis>""{name}""</Emphasis>" method is often used for debugging or during implementation. It should be removed before deploying to production."})
+                .note(markup! {"Consider removing "<Emphasis>""{name}""</Emphasis>" to ensure all tests are executed."})
         )
     }
 
@@ -135,10 +140,15 @@ impl Rule for NoFocusedTests {
     }
 }
 
+pub struct FunctionNameAndRange {
+    name: TokenText,
+    text_range: TextRange,
+}
+
 // Pattern detection functions
 
 /// Find the `.only.each` pattern in test calls
-fn match_only_each_pattern(callee: &AnyJsExpression) -> Option<TextRange> {
+fn match_only_each_pattern(callee: &AnyJsExpression) -> Option<FunctionNameAndRange> {
     callee
         .as_js_static_member_expression()
         .and_then(|static_member| {
@@ -151,12 +161,15 @@ fn match_only_each_pattern(callee: &AnyJsExpression) -> Option<TextRange> {
             // Fallback to providing any reasonable range
             callee
                 .get_callee_member_name()
-                .map(|name| name.text_trimmed_range())
+                .map(|name| FunctionNameAndRange {
+                    name: name.token_text_trimmed(),
+                    text_range: name.text_trimmed_range(),
+                })
         })
 }
 
 /// Find focused test function names like fdescribe, fit
-fn match_function_name_pattern(callee: &AnyJsExpression) -> Option<TextRange> {
+fn match_function_name_pattern(callee: &AnyJsExpression) -> Option<FunctionNameAndRange> {
     // Get the specific token for the diagnostic range
     callee
         .get_callee_member_name()
@@ -166,11 +179,14 @@ fn match_function_name_pattern(callee: &AnyJsExpression) -> Option<TextRange> {
             name.starts_with('f')
                 && (name == FDESCRIBE_KEYWORD || name == FIT_KEYWORD || name == "ftest")
         })
-        .map(|function_name| function_name.text_trimmed_range())
+        .map(|function_name| FunctionNameAndRange {
+            name: function_name.token_text_trimmed(),
+            text_range: function_name.text_trimmed_range(),
+        })
 }
 
 /// Find static member expressions with `.only` member
-fn match_static_only_member(callee: &AnyJsExpression) -> Option<TextRange> {
+fn match_static_only_member(callee: &AnyJsExpression) -> Option<FunctionNameAndRange> {
     // Find the specific 'only' member to highlight in the diagnostic
     callee
         .as_js_static_member_expression()
@@ -179,12 +195,20 @@ fn match_static_only_member(callee: &AnyJsExpression) -> Option<TextRange> {
                 .member()
                 .ok()
                 .filter(|member| member.syntax().text_trimmed() == ONLY_KEYWORD)
-                .map(|member| member.syntax().text_trimmed_range())
+                .and_then(|member| {
+                    member
+                        .value_token()
+                        .ok()
+                        .map(|value_token| FunctionNameAndRange {
+                            name: value_token.token_text_trimmed(),
+                            text_range: member.syntax().text_trimmed_range(),
+                        })
+                })
         })
 }
 
 /// Find computed member expressions with `["only"]` syntax
-fn match_computed_only_member(callee: &AnyJsExpression) -> Option<TextRange> {
+fn match_computed_only_member(callee: &AnyJsExpression) -> Option<FunctionNameAndRange> {
     let expression = callee.as_js_computed_member_expression()?;
 
     // Check for a valid test function name (describe, it, test)
@@ -209,7 +233,10 @@ fn match_computed_only_member(callee: &AnyJsExpression) -> Option<TextRange> {
     if literal.as_js_string_literal_expression().is_some()
         && literal.syntax().text_trimmed() == "\"only\""
     {
-        Some(expression.syntax().text_trimmed_range())
+        Some(FunctionNameAndRange {
+            name: literal.value_token().ok()?.token_text_trimmed(),
+            text_range: expression.syntax().text_trimmed_range(),
+        })
     } else {
         None
     }

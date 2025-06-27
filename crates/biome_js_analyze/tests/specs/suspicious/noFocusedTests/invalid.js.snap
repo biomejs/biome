@@ -1,5 +1,6 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 134
 expression: invalid.js
 ---
 # Input
@@ -48,9 +49,9 @@ invalid.js:1:10 lint/suspicious/noFocusedTests  FIXABLE  ━━━━━━━�
     2 │ it.only("bar", function () {});
     3 │ test.only("bar", function () {});
   
-  i The 'only' method is often used for debugging or during implementation. It should be removed before deploying to production.
+  i The only method is often used for debugging or during implementation. It should be removed before deploying to production.
   
-  i Consider removing 'only' to ensure all tests are executed.
+  i Consider removing only to ensure all tests are executed.
   
   i Unsafe fix: Remove focus from test.
   
@@ -70,9 +71,9 @@ invalid.js:2:4 lint/suspicious/noFocusedTests  FIXABLE  ━━━━━━━━
     3 │ test.only("bar", function () {});
     4 │ 
   
-  i The 'only' method is often used for debugging or during implementation. It should be removed before deploying to production.
+  i The only method is often used for debugging or during implementation. It should be removed before deploying to production.
   
-  i Consider removing 'only' to ensure all tests are executed.
+  i Consider removing only to ensure all tests are executed.
   
   i Unsafe fix: Remove focus from test.
   
@@ -93,9 +94,9 @@ invalid.js:3:6 lint/suspicious/noFocusedTests  FIXABLE  ━━━━━━━━
     4 │ 
     5 │ describe.only("bar", () => {});
   
-  i The 'only' method is often used for debugging or during implementation. It should be removed before deploying to production.
+  i The only method is often used for debugging or during implementation. It should be removed before deploying to production.
   
-  i Consider removing 'only' to ensure all tests are executed.
+  i Consider removing only to ensure all tests are executed.
   
   i Unsafe fix: Remove focus from test.
   
@@ -116,9 +117,9 @@ invalid.js:5:10 lint/suspicious/noFocusedTests  FIXABLE  ━━━━━━━�
     6 │ it.only("bar", () => {});
     7 │ test.only("bar", () => {});
   
-  i The 'only' method is often used for debugging or during implementation. It should be removed before deploying to production.
+  i The only method is often used for debugging or during implementation. It should be removed before deploying to production.
   
-  i Consider removing 'only' to ensure all tests are executed.
+  i Consider removing only to ensure all tests are executed.
   
   i Unsafe fix: Remove focus from test.
   
@@ -138,9 +139,9 @@ invalid.js:6:4 lint/suspicious/noFocusedTests  FIXABLE  ━━━━━━━━
     7 │ test.only("bar", () => {});
     8 │ 
   
-  i The 'only' method is often used for debugging or during implementation. It should be removed before deploying to production.
+  i The only method is often used for debugging or during implementation. It should be removed before deploying to production.
   
-  i Consider removing 'only' to ensure all tests are executed.
+  i Consider removing only to ensure all tests are executed.
   
   i Unsafe fix: Remove focus from test.
   
@@ -161,9 +162,9 @@ invalid.js:7:6 lint/suspicious/noFocusedTests  FIXABLE  ━━━━━━━━
     8 │ 
     9 │ describe["only"]("bar", function () {});
   
-  i The 'only' method is often used for debugging or during implementation. It should be removed before deploying to production.
+  i The only method is often used for debugging or during implementation. It should be removed before deploying to production.
   
-  i Consider removing 'only' to ensure all tests are executed.
+  i Consider removing only to ensure all tests are executed.
   
   i Unsafe fix: Remove focus from test.
   
@@ -184,9 +185,9 @@ invalid.js:9:1 lint/suspicious/noFocusedTests  FIXABLE  ━━━━━━━━
     10 │ it["only"]("bar", function () {});
     11 │ test["only"]("bar", function () {});
   
-  i The 'only' method is often used for debugging or during implementation. It should be removed before deploying to production.
+  i The only method is often used for debugging or during implementation. It should be removed before deploying to production.
   
-  i Consider removing 'only' to ensure all tests are executed.
+  i Consider removing only to ensure all tests are executed.
   
   i Unsafe fix: Remove focus from test.
   
@@ -206,9 +207,9 @@ invalid.js:10:1 lint/suspicious/noFocusedTests  FIXABLE  ━━━━━━━�
     11 │ test["only"]("bar", function () {});
     12 │ 
   
-  i The 'only' method is often used for debugging or during implementation. It should be removed before deploying to production.
+  i The only method is often used for debugging or during implementation. It should be removed before deploying to production.
   
-  i Consider removing 'only' to ensure all tests are executed.
+  i Consider removing only to ensure all tests are executed.
   
   i Unsafe fix: Remove focus from test.
   
@@ -229,9 +230,9 @@ invalid.js:11:1 lint/suspicious/noFocusedTests  FIXABLE  ━━━━━━━�
     12 │ 
     13 │ fdescribe("foo", () => {});
   
-  i The 'only' method is often used for debugging or during implementation. It should be removed before deploying to production.
+  i The only method is often used for debugging or during implementation. It should be removed before deploying to production.
   
-  i Consider removing 'only' to ensure all tests are executed.
+  i Consider removing only to ensure all tests are executed.
   
   i Unsafe fix: Remove focus from test.
   
@@ -252,9 +253,9 @@ invalid.js:13:1 lint/suspicious/noFocusedTests  FIXABLE  ━━━━━━━�
     14 │ fit("foo", () => {});
     15 │ 
   
-  i The 'only' method is often used for debugging or during implementation. It should be removed before deploying to production.
+  i The fdescribe method is often used for debugging or during implementation. It should be removed before deploying to production.
   
-  i Consider removing 'only' to ensure all tests are executed.
+  i Consider removing fdescribe to ensure all tests are executed.
   
   i Unsafe fix: Remove focus from test.
   
@@ -279,9 +280,9 @@ invalid.js:14:1 lint/suspicious/noFocusedTests  FIXABLE  ━━━━━━━�
     15 │ 
     16 │ describe.only(bar, () => {});
   
-  i The 'only' method is often used for debugging or during implementation. It should be removed before deploying to production.
+  i The fit method is often used for debugging or during implementation. It should be removed before deploying to production.
   
-  i Consider removing 'only' to ensure all tests are executed.
+  i Consider removing fit to ensure all tests are executed.
   
   i Unsafe fix: Remove focus from test.
   
@@ -307,9 +308,9 @@ invalid.js:16:10 lint/suspicious/noFocusedTests  FIXABLE  ━━━━━━━�
     17 │ it.only(bar, () => {});
     18 │ test.only(bar, () => {});
   
-  i The 'only' method is often used for debugging or during implementation. It should be removed before deploying to production.
+  i The only method is often used for debugging or during implementation. It should be removed before deploying to production.
   
-  i Consider removing 'only' to ensure all tests are executed.
+  i Consider removing only to ensure all tests are executed.
   
   i Unsafe fix: Remove focus from test.
   
@@ -329,9 +330,9 @@ invalid.js:17:4 lint/suspicious/noFocusedTests  FIXABLE  ━━━━━━━�
     18 │ test.only(bar, () => {});
     19 │ 
   
-  i The 'only' method is often used for debugging or during implementation. It should be removed before deploying to production.
+  i The only method is often used for debugging or during implementation. It should be removed before deploying to production.
   
-  i Consider removing 'only' to ensure all tests are executed.
+  i Consider removing only to ensure all tests are executed.
   
   i Unsafe fix: Remove focus from test.
   
@@ -352,9 +353,9 @@ invalid.js:18:6 lint/suspicious/noFocusedTests  FIXABLE  ━━━━━━━�
     19 │ 
     20 │ describe.only(foo.bar, () => {});
   
-  i The 'only' method is often used for debugging or during implementation. It should be removed before deploying to production.
+  i The only method is often used for debugging or during implementation. It should be removed before deploying to production.
   
-  i Consider removing 'only' to ensure all tests are executed.
+  i Consider removing only to ensure all tests are executed.
   
   i Unsafe fix: Remove focus from test.
   
@@ -375,9 +376,9 @@ invalid.js:20:10 lint/suspicious/noFocusedTests  FIXABLE  ━━━━━━━�
     21 │ it.only(foo.bar, () => {});
     22 │ test.only(foo.bar, () => {});
   
-  i The 'only' method is often used for debugging or during implementation. It should be removed before deploying to production.
+  i The only method is often used for debugging or during implementation. It should be removed before deploying to production.
   
-  i Consider removing 'only' to ensure all tests are executed.
+  i Consider removing only to ensure all tests are executed.
   
   i Unsafe fix: Remove focus from test.
   
@@ -397,9 +398,9 @@ invalid.js:21:4 lint/suspicious/noFocusedTests  FIXABLE  ━━━━━━━�
     22 │ test.only(foo.bar, () => {});
     23 │ 
   
-  i The 'only' method is often used for debugging or during implementation. It should be removed before deploying to production.
+  i The only method is often used for debugging or during implementation. It should be removed before deploying to production.
   
-  i Consider removing 'only' to ensure all tests are executed.
+  i Consider removing only to ensure all tests are executed.
   
   i Unsafe fix: Remove focus from test.
   
@@ -420,9 +421,9 @@ invalid.js:22:6 lint/suspicious/noFocusedTests  FIXABLE  ━━━━━━━�
     23 │ 
     24 │ describe.only(name = name || "bar", () => {});
   
-  i The 'only' method is often used for debugging or during implementation. It should be removed before deploying to production.
+  i The only method is often used for debugging or during implementation. It should be removed before deploying to production.
   
-  i Consider removing 'only' to ensure all tests are executed.
+  i Consider removing only to ensure all tests are executed.
   
   i Unsafe fix: Remove focus from test.
   
@@ -443,9 +444,9 @@ invalid.js:24:10 lint/suspicious/noFocusedTests  FIXABLE  ━━━━━━━�
     25 │ it.only(name = name || "bar", () => {});
     26 │ test.only(name = name || "bar", () => {});
   
-  i The 'only' method is often used for debugging or during implementation. It should be removed before deploying to production.
+  i The only method is often used for debugging or during implementation. It should be removed before deploying to production.
   
-  i Consider removing 'only' to ensure all tests are executed.
+  i Consider removing only to ensure all tests are executed.
   
   i Unsafe fix: Remove focus from test.
   
@@ -465,9 +466,9 @@ invalid.js:25:4 lint/suspicious/noFocusedTests  FIXABLE  ━━━━━━━�
     26 │ test.only(name = name || "bar", () => {});
     27 │ 
   
-  i The 'only' method is often used for debugging or during implementation. It should be removed before deploying to production.
+  i The only method is often used for debugging or during implementation. It should be removed before deploying to production.
   
-  i Consider removing 'only' to ensure all tests are executed.
+  i Consider removing only to ensure all tests are executed.
   
   i Unsafe fix: Remove focus from test.
   
@@ -488,9 +489,9 @@ invalid.js:26:6 lint/suspicious/noFocusedTests  FIXABLE  ━━━━━━━�
     27 │ 
     28 │ describe.only.each([["a"], ["b"]])("%s", (a) => {});
   
-  i The 'only' method is often used for debugging or during implementation. It should be removed before deploying to production.
+  i The only method is often used for debugging or during implementation. It should be removed before deploying to production.
   
-  i Consider removing 'only' to ensure all tests are executed.
+  i Consider removing only to ensure all tests are executed.
   
   i Unsafe fix: Remove focus from test.
   
@@ -511,9 +512,9 @@ invalid.js:28:10 lint/suspicious/noFocusedTests  FIXABLE  ━━━━━━━�
     29 │ it.only.each([["a"], ["b"]])("%s", (a) => {});
     30 │ test.only.each([["a"], ["b"]])("%s", (a) => {});
   
-  i The 'only' method is often used for debugging or during implementation. It should be removed before deploying to production.
+  i The only method is often used for debugging or during implementation. It should be removed before deploying to production.
   
-  i Consider removing 'only' to ensure all tests are executed.
+  i Consider removing only to ensure all tests are executed.
   
   i Unsafe fix: Remove focus from test.
   
@@ -533,9 +534,9 @@ invalid.js:29:4 lint/suspicious/noFocusedTests  FIXABLE  ━━━━━━━�
     30 │ test.only.each([["a"], ["b"]])("%s", (a) => {});
     31 │ 
   
-  i The 'only' method is often used for debugging or during implementation. It should be removed before deploying to production.
+  i The only method is often used for debugging or during implementation. It should be removed before deploying to production.
   
-  i Consider removing 'only' to ensure all tests are executed.
+  i Consider removing only to ensure all tests are executed.
   
   i Unsafe fix: Remove focus from test.
   
@@ -555,9 +556,9 @@ invalid.js:30:6 lint/suspicious/noFocusedTests  FIXABLE  ━━━━━━━�
        │      ^^^^
     31 │ 
   
-  i The 'only' method is often used for debugging or during implementation. It should be removed before deploying to production.
+  i The only method is often used for debugging or during implementation. It should be removed before deploying to production.
   
-  i Consider removing 'only' to ensure all tests are executed.
+  i Consider removing only to ensure all tests are executed.
   
   i Unsafe fix: Remove focus from test.
   
