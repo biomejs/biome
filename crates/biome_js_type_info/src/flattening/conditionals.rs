@@ -32,12 +32,12 @@ pub enum ConditionalType {
 }
 
 impl ConditionalType {
-    /// Returns the conditional type from the given data, `ty`.
+    /// Returns the conditional type from the given resolved data, `ty`.
     ///
     /// Resolves references as necessary.
-    pub fn from_data(ty: &TypeData, resolver: &dyn TypeResolver) -> Self {
+    pub fn from_resolved_data(ty: ResolvedTypeData, resolver: &dyn TypeResolver) -> Self {
         fn derive_conditional_type(
-            ty: &TypeData,
+            ty: ResolvedTypeData,
             resolver: &dyn TypeResolver,
             mut depth: usize,
         ) -> ConditionalType {
@@ -47,15 +47,16 @@ impl ConditionalType {
             }
 
             let derive_from_reference = |reference: &TypeReference| -> ConditionalType {
-                match resolver.resolve_and_get(reference) {
-                    Some(ty) => derive_conditional_type(&ty.to_data(), resolver, depth),
+                let reference = ty.apply_module_id_to_reference(reference);
+                match resolver.resolve_and_get(&reference) {
+                    Some(ty) => derive_conditional_type(ty, resolver, depth),
                     None => ConditionalType::Unknown,
                 }
             };
 
-            match ConditionalType::from_data_shallow(ty) {
+            match ConditionalType::from_data_shallow(ty.as_raw_data()) {
                 Some(conditional) => conditional,
-                None => match ty {
+                None => match ty.as_raw_data() {
                     TypeData::InstanceOf(instance) => derive_from_reference(&instance.ty),
                     TypeData::Intersection(intersection) => {
                         let mut conditional = ConditionalType::Unknown;
@@ -74,9 +75,10 @@ impl ConditionalType {
                     }
                     TypeData::MergedReference(reference) => {
                         let conditional_ty = reference.ty.as_ref().map(derive_from_reference);
-                        let conditional_value_ty = reference.ty.as_ref().map(derive_from_reference);
+                        let conditional_value_ty =
+                            reference.value_ty.as_ref().map(derive_from_reference);
                         let conditional_namespace_ty =
-                            reference.ty.as_ref().map(derive_from_reference);
+                            reference.namespace_ty.as_ref().map(derive_from_reference);
                         match (
                             conditional_ty,
                             conditional_value_ty,
@@ -336,7 +338,7 @@ enum FilteredData {
 }
 
 fn to_filtered_value(
-    ty: &TypeData,
+    resolved: &TypeData,
     filter: &impl Fn(&TypeData) -> FilteredData,
     resolver: &mut dyn TypeResolver,
     mut depth: usize,
@@ -353,9 +355,9 @@ fn to_filtered_value(
             .and_then(|ty| to_filtered_value(&ty, filter, resolver, depth))
     };
 
-    match filter(ty) {
+    match filter(resolved) {
         FilteredData::Mapped(ty) => Some(ty),
-        FilteredData::Retained => match &ty {
+        FilteredData::Retained => match resolved {
             TypeData::InstanceOf(instance) => match resolver.resolve_and_get(&instance.ty) {
                 Some(resolved) if resolved.should_flatten_instance(instance) => {
                     to_filtered_value(&resolved.to_data(), filter, resolver, depth)

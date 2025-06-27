@@ -586,6 +586,11 @@ impl TypeData {
         }
     }
 
+    #[inline]
+    pub fn string() -> Self {
+        Self::Reference(TypeReference::Resolved(GLOBAL_STRING_ID))
+    }
+
     pub fn type_parameters(&self) -> Option<&[TypeReference]> {
         match self {
             Self::Class(class) => Some(&class.type_parameters),

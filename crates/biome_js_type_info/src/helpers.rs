@@ -273,14 +273,15 @@ impl TypeData {
                     Self::Union(union) => {
                         // Flatten existing union into the new one:
                         for ty in union.types() {
+                            let ty = resolved.apply_module_id_to_reference(ty);
                             let entry = table.entry(
-                                hash_reference(ty),
-                                |i| &vec[*i] == ty,
+                                hash_reference(&ty),
+                                |i| &vec[*i] == ty.as_ref(),
                                 |i| hash_reference(&vec[*i]),
                             );
                             if let Entry::Vacant(entry) = entry {
                                 let index = vec.len();
-                                vec.push(ty.clone());
+                                vec.push(ty.into_owned());
                                 entry.insert(index);
                             }
                         }
@@ -573,6 +574,7 @@ macro_rules! generate_matcher {
 }
 
 generate_matcher!(is_any_keyword, AnyKeyword);
+generate_matcher!(is_big_int, BigInt);
 generate_matcher!(is_class, Class, _);
 generate_matcher!(is_conditional, Conditional);
 generate_matcher!(is_expression, TypeofExpression, _);
