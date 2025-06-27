@@ -44,7 +44,7 @@ pub fn is_separated_list_sorted_by<
 }
 
 /// Returns the items and their separators resulting from sorting `list` by `get_key`.
-/// WHen elements are reordered, `make_separator` is called to add missing separators in the middle of the list.
+/// When elements are reordered, `make_separator` is called to add missing separators in the middle of the list.
 ///
 /// The list is divided into chunks of nodes with keys.
 /// Thus, a node without key acts as a chuck delimiter.
