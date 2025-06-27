@@ -55,7 +55,7 @@ declare_lint_rule! {
         version: "1.0.0",
         name: "noRestrictedGlobals",
         language: "js",
-        sources: &[RuleSource::Eslint("no-restricted-globals")],
+        sources: &[RuleSource::Eslint("no-restricted-globals").same()],
         recommended: false,
         severity: Severity::Warning,
     }

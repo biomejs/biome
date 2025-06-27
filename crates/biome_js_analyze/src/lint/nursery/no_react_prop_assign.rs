@@ -40,7 +40,7 @@ declare_lint_rule! {
         version: "2.0.0",
         name: "noReactPropAssign",
         language: "jsx",
-        sources: &[RuleSource::EslintReactHooks("react-compiler")],
+        sources: &[RuleSource::EslintReactHooks("react-compiler").same()],
         recommended: false,
     }
 }

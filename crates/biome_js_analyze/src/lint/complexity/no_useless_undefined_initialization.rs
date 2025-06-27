@@ -52,7 +52,7 @@ declare_lint_rule! {
         version: "1.7.2",
         name: "noUselessUndefinedInitialization",
         language: "js",
-        sources: &[RuleSource::Eslint("no-undef-init")],
+        sources: &[RuleSource::Eslint("no-undef-init").same()],
         fix_kind: FixKind::Safe,
         recommended: true,
         severity: Severity::Information,

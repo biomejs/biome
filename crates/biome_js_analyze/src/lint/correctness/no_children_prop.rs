@@ -27,7 +27,7 @@ declare_lint_rule! {
         version: "1.0.0",
         name: "noChildrenProp",
         language: "jsx",
-        sources: &[RuleSource::EslintReact("no-children-prop")],
+        sources: &[RuleSource::EslintReact("no-children-prop").same()],
         recommended: true,
         severity: Severity::Error,
     }

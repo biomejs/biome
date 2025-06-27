@@ -6,6 +6,15 @@ snapshot_kind: text
 # Input
 ```jsx
 <><Component /></>
+
+function jsxElement() {
+	return <><JsxElement /></>;
+}
+
+function jsxElement() {
+	return (<><JsxElement /></>);
+}
+
 ```
 
 # Diagnostics
@@ -16,6 +25,8 @@ withJsxElementInvalid.jsx:1:1 lint/complexity/noUselessFragments  FIXABLE  ━�
   
   > 1 │ <><Component /></>
       │ ^^^^^^^^^^^^^^^^^^
+    2 │ 
+    3 │ function jsxElement() {
   
   i A fragment is redundant if it contains only one child, or if it is the child of a html element, and is not a keyed fragment.
   
@@ -23,5 +34,45 @@ withJsxElementInvalid.jsx:1:1 lint/complexity/noUselessFragments  FIXABLE  ━�
   
     1 │ <><Component·/></>
       │  --          ---  
+
+```
+
+```
+withJsxElementInvalid.jsx:4:9 lint/complexity/noUselessFragments  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This fragment is unnecessary.
+  
+    3 │ function jsxElement() {
+  > 4 │ 	return <><JsxElement /></>;
+      │ 	       ^^^^^^^^^^^^^^^^^^^
+    5 │ }
+    6 │ 
+  
+  i A fragment is redundant if it contains only one child, or if it is the child of a html element, and is not a keyed fragment.
+  
+  i Unsafe fix: Remove the Fragment
+  
+    4 │ → return·<><JsxElement·/></>;
+      │           --           ---   
+
+```
+
+```
+withJsxElementInvalid.jsx:8:10 lint/complexity/noUselessFragments  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This fragment is unnecessary.
+  
+     7 │ function jsxElement() {
+   > 8 │ 	return (<><JsxElement /></>);
+       │ 	        ^^^^^^^^^^^^^^^^^^^
+     9 │ }
+    10 │ 
+  
+  i A fragment is redundant if it contains only one child, or if it is the child of a html element, and is not a keyed fragment.
+  
+  i Unsafe fix: Remove the Fragment
+  
+    8 │ → return·(<><JsxElement·/></>);
+      │            --           ---    
 
 ```

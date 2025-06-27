@@ -42,7 +42,7 @@ lint ━━━━━━━━━━━━━━━━━━━━━━━━━
 check.js lint ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i The size of the file is 27 B, which exceeds the configured maximum of 16 B for this project.
-    Use the `files.maxSize` configuration to change the maximum size of files processed, or `files.ignore` to ignore the file.
+    Use the `files.maxSize` configuration to change the maximum size of files processed, or `files.includes` to ignore the file.
   
 
 ```

@@ -1,11 +1,11 @@
 use super::document::Document;
 use super::{
     ChangeFileParams, CheckFileSizeParams, CheckFileSizeResult, CloseFileParams,
-    CloseProjectParams, FeatureName, FileContent, FixFileParams, FixFileResult, FormatFileParams,
-    FormatOnTypeParams, FormatRangeParams, GetControlFlowGraphParams, GetFormatterIRParams,
-    GetSemanticModelParams, GetSyntaxTreeParams, GetSyntaxTreeResult, OpenFileParams,
-    OpenProjectParams, ParsePatternParams, ParsePatternResult, PatternId, ProjectKey,
-    PullActionsParams, PullActionsResult, PullDiagnosticsParams, PullDiagnosticsResult,
+    CloseProjectParams, FeatureName, FileContent, FileExitsParams, FixFileParams, FixFileResult,
+    FormatFileParams, FormatOnTypeParams, FormatRangeParams, GetControlFlowGraphParams,
+    GetFormatterIRParams, GetSemanticModelParams, GetSyntaxTreeParams, GetSyntaxTreeResult,
+    OpenFileParams, OpenProjectParams, ParsePatternParams, ParsePatternResult, PatternId,
+    ProjectKey, PullActionsParams, PullActionsResult, PullDiagnosticsParams, PullDiagnosticsResult,
     RenameResult, ScanProjectFolderParams, ScanProjectFolderResult, SearchPatternParams,
     SearchResults, ServiceDataNotification, SupportsFeatureParams, UpdateSettingsParams,
     UpdateSettingsResult,
@@ -844,154 +844,6 @@ impl WorkspaceServer {
 }
 
 impl Workspace for WorkspaceServer {
-    fn fs(&self) -> &dyn FsWithResolverProxy {
-        self.fs.as_ref()
-    }
-
-    fn check_file_size(
-        &self,
-        params: CheckFileSizeParams,
-    ) -> Result<CheckFileSizeResult, WorkspaceError> {
-        let documents = self.documents.pin();
-        let Some(document) = documents.get(params.path.as_path()) else {
-            return Err(WorkspaceError::not_found());
-        };
-        let file_size = document.content.len();
-        let limit = self
-            .projects
-            .get_max_file_size(params.project_key, params.path.as_path());
-        Ok(CheckFileSizeResult { file_size, limit })
-    }
-
-    fn file_features(
-        &self,
-        params: SupportsFeatureParams,
-    ) -> Result<FileFeaturesResult, WorkspaceError> {
-        let project_key = params.project_key;
-        let path = params.path.as_path();
-        let language = self.get_file_source(path);
-        let capabilities = self.features.get_capabilities(language);
-        let handle = WorkspaceSettingsHandle::from(
-            self.projects
-                .get_settings_based_on_path(project_key, &params.path)
-                .ok_or_else(WorkspaceError::no_project)?,
-        );
-        let mut file_features = FileFeaturesResult::new();
-        let file_name = path.file_name();
-        file_features = file_features.with_capabilities(&capabilities);
-        file_features = file_features.with_settings_and_language(&handle, path, &capabilities);
-
-        let Some(settings) = handle.settings() else {
-            return Ok(file_features);
-        };
-        if settings.ignore_unknown_enabled()
-            && language == DocumentFileSource::Unknown
-            && self.get_file_source(&params.path) == DocumentFileSource::Unknown
-        {
-            file_features.ignore_not_supported();
-        } else if file_name == Some(ConfigName::biome_json())
-            || file_name == Some(ConfigName::biome_jsonc())
-        {
-            // Never ignore Biome's config file
-        } else if self.is_ignored_by_top_level_config(project_key, path) {
-            file_features.set_ignored_for_all_features();
-        } else {
-            for feature in params.features.iter() {
-                if self
-                    .projects
-                    .is_ignored_by_feature_config(project_key, path, feature)
-                {
-                    file_features.ignored(feature);
-                }
-            }
-        }
-        // If the file is not ignored by at least one feature, then check that the file is not protected.
-        //
-        // Protected files must be ignored.
-        if !file_features.is_not_processed() && FileFeaturesResult::is_protected_file(path) {
-            file_features.set_protected_for_all_features();
-        }
-
-        Ok(file_features)
-    }
-
-    fn is_path_ignored(&self, params: IsPathIgnoredParams) -> Result<bool, WorkspaceError> {
-        Ok(self.is_ignored(params.project_key, params.path.as_path(), params.features))
-    }
-
-    /// Updates the global settings for this workspace.
-    ///
-    /// ## Panics
-    /// This function may panic if the internal settings mutex has been poisoned
-    /// by another thread having previously panicked while holding the lock
-    #[tracing::instrument(level = "debug", skip_all)]
-    fn update_settings(
-        &self,
-        params: UpdateSettingsParams,
-    ) -> Result<UpdateSettingsResult, WorkspaceError> {
-        let workspace_directory = params.workspace_directory.map(|p| p.to_path_buf());
-        let is_root = params.configuration.is_root();
-        let extends_root = params.configuration.extends_root();
-        let mut settings = if !is_root {
-            if !self.projects.is_project_registered(params.project_key) {
-                return Err(WorkspaceError::no_project());
-            }
-
-            if let Some(workspace_directory) = &workspace_directory {
-                self.projects
-                    .get_nested_settings(params.project_key, workspace_directory.as_path())
-                    .unwrap_or_default()
-            } else {
-                return Err(WorkspaceError::no_workspace_directory());
-            }
-        } else {
-            self.projects
-                .get_root_settings(params.project_key)
-                .ok_or_else(WorkspaceError::no_project)?
-        };
-
-        settings.merge_with_configuration(params.configuration, workspace_directory.clone())?;
-
-        let loading_directory = if extends_root {
-            self.projects.get_project_path(params.project_key)
-        } else {
-            workspace_directory.clone()
-        };
-
-        let diagnostics = self.load_plugins(
-            &loading_directory.clone().unwrap_or_default(),
-            &settings.as_all_plugins(),
-        );
-        let has_errors = diagnostics
-            .iter()
-            .any(|diagnostic| diagnostic.severity() >= Severity::Error);
-        if has_errors {
-            // Note we also pass non-error diagnostics here. Filtering them
-            // might be cleaner, but on the other hand, including them may
-            // sometimes give a hint as to why an error occurred?
-            return Err(WorkspaceError::plugin_errors(diagnostics));
-        }
-
-        if !is_root {
-            self.projects.set_nested_settings(
-                params.project_key,
-                workspace_directory.unwrap_or_default(),
-                settings,
-            );
-        } else {
-            self.projects
-                .set_root_settings(params.project_key, settings);
-        }
-
-        Ok(UpdateSettingsResult {
-            diagnostics: diagnostics.into_iter().map(Into::into).collect(),
-        })
-    }
-
-    fn open_file(&self, params: OpenFileParams) -> Result<(), WorkspaceError> {
-        self.open_file_internal(OpenFileReason::ClientRequest, params)
-    }
-
     fn open_project(&self, params: OpenProjectParams) -> Result<OpenProjectResult, WorkspaceError> {
         let (path, scan_kind) = if params.open_uninitialized {
             let path = params.path.to_path_buf();
@@ -1077,6 +929,75 @@ impl Workspace for WorkspaceServer {
         })
     }
 
+    /// Updates the global settings for this workspace.
+    ///
+    /// ## Panics
+    /// This function may panic if the internal settings mutex has been poisoned
+    /// by another thread having previously panicked while holding the lock
+    #[tracing::instrument(level = "debug", skip_all)]
+    fn update_settings(
+        &self,
+        params: UpdateSettingsParams,
+    ) -> Result<UpdateSettingsResult, WorkspaceError> {
+        let workspace_directory = params.workspace_directory.map(|p| p.to_path_buf());
+        let is_root = params.configuration.is_root();
+        let extends_root = params.configuration.extends_root();
+        let mut settings = if !is_root {
+            if !self.projects.is_project_registered(params.project_key) {
+                return Err(WorkspaceError::no_project());
+            }
+
+            if let Some(workspace_directory) = &workspace_directory {
+                self.projects
+                    .get_nested_settings(params.project_key, workspace_directory.as_path())
+                    .unwrap_or_default()
+            } else {
+                return Err(WorkspaceError::no_workspace_directory());
+            }
+        } else {
+            self.projects
+                .get_root_settings(params.project_key)
+                .ok_or_else(WorkspaceError::no_project)?
+        };
+
+        settings.merge_with_configuration(params.configuration, workspace_directory.clone())?;
+
+        let loading_directory = if extends_root {
+            self.projects.get_project_path(params.project_key)
+        } else {
+            workspace_directory.clone()
+        };
+
+        let diagnostics = self.load_plugins(
+            &loading_directory.clone().unwrap_or_default(),
+            &settings.as_all_plugins(),
+        );
+        let has_errors = diagnostics
+            .iter()
+            .any(|diagnostic| diagnostic.severity() >= Severity::Error);
+        if has_errors {
+            // Note we also pass non-error diagnostics here. Filtering them
+            // might be cleaner, but on the other hand, including them may
+            // sometimes give a hint as to why an error occurred?
+            return Err(WorkspaceError::plugin_errors(diagnostics));
+        }
+
+        if !is_root {
+            self.projects.set_nested_settings(
+                params.project_key,
+                workspace_directory.unwrap_or_default(),
+                settings,
+            );
+        } else {
+            self.projects
+                .set_root_settings(params.project_key, settings);
+        }
+
+        Ok(UpdateSettingsResult {
+            diagnostics: diagnostics.into_iter().map(Into::into).collect(),
+        })
+    }
+
     fn close_project(&self, params: CloseProjectParams) -> Result<(), WorkspaceError> {
         let project_path = self
             .projects
@@ -1113,6 +1034,73 @@ impl Workspace for WorkspaceServer {
         self.projects.remove_project(params.project_key);
 
         Ok(())
+    }
+
+    fn open_file(&self, params: OpenFileParams) -> Result<(), WorkspaceError> {
+        self.open_file_internal(OpenFileReason::ClientRequest, params)
+    }
+
+    fn file_exists(&self, params: FileExitsParams) -> Result<bool, WorkspaceError> {
+        Ok(self
+            .documents
+            .pin()
+            .contains_key(params.file_path.as_path()))
+    }
+
+    fn file_features(
+        &self,
+        params: SupportsFeatureParams,
+    ) -> Result<FileFeaturesResult, WorkspaceError> {
+        let project_key = params.project_key;
+        let path = params.path.as_path();
+        let language = self.get_file_source(path);
+        let capabilities = self.features.get_capabilities(language);
+        let handle = WorkspaceSettingsHandle::from(
+            self.projects
+                .get_settings_based_on_path(project_key, &params.path)
+                .ok_or_else(WorkspaceError::no_project)?,
+        );
+        let mut file_features = FileFeaturesResult::new();
+        let file_name = path.file_name();
+        file_features = file_features.with_capabilities(&capabilities);
+        file_features = file_features.with_settings_and_language(&handle, path, &capabilities);
+
+        let Some(settings) = handle.settings() else {
+            return Ok(file_features);
+        };
+        if settings.ignore_unknown_enabled()
+            && language == DocumentFileSource::Unknown
+            && self.get_file_source(&params.path) == DocumentFileSource::Unknown
+        {
+            file_features.ignore_not_supported();
+        } else if file_name == Some(ConfigName::biome_json())
+            || file_name == Some(ConfigName::biome_jsonc())
+        {
+            // Never ignore Biome's config file
+        } else if self.is_ignored_by_top_level_config(project_key, path) {
+            file_features.set_ignored_for_all_features();
+        } else {
+            for feature in params.features.iter() {
+                if self
+                    .projects
+                    .is_ignored_by_feature_config(project_key, path, feature)
+                {
+                    file_features.ignored(feature);
+                }
+            }
+        }
+        // If the file is not ignored by at least one feature, then check that the file is not protected.
+        //
+        // Protected files must be ignored.
+        if !file_features.is_not_processed() && FileFeaturesResult::is_protected_file(path) {
+            file_features.set_protected_for_all_features();
+        }
+
+        Ok(file_features)
+    }
+
+    fn is_path_ignored(&self, params: IsPathIgnoredParams) -> Result<bool, WorkspaceError> {
+        Ok(self.is_ignored(params.project_key, params.path.as_path(), params.features))
     }
 
     fn get_syntax_tree(
@@ -1213,6 +1201,21 @@ impl Workspace for WorkspaceServer {
             .ok_or_else(WorkspaceError::not_found)
     }
 
+    fn check_file_size(
+        &self,
+        params: CheckFileSizeParams,
+    ) -> Result<CheckFileSizeResult, WorkspaceError> {
+        let documents = self.documents.pin();
+        let Some(document) = documents.get(params.path.as_path()) else {
+            return Err(WorkspaceError::not_found());
+        };
+        let file_size = document.content.len();
+        let limit = self
+            .projects
+            .get_max_file_size(params.project_key, params.path.as_path());
+        Ok(CheckFileSizeResult { file_size, limit })
+    }
+
     /// Changes the content of an open file.
     fn change_file(
         &self,
@@ -1283,52 +1286,6 @@ impl Workspace for WorkspaceServer {
             )
         } else {
             Ok(())
-        }
-    }
-
-    /// Closes a file that is opened in the workspace.
-    ///
-    /// This only unloads the document from the workspace if the file is NOT
-    /// opened by the scanner as well. If the scanner has opened the file, it
-    /// may still be required for multi-file analysis.
-    fn close_file(&self, params: CloseFileParams) -> Result<(), WorkspaceError> {
-        let path = params.path.as_path();
-
-        let documents = self.documents.pin();
-        let result = documents.compute(path.to_path_buf(), |current| {
-            match current {
-                Some((_path, document)) if document.opened_by_scanner => {
-                    // If the scanner is still interested in the document, we
-                    // only unset the version and re-sync the content below.
-                    Operation::Insert(Document {
-                        version: None,
-                        ..document.clone()
-                    })
-                }
-                Some(_) => Operation::Remove,
-                None => Operation::Abort(()),
-            }
-        });
-
-        // The node cache can be cleared in any case.
-        self.node_cache.lock().unwrap().remove(path);
-
-        match result {
-            Compute::Inserted(_, _) => Ok(()), // should be unreachable
-            Compute::Updated { .. } => {
-                // This may look counter-intuitive, but we need to consider
-                // that the file may have gone out-of-sync between the client
-                // and the file system. So when the client closes it, and the
-                // scanner still wants it, we need to resync it to make sure
-                // they're back in sync.
-                let _ = self
-                    .watcher_tx
-                    .send(WatcherInstruction::ResyncFile(path.to_path_buf()));
-
-                Ok(())
-            }
-            Compute::Removed(_, _) => Ok(()),
-            Compute::Aborted(_) => Err(WorkspaceError::not_found()),
         }
     }
 
@@ -1643,13 +1600,54 @@ impl Workspace for WorkspaceServer {
         Ok(result)
     }
 
-    fn rage(&self, _: RageParams) -> Result<RageResult, WorkspaceError> {
-        let entries = vec![
-            RageEntry::section("Workspace"),
-            RageEntry::pair("Open Documents", &format!("{}", self.documents.len())),
-        ];
+    /// Closes a file that is opened in the workspace.
+    ///
+    /// This only unloads the document from the workspace if the file is NOT
+    /// opened by the scanner as well. If the scanner has opened the file, it
+    /// may still be required for multi-file analysis.
+    fn close_file(&self, params: CloseFileParams) -> Result<(), WorkspaceError> {
+        let path = params.path.as_path();
 
-        Ok(RageResult { entries })
+        let documents = self.documents.pin();
+        let result = documents.compute(path.to_path_buf(), |current| {
+            match current {
+                Some((_path, document)) if document.opened_by_scanner => {
+                    // If the scanner is still interested in the document, we
+                    // only unset the version and re-sync the content below.
+                    Operation::Insert(Document {
+                        version: None,
+                        ..document.clone()
+                    })
+                }
+                Some(_) => Operation::Remove,
+                None => Operation::Abort(()),
+            }
+        });
+
+        // The node cache can be cleared in any case.
+        self.node_cache.lock().unwrap().remove(path);
+
+        match result {
+            Compute::Inserted(_, _) => Ok(()), // should be unreachable
+            Compute::Updated { .. } => {
+                // This may look counter-intuitive, but we need to consider
+                // that the file may have gone out-of-sync between the client
+                // and the file system. So when the client closes it, and the
+                // scanner still wants it, we need to resync it to make sure
+                // they're back in sync.
+                let _ = self
+                    .watcher_tx
+                    .send(WatcherInstruction::ResyncFile(path.to_path_buf()));
+
+                Ok(())
+            }
+            Compute::Removed(_, _) => Ok(()),
+            Compute::Aborted(_) => Err(WorkspaceError::not_found()),
+        }
+    }
+
+    fn fs(&self) -> &dyn FsWithResolverProxy {
+        self.fs.as_ref()
     }
 
     fn parse_pattern(
@@ -1698,6 +1696,15 @@ impl Workspace for WorkspaceServer {
     fn drop_pattern(&self, params: super::DropPatternParams) -> Result<(), WorkspaceError> {
         self.patterns.pin().remove(&params.pattern);
         Ok(())
+    }
+
+    fn rage(&self, _: RageParams) -> Result<RageResult, WorkspaceError> {
+        let entries = vec![
+            RageEntry::section("Workspace"),
+            RageEntry::pair("Open Documents", &format!("{}", self.documents.len())),
+        ];
+
+        Ok(RageResult { entries })
     }
 
     fn server_info(&self) -> Option<&ServerInfo> {

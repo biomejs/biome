@@ -48,8 +48,8 @@ declare_lint_rule! {
         name: "noNegationElse",
         language: "js",
         sources: &[
-            RuleSource::Eslint("no-negated-condition"),
-            RuleSource::Clippy("if_not_else"),
+            RuleSource::Eslint("no-negated-condition").same(),
+            RuleSource::Clippy("if_not_else").same(),
         ],
         recommended: false,
         severity: Severity::Information,

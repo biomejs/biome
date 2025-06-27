@@ -49,7 +49,7 @@ declare_lint_rule! {
         version: "1.0.0",
         name: "noUndeclaredVariables",
         language: "js",
-        sources: &[RuleSource::Eslint("no-undef")],
+        sources: &[RuleSource::Eslint("no-undef").same()],
         recommended: false,
         severity: Severity::Error,
     }

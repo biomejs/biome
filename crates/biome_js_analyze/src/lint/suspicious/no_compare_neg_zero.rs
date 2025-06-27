@@ -37,7 +37,7 @@ declare_lint_rule! {
         version: "1.0.0",
         name: "noCompareNegZero",
         language: "js",
-        sources: &[RuleSource::Eslint("no-compare-neg-zero")],
+        sources: &[RuleSource::Eslint("no-compare-neg-zero").same()],
         recommended: true,
         severity: Severity::Error,
         fix_kind: FixKind::Safe,

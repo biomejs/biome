@@ -4,7 +4,7 @@ The analyzer is a generic crate aimed to implement a visitor-like infrastructure
 it's possible to inspect a piece of AST and emit diagnostics or actions based on a
 static check.
 
-The analyzer allows implementors to create **four different** types of rules:
+The analyzer allows implementors to create **three different** types of rules:
 - **Syntax**: This rule checks the syntax according to the language specification and emits error diagnostics accordingly.
 - **Lint**: This rule performs static analysis of the source code to detect invalid or error-prone patterns, and emits diagnostics along with proposed fixes.
 - **Assist**: This rule detects refactoring opportunities and emits code action signals.
@@ -399,7 +399,7 @@ declare_lint_rule! {
 
 ##### Biome lint rules inspired by other lint rules
 
-If a **lint** rule is inspired by an existing rule from other ecosystems (ESLint, ESLint plugins, clippy, etc.), you can add a new metadata to the macro called `source`. Its value is `&'static [RuleSource]`, which is a reference to a slice of `RuleSource` elements, each representing a different source.
+If a **lint** rule is ported from an existing rule from other ecosystems (ESLint, ESLint plugins, Clippy, etc.), you can add a new metadata to the macro called `source`. Its value is `&'static [RuleSource]`, which is a reference to a slice of `RuleSource` elements, each representing a different source.
 
 If you're implementing a lint rule that matches the behavior of the ESLint rule `no-debugger`, you'll use the variant `::ESLint` and pass the name of the rule:
 
@@ -413,15 +413,15 @@ declare_lint_rule! {
         name: "myRuleName",
         language: "js",
         recommended: false,
-        sources: &[RuleSource::Eslint("no-debugger")],
+        sources: &[RuleSource::Eslint("no-debugger").same()],
     }
 }
 ```
 
-If the rule you're implementing has a different behavior or option, you can add the `source_kind` metadata and use the `RuleSourceKind::Inspired` type. If there are multiple sources, we assume that each source has the same `source_kind`.
+If the rule you're implementing has a different behavior or option, you can use `.inspired()` instead of `.same()`.
 
 ```rust
-use biome_analyze::{declare_lint_rule, RuleSource, RuleSourceKind};
+use biome_analyze::{declare_lint_rule, RuleSource};
 
 declare_lint_rule! {
     /// Documentation
@@ -430,13 +430,11 @@ declare_lint_rule! {
         name: "myRuleName",
         language: "js",
         recommended: false,
-        sources: &[RuleSource::Eslint("no-debugger")],
-        source_kind: RuleSourceKind::Inspired,
+        sources: &[RuleSource::Eslint("no-debugger").inspired()],
     }
 }
 ```
 
-By default, `source_kind` is always `RuleSourceKind::SameLogic`.
 
 #### `rule_category!` macro
 

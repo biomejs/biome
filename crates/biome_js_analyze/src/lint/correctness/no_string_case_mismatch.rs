@@ -38,7 +38,7 @@ declare_lint_rule! {
         version: "1.0.0",
         name: "noStringCaseMismatch",
         language: "js",
-        sources: &[RuleSource::Clippy("match_str_case_mismatch")],
+        sources: &[RuleSource::Clippy("match_str_case_mismatch").same()],
         recommended: true,
         severity: Severity::Error,
         fix_kind: FixKind::Unsafe,

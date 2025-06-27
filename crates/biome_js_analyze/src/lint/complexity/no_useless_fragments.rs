@@ -65,7 +65,7 @@ declare_lint_rule! {
         version: "1.0.0",
         name: "noUselessFragments",
         language: "jsx",
-        sources: &[RuleSource::EslintReact("jsx-no-useless-fragment")],
+        sources: &[RuleSource::EslintReact("jsx-no-useless-fragment").same()],
         recommended: true,
         severity: Severity::Information,
         fix_kind: FixKind::Unsafe,
@@ -136,12 +136,14 @@ impl Rule for NoUselessFragments {
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
         let model = ctx.model();
-        let mut in_jsx_attr_expr = false;
-        let mut in_js_logical_expr = false;
-        let mut in_jsx_expr = false;
-        let mut in_jsx_list = false;
+
         match node {
             NoUselessFragmentsQuery::JsxFragment(fragment) => {
+                let mut in_jsx_attr_expr = false;
+                let mut in_js_logical_expr = false;
+                let mut in_jsx_expr = false;
+                let mut in_jsx_list = false;
+                let mut in_return_statement = false;
                 let parents_where_fragments_must_be_preserved =
                     node.syntax().parent().is_some_and(|parent| {
                         match JsxTagExpression::try_cast(parent.clone()) {
@@ -166,15 +168,20 @@ impl Rule for NoUselessFragments {
                                     }
                                 })
                                 .is_some_and(|parent| {
-                                    matches!(
-                                        parent.kind(),
-                                        JsSyntaxKind::JS_RETURN_STATEMENT
-                                            | JsSyntaxKind::JS_INITIALIZER_CLAUSE
-                                            | JsSyntaxKind::JS_ARROW_FUNCTION_EXPRESSION
-                                            | JsSyntaxKind::JS_FUNCTION_EXPRESSION
-                                            | JsSyntaxKind::JS_FUNCTION_DECLARATION
-                                            | JsSyntaxKind::JS_PROPERTY_OBJECT_MEMBER
-                                    )
+                                    if parent.kind() == JsSyntaxKind::JS_RETURN_STATEMENT {
+                                        in_return_statement = true;
+                                        false
+                                    } else {
+                                        // Preserve fragments in other kinds of parent
+                                        matches!(
+                                            parent.kind(),
+                                            JsSyntaxKind::JS_INITIALIZER_CLAUSE
+                                                | JsSyntaxKind::JS_ARROW_FUNCTION_EXPRESSION
+                                                | JsSyntaxKind::JS_FUNCTION_EXPRESSION
+                                                | JsSyntaxKind::JS_FUNCTION_DECLARATION
+                                                | JsSyntaxKind::JS_PROPERTY_OBJECT_MEMBER
+                                        )
+                                    }
                                 }),
                             Err(_) => {
                                 if JsxChildList::try_cast(parent.clone()).is_ok() {
@@ -215,19 +222,24 @@ impl Rule for NoUselessFragments {
                                 }
                             }
                             JsSyntaxKind::JSX_TEXT => {
-                                // We need to whitespaces and newlines from the original string.
+                                // We need to remove whitespaces and newlines from the original string.
                                 // Since in the JSX newlines aren't trivia, we require to allocate a string to trim from those characters.
                                 let original_text = child.to_trimmed_text();
-                                let child_text = original_text.text().trim();
+                                let trimmed_text = original_text.text().trim();
 
                                 if (in_jsx_expr || in_js_logical_expr)
-                                    && contains_html_character_references(child_text)
+                                    && contains_html_character_references(trimmed_text)
                                 {
                                     children_where_fragments_must_preserved = true;
                                     break;
                                 }
 
-                                if !child_text.is_empty() {
+                                // Test whether a node is a padding spaces trimmed by the React runtime.
+                                let is_only_whitespace = trimmed_text.is_empty();
+                                let is_padding_spaces =
+                                    is_only_whitespace && original_text.contains('\n');
+
+                                if !is_padding_spaces {
                                     significant_children += 1;
                                     if first_significant_child.is_none() {
                                         first_significant_child = Some(child);
@@ -251,7 +263,26 @@ impl Rule for NoUselessFragments {
                             if let Some(first) = first_significant_child {
                                 if JsxText::can_cast(first.syntax().kind()) && in_jsx_attr_expr {
                                     None
+                                } else if JsxElement::can_cast(first.syntax().kind()) {
+                                    Some(NoUselessFragmentsState::Child(first))
+                                } else if in_return_statement {
+                                    // Preserve flagment with only one JsxExpressionChild in return statement
+                                    if JsxExpressionChild::can_cast(first.syntax().kind()) {
+                                        None
+                                    } else {
+                                        Some(NoUselessFragmentsState::Child(first))
+                                    }
                                 } else {
+                                    // Do not report the fragment as unnecessary if the only child is JsxText with an HTML reference
+                                    // or if the fragment is the only child in a JSX expression (e.g. {<>Foo</>})
+                                    if let AnyJsxChild::JsxText(text) = &first {
+                                        let value_token = text.value_token().ok()?;
+                                        let value = value_token.token_text();
+                                        if contains_html_character_references(value.as_ref()) {
+                                            return None;
+                                        }
+                                    }
+
                                     Some(NoUselessFragmentsState::Child(first))
                                 }
                             } else {

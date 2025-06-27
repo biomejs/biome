@@ -66,7 +66,7 @@ declare_lint_rule! {
         version: "1.0.0",
         name: "noUnreachableSuper",
         language: "js",
-        sources: &[RuleSource::Eslint("no-this-before-super")],
+        sources: &[RuleSource::Eslint("no-this-before-super").same()],
         recommended: true,
         severity: Severity::Error,
     }

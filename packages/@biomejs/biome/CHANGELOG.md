@@ -1,5 +1,352 @@
 # @biomejs/biome
 
+## 2.0.6
+
+### Patch Changes
+
+- [#6557](https://github.com/biomejs/biome/pull/6557) [`fd68458`](https://github.com/biomejs/biome/commit/fd68458f40767cb1aeb9eb444a03c5dd6f3f7c0d) Thanks [@ematipico](https://github.com/ematipico)! - Fixed a bug where Biome didn't provide all the available code actions when requested by the editor.
+
+- [#6511](https://github.com/biomejs/biome/pull/6511) [`72623fa`](https://github.com/biomejs/biome/commit/72623fa30470bbb97bae24514233d4d8a39507ec) Thanks [@Conaclos](https://github.com/Conaclos)! - Fixed [#6492](https://github.com/biomejs/biome/issues/6492). The
+  `organizeImports` assist action no longer duplicates a comment at the start of
+  the file when `:BLANK_LINE:` precedes the first import group.
+
+- [#6557](https://github.com/biomejs/biome/pull/6557) [`fd68458`](https://github.com/biomejs/biome/commit/fd68458f40767cb1aeb9eb444a03c5dd6f3f7c0d) Thanks [@ematipico](https://github.com/ematipico)! - Fixed [#6287](https://github.com/biomejs/biome/issues/6287) where Biome Language Server didn't adhere to the `settings.requireConfiguration` option when pulling diagnostics and code actions.
+  Note that for this configuration be correctly applied, your editor must support dynamic registration capabilities.
+
+- [#6551](https://github.com/biomejs/biome/pull/6551) [`0b63b1d`](https://github.com/biomejs/biome/commit/0b63b1d95c32ba61b2dcda4195d860397de3b589) Thanks [@Conaclos](https://github.com/Conaclos)! - Fixed [#6536](https://github.com/biomejs/biome/issues/6536). `useSortedKeys` no longer panics in some edge cases where object spreads are involved.
+
+- [#6503](https://github.com/biomejs/biome/pull/6503) [`9a8fe0f`](https://github.com/biomejs/biome/commit/9a8fe0f9313b2df93df56b3446340cc04a0e1958) Thanks [@ematipico](https://github.com/ematipico)! - Fixed [#6482](https://github.com/biomejs/biome/issues/6482) where nursery rules that belonged to a domain were incorrectly enabled.
+
+- [#6565](https://github.com/biomejs/biome/pull/6565) [`e85761c`](https://github.com/biomejs/biome/commit/e85761c72058e2c039ff16707781f7e0aa19d2a9) Thanks [@daivinhtran](https://github.com/daivinhtran)! - Fixed [#4677](https://github.com/biomejs/biome/issues/4677): Now the `noUnusedImports` rule won't produce diagnostics for types used in JSDoc comment of exports.
+
+- [#6166](https://github.com/biomejs/biome/pull/6166) [`b8cbd83`](https://github.com/biomejs/biome/commit/b8cbd839935fd0e672cb0fc2051df0e2fb9e5d1a) Thanks [@mehm8128](https://github.com/mehm8128)! - Added the nursery rule [noExcessiveLinesPerFunction](https://biomejs.dev/linter/rules/no-excessive-lines-per-function/).
+  This rule restrict a maximum number of lines of code in a function body.
+
+  The following code is now reported as invalid when the limit of maximum lines is set to 2:
+
+  ```js
+  function foo() {
+    const x = 0;
+    const y = 1;
+    const z = 2;
+  }
+  ```
+
+  The following code is now reported as valid when the limit of maximum lines is set to 3:
+
+  ```jsx
+  const bar = () => {
+    const x = 0;
+    const z = 2;
+  };
+  ```
+
+- [#6553](https://github.com/biomejs/biome/pull/6553) [`5f42630`](https://github.com/biomejs/biome/commit/5f42630f7b457070c7c1ad17cee28eae2e9951cc) Thanks [@denbezrukov](https://github.com/denbezrukov)! - Fixed [#6547](https://github.com/biomejs/biome/issues/6547). Now the Biome CSS parser correctly parses `@starting-style` when it's used inside other at-rules. The following example doesn't raise an error anymore:
+
+  ```css
+  @layer my-demo-layer {
+    @starting-style {
+      div.showing {
+        background-color: red;
+      }
+    }
+  }
+  ```
+
+- [#6458](https://github.com/biomejs/biome/pull/6458) [`05402e3`](https://github.com/biomejs/biome/commit/05402e395f6e356b690e1cad740294183fafeb84) Thanks [@ematipico](https://github.com/ematipico)! - Fixed an issue where the rule `useSemanticElements` used the incorrect range when positioning suppression comments.
+
+- [#6560](https://github.com/biomejs/biome/pull/6560) [`6d8a6b9`](https://github.com/biomejs/biome/commit/6d8a6b9a31788565455d6a6138ef6c1fe67421d5) Thanks [@siketyan](https://github.com/siketyan)! - Fixed [#6559](https://github.com/biomejs/biome/issues/6559): the error message on detected a large file was outdated and referred a removed configuration option `files.ignore`.
+
+- [#6458](https://github.com/biomejs/biome/pull/6458) [`05402e3`](https://github.com/biomejs/biome/commit/05402e395f6e356b690e1cad740294183fafeb84) Thanks [@ematipico](https://github.com/ematipico)! - Fixed [#6384](https://github.com/biomejs/biome/issues/6384). The rule [`useAltText`](https://biomejs/dev/linter/rules/no-alt-text) now emits a diagnostic with a correct range, so suppression comments can work correctly.
+
+- [#6518](https://github.com/biomejs/biome/pull/6518) [`7a56288`](https://github.com/biomejs/biome/commit/7a56288e0c7f366d6aa30100432227f3501afb61) Thanks [@wojtekmaj](https://github.com/wojtekmaj)! - Fixed #6508, where the rule `noUselessFragments` incorrectly flagged Fragments containing HTML entities as unnecessary.
+
+- [#6517](https://github.com/biomejs/biome/pull/6517) [`c5217cf`](https://github.com/biomejs/biome/commit/c5217cfb21653add3d3add930102bea8fb7b5833) Thanks [@arendjr](https://github.com/arendjr)! - Fixed [#6515](https://github.com/biomejs/biome/issues/6515). When using the
+  `extends` field to extend a configuration from an NPM package, we now accept the
+  _condition names_ `"biome"` and `"default"` for exporting the configuration in
+  the `package.json`.
+
+  This means that where previously your `package.json` had to contain an export
+  declaration similar to this:
+
+  ```json
+  {
+    "exports": {
+      ".": "./biome.json"
+    }
+  }
+  ```
+
+  You may now use one of these as well:
+
+  ```json
+  {
+    "exports": {
+      ".": {
+        "biome": "./biome.json"
+      }
+    }
+  }
+  ```
+
+  Or:
+
+  ```json
+  {
+    "exports": {
+      ".": {
+        "default": "./biome.json"
+      }
+    }
+  }
+  ```
+
+- [#6219](https://github.com/biomejs/biome/pull/6219) [`a3a3715`](https://github.com/biomejs/biome/commit/a3a371552a84eaaf24ce1bd8e63e3c1243b285a9) Thanks [@huangtiandi1999](https://github.com/huangtiandi1999)! - Added new nursery rule [`noUnassignedVariables`](https://biomejs.dev/linter/rules/no-unassigned-variables/), which disallows `let` or `var` variables that are read but never assigned.
+
+  The following code is now reported as invalid:
+
+  ```js
+  let x;
+  if (x) {
+    console.log(1);
+  }
+  ```
+
+  The following code is now reported as valid:
+
+  ```js
+  let x = 1;
+  if (x) {
+    console.log(1);
+  }
+  ```
+
+- [#6395](https://github.com/biomejs/biome/pull/6395) [`f62e748`](https://github.com/biomejs/biome/commit/f62e7481c2a94271869651d2b32bde5d54adbc73) Thanks [@mdevils](https://github.com/mdevils)! - Added the new nursery rule [`noImplicitCoercion`](https://biomejs.dev/linter/rules/no-implicit-coercion), which disallows shorthand type conversions in favor of explicit type conversion functions.
+
+  **Example (Invalid): Boolean conversion using double negation:**
+
+  ```js
+  !!foo;
+  !!(foo + bar);
+  ```
+
+  **Example (Invalid): Number conversion using unary operators:**
+
+  ```js
+  +foo;
+  -(-foo);
+  foo - 0;
+  foo * 1;
+  foo / 1;
+  ```
+
+  **Example (Invalid): String conversion using concatenation:**
+
+  ```js
+  "" + foo;
+  foo + "";
+  `` + foo;
+  foo += "";
+  ```
+
+  **Example (Invalid): Index checking using bitwise NOT:**
+
+  ```js
+  ~foo.indexOf(1);
+  ~foo.bar.indexOf(2);
+  ```
+
+  **Example (Valid): Using explicit type conversion functions:**
+
+  ```js
+  Boolean(foo);
+  Number(foo);
+  String(foo);
+  foo.indexOf(1) !== -1;
+  ```
+
+- [#6544](https://github.com/biomejs/biome/pull/6544) [`f28b075`](https://github.com/biomejs/biome/commit/f28b075b4fd28e49f18ae131878f67ce9a831c5a) Thanks [@daivinhtran](https://github.com/daivinhtran)! - Fixed [#6536](https://github.com/biomejs/biome/issues/6530). Now the rule `noUselessFragments` produces diagnostics for a top-level useless fragment that is in a return statement.
+
+- [#6320](https://github.com/biomejs/biome/pull/6320) [`5705f1a`](https://github.com/biomejs/biome/commit/5705f1aa9e41bfaea53edf255a18167b52a5fd9b) Thanks [@mdevils](https://github.com/mdevils)! - Added the new nursery rule [`useUnifiedTypeSignature`](https://biomejs.dev/linter/rules/use-unified-type-signature), which disallows overload signatures that can be unified into a single signature.
+
+  Overload signatures that can be merged into a single signature are redundant and should be avoided. This rule helps simplify function signatures by combining overloads by making parameters optional and/or using type unions.
+
+  **Example (Invalid): Overload signatures that can be unified:**
+
+  ```ts
+  function f(a: number): void;
+  function f(a: string): void;
+  ```
+
+  ```ts
+  interface I {
+    a(): void;
+    a(x: number): void;
+  }
+  ```
+
+  **Example (Valid): Unified signatures:**
+
+  ```ts
+  function f(a: number | string): void {}
+  ```
+
+  ```ts
+  interface I {
+    a(x?: number): void;
+  }
+  ```
+
+  **Example (Valid): Different return types cannot be merged:**
+
+  ```ts
+  interface I {
+    f(): void;
+    f(x: number): number;
+  }
+  ```
+
+- [#6545](https://github.com/biomejs/biome/pull/6545) [`2782175`](https://github.com/biomejs/biome/commit/2782175c445d4e5f979497ea76beda0276783909) Thanks [@ematipico](https://github.com/ematipico)! - Fixed [#6529](https://github.com/biomejs/biome/issues/6529), where the Biome Language Server would emit an error when the user would open a file that isn't part of its workspace (`node_modules` or external files).
+  Now the language server doesn't emit any errors and it exits gracefully.
+
+- [#6524](https://github.com/biomejs/biome/pull/6524) [`a27b825`](https://github.com/biomejs/biome/commit/a27b8253b2f0d5e5618e9b26eebaaa5da55ed69a) Thanks [@vladimir-ivanov](https://github.com/vladimir-ivanov)! - Fixed [#6500](https://github.com/biomejs/biome/issues/6500): The `useReadonlyClassProperties` rule now correctly marks class properties as `readonly` when they are assigned in a constructor, setter or method,
+  even if the assignment occurs inside an if or else block.
+
+  The following code is now correctly detected by the rule:
+
+  ```ts
+  class Price {
+    #price: string;
+
+    @Input()
+    set some(value: string | number) {
+      if (
+        value === undefined ||
+        value === null ||
+        value === "undefined" ||
+        value === "null" ||
+        Number.isNaN(value)
+      ) {
+        this.#price = "";
+      } else {
+        this.#price = "" + value;
+      }
+    }
+  }
+  ```
+
+- [#6355](https://github.com/biomejs/biome/pull/6355) [`e128ea9`](https://github.com/biomejs/biome/commit/e128ea9eb44bcf5558ab6b08214884d1c087686d) Thanks [@anthonyshew](https://github.com/anthonyshew)! - Added a new nursery rule `noAlert` that disallows the use of `alert`, `confirm` and `prompt`.
+
+  The following code is deemed incorrect:
+
+  ```js
+  alert("here!");
+  ```
+
+- [#6548](https://github.com/biomejs/biome/pull/6548) [`37e9799`](https://github.com/biomejs/biome/commit/37e979978b406c3e132fd5093bfb21e811c93d2d) Thanks [@ematipico](https://github.com/ematipico)! - Fixed [#6459](https://github.com/biomejs/biome/issues/6459), where the Biome LSP was not taking into account the correct settings when applying `source.fixAll.biome` code action.
+
+## 2.0.5
+
+### Patch Changes
+
+- [#6461](https://github.com/biomejs/biome/pull/6461) [`38862e6`](https://github.com/biomejs/biome/commit/38862e645c07935f2daf52799dce38656d589d40) Thanks [@ematipico](https://github.com/ematipico)! - Fixed [#6419](https://github.com/biomejs/biome/issues/6419), a regression where stdin mode would create a temporary new file instead of using the one provided by the user. This was an intended regression.
+
+  Now Biome will use the file path passed via `--std-file-path`, and apply the configuration that matches it.
+
+- [#6480](https://github.com/biomejs/biome/pull/6480) [`050047f`](https://github.com/biomejs/biome/commit/050047f4a3c1379abcf3cf57f1bfecd20bb7d8c1) Thanks [@Conaclos](https://github.com/Conaclos)! - Fixed [#6371](https://github.com/biomejs/biome/issues/6371).
+  [useNamingConvention](https://biomejs.dev/linter/rules/use-naming-convention/) now checks the string case of objects' property shorthand.
+
+- [#6477](https://github.com/biomejs/biome/pull/6477) [`b98379d`](https://github.com/biomejs/biome/commit/b98379d42d97540c3bd911263a0af1eb7bc4803e) Thanks [@ematipico](https://github.com/ematipico)! - Fixed an issue where Biome formatter didn't format consistently CSS value separated by commas.
+
+  ```diff
+  .font-heading {
+  - font-feature-settings: var(--heading-salt), var(--heading-ss06),
+  -   var(--heading-ss11), var(--heading-cv09), var(--heading-liga),
+  -   var(--heading-calt);
+
+  +  font-feature-settings:
+  +    var(--heading-salt), var(--heading-ss06), var(--heading-ss11),
+  +    var(--heading-cv09), var(--heading-liga), var(--heading-calt);
+  }
+
+  ```
+
+- [#6248](https://github.com/biomejs/biome/pull/6248) [`ec7126c`](https://github.com/biomejs/biome/commit/ec7126ca3d6777344191f3463b430a44fce02489) Thanks [@fireairforce](https://github.com/fireairforce)! - Fixed grit pattern matching for different kinds of import statements.
+
+  The grit pattern `import $imports from "foo"` will match the following code:
+
+  ```ts
+  import bar from "foo";
+  import { bar } from "foo";
+  import { bar, baz } from "foo";
+  ```
+
+## 2.0.4
+
+### Patch Changes
+
+- [#6450](https://github.com/biomejs/biome/pull/6450) [`7472d9e`](https://github.com/biomejs/biome/commit/7472d9e07fd6e8afab385276678f3d39c7497bab) Thanks [@ematipico](https://github.com/ematipico)! - Fixed an issue where the binary wasn't correctly mapped.
+
+## 2.0.3
+
+### Patch Changes
+
+- [#6439](https://github.com/biomejs/biome/pull/6439) [`7e4da4e`](https://github.com/biomejs/biome/commit/7e4da4edb811f9598e446c77fd26bc3802b6d3dd) Thanks [@ematipico](https://github.com/ematipico)! - Fixed an issue where the correct rights aren't added to the binary during publishing
+
+- [#6297](https://github.com/biomejs/biome/pull/6297) [`cc4b8c9`](https://github.com/biomejs/biome/commit/cc4b8c90017f9c04eab393abc60b3f94a35e3cfa) Thanks [@vladimir-ivanov](https://github.com/vladimir-ivanov)! - Added a new lint `useReadonlyClassProperties` rule.
+  This rule is a port of ESLint's [prefer-readonly](https://typescript-eslint.io/rules/prefer-readonly/) rule.
+
+  Example:
+
+  ```ts
+  class Example {
+    // All properties below can be marked as readonly
+    public constantValue = 42;
+    protected initializedInConstructor: string;
+    private privateField = true;
+
+    constructor(initializedInConstructor: string) {
+      this.initializedInConstructor = initializedInConstructor;
+    }
+  }
+  ```
+
+## 2.0.2
+
+### Patch Changes
+
+- [#6436](https://github.com/biomejs/biome/pull/6436) [`ec7c63d`](https://github.com/biomejs/biome/commit/ec7c63df520103b5d8ea0090c59486574e7370dd) Thanks [@ematipico](https://github.com/ematipico)! - Fixed an issue where binaries weren't copied anymore inside the `@biomejs/cli-*` packages.
+
+## 2.0.1
+
+### Patch Changes
+
+- [#6425](https://github.com/biomejs/biome/pull/6425) [`00e97ad`](https://github.com/biomejs/biome/commit/00e97aded825e72e63db7827de20dc84ac8a123b) Thanks [@siketyan](https://github.com/siketyan)! - Fixed [#6391](https://github.com/biomejs/biome/issues/6391): the rule [`noUselessFragments`](https://biomejs.dev/linter/rules/no-useless-fragments/) no longer reports a fragment that contains whitespaces which aren't trimmed by the runtime.
+
+- [#6417](https://github.com/biomejs/biome/pull/6417) [`dd88565`](https://github.com/biomejs/biome/commit/dd885655b576869eb624d4a31d2d09bcb6c623a4) Thanks [@ematipico](https://github.com/ematipico)! - Fixed [#6360](https://github.com/biomejs/biome/issues/6360): The following pseudo classes and elements are no longer reported by `noUnknownPseudoClass` or `noUnknownPseudoElement` rules.
+
+  - `:open`
+  - `::details-content`
+  - `::prefix`
+  - `::search-text`
+  - `::suffix`
+
+- [#6417](https://github.com/biomejs/biome/pull/6417) [`dd88565`](https://github.com/biomejs/biome/commit/dd885655b576869eb624d4a31d2d09bcb6c623a4) Thanks [@ematipico](https://github.com/ematipico)! - Fixed [#6357](https://github.com/biomejs/biome/issues/6357), where the boolean values weren't correctly merged when using the `extends` functionality. Now Biome correctly merges the values.
+
+- [#6417](https://github.com/biomejs/biome/pull/6417) [`dd88565`](https://github.com/biomejs/biome/commit/dd885655b576869eb624d4a31d2d09bcb6c623a4) Thanks [@ematipico](https://github.com/ematipico)! - Fixed [#6341](https://github.com/biomejs/biome/issues/6341): Fixed an issue where Biome would throw an error for the language tags `nb` and `nn`.
+
+- [#6385](https://github.com/biomejs/biome/pull/6385) [`94142dd`](https://github.com/biomejs/biome/commit/94142dd84b3a4b680c08007cd4947ca7d44273a8) Thanks [@siketyan](https://github.com/siketyan)! - Fixed [#6377](https://github.com/biomejs/biome/issues/6377): The rule [noSelfCompare](https://biomejs.dev/linter/rules/no-self-compare/) now correctly compares two function calls with different arguments.
+
+- [#6417](https://github.com/biomejs/biome/pull/6417) [`dd88565`](https://github.com/biomejs/biome/commit/dd885655b576869eb624d4a31d2d09bcb6c623a4) Thanks [@ematipico](https://github.com/ematipico)! - Fixed [#6278](https://github.com/biomejs/biome/issues/6278): `useExhaustiveDependencies` no longer adds duplicated dependencies into the list.
+
+- [#6417](https://github.com/biomejs/biome/pull/6417) [`dd88565`](https://github.com/biomejs/biome/commit/dd885655b576869eb624d4a31d2d09bcb6c623a4) Thanks [@ematipico](https://github.com/ematipico)! - Fix #6396, where `vi.useFakeTimers()` and `vi.useRealTimers()` incorrectly triggered React Hooks-related rules
+
+- [#6417](https://github.com/biomejs/biome/pull/6417) [`dd88565`](https://github.com/biomejs/biome/commit/dd885655b576869eb624d4a31d2d09bcb6c623a4) Thanks [@ematipico](https://github.com/ematipico)! - Fixed a bug where Biome didn't correctly discover nested configuration files when using the `lint` command and the linter is disabled in the root configuration.
+
+- [#6422](https://github.com/biomejs/biome/pull/6422) [`594ec50`](https://github.com/biomejs/biome/commit/594ec5008761c6263a43f72f1cbb7e9aafaf8a46) Thanks [@ematipico](https://github.com/ematipico)! - Removed the experimental rename feature from Biome LSP, which caused some issues inside existing editors such as Zed.
+
+- [#6388](https://github.com/biomejs/biome/pull/6388) [`c6942d2`](https://github.com/biomejs/biome/commit/c6942d291297322234f9f145fc2fbf8506dc7673) Thanks [@siketyan](https://github.com/siketyan)! - Fixed [#6375](https://github.com/biomejs/biome/issues/6375): the formatter no longer inserts an extra empty line before a semicolon when it has leading comments.
+
 ## 2.0.0
 
 ### Major Changes

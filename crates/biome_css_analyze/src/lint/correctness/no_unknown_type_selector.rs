@@ -56,7 +56,7 @@ declare_lint_rule! {
         language: "css",
         recommended: true,
         severity: Severity::Error,
-        sources: &[RuleSource::Stylelint("selector-type-no-unknown")],
+        sources: &[RuleSource::Stylelint("selector-type-no-unknown").same()],
     }
 }
 

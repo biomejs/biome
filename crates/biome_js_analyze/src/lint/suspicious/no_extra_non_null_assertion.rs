@@ -50,7 +50,7 @@ declare_lint_rule! {
         version: "1.0.0",
         name: "noExtraNonNullAssertion",
         language: "ts",
-        sources: &[RuleSource::EslintTypeScript("no-extra-non-null-assertion")],
+        sources: &[RuleSource::EslintTypeScript("no-extra-non-null-assertion").same()],
         recommended: true,
         severity: Severity::Warning,
         fix_kind: FixKind::Safe,

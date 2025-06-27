@@ -68,7 +68,7 @@ declare_lint_rule! {
         version: "1.0.0",
         name: "useLiteralEnumMembers",
         language: "ts",
-        sources: &[RuleSource::EslintTypeScript("prefer-literal-enum-member")],
+        sources: &[RuleSource::EslintTypeScript("prefer-literal-enum-member").same()],
         recommended: true,
         severity: Severity::Warning,
     }

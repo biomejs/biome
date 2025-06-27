@@ -75,7 +75,7 @@ declare_lint_rule! {
         name: "noRestrictedElements",
         language: "jsx",
         sources: &[
-            RuleSource::EslintReact("forbid-elements"),
+            RuleSource::EslintReact("forbid-elements").same(),
         ],
         recommended: false,
     }

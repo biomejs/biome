@@ -53,7 +53,7 @@ declare_lint_rule! {
         version: "1.3.0",
         name: "useShorthandAssign",
         language: "js",
-        sources: &[RuleSource::Eslint("operator-assignment")],
+        sources: &[RuleSource::Eslint("operator-assignment").same()],
         recommended: false,
         severity: Severity::Information,
         fix_kind: FixKind::Unsafe,

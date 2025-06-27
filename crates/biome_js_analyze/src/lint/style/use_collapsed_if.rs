@@ -69,8 +69,8 @@ declare_lint_rule! {
         name: "useCollapsedIf",
         language: "js",
         sources: &[
-            RuleSource::EslintUnicorn("no-lonely-if"),
-            RuleSource::Clippy("collapsible_if")
+            RuleSource::EslintUnicorn("no-lonely-if").same(),
+            RuleSource::Clippy("collapsible_if").same(),
         ],
         recommended: false,
         severity: Severity::Information,

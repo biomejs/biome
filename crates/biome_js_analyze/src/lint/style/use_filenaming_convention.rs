@@ -1,7 +1,5 @@
 use crate::{services::semantic::SemanticServices, utils::restricted_regex::RestrictedRegex};
-use biome_analyze::{
-    Rule, RuleDiagnostic, RuleSource, RuleSourceKind, context::RuleContext, declare_lint_rule,
-};
+use biome_analyze::{Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule};
 use biome_console::markup;
 use biome_deserialize::DeserializationContext;
 use biome_deserialize_macros::Deserializable;
@@ -144,8 +142,7 @@ declare_lint_rule! {
         version: "1.5.0",
         name: "useFilenamingConvention",
         language: "js",
-        sources: &[RuleSource::EslintUnicorn("filename-case")],
-        source_kind: RuleSourceKind::Inspired,
+        sources: &[RuleSource::EslintUnicorn("filename-case").inspired()],
         recommended: false,
         severity: Severity::Information,
     }

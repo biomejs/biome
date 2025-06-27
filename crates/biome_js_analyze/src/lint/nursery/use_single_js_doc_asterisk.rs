@@ -64,7 +64,7 @@ declare_lint_rule! {
         name: "useSingleJsDocAsterisk",
         language: "js",
         recommended: false,
-        sources: &[RuleSource::EslintJsDoc("no-multi-asterisks")],
+        sources: &[RuleSource::EslintJsDoc("no-multi-asterisks").same()],
         fix_kind: FixKind::Unsafe,
     }
 }

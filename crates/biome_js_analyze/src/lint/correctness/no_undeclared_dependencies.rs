@@ -84,7 +84,7 @@ declare_lint_rule! {
         name: "noUndeclaredDependencies",
         language: "js",
         sources: &[
-            RuleSource::EslintImport("no-extraneous-dependencies"),
+            RuleSource::EslintImport("no-extraneous-dependencies").same(),
         ],
         recommended: false,
         severity: Severity::Error,

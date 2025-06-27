@@ -1,6 +1,5 @@
 use biome_analyze::{
-    Ast, Rule, RuleDiagnostic, RuleDomain, RuleSource, RuleSourceKind, context::RuleContext,
-    declare_lint_rule,
+    Ast, Rule, RuleDiagnostic, RuleDomain, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
 use biome_diagnostics::Severity;
@@ -48,8 +47,7 @@ declare_lint_rule! {
         version: "1.9.4",
         name: "noHeadImportInDocument",
         language: "jsx",
-        sources: &[RuleSource::EslintNext("no-head-import-in-document")],
-        source_kind: RuleSourceKind::SameLogic,
+        sources: &[RuleSource::EslintNext("no-head-import-in-document").same()],
         recommended: true,
         severity: Severity::Warning,
         domains: &[RuleDomain::Next],

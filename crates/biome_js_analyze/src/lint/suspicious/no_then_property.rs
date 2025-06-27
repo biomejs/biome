@@ -87,7 +87,7 @@ declare_lint_rule! {
         version: "1.5.0",
         name: "noThenProperty",
         language: "js",
-        sources: &[RuleSource::EslintUnicorn("no-thenable")],
+        sources: &[RuleSource::EslintUnicorn("no-thenable").same()],
         recommended: true,
         severity: Severity::Error,
     }

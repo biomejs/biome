@@ -1,6 +1,4 @@
-use biome_analyze::{
-    Rule, RuleDiagnostic, RuleSource, RuleSourceKind, context::RuleContext, declare_lint_rule,
-};
+use biome_analyze::{Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule};
 use biome_console::fmt::{Display, Formatter};
 use biome_console::markup;
 use biome_js_semantic::{BindingExtensions, SemanticModel};
@@ -94,8 +92,7 @@ declare_lint_rule! {
         name: "noConstantBinaryExpression",
         language: "js",
         recommended: false,
-        sources: &[RuleSource::Eslint("no-constant-binary-expression")],
-        source_kind: RuleSourceKind::SameLogic,
+        sources: &[RuleSource::Eslint("no-constant-binary-expression").same()],
     }
 }
 

@@ -42,7 +42,7 @@ declare_lint_rule! {
         version: "1.0.0",
         name: "noDuplicateParameters",
         language: "js",
-        sources: &[RuleSource::Eslint("no-dupe-args")],
+        sources: &[RuleSource::Eslint("no-dupe-args").same()],
         recommended: true,
         severity: Severity::Error,
     }

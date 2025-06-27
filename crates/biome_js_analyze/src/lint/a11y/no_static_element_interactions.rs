@@ -53,7 +53,7 @@ declare_lint_rule! {
         version: "1.9.0",
         name: "noStaticElementInteractions",
         language: "js",
-        sources: &[RuleSource::EslintJsxA11y("no-static-element-interactions")],
+        sources: &[RuleSource::EslintJsxA11y("no-static-element-interactions").same()],
         recommended: true,
         severity: Severity::Error,
     }

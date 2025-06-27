@@ -74,7 +74,7 @@ declare_lint_rule! {
         version: "2.0.0",
         name: "noNoninteractiveElementInteractions",
         language: "jsx",
-        sources: &[RuleSource::EslintJsxA11y("no-noninteractive-element-interactions")],
+        sources: &[RuleSource::EslintJsxA11y("no-noninteractive-element-interactions").same()],
         recommended: false,
     }
 }

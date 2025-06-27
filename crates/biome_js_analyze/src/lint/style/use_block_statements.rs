@@ -67,7 +67,7 @@ declare_lint_rule! {
         version: "1.0.0",
         name: "useBlockStatements",
         language: "js",
-        sources: &[RuleSource::Eslint("curly")],
+        sources: &[RuleSource::Eslint("curly").same()],
         recommended: false,
         severity: Severity::Warning,
         fix_kind: FixKind::Unsafe,

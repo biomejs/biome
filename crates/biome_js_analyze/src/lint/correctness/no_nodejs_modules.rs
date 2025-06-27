@@ -42,7 +42,7 @@ declare_lint_rule! {
         version: "1.5.0",
         name: "noNodejsModules",
         language: "js",
-        sources: &[RuleSource::EslintImport("no-nodejs-modules")],
+        sources: &[RuleSource::EslintImport("no-nodejs-modules").same()],
         recommended: false,
         severity: Severity::Warning,
     }

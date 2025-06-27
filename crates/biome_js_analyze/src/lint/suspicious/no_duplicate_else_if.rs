@@ -53,7 +53,7 @@ declare_lint_rule! {
         language: "js",
         recommended: true,
         severity: Severity::Error,
-        sources: &[RuleSource::Eslint("no-dupe-else-if")],
+        sources: &[RuleSource::Eslint("no-dupe-else-if").same()],
     }
 }
 

@@ -1124,6 +1124,19 @@ pub struct CloseProjectParams {
     pub project_key: ProjectKey,
 }
 
+#[derive(Debug, serde::Serialize, serde::Deserialize)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[serde(rename_all = "camelCase")]
+pub struct FileExitsParams {
+    pub file_path: BiomePath,
+}
+
+impl From<BiomePath> for FileExitsParams {
+    fn from(path: BiomePath) -> Self {
+        Self { file_path: path }
+    }
+}
+
 pub trait Workspace: Send + Sync + RefUnwindSafe {
     // #region PROJECT-LEVEL METHODS
 
@@ -1202,6 +1215,15 @@ pub trait Workspace: Send + Sync + RefUnwindSafe {
     /// If the file path is under a folder that belongs to an opened project
     /// other than the current one, the current project is changed accordingly.
     fn open_file(&self, params: OpenFileParams) -> Result<(), WorkspaceError>;
+
+    /// Checks if `file_path` exists in the workspace.
+    ///
+    /// This method is useful to avoid unexpected errors before using the file method and avoid errors.
+    ///
+    /// ### Error
+    ///
+    /// It throws an error only if there's an issue with the client transport.
+    fn file_exists(&self, params: FileExitsParams) -> Result<bool, WorkspaceError>;
 
     /// Checks whether a certain feature is supported for the given file path.
     ///

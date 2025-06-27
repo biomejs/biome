@@ -51,8 +51,8 @@ declare_lint_rule! {
         name: "useAwait",
         language: "js",
         sources: &[
-            RuleSource::Eslint("require-await"),
-            RuleSource::EslintTypeScript("require-await"),
+            RuleSource::Eslint("require-await").same(),
+            RuleSource::EslintTypeScript("require-await").same(),
         ],
         recommended: false,
         severity: Severity::Warning,

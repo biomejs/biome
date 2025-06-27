@@ -46,7 +46,7 @@ declare_lint_rule! {
         language: "js",
         recommended: false,
         severity: Severity::Information,
-        sources: &[RuleSource::EslintUnicorn("prefer-string-slice")],
+        sources: &[RuleSource::EslintUnicorn("prefer-string-slice").same()],
         fix_kind: FixKind::Unsafe,
     }
 }

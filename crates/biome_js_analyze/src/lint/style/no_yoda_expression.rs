@@ -63,7 +63,7 @@ declare_lint_rule! {
         version: "1.8.0",
         name: "noYodaExpression",
         language: "js",
-        sources: &[RuleSource::Eslint("yoda")],
+        sources: &[RuleSource::Eslint("yoda").same()],
         recommended: false,
         severity: Severity::Information,
         fix_kind: FixKind::Safe,
