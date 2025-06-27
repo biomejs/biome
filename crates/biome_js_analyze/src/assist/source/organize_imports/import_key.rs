@@ -5,7 +5,7 @@ use biome_js_syntax::{
 use biome_rowan::AstNode;
 
 use super::{
-    comparable_token::ComparableToken,
+    comparable_token::{ComparableToken, SortMode},
     import_groups::{self, ImportCandidate, ImportSourceCandidate},
     import_source,
     specifiers_attributes::JsNamedSpecifiers,
@@ -83,16 +83,18 @@ pub struct ImportInfo {
 impl ImportInfo {
     pub fn from_module_item(
         item: &AnyJsModuleItem,
+        sort_mode: SortMode,
     ) -> Option<(Self, Option<JsNamedSpecifiers>, Option<JsImportAssertion>)> {
         match item {
             AnyJsModuleItem::AnyJsStatement(_) => None,
-            AnyJsModuleItem::JsExport(export) => Self::from_export(export),
-            AnyJsModuleItem::JsImport(import) => Self::from_import(import),
+            AnyJsModuleItem::JsExport(export) => Self::from_export(export, sort_mode),
+            AnyJsModuleItem::JsImport(import) => Self::from_import(import, sort_mode),
         }
     }
 
     fn from_import(
         value: &JsImport,
+        sort_mode: SortMode,
     ) -> Option<(Self, Option<JsNamedSpecifiers>, Option<JsImportAssertion>)> {
         let (kind, named_specifiers, source, attributes) = match value.import_clause().ok()? {
             AnyJsImportClause::JsImportBareClause(_) => {
@@ -148,7 +150,7 @@ impl ImportInfo {
         };
         Some((
             Self {
-                source: ComparableToken(source.inner_string_text().ok()?).into(),
+                source: ComparableToken::new(source.inner_string_text().ok()?, sort_mode).into(),
                 has_no_attributes: attributes.is_none(),
                 kind,
                 slot_index: value.syntax().index() as u32,
@@ -160,6 +162,7 @@ impl ImportInfo {
 
     fn from_export(
         value: &JsExport,
+        sort_mode: SortMode,
     ) -> Option<(Self, Option<JsNamedSpecifiers>, Option<JsImportAssertion>)> {
         let (kind, _first_local_name, named_specifiers, source, attributes) =
             match value.export_clause().ok()? {
@@ -202,7 +205,7 @@ impl ImportInfo {
         let source = source.inner_string_text().ok()?;
         Some((
             Self {
-                source: ComparableToken(source).into(),
+                source: ComparableToken::new(source, sort_mode).into(),
                 has_no_attributes: attributes.is_none(),
                 kind,
                 slot_index: value.syntax().index() as u32,

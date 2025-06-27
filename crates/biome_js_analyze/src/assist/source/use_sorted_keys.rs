@@ -13,6 +13,7 @@ use biome_js_syntax::{
 };
 use biome_rowan::{AstNode, AstSeparatedList, BatchMutationExt, SyntaxResult, TokenText};
 use biome_string_case::StrLikeExtension;
+use biome_deserialize_macros::Deserializable;
 
 use crate::JsRuleAction;
 
@@ -81,17 +82,36 @@ declare_source_rule! {
     }
 }
 
+#[derive(
+    Clone, Copy, Debug, Default, Eq, PartialEq, serde::Deserialize, Deserializable, serde::Serialize,
+)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+pub enum SortMode {
+    #[default]
+    Natural,
+    Alphabetical,
+}
+#[derive(
+    Clone, Copy, Debug, Default, Eq, PartialEq, serde::Deserialize, Deserializable, serde::Serialize,
+)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[serde(rename_all = "camelCase", deny_unknown_fields, default)]
+pub struct Options {
+    sort_mode: SortMode,
+}
+
 impl Rule for UseSortedKeys {
     type Query = Ast<JsObjectMemberList>;
     type State = Vec<ObjectMember>;
     type Signals = Box<[Self::State]>;
-    type Options = ();
+    type Options = Options;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let member_list = ctx.query();
         let mut chunks = Vec::new();
         let mut current_chunk_members = Vec::with_capacity(member_list.len());
-
+        let options: &Options = ctx.options();
+        let sort_mode = options.sort_mode;
         let get_name = |name: SyntaxResult<AnyJsObjectMemberName>| name.ok()?.name();
 
         for (index, element) in member_list.elements().enumerate() {
@@ -107,7 +127,7 @@ impl Rule for UseSortedKeys {
                     }
                 };
                 if let Some(name) = name {
-                    current_chunk_members.push(ObjectMember::new(element, name));
+                    current_chunk_members.push(ObjectMember::new(element, name, sort_mode));
                 } else {
                     // If a name cannot be extracted, then the current chunk of named properties stops here.
                     if !current_chunk_members.is_empty() && !current_chunk_members.is_sorted() {
@@ -173,10 +193,11 @@ impl Rule for UseSortedKeys {
 pub struct ObjectMember {
     member: AnyJsObjectMember,
     name: TokenText,
+    sort_mode: SortMode
 }
 impl ObjectMember {
-    fn new(member: AnyJsObjectMember, name: TokenText) -> Self {
-        Self { member, name }
+    fn new(member: AnyJsObjectMember, name: TokenText, sort_mode: SortMode) -> Self {
+        Self { member, name, sort_mode }
     }
 }
 impl Eq for ObjectMember {}
@@ -187,7 +208,10 @@ impl PartialEq for ObjectMember {
 }
 impl Ord for ObjectMember {
     fn cmp(&self, other: &Self) -> Ordering {
-        self.name.text().ascii_nat_cmp(other.name.text())
+        match self.sort_mode {
+            SortMode::Alphabetical => self.name.text().cmp(other.name.text()),
+            SortMode::Natural => self.name.text().ascii_nat_cmp(other.name.text()),
+        }
     }
 }
 impl PartialOrd for ObjectMember {

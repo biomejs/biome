@@ -8,6 +8,7 @@ use biome_json_factory::make::{json_member_list, token};
 use biome_json_syntax::{JsonMember, JsonMemberList, JsonObjectValue, T, TextRange};
 use biome_rowan::{AstNode, AstNodeExt, AstSeparatedList, BatchMutationExt};
 use biome_string_case::StrLikeExtension;
+use biome_deserialize_macros::Deserializable;
 use std::cmp::Ordering;
 use std::collections::BTreeSet;
 
@@ -37,10 +38,12 @@ impl Rule for UseSortedKeys {
     type Query = Ast<JsonMemberList>;
     type State = Members;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = Options;
 
     fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
         let node = ctx.query();
+        let options = ctx.options();
+        let sort_mode = options.sort_mode;
 
         if node.is_empty() {
             return None;
@@ -50,7 +53,7 @@ impl Rule for UseSortedKeys {
             .iter()
             .filter_map(|node| {
                 let node = node.ok()?;
-                Some(MemberKey { node })
+                Some(MemberKey { node, sort_mode })
             })
             .collect::<BTreeSet<_>>();
 
@@ -101,6 +104,7 @@ impl Rule for UseSortedKeys {
 #[derive(Debug)]
 pub struct MemberKey {
     node: JsonMember,
+    sort_mode: SortMode,
 }
 impl Eq for MemberKey {}
 impl PartialEq for MemberKey {
@@ -117,7 +121,10 @@ impl Ord for MemberKey {
         let Ok(other_name) = other.node.name().and_then(|name| name.inner_string_text()) else {
             return Ordering::Equal;
         };
-        self_name.text().ascii_nat_cmp(other_name.text())
+        match self.sort_mode {
+            SortMode::Alphabetical => self_name.text().cmp(other_name.text()),
+            SortMode::Natural => self_name.text().ascii_nat_cmp(other_name.text()),
+        }
     }
 }
 
@@ -162,4 +169,22 @@ impl Members {
 
         json_member_list(items, separators)
     }
+}
+
+#[derive(
+    Clone, Copy, Debug, Default, Eq, PartialEq, serde::Deserialize, Deserializable, serde::Serialize,
+)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+pub enum SortMode {
+    #[default]
+    Natural,
+    Alphabetical,
+}
+#[derive(
+    Clone, Debug, Default, Eq, PartialEq, serde::Deserialize, Deserializable, serde::Serialize,
+)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[serde(rename_all = "camelCase", deny_unknown_fields, default)]
+pub struct Options {
+    sort_mode: SortMode,
 }

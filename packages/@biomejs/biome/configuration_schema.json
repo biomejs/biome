@@ -3109,16 +3109,6 @@
 				{ "description": "`{foo}`", "type": "string", "enum": ["shorthand"] }
 			]
 		},
-		"Options": {
-			"type": "object",
-			"properties": {
-				"groups": {
-					"default": [],
-					"allOf": [{ "$ref": "#/definitions/ImportGroups" }]
-				}
-			},
-			"additionalProperties": false
-		},
 		"OverrideAssistConfiguration": {
 			"type": "object",
 			"properties": {
@@ -3463,46 +3453,84 @@
 			"type": "string",
 			"enum": ["abstract", "private", "protected", "readonly", "static"]
 		},
-		"RuleAssistConfiguration_for_Null": {
+		"OrganizeImportConfiguration": {
 			"anyOf": [
 				{ "$ref": "#/definitions/RuleAssistPlainConfiguration" },
-				{ "$ref": "#/definitions/RuleAssistWithOptions_for_Null" }
+				{
+					"type": "object",
+					"required": ["level", "options"],
+					"properties": {
+						"level": {
+							"description": "The severity of the emitted diagnostics by the rule",
+							"allOf": [{ "$ref": "#/definitions/RuleAssistPlainConfiguration" }]
+						},
+						"options": {
+							"description": "Organize Import options",
+							"properties": {
+								"groups": {
+									"default": [],
+									"allOf": [{ "$ref": "#/definitions/ImportGroups" }]
+								},
+								"sortMode": {
+									"description": "Determines how to sort tokens",
+									"default": "natural",
+									"type": "string",
+									"enum": ["natural", "alphabetical"]
+								}
+							},
+							"additionalProperties": false
+						}
+					},
+					"additionalProperties": false
+				}
 			]
 		},
-		"RuleAssistConfiguration_for_Options": {
+		"UseSortedAttributesConfiguration": {
 			"anyOf": [
 				{ "$ref": "#/definitions/RuleAssistPlainConfiguration" },
-				{ "$ref": "#/definitions/RuleAssistWithOptions_for_Options" }
+				{ "$ref": "#/definitions/RuleAssistOptionsWithSorting" }
 			]
 		},
+		"UseSortedKeysConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RuleAssistPlainConfiguration" },
+				{ "$ref": "#/definitions/RuleAssistOptionsWithSorting" }
+			]
+		},
+		"UseSortedPropertiesConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RuleAssistPlainConfiguration" },
+				{ "$ref": "#/definitions/RuleAssistOptionsWithSorting" }
+			]
+		},		
 		"RuleAssistPlainConfiguration": { "type": "string", "enum": ["off", "on"] },
-		"RuleAssistWithOptions_for_Null": {
-			"type": "object",
-			"required": ["level", "options"],
-			"properties": {
-				"level": {
-					"description": "The severity of the emitted diagnostics by the rule",
-					"allOf": [{ "$ref": "#/definitions/RuleAssistPlainConfiguration" }]
-				},
-				"options": { "description": "Rule's options", "type": "null" }
-			},
-			"additionalProperties": false
-		},
-		"RuleAssistWithOptions_for_Options": {
-			"type": "object",
-			"required": ["level", "options"],
+		"RuleAssistOptionsWithSorting": { 
+			"type": "object", 
+			"required": ["level"],
 			"properties": {
 				"level": {
 					"description": "The severity of the emitted diagnostics by the rule",
 					"allOf": [{ "$ref": "#/definitions/RuleAssistPlainConfiguration" }]
 				},
 				"options": {
-					"description": "Rule's options",
-					"allOf": [{ "$ref": "#/definitions/Options" }]
+					"anyOf": [
+						{"type": "null"},
+						{
+							"type": "object",
+							"properties": {
+								"sortMode": {
+									"description": "Determines how to sort tokens",
+									"default": "natural",
+									"type": "string",
+									"enum": ["natural", "alphabetical"]
+								}
+							},
+							"additionalProperties": false
+						}
+					]
 				}
-			},
-			"additionalProperties": false
-		},
+			}, 
+			"additionalProperties": false },
 		"RuleConfiguration": {
 			"anyOf": [
 				{ "$ref": "#/definitions/RulePlainConfiguration" },
@@ -4404,7 +4432,7 @@
 				"organizeImports": {
 					"description": "Provides a code action to sort the imports and exports in the file using a built-in or custom order.",
 					"anyOf": [
-						{ "$ref": "#/definitions/RuleAssistConfiguration_for_Options" },
+						{ "$ref": "#/definitions/OrganizeImportConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -4415,21 +4443,21 @@
 				"useSortedAttributes": {
 					"description": "Enforce attribute sorting in JSX elements.",
 					"anyOf": [
-						{ "$ref": "#/definitions/RuleAssistConfiguration_for_Null" },
+						{ "$ref": "#/definitions/UseSortedAttributesConfiguration" },
 						{ "type": "null" }
 					]
 				},
 				"useSortedKeys": {
 					"description": "Sorts the keys of a JSON object in natural order",
 					"anyOf": [
-						{ "$ref": "#/definitions/RuleAssistConfiguration_for_Null" },
+						{ "$ref": "#/definitions/UseSortedKeysConfiguration" },
 						{ "type": "null" }
 					]
 				},
 				"useSortedProperties": {
 					"description": "Enforce ordering of CSS properties and nested rules.",
 					"anyOf": [
-						{ "$ref": "#/definitions/RuleAssistConfiguration_for_Null" },
+						{ "$ref": "#/definitions/UseSortedPropertiesConfiguration" },
 						{ "type": "null" }
 					]
 				}

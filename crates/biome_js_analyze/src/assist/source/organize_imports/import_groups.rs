@@ -435,7 +435,7 @@ impl<'a> ImportSourceCandidate<'a> {
     pub fn new(source: &'a ImportSource<ComparableToken>) -> Self {
         Self {
             source,
-            path_candidate: CandidatePath::new(source.inner().0.text()),
+            path_candidate: CandidatePath::new(source.inner().token.text()),
         }
     }
 
@@ -445,7 +445,7 @@ impl<'a> ImportSourceCandidate<'a> {
 
     /// Returns the original string of this import source.
     pub fn as_str(&self) -> &'a str {
-        self.source.inner().0.text()
+        self.source.inner().token.text()
     }
 
     /// Tests whether the current path matches `matcher`.

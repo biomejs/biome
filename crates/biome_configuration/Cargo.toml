@@ -46,6 +46,7 @@ serde                    = { workspace = true, features = ["derive"] }
 schema = [
   "dep:schemars",
   "biome_js_analyze/schema",
+  "biome_json_analyze/schema",
   "biome_css_analyze/schema",
   "biome_formatter/schema",
   "biome_json_syntax/schema",

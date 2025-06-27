@@ -2,7 +2,7 @@ use std::{borrow::Cow, cmp::Ordering, iter::zip};
 
 use biome_analyze::{
     Ast, FixKind, Rule, RuleAction, RuleDiagnostic, RuleSource, context::RuleContext,
-    declare_source_rule,
+    declare_source_rule
 };
 use biome_console::markup;
 use biome_deserialize::TextRange;
@@ -12,6 +12,7 @@ use biome_js_syntax::{
 };
 use biome_rowan::{AstNode, BatchMutationExt};
 use biome_string_case::StrLikeExtension;
+use biome_deserialize_macros::Deserializable;
 
 use crate::JsRuleAction;
 
@@ -47,20 +48,40 @@ declare_source_rule! {
     }
 }
 
+#[derive(
+    Clone, Copy, Debug, Default, Eq, PartialEq, serde::Deserialize, Deserializable, serde::Serialize,
+)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+pub enum SortMode {
+    #[default]
+    Natural,
+    Alphabetical,
+}
+#[derive(
+    Clone, Copy, Debug, Default, Eq, PartialEq, serde::Deserialize, Deserializable, serde::Serialize,
+)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[serde(rename_all = "camelCase", deny_unknown_fields, default)]
+pub struct Options {
+    sort_mode: SortMode,
+}
+
 impl Rule for UseSortedAttributes {
     type Query = Ast<JsxAttributeList>;
     type State = PropGroup;
     type Signals = Box<[Self::State]>;
-    type Options = ();
+    type Options = Options;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let props = ctx.query();
         let mut current_prop_group = PropGroup::default();
         let mut prop_groups = Vec::new();
+        let options: &Options = ctx.options();
+        let sort_mode = options.sort_mode;
         for prop in props {
             match prop {
                 AnyJsxAttribute::JsxAttribute(attr) => {
-                    current_prop_group.props.push(PropElement { prop: attr });
+                    current_prop_group.props.push(PropElement { prop: attr, sort_mode: sort_mode });
                 }
                 // spread prop reset sort order
                 AnyJsxAttribute::JsxSpreadAttribute(_) => {
@@ -102,7 +123,7 @@ impl Rule for UseSortedAttributes {
     fn action(ctx: &RuleContext<Self>, state: &Self::State) -> Option<JsRuleAction> {
         let mut mutation = ctx.root().begin();
 
-        for (PropElement { prop }, PropElement { prop: sorted_prop }) in
+        for (PropElement { prop, sort_mode: _}, PropElement { prop: sorted_prop , sort_mode: _}) in
             zip(state.props.iter(), state.get_sorted_props())
         {
             mutation.replace_node(prop.clone(), sorted_prop);
@@ -120,6 +141,7 @@ impl Rule for UseSortedAttributes {
 #[derive(PartialEq, Eq, Clone)]
 pub struct PropElement {
     prop: JsxAttribute,
+    sort_mode: SortMode,
 }
 
 impl Ord for PropElement {
@@ -131,9 +153,18 @@ impl Ord for PropElement {
             return Ordering::Equal;
         };
 
-        self_name
-            .text_trimmed()
-            .ascii_nat_cmp(other_name.text_trimmed())
+        match self.sort_mode {
+            SortMode::Alphabetical => {
+                self_name
+                .text_trimmed()
+                .cmp(other_name.text_trimmed())
+            }
+            SortMode::Natural => {
+                self_name
+                .text_trimmed()
+                .ascii_nat_cmp(other_name.text_trimmed())
+            }
+        }
     }
 }
 

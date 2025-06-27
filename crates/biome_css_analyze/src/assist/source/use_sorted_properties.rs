@@ -16,6 +16,7 @@ use biome_css_syntax::{
 use biome_diagnostics::category;
 use biome_rowan::{AstNode, BatchMutationExt, NodeOrToken, SyntaxNode, TokenText};
 use biome_string_case::StrOnlyExtension;
+use biome_deserialize_macros::Deserializable;
 use std::{
     borrow::Cow,
     cmp::Ordering,
@@ -93,6 +94,25 @@ declare_source_rule! {
     }
 }
 
+
+#[derive(
+    Clone, Copy, Debug, Default, Eq, PartialEq, serde::Deserialize, Deserializable, serde::Serialize,
+)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+pub enum SortMode {
+    #[default]
+    Natural,
+    Alphabetical,
+}
+#[derive(
+    Clone, Copy, Debug, Default, Eq, PartialEq, serde::Deserialize, Deserializable, serde::Serialize,
+)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[serde(rename_all = "camelCase", deny_unknown_fields, default)]
+pub struct Options {
+    sort_mode: SortMode,
+}
+
 pub struct UseSortedPropertiesState {
     /// The containing node
     block: CssDeclarationOrRuleBlock,
@@ -106,7 +126,7 @@ impl Rule for UseSortedProperties {
     type Query = Ast<CssDeclarationOrRuleBlock>;
     type State = UseSortedPropertiesState;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = Options;
 
     fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
         let node = ctx.query();
