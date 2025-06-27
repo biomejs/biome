@@ -4,6 +4,7 @@ use biome_rowan::{
 };
 
 /// Returns `true` if `list` is sorted by `get_key`.
+/// The function returns an error if we encounter a buggy node or separator.
 ///
 /// The list is divided into chunks of nodes with keys.
 /// Thus, a node without key acts as a chuck delimiter.
@@ -17,21 +18,29 @@ pub fn is_separated_list_sorted_by<
     list: &impl AstSeparatedList<Language = L, Node = N>,
     get_key: impl Fn(&N) -> Option<Key>,
 ) -> Result<bool, SyntaxError> {
-    let mut previous_key: Option<Key> = None;
-    for element in list.iter() {
-        if let Some(key) = get_key(&element?) {
-            if let Some(previous_key) = previous_key {
-                if previous_key > key {
-                    return Ok(false);
+    let mut is_sorted = true;
+    if list.len() > 1 {
+        let mut previous_key: Option<Key> = None;
+        for AstSeparatedElement {
+            node,
+            trailing_separator,
+        } in list.elements()
+        {
+            // We have to check if the separator is not buggy.
+            let _separator = trailing_separator?;
+            previous_key = if let Some(key) = get_key(&node?) {
+                if previous_key.is_some_and(|previous_key| previous_key > key) {
+                    // We don't return early because we want to return the error if we met one.
+                    is_sorted = false;
                 }
-            }
-            previous_key = Some(key);
-        } else {
-            // If a name cannot be extracted, then the current chunk of named properties stops here.
-            previous_key = None;
+                Some(key)
+            } else {
+                // If a name cannot be extracted, then the current chunk stops here.
+                None
+            };
         }
     }
-    Ok(true)
+    Ok(is_sorted)
 }
 
 /// Returns the items and their separators resulting from sorting `list` by `get_key`.
