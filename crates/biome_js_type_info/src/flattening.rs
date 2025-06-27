@@ -1,5 +1,6 @@
 use crate::{TypeData, TypeInstance, TypeReference, TypeResolver};
 
+mod conditionals;
 mod expressions;
 mod intersections;
 

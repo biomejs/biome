@@ -9,6 +9,10 @@ use crate::{
     Resolvable, ResolvedTypeData, ResolvedTypeMember, ResolverId, TypeData, TypeMember,
     TypeReference, TypeResolver, TypeofCallExpression, TypeofExpression,
     TypeofStaticMemberExpression,
+    flattening::conditionals::{
+        ConditionalType, reference_to_falsy_subset_of, reference_to_non_nullish_subset_of,
+        reference_to_truthy_subset_of,
+    },
     globals::{
         GLOBAL_ARRAY_ID, GLOBAL_BIGINT_STRING_LITERAL_ID, GLOBAL_BOOLEAN_STRING_LITERAL_ID,
         GLOBAL_FUNCTION_STRING_LITERAL_ID, GLOBAL_NUMBER_STRING_LITERAL_ID,
@@ -64,32 +68,56 @@ pub(super) fn flattened_expression(
             Some(callee) => flattened_call(expr, callee.to_data(), resolver),
             None => None,
         },
+        TypeofExpression::Conditional(expr) => {
+            let test = resolver.resolve_and_get(&expr.test)?.to_data();
+            let conditional = ConditionalType::from_data(&test, resolver);
+            if conditional.is_truthy() {
+                Some(TypeData::reference(expr.consequent.clone()))
+            } else if conditional.is_falsy() {
+                Some(TypeData::reference(expr.alternate.clone()))
+            } else {
+                conditional.is_inferred().then(|| {
+                    TypeData::union_of(
+                        resolver,
+                        [expr.consequent.clone(), expr.alternate.clone()].into(),
+                    )
+                })
+            }
+        }
         TypeofExpression::LogicalAnd(expr) => {
             let left = resolver.resolve_and_get(&expr.left)?.to_data();
-            if left.is_falsy(resolver) {
+            let conditional = ConditionalType::from_data(&left, resolver);
+            if conditional.is_falsy() {
                 Some(left)
-            } else if let Some(left) = left.to_falsy_value(resolver) {
-                let left = resolver.reference_to_owned_data(left);
+            } else if conditional.is_truthy() {
+                Some(TypeData::reference(expr.right.clone()))
+            } else if conditional.is_inferred() {
+                let left = reference_to_falsy_subset_of(&left, resolver)
+                    .unwrap_or_else(|| expr.left.clone());
                 Some(TypeData::union_of(
                     resolver,
                     [left, expr.right.clone()].into(),
                 ))
             } else {
-                Some(TypeData::reference(expr.right.clone()))
+                None
             }
         }
         TypeofExpression::LogicalOr(expr) => {
             let left = resolver.resolve_and_get(&expr.left)?.to_data();
-            if left.is_truthy(resolver) {
+            let conditional = ConditionalType::from_data(&left, resolver);
+            if conditional.is_truthy() {
                 Some(left)
-            } else if let Some(left) = left.to_truthy_value(resolver) {
-                let left = resolver.reference_to_owned_data(left);
+            } else if conditional.is_falsy() {
+                Some(TypeData::reference(expr.right.clone()))
+            } else if conditional.is_inferred() {
+                let left = reference_to_truthy_subset_of(&left, resolver)
+                    .unwrap_or_else(|| expr.left.clone());
                 Some(TypeData::union_of(
                     resolver,
                     [left, expr.right.clone()].into(),
                 ))
             } else {
-                Some(TypeData::reference(expr.right.clone()))
+                None
             }
         }
         TypeofExpression::Destructure(expr) => {
@@ -190,16 +218,20 @@ pub(super) fn flattened_expression(
         }
         TypeofExpression::NullishCoalescing(expr) => {
             let left = resolver.resolve_and_get(&expr.left)?.to_data();
-            if left.is_non_nullish(resolver) {
+            let conditional = ConditionalType::from_data(&left, resolver);
+            if conditional.is_non_nullish() {
                 Some(left)
-            } else if let Some(left) = left.to_non_nullish_value(resolver) {
-                let left = resolver.reference_to_owned_data(left);
+            } else if conditional.is_nullish() {
+                Some(TypeData::reference(expr.right.clone()))
+            } else if conditional.is_inferred() {
+                let left = reference_to_non_nullish_subset_of(&left, resolver)
+                    .unwrap_or_else(|| expr.left.clone());
                 Some(TypeData::union_of(
                     resolver,
                     [left, expr.right.clone()].into(),
                 ))
             } else {
-                Some(TypeData::reference(expr.right.clone()))
+                None
             }
         }
         TypeofExpression::StaticMember(expr) => {

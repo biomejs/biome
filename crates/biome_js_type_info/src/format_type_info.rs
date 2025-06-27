@@ -376,6 +376,22 @@ impl Format<FormatTypeContext> for TypeofExpression {
                     ]]
                 )
             }
+            Self::Conditional(conditional) => {
+                write!(
+                    f,
+                    [&group(&format_args![
+                        &conditional.test,
+                        soft_line_break_or_space(),
+                        text("?"),
+                        soft_line_break_or_space(),
+                        &conditional.consequent,
+                        soft_line_break_or_space(),
+                        text(":"),
+                        soft_line_break_or_space(),
+                        &conditional.alternate
+                    ])]
+                )
+            }
             Self::Destructure(destructure) => match &destructure.destructure_field {
                 DestructureField::Index(index) => {
                     write!(
