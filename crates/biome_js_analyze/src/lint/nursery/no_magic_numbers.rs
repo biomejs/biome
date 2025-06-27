@@ -6,13 +6,13 @@ use biome_js_syntax::{
     JsArrayAssignmentPatternElement, JsAssignmentExpression, JsAssignmentOperator,
     JsBigintLiteralExpression, JsBinaryExpression, JsBinaryOperator, JsCallExpression,
     JsComputedMemberAssignment, JsComputedMemberExpression, JsFormalParameter, JsInitializerClause,
-    JsLanguage, JsNumberLiteralExpression, JsObjectBindingPatternShorthandProperty,
-    JsParenthesizedExpression, JsPropertyClassMember, JsPropertyObjectMember, JsUnaryExpression,
-    JsUnaryOperator, JsxExpressionAttributeValue, JsxExpressionChild, TsEnumMemberList,
-    TsIndexedAccessType, TsNumberLiteralType, TsReturnTypeAnnotation, TsTypeAnnotation,
-    TsUnionTypeVariantList,
+    JsNumberLiteralExpression, JsObjectBindingPatternShorthandProperty,
+    JsParenthesizedExpression, JsPropertyClassMember, JsPropertyObjectMember, JsSyntaxNode,
+    JsUnaryExpression, JsUnaryOperator, JsxExpressionAttributeValue, JsxExpressionChild,
+    TsEnumMemberList, TsIndexedAccessType, TsNumberLiteralType, TsReturnTypeAnnotation,
+    TsTypeAnnotation, TsUnionTypeVariantList,
 };
-use biome_rowan::{AstNode, SyntaxNode, declare_node_union};
+use biome_rowan::{AstNode, declare_node_union};
 
 declare_lint_rule! {
     /// Reports usage of "magic numbers" — numbers used directly instead of being assigned to named constants.
@@ -25,8 +25,8 @@ declare_lint_rule! {
    /// - Enum values
    /// - Initial values in variable or class property declarations
    /// - Default values in function parameters or destructuring patterns
-   /// - Arguments to JSON.stringify and parseInt (e.g., JSON.stringify(22), parseInt("123", 10))
-   /// - Operands in bitwise operations (e.g., a & 1, a | 2)
+   /// - Arguments to JSON.stringify and parseInt (e.g., JSON.stringify(22), parseInt("123", 8))
+   /// - Operands in bitwise operations (e.g., a & 7, a | 7)
    /// - Values in JSX expressions (e.g., <div>{1}</div>)
    /// - Object property values (e.g., { tax: 0.25 })
    ///
@@ -163,7 +163,7 @@ fn is_any_operation_operand_in_js_expression(
     unary_operators: &[JsUnaryOperator],
     assignment_operators: &[JsAssignmentOperator],
 ) -> bool {
-    get_sanitized_parent_node(numeric_literal).is_some_and(|parent| {
+    get_sanitized_parent_node(numeric_literal.syntax()).is_some_and(|parent| {
         is_sanitized_operation_operand(
             binary_operators,
             unary_operators,
@@ -176,7 +176,7 @@ fn is_any_operation_operand_in_js_expression(
 /// Checks if `numeric_literal` is simple initialization value,
 /// Example:  `let foo = 2;` where `2` is the value.
 fn is_simple_initialize_value(numeric_literal: &AnyJsNumericLiteral) -> bool {
-    get_sanitized_parent_node(numeric_literal)
+    get_sanitized_parent_node(numeric_literal.syntax())
         .is_some_and(|parent| JsInitializerClause::can_cast(parent.kind()))
 }
 
@@ -184,7 +184,7 @@ fn is_simple_initialize_value(numeric_literal: &AnyJsNumericLiteral) -> bool {
 /// Example:  `let bigintTwo: bigint = BigInt(123n);` where `123n` is the value.
 fn is_simple_initialize_value_with_big_int(numeric_literal: &AnyJsNumericLiteral) -> bool {
     is_function_matching_name(numeric_literal, Some("BigInt"), None)
-        && get_sanitized_parent_node(numeric_literal).is_some_and(|parent| {
+        && get_sanitized_parent_node(numeric_literal.syntax()).is_some_and(|parent| {
             parent.grand_parent().is_some_and(|grand_grand_parent| {
                 grand_grand_parent.parent().is_some_and(|grand_x_3_parent| {
                     JsInitializerClause::can_cast(grand_x_3_parent.kind())
@@ -196,7 +196,7 @@ fn is_simple_initialize_value_with_big_int(numeric_literal: &AnyJsNumericLiteral
 /// Checks if `numeric_literal` is used within a JSX expression
 /// Example:  `<div>{2222}</div>` where `2222` is the value.
 fn is_jsx_expression(numeric_literal: &AnyJsNumericLiteral) -> bool {
-    get_sanitized_parent_node(numeric_literal).is_some_and(|parent| {
+    get_sanitized_parent_node(numeric_literal.syntax()).is_some_and(|parent| {
         JsxExpressionChild::can_cast(parent.kind())
             || JsxExpressionAttributeValue::can_cast(parent.kind())
     })
@@ -205,7 +205,7 @@ fn is_jsx_expression(numeric_literal: &AnyJsNumericLiteral) -> bool {
 /// Checks if `numeric_literal` is used in an enum declaration
 /// Example:  `enum E { A = 3, }` where `3` is the enum value.
 fn is_enum_value(numeric_literal: &AnyJsNumericLiteral) -> bool {
-    get_sanitized_parent_node(numeric_literal).is_some_and(|parent| {
+    get_sanitized_parent_node(numeric_literal.syntax()).is_some_and(|parent| {
         parent
             .grand_parent()
             .is_some_and(|grand_grand_parent| TsEnumMemberList::can_cast(grand_grand_parent.kind()))
@@ -215,7 +215,7 @@ fn is_enum_value(numeric_literal: &AnyJsNumericLiteral) -> bool {
 /// Checks if `numeric_literal` is used as an index in an array access expression
 /// Example:  `list[6] = "foo";` where `6` is the index.
 fn is_array_index(numeric_literal: &AnyJsNumericLiteral) -> bool {
-    get_sanitized_parent_node(numeric_literal).is_some_and(|parent| {
+    get_sanitized_parent_node(numeric_literal.syntax()).is_some_and(|parent| {
         JsComputedMemberAssignment::can_cast(parent.kind())
             || JsComputedMemberExpression::can_cast(parent.kind())
     })
@@ -224,7 +224,7 @@ fn is_array_index(numeric_literal: &AnyJsNumericLiteral) -> bool {
 /// Checks if `numeric_literal` is used as a default value in destructuring patterns or function parameters,
 /// such as in object/array destructuring or as a default parameter value in a function.
 fn is_default_value_in_fn_param_or_destruct_pattern(numeric_literal: &AnyJsNumericLiteral) -> bool {
-    get_sanitized_parent_node(numeric_literal).is_some_and(|parent| {
+    get_sanitized_parent_node(numeric_literal.syntax()).is_some_and(|parent| {
         parent.parent().is_some_and(|grand_parent| {
             JsObjectBindingPatternShorthandProperty::can_cast(grand_parent.kind()) // e.g. const { tax = 0.25 } = accountancy;
                 || JsFormalParameter::can_cast(grand_parent.kind()) // e.g. function mapParallel(concurrency = 3) {}
@@ -236,7 +236,7 @@ fn is_default_value_in_fn_param_or_destruct_pattern(numeric_literal: &AnyJsNumer
 /// Checks if `numeric_literal` is used as the initial value of a class property,
 /// including both direct assignments (e.g. foo = 2) and assignments via unary expressions (e.g. bar = -3).
 fn is_class_property_initial_value(numeric_literal: &AnyJsNumericLiteral) -> bool {
-    get_sanitized_parent_node(numeric_literal).is_some_and(|parent| {
+    get_sanitized_parent_node(numeric_literal.syntax()).is_some_and(|parent| {
         if JsUnaryExpression::can_cast(parent.kind()) {
             // e.g. class C { foo = -2; bar = +3; }
             return parent.grand_parent().is_some_and(|grand_grand_parent| {
@@ -262,7 +262,7 @@ fn is_class_property_initial_value(numeric_literal: &AnyJsNumericLiteral) -> boo
 /// Returns true if `numeric_literal` is used as the value of an object property,
 /// Example:  const with_tax = { tax: 0.25 };
 fn is_object_property_value(numeric_literal: &AnyJsNumericLiteral) -> bool {
-    get_sanitized_parent_node(numeric_literal)
+    get_sanitized_parent_node(numeric_literal.syntax())
         .is_some_and(|parent| JsPropertyObjectMember::can_cast(parent.kind()))
 }
 
@@ -287,7 +287,7 @@ fn is_function_matching_name(
     member_name: Option<&str>,
     object_name: Option<&str>,
 ) -> bool {
-    get_sanitized_parent_node(numeric_literal)
+    get_sanitized_parent_node(numeric_literal.syntax())
         .and_then(|parent| parent.parent())
         .and_then(|grand_parent| grand_parent.parent())
         .and_then(|grand_grand_parent| {
@@ -325,7 +325,7 @@ fn is_sanitized_operation_operand(
     binary_operators: &[JsBinaryOperator],
     unary_operators: &[JsUnaryOperator],
     assignment_operators: &[JsAssignmentOperator],
-    parent: SyntaxNode<JsLanguage>,
+    parent: JsSyntaxNode,
 ) -> bool {
     // e.g. let a = 5 & 3; let a = 5 * 3;
     JsBinaryExpression::cast(parent.clone()).is_some_and(|expression| {
@@ -348,33 +348,33 @@ fn is_sanitized_operation_operand(
 }
 
 fn is_ts_numeric_literal_union_type(numeric_literal: &TsNumberLiteralType) -> bool {
-    get_sanitized_ts_parent_node(numeric_literal)
+    get_sanitized_parent_node(numeric_literal.syntax())
         .is_some_and(|parent| TsUnionTypeVariantList::can_cast(parent.kind()))
 }
 
 fn is_ts_numeric_literal_type_index(numeric_literal: &TsNumberLiteralType) -> bool {
-    get_sanitized_ts_parent_node(numeric_literal)
+    get_sanitized_parent_node(numeric_literal.syntax())
         .is_some_and(|parent| TsIndexedAccessType::can_cast(parent.kind()))
 }
 
 /// Checks if the given `numeric_literal` is a numeric literal type annotation
 /// Example: `const MyType: 100;` where `100` is the numeric literal type annotation.
 fn is_ts_numeric_literal_type_annotation(numeric_literal: &TsNumberLiteralType) -> bool {
-    get_sanitized_ts_parent_node(numeric_literal)
+    get_sanitized_parent_node(numeric_literal.syntax())
         .is_some_and(|parent| TsTypeAnnotation::can_cast(parent.kind()))
 }
 
 /// Checks if the given `numeric_literal` is a numeric literal return type
 /// Example: `function f(x: string): 100 { return 100 }` where `100` is the numeric literal return type.
 fn is_ts_numeric_literal_return_type(numeric_literal: &TsNumberLiteralType) -> bool {
-    get_sanitized_ts_parent_node(numeric_literal)
+    get_sanitized_parent_node(numeric_literal.syntax())
         .is_some_and(|parent| TsReturnTypeAnnotation::can_cast(parent.kind()))
 }
 
 /// Omits unary plus or minus expressions by returning the parent node if
 /// the current node is a unary expression with a plus or minus operator.
 /// Example: `-5` or `+3` will return the parent node, effectively skipping the unary operator parent node.
-fn omit_unary_plus_minus_parent(node: SyntaxNode<JsLanguage>) -> Option<SyntaxNode<JsLanguage>> {
+fn omit_unary_plus_minus_parent(node: &JsSyntaxNode) -> Option<JsSyntaxNode> {
     let unary_expression_plus_or_minus =
         JsUnaryExpression::cast(node.clone()).and_then(|unary_node| {
             if unary_node.operator().is_ok_and(|operator| {
@@ -389,26 +389,25 @@ fn omit_unary_plus_minus_parent(node: SyntaxNode<JsLanguage>) -> Option<SyntaxNo
     if unary_expression_plus_or_minus.is_some() {
         node.parent()
     } else {
-        Some(node)
+        Some(node.clone())
     }
 }
 
 /// Omits the parenthesized expression if the node is wrapped in parentheses.
 /// Example: `(5)` will return the parent node, effectively skipping the parenthesized expression.
-fn omit_parenthesized_parent(node: SyntaxNode<JsLanguage>) -> Option<SyntaxNode<JsLanguage>> {
+fn omit_parenthesized_parent(node: JsSyntaxNode) -> Option<JsSyntaxNode> {
     if JsParenthesizedExpression::can_cast(node.kind()) {
         node.parent()
     } else {
-        Some(node)
+        Some(node.clone())
     }
 }
 
 /// Returns the parent node of the given node, skipping over any unary plus/minus or parenthesized expression wrappers.
 /// It helps determine the true syntactic context of the node by ignoring these common, but semantically insignificant, wrappers.
-fn get_sanitized_parent_node(node: JsSyntaxNode) -> Option<SyntaxNode<JsLanguage>> {
-    node
-        .parent()
-        .and_then(|parent| omit_unary_plus_minus_parent(parent).and_then(omit_parenthesized_parent))
+fn get_sanitized_parent_node(node: &JsSyntaxNode) -> Option<JsSyntaxNode> {
+    node.parent()
+        .and_then(|parent| omit_unary_plus_minus_parent(&parent).and_then(omit_parenthesized_parent))
 }
 
 const ALWAYS_IGNORED_IN_ARITHMETIC_OPERATIONS: &[&str] = &[
