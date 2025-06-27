@@ -6,11 +6,11 @@ use biome_js_syntax::{
     JsArrayAssignmentPatternElement, JsAssignmentExpression, JsAssignmentOperator,
     JsBigintLiteralExpression, JsBinaryExpression, JsBinaryOperator, JsCallExpression,
     JsComputedMemberAssignment, JsComputedMemberExpression, JsFormalParameter, JsInitializerClause,
-    JsNumberLiteralExpression, JsObjectBindingPatternShorthandProperty,
-    JsParenthesizedExpression, JsPropertyClassMember, JsPropertyObjectMember, JsSyntaxNode,
-    JsUnaryExpression, JsUnaryOperator, JsxExpressionAttributeValue, JsxExpressionChild,
-    TsEnumMemberList, TsIndexedAccessType, TsNumberLiteralType, TsReturnTypeAnnotation,
-    TsTypeAnnotation, TsUnionTypeVariantList,
+    JsNumberLiteralExpression, JsObjectBindingPatternShorthandProperty, JsParenthesizedExpression,
+    JsPropertyClassMember, JsPropertyObjectMember, JsSyntaxNode, JsUnaryExpression,
+    JsUnaryOperator, JsxExpressionAttributeValue, JsxExpressionChild, TsEnumMemberList,
+    TsIndexedAccessType, TsNumberLiteralType, TsReturnTypeAnnotation, TsTypeAnnotation,
+    TsUnionTypeVariantList,
 };
 use biome_rowan::{AstNode, declare_node_union};
 
@@ -374,7 +374,7 @@ fn is_ts_numeric_literal_return_type(numeric_literal: &TsNumberLiteralType) -> b
 /// Omits unary plus or minus expressions by returning the parent node if
 /// the current node is a unary expression with a plus or minus operator.
 /// Example: `-5` or `+3` will return the parent node, effectively skipping the unary operator parent node.
-fn omit_unary_plus_minus_parent(node: &JsSyntaxNode) -> Option<JsSyntaxNode> {
+fn omit_unary_plus_minus_parent(node: JsSyntaxNode) -> Option<JsSyntaxNode> {
     let unary_expression_plus_or_minus =
         JsUnaryExpression::cast(node.clone()).and_then(|unary_node| {
             if unary_node.operator().is_ok_and(|operator| {
@@ -389,7 +389,7 @@ fn omit_unary_plus_minus_parent(node: &JsSyntaxNode) -> Option<JsSyntaxNode> {
     if unary_expression_plus_or_minus.is_some() {
         node.parent()
     } else {
-        Some(node.clone())
+        Some(node)
     }
 }
 
@@ -399,7 +399,7 @@ fn omit_parenthesized_parent(node: JsSyntaxNode) -> Option<JsSyntaxNode> {
     if JsParenthesizedExpression::can_cast(node.kind()) {
         node.parent()
     } else {
-        Some(node.clone())
+        Some(node)
     }
 }
 
@@ -407,7 +407,7 @@ fn omit_parenthesized_parent(node: JsSyntaxNode) -> Option<JsSyntaxNode> {
 /// It helps determine the true syntactic context of the node by ignoring these common, but semantically insignificant, wrappers.
 fn get_sanitized_parent_node(node: &JsSyntaxNode) -> Option<JsSyntaxNode> {
     node.parent()
-        .and_then(|parent| omit_unary_plus_minus_parent(&parent).and_then(omit_parenthesized_parent))
+        .and_then(|parent| omit_unary_plus_minus_parent(parent).and_then(omit_parenthesized_parent))
 }
 
 const ALWAYS_IGNORED_IN_ARITHMETIC_OPERATIONS: &[&str] = &[
