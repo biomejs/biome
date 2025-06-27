@@ -403,23 +403,10 @@ fn omit_parenthesized_parent(node: SyntaxNode<JsLanguage>) -> Option<SyntaxNode<
     }
 }
 
-/// Returns the parent node of the given numeric literal, skipping over any unary plus/minus or parenthesized expression wrappers.
-/// It helps determine the true syntactic context of the literal by ignoring these common, but semantically insignificant, wrappers.
-fn get_sanitized_parent_node(
-    numeric_literal: &AnyJsNumericLiteral,
-) -> Option<SyntaxNode<JsLanguage>> {
-    numeric_literal
-        .syntax()
-        .parent()
-        .and_then(|parent| omit_unary_plus_minus_parent(parent).and_then(omit_parenthesized_parent))
-}
-
-/// Returns the parent node of the given numeric literal, skipping over any parenthesized expression for TsNumberLiteralType.
-fn get_sanitized_ts_parent_node(
-    numeric_literal: &TsNumberLiteralType,
-) -> Option<SyntaxNode<JsLanguage>> {
-    numeric_literal
-        .syntax()
+/// Returns the parent node of the given node, skipping over any unary plus/minus or parenthesized expression wrappers.
+/// It helps determine the true syntactic context of the node by ignoring these common, but semantically insignificant, wrappers.
+fn get_sanitized_parent_node(node: JsSyntaxNode) -> Option<SyntaxNode<JsLanguage>> {
+    node
         .parent()
         .and_then(|parent| omit_unary_plus_minus_parent(parent).and_then(omit_parenthesized_parent))
 }
