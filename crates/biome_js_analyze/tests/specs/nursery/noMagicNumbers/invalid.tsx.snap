@@ -1,0 +1,305 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 134
+expression: invalid.tsx
+---
+# Input
+```tsx
+var foo = 0 + 31;
+a = a + 5;
+a += 5;
+var foo = 0 + 1 + -4 + 4;
+var foo = 0 + 1 + 5;
+
+console.log(0x1A + 0x02);
+console.log(071);
+
+var colors = {}; colors.RED = 3; colors.YELLOW = 4; colors.BLUE = 4 + 5;
+function getSecondsInMinute() {return 60;}
+function getNegativeSecondsInMinute() {return -60;}
+
+function getSecondsInDay() {
+	return 24 * HOUR;
+}
+function getMillisecondsInDay() {
+	return (getSecondsInDay() *
+		(1000)
+	);
+}
+function callLater(func) {
+	setTimeout(func, 100);
+}
+
+var a = <div arrayProp={[1,2,3]}></div>;
+
+
+
+```
+
+# Diagnostics
+```
+invalid.tsx:1:15 lint/nursery/noMagicNumbers ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Magic number detected. Extract it to a constant with a meaningful name.
+  
+  > 1 │ var foo = 0 + 31;
+      │               ^^
+    2 │ a = a + 5;
+    3 │ a += 5;
+  
+  i Code is more readable and refactoring easier when special numbers are declared as constants as it makes their meaning explicit.
+  
+
+```
+
+```
+invalid.tsx:2:9 lint/nursery/noMagicNumbers ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Magic number detected. Extract it to a constant with a meaningful name.
+  
+    1 │ var foo = 0 + 31;
+  > 2 │ a = a + 5;
+      │         ^
+    3 │ a += 5;
+    4 │ var foo = 0 + 1 + -4 + 4;
+  
+  i Code is more readable and refactoring easier when special numbers are declared as constants as it makes their meaning explicit.
+  
+
+```
+
+```
+invalid.tsx:3:6 lint/nursery/noMagicNumbers ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Magic number detected. Extract it to a constant with a meaningful name.
+  
+    1 │ var foo = 0 + 31;
+    2 │ a = a + 5;
+  > 3 │ a += 5;
+      │      ^
+    4 │ var foo = 0 + 1 + -4 + 4;
+    5 │ var foo = 0 + 1 + 5;
+  
+  i Code is more readable and refactoring easier when special numbers are declared as constants as it makes their meaning explicit.
+  
+
+```
+
+```
+invalid.tsx:4:20 lint/nursery/noMagicNumbers ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Magic number detected. Extract it to a constant with a meaningful name.
+  
+    2 │ a = a + 5;
+    3 │ a += 5;
+  > 4 │ var foo = 0 + 1 + -4 + 4;
+      │                    ^
+    5 │ var foo = 0 + 1 + 5;
+    6 │ 
+  
+  i Code is more readable and refactoring easier when special numbers are declared as constants as it makes their meaning explicit.
+  
+
+```
+
+```
+invalid.tsx:4:24 lint/nursery/noMagicNumbers ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Magic number detected. Extract it to a constant with a meaningful name.
+  
+    2 │ a = a + 5;
+    3 │ a += 5;
+  > 4 │ var foo = 0 + 1 + -4 + 4;
+      │                        ^
+    5 │ var foo = 0 + 1 + 5;
+    6 │ 
+  
+  i Code is more readable and refactoring easier when special numbers are declared as constants as it makes their meaning explicit.
+  
+
+```
+
+```
+invalid.tsx:5:19 lint/nursery/noMagicNumbers ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Magic number detected. Extract it to a constant with a meaningful name.
+  
+    3 │ a += 5;
+    4 │ var foo = 0 + 1 + -4 + 4;
+  > 5 │ var foo = 0 + 1 + 5;
+      │                   ^
+    6 │ 
+    7 │ console.log(0x1A + 0x02);
+  
+  i Code is more readable and refactoring easier when special numbers are declared as constants as it makes their meaning explicit.
+  
+
+```
+
+```
+invalid.tsx:7:13 lint/nursery/noMagicNumbers ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Magic number detected. Extract it to a constant with a meaningful name.
+  
+    5 │ var foo = 0 + 1 + 5;
+    6 │ 
+  > 7 │ console.log(0x1A + 0x02);
+      │             ^^^^
+    8 │ console.log(071);
+    9 │ 
+  
+  i Code is more readable and refactoring easier when special numbers are declared as constants as it makes their meaning explicit.
+  
+
+```
+
+```
+invalid.tsx:7:20 lint/nursery/noMagicNumbers ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Magic number detected. Extract it to a constant with a meaningful name.
+  
+    5 │ var foo = 0 + 1 + 5;
+    6 │ 
+  > 7 │ console.log(0x1A + 0x02);
+      │                    ^^^^
+    8 │ console.log(071);
+    9 │ 
+  
+  i Code is more readable and refactoring easier when special numbers are declared as constants as it makes their meaning explicit.
+  
+
+```
+
+```
+invalid.tsx:8:13 lint/nursery/noMagicNumbers ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Magic number detected. Extract it to a constant with a meaningful name.
+  
+     7 │ console.log(0x1A + 0x02);
+   > 8 │ console.log(071);
+       │             ^^^
+     9 │ 
+    10 │ var colors = {}; colors.RED = 3; colors.YELLOW = 4; colors.BLUE = 4 + 5;
+  
+  i Code is more readable and refactoring easier when special numbers are declared as constants as it makes their meaning explicit.
+  
+
+```
+
+```
+invalid.tsx:10:31 lint/nursery/noMagicNumbers ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Magic number detected. Extract it to a constant with a meaningful name.
+  
+     8 │ console.log(071);
+     9 │ 
+  > 10 │ var colors = {}; colors.RED = 3; colors.YELLOW = 4; colors.BLUE = 4 + 5;
+       │                               ^
+    11 │ function getSecondsInMinute() {return 60;}
+    12 │ function getNegativeSecondsInMinute() {return -60;}
+  
+  i Code is more readable and refactoring easier when special numbers are declared as constants as it makes their meaning explicit.
+  
+
+```
+
+```
+invalid.tsx:10:50 lint/nursery/noMagicNumbers ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Magic number detected. Extract it to a constant with a meaningful name.
+  
+     8 │ console.log(071);
+     9 │ 
+  > 10 │ var colors = {}; colors.RED = 3; colors.YELLOW = 4; colors.BLUE = 4 + 5;
+       │                                                  ^
+    11 │ function getSecondsInMinute() {return 60;}
+    12 │ function getNegativeSecondsInMinute() {return -60;}
+  
+  i Code is more readable and refactoring easier when special numbers are declared as constants as it makes their meaning explicit.
+  
+
+```
+
+```
+invalid.tsx:10:67 lint/nursery/noMagicNumbers ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Magic number detected. Extract it to a constant with a meaningful name.
+  
+     8 │ console.log(071);
+     9 │ 
+  > 10 │ var colors = {}; colors.RED = 3; colors.YELLOW = 4; colors.BLUE = 4 + 5;
+       │                                                                   ^
+    11 │ function getSecondsInMinute() {return 60;}
+    12 │ function getNegativeSecondsInMinute() {return -60;}
+  
+  i Code is more readable and refactoring easier when special numbers are declared as constants as it makes their meaning explicit.
+  
+
+```
+
+```
+invalid.tsx:10:71 lint/nursery/noMagicNumbers ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Magic number detected. Extract it to a constant with a meaningful name.
+  
+     8 │ console.log(071);
+     9 │ 
+  > 10 │ var colors = {}; colors.RED = 3; colors.YELLOW = 4; colors.BLUE = 4 + 5;
+       │                                                                       ^
+    11 │ function getSecondsInMinute() {return 60;}
+    12 │ function getNegativeSecondsInMinute() {return -60;}
+  
+  i Code is more readable and refactoring easier when special numbers are declared as constants as it makes their meaning explicit.
+  
+
+```
+
+```
+invalid.tsx:19:4 lint/nursery/noMagicNumbers ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Magic number detected. Extract it to a constant with a meaningful name.
+  
+    17 │ function getMillisecondsInDay() {
+    18 │ 	return (getSecondsInDay() *
+  > 19 │ 		(1000)
+       │ 		 ^^^^
+    20 │ 	);
+    21 │ }
+  
+  i Code is more readable and refactoring easier when special numbers are declared as constants as it makes their meaning explicit.
+  
+
+```
+
+```
+invalid.tsx:23:19 lint/nursery/noMagicNumbers ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Magic number detected. Extract it to a constant with a meaningful name.
+  
+    21 │ }
+    22 │ function callLater(func) {
+  > 23 │ 	setTimeout(func, 100);
+       │ 	                 ^^^
+    24 │ }
+    25 │ 
+  
+  i Code is more readable and refactoring easier when special numbers are declared as constants as it makes their meaning explicit.
+  
+
+```
+
+```
+invalid.tsx:26:30 lint/nursery/noMagicNumbers ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Magic number detected. Extract it to a constant with a meaningful name.
+  
+    24 │ }
+    25 │ 
+  > 26 │ var a = <div arrayProp={[1,2,3]}></div>;
+       │                              ^
+    27 │ 
+  
+  i Code is more readable and refactoring easier when special numbers are declared as constants as it makes their meaning explicit.
+  
+
+```
