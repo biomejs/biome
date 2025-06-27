@@ -132,15 +132,16 @@ fn traverse_members_usage(
                     private_members.retain(|private_member| {
                         let member_being_used =
                             private_member.match_js_name(&js_name) == Some(true);
+
+                        if !member_being_used {
+                            return true;
+                        }
+
                         let is_write_only =
                             is_write_only(&js_name) == Some(true) && !private_member.is_accessor();
                         let is_in_update_expression = is_in_update_expression(&js_name);
 
-                        if member_being_used && is_in_update_expression {
-                            return true;
-                        }
-
-                        if member_being_used && is_write_only {
+                        if is_in_update_expression || is_write_only {
                             return true;
                         }
 
