@@ -58,5 +58,3 @@ function testTypeOnFunctionVariable() {
 	 */
 	let testTypeOnFunctionVariable;
 }
-
-
