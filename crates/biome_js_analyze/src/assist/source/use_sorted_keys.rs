@@ -1,24 +1,20 @@
-use std::borrow::Cow;
+use std::{borrow::Cow, ops::Not};
 
 use biome_analyze::{
-    Ast, FixKind, Rule, RuleAction, RuleDiagnostic, RuleSource, context::RuleContext,
+    Ast, FixKind, Rule, RuleAction, RuleDiagnostic, RuleSource,
+    context::RuleContext,
     declare_source_rule,
+    utils::{is_separated_list_sorted_by, sort_separated_list_by},
 };
 use biome_console::markup;
 use biome_deserialize::TextRange;
 use biome_diagnostics::{Applicability, category};
 use biome_js_factory::make;
 use biome_js_syntax::{JsObjectExpression, JsObjectMemberList, T};
-use biome_rowan::{
-    AstNode, AstSeparatedElement, AstSeparatedList, BatchMutationExt, TriviaPieceKind,
-};
+use biome_rowan::{AstNode, BatchMutationExt, TriviaPieceKind};
+use biome_string_case::comparable_token::ComparableToken;
 
-use crate::{
-    JsRuleAction,
-    assist::source::organize_imports::{
-        comparable_token::ComparableToken, specifiers_attributes::handle_trvia,
-    },
-};
+use crate::JsRuleAction;
 
 declare_source_rule! {
     /// Enforce ordering of a JS object properties.
@@ -92,23 +88,10 @@ impl Rule for UseSortedKeys {
     type Options = ();
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
-        let list = ctx.query();
-        let mut previous_name: Option<ComparableToken> = None;
-        for element in list.iter() {
-            if let Some(name) = element.ok()?.name() {
-                let name = ComparableToken(name);
-                if let Some(previous_name) = previous_name {
-                    if previous_name > name {
-                        return Some(());
-                    }
-                }
-                previous_name = Some(name);
-            } else {
-                // If a name cannot be extracted, then the current chunk of named properties stops here.
-                previous_name = None;
-            }
-        }
-        None
+        is_separated_list_sorted_by(ctx.query(), |node| node.name().map(ComparableToken::new))
+            .ok()?
+            .not()
+            .then_some(())
     }
 
     fn diagnostic(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<RuleDiagnostic> {
@@ -116,7 +99,7 @@ impl Rule for UseSortedKeys {
             category!("assist/source/useSortedKeys"),
             ctx.query().range(),
             markup! {
-                "The keys are not sorted."
+                "The object properties are not sorted by key."
             },
         ))
     }
@@ -132,36 +115,12 @@ impl Rule for UseSortedKeys {
     fn action(ctx: &RuleContext<Self>, _: &Self::State) -> Option<JsRuleAction> {
         let list = ctx.query();
 
-        // Collect all members
-        let mut elements = Vec::with_capacity(list.len());
-        for AstSeparatedElement {
-            node,
-            trailing_separator,
-        } in list.elements()
-        {
-            let node = node.ok()?;
-            let name = node.name().map(ComparableToken);
-            let trailing_separator = trailing_separator.ok()?;
-            elements.push((name, node, trailing_separator));
-        }
-
-        // Iterate over chunks of named properties
-        for slice in elements.split_mut(|(name, _, _)| name.is_none()) {
-            let last_has_separator = slice.last().is_some_and(|(_, _, sep)| sep.is_some());
-            // Sort named properties
-            slice.sort_by(|(name1, _, _), (name2, _, _)| name1.cmp(name2));
-            handle_trvia(
-                slice.iter_mut().map(|(_, node, sep)| (node, sep)),
-                last_has_separator,
-                || make::token(T![,]).with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")]),
-            );
-        }
-
-        let separators: Vec<_> = elements
-            .iter_mut()
-            .filter_map(|(_, _, sep)| sep.take())
-            .collect();
-        let items: Vec<_> = elements.into_iter().map(|(_, node, _)| node).collect();
+        let (items, separators) = sort_separated_list_by(
+            list,
+            |node| node.name().map(ComparableToken::new),
+            || make::token(T![,]).with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")]),
+        )
+        .ok()?;
         let new_list = make::js_object_member_list(items, separators);
 
         let mut mutation = ctx.root().begin();
@@ -170,7 +129,7 @@ impl Rule for UseSortedKeys {
         Some(RuleAction::new(
             rule_action_category!(),
             Applicability::Always,
-            markup! { "Sort the object properties." },
+            markup! { "Sort the object properties by key." },
             mutation,
         ))
     }

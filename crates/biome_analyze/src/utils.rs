@@ -1,0 +1,125 @@
+use biome_rowan::{
+    AstNode, AstSeparatedElement, AstSeparatedList, Language, SyntaxError, SyntaxToken,
+    chain_trivia_pieces,
+};
+
+/// Returns `true` if `list` is sorted by `get_key`.
+///
+/// The list is divided into chunks of nodes with keys.
+/// Thus, a node without key acts as a chuck delimiter.
+/// Chunks are sorted separately.
+pub fn is_separated_list_sorted_by<
+    'a,
+    L: Language + 'a,
+    N: AstNode<Language = L> + 'a,
+    Key: Ord,
+>(
+    list: &impl AstSeparatedList<Language = L, Node = N>,
+    get_key: impl Fn(&N) -> Option<Key>,
+) -> Result<bool, SyntaxError> {
+    let mut previous_key: Option<Key> = None;
+    for element in list.iter() {
+        if let Some(key) = get_key(&element?) {
+            if let Some(previous_key) = previous_key {
+                if previous_key > key {
+                    return Ok(false);
+                }
+            }
+            previous_key = Some(key);
+        } else {
+            // If a name cannot be extracted, then the current chunk of named properties stops here.
+            previous_key = None;
+        }
+    }
+    Ok(true)
+}
+
+/// Returns the items and their separators resulting from sorting `list` by `get_key`.
+/// WHen elements are reordered, `make_separator` is called to add missing separators in the middle of the list.
+///
+/// The list is divided into chunks of nodes with keys.
+/// Thus, a node without key acts as a chuck delimiter.
+/// Chunks are sorted separately.
+///
+/// This sort is stable (i.e., does not reorder equal elements).
+pub fn sort_separated_list_by<'a, L: Language + 'a, N: AstNode<Language = L> + 'a, Key: Ord>(
+    list: &impl AstSeparatedList<Language = L, Node = N>,
+    get_key: impl Fn(&N) -> Option<Key>,
+    make_separator: fn() -> SyntaxToken<L>,
+) -> Result<(Vec<N>, Vec<SyntaxToken<L>>), SyntaxError> {
+    let mut elements = Vec::with_capacity(list.len());
+    for AstSeparatedElement {
+        node,
+        trailing_separator,
+    } in list.elements()
+    {
+        let node = node?;
+        let trailing_separator = trailing_separator?;
+        elements.push((get_key(&node), node, trailing_separator));
+    }
+
+    // Iterate over chunks of node with a key
+    for slice in elements.split_mut(|(key, _, _)| key.is_none()) {
+        let last_has_separator = slice.last().is_some_and(|(_, _, sep)| sep.is_some());
+        slice.sort_by(|(key1, _, _), (key2, _, _)| key1.cmp(key2));
+        fix_separators(
+            slice.iter_mut().map(|(_, node, sep)| (node, sep)),
+            last_has_separator,
+            make_separator,
+        );
+    }
+
+    let separators: Vec<_> = elements
+        .iter_mut()
+        .filter_map(|(_, _, sep)| sep.take())
+        .collect();
+    let items: Vec<_> = elements.into_iter().map(|(_, node, _)| node).collect();
+    Ok((items, separators))
+}
+
+/// Fix the ordered sequence of nodes and separators adding missing separators and removing an extra separator.
+///
+/// If a separator is missing in the middle of the sequence, then a new one is created using `make_separator`.
+/// If the last node has no separator, then a new one is created only if `needs_last_separator` is set to `true`.
+/// If the last node has a separator and `needs_last_separator` is set to false, then the separator is removed.
+/// The separator is always kept if some comments are attached.
+///
+/// This utility is notably useful when a delimited list with an optional last separator is reordered.
+/// It allows to add missing separators and remove an extra separator.
+/// Usually, you collect every pair of nodes and separators in a vector and then pass a mutable iterator to `fix_separators`.
+///
+/// See [sort_separated_list_by] as a usage example.
+pub fn fix_separators<'a, L: Language + 'a, N: AstNode<Language = L> + 'a>(
+    // Mutable iterator of a list of nodes and their optional separators
+    iter: impl std::iter::ExactSizeIterator<Item = (&'a mut N, &'a mut Option<SyntaxToken<L>>)>,
+    needs_last_separator: bool,
+    make_separator: fn() -> SyntaxToken<L>,
+) {
+    let last_index = iter.len().saturating_sub(1);
+    for (i, (node, optional_separator)) in iter.enumerate() {
+        if let Some(separator) = optional_separator {
+            // Remove the last separator at the separator has no attached comments
+            if i == last_index
+                && !(needs_last_separator
+                    || separator.has_leading_comments()
+                    || separator.has_trailing_comments())
+            {
+                // Transfer the separator trivia
+                if let Some(new_node) = node.clone().append_trivia_pieces(chain_trivia_pieces(
+                    separator.leading_trivia().pieces(),
+                    separator.trailing_trivia().pieces(),
+                )) {
+                    *node = new_node;
+                }
+                *optional_separator = None;
+            }
+        } else if i != last_index || needs_last_separator {
+            // The last node is moved and has no trailing separator.
+            // Thus we build a new separator and remove its trailing whitespaces.
+            if let Some(new_node) = node.clone().trim_trailing_trivia() {
+                *node = new_node;
+            }
+            *optional_separator = Some(make_separator());
+        }
+    }
+}

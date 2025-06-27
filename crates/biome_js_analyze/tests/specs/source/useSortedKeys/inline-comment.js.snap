@@ -15,7 +15,7 @@ const foo = {
 ```
 inline-comment.js:2:3 assist/source/useSortedKeys  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i The keys are not sorted.
+  i The object properties are not sorted by key.
   
     1 │ const foo = {
   > 2 │   a: 1,
@@ -25,7 +25,7 @@ inline-comment.js:2:3 assist/source/useSortedKeys  FIXABLE  ━━━━━━�
       │   ^^^^^
     5 │ };
   
-  i Safe fix: Sort the object properties.
+  i Safe fix: Sort the object properties by key.
   
     1 1 │   const foo = {
     2 2 │     a: 1,

@@ -1425,6 +1425,9 @@ dependencies = [
 [[package]]
 name = "biome_string_case"
 version = "0.5.7"
+dependencies = [
+ "biome_rowan",
+]
 
 [[package]]
 name = "biome_suppression"
