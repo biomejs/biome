@@ -22,28 +22,41 @@ fn project_layout_with_top_level_dependencies(dependencies: Dependencies) -> Arc
 }
 
 // use this test check if your snippet produces the diagnostics you wish, without using a snapshot
+#[ignore]
 #[test]
 fn quick_test() {
-    const FILENAME: &str = "data.vue";
-    const SOURCE: &str = r#"
-export default {
-  /* ✗ BAD */
-  data: {
-    foo: null
-  }
+    const FILENAME: &str = "dummyFile.ts";
+    const SOURCE: &str = r#"type Props = {
+	a: string;
+	returnsPromise: () => Promise<void>;
+};
+async function testDestructuringAndCallingReturnsPromiseFromRest({
+	a,
+	...rest
+}: Props) {
+	rest
+		.returnsPromise()
+		.then(() => {})
+		.finally(() => {});
 }
 "#;
 
-    let parsed = parse(SOURCE, JsFileSource::vue(), JsParserOptions::default());
+    let parsed = parse(SOURCE, JsFileSource::tsx(), JsParserOptions::default());
 
     let mut fs = TemporaryFs::new("quick_test");
     fs.create_file(FILENAME, SOURCE);
-
+    fs.create_file(
+        "returnPromiseResult.ts",
+        r#"export function returnPromiseResult(): Promise<{ result: true | false }> {
+  return new Promise(resolve => resolve({ result: true }));
+}
+"#,
+    );
     let file_path = Utf8PathBuf::from(format!("{}/{FILENAME}", fs.cli_path()));
 
     let mut error_ranges: Vec<TextRange> = Vec::new();
     let options = AnalyzerOptions::default().with_file_path(file_path.clone());
-    let rule_filter = RuleFilter::Rule("nursery", "noVueDataObjectDeclaration");
+    let rule_filter = RuleFilter::Rule("nursery", "noFloatingPromises");
 
     let dependencies = Dependencies(Box::new([("buffer".into(), "latest".into())]));
 
@@ -51,7 +64,7 @@ export default {
     let services = crate::JsAnalyzerServices::from((
         module_graph_for_test_file(file_path.as_path(), project_layout.as_ref()),
         project_layout,
-        JsFileSource::vue(),
+        JsFileSource::tsx(),
     ));
 
     analyze(
