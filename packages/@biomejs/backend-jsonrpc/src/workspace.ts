@@ -1676,6 +1676,10 @@ export interface Nursery {
 	 */
 	noUselessUndefined?: RuleFixConfiguration_for_NoUselessUndefinedOptions;
 	/**
+	 * Enforce component's data property to be a function
+	 */
+	noVueDataObjectDeclaration?: RuleFixConfiguration_for_NoVueDataObjectDeclarationOptions;
+	/**
 	 * Disallow reserved keys in Vue component data and computed properties.
 	 */
 	noVueReservedKeys?: RuleConfiguration_for_NoVueReservedKeysOptions;
@@ -2973,6 +2977,9 @@ export type RuleFixConfiguration_for_NoUselessEscapeInStringOptions =
 export type RuleFixConfiguration_for_NoUselessUndefinedOptions =
 	| RulePlainConfiguration
 	| RuleWithFixOptions_for_NoUselessUndefinedOptions;
+export type RuleFixConfiguration_for_NoVueDataObjectDeclarationOptions =
+	| RulePlainConfiguration
+	| RuleWithFixOptions_for_NoVueDataObjectDeclarationOptions;
 export type RuleConfiguration_for_NoVueReservedKeysOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_NoVueReservedKeysOptions;
@@ -5415,6 +5422,20 @@ export interface RuleWithFixOptions_for_NoUselessUndefinedOptions {
 	 * Rule's options
 	 */
 	options: NoUselessUndefinedOptions;
+}
+export interface RuleWithFixOptions_for_NoVueDataObjectDeclarationOptions {
+	/**
+	 * The kind of the code actions emitted by the rule
+	 */
+	fix?: FixKind;
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: NoVueDataObjectDeclarationOptions;
 }
 export interface RuleWithOptions_for_NoVueReservedKeysOptions {
 	/**
@@ -7877,6 +7898,7 @@ export interface NoUnwantedPolyfillioOptions {}
 export interface NoUselessBackrefInRegexOptions {}
 export interface NoUselessEscapeInStringOptions {}
 export interface NoUselessUndefinedOptions {}
+export interface NoVueDataObjectDeclarationOptions {}
 export interface NoVueReservedKeysOptions {}
 export interface NoVueReservedPropsOptions {}
 export interface UseAdjacentGetterSetterOptions {}
@@ -8578,6 +8600,7 @@ export type Category =
 	| "lint/nursery/noUselessUndefined"
 	| "lint/nursery/noVueReservedKeys"
 	| "lint/nursery/noVueReservedProps"
+	| "lint/nursery/noVueDataObjectDeclaration"
 	| "lint/nursery/useAdjacentGetterSetter"
 	| "lint/nursery/useAnchorHref"
 	| "lint/nursery/useBiomeSuppressionComment"

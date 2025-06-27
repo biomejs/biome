@@ -4712,6 +4712,16 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoVueDataObjectDeclarationConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{ "$ref": "#/definitions/RuleWithNoVueDataObjectDeclarationOptions" }
+			]
+		},
+		"NoVueDataObjectDeclarationOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoVueReservedKeysConfiguration": {
 			"anyOf": [
 				{ "$ref": "#/definitions/RulePlainConfiguration" },
@@ -4979,6 +4989,13 @@
 					"description": "Disallow the use of useless undefined.",
 					"anyOf": [
 						{ "$ref": "#/definitions/NoUselessUndefinedConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noVueDataObjectDeclaration": {
+					"description": "Enforce component's data property to be a function",
+					"anyOf": [
+						{ "$ref": "#/definitions/NoVueDataObjectDeclarationConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -9508,6 +9525,27 @@
 				"options": {
 					"description": "Rule's options",
 					"allOf": [{ "$ref": "#/definitions/NoVoidTypeReturnOptions" }]
+				}
+			},
+			"additionalProperties": false
+		},
+		"RuleWithNoVueDataObjectDeclarationOptions": {
+			"type": "object",
+			"required": ["level"],
+			"properties": {
+				"fix": {
+					"description": "The kind of the code actions emitted by the rule",
+					"anyOf": [{ "$ref": "#/definitions/FixKind" }, { "type": "null" }]
+				},
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [
+						{ "$ref": "#/definitions/NoVueDataObjectDeclarationOptions" }
+					]
 				}
 			},
 			"additionalProperties": false

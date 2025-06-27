@@ -1,0 +1,41 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```js
+createApp({
+  data: {
+    foo: null
+  }
+}).mount('#app')
+```
+
+# Diagnostics
+```
+invalid.js:2:3 lint/nursery/noVueDataObjectDeclaration  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Object declaration on 'data' property is deprecated. Using function declaration instead.
+  
+    1 │ createApp({
+  > 2 │   data: {
+      │   ^^^^^^^
+  > 3 │     foo: null
+  > 4 │   }
+      │   ^
+    5 │ }).mount('#app')
+  
+  i When using the data property on a component (i.e. anywhere except on new Vue), the value must be a function that returns an object.
+  
+  i Safe fix: Convert the data object to a function returning the data object
+  
+    1 1 │   createApp({
+    2   │ - ··data:·{
+      2 │ + ··data:function(){return{
+    3 3 │       foo: null
+    4   │ - ··}
+      4 │ + ··}}
+    5 5 │   }).mount('#app')
+  
+
+```

@@ -22,14 +22,13 @@ fn project_layout_with_top_level_dependencies(dependencies: Dependencies) -> Arc
 }
 
 // use this test check if your snippet produces the diagnostics you wish, without using a snapshot
-#[ignore]
 #[test]
 fn quick_test() {
     const FILENAME: &str = "dummyFile.ts";
     const SOURCE: &str = r#"import { sleep as alias } from "./sleep.ts";
 alias(100);"#;
 
-    let parsed = parse(SOURCE, JsFileSource::tsx(), JsParserOptions::default());
+    let parsed = parse(SOURCE, JsFileSource::vue(), JsParserOptions::default());
 
     let mut fs = TemporaryFs::new("quick_test");
     fs.create_file("sleep.ts", "export const sleep = async (ms = 1000): Promise<void> => new Promise((resolve) => setTimeout(resolve, ms));");
@@ -39,7 +38,7 @@ alias(100);"#;
 
     let mut error_ranges: Vec<TextRange> = Vec::new();
     let options = AnalyzerOptions::default().with_file_path(file_path.clone());
-    let rule_filter = RuleFilter::Rule("nursery", "noFloatingPromises");
+    let rule_filter = RuleFilter::Rule("nursery", "noVueDataObjectDeclaration");
 
     let dependencies = Dependencies(Box::new([("buffer".into(), "latest".into())]));
 
@@ -47,7 +46,7 @@ alias(100);"#;
     let services = crate::JsAnalyzerServices::from((
         module_graph_for_test_file(file_path.as_path(), project_layout.as_ref()),
         project_layout,
-        JsFileSource::tsx(),
+        JsFileSource::vue(),
     ));
 
     analyze(
