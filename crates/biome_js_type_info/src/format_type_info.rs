@@ -348,7 +348,18 @@ impl Format<FormatTypeContext> for TypeofExpression {
         f: &mut biome_formatter::formatter::Formatter<FormatTypeContext>,
     ) -> FormatResult<()> {
         match self {
-            Self::Addition(_) => todo!(),
+            Self::Addition(addition) => {
+                write!(
+                    f,
+                    [&group(&format_args![
+                        &addition.left,
+                        soft_line_break_or_space(),
+                        text("+"),
+                        soft_line_break_or_space(),
+                        &addition.right,
+                    ])]
+                )
+            }
             Self::Await(await_expression) => {
                 write!(
                     f,

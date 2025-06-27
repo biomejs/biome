@@ -63,14 +63,14 @@ Module TypeId(4) => Array.prototype.map
 
 Module TypeId(5) => unknown
 
-Module TypeId(6) => Module(0) TypeId(5)
+Module TypeId(6) => unknown + Module(0) TypeId(0)
 
-Module TypeId(7) => instanceof Promise
+Module TypeId(7) => instanceof Promise<Module(0) TypeId(6)>
 
 Module TypeId(8) => async Function {
   accepts: {
     params: [
-      required x: Module(0) TypeId(5) (bindings: x:Module(0) TypeId(5))
+      required x: unknown (bindings: x:unknown)
     ]
     type_args: []
   }
@@ -124,14 +124,14 @@ Full TypeId(4) => Array.prototype.map
 
 Full TypeId(5) => unknown
 
-Full TypeId(6) => Module(0) TypeId(5)
+Full TypeId(6) => unknown + Module(0) TypeId(0)
 
-Full TypeId(7) => instanceof Promise
+Full TypeId(7) => instanceof Promise<Module(0) TypeId(6)>
 
 Full TypeId(8) => async Function {
   accepts: {
     params: [
-      required x: Module(0) TypeId(5) (bindings: x:Module(0) TypeId(5))
+      required x: unknown (bindings: x:unknown)
     ]
     type_args: []
   }

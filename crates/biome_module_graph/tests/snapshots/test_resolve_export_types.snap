@@ -79,7 +79,7 @@ Module TypeId(1) => Module(0) TypeId(0)
 
 Module TypeId(2) => number
 
-Module TypeId(3) => unknown
+Module TypeId(3) => Module(0) TypeId(0) + number
 
 Module TypeId(4) => value: Life, The Universe, and Everything
 
@@ -102,7 +102,7 @@ Module TypeId(8) => sync Function "giveMeABiggerAnswer" {
     ]
     type_args: []
   }
-  returns: unknown
+  returns: Module(0) TypeId(3)
 }
 
 Module TypeId(9) => unknown
