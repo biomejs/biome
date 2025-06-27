@@ -4,8 +4,8 @@ use crate::{
     services::semantic::Semantic,
 };
 use biome_analyze::{
-    FixKind, Rule, RuleDiagnostic, RuleSource, RuleSourceKind, context::RuleContext,
-    declare_lint_rule, options::JsxRuntime,
+    FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
+    options::JsxRuntime,
 };
 use biome_console::markup;
 use biome_deserialize_macros::Deserializable;
@@ -154,8 +154,7 @@ declare_lint_rule! {
         version: "1.5.0",
         name: "useImportType",
         language: "ts",
-        sources: &[RuleSource::EslintTypeScript("consistent-type-imports")],
-        source_kind: RuleSourceKind::Inspired,
+        sources: &[RuleSource::EslintTypeScript("consistent-type-imports").inspired()],
         recommended: true,
         severity: Severity::Warning,
         fix_kind: FixKind::Safe,

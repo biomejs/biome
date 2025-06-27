@@ -1,0 +1,826 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 134
+expression: invalid.js
+---
+# Input
+```js
+!!foo;
+!!(foo + bar);
+!!(foo + bar);
+~foo.indexOf(1);
+~foo.bar.indexOf(2);
++foo;
+-(-foo);
++foo.bar;
+1*foo;
+foo*1;
+1*foo.bar;
+foo.bar-0;
+""+foo;
+    ``+foo;
+foo+"";
+foo+``;
+""+foo.bar;
+    ``+foo.bar;
+foo.bar+"";
+foo.bar+``;
+foo += "";
+foo += ``;
+typeof+foo;
+typeof +foo;
+let x ='' + 1n;
+~foo?.indexOf(1);
+~(foo?.indexOf)(1);
+1 * a / 2;
+(a * 1) / 2;
+a * 1 / (b * 1);
+/* test */ a * 1 + 2;
+/* test */ x /*comment*/ * 1 + 2;
+
+```
+
+# Diagnostics
+```
+invalid.js:1:1 lint/nursery/noImplicitCoercion  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Implicit type conversion is hard to read and understand.
+  
+  > 1 │ !!foo;
+      │ ^^^^^
+    2 │ !!(foo + bar);
+    3 │ !!(foo + bar);
+  
+  i Unsafe fix: Use Boolean() call instead.
+  
+     1    │ - !!foo;
+        1 │ + Boolean(foo);
+     2  2 │   !!(foo + bar);
+     3  3 │   !!(foo + bar);
+  
+
+```
+
+```
+invalid.js:2:1 lint/nursery/noImplicitCoercion  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Implicit type conversion is hard to read and understand.
+  
+    1 │ !!foo;
+  > 2 │ !!(foo + bar);
+      │ ^^^^^^^^^^^^^
+    3 │ !!(foo + bar);
+    4 │ ~foo.indexOf(1);
+  
+  i Unsafe fix: Use Boolean() call instead.
+  
+     1  1 │   !!foo;
+     2    │ - !!(foo·+·bar);
+        2 │ + Boolean((foo·+·bar));
+     3  3 │   !!(foo + bar);
+     4  4 │   ~foo.indexOf(1);
+  
+
+```
+
+```
+invalid.js:3:1 lint/nursery/noImplicitCoercion  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Implicit type conversion is hard to read and understand.
+  
+    1 │ !!foo;
+    2 │ !!(foo + bar);
+  > 3 │ !!(foo + bar);
+      │ ^^^^^^^^^^^^^
+    4 │ ~foo.indexOf(1);
+    5 │ ~foo.bar.indexOf(2);
+  
+  i Unsafe fix: Use Boolean() call instead.
+  
+     1  1 │   !!foo;
+     2  2 │   !!(foo + bar);
+     3    │ - !!(foo·+·bar);
+        3 │ + Boolean((foo·+·bar));
+     4  4 │   ~foo.indexOf(1);
+     5  5 │   ~foo.bar.indexOf(2);
+  
+
+```
+
+```
+invalid.js:4:1 lint/nursery/noImplicitCoercion  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Using binary operations instead of comparisons is harder to read and understand.
+  
+    2 │ !!(foo + bar);
+    3 │ !!(foo + bar);
+  > 4 │ ~foo.indexOf(1);
+      │ ^^^^^^^^^^^^^^^
+    5 │ ~foo.bar.indexOf(2);
+    6 │ +foo;
+  
+  i Unsafe fix: Compare with -1 instead.
+  
+     2  2 │   !!(foo + bar);
+     3  3 │   !!(foo + bar);
+     4    │ - ~foo.indexOf(1);
+        4 │ + (foo.indexOf(1)·!==·-1);
+     5  5 │   ~foo.bar.indexOf(2);
+     6  6 │   +foo;
+  
+
+```
+
+```
+invalid.js:5:1 lint/nursery/noImplicitCoercion  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Using binary operations instead of comparisons is harder to read and understand.
+  
+    3 │ !!(foo + bar);
+    4 │ ~foo.indexOf(1);
+  > 5 │ ~foo.bar.indexOf(2);
+      │ ^^^^^^^^^^^^^^^^^^^
+    6 │ +foo;
+    7 │ -(-foo);
+  
+  i Unsafe fix: Compare with -1 instead.
+  
+     3  3 │   !!(foo + bar);
+     4  4 │   ~foo.indexOf(1);
+     5    │ - ~foo.bar.indexOf(2);
+        5 │ + (foo.bar.indexOf(2)·!==·-1);
+     6  6 │   +foo;
+     7  7 │   -(-foo);
+  
+
+```
+
+```
+invalid.js:6:1 lint/nursery/noImplicitCoercion  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Implicit type conversion is hard to read and understand.
+  
+    4 │ ~foo.indexOf(1);
+    5 │ ~foo.bar.indexOf(2);
+  > 6 │ +foo;
+      │ ^^^^
+    7 │ -(-foo);
+    8 │ +foo.bar;
+  
+  i Unsafe fix: Use Number() call instead.
+  
+     4  4 │   ~foo.indexOf(1);
+     5  5 │   ~foo.bar.indexOf(2);
+     6    │ - +foo;
+        6 │ + Number(foo);
+     7  7 │   -(-foo);
+     8  8 │   +foo.bar;
+  
+
+```
+
+```
+invalid.js:7:1 lint/nursery/noImplicitCoercion  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Implicit type conversion is hard to read and understand.
+  
+    5 │ ~foo.bar.indexOf(2);
+    6 │ +foo;
+  > 7 │ -(-foo);
+      │ ^^^^^^^
+    8 │ +foo.bar;
+    9 │ 1*foo;
+  
+  i Unsafe fix: Use Number() call instead.
+  
+     5  5 │   ~foo.bar.indexOf(2);
+     6  6 │   +foo;
+     7    │ - -(-foo);
+        7 │ + Number(foo);
+     8  8 │   +foo.bar;
+     9  9 │   1*foo;
+  
+
+```
+
+```
+invalid.js:8:1 lint/nursery/noImplicitCoercion  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Implicit type conversion is hard to read and understand.
+  
+     6 │ +foo;
+     7 │ -(-foo);
+   > 8 │ +foo.bar;
+       │ ^^^^^^^^
+     9 │ 1*foo;
+    10 │ foo*1;
+  
+  i Unsafe fix: Use Number() call instead.
+  
+     6  6 │   +foo;
+     7  7 │   -(-foo);
+     8    │ - +foo.bar;
+        8 │ + Number(foo.bar);
+     9  9 │   1*foo;
+    10 10 │   foo*1;
+  
+
+```
+
+```
+invalid.js:9:1 lint/nursery/noImplicitCoercion  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Implicit type conversion is hard to read and understand.
+  
+     7 │ -(-foo);
+     8 │ +foo.bar;
+   > 9 │ 1*foo;
+       │ ^^^^^
+    10 │ foo*1;
+    11 │ 1*foo.bar;
+  
+  i Unsafe fix: Use Number() call instead.
+  
+     7  7 │   -(-foo);
+     8  8 │   +foo.bar;
+     9    │ - 1*foo;
+        9 │ + Number(foo);
+    10 10 │   foo*1;
+    11 11 │   1*foo.bar;
+  
+
+```
+
+```
+invalid.js:10:1 lint/nursery/noImplicitCoercion  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Implicit type conversion is hard to read and understand.
+  
+     8 │ +foo.bar;
+     9 │ 1*foo;
+  > 10 │ foo*1;
+       │ ^^^^^
+    11 │ 1*foo.bar;
+    12 │ foo.bar-0;
+  
+  i Unsafe fix: Use Number() call instead.
+  
+     8  8 │   +foo.bar;
+     9  9 │   1*foo;
+    10    │ - foo*1;
+       10 │ + Number(foo);
+    11 11 │   1*foo.bar;
+    12 12 │   foo.bar-0;
+  
+
+```
+
+```
+invalid.js:11:1 lint/nursery/noImplicitCoercion  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Implicit type conversion is hard to read and understand.
+  
+     9 │ 1*foo;
+    10 │ foo*1;
+  > 11 │ 1*foo.bar;
+       │ ^^^^^^^^^
+    12 │ foo.bar-0;
+    13 │ ""+foo;
+  
+  i Unsafe fix: Use Number() call instead.
+  
+     9  9 │   1*foo;
+    10 10 │   foo*1;
+    11    │ - 1*foo.bar;
+       11 │ + Number(foo.bar);
+    12 12 │   foo.bar-0;
+    13 13 │   ""+foo;
+  
+
+```
+
+```
+invalid.js:12:1 lint/nursery/noImplicitCoercion  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Implicit type conversion is hard to read and understand.
+  
+    10 │ foo*1;
+    11 │ 1*foo.bar;
+  > 12 │ foo.bar-0;
+       │ ^^^^^^^^^
+    13 │ ""+foo;
+    14 │     ``+foo;
+  
+  i Unsafe fix: Use Number() call instead.
+  
+    10 10 │   foo*1;
+    11 11 │   1*foo.bar;
+    12    │ - foo.bar-0;
+       12 │ + Number(foo.bar);
+    13 13 │   ""+foo;
+    14 14 │       ``+foo;
+  
+
+```
+
+```
+invalid.js:13:1 lint/nursery/noImplicitCoercion  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Implicit type conversion is hard to read and understand.
+  
+    11 │ 1*foo.bar;
+    12 │ foo.bar-0;
+  > 13 │ ""+foo;
+       │ ^^^^^^
+    14 │     ``+foo;
+    15 │ foo+"";
+  
+  i Unsafe fix: Use String() call instead.
+  
+    11 11 │   1*foo.bar;
+    12 12 │   foo.bar-0;
+    13    │ - ""+foo;
+       13 │ + String(foo);
+    14 14 │       ``+foo;
+    15 15 │   foo+"";
+  
+
+```
+
+```
+invalid.js:14:5 lint/nursery/noImplicitCoercion  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Implicit type conversion is hard to read and understand.
+  
+    12 │ foo.bar-0;
+    13 │ ""+foo;
+  > 14 │     ``+foo;
+       │     ^^^^^^
+    15 │ foo+"";
+    16 │ foo+``;
+  
+  i Unsafe fix: Use String() call instead.
+  
+    12 12 │   foo.bar-0;
+    13 13 │   ""+foo;
+    14    │ - ····``+foo;
+       14 │ + ····String(foo);
+    15 15 │   foo+"";
+    16 16 │   foo+``;
+  
+
+```
+
+```
+invalid.js:15:1 lint/nursery/noImplicitCoercion  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Implicit type conversion is hard to read and understand.
+  
+    13 │ ""+foo;
+    14 │     ``+foo;
+  > 15 │ foo+"";
+       │ ^^^^^^
+    16 │ foo+``;
+    17 │ ""+foo.bar;
+  
+  i Unsafe fix: Use String() call instead.
+  
+    13 13 │   ""+foo;
+    14 14 │       ``+foo;
+    15    │ - foo+"";
+       15 │ + String(foo);
+    16 16 │   foo+``;
+    17 17 │   ""+foo.bar;
+  
+
+```
+
+```
+invalid.js:16:1 lint/nursery/noImplicitCoercion  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Implicit type conversion is hard to read and understand.
+  
+    14 │     ``+foo;
+    15 │ foo+"";
+  > 16 │ foo+``;
+       │ ^^^^^^
+    17 │ ""+foo.bar;
+    18 │     ``+foo.bar;
+  
+  i Unsafe fix: Use String() call instead.
+  
+    14 14 │       ``+foo;
+    15 15 │   foo+"";
+    16    │ - foo+``;
+       16 │ + String(foo);
+    17 17 │   ""+foo.bar;
+    18 18 │       ``+foo.bar;
+  
+
+```
+
+```
+invalid.js:17:1 lint/nursery/noImplicitCoercion  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Implicit type conversion is hard to read and understand.
+  
+    15 │ foo+"";
+    16 │ foo+``;
+  > 17 │ ""+foo.bar;
+       │ ^^^^^^^^^^
+    18 │     ``+foo.bar;
+    19 │ foo.bar+"";
+  
+  i Unsafe fix: Use String() call instead.
+  
+    15 15 │   foo+"";
+    16 16 │   foo+``;
+    17    │ - ""+foo.bar;
+       17 │ + String(foo.bar);
+    18 18 │       ``+foo.bar;
+    19 19 │   foo.bar+"";
+  
+
+```
+
+```
+invalid.js:18:5 lint/nursery/noImplicitCoercion  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Implicit type conversion is hard to read and understand.
+  
+    16 │ foo+``;
+    17 │ ""+foo.bar;
+  > 18 │     ``+foo.bar;
+       │     ^^^^^^^^^^
+    19 │ foo.bar+"";
+    20 │ foo.bar+``;
+  
+  i Unsafe fix: Use String() call instead.
+  
+    16 16 │   foo+``;
+    17 17 │   ""+foo.bar;
+    18    │ - ····``+foo.bar;
+       18 │ + ····String(foo.bar);
+    19 19 │   foo.bar+"";
+    20 20 │   foo.bar+``;
+  
+
+```
+
+```
+invalid.js:19:1 lint/nursery/noImplicitCoercion  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Implicit type conversion is hard to read and understand.
+  
+    17 │ ""+foo.bar;
+    18 │     ``+foo.bar;
+  > 19 │ foo.bar+"";
+       │ ^^^^^^^^^^
+    20 │ foo.bar+``;
+    21 │ foo += "";
+  
+  i Unsafe fix: Use String() call instead.
+  
+    17 17 │   ""+foo.bar;
+    18 18 │       ``+foo.bar;
+    19    │ - foo.bar+"";
+       19 │ + String(foo.bar);
+    20 20 │   foo.bar+``;
+    21 21 │   foo += "";
+  
+
+```
+
+```
+invalid.js:20:1 lint/nursery/noImplicitCoercion  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Implicit type conversion is hard to read and understand.
+  
+    18 │     ``+foo.bar;
+    19 │ foo.bar+"";
+  > 20 │ foo.bar+``;
+       │ ^^^^^^^^^^
+    21 │ foo += "";
+    22 │ foo += ``;
+  
+  i Unsafe fix: Use String() call instead.
+  
+    18 18 │       ``+foo.bar;
+    19 19 │   foo.bar+"";
+    20    │ - foo.bar+``;
+       20 │ + String(foo.bar);
+    21 21 │   foo += "";
+    22 22 │   foo += ``;
+  
+
+```
+
+```
+invalid.js:21:1 lint/nursery/noImplicitCoercion  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Implicit type conversion is hard to read and understand.
+  
+    19 │ foo.bar+"";
+    20 │ foo.bar+``;
+  > 21 │ foo += "";
+       │ ^^^^^^^^^
+    22 │ foo += ``;
+    23 │ typeof+foo;
+  
+  i Unsafe fix: Use String() call instead.
+  
+    19 19 │   foo.bar+"";
+    20 20 │   foo.bar+``;
+    21    │ - foo·+=·"";
+       21 │ + foo·=·String(foo);
+    22 22 │   foo += ``;
+    23 23 │   typeof+foo;
+  
+
+```
+
+```
+invalid.js:22:1 lint/nursery/noImplicitCoercion  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Implicit type conversion is hard to read and understand.
+  
+    20 │ foo.bar+``;
+    21 │ foo += "";
+  > 22 │ foo += ``;
+       │ ^^^^^^^^^
+    23 │ typeof+foo;
+    24 │ typeof +foo;
+  
+  i Unsafe fix: Use String() call instead.
+  
+    20 20 │   foo.bar+``;
+    21 21 │   foo += "";
+    22    │ - foo·+=·``;
+       22 │ + foo·=·String(foo);
+    23 23 │   typeof+foo;
+    24 24 │   typeof +foo;
+  
+
+```
+
+```
+invalid.js:23:7 lint/nursery/noImplicitCoercion  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Implicit type conversion is hard to read and understand.
+  
+    21 │ foo += "";
+    22 │ foo += ``;
+  > 23 │ typeof+foo;
+       │       ^^^^
+    24 │ typeof +foo;
+    25 │ let x ='' + 1n;
+  
+  i Unsafe fix: Use Number() call instead.
+  
+    21 21 │   foo += "";
+    22 22 │   foo += ``;
+    23    │ - typeof+foo;
+       23 │ + typeof·Number(foo);
+    24 24 │   typeof +foo;
+    25 25 │   let x ='' + 1n;
+  
+
+```
+
+```
+invalid.js:24:8 lint/nursery/noImplicitCoercion  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Implicit type conversion is hard to read and understand.
+  
+    22 │ foo += ``;
+    23 │ typeof+foo;
+  > 24 │ typeof +foo;
+       │        ^^^^
+    25 │ let x ='' + 1n;
+    26 │ ~foo?.indexOf(1);
+  
+  i Unsafe fix: Use Number() call instead.
+  
+    22 22 │   foo += ``;
+    23 23 │   typeof+foo;
+    24    │ - typeof·+foo;
+       24 │ + typeof·Number(foo);
+    25 25 │   let x ='' + 1n;
+    26 26 │   ~foo?.indexOf(1);
+  
+
+```
+
+```
+invalid.js:25:8 lint/nursery/noImplicitCoercion  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Implicit type conversion is hard to read and understand.
+  
+    23 │ typeof+foo;
+    24 │ typeof +foo;
+  > 25 │ let x ='' + 1n;
+       │        ^^^^^^^
+    26 │ ~foo?.indexOf(1);
+    27 │ ~(foo?.indexOf)(1);
+  
+  i Unsafe fix: Use String() call instead.
+  
+    23 23 │   typeof+foo;
+    24 24 │   typeof +foo;
+    25    │ - let·x·=''·+·1n;
+       25 │ + let·x·=String(1n);
+    26 26 │   ~foo?.indexOf(1);
+    27 27 │   ~(foo?.indexOf)(1);
+  
+
+```
+
+```
+invalid.js:26:1 lint/nursery/noImplicitCoercion  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Using binary operations instead of comparisons is harder to read and understand.
+  
+    24 │ typeof +foo;
+    25 │ let x ='' + 1n;
+  > 26 │ ~foo?.indexOf(1);
+       │ ^^^^^^^^^^^^^^^^
+    27 │ ~(foo?.indexOf)(1);
+    28 │ 1 * a / 2;
+  
+  i Unsafe fix: Compare with -1 instead.
+  
+    24 24 │   typeof +foo;
+    25 25 │   let x ='' + 1n;
+    26    │ - ~foo?.indexOf(1);
+       26 │ + (foo?.indexOf(1)·!==·-1);
+    27 27 │   ~(foo?.indexOf)(1);
+    28 28 │   1 * a / 2;
+  
+
+```
+
+```
+invalid.js:27:1 lint/nursery/noImplicitCoercion  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Using binary operations instead of comparisons is harder to read and understand.
+  
+    25 │ let x ='' + 1n;
+    26 │ ~foo?.indexOf(1);
+  > 27 │ ~(foo?.indexOf)(1);
+       │ ^^^^^^^^^^^^^^^^^^
+    28 │ 1 * a / 2;
+    29 │ (a * 1) / 2;
+  
+  i Unsafe fix: Compare with -1 instead.
+  
+    25 25 │   let x ='' + 1n;
+    26 26 │   ~foo?.indexOf(1);
+    27    │ - ~(foo?.indexOf)(1);
+       27 │ + ((foo?.indexOf)(1)·!==·-1);
+    28 28 │   1 * a / 2;
+    29 29 │   (a * 1) / 2;
+  
+
+```
+
+```
+invalid.js:28:1 lint/nursery/noImplicitCoercion  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Implicit type conversion is hard to read and understand.
+  
+    26 │ ~foo?.indexOf(1);
+    27 │ ~(foo?.indexOf)(1);
+  > 28 │ 1 * a / 2;
+       │ ^^^^^
+    29 │ (a * 1) / 2;
+    30 │ a * 1 / (b * 1);
+  
+  i Unsafe fix: Use Number() call instead.
+  
+    26 26 │   ~foo?.indexOf(1);
+    27 27 │   ~(foo?.indexOf)(1);
+    28    │ - 1·*·a·/·2;
+       28 │ + Number(a)·/·2;
+    29 29 │   (a * 1) / 2;
+    30 30 │   a * 1 / (b * 1);
+  
+
+```
+
+```
+invalid.js:29:2 lint/nursery/noImplicitCoercion  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Implicit type conversion is hard to read and understand.
+  
+    27 │ ~(foo?.indexOf)(1);
+    28 │ 1 * a / 2;
+  > 29 │ (a * 1) / 2;
+       │  ^^^^^
+    30 │ a * 1 / (b * 1);
+    31 │ /* test */ a * 1 + 2;
+  
+  i Unsafe fix: Use Number() call instead.
+  
+    27 27 │   ~(foo?.indexOf)(1);
+    28 28 │   1 * a / 2;
+    29    │ - (a·*·1)·/·2;
+       29 │ + (Number(a))·/·2;
+    30 30 │   a * 1 / (b * 1);
+    31 31 │   /* test */ a * 1 + 2;
+  
+
+```
+
+```
+invalid.js:30:1 lint/nursery/noImplicitCoercion  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Implicit type conversion is hard to read and understand.
+  
+    28 │ 1 * a / 2;
+    29 │ (a * 1) / 2;
+  > 30 │ a * 1 / (b * 1);
+       │ ^^^^^
+    31 │ /* test */ a * 1 + 2;
+    32 │ /* test */ x /*comment*/ * 1 + 2;
+  
+  i Unsafe fix: Use Number() call instead.
+  
+    28 28 │   1 * a / 2;
+    29 29 │   (a * 1) / 2;
+    30    │ - a·*·1·/·(b·*·1);
+       30 │ + Number(a)·/·(b·*·1);
+    31 31 │   /* test */ a * 1 + 2;
+    32 32 │   /* test */ x /*comment*/ * 1 + 2;
+  
+
+```
+
+```
+invalid.js:30:10 lint/nursery/noImplicitCoercion  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Implicit type conversion is hard to read and understand.
+  
+    28 │ 1 * a / 2;
+    29 │ (a * 1) / 2;
+  > 30 │ a * 1 / (b * 1);
+       │          ^^^^^
+    31 │ /* test */ a * 1 + 2;
+    32 │ /* test */ x /*comment*/ * 1 + 2;
+  
+  i Unsafe fix: Use Number() call instead.
+  
+    28 28 │   1 * a / 2;
+    29 29 │   (a * 1) / 2;
+    30    │ - a·*·1·/·(b·*·1);
+       30 │ + a·*·1·/·(Number(b));
+    31 31 │   /* test */ a * 1 + 2;
+    32 32 │   /* test */ x /*comment*/ * 1 + 2;
+  
+
+```
+
+```
+invalid.js:31:12 lint/nursery/noImplicitCoercion  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Implicit type conversion is hard to read and understand.
+  
+    29 │ (a * 1) / 2;
+    30 │ a * 1 / (b * 1);
+  > 31 │ /* test */ a * 1 + 2;
+       │            ^^^^^
+    32 │ /* test */ x /*comment*/ * 1 + 2;
+    33 │ 
+  
+  i Unsafe fix: Use Number() call instead.
+  
+    29 29 │   (a * 1) / 2;
+    30 30 │   a * 1 / (b * 1);
+    31    │ - /*·test·*/·a·*·1·+·2;
+       31 │ + /*·test·*/·Number(a)·+·2;
+    32 32 │   /* test */ x /*comment*/ * 1 + 2;
+    33 33 │   
+  
+
+```
+
+```
+invalid.js:32:12 lint/nursery/noImplicitCoercion  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Implicit type conversion is hard to read and understand.
+  
+    30 │ a * 1 / (b * 1);
+    31 │ /* test */ a * 1 + 2;
+  > 32 │ /* test */ x /*comment*/ * 1 + 2;
+       │            ^^^^^^^^^^^^^^^^^
+    33 │ 
+  
+  i Unsafe fix: Use Number() call instead.
+  
+    30 30 │   a * 1 / (b * 1);
+    31 31 │   /* test */ a * 1 + 2;
+    32    │ - /*·test·*/·x·/*comment*/·*·1·+·2;
+       32 │ + /*·test·*/·Number(x·/*comment*/)·+·2;
+    33 33 │   
+  
+
+```

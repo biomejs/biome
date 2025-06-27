@@ -2,7 +2,7 @@ use crate::CssFormatter;
 use crate::comments::CssComments;
 use crate::prelude::*;
 use biome_css_syntax::{CssGenericDelimiter, CssGenericProperty, CssLanguage, CssSyntaxKind};
-use biome_formatter::{CstFormatContext, write};
+use biome_formatter::{CstFormatContext, format_args, write};
 use biome_formatter::{FormatOptions, FormatResult};
 use biome_rowan::{AstNode, AstNodeList, TextSize};
 use biome_string_case::StrLikeExtension;
@@ -112,7 +112,13 @@ where
             write!(f, [group(&indent(&content))])
         }
         ValueListLayout::Fill => {
-            write!(f, [group(&indent(&values))])
+            let with_line_break = format_with(|f| {
+                if should_preceded_by_softline(node) {
+                    write!(f, [soft_line_break()])?;
+                }
+                Ok(())
+            });
+            write!(f, [indent(&group(&format_args![with_line_break, &values]))])
         }
         ValueListLayout::SingleValue => {
             write!(f, [values])
@@ -207,6 +213,15 @@ pub(crate) enum ValueListLayout {
     /// These conditions are inherited from Prettier,
     /// see https://github.com/biomejs/biome/pull/5334 for a detailed explanation
     OneGroupPerLine,
+}
+
+fn should_preceded_by_softline<N, I>(node: &N) -> bool
+where
+    N: AstNodeList<Language = CssLanguage, Node = I> + AstNode<Language = CssLanguage>,
+    I: AstNode<Language = CssLanguage> + IntoFormat<CssFormatContext>,
+{
+    node.iter()
+        .any(|element| CssGenericDelimiter::can_cast(element.syntax().kind()))
 }
 
 /// Returns the layout to use when printing the provided CssComponentValueList.

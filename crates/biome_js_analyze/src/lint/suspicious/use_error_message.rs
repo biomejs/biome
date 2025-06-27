@@ -44,7 +44,7 @@ declare_lint_rule! {
         version: "1.8.0",
         name: "useErrorMessage",
         language: "js",
-        sources: &[RuleSource::EslintUnicorn("error-message")],
+        sources: &[RuleSource::EslintUnicorn("error-message").same()],
         recommended: false,
         severity: Severity::Warning,
     }

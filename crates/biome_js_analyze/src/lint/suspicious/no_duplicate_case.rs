@@ -85,7 +85,7 @@ declare_lint_rule! {
         version: "1.0.0",
         name: "noDuplicateCase",
         language: "js",
-        sources: &[RuleSource::Eslint("no-duplicate-case")],
+        sources: &[RuleSource::Eslint("no-duplicate-case").same()],
         recommended: true,
         severity: Severity::Error,
     }

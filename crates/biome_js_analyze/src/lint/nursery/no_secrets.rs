@@ -1,5 +1,5 @@
 use biome_analyze::{
-    Ast, Rule, RuleDiagnostic, RuleSource, RuleSourceKind, context::RuleContext, declare_lint_rule,
+    Ast, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
 
@@ -81,8 +81,7 @@ declare_lint_rule! {
         name: "noSecrets",
         language: "js",
         recommended: false,
-        sources: &[RuleSource::EslintNoSecrets("no-secrets")],
-        source_kind: RuleSourceKind::Inspired,
+        sources: &[RuleSource::EslintNoSecrets("no-secrets").inspired()],
     }
 }
 

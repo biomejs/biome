@@ -43,7 +43,7 @@ declare_lint_rule! {
         version: "1.0.0",
         name: "noAsyncPromiseExecutor",
         language: "js",
-        sources: &[RuleSource::Eslint("no-async-promise-executor")],
+        sources: &[RuleSource::Eslint("no-async-promise-executor").same()],
         recommended: true,
         severity: Severity::Error,
     }

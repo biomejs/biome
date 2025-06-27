@@ -7,7 +7,6 @@
 //! | indent_style         | indent_style |
 //! | indent_size          | indent_width |
 //! | end_of_line          | line_ending  |
-//! | max_line_length      | line_width   |
 
 use crate::{
     Configuration, FormatterConfiguration, OverrideFormatterConfiguration, OverrideGlobs,

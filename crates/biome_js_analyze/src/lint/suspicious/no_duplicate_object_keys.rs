@@ -53,7 +53,7 @@ declare_lint_rule! {
         version: "1.0.0",
         name: "noDuplicateObjectKeys",
         language: "js",
-        sources: &[RuleSource::Eslint("no-dupe-keys")],
+        sources: &[RuleSource::Eslint("no-dupe-keys").same()],
         recommended: true,
         severity: Severity::Error,
         fix_kind: FixKind::Unsafe,

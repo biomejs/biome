@@ -44,7 +44,7 @@ declare_lint_rule! {
         version: "1.8.0",
         name: "useNumberToFixedDigitsArgument",
         language: "js",
-        sources: &[RuleSource::EslintUnicorn("require-number-to-fixed-digits-argument")],
+        sources: &[RuleSource::EslintUnicorn("require-number-to-fixed-digits-argument").same()],
         recommended: false,
         severity: Severity::Warning,
         fix_kind: FixKind::Safe,

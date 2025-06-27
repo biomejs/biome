@@ -29,7 +29,7 @@ declare_lint_rule! {
         version: "1.0.0",
         name: "noDebugger",
         language: "js",
-        sources: &[RuleSource::Eslint("no-debugger")],
+        sources: &[RuleSource::Eslint("no-debugger").same()],
         recommended: true,
         severity: Severity::Error,
         fix_kind: FixKind::Unsafe,

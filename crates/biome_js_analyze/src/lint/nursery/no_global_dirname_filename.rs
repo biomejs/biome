@@ -1,7 +1,6 @@
 use crate::{JsRuleAction, services::semantic::Semantic};
 use biome_analyze::{
-    FixKind, Rule, RuleDiagnostic, RuleSource, RuleSourceKind, context::RuleContext,
-    declare_lint_rule,
+    FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
 use biome_js_factory::make;
@@ -53,8 +52,7 @@ declare_lint_rule! {
         name: "noGlobalDirnameFilename",
         language: "js",
         recommended: false,
-        sources: &[RuleSource::EslintUnicorn("prefer-module")],
-        source_kind: RuleSourceKind::Inspired,
+        sources: &[RuleSource::EslintUnicorn("prefer-module").inspired()],
         fix_kind: FixKind::Safe,
     }
 }

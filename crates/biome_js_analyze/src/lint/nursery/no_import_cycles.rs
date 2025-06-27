@@ -83,7 +83,7 @@ declare_lint_rule! {
         name: "noImportCycles",
         language: "js",
         sources: &[
-            RuleSource::EslintImport("no-cycle"),
+            RuleSource::EslintImport("no-cycle").same(),
         ],
         severity: Severity::Warning,
         recommended: false,

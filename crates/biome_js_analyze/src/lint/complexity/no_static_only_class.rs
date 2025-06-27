@@ -96,8 +96,8 @@ declare_lint_rule! {
         name: "noStaticOnlyClass",
         language: "js",
         sources: &[
-            RuleSource::EslintTypeScript("no-extraneous-class"),
-            RuleSource::EslintUnicorn("no-static-only-class"),
+            RuleSource::EslintTypeScript("no-extraneous-class").same(),
+            RuleSource::EslintUnicorn("no-static-only-class").same(),
         ],
         recommended: true,
         severity: Severity::Warning,

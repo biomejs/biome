@@ -1,7 +1,7 @@
 use crate::JsRuleAction;
 use biome_analyze::{
     AddVisitor, FixKind, Phases, QueryMatch, Queryable, Rule, RuleDiagnostic, RuleSource,
-    RuleSourceKind, ServiceBag, Visitor, VisitorContext, context::RuleContext, declare_lint_rule,
+    ServiceBag, Visitor, VisitorContext, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
 use biome_diagnostics::Severity;
@@ -70,8 +70,7 @@ declare_lint_rule! {
         version: "1.0.0",
         name: "useArrowFunction",
         language: "js",
-        sources: &[RuleSource::Eslint("prefer-arrow-callback")],
-        source_kind: RuleSourceKind::Inspired,
+        sources: &[RuleSource::Eslint("prefer-arrow-callback").inspired()],
         recommended: true,
         severity: Severity::Warning,
         fix_kind: FixKind::Safe,

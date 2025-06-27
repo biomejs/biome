@@ -24,7 +24,7 @@ declare_lint_rule! {
         version: "1.0.0",
         name: "noVoid",
         language: "js",
-        sources: &[RuleSource::Eslint("no-void")],
+        sources: &[RuleSource::Eslint("no-void").same()],
         recommended: false,
         severity: Severity::Warning,
     }

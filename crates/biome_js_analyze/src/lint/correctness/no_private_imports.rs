@@ -148,7 +148,7 @@ declare_lint_rule! {
         name: "noPrivateImports",
         language: "js",
         sources: &[
-            RuleSource::EslintImportAccess("eslint-plugin-import-access")
+            RuleSource::EslintImportAccess("eslint-plugin-import-access").same()
         ],
         recommended: true,
         severity: Severity::Warning,

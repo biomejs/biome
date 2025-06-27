@@ -51,7 +51,7 @@ declare_lint_rule! {
         version: "1.0.0",
         name: "noUnreachable",
         language: "js",
-        sources: &[RuleSource::Eslint("no-unreachable")],
+        sources: &[RuleSource::Eslint("no-unreachable").same()],
         recommended: true,
         severity: Severity::Error,
     }

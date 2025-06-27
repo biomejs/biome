@@ -1,4 +1,3 @@
-use biome_analyze::RuleSourceKind;
 use biome_analyze::{
     Ast, Rule, RuleDiagnostic, RuleDomain, RuleSource, context::RuleContext, declare_lint_rule,
 };
@@ -48,8 +47,7 @@ declare_lint_rule! {
         version: "1.9.4",
         name: "noHeadElement",
         language: "jsx",
-        sources: &[RuleSource::EslintNext("no-head-element")],
-        source_kind: RuleSourceKind::SameLogic,
+        sources: &[RuleSource::EslintNext("no-head-element").same()],
         recommended: true,
         severity: Severity::Warning,
         domains: &[RuleDomain::Next],

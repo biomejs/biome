@@ -55,8 +55,8 @@ declare_lint_rule! {
         name: "noCommonJs",
         language: "js",
         sources: &[
-            RuleSource::EslintTypeScript("no-require-imports"),
-            RuleSource::EslintImport("no-commonjs"),
+            RuleSource::EslintTypeScript("no-require-imports").same(),
+            RuleSource::EslintImport("no-commonjs").same(),
         ],
         recommended: false,
         severity: Severity::Warning,

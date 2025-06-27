@@ -94,8 +94,8 @@ declare_lint_rule! {
         name: "noForEach",
         language: "js",
         sources: &[
-            RuleSource::EslintUnicorn("no-array-for-each"),
-            RuleSource::Clippy("needless_for_each"),
+            RuleSource::EslintUnicorn("no-array-for-each").same(),
+            RuleSource::Clippy("needless_for_each").same(),
         ],
         recommended: false,
         severity: Severity::Warning,

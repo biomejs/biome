@@ -39,7 +39,7 @@ declare_lint_rule! {
         version: "1.0.0",
         name: "noShadowRestrictedNames",
         language: "js",
-        sources: &[RuleSource::Eslint("no-shadow-restricted-names")],
+        sources: &[RuleSource::Eslint("no-shadow-restricted-names").same()],
         recommended: true,
         severity: Severity::Error,
     }

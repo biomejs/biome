@@ -56,6 +56,16 @@ impl TypedService {
     pub fn type_of_function_like(&self, function: &AnyFunctionLike) -> Option<Type> {
         match function {
             AnyFunctionLike::AnyJsFunction(function) => Some(self.type_of_function(function)),
+            AnyFunctionLike::JsConstructorClassMember(member) => {
+                let class_ty = self.get_type_of_enclosing_class(member.syntax())?;
+                let constructor = class_ty.own_members().find(|member| {
+                    // TODO: Accurately handle overloads
+                    member.is_constructor()
+                })?;
+                self.resolver
+                    .as_ref()
+                    .map(|resolver| resolver.resolved_type_for_reference(&constructor.ty))
+            }
             AnyFunctionLike::JsMethodObjectMember(member) => {
                 let name = member
                     .name()
@@ -73,9 +83,10 @@ impl TypedService {
 
                 let object_ty =
                     self.type_of_expression(&AnyJsExpression::JsObjectExpression(object));
-                let member = object_ty
-                    .own_members()
-                    .find(|member| member.has_name(name))?;
+                let member = object_ty.own_members().find(|member| {
+                    // TODO: Accurately handle overloads
+                    member.has_name(name)
+                })?;
                 self.resolver
                     .as_ref()
                     .map(|resolver| resolver.resolved_type_for_reference(&member.ty))
@@ -89,28 +100,7 @@ impl TypedService {
                     .and_then(|name| name.value().ok())?;
                 let name = name.text_trimmed();
 
-                let class = member
-                    .syntax()
-                    .ancestors()
-                    .skip(1)
-                    .find_map(AnyJsClass::cast)?;
-
-                let class_ty = match class {
-                    AnyJsClass::JsClassDeclaration(decl) => {
-                        let binding = decl.id().ok()?;
-                        let name = binding.as_js_identifier_binding()?.name_token().ok()?;
-                        self.resolver.as_ref().map(|resolver| {
-                            resolver.resolved_type_of_named_value(function.range(), name.text())
-                        })?
-                    }
-                    AnyJsClass::JsClassExportDefaultDeclaration(_decl) => self
-                        .resolver
-                        .as_ref()
-                        .and_then(|resolver| resolver.resolved_type_of_default_export())?,
-                    AnyJsClass::JsClassExpression(expr) => {
-                        self.type_of_expression(&AnyJsExpression::JsClassExpression(expr))
-                    }
-                };
+                let class_ty = self.get_type_of_enclosing_class(member.syntax())?;
                 let member = class_ty
                     .own_members()
                     .find(|member| member.has_name(name))?;
@@ -119,6 +109,27 @@ impl TypedService {
                     .map(|resolver| resolver.resolved_type_for_reference(&member.ty))
             }
         }
+    }
+
+    fn get_type_of_enclosing_class(&self, node: &JsSyntaxNode) -> Option<Type> {
+        let class = node.ancestors().skip(1).find_map(AnyJsClass::cast)?;
+        let class_ty = match class {
+            AnyJsClass::JsClassDeclaration(decl) => {
+                let binding = decl.id().ok()?;
+                let name = binding.as_js_identifier_binding()?.name_token().ok()?;
+                self.resolver.as_ref().map(|resolver| {
+                    resolver.resolved_type_of_named_value(node.text_trimmed_range(), name.text())
+                })?
+            }
+            AnyJsClass::JsClassExportDefaultDeclaration(_decl) => self
+                .resolver
+                .as_ref()
+                .and_then(|resolver| resolver.resolved_type_of_default_export())?,
+            AnyJsClass::JsClassExpression(expr) => {
+                self.type_of_expression(&AnyJsExpression::JsClassExpression(expr))
+            }
+        };
+        Some(class_ty)
     }
 }
 

@@ -61,7 +61,7 @@ declare_lint_rule! {
         name: "noBitwiseOperators",
         language: "js",
         sources: &[
-            RuleSource::Eslint("no-bitwise"),
+            RuleSource::Eslint("no-bitwise").same(),
         ],
         recommended: false,
     }

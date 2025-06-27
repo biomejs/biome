@@ -93,7 +93,7 @@ declare_lint_rule! {
         name: "useAdjacentOverloadSignatures",
         language: "js",
         sources: &[
-            RuleSource::EslintTypeScript("adjacent-overload-signatures")
+            RuleSource::EslintTypeScript("adjacent-overload-signatures").same(),
         ],
         recommended: true,
         severity: Severity::Warning,

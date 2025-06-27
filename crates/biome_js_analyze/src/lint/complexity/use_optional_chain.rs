@@ -75,7 +75,7 @@ declare_lint_rule! {
         version: "1.0.0",
         name: "useOptionalChain",
         language: "js",
-        sources: &[RuleSource::EslintTypeScript("prefer-optional-chain")],
+        sources: &[RuleSource::EslintTypeScript("prefer-optional-chain").same()],
         recommended: true,
         severity: Severity::Warning,
         fix_kind: FixKind::Unsafe,

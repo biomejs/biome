@@ -40,7 +40,7 @@ declare_lint_rule! {
         version: "1.0.0",
         name: "useIsArray",
         language: "js",
-        sources: &[RuleSource::EslintUnicorn("no-instanceof-array")],
+        sources: &[RuleSource::EslintUnicorn("no-instanceof-array").same()],
         recommended: true,
         severity: Severity::Warning,
         fix_kind: FixKind::Unsafe,

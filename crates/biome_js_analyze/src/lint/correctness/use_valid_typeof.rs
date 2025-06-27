@@ -63,7 +63,7 @@ declare_lint_rule! {
         version: "1.0.0",
         name: "useValidTypeof",
         language: "js",
-        sources: &[RuleSource::Eslint("valid-typeof")],
+        sources: &[RuleSource::Eslint("valid-typeof").same()],
         recommended: true,
         severity: Severity::Error,
         fix_kind: FixKind::Unsafe,

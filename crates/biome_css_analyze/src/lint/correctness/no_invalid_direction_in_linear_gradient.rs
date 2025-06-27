@@ -49,7 +49,7 @@ declare_lint_rule! {
         language: "css",
         recommended: true,
         severity: Severity::Error,
-        sources: &[RuleSource::Stylelint("function-linear-gradient-no-nonstandard-direction")],
+        sources: &[RuleSource::Stylelint("function-linear-gradient-no-nonstandard-direction").same()],
     }
 }
 

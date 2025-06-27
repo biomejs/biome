@@ -71,7 +71,7 @@ declare_lint_rule! {
         version: "1.0.0",
         name: "useHookAtTopLevel",
         language: "jsx",
-        sources: &[RuleSource::EslintReactHooks("rules-of-hooks")],
+        sources: &[RuleSource::EslintReactHooks("rules-of-hooks").same()],
         recommended: true,
         severity: Severity::Error,
         domains: &[RuleDomain::React, RuleDomain::Next],

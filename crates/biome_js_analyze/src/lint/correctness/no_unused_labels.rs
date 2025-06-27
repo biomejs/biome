@@ -63,7 +63,7 @@ declare_lint_rule! {
         version: "1.0.0",
         name: "noUnusedLabels",
         language: "js",
-        sources: &[RuleSource::Eslint("no-unused-labels")],
+        sources: &[RuleSource::Eslint("no-unused-labels").same()],
         recommended: true,
         severity: Severity::Warning,
         fix_kind: FixKind::Safe,

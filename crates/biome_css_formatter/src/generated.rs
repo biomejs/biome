@@ -8695,31 +8695,6 @@ impl IntoFormat<CssFormatContext> for biome_css_syntax::AnyCssSimpleSelector {
         )
     }
 }
-impl AsFormat<CssFormatContext> for biome_css_syntax::AnyCssStartingStyleBlock {
-    type Format<'a> = FormatRefWithRule<
-        'a,
-        biome_css_syntax::AnyCssStartingStyleBlock,
-        crate::css::any::starting_style_block::FormatAnyCssStartingStyleBlock,
-    >;
-    fn format(&self) -> Self::Format<'_> {
-        FormatRefWithRule::new(
-            self,
-            crate::css::any::starting_style_block::FormatAnyCssStartingStyleBlock::default(),
-        )
-    }
-}
-impl IntoFormat<CssFormatContext> for biome_css_syntax::AnyCssStartingStyleBlock {
-    type Format = FormatOwnedWithRule<
-        biome_css_syntax::AnyCssStartingStyleBlock,
-        crate::css::any::starting_style_block::FormatAnyCssStartingStyleBlock,
-    >;
-    fn into_format(self) -> Self::Format {
-        FormatOwnedWithRule::new(
-            self,
-            crate::css::any::starting_style_block::FormatAnyCssStartingStyleBlock::default(),
-        )
-    }
-}
 impl AsFormat<CssFormatContext> for biome_css_syntax::AnyCssSubSelector {
     type Format<'a> = FormatRefWithRule<
         'a,

@@ -30,7 +30,7 @@ declare_lint_rule! {
         version: "1.0.0",
         name: "noDangerouslySetInnerHtml",
         language: "jsx",
-        sources: &[RuleSource::EslintReact("no-danger")],
+        sources: &[RuleSource::EslintReact("no-danger").same()],
         recommended: true,
         severity: Severity::Error,
     }

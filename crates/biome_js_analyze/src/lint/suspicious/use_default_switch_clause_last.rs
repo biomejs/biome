@@ -74,7 +74,7 @@ declare_lint_rule! {
         version: "1.0.0",
         name: "useDefaultSwitchClauseLast",
         language: "js",
-        sources: &[RuleSource::Eslint("default-case-last")],
+        sources: &[RuleSource::Eslint("default-case-last").same()],
         recommended: true,
         severity: Severity::Warning,
     }

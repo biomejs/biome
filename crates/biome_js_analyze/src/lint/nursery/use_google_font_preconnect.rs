@@ -1,6 +1,6 @@
 use biome_analyze::{
-    Ast, FixKind, Rule, RuleDiagnostic, RuleDomain, RuleSource, RuleSourceKind,
-    context::RuleContext, declare_lint_rule,
+    Ast, FixKind, Rule, RuleDiagnostic, RuleDomain, RuleSource, context::RuleContext,
+    declare_lint_rule,
 };
 use biome_console::markup;
 use biome_js_factory::make;
@@ -49,8 +49,7 @@ declare_lint_rule! {
         version: "2.0.0",
         name: "useGoogleFontPreconnect",
         language: "jsx",
-        sources: &[RuleSource::EslintNext("google-font-preconnect")],
-        source_kind: RuleSourceKind::SameLogic,
+        sources: &[RuleSource::EslintNext("google-font-preconnect").same()],
         recommended: true,
         fix_kind: FixKind::Safe,
         domains: &[RuleDomain::Next],

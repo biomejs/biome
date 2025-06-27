@@ -105,7 +105,7 @@ declare_lint_rule! {
     /// }
     /// ```
     ///
-    /// ```js,use_options,diagnostic
+    /// ```js,use_options,expect_diagnostic
     /// function update(obj) {
     ///     obj.key = "value"; // Diagnostic: Assignment to a property of function parameter is not allowed.
     /// }
@@ -114,7 +114,7 @@ declare_lint_rule! {
         version: "1.0.0",
         name: "noParameterAssign",
         language: "js",
-        sources: &[RuleSource::Eslint("no-param-reassign")],
+        sources: &[RuleSource::Eslint("no-param-reassign").same()],
         recommended: false,
         severity: Severity::Warning,
     }

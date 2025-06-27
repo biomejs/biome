@@ -7,6 +7,24 @@ use tower_lsp_server::lsp_types::{
     WorkspaceServerCapabilities,
 };
 
+pub(crate) const DEFAULT_CODE_ACTION_CAPABILITIES: &[&str] = &[
+    "quickfix.biome",
+    // quickfix.suppressRule
+    SUPPRESSION_TOP_LEVEL_ACTION_CATEGORY,
+    SUPPRESSION_INLINE_ACTION_CATEGORY,
+    // import sorting
+    "source.organizeImports.biome",
+    // fix all
+    "source.fixAll.biome",
+    // general refactors
+    "refactor.biome",
+    "refactor.extract.biome",
+    "refactor.inline.biome",
+    "refactor.rewrite.biome",
+    // source actions
+    "source.biome",
+];
+
 /// The capabilities to send from server as part of [`InitializeResult`]
 ///
 /// [`InitializeResult`]: tower_lsp_server::lsp::InitializeResult
@@ -57,31 +75,24 @@ pub(crate) fn server_capabilities(capabilities: &ClientCapabilities) -> ServerCa
         .text_document
         .as_ref()
         .and_then(|text_document| text_document.code_action.as_ref())
-        .and_then(|code_action| code_action.code_action_literal_support.as_ref())
-        .map(|_| {
-            CodeActionOptions {
-                code_action_kinds: Some(vec![
-                    CodeActionKind::from("quickfix.biome"),
-                    // quickfix.suppressRule
-                    CodeActionKind::from(SUPPRESSION_TOP_LEVEL_ACTION_CATEGORY),
-                    CodeActionKind::from(SUPPRESSION_INLINE_ACTION_CATEGORY),
-                    // import sorting
-                    CodeActionKind::from("source.organizeImports.biome"),
-                    // fix all
-                    CodeActionKind::from("source.fixAll.biome"),
-                    // general refactors
-                    CodeActionKind::from("refactor.biome"),
-                    CodeActionKind::from("refactor.extract.biome"),
-                    CodeActionKind::from("refactor.inline.biome"),
-                    CodeActionKind::from("refactor.rewrite.biome"),
-                    // source actions
-                    CodeActionKind::from("source.biome"),
-                ]),
-                ..Default::default()
+        .and_then(|code_action| {
+            if code_action.dynamic_registration.unwrap_or(false) {
+                None
+            } else if code_action.code_action_literal_support.as_ref().is_some() {
+                Some(CodeActionProviderCapability::from(CodeActionOptions {
+                    code_action_kinds: Some(
+                        DEFAULT_CODE_ACTION_CAPABILITIES
+                            .iter()
+                            .map(|item| CodeActionKind::from(*item))
+                            .collect::<Vec<_>>(),
+                    ),
+                    ..Default::default()
+                }))
+            } else {
+                Some(CodeActionProviderCapability::Simple(true))
             }
-            .into()
-        })
-        .or(Some(CodeActionProviderCapability::Simple(true)));
+        });
+
     ServerCapabilities {
         position_encoding: Some(match negotiated_encoding(capabilities) {
             PositionEncoding::Utf8 => PositionEncodingKind::UTF8,

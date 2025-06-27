@@ -13,3 +13,12 @@
 		}
 	}
 }
+
+
+@layer my-demo-layer {
+	@starting-style {
+		div.showing {
+			background-color: red;
+		}
+	}
+}

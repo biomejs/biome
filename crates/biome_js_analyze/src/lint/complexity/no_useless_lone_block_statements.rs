@@ -46,7 +46,7 @@ declare_lint_rule! {
         version: "1.3.3",
         name: "noUselessLoneBlockStatements",
         language: "js",
-        sources: &[RuleSource::Eslint("no-lone-blocks")],
+        sources: &[RuleSource::Eslint("no-lone-blocks").same()],
         recommended: true,
         severity: Severity::Information,
         fix_kind: FixKind::Safe,

@@ -51,9 +51,9 @@ declare_lint_rule! {
         name: "noPrecisionLoss",
         language: "js",
         sources: &[
-            RuleSource::Eslint("no-loss-of-precision"),
-            RuleSource::EslintTypeScript("no-loss-of-precision"),
-            RuleSource::Clippy("lossy_float_literal")
+            RuleSource::Eslint("no-loss-of-precision").same(),
+            RuleSource::EslintTypeScript("no-loss-of-precision").same(),
+            RuleSource::Clippy("lossy_float_literal").same(),
         ],
         recommended: true,
         severity: Severity::Error,
