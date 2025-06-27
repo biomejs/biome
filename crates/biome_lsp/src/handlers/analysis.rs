@@ -332,7 +332,7 @@ fn fix_all(
 
     let fixed = session.workspace.fix_file(FixFileParams {
         project_key: doc.project_key,
-        path,
+        path: path.clone(),
         fix_file_mode: FixFileMode::SafeFixes,
         should_format,
         only: vec![],
@@ -341,6 +341,23 @@ fn fix_all(
         suppression_reason: None,
         rule_categories: categories.build(),
     })?;
+
+    let output = match path.as_path().extension() {
+        Some(extension) => {
+            let input = session.workspace.get_file_content(GetFileContentParams {
+                project_key: doc.project_key,
+                path: path.clone(),
+            })?;
+            match extension {
+                "astro" => AstroFileHandler::output(input.as_str(), fixed.code.as_str()),
+                "vue" => VueFileHandler::output(input.as_str(), fixed.code.as_str()),
+                "svelte" => SvelteFileHandler::output(input.as_str(), fixed.code.as_str()),
+                _ => fixed.code,
+            }
+        }
+
+        _ => fixed.code,
+    };
 
     if fixed.actions.is_empty() {
         return Ok(None);
@@ -400,7 +417,7 @@ fn fix_all(
                 start: lsp::Position::new(0, 0),
                 end: lsp::Position::new(line_index.len(), 0),
             },
-            new_text: fixed.code,
+            new_text: output,
         }],
     );
 
