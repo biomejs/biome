@@ -1,10 +1,9 @@
-//! An extremely fast, lookup table based, JSON lexer which yields SyntaxKind tokens used by the rome-json parser.
-
 #[rustfmt::skip]
 mod tests;
 
 use biome_markdown_syntax::MarkdownSyntaxKind;
 use biome_markdown_syntax::MarkdownSyntaxKind::*;
+use biome_markdown_syntax::T;
 use biome_parser::diagnostic::ParseDiagnostic;
 use biome_parser::lexer::{
     LexContext, Lexer, LexerCheckpoint, LexerWithCheckpoint, ReLexer, TokenFlags,
@@ -181,8 +180,23 @@ impl<'src> MarkdownLexer<'src> {
         match dispatched {
             WHS => self.consume_newline_or_whitespace(),
             MUL | MIN | IDT => self.consume_thematic_break_literal(),
+            HAS => self.consume_header(),
             _ => self.consume_textual(),
         }
+    }
+
+    fn consume_header(&mut self) -> MarkdownSyntaxKind {
+        self.assert_at_char_boundary();
+
+        // Just consume a single hash character and return its token
+        if matches!(self.current_byte(), Some(b'#')) {
+            self.advance(1);
+            return T![#];
+        }
+
+        // This shouldn't be reached if this function is called correctly
+        // but handle the error case anyway
+        self.consume_textual()
     }
 
     fn text_position(&self) -> TextSize {
@@ -354,8 +368,24 @@ impl<'src> MarkdownLexer<'src> {
     fn consume_textual(&mut self) -> MarkdownSyntaxKind {
         self.assert_at_char_boundary();
 
+        // Consume the first character
         let char = self.current_char_unchecked();
         self.advance(char.len_utf8());
+
+        // Continue consuming characters until we hit a newline or another special markdown character
+        // But allow spaces within text content
+        while let Some(byte) = self.current_byte() {
+            match byte {
+                // Stop at newlines or special Markdown syntax characters,
+                // but NOT spaces (removed b' ' from this list)
+                b'\n' | b'\r' | b'\t' | b'#' | b'*' | b'-' | b'_' => break,
+                _ => {
+                    // Consume this character and continue
+                    let next_char = self.current_char_unchecked();
+                    self.advance(next_char.len_utf8());
+                }
+            }
+        }
 
         MD_TEXTUAL_LITERAL
     }
