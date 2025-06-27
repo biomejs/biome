@@ -91,7 +91,7 @@ impl Rule for NoVueDataObjectDeclaration {
                 },
             )
             .note(markup! {
-                "When using the data property on a component (i.e. anywhere except on new Vue), the value must be a function that returns an object."
+                "When using the data property on a component, the value must be a function that returns an object."
             }),
         )
     }
