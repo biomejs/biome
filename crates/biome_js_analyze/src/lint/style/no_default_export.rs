@@ -63,7 +63,7 @@ declare_lint_rule! {
         version: "1.4.0",
         name: "noDefaultExport",
         language: "js",
-        sources: &[RuleSource::EslintImport("no-default-export")],
+        sources: &[RuleSource::EslintImport("no-default-export").same()],
         recommended: false,
         severity: Severity::Warning,
     }

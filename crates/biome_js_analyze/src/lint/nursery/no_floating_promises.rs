@@ -160,7 +160,7 @@ declare_lint_rule! {
         name: "noFloatingPromises",
         language: "ts",
         recommended: true,
-        sources: &[RuleSource::EslintTypeScript("no-floating-promises")],
+        sources: &[RuleSource::EslintTypeScript("no-floating-promises").same()],
         fix_kind: FixKind::Unsafe,
         domains: &[RuleDomain::Project],
     }

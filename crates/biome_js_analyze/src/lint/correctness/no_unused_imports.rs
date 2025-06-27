@@ -17,8 +17,8 @@ use biome_js_factory::make::{js_identifier_binding, js_module, js_module_item_li
 use biome_js_semantic::{ReferencesExtensions, SemanticModel};
 use biome_js_syntax::{
     AnyJsBinding, AnyJsClassMember, AnyJsCombinedSpecifier, AnyJsDeclaration, AnyJsImportClause,
-    AnyJsNamedImportSpecifier, AnyTsTypeMember, JsLanguage, JsNamedImportSpecifiers, JsSyntaxNode,
-    T, TsEnumMember,
+    AnyJsNamedImportSpecifier, AnyTsTypeMember, JsExport, JsLanguage, JsNamedImportSpecifiers,
+    JsSyntaxNode, T, TsEnumMember,
 };
 use biome_jsdoc_comment::JsdocComment;
 use biome_rowan::{
@@ -93,7 +93,7 @@ declare_lint_rule! {
         version: "1.3.0",
         name: "noUnusedImports",
         language: "js",
-        sources: &[RuleSource::EslintUnusedImports("no-unused-imports")],
+        sources: &[RuleSource::EslintUnusedImports("no-unused-imports").same()],
         recommended: true,
         severity: Severity::Warning,
         fix_kind: FixKind::Unsafe,
@@ -124,7 +124,7 @@ struct JsDocTypeCollectorVisitior {
 }
 
 declare_node_union! {
-    pub AnyJsWithTypeReferencingJsDoc = AnyJsDeclaration | AnyJsClassMember | AnyTsTypeMember | TsEnumMember
+    pub AnyJsWithTypeReferencingJsDoc = AnyJsDeclaration | AnyJsClassMember | AnyTsTypeMember | TsEnumMember | JsExport
 }
 
 impl Visitor for JsDocTypeCollectorVisitior {

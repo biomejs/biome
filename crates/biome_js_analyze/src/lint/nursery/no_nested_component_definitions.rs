@@ -88,7 +88,7 @@ declare_lint_rule! {
         version: "2.0.0",
         name: "noNestedComponentDefinitions",
         language: "jsx",
-        sources: &[RuleSource::EslintReactXyz("no-nested-components")],
+        sources: &[RuleSource::EslintReactXyz("no-nested-components").same()],
         recommended: false,
         domains: &[RuleDomain::React],
         severity: Severity::Error,

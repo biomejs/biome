@@ -123,7 +123,7 @@ declare_lint_rule! {
         name: "useIndexOf",
         language: "js",
         recommended: true,
-        sources: &[RuleSource::EslintUnicorn("prefer-array-index-of")],
+        sources: &[RuleSource::EslintUnicorn("prefer-array-index-of").same()],
         severity: Severity::Information,
         fix_kind: FixKind::Unsafe,
     }

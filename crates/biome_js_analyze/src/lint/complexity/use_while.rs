@@ -44,7 +44,7 @@ declare_lint_rule! {
         language: "js",
         recommended: false,
         severity: Severity::Warning,
-        sources: &[RuleSource::EslintSonarJs("prefer-while")],
+        sources: &[RuleSource::EslintSonarJs("prefer-while").same()],
         fix_kind: FixKind::Safe,
     }
 }

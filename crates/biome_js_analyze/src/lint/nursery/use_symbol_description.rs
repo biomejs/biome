@@ -35,9 +35,7 @@ declare_lint_rule! {
         version: "2.0.0",
         name: "useSymbolDescription",
         language: "js",
-        sources: &[
-            RuleSource::Eslint("symbol-description"),
-        ],
+        sources: &[RuleSource::Eslint("symbol-description").same()],
         recommended: false,
     }
 }

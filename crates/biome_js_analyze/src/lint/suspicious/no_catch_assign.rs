@@ -39,7 +39,7 @@ declare_lint_rule! {
         version: "1.0.0",
         name: "noCatchAssign",
         language: "js",
-        sources: &[RuleSource::Eslint("no-ex-assign")],
+        sources: &[RuleSource::Eslint("no-ex-assign").same()],
         recommended: true,
         severity: Severity::Warning,
     }

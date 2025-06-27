@@ -39,7 +39,7 @@ declare_lint_rule! {
         version: "1.0.0",
         name: "noSparseArray",
         language: "js",
-        sources: &[RuleSource::Eslint("no-sparse-arrays")],
+        sources: &[RuleSource::Eslint("no-sparse-arrays").same()],
         recommended: true,
         severity: Severity::Error,
         fix_kind: FixKind::Unsafe,

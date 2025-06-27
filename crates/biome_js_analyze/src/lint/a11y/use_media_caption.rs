@@ -36,7 +36,7 @@ declare_lint_rule! {
         version: "1.0.0",
         name: "useMediaCaption",
         language: "jsx",
-        sources: &[RuleSource::EslintJsxA11y("media-has-caption")],
+        sources: &[RuleSource::EslintJsxA11y("media-has-caption").same()],
         recommended: true,
         severity: Severity::Error,
     }

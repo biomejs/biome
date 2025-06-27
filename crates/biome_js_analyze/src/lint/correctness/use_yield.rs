@@ -41,7 +41,7 @@ declare_lint_rule! {
         version: "1.0.0",
         name: "useYield",
         language: "js",
-        sources: &[RuleSource::Eslint("require-yield")],
+        sources: &[RuleSource::Eslint("require-yield").same()],
         recommended: true,
         severity: Severity::Error,
     }

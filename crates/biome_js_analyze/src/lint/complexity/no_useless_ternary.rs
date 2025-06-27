@@ -56,7 +56,7 @@ declare_lint_rule! {
         version: "1.5.0",
         name: "noUselessTernary",
         language: "js",
-        sources: &[RuleSource::Eslint("no-unneeded-ternary")],
+        sources: &[RuleSource::Eslint("no-unneeded-ternary").same()],
         recommended: true,
         severity: Severity::Information,
         fix_kind: FixKind::Unsafe,

@@ -996,6 +996,11 @@ impl TypeMember {
     }
 
     #[inline]
+    pub fn is_constructor(&self) -> bool {
+        self.kind.is_constructor()
+    }
+
+    #[inline]
     pub fn is_getter(&self) -> bool {
         self.kind.is_getter()
     }

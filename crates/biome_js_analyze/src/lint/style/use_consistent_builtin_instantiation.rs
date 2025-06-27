@@ -74,9 +74,9 @@ declare_lint_rule! {
         name: "useConsistentBuiltinInstantiation",
         language: "js",
         sources: &[
-            RuleSource::Eslint("no-new-wrappers"),
+            RuleSource::Eslint("no-new-wrappers").same(),
             // FIXME: uncomment once we allow multiple rules to have the same source.
-            //RuleSource::Eslint("no-new-native-nonconstructor"),
+            //RuleSource::Eslint("no-new-native-nonconstructor").same(),
         ],
         recommended: false,
         severity: Severity::Information,

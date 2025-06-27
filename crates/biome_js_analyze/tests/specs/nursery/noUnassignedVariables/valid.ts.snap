@@ -1,0 +1,17 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid.ts
+---
+# Input
+```ts
+/* should not generate diagnostics */
+
+declare let t: number | undefined;
+console.log(t);
+
+declare module "my-module" {
+  let value: string;
+  export = value;
+}
+
+```

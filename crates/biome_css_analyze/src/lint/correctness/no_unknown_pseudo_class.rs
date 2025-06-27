@@ -65,7 +65,7 @@ declare_lint_rule! {
         language: "css",
         recommended: true,
         severity: Severity::Error,
-        sources: &[RuleSource::Stylelint("selector-pseudo-class-no-unknown")],
+        sources: &[RuleSource::Stylelint("selector-pseudo-class-no-unknown").same()],
     }
 }
 declare_node_union! {

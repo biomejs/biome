@@ -1,0 +1,917 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 134
+expression: invalid.ts
+---
+# Input
+```ts
+function f1(a: number): void;
+function f1(b: string): void;
+function f1(a: number | string): void {}
+
+function f2(x: number): void;
+function f2(x: any): void;
+function f2(x: any): any {
+    return x;
+}
+
+function f3(x: number): void;
+function f3(x: string): void;
+function f3(x: any): any {
+    return x;
+}
+
+function opt(xs?: number[]): void;
+function opt(xs: number[], y: string): void;
+function opt(...args: any[]) {}
+
+interface I1 {
+    a0(): void;
+    a0(x: string): string;
+    a0(x: number): void;
+}
+
+interface I2 {
+    a1(): void;
+    a1(x: number): void;
+}
+
+// Exported functions.
+export function f4(a: number): void;
+export function f4(a: string): void;
+export function f4(a: unknown): void {
+    return;
+}
+
+// Exported default functions.
+export default function f5(a: number): void;
+export default function f5(a: string): void;
+export default function f5(a: unknown): void {
+    return;
+}
+
+// The second signature is different by single required parameter.
+interface I3 {
+    a3(): void;
+    a3(x: number, y?: number, ...z: number[]): void;
+}
+
+// The difference is the rest parameter.
+interface I4 {
+    b(): void;
+    b(...x: number[]): void;
+}
+
+// Both parameters are optional.
+interface I5 {
+    c2(x?: number): void;
+    c2(x?: string): void;
+}
+
+interface I6 {
+    d(x: number): void;
+    d(x: string): void;
+}
+
+// Support call signatures in types.
+type T1 = {
+    (): void;
+    (x: number): void;
+};
+
+// Support call signatures in interfaces.
+interface I7 {
+    (): void;
+    (x: number): void;
+}
+
+// Supports private methods in classes.
+declare class Example {
+    #privateMethod(a: number): void;
+    #privateMethod(a: number, b?: string): void;
+}
+
+// Supports class constructors.
+declare class C {
+    constructor();
+    constructor(x: number);
+}
+
+// Supports unions.
+interface I8 {
+    f(x: number);
+    f(x: string | boolean);
+}
+
+// Supports tuples.
+interface I9 {
+    f(x: number);
+    f(x: [string, boolean]);
+}
+
+// Supports generics.
+interface Generic<T> {
+    y(x: T[]): void;
+    y(x: T): void;
+}
+
+// Merges signatures when type parameters are the same.
+function f6<T extends number>(x: T[]): void;
+function f6<T extends number>(x: T): void;
+function f6(x: unknown): void {}
+
+// Supports abstract methods.
+abstract class Foo {
+    public abstract f(x: number): void;
+    public abstract f(x: string): void;
+}
+
+// Supports literal names.
+interface I10 {
+    'f'(x: string): void;
+    'f'(x: number): void;
+}
+
+// Supports constructor signatures.
+interface Foo {
+    new (x: string): Foo;
+    new (x: number): Foo;
+}
+
+// Supports computed property names.
+interface IFoo {
+    ['name'](x: string): void;
+    ['name'](x: number): void;
+}
+
+declare module 'foo' {
+    export default function (foo: number): string[];
+    export default function (foo: number, bar?: string): string[];
+}
+
+declare function f7(x: string): void;
+declare function f7(x: number): void;
+declare function f7(x: boolean): void;
+
+// Transfers JsDoc comments to signatures.
+/** JsDoc 1 */
+declare function f8(x: string): void;
+/** JsDoc 2 */
+declare function f8(x: number): void;
+
+// Transfers JsDoc comments to signatures even if signatures are not adjacent.
+/** JsDoc 1 */
+declare function f9(x: string): void;
+declare function f9(x: boolean): boolean;
+/** JsDoc 2 */
+declare function f9(x: number): void;
+
+// Merges "this" params.
+declare function f10(this: string): void;
+declare function f10(this: number): void;
+
+```
+
+# Diagnostics
+```
+invalid.ts:1:1 lint/nursery/useUnifiedTypeSignature  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Overload signatures are hard to read and maintain.
+  
+  > 1 │ function f1(a: number): void;
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    2 │ function f1(b: string): void;
+    3 │ function f1(a: number | string): void {}
+  
+  i Unsafe fix: Combine overloads using a type union.
+  
+      1     │ - function·f1(a:·number):·void;
+      2     │ - function·f1(b:·string):·void;
+          1 │ + 
+          2 │ + function·f1(b:·string·|·number):·void;
+      3   3 │   function f1(a: number | string): void {}
+      4   4 │   
+  
+
+```
+
+```
+invalid.ts:5:1 lint/nursery/useUnifiedTypeSignature  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Overload signatures are hard to read and maintain.
+  
+    3 │ function f1(a: number | string): void {}
+    4 │ 
+  > 5 │ function f2(x: number): void;
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    6 │ function f2(x: any): void;
+    7 │ function f2(x: any): any {
+  
+  i Unsafe fix: Combine overloads using a type union.
+  
+      2   2 │   function f1(b: string): void;
+      3   3 │   function f1(a: number | string): void {}
+      4     │ - 
+      5     │ - function·f2(x:·number):·void;
+      6     │ - function·f2(x:·any):·void;
+          4 │ + function·f2(x:·any·|·number):·void;
+      7   5 │   function f2(x: any): any {
+      8   6 │       return x;
+  
+
+```
+
+```
+invalid.ts:11:1 lint/nursery/useUnifiedTypeSignature  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Overload signatures are hard to read and maintain.
+  
+     9 │ }
+    10 │ 
+  > 11 │ function f3(x: number): void;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    12 │ function f3(x: string): void;
+    13 │ function f3(x: any): any {
+  
+  i Unsafe fix: Combine overloads using a type union.
+  
+      8   8 │       return x;
+      9   9 │   }
+     10     │ - 
+     11     │ - function·f3(x:·number):·void;
+     12     │ - function·f3(x:·string):·void;
+         10 │ + function·f3(x:·string·|·number):·void;
+     13  11 │   function f3(x: any): any {
+     14  12 │       return x;
+  
+
+```
+
+```
+invalid.ts:17:1 lint/nursery/useUnifiedTypeSignature  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Overload signatures are hard to read and maintain.
+  
+    15 │ }
+    16 │ 
+  > 17 │ function opt(xs?: number[]): void;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    18 │ function opt(xs: number[], y: string): void;
+    19 │ function opt(...args: any[]) {}
+  
+  i Unsafe fix: Combine overloads by making parameters optional.
+  
+     14  14 │       return x;
+     15  15 │   }
+     16     │ - 
+     17     │ - function·opt(xs?:·number[]):·void;
+     18     │ - function·opt(xs:·number[],·y:·string):·void;
+         16 │ + function·opt(xs?:·number[],·y?:·string):·void;
+     19  17 │   function opt(...args: any[]) {}
+     20  18 │   
+  
+
+```
+
+```
+invalid.ts:22:5 lint/nursery/useUnifiedTypeSignature  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Overload signatures are hard to read and maintain.
+  
+    21 │ interface I1 {
+  > 22 │     a0(): void;
+       │     ^^^^^^^^^^^
+    23 │     a0(x: string): string;
+    24 │     a0(x: number): void;
+  
+  i Unsafe fix: Combine overloads by making parameters optional.
+  
+     20  20 │   
+     21  21 │   interface I1 {
+     22     │ - ····a0():·void;
+     23  22 │       a0(x: string): string;
+     24     │ - ····a0(x:·number):·void;
+         23 │ + ····a0(x?:·number):·void;
+     25  24 │   }
+     26  25 │   
+  
+
+```
+
+```
+invalid.ts:28:5 lint/nursery/useUnifiedTypeSignature  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Overload signatures are hard to read and maintain.
+  
+    27 │ interface I2 {
+  > 28 │     a1(): void;
+       │     ^^^^^^^^^^^
+    29 │     a1(x: number): void;
+    30 │ }
+  
+  i Unsafe fix: Combine overloads by making parameters optional.
+  
+     26  26 │   
+     27  27 │   interface I2 {
+     28     │ - ····a1():·void;
+     29     │ - ····a1(x:·number):·void;
+         28 │ + ····a1(x?:·number):·void;
+     30  29 │   }
+     31  30 │   
+  
+
+```
+
+```
+invalid.ts:33:1 lint/nursery/useUnifiedTypeSignature  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Overload signatures are hard to read and maintain.
+  
+    32 │ // Exported functions.
+  > 33 │ export function f4(a: number): void;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    34 │ export function f4(a: string): void;
+    35 │ export function f4(a: unknown): void {
+  
+  i Unsafe fix: Combine overloads using a type union.
+  
+     29  29 │       a1(x: number): void;
+     30  30 │   }
+     31     │ - 
+     32     │ - //·Exported·functions.
+     33     │ - export·function·f4(a:·number):·void;
+     34     │ - export·function·f4(a:·string):·void;
+         31 │ + 
+         32 │ + //·Exported·functions.
+         33 │ + export·function·f4(a:·string·|·number):·void;
+     35  34 │   export function f4(a: unknown): void {
+     36  35 │       return;
+  
+
+```
+
+```
+invalid.ts:40:1 lint/nursery/useUnifiedTypeSignature  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Overload signatures are hard to read and maintain.
+  
+    39 │ // Exported default functions.
+  > 40 │ export default function f5(a: number): void;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    41 │ export default function f5(a: string): void;
+    42 │ export default function f5(a: unknown): void {
+  
+  i Unsafe fix: Combine overloads using a type union.
+  
+     36  36 │       return;
+     37  37 │   }
+     38     │ - 
+     39     │ - //·Exported·default·functions.
+     40     │ - export·default·function·f5(a:·number):·void;
+     41     │ - export·default·function·f5(a:·string):·void;
+         38 │ + 
+         39 │ + //·Exported·default·functions.
+         40 │ + export·default·function·f5(a:·string·|·number):·void;
+     42  41 │   export default function f5(a: unknown): void {
+     43  42 │       return;
+  
+
+```
+
+```
+invalid.ts:48:5 lint/nursery/useUnifiedTypeSignature  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Overload signatures are hard to read and maintain.
+  
+    46 │ // The second signature is different by single required parameter.
+    47 │ interface I3 {
+  > 48 │     a3(): void;
+       │     ^^^^^^^^^^^
+    49 │     a3(x: number, y?: number, ...z: number[]): void;
+    50 │ }
+  
+  i Unsafe fix: Combine overloads by making parameters optional.
+  
+     46  46 │   // The second signature is different by single required parameter.
+     47  47 │   interface I3 {
+     48     │ - ····a3():·void;
+     49     │ - ····a3(x:·number,·y?:·number,·...z:·number[]):·void;
+         48 │ + ····a3(x?:·number,·y?:·number,·...z:·number[]):·void;
+     50  49 │   }
+     51  50 │   
+  
+
+```
+
+```
+invalid.ts:54:5 lint/nursery/useUnifiedTypeSignature  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Overload signatures are hard to read and maintain.
+  
+    52 │ // The difference is the rest parameter.
+    53 │ interface I4 {
+  > 54 │     b(): void;
+       │     ^^^^^^^^^^
+    55 │     b(...x: number[]): void;
+    56 │ }
+  
+  i Unsafe fix: Remove the unnecessary overload signature.
+  
+     52  52 │   // The difference is the rest parameter.
+     53  53 │   interface I4 {
+     54     │ - ····b():·void;
+     55  54 │       b(...x: number[]): void;
+     56  55 │   }
+  
+
+```
+
+```
+invalid.ts:60:5 lint/nursery/useUnifiedTypeSignature  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Overload signatures are hard to read and maintain.
+  
+    58 │ // Both parameters are optional.
+    59 │ interface I5 {
+  > 60 │     c2(x?: number): void;
+       │     ^^^^^^^^^^^^^^^^^^^^^
+    61 │     c2(x?: string): void;
+    62 │ }
+  
+  i Unsafe fix: Combine overloads using a type union.
+  
+     58  58 │   // Both parameters are optional.
+     59  59 │   interface I5 {
+     60     │ - ····c2(x?:·number):·void;
+     61     │ - ····c2(x?:·string):·void;
+         60 │ + ····c2(x?:·string·|·number):·void;
+     62  61 │   }
+     63  62 │   
+  
+
+```
+
+```
+invalid.ts:65:5 lint/nursery/useUnifiedTypeSignature  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Overload signatures are hard to read and maintain.
+  
+    64 │ interface I6 {
+  > 65 │     d(x: number): void;
+       │     ^^^^^^^^^^^^^^^^^^^
+    66 │     d(x: string): void;
+    67 │ }
+  
+  i Unsafe fix: Combine overloads using a type union.
+  
+     63  63 │   
+     64  64 │   interface I6 {
+     65     │ - ····d(x:·number):·void;
+     66     │ - ····d(x:·string):·void;
+         65 │ + ····d(x:·string·|·number):·void;
+     67  66 │   }
+     68  67 │   
+  
+
+```
+
+```
+invalid.ts:71:5 lint/nursery/useUnifiedTypeSignature  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Overload signatures are hard to read and maintain.
+  
+    69 │ // Support call signatures in types.
+    70 │ type T1 = {
+  > 71 │     (): void;
+       │     ^^^^^^^^^
+    72 │     (x: number): void;
+    73 │ };
+  
+  i Unsafe fix: Combine overloads by making parameters optional.
+  
+     69  69 │   // Support call signatures in types.
+     70  70 │   type T1 = {
+     71     │ - ····():·void;
+     72     │ - ····(x:·number):·void;
+         71 │ + ····(x?:·number):·void;
+     73  72 │   };
+     74  73 │   
+  
+
+```
+
+```
+invalid.ts:77:5 lint/nursery/useUnifiedTypeSignature  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Overload signatures are hard to read and maintain.
+  
+    75 │ // Support call signatures in interfaces.
+    76 │ interface I7 {
+  > 77 │     (): void;
+       │     ^^^^^^^^^
+    78 │     (x: number): void;
+    79 │ }
+  
+  i Unsafe fix: Combine overloads by making parameters optional.
+  
+     75  75 │   // Support call signatures in interfaces.
+     76  76 │   interface I7 {
+     77     │ - ····():·void;
+     78     │ - ····(x:·number):·void;
+         77 │ + ····(x?:·number):·void;
+     79  78 │   }
+     80  79 │   
+  
+
+```
+
+```
+invalid.ts:83:5 lint/nursery/useUnifiedTypeSignature  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Overload signatures are hard to read and maintain.
+  
+    81 │ // Supports private methods in classes.
+    82 │ declare class Example {
+  > 83 │     #privateMethod(a: number): void;
+       │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    84 │     #privateMethod(a: number, b?: string): void;
+    85 │ }
+  
+  i Unsafe fix: Remove the unnecessary overload signature.
+  
+     81  81 │   // Supports private methods in classes.
+     82  82 │   declare class Example {
+     83     │ - ····#privateMethod(a:·number):·void;
+     84  83 │       #privateMethod(a: number, b?: string): void;
+     85  84 │   }
+  
+
+```
+
+```
+invalid.ts:89:5 lint/nursery/useUnifiedTypeSignature  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Overload signatures are hard to read and maintain.
+  
+    87 │ // Supports class constructors.
+    88 │ declare class C {
+  > 89 │     constructor();
+       │     ^^^^^^^^^^^^^^
+    90 │     constructor(x: number);
+    91 │ }
+  
+  i Unsafe fix: Combine overloads by making parameters optional.
+  
+     87  87 │   // Supports class constructors.
+     88  88 │   declare class C {
+     89     │ - ····constructor();
+     90     │ - ····constructor(x:·number);
+         89 │ + ····constructor(x?:·number);
+     91  90 │   }
+     92  91 │   
+  
+
+```
+
+```
+invalid.ts:95:5 lint/nursery/useUnifiedTypeSignature  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Overload signatures are hard to read and maintain.
+  
+    93 │ // Supports unions.
+    94 │ interface I8 {
+  > 95 │     f(x: number);
+       │     ^^^^^^^^^^^^^
+    96 │     f(x: string | boolean);
+    97 │ }
+  
+  i Unsafe fix: Combine overloads using a type union.
+  
+     93  93 │   // Supports unions.
+     94  94 │   interface I8 {
+     95     │ - ····f(x:·number);
+     96     │ - ····f(x:·string·|·boolean);
+         95 │ + ····f(x:·string·|·boolean·|·number);
+     97  96 │   }
+     98  97 │   
+  
+
+```
+
+```
+invalid.ts:101:5 lint/nursery/useUnifiedTypeSignature  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Overload signatures are hard to read and maintain.
+  
+     99 │ // Supports tuples.
+    100 │ interface I9 {
+  > 101 │     f(x: number);
+        │     ^^^^^^^^^^^^^
+    102 │     f(x: [string, boolean]);
+    103 │ }
+  
+  i Unsafe fix: Combine overloads using a type union.
+  
+     99  99 │   // Supports tuples.
+    100 100 │   interface I9 {
+    101     │ - ····f(x:·number);
+    102     │ - ····f(x:·[string,·boolean]);
+        101 │ + ····f(x:·[string,·boolean]·|·number);
+    103 102 │   }
+    104 103 │   
+  
+
+```
+
+```
+invalid.ts:107:5 lint/nursery/useUnifiedTypeSignature  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Overload signatures are hard to read and maintain.
+  
+    105 │ // Supports generics.
+    106 │ interface Generic<T> {
+  > 107 │     y(x: T[]): void;
+        │     ^^^^^^^^^^^^^^^^
+    108 │     y(x: T): void;
+    109 │ }
+  
+  i Unsafe fix: Combine overloads using a type union.
+  
+    105 105 │   // Supports generics.
+    106 106 │   interface Generic<T> {
+    107     │ - ····y(x:·T[]):·void;
+    108     │ - ····y(x:·T):·void;
+        107 │ + ····y(x:·T·|·T[]):·void;
+    109 108 │   }
+    110 109 │   
+  
+
+```
+
+```
+invalid.ts:112:1 lint/nursery/useUnifiedTypeSignature  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Overload signatures are hard to read and maintain.
+  
+    111 │ // Merges signatures when type parameters are the same.
+  > 112 │ function f6<T extends number>(x: T[]): void;
+        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    113 │ function f6<T extends number>(x: T): void;
+    114 │ function f6(x: unknown): void {}
+  
+  i Unsafe fix: Combine overloads using a type union.
+  
+    108 108 │       y(x: T): void;
+    109 109 │   }
+    110     │ - 
+    111     │ - //·Merges·signatures·when·type·parameters·are·the·same.
+    112     │ - function·f6<T·extends·number>(x:·T[]):·void;
+    113     │ - function·f6<T·extends·number>(x:·T):·void;
+        110 │ + 
+        111 │ + //·Merges·signatures·when·type·parameters·are·the·same.
+        112 │ + function·f6<T·extends·number>(x:·T·|·T[]):·void;
+    114 113 │   function f6(x: unknown): void {}
+    115 114 │   
+  
+
+```
+
+```
+invalid.ts:118:5 lint/nursery/useUnifiedTypeSignature  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Overload signatures are hard to read and maintain.
+  
+    116 │ // Supports abstract methods.
+    117 │ abstract class Foo {
+  > 118 │     public abstract f(x: number): void;
+        │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    119 │     public abstract f(x: string): void;
+    120 │ }
+  
+  i Unsafe fix: Combine overloads using a type union.
+  
+    116 116 │   // Supports abstract methods.
+    117 117 │   abstract class Foo {
+    118     │ - ····public·abstract·f(x:·number):·void;
+    119     │ - ····public·abstract·f(x:·string):·void;
+        118 │ + ····public·abstract·f(x:·string·|·number):·void;
+    120 119 │   }
+    121 120 │   
+  
+
+```
+
+```
+invalid.ts:124:5 lint/nursery/useUnifiedTypeSignature  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Overload signatures are hard to read and maintain.
+  
+    122 │ // Supports literal names.
+    123 │ interface I10 {
+  > 124 │     'f'(x: string): void;
+        │     ^^^^^^^^^^^^^^^^^^^^^
+    125 │     'f'(x: number): void;
+    126 │ }
+  
+  i Unsafe fix: Combine overloads using a type union.
+  
+    122 122 │   // Supports literal names.
+    123 123 │   interface I10 {
+    124     │ - ····'f'(x:·string):·void;
+    125     │ - ····'f'(x:·number):·void;
+        124 │ + ····'f'(x:·number·|·string):·void;
+    126 125 │   }
+    127 126 │   
+  
+
+```
+
+```
+invalid.ts:130:5 lint/nursery/useUnifiedTypeSignature  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Overload signatures are hard to read and maintain.
+  
+    128 │ // Supports constructor signatures.
+    129 │ interface Foo {
+  > 130 │     new (x: string): Foo;
+        │     ^^^^^^^^^^^^^^^^^^^^^
+    131 │     new (x: number): Foo;
+    132 │ }
+  
+  i Unsafe fix: Combine overloads using a type union.
+  
+    128 128 │   // Supports constructor signatures.
+    129 129 │   interface Foo {
+    130     │ - ····new·(x:·string):·Foo;
+    131     │ - ····new·(x:·number):·Foo;
+        130 │ + ····new·(x:·number·|·string):·Foo;
+    132 131 │   }
+    133 132 │   
+  
+
+```
+
+```
+invalid.ts:136:5 lint/nursery/useUnifiedTypeSignature  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Overload signatures are hard to read and maintain.
+  
+    134 │ // Supports computed property names.
+    135 │ interface IFoo {
+  > 136 │     ['name'](x: string): void;
+        │     ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    137 │     ['name'](x: number): void;
+    138 │ }
+  
+  i Unsafe fix: Combine overloads using a type union.
+  
+    134 134 │   // Supports computed property names.
+    135 135 │   interface IFoo {
+    136     │ - ····['name'](x:·string):·void;
+    137     │ - ····['name'](x:·number):·void;
+        136 │ + ····['name'](x:·number·|·string):·void;
+    138 137 │   }
+    139 138 │   
+  
+
+```
+
+```
+invalid.ts:141:5 lint/nursery/useUnifiedTypeSignature  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Overload signatures are hard to read and maintain.
+  
+    140 │ declare module 'foo' {
+  > 141 │     export default function (foo: number): string[];
+        │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    142 │     export default function (foo: number, bar?: string): string[];
+    143 │ }
+  
+  i Unsafe fix: Remove the unnecessary overload signature.
+  
+    139 139 │   
+    140 140 │   declare module 'foo' {
+    141     │ - ····export·default·function·(foo:·number):·string[];
+    142 141 │       export default function (foo: number, bar?: string): string[];
+    143 142 │   }
+  
+
+```
+
+```
+invalid.ts:145:1 lint/nursery/useUnifiedTypeSignature  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Overload signatures are hard to read and maintain.
+  
+    143 │ }
+    144 │ 
+  > 145 │ declare function f7(x: string): void;
+        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    146 │ declare function f7(x: number): void;
+    147 │ declare function f7(x: boolean): void;
+  
+  i Unsafe fix: Combine overloads using a type union.
+  
+    142 142 │       export default function (foo: number, bar?: string): string[];
+    143 143 │   }
+    144     │ - 
+    145     │ - declare·function·f7(x:·string):·void;
+    146     │ - declare·function·f7(x:·number):·void;
+        144 │ + declare·function·f7(x:·number·|·string):·void;
+    147 145 │   declare function f7(x: boolean): void;
+    148 146 │   
+  
+
+```
+
+```
+invalid.ts:151:1 lint/nursery/useUnifiedTypeSignature  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Overload signatures are hard to read and maintain.
+  
+    149 │ // Transfers JsDoc comments to signatures.
+    150 │ /** JsDoc 1 */
+  > 151 │ declare function f8(x: string): void;
+        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    152 │ /** JsDoc 2 */
+    153 │ declare function f8(x: number): void;
+  
+  i Unsafe fix: Combine overloads using a type union.
+  
+    146 146 │   declare function f7(x: number): void;
+    147 147 │   declare function f7(x: boolean): void;
+    148     │ - 
+    149     │ - //·Transfers·JsDoc·comments·to·signatures.
+    150     │ - /**·JsDoc·1·*/
+    151     │ - declare·function·f8(x:·string):·void;
+        148 │ + 
+        149 │ + //·Transfers·JsDoc·comments·to·signatures.
+        150 │ + /**·JsDoc·1·*/
+    152 151 │   /** JsDoc 2 */
+    153     │ - declare·function·f8(x:·number):·void;
+        152 │ + declare·function·f8(x:·number·|·string):·void;
+    154 153 │   
+    155 154 │   // Transfers JsDoc comments to signatures even if signatures are not adjacent.
+  
+
+```
+
+```
+invalid.ts:157:1 lint/nursery/useUnifiedTypeSignature  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Overload signatures are hard to read and maintain.
+  
+    155 │ // Transfers JsDoc comments to signatures even if signatures are not adjacent.
+    156 │ /** JsDoc 1 */
+  > 157 │ declare function f9(x: string): void;
+        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    158 │ declare function f9(x: boolean): boolean;
+    159 │ /** JsDoc 2 */
+  
+  i Unsafe fix: Combine overloads using a type union.
+  
+    152 152 │   /** JsDoc 2 */
+    153 153 │   declare function f8(x: number): void;
+    154     │ - 
+    155     │ - //·Transfers·JsDoc·comments·to·signatures·even·if·signatures·are·not·adjacent.
+    156     │ - /**·JsDoc·1·*/
+    157     │ - declare·function·f9(x:·string):·void;
+    158 154 │   declare function f9(x: boolean): boolean;
+        155 │ + 
+        156 │ + //·Transfers·JsDoc·comments·to·signatures·even·if·signatures·are·not·adjacent.
+        157 │ + /**·JsDoc·1·*/
+    159 158 │   /** JsDoc 2 */
+    160     │ - declare·function·f9(x:·number):·void;
+        159 │ + declare·function·f9(x:·number·|·string):·void;
+    161 160 │   
+    162 161 │   // Merges "this" params.
+  
+
+```
+
+```
+invalid.ts:163:1 lint/nursery/useUnifiedTypeSignature  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Overload signatures are hard to read and maintain.
+  
+    162 │ // Merges "this" params.
+  > 163 │ declare function f10(this: string): void;
+        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    164 │ declare function f10(this: number): void;
+    165 │ 
+  
+  i Unsafe fix: Combine overloads using a type union.
+  
+    159 159 │   /** JsDoc 2 */
+    160 160 │   declare function f9(x: number): void;
+    161     │ - 
+    162     │ - //·Merges·"this"·params.
+    163     │ - declare·function·f10(this:·string):·void;
+    164     │ - declare·function·f10(this:·number):·void;
+        161 │ + 
+        162 │ + //·Merges·"this"·params.
+        163 │ + declare·function·f10(this:·number·|·string):·void;
+    165 164 │   
+  
+
+```

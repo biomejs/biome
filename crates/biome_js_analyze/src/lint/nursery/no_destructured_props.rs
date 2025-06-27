@@ -1,7 +1,6 @@
 use crate::services::semantic::Semantic;
 use biome_analyze::{
-    Rule, RuleDiagnostic, RuleDomain, RuleSource, RuleSourceKind, context::RuleContext,
-    declare_lint_rule,
+    Rule, RuleDiagnostic, RuleDomain, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
 use biome_js_semantic::SemanticModel;
@@ -52,8 +51,7 @@ declare_lint_rule! {
         language: "js",
         domains: &[RuleDomain::Solid],
         recommended: false,
-        sources: &[RuleSource::EslintSolid("no-destructure")],
-        source_kind: RuleSourceKind::Inspired,
+        sources: &[RuleSource::EslintSolid("no-destructure").inspired()],
     }
 }
 

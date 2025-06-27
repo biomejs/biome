@@ -2534,6 +2534,35 @@
 			},
 			"additionalProperties": false
 		},
+		"NoExcessiveLinesPerFunctionConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{ "$ref": "#/definitions/RuleWithNoExcessiveLinesPerFunctionOptions" }
+			]
+		},
+		"NoExcessiveLinesPerFunctionOptions": {
+			"type": "object",
+			"properties": {
+				"maxLines": {
+					"description": "The maximum number of lines allowed in a function body.",
+					"default": 50,
+					"type": "integer",
+					"format": "uint8",
+					"minimum": 1.0
+				},
+				"skipBlankLines": {
+					"description": "When this options is set to `true`, blank lines in the function body are not counted towards the maximum line limit.",
+					"default": false,
+					"type": "boolean"
+				},
+				"skipIifes": {
+					"description": "When this option is set to `true`, Immediately Invoked Function Expressions (IIFEs) are not checked for the maximum line limit.",
+					"default": false,
+					"type": "boolean"
+				}
+			},
+			"additionalProperties": false
+		},
 		"NoForEachConfiguration": {
 			"anyOf": [
 				{ "$ref": "#/definitions/RulePlainConfiguration" },
@@ -2751,6 +2780,15 @@
 						{ "type": "null" }
 					]
 				},
+				"noExcessiveLinesPerFunction": {
+					"description": "Restrict the number of lines of code in a function.",
+					"anyOf": [
+						{
+							"$ref": "#/definitions/NoExcessiveLinesPerFunctionConfiguration"
+						},
+						{ "type": "null" }
+					]
+				},
 				"noFloatingPromises": {
 					"description": "Require Promise-like statements to be handled appropriately.",
 					"anyOf": [
@@ -2760,6 +2798,13 @@
 				},
 				"noGlobalDirnameFilename": {
 					"description": "Disallow the use of __dirname and __filename in the global scope.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleFixConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noImplicitCoercion": {
+					"description": "Disallow shorthand type conversions.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleFixConfiguration" },
 						{ "type": "null" }
@@ -2839,6 +2884,13 @@
 					"description": "Prevents the use of the TypeScript directive @ts-ignore.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleFixConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noUnassignedVariables": {
+					"description": "Disallow let or var variables that are read but never assigned.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -3002,6 +3054,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useReadonlyClassProperties": {
+					"description": "Enforce marking members as readonly if they are never modified outside the constructor.",
+					"anyOf": [
+						{ "$ref": "#/definitions/ReadonlyClassPropertiesConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useSingleJsDocAsterisk": {
 					"description": "Enforce JSDoc comment lines to start with a single asterisk, except for the first one.",
 					"anyOf": [
@@ -3020,6 +3079,13 @@
 					"description": "Require a description parameter for the Symbol().",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"useUnifiedTypeSignature": {
+					"description": "Disallow overload signatures that can be unified into a single signature.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleFixConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -3337,6 +3403,23 @@
 		},
 		"QuoteProperties": { "type": "string", "enum": ["asNeeded", "preserve"] },
 		"QuoteStyle": { "type": "string", "enum": ["double", "single"] },
+		"ReadonlyClassPropertiesConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{ "$ref": "#/definitions/RuleWithReadonlyClassPropertiesOptions" }
+			]
+		},
+		"ReadonlyClassPropertiesOptions": {
+			"description": "Rule's options",
+			"type": "object",
+			"properties": {
+				"checkAllProperties": {
+					"description": "When `true`, the keywords `public`, `protected`, and `private` are analyzed by the rule.",
+					"type": "boolean"
+				}
+			},
+			"additionalProperties": false
+		},
 		"Regex": { "type": "string" },
 		"RestrictedGlobalsConfiguration": {
 			"anyOf": [
@@ -3733,6 +3816,23 @@
 			},
 			"additionalProperties": false
 		},
+		"RuleWithNoExcessiveLinesPerFunctionOptions": {
+			"type": "object",
+			"required": ["level"],
+			"properties": {
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [
+						{ "$ref": "#/definitions/NoExcessiveLinesPerFunctionOptions" }
+					]
+				}
+			},
+			"additionalProperties": false
+		},
 		"RuleWithNoForEachOptions": {
 			"type": "object",
 			"required": ["level"],
@@ -3883,6 +3983,25 @@
 				"options": {
 					"description": "Rule's options",
 					"allOf": [{ "$ref": "#/definitions/NoUnusedVariablesOptions" }]
+				}
+			},
+			"additionalProperties": false
+		},
+		"RuleWithReadonlyClassPropertiesOptions": {
+			"type": "object",
+			"required": ["level"],
+			"properties": {
+				"fix": {
+					"description": "The kind of the code actions emitted by the rule",
+					"anyOf": [{ "$ref": "#/definitions/FixKind" }, { "type": "null" }]
+				},
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [{ "$ref": "#/definitions/ReadonlyClassPropertiesOptions" }]
 				}
 			},
 			"additionalProperties": false
@@ -4814,6 +4933,13 @@
 			"description": "A list of rules that belong to this group",
 			"type": "object",
 			"properties": {
+				"noAlert": {
+					"description": "Disallow the use of alert, confirm, and prompt.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noApproximativeNumericConstant": {
 					"description": "Use standard constants instead of approximated literals.",
 					"anyOf": [

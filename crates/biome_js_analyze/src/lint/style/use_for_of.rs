@@ -52,8 +52,8 @@ declare_lint_rule! {
         name: "useForOf",
         language: "js",
         sources: &[
-            RuleSource::EslintTypeScript("prefer-for-of"),
-            RuleSource::EslintUnicorn("no-for-loop"),
+            RuleSource::EslintTypeScript("prefer-for-of").same(),
+            RuleSource::EslintUnicorn("no-for-loop").same(),
         ],
         recommended: false,
         severity: Severity::Information,

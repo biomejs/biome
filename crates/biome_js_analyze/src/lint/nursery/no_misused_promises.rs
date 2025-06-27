@@ -86,7 +86,7 @@ declare_lint_rule! {
         name: "noMisusedPromises",
         language: "ts",
         recommended: true,
-        sources: &[RuleSource::EslintTypeScript("no-misused-promises")],
+        sources: &[RuleSource::EslintTypeScript("no-misused-promises").same()],
         fix_kind: FixKind::Unsafe,
         domains: &[RuleDomain::Project],
     }

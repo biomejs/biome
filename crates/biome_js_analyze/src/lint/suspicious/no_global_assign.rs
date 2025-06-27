@@ -43,7 +43,7 @@ declare_lint_rule! {
         version: "1.5.0",
         name: "noGlobalAssign",
         language: "js",
-        sources: &[RuleSource::Eslint("no-global-assign")],
+        sources: &[RuleSource::Eslint("no-global-assign").same()],
         recommended: true,
         severity: Severity::Error,
     }

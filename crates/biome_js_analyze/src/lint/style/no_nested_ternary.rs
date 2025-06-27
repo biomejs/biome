@@ -47,7 +47,7 @@ declare_lint_rule! {
         language: "js",
         recommended: false,
         severity: Severity::Information,
-        sources: &[RuleSource::Eslint("no-nested-ternary")],
+        sources: &[RuleSource::Eslint("no-nested-ternary").same()],
     }
 }
 

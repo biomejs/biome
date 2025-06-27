@@ -51,7 +51,7 @@ declare_lint_rule! {
         version: "1.0.0",
         name: "noImportAssign",
         language: "js",
-        sources: &[RuleSource::Eslint("no-import-assign")],
+        sources: &[RuleSource::Eslint("no-import-assign").same()],
         recommended: true,
         severity: Severity::Error,
     }

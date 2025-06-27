@@ -138,9 +138,9 @@ declare_lint_rule! {
         name: "noUnusedVariables",
         language: "js",
         sources: &[
-            RuleSource::Eslint("no-unused-vars"),
-            RuleSource::EslintTypeScript("no-unused-vars"),
-            RuleSource::EslintUnusedImports("no-unused-vars")
+            RuleSource::Eslint("no-unused-vars").same(),
+            RuleSource::EslintTypeScript("no-unused-vars").same(),
+            RuleSource::EslintUnusedImports("no-unused-vars").same(),
         ],
         recommended: true,
         severity: Severity::Warning,

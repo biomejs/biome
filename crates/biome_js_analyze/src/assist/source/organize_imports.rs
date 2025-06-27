@@ -945,9 +945,11 @@ impl Rule for OrganizeImports {
                         };
                         let mut new_item = new_item.into_syntax();
                         let old_item = old_item.into_node()?;
-                        let blank_line_separated_groups = options
-                            .groups
-                            .separated_by_blank_line(prev_group, key.group);
+                        let blank_line_separated_groups = index != 0
+                            && options
+                                .groups
+                                .separated_by_blank_line(prev_group, key.group);
+                        prev_group = key.group;
                         // Don't make any change if it is the same node and no change have to be done
                         if !blank_line_separated_groups && index == key.slot_index && !was_merged {
                             continue;
@@ -1001,7 +1003,6 @@ impl Rule for OrganizeImports {
                             new_item = new_item.prepend_trivia_pieces(newline)?;
                         }
                         mutation.replace_element_discard_trivia(old_item.into(), new_item.into());
-                        prev_group = key.group;
                     }
                 }
             }

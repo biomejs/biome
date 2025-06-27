@@ -72,7 +72,7 @@ declare_lint_rule! {
         version: "1.5.0",
         name: "useConsistentArrayType",
         language: "ts",
-        sources: &[RuleSource::EslintTypeScript("array-type")],
+        sources: &[RuleSource::EslintTypeScript("array-type").same()],
         recommended: false,
         severity: Severity::Information,
         fix_kind: FixKind::Unsafe,

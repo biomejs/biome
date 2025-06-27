@@ -62,7 +62,7 @@ declare_lint_rule! {
         name: "useAdjacentGetterSetter",
         language: "js",
         recommended: false,
-        sources: &[RuleSource::Eslint("grouped-accessor-pairs")],
+        sources: &[RuleSource::Eslint("grouped-accessor-pairs").same()],
     }
 }
 

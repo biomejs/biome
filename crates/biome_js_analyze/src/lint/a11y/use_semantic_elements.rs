@@ -3,6 +3,7 @@ use biome_analyze::{
 };
 use biome_aria_metadata::AriaRole;
 use biome_console::markup;
+use biome_deserialize::TextRange;
 use biome_diagnostics::Severity;
 use biome_js_syntax::{JsxAttribute, JsxOpeningElement};
 use biome_rowan::AstNode;
@@ -45,7 +46,7 @@ declare_lint_rule! {
         version: "1.8.0",
         name: "useSemanticElements",
         language: "jsx",
-        sources: &[RuleSource::EslintJsxA11y("prefer-tag-over-role")],
+        sources: &[RuleSource::EslintJsxA11y("prefer-tag-over-role").same()],
         recommended: true,
         severity: Severity::Error,
     }
@@ -105,5 +106,9 @@ impl Rule for UseSemanticElements {
                 "For examples and more information, see " <Hyperlink href="https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Roles">"WAI-ARIA Roles"</Hyperlink>
             }),
         )
+    }
+
+    fn text_range(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<TextRange> {
+        Some(ctx.query().range())
     }
 }

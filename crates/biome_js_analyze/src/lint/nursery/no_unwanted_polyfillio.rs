@@ -1,8 +1,7 @@
 use std::sync::LazyLock;
 
 use biome_analyze::{
-    Rule, RuleDiagnostic, RuleDomain, RuleSource, RuleSourceKind, context::RuleContext,
-    declare_lint_rule,
+    Rule, RuleDiagnostic, RuleDomain, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
 use biome_diagnostics::Severity;
@@ -52,8 +51,7 @@ declare_lint_rule! {
         version: "2.0.0",
         name: "noUnwantedPolyfillio",
         language: "jsx",
-        sources: &[RuleSource::EslintNext("no-unwanted-polyfillio")],
-        source_kind: RuleSourceKind::SameLogic,
+        sources: &[RuleSource::EslintNext("no-unwanted-polyfillio").same()],
         recommended: true,
         severity: Severity::Warning,
         domains: &[RuleDomain::Next],

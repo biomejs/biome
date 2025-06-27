@@ -43,7 +43,7 @@ declare_lint_rule! {
         version: "1.9.0",
         name: "noUselessEscapeInRegex",
         language: "js",
-        sources: &[RuleSource::Eslint("no-useless-escape")],
+        sources: &[RuleSource::Eslint("no-useless-escape").same()],
         recommended: true,
         severity: Severity::Information,
         fix_kind: FixKind::Safe,

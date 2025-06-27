@@ -57,7 +57,7 @@ declare_lint_rule! {
         version: "1.0.0",
         name: "noConstructorReturn",
         language: "js",
-        sources: &[RuleSource::Eslint("no-constructor-return")],
+        sources: &[RuleSource::Eslint("no-constructor-return").same()],
         recommended: true,
         severity: Severity::Error,
     }

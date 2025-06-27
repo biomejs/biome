@@ -80,7 +80,7 @@ declare_lint_rule! {
         version: "1.0.0",
         name: "noUselessTypeConstraint",
         language: "ts",
-        sources: &[RuleSource::EslintTypeScript("no-unnecessary-type-constraint")],
+        sources: &[RuleSource::EslintTypeScript("no-unnecessary-type-constraint").same()],
         recommended: true,
         severity: Severity::Information,
         fix_kind: FixKind::Safe,

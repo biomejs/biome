@@ -318,7 +318,7 @@ declare_lint_rule! {
         version: "1.9.0",
         name: "useConsistentMemberAccessibility",
         language: "ts",
-        sources: &[RuleSource::EslintTypeScript("explicit-member-accessibility")],
+        sources: &[RuleSource::EslintTypeScript("explicit-member-accessibility").same()],
         recommended: false,
         severity: Severity::Information,
     }

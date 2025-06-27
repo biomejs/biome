@@ -41,7 +41,7 @@ declare_lint_rule! {
         version: "1.0.0",
         name: "noDistractingElements",
         language: "jsx",
-        sources: &[RuleSource::EslintJsxA11y("no-distracting-elements")],
+        sources: &[RuleSource::EslintJsxA11y("no-distracting-elements").same()],
         recommended: true,
         severity: Severity::Error,
         fix_kind: FixKind::Unsafe,

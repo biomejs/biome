@@ -72,7 +72,7 @@ declare_lint_rule! {
         version: "1.0.0",
         name: "noCommentText",
         language: "jsx",
-        sources: &[RuleSource::EslintReact("jsx-no-comment-textnodes")],
+        sources: &[RuleSource::EslintReact("jsx-no-comment-textnodes").same()],
         recommended: true,
         severity: Severity::Error,
         fix_kind: FixKind::Unsafe,

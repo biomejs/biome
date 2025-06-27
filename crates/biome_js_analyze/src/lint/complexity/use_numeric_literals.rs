@@ -58,7 +58,7 @@ declare_lint_rule! {
         version: "1.0.0",
         name: "useNumericLiterals",
         language: "js",
-        sources: &[RuleSource::Eslint("prefer-numeric-literals")],
+        sources: &[RuleSource::Eslint("prefer-numeric-literals").same()],
         recommended: true,
         severity: Severity::Warning,
         fix_kind: FixKind::Safe,

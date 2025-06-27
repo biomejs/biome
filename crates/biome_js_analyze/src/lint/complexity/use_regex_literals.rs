@@ -47,7 +47,7 @@ declare_lint_rule! {
         version: "1.3.0",
         name: "useRegexLiterals",
         language: "js",
-        sources: &[RuleSource::Eslint("prefer-regex-literals")],
+        sources: &[RuleSource::Eslint("prefer-regex-literals").same()],
         recommended: true,
         severity: Severity::Warning,
         fix_kind: FixKind::Safe,

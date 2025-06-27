@@ -57,9 +57,7 @@ declare_lint_rule! {
         version: "2.0.0",
         name: "useObjectSpread",
         language: "js",
-        sources: &[
-            RuleSource::Eslint("prefer-object-spread"),
-        ],
+        sources: &[RuleSource::Eslint("prefer-object-spread").same()],
         recommended: false,
         fix_kind: FixKind::Safe,
     }

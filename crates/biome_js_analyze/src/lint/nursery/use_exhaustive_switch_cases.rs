@@ -94,7 +94,7 @@ declare_lint_rule! {
         name: "useExhaustiveSwitchCases",
         language: "js",
         recommended: true,
-        sources: &[RuleSource::EslintTypeScript("switch-exhaustiveness-check")],
+        sources: &[RuleSource::EslintTypeScript("switch-exhaustiveness-check").same()],
         fix_kind: FixKind::Unsafe,
         domains: &[RuleDomain::Project],
     }
