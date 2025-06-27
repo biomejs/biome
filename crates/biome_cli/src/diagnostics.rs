@@ -503,7 +503,10 @@ impl Diagnostic for StdinDiagnostic {
     }
 
     fn severity(&self) -> Severity {
-        Severity::Error
+        match self {
+            Self::NotFormatted => Severity::Error,
+            Self::NoExtension => Severity::Warning,
+        }
     }
 
     fn message(&self, fmt: &mut Formatter<'_>) -> std::io::Result<()> {
