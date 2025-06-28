@@ -28,6 +28,8 @@ describe("Biome for Node.js", () => {
 			filePath: "example.css",
 		});
 		expect(result.diagnostics).toHaveLength(1);
-		expect(result.diagnostics[0].description).toEqual("Unknown property is not allowed.");
+		expect(result.diagnostics[0].description).toEqual(
+			"Unknown property is not allowed.",
+		);
 	});
 });
