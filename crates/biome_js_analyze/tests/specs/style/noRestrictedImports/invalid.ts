@@ -33,4 +33,15 @@ import type { default as d14, forbidden4, forbidden5 as f5 } from 'member-allowe
 import type { default as d15, forbidden5, forbidden6 as f6 } from 'namespace-allowed';
 import type { default as d16, forbidden6, forbidden7 as f7 } from 'bare-allowed';
 
-import foo from 'import-foo/foo';
+import withPatterns from "foo/baz";
+import withPatterns from "bar/n1";
+import withPatternsCaseSensitive from "FOO";
+import * from '../../my/relative-module';
+import * as All from '../../my/relative-module1';
+import { Foo } from '../../my/relative-module2';
+import { FooBar } from '../../my/relative-module3';
+import Foo, { Bar } from '../../my/relative-module4';
+import { Foo, Bar } from '../../my/relative-module5';
+import def, * as ns from 'mod1';
+import Foo from 'mod2';
+import { Bar } from 'mod3';
