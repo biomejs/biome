@@ -34,5 +34,11 @@ export type { default as d6, allowed5, allowed6 as a6 } from 'default-and-member
 export type { default as d7, allowed6, allowed7 as a7 } from 'member-forbidden';
 export type { default as d8, allowed7, allowed8 as a8 } from 'namespace-forbidden';
 
-import foo from 'import-foo';
-import bar from 'import-foo/bar';
+import withPatterns from "foo/bar";
+import withDefaultCaseSensitive from 'foo';
+import { Bar } from '../../my/relative-module';
+import Baz from '../../my/relative-module';
+import Baz from 'baz';
+import { Bar as Foo } from '../../my/relative-module';
+import x, { y as z } from '../../my/relative-module';
+export { x } from 'bar';

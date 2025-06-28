@@ -74,10 +74,42 @@
 								]
 							}
 						},
-            "patterns": {
-              "group": ["import-foo/*", "!import-foo/bar"],
-              "message": "import-foo is deprecated, except the modules in import-foo/bar."
-            }
+            "patterns": [
+              {
+                "group": ["foo/*", "!foo/bar"],
+                "message": "foo is forbidden, use bar instead"
+              },
+              {
+                "group": ["FOO"],
+                "message": "Case sensitive is the default"
+              },
+              {
+                "group": ["**/my/relative-module"],
+                "importNamePattern": "Foo"
+              },
+              {
+                "group": ["**/my/relative-module"],
+                "importNamePattern": "Baz",
+                "message": "Default import should not be reported unless importNamePattern includes 'default'"
+              },
+              {
+                "group": ["baz"],
+                "importNamePattern": "Baz"
+              },
+              {
+                "group": ["**/my/relative-module"],
+                "importNamePattern": "Foo"
+              },
+              {
+                "group": ["**/my/relative-module"],
+                "importNamePattern": "z"
+              },
+              {
+                "group": ["bar"],
+                "importNamePattern": "x",
+                "invertImportNamePattern": true
+              }
+            ]
 					}
 				}
 			}

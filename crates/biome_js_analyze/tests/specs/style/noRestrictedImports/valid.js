@@ -103,5 +103,11 @@ const { allowed2, allowed3: a3, "allowed4": a4 } = await import('namespace-forbi
 import('namespace-forbidden').then(({ allowed2, allowed3: a3, "allowed4": a4 }) => { })
 import('namespace-forbidden').then(function ({ allowed2, allowed3: a3, "allowed4": a4 }) { })
 
-import foo from 'import-foo';
-import bar from 'import-foo/bar';
+import { Bar } from '../../my/relative-module';
+import withPatternsCaseSensitive from 'foo';
+import { Bar } from '../../my/relative-module';
+import Baz from '../../my/relative-module';
+import Baz from 'baz';
+import { Bar as Foo } from '../../my/relative-module';
+import x, { y as z } from '../../my/relative-module';
+export { x } from 'bar';

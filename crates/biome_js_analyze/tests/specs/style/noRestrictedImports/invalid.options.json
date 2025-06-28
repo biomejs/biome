@@ -67,10 +67,57 @@
 								]
 							}
 						},
-            "patterns": {
-              "group": ["import-foo/*", "!import-foo/bar"],
-              "message": "import-foo is deprecated, except the modules in import-foo/bar."
-            }
+            "patterns": [
+              {
+                "group": ["foo/*", "!foo/bar"],
+                "message": "foo is forbidden, use foo/bar instead"
+              },
+              {
+                "group": ["bar/n1", "bar/n2"],
+                "message": "some bar subimports are restricted"
+              },
+              {
+                "group": ["FOO"],
+                "message": "Case sensitive is the default"
+              },
+              {
+                "group": ["**/my/relative-module"],
+                "importNamePattern": ".*"
+              },
+              {
+                "group": ["**/my/relative-module1"],
+                "importNamePattern": ".*"
+              },
+              {
+                "group": ["**/my/relative-module2"],
+                "importNamePattern": "Foo"
+              },
+              {
+                "group": ["**/my/relative-module3"],
+                "importNamePattern": "Foo.*"
+              },
+              {
+                "group": ["**/my/relative-module4"],
+                "importNamePattern": "Foo|Bar"
+              },
+              {
+                "group": ["**/my/relative-module5"],
+                "importNamePattern": "(Foo|Bar)"
+              },
+              {
+                "group": ["mod1"],
+                "importNamePattern": "default"
+              },
+              {
+                "group": ["mod2"],
+                "importNamePattern": "default"
+              },
+              {
+                "group": ["mod3"],
+                "importNamePattern": "Bar",
+                "invertImportNamePattern": false
+              }
+            ]
 					}
 				}
 			}

@@ -136,7 +136,18 @@ const { forbidden2, forbidden3: f1, "forbidden4": f2 } = await import('bare-allo
 import('bare-allowed').then(({ forbidden2, forbidden3: f1, "forbidden4": f2 }) => { })
 import('bare-allowed').then(function ({ forbidden2, forbidden3: f1, "forbidden4": f2 }) { })
 
-import foo from 'import-foo/foo';
+import withPatterns from "foo/baz";
+import withPatterns from "bar/n1";
+import withPatternsCaseSensitive from "FOO";
+import * from '../../my/relative-module';
+import * as All from '../../my/relative-module1';
+import { Foo } from '../../my/relative-module2';
+import { FooBar } from '../../my/relative-module3';
+import Foo, { Bar } from '../../my/relative-module4';
+import { Foo, Bar } from '../../my/relative-module5';
+import def, * as ns from 'mod1';
+import Foo from 'mod2';
+import { Bar } from 'mod3';
 
 ```
 
@@ -2976,7 +2987,7 @@ invalid.js:131:41 lint/style/noRestrictedImports ━━━━━━━━━━�
   > 131 │ import('bare-allowed').then(function ({ forbidden2, forbidden3: f1, "forbidden4": f2 }) { })
         │                                         ^^^^^^^^^^
     132 │ 
-    133 │ import foo from 'import-foo/foo';
+    133 │ import withPatterns from "foo/baz";
   
   i Only the following imports from 'bare-allowed' are allowed:
   
@@ -2995,7 +3006,7 @@ invalid.js:131:53 lint/style/noRestrictedImports ━━━━━━━━━━�
   > 131 │ import('bare-allowed').then(function ({ forbidden2, forbidden3: f1, "forbidden4": f2 }) { })
         │                                                     ^^^^^^^^^^
     132 │ 
-    133 │ import foo from 'import-foo/foo';
+    133 │ import withPatterns from "foo/baz";
   
   i Only the following imports from 'bare-allowed' are allowed:
   
@@ -3014,7 +3025,7 @@ invalid.js:131:69 lint/style/noRestrictedImports ━━━━━━━━━━�
   > 131 │ import('bare-allowed').then(function ({ forbidden2, forbidden3: f1, "forbidden4": f2 }) { })
         │                                                                     ^^^^^^^^^^^^
     132 │ 
-    133 │ import foo from 'import-foo/foo';
+    133 │ import withPatterns from "foo/baz";
   
   i Only the following imports from 'bare-allowed' are allowed:
   
@@ -3024,15 +3035,194 @@ invalid.js:131:69 lint/style/noRestrictedImports ━━━━━━━━━━�
 ```
 
 ```
-invalid.js:133:17 lint/style/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:133:26 lint/style/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! import-foo is deprecated, except the modules in import-foo/bar.
+  ! foo is forbidden, use foo/bar instead
   
     131 │ import('bare-allowed').then(function ({ forbidden2, forbidden3: f1, "forbidden4": f2 }) { })
     132 │ 
-  > 133 │ import foo from 'import-foo/foo';
-        │                 ^^^^^^^^^^^^^^^^
-    134 │ 
+  > 133 │ import withPatterns from "foo/baz";
+        │                          ^^^^^^^^^
+    134 │ import withPatterns from "bar/n1";
+    135 │ import withPatternsCaseSensitive from "FOO";
+  
+
+```
+
+```
+invalid.js:134:26 lint/style/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! some bar subimports are restricted
+  
+    133 │ import withPatterns from "foo/baz";
+  > 134 │ import withPatterns from "bar/n1";
+        │                          ^^^^^^^^
+    135 │ import withPatternsCaseSensitive from "FOO";
+    136 │ import * from '../../my/relative-module';
+  
+
+```
+
+```
+invalid.js:135:39 lint/style/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Case sensitive is the default
+  
+    133 │ import withPatterns from "foo/baz";
+    134 │ import withPatterns from "bar/n1";
+  > 135 │ import withPatternsCaseSensitive from "FOO";
+        │                                       ^^^^^
+    136 │ import * from '../../my/relative-module';
+    137 │ import * as All from '../../my/relative-module1';
+  
+
+```
+
+```
+invalid.js:136:8 lint/style/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not import '*' from '../../my/relative-module'.
+  
+    134 │ import withPatterns from "bar/n1";
+    135 │ import withPatternsCaseSensitive from "FOO";
+  > 136 │ import * from '../../my/relative-module';
+        │        ^
+    137 │ import * as All from '../../my/relative-module1';
+    138 │ import { Foo } from '../../my/relative-module2';
+  
+
+```
+
+```
+invalid.js:137:8 lint/style/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not import '*' from '../../my/relative-module1'.
+  
+    135 │ import withPatternsCaseSensitive from "FOO";
+    136 │ import * from '../../my/relative-module';
+  > 137 │ import * as All from '../../my/relative-module1';
+        │        ^
+    138 │ import { Foo } from '../../my/relative-module2';
+    139 │ import { FooBar } from '../../my/relative-module3';
+  
+
+```
+
+```
+invalid.js:138:10 lint/style/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not import 'Foo' from '../../my/relative-module2'.
+  
+    136 │ import * from '../../my/relative-module';
+    137 │ import * as All from '../../my/relative-module1';
+  > 138 │ import { Foo } from '../../my/relative-module2';
+        │          ^^^
+    139 │ import { FooBar } from '../../my/relative-module3';
+    140 │ import Foo, { Bar } from '../../my/relative-module4';
+  
+
+```
+
+```
+invalid.js:139:10 lint/style/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not import 'FooBar' from '../../my/relative-module3'.
+  
+    137 │ import * as All from '../../my/relative-module1';
+    138 │ import { Foo } from '../../my/relative-module2';
+  > 139 │ import { FooBar } from '../../my/relative-module3';
+        │          ^^^^^^
+    140 │ import Foo, { Bar } from '../../my/relative-module4';
+    141 │ import { Foo, Bar } from '../../my/relative-module5';
+  
+
+```
+
+```
+invalid.js:140:15 lint/style/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not import 'Bar' from '../../my/relative-module4'.
+  
+    138 │ import { Foo } from '../../my/relative-module2';
+    139 │ import { FooBar } from '../../my/relative-module3';
+  > 140 │ import Foo, { Bar } from '../../my/relative-module4';
+        │               ^^^
+    141 │ import { Foo, Bar } from '../../my/relative-module5';
+    142 │ import def, * as ns from 'mod1';
+  
+
+```
+
+```
+invalid.js:141:10 lint/style/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not import 'Foo' from '../../my/relative-module5'.
+  
+    139 │ import { FooBar } from '../../my/relative-module3';
+    140 │ import Foo, { Bar } from '../../my/relative-module4';
+  > 141 │ import { Foo, Bar } from '../../my/relative-module5';
+        │          ^^^
+    142 │ import def, * as ns from 'mod1';
+    143 │ import Foo from 'mod2';
+  
+
+```
+
+```
+invalid.js:141:15 lint/style/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not import 'Bar' from '../../my/relative-module5'.
+  
+    139 │ import { FooBar } from '../../my/relative-module3';
+    140 │ import Foo, { Bar } from '../../my/relative-module4';
+  > 141 │ import { Foo, Bar } from '../../my/relative-module5';
+        │               ^^^
+    142 │ import def, * as ns from 'mod1';
+    143 │ import Foo from 'mod2';
+  
+
+```
+
+```
+invalid.js:142:8 lint/style/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not import 'default' from 'mod1'.
+  
+    140 │ import Foo, { Bar } from '../../my/relative-module4';
+    141 │ import { Foo, Bar } from '../../my/relative-module5';
+  > 142 │ import def, * as ns from 'mod1';
+        │        ^^^
+    143 │ import Foo from 'mod2';
+    144 │ import { Bar } from 'mod3';
+  
+
+```
+
+```
+invalid.js:143:8 lint/style/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not import 'default' from 'mod2'.
+  
+    141 │ import { Foo, Bar } from '../../my/relative-module5';
+    142 │ import def, * as ns from 'mod1';
+  > 143 │ import Foo from 'mod2';
+        │        ^^^
+    144 │ import { Bar } from 'mod3';
+    145 │ 
+  
+
+```
+
+```
+invalid.js:144:10 lint/style/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not import 'Bar' from 'mod3'.
+  
+    142 │ import def, * as ns from 'mod1';
+    143 │ import Foo from 'mod2';
+  > 144 │ import { Bar } from 'mod3';
+        │          ^^^
+    145 │ 
   
 
 ```
