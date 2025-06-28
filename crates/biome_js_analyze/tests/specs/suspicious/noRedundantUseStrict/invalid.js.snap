@@ -43,12 +43,8 @@ invalid.js:2:1 lint/suspicious/noRedundantUseStrict  FIXABLE  ━━━━━━
   
   i Safe fix: Remove the redundant use strict directive.
   
-     1    │ - //·js·module
-     2    │ - "use·strict";·//·Associated·comment
-        1 │ + 
-     3  2 │   
-     4  3 │   function foo() {
-  
+    2 │ "use·strict";·//·Associated·comment
+      │ -----------------------------------
 
 ```
 
@@ -67,12 +63,8 @@ invalid.js:5:2 lint/suspicious/noRedundantUseStrict  FIXABLE  ━━━━━━
   
   i Safe fix: Remove the redundant use strict directive.
   
-     3  3 │   
-     4  4 │   function foo() {
-     5    │ - → "use·strict";
-     6  5 │   }
-     7  6 │   
-  
+    5 │ → "use·strict";
+      │   -------------
 
 ```
 
@@ -92,12 +84,8 @@ invalid.js:11:3 lint/suspicious/noRedundantUseStrict  FIXABLE  ━━━━━�
   
   i Safe fix: Remove the redundant use strict directive.
   
-     9  9 │   	// All code here is evaluated in strict mode
-    10 10 │   	test() {
-    11    │ - → → "use·strict";
-    12 11 │   	}
-    13 12 │   }
-  
+    11 │ → → "use·strict";
+       │     -------------
 
 ```
 
@@ -117,11 +105,7 @@ invalid.js:18:3 lint/suspicious/noRedundantUseStrict  FIXABLE  ━━━━━�
   
   i Safe fix: Remove the redundant use strict directive.
   
-    16 16 │   	// All code here is evaluated in strict mode
-    17 17 │   	test() {
-    18    │ - → → "use·strict";
-    19 18 │   	}
-    20 19 │   };
-  
+    18 │ → → "use·strict";
+       │     -------------
 
 ```
