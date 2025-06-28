@@ -1,5 +1,5 @@
 ---
-"@biomejs/js-api": major
+"@biomejs/js-api": minor
 ---
 
 Biome JavaScript Bindings has now specific
