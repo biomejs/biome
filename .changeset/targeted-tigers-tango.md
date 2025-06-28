@@ -17,5 +17,5 @@ a path, as well as those where project rules are enabled, are not expected to
 see performance benefits from this.
 
 Implemented [#6234](https://github.com/biomejs/biome/issues/6234), and fixed
-[#6484](https://github.com/biomejs/biome/issues/6483) and
+[#6483](https://github.com/biomejs/biome/issues/6483) and
 [#6563](https://github.com/biomejs/biome/issues/6563).
