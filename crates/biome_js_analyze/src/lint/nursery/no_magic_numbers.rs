@@ -16,34 +16,34 @@ use biome_rowan::{AstNode, declare_node_union};
 
 declare_lint_rule! {
     /// Reports usage of "magic numbers" — numbers used directly instead of being assigned to named constants.
-   ///
-   /// Its goal is to improve code maintainability and readability by encouraging developers to extract such numbers into named constants, making their purpose explicit.
-   ///
-   /// It ignores:
-   /// - non-magic values (like 0, 1, 2, 10, 24, 60, and their negative or bigint forms) found anywhere, including arithmetic expressions, fn calls etc.
-   /// - Array indices
-   /// - Enum values
-   /// - Initial values in variable or class property declarations
-   /// - Default values in function parameters or destructuring patterns
-   /// - Arguments to JSON.stringify and parseInt (e.g., JSON.stringify(22), parseInt("123", 8))
-   /// - Operands in bitwise operations (e.g., a & 7, a | 7)
-   /// - Values in JSX expressions (e.g., <div>{1}</div>)
-   /// - Object property values (e.g., { tax: 0.25 })
-   ///
-   /// ## Examples
-   ///
-   /// ### Invalid
-   ///
-   /// ```js,expect_diagnostic
-   /// let total = price * 1.23; // Magic number for tax rate
-   /// ```
-   ///
-   /// ### Valid
-   ///
-   /// ```js
-   /// const TAX_RATE = 1.23;
-   /// let total = price * TAX_RATE;
-   /// ```
+    ///
+    /// Its goal is to improve code maintainability and readability by encouraging developers to extract such numbers into named constants, making their purpose explicit.
+    ///
+    /// It ignores:
+    /// - non-magic values (like 0, 1, 2, 10, 24, 60, and their negative or bigint forms) found anywhere, including arithmetic expressions, fn calls etc.
+    /// - Array indices
+    /// - Enum values
+    /// - Initial values in variable or class property declarations
+    /// - Default values in function parameters or destructuring patterns
+    /// - Arguments to JSON.stringify and parseInt (e.g., `JSON.stringify(22)`, `parseInt("123", 8)`)
+    /// - Operands in bitwise operations (e.g., `a & 7`, `a | 7`)
+    /// - Values in JSX expressions (e.g., `<div>{1}</div>`)
+    /// - Object property values (e.g., `{ tax: 0.25 }`)
+    ///
+    /// ## Examples
+    ///
+    /// ### Invalid
+    ///
+    /// ```js,expect_diagnostic
+    /// let total = price * 1.23; // Magic number for tax rate
+    /// ```
+    ///
+    /// ### Valid
+    ///
+    /// ```js
+    /// const TAX_RATE = 1.23;
+    /// let total = price * TAX_RATE;
+    /// ```
     pub NoMagicNumbers {
         version: "next",
         name: "noMagicNumbers",
