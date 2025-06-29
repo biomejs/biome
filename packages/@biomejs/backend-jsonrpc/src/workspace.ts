@@ -837,7 +837,7 @@ export interface Source {
 	 */
 	organizeImports?: RuleAssistConfiguration_for_Options;
 	/**
-	 * It enables the recommended rules for this group
+	 * Enables the recommended rules for this group
 	 */
 	recommended?: boolean;
 	/**
@@ -845,7 +845,7 @@ export interface Source {
 	 */
 	useSortedAttributes?: RuleAssistConfiguration_for_Null;
 	/**
-	 * Sorts the keys of a JSON object in natural order
+	 * Sort the keys of a JSON object in natural order.
 	 */
 	useSortedKeys?: RuleAssistConfiguration_for_Null;
 	/**
@@ -1060,7 +1060,7 @@ export interface A11y {
 	 */
 	noSvgWithoutTitle?: RuleConfiguration_for_Null;
 	/**
-	 * It enables the recommended rules for this group
+	 * Enables the recommended rules for this group
 	 */
 	recommended?: boolean;
 	/**
@@ -1269,7 +1269,7 @@ export interface Complexity {
 	 */
 	noVoid?: RuleConfiguration_for_Null;
 	/**
-	 * It enables the recommended rules for this group
+	 * Enables the recommended rules for this group
 	 */
 	recommended?: boolean;
 	/**
@@ -1502,7 +1502,7 @@ export interface Correctness {
 	 */
 	noVoidTypeReturn?: RuleConfiguration_for_Null;
 	/**
-	 * It enables the recommended rules for this group
+	 * Enables the recommended rules for this group
 	 */
 	recommended?: boolean;
 	/**
@@ -1647,7 +1647,7 @@ export interface Nursery {
 	 */
 	noUselessUndefined?: RuleFixConfiguration_for_Null;
 	/**
-	 * It enables the recommended rules for this group
+	 * Enables the recommended rules for this group
 	 */
 	recommended?: boolean;
 	/**
@@ -1772,7 +1772,7 @@ export interface Performance {
 	 */
 	noReExportAll?: RuleConfiguration_for_Null;
 	/**
-	 * It enables the recommended rules for this group
+	 * Enables the recommended rules for this group
 	 */
 	recommended?: boolean;
 	/**
@@ -1801,7 +1801,7 @@ export interface Security {
 	 */
 	noGlobalEval?: RuleConfiguration_for_Null;
 	/**
-	 * It enables the recommended rules for this group
+	 * Enables the recommended rules for this group
 	 */
 	recommended?: boolean;
 }
@@ -1910,7 +1910,7 @@ export interface Style {
 	 */
 	noYodaExpression?: RuleFixConfiguration_for_Null;
 	/**
-	 * It enables the recommended rules for this group
+	 * Enables the recommended rules for this group
 	 */
 	recommended?: boolean;
 	/**
@@ -2347,7 +2347,7 @@ export interface Suspicious {
 	 */
 	noWith?: RuleConfiguration_for_Null;
 	/**
-	 * It enables the recommended rules for this group
+	 * Enables the recommended rules for this group
 	 */
 	recommended?: boolean;
 	/**
