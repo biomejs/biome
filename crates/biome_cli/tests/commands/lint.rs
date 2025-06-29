@@ -4078,3 +4078,161 @@ bar();"#
         result,
     ));
 }
+
+#[test]
+fn should_apply_root_settings_with_stdin_file_path() {
+    let mut fs = TemporaryFs::new("should_apply_root_settings_with_stdin_file_path");
+
+    fs.create_file(
+        "biome.jsonc",
+        r#"{
+    "javascript": {
+        "formatter": {
+            "quoteStyle": "single",
+            "semicolons": "always",
+        }
+    }
+}"#,
+    );
+
+    let mut console = BufferConsole::default();
+    console.in_buffer.push("let a = \"a\"".into());
+
+    let result = run_cli_with_dyn_fs(
+        Box::new(fs.create_os()),
+        &mut console,
+        Args::from(["check", "--stdin-file-path=file.js", "--write", "--unsafe"].as_slice()),
+    );
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "should_apply_root_settings_with_stdin_file_path",
+        fs.create_mem(),
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn should_apply_root_settings_with_stdin_file_path_and_extended_config() {
+    let mut fs =
+        TemporaryFs::new("should_apply_root_settings_with_stdin_file_path_and_extended_config");
+
+    fs.create_file(
+        "biome.jsonc",
+        r#"{
+    "extends": ["base-config/biome"],
+    "javascript": {
+        "formatter": {
+            "quoteStyle": "single",
+        }
+    }
+}"#,
+    );
+
+    fs.create_file(
+        "node_modules/base-config/package.json",
+        r#"{
+  "exports": {
+    "./biome": "./configs/biome.jsonc"
+  }
+}"#,
+    );
+
+    fs.create_file(
+        "node_modules/base-config/configs/biome.jsonc",
+        r#"{
+    "formatter": {
+        "indentStyle": "space",
+        "indentWidth": 3,
+    },
+    "javascript": {
+        "formatter": {
+            "quoteStyle": "double",
+        }
+    }
+}"#,
+    );
+
+    let mut console = BufferConsole::default();
+    console
+        .in_buffer
+        .push("let a = \"a\"; if (true) { a = \"b\" }".into());
+
+    let result = run_cli_with_dyn_fs(
+        Box::new(fs.create_os()),
+        &mut console,
+        Args::from(["check", "--stdin-file-path=file.js", "--write", "--unsafe"].as_slice()),
+    );
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "should_apply_root_settings_with_stdin_file_path_and_extended_config",
+        fs.create_mem(),
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn should_apply_root_settings_with_stdin_file_path_and_extended_non_root_config() {
+    let mut fs = TemporaryFs::new(
+        "should_apply_root_settings_with_stdin_file_path_and_extended_non_root_config",
+    );
+
+    fs.create_file(
+        "biome.jsonc",
+        r#"{
+    "extends": ["base-config/biome"],
+    "javascript": {
+        "formatter": {
+            "quoteStyle": "single",
+        }
+    }
+}"#,
+    );
+
+    fs.create_file(
+        "node_modules/base-config/package.json",
+        r#"{
+  "exports": {
+    "./biome": "./configs/biome.jsonc"
+  }
+}"#,
+    );
+
+    fs.create_file(
+        "node_modules/base-config/configs/biome.jsonc",
+        r#"{
+    "root": false,
+    "formatter": {
+        "indentStyle": "space",
+        "indentWidth": 3,
+    },
+    "javascript": {
+        "formatter": {
+            "quoteStyle": "double",
+        }
+    }
+}"#,
+    );
+
+    let mut console = BufferConsole::default();
+    console
+        .in_buffer
+        .push("let a = \"a\"; if (true) { a = \"b\" }".into());
+
+    let result = run_cli_with_dyn_fs(
+        Box::new(fs.create_os()),
+        &mut console,
+        Args::from(["check", "--stdin-file-path=file.js", "--write", "--unsafe"].as_slice()),
+    );
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "should_apply_root_settings_with_stdin_file_path_and_extended_non_root_config",
+        fs.create_mem(),
+        console,
+        result,
+    ));
+}
