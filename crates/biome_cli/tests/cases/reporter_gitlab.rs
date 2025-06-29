@@ -47,7 +47,7 @@ let f;
 
 #[test]
 fn reports_diagnostics_gitlab_check_command() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     let file_path1 = Utf8Path::new("main.ts");
@@ -84,7 +84,7 @@ fn reports_diagnostics_gitlab_check_command() {
 
 #[test]
 fn reports_diagnostics_gitlab_ci_command() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     let file_path1 = Utf8Path::new("main.ts");
@@ -121,7 +121,7 @@ fn reports_diagnostics_gitlab_ci_command() {
 
 #[test]
 fn reports_diagnostics_gitlab_lint_command() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     let file_path1 = Utf8Path::new("main.ts");
@@ -158,7 +158,7 @@ fn reports_diagnostics_gitlab_lint_command() {
 
 #[test]
 fn reports_diagnostics_gitlab_format_command() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     let file_path1 = Utf8Path::new("main.ts");

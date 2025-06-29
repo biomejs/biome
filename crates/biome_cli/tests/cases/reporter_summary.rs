@@ -57,7 +57,7 @@ const MAIN_3: &str = r#"
 
 #[test]
 fn reports_diagnostics_summary_check_command() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     let file_path1 = Utf8Path::new("main.ts");
@@ -97,7 +97,7 @@ fn reports_diagnostics_summary_check_command() {
 
 #[test]
 fn reports_diagnostics_summary_ci_command() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     let file_path1 = Utf8Path::new("main.ts");
@@ -137,7 +137,7 @@ fn reports_diagnostics_summary_ci_command() {
 
 #[test]
 fn reports_diagnostics_summary_lint_command() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     let file_path1 = Utf8Path::new("main.ts");
@@ -177,7 +177,7 @@ fn reports_diagnostics_summary_lint_command() {
 
 #[test]
 fn reports_diagnostics_summary_format_command() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     let file_path1 = Utf8Path::new("main.ts");
@@ -217,7 +217,7 @@ fn reports_diagnostics_summary_format_command() {
 
 #[test]
 fn reports_diagnostics_summary_check_verbose_command() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     let file_path1 = Utf8Path::new("main.ts");

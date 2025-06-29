@@ -42,7 +42,7 @@ fn bench_module_graph(criterion: &mut Criterion) {
 
     for (name, content) in cases {
         group.bench_with_input(BenchmarkId::from_parameter(name), content, |b, content| {
-            let mut fs = MemoryFileSystem::default();
+            let fs = MemoryFileSystem::default();
             fs.insert(name.into(), content);
 
             let added_paths = [BiomePath::new(name)];

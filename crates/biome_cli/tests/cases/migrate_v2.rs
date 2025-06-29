@@ -9,7 +9,7 @@ use camino::Utf8Path;
 
 #[test]
 fn should_successfully_migrate_knip() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     let configuration_path = Utf8Path::new("biome.json");
@@ -160,7 +160,7 @@ fn should_successfully_migrate_knip() {
 
 #[test]
 fn should_successfully_migrate_ariakit() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     let configuration_path = Utf8Path::new("biome.json");
@@ -245,7 +245,7 @@ fn should_successfully_migrate_ariakit() {
 
 #[test]
 fn should_successfully_migrate_sentry() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     let configuration_path = Utf8Path::new("biome.json");
@@ -466,7 +466,7 @@ fn should_successfully_migrate_sentry() {
 
 #[test]
 fn should_migrate_issue_5465() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     let configuration_path = Utf8Path::new("biome.json");
@@ -536,7 +536,7 @@ fn should_migrate_issue_5465() {
 }
 #[test]
 fn should_migrate_aws_config() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     let configuration_path = Utf8Path::new("biome.json");

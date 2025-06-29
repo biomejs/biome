@@ -7,7 +7,7 @@ use camino::Utf8Path;
 
 #[test]
 fn should_use_editorconfig() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     let editorconfig = Utf8Path::new(".editorconfig");
@@ -54,7 +54,7 @@ indent_size = 8
 
 #[test]
 fn should_not_use_editorconfig() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     let editorconfig = Utf8Path::new(".editorconfig");
@@ -101,7 +101,7 @@ indent_size = 2
 
 #[test]
 fn should_use_editorconfig_enabled_from_biome_conf() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     let editorconfig = Utf8Path::new(".editorconfig");
@@ -151,7 +151,7 @@ indent_size = 8
 
 #[test]
 fn should_use_editorconfig_check() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     let editorconfig = Utf8Path::new(".editorconfig");
@@ -190,7 +190,7 @@ indent_size = 8
 
 #[test]
 fn should_use_editorconfig_check_enabled_from_biome_conf() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     let editorconfig = Utf8Path::new(".editorconfig");
@@ -240,7 +240,7 @@ indent_size = 8
 
 #[test]
 fn should_have_biome_override_editorconfig() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     let editorconfig = Utf8Path::new(".editorconfig");
@@ -297,7 +297,7 @@ indent_style = tab
 
 #[test]
 fn should_not_use_higher_editorconfig_when_find_biome_conf() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     let editorconfig = Utf8Path::new(".editorconfig");
@@ -350,7 +350,7 @@ indent_size = 2
 
 #[test]
 fn should_have_cli_override_editorconfig() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     let editorconfig = Utf8Path::new(".editorconfig");
@@ -399,7 +399,7 @@ indent_size = 8
 
 #[test]
 fn should_apply_path_overrides() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     let editorconfig = Utf8Path::new(".editorconfig");
@@ -460,7 +460,7 @@ indent_style = space
 
 #[test]
 fn should_use_editorconfig_ci() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     let editorconfig = Utf8Path::new(".editorconfig");
@@ -499,7 +499,7 @@ indent_size = 8
 
 #[test]
 fn should_use_editorconfig_ci_enabled_from_biome_conf() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     let editorconfig = Utf8Path::new(".editorconfig");
@@ -547,7 +547,7 @@ indent_size = 8
 
 #[test]
 fn non_closed_section() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     let editorconfig = Utf8Path::new(".editorconfig");
@@ -577,7 +577,7 @@ indent_size = 8
 
 #[test]
 fn root_parse_error() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     let editorconfig = Utf8Path::new(".editorconfig");
@@ -605,7 +605,7 @@ root = on
 
 #[test]
 fn end_of_line_parse_error() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     let editorconfig = Utf8Path::new(".editorconfig");
@@ -634,7 +634,7 @@ end_of_line = lfcr
 
 #[test]
 fn indent_size_parse_error() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     let editorconfig = Utf8Path::new(".editorconfig");
@@ -663,7 +663,7 @@ fn indent_size_parse_error() {
 
 #[test]
 fn indent_size_can_set_to_tab() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     let editorconfig = Utf8Path::new(".editorconfig");

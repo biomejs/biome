@@ -1,3 +1,5 @@
+use std::sync::Arc;
+
 use biome_configuration::Configuration;
 use biome_deserialize::json::deserialize_from_json_str;
 use biome_fs::{BiomePath, OsFileSystem};
@@ -28,7 +30,7 @@ fn test_scanner_only_loads_type_definitions_from_node_modules() {
     let fixtures_path = get_fixtures_path("basic");
     let fs = OsFileSystem::new(fixtures_path.clone());
 
-    let workspace = server(Box::new(fs), None);
+    let workspace = server(Arc::new(fs), None);
     let OpenProjectResult { project_key, .. } = workspace
         .open_project(OpenProjectParams {
             path: fixtures_path.clone().into(),
@@ -104,7 +106,7 @@ fn test_scanner_ignored_files_are_not_loaded() {
     let fixtures_path = get_fixtures_path("with_ignores");
     let fs = OsFileSystem::new(fixtures_path.clone());
 
-    let workspace = server(Box::new(fs), None);
+    let workspace = server(Arc::new(fs), None);
     let OpenProjectResult { project_key, .. } = workspace
         .open_project(OpenProjectParams {
             path: fixtures_path.clone().into(),
@@ -172,7 +174,7 @@ fn test_scanner_required_files_are_only_ignored_in_ignored_directories() {
     let fixtures_path = get_fixtures_path("with_ignored_required_files");
     let fs = OsFileSystem::new(fixtures_path.clone());
 
-    let workspace = server(Box::new(fs), None);
+    let workspace = server(Arc::new(fs), None);
     let OpenProjectResult { project_key, .. } = workspace
         .open_project(OpenProjectParams {
             path: fixtures_path.clone().into(),

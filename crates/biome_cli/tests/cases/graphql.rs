@@ -22,7 +22,7 @@ const MISSING_REASON: &str = r#"query {
 
 #[test]
 fn format_graphql_files() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     let file_path = Utf8Path::new("file.graphql");
@@ -49,7 +49,7 @@ fn format_graphql_files() {
 
 #[test]
 fn format_and_write_graphql_files() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     let file_path = Utf8Path::new("file.graphql");
@@ -76,7 +76,7 @@ fn format_and_write_graphql_files() {
 
 #[test]
 fn lint_single_rule() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     let file_path = Utf8Path::new("file.graphql");

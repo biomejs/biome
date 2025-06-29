@@ -17,7 +17,7 @@ const SIMPLE_NUMBERS_AFTER: &str = "({ 1: 1 });";
 #[test]
 fn does_handle_included_file_and_disable_linter() {
     let mut console = BufferConsole::default();
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let file_path = Utf8Path::new("biome.json");
     fs.insert(
         file_path.into(),
@@ -61,7 +61,7 @@ fn does_handle_included_file_and_disable_linter() {
 #[test]
 fn does_include_file_with_different_rules() {
     let mut console = BufferConsole::default();
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let file_path = Utf8Path::new("biome.json");
     fs.insert(
         file_path.into(),
@@ -104,7 +104,7 @@ fn does_include_file_with_different_rules() {
 #[test]
 fn does_include_file_with_different_linting_and_applies_all_of_them() {
     let mut console = BufferConsole::default();
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let file_path = Utf8Path::new("biome.json");
     fs.insert(
         file_path.into(),
@@ -170,7 +170,7 @@ fn does_include_file_with_different_linting_and_applies_all_of_them() {
 #[test]
 fn does_include_file_with_different_overrides() {
     let mut console = BufferConsole::default();
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let file_path = Utf8Path::new("biome.json");
     fs.insert(
         file_path.into(),
@@ -236,7 +236,7 @@ fn does_include_file_with_different_overrides() {
 #[test]
 fn does_override_the_rules() {
     let mut console = BufferConsole::default();
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let file_path = Utf8Path::new("biome.json");
     fs.insert(
         file_path.into(),
@@ -290,7 +290,7 @@ fn does_override_the_rules() {
 #[test]
 fn does_not_change_linting_settings() {
     let mut console = BufferConsole::default();
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let file_path = Utf8Path::new("biome.json");
     fs.insert(
         file_path.into(),
@@ -340,7 +340,7 @@ fn does_not_change_linting_settings() {
 #[test]
 fn does_override_recommended() {
     let mut console = BufferConsole::default();
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let file_path = Utf8Path::new("biome.json");
     fs.insert(
         file_path.into(),
@@ -392,7 +392,7 @@ fn does_override_recommended() {
 #[test]
 fn does_override_groupe_recommended() {
     let mut console = BufferConsole::default();
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let file_path = Utf8Path::new("biome.json");
     fs.insert(
         file_path.into(),
@@ -448,7 +448,7 @@ fn does_override_groupe_recommended() {
 #[test]
 fn does_preserve_group_recommended_when_override_global_recommened() {
     let mut console = BufferConsole::default();
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let file_path = Utf8Path::new("biome.json");
     fs.insert(
         file_path.into(),
@@ -502,7 +502,7 @@ fn does_preserve_group_recommended_when_override_global_recommened() {
 #[test]
 fn does_preserve_individually_diabled_rules_in_overrides() {
     let mut console = BufferConsole::default();
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let file_path = Utf8Path::new("biome.json");
     fs.insert(
         file_path.into(),
@@ -556,7 +556,7 @@ fn does_preserve_individually_diabled_rules_in_overrides() {
 #[test]
 fn does_merge_all_overrides() {
     let mut console = BufferConsole::default();
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let file_path = Utf8Path::new("biome.json");
     fs.insert(
         file_path.into(),
@@ -617,7 +617,7 @@ fn does_merge_all_overrides() {
 #[test]
 fn does_not_conceal_overrides_globals() {
     let mut console = BufferConsole::default();
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let file_path = Utf8Path::new("biome.json");
     fs.insert(
         file_path.into(),
@@ -658,7 +658,7 @@ fn does_not_conceal_overrides_globals() {
 #[test]
 fn takes_last_linter_enabled_into_account() {
     let mut console = BufferConsole::default();
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let file_path = Utf8Path::new("biome.json");
     fs.insert(
         file_path.into(),

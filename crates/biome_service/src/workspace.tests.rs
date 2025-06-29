@@ -1,5 +1,6 @@
 use std::num::NonZeroU64;
 use std::str::FromStr;
+use std::sync::Arc;
 
 use biome_analyze::RuleCategories;
 use biome_configuration::analyzer::{RuleGroup, RuleSelector};
@@ -25,7 +26,7 @@ use super::{
 };
 
 fn create_server() -> (Box<dyn Workspace>, ProjectKey) {
-    let workspace = server(Box::new(MemoryFileSystem::default()), None);
+    let workspace = server(Arc::new(MemoryFileSystem::default()), None);
     let OpenProjectResult { project_key, .. } = workspace
         .open_project(OpenProjectParams {
             path: Default::default(),
@@ -316,11 +317,11 @@ fn files_loaded_by_the_scanner_are_only_unloaded_when_the_project_is_unregistere
     const FILE_A_CONTENT: &[u8] = b"import { bar } from './b.ts';\nfunction foo() {}";
     const FILE_B_CONTENT: &[u8] = b"import { foo } from './a.ts';\nfunction bar() {}";
 
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     fs.insert(Utf8PathBuf::from("/project/a.ts"), FILE_A_CONTENT);
     fs.insert(Utf8PathBuf::from("/project/b.ts"), FILE_B_CONTENT);
 
-    let workspace = server(Box::new(fs), None);
+    let workspace = server(Arc::new(fs), None);
     let OpenProjectResult { project_key, .. } = workspace
         .open_project(OpenProjectParams {
             path: Utf8PathBuf::from("/project").into(),
@@ -395,10 +396,10 @@ fn files_loaded_by_the_scanner_are_only_unloaded_when_the_project_is_unregistere
 fn too_large_files_are_tracked_but_not_parsed() {
     const FILE_CONTENT: &[u8] = b"console.log(`I'm YUUUGE!`);";
 
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     fs.insert(Utf8PathBuf::from("/project/a.ts"), FILE_CONTENT);
 
-    let workspace = server(Box::new(fs), None);
+    let workspace = server(Arc::new(fs), None);
     let OpenProjectResult { project_key, .. } = workspace
         .open_project(OpenProjectParams {
             path: Utf8PathBuf::from("/project").into(),
@@ -455,11 +456,11 @@ fn plugins_are_loaded_and_used_during_analysis() {
 
     const FILE_CONTENT: &[u8] = b"const a = Object.assign({ foo: 'bar' });";
 
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     fs.insert(Utf8PathBuf::from("/project/plugin.grit"), PLUGIN_CONTENT);
     fs.insert(Utf8PathBuf::from("/project/a.ts"), FILE_CONTENT);
 
-    let workspace = server(Box::new(fs), None);
+    let workspace = server(Arc::new(fs), None);
     let OpenProjectResult { project_key, .. } = workspace
         .open_project(OpenProjectParams {
             path: Utf8PathBuf::from("/project").into(),
@@ -524,11 +525,11 @@ language css;
 
     const FILE_CONTENT: &[u8] = b"p { color: red }";
 
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     fs.insert(Utf8PathBuf::from("/project/plugin.grit"), PLUGIN_CONTENT);
     fs.insert(Utf8PathBuf::from("/project/a.css"), FILE_CONTENT);
 
-    let workspace = server(Box::new(fs), None);
+    let workspace = server(Arc::new(fs), None);
     let OpenProjectResult { project_key, .. } = workspace
         .open_project(OpenProjectParams {
             path: Utf8PathBuf::from("/project").into(),
@@ -589,11 +590,11 @@ fn plugins_may_use_invalid_span() {
 
     const FILE_CONTENT: &[u8] = b"const a = Object.assign({ foo: 'bar' });";
 
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     fs.insert(Utf8PathBuf::from("/project/plugin.grit"), PLUGIN_CONTENT);
     fs.insert(Utf8PathBuf::from("/project/a.ts"), FILE_CONTENT);
 
-    let workspace = server(Box::new(fs), None);
+    let workspace = server(Arc::new(fs), None);
     let OpenProjectResult { project_key, .. } = workspace
         .open_project(OpenProjectParams {
             path: Utf8PathBuf::from("/project").into(),
@@ -687,12 +688,12 @@ const hasOwn = Object.hasOwn({ foo: 'bar' }, 'foo');"#,
     ),
 ];
 
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     for (path, content) in files {
         fs.insert(Utf8PathBuf::from(*path), *content);
     }
 
-    let workspace = server(Box::new(fs), None);
+    let workspace = server(Arc::new(fs), None);
     let OpenProjectResult { project_key, .. } = workspace
         .open_project(OpenProjectParams {
             path: Utf8PathBuf::from("/project").into(),

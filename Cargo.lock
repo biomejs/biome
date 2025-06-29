@@ -1528,6 +1528,7 @@ dependencies = [
  "biome_js_formatter",
  "biome_rowan",
  "biome_service",
+ "camino",
  "console_error_panic_hook",
  "js-sys",
  "quote",

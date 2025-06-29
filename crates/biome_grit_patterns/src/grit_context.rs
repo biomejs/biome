@@ -290,7 +290,14 @@ fn file_owner_from_matches(
         return Ok(None);
     };
 
-    let absolute_path = name.absolutize()?.to_path_buf();
+    let base_dir = if cfg!(target_family = "wasm") {
+        PathBuf::from("/")
+    } else {
+        std::env::current_dir()?
+    };
+
+    let absolute_path = name.absolutize_from(base_dir)?.to_path_buf();
+
     Ok(Some(FileOwner {
         name,
         absolute_path,
@@ -315,7 +322,14 @@ fn new_file_owner(
         return Ok(None);
     };
 
-    let absolute_path = name.absolutize()?.to_path_buf();
+    let base_dir = if cfg!(target_family = "wasm") {
+        PathBuf::from("/")
+    } else {
+        std::env::current_dir()?
+    };
+
+    let absolute_path = name.absolutize_from(base_dir)?.to_path_buf();
+
     Ok(Some(FileOwner {
         name,
         absolute_path,
