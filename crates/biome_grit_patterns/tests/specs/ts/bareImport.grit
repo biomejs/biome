@@ -1,0 +1,10 @@
+`import $source`
+
+//  works - matching the snapshot
+// `import "main.css"`
+
+//  doesn't work in Biome but does in Grit CLI
+// `import "$foo"`
+
+//  doesn't work in Biome but does in Grit CLI
+// `import $what from $source`
