@@ -148,9 +148,15 @@ pub enum BiomeCommand {
         configuration: Option<Configuration>,
         #[bpaf(external, hide_usage)]
         cli_options: CliOptions,
-        /// Use this option when you want to format code piped from `stdin`, and print the output to `stdout`.
+        /// Use this option when you want to format code piped from `stdin`, and
+        /// print the output to `stdout`.
         ///
-        /// The file doesn't need to exist on disk, what matters is the extension of the file. Based on the extension, Biome knows how to check the code.
+        /// The file doesn't need to exist on disk, what matters is the
+        /// extension of the file. Based on the extension, Biome knows how to
+        /// check the code.
+        ///
+        /// Also, if you have overrides configured and/or nested configurations,
+        /// the path may determine the settings being applied.
         ///
         /// Example:
         /// ```shell
