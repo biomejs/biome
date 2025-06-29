@@ -3964,7 +3964,7 @@ export type ScanKind =
 				/**
 	* The paths to target by the scanner.
 
-If a target path indicates a folder, all files and folders within are scanned as well.
+If a target path indicates a folder, all files within are scanned as well.
 
 Target paths must be absolute. 
 	 */

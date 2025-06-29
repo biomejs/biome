@@ -109,7 +109,9 @@ impl WorkspaceError {
     }
 
     pub fn non_utf8_path(path: OsString) -> Self {
-        Self::NonUtf8Path(NonUtf8Path { path: path.display().to_string() })
+        Self::NonUtf8Path(NonUtf8Path {
+            path: path.display().to_string(),
+        })
     }
 
     pub fn not_found() -> Self {
@@ -238,14 +240,14 @@ impl From<WorkspaceError> for biome_diagnostics::serde::Diagnostic {
 }
 
 #[derive(Debug, Deserialize, Diagnostic, Serialize)]
-#[diagnostic( 
-     category = "internalError/fs", 
-     severity = Error, 
-     message( 
-         description = "Biome does not support non-UTF8 characters in path: {path}", 
-         message("Biome does not support non-UTF8 characters in path: "<Emphasis>{self.path}</Emphasis>) 
-     ), 
- )] 
+#[diagnostic(
+     category = "internalError/fs",
+     severity = Error,
+     message(
+         description = "Biome does not support non-UTF8 characters in path: {path}",
+         message("Biome does not support non-UTF8 characters in path: "<Emphasis>{self.path}</Emphasis>)
+     ),
+ )]
 pub struct NonUtf8Path {
     path: String,
 }
