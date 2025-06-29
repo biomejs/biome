@@ -86,9 +86,9 @@ impl Rule for UseJsonImportAttribute {
             for entry in assertions.into_iter().flatten() {
                 if let AnyJsImportAssertionEntry::JsImportAssertionEntry(entry) = entry {
                     if let Ok(key) = entry.key() {
-                        if key.text() == "type" {
+                        if key.text_trimmed() == "type" {
                             if let Ok(value) = entry.value_token() {
-                                if value.text() == "json" {
+                                if value.text_trimmed() == "json" {
                                     found_type_json = true;
                                     break;
                                 } else {
