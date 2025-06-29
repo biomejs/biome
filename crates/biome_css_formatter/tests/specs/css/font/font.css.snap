@@ -1,0 +1,70 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: css/font/font.css
+---
+# Input
+
+```css
+html {
+	font-family: system-ui, -apple-system;
+}
+
+html {
+	font-family: -apple-system, system-ui;
+}
+
+html {
+	font-family: "Lato", system-ui, -apple-system, Arial, sans-serif;
+}
+
+html {
+	font-family: -apple-system, "Lato", system-ui, -apple-system, Arial, sans-serif;
+}
+
+```
+
+
+=============================
+
+# Outputs
+
+## Output 1
+
+-----
+Indent style: Tab
+Indent width: 2
+Line ending: LF
+Line width: 80
+Quote style: Double Quotes
+-----
+
+```css
+html {
+	font-family:
+		system-ui,
+		-apple-system;
+}
+
+html {
+	font-family: -apple-system, system-ui;
+}
+
+html {
+	font-family:
+		"Lato",
+		system-ui,
+		-apple-system,
+		Arial,
+		sans-serif;
+}
+
+html {
+	font-family:
+		-apple-system,
+		"Lato",
+		system-ui,
+		-apple-system,
+		Arial,
+		sans-serif;
+}
+```
