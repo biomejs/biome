@@ -10,8 +10,8 @@ use biome_analyze::{
 use biome_configuration::analyzer::RuleSelector;
 use biome_diagnostics::Error;
 use biome_fs::BiomePath;
+use biome_line_index::LineIndex;
 use biome_lsp_converters::from_proto;
-use biome_lsp_converters::line_index::LineIndex;
 use biome_rowan::{TextRange, TextSize};
 use biome_service::WorkspaceError;
 use biome_service::file_handlers::{AstroFileHandler, SvelteFileHandler, VueFileHandler};

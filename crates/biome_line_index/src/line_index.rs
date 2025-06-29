@@ -3,7 +3,7 @@
 
 use std::mem;
 
-use biome_rowan::TextSize;
+use biome_text_size::TextSize;
 use rustc_hash::FxHashMap;
 
 use crate::{LineCol, WideChar, WideEncoding, WideLineCol};
