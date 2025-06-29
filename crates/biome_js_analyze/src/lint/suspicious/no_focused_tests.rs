@@ -101,13 +101,17 @@ impl Rule for NoFocusedTests {
         FunctionNameAndRange { name, text_range }: &Self::State,
     ) -> Option<RuleDiagnostic> {
         // if invoked in square brackets such as it["only"] computed member expression, strip quotes
-        let name = name.text().replace('"', "");
-
+        let name_str = name.text().replace('"', "");
         let secondary_note_suffix = "to ensure all tests are executed.";
-        let secondary_note = if name == ONLY_KEYWORD {
-            markup! {"Consider removing '"{name}"' "{secondary_note_suffix}""}
-        } else {
-            markup! {"Consider removing 'f' prefix from '"{name}"' "{secondary_note_suffix}""}
+        let secondary_note = {
+            if name_str == ONLY_KEYWORD {
+                format!("Consider removing '{}' {}", name_str, secondary_note_suffix)
+            } else {
+                format!(
+                    "Consider removing 'f' prefix from '{}' {}",
+                    name_str, secondary_note_suffix
+                )
+            }
         };
 
         Some(
@@ -118,7 +122,7 @@ impl Rule for NoFocusedTests {
                     "Don't focus the test."
                 },
             )
-                .note(markup! {"The '"{name}"' method is often used for debugging or during implementation."})
+                .note(markup! {"The '"{name_str}"' method is often used for debugging or during implementation."})
                 .note(secondary_note)
         )
     }
