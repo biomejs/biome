@@ -57,6 +57,45 @@ pub struct LoadedConfiguration {
 }
 
 impl LoadedConfiguration {
+    /// It consumes the payload, applies and extends and returns the final, extended configuration.
+    pub fn try_from_payload(
+        value: Option<ConfigurationPayload>,
+        fs: &dyn FsWithResolverProxy,
+    ) -> Result<Self, WorkspaceError> {
+        let Some(value) = value else {
+            return Ok(Self::default());
+        };
+
+        let ConfigurationPayload {
+            external_resolution_base_path,
+            configuration_file_path,
+            deserialized,
+        } = value;
+        let (partial_configuration, mut diagnostics) = deserialized.consume();
+
+        Ok(Self {
+            configuration: match partial_configuration {
+                Some(mut partial_configuration) => {
+                    partial_configuration.apply_extends(
+                        fs,
+                        &configuration_file_path,
+                        &external_resolution_base_path,
+                        &mut diagnostics,
+                    )?;
+                    partial_configuration.migrate_deprecated_fields();
+                    partial_configuration
+                }
+                None => Configuration::default(),
+            },
+            diagnostics: diagnostics
+                .into_iter()
+                .map(|diagnostic| diagnostic.with_file_path(configuration_file_path.to_string()))
+                .collect(),
+            directory_path: configuration_file_path.parent().map(Utf8PathBuf::from),
+            file_path: Some(configuration_file_path),
+        })
+    }
+
     /// Return the path of the **directory** where the configuration is
     pub fn directory_path(&self) -> Option<&Utf8Path> {
         self.directory_path.as_deref()
@@ -112,96 +151,14 @@ impl<'a> Iterator for ConfigurationDiagnosticsIter<'a> {
 
 impl FusedIterator for ConfigurationDiagnosticsIter<'_> {}
 
-impl LoadedConfiguration {
-    /// It consumes the payload, applies and extends and returns the final, extended configuration.
-    pub fn try_from_payload(
-        value: Option<ConfigurationPayload>,
-        fs: &dyn FsWithResolverProxy,
-    ) -> Result<Self, WorkspaceError> {
-        let Some(value) = value else {
-            return Ok(Self::default());
-        };
-
-        let ConfigurationPayload {
-            external_resolution_base_path,
-            configuration_file_path,
-            deserialized,
-        } = value;
-        let (partial_configuration, mut diagnostics) = deserialized.consume();
-
-        Ok(Self {
-            configuration: match partial_configuration {
-                Some(mut partial_configuration) => {
-                    partial_configuration.apply_extends(
-                        fs,
-                        &configuration_file_path,
-                        &external_resolution_base_path,
-                        &mut diagnostics,
-                    )?;
-                    partial_configuration.migrate_deprecated_fields();
-                    partial_configuration
-                }
-                None => Configuration::default(),
-            },
-            diagnostics: diagnostics
-                .into_iter()
-                .map(|diagnostic| diagnostic.with_file_path(configuration_file_path.to_string()))
-                .collect(),
-            directory_path: configuration_file_path.parent().map(Utf8PathBuf::from),
-            file_path: Some(configuration_file_path),
-        })
-    }
-}
-
-/// Load the partial configuration for this session of the CLI.
-///
-/// When `root` is passed, it returns the first configuration that has `root: true`.
+/// Load the partial configuration for this session.
 #[instrument(level = "debug", skip(fs))]
 pub fn load_configuration(
     fs: &dyn FsWithResolverProxy,
     config_path: ConfigurationPathHint,
 ) -> Result<LoadedConfiguration, WorkspaceError> {
     let config = read_config(fs, config_path, true)?;
-    let mut loaded_configuration = LoadedConfiguration::try_from_payload(config, fs);
-
-    // We loaded the configuration, now we must check if this configuration is inside a monorepo.
-    if let Ok(loaded_configuration) = &mut loaded_configuration {
-        // First, we check if the configuration found uses the syntax `"extends": "//"`
-        if loaded_configuration.configuration.extends_root() {
-            // We start looking upwards and find a `biome.json` that has `root: true`
-            if let Some(directory_path) = loaded_configuration.directory_path.as_ref() {
-                let root_config = read_config(
-                    fs,
-                    ConfigurationPathHint::FromWorkspace(directory_path.clone()),
-                    true,
-                )?;
-
-                if root_config.is_none() {
-                    return Err(BiomeDiagnostic::no_root_from_nested_extend().into());
-                }
-
-                // We call possible extends from the root configuration
-                let mut result = LoadedConfiguration::try_from_payload(root_config, fs)?;
-                // The configuration we found at the beginning now must "extend" from the root, and
-                // to do so we merge the root with the original configuration, so the original
-                // configuration takes precedence...
-                result
-                    .configuration
-                    .merge_with(loaded_configuration.configuration.clone());
-
-                // ...and how we swap the values to `loaded_configuration` configuration takes the correct
-                // configuration has the correct final values
-                std::mem::swap(
-                    &mut loaded_configuration.configuration,
-                    &mut result.configuration,
-                );
-                // We add possible diagnostics coming from the root configuration
-                loaded_configuration.diagnostics.extend(result.diagnostics);
-            }
-        }
-    }
-
-    loaded_configuration
+    LoadedConfiguration::try_from_payload(config, fs)
 }
 
 /// - [Result]: if an error occurred while loading the configuration file.
@@ -209,51 +166,57 @@ pub fn load_configuration(
 /// - [ConfigurationPayload]: The result of the operation
 type LoadConfig = Result<Option<ConfigurationPayload>, WorkspaceError>;
 
-/// Load the configuration from the file system.
+/// Loads the configuration from the file system.
 ///
-/// The configuration file will be read from the `fs`. A [path hint](ConfigurationPathHint) should be provided.
+/// The configuration file will be read from the `fs`.
 ///
-/// - If the path hint is a path to a file that is provided by the user, the function will try to load that file or error.
-///     The name doesn't have to be `biome.json` or `biome.jsonc`. And if it doesn't end with `.json`, Biome will try to
-///     deserialize it as a `.jsonc` file.
+/// A [`path_hint`](ConfigurationPathHint) should be provided.
 ///
-/// - If the path hint is a path to a directory which is provided by the user, the function will try to find a `biome.json`
-///     or `biome.jsonc` file in order in that directory. And If it cannot find one, it will error.
+/// - If the path hint is a path to a file that is provided by the user, the
+///     function will try to load that file or error. The name doesn't have to
+///     be `biome.json` or `biome.jsonc`. And if it doesn't end with `.json`,
+///     Biome will try to deserialize it as a `.jsonc` file.
 ///
-/// - Otherwise, the function will try to traverse upwards the file system until it finds a `biome.json` or `biome.jsonc`
-///     file, or there aren't directories anymore. In this case, the function will not error but return an `Ok(None)`, which
-///     means Biome will use the default configuration.
+/// - If the path hint is a path to a directory which is provided by the user,
+///     the function will try to find a `biome.json` or `biome.jsonc` file in
+///     order in that directory. And if it cannot find one, it will error.
 ///
-/// When `seek_root` is `true`, the function will stop at the first configuration file with `"root": true`, and it skips it
-/// otherwise
+/// - Otherwise, the function will try to traverse upwards through the file
+///     system until it finds a `biome.json` or `biome.jsonc` file, or there
+///     aren't directories anymore. In this case, the function will not error
+///     but return an `Ok(None)`, which means Biome will use the default
+///     configuration.
+///
+/// If `seek_root` is `true`, the function will stop at the first
+/// configuration file with `"root": true`. Otherwise, any configuration file
+/// will do.
 #[instrument(level = "debug", skip(fs))]
 pub fn read_config(
     fs: &dyn FileSystem,
-    base_path: ConfigurationPathHint,
+    path_hint: ConfigurationPathHint,
     seek_root: bool,
 ) -> LoadConfig {
     // This path is used for configuration resolution from external packages.
-    let external_resolution_base_path = match &base_path {
+    let external_resolution_base_path = match &path_hint {
         // Path hint from LSP is always the workspace root
         // we use it as the resolution base path.
         ConfigurationPathHint::FromLsp(path) => path.clone(),
         ConfigurationPathHint::FromWorkspace(path) => path.clone(),
         ConfigurationPathHint::FromUser(path) => path.clone(),
-        ConfigurationPathHint::None => fs
-            .working_directory()
-            .map_or(Utf8PathBuf::new(), |working_directory| working_directory),
+        ConfigurationPathHint::None => fs.working_directory().unwrap_or_default(),
     };
 
     // If the configuration path hint is not a file path
     // we'll auto search for the configuration file
-    let configuration_directory = match base_path {
+    let configuration_directory = match path_hint {
         ConfigurationPathHint::FromLsp(path) => path,
         ConfigurationPathHint::FromWorkspace(path) => path,
-        ConfigurationPathHint::None => fs.working_directory().unwrap_or_default(),
         ConfigurationPathHint::FromUser(ref config_file_path) => {
-            // If the configuration path hint is from user and is a file path, we'll load it directly
+            // If the configuration path hint is from the user, we'll load it
+            // directly.
             return load_user_config(fs, config_file_path, external_resolution_base_path);
         }
+        ConfigurationPathHint::None => fs.working_directory().unwrap_or_default(),
     };
 
     // We search for the first non-root `biome.json` or `biome.jsonc` files:
@@ -268,20 +231,14 @@ pub fn read_config(
 
         let deserialized_content =
             deserialize_from_json_str::<Configuration>(content, parser_options, "");
-        let is_root = deserialized_content
+        let is_found = deserialized_content
             .deserialized
             .as_ref()
-            .is_some_and(|config| {
-                if seek_root {
-                    config.is_root()
-                } else {
-                    !config.is_root()
-                }
-            });
-        if is_root {
+            .is_some_and(|config| if seek_root { config.is_root() } else { true });
+        if is_found {
             deserialized = Some(deserialized_content);
         }
-        is_root
+        is_found
     };
 
     let Some(auto_search_result) = fs.auto_search_files_with_predicate(
@@ -306,8 +263,7 @@ fn load_user_config(
     config_file_path: &Utf8Path,
     external_resolution_base_path: Utf8PathBuf,
 ) -> LoadConfig {
-    // If the configuration path hint is from user and is a file path,
-    // we'll load it directly
+    // If the configuration path hint is a file path, we'll load it directly.
     if fs.path_is_file(config_file_path) {
         let content = fs.read_file_from_path(config_file_path)?;
         let parser_options = match config_file_path.extension() {

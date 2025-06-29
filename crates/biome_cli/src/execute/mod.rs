@@ -31,7 +31,6 @@ use biome_service::workspace::{
 };
 use camino::{Utf8Path, Utf8PathBuf};
 use std::cmp::Ordering;
-use std::ffi::OsString;
 use std::fmt::{Display, Formatter};
 use std::time::Duration;
 use tracing::{info, instrument};
@@ -64,7 +63,7 @@ pub struct Stdin(
 );
 
 impl Stdin {
-    fn as_path(&self) -> &Utf8Path {
+    pub fn as_path(&self) -> &Utf8Path {
         self.0.as_path()
     }
 
@@ -361,17 +360,6 @@ impl Execution {
         matches!(self.traversal_mode, TraversalMode::Lint { .. })
     }
 
-    pub(crate) fn is_stdin(&self) -> bool {
-        match &self.traversal_mode {
-            TraversalMode::Check { stdin, .. } => stdin.is_some(),
-            TraversalMode::Lint { stdin, .. } => stdin.is_some(),
-            TraversalMode::CI { .. } => false,
-            TraversalMode::Format { stdin, .. } => stdin.is_some(),
-            TraversalMode::Migrate { .. } => false,
-            TraversalMode::Search { stdin, .. } => stdin.is_some(),
-        }
-    }
-
     #[instrument(level = "debug", skip(self), fields(result))]
     pub(crate) fn is_safe_fixes_enabled(&self) -> bool {
         let result = match self.traversal_mode {
@@ -530,7 +518,7 @@ pub fn execute_mode(
     mut execution: Execution,
     mut session: CliSession,
     cli_options: &CliOptions,
-    paths: Vec<OsString>,
+    paths: Vec<String>,
     scanner_duration: Option<Duration>,
     nested_configuration_files: Vec<BiomePath>,
     project_key: ProjectKey,
@@ -717,10 +705,7 @@ pub fn execute_mode(
     if processed.saturating_sub(skipped) == 0 && !cli_options.no_errors_on_unmatched {
         Err(CliDiagnostic::no_files_processed(
             execution.as_diagnostic_category(),
-            paths
-                .into_iter()
-                .flat_map(|p| p.into_string())
-                .collect::<Vec<_>>(),
+            paths,
         ))
     } else if errors > 0 || should_exit_on_warnings {
         let category = execution.as_diagnostic_category();

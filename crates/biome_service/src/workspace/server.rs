@@ -601,15 +601,18 @@ impl WorkspaceServer {
         }
     }
 
-    /// It updates the nested settings of the project assigned to the `project_key`.
+    /// Updates the nested settings of the project assigned to the
+    /// `project_key`.
     ///
-    /// If a configuration file contains errors, it's not processed and the project isn't updated.
+    /// If a configuration file contains errors, it's not processed and the
+    /// project isn't updated.
     ///
-    /// It's the responsibility of the client to process the diagnostics and handle the errors emitted by the configuration.
+    /// It's the responsibility of the client to process the diagnostics and
+    /// handle the errors emitted by the configuration.
     ///
     /// ## Errors
     ///
-    /// - A nested configuration file si a root
+    /// - A nested configuration file is a root
     /// - Biome can't read the file
     pub(super) fn update_project_config_files(
         &self,

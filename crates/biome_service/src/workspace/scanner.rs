@@ -217,28 +217,42 @@ pub(crate) struct ScanContext<'app> {
     scan_kind: ScanKind,
 }
 
-#[derive(Debug, Copy, Clone, Eq, PartialEq, serde::Serialize, serde::Deserialize)]
+#[derive(Debug, Clone, Eq, PartialEq, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase")]
 pub enum ScanKind {
-    /// The scanner should not be triggered
+    /// The scanner should not be triggered.
     NoScanner,
-    /// It targets specific files
+    /// Scans for limited, known files across the repository.
     KnownFiles,
-    /// It targets the project, so it attempts to open all the files in the project.
+    /// Scans for limited, knows files, but only within a set of predefined
+    /// paths.
+    TargetedKnownFiles {
+        /// The paths to target by the scanner.
+        ///
+        /// If a target path indicates a folder, all files within are scanned as well.
+        ///
+        /// Target paths must be absolute.
+        target_paths: Vec<BiomePath>,
+
+        /// Determines whether the file scanner should descend into
+        /// subdirectories of the target paths.
+        descend_from_targets: bool,
+    },
+    /// Scans the entire repository, indexing all files to enable project rules.
     Project,
 }
 
 impl ScanKind {
-    pub const fn is_project(self) -> bool {
+    pub const fn is_project(&self) -> bool {
         matches!(self, Self::Project)
     }
 
-    pub const fn is_known_files(self) -> bool {
+    pub const fn is_known_files(&self) -> bool {
         matches!(self, Self::KnownFiles)
     }
 
-    pub const fn is_none(self) -> bool {
+    pub const fn is_none(&self) -> bool {
         matches!(self, Self::NoScanner)
     }
 }
@@ -277,27 +291,45 @@ impl TraversalContext for ScanContext<'_> {
 
         match self.workspace.fs().symlink_path_kind(path) {
             Ok(PathKind::Directory { .. }) => {
-                if self.scan_kind.is_project() && path.is_dependency() {
-                    // In project mode, the scanner always scans dependencies
-                    // because they're a valuable source of type information.
-                    true
-                } else if !path.is_dependency() {
-                    !self
-                        .workspace
-                        .is_path_ignored(IsPathIgnoredParams {
-                            project_key: self.project_key,
-                            path: path.clone(),
-                            // The scanner only cares about the top-level
-                            // `files.includes`
-                            features: FeaturesBuilder::new().build(),
-                        })
-                        .unwrap_or_default()
-                } else {
-                    false
+                if path.is_dependency() {
+                    // Only project mode cares about dependencies, because they
+                    // are a valuable source of type information.
+                    return self.scan_kind.is_project();
                 }
+
+                if self
+                    .workspace
+                    .is_path_ignored(IsPathIgnoredParams {
+                        project_key: self.project_key,
+                        path: path.clone(),
+                        // The scanner only cares about the top-level
+                        // `files.includes`
+                        features: FeaturesBuilder::new().build(),
+                    })
+                    .unwrap_or_default()
+                {
+                    return false; // Nobody cares about ignored paths.
+                }
+
+                if let ScanKind::TargetedKnownFiles {
+                    target_paths,
+                    descend_from_targets,
+                } = &self.scan_kind
+                {
+                    if !target_paths.iter().any(|target_path| {
+                        target_path.starts_with(path.as_path())
+                            || (*descend_from_targets && path.starts_with(target_path.as_path()))
+                    }) {
+                        return false; // Path is not being targeted.
+                    }
+                }
+
+                true
             }
-            Ok(PathKind::File { .. }) => match self.scan_kind {
-                ScanKind::KnownFiles => path.is_required_during_scan() && !path.is_dependency(),
+            Ok(PathKind::File { .. }) => match &self.scan_kind {
+                ScanKind::KnownFiles | ScanKind::TargetedKnownFiles { .. } => {
+                    path.is_required_during_scan() && !path.is_dependency()
+                }
                 ScanKind::Project => {
                     if path.is_dependency() {
                         path.is_package_json() || path.is_type_declaration()
