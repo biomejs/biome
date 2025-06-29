@@ -18,7 +18,7 @@ pub(crate) fn get_forced_scan_kind(
     root_configuration_dir: &Utf8Path,
     working_dir: &Utf8Path,
 ) -> Option<ScanKind> {
-    if let Some(stdin) = execution.stdin() {
+    if let Some(stdin) = execution.as_stdin_file() {
         let path = stdin.as_path();
         if path
             .parent()

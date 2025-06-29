@@ -360,17 +360,6 @@ impl Execution {
         matches!(self.traversal_mode, TraversalMode::Lint { .. })
     }
 
-    pub(crate) fn stdin(&self) -> Option<&Stdin> {
-        match &self.traversal_mode {
-            TraversalMode::Check { stdin, .. } => stdin.as_ref(),
-            TraversalMode::Lint { stdin, .. } => stdin.as_ref(),
-            TraversalMode::CI { .. } => None,
-            TraversalMode::Format { stdin, .. } => stdin.as_ref(),
-            TraversalMode::Migrate { .. } => None,
-            TraversalMode::Search { stdin, .. } => stdin.as_ref(),
-        }
-    }
-
     #[instrument(level = "debug", skip(self), fields(result))]
     pub(crate) fn is_safe_fixes_enabled(&self) -> bool {
         let result = match self.traversal_mode {
