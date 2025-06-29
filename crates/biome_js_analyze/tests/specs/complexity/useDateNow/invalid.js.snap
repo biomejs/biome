@@ -52,7 +52,7 @@ typeof+new Date();
 ```
 invalid.js:1:12 lint/complexity/useDateNow  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use Date.now() instead of new Date().getTime.
+  ! Use Date.now() instead of new Date().getTime().
   
   > 1 │ const ts = new Date().getTime();
       │            ^^^^^^^^^^^^^^^^^^^^
@@ -74,7 +74,7 @@ invalid.js:1:12 lint/complexity/useDateNow  FIXABLE  ━━━━━━━━━
 ```
 invalid.js:2:13 lint/complexity/useDateNow  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use Date.now() instead of new Date().getTime.
+  ! Use Date.now() instead of new Date().getTime().
   
     1 │ const ts = new Date().getTime();
   > 2 │ const ts1 = (new Date()).getTime();
@@ -98,7 +98,7 @@ invalid.js:2:13 lint/complexity/useDateNow  FIXABLE  ━━━━━━━━━
 ```
 invalid.js:3:14 lint/complexity/useDateNow  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use Date.now() instead of new Date().getTime.
+  ! Use Date.now() instead of new Date().getTime().
   
     1 │ const ts = new Date().getTime();
     2 │ const ts1 = (new Date()).getTime();
@@ -124,7 +124,7 @@ invalid.js:3:14 lint/complexity/useDateNow  FIXABLE  ━━━━━━━━━
 ```
 invalid.js:4:13 lint/complexity/useDateNow  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use Date.now() instead of new Date().valueOf.
+  ! Use Date.now() instead of new Date().valueOf().
   
     2 │ const ts1 = (new Date()).getTime();
     3 │ const ts2 = (new Date().getTime());
@@ -150,7 +150,7 @@ invalid.js:4:13 lint/complexity/useDateNow  FIXABLE  ━━━━━━━━━
 ```
 invalid.js:5:13 lint/complexity/useDateNow  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use Date.now() instead of new Date().valueOf.
+  ! Use Date.now() instead of new Date().valueOf().
   
     3 │ const ts2 = (new Date().getTime());
     4 │ const ts3 = new Date().valueOf();
@@ -176,7 +176,7 @@ invalid.js:5:13 lint/complexity/useDateNow  FIXABLE  ━━━━━━━━━
 ```
 invalid.js:6:14 lint/complexity/useDateNow  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use Date.now() instead of new Date().valueOf.
+  ! Use Date.now() instead of new Date().valueOf().
   
     4 │ const ts3 = new Date().valueOf();
     5 │ const ts4 = (new Date()).valueOf();
