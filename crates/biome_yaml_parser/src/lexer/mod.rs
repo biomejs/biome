@@ -37,9 +37,16 @@ impl<'src> YamlLexer<'src> {
         }
     }
 
-    /// Consume tokens until the lexer found an unambigous checkpoint.
+    /// Consume tokens until the lexer found a disambiguated checkpoint.
     /// This usually means that the lexer has determined whether the lexed tokens belong to a block
-    /// map entry `abc:` or just a plain token (`abc:`)
+    /// map entry
+    /// ```yaml
+    /// - [a, b, c]: ...
+    /// ```
+    /// or just a normal yaml value
+    /// ```yaml
+    /// - [a, b, c]
+    /// ```
     fn consume_tokens(&mut self) {
         let Some(current) = self.current_byte_in_scope() else {
             return;
@@ -86,6 +93,8 @@ impl<'src> YamlLexer<'src> {
         ScopedTokens::empty_mapping_key(indicator, self.scopes.last())
     }
 
+    /// Consume and disambiguate a YAML value to determine whether it's a YAML block map or just a
+    /// YAML flow value
     fn consume_potential_mapping_start(&mut self, current: u8) -> ScopedTokens {
         debug_assert!(self.maybe_at_mapping_start(current));
 
@@ -103,6 +112,8 @@ impl<'src> YamlLexer<'src> {
         }
     }
 
+    /// Consume a YAML flow value that can be used inside an implicit mapping key
+    /// https://yaml.org/spec/1.2.2/#rule-ns-s-block-map-implicit-key
     fn consume_potential_mapping_key(&mut self, current: u8) -> LinkedList<LexToken> {
         if is_flow_collection_indicator(current) {
             self.consume_flow_collection()
@@ -115,6 +126,7 @@ impl<'src> YamlLexer<'src> {
         }
     }
 
+    /// A yaml collection is a JSON-like data structure
     fn consume_flow_collection(&mut self) -> LinkedList<LexToken> {
         let mut current_depth: usize = 0;
         let mut collection_tokens = LinkedList::new();
@@ -323,6 +335,8 @@ impl<'src> YamlLexer<'src> {
         LexToken::new(tok, start, self.current_coordinate)
     }
 
+    /// Consume all trivia tokens. The lexer is guaranteed to land on a non trivia token after this,
+    /// which in can then use to check if it's still within the current scope or has broken out
     fn consume_trivia(&mut self, current: u8) -> LinkedList<LexToken> {
         debug_assert!(current == b'#' || is_blank(current));
         let mut tokens = LinkedList::new();
@@ -393,6 +407,7 @@ impl<'src> YamlLexer<'src> {
         LexToken::new(ERROR_TOKEN, start, self.current_coordinate)
     }
 
+    /// Exhaust all breached scopes before getting the byte at the current coordinate
     fn current_byte_in_scope(&mut self) -> Option<u8> {
         let Some(current) = self.current_byte() else {
             while let Some(scope) = self.scopes.pop() {
@@ -420,6 +435,7 @@ impl<'src> YamlLexer<'src> {
         Some(current)
     }
 
+    // https://yaml.org/spec/1.2.2/#rule-ns-s-block-map-implicit-key
     fn maybe_at_mapping_start(&self, current: u8) -> bool {
         is_flow_collection_indicator(current)
             || self.is_first_plain_char(current, false)
@@ -606,6 +622,9 @@ impl From<LexToken> for LinkedList<LexToken> {
     }
 }
 
+/// Scope of one Yaml collection. Stores the leftmost border of the scope. Any tokens to the right
+/// of this border will belong to that scope.
+/// https://yaml.org/spec/1.2.2/#82-block-collection-styles
 #[derive(Debug)]
 enum BlockScope {
     Sequence(usize),
@@ -621,6 +640,9 @@ impl BlockScope {
         Self::Sequence(coordinate.column)
     }
 
+    /// Whether the supplied coordinate strictly belongs to this scope, i.e. it doesn't share the
+    /// scope's border.
+    /// Used to check whether the supplied coordinate is the start of a new
     fn indent(&self, coordinate: TextCoordinate) -> bool {
         match self {
             Self::Sequence(border) => coordinate.column > *border,
@@ -669,6 +691,7 @@ impl BlockScope {
 }
 
 struct ScopedTokens {
+    /// Whether to enter a new scope
     new_scope: Option<BlockScope>,
     tokens: LinkedList<LexToken>,
 }
