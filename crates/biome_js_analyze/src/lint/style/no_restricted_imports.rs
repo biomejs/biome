@@ -20,10 +20,10 @@ use biome_js_syntax::{
 use biome_rowan::{
     AstNode, AstSeparatedList, SyntaxNode, SyntaxNodeCast, SyntaxToken, TextRange, TokenText,
 };
+use biome_string_case::comparable_token::ComparableToken;
 use rustc_hash::FxHashMap;
 use serde::{Deserialize, Serialize};
 
-use crate::assist::source::organize_imports::comparable_token::ComparableToken;
 use crate::assist::source::organize_imports::import_groups::{
     ImportSourceCandidate, SourcesMatcher,
 };
@@ -756,7 +756,7 @@ impl PatternOptions {
         import_source_text: &TokenText,
     ) -> Vec<RestrictedImportMessage> {
         if let Some(group) = &self.group {
-            let source = ImportSource::from(ComparableToken(import_source_text.clone()));
+            let source = ImportSource::from(ComparableToken{token: import_source_text.clone()});
             let candidate = ImportSourceCandidate::new(&source);
             if group.is_match(&candidate) {
                 return check_import_restrictions(
