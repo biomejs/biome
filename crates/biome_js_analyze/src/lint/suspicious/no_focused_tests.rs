@@ -102,6 +102,14 @@ impl Rule for NoFocusedTests {
     ) -> Option<RuleDiagnostic> {
         // if invoked in square brackets such as it["only"] computed member expression, strip quotes
         let name = name.text().replace('"', "");
+
+        let secondary_note_suffix = "to ensure all tests are executed.";
+        let secondary_note = if name == ONLY_KEYWORD {
+            markup! {"Consider removing '"{name}"' "{secondary_note_suffix}""}
+        } else {
+            markup! {"Consider removing 'f' prefix from '"{name}"' "{secondary_note_suffix}""}
+        };
+
         Some(
             RuleDiagnostic::new(
                 rule_category!(),
@@ -110,8 +118,8 @@ impl Rule for NoFocusedTests {
                     "Don't focus the test."
                 },
             )
-                .note(markup! {"The "<Emphasis>""{name}""</Emphasis>" method is often used for debugging or during implementation. It should be removed before deploying to production."})
-                .note(markup! {"Consider removing "<Emphasis>""{name}""</Emphasis>" to ensure all tests are executed."})
+                .note(markup! {"The '"{name}"' method is often used for debugging or during implementation."})
+                .note(secondary_note)
         )
     }
 
