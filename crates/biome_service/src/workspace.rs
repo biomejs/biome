@@ -1572,3 +1572,4 @@ impl<W: Workspace + ?Sized> Drop for FileGuard<'_, W> {
 #[cfg(test)]
 #[path = "workspace.tests.rs"]
 mod tests;
+mod injection;
