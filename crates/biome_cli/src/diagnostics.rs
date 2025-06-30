@@ -516,7 +516,7 @@ impl Diagnostic for StdinDiagnostic {
             },
             Self::NoExtension => {
                 fmt.write_markup(markup!{
-                    "The file passed via "<Emphasis>"--stdin-file-path"</Emphasis>" doesn't have an extension. Biome needs a file extension to know how handle the file."
+                    "The file passed via "<Emphasis>"--stdin-file-path"</Emphasis>" doesn't have an extension. Biome needs a file extension to know how to handle the file."
                 })
             }
         }

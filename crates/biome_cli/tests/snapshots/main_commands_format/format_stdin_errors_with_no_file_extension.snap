@@ -13,7 +13,7 @@ function f() {return{}}
 ```block
 stdin ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The file passed via --stdin-file-path doesn't have an extension. Biome needs a file extension to know how handle the file.
+  ! The file passed via --stdin-file-path doesn't have an extension. Biome needs a file extension to know how to handle the file.
   
 
 ```
