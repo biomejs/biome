@@ -23,8 +23,8 @@ use std::sync::Arc;
 use std::{fs::read_to_string, slice};
 
 tests_macros::gen_tests! {"tests/specs/**/*.{cjs,cts,js,mjs,jsx,tsx,ts,json,jsonc,svelte}", crate::run_test, "module"}
-tests_macros::gen_tests! {"tests/suppression/**/*.{js,ts,cjs,cjs,mjs,mts,jsx,tsx}", crate::run_suppression_test, "module"}
-tests_macros::gen_tests! {"tests/multiple_rules/**/*.{js,ts,cjs,cjs,mjs,mts,jsx,tsx}", crate::run_multi_rule_test, "module"}
+tests_macros::gen_tests! {"tests/suppression/**/*.{cjs,cts,js,jsx,tsx,ts,json,jsonc,svelte}", crate::run_suppression_test, "module"}
+tests_macros::gen_tests! {"tests/multiple_rules/**/*.{cjs,cts,js,jsx,tsx,ts,json,jsonc,svelte}", crate::run_multi_rule_test, "module"}
 tests_macros::gen_tests! {"tests/plugin/*.grit", crate::run_plugin_test, "module"}
 
 /// Checks if any of the enabled rules is in the project domain and requires the module graph.
