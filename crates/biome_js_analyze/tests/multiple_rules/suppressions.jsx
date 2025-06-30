@@ -120,6 +120,18 @@ function narrowThenWide() {
   )
 }
 
+function narrowThenWideUnused() {
+  return (
+    // biome-ignore lint/a11y/useKeyWithClickEvents: ...
+    // biome-ignore lint/a11y/useSemanticElements: ...
+    // biome-ignore lint: ...
+    <span
+      role="button"
+      onClick={()=>null}
+    >Some text</span>
+  )
+}
+
 function narrowUnusedThenWide() {
   return (
     // biome-ignore lint/security/noBlankTarget: ...

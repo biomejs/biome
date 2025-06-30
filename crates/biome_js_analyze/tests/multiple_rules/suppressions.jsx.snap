@@ -126,6 +126,18 @@ function narrowThenWide() {
   )
 }
 
+function narrowThenWideUnused() {
+  return (
+    // biome-ignore lint/a11y/useKeyWithClickEvents: ...
+    // biome-ignore lint/a11y/useSemanticElements: ...
+    // biome-ignore lint: ...
+    <span
+      role="button"
+      onClick={()=>null}
+    >Some text</span>
+  )
+}
+
 function narrowUnusedThenWide() {
   return (
     // biome-ignore lint/security/noBlankTarget: ...
@@ -566,16 +578,31 @@ suppressions.jsx:104:5 suppressions/unused ━━━━━━━━━━━━�
 ```
 
 ```
-suppressions.jsx:125:5 suppressions/unused ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+suppressions.jsx:127:5 suppressions/unused ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Suppression comment has no effect. Remove the suppression or make sure you are suppressing the correct rule.
   
-    123 │ function narrowUnusedThenWide() {
-    124 │   return (
-  > 125 │     // biome-ignore lint/security/noBlankTarget: ...
+    125 │     // biome-ignore lint/a11y/useKeyWithClickEvents: ...
+    126 │     // biome-ignore lint/a11y/useSemanticElements: ...
+  > 127 │     // biome-ignore lint: ...
+        │     ^^^^^^^^^^^^^^^^^^^^^^^^^
+    128 │     <span
+    129 │       role="button"
+  
+
+```
+
+```
+suppressions.jsx:137:5 suppressions/unused ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Suppression comment has no effect. Remove the suppression or make sure you are suppressing the correct rule.
+  
+    135 │ function narrowUnusedThenWide() {
+    136 │   return (
+  > 137 │     // biome-ignore lint/security/noBlankTarget: ...
         │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    126 │     // biome-ignore lint: ...
-    127 │     <span
+    138 │     // biome-ignore lint: ...
+    139 │     <span
   
 
 ```
