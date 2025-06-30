@@ -126,8 +126,7 @@ pub(crate) struct LineSuppression {
     pub(crate) comment_span: TextRange,
     /// Range of source text this comment is suppressing lint rules for
     pub(crate) text_range: TextRange,
-    /// Set to true if this comment has set the `suppress_all` flag to true
-    /// (must be restored to false on expiration)
+    /// All rules from groups included here are ignored.
     pub(crate) suppressed_categories: RuleCategories,
     /// List of all the rules this comment has started suppressing (must be
     /// removed from the suppressed set on expiration)
@@ -408,7 +407,7 @@ impl<'analyzer> Suppressions<'analyzer> {
         rule_category: RuleCategory,
     ) -> Result<(), AnalyzerSuppressionDiagnostic> {
         if let Some(suppression) = self.line_suppressions.last_mut() {
-            if (suppression.line_index) == (self.line_index) {
+            if suppression.line_index == self.line_index {
                 suppression.already_suppressed = already_suppressed;
 
                 match filter {
@@ -436,7 +435,6 @@ impl<'analyzer> Suppressions<'analyzer> {
                         if let Some(instance) = instance {
                             suppression.suppressed_instances.insert(instance, filter);
                         }
-                        suppression.suppressed_categories.insert(rule_category);
                     }
                 }
                 return Ok(());
