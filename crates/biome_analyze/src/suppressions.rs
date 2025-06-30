@@ -402,13 +402,14 @@ impl<'analyzer> Suppressions<'analyzer> {
         filter: Option<RuleFilter<'static>>,
         plugin_name: Option<String>,
         instance: Option<String>,
-        current_range: TextRange,
+        comment_range: TextRange,
         already_suppressed: Option<TextRange>,
         rule_category: RuleCategory,
     ) -> Result<(), AnalyzerSuppressionDiagnostic> {
         if let Some(suppression) = self.line_suppressions.last_mut() {
             if suppression.line_index == self.line_index {
                 suppression.already_suppressed = already_suppressed;
+                suppression.comment_span = suppression.comment_span.cover(comment_range);
 
                 match filter {
                     None => {
@@ -442,8 +443,8 @@ impl<'analyzer> Suppressions<'analyzer> {
         }
 
         let mut suppression = LineSuppression {
-            comment_span: current_range,
-            text_range: current_range,
+            comment_span: comment_range,
+            text_range: comment_range,
             line_index: self.line_index,
             already_suppressed,
             ..Default::default()

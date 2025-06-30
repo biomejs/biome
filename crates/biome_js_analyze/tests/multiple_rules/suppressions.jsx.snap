@@ -396,8 +396,10 @@ suppressions.jsx:68:5 suppressions/unused ━━━━━━━━━━━━�
     67 │   return (
   > 68 │     // biome-ignore lint/style/noImplicitBoolean: ...
        │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    69 │     // biome-ignore lint/security/noBlankTarget: ...
+  > 69 │     // biome-ignore lint/security/noBlankTarget: ...
+       │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     70 │     <span
+    71 │       role="button"
   
 
 ```
