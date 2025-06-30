@@ -578,7 +578,7 @@ pub struct ServerFactory {
 
 impl Default for ServerFactory {
     fn default() -> Self {
-        Self::new_with_fs(Box::new(MemoryFileSystem::default()))
+        Self::new_with_fs(Arc::new(MemoryFileSystem::default()))
     }
 }
 
@@ -589,7 +589,7 @@ impl ServerFactory {
         Self {
             cancellation: Arc::default(),
             workspace: Arc::new(WorkspaceServer::new(
-                Box::new(OsFileSystem::default()),
+                Arc::new(OsFileSystem::default()),
                 instruction_tx,
                 service_data_tx,
                 None,
@@ -603,7 +603,7 @@ impl ServerFactory {
     }
 
     /// Constructor for use in tests.
-    pub fn new_with_fs(fs: Box<dyn FsWithResolverProxy>) -> Self {
+    pub fn new_with_fs(fs: Arc<dyn FsWithResolverProxy>) -> Self {
         let (watcher_tx, _) = bounded(0);
         let (service_data_tx, service_data_rx) = watch::channel(ServiceDataNotification::Updated);
         Self {

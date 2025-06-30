@@ -1,3 +1,5 @@
+use std::sync::Arc;
+
 use biome_fs::{BiomePath, MemoryFileSystem};
 use camino::Utf8PathBuf;
 use crossbeam::channel::unbounded;
@@ -17,12 +19,12 @@ use crate::{
 fn close_file_through_watcher_before_client() {
     const FILE_CONTENT: &str = "import 'foo';";
 
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     fs.insert(Utf8PathBuf::from("/project/a.js"), FILE_CONTENT);
 
     let (watcher_tx, _) = unbounded();
     let (service_data_tx, _) = watch::channel(ServiceDataNotification::Updated);
-    let workspace = WorkspaceServer::new(Box::new(fs), watcher_tx, service_data_tx, None);
+    let workspace = WorkspaceServer::new(Arc::new(fs), watcher_tx, service_data_tx, None);
     let OpenProjectResult { project_key, .. } = workspace
         .open_project(OpenProjectParams {
             path: BiomePath::new("/project"),
@@ -83,12 +85,12 @@ fn close_file_through_watcher_before_client() {
 fn close_file_from_client_before_watcher() {
     const FILE_CONTENT: &str = "import 'foo';";
 
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     fs.insert(Utf8PathBuf::from("/project/a.js"), FILE_CONTENT);
 
     let (watcher_tx, _) = unbounded();
     let (service_data_tx, _) = watch::channel(ServiceDataNotification::Updated);
-    let workspace = WorkspaceServer::new(Box::new(fs), watcher_tx, service_data_tx, None);
+    let workspace = WorkspaceServer::new(Arc::new(fs), watcher_tx, service_data_tx, None);
     let OpenProjectResult { project_key, .. } = workspace
         .open_project(OpenProjectParams {
             path: BiomePath::new("/project"),
@@ -150,12 +152,12 @@ fn close_modified_file_from_client_before_watcher() {
     const FILE_CONTENT: &str = "import 'foo';";
     const FILE_CONTENT_MODIFIED: &str = "import 'fooo';";
 
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     fs.insert(Utf8PathBuf::from("/project/a.js"), FILE_CONTENT);
 
     let (watcher_tx, rx) = unbounded();
     let (service_data_tx, _) = watch::channel(ServiceDataNotification::Updated);
-    let workspace = WorkspaceServer::new(Box::new(fs), watcher_tx, service_data_tx, None);
+    let workspace = WorkspaceServer::new(Arc::new(fs), watcher_tx, service_data_tx, None);
     let OpenProjectResult { project_key, .. } = workspace
         .open_project(OpenProjectParams {
             path: BiomePath::new("/project"),

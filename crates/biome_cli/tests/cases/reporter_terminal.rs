@@ -57,7 +57,7 @@ const MAIN_3: &str = r#"
 
 #[test]
 fn reports_diagnostics_check_command_verbose() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     let file_path1 = Utf8Path::new("main.ts");
@@ -98,7 +98,7 @@ fn reports_diagnostics_check_command_verbose() {
 
 #[test]
 fn reports_diagnostics_check_write_command_verbose() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     let file_path1 = Utf8Path::new("main.ts");

@@ -665,7 +665,7 @@ mod test {
 
     #[test]
     fn should_not_load_a_configuration_yml() {
-        let mut fs = MemoryFileSystem::default();
+        let fs = MemoryFileSystem::default();
         fs.insert(Utf8PathBuf::from("biome.yml"), "content".to_string());
         let path_hint = ConfigurationPathHint::FromUser(Utf8PathBuf::from("biome.yml"));
 
@@ -676,7 +676,7 @@ mod test {
 
     #[test]
     fn should_skip_non_root_configuration() {
-        let mut fs = MemoryFileSystem::default();
+        let fs = MemoryFileSystem::default();
         fs.insert(
             Utf8PathBuf::from("/biome.json"),
             r#"{ "linter": { "enabled": false } }"#.to_string(),
@@ -704,7 +704,7 @@ mod test {
 
     #[test]
     fn should_refuse_user_provided_non_root_configuration() {
-        let mut fs = MemoryFileSystem::default();
+        let fs = MemoryFileSystem::default();
         fs.insert(
             Utf8PathBuf::from("/biome.json"),
             r#"{ "linter": { "enabled": false } }"#.to_string(),
