@@ -474,6 +474,12 @@ impl<'a> ResolvedTypeMember<'a> {
         self.member.is_getter()
     }
 
+    pub fn is_index_signature_with_ty(&self, predicate: impl Fn(&TypeReference) -> bool) -> bool {
+        self.member.is_index_signature_with_ty(|reference| {
+            predicate(&self.apply_module_id_to_reference(reference))
+        })
+    }
+
     #[inline]
     pub fn is_static(&self) -> bool {
         self.member.is_static()

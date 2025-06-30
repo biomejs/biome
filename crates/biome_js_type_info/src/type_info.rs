@@ -25,7 +25,7 @@ use crate::globals::{
 use crate::type_info::literal::{BooleanLiteral, NumberLiteral, StringLiteral};
 use crate::{
     GLOBAL_RESOLVER, ModuleId, Resolvable, ResolvedTypeData, ResolvedTypeId, ResolvedTypeMember,
-    TypeResolver,
+    ResolverId, TypeResolver,
 };
 
 const UNKNOWN: TypeData = TypeData::Reference(TypeReference::Resolved(GLOBAL_UNKNOWN_ID));
@@ -161,7 +161,7 @@ impl Type {
     }
 
     /// Returns whether this type is a number or a literal number.
-    pub fn is_number(&self) -> bool {
+    pub fn is_number_or_number_literal(&self) -> bool {
         self.id == GLOBAL_NUMBER_ID
             || self.as_raw_data().is_some_and(|ty| match ty {
                 TypeData::Number => true,
@@ -181,8 +181,8 @@ impl Type {
             .is_some_and(|ty| ty.is_instance_of(self.resolver.as_ref(), GLOBAL_PROMISE_ID))
     }
 
-    /// Returns whether this type is a string.
-    pub fn is_string(&self) -> bool {
+    /// Returns whether this type is a string or a literal string.
+    pub fn is_string_or_string_literal(&self) -> bool {
         self.id == GLOBAL_STRING_ID
             || self.as_raw_data().is_some_and(|ty| match ty {
                 TypeData::String => true,
@@ -415,6 +415,12 @@ impl From<Module> for TypeData {
 impl From<Namespace> for TypeData {
     fn from(value: Namespace) -> Self {
         Self::Namespace(Box::new(value))
+    }
+}
+
+impl From<Tuple> for TypeData {
+    fn from(value: Tuple) -> Self {
+        Self::Tuple(Box::new(value))
     }
 }
 
@@ -911,38 +917,28 @@ impl Tuple {
         &self.0
     }
 
-    /// Returns the type at the given index.
-    pub fn get_ty<'a>(
-        &'a self,
-        resolver: &'a mut dyn TypeResolver,
-        index: usize,
-    ) -> ResolvedTypeData<'a> {
-        let resolved_id = if let Some(elem_type) = self.0.get(index) {
-            let ty = elem_type.ty.clone();
-            let id = if elem_type.is_optional {
-                resolver.optional(ty)
-            } else {
-                resolver.register_type(Cow::Owned(TypeData::reference(ty)))
-            };
-            ResolvedTypeId::new(resolver.level(), id)
-        } else {
-            self.0
-                .last()
-                .filter(|last| last.is_rest)
-                .map(|last| resolver.optional(last.ty.clone()))
-                .map_or(GLOBAL_UNKNOWN_ID, |id| {
-                    ResolvedTypeId::new(resolver.level(), id)
-                })
-        };
-
-        resolver
-            .get_by_resolved_id(resolved_id)
-            .expect("tuple element type must be registered")
+    /// Returns the element at the given index.
+    pub fn get_element(&self, index: usize) -> Option<&TupleElementType> {
+        self.0
+            .get(index)
+            .or_else(|| self.0.last().filter(|last| last.is_rest))
     }
 
     /// Returns a new tuple starting at the given index.
-    pub fn slice_from(&self, index: usize) -> Self {
-        Self(self.0.iter().skip(index).cloned().collect())
+    pub fn slice_from(&self, resolver_id: ResolverId, index: usize) -> Self {
+        Self(
+            self.0
+                .iter()
+                .skip(index)
+                .map(|element| TupleElementType {
+                    ty: resolver_id
+                        .apply_module_id_to_reference(&element.ty)
+                        .into_owned(),
+                    name: element.name.clone(),
+                    ..*element
+                })
+                .collect(),
+        )
     }
 }
 
@@ -1000,6 +996,13 @@ impl TypeMember {
         self.kind.is_constructor()
     }
 
+    pub fn is_index_signature_with_ty(&self, predicate: impl Fn(&TypeReference) -> bool) -> bool {
+        match &self.kind {
+            TypeMemberKind::IndexSignature(ty) => predicate(ty),
+            _ => false,
+        }
+    }
+
     #[inline]
     pub fn is_getter(&self) -> bool {
         self.kind.is_getter()
@@ -1016,12 +1019,13 @@ impl TypeMember {
 }
 
 /// Kind of a [`TypeMember`], with an optional name.
-// TODO: Include getters, setters and index signatures.
+// TODO: Include setters.
 #[derive(Clone, Debug, Eq, Hash, PartialEq, Resolvable)]
 pub enum TypeMemberKind {
     CallSignature,
     Constructor,
     Getter(Text),
+    IndexSignature(TypeReference),
     Named(Text),
     NamedStatic(Text),
 }
@@ -1029,7 +1033,7 @@ pub enum TypeMemberKind {
 impl TypeMemberKind {
     pub fn has_name(&self, name: &str) -> bool {
         match self {
-            Self::CallSignature => false,
+            Self::CallSignature | Self::IndexSignature(_) => false,
             Self::Constructor => name == "constructor",
             Self::Getter(own_name) | Self::Named(own_name) | Self::NamedStatic(own_name) => {
                 *own_name == name
@@ -1059,7 +1063,7 @@ impl TypeMemberKind {
 
     pub fn name(&self) -> Option<Text> {
         match self {
-            Self::CallSignature => None,
+            Self::CallSignature | Self::IndexSignature(_) => None,
             Self::Constructor => Some(Text::Static("constructor")),
             Self::Getter(name) | Self::Named(name) | Self::NamedStatic(name) => Some(name.clone()),
         }
