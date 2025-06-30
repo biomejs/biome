@@ -121,6 +121,9 @@ impl LSPServer {
     async fn setup_capabilities(&self) {
         let mut capabilities = CapabilitySet::default();
 
+        let is_linting_and_formatting_disabled = self.session.is_linting_and_formatting_disabled();
+        debug!("Requires configuration: {is_linting_and_formatting_disabled}");
+
         capabilities.add_capability(
             "biome_did_change_extension_settings",
             "workspace/didChangeConfiguration",
@@ -193,7 +196,7 @@ impl LSPServer {
         capabilities.add_capability(
             "biome_formatting",
             "textDocument/formatting",
-            if self.session.is_linting_and_formatting_disabled() {
+            if is_linting_and_formatting_disabled || !self.session.can_register_formatting() {
                 CapabilityStatus::Disable
             } else {
                 CapabilityStatus::Enable(None)
@@ -202,7 +205,7 @@ impl LSPServer {
         capabilities.add_capability(
             "biome_range_formatting",
             "textDocument/rangeFormatting",
-            if self.session.is_linting_and_formatting_disabled() {
+            if is_linting_and_formatting_disabled || !self.session.can_register_range_formatting() {
                 CapabilityStatus::Disable
             } else {
                 CapabilityStatus::Enable(None)
@@ -211,7 +214,8 @@ impl LSPServer {
         capabilities.add_capability(
             "biome_on_type_formatting",
             "textDocument/onTypeFormatting",
-            if self.session.is_linting_and_formatting_disabled() {
+            if is_linting_and_formatting_disabled || !self.session.can_register_on_type_formatting()
+            {
                 CapabilityStatus::Disable
             } else {
                 CapabilityStatus::Enable(Some(json!(DocumentOnTypeFormattingRegistrationOptions {
@@ -222,12 +226,10 @@ impl LSPServer {
             },
         );
 
-        let f = self.session.is_linting_and_formatting_disabled();
-        debug!("Requires configuration: {f}");
         capabilities.add_capability(
             "biome_code_action",
             "textDocument/codeAction",
-            if self.session.is_linting_and_formatting_disabled() {
+            if is_linting_and_formatting_disabled || !self.session.can_register_code_action() {
                 CapabilityStatus::Disable
             } else {
                 CapabilityStatus::Enable(Some(json!(CodeActionProviderCapability::from(
