@@ -5,6 +5,7 @@ use super::{
 };
 use crate::settings::{check_feature_activity, check_override_feature_activity};
 use crate::workspace::FixFileResult;
+use crate::workspace::{EmbeddedCssContent, EmbeddedJsContent};
 use crate::{
     WorkspaceError,
     settings::{ServiceLanguage, Settings, WorkspaceSettingsHandle},
@@ -12,6 +13,7 @@ use crate::{
 };
 use biome_analyze::AnalyzerOptions;
 use biome_configuration::html::{HtmlFormatterConfiguration, HtmlFormatterEnabled};
+use biome_css_parser::{CssParserOptions, parse_css_with_offset_and_cache};
 use biome_diagnostics::{Diagnostic, Severity};
 use biome_formatter::{
     AttributePosition, BracketSameLine, IndentStyle, IndentWidth, LineEnding, LineWidth, Printed,
@@ -24,9 +26,11 @@ use biome_html_formatter::{
     format_node,
 };
 use biome_html_parser::parse_html_with_cache;
-use biome_html_syntax::{HtmlLanguage, HtmlRoot, HtmlSyntaxNode};
+use biome_html_syntax::{HtmlElement, HtmlLanguage, HtmlRoot, HtmlSyntaxNode};
+use biome_js_parser::{JsParserOptions, parse_js_with_offset_and_cache};
+use biome_js_syntax::JsFileSource;
 use biome_parser::AnyParse;
-use biome_rowan::{AstNode, NodeCache};
+use biome_rowan::{AstNode, AstNodeList, NodeCache};
 use camino::Utf8Path;
 use tracing::debug_span;
 
@@ -255,6 +259,119 @@ fn parse(
         any_parse: parse.into(),
         language: Some(file_source),
     }
+}
+
+/// Extracts embedded JavaScript content from HTML script elements.
+///
+/// This function walks the HTML syntax tree to find all `<script>` elements
+/// and extracts their content for offset-aware JavaScript parsing.
+///
+/// # Arguments
+/// * `html_root` - The parsed HTML syntax tree
+/// * `source_text` - The original HTML source text
+/// * `cache` - Node cache for performance optimization
+///
+/// # Returns
+/// A vector of `EmbeddedJsContent` containing parsed JavaScript with correct offsets
+pub(crate) fn extract_embedded_scripts(
+    html_root: &HtmlRoot,
+    cache: &mut NodeCache,
+) -> Vec<EmbeddedJsContent> {
+    let mut scripts = Vec::new();
+
+    // Walk through all HTML elements looking for script tags
+    for element in html_root.syntax().descendants() {
+        let Some(html_element) = HtmlElement::cast(element.clone()) else {
+            continue;
+        };
+        let Ok(opening_element) = html_element.opening_element() else {
+            continue;
+        };
+        let Ok(name) = opening_element.name() else {
+            continue;
+        };
+        let name_text = name.syntax().text_trimmed().to_string();
+
+        if name_text.eq_ignore_ascii_case("script") {
+            let list: Vec<_> = html_element
+                .children()
+                .iter()
+                .filter_map(|child| child.as_html_content().cloned())
+                .filter_map(|child| {
+                    let content = child.value_token().ok()?;
+                    let parse = parse_js_with_offset_and_cache(
+                        content.text(),
+                        content.text_range().start(),
+                        JsFileSource::js_script(),
+                        JsParserOptions::default(),
+                        cache,
+                    );
+
+                    Some(EmbeddedJsContent {
+                        parse: parse.into(),
+                        element_range: child.range(),
+                        content_range: content.text_range(),
+                        content_offset: content.text_range().start(),
+                    })
+                })
+                .collect();
+
+            scripts.extend(list);
+        }
+    }
+    scripts
+}
+
+/// Extracts embedded CSS content from HTML style elements.
+pub(crate) fn parse_embedded_styles(
+    html_root: &HtmlRoot,
+    cache: &mut NodeCache,
+) -> Vec<EmbeddedCssContent> {
+    let mut styles = Vec::new();
+
+    // Walk through all HTML elements looking for style tags
+    for element in html_root.syntax().descendants() {
+        let Some(html_element) = HtmlElement::cast(element.clone()) else {
+            continue;
+        };
+        let Ok(opening_element) = html_element.opening_element() else {
+            continue;
+        };
+        let Ok(name) = opening_element.name() else {
+            continue;
+        };
+        let Ok(name) = name.value_token() else {
+            continue;
+        };
+
+        if name.text_trimmed() == "style" {
+            let list: Vec<_> = html_element
+                .children()
+                .iter()
+                .filter_map(|child| child.as_html_content().cloned())
+                .filter_map(|child| {
+                    let content = child.value_token().ok()?;
+                    let parse = parse_css_with_offset_and_cache(
+                        content.text(),
+                        content.text_range().start(),
+                        cache,
+                        CssParserOptions::default(),
+                    );
+
+                    Some(EmbeddedCssContent {
+                        parse: parse.into(),
+                        element_range: child.range(),
+                        content_range: content.text_range(),
+                        content_offset: content.text_range().start(),
+                    })
+                })
+                .collect();
+
+            styles.extend(list);
+        }
+    }
+
+    styles
 }
 
 fn debug_syntax_tree(_biome_path: &BiomePath, parse: AnyParse) -> GetSyntaxTreeResult {

@@ -1,4 +1,4 @@
-//! Utilities for high level parsing of js code.
+//! Utilities for high-level parsing of js code.
 
 use crate::*;
 pub use biome_js_syntax::{
@@ -6,7 +6,7 @@ pub use biome_js_syntax::{
 };
 use biome_parser::token_source::Trivia;
 use biome_parser::{AnyParse, event::Event};
-use biome_rowan::{AstNode, NodeCache};
+use biome_rowan::{AstNode, NodeCache, SyntaxNodeWithOffset};
 use std::marker::PhantomData;
 
 /// A utility struct for managing the result of a parser job
@@ -280,4 +280,145 @@ pub fn parse_js_with_cache(
     biome_parser::event::process(&mut tree_sink, events, errors);
     let (green, parse_errors) = tree_sink.finish();
     Parse::new(green, parse_errors)
+}
+
+/// A utility struct for managing the result of an offset-aware parser job
+#[derive(Clone, Debug)]
+pub struct JsOffsetParse {
+    root: SyntaxNodeWithOffset<JsLanguage>,
+    diagnostics: Vec<ParseDiagnostic>,
+}
+
+impl JsOffsetParse {
+    pub fn new(root: SyntaxNodeWithOffset<JsLanguage>, diagnostics: Vec<ParseDiagnostic>) -> Self {
+        Self { root, diagnostics }
+    }
+
+    /// The offset-aware syntax node represented by this Parse result
+    pub fn syntax(&self) -> &biome_rowan::SyntaxNodeWithOffset<JsLanguage> {
+        &self.root
+    }
+
+    /// Get the diagnostics which occurred when parsing
+    pub fn diagnostics(&self) -> &[ParseDiagnostic] {
+        &self.diagnostics
+    }
+
+    /// Get the diagnostics which occurred when parsing
+    pub fn into_diagnostics(self) -> Vec<ParseDiagnostic> {
+        self.diagnostics
+    }
+
+    /// Returns [true] if the parser encountered some errors during the parsing.
+    pub fn has_errors(&self) -> bool {
+        self.diagnostics
+            .iter()
+            .any(|diagnostic| diagnostic.is_error())
+    }
+
+    /// Convert this parse result into a typed AST node.
+    ///
+    /// # Panics
+    /// Panics if the node represented by this parse result mismatches.
+    pub fn tree(&self) -> AnyJsRoot {
+        AnyJsRoot::unwrap_cast(self.root.inner().clone())
+    }
+
+    /// Get the base offset applied to this parse result
+    pub fn base_offset(&self) -> biome_rowan::TextSize {
+        self.root.base_offset()
+    }
+
+    /// Convert back to the underlying parse result, discarding offset information
+    pub fn into_inner(self) -> Parse<JsLanguage> {
+        Parse::new(self.root.into_inner(), self.diagnostics)
+    }
+}
+
+/// Parses JavaScript/TypeScript code with an offset for embedded content.
+///
+/// This function is designed for parsing embedded JavaScript content (e.g., in HTML `<script>` tags)
+/// where the source positions need to be adjusted relative to the parent document.
+///
+/// # Arguments
+/// * `text` - The JavaScript/TypeScript source code to parse
+/// * `base_offset` - The offset to apply to all source positions
+/// * `source_type` - The file source configuration (JS, TS, JSX, etc.)
+/// * `options` - Parser options
+///
+/// # Examples
+/// ```
+/// use biome_js_parser::{JsParserOptions, parse_js_with_offset};
+/// use biome_js_syntax::JsFileSource;
+/// use biome_rowan::TextSize;
+///
+/// // Parsing embedded JavaScript starting at position 100 in an HTML document
+/// let js_code = "console.log('Hello, world!');";
+/// let offset = TextSize::from(100);
+/// let parse = parse_js_with_offset(
+///     js_code,
+///     offset,
+///     JsFileSource::js_module(),
+///     JsParserOptions::default()
+/// );
+///
+/// // All text ranges in the resulting AST will be offset by 100
+/// assert_eq!(parse.base_offset(), offset);
+/// ```
+pub fn parse_js_with_offset(
+    text: &str,
+    base_offset: biome_rowan::TextSize,
+    source_type: JsFileSource,
+    options: JsParserOptions,
+) -> JsOffsetParse {
+    let mut cache = NodeCache::default();
+    parse_js_with_offset_and_cache(text, base_offset, source_type, options, &mut cache)
+}
+
+/// Parses JavaScript/TypeScript code with an offset and cache for embedded content.
+///
+/// This is the cache-enabled version of [`parse_js_with_offset`] for improved performance
+/// when parsing multiple embedded code blocks.
+pub fn parse_js_with_offset_and_cache(
+    text: &str,
+    base_offset: biome_rowan::TextSize,
+    source_type: JsFileSource,
+    options: JsParserOptions,
+    cache: &mut NodeCache,
+) -> JsOffsetParse {
+    let (events, errors, tokens) = parse_common(text, source_type, options);
+    let mut tree_sink =
+        crate::JsOffsetLosslessTreeSink::with_cache(text, &tokens, cache, base_offset);
+    biome_parser::event::process(&mut tree_sink, events, errors);
+    let (offset_node, parse_errors) = tree_sink.finish();
+    JsOffsetParse::new(offset_node, parse_errors)
+}
+
+/// Parse JavaScript script text with an offset for embedded content.
+///
+/// This is the offset-aware version of [`parse_script`] for embedded script tags.
+pub fn parse_script_with_offset(
+    text: &str,
+    base_offset: biome_rowan::TextSize,
+    options: JsParserOptions,
+) -> JsOffsetParse {
+    let parse = parse_js_with_offset(
+        text,
+        base_offset,
+        JsFileSource::js_module().with_module_kind(ModuleKind::Script),
+        options,
+    );
+    JsOffsetParse::new(parse.root, parse.diagnostics)
+}
+
+/// Parse JavaScript module text with an offset for embedded content.
+///
+/// This is the offset-aware version of [`parse_module`] for embedded script tags.
+pub fn parse_module_with_offset(
+    text: &str,
+    base_offset: biome_rowan::TextSize,
+    options: JsParserOptions,
+) -> JsOffsetParse {
+    let parse = parse_js_with_offset(text, base_offset, JsFileSource::js_module(), options);
+    JsOffsetParse::new(parse.root, parse.diagnostics)
 }

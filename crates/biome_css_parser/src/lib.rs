@@ -1,15 +1,14 @@
-//! Extremely fast, lossless, and error tolerant CSS Parser.
+//! Extremely fast, lossless, and error-tolerant CSS Parser.
 
 #![deny(clippy::use_self)]
 
 use crate::parser::CssParser;
-
 use crate::syntax::parse_root;
 use biome_css_factory::CssSyntaxFactory;
 use biome_css_syntax::{CssLanguage, CssRoot, CssSyntaxNode};
+use biome_parser::AnyParse;
 pub use biome_parser::prelude::*;
-use biome_parser::{AnyParse, tree_sink::LosslessTreeSink};
-use biome_rowan::{AstNode, NodeCache};
+use biome_rowan::{AstNode, NodeCache, SyntaxNodeWithOffset};
 pub use parser::CssParserOptions;
 
 mod lexer;
@@ -21,6 +20,9 @@ mod token_source;
 
 pub(crate) type CssLosslessTreeSink<'source> =
     LosslessTreeSink<'source, CssLanguage, CssSyntaxFactory>;
+
+pub(crate) type CssOffsetLosslessTreeSink<'source> =
+    biome_parser::tree_sink::OffsetLosslessTreeSink<'source, CssLanguage, CssSyntaxFactory>;
 
 pub fn parse_css(source: &str, options: CssParserOptions) -> CssParse {
     let mut cache = NodeCache::default();
@@ -117,6 +119,114 @@ impl From<CssParse> for AnyParse {
             diagnostics,
         )
     }
+}
+
+/// A utility struct for managing the result of an offset-aware CSS parser job
+#[derive(Clone, Debug)]
+pub struct CssOffsetParse {
+    root: SyntaxNodeWithOffset<CssLanguage>,
+    diagnostics: Vec<ParseDiagnostic>,
+}
+
+impl CssOffsetParse {
+    pub fn new(root: SyntaxNodeWithOffset<CssLanguage>, diagnostics: Vec<ParseDiagnostic>) -> Self {
+        Self { root, diagnostics }
+    }
+
+    /// The offset-aware syntax node represented by this Parse result
+    pub fn syntax(&self) -> &biome_rowan::SyntaxNodeWithOffset<CssLanguage> {
+        &self.root
+    }
+
+    /// Get the diagnostics which occurred when parsing
+    pub fn diagnostics(&self) -> &[ParseDiagnostic] {
+        &self.diagnostics
+    }
+
+    /// Get the diagnostics which occurred when parsing
+    pub fn into_diagnostics(self) -> Vec<ParseDiagnostic> {
+        self.diagnostics
+    }
+
+    /// Returns [true] if the parser encountered some errors during the parsing.
+    pub fn has_errors(&self) -> bool {
+        self.diagnostics
+            .iter()
+            .any(|diagnostic| diagnostic.is_error())
+    }
+
+    /// Convert this parse into a typed AST node.
+    ///
+    /// # Panics
+    /// Panics if the node represented by this parse result mismatches.
+    pub fn tree(&self) -> CssRoot {
+        CssRoot::unwrap_cast(self.root.inner().clone())
+    }
+
+    /// Get the base offset applied to this parse result
+    pub fn base_offset(&self) -> biome_rowan::TextSize {
+        self.root.base_offset()
+    }
+
+    /// Convert back to the underlying parse result, discarding offset information
+    pub fn into_inner(self) -> CssParse {
+        CssParse::new(self.root.into_inner(), self.diagnostics)
+    }
+}
+
+/// Parses CSS code with an offset for embedded content.
+///
+/// This function is designed for parsing embedded CSS content (e.g., in HTML `<style>` tags)
+/// where the source positions need to be adjusted relative to the parent document.
+///
+/// # Arguments
+/// * `source` - The CSS source code to parse
+/// * `base_offset` - The offset to apply to all source positions
+/// * `options` - Parser options
+///
+/// # Examples
+/// ```
+/// use biome_css_parser::{CssParserOptions, parse_css_with_offset};
+/// use biome_rowan::TextSize;
+///
+/// // Parsing embedded CSS starting at position 50 in an HTML document
+/// let css_code = "body { color: red; }";
+/// let offset = TextSize::from(50);
+/// let parse = parse_css_with_offset(css_code, offset, CssParserOptions::default());
+///
+/// // All text ranges in the resulting AST will be offset by 50
+/// assert_eq!(parse.base_offset(), offset);
+/// ```
+pub fn parse_css_with_offset(
+    source: &str,
+    base_offset: biome_rowan::TextSize,
+    options: CssParserOptions,
+) -> CssOffsetParse {
+    let mut cache = NodeCache::default();
+    parse_css_with_offset_and_cache(source, base_offset, &mut cache, options)
+}
+
+/// Parses CSS code with an offset and cache for embedded content.
+///
+/// This is the cache-enabled version of [`parse_css_with_offset`] for improved performance
+/// when parsing multiple embedded CSS blocks.
+pub fn parse_css_with_offset_and_cache(
+    source: &str,
+    base_offset: biome_rowan::TextSize,
+    cache: &mut NodeCache,
+    options: CssParserOptions,
+) -> CssOffsetParse {
+    let mut parser = CssParser::new(source, options);
+
+    parse_root(&mut parser);
+
+    let (events, diagnostics, trivia) = parser.finish();
+
+    let mut tree_sink = CssOffsetLosslessTreeSink::with_cache(source, &trivia, cache, base_offset);
+    biome_parser::event::process(&mut tree_sink, events, diagnostics);
+    let (offset_node, parse_diagnostics) = tree_sink.finish();
+
+    CssOffsetParse::new(offset_node, parse_diagnostics)
 }
 
 #[cfg(test)]

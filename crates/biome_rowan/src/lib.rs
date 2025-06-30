@@ -45,9 +45,10 @@ pub use crate::{
     syntax::{
         ChainTriviaPiecesIterator, Language, SendNode, SyntaxElement, SyntaxElementChildren,
         SyntaxKind, SyntaxList, SyntaxNode, SyntaxNodeChildren, SyntaxNodeOptionExt,
-        SyntaxRewriter, SyntaxSlot, SyntaxSlots, SyntaxToken, SyntaxTriviaPiece,
-        SyntaxTriviaPieceComments, TriviaPiece, TriviaPieceKind, VisitNodeSignal,
-        chain_trivia_pieces, trim_leading_trivia_pieces, trim_trailing_trivia_pieces,
+        SyntaxNodeWithOffset, SyntaxRewriter, SyntaxSlot, SyntaxSlots, SyntaxToken,
+        SyntaxTokenWithOffset, SyntaxTriviaPiece, SyntaxTriviaPieceComments, TriviaPiece,
+        TriviaPieceKind, VisitNodeSignal, chain_trivia_pieces, trim_leading_trivia_pieces,
+        trim_trailing_trivia_pieces,
     },
     syntax_factory::*,
     syntax_node_text::SyntaxNodeText,

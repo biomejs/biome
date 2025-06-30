@@ -6,8 +6,8 @@ use crate::parser::JsonParser;
 use crate::syntax::parse_root;
 use biome_json_factory::JsonSyntaxFactory;
 use biome_json_syntax::{JsonLanguage, JsonRoot, JsonSyntaxNode};
+use biome_parser::AnyParse;
 pub use biome_parser::prelude::*;
-use biome_parser::{AnyParse, tree_sink::LosslessTreeSink};
 use biome_rowan::{AstNode, NodeCache};
 pub use parser::JsonParserOptions;
 

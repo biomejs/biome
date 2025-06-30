@@ -12,6 +12,7 @@ use super::{
 };
 use crate::configuration::{LoadedConfiguration, ProjectScanComputer, read_config};
 use crate::diagnostics::FileTooLarge;
+use crate::file_handlers::html::{extract_embedded_scripts, parse_embedded_styles};
 use crate::file_handlers::{
     Capabilities, CodeActionsParams, DocumentFileSource, Features, FixAllParams, LintParams,
     ParseResult,
@@ -401,6 +402,37 @@ impl WorkspaceServer {
 
         let opened_by_scanner = reason.is_opened_by_scanner();
 
+        // Second-pass parsing for HTML files with embedded JavaScript and CSS content
+        let (embedded_scripts, embedded_styles) = if let Some(file_source) = self.get_source(index)
+        {
+            if matches!(file_source, DocumentFileSource::Html(_)) {
+                if let Some(Ok(any_parse)) = &syntax {
+                    if let Some(html_root) =
+                        biome_html_syntax::HtmlRoot::cast(any_parse.syntax().clone())
+                    {
+                        let mut node_cache = NodeCache::default();
+                        let scripts = crate::file_handlers::html::extract_embedded_scripts(
+                            &html_root,
+                            &mut node_cache,
+                        );
+                        let styles = crate::file_handlers::html::parse_embedded_styles(
+                            &html_root,
+                            &mut node_cache,
+                        );
+                        (scripts, styles)
+                    } else {
+                        (Vec::new(), Vec::new())
+                    }
+                } else {
+                    (Vec::new(), Vec::new())
+                }
+            } else {
+                (Vec::new(), Vec::new())
+            }
+        } else {
+            (Vec::new(), Vec::new())
+        };
+
         let documents = self.documents.pin();
         let result = documents.compute(path.clone(), |current| {
             let biome_path = BiomePath::new(&path);
@@ -456,6 +488,8 @@ impl WorkspaceServer {
                         file_source_index: index,
                         syntax: syntax.clone(),
                         opened_by_scanner: opened_by_scanner || document.opened_by_scanner,
+                        embedded_scripts: embedded_scripts.clone(),
+                        embedded_styles: embedded_styles.clone(),
                     })
                 }
                 None => Operation::Insert(Document {
@@ -464,6 +498,8 @@ impl WorkspaceServer {
                     file_source_index: index,
                     syntax: syntax.clone(),
                     opened_by_scanner,
+                    embedded_scripts: embedded_scripts.clone(),
+                    embedded_styles: embedded_styles.clone(),
                 }),
             }
         });
@@ -1258,12 +1294,35 @@ impl Workspace for WorkspaceServer {
         let parsed = self.parse(project_key, &path, &content, index, &mut node_cache)?;
         let root = parsed.any_parse.root();
 
+        // Second-pass parsing for HTML files with embedded JavaScript and CSS content
+        let (embedded_scripts, embedded_styles) = if let Some(file_source) = self.get_source(index)
+        {
+            if matches!(file_source, DocumentFileSource::Html(_)) {
+                if let Some(html_root) =
+                    biome_html_syntax::HtmlRoot::cast(parsed.any_parse.syntax().clone())
+                {
+                    let mut embedded_node_cache = NodeCache::default();
+                    let scripts = extract_embedded_scripts(&html_root, &mut embedded_node_cache);
+                    let styles = parse_embedded_styles(&html_root, &mut embedded_node_cache);
+                    (scripts, styles)
+                } else {
+                    (Vec::new(), Vec::new())
+                }
+            } else {
+                (Vec::new(), Vec::new())
+            }
+        } else {
+            (Vec::new(), Vec::new())
+        };
+
         let document = Document {
             content,
             version: Some(version),
             file_source_index: index,
             syntax: Some(Ok(parsed.any_parse)),
             opened_by_scanner,
+            embedded_scripts,
+            embedded_styles,
         };
 
         if persist_node_cache {
