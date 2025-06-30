@@ -604,7 +604,7 @@ export const promise = makePromiseCb();
 
 #[test]
 fn test_resolve_generic_mapped_value() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     fs.insert(
         "/src/index.ts".into(),
         r#"const mapped = [1, 2, 3].map(async (x) => x + 1);
@@ -700,7 +700,7 @@ fn test_resolve_generic_return_value_with_multiple_modules() {
 
 #[test]
 fn test_resolve_import_as_namespace() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     fs.insert(
         "/src/foo.ts".into(),
         r#"
@@ -781,7 +781,7 @@ fn test_resolve_nested_function_call_with_namespace_in_return_type() {
 
 #[test]
 fn test_resolve_return_value_of_function() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     fs.insert(
         "/src/index.ts".into(),
         r#"
@@ -835,7 +835,7 @@ fn test_resolve_return_value_of_function() {
 
 #[test]
 fn test_resolve_type_of_property_with_getter() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     fs.insert(
         "/src/index.ts".into(),
         r#"
@@ -1264,7 +1264,7 @@ fn test_resolve_react_types() {
 
 #[test]
 fn test_resolve_single_reexport() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     fs.insert(
         "/src/foo.ts".into(),
         r#"
@@ -1317,7 +1317,7 @@ fn test_resolve_single_reexport() {
 
 #[test]
 fn test_resolve_multiple_reexports() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     fs.insert(
         "/src/foo.ts".into(),
         r#"
@@ -1543,7 +1543,7 @@ fn test_resolve_promise_from_imported_function_returning_reexported_promise_type
 
 #[test]
 fn test_resolve_type_of_destructured_field_of_intersection_of_interfaces() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     fs.insert(
         "/src/index.ts".into(),
         r#"
@@ -1613,7 +1613,7 @@ const { mutate } = useSWRConfig();
 
 #[test]
 fn test_resolve_type_of_intersection_of_interfaces() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     fs.insert(
         "/src/index.ts".into(),
         r#"interface Foo {
