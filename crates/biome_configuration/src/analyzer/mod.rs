@@ -30,6 +30,11 @@ impl<T: Default + Deserializable> Deserializable for RuleConfiguration<T> {
         value: &impl DeserializableValue,
         rule_name: &str,
     ) -> Option<Self> {
+        dbg!(
+            "deserializem with options",
+            &rule_name,
+            value.visitable_type()?
+        );
         if value.visitable_type()? == DeserializableType::Str {
             Deserializable::deserialize(ctx, value, rule_name).map(Self::Plain)
         } else {
@@ -74,7 +79,7 @@ impl<T: Clone + Default> Merge for RuleConfiguration<T> {
         }
     }
 }
-impl<T: Clone + Default + 'static> RuleConfiguration<T> {
+impl<T: Clone + Default + 'static + Debug> RuleConfiguration<T> {
     pub fn get_options(&self) -> Option<RuleOptions> {
         match self {
             Self::Plain(_) => None,
@@ -116,6 +121,7 @@ impl<T: Default + Deserializable> Deserializable for RuleFixConfiguration<T> {
         value: &impl DeserializableValue,
         rule_name: &str,
     ) -> Option<Self> {
+        dbg!("deserializem with options");
         if value.visitable_type()? == DeserializableType::Str {
             Deserializable::deserialize(ctx, value, rule_name).map(Self::Plain)
         } else {
@@ -260,6 +266,7 @@ impl<T: Default + Deserializable> Deserializable for RuleAssistConfiguration<T> 
         value: &impl DeserializableValue,
         name: &str,
     ) -> Option<Self> {
+        dbg!("deserializem with options");
         if value.visitable_type()? == DeserializableType::Str {
             Deserializable::deserialize(ctx, value, name).map(Self::Plain)
         } else {
@@ -382,6 +389,23 @@ pub struct RuleWithOptions<T: Default> {
     /// Rule's options
     pub options: T,
 }
+
+// impl<T: Default> Deserializable for RuleWithOptions<T>
+// where
+//     T: Deserializable,
+// {
+//     fn deserialize(
+//         ctx: &mut impl DeserializationContext,
+//         value: &impl DeserializableValue,
+//         name: &str,
+//     ) -> Option<Self> {
+//         let level = Deserializable::deserialize(ctx, value, name)?;
+//         let options = Deserializable::deserialize(ctx, value, name)?;
+//
+//         Some(Self { level, options })
+//     }
+// }
+
 impl<T: Default> Merge for RuleWithOptions<T> {
     fn merge_with(&mut self, other: Self) {
         self.level = other.level;
@@ -834,6 +858,7 @@ impl<G: Deserializable> Deserializable for SeverityOrGroup<G> {
         value: &impl DeserializableValue,
         name: &str,
     ) -> Option<Self> {
+        dbg!("deserializem with options");
         if value.visitable_type()? == DeserializableType::Str {
             Deserializable::deserialize(ctx, value, name).map(SeverityOrGroup::Plain)
         } else {

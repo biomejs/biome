@@ -15,7 +15,7 @@ use biome_string_case::AsciiCollator;
 /// See [ImportSourceAsciiCollator] for more details.
 ///
 /// ```
-/// use biome_js_analyze::assist::source::organize_imports::import_source::ImportSource;
+/// use biome_rule_options::organize_imports::import_source::ImportSource;
 ///
 /// assert!(ImportSource::from("https://example.org") < ImportSource::from("bun:test"));
 /// assert!(ImportSource::from("node:test") < ImportSource::from("@scope/package"));

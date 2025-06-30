@@ -3,4 +3,7 @@ use serde::{Deserialize, Serialize};
 #[derive(Default, Clone, Debug, Deserialize, Deserializable, Eq, PartialEq, Serialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase", deny_unknown_fields, default)]
-pub struct UseJsxKeyInIterableOptions {}
+pub struct UseJsxKeyInIterableOptions {
+    /// Set to `true` to check shorthand fragments (`<></>`)
+    pub check_shorthand_fragments: bool,
+}

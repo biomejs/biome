@@ -15,9 +15,9 @@ use biome_js_semantic::{CanBeImportedExported, SemanticModel};
 use biome_js_syntax::{
     AnyJsClassMember, AnyJsObjectMember, AnyJsVariableDeclaration, AnyTsTypeMember, JsFileSource,
     JsIdentifierBinding, JsLiteralExportName, JsLiteralMemberName, JsModuleItemList,
-    JsPrivateClassMemberName, JsSyntaxKind, JsSyntaxToken, JsVariableDeclarator, JsVariableKind,
-    Modifier, TsDeclarationModule, TsIdentifierBinding, TsLiteralEnumMemberName,
-    TsTypeParameterName,
+    JsPrivateClassMemberName, JsShorthandPropertyObjectMember, JsSyntaxKind, JsSyntaxToken,
+    JsVariableDeclarator, JsVariableKind, Modifier, TsDeclarationModule, TsIdentifierBinding,
+    TsLiteralEnumMemberName, TsTypeParameterName,
     binding_ext::{AnyJsBindingDeclaration, AnyJsIdentifierBinding},
 };
 use biome_rowan::{
@@ -1115,8 +1115,9 @@ fn selector_from_name(js_name: &AnyIdentifierBindingLike) -> Option<Selector> {
             }
         }
         AnyIdentifierBindingLike::JsShorthandPropertyObjectMember(_) => {
-                Some(Kind::ObjectLiteralProperty.into())
-            }AnyIdentifierBindingLike::JsPrivateClassMemberName(member_name) => {
+            Some(Kind::ObjectLiteralProperty.into())
+        }
+        AnyIdentifierBindingLike::JsPrivateClassMemberName(member_name) => {
             selector_from_class_member(&member_name.parent::<AnyJsClassMember>()?)
         }
         AnyIdentifierBindingLike::JsLiteralExportName(export_name) => {

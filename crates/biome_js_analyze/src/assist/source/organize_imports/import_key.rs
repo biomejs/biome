@@ -1,21 +1,20 @@
+use super::specifiers_attributes::JsNamedSpecifiers;
 use biome_js_syntax::{
     AnyJsCombinedSpecifier, AnyJsExportClause, AnyJsImportClause, AnyJsModuleItem,
     AnyJsModuleSource, JsExport, JsImport, JsImportAssertion,
 };
 use biome_rowan::AstNode;
-use biome_string_case::comparable_token::ComparableToken;
-
-use super::{
-    import_groups::{self, ImportCandidate, ImportSourceCandidate},
-    import_source,
-    specifiers_attributes::JsNamedSpecifiers,
+use biome_rule_options::organize_imports::import_groups::{
+    ImportCandidate, ImportGroups, ImportSourceCandidate,
 };
+use biome_rule_options::organize_imports::import_source::ImportSource;
+use biome_string_case::comparable_token::ComparableToken;
 
 /// Type used to determine the order between imports
 #[derive(Debug, Eq, Ord, PartialEq, PartialOrd)]
 pub struct ImportKey {
     pub group: u16,
-    pub source: import_source::ImportSource<ComparableToken>,
+    pub source: ImportSource<ComparableToken>,
     pub has_no_attributes: bool,
     pub kind: ImportStatementKind,
     /// Slot index of the import in the module.
@@ -23,7 +22,7 @@ pub struct ImportKey {
     pub slot_index: u32,
 }
 impl ImportKey {
-    pub fn new(info: ImportInfo, groups: &import_groups::ImportGroups) -> Self {
+    pub fn new(info: ImportInfo, groups: &ImportGroups) -> Self {
         Self {
             group: groups.index(&((&info).into())),
             source: info.source,
@@ -77,7 +76,7 @@ pub struct ImportInfo {
     /// Slot index of the import in the module.
     pub slot_index: u32,
     pub kind: ImportStatementKind,
-    pub source: import_source::ImportSource<ComparableToken>,
+    pub source: ImportSource<ComparableToken>,
     pub has_no_attributes: bool,
 }
 impl ImportInfo {

@@ -157,10 +157,12 @@ impl AnalyzerOptions {
     where
         R: Rule<Options: Clone> + 'static,
     {
-        self.configuration
-            .rules
-            .get_rule_options::<R::Options>(&RuleKey::rule::<R>())
-            .cloned()
+        dbg!(
+            self.configuration
+                .rules
+                .get_rule_options::<R::Options>(&RuleKey::rule::<R>())
+                .cloned()
+        )
     }
 
     pub fn rule_fix_kind<R>(&self) -> Option<FixKind>

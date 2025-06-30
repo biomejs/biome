@@ -1367,12 +1367,18 @@ dependencies = [
 name = "biome_rule_options"
 version = "0.0.1"
 dependencies = [
+ "biome_console",
  "biome_deserialize",
  "biome_deserialize_macros",
+ "biome_diagnostics",
+ "biome_glob",
+ "biome_resolver",
  "biome_rowan",
  "biome_string_case",
+ "camino",
  "enumflags2",
  "regex",
+ "rustc-hash 2.1.1",
  "schemars",
  "serde",
  "smallvec",
