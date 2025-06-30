@@ -129,3 +129,16 @@ import { forbidden1 } from 'bare-allowed';
 const { forbidden2, forbidden3: f1, "forbidden4": f2 } = await import('bare-allowed');
 import('bare-allowed').then(({ forbidden2, forbidden3: f1, "forbidden4": f2 }) => { })
 import('bare-allowed').then(function ({ forbidden2, forbidden3: f1, "forbidden4": f2 }) { })
+
+import withPatterns from "foo/baz";
+import withPatterns from "bar/n1";
+import withPatternsCaseSensitive from "FOO";
+import * from '../../my/relative-module';
+import * as All from '../../my/relative-module1';
+import { Foo } from '../../my/relative-module2';
+import { FooBar } from '../../my/relative-module3';
+import Foo, { Bar } from '../../my/relative-module4';
+import { Foo, Bar } from '../../my/relative-module5';
+import def, * as ns from 'mod1';
+import Foo from 'mod2';
+import { Bar } from 'mod3';
