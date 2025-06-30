@@ -9,7 +9,8 @@ This has been updated to use the actual function name, so the message is now mor
 
 Example for `fdescribe`:
 
-```diff
--│i The 'only' method is often used for debugging or during implementation. It should be removed before deploying to production.
-+│i The fdescribe method is often used for debugging or during implementation. It should be removed before deploying to production.
+```text
+  i The 'fdescribe' method is often used for debugging or during implementation.
+
+  i Consider removing 'f' prefix from 'fdescribe' to ensure all tests are executed.
 ```
