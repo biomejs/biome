@@ -1,343 +1,63 @@
 import type {
-	BiomePath,
-	Configuration,
-	Diagnostic,
-	FixFileMode,
-	OpenProjectResult,
-	ProjectKey,
-	Workspace,
+	Configuration as ConfigurationBundler,
+	Diagnostic as DiagnosticBundler,
+} from "@biomejs/wasm-bundler";
+import type {
+	Configuration as ConfigurationNodejs,
+	Diagnostic as DiagnosticNodeJs,
 } from "@biomejs/wasm-nodejs";
-import { Distribution, loadModule, type WasmModule, wrapError } from "./wasm";
+import type {
+	Configuration as ConfigurationWeb,
+	Diagnostic as DiagnosticWeb,
+} from "@biomejs/wasm-web";
+import { BiomeCommon } from "./common";
 
-// Re-export of some useful types for users
-export type { Diagnostic, Configuration };
-export { Distribution };
+export type * from "./common";
+export type Configuration =
+	| ConfigurationBundler
+	| ConfigurationNodejs
+	| ConfigurationWeb;
+export type Diagnostic = DiagnosticBundler | DiagnosticNodeJs | DiagnosticWeb;
 
-export interface FormatContentDebugOptions extends FormatContentOptions {
+/**
+ * What kind of client Biome should use to communicate with the binary
+ */
+export enum Distribution {
 	/**
-	 * If `true`, you'll be able to inspect the IR of the formatter
+	 * Use this if you want to communicate with the WebAssembly client built for
+	 * bundlers
 	 */
-	debug: boolean;
-}
-
-export interface FormatContentOptions {
+	BUNDLER = 0,
 	/**
-	 * A virtual path of the file. You should add the extension,
-	 * so Biome knows how to parse the content
+	 * Use this if you want to communicate with the WebAssembly client built for
+	 * Node.JS
 	 */
-	filePath: string;
+	NODE = 1,
 	/**
-	 * The range where to format the content
+	 * Use this if you want to communicate with the WebAssembly client built for
+	 * the Web
 	 */
-	range?: [number, number];
-}
-
-export interface FormatResult {
-	/**
-	 * The new formatted content
-	 */
-	content: string;
-	/**
-	 * A series of errors encountered while executing an operation
-	 */
-	diagnostics: Diagnostic[];
-}
-
-export interface FormatDebugResult extends FormatResult {
-	/**
-	 * The IR emitted by the formatter
-	 */
-	ir: string;
-}
-
-export interface LintContentOptions {
-	/**
-	 * A virtual path of the file. You should add the extension,
-	 * so Biome knows how to parse the content
-	 */
-	filePath: string;
-	fixFileMode?: FixFileMode;
-}
-
-export interface LintResult {
-	content: string;
-	diagnostics: Diagnostic[];
-}
-
-function isFormatContentDebug(
-	options: FormatContentOptions | FormatContentDebugOptions,
-): options is FormatContentDebugOptions {
-	return "debug" in options && options.debug !== undefined;
+	WEB = 2,
 }
 
 export interface BiomeCreate {
 	distribution: Distribution;
 }
 
-export interface PrintDiagnosticsOptions {
-	/**
-	 * The name of the file to print diagnostics for
-	 */
-	filePath: string;
-	/**
-	 * The content of the file the diagnostics were emitted for
-	 */
-	fileSource: string;
-	/**
-	 * Whether to print the diagnostics in verbose mode
-	 */
-	verbose?: boolean;
-}
-
-export class Biome {
-	private constructor(
-		private readonly module: WasmModule,
-		private readonly workspace: Workspace,
-	) {}
-
+export class Biome extends BiomeCommon<Configuration, Diagnostic> {
 	/**
 	 * It creates a new instance of the class {Biome}.
 	 */
-	static async create(options: BiomeCreate): Promise<Biome> {
-		const module = await loadModule(options.distribution);
-		const workspace = new module.Workspace();
-		const biome = new Biome(module, workspace);
-		biome.openProject();
-		return biome;
-	}
-
-	/**
-	 * Stop this instance of Biome
-	 *
-	 * After calling `shutdown()` on this object, it should be considered
-	 * unusable as calling any method on it will fail
-	 */
-	shutdown() {
-		this.workspace.free();
-	}
-
-	/**
-	 * Allows to apply a custom configuration.
-	 *
-	 * If fails when the configuration is incorrect.
-	 *
-	 * @param {ProjectKey} projectKey The identifier of the project
-	 * @param {Configuration} configuration
-	 */
-	applyConfiguration(
-		projectKey: ProjectKey,
-		configuration: Configuration,
-	): void {
-		try {
-			this.workspace.updateSettings({
-				projectKey,
-				configuration,
-				workspaceDirectory: "./",
-			});
-		} catch (e) {
-			throw wrapError(e);
+	static async create({ distribution }: BiomeCreate): Promise<Biome> {
+		switch (distribution) {
+			case Distribution.BUNDLER:
+				return new Biome(await import("@biomejs/wasm-bundler"));
+			case Distribution.NODE:
+				return new Biome(await import("@biomejs/wasm-nodejs"));
+			case Distribution.WEB:
+				return new Biome(await import("@biomejs/wasm-web"));
+			default:
+				throw new Error(`Unknown distribution: ${distribution}`);
 		}
-	}
-
-	/**
-	 * Open a possible workspace project folder. Returns the key of said project. Use this key when you want to switch to different projects.
-	 *
-	 * @param {string} [path]
-	 */
-	openProject(path?: string): OpenProjectResult {
-		return this.workspace.openProject({
-			path: path || "",
-			openUninitialized: true,
-		});
-	}
-
-	private tryCatchWrapper<T>(func: () => T): T {
-		try {
-			return func();
-		} catch (err) {
-			throw wrapError(err);
-		}
-	}
-
-	private withFile<T>(
-		projectKey: ProjectKey,
-		path: string,
-		content: string,
-		func: (path: BiomePath) => T,
-	): T {
-		return this.tryCatchWrapper(() => {
-			this.workspace.openFile({
-				projectKey,
-				content: { type: "fromClient", content, version: 0 },
-				path,
-			});
-
-			try {
-				return func(path);
-			} finally {
-				this.workspace.closeFile({
-					projectKey,
-					path,
-				});
-			}
-		});
-	}
-
-	formatContent(
-		projectKey: ProjectKey,
-		content: string,
-		options: FormatContentOptions,
-	): FormatResult;
-	formatContent(
-		projectKey: ProjectKey,
-		content: string,
-		options: FormatContentDebugOptions,
-	): FormatDebugResult;
-
-	/**
-	 * If formats some content.
-	 *
-	 * @param {ProjectKey} projectKey The identifier of the project
-	 * @param {String} content The content to format
-	 * @param {FormatContentOptions | FormatContentDebugOptions} options Options needed when formatting some content
-	 */
-	formatContent(
-		projectKey: ProjectKey,
-		content: string,
-		options: FormatContentOptions | FormatContentDebugOptions,
-	): FormatResult | FormatDebugResult {
-		return this.withFile(projectKey, options.filePath, content, (path) => {
-			let code = content;
-
-			const { diagnostics } = this.workspace.pullDiagnostics({
-				projectKey,
-				path,
-				categories: ["syntax"],
-				only: [],
-				skip: [],
-				pullCodeActions: false,
-			});
-
-			const hasErrors = diagnostics.some(
-				(diag) => diag.severity === "fatal" || diag.severity === "error",
-			);
-			if (!hasErrors) {
-				if (options.range) {
-					const result = this.workspace.formatRange({
-						projectKey,
-						path,
-						range: options.range,
-					});
-					code = result.code;
-				} else {
-					const result = this.workspace.formatFile({
-						projectKey,
-						path,
-					});
-					code = result.code;
-				}
-
-				if (isFormatContentDebug(options)) {
-					const ir = this.workspace.getFormatterIr({
-						projectKey,
-						path,
-					});
-
-					return {
-						content: code,
-						diagnostics,
-						ir,
-					};
-				}
-			}
-
-			return {
-				content: code,
-				diagnostics,
-			};
-		});
-	}
-
-	/**
-	 * Lint the content of a file.
-	 *
-	 * @param {ProjectKey} projectKey The identifier of the project
-	 * @param {String} content The content to lint
-	 * @param {LintContentOptions} options Options needed when linting some content
-	 */
-	lintContent(
-		projectKey: ProjectKey,
-		content: string,
-		{ filePath, fixFileMode }: LintContentOptions,
-	): LintResult {
-		const maybeFixedContent = fixFileMode
-			? this.withFile(projectKey, filePath, content, (path) => {
-					let code = content;
-
-					const result = this.workspace.fixFile({
-						projectKey,
-						path,
-						fixFileMode: fixFileMode,
-						shouldFormat: false,
-						only: [],
-						skip: [],
-						ruleCategories: ["syntax", "lint", "action"],
-					});
-
-					code = result.code;
-
-					return code;
-				})
-			: content;
-
-		return this.withFile(projectKey, filePath, maybeFixedContent, (path) => {
-			const { diagnostics } = this.workspace.pullDiagnostics({
-				projectKey,
-				path,
-				categories: ["syntax", "lint", "action"],
-				only: [],
-				skip: [],
-				pullCodeActions: false,
-			});
-
-			return {
-				content: maybeFixedContent,
-				diagnostics,
-			};
-		});
-	}
-
-	/**
-	 * Print a list of diagnostics to an HTML string.
-	 *
-	 * @param {Diagnostic[]} diagnostics The list of diagnostics to print
-	 * @param {PrintDiagnosticsOptions} options Options needed for printing the diagnostics
-	 */
-	printDiagnostics(
-		diagnostics: Diagnostic[],
-		options: PrintDiagnosticsOptions,
-	): string {
-		return this.tryCatchWrapper(() => {
-			const printer = new this.module.DiagnosticPrinter(
-				options.filePath,
-				options.fileSource,
-			);
-
-			try {
-				for (const diag of diagnostics) {
-					if (options.verbose) {
-						printer.print_verbose(diag);
-					} else {
-						printer.print_simple(diag);
-					}
-				}
-				return printer.finish();
-			} catch (err) {
-				// Only call `free` if the `print` method throws, `finish` will
-				// take care of deallocating the printer even if it fails
-				printer.free();
-				throw err;
-			}
-		});
 	}
 }
