@@ -228,7 +228,7 @@ tracing              = { version = "0.1.41", default-features = false, features 
 tracing-subscriber   = "0.3.19"
 unicode-bom          = "2.0.3"
 unicode-width        = "0.1.12"
-ureq                 = "3.0.11"
+ureq                 = "3.0.12"
 url                  = "2.5.4"
 
 [profile.dev.package.biome_wasm]
