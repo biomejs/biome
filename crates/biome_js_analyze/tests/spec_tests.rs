@@ -426,6 +426,7 @@ pub(crate) fn run_multi_rule_test(input: &'static str, _: &str, _: &str, _: &str
     }, {
         insta::assert_snapshot!(file_name, snapshot, file_name);
     });
+    assert!(false);
 }
 
 fn run_plugin_test(input: &'static str, _: &str, _: &str, _: &str) {

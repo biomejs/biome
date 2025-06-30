@@ -406,42 +406,6 @@ impl<'analyzer> Suppressions<'analyzer> {
         already_suppressed: Option<TextRange>,
         rule_category: RuleCategory,
     ) -> Result<(), AnalyzerSuppressionDiagnostic> {
-        if let Some(suppression) = self.line_suppressions.last_mut() {
-            if suppression.line_index == self.line_index {
-                suppression.already_suppressed = already_suppressed;
-                suppression.comment_span = suppression.comment_span.cover(comment_range);
-
-                match filter {
-                    None => {
-                        suppression.suppressed_categories.insert(rule_category);
-                        suppression.suppressed_rules.clear();
-                        suppression.suppressed_instances.clear();
-                        suppression.suppressed_plugins.clear();
-                    }
-                    Some(PLUGIN_LINT_RULE_FILTER) => {
-                        if let Some(plugin_name) = plugin_name {
-                            suppression.suppressed_plugins.insert(plugin_name);
-                            suppression.suppress_all_plugins = false;
-                        } else {
-                            suppression.suppress_all_plugins = true;
-                        }
-                        suppression.suppressed_categories.remove(rule_category);
-                    }
-                    Some(filter) => {
-                        let filters = suppression
-                            .suppressed_rules
-                            .entry(rule_category)
-                            .or_default();
-                        filters.insert(filter);
-                        if let Some(instance) = instance {
-                            suppression.suppressed_instances.insert(instance, filter);
-                        }
-                    }
-                }
-                return Ok(());
-            }
-        }
-
         let mut suppression = LineSuppression {
             comment_span: comment_range,
             text_range: comment_range,
@@ -577,14 +541,18 @@ impl<'analyzer> Suppressions<'analyzer> {
     pub(crate) fn expand_range(&mut self, text_range: TextRange, line_index: usize) -> bool {
         self.top_level_suppression.expand_range(text_range);
         self.range_suppressions.expand_range(text_range);
-        if let Some(last_suppression) = self.line_suppressions.last_mut() {
+        let mut found = false;
+        let mut backwards = self.line_suppressions.iter_mut().rev();
+        while let Some(last_suppression) = backwards.next() {
             if last_suppression.line_index == line_index {
                 last_suppression.text_range = last_suppression.text_range.cover(text_range);
                 self.line_index = line_index;
-                return true;
+                found = true;
+            } else {
+                break;
             }
         }
-        false
+        found
     }
 
     pub(crate) fn bump_line_index(&mut self, line_index: usize) {
@@ -600,13 +568,16 @@ impl<'analyzer> Suppressions<'analyzer> {
         if let Some(variant) = &self.last_suppression {
             match variant {
                 AnalyzerSuppressionVariant::Line => {
-                    if let Some(last_suppression) = self.line_suppressions.last_mut() {
+                    let mut backwards = self.line_suppressions.iter_mut().rev();
+                    while let Some(last_suppression) = backwards.next() {
                         if last_suppression.line_index == next_line_index
                             || last_suppression.line_index + 1 == next_line_index
                         {
                             last_suppression.line_index = next_line_index;
                             last_suppression.text_range =
                                 last_suppression.text_range.cover(text_range);
+                        } else {
+                            break;
                         }
                     }
                 }
