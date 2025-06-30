@@ -1,20 +1,18 @@
-use biome_parser::lexer::BufferedLexer;
-use biome_parser::prelude::{BumpWithContext, ParseDiagnostic, TokenSource};
-use biome_parser::token_source::{TokenSourceCheckpoint, TokenSourceWithBufferedLexer, Trivia};
+use biome_parser::lexer::Lexer;
+use biome_parser::prelude::{ParseDiagnostic, TokenSource};
+use biome_parser::token_source::Trivia;
 use biome_rowan::TriviaPieceKind;
 use biome_yaml_syntax::YamlSyntaxKind::{self, EOF};
 
-use crate::lexer::{YamlLexContext, YamlLexer};
+use crate::lexer::YamlLexer;
 
 pub(crate) struct YamlTokenSource<'source> {
-    lexer: BufferedLexer<YamlSyntaxKind, YamlLexer<'source>>,
+    lexer: YamlLexer<'source>,
     trivia_list: Vec<Trivia>,
 }
 
-pub(crate) type YamlTokenSourceCheckpoint = TokenSourceCheckpoint<YamlSyntaxKind>;
-
 impl<'source> YamlTokenSource<'source> {
-    pub(crate) fn new(lexer: BufferedLexer<YamlSyntaxKind, YamlLexer<'source>>) -> Self {
+    pub(crate) fn new(lexer: YamlLexer<'source>) -> Self {
         Self {
             lexer,
             trivia_list: Vec::new(),
@@ -23,18 +21,17 @@ impl<'source> YamlTokenSource<'source> {
 
     pub fn from_str(source: &'source str) -> Self {
         let lexer = YamlLexer::from_str(source);
-        let lexer = BufferedLexer::new(lexer);
 
         let mut source = YamlTokenSource::new(lexer);
-        source.next_non_trivia_token(YamlLexContext::Regular, true);
+        source.next_non_trivia_token(true);
         source
     }
 
-    fn next_non_trivia_token(&mut self, context: YamlLexContext, first_token: bool) {
+    fn next_non_trivia_token(&mut self, first_token: bool) {
         let mut trailing = !first_token;
 
         loop {
-            let kind = self.lexer.next_token(context);
+            let kind = self.lexer.next_token(());
 
             let trivia_kind = TriviaPieceKind::try_from(kind);
 
@@ -53,25 +50,6 @@ impl<'source> YamlTokenSource<'source> {
                 }
             }
         }
-    }
-
-    pub fn re_lex(&mut self, mode: YamlLexContext) -> YamlSyntaxKind {
-        self.lexer.re_lex(mode)
-    }
-
-    /// Creates a checkpoint to which it can later return using [Self::rewind].
-    pub fn checkpoint(&self) -> YamlTokenSourceCheckpoint {
-        YamlTokenSourceCheckpoint {
-            trivia_len: self.trivia_list.len() as u32,
-            lexer_checkpoint: self.lexer.checkpoint(),
-        }
-    }
-
-    /// Restores the token source to a previous state
-    pub fn rewind(&mut self, checkpoint: YamlTokenSourceCheckpoint) {
-        assert!(self.trivia_list.len() >= checkpoint.trivia_len as usize);
-        self.trivia_list.truncate(checkpoint.trivia_len as usize);
-        self.lexer.rewind(checkpoint.lexer_checkpoint);
     }
 }
 
@@ -95,7 +73,9 @@ impl TokenSource for YamlTokenSource<'_> {
     }
 
     fn bump(&mut self) {
-        self.bump_with_context(YamlLexContext::default());
+        if self.current() != EOF {
+            self.next_non_trivia_token(false);
+        }
     }
 
     fn skip_as_trivia(&mut self) {
@@ -106,39 +86,11 @@ impl TokenSource for YamlTokenSource<'_> {
                 false,
             ));
 
-            self.next_non_trivia_token(YamlLexContext::Regular, false)
+            self.next_non_trivia_token(false)
         }
     }
 
     fn finish(self) -> (Vec<Trivia>, Vec<ParseDiagnostic>) {
         (self.trivia_list, self.lexer.finish())
-    }
-}
-
-impl<'source> TokenSourceWithBufferedLexer<YamlLexer<'source>> for YamlTokenSource<'source> {
-    fn lexer(&mut self) -> &mut BufferedLexer<YamlSyntaxKind, YamlLexer<'source>> {
-        &mut self.lexer
-    }
-}
-
-impl BumpWithContext for YamlTokenSource<'_> {
-    type Context = YamlLexContext;
-
-    fn bump_with_context(&mut self, context: Self::Context) {
-        if self.current() != EOF {
-            self.next_non_trivia_token(context, false);
-        }
-    }
-
-    fn skip_as_trivia_with_context(&mut self, context: Self::Context) {
-        if self.current() != EOF {
-            self.trivia_list.push(Trivia::new(
-                TriviaPieceKind::Skipped,
-                self.current_range(),
-                false,
-            ));
-
-            self.next_non_trivia_token(context, true)
-        }
     }
 }
