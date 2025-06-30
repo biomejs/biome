@@ -104,15 +104,15 @@ impl Rule for NoLabelWithoutControl {
         let options = ctx.options();
         let element_name = node.name()?.name_value_token().ok()?;
         let element_name = element_name.text_trimmed();
-        let is_allowed_element = has_element_name(&options, element_name)
+        let is_allowed_element = has_element_name(options, element_name)
             || DEFAULT_LABEL_COMPONENTS.contains(&element_name);
 
         if !is_allowed_element {
             return None;
         }
 
-        let has_text_content = has_accessible_label(&options, node);
-        let has_control_association = has_for_attribute(node) || has_nested_control(&options, node);
+        let has_text_content = has_accessible_label(options, node);
+        let has_control_association = has_for_attribute(node) || has_nested_control(options, node);
 
         if has_text_content && has_control_association {
             return None;

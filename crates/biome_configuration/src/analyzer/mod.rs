@@ -30,11 +30,6 @@ impl<T: Default + Deserializable> Deserializable for RuleConfiguration<T> {
         value: &impl DeserializableValue,
         rule_name: &str,
     ) -> Option<Self> {
-        dbg!(
-            "deserializem with options",
-            &rule_name,
-            value.visitable_type()?
-        );
         if value.visitable_type()? == DeserializableType::Str {
             Deserializable::deserialize(ctx, value, rule_name).map(Self::Plain)
         } else {
@@ -121,7 +116,6 @@ impl<T: Default + Deserializable> Deserializable for RuleFixConfiguration<T> {
         value: &impl DeserializableValue,
         rule_name: &str,
     ) -> Option<Self> {
-        dbg!("deserializem with options");
         if value.visitable_type()? == DeserializableType::Str {
             Deserializable::deserialize(ctx, value, rule_name).map(Self::Plain)
         } else {
@@ -266,7 +260,6 @@ impl<T: Default + Deserializable> Deserializable for RuleAssistConfiguration<T> 
         value: &impl DeserializableValue,
         name: &str,
     ) -> Option<Self> {
-        dbg!("deserializem with options");
         if value.visitable_type()? == DeserializableType::Str {
             Deserializable::deserialize(ctx, value, name).map(Self::Plain)
         } else {
@@ -858,7 +851,6 @@ impl<G: Deserializable> Deserializable for SeverityOrGroup<G> {
         value: &impl DeserializableValue,
         name: &str,
     ) -> Option<Self> {
-        dbg!("deserializem with options");
         if value.visitable_type()? == DeserializableType::Str {
             Deserializable::deserialize(ctx, value, name).map(SeverityOrGroup::Plain)
         } else {

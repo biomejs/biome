@@ -28,7 +28,7 @@ use biome_unicode_table::is_js_ident;
 use enumflags2::BitFlags;
 use smallvec::SmallVec;
 
-use biome_rule_options::use_naming_convention::{
+pub use biome_rule_options::use_naming_convention::{
     Convention, Formats, Kind, RestrictedModifier, RestrictedModifiers, Scope, Selector,
     UseNamingConventionOptions,
 };
