@@ -1,5 +1,45 @@
 # @biomejs/biome
 
+## 2.0.7
+
+### Patch Changes
+
+- [#6599](https://github.com/biomejs/biome/pull/6599) [`5e611fa`](https://github.com/biomejs/biome/commit/5e611fae93c794cdbd290f88cc1676bc6aea090d) Thanks [@vladimir-ivanov](https://github.com/vladimir-ivanov)! - Fixed [#6380](https://github.com/biomejs/biome/issues/6380): The `noFocusedTests` rule now correctly displays the function name in the diagnostic message when a test is focused.
+
+  Every instance of a focused test function (like `fdescribe`, `fit`, `ftest` and `only`) had the word 'only' hardcoded.
+  This has been updated to use the actual function name, so the message is now more accurate and specific.
+
+  Example for `fdescribe`:
+
+  ```diff
+  -│i The 'only' method is often used for debugging or during implementation. It should be removed before deploying to production.
+  +│i The fdescribe method is often used for debugging or during implementation. It should be removed before deploying to production.
+  ```
+
+- [#6587](https://github.com/biomejs/biome/pull/6587) [`a330fcc`](https://github.com/biomejs/biome/commit/a330fcc9ad6901d82b6f460d4bf50d7bdca7efbd) Thanks [@Conaclos](https://github.com/Conaclos)! - `organizeImports` is now able to sort named specifiers and import attributes
+  with bogus nodes.
+
+- [#6618](https://github.com/biomejs/biome/pull/6618) [`6174869`](https://github.com/biomejs/biome/commit/6174869dc0b6df82cda3fc5c1b7603157371a069) Thanks [@Shinyaigeek](https://github.com/Shinyaigeek)! - Fixed [#6610](https://github.com/biomejs/biome/issues/6610): Detect JSON import attribute with trimmed text value instead of raw text value in that node.
+
+- [#6587](https://github.com/biomejs/biome/pull/6587) [`a330fcc`](https://github.com/biomejs/biome/commit/a330fcc9ad6901d82b6f460d4bf50d7bdca7efbd) Thanks [@Conaclos](https://github.com/Conaclos)! - Fixed [#6491](https://github.com/biomejs/biome/issues/6491). The action of `useSortedKeys` removed comments or wrongly transferred them to distinct nodes.
+
+- [#6600](https://github.com/biomejs/biome/pull/6600) [`853e1b5`](https://github.com/biomejs/biome/commit/853e1b54c365c18d8065499797ba172596b614cb) Thanks [@daivinhtran](https://github.com/daivinhtran)! - Fixed [#4677](https://github.com/biomejs/biome/issues/4677): Now the `noUnusedImports` rule won't produce diagnostics for types used in comments of static members.
+
+- [#6562](https://github.com/biomejs/biome/pull/6562) [`153eda7`](https://github.com/biomejs/biome/commit/153eda75003d01e1b1c4c120b9516eee47e5692e) Thanks [@vladimir-ivanov](https://github.com/vladimir-ivanov)! - Added [noMagicNumbers](https://github.com/biomejs/biome/issues/4333) nursery rule.
+  The rule detects and reports the use of "magic numbers" — numeric literals that are used directly in code without being assigned to a named constant.
+
+  Example:
+
+  ```js
+  let total = price * 1.23; // Magic number for tax rate will highlight 1.23 as magic number
+  ```
+
+- [#6625](https://github.com/biomejs/biome/pull/6625) [`19cb475`](https://github.com/biomejs/biome/commit/19cb4750a1181f1e5c6c58fa169a94e812f10d25) Thanks [@arendjr](https://github.com/arendjr)! - Fixed [#6616](https://github.com/biomejs/biome/issues/6616): Fixed an issue with
+  extending configurations that contained an explicit `root` field while the
+  configuration in the project did not.
+
+- [#6594](https://github.com/biomejs/biome/pull/6594) [`626d4a1`](https://github.com/biomejs/biome/commit/626d4a1462794dbd67e2f503812f62c6d40b3aa6) Thanks [@ematipico](https://github.com/ematipico)! - Fixed [#6528](https://github.com/biomejs/biome/issues/6528). Biome didn't return the correct output when applying `source.fixAll.biome` inside Astro/Vue/Svelte files that contained safe fixed.
+
 ## 2.0.6
 
 ### Patch Changes
