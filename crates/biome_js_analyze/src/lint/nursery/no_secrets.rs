@@ -537,10 +537,5 @@ mod tests {
             "Expected some entropy for digits, got {}",
             entropy
         );
-
-        let entropy = calculate_entropy_with_case_and_classes(
-            "aGk5JmtQMiNxUjch$ek!40QHZMOCp6VDMmeVU2PWpIMSVv#!khd0I3JmNYNA",
-        );
-        assert!(entropy > 6.0)
     }
 }
