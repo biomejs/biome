@@ -543,6 +543,12 @@ impl TypeData {
                 .expression()
                 .map(|expr| resolver.resolve_expression(scope_id, &expr).into_owned())
                 .unwrap_or_default(),
+            AnyJsExpression::JsPostUpdateExpression(_)
+            | AnyJsExpression::JsPreUpdateExpression(_) => Self::number(),
+            AnyJsExpression::JsSequenceExpression(expr) => expr
+                .right()
+                .map(|expr| resolver.resolve_expression(scope_id, &expr).into_owned())
+                .unwrap_or_default(),
             AnyJsExpression::JsStaticMemberExpression(expr) => match (expr.object(), expr.member())
             {
                 (Ok(object), Ok(member)) => text_from_any_js_name(member)
