@@ -175,7 +175,6 @@ fn parse_flow_in_block_node(p: &mut YamlParser) -> CompletedMarker {
     let m = p.start();
     p.expect(FLOW_START);
     parse_flow_yaml_node(p);
-    // debug_assert!(p.at(FLOW_END));
     p.expect(FLOW_END);
     m.complete(p, YAML_FLOW_IN_BLOCK_NODE)
 }
