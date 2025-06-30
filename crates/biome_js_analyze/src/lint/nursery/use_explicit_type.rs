@@ -1,4 +1,3 @@
-use biome_rule_options::use_explicit_type::UseExplicitTypeOptions;
 use biome_analyze::{
     Ast, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
@@ -22,6 +21,7 @@ use biome_js_syntax::{
 use biome_rowan::{
     AstNode, AstSeparatedList, SyntaxNode, SyntaxNodeOptionExt, TextRange, declare_node_union,
 };
+use biome_rule_options::use_explicit_type::UseExplicitTypeOptions;
 
 declare_lint_rule! {
     /// Enforce types in functions, methods, variables, and parameters.

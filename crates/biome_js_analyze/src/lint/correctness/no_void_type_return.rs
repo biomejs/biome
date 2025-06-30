@@ -2,7 +2,6 @@ use biome_analyze::context::RuleContext;
 use biome_analyze::{Ast, Rule, RuleDiagnostic, declare_lint_rule};
 use biome_console::markup;
 use biome_diagnostics::Severity;
-use biome_rule_options::no_void_type_return::NoVoidTypeReturnOptions;
 use biome_js_syntax::{
     AnyJsExpression, AnyTsReturnType, JsArrowFunctionExpression, JsFunctionDeclaration,
     JsFunctionExportDefaultDeclaration, JsFunctionExpression, JsGetterClassMember,
@@ -10,6 +9,7 @@ use biome_js_syntax::{
     JsSyntaxKind,
 };
 use biome_rowan::{AstNode, declare_node_union};
+use biome_rule_options::no_void_type_return::NoVoidTypeReturnOptions;
 
 use crate::services::control_flow::AnyJsControlFlowRoot;
 

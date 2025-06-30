@@ -1,13 +1,13 @@
 use biome_analyze::{Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule};
 use biome_console::markup;
 use biome_js_semantic::ReferencesExtensions;
-use biome_rule_options::no_unassigned_variables::NoUnassignedVariablesOptions;
 use biome_js_syntax::{
     AnyJsBinding, AnyJsBindingPattern, JsIdentifierBinding, JsVariableDeclaration,
     JsVariableDeclarationClause, JsVariableDeclarator, JsVariableDeclaratorList,
     TsDeclareStatement,
 };
 use biome_rowan::AstNode;
+use biome_rule_options::no_unassigned_variables::NoUnassignedVariablesOptions;
 
 use crate::services::semantic::Semantic;
 

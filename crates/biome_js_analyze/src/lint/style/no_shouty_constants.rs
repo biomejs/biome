@@ -4,7 +4,6 @@ use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_factory::make::{js_literal_member_name, js_property_object_member};
 use biome_js_semantic::{Reference, ReferencesExtensions};
-use biome_rule_options::no_shouty_constants::NoShoutyConstantsOptions;
 use biome_js_syntax::{
     AnyJsExpression, AnyJsLiteralExpression, AnyJsObjectMemberName, JsIdentifierBinding,
     JsIdentifierExpression, JsReferenceIdentifier, JsShorthandPropertyObjectMember,
@@ -12,6 +11,7 @@ use biome_js_syntax::{
     JsVariableDeclaratorList,
 };
 use biome_rowan::{AstNode, BatchMutationExt, SyntaxNodeCast, SyntaxToken};
+use biome_rule_options::no_shouty_constants::NoShoutyConstantsOptions;
 
 declare_lint_rule! {
     /// Disallow the use of constants which its value is the upper-case version of its name.

@@ -1,6 +1,5 @@
 use std::borrow::Cow;
 
-use biome_rule_options::no_useless_else::NoUselessElseOptions;
 use biome_analyze::{
     Ast, FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
@@ -12,6 +11,7 @@ use biome_rowan::{
     AstNode, AstNodeList, BatchMutationExt, SyntaxNodeOptionExt, chain_trivia_pieces,
     trim_leading_trivia_pieces,
 };
+use biome_rule_options::no_useless_else::NoUselessElseOptions;
 
 use crate::JsRuleAction;
 

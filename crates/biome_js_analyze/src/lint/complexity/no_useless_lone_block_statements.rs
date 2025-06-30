@@ -1,5 +1,4 @@
 use crate::JsRuleAction;
-use biome_rule_options::no_useless_lone_block_statements::NoUselessLoneBlockStatementsOptions;
 use biome_analyze::{
     Ast, FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
@@ -11,6 +10,7 @@ use biome_js_syntax::{
     JsStatementList, JsSyntaxKind, JsVariableStatement,
 };
 use biome_rowan::{AstNode, AstNodeList, BatchMutationExt};
+use biome_rule_options::no_useless_lone_block_statements::NoUselessLoneBlockStatementsOptions;
 
 declare_lint_rule! {
     /// Disallow unnecessary nested block statements.

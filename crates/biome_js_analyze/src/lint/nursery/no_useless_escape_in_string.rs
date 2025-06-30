@@ -1,12 +1,12 @@
 use biome_analyze::{Ast, FixKind, Rule, RuleDiagnostic, context::RuleContext, declare_lint_rule};
 use biome_console::markup;
 use biome_diagnostics::Severity;
-use biome_rule_options::no_useless_escape_in_string::NoUselessEscapeInStringOptions;
 use biome_js_syntax::{
     AnyJsTemplateElement, JsLiteralMemberName, JsStringLiteralExpression, JsSyntaxKind,
     JsSyntaxToken, JsTemplateExpression,
 };
 use biome_rowan::{BatchMutationExt, TextRange, declare_node_union};
+use biome_rule_options::no_useless_escape_in_string::NoUselessEscapeInStringOptions;
 
 use crate::JsRuleAction;
 

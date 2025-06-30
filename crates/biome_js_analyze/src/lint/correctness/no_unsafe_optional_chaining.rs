@@ -1,4 +1,3 @@
-use biome_rule_options::no_unsafe_optional_chaining::NoUnsafeOptionalChainingOptions;
 use biome_analyze::{
     Ast, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
@@ -14,6 +13,7 @@ use biome_js_syntax::{
     JsTemplateExpression, JsVariableDeclarator, JsWithStatement,
 };
 use biome_rowan::{AstNode, TextRange, declare_node_union};
+use biome_rule_options::no_unsafe_optional_chaining::NoUnsafeOptionalChainingOptions;
 
 declare_lint_rule! {
     /// Disallow the use of optional chaining in contexts where the undefined value is not allowed.

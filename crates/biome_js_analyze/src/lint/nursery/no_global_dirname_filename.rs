@@ -1,5 +1,4 @@
 use crate::{JsRuleAction, services::semantic::Semantic};
-use biome_rule_options::no_global_dirname_filename::NoGlobalDirnameFilenameOptions;
 use biome_analyze::{
     FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
@@ -12,6 +11,7 @@ use biome_js_syntax::{
     JsVariableDeclarator, global_identifier,
 };
 use biome_rowan::{AstSeparatedList, BatchMutationExt, TriviaPieceKind, declare_node_union};
+use biome_rule_options::no_global_dirname_filename::NoGlobalDirnameFilenameOptions;
 
 declare_lint_rule! {
     /// Disallow the use of `__dirname` and `__filename` in the global scope.

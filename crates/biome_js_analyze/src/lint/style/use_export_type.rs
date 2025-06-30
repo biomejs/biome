@@ -1,5 +1,4 @@
 use crate::{JsRuleAction, services::semantic::Semantic};
-use biome_rule_options::use_export_type::UseExportTypeOptions;
 use biome_analyze::{
     FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
@@ -14,6 +13,7 @@ use biome_rowan::{
     AstNode, AstSeparatedList, BatchMutationExt, TriviaPieceKind, chain_trivia_pieces,
     declare_node_union, trim_leading_trivia_pieces,
 };
+use biome_rule_options::use_export_type::UseExportTypeOptions;
 
 declare_lint_rule! {
     /// Promotes the use of `export type` for types.

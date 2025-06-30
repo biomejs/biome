@@ -1,5 +1,4 @@
 use crate::JsRuleAction;
-use biome_rule_options::use_as_const_assertion::UseAsConstAssertionOptions;
 use biome_analyze::{
     Ast, FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
@@ -12,6 +11,7 @@ use biome_js_syntax::{
     TsTypeAssertionExpression,
 };
 use biome_rowan::{AstNode, BatchMutationExt, TextRange, declare_node_union};
+use biome_rule_options::use_as_const_assertion::UseAsConstAssertionOptions;
 
 declare_lint_rule! {
     /// Enforce the use of `as const` over literal type and type annotation.

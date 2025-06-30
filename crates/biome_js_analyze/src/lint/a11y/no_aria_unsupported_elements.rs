@@ -1,7 +1,6 @@
 use std::str::FromStr;
 
 use crate::JsRuleAction;
-use biome_rule_options::no_aria_unsupported_elements::NoAriaUnsupportedElementsOptions;
 use biome_analyze::{
     Ast, FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
@@ -10,6 +9,7 @@ use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_syntax::jsx_ext::AnyJsxElement;
 use biome_rowan::{AstNode, AstNodeList, BatchMutationExt};
+use biome_rule_options::no_aria_unsupported_elements::NoAriaUnsupportedElementsOptions;
 
 declare_lint_rule! {
     /// Enforce that elements that do not support ARIA roles, states, and properties do not have those attributes.

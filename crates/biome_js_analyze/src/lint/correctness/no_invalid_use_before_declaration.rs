@@ -2,13 +2,12 @@ use crate::{services::control_flow::AnyJsControlFlowRoot, services::semantic::Se
 use biome_analyze::{Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule};
 use biome_console::markup;
 use biome_diagnostics::Severity;
-use biome_rule_options::no_invalid_use_before_declaration::NoInvalidUseBeforeDeclarationOptions;
 use biome_js_syntax::{
     AnyJsExportNamedSpecifier, AnyJsIdentifierUsage,
-    binding_ext::{AnyJsBindingDeclaration, AnyJsIdentifierBinding
-},
+    binding_ext::{AnyJsBindingDeclaration, AnyJsIdentifierBinding},
 };
 use biome_rowan::{AstNode, SyntaxNodeOptionExt, TextRange};
+use biome_rule_options::no_invalid_use_before_declaration::NoInvalidUseBeforeDeclarationOptions;
 
 declare_lint_rule! {
     /// Disallow the use of variables and function parameters before their declaration

@@ -1,4 +1,3 @@
-use biome_rule_options::use_generic_font_names::UseGenericFontNamesOptions;
 use biome_analyze::{
     Ast, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
@@ -9,6 +8,7 @@ use biome_css_syntax::{
 };
 use biome_diagnostics::Severity;
 use biome_rowan::{AstNode, SyntaxNodeCast, TextRange};
+use biome_rule_options::use_generic_font_names::UseGenericFontNamesOptions;
 use biome_string_case::StrLikeExtension;
 
 use crate::utils::{

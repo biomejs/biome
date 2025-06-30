@@ -1,4 +1,3 @@
-use biome_rule_options::no_extra_boolean_cast::NoExtraBooleanCastOptions;
 use biome_analyze::{
     Ast, FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
@@ -9,6 +8,7 @@ use biome_js_syntax::{
     JsSyntaxNode, JsUnaryOperator, is_in_boolean_context, is_negation,
 };
 use biome_rowan::{AstNode, AstSeparatedList, BatchMutationExt};
+use biome_rule_options::no_extra_boolean_cast::NoExtraBooleanCastOptions;
 
 use crate::JsRuleAction;
 

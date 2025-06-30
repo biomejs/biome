@@ -1,4 +1,3 @@
-use biome_rule_options::no_floating_promises::NoFloatingPromisesOptions;
 use biome_analyze::{
     FixKind, Rule, RuleDiagnostic, RuleDomain, RuleSource, context::RuleContext, declare_lint_rule,
 };
@@ -9,6 +8,7 @@ use biome_js_syntax::{
     JsMethodClassMember, JsMethodObjectMember, JsSyntaxKind,
 };
 use biome_rowan::{AstNode, AstSeparatedList, BatchMutationExt, SyntaxNodeCast, TriviaPieceKind};
+use biome_rule_options::no_floating_promises::NoFloatingPromisesOptions;
 
 use crate::{JsRuleAction, services::typed::Typed};
 

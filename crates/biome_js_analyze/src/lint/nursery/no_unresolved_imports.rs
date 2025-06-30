@@ -1,4 +1,3 @@
-use biome_rule_options::no_unresolved_imports::NoUnresolvedImportsOptions;
 use biome_analyze::{
     Rule, RuleDiagnostic, RuleDomain, RuleSource, context::RuleContext, declare_lint_rule,
 };
@@ -9,6 +8,7 @@ use biome_js_syntax::{
 use biome_module_graph::{JsModuleInfo, ModuleGraph, SUPPORTED_EXTENSIONS};
 use biome_resolver::ResolveError;
 use biome_rowan::{AstNode, SyntaxResult, Text, TextRange, TokenText};
+use biome_rule_options::no_unresolved_imports::NoUnresolvedImportsOptions;
 use camino::{Utf8Path, Utf8PathBuf};
 
 use crate::services::module_graph::ResolvedImports;

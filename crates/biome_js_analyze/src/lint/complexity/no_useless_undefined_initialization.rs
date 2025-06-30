@@ -1,4 +1,3 @@
-use biome_rule_options::no_useless_undefined_initialization::NoUselessUndefinedInitializationOptions;
 use biome_analyze::{
     Ast, FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
@@ -8,6 +7,7 @@ use biome_js_factory::make::js_variable_declarator_list;
 use biome_js_syntax::{JsLanguage, JsSyntaxToken, JsVariableDeclarator, JsVariableStatement};
 use biome_rowan::{AstNode, BatchMutationExt, TextRange};
 use biome_rowan::{SyntaxTriviaPiece, chain_trivia_pieces};
+use biome_rule_options::no_useless_undefined_initialization::NoUselessUndefinedInitializationOptions;
 
 use crate::JsRuleAction;
 

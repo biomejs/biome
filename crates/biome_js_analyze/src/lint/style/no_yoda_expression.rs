@@ -1,5 +1,4 @@
 use crate::{JsRuleAction, utils::is_node_equal};
-use biome_rule_options::no_yoda_expression::NoYodaExpressionOptions;
 use biome_analyze::{
     Ast, FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
@@ -12,6 +11,7 @@ use biome_js_syntax::{
     JsYieldExpression, T,
 };
 use biome_rowan::{AstNode, BatchMutationExt, NodeOrToken, SyntaxTriviaPiece, TriviaPieceKind};
+use biome_rule_options::no_yoda_expression::NoYodaExpressionOptions;
 
 declare_lint_rule! {
     /// Disallow the use of yoda expressions.

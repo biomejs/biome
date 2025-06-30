@@ -1,6 +1,5 @@
 use std::collections::HashSet;
 
-use biome_rule_options::no_import_cycles::NoImportCyclesOptions;
 use biome_analyze::{
     Rule, RuleDiagnostic, RuleDomain, RuleSource, context::RuleContext, declare_lint_rule,
 };
@@ -9,6 +8,7 @@ use biome_diagnostics::Severity;
 use biome_js_syntax::AnyJsImportLike;
 use biome_module_graph::{JsModuleInfo, ResolvedPath};
 use biome_rowan::AstNode;
+use biome_rule_options::no_import_cycles::NoImportCyclesOptions;
 use camino::{Utf8Path, Utf8PathBuf};
 
 use crate::services::module_graph::ResolvedImports;

@@ -1,4 +1,3 @@
-use biome_rule_options::no_this_in_static::NoThisInStaticOptions;
 use biome_analyze::{
     Ast, FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
@@ -10,6 +9,7 @@ use biome_js_syntax::{
     JsSyntaxToken, JsThisExpression,
 };
 use biome_rowan::{AstNode, AstNodeList, BatchMutationExt, SyntaxResult, declare_node_union};
+use biome_rule_options::no_this_in_static::NoThisInStaticOptions;
 
 use crate::{JsRuleAction, services::control_flow::AnyJsControlFlowRoot};
 

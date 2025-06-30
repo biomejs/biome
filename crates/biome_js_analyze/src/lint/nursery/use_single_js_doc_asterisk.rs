@@ -1,6 +1,5 @@
 use std::borrow::Cow;
 
-use biome_rule_options::use_single_js_doc_asterisk::UseSingleJsDocAsteriskOptions;
 use biome_analyze::{
     Ast, FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
@@ -10,6 +9,7 @@ use biome_jsdoc_comment::JsdocComment;
 use biome_rowan::{
     AstNode, BatchMutationExt, Direction, TextLen, TextRange, TextSize, TriviaPiece,
 };
+use biome_rule_options::use_single_js_doc_asterisk::UseSingleJsDocAsteriskOptions;
 
 use crate::JsRuleAction;
 

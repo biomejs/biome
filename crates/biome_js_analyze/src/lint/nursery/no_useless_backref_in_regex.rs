@@ -1,12 +1,12 @@
 use std::ops::Range;
 
-use biome_rule_options::no_useless_backref_in_regex::NoUselessBackrefInRegexOptions;
 use biome_analyze::{
     Ast, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_diagnostics::Severity;
 use biome_js_syntax::JsRegexLiteralExpression;
 use biome_rowan::{AstNode, TextRange};
+use biome_rule_options::no_useless_backref_in_regex::NoUselessBackrefInRegexOptions;
 
 declare_lint_rule! {
     /// Disallow useless backreferences in regular expression literals that always match an empty string.

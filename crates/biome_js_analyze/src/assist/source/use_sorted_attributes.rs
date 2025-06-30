@@ -1,6 +1,5 @@
 use std::{borrow::Cow, cmp::Ordering, iter::zip};
 
-use biome_rule_options::use_sorted_attributes::UseSortedAttributesOptions;
 use biome_analyze::{
     Ast, FixKind, Rule, RuleAction, RuleDiagnostic, RuleSource, context::RuleContext,
     declare_source_rule,
@@ -12,6 +11,7 @@ use biome_js_syntax::{
     AnyJsxAttribute, JsxAttribute, JsxAttributeList, JsxOpeningElement, JsxSelfClosingElement,
 };
 use biome_rowan::{AstNode, BatchMutationExt};
+use biome_rule_options::use_sorted_attributes::UseSortedAttributesOptions;
 use biome_string_case::StrLikeExtension;
 
 use crate::JsRuleAction;

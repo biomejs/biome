@@ -1,4 +1,3 @@
-use biome_rule_options::no_var::NoVarOptions;
 use crate::{
     JsRuleAction, services::control_flow::AnyJsControlFlowRoot, services::semantic::Semantic,
 };
@@ -11,6 +10,7 @@ use biome_js_factory::make;
 use biome_js_syntax::{
     AnyJsVariableDeclaration, JsModule, JsScript, JsSyntaxKind, TsGlobalDeclaration,
 };
+use biome_rule_options::no_var::NoVarOptions;
 
 use crate::lint::style::use_const::ConstBindings;
 use biome_rowan::{AstNode, BatchMutationExt};

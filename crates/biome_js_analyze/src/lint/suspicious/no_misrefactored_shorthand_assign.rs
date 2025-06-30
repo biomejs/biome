@@ -1,4 +1,3 @@
-use biome_rule_options::no_misrefactored_shorthand_assign::NoMisrefactoredShorthandAssignOptions;
 use biome_analyze::{
     Ast, FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
@@ -8,6 +7,7 @@ use biome_js_syntax::{
     AnyJsExpression, JsAssignmentExpression, JsAssignmentOperator, JsBinaryExpression,
 };
 use biome_rowan::{AstNode, BatchMutationExt};
+use biome_rule_options::no_misrefactored_shorthand_assign::NoMisrefactoredShorthandAssignOptions;
 
 use crate::{
     JsRuleAction,

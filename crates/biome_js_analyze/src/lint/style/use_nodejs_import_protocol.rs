@@ -1,4 +1,3 @@
-use biome_rule_options::use_nodejs_import_protocol::UseNodejsImportProtocolOptions;
 use biome_analyze::{
     FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
@@ -7,6 +6,7 @@ use biome_diagnostics::Severity;
 use biome_js_syntax::{AnyJsImportLike, JsSyntaxKind, JsSyntaxToken, inner_string_text};
 use biome_resolver::is_builtin_node_module;
 use biome_rowan::BatchMutationExt;
+use biome_rule_options::use_nodejs_import_protocol::UseNodejsImportProtocolOptions;
 
 use crate::JsRuleAction;
 use crate::services::manifest::Manifest;

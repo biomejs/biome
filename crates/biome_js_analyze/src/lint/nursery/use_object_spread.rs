@@ -1,6 +1,5 @@
 use crate::JsRuleAction;
 use crate::services::semantic::Semantic;
-use biome_rule_options::use_object_spread::UseObjectSpreadOptions;
 use biome_analyze::{
     FixKind, Rule, RuleAction, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
@@ -11,6 +10,7 @@ use biome_js_syntax::{
     JsLanguage, JsSyntaxKind, T, global_identifier,
 };
 use biome_rowan::{AstNode, AstSeparatedList, BatchMutationExt, TextRange};
+use biome_rule_options::use_object_spread::UseObjectSpreadOptions;
 
 declare_lint_rule! {
     /// Prefer object spread over `Object.assign()` when constructing new objects.

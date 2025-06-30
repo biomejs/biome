@@ -1,5 +1,4 @@
 use crate::JsRuleAction;
-use biome_rule_options::use_unified_type_signature::UseUnifiedTypeSignatureOptions;
 use biome_analyze::{
     Ast, FixKind, Rule, RuleAction, RuleDiagnostic, RuleSource, context::RuleContext,
     declare_lint_rule,
@@ -22,6 +21,7 @@ use biome_rowan::{
     AstNode, AstSeparatedList, BatchMutation, BatchMutationExt, SyntaxResult, TextRange,
     TriviaPieceKind, chain_trivia_pieces, declare_node_union,
 };
+use biome_rule_options::use_unified_type_signature::UseUnifiedTypeSignatureOptions;
 
 declare_lint_rule! {
     /// Disallow overload signatures that can be unified into a single signature.

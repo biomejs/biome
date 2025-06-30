@@ -1,31 +1,31 @@
 [package]
-authors.workspace = true
+authors.workspace    = true
 categories.workspace = true
-edition.workspace = true
-homepage.workspace = true
-keywords.workspace = true
-license.workspace = true
-name = "biome_rule_options"
-description = "This crate is internally used to share lint rule options across analyzers"
+description          = "This crate is internally used to share lint rule options across analyzers"
+edition.workspace    = true
+homepage.workspace   = true
+keywords.workspace   = true
+license.workspace    = true
+name                 = "biome_rule_options"
 repository.workspace = true
-version = "0.0.1"
+version              = "0.0.1"
 
 [dependencies]
-biome_deserialize = { workspace = true }
+biome_console            = { workspace = true }
+biome_deserialize        = { workspace = true }
 biome_deserialize_macros = { workspace = true }
-biome_rowan = { workspace = true }
-biome_string_case = { workspace = true, features = ["biome_rowan"] }
-enumflags2 = { workspace = true }
-regex = { workspace = true }
-schemars = { workspace = true, optional = true }
-serde = { workspace = true }
-smallvec = { workspace = true }
-biome_console = { workspace = true }
-camino = { workspace = true }
-biome_glob = { workspace = true }
-biome_diagnostics = { workspace = true }
-rustc-hash = { workspace = true }
-biome_resolver = { workspace = true }
+biome_diagnostics        = { workspace = true }
+biome_glob               = { workspace = true }
+biome_resolver           = { workspace = true }
+biome_rowan              = { workspace = true }
+biome_string_case        = { workspace = true, features = ["biome_rowan"] }
+camino                   = { workspace = true }
+enumflags2               = { workspace = true }
+regex                    = { workspace = true }
+rustc-hash               = { workspace = true }
+schemars                 = { workspace = true, optional = true }
+serde                    = { workspace = true }
+smallvec                 = { workspace = true }
 
 [lints]
 workspace = true

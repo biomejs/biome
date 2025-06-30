@@ -1,4 +1,3 @@
-use biome_rule_options::no_unknown_pseudo_class::NoUnknownPseudoClassOptions;
 use crate::{
     keywords::{WEBKIT_SCROLLBAR_PSEUDO_CLASSES, WEBKIT_SCROLLBAR_PSEUDO_ELEMENTS},
     utils::{is_custom_selector, is_known_pseudo_class, is_page_pseudo_class, vendor_prefixed},
@@ -17,6 +16,7 @@ use biome_css_syntax::{
 };
 use biome_diagnostics::Severity;
 use biome_rowan::{AstNode, TextRange, declare_node_union};
+use biome_rule_options::no_unknown_pseudo_class::NoUnknownPseudoClassOptions;
 use biome_string_case::StrLikeExtension;
 
 declare_lint_rule! {

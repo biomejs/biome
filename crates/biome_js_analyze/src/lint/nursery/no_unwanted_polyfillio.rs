@@ -1,6 +1,5 @@
 use std::sync::LazyLock;
 
-use biome_rule_options::no_unwanted_polyfillio::NoUnwantedPolyfillioOptions;
 use biome_analyze::{
     Rule, RuleDiagnostic, RuleDomain, RuleSource, context::RuleContext, declare_lint_rule,
 };
@@ -8,6 +7,7 @@ use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_syntax::jsx_ext::AnyJsxElement;
 use biome_rowan::{AstNode, TextRange};
+use biome_rule_options::no_unwanted_polyfillio::NoUnwantedPolyfillioOptions;
 use regex::Regex;
 
 use crate::{

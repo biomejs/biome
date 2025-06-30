@@ -1,4 +1,3 @@
-use biome_rule_options::use_explicit_length_check::UseExplicitLengthCheckOptions;
 use biome_analyze::{
     Ast, FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
@@ -12,6 +11,7 @@ use biome_js_syntax::{
     is_in_boolean_context, is_negation,
 };
 use biome_rowan::{AstNode, AstSeparatedList, BatchMutationExt, TokenText};
+use biome_rule_options::use_explicit_length_check::UseExplicitLengthCheckOptions;
 
 use crate::JsRuleAction;
 

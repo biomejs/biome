@@ -1,4 +1,3 @@
-use biome_rule_options::use_literal_enum_members::UseLiteralEnumMembersOptions;
 use biome_analyze::{
     Ast, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
@@ -9,6 +8,7 @@ use biome_js_syntax::{
     TsEnumDeclaration,
 };
 use biome_rowan::{AstNode, TextRange};
+use biome_rule_options::use_literal_enum_members::UseLiteralEnumMembersOptions;
 use rustc_hash::FxHashSet;
 
 declare_lint_rule! {

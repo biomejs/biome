@@ -2,7 +2,6 @@ use biome_analyze::{Ast, RuleSource};
 use biome_analyze::{Rule, RuleDiagnostic, context::RuleContext, declare_lint_rule};
 use biome_console::{MarkupBuf, markup};
 use biome_diagnostics::Severity;
-use biome_rule_options::no_then_property::NoThenPropertyOptions;
 use biome_js_syntax::{
     AnyJsArrayElement, AnyJsAssignment, AnyJsAssignmentPattern, AnyJsCallArgument,
     AnyJsDeclarationClause, AnyJsExportClause, AnyJsExportNamedSpecifier, AnyJsExpression,
@@ -13,6 +12,7 @@ use biome_js_syntax::{
     JsComputedMemberName, JsExport,
 };
 use biome_rowan::{AstNode, AstSeparatedList, TextRange, declare_node_union};
+use biome_rule_options::no_then_property::NoThenPropertyOptions;
 
 declare_lint_rule! {
     /// Disallow `then` property.

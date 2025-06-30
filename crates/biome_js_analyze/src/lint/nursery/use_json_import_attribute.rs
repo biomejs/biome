@@ -1,4 +1,3 @@
-use biome_rule_options::use_json_import_attribute::UseJsonImportAttributeOptions;
 use biome_analyze::{
     FixKind, Rule, RuleDiagnostic, RuleDomain, context::RuleContext, declare_lint_rule,
 };
@@ -8,6 +7,7 @@ use biome_js_syntax::{AnyJsImportAssertionEntry, JsImport, JsImportDefaultClause
 use biome_rowan::{
     AstNode, AstSeparatedElement, AstSeparatedList, BatchMutationExt, TriviaPieceKind,
 };
+use biome_rule_options::use_json_import_attribute::UseJsonImportAttributeOptions;
 
 use crate::{JsRuleAction, services::module_graph::ResolvedImports};
 

@@ -1,6 +1,5 @@
 use crate::JsRuleAction;
 use crate::services::semantic::Semantic;
-use biome_rule_options::no_process_global::NoProcessGlobalOptions;
 use biome_analyze::{
     FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
@@ -17,6 +16,7 @@ use biome_rowan::BatchMutationExt;
 use biome_rowan::SyntaxElement;
 use biome_rowan::SyntaxNode;
 use biome_rowan::TriviaPieceKind;
+use biome_rule_options::no_process_global::NoProcessGlobalOptions;
 use smallvec::SmallVec;
 use smallvec::smallvec;
 

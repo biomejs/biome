@@ -4,13 +4,13 @@ use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_factory::make;
 use biome_js_syntax::AnyJsTemplateElement;
-use biome_rule_options::use_template::UseTemplateOptions;
 use biome_js_syntax::{
     AnyJsExpression, AnyJsLiteralExpression, JsBinaryExpression, JsBinaryOperator,
     JsParenthesizedExpression, JsStringLiteralExpression, JsSyntaxKind, JsSyntaxToken,
     JsTemplateElementList, JsTemplateExpression, T,
 };
 use biome_rowan::{AstNode, BatchMutationExt, WalkEvent};
+use biome_rule_options::use_template::UseTemplateOptions;
 
 use crate::JsRuleAction;
 

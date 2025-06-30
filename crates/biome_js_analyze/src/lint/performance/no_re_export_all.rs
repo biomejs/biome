@@ -1,4 +1,3 @@
-use biome_rule_options::no_re_export_all::NoReExportAllOptions;
 use biome_analyze::{
     Ast, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
@@ -6,6 +5,7 @@ use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_syntax::JsExportFromClause;
 use biome_rowan::AstNode;
+use biome_rule_options::no_re_export_all::NoReExportAllOptions;
 
 declare_lint_rule! {
     /// Avoid re-export all.

@@ -1,5 +1,4 @@
 use crate::services::semantic::Semantic;
-use biome_rule_options::no_destructured_props::NoDestructuredPropsOptions;
 use biome_analyze::{
     Rule, RuleDiagnostic, RuleDomain, RuleSource, context::RuleContext, declare_lint_rule,
 };
@@ -11,6 +10,7 @@ use biome_js_syntax::{
     JsParameters, JsVariableDeclarator, JsxExpressionAttributeValue,
 };
 use biome_rowan::{AstNode, AstSeparatedList, AstSeparatedListNodesIterator, TextRange};
+use biome_rule_options::no_destructured_props::NoDestructuredPropsOptions;
 use biome_string_case::Case;
 use std::collections::VecDeque;
 use std::iter::FusedIterator;

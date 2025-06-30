@@ -3,8 +3,8 @@ use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_syntax::{JsxAttribute, JsxChildList, JsxElement, jsx_ext::AnyJsxElement};
 use biome_rowan::{AstNode, AstNodeList};
-use biome_string_case::StrLikeExtension;
 use biome_rule_options::no_svg_without_title::NoSvgWithoutTitleOptions;
+use biome_string_case::StrLikeExtension;
 
 declare_lint_rule! {
     /// Enforces the usage of the `title` element for the `svg` element.

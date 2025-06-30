@@ -1,4 +1,3 @@
-use biome_rule_options::no_await_in_loop::NoAwaitInLoopOptions;
 use biome_analyze::{
     Ast, QueryMatch, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
@@ -9,6 +8,7 @@ use biome_js_syntax::{
     JsWithStatement,
 };
 use biome_rowan::{AstNode, WalkEvent, declare_node_union};
+use biome_rule_options::no_await_in_loop::NoAwaitInLoopOptions;
 
 declare_lint_rule! {
     /// Disallow `await` inside loops.

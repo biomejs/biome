@@ -1,4 +1,3 @@
-use biome_rule_options::use_google_font_preconnect::UseGoogleFontPreconnectOptions;
 use biome_analyze::{
     Ast, FixKind, Rule, RuleDiagnostic, RuleDomain, RuleSource, context::RuleContext,
     declare_lint_rule,
@@ -9,6 +8,7 @@ use biome_js_syntax::{
     AnyJsxAttribute, AnyJsxAttributeName, AnyJsxAttributeValue, T, jsx_ext::AnyJsxElement,
 };
 use biome_rowan::{AstNode, AstNodeList, BatchMutationExt, TextRange, TriviaPieceKind};
+use biome_rule_options::use_google_font_preconnect::UseGoogleFontPreconnectOptions;
 
 use crate::JsRuleAction;
 

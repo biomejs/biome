@@ -1,10 +1,8 @@
 use biome_analyze::{Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule};
 use biome_console::markup;
-use biome_rule_options::no_unreachable_super::NoUnreachableSuperOptions;
 use biome_control_flow::{
     ExceptionHandlerKind, InstructionKind,
-    builder::{BlockId, ROOT_BLOCK_ID
-},
+    builder::{BlockId, ROOT_BLOCK_ID},
 };
 use biome_diagnostics::Severity;
 use biome_js_syntax::{
@@ -12,6 +10,7 @@ use biome_js_syntax::{
     JsThrowStatement, TextRange, WalkEvent,
 };
 use biome_rowan::{AstNode, NodeOrToken};
+use biome_rule_options::no_unreachable_super::NoUnreachableSuperOptions;
 use rustc_hash::FxHashSet;
 
 use crate::services::control_flow::{AnyJsControlFlowRoot, ControlFlowGraph};

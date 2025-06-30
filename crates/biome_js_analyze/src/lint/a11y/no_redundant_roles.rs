@@ -1,5 +1,4 @@
 use crate::{JsRuleAction, services::aria::Aria};
-use biome_rule_options::no_redundant_roles::NoRedundantRolesOptions;
 use biome_analyze::{
     FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
@@ -8,6 +7,7 @@ use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_syntax::{AnyJsxAttributeValue, JsxAttribute, jsx_ext::AnyJsxElement};
 use biome_rowan::{AstNode, BatchMutationExt};
+use biome_rule_options::no_redundant_roles::NoRedundantRolesOptions;
 
 declare_lint_rule! {
     /// Enforce explicit `role` property is not the same as implicit/default role property on an element.

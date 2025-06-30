@@ -1,5 +1,4 @@
 use crate::JsRuleAction;
-use biome_rule_options::no_nonoctal_decimal_escape::NoNonoctalDecimalEscapeOptions;
 use biome_analyze::{
     Ast, FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
@@ -9,6 +8,7 @@ use biome_js_syntax::{
     JsLiteralMemberName, JsStringLiteralExpression, JsSyntaxKind, JsSyntaxToken,
 };
 use biome_rowan::{AstNode, BatchMutationExt, TextRange, declare_node_union};
+use biome_rule_options::no_nonoctal_decimal_escape::NoNonoctalDecimalEscapeOptions;
 use rustc_hash::FxHashSet;
 use std::ops::Range;
 

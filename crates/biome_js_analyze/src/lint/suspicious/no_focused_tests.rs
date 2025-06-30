@@ -1,5 +1,4 @@
 use crate::JsRuleAction;
-use biome_rule_options::no_focused_tests::NoFocusedTestsOptions;
 use biome_analyze::{
     Ast, FixKind, Rule, RuleDiagnostic, RuleDomain, RuleSource, context::RuleContext,
     declare_lint_rule,
@@ -9,6 +8,7 @@ use biome_diagnostics::Severity;
 use biome_js_factory::make;
 use biome_js_syntax::{AnyJsExpression, JsCallExpression, JsLanguage, TextRange};
 use biome_rowan::{AstNode, BatchMutation, BatchMutationExt, NodeOrToken, TokenText};
+use biome_rule_options::no_focused_tests::NoFocusedTestsOptions;
 
 declare_lint_rule! {
     /// Disallow focused tests.

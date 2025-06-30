@@ -2,12 +2,12 @@ use biome_analyze::{Rule, RuleDiagnostic, RuleDomain, context::RuleContext, decl
 use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_semantic::SemanticModel;
-use biome_rule_options::use_unique_element_ids::UseUniqueElementIdsOptions;
 use biome_js_syntax::{
     AnyJsExpression, AnyJsxAttributeValue, JsCallExpression, JsPropertyObjectMember, JsxAttribute,
     jsx_ext::AnyJsxElement,
 };
 use biome_rowan::{AstNode, declare_node_union};
+use biome_rule_options::use_unique_element_ids::UseUniqueElementIdsOptions;
 
 use crate::react::{ReactApiCall, ReactCreateElementCall};
 use crate::services::semantic::Semantic;

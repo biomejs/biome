@@ -1,5 +1,4 @@
 use crate::JsRuleAction;
-use biome_rule_options::use_at_index::UseAtIndexOptions;
 use biome_analyze::{
     Ast, FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
@@ -12,6 +11,7 @@ use biome_js_syntax::{
     JsStaticMemberExpression, JsUnaryExpression, T,
 };
 use biome_rowan::{AstNode, AstSeparatedList, BatchMutationExt, declare_node_union};
+use biome_rule_options::use_at_index::UseAtIndexOptions;
 
 declare_lint_rule! {
     /// Use `at()` instead of integer index access.

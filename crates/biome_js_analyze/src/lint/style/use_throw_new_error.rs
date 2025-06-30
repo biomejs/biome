@@ -1,4 +1,3 @@
-use biome_rule_options::use_throw_new_error::UseThrowNewErrorOptions;
 use biome_analyze::{
     Ast, FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
@@ -9,6 +8,7 @@ use biome_js_syntax::{
     AnyJsExpression, JsCallExpression, JsNewExpression, JsParenthesizedExpression, JsSyntaxKind, T,
 };
 use biome_rowan::{AstNode, BatchMutationExt, TokenText, TriviaPieceKind};
+use biome_rule_options::use_throw_new_error::UseThrowNewErrorOptions;
 
 use crate::JsRuleAction;
 

@@ -1,4 +1,3 @@
-use biome_rule_options::use_yield::UseYieldOptions;
 use biome_analyze::context::RuleContext;
 use biome_analyze::{
     AddVisitor, Phases, QueryMatch, Queryable, Rule, RuleDiagnostic, RuleSource, ServiceBag,
@@ -8,6 +7,7 @@ use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_syntax::{AnyFunctionLike, JsLanguage, JsYieldExpression, TextRange, WalkEvent};
 use biome_rowan::{AstNode, AstNodeList, Language, SyntaxNode, TextSize};
+use biome_rule_options::use_yield::UseYieldOptions;
 
 declare_lint_rule! {
     /// Require generator functions to contain `yield`.

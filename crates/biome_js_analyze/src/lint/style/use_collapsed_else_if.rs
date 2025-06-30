@@ -1,5 +1,4 @@
 use crate::JsRuleAction;
-use biome_rule_options::use_collapsed_else_if::UseCollapsedElseIfOptions;
 use biome_analyze::{
     Ast, FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
@@ -7,6 +6,7 @@ use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_syntax::{AnyJsStatement, JsBlockStatement, JsElseClause, JsIfStatement};
 use biome_rowan::{AstNode, AstNodeList, BatchMutationExt};
+use biome_rule_options::use_collapsed_else_if::UseCollapsedElseIfOptions;
 
 declare_lint_rule! {
     /// Enforce using `else if` instead of nested `if` in `else` clauses.

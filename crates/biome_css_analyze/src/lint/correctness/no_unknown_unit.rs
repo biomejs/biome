@@ -1,4 +1,3 @@
-use biome_rule_options::no_unknown_unit::NoUnknownUnitOptions;
 use biome_analyze::{
     Ast, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
@@ -8,6 +7,7 @@ use biome_css_syntax::{
 };
 use biome_diagnostics::Severity;
 use biome_rowan::{SyntaxNodeCast, TextRange};
+use biome_rule_options::no_unknown_unit::NoUnknownUnitOptions;
 use biome_string_case::StrLikeExtension;
 
 const RESOLUTION_MEDIA_FEATURE_NAMES: [&str; 3] =

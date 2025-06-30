@@ -1,4 +1,3 @@
-use biome_rule_options::no_useless_constructor::NoUselessConstructorOptions;
 use biome_analyze::{
     Ast, FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
@@ -9,6 +8,7 @@ use biome_js_syntax::{
     JsCallExpression, JsConstructorClassMember,
 };
 use biome_rowan::{AstNode, AstNodeList, AstSeparatedList, BatchMutationExt};
+use biome_rule_options::no_useless_constructor::NoUselessConstructorOptions;
 
 use crate::JsRuleAction;
 

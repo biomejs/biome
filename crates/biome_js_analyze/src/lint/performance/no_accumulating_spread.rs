@@ -2,13 +2,13 @@ use biome_analyze::{Rule, RuleDiagnostic, context::RuleContext, declare_lint_rul
 use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_semantic::SemanticModel;
-use biome_rule_options::no_accumulating_spread::NoAccumulatingSpreadOptions;
 use biome_js_syntax::{
     AnyJsFunction, AnyJsMemberExpression, JsCallArgumentList, JsCallArguments, JsCallExpression,
     JsFormalParameter, JsParameterList, JsParameters, JsReferenceIdentifier, JsSpread,
     JsStaticMemberExpression,
 };
 use biome_rowan::{AstNode, AstSeparatedList, TextRange, declare_node_union};
+use biome_rule_options::no_accumulating_spread::NoAccumulatingSpreadOptions;
 
 use crate::services::semantic::Semantic;
 

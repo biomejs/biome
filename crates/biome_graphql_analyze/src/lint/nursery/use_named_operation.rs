@@ -1,4 +1,3 @@
-use biome_rule_options::use_named_operation::UseNamedOperationOptions;
 use biome_analyze::{
     Ast, FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
@@ -7,6 +6,7 @@ use biome_diagnostics::Severity;
 use biome_graphql_factory::make;
 use biome_graphql_syntax::{GraphqlOperationDefinition, GraphqlOperationType};
 use biome_rowan::{AstNode, BatchMutationExt};
+use biome_rule_options::use_named_operation::UseNamedOperationOptions;
 use biome_string_case::Case;
 
 use crate::GraphqlRuleAction;

@@ -1,10 +1,10 @@
-use biome_rule_options::use_numeric_separators::UseNumericSeparatorsOptions;
 use biome_analyze::{
     Ast, FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
 use biome_js_syntax::{JsNumberLiteralExpression, JsSyntaxToken};
 use biome_rowan::{AstNode, BatchMutationExt};
+use biome_rule_options::use_numeric_separators::UseNumericSeparatorsOptions;
 
 use crate::JsRuleAction;
 

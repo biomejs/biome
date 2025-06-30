@@ -1,4 +1,3 @@
-use biome_rule_options::no_magic_numbers::NoMagicNumbersOptions;
 use biome_analyze::{
     Ast, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
@@ -14,6 +13,7 @@ use biome_js_syntax::{
     TsUnionTypeVariantList,
 };
 use biome_rowan::{AstNode, declare_node_union};
+use biome_rule_options::no_magic_numbers::NoMagicNumbersOptions;
 
 declare_lint_rule! {
     /// Reports usage of "magic numbers" — numbers used directly instead of being assigned to named constants.

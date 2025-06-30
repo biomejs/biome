@@ -1,4 +1,3 @@
-use biome_rule_options::no_react_prop_assign::NoReactPropAssignOptions;
 use crate::react::components::{
     AnyPotentialReactComponentDeclaration, ReactComponentInfo, ReactComponentKind,
 };
@@ -8,6 +7,7 @@ use biome_console::markup;
 use biome_js_semantic::SemanticModel;
 use biome_js_syntax::{AnyJsExpression, AnyJsStatement, JsParameterList};
 use biome_rowan::{AstNode, AstSeparatedList};
+use biome_rule_options::no_react_prop_assign::NoReactPropAssignOptions;
 
 declare_lint_rule! {
     /// Disallow assigning to React component props.

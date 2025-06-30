@@ -4,12 +4,12 @@ use biome_analyze::RuleSource;
 use biome_analyze::{Rule, RuleDiagnostic, context::RuleContext, declare_lint_rule};
 use biome_console::markup;
 use biome_diagnostics::Severity;
-use biome_rule_options::use_button_type::UseButtonTypeOptions;
 use biome_js_syntax::{
     AnyJsxElementName, JsCallExpression, JsxAttribute, JsxOpeningElement, JsxSelfClosingElement,
     TextRange,
 };
 use biome_rowan::{AstNode, declare_node_union};
+use biome_rule_options::use_button_type::UseButtonTypeOptions;
 
 declare_lint_rule! {
     /// Enforces the usage of the attribute `type` for the element `button`

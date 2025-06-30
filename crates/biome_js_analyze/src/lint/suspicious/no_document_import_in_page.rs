@@ -1,4 +1,3 @@
-use biome_rule_options::no_document_import_in_page::NoDocumentImportInPageOptions;
 use biome_analyze::{
     Ast, Rule, RuleDiagnostic, RuleDomain, RuleSource, context::RuleContext, declare_lint_rule,
 };
@@ -6,6 +5,7 @@ use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_syntax::{JsFileSource, JsImport};
 use biome_rowan::AstNode;
+use biome_rule_options::no_document_import_in_page::NoDocumentImportInPageOptions;
 
 declare_lint_rule! {
     /// Prevents importing `next/document` outside of `pages/_document.jsx` in Next.js projects.

@@ -1,5 +1,4 @@
 use crate::JsRuleAction;
-use biome_rule_options::no_implicit_coercion::NoImplicitCoercionOptions;
 use biome_analyze::{
     Ast, FixKind, Rule, RuleAction, RuleDiagnostic, RuleSource, context::RuleContext,
     declare_lint_rule,
@@ -12,6 +11,7 @@ use biome_js_syntax::{
     JsBinaryOperator, JsLanguage, JsUnaryExpression, JsUnaryOperator, T,
 };
 use biome_rowan::{AstNode, AstNodeList, BatchMutationExt, TriviaPieceKind, declare_node_union};
+use biome_rule_options::no_implicit_coercion::NoImplicitCoercionOptions;
 
 declare_lint_rule! {
     /// Disallow shorthand type conversions.

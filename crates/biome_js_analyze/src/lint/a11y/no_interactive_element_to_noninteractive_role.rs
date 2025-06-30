@@ -1,5 +1,4 @@
 use crate::{JsRuleAction, services::aria::Aria};
-use biome_rule_options::no_interactive_element_to_noninteractive_role::NoInteractiveElementToNoninteractiveRoleOptions;
 use biome_analyze::{
     FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
@@ -8,6 +7,7 @@ use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_syntax::jsx_ext::AnyJsxElement;
 use biome_rowan::{AstNode, BatchMutationExt};
+use biome_rule_options::no_interactive_element_to_noninteractive_role::NoInteractiveElementToNoninteractiveRoleOptions;
 
 declare_lint_rule! {
     /// Enforce that non-interactive ARIA roles are not assigned to interactive HTML elements.

@@ -1,5 +1,4 @@
 use crate::JsRuleAction;
-use biome_rule_options::no_ts_ignore::NoTsIgnoreOptions;
 use biome_analyze::{
     Ast, FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
@@ -7,6 +6,7 @@ use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_syntax::{JsModule, JsSyntaxToken, TextLen};
 use biome_rowan::{AstNode, BatchMutationExt, Direction, TextRange, TextSize, TriviaPiece};
+use biome_rule_options::no_ts_ignore::NoTsIgnoreOptions;
 
 declare_lint_rule! {
     /// Prevents the use of the TypeScript directive `@ts-ignore`.

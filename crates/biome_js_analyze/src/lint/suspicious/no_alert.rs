@@ -2,12 +2,12 @@ use crate::services::semantic::Semantic;
 use biome_analyze::{Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule};
 use biome_console::markup;
 use biome_js_semantic::SemanticModel;
-use biome_rule_options::no_alert::NoAlertOptions;
 use biome_js_syntax::{
     AnyJsExpression, AnyJsLiteralExpression, JsCallExpression, JsComputedMemberExpression,
     JsStaticMemberExpression, global_identifier,
 };
 use biome_rowan::AstNode;
+use biome_rule_options::no_alert::NoAlertOptions;
 
 const FORBIDDEN_FUNCTIONS: &[&str] = &["alert", "confirm", "prompt"];
 const GLOBAL_OBJECTS: &[&str] = &["window", "globalThis"];

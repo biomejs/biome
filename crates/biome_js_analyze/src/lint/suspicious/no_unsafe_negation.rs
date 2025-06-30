@@ -1,5 +1,4 @@
 use crate::JsRuleAction;
-use biome_rule_options::no_unsafe_negation::NoUnsafeNegationOptions;
 use biome_analyze::{
     Ast, FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
@@ -8,6 +7,7 @@ use biome_diagnostics::Severity;
 use biome_js_factory::make;
 use biome_js_syntax::{AnyJsExpression, JsInExpression, JsInstanceofExpression, is_negation};
 use biome_rowan::{AstNode, AstNodeExt, BatchMutationExt, declare_node_union};
+use biome_rule_options::no_unsafe_negation::NoUnsafeNegationOptions;
 
 declare_lint_rule! {
     /// Disallow using unsafe negation.

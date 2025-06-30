@@ -1,4 +1,3 @@
-use biome_rule_options::use_consistent_builtin_instantiation::UseConsistentBuiltinInstantiationOptions;
 use crate::{
     JsRuleAction,
     lint::correctness::no_invalid_builtin_instantiation::convert_new_expression_to_call_expression,
@@ -13,6 +12,7 @@ use biome_js_syntax::{
     AnyJsExpression, JsNewOrCallExpression, global_identifier, static_value::StaticValue,
 };
 use biome_rowan::{AstNode, BatchMutationExt};
+use biome_rule_options::use_consistent_builtin_instantiation::UseConsistentBuiltinInstantiationOptions;
 
 use crate::lint::style::use_throw_new_error::convert_call_expression_to_new_expression;
 

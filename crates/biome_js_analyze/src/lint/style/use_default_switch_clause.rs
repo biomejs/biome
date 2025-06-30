@@ -1,6 +1,5 @@
 use std::ops::Not;
 
-use biome_rule_options::use_default_switch_clause::UseDefaultSwitchClauseOptions;
 use biome_analyze::{
     Ast, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
@@ -8,6 +7,7 @@ use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_syntax::JsSwitchStatement;
 use biome_rowan::AstNode;
+use biome_rule_options::use_default_switch_clause::UseDefaultSwitchClauseOptions;
 
 declare_lint_rule! {
     /// Require the default clause in switch statements.

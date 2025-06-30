@@ -4,12 +4,12 @@ use biome_analyze::{Ast, FixKind, Rule, RuleDiagnostic, context::RuleContext, de
 use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_factory::make;
-use biome_rule_options::use_simple_number_keys::UseSimpleNumberKeysOptions;
 use biome_js_syntax::{
     AnyJsObjectMember, JsLiteralMemberName, JsObjectExpression, JsSyntaxKind, JsSyntaxToken,
     TextRange,
 };
 use biome_rowan::{AstNode, BatchMutationExt, SyntaxResult};
+use biome_rule_options::use_simple_number_keys::UseSimpleNumberKeysOptions;
 use std::str::FromStr;
 
 declare_lint_rule! {

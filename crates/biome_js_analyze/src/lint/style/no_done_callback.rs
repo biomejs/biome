@@ -1,4 +1,3 @@
-use biome_rule_options::no_done_callback::NoDoneCallbackOptions;
 use biome_analyze::{
     Ast, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
@@ -9,6 +8,7 @@ use biome_js_syntax::{
     JsTemplateExpression,
 };
 use biome_rowan::{AstNode, TextRange};
+use biome_rule_options::no_done_callback::NoDoneCallbackOptions;
 
 declare_lint_rule! {
     /// Disallow using a callback in asynchronous tests and hooks.

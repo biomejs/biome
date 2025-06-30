@@ -1,10 +1,10 @@
-use biome_rule_options::use_exports_last::UseExportsLastOptions;
 use biome_analyze::{
     Ast, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
 use biome_js_syntax::{AnyJsModuleItem, JsModuleItemList};
 use biome_rowan::{AstNode, AstNodeList, TextRange};
+use biome_rule_options::use_exports_last::UseExportsLastOptions;
 
 declare_lint_rule! {
     /// Require that all exports are declared after all non-export statements.

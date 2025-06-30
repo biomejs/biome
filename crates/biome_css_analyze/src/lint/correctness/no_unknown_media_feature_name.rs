@@ -1,4 +1,3 @@
-use biome_rule_options::no_unknown_media_feature_name::NoUnknownMediaFeatureNameOptions;
 use biome_analyze::{
     Ast, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
@@ -11,6 +10,7 @@ use biome_css_syntax::{
 };
 use biome_diagnostics::Severity;
 use biome_rowan::AstNode;
+use biome_rule_options::no_unknown_media_feature_name::NoUnknownMediaFeatureNameOptions;
 
 use crate::utils::is_media_feature_name;
 

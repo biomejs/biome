@@ -1,4 +1,3 @@
-use biome_rule_options::use_namespace_keyword::UseNamespaceKeywordOptions;
 use biome_analyze::{
     Ast, FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
@@ -7,6 +6,7 @@ use biome_diagnostics::Severity;
 use biome_js_factory::make;
 use biome_js_syntax::{JsSyntaxToken, T, TsModuleDeclaration};
 use biome_rowan::BatchMutationExt;
+use biome_rule_options::use_namespace_keyword::UseNamespaceKeywordOptions;
 
 use crate::JsRuleAction;
 

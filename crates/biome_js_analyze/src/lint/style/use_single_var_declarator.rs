@@ -1,4 +1,3 @@
-use biome_rule_options::use_single_var_declarator::UseSingleVarDeclaratorOptions;
 use biome_analyze::{
     Ast, FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
@@ -12,6 +11,7 @@ use biome_js_syntax::{
 use biome_rowan::{
     AstNode, AstSeparatedList, BatchMutationExt, TriviaPiece, trim_leading_trivia_pieces,
 };
+use biome_rule_options::use_single_var_declarator::UseSingleVarDeclaratorOptions;
 
 use crate::JsRuleAction;
 

@@ -3,12 +3,12 @@ use biome_analyze::{Ast, FixKind, Rule, RuleDiagnostic, context::RuleContext, de
 use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_factory::make;
-use biome_rule_options::use_simplified_logic_expression::UseSimplifiedLogicExpressionOptions;
 use biome_js_syntax::{
     AnyJsExpression, AnyJsLiteralExpression, JsBooleanLiteralExpression, JsLogicalExpression,
     JsUnaryExpression, JsUnaryOperator, T,
 };
 use biome_rowan::{AstNode, AstNodeExt, BatchMutationExt};
+use biome_rule_options::use_simplified_logic_expression::UseSimplifiedLogicExpressionOptions;
 
 declare_lint_rule! {
     /// Discard redundant terms from logical expressions.

@@ -1,4 +1,3 @@
-use biome_rule_options::no_invalid_grid_areas::NoInvalidGridAreasOptions;
 use biome_analyze::{
     Ast, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
@@ -6,6 +5,7 @@ use biome_console::markup;
 use biome_css_syntax::CssDeclarationOrRuleList;
 use biome_diagnostics::Severity;
 use biome_rowan::{TextRange, TokenText};
+use biome_rule_options::no_invalid_grid_areas::NoInvalidGridAreasOptions;
 
 use rustc_hash::FxHashSet;
 

@@ -1,5 +1,4 @@
 use crate::JsRuleAction;
-use biome_rule_options::no_comment_text::NoCommentTextOptions;
 use biome_analyze::{
     Ast, FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
@@ -8,6 +7,7 @@ use biome_diagnostics::Severity;
 use biome_js_factory::make;
 use biome_js_syntax::{AnyJsxChild, JsSyntaxKind, JsSyntaxToken, JsxText};
 use biome_rowan::{BatchMutationExt, TextRange, TextSize};
+use biome_rule_options::no_comment_text::NoCommentTextOptions;
 use std::ops::Range;
 
 declare_lint_rule! {

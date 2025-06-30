@@ -1,4 +1,3 @@
-use biome_rule_options::use_throw_only_error::UseThrowOnlyErrorOptions;
 use biome_analyze::{
     Ast, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
@@ -9,6 +8,7 @@ use biome_js_syntax::{
     JsThrowStatement,
 };
 use biome_rowan::AstNode;
+use biome_rule_options::use_throw_only_error::UseThrowOnlyErrorOptions;
 
 declare_lint_rule! {
     /// Disallow throwing non-`Error` values.

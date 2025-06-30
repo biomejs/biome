@@ -4,7 +4,6 @@ use biome_analyze::{Ast, FixKind, Rule, RuleDiagnostic, context::RuleContext, de
 use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_syntax::AnyJsLiteralExpression;
-use biome_rule_options::no_inferrable_types::NoInferrableTypesOptions;
 use biome_js_syntax::{
     AnyJsExpression, AnyTsPropertyAnnotation, AnyTsVariableAnnotation, JsFormalParameter,
     JsInitializerClause, JsPropertyClassMember, JsVariableDeclaration, JsVariableDeclarator,
@@ -12,6 +11,7 @@ use biome_js_syntax::{
 };
 use biome_rowan::AstNode;
 use biome_rowan::BatchMutationExt;
+use biome_rule_options::no_inferrable_types::NoInferrableTypesOptions;
 
 declare_lint_rule! {
     /// Disallow type annotations for variables, parameters, and class properties initialized with a literal expression.

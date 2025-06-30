@@ -3,17 +3,16 @@ use biome_analyze::context::RuleContext;
 use biome_analyze::{Ast, FixKind, Rule, RuleDiagnostic, RuleSource, declare_lint_rule};
 use biome_console::markup;
 use biome_diagnostics::Severity;
-use biome_rule_options::no_empty_interface::NoEmptyInterfaceOptions;
 use biome_js_factory::{
     make,
-    syntax::{AnyTsType, T
-},
+    syntax::{AnyTsType, T},
 };
 use biome_js_syntax::{
     AnyJsDeclarationClause, JsSyntaxKind, TriviaPieceKind, TsInterfaceDeclaration,
     TsTypeAliasDeclaration,
 };
 use biome_rowan::{AstNode, AstNodeList, BatchMutationExt, SyntaxResult};
+use biome_rule_options::no_empty_interface::NoEmptyInterfaceOptions;
 
 declare_lint_rule! {
     /// Disallow the declaration of empty interfaces.

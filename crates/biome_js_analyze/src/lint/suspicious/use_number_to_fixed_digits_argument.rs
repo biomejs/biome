@@ -1,4 +1,3 @@
-use biome_rule_options::use_number_to_fixed_digits_argument::UseNumberToFixedDigitsArgumentOptions;
 use biome_analyze::{
     Ast, FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
@@ -10,6 +9,7 @@ use biome_js_syntax::{
     JsCallExpression, JsSyntaxKind,
 };
 use biome_rowan::{AstNode, AstSeparatedList, BatchMutationExt};
+use biome_rule_options::use_number_to_fixed_digits_argument::UseNumberToFixedDigitsArgumentOptions;
 
 use crate::JsRuleAction;
 

@@ -1,6 +1,5 @@
 use std::str::FromStr;
 
-use biome_rule_options::use_valid_typeof::UseValidTypeofOptions;
 use biome_analyze::{
     Ast, FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
@@ -12,6 +11,7 @@ use biome_js_syntax::{
     JsLogicalOperator, JsUnaryOperator,
 };
 use biome_rowan::{AstNode, BatchMutationExt};
+use biome_rule_options::use_valid_typeof::UseValidTypeofOptions;
 use biome_string_case::StrLikeExtension;
 
 use crate::JsRuleAction;

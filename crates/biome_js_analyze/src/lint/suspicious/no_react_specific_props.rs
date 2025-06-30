@@ -1,5 +1,4 @@
 use crate::JsRuleAction;
-use biome_rule_options::no_react_specific_props::NoReactSpecificPropsOptions;
 use biome_analyze::context::RuleContext;
 use biome_analyze::{
     Ast, FixKind, Rule, RuleDiagnostic, RuleDomain, RuleSource, declare_lint_rule,
@@ -9,6 +8,7 @@ use biome_diagnostics::Severity;
 use biome_js_factory::make::{jsx_ident, jsx_name};
 use biome_js_syntax::{AnyJsxAttributeName, JsxAttribute};
 use biome_rowan::{AstNode, BatchMutationExt, TextRange};
+use biome_rule_options::no_react_specific_props::NoReactSpecificPropsOptions;
 
 declare_lint_rule! {
     /// Prevents React-specific JSX properties from being used.

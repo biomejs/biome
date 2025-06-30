@@ -1,4 +1,3 @@
-use biome_rule_options::no_shadow::NoShadowOptions;
 use biome_analyze::{
     QueryMatch, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
@@ -10,6 +9,7 @@ use biome_js_syntax::{
     TsTypeParameterName,
 };
 use biome_rowan::{AstNode, SyntaxNodeCast, TokenText, declare_node_union};
+use biome_rule_options::no_shadow::NoShadowOptions;
 
 use crate::services::semantic::SemanticServices;
 

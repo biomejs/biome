@@ -1,4 +1,3 @@
-use biome_rule_options::use_await::UseAwaitOptions;
 use biome_analyze::{
     AddVisitor, Phases, QueryMatch, Queryable, Rule, RuleDiagnostic, RuleSource, ServiceBag,
     Visitor, VisitorContext, context::RuleContext, declare_lint_rule,
@@ -9,6 +8,7 @@ use biome_js_syntax::{
     AnyFunctionLike, JsAwaitExpression, JsForOfStatement, JsLanguage, TextRange, WalkEvent,
 };
 use biome_rowan::{AstNode, AstNodeList, Language, SyntaxNode, TextSize};
+use biome_rule_options::use_await::UseAwaitOptions;
 
 declare_lint_rule! {
     /// Ensure `async` functions utilize `await`.

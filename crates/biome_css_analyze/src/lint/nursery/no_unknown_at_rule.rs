@@ -1,4 +1,3 @@
-use biome_rule_options::no_unknown_at_rule::NoUnknownAtRuleOptions;
 use biome_analyze::{
     Ast, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
@@ -6,6 +5,7 @@ use biome_console::markup;
 use biome_css_syntax::{CssUnknownBlockAtRule, CssUnknownValueAtRule};
 use biome_diagnostics::Severity;
 use biome_rowan::{AstNode, TextRange, declare_node_union};
+use biome_rule_options::no_unknown_at_rule::NoUnknownAtRuleOptions;
 
 declare_lint_rule! {
     /// Disallow unknown at-rules.

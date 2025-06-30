@@ -9,12 +9,12 @@ use biome_js_factory::make;
 use biome_js_factory::make::{jsx_string, jsx_string_literal};
 use biome_js_semantic::SemanticModel;
 use biome_js_syntax::jsx_ext::AnyJsxElement;
-use biome_rule_options::no_positive_tabindex::NoPositiveTabindexOptions;
 use biome_js_syntax::{
     AnyJsLiteralExpression, AnyJsxAttributeValue, JsCallExpression, JsNumberLiteralExpression,
     JsPropertyObjectMember, JsStringLiteralExpression, JsUnaryExpression, JsxAttribute, TextRange,
 };
 use biome_rowan::{AstNode, BatchMutationExt, declare_node_union};
+use biome_rule_options::no_positive_tabindex::NoPositiveTabindexOptions;
 
 declare_lint_rule! {
     /// Prevent the usage of positive integers on `tabIndex` property

@@ -1,4 +1,3 @@
-use biome_rule_options::no_unused_labels::NoUnusedLabelsOptions;
 use biome_analyze::context::RuleContext;
 use biome_analyze::{
     AddVisitor, FixKind, Phases, QueryMatch, Queryable, Rule, RuleDiagnostic, RuleSource,
@@ -10,6 +9,7 @@ use biome_js_syntax::{
     AnyJsStatement, JsBreakStatement, JsContinueStatement, JsFileSource, JsLabeledStatement,
     JsLanguage, TextRange, WalkEvent,
 };
+use biome_rule_options::no_unused_labels::NoUnusedLabelsOptions;
 
 use biome_rowan::{AstNode, BatchMutationExt, Language, SyntaxNode, SyntaxResult, TokenText};
 use rustc_hash::FxHashSet;

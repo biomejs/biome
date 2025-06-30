@@ -1,5 +1,4 @@
 use crate::JsRuleAction;
-use biome_rule_options::use_index_of::UseIndexOfOptions;
 use biome_analyze::{
     Ast, FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
@@ -12,6 +11,7 @@ use biome_js_syntax::{
     JsReturnStatement, JsSyntaxNode, JsSyntaxToken, JsVariableDeclaration, T,
 };
 use biome_rowan::{AstNode, AstSeparatedList, BatchMutationExt, SyntaxToken, Text};
+use biome_rule_options::use_index_of::UseIndexOfOptions;
 
 declare_lint_rule! {
     /// Prefer `Array#{indexOf,lastIndexOf}()` over `Array#{findIndex,findLastIndex}()` when looking for the index of an item.

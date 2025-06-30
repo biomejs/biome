@@ -6,12 +6,12 @@ use biome_console::markup;
 use biome_control_flow::builder::ROOT_BLOCK_ID;
 use biome_control_flow::{ExceptionHandlerKind, InstructionKind};
 use biome_diagnostics::Severity;
-use biome_rule_options::use_iterable_callback_return::UseIterableCallbackReturnOptions;
 use biome_js_syntax::{
     AnyJsFunctionBody, JsArrowFunctionExpression, JsCallArgumentList, JsCallArguments,
     JsCallExpression, JsFunctionExpression, JsReturnStatement, global_identifier,
 };
 use biome_rowan::{AstNode, AstSeparatedList, NodeOrToken, TextRange};
+use biome_rule_options::use_iterable_callback_return::UseIterableCallbackReturnOptions;
 use roaring::RoaringBitmap;
 use rustc_hash::FxHashMap;
 use std::io;

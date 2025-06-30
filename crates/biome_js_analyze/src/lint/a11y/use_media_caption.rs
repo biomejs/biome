@@ -5,8 +5,8 @@ use biome_diagnostics::Severity;
 use biome_js_syntax::jsx_ext::AnyJsxElement;
 use biome_js_syntax::{AnyJsxChild, JsxElement, TextRange};
 use biome_rowan::AstNode;
-use biome_string_case::StrLikeExtension;
 use biome_rule_options::use_media_caption::UseMediaCaptionOptions;
+use biome_string_case::StrLikeExtension;
 
 declare_lint_rule! {
     /// Enforces that `audio` and `video` elements must have a `track` for captions.

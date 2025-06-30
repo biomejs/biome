@@ -2,12 +2,12 @@ use biome_analyze::{Ast, FixKind, Rule, RuleDiagnostic, context::RuleContext, de
 use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_factory::make;
-use biome_rule_options::no_delete::NoDeleteOptions;
 use biome_js_syntax::{
     AnyJsAssignment, AnyJsAssignmentPattern, AnyJsExpression, JsComputedMemberExpressionFields,
     JsStaticMemberExpressionFields, JsUnaryExpression, JsUnaryOperator, T,
 };
 use biome_rowan::{AstNode, BatchMutationExt};
+use biome_rule_options::no_delete::NoDeleteOptions;
 
 use crate::JsRuleAction;
 

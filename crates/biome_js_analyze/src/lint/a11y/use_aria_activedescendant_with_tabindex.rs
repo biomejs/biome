@@ -1,5 +1,4 @@
 use crate::{JsRuleAction, services::aria::Aria};
-use biome_rule_options::use_aria_activedescendant_with_tabindex::UseAriaActivedescendantWithTabindexOptions;
 use biome_analyze::{
     FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
@@ -14,6 +13,7 @@ use biome_js_syntax::{
     jsx_ext::AnyJsxElement,
 };
 use biome_rowan::{AstNode, AstNodeList, BatchMutationExt, TriviaPieceKind};
+use biome_rule_options::use_aria_activedescendant_with_tabindex::UseAriaActivedescendantWithTabindexOptions;
 
 declare_lint_rule! {
     /// Enforce that `tabIndex` is assigned to non-interactive HTML elements with `aria-activedescendant`.

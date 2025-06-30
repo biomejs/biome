@@ -1,4 +1,3 @@
-use biome_rule_options::no_useless_this_alias::NoUselessThisAliasOptions;
 use crate::{
     JsRuleAction, services::control_flow::AnyJsControlFlowRoot, services::semantic::Semantic,
 };
@@ -15,6 +14,7 @@ use biome_js_syntax::{
     JsThisExpression, JsVariableDeclaration, JsVariableDeclarator, JsVariableStatement, T,
 };
 use biome_rowan::{AstNode, AstSeparatedList, BatchMutationExt};
+use biome_rule_options::no_useless_this_alias::NoUselessThisAliasOptions;
 
 declare_lint_rule! {
     /// Disallow useless `this` aliasing.

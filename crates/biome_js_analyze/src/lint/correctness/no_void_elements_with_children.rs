@@ -6,12 +6,12 @@ use biome_analyze::{FixKind, Rule, RuleDiagnostic, RuleSource, declare_lint_rule
 use biome_console::{MarkupBuf, markup};
 use biome_diagnostics::Severity;
 use biome_js_factory::make::{jsx_attribute_list, jsx_self_closing_element};
-use biome_rule_options::no_void_elements_with_children::NoVoidElementsWithChildrenOptions;
 use biome_js_syntax::{
     AnyJsxAttribute, JsCallExpression, JsPropertyObjectMember, JsxAttribute, JsxElement,
     JsxSelfClosingElement,
 };
 use biome_rowan::{AstNode, AstNodeList, BatchMutationExt, declare_node_union};
+use biome_rule_options::no_void_elements_with_children::NoVoidElementsWithChildrenOptions;
 
 declare_lint_rule! {
     /// This rules prevents void elements (AKA self-closing elements) from having children.

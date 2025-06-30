@@ -1,4 +1,3 @@
-use biome_rule_options::use_collapsed_if::UseCollapsedIfOptions;
 use biome_analyze::{
     Ast, FixKind, QueryMatch, Rule, RuleDiagnostic, RuleSource, context::RuleContext,
     declare_lint_rule,
@@ -9,6 +8,7 @@ use biome_js_factory::make;
 use biome_js_syntax::parentheses::NeedsParentheses;
 use biome_js_syntax::{AnyJsStatement, JsIfStatement, T};
 use biome_rowan::{AstNode, AstNodeList, BatchMutationExt};
+use biome_rule_options::use_collapsed_if::UseCollapsedIfOptions;
 
 use crate::JsRuleAction;
 

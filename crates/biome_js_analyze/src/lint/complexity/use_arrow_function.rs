@@ -1,5 +1,4 @@
 use crate::JsRuleAction;
-use biome_rule_options::use_arrow_function::UseArrowFunctionOptions;
 use biome_analyze::{
     AddVisitor, FixKind, Phases, QueryMatch, Queryable, Rule, RuleDiagnostic, RuleSource,
     ServiceBag, Visitor, VisitorContext, context::RuleContext, declare_lint_rule,
@@ -18,6 +17,7 @@ use biome_rowan::{
     AstNode, AstNodeList, AstSeparatedList, BatchMutationExt, Language, SyntaxNode, TextRange,
     TriviaPieceKind, WalkEvent, declare_node_union,
 };
+use biome_rule_options::use_arrow_function::UseArrowFunctionOptions;
 
 declare_lint_rule! {
     /// Use arrow functions over function expressions.

@@ -1,4 +1,3 @@
-use biome_rule_options::use_sorted_properties::UseSortedPropertiesOptions;
 use crate::{
     CssRuleAction,
     keywords::VENDOR_PREFIXES,
@@ -16,6 +15,7 @@ use biome_css_syntax::{
 };
 use biome_diagnostics::category;
 use biome_rowan::{AstNode, BatchMutationExt, NodeOrToken, SyntaxNode, TokenText};
+use biome_rule_options::use_sorted_properties::UseSortedPropertiesOptions;
 use biome_string_case::StrOnlyExtension;
 use std::{
     borrow::Cow,

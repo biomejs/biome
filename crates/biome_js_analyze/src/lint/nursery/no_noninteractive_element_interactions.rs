@@ -1,4 +1,3 @@
-use biome_rule_options::no_noninteractive_element_interactions::NoNoninteractiveElementInteractionsOptions;
 use crate::{
     a11y::{is_content_editable, is_hidden_from_screen_reader},
     services::aria::Aria,
@@ -7,6 +6,7 @@ use biome_analyze::{Rule, RuleDiagnostic, RuleSource, context::RuleContext, decl
 use biome_console::markup;
 use biome_js_syntax::jsx_ext::AnyJsxElement;
 use biome_rowan::AstNode;
+use biome_rule_options::no_noninteractive_element_interactions::NoNoninteractiveElementInteractionsOptions;
 
 declare_lint_rule! {
     /// Disallow use event handlers on non-interactive elements.

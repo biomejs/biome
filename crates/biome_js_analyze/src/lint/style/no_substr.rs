@@ -1,4 +1,3 @@
-use biome_rule_options::no_substr::NoSubstrOptions;
 use biome_analyze::{
     Ast, FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
@@ -9,6 +8,7 @@ use biome_js_syntax::{
     AnyJsName, JsCallArguments, JsExpressionStatement, JsSyntaxToken, JsVariableStatement,
 };
 use biome_rowan::{AstSeparatedList, BatchMutationExt, TextRange, TokenText, declare_node_union};
+use biome_rule_options::no_substr::NoSubstrOptions;
 
 use crate::JsRuleAction;
 

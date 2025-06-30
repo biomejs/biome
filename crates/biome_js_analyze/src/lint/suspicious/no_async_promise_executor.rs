@@ -1,4 +1,3 @@
-use biome_rule_options::no_async_promise_executor::NoAsyncPromiseExecutorOptions;
 use biome_analyze::{
     Ast, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
@@ -8,6 +7,7 @@ use biome_js_syntax::{
     AnyJsCallArgument, AnyJsExpression, AnyJsFunction, JsNewExpression, JsNewExpressionFields,
 };
 use biome_rowan::{AstNode, AstSeparatedList};
+use biome_rule_options::no_async_promise_executor::NoAsyncPromiseExecutorOptions;
 
 declare_lint_rule! {
     /// Disallows using an async function as a Promise executor.

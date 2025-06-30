@@ -1,10 +1,10 @@
-use biome_rule_options::use_for_component::UseForComponentOptions;
 use biome_analyze::{
     Ast, Rule, RuleDiagnostic, RuleDomain, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
 use biome_js_syntax::{AnyJsMemberExpression, JsCallExpression, JsSyntaxKind, JsxExpressionChild};
 use biome_rowan::{AstNode, AstSeparatedList, SyntaxNodeOptionExt};
+use biome_rule_options::use_for_component::UseForComponentOptions;
 
 declare_lint_rule! {
     /// Enforce using Solid's `<For />` component for mapping an array to JSX elements.

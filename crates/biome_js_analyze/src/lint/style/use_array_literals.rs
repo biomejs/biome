@@ -1,4 +1,3 @@
-use biome_rule_options::use_array_literals::UseArrayLiteralsOptions;
 use biome_analyze::{
     FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
@@ -10,6 +9,7 @@ use biome_js_syntax::{
     JsNewOrCallExpression, JsSyntaxKind, JsVariableDeclarator, T, global_identifier,
 };
 use biome_rowan::{AstNode, AstSeparatedList, BatchMutationExt};
+use biome_rule_options::use_array_literals::UseArrayLiteralsOptions;
 
 use crate::{JsRuleAction, services::semantic::Semantic};
 

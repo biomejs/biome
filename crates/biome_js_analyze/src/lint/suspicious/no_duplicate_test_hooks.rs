@@ -1,4 +1,3 @@
-use biome_rule_options::no_duplicate_test_hooks::NoDuplicateTestHooksOptions;
 use biome_analyze::{
     AddVisitor, Phases, QueryMatch, Queryable, Rule, RuleDiagnostic, RuleDomain, RuleSource,
     ServiceBag, Visitor, VisitorContext, context::RuleContext, declare_lint_rule,
@@ -7,6 +6,7 @@ use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_syntax::{AnyJsExpression, JsCallExpression, JsLanguage, TextRange};
 use biome_rowan::{AstNode, Language, SyntaxNode, WalkEvent};
+use biome_rule_options::no_duplicate_test_hooks::NoDuplicateTestHooksOptions;
 
 declare_lint_rule! {
     /// A `describe` block should not contain duplicate hooks.

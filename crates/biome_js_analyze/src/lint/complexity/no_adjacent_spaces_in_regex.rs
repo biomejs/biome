@@ -1,4 +1,3 @@
-use biome_rule_options::no_adjacent_spaces_in_regex::NoAdjacentSpacesInRegexOptions;
 use biome_analyze::{
     Ast, FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
@@ -6,6 +5,7 @@ use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_syntax::{JsRegexLiteralExpression, JsSyntaxKind, JsSyntaxToken, TextRange, TextSize};
 use biome_rowan::BatchMutationExt;
+use biome_rule_options::no_adjacent_spaces_in_regex::NoAdjacentSpacesInRegexOptions;
 use std::{fmt::Write, ops::Range};
 
 use crate::JsRuleAction;

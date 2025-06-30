@@ -6,12 +6,12 @@ use biome_diagnostics::Severity;
 use biome_js_factory::make;
 use biome_js_factory::make::ts_type_alias_declaration;
 use biome_js_syntax::AnyTsType::TsThisType;
-use biome_rule_options::use_shorthand_function_type::UseShorthandFunctionTypeOptions;
 use biome_js_syntax::{
     AnyJsDeclarationClause, AnyTsReturnType, AnyTsType, JsSyntaxKind, T, TsCallSignatureTypeMember,
     TsFunctionType, TsInterfaceDeclaration, TsObjectType, TsTypeMemberList,
 };
 use biome_rowan::{AstNode, AstNodeList, BatchMutationExt, SyntaxNodeOptionExt, TriviaPieceKind};
+use biome_rule_options::use_shorthand_function_type::UseShorthandFunctionTypeOptions;
 
 declare_lint_rule! {
     /// Enforce using function types instead of object type with call signatures.

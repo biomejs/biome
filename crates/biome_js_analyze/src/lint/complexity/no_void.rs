@@ -1,4 +1,3 @@
-use biome_rule_options::no_void::NoVoidOptions;
 use biome_analyze::{
     Ast, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
@@ -6,6 +5,7 @@ use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_syntax::JsUnaryExpression;
 use biome_rowan::AstNode;
+use biome_rule_options::no_void::NoVoidOptions;
 
 declare_lint_rule! {
     /// Disallow the use of `void` operators, which is not a familiar operator.

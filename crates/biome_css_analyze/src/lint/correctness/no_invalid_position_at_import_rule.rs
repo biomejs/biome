@@ -1,4 +1,3 @@
-use biome_rule_options::no_invalid_position_at_import_rule::NoInvalidPositionAtImportRuleOptions;
 use biome_analyze::{
     Ast, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
@@ -6,6 +5,7 @@ use biome_console::markup;
 use biome_css_syntax::{AnyCssRule, CssRuleList};
 use biome_diagnostics::Severity;
 use biome_rowan::{AstNode, TextRange};
+use biome_rule_options::no_invalid_position_at_import_rule::NoInvalidPositionAtImportRuleOptions;
 
 declare_lint_rule! {
     /// Disallow the use of `@import` at-rules in invalid positions.

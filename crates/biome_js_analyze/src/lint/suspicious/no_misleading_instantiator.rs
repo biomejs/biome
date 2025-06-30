@@ -1,4 +1,3 @@
-use biome_rule_options::no_misleading_instantiator::NoMisleadingInstantiatorOptions;
 use biome_analyze::{
     Ast, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
@@ -10,6 +9,7 @@ use biome_js_syntax::{
     TsTypeAliasDeclaration,
 };
 use biome_rowan::{AstNode, TextRange, declare_node_union};
+use biome_rule_options::no_misleading_instantiator::NoMisleadingInstantiatorOptions;
 
 declare_lint_rule! {
     /// Enforce proper usage of `new` and `constructor`.

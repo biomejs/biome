@@ -1,5 +1,4 @@
 use crate::{JsRuleAction, services::aria::Aria};
-use biome_rule_options::no_noninteractive_tabindex::NoNoninteractiveTabindexOptions;
 use biome_analyze::{
     FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
@@ -10,6 +9,7 @@ use biome_js_syntax::{
     AnyJsxAttributeValue, AnyNumberLikeExpression, TextRange, jsx_ext::AnyJsxElement,
 };
 use biome_rowan::{AstNode, BatchMutationExt, TokenText};
+use biome_rule_options::no_noninteractive_tabindex::NoNoninteractiveTabindexOptions;
 
 declare_lint_rule! {
     /// Enforce that `tabIndex` is not assigned to non-interactive HTML elements.

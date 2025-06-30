@@ -1,13 +1,13 @@
 use biome_analyze::RuleSource;
 use biome_analyze::{Ast, Rule, RuleDiagnostic, context::RuleContext, declare_lint_rule};
 use biome_diagnostics::Severity;
-use biome_rule_options::no_duplicate_class_members::NoDuplicateClassMembersOptions;
 use biome_js_syntax::{
     AnyJsClassMemberName, JsClassMemberList, JsGetterClassMember, JsMethodClassMember,
     JsPropertyClassMember, JsSetterClassMember, JsStaticModifier, JsSyntaxList, TextRange,
 };
 use biome_rowan::{AstNode, declare_node_union};
 use biome_rowan::{AstNodeList, TokenText};
+use biome_rule_options::no_duplicate_class_members::NoDuplicateClassMembersOptions;
 use rustc_hash::{FxHashMap, FxHashSet};
 
 declare_lint_rule! {

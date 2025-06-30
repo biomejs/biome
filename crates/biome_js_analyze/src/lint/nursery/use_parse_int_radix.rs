@@ -1,5 +1,4 @@
 use crate::JsRuleAction;
-use biome_rule_options::use_parse_int_radix::UseParseIntRadixOptions;
 use biome_analyze::{
     Ast, FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
@@ -10,6 +9,7 @@ use biome_js_syntax::{
     JsCallExpression, T, global_identifier, numbers::parse_js_number,
 };
 use biome_rowan::{AstNode, AstSeparatedList, BatchMutationExt, TriviaPieceKind};
+use biome_rule_options::use_parse_int_radix::UseParseIntRadixOptions;
 
 declare_lint_rule! {
     /// Enforce the consistent use of the radix argument when using `parseInt()`.

@@ -1,4 +1,3 @@
-use biome_rule_options::use_trim_start_end::UseTrimStartEndOptions;
 use biome_analyze::{
     Ast, FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
@@ -10,6 +9,7 @@ use biome_js_syntax::{
     JsComputedMemberExpression, JsLanguage, JsSyntaxKind, JsSyntaxToken, JsTemplateExpression,
 };
 use biome_rowan::{AstNode, AstSeparatedList, BatchMutationExt, SyntaxToken, TextRange};
+use biome_rule_options::use_trim_start_end::UseTrimStartEndOptions;
 
 use crate::JsRuleAction;
 

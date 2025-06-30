@@ -1,4 +1,3 @@
-use biome_rule_options::no_exports_in_test::NoExportsInTestOptions;
 use biome_analyze::{
     AddVisitor, Phases, QueryMatch, Queryable, Rule, RuleDiagnostic, RuleDomain, RuleSource,
     ServiceBag, Visitor, context::RuleContext, declare_lint_rule,
@@ -10,6 +9,7 @@ use biome_js_syntax::{
     assign_ext::AnyJsMemberAssignment,
 };
 use biome_rowan::{AstNode, Language, TextRange, WalkEvent, declare_node_union};
+use biome_rule_options::no_exports_in_test::NoExportsInTestOptions;
 
 declare_lint_rule! {
     /// Disallow using `export` or `module.exports` in files containing tests

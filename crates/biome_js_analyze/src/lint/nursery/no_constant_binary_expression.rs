@@ -2,7 +2,6 @@ use biome_analyze::{Rule, RuleDiagnostic, RuleSource, context::RuleContext, decl
 use biome_console::fmt::{Display, Formatter};
 use biome_console::markup;
 use biome_js_semantic::{BindingExtensions, SemanticModel};
-use biome_rule_options::no_constant_binary_expression::NoConstantBinaryExpressionOptions;
 use biome_js_syntax::{
     AnyJsArrayElement, AnyJsCallArgument, AnyJsExpression, AnyJsLiteralExpression,
     AnyJsTemplateElement, JsAssignmentOperator, JsBinaryExpression, JsBinaryOperator,
@@ -10,6 +9,7 @@ use biome_js_syntax::{
     JsReferenceIdentifier, JsUnaryOperator,
 };
 use biome_rowan::{AstNode, AstNodeList, AstSeparatedList, SyntaxResult, declare_node_union};
+use biome_rule_options::no_constant_binary_expression::NoConstantBinaryExpressionOptions;
 
 use crate::ast_utils::is_constant_condition;
 use crate::globals::is_js_language_global;

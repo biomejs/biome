@@ -1,6 +1,5 @@
 use std::collections::HashSet;
 
-use biome_rule_options::no_duplicate_fields::NoDuplicateFieldsOptions;
 use biome_analyze::{
     Ast, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
@@ -10,6 +9,7 @@ use biome_graphql_syntax::{
     GraphqlVariableDefinitions,
 };
 use biome_rowan::{AstNode, TextRange};
+use biome_rule_options::no_duplicate_fields::NoDuplicateFieldsOptions;
 use biome_string_case::StrOnlyExtension;
 
 declare_lint_rule! {

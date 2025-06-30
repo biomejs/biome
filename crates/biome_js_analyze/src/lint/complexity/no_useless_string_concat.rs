@@ -1,4 +1,3 @@
-use biome_rule_options::no_useless_string_concat::NoUselessStringConcatOptions;
 use biome_analyze::{
     Ast, FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
@@ -11,6 +10,7 @@ use biome_js_syntax::{
     AnyJsExpression, AnyJsLiteralExpression, JsBinaryExpression, JsBinaryOperator,
 };
 use biome_rowan::{AstNode, BatchMutationExt, TextRange, TextSize};
+use biome_rule_options::no_useless_string_concat::NoUselessStringConcatOptions;
 
 use crate::JsRuleAction;
 

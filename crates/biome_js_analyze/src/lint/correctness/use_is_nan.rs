@@ -4,12 +4,12 @@ use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_factory::make;
 use biome_js_semantic::SemanticModel;
-use biome_rule_options::use_is_nan::UseIsNanOptions;
 use biome_js_syntax::{
     AnyJsCallArgument, AnyJsExpression, AnyJsMemberExpression, JsBinaryExpression,
     JsBinaryOperator, JsCaseClause, JsSwitchStatement, T, TextRange, global_identifier,
 };
 use biome_rowan::{AstNode, BatchMutationExt, declare_node_union};
+use biome_rule_options::use_is_nan::UseIsNanOptions;
 
 use crate::{JsRuleAction, services::semantic::Semantic};
 

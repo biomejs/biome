@@ -1,5 +1,4 @@
 use crate::{JsRuleAction, services::semantic::Semantic};
-use biome_rule_options::use_is_array::UseIsArrayOptions;
 use biome_analyze::{
     FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
@@ -10,6 +9,7 @@ use biome_js_syntax::{
     AnyJsCallArgument, AnyJsExpression, JsInstanceofExpression, T, global_identifier,
 };
 use biome_rowan::{AstNode, BatchMutationExt, trim_leading_trivia_pieces};
+use biome_rule_options::use_is_array::UseIsArrayOptions;
 
 declare_lint_rule! {
     /// Use `Array.isArray()` instead of `instanceof Array`.

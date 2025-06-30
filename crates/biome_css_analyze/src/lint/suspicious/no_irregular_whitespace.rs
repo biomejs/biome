@@ -1,4 +1,3 @@
-use biome_rule_options::no_irregular_whitespace::NoIrregularWhitespaceOptions;
 use biome_analyze::{
     Ast, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
@@ -6,6 +5,7 @@ use biome_console::markup;
 use biome_css_syntax::{AnyCssRule, CssLanguage};
 use biome_diagnostics::Severity;
 use biome_rowan::{AstNode, Direction, SyntaxToken, TextRange};
+use biome_rule_options::no_irregular_whitespace::NoIrregularWhitespaceOptions;
 
 const IRREGULAR_WHITESPACES: &[char; 22] = &[
     '\u{c}', '\u{b}', '\u{85}', '\u{feff}', '\u{a0}', '\u{1680}', '\u{180e}', '\u{2000}',

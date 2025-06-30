@@ -1,4 +1,3 @@
-use biome_rule_options::no_img_element::NoImgElementOptions;
 use biome_analyze::{
     Ast, Rule, RuleDiagnostic, RuleDomain, RuleSource, context::RuleContext, declare_lint_rule,
 };
@@ -7,6 +6,7 @@ use biome_diagnostics::Severity;
 use biome_js_syntax::jsx_ext::AnyJsxElement;
 use biome_js_syntax::{JsxChildList, JsxElement};
 use biome_rowan::{AstNode, AstNodeList};
+use biome_rule_options::no_img_element::NoImgElementOptions;
 
 declare_lint_rule! {
     /// Prevent usage of `<img>` element in a Next.js project.

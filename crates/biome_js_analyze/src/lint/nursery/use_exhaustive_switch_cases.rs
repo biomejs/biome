@@ -1,6 +1,5 @@
 use std::ops::Deref;
 
-use biome_rule_options::use_exhaustive_switch_cases::UseExhaustiveSwitchCasesOptions;
 use biome_analyze::{
     FixKind, Rule, RuleDiagnostic, RuleDomain, RuleSource, context::RuleContext, declare_lint_rule,
 };
@@ -11,6 +10,7 @@ use biome_js_syntax::{
 };
 use biome_js_type_info::{Literal, Type, TypeData};
 use biome_rowan::{AstNode, AstNodeList, BatchMutationExt, TriviaPieceKind};
+use biome_rule_options::use_exhaustive_switch_cases::UseExhaustiveSwitchCasesOptions;
 
 use crate::JsRuleAction;
 use crate::services::typed::Typed;

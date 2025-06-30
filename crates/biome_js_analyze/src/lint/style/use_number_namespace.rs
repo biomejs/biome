@@ -1,5 +1,4 @@
 use crate::{JsRuleAction, services::semantic::Semantic};
-use biome_rule_options::use_number_namespace::UseNumberNamespaceOptions;
 use biome_analyze::{
     FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
@@ -11,6 +10,7 @@ use biome_js_syntax::{
     static_value::StaticValue,
 };
 use biome_rowan::{AstNode, BatchMutationExt};
+use biome_rule_options::use_number_namespace::UseNumberNamespaceOptions;
 
 declare_lint_rule! {
     /// Use the `Number` properties instead of global ones.

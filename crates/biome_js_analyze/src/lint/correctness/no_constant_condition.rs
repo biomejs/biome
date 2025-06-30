@@ -3,13 +3,13 @@ use crate::services::semantic::Semantic;
 use biome_analyze::{Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule};
 use biome_console::markup;
 use biome_diagnostics::Severity;
-use biome_rule_options::no_constant_condition::NoConstantConditionOptions;
 use biome_js_syntax::{
     AnyJsExpression, AnyJsStatement, JsConditionalExpression, JsDoWhileStatement, JsForStatement,
     JsFunctionDeclaration, JsFunctionExpression, JsIfStatement, JsStatementList, JsSyntaxKind,
     JsWhileStatement, JsYieldExpression, TextRange,
 };
 use biome_rowan::{AstNode, declare_node_union};
+use biome_rule_options::no_constant_condition::NoConstantConditionOptions;
 
 declare_lint_rule! {
     /// Disallow constant expressions in conditions

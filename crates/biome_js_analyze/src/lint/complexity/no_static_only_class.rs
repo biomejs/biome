@@ -1,4 +1,3 @@
-use biome_rule_options::no_static_only_class::NoStaticOnlyClassOptions;
 use biome_analyze::{
     Ast, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
@@ -11,6 +10,7 @@ use biome_js_syntax::{
     TsPropertySignatureClassMember, TsSetterSignatureClassMember,
 };
 use biome_rowan::{AstNode, AstNodeList};
+use biome_rule_options::no_static_only_class::NoStaticOnlyClassOptions;
 
 declare_lint_rule! {
     /// This rule reports when a class has no non-static members, such as for a class used exclusively as a static namespace.

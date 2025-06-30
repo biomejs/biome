@@ -1,5 +1,4 @@
 use crate::{JsRuleAction, services::aria::Aria};
-use biome_rule_options::no_aria_hidden_on_focusable::NoAriaHiddenOnFocusableOptions;
 use biome_analyze::{
     FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
@@ -7,6 +6,7 @@ use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_syntax::{AnyJsxAttributeValue, AnyNumberLikeExpression, jsx_ext::AnyJsxElement};
 use biome_rowan::{AstNode, BatchMutationExt};
+use biome_rule_options::no_aria_hidden_on_focusable::NoAriaHiddenOnFocusableOptions;
 
 declare_lint_rule! {
     /// Enforce that aria-hidden="true" is not set on focusable elements.

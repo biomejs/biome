@@ -1,4 +1,3 @@
-use biome_rule_options::use_valid_for_direction::UseValidForDirectionOptions;
 use biome_analyze::{
     Ast, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
@@ -8,6 +7,7 @@ use biome_js_syntax::{
     AnyJsExpression, JsAssignmentOperator, JsBinaryOperator, JsForStatement,
     JsIdentifierAssignment, JsIdentifierExpression, JsPostUpdateOperator, JsUnaryOperator,
 };
+use biome_rule_options::use_valid_for_direction::UseValidForDirectionOptions;
 
 declare_lint_rule! {
     /// Enforce "for" loop update clause moving the counter in the right direction.

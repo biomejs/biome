@@ -1,5 +1,4 @@
 use crate::JsRuleAction;
-use biome_rule_options::no_non_null_assertion::NoNonNullAssertionOptions;
 use biome_analyze::{
     Ast, FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
@@ -10,6 +9,7 @@ use biome_js_syntax::{
     AnyJsExpression, T, TsNonNullAssertionAssignment, TsNonNullAssertionExpression,
 };
 use biome_rowan::{AstNode, BatchMutationExt, declare_node_union};
+use biome_rule_options::no_non_null_assertion::NoNonNullAssertionOptions;
 
 declare_lint_rule! {
     /// Disallow non-null assertions using the `!` postfix operator.

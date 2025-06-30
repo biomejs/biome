@@ -1,4 +1,3 @@
-use biome_rule_options::use_google_font_display::UseGoogleFontDisplayOptions;
 use biome_analyze::{
     Ast, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
@@ -6,6 +5,7 @@ use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_syntax::jsx_ext::AnyJsxElement;
 use biome_rowan::TextRange;
+use biome_rule_options::use_google_font_display::UseGoogleFontDisplayOptions;
 
 declare_lint_rule! {
     /// Enforces the use of a recommended `display` strategy with Google Fonts.

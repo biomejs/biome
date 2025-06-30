@@ -1,4 +1,3 @@
-use biome_rule_options::no_excessive_nested_test_suites::NoExcessiveNestedTestSuitesOptions;
 use biome_analyze::{
     AddVisitor, Phases, QueryMatch, Queryable, Rule, RuleDiagnostic, RuleDomain, RuleSource,
     ServiceBag, Visitor, VisitorContext, context::RuleContext, declare_lint_rule,
@@ -7,6 +6,7 @@ use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_syntax::{JsCallExpression, JsLanguage, JsStaticMemberExpression};
 use biome_rowan::{AstNode, Language, SyntaxNode, SyntaxNodeOptionExt, TextRange, WalkEvent};
+use biome_rule_options::no_excessive_nested_test_suites::NoExcessiveNestedTestSuitesOptions;
 
 declare_lint_rule! {
     /// This rule enforces a maximum depth to nested `describe()` in test files.

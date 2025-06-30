@@ -3,12 +3,12 @@ use biome_analyze::{Ast, Rule, RuleDiagnostic, context::RuleContext, declare_lin
 use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_syntax::parameter_ext::{AnyJsParameterList, AnyJsParameters, AnyParameter};
-use biome_rule_options::no_duplicate_parameters::NoDuplicateParametersOptions;
 use biome_js_syntax::{
     AnyJsArrayBindingPatternElement, AnyJsBinding, AnyJsBindingPattern,
     AnyJsObjectBindingPatternMember, JsIdentifierBinding,
 };
 use biome_rowan::AstNode;
+use biome_rule_options::no_duplicate_parameters::NoDuplicateParametersOptions;
 use rustc_hash::FxHashSet;
 
 declare_lint_rule! {

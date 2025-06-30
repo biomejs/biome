@@ -3,12 +3,12 @@ use biome_analyze::{Ast, FixKind, Rule, RuleDiagnostic, RuleSource, declare_lint
 use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_factory::make;
-use biome_rule_options::use_block_statements::UseBlockStatementsOptions;
 use biome_js_syntax::{
     AnyJsStatement, JsDoWhileStatement, JsElseClause, JsForInStatement, JsForOfStatement,
     JsForStatement, JsIfStatement, JsLanguage, JsSyntaxTrivia, JsWhileStatement, JsWithStatement,
     T, TriviaPieceKind,
 };
+use biome_rule_options::use_block_statements::UseBlockStatementsOptions;
 
 use biome_rowan::{AstNode, BatchMutationExt, SyntaxTriviaPiece, declare_node_union};
 

@@ -1,4 +1,3 @@
-use biome_rule_options::no_empty_pattern::NoEmptyPatternOptions;
 use biome_analyze::{
     Ast, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
@@ -6,6 +5,7 @@ use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_syntax::{JsArrayBindingPattern, JsObjectBindingPattern};
 use biome_rowan::{AstNode, AstSeparatedList, declare_node_union};
+use biome_rule_options::no_empty_pattern::NoEmptyPatternOptions;
 
 declare_lint_rule! {
     /// Disallows empty destructuring patterns.

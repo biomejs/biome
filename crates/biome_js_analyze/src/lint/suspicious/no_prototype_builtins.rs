@@ -1,5 +1,4 @@
 use crate::{JsRuleAction, services::semantic::Semantic};
-use biome_rule_options::no_prototype_builtins::NoPrototypeBuiltinsOptions;
 use biome_analyze::{
     FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
@@ -12,6 +11,7 @@ use biome_js_syntax::{
     TextRange,
 };
 use biome_rowan::{AstNode, BatchMutationExt, TriviaPieceKind};
+use biome_rule_options::no_prototype_builtins::NoPrototypeBuiltinsOptions;
 
 declare_lint_rule! {
     /// Disallow direct use of `Object.prototype` builtins.

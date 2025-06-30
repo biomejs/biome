@@ -2,12 +2,12 @@ use biome_analyze::{FixKind, Rule, RuleDiagnostic, context::RuleContext, declare
 use biome_console::markup;
 use biome_js_factory::make;
 use biome_js_semantic::SemanticModel;
-use biome_rule_options::use_consistent_response::UseConsistentResponseOptions;
 use biome_js_syntax::{
     AnyJsCallArgument, AnyJsExpression, AnyJsLiteralExpression, JsCallArguments, JsCallExpression,
     JsNewExpression, JsPropertyObjectMember, T, global_identifier,
 };
 use biome_rowan::{AstNode, AstSeparatedList, BatchMutationExt, TokenText, TriviaPieceKind};
+use biome_rule_options::use_consistent_response::UseConsistentResponseOptions;
 use biome_string_case::StrLikeExtension;
 
 use crate::{JsRuleAction, services::semantic::Semantic};

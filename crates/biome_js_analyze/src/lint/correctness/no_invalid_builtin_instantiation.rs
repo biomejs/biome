@@ -1,5 +1,4 @@
 use crate::{JsRuleAction, services::semantic::Semantic};
-use biome_rule_options::no_invalid_builtin_instantiation::NoInvalidBuiltinInstantiationOptions;
 use biome_analyze::{
     FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
@@ -11,6 +10,7 @@ use biome_js_syntax::{
     static_value::StaticValue,
 };
 use biome_rowan::{AstNode, BatchMutationExt, chain_trivia_pieces};
+use biome_rule_options::no_invalid_builtin_instantiation::NoInvalidBuiltinInstantiationOptions;
 
 use crate::lint::style::use_throw_new_error::convert_call_expression_to_new_expression;
 

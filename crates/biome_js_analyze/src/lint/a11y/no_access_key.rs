@@ -1,5 +1,4 @@
 use crate::JsRuleAction;
-use biome_rule_options::no_access_key::NoAccessKeyOptions;
 use biome_analyze::{
     Ast, FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
@@ -7,6 +6,7 @@ use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_syntax::{JsxAttribute, JsxAttributeList, jsx_ext::AnyJsxElement};
 use biome_rowan::{AstNode, BatchMutationExt};
+use biome_rule_options::no_access_key::NoAccessKeyOptions;
 
 declare_lint_rule! {
     /// Enforce that the `accessKey` attribute is not used on any HTML element.

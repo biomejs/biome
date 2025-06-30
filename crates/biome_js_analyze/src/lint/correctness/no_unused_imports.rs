@@ -1,9 +1,9 @@
-use biome_rule_options::no_unused_imports::NoUnusedImportsOptions;
 use crate::services::semantic::{SemanticModelBuilderVisitor, SemanticServices};
 use crate::{
     JsRuleAction,
     react::{ReactLibrary, is_global_react_import},
 };
+use biome_rule_options::no_unused_imports::NoUnusedImportsOptions;
 
 use biome_analyze::{
     AddVisitor, FixKind, FromServices, Phase, Phases, QueryKey, Queryable, Rule, RuleDiagnostic,

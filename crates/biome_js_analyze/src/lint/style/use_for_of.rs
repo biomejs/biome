@@ -2,7 +2,6 @@ use biome_analyze::{Rule, RuleDiagnostic, RuleSource, context::RuleContext, decl
 use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_semantic::{ReferencesExtensions, SemanticModel};
-use biome_rule_options::use_for_of::UseForOfOptions;
 use biome_js_syntax::{
     AnyJsExpression, AnyJsForInitializer, AnyJsObjectMember, AnyJsStatement,
     JsAssignmentExpression, JsAssignmentOperator, JsBinaryExpression, JsBinaryOperator,
@@ -12,6 +11,7 @@ use biome_js_syntax::{
     JsVariableDeclarator,
 };
 use biome_rowan::{AstNode, AstSeparatedList, TextRange, declare_node_union};
+use biome_rule_options::use_for_of::UseForOfOptions;
 
 use crate::{services::semantic::Semantic, utils::is_node_equal};
 

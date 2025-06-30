@@ -1,4 +1,3 @@
-use biome_rule_options::no_debugger::NoDebuggerOptions;
 use biome_analyze::{
     Ast, FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
@@ -6,6 +5,7 @@ use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_syntax::JsDebuggerStatement;
 use biome_rowan::{AstNode, BatchMutationExt};
+use biome_rule_options::no_debugger::NoDebuggerOptions;
 
 use crate::{JsRuleAction, utils::batch::JsBatchMutation};
 

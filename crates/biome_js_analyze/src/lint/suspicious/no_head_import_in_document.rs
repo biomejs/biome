@@ -1,4 +1,3 @@
-use biome_rule_options::no_head_import_in_document::NoHeadImportInDocumentOptions;
 use biome_analyze::{
     Ast, Rule, RuleDiagnostic, RuleDomain, RuleSource, context::RuleContext, declare_lint_rule,
 };
@@ -6,6 +5,7 @@ use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_syntax::{JsFileSource, JsImport};
 use biome_rowan::AstNode;
+use biome_rule_options::no_head_import_in_document::NoHeadImportInDocumentOptions;
 use std::path::MAIN_SEPARATOR;
 
 declare_lint_rule! {

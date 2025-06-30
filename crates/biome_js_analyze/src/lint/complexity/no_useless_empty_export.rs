@@ -1,4 +1,3 @@
-use biome_rule_options::no_useless_empty_export::NoUselessEmptyExportOptions;
 use biome_analyze::{
     Ast, FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
@@ -6,6 +5,7 @@ use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_syntax::{AnyJsModuleItem, JsExport, JsModuleItemList, JsSyntaxToken};
 use biome_rowan::{AstNode, AstSeparatedList, BatchMutationExt};
+use biome_rule_options::no_useless_empty_export::NoUselessEmptyExportOptions;
 
 use crate::JsRuleAction;
 

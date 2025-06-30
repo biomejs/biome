@@ -1,5 +1,4 @@
 use crate::JsRuleAction;
-use biome_rule_options::use_literal_keys::UseLiteralKeysOptions;
 use biome_analyze::{
     Ast, FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
@@ -12,6 +11,7 @@ use biome_js_syntax::{
     static_value::StaticValue,
 };
 use biome_rowan::{AstNode, BatchMutationExt, SyntaxNodeOptionExt, TextRange, declare_node_union};
+use biome_rule_options::use_literal_keys::UseLiteralKeysOptions;
 use biome_unicode_table::is_js_ident;
 
 declare_lint_rule! {

@@ -1,4 +1,3 @@
-use biome_rule_options::no_empty_block_statements::NoEmptyBlockStatementsOptions;
 use biome_analyze::{
     Ast, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
@@ -9,6 +8,7 @@ use biome_js_syntax::{
     JsStaticInitializationBlockClassMember, JsSwitchStatement,
 };
 use biome_rowan::{AstNode, AstNodeList, SyntaxNodeCast, declare_node_union};
+use biome_rule_options::no_empty_block_statements::NoEmptyBlockStatementsOptions;
 
 declare_lint_rule! {
     /// Disallow empty block statements and static blocks.

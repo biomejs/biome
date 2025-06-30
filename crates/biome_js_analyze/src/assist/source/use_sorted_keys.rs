@@ -1,6 +1,5 @@
 use std::{borrow::Cow, ops::Not};
 
-use biome_rule_options::use_sorted_keys::UseSortedKeysOptions;
 use biome_analyze::{
     Ast, FixKind, Rule, RuleAction, RuleDiagnostic, RuleSource,
     context::RuleContext,
@@ -13,6 +12,7 @@ use biome_diagnostics::{Applicability, category};
 use biome_js_factory::make;
 use biome_js_syntax::{JsObjectExpression, JsObjectMemberList, T};
 use biome_rowan::{AstNode, BatchMutationExt, TriviaPieceKind};
+use biome_rule_options::use_sorted_keys::UseSortedKeysOptions;
 use biome_string_case::comparable_token::ComparableToken;
 
 use crate::JsRuleAction;

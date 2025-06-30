@@ -1,4 +1,3 @@
-use biome_rule_options::use_adjacent_overload_signatures::UseAdjacentOverloadSignaturesOptions;
 use biome_analyze::{
     Ast, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
@@ -10,6 +9,7 @@ use biome_js_syntax::{
     TsTypeMemberList,
 };
 use biome_rowan::{AstNode, TextRange, TokenText, declare_node_union};
+use biome_rule_options::use_adjacent_overload_signatures::UseAdjacentOverloadSignaturesOptions;
 use rustc_hash::FxHashSet;
 
 declare_lint_rule! {

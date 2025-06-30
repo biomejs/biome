@@ -7,8 +7,8 @@ use biome_diagnostics::Severity;
 use biome_js_factory::make;
 use biome_js_syntax::*;
 use biome_rowan::{AstNode, AstSeparatedList, BatchMutationExt, declare_node_union};
-use biome_string_case::StrOnlyExtension;
 use biome_rule_options::no_string_case_mismatch::NoStringCaseMismatchOptions;
+use biome_string_case::StrOnlyExtension;
 
 use crate::JsRuleAction;
 

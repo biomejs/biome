@@ -1,5 +1,4 @@
 use crate::utils::{get_longhand_sub_properties, get_reset_to_initial_properties, vender_prefix};
-use biome_rule_options::no_shorthand_property_overrides::NoShorthandPropertyOverridesOptions;
 use biome_analyze::{
     AddVisitor, Phases, QueryMatch, Queryable, Rule, RuleDiagnostic, RuleSource, ServiceBag,
     Visitor, VisitorContext, context::RuleContext, declare_lint_rule,
@@ -8,6 +7,7 @@ use biome_console::markup;
 use biome_css_syntax::{AnyCssDeclarationName, CssGenericProperty, CssLanguage, CssSyntaxKind};
 use biome_diagnostics::Severity;
 use biome_rowan::{AstNode, Language, SyntaxNode, TextRange, WalkEvent};
+use biome_rule_options::no_shorthand_property_overrides::NoShorthandPropertyOverridesOptions;
 
 fn remove_vendor_prefix<'a>(prop: &'a str, prefix: &'a str) -> &'a str {
     if let Some(prop) = prop.strip_prefix(prefix) {

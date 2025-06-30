@@ -4,7 +4,6 @@ use biome_analyze::context::RuleContext;
 use biome_analyze::{Rule, RuleDiagnostic, RuleSource, declare_lint_rule};
 use biome_console::markup;
 use biome_diagnostics::Severity;
-use biome_rule_options::no_array_index_key::NoArrayIndexKeyOptions;
 use biome_js_syntax::{
     AnyJsExpression, AnyJsFunction, AnyJsMemberExpression, AnyJsTemplateElement,
     JsBinaryExpression, JsCallArgumentList, JsCallArguments, JsCallExpression, JsFormalParameter,
@@ -12,6 +11,7 @@ use biome_js_syntax::{
     JsReferenceIdentifier, JsxAttribute,
 };
 use biome_rowan::{AstNode, TextRange, declare_node_union};
+use biome_rule_options::no_array_index_key::NoArrayIndexKeyOptions;
 
 declare_lint_rule! {
     /// Discourage the usage of Array index in keys.

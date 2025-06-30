@@ -1,4 +1,3 @@
-use biome_rule_options::no_unused_private_class_members::NoUnusedPrivateClassMembersOptions;
 use biome_analyze::{
     Ast, FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
@@ -13,6 +12,7 @@ use biome_rowan::{
     AstNode, AstNodeList, AstSeparatedList, BatchMutationExt, SyntaxNodeOptionExt, TextRange,
     declare_node_union,
 };
+use biome_rule_options::no_unused_private_class_members::NoUnusedPrivateClassMembersOptions;
 use rustc_hash::FxHashSet;
 
 use crate::{JsRuleAction, utils::is_node_equal};

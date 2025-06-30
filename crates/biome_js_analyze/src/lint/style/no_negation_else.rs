@@ -1,4 +1,3 @@
-use biome_rule_options::no_negation_else::NoNegationElseOptions;
 use biome_analyze::{
     Ast, FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
@@ -9,6 +8,7 @@ use biome_js_syntax::{
     AnyJsExpression, AnyJsStatement, JsConditionalExpression, JsIfStatement, JsUnaryOperator, T,
 };
 use biome_rowan::{AstNode, BatchMutationExt, declare_node_union};
+use biome_rule_options::no_negation_else::NoNegationElseOptions;
 
 use crate::JsRuleAction;
 

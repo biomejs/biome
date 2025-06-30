@@ -1,5 +1,4 @@
 use crate::react::components::{AnyPotentialReactComponentDeclaration, ReactComponentInfo};
-use biome_rule_options::no_nested_component_definitions::NoNestedComponentDefinitionsOptions;
 use biome_analyze::{
     Ast, Rule, RuleDiagnostic, RuleDomain, RuleSource, context::RuleContext, declare_lint_rule,
 };
@@ -7,6 +6,7 @@ use biome_console::markup;
 use biome_deserialize::TextRange;
 use biome_diagnostics::Severity;
 use biome_rowan::AstNode;
+use biome_rule_options::no_nested_component_definitions::NoNestedComponentDefinitionsOptions;
 
 declare_lint_rule! {
     /// Disallows defining React components inside other components.

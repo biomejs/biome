@@ -5,7 +5,6 @@ use biome_analyze::{FixKind, Rule, RuleDiagnostic, RuleSource, declare_lint_rule
 use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_factory::{make, syntax::T};
-use biome_rule_options::use_exponentiation_operator::UseExponentiationOperatorOptions;
 use biome_js_syntax::{
     AnyJsCallArgument, AnyJsExpression, AnyJsMemberExpression, JsBinaryOperator, JsCallExpression,
     JsClassDeclaration, JsClassExpression, JsExtendsClause, JsInExpression, OperatorPrecedence,
@@ -15,6 +14,7 @@ use biome_rowan::{
     AstNode, AstSeparatedList, BatchMutationExt, SyntaxResult, chain_trivia_pieces,
     trim_leading_trivia_pieces,
 };
+use biome_rule_options::use_exponentiation_operator::UseExponentiationOperatorOptions;
 
 declare_lint_rule! {
     /// Disallow the use of `Math.pow` in favor of the `**` operator.
