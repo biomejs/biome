@@ -1782,7 +1782,7 @@ fn check_stdin_write_successfully() {
 
 #[test]
 fn check_stdin_applies_the_config_based_on_path() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     fs.insert(

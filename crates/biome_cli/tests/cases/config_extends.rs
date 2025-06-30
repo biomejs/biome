@@ -166,7 +166,7 @@ fn extends_config_ok_from_npm_package_with_author_field() {
 
 #[test]
 fn extends_config_ok_from_npm_package_with_condition_names() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     let biome_json = Utf8Path::new("biome.json");
@@ -202,7 +202,7 @@ fn extends_config_ok_from_npm_package_with_condition_names() {
     "exports": {
         "./biome": {
             "default": "./biome.jsonc"
-        } 
+        }
     }
 }"#,
     );
