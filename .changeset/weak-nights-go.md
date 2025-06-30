@@ -1,7 +1,5 @@
 ---
-"@biomejs/wasm-bundler": minor
-"@biomejs/wasm-nodejs": minor
-"@biomejs/wasm-web": minor
+"@biomejs/biome": patch
 ---
 
 Added `MemoryFileSystem` to the WASM API.
