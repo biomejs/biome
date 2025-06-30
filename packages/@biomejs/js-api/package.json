@@ -28,6 +28,25 @@
     "ROME-LICENSE-MIT",
     "dist/"
   ],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./bundler": {
+      "types": "./dist/bundler.d.ts",
+      "default": "./dist/bundler.js"
+    },
+    "./nodejs": {
+      "types": "./dist/nodejs.d.ts",
+      "default": "./dist/nodejs.js"
+    },
+    "./web": {
+      "types": "./dist/web.d.ts",
+      "default": "./dist/web.js"
+    },
+    "./package.json": "./package.json"
+  },
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "keywords": [
