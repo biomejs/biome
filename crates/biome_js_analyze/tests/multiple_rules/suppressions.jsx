@@ -41,6 +41,19 @@ function bothDisabled() {
   )
 }
 
+function bothDisabledFarAway() {
+  return (
+    // biome-ignore lint/a11y/useKeyWithClickEvents: ...
+    // biome-ignore lint/a11y/useSemanticElements: ...
+    // biome-ignore lint/a11y/noRedundantAlt: ...
+    // biome-ignore lint/security/noBlankTarget: ...
+    <span
+      role="button"
+      onClick={()=>null}
+    >Some text</span>
+  )
+}
+
 function unused1() {
   return (
     // biome-ignore lint/a11y/useKeyWithClickEvents: ...
@@ -67,6 +80,50 @@ function unused3() {
   return (
     // biome-ignore lint/style/noImplicitBoolean: ...
     // biome-ignore lint/security/noBlankTarget: ...
+    <span
+      role="button"
+      onClick={()=>null}
+    >Some text</span>
+  )
+}
+
+function wideThenNarrow() {
+  return (
+    // biome-ignore lint: ...
+    // biome-ignore lint/a11y/useKeyWithClickEvents: ...
+    <span
+      role="button"
+      onClick={()=>null}
+    >Some text</span>
+  )
+}
+
+function wideThenNarrowUnused() {
+  return (
+    // biome-ignore lint: ...
+    // biome-ignore lint/security/noBlankTarget: ...
+    <span
+      role="button"
+      onClick={()=>null}
+    >Some text</span>
+  )
+}
+
+function narrowThenWide() {
+  return (
+    // biome-ignore lint/a11y/useKeyWithClickEvents: ...
+    // biome-ignore lint: ...
+    <span
+      role="button"
+      onClick={()=>null}
+    >Some text</span>
+  )
+}
+
+function narrowUnusedThenWide() {
+  return (
+    // biome-ignore lint/security/noBlankTarget: ...
+    // biome-ignore lint: ...
     <span
       role="button"
       onClick={()=>null}
