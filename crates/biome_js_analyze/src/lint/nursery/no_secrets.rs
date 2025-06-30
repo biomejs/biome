@@ -459,7 +459,6 @@ fn calculate_entropy_with_case_and_classes(data: &str) -> f64 {
         0.0
     };
 
-    // TODO: length-based entropy scaling maybe helpful
     shannon_entropy
         + (case_entropy_boost * 2.5)
         + (symbol_entropy_boost * 1.5)
@@ -542,7 +541,6 @@ mod tests {
         let entropy = calculate_entropy_with_case_and_classes(
             "aGk5JmtQMiNxUjch$ek!40QHZMOCp6VDMmeVU2PWpIMSVv#!khd0I3JmNYNA",
         );
-        dbg!(entropy);
         assert!(entropy > 6.0)
     }
 }
