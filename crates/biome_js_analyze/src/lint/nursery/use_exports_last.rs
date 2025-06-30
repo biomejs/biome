@@ -1,3 +1,4 @@
+use biome_rule_options::use_exports_last::UseExportsLastOptions;
 use biome_analyze::{
     Ast, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
@@ -45,7 +46,7 @@ impl Rule for UseExportsLast {
     type Query = Ast<JsModuleItemList>;
     type State = TextRange;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = UseExportsLastOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let items = ctx.query();

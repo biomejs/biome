@@ -1,4 +1,5 @@
 use crate::JsRuleAction;
+use biome_rule_options::no_implicit_coercion::NoImplicitCoercionOptions;
 use biome_analyze::{
     Ast, FixKind, Rule, RuleAction, RuleDiagnostic, RuleSource, context::RuleContext,
     declare_lint_rule,
@@ -118,7 +119,7 @@ impl Rule for NoImplicitCoercion {
     type Query = Ast<PotentialImplicitCoercion>;
     type State = RuleState;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoImplicitCoercionOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();

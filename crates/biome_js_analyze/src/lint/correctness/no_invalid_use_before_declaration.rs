@@ -2,9 +2,11 @@ use crate::{services::control_flow::AnyJsControlFlowRoot, services::semantic::Se
 use biome_analyze::{Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule};
 use biome_console::markup;
 use biome_diagnostics::Severity;
+use biome_rule_options::no_invalid_use_before_declaration::NoInvalidUseBeforeDeclarationOptions;
 use biome_js_syntax::{
     AnyJsExportNamedSpecifier, AnyJsIdentifierUsage,
-    binding_ext::{AnyJsBindingDeclaration, AnyJsIdentifierBinding},
+    binding_ext::{AnyJsBindingDeclaration, AnyJsIdentifierBinding
+},
 };
 use biome_rowan::{AstNode, SyntaxNodeOptionExt, TextRange};
 
@@ -75,7 +77,7 @@ impl Rule for NoInvalidUseBeforeDeclaration {
     type Query = SemanticServices;
     type State = InvalidUseBeforeDeclaration;
     type Signals = Box<[Self::State]>;
-    type Options = ();
+    type Options = NoInvalidUseBeforeDeclarationOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let model = ctx.model();

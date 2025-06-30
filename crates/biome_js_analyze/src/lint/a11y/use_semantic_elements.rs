@@ -1,3 +1,4 @@
+use biome_rule_options::use_semantic_elements::UseSemanticElementsOptions;
 use biome_analyze::{
     Ast, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
@@ -56,7 +57,7 @@ impl Rule for UseSemanticElements {
     type Query = Ast<JsxOpeningElement>;
     type State = JsxAttribute;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = UseSemanticElementsOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();

@@ -1,4 +1,5 @@
 use crate::JsRuleAction;
+use biome_rule_options::no_access_key::NoAccessKeyOptions;
 use biome_analyze::{
     Ast, FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
@@ -51,7 +52,7 @@ impl Rule for NoAccessKey {
     type Query = Ast<JsxAttribute>;
     type State = ();
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoAccessKeyOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();

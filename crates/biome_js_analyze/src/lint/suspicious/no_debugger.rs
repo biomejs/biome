@@ -1,3 +1,4 @@
+use biome_rule_options::no_debugger::NoDebuggerOptions;
 use biome_analyze::{
     Ast, FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
@@ -40,7 +41,7 @@ impl Rule for NoDebugger {
     type Query = Ast<JsDebuggerStatement>;
     type State = ();
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoDebuggerOptions;
 
     fn run(_: &RuleContext<Self>) -> Option<Self::State> {
         Some(())

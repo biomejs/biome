@@ -1,3 +1,4 @@
+use biome_rule_options::no_unresolved_imports::NoUnresolvedImportsOptions;
 use biome_analyze::{
     Rule, RuleDiagnostic, RuleDomain, RuleSource, context::RuleContext, declare_lint_rule,
 };
@@ -90,7 +91,7 @@ impl Rule for NoUnresolvedImports {
     type Query = ResolvedImports<AnyJsImportLike>;
     type State = NoUnresolvedImportsState;
     type Signals = Vec<Self::State>;
-    type Options = ();
+    type Options = NoUnresolvedImportsOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let Some(module_info) = ctx.module_info_for_path(ctx.file_path()) else {

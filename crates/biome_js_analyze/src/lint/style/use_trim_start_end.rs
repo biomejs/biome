@@ -1,3 +1,4 @@
+use biome_rule_options::use_trim_start_end::UseTrimStartEndOptions;
 use biome_analyze::{
     Ast, FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
@@ -66,7 +67,7 @@ impl Rule for UseTrimStartEnd {
     type Query = Ast<JsCallExpression>;
     type State = UseTrimStartEndState;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = UseTrimStartEndOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();

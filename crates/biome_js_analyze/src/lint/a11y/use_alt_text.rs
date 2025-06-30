@@ -1,3 +1,4 @@
+use biome_rule_options::use_alt_text::UseAltTextOptions;
 use biome_analyze::{
     Ast, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
@@ -76,7 +77,7 @@ impl Rule for UseAltText {
     type Query = Ast<AnyJsxElement>;
     type State = (ValidatedElement, TextRange);
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = UseAltTextOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let element = ctx.query();

@@ -1,3 +1,4 @@
+use biome_rule_options::use_deprecated_reason::UseDeprecatedReasonOptions;
 use biome_analyze::{
     Ast, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
@@ -43,7 +44,7 @@ impl Rule for UseDeprecatedReason {
     type Query = Ast<GraphqlDirective>;
     type State = GraphqlDirective;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = UseDeprecatedReasonOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
         let node = ctx.query();

@@ -1,4 +1,5 @@
 use crate::JsRuleAction;
+use biome_rule_options::no_ts_ignore::NoTsIgnoreOptions;
 use biome_analyze::{
     Ast, FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
@@ -51,7 +52,7 @@ impl Rule for NoTsIgnore {
     type Query = Ast<JsModule>;
     type State = RuleState;
     type Signals = Vec<Self::State>;
-    type Options = ();
+    type Options = NoTsIgnoreOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let module = ctx.query();

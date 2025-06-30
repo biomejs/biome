@@ -1,3 +1,4 @@
+use biome_rule_options::no_head_element::NoHeadElementOptions;
 use biome_analyze::{
     Ast, Rule, RuleDiagnostic, RuleDomain, RuleSource, context::RuleContext, declare_lint_rule,
 };
@@ -58,7 +59,7 @@ impl Rule for NoHeadElement {
     type Query = Ast<JsxOpeningElement>;
     type State = TextRange;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoHeadElementOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let element = ctx.query();

@@ -1,3 +1,4 @@
+use biome_rule_options::use_json_import_attribute::UseJsonImportAttributeOptions;
 use biome_analyze::{
     FixKind, Rule, RuleDiagnostic, RuleDomain, context::RuleContext, declare_lint_rule,
 };
@@ -64,7 +65,7 @@ impl Rule for UseJsonImportAttribute {
     type Query = ResolvedImports<JsImportDefaultClause>;
     type State = UseJsonImportAttributeState;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = UseJsonImportAttributeOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();

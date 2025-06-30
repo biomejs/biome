@@ -1,3 +1,4 @@
+use biome_rule_options::no_floating_promises::NoFloatingPromisesOptions;
 use biome_analyze::{
     FixKind, Rule, RuleDiagnostic, RuleDomain, RuleSource, context::RuleContext, declare_lint_rule,
 };
@@ -168,7 +169,7 @@ impl Rule for NoFloatingPromises {
     type Query = Typed<JsExpressionStatement>;
     type State = ();
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoFloatingPromisesOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();

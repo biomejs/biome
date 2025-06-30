@@ -2,9 +2,11 @@ use std::{cmp::Ordering, collections::VecDeque, num::NonZeroU32, vec::IntoIter};
 
 use crate::services::control_flow::{ControlFlowGraph, JsControlFlowGraph};
 use biome_analyze::{Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule};
+use biome_rule_options::no_unreachable::NoUnreachableOptions;
 use biome_control_flow::{
     ExceptionHandler, ExceptionHandlerKind, Instruction, InstructionKind,
-    builder::{BlockId, ROOT_BLOCK_ID},
+    builder::{BlockId, ROOT_BLOCK_ID
+},
 };
 use biome_diagnostics::Severity;
 use biome_js_syntax::{
@@ -61,7 +63,7 @@ impl Rule for NoUnreachable {
     type Query = ControlFlowGraph;
     type State = UnreachableRange;
     type Signals = UnreachableRanges;
-    type Options = ();
+    type Options = NoUnreachableOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let mut signals = UnreachableRanges::new();

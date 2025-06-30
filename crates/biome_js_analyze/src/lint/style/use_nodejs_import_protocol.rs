@@ -1,3 +1,4 @@
+use biome_rule_options::use_nodejs_import_protocol::UseNodejsImportProtocolOptions;
 use biome_analyze::{
     FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
@@ -64,7 +65,7 @@ impl Rule for UseNodejsImportProtocol {
     type Query = Manifest<AnyJsImportLike>;
     type State = JsSyntaxToken;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = UseNodejsImportProtocolOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();

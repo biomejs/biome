@@ -5,6 +5,7 @@ use biome_analyze::{FixKind, Rule, RuleDiagnostic, RuleSource, declare_lint_rule
 use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_factory::{make, syntax::T};
+use biome_rule_options::use_exponentiation_operator::UseExponentiationOperatorOptions;
 use biome_js_syntax::{
     AnyJsCallArgument, AnyJsExpression, AnyJsMemberExpression, JsBinaryOperator, JsCallExpression,
     JsClassDeclaration, JsClassExpression, JsExtendsClause, JsInExpression, OperatorPrecedence,
@@ -68,7 +69,7 @@ impl Rule for UseExponentiationOperator {
     type Query = Semantic<JsCallExpression>;
     type State = ();
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = UseExponentiationOperatorOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();

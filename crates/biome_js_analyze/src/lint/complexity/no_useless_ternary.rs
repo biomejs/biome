@@ -1,3 +1,4 @@
+use biome_rule_options::no_useless_ternary::NoUselessTernaryOptions;
 use biome_analyze::{
     Ast, FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
@@ -67,7 +68,7 @@ impl Rule for NoUselessTernary {
     type Query = Ast<JsConditionalExpression>;
     type State = ();
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoUselessTernaryOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();

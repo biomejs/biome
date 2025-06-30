@@ -3,9 +3,11 @@ use biome_analyze::context::RuleContext;
 use biome_analyze::{Ast, FixKind, Rule, RuleDiagnostic, RuleSource, declare_lint_rule};
 use biome_console::markup;
 use biome_diagnostics::Severity;
+use biome_rule_options::no_empty_interface::NoEmptyInterfaceOptions;
 use biome_js_factory::{
     make,
-    syntax::{AnyTsType, T},
+    syntax::{AnyTsType, T
+},
 };
 use biome_js_syntax::{
     AnyJsDeclarationClause, JsSyntaxKind, TriviaPieceKind, TsInterfaceDeclaration,
@@ -59,7 +61,7 @@ impl Rule for NoEmptyInterface {
     type Query = Ast<TsInterfaceDeclaration>;
     type State = ();
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoEmptyInterfaceOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();

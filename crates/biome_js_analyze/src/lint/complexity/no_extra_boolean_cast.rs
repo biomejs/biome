@@ -1,3 +1,4 @@
+use biome_rule_options::no_extra_boolean_cast::NoExtraBooleanCastOptions;
 use biome_analyze::{
     Ast, FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
@@ -92,7 +93,7 @@ impl Rule for NoExtraBooleanCast {
     type Query = Ast<AnyJsExpression>;
     type State = (AnyJsExpression, ExtraBooleanCastType);
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoExtraBooleanCastOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
         let n = ctx.query();

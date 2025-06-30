@@ -2,9 +2,11 @@ use std::collections::VecDeque;
 
 use biome_analyze::{Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule};
 use biome_console::markup;
+use biome_rule_options::no_fallthrough_switch_clause::NoFallthroughSwitchClauseOptions;
 use biome_control_flow::{
     ExceptionHandlerKind, InstructionKind,
-    builder::{BlockId, ROOT_BLOCK_ID},
+    builder::{BlockId, ROOT_BLOCK_ID
+},
 };
 use biome_diagnostics::Severity;
 use biome_js_syntax::{JsDefaultClause, JsLanguage, JsSwitchStatement, JsSyntaxNode};
@@ -69,7 +71,7 @@ impl Rule for NoFallthroughSwitchClause {
     type Query = ControlFlowGraph;
     type State = TextRange;
     type Signals = Box<[Self::State]>;
-    type Options = ();
+    type Options = NoFallthroughSwitchClauseOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let cfg = ctx.query();

@@ -1,3 +1,4 @@
+use biome_rule_options::use_yield::UseYieldOptions;
 use biome_analyze::context::RuleContext;
 use biome_analyze::{
     AddVisitor, Phases, QueryMatch, Queryable, Rule, RuleDiagnostic, RuleSource, ServiceBag,
@@ -127,7 +128,7 @@ impl Rule for UseYield {
     type Query = MissingYield;
     type State = ();
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = UseYieldOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let query = ctx.query();

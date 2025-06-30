@@ -1,3 +1,4 @@
+use biome_rule_options::no_unused_imports::NoUnusedImportsOptions;
 use crate::services::semantic::{SemanticModelBuilderVisitor, SemanticServices};
 use crate::{
     JsRuleAction,
@@ -257,7 +258,7 @@ impl Rule for NoUnusedImports {
     type Query = NoUnusedImportsQuery;
     type State = Unused;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoUnusedImportsOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         match ctx.query() {

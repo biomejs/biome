@@ -1,4 +1,5 @@
 use crate::JsRuleAction;
+use biome_rule_options::use_arrow_function::UseArrowFunctionOptions;
 use biome_analyze::{
     AddVisitor, FixKind, Phases, QueryMatch, Queryable, Rule, RuleDiagnostic, RuleSource,
     ServiceBag, Visitor, VisitorContext, context::RuleContext, declare_lint_rule,
@@ -81,7 +82,7 @@ impl Rule for UseArrowFunction {
     type Query = ActualThisScope;
     type State = ();
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = UseArrowFunctionOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let AnyThisScopeMetadata { scope, has_this } = ctx.query();

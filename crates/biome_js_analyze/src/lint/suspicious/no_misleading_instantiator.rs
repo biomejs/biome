@@ -1,3 +1,4 @@
+use biome_rule_options::no_misleading_instantiator::NoMisleadingInstantiatorOptions;
 use biome_analyze::{
     Ast, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
@@ -127,7 +128,7 @@ impl Rule for NoMisleadingInstantiator {
     type Query = Ast<DeclarationQuery>;
     type State = RuleState;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoMisleadingInstantiatorOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();

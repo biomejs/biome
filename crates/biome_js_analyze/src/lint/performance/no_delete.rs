@@ -2,6 +2,7 @@ use biome_analyze::{Ast, FixKind, Rule, RuleDiagnostic, context::RuleContext, de
 use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_factory::make;
+use biome_rule_options::no_delete::NoDeleteOptions;
 use biome_js_syntax::{
     AnyJsAssignment, AnyJsAssignmentPattern, AnyJsExpression, JsComputedMemberExpressionFields,
     JsStaticMemberExpressionFields, JsUnaryExpression, JsUnaryOperator, T,
@@ -69,7 +70,7 @@ impl Rule for NoDelete {
     type Query = Ast<JsUnaryExpression>;
     type State = AnyJsExpression;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoDeleteOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();

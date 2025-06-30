@@ -2,6 +2,7 @@ use biome_analyze::{Ast, RuleSource};
 use biome_analyze::{Rule, RuleDiagnostic, context::RuleContext, declare_lint_rule};
 use biome_console::{MarkupBuf, markup};
 use biome_diagnostics::Severity;
+use biome_rule_options::no_then_property::NoThenPropertyOptions;
 use biome_js_syntax::{
     AnyJsArrayElement, AnyJsAssignment, AnyJsAssignmentPattern, AnyJsCallArgument,
     AnyJsDeclarationClause, AnyJsExportClause, AnyJsExportNamedSpecifier, AnyJsExpression,
@@ -133,7 +134,7 @@ impl Rule for NoThenProperty {
     type Query = Ast<NoThenPropertyQuery>;
     type State = RuleState;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoThenPropertyOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let binding = ctx.query();

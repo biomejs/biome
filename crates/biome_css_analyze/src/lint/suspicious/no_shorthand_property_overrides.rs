@@ -1,4 +1,5 @@
 use crate::utils::{get_longhand_sub_properties, get_reset_to_initial_properties, vender_prefix};
+use biome_rule_options::no_shorthand_property_overrides::NoShorthandPropertyOverridesOptions;
 use biome_analyze::{
     AddVisitor, Phases, QueryMatch, Queryable, Rule, RuleDiagnostic, RuleSource, ServiceBag,
     Visitor, VisitorContext, context::RuleContext, declare_lint_rule,
@@ -186,7 +187,7 @@ impl Rule for NoShorthandPropertyOverrides {
     type Query = NoDeclarationBlockShorthandPropertyOverridesQuery;
     type State = NoDeclarationBlockShorthandPropertyOverridesState;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoShorthandPropertyOverridesOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
         let query = ctx.query();

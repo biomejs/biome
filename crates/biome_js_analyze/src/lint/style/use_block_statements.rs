@@ -3,6 +3,7 @@ use biome_analyze::{Ast, FixKind, Rule, RuleDiagnostic, RuleSource, declare_lint
 use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_factory::make;
+use biome_rule_options::use_block_statements::UseBlockStatementsOptions;
 use biome_js_syntax::{
     AnyJsStatement, JsDoWhileStatement, JsElseClause, JsForInStatement, JsForOfStatement,
     JsForStatement, JsIfStatement, JsLanguage, JsSyntaxTrivia, JsWhileStatement, JsWithStatement,
@@ -82,7 +83,7 @@ impl Rule for UseBlockStatements {
     type Query = Ast<AnyJsBlockStatement>;
     type State = UseBlockStatementsOperationType;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = UseBlockStatementsOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
         let node = ctx.query();

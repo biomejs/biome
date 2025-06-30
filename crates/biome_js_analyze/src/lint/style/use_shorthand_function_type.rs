@@ -6,6 +6,7 @@ use biome_diagnostics::Severity;
 use biome_js_factory::make;
 use biome_js_factory::make::ts_type_alias_declaration;
 use biome_js_syntax::AnyTsType::TsThisType;
+use biome_rule_options::use_shorthand_function_type::UseShorthandFunctionTypeOptions;
 use biome_js_syntax::{
     AnyJsDeclarationClause, AnyTsReturnType, AnyTsType, JsSyntaxKind, T, TsCallSignatureTypeMember,
     TsFunctionType, TsInterfaceDeclaration, TsObjectType, TsTypeMemberList,
@@ -91,7 +92,7 @@ impl Rule for UseShorthandFunctionType {
     type Query = Ast<TsCallSignatureTypeMember>;
     type State = ();
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = UseShorthandFunctionTypeOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let query = ctx.query();

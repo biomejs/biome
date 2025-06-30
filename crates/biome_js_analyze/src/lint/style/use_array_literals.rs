@@ -1,3 +1,4 @@
+use biome_rule_options::use_array_literals::UseArrayLiteralsOptions;
 use biome_analyze::{
     FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
@@ -70,7 +71,7 @@ impl Rule for UseArrayLiterals {
     type Query = Semantic<JsNewOrCallExpression>;
     type State = ();
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = UseArrayLiteralsOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();

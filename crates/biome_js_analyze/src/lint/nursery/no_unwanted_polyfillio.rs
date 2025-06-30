@@ -1,5 +1,6 @@
 use std::sync::LazyLock;
 
+use biome_rule_options::no_unwanted_polyfillio::NoUnwantedPolyfillioOptions;
 use biome_analyze::{
     Rule, RuleDiagnostic, RuleDomain, RuleSource, context::RuleContext, declare_lint_rule,
 };
@@ -67,7 +68,7 @@ impl Rule for NoUnwantedPolyfillio {
     type Query = Semantic<AnyJsxElement>;
     type State = RuleState;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoUnwantedPolyfillioOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let jsx_element = ctx.query();

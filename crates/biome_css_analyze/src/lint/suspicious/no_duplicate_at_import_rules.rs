@@ -1,5 +1,6 @@
 use std::collections::{HashMap, HashSet};
 
+use biome_rule_options::no_duplicate_at_import_rules::NoDuplicateAtImportRulesOptions;
 use biome_analyze::{
     Ast, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
@@ -61,7 +62,7 @@ impl Rule for NoDuplicateAtImportRules {
     type Query = Ast<CssRuleList>;
     type State = CssImportAtRule;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoDuplicateAtImportRulesOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
         let node = ctx.query();

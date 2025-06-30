@@ -1,3 +1,4 @@
+use biome_rule_options::no_unmatchable_anb_selector::NoUnmatchableAnbSelectorOptions;
 use biome_analyze::{
     Ast, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
@@ -67,7 +68,7 @@ impl Rule for NoUnmatchableAnbSelector {
     type Query = Ast<CssPseudoClassNthSelector>;
     type State = CssPseudoClassNthSelector;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoUnmatchableAnbSelectorOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
         let node = ctx.query();

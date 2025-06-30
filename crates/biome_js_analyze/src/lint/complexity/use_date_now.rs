@@ -1,3 +1,4 @@
+use biome_rule_options::use_date_now::UseDateNowOptions;
 use biome_analyze::{
     Ast, FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
@@ -68,7 +69,7 @@ impl Rule for UseDateNow {
     type Query = Ast<JsNewOrCallExpression>;
     type State = (AnyJsExpression, UseDateNowIssueKind);
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = UseDateNowOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let expr = ctx.query();

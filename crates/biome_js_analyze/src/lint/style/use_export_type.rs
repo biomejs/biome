@@ -1,4 +1,5 @@
 use crate::{JsRuleAction, services::semantic::Semantic};
+use biome_rule_options::use_export_type::UseExportTypeOptions;
 use biome_analyze::{
     FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
@@ -75,7 +76,7 @@ impl Rule for UseExportType {
     type Query = Semantic<AnyJsExportNamedClause>;
     type State = ExportTypeFix;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = UseExportTypeOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let source_type = ctx.source_type::<JsFileSource>();

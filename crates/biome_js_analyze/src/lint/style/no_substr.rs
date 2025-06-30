@@ -1,3 +1,4 @@
+use biome_rule_options::no_substr::NoSubstrOptions;
 use biome_analyze::{
     Ast, FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
@@ -55,7 +56,7 @@ impl Rule for NoSubstr {
     type Query = Ast<AnyJsStatement>;
     type State = NoSubstrState;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoSubstrOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();

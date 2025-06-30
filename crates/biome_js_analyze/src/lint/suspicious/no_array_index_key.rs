@@ -4,6 +4,7 @@ use biome_analyze::context::RuleContext;
 use biome_analyze::{Rule, RuleDiagnostic, RuleSource, declare_lint_rule};
 use biome_console::markup;
 use biome_diagnostics::Severity;
+use biome_rule_options::no_array_index_key::NoArrayIndexKeyOptions;
 use biome_js_syntax::{
     AnyJsExpression, AnyJsFunction, AnyJsMemberExpression, AnyJsTemplateElement,
     JsBinaryExpression, JsCallArgumentList, JsCallArguments, JsCallExpression, JsFormalParameter,
@@ -126,7 +127,7 @@ impl Rule for NoArrayIndexKey {
     type Query = Semantic<NoArrayIndexKeyQuery>;
     type State = NoArrayIndexKeyState;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoArrayIndexKeyOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();

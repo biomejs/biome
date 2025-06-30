@@ -1,8 +1,10 @@
 use biome_analyze::{Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule};
 use biome_console::markup;
+use biome_rule_options::no_unreachable_super::NoUnreachableSuperOptions;
 use biome_control_flow::{
     ExceptionHandlerKind, InstructionKind,
-    builder::{BlockId, ROOT_BLOCK_ID},
+    builder::{BlockId, ROOT_BLOCK_ID
+},
 };
 use biome_diagnostics::Severity;
 use biome_js_syntax::{
@@ -94,7 +96,7 @@ impl Rule for NoUnreachableSuper {
     type Query = ControlFlowGraph;
     type State = RuleState;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoUnreachableSuperOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let cfg = ctx.query();

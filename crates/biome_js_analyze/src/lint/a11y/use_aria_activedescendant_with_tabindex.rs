@@ -1,4 +1,5 @@
 use crate::{JsRuleAction, services::aria::Aria};
+use biome_rule_options::use_aria_activedescendant_with_tabindex::UseAriaActivedescendantWithTabindexOptions;
 use biome_analyze::{
     FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
@@ -63,7 +64,7 @@ impl Rule for UseAriaActivedescendantWithTabindex {
     type Query = Aria<AnyJsxElement>;
     type State = ();
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = UseAriaActivedescendantWithTabindexOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();

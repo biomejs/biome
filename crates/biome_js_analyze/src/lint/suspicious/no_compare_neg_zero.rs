@@ -1,3 +1,4 @@
+use biome_rule_options::no_compare_neg_zero::NoCompareNegZeroOptions;
 use biome_analyze::{
     Ast, FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
@@ -48,7 +49,7 @@ impl Rule for NoCompareNegZero {
     type Query = Ast<JsBinaryExpression>;
     type State = NoCompareNegZeroState;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoCompareNegZeroOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
         let node = ctx.query();

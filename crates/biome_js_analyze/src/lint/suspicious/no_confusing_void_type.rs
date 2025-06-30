@@ -1,3 +1,4 @@
+use biome_rule_options::no_confusing_void_type::NoConfusingVoidTypeOptions;
 use biome_analyze::{
     Ast, FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
@@ -79,7 +80,7 @@ impl Rule for NoConfusingVoidType {
     type Query = Ast<TsVoidType>;
     type State = VoidTypeContext;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoConfusingVoidTypeOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();

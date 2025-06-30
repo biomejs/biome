@@ -1,3 +1,4 @@
+use biome_rule_options::no_re_export_all::NoReExportAllOptions;
 use biome_analyze::{
     Ast, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
@@ -50,7 +51,7 @@ impl Rule for NoReExportAll {
     type Query = Ast<JsExportFromClause>;
     type State = ();
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoReExportAllOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         ctx.query().type_token().is_none().then_some(())

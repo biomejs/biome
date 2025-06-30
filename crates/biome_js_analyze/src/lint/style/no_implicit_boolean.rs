@@ -1,3 +1,4 @@
+use biome_rule_options::no_implicit_boolean::NoImplicitBooleanOptions;
 use biome_analyze::{
     Ast, FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
@@ -58,7 +59,7 @@ impl Rule for NoImplicitBoolean {
     type Query = Ast<JsxAttribute>;
     type State = ();
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoImplicitBooleanOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
         let n = ctx.query();

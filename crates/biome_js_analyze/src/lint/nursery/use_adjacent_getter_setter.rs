@@ -1,3 +1,4 @@
+use biome_rule_options::use_adjacent_getter_setter::UseAdjacentGetterSetterOptions;
 use biome_analyze::{
     Ast, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
@@ -70,7 +71,7 @@ impl Rule for UseAdjacentGetterSetter {
     type Query = Ast<AnySetter>;
     type State = MatchingPropertyAccessors;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = UseAdjacentGetterSetterOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();

@@ -1,4 +1,5 @@
 use crate::JsRuleAction;
+use biome_rule_options::no_non_null_assertion::NoNonNullAssertionOptions;
 use biome_analyze::{
     Ast, FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
@@ -63,7 +64,7 @@ impl Rule for NoNonNullAssertion {
     type Query = Ast<AnyTsNonNullAssertion>;
     type State = ();
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoNonNullAssertionOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         match ctx.query() {

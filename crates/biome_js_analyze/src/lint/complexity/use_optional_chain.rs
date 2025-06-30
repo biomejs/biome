@@ -3,6 +3,7 @@ use biome_analyze::{Ast, FixKind, Rule, RuleDiagnostic, context::RuleContext, de
 use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_factory::make;
+use biome_rule_options::use_optional_chain::UseOptionalChainOptions;
 use biome_js_syntax::{
     AnyJsExpression, AnyJsMemberExpression, AnyJsName, JsLogicalExpression, JsLogicalOperator,
     OperatorPrecedence, T,
@@ -91,7 +92,7 @@ impl Rule for UseOptionalChain {
     type Query = Ast<JsLogicalExpression>;
     type State = UseOptionalChainState;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = UseOptionalChainOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
         let logical = ctx.query();

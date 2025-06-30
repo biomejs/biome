@@ -1,3 +1,4 @@
+use biome_rule_options::no_this_in_static::NoThisInStaticOptions;
 use biome_analyze::{
     Ast, FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
@@ -92,7 +93,7 @@ impl Rule for NoThisInStatic {
     type Query = Ast<JsThisSuperExpression>;
     type State = ();
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoThisInStaticOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let this_super_expression = ctx.query();

@@ -1,3 +1,4 @@
+use biome_rule_options::no_excessive_nested_test_suites::NoExcessiveNestedTestSuitesOptions;
 use biome_analyze::{
     AddVisitor, Phases, QueryMatch, Queryable, Rule, RuleDiagnostic, RuleDomain, RuleSource,
     ServiceBag, Visitor, VisitorContext, context::RuleContext, declare_lint_rule,
@@ -67,7 +68,7 @@ impl Rule for NoExcessiveNestedTestSuites {
     type Query = NestedTest;
     type State = ();
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoExcessiveNestedTestSuitesOptions;
 
     fn run(_: &RuleContext<Self>) -> Self::Signals {
         Some(())

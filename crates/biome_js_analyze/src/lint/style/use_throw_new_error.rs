@@ -1,3 +1,4 @@
+use biome_rule_options::use_throw_new_error::UseThrowNewErrorOptions;
 use biome_analyze::{
     Ast, FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
@@ -59,7 +60,7 @@ impl Rule for UseThrowNewError {
     type Query = Ast<JsCallExpression>;
     type State = TokenText;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = UseThrowNewErrorOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();

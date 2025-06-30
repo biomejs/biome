@@ -1,3 +1,4 @@
+use biome_rule_options::no_inner_declarations::NoInnerDeclarationsOptions;
 use biome_analyze::{
     Ast, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
@@ -102,7 +103,7 @@ impl Rule for NoInnerDeclarations {
     type Query = Ast<AnyJsDeclaration>;
     type State = ();
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoInnerDeclarationsOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let decl = ctx.query();

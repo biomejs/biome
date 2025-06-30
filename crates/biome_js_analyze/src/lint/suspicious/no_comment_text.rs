@@ -1,4 +1,5 @@
 use crate::JsRuleAction;
+use biome_rule_options::no_comment_text::NoCommentTextOptions;
 use biome_analyze::{
     Ast, FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
@@ -83,7 +84,7 @@ impl Rule for NoCommentText {
     type Query = Ast<JsxText>;
     type State = Range<usize>;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoCommentTextOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
         let node = ctx.query();

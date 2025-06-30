@@ -1,3 +1,4 @@
+use biome_rule_options::no_shadow::NoShadowOptions;
 use biome_analyze::{
     QueryMatch, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
@@ -81,7 +82,7 @@ impl Rule for NoShadow {
     type Query = SemanticServices;
     type State = ShadowedBinding;
     type Signals = Box<[Self::State]>;
-    type Options = ();
+    type Options = NoShadowOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let mut shadowed_bindings = Vec::new();

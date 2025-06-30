@@ -1,3 +1,4 @@
+use biome_rule_options::no_namespace_import::NoNamespaceImportOptions;
 use biome_analyze::{
     Ast, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
@@ -43,7 +44,7 @@ impl Rule for NoNamespaceImport {
     type Query = Ast<JsImportNamespaceClause>;
     type State = ();
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoNamespaceImportOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let import_namespace_clause = ctx.query();

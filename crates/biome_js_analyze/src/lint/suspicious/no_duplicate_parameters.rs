@@ -3,6 +3,7 @@ use biome_analyze::{Ast, Rule, RuleDiagnostic, context::RuleContext, declare_lin
 use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_syntax::parameter_ext::{AnyJsParameterList, AnyJsParameters, AnyParameter};
+use biome_rule_options::no_duplicate_parameters::NoDuplicateParametersOptions;
 use biome_js_syntax::{
     AnyJsArrayBindingPatternElement, AnyJsBinding, AnyJsBindingPattern,
     AnyJsObjectBindingPatternMember, JsIdentifierBinding,
@@ -52,7 +53,7 @@ impl Rule for NoDuplicateParameters {
     type Query = Ast<AnyJsParameters>;
     type State = JsIdentifierBinding;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoDuplicateParametersOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
         let parameters = ctx.query();

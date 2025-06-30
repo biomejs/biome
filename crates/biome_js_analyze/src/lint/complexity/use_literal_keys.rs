@@ -1,4 +1,5 @@
 use crate::JsRuleAction;
+use biome_rule_options::use_literal_keys::UseLiteralKeysOptions;
 use biome_analyze::{
     Ast, FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
@@ -64,7 +65,7 @@ impl Rule for UseLiteralKeys {
     type Query = Ast<AnyJsMember>;
     type State = (TextRange, JsSyntaxToken, bool);
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = UseLiteralKeysOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();

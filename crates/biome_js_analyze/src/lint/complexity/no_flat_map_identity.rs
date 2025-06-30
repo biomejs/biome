@@ -1,3 +1,4 @@
+use biome_rule_options::no_flat_map_identity::NoFlatMapIdentityOptions;
 use biome_analyze::{
     Ast, FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
@@ -50,7 +51,7 @@ impl Rule for NoFlatMapIdentity {
     type Query = Ast<JsCallExpression>;
     type State = ();
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoFlatMapIdentityOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let flat_map_call = ctx.query();

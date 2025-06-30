@@ -1,4 +1,5 @@
 use crate::JsRuleAction;
+use biome_rule_options::use_strict_mode::UseStrictModeOptions;
 use biome_analyze::{
     Ast, FixKind, Rule, RuleDiagnostic, context::RuleContext, declare_lint_rule,
     options::PreferredQuote,
@@ -49,7 +50,7 @@ impl Rule for UseStrictMode {
     type Query = Ast<JsScript>;
     type State = ();
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = UseStrictModeOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();

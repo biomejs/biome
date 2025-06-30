@@ -5,6 +5,7 @@ use biome_analyze::{Rule, RuleDiagnostic, RuleSource, declare_lint_rule};
 use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_semantic::SemanticModel;
+use biome_rule_options::no_dangerously_set_inner_html_with_children::NoDangerouslySetInnerHtmlWithChildrenOptions;
 use biome_js_syntax::{
     JsCallExpression, JsPropertyObjectMember, JsSyntaxNode, JsxAttribute, JsxElement,
     JsxSelfClosingElement,
@@ -156,7 +157,7 @@ impl Rule for NoDangerouslySetInnerHtmlWithChildren {
     type Query = Semantic<AnyJsCreateElement>;
     type State = RuleState;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoDangerouslySetInnerHtmlWithChildrenOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();

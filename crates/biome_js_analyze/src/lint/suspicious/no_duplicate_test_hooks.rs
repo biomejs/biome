@@ -1,3 +1,4 @@
+use biome_rule_options::no_duplicate_test_hooks::NoDuplicateTestHooksOptions;
 use biome_analyze::{
     AddVisitor, Phases, QueryMatch, Queryable, Rule, RuleDiagnostic, RuleDomain, RuleSource,
     ServiceBag, Visitor, VisitorContext, context::RuleContext, declare_lint_rule,
@@ -216,7 +217,7 @@ impl Rule for NoDuplicateTestHooks {
     type Query = DuplicateHooks;
     type State = ();
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoDuplicateTestHooksOptions;
 
     fn run(_: &RuleContext<Self>) -> Self::Signals {
         Some(())

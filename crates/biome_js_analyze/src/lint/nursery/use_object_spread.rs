@@ -1,5 +1,6 @@
 use crate::JsRuleAction;
 use crate::services::semantic::Semantic;
+use biome_rule_options::use_object_spread::UseObjectSpreadOptions;
 use biome_analyze::{
     FixKind, Rule, RuleAction, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
@@ -67,7 +68,7 @@ impl Rule for UseObjectSpread {
     type Query = Semantic<JsCallExpression>;
     type State = RuleState;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = UseObjectSpreadOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();

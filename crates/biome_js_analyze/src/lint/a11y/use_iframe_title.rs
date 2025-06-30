@@ -1,3 +1,4 @@
+use biome_rule_options::use_iframe_title::UseIframeTitleOptions;
 use biome_analyze::{
     Ast, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
@@ -75,7 +76,7 @@ impl Rule for UseIframeTitle {
     type Query = Ast<AnyJsxElement>;
     type State = ();
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = UseIframeTitleOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let element = ctx.query();

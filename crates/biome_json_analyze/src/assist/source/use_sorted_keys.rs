@@ -1,4 +1,5 @@
 use crate::JsonRuleAction;
+use biome_rule_options::use_sorted_keys::UseSortedKeysOptions;
 use biome_analyze::utils::{is_separated_list_sorted_by, sorted_separated_list_by};
 use biome_analyze::{
     Ast, FixKind, Rule, RuleAction, RuleDiagnostic, context::RuleContext, declare_source_rule,
@@ -37,7 +38,7 @@ impl Rule for UseSortedKeys {
     type Query = Ast<JsonMemberList>;
     type State = ();
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = UseSortedKeysOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
         is_separated_list_sorted_by(ctx.query(), |node| {

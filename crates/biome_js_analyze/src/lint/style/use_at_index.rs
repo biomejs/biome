@@ -1,4 +1,5 @@
 use crate::JsRuleAction;
+use biome_rule_options::use_at_index::UseAtIndexOptions;
 use biome_analyze::{
     Ast, FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
@@ -127,7 +128,7 @@ impl Rule for UseAtIndex {
     type Query = Ast<AnyJsArrayAccess>;
     type State = UseAtIndexState;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = UseAtIndexOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let exp = ctx.query();

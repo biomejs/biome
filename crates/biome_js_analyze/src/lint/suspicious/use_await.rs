@@ -1,3 +1,4 @@
+use biome_rule_options::use_await::UseAwaitOptions;
 use biome_analyze::{
     AddVisitor, Phases, QueryMatch, Queryable, Rule, RuleDiagnostic, RuleSource, ServiceBag,
     Visitor, VisitorContext, context::RuleContext, declare_lint_rule,
@@ -135,7 +136,7 @@ impl Rule for UseAwait {
     type Query = MissingAwait;
     type State = ();
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = UseAwaitOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let query = ctx.query();

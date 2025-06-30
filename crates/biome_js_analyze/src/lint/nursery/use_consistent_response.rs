@@ -2,6 +2,7 @@ use biome_analyze::{FixKind, Rule, RuleDiagnostic, context::RuleContext, declare
 use biome_console::markup;
 use biome_js_factory::make;
 use biome_js_semantic::SemanticModel;
+use biome_rule_options::use_consistent_response::UseConsistentResponseOptions;
 use biome_js_syntax::{
     AnyJsCallArgument, AnyJsExpression, AnyJsLiteralExpression, JsCallArguments, JsCallExpression,
     JsNewExpression, JsPropertyObjectMember, T, global_identifier,
@@ -86,7 +87,7 @@ impl Rule for UseConsistentResponse {
     type Query = Semantic<JsNewExpression>;
     type State = ResponseSimplification;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = UseConsistentResponseOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();

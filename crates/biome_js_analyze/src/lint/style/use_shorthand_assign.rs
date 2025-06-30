@@ -1,3 +1,4 @@
+use biome_rule_options::use_shorthand_assign::UseShorthandAssignOptions;
 use biome_analyze::{
     Ast, FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
@@ -69,7 +70,7 @@ impl Rule for UseShorthandAssign {
     type Query = Ast<JsAssignmentExpression>;
     type State = RuleState;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = UseShorthandAssignOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();

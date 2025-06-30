@@ -1,4 +1,5 @@
 use crate::{JsRuleAction, services::semantic::Semantic};
+use biome_rule_options::use_is_array::UseIsArrayOptions;
 use biome_analyze::{
     FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
@@ -51,7 +52,7 @@ impl Rule for UseIsArray {
     type Query = Semantic<JsInstanceofExpression>;
     type State = ();
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = UseIsArrayOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();

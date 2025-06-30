@@ -1,6 +1,7 @@
 use biome_analyze::RuleSource;
 use biome_analyze::{Ast, Rule, RuleDiagnostic, context::RuleContext, declare_lint_rule};
 use biome_diagnostics::Severity;
+use biome_rule_options::no_duplicate_class_members::NoDuplicateClassMembersOptions;
 use biome_js_syntax::{
     AnyJsClassMemberName, JsClassMemberList, JsGetterClassMember, JsMethodClassMember,
     JsPropertyClassMember, JsSetterClassMember, JsStaticModifier, JsSyntaxList, TextRange,
@@ -174,7 +175,7 @@ impl Rule for NoDuplicateClassMembers {
     type Query = Ast<JsClassMemberList>;
     type State = AnyClassMemberDefinition;
     type Signals = Box<[Self::State]>;
-    type Options = ();
+    type Options = NoDuplicateClassMembersOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let mut defined_members: FxHashMap<MemberState, FxHashSet<MemberType>> =

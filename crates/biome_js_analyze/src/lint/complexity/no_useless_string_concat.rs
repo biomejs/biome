@@ -1,3 +1,4 @@
+use biome_rule_options::no_useless_string_concat::NoUselessStringConcatOptions;
 use biome_analyze::{
     Ast, FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
@@ -76,7 +77,7 @@ impl Rule for NoUselessStringConcat {
     type Query = Ast<JsBinaryExpression>;
     type State = TextRange;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoUselessStringConcatOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();

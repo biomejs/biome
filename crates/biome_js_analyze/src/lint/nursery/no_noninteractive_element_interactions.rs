@@ -1,3 +1,4 @@
+use biome_rule_options::no_noninteractive_element_interactions::NoNoninteractiveElementInteractionsOptions;
 use crate::{
     a11y::{is_content_editable, is_hidden_from_screen_reader},
     services::aria::Aria,
@@ -83,7 +84,7 @@ impl Rule for NoNoninteractiveElementInteractions {
     type Query = Aria<AnyJsxElement>;
     type State = ();
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoNoninteractiveElementInteractionsOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let element = ctx.query();

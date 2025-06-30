@@ -1,5 +1,6 @@
 use std::collections::HashSet;
 
+use biome_rule_options::no_duplicate_fields::NoDuplicateFieldsOptions;
 use biome_analyze::{
     Ast, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
@@ -49,7 +50,7 @@ impl Rule for NoDuplicateFields {
     type Query = Ast<AnyGraphqlOperationDefinition>;
     type State = DuplicatedField;
     type Signals = Box<[Self::State]>;
-    type Options = ();
+    type Options = NoDuplicateFieldsOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let operation = ctx.query();

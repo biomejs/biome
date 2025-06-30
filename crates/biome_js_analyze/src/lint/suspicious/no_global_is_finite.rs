@@ -5,6 +5,7 @@ use biome_diagnostics::Severity;
 use biome_js_factory::make;
 use biome_js_syntax::{AnyJsExpression, T, global_identifier};
 use biome_rowan::{AstNode, BatchMutationExt};
+use biome_rule_options::no_global_is_finite::NoGlobalIsFiniteOptions;
 
 declare_lint_rule! {
     /// Use `Number.isFinite` instead of global `isFinite`.
@@ -41,7 +42,7 @@ impl Rule for NoGlobalIsFinite {
     type Query = Semantic<AnyJsExpression>;
     type State = ();
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoGlobalIsFiniteOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();

@@ -1,3 +1,4 @@
+use biome_rule_options::no_exports_in_test::NoExportsInTestOptions;
 use biome_analyze::{
     AddVisitor, Phases, QueryMatch, Queryable, Rule, RuleDiagnostic, RuleDomain, RuleSource,
     ServiceBag, Visitor, context::RuleContext, declare_lint_rule,
@@ -188,7 +189,7 @@ impl Rule for NoExportsInTest {
     type Query = AnyExportInTest;
     type State = ();
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoExportsInTestOptions;
 
     fn run(_: &RuleContext<Self>) -> Self::Signals {
         Some(())

@@ -1,3 +1,4 @@
+use biome_rule_options::no_await_in_loop::NoAwaitInLoopOptions;
 use biome_analyze::{
     Ast, QueryMatch, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
@@ -51,7 +52,7 @@ impl Rule for NoAwaitInLoop {
     type Query = Ast<AnyLoopNode>;
     type State = JsSyntaxNode;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoAwaitInLoopOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let loop_node = ctx.query();

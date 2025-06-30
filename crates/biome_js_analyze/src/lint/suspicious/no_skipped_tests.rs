@@ -1,3 +1,4 @@
+use biome_rule_options::no_skipped_tests::NoSkippedTestsOptions;
 use biome_analyze::{
     Ast, FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
@@ -53,7 +54,7 @@ impl Rule for NoSkippedTests {
     type Query = Ast<JsCallExpression>;
     type State = TextRange;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoSkippedTestsOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();

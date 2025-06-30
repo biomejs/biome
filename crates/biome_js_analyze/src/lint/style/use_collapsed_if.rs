@@ -1,3 +1,4 @@
+use biome_rule_options::use_collapsed_if::UseCollapsedIfOptions;
 use biome_analyze::{
     Ast, FixKind, QueryMatch, Rule, RuleDiagnostic, RuleSource, context::RuleContext,
     declare_lint_rule,
@@ -87,7 +88,7 @@ impl Rule for UseCollapsedIf {
     type Query = Ast<JsIfStatement>;
     type State = RuleState;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = UseCollapsedIfOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let if_stmt = ctx.query();

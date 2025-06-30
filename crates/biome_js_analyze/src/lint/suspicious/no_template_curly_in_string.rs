@@ -1,3 +1,4 @@
+use biome_rule_options::no_template_curly_in_string::NoTemplateCurlyInStringOptions;
 use biome_analyze::{
     Ast, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
@@ -53,7 +54,7 @@ impl Rule for NoTemplateCurlyInString {
     type Query = Ast<JsStringLiteralExpression>;
     type State = (u32, u32);
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoTemplateCurlyInStringOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();

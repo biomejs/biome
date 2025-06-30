@@ -1,3 +1,4 @@
+use biome_rule_options::no_negation_else::NoNegationElseOptions;
 use biome_analyze::{
     Ast, FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
@@ -61,7 +62,7 @@ impl Rule for NoNegationElse {
     type Query = Ast<AnyJsCondition>;
     type State = ();
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoNegationElseOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
         let node = ctx.query();

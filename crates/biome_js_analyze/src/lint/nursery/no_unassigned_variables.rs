@@ -1,6 +1,7 @@
 use biome_analyze::{Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule};
 use biome_console::markup;
 use biome_js_semantic::ReferencesExtensions;
+use biome_rule_options::no_unassigned_variables::NoUnassignedVariablesOptions;
 use biome_js_syntax::{
     AnyJsBinding, AnyJsBindingPattern, JsIdentifierBinding, JsVariableDeclaration,
     JsVariableDeclarationClause, JsVariableDeclarator, JsVariableDeclaratorList,
@@ -70,7 +71,7 @@ impl Rule for NoUnassignedVariables {
     type Query = Semantic<JsVariableDeclarator>;
     type State = JsIdentifierBinding;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoUnassignedVariablesOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let declarator = ctx.query();

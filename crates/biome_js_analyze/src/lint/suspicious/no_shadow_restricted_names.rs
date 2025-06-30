@@ -1,4 +1,5 @@
 use crate::globals::javascript::language::ES_BUILTIN;
+use biome_rule_options::no_shadow_restricted_names::NoShadowRestrictedNamesOptions;
 use biome_analyze::{
     Ast, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
@@ -53,7 +54,7 @@ impl Rule for NoShadowRestrictedNames {
     type Query = Ast<JsIdentifierBinding>;
     type State = State;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoShadowRestrictedNamesOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
         let binding = ctx.query();

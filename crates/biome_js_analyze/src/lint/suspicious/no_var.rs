@@ -1,3 +1,4 @@
+use biome_rule_options::no_var::NoVarOptions;
 use crate::{
     JsRuleAction, services::control_flow::AnyJsControlFlowRoot, services::semantic::Semantic,
 };
@@ -50,7 +51,7 @@ impl Rule for NoVar {
     type Query = Semantic<AnyJsVariableDeclaration>;
     type State = ();
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoVarOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let declaration = ctx.query();

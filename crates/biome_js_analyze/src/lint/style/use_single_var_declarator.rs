@@ -1,3 +1,4 @@
+use biome_rule_options::use_single_var_declarator::UseSingleVarDeclaratorOptions;
 use biome_analyze::{
     Ast, FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
@@ -55,7 +56,7 @@ impl Rule for UseSingleVarDeclarator {
     type Query = Ast<JsVariableStatement>;
     type State = ();
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = UseSingleVarDeclaratorOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
         (ctx.query().declaration().ok()?.declarators().len() > 1).then_some(())

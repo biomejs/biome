@@ -1,3 +1,4 @@
+use biome_rule_options::no_invalid_position_at_import_rule::NoInvalidPositionAtImportRuleOptions;
 use biome_analyze::{
     Ast, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
@@ -41,7 +42,7 @@ impl Rule for NoInvalidPositionAtImportRule {
     type Query = Ast<CssRuleList>;
     type State = TextRange;
     type Signals = Box<[Self::State]>;
-    type Options = ();
+    type Options = NoInvalidPositionAtImportRuleOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();

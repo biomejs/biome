@@ -6,6 +6,7 @@ use biome_console::markup;
 use biome_control_flow::builder::ROOT_BLOCK_ID;
 use biome_control_flow::{ExceptionHandlerKind, InstructionKind};
 use biome_diagnostics::Severity;
+use biome_rule_options::use_iterable_callback_return::UseIterableCallbackReturnOptions;
 use biome_js_syntax::{
     AnyJsFunctionBody, JsArrowFunctionExpression, JsCallArgumentList, JsCallArguments,
     JsCallExpression, JsFunctionExpression, JsReturnStatement, global_identifier,
@@ -89,7 +90,7 @@ impl Rule for UseIterableCallbackReturn {
     type Query = ControlFlowGraph;
     type State = RuleState;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = UseIterableCallbackReturnOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let cfg = ctx.query();

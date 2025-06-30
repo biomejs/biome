@@ -1,4 +1,5 @@
 use crate::JsRuleAction;
+use biome_rule_options::no_unsafe_negation::NoUnsafeNegationOptions;
 use biome_analyze::{
     Ast, FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
@@ -47,7 +48,7 @@ impl Rule for NoUnsafeNegation {
     type Query = Ast<JsInOrInstanceOfExpression>;
     type State = ();
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoUnsafeNegationOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
         let node = ctx.query();

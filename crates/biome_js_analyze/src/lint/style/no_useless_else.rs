@@ -1,5 +1,6 @@
 use std::borrow::Cow;
 
+use biome_rule_options::no_useless_else::NoUselessElseOptions;
 use biome_analyze::{
     Ast, FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
@@ -102,7 +103,7 @@ impl Rule for NoUselessElse {
     type Query = Ast<JsIfStatement>;
     type State = JsIfStatement;
     type Signals = Box<[Self::State]>;
-    type Options = ();
+    type Options = NoUselessElseOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let mut result = Vec::new();

@@ -1,3 +1,4 @@
+use biome_rule_options::use_sorted_properties::UseSortedPropertiesOptions;
 use crate::{
     CssRuleAction,
     keywords::VENDOR_PREFIXES,
@@ -106,7 +107,7 @@ impl Rule for UseSortedProperties {
     type Query = Ast<CssDeclarationOrRuleBlock>;
     type State = UseSortedPropertiesState;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = UseSortedPropertiesOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
         let node = ctx.query();

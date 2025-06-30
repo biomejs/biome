@@ -1,5 +1,6 @@
 use std::ops::Range;
 
+use biome_rule_options::no_useless_backref_in_regex::NoUselessBackrefInRegexOptions;
 use biome_analyze::{
     Ast, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
@@ -97,7 +98,7 @@ impl Rule for NoUselessBackrefInRegex {
     type Query = Ast<JsRegexLiteralExpression>;
     type State = BackRefIssue;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoUselessBackrefInRegexOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();

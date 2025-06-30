@@ -1,3 +1,4 @@
+use biome_rule_options::no_unknown_property::NoUnknownPropertyOptions;
 use biome_analyze::{
     Ast, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
@@ -71,7 +72,7 @@ impl Rule for NoUnknownProperty {
     type Query = Ast<CssGenericProperty>;
     type State = TextRange;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoUnknownPropertyOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
         let node = ctx.query();

@@ -1,5 +1,6 @@
 use std::ops::Range;
 
+use biome_rule_options::no_empty_character_class_in_regex::NoEmptyCharacterClassInRegexOptions;
 use biome_analyze::{
     Ast, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
@@ -55,7 +56,7 @@ impl Rule for NoEmptyCharacterClassInRegex {
     type Query = Ast<JsRegexLiteralExpression>;
     type State = Range<usize>;
     type Signals = Box<[Self::State]>;
-    type Options = ();
+    type Options = NoEmptyCharacterClassInRegexOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let mut empty_classes = vec![];

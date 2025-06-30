@@ -1,4 +1,5 @@
 use crate::JsRuleAction;
+use biome_rule_options::no_focused_tests::NoFocusedTestsOptions;
 use biome_analyze::{
     Ast, FixKind, Rule, RuleDiagnostic, RuleDomain, RuleSource, context::RuleContext,
     declare_lint_rule,
@@ -67,7 +68,7 @@ impl Rule for NoFocusedTests {
     type Query = Ast<JsCallExpression>;
     type State = FunctionNameAndRange;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoFocusedTestsOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();

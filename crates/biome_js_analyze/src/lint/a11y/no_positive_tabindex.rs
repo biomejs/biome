@@ -9,6 +9,7 @@ use biome_js_factory::make;
 use biome_js_factory::make::{jsx_string, jsx_string_literal};
 use biome_js_semantic::SemanticModel;
 use biome_js_syntax::jsx_ext::AnyJsxElement;
+use biome_rule_options::no_positive_tabindex::NoPositiveTabindexOptions;
 use biome_js_syntax::{
     AnyJsLiteralExpression, AnyJsxAttributeValue, JsCallExpression, JsNumberLiteralExpression,
     JsPropertyObjectMember, JsStringLiteralExpression, JsUnaryExpression, JsxAttribute, TextRange,
@@ -100,7 +101,7 @@ impl Rule for NoPositiveTabindex {
     type Query = Semantic<NoPositiveTabindexQuery>;
     type State = TextRange;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoPositiveTabindexOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();

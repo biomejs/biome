@@ -1,3 +1,4 @@
+use biome_rule_options::no_empty_pattern::NoEmptyPatternOptions;
 use biome_analyze::{
     Ast, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
@@ -49,7 +50,7 @@ impl Rule for NoEmptyPattern {
     type Query = Ast<JsAnyBindPatternLike>;
     type State = ();
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoEmptyPatternOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
         use JsAnyBindPatternLike::*;

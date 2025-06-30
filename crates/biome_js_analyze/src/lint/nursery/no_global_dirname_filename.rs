@@ -1,4 +1,5 @@
 use crate::{JsRuleAction, services::semantic::Semantic};
+use biome_rule_options::no_global_dirname_filename::NoGlobalDirnameFilenameOptions;
 use biome_analyze::{
     FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
@@ -68,7 +69,7 @@ impl Rule for NoGlobalDirnameFilename {
     type Query = Semantic<AnyGlobalDirnameFileName>;
     type State = (JsSyntaxToken, String);
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoGlobalDirnameFilenameOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();

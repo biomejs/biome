@@ -1,4 +1,5 @@
 use crate::JsRuleAction;
+use biome_rule_options::no_react_specific_props::NoReactSpecificPropsOptions;
 use biome_analyze::context::RuleContext;
 use biome_analyze::{
     Ast, FixKind, Rule, RuleDiagnostic, RuleDomain, RuleSource, declare_lint_rule,
@@ -54,7 +55,7 @@ impl Rule for NoReactSpecificProps {
     type Query = Ast<JsxAttribute>;
     type State = (TextRange, &'static str);
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoReactSpecificPropsOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let attribute = ctx.query();

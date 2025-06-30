@@ -1,4 +1,5 @@
 use crate::react::components::{AnyPotentialReactComponentDeclaration, ReactComponentInfo};
+use biome_rule_options::no_nested_component_definitions::NoNestedComponentDefinitionsOptions;
 use biome_analyze::{
     Ast, Rule, RuleDiagnostic, RuleDomain, RuleSource, context::RuleContext, declare_lint_rule,
 };
@@ -99,7 +100,7 @@ impl Rule for NoNestedComponentDefinitions {
     type Query = Ast<AnyPotentialReactComponentDeclaration>;
     type State = RuleState;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoNestedComponentDefinitionsOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();

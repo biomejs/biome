@@ -1,4 +1,5 @@
 use crate::JsRuleAction;
+use biome_rule_options::use_collapsed_else_if::UseCollapsedElseIfOptions;
 use biome_analyze::{
     Ast, FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
@@ -103,7 +104,7 @@ impl Rule for UseCollapsedElseIf {
     type Query = Ast<JsElseClause>;
     type State = RuleState;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = UseCollapsedElseIfOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let else_clause = ctx.query();

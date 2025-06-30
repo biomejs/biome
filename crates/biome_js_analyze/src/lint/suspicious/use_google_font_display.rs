@@ -1,3 +1,4 @@
+use biome_rule_options::use_google_font_display::UseGoogleFontDisplayOptions;
 use biome_analyze::{
     Ast, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
@@ -70,7 +71,7 @@ impl Rule for UseGoogleFontDisplay {
     type Query = Ast<AnyJsxElement>;
     type State = (FontDisplayIssue, TextRange);
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = UseGoogleFontDisplayOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let element = ctx.query();

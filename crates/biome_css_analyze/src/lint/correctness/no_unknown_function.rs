@@ -1,3 +1,4 @@
+use biome_rule_options::no_unknown_function::NoUnknownFunctionOptions;
 use biome_analyze::{
     Ast, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
@@ -51,7 +52,7 @@ impl Rule for NoUnknownFunction {
     type Query = Ast<CssFunction>;
     type State = NoUnknownFunctionState;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoUnknownFunctionOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
         let node = ctx.query();

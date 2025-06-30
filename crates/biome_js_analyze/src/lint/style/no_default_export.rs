@@ -1,3 +1,4 @@
+use biome_rule_options::no_default_export::NoDefaultExportOptions;
 use biome_analyze::{
     Ast, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
@@ -73,7 +74,7 @@ impl Rule for NoDefaultExport {
     type Query = Ast<AnyJsExportClause>;
     type State = TextRange;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoDefaultExportOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let export_clause = ctx.query();

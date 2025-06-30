@@ -1,3 +1,4 @@
+use biome_rule_options::no_static_only_class::NoStaticOnlyClassOptions;
 use biome_analyze::{
     Ast, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
@@ -135,7 +136,7 @@ impl Rule for NoStaticOnlyClass {
     type Query = Ast<AnyJsClass>;
     type State = ();
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoStaticOnlyClassOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let class_declaration = ctx.query();

@@ -1,5 +1,6 @@
 use std::cmp::Ordering;
 
+use biome_rule_options::no_approximative_numeric_constant::NoApproximativeNumericConstantOptions;
 use biome_analyze::{
     Ast, FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
@@ -57,7 +58,7 @@ impl Rule for NoApproximativeNumericConstant {
     type Query = Ast<JsNumberLiteralExpression>;
     type State = &'static str;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoApproximativeNumericConstantOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let token = ctx.query().value_token().ok()?;

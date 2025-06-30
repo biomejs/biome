@@ -1,3 +1,4 @@
+use biome_rule_options::no_unknown_pseudo_class::NoUnknownPseudoClassOptions;
 use crate::{
     keywords::{WEBKIT_SCROLLBAR_PSEUDO_CLASSES, WEBKIT_SCROLLBAR_PSEUDO_ELEMENTS},
     utils::{is_custom_selector, is_known_pseudo_class, is_page_pseudo_class, vendor_prefixed},
@@ -187,7 +188,7 @@ impl Rule for NoUnknownPseudoClass {
     type Query = Ast<AnyPseudoLike>;
     type State = NoUnknownPseudoClassSelectorState;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoUnknownPseudoClassOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
         let pseudo_class = ctx.query();

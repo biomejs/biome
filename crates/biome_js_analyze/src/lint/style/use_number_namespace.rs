@@ -1,4 +1,5 @@
 use crate::{JsRuleAction, services::semantic::Semantic};
+use biome_rule_options::use_number_namespace::UseNumberNamespaceOptions;
 use biome_analyze::{
     FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
@@ -82,7 +83,7 @@ impl Rule for UseNumberNamespace {
     type Query = Semantic<AnyJsExpression>;
     type State = StaticValue;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = UseNumberNamespaceOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();

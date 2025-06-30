@@ -1,4 +1,5 @@
 use crate::JsRuleAction;
+use biome_rule_options::no_nonoctal_decimal_escape::NoNonoctalDecimalEscapeOptions;
 use biome_analyze::{
     Ast, FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
@@ -82,7 +83,7 @@ impl Rule for NoNonoctalDecimalEscape {
     type Query = Ast<AnyJsStringLiteral>;
     type State = RuleState;
     type Signals = Box<[Self::State]>;
-    type Options = ();
+    type Options = NoNonoctalDecimalEscapeOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();

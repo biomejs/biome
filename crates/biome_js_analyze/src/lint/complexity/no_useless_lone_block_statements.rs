@@ -1,4 +1,5 @@
 use crate::JsRuleAction;
+use biome_rule_options::no_useless_lone_block_statements::NoUselessLoneBlockStatementsOptions;
 use biome_analyze::{
     Ast, FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
@@ -57,7 +58,7 @@ impl Rule for NoUselessLoneBlockStatements {
     type Query = Ast<JsBlockStatement>;
     type State = ();
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoUselessLoneBlockStatementsOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let block = ctx.query();

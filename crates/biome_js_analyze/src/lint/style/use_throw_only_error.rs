@@ -1,3 +1,4 @@
+use biome_rule_options::use_throw_only_error::UseThrowOnlyErrorOptions;
 use biome_analyze::{
     Ast, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
@@ -67,7 +68,7 @@ impl Rule for UseThrowOnlyError {
     type Query = Ast<JsThrowStatement>;
     type State = ();
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = UseThrowOnlyErrorOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();

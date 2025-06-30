@@ -4,6 +4,7 @@ use biome_analyze::{Ast, FixKind, Rule, RuleDiagnostic, context::RuleContext, de
 use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_factory::make;
+use biome_rule_options::use_simple_number_keys::UseSimpleNumberKeysOptions;
 use biome_js_syntax::{
     AnyJsObjectMember, JsLiteralMemberName, JsObjectExpression, JsSyntaxKind, JsSyntaxToken,
     TextRange,
@@ -268,7 +269,7 @@ impl Rule for UseSimpleNumberKeys {
     type Query = Ast<JsObjectExpression>;
     type State = RuleState;
     type Signals = Box<[Self::State]>;
-    type Options = ();
+    type Options = UseSimpleNumberKeysOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let mut result = Vec::new();

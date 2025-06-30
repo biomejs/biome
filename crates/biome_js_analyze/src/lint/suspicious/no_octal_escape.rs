@@ -1,3 +1,4 @@
+use biome_rule_options::no_octal_escape::NoOctalEscapeOptions;
 use biome_analyze::{
     Ast, FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
@@ -44,7 +45,7 @@ impl Rule for NoOctalEscape {
     type Query = Ast<AnyJsStringLiteral>;
     type State = RuleState;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoOctalEscapeOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let token = ctx.query().string_literal_token()?;

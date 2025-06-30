@@ -1,3 +1,4 @@
+use biome_rule_options::no_useless_undefined::NoUselessUndefinedOptions;
 use biome_analyze::{
     Ast, FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
@@ -107,7 +108,7 @@ impl Rule for NoUselessUndefined {
     type Query = Ast<AnyUndefinedNode>;
     type State = RuleState;
     type Signals = Box<[Self::State]>;
-    type Options = ();
+    type Options = NoUselessUndefinedOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();

@@ -1,3 +1,4 @@
+use biome_rule_options::use_named_operation::UseNamedOperationOptions;
 use biome_analyze::{
     Ast, FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
@@ -46,7 +47,7 @@ impl Rule for UseNamedOperation {
     type Query = Ast<GraphqlOperationDefinition>;
     type State = GraphqlOperationType;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = UseNamedOperationOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
         let node = ctx.query();

@@ -1,3 +1,4 @@
+use biome_rule_options::no_unused_labels::NoUnusedLabelsOptions;
 use biome_analyze::context::RuleContext;
 use biome_analyze::{
     AddVisitor, FixKind, Phases, QueryMatch, Queryable, Rule, RuleDiagnostic, RuleSource,
@@ -163,7 +164,7 @@ impl Rule for NoUnusedLabels {
     type Query = UnusedLabel;
     type State = ();
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoUnusedLabelsOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
         let label = ctx.query().label_token().ok()?;

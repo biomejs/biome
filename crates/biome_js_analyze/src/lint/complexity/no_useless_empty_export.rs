@@ -1,3 +1,4 @@
+use biome_rule_options::no_useless_empty_export::NoUselessEmptyExportOptions;
 use biome_analyze::{
     Ast, FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
@@ -57,7 +58,7 @@ impl Rule for NoUselessEmptyExport {
     /// The first import or export that makes useless the empty export.
     type State = JsSyntaxToken;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoUselessEmptyExportOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();

@@ -1,3 +1,4 @@
+use biome_rule_options::no_duplicate_font_names::NoDuplicateFontNamesOptions;
 use biome_analyze::{
     Ast, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
@@ -62,7 +63,7 @@ impl Rule for NoDuplicateFontNames {
     type Query = Ast<CssGenericProperty>;
     type State = RuleState;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoDuplicateFontNamesOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
         let node = ctx.query();

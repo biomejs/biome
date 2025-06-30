@@ -1,3 +1,4 @@
+use biome_rule_options::use_numeric_separators::UseNumericSeparatorsOptions;
 use biome_analyze::{
     Ast, FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
@@ -65,7 +66,7 @@ impl Rule for UseNumericSeparators {
     type Query = Ast<JsNumberLiteralExpression>;
     type State = State;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = UseNumericSeparatorsOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let token = ctx.query().value_token().ok()?;

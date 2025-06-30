@@ -1,3 +1,4 @@
+use biome_rule_options::use_consistent_curly_braces::UseConsistentCurlyBracesOptions;
 use biome_analyze::{
     Ast, FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
@@ -83,7 +84,7 @@ impl Rule for UseConsistentCurlyBraces {
     type Query = Ast<AnyJsxCurlyQuery>;
     type State = CurlyBraceResolution;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = UseConsistentCurlyBracesOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let query = ctx.query();

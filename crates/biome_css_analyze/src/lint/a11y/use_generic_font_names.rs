@@ -1,3 +1,4 @@
+use biome_rule_options::use_generic_font_names::UseGenericFontNamesOptions;
 use biome_analyze::{
     Ast, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
@@ -75,7 +76,7 @@ impl Rule for UseGenericFontNames {
     type Query = Ast<CssGenericProperty>;
     type State = TextRange;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = UseGenericFontNamesOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
         let node = ctx.query();

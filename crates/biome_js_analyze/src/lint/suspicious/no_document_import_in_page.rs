@@ -1,3 +1,4 @@
+use biome_rule_options::no_document_import_in_page::NoDocumentImportInPageOptions;
 use biome_analyze::{
     Ast, Rule, RuleDiagnostic, RuleDomain, RuleSource, context::RuleContext, declare_lint_rule,
 };
@@ -45,7 +46,7 @@ impl Rule for NoDocumentImportInPage {
     type Query = Ast<JsImport>;
     type State = ();
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoDocumentImportInPageOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         if !ctx.source_type::<JsFileSource>().is_jsx() {

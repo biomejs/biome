@@ -1,3 +1,4 @@
+use biome_rule_options::no_nested_ternary::NoNestedTernaryOptions;
 use biome_analyze::{
     Ast, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
@@ -55,7 +56,7 @@ impl Rule for NoNestedTernary {
     type Query = Ast<JsConditionalExpression>;
     type State = TextRange;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoNestedTernaryOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();

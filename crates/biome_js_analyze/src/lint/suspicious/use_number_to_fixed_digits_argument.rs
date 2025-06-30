@@ -1,3 +1,4 @@
+use biome_rule_options::use_number_to_fixed_digits_argument::UseNumberToFixedDigitsArgumentOptions;
 use biome_analyze::{
     Ast, FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
@@ -55,7 +56,7 @@ impl Rule for UseNumberToFixedDigitsArgument {
     type Query = Ast<JsCallExpression>;
     type State = ();
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = UseNumberToFixedDigitsArgumentOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();

@@ -1,5 +1,6 @@
 use std::{borrow::Cow, ops::Not};
 
+use biome_rule_options::use_sorted_keys::UseSortedKeysOptions;
 use biome_analyze::{
     Ast, FixKind, Rule, RuleAction, RuleDiagnostic, RuleSource,
     context::RuleContext,
@@ -85,7 +86,7 @@ impl Rule for UseSortedKeys {
     type Query = Ast<JsObjectMemberList>;
     type State = ();
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = UseSortedKeysOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         is_separated_list_sorted_by(ctx.query(), |node| node.name().map(ComparableToken::new))

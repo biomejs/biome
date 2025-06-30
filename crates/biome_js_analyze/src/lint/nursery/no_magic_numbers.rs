@@ -1,3 +1,4 @@
+use biome_rule_options::no_magic_numbers::NoMagicNumbersOptions;
 use biome_analyze::{
     Ast, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
@@ -57,7 +58,7 @@ impl Rule for NoMagicNumbers {
     type Query = Ast<JsOrTsNumericLiteral>;
     type State = ();
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoMagicNumbersOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let literal_expression = ctx.query();

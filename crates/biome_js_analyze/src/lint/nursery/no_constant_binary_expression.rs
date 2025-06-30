@@ -2,6 +2,7 @@ use biome_analyze::{Rule, RuleDiagnostic, RuleSource, context::RuleContext, decl
 use biome_console::fmt::{Display, Formatter};
 use biome_console::markup;
 use biome_js_semantic::{BindingExtensions, SemanticModel};
+use biome_rule_options::no_constant_binary_expression::NoConstantBinaryExpressionOptions;
 use biome_js_syntax::{
     AnyJsArrayElement, AnyJsCallArgument, AnyJsExpression, AnyJsLiteralExpression,
     AnyJsTemplateElement, JsAssignmentOperator, JsBinaryExpression, JsBinaryOperator,
@@ -153,7 +154,7 @@ impl Rule for NoConstantBinaryExpression {
     type Query = Semantic<Query>;
     type State = Issue;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoConstantBinaryExpressionOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let model = ctx.model();

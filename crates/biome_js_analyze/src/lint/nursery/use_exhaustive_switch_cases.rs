@@ -1,5 +1,6 @@
 use std::ops::Deref;
 
+use biome_rule_options::use_exhaustive_switch_cases::UseExhaustiveSwitchCasesOptions;
 use biome_analyze::{
     FixKind, Rule, RuleDiagnostic, RuleDomain, RuleSource, context::RuleContext, declare_lint_rule,
 };
@@ -104,7 +105,7 @@ impl Rule for UseExhaustiveSwitchCases {
     type Query = Typed<JsSwitchStatement>;
     type State = Vec<Type>;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = UseExhaustiveSwitchCasesOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let stmt = ctx.query();

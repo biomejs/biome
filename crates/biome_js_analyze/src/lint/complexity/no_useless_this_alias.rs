@@ -1,3 +1,4 @@
+use biome_rule_options::no_useless_this_alias::NoUselessThisAliasOptions;
 use crate::{
     JsRuleAction, services::control_flow::AnyJsControlFlowRoot, services::semantic::Semantic,
 };
@@ -65,7 +66,7 @@ impl Rule for NoUselessThisAlias {
     type Query = Semantic<JsVariableDeclarator>;
     type State = JsIdentifierBinding;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoUselessThisAliasOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let declarator = ctx.query();

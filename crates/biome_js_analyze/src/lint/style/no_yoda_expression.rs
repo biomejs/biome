@@ -1,4 +1,5 @@
 use crate::{JsRuleAction, utils::is_node_equal};
+use biome_rule_options::no_yoda_expression::NoYodaExpressionOptions;
 use biome_analyze::{
     Ast, FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
@@ -74,7 +75,7 @@ impl Rule for NoYodaExpression {
     type Query = Ast<JsBinaryExpression>;
     type State = ();
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoYodaExpressionOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();

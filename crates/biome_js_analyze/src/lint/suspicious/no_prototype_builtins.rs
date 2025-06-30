@@ -1,4 +1,5 @@
 use crate::{JsRuleAction, services::semantic::Semantic};
+use biome_rule_options::no_prototype_builtins::NoPrototypeBuiltinsOptions;
 use biome_analyze::{
     FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
@@ -76,7 +77,7 @@ impl Rule for NoPrototypeBuiltins {
     type Query = Semantic<JsCallExpression>;
     type State = RuleState;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoPrototypeBuiltinsOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let call_expr = ctx.query();

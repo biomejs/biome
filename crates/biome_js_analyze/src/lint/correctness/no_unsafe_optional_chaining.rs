@@ -1,3 +1,4 @@
+use biome_rule_options::no_unsafe_optional_chaining::NoUnsafeOptionalChainingOptions;
 use biome_analyze::{
     Ast, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
@@ -78,7 +79,7 @@ impl Rule for NoUnsafeOptionalChaining {
     type Query = Ast<AnyJsOptionalChainExpression>;
     type State = TextRange;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoUnsafeOptionalChainingOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();

@@ -1,4 +1,5 @@
 use crate::{JsRuleAction, services::aria::Aria};
+use biome_rule_options::no_noninteractive_tabindex::NoNoninteractiveTabindexOptions;
 use biome_analyze::{
     FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
@@ -67,7 +68,7 @@ impl Rule for NoNoninteractiveTabindex {
     type Query = Aria<AnyJsxElement>;
     type State = RuleState;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoNoninteractiveTabindexOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();

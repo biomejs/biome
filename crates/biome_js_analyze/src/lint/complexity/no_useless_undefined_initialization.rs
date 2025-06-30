@@ -1,3 +1,4 @@
+use biome_rule_options::no_useless_undefined_initialization::NoUselessUndefinedInitializationOptions;
 use biome_analyze::{
     Ast, FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
@@ -63,7 +64,7 @@ impl Rule for NoUselessUndefinedInitialization {
     type Query = Ast<JsVariableStatement>;
     type State = (Box<str>, TextRange);
     type Signals = Box<[Self::State]>;
-    type Options = ();
+    type Options = NoUselessUndefinedInitializationOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let statement = ctx.query();

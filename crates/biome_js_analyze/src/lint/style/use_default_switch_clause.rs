@@ -1,5 +1,6 @@
 use std::ops::Not;
 
+use biome_rule_options::use_default_switch_clause::UseDefaultSwitchClauseOptions;
 use biome_analyze::{
     Ast, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
@@ -53,7 +54,7 @@ impl Rule for UseDefaultSwitchClause {
     type Query = Ast<JsSwitchStatement>;
     type State = ();
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = UseDefaultSwitchClauseOptions;
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
 

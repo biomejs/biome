@@ -1,3 +1,4 @@
+use biome_rule_options::no_async_promise_executor::NoAsyncPromiseExecutorOptions;
 use biome_analyze::{
     Ast, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
@@ -53,7 +54,7 @@ impl Rule for NoAsyncPromiseExecutor {
     type Query = Ast<JsNewExpression>;
     type State = AnyJsFunction;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoAsyncPromiseExecutorOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
         let node = ctx.query();

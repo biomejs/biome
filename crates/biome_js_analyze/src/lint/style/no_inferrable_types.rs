@@ -4,6 +4,7 @@ use biome_analyze::{Ast, FixKind, Rule, RuleDiagnostic, context::RuleContext, de
 use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_syntax::AnyJsLiteralExpression;
+use biome_rule_options::no_inferrable_types::NoInferrableTypesOptions;
 use biome_js_syntax::{
     AnyJsExpression, AnyTsPropertyAnnotation, AnyTsVariableAnnotation, JsFormalParameter,
     JsInitializerClause, JsPropertyClassMember, JsVariableDeclaration, JsVariableDeclarator,
@@ -107,7 +108,7 @@ impl Rule for NoInferrableTypes {
     type Query = Ast<JsInitializerClause>;
     type State = TsTypeAnnotation;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoInferrableTypesOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let init = ctx.query();

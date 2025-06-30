@@ -1,5 +1,6 @@
 use std::collections::HashSet;
 
+use biome_rule_options::no_import_cycles::NoImportCyclesOptions;
 use biome_analyze::{
     Rule, RuleDiagnostic, RuleDomain, RuleSource, context::RuleContext, declare_lint_rule,
 };
@@ -95,7 +96,7 @@ impl Rule for NoImportCycles {
     type Query = ResolvedImports<AnyJsImportLike>;
     type State = Box<[Box<str>]>;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoImportCyclesOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let module_info = ctx.module_info_for_path(ctx.file_path())?;

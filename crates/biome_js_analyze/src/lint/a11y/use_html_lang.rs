@@ -1,3 +1,4 @@
+use biome_rule_options::use_html_lang::UseHtmlLangOptions;
 use biome_analyze::{
     Ast, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
@@ -69,7 +70,7 @@ impl Rule for UseHtmlLang {
     type Query = Ast<AnyJsxElement>;
     type State = TextRange;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = UseHtmlLangOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let element = ctx.query();

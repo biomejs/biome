@@ -4,6 +4,7 @@ use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_factory::make;
 use biome_js_semantic::SemanticModel;
+use biome_rule_options::use_is_nan::UseIsNanOptions;
 use biome_js_syntax::{
     AnyJsCallArgument, AnyJsExpression, AnyJsMemberExpression, JsBinaryExpression,
     JsBinaryOperator, JsCaseClause, JsSwitchStatement, T, TextRange, global_identifier,
@@ -101,7 +102,7 @@ impl Rule for UseIsNan {
     type Query = Semantic<UseIsNanQuery>;
     type State = RuleState;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = UseIsNanOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();

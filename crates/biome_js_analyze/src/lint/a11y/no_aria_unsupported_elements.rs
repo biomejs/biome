@@ -1,6 +1,7 @@
 use std::str::FromStr;
 
 use crate::JsRuleAction;
+use biome_rule_options::no_aria_unsupported_elements::NoAriaUnsupportedElementsOptions;
 use biome_analyze::{
     Ast, FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
@@ -74,7 +75,7 @@ impl Rule for NoAriaUnsupportedElements {
     type Query = Ast<AnyJsxElement>;
     type State = RuleState;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoAriaUnsupportedElementsOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();

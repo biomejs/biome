@@ -2,6 +2,7 @@ use biome_analyze::{Rule, RuleDiagnostic, RuleSource, context::RuleContext, decl
 use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_semantic::{ReferencesExtensions, SemanticModel};
+use biome_rule_options::use_for_of::UseForOfOptions;
 use biome_js_syntax::{
     AnyJsExpression, AnyJsForInitializer, AnyJsObjectMember, AnyJsStatement,
     JsAssignmentExpression, JsAssignmentOperator, JsBinaryExpression, JsBinaryOperator,
@@ -72,7 +73,7 @@ impl Rule for UseForOf {
     type Query = Semantic<JsForStatement>;
     type State = ();
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = UseForOfOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();

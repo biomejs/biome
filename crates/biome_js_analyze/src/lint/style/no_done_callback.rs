@@ -1,3 +1,4 @@
+use biome_rule_options::no_done_callback::NoDoneCallbackOptions;
 use biome_analyze::{
     Ast, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
@@ -61,7 +62,7 @@ impl Rule for NoDoneCallback {
     type Query = Ast<JsCallExpression>;
     type State = TextRange;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoDoneCallbackOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();

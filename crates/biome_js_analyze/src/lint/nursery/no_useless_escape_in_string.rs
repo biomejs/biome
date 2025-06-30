@@ -1,6 +1,7 @@
 use biome_analyze::{Ast, FixKind, Rule, RuleDiagnostic, context::RuleContext, declare_lint_rule};
 use biome_console::markup;
 use biome_diagnostics::Severity;
+use biome_rule_options::no_useless_escape_in_string::NoUselessEscapeInStringOptions;
 use biome_js_syntax::{
     AnyJsTemplateElement, JsLiteralMemberName, JsStringLiteralExpression, JsSyntaxKind,
     JsSyntaxToken, JsTemplateExpression,
@@ -65,7 +66,7 @@ impl Rule for NoUselessEscapeInString {
     type Query = Ast<AnyJsString>;
     type State = (JsSyntaxToken, usize);
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoUselessEscapeInStringOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();

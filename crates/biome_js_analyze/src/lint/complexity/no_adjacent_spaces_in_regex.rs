@@ -1,3 +1,4 @@
+use biome_rule_options::no_adjacent_spaces_in_regex::NoAdjacentSpacesInRegexOptions;
 use biome_analyze::{
     Ast, FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
@@ -60,7 +61,7 @@ impl Rule for NoAdjacentSpacesInRegex {
     type Query = Ast<JsRegexLiteralExpression>;
     type State = Vec<Range<usize>>;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoAdjacentSpacesInRegexOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
         let value_token = ctx.query().value_token().ok()?;

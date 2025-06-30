@@ -1,4 +1,5 @@
 use crate::{JsRuleAction, services::semantic::Semantic};
+use biome_rule_options::no_invalid_builtin_instantiation::NoInvalidBuiltinInstantiationOptions;
 use biome_analyze::{
     FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
@@ -89,7 +90,7 @@ impl Rule for NoInvalidBuiltinInstantiation {
     type Query = Semantic<JsNewOrCallExpression>;
     type State = NoInvalidBuiltinInstantiationState;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoInvalidBuiltinInstantiationOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();

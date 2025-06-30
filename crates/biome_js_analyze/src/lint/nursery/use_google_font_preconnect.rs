@@ -1,3 +1,4 @@
+use biome_rule_options::use_google_font_preconnect::UseGoogleFontPreconnectOptions;
 use biome_analyze::{
     Ast, FixKind, Rule, RuleDiagnostic, RuleDomain, RuleSource, context::RuleContext,
     declare_lint_rule,
@@ -60,7 +61,7 @@ impl Rule for UseGoogleFontPreconnect {
     type Query = Ast<AnyJsxElement>;
     type State = TextRange;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = UseGoogleFontPreconnectOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();

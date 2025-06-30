@@ -1,5 +1,6 @@
 use crate::JsRuleAction;
 use crate::services::semantic::Semantic;
+use biome_rule_options::no_process_global::NoProcessGlobalOptions;
 use biome_analyze::{
     FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
@@ -63,7 +64,7 @@ impl Rule for NoProcessGlobal {
     type Query = Semantic<AnyJsExpression>;
     type State = ();
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoProcessGlobalOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();

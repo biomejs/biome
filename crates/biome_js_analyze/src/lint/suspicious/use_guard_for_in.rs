@@ -1,3 +1,4 @@
+use biome_rule_options::use_guard_for_in::UseGuardForInOptions;
 use biome_analyze::{
     Ast, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
@@ -66,7 +67,7 @@ impl Rule for UseGuardForIn {
     type Query = Ast<JsForInStatement>;
     type State = ();
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = UseGuardForInOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();

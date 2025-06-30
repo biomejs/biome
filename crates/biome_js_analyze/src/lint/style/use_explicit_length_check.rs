@@ -1,3 +1,4 @@
+use biome_rule_options::use_explicit_length_check::UseExplicitLengthCheckOptions;
 use biome_analyze::{
     Ast, FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
@@ -139,7 +140,7 @@ impl Rule for UseExplicitLengthCheck {
     type Query = Ast<JsStaticMemberExpression>;
     type State = UseExplicitLengthCheckState;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = UseExplicitLengthCheckOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let member_expr = ctx.query();

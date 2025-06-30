@@ -1,5 +1,6 @@
 use std::{borrow::Cow, cmp::Ordering, iter::zip};
 
+use biome_rule_options::use_sorted_attributes::UseSortedAttributesOptions;
 use biome_analyze::{
     Ast, FixKind, Rule, RuleAction, RuleDiagnostic, RuleSource, context::RuleContext,
     declare_source_rule,
@@ -51,7 +52,7 @@ impl Rule for UseSortedAttributes {
     type Query = Ast<JsxAttributeList>;
     type State = PropGroup;
     type Signals = Box<[Self::State]>;
-    type Options = ();
+    type Options = UseSortedAttributesOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let props = ctx.query();

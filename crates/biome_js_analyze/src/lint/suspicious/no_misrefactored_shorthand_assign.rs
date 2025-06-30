@@ -1,3 +1,4 @@
+use biome_rule_options::no_misrefactored_shorthand_assign::NoMisrefactoredShorthandAssignOptions;
 use biome_analyze::{
     Ast, FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
@@ -63,7 +64,7 @@ impl Rule for NoMisrefactoredShorthandAssign {
     type Query = Ast<JsAssignmentExpression>;
     type State = AnyJsExpression;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoMisrefactoredShorthandAssignOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();

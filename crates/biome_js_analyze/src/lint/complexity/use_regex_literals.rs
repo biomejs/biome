@@ -1,3 +1,4 @@
+use biome_rule_options::use_regex_literals::UseRegexLiteralsOptions;
 use biome_analyze::{
     FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
@@ -64,7 +65,7 @@ impl Rule for UseRegexLiterals {
     type Query = Semantic<JsNewOrCallExpression>;
     type State = UseRegexLiteralsState;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = UseRegexLiteralsOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();

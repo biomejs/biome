@@ -1,4 +1,5 @@
 use crate::JsRuleAction;
+use biome_rule_options::no_misleading_character_class::NoMisleadingCharacterClassOptions;
 use biome_analyze::{
     Ast, FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
@@ -119,7 +120,7 @@ impl Rule for NoMisleadingCharacterClass {
     type Query = Ast<JsRegexLiteralExpression>;
     type State = RuleState;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoMisleadingCharacterClassOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();

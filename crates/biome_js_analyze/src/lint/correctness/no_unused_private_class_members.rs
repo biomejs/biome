@@ -1,3 +1,4 @@
+use biome_rule_options::no_unused_private_class_members::NoUnusedPrivateClassMembersOptions;
 use biome_analyze::{
     Ast, FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
@@ -79,7 +80,7 @@ impl Rule for NoUnusedPrivateClassMembers {
     type Query = Ast<JsClassDeclaration>;
     type State = AnyMember;
     type Signals = Box<[Self::State]>;
-    type Options = ();
+    type Options = NoUnusedPrivateClassMembersOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();

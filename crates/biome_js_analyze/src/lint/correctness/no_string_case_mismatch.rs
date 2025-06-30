@@ -8,6 +8,7 @@ use biome_js_factory::make;
 use biome_js_syntax::*;
 use biome_rowan::{AstNode, AstSeparatedList, BatchMutationExt, declare_node_union};
 use biome_string_case::StrOnlyExtension;
+use biome_rule_options::no_string_case_mismatch::NoStringCaseMismatchOptions;
 
 use crate::JsRuleAction;
 
@@ -49,7 +50,7 @@ impl Rule for NoStringCaseMismatch {
     type Query = Ast<QueryCandidate>;
     type State = CaseMismatchInfo;
     type Signals = Box<[Self::State]>;
-    type Options = ();
+    type Options = NoStringCaseMismatchOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let query = ctx.query();

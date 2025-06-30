@@ -1,3 +1,4 @@
+use biome_rule_options::no_void::NoVoidOptions;
 use biome_analyze::{
     Ast, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
@@ -34,7 +35,7 @@ impl Rule for NoVoid {
     type Query = Ast<JsUnaryExpression>;
     type State = ();
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoVoidOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let expression = ctx.query();

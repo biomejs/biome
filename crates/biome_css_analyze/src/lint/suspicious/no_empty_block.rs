@@ -1,3 +1,4 @@
+use biome_rule_options::no_empty_block::NoEmptyBlockOptions;
 use biome_analyze::{
     Ast, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
@@ -57,7 +58,7 @@ impl Rule for NoEmptyBlock {
     type Query = Ast<CssBlockLike>;
     type State = CssBlockLike;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoEmptyBlockOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
         let node = ctx.query();

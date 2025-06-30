@@ -1,3 +1,4 @@
+use biome_rule_options::no_unknown_at_rule::NoUnknownAtRuleOptions;
 use biome_analyze::{
     Ast, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
@@ -61,7 +62,7 @@ impl Rule for NoUnknownAtRule {
     type Query = Ast<AnyUnknownAtRule>;
     type State = NoUnknownAtRuleState;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoUnknownAtRuleOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
         let node = ctx.query();

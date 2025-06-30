@@ -2,6 +2,7 @@ use biome_analyze::context::RuleContext;
 use biome_analyze::{Ast, Rule, RuleDiagnostic, RuleSource, declare_lint_rule};
 use biome_console::markup;
 use biome_diagnostics::Severity;
+use biome_rule_options::no_assign_in_expressions::NoAssignInExpressionsOptions;
 use biome_js_syntax::{
     JsAssignmentExpression, JsExpressionStatement, JsForStatement, JsParenthesizedExpression,
     JsSequenceExpression,
@@ -56,7 +57,7 @@ impl Rule for NoAssignInExpressions {
     type Query = Ast<JsAssignmentExpression>;
     type State = ();
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoAssignInExpressionsOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let assign = ctx.query();

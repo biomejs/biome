@@ -1,3 +1,4 @@
+use biome_rule_options::no_useless_escape_in_regex::NoUselessEscapeInRegexOptions;
 use biome_analyze::{
     Ast, FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
@@ -54,7 +55,7 @@ impl Rule for NoUselessEscapeInRegex {
     type Query = Ast<JsRegexLiteralExpression>;
     type State = State;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoUselessEscapeInRegexOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();

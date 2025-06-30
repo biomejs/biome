@@ -1,5 +1,6 @@
 use std::collections::HashSet;
 
+use biome_rule_options::no_duplicate_selectors_keyframe_block::NoDuplicateSelectorsKeyframeBlockOptions;
 use biome_analyze::{
     Ast, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
@@ -52,7 +53,7 @@ impl Rule for NoDuplicateSelectorsKeyframeBlock {
     type Query = Ast<CssKeyframesBlock>;
     type State = AnyCssKeyframesSelector;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoDuplicateSelectorsKeyframeBlockOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
         let node = ctx.query();

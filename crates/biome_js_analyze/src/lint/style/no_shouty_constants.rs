@@ -4,6 +4,7 @@ use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_factory::make::{js_literal_member_name, js_property_object_member};
 use biome_js_semantic::{Reference, ReferencesExtensions};
+use biome_rule_options::no_shouty_constants::NoShoutyConstantsOptions;
 use biome_js_syntax::{
     AnyJsExpression, AnyJsLiteralExpression, AnyJsObjectMemberName, JsIdentifierBinding,
     JsIdentifierExpression, JsReferenceIdentifier, JsShorthandPropertyObjectMember,
@@ -91,7 +92,7 @@ impl Rule for NoShoutyConstants {
     type Query = Semantic<JsVariableDeclarator>;
     type State = State;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoShoutyConstantsOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
         let declarator = ctx.query();

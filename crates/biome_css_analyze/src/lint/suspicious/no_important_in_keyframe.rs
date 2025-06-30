@@ -1,3 +1,4 @@
+use biome_rule_options::no_important_in_keyframe::NoImportantInKeyframeOptions;
 use biome_analyze::{
     Ast, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
@@ -55,7 +56,7 @@ impl Rule for NoImportantInKeyframe {
     type Query = Ast<CssKeyframesBlock>;
     type State = CssDeclarationImportant;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoImportantInKeyframeOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
         let node = ctx.query();

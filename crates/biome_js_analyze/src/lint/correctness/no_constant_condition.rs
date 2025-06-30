@@ -3,6 +3,7 @@ use crate::services::semantic::Semantic;
 use biome_analyze::{Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule};
 use biome_console::markup;
 use biome_diagnostics::Severity;
+use biome_rule_options::no_constant_condition::NoConstantConditionOptions;
 use biome_js_syntax::{
     AnyJsExpression, AnyJsStatement, JsConditionalExpression, JsDoWhileStatement, JsForStatement,
     JsFunctionDeclaration, JsFunctionExpression, JsIfStatement, JsStatementList, JsSyntaxKind,
@@ -97,7 +98,7 @@ impl Rule for NoConstantCondition {
     type Query = Semantic<ConditionalStatement>;
     type State = TextRange;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoConstantConditionOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let conditional_stmt = ctx.query();

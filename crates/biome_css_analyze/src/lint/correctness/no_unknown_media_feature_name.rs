@@ -1,3 +1,4 @@
+use biome_rule_options::no_unknown_media_feature_name::NoUnknownMediaFeatureNameOptions;
 use biome_analyze::{
     Ast, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
@@ -81,7 +82,7 @@ impl Rule for NoUnknownMediaFeatureName {
     type Query = Ast<CssMediaQueryList>;
     type State = CssMediaQueryList;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoUnknownMediaFeatureNameOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
         let media_query_list = ctx.query();

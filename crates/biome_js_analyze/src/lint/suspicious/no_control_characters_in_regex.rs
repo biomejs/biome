@@ -1,3 +1,4 @@
+use biome_rule_options::no_control_characters_in_regex::NoControlCharactersInRegexOptions;
 use biome_analyze::{
     Ast, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
@@ -154,7 +155,7 @@ impl Rule for NoControlCharactersInRegex {
     type Query = Ast<JsRegexLiteralExpression>;
     type State = TextRange;
     type Signals = Box<[Self::State]>;
-    type Options = ();
+    type Options = NoControlCharactersInRegexOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();

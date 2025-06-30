@@ -1,4 +1,5 @@
 use crate::JsRuleAction;
+use biome_rule_options::use_index_of::UseIndexOfOptions;
 use biome_analyze::{
     Ast, FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
@@ -133,7 +134,7 @@ impl Rule for UseIndexOf {
     type Query = Ast<JsCallExpression>;
     type State = JsSyntaxMatchPair;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = UseIndexOfOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let call = ctx.query();

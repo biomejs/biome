@@ -2,6 +2,7 @@ use biome_analyze::{Rule, RuleDiagnostic, RuleSource, context::RuleContext, decl
 use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_semantic::SemanticModel;
+use biome_rule_options::no_document_cookie::NoDocumentCookieOptions;
 use biome_js_syntax::{
     AnyJsAssignment, AnyJsExpression, JsAssignmentExpression, JsReferenceIdentifier,
     binding_ext::AnyJsBindingDeclaration, global_identifier, static_value::StaticValue,
@@ -129,7 +130,7 @@ impl Rule for NoDocumentCookie {
     type Query = Semantic<JsAssignmentExpression>;
     type State = ();
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoDocumentCookieOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();

@@ -1,5 +1,6 @@
 use std::borrow::Cow;
 
+use biome_rule_options::use_single_js_doc_asterisk::UseSingleJsDocAsteriskOptions;
 use biome_analyze::{
     Ast, FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
@@ -73,7 +74,7 @@ impl Rule for UseSingleJsDocAsterisk {
     type Query = Ast<JsModule>;
     type State = RuleState;
     type Signals = Vec<Self::State>;
-    type Options = ();
+    type Options = UseSingleJsDocAsteriskOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let module = ctx.query();
