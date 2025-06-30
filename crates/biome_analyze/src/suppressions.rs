@@ -1,3 +1,5 @@
+use std::cmp::Ordering;
+
 use crate::{
     AnalyzerSuppression, AnalyzerSuppressionDiagnostic, AnalyzerSuppressionKind,
     AnalyzerSuppressionVariant, MetadataRegistry, RuleCategories, RuleCategory, RuleFilter,
@@ -612,9 +614,40 @@ impl<'analyzer> Suppressions<'analyzer> {
     }
 
     /// Finalizes the suppressions after having evaluated the suppression source (i.e. a file)
-    /// This exists to validate things like correctly ended range suppresions
+    /// This exists to validate things like correctly ended range suppressions
     pub fn finalize(&self) -> Result<(), Vec<AnalyzerSuppressionDiagnostic>> {
         // Only range_suppressions have a finalize right now
         self.range_suppressions.finalize()
+    }
+
+    pub(crate) fn overlapping_line_suppressions(
+        &mut self,
+        target: &TextRange,
+    ) -> &mut [LineSuppression] {
+        let Ok(middle_index) = self.line_suppressions.binary_search_by(|s| {
+            if s.text_range.end() < target.start() {
+                Ordering::Less
+            } else if target.end() < s.text_range.start() {
+                Ordering::Greater
+            } else {
+                Ordering::Equal
+            }
+        }) else {
+            return &mut [];
+        };
+        // Perf: normally just traversing in both directions should be faster - more than 2
+        // comments in a row should be rare, and 2-3 extra comparisons are faster than
+        // bisecting twice for left and right border.
+        let mut left = middle_index;
+        while left > 0 && self.line_suppressions[left - 1].text_range.end() >= target.start() {
+            left -= 1;
+        }
+        let mut right = middle_index;
+        while right < self.line_suppressions.len() - 1
+            && self.line_suppressions[right + 1].text_range.start() <= target.end()
+        {
+            right += 1;
+        }
+        &mut self.line_suppressions[left..=right]
     }
 }

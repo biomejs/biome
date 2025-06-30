@@ -2,7 +2,6 @@
 
 use biome_console::markup;
 use biome_parser::AnyParse;
-use std::cmp::Ordering;
 use std::collections::{BTreeMap, BinaryHeap};
 use std::fmt::{Debug, Display, Formatter};
 use std::ops;
@@ -226,22 +225,19 @@ where
                     //    processed, thus all range suppressions are cleared.
 
                     // 3. Check for line suppression:
-                    suppressions.line_suppressions.iter_mut().find(|s| {
-                        s.text_range.end() >= text_range.start()
-                            && text_range.end() >= s.text_range.start()
-                            && (s.suppressed_categories.contains(RuleCategory::Lint)
-                                || s.suppress_all_plugins
-                                || s.suppressed_plugins.contains(&name))
-                    })
+                    suppressions
+                        .overlapping_line_suppressions(&text_range)
+                        .iter_mut()
+                        .find(|s| {
+                            s.text_range.contains(text_range.start())
+                                && (s.suppressed_categories.contains(RuleCategory::Lint)
+                                    || s.suppress_all_plugins
+                                    || s.suppressed_plugins.contains(&name))
+                        })
                 });
 
                 if let Some(suppression) = suppression {
-                    if suppression
-                        .suppressed_categories
-                        .contains(RuleCategory::Lint)
-                    {
-                        suppression.did_suppress_signal = true;
-                    }
+                    suppression.did_suppress_signal = true;
                 } else {
                     let signal = DiagnosticSignal::new(|| diagnostic.clone());
                     if let ControlFlow::Break(br) = (emit_signal)(&signal) {
@@ -273,11 +269,6 @@ where
         }
 
         for suppression in suppressions.line_suppressions {
-            // TODO: `did_suppress_signal` is set after any single match. If a
-            // comment suppresses multiple rules, any unused parts of it will not
-            // be reported. This can be solved by tracking every rule match separately,
-            // but that would essentially duplicate the logic of handling separate rules.
-            // We'd better stop merging them altogether.
             if suppression.did_suppress_signal {
                 continue;
             }
@@ -511,7 +502,7 @@ where
 
             let suppression = self
                 .suppressions
-                .line_suppressions
+                .overlapping_line_suppressions(&entry.text_range)
                 .iter_mut()
                 .find(|s| s.text_range.contains(start) && matches_entry(s));
 
