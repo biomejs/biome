@@ -374,7 +374,7 @@ pub(crate) fn run_multi_rule_test(input: &'static str, _: &str, _: &str, _: &str
     let rule_filters: Vec<_> = input_code
         .lines()
         .take_while(|line| line.is_empty() || line.starts_with("///!"))
-        .flat_map(|line| {
+        .filter_map(|line| {
             if line.is_empty() {
                 return None;
             }
@@ -382,7 +382,7 @@ pub(crate) fn run_multi_rule_test(input: &'static str, _: &str, _: &str, _: &str
             if !line.starts_with(prefix) {
                 panic!("Rule enabling comments must be of shape `{prefix}{{group}}/{{rule}}");
             }
-            let mut parts = line.trim_start_matches(prefix).split("/");
+            let mut parts = line.trim_start_matches(prefix).split('*');
             let group = parts.next().expect("Missing rule part in enable comment");
             let rule = parts.next().expect("Missing rule part in enable comment");
             if let Some(unused) = parts.next() {
