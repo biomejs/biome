@@ -476,7 +476,7 @@ impl Rule for NoRestrictedImports {
             let path_options: PathOptions = paths.clone().into();
             check_import_restrictions(&path_options, node, &module_name, import_source)
         } else if let Some(patterns) = &options.patterns {
-            let mut results = Vec::new();
+            let mut results: Vec<RestrictedImportMessage> = vec![];
             for pattern in patterns {
                 match pattern {
                     Patterns::WithOptions(pattern_options) => {

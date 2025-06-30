@@ -76,37 +76,32 @@
 						},
             "patterns": [
               {
-                "group": ["foo/*", "!foo/bar"],
-                "message": "foo is forbidden, use bar instead"
+                "group": ["**/sideeffect-forbidden", "!**/sideeffect-allowed"],
+                "importNamePattern": "",
+                "message": "sideeffect-forbidden is forbidden, use sideeffect-allowed instead"
               },
               {
-                "group": ["FOO"],
-                "message": "Case sensitive is the default"
+                "group": ["d-sideeffect-forbidden"]
               },
               {
-                "group": ["**/my/relative-module"],
-                "importNamePattern": "Foo"
+                "group": ["namespace-import-forbidden"]
               },
               {
-                "group": ["**/my/relative-module"],
-                "importNamePattern": "Baz",
+                "group": ["named-import-forbidden"],
+                "importNamePattern": "export1"
+              },
+              {
+                "group": ["default-import-forbidden"],
+                "importNamePattern": "default"
+              },
+              {
+                "group": ["default-import-allowed"],
+                "importNamePattern": "not-default",
                 "message": "Default import should not be reported unless importNamePattern includes 'default'"
               },
               {
-                "group": ["baz"],
-                "importNamePattern": "Baz"
-              },
-              {
-                "group": ["**/my/relative-module"],
-                "importNamePattern": "Foo"
-              },
-              {
-                "group": ["**/my/relative-module"],
-                "importNamePattern": "z"
-              },
-              {
-                "group": ["bar"],
-                "importNamePattern": "x",
+                "group": ["default-import-allowed"],
+                "importNamePattern": "default",
                 "invertImportNamePattern": true
               }
             ]

@@ -69,52 +69,32 @@
 						},
             "patterns": [
               {
-                "group": ["foo/*", "!foo/bar"],
-                "message": "foo is forbidden, use foo/bar instead"
+                "group": ["**/sideeffect-forbidden", "!**/sideeffect-allowed"],
+                "importNamePattern": "",
+                "message": "sideeffect-forbidden is forbidden, use sideeffect-allowed instead"
               },
               {
-                "group": ["bar/n1", "bar/n2"],
-                "message": "some bar subimports are restricted"
+                "group": ["d-sideeffect-forbidden"]
               },
               {
-                "group": ["FOO"],
-                "message": "Case sensitive is the default"
+                "group": ["namespace-import-forbidden"]
               },
               {
-                "group": ["**/my/relative-module"],
-                "importNamePattern": ".*"
+                "group": ["named-import-forbidden"],
+                "importNamePattern": "export1"
               },
               {
-                "group": ["**/my/relative-module1"],
-                "importNamePattern": ".*"
-              },
-              {
-                "group": ["**/my/relative-module2"],
-                "importNamePattern": "Foo"
-              },
-              {
-                "group": ["**/my/relative-module3"],
-                "importNamePattern": "Foo.*"
-              },
-              {
-                "group": ["**/my/relative-module4"],
-                "importNamePattern": "Foo|Bar"
-              },
-              {
-                "group": ["**/my/relative-module5"],
-                "importNamePattern": "(Foo|Bar)"
-              },
-              {
-                "group": ["mod1"],
+                "group": ["default-import-forbidden"],
                 "importNamePattern": "default"
               },
               {
-                "group": ["mod2"],
-                "importNamePattern": "default"
+                "group": ["default-import-forbidden"],
+                "importNamePattern": "default",
+                "message": "Default import should not be reported unless importNamePattern includes 'default'"
               },
               {
-                "group": ["mod3"],
-                "importNamePattern": "Bar",
+                "group": ["default-import-forbidden"],
+                "importNamePattern": "default",
                 "invertImportNamePattern": false
               }
             ]

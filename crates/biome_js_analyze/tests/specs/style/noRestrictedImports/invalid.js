@@ -1,3 +1,4 @@
+/* for the `paths` option */
 import eslint from 'eslint';
 const l = require('lodash');
 
@@ -130,15 +131,25 @@ const { forbidden2, forbidden3: f1, "forbidden4": f2 } = await import('bare-allo
 import('bare-allowed').then(({ forbidden2, forbidden3: f1, "forbidden4": f2 }) => { })
 import('bare-allowed').then(function ({ forbidden2, forbidden3: f1, "forbidden4": f2 }) { })
 
-import withPatterns from "foo/baz";
-import withPatterns from "bar/n1";
-import withPatternsCaseSensitive from "FOO";
-import * from '../../my/relative-module';
-import * as All from '../../my/relative-module1';
-import { Foo } from '../../my/relative-module2';
-import { FooBar } from '../../my/relative-module3';
-import Foo, { Bar } from '../../my/relative-module4';
-import { Foo, Bar } from '../../my/relative-module5';
-import def, * as ns from 'mod1';
-import Foo from 'mod2';
-import { Bar } from 'mod3';
+/* for the `patterns` option */
+import '../../sideeffect-forbidden';
+import * as alias1 from "namespace-import-forbidden";
+export * from "namespace-import-forbidden";
+import { export1, export2 as alias2, "string-name" as alias3, default as defaultExport } from "named-import-forbidden";
+export { export1, export2 as alias2, "string-name" as alias3, default as defaultExport } from "named-import-forbidden";
+import defaultExport from "default-import-forbidden";
+
+import('d-sideeffect-forbidden');
+await import('d-sideeffect-forbidden');
+const alias1 = await import('namespace-import-forbidden');
+import('namespace-import-forbidden').then(alias1 => { });
+import('namespace-import-forbidden').then((alias1) => { });
+import('namespace-import-forbidden').then(function(alias1) { });
+myFunction(...args, import("namespace-import-forbidden"), ...args)
+const { export1, export2: alias2, "string-name": alias3, default: defaultExport } = await import("named-import-forbidden");
+import('named-import-forbidden').then(({ export1, export2: alias2, "string-name": alias3, default: defaultExport }) => { });
+import('named-import-forbidden').then(function({ export1, export2: alias2, "string-name": alias3, default: defaultExport }) { });
+const { default: defaultExport } = await import('default-import-forbidden')
+import('default-import-forbidden').then(({ default: defaultExport }) => { });
+import('default-import-forbidden').then(function({ default: defaultExport }) { });
+const defaultExport = require('default-import-forbidden');
