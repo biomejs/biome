@@ -544,8 +544,7 @@ impl<'analyzer> Suppressions<'analyzer> {
         self.top_level_suppression.expand_range(text_range);
         self.range_suppressions.expand_range(text_range);
         let mut found = false;
-        let mut backwards = self.line_suppressions.iter_mut().rev();
-        while let Some(last_suppression) = backwards.next() {
+        for last_suppression in self.line_suppressions.iter_mut().rev() {
             if last_suppression.line_index == line_index {
                 last_suppression.text_range = last_suppression.text_range.cover(text_range);
                 self.line_index = line_index;
@@ -570,8 +569,7 @@ impl<'analyzer> Suppressions<'analyzer> {
         if let Some(variant) = &self.last_suppression {
             match variant {
                 AnalyzerSuppressionVariant::Line => {
-                    let mut backwards = self.line_suppressions.iter_mut().rev();
-                    while let Some(last_suppression) = backwards.next() {
+                    for last_suppression in self.line_suppressions.iter_mut().rev() {
                         if last_suppression.line_index == next_line_index
                             || last_suppression.line_index + 1 == next_line_index
                         {
