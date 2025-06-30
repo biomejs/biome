@@ -1476,7 +1476,7 @@ export interface Correctness {
 	/**
 	 * Disallow unused function parameters.
 	 */
-	noUnusedFunctionParameters?: RuleFixConfiguration_for_Null;
+	noUnusedFunctionParameters?: RuleFixConfiguration_for_NoUnusedFunctionParametersOptions;
 	/**
 	 * Disallow unused imports.
 	 */
@@ -2446,6 +2446,9 @@ export type RuleConfiguration_for_NoUndeclaredDependenciesOptions =
 export type RuleConfiguration_for_UndeclaredVariablesOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_UndeclaredVariablesOptions;
+export type RuleFixConfiguration_for_NoUnusedFunctionParametersOptions =
+	| RulePlainConfiguration
+	| RuleWithFixOptions_for_NoUnusedFunctionParametersOptions;
 export type RuleFixConfiguration_for_NoUnusedVariablesOptions =
 	| RulePlainConfiguration
 	| RuleWithFixOptions_for_NoUnusedVariablesOptions;
@@ -2638,6 +2641,20 @@ export interface RuleWithOptions_for_UndeclaredVariablesOptions {
 	 * Rule's options
 	 */
 	options: UndeclaredVariablesOptions;
+}
+export interface RuleWithFixOptions_for_NoUnusedFunctionParametersOptions {
+	/**
+	 * The kind of the code actions emitted by the rule
+	 */
+	fix?: FixKind;
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: NoUnusedFunctionParametersOptions;
 }
 export interface RuleWithFixOptions_for_NoUnusedVariablesOptions {
 	/**
@@ -3042,6 +3059,15 @@ export interface UndeclaredVariablesOptions {
 	 * Check undeclared types.
 	 */
 	checkTypes?: boolean;
+}
+/**
+ * Rule's options
+ */
+export interface NoUnusedFunctionParametersOptions {
+	/**
+	 * Whether to ignore unused variables from an object destructuring with a spread.
+	 */
+	ignoreRestSiblings?: boolean;
 }
 export interface NoUnusedVariablesOptions {
 	/**
