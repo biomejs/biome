@@ -19,53 +19,48 @@ YamlRoot {
             bom_token: missing (optional),
             directives: YamlDirectiveList [],
             dashdashdash_token: missing (optional),
-            node: YamlBlockCollection {
+            node: YamlBlockMapping {
+                mapping_start_token: MAPPING_START@0..0 "" [] [],
                 properties: missing (optional),
-                content: YamlBlockMapping {
-                    indent_token: missing (optional),
-                    entries: YamlBlockMapEntryList [
-                        YamlBlockMapImplicitEntry {
-                            key: YamlFlowYamlNode {
-                                properties: missing (optional),
-                                content: YamlPlainScalar {
-                                    value_token: PLAIN_LITERAL@0..1 "a" [] [],
-                                },
-                            },
-                            value: YamlBlockMapImplicitValue {
-                                colon_token: COLON@1..2 ":" [] [],
-                                value: missing (optional),
-                                newline_token: NEWLINE@2..3 "\n" [] [],
+                entries: YamlBlockMapEntryList [
+                    YamlBlockMapImplicitEntry {
+                        key: YamlFlowYamlNode {
+                            properties: missing (optional),
+                            content: YamlPlainScalar {
+                                value_token: PLAIN_LITERAL@0..1 "a" [] [],
                             },
                         },
-                        YamlBlockMapImplicitEntry {
-                            key: YamlFlowYamlNode {
-                                properties: missing (optional),
-                                content: YamlPlainScalar {
-                                    value_token: PLAIN_LITERAL@3..4 "b" [] [],
-                                },
-                            },
-                            value: YamlBlockMapImplicitValue {
-                                colon_token: COLON@4..5 ":" [] [],
-                                value: missing (optional),
-                                newline_token: NEWLINE@5..6 "\n" [] [],
+                        value: YamlBlockMapImplicitValue {
+                            colon_token: COLON@1..2 ":" [] [],
+                            value: missing (optional),
+                        },
+                    },
+                    YamlBlockMapImplicitEntry {
+                        key: YamlFlowYamlNode {
+                            properties: missing (optional),
+                            content: YamlPlainScalar {
+                                value_token: PLAIN_LITERAL@2..4 "b" [Newline("\n")] [],
                             },
                         },
-                        YamlBlockMapImplicitEntry {
-                            key: YamlFlowYamlNode {
-                                properties: missing (optional),
-                                content: YamlPlainScalar {
-                                    value_token: PLAIN_LITERAL@6..7 "c" [] [],
-                                },
-                            },
-                            value: YamlBlockMapImplicitValue {
-                                colon_token: COLON@7..8 ":" [] [],
-                                value: missing (optional),
-                                newline_token: NEWLINE@8..9 "\n" [] [],
+                        value: YamlBlockMapImplicitValue {
+                            colon_token: COLON@4..5 ":" [] [],
+                            value: missing (optional),
+                        },
+                    },
+                    YamlBlockMapImplicitEntry {
+                        key: YamlFlowYamlNode {
+                            properties: missing (optional),
+                            content: YamlPlainScalar {
+                                value_token: PLAIN_LITERAL@5..7 "c" [Newline("\n")] [],
                             },
                         },
-                    ],
-                    dedent_token: missing (optional),
-                },
+                        value: YamlBlockMapImplicitValue {
+                            colon_token: COLON@7..8 ":" [] [],
+                            value: missing (optional),
+                        },
+                    },
+                ],
+                mapping_end_token: MAPPING_END@8..9 "" [Newline("\n")] [],
             },
             dotdotdot_token: missing (optional),
         },
@@ -83,39 +78,35 @@ YamlRoot {
       0: (empty)
       1: YAML_DIRECTIVE_LIST@0..0
       2: (empty)
-      3: YAML_BLOCK_COLLECTION@0..9
-        0: (empty)
-        1: YAML_BLOCK_MAPPING@0..9
-          0: (empty)
-          1: YAML_BLOCK_MAP_ENTRY_LIST@0..9
-            0: YAML_BLOCK_MAP_IMPLICIT_ENTRY@0..3
-              0: YAML_FLOW_YAML_NODE@0..1
-                0: (empty)
-                1: YAML_PLAIN_SCALAR@0..1
-                  0: PLAIN_LITERAL@0..1 "a" [] []
-              1: YAML_BLOCK_MAP_IMPLICIT_VALUE@1..3
-                0: COLON@1..2 ":" [] []
-                1: (empty)
-                2: NEWLINE@2..3 "\n" [] []
-            1: YAML_BLOCK_MAP_IMPLICIT_ENTRY@3..6
-              0: YAML_FLOW_YAML_NODE@3..4
-                0: (empty)
-                1: YAML_PLAIN_SCALAR@3..4
-                  0: PLAIN_LITERAL@3..4 "b" [] []
-              1: YAML_BLOCK_MAP_IMPLICIT_VALUE@4..6
-                0: COLON@4..5 ":" [] []
-                1: (empty)
-                2: NEWLINE@5..6 "\n" [] []
-            2: YAML_BLOCK_MAP_IMPLICIT_ENTRY@6..9
-              0: YAML_FLOW_YAML_NODE@6..7
-                0: (empty)
-                1: YAML_PLAIN_SCALAR@6..7
-                  0: PLAIN_LITERAL@6..7 "c" [] []
-              1: YAML_BLOCK_MAP_IMPLICIT_VALUE@7..9
-                0: COLON@7..8 ":" [] []
-                1: (empty)
-                2: NEWLINE@8..9 "\n" [] []
-          2: (empty)
+      3: YAML_BLOCK_MAPPING@0..9
+        0: MAPPING_START@0..0 "" [] []
+        1: (empty)
+        2: YAML_BLOCK_MAP_ENTRY_LIST@0..8
+          0: YAML_BLOCK_MAP_IMPLICIT_ENTRY@0..2
+            0: YAML_FLOW_YAML_NODE@0..1
+              0: (empty)
+              1: YAML_PLAIN_SCALAR@0..1
+                0: PLAIN_LITERAL@0..1 "a" [] []
+            1: YAML_BLOCK_MAP_IMPLICIT_VALUE@1..2
+              0: COLON@1..2 ":" [] []
+              1: (empty)
+          1: YAML_BLOCK_MAP_IMPLICIT_ENTRY@2..5
+            0: YAML_FLOW_YAML_NODE@2..4
+              0: (empty)
+              1: YAML_PLAIN_SCALAR@2..4
+                0: PLAIN_LITERAL@2..4 "b" [Newline("\n")] []
+            1: YAML_BLOCK_MAP_IMPLICIT_VALUE@4..5
+              0: COLON@4..5 ":" [] []
+              1: (empty)
+          2: YAML_BLOCK_MAP_IMPLICIT_ENTRY@5..8
+            0: YAML_FLOW_YAML_NODE@5..7
+              0: (empty)
+              1: YAML_PLAIN_SCALAR@5..7
+                0: PLAIN_LITERAL@5..7 "c" [Newline("\n")] []
+            1: YAML_BLOCK_MAP_IMPLICIT_VALUE@7..8
+              0: COLON@7..8 ":" [] []
+              1: (empty)
+        3: MAPPING_END@8..9 "" [Newline("\n")] []
       4: (empty)
   1: EOF@9..9 "" [] []
 

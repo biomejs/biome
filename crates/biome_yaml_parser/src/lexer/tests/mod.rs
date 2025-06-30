@@ -1,9 +1,11 @@
 #![cfg(test)]
 
+mod block;
+mod flow;
+
 use super::TextSize;
-use crate::lexer::{YamlLexContext, YamlLexer};
+use crate::lexer::YamlLexer;
 use biome_parser::lexer::Lexer;
-use biome_yaml_syntax::YamlSyntaxKind::*;
 use quickcheck_macros::quickcheck;
 use std::sync::mpsc::channel;
 use std::thread;
@@ -11,16 +13,18 @@ use std::time::Duration;
 
 // Assert the result of lexing a piece of source code,
 // and make sure the tokens yielded are fully lossless and the source can be reconstructed from only the tokens
+#[macro_export]
 macro_rules! assert_lex {
-    ($context:expr, $src:expr, $($kind:ident:$len:expr $(,)?)*) => {{
-        let mut lexer = YamlLexer::from_str($src);
+    ($src:expr, $($kind:ident:$len:expr $(,)?)*) => {{
+        let mut lexer = $crate::lexer::YamlLexer::from_str($src);
         let mut idx = 0;
-        let mut tok_idx = TextSize::default();
+        let mut tok_idx = biome_rowan::TextSize::default();
 
         let mut new_str = String::with_capacity($src.len());
         let mut tokens = vec![];
 
-        while lexer.next_token($context) != EOF {
+        use biome_parser::lexer::Lexer;
+        while lexer.next_token(()) != biome_yaml_syntax::YamlSyntaxKind::EOF {
             tokens.push((lexer.current(), lexer.current_range()));
         }
 
@@ -35,7 +39,7 @@ macro_rules! assert_lex {
 
             assert_eq!(
                 tokens[idx].1.len(),
-                TextSize::from($len),
+                biome_rowan::TextSize::from($len),
                 "expected token length of {}, but found {:?} for token {:?}",
                 $len,
                 tokens[idx].1.len(),
@@ -75,7 +79,7 @@ fn losslessness(string: String) -> bool {
         let mut lexer = YamlLexer::from_str(&cloned);
         let mut tokens = vec![];
 
-        while lexer.next_token(YamlLexContext::default()) != EOF {
+        while lexer.next_token(()) != biome_yaml_syntax::YamlSyntaxKind::EOF {
             tokens.push(lexer.current_range());
         }
 
@@ -96,75 +100,4 @@ fn losslessness(string: String) -> bool {
     }
 
     string == new_str
-}
-
-#[test]
-fn lex_double_quoted_literal() {
-    assert_lex!(
-        YamlLexContext::Regular,
-        "\"hello world\"",
-        DOUBLE_QUOTED_LITERAL:13,
-    );
-}
-
-#[test]
-fn lex_single_quoted_literal() {
-    assert_lex!(
-        YamlLexContext::Regular,
-        "'hello world'",
-        SINGLE_QUOTED_LITERAL:13,
-    );
-}
-
-#[test]
-fn lex_comment() {
-    assert_lex!(
-        YamlLexContext::Regular,
-        "# this is a comment",
-        COMMENT:19,
-    );
-}
-
-#[test]
-fn lex_simple_mapping_key() {
-    assert_lex!(
-        YamlLexContext::BlockKey,
-        "abc:",
-        PLAIN_LITERAL:3,
-        COLON:1,
-    );
-}
-
-#[test]
-fn lex_plain_with_special_char() {
-    assert_lex!(
-        YamlLexContext::BlockKey,
-        "ab,c:d e-[f:#gh: ",
-        PLAIN_LITERAL:15,
-        COLON:1,
-        WHITESPACE:1,
-    );
-}
-
-#[test]
-fn lex_unambigous_mapping_and_comment() {
-    assert_lex!(
-        YamlLexContext::BlockKey,
-        "abc: #abc",
-        PLAIN_LITERAL:3,
-        COLON:1,
-        WHITESPACE:1,
-        COMMENT:4
-    );
-}
-
-#[test]
-fn lex_incorrect_flow_key() {
-    assert_lex!(
-        YamlLexContext::FlowKey,
-        "a bc[xyz",
-        PLAIN_LITERAL:4,
-        L_BRACK:1,
-        PLAIN_LITERAL:3,
-    );
 }
