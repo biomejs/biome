@@ -291,6 +291,11 @@ where
         }
 
         for suppression in suppressions.line_suppressions {
+            // TODO: `did_suppress_signal` is set after any single match. If a
+            // comment suppresses multiple rules, any unused parts of it will not
+            // be reported. This can be solved by tracking every rule match separately,
+            // but that would essentially duplicate the logic of handling separate rules.
+            // We'd better stop merging them altogether.
             if suppression.did_suppress_signal {
                 continue;
             }
