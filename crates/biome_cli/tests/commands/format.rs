@@ -1236,7 +1236,7 @@ fn format_stdin_with_errors() {
 }
 
 #[test]
-fn format_stdin_errors_with_no_file_extension() {
+fn format_stdin_does_not_with_no_file_extension() {
     let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
@@ -1250,11 +1250,46 @@ fn format_stdin_errors_with_no_file_extension() {
         Args::from(["format", "--stdin-file-path", "mock"].as_slice()),
     );
 
-    assert!(result.is_err(), "run_cli returned {result:?}");
+    assert!(result.is_ok(), "run_cli returned {result:?}");
 
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
         "format_stdin_errors_with_no_file_extension",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn format_stdin_does_not_error_with_ignore_unknown_file_extensions() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    console
+        .in_buffer
+        .push("function f() {return{}}".to_string());
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(
+            [
+                "format",
+                "--stdin-file-path",
+                "mock.cc",
+                "--files-ignore-unknown",
+                "true",
+            ]
+            .as_slice(),
+        ),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "format_stdin_does_not_error_with_ignore_unknown_file_extensions",
         fs,
         console,
         result,

@@ -1,0 +1,15 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+# Input messages
+
+```block
+function f() {var x=1; return{x}} class Foo {}
+```
+
+# Emitted Messages
+
+```block
+function f() {var x=1; return{x}} class Foo {}
+```
