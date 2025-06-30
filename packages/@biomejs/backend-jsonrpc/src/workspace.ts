@@ -3438,7 +3438,9 @@ export type RuleFixConfiguration_for_UseNumberToFixedDigitsArgumentOptions =
 export type RuleFixConfiguration_for_UseStrictModeOptions =
 	| RulePlainConfiguration
 	| RuleWithFixOptions_for_UseStrictModeOptions;
-export interface OrganizeImportsOptions {}
+export interface OrganizeImportsOptions {
+	groups?: ImportGroups;
+}
 export interface UseSortedAttributesOptions {}
 export interface UseSortedKeysOptions {}
 export interface UseSortedPropertiesOptions {}
@@ -7363,6 +7365,7 @@ export interface RuleWithFixOptions_for_UseStrictModeOptions {
 	 */
 	options: UseStrictModeOptions;
 }
+export type ImportGroups = ImportGroup[];
 /**
  * Used to identify the kind of code action emitted by a rule
  */
@@ -7374,7 +7377,20 @@ export interface NoAutofocusOptions {}
 export interface NoDistractingElementsOptions {}
 export interface NoHeaderScopeOptions {}
 export interface NoInteractiveElementToNoninteractiveRoleOptions {}
-export interface NoLabelWithoutControlOptions {}
+export interface NoLabelWithoutControlOptions {
+	/**
+	 * Array of component names that should be considered the same as an `input` element.
+	 */
+	inputComponents?: string[];
+	/**
+	 * Array of attributes that should be treated as the `label` accessible text content.
+	 */
+	labelAttributes?: string[];
+	/**
+	 * Array of component names that should be considered the same as a `label` element.
+	 */
+	labelComponents?: string[];
+}
 export interface NoNoninteractiveElementToInteractiveRoleOptions {}
 export interface NoNoninteractiveTabindexOptions {}
 export interface NoPositiveTabindexOptions {}
@@ -7399,7 +7415,16 @@ export interface UseMediaCaptionOptions {}
 export interface UseSemanticElementsOptions {}
 export interface UseValidAnchorOptions {}
 export interface UseValidAriaPropsOptions {}
-export interface UseValidAriaRoleOptions {}
+export interface UseValidAriaRoleOptions {
+	/**
+	 * It allows specifying a list of roles that might be invalid otherwise
+	 */
+	allowInvalidRoles?: string[];
+	/**
+	 * Use this option to ignore non-DOM elements, such as custom components
+	 */
+	ignoreNonDom?: boolean;
+}
 export interface UseValidAriaValuesOptions {}
 export interface UseValidAutocompleteOptions {
 	/**
@@ -7413,11 +7438,21 @@ export interface NoArgumentsOptions {}
 export interface NoBannedTypesOptions {}
 export interface NoCommaOperatorOptions {}
 export interface NoEmptyTypeParametersOptions {}
-export interface NoExcessiveCognitiveComplexityOptions {}
+export interface NoExcessiveCognitiveComplexityOptions {
+	/**
+	 * The maximum complexity score that we allow. Anything higher is considered excessive.
+	 */
+	maxAllowedComplexity?: number;
+}
 export interface NoExcessiveNestedTestSuitesOptions {}
 export interface NoExtraBooleanCastOptions {}
 export interface NoFlatMapIdentityOptions {}
-export interface NoForEachOptions {}
+export interface NoForEachOptions {
+	/**
+	 * A list of variable names allowed for `forEach` calls.
+	 */
+	allowedIdentifiers?: string[];
+}
 export interface NoStaticOnlyClassOptions {}
 export interface NoThisInStaticOptions {}
 export interface NoUselessCatchOptions {}
@@ -7466,14 +7501,39 @@ export interface NoMissingVarFunctionOptions {}
 export interface NoNodejsModulesOptions {}
 export interface NoNonoctalDecimalEscapeOptions {}
 export interface NoPrecisionLossOptions {}
-export interface NoPrivateImportsOptions {}
+export interface NoPrivateImportsOptions {
+	/**
+	* The default visibility to assume for symbols without visibility tag.
+
+Default: **public**. 
+	 */
+	defaultVisibility?: Visibility;
+}
 export interface NoRenderReturnValueOptions {}
 export interface NoSelfAssignOptions {}
 export interface NoSetterReturnOptions {}
 export interface NoStringCaseMismatchOptions {}
 export interface NoSwitchDeclarationsOptions {}
-export interface NoUndeclaredDependenciesOptions {}
-export interface NoUndeclaredVariablesOptions {}
+export interface NoUndeclaredDependenciesOptions {
+	/**
+	 * If set to `false`, then the rule will show an error when `devDependencies` are imported. Defaults to `true`.
+	 */
+	devDependencies?: DependencyAvailability;
+	/**
+	 * If set to `false`, then the rule will show an error when `optionalDependencies` are imported. Defaults to `true`.
+	 */
+	optionalDependencies?: DependencyAvailability;
+	/**
+	 * If set to `false`, then the rule will show an error when `peerDependencies` are imported. Defaults to `true`.
+	 */
+	peerDependencies?: DependencyAvailability;
+}
+export interface NoUndeclaredVariablesOptions {
+	/**
+	 * Check undeclared types.
+	 */
+	checkTypes?: boolean;
+}
 export interface NoUnknownFunctionOptions {}
 export interface NoUnknownMediaFeatureNameOptions {}
 export interface NoUnknownPropertyOptions {}
@@ -7490,22 +7550,68 @@ export interface NoUnusedFunctionParametersOptions {}
 export interface NoUnusedImportsOptions {}
 export interface NoUnusedLabelsOptions {}
 export interface NoUnusedPrivateClassMembersOptions {}
-export interface NoUnusedVariablesOptions {}
+export interface NoUnusedVariablesOptions {
+	/**
+	 * Whether to ignore unused variables from an object destructuring with a spread.
+	 */
+	ignoreRestSiblings?: boolean;
+}
 export interface NoVoidElementsWithChildrenOptions {}
 export interface NoVoidTypeReturnOptions {}
-export interface UseExhaustiveDependenciesOptions {}
+export interface UseExhaustiveDependenciesOptions {
+	/**
+	 * List of hooks of which the dependencies should be validated.
+	 */
+	hooks?: Hook[];
+	/**
+	 * Whether to report an error when a hook has no dependencies array.
+	 */
+	reportMissingDependenciesArray?: boolean;
+	/**
+	 * Whether to report an error when a dependency is listed in the dependencies array but isn't used. Defaults to true.
+	 */
+	reportUnnecessaryDependencies?: boolean;
+}
 export interface UseHookAtTopLevelOptions {}
-export interface UseImportExtensionsOptions {}
+export interface UseImportExtensionsOptions {
+	/**
+	 * If `true`, the suggested extension is always `.js` regardless of what extension the source file has in your project.
+	 */
+	forceJsExtensions?: boolean;
+}
 export interface UseIsNanOptions {}
-export interface UseJsxKeyInIterableOptions {}
+export interface UseJsxKeyInIterableOptions {
+	/**
+	 * Set to `true` to check shorthand fragments (`<></>`)
+	 */
+	checkShorthandFragments?: boolean;
+}
 export interface UseValidForDirectionOptions {}
 export interface UseValidTypeofOptions {}
 export interface UseYieldOptions {}
 export interface NoAwaitInLoopOptions {}
-export interface NoBitwiseOperatorsOptions {}
+export interface NoBitwiseOperatorsOptions {
+	/**
+	 * Allows a list of bitwise operators to be used as exceptions.
+	 */
+	allow: string[];
+}
 export interface NoConstantBinaryExpressionOptions {}
 export interface NoDestructuredPropsOptions {}
-export interface NoExcessiveLinesPerFunctionOptions {}
+export interface NoExcessiveLinesPerFunctionOptions {
+	/**
+	 * The maximum number of lines allowed in a function body.
+	 */
+	maxLines?: number;
+	/**
+	 * When this options is set to `true`, blank lines in the function body are not counted towards the maximum line limit.
+	 */
+	skipBlankLines?: boolean;
+	/**
+	 * When this option is set to `true`, Immediately Invoked Function Expressions (IIFEs) are not checked for the maximum line limit.
+	 */
+	skipIifes?: boolean;
+}
 export interface NoFloatingPromisesOptions {}
 export interface NoGlobalDirnameFilenameOptions {}
 export interface NoImplicitCoercionOptions {}
@@ -7516,7 +7622,12 @@ export interface NoNestedComponentDefinitionsOptions {}
 export interface NoNoninteractiveElementInteractionsOptions {}
 export interface NoProcessGlobalOptions {}
 export interface NoReactPropAssignOptions {}
-export interface NoRestrictedElementsOptions {}
+export interface NoRestrictedElementsOptions {
+	/**
+	 * Elements to restrict. Each key is the element name, and the value is the message to show when the element is used.
+	 */
+	elements: CustomRestrictedElements;
+}
 export interface NoSecretsOptions {}
 export interface NoShadowOptions {}
 export interface NoTsIgnoreOptions {}
@@ -7528,7 +7639,12 @@ export interface NoUselessBackrefInRegexOptions {}
 export interface NoUselessEscapeInStringOptions {}
 export interface NoUselessUndefinedOptions {}
 export interface UseAdjacentGetterSetterOptions {}
-export interface UseConsistentObjectDefinitionOptions {}
+export interface UseConsistentObjectDefinitionOptions {
+	/**
+	 * The preferred syntax to enforce.
+	 */
+	syntax?: ObjectPropertySyntax;
+}
 export interface UseConsistentResponseOptions {}
 export interface UseExhaustiveSwitchCasesOptions {}
 export interface UseExplicitTypeOptions {}
@@ -7559,9 +7675,23 @@ export interface UseNamingConventionOptions {
 export interface UseNumericSeparatorsOptions {}
 export interface UseObjectSpreadOptions {}
 export interface UseParseIntRadixOptions {}
-export interface UseReadonlyClassPropertiesOptions {}
+export interface UseReadonlyClassPropertiesOptions {
+	/**
+	 * When `true`, the keywords `public`, `protected`, and `private` are analyzed by the rule.
+	 */
+	checkAllProperties: boolean;
+}
 export interface UseSingleJsDocAsteriskOptions {}
-export interface UseSortedClassesOptions {}
+export interface UseSortedClassesOptions {
+	/**
+	 * Additional attributes that will be sorted.
+	 */
+	attributes?: string[];
+	/**
+	 * Names of the functions or tagged templates that will be sorted.
+	 */
+	functions?: string[];
+}
 export interface UseSymbolDescriptionOptions {}
 export interface UseUnifiedTypeSignatureOptions {}
 export interface UseUniqueElementIdsOptions {}
@@ -7599,12 +7729,29 @@ export interface NoNamespaceOptions {}
 export interface NoNegationElseOptions {}
 export interface NoNestedTernaryOptions {}
 export interface NoNonNullAssertionOptions {}
-export interface NoParameterAssignOptions {}
+export interface NoParameterAssignOptions {
+	/**
+	 * Whether to report an error when a dependency is listed in the dependencies array but isn't used. Defaults to `allow`.
+	 */
+	propertyAssignment?: PropertyAssignmentMode;
+}
 export interface NoParameterPropertiesOptions {}
 export interface NoProcessEnvOptions {}
-export interface NoRestrictedGlobalsOptions {}
-export interface NoRestrictedImportsOptions {}
-export interface NoRestrictedTypesOptions {}
+export interface NoRestrictedGlobalsOptions {
+	/**
+	 * A list of names that should trigger the rule
+	 */
+	deniedGlobals: Record<string, string>;
+}
+export interface NoRestrictedImportsOptions {
+	/**
+	 * A list of import paths that should trigger the rule.
+	 */
+	paths: Record<string, CustomRestrictedImport>;
+}
+export interface NoRestrictedTypesOptions {
+	types?: Record<string, CustomRestrictedType>;
+}
 export interface NoShoutyConstantsOptions {}
 export interface NoSubstrOptions {}
 export interface NoUnusedTemplateLiteralOptions {}
@@ -7617,11 +7764,27 @@ export interface UseAtIndexOptions {}
 export interface UseBlockStatementsOptions {}
 export interface UseCollapsedElseIfOptions {}
 export interface UseCollapsedIfOptions {}
-export interface UseComponentExportOnlyModulesOptions {}
-export interface UseConsistentArrayTypeOptions {}
+export interface UseComponentExportOnlyModulesOptions {
+	/**
+	 * Allows the export of constants. This option is for environments that support it, such as [Vite](https://vitejs.dev/)
+	 */
+	allowConstantExport?: boolean;
+	/**
+	 * A list of names that can be additionally exported from the module This option is for exports that do not hinder [React Fast Refresh](https://github.com/facebook/react/tree/main/packages/react-refresh), such as [`meta` in Remix](https://remix.run/docs/en/main/route/meta)
+	 */
+	allowExportNames: string[];
+}
+export interface UseConsistentArrayTypeOptions {
+	syntax?: ConsistentArrayType;
+}
 export interface UseConsistentBuiltinInstantiationOptions {}
 export interface UseConsistentCurlyBracesOptions {}
-export interface UseConsistentMemberAccessibilityOptions {}
+export interface UseConsistentMemberAccessibilityOptions {
+	/**
+	 * The kind of accessibility you want to enforce. Default to "noPublic"
+	 */
+	accessibility?: Accessibility;
+}
 export interface UseConstOptions {}
 export interface UseDefaultParameterLastOptions {}
 export interface UseDefaultSwitchClauseOptions {}
@@ -7630,15 +7793,39 @@ export interface UseEnumInitializersOptions {}
 export interface UseExplicitLengthCheckOptions {}
 export interface UseExponentiationOperatorOptions {}
 export interface UseExportTypeOptions {}
-export interface UseFilenamingConventionOptions {}
+export interface UseFilenamingConventionOptions {
+	/**
+	 * Allowed cases for file names.
+	 */
+	filenameCases: FilenameCases;
+	/**
+	 * Regular expression to enforce
+	 */
+	match?: Regex;
+	/**
+	 * If `false`, then non-ASCII characters are allowed.
+	 */
+	requireAscii: boolean;
+	/**
+	 * If `false`, then consecutive uppercase are allowed in _camel_ and _pascal_ cases. This does not affect other [Case].
+	 */
+	strictCase: boolean;
+}
 export interface UseForOfOptions {}
 export interface UseFragmentSyntaxOptions {}
-export interface UseImportTypeOptions {}
+export interface UseImportTypeOptions {
+	/**
+	 * The style to apply when import types. Default to "auto"
+	 */
+	style?: Style2;
+}
 export interface UseLiteralEnumMembersOptions {}
 export interface UseNodeAssertStrictOptions {}
 export interface UseNodejsImportProtocolOptions {}
 export interface UseNumberNamespaceOptions {}
-export interface UseSelfClosingElementsOptions {}
+export interface UseSelfClosingElementsOptions {
+	ignoreHtmlElements?: boolean;
+}
 export interface UseShorthandAssignOptions {}
 export interface UseShorthandFunctionTypeOptions {}
 export interface UseSingleVarDeclaratorOptions {}
@@ -7655,15 +7842,32 @@ export interface NoCatchAssignOptions {}
 export interface NoClassAssignOptions {}
 export interface NoCommentTextOptions {}
 export interface NoCompareNegZeroOptions {}
-export interface NoConfusingLabelsOptions {}
+export interface NoConfusingLabelsOptions {
+	/**
+	 * A list of (non-confusing) labels that should be allowed
+	 */
+	allowedLabels: string[];
+}
 export interface NoConfusingVoidTypeOptions {}
-export interface NoConsoleOptions {}
+export interface NoConsoleOptions {
+	/**
+	 * Allowed calls on the console object.
+	 */
+	allow: string[];
+}
 export interface NoConstEnumOptions {}
 export interface NoControlCharactersInRegexOptions {}
 export interface NoDebuggerOptions {}
 export interface NoDocumentCookieOptions {}
 export interface NoDocumentImportInPageOptions {}
-export interface NoDoubleEqualsOptions {}
+export interface NoDoubleEqualsOptions {
+	/**
+	* If `true`, an exception is made when comparing with `null`, as it's often relied on to check both for `null` or `undefined`.
+
+If `false`, no such exception will be made. 
+	 */
+	ignoreNull: boolean;
+}
 export interface NoDuplicateAtImportRulesOptions {}
 export interface NoDuplicateCaseOptions {}
 export interface NoDuplicateClassMembersOptions {}
@@ -7728,6 +7932,37 @@ export interface UseIsArrayOptions {}
 export interface UseNamespaceKeywordOptions {}
 export interface UseNumberToFixedDigitsArgumentOptions {}
 export interface UseStrictModeOptions {}
+export type ImportGroup = null | GroupMatcher | GroupMatcher[];
+export type Visibility = "public" | "package" | "private";
+export type DependencyAvailability = boolean | string[];
+export interface Hook {
+	/**
+	* The "position" of the closure function, starting from zero.
+
+For example, for React's `useEffect()` hook, the closure index is 0. 
+	 */
+	closureIndex?: number;
+	/**
+	* The "position" of the array of dependencies, starting from zero.
+
+For example, for React's `useEffect()` hook, the dependencies index is 1. 
+	 */
+	dependenciesIndex?: number;
+	/**
+	 * The name of the hook.
+	 */
+	name?: string;
+	/**
+	* Whether the result of the hook is stable.
+
+Set to `true` to mark the identity of the hook's return value as stable, or use a number/an array of numbers to mark the "positions" in the return array as stable.
+
+For example, for React's `useRef()` hook the value would be `true`, while for `useState()` it would be `[1]`. 
+	 */
+	stableResult?: StableHookResult;
+}
+export type CustomRestrictedElements = Record<string, string>;
+export type ObjectPropertySyntax = "explicit" | "shorthand";
 export interface Convention {
 	/**
 	 * String cases to enforce
@@ -7742,8 +7977,23 @@ export interface Convention {
 	 */
 	selector: Selector;
 }
-export type Formats = Format[];
+/**
+ * Specifies whether property assignments on function parameters are allowed or denied.
+ */
+export type PropertyAssignmentMode = "allow" | "deny";
+export type CustomRestrictedImport = string | CustomRestrictedImportOptions;
+export type CustomRestrictedType = string | CustomRestrictedTypeOptions;
+export type ConsistentArrayType = "shorthand" | "generic";
+export type Accessibility = "noPublic" | "explicit" | "none";
+export type FilenameCases = FilenameCase[];
 export type Regex = string;
+/**
+ * Rule's options.
+ */
+export type Style2 = "auto" | "inlineType" | "separatedType";
+export type GroupMatcher = ImportMatcher | SourceMatcher;
+export type StableHookResult = boolean | number[];
+export type Formats = Format[];
 export interface Selector {
 	/**
 	 * Declaration kind
@@ -7758,6 +8008,38 @@ export interface Selector {
 	 */
 	scope: Scope;
 }
+export interface CustomRestrictedImportOptions {
+	/**
+	 * Names of the exported members that allowed to be not be used.
+	 */
+	allowImportNames: string[];
+	/**
+	 * Names of the exported members that should not be used.
+	 */
+	importNames: string[];
+	/**
+	 * The message to display when this module is imported.
+	 */
+	message: string;
+}
+export interface CustomRestrictedTypeOptions {
+	message?: string;
+	use?: string;
+}
+/**
+ * Supported cases for file names.
+ */
+export type FilenameCase =
+	| "camelCase"
+	| "export"
+	| "kebab-case"
+	| "PascalCase"
+	| "snake_case";
+export interface ImportMatcher {
+	source?: SourcesMatcher;
+	type?: boolean;
+}
+export type SourceMatcher = NegatablePredefinedSourceMatcher | ImportSourceGlob;
 /**
  * Supported cases.
  */
@@ -7807,6 +8089,26 @@ export type Kind =
 	| "typeMethod";
 export type Modifiers = RestrictedModifier[];
 export type Scope = "any" | "global";
+export type SourcesMatcher = SourceMatcher | SourceMatcher[];
+export type NegatablePredefinedSourceMatcher =
+	| ":ALIAS:"
+	| ":BUN:"
+	| ":NODE:"
+	| ":PACKAGE:"
+	| ":PACKAGE_WITH_PROTOCOL:"
+	| ":PATH:"
+	| ":URL:"
+	| "!:ALIAS:"
+	| "!:BUN:"
+	| "!:NODE:"
+	| "!:PACKAGE:"
+	| "!:PACKAGE_WITH_PROTOCOL:"
+	| "!:PATH:"
+	| "!:URL:";
+/**
+ * Glob to match against import sources.
+ */
+export type ImportSourceGlob = Glob;
 export type RestrictedModifier =
 	| "abstract"
 	| "private"

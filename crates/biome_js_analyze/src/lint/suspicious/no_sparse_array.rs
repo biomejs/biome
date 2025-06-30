@@ -16,7 +16,7 @@ declare_lint_rule! {
     /// Sparse arrays may contain empty slots due to the use of multiple commas between two items, like the following:
     ///
     /// ```js,ignore
-    /// const items = [a,b];
+    /// const items = [a,,b];
     /// ```
     /// Arrays with holes might yield incorrect information. For example, the previous snippet, `items` has a length of `4`, but did the user
     /// really intended to have an array with four items? Or was it a typo.
@@ -28,7 +28,7 @@ declare_lint_rule! {
     /// ### Invalid
     ///
     /// ```js,expect_diagnostic
-    /// [1,2]
+    /// [1,,2]
     /// ```
     ///
     /// ### Valid

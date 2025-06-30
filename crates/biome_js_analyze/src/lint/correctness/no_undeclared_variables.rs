@@ -49,7 +49,7 @@ declare_lint_rule! {
     /// ```
     ///
     /// ```ts,use_options,expect_diagnostic
-    /// type B<T> = PromiseLike<T>
+    /// type A = number extends infer T ? never : T;
     /// ```
     pub NoUndeclaredVariables {
         version: "1.0.0",

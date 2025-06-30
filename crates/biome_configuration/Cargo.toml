@@ -15,14 +15,12 @@ version              = "0.0.1"
 [dependencies]
 biome_analyze            = { workspace = true, features = ["serde"] }
 biome_console            = { workspace = true }
-biome_css_syntax         = { workspace = true }
 biome_deserialize        = { workspace = true }
 biome_deserialize_macros = { workspace = true }
 biome_diagnostics        = { workspace = true }
 biome_flags              = { workspace = true }
 biome_formatter          = { workspace = true, features = ["serde"] }
 biome_glob               = { workspace = true, features = ["schema"] }
-biome_graphql_syntax     = { workspace = true }
 biome_html_formatter     = { workspace = true, features = ["serde"] }
 biome_html_syntax        = { workspace = true }
 biome_js_formatter       = { workspace = true, features = ["serde"] }
@@ -44,8 +42,6 @@ schema = [
   "dep:schemars",
   "biome_formatter/schema",
   "biome_json_syntax/schema",
-  "biome_css_syntax/schema",
-  "biome_graphql_syntax/schema",
   "biome_html_formatter/schema",
   "biome_html_syntax/schema",
   "biome_analyze/schema",

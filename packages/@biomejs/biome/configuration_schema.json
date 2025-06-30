@@ -3176,6 +3176,7 @@
 			"properties": {
 				"allowedIdentifiers": {
 					"description": "A list of variable names allowed for `forEach` calls.",
+					"default": [],
 					"type": "array",
 					"items": { "type": "string" }
 				}
@@ -3723,6 +3724,13 @@
 		},
 		"NoPrivateImportsOptions": {
 			"type": "object",
+			"properties": {
+				"defaultVisibility": {
+					"description": "The default visibility to assume for symbols without visibility tag.\n\nDefault: **public**.",
+					"default": "public",
+					"allOf": [{ "$ref": "#/definitions/Visibility" }]
+				}
+			},
 			"additionalProperties": false
 		},
 		"NoProcessEnvConfiguration": {
@@ -13387,6 +13395,9 @@
 		},
 		"UseSelfClosingElementsOptions": {
 			"type": "object",
+			"properties": {
+				"ignoreHtmlElements": { "default": false, "type": "boolean" }
+			},
 			"additionalProperties": false
 		},
 		"UseSemanticElementsConfiguration": {
@@ -13724,6 +13735,10 @@
 				}
 			},
 			"additionalProperties": false
+		},
+		"Visibility": {
+			"type": "string",
+			"enum": ["public", "package", "private"]
 		},
 		"WhitespaceSensitivity": {
 			"description": "Whitespace sensitivity for HTML formatting.\n\nThe following two cases won't produce the same output:\n\n|                |      html      |    output    | | -------------- | :------------: | :----------: | | with spaces    | `1<b> 2 </b>3` | 1<b> 2 </b>3 | | without spaces |  `1<b>2</b>3`  |  1<b>2</b>3  |\n\nThis happens because whitespace is significant in inline elements.\n\nAs a consequence of this, the formatter must format blocks that look like this (assume a small line width, <20): ```html <span>really long content</span> ``` as this, where the content hugs the tags: ```html <span >really long content</span > ```\n\nNote that this is only necessary for inline elements. Block elements do not have this restriction.",
