@@ -383,22 +383,6 @@ pub struct RuleWithOptions<T: Default> {
     pub options: T,
 }
 
-// impl<T: Default> Deserializable for RuleWithOptions<T>
-// where
-//     T: Deserializable,
-// {
-//     fn deserialize(
-//         ctx: &mut impl DeserializationContext,
-//         value: &impl DeserializableValue,
-//         name: &str,
-//     ) -> Option<Self> {
-//         let level = Deserializable::deserialize(ctx, value, name)?;
-//         let options = Deserializable::deserialize(ctx, value, name)?;
-//
-//         Some(Self { level, options })
-//     }
-// }
-
 impl<T: Default> Merge for RuleWithOptions<T> {
     fn merge_with(&mut self, other: Self) {
         self.level = other.level;

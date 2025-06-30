@@ -894,21 +894,6 @@ fn generate_group_struct(
         let rule_option_type = quote! {
             biome_rule_options::#rule_base_name::#rule_name
         };
-        // match metadata.language {
-        //     "css" => quote! {
-        //         biome_css_analyze::options::#rule_name
-        //     },
-        //     "graphql" => quote! {
-        //         biome_graphql_analyze::options::#rule_name
-        //     },
-        //     "json" => quote! {
-        //         biome_json_analyze::options::#rule_name
-        //     },
-        //     "ts" | "js" | "jsx" | "tsx" => quote! {
-        //         biome_js_analyze::options::#rule_name
-        //     },
-        //     _ => panic!("Language not supported"),
-        // };
         let rule_option = if kind == RuleCategory::Action {
             quote! { Option<#rule_config_type<#rule_option_type>> }
         } else {
