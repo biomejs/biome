@@ -25,7 +25,7 @@ use camino::{Utf8Path, Utf8PathBuf};
 use walkdir::WalkDir;
 
 fn create_test_project_layout() -> (MemoryFileSystem, ProjectLayout) {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     fs.insert(
         "/src/index.ts".into(),
         r#"
@@ -286,7 +286,7 @@ fn test_resolve_package_import_in_monorepo_fixtures() {
 
 #[test]
 fn test_export_referenced_function() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     fs.insert(
         "/src/index.ts".into(),
         r#"
@@ -312,7 +312,7 @@ fn test_export_referenced_function() {
 
 #[test]
 fn test_export_default_function_declaration() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     fs.insert(
         "/src/index.ts".into(),
         r#"
@@ -336,7 +336,7 @@ fn test_export_default_function_declaration() {
 
 #[test]
 fn test_export_const_type_declaration_with_namespace() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     fs.insert(
         "/src/index.d.ts".into(),
         r#"
@@ -364,7 +364,7 @@ fn test_export_const_type_declaration_with_namespace() {
 
 #[test]
 fn test_resolve_exports() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     fs.insert(
         "/src/index.ts".into(),
         r#"
@@ -514,7 +514,7 @@ fn test_resolve_exports() {
 
 #[test]
 fn test_resolve_export_types() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     fs.insert(
         "/src/index.ts".into(),
         r#"
@@ -562,7 +562,7 @@ fn test_resolve_export_types() {
 
 #[test]
 fn test_resolve_generic_return_value() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     fs.insert(
         "/src/index.ts".into(),
         r#"function useCallback<T extends Function>(
@@ -641,7 +641,7 @@ fn test_resolve_generic_mapped_value() {
 
 #[test]
 fn test_resolve_generic_return_value_with_multiple_modules() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     fs.insert(
         "/src/bar.ts".into(),
         r#"
@@ -746,7 +746,7 @@ fn test_resolve_import_as_namespace() {
 
 #[test]
 fn test_resolve_nested_function_call_with_namespace_in_return_type() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     fs.insert(
         "/src/foo.ts".into(),
         r#"
@@ -882,7 +882,7 @@ fn test_resolve_type_of_property_with_getter() {
 
 #[test]
 fn test_resolve_promise_export() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     fs.insert(
         "/src/index.ts".into(),
         r#"
@@ -906,7 +906,7 @@ fn test_resolve_promise_export() {
 
 #[test]
 fn test_resolve_merged_types() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     fs.insert(
         "/src/index.ts".into(),
         r#"type A = 'a';
@@ -936,7 +936,7 @@ export { A, B };
 
 #[test]
 fn test_resolve_merged_namespace_with_type() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     fs.insert(
         "/src/index.ts".into(),
         r#"export namespace Foo {
@@ -960,7 +960,7 @@ export type Foo = Foo.Bar;
 
 #[test]
 fn test_resolve_recursive_looking_country_info() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     fs.insert(
         "/node_modules/@types/iso-3166-2/index.d.ts".into(),
         r#"// Type definitions for iso-3166-2 1.0
@@ -1028,7 +1028,7 @@ export const codes: {
 
 #[test]
 fn test_resolve_recursive_looking_vfile() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     fs.insert(
         "/node_modules/vfile/types/index.d.ts".into(),
         r#"// TypeScript Version: 3.0
@@ -1207,7 +1207,7 @@ export = vfile
 
 #[test]
 fn test_resolve_react_types() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     fs.insert(
         "/node_modules/@types/react/index.d.ts".into(),
         include_bytes!("../../biome_resolver/tests/fixtures/resolver_cases_5/node_modules/@types/react/index.d.ts")
@@ -1388,7 +1388,7 @@ fn test_resolve_multiple_reexports() {
 
 #[test]
 fn test_resolve_export_type_referencing_imported_type() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     fs.insert(
         "/src/promisedResult.ts".into(),
         "export type PromisedResult = Promise<{ result: true | false }>;\n",
@@ -1420,7 +1420,7 @@ fn test_resolve_export_type_referencing_imported_type() {
 
 #[test]
 fn test_resolve_promise_from_imported_function_returning_imported_promise_type() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     fs.insert(
         "/src/promisedResult.ts".into(),
         "export type PromisedResult = Promise<{ result: true | false }>;\n",
@@ -1479,7 +1479,7 @@ fn test_resolve_promise_from_imported_function_returning_imported_promise_type()
 
 #[test]
 fn test_resolve_promise_from_imported_function_returning_reexported_promise_type() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     fs.insert(
         "/src/promisedResult.ts".into(),
         "export type PromisedResult = Promise<{ result: true | false }>;\n",

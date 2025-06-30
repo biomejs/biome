@@ -24,6 +24,7 @@ mod signals;
 mod suppression_action;
 mod suppressions;
 mod syntax;
+pub mod utils;
 mod visitor;
 
 // Re-exported for use in the `declare_group` macro

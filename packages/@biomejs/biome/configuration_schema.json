@@ -2824,6 +2824,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noMagicNumbers": {
+					"description": "Reports usage of \"magic numbers\" — numbers used directly instead of being assigned to named constants.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noMisusedPromises": {
 					"description": "Disallow Promises to be used in places where they are almost certainly a mistake.",
 					"anyOf": [

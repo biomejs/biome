@@ -1,0 +1,36 @@
+---
+source: crates/biome_json_analyze/tests/spec_tests.rs
+expression: inline_comments.jsonc
+---
+# Input
+```jsonc
+{
+    "b": 1, // Comment
+    "a": 0,
+}
+```
+
+# Diagnostics
+```
+inline_comments.jsonc:1:1 assist/source/useSortedKeys  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The members are not sorted by key.
+  
+  > 1 │ {
+      │ ^
+  > 2 │     "b": 1, // Comment
+  > 3 │     "a": 0,
+  > 4 │ }
+      │ ^
+  
+  i Safe fix: Sort the members by key.
+  
+    1 1 │   {
+    2   │ - ····"b":·1,·//·Comment
+    3   │ - ····"a":·0,
+      2 │ + ····"a":·0,
+      3 │ + ····"b":·1,·//·Comment
+    4 4 │   }
+  
+
+```

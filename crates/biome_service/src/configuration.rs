@@ -486,19 +486,20 @@ impl ConfigurationExt for Configuration {
             file_path.parent().expect("file path should have a parent"),
             external_resolution_base_path,
         )?;
-        let (configurations, errors): (Vec<_>, Vec<_>) = deserialized
-            .into_iter()
-            .map(|d| d.consume())
-            .map(|(config, diagnostics)| (config.unwrap_or_default(), diagnostics))
-            .unzip();
+        let (configurations, errors): (Vec<_>, Vec<_>) =
+            deserialized.into_iter().map(Deserialized::consume).unzip();
 
-        let extended_configuration = configurations.into_iter().reduce(
+        let extended_configuration = configurations.into_iter().flatten().reduce(
             |mut previous_configuration, current_configuration| {
                 previous_configuration.merge_with(current_configuration);
                 previous_configuration
             },
         );
         if let Some(mut extended_configuration) = extended_configuration {
+            // Make sure our root value is set explicitly, so it cannot be set
+            // by configs we extend.
+            self.root = Some(self.is_root().into());
+
             // We swap them to avoid having to clone `self.configuration` to merge it.
             std::mem::swap(self, &mut extended_configuration);
             self.merge_with(extended_configuration)
@@ -515,7 +516,8 @@ impl ConfigurationExt for Configuration {
         Ok(())
     }
 
-    /// It attempts to deserialize all the configuration files that were specified in the `extends` property
+    /// Deserializes all the configuration files that were specified in the
+    /// `extends` field.
     fn deserialize_extends(
         &mut self,
         fs: &dyn FsWithResolverProxy,
@@ -577,12 +579,16 @@ impl ConfigurationExt for Configuration {
 
                 let mut content = String::new();
                 file.read_to_string(&mut content).map_err(|err| {
-                CantLoadExtendFile::new(extend_configuration_file_path.to_string(), err.to_string()).with_verbose_advice(
-                    markup! {
-                        "It's possible that the file was created with a different user/group. Make sure you have the rights to read the file."
-                    }
-                )
-            })?;
+                    CantLoadExtendFile::new(
+                        extend_configuration_file_path.to_string(),
+                        err.to_string(),
+                    )
+                    .with_verbose_advice(markup! {
+                        "It's possible that the file was created with a "
+                        "different user/group. Make sure you have the rights "
+                        "to read the file."
+                    })
+                })?;
                 let deserialized = deserialize_from_json_str::<Self>(
                     content.as_str(),
                     match extend_configuration_file_path.extension() {
@@ -615,7 +621,7 @@ mod test {
 
     #[test]
     fn should_not_load_a_configuration_yml() {
-        let mut fs = MemoryFileSystem::default();
+        let fs = MemoryFileSystem::default();
         fs.insert(Utf8PathBuf::from("biome.yml"), "content".to_string());
         let path_hint = ConfigurationPathHint::FromUser(Utf8PathBuf::from("biome.yml"));
 
@@ -626,7 +632,7 @@ mod test {
 
     #[test]
     fn should_skip_non_root_configuration() {
-        let mut fs = MemoryFileSystem::default();
+        let fs = MemoryFileSystem::default();
         fs.insert(
             Utf8PathBuf::from("/biome.json"),
             r#"{ "linter": { "enabled": false } }"#.to_string(),
@@ -654,7 +660,7 @@ mod test {
 
     #[test]
     fn should_refuse_user_provided_non_root_configuration() {
-        let mut fs = MemoryFileSystem::default();
+        let fs = MemoryFileSystem::default();
         fs.insert(
             Utf8PathBuf::from("/biome.json"),
             r#"{ "linter": { "enabled": false } }"#.to_string(),

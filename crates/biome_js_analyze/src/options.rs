@@ -156,6 +156,8 @@ pub type NoIrregularWhitespace = < lint :: suspicious :: no_irregular_whitespace
 pub type NoLabelVar = <lint::suspicious::no_label_var::NoLabelVar as biome_analyze::Rule>::Options;
 pub type NoLabelWithoutControl =
     <lint::a11y::no_label_without_control::NoLabelWithoutControl as biome_analyze::Rule>::Options;
+pub type NoMagicNumbers =
+    <lint::nursery::no_magic_numbers::NoMagicNumbers as biome_analyze::Rule>::Options;
 pub type NoMisleadingCharacterClass = < lint :: suspicious :: no_misleading_character_class :: NoMisleadingCharacterClass as biome_analyze :: Rule > :: Options ;
 pub type NoMisleadingInstantiator = < lint :: suspicious :: no_misleading_instantiator :: NoMisleadingInstantiator as biome_analyze :: Rule > :: Options ;
 pub type NoMisplacedAssertion = < lint :: suspicious :: no_misplaced_assertion :: NoMisplacedAssertion as biome_analyze :: Rule > :: Options ;

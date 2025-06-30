@@ -1,0 +1,58 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `node_modules/base-config/configs/biome.jsonc`
+
+```json
+{
+  "formatter": {
+    "indentStyle": "space",
+    "indentWidth": 3
+  },
+  "javascript": {
+    "formatter": {
+      "quoteStyle": "double"
+    }
+  }
+}
+```
+
+## `biome.jsonc`
+
+```json
+{
+  "extends": ["base-config/biome"],
+  "javascript": {
+    "formatter": {
+      "quoteStyle": "single"
+    }
+  }
+}
+```
+
+## `node_modules/base-config/package.json`
+
+```json
+{
+  "exports": {
+    "./biome": "./configs/biome.jsonc"
+  }
+}
+```
+
+# Input messages
+
+```block
+let a = "a"; if (true) { a = "b" }
+```
+
+# Emitted Messages
+
+```block
+let _a = 'a';
+if (true) {
+   _a = 'b';
+}
+
+```

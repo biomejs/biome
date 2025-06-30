@@ -57,7 +57,7 @@ test1.js:1:10 lint/suspicious/noFocusedTests  FIXABLE  ━━━━━━━━�
       │          ^^^^
     2 │ 
   
-  i The 'only' method is often used for debugging or during implementation. It should be removed before deploying to production.
+  i The 'only' method is often used for debugging or during implementation.
   
   i Consider removing 'only' to ensure all tests are executed.
   

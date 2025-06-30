@@ -13,22 +13,18 @@ use crate::{JsRuleAction, ast_utils::is_in_async_function, services::typed::Type
 declare_lint_rule! {
     /// Require Promise-like statements to be handled appropriately.
     ///
-    /// A "floating" `Promise` is one that is created without any code set up to handle any errors it might throw.
-    /// Floating Promises can lead to several issues, including improperly sequenced operations, unhandled Promise rejections, and other unintended consequences.
+    /// A "floating" `Promise` is one that is created without any code set up to
+    /// handle any errors it might throw. Floating Promises can lead to several
+    /// issues, including improperly sequenced operations, unhandled Promise
+    /// rejections, and other unintended consequences.
     ///
-    /// This rule will report Promise-valued statements that are not treated in one of the following ways:
+    /// This rule will report Promise-valued statements that are not treated in
+    /// one of the following ways:
     /// - Calling its `.then()` method with two arguments
     /// - Calling its `.catch()` method with one argument
-    /// - `await`ing it
-    /// - `return`ing it
-    /// - `void`ing it
-    ///
-    /// ## Important notes
-    ///
-    /// :::caution
-    /// This rule is a work in progress, and is only partially implemented.
-    /// Progress is being tracked in the following GitHub issue: https://github.com/biomejs/biome/issues/3187
-    /// :::
+    /// - `await`-ing it
+    /// - `return`-ing it
+    /// - `void`-ing it
     ///
     /// ## Examples
     ///
@@ -113,6 +109,7 @@ declare_lint_rule! {
     ///   props.returnsPromise();
     /// }
     /// ```
+    ///
     /// ### Valid
     ///
     /// ```ts

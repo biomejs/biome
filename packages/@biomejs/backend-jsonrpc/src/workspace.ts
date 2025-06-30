@@ -1583,6 +1583,10 @@ export interface Nursery {
 	 */
 	noImportantStyles?: RuleFixConfiguration_for_Null;
 	/**
+	 * Reports usage of "magic numbers" — numbers used directly instead of being assigned to named constants.
+	 */
+	noMagicNumbers?: RuleConfiguration_for_Null;
+	/**
 	 * Disallow Promises to be used in places where they are almost certainly a mistake.
 	 */
 	noMisusedPromises?: RuleFixConfiguration_for_Null;
@@ -3632,6 +3636,7 @@ export type Category =
 	| "lint/nursery/noInvalidDirectionInLinearGradient"
 	| "lint/nursery/noInvalidGridAreas"
 	| "lint/nursery/noInvalidPositionAtImportRule"
+	| "lint/nursery/noMagicNumbers"
 	| "lint/nursery/noMissingGenericFamilyKeyword"
 	| "lint/nursery/noMisusedPromises"
 	| "lint/nursery/noNestedComponentDefinitions"
