@@ -44,3 +44,7 @@ function functionWithParams({ option }: Params) {
 let maybeString: string | undefined;
 const definitelyString = maybeString ?? "string";
 definitelyString ?? Promise.reject("logical operator bypass");
+
+let bool: boolean;
+const definitelyTruthy = bool || "string";
+definitelyTruthy || Promise.reject("logical operator bypass");
