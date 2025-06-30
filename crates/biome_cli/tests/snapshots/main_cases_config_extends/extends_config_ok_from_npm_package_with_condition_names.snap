@@ -41,7 +41,7 @@ expression: redactor(content)
     "exports": {
         "./biome": {
             "default": "./biome.jsonc"
-        } 
+        }
     }
 }
 ```
