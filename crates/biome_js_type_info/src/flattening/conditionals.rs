@@ -318,12 +318,16 @@ pub fn reference_to_truthy_subset_of(
     ty: &TypeData,
     resolver: &mut dyn TypeResolver,
 ) -> Option<TypeReference> {
-    let filter = |ty: &TypeData| {
-        if ConditionalType::from_data_shallow(ty).is_none_or(|conditional| !conditional.is_falsy())
-        {
-            FilteredData::Retained
-        } else {
-            FilteredData::Stripped
+    let filter = |ty: &TypeData| match ty {
+        TypeData::Boolean => FilteredData::Mapped(Literal::Boolean(true.into()).into()),
+        other => {
+            if ConditionalType::from_data_shallow(other)
+                .is_none_or(|conditional| !conditional.is_falsy())
+            {
+                FilteredData::Retained
+            } else {
+                FilteredData::Stripped
+            }
         }
     };
 
