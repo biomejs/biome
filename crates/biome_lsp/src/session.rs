@@ -508,6 +508,48 @@ impl Session {
     }
 
     #[instrument(level = "info", skip(self))]
+    pub(crate) fn can_register_on_type_formatting(&self) -> bool {
+        let result = self
+            .initialize_params
+            .get()
+            .and_then(|c| c.client_capabilities.text_document.as_ref())
+            .and_then(|c| c.on_type_formatting)
+            .and_then(|c| c.dynamic_registration)
+            == Some(true);
+
+        info!("Can register onTypeFormatting: {result}");
+        result
+    }
+
+    #[instrument(level = "info", skip(self))]
+    pub(crate) fn can_register_formatting(&self) -> bool {
+        let result = self
+            .initialize_params
+            .get()
+            .and_then(|c| c.client_capabilities.text_document.as_ref())
+            .and_then(|c| c.formatting)
+            .and_then(|c| c.dynamic_registration)
+            == Some(true);
+
+        info!("Can register formatting: {result}");
+        result
+    }
+
+    #[instrument(level = "info", skip(self))]
+    pub(crate) fn can_register_range_formatting(&self) -> bool {
+        let result = self
+            .initialize_params
+            .get()
+            .and_then(|c| c.client_capabilities.text_document.as_ref())
+            .and_then(|c| c.range_formatting)
+            .and_then(|c| c.dynamic_registration)
+            == Some(true);
+
+        info!("Can register rangeFormatting: {result}");
+        result
+    }
+
+    #[instrument(level = "info", skip(self))]
     pub(crate) fn can_register_did_change_watched_files(&self) -> bool {
         let result = self
             .initialize_params
@@ -518,6 +560,20 @@ impl Session {
             == Some(true);
 
         info!("Can register didChangeWatchedFiles: {result}");
+        result
+    }
+
+    #[instrument(level = "info", skip(self))]
+    pub(crate) fn can_register_code_action(&self) -> bool {
+        let result = self
+            .initialize_params
+            .get()
+            .and_then(|c| c.client_capabilities.text_document.as_ref())
+            .and_then(|c| c.code_action.as_ref())
+            .and_then(|c| c.dynamic_registration)
+            == Some(true);
+
+        info!("Can register codeAction: {result}");
         result
     }
 
