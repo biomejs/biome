@@ -21,7 +21,6 @@ use specifiers_attributes::{
 use crate::JsRuleAction;
 use util::{attached_trivia, detached_trivia, has_detached_leading_comment, leading_newlines};
 
-pub mod comparable_token;
 pub mod import_groups;
 pub mod import_key;
 pub mod import_source;
@@ -910,22 +909,22 @@ impl Rule for OrganizeImports {
                     );
                     // Merge imports/exports
                     // We use `while` and indexing to allow both iteration and mutation of `import_keys`.
-                    let mut i = 0;
-                    while (i + 1) < import_keys.len() {
-                        let KeyedItem { key, item, .. } = &import_keys[i];
+                    let mut i = import_keys.len() - 1;
+                    while i > 0 {
                         let KeyedItem {
-                            key: next_key,
-                            item: next_item,
+                            key: prev_key,
+                            item: prev_item,
                             ..
-                        } = &import_keys[i + 1];
-                        if key.is_mergeable(next_key) {
-                            if let Some(merged) = merge(item.as_ref(), next_item.as_ref()) {
+                        } = &import_keys[i - 1];
+                        let KeyedItem { key, item, .. } = &import_keys[i];
+                        if prev_key.is_mergeable(key) {
+                            if let Some(merged) = merge(prev_item.as_ref(), item.as_ref()) {
+                                import_keys[i - 1].was_merged = true;
+                                import_keys[i - 1].item = Some(merged);
                                 import_keys[i].item = None;
-                                import_keys[i + 1].was_merged = true;
-                                import_keys[i + 1].item = Some(merged);
                             }
                         }
-                        i += 1;
+                        i -= 1;
                     }
                     // Swap the items to obtain a sorted chunk
                     let mut prev_group: u16 = 0;
@@ -945,16 +944,23 @@ impl Rule for OrganizeImports {
                         };
                         let mut new_item = new_item.into_syntax();
                         let old_item = old_item.into_node()?;
-                        let blank_line_separated_groups = options
-                            .groups
-                            .separated_by_blank_line(prev_group, key.group);
+                        let blank_line_separated_groups = index != 0
+                            && options
+                                .groups
+                                .separated_by_blank_line(prev_group, key.group);
+                        prev_group = key.group;
                         // Don't make any change if it is the same node and no change have to be done
                         if !blank_line_separated_groups && index == key.slot_index && !was_merged {
                             continue;
                         }
                         if index == slot_indexes.start {
                             if index == key.slot_index && was_merged {
-                                // DOn't change anything
+                                // Merged imports always have a leading newline.
+                                // We remove it if the merged import is at the start and
+                                // if the old first import has no leading newline.
+                                if index == 0 && leading_newlines(&old_item).count() == 0 {
+                                    new_item = new_item.trim_leading_trivia()?;
+                                }
                             } else if let Some(detached) = detached_trivia(&old_item) {
                                 if leading_newlines(&old_item).count() == 1 {
                                     let newline = old_item.first_leading_trivia()?.pieces().take(1);
@@ -996,7 +1002,6 @@ impl Rule for OrganizeImports {
                             new_item = new_item.prepend_trivia_pieces(newline)?;
                         }
                         mutation.replace_element_discard_trivia(old_item.into(), new_item.into());
-                        prev_group = key.group;
                     }
                 }
             }
@@ -1075,9 +1080,15 @@ fn merge(
             if let Some(meregd_specifiers) = merge_export_specifiers(&specifiers1, &specifiers2) {
                 let meregd_clause = clause1.with_specifiers(meregd_specifiers);
                 let merged_item = item2.clone().with_export_clause(meregd_clause.into());
-                let merged_item = merged_item
-                    .trim_leading_trivia()?
-                    .prepend_trivia_pieces(item1.syntax().first_leading_trivia()?.pieces())?;
+
+                let item1_leading_trivia = item1.syntax().first_leading_trivia()?;
+                let merged_item = if item1_leading_trivia.is_empty() {
+                    merged_item
+                } else {
+                    merged_item
+                        .trim_leading_trivia()?
+                        .prepend_trivia_pieces(item1.syntax().first_leading_trivia()?.pieces())?
+                };
                 return Some(merged_item.into());
             }
         }
@@ -1106,9 +1117,15 @@ fn merge(
                     )
                     .build();
                     let merged_item = item2.clone().with_import_clause(merged_clause.into());
-                    let merged_item = merged_item
-                        .trim_leading_trivia()?
-                        .prepend_trivia_pieces(item1.syntax().first_leading_trivia()?.pieces())?;
+
+                    let item1_leading_trivia = item1.syntax().first_leading_trivia()?;
+                    let merged_item = if item1_leading_trivia.is_empty() {
+                        merged_item
+                    } else {
+                        merged_item.trim_leading_trivia()?.prepend_trivia_pieces(
+                            item1.syntax().first_leading_trivia()?.pieces(),
+                        )?
+                    };
                     return Some(merged_item.into());
                 }
                 (
@@ -1130,10 +1147,15 @@ fn merge(
                     {
                         let merged_clause = clause1.with_specifier(meregd_specifiers.into());
                         let merged_item = item2.clone().with_import_clause(merged_clause.into());
-                        let merged_item =
+
+                        let item1_leading_trivia = item1.syntax().first_leading_trivia()?;
+                        let merged_item = if item1_leading_trivia.is_empty() {
+                            merged_item
+                        } else {
                             merged_item.trim_leading_trivia()?.prepend_trivia_pieces(
                                 item1.syntax().first_leading_trivia()?.pieces(),
-                            )?;
+                            )?
+                        };
                         return Some(merged_item.into());
                     }
                 }
@@ -1148,10 +1170,14 @@ fn merge(
                     {
                         let merged_clause = clause1.with_named_specifiers(meregd_specifiers);
                         let merged_item = item2.clone().with_import_clause(merged_clause.into());
-                        let merged_item =
+                        let item1_leading_trivia = item1.syntax().first_leading_trivia()?;
+                        let merged_item = if item1_leading_trivia.is_empty() {
+                            merged_item
+                        } else {
                             merged_item.trim_leading_trivia()?.prepend_trivia_pieces(
                                 item1.syntax().first_leading_trivia()?.pieces(),
-                            )?;
+                            )?
+                        };
                         return Some(merged_item.into());
                     }
                 }
@@ -1176,9 +1202,14 @@ fn merge(
                     )
                     .build();
                     let merged_item = item2.clone().with_import_clause(merged_clause.into());
-                    let merged_item = merged_item
-                        .trim_leading_trivia()?
-                        .prepend_trivia_pieces(item1.syntax().first_leading_trivia()?.pieces())?;
+                    let item1_leading_trivia = item1.syntax().first_leading_trivia()?;
+                    let merged_item = if item1_leading_trivia.is_empty() {
+                        merged_item
+                    } else {
+                        merged_item.trim_leading_trivia()?.prepend_trivia_pieces(
+                            item1.syntax().first_leading_trivia()?.pieces(),
+                        )?
+                    };
                     return Some(merged_item.into());
                 }
                 _ => {}

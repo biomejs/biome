@@ -58,10 +58,10 @@ declare_lint_rule! {
         version: "1.0.0",
         name: "noExtraBooleanCast",
         language: "js",
-        sources: &[RuleSource::Eslint("no-extra-boolean-cast")],
+        sources: &[RuleSource::Eslint("no-extra-boolean-cast").same()],
         recommended: true,
         severity: Severity::Information,
-        fix_kind: FixKind::Unsafe,
+        fix_kind: FixKind::Safe,
     }
 }
 

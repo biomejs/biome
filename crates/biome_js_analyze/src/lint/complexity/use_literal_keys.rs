@@ -7,7 +7,8 @@ use biome_diagnostics::Severity;
 use biome_js_factory::make;
 use biome_js_syntax::{
     AnyJsAssignment, AnyJsComputedMember, AnyJsMemberExpression, AnyJsName, AnyJsObjectMemberName,
-    AnyTsEnumMemberName, JsComputedMemberName, JsSyntaxKind, T,
+    AnyTsEnumMemberName, JsComputedMemberName, JsSyntaxKind, JsSyntaxToken, T, inner_string_text,
+    static_value::StaticValue,
 };
 use biome_rowan::{AstNode, BatchMutationExt, SyntaxNodeOptionExt, TextRange, declare_node_union};
 use biome_unicode_table::is_js_ident;
@@ -49,8 +50,9 @@ declare_lint_rule! {
         name: "useLiteralKeys",
         language: "js",
         sources: &[
-            RuleSource::Eslint("dot-notation"),
-            RuleSource::EslintTypeScript("dot-notation")
+            RuleSource::Eslint("dot-notation").same(),
+            RuleSource::Eslint("no-useless-computed-key").same(),
+            RuleSource::EslintTypeScript("dot-notation").same(),
         ],
         recommended: true,
         severity: Severity::Information,
@@ -60,7 +62,7 @@ declare_lint_rule! {
 
 impl Rule for UseLiteralKeys {
     type Query = Ast<AnyJsMember>;
-    type State = (TextRange, String, bool);
+    type State = (TextRange, JsSyntaxToken, bool);
     type Signals = Option<Self::State>;
     type Options = ();
 
@@ -75,29 +77,37 @@ impl Rule for UseLiteralKeys {
             }
         };
         let value = inner_expression.as_static_value()?;
-        let value = value.as_string_constant()?;
-        // `{["__proto__"]: null }` and `{"__proto__": null}`/`{"__proto__": null}`
-        // have different semantic.
-        // The first is a regular property.
-        // The second is a special property that changes the object prototype.
-        // See https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/proto
-        if is_computed_member_name && value == "__proto__" {
-            return None;
-        }
-        // A computed property `["something"]` can always be simplified to a string literal "something",
-        // unless it is a template literal inside that contains unescaped new line characters:
-        //
-        // const a = {
-        //   [`line1
-        //   line2`]: true
-        // }
-        //
-        if (is_computed_member_name && !has_unescaped_new_line(value)) || is_js_ident(value) {
-            return Some((
-                inner_expression.range(),
-                value.to_string(),
-                is_computed_member_name,
-            ));
+        match value {
+            StaticValue::Number(token) => {
+                if is_computed_member_name {
+                    return Some((inner_expression.range(), token, is_computed_member_name));
+                }
+            }
+            StaticValue::String(token) => {
+                let value = inner_string_text(&token);
+                // `{["__proto__"]: null }` and `{"__proto__": null}`/`{"__proto__": null}`
+                // have different semantic.
+                // The first is a regular property.
+                // The second is a special property that changes the object prototype.
+                // See https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/proto
+                if is_computed_member_name && value == "__proto__" {
+                    return None;
+                }
+                // A computed property `["something"]` can always be simplified to a string literal "something",
+                // unless it is a template literal inside that contains unescaped new line characters:
+                //
+                // const a = {
+                //   [`line1
+                //   line2`]: true
+                // }
+                //
+                if (is_computed_member_name && !has_unescaped_new_line(&value))
+                    || is_js_ident(&value)
+                {
+                    return Some((inner_expression.range(), token, is_computed_member_name));
+                }
+            }
+            _ => {}
         }
         None
     }
@@ -121,13 +131,14 @@ impl Rule for UseLiteralKeys {
         ))
     }
 
-    fn action(ctx: &RuleContext<Self>, (_, identifier, _): &Self::State) -> Option<JsRuleAction> {
+    fn action(ctx: &RuleContext<Self>, (_, token, _): &Self::State) -> Option<JsRuleAction> {
         let node = ctx.query();
         let mut mutation = ctx.root().begin();
         match node {
             AnyJsMember::AnyJsComputedMember(node) => {
+                let identifier = inner_string_text(token);
                 let object = node.object().ok()?;
-                let member = make::js_name(make::ident(identifier));
+                let member = make::js_name(make::ident(&identifier));
                 let dot_token = node
                     .optional_chain_token()
                     .unwrap_or_else(|| make::token(T![.]));
@@ -158,10 +169,15 @@ impl Rule for UseLiteralKeys {
                 }
             }
             AnyJsMember::JsComputedMemberName(member) => {
-                let name_token = if ctx.as_preferred_quote().is_double() {
-                    make::js_string_literal(identifier)
+                let name_token = if token.kind() == JsSyntaxKind::JS_NUMBER_LITERAL {
+                    token.clone()
                 } else {
-                    make::js_string_literal_single_quotes(identifier)
+                    let identifier = inner_string_text(token);
+                    if ctx.as_preferred_quote().is_double() {
+                        make::js_string_literal(&identifier)
+                    } else {
+                        make::js_string_literal_single_quotes(&identifier)
+                    }
                 };
                 if member.syntax().parent().kind() == Some(JsSyntaxKind::TS_ENUM_MEMBER) {
                     let literal_enum_member_name = make::ts_literal_enum_member_name(name_token);

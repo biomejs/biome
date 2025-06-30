@@ -119,8 +119,8 @@ declare_lint_rule! {
         name: "noUselessConstructor",
         language: "js",
         sources: &[
-            RuleSource::Eslint("no-useless-constructor"),
-            RuleSource::EslintTypeScript("no-useless-constructor"),
+            RuleSource::Eslint("no-useless-constructor").same(),
+            RuleSource::EslintTypeScript("no-useless-constructor").same(),
         ],
         recommended: true,
         severity: Severity::Information,

@@ -9,6 +9,18 @@ pub(crate) fn migrate_eslint_any_rule(
     results: &mut eslint_to_biome::MigrationResults,
 ) -> bool {
     match eslint_name {
+        "@eslint-react/no-nested-components" => {
+            if !options.include_nursery {
+                results.add(eslint_name, eslint_to_biome::RuleMigrationResult::Nursery);
+                return false;
+            }
+            let group = rules.nursery.get_or_insert_with(Default::default);
+            let rule = group
+                .unwrap_group_as_mut()
+                .no_nested_component_definitions
+                .get_or_insert(Default::default());
+            rule.set_level(rule.level().max(rule_severity.into()));
+        }
         "@mysticatea/no-this-in-static" => {
             let group = rules.complexity.get_or_insert_with(Default::default);
             let rule = group
@@ -27,6 +39,7 @@ pub(crate) fn migrate_eslint_any_rule(
         }
         "@next/google-font-preconnect" => {
             if !options.include_nursery {
+                results.add(eslint_name, eslint_to_biome::RuleMigrationResult::Nursery);
                 return false;
             }
             let group = rules.nursery.get_or_insert_with(Default::default);
@@ -70,6 +83,7 @@ pub(crate) fn migrate_eslint_any_rule(
         }
         "@next/no-unwanted-polyfillio" => {
             if !options.include_nursery {
+                results.add(eslint_name, eslint_to_biome::RuleMigrationResult::Nursery);
                 return false;
             }
             let group = rules.nursery.get_or_insert_with(Default::default);
@@ -105,10 +119,11 @@ pub(crate) fn migrate_eslint_any_rule(
         }
         "@typescript-eslint/ban-ts-comment" => {
             if !options.include_inspired {
-                results.has_inspired_rules = true;
+                results.add(eslint_name, eslint_to_biome::RuleMigrationResult::Inspired);
                 return false;
             }
             if !options.include_nursery {
+                results.add(eslint_name, eslint_to_biome::RuleMigrationResult::Nursery);
                 return false;
             }
             let group = rules.nursery.get_or_insert_with(Default::default);
@@ -128,7 +143,7 @@ pub(crate) fn migrate_eslint_any_rule(
         }
         "@typescript-eslint/consistent-type-exports" => {
             if !options.include_inspired {
-                results.has_inspired_rules = true;
+                results.add(eslint_name, eslint_to_biome::RuleMigrationResult::Inspired);
                 return false;
             }
             let group = rules.style.get_or_insert_with(Default::default);
@@ -140,7 +155,7 @@ pub(crate) fn migrate_eslint_any_rule(
         }
         "@typescript-eslint/consistent-type-imports" => {
             if !options.include_inspired {
-                results.has_inspired_rules = true;
+                results.add(eslint_name, eslint_to_biome::RuleMigrationResult::Inspired);
                 return false;
             }
             let group = rules.style.get_or_insert_with(Default::default);
@@ -168,10 +183,11 @@ pub(crate) fn migrate_eslint_any_rule(
         }
         "@typescript-eslint/explicit-function-return-type" => {
             if !options.include_inspired {
-                results.has_inspired_rules = true;
+                results.add(eslint_name, eslint_to_biome::RuleMigrationResult::Inspired);
                 return false;
             }
             if !options.include_nursery {
+                results.add(eslint_name, eslint_to_biome::RuleMigrationResult::Nursery);
                 return false;
             }
             let group = rules.nursery.get_or_insert_with(Default::default);
@@ -191,10 +207,11 @@ pub(crate) fn migrate_eslint_any_rule(
         }
         "@typescript-eslint/explicit-module-boundary-types" => {
             if !options.include_inspired {
-                results.has_inspired_rules = true;
+                results.add(eslint_name, eslint_to_biome::RuleMigrationResult::Inspired);
                 return false;
             }
             if !options.include_nursery {
+                results.add(eslint_name, eslint_to_biome::RuleMigrationResult::Nursery);
                 return false;
             }
             let group = rules.nursery.get_or_insert_with(Default::default);
@@ -206,7 +223,7 @@ pub(crate) fn migrate_eslint_any_rule(
         }
         "@typescript-eslint/naming-convention" => {
             if !options.include_inspired {
-                results.has_inspired_rules = true;
+                results.add(eslint_name, eslint_to_biome::RuleMigrationResult::Inspired);
                 return false;
             }
             let group = rules.style.get_or_insert_with(Default::default);
@@ -217,7 +234,7 @@ pub(crate) fn migrate_eslint_any_rule(
             rule.set_level(rule.level().max(rule_severity.into()));
         }
         "@typescript-eslint/no-array-constructor" => {
-            let group = rules.correctness.get_or_insert_with(Default::default);
+            let group = rules.style.get_or_insert_with(Default::default);
             let rule = group
                 .unwrap_group_as_mut()
                 .use_array_literals
@@ -242,7 +259,7 @@ pub(crate) fn migrate_eslint_any_rule(
         }
         "@typescript-eslint/no-empty-interface" => {
             if !options.include_inspired {
-                results.has_inspired_rules = true;
+                results.add(eslint_name, eslint_to_biome::RuleMigrationResult::Inspired);
                 return false;
             }
             let group = rules.suspicious.get_or_insert_with(Default::default);
@@ -278,6 +295,7 @@ pub(crate) fn migrate_eslint_any_rule(
         }
         "@typescript-eslint/no-floating-promises" => {
             if !options.include_nursery {
+                results.add(eslint_name, eslint_to_biome::RuleMigrationResult::Nursery);
                 return false;
             }
             let group = rules.nursery.get_or_insert_with(Default::default);
@@ -308,6 +326,18 @@ pub(crate) fn migrate_eslint_any_rule(
             let rule = group
                 .unwrap_group_as_mut()
                 .no_precision_loss
+                .get_or_insert(Default::default());
+            rule.set_level(rule.level().max(rule_severity.into()));
+        }
+        "@typescript-eslint/no-magic-numbers" => {
+            if !options.include_nursery {
+                results.add(eslint_name, eslint_to_biome::RuleMigrationResult::Nursery);
+                return false;
+            }
+            let group = rules.nursery.get_or_insert_with(Default::default);
+            let rule = group
+                .unwrap_group_as_mut()
+                .no_magic_numbers
                 .get_or_insert(Default::default());
             rule.set_level(rule.level().max(rule_severity.into()));
         }
@@ -369,7 +399,7 @@ pub(crate) fn migrate_eslint_any_rule(
         }
         "@typescript-eslint/no-this-alias" => {
             if !options.include_inspired {
-                results.has_inspired_rules = true;
+                results.add(eslint_name, eslint_to_biome::RuleMigrationResult::Inspired);
                 return false;
             }
             let group = rules.complexity.get_or_insert_with(Default::default);
@@ -429,7 +459,7 @@ pub(crate) fn migrate_eslint_any_rule(
         }
         "@typescript-eslint/only-throw-error" => {
             if !options.include_inspired {
-                results.has_inspired_rules = true;
+                results.add(eslint_name, eslint_to_biome::RuleMigrationResult::Inspired);
                 return false;
             }
             let group = rules.style.get_or_insert_with(Default::default);
@@ -441,7 +471,7 @@ pub(crate) fn migrate_eslint_any_rule(
         }
         "@typescript-eslint/parameter-properties" => {
             if !options.include_inspired {
-                results.has_inspired_rules = true;
+                results.add(eslint_name, eslint_to_biome::RuleMigrationResult::Inspired);
                 return false;
             }
             let group = rules.style.get_or_insert_with(Default::default);
@@ -507,6 +537,18 @@ pub(crate) fn migrate_eslint_any_rule(
                 .get_or_insert(Default::default());
             rule.set_level(rule.level().max(rule_severity.into()));
         }
+        "@typescript-eslint/prefer-readonly" => {
+            if !options.include_nursery {
+                results.add(eslint_name, eslint_to_biome::RuleMigrationResult::Nursery);
+                return false;
+            }
+            let group = rules.nursery.get_or_insert_with(Default::default);
+            let rule = group
+                .unwrap_group_as_mut()
+                .use_readonly_class_properties
+                .get_or_insert(Default::default());
+            rule.set_level(rule.level().max(rule_severity.into()));
+        }
         "@typescript-eslint/require-await" => {
             let group = rules.suspicious.get_or_insert_with(Default::default);
             let rule = group
@@ -517,6 +559,7 @@ pub(crate) fn migrate_eslint_any_rule(
         }
         "@typescript-eslint/switch-exhaustiveness-check" => {
             if !options.include_nursery {
+                results.add(eslint_name, eslint_to_biome::RuleMigrationResult::Nursery);
                 return false;
             }
             let group = rules.nursery.get_or_insert_with(Default::default);
@@ -526,8 +569,21 @@ pub(crate) fn migrate_eslint_any_rule(
                 .get_or_insert(Default::default());
             rule.set_level(rule.level().max(rule_severity.into()));
         }
+        "@typescript-eslint/unified-signatures" => {
+            if !options.include_nursery {
+                results.add(eslint_name, eslint_to_biome::RuleMigrationResult::Nursery);
+                return false;
+            }
+            let group = rules.nursery.get_or_insert_with(Default::default);
+            let rule = group
+                .unwrap_group_as_mut()
+                .use_unified_type_signature
+                .get_or_insert(Default::default());
+            rule.set_level(rule.level().max(rule_severity.into()));
+        }
         "array-callback-return" => {
             if !options.include_nursery {
+                results.add(eslint_name, eslint_to_biome::RuleMigrationResult::Nursery);
                 return false;
             }
             let group = rules.nursery.get_or_insert_with(Default::default);
@@ -539,7 +595,7 @@ pub(crate) fn migrate_eslint_any_rule(
         }
         "barrel-files/avoid-barrel-files" => {
             if !options.include_inspired {
-                results.has_inspired_rules = true;
+                results.add(eslint_name, eslint_to_biome::RuleMigrationResult::Inspired);
                 return false;
             }
             let group = rules.performance.get_or_insert_with(Default::default);
@@ -550,7 +606,7 @@ pub(crate) fn migrate_eslint_any_rule(
             rule.set_level(rule.level().max(rule_severity.into()));
         }
         "barrel-files/avoid-namespace-import" => {
-            let group = rules.style.get_or_insert_with(Default::default);
+            let group = rules.performance.get_or_insert_with(Default::default);
             let rule = group
                 .unwrap_group_as_mut()
                 .no_namespace_import
@@ -607,6 +663,7 @@ pub(crate) fn migrate_eslint_any_rule(
         }
         "deno-lint/no-process-global" => {
             if !options.include_nursery {
+                results.add(eslint_name, eslint_to_biome::RuleMigrationResult::Nursery);
                 return false;
             }
             let group = rules.nursery.get_or_insert_with(Default::default);
@@ -650,6 +707,7 @@ pub(crate) fn migrate_eslint_any_rule(
         }
         "grouped-accessor-pairs" => {
             if !options.include_nursery {
+                results.add(eslint_name, eslint_to_biome::RuleMigrationResult::Nursery);
                 return false;
             }
             let group = rules.nursery.get_or_insert_with(Default::default);
@@ -677,6 +735,7 @@ pub(crate) fn migrate_eslint_any_rule(
         }
         "import/exports-last" => {
             if !options.include_nursery {
+                results.add(eslint_name, eslint_to_biome::RuleMigrationResult::Nursery);
                 return false;
             }
             let group = rules.nursery.get_or_insert_with(Default::default);
@@ -688,10 +747,11 @@ pub(crate) fn migrate_eslint_any_rule(
         }
         "import/named" => {
             if !options.include_inspired {
-                results.has_inspired_rules = true;
+                results.add(eslint_name, eslint_to_biome::RuleMigrationResult::Inspired);
                 return false;
             }
             if !options.include_nursery {
+                results.add(eslint_name, eslint_to_biome::RuleMigrationResult::Nursery);
                 return false;
             }
             let group = rules.nursery.get_or_insert_with(Default::default);
@@ -711,6 +771,7 @@ pub(crate) fn migrate_eslint_any_rule(
         }
         "import/no-cycle" => {
             if !options.include_nursery {
+                results.add(eslint_name, eslint_to_biome::RuleMigrationResult::Nursery);
                 return false;
             }
             let group = rules.nursery.get_or_insert_with(Default::default);
@@ -754,7 +815,7 @@ pub(crate) fn migrate_eslint_any_rule(
         }
         "jest/no-disabled-tests" => {
             if !options.include_inspired {
-                results.has_inspired_rules = true;
+                results.add(eslint_name, eslint_to_biome::RuleMigrationResult::Inspired);
                 return false;
             }
             let group = rules.suspicious.get_or_insert_with(Default::default);
@@ -774,7 +835,7 @@ pub(crate) fn migrate_eslint_any_rule(
         }
         "jest/no-duplicate-hooks" => {
             if !options.include_inspired {
-                results.has_inspired_rules = true;
+                results.add(eslint_name, eslint_to_biome::RuleMigrationResult::Inspired);
                 return false;
             }
             let group = rules.suspicious.get_or_insert_with(Default::default);
@@ -786,7 +847,7 @@ pub(crate) fn migrate_eslint_any_rule(
         }
         "jest/no-export" => {
             if !options.include_inspired {
-                results.has_inspired_rules = true;
+                results.add(eslint_name, eslint_to_biome::RuleMigrationResult::Inspired);
                 return false;
             }
             let group = rules.suspicious.get_or_insert_with(Default::default);
@@ -798,7 +859,7 @@ pub(crate) fn migrate_eslint_any_rule(
         }
         "jest/no-focused-tests" => {
             if !options.include_inspired {
-                results.has_inspired_rules = true;
+                results.add(eslint_name, eslint_to_biome::RuleMigrationResult::Inspired);
                 return false;
             }
             let group = rules.suspicious.get_or_insert_with(Default::default);
@@ -810,7 +871,7 @@ pub(crate) fn migrate_eslint_any_rule(
         }
         "jest/no-standalone-expect" => {
             if !options.include_inspired {
-                results.has_inspired_rules = true;
+                results.add(eslint_name, eslint_to_biome::RuleMigrationResult::Inspired);
                 return false;
             }
             let group = rules.suspicious.get_or_insert_with(Default::default);
@@ -822,6 +883,7 @@ pub(crate) fn migrate_eslint_any_rule(
         }
         "jsdoc/no-multi-asterisks" => {
             if !options.include_nursery {
+                results.add(eslint_name, eslint_to_biome::RuleMigrationResult::Nursery);
                 return false;
             }
             let group = rules.nursery.get_or_insert_with(Default::default);
@@ -1025,6 +1087,7 @@ pub(crate) fn migrate_eslint_any_rule(
         }
         "jsx-a11y/no-noninteractive-element-interactions" => {
             if !options.include_nursery {
+                results.add(eslint_name, eslint_to_biome::RuleMigrationResult::Nursery);
                 return false;
             }
             let group = rules.nursery.get_or_insert_with(Default::default);
@@ -1106,6 +1169,22 @@ pub(crate) fn migrate_eslint_any_rule(
                 .get_or_insert(Default::default());
             rule.set_level(rule.level().max(rule_severity.into()));
         }
+        "max-lines-per-function" => {
+            if !options.include_inspired {
+                results.add(eslint_name, eslint_to_biome::RuleMigrationResult::Inspired);
+                return false;
+            }
+            if !options.include_nursery {
+                results.add(eslint_name, eslint_to_biome::RuleMigrationResult::Nursery);
+                return false;
+            }
+            let group = rules.nursery.get_or_insert_with(Default::default);
+            let rule = group
+                .unwrap_group_as_mut()
+                .no_excessive_lines_per_function
+                .get_or_insert(Default::default());
+            rule.set_level(rule.level().max(rule_severity.into()));
+        }
         "n/no-process-env" => {
             let group = rules.style.get_or_insert_with(Default::default);
             let rule = group
@@ -1114,8 +1193,16 @@ pub(crate) fn migrate_eslint_any_rule(
                 .get_or_insert(Default::default());
             rule.set_level(rule.level().max(rule_severity.into()));
         }
+        "no-alert" => {
+            let group = rules.suspicious.get_or_insert_with(Default::default);
+            let rule = group
+                .unwrap_group_as_mut()
+                .no_alert
+                .get_or_insert(Default::default());
+            rule.set_level(rule.level().max(rule_severity.into()));
+        }
         "no-array-constructor" => {
-            let group = rules.correctness.get_or_insert_with(Default::default);
+            let group = rules.style.get_or_insert_with(Default::default);
             let rule = group
                 .unwrap_group_as_mut()
                 .use_array_literals
@@ -1132,6 +1219,7 @@ pub(crate) fn migrate_eslint_any_rule(
         }
         "no-await-in-loop" => {
             if !options.include_nursery {
+                results.add(eslint_name, eslint_to_biome::RuleMigrationResult::Nursery);
                 return false;
             }
             let group = rules.nursery.get_or_insert_with(Default::default);
@@ -1143,6 +1231,7 @@ pub(crate) fn migrate_eslint_any_rule(
         }
         "no-bitwise" => {
             if !options.include_nursery {
+                results.add(eslint_name, eslint_to_biome::RuleMigrationResult::Nursery);
                 return false;
             }
             let group = rules.nursery.get_or_insert_with(Default::default);
@@ -1178,7 +1267,7 @@ pub(crate) fn migrate_eslint_any_rule(
         }
         "no-cond-assign" => {
             if !options.include_inspired {
-                results.has_inspired_rules = true;
+                results.add(eslint_name, eslint_to_biome::RuleMigrationResult::Inspired);
                 return false;
             }
             let group = rules.suspicious.get_or_insert_with(Default::default);
@@ -1206,6 +1295,7 @@ pub(crate) fn migrate_eslint_any_rule(
         }
         "no-constant-binary-expression" => {
             if !options.include_nursery {
+                results.add(eslint_name, eslint_to_biome::RuleMigrationResult::Nursery);
                 return false;
             }
             let group = rules.nursery.get_or_insert_with(Default::default);
@@ -1289,7 +1379,7 @@ pub(crate) fn migrate_eslint_any_rule(
         }
         "no-else-return" => {
             if !options.include_inspired {
-                results.has_inspired_rules = true;
+                results.add(eslint_name, eslint_to_biome::RuleMigrationResult::Inspired);
                 return false;
             }
             let group = rules.style.get_or_insert_with(Default::default);
@@ -1395,6 +1485,18 @@ pub(crate) fn migrate_eslint_any_rule(
                 .get_or_insert(Default::default());
             rule.set_level(rule.level().max(rule_severity.into()));
         }
+        "no-implicit-coercion" => {
+            if !options.include_nursery {
+                results.add(eslint_name, eslint_to_biome::RuleMigrationResult::Nursery);
+                return false;
+            }
+            let group = rules.nursery.get_or_insert_with(Default::default);
+            let rule = group
+                .unwrap_group_as_mut()
+                .no_implicit_coercion
+                .get_or_insert(Default::default());
+            rule.set_level(rule.level().max(rule_severity.into()));
+        }
         "no-import-assign" => {
             let group = rules.suspicious.get_or_insert_with(Default::default);
             let rule = group
@@ -1429,7 +1531,7 @@ pub(crate) fn migrate_eslint_any_rule(
         }
         "no-labels" => {
             if !options.include_inspired {
-                results.has_inspired_rules = true;
+                results.add(eslint_name, eslint_to_biome::RuleMigrationResult::Inspired);
                 return false;
             }
             let group = rules.suspicious.get_or_insert_with(Default::default);
@@ -1577,10 +1679,11 @@ pub(crate) fn migrate_eslint_any_rule(
         }
         "no-secrets/no-secrets" => {
             if !options.include_inspired {
-                results.has_inspired_rules = true;
+                results.add(eslint_name, eslint_to_biome::RuleMigrationResult::Inspired);
                 return false;
             }
             if !options.include_nursery {
+                results.add(eslint_name, eslint_to_biome::RuleMigrationResult::Nursery);
                 return false;
             }
             let group = rules.nursery.get_or_insert_with(Default::default);
@@ -1607,7 +1710,7 @@ pub(crate) fn migrate_eslint_any_rule(
             rule.set_level(rule.level().max(rule_severity.into()));
         }
         "no-sequences" => {
-            let group = rules.style.get_or_insert_with(Default::default);
+            let group = rules.complexity.get_or_insert_with(Default::default);
             let rule = group
                 .unwrap_group_as_mut()
                 .no_comma_operator
@@ -1624,6 +1727,7 @@ pub(crate) fn migrate_eslint_any_rule(
         }
         "no-shadow" => {
             if !options.include_nursery {
+                results.add(eslint_name, eslint_to_biome::RuleMigrationResult::Nursery);
                 return false;
             }
             let group = rules.nursery.get_or_insert_with(Default::default);
@@ -1667,13 +1771,25 @@ pub(crate) fn migrate_eslint_any_rule(
         }
         "no-throw-literal" => {
             if !options.include_inspired {
-                results.has_inspired_rules = true;
+                results.add(eslint_name, eslint_to_biome::RuleMigrationResult::Inspired);
                 return false;
             }
             let group = rules.style.get_or_insert_with(Default::default);
             let rule = group
                 .unwrap_group_as_mut()
                 .use_throw_only_error
+                .get_or_insert(Default::default());
+            rule.set_level(rule.level().max(rule_severity.into()));
+        }
+        "no-unassigned-vars" => {
+            if !options.include_nursery {
+                results.add(eslint_name, eslint_to_biome::RuleMigrationResult::Nursery);
+                return false;
+            }
+            let group = rules.nursery.get_or_insert_with(Default::default);
+            let rule = group
+                .unwrap_group_as_mut()
+                .no_unassigned_variables
                 .get_or_insert(Default::default());
             rule.set_level(rule.level().max(rule_severity.into()));
         }
@@ -1767,6 +1883,7 @@ pub(crate) fn migrate_eslint_any_rule(
         }
         "no-useless-backreference" => {
             if !options.include_nursery {
+                results.add(eslint_name, eslint_to_biome::RuleMigrationResult::Nursery);
                 return false;
             }
             let group = rules.nursery.get_or_insert_with(Default::default);
@@ -1781,6 +1898,14 @@ pub(crate) fn migrate_eslint_any_rule(
             let rule = group
                 .unwrap_group_as_mut()
                 .no_useless_catch
+                .get_or_insert(Default::default());
+            rule.set_level(rule.level().max(rule_severity.into()));
+        }
+        "no-useless-computed-key" => {
+            let group = rules.complexity.get_or_insert_with(Default::default);
+            let rule = group
+                .unwrap_group_as_mut()
+                .use_literal_keys
                 .get_or_insert(Default::default());
             rule.set_level(rule.level().max(rule_severity.into()));
         }
@@ -1833,7 +1958,7 @@ pub(crate) fn migrate_eslint_any_rule(
             rule.set_level(rule.level().max(rule_severity.into()));
         }
         "no-with" => {
-            let group = rules.complexity.get_or_insert_with(Default::default);
+            let group = rules.suspicious.get_or_insert_with(Default::default);
             let rule = group
                 .unwrap_group_as_mut()
                 .no_with
@@ -1842,10 +1967,11 @@ pub(crate) fn migrate_eslint_any_rule(
         }
         "object-shorthand" => {
             if !options.include_inspired {
-                results.has_inspired_rules = true;
+                results.add(eslint_name, eslint_to_biome::RuleMigrationResult::Inspired);
                 return false;
             }
             if !options.include_nursery {
+                results.add(eslint_name, eslint_to_biome::RuleMigrationResult::Nursery);
                 return false;
             }
             let group = rules.nursery.get_or_insert_with(Default::default);
@@ -1873,7 +1999,7 @@ pub(crate) fn migrate_eslint_any_rule(
         }
         "prefer-arrow-callback" => {
             if !options.include_inspired {
-                results.has_inspired_rules = true;
+                results.add(eslint_name, eslint_to_biome::RuleMigrationResult::Inspired);
                 return false;
             }
             let group = rules.complexity.get_or_insert_with(Default::default);
@@ -1900,7 +2026,7 @@ pub(crate) fn migrate_eslint_any_rule(
             rule.set_level(rule.level().max(rule_severity.into()));
         }
         "prefer-numeric-literals" => {
-            let group = rules.style.get_or_insert_with(Default::default);
+            let group = rules.complexity.get_or_insert_with(Default::default);
             let rule = group
                 .unwrap_group_as_mut()
                 .use_numeric_literals
@@ -1915,6 +2041,18 @@ pub(crate) fn migrate_eslint_any_rule(
                 .get_or_insert(Default::default());
             rule.set_level(rule.level().max(rule_severity.into()));
         }
+        "prefer-object-spread" => {
+            if !options.include_nursery {
+                results.add(eslint_name, eslint_to_biome::RuleMigrationResult::Nursery);
+                return false;
+            }
+            let group = rules.nursery.get_or_insert_with(Default::default);
+            let rule = group
+                .unwrap_group_as_mut()
+                .use_object_spread
+                .get_or_insert(Default::default());
+            rule.set_level(rule.level().max(rule_severity.into()));
+        }
         "prefer-regex-literals" => {
             let group = rules.complexity.get_or_insert_with(Default::default);
             let rule = group
@@ -1924,7 +2062,7 @@ pub(crate) fn migrate_eslint_any_rule(
             rule.set_level(rule.level().max(rule_severity.into()));
         }
         "prefer-rest-params" => {
-            let group = rules.style.get_or_insert_with(Default::default);
+            let group = rules.complexity.get_or_insert_with(Default::default);
             let rule = group
                 .unwrap_group_as_mut()
                 .no_arguments
@@ -1941,6 +2079,7 @@ pub(crate) fn migrate_eslint_any_rule(
         }
         "radix" => {
             if !options.include_nursery {
+                results.add(eslint_name, eslint_to_biome::RuleMigrationResult::Nursery);
                 return false;
             }
             let group = rules.nursery.get_or_insert_with(Default::default);
@@ -1958,6 +2097,18 @@ pub(crate) fn migrate_eslint_any_rule(
                 .get_or_insert(Default::default());
             rule.set_level(rule.level().max(rule_severity.into()));
         }
+        "react-hooks/react-compiler" => {
+            if !options.include_nursery {
+                results.add(eslint_name, eslint_to_biome::RuleMigrationResult::Nursery);
+                return false;
+            }
+            let group = rules.nursery.get_or_insert_with(Default::default);
+            let rule = group
+                .unwrap_group_as_mut()
+                .no_react_prop_assign
+                .get_or_insert(Default::default());
+            rule.set_level(rule.level().max(rule_severity.into()));
+        }
         "react-hooks/rules-of-hooks" => {
             let group = rules.correctness.get_or_insert_with(Default::default);
             let rule = group
@@ -1968,7 +2119,7 @@ pub(crate) fn migrate_eslint_any_rule(
         }
         "react-refresh/only-export-components" => {
             if !options.include_inspired {
-                results.has_inspired_rules = true;
+                results.add(eslint_name, eslint_to_biome::RuleMigrationResult::Inspired);
                 return false;
             }
             let group = rules.style.get_or_insert_with(Default::default);
@@ -1988,6 +2139,7 @@ pub(crate) fn migrate_eslint_any_rule(
         }
         "react/forbid-elements" => {
             if !options.include_nursery {
+                results.add(eslint_name, eslint_to_biome::RuleMigrationResult::Nursery);
                 return false;
             }
             let group = rules.nursery.get_or_insert_with(Default::default);
@@ -1999,7 +2151,7 @@ pub(crate) fn migrate_eslint_any_rule(
         }
         "react/jsx-boolean-value" => {
             if !options.include_inspired {
-                results.has_inspired_rules = true;
+                results.add(eslint_name, eslint_to_biome::RuleMigrationResult::Inspired);
                 return false;
             }
             let group = rules.style.get_or_insert_with(Default::default);
@@ -2011,7 +2163,7 @@ pub(crate) fn migrate_eslint_any_rule(
         }
         "react/jsx-curly-brace-presence" => {
             if !options.include_inspired {
-                results.has_inspired_rules = true;
+                results.add(eslint_name, eslint_to_biome::RuleMigrationResult::Inspired);
                 return false;
             }
             let group = rules.style.get_or_insert_with(Default::default);
@@ -2055,7 +2207,7 @@ pub(crate) fn migrate_eslint_any_rule(
         }
         "react/jsx-no-target-blank" => {
             if !options.include_inspired {
-                results.has_inspired_rules = true;
+                results.add(eslint_name, eslint_to_biome::RuleMigrationResult::Inspired);
                 return false;
             }
             let group = rules.security.get_or_insert_with(Default::default);
@@ -2115,6 +2267,7 @@ pub(crate) fn migrate_eslint_any_rule(
         }
         "regexp/no-useless-backreference" => {
             if !options.include_nursery {
+                results.add(eslint_name, eslint_to_biome::RuleMigrationResult::Nursery);
                 return false;
             }
             let group = rules.nursery.get_or_insert_with(Default::default);
@@ -2142,10 +2295,11 @@ pub(crate) fn migrate_eslint_any_rule(
         }
         "solidjs/no-destructure" => {
             if !options.include_inspired {
-                results.has_inspired_rules = true;
+                results.add(eslint_name, eslint_to_biome::RuleMigrationResult::Inspired);
                 return false;
             }
             if !options.include_nursery {
+                results.add(eslint_name, eslint_to_biome::RuleMigrationResult::Nursery);
                 return false;
             }
             let group = rules.nursery.get_or_insert_with(Default::default);
@@ -2165,10 +2319,11 @@ pub(crate) fn migrate_eslint_any_rule(
         }
         "solidjs/perfer-for" => {
             if !options.include_inspired {
-                results.has_inspired_rules = true;
+                results.add(eslint_name, eslint_to_biome::RuleMigrationResult::Inspired);
                 return false;
             }
             if !options.include_nursery {
+                results.add(eslint_name, eslint_to_biome::RuleMigrationResult::Nursery);
                 return false;
             }
             let group = rules.nursery.get_or_insert_with(Default::default);
@@ -2196,6 +2351,7 @@ pub(crate) fn migrate_eslint_any_rule(
         }
         "symbol-description" => {
             if !options.include_nursery {
+                results.add(eslint_name, eslint_to_biome::RuleMigrationResult::Nursery);
                 return false;
             }
             let group = rules.nursery.get_or_insert_with(Default::default);
@@ -2223,7 +2379,7 @@ pub(crate) fn migrate_eslint_any_rule(
         }
         "unicorn/filename-case" => {
             if !options.include_inspired {
-                results.has_inspired_rules = true;
+                results.add(eslint_name, eslint_to_biome::RuleMigrationResult::Inspired);
                 return false;
             }
             let group = rules.style.get_or_insert_with(Default::default);
@@ -2307,6 +2463,7 @@ pub(crate) fn migrate_eslint_any_rule(
         }
         "unicorn/no-useless-undefined" => {
             if !options.include_nursery {
+                results.add(eslint_name, eslint_to_biome::RuleMigrationResult::Nursery);
                 return false;
             }
             let group = rules.nursery.get_or_insert_with(Default::default);
@@ -2318,6 +2475,7 @@ pub(crate) fn migrate_eslint_any_rule(
         }
         "unicorn/numeric-separators-style" => {
             if !options.include_nursery {
+                results.add(eslint_name, eslint_to_biome::RuleMigrationResult::Nursery);
                 return false;
             }
             let group = rules.nursery.get_or_insert_with(Default::default);
@@ -2335,9 +2493,21 @@ pub(crate) fn migrate_eslint_any_rule(
                 .get_or_insert(Default::default());
             rule.set_level(rule.level().max(rule_severity.into()));
         }
+        "unicorn/prefer-array-index-of" => {
+            if !options.include_nursery {
+                results.add(eslint_name, eslint_to_biome::RuleMigrationResult::Nursery);
+                return false;
+            }
+            let group = rules.nursery.get_or_insert_with(Default::default);
+            let rule = group
+                .unwrap_group_as_mut()
+                .use_index_of
+                .get_or_insert(Default::default());
+            rule.set_level(rule.level().max(rule_severity.into()));
+        }
         "unicorn/prefer-at" => {
             if !options.include_inspired {
-                results.has_inspired_rules = true;
+                results.add(eslint_name, eslint_to_biome::RuleMigrationResult::Inspired);
                 return false;
             }
             let group = rules.style.get_or_insert_with(Default::default);
@@ -2357,10 +2527,11 @@ pub(crate) fn migrate_eslint_any_rule(
         }
         "unicorn/prefer-module" => {
             if !options.include_inspired {
-                results.has_inspired_rules = true;
+                results.add(eslint_name, eslint_to_biome::RuleMigrationResult::Inspired);
                 return false;
             }
             if !options.include_nursery {
+                results.add(eslint_name, eslint_to_biome::RuleMigrationResult::Nursery);
                 return false;
             }
             let group = rules.nursery.get_or_insert_with(Default::default);
@@ -2443,7 +2614,7 @@ pub(crate) fn migrate_eslint_any_rule(
             rule.set_level(rule.level().max(rule_severity.into()));
         }
         "valid-typeof" => {
-            let group = rules.suspicious.get_or_insert_with(Default::default);
+            let group = rules.correctness.get_or_insert_with(Default::default);
             let rule = group
                 .unwrap_group_as_mut()
                 .use_valid_typeof
@@ -2460,7 +2631,7 @@ pub(crate) fn migrate_eslint_any_rule(
         }
         "vitest/no-disabled-tests" => {
             if !options.include_inspired {
-                results.has_inspired_rules = true;
+                results.add(eslint_name, eslint_to_biome::RuleMigrationResult::Inspired);
                 return false;
             }
             let group = rules.suspicious.get_or_insert_with(Default::default);
@@ -2480,7 +2651,7 @@ pub(crate) fn migrate_eslint_any_rule(
         }
         "vitest/no-duplicate-hooks" => {
             if !options.include_inspired {
-                results.has_inspired_rules = true;
+                results.add(eslint_name, eslint_to_biome::RuleMigrationResult::Inspired);
                 return false;
             }
             let group = rules.suspicious.get_or_insert_with(Default::default);
@@ -2492,7 +2663,7 @@ pub(crate) fn migrate_eslint_any_rule(
         }
         "vitest/no-focused-tests" => {
             if !options.include_inspired {
-                results.has_inspired_rules = true;
+                results.add(eslint_name, eslint_to_biome::RuleMigrationResult::Inspired);
                 return false;
             }
             let group = rules.suspicious.get_or_insert_with(Default::default);
@@ -2504,7 +2675,7 @@ pub(crate) fn migrate_eslint_any_rule(
         }
         "vitest/no-standalone-expect" => {
             if !options.include_inspired {
-                results.has_inspired_rules = true;
+                results.add(eslint_name, eslint_to_biome::RuleMigrationResult::Inspired);
                 return false;
             }
             let group = rules.suspicious.get_or_insert_with(Default::default);
@@ -2523,8 +2694,13 @@ pub(crate) fn migrate_eslint_any_rule(
             rule.set_level(rule.level().max(rule_severity.into()));
         }
         _ => {
+            results.add(
+                eslint_name,
+                eslint_to_biome::RuleMigrationResult::Unsupported,
+            );
             return false;
         }
     }
+    results.add(eslint_name, eslint_to_biome::RuleMigrationResult::Migrated);
     true
 }

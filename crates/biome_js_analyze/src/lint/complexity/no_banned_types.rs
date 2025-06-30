@@ -92,7 +92,7 @@ declare_lint_rule! {
         version: "1.0.0",
         name: "noBannedTypes",
         language: "ts",
-        sources: &[RuleSource::EslintTypeScript("ban-types")],
+        sources: &[RuleSource::EslintTypeScript("ban-types").same()],
         recommended: true,
         severity: Severity::Warning,
         fix_kind: FixKind::Safe,

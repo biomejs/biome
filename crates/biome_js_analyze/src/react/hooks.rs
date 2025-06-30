@@ -18,6 +18,7 @@ use biome_rowan::AstNode;
 use rustc_hash::{FxHashMap, FxHashSet};
 use serde::{Deserialize, Serialize};
 
+use biome_analyze::QueryMatch;
 #[cfg(feature = "schemars")]
 use schemars::JsonSchema;
 
@@ -72,7 +73,10 @@ impl ReactCallWithDependencyResult {
                 closure
                     .descendents()
                     .flat_map(|closure| closure.all_captures())
-                    .filter(move |capture| !range.contains(capture.declaration_range().start()))
+                    .filter(move |capture| {
+                        !range.contains(capture.declaration_range().start())
+                            && range.contains(capture.node().text_range().start())
+                    })
             })
             .into_iter()
             .flatten()
@@ -125,21 +129,12 @@ fn get_untrimmed_callee_name(call: &JsCallExpression) -> Option<JsSyntaxToken> {
     None
 }
 
-/// Checks whether the given function name belongs to a React component, based
-/// on the official convention for React component naming: React component names
-/// must start with a capital letter.
-///
-/// Source: https://react.dev/learn/reusing-logic-with-custom-hooks#hook-names-always-start-with-use
-pub(crate) fn is_react_component(name: &str) -> bool {
-    name.chars().next().is_some_and(char::is_uppercase)
-}
-
 /// Checks whether the given function name belongs to a React hook, based on the
 /// official convention for React hook naming: Hook names must start with `use`
 /// followed by a capital letter.
 ///
 /// Source: https://react.dev/learn/reusing-logic-with-custom-hooks#hook-names-always-start-with-use
-pub(crate) fn is_react_hook(name: &str) -> bool {
+pub(crate) fn is_react_hook_name(name: &str) -> bool {
     name.starts_with("use") && name.chars().nth(3).is_some_and(char::is_uppercase)
 }
 
@@ -147,13 +142,13 @@ pub(crate) fn is_react_hook(name: &str) -> bool {
 /// official convention for React hook naming: Hook names must start with `use`
 /// followed by a capital letter.
 ///
-/// See [is_react_hook()].
+/// See [is_react_hook_name()].
 pub(crate) fn is_react_hook_call(call: &JsCallExpression) -> bool {
     let Some(name) = get_untrimmed_callee_name(call) else {
         return false;
     };
 
-    // HACK: jest has some functions that start with `use` and are not hooks
+    // HACK: Jest/Vitest have some functions that start with `use` and are not hooks
     if let Some(expr) = call
         .callee()
         .ok()
@@ -163,12 +158,13 @@ pub(crate) fn is_react_hook_call(call: &JsCallExpression) -> bool {
         .and_then(|ident| ident.name().ok())
         .and_then(|name| name.value_token().ok())
     {
-        if expr.text_trimmed() == "jest" {
+        let expr_trimmed = expr.text_trimmed();
+        if expr_trimmed == "jest" || expr_trimmed == "vi" {
             return false;
         }
     }
 
-    is_react_hook(name.text_trimmed())
+    is_react_hook_name(name.text_trimmed())
 }
 
 /// Returns the [TextRange] of the hook name; the node of the

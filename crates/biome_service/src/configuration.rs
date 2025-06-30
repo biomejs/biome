@@ -1,8 +1,12 @@
 use crate::WorkspaceError;
 use crate::settings::Settings;
-use biome_analyze::AnalyzerRules;
+use crate::workspace::ScanKind;
+use biome_analyze::{
+    AnalyzerRules, Queryable, RegistryVisitor, Rule, RuleDomain, RuleFilter, RuleGroup,
+};
+use biome_configuration::analyzer::{RuleDomainValue, RuleSelector};
 use biome_configuration::diagnostics::{
-    CantLoadExtendFile, EditorConfigDiagnostic, ParseFailedDiagnostic,
+    CantLoadExtendFile, CantResolve, EditorConfigDiagnostic, ParseFailedDiagnostic,
 };
 use biome_configuration::editorconfig::EditorConfig;
 use biome_configuration::{
@@ -11,20 +15,23 @@ use biome_configuration::{
 use biome_configuration::{Configuration, VERSION, push_to_analyzer_assist};
 use biome_console::markup;
 use biome_css_analyze::METADATA as css_lint_metadata;
+use biome_css_syntax::CssLanguage;
 use biome_deserialize::json::deserialize_from_json_str;
 use biome_deserialize::{Deserialized, Merge};
-use biome_diagnostics::CaminoError;
 use biome_diagnostics::{DiagnosticExt, Error, Severity};
-use biome_fs::{
-    AutoSearchResult, ConfigName, FileSystem, FileSystemDiagnostic, FsErrorKind, OpenOptions,
-};
+use biome_fs::{AutoSearchResult, ConfigName, FileSystem, OpenOptions};
 use biome_graphql_analyze::METADATA as graphql_lint_metadata;
+use biome_graphql_syntax::GraphqlLanguage;
 use biome_js_analyze::METADATA as js_lint_metadata;
+use biome_js_syntax::JsLanguage;
 use biome_json_analyze::METADATA as json_lint_metadata;
 use biome_json_formatter::context::JsonFormatOptions;
 use biome_json_parser::{JsonParserOptions, parse_json};
+use biome_json_syntax::JsonLanguage;
+use biome_resolver::{FsWithResolverProxy, ResolveOptions, resolve};
+use biome_rowan::Language;
 use camino::{Utf8Path, Utf8PathBuf};
-use std::ffi::OsStr;
+use rustc_hash::FxHashSet;
 use std::fmt::Debug;
 use std::io::ErrorKind;
 use std::iter::FusedIterator;
@@ -106,9 +113,10 @@ impl<'a> Iterator for ConfigurationDiagnosticsIter<'a> {
 impl FusedIterator for ConfigurationDiagnosticsIter<'_> {}
 
 impl LoadedConfiguration {
-    fn try_from_payload(
+    /// It consumes the payload, applies and extends and returns the final, extended configuration.
+    pub fn try_from_payload(
         value: Option<ConfigurationPayload>,
-        fs: &dyn FileSystem,
+        fs: &dyn FsWithResolverProxy,
     ) -> Result<Self, WorkspaceError> {
         let Some(value) = value else {
             return Ok(Self::default());
@@ -146,13 +154,54 @@ impl LoadedConfiguration {
 }
 
 /// Load the partial configuration for this session of the CLI.
+///
+/// When `root` is passed, it returns the first configuration that has `root: true`.
 #[instrument(level = "debug", skip(fs))]
 pub fn load_configuration(
-    fs: &dyn FileSystem,
+    fs: &dyn FsWithResolverProxy,
     config_path: ConfigurationPathHint,
 ) -> Result<LoadedConfiguration, WorkspaceError> {
-    let config = load_config(fs, config_path)?;
-    LoadedConfiguration::try_from_payload(config, fs)
+    let config = read_config(fs, config_path, true)?;
+    let mut loaded_configuration = LoadedConfiguration::try_from_payload(config, fs);
+
+    // We loaded the configuration, now we must check if this configuration is inside a monorepo.
+    if let Ok(loaded_configuration) = &mut loaded_configuration {
+        // First, we check if the configuration found uses the syntax `"extends": "//"`
+        if loaded_configuration.configuration.extends_root() {
+            // We start looking upwards and find a `biome.json` that has `root: true`
+            if let Some(directory_path) = loaded_configuration.directory_path.as_ref() {
+                let root_config = read_config(
+                    fs,
+                    ConfigurationPathHint::FromWorkspace(directory_path.clone()),
+                    true,
+                )?;
+
+                if root_config.is_none() {
+                    return Err(BiomeDiagnostic::no_root_from_nested_extend().into());
+                }
+
+                // We call possible extends from the root configuration
+                let mut result = LoadedConfiguration::try_from_payload(root_config, fs)?;
+                // The configuration we found at the beginning now must "extend" from the root, and
+                // to do so we merge the root with the original configuration, so the original
+                // configuration takes precedence...
+                result
+                    .configuration
+                    .merge_with(loaded_configuration.configuration.clone());
+
+                // ...and how we swap the values to `loaded_configuration` configuration takes the correct
+                // configuration has the correct final values
+                std::mem::swap(
+                    &mut loaded_configuration.configuration,
+                    &mut result.configuration,
+                );
+                // We add possible diagnostics coming from the root configuration
+                loaded_configuration.diagnostics.extend(result.diagnostics);
+            }
+        }
+    }
+
+    loaded_configuration
 }
 
 /// - [Result]: if an error occurred while loading the configuration file.
@@ -174,8 +223,15 @@ type LoadConfig = Result<Option<ConfigurationPayload>, WorkspaceError>;
 /// - Otherwise, the function will try to traverse upwards the file system until it finds a `biome.json` or `biome.jsonc`
 ///     file, or there aren't directories anymore. In this case, the function will not error but return an `Ok(None)`, which
 ///     means Biome will use the default configuration.
+///
+/// When `seek_root` is `true`, the function will stop at the first configuration file with `"root": true`, and it skips it
+/// otherwise
 #[instrument(level = "debug", skip(fs))]
-fn load_config(fs: &dyn FileSystem, base_path: ConfigurationPathHint) -> LoadConfig {
+pub fn read_config(
+    fs: &dyn FileSystem,
+    base_path: ConfigurationPathHint,
+    seek_root: bool,
+) -> LoadConfig {
     // This path is used for configuration resolution from external packages.
     let external_resolution_base_path = match &base_path {
         // Path hint from LSP is always the workspace root
@@ -215,7 +271,13 @@ fn load_config(fs: &dyn FileSystem, base_path: ConfigurationPathHint) -> LoadCon
         let is_root = deserialized_content
             .deserialized
             .as_ref()
-            .is_some_and(|config| config.root.is_none_or(|root| root.value()));
+            .is_some_and(|config| {
+                if seek_root {
+                    config.is_root()
+                } else {
+                    !config.is_root()
+                }
+            });
         if is_root {
             deserialized = Some(deserialized_content);
         }
@@ -433,7 +495,7 @@ pub fn to_analyzer_rules(settings: &Settings, path: &Utf8Path) -> AnalyzerRules 
 pub trait ConfigurationExt {
     fn apply_extends(
         &mut self,
-        fs: &dyn FileSystem,
+        fs: &dyn FsWithResolverProxy,
         file_path: &Utf8Path,
         external_resolution_base_path: &Utf8Path,
         diagnostics: &mut Vec<Error>,
@@ -441,7 +503,7 @@ pub trait ConfigurationExt {
 
     fn deserialize_extends(
         &mut self,
-        fs: &dyn FileSystem,
+        fs: &dyn FsWithResolverProxy,
         relative_resolution_base_path: &Utf8Path,
         external_resolution_base_path: &Utf8Path,
     ) -> Result<Vec<Deserialized<Configuration>>, WorkspaceError>;
@@ -458,7 +520,7 @@ impl ConfigurationExt for Configuration {
     /// If a configuration can't be resolved from the file system, the operation will fail.
     fn apply_extends(
         &mut self,
-        fs: &dyn FileSystem,
+        fs: &dyn FsWithResolverProxy,
         file_path: &Utf8Path,
         external_resolution_base_path: &Utf8Path,
         diagnostics: &mut Vec<Error>,
@@ -468,19 +530,20 @@ impl ConfigurationExt for Configuration {
             file_path.parent().expect("file path should have a parent"),
             external_resolution_base_path,
         )?;
-        let (configurations, errors): (Vec<_>, Vec<_>) = deserialized
-            .into_iter()
-            .map(|d| d.consume())
-            .map(|(config, diagnostics)| (config.unwrap_or_default(), diagnostics))
-            .unzip();
+        let (configurations, errors): (Vec<_>, Vec<_>) =
+            deserialized.into_iter().map(Deserialized::consume).unzip();
 
-        let extended_configuration = configurations.into_iter().reduce(
+        let extended_configuration = configurations.into_iter().flatten().reduce(
             |mut previous_configuration, current_configuration| {
                 previous_configuration.merge_with(current_configuration);
                 previous_configuration
             },
         );
         if let Some(mut extended_configuration) = extended_configuration {
+            // Make sure our root value is set explicitly, so it cannot be set
+            // by configs we extend.
+            self.root = Some(self.is_root().into());
+
             // We swap them to avoid having to clone `self.configuration` to merge it.
             std::mem::swap(self, &mut extended_configuration);
             self.merge_with(extended_configuration)
@@ -497,10 +560,11 @@ impl ConfigurationExt for Configuration {
         Ok(())
     }
 
-    /// It attempts to deserialize all the configuration files that were specified in the `extends` property
+    /// Deserializes all the configuration files that were specified in the
+    /// `extends` field.
     fn deserialize_extends(
         &mut self,
-        fs: &dyn FileSystem,
+        fs: &dyn FsWithResolverProxy,
         relative_resolution_base_path: &Utf8Path,
         external_resolution_base_path: &Utf8Path,
     ) -> Result<Vec<Deserialized<Configuration>>, WorkspaceError> {
@@ -509,73 +573,78 @@ impl ConfigurationExt for Configuration {
         };
 
         let mut deserialized_configurations = vec![];
-        for extend_entry in extends.iter() {
-            let extend_entry_as_path = Path::new(extend_entry.as_ref());
+        if let Some(extends) = extends.as_list() {
+            for extend_entry in extends.iter() {
+                let extend_entry_as_path = Path::new(extend_entry.as_ref());
 
-            let extend_configuration_file_path = if extend_entry_as_path.starts_with(".")
-                // TODO: Remove extension in Biome 2.0
-                || matches!(
-                    extend_entry_as_path.extension().map(OsStr::as_encoded_bytes),
-                    Some(b"json" | b"jsonc")
-                ) {
-                relative_resolution_base_path.join(extend_entry.as_ref())
-            } else {
-                Utf8PathBuf::try_from(
-                    fs.resolve_configuration(extend_entry.as_ref(), external_resolution_base_path)
-                        .map_err(|error| {
-                            BiomeDiagnostic::cant_resolve(
-                                external_resolution_base_path.to_string(),
-                                error,
-                            )
-                        })?
-                        .into_path_buf(),
-                )
-                .map_err(|err| FileSystemDiagnostic {
-                    path: external_resolution_base_path.to_string(),
-                    severity: Severity::Error,
-                    error_kind: FsErrorKind::CantReadFile,
-                    source: Some(Error::from(CaminoError::from(err))),
-                })?
-            };
+                let extend_configuration_file_path = if extend_entry_as_path.starts_with(".") {
+                    relative_resolution_base_path.join(extend_entry.as_ref())
+                } else {
+                    const RESOLVE_OPTIONS: ResolveOptions = ResolveOptions::new()
+                        .with_assume_relative()
+                        .with_condition_names(&["biome", "default"]);
 
-            let mut file = fs
-                .open_with_options(
-                    extend_configuration_file_path.as_path(),
-                    OpenOptions::default().read(true),
-                )
-                .map_err(|err| {
+                    resolve(
+                        extend_entry.as_ref(),
+                        external_resolution_base_path,
+                        fs,
+                        &RESOLVE_OPTIONS,
+                    )
+                    .map_err(|error| {
+                        CantResolve::new(Utf8PathBuf::from(extend_entry), error)
+                            .with_verbose_advice(markup! {
+                                "Biome tried to resolve the configuration file \""<Emphasis>{
+                                    extend_entry
+                                }</Emphasis>"\" in \"extends\" using \""<Emphasis>{
+                                    external_resolution_base_path.to_string()
+                                }</Emphasis>"\" as the base path."
+                            })
+                    })?
+                };
+
+                let mut file = fs
+                    .open_with_options(
+                        extend_configuration_file_path.as_path(),
+                        OpenOptions::default().read(true),
+                    )
+                    .map_err(|err| {
+                        CantLoadExtendFile::new(
+                            extend_configuration_file_path.to_string(),
+                            err.to_string(),
+                        )
+                        .with_verbose_advice(markup! {
+                            "Biome tried to load the configuration file \""<Emphasis>{
+                                extend_configuration_file_path.to_string()
+                            }</Emphasis>"\" in \"extends\" using \""<Emphasis>{
+                                external_resolution_base_path.to_string()
+                            }</Emphasis>"\" as the base path."
+                        })
+                    })?;
+
+                let mut content = String::new();
+                file.read_to_string(&mut content).map_err(|err| {
                     CantLoadExtendFile::new(
                         extend_configuration_file_path.to_string(),
                         err.to_string(),
                     )
                     .with_verbose_advice(markup! {
-                        "Biome tried to load the configuration file \""<Emphasis>{
-                            extend_configuration_file_path.to_string()
-                        }</Emphasis>"\" in \"extends\" using \""<Emphasis>{
-                            external_resolution_base_path.to_string()
-                        }</Emphasis>"\" as the base path."
+                        "It's possible that the file was created with a "
+                        "different user/group. Make sure you have the rights "
+                        "to read the file."
                     })
                 })?;
-
-            let mut content = String::new();
-            file.read_to_string(&mut content).map_err(|err| {
-                CantLoadExtendFile::new(extend_configuration_file_path.to_string(), err.to_string()).with_verbose_advice(
-                    markup! {
-                        "It's possible that the file was created with a different user/group. Make sure you have the rights to read the file."
-                    }
-                )
-            })?;
-            let deserialized = deserialize_from_json_str::<Self>(
-                content.as_str(),
-                match extend_configuration_file_path.extension() {
-                    Some("json") => JsonParserOptions::default(),
-                    _ => JsonParserOptions::default()
-                        .with_allow_comments()
-                        .with_allow_trailing_commas(),
-                },
-                "",
-            );
-            deserialized_configurations.push(deserialized)
+                let deserialized = deserialize_from_json_str::<Self>(
+                    content.as_str(),
+                    match extend_configuration_file_path.extension() {
+                        Some("json") => JsonParserOptions::default(),
+                        _ => JsonParserOptions::default()
+                            .with_allow_comments()
+                            .with_allow_trailing_commas(),
+                    },
+                    "",
+                );
+                deserialized_configurations.push(deserialized)
+            }
         }
         Ok(deserialized_configurations)
     }
@@ -657,5 +726,248 @@ mod test {
                 ));
             }
         }
+    }
+}
+
+/// Use this type to determine what kind of [ScanKind] needs to be used based
+/// on the current configuration
+pub struct ProjectScanComputer<'a> {
+    requires_project_scan: bool,
+    enabled_rules: FxHashSet<RuleFilter<'a>>,
+    configuration: &'a Configuration,
+    skip: &'a [RuleSelector],
+    only: &'a [RuleSelector],
+}
+
+impl<'a> ProjectScanComputer<'a> {
+    pub fn new(
+        configuration: &'a Configuration,
+        skip: &'a [RuleSelector],
+        only: &'a [RuleSelector],
+    ) -> Self {
+        let enabled_rules = configuration.get_linter_rules().as_enabled_rules();
+        Self {
+            enabled_rules,
+            requires_project_scan: false,
+            skip,
+            only,
+            configuration,
+        }
+    }
+
+    /// Computes and return the [ScanKind] required by this project
+    pub fn compute(mut self) -> ScanKind {
+        let domains = self.configuration.get_linter_domains();
+
+        if let Some(domains) = domains {
+            for (domain, value) in domains.iter() {
+                if domain == &RuleDomain::Project && value != &RuleDomainValue::None {
+                    self.requires_project_scan = true;
+                    break;
+                }
+            }
+        }
+
+        biome_graphql_analyze::visit_registry(&mut self);
+        biome_css_analyze::visit_registry(&mut self);
+        biome_json_analyze::visit_registry(&mut self);
+        biome_js_analyze::visit_registry(&mut self);
+
+        if self.requires_project_scan {
+            ScanKind::Project
+        } else {
+            // There's no need to scan further known files if the VCS isn't enabled
+            if !self.configuration.use_ignore_file() {
+                ScanKind::NoScanner
+            } else {
+                ScanKind::KnownFiles
+            }
+        }
+    }
+
+    fn check_rule<R, L>(&mut self)
+    where
+        L: Language,
+        R: Rule<Options: Default, Query: Queryable<Language = L, Output: Clone>> + 'static,
+    {
+        let filter = RuleFilter::Rule(<R::Group as RuleGroup>::NAME, R::METADATA.name);
+        let selector = RuleSelector::Rule(<R::Group as RuleGroup>::NAME, R::METADATA.name);
+        if !self.only.is_empty() {
+            if self.only.contains(&selector) {
+                let domains = R::METADATA.domains;
+                self.requires_project_scan |= domains.contains(&RuleDomain::Project);
+            }
+        } else if !self.skip.contains(&selector) && self.enabled_rules.contains(&filter) {
+            let domains = R::METADATA.domains;
+            self.requires_project_scan |= domains.contains(&RuleDomain::Project);
+        }
+    }
+}
+
+impl RegistryVisitor<JsLanguage> for ProjectScanComputer<'_> {
+    fn record_rule<R>(&mut self)
+    where
+        R: Rule<Options: Default, Query: Queryable<Language = JsLanguage, Output: Clone>> + 'static,
+    {
+        self.check_rule::<R, JsLanguage>();
+    }
+}
+
+impl RegistryVisitor<JsonLanguage> for ProjectScanComputer<'_> {
+    fn record_rule<R>(&mut self)
+    where
+        R: Rule<Options: Default, Query: Queryable<Language = JsonLanguage, Output: Clone>>
+            + 'static,
+    {
+        self.check_rule::<R, JsonLanguage>();
+    }
+}
+
+impl RegistryVisitor<CssLanguage> for ProjectScanComputer<'_> {
+    fn record_rule<R>(&mut self)
+    where
+        R: Rule<Options: Default, Query: Queryable<Language = CssLanguage, Output: Clone>>
+            + 'static,
+    {
+        self.check_rule::<R, CssLanguage>();
+    }
+}
+
+impl RegistryVisitor<GraphqlLanguage> for ProjectScanComputer<'_> {
+    fn record_rule<R>(&mut self)
+    where
+        R: Rule<Options: Default, Query: Queryable<Language = GraphqlLanguage, Output: Clone>>
+            + 'static,
+    {
+        self.check_rule::<R, GraphqlLanguage>();
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use biome_configuration::analyzer::{
+        Correctness, RuleDomainValue, RuleDomains, SeverityOrGroup,
+    };
+    use biome_configuration::{
+        LinterConfiguration, RuleConfiguration, RulePlainConfiguration, Rules,
+    };
+    use rustc_hash::FxHashMap;
+
+    #[test]
+    fn should_return_none_if_the_linter_is_disabled() {
+        let configuration = Configuration {
+            linter: Some(LinterConfiguration {
+                enabled: Some(false.into()),
+                ..Default::default()
+            }),
+            ..Default::default()
+        };
+
+        assert_eq!(
+            ProjectScanComputer::new(&configuration, &[], &[]).compute(),
+            ScanKind::NoScanner
+        );
+    }
+
+    #[test]
+    fn should_scan_project_project_domain_is_enabled() {
+        let mut domains = FxHashMap::default();
+        domains.insert(RuleDomain::Project, RuleDomainValue::Recommended);
+
+        let configuration = Configuration {
+            linter: Some(LinterConfiguration {
+                domains: Some(RuleDomains(domains)),
+                ..Default::default()
+            }),
+            ..Default::default()
+        };
+
+        assert_eq!(
+            ProjectScanComputer::new(&configuration, &[], &[]).compute(),
+            ScanKind::Project
+        );
+    }
+
+    #[test]
+    fn should_scan_project_project_rule_is_enabled() {
+        let configuration = Configuration {
+            linter: Some(LinterConfiguration {
+                rules: Some(Rules {
+                    correctness: Some(SeverityOrGroup::Group(Correctness {
+                        no_private_imports: Some(RuleConfiguration::Plain(
+                            RulePlainConfiguration::Error,
+                        )),
+                        ..Default::default()
+                    })),
+                    ..Default::default()
+                }),
+                ..Default::default()
+            }),
+            ..Default::default()
+        };
+
+        assert_eq!(
+            ProjectScanComputer::new(&configuration, &[], &[]).compute(),
+            ScanKind::Project
+        );
+    }
+
+    #[test]
+    fn should_skip_project_rule_is_skipped() {
+        let configuration = Configuration {
+            linter: Some(LinterConfiguration {
+                rules: Some(Rules {
+                    correctness: Some(SeverityOrGroup::Group(Correctness {
+                        no_private_imports: Some(RuleConfiguration::Plain(
+                            RulePlainConfiguration::Error,
+                        )),
+                        ..Default::default()
+                    })),
+                    ..Default::default()
+                }),
+                ..Default::default()
+            }),
+            ..Default::default()
+        };
+
+        assert_eq!(
+            ProjectScanComputer::new(
+                &configuration,
+                &[RuleSelector::Rule("correctness", "noPrivateImports")],
+                &[]
+            )
+            .compute(),
+            ScanKind::NoScanner
+        );
+    }
+
+    #[test]
+    fn should_return_project_if_project_rule_is_only() {
+        let configuration = Configuration {
+            linter: Some(LinterConfiguration {
+                rules: Some(Rules {
+                    correctness: Some(SeverityOrGroup::Group(Correctness {
+                        no_private_imports: Some(RuleConfiguration::Plain(
+                            RulePlainConfiguration::Off,
+                        )),
+                        ..Default::default()
+                    })),
+                    ..Default::default()
+                }),
+                ..Default::default()
+            }),
+            ..Default::default()
+        };
+
+        assert_eq!(
+            ProjectScanComputer::new(
+                &configuration,
+                &[],
+                &[RuleSelector::Rule("correctness", "noPrivateImports")]
+            )
+            .compute(),
+            ScanKind::Project
+        );
     }
 }

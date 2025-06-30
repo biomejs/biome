@@ -1,8 +1,6 @@
 use crate::JsRuleAction;
 use biome_analyze::context::RuleContext;
-use biome_analyze::{
-    Ast, FixKind, Rule, RuleDiagnostic, RuleSource, RuleSourceKind, declare_lint_rule,
-};
+use biome_analyze::{Ast, FixKind, Rule, RuleDiagnostic, RuleSource, declare_lint_rule};
 use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_factory::make::{
@@ -137,8 +135,7 @@ declare_lint_rule! {
         version: "1.0.0",
         name: "noBlankTarget",
         language: "jsx",
-        sources: &[RuleSource::EslintReact("jsx-no-target-blank")],
-        source_kind: RuleSourceKind::Inspired,
+        sources: &[RuleSource::EslintReact("jsx-no-target-blank").inspired()],
         recommended: true,
         severity: Severity::Error,
         fix_kind: FixKind::Safe,

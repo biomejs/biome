@@ -5,8 +5,8 @@ use crate::utils::apply_document_changes;
 use crate::{documents::Document, session::Session};
 use biome_fs::BiomePath;
 use biome_service::workspace::{
-    ChangeFileParams, CloseFileParams, DocumentFileSource, FileContent, GetFileContentParams,
-    OpenFileParams, OpenProjectParams,
+    ChangeFileParams, CloseFileParams, DocumentFileSource, FeaturesBuilder, FileContent,
+    GetFileContentParams, IsPathIgnoredParams, OpenFileParams, OpenProjectParams, ScanKind,
 };
 use tower_lsp_server::lsp_types;
 use tracing::{debug, error, field, info};
@@ -39,14 +39,36 @@ pub(crate) async fn did_open(
                     .map(|parent| parent.to_path_buf())
                     .unwrap_or_default(),
             );
-            let project_key = session.workspace.open_project(OpenProjectParams {
+            let result = session.workspace.open_project(OpenProjectParams {
                 path: parent_path.clone(),
                 open_uninitialized: true,
+                skip_rules: None,
+                only_rules: None,
             })?;
-            session.insert_and_scan_project(project_key, parent_path);
-            project_key
+            let scan_kind = if result.scan_kind.is_none() {
+                ScanKind::KnownFiles
+            } else {
+                result.scan_kind
+            };
+            session
+                .insert_and_scan_project(result.project_key, parent_path, scan_kind)
+                .await;
+            result.project_key
         }
     };
+
+    let is_ignored = session
+        .workspace
+        .is_path_ignored(IsPathIgnoredParams {
+            project_key,
+            path: path.clone(),
+            features: FeaturesBuilder::new().build(),
+        })
+        .unwrap_or_default();
+
+    if is_ignored {
+        return Ok(());
+    }
 
     let doc = Document::new(project_key, version, &content);
 
@@ -77,7 +99,20 @@ pub(crate) async fn did_change(
     let version = params.text_document.version;
 
     let path = session.file_path(&url)?;
-    let doc = session.document(&url)?;
+    let Some(doc) = session.document(&url) else {
+        return Ok(());
+    };
+    if !session.workspace.file_exists(path.clone().into())? {
+        return Ok(());
+    }
+    let features = FeaturesBuilder::new().build();
+    if session.workspace.is_path_ignored(IsPathIgnoredParams {
+        path: path.clone(),
+        project_key: doc.project_key,
+        features,
+    })? {
+        return Ok(());
+    }
 
     let old_text = session.workspace.get_file_content(GetFileContentParams {
         project_key: doc.project_key,

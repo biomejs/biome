@@ -71,7 +71,7 @@ with_existing_linter.json:1:1 migrate  FIXABLE  ━━━━━━━━━━�
 ```
 with_existing_linter.json:1:1 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Biome style rule useSingleVarDeclarator isn't recommended anymore.
+  ! Biome style rule noUnusedTemplateLiteral isn't recommended anymore.
   
   > 1 │ {
       │ ^
@@ -88,7 +88,7 @@ with_existing_linter.json:1:1 migrate  FIXABLE  ━━━━━━━━━━�
       2 │ + ··"linter":·{
       3 │ + ····"rules":·{
       4 │ + ······"style":·{
-      5 │ + ········"useSingleVarDeclarator":·"error"
+      5 │ + ········"noUnusedTemplateLiteral":·"error"
       6 │ + ······}
       7 │ + ····}
       8 │ + ··}
@@ -158,6 +158,35 @@ with_existing_linter.json:1:1 migrate  FIXABLE  ━━━━━━━━━━�
 ```
 with_existing_linter.json:1:1 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
+  ! Biome style rule useSingleVarDeclarator isn't recommended anymore.
+  
+  > 1 │ {
+      │ ^
+  > 2 │   "linter": {}
+  > 3 │ }
+      │ ^
+  
+  i To avoid regressions with your code base, Biome will update the configuration file to maintain the compatibility with your current setup.
+  
+  i Safe fix: Update the configuration to enable these rules.
+  
+    1 1 │   {
+    2   │ - ··"linter":·{}
+      2 │ + ··"linter":·{
+      3 │ + ····"rules":·{
+      4 │ + ······"style":·{
+      5 │ + ········"useSingleVarDeclarator":·"error"
+      6 │ + ······}
+      7 │ + ····}
+      8 │ + ··}
+    3 9 │   }
+  
+
+```
+
+```
+with_existing_linter.json:1:1 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
   ! Biome style rule useNumberNamespace isn't recommended anymore.
   
   > 1 │ {
@@ -176,64 +205,6 @@ with_existing_linter.json:1:1 migrate  FIXABLE  ━━━━━━━━━━�
       3 │ + ····"rules":·{
       4 │ + ······"style":·{
       5 │ + ········"useNumberNamespace":·"error"
-      6 │ + ······}
-      7 │ + ····}
-      8 │ + ··}
-    3 9 │   }
-  
-
-```
-
-```
-with_existing_linter.json:1:1 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! Biome style rule useConst isn't recommended anymore.
-  
-  > 1 │ {
-      │ ^
-  > 2 │   "linter": {}
-  > 3 │ }
-      │ ^
-  
-  i To avoid regressions with your code base, Biome will update the configuration file to maintain the compatibility with your current setup.
-  
-  i Safe fix: Update the configuration to enable these rules.
-  
-    1 1 │   {
-    2   │ - ··"linter":·{}
-      2 │ + ··"linter":·{
-      3 │ + ····"rules":·{
-      4 │ + ······"style":·{
-      5 │ + ········"useConst":·"error"
-      6 │ + ······}
-      7 │ + ····}
-      8 │ + ··}
-    3 9 │   }
-  
-
-```
-
-```
-with_existing_linter.json:1:1 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! Biome style rule noUnusedTemplateLiteral isn't recommended anymore.
-  
-  > 1 │ {
-      │ ^
-  > 2 │   "linter": {}
-  > 3 │ }
-      │ ^
-  
-  i To avoid regressions with your code base, Biome will update the configuration file to maintain the compatibility with your current setup.
-  
-  i Safe fix: Update the configuration to enable these rules.
-  
-    1 1 │   {
-    2   │ - ··"linter":·{}
-      2 │ + ··"linter":·{
-      3 │ + ····"rules":·{
-      4 │ + ······"style":·{
-      5 │ + ········"noUnusedTemplateLiteral":·"error"
       6 │ + ······}
       7 │ + ····}
       8 │ + ··}

@@ -68,7 +68,7 @@ declare_lint_rule! {
         version: "1.0.0",
         name: "noUnsafeOptionalChaining",
         language: "js",
-        sources: &[RuleSource::Eslint("no-unsafe-optional-chaining")],
+        sources: &[RuleSource::Eslint("no-unsafe-optional-chaining").same()],
         recommended: true,
         severity: Severity::Error,
     }

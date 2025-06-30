@@ -47,7 +47,7 @@ debugger;
 console.log(a);
 ";
 
-const APPLY_SUGGESTED_AFTER: &str = "let a = 4;\nconsole.log(a);\n";
+const APPLY_SUGGESTED_AFTER: &str = "const a = 4;\nconsole.log(a);\n";
 
 const NO_DEBUGGER_BEFORE: &str = "debugger;\n";
 const NO_DEBUGGER_AFTER: &str = "debugger;\n";
@@ -331,7 +331,7 @@ console.log(a);
 function _f() { arguments; }
 ";
 
-    let expected = "let a = 4;
+    let expected = "const a = 4;
 console.log(a);
 function _f() {\n\targuments;\n}
 ";
@@ -1781,6 +1781,96 @@ fn check_stdin_write_successfully() {
 }
 
 #[test]
+fn check_stdin_applies_the_config_based_on_path() {
+    let mut fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    fs.insert(
+        "biome.json".into(),
+        r#"{
+  "$schema": "./node_modules/@biomejs/biome/configuration_schema.json",
+  "linter": {
+    "enabled": true,
+    "rules": {
+      "recommended": true
+    }
+  },
+  "formatter": {
+    "indentStyle": "space"
+  },
+  "javascript": {
+    "formatter": {
+      "quoteStyle": "single",
+      "semicolons": "asNeeded",
+      "arrowParentheses": "always",
+      "trailingCommas": "es5"
+    }
+  },
+  "overrides": [
+    {
+      "includes": ["apps/test/**"],
+      "javascript": {
+        "formatter": {
+          "lineWidth": 100
+        }
+      }
+    }
+  ]
+}
+"#
+        .as_bytes(),
+    );
+
+    console.in_buffer.push(
+        r#"const _t = [
+  colors.l3BackgroundTertiary,
+  colors.l3BackgroundPositive,
+  colors.l3BackgroundTertiary,
+]
+"#
+        .to_string(),
+    );
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(
+            [
+                "check",
+                "--write",
+                "--stdin-file-path",
+                "apps/test/index.tsx",
+            ]
+            .as_slice(),
+        ),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    let message = console
+        .out_buffer
+        .first()
+        .expect("Console should have written a message");
+
+    let content = markup_to_string(markup! {
+        {message.content}
+    });
+
+    assert_eq!(
+        content,
+        "const _t = [colors.l3BackgroundTertiary, colors.l3BackgroundPositive, colors.l3BackgroundTertiary]\n"
+    );
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "check_stdin_applies_the_config_based_on_path",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
 fn check_stdin_write_unsafe_successfully() {
     let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
@@ -1953,6 +2043,54 @@ fn check_stdin_returns_content_when_not_write() {
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
         "check_stdin_returns_content_when_not_write",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn check_stdin_ignores_unknown_file_path() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    console
+        .in_buffer
+        .push("function f() {var x=1; return{x}} class Foo {}".to_string());
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(
+            [
+                "lint",
+                "--write",
+                "--unsafe",
+                "--stdin-file-path",
+                "mock.cc",
+                "--files-ignore-unknown",
+                "true",
+            ]
+            .as_slice(),
+        ),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    let message = console
+        .out_buffer
+        .first()
+        .expect("Console should have written a message");
+
+    let content = markup_to_string(markup! {
+        {message.content}
+    });
+
+    assert_eq!(content, "function f() {var x=1; return{x}} class Foo {}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "check_stdin_ignores_unknown_file_path",
         fs,
         console,
         result,
@@ -2633,7 +2771,7 @@ console.log(a);
 function _f() { arguments; }
 ";
 
-    let expected = "let a = 4;
+    let expected = "const a = 4;
 console.log(a);
 function _f() {\n\targuments;\n}
 ";
@@ -2778,7 +2916,7 @@ console.log(a);
 function _f() { arguments; }
 ";
 
-    let expected = "let a = 4;
+    let expected = "const a = 4;
 console.log(a);
 function _f() {\n\targuments;\n}
 ";
@@ -2986,6 +3124,52 @@ fn check_plugin_suppressions() {
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
         "check_plugin_suppressions",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn doesnt_check_file_when_assist_is_disabled() {
+    let mut fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    fs.insert(
+        "biome.json".into(),
+        br#"{
+    "assist": {
+        "actions": {
+            "source": {
+                "useSortedKeys": "on"
+            }
+        },
+        "includes": [
+            "**",
+            "!**/src/file.json"
+        ]
+    }
+}"#,
+    );
+
+    let file_path = Utf8Path::new("src/file.json");
+    fs.insert(
+        file_path.into(),
+        r#"{ "z": 1, "b": 2 }
+"#
+        .as_bytes(),
+    );
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["check", "--verbose", file_path.as_str()].as_slice()),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "doesnt_check_file_when_assist_is_disabled",
         fs,
         console,
         result,

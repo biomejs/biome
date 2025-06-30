@@ -1,0 +1,362 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```js
+// Invalid string literals
+typeof foo === "strnig";
+typeof foo == `String`;
+typeof foo !== "undefimed";
+typeof foo != "undefimed";
+"nunber" === typeof foo
+"nunber" == typeof foo;
+"fucntion" !== typeof foo
+"fucntion" != typeof foo;
+
+// Invalid literals
+typeof foo != undefined;
+typeof foo != null;
+typeof foo != 5;
+typeof foo != -5;
+typeof foo != true;
+
+typeof foo != void 0;
+typeof foo != 0 + 1;
+typeof foo != (false || true);
+
+```
+
+# Diagnostics
+```
+invalid.js:2:16 lint/correctness/useValidTypeof ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × "strnig" is not a valid typeof value.
+  
+    1 │ // Invalid string literals
+  > 2 │ typeof foo === "strnig";
+      │                ^^^^^^^^
+    3 │ typeof foo == `String`;
+    4 │ typeof foo !== "undefimed";
+  
+
+```
+
+```
+invalid.js:3:15 lint/correctness/useValidTypeof  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × "String" is not a valid typeof value.
+  
+    1 │ // Invalid string literals
+    2 │ typeof foo === "strnig";
+  > 3 │ typeof foo == `String`;
+      │               ^^^^^^^^
+    4 │ typeof foo !== "undefimed";
+    5 │ typeof foo != "undefimed";
+  
+  i Unsafe fix: Use a valid typeof value.
+  
+     1  1 │   // Invalid string literals
+     2  2 │   typeof foo === "strnig";
+     3    │ - typeof·foo·==·`String`;
+        3 │ + typeof·foo·==·"string";
+     4  4 │   typeof foo !== "undefimed";
+     5  5 │   typeof foo != "undefimed";
+  
+
+```
+
+```
+invalid.js:4:16 lint/correctness/useValidTypeof ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × "undefimed" is not a valid typeof value.
+  
+    2 │ typeof foo === "strnig";
+    3 │ typeof foo == `String`;
+  > 4 │ typeof foo !== "undefimed";
+      │                ^^^^^^^^^^^
+    5 │ typeof foo != "undefimed";
+    6 │ "nunber" === typeof foo
+  
+
+```
+
+```
+invalid.js:5:15 lint/correctness/useValidTypeof ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × "undefimed" is not a valid typeof value.
+  
+    3 │ typeof foo == `String`;
+    4 │ typeof foo !== "undefimed";
+  > 5 │ typeof foo != "undefimed";
+      │               ^^^^^^^^^^^
+    6 │ "nunber" === typeof foo
+    7 │ "nunber" == typeof foo;
+  
+
+```
+
+```
+invalid.js:6:1 lint/correctness/useValidTypeof ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × "nunber" is not a valid typeof value.
+  
+    4 │ typeof foo !== "undefimed";
+    5 │ typeof foo != "undefimed";
+  > 6 │ "nunber" === typeof foo
+      │ ^^^^^^^^
+    7 │ "nunber" == typeof foo;
+    8 │ "fucntion" !== typeof foo
+  
+
+```
+
+```
+invalid.js:7:1 lint/correctness/useValidTypeof ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × "nunber" is not a valid typeof value.
+  
+    5 │ typeof foo != "undefimed";
+    6 │ "nunber" === typeof foo
+  > 7 │ "nunber" == typeof foo;
+      │ ^^^^^^^^
+    8 │ "fucntion" !== typeof foo
+    9 │ "fucntion" != typeof foo;
+  
+
+```
+
+```
+invalid.js:8:1 lint/correctness/useValidTypeof ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × "fucntion" is not a valid typeof value.
+  
+     6 │ "nunber" === typeof foo
+     7 │ "nunber" == typeof foo;
+   > 8 │ "fucntion" !== typeof foo
+       │ ^^^^^^^^^^
+     9 │ "fucntion" != typeof foo;
+    10 │ 
+  
+
+```
+
+```
+invalid.js:9:1 lint/correctness/useValidTypeof ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × "fucntion" is not a valid typeof value.
+  
+     7 │ "nunber" == typeof foo;
+     8 │ "fucntion" !== typeof foo
+   > 9 │ "fucntion" != typeof foo;
+       │ ^^^^^^^^^^
+    10 │ 
+    11 │ // Invalid literals
+  
+
+```
+
+```
+invalid.js:12:15 lint/correctness/useValidTypeof ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Invalid typeof comparison.
+  
+    11 │ // Invalid literals
+  > 12 │ typeof foo != undefined;
+       │               ^^^^^^^^^
+    13 │ typeof foo != null;
+    14 │ typeof foo != 5;
+  
+  i Compare with one of the following string literals:
+  
+  - "bigint"
+  - "boolean"
+  - "function"
+  - "number"
+  - "object"
+  - "string"
+  - "symbol"
+  - "undefined"
+  
+
+```
+
+```
+invalid.js:13:15 lint/correctness/useValidTypeof ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Invalid typeof comparison.
+  
+    11 │ // Invalid literals
+    12 │ typeof foo != undefined;
+  > 13 │ typeof foo != null;
+       │               ^^^^
+    14 │ typeof foo != 5;
+    15 │ typeof foo != -5;
+  
+  i Compare with one of the following string literals:
+  
+  - "bigint"
+  - "boolean"
+  - "function"
+  - "number"
+  - "object"
+  - "string"
+  - "symbol"
+  - "undefined"
+  
+
+```
+
+```
+invalid.js:14:15 lint/correctness/useValidTypeof ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Invalid typeof comparison.
+  
+    12 │ typeof foo != undefined;
+    13 │ typeof foo != null;
+  > 14 │ typeof foo != 5;
+       │               ^
+    15 │ typeof foo != -5;
+    16 │ typeof foo != true;
+  
+  i Compare with one of the following string literals:
+  
+  - "bigint"
+  - "boolean"
+  - "function"
+  - "number"
+  - "object"
+  - "string"
+  - "symbol"
+  - "undefined"
+  
+
+```
+
+```
+invalid.js:15:15 lint/correctness/useValidTypeof ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Invalid typeof comparison.
+  
+    13 │ typeof foo != null;
+    14 │ typeof foo != 5;
+  > 15 │ typeof foo != -5;
+       │               ^^
+    16 │ typeof foo != true;
+    17 │ 
+  
+  i Compare with one of the following string literals:
+  
+  - "bigint"
+  - "boolean"
+  - "function"
+  - "number"
+  - "object"
+  - "string"
+  - "symbol"
+  - "undefined"
+  
+
+```
+
+```
+invalid.js:16:15 lint/correctness/useValidTypeof ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Invalid typeof comparison.
+  
+    14 │ typeof foo != 5;
+    15 │ typeof foo != -5;
+  > 16 │ typeof foo != true;
+       │               ^^^^
+    17 │ 
+    18 │ typeof foo != void 0;
+  
+  i Compare with one of the following string literals:
+  
+  - "bigint"
+  - "boolean"
+  - "function"
+  - "number"
+  - "object"
+  - "string"
+  - "symbol"
+  - "undefined"
+  
+
+```
+
+```
+invalid.js:18:15 lint/correctness/useValidTypeof ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Invalid typeof comparison.
+  
+    16 │ typeof foo != true;
+    17 │ 
+  > 18 │ typeof foo != void 0;
+       │               ^^^^^^
+    19 │ typeof foo != 0 + 1;
+    20 │ typeof foo != (false || true);
+  
+  i Compare with one of the following string literals:
+  
+  - "bigint"
+  - "boolean"
+  - "function"
+  - "number"
+  - "object"
+  - "string"
+  - "symbol"
+  - "undefined"
+  
+
+```
+
+```
+invalid.js:19:15 lint/correctness/useValidTypeof ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Invalid typeof comparison.
+  
+    18 │ typeof foo != void 0;
+  > 19 │ typeof foo != 0 + 1;
+       │               ^^^^^
+    20 │ typeof foo != (false || true);
+    21 │ 
+  
+  i Compare with one of the following string literals:
+  
+  - "bigint"
+  - "boolean"
+  - "function"
+  - "number"
+  - "object"
+  - "string"
+  - "symbol"
+  - "undefined"
+  
+
+```
+
+```
+invalid.js:20:16 lint/correctness/useValidTypeof ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Invalid typeof comparison.
+  
+    18 │ typeof foo != void 0;
+    19 │ typeof foo != 0 + 1;
+  > 20 │ typeof foo != (false || true);
+       │                ^^^^^^^^^^^^^
+    21 │ 
+  
+  i Compare with one of the following string literals:
+  
+  - "bigint"
+  - "boolean"
+  - "function"
+  - "number"
+  - "object"
+  - "string"
+  - "symbol"
+  - "undefined"
+  
+
+```

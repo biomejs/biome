@@ -24,6 +24,7 @@ mod signals;
 mod suppression_action;
 mod suppressions;
 mod syntax;
+pub mod utils;
 mod visitor;
 
 // Re-exported for use in the `declare_group` macro
@@ -45,7 +46,8 @@ pub use crate::registry::{
 };
 pub use crate::rule::{
     CategoryLanguage, FixKind, GroupCategory, GroupLanguage, Rule, RuleAction, RuleDiagnostic,
-    RuleDomain, RuleGroup, RuleMeta, RuleMetadata, RuleSource, RuleSourceKind, SuppressAction,
+    RuleDomain, RuleGroup, RuleMeta, RuleMetadata, RuleSource, RuleSourceKind, RuleSourceWithKind,
+    SuppressAction,
 };
 pub use crate::services::{FromServices, ServiceBag, ServicesDiagnostic};
 pub use crate::signals::{

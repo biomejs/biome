@@ -45,7 +45,7 @@ declare_lint_rule! {
         version: "1.3.0",
         name: "noEmptyCharacterClassInRegex",
         language: "js",
-        sources: &[RuleSource::Eslint("no-empty-character-class")],
+        sources: &[RuleSource::Eslint("no-empty-character-class").same()],
         recommended: true,
         severity: Severity::Error,
     }

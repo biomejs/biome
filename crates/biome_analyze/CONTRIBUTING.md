@@ -4,48 +4,61 @@ The analyzer is a generic crate aimed to implement a visitor-like infrastructure
 it's possible to inspect a piece of AST and emit diagnostics or actions based on a
 static check.
 
-The analyzer allows implementors to create **four different** types of rules:
+The analyzer allows implementors to create **three different** types of rules:
 - **Syntax**: This rule checks the syntax according to the language specification and emits error diagnostics accordingly.
 - **Lint**: This rule performs static analysis of the source code to detect invalid or error-prone patterns, and emits diagnostics along with proposed fixes.
 - **Assist**: This rule detects refactoring opportunities and emits code action signals.
-- **Transformation**: This rule detects transformations that should be applied to the code.
 
-### Table of Contents
 
-- [Creating a Rule](#creating-a-rule)
-  - [Guidelines](#guidelines)
-    - [Naming Conventions for Rules](#naming-conventions-for-rules)
-    - [What a Rule should say to the User](#what-a-rule-should-say-to-the-user)
-    - [Placement of New Rules](#placement-of-new-rules)
-  - [Creating and Implementing the Rule](#creating-and-implementing-the-rule)
-  - [Coding Tips for Rules](#coding-tips-for-rules)
-    - [`declare_lint_rule!` macro](#declare_lint_rule-macro)
-    - [`rule_category!` macro](#rule_category-macro)
-    - [Rule Options](#rule-options)
-    - [Navigating the CST (Concrete Syntax Tree)](#navigating-the-cst-concrete-syntax-tree)
-    - [Querying multiple node types via `declare_node_union!`](#querying-multiple-node-types-via-declare_node_union)
-    - [Semantic Model](#semantic-model)
-    - [Multiple Signals](#multiple-signals)
-    - [Code Actions](#code-actions)
-    - [Custom Syntax Tree Visitors](#custom-syntax-tree-visitors)
-    - [Common Logic Mistakes](#common-logic-mistakes)
-  - [Testing the Rule](#testing-the-rule)
-    - [Quick Test](#quick-test)
-    - [Snapshot Tests](#snapshot-tests)
-    - [Run the Snapshot Tests](#run-the-snapshot-tests)
-  - [Documenting the Rule](#documenting-the-rule)
-    - [General Structure](#general-structure)
-    - [Associated Language(s)](#associated-languages)
-    - [Code Blocks](#code-blocks)
-    - [Using Rule Options](#using-rule-options)
-    - [Full Documentation Example](#full-documentation-example)
-  - [Code generation](#code-generation)
-  - [Committing your work](#commiting-your-work)
-  - [Sidenote: Deprecating a rule](#sidenote-deprecating-a-rule)
+## Table of Contents
+
+- [Analyzer](#analyzer)
+  * [Table of Contents](#table-of-contents)
+  * [Creating a Rule](#creating-a-rule)
+    + [Guidelines](#guidelines)
+      - [Naming Conventions for Rules](#naming-conventions-for-rules)
+      - [What a Rule should say to the User](#what-a-rule-should-say-to-the-user)
+      - [Placement of New Rules](#placement-of-new-rules)
+    + [Creating and Implementing the Rule](#creating-and-implementing-the-rule)
+    + [Coding Tips for Rules](#coding-tips-for-rules)
+      - [`declare_lint_rule!` macro](#declare_lint_rule-macro)
+        * [Biome lint rules inspired by other lint rules](#biome-lint-rules-inspired-by-other-lint-rules)
+      - [`rule_category!` macro](#rule_category-macro)
+      - [Rule severity](#rule-severity)
+      - [Rule domains](#rule-domains)
+      - [Rule Options](#rule-options)
+        * [Options for our example rule](#options-for-our-example-rule)
+        * [Representing the rule options in Rust](#representing-the-rule-options-in-rust)
+        * [Retrieving the rule options within a Rule](#retrieving-the-rule-options-within-a-rule)
+        * [Implementing JSON deserialization/serialization support](#implementing-json-deserializationserialization-support)
+        * [Testing & Documenting Rule Options](#testing-documenting-rule-options)
+      - [Navigating the CST (Concrete Syntax Tree)](#navigating-the-cst-concrete-syntax-tree)
+      - [Querying multiple node types via `declare_node_union!`](#querying-multiple-node-types-via-declare_node_union)
+      - [Semantic Model](#semantic-model)
+        * [How to use the query `Semantic<>` in a lint rule](#how-to-use-the-query-semantic-in-a-lint-rule)
+      - [Multiple Signals](#multiple-signals)
+      - [Code Actions](#code-actions)
+      - [Custom Syntax Tree Visitors](#custom-syntax-tree-visitors)
+      - [Common Logic Mistakes](#common-logic-mistakes)
+        * [Not checking if a variable is global](#not-checking-if-a-variable-is-global)
+    + [Testing the Rule](#testing-the-rule)
+      - [Quick Test](#quick-test)
+      - [Snapshot Tests](#snapshot-tests)
+        * [`.jsonc` files](#jsonc-files)
+      - [Run the Snapshot Tests](#run-the-snapshot-tests)
+    + [Documenting the Rule](#documenting-the-rule)
+      - [General Structure](#general-structure)
+      - [Associated Language(s)](#associated-languages)
+      - [Code Blocks](#code-blocks)
+      - [Using Rule Options](#using-rule-options)
+      - [Full Documentation Example](#full-documentation-example)
+    + [Code generation](#code-generation)
+    + [Committing your work](#committing-your-work)
+    + [Sidenote: Deprecating a rule](#sidenote-deprecating-a-rule)
 
 ## Creating a Rule
 
-When creating or updating a lint rule, you need to be aware that there's a lot of generated code inside our toolchain.
+When creating or updating a rule, you need to be aware that there's a lot of generated code inside our toolchain.
 Our CI ensures that this code is not out of sync and fails otherwise.
 See the [code generation section](#code-generation) for more details.
 
@@ -386,7 +399,7 @@ declare_lint_rule! {
 
 ##### Biome lint rules inspired by other lint rules
 
-If a **lint** rule is inspired by an existing rule from other ecosystems (ESLint, ESLint plugins, clippy, etc.), you can add a new metadata to the macro called `source`. Its value is `&'static [RuleSource]`, which is a reference to a slice of `RuleSource` elements, each representing a different source.
+If a **lint** rule is ported from an existing rule from other ecosystems (ESLint, ESLint plugins, Clippy, etc.), you can add a new metadata to the macro called `source`. Its value is `&'static [RuleSource]`, which is a reference to a slice of `RuleSource` elements, each representing a different source.
 
 If you're implementing a lint rule that matches the behavior of the ESLint rule `no-debugger`, you'll use the variant `::ESLint` and pass the name of the rule:
 
@@ -400,15 +413,15 @@ declare_lint_rule! {
         name: "myRuleName",
         language: "js",
         recommended: false,
-        sources: &[RuleSource::Eslint("no-debugger")],
+        sources: &[RuleSource::Eslint("no-debugger").same()],
     }
 }
 ```
 
-If the rule you're implementing has a different behavior or option, you can add the `source_kind` metadata and use the `RuleSourceKind::Inspired` type. If there are multiple sources, we assume that each source has the same `source_kind`.
+If the rule you're implementing has a different behavior or option, you can use `.inspired()` instead of `.same()`.
 
 ```rust
-use biome_analyze::{declare_lint_rule, RuleSource, RuleSourceKind};
+use biome_analyze::{declare_lint_rule, RuleSource};
 
 declare_lint_rule! {
     /// Documentation
@@ -417,13 +430,11 @@ declare_lint_rule! {
         name: "myRuleName",
         language: "js",
         recommended: false,
-        sources: &[RuleSource::Eslint("no-debugger")],
-        source_kind: RuleSourceKind::Inspired,
+        sources: &[RuleSource::Eslint("no-debugger").inspired()],
     }
 }
 ```
 
-By default, `source_kind` is always `RuleSourceKind::SameLogic`.
 
 #### `rule_category!` macro
 

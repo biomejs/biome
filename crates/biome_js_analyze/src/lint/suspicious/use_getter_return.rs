@@ -62,7 +62,7 @@ declare_lint_rule! {
         version: "1.0.0",
         name: "useGetterReturn",
         language: "js",
-        sources: &[RuleSource::Eslint("getter-return")],
+        sources: &[RuleSource::Eslint("getter-return").same()],
         recommended: true,
         severity: Severity::Error,
     }

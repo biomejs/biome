@@ -1,0 +1,117 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `foo/biome.json`
+
+```json
+{ "linter": { "rules": { "recommended": true } } }
+```
+
+## `biome.json`
+
+```json
+{ "linter": { "rules": { "recommended": true } } }
+```
+
+## `bar/biome.json`
+
+```json
+{ "linter": { "rules": { "recommended": true } } }
+```
+
+# Emitted Messages
+
+```block
+<TEMP_DIR>/should_migrate_nested_config/bar/biome.json migrate ━━━━━━━━━━━━━━━━━━━━
+
+  i Configuration file can be updated.
+  
+    1    │ - {·"linter":·{·"rules":·{·"recommended":·true·}·}·}
+       1 │ + {·"root":·false,"linter":·{
+       2 │ + ····"rules":·{"recommended":·true·,
+       3 │ + ······"style":·{
+       4 │ + ········"noParameterAssign":·"error",
+       5 │ + ········"useAsConstAssertion":·"error",
+       6 │ + ········"useDefaultParameterLast":·"error",
+       7 │ + ········"useEnumInitializers":·"error",
+       8 │ + ········"useSelfClosingElements":·"error",
+       9 │ + ········"useSingleVarDeclarator":·"error",
+      10 │ + ········"noUnusedTemplateLiteral":·"error",
+      11 │ + ········"useNumberNamespace":·"error",
+      12 │ + ········"noInferrableTypes":·"error",
+      13 │ + ········"noUselessElse":·"error"
+      14 │ + ······}
+      15 │ + ····}
+      16 │ + ··}·}
+  
+
+```
+
+```block
+<TEMP_DIR>/should_migrate_nested_config/biome.json migrate ━━━━━━━━━━━━━━━━━━━━
+
+  i Configuration file can be updated.
+  
+    1    │ - {·"linter":·{·"rules":·{·"recommended":·true·}·}·}
+       1 │ + {·"linter":·{
+       2 │ + ····"rules":·{"recommended":·true·,
+       3 │ + ······"style":·{
+       4 │ + ········"noParameterAssign":·"error",
+       5 │ + ········"useAsConstAssertion":·"error",
+       6 │ + ········"useDefaultParameterLast":·"error",
+       7 │ + ········"useEnumInitializers":·"error",
+       8 │ + ········"useSelfClosingElements":·"error",
+       9 │ + ········"useSingleVarDeclarator":·"error",
+      10 │ + ········"noUnusedTemplateLiteral":·"error",
+      11 │ + ········"useNumberNamespace":·"error",
+      12 │ + ········"noInferrableTypes":·"error",
+      13 │ + ········"noUselessElse":·"error"
+      14 │ + ······}
+      15 │ + ····}
+      16 │ + ··}·}
+  
+
+```
+
+```block
+<TEMP_DIR>/should_migrate_nested_config/foo/biome.json migrate ━━━━━━━━━━━━━━━━━━━━
+
+  i Configuration file can be updated.
+  
+    1    │ - {·"linter":·{·"rules":·{·"recommended":·true·}·}·}
+       1 │ + {·"root":·false,"linter":·{
+       2 │ + ····"rules":·{"recommended":·true·,
+       3 │ + ······"style":·{
+       4 │ + ········"noParameterAssign":·"error",
+       5 │ + ········"useAsConstAssertion":·"error",
+       6 │ + ········"useDefaultParameterLast":·"error",
+       7 │ + ········"useEnumInitializers":·"error",
+       8 │ + ········"useSelfClosingElements":·"error",
+       9 │ + ········"useSingleVarDeclarator":·"error",
+      10 │ + ········"noUnusedTemplateLiteral":·"error",
+      11 │ + ········"useNumberNamespace":·"error",
+      12 │ + ········"noInferrableTypes":·"error",
+      13 │ + ········"noUselessElse":·"error"
+      14 │ + ······}
+      15 │ + ····}
+      16 │ + ··}·}
+  
+
+```
+
+```block
+configuration ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Migration results:
+  
+  - <TEMP_DIR>/should_migrate_nested_config/bar/biome.json: configuration needs migration.
+  - <TEMP_DIR>/should_migrate_nested_config/biome.json: configuration needs migration.
+  - <TEMP_DIR>/should_migrate_nested_config/foo/biome.json: configuration needs migration.
+  
+  i Use --write to apply the changes.
+  
+  $ biome migrate --write
+  
+
+```

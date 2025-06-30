@@ -57,10 +57,10 @@ declare_lint_rule! {
         version: "1.0.0",
         name: "noNonoctalDecimalEscape",
         language: "js",
-        sources: &[RuleSource::Eslint("no-nonoctal-decimal-escape")],
+        sources: &[RuleSource::Eslint("no-nonoctal-decimal-escape").same()],
         recommended: true,
         severity: Severity::Error,
-        fix_kind: FixKind::Unsafe,
+        fix_kind: FixKind::Safe,
     }
 }
 

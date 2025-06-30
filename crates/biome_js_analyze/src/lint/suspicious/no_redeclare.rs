@@ -64,8 +64,8 @@ declare_lint_rule! {
         name: "noRedeclare",
         language: "js",
         sources: &[
-            RuleSource::Eslint("no-redeclare"),
-            RuleSource::EslintTypeScript("no-redeclare"),
+            RuleSource::Eslint("no-redeclare").same(),
+            RuleSource::EslintTypeScript("no-redeclare").same(),
         ],
         recommended: true,
         severity: Severity::Error,

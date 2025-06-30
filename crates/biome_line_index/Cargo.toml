@@ -1,0 +1,20 @@
+[package]
+authors.workspace    = true
+categories.workspace = true
+description          = "Biome's tools for converting between byte offsets and line / column positions"
+edition.workspace    = true
+homepage.workspace   = true
+keywords.workspace   = true
+license.workspace    = true
+name                 = "biome_line_index"
+repository.workspace = true
+version              = "0.1.0"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+biome_text_size = { workspace = true }
+rustc-hash      = { workspace = true }
+
+[lints]
+workspace = true

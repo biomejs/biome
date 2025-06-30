@@ -88,7 +88,7 @@ declare_lint_rule! {
         version: "1.0.0",
         name: "useSelfClosingElements",
         language: "js",
-        sources: &[RuleSource::EslintStylistic("jsx-self-closing-comp")],
+        sources: &[RuleSource::EslintStylistic("jsx-self-closing-comp").same()],
         recommended: false,
         severity: Severity::Information,
         fix_kind: FixKind::Safe,

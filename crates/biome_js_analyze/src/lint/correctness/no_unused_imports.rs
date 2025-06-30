@@ -13,17 +13,17 @@ use biome_analyze::{
 use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_factory::make;
-use biome_js_factory::make::{js_module, js_module_item_list};
+use biome_js_factory::make::{js_identifier_binding, js_module, js_module_item_list};
 use biome_js_semantic::{ReferencesExtensions, SemanticModel};
 use biome_js_syntax::{
     AnyJsBinding, AnyJsClassMember, AnyJsCombinedSpecifier, AnyJsDeclaration, AnyJsImportClause,
-    AnyJsNamedImportSpecifier, AnyTsTypeMember, JsLanguage, JsNamedImportSpecifiers, JsSyntaxNode,
-    T, TsEnumMember,
+    AnyJsNamedImportSpecifier, AnyTsTypeMember, JsExport, JsLanguage, JsNamedImportSpecifiers,
+    JsStaticMemberAssignment, JsSyntaxNode, T, TsEnumMember,
 };
 use biome_jsdoc_comment::JsdocComment;
 use biome_rowan::{
     AstNode, AstSeparatedElement, AstSeparatedList, BatchMutationExt, Language, NodeOrToken,
-    SyntaxNode, TextRange, WalkEvent, declare_node_union,
+    SyntaxNode, TextRange, TriviaPieceKind, WalkEvent, declare_node_union,
 };
 use regex::Regex;
 use rustc_hash::FxHashSet;
@@ -93,10 +93,10 @@ declare_lint_rule! {
         version: "1.3.0",
         name: "noUnusedImports",
         language: "js",
-        sources: &[RuleSource::EslintUnusedImports("no-unused-imports")],
+        sources: &[RuleSource::EslintUnusedImports("no-unused-imports").same()],
         recommended: true,
         severity: Severity::Warning,
-        fix_kind: FixKind::Safe,
+        fix_kind: FixKind::Unsafe,
     }
 }
 
@@ -124,7 +124,7 @@ struct JsDocTypeCollectorVisitior {
 }
 
 declare_node_union! {
-    pub AnyJsWithTypeReferencingJsDoc = AnyJsDeclaration | AnyJsClassMember | AnyTsTypeMember | TsEnumMember
+    pub AnyJsWithTypeReferencingJsDoc = AnyJsDeclaration | AnyJsClassMember | AnyTsTypeMember | TsEnumMember | JsExport | JsStaticMemberAssignment
 }
 
 impl Visitor for JsDocTypeCollectorVisitior {
@@ -380,6 +380,7 @@ impl Rule for NoUnusedImports {
         let node = ctx.query();
         let root = ctx.root();
         let mut mutation = root.clone().begin();
+
         match state {
             Unused::EmptyStatement(_) | Unused::AllImports(_) => {
                 let parent = node.syntax().parent()?;
@@ -464,8 +465,16 @@ impl Rule for NoUnusedImports {
             }
             Unused::CombinedImport(_) => {
                 let prev_clause = node.as_js_import_combined_clause()?.clone();
+                let default_specifier = prev_clause.default_specifier().ok()?;
+                let local_name = default_specifier.local_name().ok()?;
+                let mut local_name = local_name.as_js_identifier_binding()?.name_token().ok()?;
+                local_name =
+                    local_name.with_trailing_trivia(vec![(TriviaPieceKind::Whitespace, " ")]);
+
                 let new_clause = make::js_import_default_clause(
-                    prev_clause.default_specifier().ok()?,
+                    prev_clause.default_specifier().ok()?.with_local_name(
+                        AnyJsBinding::JsIdentifierBinding(js_identifier_binding(local_name)),
+                    ),
                     prev_clause.from_token().ok()?,
                     prev_clause.source().ok()?,
                 );

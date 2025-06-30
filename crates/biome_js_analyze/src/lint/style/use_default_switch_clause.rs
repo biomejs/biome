@@ -43,7 +43,7 @@ declare_lint_rule! {
         version: "1.7.2",
         name: "useDefaultSwitchClause",
         language: "js",
-        sources: &[RuleSource::Eslint("default-case")],
+        sources: &[RuleSource::Eslint("default-case").same()],
         recommended: false,
         severity: Severity::Warning,
     }

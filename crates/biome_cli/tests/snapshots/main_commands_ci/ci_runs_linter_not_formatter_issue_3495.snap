@@ -21,9 +21,30 @@ let a = !b || !c
 # Emitted Messages
 
 ```block
+file.js:1:1 lint/style/useConst  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This let declares a variable that is only assigned once.
+  
+  > 1 │ let a = !b || !c
+      │ ^^^
+  
+  i 'a' is never reassigned.
+  
+  > 1 │ let a = !b || !c
+      │     ^
+  
+  i Safe fix: Use const instead.
+  
+  - let·a·=·!b·||·!c
+  + const·a·=·!b·||·!c
+  
+
+```
+
+```block
 file.js:1:5 lint/correctness/noUnusedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This variable is unused.
+  ! This variable a is unused.
   
   > 1 │ let a = !b || !c
       │     ^
@@ -40,5 +61,5 @@ file.js:1:5 lint/correctness/noUnusedVariables  FIXABLE  ━━━━━━━�
 
 ```block
 Checked 1 file in <TIME>. No fixes applied.
-Found 1 warning.
+Found 2 warnings.
 ```

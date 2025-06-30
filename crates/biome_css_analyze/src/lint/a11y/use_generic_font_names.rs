@@ -67,7 +67,7 @@ declare_lint_rule! {
         language: "css",
         recommended: true,
         severity: Severity::Error,
-        sources: &[RuleSource::Stylelint("font-family-no-missing-generic-family-keyword")],
+        sources: &[RuleSource::Stylelint("font-family-no-missing-generic-family-keyword").same()],
     }
 }
 

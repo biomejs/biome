@@ -18,8 +18,7 @@ use crate::workspace::{
 use crate::{WorkspaceError, extension_error};
 use biome_analyze::options::PreferredQuote;
 use biome_analyze::{
-    AnalysisFilter, AnalyzerConfiguration, AnalyzerOptions, ControlFlow, Never,
-    RuleCategoriesBuilder, RuleError,
+    AnalysisFilter, AnalyzerConfiguration, AnalyzerOptions, ControlFlow, Never, RuleError,
 };
 use biome_configuration::Configuration;
 use biome_configuration::json::{
@@ -437,8 +436,6 @@ fn format(
 ) -> Result<Printed, WorkspaceError> {
     let options = settings.format_options::<JsonLanguage>(path, document_file_source);
 
-    tracing::debug!("Format with the following options: {:?}", options);
-
     let tree = parse.syntax();
     let formatted = format_node(options, &tree)?;
 
@@ -577,6 +574,7 @@ fn code_actions(params: CodeActionsParams) -> PullActionsResult {
         enabled_rules: rules,
         suppression_reason,
         plugins: _,
+        categories,
     } = params;
 
     let _ = debug_span!("Code actions JSON",  range =? range, path =? path).entered();
@@ -597,11 +595,7 @@ fn code_actions(params: CodeActionsParams) -> PullActionsResult {
             .finish();
 
     let filter = AnalysisFilter {
-        categories: RuleCategoriesBuilder::default()
-            .with_syntax()
-            .with_lint()
-            .with_assist()
-            .build(),
+        categories,
         enabled_rules: Some(enabled_rules.as_slice()),
         disabled_rules: &disabled_rules,
         range,
@@ -658,11 +652,7 @@ fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceError> {
             .finish();
 
     let filter = AnalysisFilter {
-        categories: RuleCategoriesBuilder::default()
-            .with_syntax()
-            .with_lint()
-            .with_assist()
-            .build(),
+        categories: params.rule_categories,
         enabled_rules: Some(enabled_rules.as_slice()),
         disabled_rules: &disabled_rules,
         range: None,

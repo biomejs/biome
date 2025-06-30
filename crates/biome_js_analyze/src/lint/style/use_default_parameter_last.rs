@@ -53,8 +53,8 @@ declare_lint_rule! {
         name: "useDefaultParameterLast",
         language: "js",
         sources: &[
-            RuleSource::Eslint("default-param-last"),
-            RuleSource::EslintTypeScript("default-param-last")
+            RuleSource::Eslint("default-param-last").same(),
+            RuleSource::EslintTypeScript("default-param-last").same(),
         ],
         recommended: false,
         severity: Severity::Warning,
@@ -105,13 +105,12 @@ impl Rule for UseDefaultParameterLast {
         if formal_param.is_required() {
             return None;
         }
-        let last_required_param = formal_param
+        formal_param
             .syntax()
             .siblings(Direction::Next)
             .filter_map(AnyFormalParameter::cast)
             .filter(|x| x.is_required())
-            .last();
-        last_required_param
+            .last()
     }
 
     fn diagnostic(

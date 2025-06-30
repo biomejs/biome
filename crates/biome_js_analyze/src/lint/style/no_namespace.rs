@@ -52,7 +52,7 @@ declare_lint_rule! {
         version: "1.0.0",
         name: "noNamespace",
         language: "ts",
-        sources: &[RuleSource::EslintTypeScript("no-namespace")],
+        sources: &[RuleSource::EslintTypeScript("no-namespace").same()],
         recommended: false,
         severity: Severity::Warning,
     }

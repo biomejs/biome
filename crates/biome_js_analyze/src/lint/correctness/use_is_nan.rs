@@ -63,7 +63,7 @@ declare_lint_rule! {
         version: "1.0.0",
         name: "useIsNan",
         language: "js",
-        sources: &[RuleSource::Eslint("use-isnan")],
+        sources: &[RuleSource::Eslint("use-isnan").same()],
         recommended: true,
         severity: Severity::Error,
         fix_kind: FixKind::Unsafe,

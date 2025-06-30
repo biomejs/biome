@@ -5587,7 +5587,7 @@ impl CssStartingStyleAtRule {
     pub fn starting_style_token(&self) -> SyntaxResult<SyntaxToken> {
         support::required_token(&self.syntax, 0usize)
     }
-    pub fn block(&self) -> SyntaxResult<AnyCssStartingStyleBlock> {
+    pub fn block(&self) -> SyntaxResult<AnyCssConditionalBlock> {
         support::required_node(&self.syntax, 1usize)
     }
 }
@@ -5602,7 +5602,7 @@ impl Serialize for CssStartingStyleAtRule {
 #[derive(Serialize)]
 pub struct CssStartingStyleAtRuleFields {
     pub starting_style_token: SyntaxResult<SyntaxToken>,
-    pub block: SyntaxResult<AnyCssStartingStyleBlock>,
+    pub block: SyntaxResult<AnyCssConditionalBlock>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct CssString {
@@ -8468,32 +8468,6 @@ impl AnyCssSimpleSelector {
     pub fn as_css_universal_selector(&self) -> Option<&CssUniversalSelector> {
         match &self {
             Self::CssUniversalSelector(item) => Some(item),
-            _ => None,
-        }
-    }
-}
-#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
-pub enum AnyCssStartingStyleBlock {
-    CssBogusBlock(CssBogusBlock),
-    CssDeclarationBlock(CssDeclarationBlock),
-    CssRuleBlock(CssRuleBlock),
-}
-impl AnyCssStartingStyleBlock {
-    pub fn as_css_bogus_block(&self) -> Option<&CssBogusBlock> {
-        match &self {
-            Self::CssBogusBlock(item) => Some(item),
-            _ => None,
-        }
-    }
-    pub fn as_css_declaration_block(&self) -> Option<&CssDeclarationBlock> {
-        match &self {
-            Self::CssDeclarationBlock(item) => Some(item),
-            _ => None,
-        }
-    }
-    pub fn as_css_rule_block(&self) -> Option<&CssRuleBlock> {
-        match &self {
-            Self::CssRuleBlock(item) => Some(item),
             _ => None,
         }
     }
@@ -22027,80 +22001,6 @@ impl From<AnyCssSimpleSelector> for SyntaxElement {
         node.into()
     }
 }
-impl From<CssBogusBlock> for AnyCssStartingStyleBlock {
-    fn from(node: CssBogusBlock) -> Self {
-        Self::CssBogusBlock(node)
-    }
-}
-impl From<CssDeclarationBlock> for AnyCssStartingStyleBlock {
-    fn from(node: CssDeclarationBlock) -> Self {
-        Self::CssDeclarationBlock(node)
-    }
-}
-impl From<CssRuleBlock> for AnyCssStartingStyleBlock {
-    fn from(node: CssRuleBlock) -> Self {
-        Self::CssRuleBlock(node)
-    }
-}
-impl AstNode for AnyCssStartingStyleBlock {
-    type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> = CssBogusBlock::KIND_SET
-        .union(CssDeclarationBlock::KIND_SET)
-        .union(CssRuleBlock::KIND_SET);
-    fn can_cast(kind: SyntaxKind) -> bool {
-        matches!(
-            kind,
-            CSS_BOGUS_BLOCK | CSS_DECLARATION_BLOCK | CSS_RULE_BLOCK
-        )
-    }
-    fn cast(syntax: SyntaxNode) -> Option<Self> {
-        let res = match syntax.kind() {
-            CSS_BOGUS_BLOCK => Self::CssBogusBlock(CssBogusBlock { syntax }),
-            CSS_DECLARATION_BLOCK => Self::CssDeclarationBlock(CssDeclarationBlock { syntax }),
-            CSS_RULE_BLOCK => Self::CssRuleBlock(CssRuleBlock { syntax }),
-            _ => return None,
-        };
-        Some(res)
-    }
-    fn syntax(&self) -> &SyntaxNode {
-        match self {
-            Self::CssBogusBlock(it) => &it.syntax,
-            Self::CssDeclarationBlock(it) => &it.syntax,
-            Self::CssRuleBlock(it) => &it.syntax,
-        }
-    }
-    fn into_syntax(self) -> SyntaxNode {
-        match self {
-            Self::CssBogusBlock(it) => it.syntax,
-            Self::CssDeclarationBlock(it) => it.syntax,
-            Self::CssRuleBlock(it) => it.syntax,
-        }
-    }
-}
-impl std::fmt::Debug for AnyCssStartingStyleBlock {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            Self::CssBogusBlock(it) => std::fmt::Debug::fmt(it, f),
-            Self::CssDeclarationBlock(it) => std::fmt::Debug::fmt(it, f),
-            Self::CssRuleBlock(it) => std::fmt::Debug::fmt(it, f),
-        }
-    }
-}
-impl From<AnyCssStartingStyleBlock> for SyntaxNode {
-    fn from(n: AnyCssStartingStyleBlock) -> Self {
-        match n {
-            AnyCssStartingStyleBlock::CssBogusBlock(it) => it.into(),
-            AnyCssStartingStyleBlock::CssDeclarationBlock(it) => it.into(),
-            AnyCssStartingStyleBlock::CssRuleBlock(it) => it.into(),
-        }
-    }
-}
-impl From<AnyCssStartingStyleBlock> for SyntaxElement {
-    fn from(n: AnyCssStartingStyleBlock) -> Self {
-        let node: SyntaxNode = n.into();
-        node.into()
-    }
-}
 impl From<CssAttributeSelector> for AnyCssSubSelector {
     fn from(node: CssAttributeSelector) -> Self {
         Self::CssAttributeSelector(node)
@@ -23535,11 +23435,6 @@ impl std::fmt::Display for AnyCssSelector {
     }
 }
 impl std::fmt::Display for AnyCssSimpleSelector {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        std::fmt::Display::fmt(self.syntax(), f)
-    }
-}
-impl std::fmt::Display for AnyCssStartingStyleBlock {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }

@@ -1,7 +1,6 @@
 ---
 source: crates/biome_cli/tests/snap_test.rs
 expression: redactor(content)
-snapshot_kind: text
 ---
 # Input messages
 
@@ -9,13 +8,16 @@ snapshot_kind: text
 function f() {return{}}
 ```
 
-# Termination Message
+# Emitted Messages
 
 ```block
 stdin ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × The file passed via --stdin-file-path doesn't have an extension. Biome needs a file extension to know how handle the file.
+  ! The file passed via --stdin-file-path doesn't have an extension. Biome needs a file extension to know how to handle the file.
   
 
+```
 
+```block
+function f() {return{}}
 ```

@@ -55,7 +55,7 @@ declare_lint_rule! {
         version: "1.5.0",
         name: "noMisleadingCharacterClass",
         language: "js",
-        sources: &[RuleSource::Eslint("no-misleading-character-class")],
+        sources: &[RuleSource::Eslint("no-misleading-character-class").same()],
         recommended: true,
         severity: Severity::Error,
         fix_kind: FixKind::Safe,

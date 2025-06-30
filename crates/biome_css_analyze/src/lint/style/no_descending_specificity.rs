@@ -87,7 +87,7 @@ declare_lint_rule! {
         language: "css",
         recommended: true,
         severity: Severity::Warning,
-        sources: &[RuleSource::Stylelint("no-descending-specificity")],
+        sources: &[RuleSource::Stylelint("no-descending-specificity").same()],
     }
 }
 

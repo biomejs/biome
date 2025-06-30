@@ -45,6 +45,7 @@ Environment:
   BIOME_LOG_PATH:               **PLACEHOLDER**
   BIOME_LOG_PREFIX_NAME:        unset
   BIOME_CONFIG_PATH:            unset
+  BIOME_THREADS:                unset
   NO_COLOR:                     **PLACEHOLDER**
   TERM:                         **PLACEHOLDER**
   JS_RUNTIME_VERSION:           unset
@@ -67,13 +68,17 @@ Linter:
   Recommended:                  false
   Enabled rules:
     complexity/noAdjacentSpacesInRegex
+    complexity/noArguments
     complexity/noBannedTypes
+    complexity/noCommaOperator
     complexity/noEmptyTypeParameters
     complexity/noExtraBooleanCast
+    complexity/noFlatMapIdentity
     complexity/noStaticOnlyClass
     complexity/noThisInStatic
     complexity/noUselessCatch
     complexity/noUselessConstructor
+    complexity/noUselessContinue
     complexity/noUselessEmptyExport
     complexity/noUselessEscapeInRegex
     complexity/noUselessFragments
@@ -86,11 +91,11 @@ Linter:
     complexity/noUselessThisAlias
     complexity/noUselessTypeConstraint
     complexity/noUselessUndefinedInitialization
-    complexity/noWith
     complexity/useArrowFunction
     complexity/useDateNow
     complexity/useFlatMap
     complexity/useLiteralKeys
+    complexity/useNumericLiterals
     complexity/useOptionalChain
     complexity/useRegexLiterals
     complexity/useSimpleNumberKeys

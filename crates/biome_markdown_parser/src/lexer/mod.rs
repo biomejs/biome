@@ -309,16 +309,14 @@ impl<'src> MarkdownLexer<'src> {
         let string = unsafe {
             std::str::from_utf8_unchecked(self.source.as_bytes().get_unchecked(self.position..))
         };
-        let chr = if let Some(chr) = string.chars().next() {
+        if let Some(chr) = string.chars().next() {
             chr
         } else {
             // Safety: we always call this when we are at a valid char, so this branch is completely unreachable
             unsafe {
                 core::hint::unreachable_unchecked();
             }
-        };
-
-        chr
+        }
     }
 
     /// Gets the current byte.

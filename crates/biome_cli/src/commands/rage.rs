@@ -10,7 +10,8 @@ use biome_console::{
 use biome_diagnostics::termcolor::{ColorChoice, WriteColor};
 use biome_diagnostics::{PrintDescription, termcolor};
 use biome_flags::biome_env;
-use biome_fs::{FileSystem, OsFileSystem};
+use biome_fs::OsFileSystem;
+use biome_resolver::FsWithResolverProxy;
 use biome_service::Workspace;
 use biome_service::configuration::{LoadedConfiguration, load_configuration};
 use biome_service::settings::Settings;
@@ -192,7 +193,7 @@ impl Display for RunningBiomeServer {
 }
 
 struct RageConfiguration<'a> {
-    fs: &'a dyn FileSystem,
+    fs: &'a dyn FsWithResolverProxy,
     formatter: bool,
     linter: bool,
 }
@@ -415,7 +416,7 @@ impl Display for BiomeServerLog {
         if let Ok(Some(log)) = read_most_recent_log_file(
             biome_env().biome_log_path.value().map(Utf8PathBuf::from),
             biome_env()
-                .biome_log_prefix
+                .biome_log_prefix_name
                 .value()
                 .unwrap_or("server.log".to_string()),
         ) {

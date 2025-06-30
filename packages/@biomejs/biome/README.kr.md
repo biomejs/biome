@@ -20,11 +20,10 @@
   [discord-url]: https://biomejs.dev/chat
   [npm-badge]: https://badgen.net/npm/v/@biomejs/biome?icon=npm&color=60a5fa&label=%40biomejs%2Fbiome
   [npm-url]: https://www.npmjs.com/package/@biomejs/biome/v/latest
-  [vscode-badge]: https://badgen.net/vs-marketplace/v/biomejs.biome?label=vscode&icon=visualstudio&color=60a5fa
+  [vscode-badge]: https://img.shields.io/visual-studio-marketplace/v/biomejs.biome?label=Visual%20Studio%20Marketplace&labelColor=374151&color=60a5fa
   [vscode-url]: https://marketplace.visualstudio.com/items?itemName=biomejs.biome
-  [open-vsx-badge]: https://badgen.net/open-vsx/version/biomejs/biome?label=open-vsx&color=60a5fa
+  [open-vsx-badge]: https://img.shields.io/visual-studio-marketplace/v/biomejs.biome?label=Open%20VSX%20Registry&logo=data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz4KPHN2ZyB2aWV3Qm94PSI0LjYgNSA5Ni4yIDEyMi43IiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPgogIDxwYXRoIGQ9Ik0zMCA0NC4yTDUyLjYgNUg3LjN6TTQuNiA4OC41aDQ1LjNMMjcuMiA0OS40em01MSAwbDIyLjYgMzkuMiAyMi42LTM5LjJ6IiBmaWxsPSIjYzE2MGVmIi8+CiAgPHBhdGggZD0iTTUyLjYgNUwzMCA0NC4yaDQ1LjJ6TTI3LjIgNDkuNGwyMi43IDM5LjEgMjIuNi0zOS4xem01MSAwTDU1LjYgODguNWg0NS4yeiIgZmlsbD0iI2E2MGVlNSIvPgo8L3N2Zz4=&labelColor=374151&color=60a5fa
   [open-vsx-url]: https://open-vsx.org/extension/biomejs/biome
-  [polar-badge]: https://polar.sh/embed/seeks-funding-shield.svg?org=biomejs
 
   <!-- Insert new entries lexicographically by language code.
      For example given below is the same order as these files appear on page:
@@ -41,7 +40,7 @@
 
 **Biome**은 _JavaScript_, _TypeScript_, _JSX_, _CSS_ 및 *GraphQL*을 위한 **[고성능 린터](https://github.com/biomejs/biome/tree/main/benchmark#linting)로**, ESLint, typescript-eslint 등 [다양한 소스](https://github.com/biomejs/biome/discussions/3)에서 가져온 **[270개 이상의 규칙](https://biomejs.dev/linter/rules/)을** 제공합니다. **맥락을 고려한 상세한 진단 정보**를 제공하여 코드 품질 향상과 개발 실력 향상에 도움을 줍니다!
 
-**Biome**은 처음부터 [에디터와 상호작용](https://biomejs.dev/guides/integrate-in-editor/)하도록 설계되었습니다. 코드를 작성하는 동안에도 포매팅과 린팅을 수행할 수 있습니다.
+**Biome**은 처음부터 [에디터와 상호작용](https://biomejs.dev/guides/editors/first-party-extensions/)하도록 설계되었습니다. 코드를 작성하는 동안에도 포매팅과 린팅을 수행할 수 있습니다.
 
 ### 설치
 

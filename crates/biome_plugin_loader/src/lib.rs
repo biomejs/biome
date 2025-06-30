@@ -32,7 +32,7 @@ impl BiomePlugin {
         fs: &dyn FileSystem,
         plugin_path: &str,
         base_path: &Utf8Path,
-    ) -> Result<Self, PluginDiagnostic> {
+    ) -> Result<(Self, Utf8PathBuf), PluginDiagnostic> {
         let plugin_path = normalize_path(&base_path.join(plugin_path));
 
         // If the plugin path references a `.grit` file directly, treat it as
@@ -42,17 +42,17 @@ impl BiomePlugin {
             .is_some_and(|extension| extension == "grit")
         {
             let plugin = AnalyzerGritPlugin::load(fs, &plugin_path)?;
-            return Ok(Self {
-                analyzer_plugins: vec![Arc::new(Box::new(plugin) as Box<dyn AnalyzerPlugin>)],
-            });
+            return Ok((
+                Self {
+                    analyzer_plugins: vec![Arc::new(Box::new(plugin) as Box<dyn AnalyzerPlugin>)],
+                },
+                plugin_path,
+            ));
         }
 
         let manifest_path = plugin_path.join("biome-manifest.jsonc");
         if !fs.path_is_file(&manifest_path) {
-            return Err(PluginDiagnostic::cant_resolve(
-                manifest_path.to_string(),
-                None,
-            ));
+            return Err(PluginDiagnostic::cant_resolve(manifest_path, None));
         }
 
         let manifest_content = fs.read_file_from_path(&manifest_path)?;
@@ -89,7 +89,7 @@ impl BiomePlugin {
                 .collect::<Result<_, _>>()?,
         };
 
-        Ok(plugin)
+        Ok((plugin, plugin_path))
     }
 }
 
@@ -126,7 +126,7 @@ mod test {
 
         fs.insert("/my-plugin/rules/1.grit".into(), r#"`hello`"#);
 
-        let plugin = BiomePlugin::load(&fs, "./my-plugin", Utf8Path::new("/"))
+        let (plugin, _) = BiomePlugin::load(&fs, "./my-plugin", Utf8Path::new("/"))
             .expect("Couldn't load plugin");
         assert_eq!(plugin.analyzer_plugins.len(), 1);
     }
@@ -178,7 +178,7 @@ mod test {
         let mut fs = MemoryFileSystem::default();
         fs.insert("/my-plugin.grit".into(), r#"`hello`"#);
 
-        let plugin = BiomePlugin::load(&fs, "./my-plugin.grit", Utf8Path::new("/"))
+        let (plugin, _) = BiomePlugin::load(&fs, "./my-plugin.grit", Utf8Path::new("/"))
             .expect("Couldn't load plugin");
         assert_eq!(plugin.analyzer_plugins.len(), 1);
     }

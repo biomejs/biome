@@ -17,7 +17,7 @@ declare_lint_rule! {
     ///
     /// Shadowing is the process by which a local variable shares the same name as a variable in its containing scope. This can cause confusion while reading the code and make it impossible to access the global variable.
     ///
-    /// See also: [`noShadowRestrictedNames`](http://biome.dev/linter/rules/no-shadow-restricted-names)
+    /// See also: [`noShadowRestrictedNames`](http://biomejs.dev/linter/rules/no-shadow-restricted-names)
     ///
     /// ## Examples
     ///
@@ -63,7 +63,7 @@ declare_lint_rule! {
         language: "js",
         recommended: false,
         sources: &[
-            RuleSource::Eslint("no-shadow"),
+            RuleSource::Eslint("no-shadow").same(),
             // uncomment when we can handle the test cases from typescript-eslint
             // RuleSource::EslintTypeScript("no-shadow"),
         ],

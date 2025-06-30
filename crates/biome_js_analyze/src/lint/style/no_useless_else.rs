@@ -1,8 +1,7 @@
 use std::borrow::Cow;
 
 use biome_analyze::{
-    Ast, FixKind, Rule, RuleDiagnostic, RuleSource, RuleSourceKind, context::RuleContext,
-    declare_lint_rule,
+    Ast, FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
 use biome_diagnostics::Severity;
@@ -90,13 +89,12 @@ declare_lint_rule! {
         name: "noUselessElse",
         language: "js",
         sources: &[
-            RuleSource::Eslint("no-else-return"),
-            RuleSource::Clippy("redundant_else"),
+            RuleSource::Eslint("no-else-return").inspired(),
+            RuleSource::Clippy("redundant_else").inspired(),
         ],
-        source_kind: RuleSourceKind::Inspired,
         recommended: false,
         severity: Severity::Information,
-        fix_kind: FixKind::Unsafe,
+        fix_kind: FixKind::Safe,
     }
 }
 

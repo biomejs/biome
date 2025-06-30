@@ -9,10 +9,6 @@
 //! - Objects, strings, and arrays can be mutated.
 //! - String values have escape sequences processed, so that their values
 //!   correspond to runtime values and not just lexical values.
-//! - [`oxc_resolver::ImportsExportsEntry`], [`oxc_resolver::ImportsExportsArray`],
-//!   and [`oxc_resolver::ImportsExportsMap`] are implemented for [`JsonValue`],
-//!   [`JsonArray`] and [`JsonObject`], respectively. This functionality can be
-//!   enabled through the `oxc_resolver` feature flag.
 //! - They are both [`Send`] and [`Sync`], so they can be shared across threads.
 use std::{
     borrow::Borrow,
@@ -149,42 +145,6 @@ impl From<JsonString> for JsonValue {
     }
 }
 
-#[cfg(feature = "oxc_resolver")]
-impl<'a> oxc_resolver::ImportsExportsEntry<'a> for &'a JsonValue {
-    type Array = &'a JsonArray;
-    type Map = &'a JsonObject;
-
-    fn kind(&self) -> oxc_resolver::ImportsExportsKind {
-        match self {
-            JsonValue::Array(_) => oxc_resolver::ImportsExportsKind::Array,
-            JsonValue::Object(_) => oxc_resolver::ImportsExportsKind::Map,
-            JsonValue::String(_) => oxc_resolver::ImportsExportsKind::String,
-            _ => oxc_resolver::ImportsExportsKind::Invalid,
-        }
-    }
-
-    fn as_string(&self) -> Option<&'a str> {
-        match self {
-            JsonValue::String(string) => Some(string.as_ref()),
-            _ => None,
-        }
-    }
-
-    fn as_array(&self) -> Option<Self::Array> {
-        match self {
-            JsonValue::Array(array) => Some(array),
-            _ => None,
-        }
-    }
-
-    fn as_map(&self) -> Option<Self::Map> {
-        match self {
-            JsonValue::Object(map) => Some(map),
-            _ => None,
-        }
-    }
-}
-
 /// JSON array to be used with [JsonValue].
 ///
 /// See the [module-level documentation](self) for more info.
@@ -216,19 +176,6 @@ impl From<JsonArrayValue> for JsonArray {
             })
             .collect();
         Self(vec)
-    }
-}
-
-#[cfg(feature = "oxc_resolver")]
-impl<'a> oxc_resolver::ImportsExportsArray<'a> for &'a JsonArray {
-    type Entry = &'a JsonValue;
-
-    fn len(&self) -> usize {
-        self.0.len()
-    }
-
-    fn iter(&self) -> impl Iterator<Item = Self::Entry> {
-        self.0.iter()
     }
 }
 
@@ -273,23 +220,6 @@ impl From<JsonObjectValue> for JsonObject {
             })
             .collect();
         Self(map)
-    }
-}
-
-#[cfg(feature = "oxc_resolver")]
-impl<'a> oxc_resolver::ImportsExportsMap<'a> for &'a JsonObject {
-    type Entry = &'a JsonValue;
-
-    fn get(&self, key: &str) -> Option<Self::Entry> {
-        self.0.get(key)
-    }
-
-    fn iter(&self) -> impl Iterator<Item = (&'a str, Self::Entry)> {
-        self.0.iter().map(|(key, value)| (key.as_ref(), value))
-    }
-
-    fn keys(&self) -> impl Iterator<Item = &'a str> {
-        self.0.keys().map(JsonString::as_ref)
     }
 }
 
@@ -339,6 +269,16 @@ impl From<JsonStringValue> for JsonString {
 impl From<String> for JsonString {
     fn from(value: String) -> Self {
         Self(Text::Owned(value))
+    }
+}
+
+impl From<Text> for JsonString {
+    fn from(text: Text) -> Self {
+        match text {
+            Text::Borrowed(token_text) => token_text.into(),
+            Text::Owned(string) => Self(Text::Owned(string)),
+            Text::Static(string) => Self(Text::Static(string)),
+        }
     }
 }
 

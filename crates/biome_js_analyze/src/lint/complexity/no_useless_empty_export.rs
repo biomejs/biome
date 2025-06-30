@@ -45,7 +45,7 @@ declare_lint_rule! {
         version: "1.0.0",
         name: "noUselessEmptyExport",
         language: "ts",
-        sources: &[RuleSource::EslintTypeScript("no-useless-empty-export")],
+        sources: &[RuleSource::EslintTypeScript("no-useless-empty-export").same()],
         recommended: true,
         severity: Severity::Information,
         fix_kind: FixKind::Safe,

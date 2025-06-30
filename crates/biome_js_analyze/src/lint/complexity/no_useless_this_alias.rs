@@ -2,8 +2,7 @@ use crate::{
     JsRuleAction, services::control_flow::AnyJsControlFlowRoot, services::semantic::Semantic,
 };
 use biome_analyze::{
-    FixKind, Rule, RuleDiagnostic, RuleSource, RuleSourceKind, context::RuleContext,
-    declare_lint_rule,
+    FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
 use biome_diagnostics::Severity;
@@ -55,8 +54,7 @@ declare_lint_rule! {
         version: "1.0.0",
         name: "noUselessThisAlias",
         language: "js",
-        sources: &[RuleSource::EslintTypeScript("no-this-alias")],
-        source_kind: RuleSourceKind::Inspired,
+        sources: &[RuleSource::EslintTypeScript("no-this-alias").inspired()],
         recommended: true,
         severity: Severity::Information,
         fix_kind: FixKind::Safe,

@@ -1,10 +1,11 @@
 {
   "linter": {
     "rules": {
-      
-      "complexity": {
-        "noMultipleSpacesInRegularExpressionLiterals": "on",
+      "correctness": {
         "noUnnecessaryContinue": "on"
+      },
+      "complexity": {
+        "noMultipleSpacesInRegularExpressionLiterals": "on"
       }
     }
   }

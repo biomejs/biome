@@ -26,7 +26,6 @@ indexmap                 = { workspace = true }
 rustc-hash               = { workspace = true }
 schemars                 = { workspace = true, optional = true }
 serde                    = { workspace = true, features = ["derive"], optional = true }
-tracing                  = { workspace = true }
 
 [features]
 schema = ["dep:schemars", "biome_console/schema", "serde"]

@@ -23,7 +23,7 @@ for(f = 0; cond; f++) {}
 ```
 inavlidSelfWrite.js:1:5 lint/correctness/noUnusedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This variable is unused.
+  ! This variable a is unused.
   
   > 1 │ let a = 1;
       │     ^
@@ -50,7 +50,7 @@ inavlidSelfWrite.js:1:5 lint/correctness/noUnusedVariables  FIXABLE  ━━━�
 ```
 inavlidSelfWrite.js:7:5 lint/correctness/noUnusedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This variable is unused.
+  ! This variable d is unused.
   
     6 │ // object assignment pattern
   > 7 │ let d, e;·
@@ -77,7 +77,7 @@ inavlidSelfWrite.js:7:5 lint/correctness/noUnusedVariables  FIXABLE  ━━━�
 ```
 inavlidSelfWrite.js:7:8 lint/correctness/noUnusedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This variable is unused.
+  ! This variable e is unused.
   
     6 │ // object assignment pattern
   > 7 │ let d, e;·
@@ -104,7 +104,7 @@ inavlidSelfWrite.js:7:8 lint/correctness/noUnusedVariables  FIXABLE  ━━━�
 ```
 inavlidSelfWrite.js:10:5 lint/correctness/noUnusedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This variable is unused.
+  ! This variable f is unused.
   
      8 │ ({d, e} = {d: 1, e: 2});
      9 │ 

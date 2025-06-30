@@ -1,22 +1,17 @@
 {
+  "root": false,
   "$schema": "../packages/@biomejs/biome/configuration_schema.json",
   "formatter": {
-    "includes": [
-      "**/*.js",
-      "**/*.jsx",
-      "**/*.cjs",
-      "**/*.ts",
-      "**/*.tsx"
-    ],
+    "includes": ["**/*.js", "**/*.jsx", "**/*.cjs", "**/*.ts", "**/*.tsx"],
     "indentStyle": "space"
   },
   "linter": {
-    "includes": [
-      "**/*.js"
-    ],
+    "includes": ["**/*.js"],
     "rules": {
       "recommended": false,
       "complexity": {
+        "noArguments": "error",
+        "noCommaOperator": "error",
         "noExtraBooleanCast": "error",
         "noAdjacentSpacesInRegex": "error",
         "noUselessCatch": "error",
@@ -24,9 +19,9 @@
         "noUselessLabel": "error",
         "noUselessRename": "error",
         "noVoid": "error",
-        "noWith": "error",
         "useArrowFunction": "error",
         "useLiteralKeys": "error",
+        "useNumericLiterals": "error",
         "useRegexLiterals": "error"
       },
       "correctness": {
@@ -52,23 +47,21 @@
         "noUnusedLabels": "error",
         "noUnusedPrivateClassMembers": "error",
         "noUnusedVariables": "error",
-        "useArrayLiterals": "error",
         "useIsNan": "error",
         "useValidForDirection": "error",
+        "useValidTypeof": "error",
         "useYield": "error"
       },
       "security": {
         "noGlobalEval": "error"
       },
       "style": {
-        "noArguments": "error",
-        "noCommaOperator": "error",
         "noParameterAssign": "error",
+        "useArrayLiterals": "error",
         "useConst": "error",
         "useCollapsedElseIf": "error",
         "useDefaultParameterLast": "error",
         "useExponentiationOperator": "error",
-        "useNumericLiterals": "error",
         "useSingleVarDeclarator": "error",
         "useTemplate": "error"
       },
@@ -99,10 +92,10 @@
         "noShadowRestrictedNames": "error",
         "noSparseArray": "error",
         "noUnsafeNegation": "error",
+        "noWith": "error",
         "useAwait": "error",
         "useDefaultSwitchClauseLast": "error",
         "useGetterReturn": "error",
-        "useValidTypeof": "error",
         "noVar": "error"
       }
     }

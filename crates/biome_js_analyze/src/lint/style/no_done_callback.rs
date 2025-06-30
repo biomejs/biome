@@ -50,7 +50,10 @@ declare_lint_rule! {
         language: "js",
         recommended: false,
         severity: Severity::Information,
-        sources: &[RuleSource::EslintJest("no-done-callback"), RuleSource::EslintVitest("no-done-callback")],
+        sources: &[
+            RuleSource::EslintJest("no-done-callback").same(),
+            RuleSource::EslintVitest("no-done-callback").same()
+        ],
     }
 }
 

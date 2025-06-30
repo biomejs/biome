@@ -53,7 +53,7 @@ declare_lint_rule! {
         version: "1.3.0",
         name: "noMisleadingInstantiator",
         language: "ts",
-        sources: &[RuleSource::EslintTypeScript("no-misused-new")],
+        sources: &[RuleSource::EslintTypeScript("no-misused-new").same()],
         recommended: true,
         severity: Severity::Error,
     }

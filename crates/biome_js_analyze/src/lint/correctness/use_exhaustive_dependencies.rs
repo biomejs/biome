@@ -251,7 +251,7 @@ declare_lint_rule! {
         version: "1.0.0",
         name: "useExhaustiveDependencies",
         language: "jsx",
-        sources: &[RuleSource::EslintReactHooks("exhaustive-deps")],
+        sources: &[RuleSource::EslintReactHooks("exhaustive-deps").same()],
         recommended: true,
         severity: Severity::Error,
         domains: &[RuleDomain::React, RuleDomain::Next],
@@ -515,6 +515,7 @@ fn capture_needs_to_be_in_the_dependency_list(
         | AnyJsBindingDeclaration::TsEnumDeclaration(_)
         | AnyJsBindingDeclaration::TsTypeAliasDeclaration(_)
         | AnyJsBindingDeclaration::TsInterfaceDeclaration(_)
+        | AnyJsBindingDeclaration::TsExternalModuleDeclaration(_)
         | AnyJsBindingDeclaration::TsModuleDeclaration(_)
         | AnyJsBindingDeclaration::TsInferType(_)
         | AnyJsBindingDeclaration::TsMappedType(_)
@@ -856,7 +857,9 @@ impl Rule for UseExhaustiveDependencies {
                         .entry(capture.text_trimmed().into_text().into())
                         .or_default();
 
-                    captures.push(capture.clone());
+                    if !captures.iter().any(|existing| existing == capture) {
+                        captures.push(capture.clone());
+                    }
                 }
             }
 
@@ -971,22 +974,18 @@ impl Rule for UseExhaustiveDependencies {
                 let mut diag = RuleDiagnostic::new(
                     rule_category!(),
                     function_name_range,
-                    markup! {"This hook does not specify all of its dependencies: "{capture_text.as_ref()}""},
+                    markup! {"This hook does not specify its dependency on "<Emphasis>{capture_text.as_ref()}</Emphasis>"."},
                 );
 
                 for range in captures_range {
                     diag = diag.detail(
                         range.text_trimmed_range(),
-                        "This dependency is not specified in the hook dependency list.",
+                        "This dependency is being used here, but is not specified in the hook dependency list.",
                     );
                 }
 
                 if dependencies_array.elements().len() == 0 {
-                    diag = if captures_range.len() == 1 {
-                        diag.note("Either include it or remove the dependency array")
-                    } else {
-                        diag.note("Either include them or remove the dependency array")
-                    }
+                    diag = diag.note("Either include it or remove the dependency array.");
                 }
 
                 Some(diag)
@@ -1074,19 +1073,21 @@ impl Rule for UseExhaustiveDependencies {
 
         let message = match state {
             Fix::AddDependency {
-                captures: (_, nodes),
+                captures: (_, captures),
                 dependencies_array,
                 ..
             } => {
+                let new_elements = captures.first().into_iter().filter_map(|node| {
+                    node.ancestors()
+                        .find_map(|node| node.cast::<AnyJsExpression>()?.trim_trivia())
+                        .map(AnyJsArrayElement::AnyJsExpression)
+                });
+
                 let elements = dependencies_array.elements();
                 let elements = elements
                     .elements()
                     .flat_map(|element| element.into_node())
-                    .chain(nodes.iter().filter_map(|node| {
-                        node.ancestors()
-                            .find_map(|node| node.cast::<AnyJsExpression>()?.trim_trivia())
-                            .map(AnyJsArrayElement::AnyJsExpression)
-                    }))
+                    .chain(new_elements)
                     .collect::<Vec<_>>();
 
                 mutation.replace_node(
@@ -1094,7 +1095,7 @@ impl Rule for UseExhaustiveDependencies {
                     recreate_array(dependencies_array, elements),
                 );
 
-                markup! { "Add the missing dependencies to the list." }
+                markup! { "Add the missing dependency to the list." }
             }
             Fix::RemoveDependency {
                 dependencies,

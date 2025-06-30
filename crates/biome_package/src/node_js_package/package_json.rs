@@ -1,46 +1,40 @@
 use crate::{LanguageRoot, Manifest};
+use biome_deserialize::json::deserialize_from_json_str;
 use biome_deserialize::{
     Deserializable, DeserializableTypes, DeserializableValue, DeserializationContext,
     DeserializationVisitor, Deserialized, Text, json::deserialize_from_json_ast,
 };
+use biome_diagnostics::Error;
+use biome_json_parser::JsonParserOptions;
 use biome_json_syntax::JsonLanguage;
-use biome_json_value::{JsonObject, JsonString, JsonValue};
+use biome_json_value::{JsonObject, JsonValue};
 use biome_text_size::TextRange;
-use camino::{Utf8Path, Utf8PathBuf};
+use camino::Utf8Path;
 use node_semver::{Range, SemverError};
-use oxc_resolver::{ImportsExportsEntry, ImportsExportsMap, PathUtil, ResolveError};
-use rustc_hash::{FxBuildHasher, FxHashMap};
 use std::panic::catch_unwind;
-use std::{ops::Deref, path::Path, str::FromStr};
+use std::{ops::Deref, str::FromStr};
 
 /// Deserialized `package.json`.
 #[derive(Debug, Default, Clone)]
 pub struct PackageJson {
-    /// Path to `package.json`. Contains the `package.json` filename.
-    pub path: Utf8PathBuf,
-
-    /// Canonicalized version of [Self::path], where all symbolic links are
-    /// resolved.
-    pub canonicalized_path: Utf8PathBuf,
-
-    /// The "name" field defines your package's name.
-    /// The "name" field can be used in addition to the "exports" field to self-reference a package using its name.
+    /// The "name" field defines your package's name. The "name" field can be
+    /// used in addition to the "exports" field to self-reference a package
+    /// using its name.
     ///
     /// <https://nodejs.org/api/packages.html#name>
-    pub name: Option<String>,
+    pub name: Option<Box<str>>,
 
     /// The "type" field.
     ///
     /// <https://nodejs.org/api/packages.html#type>
     pub r#type: Option<PackageType>,
 
-    pub version: Option<String>,
-    pub description: Option<String>,
+    pub version: Option<Box<str>>,
     pub dependencies: Dependencies,
     pub dev_dependencies: Dependencies,
     pub peer_dependencies: Dependencies,
     pub optional_dependencies: Dependencies,
-    pub license: Option<(String, TextRange)>,
+    pub license: Option<(Box<str>, TextRange)>,
 
     pub(crate) raw_json: JsonObject,
 }
@@ -48,7 +42,7 @@ pub struct PackageJson {
 static_assertions::assert_impl_all!(PackageJson: Send, Sync);
 
 impl PackageJson {
-    pub fn new(name: impl Into<String>) -> Self {
+    pub fn new(name: impl Into<Box<str>>) -> Self {
         Self {
             name: Some(name.into()),
             r#type: Some(PackageType::Module),
@@ -56,36 +50,9 @@ impl PackageJson {
         }
     }
 
-    /// Returns [self] with both `path` and `canonicalized_path` set to the
-    /// given `path`.
-    ///
-    /// Use [Self::with_path_and_canonicalized_path()] if you want to set a
-    /// different canonicalized path.
-    pub fn with_path(self, path: impl Into<Utf8PathBuf>) -> Self {
-        let path: Utf8PathBuf = path.into();
+    pub fn with_version(self, version: impl Into<Box<str>>) -> Self {
         Self {
-            path: path.clone(),
-            canonicalized_path: path,
-            ..self
-        }
-    }
-
-    /// Returns [self] with updated `path` and `canonicalized_path`.
-    pub fn with_path_and_canonicalized_path(
-        self,
-        path: impl Into<Utf8PathBuf>,
-        canonicalized_path: impl Into<Utf8PathBuf>,
-    ) -> Self {
-        Self {
-            path: path.into(),
-            canonicalized_path: canonicalized_path.into(),
-            ..self
-        }
-    }
-
-    pub fn with_version(self, version: String) -> Self {
-        Self {
-            version: Some(version),
+            version: Some(version.into()),
             ..self
         }
     }
@@ -103,15 +70,17 @@ impl PackageJson {
         }
     }
 
-    /// Checks whether the `specifier` is defined in `dependencies`, `dev_dependencies` or `peer_dependencies`
+    /// Checks whether the `specifier` is defined in `dependencies`,
+    /// `dev_dependencies` or `peer_dependencies`
     pub fn contains_dependency(&self, specifier: &str) -> bool {
         self.dependencies.contains(specifier)
             || self.dev_dependencies.contains(specifier)
             || self.peer_dependencies.contains(specifier)
     }
 
-    /// Checks whether the `specifier` is defined in `dependencies`, `dev_dependencies` or `peer_dependencies`, and the `range`
-    /// of matches the one of the manifest
+    /// Checks whether the `specifier` is defined in `dependencies`,
+    /// `dev_dependencies` or `peer_dependencies`, and the `range` of matches
+    /// the one of the manifest
     pub fn matches_dependency(&self, specifier: &str, range: &str) -> bool {
         let iter = self
             .dependencies
@@ -119,8 +88,8 @@ impl PackageJson {
             .chain(self.dev_dependencies.iter())
             .chain(self.peer_dependencies.iter());
         for (dependency_name, dependency_version) in iter {
-            if dependency_name == specifier
-                && Version::from(dependency_version.as_str()).satisfies(range)
+            if dependency_name.as_ref() == specifier
+                && Version::from(dependency_version.as_ref()).satisfies(range)
             {
                 return true;
             }
@@ -129,44 +98,14 @@ impl PackageJson {
         false
     }
 
-    pub(crate) fn alias_value<'a>(
-        key: &Path,
-        value: &'a JsonValue,
-    ) -> Result<Option<&'a str>, ResolveError> {
-        match value {
-            JsonValue::String(value) => Ok(Some(value.as_ref())),
-            JsonValue::Bool(b) if !b => Err(ResolveError::Ignored(key.to_path_buf())),
-            _ => Ok(None),
-        }
-    }
-
-    /// The "browser" field is provided by a module author as a hint to javascript bundlers or component tools when packaging modules for client side use.
-    /// Multiple values are configured by [ResolveOptions::alias_fields].
-    ///
-    /// <https://github.com/defunctzombie/package-browser-field-spec>
-    pub(crate) fn browser_fields<'a>(
-        &'a self,
-        alias_fields: &'a [Vec<String>],
-    ) -> impl Iterator<Item = &'a JsonObject> + 'a {
-        alias_fields.iter().filter_map(|object_path| {
-            Self::get_value_by_path(&self.raw_json, object_path)
-                // Only object is valid, all other types are invalid
-                // https://github.com/webpack/enhanced-resolve/blob/3a28f47788de794d9da4d1702a3a583d8422cd48/lib/AliasFieldPlugin.js#L44-L52
-                .and_then(|value| value.as_map())
-        })
-    }
-
-    pub(crate) fn get_value_by_path<'a>(
-        fields: &'a JsonObject,
-        path: &[String],
-    ) -> Option<&'a JsonValue> {
+    pub fn get_value_by_path(&self, path: &[&str]) -> Option<&JsonValue> {
         if path.is_empty() {
             return None;
         }
 
-        let mut value = fields.get(path[0].as_str())?;
+        let mut value = self.raw_json.get(path[0])?;
         for key in path.iter().skip(1) {
-            if let Some(inner_value) = value.as_map().and_then(|o| o.get(key.as_str())) {
+            if let Some(inner_value) = value.as_object().and_then(|object| object.get(*key)) {
                 value = inner_value;
             } else {
                 return None;
@@ -176,110 +115,79 @@ impl PackageJson {
     }
 }
 
-impl oxc_resolver::PackageJson for PackageJson {
-    fn path(&self) -> &Path {
-        self.path.as_std_path()
-    }
-
-    fn realpath(&self) -> &Path {
-        self.canonicalized_path.as_std_path()
-    }
-
-    fn directory(&self) -> &Path {
-        debug_assert!(
-            self.canonicalized_path
-                .file_name()
-                .is_some_and(|x| x == "package.json")
-        );
-        self.canonicalized_path
-            .parent()
-            .map(Utf8Path::as_std_path)
-            .unwrap()
-    }
-
-    fn name(&self) -> Option<&str> {
-        self.name.as_deref()
-    }
-
-    fn r#type(&self) -> Option<oxc_resolver::PackageType> {
-        self.r#type.map(Into::into)
-    }
-
-    fn main_fields<'a>(&'a self, main_fields: &'a [String]) -> impl Iterator<Item = &'a str> + 'a {
-        main_fields
-            .iter()
-            .filter_map(|main_field| self.raw_json.get(main_field.as_str()))
-            .filter_map(|value| value.as_string())
-            .map(JsonString::as_str)
-    }
-
-    fn exports_fields<'a>(
-        &'a self,
-        exports_fields: &'a [Vec<String>],
-    ) -> impl Iterator<Item = impl ImportsExportsEntry<'a>> + 'a {
-        exports_fields
-            .iter()
-            .filter_map(|object_path| Self::get_value_by_path(&self.raw_json, object_path))
-    }
-
-    fn imports_fields<'a>(
-        &'a self,
-        imports_fields: &'a [Vec<String>],
-    ) -> impl Iterator<Item = impl ImportsExportsMap<'a>> + 'a {
-        imports_fields
-            .iter()
-            .filter_map(|object_path| Self::get_value_by_path(&self.raw_json, object_path))
-            .filter_map(|value| value.as_map())
-    }
-
-    fn resolve_browser_field<'a>(
-        &'a self,
-        path: &Path,
-        request: Option<&str>,
-        alias_fields: &'a [Vec<String>],
-    ) -> Result<Option<&'a str>, ResolveError> {
-        for object in self.browser_fields(alias_fields) {
-            if let Some(request) = request {
-                if let Some(value) = object.get(request) {
-                    return Self::alias_value(path, value);
-                }
-            } else {
-                let dir = self.path.parent().unwrap();
-                for (key, value) in object.iter() {
-                    let joined = dir.as_std_path().normalize_with(Utf8Path::new(key));
-                    if joined == path {
-                        return Self::alias_value(path, value);
-                    }
-                }
-            }
-        }
-        Ok(None)
-    }
-}
-
 impl Manifest for PackageJson {
     type Language = JsonLanguage;
 
     fn deserialize_manifest(root: &LanguageRoot<Self::Language>) -> Deserialized<Self> {
         deserialize_from_json_ast::<Self>(root, "")
     }
-}
 
-#[derive(Debug, Default, Clone, biome_deserialize_macros::Deserializable)]
-pub struct Dependencies(FxHashMap<String, String>);
-
-impl<const N: usize> From<[(String, String); N]> for Dependencies {
-    fn from(dependencies: [(String, String); N]) -> Self {
-        let mut map = FxHashMap::with_capacity_and_hasher(N, FxBuildHasher);
-        for (dependency, version) in dependencies {
-            map.insert(dependency, version);
+    fn read_manifest(fs: &dyn biome_fs::FileSystem, path: &Utf8Path) -> Deserialized<Self> {
+        match fs.read_file_from_path(path) {
+            Ok(content) => deserialize_from_json_str(&content, JsonParserOptions::default(), ""),
+            Err(error) => Deserialized::new(None, vec![Error::from(error)]),
         }
-        Self(map)
     }
 }
 
+#[derive(Debug, Default, Clone)]
+pub struct Dependencies(pub Box<[(Box<str>, Box<str>)]>);
+
+impl Deserializable for Dependencies {
+    fn deserialize(
+        ctx: &mut impl DeserializationContext,
+        value: &impl DeserializableValue,
+        name: &str,
+    ) -> Option<Self> {
+        struct Visitor;
+        impl DeserializationVisitor for Visitor {
+            type Output = Dependencies;
+            const EXPECTED_TYPE: DeserializableTypes = DeserializableTypes::MAP;
+
+            fn visit_map(
+                self,
+                ctx: &mut impl DeserializationContext,
+                members: impl Iterator<
+                    Item = Option<(impl DeserializableValue, impl DeserializableValue)>,
+                >,
+                _range: TextRange,
+                name: &str,
+            ) -> Option<Self::Output> {
+                let result = members
+                    .filter_map(|value| {
+                        if let Some((key, value)) = value {
+                            let key: Box<str> = Deserializable::deserialize(ctx, &key, name)?;
+                            let value: Box<str> = Deserializable::deserialize(ctx, &value, name)?;
+                            Some((key, value))
+                        } else {
+                            None
+                        }
+                    })
+                    .collect::<Vec<_>>();
+
+                Some(Dependencies(result.into_boxed_slice()))
+            }
+        }
+
+        value.deserialize(ctx, Visitor, name)
+        // let result = Vec::<(Box<str>, Box<str>)>::deserialize(ctx, value, name)
+        //     .map(|v| v.into_boxed_slice())
+
+        // .map(Self)
+    }
+}
+
+// impl<const N: usize> From<[(Box<str>, Box<str>); N]> for Dependencies {
+//     fn from(dependencies: [(Box<str>, Box<str>); N]) -> Self {
+//         for (dependency, version) in dependencies {
+//             map.insert(dependency.as_str().into(), version.as_str().into());
+//         }
+//         Self(dependencies)
+//     }
+// }
+
 impl Deref for Dependencies {
-    type Target = FxHashMap<String, String>;
+    type Target = Box<[(Box<str>, Box<str>)]>;
 
     fn deref(&self) -> &Self::Target {
         &self.0
@@ -287,16 +195,8 @@ impl Deref for Dependencies {
 }
 
 impl Dependencies {
-    pub fn to_keys(&self) -> Vec<String> {
-        self.0.keys().cloned().collect()
-    }
-
     pub fn contains(&self, specifier: &str) -> bool {
-        self.0.contains_key(specifier)
-    }
-
-    pub fn add(&mut self, dependency: impl Into<String>, version: impl Into<String>) {
-        self.0.insert(dependency.into(), version.into());
+        self.0.iter().any(|(k, _)| k.as_ref() == specifier)
     }
 }
 
@@ -375,9 +275,6 @@ impl DeserializationVisitor for PackageJsonVisitor {
                     result.license = Deserializable::deserialize(ctx, &value, &key_text)
                         .map(|license| (license, license_range));
                 }
-                "description" => {
-                    result.description = Deserializable::deserialize(ctx, &value, &key_text);
-                }
                 "dependencies" => {
                     if let Some(deps) = Deserializable::deserialize(ctx, &value, &key_text) {
                         result.dependencies = deps;
@@ -401,9 +298,9 @@ impl DeserializationVisitor for PackageJsonVisitor {
                 "type" => {
                     result.r#type = Deserializable::deserialize(ctx, &value, &key_text);
                 }
-                key => {
+                _ => {
                     if let Some(value) = JsonValue::deserialize(ctx, &value, &key_text) {
-                        result.raw_json.insert(key.into(), value);
+                        result.raw_json.insert(key_text.into(), value);
                     }
                 }
             }
@@ -445,15 +342,6 @@ impl PackageType {
     }
 }
 
-impl From<PackageType> for oxc_resolver::PackageType {
-    fn from(value: PackageType) -> Self {
-        match value {
-            PackageType::Module => Self::Module,
-            PackageType::CommonJs => Self::CommonJs,
-        }
-    }
-}
-
 fn parse_range(range: &str) -> Result<Version, SemverError> {
     match catch_unwind(|| Range::parse(range).map(Version::SemVer)) {
         Ok(result) => result,
@@ -464,6 +352,29 @@ fn parse_range(range: &str) -> Result<Version, SemverError> {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn parse_package_json_author_field() {
+        let deserialized = deserialize_from_json_str::<PackageJson>(
+            r#"{
+    "name": "@shared/format",
+    "author": "Biome Team",
+    "exports": {
+        "./biome": "./biome.json"
+    }
+}"#,
+            JsonParserOptions::default(),
+            "",
+        );
+        let (package_json, errors) = deserialized.consume();
+        assert!(errors.is_empty());
+
+        let package_json = package_json.expect("parsing must have succeeded");
+        assert_eq!(
+            package_json.get_value_by_path(&["author"]),
+            Some(&JsonValue::String(Text::Static("Biome Team").into()))
+        );
+    }
 
     #[test]
     fn should_not_panic_on_invalid_semver_range() {

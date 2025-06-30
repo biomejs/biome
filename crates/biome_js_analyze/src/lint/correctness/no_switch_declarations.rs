@@ -73,10 +73,10 @@ declare_lint_rule! {
         version: "1.0.0",
         name: "noSwitchDeclarations",
         language: "js",
-        sources: &[RuleSource::Eslint("no-case-declarations")],
+        sources: &[RuleSource::Eslint("no-case-declarations").same()],
         recommended: true,
         severity: Severity::Error,
-        fix_kind: FixKind::Unsafe,
+        fix_kind: FixKind::Safe,
     }
 }
 

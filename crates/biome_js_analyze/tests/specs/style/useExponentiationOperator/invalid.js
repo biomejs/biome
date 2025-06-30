@@ -1,4 +1,4 @@
-Math.pow(a, b);
+/*1*/Math.pow(/*2*/a/*3*/, /*4*/b/*5*/)/*6*/;
 (Math).pow(a, b);
 
 // able to catch some workarounds

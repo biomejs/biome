@@ -64,7 +64,7 @@ declare_lint_rule! {
         version: "1.3.3",
         name: "noUnusedPrivateClassMembers",
         language: "js",
-        sources: &[RuleSource::Eslint("no-unused-private-class-members")],
+        sources: &[RuleSource::Eslint("no-unused-private-class-members").same()],
         recommended: true,
         severity: Severity::Warning,
         fix_kind: FixKind::Unsafe,

@@ -1,5 +1,6 @@
 use biome_analyze::{
     GroupCategory, Queryable, RegistryVisitor, Rule, RuleCategory, RuleGroup, RuleMetadata,
+    RuleSourceKind, RuleSourceWithKind,
 };
 use biome_rowan::syntax::Language;
 use biome_string_case::Case;
@@ -13,17 +14,14 @@ pub(crate) fn generate_migrate_eslint(mode: Mode) -> Result<()> {
     biome_js_analyze::visit_registry(&mut visitor);
     biome_json_analyze::visit_registry(&mut visitor);
     let mut lines = Vec::with_capacity(visitor.0.len());
-    for (eslint_name, (group_name, rule_metadata)) in visitor.0 {
+    for ((eslint_name, source_kind), (group_name, rule_metadata)) in visitor.0 {
         let name = rule_metadata.name;
         let name_ident = format_ident!("{}", Case::Snake.convert(name));
         let group_ident = format_ident!("{group_name}");
-        let is_inspuired = rule_metadata
-            .source_kind
-            .is_some_and(|source_kind| source_kind.is_inspired());
-        let check_inspired = if is_inspuired {
+        let check_inspired = if source_kind.is_inspired() {
             quote! {
                 if !options.include_inspired {
-                    results.has_inspired_rules = true;
+                    results.add(eslint_name, eslint_to_biome::RuleMigrationResult::Inspired);
                     return false;
                 }
             }
@@ -33,6 +31,7 @@ pub(crate) fn generate_migrate_eslint(mode: Mode) -> Result<()> {
         let check_nursery = if group_name == "nursery" {
             quote! {
                 if !options.include_nursery {
+                    results.add(eslint_name, eslint_to_biome::RuleMigrationResult::Nursery);
                     return false;
                 }
             }
@@ -61,9 +60,11 @@ pub(crate) fn generate_migrate_eslint(mode: Mode) -> Result<()> {
             match eslint_name {
                 #( #lines )*
                 _ => {
+                    results.add(eslint_name, eslint_to_biome::RuleMigrationResult::Unsupported);
                     return false;
                 }
             }
+            results.add(eslint_name, eslint_to_biome::RuleMigrationResult::Migrated);
             true
         }
     });
@@ -74,7 +75,7 @@ pub(crate) fn generate_migrate_eslint(mode: Mode) -> Result<()> {
 }
 
 #[derive(Default)]
-struct EslintLintRulesVisitor(BTreeMap<String, (&'static str, RuleMetadata)>);
+struct EslintLintRulesVisitor(BTreeMap<(Box<str>, RuleSourceKind), (&'static str, RuleMetadata)>);
 
 impl<L: Language> RegistryVisitor<L> for EslintLintRulesVisitor {
     fn record_category<C: GroupCategory<Language = L>>(&mut self) {
@@ -88,10 +89,10 @@ impl<L: Language> RegistryVisitor<L> for EslintLintRulesVisitor {
         R::Query: Queryable<Language = L>,
         <R::Query as Queryable>::Output: Clone,
     {
-        for source in R::METADATA.sources {
+        for RuleSourceWithKind { kind, source } in R::METADATA.sources {
             if source.is_eslint() || source.is_eslint_plugin() {
                 self.0.insert(
-                    source.to_namespaced_rule_name(),
+                    (source.to_namespaced_rule_name().into_boxed_str(), *kind),
                     (<R::Group as RuleGroup>::NAME, R::METADATA),
                 );
             }

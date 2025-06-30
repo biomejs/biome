@@ -3,6 +3,7 @@ import type {
 	Configuration,
 	Diagnostic,
 	FixFileMode,
+	OpenProjectResult,
 	ProjectKey,
 	Workspace,
 } from "@biomejs/wasm-nodejs";
@@ -143,7 +144,7 @@ export class Biome {
 	 *
 	 * @param {string} [path]
 	 */
-	openProject(path?: string): ProjectKey {
+	openProject(path?: string): OpenProjectResult {
 		return this.workspace.openProject({
 			path: path || "",
 			openUninitialized: true,

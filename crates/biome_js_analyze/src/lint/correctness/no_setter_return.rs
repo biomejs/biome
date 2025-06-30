@@ -69,7 +69,7 @@ declare_lint_rule! {
         version: "1.0.0",
         name: "noSetterReturn",
         language: "js",
-        sources: &[RuleSource::Eslint("no-setter-return")],
+        sources: &[RuleSource::Eslint("no-setter-return").same()],
         recommended: true,
         severity: Severity::Error,
     }
@@ -89,12 +89,10 @@ impl Rule for NoSetterReturn {
         let ret = ctx.query();
         // Do not take arg-less returns into account
         let _arg = ret.argument()?;
-        let setter = ret
-            .syntax()
+        ret.syntax()
             .ancestors()
             .find(|x| AnyJsControlFlowRoot::can_cast(x.kind()))
-            .and_then(JsSetterMember::cast);
-        setter
+            .and_then(JsSetterMember::cast)
     }
 
     fn diagnostic(ctx: &RuleContext<Self>, setter: &Self::State) -> Option<RuleDiagnostic> {

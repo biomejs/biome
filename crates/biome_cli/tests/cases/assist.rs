@@ -175,7 +175,7 @@ fn assist_writes() {
     assert_file_contents(
         &fs,
         file,
-        r#"{ "foo": "bar" ,"lorem": "ipsum","zod": true }"#,
+        r#"{ "foo": "bar","lorem": "ipsum", "zod": true }"#,
     );
 
     assert_cli_snapshot(SnapshotPayload::new(

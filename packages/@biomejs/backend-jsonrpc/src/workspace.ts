@@ -42,7 +42,7 @@ export interface Configuration {
 	/**
 	 * A list of paths to other JSON files, used to extends the current configuration.
 	 */
-	extends?: string[];
+	extends?: Extends;
 	/**
 	 * The configuration of the filesystem
 	 */
@@ -132,10 +132,31 @@ export interface CssConfiguration {
 	 */
 	parser?: CssParserConfiguration;
 }
+export type Extends = string[] | string;
 /**
  * The configuration of the filesystem
  */
 export interface FilesConfiguration {
+	/**
+	* Set of file and folder names that should be unconditionally ignored by Biome's scanner.
+
+Biome maintains an internal list of default ignore entries, which is based on user feedback and which may change in any release. This setting allows overriding this internal list completely.
+
+This is considered an advanced feature that users _should_ not need to tweak themselves, but they can as a last resort. This setting can only be configured in root configurations, and is ignored in nested configs.
+
+Entries must be file or folder *names*. Specific paths and globs are not supported.
+
+Examples where this may be useful:
+
+```jsonc { "files": { "experimentalScannerIgnores": [ // You almost certainly don't want to scan your `.git` // folder, which is why it's already ignored by default: ".git",
+
+// But the scanner does scan `node_modules` by default. If // you *really* don't want this, you can ignore it like // this: "node_modules",
+
+// But it's probably better to ignore a specific dependency. // For instance, one that happens to be particularly slow to // scan: "RedisCommander.d.ts", ], } } ```
+
+Please be aware that rules relying on the module graph or type inference information may be negatively affected if dependencies of your project aren't (fully) scanned. 
+	 */
+	experimentalScannerIgnores?: string[];
 	/**
 	 * Tells Biome to not emit diagnostics when handling files that doesn't know
 	 */
@@ -800,6 +821,10 @@ export interface OverridePattern {
 	 * Specific configuration for the Json language
 	 */
 	linter?: OverrideLinterConfiguration;
+	/**
+	 * Specific configuration for additional plugins
+	 */
+	plugins?: Plugins;
 }
 export type PluginConfiguration = string;
 export type VcsClientKind = "git";
@@ -810,7 +835,7 @@ export interface Source {
 	/**
 	 * Provides a code action to sort the imports and exports in the file using a built-in or custom order.
 	 */
-	organizeImports?: RuleAssistConfiguration_for_OrganizeImportsOptions;
+	organizeImports?: RuleAssistConfiguration_for_Options;
 	/**
 	 * It enables the recommended rules for this group
 	 */
@@ -818,15 +843,15 @@ export interface Source {
 	/**
 	 * Enforce attribute sorting in JSX elements.
 	 */
-	useSortedAttributes?: RuleAssistConfiguration_for_UseSortedAttributesOptions;
+	useSortedAttributes?: RuleAssistConfiguration_for_Null;
 	/**
 	 * Sorts the keys of a JSON object in natural order
 	 */
-	useSortedKeys?: RuleAssistConfiguration_for_UseSortedKeysOptions;
+	useSortedKeys?: RuleAssistConfiguration_for_Null;
 	/**
 	 * Enforce ordering of CSS properties and nested rules.
 	 */
-	useSortedProperties?: RuleAssistConfiguration_for_UseSortedPropertiesOptions;
+	useSortedProperties?: RuleAssistConfiguration_for_Null;
 }
 export type Glob = string;
 export type QuoteStyle = "double" | "single";
@@ -865,7 +890,13 @@ export type TrailingCommas2 = "none" | "all";
 /**
  * Rule domains
  */
-export type RuleDomain = "react" | "test" | "solid" | "next" | "project";
+export type RuleDomain =
+	| "react"
+	| "test"
+	| "solid"
+	| "next"
+	| "vue"
+	| "project";
 export type RuleDomainValue = "all" | "none" | "recommended";
 export type SeverityOrGroup_for_A11y = GroupPlainConfiguration | A11y;
 export type SeverityOrGroup_for_Complexity =
@@ -957,18 +988,12 @@ export interface OverrideLinterConfiguration {
 	 */
 	rules?: Rules;
 }
-export type RuleAssistConfiguration_for_OrganizeImportsOptions =
+export type RuleAssistConfiguration_for_Options =
 	| RuleAssistPlainConfiguration
-	| RuleAssistWithOptions_for_OrganizeImportsOptions;
-export type RuleAssistConfiguration_for_UseSortedAttributesOptions =
+	| RuleAssistWithOptions_for_Options;
+export type RuleAssistConfiguration_for_Null =
 	| RuleAssistPlainConfiguration
-	| RuleAssistWithOptions_for_UseSortedAttributesOptions;
-export type RuleAssistConfiguration_for_UseSortedKeysOptions =
-	| RuleAssistPlainConfiguration
-	| RuleAssistWithOptions_for_UseSortedKeysOptions;
-export type RuleAssistConfiguration_for_UseSortedPropertiesOptions =
-	| RuleAssistPlainConfiguration
-	| RuleAssistWithOptions_for_UseSortedPropertiesOptions;
+	| RuleAssistWithOptions_for_Null;
 export type GroupPlainConfiguration = "off" | "on" | "info" | "warn" | "error";
 /**
  * A list of rules that belong to this group
@@ -977,31 +1002,31 @@ export interface A11y {
 	/**
 	 * Enforce that the accessKey attribute is not used on any HTML element.
 	 */
-	noAccessKey?: RuleFixConfiguration_for_NoAccessKeyOptions;
+	noAccessKey?: RuleFixConfiguration_for_Null;
 	/**
 	 * Enforce that aria-hidden="true" is not set on focusable elements.
 	 */
-	noAriaHiddenOnFocusable?: RuleFixConfiguration_for_NoAriaHiddenOnFocusableOptions;
+	noAriaHiddenOnFocusable?: RuleFixConfiguration_for_Null;
 	/**
 	 * Enforce that elements that do not support ARIA roles, states, and properties do not have those attributes.
 	 */
-	noAriaUnsupportedElements?: RuleFixConfiguration_for_NoAriaUnsupportedElementsOptions;
+	noAriaUnsupportedElements?: RuleFixConfiguration_for_Null;
 	/**
 	 * Enforce that autoFocus prop is not used on elements.
 	 */
-	noAutofocus?: RuleFixConfiguration_for_NoAutofocusOptions;
+	noAutofocus?: RuleFixConfiguration_for_Null;
 	/**
 	 * Enforces that no distracting elements are used.
 	 */
-	noDistractingElements?: RuleFixConfiguration_for_NoDistractingElementsOptions;
+	noDistractingElements?: RuleFixConfiguration_for_Null;
 	/**
 	 * The scope prop should be used only on \<th> elements.
 	 */
-	noHeaderScope?: RuleFixConfiguration_for_NoHeaderScopeOptions;
+	noHeaderScope?: RuleFixConfiguration_for_Null;
 	/**
 	 * Enforce that non-interactive ARIA roles are not assigned to interactive HTML elements.
 	 */
-	noInteractiveElementToNoninteractiveRole?: RuleFixConfiguration_for_NoInteractiveElementToNoninteractiveRoleOptions;
+	noInteractiveElementToNoninteractiveRole?: RuleFixConfiguration_for_Null;
 	/**
 	 * Enforce that a label element or component has a text label and an associated input.
 	 */
@@ -1009,31 +1034,31 @@ export interface A11y {
 	/**
 	 * Enforce that interactive ARIA roles are not assigned to non-interactive HTML elements.
 	 */
-	noNoninteractiveElementToInteractiveRole?: RuleFixConfiguration_for_NoNoninteractiveElementToInteractiveRoleOptions;
+	noNoninteractiveElementToInteractiveRole?: RuleFixConfiguration_for_Null;
 	/**
 	 * Enforce that tabIndex is not assigned to non-interactive HTML elements.
 	 */
-	noNoninteractiveTabindex?: RuleFixConfiguration_for_NoNoninteractiveTabindexOptions;
+	noNoninteractiveTabindex?: RuleFixConfiguration_for_Null;
 	/**
 	 * Prevent the usage of positive integers on tabIndex property
 	 */
-	noPositiveTabindex?: RuleFixConfiguration_for_NoPositiveTabindexOptions;
+	noPositiveTabindex?: RuleFixConfiguration_for_Null;
 	/**
 	 * Enforce img alt prop does not contain the word "image", "picture", or "photo".
 	 */
-	noRedundantAlt?: RuleConfiguration_for_NoRedundantAltOptions;
+	noRedundantAlt?: RuleConfiguration_for_Null;
 	/**
 	 * Enforce explicit role property is not the same as implicit/default role property on an element.
 	 */
-	noRedundantRoles?: RuleFixConfiguration_for_NoRedundantRolesOptions;
+	noRedundantRoles?: RuleFixConfiguration_for_Null;
 	/**
 	 * Enforce that static, visible elements (such as \<div>) that have click handlers use the valid role attribute.
 	 */
-	noStaticElementInteractions?: RuleConfiguration_for_NoStaticElementInteractionsOptions;
+	noStaticElementInteractions?: RuleConfiguration_for_Null;
 	/**
 	 * Enforces the usage of the title element for the svg element.
 	 */
-	noSvgWithoutTitle?: RuleConfiguration_for_NoSvgWithoutTitleOptions;
+	noSvgWithoutTitle?: RuleConfiguration_for_Null;
 	/**
 	 * It enables the recommended rules for this group
 	 */
@@ -1041,79 +1066,79 @@ export interface A11y {
 	/**
 	 * Enforce that all elements that require alternative text have meaningful information to relay back to the end user.
 	 */
-	useAltText?: RuleConfiguration_for_UseAltTextOptions;
+	useAltText?: RuleConfiguration_for_Null;
 	/**
 	 * Enforce that anchors have content and that the content is accessible to screen readers.
 	 */
-	useAnchorContent?: RuleFixConfiguration_for_UseAnchorContentOptions;
+	useAnchorContent?: RuleFixConfiguration_for_Null;
 	/**
 	 * Enforce that tabIndex is assigned to non-interactive HTML elements with aria-activedescendant.
 	 */
-	useAriaActivedescendantWithTabindex?: RuleFixConfiguration_for_UseAriaActivedescendantWithTabindexOptions;
+	useAriaActivedescendantWithTabindex?: RuleFixConfiguration_for_Null;
 	/**
 	 * Enforce that elements with ARIA roles must have all required ARIA attributes for that role.
 	 */
-	useAriaPropsForRole?: RuleConfiguration_for_UseAriaPropsForRoleOptions;
+	useAriaPropsForRole?: RuleConfiguration_for_Null;
 	/**
 	 * Enforce that ARIA properties are valid for the roles that are supported by the element.
 	 */
-	useAriaPropsSupportedByRole?: RuleConfiguration_for_UseAriaPropsSupportedByRoleOptions;
+	useAriaPropsSupportedByRole?: RuleConfiguration_for_Null;
 	/**
 	 * Enforces the usage of the attribute type for the element button
 	 */
-	useButtonType?: RuleConfiguration_for_UseButtonTypeOptions;
+	useButtonType?: RuleConfiguration_for_Null;
 	/**
 	 * Elements with an interactive role and interaction handlers must be focusable.
 	 */
-	useFocusableInteractive?: RuleConfiguration_for_UseFocusableInteractiveOptions;
+	useFocusableInteractive?: RuleConfiguration_for_Null;
 	/**
 	 * Disallow a missing generic family keyword within font families.
 	 */
-	useGenericFontNames?: RuleConfiguration_for_UseGenericFontNamesOptions;
+	useGenericFontNames?: RuleConfiguration_for_Null;
 	/**
 	 * Enforce that heading elements (h1, h2, etc.) have content and that the content is accessible to screen readers. Accessible means that it is not hidden using the aria-hidden prop.
 	 */
-	useHeadingContent?: RuleConfiguration_for_UseHeadingContentOptions;
+	useHeadingContent?: RuleConfiguration_for_Null;
 	/**
 	 * Enforce that html element has lang attribute.
 	 */
-	useHtmlLang?: RuleConfiguration_for_UseHtmlLangOptions;
+	useHtmlLang?: RuleConfiguration_for_Null;
 	/**
 	 * Enforces the usage of the attribute title for the element iframe.
 	 */
-	useIframeTitle?: RuleConfiguration_for_UseIframeTitleOptions;
+	useIframeTitle?: RuleConfiguration_for_Null;
 	/**
 	 * Enforce onClick is accompanied by at least one of the following: onKeyUp, onKeyDown, onKeyPress.
 	 */
-	useKeyWithClickEvents?: RuleConfiguration_for_UseKeyWithClickEventsOptions;
+	useKeyWithClickEvents?: RuleConfiguration_for_Null;
 	/**
 	 * Enforce onMouseOver / onMouseOut are accompanied by onFocus / onBlur.
 	 */
-	useKeyWithMouseEvents?: RuleConfiguration_for_UseKeyWithMouseEventsOptions;
+	useKeyWithMouseEvents?: RuleConfiguration_for_Null;
 	/**
 	 * Enforces that audio and video elements must have a track for captions.
 	 */
-	useMediaCaption?: RuleConfiguration_for_UseMediaCaptionOptions;
+	useMediaCaption?: RuleConfiguration_for_Null;
 	/**
 	 * It detects the use of role attributes in JSX elements and suggests using semantic elements instead.
 	 */
-	useSemanticElements?: RuleConfiguration_for_UseSemanticElementsOptions;
+	useSemanticElements?: RuleConfiguration_for_Null;
 	/**
 	 * Enforce that all anchors are valid, and they are navigable elements.
 	 */
-	useValidAnchor?: RuleConfiguration_for_UseValidAnchorOptions;
+	useValidAnchor?: RuleConfiguration_for_Null;
 	/**
 	 * Ensures that ARIA properties aria-* are all valid.
 	 */
-	useValidAriaProps?: RuleFixConfiguration_for_UseValidAriaPropsOptions;
+	useValidAriaProps?: RuleFixConfiguration_for_Null;
 	/**
 	 * Elements with ARIA roles must use a valid, non-abstract ARIA role.
 	 */
-	useValidAriaRole?: RuleFixConfiguration_for_UseValidAriaRoleOptions;
+	useValidAriaRole?: RuleFixConfiguration_for_ValidAriaRoleOptions;
 	/**
 	 * Enforce that ARIA state and property values are valid.
 	 */
-	useValidAriaValues?: RuleConfiguration_for_UseValidAriaValuesOptions;
+	useValidAriaValues?: RuleConfiguration_for_Null;
 	/**
 	 * Use valid values for the autocomplete attribute on input elements.
 	 */
@@ -1121,7 +1146,7 @@ export interface A11y {
 	/**
 	 * Ensure that the attribute passed to the lang attribute is a correct ISO language and/or country.
 	 */
-	useValidLang?: RuleConfiguration_for_UseValidLangOptions;
+	useValidLang?: RuleConfiguration_for_Null;
 }
 /**
  * A list of rules that belong to this group
@@ -1130,27 +1155,39 @@ export interface Complexity {
 	/**
 	 * Disallow unclear usage of consecutive space characters in regular expression literals
 	 */
-	noAdjacentSpacesInRegex?: RuleFixConfiguration_for_NoAdjacentSpacesInRegexOptions;
+	noAdjacentSpacesInRegex?: RuleFixConfiguration_for_Null;
+	/**
+	 * Disallow the use of arguments.
+	 */
+	noArguments?: RuleConfiguration_for_Null;
 	/**
 	 * Disallow primitive type aliases and misleading types.
 	 */
-	noBannedTypes?: RuleFixConfiguration_for_NoBannedTypesOptions;
+	noBannedTypes?: RuleFixConfiguration_for_Null;
+	/**
+	 * Disallow comma operator.
+	 */
+	noCommaOperator?: RuleConfiguration_for_Null;
 	/**
 	 * Disallow empty type parameters in type aliases and interfaces.
 	 */
-	noEmptyTypeParameters?: RuleConfiguration_for_NoEmptyTypeParametersOptions;
+	noEmptyTypeParameters?: RuleConfiguration_for_Null;
 	/**
 	 * Disallow functions that exceed a given Cognitive Complexity score.
 	 */
-	noExcessiveCognitiveComplexity?: RuleConfiguration_for_NoExcessiveCognitiveComplexityOptions;
+	noExcessiveCognitiveComplexity?: RuleConfiguration_for_ComplexityOptions;
 	/**
 	 * This rule enforces a maximum depth to nested describe() in test files.
 	 */
-	noExcessiveNestedTestSuites?: RuleConfiguration_for_NoExcessiveNestedTestSuitesOptions;
+	noExcessiveNestedTestSuites?: RuleConfiguration_for_Null;
 	/**
 	 * Disallow unnecessary boolean casts
 	 */
-	noExtraBooleanCast?: RuleFixConfiguration_for_NoExtraBooleanCastOptions;
+	noExtraBooleanCast?: RuleFixConfiguration_for_Null;
+	/**
+	 * Disallow to use unnecessary callback on flatMap.
+	 */
+	noFlatMapIdentity?: RuleFixConfiguration_for_Null;
 	/**
 	 * Prefer for...of statement instead of Array.forEach.
 	 */
@@ -1158,79 +1195,79 @@ export interface Complexity {
 	/**
 	 * This rule reports when a class has no non-static members, such as for a class used exclusively as a static namespace.
 	 */
-	noStaticOnlyClass?: RuleConfiguration_for_NoStaticOnlyClassOptions;
+	noStaticOnlyClass?: RuleConfiguration_for_Null;
 	/**
 	 * Disallow this and super in static contexts.
 	 */
-	noThisInStatic?: RuleFixConfiguration_for_NoThisInStaticOptions;
+	noThisInStatic?: RuleFixConfiguration_for_Null;
 	/**
 	 * Disallow unnecessary catch clauses.
 	 */
-	noUselessCatch?: RuleFixConfiguration_for_NoUselessCatchOptions;
+	noUselessCatch?: RuleFixConfiguration_for_Null;
 	/**
 	 * Disallow unnecessary constructors.
 	 */
-	noUselessConstructor?: RuleFixConfiguration_for_NoUselessConstructorOptions;
+	noUselessConstructor?: RuleFixConfiguration_for_Null;
+	/**
+	 * Avoid using unnecessary continue.
+	 */
+	noUselessContinue?: RuleFixConfiguration_for_Null;
 	/**
 	 * Disallow empty exports that don't change anything in a module file.
 	 */
-	noUselessEmptyExport?: RuleFixConfiguration_for_NoUselessEmptyExportOptions;
+	noUselessEmptyExport?: RuleFixConfiguration_for_Null;
 	/**
 	 * Disallow unnecessary escape sequence in regular expression literals.
 	 */
-	noUselessEscapeInRegex?: RuleFixConfiguration_for_NoUselessEscapeInRegexOptions;
+	noUselessEscapeInRegex?: RuleFixConfiguration_for_Null;
 	/**
 	 * Disallow unnecessary fragments
 	 */
-	noUselessFragments?: RuleFixConfiguration_for_NoUselessFragmentsOptions;
+	noUselessFragments?: RuleFixConfiguration_for_Null;
 	/**
 	 * Disallow unnecessary labels.
 	 */
-	noUselessLabel?: RuleFixConfiguration_for_NoUselessLabelOptions;
+	noUselessLabel?: RuleFixConfiguration_for_Null;
 	/**
 	 * Disallow unnecessary nested block statements.
 	 */
-	noUselessLoneBlockStatements?: RuleFixConfiguration_for_NoUselessLoneBlockStatementsOptions;
+	noUselessLoneBlockStatements?: RuleFixConfiguration_for_Null;
 	/**
 	 * Disallow renaming import, export, and destructured assignments to the same name.
 	 */
-	noUselessRename?: RuleFixConfiguration_for_NoUselessRenameOptions;
+	noUselessRename?: RuleFixConfiguration_for_Null;
 	/**
 	 * Disallow unnecessary concatenation of string or template literals.
 	 */
-	noUselessStringConcat?: RuleFixConfiguration_for_NoUselessStringConcatOptions;
+	noUselessStringConcat?: RuleFixConfiguration_for_Null;
 	/**
 	 * Disallow unnecessary String.raw function in template string literals without any escape sequence.
 	 */
-	noUselessStringRaw?: RuleConfiguration_for_NoUselessStringRawOptions;
+	noUselessStringRaw?: RuleConfiguration_for_Null;
 	/**
 	 * Disallow useless case in switch statements.
 	 */
-	noUselessSwitchCase?: RuleFixConfiguration_for_NoUselessSwitchCaseOptions;
+	noUselessSwitchCase?: RuleFixConfiguration_for_Null;
 	/**
 	 * Disallow ternary operators when simpler alternatives exist.
 	 */
-	noUselessTernary?: RuleFixConfiguration_for_NoUselessTernaryOptions;
+	noUselessTernary?: RuleFixConfiguration_for_Null;
 	/**
 	 * Disallow useless this aliasing.
 	 */
-	noUselessThisAlias?: RuleFixConfiguration_for_NoUselessThisAliasOptions;
+	noUselessThisAlias?: RuleFixConfiguration_for_Null;
 	/**
 	 * Disallow using any or unknown as type constraint.
 	 */
-	noUselessTypeConstraint?: RuleFixConfiguration_for_NoUselessTypeConstraintOptions;
+	noUselessTypeConstraint?: RuleFixConfiguration_for_Null;
 	/**
 	 * Disallow initializing variables to undefined.
 	 */
-	noUselessUndefinedInitialization?: RuleFixConfiguration_for_NoUselessUndefinedInitializationOptions;
+	noUselessUndefinedInitialization?: RuleFixConfiguration_for_Null;
 	/**
 	 * Disallow the use of void operators, which is not a familiar operator.
 	 */
-	noVoid?: RuleConfiguration_for_NoVoidOptions;
-	/**
-	 * Disallow with statements in non-strict contexts.
-	 */
-	noWith?: RuleConfiguration_for_NoWithOptions;
+	noVoid?: RuleConfiguration_for_Null;
 	/**
 	 * It enables the recommended rules for this group
 	 */
@@ -1238,39 +1275,43 @@ export interface Complexity {
 	/**
 	 * Use arrow functions over function expressions.
 	 */
-	useArrowFunction?: RuleFixConfiguration_for_UseArrowFunctionOptions;
+	useArrowFunction?: RuleFixConfiguration_for_Null;
 	/**
 	 * Use Date.now() to get the number of milliseconds since the Unix Epoch.
 	 */
-	useDateNow?: RuleFixConfiguration_for_UseDateNowOptions;
+	useDateNow?: RuleFixConfiguration_for_Null;
 	/**
 	 * Promotes the use of .flatMap() when map().flat() are used together.
 	 */
-	useFlatMap?: RuleFixConfiguration_for_UseFlatMapOptions;
+	useFlatMap?: RuleFixConfiguration_for_Null;
 	/**
 	 * Enforce the usage of a literal access to properties over computed property access.
 	 */
-	useLiteralKeys?: RuleFixConfiguration_for_UseLiteralKeysOptions;
+	useLiteralKeys?: RuleFixConfiguration_for_Null;
+	/**
+	 * Disallow parseInt() and Number.parseInt() in favor of binary, octal, and hexadecimal literals
+	 */
+	useNumericLiterals?: RuleFixConfiguration_for_Null;
 	/**
 	 * Enforce using concise optional chain instead of chained logical expressions.
 	 */
-	useOptionalChain?: RuleFixConfiguration_for_UseOptionalChainOptions;
+	useOptionalChain?: RuleFixConfiguration_for_Null;
 	/**
 	 * Enforce the use of the regular expression literals instead of the RegExp constructor if possible.
 	 */
-	useRegexLiterals?: RuleFixConfiguration_for_UseRegexLiteralsOptions;
+	useRegexLiterals?: RuleFixConfiguration_for_Null;
 	/**
 	 * Disallow number literal object member names which are not base 10 or use underscore as separator.
 	 */
-	useSimpleNumberKeys?: RuleFixConfiguration_for_UseSimpleNumberKeysOptions;
+	useSimpleNumberKeys?: RuleFixConfiguration_for_Null;
 	/**
 	 * Discard redundant terms from logical expressions.
 	 */
-	useSimplifiedLogicExpression?: RuleFixConfiguration_for_UseSimplifiedLogicExpressionOptions;
+	useSimplifiedLogicExpression?: RuleFixConfiguration_for_Null;
 	/**
 	 * Enforce the use of while loops instead of for loops when the initializer and update expressions are not needed.
 	 */
-	useWhile?: RuleFixConfiguration_for_UseWhileOptions;
+	useWhile?: RuleFixConfiguration_for_Null;
 }
 /**
  * A list of rules that belong to this group
@@ -1279,83 +1320,79 @@ export interface Correctness {
 	/**
 	 * Prevent passing of children as props.
 	 */
-	noChildrenProp?: RuleConfiguration_for_NoChildrenPropOptions;
+	noChildrenProp?: RuleConfiguration_for_Null;
 	/**
 	 * Prevents from having const variables being re-assigned.
 	 */
-	noConstAssign?: RuleFixConfiguration_for_NoConstAssignOptions;
+	noConstAssign?: RuleFixConfiguration_for_Null;
 	/**
 	 * Disallow constant expressions in conditions
 	 */
-	noConstantCondition?: RuleConfiguration_for_NoConstantConditionOptions;
+	noConstantCondition?: RuleConfiguration_for_Null;
 	/**
 	 * Disallow the use of Math.min and Math.max to clamp a value where the result itself is constant.
 	 */
-	noConstantMathMinMaxClamp?: RuleFixConfiguration_for_NoConstantMathMinMaxClampOptions;
+	noConstantMathMinMaxClamp?: RuleFixConfiguration_for_Null;
 	/**
 	 * Disallow returning a value from a constructor.
 	 */
-	noConstructorReturn?: RuleConfiguration_for_NoConstructorReturnOptions;
+	noConstructorReturn?: RuleConfiguration_for_Null;
 	/**
 	 * Disallow empty character classes in regular expression literals.
 	 */
-	noEmptyCharacterClassInRegex?: RuleConfiguration_for_NoEmptyCharacterClassInRegexOptions;
+	noEmptyCharacterClassInRegex?: RuleConfiguration_for_Null;
 	/**
 	 * Disallows empty destructuring patterns.
 	 */
-	noEmptyPattern?: RuleConfiguration_for_NoEmptyPatternOptions;
-	/**
-	 * Disallow to use unnecessary callback on flatMap.
-	 */
-	noFlatMapIdentity?: RuleFixConfiguration_for_NoFlatMapIdentityOptions;
+	noEmptyPattern?: RuleConfiguration_for_Null;
 	/**
 	 * Disallow calling global object properties as functions
 	 */
-	noGlobalObjectCalls?: RuleConfiguration_for_NoGlobalObjectCallsOptions;
+	noGlobalObjectCalls?: RuleConfiguration_for_Null;
 	/**
 	 * Disallow function and var declarations that are accessible outside their block.
 	 */
-	noInnerDeclarations?: RuleConfiguration_for_NoInnerDeclarationsOptions;
+	noInnerDeclarations?: RuleConfiguration_for_Null;
 	/**
 	 * Ensure that builtins are correctly instantiated.
 	 */
-	noInvalidBuiltinInstantiation?: RuleFixConfiguration_for_NoInvalidBuiltinInstantiationOptions;
+	noInvalidBuiltinInstantiation?: RuleFixConfiguration_for_Null;
 	/**
 	 * Prevents the incorrect use of super() inside classes. It also checks whether a call super() is missing from classes that extends other constructors.
 	 */
-	noInvalidConstructorSuper?: RuleConfiguration_for_NoInvalidConstructorSuperOptions;
+	noInvalidConstructorSuper?: RuleConfiguration_for_Null;
 	/**
 	 * Disallow non-standard direction values for linear gradient functions.
 	 */
-	noInvalidDirectionInLinearGradient?: RuleConfiguration_for_NoInvalidDirectionInLinearGradientOptions;
+	noInvalidDirectionInLinearGradient?: RuleConfiguration_for_Null;
 	/**
 	 * Disallows invalid named grid areas in CSS Grid Layouts.
 	 */
-	noInvalidGridAreas?: RuleConfiguration_for_NoInvalidGridAreasOptions;
+	noInvalidGridAreas?: RuleConfiguration_for_Null;
 	/**
 	 * Disallow the use of @import at-rules in invalid positions.
 	 */
-	noInvalidPositionAtImportRule?: RuleConfiguration_for_NoInvalidPositionAtImportRuleOptions;
+	noInvalidPositionAtImportRule?: RuleConfiguration_for_Null;
 	/**
 	 * Disallow the use of variables and function parameters before their declaration
 	 */
-	noInvalidUseBeforeDeclaration?: RuleConfiguration_for_NoInvalidUseBeforeDeclarationOptions;
+	noInvalidUseBeforeDeclaration?: RuleConfiguration_for_Null;
 	/**
 	 * Disallow missing var function for css variables.
 	 */
-	noMissingVarFunction?: RuleConfiguration_for_NoMissingVarFunctionOptions;
+	noMissingVarFunction?: RuleConfiguration_for_Null;
 	/**
 	 * Forbid the use of Node.js builtin modules.
 	 */
-	noNodejsModules?: RuleConfiguration_for_NoNodejsModulesOptions;
+	noNodejsModules?: RuleConfiguration_for_Null;
 	/**
 	 * Disallow \8 and \9 escape sequences in string literals.
 	 */
-	noNonoctalDecimalEscape?: RuleFixConfiguration_for_NoNonoctalDecimalEscapeOptions;
+	noNonoctalDecimalEscape?: RuleFixConfiguration_for_Null;
 	/**
 	 * Disallow literal numbers that lose precision
 	 */
-	noPrecisionLoss?: RuleConfiguration_for_NoPrecisionLossOptions;
+	noPrecisionLoss?: RuleConfiguration_for_Null;
 	/**
 	 * Restrict imports of private exports.
 	 */
@@ -1363,23 +1400,23 @@ export interface Correctness {
 	/**
 	 * Prevent the usage of the return value of React.render.
 	 */
-	noRenderReturnValue?: RuleConfiguration_for_NoRenderReturnValueOptions;
+	noRenderReturnValue?: RuleConfiguration_for_Null;
 	/**
 	 * Disallow assignments where both sides are exactly the same.
 	 */
-	noSelfAssign?: RuleConfiguration_for_NoSelfAssignOptions;
+	noSelfAssign?: RuleConfiguration_for_Null;
 	/**
 	 * Disallow returning a value from a setter
 	 */
-	noSetterReturn?: RuleConfiguration_for_NoSetterReturnOptions;
+	noSetterReturn?: RuleConfiguration_for_Null;
 	/**
 	 * Disallow comparison of expressions modifying the string case with non-compliant value.
 	 */
-	noStringCaseMismatch?: RuleFixConfiguration_for_NoStringCaseMismatchOptions;
+	noStringCaseMismatch?: RuleFixConfiguration_for_Null;
 	/**
 	 * Disallow lexical declarations in switch clauses.
 	 */
-	noSwitchDeclarations?: RuleFixConfiguration_for_NoSwitchDeclarationsOptions;
+	noSwitchDeclarations?: RuleFixConfiguration_for_Null;
 	/**
 	 * Disallow the use of dependencies that aren't specified in the package.json.
 	 */
@@ -1387,95 +1424,87 @@ export interface Correctness {
 	/**
 	 * Prevents the usage of variables that haven't been declared inside the document.
 	 */
-	noUndeclaredVariables?: RuleConfiguration_for_NoUndeclaredVariablesOptions;
+	noUndeclaredVariables?: RuleConfiguration_for_UndeclaredVariablesOptions;
 	/**
 	 * Disallow unknown CSS value functions.
 	 */
-	noUnknownFunction?: RuleConfiguration_for_NoUnknownFunctionOptions;
+	noUnknownFunction?: RuleConfiguration_for_Null;
 	/**
 	 * Disallow unknown media feature names.
 	 */
-	noUnknownMediaFeatureName?: RuleConfiguration_for_NoUnknownMediaFeatureNameOptions;
+	noUnknownMediaFeatureName?: RuleConfiguration_for_Null;
 	/**
 	 * Disallow unknown properties.
 	 */
-	noUnknownProperty?: RuleConfiguration_for_NoUnknownPropertyOptions;
+	noUnknownProperty?: RuleConfiguration_for_Null;
 	/**
 	 * Disallow unknown pseudo-class selectors.
 	 */
-	noUnknownPseudoClass?: RuleConfiguration_for_NoUnknownPseudoClassOptions;
+	noUnknownPseudoClass?: RuleConfiguration_for_Null;
 	/**
 	 * Disallow unknown pseudo-element selectors.
 	 */
-	noUnknownPseudoElement?: RuleConfiguration_for_NoUnknownPseudoElementOptions;
+	noUnknownPseudoElement?: RuleConfiguration_for_Null;
 	/**
 	 * Disallow unknown type selectors.
 	 */
-	noUnknownTypeSelector?: RuleConfiguration_for_NoUnknownTypeSelectorOptions;
+	noUnknownTypeSelector?: RuleConfiguration_for_Null;
 	/**
 	 * Disallow unknown CSS units.
 	 */
-	noUnknownUnit?: RuleConfiguration_for_NoUnknownUnitOptions;
+	noUnknownUnit?: RuleConfiguration_for_Null;
 	/**
 	 * Disallow unmatchable An+B selectors.
 	 */
-	noUnmatchableAnbSelector?: RuleConfiguration_for_NoUnmatchableAnbSelectorOptions;
+	noUnmatchableAnbSelector?: RuleConfiguration_for_Null;
 	/**
 	 * Disallow unreachable code
 	 */
-	noUnreachable?: RuleConfiguration_for_NoUnreachableOptions;
+	noUnreachable?: RuleConfiguration_for_Null;
 	/**
 	 * Ensures the super() constructor is called exactly once on every code  path in a class constructor before this is accessed if the class has a superclass
 	 */
-	noUnreachableSuper?: RuleConfiguration_for_NoUnreachableSuperOptions;
+	noUnreachableSuper?: RuleConfiguration_for_Null;
 	/**
 	 * Disallow control flow statements in finally blocks.
 	 */
-	noUnsafeFinally?: RuleConfiguration_for_NoUnsafeFinallyOptions;
+	noUnsafeFinally?: RuleConfiguration_for_Null;
 	/**
 	 * Disallow the use of optional chaining in contexts where the undefined value is not allowed.
 	 */
-	noUnsafeOptionalChaining?: RuleConfiguration_for_NoUnsafeOptionalChainingOptions;
+	noUnsafeOptionalChaining?: RuleConfiguration_for_Null;
 	/**
 	 * Disallow unused function parameters.
 	 */
-	noUnusedFunctionParameters?: RuleFixConfiguration_for_NoUnusedFunctionParametersOptions;
+	noUnusedFunctionParameters?: RuleFixConfiguration_for_Null;
 	/**
 	 * Disallow unused imports.
 	 */
-	noUnusedImports?: RuleFixConfiguration_for_NoUnusedImportsOptions;
+	noUnusedImports?: RuleFixConfiguration_for_Null;
 	/**
 	 * Disallow unused labels.
 	 */
-	noUnusedLabels?: RuleFixConfiguration_for_NoUnusedLabelsOptions;
+	noUnusedLabels?: RuleFixConfiguration_for_Null;
 	/**
 	 * Disallow unused private class members
 	 */
-	noUnusedPrivateClassMembers?: RuleFixConfiguration_for_NoUnusedPrivateClassMembersOptions;
+	noUnusedPrivateClassMembers?: RuleFixConfiguration_for_Null;
 	/**
 	 * Disallow unused variables.
 	 */
 	noUnusedVariables?: RuleFixConfiguration_for_NoUnusedVariablesOptions;
 	/**
-	 * Avoid using unnecessary continue.
-	 */
-	noUselessContinue?: RuleFixConfiguration_for_NoUselessContinueOptions;
-	/**
 	 * This rules prevents void elements (AKA self-closing elements) from having children.
 	 */
-	noVoidElementsWithChildren?: RuleFixConfiguration_for_NoVoidElementsWithChildrenOptions;
+	noVoidElementsWithChildren?: RuleFixConfiguration_for_Null;
 	/**
 	 * Disallow returning a value from a function with the return type 'void'
 	 */
-	noVoidTypeReturn?: RuleConfiguration_for_NoVoidTypeReturnOptions;
+	noVoidTypeReturn?: RuleConfiguration_for_Null;
 	/**
 	 * It enables the recommended rules for this group
 	 */
 	recommended?: boolean;
-	/**
-	 * Disallow Array constructors.
-	 */
-	useArrayLiterals?: RuleFixConfiguration_for_UseArrayLiteralsOptions;
 	/**
 	 * Enforce all dependencies are correctly specified in a React hook.
 	 */
@@ -1483,7 +1512,7 @@ export interface Correctness {
 	/**
 	 * Enforce that all React hooks are being called from the Top Level component functions.
 	 */
-	useHookAtTopLevel?: RuleConfiguration_for_UseHookAtTopLevelOptions;
+	useHookAtTopLevel?: RuleConfiguration_for_DeprecatedHooksOptions;
 	/**
 	 * Enforce file extensions for relative imports.
 	 */
@@ -1491,7 +1520,7 @@ export interface Correctness {
 	/**
 	 * Require calls to isNaN() when checking for NaN.
 	 */
-	useIsNan?: RuleFixConfiguration_for_UseIsNanOptions;
+	useIsNan?: RuleFixConfiguration_for_Null;
 	/**
 	 * Disallow missing key props in iterators/collection literals.
 	 */
@@ -1499,11 +1528,15 @@ export interface Correctness {
 	/**
 	 * Enforce "for" loop update clause moving the counter in the right direction.
 	 */
-	useValidForDirection?: RuleConfiguration_for_UseValidForDirectionOptions;
+	useValidForDirection?: RuleConfiguration_for_Null;
+	/**
+	 * This rule checks that the result of a typeof expression is compared to a valid value.
+	 */
+	useValidTypeof?: RuleFixConfiguration_for_Null;
 	/**
 	 * Require generator functions to contain yield.
 	 */
-	useYield?: RuleConfiguration_for_UseYieldOptions;
+	useYield?: RuleConfiguration_for_Null;
 }
 /**
  * A list of rules that belong to this group
@@ -1512,7 +1545,7 @@ export interface Nursery {
 	/**
 	 * Disallow await inside loops.
 	 */
-	noAwaitInLoop?: RuleConfiguration_for_NoAwaitInLoopOptions;
+	noAwaitInLoop?: RuleConfiguration_for_Null;
 	/**
 	 * Disallow bitwise operators.
 	 */
@@ -1520,35 +1553,55 @@ export interface Nursery {
 	/**
 	 * Disallow expressions where the operation doesn't affect the value
 	 */
-	noConstantBinaryExpression?: RuleConfiguration_for_NoConstantBinaryExpressionOptions;
+	noConstantBinaryExpression?: RuleConfiguration_for_Null;
 	/**
 	 * Disallow destructuring props inside JSX components in Solid projects.
 	 */
-	noDestructuredProps?: RuleConfiguration_for_NoDestructuredPropsOptions;
+	noDestructuredProps?: RuleConfiguration_for_Null;
+	/**
+	 * Restrict the number of lines of code in a function.
+	 */
+	noExcessiveLinesPerFunction?: RuleConfiguration_for_NoExcessiveLinesPerFunctionOptions;
 	/**
 	 * Require Promise-like statements to be handled appropriately.
 	 */
-	noFloatingPromises?: RuleFixConfiguration_for_NoFloatingPromisesOptions;
+	noFloatingPromises?: RuleFixConfiguration_for_Null;
 	/**
 	 * Disallow the use of __dirname and __filename in the global scope.
 	 */
-	noGlobalDirnameFilename?: RuleFixConfiguration_for_NoGlobalDirnameFilenameOptions;
+	noGlobalDirnameFilename?: RuleFixConfiguration_for_Null;
+	/**
+	 * Disallow shorthand type conversions.
+	 */
+	noImplicitCoercion?: RuleFixConfiguration_for_Null;
 	/**
 	 * Prevent import cycles.
 	 */
-	noImportCycles?: RuleConfiguration_for_NoImportCyclesOptions;
+	noImportCycles?: RuleConfiguration_for_Null;
 	/**
 	 * Disallow the use of the !important style.
 	 */
-	noImportantStyles?: RuleFixConfiguration_for_NoImportantStylesOptions;
+	noImportantStyles?: RuleFixConfiguration_for_Null;
+	/**
+	 * Reports usage of "magic numbers" — numbers used directly instead of being assigned to named constants.
+	 */
+	noMagicNumbers?: RuleConfiguration_for_Null;
+	/**
+	 * Disallows defining React components inside other components.
+	 */
+	noNestedComponentDefinitions?: RuleConfiguration_for_Null;
 	/**
 	 * Disallow use event handlers on non-interactive elements.
 	 */
-	noNoninteractiveElementInteractions?: RuleConfiguration_for_NoNoninteractiveElementInteractionsOptions;
+	noNoninteractiveElementInteractions?: RuleConfiguration_for_Null;
 	/**
 	 * Disallow the use of process global.
 	 */
-	noProcessGlobal?: RuleFixConfiguration_for_NoProcessGlobalOptions;
+	noProcessGlobal?: RuleFixConfiguration_for_Null;
+	/**
+	 * Disallow assigning to React component props.
+	 */
+	noReactPropAssign?: RuleConfiguration_for_Null;
 	/**
 	 * Disallow the use of configured elements.
 	 */
@@ -1560,35 +1613,39 @@ export interface Nursery {
 	/**
 	 * Disallow variable declarations from shadowing variables declared in the outer scope.
 	 */
-	noShadow?: RuleConfiguration_for_NoShadowOptions;
+	noShadow?: RuleConfiguration_for_Null;
 	/**
 	 * Prevents the use of the TypeScript directive @ts-ignore.
 	 */
-	noTsIgnore?: RuleFixConfiguration_for_NoTsIgnoreOptions;
+	noTsIgnore?: RuleFixConfiguration_for_Null;
+	/**
+	 * Disallow let or var variables that are read but never assigned.
+	 */
+	noUnassignedVariables?: RuleConfiguration_for_Null;
 	/**
 	 * Disallow unknown at-rules.
 	 */
-	noUnknownAtRule?: RuleConfiguration_for_NoUnknownAtRuleOptions;
+	noUnknownAtRule?: RuleConfiguration_for_Null;
 	/**
 	 * Warn when importing non-existing exports.
 	 */
-	noUnresolvedImports?: RuleConfiguration_for_NoUnresolvedImportsOptions;
+	noUnresolvedImports?: RuleConfiguration_for_Null;
 	/**
 	 * Prevent duplicate polyfills from Polyfill.io.
 	 */
-	noUnwantedPolyfillio?: RuleConfiguration_for_NoUnwantedPolyfillioOptions;
+	noUnwantedPolyfillio?: RuleConfiguration_for_Null;
 	/**
 	 * Disallow useless backreferences in regular expression literals that always match an empty string.
 	 */
-	noUselessBackrefInRegex?: RuleConfiguration_for_NoUselessBackrefInRegexOptions;
+	noUselessBackrefInRegex?: RuleConfiguration_for_Null;
 	/**
 	 * Disallow unnecessary escapes in string literals.
 	 */
-	noUselessEscapeInString?: RuleFixConfiguration_for_NoUselessEscapeInStringOptions;
+	noUselessEscapeInString?: RuleFixConfiguration_for_Null;
 	/**
 	 * Disallow the use of useless undefined.
 	 */
-	noUselessUndefined?: RuleFixConfiguration_for_NoUselessUndefinedOptions;
+	noUselessUndefined?: RuleFixConfiguration_for_Null;
 	/**
 	 * It enables the recommended rules for this group
 	 */
@@ -1596,63 +1653,91 @@ export interface Nursery {
 	/**
 	 * Enforce that getters and setters for the same property are adjacent in class and object definitions.
 	 */
-	useAdjacentGetterSetter?: RuleConfiguration_for_UseAdjacentGetterSetterOptions;
+	useAdjacentGetterSetter?: RuleConfiguration_for_Null;
 	/**
 	 * Require the consistent declaration of object literals. Defaults to explicit definitions.
 	 */
 	useConsistentObjectDefinition?: RuleFixConfiguration_for_UseConsistentObjectDefinitionOptions;
 	/**
+	 * Use static Response methods instead of new Response() constructor when possible.
+	 */
+	useConsistentResponse?: RuleFixConfiguration_for_Null;
+	/**
 	 * Require switch-case statements to be exhaustive.
 	 */
-	useExhaustiveSwitchCases?: RuleFixConfiguration_for_UseExhaustiveSwitchCasesOptions;
+	useExhaustiveSwitchCases?: RuleFixConfiguration_for_Null;
 	/**
 	 * Enforce types in functions, methods, variables, and parameters.
 	 */
-	useExplicitType?: RuleConfiguration_for_UseExplicitTypeOptions;
+	useExplicitType?: RuleConfiguration_for_Null;
 	/**
 	 * Require that all exports are declared after all non-export statements.
 	 */
-	useExportsLast?: RuleConfiguration_for_UseExportsLastOptions;
+	useExportsLast?: RuleConfiguration_for_Null;
 	/**
 	 * Enforce using Solid's \<For /> component for mapping an array to JSX elements.
 	 */
-	useForComponent?: RuleConfiguration_for_UseForComponentOptions;
+	useForComponent?: RuleConfiguration_for_Null;
 	/**
 	 * Ensure the preconnect attribute is used when using Google Fonts.
 	 */
-	useGoogleFontPreconnect?: RuleFixConfiguration_for_UseGoogleFontPreconnectOptions;
+	useGoogleFontPreconnect?: RuleFixConfiguration_for_Null;
+	/**
+	 * Prefer Array#{indexOf,lastIndexOf}() over Array#{findIndex,findLastIndex}() when looking for the index of an item.
+	 */
+	useIndexOf?: RuleFixConfiguration_for_Null;
 	/**
 	 * Enforce consistent return values in iterable callbacks.
 	 */
-	useIterableCallbackReturn?: RuleConfiguration_for_UseIterableCallbackReturnOptions;
+	useIterableCallbackReturn?: RuleConfiguration_for_Null;
+	/**
+	 * Enforces the use of with { type: "json" } for JSON module imports.
+	 */
+	useJsonImportAttribute?: RuleFixConfiguration_for_Null;
 	/**
 	 * Enforce specifying the name of GraphQL operations.
 	 */
-	useNamedOperation?: RuleFixConfiguration_for_UseNamedOperationOptions;
+	useNamedOperation?: RuleFixConfiguration_for_Null;
 	/**
 	 * Validates that all enum values are capitalized.
 	 */
-	useNamingConvention?: RuleConfiguration_for_UseNamingConventionOptions;
+	useNamingConvention?: RuleConfiguration_for_Null;
 	/**
 	 * Enforce the use of numeric separators in numeric literals.
 	 */
-	useNumericSeparators?: RuleFixConfiguration_for_UseNumericSeparatorsOptions;
+	useNumericSeparators?: RuleFixConfiguration_for_Null;
+	/**
+	 * Prefer object spread over Object.assign() when constructing new objects.
+	 */
+	useObjectSpread?: RuleFixConfiguration_for_Null;
 	/**
 	 * Enforce the consistent use of the radix argument when using parseInt().
 	 */
-	useParseIntRadix?: RuleFixConfiguration_for_UseParseIntRadixOptions;
+	useParseIntRadix?: RuleFixConfiguration_for_Null;
+	/**
+	 * Enforce marking members as readonly if they are never modified outside the constructor.
+	 */
+	useReadonlyClassProperties?: RuleFixConfiguration_for_ReadonlyClassPropertiesOptions;
 	/**
 	 * Enforce JSDoc comment lines to start with a single asterisk, except for the first one.
 	 */
-	useSingleJsDocAsterisk?: RuleFixConfiguration_for_UseSingleJsDocAsteriskOptions;
+	useSingleJsDocAsterisk?: RuleFixConfiguration_for_Null;
 	/**
 	 * Enforce the sorting of CSS utility classes.
 	 */
-	useSortedClasses?: RuleFixConfiguration_for_UseSortedClassesOptions;
+	useSortedClasses?: RuleFixConfiguration_for_UtilityClassSortingOptions;
 	/**
 	 * Require a description parameter for the Symbol().
 	 */
-	useSymbolDescription?: RuleConfiguration_for_UseSymbolDescriptionOptions;
+	useSymbolDescription?: RuleConfiguration_for_Null;
+	/**
+	 * Disallow overload signatures that can be unified into a single signature.
+	 */
+	useUnifiedTypeSignature?: RuleFixConfiguration_for_Null;
+	/**
+	 * Prevent the usage of static string literal id attribute on elements.
+	 */
+	useUniqueElementIds?: RuleConfiguration_for_Null;
 }
 /**
  * A list of rules that belong to this group
@@ -1661,27 +1746,31 @@ export interface Performance {
 	/**
 	 * Disallow the use of spread (...) syntax on accumulators.
 	 */
-	noAccumulatingSpread?: RuleConfiguration_for_NoAccumulatingSpreadOptions;
+	noAccumulatingSpread?: RuleConfiguration_for_Null;
 	/**
 	 * Disallow the use of barrel file.
 	 */
-	noBarrelFile?: RuleConfiguration_for_NoBarrelFileOptions;
+	noBarrelFile?: RuleConfiguration_for_Null;
 	/**
 	 * Disallow the use of the delete operator.
 	 */
-	noDelete?: RuleFixConfiguration_for_NoDeleteOptions;
+	noDelete?: RuleFixConfiguration_for_Null;
 	/**
 	 * Disallow accessing namespace imports dynamically.
 	 */
-	noDynamicNamespaceImportAccess?: RuleConfiguration_for_NoDynamicNamespaceImportAccessOptions;
+	noDynamicNamespaceImportAccess?: RuleConfiguration_for_Null;
 	/**
 	 * Prevent usage of \<img> element in a Next.js project.
 	 */
-	noImgElement?: RuleConfiguration_for_NoImgElementOptions;
+	noImgElement?: RuleConfiguration_for_Null;
+	/**
+	 * Disallow the use of namespace imports.
+	 */
+	noNamespaceImport?: RuleConfiguration_for_Null;
 	/**
 	 * Avoid re-export all.
 	 */
-	noReExportAll?: RuleConfiguration_for_NoReExportAllOptions;
+	noReExportAll?: RuleConfiguration_for_Null;
 	/**
 	 * It enables the recommended rules for this group
 	 */
@@ -1689,7 +1778,7 @@ export interface Performance {
 	/**
 	 * Require regex literals to be declared at the top level.
 	 */
-	useTopLevelRegex?: RuleConfiguration_for_UseTopLevelRegexOptions;
+	useTopLevelRegex?: RuleConfiguration_for_Null;
 }
 /**
  * A list of rules that belong to this group
@@ -1702,15 +1791,15 @@ export interface Security {
 	/**
 	 * Prevent the usage of dangerous JSX props
 	 */
-	noDangerouslySetInnerHtml?: RuleConfiguration_for_NoDangerouslySetInnerHtmlOptions;
+	noDangerouslySetInnerHtml?: RuleConfiguration_for_Null;
 	/**
 	 * Report when a DOM element or a component uses both children and dangerouslySetInnerHTML prop.
 	 */
-	noDangerouslySetInnerHtmlWithChildren?: RuleConfiguration_for_NoDangerouslySetInnerHtmlWithChildrenOptions;
+	noDangerouslySetInnerHtmlWithChildren?: RuleConfiguration_for_Null;
 	/**
 	 * Disallow the use of global eval().
 	 */
-	noGlobalEval?: RuleConfiguration_for_NoGlobalEvalOptions;
+	noGlobalEval?: RuleConfiguration_for_Null;
 	/**
 	 * It enables the recommended rules for this group
 	 */
@@ -1721,69 +1810,57 @@ export interface Security {
  */
 export interface Style {
 	/**
-	 * Disallow the use of arguments.
-	 */
-	noArguments?: RuleConfiguration_for_NoArgumentsOptions;
-	/**
-	 * Disallow comma operator.
-	 */
-	noCommaOperator?: RuleConfiguration_for_NoCommaOperatorOptions;
-	/**
 	 * Disallow use of CommonJs module system in favor of ESM style imports.
 	 */
-	noCommonJs?: RuleConfiguration_for_NoCommonJsOptions;
+	noCommonJs?: RuleConfiguration_for_Null;
 	/**
 	 * Disallow default exports.
 	 */
-	noDefaultExport?: RuleConfiguration_for_NoDefaultExportOptions;
+	noDefaultExport?: RuleConfiguration_for_Null;
 	/**
 	 * Disallow a lower specificity selector from coming after a higher specificity selector.
 	 */
-	noDescendingSpecificity?: RuleConfiguration_for_NoDescendingSpecificityOptions;
+	noDescendingSpecificity?: RuleConfiguration_for_Null;
 	/**
 	 * Disallow using a callback in asynchronous tests and hooks.
 	 */
-	noDoneCallback?: RuleConfiguration_for_NoDoneCallbackOptions;
+	noDoneCallback?: RuleConfiguration_for_Null;
 	/**
 	 * Disallow TypeScript enum.
 	 */
-	noEnum?: RuleConfiguration_for_NoEnumOptions;
+	noEnum?: RuleConfiguration_for_Null;
 	/**
 	 * Disallow exporting an imported variable.
 	 */
-	noExportedImports?: RuleConfiguration_for_NoExportedImportsOptions;
+	noExportedImports?: RuleConfiguration_for_Null;
 	/**
 	 * Prevent usage of \<head> element in a Next.js project.
 	 */
-	noHeadElement?: RuleConfiguration_for_NoHeadElementOptions;
+	noHeadElement?: RuleConfiguration_for_Null;
 	/**
 	 * Disallow implicit true values on JSX boolean attributes
 	 */
-	noImplicitBoolean?: RuleFixConfiguration_for_NoImplicitBooleanOptions;
+	noImplicitBoolean?: RuleFixConfiguration_for_Null;
 	/**
 	 * Disallow type annotations for variables, parameters, and class properties initialized with a literal expression.
 	 */
-	noInferrableTypes?: RuleFixConfiguration_for_NoInferrableTypesOptions;
+	noInferrableTypes?: RuleFixConfiguration_for_Null;
 	/**
 	 * Disallow the use of TypeScript's namespaces.
 	 */
-	noNamespace?: RuleConfiguration_for_NoNamespaceOptions;
-	/**
-	 * Disallow the use of namespace imports.
-	 */
-	noNamespaceImport?: RuleConfiguration_for_NoNamespaceImportOptions;
+	noNamespace?: RuleConfiguration_for_Null;
 	/**
 	 * Disallow negation in the condition of an if statement if it has an else clause.
 	 */
-	noNegationElse?: RuleFixConfiguration_for_NoNegationElseOptions;
+	noNegationElse?: RuleFixConfiguration_for_Null;
 	/**
 	 * Disallow nested ternary expressions.
 	 */
-	noNestedTernary?: RuleConfiguration_for_NoNestedTernaryOptions;
+	noNestedTernary?: RuleConfiguration_for_Null;
 	/**
 	 * Disallow non-null assertions using the ! postfix operator.
 	 */
-	noNonNullAssertion?: RuleFixConfiguration_for_NoNonNullAssertionOptions;
+	noNonNullAssertion?: RuleFixConfiguration_for_Null;
 	/**
 	 * Disallow reassigning function parameters.
 	 */
@@ -1791,19 +1868,19 @@ export interface Style {
 	/**
 	 * Disallow the use of parameter properties in class constructors.
 	 */
-	noParameterProperties?: RuleConfiguration_for_NoParameterPropertiesOptions;
+	noParameterProperties?: RuleConfiguration_for_Null;
 	/**
 	 * Disallow the use of process.env.
 	 */
-	noProcessEnv?: RuleConfiguration_for_NoProcessEnvOptions;
+	noProcessEnv?: RuleConfiguration_for_Null;
 	/**
 	 * This rule allows you to specify global variable names that you don’t want to use in your application.
 	 */
-	noRestrictedGlobals?: RuleConfiguration_for_NoRestrictedGlobalsOptions;
+	noRestrictedGlobals?: RuleConfiguration_for_RestrictedGlobalsOptions;
 	/**
 	 * Disallow specified modules when loaded by import or require.
 	 */
-	noRestrictedImports?: RuleConfiguration_for_NoRestrictedImportsOptions;
+	noRestrictedImports?: RuleConfiguration_for_RestrictedImportsOptions;
 	/**
 	 * Disallow user defined types.
 	 */
@@ -1811,51 +1888,55 @@ export interface Style {
 	/**
 	 * Disallow the use of constants which its value is the upper-case version of its name.
 	 */
-	noShoutyConstants?: RuleFixConfiguration_for_NoShoutyConstantsOptions;
+	noShoutyConstants?: RuleFixConfiguration_for_Null;
 	/**
 	 * Enforce the use of String.slice() over String.substr() and String.substring().
 	 */
-	noSubstr?: RuleFixConfiguration_for_NoSubstrOptions;
+	noSubstr?: RuleFixConfiguration_for_Null;
 	/**
 	 * Disallow template literals if interpolation and special-character handling are not needed
 	 */
-	noUnusedTemplateLiteral?: RuleFixConfiguration_for_NoUnusedTemplateLiteralOptions;
+	noUnusedTemplateLiteral?: RuleFixConfiguration_for_Null;
 	/**
 	 * Disallow else block when the if block breaks early.
 	 */
-	noUselessElse?: RuleFixConfiguration_for_NoUselessElseOptions;
+	noUselessElse?: RuleFixConfiguration_for_Null;
 	/**
 	 * Disallow use of @value rule in css modules.
 	 */
-	noValueAtRule?: RuleConfiguration_for_NoValueAtRuleOptions;
+	noValueAtRule?: RuleConfiguration_for_Null;
 	/**
 	 * Disallow the use of yoda expressions.
 	 */
-	noYodaExpression?: RuleFixConfiguration_for_NoYodaExpressionOptions;
+	noYodaExpression?: RuleFixConfiguration_for_Null;
 	/**
 	 * It enables the recommended rules for this group
 	 */
 	recommended?: boolean;
 	/**
+	 * Disallow Array constructors.
+	 */
+	useArrayLiterals?: RuleFixConfiguration_for_Null;
+	/**
 	 * Enforce the use of as const over literal type and type annotation.
 	 */
-	useAsConstAssertion?: RuleFixConfiguration_for_UseAsConstAssertionOptions;
+	useAsConstAssertion?: RuleFixConfiguration_for_Null;
 	/**
 	 * Use at() instead of integer index access.
 	 */
-	useAtIndex?: RuleFixConfiguration_for_UseAtIndexOptions;
+	useAtIndex?: RuleFixConfiguration_for_Null;
 	/**
 	 * Requires following curly brace conventions.
 	 */
-	useBlockStatements?: RuleFixConfiguration_for_UseBlockStatementsOptions;
+	useBlockStatements?: RuleFixConfiguration_for_Null;
 	/**
 	 * Enforce using else if instead of nested if in else clauses.
 	 */
-	useCollapsedElseIf?: RuleFixConfiguration_for_UseCollapsedElseIfOptions;
+	useCollapsedElseIf?: RuleFixConfiguration_for_Null;
 	/**
 	 * Enforce using single if instead of nested if clauses.
 	 */
-	useCollapsedIf?: RuleFixConfiguration_for_UseCollapsedIfOptions;
+	useCollapsedIf?: RuleFixConfiguration_for_Null;
 	/**
 	 * Enforce declaring components only within modules that export React Components exclusively.
 	 */
@@ -1863,91 +1944,87 @@ export interface Style {
 	/**
 	 * Require consistently using either T\[] or Array\<T>
 	 */
-	useConsistentArrayType?: RuleFixConfiguration_for_UseConsistentArrayTypeOptions;
+	useConsistentArrayType?: RuleFixConfiguration_for_ConsistentArrayTypeOptions;
 	/**
 	 * Enforce the use of new for all builtins, except String, Number and Boolean.
 	 */
-	useConsistentBuiltinInstantiation?: RuleFixConfiguration_for_UseConsistentBuiltinInstantiationOptions;
+	useConsistentBuiltinInstantiation?: RuleFixConfiguration_for_Null;
 	/**
 	 * This rule enforces consistent use of curly braces inside JSX attributes and JSX children.
 	 */
-	useConsistentCurlyBraces?: RuleFixConfiguration_for_UseConsistentCurlyBracesOptions;
+	useConsistentCurlyBraces?: RuleFixConfiguration_for_Null;
 	/**
 	 * Require consistent accessibility modifiers on class properties and methods.
 	 */
-	useConsistentMemberAccessibility?: RuleConfiguration_for_UseConsistentMemberAccessibilityOptions;
+	useConsistentMemberAccessibility?: RuleConfiguration_for_ConsistentMemberAccessibilityOptions;
 	/**
 	 * Require const declarations for variables that are only assigned once.
 	 */
-	useConst?: RuleFixConfiguration_for_UseConstOptions;
+	useConst?: RuleFixConfiguration_for_Null;
 	/**
 	 * Enforce default function parameters and optional function parameters to be last.
 	 */
-	useDefaultParameterLast?: RuleFixConfiguration_for_UseDefaultParameterLastOptions;
+	useDefaultParameterLast?: RuleFixConfiguration_for_Null;
 	/**
 	 * Require the default clause in switch statements.
 	 */
-	useDefaultSwitchClause?: RuleConfiguration_for_UseDefaultSwitchClauseOptions;
+	useDefaultSwitchClause?: RuleConfiguration_for_Null;
 	/**
 	 * Require specifying the reason argument when using @deprecated directive
 	 */
-	useDeprecatedReason?: RuleConfiguration_for_UseDeprecatedReasonOptions;
+	useDeprecatedReason?: RuleConfiguration_for_Null;
 	/**
 	 * Require that each enum member value be explicitly initialized.
 	 */
-	useEnumInitializers?: RuleFixConfiguration_for_UseEnumInitializersOptions;
+	useEnumInitializers?: RuleFixConfiguration_for_Null;
 	/**
 	 * Enforce explicitly comparing the length, size, byteLength or byteOffset property of a value.
 	 */
-	useExplicitLengthCheck?: RuleFixConfiguration_for_UseExplicitLengthCheckOptions;
+	useExplicitLengthCheck?: RuleFixConfiguration_for_Null;
 	/**
 	 * Disallow the use of Math.pow in favor of the ** operator.
 	 */
-	useExponentiationOperator?: RuleFixConfiguration_for_UseExponentiationOperatorOptions;
+	useExponentiationOperator?: RuleFixConfiguration_for_Null;
 	/**
 	 * Promotes the use of export type for types.
 	 */
-	useExportType?: RuleFixConfiguration_for_UseExportTypeOptions;
+	useExportType?: RuleFixConfiguration_for_Null;
 	/**
 	 * Enforce naming conventions for JavaScript and TypeScript filenames.
 	 */
-	useFilenamingConvention?: RuleConfiguration_for_UseFilenamingConventionOptions;
+	useFilenamingConvention?: RuleConfiguration_for_FilenamingConventionOptions;
 	/**
 	 * This rule recommends a for-of loop when in a for loop, the index used to extract an item from the iterated array.
 	 */
-	useForOf?: RuleConfiguration_for_UseForOfOptions;
+	useForOf?: RuleConfiguration_for_Null;
 	/**
 	 * This rule enforces the use of \<>...\</> over \<Fragment>...\</Fragment>.
 	 */
-	useFragmentSyntax?: RuleFixConfiguration_for_UseFragmentSyntaxOptions;
+	useFragmentSyntax?: RuleFixConfiguration_for_Null;
 	/**
 	 * Promotes the use of import type for types.
 	 */
-	useImportType?: RuleFixConfiguration_for_UseImportTypeOptions;
+	useImportType?: RuleFixConfiguration_for_ImportTypeOptions;
 	/**
 	 * Require all enum members to be literal values.
 	 */
-	useLiteralEnumMembers?: RuleConfiguration_for_UseLiteralEnumMembersOptions;
+	useLiteralEnumMembers?: RuleConfiguration_for_Null;
 	/**
 	 * Enforce naming conventions for everything across a codebase.
 	 */
-	useNamingConvention?: RuleFixConfiguration_for_UseNamingConventionOptions;
+	useNamingConvention?: RuleFixConfiguration_for_NamingConventionOptions;
 	/**
 	 * Promotes the usage of node:assert/strict over node:assert.
 	 */
-	useNodeAssertStrict?: RuleFixConfiguration_for_UseNodeAssertStrictOptions;
+	useNodeAssertStrict?: RuleFixConfiguration_for_Null;
 	/**
 	 * Enforces using the node: protocol for Node.js builtin modules.
 	 */
-	useNodejsImportProtocol?: RuleFixConfiguration_for_UseNodejsImportProtocolOptions;
+	useNodejsImportProtocol?: RuleFixConfiguration_for_Null;
 	/**
 	 * Use the Number properties instead of global ones.
 	 */
-	useNumberNamespace?: RuleFixConfiguration_for_UseNumberNamespaceOptions;
-	/**
-	 * Disallow parseInt() and Number.parseInt() in favor of binary, octal, and hexadecimal literals
-	 */
-	useNumericLiterals?: RuleFixConfiguration_for_UseNumericLiteralsOptions;
+	useNumberNamespace?: RuleFixConfiguration_for_Null;
 	/**
 	 * Prevent extra closing tags for components without children.
 	 */
@@ -1955,68 +2032,72 @@ export interface Style {
 	/**
 	 * Require assignment operator shorthand where possible.
 	 */
-	useShorthandAssign?: RuleFixConfiguration_for_UseShorthandAssignOptions;
+	useShorthandAssign?: RuleFixConfiguration_for_Null;
 	/**
 	 * Enforce using function types instead of object type with call signatures.
 	 */
-	useShorthandFunctionType?: RuleFixConfiguration_for_UseShorthandFunctionTypeOptions;
+	useShorthandFunctionType?: RuleFixConfiguration_for_Null;
 	/**
 	 * Disallow multiple variable declarations in the same variable statement
 	 */
-	useSingleVarDeclarator?: RuleFixConfiguration_for_UseSingleVarDeclaratorOptions;
+	useSingleVarDeclarator?: RuleFixConfiguration_for_Null;
 	/**
 	 * Prefer template literals over string concatenation.
 	 */
-	useTemplate?: RuleFixConfiguration_for_UseTemplateOptions;
+	useTemplate?: RuleFixConfiguration_for_Null;
 	/**
 	 * Require new when throwing an error.
 	 */
-	useThrowNewError?: RuleFixConfiguration_for_UseThrowNewErrorOptions;
+	useThrowNewError?: RuleFixConfiguration_for_Null;
 	/**
 	 * Disallow throwing non-Error values.
 	 */
-	useThrowOnlyError?: RuleConfiguration_for_UseThrowOnlyErrorOptions;
+	useThrowOnlyError?: RuleConfiguration_for_Null;
 	/**
 	 * Enforce the use of String.trimStart() and String.trimEnd() over String.trimLeft() and String.trimRight().
 	 */
-	useTrimStartEnd?: RuleFixConfiguration_for_UseTrimStartEndOptions;
+	useTrimStartEnd?: RuleFixConfiguration_for_Null;
 }
 /**
  * A list of rules that belong to this group
  */
 export interface Suspicious {
 	/**
+	 * Disallow the use of alert, confirm, and prompt.
+	 */
+	noAlert?: RuleConfiguration_for_Null;
+	/**
 	 * Use standard constants instead of approximated literals.
 	 */
-	noApproximativeNumericConstant?: RuleFixConfiguration_for_NoApproximativeNumericConstantOptions;
+	noApproximativeNumericConstant?: RuleFixConfiguration_for_Null;
 	/**
 	 * Discourage the usage of Array index in keys.
 	 */
-	noArrayIndexKey?: RuleConfiguration_for_NoArrayIndexKeyOptions;
+	noArrayIndexKey?: RuleConfiguration_for_Null;
 	/**
 	 * Disallow assignments in expressions.
 	 */
-	noAssignInExpressions?: RuleConfiguration_for_NoAssignInExpressionsOptions;
+	noAssignInExpressions?: RuleConfiguration_for_Null;
 	/**
 	 * Disallows using an async function as a Promise executor.
 	 */
-	noAsyncPromiseExecutor?: RuleConfiguration_for_NoAsyncPromiseExecutorOptions;
+	noAsyncPromiseExecutor?: RuleConfiguration_for_Null;
 	/**
 	 * Disallow reassigning exceptions in catch clauses.
 	 */
-	noCatchAssign?: RuleConfiguration_for_NoCatchAssignOptions;
+	noCatchAssign?: RuleConfiguration_for_Null;
 	/**
 	 * Disallow reassigning class members.
 	 */
-	noClassAssign?: RuleConfiguration_for_NoClassAssignOptions;
+	noClassAssign?: RuleConfiguration_for_Null;
 	/**
 	 * Prevent comments from being inserted as text nodes
 	 */
-	noCommentText?: RuleFixConfiguration_for_NoCommentTextOptions;
+	noCommentText?: RuleFixConfiguration_for_Null;
 	/**
 	 * Disallow comparing against -0
 	 */
-	noCompareNegZero?: RuleFixConfiguration_for_NoCompareNegZeroOptions;
+	noCompareNegZero?: RuleFixConfiguration_for_Null;
 	/**
 	 * Disallow labeled statements that are not loops.
 	 */
@@ -2024,7 +2105,7 @@ export interface Suspicious {
 	/**
 	 * Disallow void type outside of generic or return types.
 	 */
-	noConfusingVoidType?: RuleFixConfiguration_for_NoConfusingVoidTypeOptions;
+	noConfusingVoidType?: RuleFixConfiguration_for_Null;
 	/**
 	 * Disallow the use of console.
 	 */
@@ -2032,23 +2113,23 @@ export interface Suspicious {
 	/**
 	 * Disallow TypeScript const enum
 	 */
-	noConstEnum?: RuleFixConfiguration_for_NoConstEnumOptions;
+	noConstEnum?: RuleFixConfiguration_for_Null;
 	/**
 	 * Prevents from having control characters and some escape sequences that match control characters in regular expression literals.
 	 */
-	noControlCharactersInRegex?: RuleConfiguration_for_NoControlCharactersInRegexOptions;
+	noControlCharactersInRegex?: RuleConfiguration_for_Null;
 	/**
 	 * Disallow the use of debugger
 	 */
-	noDebugger?: RuleFixConfiguration_for_NoDebuggerOptions;
+	noDebugger?: RuleFixConfiguration_for_Null;
 	/**
 	 * Disallow direct assignments to document.cookie.
 	 */
-	noDocumentCookie?: RuleConfiguration_for_NoDocumentCookieOptions;
+	noDocumentCookie?: RuleConfiguration_for_Null;
 	/**
 	 * Prevents importing next/document outside of pages/_document.jsx in Next.js projects.
 	 */
-	noDocumentImportInPage?: RuleConfiguration_for_NoDocumentImportInPageOptions;
+	noDocumentImportInPage?: RuleConfiguration_for_Null;
 	/**
 	 * Require the use of === and !==.
 	 */
@@ -2056,211 +2137,215 @@ export interface Suspicious {
 	/**
 	 * Disallow duplicate @import rules.
 	 */
-	noDuplicateAtImportRules?: RuleConfiguration_for_NoDuplicateAtImportRulesOptions;
+	noDuplicateAtImportRules?: RuleConfiguration_for_Null;
 	/**
 	 * Disallow duplicate case labels.
 	 */
-	noDuplicateCase?: RuleConfiguration_for_NoDuplicateCaseOptions;
+	noDuplicateCase?: RuleConfiguration_for_Null;
 	/**
 	 * Disallow duplicate class members.
 	 */
-	noDuplicateClassMembers?: RuleConfiguration_for_NoDuplicateClassMembersOptions;
+	noDuplicateClassMembers?: RuleConfiguration_for_Null;
 	/**
 	 * Disallow duplicate custom properties within declaration blocks.
 	 */
-	noDuplicateCustomProperties?: RuleConfiguration_for_NoDuplicateCustomPropertiesOptions;
+	noDuplicateCustomProperties?: RuleConfiguration_for_Null;
 	/**
 	 * Disallow duplicate conditions in if-else-if chains
 	 */
-	noDuplicateElseIf?: RuleConfiguration_for_NoDuplicateElseIfOptions;
+	noDuplicateElseIf?: RuleConfiguration_for_Null;
 	/**
 	 * No duplicated fields in GraphQL operations.
 	 */
-	noDuplicateFields?: RuleConfiguration_for_NoDuplicateFieldsOptions;
+	noDuplicateFields?: RuleConfiguration_for_Null;
 	/**
 	 * Disallow duplicate names within font families.
 	 */
-	noDuplicateFontNames?: RuleConfiguration_for_NoDuplicateFontNamesOptions;
+	noDuplicateFontNames?: RuleConfiguration_for_Null;
 	/**
 	 * Prevents JSX properties to be assigned multiple times.
 	 */
-	noDuplicateJsxProps?: RuleConfiguration_for_NoDuplicateJsxPropsOptions;
+	noDuplicateJsxProps?: RuleConfiguration_for_Null;
 	/**
 	 * Disallow two keys with the same name inside objects.
 	 */
-	noDuplicateObjectKeys?: RuleConfiguration_for_NoDuplicateObjectKeysOptions;
+	noDuplicateObjectKeys?: RuleConfiguration_for_Null;
 	/**
 	 * Disallow duplicate function parameter name.
 	 */
-	noDuplicateParameters?: RuleConfiguration_for_NoDuplicateParametersOptions;
+	noDuplicateParameters?: RuleConfiguration_for_Null;
 	/**
 	 * Disallow duplicate properties within declaration blocks.
 	 */
-	noDuplicateProperties?: RuleConfiguration_for_NoDuplicatePropertiesOptions;
+	noDuplicateProperties?: RuleConfiguration_for_Null;
 	/**
 	 * Disallow duplicate selectors within keyframe blocks.
 	 */
-	noDuplicateSelectorsKeyframeBlock?: RuleConfiguration_for_NoDuplicateSelectorsKeyframeBlockOptions;
+	noDuplicateSelectorsKeyframeBlock?: RuleConfiguration_for_Null;
 	/**
 	 * A describe block should not contain duplicate hooks.
 	 */
-	noDuplicateTestHooks?: RuleConfiguration_for_NoDuplicateTestHooksOptions;
+	noDuplicateTestHooks?: RuleConfiguration_for_Null;
 	/**
 	 * Disallow CSS empty blocks.
 	 */
-	noEmptyBlock?: RuleConfiguration_for_NoEmptyBlockOptions;
+	noEmptyBlock?: RuleConfiguration_for_Null;
 	/**
 	 * Disallow empty block statements and static blocks.
 	 */
-	noEmptyBlockStatements?: RuleConfiguration_for_NoEmptyBlockStatementsOptions;
+	noEmptyBlockStatements?: RuleConfiguration_for_Null;
 	/**
 	 * Disallow the declaration of empty interfaces.
 	 */
-	noEmptyInterface?: RuleFixConfiguration_for_NoEmptyInterfaceOptions;
+	noEmptyInterface?: RuleFixConfiguration_for_Null;
 	/**
 	 * Disallow variables from evolving into any type through reassignments.
 	 */
-	noEvolvingTypes?: RuleConfiguration_for_NoEvolvingTypesOptions;
+	noEvolvingTypes?: RuleConfiguration_for_Null;
 	/**
 	 * Disallow the any type usage.
 	 */
-	noExplicitAny?: RuleConfiguration_for_NoExplicitAnyOptions;
+	noExplicitAny?: RuleConfiguration_for_Null;
 	/**
 	 * Disallow using export or module.exports in files containing tests
 	 */
-	noExportsInTest?: RuleConfiguration_for_NoExportsInTestOptions;
+	noExportsInTest?: RuleConfiguration_for_Null;
 	/**
 	 * Prevents the wrong usage of the non-null assertion operator (!) in TypeScript files.
 	 */
-	noExtraNonNullAssertion?: RuleFixConfiguration_for_NoExtraNonNullAssertionOptions;
+	noExtraNonNullAssertion?: RuleFixConfiguration_for_Null;
 	/**
 	 * Disallow fallthrough of switch clauses.
 	 */
-	noFallthroughSwitchClause?: RuleConfiguration_for_NoFallthroughSwitchClauseOptions;
+	noFallthroughSwitchClause?: RuleConfiguration_for_Null;
 	/**
 	 * Disallow focused tests.
 	 */
-	noFocusedTests?: RuleFixConfiguration_for_NoFocusedTestsOptions;
+	noFocusedTests?: RuleFixConfiguration_for_Null;
 	/**
 	 * Disallow reassigning function declarations.
 	 */
-	noFunctionAssign?: RuleConfiguration_for_NoFunctionAssignOptions;
+	noFunctionAssign?: RuleConfiguration_for_Null;
 	/**
 	 * Disallow assignments to native objects and read-only global variables.
 	 */
-	noGlobalAssign?: RuleConfiguration_for_NoGlobalAssignOptions;
+	noGlobalAssign?: RuleConfiguration_for_Null;
 	/**
 	 * Use Number.isFinite instead of global isFinite.
 	 */
-	noGlobalIsFinite?: RuleFixConfiguration_for_NoGlobalIsFiniteOptions;
+	noGlobalIsFinite?: RuleFixConfiguration_for_Null;
 	/**
 	 * Use Number.isNaN instead of global isNaN.
 	 */
-	noGlobalIsNan?: RuleFixConfiguration_for_NoGlobalIsNanOptions;
+	noGlobalIsNan?: RuleFixConfiguration_for_Null;
 	/**
 	 * Prevent using the next/head module in pages/_document.js on Next.js projects.
 	 */
-	noHeadImportInDocument?: RuleConfiguration_for_NoHeadImportInDocumentOptions;
+	noHeadImportInDocument?: RuleConfiguration_for_Null;
 	/**
 	 * Disallow use of implicit any type on variable declarations.
 	 */
-	noImplicitAnyLet?: RuleConfiguration_for_NoImplicitAnyLetOptions;
+	noImplicitAnyLet?: RuleConfiguration_for_Null;
 	/**
 	 * Disallow assigning to imported bindings
 	 */
-	noImportAssign?: RuleConfiguration_for_NoImportAssignOptions;
+	noImportAssign?: RuleConfiguration_for_Null;
 	/**
 	 * Disallow invalid !important within keyframe declarations
 	 */
-	noImportantInKeyframe?: RuleConfiguration_for_NoImportantInKeyframeOptions;
+	noImportantInKeyframe?: RuleConfiguration_for_Null;
 	/**
 	 * Disallows the use of irregular whitespace characters.
 	 */
-	noIrregularWhitespace?: RuleConfiguration_for_NoIrregularWhitespaceOptions;
+	noIrregularWhitespace?: RuleConfiguration_for_Null;
 	/**
 	 * Disallow labels that share a name with a variable
 	 */
-	noLabelVar?: RuleConfiguration_for_NoLabelVarOptions;
+	noLabelVar?: RuleConfiguration_for_Null;
 	/**
 	 * Disallow characters made with multiple code points in character class syntax.
 	 */
-	noMisleadingCharacterClass?: RuleFixConfiguration_for_NoMisleadingCharacterClassOptions;
+	noMisleadingCharacterClass?: RuleFixConfiguration_for_Null;
 	/**
 	 * Enforce proper usage of new and constructor.
 	 */
-	noMisleadingInstantiator?: RuleConfiguration_for_NoMisleadingInstantiatorOptions;
+	noMisleadingInstantiator?: RuleConfiguration_for_Null;
 	/**
 	 * Checks that the assertion function, for example expect, is placed inside an it() function call.
 	 */
-	noMisplacedAssertion?: RuleConfiguration_for_NoMisplacedAssertionOptions;
+	noMisplacedAssertion?: RuleConfiguration_for_Null;
 	/**
 	 * Disallow shorthand assign when variable appears on both sides.
 	 */
-	noMisrefactoredShorthandAssign?: RuleFixConfiguration_for_NoMisrefactoredShorthandAssignOptions;
+	noMisrefactoredShorthandAssign?: RuleFixConfiguration_for_Null;
 	/**
 	 * Disallow octal escape sequences in string literals
 	 */
-	noOctalEscape?: RuleFixConfiguration_for_NoOctalEscapeOptions;
+	noOctalEscape?: RuleFixConfiguration_for_Null;
 	/**
 	 * Disallow direct use of Object.prototype builtins.
 	 */
-	noPrototypeBuiltins?: RuleFixConfiguration_for_NoPrototypeBuiltinsOptions;
+	noPrototypeBuiltins?: RuleFixConfiguration_for_Null;
 	/**
 	 * Prevents React-specific JSX properties from being used.
 	 */
-	noReactSpecificProps?: RuleFixConfiguration_for_NoReactSpecificPropsOptions;
+	noReactSpecificProps?: RuleFixConfiguration_for_Null;
 	/**
 	 * Disallow variable, function, class, and type redeclarations in the same scope.
 	 */
-	noRedeclare?: RuleConfiguration_for_NoRedeclareOptions;
+	noRedeclare?: RuleConfiguration_for_Null;
 	/**
 	 * Prevents from having redundant "use strict".
 	 */
-	noRedundantUseStrict?: RuleFixConfiguration_for_NoRedundantUseStrictOptions;
+	noRedundantUseStrict?: RuleFixConfiguration_for_Null;
 	/**
 	 * Disallow comparisons where both sides are exactly the same.
 	 */
-	noSelfCompare?: RuleConfiguration_for_NoSelfCompareOptions;
+	noSelfCompare?: RuleConfiguration_for_Null;
 	/**
 	 * Disallow identifiers from shadowing restricted names.
 	 */
-	noShadowRestrictedNames?: RuleConfiguration_for_NoShadowRestrictedNamesOptions;
+	noShadowRestrictedNames?: RuleConfiguration_for_Null;
 	/**
 	 * Disallow shorthand properties that override related longhand properties.
 	 */
-	noShorthandPropertyOverrides?: RuleConfiguration_for_NoShorthandPropertyOverridesOptions;
+	noShorthandPropertyOverrides?: RuleConfiguration_for_Null;
 	/**
 	 * Disallow disabled tests.
 	 */
-	noSkippedTests?: RuleFixConfiguration_for_NoSkippedTestsOptions;
+	noSkippedTests?: RuleFixConfiguration_for_Null;
 	/**
 	 * Prevents the use of sparse arrays (arrays with holes).
 	 */
-	noSparseArray?: RuleFixConfiguration_for_NoSparseArrayOptions;
+	noSparseArray?: RuleFixConfiguration_for_Null;
 	/**
 	 * It detects possible "wrong" semicolons inside JSX elements.
 	 */
-	noSuspiciousSemicolonInJsx?: RuleConfiguration_for_NoSuspiciousSemicolonInJsxOptions;
+	noSuspiciousSemicolonInJsx?: RuleConfiguration_for_Null;
 	/**
 	 * Disallow template literal placeholder syntax in regular strings.
 	 */
-	noTemplateCurlyInString?: RuleConfiguration_for_NoTemplateCurlyInStringOptions;
+	noTemplateCurlyInString?: RuleConfiguration_for_Null;
 	/**
 	 * Disallow then property.
 	 */
-	noThenProperty?: RuleConfiguration_for_NoThenPropertyOptions;
+	noThenProperty?: RuleConfiguration_for_Null;
 	/**
 	 * Disallow unsafe declaration merging between interfaces and classes.
 	 */
-	noUnsafeDeclarationMerging?: RuleConfiguration_for_NoUnsafeDeclarationMergingOptions;
+	noUnsafeDeclarationMerging?: RuleConfiguration_for_Null;
 	/**
 	 * Disallow using unsafe negation.
 	 */
-	noUnsafeNegation?: RuleFixConfiguration_for_NoUnsafeNegationOptions;
+	noUnsafeNegation?: RuleFixConfiguration_for_Null;
 	/**
 	 * Disallow the use of var
 	 */
-	noVar?: RuleFixConfiguration_for_NoVarOptions;
+	noVar?: RuleFixConfiguration_for_Null;
+	/**
+	 * Disallow with statements in non-strict contexts.
+	 */
+	noWith?: RuleConfiguration_for_Null;
 	/**
 	 * It enables the recommended rules for this group
 	 */
@@ -2268,54 +2353,50 @@ export interface Suspicious {
 	/**
 	 * Disallow the use of overload signatures that are not next to each other.
 	 */
-	useAdjacentOverloadSignatures?: RuleConfiguration_for_UseAdjacentOverloadSignaturesOptions;
+	useAdjacentOverloadSignatures?: RuleConfiguration_for_Null;
 	/**
 	 * Ensure async functions utilize await.
 	 */
-	useAwait?: RuleConfiguration_for_UseAwaitOptions;
+	useAwait?: RuleConfiguration_for_Null;
 	/**
 	 * Enforce default clauses in switch statements to be last
 	 */
-	useDefaultSwitchClauseLast?: RuleConfiguration_for_UseDefaultSwitchClauseLastOptions;
+	useDefaultSwitchClauseLast?: RuleConfiguration_for_Null;
 	/**
 	 * Enforce passing a message value when creating a built-in error.
 	 */
-	useErrorMessage?: RuleConfiguration_for_UseErrorMessageOptions;
+	useErrorMessage?: RuleConfiguration_for_Null;
 	/**
 	 * Enforce get methods to always return a value.
 	 */
-	useGetterReturn?: RuleConfiguration_for_UseGetterReturnOptions;
+	useGetterReturn?: RuleConfiguration_for_Null;
 	/**
 	 * Enforces the use of a recommended display strategy with Google Fonts.
 	 */
-	useGoogleFontDisplay?: RuleConfiguration_for_UseGoogleFontDisplayOptions;
+	useGoogleFontDisplay?: RuleConfiguration_for_Null;
 	/**
 	 * Require for-in loops to include an if statement.
 	 */
-	useGuardForIn?: RuleConfiguration_for_UseGuardForInOptions;
+	useGuardForIn?: RuleConfiguration_for_Null;
 	/**
 	 * Use Array.isArray() instead of instanceof Array.
 	 */
-	useIsArray?: RuleFixConfiguration_for_UseIsArrayOptions;
+	useIsArray?: RuleFixConfiguration_for_Null;
 	/**
 	 * Require using the namespace keyword over the module keyword to declare TypeScript namespaces.
 	 */
-	useNamespaceKeyword?: RuleFixConfiguration_for_UseNamespaceKeywordOptions;
+	useNamespaceKeyword?: RuleFixConfiguration_for_Null;
 	/**
 	 * Enforce using the digits argument with Number#toFixed().
 	 */
-	useNumberToFixedDigitsArgument?: RuleFixConfiguration_for_UseNumberToFixedDigitsArgumentOptions;
+	useNumberToFixedDigitsArgument?: RuleFixConfiguration_for_Null;
 	/**
 	 * Enforce the use of the directive "use strict" in script files.
 	 */
-	useStrictMode?: RuleFixConfiguration_for_UseStrictModeOptions;
-	/**
-	 * This rule checks that the result of a typeof expression is compared to a valid value.
-	 */
-	useValidTypeof?: RuleFixConfiguration_for_UseValidTypeofOptions;
+	useStrictMode?: RuleFixConfiguration_for_Null;
 }
 export type RuleAssistPlainConfiguration = "off" | "on";
-export interface RuleAssistWithOptions_for_OrganizeImportsOptions {
+export interface RuleAssistWithOptions_for_Options {
 	/**
 	 * The severity of the emitted diagnostics by the rule
 	 */
@@ -2323,9 +2404,9 @@ export interface RuleAssistWithOptions_for_OrganizeImportsOptions {
 	/**
 	 * Rule's options
 	 */
-	options: OrganizeImportsOptions;
+	options: Options;
 }
-export interface RuleAssistWithOptions_for_UseSortedAttributesOptions {
+export interface RuleAssistWithOptions_for_Null {
 	/**
 	 * The severity of the emitted diagnostics by the rule
 	 */
@@ -2333,988 +2414,124 @@ export interface RuleAssistWithOptions_for_UseSortedAttributesOptions {
 	/**
 	 * Rule's options
 	 */
-	options: UseSortedAttributesOptions;
+	options: null;
 }
-export interface RuleAssistWithOptions_for_UseSortedKeysOptions {
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RuleAssistPlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: UseSortedKeysOptions;
-}
-export interface RuleAssistWithOptions_for_UseSortedPropertiesOptions {
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RuleAssistPlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: UseSortedPropertiesOptions;
-}
-export type RuleFixConfiguration_for_NoAccessKeyOptions =
+export type RuleFixConfiguration_for_Null =
 	| RulePlainConfiguration
-	| RuleWithFixOptions_for_NoAccessKeyOptions;
-export type RuleFixConfiguration_for_NoAriaHiddenOnFocusableOptions =
-	| RulePlainConfiguration
-	| RuleWithFixOptions_for_NoAriaHiddenOnFocusableOptions;
-export type RuleFixConfiguration_for_NoAriaUnsupportedElementsOptions =
-	| RulePlainConfiguration
-	| RuleWithFixOptions_for_NoAriaUnsupportedElementsOptions;
-export type RuleFixConfiguration_for_NoAutofocusOptions =
-	| RulePlainConfiguration
-	| RuleWithFixOptions_for_NoAutofocusOptions;
-export type RuleFixConfiguration_for_NoDistractingElementsOptions =
-	| RulePlainConfiguration
-	| RuleWithFixOptions_for_NoDistractingElementsOptions;
-export type RuleFixConfiguration_for_NoHeaderScopeOptions =
-	| RulePlainConfiguration
-	| RuleWithFixOptions_for_NoHeaderScopeOptions;
-export type RuleFixConfiguration_for_NoInteractiveElementToNoninteractiveRoleOptions =
-	| RulePlainConfiguration
-	| RuleWithFixOptions_for_NoInteractiveElementToNoninteractiveRoleOptions;
+	| RuleWithFixOptions_for_Null;
 export type RuleConfiguration_for_NoLabelWithoutControlOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_NoLabelWithoutControlOptions;
-export type RuleFixConfiguration_for_NoNoninteractiveElementToInteractiveRoleOptions =
+export type RuleConfiguration_for_Null =
 	| RulePlainConfiguration
-	| RuleWithFixOptions_for_NoNoninteractiveElementToInteractiveRoleOptions;
-export type RuleFixConfiguration_for_NoNoninteractiveTabindexOptions =
+	| RuleWithOptions_for_Null;
+export type RuleFixConfiguration_for_ValidAriaRoleOptions =
 	| RulePlainConfiguration
-	| RuleWithFixOptions_for_NoNoninteractiveTabindexOptions;
-export type RuleFixConfiguration_for_NoPositiveTabindexOptions =
-	| RulePlainConfiguration
-	| RuleWithFixOptions_for_NoPositiveTabindexOptions;
-export type RuleConfiguration_for_NoRedundantAltOptions =
-	| RulePlainConfiguration
-	| RuleWithOptions_for_NoRedundantAltOptions;
-export type RuleFixConfiguration_for_NoRedundantRolesOptions =
-	| RulePlainConfiguration
-	| RuleWithFixOptions_for_NoRedundantRolesOptions;
-export type RuleConfiguration_for_NoStaticElementInteractionsOptions =
-	| RulePlainConfiguration
-	| RuleWithOptions_for_NoStaticElementInteractionsOptions;
-export type RuleConfiguration_for_NoSvgWithoutTitleOptions =
-	| RulePlainConfiguration
-	| RuleWithOptions_for_NoSvgWithoutTitleOptions;
-export type RuleConfiguration_for_UseAltTextOptions =
-	| RulePlainConfiguration
-	| RuleWithOptions_for_UseAltTextOptions;
-export type RuleFixConfiguration_for_UseAnchorContentOptions =
-	| RulePlainConfiguration
-	| RuleWithFixOptions_for_UseAnchorContentOptions;
-export type RuleFixConfiguration_for_UseAriaActivedescendantWithTabindexOptions =
-	| RulePlainConfiguration
-	| RuleWithFixOptions_for_UseAriaActivedescendantWithTabindexOptions;
-export type RuleConfiguration_for_UseAriaPropsForRoleOptions =
-	| RulePlainConfiguration
-	| RuleWithOptions_for_UseAriaPropsForRoleOptions;
-export type RuleConfiguration_for_UseAriaPropsSupportedByRoleOptions =
-	| RulePlainConfiguration
-	| RuleWithOptions_for_UseAriaPropsSupportedByRoleOptions;
-export type RuleConfiguration_for_UseButtonTypeOptions =
-	| RulePlainConfiguration
-	| RuleWithOptions_for_UseButtonTypeOptions;
-export type RuleConfiguration_for_UseFocusableInteractiveOptions =
-	| RulePlainConfiguration
-	| RuleWithOptions_for_UseFocusableInteractiveOptions;
-export type RuleConfiguration_for_UseGenericFontNamesOptions =
-	| RulePlainConfiguration
-	| RuleWithOptions_for_UseGenericFontNamesOptions;
-export type RuleConfiguration_for_UseHeadingContentOptions =
-	| RulePlainConfiguration
-	| RuleWithOptions_for_UseHeadingContentOptions;
-export type RuleConfiguration_for_UseHtmlLangOptions =
-	| RulePlainConfiguration
-	| RuleWithOptions_for_UseHtmlLangOptions;
-export type RuleConfiguration_for_UseIframeTitleOptions =
-	| RulePlainConfiguration
-	| RuleWithOptions_for_UseIframeTitleOptions;
-export type RuleConfiguration_for_UseKeyWithClickEventsOptions =
-	| RulePlainConfiguration
-	| RuleWithOptions_for_UseKeyWithClickEventsOptions;
-export type RuleConfiguration_for_UseKeyWithMouseEventsOptions =
-	| RulePlainConfiguration
-	| RuleWithOptions_for_UseKeyWithMouseEventsOptions;
-export type RuleConfiguration_for_UseMediaCaptionOptions =
-	| RulePlainConfiguration
-	| RuleWithOptions_for_UseMediaCaptionOptions;
-export type RuleConfiguration_for_UseSemanticElementsOptions =
-	| RulePlainConfiguration
-	| RuleWithOptions_for_UseSemanticElementsOptions;
-export type RuleConfiguration_for_UseValidAnchorOptions =
-	| RulePlainConfiguration
-	| RuleWithOptions_for_UseValidAnchorOptions;
-export type RuleFixConfiguration_for_UseValidAriaPropsOptions =
-	| RulePlainConfiguration
-	| RuleWithFixOptions_for_UseValidAriaPropsOptions;
-export type RuleFixConfiguration_for_UseValidAriaRoleOptions =
-	| RulePlainConfiguration
-	| RuleWithFixOptions_for_UseValidAriaRoleOptions;
-export type RuleConfiguration_for_UseValidAriaValuesOptions =
-	| RulePlainConfiguration
-	| RuleWithOptions_for_UseValidAriaValuesOptions;
+	| RuleWithFixOptions_for_ValidAriaRoleOptions;
 export type RuleConfiguration_for_UseValidAutocompleteOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_UseValidAutocompleteOptions;
-export type RuleConfiguration_for_UseValidLangOptions =
+export type RuleConfiguration_for_ComplexityOptions =
 	| RulePlainConfiguration
-	| RuleWithOptions_for_UseValidLangOptions;
-export type RuleFixConfiguration_for_NoAdjacentSpacesInRegexOptions =
-	| RulePlainConfiguration
-	| RuleWithFixOptions_for_NoAdjacentSpacesInRegexOptions;
-export type RuleFixConfiguration_for_NoBannedTypesOptions =
-	| RulePlainConfiguration
-	| RuleWithFixOptions_for_NoBannedTypesOptions;
-export type RuleConfiguration_for_NoEmptyTypeParametersOptions =
-	| RulePlainConfiguration
-	| RuleWithOptions_for_NoEmptyTypeParametersOptions;
-export type RuleConfiguration_for_NoExcessiveCognitiveComplexityOptions =
-	| RulePlainConfiguration
-	| RuleWithOptions_for_NoExcessiveCognitiveComplexityOptions;
-export type RuleConfiguration_for_NoExcessiveNestedTestSuitesOptions =
-	| RulePlainConfiguration
-	| RuleWithOptions_for_NoExcessiveNestedTestSuitesOptions;
-export type RuleFixConfiguration_for_NoExtraBooleanCastOptions =
-	| RulePlainConfiguration
-	| RuleWithFixOptions_for_NoExtraBooleanCastOptions;
+	| RuleWithOptions_for_ComplexityOptions;
 export type RuleConfiguration_for_NoForEachOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_NoForEachOptions;
-export type RuleConfiguration_for_NoStaticOnlyClassOptions =
-	| RulePlainConfiguration
-	| RuleWithOptions_for_NoStaticOnlyClassOptions;
-export type RuleFixConfiguration_for_NoThisInStaticOptions =
-	| RulePlainConfiguration
-	| RuleWithFixOptions_for_NoThisInStaticOptions;
-export type RuleFixConfiguration_for_NoUselessCatchOptions =
-	| RulePlainConfiguration
-	| RuleWithFixOptions_for_NoUselessCatchOptions;
-export type RuleFixConfiguration_for_NoUselessConstructorOptions =
-	| RulePlainConfiguration
-	| RuleWithFixOptions_for_NoUselessConstructorOptions;
-export type RuleFixConfiguration_for_NoUselessEmptyExportOptions =
-	| RulePlainConfiguration
-	| RuleWithFixOptions_for_NoUselessEmptyExportOptions;
-export type RuleFixConfiguration_for_NoUselessEscapeInRegexOptions =
-	| RulePlainConfiguration
-	| RuleWithFixOptions_for_NoUselessEscapeInRegexOptions;
-export type RuleFixConfiguration_for_NoUselessFragmentsOptions =
-	| RulePlainConfiguration
-	| RuleWithFixOptions_for_NoUselessFragmentsOptions;
-export type RuleFixConfiguration_for_NoUselessLabelOptions =
-	| RulePlainConfiguration
-	| RuleWithFixOptions_for_NoUselessLabelOptions;
-export type RuleFixConfiguration_for_NoUselessLoneBlockStatementsOptions =
-	| RulePlainConfiguration
-	| RuleWithFixOptions_for_NoUselessLoneBlockStatementsOptions;
-export type RuleFixConfiguration_for_NoUselessRenameOptions =
-	| RulePlainConfiguration
-	| RuleWithFixOptions_for_NoUselessRenameOptions;
-export type RuleFixConfiguration_for_NoUselessStringConcatOptions =
-	| RulePlainConfiguration
-	| RuleWithFixOptions_for_NoUselessStringConcatOptions;
-export type RuleConfiguration_for_NoUselessStringRawOptions =
-	| RulePlainConfiguration
-	| RuleWithOptions_for_NoUselessStringRawOptions;
-export type RuleFixConfiguration_for_NoUselessSwitchCaseOptions =
-	| RulePlainConfiguration
-	| RuleWithFixOptions_for_NoUselessSwitchCaseOptions;
-export type RuleFixConfiguration_for_NoUselessTernaryOptions =
-	| RulePlainConfiguration
-	| RuleWithFixOptions_for_NoUselessTernaryOptions;
-export type RuleFixConfiguration_for_NoUselessThisAliasOptions =
-	| RulePlainConfiguration
-	| RuleWithFixOptions_for_NoUselessThisAliasOptions;
-export type RuleFixConfiguration_for_NoUselessTypeConstraintOptions =
-	| RulePlainConfiguration
-	| RuleWithFixOptions_for_NoUselessTypeConstraintOptions;
-export type RuleFixConfiguration_for_NoUselessUndefinedInitializationOptions =
-	| RulePlainConfiguration
-	| RuleWithFixOptions_for_NoUselessUndefinedInitializationOptions;
-export type RuleConfiguration_for_NoVoidOptions =
-	| RulePlainConfiguration
-	| RuleWithOptions_for_NoVoidOptions;
-export type RuleConfiguration_for_NoWithOptions =
-	| RulePlainConfiguration
-	| RuleWithOptions_for_NoWithOptions;
-export type RuleFixConfiguration_for_UseArrowFunctionOptions =
-	| RulePlainConfiguration
-	| RuleWithFixOptions_for_UseArrowFunctionOptions;
-export type RuleFixConfiguration_for_UseDateNowOptions =
-	| RulePlainConfiguration
-	| RuleWithFixOptions_for_UseDateNowOptions;
-export type RuleFixConfiguration_for_UseFlatMapOptions =
-	| RulePlainConfiguration
-	| RuleWithFixOptions_for_UseFlatMapOptions;
-export type RuleFixConfiguration_for_UseLiteralKeysOptions =
-	| RulePlainConfiguration
-	| RuleWithFixOptions_for_UseLiteralKeysOptions;
-export type RuleFixConfiguration_for_UseOptionalChainOptions =
-	| RulePlainConfiguration
-	| RuleWithFixOptions_for_UseOptionalChainOptions;
-export type RuleFixConfiguration_for_UseRegexLiteralsOptions =
-	| RulePlainConfiguration
-	| RuleWithFixOptions_for_UseRegexLiteralsOptions;
-export type RuleFixConfiguration_for_UseSimpleNumberKeysOptions =
-	| RulePlainConfiguration
-	| RuleWithFixOptions_for_UseSimpleNumberKeysOptions;
-export type RuleFixConfiguration_for_UseSimplifiedLogicExpressionOptions =
-	| RulePlainConfiguration
-	| RuleWithFixOptions_for_UseSimplifiedLogicExpressionOptions;
-export type RuleFixConfiguration_for_UseWhileOptions =
-	| RulePlainConfiguration
-	| RuleWithFixOptions_for_UseWhileOptions;
-export type RuleConfiguration_for_NoChildrenPropOptions =
-	| RulePlainConfiguration
-	| RuleWithOptions_for_NoChildrenPropOptions;
-export type RuleFixConfiguration_for_NoConstAssignOptions =
-	| RulePlainConfiguration
-	| RuleWithFixOptions_for_NoConstAssignOptions;
-export type RuleConfiguration_for_NoConstantConditionOptions =
-	| RulePlainConfiguration
-	| RuleWithOptions_for_NoConstantConditionOptions;
-export type RuleFixConfiguration_for_NoConstantMathMinMaxClampOptions =
-	| RulePlainConfiguration
-	| RuleWithFixOptions_for_NoConstantMathMinMaxClampOptions;
-export type RuleConfiguration_for_NoConstructorReturnOptions =
-	| RulePlainConfiguration
-	| RuleWithOptions_for_NoConstructorReturnOptions;
-export type RuleConfiguration_for_NoEmptyCharacterClassInRegexOptions =
-	| RulePlainConfiguration
-	| RuleWithOptions_for_NoEmptyCharacterClassInRegexOptions;
-export type RuleConfiguration_for_NoEmptyPatternOptions =
-	| RulePlainConfiguration
-	| RuleWithOptions_for_NoEmptyPatternOptions;
-export type RuleFixConfiguration_for_NoFlatMapIdentityOptions =
-	| RulePlainConfiguration
-	| RuleWithFixOptions_for_NoFlatMapIdentityOptions;
-export type RuleConfiguration_for_NoGlobalObjectCallsOptions =
-	| RulePlainConfiguration
-	| RuleWithOptions_for_NoGlobalObjectCallsOptions;
-export type RuleConfiguration_for_NoInnerDeclarationsOptions =
-	| RulePlainConfiguration
-	| RuleWithOptions_for_NoInnerDeclarationsOptions;
-export type RuleFixConfiguration_for_NoInvalidBuiltinInstantiationOptions =
-	| RulePlainConfiguration
-	| RuleWithFixOptions_for_NoInvalidBuiltinInstantiationOptions;
-export type RuleConfiguration_for_NoInvalidConstructorSuperOptions =
-	| RulePlainConfiguration
-	| RuleWithOptions_for_NoInvalidConstructorSuperOptions;
-export type RuleConfiguration_for_NoInvalidDirectionInLinearGradientOptions =
-	| RulePlainConfiguration
-	| RuleWithOptions_for_NoInvalidDirectionInLinearGradientOptions;
-export type RuleConfiguration_for_NoInvalidGridAreasOptions =
-	| RulePlainConfiguration
-	| RuleWithOptions_for_NoInvalidGridAreasOptions;
-export type RuleConfiguration_for_NoInvalidPositionAtImportRuleOptions =
-	| RulePlainConfiguration
-	| RuleWithOptions_for_NoInvalidPositionAtImportRuleOptions;
-export type RuleConfiguration_for_NoInvalidUseBeforeDeclarationOptions =
-	| RulePlainConfiguration
-	| RuleWithOptions_for_NoInvalidUseBeforeDeclarationOptions;
-export type RuleConfiguration_for_NoMissingVarFunctionOptions =
-	| RulePlainConfiguration
-	| RuleWithOptions_for_NoMissingVarFunctionOptions;
-export type RuleConfiguration_for_NoNodejsModulesOptions =
-	| RulePlainConfiguration
-	| RuleWithOptions_for_NoNodejsModulesOptions;
-export type RuleFixConfiguration_for_NoNonoctalDecimalEscapeOptions =
-	| RulePlainConfiguration
-	| RuleWithFixOptions_for_NoNonoctalDecimalEscapeOptions;
-export type RuleConfiguration_for_NoPrecisionLossOptions =
-	| RulePlainConfiguration
-	| RuleWithOptions_for_NoPrecisionLossOptions;
 export type RuleConfiguration_for_NoPrivateImportsOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_NoPrivateImportsOptions;
-export type RuleConfiguration_for_NoRenderReturnValueOptions =
-	| RulePlainConfiguration
-	| RuleWithOptions_for_NoRenderReturnValueOptions;
-export type RuleConfiguration_for_NoSelfAssignOptions =
-	| RulePlainConfiguration
-	| RuleWithOptions_for_NoSelfAssignOptions;
-export type RuleConfiguration_for_NoSetterReturnOptions =
-	| RulePlainConfiguration
-	| RuleWithOptions_for_NoSetterReturnOptions;
-export type RuleFixConfiguration_for_NoStringCaseMismatchOptions =
-	| RulePlainConfiguration
-	| RuleWithFixOptions_for_NoStringCaseMismatchOptions;
-export type RuleFixConfiguration_for_NoSwitchDeclarationsOptions =
-	| RulePlainConfiguration
-	| RuleWithFixOptions_for_NoSwitchDeclarationsOptions;
 export type RuleConfiguration_for_NoUndeclaredDependenciesOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_NoUndeclaredDependenciesOptions;
-export type RuleConfiguration_for_NoUndeclaredVariablesOptions =
+export type RuleConfiguration_for_UndeclaredVariablesOptions =
 	| RulePlainConfiguration
-	| RuleWithOptions_for_NoUndeclaredVariablesOptions;
-export type RuleConfiguration_for_NoUnknownFunctionOptions =
-	| RulePlainConfiguration
-	| RuleWithOptions_for_NoUnknownFunctionOptions;
-export type RuleConfiguration_for_NoUnknownMediaFeatureNameOptions =
-	| RulePlainConfiguration
-	| RuleWithOptions_for_NoUnknownMediaFeatureNameOptions;
-export type RuleConfiguration_for_NoUnknownPropertyOptions =
-	| RulePlainConfiguration
-	| RuleWithOptions_for_NoUnknownPropertyOptions;
-export type RuleConfiguration_for_NoUnknownPseudoClassOptions =
-	| RulePlainConfiguration
-	| RuleWithOptions_for_NoUnknownPseudoClassOptions;
-export type RuleConfiguration_for_NoUnknownPseudoElementOptions =
-	| RulePlainConfiguration
-	| RuleWithOptions_for_NoUnknownPseudoElementOptions;
-export type RuleConfiguration_for_NoUnknownTypeSelectorOptions =
-	| RulePlainConfiguration
-	| RuleWithOptions_for_NoUnknownTypeSelectorOptions;
-export type RuleConfiguration_for_NoUnknownUnitOptions =
-	| RulePlainConfiguration
-	| RuleWithOptions_for_NoUnknownUnitOptions;
-export type RuleConfiguration_for_NoUnmatchableAnbSelectorOptions =
-	| RulePlainConfiguration
-	| RuleWithOptions_for_NoUnmatchableAnbSelectorOptions;
-export type RuleConfiguration_for_NoUnreachableOptions =
-	| RulePlainConfiguration
-	| RuleWithOptions_for_NoUnreachableOptions;
-export type RuleConfiguration_for_NoUnreachableSuperOptions =
-	| RulePlainConfiguration
-	| RuleWithOptions_for_NoUnreachableSuperOptions;
-export type RuleConfiguration_for_NoUnsafeFinallyOptions =
-	| RulePlainConfiguration
-	| RuleWithOptions_for_NoUnsafeFinallyOptions;
-export type RuleConfiguration_for_NoUnsafeOptionalChainingOptions =
-	| RulePlainConfiguration
-	| RuleWithOptions_for_NoUnsafeOptionalChainingOptions;
-export type RuleFixConfiguration_for_NoUnusedFunctionParametersOptions =
-	| RulePlainConfiguration
-	| RuleWithFixOptions_for_NoUnusedFunctionParametersOptions;
-export type RuleFixConfiguration_for_NoUnusedImportsOptions =
-	| RulePlainConfiguration
-	| RuleWithFixOptions_for_NoUnusedImportsOptions;
-export type RuleFixConfiguration_for_NoUnusedLabelsOptions =
-	| RulePlainConfiguration
-	| RuleWithFixOptions_for_NoUnusedLabelsOptions;
-export type RuleFixConfiguration_for_NoUnusedPrivateClassMembersOptions =
-	| RulePlainConfiguration
-	| RuleWithFixOptions_for_NoUnusedPrivateClassMembersOptions;
+	| RuleWithOptions_for_UndeclaredVariablesOptions;
 export type RuleFixConfiguration_for_NoUnusedVariablesOptions =
 	| RulePlainConfiguration
 	| RuleWithFixOptions_for_NoUnusedVariablesOptions;
-export type RuleFixConfiguration_for_NoUselessContinueOptions =
-	| RulePlainConfiguration
-	| RuleWithFixOptions_for_NoUselessContinueOptions;
-export type RuleFixConfiguration_for_NoVoidElementsWithChildrenOptions =
-	| RulePlainConfiguration
-	| RuleWithFixOptions_for_NoVoidElementsWithChildrenOptions;
-export type RuleConfiguration_for_NoVoidTypeReturnOptions =
-	| RulePlainConfiguration
-	| RuleWithOptions_for_NoVoidTypeReturnOptions;
-export type RuleFixConfiguration_for_UseArrayLiteralsOptions =
-	| RulePlainConfiguration
-	| RuleWithFixOptions_for_UseArrayLiteralsOptions;
 export type RuleFixConfiguration_for_UseExhaustiveDependenciesOptions =
 	| RulePlainConfiguration
 	| RuleWithFixOptions_for_UseExhaustiveDependenciesOptions;
-export type RuleConfiguration_for_UseHookAtTopLevelOptions =
+export type RuleConfiguration_for_DeprecatedHooksOptions =
 	| RulePlainConfiguration
-	| RuleWithOptions_for_UseHookAtTopLevelOptions;
+	| RuleWithOptions_for_DeprecatedHooksOptions;
 export type RuleFixConfiguration_for_UseImportExtensionsOptions =
 	| RulePlainConfiguration
 	| RuleWithFixOptions_for_UseImportExtensionsOptions;
-export type RuleFixConfiguration_for_UseIsNanOptions =
-	| RulePlainConfiguration
-	| RuleWithFixOptions_for_UseIsNanOptions;
 export type RuleConfiguration_for_UseJsxKeyInIterableOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_UseJsxKeyInIterableOptions;
-export type RuleConfiguration_for_UseValidForDirectionOptions =
-	| RulePlainConfiguration
-	| RuleWithOptions_for_UseValidForDirectionOptions;
-export type RuleConfiguration_for_UseYieldOptions =
-	| RulePlainConfiguration
-	| RuleWithOptions_for_UseYieldOptions;
-export type RuleConfiguration_for_NoAwaitInLoopOptions =
-	| RulePlainConfiguration
-	| RuleWithOptions_for_NoAwaitInLoopOptions;
 export type RuleConfiguration_for_NoBitwiseOperatorsOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_NoBitwiseOperatorsOptions;
-export type RuleConfiguration_for_NoConstantBinaryExpressionOptions =
+export type RuleConfiguration_for_NoExcessiveLinesPerFunctionOptions =
 	| RulePlainConfiguration
-	| RuleWithOptions_for_NoConstantBinaryExpressionOptions;
-export type RuleConfiguration_for_NoDestructuredPropsOptions =
-	| RulePlainConfiguration
-	| RuleWithOptions_for_NoDestructuredPropsOptions;
-export type RuleFixConfiguration_for_NoFloatingPromisesOptions =
-	| RulePlainConfiguration
-	| RuleWithFixOptions_for_NoFloatingPromisesOptions;
-export type RuleFixConfiguration_for_NoGlobalDirnameFilenameOptions =
-	| RulePlainConfiguration
-	| RuleWithFixOptions_for_NoGlobalDirnameFilenameOptions;
-export type RuleConfiguration_for_NoImportCyclesOptions =
-	| RulePlainConfiguration
-	| RuleWithOptions_for_NoImportCyclesOptions;
-export type RuleFixConfiguration_for_NoImportantStylesOptions =
-	| RulePlainConfiguration
-	| RuleWithFixOptions_for_NoImportantStylesOptions;
-export type RuleConfiguration_for_NoNoninteractiveElementInteractionsOptions =
-	| RulePlainConfiguration
-	| RuleWithOptions_for_NoNoninteractiveElementInteractionsOptions;
-export type RuleFixConfiguration_for_NoProcessGlobalOptions =
-	| RulePlainConfiguration
-	| RuleWithFixOptions_for_NoProcessGlobalOptions;
+	| RuleWithOptions_for_NoExcessiveLinesPerFunctionOptions;
 export type RuleConfiguration_for_NoRestrictedElementsOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_NoRestrictedElementsOptions;
 export type RuleConfiguration_for_NoSecretsOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_NoSecretsOptions;
-export type RuleConfiguration_for_NoShadowOptions =
-	| RulePlainConfiguration
-	| RuleWithOptions_for_NoShadowOptions;
-export type RuleFixConfiguration_for_NoTsIgnoreOptions =
-	| RulePlainConfiguration
-	| RuleWithFixOptions_for_NoTsIgnoreOptions;
-export type RuleConfiguration_for_NoUnknownAtRuleOptions =
-	| RulePlainConfiguration
-	| RuleWithOptions_for_NoUnknownAtRuleOptions;
-export type RuleConfiguration_for_NoUnresolvedImportsOptions =
-	| RulePlainConfiguration
-	| RuleWithOptions_for_NoUnresolvedImportsOptions;
-export type RuleConfiguration_for_NoUnwantedPolyfillioOptions =
-	| RulePlainConfiguration
-	| RuleWithOptions_for_NoUnwantedPolyfillioOptions;
-export type RuleConfiguration_for_NoUselessBackrefInRegexOptions =
-	| RulePlainConfiguration
-	| RuleWithOptions_for_NoUselessBackrefInRegexOptions;
-export type RuleFixConfiguration_for_NoUselessEscapeInStringOptions =
-	| RulePlainConfiguration
-	| RuleWithFixOptions_for_NoUselessEscapeInStringOptions;
-export type RuleFixConfiguration_for_NoUselessUndefinedOptions =
-	| RulePlainConfiguration
-	| RuleWithFixOptions_for_NoUselessUndefinedOptions;
-export type RuleConfiguration_for_UseAdjacentGetterSetterOptions =
-	| RulePlainConfiguration
-	| RuleWithOptions_for_UseAdjacentGetterSetterOptions;
 export type RuleFixConfiguration_for_UseConsistentObjectDefinitionOptions =
 	| RulePlainConfiguration
 	| RuleWithFixOptions_for_UseConsistentObjectDefinitionOptions;
-export type RuleFixConfiguration_for_UseExhaustiveSwitchCasesOptions =
+export type RuleFixConfiguration_for_ReadonlyClassPropertiesOptions =
 	| RulePlainConfiguration
-	| RuleWithFixOptions_for_UseExhaustiveSwitchCasesOptions;
-export type RuleConfiguration_for_UseExplicitTypeOptions =
+	| RuleWithFixOptions_for_ReadonlyClassPropertiesOptions;
+export type RuleFixConfiguration_for_UtilityClassSortingOptions =
 	| RulePlainConfiguration
-	| RuleWithOptions_for_UseExplicitTypeOptions;
-export type RuleConfiguration_for_UseExportsLastOptions =
-	| RulePlainConfiguration
-	| RuleWithOptions_for_UseExportsLastOptions;
-export type RuleConfiguration_for_UseForComponentOptions =
-	| RulePlainConfiguration
-	| RuleWithOptions_for_UseForComponentOptions;
-export type RuleFixConfiguration_for_UseGoogleFontPreconnectOptions =
-	| RulePlainConfiguration
-	| RuleWithFixOptions_for_UseGoogleFontPreconnectOptions;
-export type RuleConfiguration_for_UseIterableCallbackReturnOptions =
-	| RulePlainConfiguration
-	| RuleWithOptions_for_UseIterableCallbackReturnOptions;
-export type RuleFixConfiguration_for_UseNamedOperationOptions =
-	| RulePlainConfiguration
-	| RuleWithFixOptions_for_UseNamedOperationOptions;
-export type RuleConfiguration_for_UseNamingConventionOptions =
-	| RulePlainConfiguration
-	| RuleWithOptions_for_UseNamingConventionOptions;
-export type RuleFixConfiguration_for_UseNumericSeparatorsOptions =
-	| RulePlainConfiguration
-	| RuleWithFixOptions_for_UseNumericSeparatorsOptions;
-export type RuleFixConfiguration_for_UseParseIntRadixOptions =
-	| RulePlainConfiguration
-	| RuleWithFixOptions_for_UseParseIntRadixOptions;
-export type RuleFixConfiguration_for_UseSingleJsDocAsteriskOptions =
-	| RulePlainConfiguration
-	| RuleWithFixOptions_for_UseSingleJsDocAsteriskOptions;
-export type RuleFixConfiguration_for_UseSortedClassesOptions =
-	| RulePlainConfiguration
-	| RuleWithFixOptions_for_UseSortedClassesOptions;
-export type RuleConfiguration_for_UseSymbolDescriptionOptions =
-	| RulePlainConfiguration
-	| RuleWithOptions_for_UseSymbolDescriptionOptions;
-export type RuleConfiguration_for_NoAccumulatingSpreadOptions =
-	| RulePlainConfiguration
-	| RuleWithOptions_for_NoAccumulatingSpreadOptions;
-export type RuleConfiguration_for_NoBarrelFileOptions =
-	| RulePlainConfiguration
-	| RuleWithOptions_for_NoBarrelFileOptions;
-export type RuleFixConfiguration_for_NoDeleteOptions =
-	| RulePlainConfiguration
-	| RuleWithFixOptions_for_NoDeleteOptions;
-export type RuleConfiguration_for_NoDynamicNamespaceImportAccessOptions =
-	| RulePlainConfiguration
-	| RuleWithOptions_for_NoDynamicNamespaceImportAccessOptions;
-export type RuleConfiguration_for_NoImgElementOptions =
-	| RulePlainConfiguration
-	| RuleWithOptions_for_NoImgElementOptions;
-export type RuleConfiguration_for_NoReExportAllOptions =
-	| RulePlainConfiguration
-	| RuleWithOptions_for_NoReExportAllOptions;
-export type RuleConfiguration_for_UseTopLevelRegexOptions =
-	| RulePlainConfiguration
-	| RuleWithOptions_for_UseTopLevelRegexOptions;
+	| RuleWithFixOptions_for_UtilityClassSortingOptions;
 export type RuleFixConfiguration_for_NoBlankTargetOptions =
 	| RulePlainConfiguration
 	| RuleWithFixOptions_for_NoBlankTargetOptions;
-export type RuleConfiguration_for_NoDangerouslySetInnerHtmlOptions =
-	| RulePlainConfiguration
-	| RuleWithOptions_for_NoDangerouslySetInnerHtmlOptions;
-export type RuleConfiguration_for_NoDangerouslySetInnerHtmlWithChildrenOptions =
-	| RulePlainConfiguration
-	| RuleWithOptions_for_NoDangerouslySetInnerHtmlWithChildrenOptions;
-export type RuleConfiguration_for_NoGlobalEvalOptions =
-	| RulePlainConfiguration
-	| RuleWithOptions_for_NoGlobalEvalOptions;
-export type RuleConfiguration_for_NoArgumentsOptions =
-	| RulePlainConfiguration
-	| RuleWithOptions_for_NoArgumentsOptions;
-export type RuleConfiguration_for_NoCommaOperatorOptions =
-	| RulePlainConfiguration
-	| RuleWithOptions_for_NoCommaOperatorOptions;
-export type RuleConfiguration_for_NoCommonJsOptions =
-	| RulePlainConfiguration
-	| RuleWithOptions_for_NoCommonJsOptions;
-export type RuleConfiguration_for_NoDefaultExportOptions =
-	| RulePlainConfiguration
-	| RuleWithOptions_for_NoDefaultExportOptions;
-export type RuleConfiguration_for_NoDescendingSpecificityOptions =
-	| RulePlainConfiguration
-	| RuleWithOptions_for_NoDescendingSpecificityOptions;
-export type RuleConfiguration_for_NoDoneCallbackOptions =
-	| RulePlainConfiguration
-	| RuleWithOptions_for_NoDoneCallbackOptions;
-export type RuleConfiguration_for_NoEnumOptions =
-	| RulePlainConfiguration
-	| RuleWithOptions_for_NoEnumOptions;
-export type RuleConfiguration_for_NoExportedImportsOptions =
-	| RulePlainConfiguration
-	| RuleWithOptions_for_NoExportedImportsOptions;
-export type RuleConfiguration_for_NoHeadElementOptions =
-	| RulePlainConfiguration
-	| RuleWithOptions_for_NoHeadElementOptions;
-export type RuleFixConfiguration_for_NoImplicitBooleanOptions =
-	| RulePlainConfiguration
-	| RuleWithFixOptions_for_NoImplicitBooleanOptions;
-export type RuleFixConfiguration_for_NoInferrableTypesOptions =
-	| RulePlainConfiguration
-	| RuleWithFixOptions_for_NoInferrableTypesOptions;
-export type RuleConfiguration_for_NoNamespaceOptions =
-	| RulePlainConfiguration
-	| RuleWithOptions_for_NoNamespaceOptions;
-export type RuleConfiguration_for_NoNamespaceImportOptions =
-	| RulePlainConfiguration
-	| RuleWithOptions_for_NoNamespaceImportOptions;
-export type RuleFixConfiguration_for_NoNegationElseOptions =
-	| RulePlainConfiguration
-	| RuleWithFixOptions_for_NoNegationElseOptions;
-export type RuleConfiguration_for_NoNestedTernaryOptions =
-	| RulePlainConfiguration
-	| RuleWithOptions_for_NoNestedTernaryOptions;
-export type RuleFixConfiguration_for_NoNonNullAssertionOptions =
-	| RulePlainConfiguration
-	| RuleWithFixOptions_for_NoNonNullAssertionOptions;
 export type RuleConfiguration_for_NoParameterAssignOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_NoParameterAssignOptions;
-export type RuleConfiguration_for_NoParameterPropertiesOptions =
+export type RuleConfiguration_for_RestrictedGlobalsOptions =
 	| RulePlainConfiguration
-	| RuleWithOptions_for_NoParameterPropertiesOptions;
-export type RuleConfiguration_for_NoProcessEnvOptions =
+	| RuleWithOptions_for_RestrictedGlobalsOptions;
+export type RuleConfiguration_for_RestrictedImportsOptions =
 	| RulePlainConfiguration
-	| RuleWithOptions_for_NoProcessEnvOptions;
-export type RuleConfiguration_for_NoRestrictedGlobalsOptions =
-	| RulePlainConfiguration
-	| RuleWithOptions_for_NoRestrictedGlobalsOptions;
-export type RuleConfiguration_for_NoRestrictedImportsOptions =
-	| RulePlainConfiguration
-	| RuleWithOptions_for_NoRestrictedImportsOptions;
+	| RuleWithOptions_for_RestrictedImportsOptions;
 export type RuleFixConfiguration_for_NoRestrictedTypesOptions =
 	| RulePlainConfiguration
 	| RuleWithFixOptions_for_NoRestrictedTypesOptions;
-export type RuleFixConfiguration_for_NoShoutyConstantsOptions =
-	| RulePlainConfiguration
-	| RuleWithFixOptions_for_NoShoutyConstantsOptions;
-export type RuleFixConfiguration_for_NoSubstrOptions =
-	| RulePlainConfiguration
-	| RuleWithFixOptions_for_NoSubstrOptions;
-export type RuleFixConfiguration_for_NoUnusedTemplateLiteralOptions =
-	| RulePlainConfiguration
-	| RuleWithFixOptions_for_NoUnusedTemplateLiteralOptions;
-export type RuleFixConfiguration_for_NoUselessElseOptions =
-	| RulePlainConfiguration
-	| RuleWithFixOptions_for_NoUselessElseOptions;
-export type RuleConfiguration_for_NoValueAtRuleOptions =
-	| RulePlainConfiguration
-	| RuleWithOptions_for_NoValueAtRuleOptions;
-export type RuleFixConfiguration_for_NoYodaExpressionOptions =
-	| RulePlainConfiguration
-	| RuleWithFixOptions_for_NoYodaExpressionOptions;
-export type RuleFixConfiguration_for_UseAsConstAssertionOptions =
-	| RulePlainConfiguration
-	| RuleWithFixOptions_for_UseAsConstAssertionOptions;
-export type RuleFixConfiguration_for_UseAtIndexOptions =
-	| RulePlainConfiguration
-	| RuleWithFixOptions_for_UseAtIndexOptions;
-export type RuleFixConfiguration_for_UseBlockStatementsOptions =
-	| RulePlainConfiguration
-	| RuleWithFixOptions_for_UseBlockStatementsOptions;
-export type RuleFixConfiguration_for_UseCollapsedElseIfOptions =
-	| RulePlainConfiguration
-	| RuleWithFixOptions_for_UseCollapsedElseIfOptions;
-export type RuleFixConfiguration_for_UseCollapsedIfOptions =
-	| RulePlainConfiguration
-	| RuleWithFixOptions_for_UseCollapsedIfOptions;
 export type RuleConfiguration_for_UseComponentExportOnlyModulesOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_UseComponentExportOnlyModulesOptions;
-export type RuleFixConfiguration_for_UseConsistentArrayTypeOptions =
+export type RuleFixConfiguration_for_ConsistentArrayTypeOptions =
 	| RulePlainConfiguration
-	| RuleWithFixOptions_for_UseConsistentArrayTypeOptions;
-export type RuleFixConfiguration_for_UseConsistentBuiltinInstantiationOptions =
+	| RuleWithFixOptions_for_ConsistentArrayTypeOptions;
+export type RuleConfiguration_for_ConsistentMemberAccessibilityOptions =
 	| RulePlainConfiguration
-	| RuleWithFixOptions_for_UseConsistentBuiltinInstantiationOptions;
-export type RuleFixConfiguration_for_UseConsistentCurlyBracesOptions =
+	| RuleWithOptions_for_ConsistentMemberAccessibilityOptions;
+export type RuleConfiguration_for_FilenamingConventionOptions =
 	| RulePlainConfiguration
-	| RuleWithFixOptions_for_UseConsistentCurlyBracesOptions;
-export type RuleConfiguration_for_UseConsistentMemberAccessibilityOptions =
+	| RuleWithOptions_for_FilenamingConventionOptions;
+export type RuleFixConfiguration_for_ImportTypeOptions =
 	| RulePlainConfiguration
-	| RuleWithOptions_for_UseConsistentMemberAccessibilityOptions;
-export type RuleFixConfiguration_for_UseConstOptions =
+	| RuleWithFixOptions_for_ImportTypeOptions;
+export type RuleFixConfiguration_for_NamingConventionOptions =
 	| RulePlainConfiguration
-	| RuleWithFixOptions_for_UseConstOptions;
-export type RuleFixConfiguration_for_UseDefaultParameterLastOptions =
-	| RulePlainConfiguration
-	| RuleWithFixOptions_for_UseDefaultParameterLastOptions;
-export type RuleConfiguration_for_UseDefaultSwitchClauseOptions =
-	| RulePlainConfiguration
-	| RuleWithOptions_for_UseDefaultSwitchClauseOptions;
-export type RuleConfiguration_for_UseDeprecatedReasonOptions =
-	| RulePlainConfiguration
-	| RuleWithOptions_for_UseDeprecatedReasonOptions;
-export type RuleFixConfiguration_for_UseEnumInitializersOptions =
-	| RulePlainConfiguration
-	| RuleWithFixOptions_for_UseEnumInitializersOptions;
-export type RuleFixConfiguration_for_UseExplicitLengthCheckOptions =
-	| RulePlainConfiguration
-	| RuleWithFixOptions_for_UseExplicitLengthCheckOptions;
-export type RuleFixConfiguration_for_UseExponentiationOperatorOptions =
-	| RulePlainConfiguration
-	| RuleWithFixOptions_for_UseExponentiationOperatorOptions;
-export type RuleFixConfiguration_for_UseExportTypeOptions =
-	| RulePlainConfiguration
-	| RuleWithFixOptions_for_UseExportTypeOptions;
-export type RuleConfiguration_for_UseFilenamingConventionOptions =
-	| RulePlainConfiguration
-	| RuleWithOptions_for_UseFilenamingConventionOptions;
-export type RuleConfiguration_for_UseForOfOptions =
-	| RulePlainConfiguration
-	| RuleWithOptions_for_UseForOfOptions;
-export type RuleFixConfiguration_for_UseFragmentSyntaxOptions =
-	| RulePlainConfiguration
-	| RuleWithFixOptions_for_UseFragmentSyntaxOptions;
-export type RuleFixConfiguration_for_UseImportTypeOptions =
-	| RulePlainConfiguration
-	| RuleWithFixOptions_for_UseImportTypeOptions;
-export type RuleConfiguration_for_UseLiteralEnumMembersOptions =
-	| RulePlainConfiguration
-	| RuleWithOptions_for_UseLiteralEnumMembersOptions;
-export type RuleFixConfiguration_for_UseNamingConventionOptions =
-	| RulePlainConfiguration
-	| RuleWithFixOptions_for_UseNamingConventionOptions;
-export type RuleFixConfiguration_for_UseNodeAssertStrictOptions =
-	| RulePlainConfiguration
-	| RuleWithFixOptions_for_UseNodeAssertStrictOptions;
-export type RuleFixConfiguration_for_UseNodejsImportProtocolOptions =
-	| RulePlainConfiguration
-	| RuleWithFixOptions_for_UseNodejsImportProtocolOptions;
-export type RuleFixConfiguration_for_UseNumberNamespaceOptions =
-	| RulePlainConfiguration
-	| RuleWithFixOptions_for_UseNumberNamespaceOptions;
-export type RuleFixConfiguration_for_UseNumericLiteralsOptions =
-	| RulePlainConfiguration
-	| RuleWithFixOptions_for_UseNumericLiteralsOptions;
+	| RuleWithFixOptions_for_NamingConventionOptions;
 export type RuleFixConfiguration_for_UseSelfClosingElementsOptions =
 	| RulePlainConfiguration
 	| RuleWithFixOptions_for_UseSelfClosingElementsOptions;
-export type RuleFixConfiguration_for_UseShorthandAssignOptions =
-	| RulePlainConfiguration
-	| RuleWithFixOptions_for_UseShorthandAssignOptions;
-export type RuleFixConfiguration_for_UseShorthandFunctionTypeOptions =
-	| RulePlainConfiguration
-	| RuleWithFixOptions_for_UseShorthandFunctionTypeOptions;
-export type RuleFixConfiguration_for_UseSingleVarDeclaratorOptions =
-	| RulePlainConfiguration
-	| RuleWithFixOptions_for_UseSingleVarDeclaratorOptions;
-export type RuleFixConfiguration_for_UseTemplateOptions =
-	| RulePlainConfiguration
-	| RuleWithFixOptions_for_UseTemplateOptions;
-export type RuleFixConfiguration_for_UseThrowNewErrorOptions =
-	| RulePlainConfiguration
-	| RuleWithFixOptions_for_UseThrowNewErrorOptions;
-export type RuleConfiguration_for_UseThrowOnlyErrorOptions =
-	| RulePlainConfiguration
-	| RuleWithOptions_for_UseThrowOnlyErrorOptions;
-export type RuleFixConfiguration_for_UseTrimStartEndOptions =
-	| RulePlainConfiguration
-	| RuleWithFixOptions_for_UseTrimStartEndOptions;
-export type RuleFixConfiguration_for_NoApproximativeNumericConstantOptions =
-	| RulePlainConfiguration
-	| RuleWithFixOptions_for_NoApproximativeNumericConstantOptions;
-export type RuleConfiguration_for_NoArrayIndexKeyOptions =
-	| RulePlainConfiguration
-	| RuleWithOptions_for_NoArrayIndexKeyOptions;
-export type RuleConfiguration_for_NoAssignInExpressionsOptions =
-	| RulePlainConfiguration
-	| RuleWithOptions_for_NoAssignInExpressionsOptions;
-export type RuleConfiguration_for_NoAsyncPromiseExecutorOptions =
-	| RulePlainConfiguration
-	| RuleWithOptions_for_NoAsyncPromiseExecutorOptions;
-export type RuleConfiguration_for_NoCatchAssignOptions =
-	| RulePlainConfiguration
-	| RuleWithOptions_for_NoCatchAssignOptions;
-export type RuleConfiguration_for_NoClassAssignOptions =
-	| RulePlainConfiguration
-	| RuleWithOptions_for_NoClassAssignOptions;
-export type RuleFixConfiguration_for_NoCommentTextOptions =
-	| RulePlainConfiguration
-	| RuleWithFixOptions_for_NoCommentTextOptions;
-export type RuleFixConfiguration_for_NoCompareNegZeroOptions =
-	| RulePlainConfiguration
-	| RuleWithFixOptions_for_NoCompareNegZeroOptions;
 export type RuleConfiguration_for_NoConfusingLabelsOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_NoConfusingLabelsOptions;
-export type RuleFixConfiguration_for_NoConfusingVoidTypeOptions =
-	| RulePlainConfiguration
-	| RuleWithFixOptions_for_NoConfusingVoidTypeOptions;
 export type RuleFixConfiguration_for_NoConsoleOptions =
 	| RulePlainConfiguration
 	| RuleWithFixOptions_for_NoConsoleOptions;
-export type RuleFixConfiguration_for_NoConstEnumOptions =
-	| RulePlainConfiguration
-	| RuleWithFixOptions_for_NoConstEnumOptions;
-export type RuleConfiguration_for_NoControlCharactersInRegexOptions =
-	| RulePlainConfiguration
-	| RuleWithOptions_for_NoControlCharactersInRegexOptions;
-export type RuleFixConfiguration_for_NoDebuggerOptions =
-	| RulePlainConfiguration
-	| RuleWithFixOptions_for_NoDebuggerOptions;
-export type RuleConfiguration_for_NoDocumentCookieOptions =
-	| RulePlainConfiguration
-	| RuleWithOptions_for_NoDocumentCookieOptions;
-export type RuleConfiguration_for_NoDocumentImportInPageOptions =
-	| RulePlainConfiguration
-	| RuleWithOptions_for_NoDocumentImportInPageOptions;
 export type RuleFixConfiguration_for_NoDoubleEqualsOptions =
 	| RulePlainConfiguration
 	| RuleWithFixOptions_for_NoDoubleEqualsOptions;
-export type RuleConfiguration_for_NoDuplicateAtImportRulesOptions =
-	| RulePlainConfiguration
-	| RuleWithOptions_for_NoDuplicateAtImportRulesOptions;
-export type RuleConfiguration_for_NoDuplicateCaseOptions =
-	| RulePlainConfiguration
-	| RuleWithOptions_for_NoDuplicateCaseOptions;
-export type RuleConfiguration_for_NoDuplicateClassMembersOptions =
-	| RulePlainConfiguration
-	| RuleWithOptions_for_NoDuplicateClassMembersOptions;
-export type RuleConfiguration_for_NoDuplicateCustomPropertiesOptions =
-	| RulePlainConfiguration
-	| RuleWithOptions_for_NoDuplicateCustomPropertiesOptions;
-export type RuleConfiguration_for_NoDuplicateElseIfOptions =
-	| RulePlainConfiguration
-	| RuleWithOptions_for_NoDuplicateElseIfOptions;
-export type RuleConfiguration_for_NoDuplicateFieldsOptions =
-	| RulePlainConfiguration
-	| RuleWithOptions_for_NoDuplicateFieldsOptions;
-export type RuleConfiguration_for_NoDuplicateFontNamesOptions =
-	| RulePlainConfiguration
-	| RuleWithOptions_for_NoDuplicateFontNamesOptions;
-export type RuleConfiguration_for_NoDuplicateJsxPropsOptions =
-	| RulePlainConfiguration
-	| RuleWithOptions_for_NoDuplicateJsxPropsOptions;
-export type RuleConfiguration_for_NoDuplicateObjectKeysOptions =
-	| RulePlainConfiguration
-	| RuleWithOptions_for_NoDuplicateObjectKeysOptions;
-export type RuleConfiguration_for_NoDuplicateParametersOptions =
-	| RulePlainConfiguration
-	| RuleWithOptions_for_NoDuplicateParametersOptions;
-export type RuleConfiguration_for_NoDuplicatePropertiesOptions =
-	| RulePlainConfiguration
-	| RuleWithOptions_for_NoDuplicatePropertiesOptions;
-export type RuleConfiguration_for_NoDuplicateSelectorsKeyframeBlockOptions =
-	| RulePlainConfiguration
-	| RuleWithOptions_for_NoDuplicateSelectorsKeyframeBlockOptions;
-export type RuleConfiguration_for_NoDuplicateTestHooksOptions =
-	| RulePlainConfiguration
-	| RuleWithOptions_for_NoDuplicateTestHooksOptions;
-export type RuleConfiguration_for_NoEmptyBlockOptions =
-	| RulePlainConfiguration
-	| RuleWithOptions_for_NoEmptyBlockOptions;
-export type RuleConfiguration_for_NoEmptyBlockStatementsOptions =
-	| RulePlainConfiguration
-	| RuleWithOptions_for_NoEmptyBlockStatementsOptions;
-export type RuleFixConfiguration_for_NoEmptyInterfaceOptions =
-	| RulePlainConfiguration
-	| RuleWithFixOptions_for_NoEmptyInterfaceOptions;
-export type RuleConfiguration_for_NoEvolvingTypesOptions =
-	| RulePlainConfiguration
-	| RuleWithOptions_for_NoEvolvingTypesOptions;
-export type RuleConfiguration_for_NoExplicitAnyOptions =
-	| RulePlainConfiguration
-	| RuleWithOptions_for_NoExplicitAnyOptions;
-export type RuleConfiguration_for_NoExportsInTestOptions =
-	| RulePlainConfiguration
-	| RuleWithOptions_for_NoExportsInTestOptions;
-export type RuleFixConfiguration_for_NoExtraNonNullAssertionOptions =
-	| RulePlainConfiguration
-	| RuleWithFixOptions_for_NoExtraNonNullAssertionOptions;
-export type RuleConfiguration_for_NoFallthroughSwitchClauseOptions =
-	| RulePlainConfiguration
-	| RuleWithOptions_for_NoFallthroughSwitchClauseOptions;
-export type RuleFixConfiguration_for_NoFocusedTestsOptions =
-	| RulePlainConfiguration
-	| RuleWithFixOptions_for_NoFocusedTestsOptions;
-export type RuleConfiguration_for_NoFunctionAssignOptions =
-	| RulePlainConfiguration
-	| RuleWithOptions_for_NoFunctionAssignOptions;
-export type RuleConfiguration_for_NoGlobalAssignOptions =
-	| RulePlainConfiguration
-	| RuleWithOptions_for_NoGlobalAssignOptions;
-export type RuleFixConfiguration_for_NoGlobalIsFiniteOptions =
-	| RulePlainConfiguration
-	| RuleWithFixOptions_for_NoGlobalIsFiniteOptions;
-export type RuleFixConfiguration_for_NoGlobalIsNanOptions =
-	| RulePlainConfiguration
-	| RuleWithFixOptions_for_NoGlobalIsNanOptions;
-export type RuleConfiguration_for_NoHeadImportInDocumentOptions =
-	| RulePlainConfiguration
-	| RuleWithOptions_for_NoHeadImportInDocumentOptions;
-export type RuleConfiguration_for_NoImplicitAnyLetOptions =
-	| RulePlainConfiguration
-	| RuleWithOptions_for_NoImplicitAnyLetOptions;
-export type RuleConfiguration_for_NoImportAssignOptions =
-	| RulePlainConfiguration
-	| RuleWithOptions_for_NoImportAssignOptions;
-export type RuleConfiguration_for_NoImportantInKeyframeOptions =
-	| RulePlainConfiguration
-	| RuleWithOptions_for_NoImportantInKeyframeOptions;
-export type RuleConfiguration_for_NoIrregularWhitespaceOptions =
-	| RulePlainConfiguration
-	| RuleWithOptions_for_NoIrregularWhitespaceOptions;
-export type RuleConfiguration_for_NoLabelVarOptions =
-	| RulePlainConfiguration
-	| RuleWithOptions_for_NoLabelVarOptions;
-export type RuleFixConfiguration_for_NoMisleadingCharacterClassOptions =
-	| RulePlainConfiguration
-	| RuleWithFixOptions_for_NoMisleadingCharacterClassOptions;
-export type RuleConfiguration_for_NoMisleadingInstantiatorOptions =
-	| RulePlainConfiguration
-	| RuleWithOptions_for_NoMisleadingInstantiatorOptions;
-export type RuleConfiguration_for_NoMisplacedAssertionOptions =
-	| RulePlainConfiguration
-	| RuleWithOptions_for_NoMisplacedAssertionOptions;
-export type RuleFixConfiguration_for_NoMisrefactoredShorthandAssignOptions =
-	| RulePlainConfiguration
-	| RuleWithFixOptions_for_NoMisrefactoredShorthandAssignOptions;
-export type RuleFixConfiguration_for_NoOctalEscapeOptions =
-	| RulePlainConfiguration
-	| RuleWithFixOptions_for_NoOctalEscapeOptions;
-export type RuleFixConfiguration_for_NoPrototypeBuiltinsOptions =
-	| RulePlainConfiguration
-	| RuleWithFixOptions_for_NoPrototypeBuiltinsOptions;
-export type RuleFixConfiguration_for_NoReactSpecificPropsOptions =
-	| RulePlainConfiguration
-	| RuleWithFixOptions_for_NoReactSpecificPropsOptions;
-export type RuleConfiguration_for_NoRedeclareOptions =
-	| RulePlainConfiguration
-	| RuleWithOptions_for_NoRedeclareOptions;
-export type RuleFixConfiguration_for_NoRedundantUseStrictOptions =
-	| RulePlainConfiguration
-	| RuleWithFixOptions_for_NoRedundantUseStrictOptions;
-export type RuleConfiguration_for_NoSelfCompareOptions =
-	| RulePlainConfiguration
-	| RuleWithOptions_for_NoSelfCompareOptions;
-export type RuleConfiguration_for_NoShadowRestrictedNamesOptions =
-	| RulePlainConfiguration
-	| RuleWithOptions_for_NoShadowRestrictedNamesOptions;
-export type RuleConfiguration_for_NoShorthandPropertyOverridesOptions =
-	| RulePlainConfiguration
-	| RuleWithOptions_for_NoShorthandPropertyOverridesOptions;
-export type RuleFixConfiguration_for_NoSkippedTestsOptions =
-	| RulePlainConfiguration
-	| RuleWithFixOptions_for_NoSkippedTestsOptions;
-export type RuleFixConfiguration_for_NoSparseArrayOptions =
-	| RulePlainConfiguration
-	| RuleWithFixOptions_for_NoSparseArrayOptions;
-export type RuleConfiguration_for_NoSuspiciousSemicolonInJsxOptions =
-	| RulePlainConfiguration
-	| RuleWithOptions_for_NoSuspiciousSemicolonInJsxOptions;
-export type RuleConfiguration_for_NoTemplateCurlyInStringOptions =
-	| RulePlainConfiguration
-	| RuleWithOptions_for_NoTemplateCurlyInStringOptions;
-export type RuleConfiguration_for_NoThenPropertyOptions =
-	| RulePlainConfiguration
-	| RuleWithOptions_for_NoThenPropertyOptions;
-export type RuleConfiguration_for_NoUnsafeDeclarationMergingOptions =
-	| RulePlainConfiguration
-	| RuleWithOptions_for_NoUnsafeDeclarationMergingOptions;
-export type RuleFixConfiguration_for_NoUnsafeNegationOptions =
-	| RulePlainConfiguration
-	| RuleWithFixOptions_for_NoUnsafeNegationOptions;
-export type RuleFixConfiguration_for_NoVarOptions =
-	| RulePlainConfiguration
-	| RuleWithFixOptions_for_NoVarOptions;
-export type RuleConfiguration_for_UseAdjacentOverloadSignaturesOptions =
-	| RulePlainConfiguration
-	| RuleWithOptions_for_UseAdjacentOverloadSignaturesOptions;
-export type RuleConfiguration_for_UseAwaitOptions =
-	| RulePlainConfiguration
-	| RuleWithOptions_for_UseAwaitOptions;
-export type RuleConfiguration_for_UseDefaultSwitchClauseLastOptions =
-	| RulePlainConfiguration
-	| RuleWithOptions_for_UseDefaultSwitchClauseLastOptions;
-export type RuleConfiguration_for_UseErrorMessageOptions =
-	| RulePlainConfiguration
-	| RuleWithOptions_for_UseErrorMessageOptions;
-export type RuleConfiguration_for_UseGetterReturnOptions =
-	| RulePlainConfiguration
-	| RuleWithOptions_for_UseGetterReturnOptions;
-export type RuleConfiguration_for_UseGoogleFontDisplayOptions =
-	| RulePlainConfiguration
-	| RuleWithOptions_for_UseGoogleFontDisplayOptions;
-export type RuleConfiguration_for_UseGuardForInOptions =
-	| RulePlainConfiguration
-	| RuleWithOptions_for_UseGuardForInOptions;
-export type RuleFixConfiguration_for_UseIsArrayOptions =
-	| RulePlainConfiguration
-	| RuleWithFixOptions_for_UseIsArrayOptions;
-export type RuleFixConfiguration_for_UseNamespaceKeywordOptions =
-	| RulePlainConfiguration
-	| RuleWithFixOptions_for_UseNamespaceKeywordOptions;
-export type RuleFixConfiguration_for_UseNumberToFixedDigitsArgumentOptions =
-	| RulePlainConfiguration
-	| RuleWithFixOptions_for_UseNumberToFixedDigitsArgumentOptions;
-export type RuleFixConfiguration_for_UseStrictModeOptions =
-	| RulePlainConfiguration
-	| RuleWithFixOptions_for_UseStrictModeOptions;
-export type RuleFixConfiguration_for_UseValidTypeofOptions =
-	| RulePlainConfiguration
-	| RuleWithFixOptions_for_UseValidTypeofOptions;
-export interface OrganizeImportsOptions {}
-export interface UseSortedAttributesOptions {}
-export interface UseSortedKeysOptions {}
-export interface UseSortedPropertiesOptions {}
+export interface Options {
+	groups?: ImportGroups;
+}
 export type RulePlainConfiguration = "off" | "on" | "info" | "warn" | "error";
-export interface RuleWithFixOptions_for_NoAccessKeyOptions {
+export interface RuleWithFixOptions_for_Null {
 	/**
 	 * The kind of the code actions emitted by the rule
 	 */
@@ -3326,91 +2543,7 @@ export interface RuleWithFixOptions_for_NoAccessKeyOptions {
 	/**
 	 * Rule's options
 	 */
-	options: NoAccessKeyOptions;
-}
-export interface RuleWithFixOptions_for_NoAriaHiddenOnFocusableOptions {
-	/**
-	 * The kind of the code actions emitted by the rule
-	 */
-	fix?: FixKind;
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: NoAriaHiddenOnFocusableOptions;
-}
-export interface RuleWithFixOptions_for_NoAriaUnsupportedElementsOptions {
-	/**
-	 * The kind of the code actions emitted by the rule
-	 */
-	fix?: FixKind;
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: NoAriaUnsupportedElementsOptions;
-}
-export interface RuleWithFixOptions_for_NoAutofocusOptions {
-	/**
-	 * The kind of the code actions emitted by the rule
-	 */
-	fix?: FixKind;
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: NoAutofocusOptions;
-}
-export interface RuleWithFixOptions_for_NoDistractingElementsOptions {
-	/**
-	 * The kind of the code actions emitted by the rule
-	 */
-	fix?: FixKind;
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: NoDistractingElementsOptions;
-}
-export interface RuleWithFixOptions_for_NoHeaderScopeOptions {
-	/**
-	 * The kind of the code actions emitted by the rule
-	 */
-	fix?: FixKind;
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: NoHeaderScopeOptions;
-}
-export interface RuleWithFixOptions_for_NoInteractiveElementToNoninteractiveRoleOptions {
-	/**
-	 * The kind of the code actions emitted by the rule
-	 */
-	fix?: FixKind;
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: NoInteractiveElementToNoninteractiveRoleOptions;
+	options: null;
 }
 export interface RuleWithOptions_for_NoLabelWithoutControlOptions {
 	/**
@@ -3422,7 +2555,17 @@ export interface RuleWithOptions_for_NoLabelWithoutControlOptions {
 	 */
 	options: NoLabelWithoutControlOptions;
 }
-export interface RuleWithFixOptions_for_NoNoninteractiveElementToInteractiveRoleOptions {
+export interface RuleWithOptions_for_Null {
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: null;
+}
+export interface RuleWithFixOptions_for_ValidAriaRoleOptions {
 	/**
 	 * The kind of the code actions emitted by the rule
 	 */
@@ -3434,285 +2577,7 @@ export interface RuleWithFixOptions_for_NoNoninteractiveElementToInteractiveRole
 	/**
 	 * Rule's options
 	 */
-	options: NoNoninteractiveElementToInteractiveRoleOptions;
-}
-export interface RuleWithFixOptions_for_NoNoninteractiveTabindexOptions {
-	/**
-	 * The kind of the code actions emitted by the rule
-	 */
-	fix?: FixKind;
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: NoNoninteractiveTabindexOptions;
-}
-export interface RuleWithFixOptions_for_NoPositiveTabindexOptions {
-	/**
-	 * The kind of the code actions emitted by the rule
-	 */
-	fix?: FixKind;
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: NoPositiveTabindexOptions;
-}
-export interface RuleWithOptions_for_NoRedundantAltOptions {
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: NoRedundantAltOptions;
-}
-export interface RuleWithFixOptions_for_NoRedundantRolesOptions {
-	/**
-	 * The kind of the code actions emitted by the rule
-	 */
-	fix?: FixKind;
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: NoRedundantRolesOptions;
-}
-export interface RuleWithOptions_for_NoStaticElementInteractionsOptions {
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: NoStaticElementInteractionsOptions;
-}
-export interface RuleWithOptions_for_NoSvgWithoutTitleOptions {
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: NoSvgWithoutTitleOptions;
-}
-export interface RuleWithOptions_for_UseAltTextOptions {
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: UseAltTextOptions;
-}
-export interface RuleWithFixOptions_for_UseAnchorContentOptions {
-	/**
-	 * The kind of the code actions emitted by the rule
-	 */
-	fix?: FixKind;
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: UseAnchorContentOptions;
-}
-export interface RuleWithFixOptions_for_UseAriaActivedescendantWithTabindexOptions {
-	/**
-	 * The kind of the code actions emitted by the rule
-	 */
-	fix?: FixKind;
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: UseAriaActivedescendantWithTabindexOptions;
-}
-export interface RuleWithOptions_for_UseAriaPropsForRoleOptions {
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: UseAriaPropsForRoleOptions;
-}
-export interface RuleWithOptions_for_UseAriaPropsSupportedByRoleOptions {
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: UseAriaPropsSupportedByRoleOptions;
-}
-export interface RuleWithOptions_for_UseButtonTypeOptions {
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: UseButtonTypeOptions;
-}
-export interface RuleWithOptions_for_UseFocusableInteractiveOptions {
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: UseFocusableInteractiveOptions;
-}
-export interface RuleWithOptions_for_UseGenericFontNamesOptions {
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: UseGenericFontNamesOptions;
-}
-export interface RuleWithOptions_for_UseHeadingContentOptions {
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: UseHeadingContentOptions;
-}
-export interface RuleWithOptions_for_UseHtmlLangOptions {
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: UseHtmlLangOptions;
-}
-export interface RuleWithOptions_for_UseIframeTitleOptions {
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: UseIframeTitleOptions;
-}
-export interface RuleWithOptions_for_UseKeyWithClickEventsOptions {
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: UseKeyWithClickEventsOptions;
-}
-export interface RuleWithOptions_for_UseKeyWithMouseEventsOptions {
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: UseKeyWithMouseEventsOptions;
-}
-export interface RuleWithOptions_for_UseMediaCaptionOptions {
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: UseMediaCaptionOptions;
-}
-export interface RuleWithOptions_for_UseSemanticElementsOptions {
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: UseSemanticElementsOptions;
-}
-export interface RuleWithOptions_for_UseValidAnchorOptions {
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: UseValidAnchorOptions;
-}
-export interface RuleWithFixOptions_for_UseValidAriaPropsOptions {
-	/**
-	 * The kind of the code actions emitted by the rule
-	 */
-	fix?: FixKind;
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: UseValidAriaPropsOptions;
-}
-export interface RuleWithFixOptions_for_UseValidAriaRoleOptions {
-	/**
-	 * The kind of the code actions emitted by the rule
-	 */
-	fix?: FixKind;
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: UseValidAriaRoleOptions;
-}
-export interface RuleWithOptions_for_UseValidAriaValuesOptions {
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: UseValidAriaValuesOptions;
+	options: ValidAriaRoleOptions;
 }
 export interface RuleWithOptions_for_UseValidAutocompleteOptions {
 	/**
@@ -3724,7 +2589,7 @@ export interface RuleWithOptions_for_UseValidAutocompleteOptions {
 	 */
 	options: UseValidAutocompleteOptions;
 }
-export interface RuleWithOptions_for_UseValidLangOptions {
+export interface RuleWithOptions_for_ComplexityOptions {
 	/**
 	 * The severity of the emitted diagnostics by the rule
 	 */
@@ -3732,79 +2597,7 @@ export interface RuleWithOptions_for_UseValidLangOptions {
 	/**
 	 * Rule's options
 	 */
-	options: UseValidLangOptions;
-}
-export interface RuleWithFixOptions_for_NoAdjacentSpacesInRegexOptions {
-	/**
-	 * The kind of the code actions emitted by the rule
-	 */
-	fix?: FixKind;
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: NoAdjacentSpacesInRegexOptions;
-}
-export interface RuleWithFixOptions_for_NoBannedTypesOptions {
-	/**
-	 * The kind of the code actions emitted by the rule
-	 */
-	fix?: FixKind;
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: NoBannedTypesOptions;
-}
-export interface RuleWithOptions_for_NoEmptyTypeParametersOptions {
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: NoEmptyTypeParametersOptions;
-}
-export interface RuleWithOptions_for_NoExcessiveCognitiveComplexityOptions {
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: NoExcessiveCognitiveComplexityOptions;
-}
-export interface RuleWithOptions_for_NoExcessiveNestedTestSuitesOptions {
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: NoExcessiveNestedTestSuitesOptions;
-}
-export interface RuleWithFixOptions_for_NoExtraBooleanCastOptions {
-	/**
-	 * The kind of the code actions emitted by the rule
-	 */
-	fix?: FixKind;
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: NoExtraBooleanCastOptions;
+	options: ComplexityOptions;
 }
 export interface RuleWithOptions_for_NoForEachOptions {
 	/**
@@ -3816,602 +2609,6 @@ export interface RuleWithOptions_for_NoForEachOptions {
 	 */
 	options: NoForEachOptions;
 }
-export interface RuleWithOptions_for_NoStaticOnlyClassOptions {
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: NoStaticOnlyClassOptions;
-}
-export interface RuleWithFixOptions_for_NoThisInStaticOptions {
-	/**
-	 * The kind of the code actions emitted by the rule
-	 */
-	fix?: FixKind;
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: NoThisInStaticOptions;
-}
-export interface RuleWithFixOptions_for_NoUselessCatchOptions {
-	/**
-	 * The kind of the code actions emitted by the rule
-	 */
-	fix?: FixKind;
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: NoUselessCatchOptions;
-}
-export interface RuleWithFixOptions_for_NoUselessConstructorOptions {
-	/**
-	 * The kind of the code actions emitted by the rule
-	 */
-	fix?: FixKind;
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: NoUselessConstructorOptions;
-}
-export interface RuleWithFixOptions_for_NoUselessEmptyExportOptions {
-	/**
-	 * The kind of the code actions emitted by the rule
-	 */
-	fix?: FixKind;
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: NoUselessEmptyExportOptions;
-}
-export interface RuleWithFixOptions_for_NoUselessEscapeInRegexOptions {
-	/**
-	 * The kind of the code actions emitted by the rule
-	 */
-	fix?: FixKind;
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: NoUselessEscapeInRegexOptions;
-}
-export interface RuleWithFixOptions_for_NoUselessFragmentsOptions {
-	/**
-	 * The kind of the code actions emitted by the rule
-	 */
-	fix?: FixKind;
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: NoUselessFragmentsOptions;
-}
-export interface RuleWithFixOptions_for_NoUselessLabelOptions {
-	/**
-	 * The kind of the code actions emitted by the rule
-	 */
-	fix?: FixKind;
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: NoUselessLabelOptions;
-}
-export interface RuleWithFixOptions_for_NoUselessLoneBlockStatementsOptions {
-	/**
-	 * The kind of the code actions emitted by the rule
-	 */
-	fix?: FixKind;
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: NoUselessLoneBlockStatementsOptions;
-}
-export interface RuleWithFixOptions_for_NoUselessRenameOptions {
-	/**
-	 * The kind of the code actions emitted by the rule
-	 */
-	fix?: FixKind;
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: NoUselessRenameOptions;
-}
-export interface RuleWithFixOptions_for_NoUselessStringConcatOptions {
-	/**
-	 * The kind of the code actions emitted by the rule
-	 */
-	fix?: FixKind;
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: NoUselessStringConcatOptions;
-}
-export interface RuleWithOptions_for_NoUselessStringRawOptions {
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: NoUselessStringRawOptions;
-}
-export interface RuleWithFixOptions_for_NoUselessSwitchCaseOptions {
-	/**
-	 * The kind of the code actions emitted by the rule
-	 */
-	fix?: FixKind;
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: NoUselessSwitchCaseOptions;
-}
-export interface RuleWithFixOptions_for_NoUselessTernaryOptions {
-	/**
-	 * The kind of the code actions emitted by the rule
-	 */
-	fix?: FixKind;
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: NoUselessTernaryOptions;
-}
-export interface RuleWithFixOptions_for_NoUselessThisAliasOptions {
-	/**
-	 * The kind of the code actions emitted by the rule
-	 */
-	fix?: FixKind;
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: NoUselessThisAliasOptions;
-}
-export interface RuleWithFixOptions_for_NoUselessTypeConstraintOptions {
-	/**
-	 * The kind of the code actions emitted by the rule
-	 */
-	fix?: FixKind;
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: NoUselessTypeConstraintOptions;
-}
-export interface RuleWithFixOptions_for_NoUselessUndefinedInitializationOptions {
-	/**
-	 * The kind of the code actions emitted by the rule
-	 */
-	fix?: FixKind;
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: NoUselessUndefinedInitializationOptions;
-}
-export interface RuleWithOptions_for_NoVoidOptions {
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: NoVoidOptions;
-}
-export interface RuleWithOptions_for_NoWithOptions {
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: NoWithOptions;
-}
-export interface RuleWithFixOptions_for_UseArrowFunctionOptions {
-	/**
-	 * The kind of the code actions emitted by the rule
-	 */
-	fix?: FixKind;
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: UseArrowFunctionOptions;
-}
-export interface RuleWithFixOptions_for_UseDateNowOptions {
-	/**
-	 * The kind of the code actions emitted by the rule
-	 */
-	fix?: FixKind;
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: UseDateNowOptions;
-}
-export interface RuleWithFixOptions_for_UseFlatMapOptions {
-	/**
-	 * The kind of the code actions emitted by the rule
-	 */
-	fix?: FixKind;
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: UseFlatMapOptions;
-}
-export interface RuleWithFixOptions_for_UseLiteralKeysOptions {
-	/**
-	 * The kind of the code actions emitted by the rule
-	 */
-	fix?: FixKind;
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: UseLiteralKeysOptions;
-}
-export interface RuleWithFixOptions_for_UseOptionalChainOptions {
-	/**
-	 * The kind of the code actions emitted by the rule
-	 */
-	fix?: FixKind;
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: UseOptionalChainOptions;
-}
-export interface RuleWithFixOptions_for_UseRegexLiteralsOptions {
-	/**
-	 * The kind of the code actions emitted by the rule
-	 */
-	fix?: FixKind;
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: UseRegexLiteralsOptions;
-}
-export interface RuleWithFixOptions_for_UseSimpleNumberKeysOptions {
-	/**
-	 * The kind of the code actions emitted by the rule
-	 */
-	fix?: FixKind;
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: UseSimpleNumberKeysOptions;
-}
-export interface RuleWithFixOptions_for_UseSimplifiedLogicExpressionOptions {
-	/**
-	 * The kind of the code actions emitted by the rule
-	 */
-	fix?: FixKind;
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: UseSimplifiedLogicExpressionOptions;
-}
-export interface RuleWithFixOptions_for_UseWhileOptions {
-	/**
-	 * The kind of the code actions emitted by the rule
-	 */
-	fix?: FixKind;
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: UseWhileOptions;
-}
-export interface RuleWithOptions_for_NoChildrenPropOptions {
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: NoChildrenPropOptions;
-}
-export interface RuleWithFixOptions_for_NoConstAssignOptions {
-	/**
-	 * The kind of the code actions emitted by the rule
-	 */
-	fix?: FixKind;
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: NoConstAssignOptions;
-}
-export interface RuleWithOptions_for_NoConstantConditionOptions {
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: NoConstantConditionOptions;
-}
-export interface RuleWithFixOptions_for_NoConstantMathMinMaxClampOptions {
-	/**
-	 * The kind of the code actions emitted by the rule
-	 */
-	fix?: FixKind;
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: NoConstantMathMinMaxClampOptions;
-}
-export interface RuleWithOptions_for_NoConstructorReturnOptions {
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: NoConstructorReturnOptions;
-}
-export interface RuleWithOptions_for_NoEmptyCharacterClassInRegexOptions {
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: NoEmptyCharacterClassInRegexOptions;
-}
-export interface RuleWithOptions_for_NoEmptyPatternOptions {
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: NoEmptyPatternOptions;
-}
-export interface RuleWithFixOptions_for_NoFlatMapIdentityOptions {
-	/**
-	 * The kind of the code actions emitted by the rule
-	 */
-	fix?: FixKind;
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: NoFlatMapIdentityOptions;
-}
-export interface RuleWithOptions_for_NoGlobalObjectCallsOptions {
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: NoGlobalObjectCallsOptions;
-}
-export interface RuleWithOptions_for_NoInnerDeclarationsOptions {
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: NoInnerDeclarationsOptions;
-}
-export interface RuleWithFixOptions_for_NoInvalidBuiltinInstantiationOptions {
-	/**
-	 * The kind of the code actions emitted by the rule
-	 */
-	fix?: FixKind;
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: NoInvalidBuiltinInstantiationOptions;
-}
-export interface RuleWithOptions_for_NoInvalidConstructorSuperOptions {
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: NoInvalidConstructorSuperOptions;
-}
-export interface RuleWithOptions_for_NoInvalidDirectionInLinearGradientOptions {
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: NoInvalidDirectionInLinearGradientOptions;
-}
-export interface RuleWithOptions_for_NoInvalidGridAreasOptions {
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: NoInvalidGridAreasOptions;
-}
-export interface RuleWithOptions_for_NoInvalidPositionAtImportRuleOptions {
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: NoInvalidPositionAtImportRuleOptions;
-}
-export interface RuleWithOptions_for_NoInvalidUseBeforeDeclarationOptions {
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: NoInvalidUseBeforeDeclarationOptions;
-}
-export interface RuleWithOptions_for_NoMissingVarFunctionOptions {
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: NoMissingVarFunctionOptions;
-}
-export interface RuleWithOptions_for_NoNodejsModulesOptions {
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: NoNodejsModulesOptions;
-}
-export interface RuleWithFixOptions_for_NoNonoctalDecimalEscapeOptions {
-	/**
-	 * The kind of the code actions emitted by the rule
-	 */
-	fix?: FixKind;
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: NoNonoctalDecimalEscapeOptions;
-}
-export interface RuleWithOptions_for_NoPrecisionLossOptions {
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: NoPrecisionLossOptions;
-}
 export interface RuleWithOptions_for_NoPrivateImportsOptions {
 	/**
 	 * The severity of the emitted diagnostics by the rule
@@ -4421,64 +2618,6 @@ export interface RuleWithOptions_for_NoPrivateImportsOptions {
 	 * Rule's options
 	 */
 	options: NoPrivateImportsOptions;
-}
-export interface RuleWithOptions_for_NoRenderReturnValueOptions {
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: NoRenderReturnValueOptions;
-}
-export interface RuleWithOptions_for_NoSelfAssignOptions {
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: NoSelfAssignOptions;
-}
-export interface RuleWithOptions_for_NoSetterReturnOptions {
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: NoSetterReturnOptions;
-}
-export interface RuleWithFixOptions_for_NoStringCaseMismatchOptions {
-	/**
-	 * The kind of the code actions emitted by the rule
-	 */
-	fix?: FixKind;
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: NoStringCaseMismatchOptions;
-}
-export interface RuleWithFixOptions_for_NoSwitchDeclarationsOptions {
-	/**
-	 * The kind of the code actions emitted by the rule
-	 */
-	fix?: FixKind;
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: NoSwitchDeclarationsOptions;
 }
 export interface RuleWithOptions_for_NoUndeclaredDependenciesOptions {
 	/**
@@ -4490,7 +2629,7 @@ export interface RuleWithOptions_for_NoUndeclaredDependenciesOptions {
 	 */
 	options: NoUndeclaredDependenciesOptions;
 }
-export interface RuleWithOptions_for_NoUndeclaredVariablesOptions {
+export interface RuleWithOptions_for_UndeclaredVariablesOptions {
 	/**
 	 * The severity of the emitted diagnostics by the rule
 	 */
@@ -4498,183 +2637,7 @@ export interface RuleWithOptions_for_NoUndeclaredVariablesOptions {
 	/**
 	 * Rule's options
 	 */
-	options: NoUndeclaredVariablesOptions;
-}
-export interface RuleWithOptions_for_NoUnknownFunctionOptions {
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: NoUnknownFunctionOptions;
-}
-export interface RuleWithOptions_for_NoUnknownMediaFeatureNameOptions {
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: NoUnknownMediaFeatureNameOptions;
-}
-export interface RuleWithOptions_for_NoUnknownPropertyOptions {
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: NoUnknownPropertyOptions;
-}
-export interface RuleWithOptions_for_NoUnknownPseudoClassOptions {
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: NoUnknownPseudoClassOptions;
-}
-export interface RuleWithOptions_for_NoUnknownPseudoElementOptions {
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: NoUnknownPseudoElementOptions;
-}
-export interface RuleWithOptions_for_NoUnknownTypeSelectorOptions {
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: NoUnknownTypeSelectorOptions;
-}
-export interface RuleWithOptions_for_NoUnknownUnitOptions {
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: NoUnknownUnitOptions;
-}
-export interface RuleWithOptions_for_NoUnmatchableAnbSelectorOptions {
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: NoUnmatchableAnbSelectorOptions;
-}
-export interface RuleWithOptions_for_NoUnreachableOptions {
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: NoUnreachableOptions;
-}
-export interface RuleWithOptions_for_NoUnreachableSuperOptions {
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: NoUnreachableSuperOptions;
-}
-export interface RuleWithOptions_for_NoUnsafeFinallyOptions {
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: NoUnsafeFinallyOptions;
-}
-export interface RuleWithOptions_for_NoUnsafeOptionalChainingOptions {
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: NoUnsafeOptionalChainingOptions;
-}
-export interface RuleWithFixOptions_for_NoUnusedFunctionParametersOptions {
-	/**
-	 * The kind of the code actions emitted by the rule
-	 */
-	fix?: FixKind;
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: NoUnusedFunctionParametersOptions;
-}
-export interface RuleWithFixOptions_for_NoUnusedImportsOptions {
-	/**
-	 * The kind of the code actions emitted by the rule
-	 */
-	fix?: FixKind;
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: NoUnusedImportsOptions;
-}
-export interface RuleWithFixOptions_for_NoUnusedLabelsOptions {
-	/**
-	 * The kind of the code actions emitted by the rule
-	 */
-	fix?: FixKind;
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: NoUnusedLabelsOptions;
-}
-export interface RuleWithFixOptions_for_NoUnusedPrivateClassMembersOptions {
-	/**
-	 * The kind of the code actions emitted by the rule
-	 */
-	fix?: FixKind;
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: NoUnusedPrivateClassMembersOptions;
+	options: UndeclaredVariablesOptions;
 }
 export interface RuleWithFixOptions_for_NoUnusedVariablesOptions {
 	/**
@@ -4690,58 +2653,6 @@ export interface RuleWithFixOptions_for_NoUnusedVariablesOptions {
 	 */
 	options: NoUnusedVariablesOptions;
 }
-export interface RuleWithFixOptions_for_NoUselessContinueOptions {
-	/**
-	 * The kind of the code actions emitted by the rule
-	 */
-	fix?: FixKind;
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: NoUselessContinueOptions;
-}
-export interface RuleWithFixOptions_for_NoVoidElementsWithChildrenOptions {
-	/**
-	 * The kind of the code actions emitted by the rule
-	 */
-	fix?: FixKind;
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: NoVoidElementsWithChildrenOptions;
-}
-export interface RuleWithOptions_for_NoVoidTypeReturnOptions {
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: NoVoidTypeReturnOptions;
-}
-export interface RuleWithFixOptions_for_UseArrayLiteralsOptions {
-	/**
-	 * The kind of the code actions emitted by the rule
-	 */
-	fix?: FixKind;
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: UseArrayLiteralsOptions;
-}
 export interface RuleWithFixOptions_for_UseExhaustiveDependenciesOptions {
 	/**
 	 * The kind of the code actions emitted by the rule
@@ -4756,7 +2667,7 @@ export interface RuleWithFixOptions_for_UseExhaustiveDependenciesOptions {
 	 */
 	options: UseExhaustiveDependenciesOptions;
 }
-export interface RuleWithOptions_for_UseHookAtTopLevelOptions {
+export interface RuleWithOptions_for_DeprecatedHooksOptions {
 	/**
 	 * The severity of the emitted diagnostics by the rule
 	 */
@@ -4764,7 +2675,7 @@ export interface RuleWithOptions_for_UseHookAtTopLevelOptions {
 	/**
 	 * Rule's options
 	 */
-	options: UseHookAtTopLevelOptions;
+	options: DeprecatedHooksOptions;
 }
 export interface RuleWithFixOptions_for_UseImportExtensionsOptions {
 	/**
@@ -4780,20 +2691,6 @@ export interface RuleWithFixOptions_for_UseImportExtensionsOptions {
 	 */
 	options: UseImportExtensionsOptions;
 }
-export interface RuleWithFixOptions_for_UseIsNanOptions {
-	/**
-	 * The kind of the code actions emitted by the rule
-	 */
-	fix?: FixKind;
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: UseIsNanOptions;
-}
 export interface RuleWithOptions_for_UseJsxKeyInIterableOptions {
 	/**
 	 * The severity of the emitted diagnostics by the rule
@@ -4803,36 +2700,6 @@ export interface RuleWithOptions_for_UseJsxKeyInIterableOptions {
 	 * Rule's options
 	 */
 	options: UseJsxKeyInIterableOptions;
-}
-export interface RuleWithOptions_for_UseValidForDirectionOptions {
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: UseValidForDirectionOptions;
-}
-export interface RuleWithOptions_for_UseYieldOptions {
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: UseYieldOptions;
-}
-export interface RuleWithOptions_for_NoAwaitInLoopOptions {
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: NoAwaitInLoopOptions;
 }
 export interface RuleWithOptions_for_NoBitwiseOperatorsOptions {
 	/**
@@ -4844,7 +2711,7 @@ export interface RuleWithOptions_for_NoBitwiseOperatorsOptions {
 	 */
 	options: NoBitwiseOperatorsOptions;
 }
-export interface RuleWithOptions_for_NoConstantBinaryExpressionOptions {
+export interface RuleWithOptions_for_NoExcessiveLinesPerFunctionOptions {
 	/**
 	 * The severity of the emitted diagnostics by the rule
 	 */
@@ -4852,93 +2719,7 @@ export interface RuleWithOptions_for_NoConstantBinaryExpressionOptions {
 	/**
 	 * Rule's options
 	 */
-	options: NoConstantBinaryExpressionOptions;
-}
-export interface RuleWithOptions_for_NoDestructuredPropsOptions {
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: NoDestructuredPropsOptions;
-}
-export interface RuleWithFixOptions_for_NoFloatingPromisesOptions {
-	/**
-	 * The kind of the code actions emitted by the rule
-	 */
-	fix?: FixKind;
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: NoFloatingPromisesOptions;
-}
-export interface RuleWithFixOptions_for_NoGlobalDirnameFilenameOptions {
-	/**
-	 * The kind of the code actions emitted by the rule
-	 */
-	fix?: FixKind;
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: NoGlobalDirnameFilenameOptions;
-}
-export interface RuleWithOptions_for_NoImportCyclesOptions {
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: NoImportCyclesOptions;
-}
-export interface RuleWithFixOptions_for_NoImportantStylesOptions {
-	/**
-	 * The kind of the code actions emitted by the rule
-	 */
-	fix?: FixKind;
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: NoImportantStylesOptions;
-}
-export interface RuleWithOptions_for_NoNoninteractiveElementInteractionsOptions {
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: NoNoninteractiveElementInteractionsOptions;
-}
-export interface RuleWithFixOptions_for_NoProcessGlobalOptions {
-	/**
-	 * The kind of the code actions emitted by the rule
-	 */
-	fix?: FixKind;
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: NoProcessGlobalOptions;
+	options: NoExcessiveLinesPerFunctionOptions;
 }
 export interface RuleWithOptions_for_NoRestrictedElementsOptions {
 	/**
@@ -4960,108 +2741,6 @@ export interface RuleWithOptions_for_NoSecretsOptions {
 	 */
 	options: NoSecretsOptions;
 }
-export interface RuleWithOptions_for_NoShadowOptions {
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: NoShadowOptions;
-}
-export interface RuleWithFixOptions_for_NoTsIgnoreOptions {
-	/**
-	 * The kind of the code actions emitted by the rule
-	 */
-	fix?: FixKind;
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: NoTsIgnoreOptions;
-}
-export interface RuleWithOptions_for_NoUnknownAtRuleOptions {
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: NoUnknownAtRuleOptions;
-}
-export interface RuleWithOptions_for_NoUnresolvedImportsOptions {
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: NoUnresolvedImportsOptions;
-}
-export interface RuleWithOptions_for_NoUnwantedPolyfillioOptions {
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: NoUnwantedPolyfillioOptions;
-}
-export interface RuleWithOptions_for_NoUselessBackrefInRegexOptions {
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: NoUselessBackrefInRegexOptions;
-}
-export interface RuleWithFixOptions_for_NoUselessEscapeInStringOptions {
-	/**
-	 * The kind of the code actions emitted by the rule
-	 */
-	fix?: FixKind;
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: NoUselessEscapeInStringOptions;
-}
-export interface RuleWithFixOptions_for_NoUselessUndefinedOptions {
-	/**
-	 * The kind of the code actions emitted by the rule
-	 */
-	fix?: FixKind;
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: NoUselessUndefinedOptions;
-}
-export interface RuleWithOptions_for_UseAdjacentGetterSetterOptions {
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: UseAdjacentGetterSetterOptions;
-}
 export interface RuleWithFixOptions_for_UseConsistentObjectDefinitionOptions {
 	/**
 	 * The kind of the code actions emitted by the rule
@@ -5076,7 +2755,7 @@ export interface RuleWithFixOptions_for_UseConsistentObjectDefinitionOptions {
 	 */
 	options: UseConsistentObjectDefinitionOptions;
 }
-export interface RuleWithFixOptions_for_UseExhaustiveSwitchCasesOptions {
+export interface RuleWithFixOptions_for_ReadonlyClassPropertiesOptions {
 	/**
 	 * The kind of the code actions emitted by the rule
 	 */
@@ -5088,39 +2767,9 @@ export interface RuleWithFixOptions_for_UseExhaustiveSwitchCasesOptions {
 	/**
 	 * Rule's options
 	 */
-	options: UseExhaustiveSwitchCasesOptions;
+	options: ReadonlyClassPropertiesOptions;
 }
-export interface RuleWithOptions_for_UseExplicitTypeOptions {
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: UseExplicitTypeOptions;
-}
-export interface RuleWithOptions_for_UseExportsLastOptions {
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: UseExportsLastOptions;
-}
-export interface RuleWithOptions_for_UseForComponentOptions {
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: UseForComponentOptions;
-}
-export interface RuleWithFixOptions_for_UseGoogleFontPreconnectOptions {
+export interface RuleWithFixOptions_for_UtilityClassSortingOptions {
 	/**
 	 * The kind of the code actions emitted by the rule
 	 */
@@ -5132,181 +2781,7 @@ export interface RuleWithFixOptions_for_UseGoogleFontPreconnectOptions {
 	/**
 	 * Rule's options
 	 */
-	options: UseGoogleFontPreconnectOptions;
-}
-export interface RuleWithOptions_for_UseIterableCallbackReturnOptions {
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: UseIterableCallbackReturnOptions;
-}
-export interface RuleWithFixOptions_for_UseNamedOperationOptions {
-	/**
-	 * The kind of the code actions emitted by the rule
-	 */
-	fix?: FixKind;
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: UseNamedOperationOptions;
-}
-export interface RuleWithOptions_for_UseNamingConventionOptions {
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: UseNamingConventionOptions;
-}
-export interface RuleWithFixOptions_for_UseNumericSeparatorsOptions {
-	/**
-	 * The kind of the code actions emitted by the rule
-	 */
-	fix?: FixKind;
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: UseNumericSeparatorsOptions;
-}
-export interface RuleWithFixOptions_for_UseParseIntRadixOptions {
-	/**
-	 * The kind of the code actions emitted by the rule
-	 */
-	fix?: FixKind;
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: UseParseIntRadixOptions;
-}
-export interface RuleWithFixOptions_for_UseSingleJsDocAsteriskOptions {
-	/**
-	 * The kind of the code actions emitted by the rule
-	 */
-	fix?: FixKind;
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: UseSingleJsDocAsteriskOptions;
-}
-export interface RuleWithFixOptions_for_UseSortedClassesOptions {
-	/**
-	 * The kind of the code actions emitted by the rule
-	 */
-	fix?: FixKind;
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: UseSortedClassesOptions;
-}
-export interface RuleWithOptions_for_UseSymbolDescriptionOptions {
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: UseSymbolDescriptionOptions;
-}
-export interface RuleWithOptions_for_NoAccumulatingSpreadOptions {
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: NoAccumulatingSpreadOptions;
-}
-export interface RuleWithOptions_for_NoBarrelFileOptions {
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: NoBarrelFileOptions;
-}
-export interface RuleWithFixOptions_for_NoDeleteOptions {
-	/**
-	 * The kind of the code actions emitted by the rule
-	 */
-	fix?: FixKind;
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: NoDeleteOptions;
-}
-export interface RuleWithOptions_for_NoDynamicNamespaceImportAccessOptions {
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: NoDynamicNamespaceImportAccessOptions;
-}
-export interface RuleWithOptions_for_NoImgElementOptions {
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: NoImgElementOptions;
-}
-export interface RuleWithOptions_for_NoReExportAllOptions {
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: NoReExportAllOptions;
-}
-export interface RuleWithOptions_for_UseTopLevelRegexOptions {
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: UseTopLevelRegexOptions;
+	options: UtilityClassSortingOptions;
 }
 export interface RuleWithFixOptions_for_NoBlankTargetOptions {
 	/**
@@ -5322,212 +2797,6 @@ export interface RuleWithFixOptions_for_NoBlankTargetOptions {
 	 */
 	options: NoBlankTargetOptions;
 }
-export interface RuleWithOptions_for_NoDangerouslySetInnerHtmlOptions {
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: NoDangerouslySetInnerHtmlOptions;
-}
-export interface RuleWithOptions_for_NoDangerouslySetInnerHtmlWithChildrenOptions {
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: NoDangerouslySetInnerHtmlWithChildrenOptions;
-}
-export interface RuleWithOptions_for_NoGlobalEvalOptions {
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: NoGlobalEvalOptions;
-}
-export interface RuleWithOptions_for_NoArgumentsOptions {
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: NoArgumentsOptions;
-}
-export interface RuleWithOptions_for_NoCommaOperatorOptions {
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: NoCommaOperatorOptions;
-}
-export interface RuleWithOptions_for_NoCommonJsOptions {
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: NoCommonJsOptions;
-}
-export interface RuleWithOptions_for_NoDefaultExportOptions {
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: NoDefaultExportOptions;
-}
-export interface RuleWithOptions_for_NoDescendingSpecificityOptions {
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: NoDescendingSpecificityOptions;
-}
-export interface RuleWithOptions_for_NoDoneCallbackOptions {
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: NoDoneCallbackOptions;
-}
-export interface RuleWithOptions_for_NoEnumOptions {
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: NoEnumOptions;
-}
-export interface RuleWithOptions_for_NoExportedImportsOptions {
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: NoExportedImportsOptions;
-}
-export interface RuleWithOptions_for_NoHeadElementOptions {
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: NoHeadElementOptions;
-}
-export interface RuleWithFixOptions_for_NoImplicitBooleanOptions {
-	/**
-	 * The kind of the code actions emitted by the rule
-	 */
-	fix?: FixKind;
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: NoImplicitBooleanOptions;
-}
-export interface RuleWithFixOptions_for_NoInferrableTypesOptions {
-	/**
-	 * The kind of the code actions emitted by the rule
-	 */
-	fix?: FixKind;
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: NoInferrableTypesOptions;
-}
-export interface RuleWithOptions_for_NoNamespaceOptions {
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: NoNamespaceOptions;
-}
-export interface RuleWithOptions_for_NoNamespaceImportOptions {
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: NoNamespaceImportOptions;
-}
-export interface RuleWithFixOptions_for_NoNegationElseOptions {
-	/**
-	 * The kind of the code actions emitted by the rule
-	 */
-	fix?: FixKind;
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: NoNegationElseOptions;
-}
-export interface RuleWithOptions_for_NoNestedTernaryOptions {
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: NoNestedTernaryOptions;
-}
-export interface RuleWithFixOptions_for_NoNonNullAssertionOptions {
-	/**
-	 * The kind of the code actions emitted by the rule
-	 */
-	fix?: FixKind;
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: NoNonNullAssertionOptions;
-}
 export interface RuleWithOptions_for_NoParameterAssignOptions {
 	/**
 	 * The severity of the emitted diagnostics by the rule
@@ -5538,7 +2807,7 @@ export interface RuleWithOptions_for_NoParameterAssignOptions {
 	 */
 	options: NoParameterAssignOptions;
 }
-export interface RuleWithOptions_for_NoParameterPropertiesOptions {
+export interface RuleWithOptions_for_RestrictedGlobalsOptions {
 	/**
 	 * The severity of the emitted diagnostics by the rule
 	 */
@@ -5546,9 +2815,9 @@ export interface RuleWithOptions_for_NoParameterPropertiesOptions {
 	/**
 	 * Rule's options
 	 */
-	options: NoParameterPropertiesOptions;
+	options: RestrictedGlobalsOptions;
 }
-export interface RuleWithOptions_for_NoProcessEnvOptions {
+export interface RuleWithOptions_for_RestrictedImportsOptions {
 	/**
 	 * The severity of the emitted diagnostics by the rule
 	 */
@@ -5556,27 +2825,7 @@ export interface RuleWithOptions_for_NoProcessEnvOptions {
 	/**
 	 * Rule's options
 	 */
-	options: NoProcessEnvOptions;
-}
-export interface RuleWithOptions_for_NoRestrictedGlobalsOptions {
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: NoRestrictedGlobalsOptions;
-}
-export interface RuleWithOptions_for_NoRestrictedImportsOptions {
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: NoRestrictedImportsOptions;
+	options: RestrictedImportsOptions;
 }
 export interface RuleWithFixOptions_for_NoRestrictedTypesOptions {
 	/**
@@ -5592,156 +2841,6 @@ export interface RuleWithFixOptions_for_NoRestrictedTypesOptions {
 	 */
 	options: NoRestrictedTypesOptions;
 }
-export interface RuleWithFixOptions_for_NoShoutyConstantsOptions {
-	/**
-	 * The kind of the code actions emitted by the rule
-	 */
-	fix?: FixKind;
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: NoShoutyConstantsOptions;
-}
-export interface RuleWithFixOptions_for_NoSubstrOptions {
-	/**
-	 * The kind of the code actions emitted by the rule
-	 */
-	fix?: FixKind;
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: NoSubstrOptions;
-}
-export interface RuleWithFixOptions_for_NoUnusedTemplateLiteralOptions {
-	/**
-	 * The kind of the code actions emitted by the rule
-	 */
-	fix?: FixKind;
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: NoUnusedTemplateLiteralOptions;
-}
-export interface RuleWithFixOptions_for_NoUselessElseOptions {
-	/**
-	 * The kind of the code actions emitted by the rule
-	 */
-	fix?: FixKind;
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: NoUselessElseOptions;
-}
-export interface RuleWithOptions_for_NoValueAtRuleOptions {
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: NoValueAtRuleOptions;
-}
-export interface RuleWithFixOptions_for_NoYodaExpressionOptions {
-	/**
-	 * The kind of the code actions emitted by the rule
-	 */
-	fix?: FixKind;
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: NoYodaExpressionOptions;
-}
-export interface RuleWithFixOptions_for_UseAsConstAssertionOptions {
-	/**
-	 * The kind of the code actions emitted by the rule
-	 */
-	fix?: FixKind;
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: UseAsConstAssertionOptions;
-}
-export interface RuleWithFixOptions_for_UseAtIndexOptions {
-	/**
-	 * The kind of the code actions emitted by the rule
-	 */
-	fix?: FixKind;
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: UseAtIndexOptions;
-}
-export interface RuleWithFixOptions_for_UseBlockStatementsOptions {
-	/**
-	 * The kind of the code actions emitted by the rule
-	 */
-	fix?: FixKind;
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: UseBlockStatementsOptions;
-}
-export interface RuleWithFixOptions_for_UseCollapsedElseIfOptions {
-	/**
-	 * The kind of the code actions emitted by the rule
-	 */
-	fix?: FixKind;
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: UseCollapsedElseIfOptions;
-}
-export interface RuleWithFixOptions_for_UseCollapsedIfOptions {
-	/**
-	 * The kind of the code actions emitted by the rule
-	 */
-	fix?: FixKind;
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: UseCollapsedIfOptions;
-}
 export interface RuleWithOptions_for_UseComponentExportOnlyModulesOptions {
 	/**
 	 * The severity of the emitted diagnostics by the rule
@@ -5752,7 +2851,7 @@ export interface RuleWithOptions_for_UseComponentExportOnlyModulesOptions {
 	 */
 	options: UseComponentExportOnlyModulesOptions;
 }
-export interface RuleWithFixOptions_for_UseConsistentArrayTypeOptions {
+export interface RuleWithFixOptions_for_ConsistentArrayTypeOptions {
 	/**
 	 * The kind of the code actions emitted by the rule
 	 */
@@ -5764,9 +2863,29 @@ export interface RuleWithFixOptions_for_UseConsistentArrayTypeOptions {
 	/**
 	 * Rule's options
 	 */
-	options: UseConsistentArrayTypeOptions;
+	options: ConsistentArrayTypeOptions;
 }
-export interface RuleWithFixOptions_for_UseConsistentBuiltinInstantiationOptions {
+export interface RuleWithOptions_for_ConsistentMemberAccessibilityOptions {
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: ConsistentMemberAccessibilityOptions;
+}
+export interface RuleWithOptions_for_FilenamingConventionOptions {
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: FilenamingConventionOptions;
+}
+export interface RuleWithFixOptions_for_ImportTypeOptions {
 	/**
 	 * The kind of the code actions emitted by the rule
 	 */
@@ -5778,9 +2897,9 @@ export interface RuleWithFixOptions_for_UseConsistentBuiltinInstantiationOptions
 	/**
 	 * Rule's options
 	 */
-	options: UseConsistentBuiltinInstantiationOptions;
+	options: ImportTypeOptions;
 }
-export interface RuleWithFixOptions_for_UseConsistentCurlyBracesOptions {
+export interface RuleWithFixOptions_for_NamingConventionOptions {
 	/**
 	 * The kind of the code actions emitted by the rule
 	 */
@@ -5792,249 +2911,7 @@ export interface RuleWithFixOptions_for_UseConsistentCurlyBracesOptions {
 	/**
 	 * Rule's options
 	 */
-	options: UseConsistentCurlyBracesOptions;
-}
-export interface RuleWithOptions_for_UseConsistentMemberAccessibilityOptions {
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: UseConsistentMemberAccessibilityOptions;
-}
-export interface RuleWithFixOptions_for_UseConstOptions {
-	/**
-	 * The kind of the code actions emitted by the rule
-	 */
-	fix?: FixKind;
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: UseConstOptions;
-}
-export interface RuleWithFixOptions_for_UseDefaultParameterLastOptions {
-	/**
-	 * The kind of the code actions emitted by the rule
-	 */
-	fix?: FixKind;
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: UseDefaultParameterLastOptions;
-}
-export interface RuleWithOptions_for_UseDefaultSwitchClauseOptions {
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: UseDefaultSwitchClauseOptions;
-}
-export interface RuleWithOptions_for_UseDeprecatedReasonOptions {
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: UseDeprecatedReasonOptions;
-}
-export interface RuleWithFixOptions_for_UseEnumInitializersOptions {
-	/**
-	 * The kind of the code actions emitted by the rule
-	 */
-	fix?: FixKind;
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: UseEnumInitializersOptions;
-}
-export interface RuleWithFixOptions_for_UseExplicitLengthCheckOptions {
-	/**
-	 * The kind of the code actions emitted by the rule
-	 */
-	fix?: FixKind;
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: UseExplicitLengthCheckOptions;
-}
-export interface RuleWithFixOptions_for_UseExponentiationOperatorOptions {
-	/**
-	 * The kind of the code actions emitted by the rule
-	 */
-	fix?: FixKind;
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: UseExponentiationOperatorOptions;
-}
-export interface RuleWithFixOptions_for_UseExportTypeOptions {
-	/**
-	 * The kind of the code actions emitted by the rule
-	 */
-	fix?: FixKind;
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: UseExportTypeOptions;
-}
-export interface RuleWithOptions_for_UseFilenamingConventionOptions {
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: UseFilenamingConventionOptions;
-}
-export interface RuleWithOptions_for_UseForOfOptions {
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: UseForOfOptions;
-}
-export interface RuleWithFixOptions_for_UseFragmentSyntaxOptions {
-	/**
-	 * The kind of the code actions emitted by the rule
-	 */
-	fix?: FixKind;
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: UseFragmentSyntaxOptions;
-}
-export interface RuleWithFixOptions_for_UseImportTypeOptions {
-	/**
-	 * The kind of the code actions emitted by the rule
-	 */
-	fix?: FixKind;
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: UseImportTypeOptions;
-}
-export interface RuleWithOptions_for_UseLiteralEnumMembersOptions {
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: UseLiteralEnumMembersOptions;
-}
-export interface RuleWithFixOptions_for_UseNamingConventionOptions {
-	/**
-	 * The kind of the code actions emitted by the rule
-	 */
-	fix?: FixKind;
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: UseNamingConventionOptions;
-}
-export interface RuleWithFixOptions_for_UseNodeAssertStrictOptions {
-	/**
-	 * The kind of the code actions emitted by the rule
-	 */
-	fix?: FixKind;
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: UseNodeAssertStrictOptions;
-}
-export interface RuleWithFixOptions_for_UseNodejsImportProtocolOptions {
-	/**
-	 * The kind of the code actions emitted by the rule
-	 */
-	fix?: FixKind;
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: UseNodejsImportProtocolOptions;
-}
-export interface RuleWithFixOptions_for_UseNumberNamespaceOptions {
-	/**
-	 * The kind of the code actions emitted by the rule
-	 */
-	fix?: FixKind;
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: UseNumberNamespaceOptions;
-}
-export interface RuleWithFixOptions_for_UseNumericLiteralsOptions {
-	/**
-	 * The kind of the code actions emitted by the rule
-	 */
-	fix?: FixKind;
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: UseNumericLiteralsOptions;
+	options: NamingConventionOptions;
 }
 export interface RuleWithFixOptions_for_UseSelfClosingElementsOptions {
 	/**
@@ -6050,192 +2927,6 @@ export interface RuleWithFixOptions_for_UseSelfClosingElementsOptions {
 	 */
 	options: UseSelfClosingElementsOptions;
 }
-export interface RuleWithFixOptions_for_UseShorthandAssignOptions {
-	/**
-	 * The kind of the code actions emitted by the rule
-	 */
-	fix?: FixKind;
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: UseShorthandAssignOptions;
-}
-export interface RuleWithFixOptions_for_UseShorthandFunctionTypeOptions {
-	/**
-	 * The kind of the code actions emitted by the rule
-	 */
-	fix?: FixKind;
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: UseShorthandFunctionTypeOptions;
-}
-export interface RuleWithFixOptions_for_UseSingleVarDeclaratorOptions {
-	/**
-	 * The kind of the code actions emitted by the rule
-	 */
-	fix?: FixKind;
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: UseSingleVarDeclaratorOptions;
-}
-export interface RuleWithFixOptions_for_UseTemplateOptions {
-	/**
-	 * The kind of the code actions emitted by the rule
-	 */
-	fix?: FixKind;
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: UseTemplateOptions;
-}
-export interface RuleWithFixOptions_for_UseThrowNewErrorOptions {
-	/**
-	 * The kind of the code actions emitted by the rule
-	 */
-	fix?: FixKind;
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: UseThrowNewErrorOptions;
-}
-export interface RuleWithOptions_for_UseThrowOnlyErrorOptions {
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: UseThrowOnlyErrorOptions;
-}
-export interface RuleWithFixOptions_for_UseTrimStartEndOptions {
-	/**
-	 * The kind of the code actions emitted by the rule
-	 */
-	fix?: FixKind;
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: UseTrimStartEndOptions;
-}
-export interface RuleWithFixOptions_for_NoApproximativeNumericConstantOptions {
-	/**
-	 * The kind of the code actions emitted by the rule
-	 */
-	fix?: FixKind;
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: NoApproximativeNumericConstantOptions;
-}
-export interface RuleWithOptions_for_NoArrayIndexKeyOptions {
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: NoArrayIndexKeyOptions;
-}
-export interface RuleWithOptions_for_NoAssignInExpressionsOptions {
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: NoAssignInExpressionsOptions;
-}
-export interface RuleWithOptions_for_NoAsyncPromiseExecutorOptions {
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: NoAsyncPromiseExecutorOptions;
-}
-export interface RuleWithOptions_for_NoCatchAssignOptions {
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: NoCatchAssignOptions;
-}
-export interface RuleWithOptions_for_NoClassAssignOptions {
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: NoClassAssignOptions;
-}
-export interface RuleWithFixOptions_for_NoCommentTextOptions {
-	/**
-	 * The kind of the code actions emitted by the rule
-	 */
-	fix?: FixKind;
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: NoCommentTextOptions;
-}
-export interface RuleWithFixOptions_for_NoCompareNegZeroOptions {
-	/**
-	 * The kind of the code actions emitted by the rule
-	 */
-	fix?: FixKind;
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: NoCompareNegZeroOptions;
-}
 export interface RuleWithOptions_for_NoConfusingLabelsOptions {
 	/**
 	 * The severity of the emitted diagnostics by the rule
@@ -6245,20 +2936,6 @@ export interface RuleWithOptions_for_NoConfusingLabelsOptions {
 	 * Rule's options
 	 */
 	options: NoConfusingLabelsOptions;
-}
-export interface RuleWithFixOptions_for_NoConfusingVoidTypeOptions {
-	/**
-	 * The kind of the code actions emitted by the rule
-	 */
-	fix?: FixKind;
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: NoConfusingVoidTypeOptions;
 }
 export interface RuleWithFixOptions_for_NoConsoleOptions {
 	/**
@@ -6274,64 +2951,6 @@ export interface RuleWithFixOptions_for_NoConsoleOptions {
 	 */
 	options: NoConsoleOptions;
 }
-export interface RuleWithFixOptions_for_NoConstEnumOptions {
-	/**
-	 * The kind of the code actions emitted by the rule
-	 */
-	fix?: FixKind;
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: NoConstEnumOptions;
-}
-export interface RuleWithOptions_for_NoControlCharactersInRegexOptions {
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: NoControlCharactersInRegexOptions;
-}
-export interface RuleWithFixOptions_for_NoDebuggerOptions {
-	/**
-	 * The kind of the code actions emitted by the rule
-	 */
-	fix?: FixKind;
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: NoDebuggerOptions;
-}
-export interface RuleWithOptions_for_NoDocumentCookieOptions {
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: NoDocumentCookieOptions;
-}
-export interface RuleWithOptions_for_NoDocumentImportInPageOptions {
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: NoDocumentImportInPageOptions;
-}
 export interface RuleWithFixOptions_for_NoDoubleEqualsOptions {
 	/**
 	 * The kind of the code actions emitted by the rule
@@ -6346,890 +2965,270 @@ export interface RuleWithFixOptions_for_NoDoubleEqualsOptions {
 	 */
 	options: NoDoubleEqualsOptions;
 }
-export interface RuleWithOptions_for_NoDuplicateAtImportRulesOptions {
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: NoDuplicateAtImportRulesOptions;
-}
-export interface RuleWithOptions_for_NoDuplicateCaseOptions {
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: NoDuplicateCaseOptions;
-}
-export interface RuleWithOptions_for_NoDuplicateClassMembersOptions {
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: NoDuplicateClassMembersOptions;
-}
-export interface RuleWithOptions_for_NoDuplicateCustomPropertiesOptions {
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: NoDuplicateCustomPropertiesOptions;
-}
-export interface RuleWithOptions_for_NoDuplicateElseIfOptions {
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: NoDuplicateElseIfOptions;
-}
-export interface RuleWithOptions_for_NoDuplicateFieldsOptions {
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: NoDuplicateFieldsOptions;
-}
-export interface RuleWithOptions_for_NoDuplicateFontNamesOptions {
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: NoDuplicateFontNamesOptions;
-}
-export interface RuleWithOptions_for_NoDuplicateJsxPropsOptions {
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: NoDuplicateJsxPropsOptions;
-}
-export interface RuleWithOptions_for_NoDuplicateObjectKeysOptions {
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: NoDuplicateObjectKeysOptions;
-}
-export interface RuleWithOptions_for_NoDuplicateParametersOptions {
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: NoDuplicateParametersOptions;
-}
-export interface RuleWithOptions_for_NoDuplicatePropertiesOptions {
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: NoDuplicatePropertiesOptions;
-}
-export interface RuleWithOptions_for_NoDuplicateSelectorsKeyframeBlockOptions {
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: NoDuplicateSelectorsKeyframeBlockOptions;
-}
-export interface RuleWithOptions_for_NoDuplicateTestHooksOptions {
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: NoDuplicateTestHooksOptions;
-}
-export interface RuleWithOptions_for_NoEmptyBlockOptions {
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: NoEmptyBlockOptions;
-}
-export interface RuleWithOptions_for_NoEmptyBlockStatementsOptions {
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: NoEmptyBlockStatementsOptions;
-}
-export interface RuleWithFixOptions_for_NoEmptyInterfaceOptions {
-	/**
-	 * The kind of the code actions emitted by the rule
-	 */
-	fix?: FixKind;
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: NoEmptyInterfaceOptions;
-}
-export interface RuleWithOptions_for_NoEvolvingTypesOptions {
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: NoEvolvingTypesOptions;
-}
-export interface RuleWithOptions_for_NoExplicitAnyOptions {
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: NoExplicitAnyOptions;
-}
-export interface RuleWithOptions_for_NoExportsInTestOptions {
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: NoExportsInTestOptions;
-}
-export interface RuleWithFixOptions_for_NoExtraNonNullAssertionOptions {
-	/**
-	 * The kind of the code actions emitted by the rule
-	 */
-	fix?: FixKind;
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: NoExtraNonNullAssertionOptions;
-}
-export interface RuleWithOptions_for_NoFallthroughSwitchClauseOptions {
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: NoFallthroughSwitchClauseOptions;
-}
-export interface RuleWithFixOptions_for_NoFocusedTestsOptions {
-	/**
-	 * The kind of the code actions emitted by the rule
-	 */
-	fix?: FixKind;
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: NoFocusedTestsOptions;
-}
-export interface RuleWithOptions_for_NoFunctionAssignOptions {
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: NoFunctionAssignOptions;
-}
-export interface RuleWithOptions_for_NoGlobalAssignOptions {
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: NoGlobalAssignOptions;
-}
-export interface RuleWithFixOptions_for_NoGlobalIsFiniteOptions {
-	/**
-	 * The kind of the code actions emitted by the rule
-	 */
-	fix?: FixKind;
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: NoGlobalIsFiniteOptions;
-}
-export interface RuleWithFixOptions_for_NoGlobalIsNanOptions {
-	/**
-	 * The kind of the code actions emitted by the rule
-	 */
-	fix?: FixKind;
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: NoGlobalIsNanOptions;
-}
-export interface RuleWithOptions_for_NoHeadImportInDocumentOptions {
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: NoHeadImportInDocumentOptions;
-}
-export interface RuleWithOptions_for_NoImplicitAnyLetOptions {
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: NoImplicitAnyLetOptions;
-}
-export interface RuleWithOptions_for_NoImportAssignOptions {
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: NoImportAssignOptions;
-}
-export interface RuleWithOptions_for_NoImportantInKeyframeOptions {
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: NoImportantInKeyframeOptions;
-}
-export interface RuleWithOptions_for_NoIrregularWhitespaceOptions {
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: NoIrregularWhitespaceOptions;
-}
-export interface RuleWithOptions_for_NoLabelVarOptions {
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: NoLabelVarOptions;
-}
-export interface RuleWithFixOptions_for_NoMisleadingCharacterClassOptions {
-	/**
-	 * The kind of the code actions emitted by the rule
-	 */
-	fix?: FixKind;
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: NoMisleadingCharacterClassOptions;
-}
-export interface RuleWithOptions_for_NoMisleadingInstantiatorOptions {
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: NoMisleadingInstantiatorOptions;
-}
-export interface RuleWithOptions_for_NoMisplacedAssertionOptions {
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: NoMisplacedAssertionOptions;
-}
-export interface RuleWithFixOptions_for_NoMisrefactoredShorthandAssignOptions {
-	/**
-	 * The kind of the code actions emitted by the rule
-	 */
-	fix?: FixKind;
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: NoMisrefactoredShorthandAssignOptions;
-}
-export interface RuleWithFixOptions_for_NoOctalEscapeOptions {
-	/**
-	 * The kind of the code actions emitted by the rule
-	 */
-	fix?: FixKind;
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: NoOctalEscapeOptions;
-}
-export interface RuleWithFixOptions_for_NoPrototypeBuiltinsOptions {
-	/**
-	 * The kind of the code actions emitted by the rule
-	 */
-	fix?: FixKind;
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: NoPrototypeBuiltinsOptions;
-}
-export interface RuleWithFixOptions_for_NoReactSpecificPropsOptions {
-	/**
-	 * The kind of the code actions emitted by the rule
-	 */
-	fix?: FixKind;
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: NoReactSpecificPropsOptions;
-}
-export interface RuleWithOptions_for_NoRedeclareOptions {
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: NoRedeclareOptions;
-}
-export interface RuleWithFixOptions_for_NoRedundantUseStrictOptions {
-	/**
-	 * The kind of the code actions emitted by the rule
-	 */
-	fix?: FixKind;
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: NoRedundantUseStrictOptions;
-}
-export interface RuleWithOptions_for_NoSelfCompareOptions {
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: NoSelfCompareOptions;
-}
-export interface RuleWithOptions_for_NoShadowRestrictedNamesOptions {
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: NoShadowRestrictedNamesOptions;
-}
-export interface RuleWithOptions_for_NoShorthandPropertyOverridesOptions {
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: NoShorthandPropertyOverridesOptions;
-}
-export interface RuleWithFixOptions_for_NoSkippedTestsOptions {
-	/**
-	 * The kind of the code actions emitted by the rule
-	 */
-	fix?: FixKind;
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: NoSkippedTestsOptions;
-}
-export interface RuleWithFixOptions_for_NoSparseArrayOptions {
-	/**
-	 * The kind of the code actions emitted by the rule
-	 */
-	fix?: FixKind;
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: NoSparseArrayOptions;
-}
-export interface RuleWithOptions_for_NoSuspiciousSemicolonInJsxOptions {
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: NoSuspiciousSemicolonInJsxOptions;
-}
-export interface RuleWithOptions_for_NoTemplateCurlyInStringOptions {
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: NoTemplateCurlyInStringOptions;
-}
-export interface RuleWithOptions_for_NoThenPropertyOptions {
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: NoThenPropertyOptions;
-}
-export interface RuleWithOptions_for_NoUnsafeDeclarationMergingOptions {
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: NoUnsafeDeclarationMergingOptions;
-}
-export interface RuleWithFixOptions_for_NoUnsafeNegationOptions {
-	/**
-	 * The kind of the code actions emitted by the rule
-	 */
-	fix?: FixKind;
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: NoUnsafeNegationOptions;
-}
-export interface RuleWithFixOptions_for_NoVarOptions {
-	/**
-	 * The kind of the code actions emitted by the rule
-	 */
-	fix?: FixKind;
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: NoVarOptions;
-}
-export interface RuleWithOptions_for_UseAdjacentOverloadSignaturesOptions {
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: UseAdjacentOverloadSignaturesOptions;
-}
-export interface RuleWithOptions_for_UseAwaitOptions {
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: UseAwaitOptions;
-}
-export interface RuleWithOptions_for_UseDefaultSwitchClauseLastOptions {
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: UseDefaultSwitchClauseLastOptions;
-}
-export interface RuleWithOptions_for_UseErrorMessageOptions {
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: UseErrorMessageOptions;
-}
-export interface RuleWithOptions_for_UseGetterReturnOptions {
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: UseGetterReturnOptions;
-}
-export interface RuleWithOptions_for_UseGoogleFontDisplayOptions {
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: UseGoogleFontDisplayOptions;
-}
-export interface RuleWithOptions_for_UseGuardForInOptions {
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: UseGuardForInOptions;
-}
-export interface RuleWithFixOptions_for_UseIsArrayOptions {
-	/**
-	 * The kind of the code actions emitted by the rule
-	 */
-	fix?: FixKind;
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: UseIsArrayOptions;
-}
-export interface RuleWithFixOptions_for_UseNamespaceKeywordOptions {
-	/**
-	 * The kind of the code actions emitted by the rule
-	 */
-	fix?: FixKind;
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: UseNamespaceKeywordOptions;
-}
-export interface RuleWithFixOptions_for_UseNumberToFixedDigitsArgumentOptions {
-	/**
-	 * The kind of the code actions emitted by the rule
-	 */
-	fix?: FixKind;
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: UseNumberToFixedDigitsArgumentOptions;
-}
-export interface RuleWithFixOptions_for_UseStrictModeOptions {
-	/**
-	 * The kind of the code actions emitted by the rule
-	 */
-	fix?: FixKind;
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: UseStrictModeOptions;
-}
-export interface RuleWithFixOptions_for_UseValidTypeofOptions {
-	/**
-	 * The kind of the code actions emitted by the rule
-	 */
-	fix?: FixKind;
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: UseValidTypeofOptions;
-}
+export type ImportGroups = ImportGroup[];
 /**
  * Used to identify the kind of code action emitted by a rule
  */
 export type FixKind = "none" | "safe" | "unsafe";
-export interface NoAccessKeyOptions {}
-export interface NoAriaHiddenOnFocusableOptions {}
-export interface NoAriaUnsupportedElementsOptions {}
-export interface NoAutofocusOptions {}
-export interface NoDistractingElementsOptions {}
-export interface NoHeaderScopeOptions {}
-export interface NoInteractiveElementToNoninteractiveRoleOptions {}
-export interface NoLabelWithoutControlOptions {}
-export interface NoNoninteractiveElementToInteractiveRoleOptions {}
-export interface NoNoninteractiveTabindexOptions {}
-export interface NoPositiveTabindexOptions {}
-export interface NoRedundantAltOptions {}
-export interface NoRedundantRolesOptions {}
-export interface NoStaticElementInteractionsOptions {}
-export interface NoSvgWithoutTitleOptions {}
-export interface UseAltTextOptions {}
-export interface UseAnchorContentOptions {}
-export interface UseAriaActivedescendantWithTabindexOptions {}
-export interface UseAriaPropsForRoleOptions {}
-export interface UseAriaPropsSupportedByRoleOptions {}
-export interface UseButtonTypeOptions {}
-export interface UseFocusableInteractiveOptions {}
-export interface UseGenericFontNamesOptions {}
-export interface UseHeadingContentOptions {}
-export interface UseHtmlLangOptions {}
-export interface UseIframeTitleOptions {}
-export interface UseKeyWithClickEventsOptions {}
-export interface UseKeyWithMouseEventsOptions {}
-export interface UseMediaCaptionOptions {}
-export interface UseSemanticElementsOptions {}
-export interface UseValidAnchorOptions {}
-export interface UseValidAriaPropsOptions {}
-export interface UseValidAriaRoleOptions {}
-export interface UseValidAriaValuesOptions {}
-export interface UseValidAutocompleteOptions {}
-export interface UseValidLangOptions {}
-export interface NoAdjacentSpacesInRegexOptions {}
-export interface NoBannedTypesOptions {}
-export interface NoEmptyTypeParametersOptions {}
-export interface NoExcessiveCognitiveComplexityOptions {}
-export interface NoExcessiveNestedTestSuitesOptions {}
-export interface NoExtraBooleanCastOptions {}
-export interface NoForEachOptions {}
-export interface NoStaticOnlyClassOptions {}
-export interface NoThisInStaticOptions {}
-export interface NoUselessCatchOptions {}
-export interface NoUselessConstructorOptions {}
-export interface NoUselessEmptyExportOptions {}
-export interface NoUselessEscapeInRegexOptions {}
-export interface NoUselessFragmentsOptions {}
-export interface NoUselessLabelOptions {}
-export interface NoUselessLoneBlockStatementsOptions {}
-export interface NoUselessRenameOptions {}
-export interface NoUselessStringConcatOptions {}
-export interface NoUselessStringRawOptions {}
-export interface NoUselessSwitchCaseOptions {}
-export interface NoUselessTernaryOptions {}
-export interface NoUselessThisAliasOptions {}
-export interface NoUselessTypeConstraintOptions {}
-export interface NoUselessUndefinedInitializationOptions {}
-export interface NoVoidOptions {}
-export interface NoWithOptions {}
-export interface UseArrowFunctionOptions {}
-export interface UseDateNowOptions {}
-export interface UseFlatMapOptions {}
-export interface UseLiteralKeysOptions {}
-export interface UseOptionalChainOptions {}
-export interface UseRegexLiteralsOptions {}
-export interface UseSimpleNumberKeysOptions {}
-export interface UseSimplifiedLogicExpressionOptions {}
-export interface UseWhileOptions {}
-export interface NoChildrenPropOptions {}
-export interface NoConstAssignOptions {}
-export interface NoConstantConditionOptions {}
-export interface NoConstantMathMinMaxClampOptions {}
-export interface NoConstructorReturnOptions {}
-export interface NoEmptyCharacterClassInRegexOptions {}
-export interface NoEmptyPatternOptions {}
-export interface NoFlatMapIdentityOptions {}
-export interface NoGlobalObjectCallsOptions {}
-export interface NoInnerDeclarationsOptions {}
-export interface NoInvalidBuiltinInstantiationOptions {}
-export interface NoInvalidConstructorSuperOptions {}
-export interface NoInvalidDirectionInLinearGradientOptions {}
-export interface NoInvalidGridAreasOptions {}
-export interface NoInvalidPositionAtImportRuleOptions {}
-export interface NoInvalidUseBeforeDeclarationOptions {}
-export interface NoMissingVarFunctionOptions {}
-export interface NoNodejsModulesOptions {}
-export interface NoNonoctalDecimalEscapeOptions {}
-export interface NoPrecisionLossOptions {}
-export interface NoPrivateImportsOptions {}
-export interface NoRenderReturnValueOptions {}
-export interface NoSelfAssignOptions {}
-export interface NoSetterReturnOptions {}
-export interface NoStringCaseMismatchOptions {}
-export interface NoSwitchDeclarationsOptions {}
-export interface NoUndeclaredDependenciesOptions {}
-export interface NoUndeclaredVariablesOptions {}
-export interface NoUnknownFunctionOptions {}
-export interface NoUnknownMediaFeatureNameOptions {}
-export interface NoUnknownPropertyOptions {}
-export interface NoUnknownPseudoClassOptions {}
-export interface NoUnknownPseudoElementOptions {}
-export interface NoUnknownTypeSelectorOptions {}
-export interface NoUnknownUnitOptions {}
-export interface NoUnmatchableAnbSelectorOptions {}
-export interface NoUnreachableOptions {}
-export interface NoUnreachableSuperOptions {}
-export interface NoUnsafeFinallyOptions {}
-export interface NoUnsafeOptionalChainingOptions {}
-export interface NoUnusedFunctionParametersOptions {}
-export interface NoUnusedImportsOptions {}
-export interface NoUnusedLabelsOptions {}
-export interface NoUnusedPrivateClassMembersOptions {}
-export interface NoUnusedVariablesOptions {}
-export interface NoUselessContinueOptions {}
-export interface NoVoidElementsWithChildrenOptions {}
-export interface NoVoidTypeReturnOptions {}
-export interface UseArrayLiteralsOptions {}
-export interface UseExhaustiveDependenciesOptions {}
-export interface UseHookAtTopLevelOptions {}
-export interface UseImportExtensionsOptions {}
-export interface UseIsNanOptions {}
-export interface UseJsxKeyInIterableOptions {}
-export interface UseValidForDirectionOptions {}
-export interface UseYieldOptions {}
-export interface NoAwaitInLoopOptions {}
-export interface NoBitwiseOperatorsOptions {}
-export interface NoConstantBinaryExpressionOptions {}
-export interface NoDestructuredPropsOptions {}
-export interface NoFloatingPromisesOptions {}
-export interface NoGlobalDirnameFilenameOptions {}
-export interface NoImportCyclesOptions {}
-export interface NoImportantStylesOptions {}
-export interface NoNoninteractiveElementInteractionsOptions {}
-export interface NoProcessGlobalOptions {}
-export interface NoRestrictedElementsOptions {}
-export interface NoSecretsOptions {}
-export interface NoShadowOptions {}
-export interface NoTsIgnoreOptions {}
-export interface NoUnknownAtRuleOptions {}
-export interface NoUnresolvedImportsOptions {}
-export interface NoUnwantedPolyfillioOptions {}
-export interface NoUselessBackrefInRegexOptions {}
-export interface NoUselessEscapeInStringOptions {}
-export interface NoUselessUndefinedOptions {}
-export interface UseAdjacentGetterSetterOptions {}
-export interface UseConsistentObjectDefinitionOptions {}
-export interface UseExhaustiveSwitchCasesOptions {}
-export interface UseExplicitTypeOptions {}
-export interface UseExportsLastOptions {}
-export interface UseForComponentOptions {}
-export interface UseGoogleFontPreconnectOptions {}
-export interface UseIterableCallbackReturnOptions {}
-export interface UseNamedOperationOptions {}
+export interface NoLabelWithoutControlOptions {
+	/**
+	 * Array of component names that should be considered the same as an `input` element.
+	 */
+	inputComponents?: string[];
+	/**
+	 * Array of attributes that should be treated as the `label` accessible text content.
+	 */
+	labelAttributes?: string[];
+	/**
+	 * Array of component names that should be considered the same as a `label` element.
+	 */
+	labelComponents?: string[];
+}
+export interface ValidAriaRoleOptions {
+	allowInvalidRoles?: string[];
+	ignoreNonDom?: boolean;
+}
+export interface UseValidAutocompleteOptions {
+	/**
+	 * `input` like custom components that should be checked.
+	 */
+	inputComponents?: string[];
+}
+/**
+ * Options for the rule `noExcessiveCognitiveComplexity`.
+ */
+export interface ComplexityOptions {
+	/**
+	 * The maximum complexity score that we allow. Anything higher is considered excessive.
+	 */
+	maxAllowedComplexity?: number;
+}
+export interface NoForEachOptions {
+	/**
+	 * A list of variable names allowed for `forEach` calls.
+	 */
+	allowedIdentifiers: string[];
+}
+/**
+ * Options for the rule `noPrivateImports`.
+ */
+export interface NoPrivateImportsOptions {
+	/**
+	* The default visibility to assume for symbols without visibility tag.
+
+Default: **public**. 
+	 */
+	defaultVisibility?: Visibility;
+}
+/**
+ * Rule's options
+ */
+export interface NoUndeclaredDependenciesOptions {
+	/**
+	 * If set to `false`, then the rule will show an error when `devDependencies` are imported. Defaults to `true`.
+	 */
+	devDependencies?: DependencyAvailability;
+	/**
+	 * If set to `false`, then the rule will show an error when `optionalDependencies` are imported. Defaults to `true`.
+	 */
+	optionalDependencies?: DependencyAvailability;
+	/**
+	 * If set to `false`, then the rule will show an error when `peerDependencies` are imported. Defaults to `true`.
+	 */
+	peerDependencies?: DependencyAvailability;
+}
+export interface UndeclaredVariablesOptions {
+	/**
+	 * Check undeclared types.
+	 */
+	checkTypes?: boolean;
+}
+export interface NoUnusedVariablesOptions {
+	/**
+	 * Whether to ignore unused variables from an object destructuring with a spread.
+	 */
+	ignoreRestSiblings?: boolean;
+}
+/**
+ * Options for the rule `useExhaustiveDependencies`
+ */
+export interface UseExhaustiveDependenciesOptions {
+	/**
+	 * List of hooks of which the dependencies should be validated.
+	 */
+	hooks?: Hook[];
+	/**
+	 * Whether to report an error when a hook has no dependencies array.
+	 */
+	reportMissingDependenciesArray?: boolean;
+	/**
+	 * Whether to report an error when a dependency is listed in the dependencies array but isn't used. Defaults to true.
+	 */
+	reportUnnecessaryDependencies?: boolean;
+}
+/**
+ * Options for the `useHookAtTopLevel` rule have been deprecated, since we now use the React hook naming convention to determine whether a function is a hook.
+ */
+export interface DeprecatedHooksOptions {}
+export interface UseImportExtensionsOptions {
+	/**
+	 * If `true`, the suggested extension is always `.js` regardless of what extension the source file has in your project.
+	 */
+	forceJsExtensions?: boolean;
+}
+export interface UseJsxKeyInIterableOptions {
+	/**
+	 * Set to `true` to check shorthand fragments (`<></>`)
+	 */
+	checkShorthandFragments?: boolean;
+}
+/**
+ * Rule's options
+ */
+export interface NoBitwiseOperatorsOptions {
+	/**
+	 * Allows a list of bitwise operators to be used as exceptions.
+	 */
+	allow: string[];
+}
+export interface NoExcessiveLinesPerFunctionOptions {
+	/**
+	 * The maximum number of lines allowed in a function body.
+	 */
+	maxLines?: number;
+	/**
+	 * When this options is set to `true`, blank lines in the function body are not counted towards the maximum line limit.
+	 */
+	skipBlankLines?: boolean;
+	/**
+	 * When this option is set to `true`, Immediately Invoked Function Expressions (IIFEs) are not checked for the maximum line limit.
+	 */
+	skipIifes?: boolean;
+}
+export interface NoRestrictedElementsOptions {
+	/**
+	 * Elements to restrict. Each key is the element name, and the value is the message to show when the element is used.
+	 */
+	elements: CustomRestrictedElements;
+}
+export interface NoSecretsOptions {
+	/**
+	 * Set entropy threshold (default is 41).
+	 */
+	entropyThreshold?: number;
+}
+export interface UseConsistentObjectDefinitionOptions {
+	/**
+	 * The preferred syntax to enforce.
+	 */
+	syntax?: ObjectPropertySyntax;
+}
+/**
+ * Rule's options
+ */
+export interface ReadonlyClassPropertiesOptions {
+	/**
+	 * When `true`, the keywords `public`, `protected`, and `private` are analyzed by the rule.
+	 */
+	checkAllProperties: boolean;
+}
+export interface UtilityClassSortingOptions {
+	/**
+	 * Additional attributes that will be sorted.
+	 */
+	attributes?: string[];
+	/**
+	 * Names of the functions or tagged templates that will be sorted.
+	 */
+	functions?: string[];
+}
+export interface NoBlankTargetOptions {
+	/**
+	 * List of domains where `target="_blank"` is allowed without `rel="noopener"`.
+	 */
+	allowDomains: string[];
+	/**
+	 * Whether `noreferrer` is allowed in addition to `noopener`.
+	 */
+	allowNoReferrer?: boolean;
+}
+/**
+ * Options for the rule `NoParameterAssign`
+ */
+export interface NoParameterAssignOptions {
+	/**
+	 * Whether to report an error when a dependency is listed in the dependencies array but isn't used. Defaults to `allow`.
+	 */
+	propertyAssignment?: PropertyAssignmentMode;
+}
+/**
+ * Options for the rule `noRestrictedGlobals`.
+ */
+export interface RestrictedGlobalsOptions {
+	/**
+	 * A list of names that should trigger the rule
+	 */
+	deniedGlobals: Record<string, string>;
+}
+/**
+ * Options for the rule `noRestrictedImports`.
+ */
+export interface RestrictedImportsOptions {
+	/**
+	 * A list of import paths that should trigger the rule.
+	 */
+	paths: Record<string, CustomRestrictedImport>;
+}
+export interface NoRestrictedTypesOptions {
+	types?: Record<string, CustomRestrictedType>;
+}
+export interface UseComponentExportOnlyModulesOptions {
+	/**
+	 * Allows the export of constants. This option is for environments that support it, such as [Vite](https://vitejs.dev/)
+	 */
+	allowConstantExport?: boolean;
+	/**
+	 * A list of names that can be additionally exported from the module This option is for exports that do not hinder [React Fast Refresh](https://github.com/facebook/react/tree/main/packages/react-refresh), such as [`meta` in Remix](https://remix.run/docs/en/main/route/meta)
+	 */
+	allowExportNames: string[];
+}
+export interface ConsistentArrayTypeOptions {
+	syntax?: ConsistentArrayType;
+}
+export interface ConsistentMemberAccessibilityOptions {
+	accessibility?: Accessibility;
+}
 /**
  * Rule's options.
  */
-export interface UseNamingConventionOptions {
+export interface FilenamingConventionOptions {
+	/**
+	 * Allowed cases for file names.
+	 */
+	filenameCases: FilenameCases;
+	/**
+	 * Regular expression to enforce
+	 */
+	match?: Regex;
+	/**
+	 * If `false`, then non-ASCII characters are allowed.
+	 */
+	requireAscii: boolean;
+	/**
+	 * If `false`, then consecutive uppercase are allowed in _camel_ and _pascal_ cases. This does not affect other [Case].
+	 */
+	strictCase: boolean;
+}
+/**
+ * Rule's options.
+ */
+export interface ImportTypeOptions {
+	style: Style2;
+}
+/**
+ * Rule's options.
+ */
+export interface NamingConventionOptions {
 	/**
 	 * Custom conventions.
 	 */
@@ -7243,175 +3242,83 @@ export interface UseNamingConventionOptions {
 	 */
 	strictCase: boolean;
 }
-export interface UseNumericSeparatorsOptions {}
-export interface UseParseIntRadixOptions {}
-export interface UseSingleJsDocAsteriskOptions {}
-export interface UseSortedClassesOptions {}
-export interface UseSymbolDescriptionOptions {}
-export interface NoAccumulatingSpreadOptions {}
-export interface NoBarrelFileOptions {}
-export interface NoDeleteOptions {}
-export interface NoDynamicNamespaceImportAccessOptions {}
-export interface NoImgElementOptions {}
-export interface NoReExportAllOptions {}
-export interface UseTopLevelRegexOptions {}
-export interface NoBlankTargetOptions {
-	/**
-	 * List of domains where `target="_blank"` is allowed without `rel="noopener"`.
-	 */
-	allowDomains: string[];
-	/**
-	 * Whether `noreferrer` is allowed in addition to `noopener`.
-	 */
-	allowNoReferrer?: boolean;
+/**
+ * Options for the `useSelfClosingElements` rule.
+ */
+export interface UseSelfClosingElementsOptions {
+	ignoreHtmlElements?: boolean;
 }
-export interface NoDangerouslySetInnerHtmlOptions {}
-export interface NoDangerouslySetInnerHtmlWithChildrenOptions {}
-export interface NoGlobalEvalOptions {}
-export interface NoArgumentsOptions {}
-export interface NoCommaOperatorOptions {}
-export interface NoCommonJsOptions {}
-export interface NoDefaultExportOptions {}
-export interface NoDescendingSpecificityOptions {}
-export interface NoDoneCallbackOptions {}
-export interface NoEnumOptions {}
-export interface NoExportedImportsOptions {}
-export interface NoHeadElementOptions {}
-export interface NoImplicitBooleanOptions {}
-export interface NoInferrableTypesOptions {}
-export interface NoNamespaceOptions {}
-export interface NoNamespaceImportOptions {}
-export interface NoNegationElseOptions {}
-export interface NoNestedTernaryOptions {}
-export interface NoNonNullAssertionOptions {}
-export interface NoParameterAssignOptions {}
-export interface NoParameterPropertiesOptions {}
-export interface NoProcessEnvOptions {}
-export interface NoRestrictedGlobalsOptions {}
-export interface NoRestrictedImportsOptions {}
-export interface NoRestrictedTypesOptions {}
-export interface NoShoutyConstantsOptions {}
-export interface NoSubstrOptions {}
-export interface NoUnusedTemplateLiteralOptions {}
-export interface NoUselessElseOptions {}
-export interface NoValueAtRuleOptions {}
-export interface NoYodaExpressionOptions {}
-export interface UseAsConstAssertionOptions {}
-export interface UseAtIndexOptions {}
-export interface UseBlockStatementsOptions {}
-export interface UseCollapsedElseIfOptions {}
-export interface UseCollapsedIfOptions {}
-export interface UseComponentExportOnlyModulesOptions {}
-export interface UseConsistentArrayTypeOptions {}
-export interface UseConsistentBuiltinInstantiationOptions {}
-export interface UseConsistentCurlyBracesOptions {}
-export interface UseConsistentMemberAccessibilityOptions {}
-export interface UseConstOptions {}
-export interface UseDefaultParameterLastOptions {}
-export interface UseDefaultSwitchClauseOptions {}
-export interface UseDeprecatedReasonOptions {}
-export interface UseEnumInitializersOptions {}
-export interface UseExplicitLengthCheckOptions {}
-export interface UseExponentiationOperatorOptions {}
-export interface UseExportTypeOptions {}
-export interface UseFilenamingConventionOptions {}
-export interface UseForOfOptions {}
-export interface UseFragmentSyntaxOptions {}
-export interface UseImportTypeOptions {}
-export interface UseLiteralEnumMembersOptions {}
-export interface UseNodeAssertStrictOptions {}
-export interface UseNodejsImportProtocolOptions {}
-export interface UseNumberNamespaceOptions {}
-export interface UseNumericLiteralsOptions {}
-export interface UseSelfClosingElementsOptions {}
-export interface UseShorthandAssignOptions {}
-export interface UseShorthandFunctionTypeOptions {}
-export interface UseSingleVarDeclaratorOptions {}
-export interface UseTemplateOptions {}
-export interface UseThrowNewErrorOptions {}
-export interface UseThrowOnlyErrorOptions {}
-export interface UseTrimStartEndOptions {}
-export interface NoApproximativeNumericConstantOptions {}
-export interface NoArrayIndexKeyOptions {}
-export interface NoAssignInExpressionsOptions {}
-export interface NoAsyncPromiseExecutorOptions {}
-export interface NoCatchAssignOptions {}
-export interface NoClassAssignOptions {}
-export interface NoCommentTextOptions {}
-export interface NoCompareNegZeroOptions {}
-export interface NoConfusingLabelsOptions {}
-export interface NoConfusingVoidTypeOptions {}
-export interface NoConsoleOptions {}
-export interface NoConstEnumOptions {}
-export interface NoControlCharactersInRegexOptions {}
-export interface NoDebuggerOptions {}
-export interface NoDocumentCookieOptions {}
-export interface NoDocumentImportInPageOptions {}
-export interface NoDoubleEqualsOptions {}
-export interface NoDuplicateAtImportRulesOptions {}
-export interface NoDuplicateCaseOptions {}
-export interface NoDuplicateClassMembersOptions {}
-export interface NoDuplicateCustomPropertiesOptions {}
-export interface NoDuplicateElseIfOptions {}
-export interface NoDuplicateFieldsOptions {}
-export interface NoDuplicateFontNamesOptions {}
-export interface NoDuplicateJsxPropsOptions {}
-export interface NoDuplicateObjectKeysOptions {}
-export interface NoDuplicateParametersOptions {}
-export interface NoDuplicatePropertiesOptions {}
-export interface NoDuplicateSelectorsKeyframeBlockOptions {}
-export interface NoDuplicateTestHooksOptions {}
-export interface NoEmptyBlockOptions {}
-export interface NoEmptyBlockStatementsOptions {}
-export interface NoEmptyInterfaceOptions {}
-export interface NoEvolvingTypesOptions {}
-export interface NoExplicitAnyOptions {}
-export interface NoExportsInTestOptions {}
-export interface NoExtraNonNullAssertionOptions {}
-export interface NoFallthroughSwitchClauseOptions {}
-export interface NoFocusedTestsOptions {}
-export interface NoFunctionAssignOptions {}
-export interface NoGlobalAssignOptions {}
-export interface NoGlobalIsFiniteOptions {}
-export interface NoGlobalIsNanOptions {}
-export interface NoHeadImportInDocumentOptions {}
-export interface NoImplicitAnyLetOptions {}
-export interface NoImportAssignOptions {}
-export interface NoImportantInKeyframeOptions {}
-export interface NoIrregularWhitespaceOptions {}
-export interface NoLabelVarOptions {}
-export interface NoMisleadingCharacterClassOptions {}
-export interface NoMisleadingInstantiatorOptions {}
-export interface NoMisplacedAssertionOptions {}
-export interface NoMisrefactoredShorthandAssignOptions {}
-export interface NoOctalEscapeOptions {}
-export interface NoPrototypeBuiltinsOptions {}
-export interface NoReactSpecificPropsOptions {}
-export interface NoRedeclareOptions {}
-export interface NoRedundantUseStrictOptions {}
-export interface NoSelfCompareOptions {}
-export interface NoShadowRestrictedNamesOptions {}
-export interface NoShorthandPropertyOverridesOptions {}
-export interface NoSkippedTestsOptions {}
-export interface NoSparseArrayOptions {}
-export interface NoSuspiciousSemicolonInJsxOptions {}
-export interface NoTemplateCurlyInStringOptions {}
-export interface NoThenPropertyOptions {}
-export interface NoUnsafeDeclarationMergingOptions {}
-export interface NoUnsafeNegationOptions {}
-export interface NoVarOptions {}
-export interface UseAdjacentOverloadSignaturesOptions {}
-export interface UseAwaitOptions {}
-export interface UseDefaultSwitchClauseLastOptions {}
-export interface UseErrorMessageOptions {}
-export interface UseGetterReturnOptions {}
-export interface UseGoogleFontDisplayOptions {}
-export interface UseGuardForInOptions {}
-export interface UseIsArrayOptions {}
-export interface UseNamespaceKeywordOptions {}
-export interface UseNumberToFixedDigitsArgumentOptions {}
-export interface UseStrictModeOptions {}
-export interface UseValidTypeofOptions {}
+/**
+ * Options for the rule `noConfusingLabels`
+ */
+export interface NoConfusingLabelsOptions {
+	/**
+	 * A list of (non-confusing) labels that should be allowed
+	 */
+	allowedLabels: string[];
+}
+export interface NoConsoleOptions {
+	/**
+	 * Allowed calls on the console object.
+	 */
+	allow: string[];
+}
+/**
+ * Rule's options
+ */
+export interface NoDoubleEqualsOptions {
+	/**
+	* If `true`, an exception is made when comparing with `null`, as it's often relied on to check both for `null` or `undefined`.
+
+If `false`, no such exception will be made. 
+	 */
+	ignoreNull: boolean;
+}
+export type ImportGroup = null | GroupMatcher | GroupMatcher[];
+export type Visibility = "public" | "package" | "private";
+export type DependencyAvailability = boolean | string[];
+export interface Hook {
+	/**
+	* The "position" of the closure function, starting from zero.
+
+For example, for React's `useEffect()` hook, the closure index is 0. 
+	 */
+	closureIndex?: number;
+	/**
+	* The "position" of the array of dependencies, starting from zero.
+
+For example, for React's `useEffect()` hook, the dependencies index is 1. 
+	 */
+	dependenciesIndex?: number;
+	/**
+	 * The name of the hook.
+	 */
+	name?: string;
+	/**
+	* Whether the result of the hook is stable.
+
+Set to `true` to mark the identity of the hook's return value as stable, or use a number/an array of numbers to mark the "positions" in the return array as stable.
+
+For example, for React's `useRef()` hook the value would be `true`, while for `useState()` it would be `[1]`. 
+	 */
+	stableResult?: StableHookResult;
+}
+export type CustomRestrictedElements = Record<string, string>;
+export type ObjectPropertySyntax = "explicit" | "shorthand";
+/**
+ * Specifies whether property assignments on function parameters are allowed or denied.
+ */
+export type PropertyAssignmentMode = "allow" | "deny";
+export type CustomRestrictedImport = string | CustomRestrictedImportOptions;
+export type CustomRestrictedType = string | CustomRestrictedTypeOptions;
+export type ConsistentArrayType = "shorthand" | "generic";
+export type Accessibility = "noPublic" | "explicit" | "none";
+export type FilenameCases = FilenameCase[];
+export type Regex = string;
+/**
+ * Rule's options.
+ */
+export type Style2 = "auto" | "inlineType" | "separatedType";
 export interface Convention {
 	/**
 	 * String cases to enforce
@@ -7426,8 +3333,36 @@ export interface Convention {
 	 */
 	selector: Selector;
 }
+export type GroupMatcher = ImportMatcher | SourceMatcher;
+export type StableHookResult = boolean | number[];
+export interface CustomRestrictedImportOptions {
+	/**
+	 * Names of the exported members that allowed to be not be used.
+	 */
+	allowImportNames: string[];
+	/**
+	 * Names of the exported members that should not be used.
+	 */
+	importNames: string[];
+	/**
+	 * The message to display when this module is imported.
+	 */
+	message: string;
+}
+export interface CustomRestrictedTypeOptions {
+	message?: string;
+	use?: string;
+}
+/**
+ * Supported cases for file names.
+ */
+export type FilenameCase =
+	| "camelCase"
+	| "export"
+	| "kebab-case"
+	| "PascalCase"
+	| "snake_case";
 export type Formats = Format[];
-export type Regex = string;
 export interface Selector {
 	/**
 	 * Declaration kind
@@ -7442,6 +3377,11 @@ export interface Selector {
 	 */
 	scope: Scope;
 }
+export interface ImportMatcher {
+	source?: SourcesMatcher;
+	type?: boolean;
+}
+export type SourceMatcher = NegatablePredefinedSourceMatcher | ImportSourceGlob;
 /**
  * Supported cases.
  */
@@ -7491,6 +3431,26 @@ export type Kind =
 	| "typeMethod";
 export type Modifiers = RestrictedModifier[];
 export type Scope = "any" | "global";
+export type SourcesMatcher = SourceMatcher | SourceMatcher[];
+export type NegatablePredefinedSourceMatcher =
+	| ":ALIAS:"
+	| ":BUN:"
+	| ":NODE:"
+	| ":PACKAGE:"
+	| ":PACKAGE_WITH_PROTOCOL:"
+	| ":PATH:"
+	| ":URL:"
+	| "!:ALIAS:"
+	| "!:BUN:"
+	| "!:NODE:"
+	| "!:PACKAGE:"
+	| "!:PACKAGE_WITH_PROTOCOL:"
+	| "!:PATH:"
+	| "!:URL:";
+/**
+ * Glob to match against import sources.
+ */
+export type ImportSourceGlob = Glob;
 export type RestrictedModifier =
 	| "abstract"
 	| "private"
@@ -7558,16 +3518,20 @@ export type Category =
 	| "lint/a11y/useValidAutocomplete"
 	| "lint/a11y/useValidLang"
 	| "lint/complexity/noAdjacentSpacesInRegex"
+	| "lint/complexity/noArguments"
 	| "lint/complexity/noBannedTypes"
+	| "lint/complexity/noCommaOperator"
 	| "lint/complexity/noEmptyTypeParameters"
 	| "lint/complexity/noExcessiveCognitiveComplexity"
 	| "lint/complexity/noExcessiveNestedTestSuites"
 	| "lint/complexity/noExtraBooleanCast"
+	| "lint/complexity/noFlatMapIdentity"
 	| "lint/complexity/noForEach"
 	| "lint/complexity/noStaticOnlyClass"
 	| "lint/complexity/noThisInStatic"
 	| "lint/complexity/noUselessCatch"
 	| "lint/complexity/noUselessConstructor"
+	| "lint/complexity/noUselessContinue"
 	| "lint/complexity/noUselessEmptyExport"
 	| "lint/complexity/noUselessEscapeInRegex"
 	| "lint/complexity/noUselessFragments"
@@ -7582,11 +3546,11 @@ export type Category =
 	| "lint/complexity/noUselessTypeConstraint"
 	| "lint/complexity/noUselessUndefinedInitialization"
 	| "lint/complexity/noVoid"
-	| "lint/complexity/noWith"
 	| "lint/complexity/useArrowFunction"
 	| "lint/complexity/useDateNow"
 	| "lint/complexity/useFlatMap"
 	| "lint/complexity/useLiteralKeys"
+	| "lint/complexity/useNumericLiterals"
 	| "lint/complexity/useOptionalChain"
 	| "lint/complexity/useRegexLiterals"
 	| "lint/complexity/useSimpleNumberKeys"
@@ -7599,7 +3563,6 @@ export type Category =
 	| "lint/correctness/noConstructorReturn"
 	| "lint/correctness/noEmptyCharacterClassInRegex"
 	| "lint/correctness/noEmptyPattern"
-	| "lint/correctness/noFlatMapIdentity"
 	| "lint/correctness/noGlobalObjectCalls"
 	| "lint/correctness/noInnerDeclarations"
 	| "lint/correctness/noInvalidBuiltinInstantiation"
@@ -7640,16 +3603,15 @@ export type Category =
 	| "lint/correctness/noUnusedLabels"
 	| "lint/correctness/noUnusedPrivateClassMembers"
 	| "lint/correctness/noUnusedVariables"
-	| "lint/correctness/noUselessContinue"
 	| "lint/correctness/noVoidElementsWithChildren"
 	| "lint/correctness/noVoidTypeReturn"
-	| "lint/correctness/useArrayLiterals"
 	| "lint/correctness/useExhaustiveDependencies"
 	| "lint/correctness/useHookAtTopLevel"
 	| "lint/correctness/useImportExtensions"
 	| "lint/correctness/useIsNan"
 	| "lint/correctness/useJsxKeyInIterable"
 	| "lint/correctness/useValidForDirection"
+	| "lint/correctness/useValidTypeof"
 	| "lint/correctness/useYield"
 	| "lint/nursery/colorNoInvalidHex"
 	| "lint/nursery/noAwaitInLoop"
@@ -7660,23 +3622,29 @@ export type Category =
 	| "lint/nursery/noDestructuredProps"
 	| "lint/nursery/noDoneCallback"
 	| "lint/nursery/noDuplicateAtImportRules"
+	| "lint/nursery/noExcessiveLinesPerFunction"
 	| "lint/nursery/noFloatingPromises"
 	| "lint/nursery/noGlobalDirnameFilename"
+	| "lint/nursery/noImplicitCoercion"
 	| "lint/nursery/noImportCycles"
 	| "lint/nursery/noImportantInKeyframe"
 	| "lint/nursery/noImportantStyles"
 	| "lint/nursery/noInvalidDirectionInLinearGradient"
 	| "lint/nursery/noInvalidGridAreas"
 	| "lint/nursery/noInvalidPositionAtImportRule"
+	| "lint/nursery/noMagicNumbers"
 	| "lint/nursery/noMissingGenericFamilyKeyword"
+	| "lint/nursery/noNestedComponentDefinitions"
 	| "lint/nursery/noNoninteractiveElementInteractions"
 	| "lint/nursery/noProcessGlobal"
+	| "lint/nursery/noReactPropAssign"
 	| "lint/nursery/noReactSpecificProps"
 	| "lint/nursery/noRestrictedElements"
 	| "lint/nursery/noSecrets"
 	| "lint/nursery/noShadow"
 	| "lint/nursery/noShorthandPropertyOverrides"
 	| "lint/nursery/noTsIgnore"
+	| "lint/nursery/noUnassignedVariables"
 	| "lint/nursery/noUndeclaredDependencies"
 	| "lint/nursery/noUnknownAtRule"
 	| "lint/nursery/noUnknownFunction"
@@ -7694,6 +3662,7 @@ export type Category =
 	| "lint/nursery/useAdjacentGetterSetter"
 	| "lint/nursery/useBiomeSuppressionComment"
 	| "lint/nursery/useConsistentObjectDefinition"
+	| "lint/nursery/useConsistentResponse"
 	| "lint/nursery/useExhaustiveSwitchCases"
 	| "lint/nursery/useExplicitFunctionReturnType"
 	| "lint/nursery/useExplicitType"
@@ -7701,29 +3670,34 @@ export type Category =
 	| "lint/nursery/useForComponent"
 	| "lint/nursery/useGoogleFontPreconnect"
 	| "lint/nursery/useImportRestrictions"
+	| "lint/nursery/useIndexOf"
 	| "lint/nursery/useIterableCallbackReturn"
+	| "lint/nursery/useJsonImportAttribute"
 	| "lint/nursery/useJsxCurlyBraceConvention"
 	| "lint/nursery/useNamedOperation"
 	| "lint/nursery/useNamingConvention"
 	| "lint/nursery/useNumericSeparators"
+	| "lint/nursery/useObjectSpread"
 	| "lint/nursery/useParseIntRadix"
+	| "lint/nursery/useReadonlyClassProperties"
 	| "lint/nursery/useSingleJsDocAsterisk"
 	| "lint/nursery/useSortedClasses"
 	| "lint/nursery/useSortedProperties"
 	| "lint/nursery/useSymbolDescription"
+	| "lint/nursery/useUnifiedTypeSignature"
+	| "lint/nursery/useUniqueElementIds"
 	| "lint/performance/noAccumulatingSpread"
 	| "lint/performance/noBarrelFile"
 	| "lint/performance/noDelete"
 	| "lint/performance/noDynamicNamespaceImportAccess"
 	| "lint/performance/noImgElement"
+	| "lint/performance/noNamespaceImport"
 	| "lint/performance/noReExportAll"
 	| "lint/performance/useTopLevelRegex"
 	| "lint/security/noBlankTarget"
 	| "lint/security/noDangerouslySetInnerHtml"
 	| "lint/security/noDangerouslySetInnerHtmlWithChildren"
 	| "lint/security/noGlobalEval"
-	| "lint/style/noArguments"
-	| "lint/style/noCommaOperator"
 	| "lint/style/noCommonJs"
 	| "lint/style/noDefaultExport"
 	| "lint/style/noDescendingSpecificity"
@@ -7734,7 +3708,6 @@ export type Category =
 	| "lint/style/noImplicitBoolean"
 	| "lint/style/noInferrableTypes"
 	| "lint/style/noNamespace"
-	| "lint/style/noNamespaceImport"
 	| "lint/style/noNegationElse"
 	| "lint/style/noNestedTernary"
 	| "lint/style/noNonNullAssertion"
@@ -7750,6 +3723,7 @@ export type Category =
 	| "lint/style/noUselessElse"
 	| "lint/style/noValueAtRule"
 	| "lint/style/noYodaExpression"
+	| "lint/style/useArrayLiterals"
 	| "lint/style/useAsConstAssertion"
 	| "lint/style/useAtIndex"
 	| "lint/style/useBlockStatements"
@@ -7777,7 +3751,6 @@ export type Category =
 	| "lint/style/useNodeAssertStrict"
 	| "lint/style/useNodejsImportProtocol"
 	| "lint/style/useNumberNamespace"
-	| "lint/style/useNumericLiterals"
 	| "lint/style/useSelfClosingElements"
 	| "lint/style/useShorthandArrayType"
 	| "lint/style/useShorthandAssign"
@@ -7788,6 +3761,7 @@ export type Category =
 	| "lint/style/useThrowNewError"
 	| "lint/style/useThrowOnlyError"
 	| "lint/style/useTrimStartEnd"
+	| "lint/suspicious/noAlert"
 	| "lint/suspicious/noApproximativeNumericConstant"
 	| "lint/suspicious/noArrayIndexKey"
 	| "lint/suspicious/noAssignInExpressions"
@@ -7857,6 +3831,7 @@ export type Category =
 	| "lint/suspicious/noUnsafeDeclarationMerging"
 	| "lint/suspicious/noUnsafeNegation"
 	| "lint/suspicious/noVar"
+	| "lint/suspicious/noWith"
 	| "lint/suspicious/useAdjacentOverloadSignatures"
 	| "lint/suspicious/useAwait"
 	| "lint/suspicious/useDefaultSwitchClauseLast"
@@ -7868,7 +3843,6 @@ export type Category =
 	| "lint/suspicious/useNamespaceKeyword"
 	| "lint/suspicious/useNumberToFixedDigitsArgument"
 	| "lint/suspicious/useStrictMode"
-	| "lint/suspicious/useValidTypeof"
 	| "assist/source/useSortedKeys"
 	| "assist/source/useSortedProperties"
 	| "assist/source/useSortedAttributes"
@@ -8008,6 +3982,10 @@ export interface BacktraceSymbol {
 }
 export interface OpenProjectParams {
 	/**
+	 * Whether the client wants to run only certain rules. This is needed to compute the kind of [ScanKind].
+	 */
+	onlyRules?: RuleCode[];
+	/**
 	 * Whether the folder should be opened as a project, even if no `biome.json` can be found.
 	 */
 	openUninitialized: boolean;
@@ -8015,7 +3993,23 @@ export interface OpenProjectParams {
 	 * The path to open
 	 */
 	path: BiomePath;
+	/**
+	 * Whether the client wants to skip some lint rule. This is needed to compute the kind of [ScanKind].
+	 */
+	skipRules?: RuleCode[];
 }
+export type RuleCode = string;
+export interface OpenProjectResult {
+	/**
+	 * A unique identifier for this project
+	 */
+	projectKey: ProjectKey;
+	/**
+	 * How to scan this project
+	 */
+	scanKind: ScanKind;
+}
+export type ScanKind = "noScanner" | "knownFiles" | "project";
 export interface OpenFileParams {
 	content: FileContent;
 	documentFileSource?: DocumentFileSource;
@@ -8116,6 +4110,9 @@ export interface GetSyntaxTreeResult {
 	ast: string;
 	cst: string;
 }
+export interface FileExitsParams {
+	filePath: BiomePath;
+}
 export interface CheckFileSizeParams {
 	path: BiomePath;
 	projectKey: ProjectKey;
@@ -8165,7 +4162,6 @@ export interface PullDiagnosticsParams {
 	skip?: RuleCode[];
 }
 export type RuleCategories = RuleCategory[];
-export type RuleCode = string;
 export type RuleCategory = "syntax" | "lint" | "action" | "transformation";
 export interface PullDiagnosticsResult {
 	diagnostics: Diagnostic[];
@@ -8173,6 +4169,7 @@ export interface PullDiagnosticsResult {
 	skippedDiagnostics: number;
 }
 export interface PullActionsParams {
+	categories?: RuleCategories;
 	enabledRules?: RuleCode[];
 	only?: RuleCode[];
 	path: BiomePath;
@@ -8358,11 +4355,12 @@ export interface DropPatternParams {
 export interface Workspace {
 	fileFeatures(params: SupportsFeatureParams): Promise<FileFeaturesResult>;
 	updateSettings(params: UpdateSettingsParams): Promise<UpdateSettingsResult>;
-	openProject(params: OpenProjectParams): Promise<ProjectKey>;
+	openProject(params: OpenProjectParams): Promise<OpenProjectResult>;
 	openFile(params: OpenFileParams): Promise<void>;
 	changeFile(params: ChangeFileParams): Promise<void>;
 	closeFile(params: CloseFileParams): Promise<void>;
 	getSyntaxTree(params: GetSyntaxTreeParams): Promise<GetSyntaxTreeResult>;
+	fileExists(params: FileExitsParams): Promise<boolean>;
 	checkFileSize(params: CheckFileSizeParams): Promise<CheckFileSizeResult>;
 	getFileContent(params: GetFileContentParams): Promise<string>;
 	getControlFlowGraph(params: GetControlFlowGraphParams): Promise<string>;
@@ -8406,6 +4404,9 @@ export function createWorkspace(transport: Transport): Workspace {
 		},
 		getSyntaxTree(params) {
 			return transport.request("biome/get_syntax_tree", params);
+		},
+		fileExists(params) {
+			return transport.request("biome/file_exists", params);
 		},
 		checkFileSize(params) {
 			return transport.request("biome/check_file_size", params);

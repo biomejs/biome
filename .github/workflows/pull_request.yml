@@ -4,6 +4,7 @@ on:
   pull_request:
     branches:
       - main
+      - next
     paths: # Only run when changes are made to rust code or root Cargo
       - "crates/**"
       - "fuzz/**"

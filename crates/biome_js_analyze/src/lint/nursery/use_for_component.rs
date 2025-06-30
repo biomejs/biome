@@ -1,6 +1,5 @@
 use biome_analyze::{
-    Ast, Rule, RuleDiagnostic, RuleDomain, RuleSource, RuleSourceKind, context::RuleContext,
-    declare_lint_rule,
+    Ast, Rule, RuleDiagnostic, RuleDomain, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
 use biome_js_syntax::{AnyJsMemberExpression, JsCallExpression, JsSyntaxKind, JsxExpressionChild};
@@ -58,8 +57,7 @@ declare_lint_rule! {
         language: "js",
         domains: &[RuleDomain::Solid],
         recommended: false,
-        sources: &[RuleSource::EslintSolid("perfer-for")],
-        source_kind: RuleSourceKind::Inspired,
+        sources: &[RuleSource::EslintSolid("perfer-for").inspired()],
     }
 }
 

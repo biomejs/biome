@@ -40,7 +40,7 @@ declare_lint_rule! {
         version: "1.0.0",
         name: "noAriaUnsupportedElements",
         language: "jsx",
-        sources: &[RuleSource::EslintJsxA11y("aria-unsupported-elements")],
+        sources: &[RuleSource::EslintJsxA11y("aria-unsupported-elements").same()],
         recommended: true,
         severity: Severity::Error,
         fix_kind: FixKind::Unsafe,

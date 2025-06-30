@@ -63,8 +63,8 @@ declare_lint_rule! {
         name: "noInvalidUseBeforeDeclaration",
         language: "js",
         sources: &[
-            RuleSource::Eslint("no-use-before-define"),
-            RuleSource::EslintTypeScript("no-use-before-define"),
+            RuleSource::Eslint("no-use-before-define").same(),
+            RuleSource::EslintTypeScript("no-use-before-define").same(),
         ],
         recommended: true,
         severity: Severity::Error,
@@ -232,6 +232,7 @@ impl TryFrom<&AnyJsBindingDeclaration> for DeclarationKind {
             | AnyJsBindingDeclaration::TsInterfaceDeclaration(_)
             | AnyJsBindingDeclaration::TsTypeAliasDeclaration(_)
             | AnyJsBindingDeclaration::TsEnumDeclaration(_)
+            | AnyJsBindingDeclaration::TsExternalModuleDeclaration(_)
             | AnyJsBindingDeclaration::TsModuleDeclaration(_)
             | AnyJsBindingDeclaration::JsShorthandNamedImportSpecifier(_)
             | AnyJsBindingDeclaration::JsNamedImportSpecifier(_)

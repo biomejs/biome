@@ -27,7 +27,7 @@ declare_lint_rule! {
         version: "1.0.0",
         name: "noLabelVar",
         language: "js",
-        sources: &[RuleSource::Eslint("no-label-var")],
+        sources: &[RuleSource::Eslint("no-label-var").same()],
         recommended: true,
         severity: Severity::Error,
     }

@@ -8,7 +8,7 @@ mod generate_license;
 mod generate_migrate_eslint;
 #[cfg(feature = "schema")]
 mod generate_schema;
-mod promote_rule;
+mod move_rule;
 use xtask::{Result, project_root, pushd};
 
 #[cfg(feature = "schema")]
@@ -24,7 +24,7 @@ use crate::generate_license::generate_license;
 use crate::generate_migrate_eslint::generate_migrate_eslint;
 #[cfg(feature = "schema")]
 use crate::generate_schema::generate_configuration_schema;
-use crate::promote_rule::promote_rule;
+use crate::move_rule::move_rule;
 
 use xtask::Mode::Overwrite;
 use xtask_codegen::{
@@ -78,8 +78,8 @@ fn main() -> Result<()> {
         } => {
             generate_new_analyzer_rule(kind, category, &name);
         }
-        TaskCommand::PromoteRule { name, group } => {
-            promote_rule(&name, &group);
+        TaskCommand::MoveRule { name, group } => {
+            move_rule(&name, &group);
         }
         TaskCommand::All => {
             generate_tables()?;

@@ -7,14 +7,13 @@ expression: duplicated.json
 {
   "linter": {
     "rules": {
-      
       "correctness": {
+        "noUnnecessaryContinue": "on",
         "noInvalidNewBuiltin": "on",
-        "noInvalidBuiltinInstantiation": "on",
-        "noUselessContinue": "on"
+        "noInvalidBuiltinInstantiation": "on"
       },
       "complexity": {
-        "noUnnecessaryContinue": "on"
+        "noUselessContinue": "on"
       }
     }
   }
@@ -24,48 +23,51 @@ expression: duplicated.json
 
 # Diagnostics
 ```
+duplicated.json:5:9 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This lint rule has been moved to complexity/noUselessContinue.
+  
+    3 │     "rules": {
+    4 │       "correctness": {
+  > 5 │         "noUnnecessaryContinue": "on",
+      │         ^^^^^^^^^^^^^^^^^^^^^^^
+    6 │         "noInvalidNewBuiltin": "on",
+    7 │         "noInvalidBuiltinInstantiation": "on"
+  
+  i Safe fix: Move and rename the lint rule.
+  
+     3  3 │       "rules": {
+     4  4 │         "correctness": {
+     5    │ - ········"noUnnecessaryContinue":·"on",
+     6    │ - ········"noInvalidNewBuiltin":·"on",
+        5 │ + ········"noInvalidNewBuiltin":·"on",
+     7  6 │           "noInvalidBuiltinInstantiation": "on"
+     8  7 │         },
+  
+
+```
+
+```
 duplicated.json:6:9 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! This lint rule has been renamed to noInvalidBuiltinInstantiation.
   
-    5 │       "correctness": {
+    4 │       "correctness": {
+    5 │         "noUnnecessaryContinue": "on",
   > 6 │         "noInvalidNewBuiltin": "on",
       │         ^^^^^^^^^^^^^^^^^^^^^
-    7 │         "noInvalidBuiltinInstantiation": "on",
-    8 │         "noUselessContinue": "on"
+    7 │         "noInvalidBuiltinInstantiation": "on"
+    8 │       },
   
   i Safe fix: Rename the lint rule.
   
-     4  4 │         
-     5  5 │         "correctness": {
+     4  4 │         "correctness": {
+     5  5 │           "noUnnecessaryContinue": "on",
      6    │ - ········"noInvalidNewBuiltin":·"on",
-     7    │ - ········"noInvalidBuiltinInstantiation":·"on",
-        6 │ + ········"noInvalidBuiltinInstantiation":·"on",
-     8  7 │           "noUselessContinue": "on"
-     9  8 │         },
-  
-
-```
-
-```
-duplicated.json:11:9 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! This lint rule has been moved to correctness/noUselessContinue.
-  
-     9 │       },
-    10 │       "complexity": {
-  > 11 │         "noUnnecessaryContinue": "on"
-       │         ^^^^^^^^^^^^^^^^^^^^^^^
-    12 │       }
-    13 │     }
-  
-  i Safe fix: Move and rename the lint rule.
-  
-     9  9 │         },
-    10 10 │         "complexity": {
-    11    │ - ········"noUnnecessaryContinue":·"on"
-    12 11 │         }
-    13 12 │       }
+     7    │ - ········"noInvalidBuiltinInstantiation":·"on"
+        6 │ + ········"noInvalidBuiltinInstantiation":·"on"
+     8  7 │         },
+     9  8 │         "complexity": {
   
 
 ```

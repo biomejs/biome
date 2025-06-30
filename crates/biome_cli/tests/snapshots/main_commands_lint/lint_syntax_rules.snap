@@ -54,7 +54,7 @@ check.js:1:17 lint/correctness/noUnusedPrivateClassMembers  FIXABLE  ━━━�
 ```block
 check.js:1:7 lint/correctness/noUnusedVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This class is unused.
+  ! This class A is unused.
   
   > 1 │ class A { #foo; #foo }
       │       ^

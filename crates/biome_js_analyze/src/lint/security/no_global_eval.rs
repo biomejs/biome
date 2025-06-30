@@ -54,7 +54,7 @@ declare_lint_rule! {
         version: "1.5.0",
         name: "noGlobalEval",
         language: "js",
-        sources: &[RuleSource::Eslint("no-eval")],
+        sources: &[RuleSource::Eslint("no-eval").same()],
         recommended: true,
         severity: Severity::Error,
     }

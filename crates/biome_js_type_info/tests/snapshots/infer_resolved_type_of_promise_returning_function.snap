@@ -19,14 +19,14 @@ sync Function "returnsPromise" {
     params: []
     type_args: []
   }
-  returns: Global TypeId(7)
+  returns: Global TypeId(0)
 }
 ```
 
 ## Registered types
 
 ```
-Global TypeId(7) => instanceof Global TypeId(8)
+Global TypeId(0) => instanceof Global TypeId(1)
 
-Global TypeId(8) => instanceof Promise<T = number>
+Global TypeId(1) => instanceof Promise<number>
 ```

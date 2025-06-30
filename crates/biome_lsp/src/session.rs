@@ -7,9 +7,10 @@ use biome_analyze::RuleCategoriesBuilder;
 use biome_configuration::ConfigurationPathHint;
 use biome_console::markup;
 use biome_deserialize::Merge;
-use biome_diagnostics::{DiagnosticExt, Error, PrintDescription};
+use biome_diagnostics::PrintDescription;
 use biome_fs::BiomePath;
-use biome_lsp_converters::{PositionEncoding, WideEncoding, negotiated_encoding};
+use biome_line_index::WideEncoding;
+use biome_lsp_converters::{PositionEncoding, negotiated_encoding};
 use biome_service::Workspace;
 use biome_service::WorkspaceError;
 use biome_service::configuration::{LoadedConfiguration, load_configuration, load_editorconfig};
@@ -17,8 +18,8 @@ use biome_service::file_handlers::{AstroFileHandler, SvelteFileHandler, VueFileH
 use biome_service::projects::ProjectKey;
 use biome_service::workspace::ServiceDataNotification;
 use biome_service::workspace::{
-    FeaturesBuilder, GetFileContentParams, OpenProjectParams, PullDiagnosticsParams,
-    SupportsFeatureParams,
+    FeaturesBuilder, GetFileContentParams, OpenProjectParams, OpenProjectResult,
+    PullDiagnosticsParams, SupportsFeatureParams,
 };
 use biome_service::workspace::{RageEntry, RageParams, RageResult, UpdateSettingsParams};
 use biome_service::workspace::{ScanKind, ScanProjectFolderParams};
@@ -43,7 +44,7 @@ use tower_lsp_server::lsp_types::{ClientCapabilities, Diagnostic, Uri};
 use tower_lsp_server::lsp_types::{MessageType, Registration};
 use tower_lsp_server::lsp_types::{Unregistration, WorkspaceFolder};
 use tower_lsp_server::{Client, UriExt, lsp_types};
-use tracing::{error, info, warn};
+use tracing::{debug, error, info, instrument, warn};
 
 pub(crate) struct ClientInformation {
     /// The name of the client
@@ -104,6 +105,7 @@ struct InitializeParams {
     workspace_folders: Option<Vec<WorkspaceFolder>>,
 }
 
+#[derive(Debug)]
 #[repr(u8)]
 pub(crate) enum ConfigurationStatus {
     /// The configuration file was properly loaded
@@ -207,6 +209,7 @@ impl Session {
     }
 
     /// Initialize this session instance with the incoming initialization parameters from the client
+    #[instrument(level = "debug", skip_all)]
     pub(crate) fn initialize(
         self: &Arc<Self>,
         client_capabilities: ClientCapabilities,
@@ -306,27 +309,31 @@ impl Session {
 
     /// Registers an open project with its root path and scans the folder.
     #[tracing::instrument(level = "debug", skip(self))]
-    pub(crate) fn insert_and_scan_project(
+    pub(crate) async fn insert_and_scan_project(
         self: &Arc<Self>,
         project_key: ProjectKey,
         path: BiomePath,
+        scan_kind: ScanKind,
     ) {
         self.projects.pin().insert(path.clone(), project_key);
 
         // Spawn the scan in the background, to avoid timing out the LSP request.
         let session = self.clone();
-        spawn(async move { session.scan_project_folder(project_key, path).await });
+        let project_path = path.clone();
+        spawn(async move {
+            session
+                .scan_project_folder(project_key, project_path, scan_kind)
+                .await
+        })
+        .await
+        .expect("Scanning task to complete successfully");
     }
 
     /// Get a [`Document`] matching the provided [`Uri`]
     ///
     /// If document does not exist, result is [WorkspaceError::NotFound]
-    pub(crate) fn document(&self, url: &Uri) -> Result<Document, Error> {
-        self.documents
-            .pin()
-            .get(url)
-            .cloned()
-            .ok_or_else(|| WorkspaceError::not_found().with_file_path(url.to_string()))
+    pub(crate) fn document(&self, url: &Uri) -> Option<Document> {
+        self.documents.pin().get(url).cloned()
     }
 
     /// Set the [`Document`] for the provided [`Uri`]
@@ -360,7 +367,9 @@ impl Session {
     /// contents changes.
     #[tracing::instrument(level = "debug", skip_all, fields(url = display(url.as_str()), diagnostic_count), err)]
     pub(crate) async fn update_diagnostics(&self, url: Uri) -> Result<(), LspError> {
-        let doc = self.document(&url)?;
+        let Some(doc) = self.document(&url) else {
+            return Ok(());
+        };
         self.update_diagnostics_for_document(url, doc).await
     }
 
@@ -484,13 +493,32 @@ impl Session {
     }
 
     /// True if the client supports dynamic registration of "workspace/didChangeConfiguration" requests
+    #[instrument(level = "info", skip(self))]
     pub(crate) fn can_register_did_change_configuration(&self) -> bool {
-        self.initialize_params
+        let result = self
+            .initialize_params
             .get()
             .and_then(|c| c.client_capabilities.workspace.as_ref())
             .and_then(|c| c.did_change_configuration)
             .and_then(|c| c.dynamic_registration)
-            == Some(true)
+            == Some(true);
+
+        info!("Can register didChangeConfiguration: {result}");
+        result
+    }
+
+    #[instrument(level = "info", skip(self))]
+    pub(crate) fn can_register_did_change_watched_files(&self) -> bool {
+        let result = self
+            .initialize_params
+            .get()
+            .and_then(|c| c.client_capabilities.workspace.as_ref())
+            .and_then(|c| c.did_change_watched_files)
+            .and_then(|c| c.dynamic_registration)
+            == Some(true);
+
+        info!("Can register didChangeWatchedFiles: {result}");
+        result
     }
 
     /// Get the current workspace folders
@@ -537,9 +565,9 @@ impl Session {
             self.set_configuration_status(ConfigurationStatus::Loading);
 
             let status = self
-                .load_biome_configuration_file(ConfigurationPathHint::FromWorkspace(config_path))
+                .load_biome_configuration_file(ConfigurationPathHint::FromUser(config_path))
                 .await;
-
+            debug!("Configuration status: {:?}", status);
             self.set_configuration_status(status);
         } else if let Some(folders) = self.get_workspace_folders() {
             info!("Detected workspace folder.");
@@ -556,6 +584,7 @@ impl Session {
                                 base_path,
                             ))
                             .await;
+                        debug!("Configuration status: {:?}", status);
                         self.set_configuration_status(status);
                     }
                     None => {
@@ -576,13 +605,16 @@ impl Session {
         }
     }
 
+    #[instrument(level = "debug", skip(self))]
     pub(crate) async fn scan_project_folder(
         self: &Arc<Self>,
         project_key: ProjectKey,
         project_path: BiomePath,
+        scan_kind: ScanKind,
     ) {
         let session = self.clone();
-        let scan_project = move || {
+
+        spawn_blocking(move || {
             let result = session
                 .workspace
                 .scan_project_folder(ScanProjectFolderParams {
@@ -590,7 +622,7 @@ impl Session {
                     path: Some(project_path),
                     watch: true,
                     force: false,
-                    scan_kind: ScanKind::Project,
+                    scan_kind,
                 });
 
             match result {
@@ -615,9 +647,9 @@ impl Session {
                     });
                 }
             }
-        };
-
-        let _ = spawn_blocking(scan_project).await;
+        })
+        .await
+        .unwrap();
     }
 
     #[tracing::instrument(level = "debug", skip(self))]
@@ -653,6 +685,10 @@ impl Session {
             ..
         } = loaded_configuration;
 
+        if configuration_path.is_none() && self.requires_configuration() {
+            return ConfigurationStatus::Missing;
+        }
+
         let fs = self.workspace.fs();
         let should_use_editorconfig = fs_configuration.use_editorconfig();
         let mut configuration = if should_use_editorconfig {
@@ -680,25 +716,40 @@ impl Session {
 
         configuration.merge_with(fs_configuration);
 
-        let path = match (&configuration_path, &base_path) {
-            (Some(configuration_path), _) => configuration_path.as_path(),
-            (
-                None,
-                ConfigurationPathHint::FromLsp(path) | ConfigurationPathHint::FromWorkspace(path),
-            ) => path,
-            (None, _) => &fs.working_directory().unwrap_or_default(),
+        // If the configuration from the LSP or the workspace, the directory path is used as
+        // the working directory. Otherwise, the base path of the session is used, then the current
+        // working directory is used as the last resort.
+        let path = match &base_path {
+            ConfigurationPathHint::FromLsp(path) | ConfigurationPathHint::FromWorkspace(path) => {
+                path.to_path_buf()
+            }
+            _ => self
+                .base_path()
+                .or_else(|| fs.working_directory())
+                .unwrap_or_default(),
         };
         let register_result = self.workspace.open_project(OpenProjectParams {
-            path: path.into(),
+            path: path.as_path().into(),
             open_uninitialized: true,
+            skip_rules: None,
+            only_rules: None,
         });
-        let project_key = match register_result {
+        let OpenProjectResult {
+            project_key,
+            scan_kind,
+        } = match register_result {
             Ok(result) => result,
             Err(error) => {
                 error!("Failed to register the project folder: {error}");
                 self.client.log_message(MessageType::ERROR, &error).await;
                 return ConfigurationStatus::Error;
             }
+        };
+
+        let scan_kind = if scan_kind.is_none() {
+            ScanKind::KnownFiles
+        } else {
+            scan_kind
         };
 
         let result = self.workspace.update_settings(UpdateSettingsParams {
@@ -710,7 +761,8 @@ impl Session {
             configuration,
         });
 
-        self.insert_and_scan_project(project_key, path.into());
+        self.insert_and_scan_project(project_key, path.into(), scan_kind)
+            .await;
 
         if let Err(WorkspaceError::PluginErrors(error)) = result {
             error!("Failed to load plugins: {error:?}");
@@ -803,7 +855,15 @@ impl Session {
             .store(true, Ordering::Relaxed);
     }
 
+    pub(crate) fn requires_configuration(&self) -> bool {
+        self.extension_settings
+            .read()
+            .unwrap()
+            .requires_configuration()
+    }
+
     pub(crate) fn is_linting_and_formatting_disabled(&self) -> bool {
+        debug!("configuration status {:?}", self.configuration_status());
         match self.configuration_status() {
             ConfigurationStatus::Loaded => false,
             ConfigurationStatus::Missing => self

@@ -8,6 +8,7 @@ pub type PathInternerSet = HashSet<Utf8PathBuf, FxBuildHasher>;
 /// File paths interner cache
 ///
 /// The path interner stores an instance of [PathBuf]
+#[derive(Debug)]
 pub struct PathInterner {
     storage: PathInternerSet,
     handler: Sender<Utf8PathBuf>,
@@ -35,7 +36,7 @@ impl PathInterner {
         result
     }
 
-    pub fn into_paths(self) -> PathInternerSet {
-        self.storage
+    pub fn as_intern_set(&self) -> &PathInternerSet {
+        &self.storage
     }
 }

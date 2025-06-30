@@ -249,8 +249,26 @@ impl Closure {
         self.data.scopes[self.scope_id.index()].range
     }
 
+    /// Checks if a given reference is within the specified scope range.
+    fn is_reference_within_scope(
+        &self,
+        scope: &SemanticModelScopeData,
+        reference: &ReferenceId,
+    ) -> bool {
+        let binding_id = reference.binding_id();
+        let binding = self.data.binding(binding_id);
+        binding
+            .references
+            .iter()
+            .any(|semantic_reference| scope.range.contains(semantic_reference.range_start))
+    }
+
     /// Return all [Reference] this closure captures, not taking into
-    /// consideration any capture of children closures
+    /// consideration any capture of children closures.
+    /// It includes references from the current scope and any
+    /// parent scope that are within the range of this closure.
+    /// Ensures that references from the parent scope are
+    /// included only if they are within the range of this closure.
     ///
     /// ```rust,ignore
     /// let inner_function = "let a, b;
@@ -266,9 +284,27 @@ impl Closure {
         let scope = &self.data.scopes[self.scope_id.index()];
 
         let scopes = scope.children.clone();
-
         let mut references = scope.read_references.clone();
+
         references.extend(scope.write_references.iter().copied());
+
+        if let Some(parent) = scope.parent {
+            let parent_scope = &self.data.scopes[parent.index()];
+
+            let parent_read_references: Vec<_> = parent_scope
+                .read_references
+                .iter()
+                .filter(|reference| self.is_reference_within_scope(scope, reference))
+                .collect();
+            let parent_write_references: Vec<_> = parent_scope
+                .write_references
+                .iter()
+                .filter(|reference| self.is_reference_within_scope(scope, reference))
+                .collect();
+
+            references.extend(parent_read_references.iter().copied());
+            references.extend(parent_write_references.iter().copied());
+        }
 
         AllCapturesIter {
             data: self.data.clone(),

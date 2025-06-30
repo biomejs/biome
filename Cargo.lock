@@ -61,9 +61,9 @@ checksum = "7992085ec035cfe96992dd31bfd495a2ebd31969bb95f624471cb6c0b349e571"
 
 [[package]]
 name = "ascii_table"
-version = "4.0.6"
+version = "4.0.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8bc070afe45e3d9e628b82d77d61c90531dc6997b341d57715b82461af415669"
+checksum = "fb3cd3541590f14025990035bb02b205870f8ca3f5297956dd2c6b32e6470fa1"
 
 [[package]]
 name = "autocfg"
@@ -109,7 +109,6 @@ dependencies = [
  "rustc-hash 2.1.1",
  "schemars",
  "serde",
- "tracing",
 ]
 
 [[package]]
@@ -165,6 +164,7 @@ dependencies = [
  "biome_json_syntax",
  "biome_lsp",
  "biome_migrate",
+ "biome_resolver",
  "biome_rowan",
  "biome_service",
  "biome_text_edit",
@@ -212,17 +212,20 @@ dependencies = [
  "biome_json_formatter",
  "biome_json_parser",
  "biome_json_syntax",
+ "biome_resolver",
  "biome_rowan",
  "biome_rule_options",
  "bpaf",
  "camino",
+ "codspeed-criterion-compat",
  "insta",
- "oxc_resolver",
+ "mimalloc",
  "regex",
  "rustc-hash 2.1.1",
  "schemars",
  "serde",
  "tests_macros",
+ "tikv-jemallocator",
 ]
 
 [[package]]
@@ -267,12 +270,15 @@ dependencies = [
  "biome_suppression",
  "biome_test_utils",
  "camino",
+ "codspeed-criterion-compat",
  "insta",
+ "mimalloc",
  "regex",
  "rustc-hash 2.1.1",
  "schemars",
  "serde",
  "tests_macros",
+ "tikv-jemallocator",
 ]
 
 [[package]]
@@ -299,11 +305,15 @@ dependencies = [
  "biome_service",
  "biome_string_case",
  "biome_suppression",
+ "biome_test_utils",
  "camino",
+ "codspeed-criterion-compat",
  "countme",
+ "mimalloc",
  "serde",
  "serde_json",
  "tests_macros",
+ "tikv-jemallocator",
 ]
 
 [[package]]
@@ -323,10 +333,13 @@ dependencies = [
  "biome_test_utils",
  "biome_unicode_table",
  "camino",
+ "codspeed-criterion-compat",
  "insta",
+ "mimalloc",
  "quickcheck",
  "quickcheck_macros",
  "tests_macros",
+ "tikv-jemallocator",
  "tracing",
 ]
 
@@ -394,7 +407,6 @@ dependencies = [
  "camino",
  "enumflags2",
  "insta",
- "oxc_resolver",
  "schemars",
  "serde",
  "serde_json",
@@ -485,7 +497,6 @@ dependencies = [
  "crossbeam",
  "directories",
  "enumflags2",
- "oxc_resolver",
  "papaya",
  "parking_lot",
  "path-absolutize",
@@ -556,11 +567,15 @@ dependencies = [
  "biome_rowan",
  "biome_service",
  "biome_suppression",
+ "biome_test_utils",
  "camino",
+ "codspeed-criterion-compat",
  "countme",
+ "mimalloc",
  "serde",
  "serde_json",
  "tests_macros",
+ "tikv-jemallocator",
 ]
 
 [[package]]
@@ -575,10 +590,13 @@ dependencies = [
  "biome_rowan",
  "biome_test_utils",
  "biome_unicode_table",
+ "codspeed-criterion-compat",
  "insta",
+ "mimalloc",
  "quickcheck",
  "quickcheck_macros",
  "tests_macros",
+ "tikv-jemallocator",
  "tracing",
  "unicode-bom",
 ]
@@ -627,7 +645,6 @@ dependencies = [
  "biome_rowan",
  "biome_service",
  "camino",
- "countme",
  "serde",
  "serde_json",
  "tests_macros",
@@ -724,11 +741,15 @@ dependencies = [
  "biome_service",
  "biome_string_case",
  "biome_suppression",
+ "biome_test_utils",
  "camino",
+ "codspeed-criterion-compat",
  "countme",
+ "mimalloc",
  "schemars",
  "serde",
  "tests_macros",
+ "tikv-jemallocator",
 ]
 
 [[package]]
@@ -743,10 +764,13 @@ dependencies = [
  "biome_rowan",
  "biome_test_utils",
  "biome_unicode_table",
+ "codspeed-criterion-compat",
  "insta",
+ "mimalloc",
  "quickcheck",
  "quickcheck_macros",
  "tests_macros",
+ "tikv-jemallocator",
  "tracing",
 ]
 
@@ -785,6 +809,7 @@ dependencies = [
  "biome_package",
  "biome_plugin_loader",
  "biome_project_layout",
+ "biome_resolver",
  "biome_rowan",
  "biome_rule_options",
  "biome_string_case",
@@ -793,9 +818,11 @@ dependencies = [
  "biome_unicode_table",
  "bitvec",
  "camino",
+ "codspeed-criterion-compat",
  "enumflags2",
  "globset",
  "insta",
+ "mimalloc",
  "regex",
  "roaring",
  "rustc-hash 2.1.1",
@@ -803,6 +830,7 @@ dependencies = [
  "serde",
  "smallvec",
  "tests_macros",
+ "tikv-jemallocator",
 ]
 
 [[package]]
@@ -831,16 +859,20 @@ dependencies = [
  "biome_service",
  "biome_string_case",
  "biome_suppression",
+ "biome_test_utils",
  "biome_text_size",
  "biome_unicode_table",
  "camino",
+ "codspeed-criterion-compat",
  "countme",
+ "mimalloc",
  "quickcheck",
  "schemars",
  "serde",
  "serde_json",
  "smallvec",
  "tests_macros",
+ "tikv-jemallocator",
  "unicode-width 0.1.12",
 ]
 
@@ -861,10 +893,12 @@ dependencies = [
  "biome_test_utils",
  "biome_unicode_table",
  "camino",
+ "codspeed-criterion-compat",
  "drop_bomb",
  "enumflags2",
  "indexmap",
  "insta",
+ "mimalloc",
  "quickcheck",
  "quickcheck_macros",
  "rustc-hash 2.1.1",
@@ -873,6 +907,7 @@ dependencies = [
  "serde_json",
  "smallvec",
  "tests_macros",
+ "tikv-jemallocator",
  "tracing",
 ]
 
@@ -933,10 +968,13 @@ dependencies = [
  "biome_js_parser",
  "biome_js_syntax",
  "biome_js_type_info_macros",
+ "biome_resolver",
  "biome_rowan",
  "biome_test_utils",
  "camino",
+ "hashbrown 0.15.4",
  "insta",
+ "rustc-hash 2.1.1",
 ]
 
 [[package]]
@@ -974,9 +1012,12 @@ dependencies = [
  "biome_suppression",
  "biome_test_utils",
  "camino",
+ "codspeed-criterion-compat",
  "insta",
+ "mimalloc",
  "rustc-hash 2.1.1",
  "tests_macros",
+ "tikv-jemallocator",
 ]
 
 [[package]]
@@ -1005,11 +1046,14 @@ dependencies = [
  "biome_suppression",
  "biome_test_utils",
  "camino",
+ "codspeed-criterion-compat",
  "countme",
+ "mimalloc",
  "schemars",
  "serde",
  "serde_json",
  "tests_macros",
+ "tikv-jemallocator",
 ]
 
 [[package]]
@@ -1024,10 +1068,13 @@ dependencies = [
  "biome_rowan",
  "biome_test_utils",
  "biome_unicode_table",
+ "codspeed-criterion-compat",
  "insta",
+ "mimalloc",
  "quickcheck",
  "quickcheck_macros",
  "tests_macros",
+ "tikv-jemallocator",
  "tracing",
  "unicode-bom",
 ]
@@ -1053,9 +1100,16 @@ dependencies = [
  "biome_json_syntax",
  "biome_rowan",
  "indexmap",
- "oxc_resolver",
  "rustc-hash 2.1.1",
  "static_assertions",
+]
+
+[[package]]
+name = "biome_line_index"
+version = "0.1.0"
+dependencies = [
+ "biome_text_size",
+ "rustc-hash 2.1.1",
 ]
 
 [[package]]
@@ -1069,7 +1123,9 @@ dependencies = [
  "biome_deserialize",
  "biome_diagnostics",
  "biome_fs",
+ "biome_line_index",
  "biome_lsp_converters",
+ "biome_resolver",
  "biome_rowan",
  "biome_service",
  "biome_text_edit",
@@ -1091,7 +1147,8 @@ name = "biome_lsp_converters"
 version = "0.1.0"
 dependencies = [
  "anyhow",
- "biome_rowan",
+ "biome_line_index",
+ "biome_text_size",
  "rustc-hash 2.1.1",
  "tower",
  "tower-lsp-server",
@@ -1182,18 +1239,21 @@ dependencies = [
  "biome_json_value",
  "biome_package",
  "biome_project_layout",
+ "biome_resolver",
  "biome_rowan",
  "biome_test_utils",
  "camino",
  "cfg-if",
+ "codspeed-criterion-compat",
  "insta",
+ "mimalloc",
  "once_cell",
- "oxc_resolver",
  "papaya",
  "rust-lapper",
  "rustc-hash 2.1.1",
  "serde_json",
  "static_assertions",
+ "tikv-jemallocator",
 ]
 
 [[package]]
@@ -1204,6 +1264,7 @@ dependencies = [
  "biome_deserialize",
  "biome_deserialize_macros",
  "biome_diagnostics",
+ "biome_fs",
  "biome_json_parser",
  "biome_json_syntax",
  "biome_json_value",
@@ -1211,14 +1272,16 @@ dependencies = [
  "biome_rowan",
  "biome_text_size",
  "camino",
+ "codspeed-criterion-compat",
  "indexmap",
  "insta",
+ "mimalloc",
  "node-semver",
- "oxc_resolver",
  "rustc-hash 2.1.1",
  "serde",
  "static_assertions",
  "tests_macros",
+ "tikv-jemallocator",
 ]
 
 [[package]]
@@ -1239,6 +1302,7 @@ name = "biome_plugin_loader"
 version = "0.0.1"
 dependencies = [
  "biome_analyze",
+ "biome_configuration",
  "biome_console",
  "biome_deserialize",
  "biome_deserialize_macros",
@@ -1247,6 +1311,7 @@ dependencies = [
  "biome_grit_patterns",
  "biome_json_parser",
  "biome_parser",
+ "biome_resolver",
  "biome_rowan",
  "camino",
  "grit-pattern-matcher",
@@ -1269,13 +1334,26 @@ dependencies = [
 ]
 
 [[package]]
+name = "biome_resolver"
+version = "0.1.0"
+dependencies = [
+ "biome_console",
+ "biome_diagnostics",
+ "biome_fs",
+ "biome_json_value",
+ "biome_package",
+ "biome_rowan",
+ "camino",
+]
+
+[[package]]
 name = "biome_rowan"
 version = "0.5.7"
 dependencies = [
  "biome_text_edit",
  "biome_text_size",
  "countme",
- "hashbrown 0.15.2",
+ "hashbrown 0.15.4",
  "iai",
  "quickcheck",
  "quickcheck_macros",
@@ -1344,6 +1422,7 @@ dependencies = [
  "biome_parser",
  "biome_plugin_loader",
  "biome_project_layout",
+ "biome_resolver",
  "biome_rowan",
  "biome_string_case",
  "biome_text_edit",
@@ -1369,6 +1448,9 @@ dependencies = [
 [[package]]
 name = "biome_string_case"
 version = "0.5.7"
+dependencies = [
+ "biome_rowan",
+]
 
 [[package]]
 name = "biome_suppression"
@@ -1394,6 +1476,7 @@ dependencies = [
 name = "biome_test_utils"
 version = "0.0.0"
 dependencies = [
+ "ansi_rgb",
  "biome_analyze",
  "biome_configuration",
  "biome_console",
@@ -1415,6 +1498,8 @@ dependencies = [
  "json_comments",
  "serde_json",
  "similar",
+ "ureq",
+ "url",
 ]
 
 [[package]]
@@ -1529,9 +1614,9 @@ dependencies = [
 
 [[package]]
 name = "bpaf"
-version = "0.9.19"
+version = "0.9.20"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4848ed5727d39a7573551c205bcb1ccd88c8cad4ed2c80f62e2316f208196b8d"
+checksum = "473976d7a8620bb1e06dcdd184407c2363fe4fec8e983ee03ed9197222634a31"
 dependencies = [
  "bpaf_derive",
  "owo-colors",
@@ -1592,9 +1677,9 @@ checksum = "89b2fd2a0dcf38d7971e2194b6b6eebab45ae01067456a7fd93d5547a61b70be"
 
 [[package]]
 name = "camino"
-version = "1.1.9"
+version = "1.1.10"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8b96ec4966b5813e2c0507c1f86115c8c5abaadc3980879c3424042a02fd1ad3"
+checksum = "0da45bc31171d8d6960122e222a67740df867c1dd53b4d51caa297084c185cab"
 dependencies = [
  "serde",
 ]
@@ -1624,9 +1709,9 @@ dependencies = [
 
 [[package]]
 name = "cfg-if"
-version = "1.0.0"
+version = "1.0.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "baf1de4339761588bc0619e3cbc0120ee582ebb74b53b4efbf79117bd2da40fd"
+checksum = "9555578bc9e57714c812a1f84e4fc5b4d21fcb063490c624de019f7464c91268"
 
 [[package]]
 name = "chrono"
@@ -2075,9 +2160,9 @@ checksum = "a357d28ed41a50f9c765dbfe56cbc04a64e53e5fc58ba79fbc34c10ef3df831f"
 
 [[package]]
 name = "enumflags2"
-version = "0.7.11"
+version = "0.7.12"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ba2f4b465f5318854c6f8dd686ede6c0a9dc67d4b1ac241cf0eb51521a309147"
+checksum = "1027f7680c853e056ebcec683615fb6fbbc07dbaa13b4d5d9442b146ded4ecef"
 dependencies = [
  "enumflags2_derive",
  "serde",
@@ -2085,9 +2170,9 @@ dependencies = [
 
 [[package]]
 name = "enumflags2_derive"
-version = "0.7.11"
+version = "0.7.12"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "fc4caf64a58d7a6d65ab00639b046ff54399a39f5f2554728895ace4b297cd79"
+checksum = "67c78a4d8fdf9953a5c9d458f9efe940fd97a0cab0941c075a813ac594733827"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -2402,9 +2487,9 @@ checksum = "e5274423e17b7c9fc20b6e7e208532f9b19825d82dfd615708b70edd83df41f1"
 
 [[package]]
 name = "hashbrown"
-version = "0.15.2"
+version = "0.15.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "bf151400ff0baff5465007dd2f3e717f3fe502074ca563069ce3a6629d07b289"
+checksum = "5971ac85611da7067dbfcabef3c70ebb5606018acd9e2a3903a0da507521e0d5"
 
 [[package]]
 name = "hermit-abi"
@@ -2603,7 +2688,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "cea70ddb795996207ad57735b50c5982d8844f38ba9ee5f1aedcfb708a2aa11e"
 dependencies = [
  "equivalent",
- "hashbrown 0.15.2",
+ "hashbrown 0.15.4",
  "serde",
 ]
 
@@ -2717,12 +2802,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "json-strip-comments"
-version = "1.0.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c3d129799327c8f80861e467c59b825ba24c277dba6ad0d71a141dc98f9e04ee"
-
-[[package]]
 name = "json_comments"
 version = "0.2.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2756,9 +2835,9 @@ checksum = "bbd2bcb4c963f2ddae06a2efc7e9f3591312473c50c6685e1f298068316e66fe"
 
 [[package]]
 name = "libc"
-version = "0.2.172"
+version = "0.2.173"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d750af042f7ef4f724306de029d18836c26c1765a54a6a3f094cbd23a7267ffa"
+checksum = "d8cfeafaffdbc32176b64fb251369d52ea9f0a8fbc6f8759edffef7b525d64bb"
 
 [[package]]
 name = "libgit2-sys"
@@ -2774,9 +2853,9 @@ dependencies = [
 
 [[package]]
 name = "libmimalloc-sys"
-version = "0.1.42"
+version = "0.1.43"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ec9d6fac27761dabcd4ee73571cdb06b7022dc99089acbe5435691edffaac0f4"
+checksum = "bf88cd67e9de251c1781dbe2f641a1a3ad66eaae831b8a2c38fbdc5ddae16d4d"
 dependencies = [
  "cc",
  "libc",
@@ -2790,7 +2869,7 @@ checksum = "c0ff37bd590ca25063e35af745c343cb7a0271906fb7b37e4813e8f79f00268d"
 dependencies = [
  "bitflags 2.8.0",
  "libc",
- "redox_syscall 0.5.9",
+ "redox_syscall",
 ]
 
 [[package]]
@@ -2831,9 +2910,9 @@ checksum = "b4ce301924b7887e9d637144fdade93f9dfff9b60981d4ac161db09720d39aa5"
 
 [[package]]
 name = "lock_api"
-version = "0.4.11"
+version = "0.4.13"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3c168f8615b12bc01f9c17e2eb0cc07dcae1940121185446edc3744920e8ef45"
+checksum = "96936507f153605bddfcda068dd804796c84324ed2510809e5b2a624c81da765"
 dependencies = [
  "autocfg",
  "scopeguard",
@@ -2898,9 +2977,9 @@ dependencies = [
 
 [[package]]
 name = "mimalloc"
-version = "0.1.46"
+version = "0.1.47"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "995942f432bbb4822a7e9c3faa87a695185b0d09273ba85f097b54f4e458f2af"
+checksum = "b1791cbe101e95af5764f06f20f6760521f7158f69dbf9d6baf941ee1bf6bc40"
 dependencies = [
  "libmimalloc-sys",
 ]
@@ -3071,29 +3150,10 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "c1b04fb49957986fdce4d6ee7a65027d55d4b6d2265e5848bbb507b58ccfdb6f"
 
 [[package]]
-name = "oxc_resolver"
-version = "8.0.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "fe5c7d43ec2c0dcd506adb52f94cc2903e754f413cb548c4733b03c3103eb908"
-dependencies = [
- "cfg-if",
- "indexmap",
- "json-strip-comments",
- "once_cell",
- "papaya",
- "rustc-hash 2.1.1",
- "serde",
- "serde_json",
- "simdutf8",
- "thiserror 2.0.3",
- "tracing",
-]
-
-[[package]]
 name = "papaya"
-version = "0.2.1"
+version = "0.2.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6827e3fc394523c21d4464d02c0bb1c19966ea4a58a9844ad6d746214179d2bc"
+checksum = "f92dd0b07c53a0a0c764db2ace8c541dc47320dad97c2200c2a637ab9dd2328f"
 dependencies = [
  "equivalent",
  "seize",
@@ -3101,9 +3161,9 @@ dependencies = [
 
 [[package]]
 name = "parking_lot"
-version = "0.12.3"
+version = "0.12.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f1bf18183cf54e8d6059647fc3063646a1801cf30896933ec2311622cc4b9a27"
+checksum = "70d58bf43669b5795d1576d0641cfb6fbb2057bf629506267a92807158584a13"
 dependencies = [
  "lock_api",
  "parking_lot_core",
@@ -3111,15 +3171,15 @@ dependencies = [
 
 [[package]]
 name = "parking_lot_core"
-version = "0.9.9"
+version = "0.9.11"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4c42a9226546d68acdd9c0a280d17ce19bfe27a46bf68784e4066115788d008e"
+checksum = "bc838d2a56b5b1a6c25f55575dfc605fabb63bb2365f6c2353ef9159aa69e4a5"
 dependencies = [
  "cfg-if",
  "libc",
- "redox_syscall 0.4.1",
+ "redox_syscall",
  "smallvec",
- "windows-targets 0.48.5",
+ "windows-targets 0.52.6",
 ]
 
 [[package]]
@@ -3218,9 +3278,9 @@ checksum = "5b40af805b3121feab8a3c29f04d8ad262fa8e0561883e7653e024ae4479e6de"
 
 [[package]]
 name = "prettyplease"
-version = "0.2.32"
+version = "0.2.34"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "664ec5419c51e34154eec046ebcba56312d5a2fc3b09a06da188e1ad21afadf6"
+checksum = "6837b9e10d61f45f987d50808f83d1ee3d206c66acf650c3e4ae2e1f6ddedf55"
 dependencies = [
  "proc-macro2",
  "syn 2.0.96",
@@ -3390,15 +3450,6 @@ checksum = "1465873a3dfdaa8ae7cb14b4383657caab0b3e8a0aa9ae8e04b044854c8dfce2"
 dependencies = [
  "crossbeam-deque",
  "crossbeam-utils",
-]
-
-[[package]]
-name = "redox_syscall"
-version = "0.4.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4722d768eff46b75989dd134e5c353f0d6296e5aaa3132e776cbdb56be7731aa"
-dependencies = [
- "bitflags 1.3.2",
 ]
 
 [[package]]
@@ -3734,7 +3785,6 @@ version = "1.0.140"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "20068b6e96dc6c9bd23e01df8827e6c7e1f2fddd43c21810382803c136b99373"
 dependencies = [
- "indexmap",
  "itoa",
  "memchr",
  "ryu",
@@ -3808,12 +3858,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "simdutf8"
-version = "0.1.4"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f27f6278552951f1f2b8cf9da965d10969b2efdea95a6ec47987ab46edfe263a"
-
-[[package]]
 name = "similar"
 version = "2.7.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3844,9 +3888,9 @@ dependencies = [
 
 [[package]]
 name = "smallvec"
-version = "1.15.0"
+version = "1.15.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8917285742e9f3e1683f0a9c4e6b57960b7314d0b08d30d1ecd426713ee2eee9"
+checksum = "67b1b7a3b5fe4f1376887184045fcf45c69e92af734b7aaddc05fb777b6fbd03"
 dependencies = [
  "serde",
 ]
@@ -4119,9 +4163,9 @@ dependencies = [
 
 [[package]]
 name = "tokio"
-version = "1.45.0"
+version = "1.45.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2513ca694ef9ede0fb23fe71a4ee4107cb102b9dc1930f6d0fd77aae068ae165"
+checksum = "75ef51a33ef1da925cea3e4eb122833cb377c61439ca401b770f54902b806779"
 dependencies = [
  "backtrace",
  "bytes",
@@ -4216,9 +4260,9 @@ checksum = "121c2a6cda46980bb0fcd1647ffaf6cd3fc79a013de288782836f6df9c48780e"
 
 [[package]]
 name = "tower-lsp-server"
-version = "0.21.1"
+version = "0.22.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5fade4c658b63d11b623ddfa80821901e943a2923a010ae4a038661de42bd377"
+checksum = "76cd168c085174eafa7492a519715f2d59436dc28cdfd9d13a5b864246899db9"
 dependencies = [
  "bytes",
  "dashmap 6.1.0",
@@ -4226,6 +4270,7 @@ dependencies = [
  "httparse",
  "lsp-types",
  "memchr",
+ "percent-encoding",
  "serde",
  "serde_json",
  "tokio",
@@ -4407,9 +4452,9 @@ checksum = "8ecb6da28b8a351d773b68d5825ac39017e680750f980f3a1a85cd8dd28a47c1"
 
 [[package]]
 name = "ureq"
-version = "3.0.11"
+version = "3.0.12"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b7a3e9af6113ecd57b8c63d3cd76a385b2e3881365f1f489e54f49801d0c83ea"
+checksum = "9f0fde9bc91026e381155f8c67cb354bcd35260b2f4a29bcc84639f762760c39"
 dependencies = [
  "base64",
  "cookie_store",
@@ -4428,9 +4473,9 @@ dependencies = [
 
 [[package]]
 name = "ureq-proto"
-version = "0.4.1"
+version = "0.4.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "fadf18427d33828c311234884b7ba2afb57143e6e7e69fda7ee883b624661e36"
+checksum = "59db78ad1923f2b1be62b6da81fe80b173605ca0d57f85da2e005382adf693f7"
 dependencies = [
  "base64",
  "http",
@@ -4938,43 +4983,6 @@ name = "xtask"
 version = "0.0.0"
 dependencies = [
  "anyhow",
-]
-
-[[package]]
-name = "xtask_bench"
-version = "0.0.0"
-dependencies = [
- "ansi_rgb",
- "biome_analyze",
- "biome_css_analyze",
- "biome_css_formatter",
- "biome_css_parser",
- "biome_css_syntax",
- "biome_diagnostics",
- "biome_formatter",
- "biome_graphql_formatter",
- "biome_graphql_parser",
- "biome_graphql_syntax",
- "biome_grit_patterns",
- "biome_html_formatter",
- "biome_html_parser",
- "biome_html_syntax",
- "biome_js_analyze",
- "biome_js_formatter",
- "biome_js_parser",
- "biome_js_syntax",
- "biome_json_analyze",
- "biome_json_formatter",
- "biome_json_parser",
- "biome_json_syntax",
- "biome_parser",
- "biome_rowan",
- "camino",
- "codspeed-criterion-compat",
- "mimalloc",
- "tikv-jemallocator",
- "ureq",
- "url",
 ]
 
 [[package]]

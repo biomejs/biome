@@ -261,6 +261,11 @@ impl AsResource for str {
         Some(Resource::File(self))
     }
 }
+impl AsResource for Box<str> {
+    fn as_resource(&self) -> Option<Resource<&'_ str>> {
+        Some(Resource::File(self))
+    }
+}
 
 /// Utility trait for types that can be converted into `Option<TextRange>`
 pub trait AsSpan {

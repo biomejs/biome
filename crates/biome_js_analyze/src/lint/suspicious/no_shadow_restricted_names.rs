@@ -10,7 +10,7 @@ use biome_rowan::AstNode;
 declare_lint_rule! {
     /// Disallow identifiers from shadowing restricted names.
     ///
-    /// See also: [`noShadow`](http://biome.dev/linter/rules/no-shadow)
+    /// See also: [`noShadow`](http://biomejs.dev/linter/rules/no-shadow)
     ///
     /// ## Examples
     ///
@@ -39,7 +39,7 @@ declare_lint_rule! {
         version: "1.0.0",
         name: "noShadowRestrictedNames",
         language: "js",
-        sources: &[RuleSource::Eslint("no-shadow-restricted-names")],
+        sources: &[RuleSource::Eslint("no-shadow-restricted-names").same()],
         recommended: true,
         severity: Severity::Error,
     }

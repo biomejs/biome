@@ -19,6 +19,7 @@ biome_control_flow       = { workspace = true }
 biome_deserialize        = { workspace = true, features = ["smallvec"] }
 biome_deserialize_macros = { workspace = true }
 biome_diagnostics        = { workspace = true }
+biome_fs                 = { workspace = true }
 biome_glob               = { workspace = true, features = ["biome_deserialize", "serde"] }
 biome_js_factory         = { workspace = true }
 biome_js_semantic        = { workspace = true }
@@ -28,6 +29,7 @@ biome_jsdoc_comment      = { workspace = true }
 biome_module_graph       = { workspace = true }
 biome_package            = { workspace = true }
 biome_project_layout     = { workspace = true }
+biome_resolver           = { workspace = true }
 biome_rowan              = { workspace = true }
 biome_rule_options       = { workspace = true }
 biome_string_case        = { workspace = true }
@@ -50,11 +52,21 @@ biome_fs            = { workspace = true }
 biome_js_parser     = { path = "../biome_js_parser", features = ["tests"] }
 biome_plugin_loader = { workspace = true }
 biome_test_utils    = { path = "../biome_test_utils" }
+criterion           = { package = "codspeed-criterion-compat", version = "=2.10.1" }
 insta               = { workspace = true, features = ["glob"] }
 tests_macros        = { path = "../tests_macros" }
 
+[target.'cfg(target_os = "windows")'.dev-dependencies]
+mimalloc = { workspace = true }
+
+[target.'cfg(all(target_family="unix", not(all(target_arch = "aarch64", target_env = "musl"))))'.dev-dependencies]
+tikv-jemallocator = { workspace = true }
 [features]
 schema = ["schemars", "biome_glob/schema"]
 
 [lints]
 workspace = true
+
+[[bench]]
+harness = false
+name    = "js_analyzer"

@@ -1,11 +1,12 @@
 use biome_console::fmt::Display;
 use biome_console::markup;
 use biome_deserialize::DeserializationDiagnostic;
-use biome_diagnostics::ResolveError;
 use biome_diagnostics::{Diagnostic, Error, MessageAndDescription};
 use biome_fs::FileSystemDiagnostic;
 use biome_grit_patterns::CompileError;
+use biome_resolver::{ResolveError, ResolveErrorDiagnostic};
 use biome_rowan::SyntaxError;
+use camino::Utf8PathBuf;
 use serde::{Deserialize, Serialize};
 use std::fmt::{Debug, Formatter};
 
@@ -32,6 +33,9 @@ pub enum PluginDiagnostic {
 
     /// When an analyzer rule plugin uses an unsupported file format.
     UnsupportedRuleFormat(UnsupportedRuleFormat),
+
+    /// When plugin is requested but not loaded
+    NotLoaded(NotLoaded),
 }
 
 impl From<CompileError> for PluginDiagnostic {
@@ -62,15 +66,16 @@ impl From<SyntaxError> for PluginDiagnostic {
 }
 
 impl PluginDiagnostic {
-    pub fn cant_resolve(path: impl Display, source: Option<ResolveError>) -> Self {
+    pub fn cant_resolve(path: Utf8PathBuf, kind: Option<ResolveError>) -> Self {
         Self::CantResolve(CantResolve {
             message: MessageAndDescription::from(
                 markup! {
-                   "Failed to resolve the plugin manifest from "<Emphasis>{path}</Emphasis>
+                   "Failed to resolve the plugin manifest from "
+                   <Emphasis>{path.to_string()}</Emphasis>
                 }
                 .to_owned(),
             ),
-            source: source.map(Error::from),
+            source: kind.map(|kind| ResolveErrorDiagnostic::new(kind, path).into()),
         })
     }
 
@@ -84,6 +89,18 @@ impl PluginDiagnostic {
     pub fn unsupported_rule_format(message: impl Display) -> Self {
         Self::UnsupportedRuleFormat(UnsupportedRuleFormat {
             message: MessageAndDescription::from(markup! {{message}}.to_owned()),
+        })
+    }
+
+    pub fn not_loaded(path: Utf8PathBuf) -> Self {
+        Self::NotLoaded(NotLoaded {
+            message: MessageAndDescription::from(
+                markup! {
+                    "Plugin is requested but not loaded: "
+                    <Emphasis>{path.to_string()}</Emphasis>
+                }
+                .to_owned(),
+            ),
         })
     }
 }
@@ -154,6 +171,17 @@ pub struct CantResolve {
     severity = Error,
 )]
 pub struct UnsupportedRuleFormat {
+    #[message]
+    #[description]
+    pub message: MessageAndDescription,
+}
+
+#[derive(Debug, Serialize, Deserialize, Diagnostic)]
+#[diagnostic(
+    category = "plugin",
+    severity = Error,
+)]
+pub struct NotLoaded {
     #[message]
     #[description]
     pub message: MessageAndDescription,

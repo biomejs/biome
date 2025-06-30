@@ -21,7 +21,9 @@ biome_console        = { workspace = true }
 biome_deserialize    = { workspace = true }
 biome_diagnostics    = { workspace = true }
 biome_fs             = { workspace = true }
+biome_line_index     = { workspace = true }
 biome_lsp_converters = { workspace = true }
+biome_resolver       = { workspace = true }
 biome_rowan          = { workspace = true }
 biome_service        = { workspace = true }
 biome_text_edit      = { workspace = true }

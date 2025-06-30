@@ -48,7 +48,7 @@ declare_lint_rule! {
         version: "1.8.0",
         name: "useThrowNewError",
         language: "js",
-        sources: &[RuleSource::EslintUnicorn("throw-new-error")],
+        sources: &[RuleSource::EslintUnicorn("throw-new-error").same()],
         recommended: false,
         severity: Severity::Information,
         fix_kind: FixKind::Unsafe,

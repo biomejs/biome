@@ -1,7 +1,7 @@
 use crate::react::{ReactLibrary, is_react_call_api};
 use crate::services::semantic::Semantic;
+use biome_analyze::RuleSource;
 use biome_analyze::{Rule, RuleDiagnostic, RuleDomain, context::RuleContext, declare_lint_rule};
-use biome_analyze::{RuleSource, RuleSourceKind};
 use biome_console::markup;
 use biome_deserialize_macros::Deserializable;
 use biome_diagnostics::Severity;
@@ -61,8 +61,7 @@ declare_lint_rule! {
         version: "1.6.0",
         name: "useJsxKeyInIterable",
         language: "jsx",
-        sources: &[RuleSource::EslintReact("jsx-key")],
-        source_kind: RuleSourceKind::SameLogic,
+        sources: &[RuleSource::EslintReact("jsx-key").same()],
         recommended: true,
         severity: Severity::Error,
         domains: &[RuleDomain::React],

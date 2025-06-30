@@ -26,9 +26,19 @@ fn project_layout_with_top_level_dependencies(dependencies: Dependencies) -> Arc
 #[test]
 fn quick_test() {
     const FILENAME: &str = "dummyFile.ts";
-    const SOURCE: &str = r#"import { returnPromiseResult } from "./returnPromiseResult.ts";
-
-returnPromiseResult();
+    const SOURCE: &str = r#"type Props = {
+	a: string;
+	returnsPromise: () => Promise<void>;
+};
+async function testDestructuringAndCallingReturnsPromiseFromRest({
+	a,
+	...rest
+}: Props) {
+	rest
+		.returnsPromise()
+		.then(() => {})
+		.finally(() => {});
+}
 "#;
 
     let parsed = parse(SOURCE, JsFileSource::tsx(), JsParserOptions::default());
@@ -48,8 +58,7 @@ returnPromiseResult();
     let options = AnalyzerOptions::default().with_file_path(file_path.clone());
     let rule_filter = RuleFilter::Rule("nursery", "noFloatingPromises");
 
-    let mut dependencies = Dependencies::default();
-    dependencies.add("buffer", "latest");
+    let dependencies = Dependencies(Box::new([("buffer".into(), "latest".into())]));
 
     let project_layout = project_layout_with_top_level_dependencies(dependencies);
     let services = crate::JsAnalyzerServices::from((

@@ -6,6 +6,7 @@ expression: redactor(content)
 
 ```json
 {
+  "root": false,
   "$schema": "./node_modules/@biomejs/biome/configuration_schema.json",
   "vcs": {
     "enabled": true,
@@ -64,7 +65,6 @@ expression: redactor(content)
         "useDefaultParameterLast": "error",
         "useEnumInitializers": "error",
         "useSelfClosingElements": "error",
-        "useConst": "error",
         "useSingleVarDeclarator": "error",
         "useNumberNamespace": "error",
         "noInferrableTypes": "error"
@@ -77,5 +77,11 @@ expression: redactor(content)
 # Emitted Messages
 
 ```block
-Your configuration file(s) have been successfully migrated.
+configuration ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Migration results:
+  
+  - biome.json: configuration successfully migrated.
+  
+
 ```

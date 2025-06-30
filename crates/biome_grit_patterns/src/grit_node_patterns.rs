@@ -12,6 +12,33 @@ use grit_pattern_matcher::pattern::{
 use grit_util::error::GritResult;
 use grit_util::{AnalysisLogs, Language};
 
+/// Check if two syntax kinds are compatible for import pattern matching
+fn are_import_kinds_compatible(
+    pattern_kind: GritTargetSyntaxKind,
+    node_kind: GritTargetSyntaxKind,
+) -> bool {
+    let Some(pattern_js_kind) = pattern_kind.as_js_kind() else {
+        return false;
+    };
+    let Some(node_js_kind) = node_kind.as_js_kind() else {
+        return false;
+    };
+
+    use biome_js_syntax::JsSyntaxKind::*;
+
+    // Only allow specific import transformations to avoid over-matching
+    match (pattern_js_kind, node_js_kind) {
+        // Default import pattern can match named import
+        (JS_IMPORT_DEFAULT_CLAUSE, JS_IMPORT_NAMED_CLAUSE) => true,
+        // Named import pattern can match default import
+        (JS_IMPORT_NAMED_CLAUSE, JS_IMPORT_DEFAULT_CLAUSE) => true,
+        // Default import specifier can match named import specifiers
+        (JS_DEFAULT_IMPORT_SPECIFIER, JS_NAMED_IMPORT_SPECIFIERS) => true,
+        (JS_NAMED_IMPORT_SPECIFIERS, JS_DEFAULT_IMPORT_SPECIFIER) => true,
+        _ => false,
+    }
+}
+
 #[derive(Clone, Debug)]
 pub struct GritNodePattern {
     pub kind: GritTargetSyntaxKind,
@@ -59,7 +86,7 @@ impl Matcher<GritQueryContext> for GritNodePattern {
             );
         }
 
-        if node.kind() != self.kind {
+        if node.kind() != self.kind && !are_import_kinds_compatible(self.kind, node.kind()) {
             return Ok(false);
         }
         if self.args.is_empty() {

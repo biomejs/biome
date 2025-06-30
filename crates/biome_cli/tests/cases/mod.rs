@@ -17,6 +17,7 @@ mod included_files;
 mod linter_domains;
 mod linter_groups_plain;
 mod migrate_v2;
+mod monorepo;
 mod overrides_formatter;
 mod overrides_linter;
 mod overrides_max_file_size;

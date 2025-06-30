@@ -49,7 +49,7 @@ declare_lint_rule! {
         language: "css",
         recommended: true,
         severity: Severity::Error,
-        sources: &[RuleSource::Stylelint("font-family-no-duplicate-names")],
+        sources: &[RuleSource::Stylelint("font-family-no-duplicate-names").same()],
     }
 }
 

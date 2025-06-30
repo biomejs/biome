@@ -45,7 +45,7 @@ debugger;
 console.log(a);
 ";
 
-const APPLY_SUGGESTED_AFTER: &str = "let a = 4;\nconsole.log(a);\n";
+const APPLY_SUGGESTED_AFTER: &str = "const a = 4;\nconsole.log(a);\n";
 
 const NO_DEBUGGER_BEFORE: &str = "debugger;\n";
 const NO_DEBUGGER_AFTER: &str = "debugger;\n";
@@ -304,7 +304,7 @@ console.log(a);
 function _f() { arguments; }
 ";
 
-    let expected = "let a = 4;
+    let expected = "const a = 4;
 console.log(a);
 function _f() { arguments; }
 ";
@@ -1171,6 +1171,7 @@ fn include_files_in_symlinked_subdir() {
     let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
     let config = r#"{
+        "root": false,
         "files": {
             "includes": ["**/*.js"]
         }
@@ -1181,6 +1182,17 @@ fn include_files_in_symlinked_subdir() {
         .join("include_files_in_symlinked_subdir");
     let _ = remove_dir_all(&root_path);
     create_dir(&root_path).unwrap();
+    File::create(root_path.join("biome.json"))
+        .unwrap()
+        .write_all(
+            r#"{
+        "files": {
+            "includes": ["**/*.js"]
+        }
+    }"#
+            .as_bytes(),
+        )
+        .unwrap();
 
     let symlinked = root_path.join("symlinked");
     create_dir(&symlinked).unwrap();
@@ -3579,7 +3591,7 @@ console.log(a);
 function _f() { arguments; }
 ";
 
-    let expected = "let a = 4;
+    let expected = "const a = 4;
 console.log(a);
 function _f() { arguments; }
 ";
@@ -4009,6 +4021,217 @@ fn lint_skip_parse_errors() {
         module_path!(),
         "lint_skip_parse_errors",
         fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn linter_can_resolve_imported_symbols() {
+    let mut console = BufferConsole::default();
+    let mut fs = MemoryFileSystem::default();
+
+    fs.insert(
+        Utf8Path::new("biome.json").into(),
+        r#"{
+    "linter": {
+        "rules": {
+            "nursery": {
+                "noFloatingPromises": "on"
+            }
+        }
+    }
+}"#
+        .as_bytes(),
+    );
+
+    let file = Utf8Path::new("src/foo.ts");
+    fs.insert(
+        file.into(),
+        r#"export function foo(): Foo {}
+
+export async function bar() {}"#
+            .as_bytes(),
+    );
+
+    let file = Utf8Path::new("src/index.ts");
+    fs.insert(
+        file.into(),
+        r#"import { foo, bar } from "./foo.ts";
+
+fn(foo());
+
+bar();"#
+            .as_bytes(),
+    );
+
+    let (fs, result) = run_cli_with_server_workspace(
+        fs,
+        &mut console,
+        Args::from(["lint", file.as_str()].as_slice()),
+    );
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "linter_can_resolve_imported_symbols",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn should_apply_root_settings_with_stdin_file_path() {
+    let mut fs = TemporaryFs::new("should_apply_root_settings_with_stdin_file_path");
+
+    fs.create_file(
+        "biome.jsonc",
+        r#"{
+    "javascript": {
+        "formatter": {
+            "quoteStyle": "single",
+            "semicolons": "always",
+        }
+    }
+}"#,
+    );
+
+    let mut console = BufferConsole::default();
+    console.in_buffer.push("let a = \"a\"".into());
+
+    let result = run_cli_with_dyn_fs(
+        Box::new(fs.create_os()),
+        &mut console,
+        Args::from(["check", "--stdin-file-path=file.js", "--write", "--unsafe"].as_slice()),
+    );
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "should_apply_root_settings_with_stdin_file_path",
+        fs.create_mem(),
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn should_apply_root_settings_with_stdin_file_path_and_extended_config() {
+    let mut fs =
+        TemporaryFs::new("should_apply_root_settings_with_stdin_file_path_and_extended_config");
+
+    fs.create_file(
+        "biome.jsonc",
+        r#"{
+    "extends": ["base-config/biome"],
+    "javascript": {
+        "formatter": {
+            "quoteStyle": "single",
+        }
+    }
+}"#,
+    );
+
+    fs.create_file(
+        "node_modules/base-config/package.json",
+        r#"{
+  "exports": {
+    "./biome": "./configs/biome.jsonc"
+  }
+}"#,
+    );
+
+    fs.create_file(
+        "node_modules/base-config/configs/biome.jsonc",
+        r#"{
+    "formatter": {
+        "indentStyle": "space",
+        "indentWidth": 3,
+    },
+    "javascript": {
+        "formatter": {
+            "quoteStyle": "double",
+        }
+    }
+}"#,
+    );
+
+    let mut console = BufferConsole::default();
+    console
+        .in_buffer
+        .push("let a = \"a\"; if (true) { a = \"b\" }".into());
+
+    let result = run_cli_with_dyn_fs(
+        Box::new(fs.create_os()),
+        &mut console,
+        Args::from(["check", "--stdin-file-path=file.js", "--write", "--unsafe"].as_slice()),
+    );
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "should_apply_root_settings_with_stdin_file_path_and_extended_config",
+        fs.create_mem(),
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn should_apply_root_settings_with_stdin_file_path_and_extended_non_root_config() {
+    let mut fs = TemporaryFs::new(
+        "should_apply_root_settings_with_stdin_file_path_and_extended_non_root_config",
+    );
+
+    fs.create_file(
+        "biome.jsonc",
+        r#"{
+    "extends": ["base-config/biome"],
+    "javascript": {
+        "formatter": {
+            "quoteStyle": "single",
+        }
+    }
+}"#,
+    );
+
+    fs.create_file(
+        "node_modules/base-config/package.json",
+        r#"{
+  "exports": {
+    "./biome": "./configs/biome.jsonc"
+  }
+}"#,
+    );
+
+    fs.create_file(
+        "node_modules/base-config/configs/biome.jsonc",
+        r#"{
+    "root": false,
+    "formatter": {
+        "indentStyle": "space",
+        "indentWidth": 3,
+    },
+    "javascript": {
+        "formatter": {
+            "quoteStyle": "double",
+        }
+    }
+}"#,
+    );
+
+    let mut console = BufferConsole::default();
+    console
+        .in_buffer
+        .push("let a = \"a\"; if (true) { a = \"b\" }".into());
+
+    let result = run_cli_with_dyn_fs(
+        Box::new(fs.create_os()),
+        &mut console,
+        Args::from(["check", "--stdin-file-path=file.js", "--write", "--unsafe"].as_slice()),
+    );
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "should_apply_root_settings_with_stdin_file_path_and_extended_non_root_config",
+        fs.create_mem(),
         console,
         result,
     ));

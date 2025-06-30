@@ -68,7 +68,7 @@ declare_lint_rule! {
         version: "1.0.0",
         name: "noArrayIndexKey",
         language: "jsx",
-        sources: &[RuleSource::EslintReact("no-array-index-key")],
+        sources: &[RuleSource::EslintReact("no-array-index-key").same()],
         recommended: true,
         severity: Severity::Error,
     }

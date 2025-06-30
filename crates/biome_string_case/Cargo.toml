@@ -10,5 +10,11 @@ name                 = "biome_string_case"
 repository.workspace = true
 version              = "0.5.7"
 
+[dependencies]
+biome_rowan = { workspace = true, optional = true }
+
+[features]
+biome_rowan = ["dep:biome_rowan"]
+
 [lints]
 workspace = true

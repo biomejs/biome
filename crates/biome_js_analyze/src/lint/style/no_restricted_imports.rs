@@ -320,8 +320,8 @@ declare_lint_rule! {
         name: "noRestrictedImports",
         language: "js",
         sources: &[
-            RuleSource::Eslint("no-restricted-imports"),
-            RuleSource::EslintTypeScript("no-restricted-imports")
+            RuleSource::Eslint("no-restricted-imports").same(),
+            RuleSource::EslintTypeScript("no-restricted-imports").same(),
         ],
         recommended: false,
         severity: Severity::Warning,

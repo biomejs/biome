@@ -1,4 +1,4 @@
-use biome_lsp_converters::line_index::LineIndex;
+use biome_line_index::LineIndex;
 use biome_service::projects::ProjectKey;
 
 /// Represents an open [`textDocument`]. Can be cheaply cloned.

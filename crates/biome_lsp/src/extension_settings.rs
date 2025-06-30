@@ -59,26 +59,15 @@ impl ExtensionSettings {
         Ok(())
     }
 
-    pub(crate) fn rename_enabled(&self) -> bool {
-        let new_setting = self
-            .settings
-            .experimental
-            .as_ref()
-            .is_some_and(|experimental| experimental.rename.unwrap_or(false));
-
-        let old_setting = self.settings.rename.unwrap_or(false);
-
-        new_setting | old_setting
-    }
-
     pub(crate) fn requires_configuration(&self) -> bool {
         self.settings.require_configuration.unwrap_or_default()
     }
 
     pub(crate) fn configuration_path(&self) -> Option<Utf8PathBuf> {
-        self.settings
-            .configuration_path
-            .as_deref()
-            .map(|config_path| Utf8PathBuf::from_str(config_path).unwrap()) // infallible
+        match self.settings.configuration_path.as_deref() {
+            // Ignore if empty as VS Code responses an empty string even if it's not set.
+            Some(config_path) if !config_path.is_empty() => Utf8PathBuf::from_str(config_path).ok(),
+            _ => None,
+        }
     }
 }

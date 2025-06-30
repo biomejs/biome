@@ -13,21 +13,31 @@ use crate::{LICENSE_LIST, Manifest, Package, PackageAnalyzeResult, ProjectAnalyz
 pub struct NodeJsPackage {
     /// The `package.json` manifest
     pub manifest: Option<PackageJson>,
+
     /// Diagnostics emitted during the operations
     pub diagnostics: Vec<biome_diagnostics::serde::Diagnostic>,
+
     /// The `tsconfig.json` manifest
-    pub tsconfig: TsConfigJson,
+    pub tsconfig: Option<TsConfigJson>,
 }
 
 impl NodeJsPackage {
-    pub fn deserialize_tsconfig(&mut self, content: &ProjectLanguageRoot<TsConfigJson>) {
+    pub fn insert_serialized_tsconfig(&mut self, content: &ProjectLanguageRoot<TsConfigJson>) {
         let tsconfig = TsConfigJson::deserialize_manifest(content);
         let (tsconfig, deserialize_diagnostics) = tsconfig.consume();
-        self.tsconfig = tsconfig.unwrap_or_default();
+        self.tsconfig = Some(tsconfig.unwrap_or_default());
         self.diagnostics = deserialize_diagnostics
             .into_iter()
             .map(biome_diagnostics::serde::Diagnostic::new)
             .collect();
+    }
+
+    pub fn without_tsconfig(&self) -> Self {
+        Self {
+            manifest: self.manifest.clone(),
+            diagnostics: self.diagnostics.clone(),
+            tsconfig: None,
+        }
     }
 }
 
@@ -58,11 +68,14 @@ impl Package for NodeJsPackage {
             .and_then(|manifest| manifest.license.as_ref())
         {
             if !LICENSE_LIST.is_valid(license) {
-                diagnostics
-                    .push(ProjectAnalyzeDiagnostic::new_invalid_license(license).with_range(range))
+                diagnostics.push(
+                    ProjectAnalyzeDiagnostic::new_invalid_license(license.to_string())
+                        .with_range(range),
+                )
             } else if !LICENSE_LIST.is_deprecated(license) {
                 diagnostics.push(
-                    ProjectAnalyzeDiagnostic::new_deprecated_license(license).with_range(range),
+                    ProjectAnalyzeDiagnostic::new_deprecated_license(license.to_string())
+                        .with_range(range),
                 )
             }
         }

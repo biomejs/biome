@@ -450,7 +450,8 @@ type DebugFormatterIR = fn(
     AnyParse,
     WorkspaceSettingsHandle,
 ) -> Result<String, WorkspaceError>;
-type DebugTypeInfo = fn(&BiomePath, AnyParse) -> Result<String, WorkspaceError>;
+type DebugTypeInfo =
+    fn(&BiomePath, Option<AnyParse>, Arc<ModuleGraph>) -> Result<String, WorkspaceError>;
 type DebugRegisteredTypes = fn(&BiomePath, AnyParse) -> Result<String, WorkspaceError>;
 type DebugSemanticModel = fn(&BiomePath, AnyParse) -> Result<String, WorkspaceError>;
 
@@ -613,6 +614,7 @@ pub(crate) struct CodeActionsParams<'a> {
     pub(crate) suppression_reason: Option<String>,
     pub(crate) enabled_rules: Vec<RuleSelector>,
     pub(crate) plugins: AnalyzerPluginVec,
+    pub(crate) categories: RuleCategories,
 }
 
 type Lint = fn(LintParams) -> LintResults;
@@ -1009,7 +1011,21 @@ impl<'a, 'b> LintVisitor<'a, 'b> {
         L: biome_rowan::Language,
         R: Rule<Query: Queryable<Language = L, Output: Clone>> + 'static,
     {
+        let group = <R::Group as RuleGroup>::NAME;
+        // Nursery rules must be enabled only when they are enabled from the group
+        if group == "nursery" {
+            return;
+        }
+
         let path = self.path.expect("File path");
+
+        let recommended_enabled = self
+            .settings
+            .is_some_and(|settings| settings.linter_recommended_enabled());
+        if !recommended_enabled {
+            return;
+        }
+
         let no_only = self.only.is_some_and(|only| only.is_empty());
         let no_domains = self
             .settings
@@ -1021,13 +1037,16 @@ impl<'a, 'b> LintVisitor<'a, 'b> {
 
         if let Some(manifest) = &self.package_json {
             for domain in R::METADATA.domains {
-                self.analyzer_options
-                    .push_globals(domain.globals().iter().map(|s| Box::from(*s)).collect());
+                let matches_a_dependency = domain
+                    .manifest_dependencies()
+                    .iter()
+                    .any(|(dependency, range)| manifest.matches_dependency(dependency, range));
 
-                for (dependency, range) in domain.manifest_dependencies() {
-                    if manifest.matches_dependency(dependency, range) {
-                        self.enabled_rules.insert(rule_filter);
-                    }
+                if matches_a_dependency {
+                    self.enabled_rules.insert(rule_filter);
+
+                    self.analyzer_options
+                        .push_globals(domain.globals().iter().map(|s| Box::from(*s)).collect());
                 }
             }
         }
@@ -1044,7 +1063,11 @@ impl<'a, 'b> LintVisitor<'a, 'b> {
         R: Rule<Query: Queryable<Language = L, Output: Clone>> + 'static,
     {
         let no_only = self.only.is_some_and(|only| only.is_empty());
-
+        let group = <R::Group as RuleGroup>::NAME;
+        // Nursery rules must be enabled only when they are enabled from the group
+        if group == "nursery" {
+            return;
+        }
         if !no_only {
             return;
         }

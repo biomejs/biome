@@ -1,6 +1,8 @@
 use crate::workspace::{CheckFileSizeResult, DocumentFileSource};
 use biome_analyze::RuleError;
-use biome_configuration::diagnostics::{ConfigurationDiagnostic, EditorConfigDiagnostic};
+use biome_configuration::diagnostics::{
+    CantResolve, ConfigurationDiagnostic, EditorConfigDiagnostic,
+};
 use biome_configuration::{BiomeDiagnostic, CantLoadExtendFile};
 use biome_console::fmt::Bytes;
 use biome_console::markup;
@@ -43,6 +45,8 @@ pub enum WorkspaceError {
     Configuration(ConfigurationDiagnostic),
     /// An operation is attempted on the registered project, but there is no registered project.
     NoProject(NoProject),
+    /// Thrown when the workspace attempts to register a nested project, but no working directory was provided
+    NoWorkspaceDirectory(NoWorkspaceDirectory),
     /// Error thrown when Biome cannot rename a symbol.
     RenameError(RenameError),
     /// Error emitted by the underlying transport layer for a remote Workspace
@@ -82,6 +86,10 @@ impl WorkspaceError {
 
     pub fn no_project() -> Self {
         Self::NoProject(NoProject)
+    }
+
+    pub fn no_workspace_directory() -> Self {
+        Self::NoWorkspaceDirectory(NoWorkspaceDirectory)
     }
 
     pub fn file_ignored(path: String) -> Self {
@@ -182,6 +190,12 @@ impl From<EditorConfigDiagnostic> for WorkspaceError {
 impl From<CantLoadExtendFile> for WorkspaceError {
     fn from(value: CantLoadExtendFile) -> Self {
         Self::Configuration(BiomeDiagnostic::CantLoadExtendFile(value).into())
+    }
+}
+
+impl From<CantResolve> for WorkspaceError {
+    fn from(value: CantResolve) -> Self {
+        Self::Configuration(BiomeDiagnostic::CantResolve(value).into())
     }
 }
 
@@ -295,7 +309,7 @@ impl Diagnostic for FileTooLarge {
         fmt.write_markup(
             markup!{
                 "The size of the file is "{Bytes(self.size)}", which exceeds the configured maximum of "{Bytes(self.limit)}" for this project.
-Use the `files.maxSize` configuration to change the maximum size of files processed, or `files.ignore` to ignore the file."
+Use the `files.maxSize` configuration to change the maximum size of files processed, or `files.includes` to ignore the file."
             }
         )
     }
@@ -312,6 +326,10 @@ Use the `files.maxSize` configuration to change the maximum size of files proces
     )
 )]
 pub struct NoProject;
+
+#[derive(Debug, Serialize, Deserialize, Diagnostic)]
+#[diagnostic(category = "project")]
+pub struct NoWorkspaceDirectory;
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct SourceFileNotSupported {

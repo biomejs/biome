@@ -1,8 +1,8 @@
 use serde::{Deserialize, Serialize};
 
 use biome_analyze::{
-    Ast, FixKind, Rule, RuleAction, RuleDiagnostic, RuleSource, RuleSourceKind,
-    context::RuleContext, declare_lint_rule,
+    Ast, FixKind, Rule, RuleAction, RuleDiagnostic, RuleSource, context::RuleContext,
+    declare_lint_rule,
 };
 use biome_console::markup;
 use biome_deserialize_macros::Deserializable;
@@ -23,39 +23,6 @@ declare_lint_rule! {
     /// Using the same style consistently across your codebase makes it easier to quickly read and understand object definitions.
     ///
     /// ## Example
-    ///
-    /// ### Invalid
-    ///
-    /// ```json,options
-    /// {
-    ///     "options": {
-    ///         "syntax": "explicit"
-    ///     }
-    /// }
-    /// ```
-    ///
-    /// ```js,expect_diagnostic,use_options
-    /// let foo = 1;
-    /// let invalid = {
-    ///     foo
-    /// };
-    /// ```
-    ///
-    /// ```js,expect_diagnostic,use_options
-    /// let invalid = {
-    ///     bar() { return "bar"; },
-    /// };
-    /// ```
-    ///
-    /// ### Valid
-    ///
-    /// ```js,use_options
-    /// let foo = 1;
-    /// let valid = {
-    ///     foo: foo,
-    ///     bar: function() { return "bar"; },
-    /// };
-    /// ```
     ///
     /// ### Invalid
     ///
@@ -90,6 +57,39 @@ declare_lint_rule! {
     /// };
     /// ```
     ///
+    /// ### Invalid
+    ///
+    /// ```json,options
+    /// {
+    ///     "options": {
+    ///         "syntax": "explicit"
+    ///     }
+    /// }
+    /// ```
+    ///
+    /// ```js,expect_diagnostic,use_options
+    /// let foo = 1;
+    /// let invalid = {
+    ///     foo
+    /// };
+    /// ```
+    ///
+    /// ```js,expect_diagnostic,use_options
+    /// let invalid = {
+    ///     bar() { return "bar"; },
+    /// };
+    /// ```
+    ///
+    /// ### Valid
+    ///
+    /// ```js,use_options
+    /// let foo = 1;
+    /// let valid = {
+    ///     foo: foo,
+    ///     bar: function() { return "bar"; },
+    /// };
+    /// ```
+    ///
     /// ## Options
     ///
     /// Use the options to specify the syntax of object literals to enforce.
@@ -105,10 +105,10 @@ declare_lint_rule! {
     /// ### syntax
     ///
     /// The syntax to use:
-    /// - `explicit`: enforces the use of explicit object property syntax in every case.
     /// - `shorthand`: enforces the use of shorthand object property syntax when possible.
+    /// - `explicit`: enforces the use of explicit object property syntax in every case.
     ///
-    /// **Default:** `explicit`
+    /// **Default:** `shorthand`
     ///
     pub UseConsistentObjectDefinition {
         version: "2.0.0",
@@ -117,8 +117,7 @@ declare_lint_rule! {
         recommended: false,
         fix_kind: FixKind::Safe,
         severity: Severity::Error,
-        sources: &[RuleSource::Eslint("object-shorthand")],
-        source_kind: RuleSourceKind::Inspired,
+        sources: &[RuleSource::Eslint("object-shorthand").inspired()],
     }
 }
 
@@ -135,9 +134,9 @@ pub struct UseConsistentObjectDefinitionOptions {
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub enum ObjectPropertySyntax {
     /// `{foo: foo}`
-    #[default]
     Explicit,
     /// `{foo}`
+    #[default]
     Shorthand,
 }
 

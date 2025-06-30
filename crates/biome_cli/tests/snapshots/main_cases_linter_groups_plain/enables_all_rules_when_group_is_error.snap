@@ -17,7 +17,7 @@ expression: redactor(content)
 ## `test1.js`
 
 ```js
-function f() { console.log(arguments); }
+export default function f() {}
 
 ```
 
@@ -35,35 +35,17 @@ lint ━━━━━━━━━━━━━━━━━━━━━━━━━
 # Emitted Messages
 
 ```block
-test1.js:1:10 lint/correctness/noUnusedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+test1.js:1:8 lint/style/noDefaultExport ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This function is unused.
+  × Avoid default exports.
   
-  > 1 │ function f() { console.log(arguments); }
-      │          ^
+  > 1 │ export default function f() {}
+      │        ^^^^^^^
     2 │ 
   
-  i Unused variables are often the result of an incomplete refactoring, typos, or other sources of bugs.
+  i Default exports cannot be easily discovered inside an editor and don't encourage the use of consistent names through a code base.
   
-  i Unsafe fix: If this is intentional, prepend f with an underscore.
-  
-    1   │ - function·f()·{·console.log(arguments);·}
-      1 │ + function·_f()·{·console.log(arguments);·}
-    2 2 │   
-  
-
-```
-
-```block
-test1.js:1:28 lint/style/noArguments ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Use the rest parameters instead of arguments.
-  
-  > 1 │ function f() { console.log(arguments); }
-      │                            ^^^^^^^^^
-    2 │ 
-  
-  i arguments does not have Array.prototype methods and can be inconvenient to use.
+  i Use a named export instead.
   
 
 ```
@@ -71,5 +53,4 @@ test1.js:1:28 lint/style/noArguments ━━━━━━━━━━━━━━�
 ```block
 Checked 1 file in <TIME>. No fixes applied.
 Found 1 error.
-Found 1 warning.
 ```

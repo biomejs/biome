@@ -3,9 +3,9 @@ use biome_js_syntax::{
     AnyJsModuleSource, JsExport, JsImport, JsImportAssertion,
 };
 use biome_rowan::AstNode;
+use biome_string_case::comparable_token::ComparableToken;
 
 use super::{
-    comparable_token::ComparableToken,
     import_groups::{self, ImportCandidate, ImportSourceCandidate},
     import_source,
     specifiers_attributes::JsNamedSpecifiers,
@@ -148,7 +148,7 @@ impl ImportInfo {
         };
         Some((
             Self {
-                source: ComparableToken(source.inner_string_text().ok()?).into(),
+                source: ComparableToken::new(source.inner_string_text().ok()?).into(),
                 has_no_attributes: attributes.is_none(),
                 kind,
                 slot_index: value.syntax().index() as u32,
@@ -202,7 +202,7 @@ impl ImportInfo {
         let source = source.inner_string_text().ok()?;
         Some((
             Self {
-                source: ComparableToken(source).into(),
+                source: ComparableToken::new(source).into(),
                 has_no_attributes: attributes.is_none(),
                 kind,
                 slot_index: value.syntax().index() as u32,

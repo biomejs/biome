@@ -98,7 +98,7 @@ declare_lint_rule! {
         version: "1.0.0",
         name: "noFunctionAssign",
         language: "js",
-        sources: &[RuleSource::Eslint("no-func-assign")],
+        sources: &[RuleSource::Eslint("no-func-assign").same()],
         recommended: true,
         severity: Severity::Error,
     }

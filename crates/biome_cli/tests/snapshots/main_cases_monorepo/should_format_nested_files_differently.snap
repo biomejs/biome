@@ -1,0 +1,146 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `packages/lib/biome.json`
+
+```json
+{
+  "root": false,
+  "formatter": {
+    "indentStyle": "space",
+    "indentWidth": 8
+  },
+  "javascript": {
+    "formatter": {
+      "quoteStyle": "single"
+    }
+  }
+}
+```
+
+## `biome.json`
+
+```json
+{
+  "javascript": {
+    "formatter": {
+      "quoteStyle": "double"
+    }
+  }
+}
+```
+
+## `file.js`
+
+```js
+function f() { const lorem_and_ipsum = 'lorem ipsum'; }
+```
+
+## `packages/lib/file.js`
+
+```js
+function f() { const lorem_and_ipsum = 'lorem ipsum'; }
+```
+
+# Termination Message
+
+```block
+format ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Some errors were emitted while running checks.
+  
+
+
+```
+
+# Emitted Messages
+
+```block
+biome.json format ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Formatter would have printed the following content:
+  
+    1   │ - 
+    2 1 │   {
+    3   │ - ····"javascript":·{
+    4   │ - ········"formatter":·{
+    5   │ - ············"quoteStyle":·"double"
+    6   │ - ········}
+    7   │ - ····}
+      2 │ + → "javascript":·{
+      3 │ + → → "formatter":·{
+      4 │ + → → → "quoteStyle":·"double"
+      5 │ + → → }
+      6 │ + → }
+    8 7 │   }
+    9 8 │   
+  
+
+```
+
+```block
+file.js format ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Formatter would have printed the following content:
+  
+    1   │ - function·f()·{·const·lorem_and_ipsum·=·'lorem·ipsum';·}
+      1 │ + function·f()·{
+      2 │ + → const·lorem_and_ipsum·=·"lorem·ipsum";
+      3 │ + }
+      4 │ + 
+  
+
+```
+
+```block
+packages/lib/biome.json format ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Formatter would have printed the following content:
+  
+     1    │ - 
+     2  1 │   {
+     3    │ - ····"root":·false,
+     4    │ - ····"formatter":·{
+     5    │ - ········"indentStyle":·"space",
+     6    │ - ········"indentWidth":·8
+     7    │ - ····},
+     8    │ - ····"javascript":·{
+     9    │ - ········"formatter":·{
+    10    │ - ············"quoteStyle":·"single"
+    11    │ - ········}
+    12    │ - ··}
+        2 │ + ········"root":·false,
+        3 │ + ········"formatter":·{
+        4 │ + ················"indentStyle":·"space",
+        5 │ + ················"indentWidth":·8
+        6 │ + ········},
+        7 │ + ········"javascript":·{
+        8 │ + ················"formatter":·{
+        9 │ + ························"quoteStyle":·"single"
+       10 │ + ················}
+       11 │ + ········}
+    13 12 │   }
+    14 13 │   
+  
+
+```
+
+```block
+packages/lib/file.js format ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Formatter would have printed the following content:
+  
+    1   │ - function·f()·{·const·lorem_and_ipsum·=·'lorem·ipsum';·}
+      1 │ + function·f()·{
+      2 │ + ········const·lorem_and_ipsum·=·'lorem·ipsum';
+      3 │ + }
+      4 │ + 
+  
+
+```
+
+```block
+Checked 4 files in <TIME>. No fixes applied.
+Found 4 errors.
+```

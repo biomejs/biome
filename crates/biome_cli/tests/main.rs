@@ -4,12 +4,13 @@ mod configs;
 #[cfg(test)]
 mod snap_test;
 
+use biome_resolver::FsWithResolverProxy;
 #[cfg(test)]
 use snap_test::assert_cli_snapshot;
 
 use biome_cli::{CliDiagnostic, CliSession, biome_command};
 use biome_console::{BufferConsole, Console, ConsoleExt, markup};
-use biome_fs::{FileSystem, MemoryFileSystem, OsFileSystem};
+use biome_fs::{MemoryFileSystem, OsFileSystem};
 use biome_service::App;
 use bpaf::ParseFailure;
 
@@ -347,7 +348,7 @@ pub(crate) fn run_cli(
 /// Create an [App] instance using the provided [FileSystem] and [Console]
 /// instance, and using an in-process "remote" instance of the workspace
 pub(crate) fn run_cli_with_dyn_fs(
-    fs: Box<dyn FileSystem>,
+    fs: Box<dyn FsWithResolverProxy>,
     console: &mut dyn Console,
     args: bpaf::Args,
 ) -> Result<(), CliDiagnostic> {
@@ -359,7 +360,9 @@ pub(crate) fn run_cli_with_dyn_fs(
         runtime::Runtime,
     };
 
-    let factory = ServerFactory::new_with_fs(Box::new(OsFileSystem::default()));
+    let factory = ServerFactory::new_with_fs(Box::new(OsFileSystem::new(
+        fs.working_directory().unwrap_or_default(),
+    )));
     let connection = factory.create();
 
     let runtime = Runtime::new().expect("failed to create runtime");
