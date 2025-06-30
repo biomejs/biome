@@ -2050,6 +2050,54 @@ fn check_stdin_returns_content_when_not_write() {
 }
 
 #[test]
+fn check_stdin_ignores_unknown_file_path() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    console
+        .in_buffer
+        .push("function f() {var x=1; return{x}} class Foo {}".to_string());
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(
+            [
+                "lint",
+                "--write",
+                "--unsafe",
+                "--stdin-file-path",
+                "mock.cc",
+                "--files-ignore-unknown",
+                "true",
+            ]
+            .as_slice(),
+        ),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    let message = console
+        .out_buffer
+        .first()
+        .expect("Console should have written a message");
+
+    let content = markup_to_string(markup! {
+        {message.content}
+    });
+
+    assert_eq!(content, "function f() {var x=1; return{x}} class Foo {}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "check_stdin_ignores_unknown_file_path",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
 fn should_apply_correct_file_source() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();

@@ -573,7 +573,7 @@ pub fn execute_mode(
             &execution,
             biome_path,
             stdin.as_content(),
-            cli_options.verbose,
+            cli_options,
         );
     }
 
