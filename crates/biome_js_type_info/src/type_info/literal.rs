@@ -60,6 +60,7 @@ impl NumberLiteral {
                 Some("0b" | "0B") => Some(u64::from_str_radix(&s[2..], 2).ok()? as f64),
                 Some("0o" | "0O") => Some(u64::from_str_radix(&s[2..], 8).ok()? as f64),
                 Some("0x" | "0X") => Some(u64::from_str_radix(&s[2..], 16).ok()? as f64),
+                Some("Na") => (s == "NaN").then_some(f64::NAN),
                 Some(prefix)
                     if prefix.starts_with('0')
                         && !prefix.ends_with(['e', 'E'])

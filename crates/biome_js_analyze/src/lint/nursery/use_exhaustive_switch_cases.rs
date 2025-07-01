@@ -123,7 +123,7 @@ impl Rule for UseExhaustiveSwitchCases {
             .filter_map(|case| match case {
                 AnyJsSwitchClause::JsCaseClause(case) => {
                     let test = case.test().ok()?;
-                    flatten_type(&ctx.type_for_expression(&test))
+                    flatten_type(&ctx.type_of_expression(&test))
                         .as_deref()
                         .cloned()
                 }
@@ -134,7 +134,7 @@ impl Rule for UseExhaustiveSwitchCases {
         let mut missing_cases = Vec::new();
 
         let discriminant = stmt.discriminant().ok()?;
-        let discriminant_ty = flatten_type(&ctx.type_for_expression(&discriminant))?;
+        let discriminant_ty = flatten_type(&ctx.type_of_expression(&discriminant))?;
 
         for union_part in match discriminant_ty.deref() {
             TypeData::Union(union) => union
@@ -275,6 +275,7 @@ impl Rule for UseExhaustiveSwitchCases {
 fn flatten_type(ty: &Type) -> Option<Type> {
     match ty.deref() {
         TypeData::InstanceOf(instance) => ty.resolve(&instance.ty),
+        TypeData::Reference(reference) => ty.resolve(reference),
         TypeData::TypeofType(inner) => ty.resolve(inner),
         _ => Some(ty.clone()),
     }
@@ -284,7 +285,6 @@ fn type_to_string(ty: &Type) -> String {
     match ty.deref() {
         TypeData::Literal(lit) => match lit.as_ref() {
             Literal::Boolean(b) => b.as_bool().to_string(),
-            Literal::Null => "null".to_string(),
             Literal::Number(n) => n.text().to_string(),
             Literal::String(s) => format!("\"{}\"", s.as_str()),
             _ => "unknown".to_string(),
@@ -305,7 +305,6 @@ fn type_to_expression(ty: &Type) -> Option<AnyJsExpression> {
                 }))
                 .into()
             }
-            Literal::Null => make::js_null_literal_expression(make::token(T![null])).into(),
             Literal::Number(n) => {
                 let text = n.text();
                 make::js_number_literal_expression(make::js_number_literal(text)).into()

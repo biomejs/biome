@@ -10,7 +10,7 @@ use biome_analyze::{
 use biome_aria::AriaRoles;
 use biome_diagnostics::Error as DiagnosticError;
 use biome_js_syntax::{JsFileSource, JsLanguage};
-use biome_module_graph::{ModuleGraph, ScopedResolver};
+use biome_module_graph::{ModuleGraph, ModuleResolver};
 use biome_project_layout::ProjectLayout;
 use biome_rowan::TextRange;
 use biome_suppression::{SuppressionDiagnostic, parse_suppression_comment};
@@ -153,11 +153,7 @@ where
 
     let type_resolver = module_graph
         .module_info_for_path(file_path.as_ref())
-        .map(|module_info| {
-            let mut resolver = ScopedResolver::from_global_scope(module_info, module_graph.clone());
-            resolver.run_inference();
-            resolver
-        })
+        .map(|module_info| ModuleResolver::for_module(module_info, module_graph.clone()))
         .map(Arc::new);
 
     services.insert_service(Arc::new(AriaRoles));

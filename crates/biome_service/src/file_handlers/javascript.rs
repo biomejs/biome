@@ -649,8 +649,7 @@ fn debug_type_info(
             // TODO: print correct type info
             Some(module_info) => {
                 let mut result = String::new();
-                let types = module_info.as_resolver().registered_types();
-                for ty in types {
+                for ty in module_info.types() {
                     result.push_str(format!("{ty}\n").as_str());
                 }
                 Ok(result)

@@ -1256,6 +1256,7 @@ dependencies = [
  "serde_json",
  "static_assertions",
  "tikv-jemallocator",
+ "walkdir",
 ]
 
 [[package]]

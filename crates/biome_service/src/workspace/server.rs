@@ -540,26 +540,18 @@ impl WorkspaceServer {
     /// Checks whether a file is ignored in the top-level config's
     /// `files.includes` or in the feature's `includes`.
     fn is_ignored(&self, project_key: ProjectKey, path: &Utf8Path, features: FeatureName) -> bool {
-        let file_name = path.file_name();
-        // Never ignore Biome's config file regardless of `includes`.
-        if file_name == Some(ConfigName::biome_json())
-            || file_name == Some(ConfigName::biome_jsonc())
-        {
+        // Never ignore Biome's top-level config file regardless of `includes`.
+        if path.file_name().is_some_and(|file_name| {
+            file_name == ConfigName::biome_json() || file_name == ConfigName::biome_jsonc()
+        }) && path.parent().is_some_and(|dir_path| {
+            self.projects
+                .get_project_path(project_key)
+                .is_some_and(|project_path| dir_path == project_path)
+        }) {
             return false;
         };
 
-        // Apply top-level `includes`
-        self.is_ignored_by_top_level_config(project_key, path) ||
-                // Apply feature-level `includes`
-                !features.is_empty() && features.iter().all(|feature| self
-                    .projects
-                    .is_ignored_by_feature_config(project_key, path, feature))
-    }
-
-    /// Checks whether a file is ignored in the top-level `files.includes`.
-    fn is_ignored_by_top_level_config(&self, project_key: ProjectKey, path: &Utf8Path) -> bool {
-        self.projects
-            .is_ignored_by_top_level_config(project_key, path)
+        self.projects.is_ignored(project_key, path, features)
     }
 
     pub(super) fn is_ignored_by_scanner(&self, project_key: ProjectKey, path: &Utf8Path) -> bool {
@@ -601,15 +593,18 @@ impl WorkspaceServer {
         }
     }
 
-    /// It updates the nested settings of the project assigned to the `project_key`.
+    /// Updates the nested settings of the project assigned to the
+    /// `project_key`.
     ///
-    /// If a configuration file contains errors, it's not processed and the project isn't updated.
+    /// If a configuration file contains errors, it's not processed and the
+    /// project isn't updated.
     ///
-    /// It's the responsibility of the client to process the diagnostics and handle the errors emitted by the configuration.
+    /// It's the responsibility of the client to process the diagnostics and
+    /// handle the errors emitted by the configuration.
     ///
     /// ## Errors
     ///
-    /// - A nested configuration file si a root
+    /// - A nested configuration file is a root
     /// - Biome can't read the file
     pub(super) fn update_project_config_files(
         &self,
@@ -1077,7 +1072,10 @@ impl Workspace for WorkspaceServer {
             || file_name == Some(ConfigName::biome_jsonc())
         {
             // Never ignore Biome's config file
-        } else if self.is_ignored_by_top_level_config(project_key, path) {
+        } else if self
+            .projects
+            .is_ignored_by_top_level_config(project_key, path)
+        {
             file_features.set_ignored_for_all_features();
         } else {
             for feature in params.features.iter() {

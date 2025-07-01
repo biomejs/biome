@@ -3551,6 +3551,16 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoMisusedPromisesConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{ "$ref": "#/definitions/RuleWithNoMisusedPromisesOptions" }
+			]
+		},
+		"NoMisusedPromisesOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoNamespaceConfiguration": {
 			"anyOf": [
 				{ "$ref": "#/definitions/RulePlainConfiguration" },
@@ -4720,6 +4730,13 @@
 					"description": "Reports usage of \"magic numbers\" — numbers used directly instead of being assigned to named constants.",
 					"anyOf": [
 						{ "$ref": "#/definitions/NoMagicNumbersConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noMisusedPromises": {
+					"description": "Disallow Promises to be used in places where they are almost certainly a mistake.",
+					"anyOf": [
+						{ "$ref": "#/definitions/NoMisusedPromisesConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -7430,6 +7447,25 @@
 				"options": {
 					"description": "Rule's options",
 					"allOf": [{ "$ref": "#/definitions/NoMissingVarFunctionOptions" }]
+				}
+			},
+			"additionalProperties": false
+		},
+		"RuleWithNoMisusedPromisesOptions": {
+			"type": "object",
+			"required": ["level"],
+			"properties": {
+				"fix": {
+					"description": "The kind of the code actions emitted by the rule",
+					"anyOf": [{ "$ref": "#/definitions/FixKind" }, { "type": "null" }]
+				},
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [{ "$ref": "#/definitions/NoMisusedPromisesOptions" }]
 				}
 			},
 			"additionalProperties": false

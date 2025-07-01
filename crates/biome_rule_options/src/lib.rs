@@ -119,6 +119,7 @@ pub mod no_misleading_instantiator;
 pub mod no_misplaced_assertion;
 pub mod no_misrefactored_shorthand_assign;
 pub mod no_missing_var_function;
+pub mod no_misused_promises;
 pub mod no_namespace;
 pub mod no_namespace_import;
 pub mod no_negation_else;

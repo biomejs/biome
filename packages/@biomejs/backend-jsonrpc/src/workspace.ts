@@ -1593,6 +1593,10 @@ export interface Nursery {
 	 */
 	noMagicNumbers?: RuleConfiguration_for_NoMagicNumbersOptions;
 	/**
+	 * Disallow Promises to be used in places where they are almost certainly a mistake.
+	 */
+	noMisusedPromises?: RuleFixConfiguration_for_NoMisusedPromisesOptions;
+	/**
 	 * Disallows defining React components inside other components.
 	 */
 	noNestedComponentDefinitions?: RuleConfiguration_for_NoNestedComponentDefinitionsOptions;
@@ -2862,6 +2866,9 @@ export type RuleFixConfiguration_for_NoImportantStylesOptions =
 export type RuleConfiguration_for_NoMagicNumbersOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_NoMagicNumbersOptions;
+export type RuleFixConfiguration_for_NoMisusedPromisesOptions =
+	| RulePlainConfiguration
+	| RuleWithFixOptions_for_NoMisusedPromisesOptions;
 export type RuleConfiguration_for_NoNestedComponentDefinitionsOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_NoNestedComponentDefinitionsOptions;
@@ -5104,6 +5111,20 @@ export interface RuleWithOptions_for_NoMagicNumbersOptions {
 	 * Rule's options
 	 */
 	options: NoMagicNumbersOptions;
+}
+export interface RuleWithFixOptions_for_NoMisusedPromisesOptions {
+	/**
+	 * The kind of the code actions emitted by the rule
+	 */
+	fix?: FixKind;
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: NoMisusedPromisesOptions;
 }
 export interface RuleWithOptions_for_NoNestedComponentDefinitionsOptions {
 	/**
@@ -7618,6 +7639,7 @@ export interface NoImplicitCoercionOptions {}
 export interface NoImportCyclesOptions {}
 export interface NoImportantStylesOptions {}
 export interface NoMagicNumbersOptions {}
+export interface NoMisusedPromisesOptions {}
 export interface NoNestedComponentDefinitionsOptions {}
 export interface NoNoninteractiveElementInteractionsOptions {}
 export interface NoProcessGlobalOptions {}
@@ -8292,6 +8314,7 @@ export type Category =
 	| "lint/nursery/noInvalidPositionAtImportRule"
 	| "lint/nursery/noMagicNumbers"
 	| "lint/nursery/noMissingGenericFamilyKeyword"
+	| "lint/nursery/noMisusedPromises"
 	| "lint/nursery/noNestedComponentDefinitions"
 	| "lint/nursery/noNoninteractiveElementInteractions"
 	| "lint/nursery/noProcessGlobal"
@@ -8667,7 +8690,26 @@ export interface OpenProjectResult {
 	 */
 	scanKind: ScanKind;
 }
-export type ScanKind = "noScanner" | "knownFiles" | "project";
+export type ScanKind =
+	| "noScanner"
+	| "knownFiles"
+	| {
+			targetedKnownFiles: {
+				/**
+				 * Determines whether the file scanner should descend into subdirectories of the target paths.
+				 */
+				descendFromTargets: boolean;
+				/**
+	* The paths to target by the scanner.
+
+If a target path indicates a folder, all files within are scanned as well.
+
+Target paths must be absolute. 
+	 */
+				targetPaths: BiomePath[];
+			};
+	  }
+	| "project";
 export interface OpenFileParams {
 	content: FileContent;
 	documentFileSource?: DocumentFileSource;

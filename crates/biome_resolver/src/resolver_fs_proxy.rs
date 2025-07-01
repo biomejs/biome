@@ -46,8 +46,12 @@ pub trait ResolverFsProxy {
     /// points to something that is not a file, directory, or symlink.
     fn path_info(&self, path: &Utf8Path) -> Result<PathInfo, ResolveError>;
 
-    /// Reads the `package.json` manifest at the given path.
-    fn read_package_json(&self, path: &Utf8Path) -> Result<PackageJson, ResolveError>;
+    /// Reads the `package.json` manifest that is expected to exist in the
+    /// directory with the given path.
+    fn read_package_json_in_directory(
+        &self,
+        dir_path: &Utf8Path,
+    ) -> Result<PackageJson, ResolveError>;
 
     /// Reads the `tsconfig.json` manifest at the given path.
     fn read_tsconfig_json(&self, path: &Utf8Path) -> Result<TsConfigJson, ResolveError>;
@@ -65,7 +69,7 @@ impl<Fs: FileSystem> ResolverFsProxy for Fs {
         self.auto_search_files(search_dir, &["package.json"])
             .ok_or(ResolveError::NotFound)
             .and_then(|result| {
-                self.read_package_json(&result.file_path)
+                self.read_package_json_in_directory(&result.directory_path)
                     .map(|manifest| (result.directory_path, manifest))
             })
     }
@@ -89,8 +93,11 @@ impl<Fs: FileSystem> ResolverFsProxy for Fs {
         }
     }
 
-    fn read_package_json(&self, path: &Utf8Path) -> Result<PackageJson, ResolveError> {
-        match PackageJson::read_manifest(self, path).consume() {
+    fn read_package_json_in_directory(
+        &self,
+        dir_path: &Utf8Path,
+    ) -> Result<PackageJson, ResolveError> {
+        match PackageJson::read_manifest(self, &dir_path.join("package.json")).consume() {
             (Some(manifest), _errors) => Ok(manifest),
             _ => Err(ResolveError::ErrorLoadingManifest),
         }
