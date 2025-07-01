@@ -9,6 +9,7 @@ use biome_js_syntax::{
     TsTypeParameterName,
 };
 use biome_rowan::{AstNode, SyntaxNodeCast, TokenText, declare_node_union};
+use biome_rule_options::no_shadow::NoShadowOptions;
 
 use crate::services::semantic::SemanticServices;
 
@@ -81,7 +82,7 @@ impl Rule for NoShadow {
     type Query = SemanticServices;
     type State = ShadowedBinding;
     type Signals = Box<[Self::State]>;
-    type Options = ();
+    type Options = NoShadowOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let mut shadowed_bindings = Vec::new();

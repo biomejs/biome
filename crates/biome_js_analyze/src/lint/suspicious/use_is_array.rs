@@ -9,6 +9,7 @@ use biome_js_syntax::{
     AnyJsCallArgument, AnyJsExpression, JsInstanceofExpression, T, global_identifier,
 };
 use biome_rowan::{AstNode, BatchMutationExt, trim_leading_trivia_pieces};
+use biome_rule_options::use_is_array::UseIsArrayOptions;
 
 declare_lint_rule! {
     /// Use `Array.isArray()` instead of `instanceof Array`.
@@ -51,7 +52,7 @@ impl Rule for UseIsArray {
     type Query = Semantic<JsInstanceofExpression>;
     type State = ();
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = UseIsArrayOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();

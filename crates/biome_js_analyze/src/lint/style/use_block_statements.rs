@@ -8,6 +8,7 @@ use biome_js_syntax::{
     JsForStatement, JsIfStatement, JsLanguage, JsSyntaxTrivia, JsWhileStatement, JsWithStatement,
     T, TriviaPieceKind,
 };
+use biome_rule_options::use_block_statements::UseBlockStatementsOptions;
 
 use biome_rowan::{AstNode, BatchMutationExt, SyntaxTriviaPiece, declare_node_union};
 
@@ -82,7 +83,7 @@ impl Rule for UseBlockStatements {
     type Query = Ast<AnyJsBlockStatement>;
     type State = UseBlockStatementsOperationType;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = UseBlockStatementsOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
         let node = ctx.query();

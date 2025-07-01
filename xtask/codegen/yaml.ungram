@@ -35,7 +35,11 @@ YamlRoot =
 	documents: YamlDocumentList
 	eof: 'EOF'
 
-YamlDocumentList = YamlDocument*
+YamlDocumentList = AnyYamlDocument*
+
+AnyYamlDocument =
+	YamlDocument
+	| YamlBogus
 
 // https://yaml.org/spec/1.2.2/#91-documents
 YamlDocument =
@@ -66,8 +70,9 @@ AnyYamlBlockNode =
 
 // https://yaml.org/spec/1.2.2/#rule-s-l+flow-in-block
 YamlFlowInBlockNode =
+	'flow_start'
 	flow: AnyYamlFlowNode
-	newline: 'NEWLINE'?
+	'flow_end'
 
 // https://yaml.org/spec/1.2.2/#rule-ns-flow-node
 AnyYamlFlowNode =
@@ -150,26 +155,9 @@ AnyYamlFlowMapImplicitKey =
 
 // https://yaml.org/spec/1.2.2/#rule-s-l+block-in-block
 AnyYamlBlockInBlockNode =
-	YamlBlockCollection
-	| YamlBlockScalar
-
-// https://yaml.org/spec/1.2.2/#rule-s-l+block-collection
-YamlBlockCollection =
-	properties: AnyYamlPropertiesCombination?
-	content: AnyYamlBlockCollectionContent
-
-// https://yaml.org/spec/1.2.2/#rule-s-l+block-scalar
-YamlBlockScalar =
-	properties: AnyYamlPropertiesCombination?
-	content: AnyYamlBlockScalarContent
-
-AnyYamlBlockCollectionContent =
 	YamlBlockSequence
 	| YamlBlockMapping
-
-AnyYamlBlockScalarContent =
-	YamlLiteralScalar
-	| YamlFoldedScalar
+	| YamlBlockScalar
 
 // a:
 //  - b
@@ -178,16 +166,11 @@ AnyYamlBlockScalarContent =
 // https://yaml.org/spec/1.2.2/#rule-l+block-sequence
 YamlBlockSequence =
 	// Indent block
-	'indent'?
+	'sequence_start'
+	properties: AnyYamlPropertiesCombination?
 	entries: YamlBlockSequenceEntryList
 	// Dedent block, that is, go back to parent block's scope
-	'dedent'?
-
-YamlBlockSequenceEntryList = YamlBlockSequenceEntry*
-
-YamlBlockSequenceEntry =
-	'-'
-	value: AnyYamlBlockIndented?
+	'sequence_end'
 
 // a:
 //  b: c
@@ -196,10 +179,26 @@ YamlBlockSequenceEntry =
 // https://yaml.org/spec/1.2.2/#rule-l+block-mapping
 YamlBlockMapping =
 	// Indent block
-	'indent'?
+	'mapping_start'
+	properties: AnyYamlPropertiesCombination?
 	entries: YamlBlockMapEntryList
 	// Dedent block, that is, go back to parent block's scope
-	'dedent'?
+	'mapping_end'
+
+// https://yaml.org/spec/1.2.2/#rule-s-l+block-scalar
+YamlBlockScalar =
+	properties: AnyYamlPropertiesCombination?
+	content: AnyYamlBlockScalarContent
+
+AnyYamlBlockScalarContent =
+	YamlLiteralScalar
+	| YamlFoldedScalar
+
+YamlBlockSequenceEntryList = YamlBlockSequenceEntry*
+
+YamlBlockSequenceEntry =
+	'-'
+	value: AnyYamlBlockIndented?
 
 YamlBlockMapEntryList = AnyYamlBlockMapEntry*
 
@@ -237,13 +236,21 @@ AnyYamlBlockIndented =
 	| YamlCompactMapping
 	| AnyYamlBlockNode
 
+// a: - b <-
+//    - c <-
+//    - d <-
+//    ^^^
 // https://yaml.org/spec/1.2.2/#rule-ns-l-compact-sequence
 YamlCompactSequence =
 	entries: YamlBlockSequenceEntryList
 
+// a: b: x <-
+//    c: y <-
+//    d: z <-
+//    ^^^
 // https://yaml.org/spec/1.2.2/#rule-ns-l-compact-mapping
 YamlCompactMapping =
-	entries: YamlBlockSequenceEntryList
+	entries: YamlBlockMapEntryList
 
 // https://yaml.org/spec/1.2.2/#rule-ns-l-block-map-implicit-entry
 YamlBlockMapImplicitEntry =
@@ -258,9 +265,7 @@ AnyYamlBlockMapImplicitKey =
 // https://yaml.org/spec/1.2.2/#rule-c-l-block-map-implicit-value
 YamlBlockMapImplicitValue =
 	':'
-	// Node value can be empty, but must be replaced by a newline
 	value: AnyYamlBlockNode?
-	newline: 'NEWLINE'?
 
 // https://yaml.org/spec/1.2.2/#rule-c-ns-properties
 AnyYamlPropertiesCombination =

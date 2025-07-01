@@ -3,7 +3,6 @@ use crate::services::semantic::Semantic;
 use biome_analyze::RuleSource;
 use biome_analyze::{Rule, RuleDiagnostic, RuleDomain, context::RuleContext, declare_lint_rule};
 use biome_console::markup;
-use biome_deserialize_macros::Deserializable;
 use biome_diagnostics::Severity;
 use biome_js_semantic::SemanticModel;
 use biome_js_syntax::{
@@ -13,7 +12,7 @@ use biome_js_syntax::{
     JsxTagExpression,
 };
 use biome_rowan::{AstNode, AstNodeList, AstSeparatedList, TextRange, declare_node_union};
-use serde::{Deserialize, Serialize};
+use biome_rule_options::use_jsx_key_in_iterable::UseJsxKeyInIterableOptions;
 
 declare_lint_rule! {
     /// Disallow missing key props in iterators/collection literals.
@@ -74,14 +73,6 @@ declare_node_union! {
 
 declare_node_union! {
     pub ReactComponentExpression = JsxTagExpression | JsCallExpression
-}
-
-#[derive(Debug, Default, Clone, Serialize, Deserialize, Deserializable, Eq, PartialEq)]
-#[cfg_attr(feature = "schemars", derive(schemars::JsonSchema))]
-#[serde(rename_all = "camelCase", deny_unknown_fields, default)]
-pub struct UseJsxKeyInIterableOptions {
-    /// Set to `true` to check shorthand fragments (`<></>`)
-    check_shorthand_fragments: bool,
 }
 
 impl Rule for UseJsxKeyInIterable {

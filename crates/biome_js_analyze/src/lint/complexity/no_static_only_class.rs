@@ -10,6 +10,7 @@ use biome_js_syntax::{
     TsPropertySignatureClassMember, TsSetterSignatureClassMember,
 };
 use biome_rowan::{AstNode, AstNodeList};
+use biome_rule_options::no_static_only_class::NoStaticOnlyClassOptions;
 
 declare_lint_rule! {
     /// This rule reports when a class has no non-static members, such as for a class used exclusively as a static namespace.
@@ -135,7 +136,7 @@ impl Rule for NoStaticOnlyClass {
     type Query = Ast<AnyJsClass>;
     type State = ();
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoStaticOnlyClassOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let class_declaration = ctx.query();

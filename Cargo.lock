@@ -166,6 +166,7 @@ dependencies = [
  "biome_migrate",
  "biome_resolver",
  "biome_rowan",
+ "biome_rule_options",
  "biome_service",
  "biome_text_edit",
  "bpaf",
@@ -198,26 +199,21 @@ version = "0.0.1"
 dependencies = [
  "biome_analyze",
  "biome_console",
- "biome_css_analyze",
- "biome_css_syntax",
  "biome_deserialize",
  "biome_deserialize_macros",
  "biome_diagnostics",
  "biome_flags",
  "biome_formatter",
  "biome_glob",
- "biome_graphql_analyze",
- "biome_graphql_syntax",
  "biome_html_formatter",
  "biome_html_syntax",
- "biome_js_analyze",
  "biome_js_formatter",
- "biome_json_analyze",
  "biome_json_formatter",
  "biome_json_parser",
  "biome_json_syntax",
  "biome_resolver",
  "biome_rowan",
+ "biome_rule_options",
  "bpaf",
  "camino",
  "codspeed-criterion-compat",
@@ -269,6 +265,7 @@ dependencies = [
  "biome_fs",
  "biome_plugin_loader",
  "biome_rowan",
+ "biome_rule_options",
  "biome_string_case",
  "biome_suppression",
  "biome_test_utils",
@@ -537,6 +534,7 @@ dependencies = [
  "biome_graphql_parser",
  "biome_graphql_syntax",
  "biome_rowan",
+ "biome_rule_options",
  "biome_string_case",
  "biome_suppression",
  "biome_test_utils",
@@ -814,6 +812,7 @@ dependencies = [
  "biome_project_layout",
  "biome_resolver",
  "biome_rowan",
+ "biome_rule_options",
  "biome_string_case",
  "biome_suppression",
  "biome_test_utils",
@@ -1010,6 +1009,7 @@ dependencies = [
  "biome_json_parser",
  "biome_json_syntax",
  "biome_rowan",
+ "biome_rule_options",
  "biome_string_case",
  "biome_suppression",
  "biome_test_utils",
@@ -1366,6 +1366,27 @@ dependencies = [
 ]
 
 [[package]]
+name = "biome_rule_options"
+version = "0.0.1"
+dependencies = [
+ "biome_console",
+ "biome_deserialize",
+ "biome_deserialize_macros",
+ "biome_diagnostics",
+ "biome_glob",
+ "biome_resolver",
+ "biome_rowan",
+ "biome_string_case",
+ "camino",
+ "enumflags2",
+ "regex",
+ "rustc-hash 2.1.1",
+ "schemars",
+ "serde",
+ "smallvec",
+]
+
+[[package]]
 name = "biome_service"
 version = "0.0.0"
 dependencies = [
@@ -1528,6 +1549,7 @@ dependencies = [
  "biome_js_formatter",
  "biome_rowan",
  "biome_service",
+ "camino",
  "console_error_panic_hook",
  "js-sys",
  "quote",
@@ -3138,9 +3160,9 @@ checksum = "c1b04fb49957986fdce4d6ee7a65027d55d4b6d2265e5848bbb507b58ccfdb6f"
 
 [[package]]
 name = "papaya"
-version = "0.2.1"
+version = "0.2.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6827e3fc394523c21d4464d02c0bb1c19966ea4a58a9844ad6d746214179d2bc"
+checksum = "f92dd0b07c53a0a0c764db2ace8c541dc47320dad97c2200c2a637ab9dd2328f"
 dependencies = [
  "equivalent",
  "seize",
@@ -4439,9 +4461,9 @@ checksum = "8ecb6da28b8a351d773b68d5825ac39017e680750f980f3a1a85cd8dd28a47c1"
 
 [[package]]
 name = "ureq"
-version = "3.0.11"
+version = "3.0.12"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b7a3e9af6113ecd57b8c63d3cd76a385b2e3881365f1f489e54f49801d0c83ea"
+checksum = "9f0fde9bc91026e381155f8c67cb354bcd35260b2f4a29bcc84639f762760c39"
 dependencies = [
  "base64",
  "cookie_store",
@@ -4460,9 +4482,9 @@ dependencies = [
 
 [[package]]
 name = "ureq-proto"
-version = "0.4.1"
+version = "0.4.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "fadf18427d33828c311234884b7ba2afb57143e6e7e69fda7ee883b624661e36"
+checksum = "59db78ad1923f2b1be62b6da81fe80b173605ca0d57f85da2e005382adf693f7"
 dependencies = [
  "base64",
  "http",

@@ -7,6 +7,7 @@ use biome_css_syntax::{
 };
 use biome_diagnostics::Severity;
 use biome_rowan::AstNode;
+use biome_rule_options::no_important_in_keyframe::NoImportantInKeyframeOptions;
 
 declare_lint_rule! {
     /// Disallow invalid `!important` within keyframe declarations
@@ -55,7 +56,7 @@ impl Rule for NoImportantInKeyframe {
     type Query = Ast<CssKeyframesBlock>;
     type State = CssDeclarationImportant;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoImportantInKeyframeOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
         let node = ctx.query();

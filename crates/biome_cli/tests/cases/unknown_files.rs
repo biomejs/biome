@@ -7,7 +7,7 @@ use camino::Utf8Path;
 
 #[test]
 fn should_print_a_diagnostic_unknown_file() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     let file_path1 = Utf8Path::new("format.yml");
@@ -35,7 +35,7 @@ fn should_print_a_diagnostic_unknown_file() {
 
 #[test]
 fn should_not_print_a_diagnostic_unknown_file_because_ignored() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     let file_path1 = Utf8Path::new("biome.json");

@@ -3,6 +3,7 @@ use crate::{
     JsRuleAction,
     react::{ReactLibrary, is_global_react_import},
 };
+use biome_rule_options::no_unused_imports::NoUnusedImportsOptions;
 
 use biome_analyze::{
     AddVisitor, FixKind, FromServices, Phase, Phases, QueryKey, Queryable, Rule, RuleDiagnostic,
@@ -257,7 +258,7 @@ impl Rule for NoUnusedImports {
     type Query = NoUnusedImportsQuery;
     type State = Unused;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoUnusedImportsOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         match ctx.query() {

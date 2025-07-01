@@ -21,6 +21,7 @@ use biome_rowan::{
     AstNode, AstSeparatedList, BatchMutation, BatchMutationExt, SyntaxResult, TextRange,
     TriviaPieceKind, chain_trivia_pieces, declare_node_union,
 };
+use biome_rule_options::use_unified_type_signature::UseUnifiedTypeSignatureOptions;
 
 declare_lint_rule! {
     /// Disallow overload signatures that can be unified into a single signature.
@@ -86,7 +87,7 @@ impl Rule for UseUnifiedTypeSignature {
     type Query = Ast<AnyPotentialTsOverloadSignature>;
     type State = MergeOverloadSignaturesInfo;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = UseUnifiedTypeSignatureOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();

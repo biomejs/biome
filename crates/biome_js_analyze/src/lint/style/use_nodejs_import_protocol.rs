@@ -6,6 +6,7 @@ use biome_diagnostics::Severity;
 use biome_js_syntax::{AnyJsImportLike, JsSyntaxKind, JsSyntaxToken, inner_string_text};
 use biome_resolver::is_builtin_node_module;
 use biome_rowan::BatchMutationExt;
+use biome_rule_options::use_nodejs_import_protocol::UseNodejsImportProtocolOptions;
 
 use crate::JsRuleAction;
 use crate::services::manifest::Manifest;
@@ -64,7 +65,7 @@ impl Rule for UseNodejsImportProtocol {
     type Query = Manifest<AnyJsImportLike>;
     type State = JsSyntaxToken;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = UseNodejsImportProtocolOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();

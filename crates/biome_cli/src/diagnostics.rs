@@ -503,7 +503,10 @@ impl Diagnostic for StdinDiagnostic {
     }
 
     fn severity(&self) -> Severity {
-        Severity::Error
+        match self {
+            Self::NotFormatted => Severity::Error,
+            Self::NoExtension => Severity::Warning,
+        }
     }
 
     fn message(&self, fmt: &mut Formatter<'_>) -> std::io::Result<()> {
@@ -513,7 +516,7 @@ impl Diagnostic for StdinDiagnostic {
             },
             Self::NoExtension => {
                 fmt.write_markup(markup!{
-                    "The file passed via "<Emphasis>"--stdin-file-path"</Emphasis>" doesn't have an extension. Biome needs a file extension to know how handle the file."
+                    "The file passed via "<Emphasis>"--stdin-file-path"</Emphasis>" doesn't have an extension. Biome needs a file extension to know how to handle the file."
                 })
             }
         }

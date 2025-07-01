@@ -6,6 +6,7 @@ use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_syntax::{JsCallExpression, JsExpressionStatement};
 use biome_rowan::AstNode;
+use biome_rule_options::no_render_return_value::NoRenderReturnValueOptions;
 
 declare_lint_rule! {
     /// Prevent the usage of the return value of `React.render`.
@@ -44,7 +45,7 @@ impl Rule for NoRenderReturnValue {
     type Query = Semantic<JsCallExpression>;
     type State = ();
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoRenderReturnValueOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();

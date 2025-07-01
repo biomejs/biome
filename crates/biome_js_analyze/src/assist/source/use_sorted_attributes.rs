@@ -11,6 +11,7 @@ use biome_js_syntax::{
     AnyJsxAttribute, JsxAttribute, JsxAttributeList, JsxOpeningElement, JsxSelfClosingElement,
 };
 use biome_rowan::{AstNode, BatchMutationExt};
+use biome_rule_options::use_sorted_attributes::UseSortedAttributesOptions;
 use biome_string_case::StrLikeExtension;
 
 use crate::JsRuleAction;
@@ -51,7 +52,7 @@ impl Rule for UseSortedAttributes {
     type Query = Ast<JsxAttributeList>;
     type State = PropGroup;
     type Signals = Box<[Self::State]>;
-    type Options = ();
+    type Options = UseSortedAttributesOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let props = ctx.query();

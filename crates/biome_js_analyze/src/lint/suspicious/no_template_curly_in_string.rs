@@ -5,6 +5,7 @@ use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_syntax::JsStringLiteralExpression;
 use biome_rowan::{TextRange, TextSize};
+use biome_rule_options::no_template_curly_in_string::NoTemplateCurlyInStringOptions;
 
 declare_lint_rule! {
     /// Disallow template literal placeholder syntax in regular strings.
@@ -53,7 +54,7 @@ impl Rule for NoTemplateCurlyInString {
     type Query = Ast<JsStringLiteralExpression>;
     type State = (u32, u32);
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoTemplateCurlyInStringOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();

@@ -109,7 +109,7 @@ pub struct WorkspaceServer {
     pub(super) node_cache: Mutex<FxHashMap<Utf8PathBuf, NodeCache>>,
 
     /// File system implementation.
-    pub(super) fs: Box<dyn FsWithResolverProxy>,
+    pub(super) fs: Arc<dyn FsWithResolverProxy>,
 
     /// Channel sender for instructions to the [crate::WorkspaceWatcher].
     watcher_tx: Sender<WatcherInstruction>,
@@ -132,7 +132,7 @@ impl RefUnwindSafe for WorkspaceServer {}
 impl WorkspaceServer {
     /// Creates a new [Workspace].
     pub fn new(
-        fs: Box<dyn FsWithResolverProxy>,
+        fs: Arc<dyn FsWithResolverProxy>,
         watcher_tx: Sender<WatcherInstruction>,
         notification_tx: watch::Sender<ServiceDataNotification>,
         threads: Option<usize>,

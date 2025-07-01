@@ -3,6 +3,7 @@ use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_syntax::{AnyJsxTag, JsxChildList};
 use biome_rowan::{AstNodeList, TextRange};
+use biome_rule_options::no_suspicious_semicolon_in_jsx::NoSuspiciousSemicolonInJsxOptions;
 
 declare_lint_rule! {
     /// It detects possible "wrong" semicolons inside JSX elements.
@@ -56,7 +57,7 @@ impl Rule for NoSuspiciousSemicolonInJsx {
     type Query = Ast<AnyJsxTag>;
     type State = TextRange;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoSuspiciousSemicolonInJsxOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
