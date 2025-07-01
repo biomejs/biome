@@ -1,5 +1,5 @@
-use crate::WorkspaceError;
-use crate::workspace::DocumentFileSource;
+use crate::workspace::{DocumentFileSource, FeatureKind};
+use crate::{WorkspaceError, is_dir};
 use biome_analyze::{AnalyzerOptions, AnalyzerRules};
 use biome_configuration::analyzer::assist::{Actions, AssistConfiguration, AssistEnabled};
 use biome_configuration::analyzer::{LinterEnabled, RuleDomains};
@@ -307,6 +307,39 @@ impl Settings {
 
     pub fn is_assist_enabled(&self) -> bool {
         self.assist.is_enabled()
+    }
+
+    /// Returns whether the given `path` is ignored for the given `feature`,
+    /// based on the current settings.
+    pub fn is_ignored_for_feature(&self, path: &Utf8Path, feature: FeatureKind) -> bool {
+        let feature_includes_files = match feature {
+            FeatureKind::Format => {
+                let formatter = &self.formatter;
+                &formatter.includes
+            }
+            FeatureKind::Lint => {
+                let linter = &self.linter;
+                &linter.includes
+            }
+
+            FeatureKind::Assist => {
+                let assists = &self.assist;
+                &assists.includes
+            }
+            // TODO: enable once the configuration is available
+            FeatureKind::Search => return false, // There is no search-specific config.
+            FeatureKind::Debug => return false,
+        };
+
+        let mut is_feature_included = true;
+        if !feature_includes_files.is_unset() {
+            is_feature_included = if is_dir(path) {
+                feature_includes_files.matches_directory_with_exceptions(path)
+            } else {
+                feature_includes_files.matches_with_exceptions(path)
+            };
+        }
+        !is_feature_included
     }
 }
 

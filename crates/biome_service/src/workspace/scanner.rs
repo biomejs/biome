@@ -33,7 +33,9 @@ pub(crate) struct ScanResult {
     /// Duration of the full scan.
     pub duration: Duration,
 
-    /// List of additional configuration files found inside the project (it doesn't contain the current one)
+    /// List of nested configuration files found inside the project.
+    ///
+    /// The root configuration is not included in this.
     pub configuration_files: Vec<BiomePath>,
 }
 
@@ -299,14 +301,8 @@ impl TraversalContext for ScanContext<'_> {
 
                 if self
                     .workspace
-                    .is_path_ignored(IsPathIgnoredParams {
-                        project_key: self.project_key,
-                        path: path.clone(),
-                        // The scanner only cares about the top-level
-                        // `files.includes`
-                        features: FeaturesBuilder::new().build(),
-                    })
-                    .unwrap_or_default()
+                    .projects
+                    .is_ignored_by_top_level_config(self.project_key, path)
                 {
                     return false; // Nobody cares about ignored paths.
                 }
