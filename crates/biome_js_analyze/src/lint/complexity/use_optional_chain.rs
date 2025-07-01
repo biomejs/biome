@@ -8,6 +8,7 @@ use biome_js_syntax::{
     OperatorPrecedence, T,
 };
 use biome_rowan::{AstNode, AstNodeExt, BatchMutationExt, SyntaxResult};
+use biome_rule_options::use_optional_chain::UseOptionalChainOptions;
 use std::cmp::Ordering;
 use std::collections::VecDeque;
 use std::iter;
@@ -91,7 +92,7 @@ impl Rule for UseOptionalChain {
     type Query = Ast<JsLogicalExpression>;
     type State = UseOptionalChainState;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = UseOptionalChainOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
         let logical = ctx.query();

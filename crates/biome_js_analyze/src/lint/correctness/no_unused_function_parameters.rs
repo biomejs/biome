@@ -7,6 +7,7 @@ use biome_js_syntax::{
     binding_ext::{AnyJsBindingDeclaration, AnyJsParameterParentFunction},
 };
 use biome_rowan::{AstNode, BatchMutationExt, Direction};
+use biome_rule_options::no_unused_function_parameters::NoUnusedFunctionParametersOptions;
 
 use crate::{JsRuleAction, services::semantic::Semantic, utils::rename::RenameSymbolExtensions};
 
@@ -93,7 +94,7 @@ impl Rule for NoUnusedFunctionParameters {
     type Query = Semantic<JsIdentifierBinding>;
     type State = SuggestedFix;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoUnusedFunctionParametersOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let binding = ctx.query();

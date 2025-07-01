@@ -4,6 +4,7 @@ use biome_analyze::{
 use biome_console::markup;
 use biome_js_syntax::{JsNumberLiteralExpression, JsSyntaxToken};
 use biome_rowan::{AstNode, BatchMutationExt};
+use biome_rule_options::use_numeric_separators::UseNumericSeparatorsOptions;
 
 use crate::JsRuleAction;
 
@@ -65,7 +66,7 @@ impl Rule for UseNumericSeparators {
     type Query = Ast<JsNumberLiteralExpression>;
     type State = State;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = UseNumericSeparatorsOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let token = ctx.query().value_token().ok()?;

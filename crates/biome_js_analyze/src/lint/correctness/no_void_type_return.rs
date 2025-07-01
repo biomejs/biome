@@ -9,6 +9,7 @@ use biome_js_syntax::{
     JsSyntaxKind,
 };
 use biome_rowan::{AstNode, declare_node_union};
+use biome_rule_options::no_void_type_return::NoVoidTypeReturnOptions;
 
 use crate::services::control_flow::AnyJsControlFlowRoot;
 
@@ -99,7 +100,7 @@ impl Rule for NoVoidTypeReturn {
     type Query = Ast<JsReturnStatement>;
     type State = AnyJsFunctionMethodWithReturnType;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoVoidTypeReturnOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let ret = ctx.query();

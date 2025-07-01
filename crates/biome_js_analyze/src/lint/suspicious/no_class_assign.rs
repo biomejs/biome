@@ -4,6 +4,7 @@ use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_semantic::{Reference, ReferencesExtensions};
 use biome_js_syntax::AnyJsClass;
+use biome_rule_options::no_class_assign::NoClassAssignOptions;
 
 use crate::services::semantic::Semantic;
 
@@ -80,7 +81,7 @@ impl Rule for NoClassAssign {
     type Query = Semantic<AnyJsClass>;
     type State = Reference;
     type Signals = Box<[Self::State]>;
-    type Options = ();
+    type Options = NoClassAssignOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();

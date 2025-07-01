@@ -17,6 +17,7 @@ use biome_rowan::{
     AstNode, AstNodeList, AstSeparatedList, BatchMutationExt, Language, SyntaxNode, TextRange,
     TriviaPieceKind, WalkEvent, declare_node_union,
 };
+use biome_rule_options::use_arrow_function::UseArrowFunctionOptions;
 
 declare_lint_rule! {
     /// Use arrow functions over function expressions.
@@ -81,7 +82,7 @@ impl Rule for UseArrowFunction {
     type Query = ActualThisScope;
     type State = ();
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = UseArrowFunctionOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let AnyThisScopeMetadata { scope, has_this } = ctx.query();

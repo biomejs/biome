@@ -8,6 +8,7 @@ use biome_js_syntax::{
     AnyJsLiteralExpression, AnyJsxAttributeValue, JsSyntaxKind, JsxAttribute, JsxAttributeFields, T,
 };
 use biome_rowan::{AstNode, AstNodeExt, BatchMutationExt};
+use biome_rule_options::no_implicit_boolean::NoImplicitBooleanOptions;
 
 use crate::JsRuleAction;
 
@@ -58,7 +59,7 @@ impl Rule for NoImplicitBoolean {
     type Query = Ast<JsxAttribute>;
     type State = ();
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoImplicitBooleanOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
         let n = ctx.query();

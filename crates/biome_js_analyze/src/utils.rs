@@ -4,7 +4,6 @@ use std::iter;
 
 pub mod batch;
 pub mod rename;
-pub mod restricted_regex;
 #[cfg(test)]
 pub mod tests;
 

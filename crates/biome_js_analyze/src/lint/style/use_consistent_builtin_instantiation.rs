@@ -12,6 +12,7 @@ use biome_js_syntax::{
     AnyJsExpression, JsNewOrCallExpression, global_identifier, static_value::StaticValue,
 };
 use biome_rowan::{AstNode, BatchMutationExt};
+use biome_rule_options::use_consistent_builtin_instantiation::UseConsistentBuiltinInstantiationOptions;
 
 use crate::lint::style::use_throw_new_error::convert_call_expression_to_new_expression;
 
@@ -88,7 +89,7 @@ impl Rule for UseConsistentBuiltinInstantiation {
     type Query = Semantic<JsNewOrCallExpression>;
     type State = UseConsistentBuiltinInstantiationState;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = UseConsistentBuiltinInstantiationOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();

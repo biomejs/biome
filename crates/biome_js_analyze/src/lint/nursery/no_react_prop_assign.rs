@@ -7,6 +7,7 @@ use biome_console::markup;
 use biome_js_semantic::SemanticModel;
 use biome_js_syntax::{AnyJsExpression, AnyJsStatement, JsParameterList};
 use biome_rowan::{AstNode, AstSeparatedList};
+use biome_rule_options::no_react_prop_assign::NoReactPropAssignOptions;
 
 declare_lint_rule! {
     /// Disallow assigning to React component props.
@@ -49,7 +50,7 @@ impl Rule for NoReactPropAssign {
     type Query = Semantic<AnyPotentialReactComponentDeclaration>;
     type State = AnyJsExpression;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoReactPropAssignOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let expression = ctx.query();

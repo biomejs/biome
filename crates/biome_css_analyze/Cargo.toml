@@ -22,6 +22,7 @@ biome_deserialize        = { workspace = true }
 biome_deserialize_macros = { workspace = true }
 biome_diagnostics        = { workspace = true }
 biome_rowan              = { workspace = true }
+biome_rule_options       = { workspace = true }
 biome_string_case        = { workspace = true }
 biome_suppression        = { workspace = true }
 camino                   = { workspace = true }

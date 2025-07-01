@@ -13,29 +13,7 @@ use biome_js_syntax::{
     TsConditionalType, TsDeclarationModule, TsInferType,
 };
 use biome_rowan::{AstNode, BatchMutationExt, Direction, SyntaxResult};
-use serde::{Deserialize, Serialize};
-
-#[derive(
-    Clone,
-    Debug,
-    Deserialize,
-    biome_deserialize_macros::Deserializable,
-    Eq,
-    PartialEq,
-    Serialize,
-    Default,
-)]
-#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
-#[serde(rename_all = "camelCase", deny_unknown_fields)]
-pub struct NoUnusedVariablesOptions {
-    /// Whether to ignore unused variables from an object destructuring with a spread.
-    #[serde(default = "ignore_rest_siblings")]
-    ignore_rest_siblings: bool,
-}
-
-const fn ignore_rest_siblings() -> bool {
-    true
-}
+use biome_rule_options::no_unused_variables::NoUnusedVariablesOptions;
 
 declare_lint_rule! {
     /// Disallow unused variables.

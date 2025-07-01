@@ -7,6 +7,7 @@ use biome_deserialize::TextRange;
 use biome_diagnostics::Severity;
 use biome_js_syntax::{JsxAttribute, JsxOpeningElement};
 use biome_rowan::AstNode;
+use biome_rule_options::use_semantic_elements::UseSemanticElementsOptions;
 
 declare_lint_rule! {
     /// It detects the use of `role` attributes in JSX elements and suggests using semantic elements instead.
@@ -56,7 +57,7 @@ impl Rule for UseSemanticElements {
     type Query = Ast<JsxOpeningElement>;
     type State = JsxAttribute;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = UseSemanticElementsOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();

@@ -10,6 +10,7 @@ use biome_js_syntax::{
     JsStatementList, JsSyntaxKind, JsVariableStatement,
 };
 use biome_rowan::{AstNode, AstNodeList, BatchMutationExt};
+use biome_rule_options::no_useless_lone_block_statements::NoUselessLoneBlockStatementsOptions;
 
 declare_lint_rule! {
     /// Disallow unnecessary nested block statements.
@@ -57,7 +58,7 @@ impl Rule for NoUselessLoneBlockStatements {
     type Query = Ast<JsBlockStatement>;
     type State = ();
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoUselessLoneBlockStatementsOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let block = ctx.query();

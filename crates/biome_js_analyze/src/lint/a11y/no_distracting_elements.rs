@@ -5,6 +5,7 @@ use biome_diagnostics::Severity;
 use biome_js_syntax::jsx_ext::AnyJsxElement;
 use biome_js_syntax::*;
 use biome_rowan::{AstNode, BatchMutationExt};
+use biome_rule_options::no_distracting_elements::NoDistractingElementsOptions;
 
 use crate::JsRuleAction;
 
@@ -52,7 +53,7 @@ impl Rule for NoDistractingElements {
     type Query = Ast<AnyJsxElement>;
     type State = JsSyntaxToken;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoDistractingElementsOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let element = ctx.query();

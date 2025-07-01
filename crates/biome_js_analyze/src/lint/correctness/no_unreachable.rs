@@ -14,6 +14,7 @@ use biome_js_syntax::{
     JsTryFinallyStatement, JsTryStatement, JsVariableStatement, JsWhileStatement, TextRange,
 };
 use biome_rowan::{AstNode, NodeOrToken, declare_node_union};
+use biome_rule_options::no_unreachable::NoUnreachableOptions;
 use roaring::bitmap::RoaringBitmap;
 use rustc_hash::FxHashMap;
 
@@ -61,7 +62,7 @@ impl Rule for NoUnreachable {
     type Query = ControlFlowGraph;
     type State = UnreachableRange;
     type Signals = UnreachableRanges;
-    type Options = ();
+    type Options = NoUnreachableOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let mut signals = UnreachableRanges::new();

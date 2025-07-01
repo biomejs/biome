@@ -5,6 +5,7 @@ use biome_console::markup;
 use biome_css_syntax::CssFunction;
 use biome_diagnostics::Severity;
 use biome_rowan::{AstNode, TextRange};
+use biome_rule_options::no_unknown_function::NoUnknownFunctionOptions;
 
 use crate::utils::{is_custom_function, is_function_keyword};
 
@@ -51,7 +52,7 @@ impl Rule for NoUnknownFunction {
     type Query = Ast<CssFunction>;
     type State = NoUnknownFunctionState;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoUnknownFunctionOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
         let node = ctx.query();

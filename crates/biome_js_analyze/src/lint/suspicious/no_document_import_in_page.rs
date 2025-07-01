@@ -5,6 +5,7 @@ use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_syntax::{JsFileSource, JsImport};
 use biome_rowan::AstNode;
+use biome_rule_options::no_document_import_in_page::NoDocumentImportInPageOptions;
 
 declare_lint_rule! {
     /// Prevents importing `next/document` outside of `pages/_document.jsx` in Next.js projects.
@@ -45,7 +46,7 @@ impl Rule for NoDocumentImportInPage {
     type Query = Ast<JsImport>;
     type State = ();
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoDocumentImportInPageOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         if !ctx.source_type::<JsFileSource>().is_jsx() {

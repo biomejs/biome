@@ -11,6 +11,7 @@ use biome_js_syntax::{
     JsCallExpression, JsFunctionExpression, JsReturnStatement, global_identifier,
 };
 use biome_rowan::{AstNode, AstSeparatedList, NodeOrToken, TextRange};
+use biome_rule_options::use_iterable_callback_return::UseIterableCallbackReturnOptions;
 use roaring::RoaringBitmap;
 use rustc_hash::FxHashMap;
 use std::io;
@@ -89,7 +90,7 @@ impl Rule for UseIterableCallbackReturn {
     type Query = ControlFlowGraph;
     type State = RuleState;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = UseIterableCallbackReturnOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let cfg = ctx.query();

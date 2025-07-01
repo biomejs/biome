@@ -9,6 +9,7 @@ use biome_graphql_syntax::{
     GraphqlVariableDefinitions,
 };
 use biome_rowan::{AstNode, TextRange};
+use biome_rule_options::no_duplicate_fields::NoDuplicateFieldsOptions;
 use biome_string_case::StrOnlyExtension;
 
 declare_lint_rule! {
@@ -49,7 +50,7 @@ impl Rule for NoDuplicateFields {
     type Query = Ast<AnyGraphqlOperationDefinition>;
     type State = DuplicatedField;
     type Signals = Box<[Self::State]>;
-    type Options = ();
+    type Options = NoDuplicateFieldsOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let operation = ctx.query();

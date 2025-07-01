@@ -6,6 +6,7 @@ use biome_diagnostics::Severity;
 use biome_js_factory::make;
 use biome_js_syntax::{AnyJsExpression, AnyJsLiteralExpression, JsSyntaxKind, TsEnumDeclaration};
 use biome_rowan::{AstNode, BatchMutationExt};
+use biome_rule_options::use_enum_initializers::UseEnumInitializersOptions;
 
 declare_lint_rule! {
     /// Require that each enum member value be explicitly initialized.
@@ -81,7 +82,7 @@ impl Rule for UseEnumInitializers {
     type Query = Ast<TsEnumDeclaration>;
     type State = ();
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = UseEnumInitializersOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let enum_declaration = ctx.query();

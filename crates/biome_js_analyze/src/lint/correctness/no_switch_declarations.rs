@@ -7,6 +7,7 @@ use biome_js_syntax::{
     AnyJsDeclaration, AnyJsStatement, AnyJsSwitchClause, JsVariableStatement, T, TriviaPieceKind,
 };
 use biome_rowan::{AstNode, BatchMutationExt, TextRange};
+use biome_rule_options::no_switch_declarations::NoSwitchDeclarationsOptions;
 
 use crate::JsRuleAction;
 
@@ -84,7 +85,7 @@ impl Rule for NoSwitchDeclarations {
     type Query = Ast<AnyJsSwitchClause>;
     type State = TextRange;
     type Signals = Box<[Self::State]>;
-    type Options = ();
+    type Options = NoSwitchDeclarationsOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let switch_clause = ctx.query();

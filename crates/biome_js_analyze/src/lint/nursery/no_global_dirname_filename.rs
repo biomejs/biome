@@ -11,6 +11,7 @@ use biome_js_syntax::{
     JsVariableDeclarator, global_identifier,
 };
 use biome_rowan::{AstSeparatedList, BatchMutationExt, TriviaPieceKind, declare_node_union};
+use biome_rule_options::no_global_dirname_filename::NoGlobalDirnameFilenameOptions;
 
 declare_lint_rule! {
     /// Disallow the use of `__dirname` and `__filename` in the global scope.
@@ -68,7 +69,7 @@ impl Rule for NoGlobalDirnameFilename {
     type Query = Semantic<AnyGlobalDirnameFileName>;
     type State = (JsSyntaxToken, String);
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoGlobalDirnameFilenameOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();

@@ -7,6 +7,7 @@ use biome_js_syntax::{
 };
 use biome_rowan::{AstNode, declare_node_union};
 use biome_rowan::{AstNodeList, TokenText};
+use biome_rule_options::no_duplicate_class_members::NoDuplicateClassMembersOptions;
 use rustc_hash::{FxHashMap, FxHashSet};
 
 declare_lint_rule! {
@@ -174,7 +175,7 @@ impl Rule for NoDuplicateClassMembers {
     type Query = Ast<JsClassMemberList>;
     type State = AnyClassMemberDefinition;
     type Signals = Box<[Self::State]>;
-    type Options = ();
+    type Options = NoDuplicateClassMembersOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let mut defined_members: FxHashMap<MemberState, FxHashSet<MemberType>> =

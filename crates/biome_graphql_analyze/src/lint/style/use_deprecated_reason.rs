@@ -5,6 +5,7 @@ use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_graphql_syntax::GraphqlDirective;
 use biome_rowan::AstNode;
+use biome_rule_options::use_deprecated_reason::UseDeprecatedReasonOptions;
 
 declare_lint_rule! {
     /// Require specifying the reason argument when using `@deprecated` directive
@@ -43,7 +44,7 @@ impl Rule for UseDeprecatedReason {
     type Query = Ast<GraphqlDirective>;
     type State = GraphqlDirective;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = UseDeprecatedReasonOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
         let node = ctx.query();

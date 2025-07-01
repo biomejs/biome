@@ -8,6 +8,7 @@ use biome_diagnostics::Severity;
 use biome_js_factory::make;
 use biome_js_syntax::{AnyJsExpression, JsCallExpression, JsLanguage, TextRange};
 use biome_rowan::{AstNode, BatchMutation, BatchMutationExt, NodeOrToken, TokenText};
+use biome_rule_options::no_focused_tests::NoFocusedTestsOptions;
 
 declare_lint_rule! {
     /// Disallow focused tests.
@@ -67,7 +68,7 @@ impl Rule for NoFocusedTests {
     type Query = Ast<JsCallExpression>;
     type State = FunctionNameAndRange;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoFocusedTestsOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();

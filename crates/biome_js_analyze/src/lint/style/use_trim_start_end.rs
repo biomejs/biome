@@ -9,6 +9,7 @@ use biome_js_syntax::{
     JsComputedMemberExpression, JsLanguage, JsSyntaxKind, JsSyntaxToken, JsTemplateExpression,
 };
 use biome_rowan::{AstNode, AstSeparatedList, BatchMutationExt, SyntaxToken, TextRange};
+use biome_rule_options::use_trim_start_end::UseTrimStartEndOptions;
 
 use crate::JsRuleAction;
 
@@ -66,7 +67,7 @@ impl Rule for UseTrimStartEnd {
     type Query = Ast<JsCallExpression>;
     type State = UseTrimStartEndState;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = UseTrimStartEndOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();

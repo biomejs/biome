@@ -5,6 +5,7 @@ use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_syntax::JsImportNamespaceClause;
 use biome_rowan::AstNode;
+use biome_rule_options::no_namespace_import::NoNamespaceImportOptions;
 
 declare_lint_rule! {
     /// Disallow the use of namespace imports.
@@ -43,7 +44,7 @@ impl Rule for NoNamespaceImport {
     type Query = Ast<JsImportNamespaceClause>;
     type State = ();
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoNamespaceImportOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let import_namespace_clause = ctx.query();

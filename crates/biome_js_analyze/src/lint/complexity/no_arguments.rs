@@ -3,6 +3,7 @@ use biome_analyze::{Rule, RuleDiagnostic, RuleSource, context::RuleContext, decl
 use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_syntax::TextRange;
+use biome_rule_options::no_arguments::NoArgumentsOptions;
 
 declare_lint_rule! {
     /// Disallow the use of `arguments`.
@@ -39,7 +40,7 @@ impl Rule for NoArguments {
     type Query = SemanticServices;
     type State = TextRange;
     type Signals = Box<[Self::State]>;
-    type Options = ();
+    type Options = NoArgumentsOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let model = ctx.query();
