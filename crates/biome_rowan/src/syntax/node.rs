@@ -840,6 +840,25 @@ impl SendNode {
     }
 }
 
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct EmbeddedSendNode {
+    offset: TextSize,
+    green: GreenNode,
+}
+
+impl EmbeddedSendNode {
+    /// Downcast this handle into a [SyntaxNodeWithOffset]
+    pub fn into_node<L>(self) -> SyntaxNodeWithOffset<L>
+    where
+        L: Language + 'static,
+    {
+        SyntaxNodeWithOffset {
+            node: SyntaxNode::new_root(self.green),
+            offset: self.offset,
+        }
+    }
+}
+
 #[derive(Debug, Clone)]
 pub struct SyntaxNodeChildren<L: Language> {
     raw: cursor::SyntaxNodeChildren,
@@ -1112,5 +1131,18 @@ impl<L: Language> SyntaxNodeWithOffset<L> {
 
     pub fn text_trimmed(&self) -> crate::SyntaxNodeText {
         self.node.text_trimmed()
+    }
+
+    /// Create a [Send] + [Sync] handle to this node.
+    ///
+    /// ### Panics
+    ///
+    /// It panics if the `base_offset` isn't greater than zero
+    pub fn as_embedded_send(&self) -> EmbeddedSendNode {
+        debug_assert!(self.offset > 0.into(), "range must be greater than 0");
+        EmbeddedSendNode {
+            green: self.node.green_node(),
+            offset: self.offset,
+        }
     }
 }

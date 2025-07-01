@@ -488,8 +488,8 @@ impl WorkspaceServer {
                         file_source_index: index,
                         syntax: syntax.clone(),
                         opened_by_scanner: opened_by_scanner || document.opened_by_scanner,
-                        embedded_scripts: embedded_scripts.clone(),
-                        embedded_styles: embedded_styles.clone(),
+                        _embedded_scripts: embedded_scripts.clone(),
+                        _embedded_styles: embedded_styles.clone(),
                     })
                 }
                 None => Operation::Insert(Document {
@@ -498,8 +498,8 @@ impl WorkspaceServer {
                     file_source_index: index,
                     syntax: syntax.clone(),
                     opened_by_scanner,
-                    embedded_scripts: embedded_scripts.clone(),
-                    embedded_styles: embedded_styles.clone(),
+                    _embedded_scripts: embedded_scripts.clone(),
+                    _embedded_styles: embedded_styles.clone(),
                 }),
             }
         });
@@ -1321,8 +1321,8 @@ impl Workspace for WorkspaceServer {
             file_source_index: index,
             syntax: Some(Ok(parsed.any_parse)),
             opened_by_scanner,
-            embedded_scripts,
-            embedded_styles,
+            _embedded_scripts: embedded_scripts,
+            _embedded_styles: embedded_styles,
         };
 
         if persist_node_cache {

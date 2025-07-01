@@ -7,8 +7,8 @@ mod trivia;
 use crate::{AstNode, RawSyntaxKind};
 pub use element::{SyntaxElement, SyntaxElementKey};
 pub use node::{
-    Preorder, PreorderWithTokens, SendNode, SyntaxElementChildren, SyntaxNode, SyntaxNodeChildren,
-    SyntaxNodeOptionExt, SyntaxNodeWithOffset, SyntaxSlot, SyntaxSlots,
+    EmbeddedSendNode, Preorder, PreorderWithTokens, SendNode, SyntaxElementChildren, SyntaxNode,
+    SyntaxNodeChildren, SyntaxNodeOptionExt, SyntaxNodeWithOffset, SyntaxSlot, SyntaxSlots,
 };
 pub use rewriter::{SyntaxRewriter, VisitNodeSignal};
 use std::fmt;

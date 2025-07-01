@@ -1,27 +1,24 @@
 use biome_css_parser::CssOffsetParse;
-use biome_css_syntax::CssLanguage;
 use biome_js_parser::JsOffsetParse;
 use biome_js_syntax::JsLanguage;
 use biome_parser::AnyParse;
 use biome_parser::diagnostic::ParseDiagnostic;
-use biome_rowan::{SyntaxNodePtr, TextRange, TextSize};
+use biome_rowan::{EmbeddedSendNode, SyntaxNodeWithOffset, TextRange, TextSize};
 
 use crate::diagnostics::FileTooLarge;
 
 #[derive(Clone, Debug)]
 pub struct SendJsEmbeddedParse {
-    #[expect(unused)]
-    pub(crate) root: SyntaxNodePtr<JsLanguage>,
+    pub(crate) root: EmbeddedSendNode,
     #[expect(unused)]
     pub(crate) diagnostics: Vec<ParseDiagnostic>,
 }
 
 impl From<JsOffsetParse> for SendJsEmbeddedParse {
     fn from(value: JsOffsetParse) -> Self {
-        let root = SyntaxNodePtr::new(value.syntax().inner());
         Self {
+            root: value.syntax().clone().as_embedded_send(),
             diagnostics: value.into_diagnostics(),
-            root,
         }
     }
 }
@@ -46,28 +43,34 @@ pub struct EmbeddedJsContent {
     /// The offset where the JavaScript content starts in the parent document.
     /// This is used for offset-aware parsing.
     pub content_offset: TextSize,
-    // The type attribute of the script tag, if present.
-    // This helps determine the correct parsing mode (module vs script).
-    // pub script_type: Option<String>,
+}
 
-    // Whether the JavaScript parse had any errors.
-    // pub has_errors: bool,
+impl EmbeddedJsContent {
+    /// Returns a syntax node
+    pub fn node(&self) -> SyntaxNodeWithOffset<JsLanguage> {
+        self.parse.root.clone().into_node::<JsLanguage>()
+    }
 }
 
 #[derive(Clone, Debug)]
 pub struct SendCssEmbeddedParse {
-    #[expect(unused)]
-    pub(crate) root: SyntaxNodePtr<CssLanguage>,
+    pub(crate) root: EmbeddedSendNode,
     #[expect(unused)]
     pub(crate) diagnostics: Vec<ParseDiagnostic>,
 }
 
+impl EmbeddedCssContent {
+    /// Returns a syntax node
+    pub fn node(&self) -> SyntaxNodeWithOffset<JsLanguage> {
+        self.parse.root.clone().into_node::<JsLanguage>()
+    }
+}
+
 impl From<CssOffsetParse> for SendCssEmbeddedParse {
     fn from(value: CssOffsetParse) -> Self {
-        let root = SyntaxNodePtr::new(value.syntax().inner());
         Self {
+            root: value.syntax().clone().as_embedded_send(),
             diagnostics: value.into_diagnostics(),
-            root,
         }
     }
 }
@@ -132,12 +135,12 @@ pub(crate) struct Document {
     /// Embedded JavaScript content found in HTML documents (script tags).
     /// Each entry contains the parsed JavaScript with offset-aware positioning
     /// relative to the parent HTML document.
-    #[expect(unused)]
-    pub(crate) embedded_scripts: Vec<EmbeddedJsContent>,
+    // FIXME: remove underscore once we start reading the field
+    pub(crate) _embedded_scripts: Vec<EmbeddedJsContent>,
 
     /// Embedded CSS content found in HTML documents (style tags).
     /// Each entry contains the parsed CSS with offset-aware positioning
     /// relative to the parent HTML document
-    #[expect(unused)]
-    pub(crate) embedded_styles: Vec<EmbeddedCssContent>,
+    // FIXME: remove underscore once we start reading the field
+    pub(crate) _embedded_styles: Vec<EmbeddedCssContent>,
 }
