@@ -33,7 +33,9 @@ pub(crate) struct ScanResult {
     /// Duration of the full scan.
     pub duration: Duration,
 
-    /// List of additional configuration files found inside the project (it doesn't contain the current one)
+    /// List of nested configuration files found inside the project.
+    ///
+    /// The root configuration is not included in this.
     pub configuration_files: Vec<BiomePath>,
 }
 

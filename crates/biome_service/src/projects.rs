@@ -1,6 +1,6 @@
 use crate::is_dir;
 use crate::settings::Settings;
-use crate::workspace::FeatureKind;
+use crate::workspace::{FeatureKind, FeatureName};
 use camino::{Utf8Path, Utf8PathBuf};
 use papaya::HashMap;
 use rustc_hash::FxBuildHasher;
@@ -133,37 +133,64 @@ impl Projects {
     }
 
     pub fn is_ignored_by_top_level_config(&self, project_key: ProjectKey, path: &Utf8Path) -> bool {
-        let is_included = self
-            .get_settings_based_on_path(project_key, path)
-            .is_some_and(|settings| {
-                let includes = &settings.files.includes;
+        self.is_ignored(project_key, path, FeatureName::empty())
+    }
 
-                let mut is_included = true;
-                if !includes.is_unset() {
-                    is_included = if is_dir(path) {
-                        includes.matches_directory_with_exceptions(path)
-                    } else {
-                        includes.matches_with_exceptions(path)
-                    };
-                }
+    pub fn is_ignored(
+        &self,
+        project_key: ProjectKey,
+        path: &Utf8Path,
+        features: FeatureName,
+    ) -> bool {
+        let data = self.0.pin();
+        let Some(project_data) = data.get(&project_key) else {
+            return false;
+        };
 
-                is_included
-            });
+        // First check if the path is ignored by the `files.includes` setting
+        // relevant to the given `path`.
+        let files_includes = project_data
+            .nested_settings
+            .iter()
+            .find(|(project_path, _)| path.starts_with(project_path))
+            .map_or(
+                &project_data.root_settings.files.includes,
+                |(_, settings)| &settings.files.includes,
+            );
 
-        // We store ignore matches inside the root settings, regardless of what package we are analyzing
-        let is_vcs_ignored = self.get_root_settings(project_key).is_some_and(|settings| {
-            if settings.vcs_settings.should_use_ignore_file() {
-                settings
-                    .vcs_settings
-                    .ignore_matches
-                    .as_ref()
-                    .is_some_and(|ignored_matches| ignored_matches.is_ignored(path, is_dir(path)))
+        let mut is_included = true;
+        if !files_includes.is_unset() {
+            is_included = if is_dir(path) {
+                files_includes.matches_directory_with_exceptions(path)
             } else {
-                false
-            }
-        });
+                files_includes.matches_with_exceptions(path)
+            };
+        }
 
-        !is_included || is_vcs_ignored
+        if !is_included {
+            return true;
+        }
+
+        // VCS settings are used from the root settings, regardless of what
+        // package we are analyzing, so we ignore the `path` for those.
+        let vcs_settings = &project_data.root_settings.vcs_settings;
+        let is_ignored_by_vcs = vcs_settings.should_use_ignore_file()
+            && vcs_settings
+                .ignore_matches
+                .as_ref()
+                .is_some_and(|ignored_matches| ignored_matches.is_ignored(path, is_dir(path)));
+        if is_ignored_by_vcs {
+            return true;
+        }
+
+        // If there are specific features enabled, but all of them ignore the
+        // path, then we treat the path as ignored too.
+        !features.is_empty()
+            && features.iter().all(|feature| {
+                project_data
+                    .root_settings
+                    .is_ignored_for_feature(path, feature)
+            })
     }
 
     /// Sets the root settings for the given project.
@@ -268,39 +295,12 @@ impl Projects {
         feature: FeatureKind,
     ) -> bool {
         let data = self.0.pin();
-        let Some(project_data) = data.get(&project_key) else {
-            return false;
-        };
-
-        let settings = &project_data.root_settings;
-        let feature_includes_files = match feature {
-            FeatureKind::Format => {
-                let formatter = &settings.formatter;
-                &formatter.includes
-            }
-            FeatureKind::Lint => {
-                let linter = &settings.linter;
-                &linter.includes
-            }
-
-            FeatureKind::Assist => {
-                let assists = &settings.assist;
-                &assists.includes
-            }
-            // TODO: enable once the configuration is available
-            FeatureKind::Search => return false, // There is no search-specific config.
-            FeatureKind::Debug => return false,
-        };
-
-        let mut is_feature_included = true;
-        if !feature_includes_files.is_unset() {
-            is_feature_included = if is_dir(path) {
-                feature_includes_files.matches_directory_with_exceptions(path)
-            } else {
-                feature_includes_files.matches_with_exceptions(path)
-            };
+        match data.get(&project_key) {
+            Some(project_data) => project_data
+                .root_settings
+                .is_ignored_for_feature(path, feature),
+            None => false,
         }
-        !is_feature_included
     }
 }
 
