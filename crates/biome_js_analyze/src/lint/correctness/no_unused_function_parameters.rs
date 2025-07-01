@@ -57,7 +57,7 @@ declare_lint_rule! {
     ///
     /// ### `ignoreRestSiblings`
     /// **Since `v2.1.0`**
-    /// 
+    ///
     /// Whether to ignore unused variables from an object destructuring with a spread.
     /// Example: `a` and `b` in `function({ a, b, ...rest }) { return rest;}` should be ignored by this rule when set to false.
     ///
