@@ -425,8 +425,7 @@ pub fn parse_module_with_offset(
 
 #[cfg(test)]
 mod tests {
-    use biome_js_parser::{JsParserOptions, parse_js_with_offset};
-    use biome_js_syntax::JsFileSource;
+    use crate::{JsFileSource, JsParserOptions, parse_js_with_cache, parse_js_with_offset};
     use biome_rowan::TextSize;
 
     #[test]
@@ -473,7 +472,7 @@ mod tests {
         );
 
         // Parse normally
-        let normal_parse = biome_js_parser::parse_js_with_cache(
+        let normal_parse = parse_js_with_cache(
             js_code,
             JsFileSource::js_module(),
             JsParserOptions::default(),
