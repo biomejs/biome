@@ -8698,7 +8698,7 @@ export type ScanKind =
 				/**
 				 * Determines whether the file scanner should descend into subdirectories of the target paths.
 				 */
-				descend_from_targets: boolean;
+				descendFromTargets: boolean;
 				/**
 	* The paths to target by the scanner.
 
@@ -8706,7 +8706,7 @@ If a target path indicates a folder, all files within are scanned as well.
 
 Target paths must be absolute. 
 	 */
-				target_paths: BiomePath[];
+				targetPaths: BiomePath[];
 			};
 	  }
 	| "project";

@@ -280,9 +280,13 @@ impl TraversalContext for ScanContext<'_> {
         self.send_diagnostic(Diagnostic::new(error));
     }
 
-    // This is the first filtering we apply at the scanner. In this function `can_handle`
-    // We roughly understand which files should be open by the scanner.
-    // Here, we mostly do file operations by reading their metadata.
+    // This is the main filtering logic applied by the scanner.
+    //
+    // Whether the scanner handles a file or not is based on:
+    // - The file path and whether that path is being ignored, and/or whether
+    //   the path belongs to a dependency.
+    // - The kind of file system entry the path points to.
+    // - The kind of scan we are performing.
     fn can_handle(&self, path: &BiomePath) -> bool {
         if self
             .workspace
