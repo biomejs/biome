@@ -756,7 +756,9 @@ impl PatternOptions {
         import_source_text: &TokenText,
     ) -> Vec<RestrictedImportMessage> {
         if let Some(group) = &self.group {
-            let source = ImportSource::from(ComparableToken{token: import_source_text.clone()});
+            let source = ImportSource::from(ComparableToken {
+                token: import_source_text.clone(),
+            });
             let candidate = ImportSourceCandidate::new(&source);
             if group.is_match(&candidate) {
                 return check_import_restrictions(
