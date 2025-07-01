@@ -159,18 +159,12 @@ impl Projects {
                 |(_, settings)| &settings.files.includes,
             );
 
-        let mut is_included = true;
-        if !files_includes.is_unset() {
-            is_included = if is_dir(path) {
+        let is_included = files_includes.is_unset()
+            || if is_dir(path) {
                 files_includes.matches_directory_with_exceptions(path)
             } else {
                 files_includes.matches_with_exceptions(path)
             };
-        }
-
-        if !is_included {
-            return true;
-        }
 
         // VCS settings are used from the root settings, regardless of what
         // package we are analyzing, so we ignore the `path` for those.
@@ -180,18 +174,17 @@ impl Projects {
                 .ignore_matches
                 .as_ref()
                 .is_some_and(|ignored_matches| ignored_matches.is_ignored(path, is_dir(path)));
-        if is_ignored_by_vcs {
-            return true;
-        }
 
         // If there are specific features enabled, but all of them ignore the
         // path, then we treat the path as ignored too.
-        !features.is_empty()
+        let is_ignored_by_features = !features.is_empty()
             && features.iter().all(|feature| {
                 project_data
                     .root_settings
                     .is_ignored_for_feature(path, feature)
-            })
+            });
+
+        !is_included || is_ignored_by_vcs || is_ignored_by_features
     }
 
     /// Sets the root settings for the given project.
