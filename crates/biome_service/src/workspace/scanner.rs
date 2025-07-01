@@ -229,6 +229,7 @@ pub enum ScanKind {
     KnownFiles,
     /// Scans for limited, knows files, but only within a set of predefined
     /// paths.
+    #[serde(rename_all = "camelCase")]
     TargetedKnownFiles {
         /// The paths to target by the scanner.
         ///

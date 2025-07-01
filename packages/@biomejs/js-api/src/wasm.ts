@@ -25,7 +25,26 @@ export interface OpenProjectResult {
 	 */
 	scanKind: ScanKind;
 }
-type ScanKind = "noScanner" | "knownFiles" | "project";
+type ScanKind =
+	| "noScanner"
+	| "knownFiles"
+	| {
+			targetedKnownFiles: {
+				/**
+				 * Determines whether the file scanner should descend into subdirectories of the target paths.
+				 */
+				descendFromTargets: boolean;
+				/**
+* The paths to target by the scanner.
+
+If a target path indicates a folder, all files within are scanned as well.
+
+Target paths must be absolute. 
+	*/
+				targetPaths: BiomePath[];
+			};
+	  }
+	| "project";
 interface OpenFileParams {
 	content: FileContent;
 	path: BiomePath;
