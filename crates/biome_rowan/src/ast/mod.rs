@@ -791,13 +791,6 @@ impl<L: Language> SyntaxNodePtr<L> {
         }
     }
 
-    pub fn new_with_range(node: &SyntaxNode<L>, range: TextRange) -> Self {
-        Self {
-            kind: node.kind(),
-            range,
-        }
-    }
-
     /// Like [`Self::try_to_node`] but panics instead of returning `None` on
     /// failure.
     pub fn to_node(&self, root: &SyntaxNode<L>) -> SyntaxNode<L> {

@@ -18,10 +18,7 @@ pub struct SendJsEmbeddedParse {
 
 impl From<JsOffsetParse> for SendJsEmbeddedParse {
     fn from(value: JsOffsetParse) -> Self {
-        let root = SyntaxNodePtr::new_with_range(
-            value.syntax().inner(),
-            value.syntax().text_range_with_trivia(),
-        );
+        let root = SyntaxNodePtr::new(value.syntax().inner());
         Self {
             diagnostics: value.into_diagnostics(),
             root,
@@ -67,10 +64,7 @@ pub struct SendCssEmbeddedParse {
 
 impl From<CssOffsetParse> for SendCssEmbeddedParse {
     fn from(value: CssOffsetParse) -> Self {
-        let root = SyntaxNodePtr::new_with_range(
-            value.syntax().inner(),
-            value.syntax().text_range_with_trivia(),
-        );
+        let root = SyntaxNodePtr::new(value.syntax().inner());
         Self {
             diagnostics: value.into_diagnostics(),
             root,
