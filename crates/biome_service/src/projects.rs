@@ -132,6 +132,7 @@ impl Projects {
         })
     }
 
+    #[inline]
     pub fn is_ignored_by_top_level_config(&self, project_key: ProjectKey, path: &Utf8Path) -> bool {
         self.is_ignored(project_key, path, FeatureName::empty())
     }
