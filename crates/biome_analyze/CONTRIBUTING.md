@@ -657,9 +657,9 @@ Also, we use other `serde` macros to adjust the JSON configuration:
 - `deny_unknown_fields`: it raises an error if the configuration contains extraneous fields.
 - `default`: it uses the `Default` value when the field is missing from `biome.json`. This macro makes the field optional.
 
-Because we use `schema`to generate a JSON schema for `biome.json`, our options type must support the `schemars::JsonSchema` trait as well.
+Because we use `schemars` to generate a JSON schema for `biome.json`, our options type must support the `schemars::JsonSchema` trait as well.
 
-You can simply use the derive macros provided by `serde`, `biome_deserialize` and `schema` to generate the necessary implementations automatically:
+You can simply use the derive macros provided by `serde`, `biome_deserialize` and `schemars` to generate the necessary implementations automatically:
 
 ```rust
 // crates/biome_rule_options/lib/use_my_rule.rs
