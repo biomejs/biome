@@ -9,6 +9,7 @@ use biome_js_syntax::{
     JsBinaryExpression, JsBinaryOperator, JsSyntaxKind, T,
 };
 use biome_rowan::{AstNode, BatchMutationExt};
+use biome_rule_options::use_shorthand_assign::UseShorthandAssignOptions;
 
 use crate::{
     JsRuleAction,
@@ -69,7 +70,7 @@ impl Rule for UseShorthandAssign {
     type Query = Ast<JsAssignmentExpression>;
     type State = RuleState;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = UseShorthandAssignOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();

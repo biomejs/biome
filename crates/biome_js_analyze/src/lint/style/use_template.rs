@@ -10,6 +10,7 @@ use biome_js_syntax::{
     JsTemplateElementList, JsTemplateExpression, T,
 };
 use biome_rowan::{AstNode, BatchMutationExt, WalkEvent};
+use biome_rule_options::use_template::UseTemplateOptions;
 
 use crate::JsRuleAction;
 
@@ -60,7 +61,7 @@ impl Rule for UseTemplate {
     type Query = Ast<JsBinaryExpression>;
     type State = ();
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = UseTemplateOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
         let node = ctx.query();

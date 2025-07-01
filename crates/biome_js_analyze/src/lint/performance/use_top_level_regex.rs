@@ -3,6 +3,7 @@ use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_syntax::{AnyJsPropertyModifier, JsPropertyClassMember, JsRegexLiteralExpression};
 use biome_rowan::{AstNode, AstNodeList};
+use biome_rule_options::use_top_level_regex::UseTopLevelRegexOptions;
 
 use crate::services::control_flow::AnyJsControlFlowRoot;
 
@@ -55,7 +56,7 @@ impl Rule for UseTopLevelRegex {
     type Query = Ast<JsRegexLiteralExpression>;
     type State = ();
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = UseTopLevelRegexOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let regex = ctx.query();

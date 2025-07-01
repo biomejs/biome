@@ -13,6 +13,7 @@ use biome_js_syntax::{
     TsUnionTypeVariantList,
 };
 use biome_rowan::{AstNode, declare_node_union};
+use biome_rule_options::no_magic_numbers::NoMagicNumbersOptions;
 
 declare_lint_rule! {
     /// Reports usage of "magic numbers" — numbers used directly instead of being assigned to named constants.
@@ -57,7 +58,7 @@ impl Rule for NoMagicNumbers {
     type Query = Ast<JsOrTsNumericLiteral>;
     type State = ();
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoMagicNumbersOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let literal_expression = ctx.query();

@@ -7,6 +7,7 @@ use biome_js_syntax::{
     AnyJsCallArgument, AnyJsExpression, AnyJsName, JsExpressionStatement, JsSyntaxKind, T,
 };
 use biome_rowan::{AstNode, AstSeparatedList, BatchMutationExt, TriviaPieceKind};
+use biome_rule_options::no_floating_promises::NoFloatingPromisesOptions;
 
 use crate::{JsRuleAction, ast_utils::is_in_async_function, services::typed::Typed};
 
@@ -172,7 +173,7 @@ impl Rule for NoFloatingPromises {
     type Query = Typed<JsExpressionStatement>;
     type State = NoFloatingPromisesState;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoFloatingPromisesOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();

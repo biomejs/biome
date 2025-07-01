@@ -17,6 +17,7 @@ use biome_js_syntax::{
     JsxText, T,
 };
 use biome_rowan::{AstNode, AstNodeList, BatchMutation, BatchMutationExt, declare_node_union};
+use biome_rule_options::no_useless_fragments::NoUselessFragmentsOptions;
 
 declare_lint_rule! {
     /// Disallow unnecessary fragments
@@ -131,7 +132,7 @@ impl Rule for NoUselessFragments {
     type Query = Semantic<NoUselessFragmentsQuery>;
     type State = NoUselessFragmentsState;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoUselessFragmentsOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();

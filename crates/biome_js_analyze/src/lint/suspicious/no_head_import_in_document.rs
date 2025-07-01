@@ -5,6 +5,7 @@ use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_syntax::{JsFileSource, JsImport};
 use biome_rowan::AstNode;
+use biome_rule_options::no_head_import_in_document::NoHeadImportInDocumentOptions;
 use std::path::MAIN_SEPARATOR;
 
 declare_lint_rule! {
@@ -58,7 +59,7 @@ impl Rule for NoHeadImportInDocument {
     type Query = Ast<JsImport>;
     type State = ();
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoHeadImportInDocumentOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         if !ctx.source_type::<JsFileSource>().is_jsx() {

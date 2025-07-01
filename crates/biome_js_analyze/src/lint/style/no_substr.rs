@@ -8,6 +8,7 @@ use biome_js_syntax::{
     AnyJsName, JsCallArguments, JsExpressionStatement, JsSyntaxToken, JsVariableStatement,
 };
 use biome_rowan::{AstSeparatedList, BatchMutationExt, TextRange, TokenText, declare_node_union};
+use biome_rule_options::no_substr::NoSubstrOptions;
 
 use crate::JsRuleAction;
 
@@ -55,7 +56,7 @@ impl Rule for NoSubstr {
     type Query = Ast<AnyJsStatement>;
     type State = NoSubstrState;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoSubstrOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();

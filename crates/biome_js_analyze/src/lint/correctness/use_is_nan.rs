@@ -9,6 +9,7 @@ use biome_js_syntax::{
     JsBinaryOperator, JsCaseClause, JsSwitchStatement, T, TextRange, global_identifier,
 };
 use biome_rowan::{AstNode, BatchMutationExt, declare_node_union};
+use biome_rule_options::use_is_nan::UseIsNanOptions;
 
 use crate::{JsRuleAction, services::semantic::Semantic};
 
@@ -101,7 +102,7 @@ impl Rule for UseIsNan {
     type Query = Semantic<UseIsNanQuery>;
     type State = RuleState;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = UseIsNanOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();

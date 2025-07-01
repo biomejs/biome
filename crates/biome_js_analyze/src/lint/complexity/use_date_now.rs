@@ -9,6 +9,7 @@ use biome_js_syntax::{
     JsNewOrCallExpression, JsSyntaxKind, JsSyntaxNode, JsUnaryOperator, T,
 };
 use biome_rowan::{AstNode, AstSeparatedList, BatchMutationExt};
+use biome_rule_options::use_date_now::UseDateNowOptions;
 
 use crate::JsRuleAction;
 
@@ -68,7 +69,7 @@ impl Rule for UseDateNow {
     type Query = Ast<JsNewOrCallExpression>;
     type State = (AnyJsExpression, UseDateNowIssueKind);
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = UseDateNowOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let expr = ctx.query();

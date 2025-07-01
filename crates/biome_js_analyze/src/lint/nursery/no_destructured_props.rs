@@ -10,6 +10,7 @@ use biome_js_syntax::{
     JsParameters, JsVariableDeclarator, JsxExpressionAttributeValue,
 };
 use biome_rowan::{AstNode, AstSeparatedList, AstSeparatedListNodesIterator, TextRange};
+use biome_rule_options::no_destructured_props::NoDestructuredPropsOptions;
 use biome_string_case::Case;
 use std::collections::VecDeque;
 use std::iter::FusedIterator;
@@ -80,7 +81,7 @@ impl Rule for NoDestructuredProps {
     type Query = Semantic<JsObjectBindingPattern>;
     type State = Violation;
     type Signals = Vec<Self::State>;
-    type Options = ();
+    type Options = NoDestructuredPropsOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let binding_pattern = ctx.query();

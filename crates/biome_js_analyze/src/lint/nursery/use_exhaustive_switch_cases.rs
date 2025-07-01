@@ -10,6 +10,7 @@ use biome_js_syntax::{
 };
 use biome_js_type_info::{Literal, Type, TypeData};
 use biome_rowan::{AstNode, AstNodeList, BatchMutationExt, TriviaPieceKind};
+use biome_rule_options::use_exhaustive_switch_cases::UseExhaustiveSwitchCasesOptions;
 
 use crate::JsRuleAction;
 use crate::services::typed::Typed;
@@ -104,7 +105,7 @@ impl Rule for UseExhaustiveSwitchCases {
     type Query = Typed<JsSwitchStatement>;
     type State = Vec<Type>;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = UseExhaustiveSwitchCasesOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let stmt = ctx.query();

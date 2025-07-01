@@ -9,6 +9,7 @@ use biome_js_syntax::{
     JsReferenceIdentifier, JsUnaryOperator,
 };
 use biome_rowan::{AstNode, AstNodeList, AstSeparatedList, SyntaxResult, declare_node_union};
+use biome_rule_options::no_constant_binary_expression::NoConstantBinaryExpressionOptions;
 
 use crate::ast_utils::is_constant_condition;
 use crate::globals::is_js_language_global;
@@ -153,7 +154,7 @@ impl Rule for NoConstantBinaryExpression {
     type Query = Semantic<Query>;
     type State = Issue;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoConstantBinaryExpressionOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let model = ctx.model();

@@ -11,6 +11,7 @@ use biome_js_syntax::{
     JsStaticMemberExpression, JsUnaryExpression, T,
 };
 use biome_rowan::{AstNode, AstSeparatedList, BatchMutationExt, declare_node_union};
+use biome_rule_options::use_at_index::UseAtIndexOptions;
 
 declare_lint_rule! {
     /// Use `at()` instead of integer index access.
@@ -127,7 +128,7 @@ impl Rule for UseAtIndex {
     type Query = Ast<AnyJsArrayAccess>;
     type State = UseAtIndexState;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = UseAtIndexOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let exp = ctx.query();

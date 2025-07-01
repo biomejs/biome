@@ -6,6 +6,7 @@ use biome_js_syntax::{
     JsSyntaxToken, JsTemplateExpression,
 };
 use biome_rowan::{BatchMutationExt, TextRange, declare_node_union};
+use biome_rule_options::no_useless_escape_in_string::NoUselessEscapeInStringOptions;
 
 use crate::JsRuleAction;
 
@@ -65,7 +66,7 @@ impl Rule for NoUselessEscapeInString {
     type Query = Ast<AnyJsString>;
     type State = (JsSyntaxToken, usize);
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoUselessEscapeInStringOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();

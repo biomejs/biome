@@ -4,6 +4,7 @@ use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_syntax::{AnyJsxAttributeValue, jsx_ext::AnyJsxElement};
 use biome_rowan::AstNode;
+use biome_rule_options::use_focusable_interactive::UseFocusableInteractiveOptions;
 
 use crate::services::aria::Aria;
 
@@ -52,7 +53,7 @@ impl Rule for UseFocusableInteractive {
     type Query = Aria<AnyJsxElement>;
     type State = Box<str>;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = UseFocusableInteractiveOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();

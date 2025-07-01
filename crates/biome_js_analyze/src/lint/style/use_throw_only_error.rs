@@ -8,6 +8,7 @@ use biome_js_syntax::{
     JsThrowStatement,
 };
 use biome_rowan::AstNode;
+use biome_rule_options::use_throw_only_error::UseThrowOnlyErrorOptions;
 
 declare_lint_rule! {
     /// Disallow throwing non-`Error` values.
@@ -67,7 +68,7 @@ impl Rule for UseThrowOnlyError {
     type Query = Ast<JsThrowStatement>;
     type State = ();
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = UseThrowOnlyErrorOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();

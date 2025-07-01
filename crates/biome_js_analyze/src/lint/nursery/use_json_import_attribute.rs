@@ -7,6 +7,7 @@ use biome_js_syntax::{AnyJsImportAssertionEntry, JsImport, JsImportDefaultClause
 use biome_rowan::{
     AstNode, AstSeparatedElement, AstSeparatedList, BatchMutationExt, TriviaPieceKind,
 };
+use biome_rule_options::use_json_import_attribute::UseJsonImportAttributeOptions;
 
 use crate::{JsRuleAction, services::module_graph::ResolvedImports};
 
@@ -64,7 +65,7 @@ impl Rule for UseJsonImportAttribute {
     type Query = ResolvedImports<JsImportDefaultClause>;
     type State = UseJsonImportAttributeState;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = UseJsonImportAttributeOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
