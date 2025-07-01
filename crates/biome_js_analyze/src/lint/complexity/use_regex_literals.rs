@@ -11,6 +11,7 @@ use biome_js_syntax::{
     global_identifier, static_value::StaticValue,
 };
 use biome_rowan::{AstNode, AstSeparatedList, BatchMutationExt, SyntaxError, TextRange, TokenText};
+use biome_rule_options::use_regex_literals::UseRegexLiteralsOptions;
 
 use crate::{JsRuleAction, services::semantic::Semantic};
 
@@ -64,7 +65,7 @@ impl Rule for UseRegexLiterals {
     type Query = Semantic<JsNewOrCallExpression>;
     type State = UseRegexLiteralsState;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = UseRegexLiteralsOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();

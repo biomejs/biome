@@ -4,6 +4,7 @@ use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_syntax::TsPropertyParameter;
 use biome_rowan::AstNode;
+use biome_rule_options::no_parameter_properties::NoParameterPropertiesOptions;
 
 declare_lint_rule! {
     /// Disallow the use of parameter properties in class constructors.
@@ -45,7 +46,7 @@ impl Rule for NoParameterProperties {
     type Query = Ast<TsPropertyParameter>;
     type State = ();
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoParameterPropertiesOptions;
 
     fn run(_: &RuleContext<Self>) -> Self::Signals {
         Some(())

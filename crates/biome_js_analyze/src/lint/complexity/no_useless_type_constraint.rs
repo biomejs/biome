@@ -11,6 +11,7 @@ use biome_js_syntax::{
 use biome_rowan::{
     AstNode, AstSeparatedList, BatchMutationExt, SyntaxNodeOptionExt, trim_leading_trivia_pieces,
 };
+use biome_rule_options::no_useless_type_constraint::NoUselessTypeConstraintOptions;
 
 use crate::JsRuleAction;
 
@@ -91,7 +92,7 @@ impl Rule for NoUselessTypeConstraint {
     type Query = Ast<TsTypeConstraintClause>;
     type State = ();
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoUselessTypeConstraintOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
         let node = ctx.query();

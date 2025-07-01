@@ -6,7 +6,7 @@ use biome_configuration::{self as biome_config};
 use biome_console::markup;
 use biome_deserialize::Merge;
 use biome_diagnostics::Location;
-use biome_js_analyze::lint::style::no_restricted_globals;
+use biome_rule_options::no_restricted_globals;
 use rustc_hash::FxHashMap;
 
 /// This modules includes implementations for converting an ESLint config to a Biome config.
@@ -489,7 +489,7 @@ fn migrate_eslint_rule(
                             biome_config::RuleWithFixOptions {
                                 level: severity.into(),
                                 fix: None,
-                                options: Box::new((*rule_options).into()),
+                                options: *Box::new((*rule_options).into()),
                             },
                         ));
                     }
@@ -516,8 +516,8 @@ fn migrate_eslint_rule(
                         Some(biome_config::RuleConfiguration::WithOptions(
                             biome_config::RuleWithOptions {
                                 level: severity.into(),
-                                options: Box::new(
-                                    no_restricted_globals::RestrictedGlobalsOptions {
+                                options: *Box::new(
+                                    no_restricted_globals::NoRestrictedGlobalsOptions {
                                         denied_globals: globals.collect::<FxHashMap<_, _>>(),
                                     },
                                 ),
@@ -536,7 +536,7 @@ fn migrate_eslint_rule(
                                 biome_config::RuleWithFixOptions {
                                     level: severity.into(),
                                     fix: None,
-                                    options: Box::new((*rule_options).into()),
+                                    options: *Box::new((*rule_options).into()),
                                 },
                             ));
                     }
@@ -620,7 +620,7 @@ fn migrate_eslint_rule(
                         Some(biome_config::RuleConfiguration::WithOptions(
                             biome_config::RuleWithOptions {
                                 level: conf.severity().into(),
-                                options: Box::new(conf.option_or_default().into()),
+                                options: conf.option_or_default().into(),
                             },
                         ));
                 }

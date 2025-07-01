@@ -9,6 +9,7 @@ use biome_js_syntax::{
     JsWhileStatement, JsYieldExpression, TextRange,
 };
 use biome_rowan::{AstNode, declare_node_union};
+use biome_rule_options::no_constant_condition::NoConstantConditionOptions;
 
 declare_lint_rule! {
     /// Disallow constant expressions in conditions
@@ -97,7 +98,7 @@ impl Rule for NoConstantCondition {
     type Query = Semantic<ConditionalStatement>;
     type State = TextRange;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoConstantConditionOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let conditional_stmt = ctx.query();

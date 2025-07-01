@@ -4,6 +4,7 @@ use biome_diagnostics::Severity;
 use biome_js_semantic::ReferencesExtensions;
 use biome_js_syntax::{JsComputedMemberExpression, JsImportNamespaceClause};
 use biome_rowan::{AstNode, TextRange};
+use biome_rule_options::no_dynamic_namespace_import_access::NoDynamicNamespaceImportAccessOptions;
 
 use crate::services::semantic::Semantic;
 
@@ -70,7 +71,7 @@ impl Rule for NoDynamicNamespaceImportAccess {
     type Query = Semantic<JsImportNamespaceClause>;
     type State = TextRange;
     type Signals = Box<[Self::State]>;
-    type Options = ();
+    type Options = NoDynamicNamespaceImportAccessOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         find_dynamic_namespace_import_accesses(ctx)

@@ -6,6 +6,7 @@ use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_syntax::{JsCallExpression, JsxAttribute};
 use biome_rowan::{AstNode, TextRange, declare_node_union};
+use biome_rule_options::no_children_prop::NoChildrenPropOptions;
 declare_lint_rule! {
     /// Prevent passing of **children** as props.
     ///
@@ -46,7 +47,7 @@ impl Rule for NoChildrenProp {
     type Query = Semantic<NoChildrenPropQuery>;
     type State = NoChildrenPropState;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoChildrenPropOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();

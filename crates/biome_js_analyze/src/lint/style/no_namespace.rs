@@ -5,6 +5,7 @@ use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_syntax::TsModuleDeclaration;
 use biome_rowan::AstNode;
+use biome_rule_options::no_namespace::NoNamespaceOptions;
 
 declare_lint_rule! {
     /// Disallow the use of TypeScript's `namespace`s.
@@ -62,7 +63,7 @@ impl Rule for NoNamespace {
     type Query = Ast<TsModuleDeclaration>;
     type State = ();
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoNamespaceOptions;
 
     fn run(_: &RuleContext<Self>) -> Self::Signals {
         Some(())

@@ -12,6 +12,7 @@ use biome_diagnostics::{Applicability, category};
 use biome_js_factory::make;
 use biome_js_syntax::{JsObjectExpression, JsObjectMemberList, T};
 use biome_rowan::{AstNode, BatchMutationExt, TriviaPieceKind};
+use biome_rule_options::use_sorted_keys::UseSortedKeysOptions;
 use biome_string_case::comparable_token::ComparableToken;
 
 use crate::JsRuleAction;
@@ -85,7 +86,7 @@ impl Rule for UseSortedKeys {
     type Query = Ast<JsObjectMemberList>;
     type State = ();
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = UseSortedKeysOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         is_separated_list_sorted_by(ctx.query(), |node| node.name().map(ComparableToken::new))

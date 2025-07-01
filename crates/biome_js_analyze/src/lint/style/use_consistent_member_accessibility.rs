@@ -2,7 +2,6 @@ use biome_analyze::{
     Ast, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
-use biome_deserialize_macros::Deserializable;
 use biome_diagnostics::Severity;
 use biome_js_syntax::{
     AnyJsClassMemberName, JsConstructorClassMember, JsGetterClassMember, JsMethodClassMember,
@@ -11,7 +10,9 @@ use biome_js_syntax::{
     TsPropertyParameter, TsPropertySignatureClassMember, TsSetterSignatureClassMember,
 };
 use biome_rowan::{AstNode, TextRange, declare_node_union};
-use serde::{Deserialize, Serialize};
+use biome_rule_options::use_consistent_member_accessibility::{
+    Accessibility, UseConsistentMemberAccessibilityOptions,
+};
 
 declare_lint_rule! {
     /// Require consistent accessibility modifiers on class properties and methods.
@@ -324,28 +325,11 @@ declare_lint_rule! {
     }
 }
 
-#[derive(Clone, Debug, Default, Deserialize, Deserializable, Eq, PartialEq, Serialize)]
-#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
-#[serde(rename_all = "camelCase", deny_unknown_fields, default)]
-pub struct ConsistentMemberAccessibilityOptions {
-    pub accessibility: Accessibility,
-}
-
-#[derive(Clone, Debug, Default, Deserialize, Deserializable, Eq, PartialEq, Serialize)]
-#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
-#[serde(rename_all = "camelCase", deny_unknown_fields)]
-pub enum Accessibility {
-    #[default]
-    NoPublic,
-    Explicit,
-    None,
-}
-
 impl Rule for UseConsistentMemberAccessibility {
     type Query = Ast<AnyJsMemberWithAccessibility>;
     type State = TextRange;
     type Signals = Option<Self::State>;
-    type Options = ConsistentMemberAccessibilityOptions;
+    type Options = UseConsistentMemberAccessibilityOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();

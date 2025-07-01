@@ -4,6 +4,7 @@ use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_syntax::{TsInterfaceDeclaration, binding_ext::AnyJsBindingDeclaration};
 use biome_rowan::{AstNode, TextRange};
+use biome_rule_options::no_unsafe_declaration_merging::NoUnsafeDeclarationMergingOptions;
 
 declare_lint_rule! {
     /// Disallow unsafe declaration merging between interfaces and classes.
@@ -55,7 +56,7 @@ impl Rule for NoUnsafeDeclarationMerging {
     type Query = Semantic<TsInterfaceDeclaration>;
     type State = TextRange;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoUnsafeDeclarationMergingOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let ts_interface = ctx.query();

@@ -7,6 +7,7 @@ use biome_diagnostics::Severity;
 use biome_js_factory::make;
 use biome_js_syntax::{AnyJsExpression, JsInExpression, JsInstanceofExpression, is_negation};
 use biome_rowan::{AstNode, AstNodeExt, BatchMutationExt, declare_node_union};
+use biome_rule_options::no_unsafe_negation::NoUnsafeNegationOptions;
 
 declare_lint_rule! {
     /// Disallow using unsafe negation.
@@ -47,7 +48,7 @@ impl Rule for NoUnsafeNegation {
     type Query = Ast<JsInOrInstanceOfExpression>;
     type State = ();
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoUnsafeNegationOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
         let node = ctx.query();

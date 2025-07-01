@@ -13,6 +13,7 @@ use biome_rowan::{
     AstNode, AstSeparatedList, BatchMutationExt, TriviaPieceKind, chain_trivia_pieces,
     declare_node_union, trim_leading_trivia_pieces,
 };
+use biome_rule_options::use_export_type::UseExportTypeOptions;
 
 declare_lint_rule! {
     /// Promotes the use of `export type` for types.
@@ -75,7 +76,7 @@ impl Rule for UseExportType {
     type Query = Semantic<AnyJsExportNamedClause>;
     type State = ExportTypeFix;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = UseExportTypeOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let source_type = ctx.source_type::<JsFileSource>();

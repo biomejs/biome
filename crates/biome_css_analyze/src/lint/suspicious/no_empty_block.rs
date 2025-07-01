@@ -5,6 +5,7 @@ use biome_console::markup;
 use biome_css_syntax::stmt_ext::CssBlockLike;
 use biome_diagnostics::Severity;
 use biome_rowan::AstNode;
+use biome_rule_options::no_empty_block::NoEmptyBlockOptions;
 
 declare_lint_rule! {
     /// Disallow CSS empty blocks.
@@ -57,7 +58,7 @@ impl Rule for NoEmptyBlock {
     type Query = Ast<CssBlockLike>;
     type State = CssBlockLike;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoEmptyBlockOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
         let node = ctx.query();

@@ -7,6 +7,7 @@ use biome_diagnostics::Severity;
 use biome_js_factory::make;
 use biome_js_syntax::{AnyJsxChild, JsSyntaxKind, JsSyntaxToken, JsxText};
 use biome_rowan::{BatchMutationExt, TextRange, TextSize};
+use biome_rule_options::no_comment_text::NoCommentTextOptions;
 use std::ops::Range;
 
 declare_lint_rule! {
@@ -83,7 +84,7 @@ impl Rule for NoCommentText {
     type Query = Ast<JsxText>;
     type State = Range<usize>;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoCommentTextOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
         let node = ctx.query();

@@ -4,6 +4,7 @@ use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_syntax::{JsLabeledStatement, JsSyntaxNode, JsSyntaxToken};
 use biome_rowan::AstNode;
+use biome_rule_options::no_label_var::NoLabelVarOptions;
 
 declare_lint_rule! {
     /// Disallow labels that share a name with a variable
@@ -38,7 +39,7 @@ impl Rule for NoLabelVar {
     /// The first element of the tuple is the name of the binding, the second element of the tuple is the label name
     type State = (JsSyntaxNode, JsSyntaxToken);
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoLabelVarOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
         let label_statement = ctx.query();

@@ -77,6 +77,7 @@ fn generate_rule_template(
 use biome_console::markup;
 use biome_js_syntax::JsIdentifierBinding;
 use biome_rowan::AstNode;
+use biome_rule_options::{rule_name_lower_camel}::{rule_name_upper_camel}Options;
 
 {macro_name}! {{
     /// Succinct description of the rule.
@@ -113,7 +114,7 @@ impl Rule for {rule_name_upper_camel} {{
     type Query = Ast<JsIdentifierBinding>;
     type State = ();
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = {rule_name_upper_camel}Options;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {{
         let _binding = ctx.query();
@@ -149,6 +150,7 @@ impl Rule for {rule_name_upper_camel} {{
 use biome_console::markup;
 use biome_css_syntax::CssDeclarationOrRuleBlock;
 use biome_rowan::AstNode;
+use biome_rule_options::{rule_name_lower_camel}::{rule_name_upper_camel}Options;
 
 {macro_name}! {{
     /// Succinct description of the rule.
@@ -188,7 +190,8 @@ impl Rule for {rule_name_upper_camel} {{
     type Query = Ast<CssDeclarationOrRuleBlock>;
     type State = CssDeclarationOrRuleBlock;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = {rule_name_upper_camel}Options;
+
 
     fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {{
         let node = ctx.query();
@@ -227,6 +230,7 @@ impl Rule for {rule_name_upper_camel} {{
 use biome_console::markup;
 use biome_json_syntax::JsonMember;
 use biome_rowan::AstNode;
+use biome_rule_options::{rule_name_lower_camel}::{rule_name_upper_camel}Options;
 
 {macro_name}! {{
     /// Succinct description of the rule.
@@ -266,7 +270,8 @@ impl Rule for {rule_name_upper_camel} {{
     type Query = Ast<JsonMember>;
     type State = ();
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = {rule_name_upper_camel}Options;
+
 
     fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {{
         let _node = ctx.query();
@@ -302,6 +307,7 @@ impl Rule for {rule_name_upper_camel} {{
 use biome_console::markup;
 use biome_graphql_syntax::GraphqlRoot;
 use biome_rowan::AstNode;
+use biome_rule_options::{rule_name_lower_camel}::{rule_name_upper_camel}Options;
 
 {macro_name}! {{
     /// Succinct description of the rule.
@@ -341,7 +347,8 @@ impl Rule for {rule_name_upper_camel} {{
     type Query = Ast<GraphqlRoot>;
     type State = ();
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = {rule_name_upper_camel}Options;
+
 
     fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {{
         let _node = ctx.query();

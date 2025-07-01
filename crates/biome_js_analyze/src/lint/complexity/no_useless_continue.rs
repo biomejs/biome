@@ -3,6 +3,7 @@ use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_syntax::{JsContinueStatement, JsLabeledStatement, JsSyntaxKind, JsSyntaxNode};
 use biome_rowan::{AstNode, BatchMutationExt};
+use biome_rule_options::no_useless_continue::NoUselessContinueOptions;
 
 use crate::{JsRuleAction, utils::batch::JsBatchMutation};
 
@@ -83,7 +84,7 @@ impl Rule for NoUselessContinue {
     type Query = Ast<JsContinueStatement>;
     type State = ();
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoUselessContinueOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
         let node = ctx.query();

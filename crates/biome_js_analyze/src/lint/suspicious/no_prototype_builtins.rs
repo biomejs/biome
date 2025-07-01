@@ -11,6 +11,7 @@ use biome_js_syntax::{
     TextRange,
 };
 use biome_rowan::{AstNode, BatchMutationExt, TriviaPieceKind};
+use biome_rule_options::no_prototype_builtins::NoPrototypeBuiltinsOptions;
 
 declare_lint_rule! {
     /// Disallow direct use of `Object.prototype` builtins.
@@ -76,7 +77,7 @@ impl Rule for NoPrototypeBuiltins {
     type Query = Semantic<JsCallExpression>;
     type State = RuleState;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoPrototypeBuiltinsOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let call_expr = ctx.query();

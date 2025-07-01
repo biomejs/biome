@@ -5,6 +5,7 @@ use biome_console::{fmt::Display, fmt::Formatter, markup};
 use biome_diagnostics::Severity;
 use biome_js_syntax::{TextRange, jsx_ext::AnyJsxElement, static_value::StaticValue};
 use biome_rowan::AstNode;
+use biome_rule_options::use_alt_text::UseAltTextOptions;
 
 declare_lint_rule! {
     /// Enforce that all elements that require alternative text have meaningful information to relay back to the end user.
@@ -76,7 +77,7 @@ impl Rule for UseAltText {
     type Query = Ast<AnyJsxElement>;
     type State = (ValidatedElement, TextRange);
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = UseAltTextOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let element = ctx.query();

@@ -7,6 +7,7 @@ use biome_css_syntax::{
 };
 use biome_diagnostics::Severity;
 use biome_rowan::{AstNode, SyntaxNodeCast};
+use biome_rule_options::no_unmatchable_anb_selector::NoUnmatchableAnbSelectorOptions;
 
 declare_lint_rule! {
     /// Disallow unmatchable An+B selectors.
@@ -67,7 +68,7 @@ impl Rule for NoUnmatchableAnbSelector {
     type Query = Ast<CssPseudoClassNthSelector>;
     type State = CssPseudoClassNthSelector;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoUnmatchableAnbSelectorOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
         let node = ctx.query();

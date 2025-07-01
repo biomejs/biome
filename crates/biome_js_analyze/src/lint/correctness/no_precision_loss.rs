@@ -9,6 +9,7 @@ use biome_diagnostics::Severity;
 use biome_js_syntax::JsNumberLiteralExpression;
 use biome_js_syntax::numbers::split_into_radix_and_number;
 use biome_rowan::AstNode;
+use biome_rule_options::no_precision_loss::NoPrecisionLossOptions;
 
 declare_lint_rule! {
     /// Disallow literal numbers that lose precision
@@ -64,7 +65,7 @@ impl Rule for NoPrecisionLoss {
     type Query = Ast<JsNumberLiteralExpression>;
     type State = ();
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoPrecisionLossOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();

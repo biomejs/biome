@@ -3,7 +3,6 @@ use biome_analyze::{
     Ast, FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
-use biome_deserialize_macros::Deserializable;
 use biome_js_factory::make;
 use biome_js_syntax::{
     AnyJsAssignment, AnyJsClassMember, AnyJsClassMemberName, AnyJsConstructorParameter,
@@ -24,7 +23,7 @@ use biome_rowan::{
     AstNode, AstNodeExt, AstNodeList, AstSeparatedList, BatchMutationExt, SyntaxNode, Text,
     TriviaPiece, declare_node_union,
 };
-use serde::{Deserialize, Serialize};
+use biome_rule_options::use_readonly_class_properties::UseReadonlyClassPropertiesOptions;
 use std::iter::once;
 
 declare_lint_rule! {
@@ -135,7 +134,7 @@ impl Rule for UseReadonlyClassProperties {
     type Query = Ast<JsClassDeclaration>;
     type State = PropOrParam;
     type Signals = Box<[Self::State]>;
-    type Options = ReadonlyClassPropertiesOptions;
+    type Options = UseReadonlyClassPropertiesOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let root = ctx.query();
@@ -273,20 +272,6 @@ impl Rule for UseReadonlyClassProperties {
             mutation,
         ))
     }
-}
-
-/// Rule's options
-#[derive(Clone, Debug, Default, Deserialize, Deserializable, Eq, PartialEq, Serialize)]
-#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
-#[serde(rename_all = "camelCase", deny_unknown_fields, default)]
-pub struct ReadonlyClassPropertiesOptions {
-    /// When `true`, the keywords `public`, `protected`, and `private` are analyzed by the rule.
-    #[serde(default, skip_serializing_if = "is_default")]
-    pub check_all_properties: bool,
-}
-
-fn is_default<T: Default + Eq>(value: &T) -> bool {
-    value == &T::default()
 }
 
 declare_node_union! {

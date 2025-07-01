@@ -7,6 +7,7 @@ use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_syntax::jsx_ext::AnyJsxElement;
 use biome_rowan::{AstNode, TextRange};
+use biome_rule_options::no_unwanted_polyfillio::NoUnwantedPolyfillioOptions;
 use regex::Regex;
 
 use crate::{
@@ -67,7 +68,7 @@ impl Rule for NoUnwantedPolyfillio {
     type Query = Semantic<AnyJsxElement>;
     type State = RuleState;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoUnwantedPolyfillioOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let jsx_element = ctx.query();

@@ -4,6 +4,7 @@ use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_syntax::{AnyJsExpression, global_identifier};
 use biome_rowan::AstNode;
+use biome_rule_options::no_global_eval::NoGlobalEvalOptions;
 
 declare_lint_rule! {
     /// Disallow the use of global `eval()`.
@@ -64,7 +65,7 @@ impl Rule for NoGlobalEval {
     type Query = Semantic<AnyJsExpression>;
     type State = ();
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoGlobalEvalOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();

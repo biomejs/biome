@@ -22,6 +22,7 @@ use biome_rowan::{
     AstNode, AstSeparatedList, BatchMutation, BatchMutationExt, SyntaxElement, SyntaxResult,
     TriviaPieceKind, chain_trivia_pieces, trim_leading_trivia_pieces, trim_trailing_trivia_pieces,
 };
+use biome_rule_options::use_import_type::{Style, UseImportTypeOptions};
 use rustc_hash::FxHashSet;
 
 declare_lint_rule! {
@@ -165,7 +166,7 @@ impl Rule for UseImportType {
     type Query = Semantic<JsImport>;
     type State = ImportTypeFix;
     type Signals = Option<Self::State>;
-    type Options = ImportTypeOptions;
+    type Options = UseImportTypeOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let source_type = ctx.source_type::<JsFileSource>();
@@ -774,25 +775,7 @@ impl Rule for UseImportType {
 )]
 #[cfg_attr(feature = "schemars", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
-pub struct ImportTypeOptions {
-    pub style: Style,
-}
-
-/// Rule's options.
-#[derive(
-    Debug, Default, Copy, Clone, Deserializable, Eq, PartialEq, serde::Deserialize, serde::Serialize,
-)]
-#[cfg_attr(feature = "schemars", derive(schemars::JsonSchema))]
-#[serde(rename_all = "camelCase", deny_unknown_fields)]
-pub enum Style {
-    /// Use the best fitting style according to the situation
-    #[default]
-    Auto,
-    /// Always use inline type keywords
-    InlineType,
-    /// Always separate types in a dedicated `import type`
-    SeparatedType,
-}
+pub struct ImportTypeOptions {}
 
 #[derive(Debug)]
 pub enum ImportTypeFix {

@@ -11,6 +11,7 @@ use biome_js_syntax::{
     JsNumberLiteralExpression, global_identifier,
 };
 use biome_rowan::{AstNode, BatchMutationExt};
+use biome_rule_options::no_constant_math_min_max_clamp::NoConstantMathMinMaxClampOptions;
 
 use crate::{JsRuleAction, services::semantic::Semantic};
 
@@ -49,7 +50,7 @@ impl Rule for NoConstantMathMinMaxClamp {
     type Query = Semantic<JsCallExpression>;
     type State = (JsNumberLiteralExpression, JsNumberLiteralExpression);
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoConstantMathMinMaxClampOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();

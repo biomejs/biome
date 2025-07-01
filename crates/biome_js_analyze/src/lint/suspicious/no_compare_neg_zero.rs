@@ -8,6 +8,7 @@ use biome_js_syntax::{
     AnyJsExpression, AnyJsLiteralExpression, JsBinaryExpression, JsSyntaxKind, JsUnaryOperator,
 };
 use biome_rowan::{AstNode, BatchMutationExt, SyntaxToken};
+use biome_rule_options::no_compare_neg_zero::NoCompareNegZeroOptions;
 
 use crate::JsRuleAction;
 
@@ -48,7 +49,7 @@ impl Rule for NoCompareNegZero {
     type Query = Ast<JsBinaryExpression>;
     type State = NoCompareNegZeroState;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoCompareNegZeroOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
         let node = ctx.query();
