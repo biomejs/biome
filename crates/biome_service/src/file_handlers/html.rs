@@ -296,9 +296,9 @@ fn extract_embedded_script(
     let html_element = HtmlElement::cast(element)?;
     let opening_element = html_element.opening_element().ok()?;
     let name = opening_element.name().ok()?;
-    let name_text = name.value_token().ok()?.text_trimmed();
+    let name_text = name.value_token().ok()?;
 
-    if name_text == "script" {
+    if name_text.text_trimmed() == "script" {
         Some(
             html_element
                 .children()
@@ -353,9 +353,9 @@ fn parse_embedded_style(
     let html_element = HtmlElement::cast(element)?;
     let opening_element = html_element.opening_element().ok()?;
     let name = opening_element.name().ok()?;
-    let name_text = name.value_token().ok()?.text_trimmed();
+    let name_text = name.value_token().ok()?;
 
-    if name_text == "style" {
+    if name_text.text_trimmed() == "style" {
         Some(
             html_element
                 .children()
