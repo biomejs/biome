@@ -1356,6 +1356,9 @@ impl OverrideSettingPattern {
         if let Some(bracket_same_line) = js_formatter.bracket_same_line {
             options.set_bracket_same_line(bracket_same_line);
         }
+        if let Some(expand) = js_formatter.expand.or(formatter.expand) {
+            options.set_expand(expand);
+        }
         if let Some(attribute_position) = js_formatter
             .attribute_position
             .or(formatter.attribute_position)
@@ -1383,8 +1386,12 @@ impl OverrideSettingPattern {
         if let Some(trailing_commas) = json_formatter.trailing_commas {
             options.set_trailing_commas(trailing_commas);
         }
-        if let Some(expand_lists) = json_formatter.expand {
+        if let Some(expand_lists) = json_formatter.expand.or(formatter.expand) {
             options.set_expand(expand_lists);
+        }
+        if let Some(bracket_spacing) = json_formatter.bracket_spacing.or(formatter.bracket_spacing)
+        {
+            options.set_bracket_spacing(bracket_spacing);
         }
     }
 
