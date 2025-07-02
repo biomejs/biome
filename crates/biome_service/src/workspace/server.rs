@@ -17,7 +17,6 @@ use crate::file_handlers::{
     ParseResult,
 };
 use crate::projects::Projects;
-use crate::settings::WorkspaceSettingsHandle;
 use crate::workspace::{
     FileFeaturesResult, GetFileContentParams, GetRegisteredTypesParams, GetTypeInfoParams,
     IsPathIgnoredParams, OpenProjectResult, RageEntry, RageParams, RageResult, ScanKind,
@@ -531,7 +530,7 @@ impl WorkspaceServer {
             &BiomePath::new(path),
             file_source,
             content,
-            settings.into(),
+            &settings,
             node_cache,
         );
         Ok(parsed)
@@ -1046,55 +1045,16 @@ impl Workspace for WorkspaceServer {
         &self,
         params: SupportsFeatureParams,
     ) -> Result<FileFeaturesResult, WorkspaceError> {
-        let project_key = params.project_key;
-        let path = params.path.as_path();
-        let language = self.get_file_source(path);
+        let language = self.get_file_source(&params.path);
         let capabilities = self.features.get_capabilities(language);
-        let handle = WorkspaceSettingsHandle::from(
-            self.projects
-                .get_settings_based_on_path(project_key, &params.path)
-                .ok_or_else(WorkspaceError::no_project)?,
-        );
-        let mut file_features = FileFeaturesResult::new();
-        let file_name = path.file_name();
-        file_features = file_features.with_capabilities(&capabilities);
-        file_features = file_features.with_settings_and_language(&handle, path, &capabilities);
 
-        let Some(settings) = handle.settings() else {
-            return Ok(file_features);
-        };
-        if settings.ignore_unknown_enabled()
-            && language == DocumentFileSource::Unknown
-            && self.get_file_source(&params.path) == DocumentFileSource::Unknown
-        {
-            file_features.ignore_not_supported();
-        } else if file_name == Some(ConfigName::biome_json())
-            || file_name == Some(ConfigName::biome_jsonc())
-        {
-            // Never ignore Biome's config file
-        } else if self
-            .projects
-            .is_ignored_by_top_level_config(project_key, path)
-        {
-            file_features.set_ignored_for_all_features();
-        } else {
-            for feature in params.features.iter() {
-                if self
-                    .projects
-                    .is_ignored_by_feature_config(project_key, path, feature)
-                {
-                    file_features.ignored(feature);
-                }
-            }
-        }
-        // If the file is not ignored by at least one feature, then check that the file is not protected.
-        //
-        // Protected files must be ignored.
-        if !file_features.is_not_processed() && FileFeaturesResult::is_protected_file(path) {
-            file_features.set_protected_for_all_features();
-        }
-
-        Ok(file_features)
+        self.projects.get_file_features(
+            params.project_key,
+            &params.path,
+            params.features,
+            language,
+            capabilities,
+        )
     }
 
     fn is_path_ignored(&self, params: IsPathIgnoredParams) -> Result<bool, WorkspaceError> {
@@ -1140,19 +1100,19 @@ impl Workspace for WorkspaceServer {
             .debug
             .debug_formatter_ir
             .ok_or_else(self.build_capability_error(&params.path))?;
-        let handle = WorkspaceSettingsHandle::from(
-            self.projects
-                .get_settings_based_on_path(params.project_key, &params.path)
-                .ok_or_else(WorkspaceError::no_project)?,
-        );
+        let settings = self
+            .projects
+            .get_settings_based_on_path(params.project_key, &params.path)
+            .ok_or_else(WorkspaceError::no_project)?;
         let parse = self.get_parse(&params.path)?;
-        if !handle.format_with_errors_enabled_for_this_file_path(&params.path) && parse.has_errors()
+        if !settings.format_with_errors_enabled_for_this_file_path(&params.path)
+            && parse.has_errors()
         {
             return Err(WorkspaceError::format_with_errors_disabled());
         }
         let document_file_source = self.get_file_source(&params.path);
 
-        debug_formatter_ir(&params.path, &document_file_source, parse, handle)
+        debug_formatter_ir(&params.path, &document_file_source, parse, &settings)
     }
 
     fn get_type_info(&self, params: GetTypeInfoParams) -> Result<String, WorkspaceError> {
@@ -1330,7 +1290,7 @@ impl Workspace for WorkspaceServer {
                     .map_err(WorkspaceError::plugin_errors)?;
                 let results = lint(LintParams {
                     parse,
-                    workspace: &settings.into(),
+                    settings: &settings,
                     path: &path,
                     only,
                     skip,
@@ -1419,7 +1379,7 @@ impl Workspace for WorkspaceServer {
         Ok(code_actions(CodeActionsParams {
             parse,
             range,
-            workspace: &settings.into(),
+            settings: &settings,
             path: &path,
             module_graph: self.module_graph.clone(),
             project_layout: self.project_layout.clone(),
@@ -1449,20 +1409,20 @@ impl Workspace for WorkspaceServer {
             .formatter
             .format
             .ok_or_else(self.build_capability_error(&params.path))?;
-        let handle = WorkspaceSettingsHandle::from(
-            self.projects
-                .get_settings_based_on_path(params.project_key, &params.path)
-                .ok_or_else(WorkspaceError::no_project)?,
-        );
+        let settings = self
+            .projects
+            .get_settings_based_on_path(params.project_key, &params.path)
+            .ok_or_else(WorkspaceError::no_project)?;
 
         let parse = self.get_parse(&params.path)?;
 
-        if !handle.format_with_errors_enabled_for_this_file_path(&params.path) && parse.has_errors()
+        if !settings.format_with_errors_enabled_for_this_file_path(&params.path)
+            && parse.has_errors()
         {
             return Err(WorkspaceError::format_with_errors_disabled());
         }
         let document_file_source = self.get_file_source(&params.path);
-        format(&params.path, &document_file_source, parse, handle)
+        format(&params.path, &document_file_source, parse, &settings)
     }
 
     #[instrument(level = "debug", skip(self, params))]
@@ -1472,11 +1432,10 @@ impl Workspace for WorkspaceServer {
             .formatter
             .format_range
             .ok_or_else(self.build_capability_error(&params.path))?;
-        let settings = WorkspaceSettingsHandle::from(
-            self.projects
-                .get_settings_based_on_path(params.project_key, &params.path)
-                .ok_or_else(WorkspaceError::no_project)?,
-        );
+        let settings = self
+            .projects
+            .get_settings_based_on_path(params.project_key, &params.path)
+            .ok_or_else(WorkspaceError::no_project)?;
         let parse = self.get_parse(&params.path)?;
         if !settings.format_with_errors_enabled_for_this_file_path(&params.path)
             && parse.has_errors()
@@ -1488,7 +1447,7 @@ impl Workspace for WorkspaceServer {
             &params.path,
             &document_file_source,
             parse,
-            settings,
+            &settings,
             params.range,
         )
     }
@@ -1501,13 +1460,13 @@ impl Workspace for WorkspaceServer {
             .format_on_type
             .ok_or_else(self.build_capability_error(&params.path))?;
 
-        let handle = WorkspaceSettingsHandle::from(
-            self.projects
-                .get_settings_based_on_path(params.project_key, &params.path)
-                .ok_or_else(WorkspaceError::no_project)?,
-        );
+        let settings = self
+            .projects
+            .get_settings_based_on_path(params.project_key, &params.path)
+            .ok_or_else(WorkspaceError::no_project)?;
         let parse = self.get_parse(&params.path)?;
-        if !handle.format_with_errors_enabled_for_this_file_path(&params.path) && parse.has_errors()
+        if !settings.format_with_errors_enabled_for_this_file_path(&params.path)
+            && parse.has_errors()
         {
             return Err(WorkspaceError::format_with_errors_disabled());
         }
@@ -1517,7 +1476,7 @@ impl Workspace for WorkspaceServer {
             &params.path,
             &document_file_source,
             parse,
-            handle,
+            &settings,
             params.offset,
         )
     }
@@ -1566,7 +1525,7 @@ impl Workspace for WorkspaceServer {
         fix_all(FixAllParams {
             parse,
             fix_file_mode,
-            workspace: settings.into(),
+            settings: &settings,
             should_format,
             biome_path: &path,
             module_graph: self.module_graph.clone(),
@@ -1686,7 +1645,7 @@ impl Workspace for WorkspaceServer {
         let parse = self.get_parse(&path)?;
 
         let document_file_source = self.get_file_source(&path);
-        let matches = search(&path, &document_file_source, parse, query, settings.into())?;
+        let matches = search(&path, &document_file_source, parse, query, &settings)?;
 
         Ok(SearchResults { path, matches })
     }

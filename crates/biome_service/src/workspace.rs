@@ -60,7 +60,7 @@ mod watcher;
 use crate::file_handlers::Capabilities;
 pub use crate::file_handlers::DocumentFileSource;
 use crate::projects::ProjectKey;
-use crate::settings::WorkspaceSettingsHandle;
+use crate::settings::Settings;
 pub use crate::workspace::scanner::ScanKind;
 use crate::{Deserialize, Serialize, WorkspaceError};
 use biome_analyze::{ActionCategory, RuleCategories};
@@ -207,17 +207,17 @@ impl FileFeaturesResult {
     /// Checks if a feature is enabled for the current path.
     ///
     /// The method checks the configuration enables a certain feature for the given path.
-    #[instrument(level = "debug", skip(self, handle, capabilities))]
+    #[instrument(level = "debug", skip(self, settings, capabilities))]
     pub(crate) fn with_settings_and_language(
         mut self,
-        handle: &WorkspaceSettingsHandle,
+        settings: &Settings,
         path: &Utf8Path,
         capabilities: &Capabilities,
     ) -> Self {
         // formatter
         let formatter_enabled = capabilities.enabled_for_path.formatter;
         if let Some(formatter_enabled) = formatter_enabled {
-            let formatter_enabled = formatter_enabled(path, handle);
+            let formatter_enabled = formatter_enabled(path, settings);
 
             if !formatter_enabled {
                 self.features_supported
@@ -228,7 +228,7 @@ impl FileFeaturesResult {
         // linter
         let linter_enabled = capabilities.enabled_for_path.linter;
         if let Some(linter_enabled) = linter_enabled {
-            let linter_enabled = linter_enabled(path, handle);
+            let linter_enabled = linter_enabled(path, settings);
             if !linter_enabled {
                 self.features_supported
                     .insert(FeatureKind::Lint, SupportKind::FeatureNotEnabled);
@@ -237,7 +237,7 @@ impl FileFeaturesResult {
         // assist
         let assist_enabled = capabilities.enabled_for_path.assist;
         if let Some(assist_enabled) = assist_enabled {
-            let assist_enabled = assist_enabled(path, handle);
+            let assist_enabled = assist_enabled(path, settings);
             if !assist_enabled {
                 self.features_supported
                     .insert(FeatureKind::Assist, SupportKind::FeatureNotEnabled);
@@ -247,7 +247,7 @@ impl FileFeaturesResult {
         // search
         let search_enabled = capabilities.enabled_for_path.search;
         if let Some(search_enabled) = search_enabled {
-            let search_enabled = search_enabled(path, handle);
+            let search_enabled = search_enabled(path, settings);
             if !search_enabled {
                 self.features_supported
                     .insert(FeatureKind::Search, SupportKind::FeatureNotEnabled);

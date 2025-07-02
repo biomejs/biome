@@ -652,14 +652,14 @@ pub trait ServiceLanguage: biome_rowan::Language {
     fn lookup_settings(languages: &LanguageListSettings) -> &LanguageSettings<Self>;
 
     /// Retrieve the environment settings of the current language
-    fn resolve_environment(settings: Option<&Settings>) -> Option<&Self::EnvironmentSettings>;
+    fn resolve_environment(settings: &Settings) -> Option<&Self::EnvironmentSettings>;
 
     /// Resolve the formatter options from the global (workspace level),
     /// per-language and editor provided formatter settings
     fn resolve_format_options(
-        global: Option<&FormatSettings>,
-        overrides: Option<&OverrideSettings>,
-        language: Option<&Self::FormatterSettings>,
+        global: &FormatSettings,
+        overrides: &OverrideSettings,
+        language: &Self::FormatterSettings,
         path: &BiomePath,
         file_source: &DocumentFileSource,
     ) -> Self::FormatOptions;
@@ -667,8 +667,8 @@ pub trait ServiceLanguage: biome_rowan::Language {
     /// Resolve the linter options from the global (workspace level),
     /// per-language and editor provided formatter settings
     fn resolve_analyzer_options(
-        global: Option<&Settings>,
-        language: Option<&Self::LinterSettings>,
+        global: &Settings,
+        language: &Self::LinterSettings,
         environment: Option<&Self::EnvironmentSettings>,
         path: &BiomePath,
         file_source: &DocumentFileSource,
@@ -678,13 +678,13 @@ pub trait ServiceLanguage: biome_rowan::Language {
     /// Checks whether this file has the linter enabled.
     ///
     /// The language is responsible for checking this.
-    fn linter_enabled_for_file_path(settings: Option<&Settings>, path: &Utf8Path) -> bool;
+    fn linter_enabled_for_file_path(settings: &Settings, path: &Utf8Path) -> bool;
 
     /// Responsible to check whether this file has formatter enabled. The language is responsible to check this
-    fn formatter_enabled_for_file_path(settings: Option<&Settings>, path: &Utf8Path) -> bool;
+    fn formatter_enabled_for_file_path(settings: &Settings, path: &Utf8Path) -> bool;
 
     /// Responsible to check whether this file has assist enabled. The language is responsible to check this
-    fn assist_enabled_for_file_path(settings: Option<&Settings>, path: &Utf8Path) -> bool;
+    fn assist_enabled_for_file_path(settings: &Settings, path: &Utf8Path) -> bool;
 }
 
 #[derive(Clone, Debug, Default)]
@@ -978,32 +978,8 @@ fn to_vcs_settings(config: VcsConfiguration) -> Result<VcsSettings, WorkspaceErr
         ignore_matches: None,
     })
 }
-/// Handle object holding a pin of the workspace settings until the deferred
-/// language-specific options resolution is called.
-#[derive(Debug)]
-pub struct WorkspaceSettingsHandle {
-    settings: Option<Settings>,
-}
 
-impl From<Option<Settings>> for WorkspaceSettingsHandle {
-    fn from(settings: Option<Settings>) -> Self {
-        Self { settings }
-    }
-}
-
-impl From<Settings> for WorkspaceSettingsHandle {
-    fn from(settings: Settings) -> Self {
-        Self {
-            settings: Some(settings),
-        }
-    }
-}
-
-impl WorkspaceSettingsHandle {
-    pub fn settings(&self) -> Option<&Settings> {
-        self.settings.as_ref()
-    }
-
+impl Settings {
     /// Resolve the formatting context for the given language
     #[instrument(level = "debug", skip(self, file_source))]
     pub fn format_options<L>(
@@ -1014,12 +990,9 @@ impl WorkspaceSettingsHandle {
     where
         L: ServiceLanguage,
     {
-        let settings = self.settings();
-        let formatter = settings.map(|s| &s.formatter);
-        let overrides = settings.map(|s| &s.override_settings);
-        let editor_settings = settings
-            .map(|s| L::lookup_settings(&s.languages))
-            .map(|result| &result.formatter);
+        let formatter = &self.formatter;
+        let overrides = &self.override_settings;
+        let editor_settings = &L::lookup_settings(&self.languages).formatter;
         L::resolve_format_options(formatter, overrides, editor_settings, path, file_source)
     }
 
@@ -1032,15 +1005,12 @@ impl WorkspaceSettingsHandle {
     where
         L: ServiceLanguage,
     {
-        let settings = self.settings();
-        let editor_settings = settings
-            .map(|s| L::lookup_settings(&s.languages))
-            .map(|result| &result.linter);
+        let linter_settings = &L::lookup_settings(&self.languages).linter;
 
-        let environment = L::resolve_environment(settings);
+        let environment = L::resolve_environment(self);
         L::resolve_analyzer_options(
-            settings,
-            editor_settings,
+            self,
+            linter_settings,
             environment,
             path,
             file_source,
@@ -1053,9 +1023,7 @@ impl WorkspaceSettingsHandle {
     where
         L: ServiceLanguage,
     {
-        let settings = self.settings();
-
-        L::linter_enabled_for_file_path(settings, path)
+        L::linter_enabled_for_file_path(self, path)
     }
 
     /// Whether the formatter is enabled for this file path
@@ -1063,9 +1031,7 @@ impl WorkspaceSettingsHandle {
     where
         L: ServiceLanguage,
     {
-        let settings = self.settings();
-
-        L::formatter_enabled_for_file_path(settings, path)
+        L::formatter_enabled_for_file_path(self, path)
     }
 
     /// Whether the assist is enabled for this file path
@@ -1073,32 +1039,24 @@ impl WorkspaceSettingsHandle {
     where
         L: ServiceLanguage,
     {
-        let settings = self.settings();
-
-        L::assist_enabled_for_file_path(settings, path)
+        L::assist_enabled_for_file_path(self, path)
     }
 
     /// Whether the formatter should format with parsing errors, for this file path
     pub fn format_with_errors_enabled_for_this_file_path(&self, path: &Utf8Path) -> bool {
-        let settings = self.settings();
-
-        settings
-            .and_then(|settings| {
-                settings
-                    .override_settings
-                    .patterns
-                    .iter()
-                    .rev()
-                    .find_map(|pattern| {
-                        if let Some(enabled) = pattern.formatter.format_with_errors {
-                            if pattern.is_file_included(path) {
-                                return Some(enabled);
-                            }
-                        }
-                        None
-                    })
-                    .or(settings.formatter.format_with_errors)
+        self.override_settings
+            .patterns
+            .iter()
+            .rev()
+            .find_map(|pattern| {
+                if let Some(enabled) = pattern.formatter.format_with_errors {
+                    if pattern.is_file_included(path) {
+                        return Some(enabled);
+                    }
+                }
+                None
             })
+            .or(self.formatter.format_with_errors)
             .unwrap_or_default()
             .into()
     }

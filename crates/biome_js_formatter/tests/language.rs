@@ -38,9 +38,9 @@ impl TestFormatLanguage for JsTestFormatLanguage {
     ) -> Self::FormatLanguage {
         let language_settings = &settings.languages.javascript.formatter;
         let options = Self::ServiceLanguage::resolve_format_options(
-            Some(&settings.formatter),
-            Some(&settings.override_settings),
-            Some(language_settings),
+            &settings.formatter,
+            &settings.override_settings,
+            language_settings,
             &BiomePath::new(""),
             file_source,
         );

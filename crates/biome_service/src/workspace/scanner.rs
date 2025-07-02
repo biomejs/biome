@@ -103,7 +103,7 @@ fn scan_folder(folder: &Utf8Path, ctx: ScanContext) -> (Duration, Vec<BiomePath>
     let evaluated_paths = ctx.evaluated_paths();
     let mut configs = Vec::new();
     let mut manifests = Vec::new();
-    let mut handleable_paths = Vec::new();
+    let mut handleable_paths = Vec::with_capacity(evaluated_paths.len());
     let mut ignore_paths = Vec::new();
     // We want to process files that closest to the project root first. For example, we must process
     // first the `.gitignore` at the root of the project.
@@ -329,7 +329,12 @@ impl TraversalContext for ScanContext<'_> {
             }
             Ok(PathKind::File { .. }) => match &self.scan_kind {
                 ScanKind::KnownFiles | ScanKind::TargetedKnownFiles { .. } => {
-                    path.is_required_during_scan() && !path.is_dependency()
+                    path.is_required_during_scan()
+                        && !path.is_dependency()
+                        && !self
+                            .workspace
+                            .projects
+                            .is_ignored_by_top_level_config(self.project_key, path)
                 }
                 ScanKind::Project => {
                     if path.is_dependency() {

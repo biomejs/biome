@@ -1,6 +1,8 @@
-use crate::is_dir;
+use crate::file_handlers::Capabilities;
 use crate::settings::Settings;
-use crate::workspace::{FeatureKind, FeatureName};
+use crate::workspace::{DocumentFileSource, FeatureKind, FeatureName, FileFeaturesResult};
+use crate::{WorkspaceError, is_dir};
+use biome_fs::ConfigName;
 use camino::{Utf8Path, Utf8PathBuf};
 use papaya::HashMap;
 use rustc_hash::FxBuildHasher;
@@ -185,6 +187,57 @@ impl Projects {
             });
 
         !is_included || is_ignored_by_vcs || is_ignored_by_features
+    }
+
+    pub fn get_file_features(
+        &self,
+        project_key: ProjectKey,
+        path: &Utf8Path,
+        features: FeatureName,
+        language: DocumentFileSource,
+        capabilities: Capabilities,
+    ) -> Result<FileFeaturesResult, WorkspaceError> {
+        let data = self.0.pin();
+        let Some(project_data) = data.get(&project_key) else {
+            return Err(WorkspaceError::no_project());
+        };
+
+        let settings = project_data
+            .nested_settings
+            .iter()
+            .find(|(project_path, _)| path.starts_with(project_path))
+            .map_or(&project_data.root_settings, |(_, settings)| settings);
+
+        let mut file_features = FileFeaturesResult::new();
+        file_features = file_features.with_capabilities(&capabilities);
+        file_features = file_features.with_settings_and_language(settings, path, &capabilities);
+
+        if settings.ignore_unknown_enabled() && language == DocumentFileSource::Unknown {
+            file_features.ignore_not_supported();
+        } else if path.file_name().is_some_and(|file_name| {
+            file_name == ConfigName::biome_json() || file_name == ConfigName::biome_jsonc()
+        }) && path.parent().is_some_and(|dir_path| {
+            self.get_project_path(project_key)
+                .is_some_and(|project_path| dir_path == project_path)
+        }) {
+            // Never ignore Biome's top-level config file
+        } else if self.is_ignored_by_top_level_config(project_key, path) {
+            file_features.set_ignored_for_all_features();
+        } else {
+            for feature in features.iter() {
+                if self.is_ignored_by_feature_config(project_key, path, feature) {
+                    file_features.ignored(feature);
+                }
+            }
+        }
+        // If the file is not ignored by at least one feature, then check that the file is not protected.
+        //
+        // Protected files must be ignored.
+        if !file_features.is_not_processed() && FileFeaturesResult::is_protected_file(path) {
+            file_features.set_protected_for_all_features();
+        }
+
+        Ok(file_features)
     }
 
     /// Sets the root settings for the given project.

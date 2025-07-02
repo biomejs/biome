@@ -24,9 +24,9 @@ impl TestFormatLanguage for GritTestFormatLanguage {
     ) -> Self::FormatLanguage {
         let language_settings = &settings.languages.grit.formatter;
         let options = Self::ServiceLanguage::resolve_format_options(
-            Some(&settings.formatter),
-            Some(&settings.override_settings),
-            Some(language_settings),
+            &settings.formatter,
+            &settings.override_settings,
+            language_settings,
             &BiomePath::new(""),
             file_source,
         );
