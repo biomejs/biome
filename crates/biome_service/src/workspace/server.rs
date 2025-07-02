@@ -1,7 +1,7 @@
 use super::document::Document;
 use super::{
     ChangeFileParams, CheckFileSizeParams, CheckFileSizeResult, CloseFileParams,
-    CloseProjectParams, FeatureName, FileContent, FileExitsParams, FixFileParams, FixFileResult,
+    CloseProjectParams, FileContent, FileExitsParams, FixFileParams, FixFileResult,
     FormatFileParams, FormatOnTypeParams, FormatRangeParams, GetControlFlowGraphParams,
     GetFormatterIRParams, GetSemanticModelParams, GetSyntaxTreeParams, GetSyntaxTreeResult,
     OpenFileParams, OpenProjectParams, ParsePatternParams, ParsePatternResult, PatternId,
@@ -536,23 +536,6 @@ impl WorkspaceServer {
         Ok(parsed)
     }
 
-    /// Checks whether a file is ignored in the top-level config's
-    /// `files.includes` or in the feature's `includes`.
-    fn is_ignored(&self, project_key: ProjectKey, path: &Utf8Path, features: FeatureName) -> bool {
-        // Never ignore Biome's top-level config file regardless of `includes`.
-        if path.file_name().is_some_and(|file_name| {
-            file_name == ConfigName::biome_json() || file_name == ConfigName::biome_jsonc()
-        }) && path.parent().is_some_and(|dir_path| {
-            self.projects
-                .get_project_path(project_key)
-                .is_some_and(|project_path| dir_path == project_path)
-        }) {
-            return false;
-        };
-
-        self.projects.is_ignored(project_key, path, features)
-    }
-
     pub(super) fn is_ignored_by_scanner(&self, project_key: ProjectKey, path: &Utf8Path) -> bool {
         self.projects.is_ignored_by_scanner(project_key, path)
     }
@@ -1058,7 +1041,20 @@ impl Workspace for WorkspaceServer {
     }
 
     fn is_path_ignored(&self, params: IsPathIgnoredParams) -> Result<bool, WorkspaceError> {
-        Ok(self.is_ignored(params.project_key, params.path.as_path(), params.features))
+        // Never ignore Biome's top-level config file regardless of `includes`.
+        if params.path.file_name().is_some_and(|file_name| {
+            file_name == ConfigName::biome_json() || file_name == ConfigName::biome_jsonc()
+        }) && params.path.parent().is_some_and(|dir_path| {
+            self.projects
+                .get_project_path(params.project_key)
+                .is_some_and(|project_path| dir_path == project_path)
+        }) {
+            return Ok(false);
+        };
+
+        Ok(self
+            .projects
+            .is_ignored(params.project_key, &params.path, params.features))
     }
 
     fn get_syntax_tree(
