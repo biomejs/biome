@@ -1,0 +1,53 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 134
+expression: sorted.js
+---
+# Input
+```js
+const obj = {
+	get aab() {
+		return this._aab;
+	},
+	set aac(v) {
+		this._aac = v;
+	},
+	w: 1,
+	x: 1,
+	...g,
+	get aaa() {
+		return "";
+	},
+	u: 1,
+	v: 1,
+	[getProp()]: 2,
+	o: 1,
+	p: 1,
+	q: 1,
+};
+
+```
+
+# Diagnostics
+```
+sorted.js:2:2 assist/source/useSortedKeys  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The object properties are not sorted by key.
+  
+     1 │ const obj = {
+   > 2 │ 	get aab() {
+       │ 	^^^^^^^^^^^
+   > 3 │ 		return this._aab;
+   > 4 │ 	},
+        ...
+  > 18 │ 	p: 1,
+  > 19 │ 	q: 1,
+       │ 	^^^^^
+    20 │ };
+    21 │ 
+  
+  i Safe fix: Sort the object properties by key.
+  
+  
+
+```
