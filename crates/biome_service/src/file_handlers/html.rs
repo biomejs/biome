@@ -281,19 +281,26 @@ pub(crate) fn extract_embedded_scripts(
 
     // Walk through all HTML elements looking for script tags
     for element in html_root.syntax().descendants() {
-        let Some(html_element) = HtmlElement::cast(element.clone()) else {
+        let Some(list) = extract_embedded_script(element.clone(), cache) else {
             continue;
         };
-        let Ok(opening_element) = html_element.opening_element() else {
-            continue;
-        };
-        let Ok(name) = opening_element.name() else {
-            continue;
-        };
-        let name_text = name.syntax().text_trimmed().to_string();
+        scripts.extend(list);
+    }
+    scripts
+}
 
-        if name_text.eq_ignore_ascii_case("script") {
-            let list: Vec<_> = html_element
+fn extract_embedded_script(
+    element: HtmlSyntaxNode,
+    cache: &mut NodeCache,
+) -> Option<Vec<EmbeddedJsContent>> {
+    let html_element = HtmlElement::cast(element)?;
+    let opening_element = html_element.opening_element().ok()?;
+    let name = opening_element.name().ok()?;
+    let name_text = name.value_token().ok()?.text_trimmed();
+
+    if name_text == "script" {
+        Some(
+            html_element
                 .children()
                 .iter()
                 .filter_map(|child| child.as_html_content().cloned())
@@ -314,12 +321,11 @@ pub(crate) fn extract_embedded_scripts(
                         content_offset: content.text_range().start(),
                     })
                 })
-                .collect();
-
-            scripts.extend(list);
-        }
+                .collect::<Vec<_>>(),
+        )
+    } else {
+        None
     }
-    scripts
 }
 
 /// Extracts embedded CSS content from HTML style elements.
@@ -331,21 +337,27 @@ pub(crate) fn parse_embedded_styles(
 
     // Walk through all HTML elements looking for style tags
     for element in html_root.syntax().descendants() {
-        let Some(html_element) = HtmlElement::cast(element.clone()) else {
+        let Some(list) = parse_embedded_style(element.clone(), cache) else {
             continue;
         };
-        let Ok(opening_element) = html_element.opening_element() else {
-            continue;
-        };
-        let Ok(name) = opening_element.name() else {
-            continue;
-        };
-        let Ok(name) = name.value_token() else {
-            continue;
-        };
+        styles.extend(list);
+    }
 
-        if name.text_trimmed() == "style" {
-            let list: Vec<_> = html_element
+    styles
+}
+
+fn parse_embedded_style(
+    element: HtmlSyntaxNode,
+    cache: &mut NodeCache,
+) -> Option<Vec<EmbeddedCssContent>> {
+    let html_element = HtmlElement::cast(element)?;
+    let opening_element = html_element.opening_element().ok()?;
+    let name = opening_element.name().ok()?;
+    let name_text = name.value_token().ok()?.text_trimmed();
+
+    if name_text == "style" {
+        Some(
+            html_element
                 .children()
                 .iter()
                 .filter_map(|child| child.as_html_content().cloned())
@@ -365,13 +377,11 @@ pub(crate) fn parse_embedded_styles(
                         content_offset: content.text_range().start(),
                     })
                 })
-                .collect();
-
-            styles.extend(list);
-        }
+                .collect::<Vec<_>>(),
+        )
+    } else {
+        None
     }
-
-    styles
 }
 
 fn debug_syntax_tree(_biome_path: &BiomePath, parse: AnyParse) -> GetSyntaxTreeResult {
