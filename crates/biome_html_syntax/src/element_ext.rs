@@ -14,7 +14,7 @@ impl HtmlSelfClosingElement {
     pub fn is_void_element(&self) -> SyntaxResult<bool> {
         let name = self.name()?;
         Ok(VOID_ELEMENTS
-            .binary_search(&name.value_token()?.text())
+            .binary_search(&name.value_token()?.text_trimmed())
             .is_ok())
     }
 }
