@@ -1,6 +1,6 @@
 use crate::file_handlers::Capabilities;
 use crate::settings::Settings;
-use crate::workspace::{DocumentFileSource, FeatureKind, FeatureName, FileFeaturesResult};
+use crate::workspace::{DocumentFileSource, FeatureName, FileFeaturesResult};
 use crate::{WorkspaceError, is_dir};
 use biome_fs::ConfigName;
 use camino::{Utf8Path, Utf8PathBuf};
@@ -136,7 +136,10 @@ impl Projects {
 
     #[inline]
     pub fn is_ignored_by_top_level_config(&self, project_key: ProjectKey, path: &Utf8Path) -> bool {
-        self.is_ignored(project_key, path, FeatureName::empty())
+        match self.0.pin().get(&project_key) {
+            Some(project_data) => is_ignored_by_top_level_config(project_data, path),
+            None => false,
+        }
     }
 
     pub fn is_ignored(
@@ -150,32 +153,7 @@ impl Projects {
             return false;
         };
 
-        // First check if the path is ignored by the `files.includes` setting
-        // relevant to the given `path`.
-        let files_includes = project_data
-            .nested_settings
-            .iter()
-            .find(|(project_path, _)| path.starts_with(project_path))
-            .map_or(
-                &project_data.root_settings.files.includes,
-                |(_, settings)| &settings.files.includes,
-            );
-
-        let is_included = files_includes.is_unset()
-            || if is_dir(path) {
-                files_includes.matches_directory_with_exceptions(path)
-            } else {
-                files_includes.matches_with_exceptions(path)
-            };
-
-        // VCS settings are used from the root settings, regardless of what
-        // package we are analyzing, so we ignore the `path` for those.
-        let vcs_settings = &project_data.root_settings.vcs_settings;
-        let is_ignored_by_vcs = vcs_settings.should_use_ignore_file()
-            && vcs_settings
-                .ignore_matches
-                .as_ref()
-                .is_some_and(|ignored_matches| ignored_matches.is_ignored(path, is_dir(path)));
+        let is_ignored_by_top_level_config = is_ignored_by_top_level_config(project_data, path);
 
         // If there are specific features enabled, but all of them ignore the
         // path, then we treat the path as ignored too.
@@ -186,7 +164,7 @@ impl Projects {
                     .is_ignored_for_feature(path, feature)
             });
 
-        !is_included || is_ignored_by_vcs || is_ignored_by_features
+        is_ignored_by_top_level_config || is_ignored_by_features
     }
 
     pub fn get_file_features(
@@ -216,16 +194,19 @@ impl Projects {
             file_features.ignore_not_supported();
         } else if path.file_name().is_some_and(|file_name| {
             file_name == ConfigName::biome_json() || file_name == ConfigName::biome_jsonc()
-        }) && path.parent().is_some_and(|dir_path| {
-            self.get_project_path(project_key)
-                .is_some_and(|project_path| dir_path == project_path)
-        }) {
+        }) && path
+            .parent()
+            .is_some_and(|dir_path| dir_path == project_data.path)
+        {
             // Never ignore Biome's top-level config file
-        } else if self.is_ignored_by_top_level_config(project_key, path) {
+        } else if is_ignored_by_top_level_config(project_data, path) {
             file_features.set_ignored_for_all_features();
         } else {
             for feature in features.iter() {
-                if self.is_ignored_by_feature_config(project_key, path, feature) {
+                if project_data
+                    .root_settings
+                    .is_ignored_for_feature(path, feature)
+                {
                     file_features.ignored(feature);
                 }
             }
@@ -332,23 +313,37 @@ impl Projects {
 
         usize::from(limit)
     }
+}
 
-    /// Checks whether a file is ignored through the feature's
-    /// `ignore`/`include` settings.
-    pub fn is_ignored_by_feature_config(
-        &self,
-        project_key: ProjectKey,
-        path: &Utf8Path,
-        feature: FeatureKind,
-    ) -> bool {
-        let data = self.0.pin();
-        match data.get(&project_key) {
-            Some(project_data) => project_data
-                .root_settings
-                .is_ignored_for_feature(path, feature),
-            None => false,
-        }
-    }
+fn is_ignored_by_top_level_config(project_data: &ProjectData, path: &Utf8Path) -> bool {
+    // First check if the path is ignored by the `files.includes` setting
+    // relevant to the given `path`.
+    let files_includes = project_data
+        .nested_settings
+        .iter()
+        .find(|(project_path, _)| path.starts_with(project_path))
+        .map_or(
+            &project_data.root_settings.files.includes,
+            |(_, settings)| &settings.files.includes,
+        );
+
+    let is_included = files_includes.is_unset()
+        || if is_dir(path) {
+            files_includes.matches_directory_with_exceptions(path)
+        } else {
+            files_includes.matches_with_exceptions(path)
+        };
+
+    // VCS settings are used from the root settings, regardless of what
+    // package we are analyzing, so we ignore the `path` for those.
+    let vcs_settings = &project_data.root_settings.vcs_settings;
+    let is_ignored_by_vcs = vcs_settings.should_use_ignore_file()
+        && vcs_settings
+            .ignore_matches
+            .as_ref()
+            .is_some_and(|ignored_matches| ignored_matches.is_ignored(path, is_dir(path)));
+
+    !is_included || is_ignored_by_vcs
 }
 
 #[derive(Clone, Copy, Debug, Deserialize, Eq, Hash, PartialEq, Serialize)]
