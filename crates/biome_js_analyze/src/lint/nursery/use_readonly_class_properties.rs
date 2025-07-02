@@ -284,6 +284,7 @@ declare_node_union! {
 
 declare_node_union! {
     pub AnyJsClassMethodBodyElement =
+    JsArrowFunctionExpression |
     JsBlockStatement |
     JsCallExpression |
     JsConditionalExpression |
@@ -476,6 +477,30 @@ fn collect_mutated_class_property_names(members: &JsClassMemberList) -> Vec<Text
                 } else {
                     None
                 }
+            }
+            // assignments in property class member if it is an arrow function
+            AnyJsClassMember::JsPropertyClassMember(property) => {
+                if let Ok(expression) = property.value()?.expression() {
+                    if let Some(arrow_function) =
+                        JsArrowFunctionExpression::cast(expression.into_syntax())
+                    {
+                        if let Ok(body) = arrow_function.body() {
+                            let this_aliases =
+                                collect_class_member_props_mutations(body.as_js_function_body()?);
+                            return Some(
+                                collect_all_assignment_names(
+                                    &MethodBodyElementOrStatementList::MethodBodyElement(
+                                        &AnyJsClassMethodBodyElement::from(arrow_function),
+                                    ),
+                                    &this_aliases,
+                                )
+                                .collect::<Vec<_>>()
+                                .into_iter(),
+                            );
+                        }
+                    }
+                };
+                None
             }
             // assignments in constructor
             AnyJsClassMember::JsConstructorClassMember(constructor) => {

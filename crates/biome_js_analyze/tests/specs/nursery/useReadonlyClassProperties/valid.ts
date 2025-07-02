@@ -589,3 +589,10 @@ class GetterWithMutationValue {
 	}
 }
 
+class ArrowFunctionWithMutation {
+	private bar: string | null = null;
+
+	readonly action = () => {
+		this.bar = "init";
+	};
+}
