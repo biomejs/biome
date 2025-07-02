@@ -9,7 +9,7 @@ use biome_js_syntax::{
     AnyJsPropertyModifier, AnyTsPropertyParameterModifier, JsArrayAssignmentPattern,
     JsArrowFunctionExpression, JsAssignmentExpression, JsBlockStatement, JsCallExpression,
     JsClassDeclaration, JsClassMemberList, JsConditionalExpression, JsConstructorClassMember,
-    JsElseClause, JsExpressionStatement, JsFunctionBody, JsFunctionExpression,
+    JsElseClause, JsExpressionStatement, JsFunctionBody, JsFunctionExpression, JsGetterClassMember,
     JsGetterObjectMember, JsIfStatement, JsInitializerClause, JsLanguage, JsMethodClassMember,
     JsMethodObjectMember, JsObjectAssignmentPattern, JsObjectExpression, JsObjectMemberList,
     JsParenthesizedExpression, JsPostUpdateExpression, JsPreUpdateExpression,
@@ -298,6 +298,7 @@ declare_node_union! {
     JsParenthesizedExpression |
     JsReturnStatement |
     JsSetterClassMember |
+    JsGetterClassMember |
     JsSetterObjectMember |
     JsVariableDeclaration |
     JsVariableDeclarator |
@@ -448,6 +449,24 @@ fn collect_mutated_class_property_names(members: &JsClassMemberList) -> Vec<Text
                         collect_all_assignment_names(
                             &MethodBodyElementOrStatementList::MethodBodyElement(
                                 &AnyJsClassMethodBodyElement::from(setter.clone()),
+                            ),
+                            &this_aliases,
+                        )
+                        .collect::<Vec<_>>()
+                        .into_iter(),
+                    )
+                } else {
+                    None
+                }
+            }
+            // assignments in getters, technically possible, but not recommended
+            AnyJsClassMember::JsGetterClassMember(getter) => {
+                if let Ok(body) = getter.body() {
+                    let this_aliases = collect_class_member_props_mutations(&body);
+                    Some(
+                        collect_all_assignment_names(
+                            &MethodBodyElementOrStatementList::MethodBodyElement(
+                                &AnyJsClassMethodBodyElement::from(getter.clone()),
                             ),
                             &this_aliases,
                         )
