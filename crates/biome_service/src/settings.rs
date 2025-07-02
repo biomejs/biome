@@ -167,8 +167,7 @@ impl Settings {
 
         // NOTE: keep this last. Computing the overrides require reading the settings computed by the parent settings.
         if let Some(overrides) = configuration.overrides {
-            self.override_settings =
-                to_override_settings(working_directory.clone(), overrides, self)?;
+            self.override_settings = to_override_settings(working_directory, overrides, self)?;
         }
 
         Ok(())
@@ -180,6 +179,7 @@ impl Settings {
     }
 
     /// Whether the files ignore_unknown is enabled
+    #[inline]
     pub fn ignore_unknown_enabled(&self) -> bool {
         self.files.ignore_unknown.unwrap_or_default().into()
     }
@@ -311,35 +311,17 @@ impl Settings {
 
     /// Returns whether the given `path` is ignored for the given `feature`,
     /// based on the current settings.
-    pub fn is_ignored_for_feature(&self, path: &Utf8Path, feature: FeatureKind) -> bool {
+    #[inline]
+    pub fn is_path_ignored_for_feature(&self, path: &Utf8Path, feature: FeatureKind) -> bool {
         let feature_includes_files = match feature {
-            FeatureKind::Format => {
-                let formatter = &self.formatter;
-                &formatter.includes
-            }
-            FeatureKind::Lint => {
-                let linter = &self.linter;
-                &linter.includes
-            }
-
-            FeatureKind::Assist => {
-                let assists = &self.assist;
-                &assists.includes
-            }
-            // TODO: enable once the configuration is available
+            FeatureKind::Format => &self.formatter.includes,
+            FeatureKind::Lint => &self.linter.includes,
+            FeatureKind::Assist => &self.assist.includes,
             FeatureKind::Search => return false, // There is no search-specific config.
             FeatureKind::Debug => return false,
         };
 
-        let mut is_feature_included = true;
-        if !feature_includes_files.is_unset() {
-            is_feature_included = if is_dir(path) {
-                feature_includes_files.matches_directory_with_exceptions(path)
-            } else {
-                feature_includes_files.matches_with_exceptions(path)
-            };
-        }
-        !is_feature_included
+        !feature_includes_files.is_included(path)
     }
 }
 
@@ -740,6 +722,17 @@ impl VcsSettings {
         self.enabled.unwrap_or_default().into()
     }
 
+    /// Returns whether the given `path` should be ignored per the VCS settings.
+    #[inline]
+    pub fn is_ignored(&self, path: &Utf8Path) -> bool {
+        self.should_use_ignore_file()
+            && self
+                .ignore_matches
+                .as_ref()
+                .is_some_and(|ignored_matches| ignored_matches.is_ignored(path, is_dir(path)))
+    }
+
+    #[inline]
     pub fn should_use_ignore_file(&self) -> bool {
         self.use_ignore_file.unwrap_or_default().into()
     }
@@ -879,7 +872,19 @@ impl Includes {
         current_globs.extend(globs.into());
     }
 
+    /// Returns whether the given `path` is included.
+    #[inline]
+    pub fn is_included(&self, path: &Utf8Path) -> bool {
+        self.is_unset()
+            || if is_dir(path) {
+                self.matches_directory_with_exceptions(path)
+            } else {
+                self.matches_with_exceptions(path)
+            }
+    }
+
     /// Returns `true` is no globs are set.
+    #[inline]
     pub fn is_unset(&self) -> bool {
         self.globs.is_none()
     }
@@ -1118,134 +1123,114 @@ impl OverrideSettings {
             .unwrap_or(base_setting)
     }
 
-    pub fn to_override_grit_format_options(
+    pub fn apply_override_grit_format_options(
         &self,
         path: &Utf8Path,
-        mut options: GritFormatOptions,
-    ) -> GritFormatOptions {
+        options: &mut GritFormatOptions,
+    ) {
         for pattern in self.patterns.iter() {
             if pattern.is_file_included(path) {
-                pattern.apply_overrides_to_grit_format_options(&mut options);
+                pattern.apply_overrides_to_grit_format_options(options);
             }
         }
-        options
     }
 
-    pub fn to_override_html_format_options(
+    pub fn apply_override_html_format_options(
         &self,
         path: &Utf8Path,
-        mut options: HtmlFormatOptions,
-    ) -> HtmlFormatOptions {
+        options: &mut HtmlFormatOptions,
+    ) {
         for pattern in self.patterns.iter() {
             if pattern.is_file_included(path) {
-                pattern.apply_overrides_to_html_format_options(&mut options);
+                pattern.apply_overrides_to_html_format_options(options);
             }
         }
-        options
     }
 
-    pub fn to_override_js_parser_options(
-        &self,
-        path: &Utf8Path,
-        mut options: JsParserOptions,
-    ) -> JsParserOptions {
+    pub fn apply_override_js_parser_options(&self, path: &Utf8Path, options: &mut JsParserOptions) {
         for pattern in self.patterns.iter() {
             if pattern.is_file_included(path) {
-                pattern.apply_overrides_to_js_parser_options(&mut options);
+                pattern.apply_overrides_to_js_parser_options(options);
             }
         }
-        options
     }
 
-    pub fn to_override_json_parser_options(
+    pub fn apply_override_json_parser_options(
         &self,
         path: &Utf8Path,
-        mut options: JsonParserOptions,
-    ) -> JsonParserOptions {
+        options: &mut JsonParserOptions,
+    ) {
         for pattern in self.patterns.iter() {
             if pattern.is_file_included(path) {
-                pattern.apply_overrides_to_json_parser_options(&mut options);
+                pattern.apply_overrides_to_json_parser_options(options);
             }
         }
-        options
     }
 
     /// Scans the override rules and returns the parser options of the first matching override.
-    pub fn to_override_css_parser_options(
+    pub fn apply_override_css_parser_options(
         &self,
         path: &Utf8Path,
-        mut options: CssParserOptions,
-    ) -> CssParserOptions {
+        options: &mut CssParserOptions,
+    ) {
         for pattern in self.patterns.iter() {
             if pattern.is_file_included(path) {
-                pattern.apply_overrides_to_css_parser_options(&mut options);
+                pattern.apply_overrides_to_css_parser_options(options);
             }
         }
-        options
     }
 
-    // #region: CSS-specific methods
-
     /// Scans and aggregates all the overrides into a single [CssFormatOptions]
-    pub fn to_override_css_format_options(
+    pub fn apply_override_css_format_options(
         &self,
         path: &Utf8Path,
-        mut options: CssFormatOptions,
-    ) -> CssFormatOptions {
+        options: &mut CssFormatOptions,
+    ) {
         for pattern in self.patterns.iter() {
             if pattern.is_file_included(path) {
-                pattern.apply_overrides_to_css_format_options(&mut options);
+                pattern.apply_overrides_to_css_format_options(options);
             }
         }
-        options
     }
 
     /// Scans and aggregates all the overrides into a single [JsonParserOptions]
-    pub fn to_override_json_parse_options(
+    pub fn apply_override_json_parse_options(
         &self,
         path: &Utf8Path,
-        mut options: JsonParserOptions,
-    ) -> JsonParserOptions {
+        options: &mut JsonParserOptions,
+    ) {
         for pattern in self.patterns.iter() {
             if pattern.is_file_included(path) {
-                pattern.apply_overrides_to_json_parser_options(&mut options);
+                pattern.apply_overrides_to_json_parser_options(options);
             }
         }
-        options
     }
 
     /// Scans and aggregates all the overrides into a single `JsonFormatOptions`
-    pub fn to_override_json_format_options(
+    pub fn apply_override_json_format_options(
         &self,
         path: &Utf8Path,
-        mut options: JsonFormatOptions,
-    ) -> JsonFormatOptions {
+        options: &mut JsonFormatOptions,
+    ) {
         for pattern in self.patterns.iter() {
             if pattern.is_file_included(path) {
-                pattern.apply_overrides_to_json_format_options(&mut options);
+                pattern.apply_overrides_to_json_format_options(options);
             }
         }
-        options
     }
-
-    // #endregion
-
-    // #region: GraphQL  methods
 
     /// Scans and aggregates all the overrides into a single [GraphqlFormatOptions]
-    pub fn to_override_graphql_format_options(
+    pub fn apply_override_graphql_format_options(
         &self,
         path: &Utf8Path,
-        mut options: GraphqlFormatOptions,
-    ) -> GraphqlFormatOptions {
+        options: &mut GraphqlFormatOptions,
+    ) {
         for pattern in self.patterns.iter() {
             if pattern.is_file_included(path) {
-                pattern.apply_overrides_to_graphql_format_options(&mut options);
+                pattern.apply_overrides_to_graphql_format_options(options);
             }
         }
-        options
     }
-    // #endregion
 
     /// Retrieves the options of lint rules that have been overridden
     pub fn override_analyzer_rules(

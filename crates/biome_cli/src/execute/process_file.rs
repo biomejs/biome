@@ -153,40 +153,13 @@ pub(crate) fn process_file(ctx: &TraversalOptions, biome_path: &BiomePath) -> Fi
     // then we pick the specific features for this file
     let unsupported_reason = match ctx.execution.traversal_mode() {
         TraversalMode::Check { .. } | TraversalMode::CI { .. } => file_features
-            .support_kind_for(&FeatureKind::Lint)
-            .and_then(|support_kind| {
-                if support_kind.is_not_enabled() {
-                    Some(support_kind)
-                } else {
-                    None
-                }
-            })
-            .and(
-                file_features
-                    .support_kind_for(&FeatureKind::Format)
-                    .and_then(|support_kind| {
-                        if support_kind.is_not_enabled() {
-                            Some(support_kind)
-                        } else {
-                            None
-                        }
-                    }),
-            )
-            .and(
-                file_features
-                    .support_kind_for(&FeatureKind::Assist)
-                    .and_then(|support_kind| {
-                        if support_kind.is_not_enabled() {
-                            Some(support_kind)
-                        } else {
-                            None
-                        }
-                    }),
-            ),
-        TraversalMode::Format { .. } => file_features.support_kind_for(&FeatureKind::Format),
-        TraversalMode::Lint { .. } => file_features.support_kind_for(&FeatureKind::Lint),
+            .support_kind_if_not_enabled(FeatureKind::Lint)
+            .and(file_features.support_kind_if_not_enabled(FeatureKind::Format))
+            .and(file_features.support_kind_if_not_enabled(FeatureKind::Assist)),
+        TraversalMode::Format { .. } => Some(file_features.support_kind_for(FeatureKind::Format)),
+        TraversalMode::Lint { .. } => Some(file_features.support_kind_for(FeatureKind::Lint)),
         TraversalMode::Migrate { .. } => None,
-        TraversalMode::Search { .. } => file_features.support_kind_for(&FeatureKind::Search),
+        TraversalMode::Search { .. } => Some(file_features.support_kind_for(FeatureKind::Search)),
     };
 
     if let Some(reason) = unsupported_reason {
@@ -229,7 +202,7 @@ pub(crate) fn process_file(ctx: &TraversalOptions, biome_path: &BiomePath) -> Fi
             format(shared_context, biome_path.clone())
         }
         TraversalMode::Check { .. } | TraversalMode::CI { .. } => {
-            check_file(shared_context, biome_path.clone(), &file_features)
+            check_file(shared_context, biome_path.clone(), file_features)
         }
         TraversalMode::Migrate { .. } => {
             unreachable!("The migration should not be called for this file")

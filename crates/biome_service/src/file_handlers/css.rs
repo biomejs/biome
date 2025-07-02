@@ -166,7 +166,7 @@ impl ServiceLanguage for CssLanguage {
             .or(global.line_ending)
             .unwrap_or_default();
 
-        let options = CssFormatOptions::new(
+        let mut options = CssFormatOptions::new(
             document_file_source
                 .to_css_file_source()
                 .unwrap_or_default(),
@@ -176,7 +176,10 @@ impl ServiceLanguage for CssLanguage {
         .with_line_width(line_width)
         .with_line_ending(line_ending)
         .with_quote_style(language.quote_style.unwrap_or_default());
-        overrides.to_override_css_format_options(path, options)
+
+        overrides.apply_override_css_format_options(path, &mut options);
+
+        options
     }
 
     fn resolve_analyzer_options(
@@ -384,9 +387,11 @@ fn parse(
             .into(),
         grit_metavariables: false,
     };
-    options = settings
+
+    settings
         .override_settings
-        .to_override_css_parser_options(biome_path, options);
+        .apply_override_css_parser_options(biome_path, &mut options);
+
     let parse = biome_css_parser::parse_css_with_cache(text, cache, options);
     ParseResult {
         any_parse: parse.into(),

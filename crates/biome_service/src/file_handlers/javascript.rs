@@ -507,6 +507,12 @@ fn parse(
             .unwrap_or_default()
             .into(),
     };
+
+    settings
+        .override_settings
+        .apply_override_js_parser_options(biome_path, &mut options);
+
+    let mut file_source = file_source.to_js_file_source().unwrap_or_default();
     let jsx_everywhere = settings
         .languages
         .javascript
@@ -514,11 +520,6 @@ fn parse(
         .jsx_everywhere
         .unwrap_or_default()
         .into();
-    options = settings
-        .override_settings
-        .to_override_js_parser_options(biome_path, options);
-
-    let mut file_source = file_source.to_js_file_source().unwrap_or_default();
     if jsx_everywhere && !file_source.is_typescript() {
         file_source = file_source.with_variant(LanguageVariant::Jsx);
     }

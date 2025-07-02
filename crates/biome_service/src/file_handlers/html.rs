@@ -111,17 +111,21 @@ impl ServiceLanguage for HtmlLanguage {
         let indent_script_and_style = language.indent_script_and_style.unwrap_or_default();
         let self_close_void_elements = language.self_close_void_elements.unwrap_or_default();
 
-        let options = HtmlFormatOptions::new(file_source.to_html_file_source().unwrap_or_default())
-            .with_indent_style(indent_style)
-            .with_indent_width(indent_width)
-            .with_line_width(line_width)
-            .with_line_ending(line_ending)
-            .with_attribute_position(attribute_position)
-            .with_bracket_same_line(bracket_same_line)
-            .with_whitespace_sensitivity(whitespace_sensitivity)
-            .with_indent_script_and_style(indent_script_and_style)
-            .with_self_close_void_elements(self_close_void_elements);
-        overrides.to_override_html_format_options(path, options)
+        let mut options =
+            HtmlFormatOptions::new(file_source.to_html_file_source().unwrap_or_default())
+                .with_indent_style(indent_style)
+                .with_indent_width(indent_width)
+                .with_line_width(line_width)
+                .with_line_ending(line_ending)
+                .with_attribute_position(attribute_position)
+                .with_bracket_same_line(bracket_same_line)
+                .with_whitespace_sensitivity(whitespace_sensitivity)
+                .with_indent_script_and_style(indent_script_and_style)
+                .with_self_close_void_elements(self_close_void_elements);
+
+        overrides.apply_override_html_format_options(path, &mut options);
+
+        options
     }
 
     fn resolve_analyzer_options(

@@ -177,7 +177,7 @@ impl ServiceLanguage for JsonLanguage {
             .to_json_file_source()
             .unwrap_or_default();
 
-        let options = JsonFormatOptions::new(file_source)
+        let mut options = JsonFormatOptions::new(file_source)
             .with_line_ending(line_ending)
             .with_indent_style(indent_style)
             .with_indent_width(indent_width)
@@ -186,7 +186,9 @@ impl ServiceLanguage for JsonLanguage {
             .with_expand(expand_lists)
             .with_bracket_spacing(bracket_spacing);
 
-        overrides.to_override_json_format_options(path, options)
+        overrides.apply_override_json_format_options(path, &mut options);
+
+        options
     }
 
     fn resolve_analyzer_options(
@@ -360,7 +362,7 @@ fn parse(
         let parser = &settings.languages.json.parser;
         let overrides = &settings.override_settings;
         let optional_json_file_source = file_source.to_json_file_source();
-        let options = JsonParserOptions {
+        let mut options = JsonParserOptions {
             allow_comments: parser.allow_comments.map_or_else(
                 || optional_json_file_source.is_some_and(|x| x.allow_comments()),
                 |value| value.value(),
@@ -370,7 +372,10 @@ fn parse(
                 |value| value.value(),
             ),
         };
-        overrides.to_override_json_parser_options(biome_path, options)
+
+        overrides.apply_override_json_parser_options(biome_path, &mut options);
+
+        options
     };
 
     let parse = biome_json_parser::parse_json_with_cache(text, cache, options);

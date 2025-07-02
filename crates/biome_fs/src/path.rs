@@ -166,6 +166,7 @@ impl BiomePath {
     }
 
     /// Returns `true` if the path is inside `node_modules`
+    #[inline(always)]
     pub fn is_dependency(&self) -> bool {
         self.path
             .components()

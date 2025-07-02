@@ -113,12 +113,16 @@ impl ServiceLanguage for GritLanguage {
             .or(global.line_ending)
             .unwrap_or_default();
 
-        let options = GritFormatOptions::new(file_source.to_grit_file_source().unwrap_or_default())
-            .with_indent_style(indent_style)
-            .with_indent_width(indent_width)
-            .with_line_width(line_width)
-            .with_line_ending(line_ending);
-        overrides.to_override_grit_format_options(path, options)
+        let mut options =
+            GritFormatOptions::new(file_source.to_grit_file_source().unwrap_or_default())
+                .with_indent_style(indent_style)
+                .with_indent_width(indent_width)
+                .with_line_width(line_width)
+                .with_line_ending(line_ending);
+
+        overrides.apply_override_grit_format_options(path, &mut options);
+
+        options
     }
 
     fn resolve_analyzer_options(

@@ -1,7 +1,7 @@
+use crate::WorkspaceError;
 use crate::file_handlers::Capabilities;
 use crate::settings::Settings;
 use crate::workspace::{DocumentFileSource, FeatureName, FileFeaturesResult};
-use crate::{WorkspaceError, is_dir};
 use biome_fs::ConfigName;
 use camino::{Utf8Path, Utf8PathBuf};
 use papaya::HashMap;
@@ -134,7 +134,6 @@ impl Projects {
         })
     }
 
-    #[inline]
     pub fn is_ignored_by_top_level_config(&self, project_key: ProjectKey, path: &Utf8Path) -> bool {
         match self.0.pin().get(&project_key) {
             Some(project_data) => is_ignored_by_top_level_config(project_data, path),
@@ -142,6 +141,7 @@ impl Projects {
         }
     }
 
+    #[inline]
     pub fn is_ignored(
         &self,
         project_key: ProjectKey,
@@ -161,24 +161,25 @@ impl Projects {
             && features.iter().all(|feature| {
                 project_data
                     .root_settings
-                    .is_ignored_for_feature(path, feature)
+                    .is_path_ignored_for_feature(path, feature)
             });
 
         is_ignored_by_top_level_config || is_ignored_by_features
     }
 
+    #[inline(always)]
     pub fn get_file_features(
         &self,
         project_key: ProjectKey,
         path: &Utf8Path,
         features: FeatureName,
         language: DocumentFileSource,
-        capabilities: Capabilities,
+        capabilities: &Capabilities,
     ) -> Result<FileFeaturesResult, WorkspaceError> {
         let data = self.0.pin();
-        let Some(project_data) = data.get(&project_key) else {
-            return Err(WorkspaceError::no_project());
-        };
+        let project_data = data
+            .get(&project_key)
+            .ok_or_else(WorkspaceError::no_project)?;
 
         let settings = project_data
             .nested_settings
@@ -187,8 +188,8 @@ impl Projects {
             .map_or(&project_data.root_settings, |(_, settings)| settings);
 
         let mut file_features = FileFeaturesResult::new();
-        file_features = file_features.with_capabilities(&capabilities);
-        file_features = file_features.with_settings_and_language(settings, path, &capabilities);
+        file_features = file_features.with_capabilities(capabilities);
+        file_features = file_features.with_settings_and_language(settings, path, capabilities);
 
         if settings.ignore_unknown_enabled() && language == DocumentFileSource::Unknown {
             file_features.ignore_not_supported();
@@ -199,19 +200,25 @@ impl Projects {
             .is_some_and(|dir_path| dir_path == project_data.path)
         {
             // Never ignore Biome's top-level config file
-        } else if is_ignored_by_top_level_config(project_data, path) {
+        } else if !settings.files.includes.is_included(path)
+            || project_data.root_settings.vcs_settings.is_ignored(path)
+        {
             file_features.set_ignored_for_all_features();
         } else {
             for feature in features.iter() {
                 if project_data
                     .root_settings
-                    .is_ignored_for_feature(path, feature)
+                    .is_path_ignored_for_feature(path, feature)
                 {
-                    file_features.ignored(feature);
+                    file_features.set_ignored(feature);
                 }
             }
         }
-        // If the file is not ignored by at least one feature, then check that the file is not protected.
+
+        drop(data);
+
+        // If the file is not ignored by at least one feature, then check that
+        // the file is not protected.
         //
         // Protected files must be ignored.
         if !file_features.is_not_processed() && FileFeaturesResult::is_protected_file(path) {
@@ -315,10 +322,11 @@ impl Projects {
     }
 }
 
+#[inline]
 fn is_ignored_by_top_level_config(project_data: &ProjectData, path: &Utf8Path) -> bool {
     // First check if the path is ignored by the `files.includes` setting
     // relevant to the given `path`.
-    let files_includes = project_data
+    let includes = project_data
         .nested_settings
         .iter()
         .find(|(project_path, _)| path.starts_with(project_path))
@@ -326,22 +334,11 @@ fn is_ignored_by_top_level_config(project_data: &ProjectData, path: &Utf8Path) -
             &project_data.root_settings.files.includes,
             |(_, settings)| &settings.files.includes,
         );
-
-    let is_included = files_includes.is_unset()
-        || if is_dir(path) {
-            files_includes.matches_directory_with_exceptions(path)
-        } else {
-            files_includes.matches_with_exceptions(path)
-        };
+    let is_included = includes.is_included(path);
 
     // VCS settings are used from the root settings, regardless of what
     // package we are analyzing, so we ignore the `path` for those.
-    let vcs_settings = &project_data.root_settings.vcs_settings;
-    let is_ignored_by_vcs = vcs_settings.should_use_ignore_file()
-        && vcs_settings
-            .ignore_matches
-            .as_ref()
-            .is_some_and(|ignored_matches| ignored_matches.is_ignored(path, is_dir(path)));
+    let is_ignored_by_vcs = project_data.root_settings.vcs_settings.is_ignored(path);
 
     !is_included || is_ignored_by_vcs
 }

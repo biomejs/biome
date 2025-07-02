@@ -133,7 +133,7 @@ impl ServiceLanguage for GraphqlLanguage {
             .or(global.bracket_spacing)
             .unwrap_or_default();
 
-        let options = GraphqlFormatOptions::new(
+        let mut options = GraphqlFormatOptions::new(
             document_file_source
                 .to_graphql_file_source()
                 .unwrap_or_default(),
@@ -144,7 +144,10 @@ impl ServiceLanguage for GraphqlLanguage {
         .with_line_ending(line_ending)
         .with_bracket_spacing(bracket_spacing)
         .with_quote_style(language.quote_style.unwrap_or_default());
-        overrides.to_override_graphql_format_options(path, options)
+
+        overrides.apply_override_graphql_format_options(path, &mut options);
+
+        options
     }
 
     fn resolve_analyzer_options(

@@ -1036,7 +1036,7 @@ impl Workspace for WorkspaceServer {
             &params.path,
             params.features,
             language,
-            capabilities,
+            &capabilities,
         )
     }
 
