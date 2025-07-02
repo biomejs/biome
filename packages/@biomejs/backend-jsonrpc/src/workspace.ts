@@ -7650,7 +7650,12 @@ export interface NoRestrictedElementsOptions {
 	 */
 	elements: CustomRestrictedElements;
 }
-export interface NoSecretsOptions {}
+export interface NoSecretsOptions {
+	/**
+	 * Set entropy threshold (default is 41).
+	 */
+	entropyThreshold?: number;
+}
 export interface NoShadowOptions {}
 export interface NoTsIgnoreOptions {}
 export interface NoUnassignedVariablesOptions {}

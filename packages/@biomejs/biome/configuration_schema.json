@@ -3921,7 +3921,19 @@
 				{ "$ref": "#/definitions/RuleWithNoSecretsOptions" }
 			]
 		},
-		"NoSecretsOptions": { "type": "object", "additionalProperties": false },
+		"NoSecretsOptions": {
+			"type": "object",
+			"properties": {
+				"entropyThreshold": {
+					"description": "Set entropy threshold (default is 41).",
+					"default": null,
+					"type": ["integer", "null"],
+					"format": "uint16",
+					"minimum": 0.0
+				}
+			},
+			"additionalProperties": false
+		},
 		"NoSelfAssignConfiguration": {
 			"anyOf": [
 				{ "$ref": "#/definitions/RulePlainConfiguration" },
