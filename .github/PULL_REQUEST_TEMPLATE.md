@@ -14,3 +14,9 @@
 ## Test Plan
 
 <!-- What demonstrates that your implementation is correct? -->
+
+## Docs
+
+<!-- If you're submitting a nursery rule/action, the documentation is part of the code -->
+
+<!-- If you're submitting a new feature, you have to send a PR to the biomejs/website repository. Link the PR here once it's ready -->

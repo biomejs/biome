@@ -365,7 +365,12 @@ We are using [action-semantic-pull-request](https://github.com/amannn/action-sem
 When creating a new pull request, it's preferable to use a conventional commit-formatted title, as this title will be used as the default commit message on the squashed commit after merging.
 See the [dedicated section](#commit-messages) about conventional commit format.
 
-Please use the template provided.
+When creating a PR, follow the following instructions:
+- if you fix a bug (code or documentation), send a PR to the maintenance branch `main`.
+- if you add a **new nursery rule**, send a PR to the maintenance branch `main`. Nursery rules don't follow semantic versioning.
+- if you promote a rule from nursery, send a PR to the `next` branch.
+- if you implement a new feature that affects the end-users, send a PR to the `next` branch.
+- if you implement a new feature that _doesn't affect end-users_, send a PR to the maintenance `main` branch.
 
 ### Changelog
 
@@ -445,6 +450,10 @@ Even minor versions are dedicated to official releases, e.g. `*.6.*`.
 ### Regular releases
 
 When releasing a new version of a Biome, follow these steps:
+
+1. [ ] Create a PR from `next` to `main`. Make sure that code conflicts are fixed and the new features have relative docs PR.
+
+1. [ ] Merge `next` to `main`.
 
 1. [ ] **Update to the same `version` in all crates** if you publish crates, if applicable. (`Cargo.toml` and `crates/**/Cargo.toml`)
 
