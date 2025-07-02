@@ -57,6 +57,8 @@ mod scanner;
 mod server;
 mod watcher;
 
+pub use document::{EmbeddedCssContent, EmbeddedJsContent};
+
 use crate::file_handlers::Capabilities;
 pub use crate::file_handlers::DocumentFileSource;
 use crate::projects::ProjectKey;
