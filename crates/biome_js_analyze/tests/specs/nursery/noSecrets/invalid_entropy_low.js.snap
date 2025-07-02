@@ -13,23 +13,6 @@ const mediumEntropy4 = "TokenXyZ98765";
 
 # Diagnostics
 ```
-invalid_entropy_low.options:10:25 deserialize ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Found an unknown key `entropyThreshold`.
-  
-     8 │                     "level": "error",
-     9 │                     "options": {
-  > 10 │                         "entropyThreshold": 20
-       │                         ^^^^^^^^^^^^^^^^^^
-    11 │                     }
-    12 │                 }
-  
-  i Known keys:
-  
-
-```
-
-```
 invalid_entropy_low.js:2:24 lint/nursery/noSecrets ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Potential secret found.
