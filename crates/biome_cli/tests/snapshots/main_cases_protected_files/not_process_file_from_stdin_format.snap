@@ -11,17 +11,5 @@ expression: redactor(content)
 # Emitted Messages
 
 ```block
-package-lock.json project  VERBOSE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  i The file package-lock.json is protected because is handled by another tool. Biome won't process it.
-  
-  Verbose advice
-  
-    i You can hide this diagnostic by using --diagnostic-level=warn to increase the diagnostic level shown by CLI.
-    
-
-```
-
-```block
 { "name": "test" }
 ```

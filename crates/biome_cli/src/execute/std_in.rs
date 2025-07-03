@@ -52,22 +52,13 @@ pub(crate) fn run<'a>(
 
         if file_features.is_protected() {
             let protected_diagnostic = WorkspaceError::protected_file(biome_path.to_string());
-
-            match cli_options.verbosity {
-                Verbosity::Simple => {
-                    console.error(markup! {{PrintDiagnostic::simple(&protected_diagnostic)}})
+            if protected_diagnostic.tags().is_verbose() {
+                if cli_options.verbosity.is_verbose() {
+                    console.error(markup! {{PrintDiagnostic::verbose(&protected_diagnostic)}})
                 }
-                Verbosity::Full => {
-                    if protected_diagnostic.tags().is_verbose() {
-                        console.error(markup! {{PrintDiagnostic::verbose(&protected_diagnostic)}})
-                    }
-                }
-                Verbosity::Minimal => {
-                    console.error(markup! {{PrintDiagnostic::minimal(&protected_diagnostic)}})
-                }
+                console.append(markup! {{content}});
+                return Ok(());
             }
-            console.append(markup! {{content}});
-            return Ok(());
         };
         if file_features.supports_format() {
             workspace.open_file(OpenFileParams {
