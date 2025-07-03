@@ -249,6 +249,7 @@ impl From<WorkspaceError> for biome_diagnostics::serde::Diagnostic {
      ),
  )]
 pub struct NonUtf8Path {
+    #[location(resource)]
     path: String,
 }
 
@@ -675,6 +676,7 @@ mod test {
     use biome_diagnostics::{DiagnosticExt, Error, print_diagnostic_to_string};
     use biome_formatter::FormatError;
     use biome_fs::BiomePath;
+    use std::ffi::OsString;
 
     fn snap_diagnostic(test_name: &str, diagnostic: Error) {
         let content = print_diagnostic_to_string(&diagnostic);
@@ -771,6 +773,14 @@ mod test {
         snap_diagnostic(
             "formatter_syntax_error",
             WorkspaceError::FormatError(FormatError::SyntaxError).with_file_path("example.js"),
+        )
+    }
+
+    #[test]
+    fn non_utf8_path() {
+        snap_diagnostic(
+            "non_utf8_path",
+            Error::from(WorkspaceError::non_utf8_path(OsString::from("path.js"))),
         )
     }
 }
