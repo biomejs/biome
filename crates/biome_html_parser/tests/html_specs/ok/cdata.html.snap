@@ -18,6 +18,7 @@ expression: snapshot
 ```
 HtmlRoot {
     bom_token: missing (optional),
+    frontmatter: missing (optional),
     directive: missing (optional),
     html: HtmlElementList [
         HtmlCdataSection {
@@ -51,7 +52,8 @@ HtmlRoot {
 0: HTML_ROOT@0..204
   0: (empty)
   1: (empty)
-  2: HTML_ELEMENT_LIST@0..203
+  2: (empty)
+  3: HTML_ELEMENT_LIST@0..203
     0: HTML_CDATA_SECTION@0..19
       0: CDATA_START@0..9 "<![CDATA[" [] []
       1: HTML_LITERAL@9..16 "example" [] []
@@ -68,6 +70,6 @@ HtmlRoot {
       0: CDATA_START@151..161 "<![CDATA[" [Newline("\n")] []
       1: HTML_LITERAL@161..200 "<div attributes=\"some-attribute\"></div>" [] []
       2: CDATA_END@200..203 "]]>" [] []
-  3: EOF@203..204 "" [Newline("\n")] []
+  4: EOF@203..204 "" [Newline("\n")] []
 
 ```

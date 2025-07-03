@@ -253,7 +253,8 @@ fn parse(
     _handle: WorkspaceSettingsHandle,
     cache: &mut NodeCache,
 ) -> ParseResult {
-    let parse = parse_html_with_cache(text, cache);
+    let html_file_source = file_source.to_html_file_source().unwrap_or_default();
+    let parse = parse_html_with_cache(text, html_file_source, cache);
 
     ParseResult {
         any_parse: parse.into(),

@@ -10,14 +10,29 @@ pub struct HtmlFileSource {
     variant: HtmlVariant,
 }
 
+impl HtmlFileSource {
+    pub const fn is_astro(&self) -> bool {
+        matches!(self.variant, HtmlVariant::Astro)
+    }
+
+    pub fn variant(&self) -> &HtmlVariant {
+        &self.variant
+    }
+}
+
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[derive(
     Debug, Clone, Default, Copy, Eq, PartialEq, Hash, serde::Serialize, serde::Deserialize,
 )]
-enum HtmlVariant {
+pub enum HtmlVariant {
     #[default]
     Standard,
+    /// Use this variant to parse an Astro file
     Astro,
+    /// Use this variant to parse a Vue file
+    Vue,
+    /// Use this variant to parse a Svelte file
+    Svelte,
 }
 
 impl HtmlFileSource {
@@ -29,6 +44,17 @@ impl HtmlFileSource {
     pub fn astro() -> Self {
         Self {
             variant: HtmlVariant::Astro,
+        }
+    }
+
+    pub fn vue() -> Self {
+        Self {
+            variant: HtmlVariant::Vue,
+        }
+    }
+    pub fn svelte() -> Self {
+        Self {
+            variant: HtmlVariant::Svelte,
         }
     }
 
@@ -44,6 +70,8 @@ impl HtmlFileSource {
         match extension {
             "html" => Ok(Self::html()),
             "astro" => Ok(Self::astro()),
+            "vue" => Ok(Self::vue()),
+            "svelte" => Ok(Self::svelte()),
             _ => Err(FileSourceError::UnknownExtension),
         }
     }
@@ -61,6 +89,8 @@ impl HtmlFileSource {
         match language_id {
             "html" => Ok(Self::html()),
             "astro" => Ok(Self::astro()),
+            "vue" => Ok(Self::vue()),
+            "svelte" => Ok(Self::svelte()),
             _ => Err(FileSourceError::UnknownLanguageId),
         }
     }

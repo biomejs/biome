@@ -7,14 +7,18 @@ mod token_source;
 
 use crate::parser::{HtmlLosslessTreeSink, HtmlParser};
 use crate::syntax::parse_root;
-use biome_html_syntax::{HtmlRoot, HtmlSyntaxNode};
+use biome_html_syntax::{HtmlFileSource, HtmlRoot, HtmlSyntaxNode};
 use biome_parser::AnyParse;
 use biome_parser::diagnostic::ParseDiagnostic;
 use biome_rowan::{AstNode, NodeCache};
 
 /// Parses the provided string as HTML program using the provided node cache.
-pub fn parse_html_with_cache(source: &str, cache: &mut NodeCache) -> HtmlParse {
-    let mut parser = HtmlParser::new(source);
+pub fn parse_html_with_cache(
+    source: &str,
+    file_source: HtmlFileSource,
+    cache: &mut NodeCache,
+) -> HtmlParse {
+    let mut parser = HtmlParser::new(source, file_source);
 
     parse_root(&mut parser);
 
@@ -26,9 +30,9 @@ pub fn parse_html_with_cache(source: &str, cache: &mut NodeCache) -> HtmlParse {
 
     HtmlParse::new(green, diagnostics)
 }
-pub fn parse_html(source: &str) -> HtmlParse {
+pub fn parse_html(source: &str, file_source: HtmlFileSource) -> HtmlParse {
     let mut cache = NodeCache::default();
-    parse_html_with_cache(source, &mut cache)
+    parse_html_with_cache(source, file_source, &mut cache)
 }
 
 /// A utility struct for managing the result of a parser job

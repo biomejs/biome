@@ -2,16 +2,11 @@ use biome_analyze::{
     Ast, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
-
 use biome_js_syntax::JsStringLiteralExpression;
-
 use biome_rowan::AstNode;
+use biome_rule_options::no_secrets::NoSecretsOptions;
 use regex::Regex;
-
 use std::sync::LazyLock;
-
-use biome_deserialize_macros::Deserializable;
-use serde::{Deserialize, Serialize};
 
 // TODO: Try to get this to work in JavaScript comments as well
 declare_lint_rule! {
@@ -151,14 +146,6 @@ impl Rule for NoSecrets {
             })
         )
     }
-}
-
-#[derive(Clone, Debug, Default, Deserialize, Deserializable, Eq, PartialEq, Serialize)]
-#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
-#[serde(rename_all = "camelCase", deny_unknown_fields)]
-pub struct NoSecretsOptions {
-    /// Set entropy threshold (default is 41).
-    entropy_threshold: Option<u16>,
 }
 
 const MIN_PATTERN_LEN: usize = 14;

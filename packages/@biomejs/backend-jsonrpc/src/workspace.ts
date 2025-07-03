@@ -7650,7 +7650,12 @@ export interface NoRestrictedElementsOptions {
 	 */
 	elements: CustomRestrictedElements;
 }
-export interface NoSecretsOptions {}
+export interface NoSecretsOptions {
+	/**
+	 * Set entropy threshold (default is 41).
+	 */
+	entropyThreshold?: number;
+}
 export interface NoShadowOptions {}
 export interface NoTsIgnoreOptions {}
 export interface NoUnassignedVariablesOptions {}
@@ -8790,7 +8795,7 @@ export type CssVariant = "standard";
  * The style of GraphQL contained in the file.
  */
 export type GraphqlVariant = "standard";
-export type HtmlVariant = "Standard" | "Astro";
+export type HtmlVariant = "Standard" | "Astro" | "Vue" | "Svelte";
 export type GritVariant = "Standard";
 export interface ChangeFileParams {
 	content: string;

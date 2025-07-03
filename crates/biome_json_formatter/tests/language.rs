@@ -21,7 +21,13 @@ impl TestFormatLanguage for JsonTestFormatLanguage {
     type FormatLanguage = JsonFormatLanguage;
 
     fn parse(&self, text: &str) -> AnyParse {
-        parse_json(text, JsonParserOptions::default().with_allow_comments()).into()
+        parse_json(
+            text,
+            JsonParserOptions::default()
+                .with_allow_comments()
+                .with_allow_trailing_commas(),
+        )
+        .into()
     }
 
     fn to_format_language(
