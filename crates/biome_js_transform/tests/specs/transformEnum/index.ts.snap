@@ -1,5 +1,6 @@
 ---
 source: crates/biome_js_transform/tests/spec_tests.rs
+assertion_line: 82
 expression: index.ts
 ---
 # Input
@@ -9,11 +10,12 @@ enum StatusA {
 	Disabled
 }
 
-
-enum StatusB {
-	Enabled = "Enabled",
-	Disabled = "Disabled"
-}
+let a = () => {
+	enum StatusB {
+		Enabled = "Enabled",
+		Disabled = "Disabled"
+	}
+};
 
 ```
 
@@ -28,12 +30,17 @@ var StatusA;
 ```
 
 ```ts
-var StatusB;
-(function (StatusB) {
-	StatusB[(StatusB["Enabled"] = "Enabled")] = "Enabled";
-	StatusB[(StatusB["Disabled"] = "Disabled")] = "Disabled";
-})(StatusB || (StatusB = {}));
+enum StatusA {
+	Enabled,
+	Disabled,
+}
+
+let a = () => {
+	var StatusB;
+	(function (StatusB) {
+		StatusB[(StatusB["Enabled"] = "Enabled")] = "Enabled";
+		StatusB[(StatusB["Disabled"] = "Disabled")] = "Disabled";
+	})(StatusB || (StatusB = {}));
+};
 
 ```
-
-
