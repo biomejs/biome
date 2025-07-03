@@ -642,7 +642,7 @@ fn print_verbose() {
 
 #[test]
 fn print_minimal() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
 
     let file_path = Utf8Path::new("ci.js");
     fs.insert(file_path.into(), LINT_ERROR.as_bytes());

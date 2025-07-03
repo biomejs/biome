@@ -168,7 +168,7 @@ fn max_diagnostics_verbose() {
 
 #[test]
 fn max_diagnostics_minimal() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     for i in 0..8 {
@@ -176,7 +176,7 @@ fn max_diagnostics_minimal() {
         fs.insert(file_path, "a == b".as_bytes());
     }
 
-    let (mut fs, result) = run_cli(
+    let (fs, result) = run_cli(
         fs,
         &mut console,
         Args::from(["ci", "--max-diagnostics=10", "--verbosity=minimal", "src"].as_slice()),

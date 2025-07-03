@@ -1331,7 +1331,7 @@ fn print_verbose() {
 
 #[test]
 fn print_minimal() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     let file_path = Utf8Path::new("check.js");
