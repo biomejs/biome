@@ -18,7 +18,7 @@ use biome_rowan::{Direction, Language, SyntaxKind, SyntaxNode, SyntaxSlot};
 use biome_service::configuration::to_analyzer_rules;
 use biome_service::file_handlers::DocumentFileSource;
 use biome_service::projects::Projects;
-use biome_service::settings::{ServiceLanguage, Settings, WorkspaceSettingsHandle};
+use biome_service::settings::{ServiceLanguage, Settings};
 use biome_string_case::StrLikeExtension;
 use camino::{Utf8Path, Utf8PathBuf};
 use json_comments::StripComments;
@@ -163,9 +163,8 @@ where
             .merge_with_configuration(configuration, None)
             .unwrap();
 
-        let handle = WorkspaceSettingsHandle::from(settings);
         let document_file_source = DocumentFileSource::from_path(input_file);
-        handle.format_options::<L>(&input_file.into(), &document_file_source)
+        settings.format_options::<L>(&input_file.into(), &document_file_source)
     }
 }
 

@@ -118,6 +118,7 @@ impl WorkspaceError {
         Self::NotFound(NotFound)
     }
 
+    #[inline]
     pub fn no_project() -> Self {
         Self::NoProject(NoProject)
     }

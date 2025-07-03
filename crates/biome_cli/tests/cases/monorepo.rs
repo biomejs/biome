@@ -582,3 +582,54 @@ fn should_find_settings_when_targeting_parent_of_nested_dir() {
         result,
     ));
 }
+
+#[test]
+fn should_ignore_nested_configuration_in_ignored_directory() {
+    let mut fs = TemporaryFs::new("should_ignore_nested_configuration_in_ignored_directory");
+
+    fs.create_file(
+        "biome.jsonc",
+        r#"{
+    "files": {
+        "includes": ["**/*.js", "!vendor/**"],
+    },
+    "linter": {
+        "rules": {
+            "correctness": { "noUnusedVariables": "off" },
+            "suspicious": { "noDebugger": "off" }
+        }
+    }
+}"#,
+    );
+
+    fs.create_file(
+        "vendor/biome.jsonc",
+        r#"{
+    "root": true,
+    "linter": {
+        "rules": {
+            "correctness": { "noUnusedVariables": "error" }
+        }
+    }
+}"#,
+    );
+
+    fs.create_file("file.js", "let a; debugger");
+
+    fs.create_file("vendor/foo/file.js", "let a; debugger");
+
+    let mut console = BufferConsole::default();
+    let result = run_cli_with_dyn_fs(
+        Box::new(fs.create_os()),
+        &mut console,
+        Args::from(["lint"].as_slice()),
+    );
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "should_ignore_nested_configuration_in_ignored_directory",
+        fs.create_mem(),
+        console,
+        result,
+    ));
+}

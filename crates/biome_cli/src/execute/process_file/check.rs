@@ -11,7 +11,7 @@ use biome_service::workspace::FileFeaturesResult;
 pub(crate) fn check_file<'ctx>(
     ctx: &'ctx SharedTraversalOptions<'ctx, '_>,
     path: BiomePath,
-    file_features: &'ctx FileFeaturesResult,
+    file_features: FileFeaturesResult,
 ) -> FileResult {
     let mut has_failures = false;
     let mut workspace_file = WorkspaceFile::new(ctx, path)?;
