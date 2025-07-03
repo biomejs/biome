@@ -8790,7 +8790,7 @@ export type CssVariant = "standard";
  * The style of GraphQL contained in the file.
  */
 export type GraphqlVariant = "standard";
-export type HtmlVariant = "Standard" | "Astro";
+export type HtmlVariant = "Standard" | "Astro" | "Vue" | "Svelte";
 export type GritVariant = "Standard";
 export interface ChangeFileParams {
 	content: string;
