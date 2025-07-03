@@ -7,20 +7,20 @@ use biome_js_syntax::{
 };
 use biome_rowan::{AstNode, AstSeparatedElement, AstSeparatedList, TriviaPieceKind};
 use biome_string_case::comparable_token::ComparableToken;
-use biome_rule_options::organize_imports::SortMode;
+use biome_rule_options::organize_imports::SortOrder;
 
 pub enum JsNamedSpecifiers {
     JsNamedImportSpecifiers(JsNamedImportSpecifiers),
     JsExportNamedFromSpecifierList(JsExportNamedFromSpecifierList),
 }
 impl JsNamedSpecifiers {
-    pub fn are_sorted(&self, sort_mode: SortMode) -> bool {
+    pub fn are_sorted(&self, sort_order: SortOrder) -> bool {
 
 
         match self {
-            Self::JsNamedImportSpecifiers(specifeirs) => are_import_specifiers_sorted(specifeirs, sort_mode),
+            Self::JsNamedImportSpecifiers(specifeirs) => are_import_specifiers_sorted(specifeirs, sort_order),
             Self::JsExportNamedFromSpecifierList(specifeirs) => {
-                are_export_specifiers_sorted(specifeirs, sort_mode)
+                are_export_specifiers_sorted(specifeirs, sort_order)
             }
         }
         // Assume the import is already sorted if there are any bogus nodes, otherwise the `--write`
@@ -29,10 +29,10 @@ impl JsNamedSpecifiers {
     }
 }
 
-pub fn are_import_specifiers_sorted(named_specifiers: &JsNamedImportSpecifiers, sort_mode: SortMode) -> Option<bool> {
-    let comparator = match sort_mode {
-        SortMode::Lexicographic => ComparableToken::lexicographic_cmp,
-        SortMode::Natural => ComparableToken::ascii_nat_cmp,
+pub fn are_import_specifiers_sorted(named_specifiers: &JsNamedImportSpecifiers, sort_order: SortOrder) -> Option<bool> {
+    let comparator = match sort_order {
+        SortOrder::Lexicographic => ComparableToken::lexicographic_cmp,
+        SortOrder::Natural => ComparableToken::ascii_nat_cmp,
     };
 
     is_separated_list_sorted_by(&named_specifiers.specifiers(), |node| {
@@ -48,9 +48,9 @@ pub fn are_import_specifiers_sorted(named_specifiers: &JsNamedImportSpecifiers, 
 
 pub fn sort_import_specifiers(
     named_specifiers: JsNamedImportSpecifiers,
-    sort_mode: SortMode,
+    sort_order: SortOrder,
 ) -> Option<JsNamedImportSpecifiers> {
-    let comparator = get_comparator(sort_mode);
+    let comparator = get_comparator(sort_order);
     let new_list = sorted_separated_list_by(
         &named_specifiers.specifiers(),
         |node| {
@@ -71,7 +71,7 @@ pub fn sort_import_specifiers(
 pub fn merge_import_specifiers(
     named_specifiers1: JsNamedImportSpecifiers,
     named_specifiers2: &JsNamedImportSpecifiers,
-    sort_mode: SortMode,
+    sort_order: SortOrder,
 ) -> Option<JsNamedImportSpecifiers> {
     let specifiers1 = named_specifiers1.specifiers();
     let specifiers2 = named_specifiers2.specifiers();
@@ -104,11 +104,11 @@ pub fn merge_import_specifiers(
         }
     }
     let new_list = make::js_named_import_specifier_list(nodes, separators);
-    sort_import_specifiers(named_specifiers1.with_specifiers(new_list), sort_mode)
+    sort_import_specifiers(named_specifiers1.with_specifiers(new_list), sort_order)
 }
 
-pub fn are_export_specifiers_sorted(specifiers: &JsExportNamedFromSpecifierList, sort_mode: SortMode) -> Option<bool> {
-    let comparator = get_comparator(sort_mode);
+pub fn are_export_specifiers_sorted(specifiers: &JsExportNamedFromSpecifierList, sort_order: SortOrder) -> Option<bool> {
+    let comparator = get_comparator(sort_order);
 
     is_separated_list_sorted_by(specifiers, |node| {
         node.source_name()
@@ -122,9 +122,9 @@ pub fn are_export_specifiers_sorted(specifiers: &JsExportNamedFromSpecifierList,
 
 pub fn sort_export_specifiers(
     named_specifiers: &JsExportNamedFromSpecifierList,
-    sort_mode: SortMode,
+    sort_order: SortOrder,
 ) -> Option<JsExportNamedFromSpecifierList> {
-    let comparator = get_comparator(sort_mode);
+    let comparator = get_comparator(sort_order);
     let new_list = sorted_separated_list_by(
         named_specifiers,
         |node| {
@@ -143,7 +143,7 @@ pub fn sort_export_specifiers(
 pub fn merge_export_specifiers(
     specifiers1: &JsExportNamedFromSpecifierList,
     specifiers2: &JsExportNamedFromSpecifierList,
-    sort_mode: SortMode,
+    sort_order: SortOrder,
 ) -> Option<JsExportNamedFromSpecifierList> {
     let mut nodes = Vec::with_capacity(specifiers1.len() + specifiers2.len());
     let mut separators = Vec::with_capacity(specifiers1.len() + specifiers2.len());
@@ -175,11 +175,11 @@ pub fn merge_export_specifiers(
     }
     sort_export_specifiers(&make::js_export_named_from_specifier_list(
         nodes, separators
-    ), sort_mode)
+    ), sort_order)
 }
 
-pub fn are_import_attributes_sorted(attributes: &JsImportAssertion, sort_mode: SortMode) -> Option<bool> {
-    let comparator = get_comparator(sort_mode);
+pub fn are_import_attributes_sorted(attributes: &JsImportAssertion, sort_order: SortOrder) -> Option<bool> {
+    let comparator = get_comparator(sort_order);
     is_separated_list_sorted_by(&attributes.assertions(), |node| {
         let AnyJsImportAssertionEntry::JsImportAssertionEntry(node) = node else {
             return None;
@@ -189,8 +189,8 @@ pub fn are_import_attributes_sorted(attributes: &JsImportAssertion, sort_mode: S
     .ok()
 }
 
-pub fn sort_attributes(attributes: JsImportAssertion, sort_mode: SortMode) -> Option<JsImportAssertion> {
-    let comparator = get_comparator(sort_mode);
+pub fn sort_attributes(attributes: JsImportAssertion, sort_order: SortOrder) -> Option<JsImportAssertion> {
+    let comparator = get_comparator(sort_order);
 
     let new_list = sorted_separated_list_by(
         &attributes.assertions(),
@@ -207,10 +207,10 @@ pub fn sort_attributes(attributes: JsImportAssertion, sort_mode: SortMode) -> Op
     Some(attributes.with_assertions(new_list))
 }
 
-pub fn get_comparator(sort_mode: SortMode) -> fn(&ComparableToken, &ComparableToken) -> Ordering {
-    let comparator = match sort_mode {
-        SortMode::Lexicographic => ComparableToken::lexicographic_cmp,
-        SortMode::Natural => ComparableToken::ascii_nat_cmp
+pub fn get_comparator(sort_order: SortOrder) -> fn(&ComparableToken, &ComparableToken) -> Ordering {
+    let comparator = match sort_order {
+        SortOrder::Lexicographic => ComparableToken::lexicographic_cmp,
+        SortOrder::Natural => ComparableToken::ascii_nat_cmp
     };
     comparator
 }

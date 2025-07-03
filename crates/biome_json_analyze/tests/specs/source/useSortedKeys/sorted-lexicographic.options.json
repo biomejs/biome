@@ -6,7 +6,7 @@
 				"useSortedKeys": {
 					"level": "on",
 					"options": {
-						"sortMode": "lexicographic"
+						"sortOrder": "lexicographic"
 					}
 				}
 			}

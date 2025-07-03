@@ -1837,7 +1837,7 @@
 			"type": "array",
 			"items": { "$ref": "#/definitions/ImportGroup" }
 		},
-		"SortMode": {
+		"SortOrder": {
 			"type": "string",
 			"enum": ["lexicographic", "natural"],
 			"default": "natural"
@@ -5034,8 +5034,8 @@
 					"default": [],
 					"allOf": [{ "$ref": "#/definitions/ImportGroups" }]
 				},
-				"sortMode": {
-					"$ref": "#/definitions/SortMode"
+				"sortOrder": {
+					"$ref": "#/definitions/SortOrder"
 				}
 			},
 			"additionalProperties": false
@@ -13517,8 +13517,8 @@
 		"UseSortedAttributesOptions": {
 			"type": "object",
 			"properties": {
-				"sortMode": {
-					"$ref": "#/definitions/SortMode"
+				"sortOrder": {
+					"$ref": "#/definitions/SortOrder"
 				}
 			},
 			"additionalProperties": false
@@ -13548,8 +13548,8 @@
 		"UseSortedKeysOptions": { 
 			"type": "object", 
 			"properties": {
-				"sortMode": {
-					"$ref": "#/definitions/SortMode"
+				"sortOrder": {
+					"$ref": "#/definitions/SortOrder"
 				}
 			},
 			"additionalProperties": false 

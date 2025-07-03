@@ -12,7 +12,7 @@ use biome_diagnostics::{Applicability, category};
 use biome_js_factory::make;
 use biome_js_syntax::{JsObjectExpression, JsObjectMemberList, T};
 use biome_rowan::{AstNode, BatchMutationExt, TriviaPieceKind};
-use biome_rule_options::use_sorted_keys::{UseSortedKeysOptions, SortMode};
+use biome_rule_options::use_sorted_keys::{UseSortedKeysOptions, SortOrder};
 use biome_string_case::comparable_token::ComparableToken;
 
 use crate::JsRuleAction;
@@ -90,10 +90,10 @@ impl Rule for UseSortedKeys {
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let options = ctx.options();
-        let sort_mode = options.sort_mode;
-        let comparator = match sort_mode {
-            SortMode::Natural => ComparableToken::ascii_nat_cmp,
-            SortMode::Lexicographic => ComparableToken::lexicographic_cmp
+        let sort_order = options.sort_order;
+        let comparator = match sort_order {
+            SortOrder::Natural => ComparableToken::ascii_nat_cmp,
+            SortOrder::Lexicographic => ComparableToken::lexicographic_cmp
         };
 
         is_separated_list_sorted_by(ctx.query(), |node| node.name().map(ComparableToken::new), Some(comparator))
@@ -123,10 +123,10 @@ impl Rule for UseSortedKeys {
     fn action(ctx: &RuleContext<Self>, _: &Self::State) -> Option<JsRuleAction> {
         let list = ctx.query();
         let options = ctx.options();
-        let sort_mode = options.sort_mode;
-        let comparator = match sort_mode {
-            SortMode::Natural => ComparableToken::ascii_nat_cmp,
-            SortMode::Lexicographic => ComparableToken::lexicographic_cmp
+        let sort_order = options.sort_order;
+        let comparator = match sort_order {
+            SortOrder::Natural => ComparableToken::ascii_nat_cmp,
+            SortOrder::Lexicographic => ComparableToken::lexicographic_cmp
         };
 
         let new_list = sorted_separated_list_by(

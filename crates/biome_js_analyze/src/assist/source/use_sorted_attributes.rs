@@ -11,7 +11,7 @@ use biome_js_syntax::{
     AnyJsxAttribute, JsxAttribute, JsxAttributeList, JsxOpeningElement, JsxSelfClosingElement,
 };
 use biome_rowan::{AstNode, BatchMutationExt};
-use biome_rule_options::use_sorted_attributes::{UseSortedAttributesOptions, SortMode};
+use biome_rule_options::use_sorted_attributes::{UseSortedAttributesOptions, SortOrder};
 use biome_string_case::StrLikeExtension;
 
 use crate::JsRuleAction;
@@ -59,11 +59,11 @@ impl Rule for UseSortedAttributes {
         let mut current_prop_group = PropGroup::default();
         let mut prop_groups = Vec::new();
         let options= ctx.options();
-        let sort_by = options.sort_mode;
+        let sort_by = options.sort_order;
 
         let comparator = match sort_by {
-            SortMode::Natural => PropElement::ascii_nat_cmp,
-            SortMode::Lexicographic => PropElement::lexicographic_cmp,
+            SortOrder::Natural => PropElement::ascii_nat_cmp,
+            SortOrder::Lexicographic => PropElement::lexicographic_cmp,
         };
 
          // Convert to boolean-based comparator for is_sorted_by
@@ -116,11 +116,11 @@ impl Rule for UseSortedAttributes {
     fn action(ctx: &RuleContext<Self>, state: &Self::State) -> Option<JsRuleAction> {
         let mut mutation = ctx.root().begin();
         let options= ctx.options();
-        let sort_by = options.sort_mode;
+        let sort_by = options.sort_order;
 
         let comparator = match sort_by {
-            SortMode::Natural => PropElement::ascii_nat_cmp,
-            SortMode::Lexicographic => PropElement::lexicographic_cmp,
+            SortOrder::Natural => PropElement::ascii_nat_cmp,
+            SortOrder::Lexicographic => PropElement::lexicographic_cmp,
         };
 
         for (PropElement { prop }, PropElement { prop: sorted_prop }) in

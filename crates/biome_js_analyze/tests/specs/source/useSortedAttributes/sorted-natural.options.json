@@ -6,7 +6,7 @@
 				"useSortedAttributes": {
 					"level": "on",
 					"options": {
-						"sortMode": "natural"
+						"sortOrder": "natural"
 					}
 				}
 			}
