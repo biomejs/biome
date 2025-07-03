@@ -8,7 +8,7 @@ mod syntax_node;
 
 pub use self::generated::*;
 pub use biome_rowan::{TextLen, TextRange, TextSize, TokenAtOffset, TriviaPieceKind, WalkEvent};
-pub use file_source::HtmlFileSource;
+pub use file_source::{HtmlFileSource, HtmlVariant};
 pub use syntax_node::*;
 
 use crate::HtmlSyntaxKind::{
