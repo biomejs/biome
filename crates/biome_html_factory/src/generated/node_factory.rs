@@ -6,6 +6,37 @@ use biome_html_syntax::{
     HtmlSyntaxToken as SyntaxToken, *,
 };
 use biome_rowan::AstNode;
+pub fn html_astro_frontmatter_element(
+    l_fence_token: SyntaxToken,
+    r_fence_token: SyntaxToken,
+) -> HtmlAstroFrontmatterElementBuilder {
+    HtmlAstroFrontmatterElementBuilder {
+        l_fence_token,
+        r_fence_token,
+        content_token: None,
+    }
+}
+pub struct HtmlAstroFrontmatterElementBuilder {
+    l_fence_token: SyntaxToken,
+    r_fence_token: SyntaxToken,
+    content_token: Option<SyntaxToken>,
+}
+impl HtmlAstroFrontmatterElementBuilder {
+    pub fn with_content_token(mut self, content_token: SyntaxToken) -> Self {
+        self.content_token = Some(content_token);
+        self
+    }
+    pub fn build(self) -> HtmlAstroFrontmatterElement {
+        HtmlAstroFrontmatterElement::unwrap_cast(SyntaxNode::new_detached(
+            HtmlSyntaxKind::HTML_ASTRO_FRONTMATTER_ELEMENT,
+            [
+                Some(SyntaxElement::Token(self.l_fence_token)),
+                self.content_token.map(|token| SyntaxElement::Token(token)),
+                Some(SyntaxElement::Token(self.r_fence_token)),
+            ],
+        ))
+    }
+}
 pub fn html_attribute(name: HtmlAttributeName) -> HtmlAttributeBuilder {
     HtmlAttributeBuilder {
         name,
@@ -197,6 +228,7 @@ pub fn html_root(html: HtmlElementList, eof_token: SyntaxToken) -> HtmlRootBuild
         html,
         eof_token,
         bom_token: None,
+        frontmatter: None,
         directive: None,
     }
 }
@@ -204,11 +236,16 @@ pub struct HtmlRootBuilder {
     html: HtmlElementList,
     eof_token: SyntaxToken,
     bom_token: Option<SyntaxToken>,
+    frontmatter: Option<HtmlAstroFrontmatterElement>,
     directive: Option<HtmlDirective>,
 }
 impl HtmlRootBuilder {
     pub fn with_bom_token(mut self, bom_token: SyntaxToken) -> Self {
         self.bom_token = Some(bom_token);
+        self
+    }
+    pub fn with_frontmatter(mut self, frontmatter: HtmlAstroFrontmatterElement) -> Self {
+        self.frontmatter = Some(frontmatter);
         self
     }
     pub fn with_directive(mut self, directive: HtmlDirective) -> Self {
@@ -220,6 +257,8 @@ impl HtmlRootBuilder {
             HtmlSyntaxKind::HTML_ROOT,
             [
                 self.bom_token.map(|token| SyntaxElement::Token(token)),
+                self.frontmatter
+                    .map(|token| SyntaxElement::Node(token.into_syntax())),
                 self.directive
                     .map(|token| SyntaxElement::Node(token.into_syntax())),
                 Some(SyntaxElement::Node(self.html.into_syntax())),

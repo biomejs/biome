@@ -765,6 +765,7 @@ dependencies = [
  "biome_rowan",
  "biome_test_utils",
  "biome_unicode_table",
+ "camino",
  "codspeed-criterion-compat",
  "insta",
  "mimalloc",
