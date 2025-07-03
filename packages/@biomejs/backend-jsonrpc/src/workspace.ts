@@ -7567,7 +7567,12 @@ export interface NoUnreachableOptions {}
 export interface NoUnreachableSuperOptions {}
 export interface NoUnsafeFinallyOptions {}
 export interface NoUnsafeOptionalChainingOptions {}
-export interface NoUnusedFunctionParametersOptions {}
+export interface NoUnusedFunctionParametersOptions {
+	/**
+	 * Whether to ignore unused variables from an object destructuring with a spread.
+	 */
+	ignoreRestSiblings?: boolean;
+}
 export interface NoUnusedImportsOptions {}
 export interface NoUnusedLabelsOptions {}
 export interface NoUnusedPrivateClassMembersOptions {}

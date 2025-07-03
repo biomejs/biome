@@ -4332,6 +4332,13 @@
 		},
 		"NoUnusedFunctionParametersOptions": {
 			"type": "object",
+			"properties": {
+				"ignoreRestSiblings": {
+					"description": "Whether to ignore unused variables from an object destructuring with a spread.",
+					"default": false,
+					"type": "boolean"
+				}
+			},
 			"additionalProperties": false
 		},
 		"NoUnusedImportsConfiguration": {
