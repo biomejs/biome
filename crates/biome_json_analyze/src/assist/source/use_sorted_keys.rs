@@ -8,6 +8,7 @@ use biome_diagnostics::category;
 use biome_json_factory::make;
 use biome_json_syntax::{JsonMemberList, JsonObjectValue, T, TextRange};
 use biome_rowan::{AstNode, BatchMutationExt};
+use biome_rule_options::use_sorted_keys::UseSortedKeysOptions;
 use biome_string_case::comparable_token::ComparableToken;
 use std::ops::Not;
 
@@ -37,7 +38,7 @@ impl Rule for UseSortedKeys {
     type Query = Ast<JsonMemberList>;
     type State = ();
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = UseSortedKeysOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
         is_separated_list_sorted_by(ctx.query(), |node| {

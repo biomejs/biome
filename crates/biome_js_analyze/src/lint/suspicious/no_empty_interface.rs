@@ -12,6 +12,7 @@ use biome_js_syntax::{
     TsTypeAliasDeclaration,
 };
 use biome_rowan::{AstNode, AstNodeList, BatchMutationExt, SyntaxResult};
+use biome_rule_options::no_empty_interface::NoEmptyInterfaceOptions;
 
 declare_lint_rule! {
     /// Disallow the declaration of empty interfaces.
@@ -59,7 +60,7 @@ impl Rule for NoEmptyInterface {
     type Query = Ast<TsInterfaceDeclaration>;
     type State = ();
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoEmptyInterfaceOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();

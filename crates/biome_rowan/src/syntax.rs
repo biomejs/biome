@@ -7,13 +7,13 @@ mod trivia;
 use crate::{AstNode, RawSyntaxKind};
 pub use element::{SyntaxElement, SyntaxElementKey};
 pub use node::{
-    Preorder, PreorderWithTokens, SendNode, SyntaxElementChildren, SyntaxNode, SyntaxNodeChildren,
-    SyntaxNodeOptionExt, SyntaxSlot, SyntaxSlots,
+    EmbeddedSendNode, Preorder, PreorderWithTokens, SendNode, SyntaxElementChildren, SyntaxNode,
+    SyntaxNodeChildren, SyntaxNodeOptionExt, SyntaxNodeWithOffset, SyntaxSlot, SyntaxSlots,
 };
 pub use rewriter::{SyntaxRewriter, VisitNodeSignal};
 use std::fmt;
 use std::fmt::Debug;
-pub use token::SyntaxToken;
+pub use token::{SyntaxToken, SyntaxTokenWithOffset};
 pub use trivia::{
     ChainTriviaPiecesIterator, SyntaxTrivia, SyntaxTriviaPiece, SyntaxTriviaPieceComments,
     SyntaxTriviaPieceNewline, SyntaxTriviaPieceSkipped, SyntaxTriviaPieceWhitespace,

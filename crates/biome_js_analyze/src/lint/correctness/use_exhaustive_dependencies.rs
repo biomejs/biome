@@ -3,10 +3,6 @@ use std::collections::BTreeMap;
 use biome_analyze::{FixKind, RuleSource};
 use biome_analyze::{Rule, RuleDiagnostic, RuleDomain, context::RuleContext, declare_lint_rule};
 use biome_console::markup;
-use biome_deserialize::{
-    DeserializableValidator, DeserializationContext, DeserializationDiagnostic, non_empty,
-};
-use biome_deserialize_macros::Deserializable;
 use biome_diagnostics::Severity;
 use biome_js_factory::make;
 use biome_js_semantic::{Capture, SemanticModel};
@@ -19,14 +15,14 @@ use biome_js_syntax::{
 };
 use biome_rowan::{AstNode, AstSeparatedList, BatchMutationExt, SyntaxNodeCast, TriviaPieceKind};
 use rustc_hash::{FxHashMap, FxHashSet};
-use serde::{Deserialize, Serialize};
 
 use crate::JsRuleAction;
 use crate::react::hooks::*;
 use crate::services::semantic::Semantic;
 
-#[cfg(feature = "schemars")]
-use schemars::JsonSchema;
+use biome_rule_options::use_exhaustive_dependencies::{
+    StableHookResult, UseExhaustiveDependenciesOptions,
+};
 
 declare_lint_rule! {
     /// Enforce all dependencies are correctly specified in a React hook.
@@ -296,97 +292,6 @@ impl Default for HookConfigMaps {
             hooks_config,
             stable_config,
         }
-    }
-}
-
-/// Options for the rule `useExhaustiveDependencies`
-#[derive(Clone, Debug, Deserialize, Deserializable, Eq, PartialEq, Serialize)]
-#[cfg_attr(feature = "schemars", derive(JsonSchema))]
-#[serde(rename_all = "camelCase", deny_unknown_fields, default)]
-pub struct UseExhaustiveDependenciesOptions {
-    /// Whether to report an error when a dependency is listed in the dependencies array but isn't used. Defaults to true.
-    #[serde(default = "report_unnecessary_dependencies_default")]
-    pub report_unnecessary_dependencies: bool,
-
-    /// Whether to report an error when a hook has no dependencies array.
-    #[serde(default)]
-    pub report_missing_dependencies_array: bool,
-
-    /// List of hooks of which the dependencies should be validated.
-    #[serde(default)]
-    #[deserializable(validate = "non_empty")]
-    pub hooks: Box<[Hook]>,
-}
-
-impl Default for UseExhaustiveDependenciesOptions {
-    fn default() -> Self {
-        Self {
-            report_unnecessary_dependencies: report_unnecessary_dependencies_default(),
-            report_missing_dependencies_array: false,
-            hooks: Vec::new().into_boxed_slice(),
-        }
-    }
-}
-
-fn report_unnecessary_dependencies_default() -> bool {
-    true
-}
-
-#[derive(Clone, Debug, Default, Deserialize, Deserializable, Eq, PartialEq, Serialize)]
-#[cfg_attr(feature = "schemars", derive(JsonSchema))]
-#[serde(rename_all = "camelCase", deny_unknown_fields, default)]
-#[deserializable(with_validator)]
-pub struct Hook {
-    /// The name of the hook.
-    #[deserializable(validate = "non_empty")]
-    pub name: Box<str>,
-
-    /// The "position" of the closure function, starting from zero.
-    ///
-    /// For example, for React's `useEffect()` hook, the closure index is 0.
-    pub closure_index: Option<u8>,
-
-    /// The "position" of the array of dependencies, starting from zero.
-    ///
-    /// For example, for React's `useEffect()` hook, the dependencies index is 1.
-    pub dependencies_index: Option<u8>,
-
-    /// Whether the result of the hook is stable.
-    ///
-    /// Set to `true` to mark the identity of the hook's return value as stable,
-    /// or use a number/an array of numbers to mark the "positions" in the
-    /// return array as stable.
-    ///
-    /// For example, for React's `useRef()` hook the value would be `true`,
-    /// while for `useState()` it would be `[1]`.
-    pub stable_result: Option<StableHookResult>,
-}
-
-impl DeserializableValidator for Hook {
-    fn validate(
-        &mut self,
-        ctx: &mut impl DeserializationContext,
-        _name: &str,
-        range: TextRange,
-    ) -> bool {
-        match (self.closure_index, self.dependencies_index) {
-            (Some(closure_index), Some(dependencies_index))
-                if closure_index == dependencies_index =>
-            {
-                ctx.report(
-                    DeserializationDiagnostic::new(markup! {
-                        <Emphasis>"closureIndex"</Emphasis>" and "<Emphasis>"dependenciesIndex"</Emphasis>" may not be the same"
-                    })
-                    .with_range(range),
-                );
-
-                self.closure_index = None;
-                self.dependencies_index = None;
-            }
-            _ => {}
-        }
-
-        true
     }
 }
 
@@ -748,7 +653,7 @@ impl Rule for UseExhaustiveDependencies {
     type Query = Semantic<JsCallExpression>;
     type State = Fix;
     type Signals = Box<[Self::State]>;
-    type Options = Box<UseExhaustiveDependenciesOptions>;
+    type Options = UseExhaustiveDependenciesOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let options = ctx.options();

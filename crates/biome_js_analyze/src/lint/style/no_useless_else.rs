@@ -11,6 +11,7 @@ use biome_rowan::{
     AstNode, AstNodeList, BatchMutationExt, SyntaxNodeOptionExt, chain_trivia_pieces,
     trim_leading_trivia_pieces,
 };
+use biome_rule_options::no_useless_else::NoUselessElseOptions;
 
 use crate::JsRuleAction;
 
@@ -102,7 +103,7 @@ impl Rule for NoUselessElse {
     type Query = Ast<JsIfStatement>;
     type State = JsIfStatement;
     type Signals = Box<[Self::State]>;
-    type Options = ();
+    type Options = NoUselessElseOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let mut result = Vec::new();

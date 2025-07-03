@@ -4,6 +4,7 @@ use biome_console::{MarkupBuf, markup};
 use biome_diagnostics::Severity;
 use biome_js_syntax::jsx_ext::AnyJsxElement;
 use biome_rowan::{AstNode, TextRange};
+use biome_rule_options::use_valid_anchor::UseValidAnchorOptions;
 
 declare_lint_rule! {
     /// Enforce that all anchors are valid, and they are navigable elements.
@@ -145,7 +146,7 @@ impl Rule for UseValidAnchor {
     type Query = Ast<AnyJsxElement>;
     type State = UseValidAnchorState;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = UseValidAnchorOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();

@@ -6,6 +6,7 @@ use biome_diagnostics::Severity;
 use biome_js_syntax::JsxOpeningElement;
 use biome_rowan::AstNode;
 use biome_rowan::TextRange;
+use biome_rule_options::no_head_element::NoHeadElementOptions;
 
 declare_lint_rule! {
     /// Prevent usage of `<head>` element in a Next.js project.
@@ -58,7 +59,7 @@ impl Rule for NoHeadElement {
     type Query = Ast<JsxOpeningElement>;
     type State = TextRange;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoHeadElementOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let element = ctx.query();

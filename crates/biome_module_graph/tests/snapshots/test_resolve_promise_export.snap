@@ -32,7 +32,7 @@ Imports {
 ```
 BindingId(1) => JsBindingData {
   Name: promise,
-  Type: Module(0) TypeId(1),
+  Type: Module(0) TypeId(2),
   Declaration kind: Value
 }
 ```
@@ -42,23 +42,15 @@ BindingId(1) => JsBindingData {
 ```
 Module TypeId(0) => value: value
 
-Module TypeId(1) => instanceof Promise
+Module TypeId(1) => Module(0) TypeId(3)
 
-Module TypeId(2) => async Function "returnsPromise" {
+Module TypeId(2) => instanceof Promise<Module(0) TypeId(0)>
+
+Module TypeId(3) => async Function "returnsPromise" {
   accepts: {
     params: []
     type_args: []
   }
-  returns: Module(0) TypeId(3)
-}
-
-Module TypeId(3) => instanceof Promise
-
-Module TypeId(4) => async Function "returnsPromise" {
-  accepts: {
-    params: []
-    type_args: []
-  }
-  returns: Module(0) TypeId(3)
+  returns: Module(0) TypeId(2)
 }
 ```

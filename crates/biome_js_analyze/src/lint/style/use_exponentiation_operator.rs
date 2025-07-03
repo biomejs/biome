@@ -14,6 +14,7 @@ use biome_rowan::{
     AstNode, AstSeparatedList, BatchMutationExt, SyntaxResult, chain_trivia_pieces,
     trim_leading_trivia_pieces,
 };
+use biome_rule_options::use_exponentiation_operator::UseExponentiationOperatorOptions;
 
 declare_lint_rule! {
     /// Disallow the use of `Math.pow` in favor of the `**` operator.
@@ -68,7 +69,7 @@ impl Rule for UseExponentiationOperator {
     type Query = Semantic<JsCallExpression>;
     type State = ();
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = UseExponentiationOperatorOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();

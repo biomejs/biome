@@ -7,6 +7,7 @@ use biome_js_syntax::{
     TsDeclareStatement,
 };
 use biome_rowan::AstNode;
+use biome_rule_options::no_unassigned_variables::NoUnassignedVariablesOptions;
 
 use crate::services::semantic::Semantic;
 
@@ -70,7 +71,7 @@ impl Rule for NoUnassignedVariables {
     type Query = Semantic<JsVariableDeclarator>;
     type State = JsIdentifierBinding;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoUnassignedVariablesOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let declarator = ctx.query();

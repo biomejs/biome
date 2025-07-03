@@ -12,6 +12,7 @@ use super::{
 };
 use crate::configuration::{LoadedConfiguration, ProjectScanComputer, read_config};
 use crate::diagnostics::FileTooLarge;
+use crate::file_handlers::html::{extract_embedded_scripts, parse_embedded_styles};
 use crate::file_handlers::{
     Capabilities, CodeActionsParams, DocumentFileSource, Features, FixAllParams, LintParams,
     ParseResult,
@@ -108,7 +109,7 @@ pub struct WorkspaceServer {
     pub(super) node_cache: Mutex<FxHashMap<Utf8PathBuf, NodeCache>>,
 
     /// File system implementation.
-    pub(super) fs: Box<dyn FsWithResolverProxy>,
+    pub(super) fs: Arc<dyn FsWithResolverProxy>,
 
     /// Channel sender for instructions to the [crate::WorkspaceWatcher].
     watcher_tx: Sender<WatcherInstruction>,
@@ -131,7 +132,7 @@ impl RefUnwindSafe for WorkspaceServer {}
 impl WorkspaceServer {
     /// Creates a new [Workspace].
     pub fn new(
-        fs: Box<dyn FsWithResolverProxy>,
+        fs: Arc<dyn FsWithResolverProxy>,
         watcher_tx: Sender<WatcherInstruction>,
         notification_tx: watch::Sender<ServiceDataNotification>,
         threads: Option<usize>,
@@ -401,6 +402,37 @@ impl WorkspaceServer {
 
         let opened_by_scanner = reason.is_opened_by_scanner();
 
+        // Second-pass parsing for HTML files with embedded JavaScript and CSS content
+        let (embedded_scripts, embedded_styles) = if let Some(file_source) = self.get_source(index)
+        {
+            if matches!(file_source, DocumentFileSource::Html(_)) {
+                if let Some(Ok(any_parse)) = &syntax {
+                    if let Some(html_root) =
+                        biome_html_syntax::HtmlRoot::cast(any_parse.syntax().clone())
+                    {
+                        let mut node_cache = NodeCache::default();
+                        let scripts = crate::file_handlers::html::extract_embedded_scripts(
+                            &html_root,
+                            &mut node_cache,
+                        );
+                        let styles = crate::file_handlers::html::parse_embedded_styles(
+                            &html_root,
+                            &mut node_cache,
+                        );
+                        (scripts, styles)
+                    } else {
+                        (Vec::new(), Vec::new())
+                    }
+                } else {
+                    (Vec::new(), Vec::new())
+                }
+            } else {
+                (Vec::new(), Vec::new())
+            }
+        } else {
+            (Vec::new(), Vec::new())
+        };
+
         let documents = self.documents.pin();
         let result = documents.compute(path.clone(), |current| {
             let biome_path = BiomePath::new(&path);
@@ -456,6 +488,8 @@ impl WorkspaceServer {
                         file_source_index: index,
                         syntax: syntax.clone(),
                         opened_by_scanner: opened_by_scanner || document.opened_by_scanner,
+                        _embedded_scripts: embedded_scripts.clone(),
+                        _embedded_styles: embedded_styles.clone(),
                     })
                 }
                 None => Operation::Insert(Document {
@@ -464,6 +498,8 @@ impl WorkspaceServer {
                     file_source_index: index,
                     syntax: syntax.clone(),
                     opened_by_scanner,
+                    _embedded_scripts: embedded_scripts.clone(),
+                    _embedded_styles: embedded_styles.clone(),
                 }),
             }
         });
@@ -540,26 +576,18 @@ impl WorkspaceServer {
     /// Checks whether a file is ignored in the top-level config's
     /// `files.includes` or in the feature's `includes`.
     fn is_ignored(&self, project_key: ProjectKey, path: &Utf8Path, features: FeatureName) -> bool {
-        let file_name = path.file_name();
-        // Never ignore Biome's config file regardless of `includes`.
-        if file_name == Some(ConfigName::biome_json())
-            || file_name == Some(ConfigName::biome_jsonc())
-        {
+        // Never ignore Biome's top-level config file regardless of `includes`.
+        if path.file_name().is_some_and(|file_name| {
+            file_name == ConfigName::biome_json() || file_name == ConfigName::biome_jsonc()
+        }) && path.parent().is_some_and(|dir_path| {
+            self.projects
+                .get_project_path(project_key)
+                .is_some_and(|project_path| dir_path == project_path)
+        }) {
             return false;
         };
 
-        // Apply top-level `includes`
-        self.is_ignored_by_top_level_config(project_key, path) ||
-                // Apply feature-level `includes`
-                !features.is_empty() && features.iter().all(|feature| self
-                    .projects
-                    .is_ignored_by_feature_config(project_key, path, feature))
-    }
-
-    /// Checks whether a file is ignored in the top-level `files.includes`.
-    fn is_ignored_by_top_level_config(&self, project_key: ProjectKey, path: &Utf8Path) -> bool {
-        self.projects
-            .is_ignored_by_top_level_config(project_key, path)
+        self.projects.is_ignored(project_key, path, features)
     }
 
     pub(super) fn is_ignored_by_scanner(&self, project_key: ProjectKey, path: &Utf8Path) -> bool {
@@ -601,15 +629,18 @@ impl WorkspaceServer {
         }
     }
 
-    /// It updates the nested settings of the project assigned to the `project_key`.
+    /// Updates the nested settings of the project assigned to the
+    /// `project_key`.
     ///
-    /// If a configuration file contains errors, it's not processed and the project isn't updated.
+    /// If a configuration file contains errors, it's not processed and the
+    /// project isn't updated.
     ///
-    /// It's the responsibility of the client to process the diagnostics and handle the errors emitted by the configuration.
+    /// It's the responsibility of the client to process the diagnostics and
+    /// handle the errors emitted by the configuration.
     ///
     /// ## Errors
     ///
-    /// - A nested configuration file si a root
+    /// - A nested configuration file is a root
     /// - Biome can't read the file
     pub(super) fn update_project_config_files(
         &self,
@@ -1077,7 +1108,10 @@ impl Workspace for WorkspaceServer {
             || file_name == Some(ConfigName::biome_jsonc())
         {
             // Never ignore Biome's config file
-        } else if self.is_ignored_by_top_level_config(project_key, path) {
+        } else if self
+            .projects
+            .is_ignored_by_top_level_config(project_key, path)
+        {
             file_features.set_ignored_for_all_features();
         } else {
             for feature in params.features.iter() {
@@ -1258,12 +1292,35 @@ impl Workspace for WorkspaceServer {
         let parsed = self.parse(project_key, &path, &content, index, &mut node_cache)?;
         let root = parsed.any_parse.root();
 
+        // Second-pass parsing for HTML files with embedded JavaScript and CSS content
+        let (embedded_scripts, embedded_styles) = if let Some(file_source) = self.get_source(index)
+        {
+            if matches!(file_source, DocumentFileSource::Html(_)) {
+                if let Some(html_root) =
+                    biome_html_syntax::HtmlRoot::cast(parsed.any_parse.syntax().clone())
+                {
+                    let mut embedded_node_cache = NodeCache::default();
+                    let scripts = extract_embedded_scripts(&html_root, &mut embedded_node_cache);
+                    let styles = parse_embedded_styles(&html_root, &mut embedded_node_cache);
+                    (scripts, styles)
+                } else {
+                    (Vec::new(), Vec::new())
+                }
+            } else {
+                (Vec::new(), Vec::new())
+            }
+        } else {
+            (Vec::new(), Vec::new())
+        };
+
         let document = Document {
             content,
             version: Some(version),
             file_source_index: index,
             syntax: Some(Ok(parsed.any_parse)),
             opened_by_scanner,
+            _embedded_scripts: embedded_scripts,
+            _embedded_styles: embedded_styles,
         };
 
         if persist_node_cache {

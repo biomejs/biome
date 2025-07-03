@@ -7,6 +7,7 @@ use biome_js_syntax::{
     JsStaticMemberExpression, global_identifier,
 };
 use biome_rowan::AstNode;
+use biome_rule_options::no_alert::NoAlertOptions;
 
 const FORBIDDEN_FUNCTIONS: &[&str] = &["alert", "confirm", "prompt"];
 const GLOBAL_OBJECTS: &[&str] = &["window", "globalThis"];
@@ -68,7 +69,7 @@ impl Rule for NoAlert {
     type Query = Semantic<JsCallExpression>;
     type State = String;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoAlertOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let call = ctx.query();

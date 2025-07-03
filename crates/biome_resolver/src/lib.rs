@@ -26,6 +26,8 @@ pub use resolver_fs_proxy::*;
 ///
 /// A more detailed version of the spec can be found here:
 ///   https://nodejs.org/api/esm.html#resolution-algorithm
+///
+/// See [`ResolveOptions`] for the options that can be passed to the resolver.
 pub fn resolve(
     specifier: &str,
     base_dir: &Utf8Path,
@@ -67,9 +69,17 @@ fn resolve_absolute_path(
     let path = normalize_owned_absolute_path(path);
 
     let try_extensions_with_fallback_error = |error: ResolveError| {
+        // Try to reuse a single allocation of `path` for all the extension
+        // variants:
+        let mut path = path.to_string();
+        path.push('.');
+        let base_path_len = path.len();
+
         for extension in options.extensions {
-            let path_with_extension = Utf8PathBuf::from(format!("{path}.{extension}"));
-            match resolve_path_info(path_with_extension, fs) {
+            path.truncate(base_path_len);
+            path.push_str(extension);
+
+            match resolve_path_info(Cow::Borrowed(Utf8Path::new(&path)), fs, options) {
                 Ok((ResolvedPathInfo::Directory, _)) => {
                     // Adding an extension yielded a directory? No, thanks.
                 }
@@ -82,7 +92,7 @@ fn resolve_absolute_path(
         Err(error)
     };
 
-    match resolve_path_info(path.clone(), fs) {
+    match resolve_path_info(Cow::Borrowed(&path), fs, options) {
         Ok((ResolvedPathInfo::Directory, realpath)) => {
             resolve_directory(&realpath, fs, options).or_else(try_extensions_with_fallback_error)
         }
@@ -114,9 +124,17 @@ fn resolve_directory(
     options: &ResolveOptions,
 ) -> Result<Utf8PathBuf, ResolveError> {
     for default_file in options.default_files {
+        // Try to reuse a single allocation of `path` for all the extension
+        // variants:
+        let mut path = dir_path.join(default_file).to_string();
+        path.push('.');
+        let base_path_len = path.len();
+
         for extension in options.extensions {
-            let default_file_path = dir_path.join(format!("{default_file}.{extension}"));
-            match resolve_path_info(default_file_path, fs) {
+            path.truncate(base_path_len);
+            path.push_str(extension);
+
+            match resolve_path_info(Cow::Borrowed(Utf8Path::new(&path)), fs, options) {
                 Ok((ResolvedPathInfo::Directory, _)) => {
                     // An index file that's a directory?
                     // Not going to fall for that...
@@ -465,7 +483,7 @@ fn resolve_dependency(
             //        definitions first, so for now we'll assume a correlation
             //        between package name and module name.
             for extension in options.extensions {
-                if extension.starts_with("d.") {
+                if let Some(extension) = definition_extension_for_js_extension(extension) {
                     let path = package_path.with_extension(extension);
                     match fs.path_info(&path) {
                         Ok(PathInfo::File) => return Ok(normalize_path(&path)),
@@ -534,7 +552,7 @@ fn resolve_package_path(
         _ => return Err(ResolveError::NotFound),
     };
 
-    if let Ok(package_json) = fs.read_package_json(&package_path.join("package.json")) {
+    if let Ok(package_json) = fs.read_package_json_in_directory(&package_path) {
         if package_json.get_value_by_path(&["exports"]).is_some() {
             return resolve_export(subpath, &package_path, &package_json, fs, options);
         }
@@ -567,12 +585,27 @@ enum ResolvedPathInfo {
 /// Resolves the given `path` to a tuple of [`ResolvedPathInfo`] and the real
 /// path being pointed to.
 fn resolve_path_info(
-    path: Utf8PathBuf,
+    path: Cow<Utf8Path>,
     fs: &dyn ResolverFsProxy,
+    options: &ResolveOptions,
 ) -> Result<(ResolvedPathInfo, Utf8PathBuf), ResolveError> {
+    if options.resolve_types {
+        if let Some(definition_ext) = path
+            .extension()
+            .and_then(definition_extension_for_js_extension)
+        {
+            // Try the type definition path first:
+            let definition_result =
+                resolve_path_info(Cow::Owned(path.with_extension(definition_ext)), fs, options);
+            if definition_result.is_ok() {
+                return definition_result;
+            }
+        }
+    }
+
     match fs.path_info(&path)? {
-        PathInfo::Directory => Ok((ResolvedPathInfo::Directory, path)),
-        PathInfo::File => Ok((ResolvedPathInfo::File, path)),
+        PathInfo::Directory => Ok((ResolvedPathInfo::Directory, path.into_owned())),
+        PathInfo::File => Ok((ResolvedPathInfo::File, path.into_owned())),
         PathInfo::Symlink {
             canonicalized_target: normalized_target,
         } => match fs.path_info(&normalized_target)? {
@@ -580,6 +613,15 @@ fn resolve_path_info(
             PathInfo::File => Ok((ResolvedPathInfo::File, normalized_target)),
             PathInfo::Symlink { .. } => Err(ResolveError::BrokenSymlink),
         },
+    }
+}
+
+fn definition_extension_for_js_extension(extension: &str) -> Option<&'static str> {
+    match extension {
+        "js" | "jsx" => Some("d.ts"),
+        "cjs" => Some("d.cts"),
+        "mjs" => Some("d.mts"),
+        _ => None,
     }
 }
 
@@ -724,13 +766,19 @@ pub struct ResolveOptions<'a> {
     /// - The `package.json`'s `main` field will be ignored.
     /// - Directories configured in [`Self::type_roots`] will be checked before
     ///   looking for dependencies in `node_modules/`.
+    /// - For any import to a **JavaScript** file where an explicit extension is
+    ///   given in the import specifier, the corresponding definition extension
+    ///   is tried first (`.d.ts` for `.js`, `.d.mts` for `.mjs`, and so on).
     ///
     /// In addition, you should set other options as follows:
-    /// - Any TypeScript extensions configured through [`Self::extensions`],
-    ///   such as `ts`, `cts`, and `mts`, should have the corresponding
-    ///   definition extension (`d.ts`, `d.cts`, or `d.mts`) configured as well,
-    ///   but with a higher priority (earlier in the array).
-    /// - [`Self::condition_names`] should be set to `["types", "default"]`.
+    /// - [`Self::condition_names`] should include `"types"`, `"import"`, and
+    ///   `"default"` (in that order).
+    /// - [`Self::extensions`] must include extensions for JavaScript files as
+    ///   well as extensions for TypeScript files. You should _not_ include the
+    ///   extensions for definition files yourself. These extensions will be
+    ///   tried automatically with a priority that is higher than the
+    ///   corresponding JavaScript extension, but lower than the extension that
+    ///   preceeds it.
     pub resolve_types: bool,
 
     /// Defines which `tsconfig.json` file should be used.

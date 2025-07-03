@@ -11,6 +11,7 @@ use biome_js_syntax::{
     TsFunctionType, TsInterfaceDeclaration, TsObjectType, TsTypeMemberList,
 };
 use biome_rowan::{AstNode, AstNodeList, BatchMutationExt, SyntaxNodeOptionExt, TriviaPieceKind};
+use biome_rule_options::use_shorthand_function_type::UseShorthandFunctionTypeOptions;
 
 declare_lint_rule! {
     /// Enforce using function types instead of object type with call signatures.
@@ -91,7 +92,7 @@ impl Rule for UseShorthandFunctionType {
     type Query = Ast<TsCallSignatureTypeMember>;
     type State = ();
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = UseShorthandFunctionTypeOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let query = ctx.query();

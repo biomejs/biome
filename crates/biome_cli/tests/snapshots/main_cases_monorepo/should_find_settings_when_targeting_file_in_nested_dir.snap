@@ -1,0 +1,78 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `packages/lib/biome.jsonc`
+
+```json
+{
+  "extends": "//",
+  "linter": {
+    "rules": {
+      "correctness": { "noUnusedVariables": "error" }
+    }
+  }
+}
+```
+
+## `biome.jsonc`
+
+```json
+{
+  "linter": {
+    "includes": ["**/*.js"],
+    "rules": {
+      "correctness": { "noUnusedVariables": "off" },
+      "suspicious": { "noDebugger": "off" }
+    }
+  }
+}
+```
+
+## `file.js`
+
+```js
+let a; debugger
+```
+
+## `packages/lib/file.js`
+
+```js
+let a; debugger
+```
+
+# Termination Message
+
+```block
+lint ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Some errors were emitted while running checks.
+  
+
+
+```
+
+# Emitted Messages
+
+```block
+packages/lib/file.js:1:5 lint/correctness/noUnusedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This variable a is unused.
+  
+  > 1 │ let a; debugger
+      │     ^
+  
+  i Unused variables are often the result of an incomplete refactoring, typos, or other sources of bugs.
+  
+  i Unsafe fix: If this is intentional, prepend a with an underscore.
+  
+  - let·a;·debugger
+  + let·_a;·debugger
+  
+
+```
+
+```block
+Checked 1 file in <TIME>. No fixes applied.
+Found 1 error.
+```

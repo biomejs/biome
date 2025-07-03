@@ -16,6 +16,7 @@ use biome_css_syntax::{
 };
 use biome_diagnostics::Severity;
 use biome_rowan::{AstNode, TextRange, declare_node_union};
+use biome_rule_options::no_unknown_pseudo_class::NoUnknownPseudoClassOptions;
 use biome_string_case::StrLikeExtension;
 
 declare_lint_rule! {
@@ -187,7 +188,7 @@ impl Rule for NoUnknownPseudoClass {
     type Query = Ast<AnyPseudoLike>;
     type State = NoUnknownPseudoClassSelectorState;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoUnknownPseudoClassOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
         let pseudo_class = ctx.query();

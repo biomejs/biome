@@ -5,6 +5,7 @@ use biome_deserialize::TextRange;
 use biome_diagnostics::Severity;
 use biome_js_syntax::{AnyJsExpression, JsCallExpression, JsIdentifierBinding, JsImport};
 use biome_rowan::AstNode;
+use biome_rule_options::no_misplaced_assertion::NoMisplacedAssertionOptions;
 
 declare_lint_rule! {
     /// Checks that the assertion function, for example `expect`, is placed inside an `it()` function call.
@@ -140,7 +141,7 @@ impl Rule for NoMisplacedAssertion {
     type Query = Semantic<AnyJsExpression>;
     type State = TextRange;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoMisplacedAssertionOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();

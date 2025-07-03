@@ -5,6 +5,7 @@ use biome_diagnostics::Severity;
 use biome_js_syntax::JsxElement;
 use biome_js_syntax::jsx_ext::AnyJsxElement;
 use biome_rowan::{AstNode, BatchMutationExt};
+use biome_rule_options::use_anchor_content::UseAnchorContentOptions;
 
 use crate::JsRuleAction;
 
@@ -79,7 +80,7 @@ impl Rule for UseAnchorContent {
     type Query = Ast<AnyJsxElement>;
     type State = ();
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = UseAnchorContentOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();

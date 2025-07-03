@@ -25,8 +25,6 @@ const IsoString = {
   key: 'ISO-27001 information , GDPR'
 };
 
-// Postgres json path query
-const isNumeric = '@.scoreDisplayMode == "numeric" || @.scoreDisplayMode == "metricSavings"'
 const tailwindClassNames = 'whitespace-nowrap bg-base-4 px-1 text-[0.65rem] group-hover:w-auto group-hover:overflow-visible'
 const tailwindConfigOptions = {
   theme: {
@@ -41,3 +39,5 @@ export const url = 'https://www.nytimes.com/2024/03/05/arts/design/pritzker-priz
 // const NAMESPACE_CLASSNAME = 'Validation.JSONSchemaValidationUtilsImplFactory';
 // const BASE64_CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
 // const webpackFriendlyConsole = require('./config/webpack/webpackFriendlyConsole');
+// Postgres json path query
+// const isNumeric = '@.scoreDisplayMode == "numeric" || @.scoreDisplayMode == "metricSavings"'

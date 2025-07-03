@@ -9,6 +9,7 @@ use biome_jsdoc_comment::JsdocComment;
 use biome_rowan::{
     AstNode, BatchMutationExt, Direction, TextLen, TextRange, TextSize, TriviaPiece,
 };
+use biome_rule_options::use_single_js_doc_asterisk::UseSingleJsDocAsteriskOptions;
 
 use crate::JsRuleAction;
 
@@ -73,7 +74,7 @@ impl Rule for UseSingleJsDocAsterisk {
     type Query = Ast<JsModule>;
     type State = RuleState;
     type Signals = Vec<Self::State>;
-    type Options = ();
+    type Options = UseSingleJsDocAsteriskOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let module = ctx.query();

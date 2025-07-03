@@ -6,6 +6,7 @@ use biome_js_syntax::{AnyJsImportClause, AnyJsImportLike, inner_string_text};
 use biome_resolver::is_builtin_node_module;
 use biome_rowan::AstNode;
 use biome_rowan::TextRange;
+use biome_rule_options::no_nodejs_modules::NoNodejsModulesOptions;
 
 declare_lint_rule! {
     /// Forbid the use of Node.js builtin modules.
@@ -52,7 +53,7 @@ impl Rule for NoNodejsModules {
     type Query = Manifest<AnyJsImportLike>;
     type State = TextRange;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoNodejsModulesOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();

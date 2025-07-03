@@ -20,8 +20,6 @@ use std::collections::BTreeSet;
 use std::sync::RwLock;
 use std::sync::atomic::AtomicU32;
 use std::{
-    env::current_dir,
-    ffi::OsString,
     panic::catch_unwind,
     sync::atomic::{AtomicUsize, Ordering},
     thread,
@@ -40,34 +38,8 @@ pub(crate) fn traverse(
     session: &mut CliSession,
     project_key: ProjectKey,
     cli_options: &CliOptions,
-    mut inputs: Vec<OsString>,
+    inputs: Vec<String>,
 ) -> Result<TraverseResult, CliDiagnostic> {
-    if inputs.is_empty() {
-        match &execution.traversal_mode {
-            TraversalMode::Check { .. }
-            | TraversalMode::Lint { .. }
-            | TraversalMode::Format { .. }
-            | TraversalMode::CI { .. }
-            | TraversalMode::Search { .. } => {
-                // If `--staged` or `--changed` is specified, it's acceptable for them to be empty, so ignore it.
-                if !execution.is_vcs_targeted() {
-                    match current_dir() {
-                        Ok(current_dir) => inputs.push(current_dir.into_os_string()),
-                        Err(err) => return Err(CliDiagnostic::io_error(err)),
-                    }
-                }
-            }
-            _ => {
-                if execution.as_stdin_file().is_none() && !cli_options.no_errors_on_unmatched {
-                    return Err(CliDiagnostic::missing_argument(
-                        "<INPUT>",
-                        format!("{}", execution.traversal_mode),
-                    ));
-                }
-            }
-        }
-    }
-
     let (interner, recv_files) = PathInterner::new();
     let (sender, receiver) = unbounded();
 
@@ -97,7 +69,7 @@ pub(crate) fn traverse(
         // contains are properly closed once the traversal finishes
         let (elapsed, evaluated_paths) = traverse_inputs(
             fs,
-            &inputs,
+            inputs,
             &TraversalOptions {
                 fs,
                 workspace,
@@ -155,16 +127,13 @@ pub(crate) fn traverse(
 /// run it to completion, returning the duration of the process and the evaluated paths
 fn traverse_inputs(
     fs: &dyn FileSystem,
-    inputs: &[OsString],
+    inputs: Vec<String>,
     ctx: &TraversalOptions,
 ) -> (Duration, BTreeSet<BiomePath>) {
     let start = Instant::now();
     fs.traversal(Box::new(move |scope: &dyn TraversalScope| {
         for input in inputs {
-            scope.evaluate(
-                ctx,
-                Utf8PathBuf::from_path_buf(input.into()).expect("Valid UTF-8 path"),
-            );
+            scope.evaluate(ctx, Utf8PathBuf::from(input));
         }
     }));
 

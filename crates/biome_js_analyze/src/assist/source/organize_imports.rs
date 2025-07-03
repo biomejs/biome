@@ -3,7 +3,6 @@ use biome_analyze::{
     declare_source_rule,
 };
 use biome_console::markup;
-use biome_deserialize_macros::Deserializable;
 use biome_diagnostics::category;
 use biome_js_factory::make;
 use biome_js_syntax::{
@@ -11,6 +10,7 @@ use biome_js_syntax::{
     JsSyntaxKind, T,
 };
 use biome_rowan::{AstNode, BatchMutationExt, TextRange, TriviaPieceKind, chain_trivia_pieces};
+use biome_rule_options::organize_imports::OrganizeImportsOptions;
 use import_key::{ImportInfo, ImportKey};
 use rustc_hash::FxHashMap;
 use specifiers_attributes::{
@@ -21,9 +21,7 @@ use specifiers_attributes::{
 use crate::JsRuleAction;
 use util::{attached_trivia, detached_trivia, has_detached_leading_comment, leading_newlines};
 
-pub mod import_groups;
 pub mod import_key;
-pub mod import_source;
 pub mod specifiers_attributes;
 mod util;
 
@@ -633,7 +631,7 @@ impl Rule for OrganizeImports {
     type Query = Ast<JsModule>;
     type State = Box<[Issue]>;
     type Signals = Option<Self::State>;
-    type Options = Options;
+    type Options = OrganizeImportsOptions;
 
     fn text_range(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<TextRange> {
         ctx.query()
@@ -1020,15 +1018,6 @@ impl Rule for OrganizeImports {
             mutation,
         ))
     }
-}
-
-#[derive(
-    Clone, Debug, Default, Eq, PartialEq, serde::Deserialize, Deserializable, serde::Serialize,
-)]
-#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
-#[serde(rename_all = "camelCase", deny_unknown_fields, default)]
-pub struct Options {
-    groups: import_groups::ImportGroups,
 }
 
 #[derive(Debug)]

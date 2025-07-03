@@ -7,7 +7,7 @@ use camino::Utf8Path;
 
 #[test]
 fn should_allow_using_export_statements() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     let file_path = Utf8Path::new("a.cts");

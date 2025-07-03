@@ -10,6 +10,7 @@ use biome_js_syntax::{
     static_value::StaticValue,
 };
 use biome_rowan::{AstNode, BatchMutationExt};
+use biome_rule_options::use_number_namespace::UseNumberNamespaceOptions;
 
 declare_lint_rule! {
     /// Use the `Number` properties instead of global ones.
@@ -82,7 +83,7 @@ impl Rule for UseNumberNamespace {
     type Query = Semantic<AnyJsExpression>;
     type State = StaticValue;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = UseNumberNamespaceOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();

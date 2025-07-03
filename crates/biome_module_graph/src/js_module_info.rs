@@ -1,20 +1,16 @@
 mod binding;
 mod collector;
+mod module_resolver;
 mod scope;
-mod scoped_resolver;
 mod visitor;
 
-use std::{borrow::Cow, collections::BTreeMap, ops::Deref, sync::Arc};
+use std::{collections::BTreeMap, ops::Deref, sync::Arc};
 
-use biome_js_syntax::{AnyJsExpression, AnyJsImportLike};
-use biome_js_type_info::{
-    BindingId, GLOBAL_RESOLVER, GLOBAL_UNKNOWN_ID, ImportSymbol, ResolvedTypeData, ResolvedTypeId,
-    ScopeId, TypeData, TypeId, TypeReference, TypeReferenceQualifier, TypeResolver,
-    TypeResolverLevel,
-};
+use biome_js_syntax::AnyJsImportLike;
+use biome_js_type_info::{BindingId, ImportSymbol, ResolvedTypeId, ScopeId, TypeData};
 use biome_jsdoc_comment::JsdocComment;
 use biome_resolver::ResolvedPath;
-use biome_rowan::{AstNode, Text, TextRange};
+use biome_rowan::{Text, TextRange};
 use rust_lapper::Lapper;
 use rustc_hash::FxHashMap;
 
@@ -23,7 +19,7 @@ use crate::ModuleGraph;
 use scope::{JsScope, JsScopeData, TsBindingReference};
 
 pub(super) use binding::JsBindingData;
-pub use scoped_resolver::ScopedResolver;
+pub use module_resolver::ModuleResolver;
 pub(crate) use visitor::JsModuleVisitor;
 
 /// Information restricted to a single module in the [ModuleGraph].
@@ -47,10 +43,6 @@ impl JsModuleInfo {
             static_import_paths: module_info.static_import_paths.clone(),
             dynamic_import_paths: module_info.dynamic_import_paths.clone(),
         }
-    }
-
-    pub fn as_resolver(&self) -> &impl TypeResolver {
-        self.0.as_ref()
     }
 
     /// Finds an exported symbol by `name`, using the `module_graph` to
@@ -149,7 +141,7 @@ pub struct JsModuleInfoInner {
     pub(crate) bindings: Box<[JsBindingData]>,
 
     /// Parsed expressions, mapped from their range to their type ID.
-    pub(crate) expressions: FxHashMap<TextRange, TypeId>,
+    pub(crate) expressions: FxHashMap<TextRange, ResolvedTypeId>,
 
     /// All scopes in this module.
     ///
@@ -160,7 +152,7 @@ pub struct JsModuleInfoInner {
     pub(crate) scope_by_range: Lapper<u32, ScopeId>,
 
     /// Collection of all types in the module.
-    pub(crate) types: Box<[TypeData]>,
+    pub(crate) types: Box<[Arc<TypeData>]>,
 }
 
 #[derive(Debug, Default)]
@@ -224,88 +216,9 @@ impl JsModuleInfoInner {
             self.dynamic_import_paths.get(specifier)
         }
     }
-}
 
-impl TypeResolver for JsModuleInfoInner {
-    fn level(&self) -> TypeResolverLevel {
-        TypeResolverLevel::Module
-    }
-
-    fn find_type(&self, type_data: &TypeData) -> Option<TypeId> {
-        self.types
-            .iter()
-            .position(|data| data == type_data)
-            .map(TypeId::new)
-    }
-
-    fn get_by_id(&self, id: TypeId) -> &TypeData {
-        &self.types[id.index()]
-    }
-
-    fn get_by_resolved_id(&self, id: ResolvedTypeId) -> Option<ResolvedTypeData> {
-        match id.level() {
-            TypeResolverLevel::Module => Some((id, self.get_by_id(id.id())).into()),
-            TypeResolverLevel::Global => Some((id, GLOBAL_RESOLVER.get_by_id(id.id())).into()),
-            TypeResolverLevel::Scope | TypeResolverLevel::Import => None,
-        }
-    }
-
-    fn register_type(&mut self, _type_data: Cow<TypeData>) -> TypeId {
-        panic!("Cannot register new types after the module has been constructed");
-    }
-
-    fn resolve_reference(&self, ty: &TypeReference) -> Option<ResolvedTypeId> {
-        match ty {
-            TypeReference::Qualifier(qualifier) => self.resolve_qualifier(qualifier),
-            TypeReference::Resolved(resolved_id) => Some(*resolved_id),
-            TypeReference::Import(_) => None,
-            TypeReference::Unknown => Some(GLOBAL_UNKNOWN_ID),
-        }
-    }
-
-    fn resolve_qualifier(&self, qualifier: &TypeReferenceQualifier) -> Option<ResolvedTypeId> {
-        if qualifier.path.len() != 1 {
-            return None;
-        }
-
-        if let Some(export) = self.exports.get(&qualifier.path[0]) {
-            export
-                .as_own_export()
-                .and_then(|own_export| match own_export {
-                    JsOwnExport::Binding(binding_id) => {
-                        self.resolve_reference(&self.bindings[binding_id.index()].ty)
-                    }
-                    JsOwnExport::Type(type_id) => Some(*type_id),
-                })
-        } else {
-            GLOBAL_RESOLVER.resolve_qualifier(qualifier)
-        }
-    }
-
-    fn resolve_type_of(&self, identifier: &Text, scope_id: ScopeId) -> Option<ResolvedTypeId> {
-        if let Some(export) = self.exports.get(identifier) {
-            export
-                .as_own_export()
-                .and_then(|own_export| match own_export {
-                    JsOwnExport::Binding(binding_id) => {
-                        self.resolve_reference(&self.bindings[binding_id.index()].ty)
-                    }
-                    JsOwnExport::Type(type_id) => Some(*type_id),
-                })
-        } else {
-            GLOBAL_RESOLVER.resolve_type_of(identifier, scope_id)
-        }
-    }
-
-    fn resolve_expression(&mut self, _scope_id: ScopeId, expr: &AnyJsExpression) -> Cow<TypeData> {
-        self.expressions.get(&expr.range()).map_or_else(
-            || Cow::Owned(TypeData::unknown()),
-            |id| Cow::Borrowed(self.get_by_id(*id)),
-        )
-    }
-
-    fn registered_types(&self) -> &[TypeData] {
-        &self.types
+    pub fn types(&self) -> Vec<&TypeData> {
+        self.types.iter().map(Arc::as_ref).collect()
     }
 }
 

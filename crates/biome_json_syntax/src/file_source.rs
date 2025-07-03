@@ -159,6 +159,10 @@ impl JsonFileSource {
         "jsr.json",
         // vscode files
         "language-configuration.json",
+        // nx config files
+        // https://github.com/nrwl/nx/blob/57e70d0e91c4af1c1b0d8e2c875a8dcedc7e0b23/packages/nx/src/utils/json.ts#L42
+        "nx.json",
+        "project.json",
         // Uses its own parser
         // https://github.com/microsoft/TypeScript/blob/a2d37a5c606803c92c00069e01d7964529e01bee/src/compiler/commandLineParser.ts#L2111-L2117
         // https://github.com/microsoft/TypeScript/blob/a2d37a5c606803c92c00069e01d7964529e01bee/src/compiler/parser.ts#L1433

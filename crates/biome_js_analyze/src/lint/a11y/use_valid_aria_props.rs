@@ -9,6 +9,7 @@ use biome_diagnostics::Severity;
 use biome_js_syntax::JsxAttribute;
 use biome_js_syntax::jsx_ext::AnyJsxElement;
 use biome_rowan::{AstNode, AstNodeList, BatchMutationExt};
+use biome_rule_options::use_valid_aria_props::UseValidAriaPropsOptions;
 
 declare_lint_rule! {
     /// Ensures that ARIA properties `aria-*` are all valid.
@@ -42,7 +43,7 @@ impl Rule for UseValidAriaProps {
     type Query = Ast<AnyJsxElement>;
     type State = JsxAttribute;
     type Signals = Box<[Self::State]>;
-    type Options = ();
+    type Options = UseValidAriaPropsOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();

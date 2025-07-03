@@ -12,7 +12,6 @@
 pub mod literal;
 
 use std::borrow::Cow;
-use std::cmp::Ordering;
 use std::fmt::Debug;
 use std::{ops::Deref, str::FromStr, sync::Arc};
 
@@ -20,9 +19,14 @@ use biome_js_type_info_macros::Resolvable;
 use biome_resolver::ResolvedPath;
 use biome_rowan::Text;
 
-use crate::globals::{GLOBAL_PROMISE_ID, GLOBAL_STRING_ID, GLOBAL_UNKNOWN_ID};
+use crate::globals::{
+    GLOBAL_ARRAY_ID, GLOBAL_NUMBER_ID, GLOBAL_PROMISE_ID, GLOBAL_STRING_ID, GLOBAL_UNKNOWN_ID,
+};
 use crate::type_info::literal::{BooleanLiteral, NumberLiteral, StringLiteral};
-use crate::{GLOBAL_RESOLVER, Resolvable, ResolvedTypeData, ResolvedTypeId, TypeResolver};
+use crate::{
+    GLOBAL_RESOLVER, ModuleId, Resolvable, ResolvedTypeData, ResolvedTypeId, ResolvedTypeMember,
+    TypeResolver,
+};
 
 const UNKNOWN: TypeData = TypeData::Reference(TypeReference::Resolved(GLOBAL_UNKNOWN_ID));
 
@@ -60,7 +64,7 @@ impl Debug for Type {
 impl Default for Type {
     fn default() -> Self {
         Self {
-            resolver: Arc::new(GLOBAL_RESOLVER.clone()),
+            resolver: GLOBAL_RESOLVER.clone(),
             id: GLOBAL_UNKNOWN_ID,
         }
     }
@@ -93,14 +97,77 @@ impl Type {
     ///
     /// Returns `false` otherwise.
     pub fn has_variant(&self, predicate: impl Fn(Self) -> bool) -> bool {
-        match self.deref() {
-            TypeData::Union(union) => union
+        match self.as_raw_data() {
+            Some(TypeData::Union(union)) => union
                 .types()
                 .iter()
                 .filter_map(|ty| self.resolve(ty))
                 .any(predicate),
             _ => false,
         }
+    }
+
+    /// Returns whether if this type is an instance of a type matching the given
+    /// `predicate`.
+    pub fn is_array_of(&self, predicate: impl Fn(Self) -> bool) -> bool {
+        match self.as_raw_data() {
+            Some(TypeData::InstanceOf(instance)) => {
+                instance.ty == GLOBAL_ARRAY_ID.into()
+                    && instance
+                        .type_parameters
+                        .first()
+                        .and_then(|type_param| self.resolve(type_param))
+                        .is_some_and(predicate)
+            }
+            _ => false,
+        }
+    }
+
+    /// Returns whether `self` is a function with a return type matching the
+    /// given `predicate`.
+    pub fn is_function_with_return_type(&self, predicate: impl Fn(Self) -> bool) -> bool {
+        match self.as_raw_data() {
+            Some(TypeData::Function(function)) => function
+                .return_type
+                .as_type()
+                .and_then(|ty| self.resolve(ty))
+                .is_some_and(predicate),
+            _ => false,
+        }
+    }
+
+    /// Returns whether if this type is an instance of a type matching the given
+    /// `predicate`.
+    pub fn is_instance_of(&self, predicate: impl Fn(Self) -> bool) -> bool {
+        match self.as_raw_data() {
+            Some(TypeData::InstanceOf(instance)) => {
+                self.resolve(&instance.ty).is_some_and(predicate)
+            }
+            _ => false,
+        }
+    }
+
+    /// Returns whether this type is an interface that has a member matching the
+    /// given `predicate`.
+    pub fn is_interface_with_member(&self, predicate: impl Fn(ResolvedTypeMember) -> bool) -> bool {
+        match self.as_raw_data() {
+            Some(TypeData::Interface(interface)) => interface
+                .members
+                .iter()
+                .map(|member| ResolvedTypeMember::from((self.id.resolver_id(), member)))
+                .any(predicate),
+            _ => false,
+        }
+    }
+
+    /// Returns whether this type is a number or a literal number.
+    pub fn is_number(&self) -> bool {
+        self.id == GLOBAL_NUMBER_ID
+            || self.as_raw_data().is_some_and(|ty| match ty {
+                TypeData::Number => true,
+                TypeData::Literal(literal) => matches!(literal.as_ref(), Literal::Number(_)),
+                _ => false,
+            })
     }
 
     /// Returns whether this type is the `Promise` class.
@@ -114,29 +181,25 @@ impl Type {
             .is_some_and(|ty| ty.is_instance_of(self.resolver.as_ref(), GLOBAL_PROMISE_ID))
     }
 
-    /// Returns whether the given type is known to reference a function that
-    /// returns a `Promise`.
-    pub fn is_function_that_returns_promise(&self) -> bool {
-        match self.deref() {
-            TypeData::Function(function) => function
-                .return_type
-                .as_type()
-                .and_then(|ty| self.resolve(ty))
-                .is_some_and(|ty| ty.is_promise()),
-            _ => false,
-        }
-    }
-
     /// Returns whether this type is a string.
     pub fn is_string(&self) -> bool {
         self.id == GLOBAL_STRING_ID
-            || self
-                .resolved_data()
-                .is_some_and(|ty| match ty.as_raw_data() {
-                    TypeData::String => true,
-                    TypeData::Literal(literal) => matches!(literal.as_ref(), Literal::String(_)),
-                    _ => false,
-                })
+            || self.as_raw_data().is_some_and(|ty| match ty {
+                TypeData::String => true,
+                TypeData::Literal(literal) => matches!(literal.as_ref(), Literal::String(_)),
+                _ => false,
+            })
+    }
+
+    /// Returns whether this type is a string with the given `value`.
+    pub fn is_string_literal(&self, value: &str) -> bool {
+        self.as_raw_data().is_some_and(|ty| match ty {
+            TypeData::Literal(literal) => match literal.as_ref() {
+                Literal::String(literal) => literal.as_str() == value,
+                _ => false,
+            },
+            _ => false,
+        })
     }
 
     pub fn resolve(&self, ty: &TypeReference) -> Option<Self> {
@@ -146,11 +209,29 @@ impl Type {
     }
 
     #[inline]
-    fn resolved_data(&self) -> Option<ResolvedTypeData> {
+    pub(super) fn as_raw_data(&self) -> Option<&TypeData> {
+        self.resolved_data().map(ResolvedTypeData::as_raw_data)
+    }
+
+    #[inline]
+    pub fn resolved_data(&self) -> Option<ResolvedTypeData> {
         self.resolver.get_by_resolved_id(self.id)
     }
 
     fn with_resolved_id(&self, id: ResolvedTypeId) -> Self {
+        let mut id = id;
+        loop {
+            let Some(resolved_data) = self.resolver.get_by_resolved_id(id) else {
+                break;
+            };
+            match resolved_data.as_raw_data() {
+                TypeData::Reference(TypeReference::Resolved(resolved_id)) => {
+                    id = resolved_data.apply_module_id(*resolved_id);
+                }
+                _ => break,
+            }
+        }
+
         Self {
             resolver: self.resolver.clone(),
             id,
@@ -158,13 +239,12 @@ impl Type {
     }
 }
 
-#[derive(Clone, Debug, Default, Eq, Hash, PartialEq, Resolvable)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq, Resolvable)]
 pub enum TypeData {
     /// The type is unknown because inference couldn't determine a type.
     ///
     /// This is different from `UnknownKeyword`, because an explicit `unknown`
     /// should not be counted as a failure of the inference.
-    #[default]
     Unknown,
 
     /// Special type referencing the global scope, which can be explicitly
@@ -179,6 +259,17 @@ pub enum TypeData {
     String,
     Symbol,
     Undefined,
+
+    /// Special type that is used for indicating an expression or return value
+    /// is interpreted as a conditional, where the condition is decided upon the
+    /// truthiness of the value.
+    ///
+    /// An example is the return value of the callback to `Array#filter()`.
+    Conditional,
+
+    /// Special type used to represent a module for which an ad-hoc namespace is
+    /// created through `import * as namespace` syntax.
+    ImportNamespace(ModuleId),
 
     // Complex types
     Class(Box<Class>),
@@ -261,6 +352,18 @@ pub enum TypeData {
     VoidKeyword,
 }
 
+impl Default for TypeData {
+    fn default() -> Self {
+        Self::unknown()
+    }
+}
+
+impl From<Class> for TypeData {
+    fn from(value: Class) -> Self {
+        Self::Class(Box::new(value))
+    }
+}
+
 impl From<Constructor> for TypeData {
     fn from(value: Constructor) -> Self {
         Self::Constructor(Box::new(value))
@@ -288,6 +391,18 @@ impl From<Interface> for TypeData {
 impl From<Literal> for TypeData {
     fn from(value: Literal) -> Self {
         Self::Literal(Box::new(value))
+    }
+}
+
+impl From<MergedReference> for TypeData {
+    fn from(value: MergedReference) -> Self {
+        Self::MergedReference(Box::new(value))
+    }
+}
+
+impl From<Object> for TypeData {
+    fn from(value: Object) -> Self {
+        Self::Object(Box::new(value))
     }
 }
 
@@ -330,6 +445,13 @@ impl TypeData {
         }
     }
 
+    pub fn as_function(&self) -> Option<&Function> {
+        match self {
+            Self::Function(function) => Some(function.as_ref()),
+            _ => None,
+        }
+    }
+
     pub fn as_object(&self) -> Option<&Object> {
         match self {
             Self::Object(object) => Some(object.as_ref()),
@@ -341,41 +463,19 @@ impl TypeData {
         Self::Boolean
     }
 
-    pub fn merged_reference(
-        ty: Option<impl Into<TypeReference>>,
-        value_ty: Option<impl Into<TypeReference>>,
-        namespace_ty: Option<impl Into<TypeReference>>,
-    ) -> Self {
-        Self::MergedReference(Box::new(MergedReference {
-            ty: ty.map(Into::into),
-            value_ty: value_ty.map(Into::into),
-            namespace_ty: namespace_ty.map(Into::into),
-        }))
-    }
-
     /// Returns the type with inference up to the level supported by the given `resolver`.
     #[inline]
     pub fn inferred(&self, resolver: &mut dyn TypeResolver) -> Self {
-        self.resolved(resolver).flattened(resolver)
+        let inferred = match self.resolved(resolver) {
+            Some(ty) => ty.flattened(resolver),
+            None => self.flattened(resolver),
+        };
+        inferred.unwrap_or_else(|| self.clone())
     }
 
     #[inline]
     pub fn instance_of(instance: impl Into<TypeInstance>) -> Self {
         Self::InstanceOf(Box::new(instance.into()))
-    }
-
-    /// Creates an intersection of type references.
-    ///
-    /// References are automatically deduplicated. If only a single type
-    /// remains, an instance of `Self::Reference` is returned instead of
-    /// `Self::Intersection`.
-    pub fn intersection_of(mut types: Vec<TypeReference>) -> Self {
-        types.dedup();
-        match types.len().cmp(&1) {
-            Ordering::Greater => Self::Intersection(Box::new(Intersection(types.into()))),
-            Ordering::Equal => Self::reference(types.remove(0)),
-            Ordering::Less => Self::unknown(),
-        }
     }
 
     /// Returns whether the given type has been inferred.
@@ -390,8 +490,105 @@ impl TypeData {
         }
     }
 
+    /// Returns whether the given type is a primitive type.
+    pub fn is_primitive(&self) -> bool {
+        match self {
+            Self::BigInt
+            | Self::Boolean
+            | Self::Null
+            | Self::Number
+            | Self::String
+            | Self::Symbol
+            | Self::Undefined => true,
+            Self::Literal(literal) => literal.is_primitive(),
+            _ => false,
+        }
+    }
+
+    pub fn merged_reference(
+        ty: Option<impl Into<TypeReference>>,
+        value_ty: Option<impl Into<TypeReference>>,
+        namespace_ty: Option<impl Into<TypeReference>>,
+    ) -> Self {
+        Self::MergedReference(Box::new(MergedReference {
+            ty: ty.map(Into::into),
+            value_ty: value_ty.map(Into::into),
+            namespace_ty: namespace_ty.map(Into::into),
+        }))
+    }
+
+    #[inline]
+    pub fn number() -> Self {
+        Self::Reference(TypeReference::Resolved(GLOBAL_NUMBER_ID))
+    }
+
     pub fn reference(reference: impl Into<TypeReference>) -> Self {
         Self::Reference(reference.into())
+    }
+
+    /// Returns whether the given `instance` wrapper should be stripped from
+    /// this type.
+    ///
+    /// [`TypeData::InstanceOf`] exists primarily in order to distinguish
+    /// classes from their instances. When referencing members of a class, you
+    /// will access its static members, whereas when you reference members of an
+    /// instance of a class, you will access its non-static members.
+    ///
+    /// Unfortunately, before resolving has taken place, we can't know whether a
+    /// given symbol refers to a class or any other type, so we need to
+    /// defensively wrap all references with [`TypeData::InstanceOf`] in places
+    /// where an instance is expected. For most types however, this is overkill,
+    /// and we should strip these wrappers again to ease analysis elsewhere.
+    ///
+    /// Then there is a second use for [`TypeData::InstanceOf`], which is to
+    /// assign concrete types to generic type parameters. For some types,
+    /// flattening instances makes sense _unless one of the generics is set_.
+    pub fn should_flatten_instance(&self, instance: &TypeInstance) -> bool {
+        match self {
+            Self::AnyKeyword
+            | Self::BigInt
+            | Self::Boolean
+            | Self::Conditional
+            | Self::Global
+            | Self::ImportNamespace(_)
+            | Self::Literal(_)
+            | Self::Module(_)
+            | Self::Namespace(_)
+            | Self::NeverKeyword
+            | Self::Null
+            | Self::Number
+            | Self::ObjectKeyword
+            | Self::String
+            | Self::Symbol
+            | Self::ThisKeyword
+            | Self::Undefined
+            | Self::Unknown
+            | Self::UnknownKeyword
+            | Self::VoidKeyword => true,
+            Self::Constructor(_)
+            | Self::Function(_)
+            | Self::InstanceOf(_)
+            | Self::Interface(_)
+            | Self::Intersection(_)
+            | Self::Object(_)
+            | Self::Tuple(_)
+            | Self::Union(_) => instance.type_parameters.is_empty(),
+            Self::Class(_)
+            | Self::Generic(_)
+            | Self::MergedReference(_)
+            // For references, we don't know. If a reference was pointing to a
+            // class, stripping the instance would change its meaning.
+            | Self::Reference(_)
+            | Self::TypeOperator(_)
+            | Self::TypeofExpression(_)
+            | Self::TypeofType(_)
+            | Self::TypeofValue(_) => false,
+        }
+    }
+
+    #[inline]
+    pub fn string() -> Self {
+        Self::Reference(TypeReference::Resolved(GLOBAL_STRING_ID))
     }
 
     pub fn type_parameters(&self) -> Option<&[TypeReference]> {
@@ -404,28 +601,14 @@ impl TypeData {
         }
     }
 
-    /// Creates a union of type references.
-    ///
-    /// References are automatically deduplicated. If only a single type
-    /// remains, an instance of `Self::Reference` is returned instead of
-    /// `Self::Union`.
-    pub fn union_of(mut types: Vec<TypeReference>) -> Self {
-        types.dedup();
-        match types.len().cmp(&1) {
-            Ordering::Greater => Self::Union(Box::new(Union(types.into()))),
-            Ordering::Equal => Self::reference(types.remove(0)),
-            Ordering::Less => Self::unknown(),
-        }
-    }
-
     #[inline]
     pub fn unknown() -> Self {
-        Self::reference(GLOBAL_UNKNOWN_ID)
+        Self::Reference(TypeReference::Resolved(GLOBAL_UNKNOWN_ID))
     }
 }
 
 /// A class definition.
-#[derive(Clone, Eq, Hash, PartialEq, Resolvable)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq, Resolvable)]
 pub struct Class {
     /// Name of the class, if specified in the definition.
     pub name: Option<Text>,
@@ -441,16 +624,6 @@ pub struct Class {
 
     /// Class members.
     pub members: Box<[TypeMember]>,
-}
-
-impl Debug for Class {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("Class")
-            .field("name", &self.name)
-            .field("type_parameters", &self.type_parameters)
-            .field("extends", &self.extends)
-            .finish()
-    }
 }
 
 /// A constructor definition.
@@ -484,6 +657,35 @@ pub struct MergedReference {
     pub ty: Option<TypeReference>,
     pub value_ty: Option<TypeReference>,
     pub namespace_ty: Option<TypeReference>,
+}
+
+impl MergedReference {
+    /// Maps the references using the given `mapper` function.
+    ///
+    /// Returns a [`TypeData::MergedReference`] if multiple mapped references
+    /// remain, and a regular [`TypeData::Reference`] if only a single reference
+    /// remains.
+    ///
+    /// Returns `None` if all references are mapped to `None`.
+    pub fn map_references(
+        &self,
+        mapper: impl Fn(&TypeReference) -> Option<TypeReference>,
+    ) -> Option<TypeData> {
+        let ty = self.ty.as_ref().and_then(&mapper);
+        let value_ty = self.value_ty.as_ref().and_then(&mapper);
+        let namespace_ty = self.namespace_ty.as_ref().and_then(&mapper);
+        match (ty, value_ty, namespace_ty) {
+            (None, None, None) => None,
+            (Some(reference), None, None)
+            | (None, Some(reference), None)
+            | (None, None, Some(reference)) => Some(TypeData::Reference(reference)),
+            (ty, value_ty, namespace_ty) => Some(TypeData::from(Self {
+                ty,
+                value_ty,
+                namespace_ty,
+            })),
+        }
+    }
 }
 
 /// A function definition.
@@ -594,12 +796,25 @@ impl Intersection {
 pub enum Literal {
     BigInt(Text),
     Boolean(BooleanLiteral),
-    Null,
     Number(NumberLiteral),
     Object(ObjectLiteral),
     RegExp(Text),
     String(StringLiteral),
     Template(Text), // TODO: Custom impl of PartialEq for template literals
+}
+
+impl Literal {
+    /// Returns whether the literal is a primitive type.
+    pub fn is_primitive(&self) -> bool {
+        matches!(
+            self,
+            Self::BigInt(_)
+                | Self::Boolean(_)
+                | Self::Number(_)
+                | Self::String(_)
+                | Self::Template(_)
+        )
+    }
 }
 
 /// A module definition.
@@ -634,6 +849,10 @@ pub struct Object {
 pub struct ObjectLiteral(pub(super) Box<[TypeMember]>);
 
 impl ObjectLiteral {
+    pub fn into_members(self) -> Box<[TypeMember]> {
+        self.0
+    }
+
     pub fn members(&self) -> &[TypeMember] {
         &self.0
     }
@@ -747,17 +966,48 @@ pub struct TupleElementType {
 #[derive(Clone, Debug, Eq, Hash, PartialEq, Resolvable)]
 pub struct TypeMember {
     pub kind: TypeMemberKind,
-    pub is_static: bool,
     pub ty: TypeReference,
 }
 
 impl TypeMember {
+    /// Returns a reference to the type of the member if we dereference it.
+    ///
+    /// This means if the member represents a getter or setter, it will
+    /// dereference to the type of the property being get or set.
+    pub fn deref_ty<'a>(&'a self, resolver: &'a dyn TypeResolver) -> Cow<'a, TypeReference> {
+        if self.is_getter() {
+            resolver
+                .resolve_and_get(&self.ty)
+                .and_then(|resolved| match resolved.as_raw_data() {
+                    TypeData::Function(function) => function
+                        .return_type
+                        .as_type()
+                        .map(|return_ty| resolved.apply_module_id_to_reference(return_ty)),
+                    _ => None,
+                })
+                .unwrap_or(Cow::Owned(TypeReference::Resolved(GLOBAL_UNKNOWN_ID)))
+        } else {
+            Cow::Borrowed(&self.ty)
+        }
+    }
+
     pub fn has_name(&self, name: &str) -> bool {
         self.kind.has_name(name)
     }
 
+    #[inline]
+    pub fn is_constructor(&self) -> bool {
+        self.kind.is_constructor()
+    }
+
+    #[inline]
+    pub fn is_getter(&self) -> bool {
+        self.kind.is_getter()
+    }
+
+    #[inline]
     pub fn is_static(&self) -> bool {
-        self.is_static
+        self.kind.is_static()
     }
 
     pub fn name(&self) -> Option<Text> {
@@ -771,7 +1021,9 @@ impl TypeMember {
 pub enum TypeMemberKind {
     CallSignature,
     Constructor,
+    Getter(Text),
     Named(Text),
+    NamedStatic(Text),
 }
 
 impl TypeMemberKind {
@@ -779,15 +1031,37 @@ impl TypeMemberKind {
         match self {
             Self::CallSignature => false,
             Self::Constructor => name == "constructor",
-            Self::Named(own_name) => *own_name == name,
+            Self::Getter(own_name) | Self::Named(own_name) | Self::NamedStatic(own_name) => {
+                *own_name == name
+            }
         }
+    }
+
+    #[inline]
+    pub fn is_call_signature(&self) -> bool {
+        matches!(self, Self::CallSignature)
+    }
+
+    #[inline]
+    pub fn is_constructor(&self) -> bool {
+        matches!(self, Self::Constructor)
+    }
+
+    #[inline]
+    pub fn is_getter(&self) -> bool {
+        matches!(self, Self::Getter(_))
+    }
+
+    #[inline]
+    pub fn is_static(&self) -> bool {
+        matches!(self, Self::Constructor | Self::NamedStatic(_))
     }
 
     pub fn name(&self) -> Option<Text> {
         match self {
             Self::CallSignature => None,
             Self::Constructor => Some(Text::Static("constructor")),
-            Self::Named(name) => Some(name.clone()),
+            Self::Getter(name) | Self::Named(name) | Self::NamedStatic(name) => Some(name.clone()),
         }
     }
 }
@@ -825,8 +1099,12 @@ pub enum TypeofExpression {
     Await(TypeofAwaitExpression),
     BitwiseNot(TypeofBitwiseNotExpression),
     Call(TypeofCallExpression),
+    Conditional(TypeofConditionalExpression),
     Destructure(TypeofDestructureExpression),
+    LogicalAnd(TypeofLogicalAndExpression),
+    LogicalOr(TypeofLogicalOrExpression),
     New(TypeofNewExpression),
+    NullishCoalescing(TypeofNullishCoalescingExpression),
     StaticMember(TypeofStaticMemberExpression),
     Super(TypeofThisOrSuperExpression),
     This(TypeofThisOrSuperExpression),
@@ -856,6 +1134,14 @@ pub struct TypeofCallExpression {
     pub arguments: Box<[CallArgumentType]>,
 }
 
+/// Represents the type of a ternary expression.
+#[derive(Clone, Debug, Eq, Hash, PartialEq, Resolvable)]
+pub struct TypeofConditionalExpression {
+    pub test: TypeReference,
+    pub consequent: TypeReference,
+    pub alternate: TypeReference,
+}
+
 #[derive(Clone, Debug, Eq, Hash, PartialEq, Resolvable)]
 pub struct TypeofDestructureExpression {
     /// The type being destructured.
@@ -874,6 +1160,18 @@ pub enum DestructureField {
 }
 
 #[derive(Clone, Debug, Eq, Hash, PartialEq, Resolvable)]
+pub struct TypeofLogicalAndExpression {
+    pub left: TypeReference,
+    pub right: TypeReference,
+}
+
+#[derive(Clone, Debug, Eq, Hash, PartialEq, Resolvable)]
+pub struct TypeofLogicalOrExpression {
+    pub left: TypeReference,
+    pub right: TypeReference,
+}
+
+#[derive(Clone, Debug, Eq, Hash, PartialEq, Resolvable)]
 pub struct TypeofNewExpression {
     pub callee: TypeReference,
     pub arguments: Box<[CallArgumentType]>,
@@ -883,6 +1181,12 @@ pub struct TypeofNewExpression {
 pub enum CallArgumentType {
     Argument(TypeReference),
     Spread(TypeReference),
+}
+
+#[derive(Clone, Debug, Eq, Hash, PartialEq, Resolvable)]
+pub struct TypeofNullishCoalescingExpression {
+    pub left: TypeReference,
+    pub right: TypeReference,
 }
 
 #[derive(Clone, Debug, Eq, Hash, PartialEq, Resolvable)]
@@ -905,11 +1209,6 @@ pub struct TypeofTypeofExpression {
     pub argument: TypeReference,
 }
 
-#[derive(Clone, Debug, Eq, Hash, PartialEq, Resolvable)]
-pub struct TypeofUnaryMinusExpression {
-    pub argument: TypeReference,
-}
-
 /// Reference to the type of a named JavaScript value.
 #[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub struct TypeofValue {
@@ -925,6 +1224,11 @@ pub struct TypeofValue {
 
     /// ID of the scope from which the value is being referenced.
     pub scope_id: Option<ScopeId>,
+}
+
+#[derive(Clone, Debug, Eq, Hash, PartialEq, Resolvable)]
+pub struct TypeofUnaryMinusExpression {
+    pub argument: TypeReference,
 }
 
 #[derive(Clone, Debug, Eq, Hash, PartialEq, Resolvable)]
@@ -984,10 +1288,17 @@ impl From<TypeImportQualifier> for TypeReference {
 }
 
 impl TypeReference {
+    /// Returns `true` if the reference references anything but `Unknown`.
     #[inline]
     pub fn is_known(&self) -> bool {
-        *self != Self::Unknown
+        match self {
+            Self::Import(_) => true,
+            Self::Qualifier(_) => true,
+            Self::Resolved(resolved_id) => *resolved_id != GLOBAL_UNKNOWN_ID,
+            Self::Unknown => false,
+        }
     }
+
     /// Merges the generic type parameters referenced by `incoming` into `base`.
     pub fn merge_parameters(base: &[Self], incoming: &[Self]) -> Box<[Self]> {
         base.iter()
@@ -1001,9 +1312,24 @@ impl TypeReference {
             Self::Qualifier(qualifier) => qualifier
                 .type_parameters
                 .iter()
-                .map(|param| param.resolved(resolver))
+                .map(|param| param.resolved(resolver).unwrap_or_else(|| param.clone()))
                 .collect(),
             _ => [].into(),
+        }
+    }
+
+    pub fn set_module_id(&mut self, module_id: ModuleId) {
+        match self {
+            Self::Qualifier(_) => {
+                // When we assign a module ID in order to store a type in the
+                // scoped resolver, we also clear out qualifiers to avoid
+                // resolving from an incorrect scope.
+                *self = Self::Unknown;
+            }
+            Self::Resolved(resolved_id) => {
+                *resolved_id = resolved_id.with_module_id(module_id);
+            }
+            _ => {}
         }
     }
 

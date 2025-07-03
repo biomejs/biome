@@ -5,6 +5,7 @@ use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_syntax::JsDebuggerStatement;
 use biome_rowan::{AstNode, BatchMutationExt};
+use biome_rule_options::no_debugger::NoDebuggerOptions;
 
 use crate::{JsRuleAction, utils::batch::JsBatchMutation};
 
@@ -40,7 +41,7 @@ impl Rule for NoDebugger {
     type Query = Ast<JsDebuggerStatement>;
     type State = ();
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoDebuggerOptions;
 
     fn run(_: &RuleContext<Self>) -> Option<Self::State> {
         Some(())

@@ -3,6 +3,7 @@ use biome_console::markup;
 use biome_css_syntax::{CssDeclarationOrRuleList, CssKeyframesAtRule};
 use biome_diagnostics::Severity;
 use biome_rowan::{AstNode, TextRange};
+use biome_rule_options::no_duplicate_properties::NoDuplicatePropertiesOptions;
 use rustc_hash::FxHashMap;
 use std::collections::hash_map::Entry;
 
@@ -47,7 +48,7 @@ impl Rule for NoDuplicateProperties {
     type Query = Semantic<CssDeclarationOrRuleList>;
     type State = (TextRange, (TextRange, Box<str>));
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoDuplicatePropertiesOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
         let node = ctx.query();

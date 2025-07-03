@@ -147,6 +147,7 @@ biome_json_formatter         = { version = "0.5.7", path = "./crates/biome_json_
 biome_json_parser            = { version = "0.5.7", path = "./crates/biome_json_parser" }
 biome_json_syntax            = { version = "0.5.7", path = "./crates/biome_json_syntax" }
 biome_json_value             = { version = "0.1.0", path = "./crates/biome_json_value" }
+biome_line_index             = { version = "0.1.0", path = "./crates/biome_line_index" }
 biome_lsp_converters         = { version = "0.1.0", path = "./crates/biome_lsp_converters" }
 biome_markdown_factory       = { version = "0.0.1", path = "./crates/biome_markdown_factory" }
 biome_markdown_parser        = { version = "0.0.1", path = "./crates/biome_markdown_parser" }
@@ -155,6 +156,7 @@ biome_module_graph           = { version = "0.0.1", path = "./crates/biome_modul
 biome_plugin_loader          = { version = "0.0.1", path = "./crates/biome_plugin_loader" }
 biome_project_layout         = { version = "0.0.1", path = "./crates/biome_project_layout" }
 biome_resolver               = { version = "0.1.0", path = "./crates/biome_resolver" }
+biome_rule_options           = { version = "0.0.1", path = "./crates/biome_rule_options" }
 biome_ungrammar              = { version = "0.3.1", path = "./crates/biome_ungrammar" }
 biome_yaml_factory           = { version = "0.0.1", path = "./crates/biome_yaml_factory" }
 biome_yaml_parser            = { version = "0.0.1", path = "./crates/biome_yaml_parser" }
@@ -199,7 +201,7 @@ ignore               = "0.4.23"
 indexmap             = { version = "2.9.0" }
 insta                = "1.43.1"
 mimalloc             = "0.1.47"
-papaya               = "0.2"
+papaya               = "0.2.3"
 path-absolutize      = { version = "3.1.1", optional = false, features = ["use_unix_paths_on_wasm"] }
 proc-macro-error2    = { version = "2.0.1", default-features = false }
 proc-macro2          = "1.0.95"
@@ -227,8 +229,9 @@ tracing              = { version = "0.1.41", default-features = false, features 
 tracing-subscriber   = "0.3.19"
 unicode-bom          = "2.0.3"
 unicode-width        = "0.1.12"
-ureq                 = "3.0.11"
+ureq                 = "3.0.12"
 url                  = "2.5.4"
+walkdir              = "2.5.0"
 
 [profile.dev.package.biome_wasm]
 debug     = true

@@ -8,6 +8,7 @@ use biome_diagnostics::Severity;
 use biome_js_syntax::AnyJsImportLike;
 use biome_module_graph::{JsModuleInfo, ResolvedPath};
 use biome_rowan::AstNode;
+use biome_rule_options::no_import_cycles::NoImportCyclesOptions;
 use camino::{Utf8Path, Utf8PathBuf};
 
 use crate::services::module_graph::ResolvedImports;
@@ -95,7 +96,7 @@ impl Rule for NoImportCycles {
     type Query = ResolvedImports<AnyJsImportLike>;
     type State = Box<[Box<str>]>;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoImportCyclesOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let module_info = ctx.module_info_for_path(ctx.file_path())?;

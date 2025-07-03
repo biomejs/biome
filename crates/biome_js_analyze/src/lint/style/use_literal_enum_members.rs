@@ -8,6 +8,7 @@ use biome_js_syntax::{
     TsEnumDeclaration,
 };
 use biome_rowan::{AstNode, TextRange};
+use biome_rule_options::use_literal_enum_members::UseLiteralEnumMembersOptions;
 use rustc_hash::FxHashSet;
 
 declare_lint_rule! {
@@ -78,7 +79,7 @@ impl Rule for UseLiteralEnumMembers {
     type Query = Ast<TsEnumDeclaration>;
     type State = TextRange;
     type Signals = Box<[Self::State]>;
-    type Options = ();
+    type Options = UseLiteralEnumMembersOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let enum_declaration = ctx.query();
