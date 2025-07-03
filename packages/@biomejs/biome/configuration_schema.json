@@ -5034,7 +5034,7 @@
 					"default": [],
 					"allOf": [{ "$ref": "#/definitions/ImportGroups" }]
 				},
-				"sortOrder": {
+				"identifierOrder": {
 					"$ref": "#/definitions/SortOrder"
 				}
 			},

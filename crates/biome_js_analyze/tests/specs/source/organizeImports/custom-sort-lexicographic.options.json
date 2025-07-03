@@ -6,7 +6,7 @@
 				"organizeImports": {
 					"level": "on",
 					"options": {
-						"sortOrder": "lexicographic"
+						"identifierOrder": "lexicographic"
 					}
 				}
 			}

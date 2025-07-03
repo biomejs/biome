@@ -683,7 +683,7 @@ impl Rule for OrganizeImports {
         let root = ctx.query();
         let mut result = Vec::new();
         let options = ctx.options();
-        let sort_order = options.sort_order;        
+        let sort_order = options.identifier_order;
         let mut chunk: Option<ChunkBuilder> = None;
         let mut prev_kind: Option<JsSyntaxKind> = None;
         let mut prev_group = 0;
@@ -793,7 +793,7 @@ impl Rule for OrganizeImports {
         }
 
         let options = ctx.options();
-        let sort_order = options.sort_order;
+        let sort_order = options.identifier_order;
         // let comparator = match sort_order {
         //     SortMode::Lexicographic => ComparableToken::lexicographic_cmp,
         //     SortMode::Natural => ComparableToken::ascii_nat_cmp
@@ -843,7 +843,9 @@ impl Rule for OrganizeImports {
                             }
                             if *are_attributes_unsorted {
                                 // Sort import attributes
-                                let sorted_attrs = clause.attribute().and_then(|attrs| sort_attributes(attrs, sort_order));
+                                let sorted_attrs = clause
+                                    .attribute()
+                                    .and_then(|attrs| sort_attributes(attrs, sort_order));
                                 clause = clause.with_attribute(sorted_attrs);
                             }
                             export.with_export_clause(clause).into()
@@ -853,14 +855,18 @@ impl Rule for OrganizeImports {
                             if *are_specifiers_unsorted {
                                 // Sort named specifiers
                                 if let Some(sorted_specifiers) =
-                                    clause.named_specifiers().and_then(|specifiers| sort_import_specifiers(specifiers, sort_order))
+                                    clause.named_specifiers().and_then(|specifiers| {
+                                        sort_import_specifiers(specifiers, sort_order)
+                                    })
                                 {
                                     clause = clause.with_named_specifiers(sorted_specifiers)
                                 }
                             }
                             if *are_attributes_unsorted {
                                 // Sort import attributes
-                                let sorted_attrs = clause.attribute().and_then(|attrs| sort_attributes(attrs, sort_order));
+                                let sorted_attrs = clause
+                                    .attribute()
+                                    .and_then(|attrs| sort_attributes(attrs, sort_order));
                                 clause = clause.with_attribute(sorted_attrs);
                             }
                             import.with_import_clause(clause).into()
@@ -910,11 +916,15 @@ impl Rule for OrganizeImports {
                     // Sort imports based on their import key
                     import_keys.sort_unstable_by(
                         |KeyedItem { key: k1, .. }, KeyedItem { key: k2, .. }| {
-                            eprint!("%%%%% {} - {}\n", k1.source.inner().token, k2.source.inner().token);
+                            eprint!(
+                                "%%%%% {} - {}\n",
+                                k1.source.inner().token,
+                                k2.source.inner().token
+                            );
                             k1.cmp(k2)
                         },
                     );
-                    
+
                     // Merge imports/exports
                     // We use `while` and indexing to allow both iteration and mutation of `import_keys`.
                     let mut i = import_keys.len() - 1;
@@ -926,7 +936,9 @@ impl Rule for OrganizeImports {
                         } = &import_keys[i - 1];
                         let KeyedItem { key, item, .. } = &import_keys[i];
                         if prev_key.is_mergeable(key) {
-                            if let Some(merged) = merge(prev_item.as_ref(), item.as_ref(), sort_order) {
+                            if let Some(merged) =
+                                merge(prev_item.as_ref(), item.as_ref(), sort_order)
+                            {
                                 import_keys[i - 1].was_merged = true;
                                 import_keys[i - 1].item = Some(merged);
                                 import_keys[i].item = None;
@@ -1077,7 +1089,9 @@ fn merge(
             let clause2 = clause2.as_js_export_named_from_clause()?;
             let specifiers1 = clause1.specifiers();
             let specifiers2 = clause2.specifiers();
-            if let Some(meregd_specifiers) = merge_export_specifiers(&specifiers1, &specifiers2, sort_order) {
+            if let Some(meregd_specifiers) =
+                merge_export_specifiers(&specifiers1, &specifiers2, sort_order)
+            {
                 let meregd_clause = clause1.with_specifiers(meregd_specifiers);
                 let merged_item = item2.clone().with_export_clause(meregd_clause.into());
 
