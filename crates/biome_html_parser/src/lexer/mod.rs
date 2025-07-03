@@ -700,9 +700,10 @@ fn is_tag_name_byte(byte: u8) -> bool {
     // However, custom tag names must start with a lowercase letter, but they can be followed by pretty much anything else.
     // https://html.spec.whatwg.org/#valid-custom-element-name
 
-    // FIXME: The extra characters allowed here `-` and `:` is a temporary fix for now to fix parsing issues in some prettier test cases.
+    // The extra characters allowed here `-`, `:`, and `.` are not usually allowed in the HTML tag name.
+    // However, Prettier considers them to be valid characters in tag names, so we allow them to remain compatible.
 
-    byte.is_ascii_alphanumeric() || byte == b'-' || byte == b':'
+    byte.is_ascii_alphanumeric() || byte == b'-' || byte == b':' || byte == b'.'
 }
 
 fn is_attribute_name_byte(byte: u8) -> bool {
