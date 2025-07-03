@@ -1,6 +1,5 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
-assertion_line: 134
 expression: invalid.js
 ---
 # Input
@@ -37,7 +36,6 @@ let x ='' + 1n;
 a * 1 / (b * 1);
 /* test */ a * 1 + 2;
 /* test */ x /*comment*/ * 1 + 2;
-
 ```
 
 # Diagnostics
@@ -789,7 +787,6 @@ invalid.js:31:12 lint/nursery/noImplicitCoercion  FIXABLE  ━━━━━━━
   > 31 │ /* test */ a * 1 + 2;
        │            ^^^^^
     32 │ /* test */ x /*comment*/ * 1 + 2;
-    33 │ 
   
   i Unsafe fix: Use Number() call instead.
   
@@ -798,7 +795,6 @@ invalid.js:31:12 lint/nursery/noImplicitCoercion  FIXABLE  ━━━━━━━
     31    │ - /*·test·*/·a·*·1·+·2;
        31 │ + /*·test·*/·Number(a)·+·2;
     32 32 │   /* test */ x /*comment*/ * 1 + 2;
-    33 33 │   
   
 
 ```
@@ -812,7 +808,6 @@ invalid.js:32:12 lint/nursery/noImplicitCoercion  FIXABLE  ━━━━━━━
     31 │ /* test */ a * 1 + 2;
   > 32 │ /* test */ x /*comment*/ * 1 + 2;
        │            ^^^^^^^^^^^^^^^^^
-    33 │ 
   
   i Unsafe fix: Use Number() call instead.
   
@@ -820,7 +815,6 @@ invalid.js:32:12 lint/nursery/noImplicitCoercion  FIXABLE  ━━━━━━━
     31 31 │   /* test */ a * 1 + 2;
     32    │ - /*·test·*/·x·/*comment*/·*·1·+·2;
        32 │ + /*·test·*/·Number(x·/*comment*/)·+·2;
-    33 33 │   
   
 
 ```
