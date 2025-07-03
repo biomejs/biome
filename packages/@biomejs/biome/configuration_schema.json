@@ -12540,7 +12540,7 @@
 					"enum": ["none"]
 				},
 				{
-					"description": "The trailing commas are allowed and advised only in JSONC files. Trailing commas are removed from JSON files.",
+					"description": "The trailing commas are allowed and advised in JSON and JSONC files.",
 					"type": "string",
 					"enum": ["all"]
 				}
