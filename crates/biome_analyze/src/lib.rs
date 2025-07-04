@@ -5,7 +5,6 @@ use biome_parser::AnyParse;
 use std::collections::{BTreeMap, BinaryHeap};
 use std::fmt::{Debug, Display, Formatter};
 use std::ops;
-use std::ops::Sub;
 use std::str::FromStr;
 use std::sync::Arc;
 use suppressions::LineSuppression;
@@ -757,16 +756,12 @@ pub fn to_analyzer_suppressions(
         piece_range.add_start(suppression.range().start()).start(),
         piece_range.add_start(suppression.range().end()).start(),
     );
+    let reason_range_rel = suppression.reason_range();
     let reason = (
         suppression.reason,
         TextRange::new(
-            piece_range.end().sub(
-                suppression
-                    .reason_range()
-                    .end()
-                    .sub(suppression.reason_range().start()),
-            ),
-            piece_range.end(),
+            piece_range.add_start(reason_range_rel.start()).start(),
+            piece_range.add_start(reason_range_rel.end()).start(),
         ),
     );
     for (key, subcategory, value) in suppression.categories {
