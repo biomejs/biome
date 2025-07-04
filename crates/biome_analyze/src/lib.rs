@@ -412,7 +412,7 @@ where
     /// whose position is less than the end of the token within the file
     fn handle_token(&mut self, token: SyntaxToken<L>) -> ControlFlow<Break> {
         // Process the content of the token for comments and newline
-        for (index, piece) in token.leading_trivia().pieces().enumerate() {
+        for piece in token.leading_trivia().pieces() {
             if matches!(
                 piece.kind(),
                 TriviaPieceKind::Newline
@@ -432,7 +432,7 @@ where
             self.deny_top_level_suppressions = !token.kind().is_allowed_before_suppressions();
         }
 
-        for (index, piece) in token.trailing_trivia().pieces().enumerate() {
+        for piece in token.trailing_trivia().pieces() {
             if matches!(
                 piece.kind(),
                 TriviaPieceKind::Newline
