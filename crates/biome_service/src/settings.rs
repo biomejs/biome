@@ -473,6 +473,7 @@ pub struct LanguageListSettings {
     pub graphql: LanguageSettings<GraphqlLanguage>,
     pub html: LanguageSettings<HtmlLanguage>,
     pub grit: LanguageSettings<GritLanguage>,
+    pub svelte: LanguageSettings<JsLanguage>,
 }
 
 impl From<JsConfiguration> for LanguageSettings<JsLanguage> {
