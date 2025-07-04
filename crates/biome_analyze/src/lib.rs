@@ -760,9 +760,7 @@ pub fn to_analyzer_suppressions(
     let reason = (
         suppression.reason,
         TextRange::new(
-            piece_range
-                .add_start(reason_range_rel.start())
-                .start(),
+            piece_range.add_start(reason_range_rel.start()).start(),
             piece_range.add_start(reason_range_rel.end()).start(),
         ),
     );
