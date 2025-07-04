@@ -9,6 +9,7 @@ use biome_js_syntax::{
     JsNewOrCallExpression, JsSyntaxKind, JsVariableDeclarator, T, global_identifier,
 };
 use biome_rowan::{AstNode, AstSeparatedList, BatchMutationExt};
+use biome_rule_options::use_array_literals::UseArrayLiteralsOptions;
 
 use crate::{JsRuleAction, services::semantic::Semantic};
 
@@ -70,7 +71,7 @@ impl Rule for UseArrayLiterals {
     type Query = Semantic<JsNewOrCallExpression>;
     type State = ();
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = UseArrayLiteralsOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();

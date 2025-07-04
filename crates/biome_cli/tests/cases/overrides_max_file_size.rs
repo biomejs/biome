@@ -24,7 +24,7 @@ fn setup_test(
     );
 
     let mut console = BufferConsole::default();
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let file_path = Utf8Path::new("biome.json");
     let file_content = file_content.unwrap_or(FORMATTED);
 

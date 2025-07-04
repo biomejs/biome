@@ -97,7 +97,7 @@ impl MemoryFileSystem {
     }
 
     /// Create or update a file in the filesystem
-    pub fn insert(&mut self, path: Utf8PathBuf, content: impl Into<Vec<u8>>) {
+    pub fn insert(&self, path: Utf8PathBuf, content: impl Into<Vec<u8>>) {
         let mut files = self.files.0.write();
         files.insert(path, Arc::new(Mutex::new(content.into())));
     }
@@ -108,7 +108,7 @@ impl MemoryFileSystem {
     }
 
     /// Remove a file from the filesystem
-    pub fn remove(&mut self, path: &Utf8Path) {
+    pub fn remove(&self, path: &Utf8Path) {
         self.files.0.write().remove(path);
     }
 
@@ -365,7 +365,7 @@ mod tests {
 
     #[test]
     fn fs_read_only() {
-        let mut fs = MemoryFileSystem::new_read_only();
+        let fs = MemoryFileSystem::new_read_only();
 
         let path = Utf8Path::new("file.js");
         fs.insert(path.into(), *b"content");
@@ -398,7 +398,7 @@ mod tests {
 
     #[test]
     fn file_read_write() {
-        let mut fs = MemoryFileSystem::default();
+        let fs = MemoryFileSystem::default();
 
         let path = Utf8Path::new("file.js");
         let content_1 = "content 1";
@@ -439,7 +439,7 @@ mod tests {
 
     #[test]
     fn file_create_truncate() {
-        let mut fs = MemoryFileSystem::default();
+        let fs = MemoryFileSystem::default();
 
         let path = Utf8Path::new("file.js");
         fs.insert(path.into(), b"content".as_slice());
@@ -487,7 +487,7 @@ mod tests {
 
     #[test]
     fn file_create_new_exists() {
-        let mut fs = MemoryFileSystem::default();
+        let fs = MemoryFileSystem::default();
 
         let path = Utf8Path::new("file.js");
         fs.insert(path.into(), b"content".as_slice());
@@ -518,7 +518,7 @@ mod tests {
 
     #[test]
     fn traversal() {
-        let mut fs = MemoryFileSystem::default();
+        let fs = MemoryFileSystem::default();
 
         fs.insert(Utf8PathBuf::from("dir1/file1"), "dir1/file1".as_bytes());
         fs.insert(Utf8PathBuf::from("dir1/file2"), "dir1/file1".as_bytes());

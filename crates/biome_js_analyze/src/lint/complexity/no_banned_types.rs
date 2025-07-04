@@ -10,6 +10,7 @@ use biome_js_syntax::{
     TsReferenceType, TsTypeConstraintClause,
 };
 use biome_rowan::{AstNode, AstNodeList, BatchMutationExt, declare_node_union};
+use biome_rule_options::no_banned_types::NoBannedTypesOptions;
 
 use crate::JsRuleAction;
 use crate::services::semantic::Semantic;
@@ -103,7 +104,7 @@ impl Rule for NoBannedTypes {
     type Query = Semantic<TsBannedType>;
     type State = State;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoBannedTypesOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let query = ctx.query();

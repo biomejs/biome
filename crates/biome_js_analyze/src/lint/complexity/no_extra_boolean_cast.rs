@@ -8,6 +8,7 @@ use biome_js_syntax::{
     JsSyntaxNode, JsUnaryOperator, is_in_boolean_context, is_negation,
 };
 use biome_rowan::{AstNode, AstSeparatedList, BatchMutationExt};
+use biome_rule_options::no_extra_boolean_cast::NoExtraBooleanCastOptions;
 
 use crate::JsRuleAction;
 
@@ -92,7 +93,7 @@ impl Rule for NoExtraBooleanCast {
     type Query = Ast<AnyJsExpression>;
     type State = (AnyJsExpression, ExtraBooleanCastType);
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoExtraBooleanCastOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
         let n = ctx.query();

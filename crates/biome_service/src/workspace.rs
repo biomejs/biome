@@ -57,10 +57,12 @@ mod scanner;
 mod server;
 mod watcher;
 
+pub use document::{EmbeddedCssContent, EmbeddedJsContent};
+
 use crate::file_handlers::Capabilities;
 pub use crate::file_handlers::DocumentFileSource;
 use crate::projects::ProjectKey;
-use crate::settings::WorkspaceSettingsHandle;
+use crate::settings::Settings;
 pub use crate::workspace::scanner::ScanKind;
 use crate::{Deserialize, Serialize, WorkspaceError};
 use biome_analyze::{ActionCategory, RuleCategories};
@@ -84,12 +86,12 @@ use enumflags2::{BitFlags, bitflags};
 use schemars::{r#gen::SchemaGenerator, schema::Schema};
 pub use server::WorkspaceServer;
 use smallvec::SmallVec;
-use std::collections::HashMap;
 use std::fmt::{Debug, Display, Formatter};
+use std::sync::Arc;
 use std::time::Duration;
 use std::{borrow::Cow, panic::RefUnwindSafe};
 use tokio::sync::watch;
-use tracing::{debug, instrument};
+use tracing::debug;
 
 /// Notification regarding a workspace's service data.
 #[derive(Clone, Copy, Debug)]
@@ -118,17 +120,18 @@ pub struct SupportsFeatureResult {
     pub reason: Option<SupportKind>,
 }
 
-#[derive(Debug, serde::Serialize, serde::Deserialize, Default, Clone, Eq, PartialEq)]
+#[derive(Debug, serde::Serialize, serde::Deserialize, Clone, Eq, PartialEq)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase")]
 pub struct FileFeaturesResult {
-    pub features_supported: HashMap<FeatureKind, SupportKind>,
+    pub features_supported: [SupportKind; NUM_FEATURE_KINDS],
 }
 
 impl std::fmt::Display for FileFeaturesResult {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        for (feature, support_kind) in self.features_supported.iter() {
-            write!(f, "{}: {}, ", feature, support_kind)?;
+        for (index, support_kind) in self.features_supported.iter().enumerate() {
+            let feature = FeatureKind::from_index(index);
+            write!(f, "{feature}: {support_kind}")?;
         }
         Ok(())
     }
@@ -155,39 +158,39 @@ impl FileFeaturesResult {
     }
 
     /// By default, all features are not supported by a file.
-    const WORKSPACE_FEATURES: [(FeatureKind, SupportKind); 5] = [
-        (FeatureKind::Lint, SupportKind::FileNotSupported),
-        (FeatureKind::Format, SupportKind::FileNotSupported),
-        (FeatureKind::Search, SupportKind::FileNotSupported),
-        (FeatureKind::Assist, SupportKind::FileNotSupported),
-        (FeatureKind::Debug, SupportKind::FileNotSupported),
+    const WORKSPACE_FEATURES: [SupportKind; NUM_FEATURE_KINDS] = [
+        SupportKind::FileNotSupported,
+        SupportKind::FileNotSupported,
+        SupportKind::FileNotSupported,
+        SupportKind::FileNotSupported,
+        SupportKind::FileNotSupported,
     ];
 
     pub fn new() -> Self {
         Self {
-            features_supported: HashMap::from(Self::WORKSPACE_FEATURES),
+            features_supported: Self::WORKSPACE_FEATURES,
         }
     }
 
+    #[inline]
+    fn insert_feature_support(&mut self, feature: FeatureKind, support: SupportKind) {
+        self.features_supported[feature.index()] = support;
+    }
+
     /// Adds the features that are enabled in `capabilities` to this result.
+    #[inline]
     pub fn with_capabilities(mut self, capabilities: &Capabilities) -> Self {
         if capabilities.formatter.format.is_some() {
-            self.features_supported
-                .insert(FeatureKind::Format, SupportKind::Supported);
+            self.insert_feature_support(FeatureKind::Format, SupportKind::Supported);
         }
         if capabilities.analyzer.lint.is_some() {
-            self.features_supported
-                .insert(FeatureKind::Lint, SupportKind::Supported);
+            self.insert_feature_support(FeatureKind::Lint, SupportKind::Supported);
         }
-
         if capabilities.analyzer.code_actions.is_some() {
-            self.features_supported
-                .insert(FeatureKind::Assist, SupportKind::Supported);
+            self.insert_feature_support(FeatureKind::Assist, SupportKind::Supported);
         }
-
         if capabilities.search.search.is_some() {
-            self.features_supported
-                .insert(FeatureKind::Search, SupportKind::Supported);
+            self.insert_feature_support(FeatureKind::Search, SupportKind::Supported);
         }
 
         if capabilities.debug.debug_syntax_tree.is_some()
@@ -196,8 +199,7 @@ impl FileFeaturesResult {
             || capabilities.debug.debug_type_info.is_some()
             || capabilities.debug.debug_registered_types.is_some()
         {
-            self.features_supported
-                .insert(FeatureKind::Debug, SupportKind::Supported);
+            self.insert_feature_support(FeatureKind::Debug, SupportKind::Supported);
         }
 
         self
@@ -206,50 +208,46 @@ impl FileFeaturesResult {
     /// Checks if a feature is enabled for the current path.
     ///
     /// The method checks the configuration enables a certain feature for the given path.
-    #[instrument(level = "debug", skip(self, handle, capabilities))]
+    #[inline]
     pub(crate) fn with_settings_and_language(
         mut self,
-        handle: &WorkspaceSettingsHandle,
+        settings: &Settings,
         path: &Utf8Path,
         capabilities: &Capabilities,
     ) -> Self {
         // formatter
         let formatter_enabled = capabilities.enabled_for_path.formatter;
         if let Some(formatter_enabled) = formatter_enabled {
-            let formatter_enabled = formatter_enabled(path, handle);
+            let formatter_enabled = formatter_enabled(path, settings);
 
             if !formatter_enabled {
-                self.features_supported
-                    .insert(FeatureKind::Format, SupportKind::FeatureNotEnabled);
+                self.insert_feature_support(FeatureKind::Format, SupportKind::FeatureNotEnabled);
             }
         }
 
         // linter
         let linter_enabled = capabilities.enabled_for_path.linter;
         if let Some(linter_enabled) = linter_enabled {
-            let linter_enabled = linter_enabled(path, handle);
+            let linter_enabled = linter_enabled(path, settings);
             if !linter_enabled {
-                self.features_supported
-                    .insert(FeatureKind::Lint, SupportKind::FeatureNotEnabled);
+                self.insert_feature_support(FeatureKind::Lint, SupportKind::FeatureNotEnabled);
             }
         }
         // assist
         let assist_enabled = capabilities.enabled_for_path.assist;
         if let Some(assist_enabled) = assist_enabled {
-            let assist_enabled = assist_enabled(path, handle);
+            let assist_enabled = assist_enabled(path, settings);
             if !assist_enabled {
-                self.features_supported
-                    .insert(FeatureKind::Assist, SupportKind::FeatureNotEnabled);
+                self.insert_feature_support(FeatureKind::Assist, SupportKind::FeatureNotEnabled);
             }
         }
 
         // search
         let search_enabled = capabilities.enabled_for_path.search;
         if let Some(search_enabled) = search_enabled {
-            let search_enabled = search_enabled(path, handle);
+            let search_enabled = search_enabled(path, settings);
             if !search_enabled {
-                self.features_supported
-                    .insert(FeatureKind::Search, SupportKind::FeatureNotEnabled);
+                self.insert_feature_support(FeatureKind::Search, SupportKind::FeatureNotEnabled);
             }
         }
 
@@ -262,100 +260,116 @@ impl FileFeaturesResult {
     }
 
     /// The file will be ignored for all features
+    #[inline]
     pub fn set_ignored_for_all_features(&mut self) {
-        for support_kind in self.features_supported.values_mut() {
+        for support_kind in self.features_supported.iter_mut() {
             *support_kind = SupportKind::Ignored;
         }
     }
 
     /// The file will be protected for all features
     pub fn set_protected_for_all_features(&mut self) {
-        for support_kind in self.features_supported.values_mut() {
+        for support_kind in self.features_supported.iter_mut() {
             *support_kind = SupportKind::Protected;
         }
     }
 
-    pub fn ignored(&mut self, feature: FeatureKind) {
-        self.features_supported
-            .insert(feature, SupportKind::Ignored);
+    #[inline]
+    pub fn set_ignored(&mut self, feature: FeatureKind) {
+        self.insert_feature_support(feature, SupportKind::Ignored);
     }
 
     /// Checks whether the file support the given `feature`
-    fn supports_for(&self, feature: &FeatureKind) -> bool {
-        self.features_supported
-            .get(feature)
-            .is_some_and(|support_kind| matches!(support_kind, SupportKind::Supported))
+    #[inline]
+    fn supports(&self, feature: FeatureKind) -> bool {
+        let support_kind = self.features_supported[feature.index()];
+        matches!(support_kind, SupportKind::Supported)
     }
 
     pub fn supports_lint(&self) -> bool {
-        self.supports_for(&FeatureKind::Lint)
+        self.supports(FeatureKind::Lint)
     }
 
     pub fn supports_format(&self) -> bool {
-        self.supports_for(&FeatureKind::Format)
+        self.supports(FeatureKind::Format)
     }
 
     pub fn supports_assist(&self) -> bool {
-        self.supports_for(&FeatureKind::Assist)
+        self.supports(FeatureKind::Assist)
     }
 
     pub fn supports_search(&self) -> bool {
-        self.supports_for(&FeatureKind::Search)
+        self.supports(FeatureKind::Search)
+    }
+
+    /// Returns the [`SupportKind`] for the given `feature`, but only if it is
+    /// not enabled.
+    #[inline(always)]
+    pub fn support_kind_for(&self, feature: FeatureKind) -> SupportKind {
+        self.features_supported[feature.index()]
+    }
+
+    /// Returns the [`SupportKind`] for the given `feature`, but only if it is
+    /// not enabled.
+    pub fn support_kind_if_not_enabled(&self, feature: FeatureKind) -> Option<SupportKind> {
+        let support_kind = self.support_kind_for(feature);
+        if support_kind.is_not_enabled() {
+            Some(support_kind)
+        } else {
+            None
+        }
     }
 
     /// Loops through all the features of the current file, and if a feature is [SupportKind::FileNotSupported],
     /// it gets changed to [SupportKind::Ignored]
     pub fn ignore_not_supported(&mut self) {
-        for support_kind in self.features_supported.values_mut() {
+        for support_kind in self.features_supported.iter_mut() {
             if matches!(support_kind, SupportKind::FileNotSupported) {
                 *support_kind = SupportKind::Ignored;
             }
         }
     }
 
-    pub fn support_kind_for(&self, feature: &FeatureKind) -> Option<&SupportKind> {
-        self.features_supported.get(feature)
-    }
-
     /// If at least one feature is supported, the file is supported
     pub fn is_supported(&self) -> bool {
         self.features_supported
-            .values()
+            .iter()
             .any(|support_kind| support_kind.is_supported())
     }
 
     /// The file is ignored only if all the features marked it as ignored
     pub fn is_ignored(&self) -> bool {
         self.features_supported
-            .values()
+            .iter()
             .all(|support_kind| support_kind.is_ignored())
     }
 
     /// The file is protected only if all the features marked it as protected
     pub fn is_protected(&self) -> bool {
         self.features_supported
-            .values()
+            .iter()
             .all(|support_kind| support_kind.is_protected())
     }
 
     /// The file is not supported if all the features are unsupported
     pub fn is_not_supported(&self) -> bool {
         self.features_supported
-            .values()
+            .iter()
             .all(|support_kind| support_kind.is_not_supported())
     }
 
     /// The file is not enabled if all the features aren't enabled
     pub fn is_not_enabled(&self) -> bool {
         self.features_supported
-            .values()
+            .iter()
             .all(|support_kind| support_kind.is_not_enabled())
     }
 
     /// The file is not processed if for every enabled feature
     /// the file is either protected, not supported, ignored.
+    #[inline]
     pub fn is_not_processed(&self) -> bool {
-        self.features_supported.values().all(|support_kind| {
+        self.features_supported.iter().all(|support_kind| {
             matches!(
                 support_kind,
                 SupportKind::FeatureNotEnabled
@@ -384,7 +398,7 @@ impl SupportsFeatureResult {
     }
 }
 
-#[derive(Debug, serde::Serialize, serde::Deserialize, Eq, PartialEq, Clone)]
+#[derive(Clone, Copy, Debug, serde::Serialize, serde::Deserialize, Eq, PartialEq)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase")]
 pub enum SupportKind {
@@ -443,6 +457,8 @@ pub enum FeatureKind {
     Debug,
 }
 
+pub const NUM_FEATURE_KINDS: usize = 5;
+
 impl std::fmt::Display for FeatureKind {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
@@ -451,6 +467,36 @@ impl std::fmt::Display for FeatureKind {
             Self::Search => write!(f, "Search"),
             Self::Assist => write!(f, "Assist"),
             Self::Debug => write!(f, "Debug"),
+        }
+    }
+}
+
+impl FeatureKind {
+    /// Returns the feature kind from its index.
+    ///
+    /// ## Panics
+    ///
+    /// Panics if the index is higher than or equal to [`NUM_FEATURE_KINDS`].
+    fn from_index(index: usize) -> Self {
+        match index {
+            0 => Self::Format,
+            1 => Self::Lint,
+            2 => Self::Search,
+            3 => Self::Assist,
+            4 => Self::Debug,
+            _ => unreachable!("invalid index for FeatureKind"),
+        }
+    }
+
+    /// Returns the index for the feature kind.
+    #[inline]
+    fn index(self) -> usize {
+        match self {
+            Self::Format => 0,
+            Self::Lint => 1,
+            Self::Search => 2,
+            Self::Assist => 3,
+            Self::Debug => 4,
         }
     }
 }
@@ -1359,7 +1405,7 @@ pub trait Workspace: Send + Sync + RefUnwindSafe {
 }
 
 /// Convenience function for constructing a server instance of [Workspace]
-pub fn server(fs: Box<dyn FsWithResolverProxy>, threads: Option<usize>) -> Box<dyn Workspace> {
+pub fn server(fs: Arc<dyn FsWithResolverProxy>, threads: Option<usize>) -> Box<dyn Workspace> {
     let (watcher_tx, _) = bounded(0);
     let (service_data_tx, _) = watch::channel(ServiceDataNotification::Updated);
     Box::new(WorkspaceServer::new(

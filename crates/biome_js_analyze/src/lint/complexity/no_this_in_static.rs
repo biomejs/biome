@@ -9,6 +9,7 @@ use biome_js_syntax::{
     JsSyntaxToken, JsThisExpression,
 };
 use biome_rowan::{AstNode, AstNodeList, BatchMutationExt, SyntaxResult, declare_node_union};
+use biome_rule_options::no_this_in_static::NoThisInStaticOptions;
 
 use crate::{JsRuleAction, services::control_flow::AnyJsControlFlowRoot};
 
@@ -92,7 +93,7 @@ impl Rule for NoThisInStatic {
     type Query = Ast<JsThisSuperExpression>;
     type State = ();
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoThisInStaticOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let this_super_expression = ctx.query();

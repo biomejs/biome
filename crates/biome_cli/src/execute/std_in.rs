@@ -1,5 +1,6 @@
 //! In here, there are the operations that run via standard input
 //!
+use crate::cli_options::CliOptions;
 use crate::diagnostics::StdinDiagnostic;
 use crate::execute::Execution;
 use crate::{CliDiagnostic, CliSession, TraversalMode};
@@ -23,14 +24,18 @@ pub(crate) fn run<'a>(
     mode: &'a Execution,
     biome_path: BiomePath,
     content: &'a str,
-    verbose: bool,
+    cli_options: &CliOptions,
 ) -> Result<(), CliDiagnostic> {
     let workspace = &*session.app.workspace;
     let console = &mut *session.app.console;
     let mut version = 0;
 
     if biome_path.extension().is_none() {
-        return Err(CliDiagnostic::from(StdinDiagnostic::new_no_extension()));
+        console.error(markup! {
+            {PrintDiagnostic::simple(&CliDiagnostic::from(StdinDiagnostic::new_no_extension()))}
+        });
+        console.append(markup! {{content}});
+        return Ok(());
     }
 
     if mode.is_format() {
@@ -39,10 +44,16 @@ pub(crate) fn run<'a>(
             path: biome_path.clone(),
             features: FeaturesBuilder::new().with_formatter().build(),
         })?;
+
+        if file_features.is_ignored() {
+            console.append(markup! {{content}});
+            return Ok(());
+        }
+
         if file_features.is_protected() {
             let protected_diagnostic = WorkspaceError::protected_file(biome_path.to_string());
             if protected_diagnostic.tags().is_verbose() {
-                if verbose {
+                if cli_options.verbose {
                     console.error(markup! {{PrintDiagnostic::verbose(&protected_diagnostic)}})
                 }
             } else {
@@ -108,10 +119,15 @@ pub(crate) fn run<'a>(
                 .build(),
         })?;
 
+        if file_features.is_ignored() {
+            console.append(markup! {{content}});
+            return Ok(());
+        }
+
         if file_features.is_protected() {
             let protected_diagnostic = WorkspaceError::protected_file(biome_path.to_string());
             if protected_diagnostic.tags().is_verbose() {
-                if verbose {
+                if cli_options.verbose {
                     console.error(markup! {{PrintDiagnostic::verbose(&protected_diagnostic)}})
                 }
             } else {

@@ -6,6 +6,7 @@ use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_syntax::{AnyJsExpression, JsCallExpression, JsLanguage, TextRange};
 use biome_rowan::{AstNode, Language, SyntaxNode, WalkEvent};
+use biome_rule_options::no_duplicate_test_hooks::NoDuplicateTestHooksOptions;
 
 declare_lint_rule! {
     /// A `describe` block should not contain duplicate hooks.
@@ -216,7 +217,7 @@ impl Rule for NoDuplicateTestHooks {
     type Query = DuplicateHooks;
     type State = ();
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoDuplicateTestHooksOptions;
 
     fn run(_: &RuleContext<Self>) -> Self::Signals {
         Some(())

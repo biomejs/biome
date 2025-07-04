@@ -1,5 +1,5 @@
-use crate::WorkspaceError;
-use crate::workspace::DocumentFileSource;
+use crate::workspace::{DocumentFileSource, FeatureKind};
+use crate::{WorkspaceError, is_dir};
 use biome_analyze::{AnalyzerOptions, AnalyzerRules};
 use biome_configuration::analyzer::assist::{Actions, AssistConfiguration, AssistEnabled};
 use biome_configuration::analyzer::{LinterEnabled, RuleDomains};
@@ -167,8 +167,7 @@ impl Settings {
 
         // NOTE: keep this last. Computing the overrides require reading the settings computed by the parent settings.
         if let Some(overrides) = configuration.overrides {
-            self.override_settings =
-                to_override_settings(working_directory.clone(), overrides, self)?;
+            self.override_settings = to_override_settings(working_directory, overrides, self)?;
         }
 
         Ok(())
@@ -180,6 +179,7 @@ impl Settings {
     }
 
     /// Whether the files ignore_unknown is enabled
+    #[inline]
     pub fn ignore_unknown_enabled(&self) -> bool {
         self.files.ignore_unknown.unwrap_or_default().into()
     }
@@ -307,6 +307,21 @@ impl Settings {
 
     pub fn is_assist_enabled(&self) -> bool {
         self.assist.is_enabled()
+    }
+
+    /// Returns whether the given `path` is ignored for the given `feature`,
+    /// based on the current settings.
+    #[inline]
+    pub fn is_path_ignored_for_feature(&self, path: &Utf8Path, feature: FeatureKind) -> bool {
+        let feature_includes_files = match feature {
+            FeatureKind::Format => &self.formatter.includes,
+            FeatureKind::Lint => &self.linter.includes,
+            FeatureKind::Assist => &self.assist.includes,
+            FeatureKind::Search => return false, // There is no search-specific config.
+            FeatureKind::Debug => return false,
+        };
+
+        !feature_includes_files.is_included(path)
     }
 }
 
@@ -619,14 +634,14 @@ pub trait ServiceLanguage: biome_rowan::Language {
     fn lookup_settings(languages: &LanguageListSettings) -> &LanguageSettings<Self>;
 
     /// Retrieve the environment settings of the current language
-    fn resolve_environment(settings: Option<&Settings>) -> Option<&Self::EnvironmentSettings>;
+    fn resolve_environment(settings: &Settings) -> Option<&Self::EnvironmentSettings>;
 
     /// Resolve the formatter options from the global (workspace level),
     /// per-language and editor provided formatter settings
     fn resolve_format_options(
-        global: Option<&FormatSettings>,
-        overrides: Option<&OverrideSettings>,
-        language: Option<&Self::FormatterSettings>,
+        global: &FormatSettings,
+        overrides: &OverrideSettings,
+        language: &Self::FormatterSettings,
         path: &BiomePath,
         file_source: &DocumentFileSource,
     ) -> Self::FormatOptions;
@@ -634,8 +649,8 @@ pub trait ServiceLanguage: biome_rowan::Language {
     /// Resolve the linter options from the global (workspace level),
     /// per-language and editor provided formatter settings
     fn resolve_analyzer_options(
-        global: Option<&Settings>,
-        language: Option<&Self::LinterSettings>,
+        global: &Settings,
+        language: &Self::LinterSettings,
         environment: Option<&Self::EnvironmentSettings>,
         path: &BiomePath,
         file_source: &DocumentFileSource,
@@ -645,13 +660,13 @@ pub trait ServiceLanguage: biome_rowan::Language {
     /// Checks whether this file has the linter enabled.
     ///
     /// The language is responsible for checking this.
-    fn linter_enabled_for_file_path(settings: Option<&Settings>, path: &Utf8Path) -> bool;
+    fn linter_enabled_for_file_path(settings: &Settings, path: &Utf8Path) -> bool;
 
     /// Responsible to check whether this file has formatter enabled. The language is responsible to check this
-    fn formatter_enabled_for_file_path(settings: Option<&Settings>, path: &Utf8Path) -> bool;
+    fn formatter_enabled_for_file_path(settings: &Settings, path: &Utf8Path) -> bool;
 
     /// Responsible to check whether this file has assist enabled. The language is responsible to check this
-    fn assist_enabled_for_file_path(settings: Option<&Settings>, path: &Utf8Path) -> bool;
+    fn assist_enabled_for_file_path(settings: &Settings, path: &Utf8Path) -> bool;
 }
 
 #[derive(Clone, Debug, Default)]
@@ -707,6 +722,17 @@ impl VcsSettings {
         self.enabled.unwrap_or_default().into()
     }
 
+    /// Returns whether the given `path` should be ignored per the VCS settings.
+    #[inline]
+    pub fn is_ignored(&self, path: &Utf8Path) -> bool {
+        self.should_use_ignore_file()
+            && self
+                .ignore_matches
+                .as_ref()
+                .is_some_and(|ignored_matches| ignored_matches.is_ignored(path, is_dir(path)))
+    }
+
+    #[inline]
     pub fn should_use_ignore_file(&self) -> bool {
         self.use_ignore_file.unwrap_or_default().into()
     }
@@ -846,7 +872,19 @@ impl Includes {
         current_globs.extend(globs.into());
     }
 
+    /// Returns whether the given `path` is included.
+    #[inline]
+    pub fn is_included(&self, path: &Utf8Path) -> bool {
+        self.is_unset()
+            || if is_dir(path) {
+                self.matches_directory_with_exceptions(path)
+            } else {
+                self.matches_with_exceptions(path)
+            }
+    }
+
     /// Returns `true` is no globs are set.
+    #[inline]
     pub fn is_unset(&self) -> bool {
         self.globs.is_none()
     }
@@ -945,32 +983,8 @@ fn to_vcs_settings(config: VcsConfiguration) -> Result<VcsSettings, WorkspaceErr
         ignore_matches: None,
     })
 }
-/// Handle object holding a pin of the workspace settings until the deferred
-/// language-specific options resolution is called.
-#[derive(Debug)]
-pub struct WorkspaceSettingsHandle {
-    settings: Option<Settings>,
-}
 
-impl From<Option<Settings>> for WorkspaceSettingsHandle {
-    fn from(settings: Option<Settings>) -> Self {
-        Self { settings }
-    }
-}
-
-impl From<Settings> for WorkspaceSettingsHandle {
-    fn from(settings: Settings) -> Self {
-        Self {
-            settings: Some(settings),
-        }
-    }
-}
-
-impl WorkspaceSettingsHandle {
-    pub fn settings(&self) -> Option<&Settings> {
-        self.settings.as_ref()
-    }
-
+impl Settings {
     /// Resolve the formatting context for the given language
     #[instrument(level = "debug", skip(self, file_source))]
     pub fn format_options<L>(
@@ -981,12 +995,9 @@ impl WorkspaceSettingsHandle {
     where
         L: ServiceLanguage,
     {
-        let settings = self.settings();
-        let formatter = settings.map(|s| &s.formatter);
-        let overrides = settings.map(|s| &s.override_settings);
-        let editor_settings = settings
-            .map(|s| L::lookup_settings(&s.languages))
-            .map(|result| &result.formatter);
+        let formatter = &self.formatter;
+        let overrides = &self.override_settings;
+        let editor_settings = &L::lookup_settings(&self.languages).formatter;
         L::resolve_format_options(formatter, overrides, editor_settings, path, file_source)
     }
 
@@ -999,15 +1010,12 @@ impl WorkspaceSettingsHandle {
     where
         L: ServiceLanguage,
     {
-        let settings = self.settings();
-        let editor_settings = settings
-            .map(|s| L::lookup_settings(&s.languages))
-            .map(|result| &result.linter);
+        let linter_settings = &L::lookup_settings(&self.languages).linter;
 
-        let environment = L::resolve_environment(settings);
+        let environment = L::resolve_environment(self);
         L::resolve_analyzer_options(
-            settings,
-            editor_settings,
+            self,
+            linter_settings,
             environment,
             path,
             file_source,
@@ -1020,9 +1028,7 @@ impl WorkspaceSettingsHandle {
     where
         L: ServiceLanguage,
     {
-        let settings = self.settings();
-
-        L::linter_enabled_for_file_path(settings, path)
+        L::linter_enabled_for_file_path(self, path)
     }
 
     /// Whether the formatter is enabled for this file path
@@ -1030,9 +1036,7 @@ impl WorkspaceSettingsHandle {
     where
         L: ServiceLanguage,
     {
-        let settings = self.settings();
-
-        L::formatter_enabled_for_file_path(settings, path)
+        L::formatter_enabled_for_file_path(self, path)
     }
 
     /// Whether the assist is enabled for this file path
@@ -1040,32 +1044,24 @@ impl WorkspaceSettingsHandle {
     where
         L: ServiceLanguage,
     {
-        let settings = self.settings();
-
-        L::assist_enabled_for_file_path(settings, path)
+        L::assist_enabled_for_file_path(self, path)
     }
 
     /// Whether the formatter should format with parsing errors, for this file path
     pub fn format_with_errors_enabled_for_this_file_path(&self, path: &Utf8Path) -> bool {
-        let settings = self.settings();
-
-        settings
-            .and_then(|settings| {
-                settings
-                    .override_settings
-                    .patterns
-                    .iter()
-                    .rev()
-                    .find_map(|pattern| {
-                        if let Some(enabled) = pattern.formatter.format_with_errors {
-                            if pattern.is_file_included(path) {
-                                return Some(enabled);
-                            }
-                        }
-                        None
-                    })
-                    .or(settings.formatter.format_with_errors)
+        self.override_settings
+            .patterns
+            .iter()
+            .rev()
+            .find_map(|pattern| {
+                if let Some(enabled) = pattern.formatter.format_with_errors {
+                    if pattern.is_file_included(path) {
+                        return Some(enabled);
+                    }
+                }
+                None
             })
+            .or(self.formatter.format_with_errors)
             .unwrap_or_default()
             .into()
     }
@@ -1127,134 +1123,114 @@ impl OverrideSettings {
             .unwrap_or(base_setting)
     }
 
-    pub fn to_override_grit_format_options(
+    pub fn apply_override_grit_format_options(
         &self,
         path: &Utf8Path,
-        mut options: GritFormatOptions,
-    ) -> GritFormatOptions {
+        options: &mut GritFormatOptions,
+    ) {
         for pattern in self.patterns.iter() {
             if pattern.is_file_included(path) {
-                pattern.apply_overrides_to_grit_format_options(&mut options);
+                pattern.apply_overrides_to_grit_format_options(options);
             }
         }
-        options
     }
 
-    pub fn to_override_html_format_options(
+    pub fn apply_override_html_format_options(
         &self,
         path: &Utf8Path,
-        mut options: HtmlFormatOptions,
-    ) -> HtmlFormatOptions {
+        options: &mut HtmlFormatOptions,
+    ) {
         for pattern in self.patterns.iter() {
             if pattern.is_file_included(path) {
-                pattern.apply_overrides_to_html_format_options(&mut options);
+                pattern.apply_overrides_to_html_format_options(options);
             }
         }
-        options
     }
 
-    pub fn to_override_js_parser_options(
-        &self,
-        path: &Utf8Path,
-        mut options: JsParserOptions,
-    ) -> JsParserOptions {
+    pub fn apply_override_js_parser_options(&self, path: &Utf8Path, options: &mut JsParserOptions) {
         for pattern in self.patterns.iter() {
             if pattern.is_file_included(path) {
-                pattern.apply_overrides_to_js_parser_options(&mut options);
+                pattern.apply_overrides_to_js_parser_options(options);
             }
         }
-        options
     }
 
-    pub fn to_override_json_parser_options(
+    pub fn apply_override_json_parser_options(
         &self,
         path: &Utf8Path,
-        mut options: JsonParserOptions,
-    ) -> JsonParserOptions {
+        options: &mut JsonParserOptions,
+    ) {
         for pattern in self.patterns.iter() {
             if pattern.is_file_included(path) {
-                pattern.apply_overrides_to_json_parser_options(&mut options);
+                pattern.apply_overrides_to_json_parser_options(options);
             }
         }
-        options
     }
 
     /// Scans the override rules and returns the parser options of the first matching override.
-    pub fn to_override_css_parser_options(
+    pub fn apply_override_css_parser_options(
         &self,
         path: &Utf8Path,
-        mut options: CssParserOptions,
-    ) -> CssParserOptions {
+        options: &mut CssParserOptions,
+    ) {
         for pattern in self.patterns.iter() {
             if pattern.is_file_included(path) {
-                pattern.apply_overrides_to_css_parser_options(&mut options);
+                pattern.apply_overrides_to_css_parser_options(options);
             }
         }
-        options
     }
 
-    // #region: CSS-specific methods
-
     /// Scans and aggregates all the overrides into a single [CssFormatOptions]
-    pub fn to_override_css_format_options(
+    pub fn apply_override_css_format_options(
         &self,
         path: &Utf8Path,
-        mut options: CssFormatOptions,
-    ) -> CssFormatOptions {
+        options: &mut CssFormatOptions,
+    ) {
         for pattern in self.patterns.iter() {
             if pattern.is_file_included(path) {
-                pattern.apply_overrides_to_css_format_options(&mut options);
+                pattern.apply_overrides_to_css_format_options(options);
             }
         }
-        options
     }
 
     /// Scans and aggregates all the overrides into a single [JsonParserOptions]
-    pub fn to_override_json_parse_options(
+    pub fn apply_override_json_parse_options(
         &self,
         path: &Utf8Path,
-        mut options: JsonParserOptions,
-    ) -> JsonParserOptions {
+        options: &mut JsonParserOptions,
+    ) {
         for pattern in self.patterns.iter() {
             if pattern.is_file_included(path) {
-                pattern.apply_overrides_to_json_parser_options(&mut options);
+                pattern.apply_overrides_to_json_parser_options(options);
             }
         }
-        options
     }
 
     /// Scans and aggregates all the overrides into a single `JsonFormatOptions`
-    pub fn to_override_json_format_options(
+    pub fn apply_override_json_format_options(
         &self,
         path: &Utf8Path,
-        mut options: JsonFormatOptions,
-    ) -> JsonFormatOptions {
+        options: &mut JsonFormatOptions,
+    ) {
         for pattern in self.patterns.iter() {
             if pattern.is_file_included(path) {
-                pattern.apply_overrides_to_json_format_options(&mut options);
+                pattern.apply_overrides_to_json_format_options(options);
             }
         }
-        options
     }
-
-    // #endregion
-
-    // #region: GraphQL  methods
 
     /// Scans and aggregates all the overrides into a single [GraphqlFormatOptions]
-    pub fn to_override_graphql_format_options(
+    pub fn apply_override_graphql_format_options(
         &self,
         path: &Utf8Path,
-        mut options: GraphqlFormatOptions,
-    ) -> GraphqlFormatOptions {
+        options: &mut GraphqlFormatOptions,
+    ) {
         for pattern in self.patterns.iter() {
             if pattern.is_file_included(path) {
-                pattern.apply_overrides_to_graphql_format_options(&mut options);
+                pattern.apply_overrides_to_graphql_format_options(options);
             }
         }
-        options
     }
-    // #endregion
 
     /// Retrieves the options of lint rules that have been overridden
     pub fn override_analyzer_rules(

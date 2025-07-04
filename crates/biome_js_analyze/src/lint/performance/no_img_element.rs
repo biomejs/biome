@@ -6,6 +6,7 @@ use biome_diagnostics::Severity;
 use biome_js_syntax::jsx_ext::AnyJsxElement;
 use biome_js_syntax::{JsxChildList, JsxElement};
 use biome_rowan::{AstNode, AstNodeList};
+use biome_rule_options::no_img_element::NoImgElementOptions;
 
 declare_lint_rule! {
     /// Prevent usage of `<img>` element in a Next.js project.
@@ -66,7 +67,7 @@ impl Rule for NoImgElement {
     type Query = Ast<AnyJsxElement>;
     type State = ();
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoImgElementOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();

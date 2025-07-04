@@ -7,7 +7,7 @@ use camino::Utf8Path;
 
 #[test]
 fn prettier_migrate() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     let configuration = r#"{ "linter": { "enabled": true } }"#;
@@ -38,7 +38,7 @@ fn prettier_migrate() {
 
 #[test]
 fn prettier_migrate_end_of_line() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     let configuration = r#"{}"#;
@@ -69,7 +69,7 @@ fn prettier_migrate_end_of_line() {
 
 #[test]
 fn prettier_migrate_with_ignore() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     let configuration = r#"{ "linter": { "enabled": true } }"#;
@@ -111,7 +111,7 @@ generated/*.spec.js
 
 #[test]
 fn prettier_migrate_jsonc() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     let configuration = r#"{ "linter": { "enabled": true } }"#;
@@ -142,7 +142,7 @@ fn prettier_migrate_jsonc() {
 
 #[test]
 fn prettier_migrate_no_file() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     let configuration = r#"{ "linter": { "enabled": true } }"#;
@@ -169,7 +169,7 @@ fn prettier_migrate_no_file() {
 
 #[test]
 fn prettier_migrate_yml_file() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     let configuration = r#"{ "linter": { "enabled": true } }"#;
@@ -200,7 +200,7 @@ fn prettier_migrate_yml_file() {
 
 #[test]
 fn prettier_migrate_write() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     let configuration = r#"{ "linter": { "enabled": true } }"#;
@@ -231,7 +231,7 @@ fn prettier_migrate_write() {
 
 #[test]
 fn prettier_migrate_fix() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     let configuration = r#"{ "linter": { "enabled": true } }"#;
@@ -262,7 +262,7 @@ fn prettier_migrate_fix() {
 
 #[test]
 fn prettierjson_migrate_write() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     let configuration = r#"{ "linter": { "enabled": true } }"#;
@@ -293,7 +293,7 @@ fn prettierjson_migrate_write() {
 
 #[test]
 fn prettier_migrate_write_packagejson() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     let configuration = r#"{ "linter": { "enabled": true } }"#;
@@ -328,7 +328,7 @@ fn prettier_migrate_write_packagejson() {
 
 #[test]
 fn prettier_migrate_write_with_ignore_file() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     let configuration = r#"{ "linter": { "enabled": true } }"#;
@@ -370,7 +370,7 @@ generated/*.spec.js
 
 #[test]
 fn prettier_migrate_write_biome_jsonc() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     let configuration = r#"{ "linter": { "enabled": true } }"#;
@@ -401,7 +401,7 @@ fn prettier_migrate_write_biome_jsonc() {
 
 #[test]
 fn prettier_migrate_overrides() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     let configuration = r#"{ "formatter": { "enabled": true } }"#;
@@ -443,7 +443,7 @@ fn prettier_migrate_overrides() {
 
 #[test]
 fn prettier_migrate_override_with_bad_print_width() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     let configuration = r#"{ "formatter": { "enabled": true } }"#;
@@ -479,7 +479,7 @@ fn prettier_migrate_override_with_bad_print_width() {
 
 #[test]
 fn prettier_migrate_with_bad_top_level_print_width() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     let configuration = r#"{ "formatter": { "enabled": true } }"#;

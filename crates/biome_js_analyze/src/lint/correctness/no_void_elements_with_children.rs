@@ -11,6 +11,7 @@ use biome_js_syntax::{
     JsxSelfClosingElement,
 };
 use biome_rowan::{AstNode, AstNodeList, BatchMutationExt, declare_node_union};
+use biome_rule_options::no_void_elements_with_children::NoVoidElementsWithChildrenOptions;
 
 declare_lint_rule! {
     /// This rules prevents void elements (AKA self-closing elements) from having children.
@@ -183,7 +184,7 @@ impl Rule for NoVoidElementsWithChildren {
     type Query = Semantic<NoVoidElementsWithChildrenQuery>;
     type State = NoVoidElementsWithChildrenState;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoVoidElementsWithChildrenOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();

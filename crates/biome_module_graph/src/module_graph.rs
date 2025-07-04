@@ -25,11 +25,7 @@ use crate::{JsExport, JsModuleInfo, JsOwnExport, js_module_info::JsModuleVisitor
 pub(crate) use fs_proxy::ModuleGraphFsProxy;
 
 pub const SUPPORTED_EXTENSIONS: &[&str] = &[
-    "js", "jsx", "mjs", "cjs", "ts", "tsx", "mts", "cts", "json", "node",
-];
-
-pub const SUPPORTED_TYPE_EXTENSIONS: &[&str] = &[
-    "d.ts", "d.mts", "d.cts", "js", "jsx", "mjs", "cjs", "ts", "tsx", "mts", "cts", "json",
+    "ts", "tsx", "mts", "cts", "js", "jsx", "mjs", "cjs", "json", "node",
 ];
 
 /// Data structure for tracking imports and exports across files.
@@ -97,8 +93,8 @@ impl ModuleGraph {
 
         let fs_proxy = ModuleGraphFsProxy::new(fs, self, project_layout);
 
-        // Traverse all the added and updated paths and insert their resolved
-        // imports.
+        // Traverse all the added and updated paths and insert their module
+        // info.
         let imports = self.data.pin();
         for (path, root) in added_or_updated_paths {
             let directory = path.parent().unwrap_or(path);

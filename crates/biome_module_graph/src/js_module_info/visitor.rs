@@ -12,7 +12,7 @@ use biome_rowan::{AstNode, TokenText, WalkEvent};
 use camino::Utf8Path;
 
 use crate::{
-    JsImport, JsModuleInfo, JsReexport, SUPPORTED_TYPE_EXTENSIONS,
+    JsImport, JsModuleInfo, JsReexport, SUPPORTED_EXTENSIONS,
     js_module_info::collector::JsCollectedExport, module_graph::ModuleGraphFsProxy,
 };
 
@@ -40,13 +40,13 @@ impl<'a> JsModuleVisitor<'a> {
         for event in iter {
             match event {
                 WalkEvent::Enter(node) => {
-                    collector.push_node(&node);
-
                     if let Some(import) = AnyJsImportLike::cast_ref(&node) {
                         self.visit_import(import, &mut collector);
                     } else if let Some(export) = biome_js_syntax::JsExport::cast_ref(&node) {
                         self.visit_export(export, &mut collector);
                     }
+
+                    collector.push_node(&node);
                 }
                 WalkEvent::Leave(node) => {
                     collector.leave_node(&node);
@@ -54,9 +54,7 @@ impl<'a> JsModuleVisitor<'a> {
             }
         }
 
-        let scope_by_range = collector.finalise();
-
-        JsModuleInfo::new(collector, scope_by_range)
+        JsModuleInfo::new(collector)
     }
 
     fn visit_import(&self, node: AnyJsImportLike, collector: &mut JsModuleInfoCollector) {
@@ -415,9 +413,9 @@ impl<'a> JsModuleVisitor<'a> {
 
     fn resolved_path_from_specifier(&self, specifier: &str) -> ResolvedPath {
         let options = ResolveOptions {
-            condition_names: &["types", "default"],
+            condition_names: &["types", "import", "default"],
             default_files: &["index"],
-            extensions: SUPPORTED_TYPE_EXTENSIONS,
+            extensions: SUPPORTED_EXTENSIONS,
             resolve_node_builtins: true,
             resolve_types: true,
             ..Default::default()

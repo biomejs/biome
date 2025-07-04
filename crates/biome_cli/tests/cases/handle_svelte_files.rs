@@ -48,7 +48,7 @@ var foo: string = "";
 
 #[test]
 fn sorts_imports_check() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     let svelte_file_path = Utf8Path::new("file.svelte");
@@ -86,7 +86,7 @@ fn sorts_imports_check() {
 
 #[test]
 fn sorts_imports_write() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     let svelte_file_path = Utf8Path::new("file.svelte");
@@ -125,7 +125,7 @@ fn sorts_imports_write() {
 
 #[test]
 fn format_svelte_ts_context_module_files() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     let svelte_file_path = Utf8Path::new("file.svelte");
@@ -159,7 +159,7 @@ fn format_svelte_ts_context_module_files() {
 
 #[test]
 fn format_svelte_ts_context_module_files_write() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     let svelte_file_path = Utf8Path::new("file.svelte");
@@ -193,7 +193,7 @@ fn format_svelte_ts_context_module_files_write() {
 
 #[test]
 fn format_svelte_carriage_return_line_feed_files() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     let svelte_file_path = Utf8Path::new("file.svelte");

@@ -16,6 +16,7 @@ use biome_rowan::BatchMutationExt;
 use biome_rowan::SyntaxElement;
 use biome_rowan::SyntaxNode;
 use biome_rowan::TriviaPieceKind;
+use biome_rule_options::no_process_global::NoProcessGlobalOptions;
 use smallvec::SmallVec;
 use smallvec::smallvec;
 
@@ -63,7 +64,7 @@ impl Rule for NoProcessGlobal {
     type Query = Semantic<AnyJsExpression>;
     type State = ();
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoProcessGlobalOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();

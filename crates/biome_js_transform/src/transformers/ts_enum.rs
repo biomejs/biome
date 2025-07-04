@@ -16,7 +16,7 @@ use biome_js_syntax::{
     AnyJsExpression, AnyJsFormalParameter, AnyJsLiteralExpression, AnyJsModuleItem, AnyJsParameter,
     AnyJsStatement, JsAssignmentExpression, JsComputedMemberAssignment, JsExpressionStatement,
     JsFunctionExpression, JsInitializerClause, JsLogicalExpression, JsModuleItemList,
-    JsStatementList, JsVariableStatement, T, TsEnumDeclaration,
+    JsStatementList, JsSyntaxKind, JsVariableStatement, T, TsEnumDeclaration,
 };
 use biome_rowan::{AstNode, BatchMutationExt, TriviaPieceKind};
 
@@ -60,18 +60,38 @@ impl Rule for TsEnum {
         let node = ctx.query();
         let mut mutation = node.clone().begin();
         let parent = node.syntax().parent();
+
         if let Some(parent) = parent {
-            if let Some(module_list) = JsModuleItemList::cast(parent) {
-                let variable = make_variable(state);
-                let function = make_function_caller(state);
-                let statements = vec![
-                    AnyJsModuleItem::AnyJsStatement(AnyJsStatement::JsVariableStatement(variable)),
-                    AnyJsModuleItem::AnyJsStatement(AnyJsStatement::JsExpressionStatement(
-                        function,
-                    )),
-                ];
-                let new_modules_list = js_module_item_list(statements);
-                mutation.replace_node(module_list, new_modules_list);
+            match parent.kind() {
+                JsSyntaxKind::JS_MODULE_ITEM_LIST => {
+                    if let Some(module_list) = JsModuleItemList::cast(parent) {
+                        let variable = make_variable(state);
+                        let function = make_function_caller(state);
+                        let statements = vec![
+                            AnyJsModuleItem::AnyJsStatement(AnyJsStatement::JsVariableStatement(
+                                variable,
+                            )),
+                            AnyJsModuleItem::AnyJsStatement(AnyJsStatement::JsExpressionStatement(
+                                function,
+                            )),
+                        ];
+                        let new_modules_list = js_module_item_list(statements);
+                        mutation.replace_node(module_list, new_modules_list);
+                    }
+                }
+                JsSyntaxKind::JS_STATEMENT_LIST => {
+                    if let Some(statement_list) = JsStatementList::cast(parent) {
+                        let variable = make_variable(state);
+                        let function = make_function_caller(state);
+                        let statements = vec![
+                            AnyJsStatement::JsVariableStatement(variable),
+                            AnyJsStatement::JsExpressionStatement(function),
+                        ];
+                        let new_statement_list = js_statement_list(statements);
+                        mutation.replace_node(statement_list, new_statement_list);
+                    }
+                }
+                _ => {}
             }
         }
 

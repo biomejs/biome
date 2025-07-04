@@ -9,7 +9,7 @@ use biome_diagnostics::termcolor::Buffer;
 use biome_diagnostics::{DiagnosticExt, Error, PrintDiagnostic};
 use biome_fs::{BiomePath, FileSystem, OsFileSystem};
 use biome_js_parser::{AnyJsRoot, JsFileSource, JsParserOptions};
-use biome_js_type_info::TypeResolver;
+use biome_js_type_info::{TypeData, TypeResolver};
 use biome_json_parser::{JsonParserOptions, ParseDiagnostic};
 use biome_module_graph::ModuleGraph;
 use biome_package::PackageJson;
@@ -18,7 +18,7 @@ use biome_rowan::{Direction, Language, SyntaxKind, SyntaxNode, SyntaxSlot};
 use biome_service::configuration::to_analyzer_rules;
 use biome_service::file_handlers::DocumentFileSource;
 use biome_service::projects::Projects;
-use biome_service::settings::{ServiceLanguage, Settings, WorkspaceSettingsHandle};
+use biome_service::settings::{ServiceLanguage, Settings};
 use biome_string_case::StrLikeExtension;
 use camino::{Utf8Path, Utf8PathBuf};
 use json_comments::StripComments;
@@ -163,9 +163,8 @@ where
             .merge_with_configuration(configuration, None)
             .unwrap();
 
-        let handle = WorkspaceSettingsHandle::from(settings);
         let document_file_source = DocumentFileSource::from_path(input_file);
-        handle.format_options::<L>(&input_file.into(), &document_file_source)
+        settings.format_options::<L>(&input_file.into(), &document_file_source)
     }
 }
 
@@ -307,6 +306,21 @@ pub fn dump_registered_types(content: &mut String, resolver: &dyn TypeResolver) 
         content.push_str(&registered_types);
         content.push_str("```\n");
     }
+}
+
+pub fn dump_registered_module_types(content: &mut String, types: &[&TypeData]) {
+    if types.is_empty() {
+        return;
+    }
+
+    content.push_str("## Registered types\n\n");
+    content.push_str("```");
+
+    for (i, ty) in types.iter().enumerate() {
+        content.push_str(&format!("\nModule TypeId({i}) => {ty}\n"));
+    }
+
+    content.push_str("```\n");
 }
 
 // Check that all red / green nodes have correctly been released on exit

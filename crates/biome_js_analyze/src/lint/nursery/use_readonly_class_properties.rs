@@ -3,14 +3,13 @@ use biome_analyze::{
     Ast, FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
-use biome_deserialize_macros::Deserializable;
 use biome_js_factory::make;
 use biome_js_syntax::{
     AnyJsAssignment, AnyJsClassMember, AnyJsClassMemberName, AnyJsConstructorParameter,
     AnyJsPropertyModifier, AnyTsPropertyParameterModifier, JsArrayAssignmentPattern,
     JsArrowFunctionExpression, JsAssignmentExpression, JsBlockStatement, JsCallExpression,
     JsClassDeclaration, JsClassMemberList, JsConditionalExpression, JsConstructorClassMember,
-    JsElseClause, JsExpressionStatement, JsFunctionBody, JsFunctionExpression,
+    JsElseClause, JsExpressionStatement, JsFunctionBody, JsFunctionExpression, JsGetterClassMember,
     JsGetterObjectMember, JsIfStatement, JsInitializerClause, JsLanguage, JsMethodClassMember,
     JsMethodObjectMember, JsObjectAssignmentPattern, JsObjectExpression, JsObjectMemberList,
     JsParenthesizedExpression, JsPostUpdateExpression, JsPreUpdateExpression,
@@ -24,7 +23,7 @@ use biome_rowan::{
     AstNode, AstNodeExt, AstNodeList, AstSeparatedList, BatchMutationExt, SyntaxNode, Text,
     TriviaPiece, declare_node_union,
 };
-use serde::{Deserialize, Serialize};
+use biome_rule_options::use_readonly_class_properties::UseReadonlyClassPropertiesOptions;
 use std::iter::once;
 
 declare_lint_rule! {
@@ -135,7 +134,7 @@ impl Rule for UseReadonlyClassProperties {
     type Query = Ast<JsClassDeclaration>;
     type State = PropOrParam;
     type Signals = Box<[Self::State]>;
-    type Options = ReadonlyClassPropertiesOptions;
+    type Options = UseReadonlyClassPropertiesOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let root = ctx.query();
@@ -275,20 +274,6 @@ impl Rule for UseReadonlyClassProperties {
     }
 }
 
-/// Rule's options
-#[derive(Clone, Debug, Default, Deserialize, Deserializable, Eq, PartialEq, Serialize)]
-#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
-#[serde(rename_all = "camelCase", deny_unknown_fields, default)]
-pub struct ReadonlyClassPropertiesOptions {
-    /// When `true`, the keywords `public`, `protected`, and `private` are analyzed by the rule.
-    #[serde(default, skip_serializing_if = "is_default")]
-    pub check_all_properties: bool,
-}
-
-fn is_default<T: Default + Eq>(value: &T) -> bool {
-    value == &T::default()
-}
-
 declare_node_union! {
     pub AnyThisMemberLike = JsThisExpression | JsStaticMemberExpression
 }
@@ -299,6 +284,7 @@ declare_node_union! {
 
 declare_node_union! {
     pub AnyJsClassMethodBodyElement =
+    JsArrowFunctionExpression |
     JsBlockStatement |
     JsCallExpression |
     JsConditionalExpression |
@@ -313,6 +299,7 @@ declare_node_union! {
     JsParenthesizedExpression |
     JsReturnStatement |
     JsSetterClassMember |
+    JsGetterClassMember |
     JsSetterObjectMember |
     JsVariableDeclaration |
     JsVariableDeclarator |
@@ -472,6 +459,48 @@ fn collect_mutated_class_property_names(members: &JsClassMemberList) -> Vec<Text
                 } else {
                     None
                 }
+            }
+            // assignments in getters, technically possible, but not recommended
+            AnyJsClassMember::JsGetterClassMember(getter) => {
+                if let Ok(body) = getter.body() {
+                    let this_aliases = collect_class_member_props_mutations(&body);
+                    Some(
+                        collect_all_assignment_names(
+                            &MethodBodyElementOrStatementList::MethodBodyElement(
+                                &AnyJsClassMethodBodyElement::from(getter.clone()),
+                            ),
+                            &this_aliases,
+                        )
+                        .collect::<Vec<_>>()
+                        .into_iter(),
+                    )
+                } else {
+                    None
+                }
+            }
+            // assignments in property class member if it is an arrow function
+            AnyJsClassMember::JsPropertyClassMember(property) => {
+                if let Ok(expression) = property.value()?.expression() {
+                    if let Some(arrow_function) =
+                        JsArrowFunctionExpression::cast(expression.into_syntax())
+                    {
+                        if let Ok(body) = arrow_function.body() {
+                            let this_aliases =
+                                collect_class_member_props_mutations(body.as_js_function_body()?);
+                            return Some(
+                                collect_all_assignment_names(
+                                    &MethodBodyElementOrStatementList::MethodBodyElement(
+                                        &AnyJsClassMethodBodyElement::from(arrow_function),
+                                    ),
+                                    &this_aliases,
+                                )
+                                .collect::<Vec<_>>()
+                                .into_iter(),
+                            );
+                        }
+                    }
+                };
+                None
             }
             // assignments in constructor
             AnyJsClassMember::JsConstructorClassMember(constructor) => {

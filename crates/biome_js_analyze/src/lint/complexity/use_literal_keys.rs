@@ -11,6 +11,7 @@ use biome_js_syntax::{
     static_value::StaticValue,
 };
 use biome_rowan::{AstNode, BatchMutationExt, SyntaxNodeOptionExt, TextRange, declare_node_union};
+use biome_rule_options::use_literal_keys::UseLiteralKeysOptions;
 use biome_unicode_table::is_js_ident;
 
 declare_lint_rule! {
@@ -64,7 +65,7 @@ impl Rule for UseLiteralKeys {
     type Query = Ast<AnyJsMember>;
     type State = (TextRange, JsSyntaxToken, bool);
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = UseLiteralKeysOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();

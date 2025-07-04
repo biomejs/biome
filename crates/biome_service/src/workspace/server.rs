@@ -1,7 +1,7 @@
 use super::document::Document;
 use super::{
     ChangeFileParams, CheckFileSizeParams, CheckFileSizeResult, CloseFileParams,
-    CloseProjectParams, FeatureName, FileContent, FileExitsParams, FixFileParams, FixFileResult,
+    CloseProjectParams, FileContent, FileExitsParams, FixFileParams, FixFileResult,
     FormatFileParams, FormatOnTypeParams, FormatRangeParams, GetControlFlowGraphParams,
     GetFormatterIRParams, GetSemanticModelParams, GetSyntaxTreeParams, GetSyntaxTreeResult,
     OpenFileParams, OpenProjectParams, ParsePatternParams, ParsePatternResult, PatternId,
@@ -12,12 +12,12 @@ use super::{
 };
 use crate::configuration::{LoadedConfiguration, ProjectScanComputer, read_config};
 use crate::diagnostics::FileTooLarge;
+use crate::file_handlers::html::{extract_embedded_scripts, parse_embedded_styles};
 use crate::file_handlers::{
     Capabilities, CodeActionsParams, DocumentFileSource, Features, FixAllParams, LintParams,
     ParseResult,
 };
 use crate::projects::Projects;
-use crate::settings::WorkspaceSettingsHandle;
 use crate::workspace::{
     FileFeaturesResult, GetFileContentParams, GetRegisteredTypesParams, GetTypeInfoParams,
     IsPathIgnoredParams, OpenProjectResult, RageEntry, RageParams, RageResult, ScanKind,
@@ -108,7 +108,7 @@ pub struct WorkspaceServer {
     pub(super) node_cache: Mutex<FxHashMap<Utf8PathBuf, NodeCache>>,
 
     /// File system implementation.
-    pub(super) fs: Box<dyn FsWithResolverProxy>,
+    pub(super) fs: Arc<dyn FsWithResolverProxy>,
 
     /// Channel sender for instructions to the [crate::WorkspaceWatcher].
     watcher_tx: Sender<WatcherInstruction>,
@@ -131,7 +131,7 @@ impl RefUnwindSafe for WorkspaceServer {}
 impl WorkspaceServer {
     /// Creates a new [Workspace].
     pub fn new(
-        fs: Box<dyn FsWithResolverProxy>,
+        fs: Arc<dyn FsWithResolverProxy>,
         watcher_tx: Sender<WatcherInstruction>,
         notification_tx: watch::Sender<ServiceDataNotification>,
         threads: Option<usize>,
@@ -401,6 +401,37 @@ impl WorkspaceServer {
 
         let opened_by_scanner = reason.is_opened_by_scanner();
 
+        // Second-pass parsing for HTML files with embedded JavaScript and CSS content
+        let (embedded_scripts, embedded_styles) = if let Some(file_source) = self.get_source(index)
+        {
+            if matches!(file_source, DocumentFileSource::Html(_)) {
+                if let Some(Ok(any_parse)) = &syntax {
+                    if let Some(html_root) =
+                        biome_html_syntax::HtmlRoot::cast(any_parse.syntax().clone())
+                    {
+                        let mut node_cache = NodeCache::default();
+                        let scripts = crate::file_handlers::html::extract_embedded_scripts(
+                            &html_root,
+                            &mut node_cache,
+                        );
+                        let styles = crate::file_handlers::html::parse_embedded_styles(
+                            &html_root,
+                            &mut node_cache,
+                        );
+                        (scripts, styles)
+                    } else {
+                        (Vec::new(), Vec::new())
+                    }
+                } else {
+                    (Vec::new(), Vec::new())
+                }
+            } else {
+                (Vec::new(), Vec::new())
+            }
+        } else {
+            (Vec::new(), Vec::new())
+        };
+
         let documents = self.documents.pin();
         let result = documents.compute(path.clone(), |current| {
             let biome_path = BiomePath::new(&path);
@@ -456,6 +487,8 @@ impl WorkspaceServer {
                         file_source_index: index,
                         syntax: syntax.clone(),
                         opened_by_scanner: opened_by_scanner || document.opened_by_scanner,
+                        _embedded_scripts: embedded_scripts.clone(),
+                        _embedded_styles: embedded_styles.clone(),
                     })
                 }
                 None => Operation::Insert(Document {
@@ -464,6 +497,8 @@ impl WorkspaceServer {
                     file_source_index: index,
                     syntax: syntax.clone(),
                     opened_by_scanner,
+                    _embedded_scripts: embedded_scripts.clone(),
+                    _embedded_styles: embedded_styles.clone(),
                 }),
             }
         });
@@ -531,35 +566,10 @@ impl WorkspaceServer {
             &BiomePath::new(path),
             file_source,
             content,
-            settings.into(),
+            &settings,
             node_cache,
         );
         Ok(parsed)
-    }
-
-    /// Checks whether a file is ignored in the top-level config's
-    /// `files.includes` or in the feature's `includes`.
-    fn is_ignored(&self, project_key: ProjectKey, path: &Utf8Path, features: FeatureName) -> bool {
-        let file_name = path.file_name();
-        // Never ignore Biome's config file regardless of `includes`.
-        if file_name == Some(ConfigName::biome_json())
-            || file_name == Some(ConfigName::biome_jsonc())
-        {
-            return false;
-        };
-
-        // Apply top-level `includes`
-        self.is_ignored_by_top_level_config(project_key, path) ||
-                // Apply feature-level `includes`
-                !features.is_empty() && features.iter().all(|feature| self
-                    .projects
-                    .is_ignored_by_feature_config(project_key, path, feature))
-    }
-
-    /// Checks whether a file is ignored in the top-level `files.includes`.
-    fn is_ignored_by_top_level_config(&self, project_key: ProjectKey, path: &Utf8Path) -> bool {
-        self.projects
-            .is_ignored_by_top_level_config(project_key, path)
     }
 
     pub(super) fn is_ignored_by_scanner(&self, project_key: ProjectKey, path: &Utf8Path) -> bool {
@@ -601,15 +611,18 @@ impl WorkspaceServer {
         }
     }
 
-    /// It updates the nested settings of the project assigned to the `project_key`.
+    /// Updates the nested settings of the project assigned to the
+    /// `project_key`.
     ///
-    /// If a configuration file contains errors, it's not processed and the project isn't updated.
+    /// If a configuration file contains errors, it's not processed and the
+    /// project isn't updated.
     ///
-    /// It's the responsibility of the client to process the diagnostics and handle the errors emitted by the configuration.
+    /// It's the responsibility of the client to process the diagnostics and
+    /// handle the errors emitted by the configuration.
     ///
     /// ## Errors
     ///
-    /// - A nested configuration file si a root
+    /// - A nested configuration file is a root
     /// - Biome can't read the file
     pub(super) fn update_project_config_files(
         &self,
@@ -1051,56 +1064,33 @@ impl Workspace for WorkspaceServer {
         &self,
         params: SupportsFeatureParams,
     ) -> Result<FileFeaturesResult, WorkspaceError> {
-        let project_key = params.project_key;
-        let path = params.path.as_path();
-        let language = self.get_file_source(path);
+        let language = self.get_file_source(&params.path);
         let capabilities = self.features.get_capabilities(language);
-        let handle = WorkspaceSettingsHandle::from(
-            self.projects
-                .get_settings_based_on_path(project_key, &params.path)
-                .ok_or_else(WorkspaceError::no_project)?,
-        );
-        let mut file_features = FileFeaturesResult::new();
-        let file_name = path.file_name();
-        file_features = file_features.with_capabilities(&capabilities);
-        file_features = file_features.with_settings_and_language(&handle, path, &capabilities);
 
-        let Some(settings) = handle.settings() else {
-            return Ok(file_features);
-        };
-        if settings.ignore_unknown_enabled()
-            && language == DocumentFileSource::Unknown
-            && self.get_file_source(&params.path) == DocumentFileSource::Unknown
-        {
-            file_features.ignore_not_supported();
-        } else if file_name == Some(ConfigName::biome_json())
-            || file_name == Some(ConfigName::biome_jsonc())
-        {
-            // Never ignore Biome's config file
-        } else if self.is_ignored_by_top_level_config(project_key, path) {
-            file_features.set_ignored_for_all_features();
-        } else {
-            for feature in params.features.iter() {
-                if self
-                    .projects
-                    .is_ignored_by_feature_config(project_key, path, feature)
-                {
-                    file_features.ignored(feature);
-                }
-            }
-        }
-        // If the file is not ignored by at least one feature, then check that the file is not protected.
-        //
-        // Protected files must be ignored.
-        if !file_features.is_not_processed() && FileFeaturesResult::is_protected_file(path) {
-            file_features.set_protected_for_all_features();
-        }
-
-        Ok(file_features)
+        self.projects.get_file_features(
+            params.project_key,
+            &params.path,
+            params.features,
+            language,
+            &capabilities,
+        )
     }
 
     fn is_path_ignored(&self, params: IsPathIgnoredParams) -> Result<bool, WorkspaceError> {
-        Ok(self.is_ignored(params.project_key, params.path.as_path(), params.features))
+        // Never ignore Biome's top-level config file regardless of `includes`.
+        if params.path.file_name().is_some_and(|file_name| {
+            file_name == ConfigName::biome_json() || file_name == ConfigName::biome_jsonc()
+        }) && params.path.parent().is_some_and(|dir_path| {
+            self.projects
+                .get_project_path(params.project_key)
+                .is_some_and(|project_path| dir_path == project_path)
+        }) {
+            return Ok(false);
+        };
+
+        Ok(self
+            .projects
+            .is_ignored(params.project_key, &params.path, params.features))
     }
 
     fn get_syntax_tree(
@@ -1142,19 +1132,19 @@ impl Workspace for WorkspaceServer {
             .debug
             .debug_formatter_ir
             .ok_or_else(self.build_capability_error(&params.path))?;
-        let handle = WorkspaceSettingsHandle::from(
-            self.projects
-                .get_settings_based_on_path(params.project_key, &params.path)
-                .ok_or_else(WorkspaceError::no_project)?,
-        );
+        let settings = self
+            .projects
+            .get_settings_based_on_path(params.project_key, &params.path)
+            .ok_or_else(WorkspaceError::no_project)?;
         let parse = self.get_parse(&params.path)?;
-        if !handle.format_with_errors_enabled_for_this_file_path(&params.path) && parse.has_errors()
+        if !settings.format_with_errors_enabled_for_this_file_path(&params.path)
+            && parse.has_errors()
         {
             return Err(WorkspaceError::format_with_errors_disabled());
         }
         let document_file_source = self.get_file_source(&params.path);
 
-        debug_formatter_ir(&params.path, &document_file_source, parse, handle)
+        debug_formatter_ir(&params.path, &document_file_source, parse, &settings)
     }
 
     fn get_type_info(&self, params: GetTypeInfoParams) -> Result<String, WorkspaceError> {
@@ -1258,12 +1248,35 @@ impl Workspace for WorkspaceServer {
         let parsed = self.parse(project_key, &path, &content, index, &mut node_cache)?;
         let root = parsed.any_parse.root();
 
+        // Second-pass parsing for HTML files with embedded JavaScript and CSS content
+        let (embedded_scripts, embedded_styles) = if let Some(file_source) = self.get_source(index)
+        {
+            if matches!(file_source, DocumentFileSource::Html(_)) {
+                if let Some(html_root) =
+                    biome_html_syntax::HtmlRoot::cast(parsed.any_parse.syntax().clone())
+                {
+                    let mut embedded_node_cache = NodeCache::default();
+                    let scripts = extract_embedded_scripts(&html_root, &mut embedded_node_cache);
+                    let styles = parse_embedded_styles(&html_root, &mut embedded_node_cache);
+                    (scripts, styles)
+                } else {
+                    (Vec::new(), Vec::new())
+                }
+            } else {
+                (Vec::new(), Vec::new())
+            }
+        } else {
+            (Vec::new(), Vec::new())
+        };
+
         let document = Document {
             content,
             version: Some(version),
             file_source_index: index,
             syntax: Some(Ok(parsed.any_parse)),
             opened_by_scanner,
+            _embedded_scripts: embedded_scripts,
+            _embedded_styles: embedded_styles,
         };
 
         if persist_node_cache {
@@ -1332,7 +1345,7 @@ impl Workspace for WorkspaceServer {
                     .map_err(WorkspaceError::plugin_errors)?;
                 let results = lint(LintParams {
                     parse,
-                    workspace: &settings.into(),
+                    settings: &settings,
                     path: &path,
                     only,
                     skip,
@@ -1421,7 +1434,7 @@ impl Workspace for WorkspaceServer {
         Ok(code_actions(CodeActionsParams {
             parse,
             range,
-            workspace: &settings.into(),
+            settings: &settings,
             path: &path,
             module_graph: self.module_graph.clone(),
             project_layout: self.project_layout.clone(),
@@ -1451,20 +1464,20 @@ impl Workspace for WorkspaceServer {
             .formatter
             .format
             .ok_or_else(self.build_capability_error(&params.path))?;
-        let handle = WorkspaceSettingsHandle::from(
-            self.projects
-                .get_settings_based_on_path(params.project_key, &params.path)
-                .ok_or_else(WorkspaceError::no_project)?,
-        );
+        let settings = self
+            .projects
+            .get_settings_based_on_path(params.project_key, &params.path)
+            .ok_or_else(WorkspaceError::no_project)?;
 
         let parse = self.get_parse(&params.path)?;
 
-        if !handle.format_with_errors_enabled_for_this_file_path(&params.path) && parse.has_errors()
+        if !settings.format_with_errors_enabled_for_this_file_path(&params.path)
+            && parse.has_errors()
         {
             return Err(WorkspaceError::format_with_errors_disabled());
         }
         let document_file_source = self.get_file_source(&params.path);
-        format(&params.path, &document_file_source, parse, handle)
+        format(&params.path, &document_file_source, parse, &settings)
     }
 
     #[instrument(level = "debug", skip(self, params))]
@@ -1474,11 +1487,10 @@ impl Workspace for WorkspaceServer {
             .formatter
             .format_range
             .ok_or_else(self.build_capability_error(&params.path))?;
-        let settings = WorkspaceSettingsHandle::from(
-            self.projects
-                .get_settings_based_on_path(params.project_key, &params.path)
-                .ok_or_else(WorkspaceError::no_project)?,
-        );
+        let settings = self
+            .projects
+            .get_settings_based_on_path(params.project_key, &params.path)
+            .ok_or_else(WorkspaceError::no_project)?;
         let parse = self.get_parse(&params.path)?;
         if !settings.format_with_errors_enabled_for_this_file_path(&params.path)
             && parse.has_errors()
@@ -1490,7 +1502,7 @@ impl Workspace for WorkspaceServer {
             &params.path,
             &document_file_source,
             parse,
-            settings,
+            &settings,
             params.range,
         )
     }
@@ -1503,13 +1515,13 @@ impl Workspace for WorkspaceServer {
             .format_on_type
             .ok_or_else(self.build_capability_error(&params.path))?;
 
-        let handle = WorkspaceSettingsHandle::from(
-            self.projects
-                .get_settings_based_on_path(params.project_key, &params.path)
-                .ok_or_else(WorkspaceError::no_project)?,
-        );
+        let settings = self
+            .projects
+            .get_settings_based_on_path(params.project_key, &params.path)
+            .ok_or_else(WorkspaceError::no_project)?;
         let parse = self.get_parse(&params.path)?;
-        if !handle.format_with_errors_enabled_for_this_file_path(&params.path) && parse.has_errors()
+        if !settings.format_with_errors_enabled_for_this_file_path(&params.path)
+            && parse.has_errors()
         {
             return Err(WorkspaceError::format_with_errors_disabled());
         }
@@ -1519,7 +1531,7 @@ impl Workspace for WorkspaceServer {
             &params.path,
             &document_file_source,
             parse,
-            handle,
+            &settings,
             params.offset,
         )
     }
@@ -1568,7 +1580,7 @@ impl Workspace for WorkspaceServer {
         fix_all(FixAllParams {
             parse,
             fix_file_mode,
-            workspace: settings.into(),
+            settings: &settings,
             should_format,
             biome_path: &path,
             module_graph: self.module_graph.clone(),
@@ -1688,7 +1700,7 @@ impl Workspace for WorkspaceServer {
         let parse = self.get_parse(&path)?;
 
         let document_file_source = self.get_file_source(&path);
-        let matches = search(&path, &document_file_source, parse, query, settings.into())?;
+        let matches = search(&path, &document_file_source, parse, query, &settings)?;
 
         Ok(SearchResults { path, matches })
     }

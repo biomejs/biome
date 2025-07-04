@@ -121,6 +121,9 @@ impl LSPServer {
     async fn setup_capabilities(&self) {
         let mut capabilities = CapabilitySet::default();
 
+        let is_linting_and_formatting_disabled = self.session.is_linting_and_formatting_disabled();
+        debug!("Requires configuration: {is_linting_and_formatting_disabled}");
+
         capabilities.add_capability(
             "biome_did_change_extension_settings",
             "workspace/didChangeConfiguration",
@@ -193,7 +196,7 @@ impl LSPServer {
         capabilities.add_capability(
             "biome_formatting",
             "textDocument/formatting",
-            if self.session.is_linting_and_formatting_disabled() {
+            if is_linting_and_formatting_disabled || !self.session.can_register_formatting() {
                 CapabilityStatus::Disable
             } else {
                 CapabilityStatus::Enable(None)
@@ -202,7 +205,7 @@ impl LSPServer {
         capabilities.add_capability(
             "biome_range_formatting",
             "textDocument/rangeFormatting",
-            if self.session.is_linting_and_formatting_disabled() {
+            if is_linting_and_formatting_disabled || !self.session.can_register_range_formatting() {
                 CapabilityStatus::Disable
             } else {
                 CapabilityStatus::Enable(None)
@@ -211,7 +214,8 @@ impl LSPServer {
         capabilities.add_capability(
             "biome_on_type_formatting",
             "textDocument/onTypeFormatting",
-            if self.session.is_linting_and_formatting_disabled() {
+            if is_linting_and_formatting_disabled || !self.session.can_register_on_type_formatting()
+            {
                 CapabilityStatus::Disable
             } else {
                 CapabilityStatus::Enable(Some(json!(DocumentOnTypeFormattingRegistrationOptions {
@@ -222,12 +226,10 @@ impl LSPServer {
             },
         );
 
-        let f = self.session.is_linting_and_formatting_disabled();
-        debug!("Requires configuration: {f}");
         capabilities.add_capability(
             "biome_code_action",
             "textDocument/codeAction",
-            if self.session.is_linting_and_formatting_disabled() {
+            if is_linting_and_formatting_disabled || !self.session.can_register_code_action() {
                 CapabilityStatus::Disable
             } else {
                 CapabilityStatus::Enable(Some(json!(CodeActionProviderCapability::from(
@@ -578,7 +580,7 @@ pub struct ServerFactory {
 
 impl Default for ServerFactory {
     fn default() -> Self {
-        Self::new_with_fs(Box::new(MemoryFileSystem::default()))
+        Self::new_with_fs(Arc::new(MemoryFileSystem::default()))
     }
 }
 
@@ -589,7 +591,7 @@ impl ServerFactory {
         Self {
             cancellation: Arc::default(),
             workspace: Arc::new(WorkspaceServer::new(
-                Box::new(OsFileSystem::default()),
+                Arc::new(OsFileSystem::default()),
                 instruction_tx,
                 service_data_tx,
                 None,
@@ -603,7 +605,7 @@ impl ServerFactory {
     }
 
     /// Constructor for use in tests.
-    pub fn new_with_fs(fs: Box<dyn FsWithResolverProxy>) -> Self {
+    pub fn new_with_fs(fs: Arc<dyn FsWithResolverProxy>) -> Self {
         let (watcher_tx, _) = bounded(0);
         let (service_data_tx, service_data_rx) = watch::channel(ServiceDataNotification::Updated);
         Self {

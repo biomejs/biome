@@ -6,6 +6,7 @@ use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_syntax::jsx_ext::AnyJsxElement;
 use biome_rowan::AstNode;
+use biome_rule_options::no_static_element_interactions::NoStaticElementInteractionsOptions;
 
 declare_lint_rule! {
     /// Enforce that static, visible elements (such as `<div>`) that have click handlers use the valid role attribute.
@@ -95,7 +96,7 @@ impl Rule for NoStaticElementInteractions {
     type Query = Aria<AnyJsxElement>;
     type State = ();
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoStaticElementInteractionsOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();

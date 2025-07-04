@@ -46,6 +46,7 @@ biome_lsp                = { workspace = true }
 biome_migrate            = { workspace = true }
 biome_resolver           = { workspace = true }
 biome_rowan              = { workspace = true }
+biome_rule_options       = { workspace = true }
 biome_service            = { workspace = true }
 biome_text_edit          = { workspace = true }
 bpaf                     = { workspace = true, features = ["bright-color"] }

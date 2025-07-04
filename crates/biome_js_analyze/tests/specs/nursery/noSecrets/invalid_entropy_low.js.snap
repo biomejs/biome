@@ -1,0 +1,101 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid_entropy_low.js
+---
+# Input
+```js
+// These should trigger with low entropy threshold
+const mediumEntropy1 = "abc123def456ghi";
+const mediumEntropy2 = "user2024Password";
+const mediumEntropy3 = "SecretKey123ABC";
+const mediumEntropy4 = "TokenXyZ98765";
+```
+
+# Diagnostics
+```
+invalid_entropy_low.js:2:24 lint/nursery/noSecrets ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Potential secret found.
+  
+    1 │ // These should trigger with low entropy threshold
+  > 2 │ const mediumEntropy1 = "abc123def456ghi";
+      │                        ^^^^^^^^^^^^^^^^^
+    3 │ const mediumEntropy2 = "user2024Password";
+    4 │ const mediumEntropy3 = "SecretKey123ABC";
+  
+  i Type of secret detected: Detected high entropy string
+  
+  i Storing secrets in source code is a security risk. Consider the following steps:
+    1. Remove the secret from your code. If you've already committed it, consider removing the commit entirely from your git tree.
+    2. If needed, use environment variables or a secure secret management system to store sensitive data.
+    3. If this is a false positive, consider adding an inline disable comment, or tweak the entropy threshold. See options in our docs.
+    This rule only catches basic vulnerabilities. For more robust, proper solutions, check out our recommendations at: https://biomejs.dev/linter/rules/no-secrets/#recommendations
+  
+
+```
+
+```
+invalid_entropy_low.js:3:24 lint/nursery/noSecrets ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Potential secret found.
+  
+    1 │ // These should trigger with low entropy threshold
+    2 │ const mediumEntropy1 = "abc123def456ghi";
+  > 3 │ const mediumEntropy2 = "user2024Password";
+      │                        ^^^^^^^^^^^^^^^^^^
+    4 │ const mediumEntropy3 = "SecretKey123ABC";
+    5 │ const mediumEntropy4 = "TokenXyZ98765";
+  
+  i Type of secret detected: Detected high entropy string
+  
+  i Storing secrets in source code is a security risk. Consider the following steps:
+    1. Remove the secret from your code. If you've already committed it, consider removing the commit entirely from your git tree.
+    2. If needed, use environment variables or a secure secret management system to store sensitive data.
+    3. If this is a false positive, consider adding an inline disable comment, or tweak the entropy threshold. See options in our docs.
+    This rule only catches basic vulnerabilities. For more robust, proper solutions, check out our recommendations at: https://biomejs.dev/linter/rules/no-secrets/#recommendations
+  
+
+```
+
+```
+invalid_entropy_low.js:4:24 lint/nursery/noSecrets ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Potential secret found.
+  
+    2 │ const mediumEntropy1 = "abc123def456ghi";
+    3 │ const mediumEntropy2 = "user2024Password";
+  > 4 │ const mediumEntropy3 = "SecretKey123ABC";
+      │                        ^^^^^^^^^^^^^^^^^
+    5 │ const mediumEntropy4 = "TokenXyZ98765";
+  
+  i Type of secret detected: Detected high entropy string
+  
+  i Storing secrets in source code is a security risk. Consider the following steps:
+    1. Remove the secret from your code. If you've already committed it, consider removing the commit entirely from your git tree.
+    2. If needed, use environment variables or a secure secret management system to store sensitive data.
+    3. If this is a false positive, consider adding an inline disable comment, or tweak the entropy threshold. See options in our docs.
+    This rule only catches basic vulnerabilities. For more robust, proper solutions, check out our recommendations at: https://biomejs.dev/linter/rules/no-secrets/#recommendations
+  
+
+```
+
+```
+invalid_entropy_low.js:5:24 lint/nursery/noSecrets ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Potential secret found.
+  
+    3 │ const mediumEntropy2 = "user2024Password";
+    4 │ const mediumEntropy3 = "SecretKey123ABC";
+  > 5 │ const mediumEntropy4 = "TokenXyZ98765";
+      │                        ^^^^^^^^^^^^^^^
+  
+  i Type of secret detected: Detected high entropy string
+  
+  i Storing secrets in source code is a security risk. Consider the following steps:
+    1. Remove the secret from your code. If you've already committed it, consider removing the commit entirely from your git tree.
+    2. If needed, use environment variables or a secure secret management system to store sensitive data.
+    3. If this is a false positive, consider adding an inline disable comment, or tweak the entropy threshold. See options in our docs.
+    This rule only catches basic vulnerabilities. For more robust, proper solutions, check out our recommendations at: https://biomejs.dev/linter/rules/no-secrets/#recommendations
+  
+
+```

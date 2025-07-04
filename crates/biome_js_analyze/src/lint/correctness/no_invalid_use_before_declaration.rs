@@ -7,6 +7,7 @@ use biome_js_syntax::{
     binding_ext::{AnyJsBindingDeclaration, AnyJsIdentifierBinding},
 };
 use biome_rowan::{AstNode, SyntaxNodeOptionExt, TextRange};
+use biome_rule_options::no_invalid_use_before_declaration::NoInvalidUseBeforeDeclarationOptions;
 
 declare_lint_rule! {
     /// Disallow the use of variables and function parameters before their declaration
@@ -75,7 +76,7 @@ impl Rule for NoInvalidUseBeforeDeclaration {
     type Query = SemanticServices;
     type State = InvalidUseBeforeDeclaration;
     type Signals = Box<[Self::State]>;
-    type Options = ();
+    type Options = NoInvalidUseBeforeDeclarationOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let model = ctx.model();

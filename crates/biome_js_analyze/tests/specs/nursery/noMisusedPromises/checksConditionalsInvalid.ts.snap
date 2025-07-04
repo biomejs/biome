@@ -1,0 +1,98 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: checksConditionalsInvalid.ts
+---
+# Input
+```ts
+const promise = Promise.resolve('value');
+
+if (promise) {
+  // Do something
+}
+
+const val = promise ? 123 : 456;
+
+[1, 2, 3].filter(() => promise);
+
+while (promise) {
+  // Do something
+}
+
+```
+
+# Diagnostics
+```
+checksConditionalsInvalid.ts:3:5 lint/nursery/noMisusedPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i A Promise was found where a conditional was expected.
+  
+    1 │ const promise = Promise.resolve('value');
+    2 │ 
+  > 3 │ if (promise) {
+      │     ^^^^^^^
+    4 │   // Do something
+    5 │ }
+  
+  i A Promise is always truthy, so this is most likely a mistake.
+  
+  i You may have intended to `await` the Promise instead.
+  
+
+```
+
+```
+checksConditionalsInvalid.ts:7:13 lint/nursery/noMisusedPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i A Promise was found where a conditional was expected.
+  
+    5 │ }
+    6 │ 
+  > 7 │ const val = promise ? 123 : 456;
+      │             ^^^^^^^
+    8 │ 
+    9 │ [1, 2, 3].filter(() => promise);
+  
+  i A Promise is always truthy, so this is most likely a mistake.
+  
+  i You may have intended to `await` the Promise instead.
+  
+
+```
+
+```
+checksConditionalsInvalid.ts:9:18 lint/nursery/noMisusedPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This function returns a Promise where a conditional was expected.
+  
+     7 │ const val = promise ? 123 : 456;
+     8 │ 
+   > 9 │ [1, 2, 3].filter(() => promise);
+       │                  ^^^^^^^^^^^^^
+    10 │ 
+    11 │ while (promise) {
+  
+  i A Promise is always truthy, so this is most likely a mistake.
+  
+  i You may have intended to `await` the Promise, but this does not work inside a synchronous callback.
+  
+
+```
+
+```
+checksConditionalsInvalid.ts:11:8 lint/nursery/noMisusedPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i A Promise was found where a conditional was expected.
+  
+     9 │ [1, 2, 3].filter(() => promise);
+    10 │ 
+  > 11 │ while (promise) {
+       │        ^^^^^^^
+    12 │   // Do something
+    13 │ }
+  
+  i A Promise is always truthy, so this is most likely a mistake.
+  
+  i You may have intended to `await` the Promise instead.
+  
+
+```

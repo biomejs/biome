@@ -9,6 +9,7 @@ use biome_js_syntax::{
     TextRange,
 };
 use biome_rowan::{AstNode, BatchMutationExt, SyntaxResult};
+use biome_rule_options::use_simple_number_keys::UseSimpleNumberKeysOptions;
 use std::str::FromStr;
 
 declare_lint_rule! {
@@ -268,7 +269,7 @@ impl Rule for UseSimpleNumberKeys {
     type Query = Ast<JsObjectExpression>;
     type State = RuleState;
     type Signals = Box<[Self::State]>;
-    type Options = ();
+    type Options = UseSimpleNumberKeysOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let mut result = Vec::new();

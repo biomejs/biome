@@ -1,15 +1,11 @@
 use crate::services::semantic::Semantic;
-use ::serde::{Deserialize, Serialize};
 use biome_analyze::{Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule};
 use biome_console::markup;
-use biome_deserialize_macros::Deserializable;
 use biome_js_syntax::{
     AnyFunctionLike, AnyJsFunction, JsCallExpression, JsParenthesizedExpression,
 };
 use biome_rowan::AstNode;
-#[cfg(feature = "schemars")]
-use schemars::JsonSchema;
-use std::num::NonZeroU8;
+use biome_rule_options::no_excessive_lines_per_function::NoExcessiveLinesPerFunctionOptions;
 
 declare_lint_rule! {
     /// Restrict the number of lines of code in a function.
@@ -214,26 +210,4 @@ fn is_iife(func: &AnyJsFunction) -> bool {
 
 pub struct State {
     function_lines_count: usize,
-}
-
-#[derive(Clone, Debug, Deserialize, Deserializable, Eq, PartialEq, Serialize)]
-#[cfg_attr(feature = "schema", derive(JsonSchema))]
-#[serde(rename_all = "camelCase", deny_unknown_fields, default)]
-pub struct NoExcessiveLinesPerFunctionOptions {
-    /// The maximum number of lines allowed in a function body.
-    pub max_lines: NonZeroU8,
-    /// When this options is set to `true`, blank lines in the function body are not counted towards the maximum line limit.
-    pub skip_blank_lines: bool,
-    /// When this option is set to `true`, Immediately Invoked Function Expressions (IIFEs) are not checked for the maximum line limit.
-    pub skip_iifes: bool,
-}
-
-impl Default for NoExcessiveLinesPerFunctionOptions {
-    fn default() -> Self {
-        Self {
-            max_lines: NonZeroU8::new(50).unwrap(),
-            skip_blank_lines: false,
-            skip_iifes: false,
-        }
-    }
 }

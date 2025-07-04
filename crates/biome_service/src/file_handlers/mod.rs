@@ -8,7 +8,7 @@ pub use crate::file_handlers::astro::{ASTRO_FENCE, AstroFileHandler};
 use crate::file_handlers::graphql::GraphqlFileHandler;
 pub use crate::file_handlers::svelte::{SVELTE_FENCE, SvelteFileHandler};
 pub use crate::file_handlers::vue::{VUE_FENCE, VueFileHandler};
-use crate::settings::{Settings, WorkspaceSettingsHandle};
+use crate::settings::Settings;
 use crate::workspace::{
     FixFileMode, FixFileResult, GetSyntaxTreeResult, PullActionsResult, RenameResult,
 };
@@ -396,7 +396,7 @@ impl biome_console::fmt::Display for DocumentFileSource {
 pub struct FixAllParams<'a> {
     pub(crate) parse: AnyParse,
     pub(crate) fix_file_mode: FixFileMode,
-    pub(crate) workspace: WorkspaceSettingsHandle,
+    pub(crate) settings: &'a Settings,
     /// Whether it should format the code action
     pub(crate) should_format: bool,
     pub(crate) biome_path: &'a BiomePath,
@@ -428,13 +428,7 @@ pub struct ParseResult {
     pub(crate) language: Option<DocumentFileSource>,
 }
 
-type Parse = fn(
-    &BiomePath,
-    DocumentFileSource,
-    &str,
-    WorkspaceSettingsHandle,
-    &mut NodeCache,
-) -> ParseResult;
+type Parse = fn(&BiomePath, DocumentFileSource, &str, &Settings, &mut NodeCache) -> ParseResult;
 
 #[derive(Default)]
 pub struct ParserCapabilities {
@@ -444,12 +438,8 @@ pub struct ParserCapabilities {
 
 type DebugSyntaxTree = fn(&BiomePath, AnyParse) -> GetSyntaxTreeResult;
 type DebugControlFlow = fn(AnyParse, TextSize) -> String;
-type DebugFormatterIR = fn(
-    &BiomePath,
-    &DocumentFileSource,
-    AnyParse,
-    WorkspaceSettingsHandle,
-) -> Result<String, WorkspaceError>;
+type DebugFormatterIR =
+    fn(&BiomePath, &DocumentFileSource, AnyParse, &Settings) -> Result<String, WorkspaceError>;
 type DebugTypeInfo =
     fn(&BiomePath, Option<AnyParse>, Arc<ModuleGraph>) -> Result<String, WorkspaceError>;
 type DebugRegisteredTypes = fn(&BiomePath, AnyParse) -> Result<String, WorkspaceError>;
@@ -474,7 +464,7 @@ pub struct DebugCapabilities {
 #[derive(Debug)]
 pub(crate) struct LintParams<'a> {
     pub(crate) parse: AnyParse,
-    pub(crate) workspace: &'a WorkspaceSettingsHandle,
+    pub(crate) settings: &'a Settings,
     pub(crate) language: DocumentFileSource,
     pub(crate) path: &'a BiomePath,
     pub(crate) only: Vec<RuleSelector>,
@@ -514,11 +504,7 @@ impl<'a> ProcessLint<'a> {
             // - if a single rule is run.
             ignores_suppression_comment: !params.categories.contains(RuleCategory::Lint)
                 || !params.only.is_empty(),
-            rules: params
-                .workspace
-                .settings()
-                .as_ref()
-                .and_then(|settings| settings.as_linter_rules(params.path.as_path())),
+            rules: params.settings.as_linter_rules(params.path.as_path()),
             pull_code_actions: params.pull_code_actions,
         }
     }
@@ -604,7 +590,7 @@ impl<'a> ProcessLint<'a> {
 pub(crate) struct CodeActionsParams<'a> {
     pub(crate) parse: AnyParse,
     pub(crate) range: Option<TextRange>,
-    pub(crate) workspace: &'a WorkspaceSettingsHandle,
+    pub(crate) settings: &'a Settings,
     pub(crate) path: &'a BiomePath,
     pub(crate) module_graph: Arc<ModuleGraph>,
     pub(crate) project_layout: Arc<ProjectLayout>,
@@ -634,24 +620,20 @@ pub struct AnalyzerCapabilities {
     pub(crate) rename: Option<Rename>,
 }
 
-type Format = fn(
-    &BiomePath,
-    &DocumentFileSource,
-    AnyParse,
-    WorkspaceSettingsHandle,
-) -> Result<Printed, WorkspaceError>;
+type Format =
+    fn(&BiomePath, &DocumentFileSource, AnyParse, &Settings) -> Result<Printed, WorkspaceError>;
 type FormatRange = fn(
     &BiomePath,
     &DocumentFileSource,
     AnyParse,
-    WorkspaceSettingsHandle,
+    &Settings,
     TextRange,
 ) -> Result<Printed, WorkspaceError>;
 type FormatOnType = fn(
     &BiomePath,
     &DocumentFileSource,
     AnyParse,
-    WorkspaceSettingsHandle,
+    &Settings,
     TextSize,
 ) -> Result<Printed, WorkspaceError>;
 
@@ -665,14 +647,14 @@ pub(crate) struct FormatterCapabilities {
     pub(crate) format_on_type: Option<FormatOnType>,
 }
 
-type Enabled = fn(&Utf8Path, &WorkspaceSettingsHandle) -> bool;
+type Enabled = fn(&Utf8Path, &Settings) -> bool;
 
 type Search = fn(
     &BiomePath,
     &DocumentFileSource,
     AnyParse,
     &GritQuery,
-    WorkspaceSettingsHandle,
+    &Settings,
 ) -> Result<Vec<TextRange>, WorkspaceError>;
 
 #[derive(Default)]
@@ -831,7 +813,7 @@ pub(crate) fn search(
     _file_source: &DocumentFileSource,
     parse: AnyParse,
     query: &GritQuery,
-    _settings: WorkspaceSettingsHandle,
+    _settings: &Settings,
 ) -> Result<Vec<TextRange>, WorkspaceError> {
     let result = query
         .execute(GritTargetFile::new(path.as_path(), parse))
@@ -975,7 +957,7 @@ struct LintVisitor<'a, 'b> {
     // lint_params: &'b LintParams<'a>,
     only: Option<&'b [RuleSelector]>,
     skip: Option<&'b [RuleSelector]>,
-    settings: Option<&'b Settings>,
+    settings: &'b Settings,
     path: Option<&'b Utf8Path>,
     package_json: Option<PackageJson>,
     analyzer_options: &'b mut AnalyzerOptions,
@@ -985,7 +967,7 @@ impl<'a, 'b> LintVisitor<'a, 'b> {
     pub(crate) fn new(
         only: Option<&'b [RuleSelector]>,
         skip: Option<&'b [RuleSelector]>,
-        settings: Option<&'b Settings>,
+        settings: &'b Settings,
         path: Option<&'b Utf8Path>,
         package_json: Option<PackageJson>,
         analyzer_options: &'b mut AnalyzerOptions,
@@ -1019,9 +1001,7 @@ impl<'a, 'b> LintVisitor<'a, 'b> {
 
         let path = self.path.expect("File path");
 
-        let recommended_enabled = self
-            .settings
-            .is_some_and(|settings| settings.linter_recommended_enabled());
+        let recommended_enabled = self.settings.linter_recommended_enabled();
         if !recommended_enabled {
             return;
         }
@@ -1029,7 +1009,7 @@ impl<'a, 'b> LintVisitor<'a, 'b> {
         let no_only = self.only.is_some_and(|only| only.is_empty());
         let no_domains = self
             .settings
-            .and_then(|settings| settings.as_linter_domains(path))
+            .as_linter_domains(path)
             .is_none_or(|d| d.is_empty());
         if !(no_only && no_domains) {
             return;
@@ -1074,7 +1054,7 @@ impl<'a, 'b> LintVisitor<'a, 'b> {
 
         let domains = self
             .settings
-            .and_then(|settings| settings.as_linter_domains(self.path.expect("File path")));
+            .as_linter_domains(self.path.expect("File path"));
 
         // no domains, no need to record the rule
         if domains.as_ref().is_none_or(|d| d.is_empty()) {
@@ -1132,7 +1112,7 @@ impl<'a, 'b> LintVisitor<'a, 'b> {
         let has_only_filter = self.only.is_none_or(|only| !only.is_empty());
         let rules = self
             .settings
-            .and_then(|settings| settings.as_linter_rules(self.path.expect("Path to be set")))
+            .as_linter_rules(self.path.expect("Path to be set"))
             .unwrap_or_default();
         if !has_only_filter {
             self.enabled_rules.extend(rules.as_enabled_rules());
@@ -1272,7 +1252,7 @@ impl RegistryVisitor<GraphqlLanguage> for LintVisitor<'_, '_> {
 }
 
 struct AssistsVisitor<'a, 'b> {
-    settings: Option<&'b Settings>,
+    settings: &'b Settings,
     enabled_rules: Vec<RuleFilter<'a>>,
     disabled_rules: Vec<RuleFilter<'a>>,
     only: Option<&'b [RuleSelector]>,
@@ -1284,7 +1264,7 @@ impl<'a, 'b> AssistsVisitor<'a, 'b> {
     pub(crate) fn new(
         only: Option<&'b [RuleSelector]>,
         skip: Option<&'b [RuleSelector]>,
-        settings: Option<&'b Settings>,
+        settings: &'b Settings,
         path: Option<&'b Utf8Path>,
     ) -> Self {
         Self {
@@ -1332,7 +1312,7 @@ impl<'a, 'b> AssistsVisitor<'a, 'b> {
         let has_only_filter = self.only.is_none_or(|only| !only.is_empty());
         let rules = self
             .settings
-            .and_then(|settings| settings.as_assist_actions(self.path.expect("Path to be set")))
+            .as_assist_actions(self.path.expect("Path to be set"))
             .unwrap_or_default();
         if !has_only_filter {
             self.enabled_rules.extend(rules.as_enabled_rules());
@@ -1406,7 +1386,7 @@ impl RegistryVisitor<GraphqlLanguage> for AssistsVisitor<'_, '_> {
 }
 
 pub(crate) struct AnalyzerVisitorBuilder<'a> {
-    settings: Option<&'a Settings>,
+    settings: &'a Settings,
     only: Option<&'a [RuleSelector]>,
     skip: Option<&'a [RuleSelector]>,
     path: Option<&'a Utf8Path>,
@@ -1416,7 +1396,7 @@ pub(crate) struct AnalyzerVisitorBuilder<'a> {
 }
 
 impl<'b> AnalyzerVisitorBuilder<'b> {
-    pub(crate) fn new(settings: Option<&'b Settings>, analyzer_options: AnalyzerOptions) -> Self {
+    pub(crate) fn new(settings: &'b Settings, analyzer_options: AnalyzerOptions) -> Self {
         Self {
             settings,
             only: None,

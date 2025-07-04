@@ -11,6 +11,7 @@ use biome_js_syntax::{
     JsBinaryOperator, JsLanguage, JsUnaryExpression, JsUnaryOperator, T,
 };
 use biome_rowan::{AstNode, AstNodeList, BatchMutationExt, TriviaPieceKind, declare_node_union};
+use biome_rule_options::no_implicit_coercion::NoImplicitCoercionOptions;
 
 declare_lint_rule! {
     /// Disallow shorthand type conversions.
@@ -118,7 +119,7 @@ impl Rule for NoImplicitCoercion {
     type Query = Ast<PotentialImplicitCoercion>;
     type State = RuleState;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoImplicitCoercionOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
@@ -206,8 +207,8 @@ impl Rule for NoImplicitCoercion {
                             None
                         }
                     }
-                    // arg * 1 | arg / 1
-                    JsBinaryOperator::Times | JsBinaryOperator::Divide => {
+                    // arg * 1
+                    JsBinaryOperator::Times => {
                         let argument =
                             binary_expression.get_another_arg_if_one_matches(|arg| arg.is_one())?;
 
@@ -215,6 +216,23 @@ impl Rule for NoImplicitCoercion {
                             Some(RuleState::ExpressionToTypeCall(ExpressionToTypeCall {
                                 expression: binary_expression.clone().into(),
                                 argument,
+                                type_name: "Number",
+                            }))
+                        } else {
+                            None
+                        }
+                    }
+                    // arg / 1
+                    JsBinaryOperator::Divide => {
+                        let (left, right) = (
+                            binary_expression.left().ok()?,
+                            binary_expression.right().ok()?,
+                        );
+
+                        if !left.is_number() && right.is_one() {
+                            Some(RuleState::ExpressionToTypeCall(ExpressionToTypeCall {
+                                expression: binary_expression.clone().into(),
+                                argument: left,
                                 type_name: "Number",
                             }))
                         } else {

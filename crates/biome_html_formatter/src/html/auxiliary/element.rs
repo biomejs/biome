@@ -80,10 +80,14 @@ impl FormatNodeRule<HtmlElement> for FormatHtmlElement {
         // to borrow, while the child formatters are responsible for actually printing
         // the tokens. `HtmlElementList` prints them if they are borrowed, otherwise
         // they are printed by their original formatter.
-        let should_borrow_opening_r_angle =
-            is_whitespace_sensitive && !children.is_empty() && !content_has_leading_whitespace;
-        let should_borrow_closing_tag =
-            is_whitespace_sensitive && !children.is_empty() && !content_has_trailing_whitespace;
+        let should_borrow_opening_r_angle = is_whitespace_sensitive
+            && !children.is_empty()
+            && !content_has_leading_whitespace
+            && !should_be_verbatim;
+        let should_borrow_closing_tag = is_whitespace_sensitive
+            && !children.is_empty()
+            && !content_has_trailing_whitespace
+            && !should_be_verbatim;
 
         let borrowed_r_angle = if should_borrow_opening_r_angle {
             opening_element.r_angle_token().ok()

@@ -8,6 +8,7 @@ use biome_js_syntax::{
     AnyJsExpression, AnyJsStatement, JsConditionalExpression, JsIfStatement, JsUnaryOperator, T,
 };
 use biome_rowan::{AstNode, BatchMutationExt, declare_node_union};
+use biome_rule_options::no_negation_else::NoNegationElseOptions;
 
 use crate::JsRuleAction;
 
@@ -61,7 +62,7 @@ impl Rule for NoNegationElse {
     type Query = Ast<AnyJsCondition>;
     type State = ();
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoNegationElseOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
         let node = ctx.query();

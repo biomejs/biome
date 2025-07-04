@@ -269,7 +269,7 @@ pub trait Parser: Sized {
         self.bump_any()
     }
 
-    /// Consume any token but cast it as a different kind using the specified `context.
+    /// Consume any token but cast it as a different kind using the specified `context`.
     fn bump_remap_with_context(
         &mut self,
         kind: Self::Kind,
@@ -402,7 +402,7 @@ pub trait Parser: Sized {
     }
 
     /// Try to eat a specific token kind, if the kind is not there then adds an error to the events stack
-    /// using the specified `context.
+    /// using the specified `context`.
     fn expect_with_context(
         &mut self,
         kind: Self::Kind,

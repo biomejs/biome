@@ -6,6 +6,7 @@ use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_syntax::{AnyJsxAttributeName, JsCallExpression, JsxAttribute};
 use biome_rowan::{AstNode, TextRange, declare_node_union};
+use biome_rule_options::no_dangerously_set_inner_html::NoDangerouslySetInnerHtmlOptions;
 
 declare_lint_rule! {
     /// Prevent the usage of dangerous JSX props
@@ -57,7 +58,7 @@ impl Rule for NoDangerouslySetInnerHtml {
     type Query = Semantic<AnyJsCreateElement>;
     type State = NoDangerState;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoDangerouslySetInnerHtmlOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();

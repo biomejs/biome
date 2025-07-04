@@ -1,0 +1,50 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `vendor/biome.jsonc`
+
+```json
+{
+  "root": true,
+  "linter": {
+    "rules": {
+      "correctness": { "noUnusedVariables": "error" }
+    }
+  }
+}
+```
+
+## `biome.jsonc`
+
+```json
+{
+  "files": {
+    "includes": ["**/*.js", "!vendor/**"]
+  },
+  "linter": {
+    "rules": {
+      "correctness": { "noUnusedVariables": "off" },
+      "suspicious": { "noDebugger": "off" }
+    }
+  }
+}
+```
+
+## `file.js`
+
+```js
+let a; debugger
+```
+
+## `vendor/foo/file.js`
+
+```js
+let a; debugger
+```
+
+# Emitted Messages
+
+```block
+Checked 2 files in <TIME>. No fixes applied.
+```

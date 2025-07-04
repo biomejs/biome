@@ -5,6 +5,7 @@ use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_syntax::{JsArrayBindingPattern, JsObjectBindingPattern};
 use biome_rowan::{AstNode, AstSeparatedList, declare_node_union};
+use biome_rule_options::no_empty_pattern::NoEmptyPatternOptions;
 
 declare_lint_rule! {
     /// Disallows empty destructuring patterns.
@@ -49,7 +50,7 @@ impl Rule for NoEmptyPattern {
     type Query = Ast<JsAnyBindPatternLike>;
     type State = ();
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoEmptyPatternOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
         use JsAnyBindPatternLike::*;

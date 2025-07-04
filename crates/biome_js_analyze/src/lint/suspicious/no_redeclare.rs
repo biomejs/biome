@@ -7,6 +7,7 @@ use biome_js_semantic::Scope;
 use biome_js_syntax::binding_ext::AnyJsBindingDeclaration;
 use biome_js_syntax::{JsSyntaxKind, TextRange};
 use biome_rowan::AstNode;
+use biome_rule_options::no_redeclare::NoRedeclareOptions;
 use rustc_hash::FxHashMap;
 
 declare_lint_rule! {
@@ -83,7 +84,7 @@ impl Rule for NoRedeclare {
     type Query = SemanticServices;
     type State = Redeclaration;
     type Signals = Box<[Redeclaration]>;
-    type Options = ();
+    type Options = NoRedeclareOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let mut redeclarations = Vec::default();

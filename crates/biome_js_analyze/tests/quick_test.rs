@@ -26,32 +26,15 @@ fn project_layout_with_top_level_dependencies(dependencies: Dependencies) -> Arc
 #[test]
 fn quick_test() {
     const FILENAME: &str = "dummyFile.ts";
-    const SOURCE: &str = r#"type Props = {
-	a: string;
-	returnsPromise: () => Promise<void>;
-};
-async function testDestructuringAndCallingReturnsPromiseFromRest({
-	a,
-	...rest
-}: Props) {
-	rest
-		.returnsPromise()
-		.then(() => {})
-		.finally(() => {});
-}
+    const SOURCE: &str = r#"const condition = Math.random() > -1; // Always true, but dynamic to linter
+condition ? Promise.reject("ternary bypass") : null;
 "#;
 
     let parsed = parse(SOURCE, JsFileSource::tsx(), JsParserOptions::default());
 
     let mut fs = TemporaryFs::new("quick_test");
     fs.create_file(FILENAME, SOURCE);
-    fs.create_file(
-        "returnPromiseResult.ts",
-        r#"export function returnPromiseResult(): Promise<{ result: true | false }> {
-  return new Promise(resolve => resolve({ result: true }));
-}
-"#,
-    );
+
     let file_path = Utf8PathBuf::from(format!("{}/{FILENAME}", fs.cli_path()));
 
     let mut error_ranges: Vec<TextRange> = Vec::new();

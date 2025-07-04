@@ -19,6 +19,7 @@ use biome_plugin_loader::PluginDiagnostic;
 use camino::Utf8Path;
 use serde::{Deserialize, Serialize};
 use std::error::Error;
+use std::ffi::OsString;
 use std::fmt;
 use std::fmt::{Debug, Display, Formatter};
 use std::process::{ExitCode, Termination};
@@ -26,43 +27,70 @@ use std::process::{ExitCode, Termination};
 /// Generic errors thrown during biome operations
 #[derive(Deserialize, Diagnostic, Serialize)]
 pub enum WorkspaceError {
-    /// The file does not exist in the [crate::Workspace]
-    NotFound(NotFound),
-    /// A file is not supported. It contains the language and path of the file
-    /// Use this error if Biome is trying to process a file that Biome can't understand
-    SourceFileNotSupported(SourceFileNotSupported),
-    /// The formatter encountered an error while formatting the file
-    FormatError(FormatError),
-    /// The formatter encountered an error while formatting the file
-    PrintError(PrintError),
-    /// The file could not be formatted since it has syntax errors and `format_with_errors` is disabled
-    FormatWithErrorsDisabled(FormatWithErrorsDisabled),
-    /// The file could not be analyzed because a rule caused an error.
-    RuleError(RuleError),
-    /// Thrown when Biome can't read a generic file
+    /// Thrown when Biome can't read a generic file.
     CantReadFile(CantReadFile),
-    /// Error thrown when validating the configuration. Once deserialized, further checks have to be done.
+
+    /// Error thrown when validating the configuration. Once deserialized,
+    /// further checks have to be done.
     Configuration(ConfigurationDiagnostic),
-    /// An operation is attempted on the registered project, but there is no registered project.
-    NoProject(NoProject),
-    /// Thrown when the workspace attempts to register a nested project, but no working directory was provided
-    NoWorkspaceDirectory(NoWorkspaceDirectory),
-    /// Error thrown when Biome cannot rename a symbol.
-    RenameError(RenameError),
-    /// Error emitted by the underlying transport layer for a remote Workspace
-    TransportError(TransportError),
-    /// Emitted when the file is ignored and should not be processed
+
+    /// Emitted when the file is ignored and should not be processed.
     FileIgnored(FileIgnored),
-    /// Diagnostics emitted when querying the file system
+
+    /// Diagnostics emitted when querying the file system.
     FileSystem(FileSystemDiagnostic),
-    /// Raised when there's an issue around the VCS integration
-    Vcs(VcsDiagnostic),
+
+    /// The formatter encountered an error while formatting the file.
+    FormatError(FormatError),
+
+    /// The file could not be formatted since it has syntax errors and
+    /// `format_with_errors` is disabled.
+    FormatWithErrorsDisabled(FormatWithErrorsDisabled),
+
+    /// An operation is attempted on the registered project, but there is no
+    /// registered project.
+    NoProject(NoProject),
+
+    /// Thrown when the workspace attempts to register a nested project, but no
+    /// working directory was provided.
+    NoWorkspaceDirectory(NoWorkspaceDirectory),
+
+    /// Path contained a non-UTF8 character.
+    NonUtf8Path(NonUtf8Path),
+
+    /// The file does not exist in the [crate::Workspace].
+    NotFound(NotFound),
+
     /// One or more errors occurred during plugin loading.
     PluginErrors(PluginErrors),
+
+    /// The formatter encountered an error while formatting the file.
+    PrintError(PrintError),
+
     /// Diagnostic raised when a file is protected.
     ProtectedFile(ProtectedFile),
+
+    /// Error thrown when Biome cannot rename a symbol.
+    RenameError(RenameError),
+
+    /// The file could not be analyzed because a rule caused an error.
+    RuleError(RuleError),
+
     /// Error when searching for a pattern
     SearchError(SearchError),
+
+    /// A file is not supported. Contains the language and path of the file.
+    ///
+    /// Use this error if Biome is trying to process a file that Biome can't
+    /// understand.
+    SourceFileNotSupported(SourceFileNotSupported),
+
+    /// Error emitted by the underlying transport layer for a remote Workspace.
+    TransportError(TransportError),
+
+    /// Raised when there's an issue around the VCS integration.
+    Vcs(VcsDiagnostic),
+
     /// Error in the workspace watcher.
     WatchError(WatchError),
 }
@@ -80,10 +108,17 @@ impl WorkspaceError {
         Self::SearchError(SearchError::InvalidPattern(InvalidPattern))
     }
 
+    pub fn non_utf8_path(path: OsString) -> Self {
+        Self::NonUtf8Path(NonUtf8Path {
+            path: path.display().to_string(),
+        })
+    }
+
     pub fn not_found() -> Self {
         Self::NotFound(NotFound)
     }
 
+    #[inline]
     pub fn no_project() -> Self {
         Self::NoProject(NoProject)
     }
@@ -203,6 +238,20 @@ impl From<WorkspaceError> for biome_diagnostics::serde::Diagnostic {
     fn from(error: WorkspaceError) -> Self {
         Self::new(error)
     }
+}
+
+#[derive(Debug, Deserialize, Diagnostic, Serialize)]
+#[diagnostic(
+     category = "internalError/fs",
+     severity = Error,
+     message(
+         description = "Biome does not support non-UTF8 characters in path: {path}",
+         message("Biome does not support non-UTF8 characters in path: "<Emphasis>{self.path}</Emphasis>)
+     ),
+ )]
+pub struct NonUtf8Path {
+    #[location(resource)]
+    path: String,
 }
 
 #[derive(Debug, Serialize, Deserialize, Diagnostic)]
@@ -628,6 +677,7 @@ mod test {
     use biome_diagnostics::{DiagnosticExt, Error, print_diagnostic_to_string};
     use biome_formatter::FormatError;
     use biome_fs::BiomePath;
+    use std::ffi::OsString;
 
     fn snap_diagnostic(test_name: &str, diagnostic: Error) {
         let content = print_diagnostic_to_string(&diagnostic);
@@ -724,6 +774,14 @@ mod test {
         snap_diagnostic(
             "formatter_syntax_error",
             WorkspaceError::FormatError(FormatError::SyntaxError).with_file_path("example.js"),
+        )
+    }
+
+    #[test]
+    fn non_utf8_path() {
+        snap_diagnostic(
+            "non_utf8_path",
+            Error::from(WorkspaceError::non_utf8_path(OsString::from("path.js"))),
         )
     }
 }

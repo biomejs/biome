@@ -13,6 +13,7 @@ use biome_js_syntax::{
     JsTemplateExpression, JsVariableDeclarator, JsWithStatement,
 };
 use biome_rowan::{AstNode, TextRange, declare_node_union};
+use biome_rule_options::no_unsafe_optional_chaining::NoUnsafeOptionalChainingOptions;
 
 declare_lint_rule! {
     /// Disallow the use of optional chaining in contexts where the undefined value is not allowed.
@@ -78,7 +79,7 @@ impl Rule for NoUnsafeOptionalChaining {
     type Query = Ast<AnyJsOptionalChainExpression>;
     type State = TextRange;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoUnsafeOptionalChainingOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();

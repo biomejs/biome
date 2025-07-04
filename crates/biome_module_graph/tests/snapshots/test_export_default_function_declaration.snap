@@ -44,7 +44,7 @@ BindingId(0) => JsBindingData {
 ## Registered types
 
 ```
-Module TypeId(0) => instanceof unresolved reference "JSX.Element" (scope ID: 1)
+Module TypeId(0) => unknown
 
 Module TypeId(1) => sync Function "Component" {
   accepts: {

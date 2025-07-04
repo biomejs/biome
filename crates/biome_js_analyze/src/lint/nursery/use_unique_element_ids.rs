@@ -7,6 +7,7 @@ use biome_js_syntax::{
     jsx_ext::AnyJsxElement,
 };
 use biome_rowan::{AstNode, declare_node_union};
+use biome_rule_options::use_unique_element_ids::UseUniqueElementIdsOptions;
 
 use crate::react::{ReactApiCall, ReactCreateElementCall};
 use crate::services::semantic::Semantic;
@@ -80,7 +81,7 @@ impl Rule for UseUniqueElementIds {
     type Query = Semantic<UseUniqueElementIdsQuery>;
     type State = ();
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = UseUniqueElementIdsOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
