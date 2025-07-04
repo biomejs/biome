@@ -1,0 +1,13 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: ignoreShebang.js
+---
+# Input
+```js
+#!/usr/bin/env bun
+
+/** biome-ignore-all lint/correctness/noUnusedVariables: explanation */
+
+const test = "hello";
+
+```

@@ -421,7 +421,7 @@ where
             }
 
             if let Some(comment) = piece.as_comments() {
-                self.handle_comment(&token, true, index, comment.text(), piece.text_range())?;
+                self.handle_comment(true, index, comment.text(), piece.text_range())?;
             }
         }
 
@@ -438,7 +438,7 @@ where
             }
 
             if let Some(comment) = piece.as_comments() {
-                self.handle_comment(&token, false, index, comment.text(), piece.text_range())?;
+                self.handle_comment(false, index, comment.text(), piece.text_range())?;
             }
         }
 
@@ -525,8 +525,7 @@ where
     /// comments, and create line suppression entries accordingly
     fn handle_comment(
         &mut self,
-        token: &SyntaxToken<L>,
-        _is_leading: bool,
+        is_leading: bool,
         _index: usize,
         text: &str,
         range: TextRange,
@@ -573,7 +572,7 @@ where
 
             if let Err(diagnostic) =
                 self.suppressions
-                    .push_suppression(&suppression, range, token.text_range())
+                    .push_suppression(&suppression, range, is_leading)
             {
                 let signal = DiagnosticSignal::new(|| diagnostic.clone());
                 (self.emit_signal)(&signal)?;

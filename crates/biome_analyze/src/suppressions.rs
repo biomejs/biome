@@ -7,7 +7,7 @@ use crate::{
 };
 use biome_console::markup;
 use biome_diagnostics::category;
-use biome_rowan::{TextRange, TextSize};
+use biome_rowan::TextRange;
 use rustc_hash::{FxHashMap, FxHashSet};
 
 const PLUGIN_LINT_RULE_FILTER: RuleFilter<'static> = RuleFilter::Group("lint/plugin");
@@ -48,10 +48,10 @@ impl TopLevelSuppression {
         &mut self,
         suppression: &AnalyzerSuppression,
         filter: Option<RuleFilter<'static>>,
-        token_range: TextRange,
         comment_range: TextRange,
+        is_leading: bool,
     ) -> Result<(), AnalyzerSuppressionDiagnostic> {
-        if suppression.is_top_level() && token_range.start() > TextSize::from(0) {
+        if suppression.is_top_level() && !is_leading {
             let mut diagnostic = AnalyzerSuppressionDiagnostic::new(
                 category!("suppressions/incorrect"),
                 comment_range,
@@ -512,7 +512,7 @@ impl<'analyzer> Suppressions<'analyzer> {
         &mut self,
         suppression: &AnalyzerSuppression,
         comment_range: TextRange,
-        token_range_not_trimmed: TextRange,
+        is_leading: bool,
     ) -> Result<(), AnalyzerSuppressionDiagnostic> {
         let filter = self.map_to_rule_filter(suppression, comment_range)?;
         let instances = self.map_to_rule_instances(&suppression.kind);
@@ -531,8 +531,8 @@ impl<'analyzer> Suppressions<'analyzer> {
             AnalyzerSuppressionVariant::TopLevel => self.top_level_suppression.push_suppression(
                 suppression,
                 filter,
-                token_range_not_trimmed,
                 comment_range,
+                is_leading,
             ),
             AnalyzerSuppressionVariant::RangeStart | AnalyzerSuppressionVariant::RangeEnd => self
                 .range_suppressions
