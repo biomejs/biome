@@ -207,8 +207,8 @@ impl Rule for NoImplicitCoercion {
                             None
                         }
                     }
-                    // arg * 1 | arg / 1
-                    JsBinaryOperator::Times | JsBinaryOperator::Divide => {
+                    // arg * 1
+                    JsBinaryOperator::Times => {
                         let argument =
                             binary_expression.get_another_arg_if_one_matches(|arg| arg.is_one())?;
 
@@ -216,6 +216,23 @@ impl Rule for NoImplicitCoercion {
                             Some(RuleState::ExpressionToTypeCall(ExpressionToTypeCall {
                                 expression: binary_expression.clone().into(),
                                 argument,
+                                type_name: "Number",
+                            }))
+                        } else {
+                            None
+                        }
+                    }
+                    // arg / 1
+                    JsBinaryOperator::Divide => {
+                        let (left, right) = (
+                            binary_expression.left().ok()?,
+                            binary_expression.right().ok()?,
+                        );
+
+                        if !left.is_number() && right.is_one() {
+                            Some(RuleState::ExpressionToTypeCall(ExpressionToTypeCall {
+                                expression: binary_expression.clone().into(),
+                                argument: left,
                                 type_name: "Number",
                             }))
                         } else {

@@ -1,7 +1,6 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
-assertion_line: 134
-expression: Falid.js
+expression: valid.js
 ---
 # Input
 ```js
@@ -56,5 +55,8 @@ parseFloat(foo) * 1;
 0 + foo;
 ~foo.bar();
 foo + 'bar';
+1 / foo;
+1 / (foo + bar);
+1 / 2;
 
 ```
