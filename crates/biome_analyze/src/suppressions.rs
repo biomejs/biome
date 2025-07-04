@@ -49,9 +49,9 @@ impl TopLevelSuppression {
         suppression: &AnalyzerSuppression,
         filter: Option<RuleFilter<'static>>,
         comment_range: TextRange,
-        is_leading: bool,
+        is_leading_in_file: bool,
     ) -> Result<(), AnalyzerSuppressionDiagnostic> {
-        if suppression.is_top_level() && !is_leading {
+        if suppression.is_top_level() && !is_leading_in_file {
             let mut diagnostic = AnalyzerSuppressionDiagnostic::new(
                 category!("suppressions/incorrect"),
                 comment_range,
@@ -512,7 +512,7 @@ impl<'analyzer> Suppressions<'analyzer> {
         &mut self,
         suppression: &AnalyzerSuppression,
         comment_range: TextRange,
-        is_leading: bool,
+        is_leading_in_file: bool,
     ) -> Result<(), AnalyzerSuppressionDiagnostic> {
         let filter = self.map_to_rule_filter(suppression, comment_range)?;
         let instances = self.map_to_rule_instances(&suppression.kind);
@@ -532,7 +532,7 @@ impl<'analyzer> Suppressions<'analyzer> {
                 suppression,
                 filter,
                 comment_range,
-                is_leading,
+                is_leading_in_file,
             ),
             AnalyzerSuppressionVariant::RangeStart | AnalyzerSuppressionVariant::RangeEnd => self
                 .range_suppressions

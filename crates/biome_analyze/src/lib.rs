@@ -58,8 +58,8 @@ pub use crate::syntax::{Ast, SyntaxVisitor};
 pub use crate::visitor::{NodeVisitor, Visitor, VisitorContext, VisitorFinishContext};
 use biome_diagnostics::{Diagnostic, DiagnosticExt, category};
 use biome_rowan::{
-    AstNode, BatchMutation, Direction, Language, SyntaxToken, TextRange, TextSize, TokenAtOffset,
-    TriviaPieceKind,
+    AstNode, BatchMutation, Direction, Language, SyntaxKind as _, SyntaxToken, TextRange, TextSize,
+    TokenAtOffset, TriviaPieceKind,
 };
 use biome_suppression::{Suppression, SuppressionKind};
 pub use suppression_action::{ApplySuppression, SuppressionAction};
@@ -173,6 +173,7 @@ where
                 options: ctx.options,
                 suppressions: &mut suppressions,
                 categories,
+                deny_top_level_suppressions: false,
             };
 
             // The first phase being run will inspect the tokens and parse the
@@ -331,6 +332,8 @@ struct PhaseRunner<'analyzer, 'phase, L: Language, Matcher, Break, Diag> {
     suppressions: &'phase mut Suppressions<'analyzer>,
     /// The current categories
     categories: RuleCategories,
+    /// Whether we have already encountered a token that can't precede top level suppressions
+    deny_top_level_suppressions: bool,
 }
 
 impl<L, Matcher, Break, Diag> PhaseRunner<'_, '_, L, Matcher, Break, Diag>
@@ -421,11 +424,14 @@ where
             }
 
             if let Some(comment) = piece.as_comments() {
-                self.handle_comment(true, index, comment.text(), piece.text_range())?;
+                self.handle_comment(comment.text(), piece.text_range())?;
             }
         }
 
         self.bump_line_index(token.text_trimmed(), token.text_trimmed_range());
+        if !self.deny_top_level_suppressions {
+            self.deny_top_level_suppressions = !token.kind().is_allowed_before_suppressions();
+        }
 
         for (index, piece) in token.trailing_trivia().pieces().enumerate() {
             if matches!(
@@ -438,7 +444,7 @@ where
             }
 
             if let Some(comment) = piece.as_comments() {
-                self.handle_comment(false, index, comment.text(), piece.text_range())?;
+                self.handle_comment(comment.text(), piece.text_range())?;
             }
         }
 
@@ -523,13 +529,7 @@ where
 
     /// Parse the text content of a comment trivia piece for suppression
     /// comments, and create line suppression entries accordingly
-    fn handle_comment(
-        &mut self,
-        is_leading: bool,
-        _index: usize,
-        text: &str,
-        range: TextRange,
-    ) -> ControlFlow<Break> {
+    fn handle_comment(&mut self, text: &str, range: TextRange) -> ControlFlow<Break> {
         for result in (self.parse_suppression_comment)(text, range) {
             let suppression: AnalyzerSuppression = match result {
                 Ok(kind) => kind,
@@ -570,10 +570,11 @@ where
                 continue;
             }
 
-            if let Err(diagnostic) =
-                self.suppressions
-                    .push_suppression(&suppression, range, is_leading)
-            {
+            if let Err(diagnostic) = self.suppressions.push_suppression(
+                &suppression,
+                range,
+                !self.deny_top_level_suppressions,
+            ) {
                 let signal = DiagnosticSignal::new(|| diagnostic.clone());
                 (self.emit_signal)(&signal)?;
                 continue;
