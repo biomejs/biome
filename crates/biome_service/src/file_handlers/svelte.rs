@@ -272,32 +272,66 @@ fn format(
     parse: AnyParse,
     settings: &Settings,
 ) -> Result<Printed, WorkspaceError> {
-    let options = settings.format_options::<JsLanguage>(biome_path, document_file_source);
-    debug!("{:?}", &options);
-    let tree = parse.syntax();
-    let formatted = format_node(options, &tree)?;
-    
     // Get the original text to handle the script tag extraction/insertion
     let original_text = document_file_source.text();
     
-    // Format the content and get the printed result
-    match formatted.print() {
-        Ok(printed) => {
-            // For Svelte files, we need to handle the script tag content
-            if document_file_source.to_js_file_source().embedding_kind() == Some(EmbeddingKind::Svelte) {
+    // Check if we have a script tag in the Svelte file
+    if let Some(script_match) = SvelteFileHandler::matches_script(original_text) {
+        // Extract the script content
+        let script_content = &original_text[script_match.start()..script_match.end()];
+        
+        // Get the script opening tag to determine if it's TypeScript
+        let opening_tag = SVELTE_FENCE
+            .captures(original_text)
+            .and_then(|captures| captures.name("opening"))
+            .map_or("", |m| &original_text[m.start()..m.end()]);
+        
+        // Determine language (JavaScript or TypeScript)
+        let (language, _) = parse_lang_from_script_opening_tag(opening_tag);
+        
+        // Create a temporary file source based on the script content
+        let temp_file_source = match language {
+            Language::TypeScript => JsFileSource::ts_module(),
+            _ => JsFileSource::js_module(),
+        };
+        
+        // Calculate the adjusted range within the script content
+        let script_start = script_match.start() as u32;
+        let adjusted_range = TextRange::new(
+            range.start().max(TextSize::from(script_start)) - TextSize::from(script_start),
+            range.end().max(TextSize::from(script_start)) - TextSize::from(script_start),
+        );
+        
+        // Parse the script content
+        let script_parse = parse_js_with_cache(
+            script_content,
+            temp_file_source,
+            &JsParserOptions::default(),
+            &mut NodeCache::default(),
+        );
+        
+        // Format the script content with our custom options
+        let options = settings.format_options::<JsLanguage>(biome_path, &temp_file_source.into());
+        debug!("{:?}", &options);
+        
+        let formatted = format_node(options, &script_parse.syntax())?;
+        
+        match formatted.print() {
+            Ok(printed) => {
                 // Get the formatted content
                 let formatted_content = printed.into_code();
                 // Insert the formatted content back into the script tag
                 let result = SvelteFileHandler::output(original_text, &formatted_content);
                 Ok(Printed::from(result))
-            } else {
-                Ok(printed)
+            },
+            Err(error) => {
+                error!("The script in file {} couldn't be formatted", biome_path.as_str());
+                Err(WorkspaceError::FormatError(error.into()))
             }
-        },
-        Err(error) => {
-            error!("The file {} couldn't be formatted", biome_path.as_str());
-            Err(WorkspaceError::FormatError(error.into()))
         }
+    } else {
+        // No script tag found, return the original content
+        Ok(Printed::from(original_text.to_string()))
     }
 }
 
@@ -308,36 +342,66 @@ pub(crate) fn format_range(
     settings: &Settings,
     range: TextRange,
 ) -> Result<Printed, WorkspaceError> {
-    // For Svelte files, we need to adjust the range to be relative to the script content
-    if document_file_source.to_js_file_source().embedding_kind() == Some(EmbeddingKind::Svelte) {
-        let original_text = document_file_source.text();
-        if let Some(script_start) = SvelteFileHandler::start(original_text) {
-            // Adjust the range to be relative to the script content
-            let adjusted_range = TextRange::new(
-                range.start().checked_sub(TextSize::from(script_start)).unwrap_or_default(),
-                range.end().checked_sub(TextSize::from(script_start)).unwrap_or_default(),
-            );
-            
-            let options = settings.format_options::<JsLanguage>(biome_path, document_file_source);
-            let tree = parse.syntax();
-            let formatted = format_node(options, &tree)?;
-            
-            match formatted.print() {
-                Ok(printed) => {
-                    let formatted_content = printed.into_code();
-                    let result = SvelteFileHandler::output(original_text, &formatted_content);
-                    Ok(Printed::from(result))
-                },
-                Err(error) => {
-                    error!("The file {} couldn't be formatted", biome_path.as_str());
-                    Err(WorkspaceError::FormatError(error.into()))
-                }
+    // Get the original text to handle the script tag extraction/insertion
+    let original_text = document_file_source.text();
+    
+    // Check if we have a script tag in the Svelte file
+    if let Some(script_match) = SvelteFileHandler::matches_script(original_text) {
+        // Extract the script content
+        let script_content = &original_text[script_match.start()..script_match.end()];
+        
+        // Get the script opening tag to determine if it's TypeScript
+        let opening_tag = SVELTE_FENCE
+            .captures(original_text)
+            .and_then(|captures| captures.name("opening"))
+            .map_or("", |m| &original_text[m.start()..m.end()]);
+        
+        // Determine language (JavaScript or TypeScript)
+        let (language, _) = parse_lang_from_script_opening_tag(opening_tag);
+        
+        // Create a temporary file source based on the script content
+        let temp_file_source = match language {
+            Language::TypeScript => JsFileSource::ts_module(),
+            _ => JsFileSource::js_module(),
+        };
+        
+        // Calculate the adjusted range within the script content
+        let script_start = script_match.start() as u32;
+        let adjusted_range = TextRange::new(
+            range.start().max(TextSize::from(script_start)) - TextSize::from(script_start),
+            range.end().max(TextSize::from(script_start)) - TextSize::from(script_start),
+        );
+        
+        // Parse the script content
+        let script_parse = parse_js_with_cache(
+            script_content,
+            temp_file_source,
+            &JsParserOptions::default(),
+            &mut NodeCache::default(),
+        );
+        
+        // Format the script content with our custom options
+        let options = settings.format_options::<JsLanguage>(biome_path, &temp_file_source.into());
+        debug!("{:?}", &options);
+        
+        let formatted = format_node(options, &script_parse.syntax())?;
+        
+        match formatted.print() {
+            Ok(printed) => {
+                // Get the formatted content
+                let formatted_content = printed.into_code();
+                // Insert the formatted content back into the script tag
+                let result = SvelteFileHandler::output(original_text, &formatted_content);
+                Ok(Printed::from(result))
+            },
+            Err(error) => {
+                error!("The script in file {} couldn't be formatted", biome_path.as_str());
+                Err(WorkspaceError::FormatError(error.into()))
             }
-        } else {
-            javascript::format_range(biome_path, document_file_source, parse, settings, range)
         }
     } else {
-        javascript::format_range(biome_path, document_file_source, parse, settings, range)
+        // No script tag found, return the original content
+        Ok(Printed::from(original_text.to_string()))
     }
 }
 
@@ -348,33 +412,63 @@ pub(crate) fn format_on_type(
     settings: &Settings,
     offset: TextSize,
 ) -> Result<Printed, WorkspaceError> {
-    // For Svelte files, we need to adjust the offset to be relative to the script content
-    if document_file_source.to_js_file_source().embedding_kind() == Some(EmbeddingKind::Svelte) {
-        let original_text = document_file_source.text();
-        if let Some(script_start) = SvelteFileHandler::start(original_text) {
-            // Adjust the offset to be relative to the script content
-            let adjusted_offset = offset.checked_sub(TextSize::from(script_start)).unwrap_or_default();
-            
-            let options = settings.format_options::<JsLanguage>(biome_path, document_file_source);
-            let tree = parse.syntax();
-            let formatted = format_node(options, &tree)?;
-            
-            match formatted.print() {
-                Ok(printed) => {
-                    let formatted_content = printed.into_code();
-                    let result = SvelteFileHandler::output(original_text, &formatted_content);
-                    Ok(Printed::from(result))
-                },
-                Err(error) => {
-                    error!("The file {} couldn't be formatted", biome_path.as_str());
-                    Err(WorkspaceError::FormatError(error.into()))
-                }
+    // Get the original text to handle the script tag extraction/insertion
+    let original_text = document_file_source.text();
+    
+    // Check if we have a script tag in the Svelte file
+    if let Some(script_match) = SvelteFileHandler::matches_script(original_text) {
+        // Extract the script content
+        let script_content = &original_text[script_match.start()..script_match.end()];
+        
+        // Get the script opening tag to determine if it's TypeScript
+        let opening_tag = SVELTE_FENCE
+            .captures(original_text)
+            .and_then(|captures| captures.name("opening"))
+            .map_or("", |m| &original_text[m.start()..m.end()]);
+        
+        // Determine language (JavaScript or TypeScript)
+        let (language, _) = parse_lang_from_script_opening_tag(opening_tag);
+        
+        // Create a temporary file source based on the script content
+        let temp_file_source = match language {
+            Language::TypeScript => JsFileSource::ts_module(),
+            _ => JsFileSource::js_module(),
+        };
+        
+        // Calculate the adjusted offset within the script content
+        let script_start = script_match.start() as u32;
+        let adjusted_offset = offset.max(TextSize::from(script_start)) - TextSize::from(script_start);
+        
+        // Parse the script content
+        let script_parse = parse_js_with_cache(
+            script_content,
+            temp_file_source,
+            &JsParserOptions::default(),
+            &mut NodeCache::default(),
+        );
+        
+        // Format the script content with our custom options
+        let options = settings.format_options::<JsLanguage>(biome_path, &temp_file_source.into());
+        debug!("{:?}", &options);
+        
+        let formatted = format_node(options, &script_parse.syntax())?;
+        
+        match formatted.print() {
+            Ok(printed) => {
+                // Get the formatted content
+                let formatted_content = printed.into_code();
+                // Insert the formatted content back into the script tag
+                let result = SvelteFileHandler::output(original_text, &formatted_content);
+                Ok(Printed::from(result))
+            },
+            Err(error) => {
+                error!("The script in file {} couldn't be formatted", biome_path.as_str());
+                Err(WorkspaceError::FormatError(error.into()))
             }
-        } else {
-            javascript::format_on_type(biome_path, document_file_source, parse, settings, offset)
         }
     } else {
-        javascript::format_on_type(biome_path, document_file_source, parse, settings, offset)
+        // No script tag found, return the original content
+        Ok(Printed::from(original_text.to_string()))
     }
 }
 
