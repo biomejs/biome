@@ -1,0 +1,25 @@
+[package]
+authors.workspace    = true
+categories.workspace = true
+description          = "Astro parser"
+edition.workspace    = true
+homepage.workspace   = true
+keywords.workspace   = true
+license.workspace    = true
+name                 = "biome_astro_parser"
+repository.workspace = true
+version              = "0.1.0"
+
+[dependencies]
+biome_astro_syntax = { workspace = true }
+biome_js_parser    = { workspace = true }
+biome_parser       = { workspace = true }
+biome_rowan        = { workspace = true }
+biome_text_size    = { workspace = true }
+
+[dev-dependencies]
+biome_astro_factory = { workspace = true }
+biome_test_utils    = { workspace = true }
+
+[lints]
+workspace = true
