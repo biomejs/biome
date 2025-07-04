@@ -5,8 +5,8 @@ use biome_console::markup;
 use biome_js_semantic::{Binding, SemanticModel};
 use biome_js_syntax::{
     JsClassExpression, JsFunctionExpression, JsIdentifierBinding, JsParameterList,
-    JsVariableDeclarator, TsIdentifierBinding, TsTypeAliasDeclaration, TsTypeParameter,
-    TsTypeParameterName,
+    JsVariableDeclarator, TsIdentifierBinding, TsPropertySignatureTypeMember,
+    TsTypeAliasDeclaration, TsTypeParameter, TsTypeParameterName,
 };
 use biome_rowan::{AstNode, SyntaxNodeCast, TokenText, declare_node_union};
 use biome_rule_options::no_shadow::NoShadowOptions;
@@ -171,7 +171,9 @@ fn evaluate_shadowing(model: &SemanticModel, binding: &Binding, upper_binding: &
             // the shadowed binding must be declared before the shadowing one
             return false;
         }
-    } else if is_inside_function_parameters(binding) && is_inside_type_parameter(binding) {
+    } else if is_inside_function_parameters(binding)
+        && (is_inside_type_parameter(binding) || is_inside_type_member(binding))
+    {
         return false;
     }
     true
@@ -248,6 +250,13 @@ fn is_inside_type_parameter(binding: &Binding) -> bool {
         .syntax()
         .ancestors()
         .any(|ancestor| ancestor.cast::<TsTypeParameter>().is_some())
+}
+
+fn is_inside_type_member(binding: &Binding) -> bool {
+    binding
+        .syntax()
+        .ancestors()
+        .any(|ancestor| ancestor.cast::<TsPropertySignatureTypeMember>().is_some())
 }
 
 fn is_inside_function_parameters(binding: &Binding) -> bool {
