@@ -1,0 +1,97 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: ignore.jsx
+---
+# Input
+```jsx
+function Component() {
+  return (<>
+    {/** biome-ignore lint/complexity/noUselessFragments: <explanation> */}
+    <></>
+    {/**     biome-ignore lint/complexity/noUselessFragments: <explanation> */}
+    <></>
+    {/** biome-ignore     lint/complexity/noUselessFragments: <explanation> */}
+    <></>
+    {/** biome-ignore lint/complexity/noUselessFragments:       <explanation> */}
+    <></>
+    {/** biome-ignore lint/complexity/noUselessFragments: <explanation>     */}
+    <></>
+  </>)
+}
+```
+
+# Diagnostics
+```
+ignore.jsx:3:59 suppressions/incorrect ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! A suppression shouldn't have an <explanation> placeholder. Example of suppression: // biome-ignore lint: false positive
+  
+    1 │ function Component() {
+    2 │   return (<>
+  > 3 │     {/** biome-ignore lint/complexity/noUselessFragments: <explanation> */}
+      │                                                           ^^^^^^^^^^^^^
+    4 │     <></>
+    5 │     {/**     biome-ignore lint/complexity/noUselessFragments: <explanation> */}
+  
+
+```
+
+```
+ignore.jsx:5:63 suppressions/incorrect ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! A suppression shouldn't have an <explanation> placeholder. Example of suppression: // biome-ignore lint: false positive
+  
+    3 │     {/** biome-ignore lint/complexity/noUselessFragments: <explanation> */}
+    4 │     <></>
+  > 5 │     {/**     biome-ignore lint/complexity/noUselessFragments: <explanation> */}
+      │                                                               ^^^^^^^^^^^^^
+    6 │     <></>
+    7 │     {/** biome-ignore     lint/complexity/noUselessFragments: <explanation> */}
+  
+
+```
+
+```
+ignore.jsx:7:63 suppressions/incorrect ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! A suppression shouldn't have an <explanation> placeholder. Example of suppression: // biome-ignore lint: false positive
+  
+    5 │     {/**     biome-ignore lint/complexity/noUselessFragments: <explanation> */}
+    6 │     <></>
+  > 7 │     {/** biome-ignore     lint/complexity/noUselessFragments: <explanation> */}
+      │                                                               ^^^^^^^^^^^^^
+    8 │     <></>
+    9 │     {/** biome-ignore lint/complexity/noUselessFragments:       <explanation> */}
+  
+
+```
+
+```
+ignore.jsx:9:65 suppressions/incorrect ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! A suppression shouldn't have an <explanation> placeholder. Example of suppression: // biome-ignore lint: false positive
+  
+     7 │     {/** biome-ignore     lint/complexity/noUselessFragments: <explanation> */}
+     8 │     <></>
+   > 9 │     {/** biome-ignore lint/complexity/noUselessFragments:       <explanation> */}
+       │                                                                 ^^^^^^^^^^^^^
+    10 │     <></>
+    11 │     {/** biome-ignore lint/complexity/noUselessFragments: <explanation>     */}
+  
+
+```
+
+```
+ignore.jsx:11:59 suppressions/incorrect ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! A suppression shouldn't have an <explanation> placeholder. Example of suppression: // biome-ignore lint: false positive
+  
+     9 │     {/** biome-ignore lint/complexity/noUselessFragments:       <explanation> */}
+    10 │     <></>
+  > 11 │     {/** biome-ignore lint/complexity/noUselessFragments: <explanation>     */}
+       │                                                           ^^^^^^^^^^^^^
+    12 │     <></>
+    13 │   </>)
+  
+
+```
