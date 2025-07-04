@@ -21,7 +21,6 @@ impl FormatNodeRule<CssContainerStyleQueryInParens> for FormatCssContainerStyleQ
             f,
             [
                 style_token.format(),
-                space(),
                 group(&format_args![
                     l_paren_token.format(),
                     soft_block_indent(&query.format()),
