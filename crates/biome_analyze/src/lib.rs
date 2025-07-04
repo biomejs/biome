@@ -756,14 +756,14 @@ pub fn to_analyzer_suppressions(
         piece_range.add_start(suppression.range().start()).start(),
         piece_range.add_start(suppression.range().end()).start(),
     );
-    let reason_range_from_start = suppression.reason_range() + suppression.range().end();
+    let reason_range_rel = suppression.reason_range();
     let reason = (
         suppression.reason,
         TextRange::new(
             piece_range
-                .add_start(reason_range_from_start.start())
+                .add_start(reason_range_rel.start())
                 .start(),
-            piece_range.add_start(reason_range_from_start.end()).start(),
+            piece_range.add_start(reason_range_rel.end()).start(),
         ),
     );
     for (key, subcategory, value) in suppression.categories {
