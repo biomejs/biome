@@ -2,13 +2,13 @@
 
 use biome_console::markup;
 use biome_parser::AnyParse;
-use std::cmp::Ordering;
 use std::collections::{BTreeMap, BinaryHeap};
 use std::fmt::{Debug, Display, Formatter};
 use std::ops;
 use std::ops::Sub;
 use std::str::FromStr;
 use std::sync::Arc;
+use suppressions::LineSuppression;
 
 mod analyzer_plugin;
 mod categories;
@@ -225,41 +225,19 @@ where
                     //    processed, thus all range suppressions are cleared.
 
                     // 3. Check for line suppression:
-                    let suppression = {
-                        let index =
-                            suppressions
-                                .line_suppressions
-                                .binary_search_by(|suppression| {
-                                    if suppression.text_range.end() < text_range.start() {
-                                        Ordering::Less
-                                    } else if text_range.end() < suppression.text_range.start() {
-                                        Ordering::Greater
-                                    } else {
-                                        Ordering::Equal
-                                    }
-                                });
-
-                        index
-                            .ok()
-                            .map(|index| &mut suppressions.line_suppressions[index])
-                    };
-
-                    suppression.filter(|suppression| {
-                        suppression
-                            .suppressed_categories
-                            .contains(RuleCategory::Lint)
-                            || suppression.suppress_all_plugins
-                            || suppression.suppressed_plugins.contains(&name)
-                    })
+                    suppressions
+                        .overlapping_line_suppressions(&text_range)
+                        .iter_mut()
+                        .find(|s| {
+                            s.text_range.contains(text_range.start())
+                                && (s.suppressed_categories.contains(RuleCategory::Lint)
+                                    || s.suppress_all_plugins
+                                    || s.suppressed_plugins.contains(&name))
+                        })
                 });
 
                 if let Some(suppression) = suppression {
-                    if suppression
-                        .suppressed_categories
-                        .contains(RuleCategory::Lint)
-                    {
-                        suppression.did_suppress_signal = true;
-                    }
+                    suppression.did_suppress_signal = true;
                 } else {
                     let signal = DiagnosticSignal::new(|| diagnostic.clone());
                     if let ControlFlow::Break(br) = (emit_signal)(&signal) {
@@ -506,47 +484,7 @@ where
             // if it matches the current line index, otherwise perform a binary
             // search over all the previously seen suppressions to find one
             // with a matching range
-            let suppression =
-                self.suppressions
-                    .line_suppressions
-                    .last_mut()
-                    .filter(|suppression| {
-                        suppression.line_index == *self.line_index
-                            && suppression.text_range.start() <= start
-                    });
-            let suppression = match suppression {
-                Some(suppression) => Some(suppression),
-                None => {
-                    let index = self
-                        .suppressions
-                        .line_suppressions
-                        .binary_search_by(|suppression| {
-                            if suppression.text_range.end() < entry.text_range.start() {
-                                Ordering::Less
-                            } else if entry.text_range.end() < suppression.text_range.start() {
-                                Ordering::Greater
-                            } else {
-                                Ordering::Equal
-                            }
-                        })
-                        .ok();
-
-                    if let Some(index) = index {
-                        let line_suppression = &mut self.suppressions.line_suppressions[index];
-                        if line_suppression.text_range.start() <= entry.text_range.start()
-                            && line_suppression.text_range.end() >= entry.text_range.start()
-                        {
-                            Some(line_suppression)
-                        } else {
-                            None
-                        }
-                    } else {
-                        None
-                    }
-                }
-            };
-
-            let suppression = suppression.filter(|suppression| {
+            let matches_entry = |suppression: &LineSuppression| {
                 if suppression.suppressed_categories.contains(entry.category) {
                     return true;
                 }
@@ -560,7 +498,13 @@ where
                             .any(|(v, filter)| *filter == entry.rule && v == value.as_ref())
                     })
                 }
-            });
+            };
+
+            let suppression = self
+                .suppressions
+                .overlapping_line_suppressions(&entry.text_range)
+                .iter_mut()
+                .find(|s| s.text_range.contains(start) && matches_entry(s));
 
             // If the signal is being suppressed, mark the line suppression as
             // hit, otherwise emit the signal
@@ -637,11 +581,9 @@ where
             }
 
             if let AnalyzerSuppressionVariant::Line = suppression.variant {
-                // Legacy varient - add the next line to a line comment
-                let line_index = *self.line_index + 1;
-
+                // Expand scope of preceding line comments
                 self.suppressions
-                    .overlap_last_suppression(line_index, range);
+                    .overlap_last_suppression(*self.line_index + 1, range);
             }
         }
 

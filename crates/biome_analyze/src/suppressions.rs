@@ -1,3 +1,5 @@
+use std::cmp::Ordering;
+
 use crate::{
     AnalyzerSuppression, AnalyzerSuppressionDiagnostic, AnalyzerSuppressionKind,
     AnalyzerSuppressionVariant, MetadataRegistry, RuleCategories, RuleCategory, RuleFilter,
@@ -126,8 +128,7 @@ pub(crate) struct LineSuppression {
     pub(crate) comment_span: TextRange,
     /// Range of source text this comment is suppressing lint rules for
     pub(crate) text_range: TextRange,
-    /// Set to true if this comment has set the `suppress_all` flag to true
-    /// (must be restored to false on expiration)
+    /// All rules from groups included here are ignored.
     pub(crate) suppressed_categories: RuleCategories,
     /// List of all the rules this comment has started suppressing (must be
     /// removed from the suppressed set on expiration)
@@ -403,49 +404,13 @@ impl<'analyzer> Suppressions<'analyzer> {
         filter: Option<RuleFilter<'static>>,
         plugin_name: Option<String>,
         instance: Option<String>,
-        current_range: TextRange,
+        comment_range: TextRange,
         already_suppressed: Option<TextRange>,
         rule_category: RuleCategory,
     ) -> Result<(), AnalyzerSuppressionDiagnostic> {
-        if let Some(suppression) = self.line_suppressions.last_mut() {
-            if (suppression.line_index) == (self.line_index) {
-                suppression.already_suppressed = already_suppressed;
-
-                match filter {
-                    None => {
-                        suppression.suppressed_categories.insert(rule_category);
-                        suppression.suppressed_rules.clear();
-                        suppression.suppressed_instances.clear();
-                        suppression.suppressed_plugins.clear();
-                    }
-                    Some(PLUGIN_LINT_RULE_FILTER) => {
-                        if let Some(plugin_name) = plugin_name {
-                            suppression.suppressed_plugins.insert(plugin_name);
-                            suppression.suppress_all_plugins = false;
-                        } else {
-                            suppression.suppress_all_plugins = true;
-                        }
-                        suppression.suppressed_categories.remove(rule_category);
-                    }
-                    Some(filter) => {
-                        let filters = suppression
-                            .suppressed_rules
-                            .entry(rule_category)
-                            .or_default();
-                        filters.insert(filter);
-                        if let Some(instance) = instance {
-                            suppression.suppressed_instances.insert(instance, filter);
-                        }
-                        suppression.suppressed_categories.insert(rule_category);
-                    }
-                }
-                return Ok(());
-            }
-        }
-
         let mut suppression = LineSuppression {
-            comment_span: current_range,
-            text_range: current_range,
+            comment_span: comment_range,
+            text_range: comment_range,
             line_index: self.line_index,
             already_suppressed,
             ..Default::default()
@@ -578,14 +543,17 @@ impl<'analyzer> Suppressions<'analyzer> {
     pub(crate) fn expand_range(&mut self, text_range: TextRange, line_index: usize) -> bool {
         self.top_level_suppression.expand_range(text_range);
         self.range_suppressions.expand_range(text_range);
-        if let Some(last_suppression) = self.line_suppressions.last_mut() {
+        let mut found = false;
+        for last_suppression in self.line_suppressions.iter_mut().rev() {
             if last_suppression.line_index == line_index {
                 last_suppression.text_range = last_suppression.text_range.cover(text_range);
                 self.line_index = line_index;
-                return true;
+                found = true;
+            } else {
+                break;
             }
         }
-        false
+        found
     }
 
     pub(crate) fn bump_line_index(&mut self, line_index: usize) {
@@ -601,13 +569,15 @@ impl<'analyzer> Suppressions<'analyzer> {
         if let Some(variant) = &self.last_suppression {
             match variant {
                 AnalyzerSuppressionVariant::Line => {
-                    if let Some(last_suppression) = self.line_suppressions.last_mut() {
+                    for last_suppression in self.line_suppressions.iter_mut().rev() {
                         if last_suppression.line_index == next_line_index
                             || last_suppression.line_index + 1 == next_line_index
                         {
                             last_suppression.line_index = next_line_index;
                             last_suppression.text_range =
                                 last_suppression.text_range.cover(text_range);
+                        } else {
+                            break;
                         }
                     }
                 }
@@ -642,9 +612,40 @@ impl<'analyzer> Suppressions<'analyzer> {
     }
 
     /// Finalizes the suppressions after having evaluated the suppression source (i.e. a file)
-    /// This exists to validate things like correctly ended range suppresions
+    /// This exists to validate things like correctly ended range suppressions
     pub fn finalize(&self) -> Result<(), Vec<AnalyzerSuppressionDiagnostic>> {
         // Only range_suppressions have a finalize right now
         self.range_suppressions.finalize()
+    }
+
+    pub(crate) fn overlapping_line_suppressions(
+        &mut self,
+        target: &TextRange,
+    ) -> &mut [LineSuppression] {
+        let Ok(middle_index) = self.line_suppressions.binary_search_by(|s| {
+            if s.text_range.end() < target.start() {
+                Ordering::Less
+            } else if target.end() < s.text_range.start() {
+                Ordering::Greater
+            } else {
+                Ordering::Equal
+            }
+        }) else {
+            return &mut [];
+        };
+        // Perf: normally just traversing in both directions should be faster - more than 2
+        // comments in a row should be rare, and 2-3 extra comparisons are faster than
+        // bisecting twice for left and right border.
+        let mut left = middle_index;
+        while left > 0 && self.line_suppressions[left - 1].text_range.end() >= target.start() {
+            left -= 1;
+        }
+        let mut right = middle_index;
+        while right < self.line_suppressions.len() - 1
+            && self.line_suppressions[right + 1].text_range.start() <= target.end()
+        {
+            right += 1;
+        }
+        &mut self.line_suppressions[left..=right]
     }
 }
