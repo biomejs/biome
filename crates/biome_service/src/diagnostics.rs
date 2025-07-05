@@ -403,17 +403,38 @@ impl Diagnostic for SourceFileNotSupported {
     fn message(&self, fmt: &mut biome_console::fmt::Formatter<'_>) -> std::io::Result<()> {
         if self.file_source != DocumentFileSource::Unknown {
             fmt.write_markup(markup! {
-                "Biome doesn't support this feature for the language "{{&self.file_source}}
+                "Biome doesn't support this feature for the language "<Emphasis>{{&self.file_source}}</Emphasis>
             })
         } else if let Some(ext) = self.extension.as_ref() {
             fmt.write_markup(markup! {
-                "Biome could not determine the language for the file extension "{{ext}}
+                "Biome could not determine the language for the file extension "<Emphasis>{{ext}}</Emphasis>
             })
         } else {
             fmt.write_markup(
                 markup!{
-                    "Biome could not determine the language for the file "{self.path}" because it doesn't have a clear extension"
+                    "Biome could not determine the language for the file"<Emphasis>{self.path}</Emphasis>" because it doesn't have a clear extension"
                 }
+            )
+        }
+    }
+
+    fn description(&self, fmt: &mut Formatter<'_>) -> fmt::Result {
+        if self.file_source != DocumentFileSource::Unknown {
+            write!(
+                fmt,
+                "Biome doesn't support this feature for the language {}",
+                &self.file_source
+            )
+        } else if let Some(ext) = self.extension.as_ref() {
+            write!(
+                fmt,
+                "Biome could not determine the language for the file extension {ext}"
+            )
+        } else {
+            write!(
+                fmt,
+                "Biome could not determine the language for the file {} because it doesn't have a clear extension",
+                &self.path
             )
         }
     }

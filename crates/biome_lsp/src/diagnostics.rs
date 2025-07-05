@@ -61,11 +61,7 @@ pub(crate) async fn handle_lsp_error<T>(
                 Ok(None)
             }
 
-            _ => {
-                let message = format!("{err}");
-                client.log_message(MessageType::ERROR, message).await;
-                Ok(None)
-            }
+            _ => Err(into_lsp_error(err)),
         },
         LspError::Anyhow(err) => Err(into_lsp_error(err)),
         LspError::Error(err) => {
