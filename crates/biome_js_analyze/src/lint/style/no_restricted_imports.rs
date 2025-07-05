@@ -16,10 +16,9 @@ use biome_js_syntax::{
 };
 use biome_rowan::{AstNode, AstSeparatedList, SyntaxNode, SyntaxNodeCast, SyntaxToken};
 use biome_rule_options::no_restricted_imports::{
-    CustomRestrictedImportOptions, ImportRestrictionCause, NoRestrictedImportsOptions,
+    Cause, ImportRestrictions, NoRestrictedImportsOptions, Options, PathOptions, Patterns,
     RestrictedImportMessage, RestrictedImportVisitor,
 };
-use serde::{Deserialize, Serialize};
 
 declare_lint_rule! {
     /// Disallow specified modules when loaded by import or require.
@@ -47,7 +46,10 @@ declare_lint_rule! {
     ///             "underscore": "",
     ///             "import-foo": { "importNames": ["Bar"] },
     ///             "import-bar": { "allowImportNames": ["Bar"] }
-    ///         }
+    ///         },
+    ///         "patterns": [{
+    ///             "group": ["import-foo/*", "!import-foo/bar"]
+    ///         }]
     ///     }
     /// }
     /// ```
@@ -56,8 +58,16 @@ declare_lint_rule! {
     ///
     /// ```js,expect_diagnostic,use_options
     /// import "lodash";
-    /// import "allowed-import";
     /// ```
+    ///
+    /// ```js,expect_diagnostic,use_options
+    /// import "underscore";
+    /// ```
+    ///
+    /// ```js,expect_diagnostic,use_options
+    /// import { Bar } from "import-foo";
+    /// ```
+    ///
     ///
     /// ```js,expect_diagnostic,use_options
     /// const underscore = await import("underscore");
@@ -67,12 +77,21 @@ declare_lint_rule! {
     /// const lodash = require("lodash");
     /// ```
     ///
+    /// ```js,expect_diagnostic,use_options
+    /// import foo from 'import-foo/foo';
+    /// ```
+    ///
     /// ### Valid
     ///
     /// ```js,use_options
     /// import "allowed-import";
     /// const myImport = await import("allowed-import");
     /// const myImport = require("allowed-import");
+    /// ```
+    ///
+    /// ```js,use_options
+    /// import foo from 'import-foo';
+    /// import bar from 'import-foo/bar';
     /// ```
     ///
     /// ## Supported Import Syntaxes
@@ -173,7 +192,7 @@ declare_lint_rule! {
     /// }
     /// ```
     ///
-    /// Use the options to specify the import paths and/or specific import names within them that you want to restrict in your source code.
+    /// Use the options to specify import paths and/or patterns, including specific import names, that you want to restrict in your source code.
     ///
     /// ```json,options
     /// {
@@ -190,6 +209,16 @@ declare_lint_rule! {
     ///               "message": "Please use only Bar from import-bar."
     ///             }
     ///         }
+    ///     }
+    /// }
+    /// ```
+    ///
+    /// ```json,options
+    /// {
+    ///     "options": {
+    ///         "patterns": [{
+    ///             "group": ["import-foo/*", "!import-foo/bar"]
+    ///         }]
     ///     }
     /// }
     /// ```
@@ -315,6 +344,93 @@ declare_lint_rule! {
     /// ```js,use_options
     /// import { Bar } from 'import-bar';
     /// ```
+    ///
+    /// ### `patterns`
+    ///
+    /// This option allows you to specify multiple modules to restrict using gitignore-style patterns.
+    ///
+    /// ### `group`
+    ///
+    /// The patterns array can also include objects. The group property is used to specify the gitignore-style patterns for restricting modules and the message property is used to specify a custom message.
+    ///
+    /// ```json,options
+    /// {
+    ///     "options": {
+    ///         "patterns": [{
+    ///             "group": ["import-foo/*", "!import-foo/bar"],
+    ///             "message": "import-foo is deprecated, except the modules in import-foo/bar."
+    ///         }]
+    ///     }
+    /// }
+    /// ```
+    ///
+    /// #### Invalid
+    ///
+    /// ```js,expect_diagnostic,use_options
+    /// import foo from 'import-foo/foo';
+    /// ```
+    ///
+    /// #### Valid
+    ///
+    /// ```js,use_options
+    /// import foo from 'import-foo';
+    /// import bar from 'import-foo/bar';
+    /// ```
+    ///
+    /// ### `importNamePattern`
+    ///
+    /// This option allows you to use regex patterns to restrict import names.
+    ///
+    /// ```json,options
+    /// {
+    ///     "options": {
+    ///        "patterns": [{
+    ///             "group": ["import-foo/*"],
+    ///             "importNamePattern": "[xyz]"
+    ///         }]
+    ///     }
+    /// }
+    /// ```
+    ///
+    /// #### Invalid
+    ///
+    /// ```js,expect_diagnostic,use_options
+    /// import { x } from 'import-foo/foo';
+    /// ```
+    ///
+    /// #### Valid
+    ///
+    /// ```js,use_options
+    /// import { foo } from 'import-foo/foo';
+    /// ```
+    ///
+    /// ### `invertImportNamePattern`
+    ///
+    /// If true, the matched patterns in the importNamePattern will be allowed
+    ///
+    /// ```json,options
+    /// {
+    ///     "options": {
+    ///        "patterns": [{
+    ///             "group": ["import-foo/*"],
+    ///             "importNamePattern": "[xyz]",
+    ///             "invertImportNamePattern": true
+    ///         }]
+    ///     }
+    /// }
+    /// ```
+    ///
+    /// #### Invalid
+    ///
+    /// ```js,expect_diagnostic,use_options
+    /// import { foo } from 'import-foo/foo';
+    /// ```
+    ///
+    /// #### Valid
+    ///
+    /// ```js,use_options
+    /// import { x } from 'import-foo/foo';
+    /// ```
     pub NoRestrictedImports {
         version: "1.6.0",
         name: "noRestrictedImports",
@@ -337,94 +453,35 @@ impl Rule for NoRestrictedImports {
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
         if node.is_in_ts_module_declaration() {
-            return Vec::new();
+            return vec![];
         }
         let Some(module_name) = node.module_name_token() else {
-            return Vec::new();
+            return vec![];
         };
         let import_source_text = inner_string_text(&module_name);
         let import_source = import_source_text.text();
+        let options = ctx.options();
 
-        let Some(restricted_import_settings) = ctx.options().paths.get(import_source) else {
-            return Vec::new();
-        };
-        let restricted_import: CustomRestrictedImportOptions =
-            restricted_import_settings.clone().into();
-
-        match node {
-            AnyJsImportLike::JsModuleSource(module_source_node) => {
-                if !restricted_import.has_import_name_patterns() {
-                    // All imports disallowed, add diagnostic to the import source
-                    vec![RestrictedImportMessage {
-                        location: module_name.text_trimmed_range(),
-                        message: restricted_import.get_message_for_restriction(
-                            import_source,
-                            "",
-                            ImportRestrictionCause::ImportSource,
-                        ),
-                        import_source: import_source.to_string(),
-                        allowed_import_names: [].into(),
-                    }]
-                } else {
-                    // Check (and possibly report) each imported name individually
-                    let mut visitor = RestrictedImportVisitor {
-                        import_source,
-                        restricted_import,
-                        results: Vec::new(),
-                    };
-                    visit_import(&mut visitor, module_source_node);
-                    visitor.results
+        if let Some(paths) = options.paths.get(import_source) {
+            let path_options: PathOptions = paths.clone().into();
+            check_import_restrictions(&path_options, node, &module_name, import_source)
+        } else if let Some(patterns) = &options.patterns {
+            let mut results: Vec<RestrictedImportMessage> = vec![];
+            for pattern in patterns {
+                match pattern {
+                    Patterns::WithOptions(pattern_options) => {
+                        results.extend(check_import_restrictions(
+                            pattern_options,
+                            node,
+                            &module_name,
+                            &import_source_text,
+                        ));
+                    }
                 }
             }
-            AnyJsImportLike::JsImportCallExpression(import_call) => {
-                // TODO: We have to parse the context of the import() call to determine
-                // which exports are being used/whether this should be considered a
-                // namespace import, a side-effect import (the two of which may
-                // be difficult to distinguish) or a collection of named imports.
-                if !restricted_import.has_import_name_patterns() {
-                    // All imports disallowed, add diagnostic to the import source
-                    vec![RestrictedImportMessage {
-                        location: module_name.text_trimmed_range(),
-                        message: restricted_import.get_message_for_restriction(
-                            import_source,
-                            "",
-                            ImportRestrictionCause::ImportSource,
-                        ),
-                        import_source: import_source.to_string(),
-                        allowed_import_names: [].into(),
-                    }]
-                } else {
-                    // Check (and possibly report) each imported name individually
-                    let mut visitor = RestrictedImportVisitor {
-                        import_source,
-                        restricted_import,
-                        results: Vec::new(),
-                    };
-                    visit_import_call(&mut visitor, import_call);
-                    visitor.results
-                }
-            }
-            AnyJsImportLike::JsCallExpression(_expression) => {
-                let status = restricted_import
-                    .is_import_allowed(RestrictedImportVisitor::DEFAULT_IMPORT_ALIAS);
-
-                if status.is_forbidden() {
-                    // require() calls can only import the default import, so
-                    // there are no individual import names to check or report on.
-                    vec![RestrictedImportMessage {
-                        location: module_name.text_trimmed_range(),
-                        message: restricted_import.get_message_for_restriction(
-                            import_source,
-                            "",
-                            ImportRestrictionCause::ImportSource,
-                        ),
-                        import_source: import_source.to_string(),
-                        allowed_import_names: [].into(),
-                    }]
-                } else {
-                    vec![]
-                }
-            }
+            results
+        } else {
+            return vec![];
         }
     }
 
@@ -455,28 +512,86 @@ impl Rule for NoRestrictedImports {
             });
 
             rule_diagnostic = rule_diagnostic.footer_list(
-                        markup! { "Only the following imports from "<Emphasis>"'"{import_source}"'"</Emphasis>" are allowed:" },
-                        allowed_import_names,
-                    );
+                markup! { "Only the following imports from "<Emphasis>"'"{import_source}"'"</Emphasis>" are allowed:" },
+                allowed_import_names,
+            );
         }
         Some(rule_diagnostic)
     }
 }
 
-/// Options for the rule `noRestrictedImports`.
-#[derive(
-    Clone,
-    Debug,
-    Default,
-    Deserialize,
-    biome_deserialize_macros::Deserializable,
-    Eq,
-    PartialEq,
-    Serialize,
-)]
-#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
-#[serde(rename_all = "camelCase", deny_unknown_fields, default)]
-pub struct RestrictedImportsOptions {}
+fn check_import_restrictions<I: ImportRestrictions>(
+    import_restriction: &I,
+    node: &AnyJsImportLike,
+    module_name: &SyntaxToken<JsLanguage>,
+    import_source: &str,
+) -> Vec<RestrictedImportMessage> {
+    match node {
+        AnyJsImportLike::JsModuleSource(module_source_node) => {
+            if !import_restriction.has_import_name_constraints() {
+                // All imports disallowed, add diagnostic to the import source
+                vec![RestrictedImportMessage::new(
+                    module_name.text_trimmed_range(),
+                    import_source,
+                    import_restriction.message(import_source, "", Cause::ImportSource),
+                    [].into(),
+                )]
+            } else {
+                // Check (and possibly report) each imported name individually
+                let mut visitor = RestrictedImportVisitor {
+                    import_source,
+                    options: import_restriction.options(),
+                    results: vec![],
+                };
+                visit_import(&mut visitor, module_source_node);
+                visitor.results
+            }
+        }
+
+        AnyJsImportLike::JsImportCallExpression(import_call) => {
+            // TODO: We have to parse the context of the import() call to determine
+            // which exports are being used/whether this should be considered a
+            // namespace import, a side-effect import (the two of which may
+            // be difficult to distinguish) or a collection of named imports.
+            if !import_restriction.has_import_name_constraints() {
+                // All imports disallowed, add diagnostic to the import source
+                vec![RestrictedImportMessage::new(
+                    module_name.text_trimmed_range(),
+                    import_source,
+                    import_restriction.message(import_source, "", Cause::ImportSource),
+                    [].into(),
+                )]
+            } else {
+                // Check (and possibly report) each imported name individually
+                let mut visitor = RestrictedImportVisitor {
+                    import_source,
+                    options: import_restriction.options(),
+                    results: vec![],
+                };
+                visit_import_call(&mut visitor, import_call);
+                visitor.results
+            }
+        }
+
+        AnyJsImportLike::JsCallExpression(_expression) => {
+            let restriction =
+                import_restriction.check_restriction(RestrictedImportVisitor::DEFAULT_IMPORT_ALIAS);
+
+            if restriction.is_forbidden() {
+                // require() calls can only import the default import, so
+                // there are no individual import names to check or report on.
+                vec![RestrictedImportMessage::new(
+                    module_name.text_trimmed_range(),
+                    import_source,
+                    import_restriction.message(import_source, "", Cause::ImportSource),
+                    [].into(),
+                )]
+            } else {
+                vec![]
+            }
+        }
+    }
+}
 
 /// Analyze the context of an `import(...)` call to find the imported names,
 /// then validate that each of the names is allowed to be imported.
@@ -922,7 +1037,7 @@ fn visit_imported_identifier(
 ) -> Option<()> {
     // TODO: inner_string_text removes quotes but does not e.g. decode escape sequences.
     //       If the imported name uses e.g. Unicode escape sequences, this may cause
-    //       problems because restricted_import.(allow_)import_names contains decoded
+    //       problems because path_options.(allow_)import_names contains decoded
     //       strings, while inner_string_text(name_token) returns encoded strings.
     visit_special_import_token(visitor, name_token, inner_string_text(name_token).text())
 }
@@ -934,21 +1049,34 @@ fn visit_special_import_node(
     import_node: &SyntaxNode<JsLanguage>,
     name_or_alias: &str,
 ) -> Option<()> {
-    let status = visitor.restricted_import.is_import_allowed(name_or_alias);
-    if status.is_allowed() {
-        return None;
+    match visitor.options {
+        Options::PathOptions(path_options) => {
+            let restriction = path_options.check_restriction(name_or_alias);
+            if restriction.is_allowed() {
+                return None;
+            }
+            visitor.results.push(RestrictedImportMessage::new(
+                import_node.text_trimmed_range(),
+                visitor.import_source,
+                path_options.message(visitor.import_source, name_or_alias, restriction.cause),
+                path_options.allow_import_names.clone(),
+            ));
+            Some(())
+        }
+        Options::PatternOptions(pattern_options) => {
+            let restriction = pattern_options.check_restriction(name_or_alias);
+            if restriction.is_allowed() {
+                return None;
+            }
+            visitor.results.push(RestrictedImportMessage::new(
+                import_node.text_trimmed_range(),
+                visitor.import_source,
+                pattern_options.message(visitor.import_source, name_or_alias, restriction.cause),
+                Vec::new().into_boxed_slice(),
+            ));
+            Some(())
+        }
     }
-    visitor.results.push(RestrictedImportMessage {
-        location: import_node.text_trimmed_range(),
-        message: visitor.restricted_import.get_message_for_restriction(
-            visitor.import_source,
-            name_or_alias,
-            status.reason(),
-        ),
-        import_source: visitor.import_source.to_string(),
-        allowed_import_names: visitor.restricted_import.allow_import_names.clone(),
-    });
-    Some(())
 }
 
 /// Checks whether the import specified by `name_or_alias` is allowed.
@@ -958,19 +1086,32 @@ fn visit_special_import_token(
     import_token: &SyntaxToken<JsLanguage>,
     name_or_alias: &str,
 ) -> Option<()> {
-    let status = visitor.restricted_import.is_import_allowed(name_or_alias);
-    if status.is_allowed() {
-        return None;
+    match visitor.options {
+        Options::PathOptions(path_options) => {
+            let restriction = path_options.check_restriction(name_or_alias);
+            if restriction.is_allowed() {
+                return None;
+            }
+            visitor.results.push(RestrictedImportMessage::new(
+                import_token.text_trimmed_range(),
+                visitor.import_source,
+                path_options.message(visitor.import_source, name_or_alias, restriction.cause),
+                path_options.allow_import_names.clone(),
+            ));
+            Some(())
+        }
+        Options::PatternOptions(pattern_options) => {
+            let restriction = pattern_options.check_restriction(name_or_alias);
+            if restriction.is_allowed() {
+                return None;
+            }
+            visitor.results.push(RestrictedImportMessage::new(
+                import_token.text_trimmed_range(),
+                visitor.import_source,
+                pattern_options.message(visitor.import_source, name_or_alias, restriction.cause),
+                Vec::new().into_boxed_slice(),
+            ));
+            Some(())
+        }
     }
-    visitor.results.push(RestrictedImportMessage {
-        location: import_token.text_trimmed_range(),
-        message: visitor.restricted_import.get_message_for_restriction(
-            visitor.import_source,
-            name_or_alias,
-            status.reason(),
-        ),
-        import_source: visitor.import_source.to_string(),
-        allowed_import_names: visitor.restricted_import.allow_import_names.clone(),
-    });
-    Some(())
 }

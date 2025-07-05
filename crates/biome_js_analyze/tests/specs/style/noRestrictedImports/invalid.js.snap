@@ -136,6 +136,28 @@ const { forbidden2, forbidden3: f1, "forbidden4": f2 } = await import('bare-allo
 import('bare-allowed').then(({ forbidden2, forbidden3: f1, "forbidden4": f2 }) => { })
 import('bare-allowed').then(function ({ forbidden2, forbidden3: f1, "forbidden4": f2 }) { })
 
+import '../../sideeffect-forbidden';
+import * as alias1 from "namespace-import-forbidden";
+export * from "namespace-import-forbidden";
+import { export1, export2 as alias2, "string-name" as alias3, default as defaultExport } from "named-import-forbidden";
+export { export1, export2 as alias2, "string-name" as alias3, default as defaultExport } from "named-import-forbidden";
+import defaultExport from "default-import-forbidden";
+
+import('d-sideeffect-forbidden');
+await import('d-sideeffect-forbidden');
+const alias1 = await import('namespace-import-forbidden');
+import('namespace-import-forbidden').then(alias1 => { });
+import('namespace-import-forbidden').then((alias1) => { });
+import('namespace-import-forbidden').then(function(alias1) { });
+myFunction(...args, import("namespace-import-forbidden"), ...args)
+const { export1, export2: alias2, "string-name": alias3, default: defaultExport } = await import("named-import-forbidden");
+import('named-import-forbidden').then(({ export1, export2: alias2, "string-name": alias3, default: defaultExport }) => { });
+import('named-import-forbidden').then(function({ export1, export2: alias2, "string-name": alias3, default: defaultExport }) { });
+const { default: defaultExport } = await import('default-import-forbidden')
+import('default-import-forbidden').then(({ default: defaultExport }) => { });
+import('default-import-forbidden').then(function({ default: defaultExport }) { });
+const defaultExport = require('default-import-forbidden');
+
 ```
 
 # Diagnostics
@@ -2974,6 +2996,7 @@ invalid.js:131:41 lint/style/noRestrictedImports ━━━━━━━━━━�
   > 131 │ import('bare-allowed').then(function ({ forbidden2, forbidden3: f1, "forbidden4": f2 }) { })
         │                                         ^^^^^^^^^^
     132 │ 
+    133 │ import '../../sideeffect-forbidden';
   
   i Only the following imports from 'bare-allowed' are allowed:
   
@@ -2992,6 +3015,7 @@ invalid.js:131:53 lint/style/noRestrictedImports ━━━━━━━━━━�
   > 131 │ import('bare-allowed').then(function ({ forbidden2, forbidden3: f1, "forbidden4": f2 }) { })
         │                                                     ^^^^^^^^^^
     132 │ 
+    133 │ import '../../sideeffect-forbidden';
   
   i Only the following imports from 'bare-allowed' are allowed:
   
@@ -3010,10 +3034,456 @@ invalid.js:131:69 lint/style/noRestrictedImports ━━━━━━━━━━�
   > 131 │ import('bare-allowed').then(function ({ forbidden2, forbidden3: f1, "forbidden4": f2 }) { })
         │                                                                     ^^^^^^^^^^^^
     132 │ 
+    133 │ import '../../sideeffect-forbidden';
   
   i Only the following imports from 'bare-allowed' are allowed:
   
   - Side-effect only import
+  
+
+```
+
+```
+invalid.js:133:8 lint/style/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! sideeffect-forbidden is forbidden, use sideeffect-allowed instead
+  
+    131 │ import('bare-allowed').then(function ({ forbidden2, forbidden3: f1, "forbidden4": f2 }) { })
+    132 │ 
+  > 133 │ import '../../sideeffect-forbidden';
+        │        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    134 │ import * as alias1 from "namespace-import-forbidden";
+    135 │ export * from "namespace-import-forbidden";
+  
+
+```
+
+```
+invalid.js:134:25 lint/style/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not import 'namespace-import-forbidden'.
+  
+    133 │ import '../../sideeffect-forbidden';
+  > 134 │ import * as alias1 from "namespace-import-forbidden";
+        │                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    135 │ export * from "namespace-import-forbidden";
+    136 │ import { export1, export2 as alias2, "string-name" as alias3, default as defaultExport } from "named-import-forbidden";
+  
+
+```
+
+```
+invalid.js:135:15 lint/style/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not import 'namespace-import-forbidden'.
+  
+    133 │ import '../../sideeffect-forbidden';
+    134 │ import * as alias1 from "namespace-import-forbidden";
+  > 135 │ export * from "namespace-import-forbidden";
+        │               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    136 │ import { export1, export2 as alias2, "string-name" as alias3, default as defaultExport } from "named-import-forbidden";
+    137 │ export { export1, export2 as alias2, "string-name" as alias3, default as defaultExport } from "named-import-forbidden";
+  
+
+```
+
+```
+invalid.js:136:10 lint/style/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not import 'export1' from 'named-import-forbidden'.
+  
+    134 │ import * as alias1 from "namespace-import-forbidden";
+    135 │ export * from "namespace-import-forbidden";
+  > 136 │ import { export1, export2 as alias2, "string-name" as alias3, default as defaultExport } from "named-import-forbidden";
+        │          ^^^^^^^
+    137 │ export { export1, export2 as alias2, "string-name" as alias3, default as defaultExport } from "named-import-forbidden";
+    138 │ import defaultExport from "default-import-forbidden";
+  
+
+```
+
+```
+invalid.js:137:10 lint/style/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not import 'export1' from 'named-import-forbidden'.
+  
+    135 │ export * from "namespace-import-forbidden";
+    136 │ import { export1, export2 as alias2, "string-name" as alias3, default as defaultExport } from "named-import-forbidden";
+  > 137 │ export { export1, export2 as alias2, "string-name" as alias3, default as defaultExport } from "named-import-forbidden";
+        │          ^^^^^^^
+    138 │ import defaultExport from "default-import-forbidden";
+    139 │ 
+  
+
+```
+
+```
+invalid.js:138:8 lint/style/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Default import should not be reported unless importNamePattern includes 'default'
+  
+    136 │ import { export1, export2 as alias2, "string-name" as alias3, default as defaultExport } from "named-import-forbidden";
+    137 │ export { export1, export2 as alias2, "string-name" as alias3, default as defaultExport } from "named-import-forbidden";
+  > 138 │ import defaultExport from "default-import-forbidden";
+        │        ^^^^^^^^^^^^^
+    139 │ 
+    140 │ import('d-sideeffect-forbidden');
+  
+
+```
+
+```
+invalid.js:138:8 lint/style/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not import 'default' from 'default-import-forbidden'.
+  
+    136 │ import { export1, export2 as alias2, "string-name" as alias3, default as defaultExport } from "named-import-forbidden";
+    137 │ export { export1, export2 as alias2, "string-name" as alias3, default as defaultExport } from "named-import-forbidden";
+  > 138 │ import defaultExport from "default-import-forbidden";
+        │        ^^^^^^^^^^^^^
+    139 │ 
+    140 │ import('d-sideeffect-forbidden');
+  
+
+```
+
+```
+invalid.js:138:8 lint/style/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not import 'default' from 'default-import-forbidden'.
+  
+    136 │ import { export1, export2 as alias2, "string-name" as alias3, default as defaultExport } from "named-import-forbidden";
+    137 │ export { export1, export2 as alias2, "string-name" as alias3, default as defaultExport } from "named-import-forbidden";
+  > 138 │ import defaultExport from "default-import-forbidden";
+        │        ^^^^^^^^^^^^^
+    139 │ 
+    140 │ import('d-sideeffect-forbidden');
+  
+
+```
+
+```
+invalid.js:140:8 lint/style/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not import 'd-sideeffect-forbidden'.
+  
+    138 │ import defaultExport from "default-import-forbidden";
+    139 │ 
+  > 140 │ import('d-sideeffect-forbidden');
+        │        ^^^^^^^^^^^^^^^^^^^^^^^^
+    141 │ await import('d-sideeffect-forbidden');
+    142 │ const alias1 = await import('namespace-import-forbidden');
+  
+
+```
+
+```
+invalid.js:141:14 lint/style/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not import 'd-sideeffect-forbidden'.
+  
+    140 │ import('d-sideeffect-forbidden');
+  > 141 │ await import('d-sideeffect-forbidden');
+        │              ^^^^^^^^^^^^^^^^^^^^^^^^
+    142 │ const alias1 = await import('namespace-import-forbidden');
+    143 │ import('namespace-import-forbidden').then(alias1 => { });
+  
+
+```
+
+```
+invalid.js:142:29 lint/style/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not import 'namespace-import-forbidden'.
+  
+    140 │ import('d-sideeffect-forbidden');
+    141 │ await import('d-sideeffect-forbidden');
+  > 142 │ const alias1 = await import('namespace-import-forbidden');
+        │                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    143 │ import('namespace-import-forbidden').then(alias1 => { });
+    144 │ import('namespace-import-forbidden').then((alias1) => { });
+  
+
+```
+
+```
+invalid.js:143:8 lint/style/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not import 'namespace-import-forbidden'.
+  
+    141 │ await import('d-sideeffect-forbidden');
+    142 │ const alias1 = await import('namespace-import-forbidden');
+  > 143 │ import('namespace-import-forbidden').then(alias1 => { });
+        │        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    144 │ import('namespace-import-forbidden').then((alias1) => { });
+    145 │ import('namespace-import-forbidden').then(function(alias1) { });
+  
+
+```
+
+```
+invalid.js:144:8 lint/style/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not import 'namespace-import-forbidden'.
+  
+    142 │ const alias1 = await import('namespace-import-forbidden');
+    143 │ import('namespace-import-forbidden').then(alias1 => { });
+  > 144 │ import('namespace-import-forbidden').then((alias1) => { });
+        │        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    145 │ import('namespace-import-forbidden').then(function(alias1) { });
+    146 │ myFunction(...args, import("namespace-import-forbidden"), ...args)
+  
+
+```
+
+```
+invalid.js:145:8 lint/style/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not import 'namespace-import-forbidden'.
+  
+    143 │ import('namespace-import-forbidden').then(alias1 => { });
+    144 │ import('namespace-import-forbidden').then((alias1) => { });
+  > 145 │ import('namespace-import-forbidden').then(function(alias1) { });
+        │        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    146 │ myFunction(...args, import("namespace-import-forbidden"), ...args)
+    147 │ const { export1, export2: alias2, "string-name": alias3, default: defaultExport } = await import("named-import-forbidden");
+  
+
+```
+
+```
+invalid.js:146:28 lint/style/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not import 'namespace-import-forbidden'.
+  
+    144 │ import('namespace-import-forbidden').then((alias1) => { });
+    145 │ import('namespace-import-forbidden').then(function(alias1) { });
+  > 146 │ myFunction(...args, import("namespace-import-forbidden"), ...args)
+        │                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    147 │ const { export1, export2: alias2, "string-name": alias3, default: defaultExport } = await import("named-import-forbidden");
+    148 │ import('named-import-forbidden').then(({ export1, export2: alias2, "string-name": alias3, default: defaultExport }) => { });
+  
+
+```
+
+```
+invalid.js:147:9 lint/style/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not import 'export1' from 'named-import-forbidden'.
+  
+    145 │ import('namespace-import-forbidden').then(function(alias1) { });
+    146 │ myFunction(...args, import("namespace-import-forbidden"), ...args)
+  > 147 │ const { export1, export2: alias2, "string-name": alias3, default: defaultExport } = await import("named-import-forbidden");
+        │         ^^^^^^^
+    148 │ import('named-import-forbidden').then(({ export1, export2: alias2, "string-name": alias3, default: defaultExport }) => { });
+    149 │ import('named-import-forbidden').then(function({ export1, export2: alias2, "string-name": alias3, default: defaultExport }) { });
+  
+
+```
+
+```
+invalid.js:148:42 lint/style/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not import 'export1' from 'named-import-forbidden'.
+  
+    146 │ myFunction(...args, import("namespace-import-forbidden"), ...args)
+    147 │ const { export1, export2: alias2, "string-name": alias3, default: defaultExport } = await import("named-import-forbidden");
+  > 148 │ import('named-import-forbidden').then(({ export1, export2: alias2, "string-name": alias3, default: defaultExport }) => { });
+        │                                          ^^^^^^^
+    149 │ import('named-import-forbidden').then(function({ export1, export2: alias2, "string-name": alias3, default: defaultExport }) { });
+    150 │ const { default: defaultExport } = await import('default-import-forbidden')
+  
+
+```
+
+```
+invalid.js:149:50 lint/style/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not import 'export1' from 'named-import-forbidden'.
+  
+    147 │ const { export1, export2: alias2, "string-name": alias3, default: defaultExport } = await import("named-import-forbidden");
+    148 │ import('named-import-forbidden').then(({ export1, export2: alias2, "string-name": alias3, default: defaultExport }) => { });
+  > 149 │ import('named-import-forbidden').then(function({ export1, export2: alias2, "string-name": alias3, default: defaultExport }) { });
+        │                                                  ^^^^^^^
+    150 │ const { default: defaultExport } = await import('default-import-forbidden')
+    151 │ import('default-import-forbidden').then(({ default: defaultExport }) => { });
+  
+
+```
+
+```
+invalid.js:150:9 lint/style/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not import 'default' from 'default-import-forbidden'.
+  
+    148 │ import('named-import-forbidden').then(({ export1, export2: alias2, "string-name": alias3, default: defaultExport }) => { });
+    149 │ import('named-import-forbidden').then(function({ export1, export2: alias2, "string-name": alias3, default: defaultExport }) { });
+  > 150 │ const { default: defaultExport } = await import('default-import-forbidden')
+        │         ^^^^^^^
+    151 │ import('default-import-forbidden').then(({ default: defaultExport }) => { });
+    152 │ import('default-import-forbidden').then(function({ default: defaultExport }) { });
+  
+
+```
+
+```
+invalid.js:150:9 lint/style/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not import 'default' from 'default-import-forbidden'.
+  
+    148 │ import('named-import-forbidden').then(({ export1, export2: alias2, "string-name": alias3, default: defaultExport }) => { });
+    149 │ import('named-import-forbidden').then(function({ export1, export2: alias2, "string-name": alias3, default: defaultExport }) { });
+  > 150 │ const { default: defaultExport } = await import('default-import-forbidden')
+        │         ^^^^^^^
+    151 │ import('default-import-forbidden').then(({ default: defaultExport }) => { });
+    152 │ import('default-import-forbidden').then(function({ default: defaultExport }) { });
+  
+
+```
+
+```
+invalid.js:150:9 lint/style/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Default import should not be reported unless importNamePattern includes 'default'
+  
+    148 │ import('named-import-forbidden').then(({ export1, export2: alias2, "string-name": alias3, default: defaultExport }) => { });
+    149 │ import('named-import-forbidden').then(function({ export1, export2: alias2, "string-name": alias3, default: defaultExport }) { });
+  > 150 │ const { default: defaultExport } = await import('default-import-forbidden')
+        │         ^^^^^^^
+    151 │ import('default-import-forbidden').then(({ default: defaultExport }) => { });
+    152 │ import('default-import-forbidden').then(function({ default: defaultExport }) { });
+  
+
+```
+
+```
+invalid.js:151:44 lint/style/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Default import should not be reported unless importNamePattern includes 'default'
+  
+    149 │ import('named-import-forbidden').then(function({ export1, export2: alias2, "string-name": alias3, default: defaultExport }) { });
+    150 │ const { default: defaultExport } = await import('default-import-forbidden')
+  > 151 │ import('default-import-forbidden').then(({ default: defaultExport }) => { });
+        │                                            ^^^^^^^
+    152 │ import('default-import-forbidden').then(function({ default: defaultExport }) { });
+    153 │ const defaultExport = require('default-import-forbidden');
+  
+
+```
+
+```
+invalid.js:151:44 lint/style/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not import 'default' from 'default-import-forbidden'.
+  
+    149 │ import('named-import-forbidden').then(function({ export1, export2: alias2, "string-name": alias3, default: defaultExport }) { });
+    150 │ const { default: defaultExport } = await import('default-import-forbidden')
+  > 151 │ import('default-import-forbidden').then(({ default: defaultExport }) => { });
+        │                                            ^^^^^^^
+    152 │ import('default-import-forbidden').then(function({ default: defaultExport }) { });
+    153 │ const defaultExport = require('default-import-forbidden');
+  
+
+```
+
+```
+invalid.js:151:44 lint/style/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not import 'default' from 'default-import-forbidden'.
+  
+    149 │ import('named-import-forbidden').then(function({ export1, export2: alias2, "string-name": alias3, default: defaultExport }) { });
+    150 │ const { default: defaultExport } = await import('default-import-forbidden')
+  > 151 │ import('default-import-forbidden').then(({ default: defaultExport }) => { });
+        │                                            ^^^^^^^
+    152 │ import('default-import-forbidden').then(function({ default: defaultExport }) { });
+    153 │ const defaultExport = require('default-import-forbidden');
+  
+
+```
+
+```
+invalid.js:152:52 lint/style/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not import 'default' from 'default-import-forbidden'.
+  
+    150 │ const { default: defaultExport } = await import('default-import-forbidden')
+    151 │ import('default-import-forbidden').then(({ default: defaultExport }) => { });
+  > 152 │ import('default-import-forbidden').then(function({ default: defaultExport }) { });
+        │                                                    ^^^^^^^
+    153 │ const defaultExport = require('default-import-forbidden');
+    154 │ 
+  
+
+```
+
+```
+invalid.js:152:52 lint/style/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Default import should not be reported unless importNamePattern includes 'default'
+  
+    150 │ const { default: defaultExport } = await import('default-import-forbidden')
+    151 │ import('default-import-forbidden').then(({ default: defaultExport }) => { });
+  > 152 │ import('default-import-forbidden').then(function({ default: defaultExport }) { });
+        │                                                    ^^^^^^^
+    153 │ const defaultExport = require('default-import-forbidden');
+    154 │ 
+  
+
+```
+
+```
+invalid.js:152:52 lint/style/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not import 'default' from 'default-import-forbidden'.
+  
+    150 │ const { default: defaultExport } = await import('default-import-forbidden')
+    151 │ import('default-import-forbidden').then(({ default: defaultExport }) => { });
+  > 152 │ import('default-import-forbidden').then(function({ default: defaultExport }) { });
+        │                                                    ^^^^^^^
+    153 │ const defaultExport = require('default-import-forbidden');
+    154 │ 
+  
+
+```
+
+```
+invalid.js:153:31 lint/style/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not import 'default-import-forbidden'.
+  
+    151 │ import('default-import-forbidden').then(({ default: defaultExport }) => { });
+    152 │ import('default-import-forbidden').then(function({ default: defaultExport }) { });
+  > 153 │ const defaultExport = require('default-import-forbidden');
+        │                               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    154 │ 
+  
+
+```
+
+```
+invalid.js:153:31 lint/style/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Default import should not be reported unless importNamePattern includes 'default'
+  
+    151 │ import('default-import-forbidden').then(({ default: defaultExport }) => { });
+    152 │ import('default-import-forbidden').then(function({ default: defaultExport }) { });
+  > 153 │ const defaultExport = require('default-import-forbidden');
+        │                               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    154 │ 
+  
+
+```
+
+```
+invalid.js:153:31 lint/style/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not import 'default-import-forbidden'.
+  
+    151 │ import('default-import-forbidden').then(({ default: defaultExport }) => { });
+    152 │ import('default-import-forbidden').then(function({ default: defaultExport }) { });
+  > 153 │ const defaultExport = require('default-import-forbidden');
+        │                               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    154 │ 
   
 
 ```
