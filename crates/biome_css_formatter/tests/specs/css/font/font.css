@@ -1,0 +1,15 @@
+html {
+	font-family: system-ui, -apple-system;
+}
+
+html {
+	font-family: -apple-system, system-ui;
+}
+
+html {
+	font-family: "Lato", system-ui, -apple-system, Arial, sans-serif;
+}
+
+html {
+	font-family: -apple-system, "Lato", system-ui, -apple-system, Arial, sans-serif;
+}
