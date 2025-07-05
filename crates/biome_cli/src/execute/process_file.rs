@@ -11,7 +11,7 @@ use biome_analyze::RuleCategoriesBuilder;
 use biome_diagnostics::{DiagnosticExt, DiagnosticTags, Error, category};
 use biome_fs::BiomePath;
 use biome_service::workspace::{
-    DocumentFileSource, FeatureKind, SupportKind, SupportsFeatureParams,
+    DocumentFileSource, FeatureKind, FileFeaturesResult, SupportKind, SupportsFeatureParams,
 };
 use check::check_file;
 use format::format;
@@ -128,7 +128,9 @@ impl<'ctx, 'app> Deref for SharedTraversalOptions<'ctx, 'app> {
 /// write mode is enabled
 pub(crate) fn process_file(ctx: &TraversalOptions, biome_path: &BiomePath) -> FileResult {
     let _ = tracing::trace_span!("process_file", path = ?biome_path).entered();
-    let file_features = ctx
+    let FileFeaturesResult {
+        features_supported: file_features,
+    } = ctx
         .workspace
         .file_features(SupportsFeatureParams {
             project_key: ctx.project_key,

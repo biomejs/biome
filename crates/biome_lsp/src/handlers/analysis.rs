@@ -16,8 +16,8 @@ use biome_rowan::{TextRange, TextSize};
 use biome_service::WorkspaceError;
 use biome_service::file_handlers::{AstroFileHandler, SvelteFileHandler, VueFileHandler};
 use biome_service::workspace::{
-    CheckFileSizeParams, FeaturesBuilder, FixFileMode, FixFileParams, GetFileContentParams,
-    IsPathIgnoredParams, PullActionsParams, SupportsFeatureParams,
+    CheckFileSizeParams, FeaturesBuilder, FileFeaturesResult, FixFileMode, FixFileParams,
+    GetFileContentParams, IsPathIgnoredParams, PullActionsParams, SupportsFeatureParams,
 };
 use std::borrow::Cow;
 use std::collections::HashMap;
@@ -69,7 +69,9 @@ pub(crate) fn code_actions(
         return Ok(Some(Vec::new()));
     }
 
-    let file_features = &session.workspace.file_features(SupportsFeatureParams {
+    let FileFeaturesResult {
+        features_supported: file_features,
+    } = &session.workspace.file_features(SupportsFeatureParams {
         project_key: doc.project_key,
         path: path.clone(),
         features,
@@ -295,7 +297,9 @@ fn fix_all(
         return Ok(None);
     }
 
-    let file_features = session.workspace.file_features(SupportsFeatureParams {
+    let FileFeaturesResult {
+        features_supported: file_features,
+    } = session.workspace.file_features(SupportsFeatureParams {
         project_key: doc.project_key,
         path: path.clone(),
         features: FeaturesBuilder::new()

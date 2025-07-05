@@ -7,8 +7,9 @@ use biome_lsp_converters::from_proto;
 use biome_rowan::{TextLen, TextRange, TextSize};
 use biome_service::file_handlers::{AstroFileHandler, SvelteFileHandler, VueFileHandler};
 use biome_service::workspace::{
-    CheckFileSizeParams, FeaturesBuilder, FileFeaturesResult, FormatFileParams, FormatOnTypeParams,
-    FormatRangeParams, GetFileContentParams, IsPathIgnoredParams, SupportsFeatureParams,
+    CheckFileSizeParams, FeaturesBuilder, FeaturesSupported, FileFeaturesResult, FormatFileParams,
+    FormatOnTypeParams, FormatRangeParams, GetFileContentParams, IsPathIgnoredParams,
+    SupportsFeatureParams,
 };
 use biome_service::{WorkspaceError, extension_error};
 use std::ops::Sub;
@@ -37,7 +38,9 @@ pub(crate) fn format(
         return Ok(None);
     }
     let features = FeaturesBuilder::new().with_formatter().build();
-    let file_features = session.workspace.file_features(SupportsFeatureParams {
+    let FileFeaturesResult {
+        features_supported: file_features,
+    } = session.workspace.file_features(SupportsFeatureParams {
         project_key: doc.project_key,
         path: path.clone(),
         features,
@@ -118,7 +121,9 @@ pub(crate) fn format_range(
     }
 
     let features = FeaturesBuilder::new().with_formatter().build();
-    let file_features = session.workspace.file_features(SupportsFeatureParams {
+    let FileFeaturesResult {
+        features_supported: file_features,
+    } = session.workspace.file_features(SupportsFeatureParams {
         project_key: doc.project_key,
         path: path.clone(),
         features,
@@ -213,7 +218,9 @@ pub(crate) fn format_on_type(
         return Ok(None);
     }
     let features = FeaturesBuilder::new().with_formatter().build();
-    let file_features = session.workspace.file_features(SupportsFeatureParams {
+    let FileFeaturesResult {
+        features_supported: file_features,
+    } = session.workspace.file_features(SupportsFeatureParams {
         project_key: doc.project_key,
         path: path.clone(),
         features,
@@ -281,7 +288,7 @@ pub(crate) fn format_on_type(
     }
 }
 
-fn notify_user<T>(file_features: FileFeaturesResult, biome_path: BiomePath) -> Result<T, LspError> {
+fn notify_user<T>(file_features: FeaturesSupported, biome_path: BiomePath) -> Result<T, LspError> {
     let error = if file_features.is_ignored() {
         WorkspaceError::file_ignored(biome_path.to_string())
     } else if file_features.is_protected() {

@@ -12,6 +12,7 @@ export type FeatureKind = "format" | "lint" | "search" | "assist" | "debug";
 export interface FileFeaturesResult {
 	featuresSupported: Map<FeatureKind, SupportKind>;
 }
+export type FeaturesSupported = { [K in FeatureKind]?: SupportKind };
 export type SupportKind =
 	| "supported"
 	| "ignored"

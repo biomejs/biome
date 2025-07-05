@@ -14,7 +14,7 @@ use biome_service::file_handlers::{AstroFileHandler, SvelteFileHandler, VueFileH
 use biome_service::projects::ProjectKey;
 use biome_service::workspace::{
     ChangeFileParams, CloseFileParams, DropPatternParams, FeaturesBuilder, FileContent,
-    FixFileParams, FormatFileParams, OpenFileParams, SupportsFeatureParams,
+    FileFeaturesResult, FixFileParams, FormatFileParams, OpenFileParams, SupportsFeatureParams,
 };
 use std::borrow::Cow;
 
@@ -39,7 +39,9 @@ pub(crate) fn run<'a>(
     }
 
     if mode.is_format() {
-        let file_features = workspace.file_features(SupportsFeatureParams {
+        let FileFeaturesResult {
+            features_supported: file_features,
+        } = workspace.file_features(SupportsFeatureParams {
             project_key,
             path: biome_path.clone(),
             features: FeaturesBuilder::new().with_formatter().build(),
@@ -108,8 +110,11 @@ pub(crate) fn run<'a>(
             document_file_source: None,
             persist_node_cache: false,
         })?;
+
         // apply fix file of the linter
-        let file_features = workspace.file_features(SupportsFeatureParams {
+        let FileFeaturesResult {
+            features_supported: file_features,
+        } = workspace.file_features(SupportsFeatureParams {
             project_key,
             path: biome_path.clone(),
             features: FeaturesBuilder::new()
