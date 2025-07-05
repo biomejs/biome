@@ -49,14 +49,14 @@ fn lex_explicit_mapping() {
         WHITESPACE:1,
         FLOW_START:0,
         PLAIN_LITERAL:3,
-        NEWLINE:1,
         FLOW_END:0,
+        NEWLINE:1,
         COLON:1,
         WHITESPACE:1,
         FLOW_START:0,
         PLAIN_LITERAL:2,
-        NEWLINE:1,
         FLOW_END:0,
+        NEWLINE:1,
         QUESTION:1,
         WHITESPACE:1,
         FLOW_START:0,
@@ -81,27 +81,59 @@ fn lex_compact_mapping_in_sequence() {
         MAPPING_START:0,
         PLAIN_LITERAL:1,
         COLON:1,
-        WHITESPACE:1
+        WHITESPACE:1,
         FLOW_START:0,
         PLAIN_LITERAL:1,
-        NEWLINE:3,
         FLOW_END:0,
+        NEWLINE:3,
         PLAIN_LITERAL:1,
         COLON:1,
-        WHITESPACE:1
+        WHITESPACE:1,
         FLOW_START:0,
         PLAIN_LITERAL:1,
-        NEWLINE:3,
         FLOW_END:0,
+        NEWLINE:3,
         PLAIN_LITERAL:1,
         COLON:1,
-        WHITESPACE:1
+        WHITESPACE:1,
         FLOW_START:0,
         PLAIN_LITERAL:1,
-        NEWLINE:1,
         FLOW_END:0,
         MAPPING_END:0,
         SEQUENCE_END:0,
+        NEWLINE:1,
+    );
+}
+
+#[test]
+fn lex_nested_sequence() {
+    assert_lex!(
+        r#"
+- - 10
+  - 20
+-
+"#,
+        NEWLINE:1
+        SEQUENCE_START:0
+        DASH:1
+        WHITESPACE:1
+        SEQUENCE_START:0
+        DASH:1
+        WHITESPACE:1
+        FLOW_START:0
+        PLAIN_LITERAL:2
+        FLOW_END:0
+        NEWLINE:3
+        DASH:1
+        WHITESPACE:1
+        FLOW_START:0
+        PLAIN_LITERAL:2
+        FLOW_END:0
+        SEQUENCE_END:0
+        NEWLINE:1
+        DASH:1
+        SEQUENCE_END:0
+        NEWLINE:1
     );
 }
 
@@ -128,17 +160,17 @@ fn lex_nested_compact_sequence() {
         WHITESPACE:1,
         SEQUENCE_START:0,
         DASH:1,
+        SEQUENCE_END:0,
+        SEQUENCE_END:0,
         NEWLINE:1,
         WHITESPACE:4,
-        SEQUENCE_END:0,
-        SEQUENCE_END:0,
         DASH:1,
+        SEQUENCE_END:0,
+        SEQUENCE_END:0,
         NEWLINE:1,
-        SEQUENCE_END:0,
-        SEQUENCE_END:0,
         DASH:1,
-        NEWLINE:1,
         SEQUENCE_END:0,
+        NEWLINE:1,
     );
 }
 
@@ -180,8 +212,8 @@ fn lex_flow_collection_as_key() {
         WHITESPACE:1,
         FLOW_START:0,
         PLAIN_LITERAL:3,
-        NEWLINE:1
         FLOW_END:0,
+        NEWLINE:1
         L_CURLY:1
         PLAIN_LITERAL:1,
         COLON:1,
@@ -198,8 +230,8 @@ fn lex_flow_collection_as_key() {
         WHITESPACE:1,
         FLOW_START:0,
         PLAIN_LITERAL:3,
-        NEWLINE:1,
         FLOW_END:0,
+        NEWLINE:1,
         MAPPING_END:0,
     );
 }
@@ -218,8 +250,8 @@ fn lex_block_map_empty_key() {
         WHITESPACE:1,
         FLOW_START:0,
         PLAIN_LITERAL:3,
-        NEWLINE:1,
         FLOW_END:0,
+        NEWLINE:1,
         L_BRACK:1,
         PLAIN_LITERAL:1,
         COMMA:1,
@@ -230,14 +262,14 @@ fn lex_block_map_empty_key() {
         WHITESPACE:1,
         FLOW_START:0,
         PLAIN_LITERAL:3,
-        NEWLINE:1,
         FLOW_END:0,
+        NEWLINE:1,
         COLON:1,
         WHITESPACE:1,
         FLOW_START:0,
         PLAIN_LITERAL:3,
-        NEWLINE:1,
         FLOW_END:0,
+        NEWLINE:1,
         MAPPING_END:0,
     );
 }
@@ -294,9 +326,9 @@ abc:
         WHITESPACE:1,
         FLOW_START:0,
         PLAIN_LITERAL:3,
-        NEWLINE:1,
         FLOW_END:0,
         SEQUENCE_END:0,
+        NEWLINE:1,
         PLAIN_LITERAL:3,
         COLON:1,
         NEWLINE:1,
@@ -305,9 +337,9 @@ abc:
         WHITESPACE:1,
         FLOW_START:0,
         PLAIN_LITERAL:3,
-        NEWLINE:1,
         FLOW_END:0,
         SEQUENCE_END:0,
+        NEWLINE:1,
         COLON:1,
         NEWLINE:1
         MAPPING_END:0,
@@ -385,6 +417,40 @@ a:
         PLAIN_LITERAL:1,
         COLON:1,
         MAPPING_END:0,
+        MAPPING_END:0,
+    );
+}
+
+#[test]
+fn lex_mapping_separated_by_trivia() {
+    assert_lex!(
+        r#"
+? a: 10
+# this is another trivia
+c: 30
+"#,
+        NEWLINE:1,
+        MAPPING_START:0,
+        QUESTION:1,
+        WHITESPACE:1,
+        MAPPING_START:0,
+        PLAIN_LITERAL:1,
+        COLON:1,
+        WHITESPACE:1,
+        FLOW_START:0,
+        PLAIN_LITERAL:2,
+        FLOW_END:0,
+        MAPPING_END:0,
+        NEWLINE:1,
+        COMMENT:24,
+        NEWLINE:1,
+        PLAIN_LITERAL:1,
+        COLON:1,
+        WHITESPACE:1,
+        FLOW_START:0,
+        PLAIN_LITERAL:2,
+        FLOW_END:0,
+        NEWLINE:1,
         MAPPING_END:0,
     );
 }

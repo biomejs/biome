@@ -5,6 +5,7 @@ expression: snapshot
 ## Input
 ```yaml
 a:
+# b
 b:
 c:
 
@@ -39,11 +40,11 @@ YamlRoot {
                         key: YamlFlowYamlNode {
                             properties: missing (optional),
                             content: YamlPlainScalar {
-                                value_token: PLAIN_LITERAL@2..4 "b" [Newline("\n")] [],
+                                value_token: PLAIN_LITERAL@2..8 "b" [Newline("\n"), Comments("# b"), Newline("\n")] [],
                             },
                         },
                         value: YamlBlockMapImplicitValue {
-                            colon_token: COLON@4..5 ":" [] [],
+                            colon_token: COLON@8..9 ":" [] [],
                             value: missing (optional),
                         },
                     },
@@ -51,37 +52,37 @@ YamlRoot {
                         key: YamlFlowYamlNode {
                             properties: missing (optional),
                             content: YamlPlainScalar {
-                                value_token: PLAIN_LITERAL@5..7 "c" [Newline("\n")] [],
+                                value_token: PLAIN_LITERAL@9..11 "c" [Newline("\n")] [],
                             },
                         },
                         value: YamlBlockMapImplicitValue {
-                            colon_token: COLON@7..8 ":" [] [],
+                            colon_token: COLON@11..12 ":" [] [],
                             value: missing (optional),
                         },
                     },
                 ],
-                mapping_end_token: MAPPING_END@8..9 "" [Newline("\n")] [],
+                mapping_end_token: MAPPING_END@12..13 "" [Newline("\n")] [],
             },
             dotdotdot_token: missing (optional),
         },
     ],
-    eof_token: EOF@9..9 "" [] [],
+    eof_token: EOF@13..13 "" [] [],
 }
 ```
 
 ## CST
 
 ```
-0: YAML_ROOT@0..9
-  0: YAML_DOCUMENT_LIST@0..9
-    0: YAML_DOCUMENT@0..9
+0: YAML_ROOT@0..13
+  0: YAML_DOCUMENT_LIST@0..13
+    0: YAML_DOCUMENT@0..13
       0: (empty)
       1: YAML_DIRECTIVE_LIST@0..0
       2: (empty)
-      3: YAML_BLOCK_MAPPING@0..9
+      3: YAML_BLOCK_MAPPING@0..13
         0: MAPPING_START@0..0 "" [] []
         1: (empty)
-        2: YAML_BLOCK_MAP_ENTRY_LIST@0..8
+        2: YAML_BLOCK_MAP_ENTRY_LIST@0..12
           0: YAML_BLOCK_MAP_IMPLICIT_ENTRY@0..2
             0: YAML_FLOW_YAML_NODE@0..1
               0: (empty)
@@ -90,24 +91,24 @@ YamlRoot {
             1: YAML_BLOCK_MAP_IMPLICIT_VALUE@1..2
               0: COLON@1..2 ":" [] []
               1: (empty)
-          1: YAML_BLOCK_MAP_IMPLICIT_ENTRY@2..5
-            0: YAML_FLOW_YAML_NODE@2..4
+          1: YAML_BLOCK_MAP_IMPLICIT_ENTRY@2..9
+            0: YAML_FLOW_YAML_NODE@2..8
               0: (empty)
-              1: YAML_PLAIN_SCALAR@2..4
-                0: PLAIN_LITERAL@2..4 "b" [Newline("\n")] []
-            1: YAML_BLOCK_MAP_IMPLICIT_VALUE@4..5
-              0: COLON@4..5 ":" [] []
+              1: YAML_PLAIN_SCALAR@2..8
+                0: PLAIN_LITERAL@2..8 "b" [Newline("\n"), Comments("# b"), Newline("\n")] []
+            1: YAML_BLOCK_MAP_IMPLICIT_VALUE@8..9
+              0: COLON@8..9 ":" [] []
               1: (empty)
-          2: YAML_BLOCK_MAP_IMPLICIT_ENTRY@5..8
-            0: YAML_FLOW_YAML_NODE@5..7
+          2: YAML_BLOCK_MAP_IMPLICIT_ENTRY@9..12
+            0: YAML_FLOW_YAML_NODE@9..11
               0: (empty)
-              1: YAML_PLAIN_SCALAR@5..7
-                0: PLAIN_LITERAL@5..7 "c" [Newline("\n")] []
-            1: YAML_BLOCK_MAP_IMPLICIT_VALUE@7..8
-              0: COLON@7..8 ":" [] []
+              1: YAML_PLAIN_SCALAR@9..11
+                0: PLAIN_LITERAL@9..11 "c" [Newline("\n")] []
+            1: YAML_BLOCK_MAP_IMPLICIT_VALUE@11..12
+              0: COLON@11..12 ":" [] []
               1: (empty)
-        3: MAPPING_END@8..9 "" [Newline("\n")] []
+        3: MAPPING_END@12..13 "" [Newline("\n")] []
       4: (empty)
-  1: EOF@9..9 "" [] []
+  1: EOF@13..13 "" [] []
 
 ```
