@@ -159,7 +159,10 @@ pub(crate) fn code_actions(
     }) {
         Ok(result) => result,
         Err(err) => {
-            return if matches!(err, WorkspaceError::FileIgnored(_)) {
+            return if matches!(
+                err,
+                WorkspaceError::FileIgnored(_) | WorkspaceError::SourceFileNotSupported(_)
+            ) {
                 Ok(Some(Vec::new()))
             } else {
                 Err(err.into())
