@@ -159,6 +159,10 @@ impl biome_rowan::SyntaxKind for JsSyntaxKind {
     fn to_string(&self) -> Option<&'static str> {
         Self::to_string(self)
     }
+
+    fn is_allowed_before_suppressions(&self) -> bool {
+        matches!(self, Self::JS_SHEBANG)
+    }
 }
 
 impl TryFrom<JsSyntaxKind> for TriviaPieceKind {
