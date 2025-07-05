@@ -26,7 +26,7 @@ impl DeserializableValidator for UseUniqueElementIdsOptions {
         for name in &self.excluded_components {
             let msg = if name.is_empty() {
                 "empty values"
-            } else if name.contains(".") {
+            } else if name.contains('.') {
                 "values with dots"
             } else {
                 continue;
