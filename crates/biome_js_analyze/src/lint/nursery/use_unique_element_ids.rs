@@ -63,16 +63,39 @@ declare_node_union! {
 }
 
 impl UseUniqueElementIdsQuery {
+    fn create_element_call(&self, model: &SemanticModel) -> Option<ReactCreateElementCall> {
+        match self {
+            Self::JsCallExpression(expression) => {
+                ReactCreateElementCall::from_call_expression(expression, model)
+            }
+            &Self::AnyJsxElement(_) => None,
+        }
+    }
+
+    fn element_name(&self, model: &SemanticModel) -> Option<Box<str>> {
+        match self {
+            Self::AnyJsxElement(jsx) => jsx
+                .name_value_token()
+                .ok()
+                .map(|tok| tok.text_trimmed().into()),
+            Self::JsCallExpression(_) => {
+                let expr = self
+                    .create_element_call(model)?
+                    .element_type
+                    .as_any_js_expression()?
+                    .get_callee_member_name();
+                expr.map(|tok| tok.text_trimmed().into())
+            }
+        }
+    }
+
     fn find_id_attribute(&self, model: &SemanticModel) -> Option<IdProp> {
         match self {
             Self::AnyJsxElement(jsx) => jsx.find_attribute_by_name("id").map(IdProp::from),
-            Self::JsCallExpression(expression) => {
-                let react_create_element =
-                    ReactCreateElementCall::from_call_expression(expression, model)?;
-                react_create_element
-                    .find_prop_by_name("id")
-                    .map(IdProp::from)
-            }
+            Self::JsCallExpression(_) => self
+                .create_element_call(model)?
+                .find_prop_by_name("id")
+                .map(IdProp::from),
         }
     }
 }
@@ -86,6 +109,13 @@ impl Rule for UseUniqueElementIds {
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
         let model = ctx.model();
+        let options = ctx.options();
+        if node
+            .element_name(model)
+            .is_some_and(|name| options.excluded_components.contains(&name))
+        {
+            return None;
+        }
         let id_attribute = node.find_id_attribute(model)?;
 
         match id_attribute {

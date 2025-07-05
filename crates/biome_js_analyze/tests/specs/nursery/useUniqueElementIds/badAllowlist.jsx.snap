@@ -1,0 +1,46 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: badAllowlist.jsx
+---
+# Input
+```jsx
+function WithJsxNamespaced() {
+	return <Library.FormattedMessage id="abc"/>
+}
+
+```
+
+# Diagnostics
+```
+badAllowlist.options:8:32 deserialize ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × 'excludedComponents' does not accept values with dots.
+  
+     6 │                 "useUniqueElementIds": {
+     7 │                     "level": "error",
+   > 8 │                     "options": {
+       │                                ^
+   > 9 │                         "excludedComponents": ["Library.FormattedMessage"]
+  > 10 │                     }
+       │                     ^
+    11 │                 }
+    12 │             }
+  
+
+```
+
+```
+badAllowlist.jsx:2:9 lint/nursery/useUniqueElementIds ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × id attribute should not be a static string literal. Generate unique IDs using useId().
+  
+    1 │ function WithJsxNamespaced() {
+  > 2 │ 	return <Library.FormattedMessage id="abc"/>
+      │ 	       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    3 │ }
+    4 │ 
+  
+  i In React, if you hardcode IDs and use the component multiple times, it can lead to duplicate IDs in the DOM. Instead, generate unique IDs using useId().
+  
+
+```
