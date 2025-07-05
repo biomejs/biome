@@ -328,7 +328,7 @@ Anyone may report a violation. Violations can be reported in the following ways:
 
 Each report will be assigned reviewers. These will initially be all project [core contributors](#core-contributors-team).
 
-In the event of any conflict of interest - e.g. core contributors who are personally connected to a situation they must immediately recurse themselves.
+In the event of any conflict of interest - e.g. core contributors who are personally connected to a situation they must immediately recuse themselves.
 
 At the reporter's request and if deemed appropriate by the reviewers, another neutral third party may be involved in the review and decision process.
 
