@@ -977,7 +977,7 @@
 
 - The rule [`useWhile`](https://biomejs.dev/linter/rules/use-while/) now belongs to the `complexity` group.
 
-- The rule [`useImportExtensions`](https://biomejs.dev/linter/rules/use-import-extensions/) has been updated to suggest actual file extensions instead of guesses based on hueristics.
+- The rule [`useImportExtensions`](https://biomejs.dev/linter/rules/use-import-extensions/) has been updated to suggest actual file extensions instead of guesses based on heuristics.
 
   As part of this, the `suggestedExtensions` option has been removed. A simpler,
   new option called `forceJsExtensions` has been introduced for those who use
@@ -2282,13 +2282,13 @@
         <a rel="
   ```
 
-- Fixed a bug where syntax rules didn't provide an automatic way to suppress the rule. Now the LSP will show supression actions if a syntax rule is violated.
+- Fixed a bug where syntax rules didn't provide an automatic way to suppress the rule. Now the LSP will show suppression actions if a syntax rule is violated.
 
 - Fixed a CSS parser error: `@-moz-document url-prefix(https://example.com)` and `@-moz-document domain(example.com)` are now valid.
 
 - Fixed [#4967](https://github.com/biomejs/biome/issues/4967): The fix for `useArrowFunction` no longer breaks function bodies starting with `{`.
 
-- Fixed [#5998](https://github.com/biomejs/biome/issues/5998). The rule `noUnknownPseudoElement` now correctly cheks names
+- Fixed [#5998](https://github.com/biomejs/biome/issues/5998). The rule `noUnknownPseudoElement` now correctly checks names
   of pseudo-element functions.
 
 - Fixed [#5024](https://github.com/biomejs/biome/issues/5024): Added `useJsxKeyInIterable` rule to React domain.
@@ -2672,7 +2672,7 @@
 
 - When pulling code actions from the LSP, now the first choice suggested by the client will be the safe fix.
 
-- Fixed [#6022](https://github.com/biomejs/biome/issues/6022), now the rule `noDuplicateProperties` does't trigger properties defined inside the `@keyframes` at rule
+- Fixed [#6022](https://github.com/biomejs/biome/issues/6022), now the rule `noDuplicateProperties` doesn't trigger properties defined inside the `@keyframes` at rule
 
 - Enhanced the error message of the diagnostics emitted when Biome can't parse a suppression comment.
 
