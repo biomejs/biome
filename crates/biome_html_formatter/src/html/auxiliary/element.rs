@@ -27,7 +27,6 @@ impl FormatNodeRule<HtmlElement> for FormatHtmlElement {
             closing_element,
         } = node.as_fields();
 
-        let closing_element = closing_element?;
         let opening_element = opening_element?;
         let tag_name = opening_element.name()?;
         let is_whitespace_sensitive = is_element_whitespace_sensitive(f, &tag_name);
@@ -55,9 +54,13 @@ impl FormatNodeRule<HtmlElement> for FormatHtmlElement {
             .last_token()
             .is_some_and(|tok| tok.has_trailing_whitespace())
             || closing_element
-                .l_angle_token()
-                .ok()
-                .is_some_and(|tok| tok.has_leading_whitespace_or_newline());
+                .as_ref()
+                .map(|e| {
+                    e.l_angle_token()
+                        .ok()
+                        .is_some_and(|tok| tok.has_leading_whitespace_or_newline())
+                })
+                .unwrap_or_default();
 
         // "Borrowing" in this context refers to tokens in nodes that would normally be
         // formatted by that node's formatter, but are instead formatted by a sibling
@@ -95,7 +98,7 @@ impl FormatNodeRule<HtmlElement> for FormatHtmlElement {
             None
         };
         let borrowed_closing_tag = if should_borrow_closing_tag {
-            Some(closing_element.clone())
+            closing_element.clone()
         } else {
             None
         };
@@ -145,13 +148,17 @@ impl FormatNodeRule<HtmlElement> for FormatHtmlElement {
                 }
             }
         }
-        FormatNodeRule::fmt(
-            &FormatHtmlClosingElement::default().with_options(FormatHtmlClosingElementOptions {
-                tag_borrowed: should_borrow_closing_tag,
-            }),
-            &closing_element,
-            f,
-        )?;
+        if let Some(closing_element) = closing_element {
+            FormatNodeRule::fmt(
+                &FormatHtmlClosingElement::default().with_options(
+                    FormatHtmlClosingElementOptions {
+                        tag_borrowed: should_borrow_closing_tag,
+                    },
+                ),
+                &closing_element,
+                f,
+            )?;
+        }
 
         Ok(())
     }
