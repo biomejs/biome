@@ -7,8 +7,8 @@ use rustc_hash::FxHasher;
 use crate::{
     CallArgumentType, DestructureField, Function, FunctionParameter, Literal, MAX_FLATTEN_DEPTH,
     Resolvable, ResolvedTypeData, ResolvedTypeMember, ResolverId, TypeData, TypeMember,
-    TypeReference, TypeResolver, TypeofCallExpression, TypeofExpression,
-    TypeofStaticMemberExpression,
+    TypeReference, TypeResolver, TypeofCallExpression, TypeofDestructureExpression,
+    TypeofExpression, TypeofStaticMemberExpression,
     flattening::conditionals::{
         ConditionalType, reference_to_falsy_subset_of, reference_to_non_nullish_subset_of,
         reference_to_truthy_subset_of,
@@ -155,74 +155,7 @@ pub(super) fn flattened_expression(
                 None
             }
         }
-        TypeofExpression::Destructure(expr) => {
-            let resolved = resolver.resolve_and_get(&expr.ty)?;
-            match (resolved.as_raw_data(), &expr.destructure_field) {
-                (_subject, DestructureField::Index(index)) => Some(
-                    resolved
-                        .to_data()
-                        .find_element_type_at_index(resolved.resolver_id(), resolver, *index)
-                        .map_or_else(TypeData::unknown, ResolvedTypeData::to_data),
-                ),
-                (_subject, DestructureField::RestFrom(index)) => Some(
-                    resolved
-                        .to_data()
-                        .find_type_of_elements_from_index(resolved.resolver_id(), resolver, *index)
-                        .map_or_else(TypeData::unknown, ResolvedTypeData::to_data),
-                ),
-                (TypeData::InstanceOf(subject_instance), DestructureField::Name(name)) => resolver
-                    .resolve_and_get(&resolved.apply_module_id_to_reference(&subject_instance.ty))
-                    .and_then(|subject| {
-                        subject
-                            .all_members(resolver)
-                            .find(|member| !member.is_static() && member.has_name(name.text()))
-                    })
-                    .and_then(|member| resolver.resolve_and_get(&member.deref_ty(resolver)))
-                    .map(ResolvedTypeData::to_data),
-                (TypeData::InstanceOf(subject_instance), DestructureField::RestExcept(names)) => {
-                    resolver
-                        .resolve_and_get(
-                            &resolved.apply_module_id_to_reference(&subject_instance.ty),
-                        )
-                        .map(|subject| flattened_rest_object(resolver, subject, names))
-                }
-                (subject @ TypeData::Class(_), DestructureField::Name(name)) => {
-                    let member_ty = subject
-                        .own_members()
-                        .find(|own_member| {
-                            own_member.is_static() && own_member.has_name(name.text())
-                        })
-                        .map(|member| resolved.apply_module_id_to_reference(&member.ty))?;
-                    resolver
-                        .resolve_and_get(&member_ty)
-                        .map(ResolvedTypeData::to_data)
-                }
-                (subject @ TypeData::Class(_), DestructureField::RestExcept(names)) => {
-                    let members = subject
-                        .own_members()
-                        .filter(|own_member| {
-                            own_member.is_static()
-                                && !names.iter().any(|name| own_member.has_name(name))
-                        })
-                        .map(|member| {
-                            ResolvedTypeMember::from((resolved.resolver_id(), member)).to_member()
-                        })
-                        .collect();
-                    Some(TypeData::object_with_members(members))
-                }
-                (_, DestructureField::Name(name)) => {
-                    let member = resolved
-                        .all_members(resolver)
-                        .find(|member| member.has_name(name.text()))?;
-                    resolver
-                        .resolve_and_get(&member.deref_ty(resolver))
-                        .map(ResolvedTypeData::to_data)
-                }
-                (_, DestructureField::RestExcept(excluded_names)) => {
-                    Some(flattened_rest_object(resolver, resolved, excluded_names))
-                }
-            }
-        }
+        TypeofExpression::Destructure(expr) => flattened_destructure(expr, resolver),
         TypeofExpression::New(expr) => {
             let resolved = resolver.resolve_and_get(&expr.callee)?;
             if let TypeData::Class(class) = resolved.as_raw_data() {
@@ -297,9 +230,9 @@ pub(super) fn flattened_expression(
                     let array = resolver
                         .get_by_resolved_id(GLOBAL_ARRAY_ID)
                         .expect("Array type must be registered");
-                    let member = array
-                        .all_members(resolver)
-                        .find(|member| member.has_name(&expr.member) && !member.is_static())?;
+                    let member = array.find_member(resolver, |member| {
+                        member.has_name(&expr.member) && !member.is_static()
+                    })?;
                     Some(TypeData::reference(member.ty().into_owned()))
                 }
 
@@ -330,8 +263,10 @@ pub(super) fn flattened_expression(
 
                 _ => {
                     let member = object
-                        .all_members(resolver)
-                        .find(|member| member.has_name(&expr.member))?;
+                        .find_member(resolver, |member| member.has_name(&expr.member))
+                        .or_else(|| {
+                            object.find_index_signature_with_ty(resolver, |ty| ty.is_string())
+                        })?;
                     Some(TypeData::reference(member.deref_ty(resolver).into_owned()))
                 }
             }
@@ -385,8 +320,7 @@ fn flattened_call(
                     instance_callee.to_data()
                 } else {
                     instance_callee
-                        .all_members(resolver)
-                        .find(|member| member.kind().is_call_signature())
+                        .find_member(resolver, |member| member.kind().is_call_signature())
                         .map(ResolvedTypeMember::to_member)
                         .and_then(|member| resolver.resolve_and_get(&member.deref_ty(resolver)))?
                         .to_data()
@@ -395,8 +329,7 @@ fn flattened_call(
             TypeData::Interface(_) | TypeData::Object(_) => {
                 callee =
                     ResolvedTypeData::from((ResolverId::from_level(resolver.level()), &callee))
-                        .all_members(resolver)
-                        .find(|member| member.kind().is_call_signature())
+                        .find_member(resolver, |member| member.kind().is_call_signature())
                         .map(ResolvedTypeMember::to_member)
                         .and_then(|member| resolver.resolve_and_get(&member.deref_ty(resolver)))?
                         .to_data();
@@ -406,6 +339,72 @@ fn flattened_call(
     }
 
     None
+}
+
+fn flattened_destructure(
+    expr: &TypeofDestructureExpression,
+    resolver: &mut dyn TypeResolver,
+) -> Option<TypeData> {
+    let resolved = resolver.resolve_and_get(&expr.ty)?;
+    match (resolved.as_raw_data(), &expr.destructure_field) {
+        (_subject, DestructureField::Index(index)) => resolved
+            .find_element_type_at_index(resolver, *index)
+            .and_then(|element_reference| {
+                let reference = element_reference.into_reference(resolver);
+                resolver
+                    .resolve_and_get(&reference)
+                    .map(ResolvedTypeData::to_data)
+            }),
+        (_subject, DestructureField::RestFrom(index)) => {
+            resolved.find_type_of_elements_from_index(resolver, *index)
+        }
+        (TypeData::InstanceOf(subject_instance), DestructureField::Name(name)) => resolver
+            .resolve_and_get(&resolved.apply_module_id_to_reference(&subject_instance.ty))
+            .and_then(|subject| {
+                subject
+                    .find_member(resolver, |member| {
+                        !member.is_static() && member.has_name(name.text())
+                    })
+                    .or_else(|| subject.find_index_signature_with_ty(resolver, |ty| ty.is_string()))
+            })
+            .and_then(|member| resolver.resolve_and_get(&member.deref_ty(resolver)))
+            .map(ResolvedTypeData::to_data),
+        (TypeData::InstanceOf(subject_instance), DestructureField::RestExcept(names)) => resolver
+            .resolve_and_get(&resolved.apply_module_id_to_reference(&subject_instance.ty))
+            .map(|subject| flattened_rest_object(resolver, subject, names)),
+        (subject @ TypeData::Class(_), DestructureField::Name(name)) => {
+            let member_ty = subject
+                .own_members()
+                .find(|own_member| own_member.is_static() && own_member.has_name(name.text()))
+                .map(|member| resolved.apply_module_id_to_reference(&member.ty))?;
+            resolver
+                .resolve_and_get(&member_ty)
+                .map(ResolvedTypeData::to_data)
+        }
+        (subject @ TypeData::Class(_), DestructureField::RestExcept(names)) => {
+            let members = subject
+                .own_members()
+                .filter(|own_member| {
+                    own_member.is_static() && !names.iter().any(|name| own_member.has_name(name))
+                })
+                .map(|member| {
+                    ResolvedTypeMember::from((resolved.resolver_id(), member)).to_member()
+                })
+                .collect();
+            Some(TypeData::object_with_members(members))
+        }
+        (_, DestructureField::Name(name)) => {
+            let member = resolved
+                .find_member(resolver, |member| member.has_name(name.text()))
+                .or_else(|| resolved.find_index_signature_with_ty(resolver, |ty| ty.is_string()))?;
+            resolver
+                .resolve_and_get(&member.deref_ty(resolver))
+                .map(ResolvedTypeData::to_data)
+        }
+        (_, DestructureField::RestExcept(excluded_names)) => {
+            Some(flattened_rest_object(resolver, resolved, excluded_names))
+        }
+    }
 }
 
 fn flattened_function_call(

@@ -318,6 +318,9 @@ impl Format<FormatTypeContext> for TypeMemberKind {
                 let quoted = std::format!("get \"{name}\"");
                 write!(f, [dynamic_text(&quoted, TextSize::default())])
             }
+            Self::IndexSignature(ty) => {
+                write!(f, [text("["), ty, text("]")])
+            }
             Self::Named(name) => {
                 let quoted = std::format!("\"{name}\"");
                 write!(f, [dynamic_text(&quoted, TextSize::default())])
