@@ -6,7 +6,7 @@ use biome_js_syntax::{
     AnyJsExpression, AnyJsxAttributeValue, JsCallExpression, JsPropertyObjectMember, JsxAttribute,
     jsx_ext::AnyJsxElement,
 };
-use biome_rowan::{AstNode, declare_node_union};
+use biome_rowan::{AstNode, TokenText, declare_node_union};
 use biome_rule_options::use_unique_element_ids::UseUniqueElementIdsOptions;
 
 use crate::react::{ReactApiCall, ReactCreateElementCall};
@@ -72,20 +72,18 @@ impl UseUniqueElementIdsQuery {
         }
     }
 
-    fn element_name(&self, model: &SemanticModel) -> Option<Box<str>> {
+    fn element_name(&self, model: &SemanticModel) -> Option<TokenText> {
         match self {
             Self::AnyJsxElement(jsx) => jsx
                 .name_value_token()
                 .ok()
-                .map(|tok| tok.text_trimmed().into()),
-            Self::JsCallExpression(_) => {
-                let expr = self
-                    .create_element_call(model)?
-                    .element_type
-                    .as_any_js_expression()?
-                    .get_callee_member_name();
-                expr.map(|tok| tok.text_trimmed().into())
-            }
+                .map(|tok| tok.token_text_trimmed()),
+            Self::JsCallExpression(_) => self
+                .create_element_call(model)?
+                .element_type
+                .as_any_js_expression()?
+                .get_callee_member_name()
+                .map(|tok| tok.token_text_trimmed()),
         }
     }
 
@@ -112,7 +110,7 @@ impl Rule for UseUniqueElementIds {
         let options = ctx.options();
         if node
             .element_name(model)
-            .is_some_and(|name| options.excluded_components.contains(&name))
+            .is_some_and(|name| options.excluded_components.contains(name.text()))
         {
             return None;
         }
