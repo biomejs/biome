@@ -1,5 +1,6 @@
 use biome_cli::{
     DiagnosticsPayload, Execution, Reporter, ReporterVisitor, TraversalSummary, VcsTargeted,
+    Verbosity,
 };
 
 /// This will be the visitor, which where we **write** the data
@@ -16,7 +17,7 @@ impl Reporter for TextReport {
             staged: false,
             changed: false,
         });
-        visitor.report_summary(&execution, self.summary, false)?;
+        visitor.report_summary(&execution, self.summary, Verbosity::Simple)?;
         Ok(())
     }
 }
@@ -26,7 +27,7 @@ impl ReporterVisitor for BufferVisitor {
         &mut self,
         _execution: &Execution,
         summary: TraversalSummary,
-        _verbose: bool,
+        _verbosity: Verbosity,
     ) -> std::io::Result<()> {
         self.0
             .push_str(&format!("Total is {}", summary.changed + summary.unchanged));
@@ -37,7 +38,7 @@ impl ReporterVisitor for BufferVisitor {
         &mut self,
         _execution: &Execution,
         _payload: DiagnosticsPayload,
-        _verbose: bool,
+        _verbosity: Verbosity,
     ) -> std::io::Result<()> {
         todo!()
     }

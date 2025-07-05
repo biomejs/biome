@@ -2,8 +2,8 @@ use biome_console::fmt::Formatter;
 use biome_console::markup;
 use biome_diagnostics::advice::ListAdvice;
 use biome_diagnostics::{
-    Advices, Category, Diagnostic, Error, LogCategory, MessageAndDescription, Severity, Visit,
-    category,
+    Advices, Category, Diagnostic, DiagnosticTags, Error, LogCategory, MessageAndDescription,
+    Severity, Visit, category,
 };
 use biome_diagnostics::{BpafError, IoError, SerdeJsonError};
 use biome_service::WorkspaceError;
@@ -34,6 +34,8 @@ pub enum CliDiagnostic {
     MissingArgument(MissingArgument),
     /// Returned when a subcommand is called without any arguments
     EmptyArguments(EmptyArguments),
+    /// Emitted when a CLI argument is deprecated
+    DeprecatedArgument(DeprecatedArgument),
     /// Returned when a subcommand is called with an unsupported combination of arguments
     IncompatibleArguments(IncompatibleArguments),
     /// Returned by a traversal command when error diagnostics were emitted
@@ -256,15 +258,38 @@ pub struct MigrationDiagnostic {
     pub reason: String,
 }
 
-#[derive(Debug, Diagnostic)]
-#[diagnostic(
-    category = "internalError/fs",
-    severity = Warning,
-    tags(DEPRECATED_CODE)
-)]
+#[derive(Debug)]
 pub struct DeprecatedArgument {
-    #[message]
     pub message: MessageAndDescription,
+    pub alternative_command: String,
+}
+
+impl Diagnostic for DeprecatedArgument {
+    fn category(&self) -> Option<&'static Category> {
+        Some(category!("flags/deprecated"))
+    }
+
+    fn severity(&self) -> Severity {
+        Severity::Warning
+    }
+
+    fn tags(&self) -> DiagnosticTags {
+        DiagnosticTags::DEPRECATED_CODE
+    }
+
+    fn message(&self, fmt: &mut Formatter<'_>) -> std::io::Result<()> {
+        fmt.write_markup(markup! {
+            {self.message}
+        })
+    }
+
+    fn advices(&self, visitor: &mut dyn Visit) -> std::io::Result<()> {
+        visitor.record_log(
+            LogCategory::Info,
+            &markup! { "Use the following command instead" },
+        )?;
+        visitor.record_command(&self.alternative_command)
+    }
 }
 
 #[derive(Debug, Diagnostic)]
@@ -311,6 +336,13 @@ impl CliDiagnostic {
         Self::IncompatibleArguments(IncompatibleArguments {
             first_argument: first_argument.into(),
             second_argument: second_argument.into(),
+        })
+    }
+
+    pub fn deprecated(message: impl Into<String>, command: impl Into<String>) -> Self {
+        Self::DeprecatedArgument(DeprecatedArgument {
+            message: MessageAndDescription::from(message.into()),
+            alternative_command: command.into(),
         })
     }
 

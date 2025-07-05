@@ -1,3 +1,4 @@
+use crate::cli_options::Verbosity;
 use crate::{DiagnosticsPayload, Execution, Reporter, ReporterVisitor, TraversalSummary};
 use biome_console::fmt::{Display, Formatter};
 use biome_console::{Console, ConsoleExt, markup};
@@ -16,12 +17,11 @@ use std::{
 pub struct GitLabReporter {
     pub(crate) execution: Execution,
     pub(crate) diagnostics: DiagnosticsPayload,
-    pub(crate) verbose: bool,
+    pub(crate) verbosity: Verbosity,
 }
-
 impl Reporter for GitLabReporter {
     fn write(self, visitor: &mut dyn ReporterVisitor) -> std::io::Result<()> {
-        visitor.report_diagnostics(&self.execution, self.diagnostics, self.verbose)?;
+        visitor.report_diagnostics(&self.execution, self.diagnostics, self.verbosity)?;
         Ok(())
     }
 }
@@ -64,7 +64,7 @@ impl ReporterVisitor for GitLabReporterVisitor<'_> {
         &mut self,
         _: &Execution,
         _: TraversalSummary,
-        _verbose: bool,
+        _: Verbosity,
     ) -> std::io::Result<()> {
         Ok(())
     }
@@ -73,14 +73,14 @@ impl ReporterVisitor for GitLabReporterVisitor<'_> {
         &mut self,
         _execution: &Execution,
         payload: DiagnosticsPayload,
-        verbose: bool,
+        verbosity: Verbosity,
     ) -> std::io::Result<()> {
         let hasher = RwLock::default();
         let diagnostics = GitLabDiagnostics {
             payload,
             lock: &hasher,
             path: self.repository_root.as_deref(),
-            verbose,
+            verbose: verbosity.is_verbose(),
         };
         self.console.log(markup!({ diagnostics }));
         Ok(())

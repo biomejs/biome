@@ -22,13 +22,13 @@ format ━━━━━━━━━━━━━━━━━━━━━━━━�
 # Emitted Messages
 
 ```block
-format.js format ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+flags/deprecated  DEPRECATED  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Formatter would have printed the following content:
+  ! The --verbose argument is deprecated
   
-    1   │ - ··statement(··)··
-      1 │ + statement();
-      2 │ + 
+  i Use the following command instead
+  
+  $ biome format --verbosity=full
   
 
 ```

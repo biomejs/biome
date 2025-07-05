@@ -344,6 +344,17 @@ impl Execution {
         }
     }
 
+    pub(crate) fn command_name(&self) -> &'static str {
+        match self.traversal_mode {
+            TraversalMode::Check { .. } => "check",
+            TraversalMode::Lint { .. } => "lint",
+            TraversalMode::CI { .. } => "ci",
+            TraversalMode::Format { .. } => "format",
+            TraversalMode::Migrate { .. } => "migrate",
+            TraversalMode::Search { .. } => "search",
+        }
+    }
+
     pub(crate) const fn is_ci(&self) -> bool {
         matches!(self.traversal_mode, TraversalMode::CI { .. })
     }
@@ -611,7 +622,7 @@ pub fn execute_mode(
                     summary,
                     diagnostics_payload,
                     execution: execution.clone(),
-                    verbose: cli_options.verbose,
+                    verbosity: cli_options.verbosity,
                     working_directory: fs.working_directory().clone(),
                     evaluated_paths,
                 };
@@ -622,7 +633,7 @@ pub fn execute_mode(
                     diagnostics_payload,
                     execution: execution.clone(),
                     evaluated_paths,
-                    verbose: cli_options.verbose,
+                    verbosity: cli_options.verbosity,
                     working_directory: fs.working_directory().clone(),
                 };
                 reporter.write(&mut ConsoleReporterVisitor(console))?;
@@ -636,7 +647,7 @@ pub fn execute_mode(
                 summary,
                 diagnostics: diagnostics_payload,
                 execution: execution.clone(),
-                verbose: cli_options.verbose,
+                verbosity: cli_options.verbosity,
             };
             let mut buffer = JsonReporterVisitor::new(summary);
             reporter.write(&mut buffer)?;
@@ -675,7 +686,7 @@ pub fn execute_mode(
             let reporter = GithubReporter {
                 diagnostics_payload,
                 execution: execution.clone(),
-                verbose: cli_options.verbose,
+                verbosity: cli_options.verbosity,
             };
             reporter.write(&mut GithubReporterVisitor(console))?;
         }
@@ -683,7 +694,7 @@ pub fn execute_mode(
             let reporter = GitLabReporter {
                 diagnostics: diagnostics_payload,
                 execution: execution.clone(),
-                verbose: cli_options.verbose,
+                verbosity: cli_options.verbosity,
             };
             reporter.write(&mut GitLabReporterVisitor::new(
                 console,
@@ -695,7 +706,7 @@ pub fn execute_mode(
                 summary,
                 diagnostics_payload,
                 execution: execution.clone(),
-                verbose: cli_options.verbose,
+                verbosity: cli_options.verbosity,
             };
             reporter.write(&mut JunitReporterVisitor::new(console))?;
         }

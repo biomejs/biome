@@ -1,3 +1,4 @@
+use crate::cli_options::Verbosity;
 use crate::{DiagnosticsPayload, Execution, Reporter, ReporterVisitor, TraversalSummary};
 use biome_console::{Console, ConsoleExt, markup};
 use biome_diagnostics::display::SourceFile;
@@ -10,13 +11,13 @@ pub(crate) struct JunitReporter {
     pub(crate) diagnostics_payload: DiagnosticsPayload,
     pub(crate) execution: Execution,
     pub(crate) summary: TraversalSummary,
-    pub(crate) verbose: bool,
+    pub(crate) verbosity: Verbosity,
 }
 
 impl Reporter for JunitReporter {
     fn write(self, visitor: &mut dyn ReporterVisitor) -> io::Result<()> {
-        visitor.report_summary(&self.execution, self.summary, self.verbose)?;
-        visitor.report_diagnostics(&self.execution, self.diagnostics_payload, self.verbose)?;
+        visitor.report_summary(&self.execution, self.summary, self.verbosity)?;
+        visitor.report_diagnostics(&self.execution, self.diagnostics_payload, self.verbosity)?;
         Ok(())
     }
 }
@@ -45,7 +46,7 @@ impl ReporterVisitor for JunitReporterVisitor<'_> {
         &mut self,
         _execution: &Execution,
         summary: TraversalSummary,
-        _verbose: bool,
+        _verbosity: Verbosity,
     ) -> io::Result<()> {
         self.0.time = Some(summary.duration);
         self.0.errors = summary.errors as usize;
@@ -57,11 +58,11 @@ impl ReporterVisitor for JunitReporterVisitor<'_> {
         &mut self,
         _execution: &Execution,
         payload: DiagnosticsPayload,
-        verbose: bool,
+        verbosity: Verbosity,
     ) -> io::Result<()> {
         let diagnostics = payload.diagnostics.iter().filter(|diagnostic| {
             if diagnostic.tags().is_verbose() {
-                verbose
+                verbosity.is_verbose()
             } else {
                 true
             }

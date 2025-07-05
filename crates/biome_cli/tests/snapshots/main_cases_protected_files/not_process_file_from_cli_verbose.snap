@@ -28,6 +28,18 @@ format ━━━━━━━━━━━━━━━━━━━━━━━━�
 # Emitted Messages
 
 ```block
+flags/deprecated  DEPRECATED  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The --verbose argument is deprecated
+  
+  i Use the following command instead
+  
+  $ biome format --verbosity=full
+  
+
+```
+
+```block
 package-lock.json project  VERBOSE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i The file package-lock.json is protected because is handled by another tool. Biome won't process it.

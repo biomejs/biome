@@ -27,6 +27,18 @@ expression: redactor(content)
 # Emitted Messages
 
 ```block
+flags/deprecated  DEPRECATED  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The --verbose argument is deprecated
+  
+  i Use the following command instead
+  
+  $ biome check --verbosity=full
+  
+
+```
+
+```block
  VERBOSE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Files processed:

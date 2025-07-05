@@ -80,85 +80,13 @@ check ━━━━━━━━━━━━━━━━━━━━━━━━�
 # Emitted Messages
 
 ```block
-index.css:3:26 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+flags/deprecated  DEPRECATED  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Expected a declaration item but instead found '}'.
+  ! The --verbose argument is deprecated
   
-  > 3 │ .brokenStyle { color: f( }
-      │                          ^
-    4 │ 
-    5 │ .style {
+  i Use the following command instead
   
-  i Expected a declaration item here.
-  
-  > 3 │ .brokenStyle { color: f( }
-      │                          ^
-    4 │ 
-    5 │ .style {
-  
-
-```
-
-```block
-index.css:3:23 lint/correctness/noUnknownFunction ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Unexpected unknown function: f
-  
-  > 3 │ .brokenStyle { color: f( }
-      │                       ^
-    4 │ 
-    5 │ .style {
-  
-  i Use a known function instead.
-  
-  i See MDN web docs for more details.
-  
-
-```
-
-```block
-index.css:7:17 lint/correctness/noUnknownFunction ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Unexpected unknown function: fakeFunction
-  
-    5 │ .style {
-    6 │                 color:
-  > 7 │                 fakeFunction()
-      │                 ^^^^^^^^^^^^
-    8 │ }
-    9 │ 
-  
-  i Use a known function instead.
-  
-  i See MDN web docs for more details.
-  
-
-```
-
-```block
-index.css:3:26 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Expected a declaration item but instead found '}'.
-  
-  > 3 │ .brokenStyle { color: f( }
-      │                          ^
-    4 │ 
-    5 │ .style {
-  
-  i Expected a declaration item here.
-  
-  > 3 │ .brokenStyle { color: f( }
-      │                          ^
-    4 │ 
-    5 │ .style {
-  
-
-```
-
-```block
-index.css format ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Code formatting aborted due to parsing errors. To format code with errors, enable the 'formatter.formatWithErrors' option.
+  $ biome check --verbosity=full
   
 
 ```

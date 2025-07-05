@@ -32,6 +32,7 @@ use crate::commands::lint::LintCommandPayload;
 use crate::commands::migrate::MigrateCommandPayload;
 pub use crate::commands::{BiomeCommand, biome_command};
 pub use crate::logging::{LoggingLevel, setup_cli_subscriber};
+pub use cli_options::Verbosity;
 pub use diagnostics::CliDiagnostic;
 pub use execute::{Execution, TraversalMode, VcsTargeted, execute_mode};
 pub use panic::setup_panic_handler;
@@ -93,7 +94,7 @@ impl<'app> CliSession<'app> {
                 since,
             } => run_command(
                 self,
-                &cli_options,
+                cli_options,
                 CheckCommandPayload {
                     write,
                     fix,
@@ -133,7 +134,7 @@ impl<'app> CliSession<'app> {
                 graphql_linter,
             } => run_command(
                 self,
-                &cli_options,
+                cli_options,
                 LintCommandPayload {
                     write,
                     suppress,
@@ -169,7 +170,7 @@ impl<'app> CliSession<'app> {
                 ..
             } => run_command(
                 self,
-                &cli_options,
+                cli_options,
                 CiCommandPayload {
                     linter_enabled,
                     formatter_enabled,
@@ -200,7 +201,7 @@ impl<'app> CliSession<'app> {
                 since,
             } => run_command(
                 self,
-                &cli_options,
+                cli_options,
                 FormatCommandPayload {
                     javascript_formatter,
                     formatter_configuration,
@@ -233,7 +234,7 @@ impl<'app> CliSession<'app> {
                 sub_command,
             } => run_command(
                 self,
-                &cli_options,
+                cli_options,
                 MigrateCommandPayload {
                     write,
                     fix,
@@ -252,7 +253,7 @@ impl<'app> CliSession<'app> {
                 vcs_configuration,
             } => run_command(
                 self,
-                &cli_options,
+                cli_options,
                 SearchCommandPayload {
                     files_configuration,
                     paths,
@@ -292,7 +293,7 @@ pub fn to_color_mode(color: Option<&ColorsArg>) -> ColorMode {
 
 pub(crate) fn run_command(
     session: CliSession,
-    cli_options: &CliOptions,
+    cli_options: CliOptions,
     mut command: impl CommandRunner,
 ) -> Result<(), CliDiagnostic> {
     let command = &mut command;

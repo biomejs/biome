@@ -18,9 +18,19 @@ pub struct CliOptions {
     #[bpaf(long("use-server"), switch, fallback(false))]
     pub use_server: bool,
 
-    /// Print additional diagnostics, and some diagnostics show more information. Also, print out what files were processed and which ones were modified.
+    /// [DEPRECATED] Print additional diagnostics, and some diagnostics show more information. Also, print out what files were processed and which ones were modified.
+    // TODO: remove in Biome 3.0
     #[bpaf(long("verbose"), switch, fallback(false))]
     pub verbose: bool,
+
+    /// If affects how diagnostics are printed in different commands
+    #[bpaf(
+        long("verbosity"),
+        argument("default|verbose|minimal"),
+        fallback(Verbosity::default()),
+        display_fallback
+    )]
+    pub verbosity: Verbosity,
 
     /// Set the file path to the configuration file, or the directory path to find `biome.json` or `biome.jsonc`.
     /// If used, it disables the default configuration file resolution.
@@ -32,7 +42,7 @@ pub struct CliOptions {
     )]
     pub config_path: Option<String>,
 
-    /// Cap the amount of diagnostics displayed. When `none` is provided, the limit is lifted.
+    /// Cap the number of diagnostics displayed. When `none` is provided, the limit is lifted.
     #[bpaf(
         long("max-diagnostics"),
         argument("none|<NUMBER>"),
@@ -263,6 +273,53 @@ impl From<MaxDiagnostics> for u32 {
         match value {
             MaxDiagnostics::None => Self::MAX,
             MaxDiagnostics::Limit(value) => value,
+        }
+    }
+}
+
+#[derive(Default, Debug, Copy, Clone, Bpaf)]
+pub enum Verbosity {
+    #[default]
+    Simple,
+    /// Print additional diagnostics, and some diagnostics show more information. Also, print out what files were processed and which ones were modified.
+    Full,
+    /// Prints only the header of diagnostics. Messages, code frames, etc. aren't printed.
+    Minimal,
+}
+
+impl Verbosity {
+    pub fn is_verbose(&self) -> bool {
+        matches!(self, Self::Full)
+    }
+    pub fn is_minimal(&self) -> bool {
+        matches!(self, Self::Minimal)
+    }
+}
+
+impl FromStr for Verbosity {
+    type Err = &'static str;
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s {
+            "simple" => Ok(Self::Simple),
+            "full" => Ok(Self::Full),
+            "minimal" => Ok(Self::Minimal),
+            _ => Err("Invalid value provided. Use 'simple', 'full' or 'minimal'."),
+        }
+    }
+}
+
+impl Display for Verbosity {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::Simple => {
+                write!(f, "simple")
+            }
+            Self::Full => {
+                write!(f, "full")
+            }
+            Self::Minimal => {
+                write!(f, "minimal")
+            }
         }
     }
 }

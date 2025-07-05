@@ -29,6 +29,18 @@ check ━━━━━━━━━━━━━━━━━━━━━━━━�
 # Emitted Messages
 
 ```block
+flags/deprecated  DEPRECATED  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The --verbose argument is deprecated
+  
+  i Use the following command instead
+  
+  $ biome check --verbosity=full
+  
+
+```
+
+```block
 check.txt files/missingHandler  VERBOSE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Biome could not determine the language for the file extension txt

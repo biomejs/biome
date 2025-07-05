@@ -1,6 +1,6 @@
 ---
 source: crates/biome_cli/tests/snap_test.rs
-expression: content
+expression: redactor(content)
 ---
 # Input messages
 
@@ -9,6 +9,18 @@ expression: content
 ```
 
 # Emitted Messages
+
+```block
+flags/deprecated  DEPRECATED  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The --verbose argument is deprecated
+  
+  i Use the following command instead
+  
+  $ biome format --verbosity=full
+  
+
+```
 
 ```block
 package-lock.json project  VERBOSE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -25,5 +37,3 @@ package-lock.json project  VERBOSE  ━━━━━━━━━━━━━━�
 ```block
 { "name": "test" }
 ```
-
-

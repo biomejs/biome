@@ -8580,6 +8580,7 @@ export type Category =
 	| "suppressions/incorrect"
 	| "args/fileNotFound"
 	| "flags/invalid"
+	| "flags/deprecated"
 	| "semanticTests";
 export interface Location {
 	path?: Resource_for_String;
