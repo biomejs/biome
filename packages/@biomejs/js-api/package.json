@@ -1,6 +1,6 @@
 {
   "name": "@biomejs/js-api",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "JavaScript APIs for the Biome package",
   "scripts": {
     "tsc": "tsc --noEmit",
@@ -73,9 +73,9 @@
     "vitest": "3.2.4"
   },
   "peerDependencies": {
-    "@biomejs/wasm-bundler": "^2.0.6",
-    "@biomejs/wasm-nodejs": "^2.0.6",
-    "@biomejs/wasm-web": "^2.0.6"
+    "@biomejs/wasm-bundler": "^2.1.0",
+    "@biomejs/wasm-nodejs": "^2.1.0",
+    "@biomejs/wasm-web": "^2.1.0"
   },
   "peerDependenciesMeta": {
     "@biomejs/wasm-bundler": {
