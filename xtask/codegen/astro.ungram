@@ -1,0 +1,239 @@
+// Astro Un-Grammar.
+//
+// This grammar specifies the structure of Astro's concrete syntax tree.
+// It does not specify parsing rules (ambiguities, precedence, etc are out of scope).
+// Tokens are processed -- contextual keywords are recognised, compound operators glued.
+//
+// Legend:
+//
+//   //          				-- comment
+//   Name =      				-- non-terminal definition
+//   'ident'     				-- token (terminal)
+//   A B         				-- sequence
+//   A | B       				-- alternation
+//   A*          				-- zero or more repetition
+//   (A (',' A)* ','?)	-- repetition of node A separated by ',' and allowing a trailing comma
+//   (A (',' A)*)	      -- repetition of node A separated by ',' without a trailing comma
+//   A?          				-- zero or one repetition
+//   (A)         				-- same as A
+//   label:A     				-- suggested name for field of AST node
+
+// NOTES
+//
+// - SyntaxNode, SyntaxToken and SyntaxElement will be stripped from the codegen
+// - Bogus nodes are special nodes used to keep track of broken code; they are
+//   not part of the grammar but they will appear inside the green tree
+
+
+///////////////
+// BOGUS NODES
+///////////////
+// SyntaxElement is a generic data structure that is meant to track nodes and tokens
+// in cases where we care about both types
+//
+// As Bogus* node will need to yield both tokens and nodes without discrimination,
+// and their children will need to yield nodes and tokens as well.
+// For this reason, SyntaxElement = SyntaxElement
+SyntaxElement = SyntaxElement
+
+AstroBogus = SyntaxElement*
+AstroBogusElement = SyntaxElement*
+AstroBogusAttribute = SyntaxElement*
+AstroBogusExpression = SyntaxElement*
+
+AstroRoot =
+	bom: 'UNICODE_BOM'?
+	frontmatter: AstroFrontmatter?
+	body: AstroElementList
+	eof: 'EOF'
+
+// ---
+// JavaScript/TypeScript frontmatter content
+// ---
+AstroFrontmatter =
+	l_fence: '---'
+	content: AstroFrontmatterContent?
+	r_fence: '---'
+
+AstroFrontmatterContent = value: 'astro_js_content'
+
+// ==================================
+// Elements and Template Structure
+// ==================================
+
+AstroElementList = AnyAstroElement*
+
+AnyAstroElement =
+	AstroElement
+	| AstroSelfClosingElement
+	| AstroComponent
+	| AstroSelfClosingComponent
+	| AstroFragment
+	| AstroExpression
+	| AstroText
+	| AstroComment
+	| AstroDoctype
+	| AstroBogusElement
+
+// Regular HTML-like elements: <div class="foo">content</div>
+AstroElement =
+	opening_element: AstroOpeningElement
+	children: AstroElementList
+	closing_element: AstroClosingElement
+
+// Self-closing HTML elements: <br />
+AstroSelfClosingElement =
+	'<'
+	name: AstroElementName
+	attributes: AstroAttributeList
+	'/'?
+	'>'
+
+// Astro/React components: <MyComponent prop="value">content</MyComponent>
+AstroComponent =
+	opening_element: AstroOpeningComponent
+	children: AstroElementList
+	closing_element: AstroClosingComponent
+
+// Self-closing components: <MyComponent prop="value" />
+AstroSelfClosingComponent =
+	'<'
+	name: AstroComponentName
+	attributes: AstroAttributeList
+	'/'?
+	'>'
+
+// Fragment: <> content </> or <Fragment> content </Fragment>
+AstroFragment =
+	opening_element: AstroOpeningFragment
+	children: AstroElementList
+	closing_element: AstroClosingFragment
+
+// Opening elements
+AstroOpeningElement =
+	'<'
+	name: AstroElementName
+	attributes: AstroAttributeList
+	'>'
+
+AstroOpeningComponent =
+	'<'
+	name: AstroComponentName
+	attributes: AstroAttributeList
+	'>'
+
+AstroOpeningFragment =
+	'<'
+	name: AstroFragmentName?
+	'>'
+
+// Closing elements
+AstroClosingElement =
+	'<'
+	'/'
+	name: AstroElementName
+	'>'
+
+AstroClosingComponent =
+	'<'
+	'/'
+	name: AstroComponentName
+	'>'
+
+AstroClosingFragment =
+	'<'
+	'/'
+	name: AstroFragmentName?
+	'>'
+
+// JavaScript expressions: {expression}
+AstroExpression =
+	'{'
+	expression: AstroExpressionContent?
+	'}'
+
+AstroExpressionContent = value: 'astro_js_content'
+
+// Plain text content
+AstroText = value: 'astro_text'
+
+// HTML comments: <!-- comment -->
+AstroComment =
+	'<!--'
+	content: 'astro_comment_content'
+	'-->'
+
+// DOCTYPE declaration: <!DOCTYPE html>
+AstroDoctype =
+	'<'
+	'!'
+	doctype: 'doctype'
+	html: 'html'?
+	quirk: 'astro_literal'?
+	public_id: 'astro_string_literal'?
+	system_id: 'astro_string_literal'?
+	'>'
+
+// ==================================
+// Attributes
+// ==================================
+
+AstroAttributeList = AnyAstroAttribute*
+
+AnyAstroAttribute =
+	AstroAttribute
+	| AstroShorthandAttribute
+	| AstroSpreadAttribute
+	| AstroExpressionAttribute
+	| AstroTemplateLiteralAttribute
+	| AstroBogusAttribute
+
+// Regular attribute: name="value"
+AstroAttribute =
+	name: AstroAttributeName
+	initializer: AstroAttributeInitializerClause?
+
+// Shorthand attribute: {name} (equivalent to name={name})
+AstroShorthandAttribute =
+	'{'
+	name: AstroAttributeName
+	'}'
+
+// Spread attribute: {...props}
+AstroSpreadAttribute =
+	'{'
+	'...'
+	expression: AstroExpressionContent
+	'}'
+
+// Expression attribute: name={expression}
+AstroExpressionAttribute =
+	name: AstroAttributeName
+	'='
+	'{'
+	expression: AstroExpressionContent
+	'}'
+
+// Template literal attribute: name=`template ${expr}`
+AstroTemplateLiteralAttribute =
+	name: AstroAttributeName
+	'='
+	'`'
+	template: AstroTemplateLiteralContent
+	'`'
+
+// Attribute initializer: ="value"
+AstroAttributeInitializerClause =
+	'='
+	value: AstroAttributeValue
+
+// ==================================
+// Names and Values
+// ==================================
+
+AstroElementName = value: 'astro_element_name'
+AstroComponentName = value: 'astro_component_name'
+AstroFragmentName = value: 'astro_fragment_name'
+AstroAttributeName = value: 'astro_attribute_name'
+AstroAttributeValue = value: 'astro_string_literal'
+AstroTemplateLiteralContent = value: 'astro_template_literal_content'
