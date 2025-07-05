@@ -10,8 +10,9 @@ export type BiomePath = string;
 export type ProjectKey = number;
 export type FeatureKind = "format" | "lint" | "search" | "assist" | "debug";
 export interface FileFeaturesResult {
-	featuresSupported: Map<FeatureKind, SupportKind>;
+	featuresSupported: FeaturesSupported;
 }
+export type FeaturesSupported = { [K in FeatureKind]?: SupportKind };
 export type SupportKind =
 	| "supported"
 	| "ignored"

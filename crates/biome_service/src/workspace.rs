@@ -120,43 +120,10 @@ pub struct SupportsFeatureResult {
     pub reason: Option<SupportKind>,
 }
 
-#[derive(Debug, serde::Serialize, serde::Deserialize, Clone, Eq, PartialEq)]
-#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
-#[serde(rename_all = "camelCase")]
-pub struct FileFeaturesResult {
-    pub features_supported: [SupportKind; NUM_FEATURE_KINDS],
-}
+#[derive(Debug, Clone, Eq, PartialEq)]
+pub struct FeaturesSupported([SupportKind; NUM_FEATURE_KINDS]);
 
-impl std::fmt::Display for FileFeaturesResult {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        for (index, support_kind) in self.features_supported.iter().enumerate() {
-            let feature = FeatureKind::from_index(index);
-            write!(f, "{feature}: {support_kind}")?;
-        }
-        Ok(())
-    }
-}
-
-impl FileFeaturesResult {
-    /// Sorted array of files that should not be processed no matter the cases.
-    /// These files are handled by other tools.
-    const PROTECTED_FILES: &'static [&'static str] = &[
-        // Composer
-        "composer.lock",
-        // NPM
-        "npm-shrinkwrap.json",
-        "package-lock.json",
-        // Yarn
-        "yarn.lock",
-    ];
-
-    /// Checks whether this file is protected.
-    /// A protected file is handled by a specific tool and should be ignored.
-    pub(crate) fn is_protected_file(path: &Utf8Path) -> bool {
-        path.file_name()
-            .is_some_and(|filename| Self::PROTECTED_FILES.contains(&filename))
-    }
-
+impl FeaturesSupported {
     /// By default, all features are not supported by a file.
     const WORKSPACE_FEATURES: [SupportKind; NUM_FEATURE_KINDS] = [
         SupportKind::FileNotSupported,
@@ -166,31 +133,25 @@ impl FileFeaturesResult {
         SupportKind::FileNotSupported,
     ];
 
-    pub fn new() -> Self {
-        Self {
-            features_supported: Self::WORKSPACE_FEATURES,
-        }
-    }
-
     #[inline]
-    fn insert_feature_support(&mut self, feature: FeatureKind, support: SupportKind) {
-        self.features_supported[feature.index()] = support;
+    fn insert(&mut self, feature: FeatureKind, support: SupportKind) {
+        self.0[feature.index()] = support;
     }
 
     /// Adds the features that are enabled in `capabilities` to this result.
     #[inline]
     pub fn with_capabilities(mut self, capabilities: &Capabilities) -> Self {
         if capabilities.formatter.format.is_some() {
-            self.insert_feature_support(FeatureKind::Format, SupportKind::Supported);
+            self.insert(FeatureKind::Format, SupportKind::Supported);
         }
         if capabilities.analyzer.lint.is_some() {
-            self.insert_feature_support(FeatureKind::Lint, SupportKind::Supported);
+            self.insert(FeatureKind::Lint, SupportKind::Supported);
         }
         if capabilities.analyzer.code_actions.is_some() {
-            self.insert_feature_support(FeatureKind::Assist, SupportKind::Supported);
+            self.insert(FeatureKind::Assist, SupportKind::Supported);
         }
         if capabilities.search.search.is_some() {
-            self.insert_feature_support(FeatureKind::Search, SupportKind::Supported);
+            self.insert(FeatureKind::Search, SupportKind::Supported);
         }
 
         if capabilities.debug.debug_syntax_tree.is_some()
@@ -199,7 +160,7 @@ impl FileFeaturesResult {
             || capabilities.debug.debug_type_info.is_some()
             || capabilities.debug.debug_registered_types.is_some()
         {
-            self.insert_feature_support(FeatureKind::Debug, SupportKind::Supported);
+            self.insert(FeatureKind::Debug, SupportKind::Supported);
         }
 
         self
@@ -221,7 +182,7 @@ impl FileFeaturesResult {
             let formatter_enabled = formatter_enabled(path, settings);
 
             if !formatter_enabled {
-                self.insert_feature_support(FeatureKind::Format, SupportKind::FeatureNotEnabled);
+                self.insert(FeatureKind::Format, SupportKind::FeatureNotEnabled);
             }
         }
 
@@ -230,7 +191,7 @@ impl FileFeaturesResult {
         if let Some(linter_enabled) = linter_enabled {
             let linter_enabled = linter_enabled(path, settings);
             if !linter_enabled {
-                self.insert_feature_support(FeatureKind::Lint, SupportKind::FeatureNotEnabled);
+                self.insert(FeatureKind::Lint, SupportKind::FeatureNotEnabled);
             }
         }
         // assist
@@ -238,7 +199,7 @@ impl FileFeaturesResult {
         if let Some(assist_enabled) = assist_enabled {
             let assist_enabled = assist_enabled(path, settings);
             if !assist_enabled {
-                self.insert_feature_support(FeatureKind::Assist, SupportKind::FeatureNotEnabled);
+                self.insert(FeatureKind::Assist, SupportKind::FeatureNotEnabled);
             }
         }
 
@@ -247,14 +208,11 @@ impl FileFeaturesResult {
         if let Some(search_enabled) = search_enabled {
             let search_enabled = search_enabled(path, settings);
             if !search_enabled {
-                self.insert_feature_support(FeatureKind::Search, SupportKind::FeatureNotEnabled);
+                self.insert(FeatureKind::Search, SupportKind::FeatureNotEnabled);
             }
         }
 
-        debug!(
-            "The file has the following feature sets: {:?}",
-            &self.features_supported
-        );
+        debug!("The file has the following feature sets: {:?}", &self);
 
         self
     }
@@ -262,27 +220,28 @@ impl FileFeaturesResult {
     /// The file will be ignored for all features
     #[inline]
     pub fn set_ignored_for_all_features(&mut self) {
-        for support_kind in self.features_supported.iter_mut() {
+        for support_kind in self.0.iter_mut() {
             *support_kind = SupportKind::Ignored;
         }
     }
 
     /// The file will be protected for all features
+    #[inline]
     pub fn set_protected_for_all_features(&mut self) {
-        for support_kind in self.features_supported.iter_mut() {
+        for support_kind in self.0.iter_mut() {
             *support_kind = SupportKind::Protected;
         }
     }
 
     #[inline]
     pub fn set_ignored(&mut self, feature: FeatureKind) {
-        self.insert_feature_support(feature, SupportKind::Ignored);
+        self.insert(feature, SupportKind::Ignored);
     }
 
     /// Checks whether the file support the given `feature`
     #[inline]
     fn supports(&self, feature: FeatureKind) -> bool {
-        let support_kind = self.features_supported[feature.index()];
+        let support_kind = self.0[feature.index()];
         matches!(support_kind, SupportKind::Supported)
     }
 
@@ -306,7 +265,7 @@ impl FileFeaturesResult {
     /// not enabled.
     #[inline(always)]
     pub fn support_kind_for(&self, feature: FeatureKind) -> SupportKind {
-        self.features_supported[feature.index()]
+        self.0[feature.index()]
     }
 
     /// Returns the [`SupportKind`] for the given `feature`, but only if it is
@@ -323,7 +282,7 @@ impl FileFeaturesResult {
     /// Loops through all the features of the current file, and if a feature is [SupportKind::FileNotSupported],
     /// it gets changed to [SupportKind::Ignored]
     pub fn ignore_not_supported(&mut self) {
-        for support_kind in self.features_supported.iter_mut() {
+        for support_kind in self.0.iter_mut() {
             if matches!(support_kind, SupportKind::FileNotSupported) {
                 *support_kind = SupportKind::Ignored;
             }
@@ -332,35 +291,33 @@ impl FileFeaturesResult {
 
     /// If at least one feature is supported, the file is supported
     pub fn is_supported(&self) -> bool {
-        self.features_supported
+        self.0
             .iter()
             .any(|support_kind| support_kind.is_supported())
     }
 
     /// The file is ignored only if all the features marked it as ignored
     pub fn is_ignored(&self) -> bool {
-        self.features_supported
-            .iter()
-            .all(|support_kind| support_kind.is_ignored())
+        self.0.iter().all(|support_kind| support_kind.is_ignored())
     }
 
     /// The file is protected only if all the features marked it as protected
     pub fn is_protected(&self) -> bool {
-        self.features_supported
+        self.0
             .iter()
             .all(|support_kind| support_kind.is_protected())
     }
 
     /// The file is not supported if all the features are unsupported
     pub fn is_not_supported(&self) -> bool {
-        self.features_supported
+        self.0
             .iter()
             .all(|support_kind| support_kind.is_not_supported())
     }
 
     /// The file is not enabled if all the features aren't enabled
     pub fn is_not_enabled(&self) -> bool {
-        self.features_supported
+        self.0
             .iter()
             .all(|support_kind| support_kind.is_not_enabled())
     }
@@ -369,7 +326,7 @@ impl FileFeaturesResult {
     /// the file is either protected, not supported, ignored.
     #[inline]
     pub fn is_not_processed(&self) -> bool {
-        self.features_supported.iter().all(|support_kind| {
+        self.0.iter().all(|support_kind| {
             matches!(
                 support_kind,
                 SupportKind::FeatureNotEnabled
@@ -378,6 +335,123 @@ impl FileFeaturesResult {
                     | SupportKind::Protected
             )
         })
+    }
+}
+
+impl Default for FeaturesSupported {
+    fn default() -> Self {
+        Self(Self::WORKSPACE_FEATURES)
+    }
+}
+
+impl Display for FeaturesSupported {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        for (index, support_kind) in self.0.iter().enumerate() {
+            let feature = FeatureKind::from_index(index);
+            write!(f, "{feature}: {support_kind}")?;
+        }
+        Ok(())
+    }
+}
+
+impl serde::Serialize for FeaturesSupported {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: serde::ser::Serializer,
+    {
+        use serde::ser::SerializeMap;
+
+        let mut map = serializer.serialize_map(Some(NUM_FEATURE_KINDS))?;
+        for (index, support_kind) in self.0.iter().enumerate() {
+            let feature = FeatureKind::from_index(index);
+            map.serialize_entry(&feature, support_kind)?;
+        }
+
+        map.end()
+    }
+}
+
+struct FeaturesSupportedVisitor;
+
+impl<'de> serde::de::Visitor<'de> for FeaturesSupportedVisitor {
+    type Value = FeaturesSupported;
+
+    fn expecting(&self, formatter: &mut Formatter) -> std::fmt::Result {
+        formatter.write_str("a map of supported features")
+    }
+
+    fn visit_map<A>(self, mut map: A) -> Result<Self::Value, A::Error>
+    where
+        A: serde::de::MapAccess<'de>,
+    {
+        let mut features = FeaturesSupported::WORKSPACE_FEATURES;
+        while let Some((key, value)) = map.next_entry::<FeatureKind, SupportKind>()? {
+            features[key.index()] = value;
+        }
+
+        Ok(FeaturesSupported(features))
+    }
+}
+
+impl<'de> serde::Deserialize<'de> for FeaturesSupported {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: serde::de::Deserializer<'de>,
+    {
+        deserializer.deserialize_map(FeaturesSupportedVisitor)
+    }
+}
+
+#[cfg(feature = "schema")]
+impl schemars::JsonSchema for FeaturesSupported {
+    fn schema_name() -> String {
+        "FeaturesSupported".to_owned()
+    }
+
+    fn json_schema(generator: &mut SchemaGenerator) -> Schema {
+        use schemars::schema::*;
+
+        Schema::Object(SchemaObject {
+            instance_type: Some(InstanceType::Object.into()),
+            object: Some(Box::new(ObjectValidation {
+                property_names: Some(Box::new(generator.subschema_for::<FeatureKind>())),
+                additional_properties: Some(Box::new(generator.subschema_for::<SupportKind>())),
+                ..Default::default()
+            })),
+            ..Default::default()
+        })
+    }
+}
+
+#[derive(Debug, serde::Serialize, serde::Deserialize, Clone, Eq, PartialEq)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[serde(rename_all = "camelCase")]
+pub struct FileFeaturesResult {
+    pub features_supported: FeaturesSupported,
+}
+
+impl FileFeaturesResult {
+    /// Sorted array of files that should not be processed no matter the cases.
+    /// These files are handled by other tools.
+    const PROTECTED_FILES: &'static [&'static str] = &[
+        // Composer
+        "composer.lock",
+        // NPM
+        "npm-shrinkwrap.json",
+        "package-lock.json",
+        // Yarn
+        "yarn.lock",
+    ];
+
+    /// Checks whether this file is protected.
+    /// A protected file is handled by a specific tool and should be ignored.
+    pub(crate) fn is_protected_file(path: &Utf8Path) -> bool {
+        path.file_name()
+            .is_some_and(|filename| Self::PROTECTED_FILES.contains(&filename))
+    }
+
+    pub fn new(features_supported: FeaturesSupported) -> Self {
+        Self { features_supported }
     }
 }
 
