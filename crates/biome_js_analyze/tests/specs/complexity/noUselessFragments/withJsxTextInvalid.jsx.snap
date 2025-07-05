@@ -1,11 +1,13 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: withJsxTextInvalid.jsx
-snapshot_kind: text
 ---
 # Input
 ```jsx
 <>foo</>
+<Fragment>foo</Fragment>
+<React.Fragment>foo</React.Fragment>
+
 ```
 
 # Diagnostics
@@ -16,13 +18,41 @@ withJsxTextInvalid.jsx:1:1 lint/complexity/noUselessFragments  FIXABLE  ━━�
   
   > 1 │ <>foo</>
       │ ^^^^^^^^
+    2 │ <Fragment>foo</Fragment>
+    3 │ <React.Fragment>foo</React.Fragment>
   
   i A fragment is redundant if it contains only one child, or if it is the child of a html element, and is not a keyed fragment.
   
   i Unsafe fix: Remove the Fragment
   
-  - <>foo</>
-  + "foo"
+    1   │ - <>foo</>
+      1 │ + "foo"
+    2 2 │   <Fragment>foo</Fragment>
+    3 3 │   <React.Fragment>foo</React.Fragment>
+  
+
+```
+
+```
+withJsxTextInvalid.jsx:3:1 lint/complexity/noUselessFragments  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This fragment is unnecessary.
+  
+    1 │ <>foo</>
+    2 │ <Fragment>foo</Fragment>
+  > 3 │ <React.Fragment>foo</React.Fragment>
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    4 │ 
+  
+  i A fragment is redundant if it contains only one child, or if it is the child of a html element, and is not a keyed fragment.
+  
+  i Unsafe fix: Remove the Fragment
+  
+    1 1 │   <>foo</>
+    2 2 │   <Fragment>foo</Fragment>
+    3   │ - <React.Fragment>foo</React.Fragment>
+      3 │ + "foo"
+    4 4 │   
   
 
 ```

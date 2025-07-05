@@ -1,7 +1,6 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: componentFragment.jsx
-snapshot_kind: text
 ---
 # Input
 ```jsx
@@ -16,9 +15,12 @@ export function Component() {
       </Suspense>
 
       <Comp prop={<></>} />
+      <Comp prop={<Fragment></Fragment>} />
+      <Comp prop={<React.Fragment></React.Fragment>} />
     </div>
   );
 }
+
 ```
 
 # Diagnostics
@@ -48,8 +50,41 @@ componentFragment.jsx:11:19 lint/complexity/noUselessFragments ━━━━━�
     10 │ 
   > 11 │       <Comp prop={<></>} />
        │                   ^^^^^
-    12 │     </div>
-    13 │   );
+    12 │       <Comp prop={<Fragment></Fragment>} />
+    13 │       <Comp prop={<React.Fragment></React.Fragment>} />
+  
+  i A fragment is redundant if it contains only one child, or if it is the child of a html element, and is not a keyed fragment.
+  
+
+```
+
+```
+componentFragment.jsx:12:19 lint/complexity/noUselessFragments ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This fragment is unnecessary.
+  
+    11 │       <Comp prop={<></>} />
+  > 12 │       <Comp prop={<Fragment></Fragment>} />
+       │                   ^^^^^^^^^^^^^^^^^^^^^
+    13 │       <Comp prop={<React.Fragment></React.Fragment>} />
+    14 │     </div>
+  
+  i A fragment is redundant if it contains only one child, or if it is the child of a html element, and is not a keyed fragment.
+  
+
+```
+
+```
+componentFragment.jsx:13:19 lint/complexity/noUselessFragments ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This fragment is unnecessary.
+  
+    11 │       <Comp prop={<></>} />
+    12 │       <Comp prop={<Fragment></Fragment>} />
+  > 13 │       <Comp prop={<React.Fragment></React.Fragment>} />
+       │                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    14 │     </div>
+    15 │   );
   
   i A fragment is redundant if it contains only one child, or if it is the child of a html element, and is not a keyed fragment.
   
