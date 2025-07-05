@@ -160,7 +160,7 @@ declare_source_rule! {
     /// 1. URLs such as `https://example.org`.
     /// 2. Packages with a protocol such as `node:path`, `bun:test`, `jsr:@my?lib`, or `npm:lib`.
     /// 3. Packages such as `mylib` or `@my/lib`.
-    /// 4. Aliases: sources starting with `@/`, `#`, `~`, or `%`.
+    /// 4. Aliases: sources starting with `@/`, `#`, `~`, `$`, or `%`.
     ///    They usually are [Node.js subpath imports](https://nodejs.org/api/packages.html#subpath-imports) or [TypeScript path aliases](https://www.typescriptlang.org/tsconfig/#paths).
     /// 5. Absolute and relative paths.
     ///
@@ -257,7 +257,7 @@ declare_source_rule! {
     /// Predefined group matchers are strings in `CONSTANT_CASE` prefixed and suffixed by `:`.
     /// The sorter provides several predefined group matchers:
     ///
-    /// - `:ALIAS:`: sources starting with `#`, `@/`, `~`, or `%`.
+    /// - `:ALIAS:`: sources starting with `#`, `@/`, `~`, `$`, or `%`.
     /// - `:BUN:`: sources starting with the protocol `bun:` or that correspond to a built-in Bun module such as `bun`.
     /// - `:NODE:`: sources starting with the protocol `node:` or that correspond to a built-in Node.js module such as `fs` or `path`.
     /// - `:PACKAGE:`: scoped and bare packages.
