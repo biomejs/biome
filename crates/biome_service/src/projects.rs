@@ -1,7 +1,7 @@
 use crate::WorkspaceError;
 use crate::file_handlers::Capabilities;
 use crate::settings::Settings;
-use crate::workspace::{DocumentFileSource, FeatureName, FileFeaturesResult};
+use crate::workspace::{DocumentFileSource, FeatureName, FeaturesSupported, FileFeaturesResult};
 use biome_fs::ConfigName;
 use camino::{Utf8Path, Utf8PathBuf};
 use papaya::HashMap;
@@ -187,7 +187,7 @@ impl Projects {
             .find(|(project_path, _)| path.starts_with(project_path))
             .map_or(&project_data.root_settings, |(_, settings)| settings);
 
-        let mut file_features = FileFeaturesResult::new();
+        let mut file_features = FeaturesSupported::default();
         file_features = file_features.with_capabilities(capabilities);
         file_features = file_features.with_settings_and_language(settings, path, capabilities);
 
@@ -225,7 +225,9 @@ impl Projects {
             file_features.set_protected_for_all_features();
         }
 
-        Ok(file_features)
+        Ok(FileFeaturesResult {
+            features_supported: file_features,
+        })
     }
 
     /// Sets the root settings for the given project.

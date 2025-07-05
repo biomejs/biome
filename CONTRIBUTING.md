@@ -120,7 +120,7 @@ This Codespace comes pre-configured with the required tools and dependencies to 
 
 > [!NOTE]
 > A basic Codespace (32gb of disk space) might run out of disk space when building biome or running the full test suite.
-> The pre-configured Codespace is therefor based on the premium image with 64gb of disk space.
+> The pre-configured Codespace is therefore based on the premium image with 64gb of disk space.
 
 ## Testing
 
