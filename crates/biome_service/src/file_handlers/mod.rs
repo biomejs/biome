@@ -394,7 +394,7 @@ impl std::fmt::Display for DocumentFileSource {
 
 impl biome_console::fmt::Display for DocumentFileSource {
     fn fmt(&self, fmt: &mut Formatter) -> std::io::Result<()> {
-        fmt.write_str(self.to_string().as_str())
+        fmt.write_fmt(format_args!("{self}"))
     }
 }
 
