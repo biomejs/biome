@@ -1837,6 +1837,11 @@
 			"type": "array",
 			"items": { "$ref": "#/definitions/ImportGroup" }
 		},
+		"SortOrder": {
+			"type": "string",
+			"enum": ["lexicographic", "natural"],
+			"default": "natural"
+		},
 		"ImportMatcher": {
 			"type": "object",
 			"properties": {
@@ -5047,6 +5052,9 @@
 				"groups": {
 					"default": [],
 					"allOf": [{ "$ref": "#/definitions/ImportGroups" }]
+				},
+				"identifierOrder": {
+					"$ref": "#/definitions/SortOrder"
 				}
 			},
 			"additionalProperties": false
@@ -13527,6 +13535,11 @@
 		},
 		"UseSortedAttributesOptions": {
 			"type": "object",
+			"properties": {
+				"sortOrder": {
+					"$ref": "#/definitions/SortOrder"
+				}
+			},
 			"additionalProperties": false
 		},
 		"UseSortedClassesConfiguration": {
@@ -13551,7 +13564,15 @@
 			},
 			"additionalProperties": false
 		},
-		"UseSortedKeysOptions": { "type": "object", "additionalProperties": false },
+		"UseSortedKeysOptions": { 
+			"type": "object", 
+			"properties": {
+				"sortOrder": {
+					"$ref": "#/definitions/SortOrder"
+				}
+			},
+			"additionalProperties": false 
+		},
 		"UseSortedPropertiesOptions": {
 			"type": "object",
 			"additionalProperties": false
