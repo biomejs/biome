@@ -5,6 +5,8 @@ expression: valid.ts
 # Input
 ```ts
 /* should not generate diagnostics */
+
+/* for the `paths` option */
 declare module "node:fs" { }
 
 import 'bare-allowed';
@@ -40,6 +42,7 @@ export type { default as d6, allowed5, allowed6 as a6 } from 'default-and-member
 export type { default as d7, allowed6, allowed7 as a7 } from 'member-forbidden';
 export type { default as d8, allowed7, allowed8 as a8 } from 'namespace-forbidden';
 
+/* for the `patterns` option */
 import '../../sideeffect-allowed';
 import * as alias1 from "namespace-import-allowed";
 export * from "namespace-import-allowed";

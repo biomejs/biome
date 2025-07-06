@@ -5,6 +5,8 @@ expression: valid.js
 # Input
 ```js
 /* should not generate diagnostics */
+
+/* for the `paths` option */
 const path = require('lodash');
 
 import eslint from 'eslint';
@@ -109,6 +111,7 @@ const { allowed2, allowed3: a3, "allowed4": a4 } = await import('namespace-forbi
 import('namespace-forbidden').then(({ allowed2, allowed3: a3, "allowed4": a4 }) => { })
 import('namespace-forbidden').then(function ({ allowed2, allowed3: a3, "allowed4": a4 }) { })
 
+/* for the `patterns` option */
 import '../../sideeffect-allowed';
 import * as alias1 from "namespace-import-allowed";
 export * from "namespace-import-allowed";
