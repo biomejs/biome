@@ -334,6 +334,7 @@ declare_lint_rule! {
     /// ```
     ///
     /// ### `patterns`
+    /// **Since `v2.1.0`**
     ///
     /// This option allows you to specify multiple modules to restrict using gitignore-style patterns.
     ///
@@ -366,6 +367,7 @@ declare_lint_rule! {
     /// ```
     ///
     /// ### `importNamePattern`
+    /// **Since `v2.1.0`**
     ///
     /// This option allows you to use regex patterns to restrict import names.
     ///
@@ -393,6 +395,7 @@ declare_lint_rule! {
     /// ```
     ///
     /// ### `invertImportNamePattern`
+    /// **Since `v2.1.0`**
     ///
     /// If true, the matched patterns in the importNamePattern will be allowed
     ///
