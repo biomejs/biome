@@ -1,0 +1,53 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: unsorted-alias.js
+---
+# Input
+```js
+/* should generate diagnostics */
+import { aa } from './aa'
+import { a } from '%f'
+import { b } from '#b'
+import { bb } from './bb'
+import { c } from '~c'
+import { d } from '@/d'
+import { cc } from '../cc'
+import { e } from '$e'
+
+```
+
+# Diagnostics
+```
+unsorted-alias.js:2:1 assist/source/organizeImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The imports and exports are not sorted.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ import { aa } from './aa'
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^
+    3 │ import { a } from '%f'
+    4 │ import { b } from '#b'
+  
+  i Safe fix: Organize Imports (Biome)
+  
+     1  1 │   /* should generate diagnostics */
+     2    │ - import·{·aa·}·from·'./aa'
+     3    │ - import·{·a·}·from·'%f'
+     4    │ - import·{·b·}·from·'#b'
+     5    │ - import·{·bb·}·from·'./bb'
+        2 │ + 
+        3 │ + import·{·b·}·from·'#b'
+        4 │ + import·{·d·}·from·'@/d'
+        5 │ + import·{·a·}·from·'%f'
+        6 │ + import·{·e·}·from·'$e'
+     6  7 │   import { c } from '~c'
+     7    │ - import·{·d·}·from·'@/d'
+     8    │ - import·{·cc·}·from·'../cc'
+     9    │ - import·{·e·}·from·'$e'
+        8 │ + import·{·cc·}·from·'../cc'
+        9 │ + import·{·aa·}·from·'./aa'
+       10 │ + import·{·bb·}·from·'./bb'
+    10 11 │   
+  
+
+```
