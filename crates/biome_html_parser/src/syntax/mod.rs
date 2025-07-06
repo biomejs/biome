@@ -2,7 +2,11 @@ mod astro;
 mod parse_error;
 
 use crate::parser::HtmlParser;
-use crate::syntax::astro::{is_at_fence, parse_astro_fence};
+use crate::syntax::astro::{
+    is_at_fence, parse_astro_fence, is_at_astro_expression, parse_astro_expression,
+    is_at_astro_spread_attribute, parse_astro_spread_attribute, parse_astro_shorthand_attribute,
+    parse_astro_expression_attribute, parse_astro_template_literal_attribute
+};
 use crate::syntax::parse_error::*;
 use crate::token_source::{HtmlEmbeddedLanguage, HtmlLexContext};
 use biome_html_syntax::HtmlSyntaxKind::*;
@@ -24,6 +28,11 @@ static VOID_ELEMENTS: &[&str] = &[
 
 /// For these elements, the content is treated as raw text and no parsing is done inside them. This is so that the contents of these tags can be parsed by a different parser.
 pub(crate) static EMBEDDED_LANGUAGE_ELEMENTS: &[&str] = &["script", "style", "pre"];
+
+/// Check if a tag name represents an Astro component (starts with uppercase) or regular HTML element
+fn is_astro_component(tag_name: &str) -> bool {
+    tag_name.chars().next().map_or(false, |c| c.is_ascii_uppercase())
+}
 
 pub(crate) fn parse_root(p: &mut HtmlParser) {
     let m = p.start();
@@ -81,10 +90,11 @@ fn parse_element(p: &mut HtmlParser) -> ParsedSyntax {
 
     p.bump(T![<]);
     let opening_tag_name = p.cur_text().to_string();
-    let should_be_self_closing = VOID_ELEMENTS
+    let is_component = is_astro_component(&opening_tag_name);
+    let should_be_self_closing = !is_component && VOID_ELEMENTS
         .iter()
         .any(|tag| tag.eq_ignore_ascii_case(opening_tag_name.as_str()));
-    let is_embedded_language_tag = EMBEDDED_LANGUAGE_ELEMENTS
+    let is_embedded_language_tag = !is_component && EMBEDDED_LANGUAGE_ELEMENTS
         .iter()
         .any(|tag| tag.eq_ignore_ascii_case(opening_tag_name.as_str()));
     parse_literal(p, HTML_TAG_NAME).or_add_diagnostic(p, expected_element_name);
@@ -173,6 +183,7 @@ impl ParseNodeList for ElementList {
             T![<!--] => parse_comment(p),
             T!["<![CDATA["] => parse_cdata_section(p),
             T![<] => parse_element(p),
+            T!['{'] if is_at_astro_expression(p) => parse_astro_expression(p),
             HTML_LITERAL => {
                 let m = p.start();
                 p.bump_with_context(HTML_LITERAL, HtmlLexContext::OutsideTag);
@@ -211,8 +222,13 @@ impl ParseNodeList for AttributeList {
     const LIST_KIND: Self::Kind = HTML_ATTRIBUTE_LIST;
 
     fn parse_element(&mut self, p: &mut Self::Parser<'_>) -> ParsedSyntax {
-        // Absent
-        parse_attribute(p)
+        if is_at_astro_spread_attribute(p) {
+            parse_astro_spread_attribute(p)
+        } else if is_at_astro_expression(p) {
+            parse_astro_shorthand_attribute(p)
+        } else {
+            parse_attribute(p)
+        }
     }
 
     fn is_at_list_end(&self, p: &mut Self::Parser<'_>) -> bool {
@@ -274,7 +290,19 @@ fn parse_attribute_initializer(p: &mut HtmlParser) -> ParsedSyntax {
     }
     let m = p.start();
     p.bump_with_context(T![=], HtmlLexContext::AttributeValue);
-    parse_attribute_string_literal(p).or_add_diagnostic(p, expected_initializer);
+    
+    // Try parsing Astro expression attributes first, then fall back to regular strings
+    let value_parsed = if is_at_astro_expression(p) {
+        if p.nth_at(1, T!['`']) {
+            parse_astro_template_literal_attribute(p)
+        } else {
+            parse_astro_expression_attribute(p)
+        }
+    } else {
+        parse_attribute_string_literal(p)
+    };
+    
+    value_parsed.or_add_diagnostic(p, expected_initializer);
     Present(m.complete(p, HTML_ATTRIBUTE_INITIALIZER_CLAUSE))
 }
 
