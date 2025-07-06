@@ -11,14 +11,11 @@ pub fn md_bullet(
     space_token: SyntaxToken,
     content: MdInlineItemList,
 ) -> MdBullet {
-    MdBullet::unwrap_cast(SyntaxNode::new_detached(
-        MarkdownSyntaxKind::MD_BULLET,
-        [
-            Some(SyntaxElement::Token(bullet_token)),
-            Some(SyntaxElement::Token(space_token)),
-            Some(SyntaxElement::Node(content.into_syntax())),
-        ],
-    ))
+    MdBullet::unwrap_cast(SyntaxNode::new_detached(MarkdownSyntaxKind::MD_BULLET, [
+        Some(SyntaxElement::Token(bullet_token)),
+        Some(SyntaxElement::Token(space_token)),
+        Some(SyntaxElement::Node(content.into_syntax())),
+    ]))
 }
 pub fn md_bullet_list_item(md_bullet_list: MdBulletList) -> MdBulletListItem {
     MdBulletListItem::unwrap_cast(SyntaxNode::new_detached(
@@ -44,14 +41,11 @@ impl MdDocumentBuilder {
         self
     }
     pub fn build(self) -> MdDocument {
-        MdDocument::unwrap_cast(SyntaxNode::new_detached(
-            MarkdownSyntaxKind::MD_DOCUMENT,
-            [
-                self.bom_token.map(|token| SyntaxElement::Token(token)),
-                Some(SyntaxElement::Node(self.value.into_syntax())),
-                Some(SyntaxElement::Token(self.eof_token)),
-            ],
-        ))
+        MdDocument::unwrap_cast(SyntaxNode::new_detached(MarkdownSyntaxKind::MD_DOCUMENT, [
+            self.bom_token.map(|token| SyntaxElement::Token(token)),
+            Some(SyntaxElement::Node(self.value.into_syntax())),
+            Some(SyntaxElement::Token(self.eof_token)),
+        ]))
     }
 }
 pub fn md_fenced_code_block(
@@ -81,10 +75,9 @@ pub fn md_hard_line(value_token: SyntaxToken) -> MdHardLine {
     ))
 }
 pub fn md_hash(hash_token: SyntaxToken) -> MdHash {
-    MdHash::unwrap_cast(SyntaxNode::new_detached(
-        MarkdownSyntaxKind::MD_HASH,
-        [Some(SyntaxElement::Token(hash_token))],
-    ))
+    MdHash::unwrap_cast(SyntaxNode::new_detached(MarkdownSyntaxKind::MD_HASH, [
+        Some(SyntaxElement::Token(hash_token)),
+    ]))
 }
 pub fn md_header(before: MdHashList, after: MdHashList) -> MdHeaderBuilder {
     MdHeaderBuilder {
@@ -104,15 +97,12 @@ impl MdHeaderBuilder {
         self
     }
     pub fn build(self) -> MdHeader {
-        MdHeader::unwrap_cast(SyntaxNode::new_detached(
-            MarkdownSyntaxKind::MD_HEADER,
-            [
-                Some(SyntaxElement::Node(self.before.into_syntax())),
-                self.content
-                    .map(|token| SyntaxElement::Node(token.into_syntax())),
-                Some(SyntaxElement::Node(self.after.into_syntax())),
-            ],
-        ))
+        MdHeader::unwrap_cast(SyntaxNode::new_detached(MarkdownSyntaxKind::MD_HEADER, [
+            Some(SyntaxElement::Node(self.before.into_syntax())),
+            self.content
+                .map(|token| SyntaxElement::Node(token.into_syntax())),
+            Some(SyntaxElement::Node(self.after.into_syntax())),
+        ]))
     }
 }
 pub fn md_html_block(md_textual: MdTextual) -> MdHtmlBlock {
@@ -122,10 +112,9 @@ pub fn md_html_block(md_textual: MdTextual) -> MdHtmlBlock {
     ))
 }
 pub fn md_indent(value_token: SyntaxToken) -> MdIndent {
-    MdIndent::unwrap_cast(SyntaxNode::new_detached(
-        MarkdownSyntaxKind::MD_INDENT,
-        [Some(SyntaxElement::Token(value_token))],
-    ))
+    MdIndent::unwrap_cast(SyntaxNode::new_detached(MarkdownSyntaxKind::MD_INDENT, [
+        Some(SyntaxElement::Token(value_token)),
+    ]))
 }
 pub fn md_indent_code_block(lines: MdIndentedCodeLineList) -> MdIndentCodeBlock {
     MdIndentCodeBlock::unwrap_cast(SyntaxNode::new_detached(
@@ -335,10 +324,9 @@ pub fn md_paragraph(list: MdInlineItemList, hard_line: MdHardLine) -> MdParagrap
     ))
 }
 pub fn md_quote(any_md_block: AnyMdBlock) -> MdQuote {
-    MdQuote::unwrap_cast(SyntaxNode::new_detached(
-        MarkdownSyntaxKind::MD_QUOTE,
-        [Some(SyntaxElement::Node(any_md_block.into_syntax()))],
-    ))
+    MdQuote::unwrap_cast(SyntaxNode::new_detached(MarkdownSyntaxKind::MD_QUOTE, [
+        Some(SyntaxElement::Node(any_md_block.into_syntax())),
+    ]))
 }
 pub fn md_setext_header(md_paragraph: MdParagraph) -> MdSetextHeader {
     MdSetextHeader::unwrap_cast(SyntaxNode::new_detached(
@@ -353,10 +341,9 @@ pub fn md_soft_break(value_token: SyntaxToken) -> MdSoftBreak {
     ))
 }
 pub fn md_textual(value_token: SyntaxToken) -> MdTextual {
-    MdTextual::unwrap_cast(SyntaxNode::new_detached(
-        MarkdownSyntaxKind::MD_TEXTUAL,
-        [Some(SyntaxElement::Token(value_token))],
-    ))
+    MdTextual::unwrap_cast(SyntaxNode::new_detached(MarkdownSyntaxKind::MD_TEXTUAL, [
+        Some(SyntaxElement::Token(value_token)),
+    ]))
 }
 pub fn md_thematic_break_block(value_token: SyntaxToken) -> MdThematicBreakBlock {
     MdThematicBreakBlock::unwrap_cast(SyntaxNode::new_detached(

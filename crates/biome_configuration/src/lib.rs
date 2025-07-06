@@ -6,7 +6,6 @@
 #![deny(clippy::use_self)]
 
 pub mod analyzer;
-pub mod astro;
 pub mod bool;
 pub mod css;
 pub mod diagnostics;
@@ -26,7 +25,6 @@ pub mod vcs;
 
 use crate::analyzer::assist::{Actions, AssistConfiguration, Source, assist_configuration};
 use crate::analyzer::{RuleAssistConfiguration, RuleDomains};
-use crate::astro::{AstroConfiguration, astro_configuration};
 use crate::bool::Bool;
 use crate::css::{CssFormatterConfiguration, CssLinterConfiguration, CssParserConfiguration};
 pub use crate::diagnostics::BiomeDiagnostic;
@@ -59,7 +57,6 @@ pub use css::{CssConfiguration, css_configuration};
 pub use formatter::{FormatterConfiguration, formatter_configuration};
 pub use graphql::{GraphqlConfiguration, graphql_configuration};
 pub use html::{HtmlConfiguration, html_configuration};
-pub use astro::{AstroConfiguration, astro_configuration};
 pub use javascript::{JsConfiguration, js_configuration};
 pub use json::{JsonConfiguration, json_configuration};
 pub use overrides::{
@@ -157,10 +154,6 @@ pub struct Configuration {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub html: Option<HtmlConfiguration>,
 
-    /// Specific configuration for the Astro language
-    #[bpaf(external(astro_configuration), optional)]
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub astro: Option<AstroConfiguration>,
 
     /// A list of granular patterns that should be applied only to a sub set of files
     #[bpaf(hide, pure(Default::default()))]

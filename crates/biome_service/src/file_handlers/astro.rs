@@ -1,21 +1,19 @@
-use crate::WorkspaceError;
-use crate::file_handlers::{
-    AnalyzerCapabilities, Capabilities, CodeActionsParams, DebugCapabilities, EnabledForPath,
+use super::{
+    AnalyzerCapabilities, Capabilities, DebugCapabilities, DocumentFileSource, EnabledForPath,
     ExtensionHandler, FixAllParams, FormatterCapabilities, LintParams, LintResults, ParseResult,
-    ParserCapabilities, javascript,
+    ParserCapabilities, SearchCapabilities, html,
 };
 use crate::settings::Settings;
-use crate::workspace::{DocumentFileSource, FixFileResult, PullActionsResult};
+use crate::workspace::{GetSyntaxTreeResult, FixFileResult};
+use crate::WorkspaceError;
 use biome_formatter::Printed;
 use biome_fs::BiomePath;
-use biome_js_parser::{JsParserOptions, parse_js_with_cache};
-use biome_js_syntax::{JsFileSource, TextRange, TextSize};
+use biome_html_parser::parse_html_with_cache;
+use biome_html_syntax::{HtmlRoot, HtmlSyntaxNode};
 use biome_parser::AnyParse;
 use biome_rowan::NodeCache;
 use regex::{Matches, Regex, RegexBuilder};
 use std::sync::LazyLock;
-
-use super::SearchCapabilities;
 
 #[derive(Debug, Default, PartialEq, Eq)]
 pub struct AstroFileHandler;
@@ -69,59 +67,69 @@ impl ExtensionHandler for AstroFileHandler {
     fn capabilities(&self) -> Capabilities {
         Capabilities {
             enabled_for_path: EnabledForPath {
-                formatter: Some(javascript::formatter_enabled),
-                search: Some(javascript::search_enabled),
-                assist: Some(javascript::assist_enabled),
-                linter: Some(javascript::linter_enabled),
+                formatter: Some(html::formatter_enabled),
+                search: Some(html::search_enabled),
+                assist: Some(html::assist_enabled),
+                linter: Some(html::linter_enabled),
             },
 
             parser: ParserCapabilities { parse: Some(parse) },
             debug: DebugCapabilities {
-                debug_syntax_tree: None,
+                debug_syntax_tree: Some(debug_syntax_tree),
                 debug_control_flow: None,
-                debug_formatter_ir: None,
+                debug_formatter_ir: Some(debug_formatter_ir),
                 debug_type_info: None,
                 debug_registered_types: None,
                 debug_semantic_model: None,
             },
             analyzer: AnalyzerCapabilities {
                 lint: Some(lint),
-                code_actions: Some(code_actions),
+                code_actions: None,
                 rename: None,
                 fix_all: Some(fix_all),
             },
             formatter: FormatterCapabilities {
                 format: Some(format),
-                format_range: Some(format_range),
-                format_on_type: Some(format_on_type),
+                format_range: None,
+                format_on_type: None,
             },
-            // TODO: We should be able to search JS portions already
             search: SearchCapabilities { search: None },
         }
     }
 }
 
 fn parse(
-    _rome_path: &BiomePath,
+    _biome_path: &BiomePath,
     file_source: DocumentFileSource,
     text: &str,
     _settings: &Settings,
     cache: &mut NodeCache,
 ) -> ParseResult {
-    let frontmatter = AstroFileHandler::input(text);
-    let parse = parse_js_with_cache(
-        frontmatter,
-        file_source
-            .to_js_file_source()
-            .unwrap_or(JsFileSource::ts()),
-        JsParserOptions::default(),
-        cache,
-    );
+    let html_file_source = file_source.to_html_file_source().unwrap_or_default();
+    let parse = parse_html_with_cache(text, html_file_source, cache);
 
     ParseResult {
         any_parse: parse.into(),
-        language: Some(JsFileSource::astro().into()),
+        language: Some(file_source),
     }
+}
+
+fn debug_syntax_tree(_biome_path: &BiomePath, parse: AnyParse) -> GetSyntaxTreeResult {
+    let syntax: HtmlSyntaxNode = parse.syntax();
+    let tree: HtmlRoot = parse.tree();
+    GetSyntaxTreeResult {
+        cst: format!("{syntax:#?}"),
+        ast: format!("{tree:#?}"),
+    }
+}
+
+fn debug_formatter_ir(
+    path: &BiomePath,
+    document_file_source: &DocumentFileSource,
+    parse: AnyParse,
+    settings: &Settings,
+) -> Result<String, WorkspaceError> {
+    html::debug_formatter_ir(path, document_file_source, parse, settings)
 }
 
 #[tracing::instrument(level = "debug", skip(parse, settings))]
@@ -131,36 +139,15 @@ fn format(
     parse: AnyParse,
     settings: &Settings,
 ) -> Result<Printed, WorkspaceError> {
-    javascript::format(biome_path, document_file_source, parse, settings)
-}
-pub(crate) fn format_range(
-    biome_path: &BiomePath,
-    document_file_source: &DocumentFileSource,
-    parse: AnyParse,
-    settings: &Settings,
-    range: TextRange,
-) -> Result<Printed, WorkspaceError> {
-    javascript::format_range(biome_path, document_file_source, parse, settings, range)
+    html::format(biome_path, document_file_source, parse, settings)
 }
 
-pub(crate) fn format_on_type(
-    biome_path: &BiomePath,
-    document_file_source: &DocumentFileSource,
-    parse: AnyParse,
-    settings: &Settings,
-    offset: TextSize,
-) -> Result<Printed, WorkspaceError> {
-    javascript::format_on_type(biome_path, document_file_source, parse, settings, offset)
+#[tracing::instrument(level = "debug", skip(params))]
+fn lint(params: LintParams) -> LintResults {
+    html::lint(params)
 }
 
-pub(crate) fn lint(params: LintParams) -> LintResults {
-    javascript::lint(params)
-}
-
-pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
-    javascript::code_actions(params)
-}
-
+#[tracing::instrument(level = "debug", skip(params))]
 fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceError> {
-    javascript::fix_all(params)
+    html::fix_all(params)
 }

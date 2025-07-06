@@ -715,7 +715,7 @@ impl Features {
     pub(crate) fn get_capabilities(&self, language_hint: DocumentFileSource) -> Capabilities {
         match language_hint {
             DocumentFileSource::Js(source) => match source.as_embedding_kind() {
-                EmbeddingKind::Astro => self.astro.capabilities(),
+                EmbeddingKind::Astro => unreachable!("Astro files should use HTML parser"),
                 EmbeddingKind::Vue => self.vue.capabilities(),
                 EmbeddingKind::Svelte => self.svelte.capabilities(),
                 EmbeddingKind::None => self.js.capabilities(),
@@ -723,7 +723,13 @@ impl Features {
             DocumentFileSource::Json(_) => self.json.capabilities(),
             DocumentFileSource::Css(_) => self.css.capabilities(),
             DocumentFileSource::Graphql(_) => self.graphql.capabilities(),
-            DocumentFileSource::Html(_) => self.html.capabilities(),
+            DocumentFileSource::Html(source) => {
+                if source.is_astro() {
+                    self.astro.capabilities()
+                } else {
+                    self.html.capabilities()
+                }
+            },
             DocumentFileSource::Grit(_) => self.grit.capabilities(),
             DocumentFileSource::Ignore => self.ignore.capabilities(),
             DocumentFileSource::Unknown => self.unknown.capabilities(),

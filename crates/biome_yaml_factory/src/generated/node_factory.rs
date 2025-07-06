@@ -7,10 +7,9 @@ use biome_yaml_syntax::{
     YamlSyntaxToken as SyntaxToken, *,
 };
 pub fn yaml_alias_node(value_token: SyntaxToken) -> YamlAliasNode {
-    YamlAliasNode::unwrap_cast(SyntaxNode::new_detached(
-        YamlSyntaxKind::YAML_ALIAS_NODE,
-        [Some(SyntaxElement::Token(value_token))],
-    ))
+    YamlAliasNode::unwrap_cast(SyntaxNode::new_detached(YamlSyntaxKind::YAML_ALIAS_NODE, [
+        Some(SyntaxElement::Token(value_token)),
+    ]))
 }
 pub fn yaml_anchor_property(value_token: SyntaxToken) -> YamlAnchorProperty {
     YamlAnchorProperty::unwrap_cast(SyntaxNode::new_detached(
@@ -285,10 +284,9 @@ pub fn yaml_compact_sequence(entries: YamlBlockSequenceEntryList) -> YamlCompact
     ))
 }
 pub fn yaml_directive(value_token: SyntaxToken) -> YamlDirective {
-    YamlDirective::unwrap_cast(SyntaxNode::new_detached(
-        YamlSyntaxKind::YAML_DIRECTIVE,
-        [Some(SyntaxElement::Token(value_token))],
-    ))
+    YamlDirective::unwrap_cast(SyntaxNode::new_detached(YamlSyntaxKind::YAML_DIRECTIVE, [
+        Some(SyntaxElement::Token(value_token)),
+    ]))
 }
 pub fn yaml_document(directives: YamlDirectiveList) -> YamlDocumentBuilder {
     YamlDocumentBuilder {
@@ -324,19 +322,16 @@ impl YamlDocumentBuilder {
         self
     }
     pub fn build(self) -> YamlDocument {
-        YamlDocument::unwrap_cast(SyntaxNode::new_detached(
-            YamlSyntaxKind::YAML_DOCUMENT,
-            [
-                self.bom_token.map(|token| SyntaxElement::Token(token)),
-                Some(SyntaxElement::Node(self.directives.into_syntax())),
-                self.dashdashdash_token
-                    .map(|token| SyntaxElement::Token(token)),
-                self.node
-                    .map(|token| SyntaxElement::Node(token.into_syntax())),
-                self.dotdotdot_token
-                    .map(|token| SyntaxElement::Token(token)),
-            ],
-        ))
+        YamlDocument::unwrap_cast(SyntaxNode::new_detached(YamlSyntaxKind::YAML_DOCUMENT, [
+            self.bom_token.map(|token| SyntaxElement::Token(token)),
+            Some(SyntaxElement::Node(self.directives.into_syntax())),
+            self.dashdashdash_token
+                .map(|token| SyntaxElement::Token(token)),
+            self.node
+                .map(|token| SyntaxElement::Node(token.into_syntax())),
+            self.dotdotdot_token
+                .map(|token| SyntaxElement::Token(token)),
+        ]))
     }
 }
 pub fn yaml_double_quoted_scalar(value_token: SyntaxToken) -> YamlDoubleQuotedScalar {
@@ -576,13 +571,10 @@ impl YamlPropertiesTagFirstBuilder {
     }
 }
 pub fn yaml_root(documents: YamlDocumentList, eof_token: SyntaxToken) -> YamlRoot {
-    YamlRoot::unwrap_cast(SyntaxNode::new_detached(
-        YamlSyntaxKind::YAML_ROOT,
-        [
-            Some(SyntaxElement::Node(documents.into_syntax())),
-            Some(SyntaxElement::Token(eof_token)),
-        ],
-    ))
+    YamlRoot::unwrap_cast(SyntaxNode::new_detached(YamlSyntaxKind::YAML_ROOT, [
+        Some(SyntaxElement::Node(documents.into_syntax())),
+        Some(SyntaxElement::Token(eof_token)),
+    ]))
 }
 pub fn yaml_single_quoted_scalar(value_token: SyntaxToken) -> YamlSingleQuotedScalar {
     YamlSingleQuotedScalar::unwrap_cast(SyntaxNode::new_detached(

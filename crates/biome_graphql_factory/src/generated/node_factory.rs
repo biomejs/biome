@@ -1052,14 +1052,11 @@ impl GraphqlRootBuilder {
         self
     }
     pub fn build(self) -> GraphqlRoot {
-        GraphqlRoot::unwrap_cast(SyntaxNode::new_detached(
-            GraphqlSyntaxKind::GRAPHQL_ROOT,
-            [
-                self.bom_token.map(|token| SyntaxElement::Token(token)),
-                Some(SyntaxElement::Node(self.definitions.into_syntax())),
-                Some(SyntaxElement::Token(self.eof_token)),
-            ],
-        ))
+        GraphqlRoot::unwrap_cast(SyntaxNode::new_detached(GraphqlSyntaxKind::GRAPHQL_ROOT, [
+            self.bom_token.map(|token| SyntaxElement::Token(token)),
+            Some(SyntaxElement::Node(self.definitions.into_syntax())),
+            Some(SyntaxElement::Token(self.eof_token)),
+        ]))
     }
 }
 pub fn graphql_root_operation_type_definition(

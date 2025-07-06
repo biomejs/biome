@@ -6,6 +6,118 @@ use biome_html_syntax::{
     HtmlSyntaxToken as SyntaxToken, *,
 };
 use biome_rowan::AstNode;
+pub fn html_astro_expression(
+    l_curly_token: SyntaxToken,
+    r_curly_token: SyntaxToken,
+) -> HtmlAstroExpressionBuilder {
+    HtmlAstroExpressionBuilder {
+        l_curly_token,
+        r_curly_token,
+        expression_token: None,
+    }
+}
+pub struct HtmlAstroExpressionBuilder {
+    l_curly_token: SyntaxToken,
+    r_curly_token: SyntaxToken,
+    expression_token: Option<SyntaxToken>,
+}
+impl HtmlAstroExpressionBuilder {
+    pub fn with_expression_token(mut self, expression_token: SyntaxToken) -> Self {
+        self.expression_token = Some(expression_token);
+        self
+    }
+    pub fn build(self) -> HtmlAstroExpression {
+        HtmlAstroExpression::unwrap_cast(SyntaxNode::new_detached(
+            HtmlSyntaxKind::HTML_ASTRO_EXPRESSION,
+            [
+                Some(SyntaxElement::Token(self.l_curly_token)),
+                self.expression_token
+                    .map(|token| SyntaxElement::Token(token)),
+                Some(SyntaxElement::Token(self.r_curly_token)),
+            ],
+        ))
+    }
+}
+pub fn html_astro_expression_attribute(
+    name: HtmlAttributeName,
+    eq_token: SyntaxToken,
+    l_curly_token: SyntaxToken,
+    r_curly_token: SyntaxToken,
+) -> HtmlAstroExpressionAttributeBuilder {
+    HtmlAstroExpressionAttributeBuilder {
+        name,
+        eq_token,
+        l_curly_token,
+        r_curly_token,
+        expression_token: None,
+    }
+}
+pub struct HtmlAstroExpressionAttributeBuilder {
+    name: HtmlAttributeName,
+    eq_token: SyntaxToken,
+    l_curly_token: SyntaxToken,
+    r_curly_token: SyntaxToken,
+    expression_token: Option<SyntaxToken>,
+}
+impl HtmlAstroExpressionAttributeBuilder {
+    pub fn with_expression_token(mut self, expression_token: SyntaxToken) -> Self {
+        self.expression_token = Some(expression_token);
+        self
+    }
+    pub fn build(self) -> HtmlAstroExpressionAttribute {
+        HtmlAstroExpressionAttribute::unwrap_cast(SyntaxNode::new_detached(
+            HtmlSyntaxKind::HTML_ASTRO_EXPRESSION_ATTRIBUTE,
+            [
+                Some(SyntaxElement::Node(self.name.into_syntax())),
+                Some(SyntaxElement::Token(self.eq_token)),
+                Some(SyntaxElement::Token(self.l_curly_token)),
+                self.expression_token
+                    .map(|token| SyntaxElement::Token(token)),
+                Some(SyntaxElement::Token(self.r_curly_token)),
+            ],
+        ))
+    }
+}
+pub fn html_astro_fragment(
+    opening_element: HtmlAstroFragmentOpen,
+    children: HtmlElementList,
+    closing_element: HtmlAstroFragmentClose,
+) -> HtmlAstroFragment {
+    HtmlAstroFragment::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::HTML_ASTRO_FRAGMENT,
+        [
+            Some(SyntaxElement::Node(opening_element.into_syntax())),
+            Some(SyntaxElement::Node(children.into_syntax())),
+            Some(SyntaxElement::Node(closing_element.into_syntax())),
+        ],
+    ))
+}
+pub fn html_astro_fragment_close(
+    l_angle_token: SyntaxToken,
+    slash_token: SyntaxToken,
+    r_angle_token: SyntaxToken,
+) -> HtmlAstroFragmentClose {
+    HtmlAstroFragmentClose::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::HTML_ASTRO_FRAGMENT_CLOSE,
+        [
+            Some(SyntaxElement::Token(l_angle_token)),
+            Some(SyntaxElement::Token(slash_token)),
+            Some(SyntaxElement::Token(r_angle_token)),
+        ],
+    ))
+}
+pub fn html_astro_fragment_open(
+    l_angle_token: SyntaxToken,
+    r_angle_token: SyntaxToken,
+) -> HtmlAstroFragmentOpen {
+    HtmlAstroFragmentOpen::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::HTML_ASTRO_FRAGMENT_OPEN,
+        [
+            Some(SyntaxElement::Token(l_angle_token)),
+            Some(SyntaxElement::Token(r_angle_token)),
+        ],
+    ))
+}
 pub fn html_astro_frontmatter_element(
     l_fence_token: SyntaxToken,
     r_fence_token: SyntaxToken,
@@ -37,6 +149,75 @@ impl HtmlAstroFrontmatterElementBuilder {
         ))
     }
 }
+pub fn html_astro_shorthand_attribute(
+    l_curly_token: SyntaxToken,
+    name: HtmlAttributeName,
+    r_curly_token: SyntaxToken,
+) -> HtmlAstroShorthandAttribute {
+    HtmlAstroShorthandAttribute::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::HTML_ASTRO_SHORTHAND_ATTRIBUTE,
+        [
+            Some(SyntaxElement::Token(l_curly_token)),
+            Some(SyntaxElement::Node(name.into_syntax())),
+            Some(SyntaxElement::Token(r_curly_token)),
+        ],
+    ))
+}
+pub fn html_astro_spread_attribute(
+    l_curly_token: SyntaxToken,
+    dot_dot_dot_token: SyntaxToken,
+    expression_token: SyntaxToken,
+    r_curly_token: SyntaxToken,
+) -> HtmlAstroSpreadAttribute {
+    HtmlAstroSpreadAttribute::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::HTML_ASTRO_SPREAD_ATTRIBUTE,
+        [
+            Some(SyntaxElement::Token(l_curly_token)),
+            Some(SyntaxElement::Token(dot_dot_dot_token)),
+            Some(SyntaxElement::Token(expression_token)),
+            Some(SyntaxElement::Token(r_curly_token)),
+        ],
+    ))
+}
+pub fn html_astro_template_literal_attribute(
+    name: HtmlAttributeName,
+    eq_token: SyntaxToken,
+    l_backtick_token: SyntaxToken,
+    r_backtick_token: SyntaxToken,
+) -> HtmlAstroTemplateLiteralAttributeBuilder {
+    HtmlAstroTemplateLiteralAttributeBuilder {
+        name,
+        eq_token,
+        l_backtick_token,
+        r_backtick_token,
+        template_token: None,
+    }
+}
+pub struct HtmlAstroTemplateLiteralAttributeBuilder {
+    name: HtmlAttributeName,
+    eq_token: SyntaxToken,
+    l_backtick_token: SyntaxToken,
+    r_backtick_token: SyntaxToken,
+    template_token: Option<SyntaxToken>,
+}
+impl HtmlAstroTemplateLiteralAttributeBuilder {
+    pub fn with_template_token(mut self, template_token: SyntaxToken) -> Self {
+        self.template_token = Some(template_token);
+        self
+    }
+    pub fn build(self) -> HtmlAstroTemplateLiteralAttribute {
+        HtmlAstroTemplateLiteralAttribute::unwrap_cast(SyntaxNode::new_detached(
+            HtmlSyntaxKind::HTML_ASTRO_TEMPLATE_LITERAL_ATTRIBUTE,
+            [
+                Some(SyntaxElement::Node(self.name.into_syntax())),
+                Some(SyntaxElement::Token(self.eq_token)),
+                Some(SyntaxElement::Token(self.l_backtick_token)),
+                self.template_token.map(|token| SyntaxElement::Token(token)),
+                Some(SyntaxElement::Token(self.r_backtick_token)),
+            ],
+        ))
+    }
+}
 pub fn html_attribute(name: HtmlAttributeName) -> HtmlAttributeBuilder {
     HtmlAttributeBuilder {
         name,
@@ -53,14 +234,11 @@ impl HtmlAttributeBuilder {
         self
     }
     pub fn build(self) -> HtmlAttribute {
-        HtmlAttribute::unwrap_cast(SyntaxNode::new_detached(
-            HtmlSyntaxKind::HTML_ATTRIBUTE,
-            [
-                Some(SyntaxElement::Node(self.name.into_syntax())),
-                self.initializer
-                    .map(|token| SyntaxElement::Node(token.into_syntax())),
-            ],
-        ))
+        HtmlAttribute::unwrap_cast(SyntaxNode::new_detached(HtmlSyntaxKind::HTML_ATTRIBUTE, [
+            Some(SyntaxElement::Node(self.name.into_syntax())),
+            self.initializer
+                .map(|token| SyntaxElement::Node(token.into_syntax())),
+        ]))
     }
 }
 pub fn html_attribute_initializer_clause(
@@ -116,20 +294,16 @@ pub fn html_comment(
     content_token: SyntaxToken,
     comment_end_token: SyntaxToken,
 ) -> HtmlComment {
-    HtmlComment::unwrap_cast(SyntaxNode::new_detached(
-        HtmlSyntaxKind::HTML_COMMENT,
-        [
-            Some(SyntaxElement::Token(comment_start_token)),
-            Some(SyntaxElement::Token(content_token)),
-            Some(SyntaxElement::Token(comment_end_token)),
-        ],
-    ))
+    HtmlComment::unwrap_cast(SyntaxNode::new_detached(HtmlSyntaxKind::HTML_COMMENT, [
+        Some(SyntaxElement::Token(comment_start_token)),
+        Some(SyntaxElement::Token(content_token)),
+        Some(SyntaxElement::Token(comment_end_token)),
+    ]))
 }
 pub fn html_content(value_token: SyntaxToken) -> HtmlContent {
-    HtmlContent::unwrap_cast(SyntaxNode::new_detached(
-        HtmlSyntaxKind::HTML_CONTENT,
-        [Some(SyntaxElement::Token(value_token))],
-    ))
+    HtmlContent::unwrap_cast(SyntaxNode::new_detached(HtmlSyntaxKind::HTML_CONTENT, [
+        Some(SyntaxElement::Token(value_token)),
+    ]))
 }
 pub fn html_directive(
     l_angle_token: SyntaxToken,
@@ -176,21 +350,18 @@ impl HtmlDirectiveBuilder {
         self
     }
     pub fn build(self) -> HtmlDirective {
-        HtmlDirective::unwrap_cast(SyntaxNode::new_detached(
-            HtmlSyntaxKind::HTML_DIRECTIVE,
-            [
-                Some(SyntaxElement::Token(self.l_angle_token)),
-                Some(SyntaxElement::Token(self.excl_token)),
-                Some(SyntaxElement::Token(self.doctype_token)),
-                self.html_token.map(|token| SyntaxElement::Token(token)),
-                self.quirk_token.map(|token| SyntaxElement::Token(token)),
-                self.public_id_token
-                    .map(|token| SyntaxElement::Token(token)),
-                self.system_id_token
-                    .map(|token| SyntaxElement::Token(token)),
-                Some(SyntaxElement::Token(self.r_angle_token)),
-            ],
-        ))
+        HtmlDirective::unwrap_cast(SyntaxNode::new_detached(HtmlSyntaxKind::HTML_DIRECTIVE, [
+            Some(SyntaxElement::Token(self.l_angle_token)),
+            Some(SyntaxElement::Token(self.excl_token)),
+            Some(SyntaxElement::Token(self.doctype_token)),
+            self.html_token.map(|token| SyntaxElement::Token(token)),
+            self.quirk_token.map(|token| SyntaxElement::Token(token)),
+            self.public_id_token
+                .map(|token| SyntaxElement::Token(token)),
+            self.system_id_token
+                .map(|token| SyntaxElement::Token(token)),
+            Some(SyntaxElement::Token(self.r_angle_token)),
+        ]))
     }
 }
 pub fn html_element(
@@ -198,14 +369,11 @@ pub fn html_element(
     children: HtmlElementList,
     closing_element: HtmlClosingElement,
 ) -> HtmlElement {
-    HtmlElement::unwrap_cast(SyntaxNode::new_detached(
-        HtmlSyntaxKind::HTML_ELEMENT,
-        [
-            Some(SyntaxElement::Node(opening_element.into_syntax())),
-            Some(SyntaxElement::Node(children.into_syntax())),
-            Some(SyntaxElement::Node(closing_element.into_syntax())),
-        ],
-    ))
+    HtmlElement::unwrap_cast(SyntaxNode::new_detached(HtmlSyntaxKind::HTML_ELEMENT, [
+        Some(SyntaxElement::Node(opening_element.into_syntax())),
+        Some(SyntaxElement::Node(children.into_syntax())),
+        Some(SyntaxElement::Node(closing_element.into_syntax())),
+    ]))
 }
 pub fn html_opening_element(
     l_angle_token: SyntaxToken,
@@ -253,18 +421,15 @@ impl HtmlRootBuilder {
         self
     }
     pub fn build(self) -> HtmlRoot {
-        HtmlRoot::unwrap_cast(SyntaxNode::new_detached(
-            HtmlSyntaxKind::HTML_ROOT,
-            [
-                self.bom_token.map(|token| SyntaxElement::Token(token)),
-                self.frontmatter
-                    .map(|token| SyntaxElement::Node(token.into_syntax())),
-                self.directive
-                    .map(|token| SyntaxElement::Node(token.into_syntax())),
-                Some(SyntaxElement::Node(self.html.into_syntax())),
-                Some(SyntaxElement::Token(self.eof_token)),
-            ],
-        ))
+        HtmlRoot::unwrap_cast(SyntaxNode::new_detached(HtmlSyntaxKind::HTML_ROOT, [
+            self.bom_token.map(|token| SyntaxElement::Token(token)),
+            self.frontmatter
+                .map(|token| SyntaxElement::Node(token.into_syntax())),
+            self.directive
+                .map(|token| SyntaxElement::Node(token.into_syntax())),
+            Some(SyntaxElement::Node(self.html.into_syntax())),
+            Some(SyntaxElement::Token(self.eof_token)),
+        ]))
     }
 }
 pub fn html_self_closing_element(
@@ -307,16 +472,14 @@ impl HtmlSelfClosingElementBuilder {
     }
 }
 pub fn html_string(value_token: SyntaxToken) -> HtmlString {
-    HtmlString::unwrap_cast(SyntaxNode::new_detached(
-        HtmlSyntaxKind::HTML_STRING,
-        [Some(SyntaxElement::Token(value_token))],
-    ))
+    HtmlString::unwrap_cast(SyntaxNode::new_detached(HtmlSyntaxKind::HTML_STRING, [
+        Some(SyntaxElement::Token(value_token)),
+    ]))
 }
 pub fn html_tag_name(value_token: SyntaxToken) -> HtmlTagName {
-    HtmlTagName::unwrap_cast(SyntaxNode::new_detached(
-        HtmlSyntaxKind::HTML_TAG_NAME,
-        [Some(SyntaxElement::Token(value_token))],
-    ))
+    HtmlTagName::unwrap_cast(SyntaxNode::new_detached(HtmlSyntaxKind::HTML_TAG_NAME, [
+        Some(SyntaxElement::Token(value_token)),
+    ]))
 }
 pub fn html_attribute_list<I>(items: I) -> HtmlAttributeList
 where

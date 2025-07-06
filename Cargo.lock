@@ -134,49 +134,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "biome_astro_factory"
-version = "0.1.0"
-dependencies = [
- "biome_astro_syntax",
- "biome_rowan",
-]
-
-[[package]]
-name = "biome_astro_formatter"
-version = "0.1.0"
-dependencies = [
- "biome_astro_factory",
- "biome_astro_parser",
- "biome_astro_syntax",
- "biome_formatter",
- "biome_formatter_test",
- "biome_js_formatter",
- "biome_rowan",
-]
-
-[[package]]
-name = "biome_astro_parser"
-version = "0.1.0"
-dependencies = [
- "biome_astro_factory",
- "biome_astro_syntax",
- "biome_js_parser",
- "biome_parser",
- "biome_rowan",
- "biome_test_utils",
- "biome_text_size",
-]
-
-[[package]]
-name = "biome_astro_syntax"
-version = "0.1.0"
-dependencies = [
- "biome_rowan",
- "biome_text_size",
- "serde",
-]
-
-[[package]]
 name = "biome_cli"
 version = "0.0.0"
 dependencies = [

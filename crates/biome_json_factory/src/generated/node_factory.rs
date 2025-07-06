@@ -31,14 +31,11 @@ pub fn json_member(
     colon_token: SyntaxToken,
     value: AnyJsonValue,
 ) -> JsonMember {
-    JsonMember::unwrap_cast(SyntaxNode::new_detached(
-        JsonSyntaxKind::JSON_MEMBER,
-        [
-            Some(SyntaxElement::Node(name.into_syntax())),
-            Some(SyntaxElement::Token(colon_token)),
-            Some(SyntaxElement::Node(value.into_syntax())),
-        ],
-    ))
+    JsonMember::unwrap_cast(SyntaxNode::new_detached(JsonSyntaxKind::JSON_MEMBER, [
+        Some(SyntaxElement::Node(name.into_syntax())),
+        Some(SyntaxElement::Token(colon_token)),
+        Some(SyntaxElement::Node(value.into_syntax())),
+    ]))
 }
 pub fn json_member_name(value_token: SyntaxToken) -> JsonMemberName {
     JsonMemberName::unwrap_cast(SyntaxNode::new_detached(
@@ -47,10 +44,9 @@ pub fn json_member_name(value_token: SyntaxToken) -> JsonMemberName {
     ))
 }
 pub fn json_null_value(value_token: SyntaxToken) -> JsonNullValue {
-    JsonNullValue::unwrap_cast(SyntaxNode::new_detached(
-        JsonSyntaxKind::JSON_NULL_VALUE,
-        [Some(SyntaxElement::Token(value_token))],
-    ))
+    JsonNullValue::unwrap_cast(SyntaxNode::new_detached(JsonSyntaxKind::JSON_NULL_VALUE, [
+        Some(SyntaxElement::Token(value_token)),
+    ]))
 }
 pub fn json_number_value(value_token: SyntaxToken) -> JsonNumberValue {
     JsonNumberValue::unwrap_cast(SyntaxNode::new_detached(
@@ -90,14 +86,11 @@ impl JsonRootBuilder {
         self
     }
     pub fn build(self) -> JsonRoot {
-        JsonRoot::unwrap_cast(SyntaxNode::new_detached(
-            JsonSyntaxKind::JSON_ROOT,
-            [
-                self.bom_token.map(|token| SyntaxElement::Token(token)),
-                Some(SyntaxElement::Node(self.value.into_syntax())),
-                Some(SyntaxElement::Token(self.eof_token)),
-            ],
-        ))
+        JsonRoot::unwrap_cast(SyntaxNode::new_detached(JsonSyntaxKind::JSON_ROOT, [
+            self.bom_token.map(|token| SyntaxElement::Token(token)),
+            Some(SyntaxElement::Node(self.value.into_syntax())),
+            Some(SyntaxElement::Token(self.eof_token)),
+        ]))
     }
 }
 pub fn json_string_value(value_token: SyntaxToken) -> JsonStringValue {
