@@ -5,8 +5,8 @@ use biome_console::fmt::{Display, Formatter};
 use biome_console::{Console, ConsoleExt, MarkupBuf, markup};
 use biome_diagnostics::advice::ListAdvice;
 use biome_diagnostics::{
-    Advices, Category, Diagnostic, LogCategory,  PrintDiagnostic, Resource,
-    Severity, Visit, category,
+    Advices, Category, Diagnostic, LogCategory, PrintDiagnostic, Resource, Severity, Visit,
+    category,
 };
 use biome_fs::BiomePath;
 use camino::{Utf8Path, Utf8PathBuf};
@@ -300,11 +300,10 @@ impl Advices for FileDiagnosticCounts<'_> {
             visitor.record_log(LogCategory::Info, &"The following files have violations:")?;
             let mut list = Vec::new();
             for (file, counts) in self.0 {
-                let absolute_path = self
-                    .1
-                    .map(|wd| wd.join(file))
-                    .map(|file| format!("file://{}", file.as_str()))
-                    .unwrap_or_else(|| file.to_string());
+                let absolute_path = self.1.map(|wd| wd.join(file)).map_or_else(
+                    || (*file).to_string(),
+                    |file| format!("file://{}", file.as_str()),
+                );
 
                 let count = CounterLine(counts.errors, counts.warnings, counts.info);
 
@@ -344,11 +343,10 @@ impl<'a> Display for FileToDiagnostics<'a> {
                 .collect();
 
             let diagnostic = SummaryListDiagnostic {
-                message:
-                    markup! {
-                        <Info>"The following files have parsing errors:"</Info>
-                    }
-                    .to_owned(),
+                message: markup! {
+                    <Info>"The following files have parsing errors:"</Info>
+                }
+                .to_owned(),
 
                 list: SummaryListAdvice(&parse_files_with_counts),
                 category: category!("reporter/parse"),
@@ -377,11 +375,10 @@ impl<'a> Display for FileToDiagnostics<'a> {
                 .collect();
 
             let diagnostic = SummaryListDiagnostic {
-                message:
-                    markup! {
-                        <Info>"The following files need to be formatted:"</Info>
-                    }
-                    .to_owned(),
+                message: markup! {
+                    <Info>"The following files need to be formatted:"</Info>
+                }
+                .to_owned(),
 
                 list: SummaryListAdvice(&format_files_with_counts),
                 category: category!("reporter/format"),
@@ -395,7 +392,7 @@ impl<'a> Display for FileToDiagnostics<'a> {
             let diagnostic = LintSummaryDiagnostic {
                 file_counts: FileDiagnosticCounts(
                     &self.violation_file_counts,
-                    self.working_directory.as_deref(),
+                    self.working_directory,
                 ),
                 tables: &self.rules,
             };
@@ -424,7 +421,10 @@ impl RulesByCategory {
 
 impl Advices for &RulesByCategory {
     fn record(&self, visitor: &mut dyn Visit) -> io::Result<()> {
-        visitor.record_log(LogCategory::Info, &"The following lint rules have violations:")?;
+        visitor.record_log(
+            LogCategory::Info,
+            &"The following lint rules have violations:",
+        )?;
         let headers = &[
             markup!("Rule Name").to_owned(),
             markup!("Diagnostics").to_owned(),
