@@ -13,6 +13,7 @@ on:
       - 'crates/**_formatter/**/*.rs'
       - 'crates/**_analyze/**/*.rs'
       - 'crates/biome_grit_patterns/**/*.rs'
+      - 'crates/biome_package/**/*.rs'
   push:
     branches:
       - main
@@ -22,6 +23,7 @@ on:
       - 'crates/**_formatter/**/*.rs'
       - 'crates/**_analyze/**/*.rs'
       - 'crates/biome_grit_patterns/**/*.rs'
+      - 'crates/biome_package/**/*.rs'
 
 env:
   RUST_LOG: info
