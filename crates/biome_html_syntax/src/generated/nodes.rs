@@ -20,6 +20,236 @@ use std::fmt::{Debug, Formatter};
 #[doc = r" the slots are not statically known."]
 pub(crate) const SLOT_MAP_EMPTY_VALUE: u8 = u8::MAX;
 #[derive(Clone, PartialEq, Eq, Hash)]
+pub struct HtmlAstroExpression {
+    pub(crate) syntax: SyntaxNode,
+}
+impl HtmlAstroExpression {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> HtmlAstroExpressionFields {
+        HtmlAstroExpressionFields {
+            l_curly_token: self.l_curly_token(),
+            expression_token: self.expression_token(),
+            r_curly_token: self.r_curly_token(),
+        }
+    }
+    pub fn l_curly_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+    pub fn expression_token(&self) -> Option<SyntaxToken> {
+        support::token(&self.syntax, 1usize)
+    }
+    pub fn r_curly_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 2usize)
+    }
+}
+impl Serialize for HtmlAstroExpression {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct HtmlAstroExpressionFields {
+    pub l_curly_token: SyntaxResult<SyntaxToken>,
+    pub expression_token: Option<SyntaxToken>,
+    pub r_curly_token: SyntaxResult<SyntaxToken>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct HtmlAstroExpressionAttribute {
+    pub(crate) syntax: SyntaxNode,
+}
+impl HtmlAstroExpressionAttribute {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> HtmlAstroExpressionAttributeFields {
+        HtmlAstroExpressionAttributeFields {
+            name: self.name(),
+            eq_token: self.eq_token(),
+            l_curly_token: self.l_curly_token(),
+            expression_token: self.expression_token(),
+            r_curly_token: self.r_curly_token(),
+        }
+    }
+    pub fn name(&self) -> SyntaxResult<HtmlAttributeName> {
+        support::required_node(&self.syntax, 0usize)
+    }
+    pub fn eq_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 1usize)
+    }
+    pub fn l_curly_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 2usize)
+    }
+    pub fn expression_token(&self) -> Option<SyntaxToken> {
+        support::token(&self.syntax, 3usize)
+    }
+    pub fn r_curly_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 4usize)
+    }
+}
+impl Serialize for HtmlAstroExpressionAttribute {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct HtmlAstroExpressionAttributeFields {
+    pub name: SyntaxResult<HtmlAttributeName>,
+    pub eq_token: SyntaxResult<SyntaxToken>,
+    pub l_curly_token: SyntaxResult<SyntaxToken>,
+    pub expression_token: Option<SyntaxToken>,
+    pub r_curly_token: SyntaxResult<SyntaxToken>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct HtmlAstroFragment {
+    pub(crate) syntax: SyntaxNode,
+}
+impl HtmlAstroFragment {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> HtmlAstroFragmentFields {
+        HtmlAstroFragmentFields {
+            opening_element: self.opening_element(),
+            children: self.children(),
+            closing_element: self.closing_element(),
+        }
+    }
+    pub fn opening_element(&self) -> SyntaxResult<HtmlAstroFragmentOpen> {
+        support::required_node(&self.syntax, 0usize)
+    }
+    pub fn children(&self) -> HtmlElementList {
+        support::list(&self.syntax, 1usize)
+    }
+    pub fn closing_element(&self) -> SyntaxResult<HtmlAstroFragmentClose> {
+        support::required_node(&self.syntax, 2usize)
+    }
+}
+impl Serialize for HtmlAstroFragment {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct HtmlAstroFragmentFields {
+    pub opening_element: SyntaxResult<HtmlAstroFragmentOpen>,
+    pub children: HtmlElementList,
+    pub closing_element: SyntaxResult<HtmlAstroFragmentClose>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct HtmlAstroFragmentClose {
+    pub(crate) syntax: SyntaxNode,
+}
+impl HtmlAstroFragmentClose {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> HtmlAstroFragmentCloseFields {
+        HtmlAstroFragmentCloseFields {
+            l_angle_token: self.l_angle_token(),
+            slash_token: self.slash_token(),
+            r_angle_token: self.r_angle_token(),
+        }
+    }
+    pub fn l_angle_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+    pub fn slash_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 1usize)
+    }
+    pub fn r_angle_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 2usize)
+    }
+}
+impl Serialize for HtmlAstroFragmentClose {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct HtmlAstroFragmentCloseFields {
+    pub l_angle_token: SyntaxResult<SyntaxToken>,
+    pub slash_token: SyntaxResult<SyntaxToken>,
+    pub r_angle_token: SyntaxResult<SyntaxToken>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct HtmlAstroFragmentOpen {
+    pub(crate) syntax: SyntaxNode,
+}
+impl HtmlAstroFragmentOpen {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> HtmlAstroFragmentOpenFields {
+        HtmlAstroFragmentOpenFields {
+            l_angle_token: self.l_angle_token(),
+            r_angle_token: self.r_angle_token(),
+        }
+    }
+    pub fn l_angle_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+    pub fn r_angle_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 1usize)
+    }
+}
+impl Serialize for HtmlAstroFragmentOpen {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct HtmlAstroFragmentOpenFields {
+    pub l_angle_token: SyntaxResult<SyntaxToken>,
+    pub r_angle_token: SyntaxResult<SyntaxToken>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
 pub struct HtmlAstroFrontmatterElement {
     pub(crate) syntax: SyntaxNode,
 }
@@ -63,6 +293,156 @@ pub struct HtmlAstroFrontmatterElementFields {
     pub l_fence_token: SyntaxResult<SyntaxToken>,
     pub content_token: Option<SyntaxToken>,
     pub r_fence_token: SyntaxResult<SyntaxToken>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct HtmlAstroShorthandAttribute {
+    pub(crate) syntax: SyntaxNode,
+}
+impl HtmlAstroShorthandAttribute {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> HtmlAstroShorthandAttributeFields {
+        HtmlAstroShorthandAttributeFields {
+            l_curly_token: self.l_curly_token(),
+            name: self.name(),
+            r_curly_token: self.r_curly_token(),
+        }
+    }
+    pub fn l_curly_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+    pub fn name(&self) -> SyntaxResult<HtmlAttributeName> {
+        support::required_node(&self.syntax, 1usize)
+    }
+    pub fn r_curly_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 2usize)
+    }
+}
+impl Serialize for HtmlAstroShorthandAttribute {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct HtmlAstroShorthandAttributeFields {
+    pub l_curly_token: SyntaxResult<SyntaxToken>,
+    pub name: SyntaxResult<HtmlAttributeName>,
+    pub r_curly_token: SyntaxResult<SyntaxToken>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct HtmlAstroSpreadAttribute {
+    pub(crate) syntax: SyntaxNode,
+}
+impl HtmlAstroSpreadAttribute {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> HtmlAstroSpreadAttributeFields {
+        HtmlAstroSpreadAttributeFields {
+            l_curly_token: self.l_curly_token(),
+            dot_dot_dot_token: self.dot_dot_dot_token(),
+            expression_token: self.expression_token(),
+            r_curly_token: self.r_curly_token(),
+        }
+    }
+    pub fn l_curly_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+    pub fn dot_dot_dot_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 1usize)
+    }
+    pub fn expression_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 2usize)
+    }
+    pub fn r_curly_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 3usize)
+    }
+}
+impl Serialize for HtmlAstroSpreadAttribute {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct HtmlAstroSpreadAttributeFields {
+    pub l_curly_token: SyntaxResult<SyntaxToken>,
+    pub dot_dot_dot_token: SyntaxResult<SyntaxToken>,
+    pub expression_token: SyntaxResult<SyntaxToken>,
+    pub r_curly_token: SyntaxResult<SyntaxToken>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct HtmlAstroTemplateLiteralAttribute {
+    pub(crate) syntax: SyntaxNode,
+}
+impl HtmlAstroTemplateLiteralAttribute {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> HtmlAstroTemplateLiteralAttributeFields {
+        HtmlAstroTemplateLiteralAttributeFields {
+            name: self.name(),
+            eq_token: self.eq_token(),
+            l_backtick_token: self.l_backtick_token(),
+            template_token: self.template_token(),
+            r_backtick_token: self.r_backtick_token(),
+        }
+    }
+    pub fn name(&self) -> SyntaxResult<HtmlAttributeName> {
+        support::required_node(&self.syntax, 0usize)
+    }
+    pub fn eq_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 1usize)
+    }
+    pub fn l_backtick_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 2usize)
+    }
+    pub fn template_token(&self) -> Option<SyntaxToken> {
+        support::token(&self.syntax, 3usize)
+    }
+    pub fn r_backtick_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 4usize)
+    }
+}
+impl Serialize for HtmlAstroTemplateLiteralAttribute {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct HtmlAstroTemplateLiteralAttributeFields {
+    pub name: SyntaxResult<HtmlAttributeName>,
+    pub eq_token: SyntaxResult<SyntaxToken>,
+    pub l_backtick_token: SyntaxResult<SyntaxToken>,
+    pub template_token: Option<SyntaxToken>,
+    pub r_backtick_token: SyntaxResult<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct HtmlAttribute {
@@ -701,10 +1081,40 @@ pub struct HtmlTagNameFields {
 }
 #[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyHtmlAttribute {
+    HtmlAstroExpressionAttribute(HtmlAstroExpressionAttribute),
+    HtmlAstroShorthandAttribute(HtmlAstroShorthandAttribute),
+    HtmlAstroSpreadAttribute(HtmlAstroSpreadAttribute),
+    HtmlAstroTemplateLiteralAttribute(HtmlAstroTemplateLiteralAttribute),
     HtmlAttribute(HtmlAttribute),
     HtmlBogusAttribute(HtmlBogusAttribute),
 }
 impl AnyHtmlAttribute {
+    pub fn as_html_astro_expression_attribute(&self) -> Option<&HtmlAstroExpressionAttribute> {
+        match &self {
+            Self::HtmlAstroExpressionAttribute(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_html_astro_shorthand_attribute(&self) -> Option<&HtmlAstroShorthandAttribute> {
+        match &self {
+            Self::HtmlAstroShorthandAttribute(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_html_astro_spread_attribute(&self) -> Option<&HtmlAstroSpreadAttribute> {
+        match &self {
+            Self::HtmlAstroSpreadAttribute(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_html_astro_template_literal_attribute(
+        &self,
+    ) -> Option<&HtmlAstroTemplateLiteralAttribute> {
+        match &self {
+            Self::HtmlAstroTemplateLiteralAttribute(item) => Some(item),
+            _ => None,
+        }
+    }
     pub fn as_html_attribute(&self) -> Option<&HtmlAttribute> {
         match &self {
             Self::HtmlAttribute(item) => Some(item),
@@ -720,6 +1130,8 @@ impl AnyHtmlAttribute {
 }
 #[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyHtmlElement {
+    HtmlAstroExpression(HtmlAstroExpression),
+    HtmlAstroFragment(HtmlAstroFragment),
     HtmlBogusElement(HtmlBogusElement),
     HtmlCdataSection(HtmlCdataSection),
     HtmlComment(HtmlComment),
@@ -728,6 +1140,18 @@ pub enum AnyHtmlElement {
     HtmlSelfClosingElement(HtmlSelfClosingElement),
 }
 impl AnyHtmlElement {
+    pub fn as_html_astro_expression(&self) -> Option<&HtmlAstroExpression> {
+        match &self {
+            Self::HtmlAstroExpression(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_html_astro_fragment(&self) -> Option<&HtmlAstroFragment> {
+        match &self {
+            Self::HtmlAstroFragment(item) => Some(item),
+            _ => None,
+        }
+    }
     pub fn as_html_bogus_element(&self) -> Option<&HtmlBogusElement> {
         match &self {
             Self::HtmlBogusElement(item) => Some(item),
@@ -763,6 +1187,291 @@ impl AnyHtmlElement {
             Self::HtmlSelfClosingElement(item) => Some(item),
             _ => None,
         }
+    }
+}
+impl AstNode for HtmlAstroExpression {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(HTML_ASTRO_EXPRESSION as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == HTML_ASTRO_EXPRESSION
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for HtmlAstroExpression {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("HtmlAstroExpression")
+                .field(
+                    "l_curly_token",
+                    &support::DebugSyntaxResult(self.l_curly_token()),
+                )
+                .field(
+                    "expression_token",
+                    &support::DebugOptionalElement(self.expression_token()),
+                )
+                .field(
+                    "r_curly_token",
+                    &support::DebugSyntaxResult(self.r_curly_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("HtmlAstroExpression").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<HtmlAstroExpression> for SyntaxNode {
+    fn from(n: HtmlAstroExpression) -> Self {
+        n.syntax
+    }
+}
+impl From<HtmlAstroExpression> for SyntaxElement {
+    fn from(n: HtmlAstroExpression) -> Self {
+        n.syntax.into()
+    }
+}
+impl AstNode for HtmlAstroExpressionAttribute {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(HTML_ASTRO_EXPRESSION_ATTRIBUTE as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == HTML_ASTRO_EXPRESSION_ATTRIBUTE
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for HtmlAstroExpressionAttribute {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("HtmlAstroExpressionAttribute")
+                .field("name", &support::DebugSyntaxResult(self.name()))
+                .field("eq_token", &support::DebugSyntaxResult(self.eq_token()))
+                .field(
+                    "l_curly_token",
+                    &support::DebugSyntaxResult(self.l_curly_token()),
+                )
+                .field(
+                    "expression_token",
+                    &support::DebugOptionalElement(self.expression_token()),
+                )
+                .field(
+                    "r_curly_token",
+                    &support::DebugSyntaxResult(self.r_curly_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("HtmlAstroExpressionAttribute").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<HtmlAstroExpressionAttribute> for SyntaxNode {
+    fn from(n: HtmlAstroExpressionAttribute) -> Self {
+        n.syntax
+    }
+}
+impl From<HtmlAstroExpressionAttribute> for SyntaxElement {
+    fn from(n: HtmlAstroExpressionAttribute) -> Self {
+        n.syntax.into()
+    }
+}
+impl AstNode for HtmlAstroFragment {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(HTML_ASTRO_FRAGMENT as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == HTML_ASTRO_FRAGMENT
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for HtmlAstroFragment {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("HtmlAstroFragment")
+                .field(
+                    "opening_element",
+                    &support::DebugSyntaxResult(self.opening_element()),
+                )
+                .field("children", &self.children())
+                .field(
+                    "closing_element",
+                    &support::DebugSyntaxResult(self.closing_element()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("HtmlAstroFragment").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<HtmlAstroFragment> for SyntaxNode {
+    fn from(n: HtmlAstroFragment) -> Self {
+        n.syntax
+    }
+}
+impl From<HtmlAstroFragment> for SyntaxElement {
+    fn from(n: HtmlAstroFragment) -> Self {
+        n.syntax.into()
+    }
+}
+impl AstNode for HtmlAstroFragmentClose {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(HTML_ASTRO_FRAGMENT_CLOSE as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == HTML_ASTRO_FRAGMENT_CLOSE
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for HtmlAstroFragmentClose {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("HtmlAstroFragmentClose")
+                .field(
+                    "l_angle_token",
+                    &support::DebugSyntaxResult(self.l_angle_token()),
+                )
+                .field(
+                    "slash_token",
+                    &support::DebugSyntaxResult(self.slash_token()),
+                )
+                .field(
+                    "r_angle_token",
+                    &support::DebugSyntaxResult(self.r_angle_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("HtmlAstroFragmentClose").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<HtmlAstroFragmentClose> for SyntaxNode {
+    fn from(n: HtmlAstroFragmentClose) -> Self {
+        n.syntax
+    }
+}
+impl From<HtmlAstroFragmentClose> for SyntaxElement {
+    fn from(n: HtmlAstroFragmentClose) -> Self {
+        n.syntax.into()
+    }
+}
+impl AstNode for HtmlAstroFragmentOpen {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(HTML_ASTRO_FRAGMENT_OPEN as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == HTML_ASTRO_FRAGMENT_OPEN
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for HtmlAstroFragmentOpen {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("HtmlAstroFragmentOpen")
+                .field(
+                    "l_angle_token",
+                    &support::DebugSyntaxResult(self.l_angle_token()),
+                )
+                .field(
+                    "r_angle_token",
+                    &support::DebugSyntaxResult(self.r_angle_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("HtmlAstroFragmentOpen").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<HtmlAstroFragmentOpen> for SyntaxNode {
+    fn from(n: HtmlAstroFragmentOpen) -> Self {
+        n.syntax
+    }
+}
+impl From<HtmlAstroFragmentOpen> for SyntaxElement {
+    fn from(n: HtmlAstroFragmentOpen) -> Self {
+        n.syntax.into()
     }
 }
 impl AstNode for HtmlAstroFrontmatterElement {
@@ -820,6 +1529,183 @@ impl From<HtmlAstroFrontmatterElement> for SyntaxNode {
 }
 impl From<HtmlAstroFrontmatterElement> for SyntaxElement {
     fn from(n: HtmlAstroFrontmatterElement) -> Self {
+        n.syntax.into()
+    }
+}
+impl AstNode for HtmlAstroShorthandAttribute {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(HTML_ASTRO_SHORTHAND_ATTRIBUTE as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == HTML_ASTRO_SHORTHAND_ATTRIBUTE
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for HtmlAstroShorthandAttribute {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("HtmlAstroShorthandAttribute")
+                .field(
+                    "l_curly_token",
+                    &support::DebugSyntaxResult(self.l_curly_token()),
+                )
+                .field("name", &support::DebugSyntaxResult(self.name()))
+                .field(
+                    "r_curly_token",
+                    &support::DebugSyntaxResult(self.r_curly_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("HtmlAstroShorthandAttribute").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<HtmlAstroShorthandAttribute> for SyntaxNode {
+    fn from(n: HtmlAstroShorthandAttribute) -> Self {
+        n.syntax
+    }
+}
+impl From<HtmlAstroShorthandAttribute> for SyntaxElement {
+    fn from(n: HtmlAstroShorthandAttribute) -> Self {
+        n.syntax.into()
+    }
+}
+impl AstNode for HtmlAstroSpreadAttribute {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(HTML_ASTRO_SPREAD_ATTRIBUTE as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == HTML_ASTRO_SPREAD_ATTRIBUTE
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for HtmlAstroSpreadAttribute {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("HtmlAstroSpreadAttribute")
+                .field(
+                    "l_curly_token",
+                    &support::DebugSyntaxResult(self.l_curly_token()),
+                )
+                .field(
+                    "dot_dot_dot_token",
+                    &support::DebugSyntaxResult(self.dot_dot_dot_token()),
+                )
+                .field(
+                    "expression_token",
+                    &support::DebugSyntaxResult(self.expression_token()),
+                )
+                .field(
+                    "r_curly_token",
+                    &support::DebugSyntaxResult(self.r_curly_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("HtmlAstroSpreadAttribute").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<HtmlAstroSpreadAttribute> for SyntaxNode {
+    fn from(n: HtmlAstroSpreadAttribute) -> Self {
+        n.syntax
+    }
+}
+impl From<HtmlAstroSpreadAttribute> for SyntaxElement {
+    fn from(n: HtmlAstroSpreadAttribute) -> Self {
+        n.syntax.into()
+    }
+}
+impl AstNode for HtmlAstroTemplateLiteralAttribute {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(HTML_ASTRO_TEMPLATE_LITERAL_ATTRIBUTE as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == HTML_ASTRO_TEMPLATE_LITERAL_ATTRIBUTE
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for HtmlAstroTemplateLiteralAttribute {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("HtmlAstroTemplateLiteralAttribute")
+                .field("name", &support::DebugSyntaxResult(self.name()))
+                .field("eq_token", &support::DebugSyntaxResult(self.eq_token()))
+                .field(
+                    "l_backtick_token",
+                    &support::DebugSyntaxResult(self.l_backtick_token()),
+                )
+                .field(
+                    "template_token",
+                    &support::DebugOptionalElement(self.template_token()),
+                )
+                .field(
+                    "r_backtick_token",
+                    &support::DebugSyntaxResult(self.r_backtick_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("HtmlAstroTemplateLiteralAttribute").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<HtmlAstroTemplateLiteralAttribute> for SyntaxNode {
+    fn from(n: HtmlAstroTemplateLiteralAttribute) -> Self {
+        n.syntax
+    }
+}
+impl From<HtmlAstroTemplateLiteralAttribute> for SyntaxElement {
+    fn from(n: HtmlAstroTemplateLiteralAttribute) -> Self {
         n.syntax.into()
     }
 }
@@ -1603,6 +2489,26 @@ impl From<HtmlTagName> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl From<HtmlAstroExpressionAttribute> for AnyHtmlAttribute {
+    fn from(node: HtmlAstroExpressionAttribute) -> Self {
+        Self::HtmlAstroExpressionAttribute(node)
+    }
+}
+impl From<HtmlAstroShorthandAttribute> for AnyHtmlAttribute {
+    fn from(node: HtmlAstroShorthandAttribute) -> Self {
+        Self::HtmlAstroShorthandAttribute(node)
+    }
+}
+impl From<HtmlAstroSpreadAttribute> for AnyHtmlAttribute {
+    fn from(node: HtmlAstroSpreadAttribute) -> Self {
+        Self::HtmlAstroSpreadAttribute(node)
+    }
+}
+impl From<HtmlAstroTemplateLiteralAttribute> for AnyHtmlAttribute {
+    fn from(node: HtmlAstroTemplateLiteralAttribute) -> Self {
+        Self::HtmlAstroTemplateLiteralAttribute(node)
+    }
+}
 impl From<HtmlAttribute> for AnyHtmlAttribute {
     fn from(node: HtmlAttribute) -> Self {
         Self::HtmlAttribute(node)
@@ -1615,13 +2521,39 @@ impl From<HtmlBogusAttribute> for AnyHtmlAttribute {
 }
 impl AstNode for AnyHtmlAttribute {
     type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> =
-        HtmlAttribute::KIND_SET.union(HtmlBogusAttribute::KIND_SET);
+    const KIND_SET: SyntaxKindSet<Language> = HtmlAstroExpressionAttribute::KIND_SET
+        .union(HtmlAstroShorthandAttribute::KIND_SET)
+        .union(HtmlAstroSpreadAttribute::KIND_SET)
+        .union(HtmlAstroTemplateLiteralAttribute::KIND_SET)
+        .union(HtmlAttribute::KIND_SET)
+        .union(HtmlBogusAttribute::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
-        matches!(kind, HTML_ATTRIBUTE | HTML_BOGUS_ATTRIBUTE)
+        matches!(
+            kind,
+            HTML_ASTRO_EXPRESSION_ATTRIBUTE
+                | HTML_ASTRO_SHORTHAND_ATTRIBUTE
+                | HTML_ASTRO_SPREAD_ATTRIBUTE
+                | HTML_ASTRO_TEMPLATE_LITERAL_ATTRIBUTE
+                | HTML_ATTRIBUTE
+                | HTML_BOGUS_ATTRIBUTE
+        )
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
+            HTML_ASTRO_EXPRESSION_ATTRIBUTE => {
+                Self::HtmlAstroExpressionAttribute(HtmlAstroExpressionAttribute { syntax })
+            }
+            HTML_ASTRO_SHORTHAND_ATTRIBUTE => {
+                Self::HtmlAstroShorthandAttribute(HtmlAstroShorthandAttribute { syntax })
+            }
+            HTML_ASTRO_SPREAD_ATTRIBUTE => {
+                Self::HtmlAstroSpreadAttribute(HtmlAstroSpreadAttribute { syntax })
+            }
+            HTML_ASTRO_TEMPLATE_LITERAL_ATTRIBUTE => {
+                Self::HtmlAstroTemplateLiteralAttribute(HtmlAstroTemplateLiteralAttribute {
+                    syntax,
+                })
+            }
             HTML_ATTRIBUTE => Self::HtmlAttribute(HtmlAttribute { syntax }),
             HTML_BOGUS_ATTRIBUTE => Self::HtmlBogusAttribute(HtmlBogusAttribute { syntax }),
             _ => return None,
@@ -1630,12 +2562,20 @@ impl AstNode for AnyHtmlAttribute {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
+            Self::HtmlAstroExpressionAttribute(it) => &it.syntax,
+            Self::HtmlAstroShorthandAttribute(it) => &it.syntax,
+            Self::HtmlAstroSpreadAttribute(it) => &it.syntax,
+            Self::HtmlAstroTemplateLiteralAttribute(it) => &it.syntax,
             Self::HtmlAttribute(it) => &it.syntax,
             Self::HtmlBogusAttribute(it) => &it.syntax,
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
+            Self::HtmlAstroExpressionAttribute(it) => it.syntax,
+            Self::HtmlAstroShorthandAttribute(it) => it.syntax,
+            Self::HtmlAstroSpreadAttribute(it) => it.syntax,
+            Self::HtmlAstroTemplateLiteralAttribute(it) => it.syntax,
             Self::HtmlAttribute(it) => it.syntax,
             Self::HtmlBogusAttribute(it) => it.syntax,
         }
@@ -1644,6 +2584,10 @@ impl AstNode for AnyHtmlAttribute {
 impl std::fmt::Debug for AnyHtmlAttribute {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
+            Self::HtmlAstroExpressionAttribute(it) => std::fmt::Debug::fmt(it, f),
+            Self::HtmlAstroShorthandAttribute(it) => std::fmt::Debug::fmt(it, f),
+            Self::HtmlAstroSpreadAttribute(it) => std::fmt::Debug::fmt(it, f),
+            Self::HtmlAstroTemplateLiteralAttribute(it) => std::fmt::Debug::fmt(it, f),
             Self::HtmlAttribute(it) => std::fmt::Debug::fmt(it, f),
             Self::HtmlBogusAttribute(it) => std::fmt::Debug::fmt(it, f),
         }
@@ -1652,6 +2596,10 @@ impl std::fmt::Debug for AnyHtmlAttribute {
 impl From<AnyHtmlAttribute> for SyntaxNode {
     fn from(n: AnyHtmlAttribute) -> Self {
         match n {
+            AnyHtmlAttribute::HtmlAstroExpressionAttribute(it) => it.into(),
+            AnyHtmlAttribute::HtmlAstroShorthandAttribute(it) => it.into(),
+            AnyHtmlAttribute::HtmlAstroSpreadAttribute(it) => it.into(),
+            AnyHtmlAttribute::HtmlAstroTemplateLiteralAttribute(it) => it.into(),
             AnyHtmlAttribute::HtmlAttribute(it) => it.into(),
             AnyHtmlAttribute::HtmlBogusAttribute(it) => it.into(),
         }
@@ -1661,6 +2609,16 @@ impl From<AnyHtmlAttribute> for SyntaxElement {
     fn from(n: AnyHtmlAttribute) -> Self {
         let node: SyntaxNode = n.into();
         node.into()
+    }
+}
+impl From<HtmlAstroExpression> for AnyHtmlElement {
+    fn from(node: HtmlAstroExpression) -> Self {
+        Self::HtmlAstroExpression(node)
+    }
+}
+impl From<HtmlAstroFragment> for AnyHtmlElement {
+    fn from(node: HtmlAstroFragment) -> Self {
+        Self::HtmlAstroFragment(node)
     }
 }
 impl From<HtmlBogusElement> for AnyHtmlElement {
@@ -1695,7 +2653,9 @@ impl From<HtmlSelfClosingElement> for AnyHtmlElement {
 }
 impl AstNode for AnyHtmlElement {
     type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> = HtmlBogusElement::KIND_SET
+    const KIND_SET: SyntaxKindSet<Language> = HtmlAstroExpression::KIND_SET
+        .union(HtmlAstroFragment::KIND_SET)
+        .union(HtmlBogusElement::KIND_SET)
         .union(HtmlCdataSection::KIND_SET)
         .union(HtmlComment::KIND_SET)
         .union(HtmlContent::KIND_SET)
@@ -1704,7 +2664,9 @@ impl AstNode for AnyHtmlElement {
     fn can_cast(kind: SyntaxKind) -> bool {
         matches!(
             kind,
-            HTML_BOGUS_ELEMENT
+            HTML_ASTRO_EXPRESSION
+                | HTML_ASTRO_FRAGMENT
+                | HTML_BOGUS_ELEMENT
                 | HTML_CDATA_SECTION
                 | HTML_COMMENT
                 | HTML_CONTENT
@@ -1714,6 +2676,8 @@ impl AstNode for AnyHtmlElement {
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
+            HTML_ASTRO_EXPRESSION => Self::HtmlAstroExpression(HtmlAstroExpression { syntax }),
+            HTML_ASTRO_FRAGMENT => Self::HtmlAstroFragment(HtmlAstroFragment { syntax }),
             HTML_BOGUS_ELEMENT => Self::HtmlBogusElement(HtmlBogusElement { syntax }),
             HTML_CDATA_SECTION => Self::HtmlCdataSection(HtmlCdataSection { syntax }),
             HTML_COMMENT => Self::HtmlComment(HtmlComment { syntax }),
@@ -1728,6 +2692,8 @@ impl AstNode for AnyHtmlElement {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
+            Self::HtmlAstroExpression(it) => &it.syntax,
+            Self::HtmlAstroFragment(it) => &it.syntax,
             Self::HtmlBogusElement(it) => &it.syntax,
             Self::HtmlCdataSection(it) => &it.syntax,
             Self::HtmlComment(it) => &it.syntax,
@@ -1738,6 +2704,8 @@ impl AstNode for AnyHtmlElement {
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
+            Self::HtmlAstroExpression(it) => it.syntax,
+            Self::HtmlAstroFragment(it) => it.syntax,
             Self::HtmlBogusElement(it) => it.syntax,
             Self::HtmlCdataSection(it) => it.syntax,
             Self::HtmlComment(it) => it.syntax,
@@ -1750,6 +2718,8 @@ impl AstNode for AnyHtmlElement {
 impl std::fmt::Debug for AnyHtmlElement {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
+            Self::HtmlAstroExpression(it) => std::fmt::Debug::fmt(it, f),
+            Self::HtmlAstroFragment(it) => std::fmt::Debug::fmt(it, f),
             Self::HtmlBogusElement(it) => std::fmt::Debug::fmt(it, f),
             Self::HtmlCdataSection(it) => std::fmt::Debug::fmt(it, f),
             Self::HtmlComment(it) => std::fmt::Debug::fmt(it, f),
@@ -1762,6 +2732,8 @@ impl std::fmt::Debug for AnyHtmlElement {
 impl From<AnyHtmlElement> for SyntaxNode {
     fn from(n: AnyHtmlElement) -> Self {
         match n {
+            AnyHtmlElement::HtmlAstroExpression(it) => it.into(),
+            AnyHtmlElement::HtmlAstroFragment(it) => it.into(),
             AnyHtmlElement::HtmlBogusElement(it) => it.into(),
             AnyHtmlElement::HtmlCdataSection(it) => it.into(),
             AnyHtmlElement::HtmlComment(it) => it.into(),
@@ -1787,7 +2759,47 @@ impl std::fmt::Display for AnyHtmlElement {
         std::fmt::Display::fmt(self.syntax(), f)
     }
 }
+impl std::fmt::Display for HtmlAstroExpression {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for HtmlAstroExpressionAttribute {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for HtmlAstroFragment {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for HtmlAstroFragmentClose {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for HtmlAstroFragmentOpen {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
 impl std::fmt::Display for HtmlAstroFrontmatterElement {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for HtmlAstroShorthandAttribute {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for HtmlAstroSpreadAttribute {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for HtmlAstroTemplateLiteralAttribute {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }
