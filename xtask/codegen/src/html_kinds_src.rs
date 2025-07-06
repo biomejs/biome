@@ -13,6 +13,10 @@ pub const HTML_KINDS_SRC: KindsSrc = KindsSrc {
         ("<![CDATA[", "CDATA_START"),
         ("]]>", "CDATA_END"),
         ("---", "FENCE"),
+        ("{", "L_CURLY"),
+        ("}", "R_CURLY"),
+        ("{{", "L_DOUBLE_CURLY"),
+        ("}}", "R_DOUBLE_CURLY"),
     ],
     keywords: &["null", "true", "false", "doctype", "html"],
     literals: &["HTML_STRING_LITERAL", "HTML_LITERAL"],
@@ -42,9 +46,12 @@ pub const HTML_KINDS_SRC: KindsSrc = KindsSrc {
         "HTML_CONTENT",
         "HTML_COMMENT",
         "HTML_CDATA_SECTION",
+        "HTML_VUE_TEXT_EXPRESSION",
+        "HTML_SVELTE_TEXT_EXPRESSION",
         // Bogus nodes
         "HTML_BOGUS",
         "HTML_BOGUS_ELEMENT",
         "HTML_BOGUS_ATTRIBUTE",
+        "HTML_BOGUS_FRONTMATTER",
     ],
 };

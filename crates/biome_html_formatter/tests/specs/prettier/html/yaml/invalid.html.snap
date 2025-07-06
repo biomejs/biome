@@ -22,24 +22,44 @@ invalid:
 ```diff
 --- Prettier
 +++ Biome
-@@ -1,7 +1,4 @@
+@@ -1,9 +1,7 @@
+ ---
+     invalid:
+ invalid:
 ----
--    invalid:
--invalid:
-----
-+--- invalid: invalid: ---
- 
- <html>
+-
+-<html>
++---<html>
    <head></head>
+   <body></body>
+ </html>
 ```
 
 # Output
 
 ```html
---- invalid: invalid: ---
-
-<html>
+---
+    invalid:
+invalid:
+---<html>
   <head></head>
   <body></body>
 </html>
+```
+
+# Errors
+```
+invalid.html:1:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × invalid syntax
+  
+  > 1 │ ---
+      │ ^^^
+  > 2 │     invalid:
+  > 3 │ invalid:
+  > 4 │ ---
+      │ ^^^
+    5 │ 
+  
+
 ```

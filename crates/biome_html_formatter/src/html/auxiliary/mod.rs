@@ -14,4 +14,6 @@ pub(crate) mod opening_element;
 pub(crate) mod root;
 pub(crate) mod self_closing_element;
 pub(crate) mod string;
+pub(crate) mod svelte_text_expression;
 pub(crate) mod tag_name;
+pub(crate) mod vue_text_expression;

@@ -516,6 +516,46 @@ impl IntoFormat<HtmlFormatContext> for biome_html_syntax::HtmlString {
         )
     }
 }
+impl FormatRule<biome_html_syntax::HtmlSvelteTextExpression>
+    for crate::html::auxiliary::svelte_text_expression::FormatHtmlSvelteTextExpression
+{
+    type Context = HtmlFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_html_syntax::HtmlSvelteTextExpression,
+        f: &mut HtmlFormatter,
+    ) -> FormatResult<()> {
+        FormatNodeRule::<biome_html_syntax::HtmlSvelteTextExpression>::fmt(self, node, f)
+    }
+}
+impl AsFormat<HtmlFormatContext> for biome_html_syntax::HtmlSvelteTextExpression {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_html_syntax::HtmlSvelteTextExpression,
+        crate::html::auxiliary::svelte_text_expression::FormatHtmlSvelteTextExpression,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::html::auxiliary::svelte_text_expression::FormatHtmlSvelteTextExpression::default(
+            ),
+        )
+    }
+}
+impl IntoFormat<HtmlFormatContext> for biome_html_syntax::HtmlSvelteTextExpression {
+    type Format = FormatOwnedWithRule<
+        biome_html_syntax::HtmlSvelteTextExpression,
+        crate::html::auxiliary::svelte_text_expression::FormatHtmlSvelteTextExpression,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(
+            self,
+            crate::html::auxiliary::svelte_text_expression::FormatHtmlSvelteTextExpression::default(
+            ),
+        )
+    }
+}
 impl FormatRule<biome_html_syntax::HtmlTagName>
     for crate::html::auxiliary::tag_name::FormatHtmlTagName
 {
@@ -551,6 +591,44 @@ impl IntoFormat<HtmlFormatContext> for biome_html_syntax::HtmlTagName {
         FormatOwnedWithRule::new(
             self,
             crate::html::auxiliary::tag_name::FormatHtmlTagName::default(),
+        )
+    }
+}
+impl FormatRule<biome_html_syntax::HtmlVueTextExpression>
+    for crate::html::auxiliary::vue_text_expression::FormatHtmlVueTextExpression
+{
+    type Context = HtmlFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_html_syntax::HtmlVueTextExpression,
+        f: &mut HtmlFormatter,
+    ) -> FormatResult<()> {
+        FormatNodeRule::<biome_html_syntax::HtmlVueTextExpression>::fmt(self, node, f)
+    }
+}
+impl AsFormat<HtmlFormatContext> for biome_html_syntax::HtmlVueTextExpression {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_html_syntax::HtmlVueTextExpression,
+        crate::html::auxiliary::vue_text_expression::FormatHtmlVueTextExpression,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::html::auxiliary::vue_text_expression::FormatHtmlVueTextExpression::default(),
+        )
+    }
+}
+impl IntoFormat<HtmlFormatContext> for biome_html_syntax::HtmlVueTextExpression {
+    type Format = FormatOwnedWithRule<
+        biome_html_syntax::HtmlVueTextExpression,
+        crate::html::auxiliary::vue_text_expression::FormatHtmlVueTextExpression,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(
+            self,
+            crate::html::auxiliary::vue_text_expression::FormatHtmlVueTextExpression::default(),
         )
     }
 }
@@ -706,6 +784,63 @@ impl IntoFormat<HtmlFormatContext> for biome_html_syntax::HtmlBogusElement {
         )
     }
 }
+impl FormatRule<biome_html_syntax::HtmlBogusFrontmatter>
+    for crate::html::bogus::bogus_frontmatter::FormatHtmlBogusFrontmatter
+{
+    type Context = HtmlFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_html_syntax::HtmlBogusFrontmatter,
+        f: &mut HtmlFormatter,
+    ) -> FormatResult<()> {
+        FormatBogusNodeRule::<biome_html_syntax::HtmlBogusFrontmatter>::fmt(self, node, f)
+    }
+}
+impl AsFormat<HtmlFormatContext> for biome_html_syntax::HtmlBogusFrontmatter {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_html_syntax::HtmlBogusFrontmatter,
+        crate::html::bogus::bogus_frontmatter::FormatHtmlBogusFrontmatter,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::html::bogus::bogus_frontmatter::FormatHtmlBogusFrontmatter::default(),
+        )
+    }
+}
+impl IntoFormat<HtmlFormatContext> for biome_html_syntax::HtmlBogusFrontmatter {
+    type Format = FormatOwnedWithRule<
+        biome_html_syntax::HtmlBogusFrontmatter,
+        crate::html::bogus::bogus_frontmatter::FormatHtmlBogusFrontmatter,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(
+            self,
+            crate::html::bogus::bogus_frontmatter::FormatHtmlBogusFrontmatter::default(),
+        )
+    }
+}
+impl AsFormat<HtmlFormatContext> for biome_html_syntax::AnyHtmlAstroFrontmatterElement {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_html_syntax::AnyHtmlAstroFrontmatterElement,
+        crate::html::any::astro_frontmatter_element::FormatAnyHtmlAstroFrontmatterElement,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule :: new (self , crate :: html :: any :: astro_frontmatter_element :: FormatAnyHtmlAstroFrontmatterElement :: default ())
+    }
+}
+impl IntoFormat<HtmlFormatContext> for biome_html_syntax::AnyHtmlAstroFrontmatterElement {
+    type Format = FormatOwnedWithRule<
+        biome_html_syntax::AnyHtmlAstroFrontmatterElement,
+        crate::html::any::astro_frontmatter_element::FormatAnyHtmlAstroFrontmatterElement,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule :: new (self , crate :: html :: any :: astro_frontmatter_element :: FormatAnyHtmlAstroFrontmatterElement :: default ())
+    }
+}
 impl AsFormat<HtmlFormatContext> for biome_html_syntax::AnyHtmlAttribute {
     type Format<'a> = FormatRefWithRule<
         'a,
@@ -731,6 +866,31 @@ impl IntoFormat<HtmlFormatContext> for biome_html_syntax::AnyHtmlAttribute {
         )
     }
 }
+impl AsFormat<HtmlFormatContext> for biome_html_syntax::AnyHtmlContent {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_html_syntax::AnyHtmlContent,
+        crate::html::any::content::FormatAnyHtmlContent,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::html::any::content::FormatAnyHtmlContent::default(),
+        )
+    }
+}
+impl IntoFormat<HtmlFormatContext> for biome_html_syntax::AnyHtmlContent {
+    type Format = FormatOwnedWithRule<
+        biome_html_syntax::AnyHtmlContent,
+        crate::html::any::content::FormatAnyHtmlContent,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(
+            self,
+            crate::html::any::content::FormatAnyHtmlContent::default(),
+        )
+    }
+}
 impl AsFormat<HtmlFormatContext> for biome_html_syntax::AnyHtmlElement {
     type Format<'a> = FormatRefWithRule<
         'a,
@@ -753,6 +913,31 @@ impl IntoFormat<HtmlFormatContext> for biome_html_syntax::AnyHtmlElement {
         FormatOwnedWithRule::new(
             self,
             crate::html::any::element::FormatAnyHtmlElement::default(),
+        )
+    }
+}
+impl AsFormat<HtmlFormatContext> for biome_html_syntax::AnyHtmlTextExpression {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_html_syntax::AnyHtmlTextExpression,
+        crate::html::any::text_expression::FormatAnyHtmlTextExpression,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::html::any::text_expression::FormatAnyHtmlTextExpression::default(),
+        )
+    }
+}
+impl IntoFormat<HtmlFormatContext> for biome_html_syntax::AnyHtmlTextExpression {
+    type Format = FormatOwnedWithRule<
+        biome_html_syntax::AnyHtmlTextExpression,
+        crate::html::any::text_expression::FormatAnyHtmlTextExpression,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(
+            self,
+            crate::html::any::text_expression::FormatAnyHtmlTextExpression::default(),
         )
     }
 }

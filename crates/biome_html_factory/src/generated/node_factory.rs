@@ -236,7 +236,7 @@ pub struct HtmlRootBuilder {
     html: HtmlElementList,
     eof_token: SyntaxToken,
     bom_token: Option<SyntaxToken>,
-    frontmatter: Option<HtmlAstroFrontmatterElement>,
+    frontmatter: Option<AnyHtmlAstroFrontmatterElement>,
     directive: Option<HtmlDirective>,
 }
 impl HtmlRootBuilder {
@@ -244,7 +244,7 @@ impl HtmlRootBuilder {
         self.bom_token = Some(bom_token);
         self
     }
-    pub fn with_frontmatter(mut self, frontmatter: HtmlAstroFrontmatterElement) -> Self {
+    pub fn with_frontmatter(mut self, frontmatter: AnyHtmlAstroFrontmatterElement) -> Self {
         self.frontmatter = Some(frontmatter);
         self
     }
@@ -312,10 +312,38 @@ pub fn html_string(value_token: SyntaxToken) -> HtmlString {
         [Some(SyntaxElement::Token(value_token))],
     ))
 }
+pub fn html_svelte_text_expression(
+    l_curly_token: SyntaxToken,
+    expression_token: SyntaxToken,
+    r_curly_token: SyntaxToken,
+) -> HtmlSvelteTextExpression {
+    HtmlSvelteTextExpression::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::HTML_SVELTE_TEXT_EXPRESSION,
+        [
+            Some(SyntaxElement::Token(l_curly_token)),
+            Some(SyntaxElement::Token(expression_token)),
+            Some(SyntaxElement::Token(r_curly_token)),
+        ],
+    ))
+}
 pub fn html_tag_name(value_token: SyntaxToken) -> HtmlTagName {
     HtmlTagName::unwrap_cast(SyntaxNode::new_detached(
         HtmlSyntaxKind::HTML_TAG_NAME,
         [Some(SyntaxElement::Token(value_token))],
+    ))
+}
+pub fn html_vue_text_expression(
+    l_double_curly_token: SyntaxToken,
+    expression_token: SyntaxToken,
+    r_double_curly_token: SyntaxToken,
+) -> HtmlVueTextExpression {
+    HtmlVueTextExpression::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::HTML_VUE_TEXT_EXPRESSION,
+        [
+            Some(SyntaxElement::Token(l_double_curly_token)),
+            Some(SyntaxElement::Token(expression_token)),
+            Some(SyntaxElement::Token(r_double_curly_token)),
+        ],
     ))
 }
 pub fn html_attribute_list<I>(items: I) -> HtmlAttributeList
@@ -366,6 +394,16 @@ where
 {
     HtmlBogusElement::unwrap_cast(SyntaxNode::new_detached(
         HtmlSyntaxKind::HTML_BOGUS_ELEMENT,
+        slots,
+    ))
+}
+pub fn html_bogus_frontmatter<I>(slots: I) -> HtmlBogusFrontmatter
+where
+    I: IntoIterator<Item = Option<SyntaxElement>>,
+    I::IntoIter: ExactSizeIterator,
+{
+    HtmlBogusFrontmatter::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::HTML_BOGUS_FRONTMATTER,
         slots,
     ))
 }

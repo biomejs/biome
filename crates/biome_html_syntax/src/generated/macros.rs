@@ -74,8 +74,16 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::HtmlString::new_unchecked(node) };
                     $body
                 }
+                $crate::HtmlSyntaxKind::HTML_SVELTE_TEXT_EXPRESSION => {
+                    let $pattern = unsafe { $crate::HtmlSvelteTextExpression::new_unchecked(node) };
+                    $body
+                }
                 $crate::HtmlSyntaxKind::HTML_TAG_NAME => {
                     let $pattern = unsafe { $crate::HtmlTagName::new_unchecked(node) };
+                    $body
+                }
+                $crate::HtmlSyntaxKind::HTML_VUE_TEXT_EXPRESSION => {
+                    let $pattern = unsafe { $crate::HtmlVueTextExpression::new_unchecked(node) };
                     $body
                 }
                 $crate::HtmlSyntaxKind::HTML_BOGUS => {
@@ -88,6 +96,10 @@ macro_rules! map_syntax_node {
                 }
                 $crate::HtmlSyntaxKind::HTML_BOGUS_ELEMENT => {
                     let $pattern = unsafe { $crate::HtmlBogusElement::new_unchecked(node) };
+                    $body
+                }
+                $crate::HtmlSyntaxKind::HTML_BOGUS_FRONTMATTER => {
+                    let $pattern = unsafe { $crate::HtmlBogusFrontmatter::new_unchecked(node) };
                     $body
                 }
                 $crate::HtmlSyntaxKind::HTML_ATTRIBUTE_LIST => {

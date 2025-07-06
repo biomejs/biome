@@ -1,6 +1,7 @@
 use crate::prelude::*;
-use biome_html_syntax::HtmlAstroFrontmatterElement;
-use biome_rowan::AstNode;
+use biome_formatter::write;
+use biome_html_syntax::{HtmlAstroFrontmatterElement, HtmlAstroFrontmatterElementFields};
+
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatHtmlAstroFrontmatterElement;
 impl FormatNodeRule<HtmlAstroFrontmatterElement> for FormatHtmlAstroFrontmatterElement {
@@ -9,6 +10,17 @@ impl FormatNodeRule<HtmlAstroFrontmatterElement> for FormatHtmlAstroFrontmatterE
         node: &HtmlAstroFrontmatterElement,
         f: &mut HtmlFormatter,
     ) -> FormatResult<()> {
-        format_verbatim_node(node.syntax()).fmt(f)
+        let HtmlAstroFrontmatterElementFields {
+            l_fence_token,
+            content_token,
+            r_fence_token,
+        } = node.as_fields();
+
+        write!(f, [l_fence_token.format(), hard_line_break(),])?;
+
+        if let Some(content_token) = content_token {
+            write!(f, [content_token.format(), hard_line_break()])?;
+        }
+        write!(f, [r_fence_token.format(), hard_line_break()])
     }
 }

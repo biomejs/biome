@@ -39,10 +39,11 @@ SyntaxElement = SyntaxElement
 HtmlBogus = SyntaxElement*
 HtmlBogusElement = SyntaxElement*
 HtmlBogusAttribute = SyntaxElement*
+HtmlBogusFrontmatter = SyntaxElement*
 
 HtmlRoot =
 	bom: 'UNICODE_BOM'?
-	frontmatter: HtmlAstroFrontmatterElement?
+	frontmatter: AnyHtmlAstroFrontmatterElement?
 	directive: HtmlDirective?
 	html: HtmlElementList
 	eof: 'EOF'
@@ -68,11 +69,30 @@ HtmlElementList = AnyHtmlElement*
 AnyHtmlElement =
 	HtmlSelfClosingElement
 	| HtmlElement
-	| HtmlContent
+	| AnyHtmlContent
 	| HtmlComment
 	| HtmlCdataSection
 	| HtmlBogusElement
 
+AnyHtmlContent =
+	HtmlContent
+	| AnyHtmlTextExpression
+
+AnyHtmlTextExpression =
+	HtmlVueTextExpression
+	| HtmlSvelteTextExpression
+
+
+// {{ variable }}
+HtmlVueTextExpression =
+	'{{'
+	expression: 'html_literal'
+	'}}'
+
+HtmlSvelteTextExpression =
+	'{'
+	expression: 'html_literal'
+	'}'
 
 // <a />
 HtmlSelfClosingElement =
@@ -115,6 +135,10 @@ HtmlCdataSection =
 	'<![CDATA['
 	content: 'html_literal'
 	']]>'
+
+AnyHtmlAstroFrontmatterElement =
+	HtmlAstroFrontmatterElement
+	| HtmlBogusFrontmatter
 
 HtmlAstroFrontmatterElement =
 	l_fence: '---'
