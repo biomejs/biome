@@ -71,6 +71,8 @@ AnyHtmlElement =
 	| HtmlContent
 	| HtmlComment
 	| HtmlCdataSection
+	| HtmlAstroExpression
+	| HtmlAstroFragment
 	| HtmlBogusElement
 
 
@@ -129,6 +131,10 @@ HtmlAttributeList = AnyHtmlAttribute*
 
 AnyHtmlAttribute =
 	HtmlAttribute
+	| HtmlAstroShorthandAttribute
+	| HtmlAstroSpreadAttribute
+	| HtmlAstroExpressionAttribute
+	| HtmlAstroTemplateLiteralAttribute
 	| HtmlBogusAttribute
 
 HtmlAttribute =
@@ -147,3 +153,57 @@ HtmlString = value: 'html_string_literal'
 HtmlTagName = value: 'html_literal'
 HtmlAttributeName = value: 'html_literal'
 HtmlContent = value: 'html_literal'
+
+// ==================================
+// Astro-specific syntax nodes
+// ==================================
+
+// Astro expressions: {expression}
+HtmlAstroExpression =
+	l_curly: '{'
+	expression: 'html_js_content'?
+	r_curly: '}'
+
+// Astro fragments: <>content</>
+HtmlAstroFragment =
+	opening_element: HtmlAstroFragmentOpen
+	children: HtmlElementList
+	closing_element: HtmlAstroFragmentClose
+
+HtmlAstroFragmentOpen =
+	'<'
+	'>'
+
+HtmlAstroFragmentClose =
+	'<'
+	'/'
+	'>'
+
+// Astro shorthand attributes: {name}
+HtmlAstroShorthandAttribute =
+	l_curly: '{'
+	name: HtmlAttributeName
+	r_curly: '}'
+
+// Astro spread attributes: {...props}
+HtmlAstroSpreadAttribute =
+	l_curly: '{'
+	dot_dot_dot: '...'
+	expression: 'html_js_content'
+	r_curly: '}'
+
+// Astro expression attributes: name={expression}
+HtmlAstroExpressionAttribute =
+	name: HtmlAttributeName
+	eq: '='
+	l_curly: '{'
+	expression: 'html_js_content'?
+	r_curly: '}'
+
+// Astro template literal attributes: name=`template`
+HtmlAstroTemplateLiteralAttribute =
+	name: HtmlAttributeName
+	eq: '='
+	l_backtick: '`'
+	template: 'html_template_literal_content'?
+	r_backtick: '`'
