@@ -1,7 +1,6 @@
 ---
 source: crates/biome_cli/tests/snap_test.rs
-expression: content
-snapshot_kind: text
+expression: redactor(content)
 ---
 ## `index.css`
 
@@ -81,13 +80,13 @@ format ━━━━━━━━━━━━━━━━━━━━━━━━�
 ```block
 reporter/parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i The following files have parsing errors.
+  i The following files have parsing errors:
   
   - index.css
   
 reporter/format ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i The following files needs to be formatted.
+  i The following files need to be formatted:
   
   - index.css
   - index.ts

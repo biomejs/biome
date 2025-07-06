@@ -1,3 +1,4 @@
+use camino::Utf8Path;
 use biome_cli::{
     DiagnosticsPayload, Execution, Reporter, ReporterVisitor, TraversalSummary, VcsTargeted,
 };
@@ -38,6 +39,7 @@ impl ReporterVisitor for BufferVisitor {
         _execution: &Execution,
         _payload: DiagnosticsPayload,
         _verbose: bool,
+        _working_directory: Option<&Utf8Path>
     ) -> std::io::Result<()> {
         todo!()
     }
