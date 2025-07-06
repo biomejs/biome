@@ -6,6 +6,190 @@ use crate::{
     AsFormat, FormatBogusNodeRule, FormatNodeRule, HtmlFormatContext, HtmlFormatter, IntoFormat,
 };
 use biome_formatter::{FormatOwnedWithRule, FormatRefWithRule, FormatResult, FormatRule};
+impl FormatRule<biome_html_syntax::HtmlAstroExpression>
+    for crate::html::auxiliary::astro_expression::FormatHtmlAstroExpression
+{
+    type Context = HtmlFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_html_syntax::HtmlAstroExpression,
+        f: &mut HtmlFormatter,
+    ) -> FormatResult<()> {
+        FormatNodeRule::<biome_html_syntax::HtmlAstroExpression>::fmt(self, node, f)
+    }
+}
+impl AsFormat<HtmlFormatContext> for biome_html_syntax::HtmlAstroExpression {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_html_syntax::HtmlAstroExpression,
+        crate::html::auxiliary::astro_expression::FormatHtmlAstroExpression,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::html::auxiliary::astro_expression::FormatHtmlAstroExpression::default(),
+        )
+    }
+}
+impl IntoFormat<HtmlFormatContext> for biome_html_syntax::HtmlAstroExpression {
+    type Format = FormatOwnedWithRule<
+        biome_html_syntax::HtmlAstroExpression,
+        crate::html::auxiliary::astro_expression::FormatHtmlAstroExpression,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(
+            self,
+            crate::html::auxiliary::astro_expression::FormatHtmlAstroExpression::default(),
+        )
+    }
+}
+impl FormatRule<biome_html_syntax::HtmlAstroExpressionAttribute>
+    for crate::html::auxiliary::astro_expression_attribute::FormatHtmlAstroExpressionAttribute
+{
+    type Context = HtmlFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_html_syntax::HtmlAstroExpressionAttribute,
+        f: &mut HtmlFormatter,
+    ) -> FormatResult<()> {
+        FormatNodeRule::<biome_html_syntax::HtmlAstroExpressionAttribute>::fmt(self, node, f)
+    }
+}
+impl AsFormat<HtmlFormatContext> for biome_html_syntax::HtmlAstroExpressionAttribute {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_html_syntax::HtmlAstroExpressionAttribute,
+        crate::html::auxiliary::astro_expression_attribute::FormatHtmlAstroExpressionAttribute,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule :: new (self , crate :: html :: auxiliary :: astro_expression_attribute :: FormatHtmlAstroExpressionAttribute :: default ())
+    }
+}
+impl IntoFormat<HtmlFormatContext> for biome_html_syntax::HtmlAstroExpressionAttribute {
+    type Format = FormatOwnedWithRule<
+        biome_html_syntax::HtmlAstroExpressionAttribute,
+        crate::html::auxiliary::astro_expression_attribute::FormatHtmlAstroExpressionAttribute,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule :: new (self , crate :: html :: auxiliary :: astro_expression_attribute :: FormatHtmlAstroExpressionAttribute :: default ())
+    }
+}
+impl FormatRule<biome_html_syntax::HtmlAstroFragment>
+    for crate::html::auxiliary::astro_fragment::FormatHtmlAstroFragment
+{
+    type Context = HtmlFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_html_syntax::HtmlAstroFragment,
+        f: &mut HtmlFormatter,
+    ) -> FormatResult<()> {
+        FormatNodeRule::<biome_html_syntax::HtmlAstroFragment>::fmt(self, node, f)
+    }
+}
+impl AsFormat<HtmlFormatContext> for biome_html_syntax::HtmlAstroFragment {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_html_syntax::HtmlAstroFragment,
+        crate::html::auxiliary::astro_fragment::FormatHtmlAstroFragment,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::html::auxiliary::astro_fragment::FormatHtmlAstroFragment::default(),
+        )
+    }
+}
+impl IntoFormat<HtmlFormatContext> for biome_html_syntax::HtmlAstroFragment {
+    type Format = FormatOwnedWithRule<
+        biome_html_syntax::HtmlAstroFragment,
+        crate::html::auxiliary::astro_fragment::FormatHtmlAstroFragment,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(
+            self,
+            crate::html::auxiliary::astro_fragment::FormatHtmlAstroFragment::default(),
+        )
+    }
+}
+impl FormatRule<biome_html_syntax::HtmlAstroFragmentClose>
+    for crate::html::auxiliary::astro_fragment_close::FormatHtmlAstroFragmentClose
+{
+    type Context = HtmlFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_html_syntax::HtmlAstroFragmentClose,
+        f: &mut HtmlFormatter,
+    ) -> FormatResult<()> {
+        FormatNodeRule::<biome_html_syntax::HtmlAstroFragmentClose>::fmt(self, node, f)
+    }
+}
+impl AsFormat<HtmlFormatContext> for biome_html_syntax::HtmlAstroFragmentClose {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_html_syntax::HtmlAstroFragmentClose,
+        crate::html::auxiliary::astro_fragment_close::FormatHtmlAstroFragmentClose,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::html::auxiliary::astro_fragment_close::FormatHtmlAstroFragmentClose::default(),
+        )
+    }
+}
+impl IntoFormat<HtmlFormatContext> for biome_html_syntax::HtmlAstroFragmentClose {
+    type Format = FormatOwnedWithRule<
+        biome_html_syntax::HtmlAstroFragmentClose,
+        crate::html::auxiliary::astro_fragment_close::FormatHtmlAstroFragmentClose,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(
+            self,
+            crate::html::auxiliary::astro_fragment_close::FormatHtmlAstroFragmentClose::default(),
+        )
+    }
+}
+impl FormatRule<biome_html_syntax::HtmlAstroFragmentOpen>
+    for crate::html::auxiliary::astro_fragment_open::FormatHtmlAstroFragmentOpen
+{
+    type Context = HtmlFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_html_syntax::HtmlAstroFragmentOpen,
+        f: &mut HtmlFormatter,
+    ) -> FormatResult<()> {
+        FormatNodeRule::<biome_html_syntax::HtmlAstroFragmentOpen>::fmt(self, node, f)
+    }
+}
+impl AsFormat<HtmlFormatContext> for biome_html_syntax::HtmlAstroFragmentOpen {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_html_syntax::HtmlAstroFragmentOpen,
+        crate::html::auxiliary::astro_fragment_open::FormatHtmlAstroFragmentOpen,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::html::auxiliary::astro_fragment_open::FormatHtmlAstroFragmentOpen::default(),
+        )
+    }
+}
+impl IntoFormat<HtmlFormatContext> for biome_html_syntax::HtmlAstroFragmentOpen {
+    type Format = FormatOwnedWithRule<
+        biome_html_syntax::HtmlAstroFragmentOpen,
+        crate::html::auxiliary::astro_fragment_open::FormatHtmlAstroFragmentOpen,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(
+            self,
+            crate::html::auxiliary::astro_fragment_open::FormatHtmlAstroFragmentOpen::default(),
+        )
+    }
+}
 impl FormatRule<biome_html_syntax::HtmlAstroFrontmatterElement>
     for crate::html::auxiliary::astro_frontmatter_element::FormatHtmlAstroFrontmatterElement
 {
@@ -36,6 +220,91 @@ impl IntoFormat<HtmlFormatContext> for biome_html_syntax::HtmlAstroFrontmatterEl
     >;
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule :: new (self , crate :: html :: auxiliary :: astro_frontmatter_element :: FormatHtmlAstroFrontmatterElement :: default ())
+    }
+}
+impl FormatRule<biome_html_syntax::HtmlAstroShorthandAttribute>
+    for crate::html::auxiliary::astro_shorthand_attribute::FormatHtmlAstroShorthandAttribute
+{
+    type Context = HtmlFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_html_syntax::HtmlAstroShorthandAttribute,
+        f: &mut HtmlFormatter,
+    ) -> FormatResult<()> {
+        FormatNodeRule::<biome_html_syntax::HtmlAstroShorthandAttribute>::fmt(self, node, f)
+    }
+}
+impl AsFormat<HtmlFormatContext> for biome_html_syntax::HtmlAstroShorthandAttribute {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_html_syntax::HtmlAstroShorthandAttribute,
+        crate::html::auxiliary::astro_shorthand_attribute::FormatHtmlAstroShorthandAttribute,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule :: new (self , crate :: html :: auxiliary :: astro_shorthand_attribute :: FormatHtmlAstroShorthandAttribute :: default ())
+    }
+}
+impl IntoFormat<HtmlFormatContext> for biome_html_syntax::HtmlAstroShorthandAttribute {
+    type Format = FormatOwnedWithRule<
+        biome_html_syntax::HtmlAstroShorthandAttribute,
+        crate::html::auxiliary::astro_shorthand_attribute::FormatHtmlAstroShorthandAttribute,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule :: new (self , crate :: html :: auxiliary :: astro_shorthand_attribute :: FormatHtmlAstroShorthandAttribute :: default ())
+    }
+}
+impl FormatRule<biome_html_syntax::HtmlAstroSpreadAttribute>
+    for crate::html::auxiliary::astro_spread_attribute::FormatHtmlAstroSpreadAttribute
+{
+    type Context = HtmlFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_html_syntax::HtmlAstroSpreadAttribute,
+        f: &mut HtmlFormatter,
+    ) -> FormatResult<()> {
+        FormatNodeRule::<biome_html_syntax::HtmlAstroSpreadAttribute>::fmt(self, node, f)
+    }
+}
+impl AsFormat<HtmlFormatContext> for biome_html_syntax::HtmlAstroSpreadAttribute {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_html_syntax::HtmlAstroSpreadAttribute,
+        crate::html::auxiliary::astro_spread_attribute::FormatHtmlAstroSpreadAttribute,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::html::auxiliary::astro_spread_attribute::FormatHtmlAstroSpreadAttribute::default(
+            ),
+        )
+    }
+}
+impl IntoFormat<HtmlFormatContext> for biome_html_syntax::HtmlAstroSpreadAttribute {
+    type Format = FormatOwnedWithRule<
+        biome_html_syntax::HtmlAstroSpreadAttribute,
+        crate::html::auxiliary::astro_spread_attribute::FormatHtmlAstroSpreadAttribute,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(
+            self,
+            crate::html::auxiliary::astro_spread_attribute::FormatHtmlAstroSpreadAttribute::default(
+            ),
+        )
+    }
+}
+impl FormatRule < biome_html_syntax :: HtmlAstroTemplateLiteralAttribute > for crate :: html :: auxiliary :: astro_template_literal_attribute :: FormatHtmlAstroTemplateLiteralAttribute { type Context = HtmlFormatContext ; # [inline (always)] fn fmt (& self , node : & biome_html_syntax :: HtmlAstroTemplateLiteralAttribute , f : & mut HtmlFormatter) -> FormatResult < () > { FormatNodeRule :: < biome_html_syntax :: HtmlAstroTemplateLiteralAttribute > :: fmt (self , node , f) } }
+impl AsFormat<HtmlFormatContext> for biome_html_syntax::HtmlAstroTemplateLiteralAttribute {
+    type Format < 'a > = FormatRefWithRule < 'a , biome_html_syntax :: HtmlAstroTemplateLiteralAttribute , crate :: html :: auxiliary :: astro_template_literal_attribute :: FormatHtmlAstroTemplateLiteralAttribute > ;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule :: new (self , crate :: html :: auxiliary :: astro_template_literal_attribute :: FormatHtmlAstroTemplateLiteralAttribute :: default ())
+    }
+}
+impl IntoFormat<HtmlFormatContext> for biome_html_syntax::HtmlAstroTemplateLiteralAttribute {
+    type Format = FormatOwnedWithRule < biome_html_syntax :: HtmlAstroTemplateLiteralAttribute , crate :: html :: auxiliary :: astro_template_literal_attribute :: FormatHtmlAstroTemplateLiteralAttribute > ;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule :: new (self , crate :: html :: auxiliary :: astro_template_literal_attribute :: FormatHtmlAstroTemplateLiteralAttribute :: default ())
     }
 }
 impl FormatRule<biome_html_syntax::HtmlAttribute>
