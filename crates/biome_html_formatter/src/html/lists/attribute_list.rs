@@ -63,6 +63,18 @@ impl FormatRule<HtmlAttributeList> for FormatHtmlAttributeList {
                                     AnyHtmlAttribute::HtmlBogusAttribute(attr) => {
                                         attr.format().fmt(f)
                                     }
+                                    AnyHtmlAttribute::HtmlAstroExpressionAttribute(attr) => {
+                                        attr.format().fmt(f)
+                                    }
+                                    AnyHtmlAttribute::HtmlAstroShorthandAttribute(attr) => {
+                                        attr.format().fmt(f)
+                                    }
+                                    AnyHtmlAttribute::HtmlAstroSpreadAttribute(attr) => {
+                                        attr.format().fmt(f)
+                                    }
+                                    AnyHtmlAttribute::HtmlAstroTemplateLiteralAttribute(attr) => {
+                                        attr.format().fmt(f)
+                                    }
                                 })
                             }))
                             .finish()?;
