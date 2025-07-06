@@ -59,6 +59,10 @@ impl<'src> HtmlLexer<'src> {
             b'/' => self.consume_byte(T![/]),
             b'=' => self.consume_byte(T![=]),
             b'!' => self.consume_byte(T![!]),
+            b'{' => self.consume_byte(T!['{']),
+            b'}' => self.consume_byte(T!['}']),
+            b'`' => self.consume_byte(T!['`']),
+            b'.' => self.consume_dot_or_dot_dot_dot(),
             b'\'' | b'"' => self.consume_string_literal(current),
             _ if self.current_kind == T![<] && is_tag_name_byte(current) => {
                 // tag names must immediately follow a `<`
@@ -80,10 +84,38 @@ impl<'src> HtmlLexer<'src> {
         }
     }
 
+    /// Consume either a single dot or dot-dot-dot (spread operator)
+    fn consume_dot_or_dot_dot_dot(&mut self) -> HtmlSyntaxKind {
+        let start = self.position;
+        
+        // Consume the first dot
+        self.position += 1;
+        
+        // Check if this is followed by two more dots for spread operator
+        if self.peek_byte() == Some(b'.') && self.peek_byte_offset(1) == Some(b'.') {
+            // Consume the second and third dots
+            self.position += 2;
+            T![...]
+        } else {
+            // Just a single dot - treat as unexpected character for HTML
+            self.position = start;
+            self.consume_unexpected_character()
+        }
+    }
+
+    /// Peek at the byte at a specific offset from current position
+    fn peek_byte_offset(&self, offset: usize) -> Option<u8> {
+        self.source.as_bytes().get(self.position + offset).copied()
+    }
+
     /// Consume a token in the [HtmlLexContext::OutsideTag] context.
     fn consume_token_outside_tag(&mut self, current: u8) -> HtmlSyntaxKind {
         match current {
             b'\n' | b'\r' | b'\t' | b' ' => self.consume_newline_or_whitespaces(),
+            b'{' => self.consume_byte(T!['{']),
+            b'}' => self.consume_byte(T!['}']),
+            b'`' => self.consume_byte(T!['`']),
+            b'.' => self.consume_dot_or_dot_dot_dot(),
             b'<' => {
                 // if this truly is the start of a tag, it *must* be immediately followed by a tag name. Whitespace is not allowed.
                 // https://html.spec.whatwg.org/multipage/syntax.html#start-tags
