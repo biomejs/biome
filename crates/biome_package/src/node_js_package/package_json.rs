@@ -7,7 +7,7 @@ use biome_deserialize::{
 use biome_diagnostics::Error;
 use biome_json_parser::JsonParserOptions;
 use biome_json_syntax::JsonLanguage;
-use biome_json_value::{JsonObject, JsonValue};
+use biome_json_value::JsonValue;
 use biome_text_size::TextRange;
 use camino::Utf8Path;
 use node_semver::{Range, SemverError};
@@ -36,7 +36,11 @@ pub struct PackageJson {
     pub optional_dependencies: Dependencies,
     pub license: Option<(Box<str>, TextRange)>,
 
-    pub(crate) raw_json: JsonObject,
+    pub author: Option<JsonValue>,
+    pub exports: Option<JsonValue>,
+    pub imports: Option<JsonValue>,
+    pub main: Option<JsonValue>,
+    pub types: Option<JsonValue>,
 }
 
 static_assertions::assert_impl_all!(PackageJson: Send, Sync);
@@ -58,9 +62,10 @@ impl PackageJson {
     }
 
     pub fn with_exports(self, exports: impl Into<JsonValue>) -> Self {
-        let mut raw_json = self.raw_json;
-        raw_json.insert("exports".into(), exports.into());
-        Self { raw_json, ..self }
+        Self {
+            exports: Some(exports.into()),
+            ..self
+        }
     }
 
     pub fn with_dependencies(self, dependencies: Dependencies) -> Self {
@@ -96,22 +101,6 @@ impl PackageJson {
         }
 
         false
-    }
-
-    pub fn get_value_by_path(&self, path: &[&str]) -> Option<&JsonValue> {
-        if path.is_empty() {
-            return None;
-        }
-
-        let mut value = self.raw_json.get(path[0])?;
-        for key in path.iter().skip(1) {
-            if let Some(inner_value) = value.as_object().and_then(|object| object.get(*key)) {
-                value = inner_value;
-            } else {
-                return None;
-            }
-        }
-        Some(value)
     }
 }
 
@@ -298,11 +287,33 @@ impl DeserializationVisitor for PackageJsonVisitor {
                 "type" => {
                     result.r#type = Deserializable::deserialize(ctx, &value, &key_text);
                 }
-                _ => {
+                "author" => {
                     if let Some(value) = JsonValue::deserialize(ctx, &value, &key_text) {
-                        result.raw_json.insert(key_text.into(), value);
+                        result.author = Some(value);
                     }
                 }
+                "exports" => {
+                    if let Some(value) = JsonValue::deserialize(ctx, &value, &key_text) {
+                        result.exports = Some(value);
+                    }
+                }
+
+                "imports" => {
+                    if let Some(value) = JsonValue::deserialize(ctx, &value, &key_text) {
+                        result.imports = Some(value);
+                    }
+                }
+                "types" => {
+                    if let Some(value) = JsonValue::deserialize(ctx, &value, &key_text) {
+                        result.types = Some(value);
+                    }
+                }
+                "main" => {
+                    if let Some(value) = JsonValue::deserialize(ctx, &value, &key_text) {
+                        result.main = Some(value);
+                    }
+                }
+                _ => {}
             }
         }
         Some(result)
@@ -371,8 +382,8 @@ mod tests {
 
         let package_json = package_json.expect("parsing must have succeeded");
         assert_eq!(
-            package_json.get_value_by_path(&["author"]),
-            Some(&JsonValue::String(Text::Static("Biome Team").into()))
+            package_json.author,
+            Some(JsonValue::String(Text::Static("Biome Team").into()))
         );
     }
 
