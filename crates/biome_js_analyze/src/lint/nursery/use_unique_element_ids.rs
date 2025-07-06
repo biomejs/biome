@@ -44,6 +44,34 @@ declare_lint_rule! {
     /// React.createElement("div", { id });
     /// ```
     ///
+    /// ## Options
+    ///
+    /// This rule supports one option - `excludedComponents` - to ignore the rule
+    /// globally for only some components. It accepts unqualified component names.
+    /// Use it to list components expecting an `id` attribute that does not represent
+    /// a DOM element ID.
+    ///
+    /// ### Example
+    ///
+    /// ```json,options
+    /// {
+    ///     "options": {
+    ///         "excludedComponents": [
+    ///             "FormattedMessage"
+    ///         ]
+    ///     }
+    /// }
+    /// ```
+    ///
+    /// With such definition, the following code becomes valid:
+    ///
+    /// ```jsx,use_options
+    /// <FormattedMessage id="static" />
+    /// ```
+    ///
+    /// ```jsx,use_options
+    /// <Library.FormattedMessage id="static" />
+    /// ```
     pub UseUniqueElementIds {
         version: "2.0.0",
         name: "useUniqueElementIds",
