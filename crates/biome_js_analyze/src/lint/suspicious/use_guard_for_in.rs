@@ -5,6 +5,7 @@ use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_syntax::{AnyJsStatement, JsForInStatement};
 use biome_rowan::{AstNode, AstNodeList};
+use biome_rule_options::use_guard_for_in::UseGuardForInOptions;
 
 declare_lint_rule! {
     /// Require `for-in` loops to include an `if` statement.
@@ -56,7 +57,7 @@ declare_lint_rule! {
         version: "1.9.4",
         name: "useGuardForIn",
         language: "js",
-        sources: &[RuleSource::Eslint("guard-for-in")],
+        sources: &[RuleSource::Eslint("guard-for-in").same()],
         recommended: false,
         severity: Severity::Warning,
     }
@@ -66,7 +67,7 @@ impl Rule for UseGuardForIn {
     type Query = Ast<JsForInStatement>;
     type State = ();
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = UseGuardForInOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();

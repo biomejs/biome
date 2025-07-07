@@ -1,6 +1,6 @@
 mod tests;
 
-use crate::token_source::{HtmlEmbededLanguage, HtmlLexContext};
+use crate::token_source::{HtmlEmbeddedLanguage, HtmlLexContext};
 use biome_html_syntax::HtmlSyntaxKind::{
     COMMENT, DOCTYPE_KW, EOF, ERROR_TOKEN, HTML_KW, HTML_LITERAL, HTML_STRING_LITERAL, NEWLINE,
     TOMBSTONE, UNICODE_BOM, WHITESPACE,
@@ -139,7 +139,8 @@ impl<'src> HtmlLexer<'src> {
     fn consume_token_embedded_language(
         &mut self,
         _current: u8,
-        lang: HtmlEmbededLanguage,
+        lang: HtmlEmbeddedLanguage,
+        context: HtmlLexContext,
     ) -> HtmlSyntaxKind {
         let start = self.text_position();
         let end_tag = lang.end_tag();
@@ -154,6 +155,10 @@ impl<'src> HtmlLexer<'src> {
                 break;
             }
             self.advance_byte_or_char(byte);
+
+            if context == HtmlLexContext::AstroFencedCodeBlock && self.is_at_frontmatter_edge() {
+                return HTML_LITERAL;
+            }
         }
 
         if self.text_position() != start {
@@ -195,6 +200,26 @@ impl<'src> HtmlLexer<'src> {
                     self.advance_byte_or_char(char);
                 }
                 HTML_LITERAL
+            }
+        }
+    }
+
+    fn consume_astro_frontmatter(
+        &mut self,
+        current: u8,
+        context: HtmlLexContext,
+    ) -> HtmlSyntaxKind {
+        match current {
+            b'\n' | b'\r' | b'\t' | b' ' => self.consume_newline_or_whitespaces(),
+            b'<' if self.at_start_cdata() => self.consume_cdata_start(),
+            b'<' => self.consume_byte(T![<]),
+            b'-' => {
+                debug_assert!(self.is_at_frontmatter_edge());
+                self.advance(3);
+                T![---]
+            }
+            _ => {
+                self.consume_token_embedded_language(current, HtmlEmbeddedLanguage::Script, context)
             }
         }
     }
@@ -426,6 +451,26 @@ impl<'src> HtmlLexer<'src> {
             && self.byte_at(2) == Some(b'>')
     }
 
+    fn is_at_frontmatter_edge(&self) -> bool {
+        self.current_byte() == Some(b'-')
+            && self.byte_at(1) == Some(b'-')
+            && self.byte_at(2) == Some(b'-')
+    }
+
+    fn consume_comment_start(&mut self) -> HtmlSyntaxKind {
+        debug_assert!(self.at_start_comment());
+
+        self.advance(4);
+        T![<!--]
+    }
+
+    fn consume_comment_end(&mut self) -> HtmlSyntaxKind {
+        debug_assert!(self.at_end_comment());
+
+        self.advance(3);
+        T![-->]
+    }
+
     fn consume_cdata_start(&mut self) -> HtmlSyntaxKind {
         debug_assert!(self.at_start_cdata());
 
@@ -580,9 +625,12 @@ impl<'src> Lexer<'src> for HtmlLexer<'src> {
                     HtmlLexContext::AttributeValue => self.consume_token_attribute_value(current),
                     HtmlLexContext::Doctype => self.consume_token_doctype(current),
                     HtmlLexContext::EmbeddedLanguage(lang) => {
-                        self.consume_token_embedded_language(current, lang)
+                        self.consume_token_embedded_language(current, lang, context)
                     }
                     HtmlLexContext::CdataSection => self.consume_inside_cdata(current),
+                    HtmlLexContext::AstroFencedCodeBlock => {
+                        self.consume_astro_frontmatter(current, context)
+                    }
                 },
                 None => EOF,
             }
@@ -657,9 +705,10 @@ fn is_tag_name_byte(byte: u8) -> bool {
     // However, custom tag names must start with a lowercase letter, but they can be followed by pretty much anything else.
     // https://html.spec.whatwg.org/#valid-custom-element-name
 
-    // FIXME: The extra characters allowed here `-` and `:` is a temporary fix for now to fix parsing issues in some prettier test cases.
+    // The extra characters allowed here `-`, `:`, and `.` are not usually allowed in the HTML tag name.
+    // However, Prettier considers them to be valid characters in tag names, so we allow them to remain compatible.
 
-    byte.is_ascii_alphanumeric() || byte == b'-' || byte == b':'
+    byte.is_ascii_alphanumeric() || byte == b'-' || byte == b':' || byte == b'.'
 }
 
 fn is_attribute_name_byte(byte: u8) -> bool {

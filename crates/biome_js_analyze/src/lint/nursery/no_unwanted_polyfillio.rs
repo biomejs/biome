@@ -1,13 +1,13 @@
 use std::sync::LazyLock;
 
 use biome_analyze::{
-    Rule, RuleDiagnostic, RuleDomain, RuleSource, RuleSourceKind, context::RuleContext,
-    declare_lint_rule,
+    Rule, RuleDiagnostic, RuleDomain, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_syntax::jsx_ext::AnyJsxElement;
 use biome_rowan::{AstNode, TextRange};
+use biome_rule_options::no_unwanted_polyfillio::NoUnwantedPolyfillioOptions;
 use regex::Regex;
 
 use crate::{
@@ -52,8 +52,7 @@ declare_lint_rule! {
         version: "2.0.0",
         name: "noUnwantedPolyfillio",
         language: "jsx",
-        sources: &[RuleSource::EslintNext("no-unwanted-polyfillio")],
-        source_kind: RuleSourceKind::SameLogic,
+        sources: &[RuleSource::EslintNext("no-unwanted-polyfillio").same()],
         recommended: true,
         severity: Severity::Warning,
         domains: &[RuleDomain::Next],
@@ -69,7 +68,7 @@ impl Rule for NoUnwantedPolyfillio {
     type Query = Semantic<AnyJsxElement>;
     type State = RuleState;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoUnwantedPolyfillioOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let jsx_element = ctx.query();

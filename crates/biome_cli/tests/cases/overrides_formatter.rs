@@ -30,7 +30,7 @@ const CSS_FORMATTED_SINGLE_QUOTES_AND_SPACES: &str =
 #[test]
 fn does_handle_included_file_and_disable_formatter() {
     let mut console = BufferConsole::default();
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let file_path = Utf8Path::new("biome.json");
     fs.insert(
         file_path.into(),
@@ -74,7 +74,7 @@ fn does_handle_included_file_and_disable_formatter() {
 #[test]
 fn does_include_file_with_different_formatting() {
     let mut console = BufferConsole::default();
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let file_path = Utf8Path::new("biome.json");
     fs.insert(
         file_path.into(),
@@ -115,7 +115,7 @@ fn does_include_file_with_different_formatting() {
 #[test]
 fn does_include_file_with_different_formatting_and_all_of_them() {
     let mut console = BufferConsole::default();
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let file_path = Utf8Path::new("biome.json");
     fs.insert(
         file_path.into(),
@@ -159,7 +159,7 @@ fn does_include_file_with_different_formatting_and_all_of_them() {
 #[test]
 fn does_include_file_with_different_overrides() {
     let mut console = BufferConsole::default();
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let file_path = Utf8Path::new("biome.json");
     fs.insert(
         file_path.into(),
@@ -204,7 +204,7 @@ fn does_include_file_with_different_overrides() {
 #[test]
 fn complex_enable_disable_overrides() {
     let mut console = BufferConsole::default();
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let file_path = Utf8Path::new("biome.json");
     fs.insert(
         file_path.into(),
@@ -271,7 +271,7 @@ fn complex_enable_disable_overrides() {
 #[test]
 fn does_include_file_with_different_languages() {
     let mut console = BufferConsole::default();
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let file_path = Utf8Path::new("biome.json");
     fs.insert(
         file_path.into(),
@@ -328,7 +328,7 @@ fn does_include_file_with_different_languages() {
 #[ignore = "Enable when we are ready to handle CSS files"]
 fn does_include_file_with_different_languages_and_files() {
     let mut console = BufferConsole::default();
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let file_path = Utf8Path::new("biome.json");
     fs.insert(
         file_path.into(),
@@ -400,7 +400,7 @@ fn does_include_file_with_different_languages_and_files() {
 #[test]
 fn does_not_change_formatting_settings() {
     let mut console = BufferConsole::default();
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let file_path = Utf8Path::new("biome.json");
     fs.insert(
         file_path.into(),
@@ -444,7 +444,7 @@ fn does_not_change_formatting_settings() {
 #[test]
 fn does_not_change_formatting_language_settings() {
     let mut console = BufferConsole::default();
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let file_path = Utf8Path::new("biome.json");
     fs.insert(
         file_path.into(),
@@ -488,7 +488,7 @@ fn does_not_change_formatting_language_settings() {
 #[test]
 fn does_not_change_formatting_language_settings_2() {
     let mut console = BufferConsole::default();
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let file_path = Utf8Path::new("biome.json");
     fs.insert(
         file_path.into(),
@@ -532,7 +532,7 @@ fn does_not_change_formatting_language_settings_2() {
 #[test]
 fn does_not_conceal_previous_overrides() {
     let mut console = BufferConsole::default();
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let file_path = Utf8Path::new("biome.json");
     fs.insert(
         file_path.into(),
@@ -570,7 +570,7 @@ fn does_not_conceal_previous_overrides() {
 #[test]
 fn takes_last_formatter_enabled_into_account() {
     let mut console = BufferConsole::default();
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let file_path = Utf8Path::new("biome.json");
     fs.insert(
         file_path.into(),
@@ -609,7 +609,7 @@ fn takes_last_formatter_enabled_into_account() {
 #[test]
 fn does_not_override_well_known_special_files_when_config_override_is_present() {
     let mut console = BufferConsole::default();
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let file_path = Utf8Path::new("biome.json");
     fs.insert(
         file_path.into(),
@@ -661,7 +661,7 @@ fn does_not_override_well_known_special_files_when_config_override_is_present() 
 #[test]
 fn allow_trailing_commas_on_well_known_files() {
     let mut console = BufferConsole::default();
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let file_path = Utf8Path::new("biome.json");
     fs.insert(
         file_path.into(),
@@ -729,7 +729,7 @@ fn allow_trailing_commas_on_well_known_files() {
 #[test]
 fn disallow_comments_on_well_known_files() {
     let mut console = BufferConsole::default();
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let file_path = Utf8Path::new("biome.json");
     fs.insert(
         file_path.into(),
@@ -777,7 +777,7 @@ fn disallow_comments_on_well_known_files() {
 #[test]
 fn overrides_default_formatter_for_package_json() {
     let mut console = BufferConsole::default();
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let biome_json = Utf8Path::new("biome.json");
     fs.insert(
         biome_json.into(),
@@ -814,7 +814,7 @@ fn overrides_default_formatter_for_package_json() {
 #[test]
 fn overrides_grit_formatting_options() {
     let mut console = BufferConsole::default();
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let file_path = Utf8Path::new("biome.json");
     fs.insert(
         file_path.into(),
@@ -852,6 +852,273 @@ fn overrides_grit_formatting_options() {
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
         "overrides_grit_formatting_options",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn overrides_javascript_formatting_options() {
+    let mut console = BufferConsole::default();
+    let fs = MemoryFileSystem::default();
+    let file_path = Utf8Path::new("biome.json");
+
+    fs.insert(
+        file_path.into(),
+        r#"{
+            "formatter": {
+                "includes": [
+                    "**/*.js"
+                ]
+            },
+            "javascript": {
+                "formatter": {
+                    "enabled": true,
+                    "arrowParentheses": "asNeeded",
+                    "attributePosition": "auto",
+                    "bracketSameLine": true,
+                    "bracketSpacing": false,
+                    "expand": "never",
+                    "indentStyle": "tab",
+                    "indentWidth": 4,
+                    "jsxQuoteStyle": "single",
+                    "lineEnding": "lf",
+                    "lineWidth": 100,
+                    "quoteProperties": "preserve",
+                    "quoteStyle": "single",
+                    "semicolons": "asNeeded",
+                    "trailingCommas": "es5"
+                }
+            },
+            "overrides": [
+                {
+                    "includes": [
+                        "overrides.js"
+                    ],
+                    "javascript": {
+                        "formatter": {
+                            "enabled": true,
+                            "arrowParentheses": "always",
+                            "attributePosition": "multiline",
+                            "bracketSameLine": false,
+                            "bracketSpacing": true,
+                            "expand": "always",
+                            "indentStyle": "space",
+                            "indentWidth": 2,
+                            "jsxQuoteStyle": "double",
+                            "lineEnding": "lf",
+                            "lineWidth": 20,
+                            "quoteProperties": "asNeeded",
+                            "quoteStyle": "double",
+                            "semicolons": "always",
+                            "trailingCommas": "all"
+                        }
+                    }
+                }
+            ]
+        }"#
+        .as_bytes(),
+    );
+
+    let file_contents: &str = r#"
+import React from 'react'
+
+const arrowParentheses = a => {return `${a} => ${b}`};
+
+const testObject = {'must-stay-wrapped': 'This is a test', 𐊧: 'no key quote wrap needed'}
+
+function MyComponent() {return <><div autoFocus data-attribute="test">no self closing element</div><input type='text' autoComplete='off' defaultValue='field value' /></>}
+    "#;
+
+    let base_js_fle = Utf8Path::new("base.js");
+    fs.insert(base_js_fle.into(), file_contents);
+
+    let overrides_js_file = Utf8Path::new("overrides.js");
+    fs.insert(overrides_js_file.into(), file_contents);
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(
+            [
+                "format",
+                "--write",
+                base_js_fle.as_str(),
+                overrides_js_file.as_str(),
+            ]
+            .as_slice(),
+        ),
+    );
+
+    assert_file_contents(
+        &fs,
+        base_js_fle,
+        r#"import React from 'react'
+
+const arrowParentheses = a => {
+	return `${a} => ${b}`
+}
+
+const testObject = {'must-stay-wrapped': 'This is a test', 𐊧: 'no key quote wrap needed'}
+
+function MyComponent() {
+	return (
+		<>
+			<div autoFocus data-attribute='test'>
+				no self closing element
+			</div>
+			<input type='text' autoComplete='off' defaultValue='field value' />
+		</>
+	)
+}
+"#,
+    );
+
+    assert_file_contents(
+        &fs,
+        overrides_js_file,
+        r#"import React from "react";
+
+const arrowParentheses =
+  (a) => {
+    return `${a} => ${b}`;
+  };
+
+const testObject = {
+  "must-stay-wrapped":
+    "This is a test",
+  𐊧: "no key quote wrap needed",
+};
+
+function MyComponent() {
+  return (
+    <>
+      <div
+        autoFocus
+        data-attribute="test"
+      >
+        no self
+        closing
+        element
+      </div>
+      <input
+        type="text"
+        autoComplete="off"
+        defaultValue="field value"
+      />
+    </>
+  );
+}
+"#,
+    );
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "overrides_javascript_formatting_options",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn overrides_json_formatting_options() {
+    let mut console = BufferConsole::default();
+    let fs = MemoryFileSystem::default();
+    let file_path = Utf8Path::new("biome.json");
+
+    fs.insert(
+        file_path.into(),
+        r#"{
+            "formatter": {
+                "includes": [
+                    "*.json"
+                ]
+            },
+            "json": {
+                "formatter": {
+                    "enabled": true,
+                    "bracketSpacing": true,
+                    "expand": "never",
+                    "indentStyle": "tab",
+                    "indentWidth": 4,
+                    "lineEnding": "lf",
+                    "lineWidth": 240,
+                    "trailingCommas": "none"
+                }
+            },
+            "overrides": [
+                {
+                    "includes": [
+                        "overrides.json"
+                    ],
+                    "json": {
+                        "formatter": {
+                            "enabled": true,
+                            "bracketSpacing": false,
+                            "expand": "always",
+                            "indentStyle": "space",
+                            "indentWidth": 2,
+                            "lineEnding": "lf",
+                            "lineWidth": 20,
+                            "trailingCommas": "all"
+                        }
+                    }
+                }
+            ]
+        }"#
+        .as_bytes(),
+    );
+
+    let file_contents: &str = r#"{"asta": ["lorem", "ipsum", {"key1":"value1 that has a way longer line width but it shouldn't break anything here", "key2":"value2"}]}"#;
+
+    let base_json_file = Utf8Path::new("base.json");
+    fs.insert(base_json_file.into(), file_contents);
+
+    let overrides_json_file = Utf8Path::new("overrides.json");
+    fs.insert(overrides_json_file.into(), file_contents);
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(
+            [
+                "format",
+                "--write",
+                base_json_file.as_str(),
+                overrides_json_file.as_str(),
+            ]
+            .as_slice(),
+        ),
+    );
+
+    assert_file_contents(
+        &fs,
+        base_json_file,
+        r#"{ "asta": ["lorem", "ipsum", { "key1": "value1 that has a way longer line width but it shouldn't break anything here", "key2": "value2" }] }
+"#,
+    );
+
+    assert_file_contents(
+        &fs,
+        overrides_json_file,
+        r#"{
+  "asta": [
+    "lorem",
+    "ipsum",
+    {
+      "key1": "value1 that has a way longer line width but it shouldn't break anything here",
+      "key2": "value2",
+    },
+  ],
+}
+"#,
+    );
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "overrides_json_formatting_options",
         fs,
         console,
         result,

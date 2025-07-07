@@ -9,6 +9,7 @@ use biome_js_syntax::{
     JsNewOrCallExpression, JsSyntaxKind, JsVariableDeclarator, T, global_identifier,
 };
 use biome_rowan::{AstNode, AstSeparatedList, BatchMutationExt};
+use biome_rule_options::use_array_literals::UseArrayLiteralsOptions;
 
 use crate::{JsRuleAction, services::semantic::Semantic};
 
@@ -56,7 +57,10 @@ declare_lint_rule! {
         version: "1.7.2",
         name: "useArrayLiterals",
         language: "js",
-        sources: &[RuleSource::Eslint("no-array-constructor"), RuleSource::EslintTypeScript("no-array-constructor")],
+        sources: &[
+            RuleSource::Eslint("no-array-constructor").same(),
+            RuleSource::EslintTypeScript("no-array-constructor").same()
+        ],
         recommended: true,
         severity: Severity::Information,
         fix_kind: FixKind::Safe,
@@ -67,7 +71,7 @@ impl Rule for UseArrayLiterals {
     type Query = Semantic<JsNewOrCallExpression>;
     type State = ();
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = UseArrayLiteralsOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();

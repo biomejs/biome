@@ -1,21 +1,17 @@
 use crate::JsRuleAction;
-use ::serde::{Deserialize, Serialize};
 use biome_analyze::context::RuleContext;
 use biome_analyze::{Ast, FixKind, Rule, RuleDiagnostic, RuleSource, declare_lint_rule};
 use biome_console::markup;
-use biome_deserialize::{
-    Deserializable, DeserializableType, DeserializableValue, DeserializationContext,
-};
 use biome_diagnostics::Severity;
 use biome_js_factory::make;
 use biome_js_syntax::TsReferenceType;
 use biome_rowan::AstNode;
 use biome_rowan::BatchMutationExt;
 use biome_unicode_table::is_js_ident;
-use rustc_hash::FxHashMap;
 
-#[cfg(feature = "schemars")]
-use schemars::JsonSchema;
+use biome_rule_options::no_restricted_types::{
+    CustomRestrictedTypeOptions, NoRestrictedTypesOptions,
+};
 
 declare_lint_rule! {
     /// Disallow user defined types.
@@ -50,7 +46,7 @@ declare_lint_rule! {
         name: "noRestrictedTypes",
         language: "ts",
         sources: &[
-            RuleSource::EslintTypeScript("no-restricted-types"),
+            RuleSource::EslintTypeScript("no-restricted-types").same(),
         ],
         recommended: false,
         severity: Severity::Warning,
@@ -109,73 +105,5 @@ impl Rule for NoRestrictedTypes {
             markup! { "Use '"{suggested_type}"' instead" }.to_owned(),
             mutation,
         ))
-    }
-}
-
-#[derive(
-    Clone,
-    Debug,
-    Default,
-    biome_deserialize_macros::Deserializable,
-    Deserialize,
-    Serialize,
-    Eq,
-    PartialEq,
-)]
-#[cfg_attr(feature = "schemars", derive(JsonSchema))]
-#[serde(rename_all = "camelCase", deny_unknown_fields, default)]
-pub struct NoRestrictedTypesOptions {
-    types: FxHashMap<Box<str>, CustomRestrictedType>,
-}
-
-#[derive(
-    Debug,
-    Clone,
-    Default,
-    biome_deserialize_macros::Deserializable,
-    Deserialize,
-    Serialize,
-    Eq,
-    PartialEq,
-)]
-#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
-#[serde(rename_all = "camelCase", deny_unknown_fields, default)]
-pub struct CustomRestrictedTypeOptions {
-    message: Box<str>,
-    #[serde(rename = "use")]
-    use_instead: Option<String>,
-}
-
-#[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
-#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
-#[serde(untagged)]
-pub enum CustomRestrictedType {
-    Plain(Box<str>),
-    WithOptions(CustomRestrictedTypeOptions),
-}
-
-impl From<CustomRestrictedType> for CustomRestrictedTypeOptions {
-    fn from(options: CustomRestrictedType) -> Self {
-        match options {
-            CustomRestrictedType::Plain(message) => Self {
-                message,
-                use_instead: None,
-            },
-            CustomRestrictedType::WithOptions(options) => options,
-        }
-    }
-}
-
-impl Deserializable for CustomRestrictedType {
-    fn deserialize(
-        ctx: &mut impl DeserializationContext,
-        value: &impl DeserializableValue,
-        name: &str,
-    ) -> Option<Self> {
-        if value.visitable_type()? == DeserializableType::Str {
-            biome_deserialize::Deserializable::deserialize(ctx, value, name).map(Self::Plain)
-        } else {
-            biome_deserialize::Deserializable::deserialize(ctx, value, name).map(Self::WithOptions)
-        }
     }
 }

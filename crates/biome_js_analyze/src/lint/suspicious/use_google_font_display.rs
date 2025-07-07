@@ -1,10 +1,11 @@
 use biome_analyze::{
-    Ast, Rule, RuleDiagnostic, RuleSource, RuleSourceKind, context::RuleContext, declare_lint_rule,
+    Ast, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_syntax::jsx_ext::AnyJsxElement;
 use biome_rowan::TextRange;
+use biome_rule_options::use_google_font_display::UseGoogleFontDisplayOptions;
 
 declare_lint_rule! {
     /// Enforces the use of a recommended `display` strategy with Google Fonts.
@@ -53,8 +54,7 @@ declare_lint_rule! {
         version: "1.9.4",
         name: "useGoogleFontDisplay",
         language: "jsx",
-        sources: &[RuleSource::EslintNext("google-font-display")],
-        source_kind: RuleSourceKind::SameLogic,
+        sources: &[RuleSource::EslintNext("google-font-display").same()],
         recommended: true,
         severity: Severity::Warning,
     }
@@ -71,7 +71,7 @@ impl Rule for UseGoogleFontDisplay {
     type Query = Ast<AnyJsxElement>;
     type State = (FontDisplayIssue, TextRange);
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = UseGoogleFontDisplayOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let element = ctx.query();

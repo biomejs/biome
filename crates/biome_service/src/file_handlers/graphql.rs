@@ -10,7 +10,7 @@ use crate::file_handlers::{
 };
 use crate::settings::{
     FormatSettings, LanguageListSettings, LanguageSettings, OverrideSettings, ServiceLanguage,
-    Settings, WorkspaceSettingsHandle, check_feature_activity, check_override_feature_activity,
+    Settings, check_feature_activity, check_override_feature_activity,
 };
 use crate::workspace::{
     CodeAction, FixAction, FixFileMode, FixFileResult, GetSyntaxTreeResult, PullActionsResult,
@@ -104,36 +104,36 @@ impl ServiceLanguage for GraphqlLanguage {
     }
 
     fn resolve_format_options(
-        global: Option<&FormatSettings>,
-        overrides: Option<&OverrideSettings>,
-        language: Option<&Self::FormatterSettings>,
+        global: &FormatSettings,
+        overrides: &OverrideSettings,
+        language: &Self::FormatterSettings,
         path: &BiomePath,
         document_file_source: &DocumentFileSource,
     ) -> Self::FormatOptions {
         let indent_style = language
-            .and_then(|l| l.indent_style)
-            .or(global.and_then(|g| g.indent_style))
+            .indent_style
+            .or(global.indent_style)
             .unwrap_or_default();
         let line_width = language
-            .and_then(|l| l.line_width)
-            .or(global.and_then(|g| g.line_width))
+            .line_width
+            .or(global.line_width)
             .unwrap_or_default();
         let indent_width = language
-            .and_then(|l| l.indent_width)
-            .or(global.and_then(|g| g.indent_width))
+            .indent_width
+            .or(global.indent_width)
             .unwrap_or_default();
 
         let line_ending = language
-            .and_then(|l| l.line_ending)
-            .or(global.and_then(|g| g.line_ending))
+            .line_ending
+            .or(global.line_ending)
             .unwrap_or_default();
 
         let bracket_spacing = language
-            .and_then(|l| l.bracket_spacing)
-            .or(global.and_then(|g| g.bracket_spacing))
+            .bracket_spacing
+            .or(global.bracket_spacing)
             .unwrap_or_default();
 
-        let options = GraphqlFormatOptions::new(
+        let mut options = GraphqlFormatOptions::new(
             document_file_source
                 .to_graphql_file_source()
                 .unwrap_or_default(),
@@ -143,17 +143,16 @@ impl ServiceLanguage for GraphqlLanguage {
         .with_line_width(line_width)
         .with_line_ending(line_ending)
         .with_bracket_spacing(bracket_spacing)
-        .with_quote_style(language.and_then(|l| l.quote_style).unwrap_or_default());
-        if let Some(overrides) = overrides {
-            overrides.to_override_graphql_format_options(path, options)
-        } else {
-            options
-        }
+        .with_quote_style(language.quote_style.unwrap_or_default());
+
+        overrides.apply_override_graphql_format_options(path, &mut options);
+
+        options
     }
 
     fn resolve_analyzer_options(
-        _global: Option<&Settings>,
-        _language: Option<&Self::LinterSettings>,
+        _global: &Settings,
+        _language: &Self::LinterSettings,
         _environment: Option<&Self::EnvironmentSettings>,
         path: &BiomePath,
         _file_source: &DocumentFileSource,
@@ -164,94 +163,88 @@ impl ServiceLanguage for GraphqlLanguage {
             .with_suppression_reason(suppression_reason)
     }
 
-    fn formatter_enabled_for_file_path(settings: Option<&Settings>, path: &Utf8Path) -> bool {
-        settings
-            .and_then(|settings| {
-                let overrides_activity =
-                    settings
-                        .override_settings
-                        .patterns
-                        .iter()
-                        .rev()
-                        .find_map(|pattern| {
-                            check_override_feature_activity(
-                                pattern.languages.graphql.formatter.enabled,
-                                pattern.formatter.enabled,
-                            )
-                            .filter(|_| {
-                                // Then check whether the path satisfies
-                                pattern.is_file_included(path)
-                            })
-                        });
+    fn formatter_enabled_for_file_path(settings: &Settings, path: &Utf8Path) -> bool {
+        let overrides_activity =
+            settings
+                .override_settings
+                .patterns
+                .iter()
+                .rev()
+                .find_map(|pattern| {
+                    check_override_feature_activity(
+                        pattern.languages.graphql.formatter.enabled,
+                        pattern.formatter.enabled,
+                    )
+                    .filter(|_| {
+                        // Then check whether the path satisfies
+                        pattern.is_file_included(path)
+                    })
+                });
 
-                overrides_activity.or(check_feature_activity(
-                    settings.languages.graphql.formatter.enabled,
-                    settings.formatter.enabled,
-                ))
-            })
+        overrides_activity
+            .or(check_feature_activity(
+                settings.languages.graphql.formatter.enabled,
+                settings.formatter.enabled,
+            ))
             .unwrap_or_default()
             .into()
     }
 
-    fn assist_enabled_for_file_path(settings: Option<&Settings>, path: &Utf8Path) -> bool {
-        settings
-            .and_then(|settings| {
-                let overrides_activity =
-                    settings
-                        .override_settings
-                        .patterns
-                        .iter()
-                        .rev()
-                        .find_map(|pattern| {
-                            check_override_feature_activity(
-                                pattern.languages.graphql.assist.enabled,
-                                pattern.assist.enabled,
-                            )
-                            .filter(|_| {
-                                // Then check whether the path satisfies
-                                pattern.is_file_included(path)
-                            })
-                        });
+    fn assist_enabled_for_file_path(settings: &Settings, path: &Utf8Path) -> bool {
+        let overrides_activity =
+            settings
+                .override_settings
+                .patterns
+                .iter()
+                .rev()
+                .find_map(|pattern| {
+                    check_override_feature_activity(
+                        pattern.languages.graphql.assist.enabled,
+                        pattern.assist.enabled,
+                    )
+                    .filter(|_| {
+                        // Then check whether the path satisfies
+                        pattern.is_file_included(path)
+                    })
+                });
 
-                overrides_activity.or(check_feature_activity(
-                    settings.languages.graphql.assist.enabled,
-                    settings.assist.enabled,
-                ))
-            })
+        overrides_activity
+            .or(check_feature_activity(
+                settings.languages.graphql.assist.enabled,
+                settings.assist.enabled,
+            ))
             .unwrap_or_default()
             .into()
     }
 
-    fn linter_enabled_for_file_path(settings: Option<&Settings>, path: &Utf8Path) -> bool {
-        settings
-            .and_then(|settings| {
-                let overrides_activity =
-                    settings
-                        .override_settings
-                        .patterns
-                        .iter()
-                        .rev()
-                        .find_map(|pattern| {
-                            check_override_feature_activity(
-                                pattern.languages.graphql.linter.enabled,
-                                pattern.linter.enabled,
-                            )
-                            .filter(|_| {
-                                // Then check whether the path satisfies
-                                pattern.is_file_included(path)
-                            })
-                        });
+    fn linter_enabled_for_file_path(settings: &Settings, path: &Utf8Path) -> bool {
+        let overrides_activity =
+            settings
+                .override_settings
+                .patterns
+                .iter()
+                .rev()
+                .find_map(|pattern| {
+                    check_override_feature_activity(
+                        pattern.languages.graphql.linter.enabled,
+                        pattern.linter.enabled,
+                    )
+                    .filter(|_| {
+                        // Then check whether the path satisfies
+                        pattern.is_file_included(path)
+                    })
+                });
 
-                overrides_activity.or(check_feature_activity(
-                    settings.languages.graphql.linter.enabled,
-                    settings.linter.enabled,
-                ))
-            })
+        overrides_activity
+            .or(check_feature_activity(
+                settings.languages.graphql.linter.enabled,
+                settings.linter.enabled,
+            ))
             .unwrap_or_default()
             .into()
     }
 
-    fn resolve_environment(_settings: Option<&Settings>) -> Option<&Self::EnvironmentSettings> {
+    fn resolve_environment(_settings: &Settings) -> Option<&Self::EnvironmentSettings> {
         None
     }
 }
@@ -293,19 +286,19 @@ impl ExtensionHandler for GraphqlFileHandler {
     }
 }
 
-fn formatter_enabled(path: &Utf8Path, handle: &WorkspaceSettingsHandle) -> bool {
-    handle.formatter_enabled_for_file_path::<GraphqlLanguage>(path)
+fn formatter_enabled(path: &Utf8Path, settings: &Settings) -> bool {
+    settings.formatter_enabled_for_file_path::<GraphqlLanguage>(path)
 }
 
-fn linter_enabled(path: &Utf8Path, handle: &WorkspaceSettingsHandle) -> bool {
-    handle.linter_enabled_for_file_path::<GraphqlLanguage>(path)
+fn linter_enabled(path: &Utf8Path, settings: &Settings) -> bool {
+    settings.linter_enabled_for_file_path::<GraphqlLanguage>(path)
 }
 
-fn assist_enabled(path: &Utf8Path, handle: &WorkspaceSettingsHandle) -> bool {
-    handle.assist_enabled_for_file_path::<GraphqlLanguage>(path)
+fn assist_enabled(path: &Utf8Path, settings: &Settings) -> bool {
+    settings.assist_enabled_for_file_path::<GraphqlLanguage>(path)
 }
 
-fn search_enabled(_path: &Utf8Path, _handle: &WorkspaceSettingsHandle) -> bool {
+fn search_enabled(_path: &Utf8Path, _settings: &Settings) -> bool {
     true
 }
 
@@ -313,7 +306,7 @@ fn parse(
     _biome_path: &BiomePath,
     file_source: DocumentFileSource,
     text: &str,
-    _settings: WorkspaceSettingsHandle,
+    _settings: &Settings,
     cache: &mut NodeCache,
 ) -> ParseResult {
     let parse = parse_graphql_with_cache(text, cache);
@@ -337,7 +330,7 @@ fn debug_formatter_ir(
     biome_path: &BiomePath,
     document_file_source: &DocumentFileSource,
     parse: AnyParse,
-    settings: WorkspaceSettingsHandle,
+    settings: &Settings,
 ) -> Result<String, WorkspaceError> {
     let options = settings.format_options::<GraphqlLanguage>(biome_path, document_file_source);
 
@@ -353,7 +346,7 @@ fn format(
     biome_path: &BiomePath,
     document_file_source: &DocumentFileSource,
     parse: AnyParse,
-    settings: WorkspaceSettingsHandle,
+    settings: &Settings,
 ) -> Result<Printed, WorkspaceError> {
     let options = settings.format_options::<GraphqlLanguage>(biome_path, document_file_source);
 
@@ -370,7 +363,7 @@ fn format_range(
     biome_path: &BiomePath,
     document_file_source: &DocumentFileSource,
     parse: AnyParse,
-    settings: WorkspaceSettingsHandle,
+    settings: &Settings,
     range: TextRange,
 ) -> Result<Printed, WorkspaceError> {
     let options = settings.format_options::<GraphqlLanguage>(biome_path, document_file_source);
@@ -384,7 +377,7 @@ fn format_on_type(
     biome_path: &BiomePath,
     document_file_source: &DocumentFileSource,
     parse: AnyParse,
-    settings: WorkspaceSettingsHandle,
+    settings: &Settings,
     offset: TextSize,
 ) -> Result<Printed, WorkspaceError> {
     let options = settings.format_options::<GraphqlLanguage>(biome_path, document_file_source);
@@ -420,7 +413,7 @@ fn format_on_type(
 fn lint(params: LintParams) -> LintResults {
     let _ = debug_span!("Linting GraphQL file", path =? params.path, language =? params.language)
         .entered();
-    let workspace_settings = &params.workspace;
+    let workspace_settings = &params.settings;
     let analyzer_options = workspace_settings.analyzer_options::<GraphqlLanguage>(
         params.path,
         &params.language,
@@ -429,7 +422,7 @@ fn lint(params: LintParams) -> LintResults {
     let tree = params.parse.tree();
 
     let (enabled_rules, disabled_rules, analyzer_options) =
-        AnalyzerVisitorBuilder::new(params.workspace.settings(), analyzer_options)
+        AnalyzerVisitorBuilder::new(params.settings, analyzer_options)
             .with_only(&params.only)
             .with_skip(&params.skip)
             .with_path(params.path.as_path())
@@ -458,7 +451,7 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
     let CodeActionsParams {
         parse,
         range,
-        workspace,
+        settings,
         path,
         module_graph: _,
         project_layout,
@@ -480,14 +473,14 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
         };
     };
 
-    let analyzer_options = workspace.analyzer_options::<GraphqlLanguage>(
+    let analyzer_options = settings.analyzer_options::<GraphqlLanguage>(
         path,
         &language,
         suppression_reason.as_deref(),
     );
     let mut actions = Vec::new();
     let (enabled_rules, disabled_rules, analyzer_options) =
-        AnalyzerVisitorBuilder::new(params.workspace.settings(), analyzer_options)
+        AnalyzerVisitorBuilder::new(settings, analyzer_options)
             .with_only(&only)
             .with_skip(&skip)
             .with_path(path.as_path())
@@ -524,24 +517,16 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
 /// If applies all the safe fixes to the given syntax tree.
 pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceError> {
     let mut tree: GraphqlRoot = params.parse.tree();
-    let Some(settings) = params.workspace.settings() else {
-        return Ok(FixFileResult {
-            actions: Vec::new(),
-            errors: 0,
-            skipped_suggested_fixes: 0,
-            code: tree.syntax().to_string(),
-        });
-    };
 
     // Compute final rules (taking `overrides` into account)
-    let rules = settings.as_linter_rules(params.biome_path.as_path());
-    let analyzer_options = params.workspace.analyzer_options::<GraphqlLanguage>(
+    let rules = params.settings.as_linter_rules(params.biome_path.as_path());
+    let analyzer_options = params.settings.analyzer_options::<GraphqlLanguage>(
         params.biome_path,
         &params.document_file_source,
         params.suppression_reason.as_deref(),
     );
     let (enabled_rules, disabled_rules, analyzer_options) =
-        AnalyzerVisitorBuilder::new(params.workspace.settings(), analyzer_options)
+        AnalyzerVisitorBuilder::new(params.settings, analyzer_options)
             .with_only(&params.only)
             .with_skip(&params.skip)
             .with_path(params.biome_path.as_path())
@@ -632,7 +617,7 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
             None => {
                 let code = if params.should_format {
                     format_node(
-                        params.workspace.format_options::<GraphqlLanguage>(
+                        params.settings.format_options::<GraphqlLanguage>(
                             params.biome_path,
                             &params.document_file_source,
                         ),

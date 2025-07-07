@@ -9,6 +9,7 @@ use biome_js_syntax::{
     JsCallExpression, JsSyntaxKind,
 };
 use biome_rowan::{AstNode, AstSeparatedList, BatchMutationExt};
+use biome_rule_options::use_number_to_fixed_digits_argument::UseNumberToFixedDigitsArgumentOptions;
 
 use crate::JsRuleAction;
 
@@ -44,7 +45,7 @@ declare_lint_rule! {
         version: "1.8.0",
         name: "useNumberToFixedDigitsArgument",
         language: "js",
-        sources: &[RuleSource::EslintUnicorn("require-number-to-fixed-digits-argument")],
+        sources: &[RuleSource::EslintUnicorn("require-number-to-fixed-digits-argument").same()],
         recommended: false,
         severity: Severity::Warning,
         fix_kind: FixKind::Safe,
@@ -55,7 +56,7 @@ impl Rule for UseNumberToFixedDigitsArgument {
     type Query = Ast<JsCallExpression>;
     type State = ();
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = UseNumberToFixedDigitsArgumentOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();

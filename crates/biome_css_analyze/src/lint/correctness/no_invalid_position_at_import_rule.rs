@@ -5,6 +5,7 @@ use biome_console::markup;
 use biome_css_syntax::{AnyCssRule, CssRuleList};
 use biome_diagnostics::Severity;
 use biome_rowan::{AstNode, TextRange};
+use biome_rule_options::no_invalid_position_at_import_rule::NoInvalidPositionAtImportRuleOptions;
 
 declare_lint_rule! {
     /// Disallow the use of `@import` at-rules in invalid positions.
@@ -33,7 +34,7 @@ declare_lint_rule! {
         language: "css",
         recommended: true,
         severity: Severity::Error,
-        sources: &[RuleSource::Stylelint("no-invalid-position-at-import-rule")],
+        sources: &[RuleSource::Stylelint("no-invalid-position-at-import-rule").same()],
     }
 }
 
@@ -41,7 +42,7 @@ impl Rule for NoInvalidPositionAtImportRule {
     type Query = Ast<CssRuleList>;
     type State = TextRange;
     type Signals = Box<[Self::State]>;
-    type Options = ();
+    type Options = NoInvalidPositionAtImportRuleOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();

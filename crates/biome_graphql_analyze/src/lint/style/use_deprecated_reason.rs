@@ -1,10 +1,11 @@
 use biome_analyze::{
-    Ast, Rule, RuleDiagnostic, RuleSource, RuleSourceKind, context::RuleContext, declare_lint_rule,
+    Ast, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_graphql_syntax::GraphqlDirective;
 use biome_rowan::AstNode;
+use biome_rule_options::use_deprecated_reason::UseDeprecatedReasonOptions;
 
 declare_lint_rule! {
     /// Require specifying the reason argument when using `@deprecated` directive
@@ -33,8 +34,7 @@ declare_lint_rule! {
         version: "1.9.0",
         name: "useDeprecatedReason",
         language: "graphql",
-        sources: &[RuleSource::EslintGraphql("require-deprecation-reason")],
-        source_kind: RuleSourceKind::SameLogic,
+        sources: &[RuleSource::EslintGraphql("require-deprecation-reason").same()],
         recommended: true,
         severity: Severity::Warning,
     }
@@ -44,7 +44,7 @@ impl Rule for UseDeprecatedReason {
     type Query = Ast<GraphqlDirective>;
     type State = GraphqlDirective;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = UseDeprecatedReasonOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
         let node = ctx.query();

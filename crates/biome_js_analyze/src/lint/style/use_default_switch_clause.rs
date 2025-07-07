@@ -7,6 +7,7 @@ use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_syntax::JsSwitchStatement;
 use biome_rowan::AstNode;
+use biome_rule_options::use_default_switch_clause::UseDefaultSwitchClauseOptions;
 
 declare_lint_rule! {
     /// Require the default clause in switch statements.
@@ -43,7 +44,7 @@ declare_lint_rule! {
         version: "1.7.2",
         name: "useDefaultSwitchClause",
         language: "js",
-        sources: &[RuleSource::Eslint("default-case")],
+        sources: &[RuleSource::Eslint("default-case").same()],
         recommended: false,
         severity: Severity::Warning,
     }
@@ -53,7 +54,7 @@ impl Rule for UseDefaultSwitchClause {
     type Query = Ast<JsSwitchStatement>;
     type State = ();
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = UseDefaultSwitchClauseOptions;
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
 

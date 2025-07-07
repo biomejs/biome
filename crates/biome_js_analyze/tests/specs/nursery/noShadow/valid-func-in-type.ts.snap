@@ -1,0 +1,14 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid-func-in-type.ts
+---
+# Input
+```ts
+/** should not generate diagnostics */
+type Props = {
+  contact: string;
+  onChange?: (contact: string) => void;
+};
+const { contact = "", onChange = () => {} }: Props = {} as Props;
+
+```

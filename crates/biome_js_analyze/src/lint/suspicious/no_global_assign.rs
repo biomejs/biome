@@ -6,6 +6,7 @@ use biome_analyze::{Rule, RuleDiagnostic, context::RuleContext, declare_lint_rul
 use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_syntax::{JsSyntaxKind, TextRange};
+use biome_rule_options::no_global_assign::NoGlobalAssignOptions;
 
 declare_lint_rule! {
     /// Disallow assignments to native objects and read-only global variables.
@@ -43,7 +44,7 @@ declare_lint_rule! {
         version: "1.5.0",
         name: "noGlobalAssign",
         language: "js",
-        sources: &[RuleSource::Eslint("no-global-assign")],
+        sources: &[RuleSource::Eslint("no-global-assign").same()],
         recommended: true,
         severity: Severity::Error,
     }
@@ -53,7 +54,7 @@ impl Rule for NoGlobalAssign {
     type Query = SemanticServices;
     type State = TextRange;
     type Signals = Box<[Self::State]>;
-    type Options = ();
+    type Options = NoGlobalAssignOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let global_refs = ctx.query().all_unresolved_references();

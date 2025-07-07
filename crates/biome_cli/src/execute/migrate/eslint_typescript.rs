@@ -1,26 +1,23 @@
 use std::{cmp::Ordering, str::FromStr};
 
+use super::eslint_eslint;
 /// Configuration related to [TypeScript Eslint](https://typescript-eslint.io/).
 ///
 /// Also, the module includes implementation to convert rule options to Biome's rule options.
 use biome_deserialize::Deserializable;
 use biome_deserialize_macros::Deserializable;
-use biome_js_analyze::{
-    lint::{
-        style::use_consistent_member_accessibility,
-        style::{use_consistent_array_type, use_import_type, use_naming_convention},
-    },
-    utils::restricted_regex::RestrictedRegex,
+use biome_rule_options::restricted_regex::RestrictedRegex;
+use biome_rule_options::{
+    use_consistent_array_type, use_consistent_member_accessibility, use_import_type,
+    use_naming_convention,
 };
-
-use super::eslint_eslint;
 
 #[derive(Debug, Default, Deserializable)]
 pub(crate) struct ArrayTypeOptions {
     default: ArrayType,
     readonly: Option<ArrayType>,
 }
-impl From<ArrayTypeOptions> for use_consistent_array_type::ConsistentArrayTypeOptions {
+impl From<ArrayTypeOptions> for use_consistent_array_type::UseConsistentArrayTypeOptions {
     fn from(val: ArrayTypeOptions) -> Self {
         Self {
             syntax: val.default.into(),
@@ -51,7 +48,7 @@ pub(crate) struct ConsistentTypeImportsOptions {
     #[deserializable(rename = "fixStyle")]
     fix_style: Option<FixStyle>,
 }
-impl From<ConsistentTypeImportsOptions> for use_import_type::ImportTypeOptions {
+impl From<ConsistentTypeImportsOptions> for use_import_type::UseImportTypeOptions {
     fn from(val: ConsistentTypeImportsOptions) -> Self {
         Self {
             style: val
@@ -83,7 +80,7 @@ pub(crate) struct ExplicitMemberAccessibilityOptions {
     accessibility: Option<AccessibilityLevel>,
 }
 impl From<ExplicitMemberAccessibilityOptions>
-    for use_consistent_member_accessibility::ConsistentMemberAccessibilityOptions
+    for use_consistent_member_accessibility::UseConsistentMemberAccessibilityOptions
 {
     fn from(value: ExplicitMemberAccessibilityOptions) -> Self {
         Self {
@@ -119,7 +116,7 @@ impl NamingConventionOptions {
         Self(inner)
     }
 }
-impl From<NamingConventionOptions> for use_naming_convention::NamingConventionOptions {
+impl From<NamingConventionOptions> for use_naming_convention::UseNamingConventionOptions {
     fn from(val: NamingConventionOptions) -> Self {
         let mut conventions = Vec::new();
         for selection in val.0 {
@@ -234,7 +231,7 @@ impl NamingConventionSelection {
 
     fn selectors(&self) -> Vec<use_naming_convention::Selector> {
         let mut result = Vec::new();
-        let modifiers: use_naming_convention::Modifiers = self
+        let modifiers: use_naming_convention::RestrictedModifiers = self
             .modifiers
             .iter()
             .flatten()

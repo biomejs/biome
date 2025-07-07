@@ -1,6 +1,5 @@
 use biome_analyze::{
-    Rule, RuleDiagnostic, RuleDomain, RuleSource, RuleSourceKind, context::RuleContext,
-    declare_lint_rule,
+    Rule, RuleDiagnostic, RuleDomain, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
 use biome_js_syntax::{
@@ -9,6 +8,7 @@ use biome_js_syntax::{
 use biome_module_graph::{JsModuleInfo, ModuleGraph, SUPPORTED_EXTENSIONS};
 use biome_resolver::ResolveError;
 use biome_rowan::{AstNode, SyntaxResult, Text, TextRange, TokenText};
+use biome_rule_options::no_unresolved_imports::NoUnresolvedImportsOptions;
 use camino::{Utf8Path, Utf8PathBuf};
 
 use crate::services::module_graph::ResolvedImports;
@@ -53,10 +53,7 @@ declare_lint_rule! {
         version: "2.0.0",
         name: "noUnresolvedImports",
         language: "js",
-        sources: &[
-            RuleSource::EslintImport("named")
-        ],
-        source_kind: RuleSourceKind::Inspired,
+        sources: &[RuleSource::EslintImport("named").inspired()],
         domains: &[RuleDomain::Project],
     }
 }
@@ -94,7 +91,7 @@ impl Rule for NoUnresolvedImports {
     type Query = ResolvedImports<AnyJsImportLike>;
     type State = NoUnresolvedImportsState;
     type Signals = Vec<Self::State>;
-    type Options = ();
+    type Options = NoUnresolvedImportsOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let Some(module_info) = ctx.module_info_for_path(ctx.file_path()) else {

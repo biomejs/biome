@@ -5,6 +5,7 @@ use biome_console::markup;
 use biome_css_syntax::CssGenericProperty;
 use biome_diagnostics::Severity;
 use biome_rowan::{AstNode, TextRange};
+use biome_rule_options::no_unknown_property::NoUnknownPropertyOptions;
 use biome_string_case::StrLikeExtension;
 
 use crate::utils::{is_known_properties, vendor_prefixed};
@@ -63,7 +64,7 @@ declare_lint_rule! {
         language: "css",
         recommended: true,
         severity: Severity::Error,
-        sources: &[RuleSource::Stylelint("property-no-unknown")],
+        sources: &[RuleSource::Stylelint("property-no-unknown").same()],
     }
 }
 
@@ -71,7 +72,7 @@ impl Rule for NoUnknownProperty {
     type Query = Ast<CssGenericProperty>;
     type State = TextRange;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoUnknownPropertyOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
         let node = ctx.query();

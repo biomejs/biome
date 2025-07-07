@@ -6,12 +6,12 @@ use biome_analyze::RuleCategoriesBuilder;
 use biome_diagnostics::DiagnosticExt;
 use biome_fs::{BiomePath, TraversalContext};
 use biome_service::diagnostics::FileTooLarge;
-use biome_service::workspace::FileFeaturesResult;
+use biome_service::workspace::FeaturesSupported;
 
 pub(crate) fn check_file<'ctx>(
     ctx: &'ctx SharedTraversalOptions<'ctx, '_>,
     path: BiomePath,
-    file_features: &'ctx FileFeaturesResult,
+    file_features: FeaturesSupported,
 ) -> FileResult {
     let mut has_failures = false;
     let mut workspace_file = WorkspaceFile::new(ctx, path)?;

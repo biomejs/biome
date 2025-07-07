@@ -20,6 +20,51 @@ use std::fmt::{Debug, Formatter};
 #[doc = r" the slots are not statically known."]
 pub(crate) const SLOT_MAP_EMPTY_VALUE: u8 = u8::MAX;
 #[derive(Clone, PartialEq, Eq, Hash)]
+pub struct HtmlAstroFrontmatterElement {
+    pub(crate) syntax: SyntaxNode,
+}
+impl HtmlAstroFrontmatterElement {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> HtmlAstroFrontmatterElementFields {
+        HtmlAstroFrontmatterElementFields {
+            l_fence_token: self.l_fence_token(),
+            content_token: self.content_token(),
+            r_fence_token: self.r_fence_token(),
+        }
+    }
+    pub fn l_fence_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+    pub fn content_token(&self) -> Option<SyntaxToken> {
+        support::token(&self.syntax, 1usize)
+    }
+    pub fn r_fence_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 2usize)
+    }
+}
+impl Serialize for HtmlAstroFrontmatterElement {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct HtmlAstroFrontmatterElementFields {
+    pub l_fence_token: SyntaxResult<SyntaxToken>,
+    pub content_token: Option<SyntaxToken>,
+    pub r_fence_token: SyntaxResult<SyntaxToken>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
 pub struct HtmlAttribute {
     pub(crate) syntax: SyntaxNode,
 }
@@ -446,6 +491,7 @@ impl HtmlRoot {
     pub fn as_fields(&self) -> HtmlRootFields {
         HtmlRootFields {
             bom_token: self.bom_token(),
+            frontmatter: self.frontmatter(),
             directive: self.directive(),
             html: self.html(),
             eof_token: self.eof_token(),
@@ -454,14 +500,17 @@ impl HtmlRoot {
     pub fn bom_token(&self) -> Option<SyntaxToken> {
         support::token(&self.syntax, 0usize)
     }
-    pub fn directive(&self) -> Option<HtmlDirective> {
+    pub fn frontmatter(&self) -> Option<HtmlAstroFrontmatterElement> {
         support::node(&self.syntax, 1usize)
     }
+    pub fn directive(&self) -> Option<HtmlDirective> {
+        support::node(&self.syntax, 2usize)
+    }
     pub fn html(&self) -> HtmlElementList {
-        support::list(&self.syntax, 2usize)
+        support::list(&self.syntax, 3usize)
     }
     pub fn eof_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 3usize)
+        support::required_token(&self.syntax, 4usize)
     }
 }
 impl Serialize for HtmlRoot {
@@ -475,6 +524,7 @@ impl Serialize for HtmlRoot {
 #[derive(Serialize)]
 pub struct HtmlRootFields {
     pub bom_token: Option<SyntaxToken>,
+    pub frontmatter: Option<HtmlAstroFrontmatterElement>,
     pub directive: Option<HtmlDirective>,
     pub html: HtmlElementList,
     pub eof_token: SyntaxResult<SyntaxToken>,
@@ -661,6 +711,64 @@ impl AnyHtmlElement {
             Self::HtmlSelfClosingElement(item) => Some(item),
             _ => None,
         }
+    }
+}
+impl AstNode for HtmlAstroFrontmatterElement {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(HTML_ASTRO_FRONTMATTER_ELEMENT as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == HTML_ASTRO_FRONTMATTER_ELEMENT
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for HtmlAstroFrontmatterElement {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("HtmlAstroFrontmatterElement")
+                .field(
+                    "l_fence_token",
+                    &support::DebugSyntaxResult(self.l_fence_token()),
+                )
+                .field(
+                    "content_token",
+                    &support::DebugOptionalElement(self.content_token()),
+                )
+                .field(
+                    "r_fence_token",
+                    &support::DebugSyntaxResult(self.r_fence_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("HtmlAstroFrontmatterElement").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<HtmlAstroFrontmatterElement> for SyntaxNode {
+    fn from(n: HtmlAstroFrontmatterElement) -> Self {
+        n.syntax
+    }
+}
+impl From<HtmlAstroFrontmatterElement> for SyntaxElement {
+    fn from(n: HtmlAstroFrontmatterElement) -> Self {
+        n.syntax.into()
     }
 }
 impl AstNode for HtmlAttribute {
@@ -1198,6 +1306,10 @@ impl std::fmt::Debug for HtmlRoot {
                     &support::DebugOptionalElement(self.bom_token()),
                 )
                 .field(
+                    "frontmatter",
+                    &support::DebugOptionalElement(self.frontmatter()),
+                )
+                .field(
                     "directive",
                     &support::DebugOptionalElement(self.directive()),
                 )
@@ -1549,6 +1661,11 @@ impl std::fmt::Display for AnyHtmlAttribute {
     }
 }
 impl std::fmt::Display for AnyHtmlElement {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for HtmlAstroFrontmatterElement {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }

@@ -3,6 +3,7 @@ use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_syntax::{AnyJsExpression, JsNewOrCallExpression, global_identifier};
 use biome_rowan::AstNode;
+use biome_rule_options::use_error_message::UseErrorMessageOptions;
 
 use crate::services::semantic::Semantic;
 
@@ -44,7 +45,7 @@ declare_lint_rule! {
         version: "1.8.0",
         name: "useErrorMessage",
         language: "js",
-        sources: &[RuleSource::EslintUnicorn("error-message")],
+        sources: &[RuleSource::EslintUnicorn("error-message").same()],
         recommended: false,
         severity: Severity::Warning,
     }
@@ -54,7 +55,7 @@ impl Rule for UseErrorMessage {
     type Query = Semantic<JsNewOrCallExpression>;
     type State = UseErrorMessageRule;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = UseErrorMessageOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();

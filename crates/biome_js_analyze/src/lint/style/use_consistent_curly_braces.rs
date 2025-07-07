@@ -1,6 +1,5 @@
 use biome_analyze::{
-    Ast, FixKind, Rule, RuleDiagnostic, RuleSource, RuleSourceKind, context::RuleContext,
-    declare_lint_rule,
+    Ast, FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
 use biome_diagnostics::Severity;
@@ -11,6 +10,7 @@ use biome_js_syntax::{
     JsxChildList, JsxExpressionAttributeValue, T,
 };
 use biome_rowan::{AstNode, BatchMutationExt, TextRange, TriviaPiece, declare_node_union};
+use biome_rule_options::use_consistent_curly_braces::UseConsistentCurlyBracesOptions;
 
 use crate::JsRuleAction;
 
@@ -52,8 +52,7 @@ declare_lint_rule! {
         language: "jsx",
         recommended: false,
         severity: Severity::Information,
-        sources: &[RuleSource::EslintReact("jsx-curly-brace-presence")],
-        source_kind: RuleSourceKind::Inspired,
+        sources: &[RuleSource::EslintReact("jsx-curly-brace-presence").inspired()],
         fix_kind: FixKind::Unsafe,
     }
 }
@@ -85,7 +84,7 @@ impl Rule for UseConsistentCurlyBraces {
     type Query = Ast<AnyJsxCurlyQuery>;
     type State = CurlyBraceResolution;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = UseConsistentCurlyBracesOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let query = ctx.query();

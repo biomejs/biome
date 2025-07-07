@@ -12,6 +12,7 @@ use biome_js_syntax::{
     AnyJsExpression, JsNewOrCallExpression, global_identifier, static_value::StaticValue,
 };
 use biome_rowan::{AstNode, BatchMutationExt};
+use biome_rule_options::use_consistent_builtin_instantiation::UseConsistentBuiltinInstantiationOptions;
 
 use crate::lint::style::use_throw_new_error::convert_call_expression_to_new_expression;
 
@@ -74,9 +75,9 @@ declare_lint_rule! {
         name: "useConsistentBuiltinInstantiation",
         language: "js",
         sources: &[
-            RuleSource::Eslint("no-new-wrappers"),
+            RuleSource::Eslint("no-new-wrappers").same(),
             // FIXME: uncomment once we allow multiple rules to have the same source.
-            //RuleSource::Eslint("no-new-native-nonconstructor"),
+            //RuleSource::Eslint("no-new-native-nonconstructor").same(),
         ],
         recommended: false,
         severity: Severity::Information,
@@ -88,7 +89,7 @@ impl Rule for UseConsistentBuiltinInstantiation {
     type Query = Semantic<JsNewOrCallExpression>;
     type State = UseConsistentBuiltinInstantiationState;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = UseConsistentBuiltinInstantiationOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();

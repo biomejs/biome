@@ -4,6 +4,9 @@
 
 use std::{borrow::Cow, cmp::Ordering, ffi::OsStr};
 
+#[cfg(feature = "biome_rowan")]
+pub mod comparable_token;
+
 /// Represents the case of a string.
 ///
 /// Note that some cases are supersets of others.

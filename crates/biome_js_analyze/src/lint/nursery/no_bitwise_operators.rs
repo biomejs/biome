@@ -2,15 +2,12 @@ use biome_analyze::{
     Ast, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
-use biome_deserialize_macros::Deserializable;
 use biome_js_syntax::{
     JsAssignmentExpression, JsAssignmentOperator, JsBinaryExpression, JsBinaryOperator,
     JsSyntaxToken, JsUnaryExpression, JsUnaryOperator,
 };
 use biome_rowan::{AstNode, declare_node_union};
-#[cfg(feature = "schemars")]
-use schemars::JsonSchema;
-use serde::{Deserialize, Serialize};
+use biome_rule_options::no_bitwise_operators::NoBitwiseOperatorsOptions;
 
 declare_lint_rule! {
     /// Disallow bitwise operators.
@@ -61,7 +58,7 @@ declare_lint_rule! {
         name: "noBitwiseOperators",
         language: "js",
         sources: &[
-            RuleSource::Eslint("no-bitwise"),
+            RuleSource::Eslint("no-bitwise").same(),
         ],
         recommended: false,
     }
@@ -162,14 +159,4 @@ impl Rule for NoBitwiseOperators {
             .note(note_msg),
         )
     }
-}
-
-/// Rule's options
-#[derive(Clone, Debug, Default, Deserialize, Deserializable, Eq, PartialEq, Serialize)]
-#[cfg_attr(feature = "schemars", derive(JsonSchema))]
-#[serde(rename_all = "camelCase", deny_unknown_fields, default)]
-pub struct NoBitwiseOperatorsOptions {
-    /// Allows a list of bitwise operators to be used as exceptions.
-    #[serde(default, skip_serializing_if = "<[_]>::is_empty")]
-    pub allow: Box<[Box<str>]>,
 }

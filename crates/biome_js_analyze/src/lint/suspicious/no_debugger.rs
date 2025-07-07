@@ -5,6 +5,7 @@ use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_syntax::JsDebuggerStatement;
 use biome_rowan::{AstNode, BatchMutationExt};
+use biome_rule_options::no_debugger::NoDebuggerOptions;
 
 use crate::{JsRuleAction, utils::batch::JsBatchMutation};
 
@@ -29,7 +30,7 @@ declare_lint_rule! {
         version: "1.0.0",
         name: "noDebugger",
         language: "js",
-        sources: &[RuleSource::Eslint("no-debugger")],
+        sources: &[RuleSource::Eslint("no-debugger").same()],
         recommended: true,
         severity: Severity::Error,
         fix_kind: FixKind::Unsafe,
@@ -40,7 +41,7 @@ impl Rule for NoDebugger {
     type Query = Ast<JsDebuggerStatement>;
     type State = ();
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoDebuggerOptions;
 
     fn run(_: &RuleContext<Self>) -> Option<Self::State> {
         Some(())

@@ -4,6 +4,7 @@ use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_syntax::{AnyJsExpression, JsCallExpression, JsNewExpression, global_identifier};
 use biome_rowan::{SyntaxResult, TextRange, declare_node_union};
+use biome_rule_options::no_global_object_calls::NoGlobalObjectCallsOptions;
 use std::{fmt::Display, str::FromStr};
 
 declare_lint_rule! {
@@ -88,7 +89,7 @@ declare_lint_rule! {
         version: "1.0.0",
         name: "noGlobalObjectCalls",
         language: "js",
-        sources: &[RuleSource::Eslint("no-obj-calls")],
+        sources: &[RuleSource::Eslint("no-obj-calls").same()],
         recommended: true,
         severity: Severity::Error,
     }
@@ -98,7 +99,7 @@ impl Rule for NoGlobalObjectCalls {
     type Query = Semantic<QueryNode>;
     type State = (NonCallableGlobals, TextRange);
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoGlobalObjectCallsOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();

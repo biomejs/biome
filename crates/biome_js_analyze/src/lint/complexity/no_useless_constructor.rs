@@ -8,6 +8,7 @@ use biome_js_syntax::{
     JsCallExpression, JsConstructorClassMember,
 };
 use biome_rowan::{AstNode, AstNodeList, AstSeparatedList, BatchMutationExt};
+use biome_rule_options::no_useless_constructor::NoUselessConstructorOptions;
 
 use crate::JsRuleAction;
 
@@ -119,8 +120,8 @@ declare_lint_rule! {
         name: "noUselessConstructor",
         language: "js",
         sources: &[
-            RuleSource::Eslint("no-useless-constructor"),
-            RuleSource::EslintTypeScript("no-useless-constructor"),
+            RuleSource::Eslint("no-useless-constructor").same(),
+            RuleSource::EslintTypeScript("no-useless-constructor").same(),
         ],
         recommended: true,
         severity: Severity::Information,
@@ -132,7 +133,7 @@ impl Rule for NoUselessConstructor {
     type Query = Ast<JsConstructorClassMember>;
     type State = ();
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoUselessConstructorOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let constructor = ctx.query();

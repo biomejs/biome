@@ -1,10 +1,10 @@
 use biome_analyze::{
-    Ast, Rule, RuleDiagnostic, RuleDomain, RuleSource, RuleSourceKind, context::RuleContext,
-    declare_lint_rule,
+    Ast, Rule, RuleDiagnostic, RuleDomain, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
 use biome_js_syntax::{AnyJsMemberExpression, JsCallExpression, JsSyntaxKind, JsxExpressionChild};
 use biome_rowan::{AstNode, AstSeparatedList, SyntaxNodeOptionExt};
+use biome_rule_options::use_for_component::UseForComponentOptions;
 
 declare_lint_rule! {
     /// Enforce using Solid's `<For />` component for mapping an array to JSX elements.
@@ -58,8 +58,7 @@ declare_lint_rule! {
         language: "js",
         domains: &[RuleDomain::Solid],
         recommended: false,
-        sources: &[RuleSource::EslintSolid("perfer-for")],
-        source_kind: RuleSourceKind::Inspired,
+        sources: &[RuleSource::EslintSolid("perfer-for").inspired()],
     }
 }
 
@@ -67,7 +66,7 @@ impl Rule for UseForComponent {
     type Query = Ast<JsCallExpression>;
     type State = ();
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = UseForComponentOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();

@@ -910,7 +910,7 @@ async fn pull_diagnostics() -> Result<()> {
                                 .unwrap(),
                         }),
                         source: Some(String::from("biome")),
-                        message: String::from("This variable is unused.",),
+                        message: String::from("This variable a is unused.",),
                         related_information: None,
                         tags: None,
                         data: None,
@@ -1093,7 +1093,7 @@ async fn pull_diagnostics_of_syntax_rules() -> Result<()> {
                                 .unwrap(),
                         }),
                         source: Some(String::from("biome")),
-                        message: String::from("This class is unused.",),
+                        message: String::from("This class A is unused.",),
                         related_information: None,
                         tags: None,
                         data: None,
@@ -1156,7 +1156,7 @@ async fn pull_diagnostics_from_new_file() -> Result<()> {
                                 .unwrap(),
                         }),
                         source: Some(String::from("biome")),
-                        message: String::from("This variable is unused.",),
+                        message: String::from("This variable a is unused.",),
                         related_information: None,
                         tags: None,
                         data: None,
@@ -1386,88 +1386,6 @@ async fn pull_quick_fixes() -> Result<()> {
 }
 
 #[tokio::test]
-async fn pull_biome_quick_fixes_ignore_unsafe() -> Result<()> {
-    let factory = ServerFactory::default();
-    let (service, client) = factory.create().into_inner();
-    let (stream, sink) = client.split();
-    let mut server = Server::new(service);
-
-    let unsafe_fixable = Diagnostic {
-        range: Range {
-            start: Position {
-                line: 0,
-                character: 6,
-            },
-            end: Position {
-                line: 0,
-                character: 9,
-            },
-        },
-        severity: Some(DiagnosticSeverity::ERROR),
-        code: Some(NumberOrString::String(String::from(
-            "lint/suspicious/noDoubleEquals",
-        ))),
-        code_description: None,
-        source: Some(String::from("biome")),
-        message: String::from("Use === instead of ==."),
-        related_information: None,
-        tags: None,
-        data: None,
-    };
-
-    let (sender, _) = channel(CHANNEL_BUFFER_SIZE);
-    let reader = tokio::spawn(client_handler(stream, sink, sender));
-
-    server.initialize().await?;
-    server.initialized().await?;
-
-    server.open_document("if(a == 0) {}").await?;
-
-    let res: CodeActionResponse = server
-        .request(
-            "textDocument/codeAction",
-            "pull_code_actions",
-            CodeActionParams {
-                text_document: TextDocumentIdentifier {
-                    uri: uri!("document.js"),
-                },
-                range: Range {
-                    start: Position {
-                        line: 0,
-                        character: 6,
-                    },
-                    end: Position {
-                        line: 0,
-                        character: 6,
-                    },
-                },
-                context: CodeActionContext {
-                    diagnostics: vec![unsafe_fixable.clone()],
-                    only: Some(vec![CodeActionKind::new("quickfix.biome")]),
-                    ..Default::default()
-                },
-                work_done_progress_params: WorkDoneProgressParams {
-                    work_done_token: None,
-                },
-                partial_result_params: PartialResultParams {
-                    partial_result_token: None,
-                },
-            },
-        )
-        .await?
-        .context("codeAction returned None")?;
-
-    assert_eq!(res, vec![]);
-
-    server.close_document().await?;
-
-    server.shutdown().await?;
-    reader.abort();
-
-    Ok(())
-}
-
-#[tokio::test]
 async fn pull_biome_quick_fixes() -> Result<()> {
     let factory = ServerFactory::default();
     let (service, client) = factory.create().into_inner();
@@ -1621,7 +1539,12 @@ async fn pull_quick_fixes_include_unsafe() -> Result<()> {
                 },
                 context: CodeActionContext {
                     diagnostics: vec![unsafe_fixable.clone()],
-                    only: Some(vec![]),
+                    only: Some(
+                        DEFAULT_CODE_ACTION_CAPABILITIES
+                            .iter()
+                            .map(|s| CodeActionKind::from(*s))
+                            .collect::<Vec<_>>(),
+                    ),
                     ..Default::default()
                 },
                 work_done_progress_params: WorkDoneProgressParams {
@@ -1821,7 +1744,7 @@ async fn pull_diagnostics_for_rome_json() -> Result<()> {
 
 #[tokio::test]
 async fn plugin_load_error_show_message() -> Result<()> {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let config = r#"{
         "css": {
             "linter": { "enabled": true }
@@ -1840,7 +1763,7 @@ async fn plugin_load_error_show_message() -> Result<()> {
         INVALID_PLUGIN_CONTENT,
     );
 
-    let factory = ServerFactory::new_with_fs(Box::new(fs));
+    let factory = ServerFactory::new_with_fs(Arc::new(fs));
     let (service, client) = factory.create().into_inner();
 
     let (stream, sink) = client.split();
@@ -1876,7 +1799,7 @@ async fn plugin_load_error_show_message() -> Result<()> {
 
 #[tokio::test]
 async fn pull_diagnostics_for_css_files() -> Result<()> {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let config = r#"{
         "css": {
             "linter": { "enabled": true }
@@ -1888,7 +1811,7 @@ async fn pull_diagnostics_for_css_files() -> Result<()> {
 
     fs.insert(to_utf8_file_path_buf(uri!("biome.json")), config);
 
-    let factory = ServerFactory::new_with_fs(Box::new(fs));
+    let factory = ServerFactory::new_with_fs(Arc::new(fs));
     let (service, client) = factory.create().into_inner();
 
     let (stream, sink) = client.split();
@@ -2278,7 +2201,7 @@ if(a === -0) {}
 
 #[tokio::test]
 async fn does_not_pull_action_for_disabled_rule_in_override_issue_2782() -> Result<()> {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let config = r#"{
     "$schema": "https://biomejs.dev/schemas/1.7.3/schema.json",
     "assist": { "enabled": false },
@@ -2307,7 +2230,7 @@ async fn does_not_pull_action_for_disabled_rule_in_override_issue_2782() -> Resu
 
     fs.insert(to_utf8_file_path_buf(uri!("biome.json")), config);
 
-    let factory = ServerFactory::new_with_fs(Box::new(fs));
+    let factory = ServerFactory::new_with_fs(Arc::new(fs));
     let (service, client) = factory.create().into_inner();
     let (stream, sink) = client.split();
     let mut server = Server::new(service);
@@ -2565,7 +2488,7 @@ async fn pull_fix_all() -> Result<()> {
     );
 
     let expected_action = CodeActionOrCommand::CodeAction(CodeAction {
-        title: String::from("Fix all auto-fixable issues"),
+        title: String::from("Apply all safe fixes (Biome)"),
         kind: Some(CodeActionKind::new("source.fixAll.biome")),
         diagnostics: Some(vec![
             fixable_diagnostic(0)?,
@@ -2794,7 +2717,7 @@ async fn format_jsx_in_javascript_file() -> Result<()> {
 #[tokio::test]
 #[ignore = "flaky, it times out on CI"]
 async fn does_not_format_ignored_files() -> Result<()> {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let config = r#"{
         "files": {
             "includes": ["**", "!**/document.js"]
@@ -2803,7 +2726,7 @@ async fn does_not_format_ignored_files() -> Result<()> {
 
     fs.insert(to_utf8_file_path_buf(uri!("biome.json")), config);
 
-    let factory = ServerFactory::new_with_fs(Box::new(fs));
+    let factory = ServerFactory::new_with_fs(Arc::new(fs));
     let (service, client) = factory.create().into_inner();
     let (stream, sink) = client.split();
     let mut server = Server::new(service);
@@ -3104,7 +3027,7 @@ async fn multiple_projects() -> Result<()> {
 
 #[tokio::test]
 async fn pull_source_assist_action() -> Result<()> {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let config = r#"{
         "assist": {
             "enabled": true,
@@ -3118,7 +3041,7 @@ async fn pull_source_assist_action() -> Result<()> {
 
     fs.insert(to_utf8_file_path_buf(uri!("biome.json")), config);
 
-    let factory = ServerFactory::new_with_fs(Box::new(fs));
+    let factory = ServerFactory::new_with_fs(Arc::new(fs));
     let (service, client) = factory.create().into_inner();
     let (stream, sink) = client.split();
     let mut server = Server::new(service);
@@ -3252,7 +3175,7 @@ async fn pull_source_assist_action() -> Result<()> {
         ],
     );
     let expected_action = CodeActionOrCommand::CodeAction(CodeAction {
-        title: String::from("They keys of the current object can be sorted."),
+        title: String::from("Sort the members by key."),
         kind: Some(CodeActionKind::new("source.biome.useSortedKeys")),
         diagnostics: None,
         edit: Some(WorkspaceEdit {
@@ -3710,7 +3633,7 @@ export function bar() {
 #[tokio::test]
 #[ignore]
 async fn pull_diagnostics_monorepo() -> Result<()> {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
 
     fs.insert(
         to_utf8_file_path_buf(uri!("biome.json")),
@@ -3740,7 +3663,7 @@ async fn pull_diagnostics_monorepo() -> Result<()> {
         r#"const a = 1; a = 2;"#,
     );
 
-    let factory = ServerFactory::new_with_fs(Box::new(fs));
+    let factory = ServerFactory::new_with_fs(Arc::new(fs));
     let (service, client) = factory.create().into_inner();
     let (stream, sink) = client.split();
     let mut server = Server::new(service);
@@ -3774,6 +3697,173 @@ async fn pull_diagnostics_monorepo() -> Result<()> {
     Ok(())
 }
 
+#[tokio::test]
+async fn should_correctly_fix_all_astro_files() -> Result<()> {
+    let factory = ServerFactory::default();
+    let (service, client) = factory.create().into_inner();
+    let (stream, sink) = client.split();
+    let mut server = Server::new(service);
+
+    let (sender, _) = channel(CHANNEL_BUFFER_SIZE);
+    let reader = tokio::spawn(client_handler(stream, sink, sender));
+
+    server.initialize().await?;
+    server.initialized().await?;
+
+    server
+        .open_named_document(
+            r#"---
+let useConst = "Astro Test";
+---
+<!doctype html>"#,
+            uri!("document.astro"),
+            "astro",
+        )
+        .await?;
+
+    let res: CodeActionResponse = server
+        .request(
+            "textDocument/codeAction",
+            "pull_code_actions",
+            CodeActionParams {
+                text_document: TextDocumentIdentifier {
+                    uri: uri!("document.astro"),
+                },
+                range: Range {
+                    start: Position {
+                        line: 1,
+                        character: 7,
+                    },
+                    end: Position {
+                        line: 1,
+                        character: 7,
+                    },
+                },
+                context: CodeActionContext {
+                    diagnostics: vec![],
+                    only: Some(vec![CodeActionKind::new("source.fixAll.biome")]),
+                    ..Default::default()
+                },
+                work_done_progress_params: WorkDoneProgressParams {
+                    work_done_token: None,
+                },
+                partial_result_params: PartialResultParams {
+                    partial_result_token: None,
+                },
+            },
+        )
+        .await?
+        .context("codeAction returned None")?;
+
+    let mut changes = HashMap::default();
+
+    changes.insert(
+        uri!("document.astro"),
+        vec![TextEdit {
+            range: Range {
+                start: Position {
+                    line: 0,
+                    character: 0,
+                },
+                end: Position {
+                    line: 4,
+                    character: 0,
+                },
+            },
+            new_text: String::from(
+                r#"---
+const useConst = "Astro Test";
+---
+<!doctype html>"#,
+            ),
+        }],
+    );
+
+    let expected_action = CodeActionOrCommand::CodeAction(CodeAction {
+        title: String::from("Apply all safe fixes (Biome)"),
+        kind: Some(CodeActionKind::new("source.fixAll.biome")),
+        diagnostics: Some(vec![]),
+        edit: Some(WorkspaceEdit {
+            changes: Some(changes),
+            document_changes: None,
+            change_annotations: None,
+        }),
+        command: None,
+        is_preferred: Some(true),
+        disabled: None,
+        data: None,
+    });
+
+    assert_eq!(res, vec![expected_action]);
+
+    server.close_document().await?;
+
+    server.shutdown().await?;
+    reader.abort();
+
+    Ok(())
+}
+
+#[tokio::test]
+async fn should_not_return_error_on_code_actions_for_grit_files() -> Result<()> {
+    let factory = ServerFactory::default();
+    let (service, client) = factory.create().into_inner();
+    let (stream, sink) = client.split();
+    let mut server = Server::new(service);
+
+    let (sender, _) = channel(CHANNEL_BUFFER_SIZE);
+    let reader = tokio::spawn(client_handler(stream, sink, sender));
+
+    server.initialize().await?;
+    server.initialized().await?;
+
+    server
+        .open_named_document(r#"`console.log($args);`"#, uri!("example.grit"), "grit")
+        .await?;
+
+    let res: CodeActionResponse = server
+        .request(
+            "textDocument/codeAction",
+            "pull_code_actions",
+            CodeActionParams {
+                text_document: TextDocumentIdentifier {
+                    uri: uri!("example.grit"),
+                },
+                range: Range {
+                    start: Position {
+                        line: 0,
+                        character: 0,
+                    },
+                    end: Position {
+                        line: 0,
+                        character: 21,
+                    },
+                },
+                context: CodeActionContext {
+                    diagnostics: vec![],
+                    only: Some(vec![CodeActionKind::new("source.fixAll.biome")]),
+                    ..Default::default()
+                },
+                work_done_progress_params: WorkDoneProgressParams {
+                    work_done_token: None,
+                },
+                partial_result_params: PartialResultParams {
+                    partial_result_token: None,
+                },
+            },
+        )
+        .await?
+        .context("codeAction returned None")?;
+
+    assert_eq!(res, vec![]);
+
+    server.close_document().await?;
+    server.shutdown().await?;
+    reader.abort();
+
+    Ok(())
+}
+
 // #endregion
 
 // #region TEST UTILS
@@ -3788,7 +3878,7 @@ fn assert_diagnostic_code(server_notification: &ServerNotification, code: &str) 
             }));
         }
         ServerNotification::ShowMessage(_) => {
-            panic!("Unexpected notification: {:?}", server_notification);
+            panic!("Unexpected notification: {server_notification:?}",);
         }
     }
 }
@@ -3799,7 +3889,7 @@ fn assert_diagnostics_count(server_notification: &ServerNotification, expected_c
             assert_eq!(publish.diagnostics.len(), expected_count)
         }
         ServerNotification::ShowMessage(_) => {
-            panic!("Unexpected notification: {:?}", server_notification);
+            panic!("Unexpected notification: {server_notification:?}",);
         }
     }
 }

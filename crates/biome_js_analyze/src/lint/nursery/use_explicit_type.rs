@@ -1,5 +1,5 @@
 use biome_analyze::{
-    Ast, Rule, RuleDiagnostic, RuleSource, RuleSourceKind, context::RuleContext, declare_lint_rule,
+    Ast, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::{Markup, markup};
 use biome_diagnostics::Severity;
@@ -21,6 +21,7 @@ use biome_js_syntax::{
 use biome_rowan::{
     AstNode, AstSeparatedList, SyntaxNode, SyntaxNodeOptionExt, TextRange, declare_node_union,
 };
+use biome_rule_options::use_explicit_type::UseExplicitTypeOptions;
 
 declare_lint_rule! {
     /// Enforce types in functions, methods, variables, and parameters.
@@ -326,8 +327,10 @@ declare_lint_rule! {
         language: "ts",
         recommended: false,
         severity: Severity::Error,
-        sources: &[RuleSource::EslintTypeScript("explicit-function-return-type"), RuleSource::EslintTypeScript("explicit-module-boundary-types")],
-        source_kind: RuleSourceKind::Inspired,
+        sources: &[
+            RuleSource::EslintTypeScript("explicit-function-return-type").inspired(),
+            RuleSource::EslintTypeScript("explicit-module-boundary-types").inspired(),
+        ],
     }
 }
 
@@ -413,7 +416,7 @@ impl Rule for UseExplicitType {
     type Query = Ast<AnyEntityWithTypes>;
     type State = State;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = UseExplicitTypeOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let source_type = ctx.source_type::<JsFileSource>().language();

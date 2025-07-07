@@ -10,6 +10,7 @@ use biome_js_syntax::{
     JsThrowStatement, TextRange, WalkEvent,
 };
 use biome_rowan::{AstNode, NodeOrToken};
+use biome_rule_options::no_unreachable_super::NoUnreachableSuperOptions;
 use rustc_hash::FxHashSet;
 
 use crate::services::control_flow::{AnyJsControlFlowRoot, ControlFlowGraph};
@@ -66,7 +67,7 @@ declare_lint_rule! {
         version: "1.0.0",
         name: "noUnreachableSuper",
         language: "js",
-        sources: &[RuleSource::Eslint("no-this-before-super")],
+        sources: &[RuleSource::Eslint("no-this-before-super").same()],
         recommended: true,
         severity: Severity::Error,
     }
@@ -94,7 +95,7 @@ impl Rule for NoUnreachableSuper {
     type Query = ControlFlowGraph;
     type State = RuleState;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoUnreachableSuperOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let cfg = ctx.query();

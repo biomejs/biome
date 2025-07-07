@@ -5,6 +5,7 @@ use biome_console::markup;
 use biome_css_syntax::{AnyCssPseudoElement, CssPseudoElementSelector};
 use biome_diagnostics::Severity;
 use biome_rowan::AstNode;
+use biome_rule_options::no_unknown_pseudo_element::NoUnknownPseudoElementOptions;
 use biome_string_case::StrLikeExtension;
 
 use crate::utils::{is_pseudo_elements, vender_prefix};
@@ -56,7 +57,7 @@ declare_lint_rule! {
         language: "css",
         recommended: true,
         severity: Severity::Error,
-        sources: &[RuleSource::Stylelint("selector-pseudo-element-no-unknown")],
+        sources: &[RuleSource::Stylelint("selector-pseudo-element-no-unknown").same()],
     }
 }
 
@@ -64,7 +65,7 @@ impl Rule for NoUnknownPseudoElement {
     type Query = Ast<CssPseudoElementSelector>;
     type State = AnyCssPseudoElement;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoUnknownPseudoElementOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
         let node: &CssPseudoElementSelector = ctx.query();

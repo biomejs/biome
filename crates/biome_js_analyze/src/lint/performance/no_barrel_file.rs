@@ -1,9 +1,10 @@
-use biome_analyze::{Ast, RuleSource, RuleSourceKind};
+use biome_analyze::{Ast, RuleSource};
 use biome_analyze::{Rule, RuleDiagnostic, context::RuleContext, declare_lint_rule};
 use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_syntax::{JsExport, JsExportFromClause, JsExportNamedFromClause, JsModule};
 use biome_rowan::AstNode;
+use biome_rule_options::no_barrel_file::NoBarrelFileOptions;
 
 declare_lint_rule! {
     /// Disallow the use of barrel file.
@@ -46,8 +47,7 @@ declare_lint_rule! {
         language: "js",
         recommended: false,
         severity: Severity::Warning,
-        sources: &[RuleSource::EslintBarrelFiles("avoid-barrel-files")],
-        source_kind: RuleSourceKind::Inspired,
+        sources: &[RuleSource::EslintBarrelFiles("avoid-barrel-files").inspired()],
     }
 }
 
@@ -55,7 +55,7 @@ impl Rule for NoBarrelFile {
     type Query = Ast<JsModule>;
     type State = JsExport;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoBarrelFileOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let items = ctx.query().items();

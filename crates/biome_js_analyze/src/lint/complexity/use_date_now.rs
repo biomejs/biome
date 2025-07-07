@@ -9,6 +9,7 @@ use biome_js_syntax::{
     JsNewOrCallExpression, JsSyntaxKind, JsSyntaxNode, JsUnaryOperator, T,
 };
 use biome_rowan::{AstNode, AstSeparatedList, BatchMutationExt};
+use biome_rule_options::use_date_now::UseDateNowOptions;
 
 use crate::JsRuleAction;
 
@@ -57,7 +58,7 @@ declare_lint_rule! {
         version: "1.8.0",
         name: "useDateNow",
         language: "js",
-        sources: &[RuleSource::EslintUnicorn("prefer-date-now")],
+        sources: &[RuleSource::EslintUnicorn("prefer-date-now").same()],
         recommended: true,
         severity: Severity::Warning,
         fix_kind: FixKind::Unsafe,
@@ -68,7 +69,7 @@ impl Rule for UseDateNow {
     type Query = Ast<JsNewOrCallExpression>;
     type State = (AnyJsExpression, UseDateNowIssueKind);
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = UseDateNowOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let expr = ctx.query();
@@ -81,7 +82,7 @@ impl Rule for UseDateNow {
 
     fn diagnostic(_: &RuleContext<Self>, (node, kind): &Self::State) -> Option<RuleDiagnostic> {
         let message = match kind {
-            UseDateNowIssueKind::ReplaceMethod(method) => format!("new Date().{method}"),
+            UseDateNowIssueKind::ReplaceMethod(method) => format!("new Date().{method}()"),
             UseDateNowIssueKind::ReplaceConstructor => "new Date()".to_string(),
             UseDateNowIssueKind::ReplaceNumberConstructor => "Number(new Date())".to_string(),
         };

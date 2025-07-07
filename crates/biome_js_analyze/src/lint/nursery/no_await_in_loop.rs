@@ -1,6 +1,5 @@
 use biome_analyze::{
-    Ast, QueryMatch, Rule, RuleDiagnostic, RuleSource, RuleSourceKind, context::RuleContext,
-    declare_lint_rule,
+    Ast, QueryMatch, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
 use biome_js_syntax::{
@@ -9,6 +8,7 @@ use biome_js_syntax::{
     JsWithStatement,
 };
 use biome_rowan::{AstNode, WalkEvent, declare_node_union};
+use biome_rule_options::no_await_in_loop::NoAwaitInLoopOptions;
 
 declare_lint_rule! {
     /// Disallow `await` inside loops.
@@ -39,8 +39,7 @@ declare_lint_rule! {
         version: "2.0.0",
         name: "noAwaitInLoop",
         language: "js",
-        sources: &[RuleSource::Eslint("no-await-in-loop")],
-        source_kind: RuleSourceKind::SameLogic,
+        sources: &[RuleSource::Eslint("no-await-in-loop").same()],
         recommended: false,
     }
 }
@@ -53,7 +52,7 @@ impl Rule for NoAwaitInLoop {
     type Query = Ast<AnyLoopNode>;
     type State = JsSyntaxNode;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoAwaitInLoopOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let loop_node = ctx.query();

@@ -4,6 +4,7 @@ use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_syntax::jsx_ext::AnyJsxElement;
 use biome_rowan::{AstNode, BatchMutationExt};
+use biome_rule_options::no_header_scope::NoHeaderScopeOptions;
 
 use crate::JsRuleAction;
 
@@ -41,7 +42,7 @@ declare_lint_rule! {
         version: "1.0.0",
         name: "noHeaderScope",
         language: "jsx",
-        sources: &[RuleSource::EslintJsxA11y("scope")],
+        sources: &[RuleSource::EslintJsxA11y("scope").same()],
         recommended: true,
         severity: Severity::Error,
         fix_kind: FixKind::Unsafe,
@@ -52,7 +53,7 @@ impl Rule for NoHeaderScope {
     type Query = Ast<AnyJsxElement>;
     type State = ();
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoHeaderScopeOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let element = ctx.query();

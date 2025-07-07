@@ -5,6 +5,7 @@ use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_syntax::jsx_ext::AnyJsxElement;
 use biome_rowan::{AstNode, TextRange};
+use biome_rule_options::use_valid_lang::UseValidLangOptions;
 declare_lint_rule! {
     /// Ensure that the attribute passed to the `lang` attribute is a correct ISO language and/or country.
     ///
@@ -33,7 +34,7 @@ declare_lint_rule! {
         version: "1.0.0",
         name: "useValidLang",
         language: "jsx",
-        sources: &[RuleSource::EslintJsxA11y("lang")],
+        sources: &[RuleSource::EslintJsxA11y("lang").same()],
         recommended: true,
         severity: Severity::Error,
     }
@@ -54,7 +55,7 @@ impl Rule for UseValidLang {
     type Query = Ast<AnyJsxElement>;
     type State = UseValidLangState;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = UseValidLangOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();

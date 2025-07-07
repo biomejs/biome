@@ -1,12 +1,12 @@
 use biome_analyze::{
-    Ast, FixKind, Rule, RuleDiagnostic, RuleSource, RuleSourceKind, context::RuleContext,
-    declare_lint_rule,
+    Ast, FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_graphql_factory::make;
 use biome_graphql_syntax::{GraphqlOperationDefinition, GraphqlOperationType};
 use biome_rowan::{AstNode, BatchMutationExt};
+use biome_rule_options::use_named_operation::UseNamedOperationOptions;
 use biome_string_case::Case;
 
 use crate::GraphqlRuleAction;
@@ -36,8 +36,7 @@ declare_lint_rule! {
         version: "2.0.0",
         name: "useNamedOperation",
         language: "graphql",
-        sources: &[RuleSource::EslintGraphql("no-anonymous-operations")],
-        source_kind: RuleSourceKind::SameLogic,
+        sources: &[RuleSource::EslintGraphql("no-anonymous-operations").same()],
         recommended: true,
         severity: Severity::Error,
         fix_kind: FixKind::Unsafe,
@@ -48,7 +47,7 @@ impl Rule for UseNamedOperation {
     type Query = Ast<GraphqlOperationDefinition>;
     type State = GraphqlOperationType;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = UseNamedOperationOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
         let node = ctx.query();

@@ -7,6 +7,7 @@ use biome_js_syntax::{
     AnyJsExpression, AnyJsLiteralExpression, AnyJsTemplateElement, AnyJsxAttributeValue,
 };
 use biome_rowan::AstNode;
+use biome_rule_options::no_redundant_alt::NoRedundantAltOptions;
 use biome_string_case::StrLikeExtension;
 
 declare_lint_rule! {
@@ -45,7 +46,7 @@ declare_lint_rule! {
         version: "1.0.0",
         name: "noRedundantAlt",
         language: "jsx",
-        sources: &[RuleSource::EslintJsxA11y("img-redundant-alt")],
+        sources: &[RuleSource::EslintJsxA11y("img-redundant-alt").same()],
         recommended: true,
         severity: Severity::Error,
     }
@@ -55,7 +56,7 @@ impl Rule for NoRedundantAlt {
     type Query = Ast<AnyJsxElement>;
     type State = AnyJsxAttributeValue;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoRedundantAltOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();

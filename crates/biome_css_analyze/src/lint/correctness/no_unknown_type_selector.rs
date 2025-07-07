@@ -5,6 +5,7 @@ use biome_console::markup;
 use biome_css_syntax::CssTypeSelector;
 use biome_diagnostics::Severity;
 use biome_rowan::AstNode;
+use biome_rule_options::no_unknown_type_selector::NoUnknownTypeSelectorOptions;
 
 use crate::utils::is_known_type_selector;
 
@@ -56,7 +57,7 @@ declare_lint_rule! {
         language: "css",
         recommended: true,
         severity: Severity::Error,
-        sources: &[RuleSource::Stylelint("selector-type-no-unknown")],
+        sources: &[RuleSource::Stylelint("selector-type-no-unknown").same()],
     }
 }
 
@@ -64,7 +65,7 @@ impl Rule for NoUnknownTypeSelector {
     type Query = Ast<CssTypeSelector>;
     type State = CssTypeSelector;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoUnknownTypeSelectorOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
         let css_type_selector = ctx.query();

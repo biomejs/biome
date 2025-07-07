@@ -6,6 +6,7 @@ use biome_diagnostics::Severity;
 use biome_js_factory::make::{ident, js_name};
 use biome_js_syntax::{AnyJsExpression, AnyJsMemberExpression, AnyJsName, JsCallExpression};
 use biome_rowan::{AstNode, AstSeparatedList, BatchMutationExt};
+use biome_rule_options::use_flat_map::UseFlatMapOptions;
 
 declare_lint_rule! {
     /// Promotes the use of `.flatMap()` when `map().flat()` are used together.
@@ -36,8 +37,8 @@ declare_lint_rule! {
         name: "useFlatMap",
         language: "js",
         sources: &[
-            RuleSource::EslintUnicorn("prefer-array-flat-map"),
-            RuleSource::Clippy("map_flatten"),
+            RuleSource::EslintUnicorn("prefer-array-flat-map").same(),
+            RuleSource::Clippy("map_flatten").same(),
         ],
         recommended: true,
         severity: Severity::Information,
@@ -49,7 +50,7 @@ impl Rule for UseFlatMap {
     type Query = Ast<JsCallExpression>;
     type State = JsCallExpression;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = UseFlatMapOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let flat_call = ctx.query();

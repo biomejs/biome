@@ -11,6 +11,7 @@ use biome_js_syntax::{
     JsYieldExpression, T,
 };
 use biome_rowan::{AstNode, BatchMutationExt, NodeOrToken, SyntaxTriviaPiece, TriviaPieceKind};
+use biome_rule_options::no_yoda_expression::NoYodaExpressionOptions;
 
 declare_lint_rule! {
     /// Disallow the use of yoda expressions.
@@ -63,7 +64,7 @@ declare_lint_rule! {
         version: "1.8.0",
         name: "noYodaExpression",
         language: "js",
-        sources: &[RuleSource::Eslint("yoda")],
+        sources: &[RuleSource::Eslint("yoda").same()],
         recommended: false,
         severity: Severity::Information,
         fix_kind: FixKind::Safe,
@@ -74,7 +75,7 @@ impl Rule for NoYodaExpression {
     type Query = Ast<JsBinaryExpression>;
     type State = ();
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoYodaExpressionOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();

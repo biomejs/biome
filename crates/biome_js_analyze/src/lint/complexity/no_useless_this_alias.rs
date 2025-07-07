@@ -2,8 +2,7 @@ use crate::{
     JsRuleAction, services::control_flow::AnyJsControlFlowRoot, services::semantic::Semantic,
 };
 use biome_analyze::{
-    FixKind, Rule, RuleDiagnostic, RuleSource, RuleSourceKind, context::RuleContext,
-    declare_lint_rule,
+    FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
 use biome_diagnostics::Severity;
@@ -15,6 +14,7 @@ use biome_js_syntax::{
     JsThisExpression, JsVariableDeclaration, JsVariableDeclarator, JsVariableStatement, T,
 };
 use biome_rowan::{AstNode, AstSeparatedList, BatchMutationExt};
+use biome_rule_options::no_useless_this_alias::NoUselessThisAliasOptions;
 
 declare_lint_rule! {
     /// Disallow useless `this` aliasing.
@@ -55,8 +55,7 @@ declare_lint_rule! {
         version: "1.0.0",
         name: "noUselessThisAlias",
         language: "js",
-        sources: &[RuleSource::EslintTypeScript("no-this-alias")],
-        source_kind: RuleSourceKind::Inspired,
+        sources: &[RuleSource::EslintTypeScript("no-this-alias").inspired()],
         recommended: true,
         severity: Severity::Information,
         fix_kind: FixKind::Safe,
@@ -67,7 +66,7 @@ impl Rule for NoUselessThisAlias {
     type Query = Semantic<JsVariableDeclarator>;
     type State = JsIdentifierBinding;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoUselessThisAliasOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let declarator = ctx.query();

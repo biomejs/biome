@@ -8,6 +8,7 @@ use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_syntax::{AnyJsxAttribute, jsx_ext::AnyJsxElement};
 use biome_rowan::AstNode;
+use biome_rule_options::use_aria_props_supported_by_role::UseAriaPropsSupportedByRoleOptions;
 
 declare_lint_rule! {
     /// Enforce that ARIA properties are valid for the roles that are supported by the element.
@@ -40,7 +41,7 @@ declare_lint_rule! {
         version: "1.9.0",
         name: "useAriaPropsSupportedByRole",
         language: "js",
-        sources: &[RuleSource::EslintJsxA11y("role-supports-aria-props")],
+        sources: &[RuleSource::EslintJsxA11y("role-supports-aria-props").same()],
         recommended: true,
         severity: Severity::Error,
     }
@@ -50,7 +51,7 @@ impl Rule for UseAriaPropsSupportedByRole {
     type Query = Aria<AnyJsxElement>;
     type State = AriaAttribute;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = UseAriaPropsSupportedByRoleOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();

@@ -3,6 +3,7 @@ use crate::{
     JsRuleAction,
     react::{ReactLibrary, is_global_react_import},
 };
+use biome_rule_options::no_unused_imports::NoUnusedImportsOptions;
 
 use biome_analyze::{
     AddVisitor, FixKind, FromServices, Phase, Phases, QueryKey, Queryable, Rule, RuleDiagnostic,
@@ -17,8 +18,8 @@ use biome_js_factory::make::{js_identifier_binding, js_module, js_module_item_li
 use biome_js_semantic::{ReferencesExtensions, SemanticModel};
 use biome_js_syntax::{
     AnyJsBinding, AnyJsClassMember, AnyJsCombinedSpecifier, AnyJsDeclaration, AnyJsImportClause,
-    AnyJsNamedImportSpecifier, AnyTsTypeMember, JsLanguage, JsNamedImportSpecifiers, JsSyntaxNode,
-    T, TsEnumMember,
+    AnyJsNamedImportSpecifier, AnyTsTypeMember, JsExport, JsLanguage, JsNamedImportSpecifiers,
+    JsStaticMemberAssignment, JsSyntaxNode, T, TsEnumMember,
 };
 use biome_jsdoc_comment::JsdocComment;
 use biome_rowan::{
@@ -89,11 +90,17 @@ declare_lint_rule! {
     ///     return new A(arg);
     /// }
     /// ```
+    ///
+    /// One notable exception is when the import is intended to be used for type augmentation.
+    ///
+    /// ```ts
+    /// import type {} from '@mui/lab/themeAugmentation';
+    /// ```
     pub NoUnusedImports {
         version: "1.3.0",
         name: "noUnusedImports",
         language: "js",
-        sources: &[RuleSource::EslintUnusedImports("no-unused-imports")],
+        sources: &[RuleSource::EslintUnusedImports("no-unused-imports").same()],
         recommended: true,
         severity: Severity::Warning,
         fix_kind: FixKind::Unsafe,
@@ -124,7 +131,7 @@ struct JsDocTypeCollectorVisitior {
 }
 
 declare_node_union! {
-    pub AnyJsWithTypeReferencingJsDoc = AnyJsDeclaration | AnyJsClassMember | AnyTsTypeMember | TsEnumMember
+    pub AnyJsWithTypeReferencingJsDoc = AnyJsDeclaration | AnyJsClassMember | AnyTsTypeMember | TsEnumMember | JsExport | JsStaticMemberAssignment
 }
 
 impl Visitor for JsDocTypeCollectorVisitior {
@@ -257,7 +264,7 @@ impl Rule for NoUnusedImports {
     type Query = NoUnusedImportsQuery;
     type State = Unused;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoUnusedImportsOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         match ctx.query() {
@@ -307,6 +314,15 @@ impl Rule for NoUnusedImports {
                 is_unused(ctx, &local_name).then_some(Unused::AllImports(local_name.range()))
             }
             AnyJsImportClause::JsImportNamedClause(clause) => {
+                // exception: allow type augmentation imports
+                // eg. `import type {} from ...`
+                // https://github.com/biomejs/biome/issues/6669
+                if clause.type_token().is_some()
+                    && clause.named_specifiers().ok()?.specifiers().is_empty()
+                {
+                    return None;
+                }
+
                 unused_named_specifiers(ctx, &clause.named_specifiers().ok()?)
             }
             AnyJsImportClause::JsImportNamespaceClause(clause) => {

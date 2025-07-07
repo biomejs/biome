@@ -1,6 +1,6 @@
 use biome_analyze::{
     AddVisitor, Phases, QueryMatch, Queryable, Rule, RuleDiagnostic, RuleDomain, RuleSource,
-    RuleSourceKind, ServiceBag, Visitor, context::RuleContext, declare_lint_rule,
+    ServiceBag, Visitor, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
 use biome_diagnostics::Severity;
@@ -9,6 +9,7 @@ use biome_js_syntax::{
     assign_ext::AnyJsMemberAssignment,
 };
 use biome_rowan::{AstNode, Language, TextRange, WalkEvent, declare_node_union};
+use biome_rule_options::no_exports_in_test::NoExportsInTestOptions;
 
 declare_lint_rule! {
     /// Disallow using `export` or `module.exports` in files containing tests
@@ -43,8 +44,7 @@ declare_lint_rule! {
         language: "js",
         recommended: true,
         severity: Severity::Error,
-        sources: &[RuleSource::EslintJest("no-export")],
-        source_kind: RuleSourceKind::Inspired,
+        sources: &[RuleSource::EslintJest("no-export").inspired()],
         domains: &[RuleDomain::Test],
     }
 }
@@ -189,7 +189,7 @@ impl Rule for NoExportsInTest {
     type Query = AnyExportInTest;
     type State = ();
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoExportsInTestOptions;
 
     fn run(_: &RuleContext<Self>) -> Self::Signals {
         Some(())

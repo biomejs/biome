@@ -116,7 +116,7 @@ fn move_to_group(
             "\n    // end syntax rules\n",
         ),
         _ => {
-            panic!("The cetagory '{}' is not handled.", category,)
+            panic!("The category '{category}' is not handled.",)
         }
     };
     debug_assert!(categories.contains(category_start));

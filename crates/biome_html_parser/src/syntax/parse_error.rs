@@ -11,6 +11,10 @@ pub(crate) fn expected_child(p: &HtmlParser, range: TextRange) -> ParseDiagnosti
     expect_one_of(&["element", "text"], range).into_diagnostic(p)
 }
 
+pub(crate) fn expected_closed_fence(p: &HtmlParser, range: TextRange) -> ParseDiagnostic {
+    expected_node("---", range, p).into_diagnostic(p)
+}
+
 /// The parser was expecting a value for an attribute initializer clause.
 ///
 /// ```html

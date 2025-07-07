@@ -7,6 +7,7 @@ use biome_js_syntax::{
     JsNewExpression, JsPropertyObjectMember, T, global_identifier,
 };
 use biome_rowan::{AstNode, AstSeparatedList, BatchMutationExt, TokenText, TriviaPieceKind};
+use biome_rule_options::use_consistent_response::UseConsistentResponseOptions;
 use biome_string_case::StrLikeExtension;
 
 use crate::{JsRuleAction, services::semantic::Semantic};
@@ -74,7 +75,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub UseConsistentResponse {
-        version: "next",
+        version: "2.0.0",
         name: "useConsistentResponse",
         language: "js",
         fix_kind: FixKind::Unsafe,
@@ -86,7 +87,7 @@ impl Rule for UseConsistentResponse {
     type Query = Semantic<JsNewExpression>;
     type State = ResponseSimplification;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = UseConsistentResponseOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();

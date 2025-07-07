@@ -540,6 +540,99 @@ let bar = 33;
 }
 
 #[test]
+fn top_level_suppression_with_shebang() {
+    const SOURCE: &str = "#!/usr/bin/env bun
+/**
+* biome-ignore-all lint/style/useConst: reason
+*/
+
+let foo = 2;
+let bar = 33;
+        ";
+
+    let parsed = parse(
+        SOURCE,
+        JsFileSource::js_module(),
+        JsParserOptions::default(),
+    );
+
+    let filter = AnalysisFilter {
+        categories: RuleCategoriesBuilder::default().with_lint().build(),
+        enabled_rules: Some(&[RuleFilter::Rule("style", "useConst")]),
+        ..AnalysisFilter::default()
+    };
+
+    let options = AnalyzerOptions::default();
+    crate::analyze(
+        &parsed.tree(),
+        filter,
+        &options,
+        &[],
+        Default::default(),
+        |signal| {
+            if let Some(diag) = signal.diagnostic() {
+                let error = diag
+                    .with_file_path("dummyFile")
+                    .with_file_source_code(SOURCE);
+                let text = print_diagnostic_to_string(&error);
+                eprintln!("{text}");
+                panic!("Unexpected diagnostic");
+            }
+
+            ControlFlow::<Never>::Continue(())
+        },
+    );
+}
+
+#[test]
+fn top_level_suppression_with_shebang_and_comment() {
+    const SOURCE: &str = "#!/usr/bin/env bun
+
+/* Arbitrary comment here
+ */
+/**
+* biome-ignore-all lint/style/useConst: reason
+*/
+
+let foo = 2;
+let bar = 33;
+        ";
+
+    let parsed = parse(
+        SOURCE,
+        JsFileSource::js_module(),
+        JsParserOptions::default(),
+    );
+
+    let filter = AnalysisFilter {
+        categories: RuleCategoriesBuilder::default().with_lint().build(),
+        enabled_rules: Some(&[RuleFilter::Rule("style", "useConst")]),
+        ..AnalysisFilter::default()
+    };
+
+    let options = AnalyzerOptions::default();
+    crate::analyze(
+        &parsed.tree(),
+        filter,
+        &options,
+        &[],
+        Default::default(),
+        |signal| {
+            if let Some(diag) = signal.diagnostic() {
+                let error = diag
+                    .with_file_path("dummyFile")
+                    .with_file_source_code(SOURCE);
+                let text = print_diagnostic_to_string(&error);
+                eprintln!("{text}");
+                panic!("Unexpected diagnostic");
+            }
+
+            ControlFlow::<Never>::Continue(())
+        },
+    );
+}
+
+#[test]
 fn suppression_range_should_report_after_end() {
     const SOURCE: &str = "
 // biome-ignore-start lint/suspicious/noDoubleEquals: single rule

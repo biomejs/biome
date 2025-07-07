@@ -22,8 +22,9 @@ use std::ops::Deref;
 use std::sync::Arc;
 use std::{fs::read_to_string, slice};
 
-tests_macros::gen_tests! {"tests/specs/**/*.{cjs,cts,js,jsx,tsx,ts,json,jsonc,svelte}", crate::run_test, "module"}
+tests_macros::gen_tests! {"tests/specs/**/*.{cjs,cts,js,mjs,jsx,tsx,ts,json,jsonc,svelte}", crate::run_test, "module"}
 tests_macros::gen_tests! {"tests/suppression/**/*.{cjs,cts,js,jsx,tsx,ts,json,jsonc,svelte}", crate::run_suppression_test, "module"}
+tests_macros::gen_tests! {"tests/multiple_rules/**/*.{cjs,cts,js,jsx,tsx,ts,json,jsonc,svelte}", crate::run_multi_rule_test, "module"}
 tests_macros::gen_tests! {"tests/plugin/*.grit", crate::run_plugin_test, "module"}
 
 /// Checks if any of the enabled rules is in the project domain and requires the module graph.
@@ -328,6 +329,81 @@ pub(crate) fn run_suppression_test(input: &'static str, _: &str, _: &str, _: &st
     let rule_filter = RuleFilter::Rule(group, rule);
     let filter = AnalysisFilter {
         enabled_rules: Some(slice::from_ref(&rule_filter)),
+        ..AnalysisFilter::default()
+    };
+
+    let mut snapshot = String::new();
+    analyze_and_snap(
+        &mut snapshot,
+        &input_code,
+        source_type,
+        filter,
+        file_name,
+        input_file,
+        CheckActionType::Suppression,
+        JsParserOptions::default(),
+        &[],
+    );
+
+    insta::with_settings!({
+        prepend_module_to_snapshot => false,
+        snapshot_path => input_file.parent().unwrap(),
+    }, {
+        insta::assert_snapshot!(file_name, snapshot, file_name);
+    });
+}
+
+pub(crate) fn run_multi_rule_test(input: &'static str, _: &str, _: &str, _: &str) {
+    register_leak_checker();
+
+    let input_file = Utf8Path::new(input);
+    let file_name = input_file.file_name().unwrap();
+    let source_type = match input_file.extension() {
+        Some("js" | "mjs" | "jsx") => JsFileSource::jsx(),
+        Some("cjs") => JsFileSource::js_script(),
+        Some("ts") => JsFileSource::ts(),
+        Some("mts" | "cts") => JsFileSource::ts_restricted(),
+        Some("tsx") => JsFileSource::tsx(),
+        _ => {
+            panic!("Unknown file extension: {:?}", input_file.extension());
+        }
+    };
+    let input_code = read_to_string(input_file)
+        .unwrap_or_else(|err| panic!("failed to read {input_file:?}: {err:?}"));
+
+    let rule_filters: Vec<_> = input_code
+        .lines()
+        .take_while(|line| line.is_empty() || line.starts_with("///!"))
+        .filter_map(|line| {
+            if line.is_empty() {
+                return None;
+            }
+            let prefix = "///! lint/";
+            if !line.starts_with(prefix) {
+                panic!("Rule enabling comments must be of shape `{prefix}{{group}}/{{rule}}");
+            }
+            let mut parts = line.trim_start_matches(prefix).split('/');
+            let group = parts.next().expect("Missing rule part in enable comment");
+            let rule = parts.next().expect("Missing rule part in enable comment");
+            if let Some(unused) = parts.next() {
+                panic!("Unrecognized enable comment suffix: {unused}");
+            }
+            if biome_js_analyze::METADATA
+                .deref()
+                .find_rule(group, rule)
+                .is_none()
+            {
+                panic!("could not find rule {group}/{rule}");
+            }
+            Some(RuleFilter::Rule(group, rule))
+        })
+        .collect();
+    if rule_filters.is_empty() {
+        panic!("At least one rule must be enabled with `///! lint/{{group}}/{{rule}}` comment");
+    }
+
+    let filter = AnalysisFilter {
+        enabled_rules: Some(&rule_filters),
         ..AnalysisFilter::default()
     };
 

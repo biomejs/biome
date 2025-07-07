@@ -10,6 +10,7 @@ use biome_js_syntax::{
     AnyJsExpression, AnyJsLiteralExpression, JsBinaryExpression, JsBinaryOperator,
 };
 use biome_rowan::{AstNode, BatchMutationExt, TextRange, TextSize};
+use biome_rule_options::no_useless_string_concat::NoUselessStringConcatOptions;
 
 use crate::JsRuleAction;
 
@@ -65,7 +66,7 @@ declare_lint_rule! {
         version: "1.8.0",
         name: "noUselessStringConcat",
         language: "js",
-        sources: &[RuleSource::Eslint("no-useless-concat")],
+        sources: &[RuleSource::Eslint("no-useless-concat").same()],
         recommended: false,
         severity: Severity::Information,
         fix_kind: FixKind::Safe,
@@ -76,7 +77,7 @@ impl Rule for NoUselessStringConcat {
     type Query = Ast<JsBinaryExpression>;
     type State = TextRange;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoUselessStringConcatOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();

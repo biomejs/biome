@@ -132,7 +132,11 @@ impl CommandRunner for CiCommandPayload {
             ));
         }
         if self.since.is_some() && !self.changed {
-            return Err(CliDiagnostic::incompatible_arguments("since", "changed"));
+            return Err(CliDiagnostic::incompatible_arguments(
+                "--since",
+                "--changed",
+                "In order to use --since, you must also use --changed.",
+            ));
         }
         Ok(())
     }

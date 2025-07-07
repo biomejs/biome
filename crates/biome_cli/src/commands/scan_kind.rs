@@ -1,23 +1,47 @@
-use crate::Execution;
+use crate::{Execution, TraversalMode};
+use biome_fs::BiomePath;
 use biome_service::workspace::ScanKind;
+use camino::Utf8Path;
 
 /// Returns a forced scan kind based on the given `execution`.
 ///
 /// Rules:
-/// - Returns [ScanKind::None] when processing from `stdin`. When using `stdin`,
-///   we don't know the input's real path, so we can't match nested configs or
-///   resolve import paths, meaning there's no use for the scanner.
+/// - When processing from `stdin`, we return [ScanKind::NoScanner] if the stdin
+///   file path is in the directory of the root configuration, and
+///   [ScanKind::TargetedKnownFiles] otherwise.
 /// - Returns [ScanKind::KnownFiles] for `biome format`, `biome migrate`, and
-///   `biome search` because we know there is no use for project analysis with
+///   `biome search`, because we know there is no use for project analysis with
 ///   these commands.
 /// - Returns `None` otherwise.
-pub(crate) fn get_forced_scan_kind(execution: &Execution) -> Option<ScanKind> {
-    if execution.is_stdin() {
-        Some(ScanKind::None)
-    } else if execution.is_migrate() || execution.is_format() || execution.is_search() {
-        Some(ScanKind::KnownFiles)
-    } else {
-        None
+pub(crate) fn get_forced_scan_kind(
+    execution: &Execution,
+    root_configuration_dir: &Utf8Path,
+    working_dir: &Utf8Path,
+) -> Option<ScanKind> {
+    if let Some(stdin) = execution.as_stdin_file() {
+        let path = stdin.as_path();
+        if path
+            .parent()
+            .is_some_and(|dir| dir == root_configuration_dir)
+        {
+            return Some(ScanKind::NoScanner);
+        } else {
+            return Some(ScanKind::TargetedKnownFiles {
+                target_paths: vec![BiomePath::new(working_dir.join(path))],
+                descend_from_targets: false,
+            });
+        }
+    }
+
+    // We want to keep the `match`, so if we add new traversal modes,
+    // the compiler will error, and we will need to handle the new variant
+    match execution.traversal_mode() {
+        TraversalMode::Format { .. }
+        | TraversalMode::Migrate { .. }
+        | TraversalMode::Search { .. } => Some(ScanKind::KnownFiles),
+        // These traversals might enable lint rules that require project rules,
+        // so we need to return `None` so we can use the `ScanKind` returned by the workspace
+        TraversalMode::Lint { .. } | TraversalMode::Check { .. } | TraversalMode::CI { .. } => None,
     }
 }
 
@@ -41,7 +65,8 @@ mod tests {
             skip_parse_errors: false,
         });
 
-        assert_eq!(get_forced_scan_kind(&execution), None);
+        let root_dir = Utf8Path::new("/");
+        assert_eq!(get_forced_scan_kind(&execution, root_dir, root_dir), None);
     }
 
     #[test]
@@ -50,10 +75,13 @@ mod tests {
             skip_parse_errors: false,
             write: true,
             stdin: None,
-
             vcs_targeted: VcsTargeted::default(),
         });
 
-        assert_eq!(get_forced_scan_kind(&execution), Some(ScanKind::KnownFiles));
+        let root_dir = Utf8Path::new("/");
+        assert_eq!(
+            get_forced_scan_kind(&execution, root_dir, root_dir),
+            Some(ScanKind::KnownFiles)
+        );
     }
 }

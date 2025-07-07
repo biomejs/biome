@@ -8,6 +8,7 @@ use biome_js_syntax::{
     AnyJsExpression, JsCallExpression, JsNewExpression, JsParenthesizedExpression, JsSyntaxKind, T,
 };
 use biome_rowan::{AstNode, BatchMutationExt, TokenText, TriviaPieceKind};
+use biome_rule_options::use_throw_new_error::UseThrowNewErrorOptions;
 
 use crate::JsRuleAction;
 
@@ -48,7 +49,7 @@ declare_lint_rule! {
         version: "1.8.0",
         name: "useThrowNewError",
         language: "js",
-        sources: &[RuleSource::EslintUnicorn("throw-new-error")],
+        sources: &[RuleSource::EslintUnicorn("throw-new-error").same()],
         recommended: false,
         severity: Severity::Information,
         fix_kind: FixKind::Unsafe,
@@ -59,7 +60,7 @@ impl Rule for UseThrowNewError {
     type Query = Ast<JsCallExpression>;
     type State = TokenText;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = UseThrowNewErrorOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();

@@ -1,0 +1,71 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `biome.json`
+
+```json
+{
+  "formatter": {
+    "includes": ["*.json"]
+  },
+  "json": {
+    "formatter": {
+      "enabled": true,
+      "bracketSpacing": true,
+      "expand": "never",
+      "indentStyle": "tab",
+      "indentWidth": 4,
+      "lineEnding": "lf",
+      "lineWidth": 240,
+      "trailingCommas": "none"
+    }
+  },
+  "overrides": [
+    {
+      "includes": ["overrides.json"],
+      "json": {
+        "formatter": {
+          "enabled": true,
+          "bracketSpacing": false,
+          "expand": "always",
+          "indentStyle": "space",
+          "indentWidth": 2,
+          "lineEnding": "lf",
+          "lineWidth": 20,
+          "trailingCommas": "all"
+        }
+      }
+    }
+  ]
+}
+```
+
+## `base.json`
+
+```json
+{ "asta": ["lorem", "ipsum", { "key1": "value1 that has a way longer line width but it shouldn't break anything here", "key2": "value2" }] }
+
+```
+
+## `overrides.json`
+
+```json
+{
+  "asta": [
+    "lorem",
+    "ipsum",
+    {
+      "key1": "value1 that has a way longer line width but it shouldn't break anything here",
+      "key2": "value2",
+    },
+  ],
+}
+
+```
+
+# Emitted Messages
+
+```block
+Formatted 2 files in <TIME>. Fixed 2 files.
+```

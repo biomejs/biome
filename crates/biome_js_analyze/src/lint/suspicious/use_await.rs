@@ -8,6 +8,7 @@ use biome_js_syntax::{
     AnyFunctionLike, JsAwaitExpression, JsForOfStatement, JsLanguage, TextRange, WalkEvent,
 };
 use biome_rowan::{AstNode, AstNodeList, Language, SyntaxNode, TextSize};
+use biome_rule_options::use_await::UseAwaitOptions;
 
 declare_lint_rule! {
     /// Ensure `async` functions utilize `await`.
@@ -51,8 +52,8 @@ declare_lint_rule! {
         name: "useAwait",
         language: "js",
         sources: &[
-            RuleSource::Eslint("require-await"),
-            RuleSource::EslintTypeScript("require-await"),
+            RuleSource::Eslint("require-await").same(),
+            RuleSource::EslintTypeScript("require-await").same(),
         ],
         recommended: false,
         severity: Severity::Warning,
@@ -135,7 +136,7 @@ impl Rule for UseAwait {
     type Query = MissingAwait;
     type State = ();
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = UseAwaitOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let query = ctx.query();

@@ -5,6 +5,7 @@ use biome_diagnostics::Severity;
 use biome_js_semantic::ReferencesExtensions;
 use biome_js_syntax::JsCatchClause;
 use biome_rowan::{AstNode, TextRange};
+use biome_rule_options::no_catch_assign::NoCatchAssignOptions;
 
 declare_lint_rule! {
     /// Disallow reassigning exceptions in catch clauses.
@@ -39,7 +40,7 @@ declare_lint_rule! {
         version: "1.0.0",
         name: "noCatchAssign",
         language: "js",
-        sources: &[RuleSource::Eslint("no-ex-assign")],
+        sources: &[RuleSource::Eslint("no-ex-assign").same()],
         recommended: true,
         severity: Severity::Warning,
     }
@@ -55,7 +56,7 @@ impl Rule for NoCatchAssign {
     // the second element of `State` is the declaration of catch clause.
     type State = (TextRange, TextRange);
     type Signals = Box<[Self::State]>;
-    type Options = ();
+    type Options = NoCatchAssignOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let catch_clause = ctx.query();

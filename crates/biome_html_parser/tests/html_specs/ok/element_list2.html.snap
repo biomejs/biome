@@ -20,6 +20,7 @@ some text
 ```
 HtmlRoot {
     bom_token: missing (optional),
+    frontmatter: missing (optional),
     directive: missing (optional),
     html: HtmlElementList [
         HtmlContent {
@@ -115,10 +116,13 @@ HtmlRoot {
 0: HTML_ROOT@0..68
   0: (empty)
   1: (empty)
-  2: HTML_ELEMENT_LIST@0..67
-    0: HTML_CONTENT@0..9
-      0: HTML_LITERAL@0..9 "some text" [] []
-    1: HTML_ELEMENT@9..21
+  2: (empty)
+  3: HTML_ELEMENT_LIST@0..67
+    0: HTML_CONTENT@0..5
+      0: HTML_LITERAL@0..5 "some" [] [Whitespace(" ")]
+    1: HTML_CONTENT@5..9
+      0: HTML_LITERAL@5..9 "text" [] []
+    2: HTML_ELEMENT@9..21
       0: HTML_OPENING_ELEMENT@9..15
         0: L_ANGLE@9..11 "<" [Newline("\n")] []
         1: HTML_TAG_NAME@11..14
@@ -176,6 +180,6 @@ HtmlRoot {
         2: HTML_TAG_NAME@63..66
           0: HTML_LITERAL@63..66 "div" [] []
         3: R_ANGLE@66..67 ">" [] []
-  3: EOF@67..68 "" [Newline("\n")] []
+  4: EOF@67..68 "" [Newline("\n")] []
 
 ```

@@ -7,6 +7,7 @@ use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_syntax::{AnyJsxAttributeValue, JsxAttribute, jsx_ext::AnyJsxElement};
 use biome_rowan::{AstNode, BatchMutationExt};
+use biome_rule_options::no_redundant_roles::NoRedundantRolesOptions;
 
 declare_lint_rule! {
     /// Enforce explicit `role` property is not the same as implicit/default role property on an element.
@@ -45,7 +46,7 @@ declare_lint_rule! {
         version: "1.0.0",
         name: "noRedundantRoles",
         language: "jsx",
-        sources: &[RuleSource::EslintJsxA11y("no-redundant-roles")],
+        sources: &[RuleSource::EslintJsxA11y("no-redundant-roles").same()],
         recommended: true,
         severity: Severity::Error,
         fix_kind: FixKind::Unsafe,
@@ -61,7 +62,7 @@ impl Rule for NoRedundantRoles {
     type Query = Aria<AnyJsxElement>;
     type State = RuleState;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoRedundantRolesOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();

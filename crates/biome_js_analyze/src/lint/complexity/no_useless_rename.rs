@@ -9,6 +9,7 @@ use biome_js_syntax::{
     JsObjectBindingPatternProperty,
 };
 use biome_rowan::{AstNode, BatchMutationExt, declare_node_union, trim_leading_trivia_pieces};
+use biome_rule_options::no_useless_rename::NoUselessRenameOptions;
 
 use crate::JsRuleAction;
 
@@ -61,7 +62,7 @@ declare_lint_rule! {
         version: "1.0.0",
         name: "noUselessRename",
         language: "js",
-        sources: &[RuleSource::Eslint("no-useless-rename")],
+        sources: &[RuleSource::Eslint("no-useless-rename").same()],
         recommended: true,
         severity: Severity::Information,
         fix_kind: FixKind::Safe,
@@ -76,7 +77,7 @@ impl Rule for NoUselessRename {
     type Query = Ast<JsRenaming>;
     type State = ();
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoUselessRenameOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let renaming = ctx.query();

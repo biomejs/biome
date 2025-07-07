@@ -4,6 +4,7 @@ use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_syntax::{AnyJsSwitchClause, JsCaseClause, JsDefaultClause};
 use biome_rowan::{AstNode, AstNodeList, BatchMutationExt, Direction};
+use biome_rule_options::no_useless_switch_case::NoUselessSwitchCaseOptions;
 
 use crate::JsRuleAction;
 
@@ -61,7 +62,7 @@ declare_lint_rule! {
         version: "1.0.0",
         name: "noUselessSwitchCase",
         language: "js",
-        sources: &[RuleSource::EslintUnicorn("no-useless-switch-case")],
+        sources: &[RuleSource::EslintUnicorn("no-useless-switch-case").same()],
         recommended: true,
         severity: Severity::Information,
         fix_kind: FixKind::Unsafe,
@@ -72,7 +73,7 @@ impl Rule for NoUselessSwitchCase {
     type Query = Ast<JsDefaultClause>;
     type State = JsCaseClause;
     type Signals = Box<[Self::State]>;
-    type Options = ();
+    type Options = NoUselessSwitchCaseOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let default_clause = ctx.query();

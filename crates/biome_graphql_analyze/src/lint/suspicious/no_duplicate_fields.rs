@@ -1,7 +1,7 @@
 use std::collections::HashSet;
 
 use biome_analyze::{
-    Ast, Rule, RuleDiagnostic, RuleSource, RuleSourceKind, context::RuleContext, declare_lint_rule,
+    Ast, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
 use biome_graphql_syntax::{
@@ -9,6 +9,7 @@ use biome_graphql_syntax::{
     GraphqlVariableDefinitions,
 };
 use biome_rowan::{AstNode, TextRange};
+use biome_rule_options::no_duplicate_fields::NoDuplicateFieldsOptions;
 use biome_string_case::StrOnlyExtension;
 
 declare_lint_rule! {
@@ -40,8 +41,7 @@ declare_lint_rule! {
         version: "1.9.0",
         name: "noDuplicateFields",
         language: "graphql",
-        sources: &[RuleSource::EslintGraphql("no-duplicate-fields")],
-        source_kind: RuleSourceKind::SameLogic,
+        sources: &[RuleSource::EslintGraphql("no-duplicate-fields").same()],
         recommended: true,
     }
 }
@@ -50,7 +50,7 @@ impl Rule for NoDuplicateFields {
     type Query = Ast<AnyGraphqlOperationDefinition>;
     type State = DuplicatedField;
     type Signals = Box<[Self::State]>;
-    type Options = ();
+    type Options = NoDuplicateFieldsOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let operation = ctx.query();

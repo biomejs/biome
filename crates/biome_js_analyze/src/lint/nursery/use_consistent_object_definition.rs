@@ -1,19 +1,18 @@
-use serde::{Deserialize, Serialize};
-
+use crate::JsRuleAction;
 use biome_analyze::{
-    Ast, FixKind, Rule, RuleAction, RuleDiagnostic, RuleSource, RuleSourceKind,
-    context::RuleContext, declare_lint_rule,
+    Ast, FixKind, Rule, RuleAction, RuleDiagnostic, RuleSource, context::RuleContext,
+    declare_lint_rule,
 };
 use biome_console::markup;
-use biome_deserialize_macros::Deserializable;
 use biome_diagnostics::Severity;
 use biome_js_factory::make;
 use biome_js_syntax::{
     AnyJsExpression, AnyJsObjectMember, AnyJsObjectMemberName, JsLanguage, T, inner_string_text,
 };
 use biome_rowan::{AstNode, BatchMutationExt, TriviaPieceKind};
-
-use crate::JsRuleAction;
+use biome_rule_options::use_consistent_object_definition::{
+    ObjectPropertySyntax, UseConsistentObjectDefinitionOptions,
+};
 
 declare_lint_rule! {
     /// Require the consistent declaration of object literals. Defaults to explicit definitions.
@@ -117,28 +116,8 @@ declare_lint_rule! {
         recommended: false,
         fix_kind: FixKind::Safe,
         severity: Severity::Error,
-        sources: &[RuleSource::Eslint("object-shorthand")],
-        source_kind: RuleSourceKind::Inspired,
+        sources: &[RuleSource::Eslint("object-shorthand").inspired()],
     }
-}
-
-#[derive(Clone, Debug, Default, Deserialize, Deserializable, Eq, PartialEq, Serialize)]
-#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
-#[serde(rename_all = "camelCase", deny_unknown_fields, default)]
-pub struct UseConsistentObjectDefinitionOptions {
-    /// The preferred syntax to enforce.
-    syntax: ObjectPropertySyntax,
-}
-
-#[derive(Clone, Debug, Default, Deserialize, Deserializable, Eq, PartialEq, Serialize)]
-#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
-#[serde(rename_all = "camelCase", deny_unknown_fields)]
-pub enum ObjectPropertySyntax {
-    /// `{foo: foo}`
-    Explicit,
-    /// `{foo}`
-    #[default]
-    Shorthand,
 }
 
 impl Rule for UseConsistentObjectDefinition {

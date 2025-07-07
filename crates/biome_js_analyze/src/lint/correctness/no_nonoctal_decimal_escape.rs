@@ -8,6 +8,7 @@ use biome_js_syntax::{
     JsLiteralMemberName, JsStringLiteralExpression, JsSyntaxKind, JsSyntaxToken,
 };
 use biome_rowan::{AstNode, BatchMutationExt, TextRange, declare_node_union};
+use biome_rule_options::no_nonoctal_decimal_escape::NoNonoctalDecimalEscapeOptions;
 use rustc_hash::FxHashSet;
 use std::ops::Range;
 
@@ -57,7 +58,7 @@ declare_lint_rule! {
         version: "1.0.0",
         name: "noNonoctalDecimalEscape",
         language: "js",
-        sources: &[RuleSource::Eslint("no-nonoctal-decimal-escape")],
+        sources: &[RuleSource::Eslint("no-nonoctal-decimal-escape").same()],
         recommended: true,
         severity: Severity::Error,
         fix_kind: FixKind::Safe,
@@ -82,7 +83,7 @@ impl Rule for NoNonoctalDecimalEscape {
     type Query = Ast<AnyJsStringLiteral>;
     type State = RuleState;
     type Signals = Box<[Self::State]>;
-    type Options = ();
+    type Options = NoNonoctalDecimalEscapeOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();

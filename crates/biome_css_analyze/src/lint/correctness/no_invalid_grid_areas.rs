@@ -5,6 +5,7 @@ use biome_console::markup;
 use biome_css_syntax::CssDeclarationOrRuleList;
 use biome_diagnostics::Severity;
 use biome_rowan::{TextRange, TokenText};
+use biome_rule_options::no_invalid_grid_areas::NoInvalidGridAreasOptions;
 
 use rustc_hash::FxHashSet;
 
@@ -55,7 +56,7 @@ declare_lint_rule! {
         language: "css",
         recommended: true,
         severity: Severity::Error,
-        sources: &[RuleSource::Stylelint("named-grid-areas-no-invalid")],
+        sources: &[RuleSource::Stylelint("named-grid-areas-no-invalid").same()],
     }
 }
 
@@ -81,7 +82,7 @@ impl Rule for NoInvalidGridAreas {
     type Query = Ast<CssDeclarationOrRuleList>;
     type State = UseConsistentGridAreasState;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoInvalidGridAreasOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
         let node = ctx.query();

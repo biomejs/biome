@@ -2,10 +2,10 @@ use biome_analyze::{
     Ast, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
-use biome_deserialize_macros::Deserializable;
 use biome_diagnostics::Severity;
 use biome_js_syntax::jsx_ext::AnyJsxElement;
 use biome_rowan::{AstNode, TextRange};
+use biome_rule_options::use_valid_autocomplete::UseValidAutocompleteOptions;
 
 declare_lint_rule! {
     /// Use valid values for the `autocomplete` attribute on `input` elements.
@@ -52,7 +52,7 @@ declare_lint_rule! {
         version: "1.9.0",
         name: "useValidAutocomplete",
         language: "js",
-        sources: &[RuleSource::EslintJsxA11y("autocomplete-valid")],
+        sources: &[RuleSource::EslintJsxA11y("autocomplete-valid").same()],
         recommended: true,
         severity: Severity::Error,
     }
@@ -132,21 +132,11 @@ const BILLING_AND_SHIPPING_ADDRESS: &[&str; 11] = &[
     "street-address",
 ];
 
-#[derive(
-    Clone, Debug, Default, Deserializable, Eq, PartialEq, serde::Deserialize, serde::Serialize,
-)]
-#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
-#[serde(rename_all = "camelCase", deny_unknown_fields, default)]
-pub struct UseValidAutocompleteOptions {
-    /// `input` like custom components that should be checked.
-    pub input_components: Box<[Box<str>]>,
-}
-
 impl Rule for UseValidAutocomplete {
     type Query = Ast<AnyJsxElement>;
     type State = TextRange;
     type Signals = Option<Self::State>;
-    type Options = Box<UseValidAutocompleteOptions>;
+    type Options = UseValidAutocompleteOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();

@@ -7,6 +7,7 @@ use biome_js_factory::make::js_variable_declarator_list;
 use biome_js_syntax::{JsLanguage, JsSyntaxToken, JsVariableDeclarator, JsVariableStatement};
 use biome_rowan::{AstNode, BatchMutationExt, TextRange};
 use biome_rowan::{SyntaxTriviaPiece, chain_trivia_pieces};
+use biome_rule_options::no_useless_undefined_initialization::NoUselessUndefinedInitializationOptions;
 
 use crate::JsRuleAction;
 
@@ -52,7 +53,7 @@ declare_lint_rule! {
         version: "1.7.2",
         name: "noUselessUndefinedInitialization",
         language: "js",
-        sources: &[RuleSource::Eslint("no-undef-init")],
+        sources: &[RuleSource::Eslint("no-undef-init").same()],
         fix_kind: FixKind::Safe,
         recommended: true,
         severity: Severity::Information,
@@ -63,7 +64,7 @@ impl Rule for NoUselessUndefinedInitialization {
     type Query = Ast<JsVariableStatement>;
     type State = (Box<str>, TextRange);
     type Signals = Box<[Self::State]>;
-    type Options = ();
+    type Options = NoUselessUndefinedInitializationOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let statement = ctx.query();

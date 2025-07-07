@@ -1,8 +1,7 @@
 use crate::prelude::*;
 use crate::separated::FormatAstSeparatedListExtension;
-use biome_formatter::separated::TrailingSeparator;
 use biome_formatter::{Expand, FormatContext, write};
-use biome_json_syntax::{AnyJsonValue, JsonArrayElementList, JsonFileVariant};
+use biome_json_syntax::{AnyJsonValue, JsonArrayElementList};
 use biome_rowan::{AstNode, AstSeparatedList};
 
 #[derive(Debug, Clone, Default)]
@@ -22,12 +21,8 @@ impl FormatRule<JsonArrayElementList> for FormatJsonArrayElementList {
 
         match layout {
             ArrayLayout::Fill => {
-                let file_source = f.options().file_source();
-                let trailing_separator = if file_source.variant() == JsonFileVariant::Standard {
-                    TrailingSeparator::Omit
-                } else {
-                    f.options().to_trailing_separator()
-                };
+                let trailing_separator = f.options().to_trailing_separator();
+
                 let mut filler = f.fill();
 
                 for (element, formatted) in node
@@ -50,12 +45,7 @@ impl FormatRule<JsonArrayElementList> for FormatJsonArrayElementList {
             }
 
             ArrayLayout::OnePerLine => {
-                let file_source = f.options().file_source();
-                let trailing_separator = if file_source.variant() == JsonFileVariant::Standard {
-                    TrailingSeparator::Omit
-                } else {
-                    f.options().to_trailing_separator()
-                };
+                let trailing_separator = f.options().to_trailing_separator();
                 let mut join = f.join_nodes_with_soft_line();
 
                 for (element, formatted) in node

@@ -7,6 +7,7 @@ use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_syntax::jsx_ext::AnyJsxElement;
 use biome_rowan::{AstNode, BatchMutationExt};
+use biome_rule_options::no_interactive_element_to_noninteractive_role::NoInteractiveElementToNoninteractiveRoleOptions;
 
 declare_lint_rule! {
     /// Enforce that non-interactive ARIA roles are not assigned to interactive HTML elements.
@@ -41,7 +42,7 @@ declare_lint_rule! {
         version: "1.3.0",
         name: "noInteractiveElementToNoninteractiveRole",
         language: "jsx",
-        sources: &[RuleSource::EslintJsxA11y("no-interactive-element-to-noninteractive-role")],
+        sources: &[RuleSource::EslintJsxA11y("no-interactive-element-to-noninteractive-role").same()],
         recommended: true,
         severity: Severity::Error,
         fix_kind: FixKind::Unsafe,
@@ -52,7 +53,7 @@ impl Rule for NoInteractiveElementToNoninteractiveRole {
     type Query = Aria<AnyJsxElement>;
     type State = ();
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoInteractiveElementToNoninteractiveRoleOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();

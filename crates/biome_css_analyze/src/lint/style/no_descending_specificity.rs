@@ -8,6 +8,7 @@ use biome_diagnostics::Severity;
 use biome_rowan::TextRange;
 
 use biome_rowan::AstNode;
+use biome_rule_options::no_descending_specificity::NoDescendingSpecificityOptions;
 
 use crate::services::semantic::Semantic;
 
@@ -87,7 +88,7 @@ declare_lint_rule! {
         language: "css",
         recommended: true,
         severity: Severity::Warning,
-        sources: &[RuleSource::Stylelint("no-descending-specificity")],
+        sources: &[RuleSource::Stylelint("no-descending-specificity").same()],
     }
 }
 
@@ -175,7 +176,7 @@ impl Rule for NoDescendingSpecificity {
     type Query = Semantic<CssRoot>;
     type State = DescendingSelector;
     type Signals = Box<[Self::State]>;
-    type Options = ();
+    type Options = NoDescendingSpecificityOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let model = ctx.model();

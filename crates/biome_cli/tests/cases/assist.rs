@@ -7,7 +7,7 @@ use camino::Utf8Path;
 
 #[test]
 fn assist_emit_diagnostic_but_doesnt_block() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     let config = Utf8Path::new("biome.json");
@@ -51,7 +51,7 @@ fn assist_emit_diagnostic_but_doesnt_block() {
 
 #[test]
 fn assist_emit_diagnostic_and_blocks() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     let config = Utf8Path::new("biome.json");
@@ -95,7 +95,7 @@ fn assist_emit_diagnostic_and_blocks() {
 
 #[test]
 fn assist_emit_diagnostic_and_blocks_ci() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     let config = Utf8Path::new("biome.json");
@@ -139,7 +139,7 @@ fn assist_emit_diagnostic_and_blocks_ci() {
 
 #[test]
 fn assist_writes() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     let config = Utf8Path::new("biome.json");
@@ -175,7 +175,7 @@ fn assist_writes() {
     assert_file_contents(
         &fs,
         file,
-        r#"{ "foo": "bar" ,"lorem": "ipsum","zod": true }"#,
+        r#"{ "foo": "bar","lorem": "ipsum", "zod": true }"#,
     );
 
     assert_cli_snapshot(SnapshotPayload::new(

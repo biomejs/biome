@@ -1,8 +1,8 @@
 use std::{borrow::Cow, cmp::Ordering, iter::zip};
 
 use biome_analyze::{
-    Ast, FixKind, Rule, RuleAction, RuleDiagnostic, RuleSource, RuleSourceKind,
-    context::RuleContext, declare_source_rule,
+    Ast, FixKind, Rule, RuleAction, RuleDiagnostic, RuleSource, context::RuleContext,
+    declare_source_rule,
 };
 use biome_console::markup;
 use biome_deserialize::TextRange;
@@ -11,6 +11,7 @@ use biome_js_syntax::{
     AnyJsxAttribute, JsxAttribute, JsxAttributeList, JsxOpeningElement, JsxSelfClosingElement,
 };
 use biome_rowan::{AstNode, BatchMutationExt};
+use biome_rule_options::use_sorted_attributes::UseSortedAttributesOptions;
 use biome_string_case::StrLikeExtension;
 
 use crate::JsRuleAction;
@@ -42,8 +43,7 @@ declare_source_rule! {
         name: "useSortedAttributes",
         language: "jsx",
         recommended: false,
-        sources: &[RuleSource::EslintReact("jsx-sort-props")],
-        source_kind: RuleSourceKind::SameLogic,
+        sources: &[RuleSource::EslintReact("jsx-sort-props").same()],
         fix_kind: FixKind::Safe,
     }
 }
@@ -52,7 +52,7 @@ impl Rule for UseSortedAttributes {
     type Query = Ast<JsxAttributeList>;
     type State = PropGroup;
     type Signals = Box<[Self::State]>;
-    type Options = ();
+    type Options = UseSortedAttributesOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let props = ctx.query();

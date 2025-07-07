@@ -5,6 +5,7 @@ use biome_diagnostics::Severity;
 use biome_js_syntax::{
     AnyJsClass, JsDirective, JsDirectiveList, JsFileSource, JsFunctionBody, JsModule, JsScript,
 };
+use biome_rule_options::no_redundant_use_strict::NoRedundantUseStrictOptions;
 
 use biome_rowan::{AstNode, AstNodeList, BatchMutationExt, declare_node_union};
 
@@ -109,7 +110,7 @@ impl Rule for NoRedundantUseStrict {
     type Query = Ast<JsDirective>;
     type State = AnyJsStrictModeNode;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoRedundantUseStrictOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();

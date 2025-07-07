@@ -5,6 +5,7 @@ use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_syntax::{JsConstructorClassMember, JsReturnStatement};
 use biome_rowan::AstNode;
+use biome_rule_options::no_constructor_return::NoConstructorReturnOptions;
 
 use crate::services::control_flow::AnyJsControlFlowRoot;
 
@@ -57,7 +58,7 @@ declare_lint_rule! {
         version: "1.0.0",
         name: "noConstructorReturn",
         language: "js",
-        sources: &[RuleSource::Eslint("no-constructor-return")],
+        sources: &[RuleSource::Eslint("no-constructor-return").same()],
         recommended: true,
         severity: Severity::Error,
     }
@@ -67,7 +68,7 @@ impl Rule for NoConstructorReturn {
     type Query = Ast<JsReturnStatement>;
     type State = JsConstructorClassMember;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoConstructorReturnOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let ret = ctx.query();

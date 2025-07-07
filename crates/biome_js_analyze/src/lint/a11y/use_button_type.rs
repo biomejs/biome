@@ -9,6 +9,7 @@ use biome_js_syntax::{
     TextRange,
 };
 use biome_rowan::{AstNode, declare_node_union};
+use biome_rule_options::use_button_type::UseButtonTypeOptions;
 
 declare_lint_rule! {
     /// Enforces the usage of the attribute `type` for the element `button`
@@ -41,7 +42,7 @@ declare_lint_rule! {
         version: "1.0.0",
         name: "useButtonType",
         language: "jsx",
-        sources: &[RuleSource::EslintReact("button-has-type")],
+        sources: &[RuleSource::EslintReact("button-has-type").same()],
         recommended: true,
         severity: Severity::Error,
     }
@@ -62,7 +63,7 @@ impl Rule for UseButtonType {
     type Query = Semantic<UseButtonTypeQuery>;
     type State = UseButtonTypeState;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = UseButtonTypeOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();

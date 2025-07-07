@@ -46,7 +46,7 @@ fn correctly_lookups_environment_settings() {
     settings
         .merge_with_configuration(configuration, None)
         .expect("valid configuration");
-    let environment = JsLanguage::resolve_environment(Some(&settings));
+    let environment = JsLanguage::resolve_environment(&settings);
 
     assert_eq!(
         environment.unwrap().jsx_runtime,
@@ -68,11 +68,11 @@ fn correctly_computes_analyzer_options() {
     settings
         .merge_with_configuration(configuration, None)
         .expect("valid configuration");
-    let environment = JsLanguage::resolve_environment(Some(&settings));
+    let environment = JsLanguage::resolve_environment(&settings);
     let language = JsLanguage::lookup_settings(&settings.languages);
     let options = JsLanguage::resolve_analyzer_options(
-        Some(&settings),
-        Some(&language.linter),
+        &settings,
+        &language.linter,
         environment,
         &BiomePath::new(Utf8PathBuf::new()),
         &DocumentFileSource::from_language_id("javascript"),

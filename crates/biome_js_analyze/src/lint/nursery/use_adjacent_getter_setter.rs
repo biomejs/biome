@@ -12,6 +12,7 @@ use biome_js_syntax::{
     TsSetterSignatureTypeMember, TsTypeMemberList,
 };
 use biome_rowan::{AstNode, AstNodeList, AstSeparatedList, SyntaxResult, declare_node_union};
+use biome_rule_options::use_adjacent_getter_setter::UseAdjacentGetterSetterOptions;
 
 declare_lint_rule! {
     /// Enforce that getters and setters for the same property are adjacent in class and object definitions.
@@ -62,7 +63,7 @@ declare_lint_rule! {
         name: "useAdjacentGetterSetter",
         language: "js",
         recommended: false,
-        sources: &[RuleSource::Eslint("grouped-accessor-pairs")],
+        sources: &[RuleSource::Eslint("grouped-accessor-pairs").same()],
     }
 }
 
@@ -70,7 +71,7 @@ impl Rule for UseAdjacentGetterSetter {
     type Query = Ast<AnySetter>;
     type State = MatchingPropertyAccessors;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = UseAdjacentGetterSetterOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();

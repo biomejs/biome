@@ -8,6 +8,7 @@ use biome_js_syntax::{
     JsStaticInitializationBlockClassMember, JsSwitchStatement,
 };
 use biome_rowan::{AstNode, AstNodeList, SyntaxNodeCast, declare_node_union};
+use biome_rule_options::no_empty_block_statements::NoEmptyBlockStatementsOptions;
 
 declare_lint_rule! {
     /// Disallow empty block statements and static blocks.
@@ -60,10 +61,10 @@ declare_lint_rule! {
         name: "noEmptyBlockStatements",
         language: "js",
         sources: &[
-            RuleSource::Eslint("no-empty"),
-            RuleSource::Eslint("no-empty-static-block"),
-            RuleSource::Eslint("no-empty-function"),
-            RuleSource::EslintTypeScript("no-empty-function"),
+            RuleSource::Eslint("no-empty").same(),
+            RuleSource::Eslint("no-empty-static-block").same(),
+            RuleSource::Eslint("no-empty-function").same(),
+            RuleSource::EslintTypeScript("no-empty-function").same(),
         ],
         recommended: false,
         severity: Severity::Warning,
@@ -78,7 +79,7 @@ impl Rule for NoEmptyBlockStatements {
     type Query = Ast<Query>;
     type State = ();
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoEmptyBlockStatementsOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let query = ctx.query();

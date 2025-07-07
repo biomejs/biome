@@ -1,0 +1,29 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `biome.jsonc`
+
+```json
+{
+  "javascript": {
+    "formatter": {
+      "quoteStyle": "single",
+      "semicolons": "always"
+    }
+  }
+}
+```
+
+# Input messages
+
+```block
+let a = "a"
+```
+
+# Emitted Messages
+
+```block
+const _a = 'a';
+
+```

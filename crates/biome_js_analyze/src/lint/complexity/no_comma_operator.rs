@@ -3,6 +3,7 @@ use biome_analyze::{Ast, Rule, RuleDiagnostic, RuleSource, declare_lint_rule};
 use biome_diagnostics::Severity;
 use biome_js_syntax::{JsForStatement, JsSequenceExpression};
 use biome_rowan::AstNode;
+use biome_rule_options::no_comma_operator::NoCommaOperatorOptions;
 
 declare_lint_rule! {
     /// Disallow comma operator.
@@ -41,7 +42,7 @@ declare_lint_rule! {
         version: "1.0.0",
         name: "noCommaOperator",
         language: "js",
-        sources: &[RuleSource::Eslint("no-sequences")],
+        sources: &[RuleSource::Eslint("no-sequences").same()],
         recommended: true,
         severity: Severity::Warning,
     }
@@ -51,7 +52,7 @@ impl Rule for NoCommaOperator {
     type Query = Ast<JsSequenceExpression>;
     type State = ();
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoCommaOperatorOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let seq = ctx.query();

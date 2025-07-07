@@ -2,7 +2,6 @@
 
 mod deserializable_derive;
 mod merge_derive;
-mod partial_derive;
 mod util;
 
 use proc_macro::TokenStream;
@@ -354,79 +353,6 @@ pub fn derive_mergeable(input: TokenStream) -> TokenStream {
     let input = merge_derive::DeriveInput::parse(input);
 
     let tokens = merge_derive::generate_merge(input);
-
-    if false {
-        panic!("{tokens}");
-    }
-
-    TokenStream::from(tokens)
-}
-
-/// Generates a "partial" struct from another.
-///
-/// A partial struct has the same shape as the struct is derived from (the
-/// "full" struct), but with all its fields wrapped in `Option`. Fields that
-/// were already wrapped in an `Option` don't get wrapped again.
-///
-/// The name of the generated partial struct is `Partial{FullStruct}`.
-///
-/// ## Conversions
-///
-/// The [`From`] trait is implemented in both directions so that partial structs
-/// can be created from full structs and the other way around. When creating a
-/// full struct from a partial one, default values are used in place of `None`
-/// values. When creating a partial struct from a full one, the partial struct
-/// will only have `Some` values for values that differed from their default.
-///
-/// As a consequence, full structs must implement `Default` to support this
-/// macro.
-///
-/// ## Partial annotations
-///
-/// The generated partial struct can receive macro annotations, including
-/// derives, just like a regular struct. In order to pass macro annotations to
-/// the partial struct, you need to wrap them in `#[partial(...)]`. This works
-/// for both struct annotations and field annotations.
-///
-/// Example:
-///
-/// ```rs
-/// #[derive(Clone, Default, Debug, Deserialize, Eq, Partial, PartialEq, Serialize)]
-/// #[partial(derive(Clone, Deserializable, Eq, Merge, PartialEq))]
-/// pub struct CssConfiguration {
-///     #[partial(type)]
-///     pub parser: CssParser,
-///
-///     #[partial(type)]
-///     pub formatter: CssFormatter,
-/// }
-/// ```
-///
-/// Partial structs always derive `Default`, `serde::Serialize` and
-/// `serde::Deserialize`, so you should not specify those anymore. In addition,
-/// all the fields of a partial struct are automatically annotated with
-/// `#[serde(skip_serializing_if = "Option::is_none")]`.
-///
-/// ### `#[partial(type)]`
-///
-/// If one of the fields of a partial struct uses a type that itself also has
-/// a derived partial struct, you can tell the macro to use that type instead
-/// using the `#[partial(type)]`.
-///
-/// In the example above, where `CssConfiguration` has a field of type
-/// `CssParser`, this will make sure the `PartialCssConfiguration` uses
-/// `PartialCssParser` instead.
-///
-/// If you need to use a fully custom in the partial struct instead, you can do
-/// so using `#[partial(type = "MyPartialType")]`.
-#[proc_macro_derive(Partial, attributes(partial))]
-#[proc_macro_error]
-pub fn derive_partial(input: TokenStream) -> TokenStream {
-    let input = parse_macro_input!(input as DeriveInput);
-
-    let input = partial_derive::DeriveInput::parse(input);
-
-    let tokens = partial_derive::generate_partial(input);
 
     if false {
         panic!("{tokens}");

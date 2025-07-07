@@ -8,6 +8,7 @@ use biome_js_syntax::{
     AnyJsObjectBindingPatternMember, JsIdentifierBinding,
 };
 use biome_rowan::AstNode;
+use biome_rule_options::no_duplicate_parameters::NoDuplicateParametersOptions;
 use rustc_hash::FxHashSet;
 
 declare_lint_rule! {
@@ -42,7 +43,7 @@ declare_lint_rule! {
         version: "1.0.0",
         name: "noDuplicateParameters",
         language: "js",
-        sources: &[RuleSource::Eslint("no-dupe-args")],
+        sources: &[RuleSource::Eslint("no-dupe-args").same()],
         recommended: true,
         severity: Severity::Error,
     }
@@ -52,7 +53,7 @@ impl Rule for NoDuplicateParameters {
     type Query = Ast<AnyJsParameters>;
     type State = JsIdentifierBinding;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoDuplicateParametersOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
         let parameters = ctx.query();

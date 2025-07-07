@@ -5,6 +5,7 @@ use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_syntax::JsRegexLiteralExpression;
 use biome_rowan::{AstNode, TextRange, TextSize};
+use biome_rule_options::no_control_characters_in_regex::NoControlCharactersInRegexOptions;
 use core::str;
 
 declare_lint_rule! {
@@ -54,7 +55,7 @@ declare_lint_rule! {
         version: "1.0.0",
         name: "noControlCharactersInRegex",
         language: "js",
-        sources: &[RuleSource::Eslint("no-control-regex")],
+        sources: &[RuleSource::Eslint("no-control-regex").same()],
         recommended: true,
         severity: Severity::Error,
     }
@@ -154,7 +155,7 @@ impl Rule for NoControlCharactersInRegex {
     type Query = Ast<JsRegexLiteralExpression>;
     type State = TextRange;
     type Signals = Box<[Self::State]>;
-    type Options = ();
+    type Options = NoControlCharactersInRegexOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();

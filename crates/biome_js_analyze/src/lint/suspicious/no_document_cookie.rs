@@ -7,6 +7,7 @@ use biome_js_syntax::{
     binding_ext::AnyJsBindingDeclaration, global_identifier, static_value::StaticValue,
 };
 use biome_rowan::AstNode;
+use biome_rule_options::no_document_cookie::NoDocumentCookieOptions;
 
 use crate::services::semantic::Semantic;
 
@@ -54,7 +55,7 @@ declare_lint_rule! {
         version: "1.9.4",
         name: "noDocumentCookie",
         language: "js",
-        sources: &[RuleSource::EslintUnicorn("no-document-cookie")],
+        sources: &[RuleSource::EslintUnicorn("no-document-cookie").same()],
         recommended: true,
         severity: Severity::Warning,
     }
@@ -129,7 +130,7 @@ impl Rule for NoDocumentCookie {
     type Query = Semantic<JsAssignmentExpression>;
     type State = ();
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoDocumentCookieOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();

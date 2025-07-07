@@ -1,9 +1,10 @@
 use biome_analyze::context::RuleContext;
-use biome_analyze::{Ast, Rule, RuleDiagnostic, RuleSource, RuleSourceKind, declare_lint_rule};
+use biome_analyze::{Ast, Rule, RuleDiagnostic, RuleSource, declare_lint_rule};
 use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_syntax::TsPropertyParameter;
 use biome_rowan::AstNode;
+use biome_rule_options::no_parameter_properties::NoParameterPropertiesOptions;
 
 declare_lint_rule! {
     /// Disallow the use of parameter properties in class constructors.
@@ -35,8 +36,7 @@ declare_lint_rule! {
         version: "1.0.0",
         name: "noParameterProperties",
         language: "ts",
-        sources: &[RuleSource::EslintTypeScript("parameter-properties")],
-        source_kind: RuleSourceKind::Inspired,
+        sources: &[RuleSource::EslintTypeScript("parameter-properties").inspired()],
         recommended: false,
         severity: Severity::Warning,
     }
@@ -46,7 +46,7 @@ impl Rule for NoParameterProperties {
     type Query = Ast<TsPropertyParameter>;
     type State = ();
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoParameterPropertiesOptions;
 
     fn run(_: &RuleContext<Self>) -> Self::Signals {
         Some(())

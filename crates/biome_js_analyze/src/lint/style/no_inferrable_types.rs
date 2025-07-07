@@ -11,6 +11,7 @@ use biome_js_syntax::{
 };
 use biome_rowan::AstNode;
 use biome_rowan::BatchMutationExt;
+use biome_rule_options::no_inferrable_types::NoInferrableTypesOptions;
 
 declare_lint_rule! {
     /// Disallow type annotations for variables, parameters, and class properties initialized with a literal expression.
@@ -96,7 +97,7 @@ declare_lint_rule! {
         version: "1.0.0",
         name: "noInferrableTypes",
         language: "ts",
-        sources: &[RuleSource::EslintTypeScript("no-inferrable-types")],
+        sources: &[RuleSource::EslintTypeScript("no-inferrable-types").same()],
         recommended: false,
         severity: Severity::Information,
         fix_kind: FixKind::Safe,
@@ -107,7 +108,7 @@ impl Rule for NoInferrableTypes {
     type Query = Ast<JsInitializerClause>;
     type State = TsTypeAnnotation;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoInferrableTypesOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let init = ctx.query();

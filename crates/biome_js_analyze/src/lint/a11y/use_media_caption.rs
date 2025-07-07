@@ -5,6 +5,7 @@ use biome_diagnostics::Severity;
 use biome_js_syntax::jsx_ext::AnyJsxElement;
 use biome_js_syntax::{AnyJsxChild, JsxElement, TextRange};
 use biome_rowan::AstNode;
+use biome_rule_options::use_media_caption::UseMediaCaptionOptions;
 use biome_string_case::StrLikeExtension;
 
 declare_lint_rule! {
@@ -36,7 +37,7 @@ declare_lint_rule! {
         version: "1.0.0",
         name: "useMediaCaption",
         language: "jsx",
-        sources: &[RuleSource::EslintJsxA11y("media-has-caption")],
+        sources: &[RuleSource::EslintJsxA11y("media-has-caption").same()],
         recommended: true,
         severity: Severity::Error,
     }
@@ -46,7 +47,7 @@ impl Rule for UseMediaCaption {
     type Query = Ast<AnyJsxElement>;
     type State = TextRange;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = UseMediaCaptionOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();

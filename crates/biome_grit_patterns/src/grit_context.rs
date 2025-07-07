@@ -20,6 +20,7 @@ use grit_pattern_matcher::pattern::{
 use grit_util::error::GritPatternError;
 use grit_util::{AnalysisLogs, FileOrigin, InputRanges, MatchRanges, error::GritResult};
 use path_absolutize::Absolutize;
+use std::collections::BTreeSet;
 use std::path::PathBuf;
 use std::sync::{Arc, Mutex};
 
@@ -163,8 +164,15 @@ impl<'a> ExecContext<'a, GritQueryContext> for GritExecContext<'a> {
         let (variables, ranges, suppressed) =
             state.bindings_history_to_ranges(&self.lang, self.name());
 
+        // Deduplicate ranges to avoid duplicate matches
+        let unique_ranges: Vec<_> = ranges
+            .into_iter()
+            .collect::<BTreeSet<_>>()
+            .into_iter()
+            .collect();
+
         let input_ranges = InputRanges {
-            ranges,
+            ranges: unique_ranges,
             variables,
             suppressed,
         };
@@ -282,7 +290,14 @@ fn file_owner_from_matches(
         return Ok(None);
     };
 
-    let absolute_path = name.absolutize()?.to_path_buf();
+    let base_dir = if cfg!(target_family = "wasm") {
+        PathBuf::from("/")
+    } else {
+        std::env::current_dir()?
+    };
+
+    let absolute_path = name.absolutize_from(base_dir)?.to_path_buf();
+
     Ok(Some(FileOwner {
         name,
         absolute_path,
@@ -307,7 +322,14 @@ fn new_file_owner(
         return Ok(None);
     };
 
-    let absolute_path = name.absolutize()?.to_path_buf();
+    let base_dir = if cfg!(target_family = "wasm") {
+        PathBuf::from("/")
+    } else {
+        std::env::current_dir()?
+    };
+
+    let absolute_path = name.absolutize_from(base_dir)?.to_path_buf();
+
     Ok(Some(FileOwner {
         name,
         absolute_path,

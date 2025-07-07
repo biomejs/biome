@@ -1,16 +1,13 @@
+use crate::JsRuleAction;
 use biome_analyze::RuleSource;
 use biome_analyze::{Ast, FixKind, Rule, RuleDiagnostic, context::RuleContext, declare_lint_rule};
 use biome_console::markup;
-use biome_deserialize_macros::Deserializable;
 use biome_diagnostics::Severity;
 use biome_js_factory::make;
 use biome_js_syntax::{AnyJsExpression, AnyJsLiteralExpression, JsBinaryExpression, T};
 use biome_js_syntax::{JsSyntaxKind::*, JsSyntaxToken};
 use biome_rowan::{BatchMutationExt, SyntaxResult};
-#[cfg(feature = "schema")]
-use schemars::JsonSchema;
-
-use crate::JsRuleAction;
+use biome_rule_options::no_double_equals::NoDoubleEqualsOptions;
 
 declare_lint_rule! {
     /// Require the use of `===` and `!==`.
@@ -78,7 +75,7 @@ declare_lint_rule! {
         version: "1.0.0",
         name: "noDoubleEquals",
         language: "js",
-        sources: &[RuleSource::Eslint("eqeqeq")],
+        sources: &[RuleSource::Eslint("eqeqeq").same()],
         recommended: true,
         severity: Severity::Error,
         fix_kind: FixKind::Unsafe,
@@ -144,38 +141,6 @@ impl Rule for NoDoubleEquals {
             mutation,
         ))
     }
-}
-
-/// Rule's options
-#[derive(Clone, Debug, Deserializable, Eq, PartialEq, serde::Deserialize, serde::Serialize)]
-#[cfg_attr(feature = "schemars", derive(JsonSchema))]
-#[serde(rename_all = "camelCase", deny_unknown_fields)]
-pub struct NoDoubleEqualsOptions {
-    /// If `true`, an exception is made when comparing with `null`, as it's often relied on to check
-    /// both for `null` or `undefined`.
-    ///
-    /// If `false`, no such exception will be made.
-    #[serde(
-        default = "ignore_null_default",
-        skip_serializing_if = "is_ignore_null_default"
-    )]
-    pub ignore_null: bool,
-}
-
-impl Default for NoDoubleEqualsOptions {
-    fn default() -> Self {
-        Self {
-            ignore_null: ignore_null_default(),
-        }
-    }
-}
-
-fn ignore_null_default() -> bool {
-    true
-}
-
-fn is_ignore_null_default(value: &bool) -> bool {
-    value == &ignore_null_default()
 }
 
 fn is_null_literal(res: &SyntaxResult<AnyJsExpression>) -> bool {

@@ -6,7 +6,6 @@ SnapshotResult {
     messages: [],
     matched_ranges: [
         "8:5-10:8",
-        "8:5-10:8",
     ],
     rewritten_files: [],
     created_files: [],

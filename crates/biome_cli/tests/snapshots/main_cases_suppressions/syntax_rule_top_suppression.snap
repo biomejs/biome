@@ -45,7 +45,7 @@ file.ts:4:13 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━━━
 ```block
 file.ts:6:10 lint/correctness/noUnusedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This function is unused.
+  ! This function sommething is unused.
   
     4 │ import type { ChalkInstance2 } from "chalk2" with { "resolution-mode": "import" };
     5 │ 

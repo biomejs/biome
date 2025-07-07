@@ -3,7 +3,6 @@ use biome_analyze::{
     declare_source_rule,
 };
 use biome_console::markup;
-use biome_deserialize_macros::Deserializable;
 use biome_diagnostics::category;
 use biome_js_factory::make;
 use biome_js_syntax::{
@@ -11,6 +10,7 @@ use biome_js_syntax::{
     JsSyntaxKind, T,
 };
 use biome_rowan::{AstNode, BatchMutationExt, TextRange, TriviaPieceKind, chain_trivia_pieces};
+use biome_rule_options::organize_imports::OrganizeImportsOptions;
 use import_key::{ImportInfo, ImportKey};
 use rustc_hash::FxHashMap;
 use specifiers_attributes::{
@@ -21,10 +21,7 @@ use specifiers_attributes::{
 use crate::JsRuleAction;
 use util::{attached_trivia, detached_trivia, has_detached_leading_comment, leading_newlines};
 
-pub mod comparable_token;
-pub mod import_groups;
 pub mod import_key;
-pub mod import_source;
 pub mod specifiers_attributes;
 mod util;
 
@@ -163,7 +160,7 @@ declare_source_rule! {
     /// 1. URLs such as `https://example.org`.
     /// 2. Packages with a protocol such as `node:path`, `bun:test`, `jsr:@my?lib`, or `npm:lib`.
     /// 3. Packages such as `mylib` or `@my/lib`.
-    /// 4. Aliases: sources starting with `@/`, `#`, `~`, or `%`.
+    /// 4. Aliases: sources starting with `@/`, `#`, `~`, `$`, or `%`.
     ///    They usually are [Node.js subpath imports](https://nodejs.org/api/packages.html#subpath-imports) or [TypeScript path aliases](https://www.typescriptlang.org/tsconfig/#paths).
     /// 5. Absolute and relative paths.
     ///
@@ -260,7 +257,7 @@ declare_source_rule! {
     /// Predefined group matchers are strings in `CONSTANT_CASE` prefixed and suffixed by `:`.
     /// The sorter provides several predefined group matchers:
     ///
-    /// - `:ALIAS:`: sources starting with `#`, `@/`, `~`, or `%`.
+    /// - `:ALIAS:`: sources starting with `#`, `@/`, `~`, `$`, or `%`.
     /// - `:BUN:`: sources starting with the protocol `bun:` or that correspond to a built-in Bun module such as `bun`.
     /// - `:NODE:`: sources starting with the protocol `node:` or that correspond to a built-in Node.js module such as `fs` or `path`.
     /// - `:PACKAGE:`: scoped and bare packages.
@@ -634,7 +631,7 @@ impl Rule for OrganizeImports {
     type Query = Ast<JsModule>;
     type State = Box<[Issue]>;
     type Signals = Option<Self::State>;
-    type Options = Options;
+    type Options = OrganizeImportsOptions;
 
     fn text_range(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<TextRange> {
         ctx.query()
@@ -945,9 +942,11 @@ impl Rule for OrganizeImports {
                         };
                         let mut new_item = new_item.into_syntax();
                         let old_item = old_item.into_node()?;
-                        let blank_line_separated_groups = options
-                            .groups
-                            .separated_by_blank_line(prev_group, key.group);
+                        let blank_line_separated_groups = index != 0
+                            && options
+                                .groups
+                                .separated_by_blank_line(prev_group, key.group);
+                        prev_group = key.group;
                         // Don't make any change if it is the same node and no change have to be done
                         if !blank_line_separated_groups && index == key.slot_index && !was_merged {
                             continue;
@@ -1001,7 +1000,6 @@ impl Rule for OrganizeImports {
                             new_item = new_item.prepend_trivia_pieces(newline)?;
                         }
                         mutation.replace_element_discard_trivia(old_item.into(), new_item.into());
-                        prev_group = key.group;
                     }
                 }
             }
@@ -1020,15 +1018,6 @@ impl Rule for OrganizeImports {
             mutation,
         ))
     }
-}
-
-#[derive(
-    Clone, Debug, Default, Eq, PartialEq, serde::Deserialize, Deserializable, serde::Serialize,
-)]
-#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
-#[serde(rename_all = "camelCase", deny_unknown_fields, default)]
-pub struct Options {
-    groups: import_groups::ImportGroups,
 }
 
 #[derive(Debug)]

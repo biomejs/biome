@@ -9,6 +9,7 @@ use biome_js_syntax::{
     JsVariableStatement, JsYieldArgument, T,
 };
 use biome_rowan::{AstNode, BatchMutationExt, TextRange, TokenText, declare_node_union};
+use biome_rule_options::no_useless_undefined::NoUselessUndefinedOptions;
 
 use crate::JsRuleAction;
 
@@ -74,7 +75,7 @@ declare_lint_rule! {
         name: "noUselessUndefined",
         language: "js",
         fix_kind: FixKind::Safe,
-        sources: &[RuleSource::EslintUnicorn("no-useless-undefined")],
+        sources: &[RuleSource::EslintUnicorn("no-useless-undefined").same()],
         recommended: false,
     }
 }
@@ -107,7 +108,7 @@ impl Rule for NoUselessUndefined {
     type Query = Ast<AnyUndefinedNode>;
     type State = RuleState;
     type Signals = Box<[Self::State]>;
-    type Options = ();
+    type Options = NoUselessUndefinedOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();

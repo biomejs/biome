@@ -27,7 +27,7 @@ var a = foo;
 ```block
 src/file.mjs:2:5 lint/correctness/noUnusedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This variable is unused.
+  ! This variable a is unused.
   
     1 │ import { foo } from "foo";
   > 2 │ var a = foo;

@@ -1957,7 +1957,7 @@ pub fn css_scope_range_start(start: CssScopeEdge) -> CssScopeRangeStart {
 }
 pub fn css_starting_style_at_rule(
     starting_style_token: SyntaxToken,
-    block: AnyCssStartingStyleBlock,
+    block: AnyCssConditionalBlock,
 ) -> CssStartingStyleAtRule {
     CssStartingStyleAtRule::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::CSS_STARTING_STYLE_AT_RULE,

@@ -74,7 +74,7 @@ impl<T: Clone + Default> Merge for RuleConfiguration<T> {
         }
     }
 }
-impl<T: Clone + Default + 'static> RuleConfiguration<T> {
+impl<T: Clone + Default + 'static + Debug> RuleConfiguration<T> {
     pub fn get_options(&self) -> Option<RuleOptions> {
         match self {
             Self::Plain(_) => None,
@@ -382,6 +382,7 @@ pub struct RuleWithOptions<T: Default> {
     /// Rule's options
     pub options: T,
 }
+
 impl<T: Default> Merge for RuleWithOptions<T> {
     fn merge_with(&mut self, other: Self) {
         self.level = other.level;
@@ -427,8 +428,8 @@ impl Debug for RuleSelector {
 impl Display for RuleSelector {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         match self {
-            Self::Group(group) => write!(f, "{}", group),
-            Self::Rule(group, rule) => write!(f, "{}/{}", group, rule),
+            Self::Group(group) => write!(f, "{group}",),
+            Self::Rule(group, rule) => write!(f, "{group}/{rule}",),
         }
     }
 }

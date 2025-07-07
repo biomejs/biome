@@ -1,8 +1,8 @@
+use crate::services::module_graph::ResolvedImports;
 use biome_analyze::{
     Rule, RuleDiagnostic, RuleDomain, RuleSource, context::RuleContext, declare_lint_rule,
 };
-use biome_console::{fmt::Display, markup};
-use biome_deserialize_macros::Deserializable;
+use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_fs::BiomePath;
 use biome_js_syntax::{
@@ -11,14 +11,9 @@ use biome_js_syntax::{
 use biome_jsdoc_comment::JsdocComment;
 use biome_module_graph::{JsModuleInfo, ModuleGraph, ResolvedPath};
 use biome_rowan::{AstNode, SyntaxResult, Text, TextRange};
+use biome_rule_options::no_private_imports::{NoPrivateImportsOptions, Visibility};
 use camino::{Utf8Path, Utf8PathBuf};
-use serde::{Deserialize, Serialize};
 use std::str::FromStr;
-
-#[cfg(feature = "schemars")]
-use schemars::JsonSchema;
-
-use crate::services::module_graph::ResolvedImports;
 
 const INDEX_BASENAMES: &[&str] = &["index", "mod"];
 
@@ -148,55 +143,11 @@ declare_lint_rule! {
         name: "noPrivateImports",
         language: "js",
         sources: &[
-            RuleSource::EslintImportAccess("eslint-plugin-import-access")
+            RuleSource::EslintImportAccess("eslint-plugin-import-access").same()
         ],
         recommended: true,
         severity: Severity::Warning,
         domains: &[RuleDomain::Project],
-    }
-}
-
-/// Options for the rule `noPrivateImports`.
-#[derive(Clone, Debug, Default, Deserialize, Deserializable, Eq, PartialEq, Serialize)]
-#[cfg_attr(feature = "schemars", derive(JsonSchema))]
-#[serde(rename_all = "camelCase", deny_unknown_fields, default)]
-pub struct NoPrivateImportsOptions {
-    /// The default visibility to assume for symbols without visibility tag.
-    ///
-    /// Default: **public**.
-    pub default_visibility: Visibility,
-}
-
-#[derive(Clone, Copy, Debug, Default, Deserialize, Deserializable, Eq, PartialEq, Serialize)]
-#[cfg_attr(feature = "schemars", derive(JsonSchema))]
-#[serde(rename_all = "camelCase")]
-pub enum Visibility {
-    #[default]
-    Public,
-    Package,
-    Private,
-}
-
-impl Display for Visibility {
-    fn fmt(&self, fmt: &mut biome_console::fmt::Formatter) -> std::io::Result<()> {
-        match self {
-            Self::Public => fmt.write_str("public"),
-            Self::Package => fmt.write_str("package"),
-            Self::Private => fmt.write_str("private"),
-        }
-    }
-}
-
-impl FromStr for Visibility {
-    type Err = ();
-
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        match s {
-            "public" => Ok(Self::Public),
-            "package" => Ok(Self::Package),
-            "private" => Ok(Self::Private),
-            _ => Err(()),
-        }
     }
 }
 
@@ -228,9 +179,9 @@ impl Rule for NoPrivateImports {
             .is_static_import()
             .then(|| node.inner_string_text())
             .flatten()
-            .filter(|specifier| !BiomePath::new(specifier.text()).is_dependency())
             .and_then(|specifier| module_info.static_import_paths.get(specifier.text()))
             .and_then(ResolvedPath::as_path)
+            .filter(|path| !BiomePath::new(path).is_dependency())
         else {
             return Vec::new();
         };

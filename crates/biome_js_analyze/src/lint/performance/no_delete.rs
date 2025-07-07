@@ -7,6 +7,7 @@ use biome_js_syntax::{
     JsStaticMemberExpressionFields, JsUnaryExpression, JsUnaryOperator, T,
 };
 use biome_rowan::{AstNode, BatchMutationExt};
+use biome_rule_options::no_delete::NoDeleteOptions;
 
 use crate::JsRuleAction;
 
@@ -69,7 +70,7 @@ impl Rule for NoDelete {
     type Query = Ast<JsUnaryExpression>;
     type State = AnyJsExpression;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoDeleteOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();

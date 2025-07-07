@@ -5,6 +5,7 @@ use biome_console::markup;
 use biome_css_syntax::{AnyCssGenericComponentValue, AnyCssValue, CssGenericProperty};
 use biome_diagnostics::Severity;
 use biome_rowan::{AstNode, TextRange};
+use biome_rule_options::no_duplicate_font_names::NoDuplicateFontNamesOptions;
 use biome_string_case::StrLikeExtension;
 use std::collections::HashSet;
 
@@ -49,7 +50,7 @@ declare_lint_rule! {
         language: "css",
         recommended: true,
         severity: Severity::Error,
-        sources: &[RuleSource::Stylelint("font-family-no-duplicate-names")],
+        sources: &[RuleSource::Stylelint("font-family-no-duplicate-names").same()],
     }
 }
 
@@ -62,7 +63,7 @@ impl Rule for NoDuplicateFontNames {
     type Query = Ast<CssGenericProperty>;
     type State = RuleState;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoDuplicateFontNamesOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
         let node = ctx.query();

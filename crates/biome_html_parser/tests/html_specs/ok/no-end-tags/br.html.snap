@@ -15,6 +15,7 @@ foo<br>bar
 ```
 HtmlRoot {
     bom_token: missing (optional),
+    frontmatter: missing (optional),
     directive: missing (optional),
     html: HtmlElementList [
         HtmlContent {
@@ -43,7 +44,8 @@ HtmlRoot {
 0: HTML_ROOT@0..11
   0: (empty)
   1: (empty)
-  2: HTML_ELEMENT_LIST@0..10
+  2: (empty)
+  3: HTML_ELEMENT_LIST@0..10
     0: HTML_CONTENT@0..3
       0: HTML_LITERAL@0..3 "foo" [] []
     1: HTML_SELF_CLOSING_ELEMENT@3..7
@@ -55,6 +57,6 @@ HtmlRoot {
       4: R_ANGLE@6..7 ">" [] []
     2: HTML_CONTENT@7..10
       0: HTML_LITERAL@7..10 "bar" [] []
-  3: EOF@10..11 "" [Newline("\n")] []
+  4: EOF@10..11 "" [Newline("\n")] []
 
 ```

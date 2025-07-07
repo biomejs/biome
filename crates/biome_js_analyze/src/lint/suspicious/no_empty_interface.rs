@@ -1,8 +1,6 @@
 use crate::JsRuleAction;
 use biome_analyze::context::RuleContext;
-use biome_analyze::{
-    Ast, FixKind, Rule, RuleDiagnostic, RuleSource, RuleSourceKind, declare_lint_rule,
-};
+use biome_analyze::{Ast, FixKind, Rule, RuleDiagnostic, RuleSource, declare_lint_rule};
 use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_factory::{
@@ -14,6 +12,7 @@ use biome_js_syntax::{
     TsTypeAliasDeclaration,
 };
 use biome_rowan::{AstNode, AstNodeList, BatchMutationExt, SyntaxResult};
+use biome_rule_options::no_empty_interface::NoEmptyInterfaceOptions;
 
 declare_lint_rule! {
     /// Disallow the declaration of empty interfaces.
@@ -50,8 +49,7 @@ declare_lint_rule! {
         version: "1.0.0",
         name: "noEmptyInterface",
         language: "ts",
-        sources: &[RuleSource::EslintTypeScript("no-empty-interface")],
-        source_kind: RuleSourceKind::Inspired,
+        sources: &[RuleSource::EslintTypeScript("no-empty-interface").inspired()],
         recommended: true,
         severity: Severity::Error,
         fix_kind: FixKind::Safe,
@@ -62,7 +60,7 @@ impl Rule for NoEmptyInterface {
     type Query = Ast<TsInterfaceDeclaration>;
     type State = ();
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoEmptyInterfaceOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();

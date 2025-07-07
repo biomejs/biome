@@ -1,9 +1,10 @@
+use biome_analyze::RuleSource;
 use biome_analyze::{Ast, Rule, RuleDiagnostic, context::RuleContext, declare_lint_rule};
-use biome_analyze::{RuleSource, RuleSourceKind};
 use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_syntax::{AnyJsRoot, JsLanguage, JsSyntaxNode};
 use biome_rowan::{AstNode, Direction, SyntaxTriviaPiece, TextRange};
+use biome_rule_options::no_irregular_whitespace::NoIrregularWhitespaceOptions;
 
 const IRREGULAR_WHITESPACES: &[char; 22] = &[
     '\u{c}', '\u{b}', '\u{85}', '\u{feff}', '\u{a0}', '\u{1680}', '\u{180e}', '\u{2000}',
@@ -42,8 +43,7 @@ declare_lint_rule! {
         version: "1.9.0",
         name: "noIrregularWhitespace",
         language: "js",
-        sources: &[RuleSource::Eslint("no-irregular-whitespace")],
-        source_kind: RuleSourceKind::SameLogic,
+        sources: &[RuleSource::Eslint("no-irregular-whitespace").same()],
         recommended: true,
         severity: Severity::Warning,
     }
@@ -53,7 +53,7 @@ impl Rule for NoIrregularWhitespace {
     type Query = Ast<AnyJsRoot>;
     type State = TextRange;
     type Signals = Box<[Self::State]>;
-    type Options = ();
+    type Options = NoIrregularWhitespaceOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         get_irregular_whitespace(ctx.query().syntax()).into_boxed_slice()

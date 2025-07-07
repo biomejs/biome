@@ -1,4 +1,4 @@
-use crate::capabilities::server_capabilities;
+use crate::capabilities::{DEFAULT_CODE_ACTION_CAPABILITIES, server_capabilities};
 use crate::diagnostics::{LspError, handle_lsp_error};
 use crate::requests::syntax_tree::{SYNTAX_TREE_REQUEST, SyntaxTreePayload};
 use crate::session::{
@@ -11,7 +11,7 @@ use biome_diagnostics::panic::PanicError;
 use biome_fs::{ConfigName, MemoryFileSystem, OsFileSystem};
 use biome_resolver::FsWithResolverProxy;
 use biome_service::workspace::{
-    CloseProjectParams, OpenProjectParams, RageEntry, RageParams, RageResult,
+    CloseProjectParams, OpenProjectParams, RageEntry, RageParams, RageResult, ScanKind,
     ServiceDataNotification,
 };
 use biome_service::{WatcherInstruction, WorkspaceServer};
@@ -30,7 +30,7 @@ use tokio::task::spawn_blocking;
 use tower_lsp_server::jsonrpc::Result as LspResult;
 use tower_lsp_server::{ClientSocket, UriExt, lsp_types::*};
 use tower_lsp_server::{LanguageServer, LspService, Server};
-use tracing::{error, info, instrument, warn};
+use tracing::{debug, error, info, instrument, warn};
 
 pub struct LSPServer {
     pub(crate) session: SessionHandle,
@@ -121,6 +121,9 @@ impl LSPServer {
     async fn setup_capabilities(&self) {
         let mut capabilities = CapabilitySet::default();
 
+        let is_linting_and_formatting_disabled = self.session.is_linting_and_formatting_disabled();
+        debug!("Requires configuration: {is_linting_and_formatting_disabled}");
+
         capabilities.add_capability(
             "biome_did_change_extension_settings",
             "workspace/didChangeConfiguration",
@@ -193,7 +196,7 @@ impl LSPServer {
         capabilities.add_capability(
             "biome_formatting",
             "textDocument/formatting",
-            if self.session.is_linting_and_formatting_disabled() {
+            if is_linting_and_formatting_disabled || !self.session.can_register_formatting() {
                 CapabilityStatus::Disable
             } else {
                 CapabilityStatus::Enable(None)
@@ -202,7 +205,7 @@ impl LSPServer {
         capabilities.add_capability(
             "biome_range_formatting",
             "textDocument/rangeFormatting",
-            if self.session.is_linting_and_formatting_disabled() {
+            if is_linting_and_formatting_disabled || !self.session.can_register_range_formatting() {
                 CapabilityStatus::Disable
             } else {
                 CapabilityStatus::Enable(None)
@@ -211,7 +214,8 @@ impl LSPServer {
         capabilities.add_capability(
             "biome_on_type_formatting",
             "textDocument/onTypeFormatting",
-            if self.session.is_linting_and_formatting_disabled() {
+            if is_linting_and_formatting_disabled || !self.session.can_register_on_type_formatting()
+            {
                 CapabilityStatus::Disable
             } else {
                 CapabilityStatus::Enable(Some(json!(DocumentOnTypeFormattingRegistrationOptions {
@@ -222,18 +226,23 @@ impl LSPServer {
             },
         );
 
-        let rename = {
-            let config = self.session.extension_settings.read().ok();
-            config.is_some_and(|x| x.rename_enabled())
-        };
-
         capabilities.add_capability(
-            "biome_rename",
-            "textDocument/rename",
-            if rename {
-                CapabilityStatus::Enable(None)
-            } else {
+            "biome_code_action",
+            "textDocument/codeAction",
+            if is_linting_and_formatting_disabled || !self.session.can_register_code_action() {
                 CapabilityStatus::Disable
+            } else {
+                CapabilityStatus::Enable(Some(json!(CodeActionProviderCapability::from(
+                    CodeActionOptions {
+                        code_action_kinds: Some(
+                            DEFAULT_CODE_ACTION_CAPABILITIES
+                                .iter()
+                                .map(|item| CodeActionKind::from(*item))
+                                .collect::<Vec<_>>(),
+                        ),
+                        ..Default::default()
+                    }
+                ))))
             },
         );
 
@@ -251,6 +260,15 @@ impl LSPServer {
             },
 
             Err(err) => Err(into_lsp_error(err)),
+        }
+    }
+
+    async fn notify_error(&self, err: LspError) {
+        if let Err(err) = handle_lsp_error::<()>(err, &self.session.client).await {
+            self.session
+                .client
+                .log_message(MessageType::ERROR, err)
+                .await;
         }
     }
 }
@@ -391,14 +409,11 @@ impl LanguageServer for LSPServer {
                     .session
                     .workspace
                     .close_project(CloseProjectParams { project_key })
-                    .map_err(into_lsp_error);
+                    .map_err(LspError::from);
 
                 if let Err(err) = result {
                     error!("Failed to remove project from the workspace: {}", err);
-                    self.session
-                        .client
-                        .log_message(MessageType::ERROR, err)
-                        .await;
+                    self.notify_error(err).await;
                 }
             }
         }
@@ -414,15 +429,20 @@ impl LanguageServer for LSPServer {
                         only_rules: None,
                         skip_rules: None,
                     })
-                    .map_err(into_lsp_error);
+                    .map_err(LspError::from);
 
                 match result {
                     Ok(result) => {
+                        let scan_kind = if result.scan_kind.is_none() {
+                            ScanKind::KnownFiles
+                        } else {
+                            result.scan_kind
+                        };
                         self.session
                             .insert_and_scan_project(
                                 result.project_key,
                                 project_path.clone(),
-                                result.scan_kind,
+                                scan_kind,
                             )
                             .await;
 
@@ -430,10 +450,7 @@ impl LanguageServer for LSPServer {
                     }
                     Err(err) => {
                         error!("Failed to add project to the workspace: {err}");
-                        self.session
-                            .client
-                            .log_message(MessageType::ERROR, err)
-                            .await;
+                        self.notify_error(err).await;
                     }
                 }
             }
@@ -441,10 +458,11 @@ impl LanguageServer for LSPServer {
     }
 
     async fn code_action(&self, params: CodeActionParams) -> LspResult<Option<CodeActionResponse>> {
-        biome_diagnostics::panic::catch_unwind(move || {
-            handlers::analysis::code_actions(&self.session, params).map_err(into_lsp_error)
-        })
-        .map_err(into_lsp_error)?
+        let result = biome_diagnostics::panic::catch_unwind(move || {
+            handlers::analysis::code_actions(&self.session, params)
+        });
+
+        self.map_op_error(result).await
     }
 
     async fn formatting(
@@ -477,25 +495,6 @@ impl LanguageServer for LSPServer {
         });
 
         self.map_op_error(result).await
-    }
-
-    async fn rename(&self, params: RenameParams) -> LspResult<Option<WorkspaceEdit>> {
-        biome_diagnostics::panic::catch_unwind(move || {
-            let rename_enabled = self
-                .session
-                .extension_settings
-                .read()
-                .ok()
-                .and_then(|config| config.settings.rename)
-                .unwrap_or(false);
-
-            if rename_enabled {
-                handlers::rename::rename(&self.session, params).map_err(into_lsp_error)
-            } else {
-                Ok(None)
-            }
-        })
-        .map_err(into_lsp_error)?
     }
 }
 
@@ -585,7 +584,7 @@ pub struct ServerFactory {
 
 impl Default for ServerFactory {
     fn default() -> Self {
-        Self::new_with_fs(Box::new(MemoryFileSystem::default()))
+        Self::new_with_fs(Arc::new(MemoryFileSystem::default()))
     }
 }
 
@@ -596,7 +595,7 @@ impl ServerFactory {
         Self {
             cancellation: Arc::default(),
             workspace: Arc::new(WorkspaceServer::new(
-                Box::new(OsFileSystem::default()),
+                Arc::new(OsFileSystem::default()),
                 instruction_tx,
                 service_data_tx,
                 None,
@@ -610,7 +609,7 @@ impl ServerFactory {
     }
 
     /// Constructor for use in tests.
-    pub fn new_with_fs(fs: Box<dyn FsWithResolverProxy>) -> Self {
+    pub fn new_with_fs(fs: Arc<dyn FsWithResolverProxy>) -> Self {
         let (watcher_tx, _) = bounded(0);
         let (service_data_tx, service_data_rx) = watch::channel(ServiceDataNotification::Updated);
         Self {
@@ -669,6 +668,7 @@ impl ServerFactory {
         workspace_method!(builder, scan_project_folder);
         workspace_method!(builder, close_project);
         workspace_method!(builder, open_file);
+        workspace_method!(builder, file_exists);
         workspace_method!(builder, get_syntax_tree);
         workspace_method!(builder, get_control_flow_graph);
         workspace_method!(builder, get_formatter_ir);

@@ -5,6 +5,7 @@ use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_syntax::JsUnaryExpression;
 use biome_rowan::AstNode;
+use biome_rule_options::no_void::NoVoidOptions;
 
 declare_lint_rule! {
     /// Disallow the use of `void` operators, which is not a familiar operator.
@@ -24,7 +25,7 @@ declare_lint_rule! {
         version: "1.0.0",
         name: "noVoid",
         language: "js",
-        sources: &[RuleSource::Eslint("no-void")],
+        sources: &[RuleSource::Eslint("no-void").same()],
         recommended: false,
         severity: Severity::Warning,
     }
@@ -34,7 +35,7 @@ impl Rule for NoVoid {
     type Query = Ast<JsUnaryExpression>;
     type State = ();
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoVoidOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let expression = ctx.query();

@@ -817,7 +817,7 @@ impl<L: Language> From<cursor::SyntaxNode> for SyntaxNode<L> {
 
 /// Language-agnostic representation of the root node of a syntax tree, can be
 /// sent or shared between threads
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub struct SendNode {
     language: TypeId,
     green: GreenNode,
@@ -836,6 +836,25 @@ impl SendNode {
             Some(SyntaxNode::new_root(self.green))
         } else {
             None
+        }
+    }
+}
+
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct EmbeddedSendNode {
+    offset: TextSize,
+    green: GreenNode,
+}
+
+impl EmbeddedSendNode {
+    /// Downcast this handle into a [SyntaxNodeWithOffset]
+    pub fn into_node<L>(self) -> SyntaxNodeWithOffset<L>
+    where
+        L: Language + 'static,
+    {
+        SyntaxNodeWithOffset {
+            node: SyntaxNode::new_root(self.green),
+            offset: self.offset,
         }
     }
 }
@@ -1055,5 +1074,75 @@ impl<L: Language> SyntaxNodeOptionExt<L> for Option<&SyntaxNode<L>> {
 impl<L: Language> SyntaxNodeOptionExt<L> for Option<SyntaxNode<L>> {
     fn kind(&self) -> Option<L::Kind> {
         self.as_ref().kind()
+    }
+}
+
+/// A syntax node that contains an offset
+///
+/// This allows embedded content to maintain correct source positions relative
+/// to the parent document. For example, JavaScript code in an HTML `<script>` tag
+/// starting at position 100 will have all its ranges offset by 100.
+#[derive(Clone, Debug, PartialEq, Eq, Hash)]
+pub struct SyntaxNodeWithOffset<L: Language> {
+    pub node: SyntaxNode<L>,
+    pub offset: TextSize,
+}
+
+impl<L: Language> SyntaxNodeWithOffset<L> {
+    pub fn new(node: SyntaxNode<L>, offset: TextSize) -> Self {
+        Self { node, offset }
+    }
+
+    /// Returns the text range including all trivia, adjusted for base offset
+    pub fn text_range_with_trivia(&self) -> TextRange {
+        let range = self.node.text_range_with_trivia();
+        TextRange::new(range.start() + self.offset, range.end() + self.offset)
+    }
+
+    /// Returns the trimmed text range, adjusted for base offset
+    pub fn text_trimmed_range(&self) -> TextRange {
+        let range = self.node.text_trimmed_range();
+        TextRange::new(range.start() + self.offset, range.end() + self.offset)
+    }
+
+    /// Get the base offset applied to this node
+    pub fn base_offset(&self) -> TextSize {
+        self.offset
+    }
+
+    /// Get the underlying syntax node without offset
+    pub fn inner(&self) -> &SyntaxNode<L> {
+        &self.node
+    }
+
+    /// Convert back to the underlying syntax node, discarding offset information
+    pub fn into_inner(self) -> SyntaxNode<L> {
+        self.node
+    }
+
+    // Forward common methods from SyntaxNode
+    pub fn kind(&self) -> L::Kind {
+        self.node.kind()
+    }
+
+    pub fn text_with_trivia(&self) -> crate::SyntaxNodeText {
+        self.node.text_with_trivia()
+    }
+
+    pub fn text_trimmed(&self) -> crate::SyntaxNodeText {
+        self.node.text_trimmed()
+    }
+
+    /// Create a [Send] + [Sync] handle to this node.
+    ///
+    /// ### Panics
+    ///
+    /// It panics if the `base_offset` isn't greater than zero
+    pub fn as_embedded_send(&self) -> EmbeddedSendNode {
+        debug_assert!(self.offset > 0.into(), "range must be greater than 0");
+        EmbeddedSendNode {
+            green: self.node.green_node(),
+            offset: self.offset,
+        }
     }
 }

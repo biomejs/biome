@@ -20,6 +20,7 @@ pub enum HtmlSyntaxKind {
     MINUS,
     CDATA_START,
     CDATA_END,
+    FENCE,
     NULL_KW,
     TRUE_KW,
     FALSE_KW,
@@ -36,6 +37,7 @@ pub enum HtmlSyntaxKind {
     HTML_DIRECTIVE,
     HTML_SELF_CLOSING_TAG,
     HTML_ELEMENT,
+    HTML_ASTRO_FRONTMATTER_ELEMENT,
     HTML_OPENING_ELEMENT,
     HTML_CLOSING_ELEMENT,
     HTML_SELF_CLOSING_ELEMENT,
@@ -60,7 +62,7 @@ impl HtmlSyntaxKind {
     pub const fn is_punct(self) -> bool {
         matches!(
             self,
-            L_ANGLE | R_ANGLE | SLASH | EQ | BANG | MINUS | CDATA_START | CDATA_END
+            L_ANGLE | R_ANGLE | SLASH | EQ | BANG | MINUS | CDATA_START | CDATA_END | FENCE
         )
     }
     pub const fn is_literal(self) -> bool {
@@ -90,6 +92,7 @@ impl HtmlSyntaxKind {
             MINUS => "-",
             CDATA_START => "<![CDATA[",
             CDATA_END => "]]>",
+            FENCE => "---",
             NULL_KW => "null",
             TRUE_KW => "true",
             FALSE_KW => "false",
@@ -104,4 +107,4 @@ impl HtmlSyntaxKind {
 }
 #[doc = r" Utility macro for creating a SyntaxKind through simple macro syntax"]
 #[macro_export]
-macro_rules ! T { [<] => { $ crate :: HtmlSyntaxKind :: L_ANGLE } ; [>] => { $ crate :: HtmlSyntaxKind :: R_ANGLE } ; [/] => { $ crate :: HtmlSyntaxKind :: SLASH } ; [=] => { $ crate :: HtmlSyntaxKind :: EQ } ; [!] => { $ crate :: HtmlSyntaxKind :: BANG } ; [-] => { $ crate :: HtmlSyntaxKind :: MINUS } ; ["<![CDATA["] => { $ crate :: HtmlSyntaxKind :: CDATA_START } ; ["]]>"] => { $ crate :: HtmlSyntaxKind :: CDATA_END } ; [null] => { $ crate :: HtmlSyntaxKind :: NULL_KW } ; [true] => { $ crate :: HtmlSyntaxKind :: TRUE_KW } ; [false] => { $ crate :: HtmlSyntaxKind :: FALSE_KW } ; [doctype] => { $ crate :: HtmlSyntaxKind :: DOCTYPE_KW } ; [html] => { $ crate :: HtmlSyntaxKind :: HTML_KW } ; [ident] => { $ crate :: HtmlSyntaxKind :: IDENT } ; [EOF] => { $ crate :: HtmlSyntaxKind :: EOF } ; [UNICODE_BOM] => { $ crate :: HtmlSyntaxKind :: UNICODE_BOM } ; [#] => { $ crate :: HtmlSyntaxKind :: HASH } ; }
+macro_rules ! T { [<] => { $ crate :: HtmlSyntaxKind :: L_ANGLE } ; [>] => { $ crate :: HtmlSyntaxKind :: R_ANGLE } ; [/] => { $ crate :: HtmlSyntaxKind :: SLASH } ; [=] => { $ crate :: HtmlSyntaxKind :: EQ } ; [!] => { $ crate :: HtmlSyntaxKind :: BANG } ; [-] => { $ crate :: HtmlSyntaxKind :: MINUS } ; ["<![CDATA["] => { $ crate :: HtmlSyntaxKind :: CDATA_START } ; ["]]>"] => { $ crate :: HtmlSyntaxKind :: CDATA_END } ; [---] => { $ crate :: HtmlSyntaxKind :: FENCE } ; [null] => { $ crate :: HtmlSyntaxKind :: NULL_KW } ; [true] => { $ crate :: HtmlSyntaxKind :: TRUE_KW } ; [false] => { $ crate :: HtmlSyntaxKind :: FALSE_KW } ; [doctype] => { $ crate :: HtmlSyntaxKind :: DOCTYPE_KW } ; [html] => { $ crate :: HtmlSyntaxKind :: HTML_KW } ; [ident] => { $ crate :: HtmlSyntaxKind :: IDENT } ; [EOF] => { $ crate :: HtmlSyntaxKind :: EOF } ; [UNICODE_BOM] => { $ crate :: HtmlSyntaxKind :: UNICODE_BOM } ; [#] => { $ crate :: HtmlSyntaxKind :: HASH } ; }

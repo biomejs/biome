@@ -7,6 +7,7 @@ use biome_console::markup;
 use biome_css_syntax::{AnyCssDeclarationName, CssGenericProperty, CssLanguage, CssSyntaxKind};
 use biome_diagnostics::Severity;
 use biome_rowan::{AstNode, Language, SyntaxNode, TextRange, WalkEvent};
+use biome_rule_options::no_shorthand_property_overrides::NoShorthandPropertyOverridesOptions;
 
 fn remove_vendor_prefix<'a>(prop: &'a str, prefix: &'a str) -> &'a str {
     if let Some(prop) = prop.strip_prefix(prefix) {
@@ -74,7 +75,7 @@ declare_lint_rule! {
         language: "css",
         recommended: true,
         severity: Severity::Error,
-        sources: &[RuleSource::Stylelint("declaration-block-no-shorthand-property-overrides")],
+        sources: &[RuleSource::Stylelint("declaration-block-no-shorthand-property-overrides").same()],
     }
 }
 
@@ -186,7 +187,7 @@ impl Rule for NoShorthandPropertyOverrides {
     type Query = NoDeclarationBlockShorthandPropertyOverridesQuery;
     type State = NoDeclarationBlockShorthandPropertyOverridesState;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoShorthandPropertyOverridesOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
         let query = ctx.query();

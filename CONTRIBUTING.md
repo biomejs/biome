@@ -120,7 +120,7 @@ This Codespace comes pre-configured with the required tools and dependencies to 
 
 > [!NOTE]
 > A basic Codespace (32gb of disk space) might run out of disk space when building biome or running the full test suite.
-> The pre-configured Codespace is therefor based on the premium image with 64gb of disk space.
+> The pre-configured Codespace is therefore based on the premium image with 64gb of disk space.
 
 ## Testing
 
@@ -385,6 +385,8 @@ The command will present a prompt where you need to choose the libraries involve
 
 The command will create the changeset(s) in the `.changeset` folder. You're free to open the file, and add more information in it.
 
+If you want to add headers, use `####` or `#####`. Other kind of headers will mess up the final CHANGELOG and break upstream tools.
+
 #### Choose the correct packages
 
 In the vast majority of cases, you want to choose the `@biomejs/biome` package, which represents the main package.
@@ -493,6 +495,8 @@ Members are listed in alphabetical order. Members are free to use the full name,
 - [Dani Guardiola @DaniGuardiola](https://github.com/DaniGuardiola)
 - [Justinas Delinda @minht11](https://github.com/minht11)
 - [Madeline Gurriarán @SuperchupuDev](https://github.com/SuperchupuDev)
+- [Marat Dulin @mdevils](https://github.com/mdevils)
+- [Vladimir Ivanov_@vlad](https://github.com/vladimir-ivanov)
 - [Vo Hoang Long @vohoanglong0107](https://github.com/vohoanglong0107)
 - [Yoshiaki Togami @togami2864](https://github.com/togami2864)
 - [Yusuke Abe @chansuke](https://github.com/chansuke)

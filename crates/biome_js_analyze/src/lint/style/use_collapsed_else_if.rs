@@ -6,6 +6,7 @@ use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_syntax::{AnyJsStatement, JsBlockStatement, JsElseClause, JsIfStatement};
 use biome_rowan::{AstNode, AstNodeList, BatchMutationExt};
+use biome_rule_options::use_collapsed_else_if::UseCollapsedElseIfOptions;
 
 declare_lint_rule! {
     /// Enforce using `else if` instead of nested `if` in `else` clauses.
@@ -85,8 +86,8 @@ declare_lint_rule! {
         name: "useCollapsedElseIf",
         language: "js",
         sources: &[
-            RuleSource::Eslint("no-lonely-if"),
-            RuleSource::Clippy("collapsible_else_if")
+            RuleSource::Eslint("no-lonely-if").same(),
+            RuleSource::Clippy("collapsible_else_if").same(),
         ],
         recommended: false,
         severity: Severity::Information,
@@ -103,7 +104,7 @@ impl Rule for UseCollapsedElseIf {
     type Query = Ast<JsElseClause>;
     type State = RuleState;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = UseCollapsedElseIfOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let else_clause = ctx.query();

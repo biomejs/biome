@@ -11,6 +11,7 @@ use biome_js_syntax::{
     JsLogicalOperator, JsUnaryOperator,
 };
 use biome_rowan::{AstNode, BatchMutationExt};
+use biome_rule_options::use_valid_typeof::UseValidTypeofOptions;
 use biome_string_case::StrLikeExtension;
 
 use crate::JsRuleAction;
@@ -63,7 +64,7 @@ declare_lint_rule! {
         version: "1.0.0",
         name: "useValidTypeof",
         language: "js",
-        sources: &[RuleSource::Eslint("valid-typeof")],
+        sources: &[RuleSource::Eslint("valid-typeof").same()],
         recommended: true,
         severity: Severity::Error,
         fix_kind: FixKind::Unsafe,
@@ -74,7 +75,7 @@ impl Rule for UseValidTypeof {
     type Query = Ast<JsBinaryExpression>;
     type State = AnyJsExpression;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = UseValidTypeofOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
         let n = ctx.query();

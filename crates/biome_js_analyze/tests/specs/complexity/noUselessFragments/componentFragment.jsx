@@ -9,6 +9,8 @@ export function Component() {
       </Suspense>
 
       <Comp prop={<></>} />
+      <Comp prop={<Fragment></Fragment>} />
+      <Comp prop={<React.Fragment></React.Fragment>} />
     </div>
   );
 }

@@ -6,6 +6,38 @@ use crate::{
     AsFormat, FormatBogusNodeRule, FormatNodeRule, HtmlFormatContext, HtmlFormatter, IntoFormat,
 };
 use biome_formatter::{FormatOwnedWithRule, FormatRefWithRule, FormatResult, FormatRule};
+impl FormatRule<biome_html_syntax::HtmlAstroFrontmatterElement>
+    for crate::html::auxiliary::astro_frontmatter_element::FormatHtmlAstroFrontmatterElement
+{
+    type Context = HtmlFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_html_syntax::HtmlAstroFrontmatterElement,
+        f: &mut HtmlFormatter,
+    ) -> FormatResult<()> {
+        FormatNodeRule::<biome_html_syntax::HtmlAstroFrontmatterElement>::fmt(self, node, f)
+    }
+}
+impl AsFormat<HtmlFormatContext> for biome_html_syntax::HtmlAstroFrontmatterElement {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_html_syntax::HtmlAstroFrontmatterElement,
+        crate::html::auxiliary::astro_frontmatter_element::FormatHtmlAstroFrontmatterElement,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule :: new (self , crate :: html :: auxiliary :: astro_frontmatter_element :: FormatHtmlAstroFrontmatterElement :: default ())
+    }
+}
+impl IntoFormat<HtmlFormatContext> for biome_html_syntax::HtmlAstroFrontmatterElement {
+    type Format = FormatOwnedWithRule<
+        biome_html_syntax::HtmlAstroFrontmatterElement,
+        crate::html::auxiliary::astro_frontmatter_element::FormatHtmlAstroFrontmatterElement,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule :: new (self , crate :: html :: auxiliary :: astro_frontmatter_element :: FormatHtmlAstroFrontmatterElement :: default ())
+    }
+}
 impl FormatRule<biome_html_syntax::HtmlAttribute>
     for crate::html::auxiliary::attribute::FormatHtmlAttribute
 {

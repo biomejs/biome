@@ -4,6 +4,7 @@ use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_syntax::{JsReturnStatement, JsSetterClassMember, JsSetterObjectMember};
 use biome_rowan::{AstNode, declare_node_union};
+use biome_rule_options::no_setter_return::NoSetterReturnOptions;
 
 use crate::services::control_flow::AnyJsControlFlowRoot;
 
@@ -69,7 +70,7 @@ declare_lint_rule! {
         version: "1.0.0",
         name: "noSetterReturn",
         language: "js",
-        sources: &[RuleSource::Eslint("no-setter-return")],
+        sources: &[RuleSource::Eslint("no-setter-return").same()],
         recommended: true,
         severity: Severity::Error,
     }
@@ -83,7 +84,7 @@ impl Rule for NoSetterReturn {
     type Query = Ast<JsReturnStatement>;
     type State = JsSetterMember;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoSetterReturnOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let ret = ctx.query();

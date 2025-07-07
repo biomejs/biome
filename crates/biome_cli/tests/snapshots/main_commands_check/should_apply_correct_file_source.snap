@@ -39,7 +39,7 @@ check ━━━━━━━━━━━━━━━━━━━━━━━━�
 ```block
 file.ts:1:30 lint/correctness/noUnusedVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This type alias is unused.
+  ! This type alias B is unused.
   
   > 1 │ type A = { a: string }; type B = Partial<A>
       │                              ^

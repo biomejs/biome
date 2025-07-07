@@ -1,14 +1,13 @@
 use crate::react::components::ReactComponentInfo;
 use biome_analyze::{
-    Ast, Rule, RuleDiagnostic, RuleSource, RuleSourceKind, context::RuleContext, declare_lint_rule,
+    Ast, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
-use biome_deserialize_macros::Deserializable;
 use biome_diagnostics::Severity;
 use biome_js_syntax::{AnyJsModuleItem, AnyJsStatement, JsModule, export_ext::AnyJsExported};
 use biome_rowan::{AstNode, TextRange};
+use biome_rule_options::use_component_export_only_modules::UseComponentExportOnlyModulesOptions;
 use rustc_hash::FxHashMap;
-use serde::{Deserialize, Serialize};
 
 declare_lint_rule! {
     /// Enforce declaring components only within modules that export React Components exclusively.
@@ -101,25 +100,11 @@ declare_lint_rule! {
         version: "1.9.2",
         name: "useComponentExportOnlyModules",
         language: "jsx",
-        sources: &[RuleSource::EslintReactRefresh("only-export-components")],
-        source_kind: RuleSourceKind::Inspired,
+        sources: &[RuleSource::EslintReactRefresh("only-export-components").inspired()],
         recommended: false,
         severity: Severity::Warning,
     }
 }
-
-#[derive(Debug, Clone, Deserialize, Deserializable, Eq, PartialEq, Serialize, Default)]
-#[cfg_attr(feature = "schemars", derive(schemars::JsonSchema))]
-#[serde(rename_all = "camelCase", deny_unknown_fields, default)]
-pub struct UseComponentExportOnlyModulesOptions {
-    /// Allows the export of constants. This option is for environments that support it, such as [Vite](https://vitejs.dev/)
-    #[serde(default)]
-    allow_constant_export: bool,
-    /// A list of names that can be additionally exported from the module This option is for exports that do not hinder [React Fast Refresh](https://github.com/facebook/react/tree/main/packages/react-refresh), such as [`meta` in Remix](https://remix.run/docs/en/main/route/meta)
-    #[serde(default, skip_serializing_if = "<[_]>::is_empty")]
-    allow_export_names: Box<[Box<str>]>,
-}
-
 enum ErrorType {
     ExportedNonComponentWithComponent,
     UnexportedComponent,

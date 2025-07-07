@@ -3,6 +3,7 @@ use biome_module_graph::ResolvedPath;
 use camino::{Utf8Component, Utf8Path};
 use serde::{Deserialize, Serialize};
 
+use crate::{JsRuleAction, services::module_graph::ResolvedImports};
 use biome_analyze::{
     FixKind, Rule, RuleDiagnostic, RuleDomain, context::RuleContext, declare_lint_rule,
 };
@@ -11,11 +12,7 @@ use biome_deserialize_macros::Deserializable;
 use biome_js_factory::make;
 use biome_js_syntax::{AnyJsImportLike, JsSyntaxToken, inner_string_text};
 use biome_rowan::BatchMutationExt;
-
-use crate::{JsRuleAction, services::module_graph::ResolvedImports};
-
-#[cfg(feature = "schemars")]
-use schemars::JsonSchema;
+use biome_rule_options::use_import_extensions::UseImportExtensionsOptions;
 
 declare_lint_rule! {
     /// Enforce file extensions for relative imports.
@@ -125,15 +122,6 @@ declare_lint_rule! {
     }
 }
 
-#[derive(Clone, Debug, Default, Deserializable, Deserialize, Serialize, Eq, PartialEq)]
-#[cfg_attr(feature = "schemars", derive(JsonSchema))]
-#[serde(rename_all = "camelCase", deny_unknown_fields, default)]
-pub struct UseImportExtensionsOptions {
-    /// If `true`, the suggested extension is always `.js` regardless of what
-    /// extension the source file has in your project.
-    pub force_js_extensions: bool,
-}
-
 #[derive(Debug, Clone, Default, Deserializable, Deserialize, Serialize, Eq, PartialEq)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase", deny_unknown_fields, default)]
@@ -148,7 +136,7 @@ impl Rule for UseImportExtensions {
     type Query = ResolvedImports<AnyJsImportLike>;
     type State = UseImportExtensionsState;
     type Signals = Option<Self::State>;
-    type Options = Box<UseImportExtensionsOptions>;
+    type Options = UseImportExtensionsOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let module_info = ctx.module_info_for_path(ctx.file_path())?;
@@ -293,7 +281,7 @@ fn get_extensionless_import(
         };
 
         if let Some(sub_ext) = sub_extension {
-            new_path.set_extension(format!("{}.{}", sub_ext, extension));
+            new_path.set_extension(format!("{sub_ext}.{extension}",));
         } else {
             new_path.set_extension(extension);
         }

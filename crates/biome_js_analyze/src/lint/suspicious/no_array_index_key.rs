@@ -11,6 +11,7 @@ use biome_js_syntax::{
     JsReferenceIdentifier, JsxAttribute,
 };
 use biome_rowan::{AstNode, TextRange, declare_node_union};
+use biome_rule_options::no_array_index_key::NoArrayIndexKeyOptions;
 
 declare_lint_rule! {
     /// Discourage the usage of Array index in keys.
@@ -68,7 +69,7 @@ declare_lint_rule! {
         version: "1.0.0",
         name: "noArrayIndexKey",
         language: "jsx",
-        sources: &[RuleSource::EslintReact("no-array-index-key")],
+        sources: &[RuleSource::EslintReact("no-array-index-key").same()],
         recommended: true,
         severity: Severity::Error,
     }
@@ -126,7 +127,7 @@ impl Rule for NoArrayIndexKey {
     type Query = Semantic<NoArrayIndexKeyQuery>;
     type State = NoArrayIndexKeyState;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoArrayIndexKeyOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();

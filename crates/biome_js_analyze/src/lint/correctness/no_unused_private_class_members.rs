@@ -12,6 +12,7 @@ use biome_rowan::{
     AstNode, AstNodeList, AstSeparatedList, BatchMutationExt, SyntaxNodeOptionExt, TextRange,
     declare_node_union,
 };
+use biome_rule_options::no_unused_private_class_members::NoUnusedPrivateClassMembersOptions;
 use rustc_hash::FxHashSet;
 
 use crate::{JsRuleAction, utils::is_node_equal};
@@ -64,7 +65,7 @@ declare_lint_rule! {
         version: "1.3.3",
         name: "noUnusedPrivateClassMembers",
         language: "js",
-        sources: &[RuleSource::Eslint("no-unused-private-class-members")],
+        sources: &[RuleSource::Eslint("no-unused-private-class-members").same()],
         recommended: true,
         severity: Severity::Warning,
         fix_kind: FixKind::Unsafe,
@@ -79,7 +80,7 @@ impl Rule for NoUnusedPrivateClassMembers {
     type Query = Ast<JsClassDeclaration>;
     type State = AnyMember;
     type Signals = Box<[Self::State]>;
-    type Options = ();
+    type Options = NoUnusedPrivateClassMembersOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();

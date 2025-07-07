@@ -40,15 +40,15 @@ ci ━━━━━━━━━━━━━━━━━━━━━━━━━�
 ```block
 file.json:1:1 assist/source/useSortedKeys  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × The keys are not sorted.
+  × The members are not sorted by key.
   
   > 1 │ { "zod": true, "lorem": "ipsum", "foo": "bar" }
       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   
-  i Safe fix: They keys of the current object can be sorted.
+  i Safe fix: Sort the members by key.
   
   - {·"zod":·true,·"lorem":·"ipsum",·"foo":·"bar"·}
-  + {·"foo":·"bar"·,"lorem":·"ipsum","zod":·true·}
+  + {·"foo":·"bar","lorem":·"ipsum",·"zod":·true·}
   
 
 ```

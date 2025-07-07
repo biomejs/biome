@@ -6,6 +6,7 @@ use biome_diagnostics::Severity;
 use biome_js_factory::make;
 use biome_js_syntax::{AnyJsTryStatement, JsStatementList, TextRange};
 use biome_rowan::{AstNode, AstNodeList, BatchMutationExt};
+use biome_rule_options::no_useless_catch::NoUselessCatchOptions;
 
 use crate::JsRuleAction;
 
@@ -68,7 +69,7 @@ declare_lint_rule! {
         version: "1.0.0",
         name: "noUselessCatch",
         language: "js",
-        sources: &[RuleSource::Eslint("no-useless-catch")],
+        sources: &[RuleSource::Eslint("no-useless-catch").same()],
         recommended: true,
         severity: Severity::Information,
         fix_kind: FixKind::Unsafe,
@@ -79,7 +80,7 @@ impl Rule for NoUselessCatch {
     type Query = Ast<AnyJsTryStatement>;
     type State = TextRange;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoUselessCatchOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();

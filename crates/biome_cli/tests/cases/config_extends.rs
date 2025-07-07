@@ -8,7 +8,7 @@ use camino::Utf8Path;
 
 #[test]
 fn extends_config_ok_formatter_no_linter() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     let biome_json = Utf8Path::new("biome.json");
@@ -46,7 +46,7 @@ fn extends_config_ok_formatter_no_linter() {
 
 #[test]
 fn extends_config_ok_from_npm_package() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     let biome_json = Utf8Path::new("biome.json");
@@ -106,7 +106,7 @@ fn extends_config_ok_from_npm_package() {
 // See: https://github.com/biomejs/biome/issues/6217
 #[test]
 fn extends_config_ok_from_npm_package_with_author_field() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     let biome_json = Utf8Path::new("biome.json");
@@ -165,8 +165,71 @@ fn extends_config_ok_from_npm_package_with_author_field() {
 }
 
 #[test]
+fn extends_config_ok_from_npm_package_with_condition_names() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let biome_json = Utf8Path::new("biome.json");
+    fs.insert(
+        biome_json.into(),
+        r#"{ "extends": ["@shared/format", "@shared/linter/biome"] }"#,
+    );
+
+    fs.insert(
+        "node_modules/@shared/format/biome.json".into(),
+        r#"{ "javascript": { "formatter": { "quoteStyle": "single" } } }"#,
+    );
+    fs.insert(
+        "node_modules/@shared/format/package.json".into(),
+        r#"{
+    "name": "@shared/format",
+    "exports": {
+        ".": {
+            "biome": "./biome.json"
+        }
+    }
+}"#,
+    );
+
+    fs.insert(
+        "node_modules/@shared/linter/biome.jsonc".into(),
+        r#"{ "linter": { "enabled": false, } }"#,
+    );
+    fs.insert(
+        "node_modules/@shared/linter/package.json".into(),
+        r#"{
+    "name": "@shared/linter",
+    "exports": {
+        "./biome": {
+            "default": "./biome.jsonc"
+        }
+    }
+}"#,
+    );
+
+    let test_file = Utf8Path::new("test.js");
+    fs.insert(test_file.into(), r#"debugger; console.log("string"); "#);
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["check", test_file.as_str()].as_slice()),
+    );
+
+    assert!(result.is_err(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "extends_config_ok_from_npm_package_with_condition_names",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
 fn extends_config_ok_linter_not_formatter() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     let biome_json = Utf8Path::new("biome.json");
@@ -213,7 +276,7 @@ fn extends_config_ok_linter_not_formatter() {
 
 #[test]
 fn extends_should_raise_an_error_for_unresolved_configuration() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     let biome_json = Utf8Path::new("biome.json");
@@ -251,7 +314,7 @@ fn extends_should_raise_an_error_for_unresolved_configuration() {
 
 #[test]
 fn extends_should_raise_an_error_for_unresolved_configuration_and_show_verbose() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     let biome_json = Utf8Path::new("biome.json");
@@ -289,7 +352,7 @@ fn extends_should_raise_an_error_for_unresolved_configuration_and_show_verbose()
 
 #[test]
 fn extends_resolves_when_using_config_path() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     let biome_json = Utf8Path::new("config/biome.json");
@@ -327,7 +390,7 @@ fn extends_resolves_when_using_config_path() {
 
 #[test]
 fn applies_extended_values_in_current_config() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     let format = Utf8Path::new("format.json");
@@ -367,7 +430,7 @@ fn applies_extended_values_in_current_config() {
 
 #[test]
 fn respects_unaffected_values_from_extended_config() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     let format = Utf8Path::new("format.json");
@@ -404,7 +467,7 @@ fn respects_unaffected_values_from_extended_config() {
 
 #[test]
 fn allows_reverting_fields_in_extended_config_to_default() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     let format = Utf8Path::new("format.json");
@@ -444,7 +507,7 @@ fn allows_reverting_fields_in_extended_config_to_default() {
 
 #[test]
 fn extends_config_merge_overrides() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     let shared = Utf8Path::new("shared.json");

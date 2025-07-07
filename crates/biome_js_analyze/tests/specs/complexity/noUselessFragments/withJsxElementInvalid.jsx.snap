@@ -1,11 +1,21 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: withJsxElementInvalid.jsx
-snapshot_kind: text
 ---
 # Input
 ```jsx
-<><Component /></>
+<><Component /></>;
+<Fragment><Component /></Fragment>;
+<React.Fragment><Component /></React.Fragment>;
+
+function jsxElement() {
+	return <><JsxElement /></>;
+}
+
+function jsxElement() {
+	return (<><JsxElement /></>);
+}
+
 ```
 
 # Diagnostics
@@ -14,14 +24,97 @@ withJsxElementInvalid.jsx:1:1 lint/complexity/noUselessFragments  FIXABLE  ━�
 
   i This fragment is unnecessary.
   
-  > 1 │ <><Component /></>
+  > 1 │ <><Component /></>;
       │ ^^^^^^^^^^^^^^^^^^
+    2 │ <Fragment><Component /></Fragment>;
+    3 │ <React.Fragment><Component /></React.Fragment>;
   
   i A fragment is redundant if it contains only one child, or if it is the child of a html element, and is not a keyed fragment.
   
   i Unsafe fix: Remove the Fragment
   
-    1 │ <><Component·/></>
-      │  --          ---  
+    1 │ <><Component·/></>;
+      │  --          ---   
+
+```
+
+```
+withJsxElementInvalid.jsx:2:1 lint/complexity/noUselessFragments  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This fragment is unnecessary.
+  
+    1 │ <><Component /></>;
+  > 2 │ <Fragment><Component /></Fragment>;
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    3 │ <React.Fragment><Component /></React.Fragment>;
+    4 │ 
+  
+  i A fragment is redundant if it contains only one child, or if it is the child of a html element, and is not a keyed fragment.
+  
+  i Unsafe fix: Remove the Fragment
+  
+    2 │ <Fragment><Component·/></Fragment>;
+      │  ----------           -----------  
+
+```
+
+```
+withJsxElementInvalid.jsx:3:1 lint/complexity/noUselessFragments  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This fragment is unnecessary.
+  
+    1 │ <><Component /></>;
+    2 │ <Fragment><Component /></Fragment>;
+  > 3 │ <React.Fragment><Component /></React.Fragment>;
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    4 │ 
+    5 │ function jsxElement() {
+  
+  i A fragment is redundant if it contains only one child, or if it is the child of a html element, and is not a keyed fragment.
+  
+  i Unsafe fix: Remove the Fragment
+  
+    3 │ <React.Fragment><Component·/></React.Fragment>;
+      │  ----------------           -----------------  
+
+```
+
+```
+withJsxElementInvalid.jsx:6:9 lint/complexity/noUselessFragments  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This fragment is unnecessary.
+  
+    5 │ function jsxElement() {
+  > 6 │ 	return <><JsxElement /></>;
+      │ 	       ^^^^^^^^^^^^^^^^^^^
+    7 │ }
+    8 │ 
+  
+  i A fragment is redundant if it contains only one child, or if it is the child of a html element, and is not a keyed fragment.
+  
+  i Unsafe fix: Remove the Fragment
+  
+    6 │ → return·<><JsxElement·/></>;
+      │           --           ---   
+
+```
+
+```
+withJsxElementInvalid.jsx:10:10 lint/complexity/noUselessFragments  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This fragment is unnecessary.
+  
+     9 │ function jsxElement() {
+  > 10 │ 	return (<><JsxElement /></>);
+       │ 	        ^^^^^^^^^^^^^^^^^^^
+    11 │ }
+    12 │ 
+  
+  i A fragment is redundant if it contains only one child, or if it is the child of a html element, and is not a keyed fragment.
+  
+  i Unsafe fix: Remove the Fragment
+  
+    10 │ → return·(<><JsxElement·/></>);
+       │            --           ---    
 
 ```

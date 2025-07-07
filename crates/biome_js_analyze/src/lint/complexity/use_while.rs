@@ -6,6 +6,7 @@ use biome_diagnostics::Severity;
 use biome_js_factory::make;
 use biome_js_syntax::{AnyJsStatement, JsForStatement, T};
 use biome_rowan::{AstNode, BatchMutationExt, trim_leading_trivia_pieces};
+use biome_rule_options::use_while::UseWhileOptions;
 
 use crate::JsRuleAction;
 
@@ -44,7 +45,7 @@ declare_lint_rule! {
         language: "js",
         recommended: false,
         severity: Severity::Warning,
-        sources: &[RuleSource::EslintSonarJs("prefer-while")],
+        sources: &[RuleSource::EslintSonarJs("prefer-while").same()],
         fix_kind: FixKind::Safe,
     }
 }
@@ -53,7 +54,7 @@ impl Rule for UseWhile {
     type Query = Ast<JsForStatement>;
     type State = ();
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = UseWhileOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
         let node = ctx.query();

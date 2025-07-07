@@ -6,6 +6,7 @@ use biome_console::markup;
 use biome_deserialize::TextRange;
 use biome_diagnostics::Severity;
 use biome_rowan::AstNode;
+use biome_rule_options::no_nested_component_definitions::NoNestedComponentDefinitionsOptions;
 
 declare_lint_rule! {
     /// Disallows defining React components inside other components.
@@ -88,7 +89,7 @@ declare_lint_rule! {
         version: "2.0.0",
         name: "noNestedComponentDefinitions",
         language: "jsx",
-        sources: &[RuleSource::EslintReactXyz("no-nested-components")],
+        sources: &[RuleSource::EslintReactXyz("no-nested-components").same()],
         recommended: false,
         domains: &[RuleDomain::React],
         severity: Severity::Error,
@@ -99,7 +100,7 @@ impl Rule for NoNestedComponentDefinitions {
     type Query = Ast<AnyPotentialReactComponentDeclaration>;
     type State = RuleState;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoNestedComponentDefinitionsOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();

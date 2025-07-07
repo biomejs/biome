@@ -17,6 +17,7 @@ use biome_js_syntax::{
     JsxText, T,
 };
 use biome_rowan::{AstNode, AstNodeList, BatchMutation, BatchMutationExt, declare_node_union};
+use biome_rule_options::no_useless_fragments::NoUselessFragmentsOptions;
 
 declare_lint_rule! {
     /// Disallow unnecessary fragments
@@ -65,7 +66,7 @@ declare_lint_rule! {
         version: "1.0.0",
         name: "noUselessFragments",
         language: "jsx",
-        sources: &[RuleSource::EslintReact("jsx-no-useless-fragment")],
+        sources: &[RuleSource::EslintReact("jsx-no-useless-fragment").same()],
         recommended: true,
         severity: Severity::Information,
         fix_kind: FixKind::Unsafe,
@@ -131,139 +132,69 @@ impl Rule for NoUselessFragments {
     type Query = Semantic<NoUselessFragmentsQuery>;
     type State = NoUselessFragmentsState;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoUselessFragmentsOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
         let model = ctx.model();
+
         let mut in_jsx_attr_expr = false;
         let mut in_js_logical_expr = false;
         let mut in_jsx_expr = false;
         let mut in_jsx_list = false;
-        match node {
-            NoUselessFragmentsQuery::JsxFragment(fragment) => {
-                let parents_where_fragments_must_be_preserved =
-                    node.syntax().parent().is_some_and(|parent| {
-                        match JsxTagExpression::try_cast(parent.clone()) {
-                            Ok(parent) => parent
-                                .syntax()
-                                .parent()
-                                .and_then(|parent| {
-                                    if JsxExpressionAttributeValue::can_cast(parent.kind()) {
-                                        in_jsx_attr_expr = true;
-                                    }
-                                    if JsLogicalExpression::can_cast(parent.kind()) {
-                                        in_js_logical_expr = true;
-                                    }
-                                    if JsxExpressionChild::can_cast(parent.kind()) {
-                                        in_jsx_expr = true;
-                                    }
-                                    match JsParenthesizedExpression::try_cast(parent) {
-                                        Ok(parenthesized_expression) => {
-                                            parenthesized_expression.syntax().parent()
-                                        }
-                                        Err(parent) => Some(parent),
-                                    }
-                                })
-                                .is_some_and(|parent| {
-                                    matches!(
-                                        parent.kind(),
-                                        JsSyntaxKind::JS_RETURN_STATEMENT
-                                            | JsSyntaxKind::JS_INITIALIZER_CLAUSE
-                                            | JsSyntaxKind::JS_ARROW_FUNCTION_EXPRESSION
-                                            | JsSyntaxKind::JS_FUNCTION_EXPRESSION
-                                            | JsSyntaxKind::JS_FUNCTION_DECLARATION
-                                            | JsSyntaxKind::JS_PROPERTY_OBJECT_MEMBER
-                                    )
-                                }),
-                            Err(_) => {
-                                if JsxChildList::try_cast(parent.clone()).is_ok() {
-                                    in_jsx_list = true;
-                                    false
-                                } else {
-                                    JsxAttributeInitializerClause::try_cast(parent.clone()).is_ok()
-                                }
+        let mut in_return_statement = false;
+        let parents_where_fragments_must_be_preserved =
+            node.syntax().parent().is_some_and(|parent| {
+                match JsxTagExpression::try_cast(parent.clone()) {
+                    Ok(parent) => parent
+                        .syntax()
+                        .parent()
+                        .and_then(|parent| {
+                            if JsxExpressionAttributeValue::can_cast(parent.kind()) {
+                                in_jsx_attr_expr = true;
                             }
-                        }
-                    });
-
-                let child_list = fragment.children();
-
-                if !parents_where_fragments_must_be_preserved {
-                    let mut significant_children = 0;
-                    let mut first_significant_child = None;
-                    let mut children_where_fragments_must_preserved = false;
-
-                    for child in child_list.iter() {
-                        match child.syntax().kind() {
-                            JsSyntaxKind::JSX_EXPRESSION_CHILD => {
-                                if !in_js_logical_expr {
-                                    significant_children += 1;
-                                    if first_significant_child.is_none() {
-                                        first_significant_child = Some(child);
-                                    }
-                                } else {
-                                    children_where_fragments_must_preserved = true;
-                                }
+                            if JsLogicalExpression::can_cast(parent.kind()) {
+                                in_js_logical_expr = true;
                             }
-                            JsSyntaxKind::JSX_SELF_CLOSING_ELEMENT
-                            | JsSyntaxKind::JSX_ELEMENT
-                            | JsSyntaxKind::JSX_FRAGMENT => {
-                                significant_children += 1;
-                                if first_significant_child.is_none() {
-                                    first_significant_child = Some(child);
-                                }
+                            if JsxExpressionChild::can_cast(parent.kind()) {
+                                in_jsx_expr = true;
                             }
-                            JsSyntaxKind::JSX_TEXT => {
-                                // We need to whitespaces and newlines from the original string.
-                                // Since in the JSX newlines aren't trivia, we require to allocate a string to trim from those characters.
-                                let original_text = child.to_trimmed_text();
-                                let child_text = original_text.text().trim();
-
-                                if (in_jsx_expr || in_js_logical_expr)
-                                    && contains_html_character_references(child_text)
-                                {
-                                    children_where_fragments_must_preserved = true;
-                                    break;
+                            match JsParenthesizedExpression::try_cast(parent) {
+                                Ok(parenthesized_expression) => {
+                                    parenthesized_expression.syntax().parent()
                                 }
-
-                                if !child_text.is_empty() {
-                                    significant_children += 1;
-                                    if first_significant_child.is_none() {
-                                        first_significant_child = Some(child);
-                                    }
-                                }
+                                Err(parent) => Some(parent),
                             }
-                            _ => {}
-                        }
-                        if significant_children > 1 || children_where_fragments_must_preserved {
-                            break;
-                        }
-                    }
-
-                    if children_where_fragments_must_preserved {
-                        return None;
-                    }
-
-                    match significant_children {
-                        0 => Some(NoUselessFragmentsState::Empty),
-                        1 => {
-                            if let Some(first) = first_significant_child {
-                                if JsxText::can_cast(first.syntax().kind()) && in_jsx_attr_expr {
-                                    None
-                                } else {
-                                    Some(NoUselessFragmentsState::Child(first))
-                                }
+                        })
+                        .is_some_and(|parent| {
+                            if parent.kind() == JsSyntaxKind::JS_RETURN_STATEMENT {
+                                in_return_statement = true;
+                                false
                             } else {
-                                None
+                                // Preserve fragments in other kinds of parent
+                                matches!(
+                                    parent.kind(),
+                                    JsSyntaxKind::JS_INITIALIZER_CLAUSE
+                                        | JsSyntaxKind::JS_ARROW_FUNCTION_EXPRESSION
+                                        | JsSyntaxKind::JS_FUNCTION_EXPRESSION
+                                        | JsSyntaxKind::JS_FUNCTION_DECLARATION
+                                        | JsSyntaxKind::JS_PROPERTY_OBJECT_MEMBER
+                                )
                             }
+                        }),
+                    Err(_) => {
+                        if JsxChildList::try_cast(parent.clone()).is_ok() {
+                            in_jsx_list = true;
+                            false
+                        } else {
+                            JsxAttributeInitializerClause::try_cast(parent.clone()).is_ok()
                         }
-                        _ => in_jsx_list.then_some(NoUselessFragmentsState::Children(child_list)),
                     }
-                } else {
-                    None
                 }
-            }
+            });
+
+        let child_list = match node {
+            NoUselessFragmentsQuery::JsxFragment(fragment) => fragment.children(),
             NoUselessFragmentsQuery::JsxElement(element) => {
                 let opening_element = element.opening_element().ok()?;
                 let name = opening_element.name().ok()?;
@@ -280,38 +211,132 @@ impl Rule for NoUselessFragments {
                     | AnyJsxElementName::JsMetavariable(_) => false,
                 };
 
-                if is_valid_react_fragment {
-                    let child_list = element.children();
-                    // The `Fragment` component supports only the "key" prop and react emits a warning for not supported props.
-                    // We assume that the user knows - and fixed - that and only care about the prop that is actually supported.
-                    let attribute_key =
-                        opening_element
-                            .attributes()
-                            .into_iter()
-                            .find_map(|attribute| {
-                                let attribute = attribute.as_jsx_attribute()?;
-                                let attribute_name = attribute.name().ok()?;
-                                let attribute_name = attribute_name.as_jsx_name()?;
-
-                                if attribute_name.value_token().ok()?.text_trimmed() == "key" {
-                                    Some(())
-                                } else {
-                                    None
-                                }
-                            });
-                    if attribute_key.is_none() {
-                        return match child_list.first() {
-                            Some(first) if child_list.len() == 1 => {
-                                Some(NoUselessFragmentsState::Child(first))
-                            }
-                            None => Some(NoUselessFragmentsState::Empty),
-                            _ => None,
-                        };
-                    }
+                if !is_valid_react_fragment {
+                    return None;
                 }
 
-                None
+                // The `Fragment` component supports only the "key" prop and react emits a warning for not supported props.
+                // We assume that the user knows - and fixed - that and only care about the prop that is actually supported.
+                let attribute_key =
+                    opening_element
+                        .attributes()
+                        .into_iter()
+                        .find_map(|attribute| {
+                            let attribute = attribute.as_jsx_attribute()?;
+                            let attribute_name = attribute.name().ok()?;
+                            let attribute_name = attribute_name.as_jsx_name()?;
+
+                            if attribute_name.value_token().ok()?.text_trimmed() == "key" {
+                                Some(())
+                            } else {
+                                None
+                            }
+                        });
+
+                if attribute_key.is_some() {
+                    return None;
+                }
+
+                element.children()
             }
+        };
+
+        if parents_where_fragments_must_be_preserved {
+            return None;
+        }
+
+        let mut significant_children = 0;
+        let mut first_significant_child = None;
+        let mut children_where_fragments_must_preserved = false;
+
+        for child in child_list.iter() {
+            match child.syntax().kind() {
+                JsSyntaxKind::JSX_EXPRESSION_CHILD => {
+                    if !in_js_logical_expr {
+                        significant_children += 1;
+                        if first_significant_child.is_none() {
+                            first_significant_child = Some(child);
+                        }
+                    } else {
+                        children_where_fragments_must_preserved = true;
+                    }
+                }
+                JsSyntaxKind::JSX_SELF_CLOSING_ELEMENT
+                | JsSyntaxKind::JSX_ELEMENT
+                | JsSyntaxKind::JSX_FRAGMENT => {
+                    significant_children += 1;
+                    if first_significant_child.is_none() {
+                        first_significant_child = Some(child);
+                    }
+                }
+                JsSyntaxKind::JSX_TEXT => {
+                    // We need to remove whitespaces and newlines from the original string.
+                    // Since in the JSX newlines aren't trivia, we require to allocate a string to trim from those characters.
+                    let original_text = child.to_trimmed_text();
+                    let trimmed_text = original_text.text().trim();
+
+                    if (in_jsx_expr || in_js_logical_expr)
+                        && contains_html_character_references(trimmed_text)
+                    {
+                        children_where_fragments_must_preserved = true;
+                        break;
+                    }
+
+                    // Test whether a node is a padding spaces trimmed by the React runtime.
+                    let is_only_whitespace = trimmed_text.is_empty();
+                    let is_padding_spaces = is_only_whitespace && original_text.contains('\n');
+
+                    if !is_padding_spaces {
+                        significant_children += 1;
+                        if first_significant_child.is_none() {
+                            first_significant_child = Some(child);
+                        }
+                    }
+                }
+                _ => {}
+            }
+            if significant_children > 1 || children_where_fragments_must_preserved {
+                break;
+            }
+        }
+
+        if children_where_fragments_must_preserved {
+            return None;
+        }
+
+        match significant_children {
+            0 => Some(NoUselessFragmentsState::Empty),
+            1 => {
+                if let Some(first) = first_significant_child {
+                    if JsxText::can_cast(first.syntax().kind()) && in_jsx_attr_expr {
+                        None
+                    } else if JsxElement::can_cast(first.syntax().kind()) {
+                        Some(NoUselessFragmentsState::Child(first))
+                    } else if in_return_statement {
+                        // Preserve flagment with only one JsxExpressionChild in return statement
+                        if JsxExpressionChild::can_cast(first.syntax().kind()) {
+                            None
+                        } else {
+                            Some(NoUselessFragmentsState::Child(first))
+                        }
+                    } else {
+                        // Do not report the fragment as unnecessary if the only child is JsxText with an HTML reference
+                        // or if the fragment is the only child in a JSX expression (e.g. {<>Foo</>})
+                        if let AnyJsxChild::JsxText(text) = &first {
+                            let value_token = text.value_token().ok()?;
+                            let value = value_token.token_text();
+                            if contains_html_character_references(value.as_ref()) {
+                                return None;
+                            }
+                        }
+
+                        Some(NoUselessFragmentsState::Child(first))
+                    }
+                } else {
+                    None
+                }
+            }
+            _ => in_jsx_list.then_some(NoUselessFragmentsState::Children(child_list)),
         }
     }
 

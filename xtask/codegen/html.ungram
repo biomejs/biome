@@ -42,6 +42,7 @@ HtmlBogusAttribute = SyntaxElement*
 
 HtmlRoot =
 	bom: 'UNICODE_BOM'?
+	frontmatter: HtmlAstroFrontmatterElement?
 	directive: HtmlDirective?
 	html: HtmlElementList
 	eof: 'EOF'
@@ -107,6 +108,11 @@ HtmlCdataSection =
 	'<![CDATA['
 	content: 'html_literal'
 	']]>'
+
+HtmlAstroFrontmatterElement =
+	l_fence: '---'
+	content: 'html_literal'?
+	r_fence: '---'
 
 // ==================================
 // Attributes

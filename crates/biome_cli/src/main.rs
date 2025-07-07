@@ -13,6 +13,7 @@ use biome_diagnostics::{Diagnostic, PrintDiagnostic, set_bottom_frame};
 use biome_fs::OsFileSystem;
 use biome_service::workspace;
 use std::process::{ExitCode, Termination};
+use std::sync::Arc;
 use tokio::runtime::Runtime;
 
 #[cfg(target_os = "windows")]
@@ -58,16 +59,16 @@ fn main() -> ExitCode {
 fn run_workspace(console: &mut EnvConsole, command: BiomeCommand) -> Result<(), CliDiagnostic> {
     // If the `--use-server` CLI flag is set, try to open a connection to an
     // existing Biome server socket
-    let fs = Box::new(OsFileSystem::default());
+    let fs = OsFileSystem::default();
     let workspace = if command.should_use_server() {
         let runtime = Runtime::new()?;
         match open_transport(runtime)? {
-            Some(transport) => workspace::client(transport, fs)?,
+            Some(transport) => workspace::client(transport, Box::new(fs))?,
             None => return Err(CliDiagnostic::server_not_running()),
         }
     } else {
         let threads = command.get_threads();
-        workspace::server(fs, threads)
+        workspace::server(Arc::new(fs), threads)
     };
 
     let session = CliSession::new(&*workspace, console)?;

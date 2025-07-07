@@ -1,8 +1,10 @@
+mod astro;
 mod parse_error;
 
 use crate::parser::HtmlParser;
+use crate::syntax::astro::{is_at_fence, parse_astro_fence};
 use crate::syntax::parse_error::*;
-use crate::token_source::{HtmlEmbededLanguage, HtmlLexContext};
+use crate::token_source::{HtmlEmbeddedLanguage, HtmlLexContext};
 use biome_html_syntax::HtmlSyntaxKind::*;
 use biome_html_syntax::{HtmlSyntaxKind, T};
 use biome_parser::Parser;
@@ -28,6 +30,9 @@ pub(crate) fn parse_root(p: &mut HtmlParser) {
 
     p.eat(UNICODE_BOM);
 
+    if is_at_fence(p) {
+        parse_astro_fence(p).ok();
+    }
     parse_doc_type(p).ok();
     ElementList.parse_list(p);
 
@@ -102,9 +107,9 @@ fn parse_element(p: &mut HtmlParser) -> ParsedSyntax {
             T![>],
             if is_embedded_language_tag {
                 HtmlLexContext::EmbeddedLanguage(match opening_tag_name.as_str() {
-                    tag if tag.eq_ignore_ascii_case("script") => HtmlEmbededLanguage::Script,
-                    tag if tag.eq_ignore_ascii_case("style") => HtmlEmbededLanguage::Style,
-                    tag if tag.eq_ignore_ascii_case("pre") => HtmlEmbededLanguage::Preformatted,
+                    tag if tag.eq_ignore_ascii_case("script") => HtmlEmbeddedLanguage::Script,
+                    tag if tag.eq_ignore_ascii_case("style") => HtmlEmbeddedLanguage::Style,
+                    tag if tag.eq_ignore_ascii_case("pre") => HtmlEmbeddedLanguage::Preformatted,
                     _ => unreachable!(),
                 })
             } else {

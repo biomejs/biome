@@ -8,6 +8,7 @@ use biome_js_syntax::{
     JsTemplateExpression,
 };
 use biome_rowan::{AstNode, TextRange};
+use biome_rule_options::no_done_callback::NoDoneCallbackOptions;
 
 declare_lint_rule! {
     /// Disallow using a callback in asynchronous tests and hooks.
@@ -50,7 +51,10 @@ declare_lint_rule! {
         language: "js",
         recommended: false,
         severity: Severity::Information,
-        sources: &[RuleSource::EslintJest("no-done-callback"), RuleSource::EslintVitest("no-done-callback")],
+        sources: &[
+            RuleSource::EslintJest("no-done-callback").same(),
+            RuleSource::EslintVitest("no-done-callback").same()
+        ],
     }
 }
 
@@ -58,7 +62,7 @@ impl Rule for NoDoneCallback {
     type Query = Ast<JsCallExpression>;
     type State = TextRange;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoDoneCallbackOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();

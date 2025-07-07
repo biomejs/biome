@@ -9,6 +9,7 @@ use biome_js_syntax::{
     AnyJsExpression, T, TsNonNullAssertionAssignment, TsNonNullAssertionExpression,
 };
 use biome_rowan::{AstNode, BatchMutationExt, declare_node_union};
+use biome_rule_options::no_non_null_assertion::NoNonNullAssertionOptions;
 
 declare_lint_rule! {
     /// Disallow non-null assertions using the `!` postfix operator.
@@ -48,7 +49,7 @@ declare_lint_rule! {
         version: "1.0.0",
         name: "noNonNullAssertion",
         language: "ts",
-        sources: &[RuleSource::EslintTypeScript("no-non-null-assertion")],
+        sources: &[RuleSource::EslintTypeScript("no-non-null-assertion").same()],
         recommended: true,
         severity: Severity::Warning,
         fix_kind: FixKind::Unsafe,
@@ -63,7 +64,7 @@ impl Rule for NoNonNullAssertion {
     type Query = Ast<AnyTsNonNullAssertion>;
     type State = ();
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoNonNullAssertionOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         match ctx.query() {

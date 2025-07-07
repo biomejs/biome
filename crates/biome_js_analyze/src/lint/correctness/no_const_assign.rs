@@ -8,6 +8,7 @@ use biome_js_factory::make::{self};
 use biome_js_syntax::binding_ext::AnyJsBindingDeclaration;
 use biome_js_syntax::{JsIdentifierAssignment, JsSyntaxKind};
 use biome_rowan::{AstNode, BatchMutationExt, TextRange};
+use biome_rule_options::no_const_assign::NoConstAssignOptions;
 
 declare_lint_rule! {
     /// Prevents from having `const` variables being re-assigned.
@@ -51,7 +52,7 @@ declare_lint_rule! {
         version: "1.0.0",
         name: "noConstAssign",
         language: "js",
-        sources: &[RuleSource::Eslint("no-const-assign")],
+        sources: &[RuleSource::Eslint("no-const-assign").same()],
         recommended: true,
         severity: Severity::Error,
         fix_kind: FixKind::Unsafe,
@@ -62,7 +63,7 @@ impl Rule for NoConstAssign {
     type Query = Semantic<JsIdentifierAssignment>;
     type State = TextRange;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoConstAssignOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();

@@ -4,7 +4,7 @@ The analyzer is a generic crate aimed to implement a visitor-like infrastructure
 it's possible to inspect a piece of AST and emit diagnostics or actions based on a
 static check.
 
-The analyzer allows implementors to create **four different** types of rules:
+The analyzer allows implementors to create **three different** types of rules:
 - **Syntax**: This rule checks the syntax according to the language specification and emits error diagnostics accordingly.
 - **Lint**: This rule performs static analysis of the source code to detect invalid or error-prone patterns, and emits diagnostics along with proposed fixes.
 - **Assist**: This rule detects refactoring opportunities and emits code action signals.
@@ -14,6 +14,7 @@ The analyzer allows implementors to create **four different** types of rules:
 
 - [Analyzer](#analyzer)
   * [Table of Contents](#table-of-contents)
+  * [Understanding Biome Linter](#understanding-biome-linter)
   * [Creating a Rule](#creating-a-rule)
     + [Guidelines](#guidelines)
       - [Naming Conventions for Rules](#naming-conventions-for-rules)
@@ -55,6 +56,15 @@ The analyzer allows implementors to create **four different** types of rules:
     + [Code generation](#code-generation)
     + [Committing your work](#committing-your-work)
     + [Sidenote: Deprecating a rule](#sidenote-deprecating-a-rule)
+
+## Understanding Biome Linter
+
+Biome linter is meant to work *across languages*, which means that a rule can work within multiple languages.
+That's why **it's important to choose a good name for your rule**. If the name of the rule is very generic, it means that
+it could potentially be implemented for multiple languages. However, if a rule is meant for a specific language, you should
+choose a name that is more specific.
+
+Understanding this is important because it might have repercussions on how rule options will be applied to different languages.
 
 ## Creating a Rule
 
@@ -399,7 +409,7 @@ declare_lint_rule! {
 
 ##### Biome lint rules inspired by other lint rules
 
-If a **lint** rule is inspired by an existing rule from other ecosystems (ESLint, ESLint plugins, clippy, etc.), you can add a new metadata to the macro called `source`. Its value is `&'static [RuleSource]`, which is a reference to a slice of `RuleSource` elements, each representing a different source.
+If a **lint** rule is ported from an existing rule from other ecosystems (ESLint, ESLint plugins, Clippy, etc.), you can add a new metadata to the macro called `source`. Its value is `&'static [RuleSource]`, which is a reference to a slice of `RuleSource` elements, each representing a different source.
 
 If you're implementing a lint rule that matches the behavior of the ESLint rule `no-debugger`, you'll use the variant `::ESLint` and pass the name of the rule:
 
@@ -413,15 +423,15 @@ declare_lint_rule! {
         name: "myRuleName",
         language: "js",
         recommended: false,
-        sources: &[RuleSource::Eslint("no-debugger")],
+        sources: &[RuleSource::Eslint("no-debugger").same()],
     }
 }
 ```
 
-If the rule you're implementing has a different behavior or option, you can add the `source_kind` metadata and use the `RuleSourceKind::Inspired` type. If there are multiple sources, we assume that each source has the same `source_kind`.
+If the rule you're implementing has a different behavior or option, you can use `.inspired()` instead of `.same()`.
 
 ```rust
-use biome_analyze::{declare_lint_rule, RuleSource, RuleSourceKind};
+use biome_analyze::{declare_lint_rule, RuleSource};
 
 declare_lint_rule! {
     /// Documentation
@@ -430,13 +440,11 @@ declare_lint_rule! {
         name: "myRuleName",
         language: "js",
         recommended: false,
-        sources: &[RuleSource::Eslint("no-debugger")],
-        source_kind: RuleSourceKind::Inspired,
+        sources: &[RuleSource::Eslint("no-debugger").inspired()],
     }
 }
 ```
 
-By default, `source_kind` is always `RuleSourceKind::SameLogic`.
 
 #### `rule_category!` macro
 
@@ -541,6 +549,12 @@ Some rules may allow customization [using per-rule options in `biome.json`](http
 >
 > If provided, options should follow our [technical philosophy](https://biomejs.dev/internals/philosophy/#technical).
 
+Rule options must be placed inside the crate `biome_rule_options`. If you run the command `just gen-analyzer`, the codegen
+should have created a new file inside the crate that has the name of your rule. For example, if the rule name is `useThisConvention`
+you should see a file `use_this_convention.rs` inside `biome_rule_options/lib`. Inside this file you'll see a struct called `UseThisConventionOptions`.
+
+Use this struct to add the options.
+
 ##### Options for our example rule
 
 Let's assume that the rule we want to implement supports the following options:
@@ -605,11 +619,13 @@ for you.
 With these types in place, you can set the associated type `Options` of the rule:
 
 ```rust
-impl Rule for MyRule {
+use biome_rule_options::use_my_rule::UseMyRuleOptions;
+
+impl Rule for UseMyRule {
     type Query = Semantic<JsCallExpression>;
     type State = Fix;
     type Signals = Vec<Self::State>;
-    type Options = MyRuleOptions;
+    type Options = UseMyRuleOptions;
 }
 ```
 
@@ -641,18 +657,19 @@ Also, we use other `serde` macros to adjust the JSON configuration:
 - `deny_unknown_fields`: it raises an error if the configuration contains extraneous fields.
 - `default`: it uses the `Default` value when the field is missing from `biome.json`. This macro makes the field optional.
 
-Because we use `schemars`to generate a JSON schema for `biome.json`, our options type must support the `schemars::JsonSchema` trait as well.
+Because we use `schemars` to generate a JSON schema for `biome.json`, our options type must support the `schemars::JsonSchema` trait as well.
 
 You can simply use the derive macros provided by `serde`, `biome_deserialize` and `schemars` to generate the necessary implementations automatically:
 
 ```rust
+// crates/biome_rule_options/lib/use_my_rule.rs
 use biome_deserialize_macros::Deserializable;
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Default, Clone, Serialize, Deserialize, Deserializable)]
-#[cfg_attr(feature = "schemars", derive(schemars::JsonSchema))]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase", deny_unknown_fields, default)]
-pub struct MyRuleOptions {
+pub struct UseMyRuleOptions {
     #[serde(default, skip_serializing_if = "is_default")]
     main_behavior: Behavior,
 
@@ -661,13 +678,15 @@ pub struct MyRuleOptions {
 }
 
 #[derive(Debug, Default, Clone)]
-#[cfg_attr(feature = "schemars", derive(JsonSchema))]
+#[cfg_attr(feature = "schema", derive(JsonSchema))]
 pub enum Behavior {
     #[default]
     A,
     B,
     C,
 }
+
+const fn is_default() -> bool { true }
 ```
 
 ##### Testing & Documenting Rule Options

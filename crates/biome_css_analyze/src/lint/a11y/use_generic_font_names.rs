@@ -8,6 +8,7 @@ use biome_css_syntax::{
 };
 use biome_diagnostics::Severity;
 use biome_rowan::{AstNode, SyntaxNodeCast, TextRange};
+use biome_rule_options::use_generic_font_names::UseGenericFontNamesOptions;
 use biome_string_case::StrLikeExtension;
 
 use crate::utils::{
@@ -67,7 +68,7 @@ declare_lint_rule! {
         language: "css",
         recommended: true,
         severity: Severity::Error,
-        sources: &[RuleSource::Stylelint("font-family-no-missing-generic-family-keyword")],
+        sources: &[RuleSource::Stylelint("font-family-no-missing-generic-family-keyword").same()],
     }
 }
 
@@ -75,7 +76,7 @@ impl Rule for UseGenericFontNames {
     type Query = Ast<CssGenericProperty>;
     type State = TextRange;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = UseGenericFontNamesOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
         let node = ctx.query();
