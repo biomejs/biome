@@ -1,0 +1,38 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 134
+expression: invalid.vue
+---
+# Input
+```js
+<script>
+export default {
+  props: {
+    ref: String,
+    key: String,
+  }
+}
+</script>
+
+```
+
+# Diagnostics
+```
+invalid.vue:2:8 lint/nursery/noVueReservedProps ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Error.
+  
+    1 │ <script>
+  > 2 │ export default {
+      │        ^^^^^^^^^
+  > 3 │   props: {
+  > 4 │     ref: String,
+  > 5 │     key: String,
+  > 6 │   }
+  > 7 │ }
+  > 8 │ </script>
+      │ ^^^^^^^^^
+    9 │ 
+  
+
+```
