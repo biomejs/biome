@@ -381,7 +381,7 @@ mod tests {
         assert!(errors.is_empty());
 
         let package_json = package_json.expect("parsing must have succeeded");
-        assert_eq!(package_json.author, Some("Biome Team").into());
+        assert_eq!(package_json.author, Some("Biome Team".into()));
     }
 
     #[test]
