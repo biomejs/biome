@@ -40,7 +40,7 @@ pub struct PackageJson {
     pub exports: Option<JsonValue>,
     pub imports: Option<JsonValue>,
     pub main: Option<String>,
-    pub types: Option<JsonValue>,
+    pub types: Option<String>,
 }
 
 static_assertions::assert_impl_all!(PackageJson: Send, Sync);
@@ -304,7 +304,7 @@ impl DeserializationVisitor for PackageJsonVisitor {
                     }
                 }
                 "types" => {
-                    if let Some(value) = JsonValue::deserialize(ctx, &value, &key_text) {
+                    if let Some(value) = Deserializable::deserialize(ctx, &value, &key_text) {
                         result.types = Some(value);
                     }
                 }

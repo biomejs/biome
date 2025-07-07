@@ -575,9 +575,9 @@ fn parse_package_json_field(
     fs: &dyn ResolverFsProxy,
     options: &ResolveOptions,
     package_path: &Utf8Path,
-    field: Option<JsonValue>,
+    field: Option<String>,
 ) -> Option<Result<Utf8PathBuf, ResolveError>> {
-    if let Some(main_target) = field.as_ref().and_then(|value| JsonValue::as_string(value)) {
+    if let Some(main_target) = field.as_ref() {
         let options = options.without_extensions_or_manifests();
         return Some(resolve_relative_path(
             main_target.as_str(),
