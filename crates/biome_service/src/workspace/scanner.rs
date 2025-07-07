@@ -329,12 +329,14 @@ impl TraversalContext for ScanContext<'_> {
             }
             Ok(PathKind::File { .. }) => match &self.scan_kind {
                 ScanKind::KnownFiles | ScanKind::TargetedKnownFiles { .. } => {
-                    path.is_required_during_scan()
-                        && !path.is_dependency()
-                        && !self
+                    if path.is_config() {
+                        !self
                             .workspace
                             .projects
                             .is_ignored_by_top_level_config(self.project_key, path)
+                    } else {
+                        path.is_ignore() || path.is_manifest()
+                    }
                 }
                 ScanKind::Project => {
                     if path.is_dependency() {
