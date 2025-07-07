@@ -81,8 +81,8 @@ where
         slice.sort_by(|(key1, _, _), (key2, _, _)| {
             match (key1, key2) {
                 (Some(k1), Some(k2)) => comparator(k1, k2),
-                (Some(_), None) => Ordering::Less,
-                (None, Some(_)) => Ordering::Greater,
+                (Some(_), None) => Ordering::Greater,
+                (None, Some(_)) => Ordering::Less,
                 (None, None) => Ordering::Equal,
             }
         });
