@@ -794,10 +794,6 @@ impl Rule for OrganizeImports {
 
         let options = ctx.options();
         let sort_order = options.identifier_order;
-        // let comparator = match sort_order {
-        //     SortMode::Lexicographic => ComparableToken::lexicographic_cmp,
-        //     SortMode::Natural => ComparableToken::ascii_nat_cmp
-        // };
         let root = ctx.query();
         let items = root.items().into_syntax();
         let mut organized_items: FxHashMap<u32, AnyJsModuleItem> = FxHashMap::default();
