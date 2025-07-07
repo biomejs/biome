@@ -554,39 +554,19 @@ fn resolve_package_path(
         }
 
         if subpath.is_empty() {
-            if options.resolve_types {
-                if let Some(value) =
-                    parse_package_json_field(fs, options, &package_path, package_json.types)
-                {
-                    return value;
-                }
-            } else if let Some(value) =
-                parse_package_json_field(fs, options, &package_path, package_json.main)
-            {
-                return value;
+            let field = if options.resolve_types {
+                &package_json.types
+            } else {
+                &package_json.main
+            };
+            if let Some(target) = field {
+                let options = options.without_extensions_or_manifests();
+                return resolve_relative_path(target, &package_path, fs, &options);
             }
         }
     }
 
     resolve_relative_path(subpath, &package_path, fs, options)
-}
-
-fn parse_package_json_field(
-    fs: &dyn ResolverFsProxy,
-    options: &ResolveOptions,
-    package_path: &Utf8Path,
-    field: Option<String>,
-) -> Option<Result<Utf8PathBuf, ResolveError>> {
-    if let Some(main_target) = field.as_ref() {
-        let options = options.without_extensions_or_manifests();
-        return Some(resolve_relative_path(
-            main_target.as_str(),
-            package_path,
-            fs,
-            &options,
-        ));
-    }
-    None
 }
 
 enum ResolvedPathInfo {
