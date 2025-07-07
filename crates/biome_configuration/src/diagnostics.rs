@@ -123,10 +123,7 @@ impl BiomeDiagnostic {
         file_path: impl Into<String>,
     ) -> Self {
         Self::InvalidIgnorePattern(InvalidIgnorePattern {
-            message: format!(
-                "Couldn't parse the pattern \"{}\". Reason: {}",
-                pattern, reason,
-            ),
+            message: format!("Couldn't parse the pattern \"{pattern}\". Reason: {reason}",),
             file_path: Some(file_path.into()),
         })
     }

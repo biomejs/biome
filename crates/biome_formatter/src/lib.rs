@@ -733,7 +733,7 @@ impl FromStr for Expand {
             "auto" => Ok(Self::Auto),
             "always" => Ok(Self::Always),
             "never" => Ok(Self::Never),
-            _ => Err(std::format!("unknown expand literal: {}", s)),
+            _ => Err(std::format!("unknown expand literal: {s}")),
         }
     }
 }

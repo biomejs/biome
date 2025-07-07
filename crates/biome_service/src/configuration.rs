@@ -424,7 +424,7 @@ pub fn create_config(
 
     config_file
         .set_content(formatted.as_code().as_bytes())
-        .map_err(|_| WorkspaceError::cant_read_file(format!("{}", path)))?;
+        .map_err(|_| WorkspaceError::cant_read_file(format!("{path}")))?;
 
     Ok(())
 }

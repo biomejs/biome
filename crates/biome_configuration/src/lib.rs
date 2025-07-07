@@ -631,16 +631,14 @@ impl Display for ConfigurationPathHint {
     fn fmt(&self, fmt: &mut Formatter) -> std::io::Result<()> {
         match self {
             Self::None => write!(fmt, "Configuration file not provided.",),
-            Self::FromWorkspace(path) => write!(
-                fmt,
-                "Configuration path provided from a workspace: {}",
-                path
-            ),
+            Self::FromWorkspace(path) => {
+                write!(fmt, "Configuration path provided from a workspace: {path}",)
+            }
             Self::FromLsp(path) => {
-                write!(fmt, "Configuration path provided from the LSP: {}", path,)
+                write!(fmt, "Configuration path provided from the LSP: {path}",)
             }
             Self::FromUser(path) => {
-                write!(fmt, "Configuration path provided by the user: {}", path,)
+                write!(fmt, "Configuration path provided by the user: {path}",)
             }
         }
     }

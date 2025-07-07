@@ -377,7 +377,7 @@ fn convert_glob(mut pattern: String) -> Result<String, EditorconfigGlobError> {
                     }
                     // This should not fail because we write in a String.
                     // Thus, we ignore any error.
-                    let _ = std::fmt::write(&mut replacement, format_args!("{}", number));
+                    let _ = std::fmt::write(&mut replacement, format_args!("{number}"));
                 }
                 pattern.replace_range(indexes, &replacement);
             }

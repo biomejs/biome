@@ -37,15 +37,13 @@ struct Errors(String);
 impl Errors {
     fn style_rule_error(rule_name: impl Display) -> Self {
         Self(format!(
-            "The rule '{}' that belongs to the group 'style' can't have Severity::Error. Lower down the severity or change the group.",
-            rule_name
+            "The rule '{rule_name}' that belongs to the group 'style' can't have Severity::Error. Lower down the severity or change the group.",
         ))
     }
 
     fn action_error(rule_name: impl Display) -> Self {
         Self(format!(
-            "The rule '{}' is an action, and it must have Severity::Information. Lower down the severity.",
-            rule_name
+            "The rule '{rule_name}' is an action, and it must have Severity::Information. Lower down the severity.",
         ))
     }
 }

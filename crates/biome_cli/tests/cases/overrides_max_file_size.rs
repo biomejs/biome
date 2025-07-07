@@ -38,13 +38,12 @@ fn setup_test(
                 "overrides": [
                     {{
                         "includes": [
-                            "{}"
+                            "{includes}"
                         ],
-                        "files": {{ "maxSize": {} }}
+                        "files": {{ "maxSize": {max_size} }}
                     }}
                 ]
-            }}"#,
-            includes, max_size
+            }}"#
         )
         .as_bytes(),
     );
@@ -104,7 +103,7 @@ fn overrides_files_max_size_too_large_limit() {
 
         assert_cli_snapshot(SnapshotPayload::new(
             module_path!(),
-            format!("overrides_files_max_size_too_large_limit_{}", cli_command).as_str(),
+            format!("overrides_files_max_size_too_large_limit_{cli_command}").as_str(),
             fs,
             console,
             result,
@@ -139,7 +138,7 @@ fn overrides_files_max_size_ignored_includes_does_not_match_filename_invalid_for
 
         assert_cli_snapshot(SnapshotPayload::new(
             module_path!(),
-            format!("overrides_files_max_size_ignored_includes_does_not_match_filename_invalid_format_{}", cli_command).as_str(),
+            format!("overrides_files_max_size_ignored_includes_does_not_match_filename_invalid_format_{cli_command}").as_str(),
             fs,
             console,
             result,

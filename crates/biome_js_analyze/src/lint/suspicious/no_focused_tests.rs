@@ -106,12 +106,9 @@ impl Rule for NoFocusedTests {
         let secondary_note_suffix = "to ensure all tests are executed.";
         let secondary_note = {
             if name_str == ONLY_KEYWORD {
-                format!("Consider removing '{}' {}", name_str, secondary_note_suffix)
+                format!("Consider removing '{name_str}' {secondary_note_suffix}",)
             } else {
-                format!(
-                    "Consider removing 'f' prefix from '{}' {}",
-                    name_str, secondary_note_suffix
-                )
+                format!("Consider removing 'f' prefix from '{name_str}' {secondary_note_suffix}",)
             }
         };
 

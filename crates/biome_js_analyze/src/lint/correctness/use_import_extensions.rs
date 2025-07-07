@@ -281,7 +281,7 @@ fn get_extensionless_import(
         };
 
         if let Some(sub_ext) = sub_extension {
-            new_path.set_extension(format!("{}.{}", sub_ext, extension));
+            new_path.set_extension(format!("{sub_ext}.{extension}",));
         } else {
             new_path.set_extension(extension);
         }
