@@ -190,3 +190,43 @@ fn ignores_file_inside_directory() {
         result,
     ));
 }
+
+#[test]
+fn use_root_gitignore_when_running_from_subdirectory() {
+    let mut fs = TemporaryFs::new("use_root_gitignore_when_running_from_subdirectory");
+    let mut console = BufferConsole::default();
+
+    fs.create_file(".gitignore", r#"dist/"#);
+    fs.create_file(
+        "biome.json",
+        r#"{
+            "files": {
+                "includes": ["packages/**"]
+            },
+            "vcs": {
+                "enabled": true,
+                "clientKind": "git",
+                "useIgnoreFile": true
+            }
+        }"#,
+    );
+
+    fs.create_file("packages/lib/dist/out.js", r#"foo.call(); bar.call();"#);
+    fs.create_file("packages/lib/src/in.js", r#"foo.call(); bar.call();"#);
+
+    fs.append_to_working_directory("packages/lib");
+
+    let result = run_cli_with_dyn_fs(
+        Box::new(fs.create_os()),
+        &mut console,
+        Args::from(["format"].as_slice()),
+    );
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "use_root_gitignore_when_running_from_subdirectory",
+        fs.create_mem(),
+        console,
+        result,
+    ));
+}
