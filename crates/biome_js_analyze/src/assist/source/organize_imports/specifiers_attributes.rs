@@ -30,10 +30,7 @@ impl JsNamedSpecifiers {
 }
 
 pub fn are_import_specifiers_sorted(named_specifiers: &JsNamedImportSpecifiers, sort_order: SortOrder) -> Option<bool> {
-    let comparator = match sort_order {
-        SortOrder::Lexicographic => ComparableToken::lexicographic_cmp,
-        SortOrder::Natural => ComparableToken::ascii_nat_cmp,
-    };
+    let comparator = get_comparator(sort_order);
 
     is_separated_list_sorted_by(&named_specifiers.specifiers(), |node| {
         let AnyJsBinding::JsIdentifierBinding(name) = node.local_name()? else {
