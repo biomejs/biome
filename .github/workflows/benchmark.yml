@@ -9,19 +9,23 @@ on:
       - next
     paths:
       - 'Cargo.lock'
-      - 'crates/**_parser/**/*.rs'
-      - 'crates/**_formatter/**/*.rs'
       - 'crates/**_analyze/**/*.rs'
+      - 'crates/**_formatter/**/*.rs'
+      - 'crates/**_parser/**/*.rs'
+      - 'crates/biome_configuration/**/*.rs'
       - 'crates/biome_grit_patterns/**/*.rs'
+      - 'crates/biome_package/**/*.rs'
   push:
     branches:
       - main
     paths:
       - 'Cargo.lock'
-      - 'crates/**_parser/**/*.rs'
-      - 'crates/**_formatter/**/*.rs'
       - 'crates/**_analyze/**/*.rs'
+      - 'crates/**_formatter/**/*.rs'
+      - 'crates/**_parser/**/*.rs'
+      - 'crates/biome_configuration/**/*.rs'
       - 'crates/biome_grit_patterns/**/*.rs'
+      - 'crates/biome_package/**/*.rs'
 
 env:
   RUST_LOG: info

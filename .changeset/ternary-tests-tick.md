@@ -4,7 +4,7 @@
 
 Type inference is now able to handle ternary conditions in expressions.
 
-## Example
+**Examples**
 
 ```ts
 const condition = Math.random() > -1; // Always true, but dynamic to linter

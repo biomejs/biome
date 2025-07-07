@@ -5,7 +5,7 @@
 Type inference is now able to handle logical expressions: `&&`, `||`, and `??`.
 
 
-## Examples
+**Examples**
 
 ```ts
 // We can now infer that because `true` is truthy, the entire expression
@@ -27,7 +27,7 @@ type Params = {
 function foo({ booleanOption, falsyOption }: Params) {
     // This may be a Promise:
     booleanOption ?? Promise.reject("logical operator bypass");
-    
+
     // But this never is:
     falsyOption && Promise.reject("logical operator bypass");
 }

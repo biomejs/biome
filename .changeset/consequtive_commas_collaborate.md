@@ -6,7 +6,7 @@ Type inference is now able to handle the sequence operator (`,`), as well as
 post- and pre-update operators: `++`.
 
 
-## Examples
+**Examples**
 
 ```ts
 let x = 5;

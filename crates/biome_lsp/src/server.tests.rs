@@ -3878,7 +3878,7 @@ fn assert_diagnostic_code(server_notification: &ServerNotification, code: &str) 
             }));
         }
         ServerNotification::ShowMessage(_) => {
-            panic!("Unexpected notification: {:?}", server_notification);
+            panic!("Unexpected notification: {server_notification:?}",);
         }
     }
 }
@@ -3889,7 +3889,7 @@ fn assert_diagnostics_count(server_notification: &ServerNotification, expected_c
             assert_eq!(publish.diagnostics.len(), expected_count)
         }
         ServerNotification::ShowMessage(_) => {
-            panic!("Unexpected notification: {:?}", server_notification);
+            panic!("Unexpected notification: {server_notification:?}",);
         }
     }
 }

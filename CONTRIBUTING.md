@@ -385,6 +385,8 @@ The command will present a prompt where you need to choose the libraries involve
 
 The command will create the changeset(s) in the `.changeset` folder. You're free to open the file, and add more information in it.
 
+If you want to add headers, use `####` or `#####`. Other kind of headers will mess up the final CHANGELOG and break upstream tools.
+
 #### Choose the correct packages
 
 In the vast majority of cases, you want to choose the `@biomejs/biome` package, which represents the main package.
