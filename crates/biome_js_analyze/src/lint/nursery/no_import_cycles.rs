@@ -182,7 +182,7 @@ fn find_cycle(
                 // I believe we only care about the first two imports here, if they are they are
                 // the same, they are the only chain, or further iterations will find the shorter
                 // import chain
-                if let (Some(first), Some(second)) = (paths.get(0), paths.get(1))
+                if let (Some(first), Some(second)) = (paths.first(), paths.get(1))
                     && *first == *second
                 {
                     continue;
