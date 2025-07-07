@@ -7,6 +7,7 @@ impl FormatNodeRule<HtmlRoot> for FormatHtmlRoot {
     fn fmt_fields(&self, node: &HtmlRoot, f: &mut HtmlFormatter) -> FormatResult<()> {
         let HtmlRootFields {
             bom_token,
+            frontmatter: _,
             directive,
             html,
             eof_token,

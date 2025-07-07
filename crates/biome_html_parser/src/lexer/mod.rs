@@ -457,20 +457,6 @@ impl<'src> HtmlLexer<'src> {
             && self.byte_at(2) == Some(b'-')
     }
 
-    fn consume_comment_start(&mut self) -> HtmlSyntaxKind {
-        debug_assert!(self.at_start_comment());
-
-        self.advance(4);
-        T![<!--]
-    }
-
-    fn consume_comment_end(&mut self) -> HtmlSyntaxKind {
-        debug_assert!(self.at_end_comment());
-
-        self.advance(3);
-        T![-->]
-    }
-
     fn consume_cdata_start(&mut self) -> HtmlSyntaxKind {
         debug_assert!(self.at_start_cdata());
 
