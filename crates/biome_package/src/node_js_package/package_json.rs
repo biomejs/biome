@@ -36,7 +36,7 @@ pub struct PackageJson {
     pub optional_dependencies: Dependencies,
     pub license: Option<(Box<str>, TextRange)>,
 
-    pub author: Option<JsonValue>,
+    pub author: Option<String>,
     pub exports: Option<JsonValue>,
     pub imports: Option<JsonValue>,
     pub main: Option<String>,
