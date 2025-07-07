@@ -288,7 +288,7 @@ impl DeserializationVisitor for PackageJsonVisitor {
                     result.r#type = Deserializable::deserialize(ctx, &value, &key_text);
                 }
                 "author" => {
-                    if let Some(value) = JsonValue::deserialize(ctx, &value, &key_text) {
+                    if let Some(value) = Deserializable::deserialize(ctx, &value, &key_text) {
                         result.author = Some(value);
                     }
                 }
@@ -309,7 +309,7 @@ impl DeserializationVisitor for PackageJsonVisitor {
                     }
                 }
                 "main" => {
-                    if let Some(value) = JsonValue::deserialize(ctx, &value, &key_text) {
+                    if let Some(value) = Deserializable::deserialize(ctx, &value, &key_text) {
                         result.main = Some(value);
                     }
                 }
@@ -381,10 +381,7 @@ mod tests {
         assert!(errors.is_empty());
 
         let package_json = package_json.expect("parsing must have succeeded");
-        assert_eq!(
-            package_json.author,
-            Some(JsonValue::String(Text::Static("Biome Team").into()))
-        );
+        assert_eq!(package_json.author, Some("Biome Team").into());
     }
 
     #[test]
