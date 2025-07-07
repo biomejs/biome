@@ -18,12 +18,9 @@ pub fn is_separated_list_sorted_by<
 >(
     list: &impl AstSeparatedList<Language = L, Node = N>,
     get_key: impl Fn(&N) -> Option<Key>,
-    comparator: Option<fn(&Key, &Key) -> Ordering>
+    comparator: impl Fn(&Key, &Key) -> Ordering
 ) -> Result<bool, SyntaxError> {
     let mut is_sorted = true;
-    let cmp = comparator.unwrap_or_else(|| |a:&Key, b: &Key| {
-        if a > b { Ordering::Greater } else if a < b {Ordering::Less} else { Ordering::Equal}
-    });
 
     if list.len() > 1 {
         let mut previous_key: Option<Key> = None;
@@ -35,7 +32,7 @@ pub fn is_separated_list_sorted_by<
             // We have to check if the separator is not buggy.
             let _separator = trailing_separator?;
             previous_key = if let Some(key) = get_key(&node?) {
-                if previous_key.is_some_and(|previous_key| cmp(&previous_key, &key) != Ordering::Equal) {
+                if previous_key.is_some_and(|previous_key| comparator(&previous_key, &key).is_ne()) {
                     // We don't return early because we want to return the error if we met one.
                     is_sorted = false;
                 }
@@ -61,15 +58,12 @@ pub fn sorted_separated_list_by<'a, L: Language + 'a, List, Node, Key: Ord>(
     list: &List,
     get_key: impl Fn(&Node) -> Option<Key>,
     make_separator: fn() -> SyntaxToken<L>,
-    comparator: Option<fn(&Key, &Key) -> Ordering>
+    comparator: impl Fn(&Key, &Key) -> Ordering
 ) -> Result<List, SyntaxError>
 where
     List: AstSeparatedList<Language = L, Node = Node> + AstNode<Language = L> + 'a,
     Node: AstNode<Language = L> + 'a,
 {
-    let cmp = comparator.unwrap_or_else(|| |a:&Key, b: &Key| {
-        if a > b { Ordering::Greater } else if a < b {Ordering::Less} else { Ordering::Equal}
-    });
     let mut elements = Vec::with_capacity(list.len());
     for AstSeparatedElement {
         node,
@@ -86,7 +80,7 @@ where
         let last_has_separator = slice.last().is_some_and(|(_, _, sep)| sep.is_some());
         slice.sort_by(|(key1, _, _), (key2, _, _)| {
             match (key1, key2) {
-                (Some(k1), Some(k2)) => cmp(k1, k2),
+                (Some(k1), Some(k2)) => comparator(k1, k2),
                 (Some(_), None) => Ordering::Less,
                 (None, Some(_)) => Ordering::Greater,
                 (None, None) => Ordering::Equal,

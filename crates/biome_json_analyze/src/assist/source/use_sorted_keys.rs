@@ -54,7 +54,7 @@ impl Rule for UseSortedKeys {
                 .inner_string_text()
                 .ok()
                 .map(ComparableToken::new)
-        }, Some(comparator))
+        }, comparator)
         .ok()?
         .not()
         .then_some(())
@@ -97,7 +97,7 @@ impl Rule for UseSortedKeys {
                     .map(ComparableToken::new)
             },
             || make::token(T![,]),
-            Some(comparator),
+            comparator,
         )
         .ok()?;
 

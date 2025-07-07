@@ -916,11 +916,6 @@ impl Rule for OrganizeImports {
                     // Sort imports based on their import key
                     import_keys.sort_unstable_by(
                         |KeyedItem { key: k1, .. }, KeyedItem { key: k2, .. }| {
-                            eprint!(
-                                "%%%%% {} - {}\n",
-                                k1.source.inner().token,
-                                k2.source.inner().token
-                            );
                             k1.cmp(k2)
                         },
                     );

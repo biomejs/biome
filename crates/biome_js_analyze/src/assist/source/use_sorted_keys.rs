@@ -96,7 +96,7 @@ impl Rule for UseSortedKeys {
             SortOrder::Lexicographic => ComparableToken::lexicographic_cmp
         };
 
-        is_separated_list_sorted_by(ctx.query(), |node| node.name().map(ComparableToken::new), Some(comparator))
+        is_separated_list_sorted_by(ctx.query(), |node| node.name().map(ComparableToken::new), comparator)
             .ok()?
             .not()
             .then_some(())
@@ -133,7 +133,7 @@ impl Rule for UseSortedKeys {
             list,
             |node| node.name().map(ComparableToken::new),
             || make::token(T![,]).with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")]),
-        Some(comparator))
+            comparator)
         .ok()?;
 
         let mut mutation = ctx.root().begin();

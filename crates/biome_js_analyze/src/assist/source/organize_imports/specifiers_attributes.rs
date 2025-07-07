@@ -42,7 +42,7 @@ pub fn are_import_specifiers_sorted(named_specifiers: &JsNamedImportSpecifiers, 
         Some(ComparableToken::new(
             name.name_token().ok()?.token_text_trimmed(),
         ))
-    }, Some(comparator))
+    }, comparator)
     .ok()
 }
 
@@ -62,7 +62,7 @@ pub fn sort_import_specifiers(
             ))
         },
         || make::token(T![,]).with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")]),
-        Some(comparator)
+        comparator
     )
     .ok()?;
     Some(named_specifiers.with_specifiers(new_list))
@@ -116,7 +116,7 @@ pub fn are_export_specifiers_sorted(specifiers: &JsExportNamedFromSpecifierList,
             .inner_string_text()
             .ok()
             .map(ComparableToken::new)
-    }, Some(comparator))
+    }, comparator)
     .ok()
 }
 
@@ -135,7 +135,7 @@ pub fn sort_export_specifiers(
                 .map(ComparableToken::new)
         },
         || make::token(T![,]).with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")]),
-    Some(comparator))
+        comparator)
     .ok()?;
     Some(new_list)
 }
@@ -185,7 +185,7 @@ pub fn are_import_attributes_sorted(attributes: &JsImportAssertion, sort_order: 
             return None;
         };
         Some(ComparableToken::new(inner_string_text(&node.key().ok()?)))
-    }, Some(comparator))
+    }, comparator)
     .ok()
 }
 
@@ -201,7 +201,7 @@ pub fn sort_attributes(attributes: JsImportAssertion, sort_order: SortOrder) -> 
             Some(ComparableToken::new(inner_string_text(&node.key().ok()?)))
         },
         || make::token(T![,]).with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")]),
-        Some(comparator),
+        comparator,
     )
     .ok()?;
     Some(attributes.with_assertions(new_list))
