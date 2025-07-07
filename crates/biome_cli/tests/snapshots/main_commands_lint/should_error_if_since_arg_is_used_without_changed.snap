@@ -1,6 +1,6 @@
 ---
 source: crates/biome_cli/tests/snap_test.rs
-expression: content
+expression: redactor(content)
 ---
 ## `file.js`
 
@@ -19,10 +19,8 @@ console.log('file2');
 ```block
 flags/invalid ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Incompatible arguments since and changed
+  × Incompatible arguments --since and --changed. In order to use --since, you must also use --changed.
   
 
 
 ```
-
-
