@@ -241,9 +241,7 @@ fn resolve_import_alias(
     fs: &dyn ResolverFsProxy,
     options: &ResolveOptions,
 ) -> Result<Utf8PathBuf, ResolveError> {
-    let imports = package_json
-        .get_value_by_path(&["imports"])
-        .ok_or(ResolveError::NotFound)?;
+    let imports = package_json.imports.clone().ok_or(ResolveError::NotFound)?;
     let imports = imports
         .as_object()
         .ok_or(ResolveError::InvalidMappingTarget)?;
@@ -260,9 +258,7 @@ fn resolve_export(
     fs: &dyn ResolverFsProxy,
     options: &ResolveOptions,
 ) -> Result<Utf8PathBuf, ResolveError> {
-    let exports = package_json
-        .get_value_by_path(&["exports"])
-        .ok_or(ResolveError::NotFound)?;
+    let exports = &package_json.exports.clone().ok_or(ResolveError::NotFound)?;
 
     match exports {
         JsonValue::Object(mapping) => {
@@ -553,28 +549,44 @@ fn resolve_package_path(
     };
 
     if let Ok(package_json) = fs.read_package_json_in_directory(&package_path) {
-        if package_json.get_value_by_path(&["exports"]).is_some() {
+        if package_json.exports.is_some() {
             return resolve_export(subpath, &package_path, &package_json, fs, options);
         }
 
         if subpath.is_empty() {
-            let fallback_field = if options.resolve_types {
-                "types"
-            } else {
-                "main"
-            };
-
-            if let Some(main_target) = package_json
-                .get_value_by_path(&[fallback_field])
-                .and_then(JsonValue::as_string)
+            if options.resolve_types {
+                if let Some(value) =
+                    parse_package_json_field(fs, options, &package_path, package_json.types)
+                {
+                    return value;
+                }
+            } else if let Some(value) =
+                parse_package_json_field(fs, options, &package_path, package_json.main)
             {
-                let options = options.without_extensions_or_manifests();
-                return resolve_relative_path(main_target.as_str(), &package_path, fs, &options);
+                return value;
             }
         }
     }
 
     resolve_relative_path(subpath, &package_path, fs, options)
+}
+
+fn parse_package_json_field(
+    fs: &dyn ResolverFsProxy,
+    options: &ResolveOptions,
+    package_path: &Utf8Path,
+    field: Option<String>,
+) -> Option<Result<Utf8PathBuf, ResolveError>> {
+    if let Some(main_target) = field.as_ref() {
+        let options = options.without_extensions_or_manifests();
+        return Some(resolve_relative_path(
+            main_target.as_str(),
+            package_path,
+            fs,
+            &options,
+        ));
+    }
+    None
 }
 
 enum ResolvedPathInfo {
