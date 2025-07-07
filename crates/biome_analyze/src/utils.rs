@@ -32,7 +32,7 @@ pub fn is_separated_list_sorted_by<
             // We have to check if the separator is not buggy.
             let _separator = trailing_separator?;
             previous_key = if let Some(key) = get_key(&node?) {
-                if previous_key.is_some_and(|previous_key| comparator(&previous_key, &key).is_ne()) {
+                if previous_key.is_some_and(|previous_key| comparator(&previous_key, &key).is_gt()) {
                     // We don't return early because we want to return the error if we met one.
                     is_sorted = false;
                 }
