@@ -36,11 +36,11 @@ pub struct PackageJson {
     pub optional_dependencies: Dependencies,
     pub license: Option<(Box<str>, TextRange)>,
 
-    pub author: Option<String>,
+    pub author: Option<Box<str>>,
     pub exports: Option<JsonValue>,
     pub imports: Option<JsonValue>,
-    pub main: Option<String>,
-    pub types: Option<String>,
+    pub main: Option<Box<str>>,
+    pub types: Option<Box<str>>,
 }
 
 static_assertions::assert_impl_all!(PackageJson: Send, Sync);
