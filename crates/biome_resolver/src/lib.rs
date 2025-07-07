@@ -577,7 +577,7 @@ fn parse_package_json_field(
     package_path: &Utf8Path,
     field: Option<JsonValue>,
 ) -> Option<Result<Utf8PathBuf, ResolveError>> {
-    if let Some(main_target) = field.and_then(|value| JsonValue::as_string(&value).cloned()) {
+    if let Some(main_target) = field.and_then(|value| JsonValue::as_string(&value).as_ref()) {
         let options = options.without_extensions_or_manifests();
         return Some(resolve_relative_path(
             main_target.as_str(),
