@@ -6,7 +6,7 @@ Added the rule [`noMisusedPromises`](https://biomejs.dev/linter/rules/no-misused
 
 It signals `Promise`s in places where conditionals or iterables are expected.
 
-## Invalid examples
+**Invalid examples**
 
 ```ts
 const promise = Promise.resolve('value');
@@ -24,7 +24,7 @@ console.log({ foo: 42, ...promise });
 });
 ```
 
-## Valid examples
+**Valid examples**
 
 ```ts
 const promise = Promise.resolve('value');
