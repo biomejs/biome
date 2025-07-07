@@ -14,7 +14,7 @@ pub fn is_separated_list_sorted_by<
     'a,
     L: Language + 'a,
     N: AstNode<Language = L> + 'a,
-    Key: Ord,
+    Key,
 >(
     list: &impl AstSeparatedList<Language = L, Node = N>,
     get_key: impl Fn(&N) -> Option<Key>,
@@ -54,7 +54,7 @@ pub fn is_separated_list_sorted_by<
 /// Chunks are sorted separately.
 ///
 /// This sort is stable (i.e., does not reorder equal elements).
-pub fn sorted_separated_list_by<'a, L: Language + 'a, List, Node, Key: Ord>(
+pub fn sorted_separated_list_by<'a, L: Language + 'a, List, Node, Key>(
     list: &List,
     get_key: impl Fn(&Node) -> Option<Key>,
     make_separator: fn() -> SyntaxToken<L>,
