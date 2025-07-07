@@ -586,22 +586,18 @@ pub fn assert_diagnostics_expectation_comment<L: Language>(
     match diagnostic_comment {
         Some(Diagnostics::ShouldNotGenerateDiagnostics) => {
             if has_diagnostics {
-                panic!(
-                    "This test should not generate diagnostics\nFile: {}",
-                    file_path
-                );
+                panic!("This test should not generate diagnostics\nFile: {file_path}",);
             }
         }
         Some(Diagnostics::ShouldGenerateDiagnostics) => {
             if !has_diagnostics {
-                panic!("This test should generate diagnostics\nFile: {}", file_path);
+                panic!("This test should generate diagnostics\nFile: {file_path}",);
             }
         }
         None => {
             if is_valid_test_file {
                 panic!(
-                    "Valid test files should contain comment `{}`\nFile: {}",
-                    no_diagnostics_comment_text, file_path
+                    "Valid test files should contain comment `{no_diagnostics_comment_text}`\nFile: {file_path}",
                 );
             }
         }

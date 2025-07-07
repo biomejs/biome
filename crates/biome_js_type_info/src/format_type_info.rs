@@ -674,7 +674,7 @@ impl Format<FormatTypeContext> for Class {
                 write!(
                     f,
                     [dynamic_text(
-                        &std::format!("\"{}\"", name),
+                        &std::format!("\"{name}\""),
                         TextSize::default()
                     )]
                 )

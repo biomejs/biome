@@ -218,7 +218,7 @@ fn format_numeric_literal(raw: &str) -> String {
                 current_num.push(b);
             }
 
-            _ => panic!("unexpected byte '{}'", b),
+            _ => panic!("unexpected byte '{b}'",),
         }
     }
 
