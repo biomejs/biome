@@ -171,12 +171,23 @@ fn find_cycle(
 
             if resolved_path == ctx.file_path() {
                 // Return all the paths from `start_path` to `resolved_path`:
-                let paths = Some(start_path.as_str())
+                let paths: Box<[Box<str>]> = Some(start_path.as_str())
                     .into_iter()
                     .map(Box::from)
-                    .chain(stack.into_iter().map(|(path, _)| path))
+                    .chain(stack.clone().into_iter().map(|(path, _)| path))
                     .chain(Some(Box::from(resolved_path.as_str())))
                     .collect();
+
+                // #6569
+                // I believe we only care about the first two imports here, if they are they are
+                // the same, they are the only chain, or further iterations will find the shorter
+                // import chain
+                if let (Some(first), Some(second)) = (paths.get(0), paths.get(1))
+                    && *first == *second
+                {
+                    continue;
+                }
+
                 return Some(paths);
             }
 
