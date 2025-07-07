@@ -39,7 +39,7 @@ pub struct PackageJson {
     pub author: Option<JsonValue>,
     pub exports: Option<JsonValue>,
     pub imports: Option<JsonValue>,
-    pub main: Option<JsonValue>,
+    pub main: Option<String>,
     pub types: Option<JsonValue>,
 }
 
