@@ -5,7 +5,7 @@
 Type inference can now infer the return types of functions and methods without
 annotations.
 
-## Example
+**Examples**
 
 ```ts
 const sneakyObject = {

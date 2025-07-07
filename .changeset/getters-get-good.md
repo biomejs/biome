@@ -4,7 +4,7 @@
 
 Biome's type inference now detects the type of properties with getters.
 
-## Example
+**Examples**
 
 ```ts
 const sneakyObject2 = {
