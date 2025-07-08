@@ -2,30 +2,17 @@
 "@biomejs/biome": patch
 ---
 
-Fixed [#6634](https://github.com/biomejs/biome/issues/6634): The `useReadonlyClassProperties` rule now correctly flags mutations in class getters and in arrow functions within class properties.
+Fixed [#6719](https://github.com/biomejs/biome/issues/6719): The `noInvalidUseBeforeDeclaration` rule covers additional use cases.
 
 Examples:
 
 ```ts
-class GetterWithMutationValue {
-	#value: string;
-
-	get value() {
-		if (!this.#value) {
-			this.#value = "defaultValue";
-		}
-
-		return this.#value;
-	}
-}
+type Bar = {[BAR]: true;};
+const BAR = 'bar';
 ```
 
 ```ts
-class ClassPropertyArrowFunctionWithMutation {
-  private bar: string | null = null;
-
-  readonly action = () => {
-    this.bar = 'init';
-  };
-}
+interface Bar {child:  {grandChild: {[BAR]: typeof BAR; enumFoo: EnumFoo}}}
+const BAR = 'bar';
+enum EnumFoo {BAR = 'bar'}
 ```

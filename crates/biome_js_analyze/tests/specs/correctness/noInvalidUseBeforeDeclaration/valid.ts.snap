@@ -1,3 +1,10 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 135
+expression: valid.ts
+---
+# Input
+```ts
 /* should not generate diagnostics */
 
 let i: I;
@@ -24,3 +31,5 @@ const FOO = 'foo';
 enum EnumFoo {BAR = 'bar'}
 
 
+
+```
