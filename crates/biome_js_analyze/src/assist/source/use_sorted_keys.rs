@@ -72,6 +72,21 @@ declare_source_rule! {
     ///   q: 1,
     /// }
     /// ```
+    ///
+    /// ## Options
+    /// This actions accepts following options
+    ///
+    /// ### `sortOrder`
+    /// This options supports `natural` and `lexicographic` values. Where as `natural` is the default.
+    ///
+    /// ```json,options
+    /// {
+    ///     "options": {
+    ///         "sortOrder": "natural"
+    ///     }
+    /// }
+    /// ```
+    ///
     pub UseSortedKeys {
         version: "2.0.0",
         name: "useSortedKeys",

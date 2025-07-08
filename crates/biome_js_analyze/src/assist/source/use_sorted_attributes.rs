@@ -38,6 +38,20 @@ declare_source_rule! {
     /// <Hello lastName="Smith" firstName="John" {...this.props} tel="0000" address="111 Main Street"  {...another.props} lastName="Smith" />;
     /// ```
     ///
+    /// ## Options
+    /// This actions accepts following options
+    ///
+    /// ### `sortOrder`
+    /// This options supports `natural` and `lexicographic` values. Where as `natural` is the default.
+    ///
+    /// ```json,options
+    /// {
+    ///     "options": {
+    ///         "sortOrder": "natural"
+    ///     }
+    /// }
+    /// ```
+    ///
     pub UseSortedAttributes {
         version: "2.0.0",
         name: "useSortedAttributes",

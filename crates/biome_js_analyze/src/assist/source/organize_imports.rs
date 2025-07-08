@@ -618,6 +618,23 @@ declare_source_rule! {
     /// }
     /// ```
     ///
+    /// ## Options
+    /// This actions accepts following options
+    ///
+    /// ### `groups`
+    /// The usage of `groups` is explained in detail above.
+    ///
+    /// ### `identifier_order`
+    /// This options supports `natural` and `lexicographic` values. Where as `natural` is the default. This only applies to the named import/exports and not the source itself.
+    ///
+    /// ```json,options
+    /// {
+    ///     "options": {
+    ///         "identifier_order": "natural"
+    ///     }
+    /// }
+    /// ```
+    ///
     pub OrganizeImports {
         version: "1.0.0",
         name: "organizeImports",
