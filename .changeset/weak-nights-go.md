@@ -3,6 +3,7 @@
 ---
 
 Added `MemoryFileSystem` to the WASM API.
+
 You can now insert a file from your JS code:
 
 ```js

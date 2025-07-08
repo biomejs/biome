@@ -2,8 +2,7 @@
 "@biomejs/biome": minor
 ---
 
-Type inference is now able to handle the sequence operator (`,`), as well as
-post- and pre-update operators: `++`.
+Type inference is now able to handle the sequence operator (`,`), as well as post- and pre-update operators: `++`.
 
 **Example**
 

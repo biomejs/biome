@@ -2,8 +2,7 @@
 "@biomejs/biome": patch
 ---
 
-Type inference can now infer the return types of functions and methods without
-annotations.
+Type inference can now infer the return types of functions and methods without annotations.
 
 **Examples**
 
