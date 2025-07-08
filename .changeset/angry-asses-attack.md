@@ -2,8 +2,7 @@
 "@biomejs/biome": minor
 ---
 
-The rule [`noFloatingPromises`](https://biomejs.dev/linter/rules/no-misused-promises/)
-can now detect floating arrays of `Promise`s.
+The rule [`noFloatingPromises`](https://biomejs.dev/linter/rules/no-misused-promises/) can now detect floating arrays of `Promise`s.
 
 **Invalid examples**
 

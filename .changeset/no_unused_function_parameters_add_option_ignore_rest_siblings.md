@@ -2,10 +2,11 @@
 "@biomejs/biome": minor
 ---
 
-Added [ignoreRestSiblings](https://github.com/biomejs/biome/issues/5941) option
-to `noUnusedFunctionParameters` rule to ignore unused function parameters that
-are siblings of the rest parameter. Default is `false`, which means that unused
-function parameters that are siblings of the rest parameter will be reported.
+Added the `ignoreRestSiblings` option to the `noUnusedFunctionParameters` rule.
+
+This option is used to ignore unused function parameters that are siblings of the rest parameter.
+
+The default is `false`, which means that unused function parameters that are siblings of the rest parameter will be reported.
 
 **Example**
 

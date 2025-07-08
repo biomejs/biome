@@ -2,10 +2,7 @@
 "@biomejs/biome": patch
 ---
 
-Added the nursery rule
-[noMagicNumbers](https://github.com/biomejs/biome/issues/4333). The rule detects
-and reports the use of "magic numbers" — numeric literals that are used directly
-in code without being assigned to a named constant.
+Added the nursery rule [noMagicNumbers](https://github.com/biomejs/biome/issues/4333). The rule detects and reports the use of "magic numbers" — numeric literals that are used directly in code without being assigned to a named constant.
 
 **Example**
 
