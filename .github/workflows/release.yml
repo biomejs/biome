@@ -396,7 +396,7 @@ jobs:
       - name: Download JS API artifacts
         uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
         with:
-          pattern: js-api
+          name: js-api
           path: packages/@biomejs/js-api/dist
 
       - name: Install Node.js
