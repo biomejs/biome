@@ -5,7 +5,7 @@
 Fixed [#6573](https://github.com/biomejs/biome/issues/6573): Grit plugins can
 now match bare imports.
 
-## Example
+**Example**
 
 The following snippet:
 

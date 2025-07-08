@@ -7,7 +7,7 @@ Added the nursery rule
 and reports the use of "magic numbers" — numeric literals that are used directly
 in code without being assigned to a named constant.
 
-## Example
+**Example**
 
 ```js
 let total = price * 1.23; // Magic number for tax rate will highlight 1.23 as magic number

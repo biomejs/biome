@@ -7,7 +7,7 @@ to `noUnusedFunctionParameters` rule to ignore unused function parameters that
 are siblings of the rest parameter. Default is `false`, which means that unused
 function parameters that are siblings of the rest parameter will be reported.
 
-## Example
+**Example**
 
 ```json
 {
