@@ -1,5 +1,20 @@
 # @biomejs/biome
 
+## 2.1.1
+
+### Patch Changes
+
+- [#6781](https://github.com/biomejs/biome/pull/6781) [`9bbd34f`](https://github.com/biomejs/biome/commit/9bbd34f8d4be3dd4ba4c63746a5b2915e578e339) Thanks [@siketyan](https://github.com/siketyan)! - Fixed the `FileFeaturesResult` interface in the WASM API was defined as a mapped object but the actual value was a `Map` object.
+
+- [#6761](https://github.com/biomejs/biome/pull/6761) [`cf3c2ce`](https://github.com/biomejs/biome/commit/cf3c2ce3ac28a36eee948ad689794783b0ba23ef) Thanks [@dyc3](https://github.com/dyc3)! - Fixed [#6759](https://github.com/biomejs/biome/issues/6759), a false positive for `noFocusedTests` that was triggered by calling any function with the name `fit` on any object.
+
+  The following code will now pass the `noFocusedTests` rule:
+
+  ```js
+  import foo from "foo";
+  foo.fit();
+  ```
+
 ## 2.1.0
 
 ### Minor Changes
