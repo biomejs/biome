@@ -1,5 +1,11 @@
 # @biomejs/js-api
 
+## 2.0.3
+
+### Patch Changes
+
+- [#6785](https://github.com/biomejs/biome/pull/6785) [`085e3c7`](https://github.com/biomejs/biome/commit/085e3c756344c92adbf69d5270b93402ff9713e8) Thanks [@siketyan](https://github.com/siketyan)! - Fixed [#6722](https://github.com/biomejs/biome/issues/6772): Missing `dist/` files are now included in the `@biomejs/js-api` package. The previous release haven't fixed the issue properly.
+
 ## 2.0.2
 
 ### Patch Changes
