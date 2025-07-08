@@ -624,13 +624,13 @@ declare_source_rule! {
     /// ### `groups`
     /// The usage of `groups` is explained in detail above.
     ///
-    /// ### `identifier_order`
+    /// ### `identifierOrder`
     /// This options supports `natural` and `lexicographic` values. Where as `natural` is the default. This only applies to the named import/exports and not the source itself.
     ///
     /// ```json,options
     /// {
     ///     "options": {
-    ///         "identifier_order": "natural"
+    ///         "identifierOrder": "natural"
     ///     }
     /// }
     /// ```

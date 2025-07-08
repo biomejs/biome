@@ -1837,11 +1837,6 @@
 			"type": "array",
 			"items": { "$ref": "#/definitions/ImportGroup" }
 		},
-		"SortOrder": {
-			"type": "string",
-			"enum": ["lexicographic", "natural"],
-			"default": "natural"
-		},
 		"ImportMatcher": {
 			"type": "object",
 			"properties": {
@@ -5035,7 +5030,8 @@
 					"allOf": [{ "$ref": "#/definitions/ImportGroups" }]
 				},
 				"identifierOrder": {
-					"$ref": "#/definitions/SortOrder"
+					"default": "natural",
+					"allOf": [{ "$ref": "#/definitions/SortOrder" }]
 				}
 			},
 			"additionalProperties": false
@@ -11379,6 +11375,7 @@
 				{ "$ref": "#/definitions/Suspicious" }
 			]
 		},
+		"SortOrder": { "type": "string", "enum": ["natural", "lexicographic"] },
 		"Source": {
 			"description": "A list of rules that belong to this group",
 			"type": "object",
@@ -13518,7 +13515,8 @@
 			"type": "object",
 			"properties": {
 				"sortOrder": {
-					"$ref": "#/definitions/SortOrder"
+					"default": "natural",
+					"allOf": [{ "$ref": "#/definitions/SortOrder" }]
 				}
 			},
 			"additionalProperties": false
@@ -13549,10 +13547,11 @@
 			"type": "object", 
 			"properties": {
 				"sortOrder": {
-					"$ref": "#/definitions/SortOrder"
+					"default": "natural",
+					"allOf": [{ "$ref": "#/definitions/SortOrder" }]
 				}
 			},
-			"additionalProperties": false 
+			"additionalProperties": false
 		},
 		"UseSortedPropertiesOptions": {
 			"type": "object",
