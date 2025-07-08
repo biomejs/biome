@@ -231,9 +231,8 @@ pub fn sort_attributes(
 }
 
 pub fn get_comparator(sort_order: SortOrder) -> fn(&ComparableToken, &ComparableToken) -> Ordering {
-    let comparator = match sort_order {
+    match sort_order {
         SortOrder::Lexicographic => ComparableToken::lexicographic_cmp,
         SortOrder::Natural => ComparableToken::ascii_nat_cmp,
-    };
-    comparator
+    }
 }
