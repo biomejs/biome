@@ -7,7 +7,7 @@ use biome_js_syntax::{
     AnyJsExpression, AnyJsObjectMember, AnyJsStatement, JsCallExpression,
     JsExportDefaultExpressionClause, JsObjectExpression, T,
 };
-use biome_rowan::{AstNode, AstSeparatedList, TextRange};
+use biome_rowan::{AstNode, AstSeparatedList, TextRange, TriviaPieceKind};
 use biome_rowan::{BatchMutationExt, declare_node_union};
 
 use crate::JsRuleAction;
@@ -121,28 +121,47 @@ fn get_options_object_expression(call: &JsCallExpression) -> Option<JsObjectExpr
     let options_argument = match callee {
         // createApp(...), defineComponent(...)
         AnyJsExpression::JsIdentifierExpression(_) => {
-            let options_argument = call.arguments().ok()?.args().elements().next()?.into_node();
+            let fn_name = call
+                .callee()
+                .ok()?
+                .get_callee_member_name()?
+                .token_text_trimmed();
 
-            if options_argument.is_ok() {
-                options_argument.ok()?
+            if fn_name == "createApp" || fn_name == "defineComponent" {
+                call.arguments()
+                    .ok()?
+                    .args()
+                    .elements()
+                    .next()?
+                    .into_node()
+                    .ok()
             } else {
-                return None;
+                None
             }
         }
         // dot access: `app.component(...)`
         AnyJsExpression::JsStaticMemberExpression(_) => {
-            let options_argument = call.arguments().ok()?.args().elements().nth(1)?.into_node();
-
-            if options_argument.is_ok() {
-                options_argument.ok()?
+            let fn_name = call
+                .callee()
+                .ok()?
+                .get_callee_member_name()?
+                .token_text_trimmed();
+            if fn_name == "component" {
+                call.arguments()
+                    .ok()?
+                    .args()
+                    .elements()
+                    .next()?
+                    .into_node()
+                    .ok()
             } else {
-                return None;
+                None
             }
         }
         _ => return None,
     };
 
-    JsObjectExpression::cast(options_argument.syntax().clone())
+    JsObjectExpression::cast(options_argument?.syntax().clone())
 }
 
 pub struct RuleState {
@@ -178,24 +197,20 @@ impl Rule for NoVueDataObjectDeclaration {
                 let member = member.ok()?;
 
                 if let AnyJsObjectMember::JsPropertyObjectMember(property_object_member) = member {
-                    if let Ok(object_member_name) = property_object_member.name() {
-                        if let Some(key_name) = object_member_name.name() {
-                            if key_name.text().trim() == "data" {
-                                if let Ok(value) = property_object_member.value() {
-                                    match value {
-                                        AnyJsExpression::JsIdentifierExpression(_)
-                                        | AnyJsExpression::JsArrowFunctionExpression(_)
-                                        | AnyJsExpression::JsFunctionExpression(_) => return None,
-                                        _ => {
-                                            return Some(RuleState {
-                                                diagnostic_range: property_object_member.range(),
-                                            });
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
+                    return property_object_member
+                        .name()
+                        .ok()
+                        .and_then(|n| n.name())
+                        .filter(|ident| ident.text().trim() == "data")
+                        .and_then(|_| property_object_member.value().ok())
+                        .and_then(|value| match value {
+                            AnyJsExpression::JsIdentifierExpression(_)
+                            | AnyJsExpression::JsArrowFunctionExpression(_)
+                            | AnyJsExpression::JsFunctionExpression(_) => None,
+                            _ => Some(RuleState {
+                                diagnostic_range: property_object_member.range(),
+                            }),
+                        });
                 }
             }
         }
@@ -224,77 +239,70 @@ impl Rule for NoVueDataObjectDeclaration {
         let vue_options_object_expression = match node {
             AnyVueOptionsLike::JsCallExpression(call) => get_options_object_expression(call),
             AnyVueOptionsLike::JsExportDefaultExpressionClause(export) => {
-                if let Ok(AnyJsExpression::JsObjectExpression(object_expression)) =
-                    export.expression()
-                {
-                    Some(object_expression)
-                } else {
-                    None
-                }
+                export.expression().ok()?.as_js_object_expression().cloned()
             }
         };
 
-        if let Some(options) = vue_options_object_expression {
-            let options_object = JsObjectExpression::cast(options.syntax().clone())?;
+        let options_object =
+            JsObjectExpression::cast(vue_options_object_expression?.syntax().clone())?;
 
-            for member in options_object.members() {
-                let member = member.ok()?;
+        for member in options_object.members() {
+            let action = member.ok()?.as_js_property_object_member().and_then(|property_object_member| {
+                    property_object_member
+                        .name()
+                        .ok()
+                        .and_then(|object_member_name| object_member_name.name())
+                        .filter(|object_member_name| object_member_name.text().trim() == "data")
+                        .and_then(|_| property_object_member.value().ok())
+                        .and_then(|value| match value {
+                            AnyJsExpression::JsIdentifierExpression(_)
+                            | AnyJsExpression::JsArrowFunctionExpression(_)
+                            | AnyJsExpression::JsFunctionExpression(_) => None,
+                            _ => {
+                                let data_function = make::js_function_expression(
+                                    make::token(T![function]),
+                                    make::js_parameters(
+                                        make::token(T!['(']),
+                                        make::js_parameter_list(None, None),
+                                        make::token(T![')']).with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")]),
+                                    ),
+                                    make::js_function_body(
+                                        make::token(T!['{']).with_trailing_trivia([(TriviaPieceKind::Newline, "\n")]),
+                                        make::js_directive_list(None),
+                                        make::js_statement_list([
+                                            AnyJsStatement::JsReturnStatement(
+                                                make::js_return_statement(make::token(
+                                                    T![return],
+                                                )
+                                                .with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")]))
+                                                .with_argument(value.clone())
+                                                .build(),
+                                            ),
+                                            ]),
+                                            make::token(T!['}']).with_leading_trivia([(TriviaPieceKind::Newline, "\n")]),
+                                        ),
+                                    )
+                                    .build();
 
-                if let AnyJsObjectMember::JsPropertyObjectMember(property_object_member) = member {
-                    if let Ok(object_member_name) = property_object_member.name() {
-                        if let Some(key_name) = object_member_name.name() {
-                            if key_name.text().trim() == "data" {
-                                if let Ok(value) = property_object_member.value() {
-                                    match value {
-                                        AnyJsExpression::JsIdentifierExpression(_)
-                                        | AnyJsExpression::JsArrowFunctionExpression(_)
-                                        | AnyJsExpression::JsFunctionExpression(_) => return None,
-                                        _ => {
-                                            let data_function = make::js_function_expression(
-                                                make::token(T![function]),
-                                                make::js_parameters(
-                                                    make::token(T!['(']),
-                                                    make::js_parameter_list(None, None),
-                                                    make::token(T![')']),
-                                                ),
-                                                make::js_function_body(
-                                                    make::token(T!['{']),
-                                                    make::js_directive_list(None),
-                                                    make::js_statement_list([
-                                                        AnyJsStatement::JsReturnStatement(
-                                                            make::js_return_statement(make::token(
-                                                                T![return],
-                                                            ))
-                                                            .with_argument(value.clone())
-                                                            .build(),
-                                                        ),
-                                                    ]),
-                                                    make::token(T!['}']),
-                                                ),
-                                            )
-                                            .build();
+                                let mut mutation = ctx.root().begin();
+                                mutation.replace_node(
+                                    value,
+                                    AnyJsExpression::JsFunctionExpression(
+                                        data_function,
+                                    ),
+                                );
 
-                                            let mut mutation = ctx.root().begin();
-                                            mutation.replace_node(
-                                                value,
-                                                AnyJsExpression::JsFunctionExpression(
-                                                    data_function,
-                                                ),
-                                            );
-
-                                            return Some(JsRuleAction::new(
+                                Some(JsRuleAction::new(
                                     ctx.metadata().action_category(ctx.category(), ctx.group()),
                                     ctx.metadata().applicability(),
                                     markup! { "Convert the data object to a function returning the data object" }.to_owned(),
                                     mutation,
-                                ));
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
+                                ))
+                        }})
+                });
+
+            if action.is_some() {
+                return action;
             }
         }
 
