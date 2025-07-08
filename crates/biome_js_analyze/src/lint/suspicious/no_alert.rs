@@ -57,7 +57,7 @@ declare_lint_rule! {
     /// }
     /// ```
     pub NoAlert {
-        version: "next",
+        version: "2.1.0",
         name: "noAlert",
         language: "js",
         sources: &[RuleSource::Eslint("no-alert").same()],

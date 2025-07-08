@@ -74,7 +74,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub UseUnifiedTypeSignature {
-        version: "next",
+        version: "2.1.0",
         name: "useUnifiedTypeSignature",
         language: "ts",
         recommended: false,
