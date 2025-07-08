@@ -13543,8 +13543,8 @@
 			},
 			"additionalProperties": false
 		},
-		"UseSortedKeysOptions": { 
-			"type": "object", 
+		"UseSortedKeysOptions": {
+			"type": "object",
 			"properties": {
 				"sortOrder": {
 					"default": "natural",
