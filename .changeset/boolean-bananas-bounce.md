@@ -4,7 +4,6 @@
 
 Type inference is now able to handle logical expressions: `&&`, `||`, and `??`.
 
-
 **Examples**
 
 ```ts
