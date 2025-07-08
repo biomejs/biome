@@ -266,8 +266,12 @@ impl Default for Workspace {
     }
 }
 
+const SERIALIZER: serde_wasm_bindgen::Serializer = serde_wasm_bindgen::Serializer::new()
+    .serialize_missing_as_null(true)
+    .serialize_maps_as_objects(true);
+
 fn to_value<T: serde::ser::Serialize + ?Sized>(
     value: &T,
 ) -> Result<JsValue, serde_wasm_bindgen::Error> {
-    value.serialize(&serde_wasm_bindgen::Serializer::new().serialize_missing_as_null(true))
+    value.serialize(&SERIALIZER)
 }

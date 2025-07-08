@@ -82,7 +82,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoMisusedPromises {
-        version: "next",
+        version: "2.1.0",
         name: "noMisusedPromises",
         language: "ts",
         recommended: true,
