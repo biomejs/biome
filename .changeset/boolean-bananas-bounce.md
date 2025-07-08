@@ -4,8 +4,7 @@
 
 Type inference is now able to handle logical expressions: `&&`, `||`, and `??`.
 
-
-**Examples**
+## Examples
 
 ```ts
 // We can now infer that because `true` is truthy, the entire expression

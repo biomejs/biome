@@ -2,7 +2,8 @@
 "@biomejs/biome": minor
 ---
 
-Added the rule [`noMisusedPromises`](https://biomejs.dev/linter/rules/no-misused-promises/).
+Added the nursery rule
+[`noMisusedPromises`](https://biomejs.dev/linter/rules/no-misused-promises/).
 
 It signals `Promise`s in places where conditionals or iterables are expected.
 
