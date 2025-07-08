@@ -4,9 +4,9 @@
 
 Allow customization for the sort order for different sorting rules. These rules are supported with following options:
 
-- assist/source/useSortedKeys (sortOrder)
-- assist/source/useSortedAttributes (sortOrder)
-- assist/source/organizeImports (identifierOrder)
+- [assist/source/useSortedKeys](https://biomejs.dev/assist/actions/use-sorted-keys/) (sortOrder)
+- [assist/source/useSortedAttributes](https://biomejs.dev/assist/actions/use-sorted-attributes/) (sortOrder)
+- [assist/source/organizeImports](https://biomejs.dev/assist/actions/organize-imports/) (identifierOrder)
 
 Following options are supported for ordering:
 
