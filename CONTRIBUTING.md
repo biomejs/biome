@@ -456,6 +456,8 @@ Even minor versions are dedicated to official releases, e.g. `*.6.*`.
 
 When releasing a new **minor** or **major** version of a Biome, follow these steps:
 
+1. [ ] Before starting the release, make sure that all issues/PRs for the milestone are done: https://github.com/biomejs/biome/milestones
+
 1. [ ] Create a PR from `next` to `main`. Make sure that code conflicts are fixed and the new features have relative docs PR.
 
 1. [ ] Merge `next` to `main`.
