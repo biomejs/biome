@@ -384,9 +384,9 @@ jobs:
   publish-js-api:
     name: Publish JS API
     runs-on: ubuntu-24.04
-    needs: build-js-api
-    if: needs.build-js-api.outputs.version
-    environment: npm-publish
+#    needs: build-js-api
+#    if: needs.build-js-api.outputs.version
+#    environment: npm-publish
     permissions:
       contents: write
       id-token: write
@@ -396,8 +396,10 @@ jobs:
       - name: Download JS API artifacts
         uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
         with:
-          pattern: js-api
+          run-id: 16145246180
+          name: js-api
           path: packages/@biomejs/js-api/dist
+          merge-multiple: true
 
       - name: Install Node.js
         uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
@@ -415,25 +417,25 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Publish npm package as latest
-        run: pnpm publish packages/@biomejs/js-api --no-git-checks --tag latest --access public
+        run: pnpm publish packages/@biomejs/js-api --no-git-checks --tag latest --access public --dry-run
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
-      - name: Publish release for @biomejs/js-api
-        run: |
-          bash scripts/print-changelog.sh ${{ needs.build-js-api.outputs.version }} packages/@biomejs/js-api/CHANGELOG.md  >| ${{ github.workspace }}/JS_RELEASE_NOTES
-
-      - name: Create GitHub @biomejs/js-api release and tag
-        uses: softprops/action-gh-release@72f2c25fcb47643c292f7107632f7a47c1df5cd8 # v2.3.2
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          name: |
-            JavaScript APIs v${{ needs.build-js-api.outputs.version }}
-          tag_name: |
-            @biomejs/js-api@${{ needs.build-js-api.outputs.version }}
-          draft: false
-          body_path: ${{ github.workspace }}/JS_RELEASE_NOTES
-          fail_on_unmatched_files: true
-          generate_release_notes: true
-          make_latest: false # Keep the CLI release as latest
+#      - name: Publish release for @biomejs/js-api
+#        run: |
+#          bash scripts/print-changelog.sh ${{ needs.build-js-api.outputs.version }} packages/@biomejs/js-api/CHANGELOG.md  >| ${{ github.workspace }}/JS_RELEASE_NOTES
+#
+#      - name: Create GitHub @biomejs/js-api release and tag
+#        uses: softprops/action-gh-release@72f2c25fcb47643c292f7107632f7a47c1df5cd8 # v2.3.2
+#        env:
+#          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+#        with:
+#          name: |
+#            JavaScript APIs v${{ needs.build-js-api.outputs.version }}
+#          tag_name: |
+#            @biomejs/js-api@${{ needs.build-js-api.outputs.version }}
+#          draft: false
+#          body_path: ${{ github.workspace }}/JS_RELEASE_NOTES
+#          fail_on_unmatched_files: true
+#          generate_release_notes: true
+#          make_latest: false # Keep the CLI release as latest
