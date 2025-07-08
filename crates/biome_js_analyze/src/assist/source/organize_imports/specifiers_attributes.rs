@@ -1,4 +1,3 @@
-use std::cmp::Ordering;
 use biome_analyze::utils::{is_separated_list_sorted_by, sorted_separated_list_by};
 use biome_js_factory::make;
 use biome_js_syntax::{
@@ -6,8 +5,9 @@ use biome_js_syntax::{
     JsNamedImportSpecifiers, T, inner_string_text,
 };
 use biome_rowan::{AstNode, AstSeparatedElement, AstSeparatedList, TriviaPieceKind};
-use biome_string_case::comparable_token::ComparableToken;
 use biome_rule_options::organize_imports::SortOrder;
+use biome_string_case::comparable_token::ComparableToken;
+use std::cmp::Ordering;
 
 pub enum JsNamedSpecifiers {
     JsNamedImportSpecifiers(JsNamedImportSpecifiers),
@@ -15,10 +15,10 @@ pub enum JsNamedSpecifiers {
 }
 impl JsNamedSpecifiers {
     pub fn are_sorted(&self, sort_order: SortOrder) -> bool {
-
-
         match self {
-            Self::JsNamedImportSpecifiers(specifeirs) => are_import_specifiers_sorted(specifeirs, sort_order),
+            Self::JsNamedImportSpecifiers(specifeirs) => {
+                are_import_specifiers_sorted(specifeirs, sort_order)
+            }
             Self::JsExportNamedFromSpecifierList(specifeirs) => {
                 are_export_specifiers_sorted(specifeirs, sort_order)
             }
@@ -29,17 +29,24 @@ impl JsNamedSpecifiers {
     }
 }
 
-pub fn are_import_specifiers_sorted(named_specifiers: &JsNamedImportSpecifiers, sort_order: SortOrder) -> Option<bool> {
+pub fn are_import_specifiers_sorted(
+    named_specifiers: &JsNamedImportSpecifiers,
+    sort_order: SortOrder,
+) -> Option<bool> {
     let comparator = get_comparator(sort_order);
 
-    is_separated_list_sorted_by(&named_specifiers.specifiers(), |node| {
-        let AnyJsBinding::JsIdentifierBinding(name) = node.local_name()? else {
-            return None;
-        };
-        Some(ComparableToken::new(
-            name.name_token().ok()?.token_text_trimmed(),
-        ))
-    }, comparator)
+    is_separated_list_sorted_by(
+        &named_specifiers.specifiers(),
+        |node| {
+            let AnyJsBinding::JsIdentifierBinding(name) = node.local_name()? else {
+                return None;
+            };
+            Some(ComparableToken::new(
+                name.name_token().ok()?.token_text_trimmed(),
+            ))
+        },
+        comparator,
+    )
     .ok()
 }
 
@@ -59,7 +66,7 @@ pub fn sort_import_specifiers(
             ))
         },
         || make::token(T![,]).with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")]),
-        comparator
+        comparator,
     )
     .ok()?;
     Some(named_specifiers.with_specifiers(new_list))
@@ -104,16 +111,23 @@ pub fn merge_import_specifiers(
     sort_import_specifiers(named_specifiers1.with_specifiers(new_list), sort_order)
 }
 
-pub fn are_export_specifiers_sorted(specifiers: &JsExportNamedFromSpecifierList, sort_order: SortOrder) -> Option<bool> {
+pub fn are_export_specifiers_sorted(
+    specifiers: &JsExportNamedFromSpecifierList,
+    sort_order: SortOrder,
+) -> Option<bool> {
     let comparator = get_comparator(sort_order);
 
-    is_separated_list_sorted_by(specifiers, |node| {
-        node.source_name()
-            .ok()?
-            .inner_string_text()
-            .ok()
-            .map(ComparableToken::new)
-    }, comparator)
+    is_separated_list_sorted_by(
+        specifiers,
+        |node| {
+            node.source_name()
+                .ok()?
+                .inner_string_text()
+                .ok()
+                .map(ComparableToken::new)
+        },
+        comparator,
+    )
     .ok()
 }
 
@@ -132,7 +146,8 @@ pub fn sort_export_specifiers(
                 .map(ComparableToken::new)
         },
         || make::token(T![,]).with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")]),
-        comparator)
+        comparator,
+    )
     .ok()?;
     Some(new_list)
 }
@@ -170,23 +185,34 @@ pub fn merge_export_specifiers(
             separators.push(separator);
         }
     }
-    sort_export_specifiers(&make::js_export_named_from_specifier_list(
-        nodes, separators
-    ), sort_order)
+    sort_export_specifiers(
+        &make::js_export_named_from_specifier_list(nodes, separators),
+        sort_order,
+    )
 }
 
-pub fn are_import_attributes_sorted(attributes: &JsImportAssertion, sort_order: SortOrder) -> Option<bool> {
+pub fn are_import_attributes_sorted(
+    attributes: &JsImportAssertion,
+    sort_order: SortOrder,
+) -> Option<bool> {
     let comparator = get_comparator(sort_order);
-    is_separated_list_sorted_by(&attributes.assertions(), |node| {
-        let AnyJsImportAssertionEntry::JsImportAssertionEntry(node) = node else {
-            return None;
-        };
-        Some(ComparableToken::new(inner_string_text(&node.key().ok()?)))
-    }, comparator)
+    is_separated_list_sorted_by(
+        &attributes.assertions(),
+        |node| {
+            let AnyJsImportAssertionEntry::JsImportAssertionEntry(node) = node else {
+                return None;
+            };
+            Some(ComparableToken::new(inner_string_text(&node.key().ok()?)))
+        },
+        comparator,
+    )
     .ok()
 }
 
-pub fn sort_attributes(attributes: JsImportAssertion, sort_order: SortOrder) -> Option<JsImportAssertion> {
+pub fn sort_attributes(
+    attributes: JsImportAssertion,
+    sort_order: SortOrder,
+) -> Option<JsImportAssertion> {
     let comparator = get_comparator(sort_order);
 
     let new_list = sorted_separated_list_by(
@@ -207,7 +233,7 @@ pub fn sort_attributes(attributes: JsImportAssertion, sort_order: SortOrder) -> 
 pub fn get_comparator(sort_order: SortOrder) -> fn(&ComparableToken, &ComparableToken) -> Ordering {
     let comparator = match sort_order {
         SortOrder::Lexicographic => ComparableToken::lexicographic_cmp,
-        SortOrder::Natural => ComparableToken::ascii_nat_cmp
+        SortOrder::Natural => ComparableToken::ascii_nat_cmp,
     };
     comparator
 }

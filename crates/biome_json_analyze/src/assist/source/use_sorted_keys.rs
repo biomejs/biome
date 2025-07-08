@@ -8,7 +8,7 @@ use biome_diagnostics::category;
 use biome_json_factory::make;
 use biome_json_syntax::{JsonMemberList, JsonObjectValue, T, TextRange};
 use biome_rowan::{AstNode, BatchMutationExt};
-use biome_rule_options::use_sorted_keys::{UseSortedKeysOptions, SortOrder};
+use biome_rule_options::use_sorted_keys::{SortOrder, UseSortedKeysOptions};
 use biome_string_case::comparable_token::ComparableToken;
 use std::ops::Not;
 
@@ -45,16 +45,20 @@ impl Rule for UseSortedKeys {
         let sort_order = options.sort_order;
         let comparator = match sort_order {
             SortOrder::Natural => ComparableToken::ascii_nat_cmp,
-            SortOrder::Lexicographic => ComparableToken::lexicographic_cmp
+            SortOrder::Lexicographic => ComparableToken::lexicographic_cmp,
         };
 
-        is_separated_list_sorted_by(ctx.query(), |node| {
-            node.name()
-                .ok()?
-                .inner_string_text()
-                .ok()
-                .map(ComparableToken::new)
-        }, comparator)
+        is_separated_list_sorted_by(
+            ctx.query(),
+            |node| {
+                node.name()
+                    .ok()?
+                    .inner_string_text()
+                    .ok()
+                    .map(ComparableToken::new)
+            },
+            comparator,
+        )
         .ok()?
         .not()
         .then_some(())
@@ -84,7 +88,7 @@ impl Rule for UseSortedKeys {
         let sort_order = options.sort_order;
         let comparator = match sort_order {
             SortOrder::Natural => ComparableToken::ascii_nat_cmp,
-            SortOrder::Lexicographic => ComparableToken::lexicographic_cmp
+            SortOrder::Lexicographic => ComparableToken::lexicographic_cmp,
         };
 
         let new_list = sorted_separated_list_by(

@@ -651,7 +651,7 @@ pub trait StrLikeExtension: ToOwned {
     fn ascii_nat_cmp(&self, other: &Self) -> Ordering;
 
     /// Compare two strings using lexicographically by their byte values.
-    /// 
+    ///
     ///  This orders Unicode code points based on their positions in the code charts.
     fn lexicographic_cmp(&self, other: &Self) -> Ordering;
 }

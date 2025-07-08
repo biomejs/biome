@@ -11,7 +11,7 @@ use biome_js_syntax::{
     AnyJsxAttribute, JsxAttribute, JsxAttributeList, JsxOpeningElement, JsxSelfClosingElement,
 };
 use biome_rowan::{AstNode, BatchMutationExt};
-use biome_rule_options::use_sorted_attributes::{UseSortedAttributesOptions, SortOrder};
+use biome_rule_options::use_sorted_attributes::{SortOrder, UseSortedAttributesOptions};
 use biome_string_case::StrLikeExtension;
 
 use crate::JsRuleAction;
@@ -58,7 +58,7 @@ impl Rule for UseSortedAttributes {
         let props = ctx.query();
         let mut current_prop_group = PropGroup::default();
         let mut prop_groups = Vec::new();
-        let options= ctx.options();
+        let options = ctx.options();
         let sort_by = options.sort_order;
 
         let comparator = match sort_by {
@@ -66,10 +66,9 @@ impl Rule for UseSortedAttributes {
             SortOrder::Lexicographic => PropElement::lexicographic_cmp,
         };
 
-         // Convert to boolean-based comparator for is_sorted_by
-        let boolean_comparator = |a: &PropElement, b: &PropElement| {
-            comparator(a, b) != Ordering::Greater
-        };
+        // Convert to boolean-based comparator for is_sorted_by
+        let boolean_comparator =
+            |a: &PropElement, b: &PropElement| comparator(a, b) != Ordering::Greater;
 
         for prop in props {
             match prop {
@@ -78,7 +77,9 @@ impl Rule for UseSortedAttributes {
                 }
                 // spread prop reset sort order
                 AnyJsxAttribute::JsxSpreadAttribute(_) => {
-                    if !current_prop_group.is_empty() && !current_prop_group.is_sorted(boolean_comparator) {
+                    if !current_prop_group.is_empty()
+                        && !current_prop_group.is_sorted(boolean_comparator)
+                    {
                         prop_groups.push(current_prop_group);
                         current_prop_group = PropGroup::default();
                     } else {
@@ -115,7 +116,7 @@ impl Rule for UseSortedAttributes {
 
     fn action(ctx: &RuleContext<Self>, state: &Self::State) -> Option<JsRuleAction> {
         let mut mutation = ctx.root().begin();
-        let options= ctx.options();
+        let options = ctx.options();
         let sort_by = options.sort_order;
 
         let comparator = match sort_by {
@@ -152,7 +153,9 @@ impl PropElement {
             return Ordering::Equal;
         };
 
-        self_name.text_trimmed().ascii_nat_cmp(other_name.text_trimmed())
+        self_name
+            .text_trimmed()
+            .ascii_nat_cmp(other_name.text_trimmed())
     }
 
     pub fn lexicographic_cmp(&self, other: &Self) -> Ordering {
@@ -163,7 +166,9 @@ impl PropElement {
             return Ordering::Equal;
         };
 
-        self_name.text_trimmed().lexicographic_cmp(other_name.text_trimmed())
+        self_name
+            .text_trimmed()
+            .lexicographic_cmp(other_name.text_trimmed())
     }
 }
 
@@ -177,16 +182,16 @@ impl PropGroup {
         self.props.is_empty()
     }
 
-    fn is_sorted<F>(&self, comparator: F) -> bool 
+    fn is_sorted<F>(&self, comparator: F) -> bool
     where
-        F: Fn(&PropElement, &PropElement) -> bool  
+        F: Fn(&PropElement, &PropElement) -> bool,
     {
         self.props.is_sorted_by(comparator)
     }
 
-    fn get_sorted_props<F>(&self, comparator: F,) -> Vec<PropElement> 
+    fn get_sorted_props<F>(&self, comparator: F) -> Vec<PropElement>
     where
-        F: FnMut(&PropElement, &PropElement) -> Ordering 
+        F: FnMut(&PropElement, &PropElement) -> Ordering,
     {
         let mut new_props = self.props.clone();
         new_props.sort_by(comparator);

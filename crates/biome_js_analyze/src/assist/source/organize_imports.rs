@@ -911,9 +911,7 @@ impl Rule for OrganizeImports {
                     );
                     // Sort imports based on their import key
                     import_keys.sort_unstable_by(
-                        |KeyedItem { key: k1, .. }, KeyedItem { key: k2, .. }| {
-                            k1.cmp(k2)
-                        },
+                        |KeyedItem { key: k1, .. }, KeyedItem { key: k2, .. }| k1.cmp(k2),
                     );
 
                     // Merge imports/exports
