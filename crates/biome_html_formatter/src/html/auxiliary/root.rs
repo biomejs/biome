@@ -18,7 +18,7 @@ impl FormatNodeRule<HtmlRoot> for FormatHtmlRoot {
         }
 
         if let Some(frontmatter) = frontmatter {
-            frontmatter.format().fmt(f)?;
+            write!(f, [frontmatter.format(), hard_line_break()])?;
         }
 
         if let Some(directive) = directive {

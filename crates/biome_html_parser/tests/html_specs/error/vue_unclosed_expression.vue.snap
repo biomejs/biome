@@ -80,7 +80,7 @@ HtmlRoot {
 ```
 vue_unclosed_expression.vue:3:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × closing }} text expression
+  × Found a text expression that doesn't have the closing }}
   
     1 │ <template>
     2 │ 	{{xyz

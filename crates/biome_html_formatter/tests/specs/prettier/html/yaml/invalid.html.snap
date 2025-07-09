@@ -22,18 +22,14 @@ invalid:
 ```diff
 --- Prettier
 +++ Biome
-@@ -3,7 +3,6 @@
+@@ -2,7 +2,6 @@
+     invalid:
  invalid:
  ---
- 
--<html>
--  <head></head>
--  <body></body>
--</html>
-+
-+
-+<html><head></head><body></body></html>
-\ No newline at end of file
+-
+ <html>
+   <head></head>
+   <body></body>
 ```
 
 # Output
@@ -43,10 +39,11 @@ invalid:
     invalid:
 invalid:
 ---
-
-
-
-<html><head></head><body></body></html>```
+<html>
+  <head></head>
+  <body></body>
+</html>
+```
 
 # Errors
 ```
@@ -62,7 +59,7 @@ invalid.html:1:1 parse ━━━━━━━━━━━━━━━━━━━
       │ ^^^
     5 │ 
   
-  i Remove it or rename it to have the .astro extension.
+  i Remove it or rename the file to have the .astro extension.
   
 
 ```

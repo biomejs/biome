@@ -5,6 +5,7 @@ use crate::parser::HtmlParser;
 use crate::syntax::astro::parse_astro_fence;
 use crate::syntax::parse_error::*;
 use crate::token_source::{HtmlEmbeddedLanguage, HtmlLexContext};
+use biome_console::markup;
 use biome_html_syntax::HtmlSyntaxKind::*;
 use biome_html_syntax::{HtmlSyntaxKind, HtmlVariant, T};
 use biome_parser::Parser;
@@ -58,7 +59,7 @@ pub(crate) fn parse_root(p: &mut HtmlParser) {
                 |p| parse_astro_fence(p),
                 |p, m| {
                     p.err_builder("Frontmatter is only valid inside Astro files.", m.range(p))
-                        .with_hint("Remove it or rename it to have the .astro extension.")
+                        .with_hint("Remove it or rename the file to have the .astro extension.")
                 },
             )
             .ok();
@@ -368,7 +369,7 @@ fn parse_text_expression(p: &mut HtmlParser) -> ParsedSyntax {
     }
     if p.at(T![<]) && !p.at(EOF) {
         p.error(
-            p.err_builder("closing }} text expression", p.cur_range())
+            p.err_builder(markup!("Found a text expression that doesn't have the closing "<Emphasis>"}}"</Emphasis>), p.cur_range())
                 .with_detail(range, "This is where the opening expression was found:"),
         );
         m.abandon(p);

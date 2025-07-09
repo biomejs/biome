@@ -20,14 +20,12 @@ href="https://prettier.io">abc</a>.
 ```diff
 --- Prettier
 +++ Biome
-@@ -2,4 +2,5 @@
+@@ -1,5 +1,4 @@
+ ---
  layout: foo
  ---
- 
--Test <a href="https://prettier.io">abc</a>.
-+Test <a
-+href="https://prettier.io">abc</a>.
-\ No newline at end of file
+-
+ Test <a href="https://prettier.io">abc</a>.
 ```
 
 # Output
@@ -36,9 +34,8 @@ href="https://prettier.io">abc</a>.
 ---
 layout: foo
 ---
-
-Test <a
-href="https://prettier.io">abc</a>.```
+Test <a href="https://prettier.io">abc</a>.
+```
 
 # Errors
 ```
@@ -54,7 +51,7 @@ issue-9042.html:1:1 parse ━━━━━━━━━━━━━━━━━━
     4 │ 
     5 │ Test <a
   
-  i Remove it or rename it to have the .astro extension.
+  i Remove it or rename the file to have the .astro extension.
   
 
 ```

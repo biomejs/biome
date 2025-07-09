@@ -56,7 +56,7 @@ impl biome_rowan::SyntaxKind for HtmlSyntaxKind {
         match self {
             kind if AnyHtmlAttribute::can_cast(*kind) => HTML_BOGUS_ATTRIBUTE,
             kind if AnyHtmlElement::can_cast(*kind) => HTML_BOGUS_ELEMENT,
-            kind if AstroBogusFrontmatter::can_cast(*kind) => ASTRO_BOGUS_FRONTMATTER,
+            kind if AnyAstroFrontmatterElement::can_cast(*kind) => ASTRO_BOGUS_FRONTMATTER,
             HTML_CLOSING_ELEMENT => HTML_BOGUS_ELEMENT,
 
             _ => HTML_BOGUS,

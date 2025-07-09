@@ -631,6 +631,7 @@ impl<'src> HtmlLexer<'src> {
                         break;
                     }
                     whitespace_started = Some(self.checkpoint());
+                    closing_expression = None;
                     self.advance(1);
                 }
                 _ => {

@@ -24,23 +24,15 @@ hello:     world
 ```diff
 --- Prettier
 +++ Biome
-@@ -1,8 +1,10 @@
+@@ -1,7 +1,6 @@
  ---
 -hello: world
 +hello:     world
  ---
- 
--<html>
--  <head></head>
--  <body></body>
--</html>
-+
-+
-+
-+
-+
-+<html><head></head><body></body></html>
-\ No newline at end of file
+-
+ <html>
+   <head></head>
+   <body></body>
 ```
 
 # Output
@@ -49,13 +41,11 @@ hello:     world
 ---
 hello:     world
 ---
-
-
-
-
-
-
-<html><head></head><body></body></html>```
+<html>
+  <head></head>
+  <body></body>
+</html>
+```
 
 # Errors
 ```
@@ -70,7 +60,7 @@ yaml.html:1:1 parse ━━━━━━━━━━━━━━━━━━━━
       │ ^^^
     4 │ 
   
-  i Remove it or rename it to have the .astro extension.
+  i Remove it or rename the file to have the .astro extension.
   
 
 ```

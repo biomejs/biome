@@ -21,7 +21,7 @@ const b = "bar"
 ```
 HtmlRoot {
     bom_token: missing (optional),
-    frontmatter: HtmlBogusFrontmatter {
+    frontmatter: AstroBogusFrontmatter {
         items: [
             FENCE@0..3 "---" [] [],
             HTML_LITERAL@3..20 "const b = \"bar\"\n" [Newline("\n")] [],
@@ -98,7 +98,7 @@ HtmlRoot {
 ```
 0: HTML_ROOT@0..69
   0: (empty)
-  1: HTML_BOGUS_FRONTMATTER@0..23
+  1: ASTRO_BOGUS_FRONTMATTER@0..23
     0: FENCE@0..3 "---" [] []
     1: HTML_LITERAL@3..20 "const b = \"bar\"\n" [Newline("\n")] []
     2: FENCE@20..23 "---" [] []
@@ -155,7 +155,7 @@ HtmlRoot {
 ```
 frontmatter_bogus.html:1:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × invalid syntax
+  × Frontmatter is only valid inside Astro files.
   
   > 1 │ ---
       │ ^^^
@@ -164,5 +164,7 @@ frontmatter_bogus.html:1:1 parse ━━━━━━━━━━━━━━━�
       │ ^^^
     4 │ <html>
     5 │ 	<head></head>
+  
+  i Remove it or rename the file to have the .astro extension.
   
 ```
