@@ -1,0 +1,25 @@
+name: Pull request Markdown
+on:
+  pull_request:
+    branches:
+      - main
+      - next
+    paths:
+      - "**/*.md"
+
+jobs:
+  lint:
+    runs-on: depot-ubuntu-24.04-arm-16
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      - uses: DavidAnson/markdownlint-cli2-action@992badcdf24e3b8eb7e87ff9287fe931bcb00c6e
+        with:
+          globs: |
+            **/*.md
+            #ROME_CHANGELOG.md
+            #GOVERNANCE.md
+            #**/node_modules
+            #xtask/coverage
+            #target
+            #crates/biome_markdown_parser/tests
+            #crates/biome_js_formatter/report*.md

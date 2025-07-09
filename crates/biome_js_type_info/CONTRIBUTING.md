@@ -1,7 +1,7 @@
 # Biome Type Architecture
 
 In order to contribute to Biome's type inference, it's good to understand our
-type architecture. 
+type architecture.
 
 ## Architecture Constraints
 
@@ -124,7 +124,7 @@ enum TypeReference {
 ```
 
 The reason for these variants is that _type resolution_, the process of
-resolving type references, works in multiple phases. 
+resolving type references, works in multiple phases.
 
 Biome recognises three levels of type inference, and has different resolution
 phases to support those...

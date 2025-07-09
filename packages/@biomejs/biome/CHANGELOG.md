@@ -114,7 +114,7 @@
 
 - [#6488](https://github.com/biomejs/biome/pull/6488) [`c5ee385`](https://github.com/biomejs/biome/commit/c5ee38569fc0b91ea9411da25560d3a1076870c6) Thanks [@ianzone](https://github.com/ianzone)! - `nx.json` and `project.json` have been added to the list of well-known files.
 
-- [#6720](https://github.com/biomejs/biome/pull/6720) [`52e36ae`](https://github.com/biomejs/biome/commit/52e36ae827d2c9f02520298d6518a00b22db38b8) Thanks [@minht11](https://github.com/minht11)! - Added `# @biomejs/biome symbol to [organizeImports](https://biomejs.dev/assist/actions/organize-imports) `:ALIAS:` group.
+- [#6720](https://github.com/biomejs/biome/pull/6720) [`52e36ae`](https://github.com/biomejs/biome/commit/52e36ae827d2c9f02520298d6518a00b22db38b8) Thanks [@minht11](https://github.com/minht11)! - Added `$` symbol to [organizeImports](https://biomejs.dev/assist/actions/organize-imports) `:ALIAS:` group.
 
   `import { action } from '$lib'` will be treated as alias import.
 
@@ -3125,37 +3125,37 @@
 
   1. **Accessibility checks**:
 
-  Now the rule correctly handles the following cases:
+     Now the rule correctly handles the following cases:
 
-  - If an element is hidden from screen readers
-  - If an element has the presentation role
-  - If an element is interactive
+     - If an element is hidden from screen readers
+     - If an element has the presentation role
+     - If an element is interactive
 
-  ```jsx
-  // No errors
-  <div aria-hidden="true" onClick={() => {}} /> // hidden from screen reader
-  <div role="presentation" onClick={() => {}} /> // presentation role
-  <button onClick={() => {}} /> // interactive role
-  ```
+     ```jsx
+     // No errors
+     <div aria-hidden="true" onClick={() => {}} /> // hidden from screen reader
+     <div role="presentation" onClick={() => {}} /> // presentation role
+     <button onClick={() => {}} /> // interactive role
+     ```
 
-  This change ensures the rule is more accurate and helpful.
+     This change ensures the rule is more accurate and helpful.
 
   2. **Checks spread syntax**:
 
-  Spread syntax used to be ignored, but has been changed to be pointed out for more stringent checking.
+     Spread syntax used to be ignored, but has been changed to be pointed out for more stringent checking.
 
-  ```jsx
-  // Errors
-  <div {...props} onClick={() => {}} />
-  // No errors
-  <div {...props} onClick={() => {}} onKeyDown={foo} />;
-  ```
+     ```jsx
+     // Errors
+     <div {...props} onClick={() => {}} />
+     // No errors
+     <div {...props} onClick={() => {}} onKeyDown={foo} />;
+     ```
 
   3. **Refactor**:
 
-  Now the rule uses the aria roles to determine if an element is interactive.
+     Now the rule uses the aria roles to determine if an element is interactive.
 
-  The changes shown here are meant to be closer to the original [jsx-eslint's `click-events-have-key-events` rule](https://github.com/jsx-eslint/eslint-plugin-jsx-a11y/blob/main/docs/rules/click-events-have-key-events.md).
+     The changes shown here are meant to be closer to the original [jsx-eslint's `click-events-have-key-events` rule](https://github.com/jsx-eslint/eslint-plugin-jsx-a11y/blob/main/docs/rules/click-events-have-key-events.md).
 
 - Fixed [#6029](https://github.com/biomejs/biome/issues/6029): A new line before the semicolon in the previous statement is now kept after formatting.
 
