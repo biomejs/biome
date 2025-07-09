@@ -66,7 +66,38 @@
 									"allowed9"
 								]
 							}
-						}
+						},
+            "patterns": [
+              {
+                "group": ["**/sideeffect-forbidden", "!**/sideeffect-allowed"],
+                "importNamePattern": "",
+                "message": "sideeffect-forbidden is forbidden, use sideeffect-allowed instead"
+              },
+              {
+                "group": ["d-sideeffect-forbidden"]
+              },
+              {
+                "group": ["namespace-import-forbidden"]
+              },
+              {
+                "group": ["named-import-forbidden"],
+                "importNamePattern": "export1"
+              },
+              {
+                "group": ["default-import-forbidden"],
+                "importNamePattern": "default"
+              },
+              {
+                "group": ["default-import-forbidden"],
+                "importNamePattern": "default",
+                "message": "Default import should not be reported unless importNamePattern includes 'default'"
+              },
+              {
+                "group": ["default-import-forbidden"],
+                "importNamePattern": "default",
+                "invertImportNamePattern": false
+              }
+            ]
 					}
 				}
 			}
