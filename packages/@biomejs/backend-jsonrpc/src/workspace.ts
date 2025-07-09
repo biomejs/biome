@@ -896,6 +896,7 @@ export type RuleDomain =
 	| "test"
 	| "solid"
 	| "next"
+	| "qwik"
 	| "vue"
 	| "project";
 export type RuleDomainValue = "all" | "none" | "recommended";
@@ -1613,6 +1614,10 @@ export interface Nursery {
 	 * Disallow assigning to React component props.
 	 */
 	noReactPropAssign?: RuleConfiguration_for_NoReactPropAssignOptions;
+	/**
+	 * Disallow React-specific className/htmlFor props in Qwik components.
+	 */
+	noReactProps?: RuleFixConfiguration_for_NoReactPropsOptions;
 	/**
 	 * Disallow the use of configured elements.
 	 */
@@ -2882,6 +2887,9 @@ export type RuleFixConfiguration_for_NoProcessGlobalOptions =
 export type RuleConfiguration_for_NoReactPropAssignOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_NoReactPropAssignOptions;
+export type RuleFixConfiguration_for_NoReactPropsOptions =
+	| RulePlainConfiguration
+	| RuleWithFixOptions_for_NoReactPropsOptions;
 export type RuleConfiguration_for_NoRestrictedElementsOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_NoRestrictedElementsOptions;
@@ -5170,6 +5178,20 @@ export interface RuleWithOptions_for_NoReactPropAssignOptions {
 	 * Rule's options
 	 */
 	options: NoReactPropAssignOptions;
+}
+export interface RuleWithFixOptions_for_NoReactPropsOptions {
+	/**
+	 * The kind of the code actions emitted by the rule
+	 */
+	fix?: FixKind;
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: NoReactPropsOptions;
 }
 export interface RuleWithOptions_for_NoRestrictedElementsOptions {
 	/**
@@ -7650,6 +7672,7 @@ export interface NoNestedComponentDefinitionsOptions {}
 export interface NoNoninteractiveElementInteractionsOptions {}
 export interface NoProcessGlobalOptions {}
 export interface NoReactPropAssignOptions {}
+export interface NoReactPropsOptions {}
 export interface NoRestrictedElementsOptions {
 	/**
 	 * Elements to restrict. Each key is the element name, and the value is the message to show when the element is used.
@@ -8330,6 +8353,7 @@ export type Category =
 	| "lint/nursery/noNoninteractiveElementInteractions"
 	| "lint/nursery/noProcessGlobal"
 	| "lint/nursery/noReactPropAssign"
+	| "lint/nursery/noReactProps"
 	| "lint/nursery/noReactSpecificProps"
 	| "lint/nursery/noRestrictedElements"
 	| "lint/nursery/noSecrets"

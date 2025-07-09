@@ -3787,6 +3787,13 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoReactPropsConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{ "$ref": "#/definitions/RuleWithNoReactPropsOptions" }
+			]
+		},
+		"NoReactPropsOptions": { "type": "object", "additionalProperties": false },
 		"NoReactSpecificPropsConfiguration": {
 			"anyOf": [
 				{ "$ref": "#/definitions/RulePlainConfiguration" },
@@ -4791,6 +4798,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noReactProps": {
+					"description": "Disallow React-specific className/htmlFor props in Qwik components.",
+					"anyOf": [
+						{ "$ref": "#/definitions/NoReactPropsConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noRestrictedElements": {
 					"description": "Disallow the use of configured elements.",
 					"anyOf": [
@@ -5453,6 +5467,11 @@
 					"description": "Next.js framework rules",
 					"type": "string",
 					"enum": ["next"]
+				},
+				{
+					"description": "Qwik framework rules",
+					"type": "string",
+					"enum": ["qwik"]
 				},
 				{
 					"description": "Vue.js framework rules",
@@ -7861,6 +7880,25 @@
 				"options": {
 					"description": "Rule's options",
 					"allOf": [{ "$ref": "#/definitions/NoReactPropAssignOptions" }]
+				}
+			},
+			"additionalProperties": false
+		},
+		"RuleWithNoReactPropsOptions": {
+			"type": "object",
+			"required": ["level"],
+			"properties": {
+				"fix": {
+					"description": "The kind of the code actions emitted by the rule",
+					"anyOf": [{ "$ref": "#/definitions/FixKind" }, { "type": "null" }]
+				},
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [{ "$ref": "#/definitions/NoReactPropsOptions" }]
 				}
 			},
 			"additionalProperties": false
