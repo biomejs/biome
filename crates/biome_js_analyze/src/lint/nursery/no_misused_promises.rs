@@ -275,7 +275,7 @@ fn find_misused_promise_returning_callback(
     {
         let callee_ty = ctx.type_of_expression(&call_expression.callee().ok()?);
         let function = callee_ty.as_function()?;
-        callee_ty.resolve(&function.parameters.get(argument_index)?.ty)?
+        callee_ty.resolve(function.parameters.get(argument_index)?.ty())?
     } else if let Some(new_expression) = argument_list
         .syntax()
         .ancestors()
@@ -290,7 +290,7 @@ fn find_misused_promise_returning_callback(
             .find(|member| member.kind == TypeMemberKind::Constructor)?;
         let constructor_ty = callee_ty.resolve(&constructor.ty)?;
         let constructor = constructor_ty.as_function()?;
-        constructor_ty.resolve(&constructor.parameters.get(argument_index)?.ty)?
+        constructor_ty.resolve(constructor.parameters.get(argument_index)?.ty())?
     } else {
         return None;
     };

@@ -29,9 +29,10 @@ use crate::literal::{BooleanLiteral, NumberLiteral, StringLiteral};
 use crate::{
     AssertsReturnType, CallArgumentType, Class, Constructor, DestructureField, Function,
     FunctionParameter, FunctionParameterBinding, GLOBAL_UNKNOWN_ID, GenericTypeParameter,
-    Interface, Literal, Module, Namespace, Object, PredicateReturnType, ResolvedTypeId, ReturnType,
-    ScopeId, Tuple, TupleElementType, TypeData, TypeInstance, TypeMember, TypeMemberKind,
-    TypeOperator, TypeOperatorType, TypeReference, TypeReferenceQualifier, TypeResolver,
+    Interface, Literal, Module, NamedFunctionParameter, Namespace, Object,
+    PatternFunctionParameter, PredicateReturnType, ResolvedTypeId, ReturnType, ScopeId, Tuple,
+    TupleElementType, TypeData, TypeInstance, TypeMember, TypeMemberKind, TypeOperator,
+    TypeOperatorType, TypeReference, TypeReferenceQualifier, TypeResolver,
     TypeofAdditionExpression, TypeofBitwiseNotExpression, TypeofCallExpression,
     TypeofConditionalExpression, TypeofDestructureExpression, TypeofExpression,
     TypeofLogicalAndExpression, TypeofLogicalOrExpression, TypeofNewExpression,
@@ -806,20 +807,13 @@ impl TypeData {
                 Ok(AnyJsArrowFunctionParameters::AnyJsBinding(binding)) => {
                     let name = binding
                         .as_js_identifier_binding()
-                        .and_then(|binding| text_from_token(binding.name_token()));
-                    Box::new([FunctionParameter {
-                        bindings: name
-                            .iter()
-                            .map(|name| FunctionParameterBinding {
-                                name: name.clone(),
-                                ty: TypeReference::Unknown,
-                            })
-                            .collect(),
+                        .and_then(|binding| text_from_token(binding.name_token()))
+                        .unwrap_or_default();
+                    Box::new([FunctionParameter::Named(NamedFunctionParameter {
                         name,
                         ty: TypeReference::Unknown,
                         is_optional: false,
-                        is_rest: false,
-                    }])
+                    })])
                 }
                 Ok(AnyJsArrowFunctionParameters::JsParameters(params)) => {
                     function_params_from_js_params(resolver, scope_id, Ok(params))
@@ -1422,13 +1416,12 @@ impl FunctionParameter {
             AnyJsParameter::AnyJsFormalParameter(AnyJsFormalParameter::JsFormalParameter(
                 param,
             )) => Self::from_js_formal_parameter(resolver, scope_id, param),
-            AnyJsParameter::AnyJsFormalParameter(_) => Self {
-                name: None,
+            AnyJsParameter::AnyJsFormalParameter(_) => Self::Pattern(PatternFunctionParameter {
                 ty: TypeReference::Unknown,
                 bindings: [].into(),
                 is_optional: false,
                 is_rest: false,
-            },
+            }),
             AnyJsParameter::JsRestParameter(param) => {
                 let ty = param
                     .type_annotation()
@@ -1444,25 +1437,22 @@ impl FunctionParameter {
                         )
                     })
                     .unwrap_or_default();
-                Self {
-                    name: None,
+                Self::Pattern(PatternFunctionParameter {
                     ty: resolver.reference_to_owned_data(ty),
                     bindings,
                     is_optional: false,
                     is_rest: true,
-                }
+                })
             }
-            AnyJsParameter::TsThisParameter(param) => Self {
-                name: Some(Text::Static("this")),
+            AnyJsParameter::TsThisParameter(param) => Self::Named(NamedFunctionParameter {
+                name: Text::Static("this"),
                 ty: param
                     .type_annotation()
                     .and_then(|annotation| annotation.ty().ok())
                     .map(|ty| TypeReference::from_any_ts_type(resolver, scope_id, &ty))
                     .unwrap_or_default(),
-                bindings: [].into(),
                 is_optional: false,
-                is_rest: false,
-            },
+            }),
         }
     }
 
@@ -1484,21 +1474,28 @@ impl FunctionParameter {
             .and_then(|annotation| annotation.ty().ok())
             .map(|ty| TypeData::from_any_ts_type(resolver, scope_id, &ty))
             .unwrap_or_default();
-        let bindings = param
-            .binding()
-            .ok()
-            .and_then(|binding| {
-                FunctionParameterBinding::bindings_from_any_js_binding_pattern_of_type(
-                    resolver, scope_id, &binding, &ty,
-                )
+        if let Some(name) = name {
+            Self::Named(NamedFunctionParameter {
+                name,
+                ty: resolver.reference_to_owned_data(ty),
+                is_optional: param.question_mark_token().is_some(),
             })
-            .unwrap_or_default();
-        Self {
-            name,
-            ty: resolver.reference_to_owned_data(ty),
-            bindings,
-            is_optional: param.question_mark_token().is_some(),
-            is_rest: false,
+        } else {
+            let bindings = param
+                .binding()
+                .ok()
+                .and_then(|binding| {
+                    FunctionParameterBinding::bindings_from_any_js_binding_pattern_of_type(
+                        resolver, scope_id, &binding, &ty,
+                    )
+                })
+                .unwrap_or_default();
+            Self::Pattern(PatternFunctionParameter {
+                bindings,
+                ty: resolver.reference_to_owned_data(ty),
+                is_optional: param.question_mark_token().is_some(),
+                is_rest: false,
+            })
         }
     }
 

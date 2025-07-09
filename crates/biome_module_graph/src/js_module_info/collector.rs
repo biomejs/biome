@@ -571,11 +571,16 @@ impl JsModuleInfoCollector {
             } else if let Some(param) = JsFormalParameter::cast_ref(&ancestor)
                 .and_then(|param| self.formal_parameters.get(param.syntax()))
             {
-                return param
-                    .bindings
-                    .iter()
-                    .find_map(|binding| (binding.name == *binding_name).then(|| binding.ty.clone()))
-                    .unwrap_or_default();
+                return match param {
+                    FunctionParameter::Named(named) => named.ty.clone(),
+                    FunctionParameter::Pattern(pattern) => pattern
+                        .bindings
+                        .iter()
+                        .find_map(|binding| {
+                            (binding.name == *binding_name).then(|| binding.ty.clone())
+                        })
+                        .unwrap_or_default(),
+                };
             } else if let Some(param) = TsTypeParameter::cast_ref(&ancestor) {
                 return match GenericTypeParameter::from_ts_type_parameter(self, scope_id, &param) {
                     Some(generic) => self.reference_to_owned_data(TypeData::from(generic)),

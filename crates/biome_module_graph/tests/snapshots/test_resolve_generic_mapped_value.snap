@@ -70,7 +70,7 @@ Module TypeId(7) => instanceof Promise<Module(0) TypeId(6)>
 Module TypeId(8) => async Function {
   accepts: {
     params: [
-      required x: unknown (bindings: x:unknown)
+      required x: unknown
     ]
     type_args: []
   }
@@ -131,7 +131,7 @@ Full TypeId(7) => instanceof Promise<Module(0) TypeId(6)>
 Full TypeId(8) => async Function {
   accepts: {
     params: [
-      required x: unknown (bindings: x:unknown)
+      required x: unknown
     ]
     type_args: []
   }

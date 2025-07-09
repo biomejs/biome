@@ -2,9 +2,10 @@ use crate::globals::global_type_name;
 use crate::{
     CallArgumentType, Class, DestructureField, Function, FunctionParameter,
     FunctionParameterBinding, GenericTypeParameter, ImportSymbol, Interface, Literal,
-    MergedReference, NUM_PREDEFINED_TYPES, Object, ObjectLiteral, ReturnType, Type, TypeData,
-    TypeId, TypeImportQualifier, TypeInstance, TypeMember, TypeMemberKind, TypeReference,
-    TypeReferenceQualifier, TypeResolverLevel, TypeofAwaitExpression, TypeofExpression, Union,
+    MergedReference, NUM_PREDEFINED_TYPES, NamedFunctionParameter, Object, ObjectLiteral,
+    PatternFunctionParameter, ReturnType, Type, TypeData, TypeId, TypeImportQualifier,
+    TypeInstance, TypeMember, TypeMemberKind, TypeReference, TypeReferenceQualifier,
+    TypeResolverLevel, TypeofAwaitExpression, TypeofExpression, Union,
 };
 use biome_formatter::prelude::*;
 use biome_formatter::{
@@ -243,6 +244,38 @@ impl Format<FormatTypeContext> for ReturnType {
 
 impl Format<FormatTypeContext> for FunctionParameter {
     fn fmt(&self, f: &mut Formatter<FormatTypeContext>) -> FormatResult<()> {
+        match self {
+            Self::Named(named) => write!(f, [named]),
+            Self::Pattern(pattern) => write!(f, [pattern]),
+        }
+    }
+}
+
+impl Format<FormatTypeContext> for NamedFunctionParameter {
+    fn fmt(&self, f: &mut Formatter<FormatTypeContext>) -> FormatResult<()> {
+        let optional = format_with(|f| {
+            if self.is_optional {
+                write!(f, [&format_args![text("optional")]])
+            } else {
+                write!(f, [&format_args![text("required")]])
+            }
+        });
+        write!(
+            f,
+            [&group(&block_indent(&format_args![
+                optional,
+                space(),
+                self.name,
+                text(":"),
+                space(),
+                &self.ty,
+            ]))]
+        )
+    }
+}
+
+impl Format<FormatTypeContext> for PatternFunctionParameter {
+    fn fmt(&self, f: &mut Formatter<FormatTypeContext>) -> FormatResult<()> {
         let bindings = format_with(|f| {
             if !self.bindings.is_empty() {
                 write!(
@@ -264,11 +297,10 @@ impl Format<FormatTypeContext> for FunctionParameter {
                 f,
                 [&group(&format_args![
                     text("..."),
-                    self.name.as_ref().unwrap_or(&Text::Static("(unnamed)")),
+                    bindings,
                     text(":"),
                     space(),
                     &self.ty,
-                    bindings
                 ])]
             )
         } else {
@@ -284,11 +316,10 @@ impl Format<FormatTypeContext> for FunctionParameter {
                 [&group(&block_indent(&format_args![
                     optional,
                     space(),
-                    self.name.as_ref().unwrap_or(&Text::Static("(unnamed)")),
+                    bindings,
                     text(":"),
                     space(),
-                    &self.ty,
-                    bindings
+                    &self.ty
                 ]))]
             )
         }
