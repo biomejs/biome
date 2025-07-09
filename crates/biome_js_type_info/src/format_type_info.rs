@@ -474,6 +474,16 @@ impl Format<FormatTypeContext> for TypeofExpression {
                     )
                 }
             },
+            Self::IterableValueOf(expr) => {
+                write!(
+                    f,
+                    [&format_args![&group(&format_args![
+                        text("iterable_value_of"),
+                        soft_line_break_or_space(),
+                        &expr.ty
+                    ])]]
+                )
+            }
             Self::LogicalAnd(expr) => {
                 write!(
                     f,

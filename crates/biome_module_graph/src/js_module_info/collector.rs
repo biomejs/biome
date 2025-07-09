@@ -7,9 +7,9 @@ use std::{
 use biome_js_semantic::{SemanticEvent, SemanticEventExtractor};
 use biome_js_syntax::{
     AnyJsCombinedSpecifier, AnyJsDeclaration, AnyJsExportDefaultDeclaration, AnyJsExpression,
-    AnyJsImportClause, JsFormalParameter, JsIdentifierBinding, JsSyntaxKind, JsSyntaxNode,
-    JsSyntaxToken, JsVariableDeclaration, TsIdentifierBinding, TsTypeParameter,
-    TsTypeParameterName, inner_string_text,
+    AnyJsImportClause, JsForVariableDeclaration, JsFormalParameter, JsIdentifierBinding,
+    JsSyntaxKind, JsSyntaxNode, JsSyntaxToken, JsVariableDeclaration, TsIdentifierBinding,
+    TsTypeParameter, TsTypeParameterName, inner_string_text,
 };
 use biome_js_type_info::{
     BindingId, FunctionParameter, GLOBAL_RESOLVER, GLOBAL_UNKNOWN_ID, GenericTypeParameter,
@@ -167,6 +167,13 @@ impl JsModuleInfoCollector {
             };
 
             self.parsed_expressions.insert(range, resolved_id);
+        } else if let Some(decl) = JsForVariableDeclaration::cast_ref(node) {
+            let scope_id = *self.scope_stack.last().expect("there must be a scope");
+            let type_bindings =
+                TypeData::typed_bindings_from_js_for_statement(self, scope_id, &decl)
+                    .unwrap_or_default();
+            self.variable_declarations
+                .insert(decl.syntax().clone(), type_bindings);
         } else if let Some(param) = JsFormalParameter::cast_ref(node) {
             let scope_id = *self.scope_stack.last().expect("there must be a scope");
             let parsed_param = FunctionParameter::from_js_formal_parameter(self, scope_id, &param);
@@ -568,6 +575,13 @@ impl JsModuleInfoCollector {
                 let data =
                     TypeData::from_any_js_export_default_declaration(self, scope_id, &declaration);
                 return self.reference_to_owned_data(data);
+            } else if let Some(typed_bindings) = JsForVariableDeclaration::cast_ref(&ancestor)
+                .and_then(|decl| self.variable_declarations.get(decl.syntax()))
+            {
+                return typed_bindings
+                    .iter()
+                    .find_map(|(name, ty)| (name == binding_name).then(|| ty.clone()))
+                    .unwrap_or_default();
             } else if let Some(param) = JsFormalParameter::cast_ref(&ancestor)
                 .and_then(|param| self.formal_parameters.get(param.syntax()))
             {
