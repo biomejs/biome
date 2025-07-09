@@ -326,6 +326,11 @@ impl WorkspaceServer {
         }
     }
 
+    #[instrument(
+        level = "debug",
+        skip(self, params),
+        fields(path = display(&params.path))
+    )]
     fn open_file_internal(
         &self,
         reason: OpenFileReason,
@@ -1540,6 +1545,7 @@ impl Workspace for WorkspaceServer {
         level = "debug",
         skip_all,
         fields(
+            path = display(&params.path),
             rule_categories = display(&params.rule_categories),
             skip = debug(&params.skip),
             only = debug(&params.only),

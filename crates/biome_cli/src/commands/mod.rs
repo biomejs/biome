@@ -719,16 +719,28 @@ fn get_files_to_process_with_cli_options(
 ) -> Result<Option<Vec<OsString>>, CliDiagnostic> {
     if since.is_some() {
         if !changed {
-            return Err(CliDiagnostic::incompatible_arguments("since", "changed"));
+            return Err(CliDiagnostic::incompatible_arguments(
+                "--since",
+                "--changed",
+                "In order to use --since, you must also use --changed.",
+            ));
         }
         if staged {
-            return Err(CliDiagnostic::incompatible_arguments("since", "staged"));
+            return Err(CliDiagnostic::incompatible_arguments(
+                "--since",
+                "--staged",
+                "--staged selects files that you have staged in version control. --since can't be used in this context.",
+            ));
         }
     }
 
     if changed {
         if staged {
-            return Err(CliDiagnostic::incompatible_arguments("changed", "staged"));
+            return Err(CliDiagnostic::incompatible_arguments(
+                "--changed",
+                "--staged",
+                "--staged selects files that you have staged in version control. --changed selects files that have been committed since your default branch. You must either use --changed or --staged, but not both.",
+            ));
         }
         Ok(Some(get_changed_files(fs, configuration, since)?))
     } else if staged {
@@ -787,14 +799,23 @@ fn check_fix_incompatible_arguments(options: FixFileModeOptions) -> Result<(), C
         ..
     } = options;
     if write && fix {
-        return Err(CliDiagnostic::incompatible_arguments("--write", "--fix"));
+        return Err(CliDiagnostic::incompatible_arguments(
+            "--write",
+            "--fix",
+            "These arguments do the same thing, but --fix is deprecated. Prefer to use --write.",
+        ));
     } else if suppress && write {
         return Err(CliDiagnostic::incompatible_arguments(
             "--suppress",
             "--write",
+            "--write is used to write fixes, and --suppress is used to suppress diagnostics. Remove one of these arguments depending on what you want to do.",
         ));
     } else if suppress && fix {
-        return Err(CliDiagnostic::incompatible_arguments("--suppress", "--fix"));
+        return Err(CliDiagnostic::incompatible_arguments(
+            "--suppress",
+            "--fix",
+            "--fix is used to write fixes, and --suppress is used to suppress diagnostics. Remove one of these arguments depending on what you want to do. Also, --fix is deprecated. Prefer to use --write.",
+        ));
     } else if !suppress && suppression_reason.is_some() {
         return Err(CliDiagnostic::unexpected_argument(
             "--reason",

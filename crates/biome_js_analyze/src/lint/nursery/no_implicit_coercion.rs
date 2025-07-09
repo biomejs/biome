@@ -104,7 +104,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoImplicitCoercion {
-        version: "next",
+        version: "2.1.0",
         name: "noImplicitCoercion",
         language: "js",
         recommended: false,
