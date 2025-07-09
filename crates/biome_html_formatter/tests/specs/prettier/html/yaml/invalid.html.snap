@@ -22,17 +22,18 @@ invalid:
 ```diff
 --- Prettier
 +++ Biome
-@@ -1,9 +1,7 @@
- ---
-     invalid:
+@@ -3,7 +3,6 @@
  invalid:
-----
--
+ ---
+ 
 -<html>
-+---<html>
-   <head></head>
-   <body></body>
- </html>
+-  <head></head>
+-  <body></body>
+-</html>
++
++
++<html><head></head><body></body></html>
+\ No newline at end of file
 ```
 
 # Output
@@ -41,17 +42,17 @@ invalid:
 ---
     invalid:
 invalid:
----<html>
-  <head></head>
-  <body></body>
-</html>
-```
+---
+
+
+
+<html><head></head><body></body></html>```
 
 # Errors
 ```
 invalid.html:1:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × invalid syntax
+  × Frontmatter is only valid inside Astro files.
   
   > 1 │ ---
       │ ^^^
@@ -60,6 +61,8 @@ invalid.html:1:1 parse ━━━━━━━━━━━━━━━━━━━
   > 4 │ ---
       │ ^^^
     5 │ 
+  
+  i Remove it or rename it to have the .astro extension.
   
 
 ```

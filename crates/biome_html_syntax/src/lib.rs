@@ -12,7 +12,7 @@ pub use file_source::{HtmlFileSource, HtmlVariant};
 pub use syntax_node::*;
 
 use crate::HtmlSyntaxKind::{
-    HTML_BOGUS, HTML_BOGUS_ATTRIBUTE, HTML_BOGUS_ELEMENT, HTML_BOGUS_FRONTMATTER,
+    ASTRO_BOGUS_FRONTMATTER, HTML_BOGUS, HTML_BOGUS_ATTRIBUTE, HTML_BOGUS_ELEMENT,
     HTML_CLOSING_ELEMENT,
 };
 use biome_rowan::{AstNode, RawSyntaxKind, SyntaxKind, TokenText};
@@ -48,7 +48,7 @@ impl biome_rowan::SyntaxKind for HtmlSyntaxKind {
     fn is_bogus(&self) -> bool {
         matches!(
             self,
-            HTML_BOGUS | HTML_BOGUS_ATTRIBUTE | HTML_BOGUS_ELEMENT | HTML_BOGUS_FRONTMATTER
+            HTML_BOGUS | HTML_BOGUS_ATTRIBUTE | HTML_BOGUS_ELEMENT | ASTRO_BOGUS_FRONTMATTER
         )
     }
 
@@ -56,7 +56,7 @@ impl biome_rowan::SyntaxKind for HtmlSyntaxKind {
         match self {
             kind if AnyHtmlAttribute::can_cast(*kind) => HTML_BOGUS_ATTRIBUTE,
             kind if AnyHtmlElement::can_cast(*kind) => HTML_BOGUS_ELEMENT,
-            kind if AnyHtmlAstroFrontmatterElement::can_cast(*kind) => HTML_BOGUS_FRONTMATTER,
+            kind if AstroBogusFrontmatter::can_cast(*kind) => ASTRO_BOGUS_FRONTMATTER,
             HTML_CLOSING_ELEMENT => HTML_BOGUS_ELEMENT,
 
             _ => HTML_BOGUS,

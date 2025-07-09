@@ -13,13 +13,14 @@ impl FormatNodeRule<HtmlRoot> for FormatHtmlRoot {
             eof_token,
         } = node.as_fields();
 
+        if let Some(bom) = bom_token {
+            bom.format().fmt(f)?;
+        }
+
         if let Some(frontmatter) = frontmatter {
             frontmatter.format().fmt(f)?;
         }
 
-        if let Some(bom) = bom_token {
-            bom.format().fmt(f)?;
-        }
         if let Some(directive) = directive {
             directive.format().fmt(f)?;
         }

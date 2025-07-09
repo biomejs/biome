@@ -39,11 +39,11 @@ SyntaxElement = SyntaxElement
 HtmlBogus = SyntaxElement*
 HtmlBogusElement = SyntaxElement*
 HtmlBogusAttribute = SyntaxElement*
-HtmlBogusFrontmatter = SyntaxElement*
+AstroBogusFrontmatter = SyntaxElement*
 
 HtmlRoot =
 	bom: 'UNICODE_BOM'?
-	frontmatter: AnyHtmlAstroFrontmatterElement?
+	frontmatter: AnyAstroFrontmatterElement?
 	directive: HtmlDirective?
 	html: HtmlElementList
 	eof: 'EOF'
@@ -79,17 +79,20 @@ AnyHtmlContent =
 	| AnyHtmlTextExpression
 
 AnyHtmlTextExpression =
-	HtmlVueTextExpression
-	| HtmlSvelteTextExpression
+	HtmlTextExpression
+	| SvelteTextExpression
 
 
-// {{ variable }}
-HtmlVueTextExpression =
+// {{ expression }}
+// ^^^^^^^^^^^^^^^^
+HtmlTextExpression =
 	'{{'
 	expression: 'html_literal'
 	'}}'
 
-HtmlSvelteTextExpression =
+// {expression}
+// ^^^^^^^^^^^^
+SvelteTextExpression =
 	'{'
 	expression: 'html_literal'
 	'}'
@@ -136,11 +139,11 @@ HtmlCdataSection =
 	content: 'html_literal'
 	']]>'
 
-AnyHtmlAstroFrontmatterElement =
-	HtmlAstroFrontmatterElement
-	| HtmlBogusFrontmatter
+AnyAstroFrontmatterElement =
+	AstroFrontmatterElement
+	| AstroBogusFrontmatter
 
-HtmlAstroFrontmatterElement =
+AstroFrontmatterElement =
 	l_fence: '---'
 	content: 'html_literal'?
 	r_fence: '---'

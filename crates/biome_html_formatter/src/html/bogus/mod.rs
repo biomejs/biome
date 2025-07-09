@@ -4,4 +4,3 @@
 pub(crate) mod bogus;
 pub(crate) mod bogus_attribute;
 pub(crate) mod bogus_element;
-pub(crate) mod bogus_frontmatter;

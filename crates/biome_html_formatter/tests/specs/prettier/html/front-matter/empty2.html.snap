@@ -20,26 +20,32 @@ info: html/front-matter/empty2.html
 ```diff
 --- Prettier
 +++ Biome
-@@ -1,4 +1,2 @@
+@@ -1,4 +1,6 @@
  ---
-----
--
+ ---
+ 
 -<div>---</div>
-+---<div>---</div>
++<div>
++---
++</div>
+\ No newline at end of file
 ```
 
 # Output
 
 ```html
 ---
----<div>---</div>
-```
+---
+
+<div>
+---
+</div>```
 
 # Errors
 ```
 empty2.html:1:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × invalid syntax
+  × Frontmatter is only valid inside Astro files.
   
   > 1 │ ---
       │ ^^^
@@ -47,6 +53,8 @@ empty2.html:1:1 parse ━━━━━━━━━━━━━━━━━━━�
       │ ^^^
     3 │ 
     4 │ <div>
+  
+  i Remove it or rename it to have the .astro extension.
   
 
 ```

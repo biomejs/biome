@@ -23,14 +23,14 @@ slug: home
 ```diff
 --- Prettier
 +++ Biome
-@@ -3,6 +3,4 @@
- title: Hello
- slug: home
+@@ -5,4 +5,5 @@
  
-----
--
+ ---
+ 
 -<h1>Hello world!</h1>
-+---<h1>Hello world!</h1>
++<h1>
++  Hello world!</h1>
+\ No newline at end of file
 ```
 
 # Output
@@ -41,14 +41,16 @@ slug: home
 title: Hello
 slug: home
 
----<h1>Hello world!</h1>
-```
+---
+
+<h1>
+  Hello world!</h1>```
 
 # Errors
 ```
 custom-parser.html:1:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × invalid syntax
+  × Frontmatter is only valid inside Astro files.
   
   > 1 │ ---mycustomparser
       │ ^^^^^^^^^^^^^^^^^
@@ -60,6 +62,8 @@ custom-parser.html:1:1 parse ━━━━━━━━━━━━━━━━━
       │ ^^^
     7 │ 
     8 │ <h1>
+  
+  i Remove it or rename it to have the .astro extension.
   
 
 ```

@@ -6,36 +6,42 @@ use crate::{
     AsFormat, FormatBogusNodeRule, FormatNodeRule, HtmlFormatContext, HtmlFormatter, IntoFormat,
 };
 use biome_formatter::{FormatOwnedWithRule, FormatRefWithRule, FormatResult, FormatRule};
-impl FormatRule<biome_html_syntax::HtmlAstroFrontmatterElement>
-    for crate::html::auxiliary::astro_frontmatter_element::FormatHtmlAstroFrontmatterElement
+impl FormatRule<biome_html_syntax::AstroFrontmatterElement>
+    for crate::astro::auxiliary::frontmatter_element::FormatAstroFrontmatterElement
 {
     type Context = HtmlFormatContext;
     #[inline(always)]
     fn fmt(
         &self,
-        node: &biome_html_syntax::HtmlAstroFrontmatterElement,
+        node: &biome_html_syntax::AstroFrontmatterElement,
         f: &mut HtmlFormatter,
     ) -> FormatResult<()> {
-        FormatNodeRule::<biome_html_syntax::HtmlAstroFrontmatterElement>::fmt(self, node, f)
+        FormatNodeRule::<biome_html_syntax::AstroFrontmatterElement>::fmt(self, node, f)
     }
 }
-impl AsFormat<HtmlFormatContext> for biome_html_syntax::HtmlAstroFrontmatterElement {
+impl AsFormat<HtmlFormatContext> for biome_html_syntax::AstroFrontmatterElement {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_html_syntax::HtmlAstroFrontmatterElement,
-        crate::html::auxiliary::astro_frontmatter_element::FormatHtmlAstroFrontmatterElement,
+        biome_html_syntax::AstroFrontmatterElement,
+        crate::astro::auxiliary::frontmatter_element::FormatAstroFrontmatterElement,
     >;
     fn format(&self) -> Self::Format<'_> {
-        FormatRefWithRule :: new (self , crate :: html :: auxiliary :: astro_frontmatter_element :: FormatHtmlAstroFrontmatterElement :: default ())
+        FormatRefWithRule::new(
+            self,
+            crate::astro::auxiliary::frontmatter_element::FormatAstroFrontmatterElement::default(),
+        )
     }
 }
-impl IntoFormat<HtmlFormatContext> for biome_html_syntax::HtmlAstroFrontmatterElement {
+impl IntoFormat<HtmlFormatContext> for biome_html_syntax::AstroFrontmatterElement {
     type Format = FormatOwnedWithRule<
-        biome_html_syntax::HtmlAstroFrontmatterElement,
-        crate::html::auxiliary::astro_frontmatter_element::FormatHtmlAstroFrontmatterElement,
+        biome_html_syntax::AstroFrontmatterElement,
+        crate::astro::auxiliary::frontmatter_element::FormatAstroFrontmatterElement,
     >;
     fn into_format(self) -> Self::Format {
-        FormatOwnedWithRule :: new (self , crate :: html :: auxiliary :: astro_frontmatter_element :: FormatHtmlAstroFrontmatterElement :: default ())
+        FormatOwnedWithRule::new(
+            self,
+            crate::astro::auxiliary::frontmatter_element::FormatAstroFrontmatterElement::default(),
+        )
     }
 }
 impl FormatRule<biome_html_syntax::HtmlAttribute>
@@ -516,46 +522,6 @@ impl IntoFormat<HtmlFormatContext> for biome_html_syntax::HtmlString {
         )
     }
 }
-impl FormatRule<biome_html_syntax::HtmlSvelteTextExpression>
-    for crate::html::auxiliary::svelte_text_expression::FormatHtmlSvelteTextExpression
-{
-    type Context = HtmlFormatContext;
-    #[inline(always)]
-    fn fmt(
-        &self,
-        node: &biome_html_syntax::HtmlSvelteTextExpression,
-        f: &mut HtmlFormatter,
-    ) -> FormatResult<()> {
-        FormatNodeRule::<biome_html_syntax::HtmlSvelteTextExpression>::fmt(self, node, f)
-    }
-}
-impl AsFormat<HtmlFormatContext> for biome_html_syntax::HtmlSvelteTextExpression {
-    type Format<'a> = FormatRefWithRule<
-        'a,
-        biome_html_syntax::HtmlSvelteTextExpression,
-        crate::html::auxiliary::svelte_text_expression::FormatHtmlSvelteTextExpression,
-    >;
-    fn format(&self) -> Self::Format<'_> {
-        FormatRefWithRule::new(
-            self,
-            crate::html::auxiliary::svelte_text_expression::FormatHtmlSvelteTextExpression::default(
-            ),
-        )
-    }
-}
-impl IntoFormat<HtmlFormatContext> for biome_html_syntax::HtmlSvelteTextExpression {
-    type Format = FormatOwnedWithRule<
-        biome_html_syntax::HtmlSvelteTextExpression,
-        crate::html::auxiliary::svelte_text_expression::FormatHtmlSvelteTextExpression,
-    >;
-    fn into_format(self) -> Self::Format {
-        FormatOwnedWithRule::new(
-            self,
-            crate::html::auxiliary::svelte_text_expression::FormatHtmlSvelteTextExpression::default(
-            ),
-        )
-    }
-}
 impl FormatRule<biome_html_syntax::HtmlTagName>
     for crate::html::auxiliary::tag_name::FormatHtmlTagName
 {
@@ -594,41 +560,79 @@ impl IntoFormat<HtmlFormatContext> for biome_html_syntax::HtmlTagName {
         )
     }
 }
-impl FormatRule<biome_html_syntax::HtmlVueTextExpression>
-    for crate::html::auxiliary::vue_text_expression::FormatHtmlVueTextExpression
+impl FormatRule<biome_html_syntax::HtmlTextExpression>
+    for crate::html::auxiliary::text_expression::FormatHtmlTextExpression
 {
     type Context = HtmlFormatContext;
     #[inline(always)]
     fn fmt(
         &self,
-        node: &biome_html_syntax::HtmlVueTextExpression,
+        node: &biome_html_syntax::HtmlTextExpression,
         f: &mut HtmlFormatter,
     ) -> FormatResult<()> {
-        FormatNodeRule::<biome_html_syntax::HtmlVueTextExpression>::fmt(self, node, f)
+        FormatNodeRule::<biome_html_syntax::HtmlTextExpression>::fmt(self, node, f)
     }
 }
-impl AsFormat<HtmlFormatContext> for biome_html_syntax::HtmlVueTextExpression {
+impl AsFormat<HtmlFormatContext> for biome_html_syntax::HtmlTextExpression {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_html_syntax::HtmlVueTextExpression,
-        crate::html::auxiliary::vue_text_expression::FormatHtmlVueTextExpression,
+        biome_html_syntax::HtmlTextExpression,
+        crate::html::auxiliary::text_expression::FormatHtmlTextExpression,
     >;
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
-            crate::html::auxiliary::vue_text_expression::FormatHtmlVueTextExpression::default(),
+            crate::html::auxiliary::text_expression::FormatHtmlTextExpression::default(),
         )
     }
 }
-impl IntoFormat<HtmlFormatContext> for biome_html_syntax::HtmlVueTextExpression {
+impl IntoFormat<HtmlFormatContext> for biome_html_syntax::HtmlTextExpression {
     type Format = FormatOwnedWithRule<
-        biome_html_syntax::HtmlVueTextExpression,
-        crate::html::auxiliary::vue_text_expression::FormatHtmlVueTextExpression,
+        biome_html_syntax::HtmlTextExpression,
+        crate::html::auxiliary::text_expression::FormatHtmlTextExpression,
     >;
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
-            crate::html::auxiliary::vue_text_expression::FormatHtmlVueTextExpression::default(),
+            crate::html::auxiliary::text_expression::FormatHtmlTextExpression::default(),
+        )
+    }
+}
+impl FormatRule<biome_html_syntax::SvelteTextExpression>
+    for crate::svelte::auxiliary::text_expression::FormatSvelteTextExpression
+{
+    type Context = HtmlFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_html_syntax::SvelteTextExpression,
+        f: &mut HtmlFormatter,
+    ) -> FormatResult<()> {
+        FormatNodeRule::<biome_html_syntax::SvelteTextExpression>::fmt(self, node, f)
+    }
+}
+impl AsFormat<HtmlFormatContext> for biome_html_syntax::SvelteTextExpression {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_html_syntax::SvelteTextExpression,
+        crate::svelte::auxiliary::text_expression::FormatSvelteTextExpression,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::svelte::auxiliary::text_expression::FormatSvelteTextExpression::default(),
+        )
+    }
+}
+impl IntoFormat<HtmlFormatContext> for biome_html_syntax::SvelteTextExpression {
+    type Format = FormatOwnedWithRule<
+        biome_html_syntax::SvelteTextExpression,
+        crate::svelte::auxiliary::text_expression::FormatSvelteTextExpression,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(
+            self,
+            crate::svelte::auxiliary::text_expression::FormatSvelteTextExpression::default(),
         )
     }
 }
@@ -679,6 +683,44 @@ impl IntoFormat<HtmlFormatContext> for biome_html_syntax::HtmlElementList {
         FormatOwnedWithRule::new(
             self,
             crate::html::lists::element_list::FormatHtmlElementList::default(),
+        )
+    }
+}
+impl FormatRule<biome_html_syntax::AstroBogusFrontmatter>
+    for crate::astro::bogus::bogus_frontmatter::FormatAstroBogusFrontmatter
+{
+    type Context = HtmlFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_html_syntax::AstroBogusFrontmatter,
+        f: &mut HtmlFormatter,
+    ) -> FormatResult<()> {
+        FormatBogusNodeRule::<biome_html_syntax::AstroBogusFrontmatter>::fmt(self, node, f)
+    }
+}
+impl AsFormat<HtmlFormatContext> for biome_html_syntax::AstroBogusFrontmatter {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_html_syntax::AstroBogusFrontmatter,
+        crate::astro::bogus::bogus_frontmatter::FormatAstroBogusFrontmatter,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::astro::bogus::bogus_frontmatter::FormatAstroBogusFrontmatter::default(),
+        )
+    }
+}
+impl IntoFormat<HtmlFormatContext> for biome_html_syntax::AstroBogusFrontmatter {
+    type Format = FormatOwnedWithRule<
+        biome_html_syntax::AstroBogusFrontmatter,
+        crate::astro::bogus::bogus_frontmatter::FormatAstroBogusFrontmatter,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(
+            self,
+            crate::astro::bogus::bogus_frontmatter::FormatAstroBogusFrontmatter::default(),
         )
     }
 }
@@ -784,61 +826,29 @@ impl IntoFormat<HtmlFormatContext> for biome_html_syntax::HtmlBogusElement {
         )
     }
 }
-impl FormatRule<biome_html_syntax::HtmlBogusFrontmatter>
-    for crate::html::bogus::bogus_frontmatter::FormatHtmlBogusFrontmatter
-{
-    type Context = HtmlFormatContext;
-    #[inline(always)]
-    fn fmt(
-        &self,
-        node: &biome_html_syntax::HtmlBogusFrontmatter,
-        f: &mut HtmlFormatter,
-    ) -> FormatResult<()> {
-        FormatBogusNodeRule::<biome_html_syntax::HtmlBogusFrontmatter>::fmt(self, node, f)
-    }
-}
-impl AsFormat<HtmlFormatContext> for biome_html_syntax::HtmlBogusFrontmatter {
+impl AsFormat<HtmlFormatContext> for biome_html_syntax::AnyAstroFrontmatterElement {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_html_syntax::HtmlBogusFrontmatter,
-        crate::html::bogus::bogus_frontmatter::FormatHtmlBogusFrontmatter,
+        biome_html_syntax::AnyAstroFrontmatterElement,
+        crate::astro::any::frontmatter_element::FormatAnyAstroFrontmatterElement,
     >;
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
-            crate::html::bogus::bogus_frontmatter::FormatHtmlBogusFrontmatter::default(),
+            crate::astro::any::frontmatter_element::FormatAnyAstroFrontmatterElement::default(),
         )
     }
 }
-impl IntoFormat<HtmlFormatContext> for biome_html_syntax::HtmlBogusFrontmatter {
+impl IntoFormat<HtmlFormatContext> for biome_html_syntax::AnyAstroFrontmatterElement {
     type Format = FormatOwnedWithRule<
-        biome_html_syntax::HtmlBogusFrontmatter,
-        crate::html::bogus::bogus_frontmatter::FormatHtmlBogusFrontmatter,
+        biome_html_syntax::AnyAstroFrontmatterElement,
+        crate::astro::any::frontmatter_element::FormatAnyAstroFrontmatterElement,
     >;
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
-            crate::html::bogus::bogus_frontmatter::FormatHtmlBogusFrontmatter::default(),
+            crate::astro::any::frontmatter_element::FormatAnyAstroFrontmatterElement::default(),
         )
-    }
-}
-impl AsFormat<HtmlFormatContext> for biome_html_syntax::AnyHtmlAstroFrontmatterElement {
-    type Format<'a> = FormatRefWithRule<
-        'a,
-        biome_html_syntax::AnyHtmlAstroFrontmatterElement,
-        crate::html::any::astro_frontmatter_element::FormatAnyHtmlAstroFrontmatterElement,
-    >;
-    fn format(&self) -> Self::Format<'_> {
-        FormatRefWithRule :: new (self , crate :: html :: any :: astro_frontmatter_element :: FormatAnyHtmlAstroFrontmatterElement :: default ())
-    }
-}
-impl IntoFormat<HtmlFormatContext> for biome_html_syntax::AnyHtmlAstroFrontmatterElement {
-    type Format = FormatOwnedWithRule<
-        biome_html_syntax::AnyHtmlAstroFrontmatterElement,
-        crate::html::any::astro_frontmatter_element::FormatAnyHtmlAstroFrontmatterElement,
-    >;
-    fn into_format(self) -> Self::Format {
-        FormatOwnedWithRule :: new (self , crate :: html :: any :: astro_frontmatter_element :: FormatAnyHtmlAstroFrontmatterElement :: default ())
     }
 }
 impl AsFormat<HtmlFormatContext> for biome_html_syntax::AnyHtmlAttribute {

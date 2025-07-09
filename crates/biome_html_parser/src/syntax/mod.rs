@@ -56,7 +56,10 @@ pub(crate) fn parse_root(p: &mut HtmlParser) {
             .parse_exclusive_syntax(
                 p,
                 |p| parse_astro_fence(p),
-                |p, m| p.err_builder("invalid syntax", m.range(p)),
+                |p, m| {
+                    p.err_builder("Frontmatter is only valid inside Astro files.", m.range(p))
+                        .with_hint("Remove it or rename it to have the .astro extension.")
+                },
             )
             .ok();
     }
@@ -372,7 +375,7 @@ fn parse_text_expression(p: &mut HtmlParser) -> ParsedSyntax {
         return Absent;
     }
     p.expect_with_context(T!["}}"], HtmlLexContext::OutsideTag);
-    Present(m.complete(p, HTML_VUE_TEXT_EXPRESSION))
+    Present(m.complete(p, HTML_TEXT_EXPRESSION))
 }
 
 pub(crate) fn is_at_l_text_expression(p: &mut HtmlParser) -> bool {

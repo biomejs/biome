@@ -20,10 +20,10 @@ use std::fmt::{Debug, Formatter};
 #[doc = r" the slots are not statically known."]
 pub(crate) const SLOT_MAP_EMPTY_VALUE: u8 = u8::MAX;
 #[derive(Clone, PartialEq, Eq, Hash)]
-pub struct HtmlAstroFrontmatterElement {
+pub struct AstroFrontmatterElement {
     pub(crate) syntax: SyntaxNode,
 }
-impl HtmlAstroFrontmatterElement {
+impl AstroFrontmatterElement {
     #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
     #[doc = r""]
     #[doc = r" # Safety"]
@@ -33,8 +33,8 @@ impl HtmlAstroFrontmatterElement {
     pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
         Self { syntax }
     }
-    pub fn as_fields(&self) -> HtmlAstroFrontmatterElementFields {
-        HtmlAstroFrontmatterElementFields {
+    pub fn as_fields(&self) -> AstroFrontmatterElementFields {
+        AstroFrontmatterElementFields {
             l_fence_token: self.l_fence_token(),
             content_token: self.content_token(),
             r_fence_token: self.r_fence_token(),
@@ -50,7 +50,7 @@ impl HtmlAstroFrontmatterElement {
         support::required_token(&self.syntax, 2usize)
     }
 }
-impl Serialize for HtmlAstroFrontmatterElement {
+impl Serialize for AstroFrontmatterElement {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
         S: Serializer,
@@ -59,7 +59,7 @@ impl Serialize for HtmlAstroFrontmatterElement {
     }
 }
 #[derive(Serialize)]
-pub struct HtmlAstroFrontmatterElementFields {
+pub struct AstroFrontmatterElementFields {
     pub l_fence_token: SyntaxResult<SyntaxToken>,
     pub content_token: Option<SyntaxToken>,
     pub r_fence_token: SyntaxResult<SyntaxToken>,
@@ -545,7 +545,7 @@ impl HtmlRoot {
     pub fn bom_token(&self) -> Option<SyntaxToken> {
         support::token(&self.syntax, 0usize)
     }
-    pub fn frontmatter(&self) -> Option<AnyHtmlAstroFrontmatterElement> {
+    pub fn frontmatter(&self) -> Option<AnyAstroFrontmatterElement> {
         support::node(&self.syntax, 1usize)
     }
     pub fn directive(&self) -> Option<HtmlDirective> {
@@ -569,7 +569,7 @@ impl Serialize for HtmlRoot {
 #[derive(Serialize)]
 pub struct HtmlRootFields {
     pub bom_token: Option<SyntaxToken>,
-    pub frontmatter: Option<AnyHtmlAstroFrontmatterElement>,
+    pub frontmatter: Option<AnyAstroFrontmatterElement>,
     pub directive: Option<HtmlDirective>,
     pub html: HtmlElementList,
     pub eof_token: SyntaxResult<SyntaxToken>,
@@ -665,51 +665,6 @@ pub struct HtmlStringFields {
     pub value_token: SyntaxResult<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
-pub struct HtmlSvelteTextExpression {
-    pub(crate) syntax: SyntaxNode,
-}
-impl HtmlSvelteTextExpression {
-    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
-    #[doc = r""]
-    #[doc = r" # Safety"]
-    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
-    #[doc = r" or a match on [SyntaxNode::kind]"]
-    #[inline]
-    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
-        Self { syntax }
-    }
-    pub fn as_fields(&self) -> HtmlSvelteTextExpressionFields {
-        HtmlSvelteTextExpressionFields {
-            l_curly_token: self.l_curly_token(),
-            expression_token: self.expression_token(),
-            r_curly_token: self.r_curly_token(),
-        }
-    }
-    pub fn l_curly_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 0usize)
-    }
-    pub fn expression_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 1usize)
-    }
-    pub fn r_curly_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 2usize)
-    }
-}
-impl Serialize for HtmlSvelteTextExpression {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: Serializer,
-    {
-        self.as_fields().serialize(serializer)
-    }
-}
-#[derive(Serialize)]
-pub struct HtmlSvelteTextExpressionFields {
-    pub l_curly_token: SyntaxResult<SyntaxToken>,
-    pub expression_token: SyntaxResult<SyntaxToken>,
-    pub r_curly_token: SyntaxResult<SyntaxToken>,
-}
-#[derive(Clone, PartialEq, Eq, Hash)]
 pub struct HtmlTagName {
     pub(crate) syntax: SyntaxNode,
 }
@@ -745,10 +700,10 @@ pub struct HtmlTagNameFields {
     pub value_token: SyntaxResult<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
-pub struct HtmlVueTextExpression {
+pub struct HtmlTextExpression {
     pub(crate) syntax: SyntaxNode,
 }
-impl HtmlVueTextExpression {
+impl HtmlTextExpression {
     #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
     #[doc = r""]
     #[doc = r" # Safety"]
@@ -758,8 +713,8 @@ impl HtmlVueTextExpression {
     pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
         Self { syntax }
     }
-    pub fn as_fields(&self) -> HtmlVueTextExpressionFields {
-        HtmlVueTextExpressionFields {
+    pub fn as_fields(&self) -> HtmlTextExpressionFields {
+        HtmlTextExpressionFields {
             l_double_curly_token: self.l_double_curly_token(),
             expression_token: self.expression_token(),
             r_double_curly_token: self.r_double_curly_token(),
@@ -775,7 +730,7 @@ impl HtmlVueTextExpression {
         support::required_token(&self.syntax, 2usize)
     }
 }
-impl Serialize for HtmlVueTextExpression {
+impl Serialize for HtmlTextExpression {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
         S: Serializer,
@@ -784,26 +739,71 @@ impl Serialize for HtmlVueTextExpression {
     }
 }
 #[derive(Serialize)]
-pub struct HtmlVueTextExpressionFields {
+pub struct HtmlTextExpressionFields {
     pub l_double_curly_token: SyntaxResult<SyntaxToken>,
     pub expression_token: SyntaxResult<SyntaxToken>,
     pub r_double_curly_token: SyntaxResult<SyntaxToken>,
 }
-#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
-pub enum AnyHtmlAstroFrontmatterElement {
-    HtmlAstroFrontmatterElement(HtmlAstroFrontmatterElement),
-    HtmlBogusFrontmatter(HtmlBogusFrontmatter),
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct SvelteTextExpression {
+    pub(crate) syntax: SyntaxNode,
 }
-impl AnyHtmlAstroFrontmatterElement {
-    pub fn as_html_astro_frontmatter_element(&self) -> Option<&HtmlAstroFrontmatterElement> {
+impl SvelteTextExpression {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> SvelteTextExpressionFields {
+        SvelteTextExpressionFields {
+            l_curly_token: self.l_curly_token(),
+            expression_token: self.expression_token(),
+            r_curly_token: self.r_curly_token(),
+        }
+    }
+    pub fn l_curly_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+    pub fn expression_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 1usize)
+    }
+    pub fn r_curly_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 2usize)
+    }
+}
+impl Serialize for SvelteTextExpression {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct SvelteTextExpressionFields {
+    pub l_curly_token: SyntaxResult<SyntaxToken>,
+    pub expression_token: SyntaxResult<SyntaxToken>,
+    pub r_curly_token: SyntaxResult<SyntaxToken>,
+}
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
+pub enum AnyAstroFrontmatterElement {
+    AstroBogusFrontmatter(AstroBogusFrontmatter),
+    AstroFrontmatterElement(AstroFrontmatterElement),
+}
+impl AnyAstroFrontmatterElement {
+    pub fn as_astro_bogus_frontmatter(&self) -> Option<&AstroBogusFrontmatter> {
         match &self {
-            Self::HtmlAstroFrontmatterElement(item) => Some(item),
+            Self::AstroBogusFrontmatter(item) => Some(item),
             _ => None,
         }
     }
-    pub fn as_html_bogus_frontmatter(&self) -> Option<&HtmlBogusFrontmatter> {
+    pub fn as_astro_frontmatter_element(&self) -> Option<&AstroFrontmatterElement> {
         match &self {
-            Self::HtmlBogusFrontmatter(item) => Some(item),
+            Self::AstroFrontmatterElement(item) => Some(item),
             _ => None,
         }
     }
@@ -895,29 +895,29 @@ impl AnyHtmlElement {
 }
 #[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyHtmlTextExpression {
-    HtmlSvelteTextExpression(HtmlSvelteTextExpression),
-    HtmlVueTextExpression(HtmlVueTextExpression),
+    HtmlTextExpression(HtmlTextExpression),
+    SvelteTextExpression(SvelteTextExpression),
 }
 impl AnyHtmlTextExpression {
-    pub fn as_html_svelte_text_expression(&self) -> Option<&HtmlSvelteTextExpression> {
+    pub fn as_html_text_expression(&self) -> Option<&HtmlTextExpression> {
         match &self {
-            Self::HtmlSvelteTextExpression(item) => Some(item),
+            Self::HtmlTextExpression(item) => Some(item),
             _ => None,
         }
     }
-    pub fn as_html_vue_text_expression(&self) -> Option<&HtmlVueTextExpression> {
+    pub fn as_svelte_text_expression(&self) -> Option<&SvelteTextExpression> {
         match &self {
-            Self::HtmlVueTextExpression(item) => Some(item),
+            Self::SvelteTextExpression(item) => Some(item),
             _ => None,
         }
     }
 }
-impl AstNode for HtmlAstroFrontmatterElement {
+impl AstNode for AstroFrontmatterElement {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
-        SyntaxKindSet::from_raw(RawSyntaxKind(HTML_ASTRO_FRONTMATTER_ELEMENT as u16));
+        SyntaxKindSet::from_raw(RawSyntaxKind(ASTRO_FRONTMATTER_ELEMENT as u16));
     fn can_cast(kind: SyntaxKind) -> bool {
-        kind == HTML_ASTRO_FRONTMATTER_ELEMENT
+        kind == ASTRO_FRONTMATTER_ELEMENT
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         if Self::can_cast(syntax.kind()) {
@@ -933,13 +933,13 @@ impl AstNode for HtmlAstroFrontmatterElement {
         self.syntax
     }
 }
-impl std::fmt::Debug for HtmlAstroFrontmatterElement {
+impl std::fmt::Debug for AstroFrontmatterElement {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
         let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
             DEPTH.set(current_depth + 1);
-            f.debug_struct("HtmlAstroFrontmatterElement")
+            f.debug_struct("AstroFrontmatterElement")
                 .field(
                     "l_fence_token",
                     &support::DebugSyntaxResult(self.l_fence_token()),
@@ -954,19 +954,19 @@ impl std::fmt::Debug for HtmlAstroFrontmatterElement {
                 )
                 .finish()
         } else {
-            f.debug_struct("HtmlAstroFrontmatterElement").finish()
+            f.debug_struct("AstroFrontmatterElement").finish()
         };
         DEPTH.set(current_depth);
         result
     }
 }
-impl From<HtmlAstroFrontmatterElement> for SyntaxNode {
-    fn from(n: HtmlAstroFrontmatterElement) -> Self {
+impl From<AstroFrontmatterElement> for SyntaxNode {
+    fn from(n: AstroFrontmatterElement) -> Self {
         n.syntax
     }
 }
-impl From<HtmlAstroFrontmatterElement> for SyntaxElement {
-    fn from(n: HtmlAstroFrontmatterElement) -> Self {
+impl From<AstroFrontmatterElement> for SyntaxElement {
+    fn from(n: AstroFrontmatterElement) -> Self {
         n.syntax.into()
     }
 }
@@ -1700,64 +1700,6 @@ impl From<HtmlString> for SyntaxElement {
         n.syntax.into()
     }
 }
-impl AstNode for HtmlSvelteTextExpression {
-    type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> =
-        SyntaxKindSet::from_raw(RawSyntaxKind(HTML_SVELTE_TEXT_EXPRESSION as u16));
-    fn can_cast(kind: SyntaxKind) -> bool {
-        kind == HTML_SVELTE_TEXT_EXPRESSION
-    }
-    fn cast(syntax: SyntaxNode) -> Option<Self> {
-        if Self::can_cast(syntax.kind()) {
-            Some(Self { syntax })
-        } else {
-            None
-        }
-    }
-    fn syntax(&self) -> &SyntaxNode {
-        &self.syntax
-    }
-    fn into_syntax(self) -> SyntaxNode {
-        self.syntax
-    }
-}
-impl std::fmt::Debug for HtmlSvelteTextExpression {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("HtmlSvelteTextExpression")
-                .field(
-                    "l_curly_token",
-                    &support::DebugSyntaxResult(self.l_curly_token()),
-                )
-                .field(
-                    "expression_token",
-                    &support::DebugSyntaxResult(self.expression_token()),
-                )
-                .field(
-                    "r_curly_token",
-                    &support::DebugSyntaxResult(self.r_curly_token()),
-                )
-                .finish()
-        } else {
-            f.debug_struct("HtmlSvelteTextExpression").finish()
-        };
-        DEPTH.set(current_depth);
-        result
-    }
-}
-impl From<HtmlSvelteTextExpression> for SyntaxNode {
-    fn from(n: HtmlSvelteTextExpression) -> Self {
-        n.syntax
-    }
-}
-impl From<HtmlSvelteTextExpression> for SyntaxElement {
-    fn from(n: HtmlSvelteTextExpression) -> Self {
-        n.syntax.into()
-    }
-}
 impl AstNode for HtmlTagName {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -1808,12 +1750,12 @@ impl From<HtmlTagName> for SyntaxElement {
         n.syntax.into()
     }
 }
-impl AstNode for HtmlVueTextExpression {
+impl AstNode for HtmlTextExpression {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
-        SyntaxKindSet::from_raw(RawSyntaxKind(HTML_VUE_TEXT_EXPRESSION as u16));
+        SyntaxKindSet::from_raw(RawSyntaxKind(HTML_TEXT_EXPRESSION as u16));
     fn can_cast(kind: SyntaxKind) -> bool {
-        kind == HTML_VUE_TEXT_EXPRESSION
+        kind == HTML_TEXT_EXPRESSION
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         if Self::can_cast(syntax.kind()) {
@@ -1829,13 +1771,13 @@ impl AstNode for HtmlVueTextExpression {
         self.syntax
     }
 }
-impl std::fmt::Debug for HtmlVueTextExpression {
+impl std::fmt::Debug for HtmlTextExpression {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
         let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
             DEPTH.set(current_depth + 1);
-            f.debug_struct("HtmlVueTextExpression")
+            f.debug_struct("HtmlTextExpression")
                 .field(
                     "l_double_curly_token",
                     &support::DebugSyntaxResult(self.l_double_curly_token()),
@@ -1850,83 +1792,140 @@ impl std::fmt::Debug for HtmlVueTextExpression {
                 )
                 .finish()
         } else {
-            f.debug_struct("HtmlVueTextExpression").finish()
+            f.debug_struct("HtmlTextExpression").finish()
         };
         DEPTH.set(current_depth);
         result
     }
 }
-impl From<HtmlVueTextExpression> for SyntaxNode {
-    fn from(n: HtmlVueTextExpression) -> Self {
+impl From<HtmlTextExpression> for SyntaxNode {
+    fn from(n: HtmlTextExpression) -> Self {
         n.syntax
     }
 }
-impl From<HtmlVueTextExpression> for SyntaxElement {
-    fn from(n: HtmlVueTextExpression) -> Self {
+impl From<HtmlTextExpression> for SyntaxElement {
+    fn from(n: HtmlTextExpression) -> Self {
         n.syntax.into()
     }
 }
-impl From<HtmlAstroFrontmatterElement> for AnyHtmlAstroFrontmatterElement {
-    fn from(node: HtmlAstroFrontmatterElement) -> Self {
-        Self::HtmlAstroFrontmatterElement(node)
-    }
-}
-impl From<HtmlBogusFrontmatter> for AnyHtmlAstroFrontmatterElement {
-    fn from(node: HtmlBogusFrontmatter) -> Self {
-        Self::HtmlBogusFrontmatter(node)
-    }
-}
-impl AstNode for AnyHtmlAstroFrontmatterElement {
+impl AstNode for SvelteTextExpression {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
-        HtmlAstroFrontmatterElement::KIND_SET.union(HtmlBogusFrontmatter::KIND_SET);
+        SyntaxKindSet::from_raw(RawSyntaxKind(SVELTE_TEXT_EXPRESSION as u16));
     fn can_cast(kind: SyntaxKind) -> bool {
-        matches!(
-            kind,
-            HTML_ASTRO_FRONTMATTER_ELEMENT | HTML_BOGUS_FRONTMATTER
-        )
+        kind == SVELTE_TEXT_EXPRESSION
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for SvelteTextExpression {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("SvelteTextExpression")
+                .field(
+                    "l_curly_token",
+                    &support::DebugSyntaxResult(self.l_curly_token()),
+                )
+                .field(
+                    "expression_token",
+                    &support::DebugSyntaxResult(self.expression_token()),
+                )
+                .field(
+                    "r_curly_token",
+                    &support::DebugSyntaxResult(self.r_curly_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("SvelteTextExpression").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<SvelteTextExpression> for SyntaxNode {
+    fn from(n: SvelteTextExpression) -> Self {
+        n.syntax
+    }
+}
+impl From<SvelteTextExpression> for SyntaxElement {
+    fn from(n: SvelteTextExpression) -> Self {
+        n.syntax.into()
+    }
+}
+impl From<AstroBogusFrontmatter> for AnyAstroFrontmatterElement {
+    fn from(node: AstroBogusFrontmatter) -> Self {
+        Self::AstroBogusFrontmatter(node)
+    }
+}
+impl From<AstroFrontmatterElement> for AnyAstroFrontmatterElement {
+    fn from(node: AstroFrontmatterElement) -> Self {
+        Self::AstroFrontmatterElement(node)
+    }
+}
+impl AstNode for AnyAstroFrontmatterElement {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        AstroBogusFrontmatter::KIND_SET.union(AstroFrontmatterElement::KIND_SET);
+    fn can_cast(kind: SyntaxKind) -> bool {
+        matches!(kind, ASTRO_BOGUS_FRONTMATTER | ASTRO_FRONTMATTER_ELEMENT)
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
-            HTML_ASTRO_FRONTMATTER_ELEMENT => {
-                Self::HtmlAstroFrontmatterElement(HtmlAstroFrontmatterElement { syntax })
+            ASTRO_BOGUS_FRONTMATTER => {
+                Self::AstroBogusFrontmatter(AstroBogusFrontmatter { syntax })
             }
-            HTML_BOGUS_FRONTMATTER => Self::HtmlBogusFrontmatter(HtmlBogusFrontmatter { syntax }),
+            ASTRO_FRONTMATTER_ELEMENT => {
+                Self::AstroFrontmatterElement(AstroFrontmatterElement { syntax })
+            }
             _ => return None,
         };
         Some(res)
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            Self::HtmlAstroFrontmatterElement(it) => &it.syntax,
-            Self::HtmlBogusFrontmatter(it) => &it.syntax,
+            Self::AstroBogusFrontmatter(it) => &it.syntax,
+            Self::AstroFrontmatterElement(it) => &it.syntax,
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            Self::HtmlAstroFrontmatterElement(it) => it.syntax,
-            Self::HtmlBogusFrontmatter(it) => it.syntax,
+            Self::AstroBogusFrontmatter(it) => it.syntax,
+            Self::AstroFrontmatterElement(it) => it.syntax,
         }
     }
 }
-impl std::fmt::Debug for AnyHtmlAstroFrontmatterElement {
+impl std::fmt::Debug for AnyAstroFrontmatterElement {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            Self::HtmlAstroFrontmatterElement(it) => std::fmt::Debug::fmt(it, f),
-            Self::HtmlBogusFrontmatter(it) => std::fmt::Debug::fmt(it, f),
+            Self::AstroBogusFrontmatter(it) => std::fmt::Debug::fmt(it, f),
+            Self::AstroFrontmatterElement(it) => std::fmt::Debug::fmt(it, f),
         }
     }
 }
-impl From<AnyHtmlAstroFrontmatterElement> for SyntaxNode {
-    fn from(n: AnyHtmlAstroFrontmatterElement) -> Self {
+impl From<AnyAstroFrontmatterElement> for SyntaxNode {
+    fn from(n: AnyAstroFrontmatterElement) -> Self {
         match n {
-            AnyHtmlAstroFrontmatterElement::HtmlAstroFrontmatterElement(it) => it.into(),
-            AnyHtmlAstroFrontmatterElement::HtmlBogusFrontmatter(it) => it.into(),
+            AnyAstroFrontmatterElement::AstroBogusFrontmatter(it) => it.into(),
+            AnyAstroFrontmatterElement::AstroFrontmatterElement(it) => it.into(),
         }
     }
 }
-impl From<AnyHtmlAstroFrontmatterElement> for SyntaxElement {
-    fn from(n: AnyHtmlAstroFrontmatterElement) -> Self {
+impl From<AnyAstroFrontmatterElement> for SyntaxElement {
+    fn from(n: AnyAstroFrontmatterElement) -> Self {
         let node: SyntaxNode = n.into();
         node.into()
     }
@@ -2167,61 +2166,57 @@ impl From<AnyHtmlElement> for SyntaxElement {
         node.into()
     }
 }
-impl From<HtmlSvelteTextExpression> for AnyHtmlTextExpression {
-    fn from(node: HtmlSvelteTextExpression) -> Self {
-        Self::HtmlSvelteTextExpression(node)
+impl From<HtmlTextExpression> for AnyHtmlTextExpression {
+    fn from(node: HtmlTextExpression) -> Self {
+        Self::HtmlTextExpression(node)
     }
 }
-impl From<HtmlVueTextExpression> for AnyHtmlTextExpression {
-    fn from(node: HtmlVueTextExpression) -> Self {
-        Self::HtmlVueTextExpression(node)
+impl From<SvelteTextExpression> for AnyHtmlTextExpression {
+    fn from(node: SvelteTextExpression) -> Self {
+        Self::SvelteTextExpression(node)
     }
 }
 impl AstNode for AnyHtmlTextExpression {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
-        HtmlSvelteTextExpression::KIND_SET.union(HtmlVueTextExpression::KIND_SET);
+        HtmlTextExpression::KIND_SET.union(SvelteTextExpression::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
-        matches!(kind, HTML_SVELTE_TEXT_EXPRESSION | HTML_VUE_TEXT_EXPRESSION)
+        matches!(kind, HTML_TEXT_EXPRESSION | SVELTE_TEXT_EXPRESSION)
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
-            HTML_SVELTE_TEXT_EXPRESSION => {
-                Self::HtmlSvelteTextExpression(HtmlSvelteTextExpression { syntax })
-            }
-            HTML_VUE_TEXT_EXPRESSION => {
-                Self::HtmlVueTextExpression(HtmlVueTextExpression { syntax })
-            }
+            HTML_TEXT_EXPRESSION => Self::HtmlTextExpression(HtmlTextExpression { syntax }),
+            SVELTE_TEXT_EXPRESSION => Self::SvelteTextExpression(SvelteTextExpression { syntax }),
             _ => return None,
         };
         Some(res)
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            Self::HtmlSvelteTextExpression(it) => &it.syntax,
-            Self::HtmlVueTextExpression(it) => &it.syntax,
+            Self::HtmlTextExpression(it) => &it.syntax,
+            Self::SvelteTextExpression(it) => &it.syntax,
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            Self::HtmlSvelteTextExpression(it) => it.syntax,
-            Self::HtmlVueTextExpression(it) => it.syntax,
+            Self::HtmlTextExpression(it) => it.syntax,
+            Self::SvelteTextExpression(it) => it.syntax,
         }
     }
 }
 impl std::fmt::Debug for AnyHtmlTextExpression {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            Self::HtmlSvelteTextExpression(it) => std::fmt::Debug::fmt(it, f),
-            Self::HtmlVueTextExpression(it) => std::fmt::Debug::fmt(it, f),
+            Self::HtmlTextExpression(it) => std::fmt::Debug::fmt(it, f),
+            Self::SvelteTextExpression(it) => std::fmt::Debug::fmt(it, f),
         }
     }
 }
 impl From<AnyHtmlTextExpression> for SyntaxNode {
     fn from(n: AnyHtmlTextExpression) -> Self {
         match n {
-            AnyHtmlTextExpression::HtmlSvelteTextExpression(it) => it.into(),
-            AnyHtmlTextExpression::HtmlVueTextExpression(it) => it.into(),
+            AnyHtmlTextExpression::HtmlTextExpression(it) => it.into(),
+            AnyHtmlTextExpression::SvelteTextExpression(it) => it.into(),
         }
     }
 }
@@ -2231,7 +2226,7 @@ impl From<AnyHtmlTextExpression> for SyntaxElement {
         node.into()
     }
 }
-impl std::fmt::Display for AnyHtmlAstroFrontmatterElement {
+impl std::fmt::Display for AnyAstroFrontmatterElement {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }
@@ -2256,7 +2251,7 @@ impl std::fmt::Display for AnyHtmlTextExpression {
         std::fmt::Display::fmt(self.syntax(), f)
     }
 }
-impl std::fmt::Display for HtmlAstroFrontmatterElement {
+impl std::fmt::Display for AstroFrontmatterElement {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }
@@ -2326,19 +2321,75 @@ impl std::fmt::Display for HtmlString {
         std::fmt::Display::fmt(self.syntax(), f)
     }
 }
-impl std::fmt::Display for HtmlSvelteTextExpression {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        std::fmt::Display::fmt(self.syntax(), f)
-    }
-}
 impl std::fmt::Display for HtmlTagName {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }
 }
-impl std::fmt::Display for HtmlVueTextExpression {
+impl std::fmt::Display for HtmlTextExpression {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for SvelteTextExpression {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
+pub struct AstroBogusFrontmatter {
+    syntax: SyntaxNode,
+}
+impl AstroBogusFrontmatter {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn items(&self) -> SyntaxElementChildren {
+        support::elements(&self.syntax)
+    }
+}
+impl AstNode for AstroBogusFrontmatter {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(ASTRO_BOGUS_FRONTMATTER as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == ASTRO_BOGUS_FRONTMATTER
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for AstroBogusFrontmatter {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("AstroBogusFrontmatter")
+            .field("items", &DebugSyntaxElementChildren(self.items()))
+            .finish()
+    }
+}
+impl From<AstroBogusFrontmatter> for SyntaxNode {
+    fn from(n: AstroBogusFrontmatter) -> Self {
+        n.syntax
+    }
+}
+impl From<AstroBogusFrontmatter> for SyntaxElement {
+    fn from(n: AstroBogusFrontmatter) -> Self {
+        n.syntax.into()
     }
 }
 #[derive(Clone, PartialEq, Eq, Hash, Serialize)]
@@ -2509,63 +2560,7 @@ impl From<HtmlBogusElement> for SyntaxElement {
         n.syntax.into()
     }
 }
-#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
-pub struct HtmlBogusFrontmatter {
-    syntax: SyntaxNode,
-}
-impl HtmlBogusFrontmatter {
-    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
-    #[doc = r""]
-    #[doc = r" # Safety"]
-    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
-    #[doc = r" or a match on [SyntaxNode::kind]"]
-    #[inline]
-    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
-        Self { syntax }
-    }
-    pub fn items(&self) -> SyntaxElementChildren {
-        support::elements(&self.syntax)
-    }
-}
-impl AstNode for HtmlBogusFrontmatter {
-    type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> =
-        SyntaxKindSet::from_raw(RawSyntaxKind(HTML_BOGUS_FRONTMATTER as u16));
-    fn can_cast(kind: SyntaxKind) -> bool {
-        kind == HTML_BOGUS_FRONTMATTER
-    }
-    fn cast(syntax: SyntaxNode) -> Option<Self> {
-        if Self::can_cast(syntax.kind()) {
-            Some(Self { syntax })
-        } else {
-            None
-        }
-    }
-    fn syntax(&self) -> &SyntaxNode {
-        &self.syntax
-    }
-    fn into_syntax(self) -> SyntaxNode {
-        self.syntax
-    }
-}
-impl std::fmt::Debug for HtmlBogusFrontmatter {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("HtmlBogusFrontmatter")
-            .field("items", &DebugSyntaxElementChildren(self.items()))
-            .finish()
-    }
-}
-impl From<HtmlBogusFrontmatter> for SyntaxNode {
-    fn from(n: HtmlBogusFrontmatter) -> Self {
-        n.syntax
-    }
-}
-impl From<HtmlBogusFrontmatter> for SyntaxElement {
-    fn from(n: HtmlBogusFrontmatter) -> Self {
-        n.syntax.into()
-    }
-}
-biome_rowan::declare_node_union! { pub AnyHtmlBogusNode = HtmlBogus | HtmlBogusAttribute | HtmlBogusElement | HtmlBogusFrontmatter }
+biome_rowan::declare_node_union! { pub AnyHtmlBogusNode = AstroBogusFrontmatter | HtmlBogus | HtmlBogusAttribute | HtmlBogusElement }
 #[derive(Clone, Eq, PartialEq, Hash)]
 pub struct HtmlAttributeList {
     syntax_list: SyntaxList,
