@@ -295,14 +295,11 @@ pub fn js_call_arguments(
     args: JsCallArgumentList,
     r_paren_token: SyntaxToken,
 ) -> JsCallArguments {
-    JsCallArguments::unwrap_cast(SyntaxNode::new_detached(
-        JsSyntaxKind::JS_CALL_ARGUMENTS,
-        [
-            Some(SyntaxElement::Token(l_paren_token)),
-            Some(SyntaxElement::Node(args.into_syntax())),
-            Some(SyntaxElement::Token(r_paren_token)),
-        ],
-    ))
+    JsCallArguments::unwrap_cast(SyntaxNode::new_detached(JsSyntaxKind::JS_CALL_ARGUMENTS, [
+        Some(SyntaxElement::Token(l_paren_token)),
+        Some(SyntaxElement::Node(args.into_syntax())),
+        Some(SyntaxElement::Token(r_paren_token)),
+    ]))
 }
 pub fn js_call_expression(
     callee: AnyJsExpression,
@@ -350,15 +347,12 @@ pub fn js_case_clause(
     colon_token: SyntaxToken,
     consequent: JsStatementList,
 ) -> JsCaseClause {
-    JsCaseClause::unwrap_cast(SyntaxNode::new_detached(
-        JsSyntaxKind::JS_CASE_CLAUSE,
-        [
-            Some(SyntaxElement::Token(case_token)),
-            Some(SyntaxElement::Node(test.into_syntax())),
-            Some(SyntaxElement::Token(colon_token)),
-            Some(SyntaxElement::Node(consequent.into_syntax())),
-        ],
-    ))
+    JsCaseClause::unwrap_cast(SyntaxNode::new_detached(JsSyntaxKind::JS_CASE_CLAUSE, [
+        Some(SyntaxElement::Token(case_token)),
+        Some(SyntaxElement::Node(test.into_syntax())),
+        Some(SyntaxElement::Token(colon_token)),
+        Some(SyntaxElement::Node(consequent.into_syntax())),
+    ]))
 }
 pub fn js_catch_clause(catch_token: SyntaxToken, body: JsBlockStatement) -> JsCatchClauseBuilder {
     JsCatchClauseBuilder {
@@ -378,15 +372,12 @@ impl JsCatchClauseBuilder {
         self
     }
     pub fn build(self) -> JsCatchClause {
-        JsCatchClause::unwrap_cast(SyntaxNode::new_detached(
-            JsSyntaxKind::JS_CATCH_CLAUSE,
-            [
-                Some(SyntaxElement::Token(self.catch_token)),
-                self.declaration
-                    .map(|token| SyntaxElement::Node(token.into_syntax())),
-                Some(SyntaxElement::Node(self.body.into_syntax())),
-            ],
-        ))
+        JsCatchClause::unwrap_cast(SyntaxNode::new_detached(JsSyntaxKind::JS_CATCH_CLAUSE, [
+            Some(SyntaxElement::Token(self.catch_token)),
+            self.declaration
+                .map(|token| SyntaxElement::Node(token.into_syntax())),
+            Some(SyntaxElement::Node(self.body.into_syntax())),
+        ]))
     }
 }
 pub fn js_catch_declaration(
@@ -818,27 +809,21 @@ impl JsDebuggerStatementBuilder {
     }
 }
 pub fn js_decorator(at_token: SyntaxToken, expression: AnyJsDecorator) -> JsDecorator {
-    JsDecorator::unwrap_cast(SyntaxNode::new_detached(
-        JsSyntaxKind::JS_DECORATOR,
-        [
-            Some(SyntaxElement::Token(at_token)),
-            Some(SyntaxElement::Node(expression.into_syntax())),
-        ],
-    ))
+    JsDecorator::unwrap_cast(SyntaxNode::new_detached(JsSyntaxKind::JS_DECORATOR, [
+        Some(SyntaxElement::Token(at_token)),
+        Some(SyntaxElement::Node(expression.into_syntax())),
+    ]))
 }
 pub fn js_default_clause(
     default_token: SyntaxToken,
     colon_token: SyntaxToken,
     consequent: JsStatementList,
 ) -> JsDefaultClause {
-    JsDefaultClause::unwrap_cast(SyntaxNode::new_detached(
-        JsSyntaxKind::JS_DEFAULT_CLAUSE,
-        [
-            Some(SyntaxElement::Token(default_token)),
-            Some(SyntaxElement::Token(colon_token)),
-            Some(SyntaxElement::Node(consequent.into_syntax())),
-        ],
-    ))
+    JsDefaultClause::unwrap_cast(SyntaxNode::new_detached(JsSyntaxKind::JS_DEFAULT_CLAUSE, [
+        Some(SyntaxElement::Token(default_token)),
+        Some(SyntaxElement::Token(colon_token)),
+        Some(SyntaxElement::Node(consequent.into_syntax())),
+    ]))
 }
 pub fn js_default_import_specifier(local_name: AnyJsBinding) -> JsDefaultImportSpecifier {
     JsDefaultImportSpecifier::unwrap_cast(SyntaxNode::new_detached(
@@ -862,14 +847,11 @@ impl JsDirectiveBuilder {
         self
     }
     pub fn build(self) -> JsDirective {
-        JsDirective::unwrap_cast(SyntaxNode::new_detached(
-            JsSyntaxKind::JS_DIRECTIVE,
-            [
-                Some(SyntaxElement::Token(self.value_token)),
-                self.semicolon_token
-                    .map(|token| SyntaxElement::Token(token)),
-            ],
-        ))
+        JsDirective::unwrap_cast(SyntaxNode::new_detached(JsSyntaxKind::JS_DIRECTIVE, [
+            Some(SyntaxElement::Token(self.value_token)),
+            self.semicolon_token
+                .map(|token| SyntaxElement::Token(token)),
+        ]))
     }
 }
 pub fn js_do_while_statement(
@@ -921,13 +903,10 @@ impl JsDoWhileStatementBuilder {
     }
 }
 pub fn js_else_clause(else_token: SyntaxToken, alternate: AnyJsStatement) -> JsElseClause {
-    JsElseClause::unwrap_cast(SyntaxNode::new_detached(
-        JsSyntaxKind::JS_ELSE_CLAUSE,
-        [
-            Some(SyntaxElement::Token(else_token)),
-            Some(SyntaxElement::Node(alternate.into_syntax())),
-        ],
-    ))
+    JsElseClause::unwrap_cast(SyntaxNode::new_detached(JsSyntaxKind::JS_ELSE_CLAUSE, [
+        Some(SyntaxElement::Token(else_token)),
+        Some(SyntaxElement::Node(alternate.into_syntax())),
+    ]))
 }
 pub fn js_empty_class_member(semicolon_token: SyntaxToken) -> JsEmptyClassMember {
     JsEmptyClassMember::unwrap_cast(SyntaxNode::new_detached(
@@ -946,14 +925,11 @@ pub fn js_export(
     export_token: SyntaxToken,
     export_clause: AnyJsExportClause,
 ) -> JsExport {
-    JsExport::unwrap_cast(SyntaxNode::new_detached(
-        JsSyntaxKind::JS_EXPORT,
-        [
-            Some(SyntaxElement::Node(decorators.into_syntax())),
-            Some(SyntaxElement::Token(export_token)),
-            Some(SyntaxElement::Node(export_clause.into_syntax())),
-        ],
-    ))
+    JsExport::unwrap_cast(SyntaxNode::new_detached(JsSyntaxKind::JS_EXPORT, [
+        Some(SyntaxElement::Node(decorators.into_syntax())),
+        Some(SyntaxElement::Token(export_token)),
+        Some(SyntaxElement::Node(export_clause.into_syntax())),
+    ]))
 }
 pub fn js_export_as_clause(
     as_token: SyntaxToken,
@@ -1348,25 +1324,19 @@ impl JsExtendsClauseBuilder {
         self
     }
     pub fn build(self) -> JsExtendsClause {
-        JsExtendsClause::unwrap_cast(SyntaxNode::new_detached(
-            JsSyntaxKind::JS_EXTENDS_CLAUSE,
-            [
-                Some(SyntaxElement::Token(self.extends_token)),
-                Some(SyntaxElement::Node(self.super_class.into_syntax())),
-                self.type_arguments
-                    .map(|token| SyntaxElement::Node(token.into_syntax())),
-            ],
-        ))
+        JsExtendsClause::unwrap_cast(SyntaxNode::new_detached(JsSyntaxKind::JS_EXTENDS_CLAUSE, [
+            Some(SyntaxElement::Token(self.extends_token)),
+            Some(SyntaxElement::Node(self.super_class.into_syntax())),
+            self.type_arguments
+                .map(|token| SyntaxElement::Node(token.into_syntax())),
+        ]))
     }
 }
 pub fn js_finally_clause(finally_token: SyntaxToken, body: JsBlockStatement) -> JsFinallyClause {
-    JsFinallyClause::unwrap_cast(SyntaxNode::new_detached(
-        JsSyntaxKind::JS_FINALLY_CLAUSE,
-        [
-            Some(SyntaxElement::Token(finally_token)),
-            Some(SyntaxElement::Node(body.into_syntax())),
-        ],
-    ))
+    JsFinallyClause::unwrap_cast(SyntaxNode::new_detached(JsSyntaxKind::JS_FINALLY_CLAUSE, [
+        Some(SyntaxElement::Token(finally_token)),
+        Some(SyntaxElement::Node(body.into_syntax())),
+    ]))
 }
 pub fn js_for_in_statement(
     for_token: SyntaxToken,
@@ -1486,23 +1456,20 @@ impl JsForStatementBuilder {
         self
     }
     pub fn build(self) -> JsForStatement {
-        JsForStatement::unwrap_cast(SyntaxNode::new_detached(
-            JsSyntaxKind::JS_FOR_STATEMENT,
-            [
-                Some(SyntaxElement::Token(self.for_token)),
-                Some(SyntaxElement::Token(self.l_paren_token)),
-                self.initializer
-                    .map(|token| SyntaxElement::Node(token.into_syntax())),
-                Some(SyntaxElement::Token(self.first_semi_token)),
-                self.test
-                    .map(|token| SyntaxElement::Node(token.into_syntax())),
-                Some(SyntaxElement::Token(self.second_semi_token)),
-                self.update
-                    .map(|token| SyntaxElement::Node(token.into_syntax())),
-                Some(SyntaxElement::Token(self.r_paren_token)),
-                Some(SyntaxElement::Node(self.body.into_syntax())),
-            ],
-        ))
+        JsForStatement::unwrap_cast(SyntaxNode::new_detached(JsSyntaxKind::JS_FOR_STATEMENT, [
+            Some(SyntaxElement::Token(self.for_token)),
+            Some(SyntaxElement::Token(self.l_paren_token)),
+            self.initializer
+                .map(|token| SyntaxElement::Node(token.into_syntax())),
+            Some(SyntaxElement::Token(self.first_semi_token)),
+            self.test
+                .map(|token| SyntaxElement::Node(token.into_syntax())),
+            Some(SyntaxElement::Token(self.second_semi_token)),
+            self.update
+                .map(|token| SyntaxElement::Node(token.into_syntax())),
+            Some(SyntaxElement::Token(self.r_paren_token)),
+            Some(SyntaxElement::Node(self.body.into_syntax())),
+        ]))
     }
 }
 pub fn js_for_variable_declaration(
@@ -1590,15 +1557,12 @@ pub fn js_function_body(
     statements: JsStatementList,
     r_curly_token: SyntaxToken,
 ) -> JsFunctionBody {
-    JsFunctionBody::unwrap_cast(SyntaxNode::new_detached(
-        JsSyntaxKind::JS_FUNCTION_BODY,
-        [
-            Some(SyntaxElement::Token(l_curly_token)),
-            Some(SyntaxElement::Node(directives.into_syntax())),
-            Some(SyntaxElement::Node(statements.into_syntax())),
-            Some(SyntaxElement::Token(r_curly_token)),
-        ],
-    ))
+    JsFunctionBody::unwrap_cast(SyntaxNode::new_detached(JsSyntaxKind::JS_FUNCTION_BODY, [
+        Some(SyntaxElement::Token(l_curly_token)),
+        Some(SyntaxElement::Node(directives.into_syntax())),
+        Some(SyntaxElement::Node(statements.into_syntax())),
+        Some(SyntaxElement::Token(r_curly_token)),
+    ]))
 }
 pub fn js_function_declaration(
     function_token: SyntaxToken,
@@ -1943,18 +1907,15 @@ impl JsIfStatementBuilder {
         self
     }
     pub fn build(self) -> JsIfStatement {
-        JsIfStatement::unwrap_cast(SyntaxNode::new_detached(
-            JsSyntaxKind::JS_IF_STATEMENT,
-            [
-                Some(SyntaxElement::Token(self.if_token)),
-                Some(SyntaxElement::Token(self.l_paren_token)),
-                Some(SyntaxElement::Node(self.test.into_syntax())),
-                Some(SyntaxElement::Token(self.r_paren_token)),
-                Some(SyntaxElement::Node(self.consequent.into_syntax())),
-                self.else_clause
-                    .map(|token| SyntaxElement::Node(token.into_syntax())),
-            ],
-        ))
+        JsIfStatement::unwrap_cast(SyntaxNode::new_detached(JsSyntaxKind::JS_IF_STATEMENT, [
+            Some(SyntaxElement::Token(self.if_token)),
+            Some(SyntaxElement::Token(self.l_paren_token)),
+            Some(SyntaxElement::Node(self.test.into_syntax())),
+            Some(SyntaxElement::Token(self.r_paren_token)),
+            Some(SyntaxElement::Node(self.consequent.into_syntax())),
+            self.else_clause
+                .map(|token| SyntaxElement::Node(token.into_syntax())),
+        ]))
     }
 }
 pub fn js_import(import_token: SyntaxToken, import_clause: AnyJsImportClause) -> JsImportBuilder {
@@ -1975,15 +1936,12 @@ impl JsImportBuilder {
         self
     }
     pub fn build(self) -> JsImport {
-        JsImport::unwrap_cast(SyntaxNode::new_detached(
-            JsSyntaxKind::JS_IMPORT,
-            [
-                Some(SyntaxElement::Token(self.import_token)),
-                Some(SyntaxElement::Node(self.import_clause.into_syntax())),
-                self.semicolon_token
-                    .map(|token| SyntaxElement::Token(token)),
-            ],
-        ))
+        JsImport::unwrap_cast(SyntaxNode::new_detached(JsSyntaxKind::JS_IMPORT, [
+            Some(SyntaxElement::Token(self.import_token)),
+            Some(SyntaxElement::Node(self.import_clause.into_syntax())),
+            self.semicolon_token
+                .map(|token| SyntaxElement::Token(token)),
+        ]))
     }
 }
 pub fn js_import_assertion(
@@ -2246,14 +2204,11 @@ pub fn js_in_expression(
     in_token: SyntaxToken,
     object: AnyJsExpression,
 ) -> JsInExpression {
-    JsInExpression::unwrap_cast(SyntaxNode::new_detached(
-        JsSyntaxKind::JS_IN_EXPRESSION,
-        [
-            Some(SyntaxElement::Node(property.into_syntax())),
-            Some(SyntaxElement::Token(in_token)),
-            Some(SyntaxElement::Node(object.into_syntax())),
-        ],
-    ))
+    JsInExpression::unwrap_cast(SyntaxNode::new_detached(JsSyntaxKind::JS_IN_EXPRESSION, [
+        Some(SyntaxElement::Node(property.into_syntax())),
+        Some(SyntaxElement::Token(in_token)),
+        Some(SyntaxElement::Node(object.into_syntax())),
+    ]))
 }
 pub fn js_initializer_clause(
     eq_token: SyntaxToken,
@@ -2282,10 +2237,9 @@ pub fn js_instanceof_expression(
     ))
 }
 pub fn js_label(value_token: SyntaxToken) -> JsLabel {
-    JsLabel::unwrap_cast(SyntaxNode::new_detached(
-        JsSyntaxKind::JS_LABEL,
-        [Some(SyntaxElement::Token(value_token))],
-    ))
+    JsLabel::unwrap_cast(SyntaxNode::new_detached(JsSyntaxKind::JS_LABEL, [Some(
+        SyntaxElement::Token(value_token),
+    )]))
 }
 pub fn js_labeled_statement(
     label: JsLabel,
@@ -2328,10 +2282,9 @@ pub fn js_logical_expression(
     ))
 }
 pub fn js_metavariable(value_token: SyntaxToken) -> JsMetavariable {
-    JsMetavariable::unwrap_cast(SyntaxNode::new_detached(
-        JsSyntaxKind::JS_METAVARIABLE,
-        [Some(SyntaxElement::Token(value_token))],
-    ))
+    JsMetavariable::unwrap_cast(SyntaxNode::new_detached(JsSyntaxKind::JS_METAVARIABLE, [
+        Some(SyntaxElement::Token(value_token)),
+    ]))
 }
 pub fn js_method_class_member(
     modifiers: JsMethodModifierList,
@@ -2497,30 +2450,25 @@ impl JsModuleBuilder {
         self
     }
     pub fn build(self) -> JsModule {
-        JsModule::unwrap_cast(SyntaxNode::new_detached(
-            JsSyntaxKind::JS_MODULE,
-            [
-                self.bom_token.map(|token| SyntaxElement::Token(token)),
-                self.interpreter_token
-                    .map(|token| SyntaxElement::Token(token)),
-                Some(SyntaxElement::Node(self.directives.into_syntax())),
-                Some(SyntaxElement::Node(self.items.into_syntax())),
-                Some(SyntaxElement::Token(self.eof_token)),
-            ],
-        ))
+        JsModule::unwrap_cast(SyntaxNode::new_detached(JsSyntaxKind::JS_MODULE, [
+            self.bom_token.map(|token| SyntaxElement::Token(token)),
+            self.interpreter_token
+                .map(|token| SyntaxElement::Token(token)),
+            Some(SyntaxElement::Node(self.directives.into_syntax())),
+            Some(SyntaxElement::Node(self.items.into_syntax())),
+            Some(SyntaxElement::Token(self.eof_token)),
+        ]))
     }
 }
 pub fn js_module_source(value_token: SyntaxToken) -> JsModuleSource {
-    JsModuleSource::unwrap_cast(SyntaxNode::new_detached(
-        JsSyntaxKind::JS_MODULE_SOURCE,
-        [Some(SyntaxElement::Token(value_token))],
-    ))
+    JsModuleSource::unwrap_cast(SyntaxNode::new_detached(JsSyntaxKind::JS_MODULE_SOURCE, [
+        Some(SyntaxElement::Token(value_token)),
+    ]))
 }
 pub fn js_name(value_token: SyntaxToken) -> JsName {
-    JsName::unwrap_cast(SyntaxNode::new_detached(
-        JsSyntaxKind::JS_NAME,
-        [Some(SyntaxElement::Token(value_token))],
-    ))
+    JsName::unwrap_cast(SyntaxNode::new_detached(JsSyntaxKind::JS_NAME, [Some(
+        SyntaxElement::Token(value_token),
+    )]))
 }
 pub fn js_named_import_specifier(
     name: JsLiteralExportName,
@@ -2612,17 +2560,14 @@ impl JsNewExpressionBuilder {
         self
     }
     pub fn build(self) -> JsNewExpression {
-        JsNewExpression::unwrap_cast(SyntaxNode::new_detached(
-            JsSyntaxKind::JS_NEW_EXPRESSION,
-            [
-                Some(SyntaxElement::Token(self.new_token)),
-                Some(SyntaxElement::Node(self.callee.into_syntax())),
-                self.type_arguments
-                    .map(|token| SyntaxElement::Node(token.into_syntax())),
-                self.arguments
-                    .map(|token| SyntaxElement::Node(token.into_syntax())),
-            ],
-        ))
+        JsNewExpression::unwrap_cast(SyntaxNode::new_detached(JsSyntaxKind::JS_NEW_EXPRESSION, [
+            Some(SyntaxElement::Token(self.new_token)),
+            Some(SyntaxElement::Node(self.callee.into_syntax())),
+            self.type_arguments
+                .map(|token| SyntaxElement::Node(token.into_syntax())),
+            self.arguments
+                .map(|token| SyntaxElement::Node(token.into_syntax())),
+        ]))
     }
 }
 pub fn js_new_target_expression(
@@ -2850,14 +2795,11 @@ pub fn js_parameters(
     items: JsParameterList,
     r_paren_token: SyntaxToken,
 ) -> JsParameters {
-    JsParameters::unwrap_cast(SyntaxNode::new_detached(
-        JsSyntaxKind::JS_PARAMETERS,
-        [
-            Some(SyntaxElement::Token(l_paren_token)),
-            Some(SyntaxElement::Node(items.into_syntax())),
-            Some(SyntaxElement::Token(r_paren_token)),
-        ],
-    ))
+    JsParameters::unwrap_cast(SyntaxNode::new_detached(JsSyntaxKind::JS_PARAMETERS, [
+        Some(SyntaxElement::Token(l_paren_token)),
+        Some(SyntaxElement::Node(items.into_syntax())),
+        Some(SyntaxElement::Token(r_paren_token)),
+    ]))
 }
 pub fn js_parenthesized_assignment(
     l_paren_token: SyntaxToken,
@@ -2924,13 +2866,10 @@ pub fn js_private_class_member_name(
     ))
 }
 pub fn js_private_name(hash_token: SyntaxToken, value_token: SyntaxToken) -> JsPrivateName {
-    JsPrivateName::unwrap_cast(SyntaxNode::new_detached(
-        JsSyntaxKind::JS_PRIVATE_NAME,
-        [
-            Some(SyntaxElement::Token(hash_token)),
-            Some(SyntaxElement::Token(value_token)),
-        ],
-    ))
+    JsPrivateName::unwrap_cast(SyntaxNode::new_detached(JsSyntaxKind::JS_PRIVATE_NAME, [
+        Some(SyntaxElement::Token(hash_token)),
+        Some(SyntaxElement::Token(value_token)),
+    ]))
 }
 pub fn js_property_class_member(
     modifiers: JsPropertyModifierList,
@@ -3033,16 +2972,13 @@ impl JsRestParameterBuilder {
         self
     }
     pub fn build(self) -> JsRestParameter {
-        JsRestParameter::unwrap_cast(SyntaxNode::new_detached(
-            JsSyntaxKind::JS_REST_PARAMETER,
-            [
-                Some(SyntaxElement::Node(self.decorators.into_syntax())),
-                Some(SyntaxElement::Token(self.dotdotdot_token)),
-                Some(SyntaxElement::Node(self.binding.into_syntax())),
-                self.type_annotation
-                    .map(|token| SyntaxElement::Node(token.into_syntax())),
-            ],
-        ))
+        JsRestParameter::unwrap_cast(SyntaxNode::new_detached(JsSyntaxKind::JS_REST_PARAMETER, [
+            Some(SyntaxElement::Node(self.decorators.into_syntax())),
+            Some(SyntaxElement::Token(self.dotdotdot_token)),
+            Some(SyntaxElement::Node(self.binding.into_syntax())),
+            self.type_annotation
+                .map(|token| SyntaxElement::Node(token.into_syntax())),
+        ]))
     }
 }
 pub fn js_return_statement(return_token: SyntaxToken) -> JsReturnStatementBuilder {
@@ -3109,17 +3045,14 @@ impl JsScriptBuilder {
         self
     }
     pub fn build(self) -> JsScript {
-        JsScript::unwrap_cast(SyntaxNode::new_detached(
-            JsSyntaxKind::JS_SCRIPT,
-            [
-                self.bom_token.map(|token| SyntaxElement::Token(token)),
-                self.interpreter_token
-                    .map(|token| SyntaxElement::Token(token)),
-                Some(SyntaxElement::Node(self.directives.into_syntax())),
-                Some(SyntaxElement::Node(self.statements.into_syntax())),
-                Some(SyntaxElement::Token(self.eof_token)),
-            ],
-        ))
+        JsScript::unwrap_cast(SyntaxNode::new_detached(JsSyntaxKind::JS_SCRIPT, [
+            self.bom_token.map(|token| SyntaxElement::Token(token)),
+            self.interpreter_token
+                .map(|token| SyntaxElement::Token(token)),
+            Some(SyntaxElement::Node(self.directives.into_syntax())),
+            Some(SyntaxElement::Node(self.statements.into_syntax())),
+            Some(SyntaxElement::Token(self.eof_token)),
+        ]))
     }
 }
 pub fn js_sequence_expression(
@@ -3270,13 +3203,10 @@ pub fn js_shorthand_property_object_member(
     ))
 }
 pub fn js_spread(dotdotdot_token: SyntaxToken, argument: AnyJsExpression) -> JsSpread {
-    JsSpread::unwrap_cast(SyntaxNode::new_detached(
-        JsSyntaxKind::JS_SPREAD,
-        [
-            Some(SyntaxElement::Token(dotdotdot_token)),
-            Some(SyntaxElement::Node(argument.into_syntax())),
-        ],
-    ))
+    JsSpread::unwrap_cast(SyntaxNode::new_detached(JsSyntaxKind::JS_SPREAD, [
+        Some(SyntaxElement::Token(dotdotdot_token)),
+        Some(SyntaxElement::Node(argument.into_syntax())),
+    ]))
 }
 pub fn js_static_initialization_block_class_member(
     static_token: SyntaxToken,
@@ -3505,14 +3435,11 @@ pub fn js_try_statement(
     body: JsBlockStatement,
     catch_clause: JsCatchClause,
 ) -> JsTryStatement {
-    JsTryStatement::unwrap_cast(SyntaxNode::new_detached(
-        JsSyntaxKind::JS_TRY_STATEMENT,
-        [
-            Some(SyntaxElement::Token(try_token)),
-            Some(SyntaxElement::Node(body.into_syntax())),
-            Some(SyntaxElement::Node(catch_clause.into_syntax())),
-        ],
-    ))
+    JsTryStatement::unwrap_cast(SyntaxNode::new_detached(JsSyntaxKind::JS_TRY_STATEMENT, [
+        Some(SyntaxElement::Token(try_token)),
+        Some(SyntaxElement::Node(body.into_syntax())),
+        Some(SyntaxElement::Node(catch_clause.into_syntax())),
+    ]))
 }
 pub fn js_unary_expression(
     operator_token_token: SyntaxToken,
@@ -3673,16 +3600,13 @@ pub fn js_with_statement(
     r_paren_token: SyntaxToken,
     body: AnyJsStatement,
 ) -> JsWithStatement {
-    JsWithStatement::unwrap_cast(SyntaxNode::new_detached(
-        JsSyntaxKind::JS_WITH_STATEMENT,
-        [
-            Some(SyntaxElement::Token(with_token)),
-            Some(SyntaxElement::Token(l_paren_token)),
-            Some(SyntaxElement::Node(object.into_syntax())),
-            Some(SyntaxElement::Token(r_paren_token)),
-            Some(SyntaxElement::Node(body.into_syntax())),
-        ],
-    ))
+    JsWithStatement::unwrap_cast(SyntaxNode::new_detached(JsSyntaxKind::JS_WITH_STATEMENT, [
+        Some(SyntaxElement::Token(with_token)),
+        Some(SyntaxElement::Token(l_paren_token)),
+        Some(SyntaxElement::Node(object.into_syntax())),
+        Some(SyntaxElement::Token(r_paren_token)),
+        Some(SyntaxElement::Node(body.into_syntax())),
+    ]))
 }
 pub fn js_yield_argument(expression: AnyJsExpression) -> JsYieldArgumentBuilder {
     JsYieldArgumentBuilder {
@@ -3700,13 +3624,10 @@ impl JsYieldArgumentBuilder {
         self
     }
     pub fn build(self) -> JsYieldArgument {
-        JsYieldArgument::unwrap_cast(SyntaxNode::new_detached(
-            JsSyntaxKind::JS_YIELD_ARGUMENT,
-            [
-                self.star_token.map(|token| SyntaxElement::Token(token)),
-                Some(SyntaxElement::Node(self.expression.into_syntax())),
-            ],
-        ))
+        JsYieldArgument::unwrap_cast(SyntaxNode::new_detached(JsSyntaxKind::JS_YIELD_ARGUMENT, [
+            self.star_token.map(|token| SyntaxElement::Token(token)),
+            Some(SyntaxElement::Node(self.expression.into_syntax())),
+        ]))
     }
 }
 pub fn js_yield_expression(yield_token: SyntaxToken) -> JsYieldExpressionBuilder {
@@ -3751,14 +3672,11 @@ impl JsxAttributeBuilder {
         self
     }
     pub fn build(self) -> JsxAttribute {
-        JsxAttribute::unwrap_cast(SyntaxNode::new_detached(
-            JsSyntaxKind::JSX_ATTRIBUTE,
-            [
-                Some(SyntaxElement::Node(self.name.into_syntax())),
-                self.initializer
-                    .map(|token| SyntaxElement::Node(token.into_syntax())),
-            ],
-        ))
+        JsxAttribute::unwrap_cast(SyntaxNode::new_detached(JsSyntaxKind::JSX_ATTRIBUTE, [
+            Some(SyntaxElement::Node(self.name.into_syntax())),
+            self.initializer
+                .map(|token| SyntaxElement::Node(token.into_syntax())),
+        ]))
     }
 }
 pub fn jsx_attribute_initializer_clause(
@@ -3808,14 +3726,11 @@ pub fn jsx_element(
     children: JsxChildList,
     closing_element: JsxClosingElement,
 ) -> JsxElement {
-    JsxElement::unwrap_cast(SyntaxNode::new_detached(
-        JsSyntaxKind::JSX_ELEMENT,
-        [
-            Some(SyntaxElement::Node(opening_element.into_syntax())),
-            Some(SyntaxElement::Node(children.into_syntax())),
-            Some(SyntaxElement::Node(closing_element.into_syntax())),
-        ],
-    ))
+    JsxElement::unwrap_cast(SyntaxNode::new_detached(JsSyntaxKind::JSX_ELEMENT, [
+        Some(SyntaxElement::Node(opening_element.into_syntax())),
+        Some(SyntaxElement::Node(children.into_syntax())),
+        Some(SyntaxElement::Node(closing_element.into_syntax())),
+    ]))
 }
 pub fn jsx_expression_attribute_value(
     l_curly_token: SyntaxToken,
@@ -3868,34 +3783,27 @@ pub fn jsx_fragment(
     children: JsxChildList,
     closing_fragment: JsxClosingFragment,
 ) -> JsxFragment {
-    JsxFragment::unwrap_cast(SyntaxNode::new_detached(
-        JsSyntaxKind::JSX_FRAGMENT,
-        [
-            Some(SyntaxElement::Node(opening_fragment.into_syntax())),
-            Some(SyntaxElement::Node(children.into_syntax())),
-            Some(SyntaxElement::Node(closing_fragment.into_syntax())),
-        ],
-    ))
+    JsxFragment::unwrap_cast(SyntaxNode::new_detached(JsSyntaxKind::JSX_FRAGMENT, [
+        Some(SyntaxElement::Node(opening_fragment.into_syntax())),
+        Some(SyntaxElement::Node(children.into_syntax())),
+        Some(SyntaxElement::Node(closing_fragment.into_syntax())),
+    ]))
 }
 pub fn jsx_member_name(
     object: AnyJsxObjectName,
     dot_token: SyntaxToken,
     member: JsName,
 ) -> JsxMemberName {
-    JsxMemberName::unwrap_cast(SyntaxNode::new_detached(
-        JsSyntaxKind::JSX_MEMBER_NAME,
-        [
-            Some(SyntaxElement::Node(object.into_syntax())),
-            Some(SyntaxElement::Token(dot_token)),
-            Some(SyntaxElement::Node(member.into_syntax())),
-        ],
-    ))
+    JsxMemberName::unwrap_cast(SyntaxNode::new_detached(JsSyntaxKind::JSX_MEMBER_NAME, [
+        Some(SyntaxElement::Node(object.into_syntax())),
+        Some(SyntaxElement::Token(dot_token)),
+        Some(SyntaxElement::Node(member.into_syntax())),
+    ]))
 }
 pub fn jsx_name(value_token: SyntaxToken) -> JsxName {
-    JsxName::unwrap_cast(SyntaxNode::new_detached(
-        JsSyntaxKind::JSX_NAME,
-        [Some(SyntaxElement::Token(value_token))],
-    ))
+    JsxName::unwrap_cast(SyntaxNode::new_detached(JsSyntaxKind::JSX_NAME, [Some(
+        SyntaxElement::Token(value_token),
+    )]))
 }
 pub fn jsx_namespace_name(
     namespace: JsxName,
@@ -4035,21 +3943,17 @@ pub fn jsx_spread_child(
     expression: AnyJsExpression,
     r_curly_token: SyntaxToken,
 ) -> JsxSpreadChild {
-    JsxSpreadChild::unwrap_cast(SyntaxNode::new_detached(
-        JsSyntaxKind::JSX_SPREAD_CHILD,
-        [
-            Some(SyntaxElement::Token(l_curly_token)),
-            Some(SyntaxElement::Token(dotdotdot_token)),
-            Some(SyntaxElement::Node(expression.into_syntax())),
-            Some(SyntaxElement::Token(r_curly_token)),
-        ],
-    ))
+    JsxSpreadChild::unwrap_cast(SyntaxNode::new_detached(JsSyntaxKind::JSX_SPREAD_CHILD, [
+        Some(SyntaxElement::Token(l_curly_token)),
+        Some(SyntaxElement::Token(dotdotdot_token)),
+        Some(SyntaxElement::Node(expression.into_syntax())),
+        Some(SyntaxElement::Token(r_curly_token)),
+    ]))
 }
 pub fn jsx_string(value_token: SyntaxToken) -> JsxString {
-    JsxString::unwrap_cast(SyntaxNode::new_detached(
-        JsSyntaxKind::JSX_STRING,
-        [Some(SyntaxElement::Token(value_token))],
-    ))
+    JsxString::unwrap_cast(SyntaxNode::new_detached(JsSyntaxKind::JSX_STRING, [Some(
+        SyntaxElement::Token(value_token),
+    )]))
 }
 pub fn jsx_tag_expression(tag: AnyJsxTag) -> JsxTagExpression {
     JsxTagExpression::unwrap_cast(SyntaxNode::new_detached(
@@ -4058,10 +3962,9 @@ pub fn jsx_tag_expression(tag: AnyJsxTag) -> JsxTagExpression {
     ))
 }
 pub fn jsx_text(value_token: SyntaxToken) -> JsxText {
-    JsxText::unwrap_cast(SyntaxNode::new_detached(
-        JsSyntaxKind::JSX_TEXT,
-        [Some(SyntaxElement::Token(value_token))],
-    ))
+    JsxText::unwrap_cast(SyntaxNode::new_detached(JsSyntaxKind::JSX_TEXT, [Some(
+        SyntaxElement::Token(value_token),
+    )]))
 }
 pub fn ts_abstract_modifier(modifier_token: SyntaxToken) -> TsAbstractModifier {
     TsAbstractModifier::unwrap_cast(SyntaxNode::new_detached(
@@ -4076,52 +3979,42 @@ pub fn ts_accessibility_modifier(modifier_token_token: SyntaxToken) -> TsAccessi
     ))
 }
 pub fn ts_any_type(any_token: SyntaxToken) -> TsAnyType {
-    TsAnyType::unwrap_cast(SyntaxNode::new_detached(
-        JsSyntaxKind::TS_ANY_TYPE,
-        [Some(SyntaxElement::Token(any_token))],
-    ))
+    TsAnyType::unwrap_cast(SyntaxNode::new_detached(JsSyntaxKind::TS_ANY_TYPE, [Some(
+        SyntaxElement::Token(any_token),
+    )]))
 }
 pub fn ts_array_type(
     element_type: AnyTsType,
     l_brack_token: SyntaxToken,
     r_brack_token: SyntaxToken,
 ) -> TsArrayType {
-    TsArrayType::unwrap_cast(SyntaxNode::new_detached(
-        JsSyntaxKind::TS_ARRAY_TYPE,
-        [
-            Some(SyntaxElement::Node(element_type.into_syntax())),
-            Some(SyntaxElement::Token(l_brack_token)),
-            Some(SyntaxElement::Token(r_brack_token)),
-        ],
-    ))
+    TsArrayType::unwrap_cast(SyntaxNode::new_detached(JsSyntaxKind::TS_ARRAY_TYPE, [
+        Some(SyntaxElement::Node(element_type.into_syntax())),
+        Some(SyntaxElement::Token(l_brack_token)),
+        Some(SyntaxElement::Token(r_brack_token)),
+    ]))
 }
 pub fn ts_as_assignment(
     assignment: AnyJsAssignment,
     as_token: SyntaxToken,
     ty: AnyTsType,
 ) -> TsAsAssignment {
-    TsAsAssignment::unwrap_cast(SyntaxNode::new_detached(
-        JsSyntaxKind::TS_AS_ASSIGNMENT,
-        [
-            Some(SyntaxElement::Node(assignment.into_syntax())),
-            Some(SyntaxElement::Token(as_token)),
-            Some(SyntaxElement::Node(ty.into_syntax())),
-        ],
-    ))
+    TsAsAssignment::unwrap_cast(SyntaxNode::new_detached(JsSyntaxKind::TS_AS_ASSIGNMENT, [
+        Some(SyntaxElement::Node(assignment.into_syntax())),
+        Some(SyntaxElement::Token(as_token)),
+        Some(SyntaxElement::Node(ty.into_syntax())),
+    ]))
 }
 pub fn ts_as_expression(
     expression: AnyJsExpression,
     as_token: SyntaxToken,
     ty: AnyTsType,
 ) -> TsAsExpression {
-    TsAsExpression::unwrap_cast(SyntaxNode::new_detached(
-        JsSyntaxKind::TS_AS_EXPRESSION,
-        [
-            Some(SyntaxElement::Node(expression.into_syntax())),
-            Some(SyntaxElement::Token(as_token)),
-            Some(SyntaxElement::Node(ty.into_syntax())),
-        ],
-    ))
+    TsAsExpression::unwrap_cast(SyntaxNode::new_detached(JsSyntaxKind::TS_AS_EXPRESSION, [
+        Some(SyntaxElement::Node(expression.into_syntax())),
+        Some(SyntaxElement::Token(as_token)),
+        Some(SyntaxElement::Node(ty.into_syntax())),
+    ]))
 }
 pub fn ts_asserts_condition(is_token: SyntaxToken, ty: AnyTsType) -> TsAssertsCondition {
     TsAssertsCondition::unwrap_cast(SyntaxNode::new_detached(
@@ -4190,10 +4083,9 @@ impl TsBigintLiteralTypeBuilder {
     }
 }
 pub fn ts_bigint_type(bigint_token: SyntaxToken) -> TsBigintType {
-    TsBigintType::unwrap_cast(SyntaxNode::new_detached(
-        JsSyntaxKind::TS_BIGINT_TYPE,
-        [Some(SyntaxElement::Token(bigint_token))],
-    ))
+    TsBigintType::unwrap_cast(SyntaxNode::new_detached(JsSyntaxKind::TS_BIGINT_TYPE, [
+        Some(SyntaxElement::Token(bigint_token)),
+    ]))
 }
 pub fn ts_boolean_literal_type(literal_token: SyntaxToken) -> TsBooleanLiteralType {
     TsBooleanLiteralType::unwrap_cast(SyntaxNode::new_detached(
@@ -4202,10 +4094,9 @@ pub fn ts_boolean_literal_type(literal_token: SyntaxToken) -> TsBooleanLiteralTy
     ))
 }
 pub fn ts_boolean_type(boolean_token: SyntaxToken) -> TsBooleanType {
-    TsBooleanType::unwrap_cast(SyntaxNode::new_detached(
-        JsSyntaxKind::TS_BOOLEAN_TYPE,
-        [Some(SyntaxElement::Token(boolean_token))],
-    ))
+    TsBooleanType::unwrap_cast(SyntaxNode::new_detached(JsSyntaxKind::TS_BOOLEAN_TYPE, [
+        Some(SyntaxElement::Token(boolean_token)),
+    ]))
 }
 pub fn ts_call_signature_type_member(parameters: JsParameters) -> TsCallSignatureTypeMemberBuilder {
     TsCallSignatureTypeMemberBuilder {
@@ -4275,10 +4166,9 @@ pub fn ts_conditional_type(
     ))
 }
 pub fn ts_const_modifier(modifier_token: SyntaxToken) -> TsConstModifier {
-    TsConstModifier::unwrap_cast(SyntaxNode::new_detached(
-        JsSyntaxKind::TS_CONST_MODIFIER,
-        [Some(SyntaxElement::Token(modifier_token))],
-    ))
+    TsConstModifier::unwrap_cast(SyntaxNode::new_detached(JsSyntaxKind::TS_CONST_MODIFIER, [
+        Some(SyntaxElement::Token(modifier_token)),
+    ]))
 }
 pub fn ts_construct_signature_type_member(
     new_token: SyntaxToken,
@@ -4700,14 +4590,11 @@ impl TsEnumMemberBuilder {
         self
     }
     pub fn build(self) -> TsEnumMember {
-        TsEnumMember::unwrap_cast(SyntaxNode::new_detached(
-            JsSyntaxKind::TS_ENUM_MEMBER,
-            [
-                Some(SyntaxElement::Node(self.name.into_syntax())),
-                self.initializer
-                    .map(|token| SyntaxElement::Node(token.into_syntax())),
-            ],
-        ))
+        TsEnumMember::unwrap_cast(SyntaxNode::new_detached(JsSyntaxKind::TS_ENUM_MEMBER, [
+            Some(SyntaxElement::Node(self.name.into_syntax())),
+            self.initializer
+                .map(|token| SyntaxElement::Node(token.into_syntax())),
+        ]))
     }
 }
 pub fn ts_export_as_namespace_clause(
@@ -4791,13 +4678,10 @@ pub fn ts_export_declare_clause(
     ))
 }
 pub fn ts_extends_clause(extends_token: SyntaxToken, types: TsTypeList) -> TsExtendsClause {
-    TsExtendsClause::unwrap_cast(SyntaxNode::new_detached(
-        JsSyntaxKind::TS_EXTENDS_CLAUSE,
-        [
-            Some(SyntaxElement::Token(extends_token)),
-            Some(SyntaxElement::Node(types.into_syntax())),
-        ],
-    ))
+    TsExtendsClause::unwrap_cast(SyntaxNode::new_detached(JsSyntaxKind::TS_EXTENDS_CLAUSE, [
+        Some(SyntaxElement::Token(extends_token)),
+        Some(SyntaxElement::Node(types.into_syntax())),
+    ]))
 }
 pub fn ts_external_module_declaration(
     module_token: SyntaxToken,
@@ -4871,16 +4755,13 @@ impl TsFunctionTypeBuilder {
         self
     }
     pub fn build(self) -> TsFunctionType {
-        TsFunctionType::unwrap_cast(SyntaxNode::new_detached(
-            JsSyntaxKind::TS_FUNCTION_TYPE,
-            [
-                self.type_parameters
-                    .map(|token| SyntaxElement::Node(token.into_syntax())),
-                Some(SyntaxElement::Node(self.parameters.into_syntax())),
-                Some(SyntaxElement::Token(self.fat_arrow_token)),
-                Some(SyntaxElement::Node(self.return_type.into_syntax())),
-            ],
-        ))
+        TsFunctionType::unwrap_cast(SyntaxNode::new_detached(JsSyntaxKind::TS_FUNCTION_TYPE, [
+            self.type_parameters
+                .map(|token| SyntaxElement::Node(token.into_syntax())),
+            Some(SyntaxElement::Node(self.parameters.into_syntax())),
+            Some(SyntaxElement::Token(self.fat_arrow_token)),
+            Some(SyntaxElement::Node(self.return_type.into_syntax())),
+        ]))
     }
 }
 pub fn ts_getter_signature_class_member(
@@ -5093,18 +4974,15 @@ impl TsImportTypeBuilder {
         self
     }
     pub fn build(self) -> TsImportType {
-        TsImportType::unwrap_cast(SyntaxNode::new_detached(
-            JsSyntaxKind::TS_IMPORT_TYPE,
-            [
-                self.typeof_token.map(|token| SyntaxElement::Token(token)),
-                Some(SyntaxElement::Token(self.import_token)),
-                Some(SyntaxElement::Node(self.arguments.into_syntax())),
-                self.qualifier_clause
-                    .map(|token| SyntaxElement::Node(token.into_syntax())),
-                self.type_arguments
-                    .map(|token| SyntaxElement::Node(token.into_syntax())),
-            ],
-        ))
+        TsImportType::unwrap_cast(SyntaxNode::new_detached(JsSyntaxKind::TS_IMPORT_TYPE, [
+            self.typeof_token.map(|token| SyntaxElement::Token(token)),
+            Some(SyntaxElement::Token(self.import_token)),
+            Some(SyntaxElement::Node(self.arguments.into_syntax())),
+            self.qualifier_clause
+                .map(|token| SyntaxElement::Node(token.into_syntax())),
+            self.type_arguments
+                .map(|token| SyntaxElement::Node(token.into_syntax())),
+        ]))
     }
 }
 pub fn ts_import_type_arguments(
@@ -5195,10 +5073,9 @@ pub fn ts_import_type_qualifier(dot_token: SyntaxToken, right: AnyTsName) -> TsI
     ))
 }
 pub fn ts_in_modifier(modifier_token: SyntaxToken) -> TsInModifier {
-    TsInModifier::unwrap_cast(SyntaxNode::new_detached(
-        JsSyntaxKind::TS_IN_MODIFIER,
-        [Some(SyntaxElement::Token(modifier_token))],
-    ))
+    TsInModifier::unwrap_cast(SyntaxNode::new_detached(JsSyntaxKind::TS_IN_MODIFIER, [
+        Some(SyntaxElement::Token(modifier_token)),
+    ]))
 }
 pub fn ts_index_signature_class_member(
     modifiers: TsIndexSignatureModifierList,
@@ -5337,15 +5214,12 @@ impl TsInferTypeBuilder {
         self
     }
     pub fn build(self) -> TsInferType {
-        TsInferType::unwrap_cast(SyntaxNode::new_detached(
-            JsSyntaxKind::TS_INFER_TYPE,
-            [
-                Some(SyntaxElement::Token(self.infer_token)),
-                Some(SyntaxElement::Node(self.name.into_syntax())),
-                self.constraint
-                    .map(|token| SyntaxElement::Node(token.into_syntax())),
-            ],
-        ))
+        TsInferType::unwrap_cast(SyntaxNode::new_detached(JsSyntaxKind::TS_INFER_TYPE, [
+            Some(SyntaxElement::Token(self.infer_token)),
+            Some(SyntaxElement::Node(self.name.into_syntax())),
+            self.constraint
+                .map(|token| SyntaxElement::Node(token.into_syntax())),
+        ]))
     }
 }
 pub fn ts_initialized_property_signature_class_member(
@@ -5554,28 +5428,25 @@ impl TsMappedTypeBuilder {
         self
     }
     pub fn build(self) -> TsMappedType {
-        TsMappedType::unwrap_cast(SyntaxNode::new_detached(
-            JsSyntaxKind::TS_MAPPED_TYPE,
-            [
-                Some(SyntaxElement::Token(self.l_curly_token)),
-                self.readonly_modifier
-                    .map(|token| SyntaxElement::Node(token.into_syntax())),
-                Some(SyntaxElement::Token(self.l_brack_token)),
-                Some(SyntaxElement::Node(self.property_name.into_syntax())),
-                Some(SyntaxElement::Token(self.in_token)),
-                Some(SyntaxElement::Node(self.keys_type.into_syntax())),
-                self.as_clause
-                    .map(|token| SyntaxElement::Node(token.into_syntax())),
-                Some(SyntaxElement::Token(self.r_brack_token)),
-                self.optional_modifier
-                    .map(|token| SyntaxElement::Node(token.into_syntax())),
-                self.mapped_type
-                    .map(|token| SyntaxElement::Node(token.into_syntax())),
-                self.semicolon_token
-                    .map(|token| SyntaxElement::Token(token)),
-                Some(SyntaxElement::Token(self.r_curly_token)),
-            ],
-        ))
+        TsMappedType::unwrap_cast(SyntaxNode::new_detached(JsSyntaxKind::TS_MAPPED_TYPE, [
+            Some(SyntaxElement::Token(self.l_curly_token)),
+            self.readonly_modifier
+                .map(|token| SyntaxElement::Node(token.into_syntax())),
+            Some(SyntaxElement::Token(self.l_brack_token)),
+            Some(SyntaxElement::Node(self.property_name.into_syntax())),
+            Some(SyntaxElement::Token(self.in_token)),
+            Some(SyntaxElement::Node(self.keys_type.into_syntax())),
+            self.as_clause
+                .map(|token| SyntaxElement::Node(token.into_syntax())),
+            Some(SyntaxElement::Token(self.r_brack_token)),
+            self.optional_modifier
+                .map(|token| SyntaxElement::Node(token.into_syntax())),
+            self.mapped_type
+                .map(|token| SyntaxElement::Node(token.into_syntax())),
+            self.semicolon_token
+                .map(|token| SyntaxElement::Token(token)),
+            Some(SyntaxElement::Token(self.r_curly_token)),
+        ]))
     }
 }
 pub fn ts_mapped_type_as_clause(as_token: SyntaxToken, ty: AnyTsType) -> TsMappedTypeAsClause {
@@ -5776,14 +5647,11 @@ pub fn ts_module_block(
     items: JsModuleItemList,
     r_curly_token: SyntaxToken,
 ) -> TsModuleBlock {
-    TsModuleBlock::unwrap_cast(SyntaxNode::new_detached(
-        JsSyntaxKind::TS_MODULE_BLOCK,
-        [
-            Some(SyntaxElement::Token(l_curly_token)),
-            Some(SyntaxElement::Node(items.into_syntax())),
-            Some(SyntaxElement::Token(r_curly_token)),
-        ],
-    ))
+    TsModuleBlock::unwrap_cast(SyntaxNode::new_detached(JsSyntaxKind::TS_MODULE_BLOCK, [
+        Some(SyntaxElement::Token(l_curly_token)),
+        Some(SyntaxElement::Node(items.into_syntax())),
+        Some(SyntaxElement::Token(r_curly_token)),
+    ]))
 }
 pub fn ts_module_declaration(
     module_or_namespace_token: SyntaxToken,
@@ -5844,10 +5712,9 @@ impl TsNamedTupleTypeElementBuilder {
     }
 }
 pub fn ts_never_type(never_token: SyntaxToken) -> TsNeverType {
-    TsNeverType::unwrap_cast(SyntaxNode::new_detached(
-        JsSyntaxKind::TS_NEVER_TYPE,
-        [Some(SyntaxElement::Token(never_token))],
-    ))
+    TsNeverType::unwrap_cast(SyntaxNode::new_detached(JsSyntaxKind::TS_NEVER_TYPE, [
+        Some(SyntaxElement::Token(never_token)),
+    ]))
 }
 pub fn ts_non_null_assertion_assignment(
     assignment: AnyJsAssignment,
@@ -5911,24 +5778,20 @@ impl TsNumberLiteralTypeBuilder {
     }
 }
 pub fn ts_number_type(number_token: SyntaxToken) -> TsNumberType {
-    TsNumberType::unwrap_cast(SyntaxNode::new_detached(
-        JsSyntaxKind::TS_NUMBER_TYPE,
-        [Some(SyntaxElement::Token(number_token))],
-    ))
+    TsNumberType::unwrap_cast(SyntaxNode::new_detached(JsSyntaxKind::TS_NUMBER_TYPE, [
+        Some(SyntaxElement::Token(number_token)),
+    ]))
 }
 pub fn ts_object_type(
     l_curly_token: SyntaxToken,
     members: TsTypeMemberList,
     r_curly_token: SyntaxToken,
 ) -> TsObjectType {
-    TsObjectType::unwrap_cast(SyntaxNode::new_detached(
-        JsSyntaxKind::TS_OBJECT_TYPE,
-        [
-            Some(SyntaxElement::Token(l_curly_token)),
-            Some(SyntaxElement::Node(members.into_syntax())),
-            Some(SyntaxElement::Token(r_curly_token)),
-        ],
-    ))
+    TsObjectType::unwrap_cast(SyntaxNode::new_detached(JsSyntaxKind::TS_OBJECT_TYPE, [
+        Some(SyntaxElement::Token(l_curly_token)),
+        Some(SyntaxElement::Node(members.into_syntax())),
+        Some(SyntaxElement::Token(r_curly_token)),
+    ]))
 }
 pub fn ts_optional_property_annotation(
     question_mark_token: SyntaxToken,
@@ -5971,10 +5834,9 @@ pub fn ts_optional_tuple_type_element(
     ))
 }
 pub fn ts_out_modifier(modifier_token: SyntaxToken) -> TsOutModifier {
-    TsOutModifier::unwrap_cast(SyntaxNode::new_detached(
-        JsSyntaxKind::TS_OUT_MODIFIER,
-        [Some(SyntaxElement::Token(modifier_token))],
-    ))
+    TsOutModifier::unwrap_cast(SyntaxNode::new_detached(JsSyntaxKind::TS_OUT_MODIFIER, [
+        Some(SyntaxElement::Token(modifier_token)),
+    ]))
 }
 pub fn ts_override_modifier(modifier_token: SyntaxToken) -> TsOverrideModifier {
     TsOverrideModifier::unwrap_cast(SyntaxNode::new_detached(
@@ -6136,14 +5998,11 @@ pub fn ts_qualified_name(
     dot_token: SyntaxToken,
     right: JsName,
 ) -> TsQualifiedName {
-    TsQualifiedName::unwrap_cast(SyntaxNode::new_detached(
-        JsSyntaxKind::TS_QUALIFIED_NAME,
-        [
-            Some(SyntaxElement::Node(left.into_syntax())),
-            Some(SyntaxElement::Token(dot_token)),
-            Some(SyntaxElement::Node(right.into_syntax())),
-        ],
-    ))
+    TsQualifiedName::unwrap_cast(SyntaxNode::new_detached(JsSyntaxKind::TS_QUALIFIED_NAME, [
+        Some(SyntaxElement::Node(left.into_syntax())),
+        Some(SyntaxElement::Token(dot_token)),
+        Some(SyntaxElement::Node(right.into_syntax())),
+    ]))
 }
 pub fn ts_readonly_modifier(modifier_token: SyntaxToken) -> TsReadonlyModifier {
     TsReadonlyModifier::unwrap_cast(SyntaxNode::new_detached(
@@ -6167,14 +6026,11 @@ impl TsReferenceTypeBuilder {
         self
     }
     pub fn build(self) -> TsReferenceType {
-        TsReferenceType::unwrap_cast(SyntaxNode::new_detached(
-            JsSyntaxKind::TS_REFERENCE_TYPE,
-            [
-                Some(SyntaxElement::Node(self.name.into_syntax())),
-                self.type_arguments
-                    .map(|token| SyntaxElement::Node(token.into_syntax())),
-            ],
-        ))
+        TsReferenceType::unwrap_cast(SyntaxNode::new_detached(JsSyntaxKind::TS_REFERENCE_TYPE, [
+            Some(SyntaxElement::Node(self.name.into_syntax())),
+            self.type_arguments
+                .map(|token| SyntaxElement::Node(token.into_syntax())),
+        ]))
     }
 }
 pub fn ts_rest_tuple_type_element(
@@ -6342,16 +6198,14 @@ pub fn ts_string_literal_type(literal_token: SyntaxToken) -> TsStringLiteralType
     ))
 }
 pub fn ts_string_type(string_token: SyntaxToken) -> TsStringType {
-    TsStringType::unwrap_cast(SyntaxNode::new_detached(
-        JsSyntaxKind::TS_STRING_TYPE,
-        [Some(SyntaxElement::Token(string_token))],
-    ))
+    TsStringType::unwrap_cast(SyntaxNode::new_detached(JsSyntaxKind::TS_STRING_TYPE, [
+        Some(SyntaxElement::Token(string_token)),
+    ]))
 }
 pub fn ts_symbol_type(symbol_token: SyntaxToken) -> TsSymbolType {
-    TsSymbolType::unwrap_cast(SyntaxNode::new_detached(
-        JsSyntaxKind::TS_SYMBOL_TYPE,
-        [Some(SyntaxElement::Token(symbol_token))],
-    ))
+    TsSymbolType::unwrap_cast(SyntaxNode::new_detached(JsSyntaxKind::TS_SYMBOL_TYPE, [
+        Some(SyntaxElement::Token(symbol_token)),
+    ]))
 }
 pub fn ts_template_chunk_element(template_chunk_token: SyntaxToken) -> TsTemplateChunkElement {
     TsTemplateChunkElement::unwrap_cast(SyntaxNode::new_detached(
@@ -6403,35 +6257,28 @@ impl TsThisParameterBuilder {
         self
     }
     pub fn build(self) -> TsThisParameter {
-        TsThisParameter::unwrap_cast(SyntaxNode::new_detached(
-            JsSyntaxKind::TS_THIS_PARAMETER,
-            [
-                Some(SyntaxElement::Token(self.this_token)),
-                self.type_annotation
-                    .map(|token| SyntaxElement::Node(token.into_syntax())),
-            ],
-        ))
+        TsThisParameter::unwrap_cast(SyntaxNode::new_detached(JsSyntaxKind::TS_THIS_PARAMETER, [
+            Some(SyntaxElement::Token(self.this_token)),
+            self.type_annotation
+                .map(|token| SyntaxElement::Node(token.into_syntax())),
+        ]))
     }
 }
 pub fn ts_this_type(this_token: SyntaxToken) -> TsThisType {
-    TsThisType::unwrap_cast(SyntaxNode::new_detached(
-        JsSyntaxKind::TS_THIS_TYPE,
-        [Some(SyntaxElement::Token(this_token))],
-    ))
+    TsThisType::unwrap_cast(SyntaxNode::new_detached(JsSyntaxKind::TS_THIS_TYPE, [
+        Some(SyntaxElement::Token(this_token)),
+    ]))
 }
 pub fn ts_tuple_type(
     l_brack_token: SyntaxToken,
     elements: TsTupleTypeElementList,
     r_brack_token: SyntaxToken,
 ) -> TsTupleType {
-    TsTupleType::unwrap_cast(SyntaxNode::new_detached(
-        JsSyntaxKind::TS_TUPLE_TYPE,
-        [
-            Some(SyntaxElement::Token(l_brack_token)),
-            Some(SyntaxElement::Node(elements.into_syntax())),
-            Some(SyntaxElement::Token(r_brack_token)),
-        ],
-    ))
+    TsTupleType::unwrap_cast(SyntaxNode::new_detached(JsSyntaxKind::TS_TUPLE_TYPE, [
+        Some(SyntaxElement::Token(l_brack_token)),
+        Some(SyntaxElement::Node(elements.into_syntax())),
+        Some(SyntaxElement::Token(r_brack_token)),
+    ]))
 }
 pub fn ts_type_alias_declaration(
     type_token: SyntaxToken,
@@ -6495,14 +6342,11 @@ pub fn ts_type_arguments(
     ts_type_argument_list: TsTypeArgumentList,
     r_angle_token: SyntaxToken,
 ) -> TsTypeArguments {
-    TsTypeArguments::unwrap_cast(SyntaxNode::new_detached(
-        JsSyntaxKind::TS_TYPE_ARGUMENTS,
-        [
-            Some(SyntaxElement::Token(l_angle_token)),
-            Some(SyntaxElement::Node(ts_type_argument_list.into_syntax())),
-            Some(SyntaxElement::Token(r_angle_token)),
-        ],
-    ))
+    TsTypeArguments::unwrap_cast(SyntaxNode::new_detached(JsSyntaxKind::TS_TYPE_ARGUMENTS, [
+        Some(SyntaxElement::Token(l_angle_token)),
+        Some(SyntaxElement::Node(ts_type_argument_list.into_syntax())),
+        Some(SyntaxElement::Token(r_angle_token)),
+    ]))
 }
 pub fn ts_type_assertion_assignment(
     l_angle_token: SyntaxToken,
@@ -6587,17 +6431,14 @@ impl TsTypeParameterBuilder {
         self
     }
     pub fn build(self) -> TsTypeParameter {
-        TsTypeParameter::unwrap_cast(SyntaxNode::new_detached(
-            JsSyntaxKind::TS_TYPE_PARAMETER,
-            [
-                Some(SyntaxElement::Node(self.modifiers.into_syntax())),
-                Some(SyntaxElement::Node(self.name.into_syntax())),
-                self.constraint
-                    .map(|token| SyntaxElement::Node(token.into_syntax())),
-                self.default
-                    .map(|token| SyntaxElement::Node(token.into_syntax())),
-            ],
-        ))
+        TsTypeParameter::unwrap_cast(SyntaxNode::new_detached(JsSyntaxKind::TS_TYPE_PARAMETER, [
+            Some(SyntaxElement::Node(self.modifiers.into_syntax())),
+            Some(SyntaxElement::Node(self.name.into_syntax())),
+            self.constraint
+                .map(|token| SyntaxElement::Node(token.into_syntax())),
+            self.default
+                .map(|token| SyntaxElement::Node(token.into_syntax())),
+        ]))
     }
 }
 pub fn ts_type_parameter_name(ident_token: SyntaxToken) -> TsTypeParameterName {
@@ -6641,22 +6482,18 @@ impl TsTypeofTypeBuilder {
         self
     }
     pub fn build(self) -> TsTypeofType {
-        TsTypeofType::unwrap_cast(SyntaxNode::new_detached(
-            JsSyntaxKind::TS_TYPEOF_TYPE,
-            [
-                Some(SyntaxElement::Token(self.typeof_token)),
-                Some(SyntaxElement::Node(self.expression_name.into_syntax())),
-                self.type_arguments
-                    .map(|token| SyntaxElement::Node(token.into_syntax())),
-            ],
-        ))
+        TsTypeofType::unwrap_cast(SyntaxNode::new_detached(JsSyntaxKind::TS_TYPEOF_TYPE, [
+            Some(SyntaxElement::Token(self.typeof_token)),
+            Some(SyntaxElement::Node(self.expression_name.into_syntax())),
+            self.type_arguments
+                .map(|token| SyntaxElement::Node(token.into_syntax())),
+        ]))
     }
 }
 pub fn ts_undefined_type(undefined_token: SyntaxToken) -> TsUndefinedType {
-    TsUndefinedType::unwrap_cast(SyntaxNode::new_detached(
-        JsSyntaxKind::TS_UNDEFINED_TYPE,
-        [Some(SyntaxElement::Token(undefined_token))],
-    ))
+    TsUndefinedType::unwrap_cast(SyntaxNode::new_detached(JsSyntaxKind::TS_UNDEFINED_TYPE, [
+        Some(SyntaxElement::Token(undefined_token)),
+    ]))
 }
 pub fn ts_union_type(types: TsUnionTypeVariantList) -> TsUnionTypeBuilder {
     TsUnionTypeBuilder {
@@ -6674,27 +6511,22 @@ impl TsUnionTypeBuilder {
         self
     }
     pub fn build(self) -> TsUnionType {
-        TsUnionType::unwrap_cast(SyntaxNode::new_detached(
-            JsSyntaxKind::TS_UNION_TYPE,
-            [
-                self.leading_separator_token
-                    .map(|token| SyntaxElement::Token(token)),
-                Some(SyntaxElement::Node(self.types.into_syntax())),
-            ],
-        ))
+        TsUnionType::unwrap_cast(SyntaxNode::new_detached(JsSyntaxKind::TS_UNION_TYPE, [
+            self.leading_separator_token
+                .map(|token| SyntaxElement::Token(token)),
+            Some(SyntaxElement::Node(self.types.into_syntax())),
+        ]))
     }
 }
 pub fn ts_unknown_type(unknown_token: SyntaxToken) -> TsUnknownType {
-    TsUnknownType::unwrap_cast(SyntaxNode::new_detached(
-        JsSyntaxKind::TS_UNKNOWN_TYPE,
-        [Some(SyntaxElement::Token(unknown_token))],
-    ))
+    TsUnknownType::unwrap_cast(SyntaxNode::new_detached(JsSyntaxKind::TS_UNKNOWN_TYPE, [
+        Some(SyntaxElement::Token(unknown_token)),
+    ]))
 }
 pub fn ts_void_type(void_token: SyntaxToken) -> TsVoidType {
-    TsVoidType::unwrap_cast(SyntaxNode::new_detached(
-        JsSyntaxKind::TS_VOID_TYPE,
-        [Some(SyntaxElement::Token(void_token))],
-    ))
+    TsVoidType::unwrap_cast(SyntaxNode::new_detached(JsSyntaxKind::TS_VOID_TYPE, [
+        Some(SyntaxElement::Token(void_token)),
+    ]))
 }
 pub fn js_array_assignment_pattern_element_list<I, S>(
     items: I,

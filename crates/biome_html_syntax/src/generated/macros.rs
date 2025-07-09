@@ -16,9 +16,44 @@ macro_rules! map_syntax_node {
     ($ node : expr , $ pattern : pat => $ body : expr) => {
         match $node {
             node => match $crate::HtmlSyntaxNode::kind(&node) {
+                $crate::HtmlSyntaxKind::HTML_ASTRO_EXPRESSION => {
+                    let $pattern = unsafe { $crate::HtmlAstroExpression::new_unchecked(node) };
+                    $body
+                }
+                $crate::HtmlSyntaxKind::HTML_ASTRO_EXPRESSION_ATTRIBUTE => {
+                    let $pattern =
+                        unsafe { $crate::HtmlAstroExpressionAttribute::new_unchecked(node) };
+                    $body
+                }
+                $crate::HtmlSyntaxKind::HTML_ASTRO_FRAGMENT => {
+                    let $pattern = unsafe { $crate::HtmlAstroFragment::new_unchecked(node) };
+                    $body
+                }
+                $crate::HtmlSyntaxKind::HTML_ASTRO_FRAGMENT_CLOSE => {
+                    let $pattern = unsafe { $crate::HtmlAstroFragmentClose::new_unchecked(node) };
+                    $body
+                }
+                $crate::HtmlSyntaxKind::HTML_ASTRO_FRAGMENT_OPEN => {
+                    let $pattern = unsafe { $crate::HtmlAstroFragmentOpen::new_unchecked(node) };
+                    $body
+                }
                 $crate::HtmlSyntaxKind::HTML_ASTRO_FRONTMATTER_ELEMENT => {
                     let $pattern =
                         unsafe { $crate::HtmlAstroFrontmatterElement::new_unchecked(node) };
+                    $body
+                }
+                $crate::HtmlSyntaxKind::HTML_ASTRO_SHORTHAND_ATTRIBUTE => {
+                    let $pattern =
+                        unsafe { $crate::HtmlAstroShorthandAttribute::new_unchecked(node) };
+                    $body
+                }
+                $crate::HtmlSyntaxKind::HTML_ASTRO_SPREAD_ATTRIBUTE => {
+                    let $pattern = unsafe { $crate::HtmlAstroSpreadAttribute::new_unchecked(node) };
+                    $body
+                }
+                $crate::HtmlSyntaxKind::HTML_ASTRO_TEMPLATE_LITERAL_ATTRIBUTE => {
+                    let $pattern =
+                        unsafe { $crate::HtmlAstroTemplateLiteralAttribute::new_unchecked(node) };
                     $body
                 }
                 $crate::HtmlSyntaxKind::HTML_ATTRIBUTE => {

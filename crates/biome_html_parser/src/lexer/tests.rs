@@ -360,3 +360,110 @@ fn cdata_full() {
         CDATA_END: 3,
     }
 }
+
+// Astro-specific tests
+
+#[test]
+fn astro_expression_simple() {
+    assert_lex! {
+        HtmlLexContext::OutsideTag,
+        "{name}",
+        L_CURLY: 1,
+        HTML_LITERAL: 5,
+    }
+}
+
+#[test]
+fn astro_spread_attribute() {
+    assert_lex! {
+        ">{...props}",
+        R_ANGLE: 1,
+        L_CURLY: 1,
+        DOT_DOT_DOT: 3,
+        HTML_LITERAL: 6,
+    }
+}
+
+#[test]
+fn astro_expression_attribute() {
+    assert_lex! {
+        "name={value}",
+        HTML_LITERAL: 4,
+        EQ: 1,
+        L_CURLY: 1,
+        HTML_LITERAL: 6,
+    }
+}
+
+#[test]
+fn astro_template_literal() {
+    assert_lex! {
+        "name={`template ${expr}`}",
+        HTML_LITERAL: 4,
+        EQ: 1,
+        L_CURLY: 1,
+        BACKTICK: 1,
+        HTML_LITERAL: 8,
+        WHITESPACE: 1,
+        HTML_LITERAL: 9,
+    }
+}
+
+#[test]
+fn astro_frontmatter_fence() {
+    assert_lex! {
+        HtmlLexContext::OutsideTag,
+        "---\nconst x = 1;\n---",
+        HTML_LITERAL: 3,
+        NEWLINE: 1,
+        HTML_LITERAL: 12,
+        NEWLINE: 1,
+        HTML_LITERAL: 3,
+    }
+}
+
+#[test]
+fn astro_component_tag() {
+    assert_lex! {
+        "<MyComponent>",
+        L_ANGLE: 1,
+        HTML_LITERAL: 11,
+        R_ANGLE: 1,
+    }
+}
+
+#[test]
+fn astro_complex_expression() {
+    assert_lex! {
+        HtmlLexContext::OutsideTag,
+        "{count > 0 ? 'yes' : 'no'}",
+        L_CURLY: 1,
+        HTML_LITERAL: 25,
+    }
+}
+
+#[test]
+fn astro_mixed_attributes() {
+    assert_lex! {
+        "<div class=\"static\" {name} {...props} data={value}>",
+        L_ANGLE: 1,
+        HTML_LITERAL: 3,
+        WHITESPACE: 1,
+        HTML_LITERAL: 5,
+        EQ: 1,
+        HTML_STRING_LITERAL: 8,
+        WHITESPACE: 1,
+        L_CURLY: 1,
+        HTML_LITERAL: 5,
+        WHITESPACE: 1,
+        L_CURLY: 1,
+        DOT_DOT_DOT: 3,
+        HTML_LITERAL: 6,
+        WHITESPACE: 1,
+        HTML_LITERAL: 4,
+        EQ: 1,
+        L_CURLY: 1,
+        HTML_LITERAL: 6,
+        R_ANGLE: 1,
+    }
+}

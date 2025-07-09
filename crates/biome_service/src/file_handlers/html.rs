@@ -222,19 +222,19 @@ impl ExtensionHandler for HtmlFileHandler {
     }
 }
 
-fn formatter_enabled(path: &Utf8Path, settings: &Settings) -> bool {
+pub(crate) fn formatter_enabled(path: &Utf8Path, settings: &Settings) -> bool {
     settings.formatter_enabled_for_file_path::<HtmlLanguage>(path)
 }
 
-fn linter_enabled(path: &Utf8Path, settings: &Settings) -> bool {
+pub(crate) fn linter_enabled(path: &Utf8Path, settings: &Settings) -> bool {
     settings.linter_enabled_for_file_path::<HtmlLanguage>(path)
 }
 
-fn assist_enabled(path: &Utf8Path, settings: &Settings) -> bool {
+pub(crate) fn assist_enabled(path: &Utf8Path, settings: &Settings) -> bool {
     settings.assist_enabled_for_file_path::<HtmlLanguage>(path)
 }
 
-fn search_enabled(_path: &Utf8Path, _settings: &Settings) -> bool {
+pub(crate) fn search_enabled(_path: &Utf8Path, _settings: &Settings) -> bool {
     true
 }
 
@@ -386,7 +386,7 @@ fn debug_syntax_tree(_biome_path: &BiomePath, parse: AnyParse) -> GetSyntaxTreeR
     }
 }
 
-fn debug_formatter_ir(
+pub(crate) fn debug_formatter_ir(
     path: &BiomePath,
     document_file_source: &DocumentFileSource,
     parse: AnyParse,
@@ -402,7 +402,7 @@ fn debug_formatter_ir(
 }
 
 #[tracing::instrument(level = "debug", skip(parse, settings))]
-fn format(
+pub(crate) fn format(
     biome_path: &BiomePath,
     document_file_source: &DocumentFileSource,
     parse: AnyParse,
@@ -420,7 +420,7 @@ fn format(
 }
 
 #[tracing::instrument(level = "debug", skip(params))]
-fn lint(params: LintParams) -> LintResults {
+pub(crate) fn lint(params: LintParams) -> LintResults {
     let _ = debug_span!("Linting HTML file", path =? params.path, language =? params.language)
         .entered();
     let diagnostics = params.parse.into_diagnostics();

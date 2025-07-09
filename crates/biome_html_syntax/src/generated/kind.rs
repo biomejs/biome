@@ -23,6 +23,10 @@ pub enum HtmlSyntaxKind {
     CDATA_START,
     CDATA_END,
     FENCE,
+    L_CURLY,
+    R_CURLY,
+    DOT_DOT_DOT,
+    BACKTICK,
     NULL_KW,
     TRUE_KW,
     FALSE_KW,
@@ -40,6 +44,14 @@ pub enum HtmlSyntaxKind {
     HTML_SELF_CLOSING_TAG,
     HTML_ELEMENT,
     HTML_ASTRO_FRONTMATTER_ELEMENT,
+    HTML_ASTRO_EXPRESSION,
+    HTML_ASTRO_FRAGMENT,
+    HTML_ASTRO_FRAGMENT_OPEN,
+    HTML_ASTRO_FRAGMENT_CLOSE,
+    HTML_ASTRO_SHORTHAND_ATTRIBUTE,
+    HTML_ASTRO_SPREAD_ATTRIBUTE,
+    HTML_ASTRO_EXPRESSION_ATTRIBUTE,
+    HTML_ASTRO_TEMPLATE_LITERAL_ATTRIBUTE,
     HTML_OPENING_ELEMENT,
     HTML_CLOSING_ELEMENT,
     HTML_SELF_CLOSING_ELEMENT,
@@ -51,6 +63,8 @@ pub enum HtmlSyntaxKind {
     HTML_ELEMENT_LIST,
     HTML_ATTRIBUTE_LIST,
     HTML_CONTENT,
+    HTML_JS_CONTENT,
+    HTML_TEMPLATE_LITERAL_CONTENT,
     HTML_COMMENT,
     HTML_CDATA_SECTION,
     HTML_BOGUS,
@@ -75,6 +89,10 @@ impl HtmlSyntaxKind {
                 | CDATA_START
                 | CDATA_END
                 | FENCE
+                | L_CURLY
+                | R_CURLY
+                | DOT_DOT_DOT
+                | BACKTICK
         )
     }
     pub const fn is_literal(self) -> bool {
@@ -107,6 +125,10 @@ impl HtmlSyntaxKind {
             CDATA_START => "<![CDATA[",
             CDATA_END => "]]>",
             FENCE => "---",
+            L_CURLY => "{",
+            R_CURLY => "}",
+            DOT_DOT_DOT => "...",
+            BACKTICK => "`",
             NULL_KW => "null",
             TRUE_KW => "true",
             FALSE_KW => "false",
@@ -121,4 +143,4 @@ impl HtmlSyntaxKind {
 }
 #[doc = r" Utility macro for creating a SyntaxKind through simple macro syntax"]
 #[macro_export]
-macro_rules ! T { [<] => { $ crate :: HtmlSyntaxKind :: L_ANGLE } ; [>] => { $ crate :: HtmlSyntaxKind :: R_ANGLE } ; [/] => { $ crate :: HtmlSyntaxKind :: SLASH } ; [=] => { $ crate :: HtmlSyntaxKind :: EQ } ; [!] => { $ crate :: HtmlSyntaxKind :: BANG } ; [-] => { $ crate :: HtmlSyntaxKind :: MINUS } ; [<!--] => { $ crate :: HtmlSyntaxKind :: COMMENT_START } ; [-->] => { $ crate :: HtmlSyntaxKind :: COMMENT_END } ; ["<![CDATA["] => { $ crate :: HtmlSyntaxKind :: CDATA_START } ; ["]]>"] => { $ crate :: HtmlSyntaxKind :: CDATA_END } ; [---] => { $ crate :: HtmlSyntaxKind :: FENCE } ; [null] => { $ crate :: HtmlSyntaxKind :: NULL_KW } ; [true] => { $ crate :: HtmlSyntaxKind :: TRUE_KW } ; [false] => { $ crate :: HtmlSyntaxKind :: FALSE_KW } ; [doctype] => { $ crate :: HtmlSyntaxKind :: DOCTYPE_KW } ; [html] => { $ crate :: HtmlSyntaxKind :: HTML_KW } ; [ident] => { $ crate :: HtmlSyntaxKind :: IDENT } ; [EOF] => { $ crate :: HtmlSyntaxKind :: EOF } ; [UNICODE_BOM] => { $ crate :: HtmlSyntaxKind :: UNICODE_BOM } ; [#] => { $ crate :: HtmlSyntaxKind :: HASH } ; }
+macro_rules ! T { [<] => { $ crate :: HtmlSyntaxKind :: L_ANGLE } ; [>] => { $ crate :: HtmlSyntaxKind :: R_ANGLE } ; [/] => { $ crate :: HtmlSyntaxKind :: SLASH } ; [=] => { $ crate :: HtmlSyntaxKind :: EQ } ; [!] => { $ crate :: HtmlSyntaxKind :: BANG } ; [-] => { $ crate :: HtmlSyntaxKind :: MINUS } ; [<!--] => { $ crate :: HtmlSyntaxKind :: COMMENT_START } ; [-->] => { $ crate :: HtmlSyntaxKind :: COMMENT_END } ; ["<![CDATA["] => { $ crate :: HtmlSyntaxKind :: CDATA_START } ; ["]]>"] => { $ crate :: HtmlSyntaxKind :: CDATA_END } ; [---] => { $ crate :: HtmlSyntaxKind :: FENCE } ; ['{'] => { $ crate :: HtmlSyntaxKind :: L_CURLY } ; ['}'] => { $ crate :: HtmlSyntaxKind :: R_CURLY } ; [...] => { $ crate :: HtmlSyntaxKind :: DOT_DOT_DOT } ; ['`'] => { $ crate :: HtmlSyntaxKind :: BACKTICK } ; [html_js_content] => { $ crate :: HtmlSyntaxKind :: HTML_JS_CONTENT } ; [html_template_literal_content] => { $ crate :: HtmlSyntaxKind :: HTML_TEMPLATE_LITERAL_CONTENT } ; [null] => { $ crate :: HtmlSyntaxKind :: NULL_KW } ; [true] => { $ crate :: HtmlSyntaxKind :: TRUE_KW } ; [false] => { $ crate :: HtmlSyntaxKind :: FALSE_KW } ; [doctype] => { $ crate :: HtmlSyntaxKind :: DOCTYPE_KW } ; [html] => { $ crate :: HtmlSyntaxKind :: HTML_KW } ; [ident] => { $ crate :: HtmlSyntaxKind :: IDENT } ; [EOF] => { $ crate :: HtmlSyntaxKind :: EOF } ; [UNICODE_BOM] => { $ crate :: HtmlSyntaxKind :: UNICODE_BOM } ; [#] => { $ crate :: HtmlSyntaxKind :: HASH } ; }
