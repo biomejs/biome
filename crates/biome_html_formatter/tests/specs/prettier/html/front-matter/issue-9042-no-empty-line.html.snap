@@ -19,17 +19,38 @@ href="https://prettier.io">abc</a>.
 ```diff
 --- Prettier
 +++ Biome
-@@ -1,5 +1 @@
-----
--layout: foo
-----
+@@ -1,5 +1,4 @@
+ ---
+ layout: foo
+ ---
 -
--Test <a href="https://prettier.io">abc</a>.
-+--- layout: foo --- Test <a href="https://prettier.io">abc</a>.
+ Test <a href="https://prettier.io">abc</a>.
 ```
 
 # Output
 
 ```html
---- layout: foo --- Test <a href="https://prettier.io">abc</a>.
+---
+layout: foo
+---
+Test <a href="https://prettier.io">abc</a>.
+```
+
+# Errors
+```
+issue-9042-no-empty-line.html:1:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Frontmatter is only valid inside Astro files.
+  
+  > 1 │ ---
+      │ ^^^
+  > 2 │ layout: foo
+  > 3 │ ---
+      │ ^^^
+    4 │ Test <a
+    5 │ href="https://prettier.io">abc</a>.
+  
+  i Remove it or rename the file to have the .astro extension.
+  
+
 ```

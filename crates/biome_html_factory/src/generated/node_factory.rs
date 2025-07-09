@@ -6,29 +6,29 @@ use biome_html_syntax::{
     HtmlSyntaxToken as SyntaxToken, *,
 };
 use biome_rowan::AstNode;
-pub fn html_astro_frontmatter_element(
+pub fn astro_frontmatter_element(
     l_fence_token: SyntaxToken,
     r_fence_token: SyntaxToken,
-) -> HtmlAstroFrontmatterElementBuilder {
-    HtmlAstroFrontmatterElementBuilder {
+) -> AstroFrontmatterElementBuilder {
+    AstroFrontmatterElementBuilder {
         l_fence_token,
         r_fence_token,
         content_token: None,
     }
 }
-pub struct HtmlAstroFrontmatterElementBuilder {
+pub struct AstroFrontmatterElementBuilder {
     l_fence_token: SyntaxToken,
     r_fence_token: SyntaxToken,
     content_token: Option<SyntaxToken>,
 }
-impl HtmlAstroFrontmatterElementBuilder {
+impl AstroFrontmatterElementBuilder {
     pub fn with_content_token(mut self, content_token: SyntaxToken) -> Self {
         self.content_token = Some(content_token);
         self
     }
-    pub fn build(self) -> HtmlAstroFrontmatterElement {
-        HtmlAstroFrontmatterElement::unwrap_cast(SyntaxNode::new_detached(
-            HtmlSyntaxKind::HTML_ASTRO_FRONTMATTER_ELEMENT,
+    pub fn build(self) -> AstroFrontmatterElement {
+        AstroFrontmatterElement::unwrap_cast(SyntaxNode::new_detached(
+            HtmlSyntaxKind::ASTRO_FRONTMATTER_ELEMENT,
             [
                 Some(SyntaxElement::Token(self.l_fence_token)),
                 self.content_token.map(|token| SyntaxElement::Token(token)),
@@ -236,7 +236,7 @@ pub struct HtmlRootBuilder {
     html: HtmlElementList,
     eof_token: SyntaxToken,
     bom_token: Option<SyntaxToken>,
-    frontmatter: Option<HtmlAstroFrontmatterElement>,
+    frontmatter: Option<AnyAstroFrontmatterElement>,
     directive: Option<HtmlDirective>,
 }
 impl HtmlRootBuilder {
@@ -244,7 +244,7 @@ impl HtmlRootBuilder {
         self.bom_token = Some(bom_token);
         self
     }
-    pub fn with_frontmatter(mut self, frontmatter: HtmlAstroFrontmatterElement) -> Self {
+    pub fn with_frontmatter(mut self, frontmatter: AnyAstroFrontmatterElement) -> Self {
         self.frontmatter = Some(frontmatter);
         self
     }
@@ -318,6 +318,34 @@ pub fn html_tag_name(value_token: SyntaxToken) -> HtmlTagName {
         [Some(SyntaxElement::Token(value_token))],
     ))
 }
+pub fn html_text_expression(
+    l_double_curly_token: SyntaxToken,
+    expression_token: SyntaxToken,
+    r_double_curly_token: SyntaxToken,
+) -> HtmlTextExpression {
+    HtmlTextExpression::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::HTML_TEXT_EXPRESSION,
+        [
+            Some(SyntaxElement::Token(l_double_curly_token)),
+            Some(SyntaxElement::Token(expression_token)),
+            Some(SyntaxElement::Token(r_double_curly_token)),
+        ],
+    ))
+}
+pub fn svelte_text_expression(
+    l_curly_token: SyntaxToken,
+    expression_token: SyntaxToken,
+    r_curly_token: SyntaxToken,
+) -> SvelteTextExpression {
+    SvelteTextExpression::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::SVELTE_TEXT_EXPRESSION,
+        [
+            Some(SyntaxElement::Token(l_curly_token)),
+            Some(SyntaxElement::Token(expression_token)),
+            Some(SyntaxElement::Token(r_curly_token)),
+        ],
+    ))
+}
 pub fn html_attribute_list<I>(items: I) -> HtmlAttributeList
 where
     I: IntoIterator<Item = AnyHtmlAttribute>,
@@ -340,6 +368,16 @@ where
         items
             .into_iter()
             .map(|item| Some(item.into_syntax().into())),
+    ))
+}
+pub fn astro_bogus_frontmatter<I>(slots: I) -> AstroBogusFrontmatter
+where
+    I: IntoIterator<Item = Option<SyntaxElement>>,
+    I::IntoIter: ExactSizeIterator,
+{
+    AstroBogusFrontmatter::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::ASTRO_BOGUS_FRONTMATTER,
+        slots,
     ))
 }
 pub fn html_bogus<I>(slots: I) -> HtmlBogus

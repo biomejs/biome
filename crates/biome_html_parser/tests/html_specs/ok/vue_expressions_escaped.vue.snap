@@ -1,0 +1,77 @@
+---
+source: crates/biome_html_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```vue
+<template>
+	\{\{ xyz \}\}
+</template>
+
+```
+
+
+## AST
+
+```
+HtmlRoot {
+    bom_token: missing (optional),
+    frontmatter: missing (optional),
+    directive: missing (optional),
+    html: HtmlElementList [
+        HtmlElement {
+            opening_element: HtmlOpeningElement {
+                l_angle_token: L_ANGLE@0..1 "<" [] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@1..9 "template" [] [],
+                },
+                attributes: HtmlAttributeList [],
+                r_angle_token: R_ANGLE@9..10 ">" [] [],
+            },
+            children: HtmlElementList [
+                HtmlContent {
+                    value_token: HTML_LITERAL@10..25 "\\{\\{ xyz \\}\\}" [Newline("\n"), Whitespace("\t")] [],
+                },
+            ],
+            closing_element: HtmlClosingElement {
+                l_angle_token: L_ANGLE@25..27 "<" [Newline("\n")] [],
+                slash_token: SLASH@27..28 "/" [] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@28..36 "template" [] [],
+                },
+                r_angle_token: R_ANGLE@36..37 ">" [] [],
+            },
+        },
+    ],
+    eof_token: EOF@37..38 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: HTML_ROOT@0..38
+  0: (empty)
+  1: (empty)
+  2: (empty)
+  3: HTML_ELEMENT_LIST@0..37
+    0: HTML_ELEMENT@0..37
+      0: HTML_OPENING_ELEMENT@0..10
+        0: L_ANGLE@0..1 "<" [] []
+        1: HTML_TAG_NAME@1..9
+          0: HTML_LITERAL@1..9 "template" [] []
+        2: HTML_ATTRIBUTE_LIST@9..9
+        3: R_ANGLE@9..10 ">" [] []
+      1: HTML_ELEMENT_LIST@10..25
+        0: HTML_CONTENT@10..25
+          0: HTML_LITERAL@10..25 "\\{\\{ xyz \\}\\}" [Newline("\n"), Whitespace("\t")] []
+      2: HTML_CLOSING_ELEMENT@25..37
+        0: L_ANGLE@25..27 "<" [Newline("\n")] []
+        1: SLASH@27..28 "/" [] []
+        2: HTML_TAG_NAME@28..36
+          0: HTML_LITERAL@28..36 "template" [] []
+        3: R_ANGLE@36..37 ">" [] []
+  4: EOF@37..38 "" [Newline("\n")] []
+
+```
