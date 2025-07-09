@@ -618,14 +618,22 @@ declare_source_rule! {
     /// }
     /// ```
     ///
-    /// ## Options
-    /// This actions accepts following options
+    /// ## Change the sorting of import identifiers to lexicographic sorting
+    /// This only applies to the named import/exports and not the source itself.
     ///
-    /// ### `groups`
-    /// The usage of `groups` is explained in detail above.
+    /// ```json,options
+    /// {
+    ///     "options": {
+    ///         "identifierOrder": "lexicographic"
+    ///     }
+    /// }
+    /// ```
+    /// ```js,use_options,expect_diagnostic
+    /// import { var1, var2, var21, var11, var12, var22 } from 'my-package'
+    /// ```
     ///
-    /// ### `identifierOrder`
-    /// This options supports `natural` and `lexicographic` values. Where as `natural` is the default. This only applies to the named import/exports and not the source itself.
+    /// ## Change the sorting of import identifiers to logical sorting
+    /// This is the default behavior incase you do not override. This only applies to the named import/exports and not the source itself.
     ///
     /// ```json,options
     /// {
@@ -633,6 +641,9 @@ declare_source_rule! {
     ///         "identifierOrder": "natural"
     ///     }
     /// }
+    /// ```
+    /// ```js,use_options,expect_diagnostic
+    /// import { var1, var2, var21, var11, var12, var22 } from 'my-package'
     /// ```
     ///
     pub OrganizeImports {

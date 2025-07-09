@@ -33,12 +33,42 @@ declare_source_rule! {
     /// ### `sortOrder`
     /// This options supports `natural` and `lexicographic` values. Where as `natural` is the default.
     ///
+    /// Following will apply the natural sort order.
+    ///
     /// ```json,options
     /// {
     ///     "options": {
     ///         "sortOrder": "natural"
     ///     }
     /// }
+    /// ```
+    /// ```json,use_options,expect_diagnostic
+    /// {
+    ///     "val13": 1,
+    ///     "val1": 1,
+    ///     "val2": 1,
+    ///     "val21": 1,
+    ///     "val11": 1,
+    /// };
+    /// ```
+    ///
+    /// Following will apply the lexicographic sort order.
+    ///
+    /// ```json,options
+    /// {
+    ///     "options": {
+    ///         "sortOrder": "lexicographic"
+    ///     }
+    /// }
+    /// ```
+    /// ```json,use_options,expect_diagnostic
+    /// {
+    ///     "val13": 1,
+    ///     "val1": 1,
+    ///     "val2": 1,
+    ///     "val21": 1,
+    ///     "val11": 1,
+    /// };
     /// ```
     ///
     pub UseSortedKeys {

@@ -44,12 +44,30 @@ declare_source_rule! {
     /// ### `sortOrder`
     /// This options supports `natural` and `lexicographic` values. Where as `natural` is the default.
     ///
+    /// Following will apply the natural sort order.
+    ///
     /// ```json,options
     /// {
     ///     "options": {
     ///         "sortOrder": "natural"
     ///     }
     /// }
+    /// ```
+    /// ```jsx,use_options,expect_diagnostic
+    /// <Hello tel={5555555} {...this.props} opt1="John" opt2="" opt12="" opt11="" />;
+    /// ```
+    ///
+    /// Following will apply the lexicographic sort order.
+    ///
+    /// ```json,options
+    /// {
+    ///     "options": {
+    ///         "sortOrder": "lexicographic"
+    ///     }
+    /// }
+    /// ```
+    /// ```jsx,use_options,expect_diagnostic
+    /// <Hello tel={5555555} {...this.props} opt1="John" opt2="" opt12="" opt11="" />;
     /// ```
     ///
     pub UseSortedAttributes {
