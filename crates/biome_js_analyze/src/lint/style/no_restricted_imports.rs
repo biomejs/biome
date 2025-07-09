@@ -334,7 +334,7 @@ declare_lint_rule! {
     /// ```
     ///
     /// ### `patterns`
-    /// **Since `v2.1.0`**
+    /// **Since `v2.2.0`**
     ///
     /// This option allows you to specify multiple modules to restrict using gitignore-style patterns.
     ///
