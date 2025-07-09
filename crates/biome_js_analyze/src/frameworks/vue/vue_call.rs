@@ -2,7 +2,7 @@ use crate::frameworks::is_framework_api_reference;
 use biome_js_semantic::SemanticModel;
 use biome_js_syntax::{AnyJsExpression, JsCallExpression};
 
-/// This function checks if a given call expression is a call to a Vue compiler macro.
+/// Given a Vue compiler macro, checks if the given call expression is a call to that macro.
 pub fn is_vue_compiler_macro_call(
     call: &JsCallExpression,
     model: &SemanticModel,
