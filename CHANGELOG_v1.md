@@ -201,7 +201,7 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
    Contributed by @fireairforce
 
- - [useNamingConvention](https://biomejs.dev/linter/rules/use-naming-convention/) now allows configuring conventions for readonly index signatures.
+- [useNamingConvention](https://biomejs.dev/linter/rules/use-naming-convention/) now allows configuring conventions for readonly index signatures.
 
   Contributed by @sepruko
 

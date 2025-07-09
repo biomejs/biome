@@ -3,7 +3,7 @@
 These test snapshots were extracted from the
 [prettier/prettier](https://github.com/prettier/prettier) repository
 
-# Usage
+## Usage
 
 These tests are run as part of the `biome_json_formatter` test suite but can be
 explicitely called with `cargo test -p biome_json_formatter --test prettier_tests`
@@ -12,7 +12,7 @@ Setting the `REPORT_PRETTIER=1` environment variable when running these tests
 will emit a `report.md` file containing an exhaustive difference between the
 output of `biome_json_formatter` and Prettier's own snapshots
 
-# Updating
+## Updating
 
 Prettier is using Jest to run snapshot tests, and a node.js script is needed to
 extract these snapshots into plain files for use in the Rust tests. To update

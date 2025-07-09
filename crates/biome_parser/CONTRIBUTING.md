@@ -163,7 +163,7 @@ pub(crate) struct BetaParser<'source> {
     options: BetaParserOptions,
 }
 ```
-___
+---
 
 ## Authoring Parse Rules
 
@@ -413,4 +413,3 @@ What if there's no `BOGUS` node matching the node of your parse rule? You must t
 * It returns `Absent` otherwise and must not progress parsing nor add any errors.
 * Lists must perform error recovery to avoid infinite loops.
 * Consult the grammar to identify the `BOGUS` node that is valid in the context of your rule.
-

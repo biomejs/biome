@@ -6,7 +6,7 @@ Added the rule [`noVueReservedProps`](https://biomejs.dev/linter/rules/no-vue-re
 
 It prevents the use of reserved Vue prop names such as `key` and `ref` which can cause conflicts and unexpected behavior in Vue components.
 
-**Invalid example**
+### Invalid example
 
 ```js
 import {defineComponent} from 'vue';
@@ -30,7 +30,7 @@ defineProps({
 </script>
 ```
 
-**Valid examples**
+### Valid examples
 
 ```js
 import {defineComponent} from 'vue';
