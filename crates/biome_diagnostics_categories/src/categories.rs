@@ -193,6 +193,7 @@ define_categories! {
     "lint/nursery/noUselessBackrefInRegex": "https://biomejs.dev/linter/rules/no-useless-backref-in-regex",
     "lint/nursery/noUselessEscapeInString": "https://biomejs.dev/linter/rules/no-useless-escape-in-string",
     "lint/nursery/noUselessUndefined": "https://biomejs.dev/linter/rules/no-useless-undefined",
+    "lint/nursery/preferClasslist": "https://biomejs.dev/linter/rules/prefer-classlist",
     "lint/nursery/useAdjacentGetterSetter": "https://biomejs.dev/linter/rules/use-adjacent-getter-setter",
     "lint/nursery/useBiomeSuppressionComment": "https://biomejs.dev/linter/rules/use-biome-suppression-comment",
     "lint/nursery/useConsistentObjectDefinition": "https://biomejs.dev/linter/rules/use-consistent-object-definition",

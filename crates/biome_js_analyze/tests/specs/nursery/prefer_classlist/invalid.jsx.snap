@@ -1,0 +1,47 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.jsx
+---
+# Input
+```jsx
+import { component$ } from "@builder.io/qwik";
+import classnames from "classnames";
+import styles from "./MyComponent.module.css";
+
+export default component$((props) => {
+  return (
+    <div class={classnames(
+      styles.container,
+      "p-8",
+      {
+        "text-green-500": props.isHighAttention,
+        "text-slate-500": !props.isHighAttention,
+      },
+      { active: true }
+    )}>
+      Hello world!
+    </div>
+  );
+}); 
+```
+
+# Diagnostics
+```
+invalid.jsx:7:10 lint/nursery/preferClasslist ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use the classlist prop instead of using classnames. The classlist prop accepts an object { [class: string]: boolean } just like classnames.
+  
+     5 │ export default component$((props) => {
+     6 │   return (
+   > 7 │     <div class={classnames(
+       │          ^^^^^^^^^^^^^^^^^^
+   > 8 │       styles.container,
+        ...
+  > 14 │       { active: true }
+  > 15 │     )}>
+       │     ^^
+    16 │       Hello world!
+    17 │     </div>
+  
+
+```
