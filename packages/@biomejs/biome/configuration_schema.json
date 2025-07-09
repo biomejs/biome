@@ -5047,6 +5047,10 @@
 				"groups": {
 					"default": [],
 					"allOf": [{ "$ref": "#/definitions/ImportGroups" }]
+				},
+				"identifierOrder": {
+					"default": "natural",
+					"allOf": [{ "$ref": "#/definitions/SortOrder" }]
 				}
 			},
 			"additionalProperties": false
@@ -11390,6 +11394,7 @@
 				{ "$ref": "#/definitions/Suspicious" }
 			]
 		},
+		"SortOrder": { "type": "string", "enum": ["natural", "lexicographic"] },
 		"Source": {
 			"description": "A list of rules that belong to this group",
 			"type": "object",
@@ -13533,6 +13538,12 @@
 		},
 		"UseSortedAttributesOptions": {
 			"type": "object",
+			"properties": {
+				"sortOrder": {
+					"default": "natural",
+					"allOf": [{ "$ref": "#/definitions/SortOrder" }]
+				}
+			},
 			"additionalProperties": false
 		},
 		"UseSortedClassesConfiguration": {
@@ -13557,7 +13568,16 @@
 			},
 			"additionalProperties": false
 		},
-		"UseSortedKeysOptions": { "type": "object", "additionalProperties": false },
+		"UseSortedKeysOptions": {
+			"type": "object",
+			"properties": {
+				"sortOrder": {
+					"default": "natural",
+					"allOf": [{ "$ref": "#/definitions/SortOrder" }]
+				}
+			},
+			"additionalProperties": false
+		},
 		"UseSortedPropertiesOptions": {
 			"type": "object",
 			"additionalProperties": false
