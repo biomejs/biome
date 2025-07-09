@@ -1,6 +1,7 @@
 use biome_cli::{
     DiagnosticsPayload, Execution, Reporter, ReporterVisitor, TraversalSummary, VcsTargeted,
 };
+use camino::Utf8Path;
 
 /// This will be the visitor, which where we **write** the data
 struct BufferVisitor(String);
@@ -38,6 +39,7 @@ impl ReporterVisitor for BufferVisitor {
         _execution: &Execution,
         _payload: DiagnosticsPayload,
         _verbose: bool,
+        _working_directory: Option<&Utf8Path>,
     ) -> std::io::Result<()> {
         todo!()
     }

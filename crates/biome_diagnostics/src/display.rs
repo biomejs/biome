@@ -513,7 +513,9 @@ impl Visit for PrintAdvices<'_, '_> {
                             self.0.write_markup(markup!({ header_cell }))?;
                             if index < headers.len() - 1 {
                                 self.0.write_markup(
-                                    markup! {{Padding::new(padding + longest_cell.saturating_sub(header_cell.text_len()))}},
+                                    markup! {
+                                        {Padding::new(padding + longest_cell.saturating_sub(header_cell.text_len()))}
+                                    },
                                 )?;
                             }
                         }
