@@ -5,6 +5,7 @@ use biome_deserialize::{
 };
 use biome_deserialize_macros::Deserializable;
 use biome_diagnostics::Severity;
+use biome_rowan::Text;
 use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Debug, Deserialize, Deserializable, Eq, PartialEq, Serialize)]
@@ -116,6 +117,10 @@ pub enum StableHookResult {
     /// For example, React's `useState()` hook returns a stable function at
     /// index 1.
     Indices(Vec<u8>),
+
+    /// Used to indicate the hook returns an object and some of its properties
+    /// have stable identities.
+    Keys(Vec<String>),
 }
 
 #[cfg(feature = "schema")]
@@ -158,7 +163,23 @@ impl schemars::JsonSchema for StableHookResult {
                             ..Default::default()
                         })),
                         ..Default::default()
-                    })
+                    }),
+                    Schema::Object(SchemaObject {
+                        instance_type: Some(InstanceType::Array.into()),
+                        array: Some(Box::new(ArrayValidation {
+                            items: Some(SingleOrVec::Single(Box::new(Schema::Object(SchemaObject {
+                                instance_type: Some(InstanceType::String.into()),
+                                ..Default::default()
+                            })))),
+                            min_items: Some(1),
+                            ..Default::default()
+                        })),
+                        metadata: Some(Box::new(Metadata {
+                            description: Some("Used to indicate the hook returns an object and some of its properties have stable identities.".to_owned()),
+                            ..Default::default()
+                        })),
+                        ..Default::default()
+                    }),
                 ]),
                 ..Default::default()
             })),
@@ -189,20 +210,40 @@ impl DeserializationVisitor for StableResultVisitor {
         self,
         ctx: &mut impl DeserializationContext,
         items: impl Iterator<Item = Option<impl DeserializableValue>>,
-        _range: TextRange,
+        range: TextRange,
         _name: &str,
     ) -> Option<Self::Output> {
-        let indices: Vec<u8> = items
-            .filter_map(|value| {
-                DeserializableValue::deserialize(&value?, ctx, StableResultIndexVisitor, "")
-            })
-            .collect();
+        let (mut keys, mut indices) = (Vec::new(), Vec::new());
 
-        Some(if indices.is_empty() {
-            StableHookResult::None
-        } else {
-            StableHookResult::Indices(indices)
-        })
+        for value in items {
+            if let Some(deserialized) = value.and_then(|v| {
+                DeserializableValue::deserialize(&v, ctx, StableResultArrayVisitor, "")
+            }) {
+                match deserialized {
+                    StableResultItem::Key(key) => keys.push(key),
+                    StableResultItem::Index(index) => indices.push(index),
+                }
+            }
+        }
+
+        if !keys.is_empty() && !indices.is_empty() {
+            ctx.report(
+                DeserializationDiagnostic::new(markup! {
+                    "Expected either property key names or array indices, not a combination of both"
+                })
+                .with_range(range),
+            );
+        }
+
+        if !keys.is_empty() {
+            return Some(StableHookResult::Keys(keys));
+        }
+
+        if !indices.is_empty() {
+            return Some(StableHookResult::Indices(indices));
+        }
+
+        Some(StableHookResult::None)
     }
 
     fn visit_bool(
@@ -236,6 +277,39 @@ impl DeserializationVisitor for StableResultVisitor {
     ) -> Option<Self::Output> {
         StableResultIndexVisitor::visit_number(StableResultIndexVisitor, ctx, value, range, name)
             .map(|index| StableHookResult::Indices(vec![index]))
+    }
+}
+
+enum StableResultItem {
+    Key(String),
+    Index(u8),
+}
+
+struct StableResultArrayVisitor;
+impl DeserializationVisitor for StableResultArrayVisitor {
+    type Output = StableResultItem;
+    const EXPECTED_TYPE: DeserializableTypes =
+        DeserializableTypes::STR.union(DeserializableTypes::NUMBER);
+
+    fn visit_str(
+        self,
+        _ctx: &mut impl DeserializationContext,
+        value: Text,
+        _range: TextRange,
+        _name: &str,
+    ) -> Option<Self::Output> {
+        Some(StableResultItem::Key(value.to_string()))
+    }
+
+    fn visit_number(
+        self,
+        ctx: &mut impl DeserializationContext,
+        value: biome_deserialize::TextNumber,
+        range: TextRange,
+        name: &str,
+    ) -> Option<Self::Output> {
+        StableResultIndexVisitor::visit_number(StableResultIndexVisitor, ctx, value, range, name)
+            .map(StableResultItem::Index)
     }
 }
 

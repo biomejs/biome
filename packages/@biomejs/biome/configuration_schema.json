@@ -11465,6 +11465,12 @@
 						"minimum": 0.0
 					},
 					"minItems": 1
+				},
+				{
+					"description": "Used to indicate the hook returns an object and some of its properties have stable identities.",
+					"type": "array",
+					"items": { "type": "string" },
+					"minItems": 1
 				}
 			]
 		},
