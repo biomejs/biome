@@ -4,8 +4,8 @@ on:
     branches:
       - main
       - next
-    # paths:
-    #   - "**/*.md"
+    paths:
+      - "**/*.md"
 
 jobs:
   lint:
