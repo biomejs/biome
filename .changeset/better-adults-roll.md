@@ -1,5 +1,4 @@
 ---
-"@biomejs/backend-jsonrpc": minor
 "@biomejs/biome": minor
 ---
 
