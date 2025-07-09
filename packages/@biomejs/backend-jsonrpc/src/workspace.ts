@@ -1658,6 +1658,10 @@ export interface Nursery {
 	 */
 	noUselessUndefined?: RuleFixConfiguration_for_NoUselessUndefinedOptions;
 	/**
+	 * Disallow reserved names to be used as props.
+	 */
+	noVueReservedProps?: RuleConfiguration_for_NoVueReservedPropsOptions;
+	/**
 	 * It enables the recommended rules for this group
 	 */
 	recommended?: boolean;
@@ -2915,6 +2919,9 @@ export type RuleFixConfiguration_for_NoUselessEscapeInStringOptions =
 export type RuleFixConfiguration_for_NoUselessUndefinedOptions =
 	| RulePlainConfiguration
 	| RuleWithFixOptions_for_NoUselessUndefinedOptions;
+export type RuleConfiguration_for_NoVueReservedPropsOptions =
+	| RulePlainConfiguration
+	| RuleWithOptions_for_NoVueReservedPropsOptions;
 export type RuleConfiguration_for_UseAdjacentGetterSetterOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_UseAdjacentGetterSetterOptions;
@@ -5292,6 +5299,16 @@ export interface RuleWithFixOptions_for_NoUselessUndefinedOptions {
 	 * Rule's options
 	 */
 	options: NoUselessUndefinedOptions;
+}
+export interface RuleWithOptions_for_NoVueReservedPropsOptions {
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: NoVueReservedPropsOptions;
 }
 export interface RuleWithOptions_for_UseAdjacentGetterSetterOptions {
 	/**
@@ -7671,6 +7688,7 @@ export interface NoUnwantedPolyfillioOptions {}
 export interface NoUselessBackrefInRegexOptions {}
 export interface NoUselessEscapeInStringOptions {}
 export interface NoUselessUndefinedOptions {}
+export interface NoVueReservedPropsOptions {}
 export interface UseAdjacentGetterSetterOptions {}
 export interface UseConsistentObjectDefinitionOptions {
 	/**
@@ -8351,6 +8369,7 @@ export type Category =
 	| "lint/nursery/noUselessBackrefInRegex"
 	| "lint/nursery/noUselessEscapeInString"
 	| "lint/nursery/noUselessUndefined"
+	| "lint/nursery/noVueReservedProps"
 	| "lint/nursery/useAdjacentGetterSetter"
 	| "lint/nursery/useBiomeSuppressionComment"
 	| "lint/nursery/useConsistentObjectDefinition"

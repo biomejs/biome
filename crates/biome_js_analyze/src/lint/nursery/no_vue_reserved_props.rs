@@ -2,22 +2,109 @@ use crate::frameworks::vue::vue_component::{
     VueComponent, VueComponentDeclarations, VueComponentQuery, VueDeclaration,
     VueDeclarationCollectionFilter, VueDeclarationName,
 };
-use biome_analyze::{Rule, RuleDiagnostic, RuleDomain, context::RuleContext, declare_lint_rule};
+use biome_analyze::{
+    Rule, RuleDiagnostic, RuleDomain, RuleSource, context::RuleContext, declare_lint_rule,
+};
 use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_syntax::JsFileSource;
-use biome_rowan::AstNode;
+use biome_rule_options::no_vue_reserved_props::NoVueReservedPropsOptions;
 use enumflags2::make_bitflags;
 
 declare_lint_rule! {
-    /// Succinct description of the rule.
+    /// Disallow reserved names to be used as props.
+    ///
+    /// Vue reserves certain prop names for its internal use. Using these reserved names
+    /// as prop names can cause conflicts and unexpected behavior in your Vue components.
+    ///
+    /// This rule prevents the use of the following reserved prop names:
+    /// - `key` - Used by Vue for list rendering and component identification
+    /// - `ref` - Used by Vue for template refs
+    ///
+    /// ## Examples
+    ///
+    /// ### Invalid
+    ///
+    /// ```vue,expect_diagnostic
+    /// <script setup>
+    /// defineProps({
+    ///     ref: String,
+    /// });
+    /// </script>
+    /// ```
+    ///
+    /// ```js,expect_diagnostic
+    /// import {defineComponent} from 'vue';
+    ///
+    /// export default defineComponent({
+    ///     props: [
+    ///         'key',
+    ///     ]
+    /// });
+    /// ```
+    ///
+    /// ```vue,expect_diagnostic
+    /// <script setup lang="ts">
+    /// defineProps<{
+    ///     ref: string,
+    /// }>();
+    /// </script>
+    /// ```
+    ///
+    /// ```vue,expect_diagnostic
+    /// <script>
+    /// export default {
+    ///     props: {
+    ///         key: String,
+    ///     }
+    /// };
+    /// </script>
+    /// ```
+    ///
+    /// ### Valid
+    ///
+    /// ```js
+    /// import {defineComponent} from 'vue';
+    ///
+    /// export default defineComponent({
+    ///     props: ['foo']
+    /// });
+    /// ```
+    ///
+    /// ```vue
+    /// <script setup>
+    /// defineProps({ foo: String });
+    /// </script>
+    /// ```
+    ///
+    /// ```vue
+    /// <script setup lang="ts">
+    /// defineProps<{
+    ///     foo: string,
+    ///     bar: string,
+    /// }>();
+    /// </script>
+    /// ```
+    ///
+    /// ```vue
+    /// <script>
+    /// export default {
+    ///     props: {
+    ///         foo: String,
+    ///         bar: String,
+    ///     }
+    /// };
+    /// </script>
+    /// ```
+    ///
     pub NoVueReservedProps {
         version: "next",
         name: "noVueReservedProps",
         language: "js",
-        recommended: false,
-        severity: Severity::Warning,
+        recommended: true,
+        severity: Severity::Error,
         domains: &[RuleDomain::Vue],
+        sources: &[RuleSource::EslintVueJs("no-reserved-props").same()],
     }
 }
 
@@ -25,7 +112,7 @@ impl Rule for NoVueReservedProps {
     type Query = VueComponentQuery;
     type State = VueDeclaration;
     type Signals = Box<[Self::State]>;
-    type Options = ();
+    type Options = NoVueReservedPropsOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let Some(component) = VueComponent::from_potential_component(
@@ -36,15 +123,12 @@ impl Rule for NoVueReservedProps {
             return Box::new([]);
         };
 
-        println!("Has component: {}", ctx.query().to_trimmed_text().text());
-
         component
             .declarations(make_bitflags!(VueDeclarationCollectionFilter::Prop))
             .into_iter()
             .filter_map(|declaration| {
                 let name = declaration.declaration_name()?;
-                println!("Decl name: {}", name.text());
-                if RESERVED_PROPS.binary_search(&name.text()).is_ok() {
+                if RESERVED_PROPS.contains(&name.text()) {
                     Some(declaration)
                 } else {
                     None
@@ -69,13 +153,5 @@ impl Rule for NoVueReservedProps {
     }
 }
 
-const RESERVED_PROPS: &[&str] = &[
-    "class",
-    "is",
-    "key",
-    "ref",
-    "slot",
-    "slot-scope",
-    "slotScope",
-    "style",
-];
+/// List of reserved Vue props for Vue version 3.x.
+const RESERVED_PROPS: &[&str] = &["key", "ref"];

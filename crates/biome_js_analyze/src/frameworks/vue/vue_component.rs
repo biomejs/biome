@@ -2,56 +2,75 @@ use crate::frameworks::vue::vue_call::{is_vue_api_reference, is_vue_compiler_mac
 use crate::services::semantic::Semantic;
 use biome_js_semantic::SemanticModel;
 use biome_js_syntax::{
-    AnyJsArrayBindingPatternElement, AnyJsArrayElement, AnyJsBinding, AnyJsBindingPattern,
-    AnyJsCombinedSpecifier, AnyJsExpression, AnyJsImportClause, AnyJsLiteralExpression,
-    AnyJsModuleItem, AnyJsNamedImportSpecifier, AnyJsObjectBindingPatternMember, AnyJsObjectMember,
-    AnyJsStatement, AnyTsType, AnyTsTypeMember, JsArrayBindingPattern, JsCallExpression,
-    JsDefaultImportSpecifier, JsExportDefaultExpressionClause, JsFileSource, JsFunctionDeclaration,
-    JsIdentifierBinding, JsMethodObjectMember, JsModule, JsNamedImportSpecifier,
-    JsNamedImportSpecifiers, JsNamespaceImportSpecifier, JsObjectBindingPattern,
-    JsPropertyObjectMember, JsShorthandNamedImportSpecifier, JsStringLiteralExpression,
-    JsVariableDeclarator, TsIdentifierBinding, TsInterfaceDeclaration,
-    TsPropertySignatureTypeMember, TsTypeAliasDeclaration,
+    AnyJsArrayElement, AnyJsExpression, AnyJsLiteralExpression, AnyJsObjectMember, AnyTsType,
+    AnyTsTypeMember, JsCallExpression, JsDefaultImportSpecifier, JsExportDefaultExpressionClause,
+    JsFileSource, JsFunctionDeclaration, JsIdentifierBinding, JsMethodObjectMember,
+    JsNamedImportSpecifier, JsNamespaceImportSpecifier, JsPropertyObjectMember,
+    JsShorthandNamedImportSpecifier, JsStringLiteralExpression, TsIdentifierBinding,
+    TsInterfaceDeclaration, TsPropertySignatureTypeMember, TsTypeAliasDeclaration,
 };
 use biome_rowan::{AstNode, AstSeparatedList, TextRange, TokenText, declare_node_union};
 
+use crate::utils::rename::RenamableNode;
 use enumflags2::{BitFlags, bitflags};
 
+/// VueComponentQuery is a query type that can be used to find Vue components.
+/// It can match any potential Vue component.
 pub type VueComponentQuery = Semantic<AnyPotentialVueComponent>;
 
 declare_node_union! {
-    pub AnyPotentialVueComponent =
-        JsModule
-        | JsExportDefaultExpressionClause
+    pub AnyPotentialVueComponent = JsExportDefaultExpressionClause
         | JsCallExpression
 }
 
+/// A filter to collect declarations from a vue component.
 #[derive(Debug, Copy, Clone, Eq, PartialEq)]
 #[bitflags]
 #[repr(u8)]
 pub enum VueDeclarationCollectionFilter {
+    /// A prop of a Vue component.
+    /// Can be defined via `props` option in Options API or `defineProps` in `<script setup>`.
     Prop = 1 << 0,
+    /// A setup variable in a Vue component.
+    /// Can be defined using `const`, `let` or `function`.
+    /// FIXME: Not supported yet. Will be supported when `<script setup>` is implemented.
     Setup = 1 << 1,
+    /// A setup import in a Vue component.
+    /// FIXME: Not supported yet. Will be supported when `<script setup>` is implemented.
     SetupImport = 1 << 2,
+    /// Data properties in a Vue component.
+    /// Can be defined via `data` option in Options API.
+    /// TODO: Support data() method, need control flow analysis for that.
     Data = 1 << 3,
+    /// Methods in a Vue component.
     Method = 1 << 4,
+    /// Computed properties in a Vue component.
     Computed = 1 << 5,
 }
 
+/// An abstraction over multiple ways to define a vue component.
+/// Provides a list of declarations for a component.
 pub enum VueComponent {
-    /// This is referred to as "normal script" Vue component.
+    /// Options API style Vue component.
+    /// ```html
     /// <script> export default { props: [ ... ], data: { ... }, ... }; </script>
-    Normal(VueNormalComponent),
+    /// ```
+    OptionsApi(VueOptionsApiComponent),
     /// A component may be defined right in the createApp call.
+    /// ```js
     /// createApp({ props: [ ... ], ... });
+    /// ```
     CreateApp(VueCreateApp),
     /// Define Component is one of the ways to define a Vue component.
+    /// ```js
+    /// defineComponent((...) => { ... }, { props: [ ... ], ... });
     /// defineComponent({ props: [ ... ], ... });
+    /// ```
     DefineComponent(VueDefineComponent),
     /// Setup component is a Vue 3 component that uses the Composition API.
+    /// ```html
     /// <script setup> defineProps({ ... }); const someData = { ... }; </script>
-    /// FIXME: Remove `allow(dead_code)` when <script setup> is supported.
-    #[expect(dead_code)]
+    /// ```
     Setup(VueSetupComponent),
 }
 
@@ -62,26 +81,24 @@ impl VueComponent {
         source: &JsFileSource,
     ) -> Option<Self> {
         match potential_component {
-            AnyPotentialVueComponent::JsModule(_js_module) => {
-                // FIXME: <script setup> is not supported yet
-                // let embedding_kind = source.as_embedding_kind();
-                // if !embedding_kind.is_vue_setup() {
-                //     return None;
-                // }
-                // Some(VueComponent::Setup(VueSetupComponent {
-                //     model: model.clone(),
-                //     js_module: js_module.clone(),
-                // }))
-                None
-            }
+            // FIXME: <script setup> is not supported yet
+            // AnyPotentialVueComponent::JsModule(_js_module) => {
+            //     let embedding_kind = source.as_embedding_kind();
+            //     if !embedding_kind.is_vue_setup() {
+            //         return None;
+            //     }
+            //     Some(VueComponent::Setup(VueSetupComponent {
+            //         model: model.clone(),
+            //         js_module: js_module.clone(),
+            //     }))
+            // }
             AnyPotentialVueComponent::JsExportDefaultExpressionClause(
                 default_expression_clause,
             ) => {
-                let embedding_kind = source.as_embedding_kind();
-                if !embedding_kind.is_vue() {
+                if !source.as_embedding_kind().is_vue() {
                     return None;
                 }
-                Some(Self::Normal(VueNormalComponent {
+                Some(Self::OptionsApi(VueOptionsApiComponent {
                     default_expression_clause: default_expression_clause.clone(),
                 }))
             }
@@ -98,6 +115,14 @@ impl VueComponent {
                     Some(Self::CreateApp(VueCreateApp {
                         call_expression: call_expression.clone(),
                     }))
+                } else if is_vue_compiler_macro_call(call_expression, model, "defineProps")
+                    && source.as_embedding_kind().is_vue()
+                {
+                    // FIXME: Since <script setup> is not supported yet, we only handle props
+                    Some(Self::Setup(VueSetupComponent {
+                        model: model.clone(),
+                        define_props_call: call_expression.clone(),
+                    }))
                 } else {
                     None
                 }
@@ -106,26 +131,70 @@ impl VueComponent {
     }
 }
 
-pub struct VueNormalComponent {
+/// Options API style Vue component.
+/// ```html
+/// <script> export default { props: [ ... ], data: { ... }, ... }; </script>
+/// ```
+pub struct VueOptionsApiComponent {
     default_expression_clause: JsExportDefaultExpressionClause,
 }
 
+/// A component may be defined right in the createApp call.
+/// ```js
+/// createApp({ props: [ ... ], ... });
+/// ```
 pub struct VueCreateApp {
     call_expression: JsCallExpression,
 }
 
+/// Define Component is one of the ways to define a Vue component.
+/// ```js
+/// defineComponent((...) => { ... }, { props: [ ... ], ... });
+/// defineComponent({ props: [ ... ], ... });
+/// ```
 pub struct VueDefineComponent {
     call_expression: JsCallExpression,
 }
 
+/// Setup component is a Vue 3 component that uses the Composition API.
+/// ```html
+/// <script setup> defineProps({ ... }); const someData = { ... }; </script>
+/// ```
 pub struct VueSetupComponent {
     model: SemanticModel,
-    js_module: JsModule,
+    // FIXME: change when <script setup> is supported
+    // js_module: JsModule,
+    define_props_call: JsCallExpression,
 }
 
 pub trait VueComponentDeclarations {
+    /// Returns a list of Vue declarations found in the component.
+    /// This includes:
+    /// * Props
+    /// * Setup variables
+    /// * Data properties
+    /// * Methods
+    /// * Computed properties
     fn declarations(&self, filter: BitFlags<VueDeclarationCollectionFilter>)
     -> Vec<VueDeclaration>;
+
+    /// Returns a "container" for data declarations.
+    /// This is either a `data()` method or an object expression containing data properties.
+    /// Examples:
+    /// ```js
+    /// export default {
+    ///   data() { return { ... } } // this
+    /// };
+    /// defineComponent({
+    ///   data: { ... } // this
+    /// });
+    /// ```
+    ///
+    fn data_declarations_container(&self) -> Option<AnyVueDataDeclarationsContainer>;
+}
+
+declare_node_union! {
+    pub AnyVueDataDeclarationsContainer = AnyJsExpression | JsMethodObjectMember
 }
 
 impl VueComponentDeclarations for VueComponent {
@@ -134,10 +203,19 @@ impl VueComponentDeclarations for VueComponent {
         filter: BitFlags<VueDeclarationCollectionFilter>,
     ) -> Vec<VueDeclaration> {
         match self {
-            Self::Normal(component) => component.declarations(filter),
+            Self::OptionsApi(component) => component.declarations(filter),
             Self::CreateApp(component) => component.declarations(filter),
             Self::DefineComponent(component) => component.declarations(filter),
             Self::Setup(component) => component.declarations(filter),
+        }
+    }
+
+    fn data_declarations_container(&self) -> Option<AnyVueDataDeclarationsContainer> {
+        match self {
+            Self::OptionsApi(component) => component.data_declarations_container(),
+            Self::CreateApp(component) => component.data_declarations_container(),
+            Self::DefineComponent(component) => component.data_declarations_container(),
+            Self::Setup(component) => component.data_declarations_container(),
         }
     }
 }
@@ -147,147 +225,265 @@ impl VueComponentDeclarations for VueSetupComponent {
         &self,
         filter: BitFlags<VueDeclarationCollectionFilter>,
     ) -> Vec<VueDeclaration> {
-        let model = &self.model;
-        let mut result = Vec::new();
-        for item in self.js_module.items() {
-            match item {
-                AnyJsModuleItem::AnyJsStatement(statement) => match statement {
-                    AnyJsStatement::JsExpressionStatement(expression_statement) => {
-                        if !filter.contains(VueDeclarationCollectionFilter::Prop) {
-                            continue;
-                        }
-                        if let Ok(expression) = expression_statement.expression() {
-                            result.extend(expression.collect_vue_declarations(model))
-                        }
-                    }
-                    AnyJsStatement::JsVariableStatement(variable_statement) => {
-                        if let Ok(declaration) = variable_statement.declaration() {
-                            for declarator in declaration.declarators().iter().flatten() {
-                                if filter.contains(VueDeclarationCollectionFilter::Setup) {
-                                    if let Ok(declarations) =
-                                        declarator.id().map(|id| id.collect_vue_declarations(model))
-                                    {
-                                        result.extend(declarations);
-                                    }
-                                }
-                                if filter.contains(VueDeclarationCollectionFilter::Prop) {
-                                    if let Some(declarations) = declarator
-                                        .initializer()
-                                        .and_then(|initializer| initializer.expression().ok())
-                                        .map(|expression| {
-                                            expression.collect_vue_declarations(model)
-                                        })
-                                    {
-                                        result.extend(declarations);
-                                    }
-                                }
-                            }
-                        }
-                    }
-                    AnyJsStatement::JsFunctionDeclaration(function_declaration) => {
-                        if !filter.contains(VueDeclarationCollectionFilter::Setup) {
-                            continue;
-                        }
-                        result.push(VueDeclaration::Setup(
-                            AnyVueSetupDeclaration::JsFunctionDeclaration(
-                                function_declaration.clone(),
-                            ),
-                        ));
-                    }
-                    _ => {}
-                },
-                // Imports are automatically added to the setup scope
-                AnyJsModuleItem::JsImport(import) => {
-                    if !filter.contains(VueDeclarationCollectionFilter::SetupImport) {
+        if !filter.contains(VueDeclarationCollectionFilter::Prop) {
+            return vec![];
+        }
+        get_props_declarations_from_call(&self.define_props_call, &self.model)
+        // FIXME: Uncomment when <script setup> is supported
+        // let model = &self.model;
+        // let mut result = Vec::new();
+        // for item in self.js_module.items() {
+        //     match item {
+        //         AnyJsModuleItem::AnyJsStatement(statement) => match statement {
+        //             AnyJsStatement::JsExpressionStatement(expression_statement) => {
+        //                 if !filter.contains(VueDeclarationCollectionFilter::Prop) {
+        //                     continue;
+        //                 }
+        //                 if let Ok(expression) = expression_statement.expression() {
+        //                     result.extend(expression.collect_vue_declarations(model))
+        //                 }
+        //             }
+        //             AnyJsStatement::JsVariableStatement(variable_statement) => {
+        //                 if let Ok(declaration) = variable_statement.declaration() {
+        //                     for declarator in declaration.declarators().iter().flatten() {
+        //                         if filter.contains(VueDeclarationCollectionFilter::Setup) {
+        //                             if let Ok(declarations) =
+        //                                 declarator.id().map(|id| id.collect_vue_declarations(model))
+        //                             {
+        //                                 result.extend(declarations);
+        //                             }
+        //                         }
+        //                         if filter.contains(VueDeclarationCollectionFilter::Prop) {
+        //                             if let Some(declarations) = declarator
+        //                                 .initializer()
+        //                                 .and_then(|initializer| initializer.expression().ok())
+        //                                 .map(|expression| {
+        //                                     expression.collect_vue_declarations(model)
+        //                                 })
+        //                             {
+        //                                 result.extend(declarations);
+        //                             }
+        //                         }
+        //                     }
+        //                 }
+        //             }
+        //             AnyJsStatement::JsFunctionDeclaration(function_declaration) => {
+        //                 if !filter.contains(VueDeclarationCollectionFilter::Setup) {
+        //                     continue;
+        //                 }
+        //                 result.push(VueDeclaration::Setup(
+        //                     AnyVueSetupDeclaration::JsFunctionDeclaration(
+        //                         function_declaration.clone(),
+        //                     ),
+        //                 ));
+        //             }
+        //             _ => {}
+        //         },
+        //         // Imports are automatically added to the setup scope
+        //         AnyJsModuleItem::JsImport(import) => {
+        //             if !filter.contains(VueDeclarationCollectionFilter::SetupImport) {
+        //                 continue;
+        //             }
+        //             result.extend(
+        //                 import
+        //                     .import_clause()
+        //                     .ok()
+        //                     .map(|import_clause| import_clause.collect_vue_declarations(model))
+        //                     .unwrap_or_default(),
+        //             );
+        //         }
+        //         // Ignore exports in setup components
+        //         AnyJsModuleItem::JsExport(_) => {}
+        //     }
+        // }
+        // result
+    }
+
+    fn data_declarations_container(&self) -> Option<AnyVueDataDeclarationsContainer> {
+        None
+    }
+}
+
+impl VueOptionsApiBasedComponent for VueOptionsApiComponent {
+    fn definition_expression(&self) -> Option<AnyJsExpression> {
+        self.default_expression_clause.expression().ok()
+    }
+}
+
+impl VueOptionsApiBasedComponent for VueCreateApp {
+    fn definition_expression(&self) -> Option<AnyJsExpression> {
+        let args = self
+            .call_expression
+            .arguments()
+            .ok()
+            .map(|arguments| arguments.args())?;
+
+        // createApp({ props: [...] });
+        let first_argument = args.first()?.ok()?;
+        first_argument.as_any_js_expression().cloned()
+    }
+}
+
+impl VueOptionsApiBasedComponent for VueDefineComponent {
+    fn definition_expression(&self) -> Option<AnyJsExpression> {
+        let args = self
+            .call_expression
+            .arguments()
+            .ok()
+            .map(|arguments| arguments.args())?;
+
+        // defineComponent({ props: [...] });
+        // defineComponent(setup, { props: [...] });
+        let last_argument = args.last()?.ok()?;
+        last_argument.as_any_js_expression().cloned()
+    }
+}
+
+pub trait VueOptionsApiBasedComponent {
+    /// Returns the potential object expression that defines the component.
+    /// Examples:
+    /// ```js
+    /// defineComponent(
+    ///     { props: [...] } // this
+    /// );
+    /// createApp(
+    ///     { props: [...] } // this
+    /// );
+    /// export default { props: [...] }; // this
+    /// ```
+    fn definition_expression(&self) -> Option<AnyJsExpression>;
+
+    fn iter_declaration_containers(
+        &self,
+    ) -> Box<dyn Iterator<Item = (TokenText, AnyJsObjectMember)>>
+    where
+        Self: Sized,
+    {
+        let Some(object_expression) = self
+            .definition_expression()
+            .and_then(|expression| expression.inner_expression())
+            .and_then(|expression| expression.as_js_object_expression().cloned())
+        else {
+            return Box::new(std::iter::empty());
+        };
+
+        Box::new(
+            object_expression
+                .members()
+                .into_iter()
+                .flatten()
+                .filter_map(|member| member.name().map(|name| (name, member))),
+        )
+    }
+}
+
+impl<T: VueOptionsApiBasedComponent> VueComponentDeclarations for T {
+    fn declarations(
+        &self,
+        filter: BitFlags<VueDeclarationCollectionFilter>,
+    ) -> Vec<VueDeclaration> {
+        let mut result = vec![];
+        for (name, group_object_member) in self.iter_declaration_containers() {
+            match name.text() {
+                "props" => {
+                    if !filter.contains(VueDeclarationCollectionFilter::Prop) {
                         continue;
                     }
-                    result.extend(
-                        import
-                            .import_clause()
-                            .ok()
-                            .map(|import_clause| import_clause.collect_vue_declarations(model))
-                            .unwrap_or_default(),
-                    );
+                    let AnyJsObjectMember::JsPropertyObjectMember(property) = group_object_member
+                    else {
+                        continue;
+                    };
+                    if let Ok(expression) = property.value() {
+                        result.extend(collect_props_declarations_from_expression(&expression));
+                    }
                 }
-                // Ignore exports in setup components
-                AnyJsModuleItem::JsExport(_) => {}
+                "computed" => {
+                    if !filter.contains(VueDeclarationCollectionFilter::Computed) {
+                        continue;
+                    }
+                    let AnyJsObjectMember::JsPropertyObjectMember(property) = group_object_member
+                    else {
+                        continue;
+                    };
+                    if let Ok(expression) = property.value() {
+                        result.extend(collect_computed_and_method_declarations(&expression));
+                    }
+                }
+                "methods" => {
+                    if !filter.contains(VueDeclarationCollectionFilter::Method) {
+                        continue;
+                    }
+                    let AnyJsObjectMember::JsPropertyObjectMember(property) = group_object_member
+                    else {
+                        continue;
+                    };
+                    if let Ok(expression) = property.value() {
+                        result.extend(collect_computed_and_method_declarations(&expression));
+                    }
+                }
+                "data" => {
+                    if !filter.contains(VueDeclarationCollectionFilter::Data) {
+                        continue;
+                    }
+                    // FIXME: Support data() method, need control flow analysis for that
+                    let AnyJsObjectMember::JsPropertyObjectMember(property) = group_object_member
+                    else {
+                        continue;
+                    };
+                    if let Ok(expression) = property.value() {
+                        result.extend(collect_data_declarations(&expression));
+                    }
+                }
+                _ => {}
             }
         }
         result
     }
-}
 
-impl VueComponentDeclarations for VueNormalComponent {
-    fn declarations(
-        &self,
-        filter: BitFlags<VueDeclarationCollectionFilter>,
-    ) -> Vec<VueDeclaration> {
-        let Ok(component_definition) = self.default_expression_clause.expression() else {
-            return vec![];
-        };
-        collect_vue_declarations_from_component_definition(&component_definition, filter)
-    }
-}
-
-impl VueComponentDeclarations for VueCreateApp {
-    fn declarations(
-        &self,
-        filter: BitFlags<VueDeclarationCollectionFilter>,
-    ) -> Vec<VueDeclaration> {
-        let Some(args) = self
-            .call_expression
-            .arguments()
-            .ok()
-            .map(|arguments| arguments.args())
-        else {
-            return vec![];
-        };
-        // createApp({ props: [...] });
-        let Some(Ok(first_argument)) = args.first() else {
-            return vec![];
-        };
-        let Some(expression) = first_argument.as_any_js_expression() else {
-            return vec![];
-        };
-        collect_vue_declarations_from_component_definition(expression, filter)
-    }
-}
-
-impl VueComponentDeclarations for VueDefineComponent {
-    fn declarations(
-        &self,
-        filter: BitFlags<VueDeclarationCollectionFilter>,
-    ) -> Vec<VueDeclaration> {
-        let Some(args) = self
-            .call_expression
-            .arguments()
-            .ok()
-            .map(|arguments| arguments.args())
-        else {
-            return vec![];
-        };
-        // defineComponent(setup, { props: [...] });
-        let Some(Ok(first_argument)) = args.iter().nth(1) else {
-            return vec![];
-        };
-        let Some(expression) = first_argument.as_any_js_expression() else {
-            return vec![];
-        };
-        collect_vue_declarations_from_component_definition(expression, filter)
+    fn data_declarations_container(&self) -> Option<AnyVueDataDeclarationsContainer> {
+        self.iter_declaration_containers()
+            .find_map(|(name, member)| {
+                if name.text() == "data" {
+                    match member {
+                        AnyJsObjectMember::JsMethodObjectMember(method) => Some(
+                            AnyVueDataDeclarationsContainer::JsMethodObjectMember(method),
+                        ),
+                        AnyJsObjectMember::JsPropertyObjectMember(property) => property
+                            .value()
+                            .ok()
+                            .map(AnyVueDataDeclarationsContainer::AnyJsExpression),
+                        _ => None,
+                    }
+                } else {
+                    None
+                }
+            })
     }
 }
 
 pub enum VueDeclaration {
+    /// A prop of a Vue component.
+    /// Can be defined via `props` option in Options API or `defineProps` in `<script setup>`.
     Prop(AnyVuePropDeclaration),
+    /// A setup variable in a Vue component.
+    /// Can be defined using `const`, `let` or `function`.
+    /// FIXME: Not supported yet. Will be supported when `<script setup>` is implemented.
     Setup(AnyVueSetupDeclaration),
+    /// A setup import in a Vue component.
+    /// FIXME: Not supported yet. Will be supported when `<script setup>` is implemented.
     SetupImport(AnyVueSetupImportDeclaration),
+    /// Data properties in a Vue component.
+    /// Can be defined via `data` option in Options API.
+    /// TODO: Support data() method, need control flow analysis for that.
     Data(JsPropertyObjectMember),
+    /// Methods in a Vue component.
     Method(AnyVueMethod),
+    /// Computed properties in a Vue component.
     Computed(AnyVueMethod),
 }
 
 pub trait VueDeclarationName {
-    /// Returns the name of the declaration.
+    /// Returns the name of the declaration. I.e. name of a prop, setup variable, method, etc.
     fn declaration_name(&self) -> Option<TokenText>;
     /// Returns the range of the declaration name in the source code.
     fn declaration_name_range(&self) -> Option<TextRange>;
@@ -459,123 +655,6 @@ impl VueDeclarationName for JsPropertyObjectMember {
     }
 }
 
-trait VueCollectDeclarations {
-    /// Returns a list of Vue declarations found in the component.
-    /// This includes props, setup variables, data properties, methods, and computed properties.
-    fn collect_vue_declarations(&self, model: &SemanticModel) -> Vec<VueDeclaration>;
-}
-
-fn collect_vue_declarations_from_component_definition(
-    expression: &AnyJsExpression,
-    filter: BitFlags<VueDeclarationCollectionFilter>,
-) -> Vec<VueDeclaration> {
-    println!(
-        "expression {} {:?}",
-        expression.to_trimmed_text().text(),
-        expression.syntax()
-    );
-    let Some(AnyJsExpression::JsObjectExpression(object_expression)) =
-        expression.inner_expression()
-    else {
-        return vec![];
-    };
-    println!(
-        "inner_expression {}",
-        object_expression.to_trimmed_text().text()
-    );
-    let mut result = Vec::new();
-    for group_object_member in object_expression.members().iter().flatten() {
-        let Some(prop_name) = group_object_member.name() else {
-            continue;
-        };
-        match prop_name.text() {
-            "props" => {
-                if !filter.contains(VueDeclarationCollectionFilter::Prop) {
-                    continue;
-                }
-                let AnyJsObjectMember::JsPropertyObjectMember(property) = group_object_member
-                else {
-                    continue;
-                };
-                if let Ok(expression) = property.value() {
-                    result.extend(collect_props_declarations_from_expression(&expression));
-                }
-            }
-            "computed" => {
-                if !filter.contains(VueDeclarationCollectionFilter::Computed) {
-                    continue;
-                }
-                let AnyJsObjectMember::JsPropertyObjectMember(property) = group_object_member
-                else {
-                    continue;
-                };
-                if let Ok(expression) = property.value() {
-                    result.extend(collect_computed_and_method_declarations(&expression));
-                }
-            }
-            "methods" => {
-                if !filter.contains(VueDeclarationCollectionFilter::Method) {
-                    continue;
-                }
-                let AnyJsObjectMember::JsPropertyObjectMember(property) = group_object_member
-                else {
-                    continue;
-                };
-                if let Ok(expression) = property.value() {
-                    result.extend(collect_computed_and_method_declarations(&expression));
-                }
-            }
-            "data" => {
-                if !filter.contains(VueDeclarationCollectionFilter::Data) {
-                    continue;
-                }
-                // FIXME: Support data() method, need control flow analysis for that
-                let AnyJsObjectMember::JsPropertyObjectMember(property) = group_object_member
-                else {
-                    continue;
-                };
-                if let Ok(expression) = property.value() {
-                    result.extend(collect_data_declarations(&expression));
-                }
-            }
-            _ => {}
-        }
-    }
-    result
-}
-
-impl VueCollectDeclarations for JsVariableDeclarator {
-    fn collect_vue_declarations(&self, model: &SemanticModel) -> Vec<VueDeclaration> {
-        let mut result = self
-            .id()
-            .map(|id| id.collect_vue_declarations(model))
-            .unwrap_or_default();
-        result.extend(
-            self.initializer()
-                .and_then(|initializer| initializer.expression().ok())
-                .map(|expression| expression.collect_vue_declarations(model))
-                .unwrap_or_default(),
-        );
-        result
-    }
-}
-
-impl VueCollectDeclarations for AnyJsExpression {
-    fn collect_vue_declarations(&self, model: &SemanticModel) -> Vec<VueDeclaration> {
-        self.inner_expression()
-            .and_then(|expression| match expression {
-                Self::JsCallExpression(call) => {
-                    if !is_vue_compiler_macro_call(&call, "defineProps") {
-                        return None;
-                    }
-                    Some(get_props_declarations_from_call(&call, model))
-                }
-                _ => None,
-            })
-            .unwrap_or_default()
-    }
-}
-
 fn get_props_declarations_from_call(
     call: &JsCallExpression,
     model: &SemanticModel,
@@ -621,10 +700,8 @@ fn collect_props_declarations_from_type(
             .ok()
             .and_then(|name| {
                 let reference_identifier = name.as_js_reference_identifier()?;
-                let binding = model.binding(reference_identifier)?;
-                let first_write = binding.all_writes().next()?;
-                let write_syntax = first_write.syntax();
-                if let Some(identifier_binding) = TsIdentifierBinding::cast_ref(write_syntax) {
+                let binding_syntax = reference_identifier.binding(model)?;
+                if let Some(identifier_binding) = TsIdentifierBinding::cast_ref(&binding_syntax) {
                     if let Some(type_alias) = identifier_binding.parent::<TsTypeAliasDeclaration>()
                     {
                         let ty = type_alias.ty().ok()?;
@@ -728,165 +805,204 @@ fn collect_data_declarations(expression: &AnyJsExpression) -> Vec<VueDeclaration
         .collect()
 }
 
-impl VueCollectDeclarations for AnyJsBinding {
-    fn collect_vue_declarations(&self, _model: &SemanticModel) -> Vec<VueDeclaration> {
-        match self {
-            Self::JsIdentifierBinding(identifier) => {
-                vec![VueDeclaration::Setup(
-                    AnyVueSetupDeclaration::JsIdentifierBinding(identifier.clone()),
-                )]
-            }
-            _ => vec![],
-        }
-    }
-}
-
-impl VueCollectDeclarations for AnyJsBindingPattern {
-    fn collect_vue_declarations(&self, model: &SemanticModel) -> Vec<VueDeclaration> {
-        match self {
-            Self::AnyJsBinding(any_binding) => any_binding.collect_vue_declarations(model),
-            Self::JsArrayBindingPattern(array_pattern) => {
-                array_pattern.collect_vue_declarations(model)
-            }
-            Self::JsObjectBindingPattern(object_pattern) => {
-                object_pattern.collect_vue_declarations(model)
-            }
-        }
-    }
-}
-
-impl VueCollectDeclarations for JsObjectBindingPattern {
-    fn collect_vue_declarations(&self, model: &SemanticModel) -> Vec<VueDeclaration> {
-        self.properties()
-            .iter()
-            .flatten()
-            .flat_map(|property| property.collect_vue_declarations(model))
-            .collect()
-    }
-}
-
-impl VueCollectDeclarations for AnyJsObjectBindingPatternMember {
-    fn collect_vue_declarations(&self, model: &SemanticModel) -> Vec<VueDeclaration> {
-        match self {
-            Self::JsObjectBindingPatternProperty(property) => property
-                .pattern()
-                .map(|pattern| pattern.collect_vue_declarations(model))
-                .unwrap_or_default(),
-            Self::JsObjectBindingPatternRest(rest) => rest
-                .binding()
-                .map(|binding| binding.collect_vue_declarations(model))
-                .unwrap_or_default(),
-            Self::JsObjectBindingPatternShorthandProperty(property) => property
-                .identifier()
-                .map(|identifier| identifier.collect_vue_declarations(model))
-                .unwrap_or_default(),
-            _ => vec![],
-        }
-    }
-}
-
-impl VueCollectDeclarations for JsArrayBindingPattern {
-    fn collect_vue_declarations(&self, model: &SemanticModel) -> Vec<VueDeclaration> {
-        self.elements()
-            .iter()
-            .flatten()
-            .flat_map(|element| element.collect_vue_declarations(model))
-            .collect()
-    }
-}
-
-impl VueCollectDeclarations for AnyJsArrayBindingPatternElement {
-    fn collect_vue_declarations(&self, model: &SemanticModel) -> Vec<VueDeclaration> {
-        match self {
-            Self::JsArrayBindingPatternElement(element) => element
-                .pattern()
-                .map(|pattern| pattern.collect_vue_declarations(model))
-                .unwrap_or_default(),
-            Self::JsArrayBindingPatternRestElement(rest) => rest
-                .pattern()
-                .map(|pattern| pattern.collect_vue_declarations(model))
-                .unwrap_or_default(),
-            Self::JsArrayHole(_) => vec![],
-        }
-    }
-}
-
-impl VueCollectDeclarations for AnyJsImportClause {
-    fn collect_vue_declarations(&self, model: &SemanticModel) -> Vec<VueDeclaration> {
-        match self {
-            Self::JsImportCombinedClause(combined_clause) => {
-                let mut declarations = Vec::new();
-                if let Ok(default_specifier) = combined_clause.default_specifier() {
-                    declarations.extend(default_specifier.collect_vue_declarations(model))
-                }
-
-                match combined_clause.specifier() {
-                    Ok(AnyJsCombinedSpecifier::JsNamedImportSpecifiers(named_specifiers)) => {
-                        declarations.extend(named_specifiers.collect_vue_declarations(model));
-                    }
-                    Ok(AnyJsCombinedSpecifier::JsNamespaceImportSpecifier(namespace_specifier)) => {
-                        declarations.extend(namespace_specifier.collect_vue_declarations(model));
-                    }
-                    _ => {}
-                }
-                declarations
-            }
-            Self::JsImportDefaultClause(default_clause) => default_clause
-                .default_specifier()
-                .ok()
-                .map(|specifier| specifier.collect_vue_declarations(model))
-                .unwrap_or_default(),
-            Self::JsImportNamedClause(named_clause) => named_clause
-                .named_specifiers()
-                .ok()
-                .map(|specifier| specifier.collect_vue_declarations(model))
-                .unwrap_or_default(),
-            Self::JsImportNamespaceClause(namespace_clause) => namespace_clause
-                .namespace_specifier()
-                .ok()
-                .map(|specifier| specifier.collect_vue_declarations(model))
-                .unwrap_or_default(),
-            Self::JsImportBareClause(_) => vec![],
-        }
-    }
-}
-
-impl VueCollectDeclarations for JsDefaultImportSpecifier {
-    fn collect_vue_declarations(&self, _model: &SemanticModel) -> Vec<VueDeclaration> {
-        vec![VueDeclaration::SetupImport(
-            AnyVueSetupImportDeclaration::JsDefaultImportSpecifier(self.clone()),
-        )]
-    }
-}
-
-impl VueCollectDeclarations for JsNamespaceImportSpecifier {
-    fn collect_vue_declarations(&self, _model: &SemanticModel) -> Vec<VueDeclaration> {
-        vec![VueDeclaration::SetupImport(
-            AnyVueSetupImportDeclaration::JsNamespaceImportSpecifier(self.clone()),
-        )]
-    }
-}
-
-impl VueCollectDeclarations for JsNamedImportSpecifiers {
-    fn collect_vue_declarations(&self, _model: &SemanticModel) -> Vec<VueDeclaration> {
-        self.specifiers()
-            .iter()
-            .flatten()
-            .filter_map(|specifier| match specifier {
-                AnyJsNamedImportSpecifier::JsNamedImportSpecifier(specifier) => {
-                    Some(VueDeclaration::SetupImport(
-                        AnyVueSetupImportDeclaration::JsNamedImportSpecifier(specifier.clone()),
-                    ))
-                }
-                AnyJsNamedImportSpecifier::JsShorthandNamedImportSpecifier(specifier) => {
-                    Some(VueDeclaration::SetupImport(
-                        AnyVueSetupImportDeclaration::JsShorthandNamedImportSpecifier(
-                            specifier.clone(),
-                        ),
-                    ))
-                }
-                AnyJsNamedImportSpecifier::JsBogusNamedImportSpecifier(_) => None,
-            })
-            .collect()
-    }
-}
+// FIXME: Uncomment when <script setup> is supported
+// trait VueCollectSetupDeclarations {
+//     /// Returns a list of Vue setup declarations found in the component.
+//     fn collect_vue_setup_declarations(&self, model: &SemanticModel) -> Vec<VueDeclaration>;
+// }
+//
+// impl VueCollectSetupDeclarations for JsVariableDeclarator {
+//     fn collect_vue_setup_declarations(&self, model: &SemanticModel) -> Vec<VueDeclaration> {
+//         let mut result = self
+//             .id()
+//             .map(|id| id.collect_vue_setup_declarations(model))
+//             .unwrap_or_default();
+//         result.extend(
+//             self.initializer()
+//                 .and_then(|initializer| initializer.expression().ok())
+//                 .map(|expression| expression.collect_vue_setup_declarations(model))
+//                 .unwrap_or_default(),
+//         );
+//         result
+//     }
+// }
+//
+// impl VueCollectSetupDeclarations for AnyJsExpression {
+//     fn collect_vue_setup_declarations(&self, model: &SemanticModel) -> Vec<VueDeclaration> {
+//         self.inner_expression()
+//             .and_then(|expression| match expression {
+//                 Self::JsCallExpression(call) => {
+//                     if !is_vue_compiler_macro_call(&call, model, "defineProps") {
+//                         return None;
+//                     }
+//                     Some(get_props_declarations_from_call(&call, model))
+//                 }
+//                 _ => None,
+//             })
+//             .unwrap_or_default()
+//     }
+// }
+//
+// impl VueCollectSetupDeclarations for AnyJsBinding {
+//     fn collect_vue_setup_declarations(&self, _model: &SemanticModel) -> Vec<VueDeclaration> {
+//         match self {
+//             Self::JsIdentifierBinding(identifier) => {
+//                 vec![VueDeclaration::Setup(
+//                     AnyVueSetupDeclaration::JsIdentifierBinding(identifier.clone()),
+//                 )]
+//             }
+//             _ => vec![],
+//         }
+//     }
+// }
+//
+// impl VueCollectSetupDeclarations for AnyJsBindingPattern {
+//     fn collect_vue_setup_declarations(&self, model: &SemanticModel) -> Vec<VueDeclaration> {
+//         match self {
+//             Self::AnyJsBinding(any_binding) => any_binding.collect_vue_setup_declarations(model),
+//             Self::JsArrayBindingPattern(array_pattern) => {
+//                 array_pattern.collect_vue_setup_declarations(model)
+//             }
+//             Self::JsObjectBindingPattern(object_pattern) => {
+//                 object_pattern.collect_vue_setup_declarations(model)
+//             }
+//         }
+//     }
+// }
+//
+// impl VueCollectSetupDeclarations for JsObjectBindingPattern {
+//     fn collect_vue_setup_declarations(&self, model: &SemanticModel) -> Vec<VueDeclaration> {
+//         self.properties()
+//             .iter()
+//             .flatten()
+//             .flat_map(|property| property.collect_vue_setup_declarations(model))
+//             .collect()
+//     }
+// }
+//
+// impl VueCollectSetupDeclarations for AnyJsObjectBindingPatternMember {
+//     fn collect_vue_setup_declarations(&self, model: &SemanticModel) -> Vec<VueDeclaration> {
+//         match self {
+//             Self::JsObjectBindingPatternProperty(property) => property
+//                 .pattern()
+//                 .map(|pattern| pattern.collect_vue_setup_declarations(model))
+//                 .unwrap_or_default(),
+//             Self::JsObjectBindingPatternRest(rest) => rest
+//                 .binding()
+//                 .map(|binding| binding.collect_vue_setup_declarations(model))
+//                 .unwrap_or_default(),
+//             Self::JsObjectBindingPatternShorthandProperty(property) => property
+//                 .identifier()
+//                 .map(|identifier| identifier.collect_vue_setup_declarations(model))
+//                 .unwrap_or_default(),
+//             _ => vec![],
+//         }
+//     }
+// }
+//
+// impl VueCollectSetupDeclarations for JsArrayBindingPattern {
+//     fn collect_vue_setup_declarations(&self, model: &SemanticModel) -> Vec<VueDeclaration> {
+//         self.elements()
+//             .iter()
+//             .flatten()
+//             .flat_map(|element| element.collect_vue_setup_declarations(model))
+//             .collect()
+//     }
+// }
+//
+// impl VueCollectSetupDeclarations for AnyJsArrayBindingPatternElement {
+//     fn collect_vue_setup_declarations(&self, model: &SemanticModel) -> Vec<VueDeclaration> {
+//         match self {
+//             Self::JsArrayBindingPatternElement(element) => element
+//                 .pattern()
+//                 .map(|pattern| pattern.collect_vue_setup_declarations(model))
+//                 .unwrap_or_default(),
+//             Self::JsArrayBindingPatternRestElement(rest) => rest
+//                 .pattern()
+//                 .map(|pattern| pattern.collect_vue_setup_declarations(model))
+//                 .unwrap_or_default(),
+//             Self::JsArrayHole(_) => vec![],
+//         }
+//     }
+// }
+//
+// impl VueCollectSetupDeclarations for AnyJsImportClause {
+//     fn collect_vue_setup_declarations(&self, model: &SemanticModel) -> Vec<VueDeclaration> {
+//         match self {
+//             Self::JsImportCombinedClause(combined_clause) => {
+//                 let mut declarations = Vec::new();
+//                 if let Ok(default_specifier) = combined_clause.default_specifier() {
+//                     declarations.extend(default_specifier.collect_vue_setup_declarations(model))
+//                 }
+//
+//                 match combined_clause.specifier() {
+//                     Ok(AnyJsCombinedSpecifier::JsNamedImportSpecifiers(named_specifiers)) => {
+//                         declarations.extend(named_specifiers.collect_vue_setup_declarations(model));
+//                     }
+//                     Ok(AnyJsCombinedSpecifier::JsNamespaceImportSpecifier(namespace_specifier)) => {
+//                         declarations
+//                             .extend(namespace_specifier.collect_vue_setup_declarations(model));
+//                     }
+//                     _ => {}
+//                 }
+//                 declarations
+//             }
+//             Self::JsImportDefaultClause(default_clause) => default_clause
+//                 .default_specifier()
+//                 .ok()
+//                 .map(|specifier| specifier.collect_vue_setup_declarations(model))
+//                 .unwrap_or_default(),
+//             Self::JsImportNamedClause(named_clause) => named_clause
+//                 .named_specifiers()
+//                 .ok()
+//                 .map(|specifier| specifier.collect_vue_setup_declarations(model))
+//                 .unwrap_or_default(),
+//             Self::JsImportNamespaceClause(namespace_clause) => namespace_clause
+//                 .namespace_specifier()
+//                 .ok()
+//                 .map(|specifier| specifier.collect_vue_setup_declarations(model))
+//                 .unwrap_or_default(),
+//             Self::JsImportBareClause(_) => vec![],
+//         }
+//     }
+// }
+//
+// impl VueCollectSetupDeclarations for JsDefaultImportSpecifier {
+//     fn collect_vue_setup_declarations(&self, _model: &SemanticModel) -> Vec<VueDeclaration> {
+//         vec![VueDeclaration::SetupImport(
+//             AnyVueSetupImportDeclaration::JsDefaultImportSpecifier(self.clone()),
+//         )]
+//     }
+// }
+//
+// impl VueCollectSetupDeclarations for JsNamespaceImportSpecifier {
+//     fn collect_vue_setup_declarations(&self, _model: &SemanticModel) -> Vec<VueDeclaration> {
+//         vec![VueDeclaration::SetupImport(
+//             AnyVueSetupImportDeclaration::JsNamespaceImportSpecifier(self.clone()),
+//         )]
+//     }
+// }
+//
+// impl VueCollectSetupDeclarations for JsNamedImportSpecifiers {
+//     fn collect_vue_setup_declarations(&self, _model: &SemanticModel) -> Vec<VueDeclaration> {
+//         self.specifiers()
+//             .iter()
+//             .flatten()
+//             .filter_map(|specifier| match specifier {
+//                 AnyJsNamedImportSpecifier::JsNamedImportSpecifier(specifier) => {
+//                     Some(VueDeclaration::SetupImport(
+//                         AnyVueSetupImportDeclaration::JsNamedImportSpecifier(specifier.clone()),
+//                     ))
+//                 }
+//                 AnyJsNamedImportSpecifier::JsShorthandNamedImportSpecifier(specifier) => {
+//                     Some(VueDeclaration::SetupImport(
+//                         AnyVueSetupImportDeclaration::JsShorthandNamedImportSpecifier(
+//                             specifier.clone(),
+//                         ),
+//                     ))
+//                 }
+//                 AnyJsNamedImportSpecifier::JsBogusNamedImportSpecifier(_) => None,
+//             })
+//             .collect()
+//     }
+// }

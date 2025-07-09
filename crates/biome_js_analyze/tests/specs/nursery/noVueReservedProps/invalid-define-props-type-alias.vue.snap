@@ -1,0 +1,53 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 146
+expression: invalid-define-props-type-alias.vue
+---
+# Input
+```ts
+<script setup lang="ts">
+; // this is a hack because vue files are still parsed as js/ts files.
+type Props = {
+    ref: string,
+    key: string,
+    foo: string,
+};
+defineProps<Props>();
+</script>
+
+```
+
+# Diagnostics
+```
+invalid-define-props-type-alias.vue:4:5 lint/nursery/noVueReservedProps ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × ref is a reserved attribute and cannot be used as props.
+  
+    2 │ ; // this is a hack because vue files are still parsed as js/ts files.
+    3 │ type Props = {
+  > 4 │     ref: string,
+      │     ^^^
+    5 │     key: string,
+    6 │     foo: string,
+  
+  i Rename the prop to avoid possible conflicts.
+  
+
+```
+
+```
+invalid-define-props-type-alias.vue:5:5 lint/nursery/noVueReservedProps ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × key is a reserved attribute and cannot be used as props.
+  
+    3 │ type Props = {
+    4 │     ref: string,
+  > 5 │     key: string,
+      │     ^^^
+    6 │     foo: string,
+    7 │ };
+  
+  i Rename the prop to avoid possible conflicts.
+  
+
+```
