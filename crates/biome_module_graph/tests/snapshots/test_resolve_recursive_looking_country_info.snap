@@ -208,8 +208,8 @@ Module TypeId(8) => Module(0) TypeId(6) | Module(0) TypeId(7)
 Module TypeId(9) => sync Function "subdivision" {
   accepts: {
     params: [
-      required countryCodeOrFullSubdivisionCode: string (bindings: countryCodeOrFullSubdivisionCode:string)
-      optional subdivisionCodeOrName: string (bindings: subdivisionCodeOrName:string)
+      required countryCodeOrFullSubdivisionCode: string
+      optional subdivisionCodeOrName: string
     ]
     type_args: []
   }
@@ -261,7 +261,7 @@ Module TypeId(11) => Module(0) TypeId(10) | Module(0) TypeId(7)
 Module TypeId(12) => sync Function "country" {
   accepts: {
     params: [
-      required countryCodeOrName: string (bindings: countryCodeOrName:string)
+      required countryCodeOrName: string
     ]
     type_args: []
   }

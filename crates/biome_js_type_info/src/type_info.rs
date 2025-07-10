@@ -718,20 +718,48 @@ impl Function {
 
 /// Definition of a function argument.
 #[derive(Clone, Debug, Eq, Hash, PartialEq, Resolvable)]
-pub struct FunctionParameter {
-    /// Name of the argument, if specified in the definition.
-    pub name: Option<Text>,
+pub enum FunctionParameter {
+    Named(NamedFunctionParameter),
+    Pattern(PatternFunctionParameter),
+}
 
-    /// Type of the argument.
+impl FunctionParameter {
+    pub fn ty(&self) -> &TypeReference {
+        match self {
+            Self::Named(named) => &named.ty,
+            Self::Pattern(pattern) => &pattern.ty,
+        }
+    }
+}
+
+/// A plain function parameter where the name of the parameter is also the name
+/// of the binding.
+#[derive(Clone, Debug, Eq, Hash, PartialEq, Resolvable)]
+pub struct NamedFunctionParameter {
+    /// Name of the parameter.
+    pub name: Text,
+
+    /// Type of the parameter.
     pub ty: TypeReference,
 
+    /// Whether the parameter is optional or not.
+    pub is_optional: bool,
+}
+
+/// A function parameter that is bound to either one or more positional
+/// parameters, and which may or may not be destructured into multiple bindings.
+#[derive(Clone, Debug, Eq, Hash, PartialEq, Resolvable)]
+pub struct PatternFunctionParameter {
     /// Bindings created for the parameter within the function body.
     pub bindings: Box<[FunctionParameterBinding]>,
 
-    /// Whether the argument is optional or not.
+    /// Type of the parameter.
+    pub ty: TypeReference,
+
+    /// Whether the parameter is optional or not.
     pub is_optional: bool,
 
-    /// Whether this is a rest argument (`...`) or not.
+    /// Whether this is a rest parameter (`...`) or not.
     pub is_rest: bool,
 }
 

@@ -25,7 +25,7 @@ Global TypeId(1) => Call unresolved reference "resolve" (scope ID: 0)(Global Typ
 Global TypeId(2) => sync Function {
   accepts: {
     params: [
-      required resolve: unknown (bindings: resolve:unknown)
+      required resolve: unknown
     ]
     type_args: []
   }

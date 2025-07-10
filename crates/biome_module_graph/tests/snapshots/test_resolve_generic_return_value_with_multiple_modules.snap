@@ -149,8 +149,8 @@ Module TypeId(2) => T
 Module TypeId(3) => sync Function "foo" {
   accepts: {
     params: [
-      required foo: Module(0) TypeId(0) (bindings: foo:Module(0) TypeId(0))
-      required bar: Module(0) TypeId(1) (bindings: bar:Module(0) TypeId(1))
+      required foo: Module(0) TypeId(0)
+      required bar: Module(0) TypeId(1)
     ]
     type_args: [Module(0) TypeId(2)]
   }
