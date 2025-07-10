@@ -3541,6 +3541,16 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoMissingJsxKeyConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{ "$ref": "#/definitions/RuleWithNoMissingJsxKeyOptions" }
+			]
+		},
+		"NoMissingJsxKeyOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoMissingVarFunctionConfiguration": {
 			"anyOf": [
 				{ "$ref": "#/definitions/RulePlainConfiguration" },
@@ -4759,6 +4769,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noMissingJsxKey": {
+					"description": "Disallow missing key props in iterators/collection literals.",
+					"anyOf": [
+						{ "$ref": "#/definitions/NoMissingJsxKeyConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noMisusedPromises": {
 					"description": "Disallow Promises to be used in places where they are almost certainly a mistake.",
 					"anyOf": [
@@ -4882,13 +4899,6 @@
 						{ "type": "null" }
 					]
 				},
-				"preferClasslist": {
-					"description": "Prefer using the classlist prop over the classnames helper.",
-					"anyOf": [
-						{ "$ref": "#/definitions/PreferClasslistConfiguration" },
-						{ "type": "null" }
-					]
-				},
 				"recommended": {
 					"description": "It enables the recommended rules for this group",
 					"type": ["boolean", "null"]
@@ -4897,6 +4907,13 @@
 					"description": "Enforce that getters and setters for the same property are adjacent in class and object definitions.",
 					"anyOf": [
 						{ "$ref": "#/definitions/UseAdjacentGetterSetterConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"useClasslist": {
+					"description": "Prefer using the classlist prop over the classnames helper.",
+					"anyOf": [
+						{ "$ref": "#/definitions/UseClasslistConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -5340,16 +5357,6 @@
 		"Plugins": {
 			"type": "array",
 			"items": { "$ref": "#/definitions/PluginConfiguration" }
-		},
-		"PreferClasslistConfiguration": {
-			"anyOf": [
-				{ "$ref": "#/definitions/RulePlainConfiguration" },
-				{ "$ref": "#/definitions/RuleWithPreferClasslistOptions" }
-			]
-		},
-		"PreferClasslistOptions": {
-			"type": "object",
-			"additionalProperties": false
 		},
 		"PropertyAssignmentMode": {
 			"description": "Specifies whether property assignments on function parameters are allowed or denied.",
@@ -7491,6 +7498,21 @@
 			},
 			"additionalProperties": false
 		},
+		"RuleWithNoMissingJsxKeyOptions": {
+			"type": "object",
+			"required": ["level"],
+			"properties": {
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [{ "$ref": "#/definitions/NoMissingJsxKeyOptions" }]
+				}
+			},
+			"additionalProperties": false
+		},
 		"RuleWithNoMissingVarFunctionOptions": {
 			"type": "object",
 			"required": ["level"],
@@ -9360,21 +9382,6 @@
 			},
 			"additionalProperties": false
 		},
-		"RuleWithPreferClasslistOptions": {
-			"type": "object",
-			"required": ["level"],
-			"properties": {
-				"level": {
-					"description": "The severity of the emitted diagnostics by the rule",
-					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
-				},
-				"options": {
-					"description": "Rule's options",
-					"allOf": [{ "$ref": "#/definitions/PreferClasslistOptions" }]
-				}
-			},
-			"additionalProperties": false
-		},
 		"RuleWithUseAdjacentGetterSetterOptions": {
 			"type": "object",
 			"required": ["level"],
@@ -9617,6 +9624,21 @@
 				"options": {
 					"description": "Rule's options",
 					"allOf": [{ "$ref": "#/definitions/UseButtonTypeOptions" }]
+				}
+			},
+			"additionalProperties": false
+		},
+		"RuleWithUseClasslistOptions": {
+			"type": "object",
+			"required": ["level"],
+			"properties": {
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [{ "$ref": "#/definitions/UseClasslistOptions" }]
 				}
 			},
 			"additionalProperties": false
@@ -12765,6 +12787,13 @@
 			]
 		},
 		"UseButtonTypeOptions": { "type": "object", "additionalProperties": false },
+		"UseClasslistConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{ "$ref": "#/definitions/RuleWithUseClasslistOptions" }
+			]
+		},
+		"UseClasslistOptions": { "type": "object", "additionalProperties": false },
 		"UseCollapsedElseIfConfiguration": {
 			"anyOf": [
 				{ "$ref": "#/definitions/RulePlainConfiguration" },

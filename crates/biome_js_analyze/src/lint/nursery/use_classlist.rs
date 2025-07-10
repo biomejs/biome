@@ -5,7 +5,7 @@ use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_syntax::{AnyJsExpression, AnyJsxAttributeValue, JsxAttribute};
 use biome_rowan::AstNode;
-use biome_rule_options::prefer_classlist::PreferClasslistOptions;
+use biome_rule_options::use_classlist::UseClasslistOptions;
 
 declare_lint_rule! {
     /// Prefer using the classlist prop over the classnames helper.
@@ -26,9 +26,9 @@ declare_lint_rule! {
     /// ```jsx
     /// <div classlist={{ active: true, disabled: false }} />
     /// ```
- pub PreferClasslist {
+ pub UseClasslist {
         version: "1.0.0",
-        name: "preferClasslist",
+        name: "useClasslist",
         language: "js",
         sources: &[RuleSource::EslintQwik("prefer-classlist").inspired()],
         recommended: true,
@@ -38,11 +38,11 @@ declare_lint_rule! {
     }
 }
 
-impl Rule for PreferClasslist {
+impl Rule for UseClasslist {
     type Query = Ast<JsxAttribute>;
     type State = biome_rowan::TextRange;
     type Signals = Option<Self::State>;
-    type Options = PreferClasslistOptions;
+    type Options = UseClasslistOptions;
 
     fn run(ctx: &biome_analyze::context::RuleContext<Self>) -> Self::Signals {
         let attr = ctx.query();

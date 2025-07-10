@@ -27,7 +27,7 @@ export default component$((props) => {
 
 # Diagnostics
 ```
-invalid.jsx:7:10 lint/nursery/preferClasslist ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:7:10 lint/nursery/useClasslist ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use the classlist prop instead of using classnames. The classlist prop accepts an object { [class: string]: boolean } just like classnames.
   

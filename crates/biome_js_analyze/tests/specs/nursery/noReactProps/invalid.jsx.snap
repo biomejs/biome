@@ -63,10 +63,10 @@ invalid.jsx:1:6 lint/nursery/noReactProps  FIXABLE  ━━━━━━━━━�
   
   i Safe fix: Replace this attribute name with "class"
   
-     1    │ - <div·className="container"·/>␍
-        1 │ + <div·class="container"·/>␍
-     2  2 │   ␍
-     3  3 │   <label htmlFor="input" />␍
+     1    │ - <div·className="container"·/>
+        1 │ + <div·class="container"·/>
+     2  2 │   
+     3  3 │   <label htmlFor="input" />
   
 
 ```
@@ -94,12 +94,12 @@ invalid.jsx:5:6 lint/nursery/noReactProps  FIXABLE  ━━━━━━━━━�
   
   i Safe fix: Replace this attribute name with "class"
   
-     3  3 │   <label htmlFor="input" />␍
-     4  4 │   ␍
-     5    │ - <div·className="container"·htmlFor="input"·/>␍
-        5 │ + <div·class="container"·htmlFor="input"·/>␍
-     6  6 │   ␍
-     7  7 │   <div className={`container ${isActive ? 'active' : ''}`} />␍
+     3  3 │   <label htmlFor="input" />
+     4  4 │   
+     5    │ - <div·className="container"·htmlFor="input"·/>
+        5 │ + <div·class="container"·htmlFor="input"·/>
+     6  6 │   
+     7  7 │   <div className={`container ${isActive ? 'active' : ''}`} />
   
 
 ```
@@ -127,12 +127,12 @@ invalid.jsx:5:28 lint/nursery/noReactProps  FIXABLE  ━━━━━━━━━
   
   i Safe fix: Replace this attribute name with "for"
   
-     3  3 │   <label htmlFor="input" />␍
-     4  4 │   ␍
-     5    │ - <div·className="container"·htmlFor="input"·/>␍
-        5 │ + <div·className="container"·for="input"·/>␍
-     6  6 │   ␍
-     7  7 │   <div className={`container ${isActive ? 'active' : ''}`} />␍
+     3  3 │   <label htmlFor="input" />
+     4  4 │   
+     5    │ - <div·className="container"·htmlFor="input"·/>
+        5 │ + <div·className="container"·for="input"·/>
+     6  6 │   
+     7  7 │   <div className={`container ${isActive ? 'active' : ''}`} />
   
 
 ```

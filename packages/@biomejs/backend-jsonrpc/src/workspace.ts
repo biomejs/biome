@@ -1595,6 +1595,10 @@ export interface Nursery {
 	 */
 	noMagicNumbers?: RuleConfiguration_for_NoMagicNumbersOptions;
 	/**
+	 * Disallow missing key props in iterators/collection literals.
+	 */
+	noMissingJsxKey?: RuleConfiguration_for_NoMissingJsxKeyOptions;
+	/**
 	 * Disallow Promises to be used in places where they are almost certainly a mistake.
 	 */
 	noMisusedPromises?: RuleFixConfiguration_for_NoMisusedPromisesOptions;
@@ -1663,10 +1667,6 @@ export interface Nursery {
 	 */
 	noUselessUndefined?: RuleFixConfiguration_for_NoUselessUndefinedOptions;
 	/**
-	 * Prefer using the classlist prop over the classnames helper.
-	 */
-	preferClasslist?: RuleConfiguration_for_PreferClasslistOptions;
-	/**
 	 * It enables the recommended rules for this group
 	 */
 	recommended?: boolean;
@@ -1674,6 +1674,10 @@ export interface Nursery {
 	 * Enforce that getters and setters for the same property are adjacent in class and object definitions.
 	 */
 	useAdjacentGetterSetter?: RuleConfiguration_for_UseAdjacentGetterSetterOptions;
+	/**
+	 * Prefer using the classlist prop over the classnames helper.
+	 */
+	useClasslist?: RuleConfiguration_for_UseClasslistOptions;
 	/**
 	 * Require the consistent declaration of object literals. Defaults to explicit definitions.
 	 */
@@ -2876,6 +2880,9 @@ export type RuleFixConfiguration_for_NoImportantStylesOptions =
 export type RuleConfiguration_for_NoMagicNumbersOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_NoMagicNumbersOptions;
+export type RuleConfiguration_for_NoMissingJsxKeyOptions =
+	| RulePlainConfiguration
+	| RuleWithOptions_for_NoMissingJsxKeyOptions;
 export type RuleFixConfiguration_for_NoMisusedPromisesOptions =
 	| RulePlainConfiguration
 	| RuleWithFixOptions_for_NoMisusedPromisesOptions;
@@ -2927,12 +2934,12 @@ export type RuleFixConfiguration_for_NoUselessEscapeInStringOptions =
 export type RuleFixConfiguration_for_NoUselessUndefinedOptions =
 	| RulePlainConfiguration
 	| RuleWithFixOptions_for_NoUselessUndefinedOptions;
-export type RuleConfiguration_for_PreferClasslistOptions =
-	| RulePlainConfiguration
-	| RuleWithOptions_for_PreferClasslistOptions;
 export type RuleConfiguration_for_UseAdjacentGetterSetterOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_UseAdjacentGetterSetterOptions;
+export type RuleConfiguration_for_UseClasslistOptions =
+	| RulePlainConfiguration
+	| RuleWithOptions_for_UseClasslistOptions;
 export type RuleFixConfiguration_for_UseConsistentObjectDefinitionOptions =
 	| RulePlainConfiguration
 	| RuleWithFixOptions_for_UseConsistentObjectDefinitionOptions;
@@ -5128,6 +5135,16 @@ export interface RuleWithOptions_for_NoMagicNumbersOptions {
 	 */
 	options: NoMagicNumbersOptions;
 }
+export interface RuleWithOptions_for_NoMissingJsxKeyOptions {
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: NoMissingJsxKeyOptions;
+}
 export interface RuleWithFixOptions_for_NoMisusedPromisesOptions {
 	/**
 	 * The kind of the code actions emitted by the rule
@@ -5322,16 +5339,6 @@ export interface RuleWithFixOptions_for_NoUselessUndefinedOptions {
 	 */
 	options: NoUselessUndefinedOptions;
 }
-export interface RuleWithOptions_for_PreferClasslistOptions {
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: PreferClasslistOptions;
-}
 export interface RuleWithOptions_for_UseAdjacentGetterSetterOptions {
 	/**
 	 * The severity of the emitted diagnostics by the rule
@@ -5341,6 +5348,16 @@ export interface RuleWithOptions_for_UseAdjacentGetterSetterOptions {
 	 * Rule's options
 	 */
 	options: UseAdjacentGetterSetterOptions;
+}
+export interface RuleWithOptions_for_UseClasslistOptions {
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: UseClasslistOptions;
 }
 export interface RuleWithFixOptions_for_UseConsistentObjectDefinitionOptions {
 	/**
@@ -7684,6 +7701,7 @@ export interface NoImplicitCoercionOptions {}
 export interface NoImportCyclesOptions {}
 export interface NoImportantStylesOptions {}
 export interface NoMagicNumbersOptions {}
+export interface NoMissingJsxKeyOptions {}
 export interface NoMisusedPromisesOptions {}
 export interface NoNestedComponentDefinitionsOptions {}
 export interface NoNoninteractiveElementInteractionsOptions {}
@@ -7711,8 +7729,8 @@ export interface NoUnwantedPolyfillioOptions {}
 export interface NoUselessBackrefInRegexOptions {}
 export interface NoUselessEscapeInStringOptions {}
 export interface NoUselessUndefinedOptions {}
-export interface PreferClasslistOptions {}
 export interface UseAdjacentGetterSetterOptions {}
+export interface UseClasslistOptions {}
 export interface UseConsistentObjectDefinitionOptions {
 	/**
 	 * The preferred syntax to enforce.
@@ -8365,6 +8383,7 @@ export type Category =
 	| "lint/nursery/noInvalidGridAreas"
 	| "lint/nursery/noInvalidPositionAtImportRule"
 	| "lint/nursery/noMagicNumbers"
+	| "lint/nursery/noMissingJsxKey"
 	| "lint/nursery/noMissingGenericFamilyKeyword"
 	| "lint/nursery/noMisusedPromises"
 	| "lint/nursery/noNestedComponentDefinitions"
@@ -8393,7 +8412,7 @@ export type Category =
 	| "lint/nursery/noUselessBackrefInRegex"
 	| "lint/nursery/noUselessEscapeInString"
 	| "lint/nursery/noUselessUndefined"
-	| "lint/nursery/preferClasslist"
+	| "lint/nursery/useClasslist"
 	| "lint/nursery/useAdjacentGetterSetter"
 	| "lint/nursery/useBiomeSuppressionComment"
 	| "lint/nursery/useConsistentObjectDefinition"
