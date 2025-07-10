@@ -17,6 +17,7 @@
   "no-duplicate-heading": null,
   "blanks-around-lists": null,
   "no-multiple-blanks": null,
+  "no-emphasis-as-heading": null,
   "blanks-around-fences": null,
   "blanks-around-headings": null,
   "heading-increment": null,
