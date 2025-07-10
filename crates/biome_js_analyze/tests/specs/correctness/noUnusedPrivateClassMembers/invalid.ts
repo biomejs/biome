@@ -1,12 +1,17 @@
 class TsBioo {
 	private unusedProperty = 5;
 
-	private unusedMethod() {}
+	private unusedMethod() {
+
+	};
 }
 
 class TSUnusedPrivateConstructor {
-	constructor(private nusedProperty = 3) {}
+	constructor(private nusedProperty = 3){
+
+	}
 }
+
 
 class TsOnlyWrite {
 	private usedOnlyInWrite = 5;
@@ -25,8 +30,8 @@ class TsSelfUpdate {
 }
 
 class TsAccessor {
-	private get unusedAccessor() {}
-	private set unusedAccessor(value) {}
+	private get unusedAccessor() { }
+	private set unusedAccessor(value) { }
 }
 
 // github.com/biomejs/biome/issues/6165
