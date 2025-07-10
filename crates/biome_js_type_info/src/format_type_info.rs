@@ -923,7 +923,7 @@ impl Format<FormatTypeContext> for FmtFunctionParameterBindings<'_> {
                 format_with(|f| write!(f, [&format_args![text(","), soft_line_break_or_space()]]));
             let mut joiner = f.join_with(separator);
             for part in self.0 {
-                joiner.entry(&format_args![&part.name, text(":"), &part.ty]);
+                joiner.entry(&format_args![&part.name, text(":"), space(), &part.ty]);
             }
             joiner.finish()
         });
