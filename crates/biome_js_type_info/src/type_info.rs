@@ -1129,6 +1129,7 @@ pub enum TypeofExpression {
     Call(TypeofCallExpression),
     Conditional(TypeofConditionalExpression),
     Destructure(TypeofDestructureExpression),
+    IterableValueOf(TypeofIterableValueOfExpression),
     LogicalAnd(TypeofLogicalAndExpression),
     LogicalOr(TypeofLogicalOrExpression),
     New(TypeofNewExpression),
@@ -1185,6 +1186,12 @@ pub enum DestructureField {
     Name(Text),
     RestExcept(Box<[Text]>),
     RestFrom(usize),
+}
+
+#[derive(Clone, Debug, Eq, Hash, PartialEq, Resolvable)]
+pub struct TypeofIterableValueOfExpression {
+    /// The type being iterated over.
+    pub ty: TypeReference,
 }
 
 #[derive(Clone, Debug, Eq, Hash, PartialEq, Resolvable)]

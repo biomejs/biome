@@ -10,9 +10,10 @@ use biome_js_syntax::{
     AnyTsReturnType, AnyTsTupleTypeElement, AnyTsType, AnyTsTypeMember,
     AnyTsTypePredicateParameterName, ClassMemberName, JsArrayBindingPattern,
     JsArrowFunctionExpression, JsBinaryExpression, JsBinaryOperator, JsCallArguments,
-    JsClassDeclaration, JsClassExportDefaultDeclaration, JsClassExpression, JsFormalParameter,
-    JsFunctionBody, JsFunctionDeclaration, JsFunctionExpression, JsLogicalExpression,
-    JsLogicalOperator, JsNewExpression, JsObjectBindingPattern, JsObjectExpression, JsParameters,
+    JsClassDeclaration, JsClassExportDefaultDeclaration, JsClassExpression, JsForInStatement,
+    JsForOfStatement, JsForVariableDeclaration, JsFormalParameter, JsFunctionBody,
+    JsFunctionDeclaration, JsFunctionExpression, JsLogicalExpression, JsLogicalOperator,
+    JsNewExpression, JsObjectBindingPattern, JsObjectExpression, JsParameters,
     JsReferenceIdentifier, JsReturnStatement, JsSyntaxToken, JsUnaryExpression, JsUnaryOperator,
     JsVariableDeclaration, JsVariableDeclarator, TsDeclareFunctionDeclaration,
     TsExternalModuleDeclaration, TsInterfaceDeclaration, TsModuleDeclaration, TsReferenceType,
@@ -33,11 +34,12 @@ use crate::{
     PatternFunctionParameter, PredicateReturnType, ResolvedTypeId, ReturnType, ScopeId, Tuple,
     TupleElementType, TypeData, TypeInstance, TypeMember, TypeMemberKind, TypeOperator,
     TypeOperatorType, TypeReference, TypeReferenceQualifier, TypeResolver,
-    TypeofAdditionExpression, TypeofBitwiseNotExpression, TypeofCallExpression,
-    TypeofConditionalExpression, TypeofDestructureExpression, TypeofExpression,
-    TypeofLogicalAndExpression, TypeofLogicalOrExpression, TypeofNewExpression,
-    TypeofNullishCoalescingExpression, TypeofStaticMemberExpression, TypeofThisOrSuperExpression,
-    TypeofTypeofExpression, TypeofUnaryMinusExpression, TypeofValue,
+    TypeofAdditionExpression, TypeofAwaitExpression, TypeofBitwiseNotExpression,
+    TypeofCallExpression, TypeofConditionalExpression, TypeofDestructureExpression,
+    TypeofExpression, TypeofIterableValueOfExpression, TypeofLogicalAndExpression,
+    TypeofLogicalOrExpression, TypeofNewExpression, TypeofNullishCoalescingExpression,
+    TypeofStaticMemberExpression, TypeofThisOrSuperExpression, TypeofTypeofExpression,
+    TypeofUnaryMinusExpression, TypeofValue,
 };
 
 impl TypeData {
@@ -1038,13 +1040,11 @@ impl TypeData {
     ) -> Option<Self> {
         let left = expr
             .left()
-            .map(|left| Self::from_any_js_expression(resolver, scope_id, &left))
-            .map(|left| resolver.reference_to_owned_data(left))
+            .map(|left| TypeReference::from_any_js_expression(resolver, scope_id, &left))
             .ok()?;
         let right = expr
             .right()
-            .map(|right| Self::from_any_js_expression(resolver, scope_id, &right))
-            .map(|right| resolver.reference_to_owned_data(right))
+            .map(|right| TypeReference::from_any_js_expression(resolver, scope_id, &right))
             .ok()?;
 
         match expr.operator().ok()? {
@@ -1323,6 +1323,67 @@ impl TypeData {
         ))
     }
 
+    pub fn typed_bindings_from_js_binding_pattern(
+        resolver: &mut dyn TypeResolver,
+        scope_id: ScopeId,
+        ty: Self,
+        pattern: &AnyJsBindingPattern,
+        is_awaited: bool,
+    ) -> Option<Box<[(Text, TypeReference)]>> {
+        let ty = if is_awaited {
+            Self::from(TypeofExpression::Await(TypeofAwaitExpression {
+                argument: resolver.reference_to_owned_data(ty),
+            }))
+        } else {
+            ty
+        };
+
+        match pattern {
+            AnyJsBindingPattern::AnyJsBinding(binding) => Some({
+                let binding = binding.as_js_identifier_binding()?;
+                let name_token = binding.name_token().ok()?;
+                Box::new([(
+                    name_token.token_text_trimmed().into(),
+                    resolver.reference_to_owned_data(ty),
+                )])
+            }),
+            AnyJsBindingPattern::JsArrayBindingPattern(pattern) => {
+                Some(ty.apply_array_binding_pattern(resolver, scope_id, pattern))
+            }
+            AnyJsBindingPattern::JsObjectBindingPattern(pattern) => {
+                Some(ty.apply_object_binding_pattern(resolver, scope_id, pattern))
+            }
+        }
+    }
+
+    pub fn typed_bindings_from_js_for_statement(
+        resolver: &mut dyn TypeResolver,
+        scope_id: ScopeId,
+        decl: &JsForVariableDeclaration,
+    ) -> Option<Box<[(Text, TypeReference)]>> {
+        let parent = decl.syntax().parent()?;
+        let (is_awaited, ty) = if JsForInStatement::can_cast(parent.kind()) {
+            (false, Self::string())
+        } else if let Some(for_of) = JsForOfStatement::cast(parent) {
+            let ty = Self::from(TypeofExpression::IterableValueOf(
+                TypeofIterableValueOfExpression {
+                    ty: TypeReference::from_any_js_expression(
+                        resolver,
+                        scope_id,
+                        &for_of.expression().ok()?,
+                    ),
+                },
+            ));
+            (for_of.await_token().is_some(), ty)
+        } else {
+            return None;
+        };
+
+        let declarator = decl.declarator().ok()?;
+        let binding = declarator.id().ok()?;
+        Self::typed_bindings_from_js_binding_pattern(resolver, scope_id, ty, &binding, is_awaited)
+    }
+
     pub fn typed_bindings_from_js_variable_declaration(
         resolver: &mut dyn TypeResolver,
         scope_id: ScopeId,
@@ -1343,30 +1404,9 @@ impl TypeData {
         scope_id: ScopeId,
         decl: &JsVariableDeclarator,
     ) -> Option<Box<[(Text, TypeReference)]>> {
-        match decl.id().ok()? {
-            AnyJsBindingPattern::AnyJsBinding(binding) => Some({
-                let binding = binding.as_js_identifier_binding()?;
-                let name_token = binding.name_token().ok()?;
-                let data =
-                    Self::from_js_variable_declarator(resolver, scope_id, decl)?.into_owned();
-                Box::new([(
-                    name_token.token_text_trimmed().into(),
-                    resolver.reference_to_owned_data(data),
-                )])
-            }),
-            AnyJsBindingPattern::JsArrayBindingPattern(pattern) => Some({
-                let pattern_ty = Self::from_js_variable_declarator(resolver, scope_id, decl)?;
-                pattern_ty
-                    .into_owned()
-                    .apply_array_binding_pattern(resolver, scope_id, &pattern)
-            }),
-            AnyJsBindingPattern::JsObjectBindingPattern(pattern) => Some({
-                let pattern_ty = Self::from_js_variable_declarator(resolver, scope_id, decl)?;
-                pattern_ty
-                    .into_owned()
-                    .apply_object_binding_pattern(resolver, scope_id, &pattern)
-            }),
-        }
+        let pattern = decl.id().ok()?;
+        let ty = Self::from_js_variable_declarator(resolver, scope_id, decl)?.into_owned();
+        Self::typed_bindings_from_js_binding_pattern(resolver, scope_id, ty, &pattern, false)
     }
 }
 
@@ -2081,6 +2121,15 @@ impl TypeMember {
 }
 
 impl TypeReference {
+    pub fn from_any_js_expression(
+        resolver: &mut dyn TypeResolver,
+        scope_id: ScopeId,
+        expr: &AnyJsExpression,
+    ) -> Self {
+        let data = TypeData::from_any_js_expression(resolver, scope_id, expr);
+        resolver.reference_to_owned_data(data)
+    }
+
     pub fn from_any_ts_type(
         resolver: &mut dyn TypeResolver,
         scope_id: ScopeId,

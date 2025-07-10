@@ -119,6 +119,26 @@ pub(super) fn flattened_expression(
                 })
             }
         }
+        TypeofExpression::IterableValueOf(expr) => {
+            let ty = resolver.resolve_and_get(&expr.ty)?;
+            match ty.as_raw_data() {
+                TypeData::InstanceOf(instance)
+                    if instance.ty == GLOBAL_ARRAY_ID.into()
+                        && instance.has_known_type_parameters() =>
+                {
+                    instance
+                        .type_parameters
+                        .first()
+                        .map(|param| ty.apply_module_id_to_reference(param))
+                        .and_then(|param| resolver.resolve_and_get(&param))
+                        .map(ResolvedTypeData::to_data)
+                }
+                _ => {
+                    // TODO: Handle other iterable types
+                    None
+                }
+            }
+        }
         TypeofExpression::LogicalAnd(expr) => {
             let left = resolver.resolve_and_get(&expr.left)?;
             let conditional = ConditionalType::from_resolved_data(left, resolver);
