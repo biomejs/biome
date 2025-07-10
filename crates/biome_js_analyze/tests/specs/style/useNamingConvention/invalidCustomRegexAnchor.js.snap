@@ -35,7 +35,7 @@ snapshot_kind: text
 ```
 invalidCustomRegexAnchor.options:14:24 deserialize ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Anchors `^` and `$` are not supported. They are implciitly present.
+  × Anchors `^` and `$` are not supported. They are implicitly present.
   
     12 │ 									"kind": "const"
     13 │ 								},
