@@ -42,15 +42,24 @@ pub use scope::*;
 pub struct SemanticModelOptions {
     /// All the allowed globals names
     pub globals: FxHashSet<String>,
+    pub flavor: SemanticFlavor,
+}
+
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq)]
+pub enum SemanticFlavor {
+    /// Regular JavaScript/Typescript
+    #[default]
+    Vanilla,
+    /// Allow the semantic model to account for Svelte specific features.
+    Svelte,
 }
 
 /// Build the complete [SemanticModel] of a parsed file.
 /// For a push based model to build the [SemanticModel], see [SemanticModelBuilder].
 pub fn semantic_model(root: &AnyJsRoot, options: SemanticModelOptions) -> SemanticModel {
-    let mut extractor = SemanticEventExtractor::default();
+    let SemanticModelOptions { globals, flavor } = options;
+    let mut extractor = SemanticEventExtractor::default().with_flavor(flavor);
     let mut builder = SemanticModelBuilder::new(root.clone());
-
-    let SemanticModelOptions { globals } = options;
 
     for global in globals {
         builder.push_global(global);
