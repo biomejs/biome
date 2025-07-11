@@ -11,11 +11,11 @@
 
 use std::path::PathBuf;
 
+use crate::{WorkspaceError, workspace_watcher::WatcherSignalKind};
 use biome_fs::PathKind;
 use camino::{Utf8Path, Utf8PathBuf};
 use papaya::{Compute, Operation};
-
-use crate::{WorkspaceError, workspace_watcher::WatcherSignalKind};
+use tracing::instrument;
 
 use super::{
     ScanKind, ScanProjectFolderParams, ServiceDataNotification, Workspace, WorkspaceServer,
@@ -74,6 +74,7 @@ impl WorkspaceServer {
     ///
     /// If you already know the path is a folder, use
     /// `Self::open_folder_through_watcher()` instead.
+    #[instrument(level = "debug", skip_all)]
     pub fn open_path_through_watcher(&self, path: &Utf8Path) -> Result<(), WorkspaceError> {
         if let PathKind::Directory { .. } = self.fs.path_kind(path)? {
             return self.open_folder_through_watcher(path);

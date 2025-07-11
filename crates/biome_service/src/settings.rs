@@ -754,8 +754,29 @@ impl VcsSettings {
         })
     }
 
-    /// Stores the contents found in the ignore file.
-    pub fn store_ignore_patterns(
+    /// It stores the patterns of the root ignore file
+    pub fn store_root_ignore_patterns(
+        &mut self,
+        path: &Utf8Path,
+        patterns: &[&str],
+    ) -> Result<(), WorkspaceError> {
+        match self.client_kind {
+            Some(VcsClientKind::Git) => {
+                let git_ignore = VcsIgnoredPatterns::git_ignore(path, patterns)?;
+                self.ignore_matches = Some(VcsIgnoredPatterns::Git {
+                    root: git_ignore,
+                    root_path: path.to_path_buf(),
+                    nested: vec![],
+                });
+            }
+            None => {}
+        };
+
+        Ok(())
+    }
+
+    /// It stores a list of patterns inside as a nested ignore file
+    pub fn store_nested_ignore_patterns(
         &mut self,
         path: &Utf8Path,
         patterns: &[&str],
@@ -765,11 +786,6 @@ impl VcsSettings {
                 let git_ignore = VcsIgnoredPatterns::git_ignore(path, patterns)?;
                 if let Some(ignore_matches) = self.ignore_matches.as_mut() {
                     ignore_matches.insert_git_match(git_ignore);
-                } else {
-                    self.ignore_matches = Some(VcsIgnoredPatterns::Git {
-                        root: git_ignore,
-                        nested: vec![],
-                    });
                 }
             }
             None => {}
@@ -782,17 +798,27 @@ impl VcsSettings {
 #[derive(Clone, Debug)]
 pub enum VcsIgnoredPatterns {
     Git {
-        // Represents the `.gitignore` file at the root of the project
+        /// Represents the `.gitignore` file at the root of the project
         root: Gitignore,
-        // The list of nested `.gitignore` files found inside the project
+        /// The path of the root ignore file
+        root_path: Utf8PathBuf,
+        /// The list of nested `.gitignore` files found inside the project
         nested: Vec<Gitignore>,
     },
 }
 
 impl VcsIgnoredPatterns {
+    /// Checks whether the path ignored only by the root ignore file
+    pub fn is_root_ignored(&self, path: &Utf8Path, is_dir: bool) -> bool {
+        match self {
+            Self::Git { root, .. } => root.matched(path, is_dir).is_ignore(),
+        }
+    }
+
+    /// Checks whether the path ignored by any ignore file found inside the project
     pub fn is_ignored(&self, path: &Utf8Path, is_dir: bool) -> bool {
         match self {
-            Self::Git { root, nested } => {
+            Self::Git { root, nested, .. } => {
                 root.matched(path, is_dir).is_ignore()
                     || nested.iter().any(|gitignore| {
                         let ignore_directory = if gitignore.path().is_file() {
