@@ -8,7 +8,6 @@ use std::fmt::{Debug, Display, Formatter};
 use std::ops;
 use std::str::FromStr;
 use std::sync::Arc;
-use suppressions::LineSuppression;
 
 mod analyzer_plugin;
 mod categories;
@@ -490,27 +489,11 @@ where
             // if it matches the current line index, otherwise perform a binary
             // search over all the previously seen suppressions to find one
             // with a matching range
-            let matches_entry =
-                |suppression: &LineSuppression, instances: &mut FxHashSet<&Box<str>>| {
-                    if suppression.suppressed_categories.contains(entry.category) {
-                        return (true, true);
-                    }
-                    if !suppression.matches_rule(&entry.category, &entry.rule) {
-                        return (false, false);
-                    }
-                    match suppression.suppressed_instance.as_ref() {
-                        None => (true, true),
-                        Some(v) => {
-                            let matches_instance = instances.remove(v);
-                            (matches_instance, false)
-                        }
-                    }
-                };
-
             let mut is_fully_suppressed = false;
             // Check that instance-based comments do indeed suppress all instances
-            // Every match is discarded from this set.
-            let mut instances = entry.instances.iter().collect();
+            // Every match is discarded from this set. Use `Option` for lazy init,
+            // because most of the rules do not use instances.
+            let mut instances: Option<FxHashSet<&Box<str>>> = None;
             for suppression in self
                 .suppressions
                 .overlapping_line_suppressions(&entry.text_range)
@@ -519,10 +502,26 @@ where
                 if !suppression.text_range.contains(start) {
                     continue;
                 }
-                let (is_match, is_exhaustive) = matches_entry(suppression, &mut instances);
+                let (is_match, is_exhaustive) =
+                    if suppression.suppressed_categories.contains(entry.category) {
+                        (true, true)
+                    } else if !suppression.matches_rule(&entry.category, &entry.rule) {
+                        (false, false)
+                    } else {
+                        match suppression.suppressed_instance.as_ref() {
+                            None => (true, true),
+                            Some(v) => {
+                                let matches_instance = instances
+                                    .get_or_insert_with(|| entry.instances.iter().collect())
+                                    .remove(v);
+                                (matches_instance, false)
+                            }
+                        }
+                    };
                 if is_match {
                     suppression.did_suppress_signal = true;
-                    is_fully_suppressed = is_exhaustive || instances.is_empty();
+                    is_fully_suppressed =
+                        is_exhaustive || instances.as_ref().is_some_and(|v| v.is_empty());
                     if is_fully_suppressed {
                         break;
                     }
