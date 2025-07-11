@@ -1,0 +1,56 @@
+name: Publish to WinGet
+
+on:
+  release:
+    types: [published]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  publish-winget:
+    name: Publish to WinGet
+    runs-on: windows-latest
+    # Only run for CLI releases (not JS API releases)
+    if: startsWith(github.event.release.tag_name, '@biomejs/biome@')
+    steps:
+      - name: Extract version from tag
+        id: extract-version
+        run: |
+          $tag = "${{ github.event.release.tag_name }}"
+          $version = $tag -replace '^@biomejs/biome@', ''
+          echo "version=$version" >> $env:GITHUB_OUTPUT
+          echo "Extracted version: $version"
+        shell: pwsh
+
+      - name: Install .NET Runtime
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '6.x'
+
+      - name: Download and install wingetcreate
+        run: |
+          Invoke-WebRequest -Uri "https://aka.ms/wingetcreate/latest" -OutFile "wingetcreate.exe"
+          echo "Downloaded wingetcreate.exe successfully"
+        shell: pwsh
+
+      - name: Submit to WinGet using wingetcreate
+        env:
+          WINGET_TOKEN: ${{ secrets.WINGET_TOKEN }}
+          VERSION: ${{ steps.extract-version.outputs.version }}
+        run: |
+          $x64Url = "https://github.com/biomejs/biome/releases/download/@biomejs/biome@$env:VERSION/biome-win32-x64.exe"
+          $arm64Url = "https://github.com/biomejs/biome/releases/download/@biomejs/biome@$env:VERSION/biome-win32-arm64.exe"
+          
+          echo "Submitting WinGet package update..."
+          echo "Version: $env:VERSION"
+          echo "x64 URL: $x64Url"
+          echo "ARM64 URL: $arm64Url"
+          
+          .\wingetcreate.exe update BiomeJS.Biome `
+            --urls $x64Url $arm64Url `
+            --version $env:VERSION `
+            --token $env:WINGET_TOKEN `
+            --submit
+        shell: pwsh 
