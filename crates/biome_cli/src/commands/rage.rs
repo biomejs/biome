@@ -1,7 +1,7 @@
 use crate::commands::daemon::read_most_recent_log_file;
 use crate::service::enumerate_pipes;
 use crate::{CliDiagnostic, CliSession, VERSION, service};
-use biome_configuration::{ConfigurationPathHint, Rules};
+use biome_configuration::Rules;
 use biome_console::fmt::{Display, Formatter};
 use biome_console::{
     ConsoleExt, DebugDisplay, DisplayOption, HorizontalLine, KeyValuePair, Padding, SOFT_LINE, fmt,
