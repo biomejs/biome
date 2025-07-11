@@ -201,6 +201,7 @@ pub mod no_unused_private_class_members;
 pub mod no_unused_template_literal;
 pub mod no_unused_variables;
 pub mod no_unwanted_polyfillio;
+pub mod no_use_visible_task;
 pub mod no_useless_backref_in_regex;
 pub mod no_useless_catch;
 pub mod no_useless_constructor;

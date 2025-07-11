@@ -1655,6 +1655,10 @@ export interface Nursery {
 	 */
 	noUnwantedPolyfillio?: RuleConfiguration_for_NoUnwantedPolyfillioOptions;
 	/**
+	 * Disallow useVisibleTask$() functions in Qwik components.
+	 */
+	noUseVisibleTask?: RuleConfiguration_for_NoUseVisibleTaskOptions;
+	/**
 	 * Disallow useless backreferences in regular expression literals that always match an empty string.
 	 */
 	noUselessBackrefInRegex?: RuleConfiguration_for_NoUselessBackrefInRegexOptions;
@@ -2929,6 +2933,9 @@ export type RuleConfiguration_for_NoUnresolvedImportsOptions =
 export type RuleConfiguration_for_NoUnwantedPolyfillioOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_NoUnwantedPolyfillioOptions;
+export type RuleConfiguration_for_NoUseVisibleTaskOptions =
+	| RulePlainConfiguration
+	| RuleWithOptions_for_NoUseVisibleTaskOptions;
 export type RuleConfiguration_for_NoUselessBackrefInRegexOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_NoUselessBackrefInRegexOptions;
@@ -5307,6 +5314,16 @@ export interface RuleWithOptions_for_NoUnwantedPolyfillioOptions {
 	 * Rule's options
 	 */
 	options: NoUnwantedPolyfillioOptions;
+}
+export interface RuleWithOptions_for_NoUseVisibleTaskOptions {
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: NoUseVisibleTaskOptions;
 }
 export interface RuleWithOptions_for_NoUselessBackrefInRegexOptions {
 	/**
@@ -7743,6 +7760,7 @@ export interface NoUnassignedVariablesOptions {}
 export interface NoUnknownAtRuleOptions {}
 export interface NoUnresolvedImportsOptions {}
 export interface NoUnwantedPolyfillioOptions {}
+export interface NoUseVisibleTaskOptions {}
 export interface NoUselessBackrefInRegexOptions {}
 export interface NoUselessEscapeInStringOptions {}
 export interface NoUselessUndefinedOptions {}
@@ -8427,6 +8445,7 @@ export type Category =
 	| "lint/nursery/noUnresolvedImports"
 	| "lint/nursery/noUnusedFunctionParameters"
 	| "lint/nursery/noUnwantedPolyfillio"
+	| "lint/nursery/noUseVisibleTask"
 	| "lint/nursery/noUselessBackrefInRegex"
 	| "lint/nursery/noUselessEscapeInString"
 	| "lint/nursery/noUselessUndefined"

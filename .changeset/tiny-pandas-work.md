@@ -89,3 +89,27 @@ The `useJsxImg` rule enforces the use of width and height attributes on `<img>` 
 The rule detects `<img>` elements that are missing either the `width` or `height` attribute and provides clear diagnostics to help developers add appropriate dimensions for optimal performance and user experience.
 
 No configuration options are currently available for this rule.
+
+Added the [`noUseVisibleTask`](https://biomejs.dev/linter/rules/no-use-visible-task) rule to Biome.
+
+The `noUseVisibleTask` rule disallows the use of `useVisibleTask$()` functions in Qwik applications. This rule is intended for use in Qwik applications to prevent the use of `useVisibleTask$()` functions which are not recommended in Qwik.
+
+**Invalid:**
+
+```js
+useVisibleTask$(() => {
+  console.log('Component is visible');
+});
+```
+
+**Valid:**
+
+```js
+useTask$(() => {
+  console.log('Task executed');
+});
+```
+
+The rule detects calls to `useVisibleTask$()` and provides clear diagnostics to help developers use alternative Qwik lifecycle functions like `useTask$()` instead.
+
+No configuration options are currently available for this rule.
