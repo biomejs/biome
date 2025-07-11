@@ -75,13 +75,16 @@ impl Rule for NoUnknownPseudoElement {
             AnyCssPseudoElement::CssBogusPseudoElement(element) => {
                 should_not_trigger(element.to_trimmed_text().text())
             }
-            AnyCssPseudoElement::CssPseudoElementFunctionIdentifier(ident) => {
-                should_not_trigger(ident.name().ok()?.text())
+            AnyCssPseudoElement::CssPseudoElementFunctionCustomIdentifier(ident) => {
+                should_not_trigger(ident.name().ok()?.to_trimmed_text().text())
             }
             AnyCssPseudoElement::CssPseudoElementFunctionSelector(selector) => {
                 should_not_trigger(selector.name().ok()?.to_trimmed_text().text())
             }
             AnyCssPseudoElement::CssPseudoElementIdentifier(ident) => {
+                should_not_trigger(ident.name().ok()?.to_trimmed_text().text())
+            }
+            AnyCssPseudoElement::CssPseudoElementFunction(ident) => {
                 should_not_trigger(ident.name().ok()?.to_trimmed_text().text())
             }
         };

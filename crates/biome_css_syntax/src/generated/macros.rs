@@ -485,9 +485,14 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::CssPseudoClassSelector::new_unchecked(node) };
                     $body
                 }
-                $crate::CssSyntaxKind::CSS_PSEUDO_ELEMENT_FUNCTION_IDENTIFIER => {
-                    let $pattern =
-                        unsafe { $crate::CssPseudoElementFunctionIdentifier::new_unchecked(node) };
+                $crate::CssSyntaxKind::CSS_PSEUDO_ELEMENT_FUNCTION => {
+                    let $pattern = unsafe { $crate::CssPseudoElementFunction::new_unchecked(node) };
+                    $body
+                }
+                $crate::CssSyntaxKind::CSS_PSEUDO_ELEMENT_FUNCTION_CUSTOM_IDENTIFIER => {
+                    let $pattern = unsafe {
+                        $crate::CssPseudoElementFunctionCustomIdentifier::new_unchecked(node)
+                    };
                     $body
                 }
                 $crate::CssSyntaxKind::CSS_PSEUDO_ELEMENT_FUNCTION_SELECTOR => {
@@ -900,6 +905,12 @@ macro_rules! map_syntax_node {
                 }
                 $crate::CssSyntaxKind::CSS_PARAMETER_LIST => {
                     let $pattern = unsafe { $crate::CssParameterList::new_unchecked(node) };
+                    $body
+                }
+                $crate::CssSyntaxKind::CSS_PSEUDO_ELEMENT_FUNCTION_PARAMETER_LIST => {
+                    let $pattern = unsafe {
+                        $crate::CssPseudoElementFunctionParameterList::new_unchecked(node)
+                    };
                     $body
                 }
                 $crate::CssSyntaxKind::CSS_PSEUDO_VALUE_LIST => {

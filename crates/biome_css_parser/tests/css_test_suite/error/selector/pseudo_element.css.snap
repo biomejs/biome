@@ -147,9 +147,11 @@ CssRoot {
                             double_colon_token: COLON2@51..55 "::" [Newline("\n"), Newline("\n")] [],
                             element: CssBogusPseudoElement {
                                 items: [
-                                    HIGHLIGHT_KW@55..64 "highlight" [] [],
-                                    L_PAREN@64..65 "(" [] [],
                                     CssIdentifier {
+                                        value_token: IDENT@55..64 "highlight" [] [],
+                                    },
+                                    L_PAREN@64..65 "(" [] [],
+                                    CssCustomIdentifier {
                                         value_token: IDENT@65..69 "div" [] [Whitespace(" ")],
                                     },
                                     CssBogus {
@@ -262,9 +264,10 @@ CssRoot {
             0: CSS_PSEUDO_ELEMENT_SELECTOR@51..76
               0: COLON2@51..55 "::" [Newline("\n"), Newline("\n")] []
               1: CSS_BOGUS_PSEUDO_ELEMENT@55..76
-                0: HIGHLIGHT_KW@55..64 "highlight" [] []
+                0: CSS_IDENTIFIER@55..64
+                  0: IDENT@55..64 "highlight" [] []
                 1: L_PAREN@64..65 "(" [] []
-                2: CSS_IDENTIFIER@65..69
+                2: CSS_CUSTOM_IDENTIFIER@65..69
                   0: IDENT@65..69 "div" [] [Whitespace(" ")]
                 3: CSS_BOGUS@69..74
                   0: PLUS@69..71 "+" [] [Whitespace(" ")]

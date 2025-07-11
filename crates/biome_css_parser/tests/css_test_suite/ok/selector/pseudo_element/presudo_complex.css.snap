@@ -165,10 +165,12 @@ CssRoot {
                         sub_selectors: CssSubSelectorList [
                             CssPseudoElementSelector {
                                 double_colon_token: COLON2@54..57 "::" [Newline("\n")] [],
-                                element: CssPseudoElementFunctionIdentifier {
-                                    name: HIGHLIGHT_KW@57..66 "highlight" [] [],
+                                element: CssPseudoElementFunctionCustomIdentifier {
+                                    name: CssIdentifier {
+                                        value_token: IDENT@57..66 "highlight" [] [],
+                                    },
                                     l_paren_token: L_PAREN@66..67 "(" [] [],
-                                    ident: CssIdentifier {
+                                    ident: CssCustomIdentifier {
                                         value_token: IDENT@67..73 "sample" [] [],
                                     },
                                     r_paren_token: R_PAREN@73..74 ")" [] [],
@@ -204,12 +206,16 @@ CssRoot {
                         sub_selectors: CssSubSelectorList [
                             CssPseudoElementSelector {
                                 double_colon_token: COLON2@81..84 "::" [Newline("\n")] [],
-                                element: CssPseudoElementFunctionIdentifier {
-                                    name: PART_KW@84..88 "part" [] [],
-                                    l_paren_token: L_PAREN@88..89 "(" [] [],
-                                    ident: CssIdentifier {
-                                        value_token: IDENT@89..95 "active" [] [],
+                                element: CssPseudoElementFunction {
+                                    name: CssIdentifier {
+                                        value_token: IDENT@84..88 "part" [] [],
                                     },
+                                    l_paren_token: L_PAREN@88..89 "(" [] [],
+                                    items: CssPseudoElementFunctionParameterList [
+                                        CssIdentifier {
+                                            value_token: IDENT@89..95 "active" [] [],
+                                        },
+                                    ],
                                     r_paren_token: R_PAREN@95..96 ")" [] [],
                                 },
                             },
@@ -265,12 +271,16 @@ CssRoot {
                                         sub_selectors: CssSubSelectorList [
                                             CssPseudoElementSelector {
                                                 double_colon_token: COLON2@112..114 "::" [] [],
-                                                element: CssPseudoElementFunctionIdentifier {
-                                                    name: PART_KW@114..118 "part" [] [],
-                                                    l_paren_token: L_PAREN@118..119 "(" [] [],
-                                                    ident: CssIdentifier {
-                                                        value_token: IDENT@119..125 "active" [] [],
+                                                element: CssPseudoElementFunction {
+                                                    name: CssIdentifier {
+                                                        value_token: IDENT@114..118 "part" [] [],
                                                     },
+                                                    l_paren_token: L_PAREN@118..119 "(" [] [],
+                                                    items: CssPseudoElementFunctionParameterList [
+                                                        CssIdentifier {
+                                                            value_token: IDENT@119..125 "active" [] [],
+                                                        },
+                                                    ],
                                                     r_paren_token: R_PAREN@125..126 ")" [] [],
                                                 },
                                             },
@@ -399,10 +409,11 @@ CssRoot {
             2: CSS_SUB_SELECTOR_LIST@54..74
               0: CSS_PSEUDO_ELEMENT_SELECTOR@54..74
                 0: COLON2@54..57 "::" [Newline("\n")] []
-                1: CSS_PSEUDO_ELEMENT_FUNCTION_IDENTIFIER@57..74
-                  0: HIGHLIGHT_KW@57..66 "highlight" [] []
+                1: CSS_PSEUDO_ELEMENT_FUNCTION_CUSTOM_IDENTIFIER@57..74
+                  0: CSS_IDENTIFIER@57..66
+                    0: IDENT@57..66 "highlight" [] []
                   1: L_PAREN@66..67 "(" [] []
-                  2: CSS_IDENTIFIER@67..73
+                  2: CSS_CUSTOM_IDENTIFIER@67..73
                     0: IDENT@67..73 "sample" [] []
                   3: R_PAREN@73..74 ")" [] []
           1: CSS_SPACE_LITERAL@74..75 " " [] []
@@ -426,11 +437,13 @@ CssRoot {
             2: CSS_SUB_SELECTOR_LIST@81..96
               0: CSS_PSEUDO_ELEMENT_SELECTOR@81..96
                 0: COLON2@81..84 "::" [Newline("\n")] []
-                1: CSS_PSEUDO_ELEMENT_FUNCTION_IDENTIFIER@84..96
-                  0: PART_KW@84..88 "part" [] []
+                1: CSS_PSEUDO_ELEMENT_FUNCTION@84..96
+                  0: CSS_IDENTIFIER@84..88
+                    0: IDENT@84..88 "part" [] []
                   1: L_PAREN@88..89 "(" [] []
-                  2: CSS_IDENTIFIER@89..95
-                    0: IDENT@89..95 "active" [] []
+                  2: CSS_PSEUDO_ELEMENT_FUNCTION_PARAMETER_LIST@89..95
+                    0: CSS_IDENTIFIER@89..95
+                      0: IDENT@89..95 "active" [] []
                   3: R_PAREN@95..96 ")" [] []
           1: CSS_SPACE_LITERAL@96..97 " " [] []
           2: CSS_COMPOUND_SELECTOR@97..101
@@ -471,11 +484,13 @@ CssRoot {
                     2: CSS_SUB_SELECTOR_LIST@112..126
                       0: CSS_PSEUDO_ELEMENT_SELECTOR@112..126
                         0: COLON2@112..114 "::" [] []
-                        1: CSS_PSEUDO_ELEMENT_FUNCTION_IDENTIFIER@114..126
-                          0: PART_KW@114..118 "part" [] []
+                        1: CSS_PSEUDO_ELEMENT_FUNCTION@114..126
+                          0: CSS_IDENTIFIER@114..118
+                            0: IDENT@114..118 "part" [] []
                           1: L_PAREN@118..119 "(" [] []
-                          2: CSS_IDENTIFIER@119..125
-                            0: IDENT@119..125 "active" [] []
+                          2: CSS_PSEUDO_ELEMENT_FUNCTION_PARAMETER_LIST@119..125
+                            0: CSS_IDENTIFIER@119..125
+                              0: IDENT@119..125 "active" [] []
                           3: R_PAREN@125..126 ")" [] []
                 3: R_PAREN@126..128 ")" [] [Whitespace(" ")]
       1: CSS_DECLARATION_OR_RULE_BLOCK@128..130

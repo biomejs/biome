@@ -397,7 +397,8 @@ CssPseudoElementSelector =
 AnyCssPseudoElement =
 	CssPseudoElementIdentifier
 	| CssPseudoElementFunctionSelector
-	| CssPseudoElementFunctionIdentifier
+	| CssPseudoElementFunctionCustomIdentifier
+	| CssPseudoElementFunction
 	| CssBogusPseudoElement
 
 // a::after {}
@@ -415,13 +416,21 @@ CssPseudoElementFunctionSelector =
 
 // ::highlight(sample) {}
 //   ^^^^^^^^^^^^^^^^^
-// ::part(active) {}
-//   ^^^^^^^^^^^^
-CssPseudoElementFunctionIdentifier =
-	name: ('highlight' | 'part')
+CssPseudoElementFunctionCustomIdentifier =
+	name: CssIdentifier
 	'('
-	ident: CssIdentifier
+	ident: CssCustomIdentifier
 	')'
+	
+// ::part(active button) {}
+//   ^^^^^^^^^^^^^^^^^^^
+CssPseudoElementFunction =
+	name: CssIdentifier
+	'('
+	items: CssPseudoElementFunctionParameterList
+	')'
+	
+CssPseudoElementFunctionParameterList = CssIdentifier*
 
 /////////////
 // COMMON BLOCKS
