@@ -4989,6 +4989,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useJsxImg": {
+					"description": "For performance reasons, always provide width and height attributes for \\<img> elements; it will help to prevent layout shifts.",
+					"anyOf": [
+						{ "$ref": "#/definitions/UseJsxImgConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useNamedOperation": {
 					"description": "Enforce specifying the name of GraphQL operations.",
 					"anyOf": [
@@ -10449,6 +10456,21 @@
 			},
 			"additionalProperties": false
 		},
+		"RuleWithUseJsxImgOptions": {
+			"type": "object",
+			"required": ["level"],
+			"properties": {
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [{ "$ref": "#/definitions/UseJsxImgOptions" }]
+				}
+			},
+			"additionalProperties": false
+		},
 		"RuleWithUseJsxKeyInIterableOptions": {
 			"type": "object",
 			"required": ["level"],
@@ -13310,6 +13332,13 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"UseJsxImgConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{ "$ref": "#/definitions/RuleWithUseJsxImgOptions" }
+			]
+		},
+		"UseJsxImgOptions": { "type": "null" },
 		"UseJsxKeyInIterableConfiguration": {
 			"anyOf": [
 				{ "$ref": "#/definitions/RulePlainConfiguration" },

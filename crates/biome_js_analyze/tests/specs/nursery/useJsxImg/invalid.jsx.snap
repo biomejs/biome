@@ -1,0 +1,69 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.jsx
+---
+# Input
+```jsx
+// Invalid: missing width and height
+<img src="/image.png">
+<img src="https://example.com/image.png">
+<img src="/image.png" width="200">
+<img src="/image.png" height="200"> 
+```
+
+# Diagnostics
+```
+invalid.jsx:2:1 lint/nursery/useJsxImg ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! For performance reasons, always provide width and height attributes for <Emphasis>img</Emphasis> elements, it will help to prevent layout shifts.
+  
+    1 │ // Invalid: missing width and height
+  > 2 │ <img src="/image.png">
+      │ ^^^^^^^^^^^^^^^^^^^^^^
+    3 │ <img src="https://example.com/image.png">
+    4 │ <img src="/image.png" width="200">
+  
+
+```
+
+```
+invalid.jsx:3:1 lint/nursery/useJsxImg ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! For performance reasons, always provide width and height attributes for <Emphasis>img</Emphasis> elements, it will help to prevent layout shifts.
+  
+    1 │ // Invalid: missing width and height
+    2 │ <img src="/image.png">
+  > 3 │ <img src="https://example.com/image.png">
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    4 │ <img src="/image.png" width="200">
+    5 │ <img src="/image.png" height="200">·
+  
+
+```
+
+```
+invalid.jsx:4:1 lint/nursery/useJsxImg ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! For performance reasons, always provide width and height attributes for <Emphasis>img</Emphasis> elements, it will help to prevent layout shifts.
+  
+    2 │ <img src="/image.png">
+    3 │ <img src="https://example.com/image.png">
+  > 4 │ <img src="/image.png" width="200">
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    5 │ <img src="/image.png" height="200">·
+  
+
+```
+
+```
+invalid.jsx:5:1 lint/nursery/useJsxImg ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! For performance reasons, always provide width and height attributes for <Emphasis>img</Emphasis> elements, it will help to prevent layout shifts.
+  
+    3 │ <img src="https://example.com/image.png">
+    4 │ <img src="/image.png" width="200">
+  > 5 │ <img src="/image.png" height="200">·
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  
+
+```

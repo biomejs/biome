@@ -1719,6 +1719,10 @@ export interface Nursery {
 	 */
 	useJsonImportAttribute?: RuleFixConfiguration_for_UseJsonImportAttributeOptions;
 	/**
+	 * For performance reasons, always provide width and height attributes for \<img> elements; it will help to prevent layout shifts.
+	 */
+	useJsxImg?: RuleConfiguration_for_UseJsxImgOptions;
+	/**
 	 * Enforce specifying the name of GraphQL operations.
 	 */
 	useNamedOperation?: RuleFixConfiguration_for_UseNamedOperationOptions;
@@ -2970,6 +2974,9 @@ export type RuleConfiguration_for_UseIterableCallbackReturnOptions =
 export type RuleFixConfiguration_for_UseJsonImportAttributeOptions =
 	| RulePlainConfiguration
 	| RuleWithFixOptions_for_UseJsonImportAttributeOptions;
+export type RuleConfiguration_for_UseJsxImgOptions =
+	| RulePlainConfiguration
+	| RuleWithOptions_for_UseJsxImgOptions;
 export type RuleFixConfiguration_for_UseNamedOperationOptions =
 	| RulePlainConfiguration
 	| RuleWithFixOptions_for_UseNamedOperationOptions;
@@ -5483,6 +5490,16 @@ export interface RuleWithFixOptions_for_UseJsonImportAttributeOptions {
 	 */
 	options: UseJsonImportAttributeOptions;
 }
+export interface RuleWithOptions_for_UseJsxImgOptions {
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: UseJsxImgOptions;
+}
 export interface RuleWithFixOptions_for_UseNamedOperationOptions {
 	/**
 	 * The kind of the code actions emitted by the rule
@@ -7746,6 +7763,7 @@ export interface UseGoogleFontPreconnectOptions {}
 export interface UseIndexOfOptions {}
 export interface UseIterableCallbackReturnOptions {}
 export interface UseJsonImportAttributeOptions {}
+export type UseJsxImgOptions = null;
 export interface UseNamedOperationOptions {}
 /**
  * Rule's options.
@@ -8428,6 +8446,7 @@ export type Category =
 	| "lint/nursery/useIterableCallbackReturn"
 	| "lint/nursery/useJsonImportAttribute"
 	| "lint/nursery/useJsxCurlyBraceConvention"
+	| "lint/nursery/useJsxImg"
 	| "lint/nursery/useNamedOperation"
 	| "lint/nursery/useNamingConvention"
 	| "lint/nursery/useNumericSeparators"

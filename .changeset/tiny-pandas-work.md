@@ -65,3 +65,27 @@ The `noMissingJsxKey` rule disallows JSX elements in iterators/collections witho
 The rule detects JSX elements inside `.map()` calls and other iterator methods that are missing the required `key` prop. It provides clear diagnostics to help developers add appropriate keys for optimal rendering performance.
 
 No configuration options are currently available for this rule.
+
+Added the [`useJsxImg`](https://biomejs.dev/linter/rules/use-jsx-img) rule to Biome.
+
+The `useJsxImg` rule enforces the use of width and height attributes on `<img>` elements for performance reasons. This rule is intended for use in Qwik applications to prevent layout shifts and improve Core Web Vitals by ensuring images have explicit dimensions.
+
+**Invalid:**
+
+```jsx
+<img src="/image.png" />
+<img src="https://example.com/image.png" />
+<img src="/image.png" width="200" />
+<img src="/image.png" height="200" />
+```
+
+**Valid:**
+
+```jsx
+<img width="200" height="600" src="/static/images/portrait-01.webp" />
+<img width="100" height="100" src="https://example.com/image.png" />
+```
+
+The rule detects `<img>` elements that are missing either the `width` or `height` attribute and provides clear diagnostics to help developers add appropriate dimensions for optimal performance and user experience.
+
+No configuration options are currently available for this rule.
