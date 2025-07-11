@@ -1881,7 +1881,7 @@ fn vcs_absolute_path() {
         "vcs": {
             "enabled": true,
             "clientKind": "git",
-            "useIgnoreFile": true
+            "useIgnoreFile": false
         }
     }"#;
     let files = [("/symbolic/link/to/path.js", true)];
