@@ -203,7 +203,7 @@ fn validate_restricted_regex(pattern: &str) -> Result<(), RestrictedRegexError> 
                 // Anchors are implicit and always present in a restricted regex
                 return Err(RestrictedRegexError::new(
                     regex::Error::Syntax(
-                        "Anchors `^` and `$` are not supported. They are implciitly present."
+                        "Anchors `^` and `$` are not supported. They are implicitly present."
                             .to_string(),
                     ),
                     i,

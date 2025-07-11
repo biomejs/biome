@@ -3,7 +3,7 @@
 These test snapshots were extracted from the
 [prettier/prettier](https://github.com/prettier/prettier) repository
 
-# Usage
+## Usage
 
 These tests are run as part of the `biome_js_formatter` test suite but can be
 explicitly called with `cargo test -p biome_js_formatter --test prettier_tests`
@@ -16,7 +16,7 @@ Setting the environment variable `INCOMPATIBLE_ONLY=1` will emit an `incompatibl
 file containing only incompatible test cases.
 
 
-# Updating
+## Updating
 
 Prettier is using Jest to run snapshot tests, and a node.js script is needed to
 extract these snapshots into plain files for use in the Rust tests. To update

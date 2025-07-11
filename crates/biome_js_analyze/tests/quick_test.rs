@@ -26,9 +26,15 @@ fn project_layout_with_top_level_dependencies(dependencies: Dependencies) -> Arc
 #[test]
 fn quick_test() {
     const FILENAME: &str = "dummyFile.ts";
-    const SOURCE: &str = r#"const condition = Math.random() > -1; // Always true, but dynamic to linter
-condition ? Promise.reject("ternary bypass") : null;
-"#;
+    const SOURCE: &str = r#"async function doStuff(db) {
+    const txStatements: Array<(tx: any) => Promise<number>> = [(tx) => tx.insert().run()];
+
+    db.transaction((tx: any) => {
+        for (const stmt of txStatements) {
+            stmt(tx)
+        }
+    });
+}"#;
 
     let parsed = parse(SOURCE, JsFileSource::tsx(), JsParserOptions::default());
 

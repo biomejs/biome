@@ -1,0 +1,12 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 149
+expression: valid-define-props-object.vue
+---
+# Input
+```ts
+<script setup>
+defineProps({ foo: String });
+</script>
+
+```

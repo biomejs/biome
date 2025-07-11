@@ -296,6 +296,7 @@ fn extract_embedded_script(
             html_element
                 .children()
                 .iter()
+                .filter_map(|child| child.as_any_html_content().cloned())
                 .filter_map(|child| child.as_html_content().cloned())
                 .filter_map(|child| {
                     let content = child.value_token().ok()?;
@@ -353,6 +354,7 @@ fn parse_embedded_style(
             html_element
                 .children()
                 .iter()
+                .filter_map(|child| child.as_any_html_content().cloned())
                 .filter_map(|child| child.as_html_content().cloned())
                 .filter_map(|child| {
                     let content = child.value_token().ok()?;

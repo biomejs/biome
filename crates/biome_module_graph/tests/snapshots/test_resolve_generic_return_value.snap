@@ -89,8 +89,8 @@ Module TypeId(9) => T extends Module(0) TypeId(8)
 Module TypeId(10) => sync Function "useCallback" {
   accepts: {
     params: [
-      required callback: Module(0) TypeId(0) (bindings: callback:Module(0) TypeId(0))
-      required deps: Module(0) TypeId(8) (bindings: deps:Module(0) TypeId(8))
+      required callback: Module(0) TypeId(0)
+      required deps: Module(0) TypeId(8)
     ]
     type_args: [Module(0) TypeId(9)]
   }
@@ -132,8 +132,8 @@ Full TypeId(9) => T extends Module(0) TypeId(8)
 Full TypeId(10) => sync Function "useCallback" {
   accepts: {
     params: [
-      required callback: Module(0) TypeId(0) (bindings: callback:Module(0) TypeId(0))
-      required deps: Module(0) TypeId(8) (bindings: deps:Module(0) TypeId(8))
+      required callback: Module(0) TypeId(0)
+      required deps: Module(0) TypeId(8)
     ]
     type_args: [Module(0) TypeId(9)]
   }

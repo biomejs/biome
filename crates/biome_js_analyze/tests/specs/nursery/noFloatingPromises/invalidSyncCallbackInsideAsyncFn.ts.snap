@@ -14,6 +14,16 @@ async function doStuff(db) {
     });
 }
 
+async function doStuff2(db) {
+    const txStatements: Array<Promise<(tx: any) => void>> = [];
+
+    db.transaction((tx: any) => {
+        for (const stmt of txStatements) {
+            stmt
+        }
+    });
+}
+
 ```
 
 # Diagnostics
@@ -28,6 +38,23 @@ invalidSyncCallbackInsideAsyncFn.ts:6:13 lint/nursery/noFloatingPromises ━━�
       │             ^^^^^^^^
     7 │         }
     8 │     });
+  
+  i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
+  
+
+```
+
+```
+invalidSyncCallbackInsideAsyncFn.ts:16:13 lint/nursery/noFloatingPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i A "floating" Promise was found, meaning it is not properly handled and could lead to ignored errors or unexpected behavior.
+  
+    14 │     db.transaction((tx: any) => {
+    15 │         for (const stmt of txStatements) {
+  > 16 │             stmt
+       │             ^^^^
+    17 │         }
+    18 │     });
   
   i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
   

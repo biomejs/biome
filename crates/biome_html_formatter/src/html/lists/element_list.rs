@@ -16,8 +16,8 @@ use crate::{
 use biome_formatter::{CstFormatContext, FormatRuleWithOptions, best_fitting, prelude::*};
 use biome_formatter::{VecBuffer, format_args, write};
 use biome_html_syntax::{
-    AnyHtmlElement, HtmlClosingElement, HtmlClosingElementFields, HtmlElementList, HtmlRoot,
-    HtmlSyntaxToken,
+    AnyHtmlContent, AnyHtmlElement, HtmlClosingElement, HtmlClosingElementFields, HtmlElementList,
+    HtmlRoot, HtmlSyntaxToken,
 };
 use tag::GroupMode;
 #[derive(Debug, Clone, Default)]
@@ -433,7 +433,7 @@ impl FormatHtmlElementList {
         use biome_formatter::CstFormatContext;
 
         for child in node {
-            if let AnyHtmlElement::HtmlContent(text) = child {
+            if let AnyHtmlElement::AnyHtmlContent(AnyHtmlContent::HtmlContent(text)) = child {
                 f.state_mut().track_token(&text.value_token().unwrap());
 
                 // You can't suppress a text node
@@ -465,11 +465,11 @@ impl FormatHtmlElementList {
         let mut meta = ChildrenMeta::default();
 
         for child in list {
-            use AnyHtmlElement::*;
-
             match child {
-                HtmlElement(_) | HtmlSelfClosingElement(_) => meta.any_tag = true,
-                HtmlContent(text) => {
+                AnyHtmlElement::HtmlElement(_) | AnyHtmlElement::HtmlSelfClosingElement(_) => {
+                    meta.any_tag = true
+                }
+                AnyHtmlElement::AnyHtmlContent(AnyHtmlContent::HtmlContent(text)) => {
                     meta.meaningful_text = meta.meaningful_text
                         || text
                             .value_token()

@@ -4648,6 +4648,16 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoVueReservedPropsConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{ "$ref": "#/definitions/RuleWithNoVueReservedPropsOptions" }
+			]
+		},
+		"NoVueReservedPropsOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoWithConfiguration": {
 			"anyOf": [
 				{ "$ref": "#/definitions/RulePlainConfiguration" },
@@ -4865,6 +4875,13 @@
 					"description": "Disallow the use of useless undefined.",
 					"anyOf": [
 						{ "$ref": "#/definitions/NoUselessUndefinedConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noVueReservedProps": {
+					"description": "Disallow reserved names to be used as props.",
+					"anyOf": [
+						{ "$ref": "#/definitions/NoVueReservedPropsConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -9267,6 +9284,21 @@
 				"options": {
 					"description": "Rule's options",
 					"allOf": [{ "$ref": "#/definitions/NoVoidTypeReturnOptions" }]
+				}
+			},
+			"additionalProperties": false
+		},
+		"RuleWithNoVueReservedPropsOptions": {
+			"type": "object",
+			"required": ["level"],
+			"properties": {
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [{ "$ref": "#/definitions/NoVueReservedPropsOptions" }]
 				}
 			},
 			"additionalProperties": false

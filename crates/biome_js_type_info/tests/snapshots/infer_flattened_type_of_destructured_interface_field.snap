@@ -19,7 +19,7 @@ function bar({ foo }: Foo) {}
 sync Function "bar" {
   accepts: {
     params: [
-      required (unnamed): Module(0) TypeId(1) (bindings: foo:Module(0) TypeId(2))
+      required (bindings: foo: Module(0) TypeId(2)): Module(0) TypeId(1)
     ]
     type_args: []
   }

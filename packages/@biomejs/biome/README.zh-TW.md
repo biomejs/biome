@@ -99,12 +99,6 @@ npx @biomejs/biome ci ./src
 
 Biome 提供了一個簡單的贊助計劃，允許公司在各種開發者中獲得可見性和認可。
 
-### 問題資金支持
-
-我們使用 [Polar.sh](https://polar.sh/biomejs) 來提升和推廣你希望看到和實現的特定功能。查看我們的待辦事項並幫助我們：
-
-<a href="https://polar.sh/biomejs"><img src="https://polar.sh/embed/fund-our-backlog.svg?org=biomejs" /></a>
-
 ## 贊助商
 
 ### Platinum Sponsors
