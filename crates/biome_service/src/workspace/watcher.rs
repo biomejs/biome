@@ -18,8 +18,8 @@ use papaya::{Compute, Operation};
 use tracing::instrument;
 
 use super::{
-    ScanKind, ScanProjectFolderParams, ServiceDataNotification, Workspace, WorkspaceServer,
-    document::Document,
+    FeaturesBuilder, IsPathIgnoredParams, ScanKind, ScanProjectFolderParams,
+    ServiceDataNotification, Workspace, WorkspaceServer, document::Document,
 };
 
 impl WorkspaceServer {
@@ -84,7 +84,14 @@ impl WorkspaceServer {
             return Ok(()); // file events outside our projects can be safely ignored.
         };
 
-        if self.is_ignored_by_scanner(project_key, path) {
+        let ignored = self.is_ignored_by_scanner(project_key, path)
+            || self.is_path_ignored(IsPathIgnoredParams {
+                path: path.into(),
+                project_key,
+                features: FeaturesBuilder::new().build(),
+            })?;
+
+        if ignored {
             return Ok(());
         }
 

@@ -1011,23 +1011,21 @@ impl Workspace for WorkspaceServer {
                     Some(VcsClientKind::Git) => {
                         let gitignore = directory.join(".gitignore");
                         let ignore = directory.join(".ignore");
-                        let content = {
-                            let result = self.fs().read_file_from_path(gitignore.as_ref());
-                            match result {
-                                Ok(content) => content,
-                                Err(_) => match self.fs().read_file_from_path(ignore.as_ref()) {
-                                    Ok(content) => content,
-                                    Err(_) => {
-                                        return Err(VcsDiagnostic::NoIgnoreFileFound(
-                                            NoIgnoreFileFound {
-                                                path: directory.to_string(),
-                                            },
-                                        )
-                                        .into());
-                                    }
-                                },
+                        let result = self
+                            .fs()
+                            .read_file_from_path(gitignore.as_ref())
+                            .ok()
+                            .or_else(|| self.fs().read_file_from_path(ignore.as_ref()).ok());
+                        let content = match result {
+                            Some(content) => content,
+                            None => {
+                                return Err(VcsDiagnostic::NoIgnoreFileFound(NoIgnoreFileFound {
+                                    path: directory.to_string(),
+                                })
+                                .into());
                             }
                         };
+
                         let lines: Vec<_> = content.lines().collect();
                         settings
                             .vcs_settings
