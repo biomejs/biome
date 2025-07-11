@@ -919,7 +919,7 @@ impl Workspace for WorkspaceServer {
                 .try_send(WatcherInstruction::WatchFolder(path.clone()));
         }
 
-        let result = self.scan(params.project_key, &path, params.scan_kind)?;
+        let result = self.scan(params.project_key, &path, params.scan_kind, params.verbose)?;
 
         let _ = self.notification_tx.send(ServiceDataNotification::Updated);
 

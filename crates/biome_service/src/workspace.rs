@@ -1234,6 +1234,9 @@ pub struct ScanProjectFolderParams {
     pub force: bool,
 
     pub scan_kind: ScanKind,
+
+    #[serde(default, skip_serializing_if = "std::ops::Not::not")]
+    pub verbose: bool,
 }
 
 #[derive(Debug, serde::Serialize, serde::Deserialize)]

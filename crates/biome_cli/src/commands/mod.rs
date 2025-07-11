@@ -985,6 +985,7 @@ pub(crate) trait CommandRunner: Sized {
             watch: cli_options.use_server,
             force: false, // TODO: Maybe we'll want a CLI flag for this.
             scan_kind,
+            verbose: cli_options.verbose,
         })?;
 
         if self.should_validate_configuration_diagnostics() {

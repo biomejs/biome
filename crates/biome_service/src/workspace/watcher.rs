@@ -102,6 +102,7 @@ impl WorkspaceServer {
             watch: false, // It's already being watched.
             force: true,
             scan_kind: ScanKind::Project,
+            verbose: false,
         })
         .map(|_| ())
     }
