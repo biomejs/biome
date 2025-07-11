@@ -54,7 +54,7 @@ fn should_not_open_an_ignored_file_inside_vcs_ignore_file() {
         .expect("can update settings");
 
     workspace
-        .open_path_through_watcher(Utf8Path::new("/project/a.js"))
+        .open_path_through_watcher(Utf8Path::new("/project/a.js"), &ScanKind::Project)
         .expect("can open file");
 
     let result = workspace.format_file(FormatFileParams {
@@ -100,7 +100,10 @@ fn should_not_open_an_ignored_file_inside_file_includes() {
         .expect("can update settings");
 
     workspace
-        .open_path_through_watcher(Utf8Path::new("/project/dist/minified.js"))
+        .open_path_through_watcher(
+            Utf8Path::new("/project/dist/minified.js"),
+            &ScanKind::Project,
+        )
         .expect("can open file");
 
     let result = workspace.format_file(FormatFileParams {
@@ -131,7 +134,7 @@ fn close_file_through_watcher_before_client() {
         .expect("can open project");
 
     workspace
-        .open_path_through_watcher(Utf8Path::new("/project/a.js"))
+        .open_path_through_watcher(Utf8Path::new("/project/a.js"), &ScanKind::Project)
         .expect("can open file");
 
     workspace
@@ -312,7 +315,7 @@ fn close_modified_file_from_client_before_watcher() {
     );
     // call the instruction handler manually for the sake of the test:
     workspace
-        .open_path_through_watcher(Utf8Path::new("/project/a.js"))
+        .open_path_through_watcher(Utf8Path::new("/project/a.js"), &ScanKind::Project)
         .expect("path to be updated by us");
 
     let content = workspace

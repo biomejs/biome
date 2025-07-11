@@ -298,9 +298,26 @@ impl WorkspaceServer {
     pub(super) fn open_file_by_watcher(
         &self,
         project_key: ProjectKey,
+        scan_kind: &ScanKind,
         path: impl Into<BiomePath>,
     ) -> Result<(), WorkspaceError> {
-        self.open_file_for_reason(project_key, path.into(), OpenFileReason::WatcherUpdate)
+        let path = path.into();
+        let Some(project_key) = self.projects.find_project_for_path(path.as_path()) else {
+            return Ok(()); // file events outside our projects can be safely ignored.
+        };
+
+        let is_ignored = self.is_ignored_by_scanner(project_key, scan_kind, &path)?
+            || self.is_path_ignored(IsPathIgnoredParams {
+                project_key,
+                path: path.clone(),
+                features: FeaturesBuilder::default().build(),
+                ignore_kind: IgnoreKind::Ancestors,
+            })?;
+        if is_ignored {
+            return Ok(());
+        }
+
+        self.open_file_for_reason(project_key, path, OpenFileReason::WatcherUpdate)
     }
 
     fn open_file_for_reason(
@@ -560,10 +577,6 @@ impl WorkspaceServer {
             node_cache,
         );
         Ok(parsed)
-    }
-
-    pub(super) fn is_ignored_by_scanner(&self, project_key: ProjectKey, path: &Utf8Path) -> bool {
-        self.projects.is_ignored_by_scanner(project_key, path)
     }
 
     fn load_plugins(&self, base_path: &Utf8Path, plugins: &Plugins) -> Vec<PluginDiagnostic> {
@@ -835,20 +848,6 @@ impl WorkspaceServer {
         root: Option<SendNode>,
     ) -> Result<(), WorkspaceError> {
         let path = BiomePath::from(path);
-        let Some(project_key) = self.projects.find_project_for_path(path.as_path()) else {
-            return Ok(()); // file events outside our projects can be safely ignored.
-        };
-
-        let ignored = self.is_ignored_by_scanner(project_key, &path)
-            || self.is_path_ignored(IsPathIgnoredParams {
-                project_key,
-                path: path.clone(),
-                features: FeaturesBuilder::default().build(),
-                ignore_kind: IgnoreKind::Ancestors,
-            })?;
-        if ignored {
-            return Ok(());
-        }
         if path.is_config() || path.is_manifest() {
             self.update_project_layout(signal_kind, &path)?;
         }
@@ -904,7 +903,8 @@ impl Workspace for WorkspaceServer {
             .or_else(|| self.projects.get_project_path(params.project_key))
             .ok_or_else(WorkspaceError::no_project)?;
 
-        if params.scan_kind.is_none() {
+        let scan_kind = params.scan_kind;
+        if scan_kind.is_none() {
             let manifest = path.join("package.json");
             if self.fs.path_exists(&manifest) {
                 self.open_file_during_initial_scan(params.project_key, manifest.clone())?;
@@ -938,12 +938,13 @@ impl Workspace for WorkspaceServer {
         if params.watch {
             self.watched_folders.pin().insert(path.clone());
 
-            let _ = self
-                .watcher_tx
-                .try_send(WatcherInstruction::WatchFolder(path.clone()));
+            let _ = self.watcher_tx.try_send(WatcherInstruction::WatchFolder(
+                path.clone(),
+                scan_kind.clone(),
+            ));
         }
 
-        let result = self.scan(params.project_key, &path, params.scan_kind, params.verbose)?;
+        let result = self.scan(params.project_key, &path, scan_kind, params.verbose)?;
 
         let _ = self.notification_tx.send(ServiceDataNotification::Updated);
 

@@ -87,6 +87,73 @@ impl WorkspaceServer {
             configuration_files,
         })
     }
+
+    pub(super) fn is_ignored_by_scanner(
+        &self,
+        project_key: ProjectKey,
+        scan_kind: &ScanKind,
+        path: &BiomePath,
+    ) -> Result<bool, WorkspaceError> {
+        if self.projects.is_ignored_by_scanner(project_key, path) {
+            return Ok(true);
+        }
+
+        let is_ignored = match self.fs().symlink_path_kind(path)? {
+            PathKind::Directory { .. } => {
+                if path.is_dependency() {
+                    // Every mode ignores dependencies, except project mode.
+                    return Ok(!scan_kind.is_project());
+                }
+
+                if self
+                    .projects
+                    .is_ignored_by_top_level_config(project_key, path, IgnoreKind::Path)
+                {
+                    return Ok(true); // Nobody cares about ignored paths.
+                }
+
+                if let ScanKind::TargetedKnownFiles {
+                    target_paths,
+                    descend_from_targets,
+                } = &scan_kind
+                    && !target_paths.iter().any(|target_path| {
+                        target_path.starts_with(path.as_path())
+                            || (*descend_from_targets && path.starts_with(target_path.as_path()))
+                    })
+                {
+                    return Ok(true); // Path is not being targeted.
+                }
+
+                false
+            }
+            PathKind::File { .. } => match scan_kind {
+                ScanKind::KnownFiles | ScanKind::TargetedKnownFiles { .. } => {
+                    if path.is_config() {
+                        self.projects.is_ignored_by_top_level_config(
+                            project_key,
+                            path,
+                            IgnoreKind::Path,
+                        )
+                    } else {
+                        !path.is_ignore() && !path.is_manifest()
+                    }
+                }
+                ScanKind::Project => {
+                    if path.is_dependency() {
+                        // For dependencies, we ignore everything except
+                        // manifests and type declarations.
+                        !path.is_package_json() && !path.is_type_declaration()
+                    } else {
+                        !path.is_required_during_scan()
+                            && DocumentFileSource::try_from_path(path).is_err()
+                    }
+                }
+                ScanKind::NoScanner => true,
+            },
+        };
+
+        Ok(is_ignored)
+    }
 }
 
 /// Initiates the filesystem traversal tasks from the provided path and runs it to completion.
@@ -288,70 +355,15 @@ impl TraversalContext for ScanContext<'_> {
     // - The kind of file system entry the path points to.
     // - The kind of scan we are performing.
     fn can_handle(&self, path: &BiomePath) -> bool {
-        if self
+        match self
             .workspace
-            .projects
-            .is_ignored_by_scanner(self.project_key, path)
+            .is_ignored_by_scanner(self.project_key, &self.scan_kind, path)
         {
-            return false;
-        }
-
-        match self.workspace.fs().symlink_path_kind(path) {
-            Ok(PathKind::Directory { .. }) => {
-                if path.is_dependency() {
-                    // Only project mode cares about dependencies, because they
-                    // are a valuable source of type information.
-                    return self.scan_kind.is_project();
-                }
-
-                if self.workspace.projects.is_ignored_by_top_level_config(
-                    self.project_key,
-                    path,
-                    IgnoreKind::Path,
-                ) {
-                    return false; // Nobody cares about ignored paths.
-                }
-
-                if let ScanKind::TargetedKnownFiles {
-                    target_paths,
-                    descend_from_targets,
-                } = &self.scan_kind
-                {
-                    if !target_paths.iter().any(|target_path| {
-                        target_path.starts_with(path.as_path())
-                            || (*descend_from_targets && path.starts_with(target_path.as_path()))
-                    }) {
-                        return false; // Path is not being targeted.
-                    }
-                }
-
-                true
-            }
-            Ok(PathKind::File { .. }) => match &self.scan_kind {
-                ScanKind::KnownFiles | ScanKind::TargetedKnownFiles { .. } => {
-                    if path.is_config() {
-                        !self.workspace.projects.is_ignored_by_top_level_config(
-                            self.project_key,
-                            path,
-                            IgnoreKind::Path,
-                        )
-                    } else {
-                        path.is_ignore() || path.is_manifest()
-                    }
-                }
-                ScanKind::Project => {
-                    if path.is_dependency() {
-                        path.is_package_json() || path.is_type_declaration()
-                    } else {
-                        path.is_required_during_scan()
-                            || DocumentFileSource::try_from_path(path).is_ok()
-                    }
-                }
-                ScanKind::NoScanner => false,
-            },
+            Ok(is_ignored) => !is_ignored,
             Err(_) => {
-                // bail on fifo and socket files
-                false
+                // Pretend we can handle it so we can give a meaningful error
+                // when it fails.
+                true
             }
         }
     }
