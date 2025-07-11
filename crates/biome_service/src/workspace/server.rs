@@ -560,10 +560,6 @@ impl WorkspaceServer {
         Ok(parsed)
     }
 
-    pub(super) fn is_ignored_by_scanner(&self, project_key: ProjectKey, path: &Utf8Path) -> bool {
-        self.projects.is_ignored_by_scanner(project_key, path)
-    }
-
     fn load_plugins(&self, base_path: &Utf8Path, plugins: &Plugins) -> Vec<PluginDiagnostic> {
         let mut diagnostics = Vec::new();
         let plugin_cache = PluginCache::default();
@@ -880,7 +876,8 @@ impl Workspace for WorkspaceServer {
             .or_else(|| self.projects.get_project_path(params.project_key))
             .ok_or_else(WorkspaceError::no_project)?;
 
-        if params.scan_kind.is_none() {
+        let scan_kind = params.scan_kind;
+        if scan_kind.is_none() {
             let manifest = path.join("package.json");
             if self.fs.path_exists(&manifest) {
                 self.open_file_during_initial_scan(params.project_key, manifest.clone())?;
@@ -914,12 +911,13 @@ impl Workspace for WorkspaceServer {
         if params.watch {
             self.watched_folders.pin().insert(path.clone());
 
-            let _ = self
-                .watcher_tx
-                .try_send(WatcherInstruction::WatchFolder(path.clone()));
+            let _ = self.watcher_tx.try_send(WatcherInstruction::WatchFolder(
+                path.clone(),
+                scan_kind.clone(),
+            ));
         }
 
-        let result = self.scan(params.project_key, &path, params.scan_kind, params.verbose)?;
+        let result = self.scan(params.project_key, &path, scan_kind, params.verbose)?;
 
         let _ = self.notification_tx.send(ServiceDataNotification::Updated);
 
