@@ -71,82 +71,82 @@ fn with_configuration() {
 }
 
 #[test]
+fn rage_with_config_path_argument() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+    let config_path = Utf8Path::new("custom-config.json");
+    fs.insert(
+        config_path.to_path_buf(),
+        r#"{\n  \"formatter\": {\n    \"enabled\": false\n  }\n}"#,
+    );
+
+    let (fs, result) = run_rage(
+        fs,
+        &mut console,
+        Args::from(["rage", "--config-path", "custom-config.json"].as_slice()),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_rage_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "rage_with_config_path_argument",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn rage_with_biome_config_path_env() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+    let config_path = Utf8Path::new("env-config.json");
+    fs.insert(
+        config_path.to_path_buf(),
+        r#"{\n  \"formatter\": {\n    \"enabled\": false\n  }\n}"#,
+    );
+    unsafe { std::env::set_var("BIOME_CONFIG_PATH", "env-config.json") };
+
+    let (fs, result) = run_rage(fs, &mut console, Args::from(["rage"].as_slice()));
+
+    unsafe { std::env::remove_var("BIOME_CONFIG_PATH") };
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_rage_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "rage_with_biome_config_path_env",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn rage_with_invalid_config_path() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let (fs, result) = run_rage(
+        fs,
+        &mut console,
+        Args::from(["rage", "--config-path", "does_not_exist.json"].as_slice()),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_rage_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "rage_with_invalid_config_path",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
 fn with_no_configuration() {
-    #[test]
-    fn rage_with_config_path_argument() {
-        let fs = MemoryFileSystem::default();
-        let mut console = BufferConsole::default();
-        let config_path = Utf8Path::new("custom-config.json");
-        fs.insert(
-            config_path.to_path_buf(),
-            r#"{\n  \"formatter\": {\n    \"enabled\": false\n  }\n}"#,
-        );
-
-        let (fs, result) = run_rage(
-            fs,
-            &mut console,
-            Args::from(["rage", "--config-path", "custom-config.json"].as_slice()),
-        );
-
-        assert!(result.is_ok(), "run_cli returned {result:?}");
-
-        assert_rage_snapshot(SnapshotPayload::new(
-            module_path!(),
-            "rage_with_config_path_argument",
-            fs,
-            console,
-            result,
-        ));
-    }
-
-    #[test]
-    fn rage_with_biome_config_path_env() {
-        let fs = MemoryFileSystem::default();
-        let mut console = BufferConsole::default();
-        let config_path = Utf8Path::new("env-config.json");
-        fs.insert(
-            config_path.to_path_buf(),
-            r#"{\n  \"formatter\": {\n    \"enabled\": false\n  }\n}"#,
-        );
-        unsafe { std::env::set_var("BIOME_CONFIG_PATH", "env-config.json") };
-
-        let (fs, result) = run_rage(fs, &mut console, Args::from(["rage"].as_slice()));
-
-        unsafe { std::env::remove_var("BIOME_CONFIG_PATH") };
-
-        assert!(result.is_ok(), "run_cli returned {result:?}");
-
-        assert_rage_snapshot(SnapshotPayload::new(
-            module_path!(),
-            "rage_with_biome_config_path_env",
-            fs,
-            console,
-            result,
-        ));
-    }
-
-    #[test]
-    fn rage_with_invalid_config_path() {
-        let fs = MemoryFileSystem::default();
-        let mut console = BufferConsole::default();
-
-        let (fs, result) = run_rage(
-            fs,
-            &mut console,
-            Args::from(["rage", "--config-path", "does_not_exist.json"].as_slice()),
-        );
-
-        assert!(result.is_ok(), "run_cli returned {result:?}");
-
-        assert_rage_snapshot(SnapshotPayload::new(
-            module_path!(),
-            "rage_with_invalid_config_path",
-            fs,
-            console,
-            result,
-        ));
-    }
-
     let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
