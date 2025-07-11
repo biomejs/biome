@@ -133,8 +133,10 @@ pub(crate) struct LineSuppression {
     /// List of all the rules this comment has started suppressing (must be
     /// removed from the suppressed set on expiration)
     pub(crate) suppressed_rules: FxHashMap<RuleCategory, FxHashSet<RuleFilter<'static>>>,
-    /// List of all the rule instances this comment has started suppressing.
-    pub(crate) suppressed_instances: FxHashMap<String, RuleFilter<'static>>,
+    /// An instance this comment should be suppressing.
+    ///
+    /// For example, this is `foo` in `// biome-ignore lint/correctness/xxx(foo): ...`
+    pub(crate) suppressed_instance: Option<Box<str>>,
     /// List of plugins this comment has started suppressing
     pub(crate) suppressed_plugins: FxHashSet<String>,
     /// Set to true if this comment suppress all plugins
@@ -142,7 +144,8 @@ pub(crate) struct LineSuppression {
     /// Set to `true` when a signal matching this suppression was emitted and
     /// suppressed
     pub(crate) did_suppress_signal: bool,
-    /// Set to `true` when this line suppresses a signal that was already suppressed by another entity e.g. top-level suppression
+    /// Points to the previous suppression if this line suppresses a signal
+    /// that was already suppressed by another entity (e.g. top-level suppression)
     pub(crate) already_suppressed: Option<TextRange>,
 }
 
@@ -154,7 +157,7 @@ impl Default for LineSuppression {
             text_range: Default::default(),
             suppressed_categories: RuleCategories::empty(),
             suppressed_rules: Default::default(),
-            suppressed_instances: Default::default(),
+            suppressed_instance: Default::default(),
             suppressed_plugins: Default::default(),
             suppress_all_plugins: false,
             did_suppress_signal: false,
@@ -436,9 +439,7 @@ impl<'analyzer> Suppressions<'analyzer> {
                     .entry(rule_category)
                     .or_default();
                 filters.insert(filter);
-                if let Some(instance) = instance {
-                    suppression.suppressed_instances.insert(instance, filter);
-                }
+                suppression.suppressed_instance = instance.map(String::into_boxed_str);
             }
         }
         self.line_suppressions.push(suppression);
