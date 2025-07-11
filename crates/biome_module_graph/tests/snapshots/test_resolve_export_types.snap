@@ -42,11 +42,11 @@ export const superComputer = new DeepThought();
 
 ```
 Exports {
-  "superComputer" => {
-    ExportOwnExport => JsOwnExport::Binding(3)
-  }
   "theAnswer" => {
     ExportOwnExport => JsOwnExport::Binding(0)
+  }
+  "superComputer" => {
+    ExportOwnExport => JsOwnExport::Binding(3)
   }
 }
 Imports {

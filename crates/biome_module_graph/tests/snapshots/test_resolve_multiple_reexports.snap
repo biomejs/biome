@@ -2,7 +2,7 @@
 source: crates/biome_module_graph/tests/snap/mod.rs
 expression: content
 ---
-# `/src/bar.ts` (Module 2)
+# `/src/bar.ts` (Module 3)
 
 ## Source
 
@@ -95,7 +95,7 @@ Module TypeId(3) => Module(0) TypeId(2).bar
 Module TypeId(4) => Call Module(0) TypeId(3)(No parameters)
 ```
 
-# `/src/foo.ts` (Module 3)
+# `/src/foo.ts` (Module 2)
 
 ## Source
 
@@ -174,7 +174,7 @@ Full TypeId(1) => namespace for ModuleId(2)
 
 Full TypeId(2) => namespace for ModuleId(3)
 
-Full TypeId(3) => Module(3) TypeId(1)
+Full TypeId(3) => Module(2) TypeId(1)
 
 Full TypeId(4) => number
 

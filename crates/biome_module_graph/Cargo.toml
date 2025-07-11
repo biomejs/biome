@@ -26,6 +26,7 @@ biome_resolver       = { workspace = true }
 biome_rowan          = { workspace = true }
 camino               = { workspace = true }
 cfg-if               = { workspace = true }
+indexmap             = { workspace = true }
 once_cell            = "1.21.3"             # Use `std::sync::OnceLock::get_or_try_init` when it is stable.
 papaya               = { workspace = true }
 rust-lapper          = { workspace = true }

@@ -25,17 +25,17 @@ export { A, B };
 
 ```
 Exports {
-  "A" => {
-    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(2))
-  }
-  "B" => {
-    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(10))
-  }
   "Union" => {
     ExportOwnExport => JsOwnExport::Binding(3)
   }
   "Union2" => {
     ExportOwnExport => JsOwnExport::Binding(7)
+  }
+  "A" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(2))
+  }
+  "B" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(10))
   }
 }
 Imports {

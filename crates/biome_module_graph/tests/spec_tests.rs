@@ -454,7 +454,7 @@ fn test_resolve_exports() {
 
     // Remove this entry, or the Windows tests fail on the path in the snapshot below:
     assert_eq!(
-        exports.remove(&Text::Static("oh\nno")),
+        exports.swap_remove(&Text::Static("oh\nno")),
         Some(JsExport::Reexport(JsReexport {
             import: JsImport {
                 specifier: "./renamed-reexports".into(),
@@ -465,7 +465,7 @@ fn test_resolve_exports() {
         }))
     );
     assert_eq!(
-        exports.remove(&Text::Static("renamed2")),
+        exports.swap_remove(&Text::Static("renamed2")),
         Some(JsExport::Reexport(JsReexport {
             import: JsImport {
                 specifier: "./renamed-reexports".into(),

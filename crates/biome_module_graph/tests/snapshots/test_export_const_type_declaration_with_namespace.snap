@@ -22,11 +22,11 @@ export = shared;
 
 ```
 Exports {
-  "default" => {
-    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(3))
-  }
   "foo" => {
     ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(1))
+  }
+  "default" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(3))
   }
 }
 Imports {

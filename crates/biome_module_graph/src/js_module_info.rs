@@ -4,13 +4,14 @@ mod module_resolver;
 mod scope;
 mod visitor;
 
-use std::{collections::BTreeMap, ops::Deref, sync::Arc};
+use std::{ops::Deref, sync::Arc};
 
 use biome_js_syntax::AnyJsImportLike;
 use biome_js_type_info::{BindingId, ImportSymbol, ResolvedTypeId, ScopeId, TypeData};
 use biome_jsdoc_comment::JsdocComment;
 use biome_resolver::ResolvedPath;
 use biome_rowan::{Text, TextRange};
+use indexmap::IndexMap;
 use rust_lapper::Lapper;
 use rustc_hash::FxHashMap;
 
@@ -38,10 +39,9 @@ impl JsModuleInfo {
     /// Returns an iterator over all the static and dynamic imports in this
     /// module.
     pub fn all_import_paths(&self) -> impl Iterator<Item = ResolvedPath> + use<> {
-        let module_info = self.0.as_ref();
         ImportPathIterator {
-            static_import_paths: module_info.static_import_paths.clone(),
-            dynamic_import_paths: module_info.dynamic_import_paths.clone(),
+            module_info: self.clone(),
+            index: 0,
         }
     }
 
@@ -105,7 +105,7 @@ pub struct JsModuleInfoInner {
     /// absolute path it resolves to. The resolved path may be looked up as key
     /// in the [ModuleGraph::data] map, although it is not required to exist
     /// (for instance, if the path is outside the project's scope).
-    pub static_import_paths: BTreeMap<Text, ResolvedPath>,
+    pub static_import_paths: IndexMap<Text, ResolvedPath>,
 
     /// Map of all dynamic import paths found in the module for which the import
     /// specifier could be statically determined.
@@ -121,7 +121,7 @@ pub struct JsModuleInfoInner {
     ///
     /// Paths found in `require()` expressions in CommonJS sources are also
     /// included with the dynamic import paths.
-    pub dynamic_import_paths: BTreeMap<Text, ResolvedPath>,
+    pub dynamic_import_paths: IndexMap<Text, ResolvedPath>,
 
     /// Map of exports from the module.
     ///
@@ -156,10 +156,10 @@ pub struct JsModuleInfoInner {
 }
 
 #[derive(Debug, Default)]
-pub struct Exports(pub(crate) BTreeMap<Text, JsExport>);
+pub struct Exports(pub(crate) IndexMap<Text, JsExport>);
 
 impl Deref for Exports {
-    type Target = BTreeMap<Text, JsExport>;
+    type Target = IndexMap<Text, JsExport>;
 
     fn deref(&self) -> &Self::Target {
         &self.0
@@ -167,10 +167,11 @@ impl Deref for Exports {
 }
 
 #[derive(Debug, Default)]
-pub struct Imports(pub(crate) BTreeMap<Text, JsImport>);
+pub struct Imports(pub(crate) IndexMap<Text, JsImport>);
 
 impl Deref for Imports {
-    type Target = BTreeMap<Text, JsImport>;
+    type Target = IndexMap<Text, JsImport>;
+
     fn deref(&self) -> &Self::Target {
         &self.0
     }
@@ -307,23 +308,29 @@ pub struct JsReexport {
 }
 
 struct ImportPathIterator {
-    static_import_paths: BTreeMap<Text, ResolvedPath>,
-    dynamic_import_paths: BTreeMap<Text, ResolvedPath>,
+    module_info: JsModuleInfo,
+    index: usize,
 }
 
 impl Iterator for ImportPathIterator {
     type Item = ResolvedPath;
 
     fn next(&mut self) -> Option<Self::Item> {
-        if self.static_import_paths.is_empty() {
-            self.dynamic_import_paths
-                .pop_first()
-                .map(|(_source, path)| path)
+        let num_static_imports = self.module_info.static_import_paths.len();
+        let resolved_path = if self.index < num_static_imports {
+            let resolved_path = &self.module_info.static_import_paths[self.index];
+            self.index += 1;
+            resolved_path
+        } else if self.index < self.module_info.dynamic_import_paths.len() + num_static_imports {
+            let resolved_path =
+                &self.module_info.dynamic_import_paths[self.index - num_static_imports];
+            self.index += 1;
+            resolved_path
         } else {
-            self.static_import_paths
-                .pop_first()
-                .map(|(_identifier, path)| path)
-        }
+            return None;
+        };
+
+        Some(resolved_path.clone())
     }
 }
 
