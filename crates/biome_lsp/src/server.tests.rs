@@ -3286,6 +3286,7 @@ export function bar() {
                 watch: true,
                 force: false,
                 scan_kind,
+                verbose: false,
             },
         )
         .await?
@@ -3505,6 +3506,7 @@ export function bar() {
                 watch: true,
                 force: false,
                 scan_kind: ScanKind::Project,
+                verbose: false,
             },
         )
         .await?

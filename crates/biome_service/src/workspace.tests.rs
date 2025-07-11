@@ -338,6 +338,7 @@ fn files_loaded_by_the_scanner_are_only_unloaded_when_the_project_is_unregistere
             watch: false,
             force: false,
             scan_kind: ScanKind::Project,
+            verbose: false,
         })
         .unwrap();
 
@@ -430,6 +431,7 @@ fn too_large_files_are_tracked_but_not_parsed() {
             watch: false,
             force: false,
             scan_kind: ScanKind::Project,
+            verbose: false,
         })
         .unwrap();
 
@@ -490,6 +492,7 @@ fn plugins_are_loaded_and_used_during_analysis() {
             watch: false,
             force: false,
             scan_kind: ScanKind::Project,
+            verbose: false,
         })
         .unwrap();
 
@@ -559,6 +562,7 @@ language css;
             watch: false,
             force: false,
             scan_kind: ScanKind::Project,
+            verbose: false,
         })
         .unwrap();
 
@@ -624,6 +628,7 @@ fn plugins_may_use_invalid_span() {
             watch: false,
             force: false,
             scan_kind: ScanKind::Project,
+            verbose: false,
         })
         .unwrap();
 
@@ -743,6 +748,7 @@ const hasOwn = Object.hasOwn({ foo: 'bar' }, 'foo');"#,
             watch: false,
             force: false,
             scan_kind: ScanKind::Project,
+            verbose: false,
         })
         .unwrap();
 
