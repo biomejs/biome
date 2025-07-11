@@ -24,6 +24,7 @@ use tokio::runtime::Runtime;
 /// Handler for the `rage` command
 pub(crate) fn rage(
     session: CliSession,
+    cli_options: &crate::cli_options::CliOptions,
     daemon_logs: bool,
     formatter: bool,
     linter: bool,
@@ -34,6 +35,7 @@ pub(crate) fn rage(
 
     let biome_env = biome_env();
 
+    let config_path_hint = cli_options.as_configuration_path_hint();
     session.app.console.log(markup!("CLI:\n"
     {KeyValuePair("Version", markup!({VERSION}))}
     {KeyValuePair("Color support", markup!({DebugDisplay(terminal_supports_colors)}))}
@@ -49,7 +51,7 @@ pub(crate) fn rage(
     {EnvVarOs("JS_RUNTIME_NAME")}
     {EnvVarOs("NODE_PACKAGE_MANAGER")}
 
-    {RageConfiguration { fs: session.app.workspace.fs(), formatter, linter }}
+    {RageConfiguration { fs: session.app.workspace.fs(), config_path_hint: &config_path_hint, formatter, linter }}
     {WorkspaceRage(session.app.workspace.deref())}
     ));
 
@@ -194,6 +196,7 @@ impl Display for RunningBiomeServer {
 
 struct RageConfiguration<'a> {
     fs: &'a dyn FsWithResolverProxy,
+    config_path_hint: &'a biome_configuration::ConfigurationPathHint,
     formatter: bool,
     linter: bool,
 }
@@ -202,7 +205,7 @@ impl Display for RageConfiguration<'_> {
     fn fmt(&self, fmt: &mut Formatter) -> io::Result<()> {
         Section("Biome Configuration").fmt(fmt)?;
 
-        match load_configuration(self.fs, ConfigurationPathHint::default()) {
+        match load_configuration(self.fs, self.config_path_hint.clone()) {
             Ok(loaded_configuration) => {
                 if loaded_configuration.directory_path.is_none() {
                     markup! {
