@@ -808,7 +808,7 @@ pub enum VcsIgnoredPatterns {
 }
 
 impl VcsIgnoredPatterns {
-    /// Checks whether the path ignored only by the root ignore file
+    /// Checks whether the path is ignored only by the root ignore file.
     pub fn is_root_ignored(&self, path: &Utf8Path, is_dir: bool) -> bool {
         match self {
             Self::Git { root, .. } => root.matched(path, is_dir).is_ignore(),
