@@ -71,11 +71,14 @@ pub enum BiomeCommand {
     Rage(
         #[bpaf(external(cli_options), hide_usage)] CliOptions,
         /// Prints the Biome daemon server logs
-        #[bpaf(long("daemon-logs"), switch)] bool,
+        #[bpaf(long("daemon-logs"), switch)]
+        bool,
         /// Prints the formatter options applied
-        #[bpaf(long("formatter"), switch)] bool,
+        #[bpaf(long("formatter"), switch)]
+        bool,
         /// Prints the linter options applied
-        #[bpaf(long("linter"), switch)] bool,
+        #[bpaf(long("linter"), switch)]
+        bool,
     ),
     /// Starts the Biome daemon server process.
     #[bpaf(command)]
