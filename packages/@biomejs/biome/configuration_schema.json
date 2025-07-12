@@ -13670,6 +13670,15 @@
 		},
 		"UseUniqueElementIdsOptions": {
 			"type": "object",
+			"properties": {
+				"excludedComponents": {
+					"description": "Component names that accept an `id` prop that does not translate to a DOM element id.",
+					"default": [],
+					"type": "array",
+					"items": { "type": "string" },
+					"uniqueItems": true
+				}
+			},
 			"additionalProperties": false
 		},
 		"UseValidAnchorConfiguration": {
