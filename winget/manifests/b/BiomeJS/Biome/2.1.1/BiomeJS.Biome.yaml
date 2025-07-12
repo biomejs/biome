@@ -1,0 +1,8 @@
+# Created using wingetcreate 1.10.2.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.version.1.10.0.schema.json
+
+PackageIdentifier: BiomeJS.Biome
+PackageVersion: 2.1.1
+DefaultLocale: en-US
+ManifestType: version
+ManifestVersion: 1.10.0

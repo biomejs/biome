@@ -1,0 +1,17 @@
+# Created using wingetcreate 1.10.2.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.installer.1.10.0.schema.json
+
+PackageIdentifier: BiomeJS.Biome
+PackageVersion: 2.1.1
+InstallerType: portable
+Commands:
+- biome
+Installers:
+- Architecture: x64
+  InstallerUrl: https://github.com/biomejs/biome/releases/download/@biomejs/biome@2.1.1/biome-win32-x64.exe
+  InstallerSha256: 14097114E02621C5C0D5B8EAEF5776FD4F6680A3DF53CFC710EF622480DB0BC3
+- Architecture: arm64
+  InstallerUrl: https://github.com/biomejs/biome/releases/download/@biomejs/biome@2.1.1/biome-win32-arm64.exe
+  InstallerSha256: C4B83923788BDC9178099063261E8D89790C42C59C3DFD174A441AC9EA4A7D81
+ManifestType: installer
+ManifestVersion: 1.10.0
