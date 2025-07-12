@@ -1,0 +1,49 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: 03_invalid.ts
+---
+# Input
+```ts
+type BagOfPromises = {
+    [property: string]: Promise<void>;
+};
+
+let bag: BagOfPromises = {};
+bag.canYouFindMe;
+
+const { anotherOne } = bag;
+anotherOne;
+
+```
+
+# Diagnostics
+```
+03_invalid.ts:6:1 lint/nursery/noFloatingPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i A "floating" Promise was found, meaning it is not properly handled and could lead to ignored errors or unexpected behavior.
+  
+    5 │ let bag: BagOfPromises = {};
+  > 6 │ bag.canYouFindMe;
+      │ ^^^^^^^^^^^^^^^^^
+    7 │ 
+    8 │ const { anotherOne } = bag;
+  
+  i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
+  
+
+```
+
+```
+03_invalid.ts:9:1 lint/nursery/noFloatingPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i A "floating" Promise was found, meaning it is not properly handled and could lead to ignored errors or unexpected behavior.
+  
+     8 │ const { anotherOne } = bag;
+   > 9 │ anotherOne;
+       │ ^^^^^^^^^^^
+    10 │ 
+  
+  i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
+  
+
+```
