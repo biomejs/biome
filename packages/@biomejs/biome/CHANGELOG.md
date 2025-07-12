@@ -1,5 +1,122 @@
 # @biomejs/biome
 
+## 2.2.0
+
+### Minor Changes
+
+- [#6757](https://github.com/biomejs/biome/pull/6757) [`13a0818`](https://github.com/biomejs/biome/commit/13a0818be8cc08efd303829252cbc3e64bcbca3a) Thanks [@mdevils](https://github.com/mdevils)! - Added the rule [`noVueReservedProps`](https://biomejs.dev/linter/rules/no-vue-reserved-props/), resolves [#6309](https://github.com/biomejs/biome/issues/6309).
+
+  It prevents the use of reserved Vue prop names such as `key` and `ref` which can cause conflicts and unexpected behavior in Vue components.
+
+  ### Invalid example
+
+  ```js
+  import { defineComponent } from "vue";
+
+  export default defineComponent({
+    props: ["ref", "key", "foo"],
+  });
+  ```
+
+  ```vue
+  <script setup>
+  defineProps({
+    ref: String,
+    key: String,
+    foo: String,
+  });
+  </script>
+  ```
+
+  ### Valid examples
+
+  ```js
+  import { defineComponent } from "vue";
+
+  export default defineComponent({
+    props: ["foo"],
+  });
+  ```
+
+  ```vue
+  <script setup>
+  defineProps({ foo: String });
+  </script>
+  ```
+
+### Patch Changes
+
+- [#6798](https://github.com/biomejs/biome/pull/6798) [`3579ffa`](https://github.com/biomejs/biome/commit/3579ffaae4e86835b001fee4ab7dd8aabb03ae54) Thanks [@dyc3](https://github.com/dyc3)! - Fixed [#6762](https://github.com/biomejs/biome/issues/6762), Biome now knows that `~/.config/zed/settings.json` and `~/.config/Code/User/settings.json` allows comments by default.
+
+- [#6823](https://github.com/biomejs/biome/pull/6823) [`eebc48e`](https://github.com/biomejs/biome/commit/eebc48e0120958a39186f510278e1e5eacad3f1c) Thanks [@arendjr](https://github.com/arendjr)! - Improved [#6172](https://github.com/biomejs/biome/issues/6172): Optimised the way function arguments are stored in Biome's type inference. This led to about 10% performance improvement in `RedisCommander.d.ts` and about 2% on `@next/font` type definitions.
+
+- [#6794](https://github.com/biomejs/biome/pull/6794) [`4d5fc0e`](https://github.com/biomejs/biome/commit/4d5fc0ef38f8c4ad820e297749efc83e983b5a91) Thanks [@vladimir-ivanov](https://github.com/vladimir-ivanov)! - Fixed [#6719](https://github.com/biomejs/biome/issues/6719): The `noInvalidUseBeforeDeclaration` rule covers additional use cases.
+
+  Examples:
+
+  ```ts
+  type Bar = { [BAR]: true };
+  const BAR = "bar";
+  ```
+
+  ```ts
+  interface Bar {
+    child: { grandChild: { [BAR]: typeof BAR; enumFoo: EnumFoo } };
+  }
+  const BAR = "bar";
+  enum EnumFoo {
+    BAR = "bar",
+  }
+  ```
+
+- [#6832](https://github.com/biomejs/biome/pull/6832) [`bdbc2b1`](https://github.com/biomejs/biome/commit/bdbc2b10ac21dcb35b41e93b17e712ba80f421ca) Thanks [@togami2864](https://github.com/togami2864)! - Fixed [#6165](https://github.com/biomejs/biome/issues/6165): Fixed false negative in [`noUnusedPrivateClassMembers`](https://biomejs.dev/linter/rules/no-unused-private-class-members/) rule when checking member usage in classes
+
+- [#6809](https://github.com/biomejs/biome/pull/6809) [`8192451`](https://github.com/biomejs/biome/commit/819245188e587d0a5ede53aa07899a2cb9fcce4f) Thanks [@arendjr](https://github.com/arendjr)! - Fixed [#6796](https://github.com/biomejs/biome/issues/6796): Fixed a false positive that happened in `noFloatingPromises` when calling functions that were declared as part of `for ... of` syntax inside `async` functions.
+
+  Instead, the variables declared inside `for ... of` loops are now correctly
+  inferred if the expression being iterated evaluates to an `Array` (support for other iterables will follow later).
+
+  **Invalid example**
+
+  ```tsx
+  const txStatements: Array<(tx) => Promise<any>> = [];
+
+  db.transaction((tx: any) => {
+    for (const stmt of txStatements) {
+      // We correctly flag this resolves to a `Promise`:
+      stmt(tx);
+    }
+  });
+  ```
+
+  **Valid example**
+
+  ```tsx
+  async function valid(db) {
+    const txStatements: Array<(tx: any) => void> = [(tx) => tx.insert().run()];
+
+    db.transaction((tx: any) => {
+      for (const stmt of txStatements) {
+        // We don't flag a false positive here anymore:
+        stmt(tx);
+      }
+    });
+  }
+  ```
+
+- [#6840](https://github.com/biomejs/biome/pull/6840) [`1a57b51`](https://github.com/biomejs/biome/commit/1a57b51097c7bf4faeb0dcc5330d49e17f86789b) Thanks [@denbezrukov](https://github.com/denbezrukov)! - Allow multiple identifiers in ::part() pseudo-element selector.
+
+  ```css
+  ::part(first second) {
+  }
+  ```
+
+- [#6845](https://github.com/biomejs/biome/pull/6845) [`4fd44ec`](https://github.com/biomejs/biome/commit/4fd44ec17a3ac6a5486ac94f01e85e62310b8061) Thanks [@arendjr](https://github.com/arendjr)! - Fixed [#6510](https://github.com/biomejs/biome/issues/6510): The scanner no longer shows diagnostics on inaccessible files unless `--verbose` is used.
+
+- [#6818](https://github.com/biomejs/biome/pull/6818) [`5f3f5a6`](https://github.com/biomejs/biome/commit/5f3f5a6e8c12b56dc36bcfb4f8d5077eb33ccf08) Thanks [@siketyan](https://github.com/siketyan)! - Fixed an issue where `textDocument/codeAction` in the LSP could respond with outdated text edits after the workspace watcher observed outdated changes to the file.
+
+- [#6804](https://github.com/biomejs/biome/pull/6804) [`3e6ab16`](https://github.com/biomejs/biome/commit/3e6ab1663ab15f9f00ae069ee790e5fd90327082) Thanks [@arendjr](https://github.com/arendjr)! - `noFloatingPromises` will no longer suggest to add `await` keyword inside synchronous callbacks nested inside `async` functions.
+
 ## 2.1.1
 
 ### Patch Changes
