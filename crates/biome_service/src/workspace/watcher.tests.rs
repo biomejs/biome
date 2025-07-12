@@ -216,7 +216,7 @@ fn close_modified_file_from_client_before_watcher() {
     );
     // call the instruction handler manually for the sake of the test:
     workspace
-        .open_path_through_watcher(Utf8Path::new("/project/a.js"))
+        .open_path_through_watcher(Utf8Path::new("/project/a.js"), &ScanKind::Project)
         .expect("path to be updated by us");
 
     let content = workspace
