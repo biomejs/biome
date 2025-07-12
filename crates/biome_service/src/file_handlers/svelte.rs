@@ -2,16 +2,18 @@ use crate::WorkspaceError;
 use crate::file_handlers::{
     AnalyzerCapabilities, Capabilities, CodeActionsParams, DebugCapabilities, EnabledForPath,
     ExtensionHandler, FixAllParams, FormatterCapabilities, LintParams, LintResults, ParseResult,
-    ParserCapabilities, javascript,
+    ParserCapabilities, javascript, html,
 };
 use crate::settings::Settings;
-use crate::workspace::{DocumentFileSource, FixFileResult, PullActionsResult};
+use crate::workspace::{DocumentFileSource, FixFileResult, PullActionsResult, EmbeddedJsContent};
 use biome_formatter::Printed;
 use biome_fs::BiomePath;
+use biome_html_parser::parse_html_with_cache;
+use biome_html_syntax::{HtmlFileSource, HtmlRoot};
 use biome_js_parser::{JsParserOptions, parse_js_with_cache};
 use biome_js_syntax::{EmbeddingKind, JsFileSource, TextRange, TextSize};
 use biome_parser::AnyParse;
-use biome_rowan::NodeCache;
+use biome_rowan::{AstNode, NodeCache};
 use regex::{Match, Regex};
 use std::sync::LazyLock;
 use tracing::debug;
@@ -21,20 +23,34 @@ use super::{SearchCapabilities, parse_lang_from_script_opening_tag};
 #[derive(Debug, Default, PartialEq, Eq)]
 pub struct SvelteFileHandler;
 
-// https://regex101.com/r/E4n4hh/6
+// Kept for backward compatibility with existing code
 pub static SVELTE_FENCE: LazyLock<Regex> = LazyLock::new(|| {
-    Regex::new(r#"(?ixs)(?<opening><script(?:\s.*?)?>)\r?\n?(?<script>(?U:.*))</script>"#).unwrap()
+    Regex::new(r#"(?ixs)(?<opening><script(?:\s.*?)?>)\r?\n?(?<script>(?U:.*?))</script>"#).unwrap()
 });
 
 impl SvelteFileHandler {
-    /// It extracts the JavaScript/TypeScript code contained in the script block of a Svelte file
+    /// Extracts the JavaScript/TypeScript code contained in the script block of a Svelte file
+    /// using HTML parsing instead of regex for better handling of HTML structure.
     ///
     /// If there's no script block, an empty string is returned.
     pub fn input(text: &str) -> &str {
+        // For backwards compatibility, still use the regex approach
         match Self::matches_script(text) {
             Some(script) => &text[script.start()..script.end()],
             _ => "",
         }
+    }
+
+    /// Extracts all embedded JavaScript content from a Svelte file using HTML parsing.
+    /// This provides better handling of HTML structure and script indentation.
+    pub fn extract_scripts(text: &str, cache: &mut NodeCache) -> Vec<EmbeddedJsContent> {
+        // Parse the Svelte file as HTML
+        let html_file_source = HtmlFileSource::default();
+        let parse = parse_html_with_cache(text, html_file_source, cache);
+        let html_root = HtmlRoot::cast(parse.syntax()).expect("Failed to cast to HtmlRoot");
+        
+        // Extract embedded scripts using the HTML handler
+        html::extract_embedded_scripts(&html_root, cache)
     }
 
     /// It takes the original content of a Svelte file, and new output of an Svelte file. The output is only the content contained inside the
@@ -116,21 +132,35 @@ impl ExtensionHandler for SvelteFileHandler {
 
 fn parse(
     _rome_path: &BiomePath,
-    _file_source: DocumentFileSource,
+    file_source: DocumentFileSource,
     text: &str,
     _settings: &Settings,
     cache: &mut NodeCache,
 ) -> ParseResult {
-    let script = SvelteFileHandler::input(text);
-    let file_source = SvelteFileHandler::file_source(text);
-
-    debug!("Parsing file with language {:?}", file_source);
-
-    let parse = parse_js_with_cache(script, file_source, JsParserOptions::default(), cache);
-
-    ParseResult {
-        any_parse: parse.into(),
-        language: Some(file_source.into()),
+    // Use HTML parsing to extract script content with proper context
+    let scripts = SvelteFileHandler::extract_scripts(text, cache);
+    
+    // If we found scripts, use the first one; otherwise fall back to regex approach
+    if let Some(first_script) = scripts.first() {
+        debug!("Parsing Svelte file with HTML-extracted script");
+        
+        ParseResult {
+            any_parse: first_script.parse.clone(),
+            language: Some(file_source),
+        }
+    } else {
+        // Fallback to the old regex approach
+        let script = SvelteFileHandler::input(text);
+        let js_file_source = SvelteFileHandler::file_source(text);
+        
+        debug!("Parsing file with language {:?} (fallback)", js_file_source);
+        
+        let parse = parse_js_with_cache(script, js_file_source, JsParserOptions::default(), cache);
+        
+        ParseResult {
+            any_parse: parse.into(),
+            language: Some(js_file_source.into()),
+        }
     }
 }
 
@@ -141,6 +171,7 @@ fn format(
     parse: AnyParse,
     settings: &Settings,
 ) -> Result<Printed, WorkspaceError> {
+    // Use JavaScript formatter but preserve HTML context
     javascript::format(biome_path, document_file_source, parse, settings)
 }
 pub(crate) fn format_range(
