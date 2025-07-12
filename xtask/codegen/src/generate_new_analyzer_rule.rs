@@ -62,6 +62,7 @@ fn generate_rule_template(
     category: &Category,
     rule_name_upper_camel: &str,
     rule_name_lower_camel: &str,
+    rule_name_snake_case: &str,
 ) -> String {
     let macro_name = match category {
         Category::Lint => "declare_lint_rule",
@@ -77,7 +78,7 @@ fn generate_rule_template(
 use biome_console::markup;
 use biome_js_syntax::JsIdentifierBinding;
 use biome_rowan::AstNode;
-use biome_rule_options::{rule_name_lower_camel}::{rule_name_upper_camel}Options;
+use biome_rule_options::{rule_name_snake_case}::{rule_name_upper_camel}Options;
 
 {macro_name}! {{
     /// Succinct description of the rule.
@@ -150,7 +151,7 @@ impl Rule for {rule_name_upper_camel} {{
 use biome_console::markup;
 use biome_css_syntax::CssDeclarationOrRuleBlock;
 use biome_rowan::AstNode;
-use biome_rule_options::{rule_name_lower_camel}::{rule_name_upper_camel}Options;
+use biome_rule_options::{rule_name_snake_case}::{rule_name_upper_camel}Options;
 
 {macro_name}! {{
     /// Succinct description of the rule.
@@ -230,7 +231,7 @@ impl Rule for {rule_name_upper_camel} {{
 use biome_console::markup;
 use biome_json_syntax::JsonMember;
 use biome_rowan::AstNode;
-use biome_rule_options::{rule_name_lower_camel}::{rule_name_upper_camel}Options;
+use biome_rule_options::{rule_name_snake_case}::{rule_name_upper_camel}Options;
 
 {macro_name}! {{
     /// Succinct description of the rule.
@@ -307,7 +308,7 @@ impl Rule for {rule_name_upper_camel} {{
 use biome_console::markup;
 use biome_graphql_syntax::GraphqlRoot;
 use biome_rowan::AstNode;
-use biome_rule_options::{rule_name_lower_camel}::{rule_name_upper_camel}Options;
+use biome_rule_options::{rule_name_snake_case}::{rule_name_upper_camel}Options;
 
 {macro_name}! {{
     /// Succinct description of the rule.
@@ -397,6 +398,7 @@ pub fn generate_new_analyzer_rule(kind: LanguageKind, category: Category, rule_n
         &category,
         Case::Pascal.convert(rule_name).as_str(),
         rule_name_camel.as_str(),
+        Case::Snake.convert(rule_name).as_str(),
     );
     if !rule_folder.exists() {
         std::fs::create_dir(rule_folder.clone()).expect("To create the rule folder");
