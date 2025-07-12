@@ -11,16 +11,15 @@
 
 use std::path::PathBuf;
 
+use super::{
+    FeaturesBuilder, IsPathIgnoredParams, ScanKind, ScanProjectFolderParams,
+    ServiceDataNotification, Workspace, WorkspaceServer, document::Document,
+};
 use crate::{WorkspaceError, workspace_watcher::WatcherSignalKind};
 use biome_fs::PathKind;
 use camino::{Utf8Path, Utf8PathBuf};
 use papaya::{Compute, Operation};
 use tracing::instrument;
-
-use super::{
-    FeaturesBuilder, IsPathIgnoredParams, ScanKind, ScanProjectFolderParams,
-    ServiceDataNotification, Workspace, WorkspaceServer, document::Document,
-};
 
 impl WorkspaceServer {
     /// Filters the given `paths` and returns only those the watcher is

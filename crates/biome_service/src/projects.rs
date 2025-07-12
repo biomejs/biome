@@ -181,6 +181,8 @@ impl Projects {
             .get(&project_key)
             .ok_or_else(WorkspaceError::no_project)?;
 
+        let project_path = project_data.path.as_path();
+
         let settings = project_data
             .nested_settings
             .iter()
@@ -201,7 +203,10 @@ impl Projects {
         {
             // Never ignore Biome's top-level config file
         } else if !settings.files.includes.is_included(path)
-            || project_data.root_settings.vcs_settings.is_ignored(path)
+            || project_data.root_settings.vcs_settings.is_ignored(
+                path.strip_prefix(project_path).unwrap_or(path),
+                project_data.path.as_path(),
+            )
         {
             file_features.set_ignored_for_all_features();
         } else {
@@ -338,9 +343,14 @@ fn is_ignored_by_top_level_config(project_data: &ProjectData, path: &Utf8Path) -
         );
     let is_included = includes.is_included(path);
 
+    let root_path = project_data.path.as_path();
+
     // VCS settings are used from the root settings, regardless of what
     // package we are analyzing, so we ignore the `path` for those.
-    let is_ignored_by_vcs = project_data.root_settings.vcs_settings.is_ignored(path);
+    let is_ignored_by_vcs = project_data
+        .root_settings
+        .vcs_settings
+        .is_ignored(path, root_path);
 
     !is_included || is_ignored_by_vcs
 }

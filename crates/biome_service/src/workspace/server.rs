@@ -1,14 +1,14 @@
 use super::document::Document;
 use super::{
     ChangeFileParams, CheckFileSizeParams, CheckFileSizeResult, CloseFileParams,
-    CloseProjectParams, FileContent, FileExitsParams, FixFileParams, FixFileResult,
-    FormatFileParams, FormatOnTypeParams, FormatRangeParams, GetControlFlowGraphParams,
-    GetFormatterIRParams, GetSemanticModelParams, GetSyntaxTreeParams, GetSyntaxTreeResult,
-    OpenFileParams, OpenProjectParams, ParsePatternParams, ParsePatternResult, PatternId,
-    ProjectKey, PullActionsParams, PullActionsResult, PullDiagnosticsParams, PullDiagnosticsResult,
-    RenameResult, ScanProjectFolderParams, ScanProjectFolderResult, SearchPatternParams,
-    SearchResults, ServiceDataNotification, SupportsFeatureParams, UpdateSettingsParams,
-    UpdateSettingsResult,
+    CloseProjectParams, FeaturesBuilder, FileContent, FileExitsParams, FixFileParams,
+    FixFileResult, FormatFileParams, FormatOnTypeParams, FormatRangeParams,
+    GetControlFlowGraphParams, GetFormatterIRParams, GetSemanticModelParams, GetSyntaxTreeParams,
+    GetSyntaxTreeResult, OpenFileParams, OpenProjectParams, ParsePatternParams, ParsePatternResult,
+    PatternId, ProjectKey, PullActionsParams, PullActionsResult, PullDiagnosticsParams,
+    PullDiagnosticsResult, RenameResult, ScanProjectFolderParams, ScanProjectFolderResult,
+    SearchPatternParams, SearchResults, ServiceDataNotification, SupportsFeatureParams,
+    UpdateSettingsParams, UpdateSettingsResult,
 };
 use crate::configuration::{LoadedConfiguration, ProjectScanComputer, read_config};
 use crate::diagnostics::{FileTooLarge, NoIgnoreFileFound, VcsDiagnostic};
@@ -731,7 +731,7 @@ impl WorkspaceServer {
         }
 
         let filtered_paths = paths.iter().filter(|path| path.is_ignore()).filter(|path| {
-            // We filter out the root ignore file, because it's store when calling `update_settings`
+            // We filter out the root ignore file, because it's stored when calling `update_settings`
             // SAFETY: the paths received are files, so it's safe to assume they have a parent folder
             project_path.as_path() != path.parent().unwrap()
         });
@@ -827,6 +827,7 @@ impl WorkspaceServer {
     }
 
     /// Updates the state of any services relevant to the given `path`.
+    #[instrument(level = "debug", skip(self, path, root))]
     pub(super) fn update_service_data(
         &self,
         signal_kind: WatcherSignalKind,
@@ -834,6 +835,19 @@ impl WorkspaceServer {
         root: Option<SendNode>,
     ) -> Result<(), WorkspaceError> {
         let path = BiomePath::from(path);
+        let Some(project_key) = self.projects.find_project_for_path(path.as_path()) else {
+            return Ok(()); // file events outside our projects can be safely ignored.
+        };
+
+        let ignored = self.is_ignored_by_scanner(project_key, &path)
+            || self.is_path_ignored(IsPathIgnoredParams {
+                project_key,
+                path: path.clone(),
+                features: FeaturesBuilder::default().build(),
+            })?;
+        if ignored {
+            return Ok(());
+        }
         if path.is_config() || path.is_manifest() {
             self.update_project_layout(signal_kind, &path)?;
         }
@@ -1004,6 +1018,7 @@ impl Workspace for WorkspaceServer {
                 settings,
             );
         } else {
+            // If the configuration is a root one, we also load the ignore files
             if settings.is_vcs_enabled() && settings.vcs_settings.should_use_ignore_file() {
                 let directory = workspace_directory.unwrap_or_default();
                 match settings.vcs_settings.client_kind {
