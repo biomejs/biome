@@ -165,7 +165,21 @@ declare_lint_rule! {
     /// ```
     ///
     /// If you wish to ignore multiple dependencies, you can add multiple
-    /// comments and add a reason for each.
+    /// comments and add a reason for each:
+    ///
+    /// ```js
+    /// import { useEffect } from "react";
+    ///
+    /// function component() {
+    ///     let a = 1;
+    ///     let b = 1;
+    ///     // biome-ignore lint/correctness/useExhaustiveDependencies(a): suppress dependency a
+    ///     // biome-ignore lint/correctness/useExhaustiveDependencies(b): suppress dependency b
+    ///     useEffect(() => {
+    ///         console.log(a, b);
+    ///     }, []);
+    /// }
+    /// ```
     ///
     /// ## Options
     ///
