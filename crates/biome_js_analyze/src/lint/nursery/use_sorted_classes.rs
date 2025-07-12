@@ -217,12 +217,15 @@ impl Rule for UseSortedClasses {
         let mut mutation = ctx.root().begin();
         match ctx.query() {
             AnyClassStringLike::JsStringLiteralExpression(string_literal) => {
-                let replacement =
-                    js_string_literal_expression(if ctx.as_preferred_quote().is_double() {
-                        js_string_literal(state)
-                    } else {
-                        js_string_literal_single_quotes(state)
-                    });
+                let is_double_quote = string_literal
+                    .value_token()
+                    .map(|token| token.text_trimmed().starts_with('"'))
+                    .unwrap_or(ctx.as_preferred_quote().is_double());
+                let replacement = js_string_literal_expression(if is_double_quote {
+                    js_string_literal(state)
+                } else {
+                    js_string_literal_single_quotes(state)
+                });
                 mutation.replace_node(string_literal.clone(), replacement);
             }
             AnyClassStringLike::JsLiteralMemberName(string_literal) => {
