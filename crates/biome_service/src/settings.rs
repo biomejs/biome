@@ -724,12 +724,11 @@ impl VcsSettings {
 
     /// Returns whether the given `path` should be ignored per the VCS settings.
     #[inline]
-    pub fn is_ignored(&self, path: &Utf8Path) -> bool {
+    pub fn is_ignored(&self, root_path: &Utf8Path, path: &Utf8Path) -> bool {
         self.should_use_ignore_file()
-            && self
-                .ignore_matches
-                .as_ref()
-                .is_some_and(|ignored_matches| ignored_matches.is_ignored(path, is_dir(path)))
+            && self.ignore_matches.as_ref().is_some_and(|ignored_matches| {
+                ignored_matches.is_ignored(path, root_path, is_dir(path))
+            })
     }
 
     #[inline]
@@ -754,8 +753,28 @@ impl VcsSettings {
         })
     }
 
-    /// Stores the contents found in the ignore file.
-    pub fn store_ignore_patterns(
+    /// Stores the patterns of the root ignore file
+    pub fn store_root_ignore_patterns(
+        &mut self,
+        path: &Utf8Path,
+        patterns: &[&str],
+    ) -> Result<(), WorkspaceError> {
+        match self.client_kind {
+            Some(VcsClientKind::Git) => {
+                let git_ignore = VcsIgnoredPatterns::git_ignore(path, patterns)?;
+                self.ignore_matches = Some(VcsIgnoredPatterns::Git {
+                    root: git_ignore,
+                    nested: vec![],
+                });
+            }
+            None => {}
+        };
+
+        Ok(())
+    }
+
+    /// Stores a list of patterns inside as a nested ignore file
+    pub fn store_nested_ignore_patterns(
         &mut self,
         path: &Utf8Path,
         patterns: &[&str],
@@ -765,11 +784,6 @@ impl VcsSettings {
                 let git_ignore = VcsIgnoredPatterns::git_ignore(path, patterns)?;
                 if let Some(ignore_matches) = self.ignore_matches.as_mut() {
                     ignore_matches.insert_git_match(git_ignore);
-                } else {
-                    self.ignore_matches = Some(VcsIgnoredPatterns::Git {
-                        root: git_ignore,
-                        nested: vec![],
-                    });
                 }
             }
             None => {}
@@ -782,33 +796,73 @@ impl VcsSettings {
 #[derive(Clone, Debug)]
 pub enum VcsIgnoredPatterns {
     Git {
-        // Represents the `.gitignore` file at the root of the project
+        /// Represents the `.gitignore` file at the root of the project
         root: Gitignore,
-        // The list of nested `.gitignore` files found inside the project
+        /// The list of nested `.gitignore` files found inside the project
         nested: Vec<Gitignore>,
     },
 }
 
 impl VcsIgnoredPatterns {
-    pub fn is_ignored(&self, path: &Utf8Path, is_dir: bool) -> bool {
+    /// Checks whether the path ignored by any ignore file found inside the project
+    ///
+    /// The `root_path` represents the root of the project, as we want to match all ignore files untile the root.
+    pub fn is_ignored(&self, root_path: &Utf8Path, path: &Utf8Path, is_dir: bool) -> bool {
         match self {
-            Self::Git { root, nested } => {
-                root.matched(path, is_dir).is_ignore()
-                    || nested.iter().any(|gitignore| {
-                        let ignore_directory = if gitignore.path().is_file() {
-                            // SAFETY: if it's a file, it always has a parent
-                            gitignore.path().parent().unwrap()
-                        } else {
-                            gitignore.path()
-                        };
-                        if let Ok(stripped_path) = path.strip_prefix(ignore_directory) {
-                            gitignore.matched(stripped_path, is_dir).is_ignore()
-                        } else {
-                            false
+            Self::Git { root, nested, .. } => {
+                // NOTE: this could be a bug of the library, need to explore. Let's assume it isn't
+                // When crawling the file system with the CLI, we correctly exclude ignored folders
+                // such as `dist/` or `build/`, in case the path to match is `/Users/foo/project/dist`
+                //
+                // However, the LSP sends absolute file paths, e.g. `/Users/foo/project/dist/a.min.js`,
+                // and they **don't** match globs such as `dist/`.
+                // To work around this limitation, we crawl upwards the parents of the path, until
+                // we arrive at the `root_path`.
+                if path.is_file() && path.is_absolute() {
+                    let mut current_path = path;
+                    let mut is_ignore = false;
+                    loop {
+                        if current_path == root_path {
+                            break;
                         }
-                    })
+                        if Self::is_git_ignore(root, nested.as_slice(), current_path, is_dir) {
+                            is_ignore = true;
+                            break;
+                        }
+                        if let Some(parent) = current_path.parent() {
+                            current_path = parent;
+                        } else {
+                            break;
+                        }
+                    }
+                    is_ignore
+                } else {
+                    Self::is_git_ignore(root, nested.as_slice(), path, is_dir)
+                }
             }
         }
+    }
+
+    fn is_git_ignore(
+        root: &Gitignore,
+        nested: &[Gitignore],
+        path: &Utf8Path,
+        is_dir: bool,
+    ) -> bool {
+        root.matched(path, is_dir).is_ignore()
+            || nested.iter().any(|gitignore| {
+                let ignore_directory = if gitignore.path().is_file() {
+                    // SAFETY: if it's a file, it always has a parent
+                    gitignore.path().parent().unwrap()
+                } else {
+                    gitignore.path()
+                };
+                if let Ok(stripped_path) = path.strip_prefix(ignore_directory) {
+                    gitignore.matched(stripped_path, is_dir).is_ignore()
+                } else {
+                    false
+                }
+            })
     }
 
     pub fn insert_git_match(&mut self, git_ignore: Gitignore) {

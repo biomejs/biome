@@ -360,10 +360,7 @@ impl TraversalContext for ScanContext<'_> {
     }
 
     fn store_path(&self, path: BiomePath) {
-        self.evaluated_paths
-            .write()
-            .unwrap()
-            .insert(BiomePath::new(path.as_path()));
+        self.evaluated_paths.write().unwrap().insert(path);
     }
 }
 

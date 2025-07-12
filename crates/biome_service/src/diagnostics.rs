@@ -577,8 +577,8 @@ impl Diagnostic for TransportError {
 
 #[derive(Debug, Deserialize, Diagnostic, Serialize)]
 pub enum VcsDiagnostic {
-    /// When the VCS folder couldn't be found
-    NoVcsFolderFound(NoVcsFolderFound),
+    /// When the VCS ignore file can't be found
+    NoIgnoreFileFound(NoIgnoreFileFound),
     /// VCS is disabled
     DisabledVcs(DisabledVcs),
 }
@@ -608,11 +608,11 @@ impl From<CompileError> for WorkspaceError {
     category = "internalError/fs",
     severity = Error,
     message(
-        description = "Biome couldn't find the VCS folder at the following path: {path}",
-        message("Biome couldn't find the VCS folder at the following path: "<Emphasis>{self.path}</Emphasis>),
+        description = "Biome couldn't find an ignore file in the following folder: {path}",
+        message("Biome couldn't find an ignore file in the following folder: "<Emphasis>{self.path}</Emphasis>),
     )
 )]
-pub struct NoVcsFolderFound {
+pub struct NoIgnoreFileFound {
     #[location(resource)]
     pub path: String,
 }
@@ -621,7 +621,7 @@ pub struct NoVcsFolderFound {
 #[diagnostic(
     category = "internalError/fs",
     severity = Warning,
-    message = "Biome couldn't determine a directory for the VCS integration. VCS integration will be disabled."
+    message = "Biome couldn't determine a folder for the VCS integration. VCS integration will be disabled."
 )]
 pub struct DisabledVcs {}
 
