@@ -53,10 +53,10 @@ pub fn yaml_block_map_explicit_key(
 }
 pub struct YamlBlockMapExplicitKeyBuilder {
     question_mark_token: SyntaxToken,
-    key: Option<AnyYamlBlockIndented>,
+    key: Option<AnyYamlBlockNode>,
 }
 impl YamlBlockMapExplicitKeyBuilder {
-    pub fn with_key(mut self, key: AnyYamlBlockIndented) -> Self {
+    pub fn with_key(mut self, key: AnyYamlBlockNode) -> Self {
         self.key = Some(key);
         self
     }
@@ -79,10 +79,10 @@ pub fn yaml_block_map_explicit_value(colon_token: SyntaxToken) -> YamlBlockMapEx
 }
 pub struct YamlBlockMapExplicitValueBuilder {
     colon_token: SyntaxToken,
-    value: Option<AnyYamlBlockIndented>,
+    value: Option<AnyYamlBlockNode>,
 }
 impl YamlBlockMapExplicitValueBuilder {
-    pub fn with_value(mut self, value: AnyYamlBlockIndented) -> Self {
+    pub fn with_value(mut self, value: AnyYamlBlockNode) -> Self {
         self.value = Some(value);
         self
     }
@@ -254,10 +254,10 @@ pub fn yaml_block_sequence_entry(minus_token: SyntaxToken) -> YamlBlockSequenceE
 }
 pub struct YamlBlockSequenceEntryBuilder {
     minus_token: SyntaxToken,
-    value: Option<AnyYamlBlockIndented>,
+    value: Option<AnyYamlBlockNode>,
 }
 impl YamlBlockSequenceEntryBuilder {
-    pub fn with_value(mut self, value: AnyYamlBlockIndented) -> Self {
+    pub fn with_value(mut self, value: AnyYamlBlockNode) -> Self {
         self.value = Some(value);
         self
     }
@@ -271,18 +271,6 @@ impl YamlBlockSequenceEntryBuilder {
             ],
         ))
     }
-}
-pub fn yaml_compact_mapping(entries: YamlBlockMapEntryList) -> YamlCompactMapping {
-    YamlCompactMapping::unwrap_cast(SyntaxNode::new_detached(
-        YamlSyntaxKind::YAML_COMPACT_MAPPING,
-        [Some(SyntaxElement::Node(entries.into_syntax()))],
-    ))
-}
-pub fn yaml_compact_sequence(entries: YamlBlockSequenceEntryList) -> YamlCompactSequence {
-    YamlCompactSequence::unwrap_cast(SyntaxNode::new_detached(
-        YamlSyntaxKind::YAML_COMPACT_SEQUENCE,
-        [Some(SyntaxElement::Node(entries.into_syntax()))],
-    ))
 }
 pub fn yaml_directive(value_token: SyntaxToken) -> YamlDirective {
     YamlDirective::unwrap_cast(SyntaxNode::new_detached(
@@ -610,7 +598,7 @@ where
 }
 pub fn yaml_block_sequence_entry_list<I>(items: I) -> YamlBlockSequenceEntryList
 where
-    I: IntoIterator<Item = YamlBlockSequenceEntry>,
+    I: IntoIterator<Item = AnyYamlBlockSequenceEntry>,
     I::IntoIter: ExactSizeIterator,
 {
     YamlBlockSequenceEntryList::unwrap_cast(SyntaxNode::new_detached(

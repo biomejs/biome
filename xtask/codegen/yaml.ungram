@@ -194,11 +194,14 @@ AnyYamlBlockScalarContent =
 	YamlLiteralScalar
 	| YamlFoldedScalar
 
-YamlBlockSequenceEntryList = YamlBlockSequenceEntry*
+YamlBlockSequenceEntryList = AnyYamlBlockSequenceEntry*
+
+AnyYamlBlockSequenceEntry = YamlBlockSequenceEntry
+	| YamlBogus
 
 YamlBlockSequenceEntry =
 	'-'
-	value: AnyYamlBlockIndented?
+	value: AnyYamlBlockNode?
 
 YamlBlockMapEntryList = AnyYamlBlockMapEntry*
 
@@ -219,38 +222,13 @@ YamlBlockMapExplicitEntry =
 // https://yaml.org/spec/1.2.2/#rule-c-l-block-map-explicit-key
 YamlBlockMapExplicitKey =
 	'?'
-	key: AnyYamlBlockIndented?
+	key: AnyYamlBlockNode?
 
 // : 10
 // https://yaml.org/spec/1.2.2/#rule-c-l-block-map-explicit-key
 YamlBlockMapExplicitValue =
 	':'
-	value: AnyYamlBlockIndented?
-
-// https://yaml.org/spec/1.2.2/#rule-s-l+block-indented
-// In the specification, this node can be completely empty.
-// Instead of modeling an empty node, we can just make this node optional
-// wherever we refer it.
-AnyYamlBlockIndented =
-	YamlCompactSequence
-	| YamlCompactMapping
-	| AnyYamlBlockNode
-
-// a: - b <-
-//    - c <-
-//    - d <-
-//    ^^^
-// https://yaml.org/spec/1.2.2/#rule-ns-l-compact-sequence
-YamlCompactSequence =
-	entries: YamlBlockSequenceEntryList
-
-// a: b: x <-
-//    c: y <-
-//    d: z <-
-//    ^^^
-// https://yaml.org/spec/1.2.2/#rule-ns-l-compact-mapping
-YamlCompactMapping =
-	entries: YamlBlockMapEntryList
+	value: AnyYamlBlockNode?
 
 // https://yaml.org/spec/1.2.2/#rule-ns-l-block-map-implicit-entry
 YamlBlockMapImplicitEntry =

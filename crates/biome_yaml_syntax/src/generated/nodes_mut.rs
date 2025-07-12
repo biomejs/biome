@@ -40,7 +40,7 @@ impl YamlBlockMapExplicitKey {
                 .splice_slots(0usize..=0usize, once(Some(element.into()))),
         )
     }
-    pub fn with_key(self, element: Option<AnyYamlBlockIndented>) -> Self {
+    pub fn with_key(self, element: Option<AnyYamlBlockNode>) -> Self {
         Self::unwrap_cast(self.syntax.splice_slots(
             1usize..=1usize,
             once(element.map(|element| element.into_syntax().into())),
@@ -54,7 +54,7 @@ impl YamlBlockMapExplicitValue {
                 .splice_slots(0usize..=0usize, once(Some(element.into()))),
         )
     }
-    pub fn with_value(self, element: Option<AnyYamlBlockIndented>) -> Self {
+    pub fn with_value(self, element: Option<AnyYamlBlockNode>) -> Self {
         Self::unwrap_cast(self.syntax.splice_slots(
             1usize..=1usize,
             once(element.map(|element| element.into_syntax().into())),
@@ -162,27 +162,11 @@ impl YamlBlockSequenceEntry {
                 .splice_slots(0usize..=0usize, once(Some(element.into()))),
         )
     }
-    pub fn with_value(self, element: Option<AnyYamlBlockIndented>) -> Self {
+    pub fn with_value(self, element: Option<AnyYamlBlockNode>) -> Self {
         Self::unwrap_cast(self.syntax.splice_slots(
             1usize..=1usize,
             once(element.map(|element| element.into_syntax().into())),
         ))
-    }
-}
-impl YamlCompactMapping {
-    pub fn with_entries(self, element: YamlBlockMapEntryList) -> Self {
-        Self::unwrap_cast(
-            self.syntax
-                .splice_slots(0usize..=0usize, once(Some(element.into_syntax().into()))),
-        )
-    }
-}
-impl YamlCompactSequence {
-    pub fn with_entries(self, element: YamlBlockSequenceEntryList) -> Self {
-        Self::unwrap_cast(
-            self.syntax
-                .splice_slots(0usize..=0usize, once(Some(element.into_syntax().into()))),
-        )
     }
 }
 impl YamlDirective {
