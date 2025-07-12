@@ -77,7 +77,7 @@ fn main() -> Result<()> {
             kind,
         } => {
             generate_new_analyzer_rule(kind, category, &name);
-            generate_analyzer_rule_options(&name, Overwrite)?;
+            generate_analyzer_rule_options(&name, Overwrite, true)?;
         }
         TaskCommand::MoveRule { name, group } => {
             move_rule(&name, &group);

@@ -13,7 +13,11 @@ pub fn get_analyzer_rule_options_path() -> PathBuf {
 /// Generates the options struct for a new analyzer rule.
 /// This function creates a new struct with the name `<RuleName>Options` and saves it in the
 /// `biome_rule_options` crate.
-pub fn generate_analyzer_rule_options(rule_name: &str, mode: Mode) -> Result<()> {
+pub fn generate_analyzer_rule_options(
+    rule_name: &str,
+    mode: Mode,
+    register_mod: bool,
+) -> Result<()> {
     let struct_name = Ident::new(
         &format!("{}Options", Case::Pascal.convert(rule_name)),
         Span::call_site(),
@@ -39,7 +43,9 @@ pub fn generate_analyzer_rule_options(rule_name: &str, mode: Mode) -> Result<()>
         &mode,
     )?;
 
-    register_analyzer_rule_options(&snake_rule_name)?;
+    if register_mod {
+        register_analyzer_rule_options(&snake_rule_name)?;
+    }
 
     Ok(())
 }
