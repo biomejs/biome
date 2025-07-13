@@ -26,6 +26,12 @@ declare_lint_rule! {
     /// only go in a single direction, i.e. they don't point "back" to the
     /// importing file.
     ///
+    /// :::note
+    /// This rule is computationally expensive. If you are particularly
+    /// pressed for lint time, or don't think you have an issue with dependency
+    /// cycles, you may not want this rule enabled.
+    /// :::
+    ///
     /// ## Examples
     ///
     /// ### Invalid
