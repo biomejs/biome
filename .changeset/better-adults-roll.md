@@ -19,13 +19,13 @@ You can now define patterns to restrict entire groups of modules. For example, y
 }
 ```
 
-### Invalid examples
+**Invalid examples**
 ```js
 import foo from 'import-foo/foo';
 import bar from 'import-foo/bar';
 ```
 
-### Valid examples
+**Valid examples**
 ```js
 import baz from 'import-foo/baz';
 ```
@@ -44,12 +44,12 @@ The following example restricts the import names that match `x` , `y` or `z` let
   }
 }
 ```
-### Invalid examples
+**Invalid examples**
 ```js
 import { x } from 'import-foo/foo';
 ```
 
-### Valid examples
+**Valid examples**
 ```js
 import { foo } from 'import-foo/foo';
 ```
@@ -68,12 +68,12 @@ Furthermore, you can use the `invertImportNamePattern` boolean option to reverse
   }
 }
 ```
-### Invalid examples
+**Invalid examples**
 ```js
 import { foo } from 'import-foo/foo';
 ```
 
-### Valid examples
+ **Valid examples**
 ```js
 import { x } from 'import-foo/foo';
 ```
