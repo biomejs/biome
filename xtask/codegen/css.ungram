@@ -450,10 +450,9 @@ CssDeclarationOrRuleList = AnyCssDeclarationOrRule*
 
 AnyCssDeclarationOrRule =
 	AnyCssRule
-	| CssDeclarationWithSemicolon
+	| AnyCssDeclarationWithSemicolon
 	| CssBogus
 	| CssMetavariable
-	| CssEmptyDeclaration
 
 // @page :left { background: red; @media (500px <= width <= 500px) {  } }
 // 						 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -469,7 +468,7 @@ CssDeclarationOrAtRuleBlock =
 CssDeclarationOrAtRuleList = AnyCssDeclarationOrAtRule*
 
 AnyCssDeclarationOrAtRule =
-    CssDeclarationWithSemicolon
+    AnyCssDeclarationWithSemicolon
     | CssAtRule
 
 // When nested in this way, the contents of a nested group rule's block are parsed as <block-contents> rather than <rule-list>:
@@ -478,6 +477,10 @@ AnyCssConditionalBlock =
 	CssDeclarationOrRuleBlock
 	| CssRuleBlock
 	| CssBogusBlock
+
+AnyCssDeclarationWithSemicolon = 
+	CssDeclarationWithSemicolon
+	| CssEmptyDeclaration
 
 // @page :left { background: red; @media (500px <= width <= 500px) {  } }
 // 						   ^^^^^^^^^^^^^^^^
@@ -498,7 +501,7 @@ CssDeclarationBlock =
 	declarations: CssDeclarationList
  	'}'
 
-CssDeclarationList = CssDeclarationWithSemicolon*
+CssDeclarationList = AnyCssDeclarationWithSemicolon*
 
 AnyCssRuleBlock =
 	CssRuleBlock
@@ -1229,7 +1232,7 @@ CssPageAtRuleBlock =
 CssPageAtRuleItemList = AnyCssPageAtRuleItem*
 
 AnyCssPageAtRuleItem =
-	CssDeclarationWithSemicolon
+	AnyCssDeclarationWithSemicolon
 	| CssAtRule
 	| CssMarginAtRule
 

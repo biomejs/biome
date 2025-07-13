@@ -2,7 +2,7 @@ use crate::parser::CssParser;
 use crate::syntax::at_rule::{is_at_at_rule, parse_at_rule};
 use crate::syntax::block::ParseBlockBody;
 use crate::syntax::parse_error::expected_any_declaration_or_at_rule;
-use crate::syntax::{is_at_declaration, parse_declaration_with_semicolon};
+use crate::syntax::{is_at_any_declaration_with_semicolon, parse_any_declaration_with_semicolon};
 use biome_css_syntax::CssSyntaxKind::*;
 use biome_css_syntax::{CssSyntaxKind, T};
 use biome_parser::parse_lists::ParseNodeList;
@@ -32,7 +32,7 @@ impl ParseBlockBody for DeclarationOrAtRuleListBlock {
 
 #[inline]
 fn is_at_declaration_or_at_rule_item(p: &mut CssParser) -> bool {
-    is_at_at_rule(p) || is_at_declaration(p)
+    is_at_at_rule(p) || is_at_any_declaration_with_semicolon(p)
 }
 
 struct DeclarationOrAtRuleListParseRecovery;
@@ -55,8 +55,8 @@ impl ParseNodeList for DeclarationOrAtRuleList {
     fn parse_element(&mut self, p: &mut Self::Parser<'_>) -> ParsedSyntax {
         if is_at_at_rule(p) {
             parse_at_rule(p)
-        } else if is_at_declaration(p) {
-            parse_declaration_with_semicolon(p)
+        } else if is_at_any_declaration_with_semicolon(p) {
+            parse_any_declaration_with_semicolon(p)
         } else {
             Absent
         }

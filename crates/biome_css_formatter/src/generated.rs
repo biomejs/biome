@@ -7648,6 +7648,25 @@ impl IntoFormat<CssFormatContext> for biome_css_syntax::AnyCssDeclarationOrRuleB
         )
     }
 }
+impl AsFormat<CssFormatContext> for biome_css_syntax::AnyCssDeclarationWithSemicolon {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_css_syntax::AnyCssDeclarationWithSemicolon,
+        crate::css::any::declaration_with_semicolon::FormatAnyCssDeclarationWithSemicolon,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule :: new (self , crate :: css :: any :: declaration_with_semicolon :: FormatAnyCssDeclarationWithSemicolon :: default ())
+    }
+}
+impl IntoFormat<CssFormatContext> for biome_css_syntax::AnyCssDeclarationWithSemicolon {
+    type Format = FormatOwnedWithRule<
+        biome_css_syntax::AnyCssDeclarationWithSemicolon,
+        crate::css::any::declaration_with_semicolon::FormatAnyCssDeclarationWithSemicolon,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule :: new (self , crate :: css :: any :: declaration_with_semicolon :: FormatAnyCssDeclarationWithSemicolon :: default ())
+    }
+}
 impl AsFormat<CssFormatContext> for biome_css_syntax::AnyCssDimension {
     type Format<'a> = FormatRefWithRule<
         'a,

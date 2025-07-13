@@ -20,6 +20,7 @@ pub(crate) mod declaration_or_at_rule;
 pub(crate) mod declaration_or_at_rule_block;
 pub(crate) mod declaration_or_rule;
 pub(crate) mod declaration_or_rule_block;
+pub(crate) mod declaration_with_semicolon;
 pub(crate) mod dimension;
 pub(crate) mod document_matcher;
 pub(crate) mod expression;

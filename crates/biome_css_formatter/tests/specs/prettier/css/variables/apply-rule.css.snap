@@ -44,13 +44,12 @@ info: css/variables/apply-rule.css
 ```diff
 --- Prettier
 +++ Biome
-@@ -5,28 +5,31 @@
+@@ -5,28 +5,30 @@
      background-color: hsl(120, 70%, 95%);
      border-radius: 4px;
      border: 1px solid var(--theme-color late);
 -  };
 +  }
-+  ;
    --toolbar-title-theme: {
      color: green;
 -  };
@@ -96,7 +95,6 @@ info: css/variables/apply-rule.css
     border-radius: 4px;
     border: 1px solid var(--theme-color late);
   }
-  ;
   --toolbar-title-theme: {
     color: green;
   }
@@ -184,26 +182,6 @@ apply-rule.css:4:20 parse ━━━━━━━━━━━━━━━━━━
   - current
   - past
   - future
-  
-apply-rule.css:8:4 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Expected a declaration, or an at rule but instead found ';'.
-  
-     6 │     border-radius: 4px;
-     7 │     border: 1px solid var(--theme-color late);
-   > 8 │   };
-       │    ^
-     9 │   --toolbar-title-theme: {
-    10 │     color: green;
-  
-  i Expected a declaration, or an at rule here.
-  
-     6 │     border-radius: 4px;
-     7 │     border: 1px solid var(--theme-color late);
-   > 8 │   };
-       │    ^
-     9 │   --toolbar-title-theme: {
-    10 │     color: green;
   
 apply-rule.css:9:26 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
