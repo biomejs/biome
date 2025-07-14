@@ -28,8 +28,8 @@ use crate::move_rule::move_rule;
 
 use xtask::Mode::Overwrite;
 use xtask_codegen::{
-    TaskCommand, generate_analyzer, generate_analyzer_rule_options, generate_ast,
-    generate_formatters, generate_new_analyzer_rule, generate_tables, task_command,
+    TaskCommand, generate_analyzer, generate_ast, generate_formatters, generate_new_analyzer_rule,
+    generate_tables, task_command,
 };
 
 fn main() -> Result<()> {
@@ -77,7 +77,6 @@ fn main() -> Result<()> {
             kind,
         } => {
             generate_new_analyzer_rule(kind, category, &name);
-            generate_analyzer_rule_options(&name, Overwrite, true)?;
         }
         TaskCommand::MoveRule { name, group } => {
             move_rule(&name, &group);

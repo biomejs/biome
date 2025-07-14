@@ -15,12 +15,3 @@ namespace N {
 }
 
 type X = typeof X; const X = 0;
-
-type Bar = {[BAR]: true;};
-const BAR = 'bar';
-
-interface NestedBar {child:  {grandChild: {[FOO]: typeof FOO; enumFoo: EnumFoo}}}
-const FOO = 'foo';
-enum EnumFoo {BAR = 'bar'}
-
-

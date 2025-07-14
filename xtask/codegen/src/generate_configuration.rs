@@ -12,7 +12,6 @@ use quote::{format_ident, quote};
 use std::collections::{BTreeMap, BTreeSet};
 use std::path::Path;
 use xtask::*;
-use xtask_codegen::{generate_analyzer_rule_options, get_analyzer_rule_options_path};
 use xtask_codegen::{to_capitalized, update};
 
 // ======= LINT ======
@@ -178,7 +177,7 @@ impl RegistryVisitor<GraphqlLanguage> for AssistActionsVisitor {
 }
 
 pub(crate) fn generate_rule_options(mode: Mode) -> Result<()> {
-    let rule_options_root = get_analyzer_rule_options_path();
+    let rule_options_root = project_root().join("crates/biome_rule_options/src/");
     let lib_root = rule_options_root.join("lib.rs");
     let mut lint_visitor = LintRulesVisitor::default();
     let mut assist_visitor = AssistActionsVisitor::default();
@@ -221,7 +220,26 @@ pub(crate) fn generate_rule_options(mode: Mode) -> Result<()> {
         if file_path.exists() {
             continue;
         }
-        generate_analyzer_rule_options(rule_name, mode, false)?;
+        let struct_name = Ident::new(
+            &format!("{}Options", Case::Pascal.convert(rule_name)),
+            Span::call_site(),
+        );
+
+        let content = quote! {
+            use biome_deserialize_macros::Deserializable;
+            use serde::{Deserialize, Serialize};
+
+            #[derive(Default, Clone, Debug, Deserialize, Deserializable, Eq, PartialEq, Serialize)]
+            #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+            #[serde(rename_all = "camelCase", deny_unknown_fields, default)]
+            pub struct #struct_name {}
+        };
+
+        update(
+            file_path.as_path(),
+            &xtask::reformat_without_preamble(content)?,
+            &mode,
+        )?;
     }
 
     let content = quote! {
