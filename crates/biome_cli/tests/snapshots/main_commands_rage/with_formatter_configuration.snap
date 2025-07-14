@@ -63,7 +63,7 @@ Platform:
 Environment:
   BIOME_LOG_PATH:               **PLACEHOLDER**
   BIOME_LOG_PREFIX_NAME:        unset
-  BIOME_CONFIG_PATH:            unset
+  BIOME_CONFIG_PATH:            env-config.json
   BIOME_THREADS:                unset
   NO_COLOR:                     **PLACEHOLDER**
   TERM:                         **PLACEHOLDER**
@@ -72,64 +72,8 @@ Environment:
   NODE_PACKAGE_MANAGER:         unset
 
 Biome Configuration:
-  Status:                       Loaded successfully
-  Path:                         biome.json
-  Formatter enabled:            true
-  Linter enabled:               true
-  Assist enabled:               true
-  VCS enabled:                  false
-
-Formatter:
-  Format with errors:           true
-  Indent style:                 Space
-  Indent width:                 2
-  Line ending:                  LF
-  Line width:                   120
-  Attribute position:           Multiline
-  Bracket spacing:              unset
-  Includes:                     **/*.html, **/*.css, **/*.js, **/*.ts, **/*.tsx, **/*.jsx, **/*.json, **/*.md, !configuration-schema.json
-
-JavaScript Formatter:
-  Enabled:                      true
-  JSX quote style:              Single Quotes
-  Quote properties:             unset
-  Trailing commas:              unset
-  Semicolons:                   unset
-  Arrow parentheses:            Always
-  Bracket spacing:              unset
-  Bracket same line:            unset
-  Quote style:                  unset
-  Indent style:                 Tab
-  Indent width:                 2
-  Line ending:                  LF
-  Line width:                   100
-  Attribute position:           unset
-
-JSON Formatter:
-  Enabled:                      true
-  Indent style:                 Space
-  Indent width:                 2
-  Line ending:                  LF
-  Line width:                   100
-  Trailing Commas:              unset
-  Expand lists:                 unset
-
-CSS Formatter:
-  Enabled:                      unset
-  Indent style:                 unset
-  Indent width:                 unset
-  Line ending:                  unset
-  Line width:                   unset
-  Quote style:                  unset
-
-GraphQL Formatter:
-  Enabled:                      unset
-  Indent style:                 unset
-  Indent width:                 unset
-  Line ending:                  unset
-  Line width:                   unset
-  Bracket spacing:              unset
-  Quote style:                  unset
+  Status:                       Failed to load
+  Error:                        Biome couldn't find a configuration in the directory env-config.json.
 
 Server:
   Version:                      0.0.0

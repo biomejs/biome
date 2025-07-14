@@ -26,7 +26,7 @@ Platform:
 Environment:
   BIOME_LOG_PATH:               **PLACEHOLDER**
   BIOME_LOG_PREFIX_NAME:        unset
-  BIOME_CONFIG_PATH:            unset
+  BIOME_CONFIG_PATH:            env-config.json
   BIOME_THREADS:                unset
   NO_COLOR:                     **PLACEHOLDER**
   TERM:                         **PLACEHOLDER**
@@ -35,12 +35,8 @@ Environment:
   NODE_PACKAGE_MANAGER:         unset
 
 Biome Configuration:
-  Status:                       Loaded successfully
-  Path:                         biome.json
-  Formatter enabled:            false
-  Linter enabled:               true
-  Assist enabled:               true
-  VCS enabled:                  false
+  Status:                       Failed to load
+  Error:                        Biome couldn't find a configuration in the directory env-config.json.
 
 Server:
   Version:                      0.0.0
