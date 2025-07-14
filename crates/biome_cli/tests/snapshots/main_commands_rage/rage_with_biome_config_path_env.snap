@@ -31,16 +31,8 @@ Environment:
   NODE_PACKAGE_MANAGER:         unset
 
 Biome Configuration:
-  Error:                        unexpected character `\`
-  Error:                        unexpected character `\`
-  Error:                        Missing closing quote
-  Error:                        expected `}` but instead the file ends
-  Status:                       Loaded with errors
-  Path:                         env-config.json
-  Formatter enabled:            true
-  Linter enabled:               true
-  Assist enabled:               true
-  VCS enabled:                  false
+  Status:                       Not set
+  Path:                         unset
 
 Server:
   Version:                      0.0.0

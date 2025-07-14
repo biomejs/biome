@@ -44,7 +44,7 @@ Platform:
 Environment:
   BIOME_LOG_PATH:               **PLACEHOLDER**
   BIOME_LOG_PREFIX_NAME:        unset
-  BIOME_CONFIG_PATH:            env-config.json
+  BIOME_CONFIG_PATH:            unset
   BIOME_THREADS:                unset
   NO_COLOR:                     **PLACEHOLDER**
   TERM:                         **PLACEHOLDER**
@@ -53,8 +53,53 @@ Environment:
   NODE_PACKAGE_MANAGER:         unset
 
 Biome Configuration:
-  Status:                       Failed to load
-  Error:                        Biome couldn't find a configuration in the directory env-config.json.
+  Status:                       Loaded successfully
+  Path:                         biome.json
+  Formatter enabled:            true
+  Linter enabled:               true
+  Assist enabled:               true
+  VCS enabled:                  false
+
+Linter:
+  JavaScript enabled:           unset
+  JSON enabled:                 unset
+  CSS enabled:                  unset
+  GraphQL enabled:              unset
+  Recommended:                  false
+  Enabled rules:
+    complexity/noAdjacentSpacesInRegex
+    complexity/noArguments
+    complexity/noBannedTypes
+    complexity/noCommaOperator
+    complexity/noEmptyTypeParameters
+    complexity/noExtraBooleanCast
+    complexity/noFlatMapIdentity
+    complexity/noStaticOnlyClass
+    complexity/noThisInStatic
+    complexity/noUselessCatch
+    complexity/noUselessConstructor
+    complexity/noUselessContinue
+    complexity/noUselessEmptyExport
+    complexity/noUselessEscapeInRegex
+    complexity/noUselessFragments
+    complexity/noUselessLabel
+    complexity/noUselessLoneBlockStatements
+    complexity/noUselessRename
+    complexity/noUselessStringRaw
+    complexity/noUselessSwitchCase
+    complexity/noUselessTernary
+    complexity/noUselessThisAlias
+    complexity/noUselessTypeConstraint
+    complexity/noUselessUndefinedInitialization
+    complexity/useArrowFunction
+    complexity/useDateNow
+    complexity/useFlatMap
+    complexity/useLiteralKeys
+    complexity/useNumericLiterals
+    complexity/useOptionalChain
+    complexity/useRegexLiterals
+    complexity/useSimpleNumberKeys
+    suspicious/noCommentText
 
 Server:
   Version:                      0.0.0

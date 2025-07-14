@@ -16,7 +16,7 @@ Platform:
 Environment:
   BIOME_LOG_PATH:               **PLACEHOLDER**
   BIOME_LOG_PREFIX_NAME:        unset
-  BIOME_CONFIG_PATH:            env-config.json
+  BIOME_CONFIG_PATH:            unset
   BIOME_THREADS:                unset
   NO_COLOR:                     **PLACEHOLDER**
   TERM:                         **PLACEHOLDER**
