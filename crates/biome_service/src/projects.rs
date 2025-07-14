@@ -1,6 +1,6 @@
 use crate::WorkspaceError;
 use crate::file_handlers::Capabilities;
-use crate::settings::Settings;
+use crate::settings::{IgnoreKind, Settings};
 use crate::workspace::{DocumentFileSource, FeatureName, FeaturesSupported, FileFeaturesResult};
 use biome_fs::ConfigName;
 use camino::{Utf8Path, Utf8PathBuf};
@@ -134,9 +134,14 @@ impl Projects {
         })
     }
 
-    pub fn is_ignored_by_top_level_config(&self, project_key: ProjectKey, path: &Utf8Path) -> bool {
+    pub fn is_ignored_by_top_level_config(
+        &self,
+        project_key: ProjectKey,
+        path: &Utf8Path,
+        ignore_kind: IgnoreKind,
+    ) -> bool {
         match self.0.pin().get(&project_key) {
-            Some(project_data) => is_ignored_by_top_level_config(project_data, path),
+            Some(project_data) => is_ignored_by_top_level_config(project_data, path, ignore_kind),
             None => false,
         }
     }
@@ -153,7 +158,13 @@ impl Projects {
             return false;
         };
 
-        let is_ignored_by_top_level_config = is_ignored_by_top_level_config(project_data, path);
+        let is_ignored_by_top_level_config = is_ignored_by_top_level_config(
+            project_data,
+            path,
+            IgnoreKind::Ancestors {
+                root_path: project_data.path.as_path(),
+            },
+        );
 
         // If there are specific features enabled, but all of them ignore the
         // path, then we treat the path as ignored too.
@@ -181,8 +192,6 @@ impl Projects {
             .get(&project_key)
             .ok_or_else(WorkspaceError::no_project)?;
 
-        let project_path = project_data.path.as_path();
-
         let settings = project_data
             .nested_settings
             .iter()
@@ -204,8 +213,10 @@ impl Projects {
             // Never ignore Biome's top-level config file
         } else if !settings.files.includes.is_included(path)
             || project_data.root_settings.vcs_settings.is_ignored(
-                path.strip_prefix(project_path).unwrap_or(path),
-                project_data.path.as_path(),
+                path,
+                IgnoreKind::Ancestors {
+                    root_path: project_data.path.as_path(),
+                },
             )
         {
             file_features.set_ignored_for_all_features();
@@ -330,7 +341,11 @@ impl Projects {
 }
 
 #[inline]
-fn is_ignored_by_top_level_config(project_data: &ProjectData, path: &Utf8Path) -> bool {
+fn is_ignored_by_top_level_config(
+    project_data: &ProjectData,
+    path: &Utf8Path,
+    ignore_kind: IgnoreKind,
+) -> bool {
     // First check if the path is ignored by the `files.includes` setting
     // relevant to the given `path`.
     let includes = project_data
@@ -343,14 +358,12 @@ fn is_ignored_by_top_level_config(project_data: &ProjectData, path: &Utf8Path) -
         );
     let is_included = includes.is_included(path);
 
-    let root_path = project_data.path.as_path();
-
     // VCS settings are used from the root settings, regardless of what
     // package we are analyzing, so we ignore the `path` for those.
     let is_ignored_by_vcs = project_data
         .root_settings
         .vcs_settings
-        .is_ignored(path, root_path);
+        .is_ignored(path, ignore_kind);
 
     !is_included || is_ignored_by_vcs
 }

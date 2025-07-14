@@ -12,6 +12,7 @@ use super::server::WorkspaceServer;
 use super::{FeaturesBuilder, IsPathIgnoredParams};
 use crate::diagnostics::Panic;
 use crate::projects::ProjectKey;
+use crate::settings::IgnoreKind;
 use crate::workspace::DocumentFileSource;
 use crate::{Workspace, WorkspaceError};
 use biome_diagnostics::serde::Diagnostic;
@@ -304,11 +305,11 @@ impl TraversalContext for ScanContext<'_> {
                     return self.scan_kind.is_project();
                 }
 
-                if self
-                    .workspace
-                    .projects
-                    .is_ignored_by_top_level_config(self.project_key, path)
-                {
+                if self.workspace.projects.is_ignored_by_top_level_config(
+                    self.project_key,
+                    path,
+                    IgnoreKind::ThisPath,
+                ) {
                     return false; // Nobody cares about ignored paths.
                 }
 
@@ -330,10 +331,11 @@ impl TraversalContext for ScanContext<'_> {
             Ok(PathKind::File { .. }) => match &self.scan_kind {
                 ScanKind::KnownFiles | ScanKind::TargetedKnownFiles { .. } => {
                     if path.is_config() {
-                        !self
-                            .workspace
-                            .projects
-                            .is_ignored_by_top_level_config(self.project_key, path)
+                        !self.workspace.projects.is_ignored_by_top_level_config(
+                            self.project_key,
+                            path,
+                            IgnoreKind::ThisPath,
+                        )
                     } else {
                         path.is_ignore() || path.is_manifest()
                     }

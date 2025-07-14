@@ -1,0 +1,56 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `biome.json`
+
+```json
+{
+  "vcs": {
+    "enabled": true,
+    "clientKind": "git",
+    "useIgnoreFile": true
+  }
+}
+```
+
+## `.gitignore`
+
+```gitignore
+dist/
+```
+
+## `dist/out.js`
+
+```js
+foo.call(); bar.call();
+```
+
+## `in.js`
+
+```js
+foo.call(); bar.call();
+```
+
+# Termination Message
+
+```block
+format ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × No files were processed in the specified paths.
+  
+  i Check your biome.json or biome.jsonc to ensure the paths are not ignored by the configuration.
+  
+  i These paths were provided but ignored:
+  
+  - <TEMP_DIR>/should_ignore_absolute_paths_in_ignore_file_with_glob/dist/out.js
+  
+
+
+```
+
+# Emitted Messages
+
+```block
+Checked 0 files in <TIME>. No fixes applied.
+```

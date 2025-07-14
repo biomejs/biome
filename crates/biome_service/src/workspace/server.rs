@@ -968,6 +968,7 @@ impl Workspace for WorkspaceServer {
             configuration,
             project_key,
         } = params;
+        let mut diagnostics: Vec<biome_diagnostics::serde::Diagnostic> = vec![];
         let workspace_directory = workspace_directory.map(|p| p.to_path_buf());
         let is_root = configuration.is_root();
         let extends_root = configuration.extends_root();
@@ -997,19 +998,15 @@ impl Workspace for WorkspaceServer {
             workspace_directory.clone()
         };
 
-        let diagnostics = self.load_plugins(
-            &loading_directory.clone().unwrap_or_default(),
-            &settings.as_all_plugins(),
+        diagnostics.extend(
+            self.load_plugins(
+                &loading_directory.clone().unwrap_or_default(),
+                &settings.as_all_plugins(),
+            )
+            .into_iter()
+            .map(Into::into)
+            .collect::<Vec<_>>(),
         );
-        let has_errors = diagnostics
-            .iter()
-            .any(|diagnostic| diagnostic.severity() >= Severity::Error);
-        if has_errors {
-            // Note we also pass non-error diagnostics here. Filtering them
-            // might be cleaner, but on the other hand, including them may
-            // sometimes give a hint as to why an error occurred?
-            return Err(WorkspaceError::plugin_errors(diagnostics));
-        }
 
         if !is_root {
             self.projects.set_nested_settings(
@@ -1034,10 +1031,12 @@ impl Workspace for WorkspaceServer {
                         let content = match result {
                             Some(content) => content,
                             None => {
-                                return Err(VcsDiagnostic::NoIgnoreFileFound(NoIgnoreFileFound {
-                                    path: directory.to_string(),
-                                })
-                                .into());
+                                diagnostics.push(biome_diagnostics::serde::Diagnostic::new(
+                                    VcsDiagnostic::NoIgnoreFileFound(NoIgnoreFileFound {
+                                        path: directory.to_string(),
+                                    }),
+                                ));
+                                return Ok(UpdateSettingsResult { diagnostics });
                             }
                         };
 

@@ -724,10 +724,10 @@ impl VcsSettings {
 
     /// Returns whether the given `path` should be ignored per the VCS settings.
     #[inline]
-    pub fn is_ignored(&self, root_path: &Utf8Path, path: &Utf8Path) -> bool {
+    pub fn is_ignored(&self, path: &Utf8Path, ignore_kind: IgnoreKind) -> bool {
         self.should_use_ignore_file()
             && self.ignore_matches.as_ref().is_some_and(|ignored_matches| {
-                ignored_matches.is_ignored(path, root_path, is_dir(path))
+                ignored_matches.is_ignored(path, is_dir(path), ignore_kind)
             })
     }
 
@@ -803,41 +803,60 @@ pub enum VcsIgnoredPatterns {
     },
 }
 
+pub enum IgnoreKind<'a> {
+    /// Checks whether a path itself is explicitly ignored only.
+    ThisPath,
+
+    /// Checks whether a path itself or one of its ancestors is ignored,
+    /// up to `root_path`.
+    Ancestors { root_path: &'a Utf8Path },
+}
+
 impl VcsIgnoredPatterns {
     /// Checks whether the path ignored by any ignore file found inside the project
     ///
     /// The `root_path` represents the root of the project, as we want to match all ignore files untile the root.
-    pub fn is_ignored(&self, root_path: &Utf8Path, path: &Utf8Path, is_dir: bool) -> bool {
+    pub fn is_ignored(&self, path: &Utf8Path, is_dir: bool, ignore_kind: IgnoreKind) -> bool {
         match self {
             Self::Git { root, nested, .. } => {
-                // NOTE: this could be a bug of the library, need to explore. Let's assume it isn't
-                // When crawling the file system with the CLI, we correctly exclude ignored folders
-                // such as `dist/` or `build/`, in case the path to match is `/Users/foo/project/dist`
-                //
-                // However, the LSP sends absolute file paths, e.g. `/Users/foo/project/dist/a.min.js`,
-                // and they **don't** match globs such as `dist/`.
-                // To work around this limitation, we crawl upwards the parents of the path, until
-                // we arrive at the `root_path`.
-                if path.is_file() && path.is_absolute() {
-                    let mut current_path = path;
-                    let mut is_ignore = false;
-                    loop {
-                        if current_path == root_path {
-                            break;
-                        }
-                        if Self::is_git_ignore(root, nested.as_slice(), current_path, is_dir) {
-                            is_ignore = true;
-                            break;
-                        }
-                        if let Some(parent) = current_path.parent() {
-                            current_path = parent;
-                        } else {
-                            break;
-                        }
+                match ignore_kind {
+                    IgnoreKind::ThisPath => {
+                        // let relative_path = path.strip_prefix(root_path).unwrap();
+                        let ignored = Self::is_git_ignore(root, nested.as_slice(), path, is_dir);
+
+                        ignored
                     }
-                    is_ignore
-                } else {
-                    Self::is_git_ignore(root, nested.as_slice(), path, is_dir)
+                    IgnoreKind::Ancestors { root_path } => {
+                        // NOTE: this could be a bug of the library, need to explore. Let's assume it isn't
+                        // When crawling the file system with the CLI, we correctly exclude ignored folders
+                        // such as `dist/` or `build/`, in case the path to match is `/Users/foo/project/dist`
+                        //
+                        // However, the LSP sends absolute file paths, e.g. `/Users/foo/project/dist/a.min.js`,
+                        // and they **don't** match globs such as `dist/`.
+                        // To work around this limitation, we crawl upwards the parents of the path, until
+                        // we arrive at the `root_path`.
+                        let mut current_path = path;
+                        let is_ignored = loop {
+                            if current_path == root_path {
+                                break false;
+                            }
+                            if Self::is_git_ignore(
+                                root,
+                                nested.as_slice(),
+                                current_path,
+                                current_path.is_dir(),
+                            ) {
+                                break true;
+                            }
+                            if let Some(parent) = current_path.parent() {
+                                current_path = parent;
+                            } else {
+                                break false;
+                            }
+                        };
+
+                        is_ignored
+                    }
                 }
             }
         }
