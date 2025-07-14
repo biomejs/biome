@@ -421,7 +421,7 @@ CssPseudoElementFunctionCustomIdentifier =
 	'('
 	ident: CssCustomIdentifier
 	')'
-	
+
 // ::part(active button) {}
 //   ^^^^^^^^^^^^^^^^^^^
 CssPseudoElementFunction =
@@ -429,7 +429,7 @@ CssPseudoElementFunction =
 	'('
 	items: CssPseudoElementFunctionParameterList
 	')'
-	
+
 CssPseudoElementFunctionParameterList = CssIdentifier*
 
 /////////////
@@ -450,7 +450,8 @@ CssDeclarationOrRuleList = AnyCssDeclarationOrRule*
 
 AnyCssDeclarationOrRule =
 	AnyCssRule
-	| AnyCssDeclarationWithSemicolon
+	| CssDeclarationWithSemicolon
+	| CssEmptyDeclaration
 	| CssBogus
 	| CssMetavariable
 
@@ -468,8 +469,9 @@ CssDeclarationOrAtRuleBlock =
 CssDeclarationOrAtRuleList = AnyCssDeclarationOrAtRule*
 
 AnyCssDeclarationOrAtRule =
-    AnyCssDeclarationWithSemicolon
-    | CssAtRule
+	CssDeclarationWithSemicolon
+	| CssEmptyDeclaration
+	| CssAtRule
 
 // When nested in this way, the contents of a nested group rule's block are parsed as <block-contents> rather than <rule-list>:
 // https://drafts.csswg.org/css-nesting-1/#conditionals
@@ -477,10 +479,6 @@ AnyCssConditionalBlock =
 	CssDeclarationOrRuleBlock
 	| CssRuleBlock
 	| CssBogusBlock
-
-AnyCssDeclarationWithSemicolon = 
-	CssDeclarationWithSemicolon
-	| CssEmptyDeclaration
 
 // @page :left { background: red; @media (500px <= width <= 500px) {  } }
 // 						   ^^^^^^^^^^^^^^^^
@@ -501,7 +499,11 @@ CssDeclarationBlock =
 	declarations: CssDeclarationList
  	'}'
 
-CssDeclarationList = AnyCssDeclarationWithSemicolon*
+CssDeclarationList = AnyCssDeclaration*
+
+AnyCssDeclaration =
+	CssDeclarationWithSemicolon
+	| CssEmptyDeclaration
 
 AnyCssRuleBlock =
 	CssRuleBlock
@@ -1232,7 +1234,8 @@ CssPageAtRuleBlock =
 CssPageAtRuleItemList = AnyCssPageAtRuleItem*
 
 AnyCssPageAtRuleItem =
-	AnyCssDeclarationWithSemicolon
+	CssDeclarationWithSemicolon
+	| CssEmptyDeclaration
 	| CssAtRule
 	| CssMarginAtRule
 
