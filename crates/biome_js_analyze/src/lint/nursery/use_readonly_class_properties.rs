@@ -571,17 +571,18 @@ fn contains_this_or_static_member_kind(
 
         if let Some(js_identifier_expression) = object.as_js_identifier_expression() {
             if let Ok(name) = js_identifier_expression.name() {
-                let name_text = name.to_trimmed_text();
-                let name_syntax = name.syntax();
+                if let Ok(value_token) = name.value_token() {
+                    let name_syntax = name.syntax();
 
-                return this_aliases
-                    .iter()
-                    .any(|ThisAliasesAndTheirScope { aliases, scope }| {
-                        aliases.contains(&name_text)
-                            && name_syntax
-                                .ancestors()
-                                .any(|ancestor| ancestor.key() == scope.syntax().key())
-                    });
+                    return this_aliases.iter().any(
+                        |ThisAliasesAndTheirScope { aliases, scope }| {
+                            aliases.contains(&Text::Borrowed(value_token.token_text_trimmed()))
+                                && name_syntax
+                                    .ancestors()
+                                    .any(|ancestor| ancestor.key() == scope.syntax().key())
+                        },
+                    );
+                }
             }
         }
     }
@@ -597,40 +598,36 @@ fn visit_fn_body_descendants<F>(
     F: FnMut(Text),
 {
     method_body_element.syntax().children().for_each(|child| {
-        if let Some(expr) = JsAssignmentExpression::cast_ref(&child) {
-            if let Ok(left) = expr.left() {
-                if let Some(assignment) = left.as_js_array_assignment_pattern().cloned() {
-                    for name in extract_js_array_assignment_pattern_names(&assignment, this_aliases)
-                    {
-                        on_name(name);
-                    }
-                    return;
+        if let Some(left) =
+            JsAssignmentExpression::cast_ref(&child).and_then(|expr| expr.left().ok())
+        {
+            if let Some(assignment) = left.as_js_array_assignment_pattern().cloned() {
+                for name in extract_js_array_assignment_pattern_names(&assignment, this_aliases) {
+                    on_name(name);
                 }
+                return;
+            }
 
-                if let Some(assignment) = left.as_js_object_assignment_pattern().cloned() {
-                    for name in
-                        collect_js_object_assignment_pattern_names(&assignment, this_aliases)
-                    {
-                        on_name(name);
-                    }
-                    return;
+            if let Some(assignment) = left.as_js_object_assignment_pattern().cloned() {
+                for name in collect_js_object_assignment_pattern_names(&assignment, this_aliases) {
+                    on_name(name);
                 }
+                return;
+            }
 
-                if let Some(assignment) = left.as_any_js_assignment().cloned() {
-                    if let Some(name) =
-                        extract_static_member_assignment_name(&assignment, this_aliases)
-                    {
-                        on_name(name);
-                    }
-                    return;
+            if let Some(assignment) = left.as_any_js_assignment().cloned() {
+                if let Some(name) = extract_static_member_assignment_name(&assignment, this_aliases)
+                {
+                    on_name(name);
                 }
+                return;
             }
         }
 
-        let operand = JsPostUpdateExpression::cast(child.clone())
+        let operand = JsPostUpdateExpression::cast_ref(&child)
             .and_then(|expr| expr.operand().ok())
             .or_else(|| {
-                JsPreUpdateExpression::cast(child.clone()).and_then(|expr| expr.operand().ok())
+                JsPreUpdateExpression::cast_ref(&child.clone()).and_then(|expr| expr.operand().ok())
             });
 
         if let Some(operand) = operand {
