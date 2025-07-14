@@ -833,7 +833,7 @@ impl VcsIgnoredPatterns {
                         // To work around this limitation, we crawl upwards the parents of the path, until
                         // we arrive at the `root_path`.
                         let mut current_path = path;
-                        {
+                        loop {
                             if current_path == root_path {
                                 break false;
                             }
