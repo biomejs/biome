@@ -11,8 +11,8 @@ jobs:
   lint:
     runs-on: depot-ubuntu-24.04-arm-16
     steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
-      - uses: DavidAnson/markdownlint-cli2-action@992badcdf24e3b8eb7e87ff9287fe931bcb00c6e
+      - uses: actions/checkout@09d2acae674a48949e3602304ab46fd20ae0c42f
+      - uses: DavidAnson/markdownlint-cli2-action@93e977280559750153a80f85d87d50502bdcdda1
         with:
           globs: |
             **/*.md
