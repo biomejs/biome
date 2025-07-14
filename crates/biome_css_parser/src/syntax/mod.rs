@@ -199,6 +199,22 @@ pub(crate) fn parse_declaration(p: &mut CssParser) -> ParsedSyntax {
     Present(m.complete(p, CSS_DECLARATION))
 }
 
+#[inline]
+pub(crate) fn is_at_any_declaration_with_semicolon(p: &mut CssParser) -> bool {
+    is_at_declaration(p) || is_at_empty_declaration(p)
+}
+
+#[inline]
+pub(crate) fn parse_any_declaration_with_semicolon(p: &mut CssParser) -> ParsedSyntax {
+    if is_at_empty_declaration(p) {
+        parse_empty_declaration(p)
+    } else if is_at_any_declaration_with_semicolon(p) {
+        parse_declaration_with_semicolon(p)
+    } else {
+        Absent
+    }
+}
+
 /// Parses a CSS declaration that may optionally end with a semicolon.
 ///
 /// This function attempts to parse a single CSS declaration from the current position
@@ -233,24 +249,23 @@ pub(crate) fn parse_declaration_with_semicolon(p: &mut CssParser) -> ParsedSynta
 }
 
 #[inline]
+pub(crate) fn is_at_empty_declaration(p: &mut CssParser) -> bool {
+    p.at(T![;])
+}
+
+#[inline]
 pub(crate) fn parse_empty_declaration(p: &mut CssParser) -> ParsedSyntax {
-    if p.at(T![;]) {
-        let m = p.start();
-        p.bump_any(); // bump ;
-        m.complete(p, CSS_EMPTY_DECLARATION).into()
-    } else {
-        Absent
+    if !is_at_empty_declaration(p) {
+        return Absent;
     }
+    let m = p.start();
+    p.bump(T![;]);
+    Present(m.complete(p, CSS_EMPTY_DECLARATION))
 }
 
 #[inline]
 fn is_at_declaration_important(p: &mut CssParser) -> bool {
     p.at(T![!]) && p.nth_at(1, T![important])
-}
-
-#[inline]
-pub(crate) fn is_at_declaration_semicolon(p: &mut CssParser) -> bool {
-    p.at(T![;]) && (p.nth_at(1, T![;]) || p.nth_at(1, T!['}']))
 }
 
 #[inline]

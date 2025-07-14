@@ -1,8 +1,8 @@
-use crate::CssSyntaxToken;
 use crate::generated::{
     CssDeclarationBlock, CssDeclarationOrAtRuleBlock, CssDeclarationOrRuleBlock,
     CssFontFeatureValuesBlock, CssKeyframesBlock, CssPageAtRuleBlock, CssRuleBlock,
 };
+use crate::{AnyCssDeclarationOrAtRule, AnyCssDeclarationOrRule, CssSyntaxToken};
 use biome_rowan::{AstNodeList, SyntaxResult, declare_node_union};
 
 declare_node_union! {
@@ -46,6 +46,36 @@ impl CssBlockLike {
             Self::CssFontFeatureValuesBlock(block) => block.items().is_empty(),
             Self::CssPageAtRuleBlock(block) => block.items().is_empty(),
             Self::CssDeclarationOrRuleBlock(block) => block.items().is_empty(),
+        }
+    }
+
+    /// Checks if the css block-like has only empty declarations, meaning it may have
+    /// declarations that are empty or have only semicolons, but no actual declarations.
+    /// # Panics
+    /// This function will panic if the block-like is empty.
+    pub fn has_only_empty_declarations(&self) -> bool {
+        debug_assert!(!self.is_empty());
+
+        match self {
+            Self::CssDeclarationBlock(block) => block
+                .declarations()
+                .iter()
+                .all(|decl| decl.as_css_declaration_with_semicolon().is_none()),
+            Self::CssDeclarationOrAtRuleBlock(block) => block.items().iter().all(|item| {
+                matches!(
+                    item,
+                    AnyCssDeclarationOrAtRule::AnyCssDeclarationWithSemicolon(decl)
+                        if decl.as_css_declaration_with_semicolon().is_none()
+                )
+            }),
+            Self::CssDeclarationOrRuleBlock(block) => block.items().iter().all(|item| {
+                matches!(
+                    item,
+                    AnyCssDeclarationOrRule::AnyCssDeclarationWithSemicolon(decl)
+                        if decl.as_css_declaration_with_semicolon().is_none()
+                )
+            }),
+            _ => false,
         }
     }
 

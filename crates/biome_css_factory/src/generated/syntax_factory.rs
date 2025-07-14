@@ -4824,9 +4824,11 @@ impl SyntaxFactory for CssSyntaxFactory {
             CSS_CUSTOM_IDENTIFIER_LIST => {
                 Self::make_node_list_syntax(kind, children, AnyCssCustomIdentifier::can_cast)
             }
-            CSS_DECLARATION_LIST => {
-                Self::make_node_list_syntax(kind, children, CssDeclarationWithSemicolon::can_cast)
-            }
+            CSS_DECLARATION_LIST => Self::make_node_list_syntax(
+                kind,
+                children,
+                AnyCssDeclarationWithSemicolon::can_cast,
+            ),
             CSS_DECLARATION_OR_AT_RULE_LIST => {
                 Self::make_node_list_syntax(kind, children, AnyCssDeclarationOrAtRule::can_cast)
             }

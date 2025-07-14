@@ -6,8 +6,8 @@ use crate::syntax::at_rule::parse_error::{
 use crate::syntax::at_rule::{is_at_at_rule, parse_at_rule};
 use crate::syntax::block::{ParseBlockBody, parse_declaration_or_at_rule_list_block};
 use crate::syntax::{
-    is_at_declaration, is_at_identifier, parse_custom_identifier_with_keywords,
-    parse_declaration_with_semicolon,
+    is_at_any_declaration_with_semicolon, is_at_identifier, parse_any_declaration_with_semicolon,
+    parse_custom_identifier_with_keywords,
 };
 use biome_css_syntax::CssSyntaxKind::*;
 use biome_css_syntax::{CssSyntaxKind, T};
@@ -165,7 +165,7 @@ impl ParseBlockBody for PageBlock {
     const BLOCK_KIND: CssSyntaxKind = CSS_PAGE_AT_RULE_BLOCK;
 
     fn is_at_element(&self, p: &mut CssParser) -> bool {
-        is_at_at_rule(p) || is_at_declaration(p) || at_margin_rule(p)
+        at_margin_rule(p) || is_at_at_rule(p) || is_at_any_declaration_with_semicolon(p)
     }
 
     fn parse_list(&mut self, p: &mut CssParser) {
@@ -186,8 +186,8 @@ impl ParseNodeList for PageAtRuleItemList {
             parse_margin_at_rule(p)
         } else if is_at_at_rule(p) {
             parse_at_rule(p)
-        } else if is_at_declaration(p) {
-            parse_declaration_with_semicolon(p)
+        } else if is_at_any_declaration_with_semicolon(p) {
+            parse_any_declaration_with_semicolon(p)
         } else {
             Absent
         }

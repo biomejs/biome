@@ -1,0 +1,47 @@
+a {
+	prop1: 1px;
+	prop1: 1px;;
+	prop2: 2px;;;
+}
+
+a {
+	prop1: 1px;;
+}
+
+a {
+	;
+}
+
+b {
+	prop1: 1px;;
+	rule {
+		;
+		prop2: 2px;;
+		;
+	}
+	;;;;;
+	span {
+
+	}
+	;
+}
+
+@page :first{
+	;;
+	prop2: 2px;
+	;
+	margin: 2cm;;;
+}
+
+@page :first {
+	@top-left {
+		;;;
+	}
+	@top-left {
+		;
+	}
+	@top-left {
+		;
+		content: "foo";;;
+	}
+}

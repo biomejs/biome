@@ -91,6 +91,7 @@ impl Rule for NoInvalidGridAreas {
             .into_iter()
             .filter_map(|item| {
                 let binding = item
+                    .as_any_css_declaration_with_semicolon()?
                     .as_css_declaration_with_semicolon()?
                     .declaration()
                     .ok()?

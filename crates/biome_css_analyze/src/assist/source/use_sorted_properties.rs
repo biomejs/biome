@@ -240,7 +240,6 @@ impl RecessOrderMember {
     /// Returns the kind of node for ordering purposes. The nodes are sorted in the order they're declared in [NodeKindOrder].
     pub fn kind(&self) -> NodeKindOrder {
         match &self.0 {
-            AnyCssDeclarationOrRule::CssEmptyDeclaration(_) => NodeKindOrder::UnknownKind,
             AnyCssDeclarationOrRule::CssBogus(_) => NodeKindOrder::UnknownKind,
             AnyCssDeclarationOrRule::CssMetavariable(_) => NodeKindOrder::UnknownKind,
             AnyCssDeclarationOrRule::AnyCssRule(rule) => match rule {
@@ -249,7 +248,12 @@ impl RecessOrderMember {
                 AnyCssRule::CssNestedQualifiedRule(_) => NodeKindOrder::NestedRuleOrAtRule,
                 AnyCssRule::CssQualifiedRule(_) => NodeKindOrder::UnknownKind,
             },
-            AnyCssDeclarationOrRule::CssDeclarationWithSemicolon(decl_with_semicolon) => {
+            AnyCssDeclarationOrRule::AnyCssDeclarationWithSemicolon(any_decl_with_semicolon) => {
+                let Some(decl_with_semicolon) =
+                    any_decl_with_semicolon.as_css_declaration_with_semicolon()
+                else {
+                    return NodeKindOrder::UnknownKind;
+                };
                 let Some(decl) = decl_with_semicolon.declaration().ok() else {
                     return NodeKindOrder::UnknownKind;
                 };
@@ -280,7 +284,8 @@ impl RecessOrderMember {
     pub fn property_index(&self) -> usize {
         let Some(prop_text) = &self
             .0
-            .as_css_declaration_with_semicolon()
+            .as_any_css_declaration_with_semicolon()
+            .and_then(|decl| decl.as_css_declaration_with_semicolon())
             .and_then(css_declaration_to_prop_text)
         else {
             return usize::MAX;
@@ -295,7 +300,8 @@ impl RecessOrderMember {
     pub fn vendor_prefix_index(&self) -> usize {
         let Some(prop_text) = &self
             .0
-            .as_css_declaration_with_semicolon()
+            .as_any_css_declaration_with_semicolon()
+            .and_then(|decl| decl.as_css_declaration_with_semicolon())
             .and_then(css_declaration_to_prop_text)
         else {
             return usize::MAX;
@@ -402,7 +408,8 @@ fn contains_shorthand_after_longhand(nodes: &[AnyCssDeclarationOrRule]) -> bool 
     // Starting from the bottom, when we see a shorthand property, record the set of longhand properties that are no longer allowed to appear above it.
     for node in nodes.iter().rev() {
         let Some(prop_text) = &node
-            .as_css_declaration_with_semicolon()
+            .as_any_css_declaration_with_semicolon()
+            .and_then(|decl| decl.as_css_declaration_with_semicolon())
             .and_then(css_declaration_to_prop_text)
         else {
             continue;
@@ -435,7 +442,8 @@ fn contains_shorthand_after_longhand(nodes: &[AnyCssDeclarationOrRule]) -> bool 
 fn contains_unknown_property(nodes: &[AnyCssDeclarationOrRule]) -> bool {
     for node in nodes.iter() {
         let Some(prop_text) = &node
-            .as_css_declaration_with_semicolon()
+            .as_any_css_declaration_with_semicolon()
+            .and_then(|decl| decl.as_css_declaration_with_semicolon())
             .and_then(css_declaration_to_prop_text)
         else {
             continue;
