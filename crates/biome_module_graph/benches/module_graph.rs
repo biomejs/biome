@@ -29,6 +29,10 @@ fn bench_module_graph(criterion: &mut Criterion) {
                 "../../biome_resolver/tests/fixtures/resolver_cases_5/node_modules/@types/react/index.d.ts"
             ) as &[u8],
         ),
+        (
+            "@next/font/google/index.d.ts",
+            include_bytes!("./next_font_google.d.ts") as &[u8],
+        ),
         // FIXME: enable it once the perf reaches a decent number
         // (
         //     "RedisCommander.d.ts",

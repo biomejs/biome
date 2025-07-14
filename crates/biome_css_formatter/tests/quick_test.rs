@@ -12,11 +12,11 @@ mod language {
 #[test]
 // use this test check if your snippet prints as you wish, without using a snapshot
 fn quick_test() {
-    let src = r#".font-heading {
-  font-feature-settings:
-      var(--heading-salt), var(--heading-ss06), var(--heading-ss11), var(--heading-cv09),
-      var(--heading-liga), var(--heading-calt);
-}
+    let src = r#"
+.container {& [lang="ru"] {
+         color: blue;
+        } }
+
 
 "#;
     let parse = parse_css(src, CssParserOptions::default());

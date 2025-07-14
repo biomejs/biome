@@ -7,3 +7,13 @@ async function doStuff(db) {
         }
     });
 }
+
+async function doStuff2(db) {
+    const txStatements: Array<Promise<(tx: any) => void>> = [];
+
+    db.transaction((tx: any) => {
+        for (const stmt of txStatements) {
+            stmt
+        }
+    });
+}

@@ -1,6 +1,6 @@
 use crate::changed::{get_changed_files, get_staged_files};
 use crate::cli_options::{CliOptions, CliReporter, ColorsArg, cli_options};
-use crate::commands::scan_kind::get_forced_scan_kind;
+use crate::commands::scan_kind::derive_best_scan_kind;
 use crate::execute::Stdin;
 use crate::logging::LoggingKind;
 use crate::{
@@ -936,21 +936,13 @@ pub(crate) trait CommandRunner: Sized {
 
         let open_project_result = workspace.open_project(params)?;
 
-        let scan_kind = get_forced_scan_kind(&execution, &root_configuration_dir, &working_dir)
-            .unwrap_or({
-                if open_project_result.scan_kind == ScanKind::NoScanner {
-                    // If we're here, it means we're executing `check`, `lint` or `ci`
-                    // and the linter is disabled or no projects rules have been enabled.
-                    // We scan known files if the configuration is a root or if the VCS integration is enabled
-                    if configuration.is_root() || configuration.use_ignore_file() {
-                        ScanKind::KnownFiles
-                    } else {
-                        ScanKind::NoScanner
-                    }
-                } else {
-                    open_project_result.scan_kind
-                }
-            });
+        let scan_kind = derive_best_scan_kind(
+            open_project_result.scan_kind,
+            &execution,
+            &root_configuration_dir,
+            &working_dir,
+            &configuration,
+        );
         let scan_kind = match (scan_kind, execution.traversal_mode()) {
             (scan_kind, TraversalMode::Migrate { .. }) => scan_kind,
             (ScanKind::KnownFiles, _) => {
@@ -985,6 +977,7 @@ pub(crate) trait CommandRunner: Sized {
             watch: cli_options.use_server,
             force: false, // TODO: Maybe we'll want a CLI flag for this.
             scan_kind,
+            verbose: cli_options.verbose,
         })?;
 
         if self.should_validate_configuration_diagnostics() {

@@ -1482,7 +1482,7 @@ async fn pull_biome_quick_fixes() -> Result<()> {
 }
 
 #[tokio::test]
-async fn pull_quick_fixes_include_unsafe() -> Result<()> {
+async fn pull_quick_fixes_not_include_unsafe() -> Result<()> {
     let factory = ServerFactory::default();
     let (service, client) = factory.create().into_inner();
     let (stream, sink) = client.split();
@@ -1558,7 +1558,7 @@ async fn pull_quick_fixes_include_unsafe() -> Result<()> {
         .await?
         .context("codeAction returned None")?;
 
-    let mut changes = HashMap::default();
+    let mut changes = HashMap::<Uri, Vec<TextEdit>>::default();
     changes.insert(
         uri!("document.js"),
         vec![TextEdit {
@@ -1576,24 +1576,7 @@ async fn pull_quick_fixes_include_unsafe() -> Result<()> {
         }],
     );
 
-    let expected_code_action = CodeActionOrCommand::CodeAction(CodeAction {
-        title: String::from("Use === instead."),
-        kind: Some(CodeActionKind::new(
-            "quickfix.biome.suspicious.noDoubleEquals",
-        )),
-        diagnostics: Some(vec![unsafe_fixable.clone()]),
-        edit: Some(WorkspaceEdit {
-            changes: Some(changes),
-            document_changes: None,
-            change_annotations: None,
-        }),
-        command: None,
-        is_preferred: None,
-        disabled: None,
-        data: None,
-    });
-
-    let mut suppression_changes = HashMap::default();
+    let mut suppression_changes = HashMap::<Uri, Vec<TextEdit>>::default();
     suppression_changes.insert(
         uri!("document.js"),
         vec![TextEdit {
@@ -1666,7 +1649,6 @@ async fn pull_quick_fixes_include_unsafe() -> Result<()> {
     assert_eq!(
         res,
         vec![
-            expected_code_action,
             expected_inline_suppression_action,
             expected_toplevel_suppression_action,
         ]
@@ -3286,6 +3268,7 @@ export function bar() {
                 watch: true,
                 force: false,
                 scan_kind,
+                verbose: false,
             },
         )
         .await?
@@ -3505,6 +3488,7 @@ export function bar() {
                 watch: true,
                 force: false,
                 scan_kind: ScanKind::Project,
+                verbose: false,
             },
         )
         .await?

@@ -60,29 +60,35 @@ export * as renamed2 from "./renamed-reexports";
 
 ```
 Exports {
+  "foo" => {
+    ExportOwnExport => JsOwnExport::Binding(0)
+  }
+  "qux" => {
+    ExportOwnExport => JsOwnExport::Binding(4)
+  }
+  "bar" => {
+    ExportOwnExport => JsOwnExport::Binding(1)
+  }
+  "quz" => {
+    ExportOwnExport => JsOwnExport::Binding(2)
+  }
+  "baz" => {
+    ExportOwnExport => JsOwnExport::Binding(3)
+  }
   "a" => {
     ExportOwnExport => JsOwnExport::Binding(5)
   }
   "b" => {
     ExportOwnExport => JsOwnExport::Binding(6)
   }
-  "bar" => {
-    ExportOwnExport => JsOwnExport::Binding(1)
-  }
-  "baz" => {
-    ExportOwnExport => JsOwnExport::Binding(3)
-  }
   "d" => {
     ExportOwnExport => JsOwnExport::Binding(7)
-  }
-  "default" => {
-    ExportOwnExport => JsOwnExport::Binding(11)
   }
   "e" => {
     ExportOwnExport => JsOwnExport::Binding(8)
   }
-  "foo" => {
-    ExportOwnExport => JsOwnExport::Binding(0)
+  "default" => {
+    ExportOwnExport => JsOwnExport::Binding(11)
   }
   "oh\nno" => {
     ExportReexport => Reexport(
@@ -90,12 +96,6 @@ Exports {
       Resolved path: "/src/renamed-reexports.ts"
       Import Symbol: ohNo
     )
-  }
-  "qux" => {
-    ExportOwnExport => JsOwnExport::Binding(4)
-  }
-  "quz" => {
-    ExportOwnExport => JsOwnExport::Binding(2)
   }
   "renamed2" => {
     ExportReexport => Reexport(

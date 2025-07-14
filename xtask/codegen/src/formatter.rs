@@ -564,6 +564,8 @@ enum NodeDialect {
     Grit,
     Graphql,
     Html,
+    Astro,
+    Svelte,
 }
 
 impl NodeDialect {
@@ -594,6 +596,8 @@ impl NodeDialect {
             Self::Grit => "grit",
             Self::Graphql => "graphql",
             Self::Html => "html",
+            Self::Astro => "astro",
+            Self::Svelte => "svelte",
         }
     }
 
@@ -607,6 +611,8 @@ impl NodeDialect {
             "Grit" => Self::Grit,
             "Graphql" => Self::Graphql,
             "Html" => Self::Html,
+            "Astro" => Self::Astro,
+            "Svelte" => Self::Svelte,
             _ => {
                 eprintln!("missing prefix {name}");
                 Self::Js

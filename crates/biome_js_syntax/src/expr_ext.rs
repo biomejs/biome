@@ -1391,6 +1391,21 @@ impl AnyJsExpression {
             _ => false,
         }
     }
+
+    /// Returns the innermost expression, ignoring any parenthesized expressions or type assertions.
+    pub fn inner_expression(&self) -> Option<Self> {
+        (match self {
+            Self::JsParenthesizedExpression(expression) => expression.expression().ok(),
+            Self::TsAsExpression(expression) => expression.expression().ok(),
+            Self::TsSatisfiesExpression(expression) => expression.expression().ok(),
+            Self::TsNonNullAssertionExpression(expression) => expression.expression().ok(),
+            Self::TsTypeAssertionExpression(expression) => expression.expression().ok(),
+            Self::TsInstantiationExpression(expression) => expression.expression().ok(),
+            _ => return Some(self.clone()),
+        })
+        .as_ref()
+        .and_then(Self::inner_expression)
+    }
 }
 
 /// Iterator that returns the callee names in "top down order".

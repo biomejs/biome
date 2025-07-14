@@ -68,27 +68,26 @@ CssRoot {
                 },
             ],
             block: CssBogusBlock {
-                items: [],
+                items: [
+                    CssDeclarationOrRuleList [
+                        CssEmptyDeclaration {
+                            semicolon_token: SEMICOLON@32..33 ";" [] [],
+                        },
+                        CssAtRule {
+                            at_token: AT@33..35 "@" [Newline("\n")] [],
+                            rule: CssFontFaceAtRule {
+                                font_face_token: FONT_FACE_KW@35..45 "font-face" [] [Whitespace(" ")],
+                                block: CssBogusBlock {
+                                    items: [],
+                                },
+                            },
+                        },
+                        CssEmptyDeclaration {
+                            semicolon_token: SEMICOLON@45..46 ";" [] [],
+                        },
+                    ],
+                ],
             },
-        },
-        CssBogusRule {
-            items: [
-                SEMICOLON@32..33 ";" [] [],
-            ],
-        },
-        CssAtRule {
-            at_token: AT@33..35 "@" [Newline("\n")] [],
-            rule: CssFontFaceAtRule {
-                font_face_token: FONT_FACE_KW@35..45 "font-face" [] [Whitespace(" ")],
-                block: CssBogusBlock {
-                    items: [],
-                },
-            },
-        },
-        CssBogusRule {
-            items: [
-                SEMICOLON@45..46 ";" [] [],
-            ],
         },
     ],
     eof_token: EOF@46..46 "" [] [],
@@ -124,7 +123,7 @@ CssRoot {
       1: CSS_FONT_FACE_AT_RULE@19..29
         0: FONT_FACE_KW@19..29 "font-face" [] [Whitespace(" ")]
         1: CSS_BOGUS_BLOCK@29..29
-    3: CSS_QUALIFIED_RULE@29..32
+    3: CSS_QUALIFIED_RULE@29..46
       0: CSS_SELECTOR_LIST@29..32
         0: CSS_COMPOUND_SELECTOR@29..32
           0: CSS_NESTED_SELECTOR_LIST@29..29
@@ -133,16 +132,17 @@ CssRoot {
             1: CSS_IDENTIFIER@29..32
               0: IDENT@29..32 "foo" [] []
           2: CSS_SUB_SELECTOR_LIST@32..32
-      1: CSS_BOGUS_BLOCK@32..32
-    4: CSS_BOGUS_RULE@32..33
-      0: SEMICOLON@32..33 ";" [] []
-    5: CSS_AT_RULE@33..45
-      0: AT@33..35 "@" [Newline("\n")] []
-      1: CSS_FONT_FACE_AT_RULE@35..45
-        0: FONT_FACE_KW@35..45 "font-face" [] [Whitespace(" ")]
-        1: CSS_BOGUS_BLOCK@45..45
-    6: CSS_BOGUS_RULE@45..46
-      0: SEMICOLON@45..46 ";" [] []
+      1: CSS_BOGUS_BLOCK@32..46
+        0: CSS_DECLARATION_OR_RULE_LIST@32..46
+          0: CSS_EMPTY_DECLARATION@32..33
+            0: SEMICOLON@32..33 ";" [] []
+          1: CSS_AT_RULE@33..45
+            0: AT@33..35 "@" [Newline("\n")] []
+            1: CSS_FONT_FACE_AT_RULE@35..45
+              0: FONT_FACE_KW@35..45 "font-face" [] [Whitespace(" ")]
+              1: CSS_BOGUS_BLOCK@45..45
+          2: CSS_EMPTY_DECLARATION@45..46
+            0: SEMICOLON@45..46 ";" [] []
   2: EOF@46..46 "" [] []
 
 ```
@@ -193,5 +193,21 @@ at_rule_font_face_error.css:3:12 parse ━━━━━━━━━━━━━�
       │            ^
   
   i Remove ;
+  
+at_rule_font_face_error.css:3:13 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `}` but instead the file ends
+  
+    1 │ @font-face foo {}
+    2 │ @font-face foo;
+  > 3 │ @font-face ;
+      │             
+  
+  i the file ends here
+  
+    1 │ @font-face foo {}
+    2 │ @font-face foo;
+  > 3 │ @font-face ;
+      │             
   
 ```

@@ -153,6 +153,8 @@ pub enum RuleSource {
     DenoLint(&'static str),
     /// Rules from [Eslint Plugin Vitest](https://github.com/vitest-dev/eslint-plugin-vitest)
     EslintVitest(&'static str),
+    /// Rules from [Eslint Plugin Vue.js](https://eslint.vuejs.org/)
+    EslintVueJs(&'static str),
 }
 
 impl PartialEq for RuleSource {
@@ -194,6 +196,7 @@ impl std::fmt::Display for RuleSource {
             Self::EslintRegexp(_) => write!(f, "eslint-plugin-regexp"),
             Self::DenoLint(_) => write!(f, "deno-lint"),
             Self::EslintVitest(_) => write!(f, "@vitest/eslint-plugin"),
+            Self::EslintVueJs(_) => write!(f, "eslint-plugin-vue"),
         }
     }
 }
@@ -268,7 +271,8 @@ impl RuleSource {
             | Self::EslintRegexp(rule_name)
             | Self::Stylelint(rule_name)
             | Self::DenoLint(rule_name)
-            | Self::EslintVitest(rule_name) => rule_name,
+            | Self::EslintVitest(rule_name)
+            | Self::EslintVueJs(rule_name) => rule_name,
         }
     }
 
@@ -303,6 +307,7 @@ impl RuleSource {
             Self::EslintRegexp(rule_name) => format!("regexp/{rule_name}"),
             Self::DenoLint(rule_name) => format!("deno-lint/{rule_name}"),
             Self::EslintVitest(rule_name) => format!("vitest/{rule_name}"),
+            Self::EslintVueJs(rule_name) => format!("vue/{rule_name}"),
         }
     }
 
@@ -338,6 +343,7 @@ impl RuleSource {
             Self::EslintRegexp(rule_name) => format!("https://ota-meshi.github.io/eslint-plugin-regexp/rules/{rule_name}.html"),
             Self::DenoLint(rule_name) => format!("https://lint.deno.land/rules/{rule_name}"),
             Self::EslintVitest(rule_name) => format!("https://github.com/vitest-dev/eslint-plugin-vitest/blob/main/docs/rule/{rule_name}.md"),
+            Self::EslintVueJs(rule_name) => format!("https://eslint.vuejs.org/rules/{rule_name}"),
         }
     }
 

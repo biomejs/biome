@@ -25,7 +25,7 @@ const hello = "hello world";
 ```
 HtmlRoot {
     bom_token: missing (optional),
-    frontmatter: HtmlAstroFrontmatterElement {
+    frontmatter: AstroFrontmatterElement {
         l_fence_token: FENCE@0..3 "---" [] [],
         content_token: HTML_LITERAL@3..33 "const hello = \"hello world\";\n" [Newline("\n")] [],
         r_fence_token: FENCE@33..36 "---" [] [],
@@ -148,7 +148,7 @@ HtmlRoot {
 ```
 0: HTML_ROOT@0..141
   0: (empty)
-  1: HTML_ASTRO_FRONTMATTER_ELEMENT@0..36
+  1: ASTRO_FRONTMATTER_ELEMENT@0..36
     0: FENCE@0..3 "---" [] []
     1: HTML_LITERAL@3..33 "const hello = \"hello world\";\n" [Newline("\n")] []
     2: FENCE@33..36 "---" [] []

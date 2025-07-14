@@ -49,6 +49,30 @@ impl CssBlockLike {
         }
     }
 
+    /// Checks if the css block-like has only empty declarations, meaning it may have
+    /// declarations that are empty or have only semicolons, but no actual declarations.
+    /// # Panics
+    /// This function will panic if the block-like is empty.
+    pub fn has_only_empty_declarations(&self) -> bool {
+        debug_assert!(!self.is_empty());
+
+        match self {
+            Self::CssDeclarationBlock(block) => block
+                .declarations()
+                .iter()
+                .all(|decl| decl.as_css_empty_declaration().is_some()),
+            Self::CssDeclarationOrAtRuleBlock(block) => block
+                .items()
+                .iter()
+                .all(|item| item.as_css_empty_declaration().is_some()),
+            Self::CssDeclarationOrRuleBlock(block) => block
+                .items()
+                .iter()
+                .all(|item| item.as_css_empty_declaration().is_some()),
+            _ => false,
+        }
+    }
+
     /// Checks if the css block-like is empty without comments inside.
     pub fn is_empty_without_comments(&self) -> bool {
         self.is_empty()

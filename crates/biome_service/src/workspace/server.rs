@@ -355,10 +355,10 @@ impl WorkspaceServer {
             match path.extension() {
                 Some("js") => {
                     let manifest = self.project_layout.find_node_manifest_for_path(&path);
-                    if let Some((_, manifest)) = manifest {
-                        if manifest.r#type == Some(PackageType::CommonJs) {
-                            js.set_module_kind(ModuleKind::Script);
-                        }
+                    if let Some((_, manifest)) = manifest
+                        && manifest.r#type == Some(PackageType::CommonJs)
+                    {
+                        js.set_module_kind(ModuleKind::Script);
                     }
                 }
                 Some("cjs") => {
@@ -407,32 +407,15 @@ impl WorkspaceServer {
         let opened_by_scanner = reason.is_opened_by_scanner();
 
         // Second-pass parsing for HTML files with embedded JavaScript and CSS content
-        let (embedded_scripts, embedded_styles) = if let Some(file_source) = self.get_source(index)
+        let (embedded_scripts, embedded_styles) = if let Some(DocumentFileSource::Html(_)) =
+            self.get_source(index)
+            && let Some(Ok(any_parse)) = &syntax
+            && let Some(html_root) = biome_html_syntax::HtmlRoot::cast(any_parse.syntax())
         {
-            if matches!(file_source, DocumentFileSource::Html(_)) {
-                if let Some(Ok(any_parse)) = &syntax {
-                    if let Some(html_root) =
-                        biome_html_syntax::HtmlRoot::cast(any_parse.syntax().clone())
-                    {
-                        let mut node_cache = NodeCache::default();
-                        let scripts = crate::file_handlers::html::extract_embedded_scripts(
-                            &html_root,
-                            &mut node_cache,
-                        );
-                        let styles = crate::file_handlers::html::parse_embedded_styles(
-                            &html_root,
-                            &mut node_cache,
-                        );
-                        (scripts, styles)
-                    } else {
-                        (Vec::new(), Vec::new())
-                    }
-                } else {
-                    (Vec::new(), Vec::new())
-                }
-            } else {
-                (Vec::new(), Vec::new())
-            }
+            let mut node_cache = NodeCache::default();
+            let scripts = extract_embedded_scripts(&html_root, &mut node_cache);
+            let styles = parse_embedded_styles(&html_root, &mut node_cache);
+            (scripts, styles)
         } else {
             (Vec::new(), Vec::new())
         };
@@ -480,14 +463,14 @@ impl WorkspaceServer {
                     // content is coming from the scanner, we keep the same
                     // content that was already in the document. This means,
                     // active clients are leading over the filesystem.
-                    let content = if document.version.is_some() && opened_by_scanner {
-                        document.content.clone()
-                    } else {
-                        content.clone()
+                    if document.version.is_some() && opened_by_scanner {
+                        let mut doc = document.clone();
+                        doc.opened_by_scanner = true;
+                        return Operation::Insert(doc);
                     };
 
                     Operation::Insert::<Document, bool>(Document {
-                        content,
+                        content: content.clone(),
                         version,
                         file_source_index: index,
                         syntax: syntax.clone(),
@@ -936,7 +919,7 @@ impl Workspace for WorkspaceServer {
                 .try_send(WatcherInstruction::WatchFolder(path.clone()));
         }
 
-        let result = self.scan(params.project_key, &path, params.scan_kind)?;
+        let result = self.scan(params.project_key, &path, params.scan_kind, params.verbose)?;
 
         let _ = self.notification_tx.send(ServiceDataNotification::Updated);
 
