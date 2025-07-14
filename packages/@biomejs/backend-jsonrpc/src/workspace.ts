@@ -155,7 +155,7 @@ Examples where this may be useful:
 
 // But it's probably better to ignore a specific dependency. // For instance, one that happens to be particularly slow to // scan: "RedisCommander.d.ts", ], } } ```
 
-Please be aware that rules relying on the module graph or type inference information may be negatively affected if dependencies of your project aren't (fully) scanned.
+Please be aware that rules relying on the module graph or type inference information may be negatively affected if dependencies of your project aren't (fully) scanned. 
 	 */
 	experimentalScannerIgnores?: string[];
 	/**
@@ -219,7 +219,7 @@ export interface FormatterConfiguration {
 	/**
 	* Use any `.editorconfig` files to configure the formatter. Configuration in `biome.json` will override `.editorconfig` configuration.
 
-Default: `true`.
+Default: `true`. 
 	 */
 	useEditorconfig?: Bool;
 }
@@ -282,7 +282,7 @@ export interface JsConfiguration {
 	/**
 	* A list of global bindings that should be ignored by the analyzers
 
-If defined here, they should not emit diagnostics.
+If defined here, they should not emit diagnostics. 
 	 */
 	globals?: string[];
 	/**
@@ -359,7 +359,7 @@ export interface VcsConfiguration {
 	/**
 	* The folder where Biome should check for VCS files. By default, Biome will use the same folder where `biome.json` was found.
 
-If Biome can't find the configuration, it will attempt to use the current working directory. If no current working directory can't be found, Biome won't use the VCS integration, and a diagnostic will be emitted
+If Biome can't find the configuration, it will attempt to use the current working directory. If no current working directory can't be found, Biome won't use the VCS integration, and a diagnostic will be emitted 
 	 */
 	root?: string;
 	/**
@@ -452,7 +452,7 @@ export type LineEnding = "lf" | "crlf" | "cr";
 /**
 	* Validated value for the `line_width` formatter options
 
-The allowed range of values is 1..=320
+The allowed range of values is 1..=320 
 	 */
 export type LineWidth = number;
 /**
@@ -687,13 +687,13 @@ export interface JsParserConfiguration {
 	/**
 	* When enabled, files like `.js`/`.mjs`/`.cjs` may contain JSX syntax.
 
-Defaults to `true`.
+Defaults to `true`. 
 	 */
 	jsxEverywhere?: Bool;
 	/**
 	* It enables the experimental and unsafe parsing of parameter decorators
 
-These decorators belong to an old proposal, and they are subject to change.
+These decorators belong to an old proposal, and they are subject to change. 
 	 */
 	unsafeParameterDecoratorsEnabled?: Bool;
 }
@@ -859,7 +859,7 @@ export type QuoteStyle = "double" | "single";
 /**
 	* Whether to indent the content of `<script>` and `<style>` tags for HTML-ish templating languages (Vue, Svelte, etc.).
 
-When true, the content of `<script>` and `<style>` tags will be indented one level.
+When true, the content of `<script>` and `<style>` tags will be indented one level. 
 	 */
 export type IndentScriptAndStyle = boolean;
 /**
@@ -877,7 +877,7 @@ This happens because whitespace is significant in inline elements.
 
 As a consequence of this, the formatter must format blocks that look like this (assume a small line width, <20): ```html <span>really long content</span> ``` as this, where the content hugs the tags: ```html <span >really long content</span > ```
 
-Note that this is only necessary for inline elements. Block elements do not have this restriction.
+Note that this is only necessary for inline elements. Block elements do not have this restriction. 
 	 */
 export type WhitespaceSensitivity = "css" | "strict" | "ignore";
 export type ArrowParentheses = "always" | "asNeeded";
@@ -7651,7 +7651,7 @@ export interface NoPrivateImportsOptions {
 	/**
 	* The default visibility to assume for symbols without visibility tag.
 
-Default: **public**.
+Default: **public**. 
 	 */
 	defaultVisibility?: Visibility;
 }
@@ -8028,7 +8028,7 @@ export interface NoDoubleEqualsOptions {
 	/**
 	* If `true`, an exception is made when comparing with `null`, as it's often relied on to check both for `null` or `undefined`.
 
-If `false`, no such exception will be made.
+If `false`, no such exception will be made. 
 	 */
 	ignoreNull: boolean;
 }
@@ -8103,13 +8103,13 @@ export interface Hook {
 	/**
 	* The "position" of the closure function, starting from zero.
 
-For example, for React's `useEffect()` hook, the closure index is 0.
+For example, for React's `useEffect()` hook, the closure index is 0. 
 	 */
 	closureIndex?: number;
 	/**
 	* The "position" of the array of dependencies, starting from zero.
 
-For example, for React's `useEffect()` hook, the dependencies index is 1.
+For example, for React's `useEffect()` hook, the dependencies index is 1. 
 	 */
 	dependenciesIndex?: number;
 	/**
@@ -8121,7 +8121,7 @@ For example, for React's `useEffect()` hook, the dependencies index is 1.
 
 Set to `true` to mark the identity of the hook's return value as stable, or use a number/an array of numbers to mark the "positions" in the return array as stable.
 
-For example, for React's `useRef()` hook the value would be `true`, while for `useState()` it would be `[1]`.
+For example, for React's `useRef()` hook the value would be `true`, while for `useState()` it would be `[1]`. 
 	 */
 	stableResult?: StableHookResult;
 }
@@ -8733,7 +8733,7 @@ export type DiagnosticTags = DiagnosticTag[];
 /**
 	* Serializable representation of a [Diagnostic](super::Diagnostic) advice
 
-See the [Visitor] trait for additional documentation on all the supported advice types.
+See the [Visitor] trait for additional documentation on all the supported advice types. 
 	 */
 export type Advice =
 	| { log: [LogCategory, MarkupBuf] }
@@ -8853,7 +8853,7 @@ export type ScanKind =
 
 If a target path indicates a folder, all files within are scanned as well.
 
-Target paths must be absolute.
+Target paths must be absolute. 
 	 */
 				targetPaths: BiomePath[];
 			};
@@ -8866,7 +8866,7 @@ export interface OpenFileParams {
 	/**
 	* Set to `true` to persist the node cache used during parsing, in order to speed up subsequent reparsing if the document has been edited.
 
-This should only be enabled if reparsing is to be expected, such as when the file is opened through the LSP Proxy.
+This should only be enabled if reparsing is to be expected, such as when the file is opened through the LSP Proxy. 
 	 */
 	persistNodeCache?: boolean;
 	projectKey: ProjectKey;
@@ -8922,7 +8922,7 @@ export type LanguageVariant = "standard" | "standardRestricted" | "jsx";
 /**
 	* Enum of the different ECMAScript standard versions. The versions are ordered in increasing order; The newest version comes last.
 
-Defaults to the latest stable ECMAScript standard.
+Defaults to the latest stable ECMAScript standard. 
 	 */
 export type LanguageVersion = "eS2022" | "eSNext";
 /**
@@ -8932,7 +8932,7 @@ export type JsonFileVariant = "standard" | "jsonc";
 /**
 	* The style of CSS contained in the file.
 
-Currently, Biome only supports plain CSS, and aims to be compatible with the latest Recommendation level standards.
+Currently, Biome only supports plain CSS, and aims to be compatible with the latest Recommendation level standards. 
 	 */
 export type CssVariant = "standard";
 /**
@@ -9038,7 +9038,7 @@ export interface CodeAction {
 /**
 	* The category of a code action, this type maps directly to the [CodeActionKind] type in the Language Server Protocol specification
 
-[CodeActionKind]: https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#codeActionKind
+[CodeActionKind]: https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#codeActionKind 
 	 */
 export type ActionCategory =
 	| { quickFix: string }
@@ -9058,7 +9058,7 @@ export interface CodeSuggestion {
 /**
 	* The sub-category of a refactor code action.
 
-[Check the LSP spec](https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#codeActionKind) for more information:
+[Check the LSP spec](https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#codeActionKind) for more information: 
 	 */
 export type RefactorKind =
 	| "none"
