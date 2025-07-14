@@ -1,11 +1,10 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
-expression: valid.jsx
+expression: valid-2.jsx
 ---
 # Input
 ```jsx
 // should not generate diagnostics
 // Valid: has width and height, and src is not local/public
-<img width="200" height="600" src="/static/images/portrait-01.webp" />
-
+<img width="100" height="100" src="https://example.com/image.png" /> 
 ```

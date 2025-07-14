@@ -1,0 +1,20 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-2.jsx
+---
+# Input
+```jsx
+<a target="_blank">External</a> 
+```
+
+# Diagnostics
+```
+invalid-2.jsx:1:1 lint/nursery/useJsxA ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! <Emphasis>a</Emphasis> elements must have an <Emphasis>href</Emphasis> attribute.
+  
+  > 1 │ <a target="_blank">External</a>·
+      │ ^^^^^^^^^^^^^^^^^^^
+  
+
+```

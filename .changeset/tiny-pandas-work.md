@@ -113,3 +113,31 @@ useTask$(() => {
 The rule detects calls to `useVisibleTask$()` and provides clear diagnostics to help developers use alternative Qwik lifecycle functions like `useTask$()` instead.
 
 No configuration options are currently available for this rule.
+
+Added the [`useJsxA`](https://biomejs.dev/linter/rules/use-jsx-a) rule to Biome.
+
+The `useJsxA` rule enforces the presence of an `href` attribute on `<a>` elements in JSX. This rule is intended for use in Qwik applications to ensure that anchor elements are always valid and accessible.
+
+**Invalid:**
+
+```jsx
+<a>Link</a>
+```
+
+```jsx
+<a target="_blank">External</a>
+```
+
+**Valid:**
+
+```jsx
+<a href="/home">Home</a>
+```
+
+```jsx
+<a href="https://example.com" target="_blank">External</a>
+```
+
+The rule detects `<a>` elements that are missing the `href` attribute and provides clear diagnostics to help developers ensure all anchor elements are valid links.
+
+No configuration options are currently available for this rule.

@@ -212,6 +212,7 @@ define_categories! {
     "lint/nursery/useJsonImportAttribute": "https://biomejs.dev/linter/rules/use-json-import-attribute",
     "lint/nursery/useJsxCurlyBraceConvention": "https://biomejs.dev/linter/rules/use-jsx-curly-brace-convention",
     "lint/nursery/useJsxImg": "https://biomejs.dev/linter/rules/use-jsx-img",
+    "lint/nursery/useJsxA": "https://biomejs.dev/linter/rules/use-jsx-a",
     "lint/nursery/useNamedOperation": "https://biomejs.dev/linter/rules/use-named-operation",
     "lint/nursery/useNamingConvention": "https://biomejs.dev/linter/rules/use-naming-convention",
     "lint/nursery/useNumericSeparators": "https://biomejs.dev/linter/rules/use-numeric-separators",

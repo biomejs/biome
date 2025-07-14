@@ -5006,6 +5006,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useJsxA": {
+					"description": "Require href attribute for \\<a> elements in JSX.",
+					"anyOf": [
+						{ "$ref": "#/definitions/UseJsxAConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useJsxImg": {
 					"description": "For performance reasons, always provide width and height attributes for \\<img> elements; it will help to prevent layout shifts.",
 					"anyOf": [
@@ -10488,6 +10495,21 @@
 			},
 			"additionalProperties": false
 		},
+		"RuleWithUseJsxAOptions": {
+			"type": "object",
+			"required": ["level"],
+			"properties": {
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [{ "$ref": "#/definitions/UseJsxAOptions" }]
+				}
+			},
+			"additionalProperties": false
+		},
 		"RuleWithUseJsxImgOptions": {
 			"type": "object",
 			"required": ["level"],
@@ -13364,6 +13386,13 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"UseJsxAConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{ "$ref": "#/definitions/RuleWithUseJsxAOptions" }
+			]
+		},
+		"UseJsxAOptions": { "type": "null" },
 		"UseJsxImgConfiguration": {
 			"anyOf": [
 				{ "$ref": "#/definitions/RulePlainConfiguration" },

@@ -17,16 +17,29 @@ declare_lint_rule! {
     /// ### Invalid
     ///
     /// ```jsx,expect_diagnostic
-    /// <img src="/image.png">
-    /// <img src="/static/images/portrait-01.webp">
-    /// <img src="/image.png" width="200">
-    /// <img src="/image.png" height="200">
+    /// <img src="/image.png"/>
+    /// ```
+    ///
+    /// ```jsx,expect_diagnostic
+    /// <img src="/static/images/portrait-01.webp"/>
+    /// ```
+    ///
+    /// ```jsx,expect_diagnostic
+    /// <img src="/image.png" width="200"/>
+    /// ```
+    ///
+    /// ```jsx,expect_diagnostic
+    /// <img src="/image.png" height="200"/>
     /// ```
     ///
     /// ### Valid
     ///
     /// ```jsx
-    /// <img width="200" height="600" src="/static/images/portrait-01.webp">
+    /// <img width="200" height="600" src="/static/images/portrait-01.webp" />
+    /// ```
+    ///
+    /// ```jsx
+    /// <img width="100" height="100" src="https://example.com/image.png" />
     /// ```
     pub UseJsxImg {
         version: "1.0.0",

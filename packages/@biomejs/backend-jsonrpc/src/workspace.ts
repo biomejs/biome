@@ -1723,6 +1723,10 @@ export interface Nursery {
 	 */
 	useJsonImportAttribute?: RuleFixConfiguration_for_UseJsonImportAttributeOptions;
 	/**
+	 * Require href attribute for \<a> elements in JSX.
+	 */
+	useJsxA?: RuleConfiguration_for_UseJsxAOptions;
+	/**
 	 * For performance reasons, always provide width and height attributes for \<img> elements; it will help to prevent layout shifts.
 	 */
 	useJsxImg?: RuleConfiguration_for_UseJsxImgOptions;
@@ -2981,6 +2985,9 @@ export type RuleConfiguration_for_UseIterableCallbackReturnOptions =
 export type RuleFixConfiguration_for_UseJsonImportAttributeOptions =
 	| RulePlainConfiguration
 	| RuleWithFixOptions_for_UseJsonImportAttributeOptions;
+export type RuleConfiguration_for_UseJsxAOptions =
+	| RulePlainConfiguration
+	| RuleWithOptions_for_UseJsxAOptions;
 export type RuleConfiguration_for_UseJsxImgOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_UseJsxImgOptions;
@@ -5507,6 +5514,16 @@ export interface RuleWithFixOptions_for_UseJsonImportAttributeOptions {
 	 */
 	options: UseJsonImportAttributeOptions;
 }
+export interface RuleWithOptions_for_UseJsxAOptions {
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: UseJsxAOptions;
+}
 export interface RuleWithOptions_for_UseJsxImgOptions {
 	/**
 	 * The severity of the emitted diagnostics by the rule
@@ -7781,6 +7798,7 @@ export interface UseGoogleFontPreconnectOptions {}
 export interface UseIndexOfOptions {}
 export interface UseIterableCallbackReturnOptions {}
 export interface UseJsonImportAttributeOptions {}
+export type UseJsxAOptions = null;
 export type UseJsxImgOptions = null;
 export interface UseNamedOperationOptions {}
 /**
@@ -8466,6 +8484,7 @@ export type Category =
 	| "lint/nursery/useJsonImportAttribute"
 	| "lint/nursery/useJsxCurlyBraceConvention"
 	| "lint/nursery/useJsxImg"
+	| "lint/nursery/useJsxA"
 	| "lint/nursery/useNamedOperation"
 	| "lint/nursery/useNamingConvention"
 	| "lint/nursery/useNumericSeparators"

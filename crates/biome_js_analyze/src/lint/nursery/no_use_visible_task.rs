@@ -1,7 +1,5 @@
 use biome_analyze::context::RuleContext;
-use biome_analyze::{
-    Ast, Rule, RuleDiagnostic, RuleDomain, RuleSource, declare_lint_rule,
-};
+use biome_analyze::{Ast, Rule, RuleDiagnostic, RuleDomain, RuleSource, declare_lint_rule};
 use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_syntax::{JsCallExpression, global_identifier};
@@ -53,7 +51,7 @@ impl Rule for NoUseVisibleTask {
         let call_expression = ctx.query();
         let callee = call_expression.callee().ok()?.omit_parentheses();
         let (_, name) = global_identifier(&callee)?;
-        
+
         if name.text() == "useVisibleTask$" {
             Some(name.range())
         } else {
@@ -74,4 +72,4 @@ impl Rule for NoUseVisibleTask {
             ),
         )
     }
-} 
+}
