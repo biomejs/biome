@@ -1,0 +1,292 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidSuppressions.jsx
+---
+# Input
+```jsx
+import { useEffect } from "react";
+
+function SingleInstanceSuppressionWrong({a, b}) {
+	// biome-ignore lint/correctness/useExhaustiveDependencies(b): test
+	useEffect(() => {}, [a]);
+}
+
+function SingleInstanceSuppressionDuplicate({a, b}) {
+	// biome-ignore lint/correctness/useExhaustiveDependencies(b): test
+	// biome-ignore lint/correctness/useExhaustiveDependencies(b): test
+	useEffect(() => {}, [b]);
+}
+
+function SingleInstanceSuppressionNotEnough({a, b}) {
+	// biome-ignore lint/correctness/useExhaustiveDependencies(a): test
+	useEffect(() => {}, [a, b]);
+}
+
+function SingleInstanceSuppressionNotEnough2({a, b}) {
+	// biome-ignore lint/correctness/useExhaustiveDependencies(b): test
+	useEffect(() => {}, [a, b]);
+}
+
+function MultiInstanceSuppressionSomeWrong({a, b, c}) {
+	// biome-ignore lint/correctness/useExhaustiveDependencies(a): test
+	// biome-ignore lint/correctness/useExhaustiveDependencies(c): test
+	useEffect(() => {}, [a, b]);
+}
+
+function MultiInstanceSuppressionAllWrong({a, b, c, d}) {
+	// biome-ignore lint/correctness/useExhaustiveDependencies(c): test
+	// biome-ignore lint/correctness/useExhaustiveDependencies(d): test
+	useEffect(() => {}, [a, b]);
+}
+
+```
+
+# Diagnostics
+```
+invalidSuppressions.jsx:5:2 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━━━━━━━━━━━━━━━━━
+
+  × This hook specifies more dependencies than necessary: a
+  
+    3 │ function SingleInstanceSuppressionWrong({a, b}) {
+    4 │ 	// biome-ignore lint/correctness/useExhaustiveDependencies(b): test
+  > 5 │ 	useEffect(() => {}, [a]);
+      │ 	^^^^^^^^^
+    6 │ }
+    7 │ 
+  
+  i Outer scope values aren't valid dependencies because mutating them doesn't re-render the component.
+  
+    3 │ function SingleInstanceSuppressionWrong({a, b}) {
+    4 │ 	// biome-ignore lint/correctness/useExhaustiveDependencies(b): test
+  > 5 │ 	useEffect(() => {}, [a]);
+      │ 	                     ^
+    6 │ }
+    7 │ 
+  
+  i Unsafe fix: Remove the extra dependencies from the list.
+  
+    5 │ → useEffect(()·=>·{},·[a]);
+      │                        -   
+
+```
+
+```
+invalidSuppressions.jsx:16:2 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━━━━━━━━━━━━━━━━
+
+  × This hook specifies more dependencies than necessary: a, b
+  
+    14 │ function SingleInstanceSuppressionNotEnough({a, b}) {
+    15 │ 	// biome-ignore lint/correctness/useExhaustiveDependencies(a): test
+  > 16 │ 	useEffect(() => {}, [a, b]);
+       │ 	^^^^^^^^^
+    17 │ }
+    18 │ 
+  
+  i Outer scope values aren't valid dependencies because mutating them doesn't re-render the component.
+  
+    14 │ function SingleInstanceSuppressionNotEnough({a, b}) {
+    15 │ 	// biome-ignore lint/correctness/useExhaustiveDependencies(a): test
+  > 16 │ 	useEffect(() => {}, [a, b]);
+       │ 	                     ^
+    17 │ }
+    18 │ 
+  
+  i Outer scope values aren't valid dependencies because mutating them doesn't re-render the component.
+  
+    14 │ function SingleInstanceSuppressionNotEnough({a, b}) {
+    15 │ 	// biome-ignore lint/correctness/useExhaustiveDependencies(a): test
+  > 16 │ 	useEffect(() => {}, [a, b]);
+       │ 	                        ^
+    17 │ }
+    18 │ 
+  
+  i Unsafe fix: Remove the extra dependencies from the list.
+  
+    16 │ → useEffect(()·=>·{},·[a,·b]);
+       │                        ----   
+
+```
+
+```
+invalidSuppressions.jsx:21:2 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━━━━━━━━━━━━━━━━
+
+  × This hook specifies more dependencies than necessary: a, b
+  
+    19 │ function SingleInstanceSuppressionNotEnough2({a, b}) {
+    20 │ 	// biome-ignore lint/correctness/useExhaustiveDependencies(b): test
+  > 21 │ 	useEffect(() => {}, [a, b]);
+       │ 	^^^^^^^^^
+    22 │ }
+    23 │ 
+  
+  i Outer scope values aren't valid dependencies because mutating them doesn't re-render the component.
+  
+    19 │ function SingleInstanceSuppressionNotEnough2({a, b}) {
+    20 │ 	// biome-ignore lint/correctness/useExhaustiveDependencies(b): test
+  > 21 │ 	useEffect(() => {}, [a, b]);
+       │ 	                     ^
+    22 │ }
+    23 │ 
+  
+  i Outer scope values aren't valid dependencies because mutating them doesn't re-render the component.
+  
+    19 │ function SingleInstanceSuppressionNotEnough2({a, b}) {
+    20 │ 	// biome-ignore lint/correctness/useExhaustiveDependencies(b): test
+  > 21 │ 	useEffect(() => {}, [a, b]);
+       │ 	                        ^
+    22 │ }
+    23 │ 
+  
+  i Unsafe fix: Remove the extra dependencies from the list.
+  
+    21 │ → useEffect(()·=>·{},·[a,·b]);
+       │                        ----   
+
+```
+
+```
+invalidSuppressions.jsx:27:2 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━━━━━━━━━━━━━━━━
+
+  × This hook specifies more dependencies than necessary: a, b
+  
+    25 │ 	// biome-ignore lint/correctness/useExhaustiveDependencies(a): test
+    26 │ 	// biome-ignore lint/correctness/useExhaustiveDependencies(c): test
+  > 27 │ 	useEffect(() => {}, [a, b]);
+       │ 	^^^^^^^^^
+    28 │ }
+    29 │ 
+  
+  i Outer scope values aren't valid dependencies because mutating them doesn't re-render the component.
+  
+    25 │ 	// biome-ignore lint/correctness/useExhaustiveDependencies(a): test
+    26 │ 	// biome-ignore lint/correctness/useExhaustiveDependencies(c): test
+  > 27 │ 	useEffect(() => {}, [a, b]);
+       │ 	                     ^
+    28 │ }
+    29 │ 
+  
+  i Outer scope values aren't valid dependencies because mutating them doesn't re-render the component.
+  
+    25 │ 	// biome-ignore lint/correctness/useExhaustiveDependencies(a): test
+    26 │ 	// biome-ignore lint/correctness/useExhaustiveDependencies(c): test
+  > 27 │ 	useEffect(() => {}, [a, b]);
+       │ 	                        ^
+    28 │ }
+    29 │ 
+  
+  i Unsafe fix: Remove the extra dependencies from the list.
+  
+    27 │ → useEffect(()·=>·{},·[a,·b]);
+       │                        ----   
+
+```
+
+```
+invalidSuppressions.jsx:33:2 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━━━━━━━━━━━━━━━━
+
+  × This hook specifies more dependencies than necessary: a, b
+  
+    31 │ 	// biome-ignore lint/correctness/useExhaustiveDependencies(c): test
+    32 │ 	// biome-ignore lint/correctness/useExhaustiveDependencies(d): test
+  > 33 │ 	useEffect(() => {}, [a, b]);
+       │ 	^^^^^^^^^
+    34 │ }
+    35 │ 
+  
+  i Outer scope values aren't valid dependencies because mutating them doesn't re-render the component.
+  
+    31 │ 	// biome-ignore lint/correctness/useExhaustiveDependencies(c): test
+    32 │ 	// biome-ignore lint/correctness/useExhaustiveDependencies(d): test
+  > 33 │ 	useEffect(() => {}, [a, b]);
+       │ 	                     ^
+    34 │ }
+    35 │ 
+  
+  i Outer scope values aren't valid dependencies because mutating them doesn't re-render the component.
+  
+    31 │ 	// biome-ignore lint/correctness/useExhaustiveDependencies(c): test
+    32 │ 	// biome-ignore lint/correctness/useExhaustiveDependencies(d): test
+  > 33 │ 	useEffect(() => {}, [a, b]);
+       │ 	                        ^
+    34 │ }
+    35 │ 
+  
+  i Unsafe fix: Remove the extra dependencies from the list.
+  
+    33 │ → useEffect(()·=>·{},·[a,·b]);
+       │                        ----   
+
+```
+
+```
+invalidSuppressions.jsx:4:2 suppressions/unused ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Suppression comment has no effect. Remove the suppression or make sure you are suppressing the correct rule.
+  
+    3 │ function SingleInstanceSuppressionWrong({a, b}) {
+  > 4 │ 	// biome-ignore lint/correctness/useExhaustiveDependencies(b): test
+      │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    5 │ 	useEffect(() => {}, [a]);
+    6 │ }
+  
+
+```
+
+```
+invalidSuppressions.jsx:10:2 suppressions/unused ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Suppression comment has no effect. Remove the suppression or make sure you are suppressing the correct rule.
+  
+     8 │ function SingleInstanceSuppressionDuplicate({a, b}) {
+     9 │ 	// biome-ignore lint/correctness/useExhaustiveDependencies(b): test
+  > 10 │ 	// biome-ignore lint/correctness/useExhaustiveDependencies(b): test
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    11 │ 	useEffect(() => {}, [b]);
+    12 │ }
+  
+
+```
+
+```
+invalidSuppressions.jsx:26:2 suppressions/unused ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Suppression comment has no effect. Remove the suppression or make sure you are suppressing the correct rule.
+  
+    24 │ function MultiInstanceSuppressionSomeWrong({a, b, c}) {
+    25 │ 	// biome-ignore lint/correctness/useExhaustiveDependencies(a): test
+  > 26 │ 	// biome-ignore lint/correctness/useExhaustiveDependencies(c): test
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    27 │ 	useEffect(() => {}, [a, b]);
+    28 │ }
+  
+
+```
+
+```
+invalidSuppressions.jsx:31:2 suppressions/unused ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Suppression comment has no effect. Remove the suppression or make sure you are suppressing the correct rule.
+  
+    30 │ function MultiInstanceSuppressionAllWrong({a, b, c, d}) {
+  > 31 │ 	// biome-ignore lint/correctness/useExhaustiveDependencies(c): test
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    32 │ 	// biome-ignore lint/correctness/useExhaustiveDependencies(d): test
+    33 │ 	useEffect(() => {}, [a, b]);
+  
+
+```
+
+```
+invalidSuppressions.jsx:32:2 suppressions/unused ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Suppression comment has no effect. Remove the suppression or make sure you are suppressing the correct rule.
+  
+    30 │ function MultiInstanceSuppressionAllWrong({a, b, c, d}) {
+    31 │ 	// biome-ignore lint/correctness/useExhaustiveDependencies(c): test
+  > 32 │ 	// biome-ignore lint/correctness/useExhaustiveDependencies(d): test
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    33 │ 	useEffect(() => {}, [a, b]);
+    34 │ }
+  
+
+```
