@@ -19,12 +19,12 @@ struct EnvVarGuard {
 impl EnvVarGuard {
     fn unset(key: &'static str) -> Self {
         let prev = std::env::var(key).ok();
-        unsafe { std::env::remove_var(key) };
+        unsafe { std::env::remove_var(key); }
         EnvVarGuard { key, prev }
     }
     fn set(key: &'static str, value: &str) -> Self {
         let prev = std::env::var(key).ok();
-        unsafe { std::env::set_var(key, value) };
+        unsafe { std::env::set_var(key, value); }
         EnvVarGuard { key, prev }
     }
 }
@@ -32,9 +32,9 @@ impl EnvVarGuard {
 impl Drop for EnvVarGuard {
     fn drop(&mut self) {
         if let Some(ref val) = self.prev {
-            unsafe { std::env::set_var(self.key, val) };
+            unsafe { std::env::set_var(self.key, val); }
         } else {
-            unsafe { std::env::remove_var(self.key) };
+            unsafe { std::env::remove_var(self.key); }
         }
     }
 }
@@ -141,11 +141,11 @@ fn rage_with_biome_config_path_env() {
         config_path.to_path_buf(),
         r#"{\n  \"formatter\": {\n    \"enabled\": false\n  }\n}"#,
     );
-    unsafe { std::env::set_var("BIOME_CONFIG_PATH", "env-config.json") };
+    unsafe { std::env::set_var("BIOME_CONFIG_PATH", "env-config.json"); }
 
     let (fs, result) = run_rage(fs, &mut console, Args::from(["rage"].as_slice()));
 
-    unsafe { std::env::remove_var("BIOME_CONFIG_PATH") };
+    unsafe { std::env::remove_var("BIOME_CONFIG_PATH"); }
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
 
@@ -497,7 +497,7 @@ impl TestLogDir {
         let guard = RAGE_GUARD.lock().unwrap();
         let path = env::temp_dir().join(name);
 
-        unsafe { env::set_var("BIOME_LOG_PATH", &path) };
+        unsafe { env::set_var("BIOME_LOG_PATH", &path); }
 
         Self {
             path: Utf8PathBuf::from_path_buf(path).unwrap(),
@@ -509,6 +509,6 @@ impl TestLogDir {
 impl Drop for TestLogDir {
     fn drop(&mut self) {
         fs::remove_dir_all(&self.path).ok();
-        unsafe { env::remove_var("BIOME_LOG_PATH") };
+        unsafe { env::remove_var("BIOME_LOG_PATH"); }
     }
 }
