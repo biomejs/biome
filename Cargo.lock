@@ -1267,6 +1267,7 @@ dependencies = [
  "camino",
  "cfg-if",
  "codspeed-criterion-compat",
+ "indexmap",
  "insta",
  "mimalloc",
  "once_cell",
