@@ -7256,6 +7256,25 @@ impl AnyCssCustomIdentifier {
     }
 }
 #[derive(Clone, PartialEq, Eq, Hash, Serialize)]
+pub enum AnyCssDeclaration {
+    CssDeclarationWithSemicolon(CssDeclarationWithSemicolon),
+    CssEmptyDeclaration(CssEmptyDeclaration),
+}
+impl AnyCssDeclaration {
+    pub fn as_css_declaration_with_semicolon(&self) -> Option<&CssDeclarationWithSemicolon> {
+        match &self {
+            Self::CssDeclarationWithSemicolon(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_css_empty_declaration(&self) -> Option<&CssEmptyDeclaration> {
+        match &self {
+            Self::CssEmptyDeclaration(item) => Some(item),
+            _ => None,
+        }
+    }
+}
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyCssDeclarationBlock {
     CssBogusBlock(CssBogusBlock),
     CssDeclarationBlock(CssDeclarationBlock),
@@ -7295,19 +7314,26 @@ impl AnyCssDeclarationName {
 }
 #[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyCssDeclarationOrAtRule {
-    AnyCssDeclarationWithSemicolon(AnyCssDeclarationWithSemicolon),
     CssAtRule(CssAtRule),
+    CssDeclarationWithSemicolon(CssDeclarationWithSemicolon),
+    CssEmptyDeclaration(CssEmptyDeclaration),
 }
 impl AnyCssDeclarationOrAtRule {
-    pub fn as_any_css_declaration_with_semicolon(&self) -> Option<&AnyCssDeclarationWithSemicolon> {
-        match &self {
-            Self::AnyCssDeclarationWithSemicolon(item) => Some(item),
-            _ => None,
-        }
-    }
     pub fn as_css_at_rule(&self) -> Option<&CssAtRule> {
         match &self {
             Self::CssAtRule(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_css_declaration_with_semicolon(&self) -> Option<&CssDeclarationWithSemicolon> {
+        match &self {
+            Self::CssDeclarationWithSemicolon(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_css_empty_declaration(&self) -> Option<&CssEmptyDeclaration> {
+        match &self {
+            Self::CssEmptyDeclaration(item) => Some(item),
             _ => None,
         }
     }
@@ -7333,18 +7359,13 @@ impl AnyCssDeclarationOrAtRuleBlock {
 }
 #[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyCssDeclarationOrRule {
-    AnyCssDeclarationWithSemicolon(AnyCssDeclarationWithSemicolon),
     AnyCssRule(AnyCssRule),
     CssBogus(CssBogus),
+    CssDeclarationWithSemicolon(CssDeclarationWithSemicolon),
+    CssEmptyDeclaration(CssEmptyDeclaration),
     CssMetavariable(CssMetavariable),
 }
 impl AnyCssDeclarationOrRule {
-    pub fn as_any_css_declaration_with_semicolon(&self) -> Option<&AnyCssDeclarationWithSemicolon> {
-        match &self {
-            Self::AnyCssDeclarationWithSemicolon(item) => Some(item),
-            _ => None,
-        }
-    }
     pub fn as_any_css_rule(&self) -> Option<&AnyCssRule> {
         match &self {
             Self::AnyCssRule(item) => Some(item),
@@ -7354,6 +7375,18 @@ impl AnyCssDeclarationOrRule {
     pub fn as_css_bogus(&self) -> Option<&CssBogus> {
         match &self {
             Self::CssBogus(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_css_declaration_with_semicolon(&self) -> Option<&CssDeclarationWithSemicolon> {
+        match &self {
+            Self::CssDeclarationWithSemicolon(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_css_empty_declaration(&self) -> Option<&CssEmptyDeclaration> {
+        match &self {
+            Self::CssEmptyDeclaration(item) => Some(item),
             _ => None,
         }
     }
@@ -7379,25 +7412,6 @@ impl AnyCssDeclarationOrRuleBlock {
     pub fn as_css_declaration_or_rule_block(&self) -> Option<&CssDeclarationOrRuleBlock> {
         match &self {
             Self::CssDeclarationOrRuleBlock(item) => Some(item),
-            _ => None,
-        }
-    }
-}
-#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
-pub enum AnyCssDeclarationWithSemicolon {
-    CssDeclarationWithSemicolon(CssDeclarationWithSemicolon),
-    CssEmptyDeclaration(CssEmptyDeclaration),
-}
-impl AnyCssDeclarationWithSemicolon {
-    pub fn as_css_declaration_with_semicolon(&self) -> Option<&CssDeclarationWithSemicolon> {
-        match &self {
-            Self::CssDeclarationWithSemicolon(item) => Some(item),
-            _ => None,
-        }
-    }
-    pub fn as_css_empty_declaration(&self) -> Option<&CssEmptyDeclaration> {
-        match &self {
-            Self::CssEmptyDeclaration(item) => Some(item),
             _ => None,
         }
     }
@@ -8022,20 +8036,27 @@ impl AnyCssPageAtRuleBlock {
 }
 #[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyCssPageAtRuleItem {
-    AnyCssDeclarationWithSemicolon(AnyCssDeclarationWithSemicolon),
     CssAtRule(CssAtRule),
+    CssDeclarationWithSemicolon(CssDeclarationWithSemicolon),
+    CssEmptyDeclaration(CssEmptyDeclaration),
     CssMarginAtRule(CssMarginAtRule),
 }
 impl AnyCssPageAtRuleItem {
-    pub fn as_any_css_declaration_with_semicolon(&self) -> Option<&AnyCssDeclarationWithSemicolon> {
-        match &self {
-            Self::AnyCssDeclarationWithSemicolon(item) => Some(item),
-            _ => None,
-        }
-    }
     pub fn as_css_at_rule(&self) -> Option<&CssAtRule> {
         match &self {
             Self::CssAtRule(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_css_declaration_with_semicolon(&self) -> Option<&CssDeclarationWithSemicolon> {
+        match &self {
+            Self::CssDeclarationWithSemicolon(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_css_empty_declaration(&self) -> Option<&CssEmptyDeclaration> {
+        match &self {
+            Self::CssEmptyDeclaration(item) => Some(item),
             _ => None,
         }
     }
@@ -18404,6 +18425,68 @@ impl From<AnyCssCustomIdentifier> for SyntaxElement {
         node.into()
     }
 }
+impl From<CssDeclarationWithSemicolon> for AnyCssDeclaration {
+    fn from(node: CssDeclarationWithSemicolon) -> Self {
+        Self::CssDeclarationWithSemicolon(node)
+    }
+}
+impl From<CssEmptyDeclaration> for AnyCssDeclaration {
+    fn from(node: CssEmptyDeclaration) -> Self {
+        Self::CssEmptyDeclaration(node)
+    }
+}
+impl AstNode for AnyCssDeclaration {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        CssDeclarationWithSemicolon::KIND_SET.union(CssEmptyDeclaration::KIND_SET);
+    fn can_cast(kind: SyntaxKind) -> bool {
+        matches!(kind, CSS_DECLARATION_WITH_SEMICOLON | CSS_EMPTY_DECLARATION)
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        let res = match syntax.kind() {
+            CSS_DECLARATION_WITH_SEMICOLON => {
+                Self::CssDeclarationWithSemicolon(CssDeclarationWithSemicolon { syntax })
+            }
+            CSS_EMPTY_DECLARATION => Self::CssEmptyDeclaration(CssEmptyDeclaration { syntax }),
+            _ => return None,
+        };
+        Some(res)
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        match self {
+            Self::CssDeclarationWithSemicolon(it) => &it.syntax,
+            Self::CssEmptyDeclaration(it) => &it.syntax,
+        }
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        match self {
+            Self::CssDeclarationWithSemicolon(it) => it.syntax,
+            Self::CssEmptyDeclaration(it) => it.syntax,
+        }
+    }
+}
+impl std::fmt::Debug for AnyCssDeclaration {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::CssDeclarationWithSemicolon(it) => std::fmt::Debug::fmt(it, f),
+            Self::CssEmptyDeclaration(it) => std::fmt::Debug::fmt(it, f),
+        }
+    }
+}
+impl From<AnyCssDeclaration> for SyntaxNode {
+    fn from(n: AnyCssDeclaration) -> Self {
+        match n {
+            AnyCssDeclaration::CssDeclarationWithSemicolon(it) => it.into(),
+            AnyCssDeclaration::CssEmptyDeclaration(it) => it.into(),
+        }
+    }
+}
+impl From<AnyCssDeclaration> for SyntaxElement {
+    fn from(n: AnyCssDeclaration) -> Self {
+        let node: SyntaxNode = n.into();
+        node.into()
+    }
+}
 impl From<CssBogusBlock> for AnyCssDeclarationBlock {
     fn from(node: CssBogusBlock) -> Self {
         Self::CssBogusBlock(node)
@@ -18529,59 +18612,68 @@ impl From<CssAtRule> for AnyCssDeclarationOrAtRule {
         Self::CssAtRule(node)
     }
 }
+impl From<CssDeclarationWithSemicolon> for AnyCssDeclarationOrAtRule {
+    fn from(node: CssDeclarationWithSemicolon) -> Self {
+        Self::CssDeclarationWithSemicolon(node)
+    }
+}
+impl From<CssEmptyDeclaration> for AnyCssDeclarationOrAtRule {
+    fn from(node: CssEmptyDeclaration) -> Self {
+        Self::CssEmptyDeclaration(node)
+    }
+}
 impl AstNode for AnyCssDeclarationOrAtRule {
     type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> =
-        AnyCssDeclarationWithSemicolon::KIND_SET.union(CssAtRule::KIND_SET);
+    const KIND_SET: SyntaxKindSet<Language> = CssAtRule::KIND_SET
+        .union(CssDeclarationWithSemicolon::KIND_SET)
+        .union(CssEmptyDeclaration::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
-        match kind {
-            CSS_AT_RULE => true,
-            k if AnyCssDeclarationWithSemicolon::can_cast(k) => true,
-            _ => false,
-        }
+        matches!(
+            kind,
+            CSS_AT_RULE | CSS_DECLARATION_WITH_SEMICOLON | CSS_EMPTY_DECLARATION
+        )
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
             CSS_AT_RULE => Self::CssAtRule(CssAtRule { syntax }),
-            _ => {
-                if let Some(any_css_declaration_with_semicolon) =
-                    AnyCssDeclarationWithSemicolon::cast(syntax)
-                {
-                    return Some(Self::AnyCssDeclarationWithSemicolon(
-                        any_css_declaration_with_semicolon,
-                    ));
-                }
-                return None;
+            CSS_DECLARATION_WITH_SEMICOLON => {
+                Self::CssDeclarationWithSemicolon(CssDeclarationWithSemicolon { syntax })
             }
+            CSS_EMPTY_DECLARATION => Self::CssEmptyDeclaration(CssEmptyDeclaration { syntax }),
+            _ => return None,
         };
         Some(res)
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
             Self::CssAtRule(it) => &it.syntax,
-            Self::AnyCssDeclarationWithSemicolon(it) => it.syntax(),
+            Self::CssDeclarationWithSemicolon(it) => &it.syntax,
+            Self::CssEmptyDeclaration(it) => &it.syntax,
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
             Self::CssAtRule(it) => it.syntax,
-            Self::AnyCssDeclarationWithSemicolon(it) => it.into_syntax(),
+            Self::CssDeclarationWithSemicolon(it) => it.syntax,
+            Self::CssEmptyDeclaration(it) => it.syntax,
         }
     }
 }
 impl std::fmt::Debug for AnyCssDeclarationOrAtRule {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            Self::AnyCssDeclarationWithSemicolon(it) => std::fmt::Debug::fmt(it, f),
             Self::CssAtRule(it) => std::fmt::Debug::fmt(it, f),
+            Self::CssDeclarationWithSemicolon(it) => std::fmt::Debug::fmt(it, f),
+            Self::CssEmptyDeclaration(it) => std::fmt::Debug::fmt(it, f),
         }
     }
 }
 impl From<AnyCssDeclarationOrAtRule> for SyntaxNode {
     fn from(n: AnyCssDeclarationOrAtRule) -> Self {
         match n {
-            AnyCssDeclarationOrAtRule::AnyCssDeclarationWithSemicolon(it) => it.into(),
             AnyCssDeclarationOrAtRule::CssAtRule(it) => it.into(),
+            AnyCssDeclarationOrAtRule::CssDeclarationWithSemicolon(it) => it.into(),
+            AnyCssDeclarationOrAtRule::CssEmptyDeclaration(it) => it.into(),
         }
     }
 }
@@ -18658,6 +18750,16 @@ impl From<CssBogus> for AnyCssDeclarationOrRule {
         Self::CssBogus(node)
     }
 }
+impl From<CssDeclarationWithSemicolon> for AnyCssDeclarationOrRule {
+    fn from(node: CssDeclarationWithSemicolon) -> Self {
+        Self::CssDeclarationWithSemicolon(node)
+    }
+}
+impl From<CssEmptyDeclaration> for AnyCssDeclarationOrRule {
+    fn from(node: CssEmptyDeclaration) -> Self {
+        Self::CssEmptyDeclaration(node)
+    }
+}
 impl From<CssMetavariable> for AnyCssDeclarationOrRule {
     fn from(node: CssMetavariable) -> Self {
         Self::CssMetavariable(node)
@@ -18665,14 +18767,17 @@ impl From<CssMetavariable> for AnyCssDeclarationOrRule {
 }
 impl AstNode for AnyCssDeclarationOrRule {
     type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> = AnyCssDeclarationWithSemicolon::KIND_SET
-        .union(AnyCssRule::KIND_SET)
+    const KIND_SET: SyntaxKindSet<Language> = AnyCssRule::KIND_SET
         .union(CssBogus::KIND_SET)
+        .union(CssDeclarationWithSemicolon::KIND_SET)
+        .union(CssEmptyDeclaration::KIND_SET)
         .union(CssMetavariable::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
         match kind {
-            CSS_BOGUS | CSS_METAVARIABLE => true,
-            k if AnyCssDeclarationWithSemicolon::can_cast(k) => true,
+            CSS_BOGUS
+            | CSS_DECLARATION_WITH_SEMICOLON
+            | CSS_EMPTY_DECLARATION
+            | CSS_METAVARIABLE => true,
             k if AnyCssRule::can_cast(k) => true,
             _ => false,
         }
@@ -18680,16 +18785,12 @@ impl AstNode for AnyCssDeclarationOrRule {
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
             CSS_BOGUS => Self::CssBogus(CssBogus { syntax }),
+            CSS_DECLARATION_WITH_SEMICOLON => {
+                Self::CssDeclarationWithSemicolon(CssDeclarationWithSemicolon { syntax })
+            }
+            CSS_EMPTY_DECLARATION => Self::CssEmptyDeclaration(CssEmptyDeclaration { syntax }),
             CSS_METAVARIABLE => Self::CssMetavariable(CssMetavariable { syntax }),
             _ => {
-                let syntax = match AnyCssDeclarationWithSemicolon::try_cast(syntax) {
-                    Ok(any_css_declaration_with_semicolon) => {
-                        return Some(Self::AnyCssDeclarationWithSemicolon(
-                            any_css_declaration_with_semicolon,
-                        ));
-                    }
-                    Err(syntax) => syntax,
-                };
                 if let Some(any_css_rule) = AnyCssRule::cast(syntax) {
                     return Some(Self::AnyCssRule(any_css_rule));
                 }
@@ -18701,16 +18802,18 @@ impl AstNode for AnyCssDeclarationOrRule {
     fn syntax(&self) -> &SyntaxNode {
         match self {
             Self::CssBogus(it) => &it.syntax,
+            Self::CssDeclarationWithSemicolon(it) => &it.syntax,
+            Self::CssEmptyDeclaration(it) => &it.syntax,
             Self::CssMetavariable(it) => &it.syntax,
-            Self::AnyCssDeclarationWithSemicolon(it) => it.syntax(),
             Self::AnyCssRule(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
             Self::CssBogus(it) => it.syntax,
+            Self::CssDeclarationWithSemicolon(it) => it.syntax,
+            Self::CssEmptyDeclaration(it) => it.syntax,
             Self::CssMetavariable(it) => it.syntax,
-            Self::AnyCssDeclarationWithSemicolon(it) => it.into_syntax(),
             Self::AnyCssRule(it) => it.into_syntax(),
         }
     }
@@ -18718,9 +18821,10 @@ impl AstNode for AnyCssDeclarationOrRule {
 impl std::fmt::Debug for AnyCssDeclarationOrRule {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            Self::AnyCssDeclarationWithSemicolon(it) => std::fmt::Debug::fmt(it, f),
             Self::AnyCssRule(it) => std::fmt::Debug::fmt(it, f),
             Self::CssBogus(it) => std::fmt::Debug::fmt(it, f),
+            Self::CssDeclarationWithSemicolon(it) => std::fmt::Debug::fmt(it, f),
+            Self::CssEmptyDeclaration(it) => std::fmt::Debug::fmt(it, f),
             Self::CssMetavariable(it) => std::fmt::Debug::fmt(it, f),
         }
     }
@@ -18728,9 +18832,10 @@ impl std::fmt::Debug for AnyCssDeclarationOrRule {
 impl From<AnyCssDeclarationOrRule> for SyntaxNode {
     fn from(n: AnyCssDeclarationOrRule) -> Self {
         match n {
-            AnyCssDeclarationOrRule::AnyCssDeclarationWithSemicolon(it) => it.into(),
             AnyCssDeclarationOrRule::AnyCssRule(it) => it.into(),
             AnyCssDeclarationOrRule::CssBogus(it) => it.into(),
+            AnyCssDeclarationOrRule::CssDeclarationWithSemicolon(it) => it.into(),
+            AnyCssDeclarationOrRule::CssEmptyDeclaration(it) => it.into(),
             AnyCssDeclarationOrRule::CssMetavariable(it) => it.into(),
         }
     }
@@ -18799,68 +18904,6 @@ impl From<AnyCssDeclarationOrRuleBlock> for SyntaxNode {
 }
 impl From<AnyCssDeclarationOrRuleBlock> for SyntaxElement {
     fn from(n: AnyCssDeclarationOrRuleBlock) -> Self {
-        let node: SyntaxNode = n.into();
-        node.into()
-    }
-}
-impl From<CssDeclarationWithSemicolon> for AnyCssDeclarationWithSemicolon {
-    fn from(node: CssDeclarationWithSemicolon) -> Self {
-        Self::CssDeclarationWithSemicolon(node)
-    }
-}
-impl From<CssEmptyDeclaration> for AnyCssDeclarationWithSemicolon {
-    fn from(node: CssEmptyDeclaration) -> Self {
-        Self::CssEmptyDeclaration(node)
-    }
-}
-impl AstNode for AnyCssDeclarationWithSemicolon {
-    type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> =
-        CssDeclarationWithSemicolon::KIND_SET.union(CssEmptyDeclaration::KIND_SET);
-    fn can_cast(kind: SyntaxKind) -> bool {
-        matches!(kind, CSS_DECLARATION_WITH_SEMICOLON | CSS_EMPTY_DECLARATION)
-    }
-    fn cast(syntax: SyntaxNode) -> Option<Self> {
-        let res = match syntax.kind() {
-            CSS_DECLARATION_WITH_SEMICOLON => {
-                Self::CssDeclarationWithSemicolon(CssDeclarationWithSemicolon { syntax })
-            }
-            CSS_EMPTY_DECLARATION => Self::CssEmptyDeclaration(CssEmptyDeclaration { syntax }),
-            _ => return None,
-        };
-        Some(res)
-    }
-    fn syntax(&self) -> &SyntaxNode {
-        match self {
-            Self::CssDeclarationWithSemicolon(it) => &it.syntax,
-            Self::CssEmptyDeclaration(it) => &it.syntax,
-        }
-    }
-    fn into_syntax(self) -> SyntaxNode {
-        match self {
-            Self::CssDeclarationWithSemicolon(it) => it.syntax,
-            Self::CssEmptyDeclaration(it) => it.syntax,
-        }
-    }
-}
-impl std::fmt::Debug for AnyCssDeclarationWithSemicolon {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            Self::CssDeclarationWithSemicolon(it) => std::fmt::Debug::fmt(it, f),
-            Self::CssEmptyDeclaration(it) => std::fmt::Debug::fmt(it, f),
-        }
-    }
-}
-impl From<AnyCssDeclarationWithSemicolon> for SyntaxNode {
-    fn from(n: AnyCssDeclarationWithSemicolon) -> Self {
-        match n {
-            AnyCssDeclarationWithSemicolon::CssDeclarationWithSemicolon(it) => it.into(),
-            AnyCssDeclarationWithSemicolon::CssEmptyDeclaration(it) => it.into(),
-        }
-    }
-}
-impl From<AnyCssDeclarationWithSemicolon> for SyntaxElement {
-    fn from(n: AnyCssDeclarationWithSemicolon) -> Self {
         let node: SyntaxNode = n.into();
         node.into()
     }
@@ -20782,6 +20825,16 @@ impl From<CssAtRule> for AnyCssPageAtRuleItem {
         Self::CssAtRule(node)
     }
 }
+impl From<CssDeclarationWithSemicolon> for AnyCssPageAtRuleItem {
+    fn from(node: CssDeclarationWithSemicolon) -> Self {
+        Self::CssDeclarationWithSemicolon(node)
+    }
+}
+impl From<CssEmptyDeclaration> for AnyCssPageAtRuleItem {
+    fn from(node: CssEmptyDeclaration) -> Self {
+        Self::CssEmptyDeclaration(node)
+    }
+}
 impl From<CssMarginAtRule> for AnyCssPageAtRuleItem {
     fn from(node: CssMarginAtRule) -> Self {
         Self::CssMarginAtRule(node)
@@ -20789,53 +20842,54 @@ impl From<CssMarginAtRule> for AnyCssPageAtRuleItem {
 }
 impl AstNode for AnyCssPageAtRuleItem {
     type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> = AnyCssDeclarationWithSemicolon::KIND_SET
-        .union(CssAtRule::KIND_SET)
+    const KIND_SET: SyntaxKindSet<Language> = CssAtRule::KIND_SET
+        .union(CssDeclarationWithSemicolon::KIND_SET)
+        .union(CssEmptyDeclaration::KIND_SET)
         .union(CssMarginAtRule::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
-        match kind {
-            CSS_AT_RULE | CSS_MARGIN_AT_RULE => true,
-            k if AnyCssDeclarationWithSemicolon::can_cast(k) => true,
-            _ => false,
-        }
+        matches!(
+            kind,
+            CSS_AT_RULE
+                | CSS_DECLARATION_WITH_SEMICOLON
+                | CSS_EMPTY_DECLARATION
+                | CSS_MARGIN_AT_RULE
+        )
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
             CSS_AT_RULE => Self::CssAtRule(CssAtRule { syntax }),
-            CSS_MARGIN_AT_RULE => Self::CssMarginAtRule(CssMarginAtRule { syntax }),
-            _ => {
-                if let Some(any_css_declaration_with_semicolon) =
-                    AnyCssDeclarationWithSemicolon::cast(syntax)
-                {
-                    return Some(Self::AnyCssDeclarationWithSemicolon(
-                        any_css_declaration_with_semicolon,
-                    ));
-                }
-                return None;
+            CSS_DECLARATION_WITH_SEMICOLON => {
+                Self::CssDeclarationWithSemicolon(CssDeclarationWithSemicolon { syntax })
             }
+            CSS_EMPTY_DECLARATION => Self::CssEmptyDeclaration(CssEmptyDeclaration { syntax }),
+            CSS_MARGIN_AT_RULE => Self::CssMarginAtRule(CssMarginAtRule { syntax }),
+            _ => return None,
         };
         Some(res)
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
             Self::CssAtRule(it) => &it.syntax,
+            Self::CssDeclarationWithSemicolon(it) => &it.syntax,
+            Self::CssEmptyDeclaration(it) => &it.syntax,
             Self::CssMarginAtRule(it) => &it.syntax,
-            Self::AnyCssDeclarationWithSemicolon(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
             Self::CssAtRule(it) => it.syntax,
+            Self::CssDeclarationWithSemicolon(it) => it.syntax,
+            Self::CssEmptyDeclaration(it) => it.syntax,
             Self::CssMarginAtRule(it) => it.syntax,
-            Self::AnyCssDeclarationWithSemicolon(it) => it.into_syntax(),
         }
     }
 }
 impl std::fmt::Debug for AnyCssPageAtRuleItem {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            Self::AnyCssDeclarationWithSemicolon(it) => std::fmt::Debug::fmt(it, f),
             Self::CssAtRule(it) => std::fmt::Debug::fmt(it, f),
+            Self::CssDeclarationWithSemicolon(it) => std::fmt::Debug::fmt(it, f),
+            Self::CssEmptyDeclaration(it) => std::fmt::Debug::fmt(it, f),
             Self::CssMarginAtRule(it) => std::fmt::Debug::fmt(it, f),
         }
     }
@@ -20843,8 +20897,9 @@ impl std::fmt::Debug for AnyCssPageAtRuleItem {
 impl From<AnyCssPageAtRuleItem> for SyntaxNode {
     fn from(n: AnyCssPageAtRuleItem) -> Self {
         match n {
-            AnyCssPageAtRuleItem::AnyCssDeclarationWithSemicolon(it) => it.into(),
             AnyCssPageAtRuleItem::CssAtRule(it) => it.into(),
+            AnyCssPageAtRuleItem::CssDeclarationWithSemicolon(it) => it.into(),
+            AnyCssPageAtRuleItem::CssEmptyDeclaration(it) => it.into(),
             AnyCssPageAtRuleItem::CssMarginAtRule(it) => it.into(),
         }
     }
@@ -23380,6 +23435,11 @@ impl std::fmt::Display for AnyCssCustomIdentifier {
         std::fmt::Display::fmt(self.syntax(), f)
     }
 }
+impl std::fmt::Display for AnyCssDeclaration {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
 impl std::fmt::Display for AnyCssDeclarationBlock {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
@@ -23406,11 +23466,6 @@ impl std::fmt::Display for AnyCssDeclarationOrRule {
     }
 }
 impl std::fmt::Display for AnyCssDeclarationOrRuleBlock {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        std::fmt::Display::fmt(self.syntax(), f)
-    }
-}
-impl std::fmt::Display for AnyCssDeclarationWithSemicolon {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }
@@ -26477,7 +26532,7 @@ impl Serialize for CssDeclarationList {
 }
 impl AstNodeList for CssDeclarationList {
     type Language = Language;
-    type Node = AnyCssDeclarationWithSemicolon;
+    type Node = AnyCssDeclaration;
     fn syntax_list(&self) -> &SyntaxList {
         &self.syntax_list
     }
@@ -26492,15 +26547,15 @@ impl Debug for CssDeclarationList {
     }
 }
 impl IntoIterator for &CssDeclarationList {
-    type Item = AnyCssDeclarationWithSemicolon;
-    type IntoIter = AstNodeListIterator<Language, AnyCssDeclarationWithSemicolon>;
+    type Item = AnyCssDeclaration;
+    type IntoIter = AstNodeListIterator<Language, AnyCssDeclaration>;
     fn into_iter(self) -> Self::IntoIter {
         self.iter()
     }
 }
 impl IntoIterator for CssDeclarationList {
-    type Item = AnyCssDeclarationWithSemicolon;
-    type IntoIter = AstNodeListIterator<Language, AnyCssDeclarationWithSemicolon>;
+    type Item = AnyCssDeclaration;
+    type IntoIter = AstNodeListIterator<Language, AnyCssDeclaration>;
     fn into_iter(self) -> Self::IntoIter {
         self.iter()
     }

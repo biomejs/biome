@@ -7502,6 +7502,31 @@ impl IntoFormat<CssFormatContext> for biome_css_syntax::AnyCssCustomIdentifier {
         )
     }
 }
+impl AsFormat<CssFormatContext> for biome_css_syntax::AnyCssDeclaration {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_css_syntax::AnyCssDeclaration,
+        crate::css::any::declaration::FormatAnyCssDeclaration,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::css::any::declaration::FormatAnyCssDeclaration::default(),
+        )
+    }
+}
+impl IntoFormat<CssFormatContext> for biome_css_syntax::AnyCssDeclaration {
+    type Format = FormatOwnedWithRule<
+        biome_css_syntax::AnyCssDeclaration,
+        crate::css::any::declaration::FormatAnyCssDeclaration,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(
+            self,
+            crate::css::any::declaration::FormatAnyCssDeclaration::default(),
+        )
+    }
+}
 impl AsFormat<CssFormatContext> for biome_css_syntax::AnyCssDeclarationBlock {
     type Format<'a> = FormatRefWithRule<
         'a,
@@ -7646,25 +7671,6 @@ impl IntoFormat<CssFormatContext> for biome_css_syntax::AnyCssDeclarationOrRuleB
             crate::css::any::declaration_or_rule_block::FormatAnyCssDeclarationOrRuleBlock::default(
             ),
         )
-    }
-}
-impl AsFormat<CssFormatContext> for biome_css_syntax::AnyCssDeclarationWithSemicolon {
-    type Format<'a> = FormatRefWithRule<
-        'a,
-        biome_css_syntax::AnyCssDeclarationWithSemicolon,
-        crate::css::any::declaration_with_semicolon::FormatAnyCssDeclarationWithSemicolon,
-    >;
-    fn format(&self) -> Self::Format<'_> {
-        FormatRefWithRule :: new (self , crate :: css :: any :: declaration_with_semicolon :: FormatAnyCssDeclarationWithSemicolon :: default ())
-    }
-}
-impl IntoFormat<CssFormatContext> for biome_css_syntax::AnyCssDeclarationWithSemicolon {
-    type Format = FormatOwnedWithRule<
-        biome_css_syntax::AnyCssDeclarationWithSemicolon,
-        crate::css::any::declaration_with_semicolon::FormatAnyCssDeclarationWithSemicolon,
-    >;
-    fn into_format(self) -> Self::Format {
-        FormatOwnedWithRule :: new (self , crate :: css :: any :: declaration_with_semicolon :: FormatAnyCssDeclarationWithSemicolon :: default ())
     }
 }
 impl AsFormat<CssFormatContext> for biome_css_syntax::AnyCssDimension {

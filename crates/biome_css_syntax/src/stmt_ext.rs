@@ -1,8 +1,8 @@
+use crate::CssSyntaxToken;
 use crate::generated::{
     CssDeclarationBlock, CssDeclarationOrAtRuleBlock, CssDeclarationOrRuleBlock,
     CssFontFeatureValuesBlock, CssKeyframesBlock, CssPageAtRuleBlock, CssRuleBlock,
 };
-use crate::{AnyCssDeclarationOrAtRule, AnyCssDeclarationOrRule, CssSyntaxToken};
 use biome_rowan::{AstNodeList, SyntaxResult, declare_node_union};
 
 declare_node_union! {
@@ -60,21 +60,15 @@ impl CssBlockLike {
             Self::CssDeclarationBlock(block) => block
                 .declarations()
                 .iter()
-                .all(|decl| decl.as_css_declaration_with_semicolon().is_none()),
-            Self::CssDeclarationOrAtRuleBlock(block) => block.items().iter().all(|item| {
-                matches!(
-                    item,
-                    AnyCssDeclarationOrAtRule::AnyCssDeclarationWithSemicolon(decl)
-                        if decl.as_css_declaration_with_semicolon().is_none()
-                )
-            }),
-            Self::CssDeclarationOrRuleBlock(block) => block.items().iter().all(|item| {
-                matches!(
-                    item,
-                    AnyCssDeclarationOrRule::AnyCssDeclarationWithSemicolon(decl)
-                        if decl.as_css_declaration_with_semicolon().is_none()
-                )
-            }),
+                .all(|decl| decl.as_css_empty_declaration().is_some()),
+            Self::CssDeclarationOrAtRuleBlock(block) => block
+                .items()
+                .iter()
+                .all(|item| item.as_css_empty_declaration().is_some()),
+            Self::CssDeclarationOrRuleBlock(block) => block
+                .items()
+                .iter()
+                .all(|item| item.as_css_empty_declaration().is_some()),
             _ => false,
         }
     }
