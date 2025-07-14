@@ -3,9 +3,9 @@ use crate::syntax::at_rule::{is_at_at_rule, parse_at_rule};
 use crate::syntax::block::ParseBlockBody;
 use crate::syntax::parse_error::expected_any_declaration_or_at_rule;
 use crate::syntax::{
-    is_at_declaration, is_at_declaration_semicolon, is_at_metavariable,
-    is_at_nested_qualified_rule, parse_declaration_with_semicolon, parse_empty_declaration,
-    parse_metavariable, parse_nested_qualified_rule, try_parse,
+    is_at_any_declaration_with_semicolon, is_at_metavariable, is_at_nested_qualified_rule,
+    parse_any_declaration_with_semicolon, parse_metavariable, parse_nested_qualified_rule,
+    try_parse,
 };
 use biome_css_syntax::CssSyntaxKind::*;
 use biome_css_syntax::{CssSyntaxKind, T};
@@ -38,7 +38,7 @@ impl ParseBlockBody for DeclarationOrRuleListBlock {
 fn is_at_declaration_or_rule_item(p: &mut CssParser) -> bool {
     is_at_at_rule(p)
         || is_at_nested_qualified_rule(p)
-        || is_at_declaration(p)
+        || is_at_any_declaration_with_semicolon(p)
         || is_at_metavariable(p)
 }
 
@@ -62,7 +62,7 @@ impl ParseNodeList for DeclarationOrRuleList {
     fn parse_element(&mut self, p: &mut Self::Parser<'_>) -> ParsedSyntax {
         if is_at_at_rule(p) {
             parse_at_rule(p)
-        } else if is_at_declaration(p) {
+        } else if is_at_any_declaration_with_semicolon(p) {
             // if we are at a declaration,
             // we still can have a nested qualified rule or a declaration
             // E.g.
@@ -74,7 +74,7 @@ impl ParseNodeList for DeclarationOrRuleList {
             // }
             // Attempt to parse the current block as a declaration.
             let declaration = try_parse(p, |p| {
-                let declaration = parse_declaration_with_semicolon(p);
+                let declaration = parse_any_declaration_with_semicolon(p);
                 // Check if the *last* token parsed is a semicolon
                 // (;) or if the parser is at a closing brace (}).
                 // ; - Indicates the end of a declaration.
@@ -123,13 +123,11 @@ impl ParseNodeList for DeclarationOrRuleList {
             // If both parsing attempts fail,
             // fall back to parsing the block as a declaration,
             // because declaration error is more relevant.
-            parse_declaration_with_semicolon(p)
+            parse_any_declaration_with_semicolon(p)
         } else if is_at_nested_qualified_rule(p) {
             parse_nested_qualified_rule(p)
         } else if is_at_metavariable(p) {
             parse_metavariable(p)
-        } else if is_at_declaration_semicolon(p) {
-            parse_empty_declaration(p)
         } else {
             Absent
         }

@@ -7256,6 +7256,25 @@ impl AnyCssCustomIdentifier {
     }
 }
 #[derive(Clone, PartialEq, Eq, Hash, Serialize)]
+pub enum AnyCssDeclaration {
+    CssDeclarationWithSemicolon(CssDeclarationWithSemicolon),
+    CssEmptyDeclaration(CssEmptyDeclaration),
+}
+impl AnyCssDeclaration {
+    pub fn as_css_declaration_with_semicolon(&self) -> Option<&CssDeclarationWithSemicolon> {
+        match &self {
+            Self::CssDeclarationWithSemicolon(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_css_empty_declaration(&self) -> Option<&CssEmptyDeclaration> {
+        match &self {
+            Self::CssEmptyDeclaration(item) => Some(item),
+            _ => None,
+        }
+    }
+}
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyCssDeclarationBlock {
     CssBogusBlock(CssBogusBlock),
     CssDeclarationBlock(CssDeclarationBlock),
@@ -7297,6 +7316,7 @@ impl AnyCssDeclarationName {
 pub enum AnyCssDeclarationOrAtRule {
     CssAtRule(CssAtRule),
     CssDeclarationWithSemicolon(CssDeclarationWithSemicolon),
+    CssEmptyDeclaration(CssEmptyDeclaration),
 }
 impl AnyCssDeclarationOrAtRule {
     pub fn as_css_at_rule(&self) -> Option<&CssAtRule> {
@@ -7308,6 +7328,12 @@ impl AnyCssDeclarationOrAtRule {
     pub fn as_css_declaration_with_semicolon(&self) -> Option<&CssDeclarationWithSemicolon> {
         match &self {
             Self::CssDeclarationWithSemicolon(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_css_empty_declaration(&self) -> Option<&CssEmptyDeclaration> {
+        match &self {
+            Self::CssEmptyDeclaration(item) => Some(item),
             _ => None,
         }
     }
@@ -8012,6 +8038,7 @@ impl AnyCssPageAtRuleBlock {
 pub enum AnyCssPageAtRuleItem {
     CssAtRule(CssAtRule),
     CssDeclarationWithSemicolon(CssDeclarationWithSemicolon),
+    CssEmptyDeclaration(CssEmptyDeclaration),
     CssMarginAtRule(CssMarginAtRule),
 }
 impl AnyCssPageAtRuleItem {
@@ -8024,6 +8051,12 @@ impl AnyCssPageAtRuleItem {
     pub fn as_css_declaration_with_semicolon(&self) -> Option<&CssDeclarationWithSemicolon> {
         match &self {
             Self::CssDeclarationWithSemicolon(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_css_empty_declaration(&self) -> Option<&CssEmptyDeclaration> {
+        match &self {
+            Self::CssEmptyDeclaration(item) => Some(item),
             _ => None,
         }
     }
@@ -18392,6 +18425,68 @@ impl From<AnyCssCustomIdentifier> for SyntaxElement {
         node.into()
     }
 }
+impl From<CssDeclarationWithSemicolon> for AnyCssDeclaration {
+    fn from(node: CssDeclarationWithSemicolon) -> Self {
+        Self::CssDeclarationWithSemicolon(node)
+    }
+}
+impl From<CssEmptyDeclaration> for AnyCssDeclaration {
+    fn from(node: CssEmptyDeclaration) -> Self {
+        Self::CssEmptyDeclaration(node)
+    }
+}
+impl AstNode for AnyCssDeclaration {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        CssDeclarationWithSemicolon::KIND_SET.union(CssEmptyDeclaration::KIND_SET);
+    fn can_cast(kind: SyntaxKind) -> bool {
+        matches!(kind, CSS_DECLARATION_WITH_SEMICOLON | CSS_EMPTY_DECLARATION)
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        let res = match syntax.kind() {
+            CSS_DECLARATION_WITH_SEMICOLON => {
+                Self::CssDeclarationWithSemicolon(CssDeclarationWithSemicolon { syntax })
+            }
+            CSS_EMPTY_DECLARATION => Self::CssEmptyDeclaration(CssEmptyDeclaration { syntax }),
+            _ => return None,
+        };
+        Some(res)
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        match self {
+            Self::CssDeclarationWithSemicolon(it) => &it.syntax,
+            Self::CssEmptyDeclaration(it) => &it.syntax,
+        }
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        match self {
+            Self::CssDeclarationWithSemicolon(it) => it.syntax,
+            Self::CssEmptyDeclaration(it) => it.syntax,
+        }
+    }
+}
+impl std::fmt::Debug for AnyCssDeclaration {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::CssDeclarationWithSemicolon(it) => std::fmt::Debug::fmt(it, f),
+            Self::CssEmptyDeclaration(it) => std::fmt::Debug::fmt(it, f),
+        }
+    }
+}
+impl From<AnyCssDeclaration> for SyntaxNode {
+    fn from(n: AnyCssDeclaration) -> Self {
+        match n {
+            AnyCssDeclaration::CssDeclarationWithSemicolon(it) => it.into(),
+            AnyCssDeclaration::CssEmptyDeclaration(it) => it.into(),
+        }
+    }
+}
+impl From<AnyCssDeclaration> for SyntaxElement {
+    fn from(n: AnyCssDeclaration) -> Self {
+        let node: SyntaxNode = n.into();
+        node.into()
+    }
+}
 impl From<CssBogusBlock> for AnyCssDeclarationBlock {
     fn from(node: CssBogusBlock) -> Self {
         Self::CssBogusBlock(node)
@@ -18522,12 +18617,21 @@ impl From<CssDeclarationWithSemicolon> for AnyCssDeclarationOrAtRule {
         Self::CssDeclarationWithSemicolon(node)
     }
 }
+impl From<CssEmptyDeclaration> for AnyCssDeclarationOrAtRule {
+    fn from(node: CssEmptyDeclaration) -> Self {
+        Self::CssEmptyDeclaration(node)
+    }
+}
 impl AstNode for AnyCssDeclarationOrAtRule {
     type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> =
-        CssAtRule::KIND_SET.union(CssDeclarationWithSemicolon::KIND_SET);
+    const KIND_SET: SyntaxKindSet<Language> = CssAtRule::KIND_SET
+        .union(CssDeclarationWithSemicolon::KIND_SET)
+        .union(CssEmptyDeclaration::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
-        matches!(kind, CSS_AT_RULE | CSS_DECLARATION_WITH_SEMICOLON)
+        matches!(
+            kind,
+            CSS_AT_RULE | CSS_DECLARATION_WITH_SEMICOLON | CSS_EMPTY_DECLARATION
+        )
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
@@ -18535,6 +18639,7 @@ impl AstNode for AnyCssDeclarationOrAtRule {
             CSS_DECLARATION_WITH_SEMICOLON => {
                 Self::CssDeclarationWithSemicolon(CssDeclarationWithSemicolon { syntax })
             }
+            CSS_EMPTY_DECLARATION => Self::CssEmptyDeclaration(CssEmptyDeclaration { syntax }),
             _ => return None,
         };
         Some(res)
@@ -18543,12 +18648,14 @@ impl AstNode for AnyCssDeclarationOrAtRule {
         match self {
             Self::CssAtRule(it) => &it.syntax,
             Self::CssDeclarationWithSemicolon(it) => &it.syntax,
+            Self::CssEmptyDeclaration(it) => &it.syntax,
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
             Self::CssAtRule(it) => it.syntax,
             Self::CssDeclarationWithSemicolon(it) => it.syntax,
+            Self::CssEmptyDeclaration(it) => it.syntax,
         }
     }
 }
@@ -18557,6 +18664,7 @@ impl std::fmt::Debug for AnyCssDeclarationOrAtRule {
         match self {
             Self::CssAtRule(it) => std::fmt::Debug::fmt(it, f),
             Self::CssDeclarationWithSemicolon(it) => std::fmt::Debug::fmt(it, f),
+            Self::CssEmptyDeclaration(it) => std::fmt::Debug::fmt(it, f),
         }
     }
 }
@@ -18565,6 +18673,7 @@ impl From<AnyCssDeclarationOrAtRule> for SyntaxNode {
         match n {
             AnyCssDeclarationOrAtRule::CssAtRule(it) => it.into(),
             AnyCssDeclarationOrAtRule::CssDeclarationWithSemicolon(it) => it.into(),
+            AnyCssDeclarationOrAtRule::CssEmptyDeclaration(it) => it.into(),
         }
     }
 }
@@ -20721,6 +20830,11 @@ impl From<CssDeclarationWithSemicolon> for AnyCssPageAtRuleItem {
         Self::CssDeclarationWithSemicolon(node)
     }
 }
+impl From<CssEmptyDeclaration> for AnyCssPageAtRuleItem {
+    fn from(node: CssEmptyDeclaration) -> Self {
+        Self::CssEmptyDeclaration(node)
+    }
+}
 impl From<CssMarginAtRule> for AnyCssPageAtRuleItem {
     fn from(node: CssMarginAtRule) -> Self {
         Self::CssMarginAtRule(node)
@@ -20730,11 +20844,15 @@ impl AstNode for AnyCssPageAtRuleItem {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> = CssAtRule::KIND_SET
         .union(CssDeclarationWithSemicolon::KIND_SET)
+        .union(CssEmptyDeclaration::KIND_SET)
         .union(CssMarginAtRule::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
         matches!(
             kind,
-            CSS_AT_RULE | CSS_DECLARATION_WITH_SEMICOLON | CSS_MARGIN_AT_RULE
+            CSS_AT_RULE
+                | CSS_DECLARATION_WITH_SEMICOLON
+                | CSS_EMPTY_DECLARATION
+                | CSS_MARGIN_AT_RULE
         )
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
@@ -20743,6 +20861,7 @@ impl AstNode for AnyCssPageAtRuleItem {
             CSS_DECLARATION_WITH_SEMICOLON => {
                 Self::CssDeclarationWithSemicolon(CssDeclarationWithSemicolon { syntax })
             }
+            CSS_EMPTY_DECLARATION => Self::CssEmptyDeclaration(CssEmptyDeclaration { syntax }),
             CSS_MARGIN_AT_RULE => Self::CssMarginAtRule(CssMarginAtRule { syntax }),
             _ => return None,
         };
@@ -20752,6 +20871,7 @@ impl AstNode for AnyCssPageAtRuleItem {
         match self {
             Self::CssAtRule(it) => &it.syntax,
             Self::CssDeclarationWithSemicolon(it) => &it.syntax,
+            Self::CssEmptyDeclaration(it) => &it.syntax,
             Self::CssMarginAtRule(it) => &it.syntax,
         }
     }
@@ -20759,6 +20879,7 @@ impl AstNode for AnyCssPageAtRuleItem {
         match self {
             Self::CssAtRule(it) => it.syntax,
             Self::CssDeclarationWithSemicolon(it) => it.syntax,
+            Self::CssEmptyDeclaration(it) => it.syntax,
             Self::CssMarginAtRule(it) => it.syntax,
         }
     }
@@ -20768,6 +20889,7 @@ impl std::fmt::Debug for AnyCssPageAtRuleItem {
         match self {
             Self::CssAtRule(it) => std::fmt::Debug::fmt(it, f),
             Self::CssDeclarationWithSemicolon(it) => std::fmt::Debug::fmt(it, f),
+            Self::CssEmptyDeclaration(it) => std::fmt::Debug::fmt(it, f),
             Self::CssMarginAtRule(it) => std::fmt::Debug::fmt(it, f),
         }
     }
@@ -20777,6 +20899,7 @@ impl From<AnyCssPageAtRuleItem> for SyntaxNode {
         match n {
             AnyCssPageAtRuleItem::CssAtRule(it) => it.into(),
             AnyCssPageAtRuleItem::CssDeclarationWithSemicolon(it) => it.into(),
+            AnyCssPageAtRuleItem::CssEmptyDeclaration(it) => it.into(),
             AnyCssPageAtRuleItem::CssMarginAtRule(it) => it.into(),
         }
     }
@@ -23308,6 +23431,11 @@ impl std::fmt::Display for AnyCssContainerStyleQuery {
     }
 }
 impl std::fmt::Display for AnyCssCustomIdentifier {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for AnyCssDeclaration {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }
@@ -26404,7 +26532,7 @@ impl Serialize for CssDeclarationList {
 }
 impl AstNodeList for CssDeclarationList {
     type Language = Language;
-    type Node = CssDeclarationWithSemicolon;
+    type Node = AnyCssDeclaration;
     fn syntax_list(&self) -> &SyntaxList {
         &self.syntax_list
     }
@@ -26419,15 +26547,15 @@ impl Debug for CssDeclarationList {
     }
 }
 impl IntoIterator for &CssDeclarationList {
-    type Item = CssDeclarationWithSemicolon;
-    type IntoIter = AstNodeListIterator<Language, CssDeclarationWithSemicolon>;
+    type Item = AnyCssDeclaration;
+    type IntoIter = AstNodeListIterator<Language, AnyCssDeclaration>;
     fn into_iter(self) -> Self::IntoIter {
         self.iter()
     }
 }
 impl IntoIterator for CssDeclarationList {
-    type Item = CssDeclarationWithSemicolon;
-    type IntoIter = AstNodeListIterator<Language, CssDeclarationWithSemicolon>;
+    type Item = AnyCssDeclaration;
+    type IntoIter = AstNodeListIterator<Language, AnyCssDeclaration>;
     fn into_iter(self) -> Self::IntoIter {
         self.iter()
     }

@@ -2419,7 +2419,7 @@ where
 }
 pub fn css_declaration_list<I>(items: I) -> CssDeclarationList
 where
-    I: IntoIterator<Item = CssDeclarationWithSemicolon>,
+    I: IntoIterator<Item = AnyCssDeclaration>,
     I::IntoIter: ExactSizeIterator,
 {
     CssDeclarationList::unwrap_cast(SyntaxNode::new_detached(
