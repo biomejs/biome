@@ -998,14 +998,24 @@ impl Workspace for WorkspaceServer {
             workspace_directory.clone()
         };
 
+        let plugin_diagnostics = self.load_plugins(
+            &loading_directory.clone().unwrap_or_default(),
+            &settings.as_all_plugins(),
+        );
+
+        let has_errors = plugin_diagnostics
+            .iter()
+            .any(|d| d.severity() >= Severity::Error);
+
+        if has_errors {
+            return Err(WorkspaceError::plugin_errors(plugin_diagnostics));
+        }
+
         diagnostics.extend(
-            self.load_plugins(
-                &loading_directory.clone().unwrap_or_default(),
-                &settings.as_all_plugins(),
-            )
-            .into_iter()
-            .map(Into::into)
-            .collect::<Vec<_>>(),
+            plugin_diagnostics
+                .into_iter()
+                .map(Into::into)
+                .collect::<Vec<_>>(),
         );
 
         if !is_root {
@@ -1051,9 +1061,7 @@ impl Workspace for WorkspaceServer {
             self.projects.set_root_settings(project_key, settings);
         }
 
-        Ok(UpdateSettingsResult {
-            diagnostics: diagnostics.into_iter().map(Into::into).collect(),
-        })
+        Ok(UpdateSettingsResult { diagnostics })
     }
 
     fn close_project(&self, params: CloseProjectParams) -> Result<(), WorkspaceError> {

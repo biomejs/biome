@@ -821,10 +821,7 @@ impl VcsIgnoredPatterns {
             Self::Git { root, nested, .. } => {
                 match ignore_kind {
                     IgnoreKind::ThisPath => {
-                        // let relative_path = path.strip_prefix(root_path).unwrap();
-                        let ignored = Self::is_git_ignore(root, nested.as_slice(), path, is_dir);
-
-                        ignored
+                        Self::is_git_ignore(root, nested.as_slice(), path, is_dir)
                     }
                     IgnoreKind::Ancestors { root_path } => {
                         // NOTE: this could be a bug of the library, need to explore. Let's assume it isn't
@@ -836,7 +833,7 @@ impl VcsIgnoredPatterns {
                         // To work around this limitation, we crawl upwards the parents of the path, until
                         // we arrive at the `root_path`.
                         let mut current_path = path;
-                        let is_ignored = loop {
+                        {
                             if current_path == root_path {
                                 break false;
                             }
@@ -853,9 +850,7 @@ impl VcsIgnoredPatterns {
                             } else {
                                 break false;
                             }
-                        };
-
-                        is_ignored
+                        }
                     }
                 }
             }
