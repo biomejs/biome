@@ -264,6 +264,10 @@ impl Configuration {
         self.extends.as_ref().is_some_and(Extends::extends_root)
     }
 
+    pub fn get_files_configuration(&self) -> FilesConfiguration {
+        self.files.clone().unwrap_or_default()
+    }
+
     pub fn get_formatter_configuration(&self) -> FormatterConfiguration {
         self.formatter.clone().unwrap_or_default()
     }
