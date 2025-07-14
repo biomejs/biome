@@ -8,8 +8,40 @@ use camino::{Utf8Path, Utf8PathBuf};
 use std::sync::{Mutex, MutexGuard};
 use std::{env, fs};
 
+/// helper to temporarily set or unset an environment variable for the duration of a scope.
+/// restores the previous value on drop.
+struct EnvVarGuard {
+    key: &'static str,
+    prev: Option<String>,
+}
+
+
+impl EnvVarGuard {
+    fn unset(key: &'static str) -> Self {
+        let prev = std::env::var(key).ok();
+        unsafe { std::env::remove_var(key) };
+        EnvVarGuard { key, prev }
+    }
+    fn set(key: &'static str, value: &str) -> Self {
+        let prev = std::env::var(key).ok();
+        unsafe { std::env::set_var(key, value) };
+        EnvVarGuard { key, prev }
+    }
+}
+
+impl Drop for EnvVarGuard {
+    fn drop(&mut self) {
+        if let Some(ref val) = self.prev {
+            unsafe { std::env::set_var(self.key, val) };
+        } else {
+            unsafe { std::env::remove_var(self.key) };
+        }
+    }
+}
+
 #[test]
 fn rage_help() {
+    let _guard = EnvVarGuard::unset("BIOME_CONFIG_PATH");
     let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
@@ -28,6 +60,7 @@ fn rage_help() {
 
 #[test]
 fn ok() {
+    let _guard = EnvVarGuard::unset("BIOME_CONFIG_PATH");
     let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
@@ -72,6 +105,7 @@ fn with_configuration() {
 
 #[test]
 fn rage_with_config_path_argument() {
+    let _guard = EnvVarGuard::unset("BIOME_CONFIG_PATH");
     let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
     let config_path = Utf8Path::new("custom-config.json");
@@ -99,6 +133,7 @@ fn rage_with_config_path_argument() {
 
 #[test]
 fn rage_with_biome_config_path_env() {
+    let _guard = EnvVarGuard::set("BIOME_CONFIG_PATH", "env-config.json");
     let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
     let config_path = Utf8Path::new("env-config.json");
@@ -125,6 +160,7 @@ fn rage_with_biome_config_path_env() {
 
 #[test]
 fn rage_with_invalid_config_path() {
+    let _guard = EnvVarGuard::unset("BIOME_CONFIG_PATH");
     let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
