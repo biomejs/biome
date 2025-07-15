@@ -3,9 +3,6 @@ mod collector;
 mod module_resolver;
 mod scope;
 mod visitor;
-
-use std::{ops::Deref, sync::Arc};
-
 use biome_js_syntax::AnyJsImportLike;
 use biome_js_type_info::{BindingId, ImportSymbol, ResolvedTypeId, ScopeId, TypeData};
 use biome_jsdoc_comment::JsdocComment;
@@ -14,6 +11,8 @@ use biome_rowan::{Text, TextRange};
 use indexmap::IndexMap;
 use rust_lapper::Lapper;
 use rustc_hash::{FxHashMap, FxHashSet};
+use std::collections::BTreeSet;
+use std::{collections::BTreeMap, ops::Deref, sync::Arc};
 
 use crate::ModuleGraph;
 
@@ -92,19 +91,19 @@ impl JsModuleInfo {
                 .map(|(text, static_import)| {
                     (text.to_string(), static_import.specifier.to_string())
                 })
-                .collect::<FxHashMap<_, _>>(),
+                .collect::<BTreeMap<_, _>>(),
 
             exports: self
                 .exports
                 .iter()
                 .map(|(text, _)| text.to_string())
-                .collect::<FxHashSet<_>>(),
+                .collect::<BTreeSet<_>>(),
 
             dynamic_imports: self
                 .dynamic_import_paths
                 .iter()
                 .map(|(text, _)| text.to_string())
-                .collect::<FxHashSet<_>>(),
+                .collect::<BTreeSet<_>>(),
         }
     }
 }
@@ -376,9 +375,9 @@ fn scope_id_for_range(scope_by_range: &Lapper<u32, ScopeId>, range: TextRange) -
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 pub struct SerializedJsModuleInfo {
     /// Static imports
-    static_imports: FxHashMap<String, String>,
+    static_imports: BTreeMap<String, String>,
     /// Dynamic imports
-    dynamic_imports: FxHashSet<String>,
+    dynamic_imports: BTreeSet<String>,
     /// Exported symbols
-    exports: FxHashSet<String>,
+    exports: BTreeSet<String>,
 }

@@ -1,7 +1,5 @@
 ---
-"@biomejs/wasm-bundler": minor
-"@biomejs/wasm-nodejs": minor
-"@biomejs/wasm-web": minor
+"@biomejs/biome": minor
 ---
 
 Added new functions:
