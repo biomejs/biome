@@ -34,7 +34,7 @@ declare_lint_rule! {
     /// <a href="https://example.com" target="_blank">External</a>
     /// ```
     pub UseJsxA {
-        version: "1.0.0",
+        version: "next",
         name: "useJsxA",
         language: "js",
         sources: &[RuleSource::EslintQwik("jsx-a").inspired()],

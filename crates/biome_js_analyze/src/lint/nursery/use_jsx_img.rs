@@ -42,7 +42,7 @@ declare_lint_rule! {
     /// <img width="100" height="100" src="https://example.com/image.png" />
     /// ```
     pub UseJsxImg {
-        version: "1.0.0",
+        version: "next",
         name: "useJsxImg",
         language: "js",
         sources: &[RuleSource::EslintQwik("jsx-img").inspired()],

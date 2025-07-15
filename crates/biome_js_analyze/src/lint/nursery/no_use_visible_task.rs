@@ -31,7 +31,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoUseVisibleTask {
-        version: "1.0.0",
+        version: "next",
         name: "noUseVisibleTask",
         language: "js",
         sources: &[RuleSource::EslintQwik("no-use-visible-task").inspired()],
