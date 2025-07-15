@@ -45,7 +45,7 @@ expression: invalid.jsx
 
 # Diagnostics
 ```
-invalid.jsx:1:6 lint/nursery/noReactProps  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:1:6 lint/nursery/noQwikReactProps  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! This JSX attribute is specific to React and should not be used in Qwik.
   
@@ -72,7 +72,7 @@ invalid.jsx:1:6 lint/nursery/noReactProps  FIXABLE  ━━━━━━━━━�
 ```
 
 ```
-invalid.jsx:5:6 lint/nursery/noReactProps  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:5:6 lint/nursery/noQwikReactProps  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! This JSX attribute is specific to React and should not be used in Qwik.
   
@@ -105,7 +105,7 @@ invalid.jsx:5:6 lint/nursery/noReactProps  FIXABLE  ━━━━━━━━━�
 ```
 
 ```
-invalid.jsx:5:28 lint/nursery/noReactProps  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:5:28 lint/nursery/noQwikReactProps  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! This JSX attribute is specific to React and should not be used in Qwik.
   

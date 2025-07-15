@@ -1611,13 +1611,13 @@ export interface Nursery {
 	 */
 	noProcessGlobal?: RuleFixConfiguration_for_NoProcessGlobalOptions;
 	/**
+	 * Disallow React-specific className/htmlFor props in Qwik components.
+	 */
+	noQwikReactProps?: RuleFixConfiguration_for_NoQwikReactPropsOptions;
+	/**
 	 * Disallow assigning to React component props.
 	 */
 	noReactPropAssign?: RuleConfiguration_for_NoReactPropAssignOptions;
-	/**
-	 * Disallow React-specific className/htmlFor props in Qwik components.
-	 */
-	noReactProps?: RuleFixConfiguration_for_NoReactPropsOptions;
 	/**
 	 * Disallow the use of configured elements.
 	 */
@@ -2904,12 +2904,12 @@ export type RuleConfiguration_for_NoNoninteractiveElementInteractionsOptions =
 export type RuleFixConfiguration_for_NoProcessGlobalOptions =
 	| RulePlainConfiguration
 	| RuleWithFixOptions_for_NoProcessGlobalOptions;
+export type RuleFixConfiguration_for_NoQwikReactPropsOptions =
+	| RulePlainConfiguration
+	| RuleWithFixOptions_for_NoQwikReactPropsOptions;
 export type RuleConfiguration_for_NoReactPropAssignOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_NoReactPropAssignOptions;
-export type RuleFixConfiguration_for_NoReactPropsOptions =
-	| RulePlainConfiguration
-	| RuleWithFixOptions_for_NoReactPropsOptions;
 export type RuleConfiguration_for_NoRestrictedElementsOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_NoRestrictedElementsOptions;
@@ -5204,17 +5204,7 @@ export interface RuleWithFixOptions_for_NoProcessGlobalOptions {
 	 */
 	options: NoProcessGlobalOptions;
 }
-export interface RuleWithOptions_for_NoReactPropAssignOptions {
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: NoReactPropAssignOptions;
-}
-export interface RuleWithFixOptions_for_NoReactPropsOptions {
+export interface RuleWithFixOptions_for_NoQwikReactPropsOptions {
 	/**
 	 * The kind of the code actions emitted by the rule
 	 */
@@ -5226,7 +5216,17 @@ export interface RuleWithFixOptions_for_NoReactPropsOptions {
 	/**
 	 * Rule's options
 	 */
-	options: NoReactPropsOptions;
+	options: NoQwikReactPropsOptions;
+}
+export interface RuleWithOptions_for_NoReactPropAssignOptions {
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: NoReactPropAssignOptions;
 }
 export interface RuleWithOptions_for_NoRestrictedElementsOptions {
 	/**
@@ -7759,8 +7759,8 @@ export interface NoMisusedPromisesOptions {}
 export interface NoNestedComponentDefinitionsOptions {}
 export interface NoNoninteractiveElementInteractionsOptions {}
 export interface NoProcessGlobalOptions {}
+export interface NoQwikReactPropsOptions {}
 export interface NoReactPropAssignOptions {}
-export interface NoReactPropsOptions {}
 export interface NoRestrictedElementsOptions {
 	/**
 	 * Elements to restrict. Each key is the element name, and the value is the message to show when the element is used.
@@ -8446,7 +8446,7 @@ export type Category =
 	| "lint/nursery/noNoninteractiveElementInteractions"
 	| "lint/nursery/noProcessGlobal"
 	| "lint/nursery/noReactPropAssign"
-	| "lint/nursery/noReactProps"
+	| "lint/nursery/noQwikReactProps"
 	| "lint/nursery/noReactSpecificProps"
 	| "lint/nursery/noRestrictedElements"
 	| "lint/nursery/noSecrets"

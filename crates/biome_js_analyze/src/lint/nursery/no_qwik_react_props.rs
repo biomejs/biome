@@ -8,7 +8,7 @@ use biome_diagnostics::Severity;
 use biome_js_factory::make::{jsx_ident, jsx_name};
 use biome_js_syntax::{AnyJsxAttributeName, JsxAttribute};
 use biome_rowan::{AstNode, BatchMutationExt, TextRange};
-use biome_rule_options::no_react_props::NoReactPropsOptions;
+use biome_rule_options::no_qwik_react_props::NoQwikReactPropsOptions;
 
 declare_lint_rule! {
     /// Disallow React-specific className/htmlFor props in Qwik components.
@@ -37,9 +37,9 @@ declare_lint_rule! {
     /// ```jsx
     /// <label for="input" />
     /// ```
- pub NoReactProps {
+ pub NoQwikReactProps {
         version: "1.0.0",
-        name: "noReactProps",
+        name: "noQwikReactProps",
         language: "js",
         sources: &[RuleSource::EslintQwik("no-react-props").inspired()],
         recommended: true,
@@ -57,11 +57,11 @@ fn get_replacement_for_react_prop(str: &str) -> Option<&'static str> {
     }
 }
 
-impl Rule for NoReactProps {
+impl Rule for NoQwikReactProps {
     type Query = Ast<JsxAttribute>;
     type State = (TextRange, &'static str);
     type Signals = Option<Self::State>;
-    type Options = NoReactPropsOptions;
+    type Options = NoQwikReactPropsOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let attribute = ctx.query();
