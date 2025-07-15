@@ -1595,10 +1595,6 @@ export interface Nursery {
 	 */
 	noMagicNumbers?: RuleConfiguration_for_NoMagicNumbersOptions;
 	/**
-	 * Disallow missing key props in iterators/collection literals.
-	 */
-	noMissingJsxKey?: RuleConfiguration_for_NoMissingJsxKeyOptions;
-	/**
 	 * Disallow Promises to be used in places where they are almost certainly a mistake.
 	 */
 	noMisusedPromises?: RuleFixConfiguration_for_NoMisusedPromisesOptions;
@@ -2896,9 +2892,6 @@ export type RuleFixConfiguration_for_NoImportantStylesOptions =
 export type RuleConfiguration_for_NoMagicNumbersOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_NoMagicNumbersOptions;
-export type RuleConfiguration_for_NoMissingJsxKeyOptions =
-	| RulePlainConfiguration
-	| RuleWithOptions_for_NoMissingJsxKeyOptions;
 export type RuleFixConfiguration_for_NoMisusedPromisesOptions =
 	| RulePlainConfiguration
 	| RuleWithFixOptions_for_NoMisusedPromisesOptions;
@@ -5162,16 +5155,6 @@ export interface RuleWithOptions_for_NoMagicNumbersOptions {
 	 * Rule's options
 	 */
 	options: NoMagicNumbersOptions;
-}
-export interface RuleWithOptions_for_NoMissingJsxKeyOptions {
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: NoMissingJsxKeyOptions;
 }
 export interface RuleWithFixOptions_for_NoMisusedPromisesOptions {
 	/**
@@ -7731,9 +7714,12 @@ export interface UseImportExtensionsOptions {
 	forceJsExtensions?: boolean;
 }
 export interface UseIsNanOptions {}
+/**
+ * Options for the useJsxKeyInIterable rule, which applies to both React and Qwik.
+ */
 export interface UseJsxKeyInIterableOptions {
 	/**
-	 * Set to `true` to check shorthand fragments (`<></>`)
+	 * Set to `true` to check shorthand fragments (`<></>`) (React only)
 	 */
 	checkShorthandFragments?: boolean;
 }
@@ -7769,7 +7755,6 @@ export interface NoImplicitCoercionOptions {}
 export interface NoImportCyclesOptions {}
 export interface NoImportantStylesOptions {}
 export interface NoMagicNumbersOptions {}
-export interface NoMissingJsxKeyOptions {}
 export interface NoMisusedPromisesOptions {}
 export interface NoNestedComponentDefinitionsOptions {}
 export interface NoNoninteractiveElementInteractionsOptions {}
@@ -8455,7 +8440,6 @@ export type Category =
 	| "lint/nursery/noInvalidGridAreas"
 	| "lint/nursery/noInvalidPositionAtImportRule"
 	| "lint/nursery/noMagicNumbers"
-	| "lint/nursery/noMissingJsxKey"
 	| "lint/nursery/noMissingGenericFamilyKeyword"
 	| "lint/nursery/noMisusedPromises"
 	| "lint/nursery/noNestedComponentDefinitions"

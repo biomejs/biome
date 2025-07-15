@@ -3541,16 +3541,6 @@
 			"type": "object",
 			"additionalProperties": false
 		},
-		"NoMissingJsxKeyConfiguration": {
-			"anyOf": [
-				{ "$ref": "#/definitions/RulePlainConfiguration" },
-				{ "$ref": "#/definitions/RuleWithNoMissingJsxKeyOptions" }
-			]
-		},
-		"NoMissingJsxKeyOptions": {
-			"type": "object",
-			"additionalProperties": false
-		},
 		"NoMissingVarFunctionConfiguration": {
 			"anyOf": [
 				{ "$ref": "#/definitions/RulePlainConfiguration" },
@@ -4786,13 +4776,6 @@
 					"description": "Reports usage of \"magic numbers\" — numbers used directly instead of being assigned to named constants.",
 					"anyOf": [
 						{ "$ref": "#/definitions/NoMagicNumbersConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"noMissingJsxKey": {
-					"description": "Disallow missing key props in iterators/collection literals.",
-					"anyOf": [
-						{ "$ref": "#/definitions/NoMissingJsxKeyConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -7542,21 +7525,6 @@
 					"allOf": [
 						{ "$ref": "#/definitions/NoMisrefactoredShorthandAssignOptions" }
 					]
-				}
-			},
-			"additionalProperties": false
-		},
-		"RuleWithNoMissingJsxKeyOptions": {
-			"type": "object",
-			"required": ["level"],
-			"properties": {
-				"level": {
-					"description": "The severity of the emitted diagnostics by the rule",
-					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
-				},
-				"options": {
-					"description": "Rule's options",
-					"allOf": [{ "$ref": "#/definitions/NoMissingJsxKeyOptions" }]
 				}
 			},
 			"additionalProperties": false
@@ -13439,10 +13407,11 @@
 			]
 		},
 		"UseJsxKeyInIterableOptions": {
+			"description": "Options for the useJsxKeyInIterable rule, which applies to both React and Qwik.",
 			"type": "object",
 			"properties": {
 				"checkShorthandFragments": {
-					"description": "Set to `true` to check shorthand fragments (`<></>`)",
+					"description": "Set to `true` to check shorthand fragments (`<></>`) (React only)",
 					"default": false,
 					"type": "boolean"
 				}

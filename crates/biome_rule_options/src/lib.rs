@@ -118,7 +118,6 @@ pub mod no_misleading_character_class;
 pub mod no_misleading_instantiator;
 pub mod no_misplaced_assertion;
 pub mod no_misrefactored_shorthand_assign;
-pub mod no_missing_jsx_key;
 pub mod no_missing_var_function;
 pub mod no_misused_promises;
 pub mod no_namespace;

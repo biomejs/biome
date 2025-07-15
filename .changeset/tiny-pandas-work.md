@@ -44,9 +44,7 @@ The rule detects usage of the `classnames` helper in `class` or `className` attr
 
 No configuration options are currently available for this rule.
 
-Added the [`noMissingJsxKey`](https://biomejs.dev/linter/rules/no-missing-jsx-key) rule to Biome.
-
-The `noMissingJsxKey` rule disallows JSX elements in iterators/collections without a `key` prop. This rule is intended for use in Qwik applications to prevent missing key props in JSX elements inside iterators, which can lead to rendering issues and performance problems.
+**Updated:** The [`useJsxKeyInIterable`](https://biomejs.dev/linter/rules/use-jsx-key-in-iterable) rule now supports both React and Qwik domains. The previous Qwik-specific `noMissingJsxKey` rule has been merged into this unified rule. It disallows JSX elements in iterators/collections without a `key` prop, helping prevent rendering issues and performance problems in both React and Qwik applications.
 
 **Invalid:**
 
