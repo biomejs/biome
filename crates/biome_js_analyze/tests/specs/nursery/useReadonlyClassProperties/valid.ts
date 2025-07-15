@@ -596,3 +596,17 @@ class ArrowFunctionWithMutation {
 		this.bar = "init";
 	};
 }
+
+class Counter {
+	private counter: number
+	count() {
+		console.log(this.counter++);
+	}
+}
+
+class Counter2 {
+	private counter: number
+	count() {
+		const counterString = `${this.counter++}`
+	}
+}
