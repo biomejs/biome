@@ -565,7 +565,13 @@ impl FeatureKind {
     /// Returns the index for the feature kind.
     #[inline]
     fn index(self) -> usize {
-        self as usize
+        match self {
+            Self::Format => 0,
+            Self::Lint => 1,
+            Self::Search => 2,
+            Self::Assist => 3,
+            Self::Debug => 4,
+        }
     }
 }
 

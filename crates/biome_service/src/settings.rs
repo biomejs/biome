@@ -852,20 +852,26 @@ impl VcsIgnoredPatterns {
         path: &Utf8Path,
         is_dir: bool,
     ) -> bool {
-        root.matched(path, is_dir).is_ignore()
-            || nested.iter().any(|gitignore| {
-                let ignore_directory = if gitignore.path().is_file() {
-                    // SAFETY: if it's a file, it always has a parent
-                    gitignore.path().parent().unwrap()
-                } else {
-                    gitignore.path()
-                };
-                if let Ok(stripped_path) = path.strip_prefix(ignore_directory) {
-                    gitignore.matched(stripped_path, is_dir).is_ignore()
-                } else {
-                    false
-                }
-            })
+        let root_ignored = {
+            let path = path.strip_prefix(root.path()).unwrap_or(path);
+            root.matched(path, is_dir).is_ignore()
+        };
+
+        let nested_ignored = nested.iter().any(|gitignore| {
+            let ignore_directory = if gitignore.path().is_file() {
+                // SAFETY: if it's a file, it always has a parent
+                gitignore.path().parent().unwrap()
+            } else {
+                gitignore.path()
+            };
+            if let Ok(stripped_path) = path.strip_prefix(ignore_directory) {
+                gitignore.matched(stripped_path, is_dir).is_ignore()
+            } else {
+                false
+            }
+        });
+
+        root_ignored || nested_ignored
     }
 
     pub fn insert_git_match(&mut self, git_ignore: Gitignore) {
