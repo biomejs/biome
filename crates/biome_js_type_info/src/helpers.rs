@@ -42,6 +42,53 @@ impl<'a> ResolvedTypeData<'a> {
         }
     }
 
+    /// Returns the type of an element at a given index, if this object is an
+    /// array or a tuple.
+    pub fn find_element_type_at_index(
+        self,
+        resolver: &'a dyn TypeResolver,
+        index: usize,
+    ) -> Option<ElementTypeReference> {
+        match self.as_raw_data() {
+            TypeData::Tuple(tuple) => {
+                let element = tuple.get_element(index)?;
+                Some(ElementTypeReference {
+                    ty: self.apply_module_id_to_reference(&element.ty).into_owned(),
+                    is_optional: element.is_optional || element.is_rest,
+                })
+            }
+            _ if self.is_instance_of(resolver, GLOBAL_ARRAY_ID) => {
+                self.get_type_parameter(0).map(|ty| ElementTypeReference {
+                    ty: ty.into_owned(),
+                    is_optional: true,
+                })
+            }
+            _ => None,
+        }
+    }
+
+    /// Convenience method for finding a type member of kind index signature.
+    pub fn find_index_signature_with_ty(
+        self,
+        resolver: &'a dyn TypeResolver,
+        predicate: impl Fn(Self) -> bool,
+    ) -> Option<ResolvedTypeMember<'a>> {
+        self.find_member(resolver, |member| {
+            member.is_index_signature_with_ty(|ty| {
+                resolver.resolve_and_get(ty).is_some_and(&predicate)
+            })
+        })
+    }
+
+    /// Convenience method for `.all_members().find()`.
+    pub fn find_member(
+        self,
+        resolver: &'a dyn TypeResolver,
+        predicate: impl Fn(&ResolvedTypeMember) -> bool,
+    ) -> Option<ResolvedTypeMember<'a>> {
+        self.all_members(resolver).find(predicate)
+    }
+
     /// Returns the promised type, if this object is an instance of `Promise`.
     pub fn find_promise_type(self, resolver: &'a dyn TypeResolver) -> Option<Self> {
         if self.is_instance_of(resolver, GLOBAL_PROMISE_ID) {
@@ -49,6 +96,30 @@ impl<'a> ResolvedTypeData<'a> {
                 .and_then(|reference| resolver.resolve_and_get(&reference))
         } else {
             None
+        }
+    }
+
+    /// Returns the type of elements from a given index, if this object is an
+    /// array or a tuple.
+    pub fn find_type_of_elements_from_index(
+        self,
+        resolver: &'a dyn TypeResolver,
+        index: usize,
+    ) -> Option<TypeData> {
+        match self.as_raw_data() {
+            TypeData::Tuple(tuple) => {
+                Some(TypeData::from(tuple.slice_from(self.resolver_id(), index)))
+            }
+            _ if self.is_instance_of(resolver, GLOBAL_ARRAY_ID) => {
+                match self.get_type_parameter(0) {
+                    Some(elem_ty) => Some(TypeData::instance_of(TypeInstance {
+                        ty: GLOBAL_ARRAY_ID.into(),
+                        type_parameters: [elem_ty.into_owned()].into(),
+                    })),
+                    None => Some(TypeData::instance_of(TypeReference::from(GLOBAL_ARRAY_ID))),
+                }
+            }
+            _ => None,
         }
     }
 
@@ -154,66 +225,6 @@ impl<'a> ResolvedTypeData<'a> {
 }
 
 impl TypeData {
-    /// Returns the type of an element at a given index, if this object is an
-    /// array or a tuple.
-    pub fn find_element_type_at_index<'a>(
-        &'a self,
-        resolver_id: ResolverId,
-        resolver: &'a mut dyn TypeResolver,
-        index: usize,
-    ) -> Option<ResolvedTypeData<'a>> {
-        match self {
-            Self::Tuple(tuple) => Some(tuple.get_ty(resolver, index)),
-            _ => {
-                let resolved = ResolvedTypeData::from((resolver_id, self));
-                if resolved.is_instance_of(resolver, GLOBAL_ARRAY_ID) {
-                    resolved
-                        .get_type_parameter(0)
-                        .map(|reference| reference.into_owned())
-                        .map(|reference| resolver.optional(reference))
-                        .map(|id| {
-                            ResolvedTypeData::from((
-                                ResolvedTypeId::new(resolver.level(), id),
-                                resolver.get_by_id(id),
-                            ))
-                        })
-                } else {
-                    None
-                }
-            }
-        }
-    }
-
-    /// Returns the type of elements from a given index, if this object is an
-    /// array or a tuple.
-    pub fn find_type_of_elements_from_index<'a>(
-        &'a self,
-        resolver_id: ResolverId,
-        resolver: &'a mut dyn TypeResolver,
-        index: usize,
-    ) -> Option<ResolvedTypeData<'a>> {
-        let data = match self {
-            Self::Tuple(tuple) => Some(Self::Tuple(Box::new(tuple.slice_from(index)))),
-            _ => {
-                let resolved = ResolvedTypeData::from((resolver_id, self));
-                if resolved.is_instance_of(resolver, GLOBAL_ARRAY_ID) {
-                    match resolved.get_type_parameter(0) {
-                        Some(elem_ty) => Some(Self::instance_of(TypeInstance {
-                            ty: GLOBAL_ARRAY_ID.into(),
-                            type_parameters: Box::new([elem_ty.into_owned()]),
-                        })),
-                        None => return resolver.get_by_resolved_id(GLOBAL_ARRAY_ID),
-                    }
-                } else {
-                    None
-                }
-            }
-        }?;
-
-        let id = resolver.register_and_resolve(data);
-        resolver.get_by_resolved_id(id)
-    }
-
     /// Turns this [`TypeData`] into an instance of itself.
     pub fn into_instance(self, resolver: &mut dyn TypeResolver) -> Self {
         match self {
@@ -315,6 +326,24 @@ fn hash_reference(reference: &TypeReference) -> u64 {
     let mut hash = FxHasher::default();
     reference.hash(&mut hash);
     hash.finish()
+}
+
+/// A reference to an element that is either optional or not.
+pub struct ElementTypeReference {
+    ty: TypeReference,
+    is_optional: bool,
+}
+
+impl ElementTypeReference {
+    pub fn into_reference(self, resolver: &mut dyn TypeResolver) -> TypeReference {
+        if self.is_optional {
+            let id = resolver.optional(self.ty);
+            let resolved_id = ResolvedTypeId::new(resolver.level(), id);
+            TypeReference::from(resolved_id)
+        } else {
+            self.ty
+        }
+    }
 }
 
 pub struct AllTypeMemberIterator<'a> {
@@ -581,8 +610,10 @@ generate_matcher!(is_expression, TypeofExpression, _);
 generate_matcher!(is_function, Function, _);
 generate_matcher!(is_generic, Generic, _);
 generate_matcher!(is_interface, Interface, _);
-generate_matcher!(is_null, Null);
-generate_matcher!(is_reference, Reference, _);
 generate_matcher!(is_never_keyword, NeverKeyword);
+generate_matcher!(is_null, Null);
+generate_matcher!(is_number, Number);
+generate_matcher!(is_reference, Reference, _);
+generate_matcher!(is_string, String);
 generate_matcher!(is_unknown_keyword, UnknownKeyword);
 generate_matcher!(is_void_keyword, VoidKeyword);
