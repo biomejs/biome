@@ -474,6 +474,15 @@ impl Format<FormatTypeContext> for TypeofExpression {
                     )
                 }
             },
+            Self::Index(expr) => {
+                write!(
+                    f,
+                    [&format_args![
+                        &expr.object,
+                        dynamic_text(&std::format!("[{}]", expr.index), TextSize::default()),
+                    ]]
+                )
+            }
             Self::IterableValueOf(expr) => {
                 write!(
                     f,
