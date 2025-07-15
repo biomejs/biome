@@ -4,11 +4,11 @@ use js_sys::Error;
 use wasm_bindgen::prelude::*;
 
 use biome_service::workspace::{
-    self, ChangeFileParams, CloseFileParams, FixFileParams, FormatFileParams, FormatOnTypeParams,
-    FormatRangeParams, GetControlFlowGraphParams, GetFileContentParams, GetFormatterIRParams,
-    GetRegisteredTypesParams, GetSemanticModelParams, GetSyntaxTreeParams, GetTypeInfoParams,
-    OpenProjectParams, PullActionsParams, PullDiagnosticsParams, RenameParams,
-    UpdateSettingsParams,
+    self, ChangeFileParams, CloseFileParams, FileExitsParams, FixFileParams, FormatFileParams,
+    FormatOnTypeParams, FormatRangeParams, GetControlFlowGraphParams, GetFileContentParams,
+    GetFormatterIRParams, GetModuleGraphResult, GetRegisteredTypesParams, GetSemanticModelParams,
+    GetSyntaxTreeParams, GetTypeInfoParams, OpenProjectParams, PullActionsParams,
+    PullDiagnosticsParams, RenameParams, UpdateModuleGraphParams, UpdateSettingsParams,
 };
 use biome_service::workspace::{OpenFileParams, SupportsFeatureParams};
 use camino::{Utf8Path, Utf8PathBuf};
@@ -191,6 +191,33 @@ impl Workspace {
         let params: CloseFileParams =
             serde_wasm_bindgen::from_value(params.into()).map_err(into_error)?;
         self.inner.close_file(params).map_err(into_error)
+    }
+
+    #[wasm_bindgen(js_name = fileExists)]
+    pub fn file_exists(&self, params: IFileExitsParams) -> Result<bool, Error> {
+        let params: FileExitsParams =
+            serde_wasm_bindgen::from_value(params.into()).map_err(into_error)?;
+        self.inner.file_exists(params).map_err(into_error)
+    }
+
+    #[wasm_bindgen(js_name = isPathIgnored)]
+    pub fn is_path_ignored(&self, params: IIsPathIgnoredParams) -> Result<bool, Error> {
+        let params: IsPathIgnoredParams =
+            serde_wasm_bindgen::from_value(params.into()).map_err(into_error)?;
+        self.inner.is_path_ignored(params).map_err(into_error)
+    }
+
+    #[wasm_bindgen(js_name = updateModuleGraph)]
+    pub fn update_module_graph(&self, params: IUpdateModuleGraphParams) -> Result<(), Error> {
+        let params: UpdateModuleGraphParams =
+            serde_wasm_bindgen::from_value(params.into()).map_err(into_error)?;
+
+        self.inner.update_module_graph(params).map_err(into_error)
+    }
+
+    #[wasm_bindgen(js_name = getModuleGraph)]
+    pub fn get_module_graph(&self) -> Result<GetModuleGraphResult, Error> {
+        self.inner.get_control_flow_graph().map_err(into_error)
     }
 
     #[wasm_bindgen(js_name = pullDiagnostics)]

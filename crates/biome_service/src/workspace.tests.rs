@@ -21,8 +21,8 @@ use crate::{Workspace, WorkspaceError};
 use super::{
     CloseFileParams, CloseProjectParams, FileContent, FileFeaturesResult, FileGuard,
     GetFileContentParams, GetSyntaxTreeParams, OpenFileParams, OpenProjectParams,
-    OpenProjectResult, PullDiagnosticsParams, ScanKind, ScanProjectFolderParams,
-    UpdateSettingsParams, server,
+    OpenProjectResult, PullDiagnosticsParams, ScanKind, ScanProjectFolderParams, UpdateKind,
+    UpdateModuleGraphParams, UpdateSettingsParams, server,
 };
 
 fn create_server() -> (Box<dyn Workspace>, ProjectKey) {
@@ -883,4 +883,93 @@ class Person {
     let result = file.get_semantic_model();
     assert!(result.is_ok());
     assert_snapshot!(result.unwrap());
+}
+
+#[test]
+fn debug_module_graph() {
+    let fs = MemoryFileSystem::default();
+
+    let workspace = server(Arc::new(fs), None);
+    let OpenProjectResult { project_key, .. } = workspace
+        .open_project(OpenProjectParams {
+            path: Utf8PathBuf::from("/project").into(),
+            open_uninitialized: true,
+            only_rules: Some(Vec::new()),
+            skip_rules: None,
+        })
+        .unwrap();
+
+    workspace
+        .open_file(OpenFileParams {
+            project_key,
+            path: BiomePath::new("/project/file.js"),
+            content: FileContent::from_client(
+                r#"
+import { filter, debounce } from "./utils.js";
+
+async function test() {
+    const {squash} = import("./dynamic.js");
+}
+"#,
+            ),
+            document_file_source: None,
+            persist_node_cache: false,
+        })
+        .unwrap();
+
+    workspace
+        .open_file(OpenFileParams {
+            project_key,
+            path: BiomePath::new("/project/utils.js"),
+
+            content: FileContent::from_client(
+                r#"
+export const filter = function filter() {};
+
+export const debounce = function debounce() {};
+"#,
+            ),
+            document_file_source: None,
+            persist_node_cache: false,
+        })
+        .unwrap();
+
+    workspace
+        .open_file(OpenFileParams {
+            project_key,
+            path: BiomePath::new("/project/dynamic.js"),
+
+            content: FileContent::from_client(
+                r#"
+export const squash = function squash() {};
+"#,
+            ),
+            document_file_source: None,
+            persist_node_cache: false,
+        })
+        .unwrap();
+
+    workspace
+        .update_module_graph(UpdateModuleGraphParams {
+            path: BiomePath::new("/project/file.js"),
+            update_kind: UpdateKind::AddOrUpdate,
+        })
+        .unwrap();
+    workspace
+        .update_module_graph(UpdateModuleGraphParams {
+            path: BiomePath::new("/project/utils.js"),
+            update_kind: UpdateKind::AddOrUpdate,
+        })
+        .unwrap();
+
+    workspace
+        .update_module_graph(UpdateModuleGraphParams {
+            path: BiomePath::new("/project/dynamic.js"),
+            update_kind: UpdateKind::AddOrUpdate,
+        })
+        .unwrap();
+
+    let result = workspace.get_module_graph().unwrap();
+
+    assert_debug_snapshot!(result)
 }

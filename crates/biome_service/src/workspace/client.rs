@@ -1,11 +1,11 @@
 use super::{
     ChangeFileParams, CloseFileParams, FileExitsParams, FixFileParams, FixFileResult,
     FormatFileParams, FormatOnTypeParams, FormatRangeParams, GetControlFlowGraphParams,
-    GetFormatterIRParams, GetSemanticModelParams, GetSyntaxTreeParams, GetSyntaxTreeResult,
-    OpenFileParams, PullActionsParams, PullActionsResult, PullDiagnosticsParams,
-    PullDiagnosticsResult, RenameParams, RenameResult, ScanProjectFolderParams,
-    ScanProjectFolderResult, SearchPatternParams, SearchResults, SupportsFeatureParams,
-    UpdateSettingsParams, UpdateSettingsResult,
+    GetFormatterIRParams, GetModuleGraphResult, GetSemanticModelParams, GetSyntaxTreeParams,
+    GetSyntaxTreeResult, OpenFileParams, PullActionsParams, PullActionsResult,
+    PullDiagnosticsParams, PullDiagnosticsResult, RenameParams, RenameResult,
+    ScanProjectFolderParams, ScanProjectFolderResult, SearchPatternParams, SearchResults,
+    SupportsFeatureParams, UpdateModuleGraphParams, UpdateSettingsParams, UpdateSettingsResult,
 };
 use crate::workspace::{
     CheckFileSizeParams, CheckFileSizeResult, CloseProjectParams, FileFeaturesResult,
@@ -231,6 +231,10 @@ where
         self.request("biome/close_file", params)
     }
 
+    fn update_module_graph(&self, params: UpdateModuleGraphParams) -> Result<(), WorkspaceError> {
+        self.request("biome/update_module_graph", params)
+    }
+
     fn fs(&self) -> &dyn FsWithResolverProxy {
         self.fs.as_ref()
     }
@@ -256,5 +260,9 @@ where
 
     fn server_info(&self) -> Option<&ServerInfo> {
         self.server_info.as_ref()
+    }
+
+    fn get_module_graph(&self) -> Result<GetModuleGraphResult, WorkspaceError> {
+        self.request("biome/get_module_graph", ())
     }
 }
