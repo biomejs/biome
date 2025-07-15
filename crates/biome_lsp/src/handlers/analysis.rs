@@ -17,7 +17,8 @@ use biome_service::WorkspaceError;
 use biome_service::file_handlers::{AstroFileHandler, SvelteFileHandler, VueFileHandler};
 use biome_service::workspace::{
     CheckFileSizeParams, FeaturesBuilder, FileFeaturesResult, FixFileMode, FixFileParams,
-    GetFileContentParams, IsPathIgnoredParams, PullActionsParams, SupportsFeatureParams,
+    GetFileContentParams, IgnoreKind, IsPathIgnoredParams, PullActionsParams,
+    SupportsFeatureParams,
 };
 use std::borrow::Cow;
 use std::collections::HashMap;
@@ -65,6 +66,7 @@ pub(crate) fn code_actions(
         path: path.clone(),
         project_key: doc.project_key,
         features,
+        ignore_kind: IgnoreKind::Ancestors,
     })? {
         return Ok(Some(Vec::new()));
     }
@@ -311,6 +313,7 @@ fn fix_all(
         path: path.clone(),
         project_key: doc.project_key,
         features: analyzer_features,
+        ignore_kind: IgnoreKind::Ancestors,
     })? {
         return Ok(None);
     }
@@ -332,6 +335,7 @@ fn fix_all(
         path: path.clone(),
         project_key: doc.project_key,
         features: analyzer_features,
+        ignore_kind: IgnoreKind::Ancestors,
     })? {
         return Ok(None);
     }

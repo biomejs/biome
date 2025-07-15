@@ -1,5 +1,7 @@
 use crate::{diagnostics::LspError, session::Session};
-use biome_service::workspace::{FeaturesBuilder, GetSyntaxTreeParams, IsPathIgnoredParams};
+use biome_service::workspace::{
+    FeaturesBuilder, GetSyntaxTreeParams, IgnoreKind, IsPathIgnoredParams,
+};
 use serde::{Deserialize, Serialize};
 use tower_lsp_server::lsp_types::{TextDocumentIdentifier, Uri};
 use tracing::info;
@@ -24,6 +26,7 @@ pub(crate) fn syntax_tree(session: &Session, url: &Uri) -> Result<Option<String>
         path: path.clone(),
         project_key: doc.project_key,
         features,
+        ignore_kind: IgnoreKind::Ancestors,
     })? {
         return Ok(None);
     }

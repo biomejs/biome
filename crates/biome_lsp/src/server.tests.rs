@@ -2695,14 +2695,12 @@ async fn format_jsx_in_javascript_file() -> Result<()> {
     Ok(())
 }
 
-// TODO: understand why this test times out in CI
 #[tokio::test]
-#[ignore = "flaky, it times out on CI"]
-async fn does_not_format_ignored_files() -> Result<()> {
+async fn does_not_format_ignored_files_inside_includes() -> Result<()> {
     let fs = MemoryFileSystem::default();
     let config = r#"{
         "files": {
-            "includes": ["**", "!**/document.js"]
+            "includes": ["**", "!document.js"]
         }
     }"#;
 
@@ -2719,15 +2717,141 @@ async fn does_not_format_ignored_files() -> Result<()> {
     server.initialize().await?;
     server.initialized().await?;
 
-    server
-        .open_named_document(config, uri!("biome.json"), "json")
-        .await?;
+    server.load_configuration().await?;
 
     server
         .open_named_document("statement (   );", uri!("document.js"), "javascript")
         .await?;
 
+    let res: Option<Vec<TextEdit>> = server
+        .request(
+            "textDocument/formatting",
+            "formatting",
+            DocumentFormattingParams {
+                text_document: TextDocumentIdentifier {
+                    uri: uri!("document.js"),
+                },
+                options: FormattingOptions {
+                    tab_size: 4,
+                    insert_spaces: false,
+                    properties: HashMap::default(),
+                    trim_trailing_whitespace: None,
+                    insert_final_newline: None,
+                    trim_final_newlines: None,
+                },
+                work_done_progress_params: WorkDoneProgressParams {
+                    work_done_token: None,
+                },
+            },
+        )
+        .await?
+        .context("formatting returned None")?;
+
+    assert!(res.is_none());
+
+    server.close_document().await?;
+
+    server.shutdown().await?;
+    reader.abort();
+
+    Ok(())
+}
+
+#[tokio::test]
+async fn does_not_format_ignored_files_inside_ignore_file() -> Result<()> {
+    let fs = MemoryFileSystem::default();
+    let config = r#"{
+    "vcs": {
+        "useIgnoreFile": true,
+        "clientKind": "git",
+        "enabled": true
+    }
+}"#;
+
+    fs.insert(to_utf8_file_path_buf(uri!("biome.json")), config);
+    fs.insert(to_utf8_file_path_buf(uri!(".gitignore")), "document.js\n");
+
+    let factory = ServerFactory::new_with_fs(Arc::new(fs));
+    let (service, client) = factory.create().into_inner();
+    let (stream, sink) = client.split();
+    let mut server = Server::new(service);
+
+    let (sender, _) = channel(CHANNEL_BUFFER_SIZE);
+    let reader = tokio::spawn(client_handler(stream, sink, sender));
+
+    server.initialize().await?;
+    server.initialized().await?;
+
     server.load_configuration().await?;
+
+    server
+        .open_named_document("statement (   );", uri!("document.js"), "javascript")
+        .await?;
+
+    let res: Option<Vec<TextEdit>> = server
+        .request(
+            "textDocument/formatting",
+            "formatting",
+            DocumentFormattingParams {
+                text_document: TextDocumentIdentifier {
+                    uri: uri!("document.js"),
+                },
+                options: FormattingOptions {
+                    tab_size: 4,
+                    insert_spaces: false,
+                    properties: HashMap::default(),
+                    trim_trailing_whitespace: None,
+                    insert_final_newline: None,
+                    trim_final_newlines: None,
+                },
+                work_done_progress_params: WorkDoneProgressParams {
+                    work_done_token: None,
+                },
+            },
+        )
+        .await?
+        .context("formatting returned None")?;
+
+    assert!(res.is_none());
+
+    server.close_document().await?;
+
+    server.shutdown().await?;
+    reader.abort();
+
+    Ok(())
+}
+
+#[tokio::test]
+async fn does_not_format_ignored_files_inside_ignore_file_with_dir() -> Result<()> {
+    let fs = MemoryFileSystem::default();
+    let config = r#"{
+    "vcs": {
+        "useIgnoreFile": true,
+        "clientKind": "git",
+        "enabled": true
+    }
+}"#;
+
+    fs.insert(to_utf8_file_path_buf(uri!("biome.json")), config);
+    fs.insert(to_utf8_file_path_buf(uri!(".gitignore")), "dist/\n");
+
+    let factory = ServerFactory::new_with_fs(Arc::new(fs));
+    let (service, client) = factory.create().into_inner();
+    let (stream, sink) = client.split();
+    let mut server = Server::new(service);
+
+    let (sender, _) = channel(CHANNEL_BUFFER_SIZE);
+    let reader = tokio::spawn(client_handler(stream, sink, sender));
+
+    server.initialize().await?;
+    server.initialized().await?;
+
+    server.load_configuration().await?;
+
+    server
+        .open_named_document("statement (   );", uri!("dist/document.js"), "javascript")
+        .await?;
 
     let res: Option<Vec<TextEdit>> = server
         .request(
