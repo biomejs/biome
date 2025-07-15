@@ -4,11 +4,11 @@ use super::{
     CloseProjectParams, FeaturesBuilder, FileContent, FileExitsParams, FixFileParams,
     FixFileResult, FormatFileParams, FormatOnTypeParams, FormatRangeParams,
     GetControlFlowGraphParams, GetFormatterIRParams, GetSemanticModelParams, GetSyntaxTreeParams,
-    GetSyntaxTreeResult, OpenFileParams, OpenProjectParams, ParsePatternParams, ParsePatternResult,
-    PatternId, ProjectKey, PullActionsParams, PullActionsResult, PullDiagnosticsParams,
-    PullDiagnosticsResult, RenameResult, ScanProjectFolderParams, ScanProjectFolderResult,
-    SearchPatternParams, SearchResults, ServiceDataNotification, SupportsFeatureParams,
-    UpdateSettingsParams, UpdateSettingsResult,
+    GetSyntaxTreeResult, IgnoreKind, OpenFileParams, OpenProjectParams, ParsePatternParams,
+    ParsePatternResult, PatternId, ProjectKey, PullActionsParams, PullActionsResult,
+    PullDiagnosticsParams, PullDiagnosticsResult, RenameResult, ScanProjectFolderParams,
+    ScanProjectFolderResult, SearchPatternParams, SearchResults, ServiceDataNotification,
+    SupportsFeatureParams, UpdateSettingsParams, UpdateSettingsResult,
 };
 use crate::configuration::{LoadedConfiguration, ProjectScanComputer, read_config};
 use crate::diagnostics::{FileTooLarge, NoIgnoreFileFound, VcsDiagnostic};
@@ -844,6 +844,7 @@ impl WorkspaceServer {
                 project_key,
                 path: path.clone(),
                 features: FeaturesBuilder::default().build(),
+                ignore_kind: IgnoreKind::Ancestors,
             })?;
         if ignored {
             return Ok(());
@@ -1141,9 +1142,12 @@ impl Workspace for WorkspaceServer {
             return Ok(false);
         };
 
-        Ok(self
-            .projects
-            .is_ignored(params.project_key, &params.path, params.features))
+        Ok(self.projects.is_ignored(
+            params.project_key,
+            &params.path,
+            params.features,
+            params.ignore_kind,
+        ))
     }
 
     fn get_syntax_tree(

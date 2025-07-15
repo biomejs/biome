@@ -12,7 +12,7 @@
 use std::path::PathBuf;
 
 use super::{
-    FeaturesBuilder, IsPathIgnoredParams, ScanKind, ScanProjectFolderParams,
+    FeaturesBuilder, IgnoreKind, IsPathIgnoredParams, ScanKind, ScanProjectFolderParams,
     ServiceDataNotification, Workspace, WorkspaceServer, document::Document,
 };
 use crate::{WorkspaceError, workspace_watcher::WatcherSignalKind};
@@ -88,6 +88,7 @@ impl WorkspaceServer {
                 path: path.into(),
                 project_key,
                 features: FeaturesBuilder::new().build(),
+                ignore_kind: IgnoreKind::Ancestors,
             })?;
 
         if ignored {

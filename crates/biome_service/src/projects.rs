@@ -1,7 +1,9 @@
 use crate::WorkspaceError;
 use crate::file_handlers::Capabilities;
-use crate::settings::{IgnoreKind, Settings};
-use crate::workspace::{DocumentFileSource, FeatureName, FeaturesSupported, FileFeaturesResult};
+use crate::settings::Settings;
+use crate::workspace::{
+    DocumentFileSource, FeatureName, FeaturesSupported, FileFeaturesResult, IgnoreKind,
+};
 use biome_fs::ConfigName;
 use camino::{Utf8Path, Utf8PathBuf};
 use papaya::HashMap;
@@ -152,19 +154,15 @@ impl Projects {
         project_key: ProjectKey,
         path: &Utf8Path,
         features: FeatureName,
+        ignore_kind: IgnoreKind,
     ) -> bool {
         let data = self.0.pin();
         let Some(project_data) = data.get(&project_key) else {
             return false;
         };
 
-        let is_ignored_by_top_level_config = is_ignored_by_top_level_config(
-            project_data,
-            path,
-            IgnoreKind::Ancestors {
-                root_path: project_data.path.as_path(),
-            },
-        );
+        let is_ignored_by_top_level_config =
+            is_ignored_by_top_level_config(project_data, path, ignore_kind);
 
         // If there are specific features enabled, but all of them ignore the
         // path, then we treat the path as ignored too.
@@ -212,12 +210,10 @@ impl Projects {
         {
             // Never ignore Biome's top-level config file
         } else if !settings.files.includes.is_included(path)
-            || project_data.root_settings.vcs_settings.is_ignored(
-                path,
-                IgnoreKind::Ancestors {
-                    root_path: project_data.path.as_path(),
-                },
-            )
+            || project_data
+                .root_settings
+                .vcs_settings
+                .is_ignored(path, Some(project_data.path.as_path()))
         {
             file_features.set_ignored_for_all_features();
         } else {
@@ -358,12 +354,16 @@ fn is_ignored_by_top_level_config(
         );
     let is_included = includes.is_included(path);
 
+    let root_path = match ignore_kind {
+        IgnoreKind::Ancestors => Some(project_data.path.as_path()),
+        IgnoreKind::Path => None,
+    };
     // VCS settings are used from the root settings, regardless of what
     // package we are analyzing, so we ignore the `path` for those.
     let is_ignored_by_vcs = project_data
         .root_settings
         .vcs_settings
-        .is_ignored(path, ignore_kind);
+        .is_ignored(path, root_path);
 
     !is_included || is_ignored_by_vcs
 }

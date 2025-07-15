@@ -724,10 +724,10 @@ impl VcsSettings {
 
     /// Returns whether the given `path` should be ignored per the VCS settings.
     #[inline]
-    pub fn is_ignored(&self, path: &Utf8Path, ignore_kind: IgnoreKind) -> bool {
+    pub fn is_ignored(&self, path: &Utf8Path, root_path: Option<&Utf8Path>) -> bool {
         self.should_use_ignore_file()
             && self.ignore_matches.as_ref().is_some_and(|ignored_matches| {
-                ignored_matches.is_ignored(path, is_dir(path), ignore_kind)
+                ignored_matches.is_ignored(path, is_dir(path), root_path)
             })
     }
 
@@ -803,27 +803,16 @@ pub enum VcsIgnoredPatterns {
     },
 }
 
-pub enum IgnoreKind<'a> {
-    /// Checks whether a path itself is explicitly ignored only.
-    ThisPath,
-
-    /// Checks whether a path itself or one of its ancestors is ignored,
-    /// up to `root_path`.
-    Ancestors { root_path: &'a Utf8Path },
-}
-
 impl VcsIgnoredPatterns {
     /// Checks whether the path ignored by any ignore file found inside the project
     ///
     /// The `root_path` represents the root of the project, as we want to match all ignore files untile the root.
-    pub fn is_ignored(&self, path: &Utf8Path, is_dir: bool, ignore_kind: IgnoreKind) -> bool {
+    pub fn is_ignored(&self, path: &Utf8Path, is_dir: bool, root_path: Option<&Utf8Path>) -> bool {
         match self {
             Self::Git { root, nested, .. } => {
-                match ignore_kind {
-                    IgnoreKind::ThisPath => {
-                        Self::is_git_ignore(root, nested.as_slice(), path, is_dir)
-                    }
-                    IgnoreKind::Ancestors { root_path } => {
+                match root_path {
+                    None => Self::is_git_ignore(root, nested.as_slice(), path, is_dir),
+                    Some(root_path) => {
                         // NOTE: this could be a bug of the library, need to explore. Let's assume it isn't
                         // When crawling the file system with the CLI, we correctly exclude ignored folders
                         // such as `dist/` or `build/`, in case the path to match is `/Users/foo/project/dist`

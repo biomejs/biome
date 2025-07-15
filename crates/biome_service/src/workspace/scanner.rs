@@ -9,10 +9,9 @@
 //! well as the watcher to allow continuous scanning.
 
 use super::server::WorkspaceServer;
-use super::{FeaturesBuilder, IsPathIgnoredParams};
+use super::{FeaturesBuilder, IgnoreKind, IsPathIgnoredParams};
 use crate::diagnostics::Panic;
 use crate::projects::ProjectKey;
-use crate::settings::IgnoreKind;
 use crate::workspace::DocumentFileSource;
 use crate::{Workspace, WorkspaceError};
 use biome_diagnostics::serde::Diagnostic;
@@ -308,7 +307,7 @@ impl TraversalContext for ScanContext<'_> {
                 if self.workspace.projects.is_ignored_by_top_level_config(
                     self.project_key,
                     path,
-                    IgnoreKind::ThisPath,
+                    IgnoreKind::Path,
                 ) {
                     return false; // Nobody cares about ignored paths.
                 }
@@ -334,7 +333,7 @@ impl TraversalContext for ScanContext<'_> {
                         !self.workspace.projects.is_ignored_by_top_level_config(
                             self.project_key,
                             path,
-                            IgnoreKind::ThisPath,
+                            IgnoreKind::Path,
                         )
                     } else {
                         path.is_ignore() || path.is_manifest()
@@ -385,6 +384,7 @@ fn open_file(ctx: &ScanContext, path: &BiomePath) {
                             project_key: ctx.project_key,
                             path: dir_path.into(),
                             features: FeaturesBuilder::new().build(),
+                            ignore_kind: IgnoreKind::Path,
                         })
                         .ok()
                 })
@@ -395,6 +395,7 @@ fn open_file(ctx: &ScanContext, path: &BiomePath) {
                     project_key: ctx.project_key,
                     path: path.clone(),
                     features: FeaturesBuilder::new().build(),
+                    ignore_kind: IgnoreKind::Path,
                 })
                 .unwrap_or_default()
         };

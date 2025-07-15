@@ -533,8 +533,8 @@ pub enum FeatureKind {
 
 pub const NUM_FEATURE_KINDS: usize = 5;
 
-impl std::fmt::Display for FeatureKind {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl Display for FeatureKind {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         match self {
             Self::Format => write!(f, "Format"),
             Self::Lint => write!(f, "Lint"),
@@ -565,13 +565,7 @@ impl FeatureKind {
     /// Returns the index for the feature kind.
     #[inline]
     fn index(self) -> usize {
-        match self {
-            Self::Format => 0,
-            Self::Lint => 1,
-            Self::Search => 2,
-            Self::Assist => 3,
-            Self::Debug => 4,
-        }
+        self as usize
     }
 }
 
@@ -1146,8 +1140,8 @@ pub struct DropPatternParams {
 #[serde(rename_all = "camelCase")]
 pub struct PatternId(String);
 
-impl std::fmt::Display for PatternId {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl Display for PatternId {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         write!(f, "{}", self.0)
     }
 }
@@ -1175,8 +1169,26 @@ impl From<&str> for PatternId {
 #[serde(rename_all = "camelCase")]
 pub struct IsPathIgnoredParams {
     pub project_key: ProjectKey,
+    /// The path to inspect
     pub path: BiomePath,
+    /// Whether the path is ignored for specific features e.g. `formatter.includes`.
+    /// When this field is empty, Biome checks only `files.includes`.
     pub features: FeatureName,
+    #[serde(default)]
+    /// Controls how to ignore check should be done
+    pub ignore_kind: IgnoreKind,
+}
+#[derive(Debug, Default, serde::Serialize, serde::Deserialize)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[serde(rename_all = "camelCase")]
+pub enum IgnoreKind {
+    /// Checks whether a path itself is explicitly ignored only.
+    #[default]
+    Path,
+
+    /// Checks whether a path itself or one of its ancestors is ignored,
+    /// up to the root path of the current project.
+    Ancestors,
 }
 
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
