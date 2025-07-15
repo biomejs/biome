@@ -12,7 +12,7 @@ use biome_fs::{BiomePath, FileSystem, PathInterner};
 use biome_fs::{TraversalContext, TraversalScope};
 use biome_service::projects::ProjectKey;
 use biome_service::workspace::{
-    DocumentFileSource, DropPatternParams, FileFeaturesResult, IsPathIgnoredParams,
+    DocumentFileSource, DropPatternParams, FileFeaturesResult, IgnoreKind, IsPathIgnoredParams,
 };
 use biome_service::{Workspace, WorkspaceError, extension_error, workspace::SupportsFeatureParams};
 use camino::{Utf8Path, Utf8PathBuf};
@@ -541,6 +541,7 @@ impl TraversalContext for TraversalOptions<'_, '_> {
                     project_key: self.project_key,
                     path: biome_path.clone(),
                     features: self.execution.to_feature(),
+                    ignore_kind: IgnoreKind::Path,
                 })
                 .unwrap_or_else(|err| {
                     self.push_diagnostic(err.into());

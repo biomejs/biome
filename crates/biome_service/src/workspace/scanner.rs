@@ -9,7 +9,7 @@
 //! well as the watcher to allow continuous scanning.
 
 use super::server::WorkspaceServer;
-use super::{FeaturesBuilder, IsPathIgnoredParams};
+use super::{FeaturesBuilder, IgnoreKind, IsPathIgnoredParams};
 use crate::diagnostics::Panic;
 use crate::projects::ProjectKey;
 use crate::workspace::DocumentFileSource;
@@ -304,11 +304,11 @@ impl TraversalContext for ScanContext<'_> {
                     return self.scan_kind.is_project();
                 }
 
-                if self
-                    .workspace
-                    .projects
-                    .is_ignored_by_top_level_config(self.project_key, path)
-                {
+                if self.workspace.projects.is_ignored_by_top_level_config(
+                    self.project_key,
+                    path,
+                    IgnoreKind::Path,
+                ) {
                     return false; // Nobody cares about ignored paths.
                 }
 
@@ -330,10 +330,11 @@ impl TraversalContext for ScanContext<'_> {
             Ok(PathKind::File { .. }) => match &self.scan_kind {
                 ScanKind::KnownFiles | ScanKind::TargetedKnownFiles { .. } => {
                     if path.is_config() {
-                        !self
-                            .workspace
-                            .projects
-                            .is_ignored_by_top_level_config(self.project_key, path)
+                        !self.workspace.projects.is_ignored_by_top_level_config(
+                            self.project_key,
+                            path,
+                            IgnoreKind::Path,
+                        )
                     } else {
                         path.is_ignore() || path.is_manifest()
                     }
@@ -360,10 +361,7 @@ impl TraversalContext for ScanContext<'_> {
     }
 
     fn store_path(&self, path: BiomePath) {
-        self.evaluated_paths
-            .write()
-            .unwrap()
-            .insert(BiomePath::new(path.as_path()));
+        self.evaluated_paths.write().unwrap().insert(path);
     }
 }
 
@@ -386,6 +384,7 @@ fn open_file(ctx: &ScanContext, path: &BiomePath) {
                             project_key: ctx.project_key,
                             path: dir_path.into(),
                             features: FeaturesBuilder::new().build(),
+                            ignore_kind: IgnoreKind::Path,
                         })
                         .ok()
                 })
@@ -396,6 +395,7 @@ fn open_file(ctx: &ScanContext, path: &BiomePath) {
                     project_key: ctx.project_key,
                     path: path.clone(),
                     features: FeaturesBuilder::new().build(),
+                    ignore_kind: IgnoreKind::Path,
                 })
                 .unwrap_or_default()
         };
