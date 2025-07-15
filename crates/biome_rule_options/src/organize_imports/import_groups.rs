@@ -308,23 +308,28 @@ impl TryFrom<String> for NegatablePredefinedSourceMatcher {
         value.parse()
     }
 }
+
 #[cfg(feature = "schema")]
 impl schemars::JsonSchema for NegatablePredefinedSourceMatcher {
-    fn schema_name() -> String {
-        "NegatablePredefinedSourceMatcher".to_string()
+    fn schema_name() -> std::borrow::Cow<'static, str> {
+        std::borrow::Cow::Borrowed("NegatablePredefinedSourceMatcher")
     }
-    fn json_schema(generator: &mut schemars::r#gen::SchemaGenerator) -> schemars::schema::Schema {
-        let schema = PredefinedSourceMatcher::json_schema(generator);
-        let mut schema_object = schema.into_object();
-        // Add negated variants
-        if let Some(enum_values) = &mut schema_object.enum_values {
-            for index in 0..enum_values.len() {
-                if let Some(val) = enum_values[index].as_str() {
-                    enum_values.push(format!("!{val}").into());
+
+    fn json_schema(generator: &mut schemars::SchemaGenerator) -> schemars::Schema {
+        let mut schema = PredefinedSourceMatcher::json_schema(generator);
+        if let Some(schema_object) = schema.as_object_mut() {
+            // Add negated variants
+            if let Some(enum_values) = schema_object.get_mut("enumValues") {
+                if let Some(enum_values) = enum_values.as_array_mut() {
+                    for index in 0..enum_values.len() {
+                        if let Some(val) = enum_values[index].as_str() {
+                            enum_values.push(format!("!{val}").into());
+                        }
+                    }
                 }
             }
         }
-        schema_object.into()
+        schema
     }
 }
 

@@ -430,11 +430,11 @@ impl<'de> serde::Deserialize<'de> for RuleCategories {
 
 #[cfg(feature = "schema")]
 impl schemars::JsonSchema for RuleCategories {
-    fn schema_name() -> String {
-        String::from("RuleCategories")
+    fn schema_name() -> Cow<'static, str> {
+        Cow::Borrowed("RuleCategories")
     }
 
-    fn json_schema(generator: &mut schemars::r#gen::SchemaGenerator) -> schemars::schema::Schema {
+    fn json_schema(generator: &mut schemars::SchemaGenerator) -> schemars::Schema {
         <Vec<RuleCategory>>::json_schema(generator)
     }
 }

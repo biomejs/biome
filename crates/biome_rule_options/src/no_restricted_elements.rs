@@ -35,16 +35,15 @@ impl Deref for CustomRestrictedElements {
 
 #[cfg(feature = "schema")]
 impl schemars::JsonSchema for CustomRestrictedElements {
-    fn schema_name() -> String {
-        "CustomRestrictedElements".to_owned()
+    fn schema_name() -> std::borrow::Cow<'static, str> {
+        std::borrow::Cow::Borrowed("CustomRestrictedElements")
     }
 
-    fn json_schema(generator: &mut schemars::SchemaGenerator) -> schemars::schema::Schema {
-        let mut schema = generator
-            .subschema_for::<CustomRestrictedElementsBaseType>()
-            .into_object();
-        schema.object().min_properties = Some(1);
-        schemars::schema::Schema::Object(schema)
+    fn json_schema(_generator: &mut schemars::SchemaGenerator) -> schemars::Schema {
+        schemars::json_schema!({
+            "$ref": "#/definitions/CustomRestrictedElementsBaseType",
+            "minProperties": 1
+        })
     }
 }
 

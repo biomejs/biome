@@ -415,11 +415,11 @@ impl From<&str> for Schema {
 
 #[cfg(feature = "schema")]
 impl schemars::JsonSchema for Schema {
-    fn schema_name() -> String {
-        "Schema".into()
+    fn schema_name() -> std::borrow::Cow<'static, str> {
+        std::borrow::Cow::Borrowed("Schema")
     }
 
-    fn json_schema(generator: &mut schemars::r#gen::SchemaGenerator) -> schemars::schema::Schema {
+    fn json_schema(generator: &mut schemars::SchemaGenerator) -> schemars::Schema {
         String::json_schema(generator)
     }
 }

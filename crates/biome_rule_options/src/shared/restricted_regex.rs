@@ -100,11 +100,11 @@ impl biome_deserialize::Deserializable for RestrictedRegex {
 
 #[cfg(feature = "schema")]
 impl schemars::JsonSchema for RestrictedRegex {
-    fn schema_name() -> String {
-        "Regex".to_string()
+    fn schema_name() -> std::borrow::Cow<'static, str> {
+        std::borrow::Cow::Borrowed("Regex")
     }
 
-    fn json_schema(generator: &mut schemars::r#gen::SchemaGenerator) -> schemars::schema::Schema {
+    fn json_schema(generator: &mut schemars::SchemaGenerator) -> schemars::Schema {
         String::json_schema(generator)
     }
 }

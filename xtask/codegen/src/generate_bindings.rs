@@ -8,9 +8,9 @@ use biome_js_syntax::{
     AnyTsReturnType, AnyTsType, AnyTsTypeMember, JsFileSource, T, TriviaPieceKind,
 };
 use biome_rowan::AstNode;
-use biome_service::workspace_types::{ModuleQueue, generate_type, methods};
+use biome_service::workspace_types::{ModuleQueue, generate_type, include_subschema, methods};
 use biome_string_case::Case;
-use schemars::r#gen::{SchemaGenerator, SchemaSettings};
+use schemars::{SchemaGenerator, generate::SchemaSettings};
 use xtask::{Mode, Result, project_root};
 use xtask_codegen::update;
 
@@ -23,9 +23,12 @@ pub(crate) fn generate_workspace_bindings(mode: Mode) -> Result<()> {
     let mut member_declarations = Vec::with_capacity(methods.len());
     let mut queue = ModuleQueue::default();
 
+    let mut generator = SchemaGenerator::new(SchemaSettings::openapi3());
+    include_subschema(&mut generator);
+
     for method in &methods {
-        let params = generate_type(&mut declarations, &mut queue, &method.params);
-        let result = generate_type(&mut declarations, &mut queue, &method.result);
+        let params = generate_type(&generator, &mut declarations, &mut queue, &method.params);
+        let result = generate_type(&generator, &mut declarations, &mut queue, &method.result);
 
         let camel_case = Case::Camel.convert(method.name);
 
@@ -154,17 +157,6 @@ pub(crate) fn generate_workspace_bindings(mode: Mode) -> Result<()> {
             .build(),
         ));
     }
-    // HACK: these types doesn't get picked up in the loop above, so we add it manually
-    let support_kind_schema = SchemaGenerator::from(SchemaSettings::openapi3())
-        .root_schema_for::<biome_service::workspace::SupportKind>();
-    generate_type(&mut declarations, &mut queue, &support_kind_schema);
-    let rule_domain_schema = SchemaGenerator::from(SchemaSettings::openapi3())
-        .root_schema_for::<biome_analyze::RuleDomain>();
-    generate_type(&mut declarations, &mut queue, &rule_domain_schema);
-    let rule_domain_value_schema = SchemaGenerator::from(SchemaSettings::openapi3())
-        .root_schema_for::<biome_configuration::analyzer::RuleDomainValue>(
-    );
-    generate_type(&mut declarations, &mut queue, &rule_domain_value_schema);
 
     let leading_comment = [
         (
@@ -207,7 +199,7 @@ pub(crate) fn generate_workspace_bindings(mode: Mode) -> Result<()> {
     items.extend(declarations.into_iter().map(|(decl, description)| {
         let mut export = make::token(T![export]);
         if let Some(description) = description {
-            let comment = format!("/**\n\t* {} \n\t */\n", description);
+            let comment = format!("/**\n\t* {description} \n\t */\n");
             let trivia = vec![
                 (TriviaPieceKind::Newline, "\n"),
                 (TriviaPieceKind::MultiLineComment, comment.as_str()),

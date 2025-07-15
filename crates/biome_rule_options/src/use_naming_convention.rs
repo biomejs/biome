@@ -479,11 +479,11 @@ impl FromIterator<RestrictedModifier> for RestrictedModifiers {
 }
 #[cfg(feature = "schema")]
 impl schemars::JsonSchema for RestrictedModifiers {
-    fn schema_name() -> String {
-        "Modifiers".to_string()
+    fn schema_name() -> std::borrow::Cow<'static, str> {
+        std::borrow::Cow::Borrowed("Modifiers")
     }
 
-    fn json_schema(generator: &mut schemars::r#gen::SchemaGenerator) -> schemars::schema::Schema {
+    fn json_schema(generator: &mut schemars::SchemaGenerator) -> schemars::Schema {
         <std::collections::HashSet<RestrictedModifier>>::json_schema(generator)
     }
 }
@@ -629,10 +629,10 @@ impl From<Formats> for SmallVec<[Format; 4]> {
 }
 #[cfg(feature = "schema")]
 impl schemars::JsonSchema for Formats {
-    fn schema_name() -> String {
-        "Formats".to_string()
+    fn schema_name() -> std::borrow::Cow<'static, str> {
+        std::borrow::Cow::Borrowed("Formats")
     }
-    fn json_schema(generator: &mut schemars::r#gen::SchemaGenerator) -> schemars::schema::Schema {
+    fn json_schema(generator: &mut schemars::SchemaGenerator) -> schemars::Schema {
         <std::collections::HashSet<Format>>::json_schema(generator)
     }
 }
