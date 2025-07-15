@@ -36,10 +36,10 @@ use crate::{
     TypeOperatorType, TypeReference, TypeReferenceQualifier, TypeResolver,
     TypeofAdditionExpression, TypeofAwaitExpression, TypeofBitwiseNotExpression,
     TypeofCallExpression, TypeofConditionalExpression, TypeofDestructureExpression,
-    TypeofExpression, TypeofIterableValueOfExpression, TypeofLogicalAndExpression,
-    TypeofLogicalOrExpression, TypeofNewExpression, TypeofNullishCoalescingExpression,
-    TypeofStaticMemberExpression, TypeofThisOrSuperExpression, TypeofTypeofExpression,
-    TypeofUnaryMinusExpression, TypeofValue,
+    TypeofExpression, TypeofIndexExpression, TypeofIterableValueOfExpression,
+    TypeofLogicalAndExpression, TypeofLogicalOrExpression, TypeofNewExpression,
+    TypeofNullishCoalescingExpression, TypeofStaticMemberExpression, TypeofThisOrSuperExpression,
+    TypeofTypeofExpression, TypeofUnaryMinusExpression, TypeofValue,
 };
 
 impl TypeData {
@@ -495,6 +495,23 @@ impl TypeData {
                                     member,
                                 },
                             ))
+                        })
+                        .unwrap_or_default(),
+                    (
+                        Ok(object),
+                        Ok(AnyJsExpression::AnyJsLiteralExpression(
+                            AnyJsLiteralExpression::JsNumberLiteralExpression(member),
+                        )),
+                    ) => unescaped_text_from_token(member.value_token())
+                        .map(|member| match member.parse() {
+                            Ok(index) => {
+                                Self::from(TypeofExpression::Index(TypeofIndexExpression {
+                                    object: resolver
+                                        .reference_to_resolved_expression(scope_id, &object),
+                                    index,
+                                }))
+                            }
+                            Err(_) => Self::unknown(),
                         })
                         .unwrap_or_default(),
                     _ => Self::unknown(),
