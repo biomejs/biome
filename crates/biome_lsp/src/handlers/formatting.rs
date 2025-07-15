@@ -8,7 +8,7 @@ use biome_rowan::{TextLen, TextRange, TextSize};
 use biome_service::file_handlers::{AstroFileHandler, SvelteFileHandler, VueFileHandler};
 use biome_service::workspace::{
     CheckFileSizeParams, FeaturesBuilder, FeaturesSupported, FileFeaturesResult, FormatFileParams,
-    FormatOnTypeParams, FormatRangeParams, GetFileContentParams, IsPathIgnoredParams,
+    FormatOnTypeParams, FormatRangeParams, GetFileContentParams, IgnoreKind, IsPathIgnoredParams,
     SupportsFeatureParams,
 };
 use biome_service::{WorkspaceError, extension_error};
@@ -34,6 +34,7 @@ pub(crate) fn format(
         path: path.clone(),
         project_key: doc.project_key,
         features,
+        ignore_kind: IgnoreKind::Ancestors,
     })? {
         return Ok(None);
     }
@@ -51,6 +52,7 @@ pub(crate) fn format(
             path: path.clone(),
             project_key: doc.project_key,
             features,
+            ignore_kind: IgnoreKind::Ancestors,
         })?
     {
         let size_limit_result = session.workspace.check_file_size(CheckFileSizeParams {
@@ -116,6 +118,7 @@ pub(crate) fn format_range(
         path: path.clone(),
         project_key: doc.project_key,
         features,
+        ignore_kind: IgnoreKind::Ancestors,
     })? {
         return Ok(None);
     }
@@ -134,6 +137,7 @@ pub(crate) fn format_range(
             path: path.clone(),
             project_key: doc.project_key,
             features,
+            ignore_kind: IgnoreKind::Ancestors,
         })?
     {
         let size_limit_result = session.workspace.check_file_size(CheckFileSizeParams {
@@ -230,6 +234,7 @@ pub(crate) fn format_on_type(
         path: path.clone(),
         project_key: doc.project_key,
         features,
+        ignore_kind: IgnoreKind::Ancestors,
     })? {
         return notify_user(file_features, path);
     }
@@ -239,6 +244,7 @@ pub(crate) fn format_on_type(
             path: path.clone(),
             project_key: doc.project_key,
             features,
+            ignore_kind: IgnoreKind::Ancestors,
         })?
     {
         let size_limit_result = session.workspace.check_file_size(CheckFileSizeParams {

@@ -11,16 +11,15 @@
 
 use std::path::PathBuf;
 
+use super::{
+    FeaturesBuilder, IgnoreKind, IsPathIgnoredParams, ScanKind, ScanProjectFolderParams,
+    ServiceDataNotification, Workspace, WorkspaceServer, document::Document,
+};
+use crate::{WorkspaceError, workspace_watcher::WatcherSignalKind};
 use biome_fs::PathKind;
 use camino::{Utf8Path, Utf8PathBuf};
 use papaya::{Compute, Operation};
-
-use crate::{WorkspaceError, workspace_watcher::WatcherSignalKind};
-
-use super::{
-    ScanKind, ScanProjectFolderParams, ServiceDataNotification, Workspace, WorkspaceServer,
-    document::Document,
-};
+use tracing::instrument;
 
 impl WorkspaceServer {
     /// Filters the given `paths` and returns only those the watcher is
@@ -74,6 +73,7 @@ impl WorkspaceServer {
     ///
     /// If you already know the path is a folder, use
     /// `Self::open_folder_through_watcher()` instead.
+    #[instrument(level = "debug", skip_all)]
     pub fn open_path_through_watcher(&self, path: &Utf8Path) -> Result<(), WorkspaceError> {
         if let PathKind::Directory { .. } = self.fs.path_kind(path)? {
             return self.open_folder_through_watcher(path);
@@ -83,7 +83,15 @@ impl WorkspaceServer {
             return Ok(()); // file events outside our projects can be safely ignored.
         };
 
-        if self.is_ignored_by_scanner(project_key, path) {
+        let ignored = self.is_ignored_by_scanner(project_key, path)
+            || self.is_path_ignored(IsPathIgnoredParams {
+                path: path.into(),
+                project_key,
+                features: FeaturesBuilder::new().build(),
+                ignore_kind: IgnoreKind::Ancestors,
+            })?;
+
+        if ignored {
             return Ok(());
         }
 
@@ -102,6 +110,7 @@ impl WorkspaceServer {
             watch: false, // It's already being watched.
             force: true,
             scan_kind: ScanKind::Project,
+            verbose: false,
         })
         .map(|_| ())
     }

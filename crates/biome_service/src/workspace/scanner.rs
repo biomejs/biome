@@ -9,13 +9,13 @@
 //! well as the watcher to allow continuous scanning.
 
 use super::server::WorkspaceServer;
-use super::{FeaturesBuilder, IsPathIgnoredParams};
+use super::{FeaturesBuilder, IgnoreKind, IsPathIgnoredParams};
 use crate::diagnostics::Panic;
 use crate::projects::ProjectKey;
 use crate::workspace::DocumentFileSource;
 use crate::{Workspace, WorkspaceError};
 use biome_diagnostics::serde::Diagnostic;
-use biome_diagnostics::{Diagnostic as _, Error, Severity};
+use biome_diagnostics::{Diagnostic as _, DiagnosticExt, Error, Severity};
 use biome_fs::{BiomePath, PathInterner, PathKind, TraversalContext, TraversalScope};
 use camino::Utf8Path;
 use crossbeam::channel::{Receiver, Sender, unbounded};
@@ -48,11 +48,12 @@ impl WorkspaceServer {
         project_key: ProjectKey,
         folder: &Utf8Path,
         scan_kind: ScanKind,
+        verbose: bool,
     ) -> Result<ScanResult, WorkspaceError> {
         let (interner, _path_receiver) = PathInterner::new();
         let (diagnostics_sender, diagnostics_receiver) = unbounded();
 
-        let collector = DiagnosticsCollector::new();
+        let collector = DiagnosticsCollector::new(verbose);
 
         let (duration, diagnostics, configuration_files) = thread::scope(|scope| {
             let handler = thread::Builder::new()
@@ -166,23 +167,22 @@ fn scan_folder(folder: &Utf8Path, ctx: ScanContext) -> (Duration, Vec<BiomePath>
 struct DiagnosticsCollector {
     /// The minimum level of diagnostic we should collect.
     diagnostic_level: Severity,
-
-    /// Whether we should collect verbose diagnostics.
-    verbose: bool,
 }
 
 impl DiagnosticsCollector {
-    fn new() -> Self {
+    fn new(verbose: bool) -> Self {
         Self {
-            diagnostic_level: Severity::Hint,
-            verbose: false,
+            diagnostic_level: if verbose {
+                Severity::Hint
+            } else {
+                Severity::Error
+            },
         }
     }
 
     /// Checks whether the given `diagnostic` should be collected or not.
     fn should_collect(&self, diagnostic: &Diagnostic) -> bool {
         diagnostic.severity() >= self.diagnostic_level
-            && (self.verbose || !diagnostic.tags().is_verbose())
     }
 
     fn run(&self, receiver: Receiver<Diagnostic>) -> Vec<Diagnostic> {
@@ -304,11 +304,11 @@ impl TraversalContext for ScanContext<'_> {
                     return self.scan_kind.is_project();
                 }
 
-                if self
-                    .workspace
-                    .projects
-                    .is_ignored_by_top_level_config(self.project_key, path)
-                {
+                if self.workspace.projects.is_ignored_by_top_level_config(
+                    self.project_key,
+                    path,
+                    IgnoreKind::Path,
+                ) {
                     return false; // Nobody cares about ignored paths.
                 }
 
@@ -330,10 +330,11 @@ impl TraversalContext for ScanContext<'_> {
             Ok(PathKind::File { .. }) => match &self.scan_kind {
                 ScanKind::KnownFiles | ScanKind::TargetedKnownFiles { .. } => {
                     if path.is_config() {
-                        !self
-                            .workspace
-                            .projects
-                            .is_ignored_by_top_level_config(self.project_key, path)
+                        !self.workspace.projects.is_ignored_by_top_level_config(
+                            self.project_key,
+                            path,
+                            IgnoreKind::Path,
+                        )
                     } else {
                         path.is_ignore() || path.is_manifest()
                     }
@@ -360,10 +361,7 @@ impl TraversalContext for ScanContext<'_> {
     }
 
     fn store_path(&self, path: BiomePath) {
-        self.evaluated_paths
-            .write()
-            .unwrap()
-            .insert(BiomePath::new(path.as_path()));
+        self.evaluated_paths.write().unwrap().insert(path);
     }
 }
 
@@ -386,6 +384,7 @@ fn open_file(ctx: &ScanContext, path: &BiomePath) {
                             project_key: ctx.project_key,
                             path: dir_path.into(),
                             features: FeaturesBuilder::new().build(),
+                            ignore_kind: IgnoreKind::Path,
                         })
                         .ok()
                 })
@@ -396,6 +395,7 @@ fn open_file(ctx: &ScanContext, path: &BiomePath) {
                     project_key: ctx.project_key,
                     path: path.clone(),
                     features: FeaturesBuilder::new().build(),
+                    ignore_kind: IgnoreKind::Path,
                 })
                 .unwrap_or_default()
         };
@@ -408,7 +408,11 @@ fn open_file(ctx: &ScanContext, path: &BiomePath) {
     }) {
         Ok(Ok(())) => {}
         Ok(Err(err)) => {
-            ctx.send_diagnostic(err);
+            let mut error: Error = err.into();
+            if !path.is_config() && error.severity() == Severity::Error {
+                error = error.with_severity(Severity::Warning);
+            }
+            ctx.send_diagnostic(Diagnostic::new(error));
         }
         Err(err) => {
             let error = match err.downcast::<String>() {
@@ -423,3 +427,7 @@ fn open_file(ctx: &ScanContext, path: &BiomePath) {
         }
     }
 }
+
+#[cfg(test)]
+#[path = "scanner.tests.rs"]
+mod tests;
