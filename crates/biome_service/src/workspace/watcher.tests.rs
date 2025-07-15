@@ -54,7 +54,7 @@ fn should_not_open_an_ignored_file_inside_vcs_ignore_file() {
         .expect("can update settings");
 
     workspace
-        .open_path_through_watcher(Utf8Path::new("/project/a.js"))
+        .open_path_through_watcher(Utf8Path::new("/project/a.js"), &ScanKind::Project)
         .expect("can open file");
 
     let result = workspace.format_file(FormatFileParams {
@@ -100,7 +100,10 @@ fn should_not_open_an_ignored_file_inside_file_includes() {
         .expect("can update settings");
 
     workspace
-        .open_path_through_watcher(Utf8Path::new("/project/dist/minified.js"))
+        .open_path_through_watcher(
+            Utf8Path::new("/project/dist/minified.js"),
+            &ScanKind::Project,
+        )
         .expect("can open file");
 
     let result = workspace.format_file(FormatFileParams {
@@ -131,7 +134,7 @@ fn close_file_through_watcher_before_client() {
         .expect("can open project");
 
     workspace
-        .open_path_through_watcher(Utf8Path::new("/project/a.js"))
+        .open_path_through_watcher(Utf8Path::new("/project/a.js"), &ScanKind::Project)
         .expect("can open file");
 
     workspace
@@ -312,7 +315,7 @@ fn close_modified_file_from_client_before_watcher() {
     );
     // call the instruction handler manually for the sake of the test:
     workspace
-        .open_path_through_watcher(Utf8Path::new("/project/a.js"))
+        .open_path_through_watcher(Utf8Path::new("/project/a.js"), &ScanKind::Project)
         .expect("path to be updated by us");
 
     let content = workspace
@@ -324,4 +327,43 @@ fn close_modified_file_from_client_before_watcher() {
 
     // Content should've reverted to the filesystem state.
     assert_eq!(content, FILE_CONTENT);
+}
+
+#[test]
+fn should_not_open_a_source_file_with_scan_kind_known_files() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(Utf8PathBuf::from("/project/a.js"), "import 'foo';");
+
+    let (watcher_tx, watcher_rx) = unbounded();
+    let (service_data_tx, _) = watch::channel(ServiceDataNotification::Updated);
+    let workspace = WorkspaceServer::new(Arc::new(fs), watcher_tx, service_data_tx, None);
+    let OpenProjectResult { project_key, .. } = workspace
+        .open_project(OpenProjectParams {
+            path: BiomePath::new("/project"),
+            open_uninitialized: true,
+            skip_rules: None,
+            only_rules: None,
+        })
+        .expect("can open project");
+
+    workspace
+        .update_settings(UpdateSettingsParams {
+            project_key,
+            workspace_directory: Some(BiomePath::new("/project")),
+            configuration: Configuration::default(),
+        })
+        .expect("can update settings");
+
+    workspace
+        .open_path_through_watcher(Utf8Path::new("/project/a.js"), &ScanKind::KnownFiles)
+        .expect("can open file");
+
+    let result = workspace.get_file_content(GetFileContentParams {
+        project_key,
+        path: BiomePath::new("/project/a.js"),
+    });
+    assert!(result.is_err());
+
+    let result = watcher_rx.try_recv();
+    assert!(result.is_err(), "no watcher notification expected");
 }

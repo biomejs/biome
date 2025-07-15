@@ -3364,10 +3364,7 @@ export function bar() {
 
     server.initialize().await?;
 
-    let OpenProjectResult {
-        project_key,
-        scan_kind,
-    } = server
+    let OpenProjectResult { project_key, .. } = server
         .request(
             "biome/open_project",
             "open_project",
@@ -3391,7 +3388,7 @@ export function bar() {
                 path: None,
                 watch: true,
                 force: false,
-                scan_kind,
+                scan_kind: ScanKind::Project,
                 verbose: false,
             },
         )
