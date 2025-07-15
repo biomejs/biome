@@ -13,7 +13,7 @@ use biome_resolver::ResolvedPath;
 use biome_rowan::{Text, TextRange};
 use indexmap::IndexMap;
 use rust_lapper::Lapper;
-use rustc_hash::FxHashMap;
+use rustc_hash::{FxHashMap, FxHashSet};
 
 use crate::ModuleGraph;
 
@@ -80,6 +80,31 @@ impl JsModuleInfo {
         JsScope {
             info: self.0.clone(),
             id: scope_id_for_range(&self.0.scope_by_range, range),
+        }
+    }
+
+    /// Returns a serializable version of this module
+    pub fn dump(&self) -> SerializedJsModuleInfo {
+        SerializedJsModuleInfo {
+            static_imports: self
+                .static_imports
+                .iter()
+                .map(|(text, static_import)| {
+                    (text.to_string(), static_import.specifier.to_string())
+                })
+                .collect::<FxHashMap<_, _>>(),
+
+            exports: self
+                .exports
+                .iter()
+                .map(|(text, _)| text.to_string())
+                .collect::<FxHashSet<_>>(),
+
+            dynamic_imports: self
+                .dynamic_import_paths
+                .iter()
+                .map(|(text, _)| text.to_string())
+                .collect::<FxHashSet<_>>(),
         }
     }
 }
@@ -344,4 +369,16 @@ fn scope_id_for_range(scope_by_range: &Lapper<u32, ScopeId>, range: TextRange) -
         .map_or(ScopeId::GLOBAL, |interval| {
             ScopeId::new(interval.val.index())
         })
+}
+
+#[derive(Debug)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+pub struct SerializedJsModuleInfo {
+    /// Static imports
+    static_imports: FxHashMap<String, String>,
+    /// Dynamic imports
+    dynamic_imports: FxHashSet<String>,
+    /// Exported symbols
+    exports: FxHashSet<String>,
 }

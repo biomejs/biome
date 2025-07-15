@@ -8832,6 +8832,22 @@ export interface CloseFileParams {
 	path: BiomePath;
 	projectKey: ProjectKey;
 }
+export interface FileExitsParams {
+	filePath: BiomePath;
+}
+export interface IsPathIgnoredParams {
+	features: FeatureName;
+	path: BiomePath;
+	projectKey: ProjectKey;
+}
+export interface UpdateModuleGraphParams {
+	path: BiomePath;
+	/**
+	 * The kind of update to apply to the module graph
+	 */
+	updateKind: UpdateKind;
+}
+export type UpdateKind = "addOrUpdate" | "remove";
 export interface GetSyntaxTreeParams {
 	path: BiomePath;
 	projectKey: ProjectKey;
@@ -8839,9 +8855,6 @@ export interface GetSyntaxTreeParams {
 export interface GetSyntaxTreeResult {
 	ast: string;
 	cst: string;
-}
-export interface FileExitsParams {
-	filePath: BiomePath;
 }
 export interface CheckFileSizeParams {
 	path: BiomePath;
@@ -9089,6 +9102,9 @@ export interface Workspace {
 	openFile(params: OpenFileParams): Promise<void>;
 	changeFile(params: ChangeFileParams): Promise<void>;
 	closeFile(params: CloseFileParams): Promise<void>;
+	fileExists(params: FileExitsParams): Promise<boolean>;
+	isPathIgnored(params: IsPathIgnoredParams): Promise<boolean>;
+	updateModuleGraph(params: UpdateModuleGraphParams): Promise<void>;
 	getSyntaxTree(params: GetSyntaxTreeParams): Promise<GetSyntaxTreeResult>;
 	fileExists(params: FileExitsParams): Promise<boolean>;
 	checkFileSize(params: CheckFileSizeParams): Promise<CheckFileSizeResult>;
@@ -9131,6 +9147,15 @@ export function createWorkspace(transport: Transport): Workspace {
 		},
 		closeFile(params) {
 			return transport.request("biome/close_file", params);
+		},
+		fileExists(params) {
+			return transport.request("biome/file_exists", params);
+		},
+		isPathIgnored(params) {
+			return transport.request("biome/is_path_ignored", params);
+		},
+		updateModuleGraph(params) {
+			return transport.request("biome/update_module_graph", params);
 		},
 		getSyntaxTree(params) {
 			return transport.request("biome/get_syntax_tree", params);

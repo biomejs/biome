@@ -1274,6 +1274,8 @@ dependencies = [
  "papaya",
  "rust-lapper",
  "rustc-hash 2.1.1",
+ "schemars",
+ "serde",
  "serde_json",
  "static_assertions",
  "tikv-jemallocator",

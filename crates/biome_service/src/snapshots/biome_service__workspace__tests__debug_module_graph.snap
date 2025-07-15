@@ -1,0 +1,33 @@
+[] bb---
+source: crates/biome_service/src/workspace.tests.rs
+expression: result
+---
+GetModuleGraphResult {
+    data: {
+        "/project/utils.js": SerializedJsModuleInfo {
+            static_imports: {},
+            dynamic_imports: {},
+            exports: {
+                "filter",
+                "debounce",
+            },
+        },
+        "/project/dynamic.js": SerializedJsModuleInfo {
+            static_imports: {},
+            dynamic_imports: {},
+            exports: {
+                "squash",
+            },
+        },
+        "/project/file.js": SerializedJsModuleInfo {
+            static_imports: {
+                "filter": "./utils.js",
+                "debounce": "./utils.js",
+            },
+            dynamic_imports: {
+                "./dynamic.js",
+            },
+            exports: {},
+        },
+    },
+}
