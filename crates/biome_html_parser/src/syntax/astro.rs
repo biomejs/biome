@@ -1,7 +1,9 @@
 use crate::parser::HtmlParser;
 use crate::syntax::parse_error::expected_closed_fence;
 use crate::token_source::HtmlLexContext;
-use biome_html_syntax::HtmlSyntaxKind::{ASTRO_FRONTMATTER_ELEMENT, FENCE, HTML_LITERAL};
+use biome_html_syntax::HtmlSyntaxKind::{
+    ASTRO_EXPRESSION, ASTRO_FRONTMATTER_ELEMENT, FENCE, HTML_LITERAL,
+};
 use biome_html_syntax::T;
 use biome_parser::Parser;
 use biome_parser::prelude::ParsedSyntax;
@@ -24,5 +26,24 @@ pub(crate) fn parse_astro_fence(p: &mut HtmlParser) -> ParsedSyntax {
     p.expect(T![---]);
 
     let c = m.complete(p, ASTRO_FRONTMATTER_ELEMENT);
+    ParsedSyntax::Present(c)
+}
+
+pub(crate) fn parse_astro_expression(p: &mut HtmlParser) -> ParsedSyntax {
+    if !p.at(T!['{']) {
+        return Absent;
+    }
+    let m = p.start();
+
+    p.bump_with_context(T!['{'], HtmlLexContext::TextExpression);
+
+    if p.at(HTML_LITERAL) {
+        p.bump_with_context(HTML_LITERAL, HtmlLexContext::AttributeValue);
+    }
+
+    p.expect(T!['}']);
+
+    let c = m.complete(p, ASTRO_EXPRESSION);
+
     ParsedSyntax::Present(c)
 }

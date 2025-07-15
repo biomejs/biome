@@ -20,6 +20,51 @@ use std::fmt::{Debug, Formatter};
 #[doc = r" the slots are not statically known."]
 pub(crate) const SLOT_MAP_EMPTY_VALUE: u8 = u8::MAX;
 #[derive(Clone, PartialEq, Eq, Hash)]
+pub struct AstroExpression {
+    pub(crate) syntax: SyntaxNode,
+}
+impl AstroExpression {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> AstroExpressionFields {
+        AstroExpressionFields {
+            l_curly_token: self.l_curly_token(),
+            expression_token: self.expression_token(),
+            r_curly_token: self.r_curly_token(),
+        }
+    }
+    pub fn l_curly_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+    pub fn expression_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 1usize)
+    }
+    pub fn r_curly_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 2usize)
+    }
+}
+impl Serialize for AstroExpression {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct AstroExpressionFields {
+    pub l_curly_token: SyntaxResult<SyntaxToken>,
+    pub expression_token: SyntaxResult<SyntaxToken>,
+    pub r_curly_token: SyntaxResult<SyntaxToken>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
 pub struct AstroFrontmatterElement {
     pub(crate) syntax: SyntaxNode,
 }
@@ -127,7 +172,7 @@ impl HtmlAttributeInitializerClause {
     pub fn eq_token(&self) -> SyntaxResult<SyntaxToken> {
         support::required_token(&self.syntax, 0usize)
     }
-    pub fn value(&self) -> SyntaxResult<HtmlString> {
+    pub fn value(&self) -> SyntaxResult<AnyHtmlAttributeInitializer> {
         support::required_node(&self.syntax, 1usize)
     }
 }
@@ -142,7 +187,7 @@ impl Serialize for HtmlAttributeInitializerClause {
 #[derive(Serialize)]
 pub struct HtmlAttributeInitializerClauseFields {
     pub eq_token: SyntaxResult<SyntaxToken>,
-    pub value: SyntaxResult<HtmlString>,
+    pub value: SyntaxResult<AnyHtmlAttributeInitializer>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct HtmlAttributeName {
@@ -828,6 +873,25 @@ impl AnyHtmlAttribute {
     }
 }
 #[derive(Clone, PartialEq, Eq, Hash, Serialize)]
+pub enum AnyHtmlAttributeInitializer {
+    AstroExpression(AstroExpression),
+    HtmlString(HtmlString),
+}
+impl AnyHtmlAttributeInitializer {
+    pub fn as_astro_expression(&self) -> Option<&AstroExpression> {
+        match &self {
+            Self::AstroExpression(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_html_string(&self) -> Option<&HtmlString> {
+        match &self {
+            Self::HtmlString(item) => Some(item),
+            _ => None,
+        }
+    }
+}
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyHtmlContent {
     AnyHtmlTextExpression(AnyHtmlTextExpression),
     HtmlContent(HtmlContent),
@@ -910,6 +974,64 @@ impl AnyHtmlTextExpression {
             Self::SvelteTextExpression(item) => Some(item),
             _ => None,
         }
+    }
+}
+impl AstNode for AstroExpression {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(ASTRO_EXPRESSION as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == ASTRO_EXPRESSION
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for AstroExpression {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("AstroExpression")
+                .field(
+                    "l_curly_token",
+                    &support::DebugSyntaxResult(self.l_curly_token()),
+                )
+                .field(
+                    "expression_token",
+                    &support::DebugSyntaxResult(self.expression_token()),
+                )
+                .field(
+                    "r_curly_token",
+                    &support::DebugSyntaxResult(self.r_curly_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("AstroExpression").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<AstroExpression> for SyntaxNode {
+    fn from(n: AstroExpression) -> Self {
+        n.syntax
+    }
+}
+impl From<AstroExpression> for SyntaxElement {
+    fn from(n: AstroExpression) -> Self {
+        n.syntax.into()
     }
 }
 impl AstNode for AstroFrontmatterElement {
@@ -1990,6 +2112,65 @@ impl From<AnyHtmlAttribute> for SyntaxElement {
         node.into()
     }
 }
+impl From<AstroExpression> for AnyHtmlAttributeInitializer {
+    fn from(node: AstroExpression) -> Self {
+        Self::AstroExpression(node)
+    }
+}
+impl From<HtmlString> for AnyHtmlAttributeInitializer {
+    fn from(node: HtmlString) -> Self {
+        Self::HtmlString(node)
+    }
+}
+impl AstNode for AnyHtmlAttributeInitializer {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> = AstroExpression::KIND_SET.union(HtmlString::KIND_SET);
+    fn can_cast(kind: SyntaxKind) -> bool {
+        matches!(kind, ASTRO_EXPRESSION | HTML_STRING)
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        let res = match syntax.kind() {
+            ASTRO_EXPRESSION => Self::AstroExpression(AstroExpression { syntax }),
+            HTML_STRING => Self::HtmlString(HtmlString { syntax }),
+            _ => return None,
+        };
+        Some(res)
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        match self {
+            Self::AstroExpression(it) => &it.syntax,
+            Self::HtmlString(it) => &it.syntax,
+        }
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        match self {
+            Self::AstroExpression(it) => it.syntax,
+            Self::HtmlString(it) => it.syntax,
+        }
+    }
+}
+impl std::fmt::Debug for AnyHtmlAttributeInitializer {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::AstroExpression(it) => std::fmt::Debug::fmt(it, f),
+            Self::HtmlString(it) => std::fmt::Debug::fmt(it, f),
+        }
+    }
+}
+impl From<AnyHtmlAttributeInitializer> for SyntaxNode {
+    fn from(n: AnyHtmlAttributeInitializer) -> Self {
+        match n {
+            AnyHtmlAttributeInitializer::AstroExpression(it) => it.into(),
+            AnyHtmlAttributeInitializer::HtmlString(it) => it.into(),
+        }
+    }
+}
+impl From<AnyHtmlAttributeInitializer> for SyntaxElement {
+    fn from(n: AnyHtmlAttributeInitializer) -> Self {
+        let node: SyntaxNode = n.into();
+        node.into()
+    }
+}
 impl From<HtmlContent> for AnyHtmlContent {
     fn from(node: HtmlContent) -> Self {
         Self::HtmlContent(node)
@@ -2236,6 +2417,11 @@ impl std::fmt::Display for AnyHtmlAttribute {
         std::fmt::Display::fmt(self.syntax(), f)
     }
 }
+impl std::fmt::Display for AnyHtmlAttributeInitializer {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
 impl std::fmt::Display for AnyHtmlContent {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
@@ -2247,6 +2433,11 @@ impl std::fmt::Display for AnyHtmlElement {
     }
 }
 impl std::fmt::Display for AnyHtmlTextExpression {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for AstroExpression {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }

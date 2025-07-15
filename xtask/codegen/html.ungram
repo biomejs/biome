@@ -158,6 +158,8 @@ AnyHtmlAttribute =
 	HtmlAttribute
 	| HtmlBogusAttribute
 
+// <a href="">
+//    ^^^^^^^
 HtmlAttribute =
 	name: HtmlAttributeName
 	initializer: HtmlAttributeInitializerClause?
@@ -167,8 +169,18 @@ HtmlAttribute =
 //        ^^^
 HtmlAttributeInitializerClause =
 	'='
-	value: HtmlString
+	value: AnyHtmlAttributeInitializer
 
+
+AnyHtmlAttributeInitializer =
+	HtmlString
+	| AstroExpression
+
+
+AstroExpression =
+	'{'
+	expression: 'html_literal'
+	'}'
 
 HtmlString = value: 'html_string_literal'
 HtmlTagName = value: 'html_literal'

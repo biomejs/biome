@@ -6,6 +6,20 @@ use biome_html_syntax::{
     HtmlSyntaxToken as SyntaxToken, *,
 };
 use biome_rowan::AstNode;
+pub fn astro_expression(
+    l_curly_token: SyntaxToken,
+    expression_token: SyntaxToken,
+    r_curly_token: SyntaxToken,
+) -> AstroExpression {
+    AstroExpression::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::ASTRO_EXPRESSION,
+        [
+            Some(SyntaxElement::Token(l_curly_token)),
+            Some(SyntaxElement::Token(expression_token)),
+            Some(SyntaxElement::Token(r_curly_token)),
+        ],
+    ))
+}
 pub fn astro_frontmatter_element(
     l_fence_token: SyntaxToken,
     r_fence_token: SyntaxToken,
@@ -65,7 +79,7 @@ impl HtmlAttributeBuilder {
 }
 pub fn html_attribute_initializer_clause(
     eq_token: SyntaxToken,
-    value: HtmlString,
+    value: AnyHtmlAttributeInitializer,
 ) -> HtmlAttributeInitializerClause {
     HtmlAttributeInitializerClause::unwrap_cast(SyntaxNode::new_detached(
         HtmlSyntaxKind::HTML_ATTRIBUTE_INITIALIZER_CLAUSE,
