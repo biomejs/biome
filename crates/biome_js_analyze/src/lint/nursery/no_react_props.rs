@@ -49,8 +49,6 @@ declare_lint_rule! {
     }
 }
 
-const REACT_SPECIFIC_JSX_PROPS: &[&str] = &["className", "htmlFor"];
-
 fn get_replacement_for_react_prop(str: &str) -> Option<&'static str> {
     match str {
         "className" => Some("class"),
@@ -71,8 +69,7 @@ impl Rule for NoReactProps {
         let range = name.range();
         let name = name.to_trimmed_text();
 
-        if REACT_SPECIFIC_JSX_PROPS.contains(&name.text()) {
-            let replacement = get_replacement_for_react_prop(&name)?;
+        if let Some(replacement) = get_replacement_for_react_prop(&name) {
             Some((range, replacement))
         } else {
             None
