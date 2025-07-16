@@ -11,7 +11,7 @@ use biome_js_syntax::{
     AnyJsxAttribute, JsxAttribute, JsxAttributeList, JsxOpeningElement, JsxSelfClosingElement,
 };
 use biome_rowan::{AstNode, BatchMutationExt};
-use biome_rule_options::use_sorted_attributes::UseSortedAttributesOptions;
+use biome_rule_options::use_sorted_attributes::{SortOrder, UseSortedAttributesOptions};
 use biome_string_case::StrLikeExtension;
 
 use crate::JsRuleAction;
@@ -38,6 +38,38 @@ declare_source_rule! {
     /// <Hello lastName="Smith" firstName="John" {...this.props} tel="0000" address="111 Main Street"  {...another.props} lastName="Smith" />;
     /// ```
     ///
+    /// ## Options
+    /// This actions accepts following options
+    ///
+    /// ### `sortOrder`
+    /// This options supports `natural` and `lexicographic` values. Where as `natural` is the default.
+    ///
+    /// Following will apply the natural sort order.
+    ///
+    /// ```json,options
+    /// {
+    ///     "options": {
+    ///         "sortOrder": "natural"
+    ///     }
+    /// }
+    /// ```
+    /// ```jsx,use_options,expect_diagnostic
+    /// <Hello tel={5555555} {...this.props} opt1="John" opt2="" opt12="" opt11="" />;
+    /// ```
+    ///
+    /// Following will apply the lexicographic sort order.
+    ///
+    /// ```json,options
+    /// {
+    ///     "options": {
+    ///         "sortOrder": "lexicographic"
+    ///     }
+    /// }
+    /// ```
+    /// ```jsx,use_options,expect_diagnostic
+    /// <Hello tel={5555555} {...this.props} opt1="John" opt2="" opt12="" opt11="" />;
+    /// ```
+    ///
     pub UseSortedAttributes {
         version: "2.0.0",
         name: "useSortedAttributes",
@@ -58,6 +90,18 @@ impl Rule for UseSortedAttributes {
         let props = ctx.query();
         let mut current_prop_group = PropGroup::default();
         let mut prop_groups = Vec::new();
+        let options = ctx.options();
+        let sort_by = options.sort_order;
+
+        let comparator = match sort_by {
+            SortOrder::Natural => PropElement::ascii_nat_cmp,
+            SortOrder::Lexicographic => PropElement::lexicographic_cmp,
+        };
+
+        // Convert to boolean-based comparator for is_sorted_by
+        let boolean_comparator =
+            |a: &PropElement, b: &PropElement| comparator(a, b) != Ordering::Greater;
+
         for prop in props {
             match prop {
                 AnyJsxAttribute::JsxAttribute(attr) => {
@@ -65,7 +109,9 @@ impl Rule for UseSortedAttributes {
                 }
                 // spread prop reset sort order
                 AnyJsxAttribute::JsxSpreadAttribute(_) => {
-                    if !current_prop_group.is_empty() && !current_prop_group.is_sorted() {
+                    if !current_prop_group.is_empty()
+                        && !current_prop_group.is_sorted(boolean_comparator)
+                    {
                         prop_groups.push(current_prop_group);
                         current_prop_group = PropGroup::default();
                     } else {
@@ -76,7 +122,7 @@ impl Rule for UseSortedAttributes {
                 AnyJsxAttribute::JsMetavariable(_) => {}
             }
         }
-        if !current_prop_group.is_empty() && !current_prop_group.is_sorted() {
+        if !current_prop_group.is_empty() && !current_prop_group.is_sorted(boolean_comparator) {
             prop_groups.push(current_prop_group);
         }
         prop_groups.into_boxed_slice()
@@ -102,9 +148,16 @@ impl Rule for UseSortedAttributes {
 
     fn action(ctx: &RuleContext<Self>, state: &Self::State) -> Option<JsRuleAction> {
         let mut mutation = ctx.root().begin();
+        let options = ctx.options();
+        let sort_by = options.sort_order;
+
+        let comparator = match sort_by {
+            SortOrder::Natural => PropElement::ascii_nat_cmp,
+            SortOrder::Lexicographic => PropElement::lexicographic_cmp,
+        };
 
         for (PropElement { prop }, PropElement { prop: sorted_prop }) in
-            zip(state.props.iter(), state.get_sorted_props())
+            zip(state.props.iter(), state.get_sorted_props(comparator))
         {
             mutation.replace_node(prop.clone(), sorted_prop);
         }
@@ -123,8 +176,8 @@ pub struct PropElement {
     prop: JsxAttribute,
 }
 
-impl Ord for PropElement {
-    fn cmp(&self, other: &Self) -> Ordering {
+impl PropElement {
+    pub fn ascii_nat_cmp(&self, other: &Self) -> Ordering {
         let (Ok(self_name), Ok(other_name)) = (self.prop.name(), other.prop.name()) else {
             return Ordering::Equal;
         };
@@ -136,11 +189,18 @@ impl Ord for PropElement {
             .text_trimmed()
             .ascii_nat_cmp(other_name.text_trimmed())
     }
-}
 
-impl PartialOrd for PropElement {
-    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
-        Some(self.cmp(other))
+    pub fn lexicographic_cmp(&self, other: &Self) -> Ordering {
+        let (Ok(self_name), Ok(other_name)) = (self.prop.name(), other.prop.name()) else {
+            return Ordering::Equal;
+        };
+        let (Ok(self_name), Ok(other_name)) = (self_name.name(), other_name.name()) else {
+            return Ordering::Equal;
+        };
+
+        self_name
+            .text_trimmed()
+            .lexicographic_cmp(other_name.text_trimmed())
     }
 }
 
@@ -154,13 +214,19 @@ impl PropGroup {
         self.props.is_empty()
     }
 
-    fn is_sorted(&self) -> bool {
-        self.props.is_sorted()
+    fn is_sorted<F>(&self, comparator: F) -> bool
+    where
+        F: Fn(&PropElement, &PropElement) -> bool,
+    {
+        self.props.is_sorted_by(comparator)
     }
 
-    fn get_sorted_props(&self) -> Vec<PropElement> {
+    fn get_sorted_props<F>(&self, comparator: F) -> Vec<PropElement>
+    where
+        F: FnMut(&PropElement, &PropElement) -> Ordering,
+    {
         let mut new_props = self.props.clone();
-        new_props.sort_unstable();
+        new_props.sort_by(comparator);
         new_props
     }
 
