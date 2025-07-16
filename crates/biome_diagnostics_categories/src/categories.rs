@@ -190,7 +190,7 @@ define_categories! {
     "lint/nursery/noUnresolvedImports": "https://biomejs.dev/linter/rules/no-unresolved-imports",
     "lint/nursery/noUnusedFunctionParameters": "https://biomejs.dev/linter/rules/no-unused-function-parameters",
     "lint/nursery/noUnwantedPolyfillio": "https://biomejs.dev/linter/rules/no-unwanted-polyfillio",
-    "lint/nursery/noUseVisibleTask": "https://biomejs.dev/linter/rules/no-use-visible-task",
+    "lint/nursery/noQwikUseVisibleTask": "https://biomejs.dev/linter/rules/no-qwik-use-visible-task",
     "lint/nursery/noUselessBackrefInRegex": "https://biomejs.dev/linter/rules/no-useless-backref-in-regex",
     "lint/nursery/noUselessEscapeInString": "https://biomejs.dev/linter/rules/no-useless-escape-in-string",
     "lint/nursery/noUselessUndefined": "https://biomejs.dev/linter/rules/no-useless-undefined",

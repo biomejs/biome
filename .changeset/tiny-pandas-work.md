@@ -2,11 +2,11 @@
 "@biomejs/biome": minor
 ---
 
-Added Qwik domain support and the [`noReactProps`](https://biomejs.dev/linter/rules/no-react-props) rule to Biome.
+Added Qwik domain support and the [`noQwikReactProps`](https://biomejs.dev/linter/rules/no-qwik-react-props) rule to Biome.
 
 The Qwik domain provides framework-specific linting rules for Qwik applications. Biome now automatically enables Qwik rules when it detects Qwik dependencies in the project.
 
-The `noReactProps` rule disallows React-specific JSX attributes (`className`, `htmlFor`) in Qwik components and suggests using standard HTML attributes instead.
+The `noQwikReactProps` rule disallows React-specific JSX attributes (`className`, `htmlFor`) in Qwik components and suggests using standard HTML attributes instead.
 
 **Invalid:**
 
@@ -44,7 +44,7 @@ The rule detects usage of the `classnames` helper in `class` or `className` attr
 
 No configuration options are currently available for this rule.
 
-**Updated:** The [`useJsxKeyInIterable`](https://biomejs.dev/linter/rules/use-jsx-key-in-iterable) rule now supports both React and Qwik domains. The previous Qwik-specific `noMissingJsxKey` rule has been merged into this unified rule. It disallows JSX elements in iterators/collections without a `key` prop, helping prevent rendering issues and performance problems in both React and Qwik applications.
+**Updated:** The [`useJsxKeyInIterable`](https://biomejs.dev/linter/rules/use-jsx-key-in-iterable) rule now supports both React and Qwik domains. The previous Qwik-specific `noMissingJsxKey` rule has been removed and its functionality merged into this unified rule. It disallows JSX elements in iterators/collections without a `key` prop, helping prevent rendering issues and performance problems in both React and Qwik applications.
 
 **Invalid:**
 
@@ -88,9 +88,9 @@ The rule detects `<img>` elements that are missing either the `width` or `height
 
 No configuration options are currently available for this rule.
 
-Added the [`noUseVisibleTask`](https://biomejs.dev/linter/rules/no-use-visible-task) rule to Biome.
+Added the [`noQwikUseVisibleTask`](https://biomejs.dev/linter/rules/no-qwik-use-visible-task) rule to Biome.
 
-The `noUseVisibleTask` rule disallows the use of `useVisibleTask$()` functions in Qwik applications. This rule is intended for use in Qwik applications to prevent the use of `useVisibleTask$()` functions which are not recommended in Qwik.
+The `noQwikUseVisibleTask` rule disallows the use of `useVisibleTask$()` functions in Qwik applications. This rule is intended for use in Qwik applications to prevent the use of `useVisibleTask$()` functions which are not recommended in Qwik.
 
 **Invalid:**
 

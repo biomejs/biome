@@ -76,7 +76,7 @@ useVisibleTask$(({ track, cleanup }) => {
 
 # Diagnostics
 ```
-invalid.js:1:1 lint/nursery/noUseVisibleTask ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:1:1 lint/nursery/noQwikUseVisibleTask ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! useVisibleTask$() is not recommended in Qwik applications.
   
@@ -96,7 +96,7 @@ invalid.js:1:1 lint/nursery/noUseVisibleTask ━━━━━━━━━━━�
 ```
 
 ```
-invalid.js:5:1 lint/nursery/noUseVisibleTask ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:5:1 lint/nursery/noQwikUseVisibleTask ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! useVisibleTask$() is not recommended in Qwik applications.
   
@@ -120,7 +120,7 @@ invalid.js:5:1 lint/nursery/noUseVisibleTask ━━━━━━━━━━━�
 ```
 
 ```
-invalid.js:10:1 lint/nursery/noUseVisibleTask ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:10:1 lint/nursery/noQwikUseVisibleTask ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! useVisibleTask$() is not recommended in Qwik applications.
   
@@ -144,7 +144,7 @@ invalid.js:10:1 lint/nursery/noUseVisibleTask ━━━━━━━━━━━�
 ```
 
 ```
-invalid.js:15:3 lint/nursery/noUseVisibleTask ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:15:3 lint/nursery/noQwikUseVisibleTask ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! useVisibleTask$() is not recommended in Qwik applications.
   
@@ -166,7 +166,7 @@ invalid.js:15:3 lint/nursery/noUseVisibleTask ━━━━━━━━━━━�
 ```
 
 ```
-invalid.js:23:3 lint/nursery/noUseVisibleTask ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:23:3 lint/nursery/noQwikUseVisibleTask ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! useVisibleTask$() is not recommended in Qwik applications.
   
@@ -188,7 +188,7 @@ invalid.js:23:3 lint/nursery/noUseVisibleTask ━━━━━━━━━━━�
 ```
 
 ```
-invalid.js:32:3 lint/nursery/noUseVisibleTask ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:32:3 lint/nursery/noQwikUseVisibleTask ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! useVisibleTask$() is not recommended in Qwik applications.
   
@@ -210,7 +210,7 @@ invalid.js:32:3 lint/nursery/noUseVisibleTask ━━━━━━━━━━━�
 ```
 
 ```
-invalid.js:38:3 lint/nursery/noUseVisibleTask ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:38:3 lint/nursery/noQwikUseVisibleTask ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! useVisibleTask$() is not recommended in Qwik applications.
   
@@ -232,7 +232,7 @@ invalid.js:38:3 lint/nursery/noUseVisibleTask ━━━━━━━━━━━�
 ```
 
 ```
-invalid.js:45:5 lint/nursery/noUseVisibleTask ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:45:5 lint/nursery/noQwikUseVisibleTask ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! useVisibleTask$() is not recommended in Qwik applications.
   
@@ -256,7 +256,7 @@ invalid.js:45:5 lint/nursery/noUseVisibleTask ━━━━━━━━━━━�
 ```
 
 ```
-invalid.js:52:1 lint/nursery/noUseVisibleTask ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:52:1 lint/nursery/noQwikUseVisibleTask ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! useVisibleTask$() is not recommended in Qwik applications.
   
@@ -278,7 +278,7 @@ invalid.js:52:1 lint/nursery/noUseVisibleTask ━━━━━━━━━━━�
 ```
 
 ```
-invalid.js:56:1 lint/nursery/noUseVisibleTask ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:56:1 lint/nursery/noQwikUseVisibleTask ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! useVisibleTask$() is not recommended in Qwik applications.
   
@@ -302,7 +302,7 @@ invalid.js:56:1 lint/nursery/noUseVisibleTask ━━━━━━━━━━━�
 ```
 
 ```
-invalid.js:61:1 lint/nursery/noUseVisibleTask ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:61:1 lint/nursery/noQwikUseVisibleTask ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! useVisibleTask$() is not recommended in Qwik applications.
   

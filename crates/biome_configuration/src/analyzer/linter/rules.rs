@@ -228,6 +228,7 @@ pub enum RuleName {
     NoProcessGlobal,
     NoPrototypeBuiltins,
     NoQwikReactProps,
+    NoQwikUseVisibleTask,
     NoReExportAll,
     NoReactPropAssign,
     NoReactSpecificProps,
@@ -287,7 +288,6 @@ pub enum RuleName {
     NoUnusedTemplateLiteral,
     NoUnusedVariables,
     NoUnwantedPolyfillio,
-    NoUseVisibleTask,
     NoUselessBackrefInRegex,
     NoUselessCatch,
     NoUselessConstructor,
@@ -574,6 +574,7 @@ impl RuleName {
             Self::NoProcessGlobal => "noProcessGlobal",
             Self::NoPrototypeBuiltins => "noPrototypeBuiltins",
             Self::NoQwikReactProps => "noQwikReactProps",
+            Self::NoQwikUseVisibleTask => "noQwikUseVisibleTask",
             Self::NoReExportAll => "noReExportAll",
             Self::NoReactPropAssign => "noReactPropAssign",
             Self::NoReactSpecificProps => "noReactSpecificProps",
@@ -633,7 +634,6 @@ impl RuleName {
             Self::NoUnusedTemplateLiteral => "noUnusedTemplateLiteral",
             Self::NoUnusedVariables => "noUnusedVariables",
             Self::NoUnwantedPolyfillio => "noUnwantedPolyfillio",
-            Self::NoUseVisibleTask => "noUseVisibleTask",
             Self::NoUselessBackrefInRegex => "noUselessBackrefInRegex",
             Self::NoUselessCatch => "noUselessCatch",
             Self::NoUselessConstructor => "noUselessConstructor",
@@ -916,6 +916,7 @@ impl RuleName {
             Self::NoProcessGlobal => RuleGroup::Nursery,
             Self::NoPrototypeBuiltins => RuleGroup::Suspicious,
             Self::NoQwikReactProps => RuleGroup::Nursery,
+            Self::NoQwikUseVisibleTask => RuleGroup::Nursery,
             Self::NoReExportAll => RuleGroup::Performance,
             Self::NoReactPropAssign => RuleGroup::Nursery,
             Self::NoReactSpecificProps => RuleGroup::Suspicious,
@@ -975,7 +976,6 @@ impl RuleName {
             Self::NoUnusedTemplateLiteral => RuleGroup::Style,
             Self::NoUnusedVariables => RuleGroup::Correctness,
             Self::NoUnwantedPolyfillio => RuleGroup::Nursery,
-            Self::NoUseVisibleTask => RuleGroup::Nursery,
             Self::NoUselessBackrefInRegex => RuleGroup::Nursery,
             Self::NoUselessCatch => RuleGroup::Complexity,
             Self::NoUselessConstructor => RuleGroup::Complexity,
@@ -1075,7 +1075,7 @@ impl RuleName {
             Self::UseMediaCaption => RuleGroup::A11y,
             Self::UseNamedOperation => RuleGroup::Nursery,
             Self::UseNamespaceKeyword => RuleGroup::Suspicious,
-            Self::UseNamingConvention => RuleGroup::Nursery,
+            Self::UseNamingConvention => RuleGroup::Style,
             Self::UseNodeAssertStrict => RuleGroup::Style,
             Self::UseNodejsImportProtocol => RuleGroup::Style,
             Self::UseNumberNamespace => RuleGroup::Style,
@@ -1267,6 +1267,7 @@ impl std::str::FromStr for RuleName {
             "noProcessGlobal" => Ok(Self::NoProcessGlobal),
             "noPrototypeBuiltins" => Ok(Self::NoPrototypeBuiltins),
             "noQwikReactProps" => Ok(Self::NoQwikReactProps),
+            "noQwikUseVisibleTask" => Ok(Self::NoQwikUseVisibleTask),
             "noReExportAll" => Ok(Self::NoReExportAll),
             "noReactPropAssign" => Ok(Self::NoReactPropAssign),
             "noReactSpecificProps" => Ok(Self::NoReactSpecificProps),
@@ -1326,7 +1327,6 @@ impl std::str::FromStr for RuleName {
             "noUnusedTemplateLiteral" => Ok(Self::NoUnusedTemplateLiteral),
             "noUnusedVariables" => Ok(Self::NoUnusedVariables),
             "noUnwantedPolyfillio" => Ok(Self::NoUnwantedPolyfillio),
-            "noUseVisibleTask" => Ok(Self::NoUseVisibleTask),
             "noUselessBackrefInRegex" => Ok(Self::NoUselessBackrefInRegex),
             "noUselessCatch" => Ok(Self::NoUselessCatch),
             "noUselessConstructor" => Ok(Self::NoUselessConstructor),
@@ -4274,7 +4274,7 @@ impl From<GroupPlainConfiguration> for Correctness {
 #[cfg_attr(feature = "schema", derive(JsonSchema))]
 #[serde(rename_all = "camelCase", default, deny_unknown_fields)]
 #[doc = r" A list of rules that belong to this group"]
-pub struct Nursery { # [doc = r" It enables the recommended rules for this group"] # [serde (skip_serializing_if = "Option::is_none")] pub recommended : Option < bool > , # [doc = "Disallow await inside loops."] # [serde (skip_serializing_if = "Option::is_none")] pub no_await_in_loop : Option < RuleConfiguration < biome_rule_options :: no_await_in_loop :: NoAwaitInLoopOptions >> , # [doc = "Disallow bitwise operators."] # [serde (skip_serializing_if = "Option::is_none")] pub no_bitwise_operators : Option < RuleConfiguration < biome_rule_options :: no_bitwise_operators :: NoBitwiseOperatorsOptions >> , # [doc = "Disallow expressions where the operation doesn't affect the value"] # [serde (skip_serializing_if = "Option::is_none")] pub no_constant_binary_expression : Option < RuleConfiguration < biome_rule_options :: no_constant_binary_expression :: NoConstantBinaryExpressionOptions >> , # [doc = "Disallow destructuring props inside JSX components in Solid projects."] # [serde (skip_serializing_if = "Option::is_none")] pub no_destructured_props : Option < RuleConfiguration < biome_rule_options :: no_destructured_props :: NoDestructuredPropsOptions >> , # [doc = "Restrict the number of lines of code in a function."] # [serde (skip_serializing_if = "Option::is_none")] pub no_excessive_lines_per_function : Option < RuleConfiguration < biome_rule_options :: no_excessive_lines_per_function :: NoExcessiveLinesPerFunctionOptions >> , # [doc = "Require Promise-like statements to be handled appropriately."] # [serde (skip_serializing_if = "Option::is_none")] pub no_floating_promises : Option < RuleFixConfiguration < biome_rule_options :: no_floating_promises :: NoFloatingPromisesOptions >> , # [doc = "Disallow the use of __dirname and __filename in the global scope."] # [serde (skip_serializing_if = "Option::is_none")] pub no_global_dirname_filename : Option < RuleFixConfiguration < biome_rule_options :: no_global_dirname_filename :: NoGlobalDirnameFilenameOptions >> , # [doc = "Disallow shorthand type conversions."] # [serde (skip_serializing_if = "Option::is_none")] pub no_implicit_coercion : Option < RuleFixConfiguration < biome_rule_options :: no_implicit_coercion :: NoImplicitCoercionOptions >> , # [doc = "Prevent import cycles."] # [serde (skip_serializing_if = "Option::is_none")] pub no_import_cycles : Option < RuleConfiguration < biome_rule_options :: no_import_cycles :: NoImportCyclesOptions >> , # [doc = "Disallow the use of the !important style."] # [serde (skip_serializing_if = "Option::is_none")] pub no_important_styles : Option < RuleFixConfiguration < biome_rule_options :: no_important_styles :: NoImportantStylesOptions >> , # [doc = "Reports usage of \"magic numbers\" — numbers used directly instead of being assigned to named constants."] # [serde (skip_serializing_if = "Option::is_none")] pub no_magic_numbers : Option < RuleConfiguration < biome_rule_options :: no_magic_numbers :: NoMagicNumbersOptions >> , # [doc = "Disallow Promises to be used in places where they are almost certainly a mistake."] # [serde (skip_serializing_if = "Option::is_none")] pub no_misused_promises : Option < RuleFixConfiguration < biome_rule_options :: no_misused_promises :: NoMisusedPromisesOptions >> , # [doc = "Disallows defining React components inside other components."] # [serde (skip_serializing_if = "Option::is_none")] pub no_nested_component_definitions : Option < RuleConfiguration < biome_rule_options :: no_nested_component_definitions :: NoNestedComponentDefinitionsOptions >> , # [doc = "Disallow use event handlers on non-interactive elements."] # [serde (skip_serializing_if = "Option::is_none")] pub no_noninteractive_element_interactions : Option < RuleConfiguration < biome_rule_options :: no_noninteractive_element_interactions :: NoNoninteractiveElementInteractionsOptions >> , # [doc = "Disallow the use of process global."] # [serde (skip_serializing_if = "Option::is_none")] pub no_process_global : Option < RuleFixConfiguration < biome_rule_options :: no_process_global :: NoProcessGlobalOptions >> , # [doc = "Disallow React-specific className/htmlFor props in Qwik components."] # [serde (skip_serializing_if = "Option::is_none")] pub no_qwik_react_props : Option < RuleFixConfiguration < biome_rule_options :: no_qwik_react_props :: NoQwikReactPropsOptions >> , # [doc = "Disallow assigning to React component props."] # [serde (skip_serializing_if = "Option::is_none")] pub no_react_prop_assign : Option < RuleConfiguration < biome_rule_options :: no_react_prop_assign :: NoReactPropAssignOptions >> , # [doc = "Disallow the use of configured elements."] # [serde (skip_serializing_if = "Option::is_none")] pub no_restricted_elements : Option < RuleConfiguration < biome_rule_options :: no_restricted_elements :: NoRestrictedElementsOptions >> , # [doc = "Disallow usage of sensitive data such as API keys and tokens."] # [serde (skip_serializing_if = "Option::is_none")] pub no_secrets : Option < RuleConfiguration < biome_rule_options :: no_secrets :: NoSecretsOptions >> , # [doc = "Disallow variable declarations from shadowing variables declared in the outer scope."] # [serde (skip_serializing_if = "Option::is_none")] pub no_shadow : Option < RuleConfiguration < biome_rule_options :: no_shadow :: NoShadowOptions >> , # [doc = "Prevents the use of the TypeScript directive @ts-ignore."] # [serde (skip_serializing_if = "Option::is_none")] pub no_ts_ignore : Option < RuleFixConfiguration < biome_rule_options :: no_ts_ignore :: NoTsIgnoreOptions >> , # [doc = "Disallow let or var variables that are read but never assigned."] # [serde (skip_serializing_if = "Option::is_none")] pub no_unassigned_variables : Option < RuleConfiguration < biome_rule_options :: no_unassigned_variables :: NoUnassignedVariablesOptions >> , # [doc = "Disallow unknown at-rules."] # [serde (skip_serializing_if = "Option::is_none")] pub no_unknown_at_rule : Option < RuleConfiguration < biome_rule_options :: no_unknown_at_rule :: NoUnknownAtRuleOptions >> , # [doc = "Warn when importing non-existing exports."] # [serde (skip_serializing_if = "Option::is_none")] pub no_unresolved_imports : Option < RuleConfiguration < biome_rule_options :: no_unresolved_imports :: NoUnresolvedImportsOptions >> , # [doc = "Prevent duplicate polyfills from Polyfill.io."] # [serde (skip_serializing_if = "Option::is_none")] pub no_unwanted_polyfillio : Option < RuleConfiguration < biome_rule_options :: no_unwanted_polyfillio :: NoUnwantedPolyfillioOptions >> , # [doc = "Disallow useVisibleTask$() functions in Qwik components."] # [serde (skip_serializing_if = "Option::is_none")] pub no_use_visible_task : Option < RuleConfiguration < biome_rule_options :: no_use_visible_task :: NoUseVisibleTaskOptions >> , # [doc = "Disallow useless backreferences in regular expression literals that always match an empty string."] # [serde (skip_serializing_if = "Option::is_none")] pub no_useless_backref_in_regex : Option < RuleConfiguration < biome_rule_options :: no_useless_backref_in_regex :: NoUselessBackrefInRegexOptions >> , # [doc = "Disallow unnecessary escapes in string literals."] # [serde (skip_serializing_if = "Option::is_none")] pub no_useless_escape_in_string : Option < RuleFixConfiguration < biome_rule_options :: no_useless_escape_in_string :: NoUselessEscapeInStringOptions >> , # [doc = "Disallow the use of useless undefined."] # [serde (skip_serializing_if = "Option::is_none")] pub no_useless_undefined : Option < RuleFixConfiguration < biome_rule_options :: no_useless_undefined :: NoUselessUndefinedOptions >> , # [doc = "Disallow reserved names to be used as props."] # [serde (skip_serializing_if = "Option::is_none")] pub no_vue_reserved_props : Option < RuleConfiguration < biome_rule_options :: no_vue_reserved_props :: NoVueReservedPropsOptions >> , # [doc = "Enforce that getters and setters for the same property are adjacent in class and object definitions."] # [serde (skip_serializing_if = "Option::is_none")] pub use_adjacent_getter_setter : Option < RuleConfiguration < biome_rule_options :: use_adjacent_getter_setter :: UseAdjacentGetterSetterOptions >> , # [doc = "Prefer using the classlist prop over the classnames helper."] # [serde (skip_serializing_if = "Option::is_none")] pub use_classlist : Option < RuleConfiguration < biome_rule_options :: use_classlist :: UseClasslistOptions >> , # [doc = "Require the consistent declaration of object literals. Defaults to explicit definitions."] # [serde (skip_serializing_if = "Option::is_none")] pub use_consistent_object_definition : Option < RuleFixConfiguration < biome_rule_options :: use_consistent_object_definition :: UseConsistentObjectDefinitionOptions >> , # [doc = "Use static Response methods instead of new Response() constructor when possible."] # [serde (skip_serializing_if = "Option::is_none")] pub use_consistent_response : Option < RuleFixConfiguration < biome_rule_options :: use_consistent_response :: UseConsistentResponseOptions >> , # [doc = "Require switch-case statements to be exhaustive."] # [serde (skip_serializing_if = "Option::is_none")] pub use_exhaustive_switch_cases : Option < RuleFixConfiguration < biome_rule_options :: use_exhaustive_switch_cases :: UseExhaustiveSwitchCasesOptions >> , # [doc = "Enforce types in functions, methods, variables, and parameters."] # [serde (skip_serializing_if = "Option::is_none")] pub use_explicit_type : Option < RuleConfiguration < biome_rule_options :: use_explicit_type :: UseExplicitTypeOptions >> , # [doc = "Require that all exports are declared after all non-export statements."] # [serde (skip_serializing_if = "Option::is_none")] pub use_exports_last : Option < RuleConfiguration < biome_rule_options :: use_exports_last :: UseExportsLastOptions >> , # [doc = "Enforce using Solid's \\<For /> component for mapping an array to JSX elements."] # [serde (skip_serializing_if = "Option::is_none")] pub use_for_component : Option < RuleConfiguration < biome_rule_options :: use_for_component :: UseForComponentOptions >> , # [doc = "Ensure the preconnect attribute is used when using Google Fonts."] # [serde (skip_serializing_if = "Option::is_none")] pub use_google_font_preconnect : Option < RuleFixConfiguration < biome_rule_options :: use_google_font_preconnect :: UseGoogleFontPreconnectOptions >> , # [doc = "Prefer Array#{indexOf,lastIndexOf}() over Array#{findIndex,findLastIndex}() when looking for the index of an item."] # [serde (skip_serializing_if = "Option::is_none")] pub use_index_of : Option < RuleFixConfiguration < biome_rule_options :: use_index_of :: UseIndexOfOptions >> , # [doc = "Enforce consistent return values in iterable callbacks."] # [serde (skip_serializing_if = "Option::is_none")] pub use_iterable_callback_return : Option < RuleConfiguration < biome_rule_options :: use_iterable_callback_return :: UseIterableCallbackReturnOptions >> , # [doc = "Enforces the use of with { type: \"json\" } for JSON module imports."] # [serde (skip_serializing_if = "Option::is_none")] pub use_json_import_attribute : Option < RuleFixConfiguration < biome_rule_options :: use_json_import_attribute :: UseJsonImportAttributeOptions >> , # [doc = "Require href attribute for \\<a> elements in JSX."] # [serde (skip_serializing_if = "Option::is_none")] pub use_jsx_a : Option < RuleConfiguration < biome_rule_options :: use_jsx_a :: UseJsxAOptions >> , # [doc = "For performance reasons, always provide width and height attributes for \\<img> elements; it will help to prevent layout shifts."] # [serde (skip_serializing_if = "Option::is_none")] pub use_jsx_img : Option < RuleConfiguration < biome_rule_options :: use_jsx_img :: UseJsxImgOptions >> , # [doc = "Enforce specifying the name of GraphQL operations."] # [serde (skip_serializing_if = "Option::is_none")] pub use_named_operation : Option < RuleFixConfiguration < biome_rule_options :: use_named_operation :: UseNamedOperationOptions >> , # [doc = "Validates that all enum values are capitalized."] # [serde (skip_serializing_if = "Option::is_none")] pub use_naming_convention : Option < RuleConfiguration < biome_rule_options :: use_naming_convention :: UseNamingConventionOptions >> , # [doc = "Enforce the use of numeric separators in numeric literals."] # [serde (skip_serializing_if = "Option::is_none")] pub use_numeric_separators : Option < RuleFixConfiguration < biome_rule_options :: use_numeric_separators :: UseNumericSeparatorsOptions >> , # [doc = "Prefer object spread over Object.assign() when constructing new objects."] # [serde (skip_serializing_if = "Option::is_none")] pub use_object_spread : Option < RuleFixConfiguration < biome_rule_options :: use_object_spread :: UseObjectSpreadOptions >> , # [doc = "Enforce the consistent use of the radix argument when using parseInt()."] # [serde (skip_serializing_if = "Option::is_none")] pub use_parse_int_radix : Option < RuleFixConfiguration < biome_rule_options :: use_parse_int_radix :: UseParseIntRadixOptions >> , # [doc = "Enforce marking members as readonly if they are never modified outside the constructor."] # [serde (skip_serializing_if = "Option::is_none")] pub use_readonly_class_properties : Option < RuleFixConfiguration < biome_rule_options :: use_readonly_class_properties :: UseReadonlyClassPropertiesOptions >> , # [doc = "Enforce JSDoc comment lines to start with a single asterisk, except for the first one."] # [serde (skip_serializing_if = "Option::is_none")] pub use_single_js_doc_asterisk : Option < RuleFixConfiguration < biome_rule_options :: use_single_js_doc_asterisk :: UseSingleJsDocAsteriskOptions >> , # [doc = "Enforce the sorting of CSS utility classes."] # [serde (skip_serializing_if = "Option::is_none")] pub use_sorted_classes : Option < RuleFixConfiguration < biome_rule_options :: use_sorted_classes :: UseSortedClassesOptions >> , # [doc = "Require a description parameter for the Symbol()."] # [serde (skip_serializing_if = "Option::is_none")] pub use_symbol_description : Option < RuleConfiguration < biome_rule_options :: use_symbol_description :: UseSymbolDescriptionOptions >> , # [doc = "Disallow overload signatures that can be unified into a single signature."] # [serde (skip_serializing_if = "Option::is_none")] pub use_unified_type_signature : Option < RuleFixConfiguration < biome_rule_options :: use_unified_type_signature :: UseUnifiedTypeSignatureOptions >> , # [doc = "Prevent the usage of static string literal id attribute on elements."] # [serde (skip_serializing_if = "Option::is_none")] pub use_unique_element_ids : Option < RuleConfiguration < biome_rule_options :: use_unique_element_ids :: UseUniqueElementIdsOptions >> }
+pub struct Nursery { # [doc = r" It enables the recommended rules for this group"] # [serde (skip_serializing_if = "Option::is_none")] pub recommended : Option < bool > , # [doc = "Disallow await inside loops."] # [serde (skip_serializing_if = "Option::is_none")] pub no_await_in_loop : Option < RuleConfiguration < biome_rule_options :: no_await_in_loop :: NoAwaitInLoopOptions >> , # [doc = "Disallow bitwise operators."] # [serde (skip_serializing_if = "Option::is_none")] pub no_bitwise_operators : Option < RuleConfiguration < biome_rule_options :: no_bitwise_operators :: NoBitwiseOperatorsOptions >> , # [doc = "Disallow expressions where the operation doesn't affect the value"] # [serde (skip_serializing_if = "Option::is_none")] pub no_constant_binary_expression : Option < RuleConfiguration < biome_rule_options :: no_constant_binary_expression :: NoConstantBinaryExpressionOptions >> , # [doc = "Disallow destructuring props inside JSX components in Solid projects."] # [serde (skip_serializing_if = "Option::is_none")] pub no_destructured_props : Option < RuleConfiguration < biome_rule_options :: no_destructured_props :: NoDestructuredPropsOptions >> , # [doc = "Restrict the number of lines of code in a function."] # [serde (skip_serializing_if = "Option::is_none")] pub no_excessive_lines_per_function : Option < RuleConfiguration < biome_rule_options :: no_excessive_lines_per_function :: NoExcessiveLinesPerFunctionOptions >> , # [doc = "Require Promise-like statements to be handled appropriately."] # [serde (skip_serializing_if = "Option::is_none")] pub no_floating_promises : Option < RuleFixConfiguration < biome_rule_options :: no_floating_promises :: NoFloatingPromisesOptions >> , # [doc = "Disallow the use of __dirname and __filename in the global scope."] # [serde (skip_serializing_if = "Option::is_none")] pub no_global_dirname_filename : Option < RuleFixConfiguration < biome_rule_options :: no_global_dirname_filename :: NoGlobalDirnameFilenameOptions >> , # [doc = "Disallow shorthand type conversions."] # [serde (skip_serializing_if = "Option::is_none")] pub no_implicit_coercion : Option < RuleFixConfiguration < biome_rule_options :: no_implicit_coercion :: NoImplicitCoercionOptions >> , # [doc = "Prevent import cycles."] # [serde (skip_serializing_if = "Option::is_none")] pub no_import_cycles : Option < RuleConfiguration < biome_rule_options :: no_import_cycles :: NoImportCyclesOptions >> , # [doc = "Disallow the use of the !important style."] # [serde (skip_serializing_if = "Option::is_none")] pub no_important_styles : Option < RuleFixConfiguration < biome_rule_options :: no_important_styles :: NoImportantStylesOptions >> , # [doc = "Reports usage of \"magic numbers\" — numbers used directly instead of being assigned to named constants."] # [serde (skip_serializing_if = "Option::is_none")] pub no_magic_numbers : Option < RuleConfiguration < biome_rule_options :: no_magic_numbers :: NoMagicNumbersOptions >> , # [doc = "Disallow Promises to be used in places where they are almost certainly a mistake."] # [serde (skip_serializing_if = "Option::is_none")] pub no_misused_promises : Option < RuleFixConfiguration < biome_rule_options :: no_misused_promises :: NoMisusedPromisesOptions >> , # [doc = "Disallows defining React components inside other components."] # [serde (skip_serializing_if = "Option::is_none")] pub no_nested_component_definitions : Option < RuleConfiguration < biome_rule_options :: no_nested_component_definitions :: NoNestedComponentDefinitionsOptions >> , # [doc = "Disallow use event handlers on non-interactive elements."] # [serde (skip_serializing_if = "Option::is_none")] pub no_noninteractive_element_interactions : Option < RuleConfiguration < biome_rule_options :: no_noninteractive_element_interactions :: NoNoninteractiveElementInteractionsOptions >> , # [doc = "Disallow the use of process global."] # [serde (skip_serializing_if = "Option::is_none")] pub no_process_global : Option < RuleFixConfiguration < biome_rule_options :: no_process_global :: NoProcessGlobalOptions >> , # [doc = "Disallow React-specific className/htmlFor props in Qwik components."] # [serde (skip_serializing_if = "Option::is_none")] pub no_qwik_react_props : Option < RuleFixConfiguration < biome_rule_options :: no_qwik_react_props :: NoQwikReactPropsOptions >> , # [doc = "Disallow useVisibleTask$() functions in Qwik components."] # [serde (skip_serializing_if = "Option::is_none")] pub no_qwik_use_visible_task : Option < RuleConfiguration < biome_rule_options :: no_qwik_use_visible_task :: NoQwikUseVisibleTaskOptions >> , # [doc = "Disallow assigning to React component props."] # [serde (skip_serializing_if = "Option::is_none")] pub no_react_prop_assign : Option < RuleConfiguration < biome_rule_options :: no_react_prop_assign :: NoReactPropAssignOptions >> , # [doc = "Disallow the use of configured elements."] # [serde (skip_serializing_if = "Option::is_none")] pub no_restricted_elements : Option < RuleConfiguration < biome_rule_options :: no_restricted_elements :: NoRestrictedElementsOptions >> , # [doc = "Disallow usage of sensitive data such as API keys and tokens."] # [serde (skip_serializing_if = "Option::is_none")] pub no_secrets : Option < RuleConfiguration < biome_rule_options :: no_secrets :: NoSecretsOptions >> , # [doc = "Disallow variable declarations from shadowing variables declared in the outer scope."] # [serde (skip_serializing_if = "Option::is_none")] pub no_shadow : Option < RuleConfiguration < biome_rule_options :: no_shadow :: NoShadowOptions >> , # [doc = "Prevents the use of the TypeScript directive @ts-ignore."] # [serde (skip_serializing_if = "Option::is_none")] pub no_ts_ignore : Option < RuleFixConfiguration < biome_rule_options :: no_ts_ignore :: NoTsIgnoreOptions >> , # [doc = "Disallow let or var variables that are read but never assigned."] # [serde (skip_serializing_if = "Option::is_none")] pub no_unassigned_variables : Option < RuleConfiguration < biome_rule_options :: no_unassigned_variables :: NoUnassignedVariablesOptions >> , # [doc = "Disallow unknown at-rules."] # [serde (skip_serializing_if = "Option::is_none")] pub no_unknown_at_rule : Option < RuleConfiguration < biome_rule_options :: no_unknown_at_rule :: NoUnknownAtRuleOptions >> , # [doc = "Warn when importing non-existing exports."] # [serde (skip_serializing_if = "Option::is_none")] pub no_unresolved_imports : Option < RuleConfiguration < biome_rule_options :: no_unresolved_imports :: NoUnresolvedImportsOptions >> , # [doc = "Prevent duplicate polyfills from Polyfill.io."] # [serde (skip_serializing_if = "Option::is_none")] pub no_unwanted_polyfillio : Option < RuleConfiguration < biome_rule_options :: no_unwanted_polyfillio :: NoUnwantedPolyfillioOptions >> , # [doc = "Disallow useless backreferences in regular expression literals that always match an empty string."] # [serde (skip_serializing_if = "Option::is_none")] pub no_useless_backref_in_regex : Option < RuleConfiguration < biome_rule_options :: no_useless_backref_in_regex :: NoUselessBackrefInRegexOptions >> , # [doc = "Disallow unnecessary escapes in string literals."] # [serde (skip_serializing_if = "Option::is_none")] pub no_useless_escape_in_string : Option < RuleFixConfiguration < biome_rule_options :: no_useless_escape_in_string :: NoUselessEscapeInStringOptions >> , # [doc = "Disallow the use of useless undefined."] # [serde (skip_serializing_if = "Option::is_none")] pub no_useless_undefined : Option < RuleFixConfiguration < biome_rule_options :: no_useless_undefined :: NoUselessUndefinedOptions >> , # [doc = "Disallow reserved names to be used as props."] # [serde (skip_serializing_if = "Option::is_none")] pub no_vue_reserved_props : Option < RuleConfiguration < biome_rule_options :: no_vue_reserved_props :: NoVueReservedPropsOptions >> , # [doc = "Enforce that getters and setters for the same property are adjacent in class and object definitions."] # [serde (skip_serializing_if = "Option::is_none")] pub use_adjacent_getter_setter : Option < RuleConfiguration < biome_rule_options :: use_adjacent_getter_setter :: UseAdjacentGetterSetterOptions >> , # [doc = "Prefer using the classlist prop over the classnames helper."] # [serde (skip_serializing_if = "Option::is_none")] pub use_classlist : Option < RuleConfiguration < biome_rule_options :: use_classlist :: UseClasslistOptions >> , # [doc = "Require the consistent declaration of object literals. Defaults to explicit definitions."] # [serde (skip_serializing_if = "Option::is_none")] pub use_consistent_object_definition : Option < RuleFixConfiguration < biome_rule_options :: use_consistent_object_definition :: UseConsistentObjectDefinitionOptions >> , # [doc = "Use static Response methods instead of new Response() constructor when possible."] # [serde (skip_serializing_if = "Option::is_none")] pub use_consistent_response : Option < RuleFixConfiguration < biome_rule_options :: use_consistent_response :: UseConsistentResponseOptions >> , # [doc = "Require switch-case statements to be exhaustive."] # [serde (skip_serializing_if = "Option::is_none")] pub use_exhaustive_switch_cases : Option < RuleFixConfiguration < biome_rule_options :: use_exhaustive_switch_cases :: UseExhaustiveSwitchCasesOptions >> , # [doc = "Enforce types in functions, methods, variables, and parameters."] # [serde (skip_serializing_if = "Option::is_none")] pub use_explicit_type : Option < RuleConfiguration < biome_rule_options :: use_explicit_type :: UseExplicitTypeOptions >> , # [doc = "Require that all exports are declared after all non-export statements."] # [serde (skip_serializing_if = "Option::is_none")] pub use_exports_last : Option < RuleConfiguration < biome_rule_options :: use_exports_last :: UseExportsLastOptions >> , # [doc = "Enforce using Solid's \\<For /> component for mapping an array to JSX elements."] # [serde (skip_serializing_if = "Option::is_none")] pub use_for_component : Option < RuleConfiguration < biome_rule_options :: use_for_component :: UseForComponentOptions >> , # [doc = "Ensure the preconnect attribute is used when using Google Fonts."] # [serde (skip_serializing_if = "Option::is_none")] pub use_google_font_preconnect : Option < RuleFixConfiguration < biome_rule_options :: use_google_font_preconnect :: UseGoogleFontPreconnectOptions >> , # [doc = "Prefer Array#{indexOf,lastIndexOf}() over Array#{findIndex,findLastIndex}() when looking for the index of an item."] # [serde (skip_serializing_if = "Option::is_none")] pub use_index_of : Option < RuleFixConfiguration < biome_rule_options :: use_index_of :: UseIndexOfOptions >> , # [doc = "Enforce consistent return values in iterable callbacks."] # [serde (skip_serializing_if = "Option::is_none")] pub use_iterable_callback_return : Option < RuleConfiguration < biome_rule_options :: use_iterable_callback_return :: UseIterableCallbackReturnOptions >> , # [doc = "Enforces the use of with { type: \"json\" } for JSON module imports."] # [serde (skip_serializing_if = "Option::is_none")] pub use_json_import_attribute : Option < RuleFixConfiguration < biome_rule_options :: use_json_import_attribute :: UseJsonImportAttributeOptions >> , # [doc = "Require href attribute for \\<a> elements in JSX."] # [serde (skip_serializing_if = "Option::is_none")] pub use_jsx_a : Option < RuleConfiguration < biome_rule_options :: use_jsx_a :: UseJsxAOptions >> , # [doc = "For performance reasons, always provide width and height attributes for \\<img> elements; it will help to prevent layout shifts."] # [serde (skip_serializing_if = "Option::is_none")] pub use_jsx_img : Option < RuleConfiguration < biome_rule_options :: use_jsx_img :: UseJsxImgOptions >> , # [doc = "Enforce specifying the name of GraphQL operations."] # [serde (skip_serializing_if = "Option::is_none")] pub use_named_operation : Option < RuleFixConfiguration < biome_rule_options :: use_named_operation :: UseNamedOperationOptions >> , # [doc = "Validates that all enum values are capitalized."] # [serde (skip_serializing_if = "Option::is_none")] pub use_naming_convention : Option < RuleConfiguration < biome_rule_options :: use_naming_convention :: UseNamingConventionOptions >> , # [doc = "Enforce the use of numeric separators in numeric literals."] # [serde (skip_serializing_if = "Option::is_none")] pub use_numeric_separators : Option < RuleFixConfiguration < biome_rule_options :: use_numeric_separators :: UseNumericSeparatorsOptions >> , # [doc = "Prefer object spread over Object.assign() when constructing new objects."] # [serde (skip_serializing_if = "Option::is_none")] pub use_object_spread : Option < RuleFixConfiguration < biome_rule_options :: use_object_spread :: UseObjectSpreadOptions >> , # [doc = "Enforce the consistent use of the radix argument when using parseInt()."] # [serde (skip_serializing_if = "Option::is_none")] pub use_parse_int_radix : Option < RuleFixConfiguration < biome_rule_options :: use_parse_int_radix :: UseParseIntRadixOptions >> , # [doc = "Enforce marking members as readonly if they are never modified outside the constructor."] # [serde (skip_serializing_if = "Option::is_none")] pub use_readonly_class_properties : Option < RuleFixConfiguration < biome_rule_options :: use_readonly_class_properties :: UseReadonlyClassPropertiesOptions >> , # [doc = "Enforce JSDoc comment lines to start with a single asterisk, except for the first one."] # [serde (skip_serializing_if = "Option::is_none")] pub use_single_js_doc_asterisk : Option < RuleFixConfiguration < biome_rule_options :: use_single_js_doc_asterisk :: UseSingleJsDocAsteriskOptions >> , # [doc = "Enforce the sorting of CSS utility classes."] # [serde (skip_serializing_if = "Option::is_none")] pub use_sorted_classes : Option < RuleFixConfiguration < biome_rule_options :: use_sorted_classes :: UseSortedClassesOptions >> , # [doc = "Require a description parameter for the Symbol()."] # [serde (skip_serializing_if = "Option::is_none")] pub use_symbol_description : Option < RuleConfiguration < biome_rule_options :: use_symbol_description :: UseSymbolDescriptionOptions >> , # [doc = "Disallow overload signatures that can be unified into a single signature."] # [serde (skip_serializing_if = "Option::is_none")] pub use_unified_type_signature : Option < RuleFixConfiguration < biome_rule_options :: use_unified_type_signature :: UseUnifiedTypeSignatureOptions >> , # [doc = "Prevent the usage of static string literal id attribute on elements."] # [serde (skip_serializing_if = "Option::is_none")] pub use_unique_element_ids : Option < RuleConfiguration < biome_rule_options :: use_unique_element_ids :: UseUniqueElementIdsOptions >> }
 impl Nursery {
     const GROUP_NAME: &'static str = "nursery";
     pub(crate) const GROUP_RULES: &'static [&'static str] = &[
@@ -4294,6 +4294,7 @@ impl Nursery {
         "noNoninteractiveElementInteractions",
         "noProcessGlobal",
         "noQwikReactProps",
+        "noQwikUseVisibleTask",
         "noReactPropAssign",
         "noRestrictedElements",
         "noSecrets",
@@ -4303,7 +4304,6 @@ impl Nursery {
         "noUnknownAtRule",
         "noUnresolvedImports",
         "noUnwantedPolyfillio",
-        "noUseVisibleTask",
         "noUselessBackrefInRegex",
         "noUselessEscapeInString",
         "noUselessUndefined",
@@ -4336,8 +4336,8 @@ impl Nursery {
     ];
     const RECOMMENDED_RULES_AS_FILTERS: &'static [RuleFilter<'static>] = &[
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[9]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[20]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[22]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[21]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[23]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[26]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[27]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[39]),
@@ -4492,52 +4492,52 @@ impl RuleGroupExt for Nursery {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[15]));
             }
         }
-        if let Some(rule) = self.no_react_prop_assign.as_ref() {
+        if let Some(rule) = self.no_qwik_use_visible_task.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[16]));
             }
         }
-        if let Some(rule) = self.no_restricted_elements.as_ref() {
+        if let Some(rule) = self.no_react_prop_assign.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[17]));
             }
         }
-        if let Some(rule) = self.no_secrets.as_ref() {
+        if let Some(rule) = self.no_restricted_elements.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[18]));
             }
         }
-        if let Some(rule) = self.no_shadow.as_ref() {
+        if let Some(rule) = self.no_secrets.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[19]));
             }
         }
-        if let Some(rule) = self.no_ts_ignore.as_ref() {
+        if let Some(rule) = self.no_shadow.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[20]));
             }
         }
-        if let Some(rule) = self.no_unassigned_variables.as_ref() {
+        if let Some(rule) = self.no_ts_ignore.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[21]));
             }
         }
-        if let Some(rule) = self.no_unknown_at_rule.as_ref() {
+        if let Some(rule) = self.no_unassigned_variables.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[22]));
             }
         }
-        if let Some(rule) = self.no_unresolved_imports.as_ref() {
+        if let Some(rule) = self.no_unknown_at_rule.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[23]));
             }
         }
-        if let Some(rule) = self.no_unwanted_polyfillio.as_ref() {
+        if let Some(rule) = self.no_unresolved_imports.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[24]));
             }
         }
-        if let Some(rule) = self.no_use_visible_task.as_ref() {
+        if let Some(rule) = self.no_unwanted_polyfillio.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[25]));
             }
@@ -4771,52 +4771,52 @@ impl RuleGroupExt for Nursery {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[15]));
             }
         }
-        if let Some(rule) = self.no_react_prop_assign.as_ref() {
+        if let Some(rule) = self.no_qwik_use_visible_task.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[16]));
             }
         }
-        if let Some(rule) = self.no_restricted_elements.as_ref() {
+        if let Some(rule) = self.no_react_prop_assign.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[17]));
             }
         }
-        if let Some(rule) = self.no_secrets.as_ref() {
+        if let Some(rule) = self.no_restricted_elements.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[18]));
             }
         }
-        if let Some(rule) = self.no_shadow.as_ref() {
+        if let Some(rule) = self.no_secrets.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[19]));
             }
         }
-        if let Some(rule) = self.no_ts_ignore.as_ref() {
+        if let Some(rule) = self.no_shadow.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[20]));
             }
         }
-        if let Some(rule) = self.no_unassigned_variables.as_ref() {
+        if let Some(rule) = self.no_ts_ignore.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[21]));
             }
         }
-        if let Some(rule) = self.no_unknown_at_rule.as_ref() {
+        if let Some(rule) = self.no_unassigned_variables.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[22]));
             }
         }
-        if let Some(rule) = self.no_unresolved_imports.as_ref() {
+        if let Some(rule) = self.no_unknown_at_rule.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[23]));
             }
         }
-        if let Some(rule) = self.no_unwanted_polyfillio.as_ref() {
+        if let Some(rule) = self.no_unresolved_imports.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[24]));
             }
         }
-        if let Some(rule) = self.no_use_visible_task.as_ref() {
+        if let Some(rule) = self.no_unwanted_polyfillio.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[25]));
             }
@@ -5060,6 +5060,10 @@ impl RuleGroupExt for Nursery {
                 .no_qwik_react_props
                 .as_ref()
                 .map(|conf| (conf.level(), conf.get_options())),
+            "noQwikUseVisibleTask" => self
+                .no_qwik_use_visible_task
+                .as_ref()
+                .map(|conf| (conf.level(), conf.get_options())),
             "noReactPropAssign" => self
                 .no_react_prop_assign
                 .as_ref()
@@ -5094,10 +5098,6 @@ impl RuleGroupExt for Nursery {
                 .map(|conf| (conf.level(), conf.get_options())),
             "noUnwantedPolyfillio" => self
                 .no_unwanted_polyfillio
-                .as_ref()
-                .map(|conf| (conf.level(), conf.get_options())),
-            "noUseVisibleTask" => self
-                .no_use_visible_task
                 .as_ref()
                 .map(|conf| (conf.level(), conf.get_options())),
             "noUselessBackrefInRegex" => self
@@ -5240,6 +5240,7 @@ impl From<GroupPlainConfiguration> for Nursery {
             no_noninteractive_element_interactions: Some(value.into()),
             no_process_global: Some(value.into()),
             no_qwik_react_props: Some(value.into()),
+            no_qwik_use_visible_task: Some(value.into()),
             no_react_prop_assign: Some(value.into()),
             no_restricted_elements: Some(value.into()),
             no_secrets: Some(value.into()),
@@ -5249,7 +5250,6 @@ impl From<GroupPlainConfiguration> for Nursery {
             no_unknown_at_rule: Some(value.into()),
             no_unresolved_imports: Some(value.into()),
             no_unwanted_polyfillio: Some(value.into()),
-            no_use_visible_task: Some(value.into()),
             no_useless_backref_in_regex: Some(value.into()),
             no_useless_escape_in_string: Some(value.into()),
             no_useless_undefined: Some(value.into()),

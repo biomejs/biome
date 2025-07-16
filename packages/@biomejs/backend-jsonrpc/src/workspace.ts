@@ -1615,6 +1615,10 @@ export interface Nursery {
 	 */
 	noQwikReactProps?: RuleFixConfiguration_for_NoQwikReactPropsOptions;
 	/**
+	 * Disallow useVisibleTask$() functions in Qwik components.
+	 */
+	noQwikUseVisibleTask?: RuleConfiguration_for_NoQwikUseVisibleTaskOptions;
+	/**
 	 * Disallow assigning to React component props.
 	 */
 	noReactPropAssign?: RuleConfiguration_for_NoReactPropAssignOptions;
@@ -1650,10 +1654,6 @@ export interface Nursery {
 	 * Prevent duplicate polyfills from Polyfill.io.
 	 */
 	noUnwantedPolyfillio?: RuleConfiguration_for_NoUnwantedPolyfillioOptions;
-	/**
-	 * Disallow useVisibleTask$() functions in Qwik components.
-	 */
-	noUseVisibleTask?: RuleConfiguration_for_NoUseVisibleTaskOptions;
 	/**
 	 * Disallow useless backreferences in regular expression literals that always match an empty string.
 	 */
@@ -2907,6 +2907,9 @@ export type RuleFixConfiguration_for_NoProcessGlobalOptions =
 export type RuleFixConfiguration_for_NoQwikReactPropsOptions =
 	| RulePlainConfiguration
 	| RuleWithFixOptions_for_NoQwikReactPropsOptions;
+export type RuleConfiguration_for_NoQwikUseVisibleTaskOptions =
+	| RulePlainConfiguration
+	| RuleWithOptions_for_NoQwikUseVisibleTaskOptions;
 export type RuleConfiguration_for_NoReactPropAssignOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_NoReactPropAssignOptions;
@@ -2934,9 +2937,6 @@ export type RuleConfiguration_for_NoUnresolvedImportsOptions =
 export type RuleConfiguration_for_NoUnwantedPolyfillioOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_NoUnwantedPolyfillioOptions;
-export type RuleConfiguration_for_NoUseVisibleTaskOptions =
-	| RulePlainConfiguration
-	| RuleWithOptions_for_NoUseVisibleTaskOptions;
 export type RuleConfiguration_for_NoUselessBackrefInRegexOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_NoUselessBackrefInRegexOptions;
@@ -5218,6 +5218,16 @@ export interface RuleWithFixOptions_for_NoQwikReactPropsOptions {
 	 */
 	options: NoQwikReactPropsOptions;
 }
+export interface RuleWithOptions_for_NoQwikUseVisibleTaskOptions {
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: NoQwikUseVisibleTaskOptions;
+}
 export interface RuleWithOptions_for_NoReactPropAssignOptions {
 	/**
 	 * The severity of the emitted diagnostics by the rule
@@ -5311,16 +5321,6 @@ export interface RuleWithOptions_for_NoUnwantedPolyfillioOptions {
 	 * Rule's options
 	 */
 	options: NoUnwantedPolyfillioOptions;
-}
-export interface RuleWithOptions_for_NoUseVisibleTaskOptions {
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: NoUseVisibleTaskOptions;
 }
 export interface RuleWithOptions_for_NoUselessBackrefInRegexOptions {
 	/**
@@ -7760,6 +7760,7 @@ export interface NoNestedComponentDefinitionsOptions {}
 export interface NoNoninteractiveElementInteractionsOptions {}
 export interface NoProcessGlobalOptions {}
 export interface NoQwikReactPropsOptions {}
+export interface NoQwikUseVisibleTaskOptions {}
 export interface NoReactPropAssignOptions {}
 export interface NoRestrictedElementsOptions {
 	/**
@@ -7779,7 +7780,6 @@ export interface NoUnassignedVariablesOptions {}
 export interface NoUnknownAtRuleOptions {}
 export interface NoUnresolvedImportsOptions {}
 export interface NoUnwantedPolyfillioOptions {}
-export interface NoUseVisibleTaskOptions {}
 export interface NoUselessBackrefInRegexOptions {}
 export interface NoUselessEscapeInStringOptions {}
 export interface NoUselessUndefinedOptions {}
@@ -8465,7 +8465,7 @@ export type Category =
 	| "lint/nursery/noUnresolvedImports"
 	| "lint/nursery/noUnusedFunctionParameters"
 	| "lint/nursery/noUnwantedPolyfillio"
-	| "lint/nursery/noUseVisibleTask"
+	| "lint/nursery/noQwikUseVisibleTask"
 	| "lint/nursery/noUselessBackrefInRegex"
 	| "lint/nursery/noUselessEscapeInString"
 	| "lint/nursery/noUselessUndefined"

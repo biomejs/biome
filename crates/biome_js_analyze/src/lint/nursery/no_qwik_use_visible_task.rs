@@ -4,7 +4,7 @@ use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_syntax::{JsCallExpression, global_identifier};
 use biome_rowan::TextRange;
-use biome_rule_options::no_use_visible_task::NoUseVisibleTaskOptions;
+use biome_rule_options::no_qwik_use_visible_task::NoQwikUseVisibleTaskOptions;
 
 declare_lint_rule! {
     /// Disallow useVisibleTask$() functions in Qwik components.
@@ -30,9 +30,9 @@ declare_lint_rule! {
     /// });
     /// ```
     ///
-    pub NoUseVisibleTask {
+    pub NoQwikUseVisibleTask {
         version: "next",
-        name: "noUseVisibleTask",
+        name: "noQwikUseVisibleTask",
         language: "js",
         sources: &[RuleSource::EslintQwik("no-use-visible-task").inspired()],
         recommended: true,
@@ -41,11 +41,11 @@ declare_lint_rule! {
     }
 }
 
-impl Rule for NoUseVisibleTask {
+impl Rule for NoQwikUseVisibleTask {
     type Query = Ast<JsCallExpression>;
     type State = TextRange;
     type Signals = Option<Self::State>;
-    type Options = NoUseVisibleTaskOptions;
+    type Options = NoQwikUseVisibleTaskOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let call_expression = ctx.query();

@@ -3780,6 +3780,16 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoQwikUseVisibleTaskConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{ "$ref": "#/definitions/RuleWithNoQwikUseVisibleTaskOptions" }
+			]
+		},
+		"NoQwikUseVisibleTaskOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoReExportAllConfiguration": {
 			"anyOf": [
 				{ "$ref": "#/definitions/RulePlainConfiguration" },
@@ -4418,16 +4428,6 @@
 			"type": "object",
 			"additionalProperties": false
 		},
-		"NoUseVisibleTaskConfiguration": {
-			"anyOf": [
-				{ "$ref": "#/definitions/RulePlainConfiguration" },
-				{ "$ref": "#/definitions/RuleWithNoUseVisibleTaskOptions" }
-			]
-		},
-		"NoUseVisibleTaskOptions": {
-			"type": "object",
-			"additionalProperties": false
-		},
 		"NoUselessBackrefInRegexConfiguration": {
 			"anyOf": [
 				{ "$ref": "#/definitions/RulePlainConfiguration" },
@@ -4821,6 +4821,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noQwikUseVisibleTask": {
+					"description": "Disallow useVisibleTask$() functions in Qwik components.",
+					"anyOf": [
+						{ "$ref": "#/definitions/NoQwikUseVisibleTaskConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noReactPropAssign": {
 					"description": "Disallow assigning to React component props.",
 					"anyOf": [
@@ -4881,13 +4888,6 @@
 					"description": "Prevent duplicate polyfills from Polyfill.io.",
 					"anyOf": [
 						{ "$ref": "#/definitions/NoUnwantedPolyfillioConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"noUseVisibleTask": {
-					"description": "Disallow useVisibleTask$() functions in Qwik components.",
-					"anyOf": [
-						{ "$ref": "#/definitions/NoUseVisibleTaskConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -7931,6 +7931,21 @@
 			},
 			"additionalProperties": false
 		},
+		"RuleWithNoQwikUseVisibleTaskOptions": {
+			"type": "object",
+			"required": ["level"],
+			"properties": {
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [{ "$ref": "#/definitions/NoQwikUseVisibleTaskOptions" }]
+				}
+			},
+			"additionalProperties": false
+		},
 		"RuleWithNoReExportAllOptions": {
 			"type": "object",
 			"required": ["level"],
@@ -8902,21 +8917,6 @@
 				"options": {
 					"description": "Rule's options",
 					"allOf": [{ "$ref": "#/definitions/NoUnwantedPolyfillioOptions" }]
-				}
-			},
-			"additionalProperties": false
-		},
-		"RuleWithNoUseVisibleTaskOptions": {
-			"type": "object",
-			"required": ["level"],
-			"properties": {
-				"level": {
-					"description": "The severity of the emitted diagnostics by the rule",
-					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
-				},
-				"options": {
-					"description": "Rule's options",
-					"allOf": [{ "$ref": "#/definitions/NoUseVisibleTaskOptions" }]
 				}
 			},
 			"additionalProperties": false
