@@ -347,7 +347,7 @@ fn handle_any_file<'scope>(
         scope.spawn(move |scope| {
             handle_dir(scope, ctx, &path_buf, origin_path);
         });
-        if ctx.store_dirs() {
+        if ctx.should_store_dirs() {
             ctx.store_path(BiomePath::new(path));
         }
         return;

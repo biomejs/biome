@@ -381,7 +381,7 @@ pub trait TraversalContext: Sync {
 
     /// Returns whether directories are stored and returned by
     /// `Self::evaluated_paths()`.
-    fn store_dirs(&self) -> bool {
+    fn should_store_dirs(&self) -> bool {
         false
     }
 }

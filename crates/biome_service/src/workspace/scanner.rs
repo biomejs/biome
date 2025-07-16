@@ -27,13 +27,24 @@ use std::time::{Duration, Instant};
 use tracing::instrument;
 
 pub(crate) struct ScanOptions {
+    /// The kind of scan to perform (targeted, project, etc.).
     pub scan_kind: ScanKind,
+
+    /// Whether diagnostics should be reported for scanned files.
+    ///
+    /// If `false`, only diagnostics related to Biome configuration files are
+    /// reported.
     pub verbose: bool,
+
+    /// Whether scanned directories should be watched for filesystem changes.
     pub watch: bool,
 }
 
 pub(crate) struct ScanResult {
     /// Diagnostics reported while scanning the project.
+    ///
+    /// If [`ScanOptions::verbose`] is `false`, only diagnostics related to
+    /// Biome configuration files are reported.
     pub diagnostics: Vec<Diagnostic>,
 
     /// Duration of the full scan.
@@ -216,7 +227,7 @@ fn scan_folder(folder: &Utf8Path, ctx: ScanContext) -> ScanFolderResult {
             manifests.push(path);
         } else if path.is_ignore() {
             ignore_paths.push(path);
-        } else if path.is_dir() {
+        } else if ctx.watch && fs.symlink_path_kind(&path).is_ok_and(PathKind::is_dir) {
             folders_to_watch.push(path.into());
         } else {
             handleable_paths.push(path);
@@ -419,7 +430,7 @@ impl TraversalContext for ScanContext<'_> {
         self.evaluated_paths.write().unwrap().insert(path);
     }
 
-    fn store_dirs(&self) -> bool {
+    fn should_store_dirs(&self) -> bool {
         self.watch
     }
 }
