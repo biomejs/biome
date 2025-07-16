@@ -20,9 +20,9 @@ use crate::{Workspace, WorkspaceError};
 
 use super::{
     CloseFileParams, CloseProjectParams, FileContent, FileFeaturesResult, FileGuard,
-    GetFileContentParams, GetSyntaxTreeParams, OpenFileParams, OpenProjectParams,
-    OpenProjectResult, PullDiagnosticsParams, ScanKind, ScanProjectFolderParams, UpdateKind,
-    UpdateModuleGraphParams, UpdateSettingsParams, server,
+    GetFileContentParams, GetModuleGraphParams, GetSyntaxTreeParams, OpenFileParams,
+    OpenProjectParams, OpenProjectResult, PullDiagnosticsParams, ScanKind, ScanProjectFolderParams,
+    UpdateKind, UpdateModuleGraphParams, UpdateSettingsParams, server,
 };
 
 fn create_server() -> (Box<dyn Workspace>, ProjectKey) {
@@ -969,7 +969,7 @@ export const squash = function squash() {};
         })
         .unwrap();
 
-    let result = workspace.get_module_graph().unwrap();
+    let result = workspace.get_module_graph(GetModuleGraphParams {}).unwrap();
 
     assert_debug_snapshot!(result)
 }
