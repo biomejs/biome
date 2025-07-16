@@ -2,7 +2,6 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: css/atrule/supports.css
 ---
-
 # Input
 
 ```css
@@ -403,5 +402,3 @@ Quote style: Double Quotes
 	}
 }
 ```
-
-

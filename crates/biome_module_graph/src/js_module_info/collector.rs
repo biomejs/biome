@@ -1,8 +1,4 @@
-use std::{
-    borrow::Cow,
-    collections::{BTreeMap, BTreeSet},
-    sync::Arc,
-};
+use std::{borrow::Cow, collections::BTreeSet, sync::Arc};
 
 use biome_js_semantic::{SemanticEvent, SemanticEventExtractor};
 use biome_js_syntax::{
@@ -19,6 +15,7 @@ use biome_js_type_info::{
 };
 use biome_jsdoc_comment::JsdocComment;
 use biome_rowan::{AstNode, Text, TextRange, TextSize, TokenText};
+use indexmap::IndexMap;
 use rust_lapper::{Interval, Lapper};
 use rustc_hash::FxHashMap;
 
@@ -77,11 +74,11 @@ pub(super) struct JsModuleInfoCollector {
 
     /// Map with all static import paths, from the source specifier to the
     /// resolved path.
-    static_import_paths: BTreeMap<Text, ResolvedPath>,
+    static_import_paths: IndexMap<Text, ResolvedPath>,
 
     /// Map with all dynamic import paths, from the import source to the
     /// resolved path.
-    dynamic_import_paths: BTreeMap<Text, ResolvedPath>,
+    dynamic_import_paths: IndexMap<Text, ResolvedPath>,
 
     /// All collected exports.
     ///
@@ -96,7 +93,7 @@ pub(super) struct JsModuleInfoCollector {
     types: TypeStore,
 
     /// Static imports mapped from the local name of the binding being imported.
-    static_imports: BTreeMap<Text, JsImport>,
+    static_imports: IndexMap<Text, JsImport>,
 }
 
 /// Intermediary representation for an exported symbol.
@@ -519,7 +516,7 @@ impl JsModuleInfoCollector {
         }
     }
 
-    fn finalise(&mut self) -> (BTreeMap<Text, JsExport>, Lapper<u32, ScopeId>) {
+    fn finalise(&mut self) -> (IndexMap<Text, JsExport>, Lapper<u32, ScopeId>) {
         let scope_by_range = Lapper::new(
             self.scope_range_by_start
                 .iter()
@@ -767,8 +764,8 @@ impl JsModuleInfoCollector {
         }
     }
 
-    fn collect_exports(&mut self) -> BTreeMap<Text, JsExport> {
-        let mut finalised_exports = BTreeMap::new();
+    fn collect_exports(&mut self) -> IndexMap<Text, JsExport> {
+        let mut finalised_exports = IndexMap::new();
 
         let exports = std::mem::take(&mut self.exports);
         for export in exports {

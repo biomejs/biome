@@ -8,7 +8,7 @@ use biome_analyze::{
     SUPPRESSION_TOP_LEVEL_ACTION_CATEGORY, SourceActionKind,
 };
 use biome_configuration::analyzer::RuleSelector;
-use biome_diagnostics::Error;
+use biome_diagnostics::{Applicability, Error};
 use biome_fs::BiomePath;
 use biome_line_index::LineIndex;
 use biome_lsp_converters::from_proto;
@@ -17,7 +17,8 @@ use biome_service::WorkspaceError;
 use biome_service::file_handlers::{AstroFileHandler, SvelteFileHandler, VueFileHandler};
 use biome_service::workspace::{
     CheckFileSizeParams, FeaturesBuilder, FileFeaturesResult, FixFileMode, FixFileParams,
-    GetFileContentParams, IsPathIgnoredParams, PullActionsParams, SupportsFeatureParams,
+    GetFileContentParams, IgnoreKind, IsPathIgnoredParams, PullActionsParams,
+    SupportsFeatureParams,
 };
 use std::borrow::Cow;
 use std::collections::HashMap;
@@ -65,6 +66,7 @@ pub(crate) fn code_actions(
         path: path.clone(),
         project_key: doc.project_key,
         features,
+        ignore_kind: IgnoreKind::Ancestors,
     })? {
         return Ok(Some(Vec::new()));
     }
@@ -98,12 +100,16 @@ pub(crate) fn code_actions(
     }
 
     let mut has_fix_all = false;
+    let mut has_quick_fix = false;
     let mut filters = Vec::new();
     if let Some(filter) = &params.context.only {
         for kind in filter {
             let kind = kind.as_str();
             if FIX_ALL_CATEGORY.matches(kind) {
                 has_fix_all = true;
+            }
+            if kind == "quickfix.biome" {
+                has_quick_fix = true;
             }
             filters.push(kind);
         }
@@ -195,6 +201,17 @@ pub(crate) fn code_actions(
                 "Action: {:?}, and applicability {:?}",
                 &action.category, &action.suggestion.applicability
             );
+
+            // Skip quick fixes that have unsafe code fixes
+            if has_quick_fix && action.suggestion.applicability == Applicability::MaybeIncorrect {
+                return None;
+            }
+
+            if action.category.matches("quickfix.biome")
+                && action.suggestion.applicability == Applicability::MaybeIncorrect
+            {
+                return None;
+            }
             // Filter out source.organizeImports.biome action when assist is not supported.
             if action.category.matches("source.organizeImports.biome")
                 && !file_features.supports_assist()
@@ -296,6 +313,7 @@ fn fix_all(
         path: path.clone(),
         project_key: doc.project_key,
         features: analyzer_features,
+        ignore_kind: IgnoreKind::Ancestors,
     })? {
         return Ok(None);
     }
@@ -317,6 +335,7 @@ fn fix_all(
         path: path.clone(),
         project_key: doc.project_key,
         features: analyzer_features,
+        ignore_kind: IgnoreKind::Ancestors,
     })? {
         return Ok(None);
     }

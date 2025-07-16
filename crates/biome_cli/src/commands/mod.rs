@@ -1,6 +1,6 @@
 use crate::changed::{get_changed_files, get_staged_files};
 use crate::cli_options::{CliOptions, CliReporter, ColorsArg, cli_options};
-use crate::commands::scan_kind::get_forced_scan_kind;
+use crate::commands::scan_kind::derive_best_scan_kind;
 use crate::execute::Stdin;
 use crate::logging::LoggingKind;
 use crate::{
@@ -882,6 +882,7 @@ pub(crate) trait CommandRunner: Sized {
         workspace: &dyn Workspace,
         cli_options: &CliOptions,
     ) -> Result<ConfiguredWorkspace, CliDiagnostic> {
+        // Load configuration
         let configuration_path_hint = cli_options.as_configuration_path_hint();
         let loaded_configuration = load_configuration(fs, configuration_path_hint)?;
         if self.should_validate_configuration_diagnostics() {
@@ -897,6 +898,8 @@ pub(crate) trait CommandRunner: Sized {
             loaded_configuration.diagnostics.len(),
         );
         let configuration_dir_path = loaded_configuration.directory_path.clone();
+
+        // Merge the FS configuration with the CLI arguments
         let configuration = self.merge_configuration(loaded_configuration, fs, console)?;
 
         let execution = self.get_execution(cli_options, console, workspace)?;
@@ -934,23 +937,32 @@ pub(crate) trait CommandRunner: Sized {
             }
         };
 
+        // Open the project
         let open_project_result = workspace.open_project(params)?;
 
-        let scan_kind = get_forced_scan_kind(&execution, &root_configuration_dir, &working_dir)
-            .unwrap_or({
-                if open_project_result.scan_kind == ScanKind::NoScanner {
-                    // If we're here, it means we're executing `check`, `lint` or `ci`
-                    // and the linter is disabled or no projects rules have been enabled.
-                    // We scan known files if the configuration is a root or if the VCS integration is enabled
-                    if configuration.is_root() || configuration.use_ignore_file() {
-                        ScanKind::KnownFiles
-                    } else {
-                        ScanKind::NoScanner
-                    }
-                } else {
-                    open_project_result.scan_kind
-                }
-            });
+        let scan_kind = derive_best_scan_kind(
+            open_project_result.scan_kind,
+            &execution,
+            &root_configuration_dir,
+            &working_dir,
+            &configuration,
+        );
+
+        // Update the settings of the project
+        let result = workspace.update_settings(UpdateSettingsParams {
+            project_key: open_project_result.project_key,
+            workspace_directory: Some(BiomePath::new(project_dir)),
+            configuration,
+        })?;
+        if self.should_validate_configuration_diagnostics() {
+            print_diagnostics_from_workspace_result(
+                result.diagnostics.as_slice(),
+                console,
+                cli_options.verbose,
+            )?;
+        }
+
+        // Scan the project
         let scan_kind = match (scan_kind, execution.traversal_mode()) {
             (scan_kind, TraversalMode::Migrate { .. }) => scan_kind,
             (ScanKind::KnownFiles, _) => {
@@ -965,26 +977,13 @@ pub(crate) trait CommandRunner: Sized {
             }
             (scan_kind, _) => scan_kind,
         };
-
-        let result = workspace.update_settings(UpdateSettingsParams {
-            project_key: open_project_result.project_key,
-            workspace_directory: Some(BiomePath::new(project_dir)),
-            configuration,
-        })?;
-        if self.should_validate_configuration_diagnostics() {
-            print_diagnostics_from_workspace_result(
-                result.diagnostics.as_slice(),
-                console,
-                cli_options.verbose,
-            )?;
-        }
-
         let result = workspace.scan_project_folder(ScanProjectFolderParams {
             project_key: open_project_result.project_key,
             path: None,
             watch: cli_options.use_server,
             force: false, // TODO: Maybe we'll want a CLI flag for this.
             scan_kind,
+            verbose: cli_options.verbose,
         })?;
 
         if self.should_validate_configuration_diagnostics() {

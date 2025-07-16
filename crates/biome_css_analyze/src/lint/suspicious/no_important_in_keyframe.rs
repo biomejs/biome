@@ -69,8 +69,12 @@ impl Rule for NoImportantInKeyframe {
             else {
                 return None;
             };
-            for colon_declaration in block_declaration.declarations() {
-                if let Some(important) = colon_declaration.declaration().ok()?.important() {
+
+            for any_colon_declaration in block_declaration.declarations() {
+                if let Some(important) = any_colon_declaration
+                    .as_css_declaration_with_semicolon()
+                    .and_then(|decl| decl.declaration().ok()?.important())
+                {
                     return Some(important);
                 }
             }

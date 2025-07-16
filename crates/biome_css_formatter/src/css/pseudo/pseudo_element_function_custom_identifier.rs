@@ -1,20 +1,20 @@
 use crate::prelude::*;
 use biome_css_syntax::{
-    CssPseudoElementFunctionIdentifier, CssPseudoElementFunctionIdentifierFields,
+    CssPseudoElementFunctionCustomIdentifier, CssPseudoElementFunctionCustomIdentifierFields,
 };
 use biome_formatter::{format_args, write};
 
 #[derive(Debug, Clone, Default)]
-pub(crate) struct FormatCssPseudoElementFunctionIdentifier;
-impl FormatNodeRule<CssPseudoElementFunctionIdentifier>
-    for FormatCssPseudoElementFunctionIdentifier
+pub(crate) struct FormatCssPseudoElementFunctionCustomIdentifier;
+impl FormatNodeRule<CssPseudoElementFunctionCustomIdentifier>
+    for FormatCssPseudoElementFunctionCustomIdentifier
 {
     fn fmt_fields(
         &self,
-        node: &CssPseudoElementFunctionIdentifier,
+        node: &CssPseudoElementFunctionCustomIdentifier,
         f: &mut CssFormatter,
     ) -> FormatResult<()> {
-        let CssPseudoElementFunctionIdentifierFields {
+        let CssPseudoElementFunctionCustomIdentifierFields {
             name,
             l_paren_token,
             ident,

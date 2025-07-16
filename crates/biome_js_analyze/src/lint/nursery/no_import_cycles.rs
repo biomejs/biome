@@ -1,5 +1,3 @@
-use std::collections::HashSet;
-
 use biome_analyze::{
     Rule, RuleDiagnostic, RuleDomain, RuleSource, context::RuleContext, declare_lint_rule,
 };
@@ -10,6 +8,7 @@ use biome_module_graph::{JsModuleInfo, ResolvedPath};
 use biome_rowan::AstNode;
 use biome_rule_options::no_import_cycles::NoImportCyclesOptions;
 use camino::{Utf8Path, Utf8PathBuf};
+use rustc_hash::FxHashSet;
 
 use crate::services::module_graph::ResolvedImports;
 
@@ -25,6 +24,12 @@ declare_lint_rule! {
     /// If a cycle is detected, it is advised to move code such that imports
     /// only go in a single direction, i.e. they don't point "back" to the
     /// importing file.
+    ///
+    /// :::note
+    /// This rule is computationally expensive. If you are particularly
+    /// pressed for lint time, or don't think you have an issue with dependency
+    /// cycles, you may not want this rule enabled.
+    /// :::
     ///
     /// ## Examples
     ///
@@ -160,36 +165,32 @@ fn find_cycle(
     start_path: &Utf8Path,
     mut module_info: JsModuleInfo,
 ) -> Option<Box<[Box<str>]>> {
-    let mut seen = HashSet::new();
+    let mut seen = FxHashSet::default();
     let mut stack: Vec<(Box<str>, JsModuleInfo)> = Vec::new();
 
     'outer: loop {
         for resolved_path in module_info.all_import_paths() {
-            let Some(resolved_path) = resolved_path.as_path() else {
+            let Some(path) = resolved_path.as_path() else {
                 continue;
             };
 
-            if resolved_path == ctx.file_path() {
+            if !seen.insert(resolved_path.clone()) {
+                continue;
+            }
+
+            if path == ctx.file_path() {
                 // Return all the paths from `start_path` to `resolved_path`:
                 let paths = Some(start_path.as_str())
                     .into_iter()
                     .map(Box::from)
                     .chain(stack.into_iter().map(|(path, _)| path))
-                    .chain(Some(Box::from(resolved_path.as_str())))
+                    .chain(Some(Box::from(path.as_str())))
                     .collect();
                 return Some(paths);
             }
 
-            // FIXME: Use `get_or_insert_with()` once it's stabilized.
-            //        See: https://github.com/rust-lang/rust/issues/60896
-            if seen.contains(resolved_path.as_str()) {
-                continue;
-            }
-
-            seen.insert(resolved_path.to_string());
-
-            if let Some(next_module_info) = ctx.module_info_for_path(resolved_path) {
-                stack.push((resolved_path.as_str().into(), module_info));
+            if let Some(next_module_info) = ctx.module_info_for_path(path) {
+                stack.push((path.as_str().into(), module_info));
                 module_info = next_module_info;
                 continue 'outer;
             }
