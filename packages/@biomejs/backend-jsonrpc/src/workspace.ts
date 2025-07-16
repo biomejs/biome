@@ -1721,7 +1721,7 @@ export interface Nursery {
 	/**
 	 * Require href attribute for \<a> elements in JSX.
 	 */
-	useJsxA?: RuleConfiguration_for_UseJsxAOptions;
+	useJsxAnchorHref?: RuleConfiguration_for_UseJsxAnchorHrefOptions;
 	/**
 	 * For performance reasons, always provide width and height attributes for \<img> elements; it will help to prevent layout shifts.
 	 */
@@ -2982,9 +2982,9 @@ export type RuleConfiguration_for_UseIterableCallbackReturnOptions =
 export type RuleFixConfiguration_for_UseJsonImportAttributeOptions =
 	| RulePlainConfiguration
 	| RuleWithFixOptions_for_UseJsonImportAttributeOptions;
-export type RuleConfiguration_for_UseJsxAOptions =
+export type RuleConfiguration_for_UseJsxAnchorHrefOptions =
 	| RulePlainConfiguration
-	| RuleWithOptions_for_UseJsxAOptions;
+	| RuleWithOptions_for_UseJsxAnchorHrefOptions;
 export type RuleConfiguration_for_UseJsxImgOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_UseJsxImgOptions;
@@ -5504,7 +5504,7 @@ export interface RuleWithFixOptions_for_UseJsonImportAttributeOptions {
 	 */
 	options: UseJsonImportAttributeOptions;
 }
-export interface RuleWithOptions_for_UseJsxAOptions {
+export interface RuleWithOptions_for_UseJsxAnchorHrefOptions {
 	/**
 	 * The severity of the emitted diagnostics by the rule
 	 */
@@ -5512,7 +5512,7 @@ export interface RuleWithOptions_for_UseJsxAOptions {
 	/**
 	 * Rule's options
 	 */
-	options: UseJsxAOptions;
+	options: UseJsxAnchorHrefOptions;
 }
 export interface RuleWithOptions_for_UseJsxImgOptions {
 	/**
@@ -7797,7 +7797,7 @@ export interface UseGoogleFontPreconnectOptions {}
 export interface UseIndexOfOptions {}
 export interface UseIterableCallbackReturnOptions {}
 export interface UseJsonImportAttributeOptions {}
-export type UseJsxAOptions = null;
+export type UseJsxAnchorHrefOptions = null;
 export type UseJsxImgOptions = null;
 export interface UseNamedOperationOptions {}
 /**
@@ -8484,7 +8484,7 @@ export type Category =
 	| "lint/nursery/useJsonImportAttribute"
 	| "lint/nursery/useJsxCurlyBraceConvention"
 	| "lint/nursery/useJsxImg"
-	| "lint/nursery/useJsxA"
+	| "lint/nursery/useJsxAnchorHref"
 	| "lint/nursery/useNamedOperation"
 	| "lint/nursery/useNamingConvention"
 	| "lint/nursery/useNumericSeparators"

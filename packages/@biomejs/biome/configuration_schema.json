@@ -5002,10 +5002,10 @@
 						{ "type": "null" }
 					]
 				},
-				"useJsxA": {
+				"useJsxAnchorHref": {
 					"description": "Require href attribute for \\<a> elements in JSX.",
 					"anyOf": [
-						{ "$ref": "#/definitions/UseJsxAConfiguration" },
+						{ "$ref": "#/definitions/UseJsxAnchorHrefConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -10483,7 +10483,7 @@
 			},
 			"additionalProperties": false
 		},
-		"RuleWithUseJsxAOptions": {
+		"RuleWithUseJsxAnchorHrefOptions": {
 			"type": "object",
 			"required": ["level"],
 			"properties": {
@@ -10493,7 +10493,7 @@
 				},
 				"options": {
 					"description": "Rule's options",
-					"allOf": [{ "$ref": "#/definitions/UseJsxAOptions" }]
+					"allOf": [{ "$ref": "#/definitions/UseJsxAnchorHrefOptions" }]
 				}
 			},
 			"additionalProperties": false
@@ -13382,13 +13382,13 @@
 			"type": "object",
 			"additionalProperties": false
 		},
-		"UseJsxAConfiguration": {
+		"UseJsxAnchorHrefConfiguration": {
 			"anyOf": [
 				{ "$ref": "#/definitions/RulePlainConfiguration" },
-				{ "$ref": "#/definitions/RuleWithUseJsxAOptions" }
+				{ "$ref": "#/definitions/RuleWithUseJsxAnchorHrefOptions" }
 			]
 		},
-		"UseJsxAOptions": { "type": "null" },
+		"UseJsxAnchorHrefOptions": { "type": "null" },
 		"UseJsxImgConfiguration": {
 			"anyOf": [
 				{ "$ref": "#/definitions/RulePlainConfiguration" },

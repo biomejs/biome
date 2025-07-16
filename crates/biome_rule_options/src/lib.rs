@@ -290,7 +290,7 @@ pub mod use_is_array;
 pub mod use_is_nan;
 pub mod use_iterable_callback_return;
 pub mod use_json_import_attribute;
-pub mod use_jsx_a;
+pub mod use_jsx_anchor_href;
 pub mod use_jsx_img;
 pub mod use_jsx_key_in_iterable;
 pub mod use_key_with_click_events;

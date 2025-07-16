@@ -5,7 +5,7 @@ use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_syntax::jsx_ext::AnyJsxElement;
 use biome_rowan::AstNode;
-use biome_rule_options::use_jsx_a::UseJsxAOptions;
+use biome_rule_options::use_jsx_anchor_href::UseJsxAnchorHrefOptions;
 
 declare_lint_rule! {
     /// Require `href` attribute for `<a>` elements in JSX.
@@ -33,9 +33,9 @@ declare_lint_rule! {
     /// ```jsx
     /// <a href="https://example.com" target="_blank">External</a>
     /// ```
-    pub UseJsxA {
+    pub UseJsxAnchorHref {
         version: "next",
-        name: "useJsxA",
+        name: "useJsxAnchorHref",
         language: "jsx",
         sources: &[RuleSource::EslintQwik("jsx-a").inspired()],
         recommended: true,
@@ -45,15 +45,15 @@ declare_lint_rule! {
     }
 }
 
-pub enum JsxADiagnosticKind {
+pub enum JsxAnchorHrefDiagnosticKind {
     MissingHref,
 }
 
-impl Rule for UseJsxA {
+impl Rule for UseJsxAnchorHref {
     type Query = Ast<AnyJsxElement>;
-    type State = (biome_rowan::TextRange, JsxADiagnosticKind);
+    type State = (biome_rowan::TextRange, JsxAnchorHrefDiagnosticKind);
     type Signals = Option<Self::State>;
-    type Options = UseJsxAOptions;
+    type Options = UseJsxAnchorHrefOptions;
 
     fn run(ctx: &biome_analyze::context::RuleContext<Self>) -> Self::Signals {
         let element = ctx.query();
@@ -63,7 +63,7 @@ impl Rule for UseJsxA {
         }
         let has_href = element.find_attribute_by_name("href").is_some();
         if !has_href {
-            return Some((element.range(), JsxADiagnosticKind::MissingHref));
+            return Some((element.range(), JsxAnchorHrefDiagnosticKind::MissingHref));
         }
         None
     }
@@ -73,7 +73,7 @@ impl Rule for UseJsxA {
         (range, kind): &Self::State,
     ) -> Option<RuleDiagnostic> {
         match kind {
-            JsxADiagnosticKind::MissingHref => Some(RuleDiagnostic::new(
+            JsxAnchorHrefDiagnosticKind::MissingHref => Some(RuleDiagnostic::new(
                 rule_category!(),
                 range,
                 markup!(
