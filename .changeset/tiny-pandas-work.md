@@ -90,7 +90,7 @@ No configuration options are currently available for this rule.
 
 Added the [`noQwikUseVisibleTask`](https://biomejs.dev/linter/rules/no-qwik-use-visible-task) rule to Biome.
 
-The `noQwikUseVisibleTask` rule disallows the use of `useVisibleTask$()` functions in Qwik applications. This rule is intended for use in Qwik applications to prevent the use of `useVisibleTask$()` functions which are not recommended in Qwik.
+This rule is intended for use in Qwik applications to warn about the use of `useVisibleTask$()` functions which require careful consideration before use.
 
 **Invalid:**
 

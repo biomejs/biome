@@ -78,7 +78,7 @@ useVisibleTask$(({ track, cleanup }) => {
 ```
 invalid.js:1:1 lint/nursery/noQwikUseVisibleTask ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! useVisibleTask$() is not recommended in Qwik applications.
+  ! useVisibleTask$() should be used with care in Qwik applications.
   
   > 1 │ useVisibleTask$(() => {
       │ ^^^^^^^^^^^^^^^
@@ -98,7 +98,7 @@ invalid.js:1:1 lint/nursery/noQwikUseVisibleTask ━━━━━━━━━━�
 ```
 invalid.js:5:1 lint/nursery/noQwikUseVisibleTask ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! useVisibleTask$() is not recommended in Qwik applications.
+  ! useVisibleTask$() should be used with care in Qwik applications.
   
     3 │ });
     4 │ 
@@ -122,7 +122,7 @@ invalid.js:5:1 lint/nursery/noQwikUseVisibleTask ━━━━━━━━━━�
 ```
 invalid.js:10:1 lint/nursery/noQwikUseVisibleTask ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! useVisibleTask$() is not recommended in Qwik applications.
+  ! useVisibleTask$() should be used with care in Qwik applications.
   
      8 │ });
      9 │ 
@@ -146,7 +146,7 @@ invalid.js:10:1 lint/nursery/noQwikUseVisibleTask ━━━━━━━━━━
 ```
 invalid.js:15:3 lint/nursery/noQwikUseVisibleTask ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! useVisibleTask$() is not recommended in Qwik applications.
+  ! useVisibleTask$() should be used with care in Qwik applications.
   
     14 │ const MyComponent = component$(() => {
   > 15 │   useVisibleTask$(() => {
@@ -168,7 +168,7 @@ invalid.js:15:3 lint/nursery/noQwikUseVisibleTask ━━━━━━━━━━
 ```
 invalid.js:23:3 lint/nursery/noQwikUseVisibleTask ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! useVisibleTask$() is not recommended in Qwik applications.
+  ! useVisibleTask$() should be used with care in Qwik applications.
   
     22 │ export const App = component$(() => {
   > 23 │   useVisibleTask$(({ track }) => {
@@ -190,7 +190,7 @@ invalid.js:23:3 lint/nursery/noQwikUseVisibleTask ━━━━━━━━━━
 ```
 invalid.js:32:3 lint/nursery/noQwikUseVisibleTask ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! useVisibleTask$() is not recommended in Qwik applications.
+  ! useVisibleTask$() should be used with care in Qwik applications.
   
     31 │ function setupComponent() {
   > 32 │   useVisibleTask$(() => {
@@ -212,7 +212,7 @@ invalid.js:32:3 lint/nursery/noQwikUseVisibleTask ━━━━━━━━━━
 ```
 invalid.js:38:3 lint/nursery/noQwikUseVisibleTask ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! useVisibleTask$() is not recommended in Qwik applications.
+  ! useVisibleTask$() should be used with care in Qwik applications.
   
     37 │ const setup = () => {
   > 38 │   useVisibleTask$(() => {
@@ -234,7 +234,7 @@ invalid.js:38:3 lint/nursery/noQwikUseVisibleTask ━━━━━━━━━━
 ```
 invalid.js:45:5 lint/nursery/noQwikUseVisibleTask ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! useVisibleTask$() is not recommended in Qwik applications.
+  ! useVisibleTask$() should be used with care in Qwik applications.
   
     43 │ class MyClass {
     44 │   constructor() {
@@ -258,7 +258,7 @@ invalid.js:45:5 lint/nursery/noQwikUseVisibleTask ━━━━━━━━━━
 ```
 invalid.js:52:1 lint/nursery/noQwikUseVisibleTask ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! useVisibleTask$() is not recommended in Qwik applications.
+  ! useVisibleTask$() should be used with care in Qwik applications.
   
     51 │ // Multiple useVisibleTask calls
   > 52 │ useVisibleTask$(() => {
@@ -280,7 +280,7 @@ invalid.js:52:1 lint/nursery/noQwikUseVisibleTask ━━━━━━━━━━
 ```
 invalid.js:56:1 lint/nursery/noQwikUseVisibleTask ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! useVisibleTask$() is not recommended in Qwik applications.
+  ! useVisibleTask$() should be used with care in Qwik applications.
   
     54 │ });
     55 │ 
@@ -304,7 +304,7 @@ invalid.js:56:1 lint/nursery/noQwikUseVisibleTask ━━━━━━━━━━
 ```
 invalid.js:61:1 lint/nursery/noQwikUseVisibleTask ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! useVisibleTask$() is not recommended in Qwik applications.
+  ! useVisibleTask$() should be used with care in Qwik applications.
   
     60 │ // With complex logic
   > 61 │ useVisibleTask$(({ track, cleanup }) => {

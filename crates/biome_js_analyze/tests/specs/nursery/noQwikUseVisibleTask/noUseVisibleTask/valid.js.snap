@@ -39,6 +39,11 @@ function useVisibleTask$() {
   // Function declaration - should not trigger
 }
 
+// Should not warn when strategy is 'document-idle'
+useVisibleTask$(() => {
+  // This should not trigger a diagnostic
+}, { strategy: 'document-idle' });
+
 // Component definitions without useVisibleTask$
 const MyComponent = component$(() => {
   useTask$(() => {

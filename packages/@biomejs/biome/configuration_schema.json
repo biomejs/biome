@@ -4931,7 +4931,7 @@
 					]
 				},
 				"useClasslist": {
-					"description": "Prefer using the classlist prop over the classnames helper.",
+					"description": "Prefer using the class prop as a classlist over the classnames helper.",
 					"anyOf": [
 						{ "$ref": "#/definitions/UseClasslistConfiguration" },
 						{ "type": "null" }

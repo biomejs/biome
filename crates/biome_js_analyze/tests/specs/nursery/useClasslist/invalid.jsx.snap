@@ -29,7 +29,7 @@ export default component$((props) => {
 ```
 invalid.jsx:7:10 lint/nursery/useClasslist ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use the classlist prop instead of using classnames. The classlist prop accepts an object { [class: string]: boolean } just like classnames.
+  ! Do not use classnames. The class prop also accepts a nested array of object { [class: string]: boolean } and strings.
   
      5 │ export default component$((props) => {
      6 │   return (

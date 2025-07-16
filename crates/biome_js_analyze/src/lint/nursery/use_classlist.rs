@@ -8,10 +8,10 @@ use biome_rowan::AstNode;
 use biome_rule_options::use_classlist::UseClasslistOptions;
 
 declare_lint_rule! {
-    /// Prefer using the classlist prop over the classnames helper.
+    /// Prefer using the `class` prop as a classlist over the classnames helper.
     ///
     /// This rule is intended for use in Qwik applications to encourage the use of
-    /// the built-in classlist prop instead of the classnames utility library.
+    /// the built-in `class` prop (which accepts a string, object, or array) instead of the classnames utility library.
     ///
     /// ## Examples
     ///
@@ -24,7 +24,7 @@ declare_lint_rule! {
     /// ### Valid
     ///
     /// ```jsx
-    /// <div classlist={{ active: true, disabled: false }} />
+    /// <div class={{ active: true, disabled: false }} />
     /// ```
  pub UseClasslist {
         version: "next",
@@ -73,7 +73,7 @@ impl Rule for UseClasslist {
             rule_category!(),
             range,
             markup!(
-                "Use the classlist prop instead of using classnames. The classlist prop accepts an object { [class: string]: boolean } just like classnames."
+                "Do not use classnames. The class prop also accepts a nested array of object { [class: string]: boolean } and strings."
             ),
         ))
     }

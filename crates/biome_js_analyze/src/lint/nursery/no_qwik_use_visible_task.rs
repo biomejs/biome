@@ -2,7 +2,8 @@ use biome_analyze::context::RuleContext;
 use biome_analyze::{Ast, Rule, RuleDiagnostic, RuleDomain, RuleSource, declare_lint_rule};
 use biome_console::markup;
 use biome_diagnostics::Severity;
-use biome_js_syntax::{JsCallExpression, global_identifier};
+use biome_js_syntax::{AnyJsCallArgument, JsCallExpression, global_identifier};
+use biome_rowan::AstSeparatedList;
 use biome_rowan::TextRange;
 use biome_rule_options::no_qwik_use_visible_task::NoQwikUseVisibleTaskOptions;
 
@@ -53,6 +54,48 @@ impl Rule for NoQwikUseVisibleTask {
         let (_, name) = global_identifier(&callee)?;
 
         if name.text() == "useVisibleTask$" {
+            if let Some(arguments) = call_expression.arguments().ok() {
+                let args = arguments.args();
+                if args.len() >= 2 {
+                    if let Some(Ok(AnyJsCallArgument::AnyJsExpression(expr))) = args.iter().nth(1) {
+                        if let Some(obj) = expr.as_js_object_expression() {
+                            for member in obj.members() {
+                                if let Ok(member) = member {
+                                    if let Some(prop) = member.as_js_property_object_member() {
+                                        if let Ok(name) = prop.name() {
+                                            if let Some(name) = name.name() {
+                                                if name == "strategy" {
+                                                    if let Ok(value) = prop.value() {
+                                                        if let Some(str_lit) = value
+                                                            .as_any_js_literal_expression()
+                                                            .and_then(|lit| {
+                                                                lit.as_js_string_literal_expression(
+                                                                )
+                                                            })
+                                                        {
+                                                            if let Ok(text) =
+                                                                str_lit.inner_string_text()
+                                                            {
+                                                                if text
+                                                                    .text()
+                                                                    .trim_matches(['"', '\''])
+                                                                    == "document-idle"
+                                                                {
+                                                                    return None;
+                                                                }
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
             Some(name.range())
         } else {
             None
@@ -64,7 +107,7 @@ impl Rule for NoQwikUseVisibleTask {
             RuleDiagnostic::new(
                 rule_category!(),
                 range,
-                markup!("useVisibleTask$() is not recommended in Qwik applications."),
+                markup!("useVisibleTask$() should be used with care in Qwik applications."),
             )
             .detail(
                 range,

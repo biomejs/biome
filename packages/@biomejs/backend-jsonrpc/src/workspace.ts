@@ -1679,7 +1679,7 @@ export interface Nursery {
 	 */
 	useAdjacentGetterSetter?: RuleConfiguration_for_UseAdjacentGetterSetterOptions;
 	/**
-	 * Prefer using the classlist prop over the classnames helper.
+	 * Prefer using the class prop as a classlist over the classnames helper.
 	 */
 	useClasslist?: RuleConfiguration_for_UseClasslistOptions;
 	/**
