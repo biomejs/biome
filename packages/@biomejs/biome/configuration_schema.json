@@ -4930,13 +4930,6 @@
 						{ "type": "null" }
 					]
 				},
-				"useClasslist": {
-					"description": "Prefer using the class prop as a classlist over the classnames helper.",
-					"anyOf": [
-						{ "$ref": "#/definitions/UseClasslistConfiguration" },
-						{ "type": "null" }
-					]
-				},
 				"useConsistentObjectDefinition": {
 					"description": "Require the consistent declaration of object literals. Defaults to explicit definitions.",
 					"anyOf": [
@@ -5055,6 +5048,13 @@
 					"description": "Enforce the consistent use of the radix argument when using parseInt().",
 					"anyOf": [
 						{ "$ref": "#/definitions/UseParseIntRadixConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"useQwikClasslist": {
+					"description": "Prefer using the class prop as a classlist over the classnames helper.",
+					"anyOf": [
+						{ "$ref": "#/definitions/UseQwikClasslistConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -9677,21 +9677,6 @@
 			},
 			"additionalProperties": false
 		},
-		"RuleWithUseClasslistOptions": {
-			"type": "object",
-			"required": ["level"],
-			"properties": {
-				"level": {
-					"description": "The severity of the emitted diagnostics by the rule",
-					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
-				},
-				"options": {
-					"description": "Rule's options",
-					"allOf": [{ "$ref": "#/definitions/UseClasslistOptions" }]
-				}
-			},
-			"additionalProperties": false
-		},
 		"RuleWithUseCollapsedElseIfOptions": {
 			"type": "object",
 			"required": ["level"],
@@ -10844,6 +10829,21 @@
 				"options": {
 					"description": "Rule's options",
 					"allOf": [{ "$ref": "#/definitions/UseParseIntRadixOptions" }]
+				}
+			},
+			"additionalProperties": false
+		},
+		"RuleWithUseQwikClasslistOptions": {
+			"type": "object",
+			"required": ["level"],
+			"properties": {
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [{ "$ref": "#/definitions/UseQwikClasslistOptions" }]
 				}
 			},
 			"additionalProperties": false
@@ -12866,13 +12866,6 @@
 			]
 		},
 		"UseButtonTypeOptions": { "type": "object", "additionalProperties": false },
-		"UseClasslistConfiguration": {
-			"anyOf": [
-				{ "$ref": "#/definitions/RulePlainConfiguration" },
-				{ "$ref": "#/definitions/RuleWithUseClasslistOptions" }
-			]
-		},
-		"UseClasslistOptions": { "type": "object", "additionalProperties": false },
 		"UseCollapsedElseIfConfiguration": {
 			"anyOf": [
 				{ "$ref": "#/definitions/RulePlainConfiguration" },
@@ -13605,6 +13598,16 @@
 			]
 		},
 		"UseParseIntRadixOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
+		"UseQwikClasslistConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{ "$ref": "#/definitions/RuleWithUseQwikClasslistOptions" }
+			]
+		},
+		"UseQwikClasslistOptions": {
 			"type": "object",
 			"additionalProperties": false
 		},

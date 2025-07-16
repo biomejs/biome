@@ -1679,10 +1679,6 @@ export interface Nursery {
 	 */
 	useAdjacentGetterSetter?: RuleConfiguration_for_UseAdjacentGetterSetterOptions;
 	/**
-	 * Prefer using the class prop as a classlist over the classnames helper.
-	 */
-	useClasslist?: RuleConfiguration_for_UseClasslistOptions;
-	/**
 	 * Require the consistent declaration of object literals. Defaults to explicit definitions.
 	 */
 	useConsistentObjectDefinition?: RuleFixConfiguration_for_UseConsistentObjectDefinitionOptions;
@@ -1750,6 +1746,10 @@ export interface Nursery {
 	 * Enforce the consistent use of the radix argument when using parseInt().
 	 */
 	useParseIntRadix?: RuleFixConfiguration_for_UseParseIntRadixOptions;
+	/**
+	 * Prefer using the class prop as a classlist over the classnames helper.
+	 */
+	useQwikClasslist?: RuleConfiguration_for_UseQwikClasslistOptions;
 	/**
 	 * Enforce marking members as readonly if they are never modified outside the constructor.
 	 */
@@ -2952,9 +2952,6 @@ export type RuleConfiguration_for_NoVueReservedPropsOptions =
 export type RuleConfiguration_for_UseAdjacentGetterSetterOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_UseAdjacentGetterSetterOptions;
-export type RuleConfiguration_for_UseClasslistOptions =
-	| RulePlainConfiguration
-	| RuleWithOptions_for_UseClasslistOptions;
 export type RuleFixConfiguration_for_UseConsistentObjectDefinitionOptions =
 	| RulePlainConfiguration
 	| RuleWithFixOptions_for_UseConsistentObjectDefinitionOptions;
@@ -3006,6 +3003,9 @@ export type RuleFixConfiguration_for_UseObjectSpreadOptions =
 export type RuleFixConfiguration_for_UseParseIntRadixOptions =
 	| RulePlainConfiguration
 	| RuleWithFixOptions_for_UseParseIntRadixOptions;
+export type RuleConfiguration_for_UseQwikClasslistOptions =
+	| RulePlainConfiguration
+	| RuleWithOptions_for_UseQwikClasslistOptions;
 export type RuleFixConfiguration_for_UseReadonlyClassPropertiesOptions =
 	| RulePlainConfiguration
 	| RuleWithFixOptions_for_UseReadonlyClassPropertiesOptions;
@@ -5380,16 +5380,6 @@ export interface RuleWithOptions_for_UseAdjacentGetterSetterOptions {
 	 */
 	options: UseAdjacentGetterSetterOptions;
 }
-export interface RuleWithOptions_for_UseClasslistOptions {
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: UseClasslistOptions;
-}
 export interface RuleWithFixOptions_for_UseConsistentObjectDefinitionOptions {
 	/**
 	 * The kind of the code actions emitted by the rule
@@ -5599,6 +5589,16 @@ export interface RuleWithFixOptions_for_UseParseIntRadixOptions {
 	 * Rule's options
 	 */
 	options: UseParseIntRadixOptions;
+}
+export interface RuleWithOptions_for_UseQwikClasslistOptions {
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: UseQwikClasslistOptions;
 }
 export interface RuleWithFixOptions_for_UseReadonlyClassPropertiesOptions {
 	/**
@@ -7782,7 +7782,6 @@ export interface NoUselessEscapeInStringOptions {}
 export interface NoUselessUndefinedOptions {}
 export interface NoVueReservedPropsOptions {}
 export interface UseAdjacentGetterSetterOptions {}
-export interface UseClasslistOptions {}
 export interface UseConsistentObjectDefinitionOptions {
 	/**
 	 * The preferred syntax to enforce.
@@ -7821,6 +7820,7 @@ export interface UseNamingConventionOptions {
 export interface UseNumericSeparatorsOptions {}
 export interface UseObjectSpreadOptions {}
 export interface UseParseIntRadixOptions {}
+export interface UseQwikClasslistOptions {}
 export interface UseReadonlyClassPropertiesOptions {
 	/**
 	 * When `true`, the keywords `public`, `protected`, and `private` are analyzed by the rule.
@@ -8466,7 +8466,7 @@ export type Category =
 	| "lint/nursery/noUselessBackrefInRegex"
 	| "lint/nursery/noUselessEscapeInString"
 	| "lint/nursery/noUselessUndefined"
-	| "lint/nursery/useClasslist"
+	| "lint/nursery/useQwikClasslist"
 	| "lint/nursery/noVueReservedProps"
 	| "lint/nursery/useAdjacentGetterSetter"
 	| "lint/nursery/useBiomeSuppressionComment"

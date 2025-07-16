@@ -27,7 +27,7 @@ export default component$((props) => {
 
 # Diagnostics
 ```
-invalid.jsx:7:10 lint/nursery/useClasslist ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:7:10 lint/nursery/useQwikClasslist ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Do not use classnames. The class prop also accepts a nested array of object { [class: string]: boolean } and strings.
   

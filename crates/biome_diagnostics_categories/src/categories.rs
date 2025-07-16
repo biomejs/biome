@@ -194,7 +194,7 @@ define_categories! {
     "lint/nursery/noUselessBackrefInRegex": "https://biomejs.dev/linter/rules/no-useless-backref-in-regex",
     "lint/nursery/noUselessEscapeInString": "https://biomejs.dev/linter/rules/no-useless-escape-in-string",
     "lint/nursery/noUselessUndefined": "https://biomejs.dev/linter/rules/no-useless-undefined",
-    "lint/nursery/useClasslist": "https://biomejs.dev/linter/rules/use-classlist",
+    "lint/nursery/useQwikClasslist": "https://biomejs.dev/linter/rules/use-qwik-classlist",
     "lint/nursery/noVueReservedProps": "https://biomejs.dev/linter/rules/no-vue-reserved-props",
     "lint/nursery/useAdjacentGetterSetter": "https://biomejs.dev/linter/rules/use-adjacent-getter-setter",
     "lint/nursery/useBiomeSuppressionComment": "https://biomejs.dev/linter/rules/use-biome-suppression-comment",
