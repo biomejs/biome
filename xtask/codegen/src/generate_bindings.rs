@@ -8,7 +8,7 @@ use biome_js_syntax::{
     AnyTsReturnType, AnyTsType, AnyTsTypeMember, JsFileSource, T, TriviaPieceKind,
 };
 use biome_rowan::AstNode;
-use biome_service::workspace_types::{ModuleQueue, generate_type, include_subschema, methods};
+use biome_service::workspace_types::{ModuleQueue, generate_type, include_subschemas, methods};
 use biome_string_case::Case;
 use schemars::{SchemaGenerator, generate::SchemaSettings};
 use xtask::{Mode, Result, project_root};
@@ -24,7 +24,7 @@ pub(crate) fn generate_workspace_bindings(mode: Mode) -> Result<()> {
     let mut queue = ModuleQueue::default();
 
     let mut generator = SchemaGenerator::new(SchemaSettings::openapi3());
-    include_subschema(&mut generator);
+    include_subschemas(&mut generator);
 
     for method in &methods {
         let params = generate_type(&generator, &mut declarations, &mut queue, &method.params);

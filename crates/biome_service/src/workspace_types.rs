@@ -2,9 +2,15 @@
 
 use std::collections::VecDeque;
 
-use biome_analyze::RuleDomain;
-use biome_configuration::{Configuration, analyzer::RuleDomainValue};
+use biome_analyze::{RuleCategories, RuleDomain};
+use biome_configuration::{
+    Configuration,
+    analyzer::{RuleDomainValue, RuleSelector},
+};
+use biome_diagnostics::serde::Diagnostic;
+use biome_formatter::SourceMarker;
 use biome_fs::BiomePath;
+use biome_grit_patterns::GritTargetLanguage;
 use biome_js_syntax::{AnyJsDeclaration, AnyTsTupleTypeElement};
 use rustc_hash::FxHashSet;
 use schemars::{JsonSchema, Schema, SchemaGenerator, generate::SchemaSettings};
@@ -178,33 +184,31 @@ fn instance_type<'a>(
                 .into()
         }
         // If the instance type is an array, generate a TS array type with the corresponding item type
-        "array" => {
-            let items = schema.get("items").unwrap();
-            match items {
-                Value::Array(items) => AnyTsType::from(make::ts_tuple_type(
-                    make::token(T!['[']),
-                    make::ts_tuple_type_element_list(
-                        items.iter().map(|schema| {
-                            let (ts_type, optional, _) = schema_type(generator, queue, schema);
-                            assert!(!optional, "optional nested types are not supported");
-                            AnyTsTupleTypeElement::AnyTsType(ts_type)
-                        }),
-                        items.iter().map(|_| make::token(T![,])),
-                    ),
-                    make::token(T![']']),
-                )),
-                schema => {
-                    let (ts_type, optional, _) = schema_type(generator, queue, schema);
-                    assert!(!optional, "optional nested types are not supported");
+        "array" => match schema.get("items") {
+            Some(Value::Array(items)) => AnyTsType::from(make::ts_tuple_type(
+                make::token(T!['[']),
+                make::ts_tuple_type_element_list(
+                    items.iter().map(|schema| {
+                        let (ts_type, optional, _) = schema_type(generator, queue, schema);
+                        assert!(!optional, "optional nested types are not supported");
+                        AnyTsTupleTypeElement::AnyTsType(ts_type)
+                    }),
+                    items.iter().map(|_| make::token(T![,])),
+                ),
+                make::token(T![']']),
+            )),
+            Some(schema) => {
+                let (ts_type, optional, _) = schema_type(generator, queue, schema);
+                assert!(!optional, "optional nested types are not supported");
 
-                    AnyTsType::from(make::ts_array_type(
-                        ts_type,
-                        make::token(T!['[']),
-                        make::token(T![']']),
-                    ))
-                }
+                AnyTsType::from(make::ts_array_type(
+                    ts_type,
+                    make::token(T!['[']),
+                    make::token(T![']']),
+                ))
             }
-        }
+            None => AnyTsType::TsAnyType(make::ts_any_type(make::token(T![any]))),
+        },
 
         // Map native types to the corresponding TS type
         "null" => AnyTsType::from(make::ts_null_literal_type(make::token(T![null]))),
@@ -265,11 +269,7 @@ fn schema_object_type<'a>(
 ) -> (AnyTsType, bool, Option<&'a str>) {
     // Start by detecting enum types by inspecting the `enum_values` field, i
     // the field is set return a union type generated from the literal enum values
-    let description = schema
-        .get("metadata")
-        .and_then(Value::as_object)
-        .and_then(|metadata| metadata.get("description"))
-        .and_then(Value::as_str);
+    let description = schema.get("description").and_then(Value::as_str);
     let ts_type = schema
         .get("enumValues")
         .and_then(Value::as_array)
@@ -340,8 +340,7 @@ fn schema_object_type<'a>(
                         .and_then(Value::as_array)?;
 
                     Some(make_union_type(any_of.iter().map(|ty| {
-                        let (ts_type, optional, _) = schema_type(generator, queue, ty);
-                        assert!(!optional, "optional nested types are not supported");
+                        let (ts_type, ..) = schema_type(generator, queue, ty);
                         ts_type
                     })))
                 })
@@ -392,16 +391,28 @@ fn schema_type<'a>(
     }
 }
 
-pub fn include_subschema(generator: &mut SchemaGenerator) {
+pub fn include_subschemas(generator: &mut SchemaGenerator) {
     // HACK: List explicit subschemas:
     generator.subschema_for::<BiomePath>();
+    generator.subschema_for::<CodeAction>();
     generator.subschema_for::<Configuration>();
+    generator.subschema_for::<Diagnostic>();
+    generator.subschema_for::<DocumentFileSource>();
     generator.subschema_for::<FeatureKind>();
     generator.subschema_for::<FeatureName>();
     generator.subschema_for::<FeaturesSupported>();
+    generator.subschema_for::<FileContent>();
+    generator.subschema_for::<FixAction>();
+    generator.subschema_for::<FixFileMode>();
+    generator.subschema_for::<GritTargetLanguage>();
+    generator.subschema_for::<PatternId>();
     generator.subschema_for::<ProjectKey>();
+    generator.subschema_for::<RuleCategories>();
     generator.subschema_for::<RuleDomain>();
     generator.subschema_for::<RuleDomainValue>();
+    generator.subschema_for::<RuleSelector>();
+    generator.subschema_for::<ScanKind>();
+    generator.subschema_for::<SourceMarker>();
     generator.subschema_for::<SupportKind>();
 }
 
