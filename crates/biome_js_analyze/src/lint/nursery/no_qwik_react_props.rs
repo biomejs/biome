@@ -67,9 +67,10 @@ impl Rule for NoQwikReactProps {
         let attribute = ctx.query();
         let name = attribute.name().ok()?;
         let range = name.range();
-        let name = name.to_trimmed_text();
+        let name_token = name.name_token().ok()?;
+        let name_text = name_token.token_text();
 
-        if let Some(replacement) = get_replacement_for_react_prop(&name) {
+        if let Some(replacement) = get_replacement_for_react_prop(&name_text) {
             Some((range, replacement))
         } else {
             None

@@ -47,7 +47,8 @@ impl Rule for UseClasslist {
     fn run(ctx: &biome_analyze::context::RuleContext<Self>) -> Self::Signals {
         let attr = ctx.query();
         let name = attr.name().ok()?;
-        let name_text = name.to_trimmed_text();
+        let name_token = name.name_token().ok()?;
+        let name_text = name_token.token_text();
         if name_text == "class" || name_text == "className" {
             let value = attr.initializer()?.value().ok()?;
             if let AnyJsxAttributeValue::JsxExpressionAttributeValue(expr_attr) = value {
