@@ -1,21 +1,23 @@
-use super::*;
-use crate::workspace::{FormatFileParams, OpenProjectResult, UpdateSettingsParams};
-use crate::{
-    WatcherInstruction,
-    workspace::{
-        ChangeFileParams, CloseFileParams, FileContent, GetFileContentParams, OpenFileParams,
-        OpenProjectParams, ServiceDataNotification,
-    },
-};
+use std::{str::FromStr, sync::Arc};
+
 use biome_configuration::vcs::{VcsClientKind, VcsConfiguration};
 use biome_configuration::{Configuration, FilesConfiguration};
 use biome_fs::{BiomePath, MemoryFileSystem};
 use biome_glob::NormalizedGlob;
 use camino::Utf8PathBuf;
 use crossbeam::channel::unbounded;
-use std::str::FromStr;
-use std::sync::Arc;
 use tokio::sync::watch;
+
+use crate::{
+    WatcherInstruction,
+    workspace::{
+        ChangeFileParams, CloseFileParams, FileContent, FormatFileParams, GetFileContentParams,
+        OpenFileParams, OpenProjectParams, OpenProjectResult, ServiceDataNotification,
+        UpdateSettingsParams,
+    },
+};
+
+use super::*;
 
 #[test]
 fn should_not_open_an_ignored_file_inside_vcs_ignore_file() {
@@ -54,7 +56,7 @@ fn should_not_open_an_ignored_file_inside_vcs_ignore_file() {
         .expect("can update settings");
 
     workspace
-        .open_path_through_watcher(Utf8Path::new("/project/a.js"), &ScanKind::Project)
+        .open_path_through_watcher(Utf8Path::new("/project/a.js"), &ScanKind::KnownFiles)
         .expect("can open file");
 
     let result = workspace.format_file(FormatFileParams {
@@ -102,7 +104,7 @@ fn should_not_open_an_ignored_file_inside_file_includes() {
     workspace
         .open_path_through_watcher(
             Utf8Path::new("/project/dist/minified.js"),
-            &ScanKind::Project,
+            &ScanKind::KnownFiles,
         )
         .expect("can open file");
 
