@@ -2,12 +2,12 @@
 
 use biome_console::markup;
 use biome_parser::AnyParse;
+use rustc_hash::FxHashSet;
 use std::collections::{BTreeMap, BinaryHeap};
 use std::fmt::{Debug, Display, Formatter};
 use std::ops;
 use std::str::FromStr;
 use std::sync::Arc;
-use suppressions::LineSuppression;
 
 mod analyzer_plugin;
 mod categories;
@@ -489,33 +489,49 @@ where
             // if it matches the current line index, otherwise perform a binary
             // search over all the previously seen suppressions to find one
             // with a matching range
-            let matches_entry = |suppression: &LineSuppression| {
-                if suppression.suppressed_categories.contains(entry.category) {
-                    return true;
-                }
-                if suppression.suppressed_instances.is_empty() {
-                    suppression.matches_rule(&entry.category, &entry.rule)
-                } else {
-                    entry.instances.iter().all(|value| {
-                        suppression
-                            .suppressed_instances
-                            .iter()
-                            .any(|(v, filter)| *filter == entry.rule && v == value.as_ref())
-                    })
-                }
-            };
-
-            let suppression = self
+            let mut is_fully_suppressed = false;
+            // Check that instance-based comments do indeed suppress all instances
+            // Every match is discarded from this set. Use `Option` for lazy init,
+            // because most of the rules do not use instances.
+            let mut instances: Option<FxHashSet<&Box<str>>> = None;
+            for suppression in self
                 .suppressions
                 .overlapping_line_suppressions(&entry.text_range)
                 .iter_mut()
-                .find(|s| s.text_range.contains(start) && matches_entry(s));
+            {
+                if !suppression.text_range.contains(start) {
+                    continue;
+                }
+                let (is_match, is_exhaustive) =
+                    if suppression.suppressed_categories.contains(entry.category) {
+                        (true, true)
+                    } else if !suppression.matches_rule(&entry.category, &entry.rule) {
+                        (false, false)
+                    } else {
+                        match suppression.suppressed_instance.as_ref() {
+                            None => (true, true),
+                            Some(v) => {
+                                let matches_instance = instances
+                                    .get_or_insert_with(|| entry.instances.iter().collect())
+                                    .remove(v);
+                                (matches_instance, false)
+                            }
+                        }
+                    };
+                if is_match {
+                    suppression.did_suppress_signal = true;
+                    is_fully_suppressed =
+                        is_exhaustive || instances.as_ref().is_some_and(|v| v.is_empty());
+                    if is_fully_suppressed {
+                        break;
+                    }
+                }
+            }
 
             // If the signal is being suppressed, mark the line suppression as
             // hit, otherwise emit the signal
-            if let Some(suppression) = suppression {
-                suppression.did_suppress_signal = true;
-            } else if range_match(self.range, entry.text_range) {
+            if !is_fully_suppressed && range_match(self.range, entry.text_range) {
+                // TODO: would be nice to remove suppressed instances, if any, before emitting
                 (self.emit_signal)(&*entry.signal)?;
             }
 

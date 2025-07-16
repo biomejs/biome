@@ -4,7 +4,6 @@ use std::collections::HashMap;
 use std::fmt::Display;
 use std::slice;
 use std::str::FromStr;
-use std::time::Duration;
 
 use anyhow::{Context, Error, Result, bail};
 use biome_analyze::RuleCategories;
@@ -23,7 +22,7 @@ use futures::{Sink, SinkExt, Stream, StreamExt};
 use serde::Serialize;
 use serde::de::DeserializeOwned;
 use serde_json::{from_value, to_value};
-use tokio::time::sleep;
+use tokio::time::{Duration, sleep, timeout};
 use tower::timeout::Timeout;
 use tower::{Service, ServiceExt};
 use tower_lsp_server::LspService;
@@ -55,8 +54,28 @@ macro_rules! uri {
     };
 }
 
+macro_rules! await_notification {
+    ($channel:expr) => {
+        sleep(Duration::from_millis(200)).await;
+
+        timeout(Duration::from_secs(2), $channel.changed())
+            .await
+            .expect("expected notification within timeout")
+            .expect("expected notification");
+    };
+}
+
 macro_rules! clear_notifications {
     ($channel:expr) => {
+        // On Windows, wait until any previous event has been delivered.
+        // On macOS, wait until the fsevents watcher sets up before receiving the first event.
+        let duration = if cfg!(any(target_os = "windows", target_os = "macos")) {
+            Duration::from_secs(1)
+        } else {
+            Duration::from_millis(200)
+        };
+        sleep(duration).await;
+
         if $channel
             .has_changed()
             .expect("Channel should not be closed")
@@ -3364,10 +3383,7 @@ export function bar() {
 
     server.initialize().await?;
 
-    let OpenProjectResult {
-        project_key,
-        scan_kind,
-    } = server
+    let OpenProjectResult { project_key, .. } = server
         .request(
             "biome/open_project",
             "open_project",
@@ -3391,7 +3407,7 @@ export function bar() {
                 path: None,
                 watch: true,
                 force: false,
-                scan_kind,
+                scan_kind: ScanKind::Project,
                 verbose: false,
             },
         )
@@ -3424,20 +3440,10 @@ export function bar() {
         "This import is part of a cycle."
     );
 
-    // On macOS, wait until the fsevents watcher sets up before receiving the first event.
-    #[cfg(target_os = "macos")]
-    std::thread::sleep(Duration::from_secs(1));
-
-    clear_notifications!(factory.service_data_rx);
-
     // ARRANGE: Remove `bar.ts`.
+    clear_notifications!(factory.service_data_rx);
     std::fs::remove_file(fs.working_directory.join("bar.ts")).expect("Cannot remove bar.ts");
-
-    factory
-        .service_data_rx
-        .changed()
-        .await
-        .expect("Expected notification");
+    await_notification!(factory.service_data_rx);
 
     // ACT: Pull diagnostics.
     let result: PullDiagnosticsResult = server
@@ -3462,14 +3468,8 @@ export function bar() {
 
     // ARRANGE: Recreate `bar.ts`.
     clear_notifications!(factory.service_data_rx);
-
     fs.create_file("bar.ts", BAR_CONTENT);
-
-    factory
-        .service_data_rx
-        .changed()
-        .await
-        .expect("Expected notification");
+    await_notification!(factory.service_data_rx);
 
     // ACT: Pull diagnostics.
     let result: PullDiagnosticsResult = server
@@ -3498,14 +3498,8 @@ export function bar() {
 
     // ARRANGE: Fix `bar.ts`.
     clear_notifications!(factory.service_data_rx);
-
     fs.create_file("bar.ts", BAR_CONTENT_FIXED);
-
-    factory
-        .service_data_rx
-        .changed()
-        .await
-        .expect("Expected notification");
+    await_notification!(factory.service_data_rx);
 
     // ACT: Pull diagnostics.
     let result: PullDiagnosticsResult = server
@@ -3644,25 +3638,14 @@ export function bar() {
         "This import is part of a cycle."
     );
 
-    // On Windows, wait until the event has been delivered.
-    // On macOS, wait until the fsevents watcher sets up before receiving the first event.
-    #[cfg(any(target_os = "windows", target_os = "macos"))]
-    std::thread::sleep(Duration::from_secs(1));
-
-    clear_notifications!(factory.service_data_rx);
-
     // ARRANGE: Move `utils` directory.
+    clear_notifications!(factory.service_data_rx);
     std::fs::rename(
         fs.working_directory.join("utils"),
         fs.working_directory.join("bin"),
     )
     .expect("Cannot move utils");
-
-    factory
-        .service_data_rx
-        .changed()
-        .await
-        .expect("Expected notification");
+    await_notification!(factory.service_data_rx);
 
     // ACT: Pull diagnostics.
     let result: PullDiagnosticsResult = server
@@ -3686,24 +3669,14 @@ export function bar() {
     //         longer there.
     assert_eq!(result.diagnostics.len(), 0);
 
-    // On Windows, wait until the event has been delivered.
-    #[cfg(target_os = "windows")]
-    std::thread::sleep(Duration::from_secs(1));
-
     // ARRANGE: Move `utils` back.
     clear_notifications!(factory.service_data_rx);
-
     std::fs::rename(
         fs.working_directory.join("bin"),
         fs.working_directory.join("utils"),
     )
     .expect("Cannot restore utils");
-
-    factory
-        .service_data_rx
-        .changed()
-        .await
-        .expect("Expected notification");
+    await_notification!(factory.service_data_rx);
 
     // ACT: Pull diagnostics.
     let result: PullDiagnosticsResult = server
@@ -3730,6 +3703,131 @@ export function bar() {
         "This import is part of a cycle."
     );
 
+    server.shutdown().await?;
+    reader.abort();
+
+    Ok(())
+}
+
+#[tokio::test]
+async fn should_open_and_update_nested_files() -> Result<()> {
+    // ARRANGE: Set up folder.
+    const FILE_PATH: &str = "src/a.js";
+    const FILE_CONTENT_BEFORE: &str = "import 'foo';";
+    const FILE_CONTENT_AFTER: &str = "import 'bar';";
+
+    let mut fs = TemporaryFs::new("should_open_and_update_nested_files");
+    fs.create_file(FILE_PATH, FILE_CONTENT_BEFORE);
+
+    let (mut watcher, instruction_channel) = WorkspaceWatcher::new()?;
+
+    // ARRANGE: Start server.
+    let mut factory = ServerFactory::new(true, instruction_channel.sender.clone());
+
+    let workspace = factory.workspace();
+    spawn_blocking(move || {
+        watcher.run(workspace.as_ref());
+    });
+
+    let (service, client) = factory.create().into_inner();
+    let (stream, sink) = client.split();
+    let mut server = Server::new(service);
+
+    let (sender, _) = channel(CHANNEL_BUFFER_SIZE);
+    let reader = tokio::spawn(client_handler(stream, sink, sender));
+
+    server.initialize().await?;
+
+    // ARRANGE: Open project.
+    let OpenProjectResult { project_key, .. } = server
+        .request(
+            "biome/open_project",
+            "open_project",
+            OpenProjectParams {
+                path: fs.working_directory.clone().into(),
+                open_uninitialized: true,
+                only_rules: None,
+                skip_rules: None,
+            },
+        )
+        .await?
+        .expect("open_project returned an error");
+
+    // ACT: Scanning the project folder initialises the service data.
+    let result: ScanProjectFolderResult = server
+        .request(
+            "biome/scan_project_folder",
+            "scan_project_folder",
+            ScanProjectFolderParams {
+                project_key,
+                path: None,
+                watch: true,
+                force: false,
+                scan_kind: ScanKind::Project,
+                verbose: false,
+            },
+        )
+        .await
+        .expect("scan_project_folder returned an error")
+        .expect("result must not be empty");
+    assert_eq!(result.diagnostics.len(), 0);
+
+    // ASSERT: File should be loaded.
+    let content: String = server
+        .request(
+            "biome/get_file_content",
+            "get_file_content",
+            GetFileContentParams {
+                project_key,
+                path: fs.working_directory.join(FILE_PATH).into(),
+            },
+        )
+        .await
+        .expect("get file content error")
+        .expect("content must not be empty");
+    assert_eq!(content, FILE_CONTENT_BEFORE);
+
+    // ACT: Update the file content.
+    clear_notifications!(factory.service_data_rx);
+    std::fs::write(fs.working_directory.join(FILE_PATH), FILE_CONTENT_AFTER)
+        .expect("cannot update file");
+    await_notification!(factory.service_data_rx);
+
+    // ASSERT: File content should have updated.
+    let content: String = server
+        .request(
+            "biome/get_file_content",
+            "get_file_content",
+            GetFileContentParams {
+                project_key,
+                path: fs.working_directory.join(FILE_PATH).into(),
+            },
+        )
+        .await
+        .expect("get file content error")
+        .expect("content must not be empty");
+
+    assert_eq!(content, FILE_CONTENT_AFTER);
+
+    // ACT: Remove the directory.
+    clear_notifications!(factory.service_data_rx);
+    std::fs::remove_dir_all(fs.working_directory.join("src")).expect("cannot remove dir");
+    await_notification!(factory.service_data_rx);
+
+    // ASSERT: File content should have been unloaded.
+    let result: Result<Option<String>> = server
+        .request(
+            "biome/get_file_content",
+            "get_file_content",
+            GetFileContentParams {
+                project_key,
+                path: fs.working_directory.join(FILE_PATH).into(),
+            },
+        )
+        .await;
+    assert!(result.is_err(), "expected error, received: {result:?}");
+
+    // ARRANGE: Shutdown server.
     server.shutdown().await?;
     reader.abort();
 

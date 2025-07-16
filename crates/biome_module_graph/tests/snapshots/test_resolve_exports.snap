@@ -291,10 +291,6 @@ Module TypeId(17) => sync Function "Component" {
   }
   returns: Module(0) TypeId(16)
 }
-
-Module TypeId(18) => Module(0) TypeId(7)
-
-Module TypeId(19) => Module(0) TypeId(8)
 ```
 
 # `/src/renamed-reexports.ts`
