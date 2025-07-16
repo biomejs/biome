@@ -44,7 +44,7 @@ declare_lint_rule! {
     pub UseJsxImg {
         version: "next",
         name: "useJsxImg",
-        language: "js",
+        language: "jsx",
         sources: &[RuleSource::EslintQwik("jsx-img").inspired()],
         recommended: true,
         severity: Severity::Warning,
