@@ -10,15 +10,18 @@ use biome_js_syntax::{
     AnyTsReturnType, AnyTsTupleTypeElement, AnyTsType, AnyTsTypeMember,
     AnyTsTypePredicateParameterName, ClassMemberName, JsArrayBindingPattern,
     JsArrowFunctionExpression, JsBinaryExpression, JsBinaryOperator, JsCallArguments,
-    JsClassDeclaration, JsClassExportDefaultDeclaration, JsClassExpression, JsForInStatement,
-    JsForOfStatement, JsForVariableDeclaration, JsFormalParameter, JsFunctionBody,
-    JsFunctionDeclaration, JsFunctionExpression, JsLogicalExpression, JsLogicalOperator,
-    JsNewExpression, JsObjectBindingPattern, JsObjectExpression, JsParameters,
-    JsReferenceIdentifier, JsReturnStatement, JsSyntaxToken, JsUnaryExpression, JsUnaryOperator,
-    JsVariableDeclaration, JsVariableDeclarator, TsDeclareFunctionDeclaration,
-    TsExternalModuleDeclaration, TsInterfaceDeclaration, TsModuleDeclaration, TsReferenceType,
-    TsReturnTypeAnnotation, TsTypeAliasDeclaration, TsTypeAnnotation, TsTypeArguments, TsTypeList,
-    TsTypeParameter, TsTypeParameters, TsTypeofType, inner_string_text, unescape_js_string,
+    JsClassDeclaration, JsClassExportDefaultDeclaration, JsClassExpression,
+    JsConstructorClassMember, JsForInStatement, JsForOfStatement, JsForVariableDeclaration,
+    JsFormalParameter, JsFunctionBody, JsFunctionDeclaration, JsFunctionExpression,
+    JsGetterClassMember, JsGetterObjectMember, JsLogicalExpression, JsLogicalOperator,
+    JsMethodClassMember, JsMethodObjectMember, JsNewExpression, JsObjectBindingPattern,
+    JsObjectExpression, JsParameters, JsReferenceIdentifier, JsReturnStatement,
+    JsSetterClassMember, JsSetterObjectMember, JsStaticInitializationBlockClassMember,
+    JsSyntaxNode, JsSyntaxToken, JsUnaryExpression, JsUnaryOperator, JsVariableDeclaration,
+    JsVariableDeclarator, TsDeclareFunctionDeclaration, TsExternalModuleDeclaration,
+    TsInterfaceDeclaration, TsModuleDeclaration, TsReferenceType, TsReturnTypeAnnotation,
+    TsTypeAliasDeclaration, TsTypeAnnotation, TsTypeArguments, TsTypeList, TsTypeParameter,
+    TsTypeParameters, TsTypeofType, inner_string_text, unescape_js_string,
 };
 use biome_rowan::{AstNode, SyntaxResult, Text, TokenText};
 
@@ -2278,10 +2281,30 @@ impl TypeReferenceQualifier {
 
 impl TypeofThisOrSuperExpression {
     fn from_any_js_expression(scope_id: ScopeId, expr: &AnyJsExpression) -> Self {
+        let binds_this = |node: &JsSyntaxNode| {
+            JsConstructorClassMember::can_cast(node.kind())
+                || JsFunctionExpression::can_cast(node.kind())
+                || JsGetterClassMember::can_cast(node.kind())
+                || JsGetterObjectMember::can_cast(node.kind())
+                || JsMethodClassMember::can_cast(node.kind())
+                || JsMethodObjectMember::can_cast(node.kind())
+                || JsSetterClassMember::can_cast(node.kind())
+                || JsSetterObjectMember::can_cast(node.kind())
+                || JsStaticInitializationBlockClassMember::can_cast(node.kind())
+        };
+
         let parent = expr
             .syntax()
             .ancestors()
+            .skip(1)
+            .skip_while(|node| !binds_this(node))
+            .skip(1)
             .find_map(|node| {
+                if binds_this(&node) {
+                    // Nested function, map `this` to unknown.
+                    return Some(Err(()));
+                }
+
                 let binding = if let Some(class) = JsClassDeclaration::cast_ref(&node) {
                     class.id().ok()
                 } else if let Some(class) = JsClassExpression::cast_ref(&node) {
@@ -2324,8 +2347,9 @@ impl TypeofThisOrSuperExpression {
 
                 let binding = binding.as_js_identifier_binding()?;
                 let name = text_from_token(binding.name_token())?;
-                Some(TypeReferenceQualifier::from_name(scope_id, name).into())
+                Some(Ok(TypeReferenceQualifier::from_name(scope_id, name).into()))
             })
+            .unwrap_or(Err(()))
             .unwrap_or_default();
 
         Self { parent }
