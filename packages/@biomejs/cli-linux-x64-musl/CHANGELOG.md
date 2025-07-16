@@ -1,7 +1,5 @@
 # @biomejs/cli-linux-x64-musl
 
-## 2.1.2
-
 ## 2.1.1
 
 ## 2.1.0
