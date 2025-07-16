@@ -17,7 +17,7 @@ use biome_service::WorkspaceError;
 use biome_service::file_handlers::{AstroFileHandler, SvelteFileHandler, VueFileHandler};
 use biome_service::workspace::{
     CheckFileSizeParams, FeaturesBuilder, FileFeaturesResult, FixFileMode, FixFileParams,
-    GetFileContentParams, IgnoreKind, IsPathIgnoredParams, PullActionsParams,
+    GetFileContentParams, IgnoreKind, PathIsIgnoredParams, PullActionsParams,
     SupportsFeatureParams,
 };
 use std::borrow::Cow;
@@ -62,7 +62,7 @@ pub(crate) fn code_actions(
         return Ok(None);
     }
 
-    if session.workspace.is_path_ignored(IsPathIgnoredParams {
+    if session.workspace.is_path_ignored(PathIsIgnoredParams {
         path: path.clone(),
         project_key: doc.project_key,
         features,
@@ -309,7 +309,7 @@ fn fix_all(
         return Ok(None);
     }
 
-    if session.workspace.is_path_ignored(IsPathIgnoredParams {
+    if session.workspace.is_path_ignored(PathIsIgnoredParams {
         path: path.clone(),
         project_key: doc.project_key,
         features: analyzer_features,
@@ -331,7 +331,7 @@ fn fix_all(
     })?;
     let should_format = file_features.supports_format();
 
-    if session.workspace.is_path_ignored(IsPathIgnoredParams {
+    if session.workspace.is_path_ignored(PathIsIgnoredParams {
         path: path.clone(),
         project_key: doc.project_key,
         features: analyzer_features,

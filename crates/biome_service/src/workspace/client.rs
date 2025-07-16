@@ -1,16 +1,16 @@
 use super::{
     ChangeFileParams, CloseFileParams, FileExitsParams, FixFileParams, FixFileResult,
     FormatFileParams, FormatOnTypeParams, FormatRangeParams, GetControlFlowGraphParams,
-    GetFormatterIRParams, GetModuleGraphResult, GetSemanticModelParams, GetSyntaxTreeParams,
-    GetSyntaxTreeResult, OpenFileParams, PullActionsParams, PullActionsResult,
+    GetFormatterIRParams, GetModuleGraphParams, GetModuleGraphResult, GetSemanticModelParams,
+    GetSyntaxTreeParams, GetSyntaxTreeResult, OpenFileParams, PullActionsParams, PullActionsResult,
     PullDiagnosticsParams, PullDiagnosticsResult, RenameParams, RenameResult,
     ScanProjectFolderParams, ScanProjectFolderResult, SearchPatternParams, SearchResults,
     SupportsFeatureParams, UpdateModuleGraphParams, UpdateSettingsParams, UpdateSettingsResult,
 };
 use crate::workspace::{
     CheckFileSizeParams, CheckFileSizeResult, CloseProjectParams, FileFeaturesResult,
-    GetFileContentParams, GetRegisteredTypesParams, GetTypeInfoParams, IsPathIgnoredParams,
-    OpenProjectParams, OpenProjectResult, RageParams, RageResult, ServerInfo,
+    GetFileContentParams, GetRegisteredTypesParams, GetTypeInfoParams, OpenProjectParams,
+    OpenProjectResult, PathIsIgnoredParams, RageParams, RageResult, ServerInfo,
 };
 use crate::{TransportError, Workspace, WorkspaceError};
 use biome_formatter::Printed;
@@ -144,7 +144,7 @@ where
         self.request("biome/file_features", params)
     }
 
-    fn is_path_ignored(&self, params: IsPathIgnoredParams) -> Result<bool, WorkspaceError> {
+    fn is_path_ignored(&self, params: PathIsIgnoredParams) -> Result<bool, WorkspaceError> {
         self.request("biome/is_path_ignored", params)
     }
 
@@ -262,7 +262,10 @@ where
         self.server_info.as_ref()
     }
 
-    fn get_module_graph(&self) -> Result<GetModuleGraphResult, WorkspaceError> {
-        self.request("biome/get_module_graph", ())
+    fn get_module_graph(
+        &self,
+        params: GetModuleGraphParams,
+    ) -> Result<GetModuleGraphResult, WorkspaceError> {
+        self.request("biome/get_module_graph", params)
     }
 }
