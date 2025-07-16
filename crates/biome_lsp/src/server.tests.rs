@@ -4,7 +4,6 @@ use std::collections::HashMap;
 use std::fmt::Display;
 use std::slice;
 use std::str::FromStr;
-use std::time::Duration;
 
 use anyhow::{Context, Error, Result, bail};
 use biome_analyze::RuleCategories;
@@ -23,7 +22,7 @@ use futures::{Sink, SinkExt, Stream, StreamExt};
 use serde::Serialize;
 use serde::de::DeserializeOwned;
 use serde_json::{from_value, to_value};
-use tokio::time::sleep;
+use tokio::time::{Duration, sleep, timeout};
 use tower::timeout::Timeout;
 use tower::{Service, ServiceExt};
 use tower_lsp_server::LspService;
@@ -55,12 +54,27 @@ macro_rules! uri {
     };
 }
 
+macro_rules! await_notification {
+    ($channel:expr) => {
+        sleep(Duration::from_millis(200)).await;
+
+        timeout(Duration::from_secs(2), $channel.changed())
+            .await
+            .expect("expected notification within timeout")
+            .expect("expected notification");
+    };
+}
+
 macro_rules! clear_notifications {
     ($channel:expr) => {
         // On Windows, wait until any previous event has been delivered.
         // On macOS, wait until the fsevents watcher sets up before receiving the first event.
-        #[cfg(any(target_os = "windows", target_os = "macos"))]
-        std::thread::sleep(Duration::from_secs(1));
+        let duration = if cfg!(any(target_os = "windows", target_os = "macos")) {
+            Duration::from_secs(1)
+        } else {
+            Duration::from_millis(200)
+        };
+        sleep(duration).await;
 
         if $channel
             .has_changed()
@@ -3426,16 +3440,10 @@ export function bar() {
         "This import is part of a cycle."
     );
 
-    clear_notifications!(factory.service_data_rx);
-
     // ARRANGE: Remove `bar.ts`.
+    clear_notifications!(factory.service_data_rx);
     std::fs::remove_file(fs.working_directory.join("bar.ts")).expect("Cannot remove bar.ts");
-
-    factory
-        .service_data_rx
-        .changed()
-        .await
-        .expect("Expected notification");
+    await_notification!(factory.service_data_rx);
 
     // ACT: Pull diagnostics.
     let result: PullDiagnosticsResult = server
@@ -3460,14 +3468,8 @@ export function bar() {
 
     // ARRANGE: Recreate `bar.ts`.
     clear_notifications!(factory.service_data_rx);
-
     fs.create_file("bar.ts", BAR_CONTENT);
-
-    factory
-        .service_data_rx
-        .changed()
-        .await
-        .expect("Expected notification");
+    await_notification!(factory.service_data_rx);
 
     // ACT: Pull diagnostics.
     let result: PullDiagnosticsResult = server
@@ -3496,14 +3498,8 @@ export function bar() {
 
     // ARRANGE: Fix `bar.ts`.
     clear_notifications!(factory.service_data_rx);
-
     fs.create_file("bar.ts", BAR_CONTENT_FIXED);
-
-    factory
-        .service_data_rx
-        .changed()
-        .await
-        .expect("Expected notification");
+    await_notification!(factory.service_data_rx);
 
     // ACT: Pull diagnostics.
     let result: PullDiagnosticsResult = server
@@ -3642,20 +3638,14 @@ export function bar() {
         "This import is part of a cycle."
     );
 
-    clear_notifications!(factory.service_data_rx);
-
     // ARRANGE: Move `utils` directory.
+    clear_notifications!(factory.service_data_rx);
     std::fs::rename(
         fs.working_directory.join("utils"),
         fs.working_directory.join("bin"),
     )
     .expect("Cannot move utils");
-
-    factory
-        .service_data_rx
-        .changed()
-        .await
-        .expect("Expected notification");
+    await_notification!(factory.service_data_rx);
 
     // ACT: Pull diagnostics.
     let result: PullDiagnosticsResult = server
@@ -3681,18 +3671,12 @@ export function bar() {
 
     // ARRANGE: Move `utils` back.
     clear_notifications!(factory.service_data_rx);
-
     std::fs::rename(
         fs.working_directory.join("bin"),
         fs.working_directory.join("utils"),
     )
     .expect("Cannot restore utils");
-
-    factory
-        .service_data_rx
-        .changed()
-        .await
-        .expect("Expected notification");
+    await_notification!(factory.service_data_rx);
 
     // ACT: Pull diagnostics.
     let result: PullDiagnosticsResult = server
@@ -3807,12 +3791,7 @@ async fn should_open_and_update_nested_files() -> Result<()> {
     clear_notifications!(factory.service_data_rx);
     std::fs::write(fs.working_directory.join(FILE_PATH), FILE_CONTENT_AFTER)
         .expect("cannot update file");
-
-    factory
-        .service_data_rx
-        .changed()
-        .await
-        .expect("expected notification");
+    await_notification!(factory.service_data_rx);
 
     // ASSERT: File content should have updated.
     let content: String = server
@@ -3833,6 +3812,7 @@ async fn should_open_and_update_nested_files() -> Result<()> {
     // ACT: Remove the directory.
     clear_notifications!(factory.service_data_rx);
     std::fs::remove_dir_all(fs.working_directory.join("src")).expect("cannot remove dir");
+    await_notification!(factory.service_data_rx);
 
     // ASSERT: File content should have been unloaded.
     let result: Result<Option<String>> = server
