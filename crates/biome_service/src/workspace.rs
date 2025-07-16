@@ -75,6 +75,7 @@ use biome_formatter::Printed;
 use biome_fs::BiomePath;
 use biome_grit_patterns::GritTargetLanguage;
 use biome_js_syntax::{TextRange, TextSize};
+use biome_module_graph::SerializedJsModuleInfo;
 use biome_resolver::FsWithResolverProxy;
 use biome_text_edit::TextEdit;
 use camino::Utf8Path;
@@ -82,6 +83,7 @@ pub use client::{TransportRequest, WorkspaceClient, WorkspaceTransport};
 use core::str;
 use crossbeam::channel::bounded;
 use enumflags2::{BitFlags, bitflags};
+use rustc_hash::FxHashMap;
 #[cfg(feature = "schema")]
 use schemars::{r#gen::SchemaGenerator, schema::Schema};
 pub use server::WorkspaceServer;
@@ -816,6 +818,11 @@ pub struct GetSemanticModelParams {
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase")]
+pub struct GetModuleGraphParams {}
+
+#[derive(Debug, serde::Serialize, serde::Deserialize)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[serde(rename_all = "camelCase")]
 pub struct GetFormatterIRParams {
     pub project_key: ProjectKey,
     pub path: BiomePath,
@@ -867,6 +874,22 @@ pub struct ChangeFileParams {
 pub struct CloseFileParams {
     pub project_key: ProjectKey,
     pub path: BiomePath,
+}
+#[derive(Debug, serde::Serialize, serde::Deserialize)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[serde(rename_all = "camelCase")]
+pub struct UpdateModuleGraphParams {
+    pub path: BiomePath,
+    /// The kind of update to apply to the module graph
+    pub update_kind: UpdateKind,
+}
+
+#[derive(Debug, serde::Serialize, serde::Deserialize)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[serde(rename_all = "camelCase")]
+pub enum UpdateKind {
+    AddOrUpdate,
+    Remove,
 }
 
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
@@ -1173,7 +1196,7 @@ impl From<&str> for PatternId {
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase")]
-pub struct IsPathIgnoredParams {
+pub struct PathIsIgnoredParams {
     pub project_key: ProjectKey,
     /// The path to inspect
     pub path: BiomePath,
@@ -1275,6 +1298,13 @@ impl From<BiomePath> for FileExitsParams {
     fn from(path: BiomePath) -> Self {
         Self { file_path: path }
     }
+}
+
+#[derive(Debug, serde::Serialize, serde::Deserialize)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[serde(rename_all = "camelCase")]
+pub struct GetModuleGraphResult {
+    pub data: FxHashMap<String, SerializedJsModuleInfo>,
 }
 
 pub trait Workspace: Send + Sync + RefUnwindSafe {
@@ -1381,37 +1411,7 @@ pub trait Workspace: Send + Sync + RefUnwindSafe {
     ///
     /// If the file path matches, `true` is returned, and it should be
     /// considered ignored.
-    fn is_path_ignored(&self, params: IsPathIgnoredParams) -> Result<bool, WorkspaceError>;
-
-    /// Returns a textual, debug representation of the syntax tree for a given
-    /// document.
-    fn get_syntax_tree(
-        &self,
-        params: GetSyntaxTreeParams,
-    ) -> Result<GetSyntaxTreeResult, WorkspaceError>;
-
-    /// Returns a textual, debug representation of the control flow graph at a
-    /// given position in the document.
-    fn get_control_flow_graph(
-        &self,
-        params: GetControlFlowGraphParams,
-    ) -> Result<String, WorkspaceError>;
-
-    /// Returns a textual, debug representation of the formatter IR for a given
-    /// document.
-    fn get_formatter_ir(&self, params: GetFormatterIRParams) -> Result<String, WorkspaceError>;
-
-    /// Returns an IR of the type information of the document
-    fn get_type_info(&self, params: GetTypeInfoParams) -> Result<String, WorkspaceError>;
-
-    /// Returns the registered types of the document
-    fn get_registered_types(
-        &self,
-        params: GetRegisteredTypesParams,
-    ) -> Result<String, WorkspaceError>;
-
-    /// Returns a textual, debug representation of the semantic model for the document.
-    fn get_semantic_model(&self, params: GetSemanticModelParams) -> Result<String, WorkspaceError>;
+    fn is_path_ignored(&self, params: PathIsIgnoredParams) -> Result<bool, WorkspaceError>;
 
     /// Returns the content of a given file.
     fn get_file_content(&self, params: GetFileContentParams) -> Result<String, WorkspaceError>;
@@ -1460,6 +1460,14 @@ pub trait Workspace: Send + Sync + RefUnwindSafe {
     /// may still be required for multi-file analysis.
     fn close_file(&self, params: CloseFileParams) -> Result<(), WorkspaceError>;
 
+    /// Updates the internal module graph using the provided path.
+    ///
+    /// ## Errors
+    ///
+    /// An error is emitted if the path doesn't exist inside the workspace. Use
+    /// the method [Workspace::open_file] before updating the module graph.
+    fn update_module_graph(&self, params: UpdateModuleGraphParams) -> Result<(), WorkspaceError>;
+
     /// Returns the filesystem implementation to open files with.
     ///
     /// This may be an in-memory file system.
@@ -1487,7 +1495,43 @@ pub trait Workspace: Send + Sync + RefUnwindSafe {
 
     // #endregion
 
-    // #region MISC METHODS
+    // #region DEBUGGING METHODS
+
+    /// Returns a textual, debug representation of the syntax tree for a given
+    /// document.
+    fn get_syntax_tree(
+        &self,
+        params: GetSyntaxTreeParams,
+    ) -> Result<GetSyntaxTreeResult, WorkspaceError>;
+
+    /// Returns a textual, debug representation of the control flow graph at a
+    /// given position in the document.
+    fn get_control_flow_graph(
+        &self,
+        params: GetControlFlowGraphParams,
+    ) -> Result<String, WorkspaceError>;
+
+    /// Returns a textual, debug representation of the formatter IR for a given
+    /// document.
+    fn get_formatter_ir(&self, params: GetFormatterIRParams) -> Result<String, WorkspaceError>;
+
+    /// Returns an IR of the type information of the document
+    fn get_type_info(&self, params: GetTypeInfoParams) -> Result<String, WorkspaceError>;
+
+    /// Returns the registered types of the document
+    fn get_registered_types(
+        &self,
+        params: GetRegisteredTypesParams,
+    ) -> Result<String, WorkspaceError>;
+
+    /// Returns a textual, debug representation of the semantic model for the document.
+    fn get_semantic_model(&self, params: GetSemanticModelParams) -> Result<String, WorkspaceError>;
+
+    /// Returns a serializable version of the module graph
+    fn get_module_graph(
+        &self,
+        params: GetModuleGraphParams,
+    ) -> Result<GetModuleGraphResult, WorkspaceError>;
 
     /// Returns debug information about this workspace.
     fn rage(&self, params: RageParams) -> Result<RageResult, WorkspaceError>;

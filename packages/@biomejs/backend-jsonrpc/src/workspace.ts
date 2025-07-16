@@ -8832,6 +8832,33 @@ export interface CloseFileParams {
 	path: BiomePath;
 	projectKey: ProjectKey;
 }
+export interface FileExitsParams {
+	filePath: BiomePath;
+}
+export interface PathIsIgnoredParams {
+	/**
+	 * Whether the path is ignored for specific features e.g. `formatter.includes`. When this field is empty, Biome checks only `files.includes`.
+	 */
+	features: FeatureName;
+	/**
+	 * Controls how to ignore check should be done
+	 */
+	ignoreKind?: IgnoreKind;
+	/**
+	 * The path to inspect
+	 */
+	path: BiomePath;
+	projectKey: ProjectKey;
+}
+export type IgnoreKind = "path" | "ancestors";
+export interface UpdateModuleGraphParams {
+	path: BiomePath;
+	/**
+	 * The kind of update to apply to the module graph
+	 */
+	updateKind: UpdateKind;
+}
+export type UpdateKind = "addOrUpdate" | "remove";
 export interface GetSyntaxTreeParams {
 	path: BiomePath;
 	projectKey: ProjectKey;
@@ -8839,9 +8866,6 @@ export interface GetSyntaxTreeParams {
 export interface GetSyntaxTreeResult {
 	ast: string;
 	cst: string;
-}
-export interface FileExitsParams {
-	filePath: BiomePath;
 }
 export interface CheckFileSizeParams {
 	path: BiomePath;
@@ -8875,6 +8899,24 @@ export interface GetRegisteredTypesParams {
 export interface GetSemanticModelParams {
 	path: BiomePath;
 	projectKey: ProjectKey;
+}
+export interface GetModuleGraphParams {}
+export interface GetModuleGraphResult {
+	data: Record<string, SerializedJsModuleInfo>;
+}
+export interface SerializedJsModuleInfo {
+	/**
+	 * Dynamic imports
+	 */
+	dynamic_imports: string[];
+	/**
+	 * Exported symbols
+	 */
+	exports: string[];
+	/**
+	 * Static imports
+	 */
+	static_imports: Record<string, string>;
 }
 export interface PullDiagnosticsParams {
 	categories: RuleCategories;
@@ -9089,6 +9131,9 @@ export interface Workspace {
 	openFile(params: OpenFileParams): Promise<void>;
 	changeFile(params: ChangeFileParams): Promise<void>;
 	closeFile(params: CloseFileParams): Promise<void>;
+	fileExists(params: FileExitsParams): Promise<boolean>;
+	isPathIgnored(params: PathIsIgnoredParams): Promise<boolean>;
+	updateModuleGraph(params: UpdateModuleGraphParams): Promise<void>;
 	getSyntaxTree(params: GetSyntaxTreeParams): Promise<GetSyntaxTreeResult>;
 	fileExists(params: FileExitsParams): Promise<boolean>;
 	checkFileSize(params: CheckFileSizeParams): Promise<CheckFileSizeResult>;
@@ -9098,6 +9143,7 @@ export interface Workspace {
 	getTypeInfo(params: GetTypeInfoParams): Promise<string>;
 	getRegisteredTypes(params: GetRegisteredTypesParams): Promise<string>;
 	getSemanticModel(params: GetSemanticModelParams): Promise<string>;
+	getModuleGraph(params: GetModuleGraphParams): Promise<GetModuleGraphResult>;
 	pullDiagnostics(
 		params: PullDiagnosticsParams,
 	): Promise<PullDiagnosticsResult>;
@@ -9132,6 +9178,15 @@ export function createWorkspace(transport: Transport): Workspace {
 		closeFile(params) {
 			return transport.request("biome/close_file", params);
 		},
+		fileExists(params) {
+			return transport.request("biome/file_exists", params);
+		},
+		isPathIgnored(params) {
+			return transport.request("biome/is_path_ignored", params);
+		},
+		updateModuleGraph(params) {
+			return transport.request("biome/update_module_graph", params);
+		},
 		getSyntaxTree(params) {
 			return transport.request("biome/get_syntax_tree", params);
 		},
@@ -9158,6 +9213,9 @@ export function createWorkspace(transport: Transport): Workspace {
 		},
 		getSemanticModel(params) {
 			return transport.request("biome/get_semantic_model", params);
+		},
+		getModuleGraph(params) {
+			return transport.request("biome/get_module_graph", params);
 		},
 		pullDiagnostics(params) {
 			return transport.request("biome/pull_diagnostics", params);
