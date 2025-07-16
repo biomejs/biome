@@ -13410,11 +13410,10 @@
 			]
 		},
 		"UseJsxKeyInIterableOptions": {
-			"description": "Options for the useJsxKeyInIterable rule, which applies to both React and Qwik.",
 			"type": "object",
 			"properties": {
 				"checkShorthandFragments": {
-					"description": "Set to `true` to check shorthand fragments (`<></>`) (React only)",
+					"description": "Set to `true` to check shorthand fragments (`<></>`)",
 					"default": false,
 					"type": "boolean"
 				}

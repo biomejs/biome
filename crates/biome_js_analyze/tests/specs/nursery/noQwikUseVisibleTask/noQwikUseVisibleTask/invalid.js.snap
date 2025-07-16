@@ -21,7 +21,6 @@ const MyComponent = component$(() => {
   useVisibleTask$(() => {
     console.log('Component mounted');
   });
-
   return <div>Hello</div>;
 });
 
@@ -30,7 +29,6 @@ export const App = component$(() => {
     track(() => state.value);
     console.log('State changed');
   });
-
   return <div>App</div>;
 });
 
@@ -54,7 +52,6 @@ class MyClass {
   }
 }
 
-// Multiple useVisibleTask calls
 useVisibleTask$(() => {
   console.log('First task');
 });
@@ -63,13 +60,11 @@ useVisibleTask$(() => {
   console.log('Second task');
 });
 
-// With complex logic
 useVisibleTask$(({ track, cleanup }) => {
   const interval = setInterval(() => {
     track(() => count.value);
     console.log('Count:', count.value);
   }, 1000);
-
   cleanup(() => clearInterval(interval));
 }); 
 ```
@@ -166,159 +161,163 @@ invalid.js:15:3 lint/nursery/noQwikUseVisibleTask ━━━━━━━━━━
 ```
 
 ```
-invalid.js:23:3 lint/nursery/noQwikUseVisibleTask ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:22:3 lint/nursery/noQwikUseVisibleTask ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! useVisibleTask$() should be used with care in Qwik applications.
   
-    22 │ export const App = component$(() => {
-  > 23 │   useVisibleTask$(({ track }) => {
+    21 │ export const App = component$(() => {
+  > 22 │   useVisibleTask$(({ track }) => {
        │   ^^^^^^^^^^^^^^^
-    24 │     track(() => state.value);
-    25 │     console.log('State changed');
+    23 │     track(() => state.value);
+    24 │     console.log('State changed');
   
   i Consider using useTask$() or other Qwik lifecycle functions instead.
   
-    22 │ export const App = component$(() => {
-  > 23 │   useVisibleTask$(({ track }) => {
+    21 │ export const App = component$(() => {
+  > 22 │   useVisibleTask$(({ track }) => {
        │   ^^^^^^^^^^^^^^^
-    24 │     track(() => state.value);
-    25 │     console.log('State changed');
+    23 │     track(() => state.value);
+    24 │     console.log('State changed');
   
 
 ```
 
 ```
-invalid.js:32:3 lint/nursery/noQwikUseVisibleTask ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:30:3 lint/nursery/noQwikUseVisibleTask ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! useVisibleTask$() should be used with care in Qwik applications.
   
-    31 │ function setupComponent() {
-  > 32 │   useVisibleTask$(() => {
+    29 │ function setupComponent() {
+  > 30 │   useVisibleTask$(() => {
        │   ^^^^^^^^^^^^^^^
-    33 │     // Setup logic
-    34 │   });
+    31 │     // Setup logic
+    32 │   });
   
   i Consider using useTask$() or other Qwik lifecycle functions instead.
   
-    31 │ function setupComponent() {
-  > 32 │   useVisibleTask$(() => {
+    29 │ function setupComponent() {
+  > 30 │   useVisibleTask$(() => {
        │   ^^^^^^^^^^^^^^^
-    33 │     // Setup logic
-    34 │   });
+    31 │     // Setup logic
+    32 │   });
   
 
 ```
 
 ```
-invalid.js:38:3 lint/nursery/noQwikUseVisibleTask ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:36:3 lint/nursery/noQwikUseVisibleTask ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! useVisibleTask$() should be used with care in Qwik applications.
   
-    37 │ const setup = () => {
-  > 38 │   useVisibleTask$(() => {
+    35 │ const setup = () => {
+  > 36 │   useVisibleTask$(() => {
        │   ^^^^^^^^^^^^^^^
-    39 │     // Setup in arrow function
-    40 │   });
+    37 │     // Setup in arrow function
+    38 │   });
   
   i Consider using useTask$() or other Qwik lifecycle functions instead.
   
-    37 │ const setup = () => {
-  > 38 │   useVisibleTask$(() => {
+    35 │ const setup = () => {
+  > 36 │   useVisibleTask$(() => {
        │   ^^^^^^^^^^^^^^^
-    39 │     // Setup in arrow function
-    40 │   });
+    37 │     // Setup in arrow function
+    38 │   });
   
 
 ```
 
 ```
-invalid.js:45:5 lint/nursery/noQwikUseVisibleTask ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:43:5 lint/nursery/noQwikUseVisibleTask ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! useVisibleTask$() should be used with care in Qwik applications.
   
-    43 │ class MyClass {
-    44 │   constructor() {
-  > 45 │     useVisibleTask$(() => {
+    41 │ class MyClass {
+    42 │   constructor() {
+  > 43 │     useVisibleTask$(() => {
        │     ^^^^^^^^^^^^^^^
-    46 │       // Setup in constructor
-    47 │     });
+    44 │       // Setup in constructor
+    45 │     });
   
   i Consider using useTask$() or other Qwik lifecycle functions instead.
   
-    43 │ class MyClass {
-    44 │   constructor() {
-  > 45 │     useVisibleTask$(() => {
+    41 │ class MyClass {
+    42 │   constructor() {
+  > 43 │     useVisibleTask$(() => {
        │     ^^^^^^^^^^^^^^^
-    46 │       // Setup in constructor
-    47 │     });
+    44 │       // Setup in constructor
+    45 │     });
   
 
 ```
 
 ```
-invalid.js:52:1 lint/nursery/noQwikUseVisibleTask ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:49:1 lint/nursery/noQwikUseVisibleTask ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! useVisibleTask$() should be used with care in Qwik applications.
   
-    51 │ // Multiple useVisibleTask calls
-  > 52 │ useVisibleTask$(() => {
+    47 │ }
+    48 │ 
+  > 49 │ useVisibleTask$(() => {
        │ ^^^^^^^^^^^^^^^
-    53 │   console.log('First task');
-    54 │ });
+    50 │   console.log('First task');
+    51 │ });
   
   i Consider using useTask$() or other Qwik lifecycle functions instead.
   
-    51 │ // Multiple useVisibleTask calls
-  > 52 │ useVisibleTask$(() => {
+    47 │ }
+    48 │ 
+  > 49 │ useVisibleTask$(() => {
        │ ^^^^^^^^^^^^^^^
-    53 │   console.log('First task');
-    54 │ });
+    50 │   console.log('First task');
+    51 │ });
   
 
 ```
 
 ```
-invalid.js:56:1 lint/nursery/noQwikUseVisibleTask ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:53:1 lint/nursery/noQwikUseVisibleTask ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! useVisibleTask$() should be used with care in Qwik applications.
   
-    54 │ });
-    55 │ 
-  > 56 │ useVisibleTask$(() => {
+    51 │ });
+    52 │ 
+  > 53 │ useVisibleTask$(() => {
        │ ^^^^^^^^^^^^^^^
-    57 │   console.log('Second task');
-    58 │ });
+    54 │   console.log('Second task');
+    55 │ });
   
   i Consider using useTask$() or other Qwik lifecycle functions instead.
   
-    54 │ });
-    55 │ 
-  > 56 │ useVisibleTask$(() => {
+    51 │ });
+    52 │ 
+  > 53 │ useVisibleTask$(() => {
        │ ^^^^^^^^^^^^^^^
-    57 │   console.log('Second task');
-    58 │ });
+    54 │   console.log('Second task');
+    55 │ });
   
 
 ```
 
 ```
-invalid.js:61:1 lint/nursery/noQwikUseVisibleTask ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:57:1 lint/nursery/noQwikUseVisibleTask ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! useVisibleTask$() should be used with care in Qwik applications.
   
-    60 │ // With complex logic
-  > 61 │ useVisibleTask$(({ track, cleanup }) => {
+    55 │ });
+    56 │ 
+  > 57 │ useVisibleTask$(({ track, cleanup }) => {
        │ ^^^^^^^^^^^^^^^
-    62 │   const interval = setInterval(() => {
-    63 │     track(() => count.value);
+    58 │   const interval = setInterval(() => {
+    59 │     track(() => count.value);
   
   i Consider using useTask$() or other Qwik lifecycle functions instead.
   
-    60 │ // With complex logic
-  > 61 │ useVisibleTask$(({ track, cleanup }) => {
+    55 │ });
+    56 │ 
+  > 57 │ useVisibleTask$(({ track, cleanup }) => {
        │ ^^^^^^^^^^^^^^^
-    62 │   const interval = setInterval(() => {
-    63 │     track(() => count.value);
+    58 │   const interval = setInterval(() => {
+    59 │     track(() => count.value);
   
 
 ```

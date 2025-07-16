@@ -1,5 +1,4 @@
-/* should not generate diagnostics */
-
+// should not generate diagnostics
 <div class="container" />
 <label for="input" />
 
@@ -23,6 +22,7 @@
 
 <form>
   <label for="nested-input" />
+  <input id="name" type="text" />
 </form>
 
 <div class="class1 class2 class3" />

@@ -7714,12 +7714,9 @@ export interface UseImportExtensionsOptions {
 	forceJsExtensions?: boolean;
 }
 export interface UseIsNanOptions {}
-/**
- * Options for the useJsxKeyInIterable rule, which applies to both React and Qwik.
- */
 export interface UseJsxKeyInIterableOptions {
 	/**
-	 * Set to `true` to check shorthand fragments (`<></>`) (React only)
+	 * Set to `true` to check shorthand fragments (`<></>`)
 	 */
 	checkShorthandFragments?: boolean;
 }

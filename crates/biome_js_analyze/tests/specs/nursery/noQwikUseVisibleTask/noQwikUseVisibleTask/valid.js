@@ -1,12 +1,4 @@
----
-source: crates/biome_js_analyze/tests/spec_tests.rs
-expression: valid.js
----
-# Input
-```js
-/* should not generate diagnostics */
-
-// Valid Qwik lifecycle functions
+// should not generate diagnostics
 useTask$(() => {
   console.log('Task executed');
 });
@@ -22,34 +14,20 @@ useStore({
   name: 'Qwik'
 });
 
-// Other function calls that should not trigger
-useVisibleTask(() => {
-  // Missing $ - should not trigger
-});
+useVisibleTask(() => {});
 
-useVisibleTask$ = () => {
-  // Assignment - should not trigger
-};
+useVisibleTask$ = () => {};
 
-const useVisibleTask$ = () => {
-  // Variable declaration - should not trigger
-};
+const useVisibleTask$ = () => {};
 
-function useVisibleTask$() {
-  // Function declaration - should not trigger
-}
+function useVisibleTask$() {}
 
-// Should not warn when strategy is 'document-idle'
-useVisibleTask$(() => {
-  // This should not trigger a diagnostic
-}, { strategy: 'document-idle' });
+useVisibleTask$(() => {}, { strategy: 'document-idle' });
 
-// Component definitions without useVisibleTask$
 const MyComponent = component$(() => {
   useTask$(() => {
     console.log('Component mounted');
   });
-
   return <div>Hello</div>;
 });
 
@@ -58,78 +36,61 @@ export const App = component$(() => {
     track(() => state.value);
     console.log('State changed');
   });
-
   return <div>App</div>;
 });
 
-// Regular function calls
 console.log('Hello');
 setTimeout(() => {
   console.log('Timeout');
 }, 1000);
 
-// Arrow functions
 const handler = () => {
   console.log('Handler');
 };
 
-// Class methods
 class MyClass {
   constructor() {
     this.setup();
   }
-
   setup() {
     console.log('Setup');
   }
 }
 
-// Function expressions
 const setupComponent = function() {
   console.log('Setup component');
 };
 
-// Async functions
 async function fetchData() {
   const response = await fetch('/api/data');
   return response.json();
 }
 
-// Generator functions
 function* generator() {
   yield 1;
   yield 2;
 }
 
-// Template literals
 const message = `Hello ${name}`;
 
-// Object methods
 const obj = {
   method() {
     console.log('Method');
   }
 };
 
-// Array methods
 const items = [1, 2, 3].map(item => item * 2);
 
-// Conditional expressions
 const result = condition ? 'yes' : 'no';
 
-// Logical expressions
 const value = a && b || c;
 
-// Binary expressions
 const sum = a + b;
 
-// Unary expressions
 const negated = !value;
 
-// Member expressions
 const property = object.property;
 
-// Call expressions with different names
 useEffect(() => {
   console.log('React effect');
 });
@@ -140,21 +101,12 @@ useCallback(() => {
   console.log('React callback');
 });
 
-// String literals
 const text = 'useVisibleTask$';
 
-// Comments mentioning the function
-// This is a comment about useVisibleTask$
-/* Another comment about useVisibleTask$ */
-
-// Import statements
 import { useTask$ } from '@builder.io/qwik';
 
-// Export statements
 export { useTask$ };
 
-// Variable declarations
 let useVisibleTask$ = 'string';
 const useVisibleTask$ = 42;
 var useVisibleTask$ = true; 
-```

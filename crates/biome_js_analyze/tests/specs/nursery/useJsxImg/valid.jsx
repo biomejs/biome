@@ -1,3 +1,2 @@
 // should not generate diagnostics
-// Valid: has width and height, and src is not local/public
 <img width="200" height="600" src="/static/images/portrait-01.webp" />

@@ -15,7 +15,6 @@ const MyComponent = component$(() => {
   useVisibleTask$(() => {
     console.log('Component mounted');
   });
-
   return <div>Hello</div>;
 });
 
@@ -24,7 +23,6 @@ export const App = component$(() => {
     track(() => state.value);
     console.log('State changed');
   });
-
   return <div>App</div>;
 });
 
@@ -48,7 +46,6 @@ class MyClass {
   }
 }
 
-// Multiple useVisibleTask calls
 useVisibleTask$(() => {
   console.log('First task');
 });
@@ -57,12 +54,10 @@ useVisibleTask$(() => {
   console.log('Second task');
 });
 
-// With complex logic
 useVisibleTask$(({ track, cleanup }) => {
   const interval = setInterval(() => {
     track(() => count.value);
     console.log('Count:', count.value);
   }, 1000);
-
   cleanup(() => clearInterval(interval));
 }); 
