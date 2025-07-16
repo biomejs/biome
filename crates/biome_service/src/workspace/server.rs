@@ -3,13 +3,13 @@ use super::{
     ChangeFileParams, CheckFileSizeParams, CheckFileSizeResult, CloseFileParams,
     CloseProjectParams, FeaturesBuilder, FileContent, FileExitsParams, FixFileParams,
     FixFileResult, FormatFileParams, FormatOnTypeParams, FormatRangeParams,
-    GetControlFlowGraphParams, GetFormatterIRParams, GetModuleGraphResult, GetSemanticModelParams,
-    GetSyntaxTreeParams, GetSyntaxTreeResult, IgnoreKind, OpenFileParams, OpenProjectParams,
-    ParsePatternParams, ParsePatternResult, PatternId, ProjectKey, PullActionsParams,
-    PullActionsResult, PullDiagnosticsParams, PullDiagnosticsResult, RenameResult,
-    ScanProjectFolderParams, ScanProjectFolderResult, SearchPatternParams, SearchResults,
-    ServiceDataNotification, SupportsFeatureParams, UpdateKind, UpdateModuleGraphParams,
-    UpdateSettingsParams, UpdateSettingsResult,
+    GetControlFlowGraphParams, GetFormatterIRParams, GetModuleGraphParams, GetModuleGraphResult,
+    GetSemanticModelParams, GetSyntaxTreeParams, GetSyntaxTreeResult, IgnoreKind, OpenFileParams,
+    OpenProjectParams, ParsePatternParams, ParsePatternResult, PatternId, ProjectKey,
+    PullActionsParams, PullActionsResult, PullDiagnosticsParams, PullDiagnosticsResult,
+    RenameResult, ScanProjectFolderParams, ScanProjectFolderResult, SearchPatternParams,
+    SearchResults, ServiceDataNotification, SupportsFeatureParams, UpdateKind,
+    UpdateModuleGraphParams, UpdateSettingsParams, UpdateSettingsResult,
 };
 use crate::configuration::{LoadedConfiguration, ProjectScanComputer, read_config};
 use crate::diagnostics::{FileTooLarge, NoIgnoreFileFound, VcsDiagnostic};
@@ -22,7 +22,7 @@ use crate::projects::Projects;
 use crate::workspace::scanner::ScanOptions;
 use crate::workspace::{
     FileFeaturesResult, GetFileContentParams, GetRegisteredTypesParams, GetTypeInfoParams,
-    IsPathIgnoredParams, OpenProjectResult, RageEntry, RageParams, RageResult, ScanKind,
+    OpenProjectResult, PathIsIgnoredParams, RageEntry, RageParams, RageResult, ScanKind,
     ServerInfo,
 };
 use crate::workspace_watcher::{OpenFileReason, WatcherSignalKind};
@@ -1102,7 +1102,7 @@ impl Workspace for WorkspaceServer {
         )
     }
 
-    fn is_path_ignored(&self, params: IsPathIgnoredParams) -> Result<bool, WorkspaceError> {
+    fn is_path_ignored(&self, params: PathIsIgnoredParams) -> Result<bool, WorkspaceError> {
         // Never ignore Biome's top-level config file regardless of `includes`.
         if params.path.file_name().is_some_and(|file_name| {
             file_name == ConfigName::biome_json() || file_name == ConfigName::biome_jsonc()
@@ -1766,7 +1766,10 @@ impl Workspace for WorkspaceServer {
         None
     }
 
-    fn get_module_graph(&self) -> Result<GetModuleGraphResult, WorkspaceError> {
+    fn get_module_graph(
+        &self,
+        _params: GetModuleGraphParams,
+    ) -> Result<GetModuleGraphResult, WorkspaceError> {
         let module_graph = self.module_graph.data();
         let mut data = FxHashMap::default();
 

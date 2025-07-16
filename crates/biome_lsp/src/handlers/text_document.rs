@@ -6,7 +6,7 @@ use crate::{documents::Document, session::Session};
 use biome_fs::BiomePath;
 use biome_service::workspace::{
     ChangeFileParams, CloseFileParams, DocumentFileSource, FeaturesBuilder, FileContent,
-    GetFileContentParams, IgnoreKind, IsPathIgnoredParams, OpenFileParams, OpenProjectParams,
+    GetFileContentParams, IgnoreKind, OpenFileParams, OpenProjectParams, PathIsIgnoredParams,
     ScanKind,
 };
 use tower_lsp_server::lsp_types;
@@ -60,7 +60,7 @@ pub(crate) async fn did_open(
 
     let is_ignored = session
         .workspace
-        .is_path_ignored(IsPathIgnoredParams {
+        .is_path_ignored(PathIsIgnoredParams {
             project_key,
             path: path.clone(),
             features: FeaturesBuilder::new().build(),
@@ -108,7 +108,7 @@ pub(crate) async fn did_change(
         return Ok(());
     }
     let features = FeaturesBuilder::new().build();
-    if session.workspace.is_path_ignored(IsPathIgnoredParams {
+    if session.workspace.is_path_ignored(PathIsIgnoredParams {
         path: path.clone(),
         project_key: doc.project_key,
         features,

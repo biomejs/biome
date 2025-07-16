@@ -818,6 +818,11 @@ pub struct GetSemanticModelParams {
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase")]
+pub struct GetModuleGraphParams {}
+
+#[derive(Debug, serde::Serialize, serde::Deserialize)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[serde(rename_all = "camelCase")]
 pub struct GetFormatterIRParams {
     pub project_key: ProjectKey,
     pub path: BiomePath,
@@ -1191,7 +1196,7 @@ impl From<&str> for PatternId {
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase")]
-pub struct IsPathIgnoredParams {
+pub struct PathIsIgnoredParams {
     pub project_key: ProjectKey,
     /// The path to inspect
     pub path: BiomePath,
@@ -1406,7 +1411,7 @@ pub trait Workspace: Send + Sync + RefUnwindSafe {
     ///
     /// If the file path matches, `true` is returned, and it should be
     /// considered ignored.
-    fn is_path_ignored(&self, params: IsPathIgnoredParams) -> Result<bool, WorkspaceError>;
+    fn is_path_ignored(&self, params: PathIsIgnoredParams) -> Result<bool, WorkspaceError>;
 
     /// Returns the content of a given file.
     fn get_file_content(&self, params: GetFileContentParams) -> Result<String, WorkspaceError>;
@@ -1523,7 +1528,10 @@ pub trait Workspace: Send + Sync + RefUnwindSafe {
     fn get_semantic_model(&self, params: GetSemanticModelParams) -> Result<String, WorkspaceError>;
 
     /// Returns a serializable version of the module graph
-    fn get_module_graph(&self) -> Result<GetModuleGraphResult, WorkspaceError>;
+    fn get_module_graph(
+        &self,
+        params: GetModuleGraphParams,
+    ) -> Result<GetModuleGraphResult, WorkspaceError>;
 
     /// Returns debug information about this workspace.
     fn rage(&self, params: RageParams) -> Result<RageResult, WorkspaceError>;

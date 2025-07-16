@@ -6,9 +6,10 @@ use wasm_bindgen::prelude::*;
 use biome_service::workspace::{
     self, ChangeFileParams, CloseFileParams, FileExitsParams, FixFileParams, FormatFileParams,
     FormatOnTypeParams, FormatRangeParams, GetControlFlowGraphParams, GetFileContentParams,
-    GetFormatterIRParams, GetModuleGraphResult, GetRegisteredTypesParams, GetSemanticModelParams,
-    GetSyntaxTreeParams, GetTypeInfoParams, OpenProjectParams, PullActionsParams,
-    PullDiagnosticsParams, RenameParams, UpdateModuleGraphParams, UpdateSettingsParams,
+    GetFormatterIRParams, GetModuleGraphParams, GetRegisteredTypesParams, GetSemanticModelParams,
+    GetSyntaxTreeParams, GetTypeInfoParams, OpenProjectParams, PathIsIgnoredParams,
+    PullActionsParams, PullDiagnosticsParams, RenameParams, UpdateModuleGraphParams,
+    UpdateSettingsParams,
 };
 use biome_service::workspace::{OpenFileParams, SupportsFeatureParams};
 use camino::{Utf8Path, Utf8PathBuf};
@@ -201,8 +202,8 @@ impl Workspace {
     }
 
     #[wasm_bindgen(js_name = isPathIgnored)]
-    pub fn is_path_ignored(&self, params: IIsPathIgnoredParams) -> Result<bool, Error> {
-        let params: IsPathIgnoredParams =
+    pub fn is_path_ignored(&self, params: IPathIsIgnoredParams) -> Result<bool, Error> {
+        let params: PathIsIgnoredParams =
             serde_wasm_bindgen::from_value(params.into()).map_err(into_error)?;
         self.inner.is_path_ignored(params).map_err(into_error)
     }
@@ -216,8 +217,17 @@ impl Workspace {
     }
 
     #[wasm_bindgen(js_name = getModuleGraph)]
-    pub fn get_module_graph(&self) -> Result<GetModuleGraphResult, Error> {
-        self.inner.get_control_flow_graph().map_err(into_error)
+    pub fn get_module_graph(
+        &self,
+        params: IGetModuleGraphParams,
+    ) -> Result<IGetModuleGraphResult, Error> {
+        let params: GetModuleGraphParams =
+            serde_wasm_bindgen::from_value(params.into()).map_err(into_error)?;
+
+        let result = self.inner.get_module_graph(params).map_err(into_error)?;
+        to_value(&result)
+            .map(IGetModuleGraphResult::from)
+            .map_err(into_error)
     }
 
     #[wasm_bindgen(js_name = pullDiagnostics)]

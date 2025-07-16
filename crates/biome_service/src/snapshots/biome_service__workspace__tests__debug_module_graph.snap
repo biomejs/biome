@@ -1,4 +1,4 @@
-[] bb---
+---
 source: crates/biome_service/src/workspace.tests.rs
 expression: result
 ---
@@ -8,8 +8,8 @@ GetModuleGraphResult {
             static_imports: {},
             dynamic_imports: {},
             exports: {
-                "filter",
                 "debounce",
+                "filter",
             },
         },
         "/project/dynamic.js": SerializedJsModuleInfo {
@@ -21,8 +21,8 @@ GetModuleGraphResult {
         },
         "/project/file.js": SerializedJsModuleInfo {
             static_imports: {
-                "filter": "./utils.js",
                 "debounce": "./utils.js",
+                "filter": "./utils.js",
             },
             dynamic_imports: {
                 "./dynamic.js",
