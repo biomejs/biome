@@ -36,7 +36,7 @@ declare_lint_rule! {
     pub UseJsxA {
         version: "next",
         name: "useJsxA",
-        language: "js",
+        language: "jsx",
         sources: &[RuleSource::EslintQwik("jsx-a").inspired()],
         recommended: true,
         severity: Severity::Warning,

@@ -29,7 +29,7 @@ declare_lint_rule! {
  pub UseClasslist {
         version: "next",
         name: "useClasslist",
-        language: "js",
+        language: "jsx",
         sources: &[RuleSource::EslintQwik("prefer-classlist").inspired()],
         recommended: true,
         severity: Severity::Warning,

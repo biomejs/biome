@@ -40,7 +40,7 @@ declare_lint_rule! {
  pub NoQwikReactProps {
         version: "1.0.0",
         name: "noQwikReactProps",
-        language: "js",
+        language: "jsx",
         sources: &[RuleSource::EslintQwik("no-react-props").inspired()],
         recommended: true,
         severity: Severity::Warning,
