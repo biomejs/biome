@@ -10,7 +10,7 @@ use biome_resolver::ResolvedPath;
 use biome_rowan::{Text, TextRange};
 use indexmap::IndexMap;
 use rust_lapper::Lapper;
-use rustc_hash::{FxHashMap, FxHashSet};
+use rustc_hash::FxHashMap;
 use std::collections::BTreeSet;
 use std::{collections::BTreeMap, ops::Deref, sync::Arc};
 

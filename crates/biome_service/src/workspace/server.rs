@@ -1,13 +1,14 @@
 use super::document::Document;
 use super::{
     ChangeFileParams, CheckFileSizeParams, CheckFileSizeResult, CloseFileParams,
-    CloseProjectParams, FileContent, FileExitsParams, FixFileParams, FixFileResult,
-    FormatFileParams, FormatOnTypeParams, FormatRangeParams, GetControlFlowGraphParams,
-    GetFormatterIRParams, GetSemanticModelParams, GetSyntaxTreeParams, GetSyntaxTreeResult,
-    IgnoreKind, OpenFileParams, OpenProjectParams, ParsePatternParams, ParsePatternResult,
-    PatternId, ProjectKey, PullActionsParams, PullActionsResult, PullDiagnosticsParams,
-    PullDiagnosticsResult, RenameResult, ScanProjectFolderParams, ScanProjectFolderResult,
-    SearchPatternParams, SearchResults, ServiceDataNotification, SupportsFeatureParams,
+    CloseProjectParams, FeaturesBuilder, FileContent, FileExitsParams, FixFileParams,
+    FixFileResult, FormatFileParams, FormatOnTypeParams, FormatRangeParams,
+    GetControlFlowGraphParams, GetFormatterIRParams, GetModuleGraphResult, GetSemanticModelParams,
+    GetSyntaxTreeParams, GetSyntaxTreeResult, IgnoreKind, OpenFileParams, OpenProjectParams,
+    ParsePatternParams, ParsePatternResult, PatternId, ProjectKey, PullActionsParams,
+    PullActionsResult, PullDiagnosticsParams, PullDiagnosticsResult, RenameResult,
+    ScanProjectFolderParams, ScanProjectFolderResult, SearchPatternParams, SearchResults,
+    ServiceDataNotification, SupportsFeatureParams, UpdateKind, UpdateModuleGraphParams,
     UpdateSettingsParams, UpdateSettingsResult,
 };
 use crate::configuration::{LoadedConfiguration, ProjectScanComputer, read_config};
