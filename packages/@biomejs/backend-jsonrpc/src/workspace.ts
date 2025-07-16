@@ -7798,7 +7798,11 @@ export interface NoRestrictedImportsOptions {
 	/**
 	 * A list of import paths that should trigger the rule.
 	 */
-	paths: Record<string, CustomRestrictedImport>;
+	paths: Record<string, Paths>;
+	/**
+	 * gitignore-style patterns that should trigger the rule.
+	 */
+	patterns?: Patterns[];
 }
 export interface NoRestrictedTypesOptions {
 	types?: Record<string, CustomRestrictedType>;
@@ -8032,7 +8036,8 @@ export interface Convention {
  * Specifies whether property assignments on function parameters are allowed or denied.
  */
 export type PropertyAssignmentMode = "allow" | "deny";
-export type CustomRestrictedImport = string | CustomRestrictedImportOptions;
+export type Paths = string | PathOptions;
+export type Patterns = PatternOptions;
 export type CustomRestrictedType = string | CustomRestrictedTypeOptions;
 export type ConsistentArrayType = "shorthand" | "generic";
 export type Accessibility = "noPublic" | "explicit" | "none";
@@ -8059,7 +8064,7 @@ export interface Selector {
 	 */
 	scope: Scope;
 }
-export interface CustomRestrictedImportOptions {
+export interface PathOptions {
 	/**
 	 * Names of the exported members that allowed to be not be used.
 	 */
@@ -8072,6 +8077,24 @@ export interface CustomRestrictedImportOptions {
 	 * The message to display when this module is imported.
 	 */
 	message: string;
+}
+export interface PatternOptions {
+	/**
+	 * An array of gitignore-style patterns.
+	 */
+	group?: SourcesMatcher;
+	/**
+	 * A regex pattern for import names to forbid within the matched modules.
+	 */
+	importNamePattern?: Regex;
+	/**
+	 * If true, the matched patterns in the importNamePattern will be allowed. Defaults to `false`.
+	 */
+	invertImportNamePattern?: boolean;
+	/**
+	 * A custom message for diagnostics related to this pattern.
+	 */
+	message?: string;
 }
 export interface CustomRestrictedTypeOptions {
 	message?: string;
