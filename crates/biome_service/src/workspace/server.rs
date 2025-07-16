@@ -54,7 +54,7 @@ use biome_resolver::FsWithResolverProxy;
 use biome_rowan::{AstNode, NodeCache, SendNode};
 use camino::{Utf8Path, Utf8PathBuf};
 use crossbeam::channel::Sender;
-use papaya::{Compute, HashMap, HashSet, Operation};
+use papaya::{Compute, HashMap, Operation};
 use rustc_hash::{FxBuildHasher, FxHashMap};
 use std::panic::RefUnwindSafe;
 use std::sync::atomic::{AtomicUsize, Ordering};
@@ -115,9 +115,6 @@ pub struct WorkspaceServer {
     /// Channel sender for instructions to the [crate::WorkspaceWatcher].
     pub(super) watcher_tx: Sender<WatcherInstruction>,
 
-    /// Set containing all the watched folders.
-    pub(super) watched_folders: HashSet<Utf8PathBuf>,
-
     /// Channel sender for sending notifications of service data updates.
     pub(super) notification_tx: watch::Sender<ServiceDataNotification>,
 }
@@ -152,7 +149,6 @@ impl WorkspaceServer {
             node_cache: Default::default(),
             fs,
             watcher_tx,
-            watched_folders: Default::default(),
             notification_tx,
         }
     }
@@ -893,7 +889,7 @@ impl Workspace for WorkspaceServer {
             project_key,
             path,
             watch,
-            force,
+            force: _, // FIXME: `force` does nothing at the moment.
             scan_kind,
             verbose,
         }: ScanProjectFolderParams,
@@ -912,21 +908,6 @@ impl Workspace for WorkspaceServer {
                     &manifest,
                 )?;
             }
-            return Ok(ScanProjectFolderResult {
-                diagnostics: Vec::new(),
-                duration: Duration::from_millis(0),
-                configuration_files: vec![],
-            });
-        }
-
-        let should_scan = force
-            || !self
-                .watched_folders
-                .pin()
-                .iter()
-                .any(|watched_folder| path.starts_with(watched_folder));
-        if !should_scan {
-            // No need to scan folders that are already being watched.
             return Ok(ScanProjectFolderResult {
                 diagnostics: Vec::new(),
                 duration: Duration::from_millis(0),
@@ -1068,17 +1049,6 @@ impl Workspace for WorkspaceServer {
             .get_project_path(params.project_key)
             .ok_or_else(WorkspaceError::no_project)?;
 
-        self.watched_folders.pin().retain(|watched_folder| {
-            if watched_folder.starts_with(&project_path) {
-                let _ = self
-                    .watcher_tx
-                    .try_send(WatcherInstruction::UnwatchFolder(watched_folder.clone()));
-                false
-            } else {
-                true
-            }
-        });
-
         // Limit the scope of the pin and the lock inside.
         {
             let documents = self.documents.pin();
@@ -1094,6 +1064,10 @@ impl Workspace for WorkspaceServer {
                 }
             }
         }
+
+        let _ = self
+            .watcher_tx
+            .try_send(WatcherInstruction::UnwatchFolder(project_path));
 
         self.projects.remove_project(params.project_key);
 
