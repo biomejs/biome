@@ -343,16 +343,18 @@ fn handle_any_file<'scope>(
     }
 
     if file_type.is_dir() {
+        let path_buf = path.to_path_buf();
         scope.spawn(move |scope| {
-            handle_dir(scope, ctx, &path, origin_path);
+            handle_dir(scope, ctx, &path_buf, origin_path);
         });
+        if ctx.store_dirs() {
+            ctx.store_path(BiomePath::new(path));
+        }
         return;
     }
 
     if file_type.is_file() {
-        scope.spawn(move |_| {
-            ctx.store_path(BiomePath::new(path));
-        });
+        ctx.store_path(BiomePath::new(path));
         return;
     }
 

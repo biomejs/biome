@@ -1,14 +1,14 @@
 use super::document::Document;
 use super::{
     ChangeFileParams, CheckFileSizeParams, CheckFileSizeResult, CloseFileParams,
-    CloseProjectParams, FeaturesBuilder, FileContent, FileExitsParams, FixFileParams,
-    FixFileResult, FormatFileParams, FormatOnTypeParams, FormatRangeParams,
-    GetControlFlowGraphParams, GetFormatterIRParams, GetSemanticModelParams, GetSyntaxTreeParams,
-    GetSyntaxTreeResult, IgnoreKind, OpenFileParams, OpenProjectParams, ParsePatternParams,
-    ParsePatternResult, PatternId, ProjectKey, PullActionsParams, PullActionsResult,
-    PullDiagnosticsParams, PullDiagnosticsResult, RenameResult, ScanProjectFolderParams,
-    ScanProjectFolderResult, SearchPatternParams, SearchResults, ServiceDataNotification,
-    SupportsFeatureParams, UpdateSettingsParams, UpdateSettingsResult,
+    CloseProjectParams, FileContent, FileExitsParams, FixFileParams, FixFileResult,
+    FormatFileParams, FormatOnTypeParams, FormatRangeParams, GetControlFlowGraphParams,
+    GetFormatterIRParams, GetSemanticModelParams, GetSyntaxTreeParams, GetSyntaxTreeResult,
+    IgnoreKind, OpenFileParams, OpenProjectParams, ParsePatternParams, ParsePatternResult,
+    PatternId, ProjectKey, PullActionsParams, PullActionsResult, PullDiagnosticsParams,
+    PullDiagnosticsResult, RenameResult, ScanProjectFolderParams, ScanProjectFolderResult,
+    SearchPatternParams, SearchResults, ServiceDataNotification, SupportsFeatureParams,
+    UpdateSettingsParams, UpdateSettingsResult,
 };
 use crate::configuration::{LoadedConfiguration, ProjectScanComputer, read_config};
 use crate::diagnostics::{FileTooLarge, NoIgnoreFileFound, VcsDiagnostic};
@@ -18,6 +18,7 @@ use crate::file_handlers::{
     ParseResult,
 };
 use crate::projects::Projects;
+use crate::workspace::scanner::ScanOptions;
 use crate::workspace::{
     FileFeaturesResult, GetFileContentParams, GetRegisteredTypesParams, GetTypeInfoParams,
     IsPathIgnoredParams, OpenProjectResult, RageEntry, RageParams, RageResult, ScanKind,
@@ -112,10 +113,10 @@ pub struct WorkspaceServer {
     pub(super) fs: Arc<dyn FsWithResolverProxy>,
 
     /// Channel sender for instructions to the [crate::WorkspaceWatcher].
-    watcher_tx: Sender<WatcherInstruction>,
+    pub(super) watcher_tx: Sender<WatcherInstruction>,
 
     /// Set containing all the watched folders.
-    watched_folders: HashSet<Utf8PathBuf>,
+    pub(super) watched_folders: HashSet<Utf8PathBuf>,
 
     /// Channel sender for sending notifications of service data updates.
     pub(super) notification_tx: watch::Sender<ServiceDataNotification>,
@@ -306,14 +307,7 @@ impl WorkspaceServer {
             return Ok(()); // file events outside our projects can be safely ignored.
         };
 
-        let is_ignored = self.is_ignored_by_scanner(project_key, scan_kind, &path)?
-            || self.is_path_ignored(IsPathIgnoredParams {
-                project_key,
-                path: path.clone(),
-                features: FeaturesBuilder::default().build(),
-                ignore_kind: IgnoreKind::Ancestors,
-            })?;
-        if is_ignored {
+        if self.is_ignored_by_scanner(project_key, scan_kind, &path, IgnoreKind::Ancestors)? {
             return Ok(());
         }
 
@@ -895,19 +889,24 @@ impl Workspace for WorkspaceServer {
 
     fn scan_project_folder(
         &self,
-        params: ScanProjectFolderParams,
+        ScanProjectFolderParams {
+            project_key,
+            path,
+            watch,
+            force,
+            scan_kind,
+            verbose,
+        }: ScanProjectFolderParams,
     ) -> Result<ScanProjectFolderResult, WorkspaceError> {
-        let path = params
-            .path
+        let path = path
             .map(Utf8PathBuf::from)
-            .or_else(|| self.projects.get_project_path(params.project_key))
+            .or_else(|| self.projects.get_project_path(project_key))
             .ok_or_else(WorkspaceError::no_project)?;
 
-        let scan_kind = params.scan_kind;
         if scan_kind.is_none() {
             let manifest = path.join("package.json");
             if self.fs.path_exists(&manifest) {
-                self.open_file_during_initial_scan(params.project_key, manifest.clone())?;
+                self.open_file_during_initial_scan(project_key, manifest.clone())?;
                 self.update_project_layout(
                     WatcherSignalKind::AddedOrChanged(OpenFileReason::InitialScan),
                     &manifest,
@@ -920,7 +919,7 @@ impl Workspace for WorkspaceServer {
             });
         }
 
-        let should_scan = params.force
+        let should_scan = force
             || !self
                 .watched_folders
                 .pin()
@@ -935,16 +934,13 @@ impl Workspace for WorkspaceServer {
             });
         }
 
-        if params.watch {
-            self.watched_folders.pin().insert(path.clone());
+        let scan_options = ScanOptions {
+            scan_kind,
+            verbose,
+            watch,
+        };
 
-            let _ = self.watcher_tx.try_send(WatcherInstruction::WatchFolder(
-                path.clone(),
-                scan_kind.clone(),
-            ));
-        }
-
-        let result = self.scan(params.project_key, &path, scan_kind, params.verbose)?;
+        let result = self.scan(project_key, &path, scan_options)?;
 
         let _ = self.notification_tx.send(ServiceDataNotification::Updated);
 

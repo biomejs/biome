@@ -378,6 +378,12 @@ pub trait TraversalContext: Sync {
 
     /// Returns the paths that should be handled
     fn evaluated_paths(&self) -> BTreeSet<BiomePath>;
+
+    /// Returns whether directories are stored and returned by
+    /// `Self::evaluated_paths()`.
+    fn store_dirs(&self) -> bool {
+        false
+    }
 }
 
 impl<T> FileSystem for Arc<T>
