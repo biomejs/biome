@@ -1,5 +1,28 @@
 # @biomejs/js-api
 
+## 2.0.3
+
+### Patch Changes
+
+- [#6785](https://github.com/biomejs/biome/pull/6785) [`085e3c7`](https://github.com/biomejs/biome/commit/085e3c756344c92adbf69d5270b93402ff9713e8) Thanks [@siketyan](https://github.com/siketyan)! - Fixed [#6722](https://github.com/biomejs/biome/issues/6772): Missing `dist/` files are now included in the `@biomejs/js-api` package. The previous release haven't fixed the issue properly.
+
+## 2.0.2
+
+### Patch Changes
+
+- [#6780](https://github.com/biomejs/biome/pull/6780) [`563f3d5`](https://github.com/biomejs/biome/commit/563f3d5fbcfb220bf5c2a386be385a42d2a7069c) Thanks [@siketyan](https://github.com/siketyan)! - Fixed [#6722](https://github.com/biomejs/biome/issues/6772): Missing `dist/` files are now included in the `@biomejs/js-api` package. The previous release haven't fixed the issue properly.
+
+- Updated dependencies []:
+  - @biomejs/wasm-web@2.1.1
+  - @biomejs/wasm-bundler@2.1.1
+  - @biomejs/wasm-nodejs@2.1.1
+
+## 2.0.1
+
+### Patch Changes
+
+- [#6776](https://github.com/biomejs/biome/pull/6776) [`08652d0`](https://github.com/biomejs/biome/commit/08652d0dfd34f84759597dc7f613cc260e362ee9) Thanks [@siketyan](https://github.com/siketyan)! - Fixed [#6722](https://github.com/biomejs/biome/issues/6772): Missing `dist/` files are now included in the `@biomejs/js-api` package.
+
 ## 2.0.0
 
 ### Minor Changes

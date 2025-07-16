@@ -171,7 +171,7 @@ fn should_successfully_migrate_ariakit() {
   "vcs": {
     "enabled": true,
     "clientKind": "git",
-    "useIgnoreFile": true
+    "useIgnoreFile": false
   },
   "files": {
     "ignoreUnknown": true,
@@ -256,7 +256,7 @@ fn should_successfully_migrate_sentry() {
   "vcs": {
     "enabled": true,
     "clientKind": "git",
-    "useIgnoreFile": true,
+    "useIgnoreFile": false,
     "defaultBranch": "master"
   },
   "organizeImports": {
@@ -580,7 +580,7 @@ fn should_migrate_aws_config() {
   "vcs": {
     "enabled": true,
     "clientKind": "git",
-    "useIgnoreFile": true
+    "useIgnoreFile": false
   }
 }
 

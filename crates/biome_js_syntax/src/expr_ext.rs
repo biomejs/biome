@@ -1161,17 +1161,18 @@ impl AnyJsExpression {
         let mut members = CalleeNamesIterator::new(self.clone());
 
         let first = members.next();
+        let second = members.next();
 
         // Jasmine / Angular focused test patterns (f prepended)
         if let Some(token) = &first {
             let name = token.text();
-            if matches!(name, "fdescribe" | "fit" | "ftest") {
+            if matches!(name, "fdescribe" | "fit" | "ftest") && second.is_none() {
                 return Ok(true);
             }
         }
 
         // Handle cases with .only
-        if let (Some(first_token), Some(second_token)) = (&first, &members.next()) {
+        if let (Some(first_token), Some(second_token)) = (&first, &second) {
             // Check for direct .only pattern: test.only, it.only, describe.only
             if first_token.text() == "only"
                 && matches!(second_token.text(), "test" | "it" | "describe")
@@ -1389,6 +1390,21 @@ impl AnyJsExpression {
             }
             _ => false,
         }
+    }
+
+    /// Returns the innermost expression, ignoring any parenthesized expressions or type assertions.
+    pub fn inner_expression(&self) -> Option<Self> {
+        (match self {
+            Self::JsParenthesizedExpression(expression) => expression.expression().ok(),
+            Self::TsAsExpression(expression) => expression.expression().ok(),
+            Self::TsSatisfiesExpression(expression) => expression.expression().ok(),
+            Self::TsNonNullAssertionExpression(expression) => expression.expression().ok(),
+            Self::TsTypeAssertionExpression(expression) => expression.expression().ok(),
+            Self::TsInstantiationExpression(expression) => expression.expression().ok(),
+            _ => return Some(self.clone()),
+        })
+        .as_ref()
+        .and_then(Self::inner_expression)
     }
 }
 
@@ -2496,182 +2512,79 @@ mod test {
 
     #[test]
     fn matches_focused_test() {
-        let call_expression = extract_call_expression("fit('name', () => {});");
-        assert_eq!(
-            call_expression.callee().unwrap().contains_focused_test(),
-            Ok(true)
-        );
-
-        let call_expression = extract_call_expression("fdescribe('name', () => {});");
-        assert_eq!(
-            call_expression.callee().unwrap().contains_focused_test(),
-            Ok(true)
-        );
-
-        let call_expression = extract_call_expression("fit('name', () => {});");
-        assert_eq!(
-            call_expression.callee().unwrap().contains_focused_test(),
-            Ok(true)
-        );
-
-        let call_expression = extract_call_expression("describe.only('name', () => {});");
-        assert_eq!(
-            call_expression.callee().unwrap().contains_focused_test(),
-            Ok(true)
-        );
-
-        let call_expression = extract_call_expression("it.only('name', () => {});");
-        assert_eq!(
-            call_expression.callee().unwrap().contains_focused_test(),
-            Ok(true)
-        );
-
-        let call_expression = extract_call_expression("test.only('name', () => {});");
-        assert_eq!(
-            call_expression.callee().unwrap().contains_focused_test(),
-            Ok(true)
-        );
-
-        // Negative tests
-        let call_expression = extract_call_expression("test('name', () => {});");
-        assert_eq!(
-            call_expression.callee().unwrap().contains_focused_test(),
-            Ok(false)
-        );
-
-        let call_expression = extract_call_expression("describe('name', () => {});");
-        assert_eq!(
-            call_expression.callee().unwrap().contains_focused_test(),
-            Ok(false)
-        );
-
-        let call_expression = extract_call_expression("it('name', () => {});");
-        assert_eq!(
-            call_expression.callee().unwrap().contains_focused_test(),
-            Ok(false)
-        );
+        const VALID: &[&str] = &[
+            "fit('name', () => {});",
+            "fdescribe('name', () => {});",
+            "fit('name', () => {});",
+            "describe.only('name', () => {});",
+            "it.only('name', () => {});",
+            "test.only('name', () => {});",
+        ];
+        const INVALID: &[&str] = &[
+            "test('name', () => {});",
+            "describe('name', () => {});",
+            "it('name', () => {});",
+            "foo.fit()",
+        ];
+        for valid_case in VALID {
+            let call_expression = extract_call_expression(valid_case);
+            assert_eq!(
+                call_expression.callee().unwrap().contains_focused_test(),
+                Ok(true),
+                "Expected this case to be valid: {valid_case}"
+            );
+        }
+        for invalid_case in INVALID {
+            let call_expression = extract_call_expression(invalid_case);
+            assert_eq!(
+                call_expression.callee().unwrap().contains_focused_test(),
+                Ok(false),
+                "Expected this case to be invalid: {invalid_case}"
+            );
+        }
     }
 
     #[test]
     fn contains_only_each_pattern() {
-        let call_expression = extract_call_expression("test.only.each();");
-        assert_eq!(
-            call_expression
-                .callee()
-                .unwrap()
-                .contains_only_each_pattern(),
-            Ok(true)
-        );
-
-        let call_expression = extract_call_expression("describe.only.each();");
-        assert_eq!(
-            call_expression
-                .callee()
-                .unwrap()
-                .contains_only_each_pattern(),
-            Ok(true)
-        );
-
-        let call_expression = extract_call_expression("it.only.each();");
-        assert_eq!(
-            call_expression
-                .callee()
-                .unwrap()
-                .contains_only_each_pattern(),
-            Ok(true)
-        );
-
-        // Test with concurrent
-        let call_expression = extract_call_expression("test.concurrent.only.each();");
-        assert_eq!(
-            call_expression
-                .callee()
-                .unwrap()
-                .contains_only_each_pattern(),
-            Ok(true)
-        );
-
-        let call_expression = extract_call_expression("it.concurrent.only.each();");
-        assert_eq!(
-            call_expression
-                .callee()
-                .unwrap()
-                .contains_only_each_pattern(),
-            Ok(true)
-        );
-
-        // Negative tests - should return false (these are loops, but not focused / skipping other in the suite)
-        let call_expression = extract_call_expression("test.each();");
-        assert_eq!(
-            call_expression
-                .callee()
-                .unwrap()
-                .contains_only_each_pattern(),
-            Ok(false)
-        );
-
-        let call_expression = extract_call_expression("describe.each();");
-        assert_eq!(
-            call_expression
-                .callee()
-                .unwrap()
-                .contains_only_each_pattern(),
-            Ok(false)
-        );
-
-        let call_expression = extract_call_expression("it.each();");
-        assert_eq!(
-            call_expression
-                .callee()
-                .unwrap()
-                .contains_only_each_pattern(),
-            Ok(false)
-        );
-
-        let call_expression = extract_call_expression("test.skip.each();");
-        assert_eq!(
-            call_expression
-                .callee()
-                .unwrap()
-                .contains_only_each_pattern(),
-            Ok(false)
-        );
-
-        let call_expression = extract_call_expression("describe.skip.each();");
-        assert_eq!(
-            call_expression
-                .callee()
-                .unwrap()
-                .contains_only_each_pattern(),
-            Ok(false)
-        );
-
-        let call_expression = extract_call_expression("it.skip.each();");
-        assert_eq!(
-            call_expression
-                .callee()
-                .unwrap()
-                .contains_only_each_pattern(),
-            Ok(false)
-        );
-
-        let call_expression = extract_call_expression("test.only();");
-        assert_eq!(
-            call_expression
-                .callee()
-                .unwrap()
-                .contains_only_each_pattern(),
-            Ok(false)
-        );
-
-        let call_expression = extract_call_expression("describe.only();");
-        assert_eq!(
-            call_expression
-                .callee()
-                .unwrap()
-                .contains_only_each_pattern(),
-            Ok(false)
-        );
+        const VALID: &[&str] = &[
+            "test.only.each();",
+            "describe.only.each();",
+            "it.only.each();",
+            "test.concurrent.only.each();",
+            "it.concurrent.only.each();",
+        ];
+        const INVALID: &[&str] = &[
+            "test.each();",
+            "describe.each();",
+            "it.each();",
+            "test.skip.each();",
+            "describe.skip.each();",
+            "it.skip.each();",
+            "test.only();",
+            "describe.only();",
+        ];
+        for valid_case in VALID {
+            let call_expression = extract_call_expression(valid_case);
+            assert_eq!(
+                call_expression
+                    .callee()
+                    .unwrap()
+                    .contains_only_each_pattern(),
+                Ok(true),
+                "Expected this case to be valid: {valid_case}"
+            );
+        }
+        for invalid_case in INVALID {
+            let call_expression = extract_call_expression(invalid_case);
+            assert_eq!(
+                call_expression
+                    .callee()
+                    .unwrap()
+                    .contains_only_each_pattern(),
+                Ok(false),
+                "Expected this case to be invalid: {invalid_case}"
+            );
+        }
     }
 }
 

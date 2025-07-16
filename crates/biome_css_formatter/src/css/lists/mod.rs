@@ -22,6 +22,7 @@ pub(crate) mod page_at_rule_item_list;
 pub(crate) mod page_selector_list;
 pub(crate) mod page_selector_pseudo_list;
 pub(crate) mod parameter_list;
+pub(crate) mod pseudo_element_function_parameter_list;
 pub(crate) mod pseudo_value_list;
 pub(crate) mod relative_selector_list;
 pub(crate) mod rule_list;

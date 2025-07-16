@@ -18,7 +18,7 @@ use crate::{
         GLOBAL_FUNCTION_STRING_LITERAL_ID, GLOBAL_NUMBER_STRING_LITERAL_ID,
         GLOBAL_OBJECT_STRING_LITERAL_ID, GLOBAL_STRING_STRING_LITERAL_ID,
         GLOBAL_SYMBOL_STRING_LITERAL_ID, GLOBAL_TYPEOF_OPERATOR_RETURN_UNION_ID,
-        GLOBAL_UNDEFINED_STRING_LITERAL_ID,
+        GLOBAL_UNDEFINED_ID, GLOBAL_UNDEFINED_STRING_LITERAL_ID,
     },
 };
 
@@ -119,42 +119,6 @@ pub(super) fn flattened_expression(
                 })
             }
         }
-        TypeofExpression::LogicalAnd(expr) => {
-            let left = resolver.resolve_and_get(&expr.left)?;
-            let conditional = ConditionalType::from_resolved_data(left, resolver);
-            if conditional.is_falsy() {
-                Some(left.to_data())
-            } else if conditional.is_truthy() {
-                Some(TypeData::reference(expr.right.clone()))
-            } else if conditional.is_inferred() {
-                let left = reference_to_falsy_subset_of(&left.to_data(), resolver)
-                    .unwrap_or_else(|| expr.left.clone());
-                Some(TypeData::union_of(
-                    resolver,
-                    [left, expr.right.clone()].into(),
-                ))
-            } else {
-                None
-            }
-        }
-        TypeofExpression::LogicalOr(expr) => {
-            let left = resolver.resolve_and_get(&expr.left)?;
-            let conditional = ConditionalType::from_resolved_data(left, resolver);
-            if conditional.is_truthy() {
-                Some(left.to_data())
-            } else if conditional.is_falsy() {
-                Some(TypeData::reference(expr.right.clone()))
-            } else if conditional.is_inferred() {
-                let left = reference_to_truthy_subset_of(&left.to_data(), resolver)
-                    .unwrap_or_else(|| expr.left.clone());
-                Some(TypeData::union_of(
-                    resolver,
-                    [left, expr.right.clone()].into(),
-                ))
-            } else {
-                None
-            }
-        }
         TypeofExpression::Destructure(expr) => {
             let resolved = resolver.resolve_and_get(&expr.ty)?;
             match (resolved.as_raw_data(), &expr.destructure_field) {
@@ -221,6 +185,70 @@ pub(super) fn flattened_expression(
                 (_, DestructureField::RestExcept(excluded_names)) => {
                     Some(flattened_rest_object(resolver, resolved, excluded_names))
                 }
+            }
+        }
+        TypeofExpression::Index(expr) => {
+            let object = resolver.resolve_and_get(&expr.object)?;
+            let element_ty = object
+                .to_data()
+                .find_element_type_at_index(object.resolver_id(), resolver, expr.index)
+                .map_or_else(TypeData::unknown, ResolvedTypeData::to_data);
+            Some(element_ty)
+        }
+        TypeofExpression::IterableValueOf(expr) => {
+            let ty = resolver.resolve_and_get(&expr.ty)?;
+            match ty.as_raw_data() {
+                TypeData::InstanceOf(instance)
+                    if instance.ty == GLOBAL_ARRAY_ID.into()
+                        && instance.has_known_type_parameters() =>
+                {
+                    instance
+                        .type_parameters
+                        .first()
+                        .map(|param| ty.apply_module_id_to_reference(param))
+                        .and_then(|param| resolver.resolve_and_get(&param))
+                        .map(ResolvedTypeData::to_data)
+                }
+                _ => {
+                    // TODO: Handle other iterable types
+                    None
+                }
+            }
+        }
+        TypeofExpression::LogicalAnd(expr) => {
+            let left = resolver.resolve_and_get(&expr.left)?;
+            let conditional = ConditionalType::from_resolved_data(left, resolver);
+            if conditional.is_falsy() {
+                Some(left.to_data())
+            } else if conditional.is_truthy() {
+                Some(TypeData::reference(expr.right.clone()))
+            } else if conditional.is_inferred() {
+                let left = reference_to_falsy_subset_of(&left.to_data(), resolver)
+                    .unwrap_or_else(|| expr.left.clone());
+                Some(TypeData::union_of(
+                    resolver,
+                    [left, expr.right.clone()].into(),
+                ))
+            } else {
+                None
+            }
+        }
+        TypeofExpression::LogicalOr(expr) => {
+            let left = resolver.resolve_and_get(&expr.left)?;
+            let conditional = ConditionalType::from_resolved_data(left, resolver);
+            if conditional.is_truthy() {
+                Some(left.to_data())
+            } else if conditional.is_falsy() {
+                Some(TypeData::reference(expr.right.clone()))
+            } else if conditional.is_inferred() {
+                let left = reference_to_truthy_subset_of(&left.to_data(), resolver)
+                    .unwrap_or_else(|| expr.left.clone());
+                Some(TypeData::union_of(
+                    resolver,
+                    [left, expr.right.clone()].into(),
+                ))
+            } else {
+                None
             }
         }
         TypeofExpression::New(expr) => {
@@ -312,7 +340,11 @@ pub(super) fn flattened_expression(
                         .collect();
                     let types = types
                         .into_iter()
-                        .map(|variant| {
+                        .filter_map(|variant| {
+                            if variant == GLOBAL_UNDEFINED_ID.into() {
+                                return None;
+                            }
+
                             // Resolve and flatten the type member for each variant.
                             let variant = TypeData::TypeofExpression(Box::new(
                                 TypeofExpression::StaticMember(TypeofStaticMemberExpression {
@@ -321,7 +353,7 @@ pub(super) fn flattened_expression(
                                 }),
                             ));
 
-                            resolver.reference_to_owned_data(variant)
+                            Some(resolver.reference_to_owned_data(variant))
                         })
                         .collect();
 
@@ -470,7 +502,7 @@ fn infer_generic_arg(
     // If the parameter's type directly references the target, we replace all
     // the target's references to the generic with references to the concrete
     // argument type.
-    if param.ty == *target_reference {
+    if param.ty() == target_reference {
         target.update_all_references(|reference| {
             if reference == generic_reference {
                 *reference = concrete_reference.clone();
@@ -480,7 +512,7 @@ fn infer_generic_arg(
     }
 
     // Otherwise, we proceed by looking into the parameter type itself...
-    let resolved_param = resolver.resolve_and_get(&param.ty)?;
+    let resolved_param = resolver.resolve_and_get(param.ty())?;
 
     // If the parameter type is a function, ie. callback, we try to infer from
     // the callback's return type.

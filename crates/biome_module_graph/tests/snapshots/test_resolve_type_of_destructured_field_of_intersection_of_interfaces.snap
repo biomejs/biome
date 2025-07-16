@@ -104,9 +104,9 @@ Module TypeId(17) => instanceof Promise<Module(0) TypeId(16)>
 Module TypeId(18) => sync Function {
   accepts: {
     params: [
-      required key: Module(0) TypeId(22) (bindings: key:Module(0) TypeId(22))
-      optional data: Module(0) TypeId(12) (bindings: data:Module(0) TypeId(12))
-      optional opts: Module(0) TypeId(14) (bindings: opts:Module(0) TypeId(14))
+      required key: Module(0) TypeId(22)
+      optional data: Module(0) TypeId(12)
+      optional opts: Module(0) TypeId(14)
     ]
     type_args: []
   }
@@ -184,9 +184,9 @@ Full TypeId(15) => instanceof Promise<Module(0) TypeId(16)>
 Full TypeId(16) => sync Function {
   accepts: {
     params: [
-      required key: Module(0) TypeId(22) (bindings: key:Module(0) TypeId(22))
-      optional data: Module(0) TypeId(12) (bindings: data:Module(0) TypeId(12))
-      optional opts: Module(0) TypeId(14) (bindings: opts:Module(0) TypeId(14))
+      required key: Module(0) TypeId(22)
+      optional data: Module(0) TypeId(12)
+      optional opts: Module(0) TypeId(14)
     ]
     type_args: []
   }

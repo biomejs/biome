@@ -10,6 +10,7 @@ impl FormatRule<AnyCssPageAtRuleItem> for FormatAnyCssPageAtRuleItem {
         match node {
             AnyCssPageAtRuleItem::CssAtRule(node) => node.format().fmt(f),
             AnyCssPageAtRuleItem::CssDeclarationWithSemicolon(node) => node.format().fmt(f),
+            AnyCssPageAtRuleItem::CssEmptyDeclaration(node) => node.format().fmt(f),
             AnyCssPageAtRuleItem::CssMarginAtRule(node) => node.format().fmt(f),
         }
     }

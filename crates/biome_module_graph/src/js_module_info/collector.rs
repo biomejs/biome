@@ -1,15 +1,11 @@
-use std::{
-    borrow::Cow,
-    collections::{BTreeMap, BTreeSet},
-    sync::Arc,
-};
+use std::{borrow::Cow, collections::BTreeSet, sync::Arc};
 
 use biome_js_semantic::{SemanticEvent, SemanticEventExtractor};
 use biome_js_syntax::{
     AnyJsCombinedSpecifier, AnyJsDeclaration, AnyJsExportDefaultDeclaration, AnyJsExpression,
-    AnyJsImportClause, JsFormalParameter, JsIdentifierBinding, JsSyntaxKind, JsSyntaxNode,
-    JsSyntaxToken, JsVariableDeclaration, TsIdentifierBinding, TsTypeParameter,
-    TsTypeParameterName, inner_string_text,
+    AnyJsImportClause, JsForVariableDeclaration, JsFormalParameter, JsIdentifierBinding,
+    JsSyntaxKind, JsSyntaxNode, JsSyntaxToken, JsVariableDeclaration, TsIdentifierBinding,
+    TsTypeParameter, TsTypeParameterName, inner_string_text,
 };
 use biome_js_type_info::{
     BindingId, FunctionParameter, GLOBAL_RESOLVER, GLOBAL_UNKNOWN_ID, GenericTypeParameter,
@@ -19,6 +15,7 @@ use biome_js_type_info::{
 };
 use biome_jsdoc_comment::JsdocComment;
 use biome_rowan::{AstNode, Text, TextRange, TextSize, TokenText};
+use indexmap::IndexMap;
 use rust_lapper::{Interval, Lapper};
 use rustc_hash::FxHashMap;
 
@@ -77,11 +74,11 @@ pub(super) struct JsModuleInfoCollector {
 
     /// Map with all static import paths, from the source specifier to the
     /// resolved path.
-    static_import_paths: BTreeMap<Text, ResolvedPath>,
+    static_import_paths: IndexMap<Text, ResolvedPath>,
 
     /// Map with all dynamic import paths, from the import source to the
     /// resolved path.
-    dynamic_import_paths: BTreeMap<Text, ResolvedPath>,
+    dynamic_import_paths: IndexMap<Text, ResolvedPath>,
 
     /// All collected exports.
     ///
@@ -96,7 +93,7 @@ pub(super) struct JsModuleInfoCollector {
     types: TypeStore,
 
     /// Static imports mapped from the local name of the binding being imported.
-    static_imports: BTreeMap<Text, JsImport>,
+    static_imports: IndexMap<Text, JsImport>,
 }
 
 /// Intermediary representation for an exported symbol.
@@ -167,6 +164,13 @@ impl JsModuleInfoCollector {
             };
 
             self.parsed_expressions.insert(range, resolved_id);
+        } else if let Some(decl) = JsForVariableDeclaration::cast_ref(node) {
+            let scope_id = *self.scope_stack.last().expect("there must be a scope");
+            let type_bindings =
+                TypeData::typed_bindings_from_js_for_statement(self, scope_id, &decl)
+                    .unwrap_or_default();
+            self.variable_declarations
+                .insert(decl.syntax().clone(), type_bindings);
         } else if let Some(param) = JsFormalParameter::cast_ref(node) {
             let scope_id = *self.scope_stack.last().expect("there must be a scope");
             let parsed_param = FunctionParameter::from_js_formal_parameter(self, scope_id, &param);
@@ -512,7 +516,7 @@ impl JsModuleInfoCollector {
         }
     }
 
-    fn finalise(&mut self) -> (BTreeMap<Text, JsExport>, Lapper<u32, ScopeId>) {
+    fn finalise(&mut self) -> (IndexMap<Text, JsExport>, Lapper<u32, ScopeId>) {
         let scope_by_range = Lapper::new(
             self.scope_range_by_start
                 .iter()
@@ -568,14 +572,26 @@ impl JsModuleInfoCollector {
                 let data =
                     TypeData::from_any_js_export_default_declaration(self, scope_id, &declaration);
                 return self.reference_to_owned_data(data);
+            } else if let Some(typed_bindings) = JsForVariableDeclaration::cast_ref(&ancestor)
+                .and_then(|decl| self.variable_declarations.get(decl.syntax()))
+            {
+                return typed_bindings
+                    .iter()
+                    .find_map(|(name, ty)| (name == binding_name).then(|| ty.clone()))
+                    .unwrap_or_default();
             } else if let Some(param) = JsFormalParameter::cast_ref(&ancestor)
                 .and_then(|param| self.formal_parameters.get(param.syntax()))
             {
-                return param
-                    .bindings
-                    .iter()
-                    .find_map(|binding| (binding.name == *binding_name).then(|| binding.ty.clone()))
-                    .unwrap_or_default();
+                return match param {
+                    FunctionParameter::Named(named) => named.ty.clone(),
+                    FunctionParameter::Pattern(pattern) => pattern
+                        .bindings
+                        .iter()
+                        .find_map(|binding| {
+                            (binding.name == *binding_name).then(|| binding.ty.clone())
+                        })
+                        .unwrap_or_default(),
+                };
             } else if let Some(param) = TsTypeParameter::cast_ref(&ancestor) {
                 return match GenericTypeParameter::from_ts_type_parameter(self, scope_id, &param) {
                     Some(generic) => self.reference_to_owned_data(TypeData::from(generic)),
@@ -748,8 +764,8 @@ impl JsModuleInfoCollector {
         }
     }
 
-    fn collect_exports(&mut self) -> BTreeMap<Text, JsExport> {
-        let mut finalised_exports = BTreeMap::new();
+    fn collect_exports(&mut self) -> IndexMap<Text, JsExport> {
+        let mut finalised_exports = IndexMap::new();
 
         let exports = std::mem::take(&mut self.exports);
         for export in exports {

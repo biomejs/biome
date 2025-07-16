@@ -11,9 +11,9 @@ use biome_js_syntax::AnyJsExpression;
 use biome_rowan::Text;
 
 use crate::{
-    Class, Function, FunctionParameter, GenericTypeParameter, Literal, Resolvable,
-    ResolvedTypeData, ResolvedTypeId, ReturnType, ScopeId, TypeData, TypeId, TypeInstance,
-    TypeMember, TypeMemberKind, TypeReference, TypeReferenceQualifier, TypeResolver,
+    Class, Function, FunctionParameter, GenericTypeParameter, Literal, PatternFunctionParameter,
+    Resolvable, ResolvedTypeData, ResolvedTypeId, ReturnType, ScopeId, TypeData, TypeId,
+    TypeInstance, TypeMember, TypeMemberKind, TypeReference, TypeReferenceQualifier, TypeResolver,
     TypeResolverLevel, TypeStore, Union, flattening::MAX_FLATTEN_DEPTH,
 };
 
@@ -191,13 +191,12 @@ impl Default for GlobalsResolver {
                     is_async: false,
                     type_parameters,
                     name: Some(Text::Static(global_type_name(id))),
-                    parameters: [FunctionParameter {
-                        name: None,
+                    parameters: [FunctionParameter::Pattern(PatternFunctionParameter {
                         bindings: Default::default(),
                         is_optional: false,
                         is_rest: false,
                         ty: ResolvedTypeId::new(TypeResolverLevel::Global, param_type_id).into(),
-                    }]
+                    })]
                     .into(),
                     return_type: ReturnType::Type(
                         ResolvedTypeId::new(TypeResolverLevel::Global, return_type_id).into(),
@@ -292,13 +291,12 @@ impl Default for GlobalsResolver {
                 is_async: false,
                 type_parameters: Default::default(),
                 name: Some(Text::Static(global_type_name(PROMISE_CONSTRUCTOR_ID))),
-                parameters: [FunctionParameter {
-                    name: None,
+                parameters: [FunctionParameter::Pattern(PatternFunctionParameter {
                     bindings: Default::default(),
                     is_optional: false,
                     is_rest: false,
                     ty: ResolvedTypeId::new(GLOBAL_LEVEL, VOID_CALLBACK_ID).into(),
-                }]
+                })]
                 .into(),
                 return_type: ReturnType::Type(GLOBAL_VOID_ID.into()),
             }),
@@ -351,13 +349,12 @@ impl Default for GlobalsResolver {
                 is_async: false,
                 type_parameters: Default::default(),
                 name: Some(Text::Static(global_type_name(MAP_CALLBACK_ID))),
-                parameters: [FunctionParameter {
-                    name: None,
+                parameters: [FunctionParameter::Pattern(PatternFunctionParameter {
                     ty: GLOBAL_U_ID.into(),
                     bindings: Default::default(),
                     is_optional: false,
                     is_rest: false,
-                }]
+                })]
                 .into(),
                 return_type: ReturnType::Type(GLOBAL_U_ID.into()),
             }),

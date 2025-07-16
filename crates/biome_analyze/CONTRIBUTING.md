@@ -32,7 +32,7 @@ The analyzer allows implementors to create **three different** types of rules:
         * [Representing the rule options in Rust](#representing-the-rule-options-in-rust)
         * [Retrieving the rule options within a Rule](#retrieving-the-rule-options-within-a-rule)
         * [Implementing JSON deserialization/serialization support](#implementing-json-deserializationserialization-support)
-        * [Testing & Documenting Rule Options](#testing-documenting-rule-options)
+        * [Testing & Documenting Rule Options](#testing--documenting-rule-options)
       - [Navigating the CST (Concrete Syntax Tree)](#navigating-the-cst-concrete-syntax-tree)
       - [Querying multiple node types via `declare_node_union!`](#querying-multiple-node-types-via-declare_node_union)
       - [Semantic Model](#semantic-model)
@@ -217,7 +217,7 @@ New rules **must** be placed inside the `nursery` group. This group is meant as 
 Let's say we want to create a new **lint** rule called `useMyRuleName`, follow these steps:
 
 1. **Generate the code for your rule** by running this command
-   _(Hint: Replace `useMyRuleName` with your custom name as recommended by the [naming convention](#guideline-naming-convention-for-rules))_:
+   _(Hint: Replace `useMyRuleName` with your custom name as recommended by the [naming convention](#naming-conventions-for-rules))_:
 
    ```shell
    # Example: Create a new JS lint rule
@@ -327,7 +327,7 @@ Let's say we want to create a new **lint** rule called `useMyRuleName`, follow t
 
 6. Implement the `diagnostic` function to define what the user will see.
 
-   Follow the [guidelines & pillars](#explain-a-rule-to-the-user) when writing the messages.
+   Follow the [guidelines & pillars](#what-a-rule-should-say-to-the-user) when writing the messages.
    Please also keep [Biome's technical principals](https://biomejs.dev/internals/philosophy/#technical) in mind when writing those messages and implementing your diagnostic rule.
 
    ```rust
@@ -348,7 +348,7 @@ Let's say we want to create a new **lint** rule called `useMyRuleName`, follow t
    }
    ```
 
-6. Optional: Implement the `action` function if your rule is able to provide a [code action](#code-actions):
+7. Optional: Implement the `action` function if your rule is able to provide a [code action](#code-actions):
 
    ```rust
    impl Rule for UseAwesomeTricks {
@@ -1119,7 +1119,7 @@ The documentation needs to adhere to the following rules:
 
 - **Hiding lines**
 
-  Although usually not necessary, it is possible to prevent code lines from being shown in the output by prefixing them with `# `.
+  Although usually not necessary, it is possible to prevent code lines from being shown in the output by prefixing them with `#`.
 
   You should usually prefer to show a concise but complete sample snippet instead.
 

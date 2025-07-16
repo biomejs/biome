@@ -582,16 +582,7 @@ trait ExpressionExt {
 
 impl ExpressionExt for AnyJsExpression {
     fn inner_expression(&self) -> Option<Self> {
-        (match self {
-            Self::JsParenthesizedExpression(expression) => expression.expression().ok(),
-            Self::TsAsExpression(expression) => expression.expression().ok(),
-            Self::TsSatisfiesExpression(expression) => expression.expression().ok(),
-            Self::TsNonNullAssertionExpression(expression) => expression.expression().ok(),
-            Self::TsTypeAssertionExpression(expression) => expression.expression().ok(),
-            _ => return Some(self.clone()),
-        })
-        .as_ref()
-        .and_then(Self::inner_expression)
+        Self::inner_expression(self)
     }
 
     fn wrap_in_type_converter(&self, name: &'static str) -> Self {

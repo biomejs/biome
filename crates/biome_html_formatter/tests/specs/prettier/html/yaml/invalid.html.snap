@@ -22,24 +22,44 @@ invalid:
 ```diff
 --- Prettier
 +++ Biome
-@@ -1,7 +1,4 @@
-----
--    invalid:
--invalid:
-----
-+--- invalid: invalid: ---
- 
+@@ -2,7 +2,6 @@
+     invalid:
+ invalid:
+ ---
+-
  <html>
    <head></head>
+   <body></body>
 ```
 
 # Output
 
 ```html
---- invalid: invalid: ---
-
+---
+    invalid:
+invalid:
+---
 <html>
   <head></head>
   <body></body>
 </html>
+```
+
+# Errors
+```
+invalid.html:1:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Frontmatter is only valid inside Astro files.
+  
+  > 1 │ ---
+      │ ^^^
+  > 2 │     invalid:
+  > 3 │ invalid:
+  > 4 │ ---
+      │ ^^^
+    5 │ 
+  
+  i Remove it or rename the file to have the .astro extension.
+  
+
 ```
