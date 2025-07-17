@@ -40,6 +40,7 @@ HtmlBogus = SyntaxElement*
 HtmlBogusElement = SyntaxElement*
 HtmlBogusAttribute = SyntaxElement*
 AstroBogusFrontmatter = SyntaxElement*
+HtmlBogusTextExpression = SyntaxElement*
 
 HtmlRoot =
 	bom: 'UNICODE_BOM'?
@@ -79,20 +80,21 @@ AnyHtmlContent =
 	| AnyHtmlTextExpression
 
 AnyHtmlTextExpression =
-	HtmlTextExpression
-	| SvelteTextExpression
+	HtmlDoubleTextExpression
+	| HtmlSingleTextExpression
+	| HtmlBogusTextExpression
 
 
 // {{ expression }}
 // ^^^^^^^^^^^^^^^^
-HtmlTextExpression =
+HtmlDoubleTextExpression =
 	'{{'
 	expression: 'html_literal'
 	'}}'
 
 // {expression}
 // ^^^^^^^^^^^^
-SvelteTextExpression =
+HtmlSingleTextExpression =
 	'{'
 	expression: 'html_literal'
 	'}'
@@ -156,8 +158,11 @@ HtmlAttributeList = AnyHtmlAttribute*
 
 AnyHtmlAttribute =
 	HtmlAttribute
+	| HtmlDoubleTextExpression
 	| HtmlBogusAttribute
 
+// <a href="">
+//    ^^^^^^^
 HtmlAttribute =
 	name: HtmlAttributeName
 	initializer: HtmlAttributeInitializerClause?
@@ -167,7 +172,13 @@ HtmlAttribute =
 //        ^^^
 HtmlAttributeInitializerClause =
 	'='
-	value: HtmlString
+	value: AnyHtmlAttributeInitializer
+
+
+AnyHtmlAttributeInitializer =
+	HtmlString
+	| HtmlSingleTextExpression
+
 
 
 HtmlString = value: 'html_string_literal'

@@ -7,7 +7,7 @@ use crate::syntax::parse_error::*;
 use crate::token_source::{HtmlEmbeddedLanguage, HtmlLexContext};
 use biome_console::markup;
 use biome_html_syntax::HtmlSyntaxKind::*;
-use biome_html_syntax::{HtmlSyntaxKind, HtmlVariant, T};
+use biome_html_syntax::{HtmlSyntaxKind, HtmlTextExpressions, HtmlVariant, T};
 use biome_parser::Parser;
 use biome_parser::parse_lists::ParseNodeList;
 use biome_parser::parse_recovery::{ParseRecoveryTokenSet, RecoveryResult};
@@ -16,10 +16,12 @@ use biome_parser::prelude::ParsedSyntax::Absent;
 use biome_parser::prelude::*;
 
 pub(crate) enum HtmlSyntaxFeatures {
-    /// Exclusive to those documents that support front matter at the top of the file
-    Frontmatter,
-    /// Exclusive to those documents that support text expressions
-    TextExpressions,
+    /// Exclusive to those documents that support Astro
+    Astro,
+    /// Exclusive to those documents that support text expressions with {{ }}
+    DoubleTextExpressions,
+    /// Exclusive to those documents that support text expressions with { }
+    SingleTextExpressions,
 }
 
 impl SyntaxFeature for HtmlSyntaxFeatures {
@@ -27,10 +29,19 @@ impl SyntaxFeature for HtmlSyntaxFeatures {
 
     fn is_supported(&self, p: &HtmlParser) -> bool {
         match self {
-            Self::Frontmatter => p.file_source().is_astro(),
-            Self::TextExpressions => match p.file_source().variant() {
-                HtmlVariant::Standard | HtmlVariant::Astro | HtmlVariant::Svelte => false,
+            Self::Astro => p.file_source().is_astro(),
+            Self::DoubleTextExpressions => match p.file_source().variant() {
+                HtmlVariant::Standard => {
+                    p.file_source().text_expressions() == Some(&HtmlTextExpressions::Double)
+                }
+                HtmlVariant::Astro | HtmlVariant::Svelte => false,
                 HtmlVariant::Vue => true,
+            },
+            Self::SingleTextExpressions => match p.file_source().variant() {
+                HtmlVariant::Standard => false,
+                HtmlVariant::Astro => true,
+                HtmlVariant::Vue => false,
+                HtmlVariant::Svelte => true,
             },
         }
     }
@@ -53,7 +64,7 @@ pub(crate) fn parse_root(p: &mut HtmlParser) {
     p.eat(UNICODE_BOM);
 
     if p.at(T![---]) {
-        HtmlSyntaxFeatures::Frontmatter
+        HtmlSyntaxFeatures::Astro
             .parse_exclusive_syntax(
                 p,
                 |p| parse_astro_fence(p),
@@ -204,12 +215,17 @@ impl ParseNodeList for ElementList {
             T![<!--] => parse_comment(p),
             T!["<![CDATA["] => parse_cdata_section(p),
             T![<] => parse_element(p),
-            T!["{{"] => parse_text_expression(p).or_else(|| {
+            T!["{{"] => parse_double_text_expression(p).or_else(|| {
                 let m = p.start();
                 p.bump_remap_with_context(HTML_LITERAL, HtmlLexContext::OutsideTag);
                 Present(m.complete(p, HTML_CONTENT))
             }),
-            T!["}}"] => {
+            T!['{'] => parse_single_text_expression(p).or_else(|| {
+                let m = p.start();
+                p.bump_remap_with_context(HTML_LITERAL, HtmlLexContext::OutsideTag);
+                Present(m.complete(p, HTML_CONTENT))
+            }),
+            T!["}}"] | T!['}'] => {
                 // The closing text expression should be handled by other functions.
                 // If we're here, we assume that text expressions are enabled and
                 // we remap to HTML_LITERAL
@@ -255,8 +271,10 @@ impl ParseNodeList for AttributeList {
     const LIST_KIND: Self::Kind = HTML_ATTRIBUTE_LIST;
 
     fn parse_element(&mut self, p: &mut Self::Parser<'_>) -> ParsedSyntax {
-        // Absent
-        parse_attribute(p)
+        match p.cur() {
+            T!["{{"] => parse_double_text_expression(p).or_else(|| parse_attribute(p)),
+            _ => parse_attribute(p),
+        }
     }
 
     fn is_at_list_end(&self, p: &mut Self::Parser<'_>) -> bool {
@@ -277,16 +295,29 @@ impl ParseNodeList for AttributeList {
 }
 
 fn parse_attribute(p: &mut HtmlParser) -> ParsedSyntax {
-    if !p.at(HTML_LITERAL) {
+    if !p.at(HTML_LITERAL) && !p.at(T!["{{"]) {
         return Absent;
     }
+
     let m = p.start();
-    parse_literal(p, HTML_ATTRIBUTE_NAME).or_add_diagnostic(p, expected_attribute);
-    if p.at(T![=]) {
-        parse_attribute_initializer(p).ok();
-        Present(m.complete(p, HTML_ATTRIBUTE))
+    if p.at(T!["{{"]) {
+        if HtmlSyntaxFeatures::DoubleTextExpressions.is_supported(p) {
+            parse_double_text_expression(p)
+        } else {
+            HtmlSyntaxFeatures::DoubleTextExpressions.parse_exclusive_syntax(
+                p,
+                parse_double_text_expression,
+                |p, marker| p.err_builder("Unsupported syntax", marker.range(p)),
+            )
+        }
     } else {
-        Present(m.complete(p, HTML_ATTRIBUTE))
+        parse_literal(p, HTML_ATTRIBUTE_NAME).or_add_diagnostic(p, expected_attribute);
+        if p.at(T![=]) {
+            parse_attribute_initializer(p).ok();
+            Present(m.complete(p, HTML_ATTRIBUTE))
+        } else {
+            Present(m.complete(p, HTML_ATTRIBUTE))
+        }
     }
 }
 
@@ -318,7 +349,41 @@ fn parse_attribute_initializer(p: &mut HtmlParser) -> ParsedSyntax {
     }
     let m = p.start();
     p.bump_with_context(T![=], HtmlLexContext::AttributeValue);
-    parse_attribute_string_literal(p).or_add_diagnostic(p, expected_initializer);
+    if p.at(T!['{']) {
+        HtmlSyntaxFeatures::SingleTextExpressions
+            .parse_exclusive_syntax(
+                p,
+                |p| parse_single_text_expression(p),
+                |p, m| {
+                    p.err_builder("Expressions are only valid inside Astro files.", m.range(p))
+                        .with_hint("Remove it or rename the file to have the .astro extension.")
+                },
+            )
+            .or_recover_with_token_set(
+                p,
+                &ParseRecoveryTokenSet::new(HTML_BOGUS_TEXT_EXPRESSION, RECOVER_ATTRIBUTE_LIST),
+                expected_attribute,
+            )
+            .ok();
+    } else if p.at(T!["{{"]) {
+        HtmlSyntaxFeatures::DoubleTextExpressions
+            .parse_exclusive_syntax(
+                p,
+                |p| parse_double_text_expression(p),
+                |p, m| {
+                    p.err_builder("Text expressions aren't supported.", m.range(p))
+                        .with_hint("Remove it or add the option.")
+                },
+            )
+            .or_recover_with_token_set(
+                p,
+                &ParseRecoveryTokenSet::new(HTML_BOGUS_TEXT_EXPRESSION, RECOVER_ATTRIBUTE_LIST),
+                expected_attribute,
+            )
+            .ok();
+    } else {
+        parse_attribute_string_literal(p).or_add_diagnostic(p, expected_initializer);
+    }
     Present(m.complete(p, HTML_ATTRIBUTE_INITIALIZER_CLAUSE))
 }
 
@@ -353,19 +418,19 @@ fn parse_cdata_section(p: &mut HtmlParser) -> ParsedSyntax {
 /// ```vue
 /// {{ expression }}
 /// ```
-fn parse_text_expression(p: &mut HtmlParser) -> ParsedSyntax {
-    if !HtmlSyntaxFeatures::TextExpressions.is_supported(p) {
+fn parse_double_text_expression(p: &mut HtmlParser) -> ParsedSyntax {
+    if !HtmlSyntaxFeatures::DoubleTextExpressions.is_supported(p) {
         return Absent;
     }
-    if !is_at_l_text_expression(p) {
+    if !is_at_opening_double_expression(p) {
         return Absent;
     }
     let m = p.start();
     let range = p.cur_range();
-    p.bump_with_context(T!["{{"], HtmlLexContext::OutsideTag);
+    p.bump_with_context(T!["{{"], HtmlLexContext::TextExpression);
 
     while p.at(HTML_LITERAL) {
-        p.bump_with_context(HTML_LITERAL, HtmlLexContext::OutsideTag);
+        p.bump_with_context(HTML_LITERAL, HtmlLexContext::TextExpression);
     }
     if p.at(T![<]) && !p.at(EOF) {
         p.error(
@@ -375,10 +440,29 @@ fn parse_text_expression(p: &mut HtmlParser) -> ParsedSyntax {
         m.abandon(p);
         return Absent;
     }
-    p.expect_with_context(T!["}}"], HtmlLexContext::OutsideTag);
-    Present(m.complete(p, HTML_TEXT_EXPRESSION))
+    p.expect(T!["}}"]);
+    Present(m.complete(p, HTML_DOUBLE_TEXT_EXPRESSION))
 }
 
-pub(crate) fn is_at_l_text_expression(p: &mut HtmlParser) -> bool {
+pub(crate) fn is_at_opening_double_expression(p: &mut HtmlParser) -> bool {
     p.at(T!["{{"])
+}
+
+pub(crate) fn parse_single_text_expression(p: &mut HtmlParser) -> ParsedSyntax {
+    if !p.at(T!['{']) {
+        return Absent;
+    }
+    let m = p.start();
+
+    p.bump_with_context(T!['{'], HtmlLexContext::TextExpression);
+
+    while p.at(HTML_LITERAL) {
+        p.bump_with_context(HTML_LITERAL, HtmlLexContext::TextExpression);
+    }
+
+    p.expect(T!['}']);
+
+    let c = m.complete(p, HTML_SINGLE_TEXT_EXPRESSION);
+
+    Present(c)
 }
