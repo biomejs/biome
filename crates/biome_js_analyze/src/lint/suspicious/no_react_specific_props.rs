@@ -36,7 +36,7 @@ declare_lint_rule! {
         recommended: true,
         severity: Severity::Warning,
         fix_kind: FixKind::Safe,
-        domains: &[RuleDomain::Solid, RuleDomain::Qwik],
+        domains: &[RuleDomain::Solid],
     }
 }
 

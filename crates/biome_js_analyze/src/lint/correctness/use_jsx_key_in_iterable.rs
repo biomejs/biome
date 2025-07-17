@@ -65,7 +65,7 @@ declare_lint_rule! {
         sources: &[RuleSource::EslintReact("jsx-key").same()],
         recommended: true,
         severity: Severity::Error,
-        domains: &[RuleDomain::React, RuleDomain::Qwik],
+        domains: &[RuleDomain::React],
     }
 }
 

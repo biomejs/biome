@@ -36,13 +36,13 @@ Imports {
 ## Registered types
 
 ```
-Module TypeId(0) => Module(0) TypeId(2).initialised
+Module TypeId(0) => unknown
 
-Module TypeId(1) => boolean
+Module TypeId(1) => Module(0) TypeId(0).initialised
 
-Module TypeId(2) => instanceof Module(0) TypeId(10)
+Module TypeId(2) => boolean
 
-Module TypeId(3) => Module(0) TypeId(2).initialise
+Module TypeId(3) => Module(0) TypeId(0).initialise
 
 Module TypeId(4) => Call Module(0) TypeId(3)(No parameters)
 

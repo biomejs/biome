@@ -99,28 +99,3 @@ data.map((x) => {
 			return <div>{x.value}</div> // no key
 	}
 })
-
-
-import { component$ } from "@builder.io/qwik";
-
-export default component$(() => {
-  const items = ["apple", "banana", "cherry"];
-
-  return (
-    <div>
-      {items.map(item => <li>{item}</li>)}
-      
-      {items.forEach(item => <span>{item}</span>)}
-      
-      {items.filter(item => item.length > 5).map(item => <div>{item}</div>)}
-      
-      {items.map(category => 
-        category.split('').map(letter => <span>{letter}</span>)
-      )}
-      
-      {Object.keys({a: 1, b: 2}).map(key => <div>{key}</div>)}
-      
-      {[1, 2, 3].map(num => <p>{num}</p>)}
-    </div>
-  );
-});
