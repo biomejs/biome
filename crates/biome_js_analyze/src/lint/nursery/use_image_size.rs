@@ -8,7 +8,7 @@ use biome_rowan::AstNode;
 use biome_rule_options::use_image_size::UseImageSizeOptions;
 
 declare_lint_rule! {
-    /// For performance reasons, always provide width and height attributes for `<img>` elements; it will help to prevent layout shifts.
+    /// Enforces that `<img>` elements have both width and height attributes.
     ///
     /// This rule is intended for use in Qwik applications to ensure `<img>` elements have width and height attributes.
     ///
@@ -45,7 +45,7 @@ declare_lint_rule! {
         version: "next",
         name: "useImageSize",
         language: "jsx",
-        sources: &[RuleSource::EslintQwik("jsx-img").inspired()],
+        sources: &[RuleSource::EslintQwik("jsx-img").same()],
         recommended: true,
         severity: Severity::Warning,
         fix_kind: FixKind::None,
@@ -59,7 +59,7 @@ pub enum JsxImgDiagnosticKind {
 
 impl Rule for UseImageSize {
     type Query = Ast<AnyJsxElement>;
-    type State = (biome_rowan::TextRange, JsxImgDiagnosticKind);
+    type State = JsxImgDiagnosticKind;
     type Signals = Option<Self::State>;
     type Options = UseImageSizeOptions;
 
@@ -72,19 +72,19 @@ impl Rule for UseImageSize {
         let has_width = element.find_attribute_by_name("width").is_some();
         let has_height = element.find_attribute_by_name("height").is_some();
         if !has_width || !has_height {
-            return Some((element.range(), JsxImgDiagnosticKind::MissingWidthOrHeight));
+            return Some(JsxImgDiagnosticKind::MissingWidthOrHeight);
         }
         None
     }
 
     fn diagnostic(
-        _: &biome_analyze::context::RuleContext<Self>,
-        (range, kind): &Self::State,
+        ctx: &biome_analyze::context::RuleContext<Self>,
+        kind: &Self::State,
     ) -> Option<RuleDiagnostic> {
         match kind {
             JsxImgDiagnosticKind::MissingWidthOrHeight => Some(RuleDiagnostic::new(
                 rule_category!(),
-                range,
+                ctx.query().range(),
                 markup!(
                     "<Emphasis>img</Emphasis> elements should always have both width and height attributes to prevent layout shifts and improve performance."
                 ),

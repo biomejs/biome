@@ -8,10 +8,10 @@ use biome_rowan::TextRange;
 use biome_rule_options::no_qwik_use_visible_task::NoQwikUseVisibleTaskOptions;
 
 declare_lint_rule! {
-    /// Disallow useVisibleTask$() functions in Qwik components.
+    /// Disallow `useVisibleTask$()` functions in Qwik components.
     ///
     /// This rule is intended for use in Qwik applications to prevent the use of
-    /// useVisibleTask$() functions which are not recommended in Qwik.
+    /// `useVisibleTask$()` functions which are not recommended in Qwik.
     ///
     /// ## Examples
     ///
@@ -34,8 +34,8 @@ declare_lint_rule! {
     pub NoQwikUseVisibleTask {
         version: "next",
         name: "noQwikUseVisibleTask",
-        language: "js",
-        sources: &[RuleSource::EslintQwik("no-use-visible-task").inspired()],
+        language: "jsx",
+        sources: &[RuleSource::EslintQwik("no-use-visible-task").same()],
         recommended: true,
         severity: Severity::Warning,
         domains: &[RuleDomain::Qwik],
@@ -68,10 +68,7 @@ impl Rule for NoQwikUseVisibleTask {
                 return Some(name.range());
             };
 
-            for member_result in obj.members().iter() {
-                let Ok(member) = member_result else {
-                    continue;
-                };
+            for member in obj.members().iter().flatten() {
                 let Some(prop) = member.as_js_property_object_member() else {
                     continue;
                 };

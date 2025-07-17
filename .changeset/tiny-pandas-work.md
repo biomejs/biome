@@ -42,23 +42,7 @@ The `preferClasslist` rule encourages the use of the Qwik-specific `classlist` p
 
 The rule detects usage of the `classnames` helper in `class` or `className` attributes and recommends switching to the `classlist` prop, which accepts an object mapping class names to booleans.
 
-**Updated:** The [`useJsxKeyInIterable`](https://biomejs.dev/linter/rules/use-jsx-key-in-iterable) rule now supports both React and Qwik domains. The previous Qwik-specific `noMissingJsxKey` rule has been removed and its functionality merged into this unified rule. It disallows JSX elements in iterators/collections without a `key` prop, helping prevent rendering issues and performance problems in both React and Qwik applications.
-
-**Invalid:**
-
-```jsx
-{items.map(item => <li>{item}</li>)}
-{users.map(user => <div>{user.name}</div>)}
-```
-
-**Valid:**
-
-```jsx
-{items.map((item, index) => <li key={index}>{item}</li>)}
-{users.map(user => <div key={user.id}>{user.name}</div>)}
-```
-
-The rule detects JSX elements inside `.map()` calls and other iterator methods that are missing the required `key` prop. It provides clear diagnostics to help developers add appropriate keys for optimal rendering performance.
+The pre-existing `useJsxKeyInIterable` rule is now available in the Qwik domain.
 
 Added the [`useJsxImg`](https://biomejs.dev/linter/rules/use-jsx-img) rule to Biome.
 

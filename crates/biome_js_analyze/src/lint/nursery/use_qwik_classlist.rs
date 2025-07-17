@@ -8,10 +8,10 @@ use biome_rowan::AstNode;
 use biome_rule_options::use_qwik_classlist::UseQwikClasslistOptions;
 
 declare_lint_rule! {
-    /// Prefer using the `class` prop as a classlist over the classnames helper.
+    /// Prefer using the `class` prop as a classlist over the `classnames` helper.
     ///
     /// This rule is intended for use in Qwik applications to encourage the use of
-    /// the built-in `class` prop (which accepts a string, object, or array) instead of the classnames utility library.
+    /// the built-in `class` prop (which accepts a string, object, or array) instead of the `classnames` utility library.
     ///
     /// ## Examples
     ///
@@ -30,7 +30,7 @@ declare_lint_rule! {
         version: "next",
         name: "useQwikClasslist",
         language: "jsx",
-        sources: &[RuleSource::EslintQwik("prefer-classlist").inspired()],
+        sources: &[RuleSource::EslintQwik("prefer-classlist").same()],
         recommended: true,
         severity: Severity::Warning,
         fix_kind: FixKind::None,
@@ -51,15 +51,18 @@ impl Rule for UseQwikClasslist {
         let name_text = name_token.token_text();
         if name_text == "class" || name_text == "className" {
             let value = attr.initializer()?.value().ok()?;
-            if let AnyJsxAttributeValue::JsxExpressionAttributeValue(expr_attr) = value {
-                if let AnyJsExpression::JsCallExpression(call) = expr_attr.expression().ok()? {
-                    let callee = call.callee().ok()?;
-                    if let Some(ident) = callee.as_js_reference_identifier() {
-                        if ident.value_token().ok()?.text() == "classnames" {
-                            return Some(attr.range());
-                        }
-                    }
-                }
+            let expr_attr = match value {
+                AnyJsxAttributeValue::JsxExpressionAttributeValue(expr_attr) => expr_attr,
+                _ => return None,
+            };
+            let call = match expr_attr.expression().ok()? {
+                AnyJsExpression::JsCallExpression(call) => call,
+                _ => return None,
+            };
+            let callee = call.callee().ok()?;
+            let ident = callee.as_js_reference_identifier()?;
+            if ident.value_token().ok()?.text() == "classnames" {
+                return Some(attr.range());
             }
         }
         None

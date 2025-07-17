@@ -37,7 +37,7 @@ declare_lint_rule! {
         version: "next",
         name: "useAnchorHref",
         language: "jsx",
-        sources: &[RuleSource::EslintQwik("jsx-a").inspired()],
+        sources: &[RuleSource::EslintQwik("jsx-a").same()],
         recommended: true,
         severity: Severity::Warning,
         fix_kind: FixKind::None,
@@ -57,8 +57,7 @@ impl Rule for UseAnchorHref {
         if tag_token.text_trimmed() != "a" {
             return None;
         }
-        let has_href = element.find_attribute_by_name("href").is_some();
-        if !has_href {
+        if element.find_attribute_by_name("href").is_none() {
             return Some(element.range());
         }
         None
