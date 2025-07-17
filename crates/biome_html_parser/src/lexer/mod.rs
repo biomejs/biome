@@ -1,6 +1,6 @@
 mod tests;
 
-use crate::token_source::{HtmlEmbeddedLanguage, HtmlLexContext};
+use crate::token_source::{HtmlEmbeddedLanguage, HtmlLexContext, TextExpressionKind};
 use biome_html_syntax::HtmlSyntaxKind::{
     COMMENT, DOCTYPE_KW, EOF, ERROR_TOKEN, HTML_KW, HTML_LITERAL, HTML_STRING_LITERAL, NEWLINE,
     TOMBSTONE, UNICODE_BOM, WHITESPACE,
@@ -59,10 +59,20 @@ impl<'src> HtmlLexer<'src> {
             b'/' => self.consume_byte(T![/]),
             b'=' => self.consume_byte(T![=]),
             b'!' => self.consume_byte(T![!]),
-            b'{' if self.is_at_l_text_expression() => self.consume_l_text_expression(),
-            b'{' => self.consume_byte(T!['{']),
-            b'}' if self.is_at_r_text_expression() => self.consume_r_text_expression(),
-            b'}' => self.consume_byte(T!['}']),
+            b'{' => {
+                if self.is_at_opening_double_text_expression() {
+                    self.consume_l_double_text_expression()
+                } else {
+                    self.consume_byte(T!['{'])
+                }
+            }
+            b'}' => {
+                if self.is_at_closing_double_text_expression() {
+                    self.consume_r_double_text_expression()
+                } else {
+                    self.consume_byte(T!['}'])
+                }
+            }
             b'\'' | b'"' => self.consume_string_literal(current),
             _ if self.current_kind == T![<] && is_tag_name_byte(current) => {
                 // tag names must immediately follow a `<`
@@ -88,13 +98,23 @@ impl<'src> HtmlLexer<'src> {
     fn consume_token(&mut self, current: u8) -> HtmlSyntaxKind {
         match current {
             b'\n' | b'\r' | b'\t' | b' ' => self.consume_newline_or_whitespaces(),
-            b'{' if self.is_at_l_text_expression() => self.consume_l_text_expression(),
-            b'{' => self.consume_byte(T!['{']),
-            b'}' if self.is_at_r_text_expression() => self.consume_r_text_expression(),
-            b'}' => self.consume_byte(T!['}']),
             b'!' if self.current() == T![<] => self.consume_byte(T![!]),
             b'/' if self.current() == T![<] => self.consume_byte(T![/]),
             b'-' if self.is_at_frontmatter_edge() => self.consume_frontmatter_edge(),
+            b'{' => {
+                if self.is_at_opening_double_text_expression() {
+                    self.consume_l_double_text_expression()
+                } else {
+                    self.consume_byte(T!['{'])
+                }
+            }
+            b'}' => {
+                if self.is_at_closing_double_text_expression() {
+                    self.consume_r_double_text_expression()
+                } else {
+                    self.consume_byte(T!['}'])
+                }
+            }
             b'<' => {
                 // if this truly is the start of a tag, it *must* be immediately followed by a tag name. Whitespace is not allowed.
                 // https://html.spec.whatwg.org/multipage/syntax.html#start-tags
@@ -114,7 +134,7 @@ impl<'src> HtmlLexer<'src> {
                     self.consume_byte(HTML_LITERAL)
                 }
             }
-            _ => self.consume_html_text(),
+            _ => self.consume_html_text(current),
         }
     }
 
@@ -124,6 +144,8 @@ impl<'src> HtmlLexer<'src> {
             b'\n' | b'\r' | b'\t' | b' ' => self.consume_newline_or_whitespaces(),
             b'<' => self.consume_byte(T![<]),
             b'>' => self.consume_byte(T![>]),
+            b'{' => self.consume_byte(T!['{']),
+            b'}' => self.consume_byte(T!['}']),
             b'\'' | b'"' => self.consume_string_literal(current),
             _ => self.consume_unquoted_string_literal(),
         }
@@ -176,6 +198,46 @@ impl<'src> HtmlLexer<'src> {
             // if the element is empty, we will immediately hit the closing tag.
             // we HAVE to consume something, so we start consuming the closing tag.
             self.consume_byte(T![<])
+        }
+    }
+
+    fn consume_double_text_expression(&mut self, current: u8) -> HtmlSyntaxKind {
+        match current {
+            b'}' if self.is_at_closing_double_text_expression() => {
+                self.consume_r_double_text_expression()
+            }
+            b'<' => self.consume_byte(T![<]),
+            _ => {
+                while let Some(current) = self.current_byte() {
+                    match current {
+                        b'}' if self.is_at_closing_double_text_expression() => break,
+                        b'<' | b'/' => break,
+                        _ => {
+                            self.advance(1);
+                        }
+                    }
+                }
+                HTML_LITERAL
+            }
+        }
+    }
+
+    fn consume_single_text_expression(&mut self, current: u8) -> HtmlSyntaxKind {
+        match current {
+            b'}' if !self.is_at_closing_double_text_expression() => self.consume_byte(T!['}']),
+            b'<' => self.consume_byte(T![<]),
+            _ => {
+                while let Some(current) = self.current_byte() {
+                    match current {
+                        b'}' if !self.is_at_closing_double_text_expression() => break,
+                        b'<' | b'/' => break,
+                        _ => {
+                            self.advance(1);
+                        }
+                    }
+                }
+                HTML_LITERAL
+            }
         }
     }
 
@@ -429,14 +491,14 @@ impl<'src> HtmlLexer<'src> {
         }
     }
 
-    fn consume_l_text_expression(&mut self) -> HtmlSyntaxKind {
-        debug_assert!(self.is_at_l_text_expression());
+    fn consume_l_double_text_expression(&mut self) -> HtmlSyntaxKind {
+        debug_assert!(self.is_at_opening_double_text_expression());
         self.advance(2);
         T!["{{"]
     }
 
-    fn consume_r_text_expression(&mut self) -> HtmlSyntaxKind {
-        debug_assert!(self.is_at_r_text_expression());
+    fn consume_r_double_text_expression(&mut self) -> HtmlSyntaxKind {
+        debug_assert!(self.is_at_closing_double_text_expression());
         self.advance(2);
         T!["}}"]
     }
@@ -484,11 +546,11 @@ impl<'src> HtmlLexer<'src> {
             && self.byte_at(2) == Some(b'-')
     }
 
-    fn is_at_l_text_expression(&self) -> bool {
+    fn is_at_opening_double_text_expression(&self) -> bool {
         self.current_byte() == Some(b'{') && self.byte_at(1) == Some(b'{')
     }
 
-    fn is_at_r_text_expression(&self) -> bool {
+    fn is_at_closing_double_text_expression(&self) -> bool {
         self.current_byte() == Some(b'}') && self.byte_at(1) == Some(b'}')
     }
 
@@ -571,76 +633,97 @@ impl<'src> HtmlLexer<'src> {
     ///
     /// - See: <https://html.spec.whatwg.org/#space-separated-tokens>
     /// - See: <https://infra.spec.whatwg.org/#strip-leading-and-trailing-ascii-whitespace>
-    fn consume_html_text(&mut self) -> HtmlSyntaxKind {
+    fn consume_html_text(&mut self, current: u8) -> HtmlSyntaxKind {
         let mut whitespace_started = None;
         let mut seen_newlines = 0;
 
         let mut closing_expression = None;
         let mut was_escaped = false;
 
-        if self.is_at_r_text_expression() {
-            return T!["}}"];
-        }
-
-        while let Some(current) = self.current_byte() {
-            match current {
-                b'\\' => {
-                    was_escaped = true;
-                    whitespace_started = None;
-                    self.advance(1);
-                }
-                b'}' => {
-                    if was_escaped {
-                        self.advance(1);
-                    } else {
-                        if let Some(checkpoint) = closing_expression {
-                            self.rewind(checkpoint);
-                            break;
-                        }
-                        closing_expression = Some(self.checkpoint());
-                        whitespace_started = None;
-                        self.advance(1);
-                    }
-                }
-
-                b'<' => {
-                    break;
-                }
-                b'\n' | b'\r' => {
-                    if whitespace_started.is_none() {
-                        whitespace_started = Some(self.checkpoint());
-                    }
-                    self.after_newline = true;
-                    seen_newlines += 1;
-                    if seen_newlines > 1 {
-                        break;
-                    }
-                    self.advance(1);
-                }
-                b' ' | b'\t' => {
-                    if was_escaped {
-                        was_escaped = false;
-                    }
-                    if whitespace_started.is_none() {
-                        whitespace_started = Some(self.checkpoint());
-                    }
-                    closing_expression = None;
-                    self.advance(1);
-                }
-                _ => {
-                    self.advance(1);
-                    whitespace_started = None;
-                    seen_newlines = 0;
+        match current {
+            b'{' => {
+                if self.is_at_opening_double_text_expression() {
+                    self.consume_l_double_text_expression()
+                } else {
+                    self.consume_byte(T!['{'])
                 }
             }
-        }
+            b'}' => {
+                if self.is_at_closing_double_text_expression() {
+                    self.consume_r_double_text_expression()
+                } else {
+                    self.consume_byte(T!['}'])
+                }
+            }
+            _ => {
+                while let Some(current) = self.current_byte() {
+                    match current {
+                        b'{' => {
+                            if was_escaped {
+                                self.advance(1);
+                            } else {
+                                break;
+                            }
+                        }
+                        b'\\' => {
+                            was_escaped = true;
+                            whitespace_started = None;
+                            self.advance(1);
+                        }
+                        b'}' => {
+                            if was_escaped {
+                                self.advance(1);
+                            } else {
+                                if let Some(checkpoint) = closing_expression {
+                                    self.rewind(checkpoint);
+                                    break;
+                                }
+                                closing_expression = Some(self.checkpoint());
+                                whitespace_started = None;
+                                self.advance(1);
+                            }
+                        }
 
-        if let Some(checkpoint) = whitespace_started {
-            // avoid treating the trailing whitespace as part of the token if there is any
-            self.rewind(checkpoint);
-        }
+                        b'<' => {
+                            break;
+                        }
+                        b'\n' | b'\r' => {
+                            if whitespace_started.is_none() {
+                                whitespace_started = Some(self.checkpoint());
+                            }
+                            self.after_newline = true;
+                            seen_newlines += 1;
+                            if seen_newlines > 1 {
+                                break;
+                            }
+                            self.advance(1);
+                        }
+                        b' ' | b'\t' => {
+                            if was_escaped {
+                                was_escaped = false;
+                            }
+                            if whitespace_started.is_none() {
+                                whitespace_started = Some(self.checkpoint());
+                            }
+                            closing_expression = None;
+                            self.advance(1);
+                        }
+                        _ => {
+                            self.advance(1);
+                            whitespace_started = None;
+                            seen_newlines = 0;
+                        }
+                    }
+                }
 
-        HTML_LITERAL
+                if let Some(checkpoint) = whitespace_started {
+                    // avoid treating the trailing whitespace as part of the token if there is any
+                    self.rewind(checkpoint);
+                }
+
+                HTML_LITERAL
+            }
+        }
     }
 }
 
@@ -679,6 +762,10 @@ impl<'src> Lexer<'src> for HtmlLexer<'src> {
                     HtmlLexContext::EmbeddedLanguage(lang) => {
                         self.consume_token_embedded_language(current, lang, context)
                     }
+                    HtmlLexContext::TextExpression(kind) => match kind {
+                        TextExpressionKind::Double => self.consume_double_text_expression(current),
+                        TextExpressionKind::Single => self.consume_single_text_expression(current),
+                    },
                     HtmlLexContext::CdataSection => self.consume_inside_cdata(current),
                     HtmlLexContext::AstroFencedCodeBlock => {
                         self.consume_astro_frontmatter(current, context)

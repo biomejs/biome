@@ -600,6 +600,10 @@ impl From<HtmlConfiguration> for LanguageSettings<HtmlLanguage> {
             language_setting.formatter = formatter.into();
         }
 
+        if let Some(parser) = html.parser {
+            language_setting.parser = parser.into();
+        }
+
         // NOTE: uncomment once ready
         // if let Some(linter) = html.linter {
         //     language_setting.linter = linter.into();

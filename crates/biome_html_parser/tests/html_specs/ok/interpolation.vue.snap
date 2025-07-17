@@ -4,7 +4,7 @@ expression: snapshot
 ---
 ## Input
 
-```html
+```vue
 <div>Fuga magnam facilis. Voluptatem quaerat porro.{{
 
 
@@ -38,22 +38,24 @@ HtmlRoot {
             },
             children: HtmlElementList [
                 HtmlContent {
-                    value_token: HTML_LITERAL@5..53 "Fuga magnam facilis. Voluptatem quaerat porro.{{" [] [],
+                    value_token: HTML_LITERAL@5..51 "Fuga magnam facilis. Voluptatem quaerat porro." [] [],
+                },
+                HtmlDoubleTextExpression {
+                    l_double_curly_token: L_DOUBLE_CURLY@51..53 "{{" [] [],
+                    expression: HtmlTextExpression {
+                        html_literal_token: HTML_LITERAL@53..108 "\n\n\n\tx => {\n\tconst hello = 'world'\n\treturn hello;\n\t}\n\n\n\t" [] [],
+                    },
+                    r_double_curly_token: R_DOUBLE_CURLY@108..111 "}}" [] [Whitespace(" ")],
                 },
                 HtmlContent {
-                    value_token: HTML_LITERAL@53..104 "x => {\n\tconst hello = 'world'\n\treturn hello;\n\t}" [Newline("\n"), Newline("\n"), Newline("\n"), Whitespace("\t")] [],
+                    value_token: HTML_LITERAL@111..142 "reprehenderit voluptates minus" [] [Whitespace(" ")],
                 },
-                HtmlContent {
-                    value_token: HTML_LITERAL@104..111 "}}" [Newline("\n"), Newline("\n"), Newline("\n"), Whitespace("\t")] [Whitespace(" ")],
-                },
-                HtmlContent {
-                    value_token: HTML_LITERAL@111..125 "reprehenderit" [] [Whitespace(" ")],
-                },
-                HtmlContent {
-                    value_token: HTML_LITERAL@125..179 "voluptates minus {{console.log(  short_interpolation )" [] [],
-                },
-                HtmlContent {
-                    value_token: HTML_LITERAL@179..182 "}}" [] [Whitespace(" ")],
+                HtmlDoubleTextExpression {
+                    l_double_curly_token: L_DOUBLE_CURLY@142..144 "{{" [] [],
+                    expression: HtmlTextExpression {
+                        html_literal_token: HTML_LITERAL@144..179 "console.log(  short_interpolation )" [] [],
+                    },
+                    r_double_curly_token: R_DOUBLE_CURLY@179..182 "}}" [] [Whitespace(" ")],
                 },
                 HtmlContent {
                     value_token: HTML_LITERAL@182..187 "nemo." [] [],
@@ -89,19 +91,21 @@ HtmlRoot {
         2: HTML_ATTRIBUTE_LIST@4..4
         3: R_ANGLE@4..5 ">" [] []
       1: HTML_ELEMENT_LIST@5..187
-        0: HTML_CONTENT@5..53
-          0: HTML_LITERAL@5..53 "Fuga magnam facilis. Voluptatem quaerat porro.{{" [] []
-        1: HTML_CONTENT@53..104
-          0: HTML_LITERAL@53..104 "x => {\n\tconst hello = 'world'\n\treturn hello;\n\t}" [Newline("\n"), Newline("\n"), Newline("\n"), Whitespace("\t")] []
-        2: HTML_CONTENT@104..111
-          0: HTML_LITERAL@104..111 "}}" [Newline("\n"), Newline("\n"), Newline("\n"), Whitespace("\t")] [Whitespace(" ")]
-        3: HTML_CONTENT@111..125
-          0: HTML_LITERAL@111..125 "reprehenderit" [] [Whitespace(" ")]
-        4: HTML_CONTENT@125..179
-          0: HTML_LITERAL@125..179 "voluptates minus {{console.log(  short_interpolation )" [] []
-        5: HTML_CONTENT@179..182
-          0: HTML_LITERAL@179..182 "}}" [] [Whitespace(" ")]
-        6: HTML_CONTENT@182..187
+        0: HTML_CONTENT@5..51
+          0: HTML_LITERAL@5..51 "Fuga magnam facilis. Voluptatem quaerat porro." [] []
+        1: HTML_DOUBLE_TEXT_EXPRESSION@51..111
+          0: L_DOUBLE_CURLY@51..53 "{{" [] []
+          1: HTML_TEXT_EXPRESSION@53..108
+            0: HTML_LITERAL@53..108 "\n\n\n\tx => {\n\tconst hello = 'world'\n\treturn hello;\n\t}\n\n\n\t" [] []
+          2: R_DOUBLE_CURLY@108..111 "}}" [] [Whitespace(" ")]
+        2: HTML_CONTENT@111..142
+          0: HTML_LITERAL@111..142 "reprehenderit voluptates minus" [] [Whitespace(" ")]
+        3: HTML_DOUBLE_TEXT_EXPRESSION@142..182
+          0: L_DOUBLE_CURLY@142..144 "{{" [] []
+          1: HTML_TEXT_EXPRESSION@144..179
+            0: HTML_LITERAL@144..179 "console.log(  short_interpolation )" [] []
+          2: R_DOUBLE_CURLY@179..182 "}}" [] [Whitespace(" ")]
+        4: HTML_CONTENT@182..187
           0: HTML_LITERAL@182..187 "nemo." [] []
       2: HTML_CLOSING_ELEMENT@187..193
         0: L_ANGLE@187..188 "<" [] []

@@ -588,7 +588,12 @@ export interface HtmlFormatterConfiguration {
 /**
  * Options that changes how the HTML parser behaves
  */
-export type HtmlParserConfiguration = null;
+export interface HtmlParserConfiguration {
+	/**
+	 * Enables the parsing of double text expressions such as `{{ expression }}` inside `.html` files
+	 */
+	interpolation?: Bool;
+}
 /**
  * Assist options specific to the JavaScript assist
  */
@@ -8968,8 +8973,13 @@ export type CssVariant = "standard";
  * The style of GraphQL contained in the file.
  */
 export type GraphqlVariant = "standard";
-export type HtmlVariant = "Standard" | "Astro" | "Vue" | "Svelte";
+export type HtmlVariant =
+	| { Standard: HtmlTextExpressions }
+	| "Astro"
+	| "Vue"
+	| "Svelte";
 export type GritVariant = "Standard";
+export type HtmlTextExpressions = "None" | "Single" | "Double";
 export interface ChangeFileParams {
 	content: string;
 	path: BiomePath;
