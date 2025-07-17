@@ -347,32 +347,24 @@ impl LanguageServer for LSPServer {
         let file_paths = params
             .changes
             .iter()
-            .map(|change| change.uri.to_file_path());
+            .filter_map(|change| change.uri.to_file_path())
+            .collect::<Vec<_>>();
         for file_path in file_paths {
-            match file_path {
-                Some(file_path) => {
-                    let base_path = self.session.base_path();
-                    if let Some(base_path) = base_path {
-                        let possible_biome_json = file_path.strip_prefix(&base_path);
-                        if let Ok(watched_file) = possible_biome_json {
-                            if ConfigName::file_names()
-                                .contains(&&*watched_file.display().to_string())
-                                || watched_file.ends_with(".editorconfig")
-                            {
-                                self.session.load_workspace_settings().await;
-                                self.setup_capabilities().await;
-                                self.session.update_all_diagnostics().await;
-                                // for now we are only interested to the configuration file,
-                                // so it's OK to exist the loop
-                                break;
-                            }
-                        }
+            let base_path = self.session.base_path();
+            if let Some(base_path) = base_path {
+                let possible_biome_json = file_path.strip_prefix(&base_path);
+                if let Ok(watched_file) = possible_biome_json {
+                    if ConfigName::file_names().contains(&&*watched_file.display().to_string())
+                        || watched_file.ends_with(".editorconfig")
+                    {
+                        self.session.load_extension_settings().await;
+                        self.session.load_workspace_settings().await;
+                        self.setup_capabilities().await;
+                        self.session.update_all_diagnostics().await;
+                        // for now we are only interested to the configuration file,
+                        // so it's OK to exist the loop
+                        break;
                     }
-                }
-                None => {
-                    error!(
-                        "The Workspace root URI {file_path:?} could not be parsed as a filesystem path"
-                    );
                 }
             }
         }
