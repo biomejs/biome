@@ -93,7 +93,7 @@ impl SyntaxFactory for YamlSyntaxFactory {
                 }
                 slots.next_slot();
                 if let Some(element) = &current_element {
-                    if AnyYamlBlockIndented::can_cast(element.kind()) {
+                    if AnyYamlBlockNode::can_cast(element.kind()) {
                         slots.mark_present();
                         current_element = elements.next();
                     }
@@ -119,7 +119,7 @@ impl SyntaxFactory for YamlSyntaxFactory {
                 }
                 slots.next_slot();
                 if let Some(element) = &current_element {
-                    if AnyYamlBlockIndented::can_cast(element.kind()) {
+                    if AnyYamlBlockNode::can_cast(element.kind()) {
                         slots.mark_present();
                         current_element = elements.next();
                     }
@@ -303,7 +303,7 @@ impl SyntaxFactory for YamlSyntaxFactory {
                 }
                 slots.next_slot();
                 if let Some(element) = &current_element {
-                    if AnyYamlBlockIndented::can_cast(element.kind()) {
+                    if AnyYamlBlockNode::can_cast(element.kind()) {
                         slots.mark_present();
                         current_element = elements.next();
                     }
@@ -316,44 +316,6 @@ impl SyntaxFactory for YamlSyntaxFactory {
                     );
                 }
                 slots.into_node(YAML_BLOCK_SEQUENCE_ENTRY, children)
-            }
-            YAML_COMPACT_MAPPING => {
-                let mut elements = (&children).into_iter();
-                let mut slots: RawNodeSlots<1usize> = RawNodeSlots::default();
-                let mut current_element = elements.next();
-                if let Some(element) = &current_element {
-                    if YamlBlockMapEntryList::can_cast(element.kind()) {
-                        slots.mark_present();
-                        current_element = elements.next();
-                    }
-                }
-                slots.next_slot();
-                if current_element.is_some() {
-                    return RawSyntaxNode::new(
-                        YAML_COMPACT_MAPPING.to_bogus(),
-                        children.into_iter().map(Some),
-                    );
-                }
-                slots.into_node(YAML_COMPACT_MAPPING, children)
-            }
-            YAML_COMPACT_SEQUENCE => {
-                let mut elements = (&children).into_iter();
-                let mut slots: RawNodeSlots<1usize> = RawNodeSlots::default();
-                let mut current_element = elements.next();
-                if let Some(element) = &current_element {
-                    if YamlBlockSequenceEntryList::can_cast(element.kind()) {
-                        slots.mark_present();
-                        current_element = elements.next();
-                    }
-                }
-                slots.next_slot();
-                if current_element.is_some() {
-                    return RawSyntaxNode::new(
-                        YAML_COMPACT_SEQUENCE.to_bogus(),
-                        children.into_iter().map(Some),
-                    );
-                }
-                slots.into_node(YAML_COMPACT_SEQUENCE, children)
             }
             YAML_DIRECTIVE => {
                 let mut elements = (&children).into_iter();
@@ -827,7 +789,7 @@ impl SyntaxFactory for YamlSyntaxFactory {
                 Self::make_node_list_syntax(kind, children, AnyYamlBlockMapEntry::can_cast)
             }
             YAML_BLOCK_SEQUENCE_ENTRY_LIST => {
-                Self::make_node_list_syntax(kind, children, YamlBlockSequenceEntry::can_cast)
+                Self::make_node_list_syntax(kind, children, AnyYamlBlockSequenceEntry::can_cast)
             }
             YAML_DIRECTIVE_LIST => {
                 Self::make_node_list_syntax(kind, children, YamlDirective::can_cast)
