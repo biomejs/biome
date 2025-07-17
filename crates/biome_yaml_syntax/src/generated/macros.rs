@@ -64,14 +64,6 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::YamlBlockSequenceEntry::new_unchecked(node) };
                     $body
                 }
-                $crate::YamlSyntaxKind::YAML_COMPACT_MAPPING => {
-                    let $pattern = unsafe { $crate::YamlCompactMapping::new_unchecked(node) };
-                    $body
-                }
-                $crate::YamlSyntaxKind::YAML_COMPACT_SEQUENCE => {
-                    let $pattern = unsafe { $crate::YamlCompactSequence::new_unchecked(node) };
-                    $body
-                }
                 $crate::YamlSyntaxKind::YAML_DIRECTIVE => {
                     let $pattern = unsafe { $crate::YamlDirective::new_unchecked(node) };
                     $body
