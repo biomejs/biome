@@ -1707,6 +1707,10 @@ export interface Nursery {
 	 */
 	useGoogleFontPreconnect?: RuleFixConfiguration_for_UseGoogleFontPreconnectOptions;
 	/**
+	 * For performance reasons, always provide width and height attributes for \<img> elements; it will help to prevent layout shifts.
+	 */
+	useImageSize?: RuleConfiguration_for_UseImageSizeOptions;
+	/**
 	 * Prefer Array#{indexOf,lastIndexOf}() over Array#{findIndex,findLastIndex}() when looking for the index of an item.
 	 */
 	useIndexOf?: RuleFixConfiguration_for_UseIndexOfOptions;
@@ -1722,10 +1726,6 @@ export interface Nursery {
 	 * Require href attribute for \<a> elements in JSX.
 	 */
 	useJsxAnchorHref?: RuleConfiguration_for_UseJsxAnchorHrefOptions;
-	/**
-	 * For performance reasons, always provide width and height attributes for \<img> elements; it will help to prevent layout shifts.
-	 */
-	useJsxImg?: RuleConfiguration_for_UseJsxImgOptions;
 	/**
 	 * Enforce specifying the name of GraphQL operations.
 	 */
@@ -2973,6 +2973,9 @@ export type RuleConfiguration_for_UseForComponentOptions =
 export type RuleFixConfiguration_for_UseGoogleFontPreconnectOptions =
 	| RulePlainConfiguration
 	| RuleWithFixOptions_for_UseGoogleFontPreconnectOptions;
+export type RuleConfiguration_for_UseImageSizeOptions =
+	| RulePlainConfiguration
+	| RuleWithOptions_for_UseImageSizeOptions;
 export type RuleFixConfiguration_for_UseIndexOfOptions =
 	| RulePlainConfiguration
 	| RuleWithFixOptions_for_UseIndexOfOptions;
@@ -2985,9 +2988,6 @@ export type RuleFixConfiguration_for_UseJsonImportAttributeOptions =
 export type RuleConfiguration_for_UseJsxAnchorHrefOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_UseJsxAnchorHrefOptions;
-export type RuleConfiguration_for_UseJsxImgOptions =
-	| RulePlainConfiguration
-	| RuleWithOptions_for_UseJsxImgOptions;
 export type RuleFixConfiguration_for_UseNamedOperationOptions =
 	| RulePlainConfiguration
 	| RuleWithFixOptions_for_UseNamedOperationOptions;
@@ -5466,6 +5466,16 @@ export interface RuleWithFixOptions_for_UseGoogleFontPreconnectOptions {
 	 */
 	options: UseGoogleFontPreconnectOptions;
 }
+export interface RuleWithOptions_for_UseImageSizeOptions {
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: UseImageSizeOptions;
+}
 export interface RuleWithFixOptions_for_UseIndexOfOptions {
 	/**
 	 * The kind of the code actions emitted by the rule
@@ -5513,16 +5523,6 @@ export interface RuleWithOptions_for_UseJsxAnchorHrefOptions {
 	 * Rule's options
 	 */
 	options: UseJsxAnchorHrefOptions;
-}
-export interface RuleWithOptions_for_UseJsxImgOptions {
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: UseJsxImgOptions;
 }
 export interface RuleWithFixOptions_for_UseNamedOperationOptions {
 	/**
@@ -7794,11 +7794,11 @@ export interface UseExplicitTypeOptions {}
 export interface UseExportsLastOptions {}
 export interface UseForComponentOptions {}
 export interface UseGoogleFontPreconnectOptions {}
+export type UseImageSizeOptions = null;
 export interface UseIndexOfOptions {}
 export interface UseIterableCallbackReturnOptions {}
 export interface UseJsonImportAttributeOptions {}
 export type UseJsxAnchorHrefOptions = null;
-export type UseJsxImgOptions = null;
 export interface UseNamedOperationOptions {}
 /**
  * Rule's options.
@@ -8481,9 +8481,9 @@ export type Category =
 	| "lint/nursery/useImportRestrictions"
 	| "lint/nursery/useIndexOf"
 	| "lint/nursery/useIterableCallbackReturn"
+	| "lint/nursery/useImageSize"
 	| "lint/nursery/useJsonImportAttribute"
 	| "lint/nursery/useJsxCurlyBraceConvention"
-	| "lint/nursery/useJsxImg"
 	| "lint/nursery/useJsxAnchorHref"
 	| "lint/nursery/useNamedOperation"
 	| "lint/nursery/useNamingConvention"

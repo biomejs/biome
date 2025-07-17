@@ -4981,6 +4981,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useImageSize": {
+					"description": "For performance reasons, always provide width and height attributes for \\<img> elements; it will help to prevent layout shifts.",
+					"anyOf": [
+						{ "$ref": "#/definitions/UseImageSizeConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useIndexOf": {
 					"description": "Prefer Array#{indexOf,lastIndexOf}() over Array#{findIndex,findLastIndex}() when looking for the index of an item.",
 					"anyOf": [
@@ -5006,13 +5013,6 @@
 					"description": "Require href attribute for \\<a> elements in JSX.",
 					"anyOf": [
 						{ "$ref": "#/definitions/UseJsxAnchorHrefConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"useJsxImg": {
-					"description": "For performance reasons, always provide width and height attributes for \\<img> elements; it will help to prevent layout shifts.",
-					"anyOf": [
-						{ "$ref": "#/definitions/UseJsxImgConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -10352,6 +10352,21 @@
 			},
 			"additionalProperties": false
 		},
+		"RuleWithUseImageSizeOptions": {
+			"type": "object",
+			"required": ["level"],
+			"properties": {
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [{ "$ref": "#/definitions/UseImageSizeOptions" }]
+				}
+			},
+			"additionalProperties": false
+		},
 		"RuleWithUseImportExtensionsOptions": {
 			"type": "object",
 			"required": ["level"],
@@ -10494,21 +10509,6 @@
 				"options": {
 					"description": "Rule's options",
 					"allOf": [{ "$ref": "#/definitions/UseJsxAnchorHrefOptions" }]
-				}
-			},
-			"additionalProperties": false
-		},
-		"RuleWithUseJsxImgOptions": {
-			"type": "object",
-			"required": ["level"],
-			"properties": {
-				"level": {
-					"description": "The severity of the emitted diagnostics by the rule",
-					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
-				},
-				"options": {
-					"description": "Rule's options",
-					"allOf": [{ "$ref": "#/definitions/UseJsxImgOptions" }]
 				}
 			},
 			"additionalProperties": false
@@ -13307,6 +13307,13 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"UseImageSizeConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{ "$ref": "#/definitions/RuleWithUseImageSizeOptions" }
+			]
+		},
+		"UseImageSizeOptions": { "type": "null" },
 		"UseImportExtensionsConfiguration": {
 			"anyOf": [
 				{ "$ref": "#/definitions/RulePlainConfiguration" },
@@ -13389,13 +13396,6 @@
 			]
 		},
 		"UseJsxAnchorHrefOptions": { "type": "null" },
-		"UseJsxImgConfiguration": {
-			"anyOf": [
-				{ "$ref": "#/definitions/RulePlainConfiguration" },
-				{ "$ref": "#/definitions/RuleWithUseJsxImgOptions" }
-			]
-		},
-		"UseJsxImgOptions": { "type": "null" },
 		"UseJsxKeyInIterableConfiguration": {
 			"anyOf": [
 				{ "$ref": "#/definitions/RulePlainConfiguration" },

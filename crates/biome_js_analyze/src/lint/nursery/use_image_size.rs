@@ -5,7 +5,7 @@ use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_syntax::jsx_ext::AnyJsxElement;
 use biome_rowan::AstNode;
-use biome_rule_options::use_jsx_img::UseJsxImgOptions;
+use biome_rule_options::use_image_size::UseImageSizeOptions;
 
 declare_lint_rule! {
     /// For performance reasons, always provide width and height attributes for `<img>` elements; it will help to prevent layout shifts.
@@ -41,9 +41,9 @@ declare_lint_rule! {
     /// ```jsx
     /// <img width="100" height="100" src="https://example.com/image.png" />
     /// ```
-    pub UseJsxImg {
+    pub UseImageSize {
         version: "next",
-        name: "useJsxImg",
+        name: "useImageSize",
         language: "jsx",
         sources: &[RuleSource::EslintQwik("jsx-img").inspired()],
         recommended: true,
@@ -57,11 +57,11 @@ pub enum JsxImgDiagnosticKind {
     MissingWidthOrHeight,
 }
 
-impl Rule for UseJsxImg {
+impl Rule for UseImageSize {
     type Query = Ast<AnyJsxElement>;
     type State = (biome_rowan::TextRange, JsxImgDiagnosticKind);
     type Signals = Option<Self::State>;
-    type Options = UseJsxImgOptions;
+    type Options = UseImageSizeOptions;
 
     fn run(ctx: &biome_analyze::context::RuleContext<Self>) -> Self::Signals {
         let element = ctx.query();

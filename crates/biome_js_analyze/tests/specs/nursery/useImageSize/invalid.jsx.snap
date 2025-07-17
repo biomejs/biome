@@ -9,7 +9,7 @@ expression: invalid.jsx
 
 # Diagnostics
 ```
-invalid.jsx:1:1 lint/nursery/useJsxImg ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:1:1 lint/nursery/useImageSize ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! <Emphasis>img</Emphasis> elements should always have both width and height attributes to prevent layout shifts and improve performance.
   
