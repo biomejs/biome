@@ -38,7 +38,7 @@ declare_lint_rule! {
     /// <label for="input" />
     /// ```
  pub NoQwikReactProps {
-        version: "1.0.0",
+        version: "next",
         name: "noQwikReactProps",
         language: "jsx",
         sources: &[RuleSource::EslintQwik("no-react-props").inspired()],
