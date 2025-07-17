@@ -11,7 +11,7 @@ expression: invalid.jsx
 ```
 invalid.jsx:1:1 lint/nursery/useJsxAnchorHref ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! <Emphasis>a</Emphasis> elements must have an <Emphasis>href</Emphasis> attribute.
+  ! <Emphasis>a</Emphasis> elements must have an <Emphasis>href</Emphasis> attribute to ensure accessibility and proper navigation.
   
   > 1 │ <a>Link</a>·
       │ ^^^

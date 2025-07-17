@@ -54,45 +54,49 @@ impl Rule for NoQwikUseVisibleTask {
         let (_, name) = global_identifier(&callee)?;
 
         if name.text() == "useVisibleTask$" {
-            if let Some(arguments) = call_expression.arguments().ok() {
-                let args = arguments.args();
-                if args.len() >= 2 {
-                    if let Some(Ok(AnyJsCallArgument::AnyJsExpression(expr))) = args.iter().nth(1) {
-                        if let Some(obj) = expr.as_js_object_expression() {
-                            for member in obj.members() {
-                                if let Ok(member) = member {
-                                    if let Some(prop) = member.as_js_property_object_member() {
-                                        if let Ok(name) = prop.name() {
-                                            if let Some(name) = name.name() {
-                                                if name == "strategy" {
-                                                    if let Ok(value) = prop.value() {
-                                                        if let Some(str_lit) = value
-                                                            .as_any_js_literal_expression()
-                                                            .and_then(|lit| {
-                                                                lit.as_js_string_literal_expression(
-                                                                )
-                                                            })
-                                                        {
-                                                            if let Ok(text) =
-                                                                str_lit.inner_string_text()
-                                                            {
-                                                                if text
-                                                                    .text()
-                                                                    .trim_matches(['"', '\''])
-                                                                    == "document-idle"
-                                                                {
-                                                                    return None;
-                                                                }
-                                                            }
-                                                        }
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
+            let Some(arguments) = call_expression.arguments().ok() else {
+                return Some(name.range());
+            };
+            let args = arguments.args();
+            if args.len() < 2 {
+                return Some(name.range());
+            }
+            let Some(Ok(AnyJsCallArgument::AnyJsExpression(expr))) = args.iter().nth(1) else {
+                return Some(name.range());
+            };
+            let Some(obj) = expr.as_js_object_expression() else {
+                return Some(name.range());
+            };
+
+            for member_result in obj.members().iter() {
+                let Ok(member) = member_result else {
+                    continue;
+                };
+                let Some(prop) = member.as_js_property_object_member() else {
+                    continue;
+                };
+                let Ok(name_node) = prop.name() else {
+                    continue;
+                };
+                let Some(name) = name_node.name() else {
+                    continue;
+                };
+                if name == "strategy" {
+                    let Ok(value) = prop.value() else {
+                        continue;
+                    };
+                    let Some(lit) = value.as_any_js_literal_expression() else {
+                        continue;
+                    };
+                    let Some(str_lit) = lit.as_js_string_literal_expression() else {
+                        continue;
+                    };
+                    let Ok(text) = str_lit.inner_string_text() else {
+                        continue;
+                    };
+                    let trimmed = text.text().trim_matches(['"', '\'']);
+                    if trimmed == "document-idle" {
+                        return None;
                     }
                 }
             }
@@ -107,12 +111,11 @@ impl Rule for NoQwikUseVisibleTask {
             RuleDiagnostic::new(
                 rule_category!(),
                 range,
-                markup!("useVisibleTask$() should be used with care in Qwik applications."),
+                markup!("useVisibleTask$() runs code in the browser immediately without user interaction, which is an anti-pattern."),
             )
-            .detail(
-                range,
-                "Consider using useTask$() or other Qwik lifecycle functions instead.",
-            ),
+            .note(markup!(
+                "Consider using useTask$ for async operations, useComputed$ for derived state, event hooks (useOn, useOnDocument, useOnWindow) for user interactions, or sync$ for synchronous operations."
+            )),
         )
     }
 }

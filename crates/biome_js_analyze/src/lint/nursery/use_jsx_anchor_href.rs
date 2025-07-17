@@ -45,13 +45,9 @@ declare_lint_rule! {
     }
 }
 
-pub enum JsxAnchorHrefDiagnosticKind {
-    MissingHref,
-}
-
 impl Rule for UseJsxAnchorHref {
     type Query = Ast<AnyJsxElement>;
-    type State = (biome_rowan::TextRange, JsxAnchorHrefDiagnosticKind);
+    type State = biome_rowan::TextRange;
     type Signals = Option<Self::State>;
     type Options = UseJsxAnchorHrefOptions;
 
@@ -63,23 +59,21 @@ impl Rule for UseJsxAnchorHref {
         }
         let has_href = element.find_attribute_by_name("href").is_some();
         if !has_href {
-            return Some((element.range(), JsxAnchorHrefDiagnosticKind::MissingHref));
+            return Some(element.range());
         }
         None
     }
 
     fn diagnostic(
         _: &biome_analyze::context::RuleContext<Self>,
-        (range, kind): &Self::State,
+        range: &Self::State,
     ) -> Option<RuleDiagnostic> {
-        match kind {
-            JsxAnchorHrefDiagnosticKind::MissingHref => Some(RuleDiagnostic::new(
-                rule_category!(),
-                range,
-                markup!(
-                    "<Emphasis>a</Emphasis> elements must have an <Emphasis>href</Emphasis> attribute."
-                ),
-            )),
-        }
+        Some(RuleDiagnostic::new(
+            rule_category!(),
+            range,
+            markup!(
+                "<Emphasis>a</Emphasis> elements must have an <Emphasis>href</Emphasis> attribute to ensure accessibility and proper navigation."
+            ),
+        ))
     }
 }

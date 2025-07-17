@@ -86,7 +86,7 @@ impl Rule for UseJsxImg {
                 rule_category!(),
                 range,
                 markup!(
-                    "For performance reasons, always provide width and height attributes for <Emphasis>img</Emphasis> elements, it will help to prevent layout shifts."
+                    "<Emphasis>img</Emphasis> elements should always have both width and height attributes to prevent layout shifts and improve performance."
                 ),
             )),
         }

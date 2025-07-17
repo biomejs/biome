@@ -73,7 +73,7 @@ impl Rule for UseQwikClasslist {
             rule_category!(),
             range,
             markup!(
-                "Do not use classnames. The class prop also accepts a nested array of object { [class: string]: boolean } and strings."
+                "Avoid using the classnames utility. The Qwik class prop natively supports strings, objects, and arrays, which enables better static analysis and reactivity."
             ),
         ))
     }

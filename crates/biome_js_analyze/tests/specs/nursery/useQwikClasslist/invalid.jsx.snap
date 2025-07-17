@@ -29,7 +29,7 @@ export default component$((props) => {
 ```
 invalid.jsx:7:10 lint/nursery/useQwikClasslist ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Do not use classnames. The class prop also accepts a nested array of object { [class: string]: boolean } and strings.
+  ! Avoid using the classnames utility. The Qwik class prop natively supports strings, objects, and arrays, which enables better static analysis and reactivity.
   
      5 │ export default component$((props) => {
      6 │   return (

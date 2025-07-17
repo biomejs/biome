@@ -82,11 +82,11 @@ impl Rule for NoQwikReactProps {
             RuleDiagnostic::new(
                 rule_category!(),
                 range,
-                markup!("This JSX attribute is specific to React and should not be used in Qwik."),
+                markup!("This JSX attribute is specific to React and can cause issues in Qwik components, as Qwik expects standard HTML attributes for optimal reactivity and compatibility."),
             )
             .detail(
                 range,
-                "Use standard HTML attributes instead of React-specific prop names.",
+                "Replace React-specific props like className/htmlFor with their standard HTML equivalents (class/for) to ensure proper behavior in Qwik applications.",
             ),
         )
     }

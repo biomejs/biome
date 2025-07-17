@@ -42,8 +42,6 @@ The `preferClasslist` rule encourages the use of the Qwik-specific `classlist` p
 
 The rule detects usage of the `classnames` helper in `class` or `className` attributes and recommends switching to the `classlist` prop, which accepts an object mapping class names to booleans.
 
-No configuration options are currently available for this rule.
-
 **Updated:** The [`useJsxKeyInIterable`](https://biomejs.dev/linter/rules/use-jsx-key-in-iterable) rule now supports both React and Qwik domains. The previous Qwik-specific `noMissingJsxKey` rule has been removed and its functionality merged into this unified rule. It disallows JSX elements in iterators/collections without a `key` prop, helping prevent rendering issues and performance problems in both React and Qwik applications.
 
 **Invalid:**
@@ -61,8 +59,6 @@ No configuration options are currently available for this rule.
 ```
 
 The rule detects JSX elements inside `.map()` calls and other iterator methods that are missing the required `key` prop. It provides clear diagnostics to help developers add appropriate keys for optimal rendering performance.
-
-No configuration options are currently available for this rule.
 
 Added the [`useJsxImg`](https://biomejs.dev/linter/rules/use-jsx-img) rule to Biome.
 
@@ -86,8 +82,6 @@ The `useJsxImg` rule enforces the use of width and height attributes on `<img>` 
 
 The rule detects `<img>` elements that are missing either the `width` or `height` attribute and provides clear diagnostics to help developers add appropriate dimensions for optimal performance and user experience.
 
-No configuration options are currently available for this rule.
-
 Added the [`noQwikUseVisibleTask`](https://biomejs.dev/linter/rules/no-qwik-use-visible-task) rule to Biome.
 
 This rule is intended for use in Qwik applications to warn about the use of `useVisibleTask$()` functions which require careful consideration before use.
@@ -109,8 +103,6 @@ useTask$(() => {
 ```
 
 The rule detects calls to `useVisibleTask$()` and provides clear diagnostics to help developers use alternative Qwik lifecycle functions like `useTask$()` instead.
-
-No configuration options are currently available for this rule.
 
 Added the [`useJsxAnchorHref`](https://biomejs.dev/linter/rules/use-jsx-anchor-href) rule to Biome.
 
@@ -137,5 +129,3 @@ The `useJsxAnchorHref` rule enforces the presence of an `href` attribute on `<a>
 ```
 
 The rule detects `<a>` elements that are missing the `href` attribute and provides clear diagnostics to help developers ensure all anchor elements are valid links.
-
-No configuration options are currently available for this rule.

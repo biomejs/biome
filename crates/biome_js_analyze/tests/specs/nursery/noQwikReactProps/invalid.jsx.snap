@@ -47,14 +47,14 @@ expression: invalid.jsx
 ```
 invalid.jsx:1:6 lint/nursery/noQwikReactProps  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This JSX attribute is specific to React and should not be used in Qwik.
+  ! This JSX attribute is specific to React and can cause issues in Qwik components, as Qwik expects standard HTML attributes for optimal reactivity and compatibility.
   
   > 1 │ <div className="container" />
       │      ^^^^^^^^^
     2 │ 
     3 │ <label htmlFor="input" />
   
-  i Use standard HTML attributes instead of React-specific prop names.
+  i Replace React-specific props like className/htmlFor with their standard HTML equivalents (class/for) to ensure proper behavior in Qwik applications.
   
   > 1 │ <div className="container" />
       │      ^^^^^^^^^
@@ -74,7 +74,7 @@ invalid.jsx:1:6 lint/nursery/noQwikReactProps  FIXABLE  ━━━━━━━━
 ```
 invalid.jsx:5:6 lint/nursery/noQwikReactProps  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This JSX attribute is specific to React and should not be used in Qwik.
+  ! This JSX attribute is specific to React and can cause issues in Qwik components, as Qwik expects standard HTML attributes for optimal reactivity and compatibility.
   
     3 │ <label htmlFor="input" />
     4 │ 
@@ -83,7 +83,7 @@ invalid.jsx:5:6 lint/nursery/noQwikReactProps  FIXABLE  ━━━━━━━━
     6 │ 
     7 │ <div className={`container ${isActive ? 'active' : ''}`} />
   
-  i Use standard HTML attributes instead of React-specific prop names.
+  i Replace React-specific props like className/htmlFor with their standard HTML equivalents (class/for) to ensure proper behavior in Qwik applications.
   
     3 │ <label htmlFor="input" />
     4 │ 
@@ -107,7 +107,7 @@ invalid.jsx:5:6 lint/nursery/noQwikReactProps  FIXABLE  ━━━━━━━━
 ```
 invalid.jsx:5:28 lint/nursery/noQwikReactProps  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This JSX attribute is specific to React and should not be used in Qwik.
+  ! This JSX attribute is specific to React and can cause issues in Qwik components, as Qwik expects standard HTML attributes for optimal reactivity and compatibility.
   
     3 │ <label htmlFor="input" />
     4 │ 
@@ -116,7 +116,7 @@ invalid.jsx:5:28 lint/nursery/noQwikReactProps  FIXABLE  ━━━━━━━�
     6 │ 
     7 │ <div className={`container ${isActive ? 'active' : ''}`} />
   
-  i Use standard HTML attributes instead of React-specific prop names.
+  i Replace React-specific props like className/htmlFor with their standard HTML equivalents (class/for) to ensure proper behavior in Qwik applications.
   
     3 │ <label htmlFor="input" />
     4 │ 

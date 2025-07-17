@@ -73,19 +73,14 @@ useVisibleTask$(({ track, cleanup }) => {
 ```
 invalid.js:1:1 lint/nursery/noQwikUseVisibleTask ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! useVisibleTask$() should be used with care in Qwik applications.
+  ! useVisibleTask$() runs code in the browser immediately without user interaction, which is an anti-pattern.
   
   > 1 │ useVisibleTask$(() => {
       │ ^^^^^^^^^^^^^^^
     2 │   console.log('Component is visible');
     3 │ });
   
-  i Consider using useTask$() or other Qwik lifecycle functions instead.
-  
-  > 1 │ useVisibleTask$(() => {
-      │ ^^^^^^^^^^^^^^^
-    2 │   console.log('Component is visible');
-    3 │ });
+  i Consider using useTask$ for async operations, useComputed$ for derived state, event hooks (useOn, useOnDocument, useOnWindow) for user interactions, or sync$ for synchronous operations.
   
 
 ```
@@ -93,7 +88,7 @@ invalid.js:1:1 lint/nursery/noQwikUseVisibleTask ━━━━━━━━━━�
 ```
 invalid.js:5:1 lint/nursery/noQwikUseVisibleTask ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! useVisibleTask$() should be used with care in Qwik applications.
+  ! useVisibleTask$() runs code in the browser immediately without user interaction, which is an anti-pattern.
   
     3 │ });
     4 │ 
@@ -102,14 +97,7 @@ invalid.js:5:1 lint/nursery/noQwikUseVisibleTask ━━━━━━━━━━�
     6 │   const subscription = someObservable.subscribe();
     7 │   cleanup(() => subscription.unsubscribe());
   
-  i Consider using useTask$() or other Qwik lifecycle functions instead.
-  
-    3 │ });
-    4 │ 
-  > 5 │ useVisibleTask$(({ cleanup }) => {
-      │ ^^^^^^^^^^^^^^^
-    6 │   const subscription = someObservable.subscribe();
-    7 │   cleanup(() => subscription.unsubscribe());
+  i Consider using useTask$ for async operations, useComputed$ for derived state, event hooks (useOn, useOnDocument, useOnWindow) for user interactions, or sync$ for synchronous operations.
   
 
 ```
@@ -117,7 +105,7 @@ invalid.js:5:1 lint/nursery/noQwikUseVisibleTask ━━━━━━━━━━�
 ```
 invalid.js:10:1 lint/nursery/noQwikUseVisibleTask ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! useVisibleTask$() should be used with care in Qwik applications.
+  ! useVisibleTask$() runs code in the browser immediately without user interaction, which is an anti-pattern.
   
      8 │ });
      9 │ 
@@ -126,14 +114,7 @@ invalid.js:10:1 lint/nursery/noQwikUseVisibleTask ━━━━━━━━━━
     11 │   document.title = 'New Title';
     12 │ }, { eagerness: 'visible' });
   
-  i Consider using useTask$() or other Qwik lifecycle functions instead.
-  
-     8 │ });
-     9 │ 
-  > 10 │ useVisibleTask$(() => {
-       │ ^^^^^^^^^^^^^^^
-    11 │   document.title = 'New Title';
-    12 │ }, { eagerness: 'visible' });
+  i Consider using useTask$ for async operations, useComputed$ for derived state, event hooks (useOn, useOnDocument, useOnWindow) for user interactions, or sync$ for synchronous operations.
   
 
 ```
@@ -141,7 +122,7 @@ invalid.js:10:1 lint/nursery/noQwikUseVisibleTask ━━━━━━━━━━
 ```
 invalid.js:15:3 lint/nursery/noQwikUseVisibleTask ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! useVisibleTask$() should be used with care in Qwik applications.
+  ! useVisibleTask$() runs code in the browser immediately without user interaction, which is an anti-pattern.
   
     14 │ const MyComponent = component$(() => {
   > 15 │   useVisibleTask$(() => {
@@ -149,13 +130,7 @@ invalid.js:15:3 lint/nursery/noQwikUseVisibleTask ━━━━━━━━━━
     16 │     console.log('Component mounted');
     17 │   });
   
-  i Consider using useTask$() or other Qwik lifecycle functions instead.
-  
-    14 │ const MyComponent = component$(() => {
-  > 15 │   useVisibleTask$(() => {
-       │   ^^^^^^^^^^^^^^^
-    16 │     console.log('Component mounted');
-    17 │   });
+  i Consider using useTask$ for async operations, useComputed$ for derived state, event hooks (useOn, useOnDocument, useOnWindow) for user interactions, or sync$ for synchronous operations.
   
 
 ```
@@ -163,7 +138,7 @@ invalid.js:15:3 lint/nursery/noQwikUseVisibleTask ━━━━━━━━━━
 ```
 invalid.js:22:3 lint/nursery/noQwikUseVisibleTask ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! useVisibleTask$() should be used with care in Qwik applications.
+  ! useVisibleTask$() runs code in the browser immediately without user interaction, which is an anti-pattern.
   
     21 │ export const App = component$(() => {
   > 22 │   useVisibleTask$(({ track }) => {
@@ -171,13 +146,7 @@ invalid.js:22:3 lint/nursery/noQwikUseVisibleTask ━━━━━━━━━━
     23 │     track(() => state.value);
     24 │     console.log('State changed');
   
-  i Consider using useTask$() or other Qwik lifecycle functions instead.
-  
-    21 │ export const App = component$(() => {
-  > 22 │   useVisibleTask$(({ track }) => {
-       │   ^^^^^^^^^^^^^^^
-    23 │     track(() => state.value);
-    24 │     console.log('State changed');
+  i Consider using useTask$ for async operations, useComputed$ for derived state, event hooks (useOn, useOnDocument, useOnWindow) for user interactions, or sync$ for synchronous operations.
   
 
 ```
@@ -185,7 +154,7 @@ invalid.js:22:3 lint/nursery/noQwikUseVisibleTask ━━━━━━━━━━
 ```
 invalid.js:30:3 lint/nursery/noQwikUseVisibleTask ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! useVisibleTask$() should be used with care in Qwik applications.
+  ! useVisibleTask$() runs code in the browser immediately without user interaction, which is an anti-pattern.
   
     29 │ function setupComponent() {
   > 30 │   useVisibleTask$(() => {
@@ -193,13 +162,7 @@ invalid.js:30:3 lint/nursery/noQwikUseVisibleTask ━━━━━━━━━━
     31 │     // Setup logic
     32 │   });
   
-  i Consider using useTask$() or other Qwik lifecycle functions instead.
-  
-    29 │ function setupComponent() {
-  > 30 │   useVisibleTask$(() => {
-       │   ^^^^^^^^^^^^^^^
-    31 │     // Setup logic
-    32 │   });
+  i Consider using useTask$ for async operations, useComputed$ for derived state, event hooks (useOn, useOnDocument, useOnWindow) for user interactions, or sync$ for synchronous operations.
   
 
 ```
@@ -207,7 +170,7 @@ invalid.js:30:3 lint/nursery/noQwikUseVisibleTask ━━━━━━━━━━
 ```
 invalid.js:36:3 lint/nursery/noQwikUseVisibleTask ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! useVisibleTask$() should be used with care in Qwik applications.
+  ! useVisibleTask$() runs code in the browser immediately without user interaction, which is an anti-pattern.
   
     35 │ const setup = () => {
   > 36 │   useVisibleTask$(() => {
@@ -215,13 +178,7 @@ invalid.js:36:3 lint/nursery/noQwikUseVisibleTask ━━━━━━━━━━
     37 │     // Setup in arrow function
     38 │   });
   
-  i Consider using useTask$() or other Qwik lifecycle functions instead.
-  
-    35 │ const setup = () => {
-  > 36 │   useVisibleTask$(() => {
-       │   ^^^^^^^^^^^^^^^
-    37 │     // Setup in arrow function
-    38 │   });
+  i Consider using useTask$ for async operations, useComputed$ for derived state, event hooks (useOn, useOnDocument, useOnWindow) for user interactions, or sync$ for synchronous operations.
   
 
 ```
@@ -229,7 +186,7 @@ invalid.js:36:3 lint/nursery/noQwikUseVisibleTask ━━━━━━━━━━
 ```
 invalid.js:43:5 lint/nursery/noQwikUseVisibleTask ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! useVisibleTask$() should be used with care in Qwik applications.
+  ! useVisibleTask$() runs code in the browser immediately without user interaction, which is an anti-pattern.
   
     41 │ class MyClass {
     42 │   constructor() {
@@ -238,14 +195,7 @@ invalid.js:43:5 lint/nursery/noQwikUseVisibleTask ━━━━━━━━━━
     44 │       // Setup in constructor
     45 │     });
   
-  i Consider using useTask$() or other Qwik lifecycle functions instead.
-  
-    41 │ class MyClass {
-    42 │   constructor() {
-  > 43 │     useVisibleTask$(() => {
-       │     ^^^^^^^^^^^^^^^
-    44 │       // Setup in constructor
-    45 │     });
+  i Consider using useTask$ for async operations, useComputed$ for derived state, event hooks (useOn, useOnDocument, useOnWindow) for user interactions, or sync$ for synchronous operations.
   
 
 ```
@@ -253,7 +203,7 @@ invalid.js:43:5 lint/nursery/noQwikUseVisibleTask ━━━━━━━━━━
 ```
 invalid.js:49:1 lint/nursery/noQwikUseVisibleTask ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! useVisibleTask$() should be used with care in Qwik applications.
+  ! useVisibleTask$() runs code in the browser immediately without user interaction, which is an anti-pattern.
   
     47 │ }
     48 │ 
@@ -262,14 +212,7 @@ invalid.js:49:1 lint/nursery/noQwikUseVisibleTask ━━━━━━━━━━
     50 │   console.log('First task');
     51 │ });
   
-  i Consider using useTask$() or other Qwik lifecycle functions instead.
-  
-    47 │ }
-    48 │ 
-  > 49 │ useVisibleTask$(() => {
-       │ ^^^^^^^^^^^^^^^
-    50 │   console.log('First task');
-    51 │ });
+  i Consider using useTask$ for async operations, useComputed$ for derived state, event hooks (useOn, useOnDocument, useOnWindow) for user interactions, or sync$ for synchronous operations.
   
 
 ```
@@ -277,7 +220,7 @@ invalid.js:49:1 lint/nursery/noQwikUseVisibleTask ━━━━━━━━━━
 ```
 invalid.js:53:1 lint/nursery/noQwikUseVisibleTask ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! useVisibleTask$() should be used with care in Qwik applications.
+  ! useVisibleTask$() runs code in the browser immediately without user interaction, which is an anti-pattern.
   
     51 │ });
     52 │ 
@@ -286,14 +229,7 @@ invalid.js:53:1 lint/nursery/noQwikUseVisibleTask ━━━━━━━━━━
     54 │   console.log('Second task');
     55 │ });
   
-  i Consider using useTask$() or other Qwik lifecycle functions instead.
-  
-    51 │ });
-    52 │ 
-  > 53 │ useVisibleTask$(() => {
-       │ ^^^^^^^^^^^^^^^
-    54 │   console.log('Second task');
-    55 │ });
+  i Consider using useTask$ for async operations, useComputed$ for derived state, event hooks (useOn, useOnDocument, useOnWindow) for user interactions, or sync$ for synchronous operations.
   
 
 ```
@@ -301,7 +237,7 @@ invalid.js:53:1 lint/nursery/noQwikUseVisibleTask ━━━━━━━━━━
 ```
 invalid.js:57:1 lint/nursery/noQwikUseVisibleTask ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! useVisibleTask$() should be used with care in Qwik applications.
+  ! useVisibleTask$() runs code in the browser immediately without user interaction, which is an anti-pattern.
   
     55 │ });
     56 │ 
@@ -310,14 +246,7 @@ invalid.js:57:1 lint/nursery/noQwikUseVisibleTask ━━━━━━━━━━
     58 │   const interval = setInterval(() => {
     59 │     track(() => count.value);
   
-  i Consider using useTask$() or other Qwik lifecycle functions instead.
-  
-    55 │ });
-    56 │ 
-  > 57 │ useVisibleTask$(({ track, cleanup }) => {
-       │ ^^^^^^^^^^^^^^^
-    58 │   const interval = setInterval(() => {
-    59 │     track(() => count.value);
+  i Consider using useTask$ for async operations, useComputed$ for derived state, event hooks (useOn, useOnDocument, useOnWindow) for user interactions, or sync$ for synchronous operations.
   
 
 ```
