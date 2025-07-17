@@ -1078,7 +1078,33 @@ The documentation needs to adhere to the following rules:
 - The next paragraphs can be used to further document the rule with as many details as you see fit.
 - The documentation must have a `## Examples` header, followed by two headers: `### Invalid` and `### Valid`.
   `### Invalid` must go first because we need to show when the rule is triggered.
-- Rule options if any, must be documented in the `## Options` section.
+- Rule options if any, must be documented in the `## Options` section, after the `## Examples` header.
+- Each option must have its own h3 header e.g. `### ignoreSiblings`, a description of what the option does, its
+  default value, a options block, and a code block where those options are applied. Depending on the option,
+  you might want to use the `expect_diagnostic` directive, or not. The final Markdown will look like this:
+  ``````md
+  ## Options
+
+  The following options are available
+
+  ### `ignoreSiblings`
+
+  This option will ignore the sibling of the spread operator.
+
+  Default: `false`
+
+  ```json,options
+  {
+    "options": {
+      "ignoreSiblings": true
+    }
+  }
+  ```
+
+  ```js,expect_diagnostic,use_options
+  const { ...sibling, id } = object;
+  ```
+  ``````
 
 #### Associated Language(s)
 
