@@ -1611,10 +1611,6 @@ export interface Nursery {
 	 */
 	noProcessGlobal?: RuleFixConfiguration_for_NoProcessGlobalOptions;
 	/**
-	 * Disallow React-specific className/htmlFor props in Qwik components.
-	 */
-	noQwikReactProps?: RuleFixConfiguration_for_NoQwikReactPropsOptions;
-	/**
 	 * Disallow useVisibleTask$() functions in Qwik components.
 	 */
 	noQwikUseVisibleTask?: RuleConfiguration_for_NoQwikUseVisibleTaskOptions;
@@ -1711,7 +1707,7 @@ export interface Nursery {
 	 */
 	useGoogleFontPreconnect?: RuleFixConfiguration_for_UseGoogleFontPreconnectOptions;
 	/**
-	 * For performance reasons, always provide width and height attributes for \<img> elements; it will help to prevent layout shifts.
+	 * Enforces that \<img> elements have both width and height attributes.
 	 */
 	useImageSize?: RuleConfiguration_for_UseImageSizeOptions;
 	/**
@@ -2904,9 +2900,6 @@ export type RuleConfiguration_for_NoNoninteractiveElementInteractionsOptions =
 export type RuleFixConfiguration_for_NoProcessGlobalOptions =
 	| RulePlainConfiguration
 	| RuleWithFixOptions_for_NoProcessGlobalOptions;
-export type RuleFixConfiguration_for_NoQwikReactPropsOptions =
-	| RulePlainConfiguration
-	| RuleWithFixOptions_for_NoQwikReactPropsOptions;
 export type RuleConfiguration_for_NoQwikUseVisibleTaskOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_NoQwikUseVisibleTaskOptions;
@@ -5203,20 +5196,6 @@ export interface RuleWithFixOptions_for_NoProcessGlobalOptions {
 	 * Rule's options
 	 */
 	options: NoProcessGlobalOptions;
-}
-export interface RuleWithFixOptions_for_NoQwikReactPropsOptions {
-	/**
-	 * The kind of the code actions emitted by the rule
-	 */
-	fix?: FixKind;
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: NoQwikReactPropsOptions;
 }
 export interface RuleWithOptions_for_NoQwikUseVisibleTaskOptions {
 	/**
@@ -7756,7 +7735,6 @@ export interface NoMisusedPromisesOptions {}
 export interface NoNestedComponentDefinitionsOptions {}
 export interface NoNoninteractiveElementInteractionsOptions {}
 export interface NoProcessGlobalOptions {}
-export interface NoQwikReactPropsOptions {}
 export interface NoQwikUseVisibleTaskOptions {}
 export interface NoReactPropAssignOptions {}
 export interface NoRestrictedElementsOptions {
@@ -8443,7 +8421,6 @@ export type Category =
 	| "lint/nursery/noNoninteractiveElementInteractions"
 	| "lint/nursery/noProcessGlobal"
 	| "lint/nursery/noReactPropAssign"
-	| "lint/nursery/noQwikReactProps"
 	| "lint/nursery/noReactSpecificProps"
 	| "lint/nursery/noRestrictedElements"
 	| "lint/nursery/noSecrets"

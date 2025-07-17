@@ -171,7 +171,6 @@ define_categories! {
     "lint/nursery/noNoninteractiveElementInteractions": "https://biomejs.dev/linter/rules/no-noninteractive-element-interactions",
     "lint/nursery/noProcessGlobal": "https://biomejs.dev/linter/rules/no-process-global",
     "lint/nursery/noReactPropAssign": "https://biomejs.dev/linter/rules/no-react-prop-assign",
-    "lint/nursery/noQwikReactProps": "https://biomejs.dev/linter/rules/no-qwik-react-props",
     "lint/nursery/noReactSpecificProps": "https://biomejs.dev/linter/rules/no-react-specific-props",
     "lint/nursery/noRestrictedElements": "https://biomejs.dev/linter/rules/no-restricted-elements",
     "lint/nursery/noSecrets": "https://biomejs.dev/linter/rules/no-secrets",

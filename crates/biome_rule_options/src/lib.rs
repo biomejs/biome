@@ -140,7 +140,6 @@ pub mod no_private_imports;
 pub mod no_process_env;
 pub mod no_process_global;
 pub mod no_prototype_builtins;
-pub mod no_qwik_react_props;
 pub mod no_qwik_use_visible_task;
 pub mod no_re_export_all;
 pub mod no_react_prop_assign;

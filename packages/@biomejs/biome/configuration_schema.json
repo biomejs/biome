@@ -3770,16 +3770,6 @@
 			"type": "object",
 			"additionalProperties": false
 		},
-		"NoQwikReactPropsConfiguration": {
-			"anyOf": [
-				{ "$ref": "#/definitions/RulePlainConfiguration" },
-				{ "$ref": "#/definitions/RuleWithNoQwikReactPropsOptions" }
-			]
-		},
-		"NoQwikReactPropsOptions": {
-			"type": "object",
-			"additionalProperties": false
-		},
 		"NoQwikUseVisibleTaskConfiguration": {
 			"anyOf": [
 				{ "$ref": "#/definitions/RulePlainConfiguration" },
@@ -4814,13 +4804,6 @@
 						{ "type": "null" }
 					]
 				},
-				"noQwikReactProps": {
-					"description": "Disallow React-specific className/htmlFor props in Qwik components.",
-					"anyOf": [
-						{ "$ref": "#/definitions/NoQwikReactPropsConfiguration" },
-						{ "type": "null" }
-					]
-				},
 				"noQwikUseVisibleTask": {
 					"description": "Disallow useVisibleTask$() functions in Qwik components.",
 					"anyOf": [
@@ -4989,7 +4972,7 @@
 					]
 				},
 				"useImageSize": {
-					"description": "For performance reasons, always provide width and height attributes for \\<img> elements; it will help to prevent layout shifts.",
+					"description": "Enforces that \\<img> elements have both width and height attributes.",
 					"anyOf": [
 						{ "$ref": "#/definitions/UseImageSizeConfiguration" },
 						{ "type": "null" }
@@ -7908,25 +7891,6 @@
 				"options": {
 					"description": "Rule's options",
 					"allOf": [{ "$ref": "#/definitions/NoPrototypeBuiltinsOptions" }]
-				}
-			},
-			"additionalProperties": false
-		},
-		"RuleWithNoQwikReactPropsOptions": {
-			"type": "object",
-			"required": ["level"],
-			"properties": {
-				"fix": {
-					"description": "The kind of the code actions emitted by the rule",
-					"anyOf": [{ "$ref": "#/definitions/FixKind" }, { "type": "null" }]
-				},
-				"level": {
-					"description": "The severity of the emitted diagnostics by the rule",
-					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
-				},
-				"options": {
-					"description": "Rule's options",
-					"allOf": [{ "$ref": "#/definitions/NoQwikReactPropsOptions" }]
 				}
 			},
 			"additionalProperties": false
