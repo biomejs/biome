@@ -104,9 +104,9 @@ useTask$(() => {
 
 The rule detects calls to `useVisibleTask$()` and provides clear diagnostics to help developers use alternative Qwik lifecycle functions like `useTask$()` instead.
 
-Added the [`useJsxAnchorHref`](https://biomejs.dev/linter/rules/use-jsx-anchor-href) rule to Biome.
+Added the [`useAnchorHref`](https://biomejs.dev/linter/rules/use-anchor-href) rule to Biome.
 
-The `useJsxAnchorHref` rule enforces the presence of an `href` attribute on `<a>` elements in JSX. This rule is intended for use in Qwik applications to ensure that anchor elements are always valid and accessible.
+The `useAnchorHref` rule enforces the presence of an `href` attribute on `<a>` elements in JSX. This rule is intended for use in Qwik applications to ensure that anchor elements are always valid and accessible.
 
 **Invalid:**
 

@@ -5,7 +5,7 @@ use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_syntax::jsx_ext::AnyJsxElement;
 use biome_rowan::AstNode;
-use biome_rule_options::use_jsx_anchor_href::UseJsxAnchorHrefOptions;
+use biome_rule_options::use_anchor_href::UseAnchorHrefOptions;
 
 declare_lint_rule! {
     /// Require `href` attribute for `<a>` elements in JSX.
@@ -33,9 +33,9 @@ declare_lint_rule! {
     /// ```jsx
     /// <a href="https://example.com" target="_blank">External</a>
     /// ```
-    pub UseJsxAnchorHref {
+    pub UseAnchorHref {
         version: "next",
-        name: "useJsxAnchorHref",
+        name: "useAnchorHref",
         language: "jsx",
         sources: &[RuleSource::EslintQwik("jsx-a").inspired()],
         recommended: true,
@@ -45,11 +45,11 @@ declare_lint_rule! {
     }
 }
 
-impl Rule for UseJsxAnchorHref {
+impl Rule for UseAnchorHref {
     type Query = Ast<AnyJsxElement>;
     type State = biome_rowan::TextRange;
     type Signals = Option<Self::State>;
-    type Options = UseJsxAnchorHrefOptions;
+    type Options = UseAnchorHrefOptions;
 
     fn run(ctx: &biome_analyze::context::RuleContext<Self>) -> Self::Signals {
         let element = ctx.query();

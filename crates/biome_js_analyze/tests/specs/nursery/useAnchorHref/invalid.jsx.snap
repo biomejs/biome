@@ -9,7 +9,7 @@ expression: invalid.jsx
 
 # Diagnostics
 ```
-invalid.jsx:1:1 lint/nursery/useJsxAnchorHref ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:1:1 lint/nursery/useAnchorHref ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! <Emphasis>a</Emphasis> elements must have an <Emphasis>href</Emphasis> attribute to ensure accessibility and proper navigation.
   

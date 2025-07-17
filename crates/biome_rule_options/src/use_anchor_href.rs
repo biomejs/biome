@@ -3,4 +3,4 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Default, Clone, Debug, Deserialize, Deserializable, Eq, PartialEq, Serialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
-pub struct UseJsxAnchorHrefOptions;
+pub struct UseAnchorHrefOptions;

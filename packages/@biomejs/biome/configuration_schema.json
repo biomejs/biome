@@ -4930,6 +4930,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useAnchorHref": {
+					"description": "Require href attribute for \\<a> elements in JSX.",
+					"anyOf": [
+						{ "$ref": "#/definitions/UseAnchorHrefConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useConsistentObjectDefinition": {
 					"description": "Require the consistent declaration of object literals. Defaults to explicit definitions.",
 					"anyOf": [
@@ -5006,13 +5013,6 @@
 					"description": "Enforces the use of with { type: \"json\" } for JSON module imports.",
 					"anyOf": [
 						{ "$ref": "#/definitions/UseJsonImportAttributeConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"useJsxAnchorHref": {
-					"description": "Require href attribute for \\<a> elements in JSX.",
-					"anyOf": [
-						{ "$ref": "#/definitions/UseJsxAnchorHrefConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -9497,6 +9497,21 @@
 			},
 			"additionalProperties": false
 		},
+		"RuleWithUseAnchorHrefOptions": {
+			"type": "object",
+			"required": ["level"],
+			"properties": {
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [{ "$ref": "#/definitions/UseAnchorHrefOptions" }]
+				}
+			},
+			"additionalProperties": false
+		},
 		"RuleWithUseAriaActivedescendantWithTabindexOptions": {
 			"type": "object",
 			"required": ["level"],
@@ -10494,21 +10509,6 @@
 				"options": {
 					"description": "Rule's options",
 					"allOf": [{ "$ref": "#/definitions/UseJsonImportAttributeOptions" }]
-				}
-			},
-			"additionalProperties": false
-		},
-		"RuleWithUseJsxAnchorHrefOptions": {
-			"type": "object",
-			"required": ["level"],
-			"properties": {
-				"level": {
-					"description": "The severity of the emitted diagnostics by the rule",
-					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
-				},
-				"options": {
-					"description": "Rule's options",
-					"allOf": [{ "$ref": "#/definitions/UseJsxAnchorHrefOptions" }]
 				}
 			},
 			"additionalProperties": false
@@ -12773,6 +12773,13 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"UseAnchorHrefConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{ "$ref": "#/definitions/RuleWithUseAnchorHrefOptions" }
+			]
+		},
+		"UseAnchorHrefOptions": { "type": "null" },
 		"UseAriaActivedescendantWithTabindexConfiguration": {
 			"anyOf": [
 				{ "$ref": "#/definitions/RulePlainConfiguration" },
@@ -13389,13 +13396,6 @@
 			"type": "object",
 			"additionalProperties": false
 		},
-		"UseJsxAnchorHrefConfiguration": {
-			"anyOf": [
-				{ "$ref": "#/definitions/RulePlainConfiguration" },
-				{ "$ref": "#/definitions/RuleWithUseJsxAnchorHrefOptions" }
-			]
-		},
-		"UseJsxAnchorHrefOptions": { "type": "null" },
 		"UseJsxKeyInIterableConfiguration": {
 			"anyOf": [
 				{ "$ref": "#/definitions/RulePlainConfiguration" },

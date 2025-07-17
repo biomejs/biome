@@ -1679,6 +1679,10 @@ export interface Nursery {
 	 */
 	useAdjacentGetterSetter?: RuleConfiguration_for_UseAdjacentGetterSetterOptions;
 	/**
+	 * Require href attribute for \<a> elements in JSX.
+	 */
+	useAnchorHref?: RuleConfiguration_for_UseAnchorHrefOptions;
+	/**
 	 * Require the consistent declaration of object literals. Defaults to explicit definitions.
 	 */
 	useConsistentObjectDefinition?: RuleFixConfiguration_for_UseConsistentObjectDefinitionOptions;
@@ -1722,10 +1726,6 @@ export interface Nursery {
 	 * Enforces the use of with { type: "json" } for JSON module imports.
 	 */
 	useJsonImportAttribute?: RuleFixConfiguration_for_UseJsonImportAttributeOptions;
-	/**
-	 * Require href attribute for \<a> elements in JSX.
-	 */
-	useJsxAnchorHref?: RuleConfiguration_for_UseJsxAnchorHrefOptions;
 	/**
 	 * Enforce specifying the name of GraphQL operations.
 	 */
@@ -2952,6 +2952,9 @@ export type RuleConfiguration_for_NoVueReservedPropsOptions =
 export type RuleConfiguration_for_UseAdjacentGetterSetterOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_UseAdjacentGetterSetterOptions;
+export type RuleConfiguration_for_UseAnchorHrefOptions =
+	| RulePlainConfiguration
+	| RuleWithOptions_for_UseAnchorHrefOptions;
 export type RuleFixConfiguration_for_UseConsistentObjectDefinitionOptions =
 	| RulePlainConfiguration
 	| RuleWithFixOptions_for_UseConsistentObjectDefinitionOptions;
@@ -2985,9 +2988,6 @@ export type RuleConfiguration_for_UseIterableCallbackReturnOptions =
 export type RuleFixConfiguration_for_UseJsonImportAttributeOptions =
 	| RulePlainConfiguration
 	| RuleWithFixOptions_for_UseJsonImportAttributeOptions;
-export type RuleConfiguration_for_UseJsxAnchorHrefOptions =
-	| RulePlainConfiguration
-	| RuleWithOptions_for_UseJsxAnchorHrefOptions;
 export type RuleFixConfiguration_for_UseNamedOperationOptions =
 	| RulePlainConfiguration
 	| RuleWithFixOptions_for_UseNamedOperationOptions;
@@ -5380,6 +5380,16 @@ export interface RuleWithOptions_for_UseAdjacentGetterSetterOptions {
 	 */
 	options: UseAdjacentGetterSetterOptions;
 }
+export interface RuleWithOptions_for_UseAnchorHrefOptions {
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: UseAnchorHrefOptions;
+}
 export interface RuleWithFixOptions_for_UseConsistentObjectDefinitionOptions {
 	/**
 	 * The kind of the code actions emitted by the rule
@@ -5513,16 +5523,6 @@ export interface RuleWithFixOptions_for_UseJsonImportAttributeOptions {
 	 * Rule's options
 	 */
 	options: UseJsonImportAttributeOptions;
-}
-export interface RuleWithOptions_for_UseJsxAnchorHrefOptions {
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: UseJsxAnchorHrefOptions;
 }
 export interface RuleWithFixOptions_for_UseNamedOperationOptions {
 	/**
@@ -7782,6 +7782,7 @@ export interface NoUselessEscapeInStringOptions {}
 export interface NoUselessUndefinedOptions {}
 export interface NoVueReservedPropsOptions {}
 export interface UseAdjacentGetterSetterOptions {}
+export type UseAnchorHrefOptions = null;
 export interface UseConsistentObjectDefinitionOptions {
 	/**
 	 * The preferred syntax to enforce.
@@ -7798,7 +7799,6 @@ export type UseImageSizeOptions = null;
 export interface UseIndexOfOptions {}
 export interface UseIterableCallbackReturnOptions {}
 export interface UseJsonImportAttributeOptions {}
-export type UseJsxAnchorHrefOptions = null;
 export interface UseNamedOperationOptions {}
 /**
  * Rule's options.
@@ -8484,7 +8484,7 @@ export type Category =
 	| "lint/nursery/useImageSize"
 	| "lint/nursery/useJsonImportAttribute"
 	| "lint/nursery/useJsxCurlyBraceConvention"
-	| "lint/nursery/useJsxAnchorHref"
+	| "lint/nursery/useAnchorHref"
 	| "lint/nursery/useNamedOperation"
 	| "lint/nursery/useNamingConvention"
 	| "lint/nursery/useNumericSeparators"
