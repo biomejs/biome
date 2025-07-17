@@ -20,7 +20,6 @@ mod cst;
 mod generated;
 mod html;
 pub(crate) mod prelude;
-mod svelte;
 mod trivia;
 pub mod utils;
 mod verbatim;

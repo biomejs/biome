@@ -21,12 +21,17 @@ pub(crate) enum HtmlLexContext {
     Regular,
     /// When the lexer is outside of a tag, special characters are lexed as text.
     ///
-    /// The exeptions being `<` which indicates the start of a tag, and `>` which is invalid syntax if not preceeded with a `<`.
+    /// The exceptions being `<` which indicates the start of a tag, and `>` which is invalid syntax if not preceeded with a `<`.
     OutsideTag,
     /// When the parser encounters a `=` token (the beginning of the attribute initializer clause), it switches to this context.
     ///
     /// This is because attribute values can start and end with a `"` or `'` character, or be unquoted, and the lexer needs to know to start lexing a string literal.
     AttributeValue,
+
+    /// Lex tokens inside text expressions. In the following examples, `foo` is the text expression:
+    /// - `{{ foo }}`
+    /// - `attr={ foo }`
+    TextExpression,
     /// Enables the `html` keyword token.
     ///
     /// When the parser has encounters the sequence `<!DOCTYPE`, it switches to this context. It will remain in this context until the next `>` token is encountered.
@@ -37,7 +42,8 @@ pub(crate) enum HtmlLexContext {
     Comment,
     /// CDATA Sections are treated as text until the closing CDATA token is encountered.
     CdataSection,
-    /// Lexing the Astro frontmatter
+    /// Lexing the Astro frontmatter. When in this context, the lexer will treat `---`
+    /// as a boundary for `HTML_LITERAL`
     AstroFencedCodeBlock,
 }
 
