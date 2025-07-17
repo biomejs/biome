@@ -82,8 +82,6 @@ pub use client::{TransportRequest, WorkspaceClient, WorkspaceTransport};
 use core::str;
 use crossbeam::channel::bounded;
 use enumflags2::{BitFlags, bitflags};
-#[cfg(feature = "schema")]
-use schemars::{r#gen::SchemaGenerator, schema::Schema};
 pub use server::WorkspaceServer;
 use smallvec::SmallVec;
 use std::fmt::{Debug, Display, Formatter};
@@ -404,21 +402,19 @@ impl<'de> serde::Deserialize<'de> for FeaturesSupported {
 
 #[cfg(feature = "schema")]
 impl schemars::JsonSchema for FeaturesSupported {
-    fn schema_name() -> String {
-        "FeaturesSupported".to_owned()
+    fn schema_name() -> Cow<'static, str> {
+        Cow::Borrowed("FeaturesSupported")
     }
 
-    fn json_schema(generator: &mut SchemaGenerator) -> Schema {
-        use schemars::schema::*;
-
-        Schema::Object(SchemaObject {
-            instance_type: Some(InstanceType::Object.into()),
-            object: Some(Box::new(ObjectValidation {
-                property_names: Some(Box::new(generator.subschema_for::<FeatureKind>())),
-                additional_properties: Some(Box::new(generator.subschema_for::<SupportKind>())),
-                ..Default::default()
-            })),
-            ..Default::default()
+    fn json_schema(_generator: &mut schemars::SchemaGenerator) -> schemars::Schema {
+        schemars::json_schema!({
+            "type": "object",
+            "propertyNames": {
+                "$ref": "#/definitions/FeatureKind"
+            },
+            "additionalProperties": {
+                "$ref": "#/definitions/SupportKind"
+            }
         })
     }
 }
@@ -643,11 +639,11 @@ impl From<FeatureName> for SmallVec<[FeatureKind; 6]> {
 
 #[cfg(feature = "schema")]
 impl schemars::JsonSchema for FeatureName {
-    fn schema_name() -> String {
-        String::from("FeatureName")
+    fn schema_name() -> Cow<'static, str> {
+        Cow::Borrowed("FeatureName")
     }
 
-    fn json_schema(generator: &mut SchemaGenerator) -> Schema {
+    fn json_schema(generator: &mut schemars::SchemaGenerator) -> schemars::Schema {
         <Vec<FeatureKind>>::json_schema(generator)
     }
 }

@@ -5,12 +5,14 @@
 //! for the `biome.json` configuration file and TypeScript types for the node.js
 //! bindings to the Workspace API
 
+use std::borrow::Cow;
+
 use crate::{TextRange, TextSize};
-use schemars::{JsonSchema, r#gen::SchemaGenerator, schema::Schema};
+use schemars::{JsonSchema, Schema, SchemaGenerator};
 
 impl JsonSchema for TextSize {
-    fn schema_name() -> String {
-        String::from("TextSize")
+    fn schema_name() -> Cow<'static, str> {
+        Cow::Borrowed("TextSize")
     }
 
     fn json_schema(generator: &mut SchemaGenerator) -> Schema {
@@ -21,8 +23,8 @@ impl JsonSchema for TextSize {
 }
 
 impl JsonSchema for TextRange {
-    fn schema_name() -> String {
-        String::from("TextRange")
+    fn schema_name() -> Cow<'static, str> {
+        Cow::Borrowed("TextRange")
     }
 
     fn json_schema(generator: &mut SchemaGenerator) -> Schema {

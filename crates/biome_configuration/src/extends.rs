@@ -62,11 +62,11 @@ impl Deserializable for Extends {
 
 #[cfg(feature = "schema")]
 impl schemars::JsonSchema for Extends {
-    fn schema_name() -> String {
-        "Extends".to_string()
+    fn schema_name() -> std::borrow::Cow<'static, str> {
+        std::borrow::Cow::Borrowed("Extends")
     }
 
-    fn json_schema(generator: &mut schemars::SchemaGenerator) -> schemars::schema::Schema {
+    fn json_schema(generator: &mut schemars::SchemaGenerator) -> schemars::Schema {
         #[derive(serde::Deserialize, schemars::JsonSchema)]
         #[serde(untagged)]
         #[expect(dead_code)]

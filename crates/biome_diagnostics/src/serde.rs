@@ -361,11 +361,11 @@ impl<'de> Deserialize<'de> for DiagnosticTags {
 
 #[cfg(feature = "schema")]
 impl schemars::JsonSchema for DiagnosticTags {
-    fn schema_name() -> String {
-        String::from("DiagnosticTags")
+    fn schema_name() -> std::borrow::Cow<'static, str> {
+        std::borrow::Cow::Borrowed("DiagnosticTags")
     }
 
-    fn json_schema(generator: &mut schemars::r#gen::SchemaGenerator) -> schemars::schema::Schema {
+    fn json_schema(generator: &mut schemars::SchemaGenerator) -> schemars::Schema {
         <Vec<DiagnosticTag>>::json_schema(generator)
     }
 }

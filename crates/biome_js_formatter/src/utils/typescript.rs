@@ -59,6 +59,10 @@ pub(crate) fn should_hug_type(ty: &AnyTsType, f: &Formatter<JsFormatContext>) ->
 
     // Checking for unions where all types but one are "void types", so things like `TypeName | null | void`
     if let AnyTsType::TsUnionType(union_type) = ty {
+        if union_type.types().is_empty() {
+            return false;
+        }
+
         let mut iter = union_type.types().iter();
 
         let has_object_type = iter.any(|ty| {

@@ -55,6 +55,7 @@ configuration = [
   "pulldown-cmark",
   "biome_diagnostics",
 ]
+default = ["schema"]
 license = ["ureq/default", "ureq/json", "serde", "serde_json"]
 schema = [
   "schemars",

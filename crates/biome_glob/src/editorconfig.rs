@@ -55,6 +55,9 @@
 //! ```
 //!
 
+#[cfg(feature = "schema")]
+use std::borrow::Cow;
+
 /// Am Editorconfig glob pattern.
 #[derive(Clone)]
 #[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize))]
@@ -154,11 +157,11 @@ impl biome_deserialize::Deserializable for EditorconfigGlob {
 }
 #[cfg(feature = "schema")]
 impl schemars::JsonSchema for EditorconfigGlob {
-    fn schema_name() -> String {
-        "Glob".to_string()
+    fn schema_name() -> Cow<'static, str> {
+        Cow::Borrowed("Glob")
     }
 
-    fn json_schema(generator: &mut schemars::r#gen::SchemaGenerator) -> schemars::schema::Schema {
+    fn json_schema(generator: &mut schemars::SchemaGenerator) -> schemars::Schema {
         String::json_schema(generator)
     }
 }

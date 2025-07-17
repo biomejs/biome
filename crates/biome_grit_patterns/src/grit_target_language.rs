@@ -76,17 +76,14 @@ macro_rules! generate_target_language {
 
         #[cfg(feature = "schema")]
         impl schemars::JsonSchema for GritTargetLanguage {
-            fn schema_name() -> String {
-                "GritTargetLanguage".to_owned()
+            fn schema_name() -> Cow<'static, str> {
+                Cow::Borrowed("GritTargetLanguage")
             }
 
-            fn json_schema(_generator: &mut schemars::r#gen::SchemaGenerator) -> schemars::schema::Schema {
-                schemars::schema::Schema::Object(schemars::schema::SchemaObject {
-                    enum_values: Some(vec![
-                        $(serde_json::json!($name)),+
-                    ]),
-                    ..Default::default()
-                })
+            fn json_schema(_generator: &mut schemars::SchemaGenerator) -> schemars::Schema {
+                let mut map = serde_json::Map::new();
+                map.insert("enumValues".into(), vec![$( serde_json::Value::from($name) ),*].into());
+                schemars::Schema::from(map)
             }
         }
 

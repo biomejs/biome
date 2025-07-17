@@ -618,10 +618,10 @@ impl<'de> serde::Deserialize<'de> for RuleSelector {
 
 #[cfg(feature = "schema")]
 impl schemars::JsonSchema for RuleSelector {
-    fn schema_name() -> String {
-        "RuleCode".to_string()
+    fn schema_name() -> std::borrow::Cow<'static, str> {
+        std::borrow::Cow::Borrowed("RuleCode")
     }
-    fn json_schema(generator: &mut schemars::r#gen::SchemaGenerator) -> schemars::schema::Schema {
+    fn json_schema(generator: &mut schemars::SchemaGenerator) -> schemars::Schema {
         String::json_schema(generator)
     }
 }

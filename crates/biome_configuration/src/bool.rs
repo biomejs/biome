@@ -102,11 +102,11 @@ impl From<Bool<true>> for Bool<false> {
 
 #[cfg(feature = "schema")]
 impl<const D: bool> schemars::JsonSchema for Bool<D> {
-    fn schema_name() -> String {
-        "Bool".to_string()
+    fn schema_name() -> std::borrow::Cow<'static, str> {
+        std::borrow::Cow::Borrowed("Bool")
     }
 
-    fn json_schema(generator: &mut schemars::r#gen::SchemaGenerator) -> schemars::schema::Schema {
+    fn json_schema(generator: &mut schemars::SchemaGenerator) -> schemars::Schema {
         bool::json_schema(generator)
     }
 }
