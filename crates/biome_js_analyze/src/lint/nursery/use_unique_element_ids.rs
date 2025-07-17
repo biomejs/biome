@@ -44,7 +44,17 @@ declare_lint_rule! {
     /// React.createElement("div", { id });
     /// ```
     ///
-    /// Valid only with extra configuration:
+    /// ## Options
+    ///
+    /// The following option is available
+    ///
+    /// ### `excludedComponents`
+    ///
+    /// List of unqualified component names to ignore.
+    /// Use it to list components expecting an `id` attribute that does not represent
+    /// a DOM element ID.
+    ///
+    /// **Default**: empty list.
     ///
     /// ```json,options
     /// {
@@ -64,29 +74,6 @@ declare_lint_rule! {
     /// <Library.FormattedMessage id="static" />
     /// ```
     ///
-    /// ## Options
-    ///
-    /// Use the options to specify the components that should be excluded from this check.
-    ///
-    /// ```json,options
-    /// {
-    ///     "options": {
-    ///         "excludedComponents": [
-    ///             "FormattedMessage"
-    ///         ]
-    ///     }
-    /// }
-    /// ```
-    ///
-    /// The following option is available:
-    ///
-    /// ### `excludedComponents`
-    ///
-    /// List of unqualified component names to ignore.
-    /// Use it to list components expecting an `id` attribute that does not represent
-    /// a DOM element ID.
-    ///
-    /// **Default**: empty list.
     ///
     pub UseUniqueElementIds {
         version: "2.0.0",
