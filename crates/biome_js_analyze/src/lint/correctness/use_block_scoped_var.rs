@@ -69,7 +69,7 @@ declare_lint_rule! {
     /// }
     /// ```
     pub UseBlockScopedVar {
-        version: "1.0.0",
+        version: "next",
         name: "useBlockScopedVar",
         language: "js",
         sources: &[RuleSource::Eslint("block-scoped-var").same()],
