@@ -362,7 +362,7 @@ impl LanguageServer for LSPServer {
                         self.setup_capabilities().await;
                         self.session.update_all_diagnostics().await;
                         // for now we are only interested to the configuration file,
-                        // so it's OK to exist the loop
+                        // so it's OK to exit the loop
                         break;
                     }
                 }
