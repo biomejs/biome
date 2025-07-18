@@ -74,7 +74,6 @@ declare_lint_rule! {
         language: "js",
         sources: &[RuleSource::Eslint("block-scoped-var").same()],
         recommended: false,
-        severity: Severity::Warning,
     }
 }
 
