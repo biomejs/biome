@@ -519,11 +519,7 @@ impl Rule for UseHookAtTopLevel {
                 "This hook is being called from a nested function, but all hooks must be called "
                 "unconditionally from the top-level component."
             },
-            SuggestionKind::Recursive => markup! {
-                "This hook is being called recursively. Hooks may not call themselves recursively, "
-                "because calls to hooks may not be conditional and recursive calls require a "
-                "condition in order to terminate."
-            },
+            SuggestionKind::Recursive => markup! { "This hook is being called recursively." },
             _ if path.len() <= 1 => markup! {
                 "This hook is being called conditionally, but all hooks must be called in the "
                 "exact same order in every component render."
@@ -545,21 +541,28 @@ impl Rule for UseHookAtTopLevel {
             diag = diag.detail(range, msg);
         }
 
-        if let SuggestionKind::EarlyReturn(range) = kind {
+        if let SuggestionKind::EarlyReturn(range) = &kind {
             diag = diag.detail(
-                range,
+                *range,
                 markup! { "Hooks should not be called after an early return." },
             )
         }
 
-        let diag = diag
-            .note(markup! {
-                "For React to preserve state between calls, hooks needs to be called "
-                "unconditionally and always in the same order."
-            })
-            .note(markup! {
-                "See https://reactjs.org/docs/hooks-rules.html#only-call-hooks-at-the-top-level"
+        let mut diag = diag.note(markup! {
+            "For React to preserve state between calls, hooks needs to be called "
+            "unconditionally and always in the same order."
+        });
+
+        if matches!(kind, SuggestionKind::Recursive) {
+            diag = diag.note(markup! {
+                "This means recursive calls are not allowed, because they require a condition "
+                "in order to terminate."
             });
+        }
+
+        let diag = diag.note(markup! {
+            "See https://reactjs.org/docs/hooks-rules.html#only-call-hooks-at-the-top-level"
+        });
         Some(diag)
     }
 }

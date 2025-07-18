@@ -67,7 +67,7 @@ src/hooks/useHook.ts:1:10 lint/correctness/noUnusedVariables  FIXABLE  ━━━
 ```block
 src/hooks/useHook.ts:2:5 lint/correctness/useHookAtTopLevel ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × This hook is being called recursively. Hooks may not call themselves recursively, because calls to hooks may not be conditional and recursive calls require a condition in order to terminate.
+  × This hook is being called recursively.
   
     1 │ function useHook() {
   > 2 │     useHook();
@@ -75,6 +75,8 @@ src/hooks/useHook.ts:2:5 lint/correctness/useHookAtTopLevel ━━━━━━�
     3 │ }
   
   i For React to preserve state between calls, hooks needs to be called unconditionally and always in the same order.
+  
+  i This means recursive calls are not allowed, because they require a condition in order to terminate.
   
   i See https://reactjs.org/docs/hooks-rules.html#only-call-hooks-at-the-top-level
   
