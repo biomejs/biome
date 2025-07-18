@@ -4,6 +4,7 @@ expression: valid.jsx
 ---
 # Input
 ```jsx
+// should not generate diagnostics
 import React from "react";
 
 [<Hello key="first" />, <Hello key="second" />, <Hello key="third" />];
@@ -113,47 +114,4 @@ const Valid = [<>
 	<p>Test 2</p>
 	<p>Test 3</p>
 </>]
-
-
-// should not generate diagnostics
-import { component$ } from "@builder.io/qwik";
-
-export default component$(() => {
-  const items = ["apple", "banana", "cherry"];
-  const users = [
-    { id: 1, name: "Alice" },
-    { id: 2, name: "Bob" },
-    { id: 3, name: "Charlie" }
-  ];
-
-  return (
-    <div>
-      {items.map((item, index) => <li key={index}>{item}</li>)}
-      
-      {users.map(user => <div key={user.id}>{user.name}</div>)}
-      
-      {items.map(item => <span key={`item-${item}`}>{item}</span>)}
-      
-      {items.filter(item => item.length > 5).map((item, index) => 
-        <div key={`filtered-${index}`}>{item}</div>
-      )}
-      
-      {items.map((category, catIndex) => 
-        category.split('').map((letter, letterIndex) => 
-          <span key={`${catIndex}-${letterIndex}`}>{letter}</span>
-        )
-      )}
-      
-      {Object.keys({a: 1, b: 2}).map((key, index) => 
-        <div key={`obj-${index}`}>{key}</div>
-      )}
-      
-      {[1, 2, 3].map((num, index) => <p key={num}>{num}</p>)}
-      
-      <div>Static content</div>
-      
-      {items.map(item => item.toUpperCase())}
-    </div>
-  );
-});
 ```
