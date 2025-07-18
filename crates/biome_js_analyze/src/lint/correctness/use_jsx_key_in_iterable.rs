@@ -20,6 +20,8 @@ declare_lint_rule! {
     /// Warn if an element that likely requires a key prop--namely, one present in an array literal or an arrow function expression.
     /// Check out React documentation for [explanation on the why does React need keys.](https://react.dev/learn/rendering-lists#why-does-react-need-keys)
     ///
+    /// This rule is intended for use in both React and Qwik applications to prevent missing key props in JSX elements inside iterators.
+    ///
     /// ## Examples
     ///
     /// ### Invalid
@@ -28,14 +30,14 @@ declare_lint_rule! {
     /// [<Hello />];
     /// ```
     /// ```jsx,expect_diagnostic
-    /// data.map((x) => <Hello>{x}</Hello>);
+    /// {items.map(item => <li>{item}</li>)}
     /// ```
     ///
     /// ### Valid
     ///
     /// ```jsx
     /// [<Hello key="first" />, <Hello key="second" />, <Hello key="third" />];
-    /// data.map((x) => <Hello key={x.id}>{x}</Hello>);
+    /// {items.map(item => <li key={item.id}>{item}</li>)}
     /// ```
     ///
     /// ## Options
@@ -63,7 +65,7 @@ declare_lint_rule! {
         sources: &[RuleSource::EslintReact("jsx-key").same()],
         recommended: true,
         severity: Severity::Error,
-        domains: &[RuleDomain::React],
+        domains: &[RuleDomain::React, RuleDomain::Qwik],
     }
 }
 
