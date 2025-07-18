@@ -47,7 +47,7 @@ fn verify_type_sizes() {
 
     assert_eq!(
         std::mem::size_of::<TypeReferenceQualifier>(),
-        48,
+        56,
         "The size shouldn't go higher"
     );
 

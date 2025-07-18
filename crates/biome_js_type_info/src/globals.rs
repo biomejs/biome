@@ -454,8 +454,10 @@ impl TypeResolver for GlobalsResolver {
             Some(GLOBAL_ARRAY_ID)
         } else if qualifier.is_promise() && !qualifier.has_known_type_parameters() {
             Some(GLOBAL_PROMISE_ID)
-        } else if !qualifier.type_only && qualifier.path.len() == 1 {
-            self.resolve_type_of(&qualifier.path[0], qualifier.scope_id)
+        } else if !qualifier.type_only
+            && let Some(ident) = qualifier.path.identifier()
+        {
+            self.resolve_type_of(ident, qualifier.scope_id)
         } else {
             None
         }

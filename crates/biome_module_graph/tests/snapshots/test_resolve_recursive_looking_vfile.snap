@@ -252,11 +252,11 @@ Module TypeId(5) => Module(0) TypeId(53) | Module(0) TypeId(53) | Module(0) Type
 Module TypeId(6) => Module(0) TypeId(42)
 
 Module TypeId(7) => Namespace {
-    path: [
+    path: Identifier(
         Borrowed(
             "vfile",
         ),
-    ],
+    ),
     members: [
         TypeMember {
             kind: NamedStatic(

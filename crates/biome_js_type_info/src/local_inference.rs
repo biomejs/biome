@@ -33,7 +33,7 @@ use crate::literal::{BooleanLiteral, NumberLiteral, StringLiteral};
 use crate::{
     AssertsReturnType, CallArgumentType, Class, Constructor, DestructureField, Function,
     FunctionParameter, FunctionParameterBinding, GLOBAL_UNKNOWN_ID, GenericTypeParameter,
-    Interface, Literal, Module, NamedFunctionParameter, Namespace, Object,
+    Interface, Literal, Module, NamedFunctionParameter, Namespace, Object, Path,
     PatternFunctionParameter, PredicateReturnType, ResolvedTypeId, ReturnType, ScopeId, Tuple,
     TupleElementType, TypeData, TypeInstance, TypeMember, TypeMemberKind, TypeOperator,
     TypeOperatorType, TypeReference, TypeReferenceQualifier, TypeResolver,
@@ -1338,7 +1338,7 @@ impl TypeData {
 
     pub fn promise_of(scope_id: ScopeId, ty: TypeReference) -> Self {
         Self::instance_of(TypeReference::from(
-            TypeReferenceQualifier::from_path(scope_id, [Text::Static("Promise")])
+            TypeReferenceQualifier::from_path(scope_id, Text::Static("Promise"))
                 .with_type_parameters([ty]),
         ))
     }
@@ -2160,7 +2160,10 @@ impl TypeReference {
     }
 
     pub fn from_name(scope_id: ScopeId, name: TokenText) -> Self {
-        Self::from(TypeReferenceQualifier::from_name(scope_id, name.into()))
+        Self::from(TypeReferenceQualifier::from_path(
+            scope_id,
+            Text::from(name),
+        ))
     }
 
     pub fn from_ts_reference_type(
@@ -2226,17 +2229,17 @@ impl TypeReferenceQualifier {
         match name {
             AnyTsName::JsReferenceIdentifier(identifier) => {
                 text_from_token(identifier.value_token())
-                    .map(|name| Self::from_name(scope_id, name).with_type_only())
+                    .map(|name| Self::from_path(scope_id, name).with_type_only())
             }
             AnyTsName::TsQualifiedName(name) => {
                 let mut fields = name.as_fields();
-                let mut path = Vec::new();
+                let mut reversed_path = Vec::new();
                 loop {
-                    path.insert(0, text_from_token(fields.right.ok()?.value_token())?);
+                    reversed_path.push(text_from_token(fields.right.ok()?.value_token())?);
 
                     match fields.left.ok()? {
                         AnyTsName::JsReferenceIdentifier(identifier) => {
-                            path.insert(0, text_from_token(identifier.value_token())?);
+                            reversed_path.push(text_from_token(identifier.value_token())?);
                             break;
                         }
                         AnyTsName::TsQualifiedName(name) => {
@@ -2244,16 +2247,13 @@ impl TypeReferenceQualifier {
                         }
                     }
                 }
+                let path = Path::from_reversed_parts(reversed_path);
                 Some(Self::from_path(scope_id, path).with_type_only())
             }
         }
     }
 
-    pub fn from_name(scope_id: ScopeId, name: Text) -> Self {
-        Self::from_path(scope_id, [name])
-    }
-
-    pub fn from_path(scope_id: ScopeId, path: impl Into<Box<[Text]>>) -> Self {
+    pub fn from_path(scope_id: ScopeId, path: impl Into<Path>) -> Self {
         Self {
             path: path.into(),
             type_parameters: [].into(),
@@ -2347,7 +2347,7 @@ impl TypeofThisOrSuperExpression {
 
                 let binding = binding.as_js_identifier_binding()?;
                 let name = text_from_token(binding.name_token())?;
-                Some(Ok(TypeReferenceQualifier::from_name(scope_id, name).into()))
+                Some(Ok(TypeReferenceQualifier::from_path(scope_id, name).into()))
             })
             .unwrap_or(Err(()))
             .unwrap_or_default();
@@ -2434,27 +2434,26 @@ fn generic_params_from_ts_type_params(
 }
 
 #[inline]
-fn path_from_any_ts_module_name(module_name: AnyTsModuleName) -> Option<Box<[Text]>> {
-    let mut path = Vec::new();
+fn path_from_any_ts_module_name(module_name: AnyTsModuleName) -> Option<Path> {
+    let mut reversed_path = Vec::new();
     let mut module_name = module_name;
     loop {
         match module_name {
             AnyTsModuleName::AnyTsIdentifierBinding(binding) => {
                 let binding = binding.as_ts_identifier_binding()?;
-                let name = text_from_token(binding.name_token())?;
-                path.insert(0, name);
+                reversed_path.push(text_from_token(binding.name_token())?);
                 break;
             }
             AnyTsModuleName::TsQualifiedModuleName(qualified) => {
                 let right = qualified.right().ok()?;
-                path.insert(0, text_from_token(right.value_token())?);
+                reversed_path.push(text_from_token(right.value_token())?);
 
                 module_name = qualified.left().ok()?;
             }
         }
     }
 
-    Some(path.into())
+    Some(Path::from_reversed_parts(reversed_path))
 }
 
 #[inline]

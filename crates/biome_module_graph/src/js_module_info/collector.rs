@@ -920,7 +920,8 @@ impl TypeResolver for JsModuleInfoCollector {
     }
 
     fn resolve_qualifier(&self, qualifier: &TypeReferenceQualifier) -> Option<ResolvedTypeId> {
-        let identifier = qualifier.path.first()?;
+        let mut path_parts = qualifier.path.iter();
+        let identifier = path_parts.next()?;
         let Some(binding_ref) = self.find_binding_in_scope(identifier, qualifier.scope_id) else {
             return GLOBAL_RESOLVER.resolve_qualifier(qualifier);
         };
@@ -936,7 +937,7 @@ impl TypeResolver for JsModuleInfoCollector {
         }
 
         let mut ty = Cow::Borrowed(&binding.ty);
-        for identifier in &qualifier.path[1..] {
+        for identifier in path_parts {
             let resolved = self.resolve_and_get(&ty)?;
             let member = resolved
                 .all_members(self)

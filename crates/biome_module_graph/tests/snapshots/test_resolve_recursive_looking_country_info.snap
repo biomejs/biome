@@ -162,11 +162,11 @@ Module TypeId(5) => interface "Full" {
 }
 
 Module TypeId(6) => Namespace {
-    path: [
+    path: Identifier(
         Borrowed(
             "SubdivisionInfo",
         ),
-    ],
+    ),
     members: [
         TypeMember {
             kind: NamedStatic(
@@ -217,11 +217,11 @@ Module TypeId(9) => sync Function "subdivision" {
 }
 
 Module TypeId(10) => Namespace {
-    path: [
+    path: Identifier(
         Borrowed(
             "CountryInfo",
         ),
-    ],
+    ),
     members: [
         TypeMember {
             kind: NamedStatic(
