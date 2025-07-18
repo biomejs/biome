@@ -339,3 +339,5 @@ pub mod use_valid_lang;
 pub mod use_valid_typeof;
 pub mod use_while;
 pub mod use_yield;
+pub mod no_unnecessary_conditions;
+

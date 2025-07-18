@@ -51,7 +51,7 @@ impl JsBindingReference {
 /// Provides access to all semantic data of a specific binding.
 pub struct JsBinding {
     pub(crate) data: Arc<JsModuleInfoInner>,
-    pub(crate) id: BindingId,
+    pub id: BindingId,
 }
 
 impl std::fmt::Debug for JsBinding {
