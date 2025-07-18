@@ -34,10 +34,10 @@ fn bench_module_graph(criterion: &mut Criterion) {
             include_bytes!("./next_font_google.d.ts") as &[u8],
         ),
         // FIXME: enable it once the perf reaches a decent number
-        (
-            "RedisCommander.d.ts",
-            include_bytes!("./RedisCommander.d.ts") as &[u8],
-        ),
+        // (
+        //     "RedisCommander.d.ts",
+        //     include_bytes!("./RedisCommander.d.ts") as &[u8],
+        // ),
     ];
 
     let mut group = criterion.benchmark_group("module_graph");
