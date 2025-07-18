@@ -1,0 +1,70 @@
+name: Formatter benchmarks
+
+on:
+  workflow_dispatch:
+  pull_request:
+    types: [ opened, synchronize ]
+    branches:
+      - main
+      - next
+    paths:
+      - 'Cargo.lock'
+      - 'crates/biome_rowan/**/*.rs'
+      - 'crates/**_formatter/**/*.rs'
+      - 'crates/**_syntax/**/*.rs'
+  push:
+    branches:
+      - main
+      - next
+    paths:
+      - 'Cargo.lock'
+      - 'crates/biome_rowan/**/*.rs'
+      - 'crates/**_formatter/**/*.rs'
+      - 'crates/**_syntax/**/*.rs'
+
+env:
+  RUST_LOG: info
+
+jobs:
+  bench:
+    permissions:
+      pull-requests: write
+    name: Bench
+    runs-on: depot-ubuntu-24.04-arm-16
+    strategy:
+      matrix:
+        package:
+          - biome_js_formatter
+          - biome_css_formatter
+          - biome_json_formatter
+          - biome_graphql_formatter
+          - biome_html_formatter
+
+    steps:
+      - name: Checkout PR Branch
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          ref: ${{ steps.sha.outputs.result }}
+
+      - name: Install toolchain
+        uses: moonrepo/setup-rust@ede6de059f8046a5e236c94046823e2af11ca670 # v1.2.2
+        with:
+          channel: stable
+          cache-target: release
+          bins: cargo-codspeed
+          cache-base: main
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Compile
+        timeout-minutes: 20
+        run: cargo codspeed build -p ${{ matrix.package }}
+        env:
+          CARGO_BUILD_JOBS: 3  # Default is 4 (equals to the vCPU count of the runner), which leads OOM on cargo build
+
+      - name: Run the benchmarks
+        uses: CodSpeedHQ/action@c28fe9fbe7d57a3da1b7834ae3761c1d8217612d # v3.7.0
+        timeout-minutes: 50
+        with:
+          run: cargo codspeed run
+          token: ${{ secrets.CODSPEED_TOKEN }}
