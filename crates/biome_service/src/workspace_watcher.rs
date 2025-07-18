@@ -216,9 +216,9 @@ impl WorkspaceWatcher {
                     }
                     _ => Ok(()),
                 },
-                // `RenameMode::Any` and `ModifyKind::Any` need to be included as a catch-all.
+                // `RenameMode::Any` needs to be included as a catch-all.
                 // Without it, we'll miss events on Windows or macOS.
-                ModifyKind::Data(_) | ModifyKind::Name(RenameMode::Any) | ModifyKind::Any => {
+                ModifyKind::Data(_) | ModifyKind::Name(RenameMode::Any) => {
                     workspace.open_paths_through_watcher(paths, &scan_kind)
                 }
                 _ => Ok(()),
