@@ -4236,3 +4236,48 @@ fn should_apply_root_settings_with_stdin_file_path_and_extended_non_root_config(
         result,
     ));
 }
+
+#[test]
+fn should_not_choke_on_recursive_function_call() {
+    let mut fs = TemporaryFs::new("should_not_choke_on_recursive_function_call");
+
+    fs.create_file(
+        "biome.jsonc",
+        r#"{
+    "linter": {
+        "rules": {
+            "recommended": true,
+        },
+        "domains": {
+            "next": "all",
+            "project": "all",
+            "react": "all",
+            "solid": "all",
+        }
+    }
+}"#,
+    );
+
+    // Use a hook name to catch https://github.com/biomejs/biome/issues/6915.
+    fs.create_file(
+        "src/hooks/useHook.ts",
+        r#"function useHook() {
+    useHook();
+}"#,
+    );
+
+    let mut console = BufferConsole::default();
+    let result = run_cli_with_dyn_fs(
+        Box::new(fs.create_os()),
+        &mut console,
+        Args::from(["lint"].as_slice()),
+    );
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "should_not_choke_on_recursive_function_call",
+        fs.create_mem(),
+        console,
+        result,
+    ));
+}
