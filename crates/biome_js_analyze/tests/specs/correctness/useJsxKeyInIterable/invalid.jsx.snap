@@ -106,6 +106,31 @@ data.map((x) => {
 	}
 })
 
+
+import { component$ } from "@builder.io/qwik";
+
+export default component$(() => {
+  const items = ["apple", "banana", "cherry"];
+
+  return (
+    <div>
+      {items.map(item => <li>{item}</li>)}
+      
+      {items.forEach(item => <span>{item}</span>)}
+      
+      {items.filter(item => item.length > 5).map(item => <div>{item}</div>)}
+      
+      {items.map(category => 
+        category.split('').map(letter => <span>{letter}</span>)
+      )}
+      
+      {Object.keys({a: 1, b: 2}).map(key => <div>{key}</div>)}
+      
+      {[1, 2, 3].map(num => <p>{num}</p>)}
+    </div>
+  );
+});
+
 ```
 
 # Diagnostics
@@ -877,6 +902,119 @@ invalid.jsx:99:11 lint/correctness/useJsxKeyInIterable ━━━━━━━━�
         │ 			       ^^^^^
     100 │ 	}
     101 │ })
+  
+  i The order of the items may change, and having a key can help React identify which item was moved.
+  
+  i Check the React documentation. 
+  
+
+```
+
+```
+invalid.jsx:111:26 lint/correctness/useJsxKeyInIterable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Missing key property for this element in iterable.
+  
+    109 │   return (
+    110 │     <div>
+  > 111 │       {items.map(item => <li>{item}</li>)}
+        │                          ^^^^
+    112 │       
+    113 │       {items.forEach(item => <span>{item}</span>)}
+  
+  i The order of the items may change, and having a key can help React identify which item was moved.
+  
+  i Check the React documentation. 
+  
+
+```
+
+```
+invalid.jsx:113:30 lint/correctness/useJsxKeyInIterable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Missing key property for this element in iterable.
+  
+    111 │       {items.map(item => <li>{item}</li>)}
+    112 │       
+  > 113 │       {items.forEach(item => <span>{item}</span>)}
+        │                              ^^^^^^
+    114 │       
+    115 │       {items.filter(item => item.length > 5).map(item => <div>{item}</div>)}
+  
+  i The order of the items may change, and having a key can help React identify which item was moved.
+  
+  i Check the React documentation. 
+  
+
+```
+
+```
+invalid.jsx:115:58 lint/correctness/useJsxKeyInIterable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Missing key property for this element in iterable.
+  
+    113 │       {items.forEach(item => <span>{item}</span>)}
+    114 │       
+  > 115 │       {items.filter(item => item.length > 5).map(item => <div>{item}</div>)}
+        │                                                          ^^^^^
+    116 │       
+    117 │       {items.map(category =>·
+  
+  i The order of the items may change, and having a key can help React identify which item was moved.
+  
+  i Check the React documentation. 
+  
+
+```
+
+```
+invalid.jsx:118:42 lint/correctness/useJsxKeyInIterable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Missing key property for this element in iterable.
+  
+    117 │       {items.map(category =>·
+  > 118 │         category.split('').map(letter => <span>{letter}</span>)
+        │                                          ^^^^^^
+    119 │       )}
+    120 │       
+  
+  i The order of the items may change, and having a key can help React identify which item was moved.
+  
+  i Check the React documentation. 
+  
+
+```
+
+```
+invalid.jsx:121:45 lint/correctness/useJsxKeyInIterable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Missing key property for this element in iterable.
+  
+    119 │       )}
+    120 │       
+  > 121 │       {Object.keys({a: 1, b: 2}).map(key => <div>{key}</div>)}
+        │                                             ^^^^^
+    122 │       
+    123 │       {[1, 2, 3].map(num => <p>{num}</p>)}
+  
+  i The order of the items may change, and having a key can help React identify which item was moved.
+  
+  i Check the React documentation. 
+  
+
+```
+
+```
+invalid.jsx:123:29 lint/correctness/useJsxKeyInIterable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Missing key property for this element in iterable.
+  
+    121 │       {Object.keys({a: 1, b: 2}).map(key => <div>{key}</div>)}
+    122 │       
+  > 123 │       {[1, 2, 3].map(num => <p>{num}</p>)}
+        │                             ^^^
+    124 │     </div>
+    125 │   );
   
   i The order of the items may change, and having a key can help React identify which item was moved.
   
