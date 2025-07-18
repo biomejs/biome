@@ -267,7 +267,7 @@ define_categories! {
     "lint/style/useBlockStatements": "https://biomejs.dev/linter/rules/use-block-statements",
     "lint/style/useCollapsedElseIf": "https://biomejs.dev/linter/rules/use-collapsed-else-if",
     "lint/style/useCollapsedIf": "https://biomejs.dev/linter/rules/use-collapsed-if",
-    "lint/style/useComponentExportOnlyModules": "https://biomejs.dev/linter/rules/use-components-only-module",
+    "lint/style/useComponentExportOnlyModules": "https://biomejs.dev/linter/rules/use-component-export-only-modules",
     "lint/style/useConsistentArrayType": "https://biomejs.dev/linter/rules/use-consistent-array-type",
     "lint/style/useConsistentBuiltinInstantiation": "https://biomejs.dev/linter/rules/use-consistent-new-builtin",
     "lint/style/useConsistentCurlyBraces": "https://biomejs.dev/linter/rules/use-consistent-curly-braces",
