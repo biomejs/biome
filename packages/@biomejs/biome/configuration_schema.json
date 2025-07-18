@@ -1086,6 +1086,13 @@
 					"description": "It enables the recommended rules for this group",
 					"type": ["boolean", "null"]
 				},
+				"useBlockScopedVar": {
+					"description": "Enforce the use of variables within the scope they are defined.",
+					"anyOf": [
+						{ "$ref": "#/definitions/UseBlockScopedVarConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useExhaustiveDependencies": {
 					"description": "Enforce all dependencies are correctly specified in a React hook.",
 					"anyOf": [
@@ -9549,6 +9556,21 @@
 			},
 			"additionalProperties": false
 		},
+		"RuleWithUseBlockScopedVarOptions": {
+			"type": "object",
+			"required": ["level"],
+			"properties": {
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [{ "$ref": "#/definitions/UseBlockScopedVarOptions" }]
+				}
+			},
+			"additionalProperties": false
+		},
 		"RuleWithUseBlockStatementsOptions": {
 			"type": "object",
 			"required": ["level"],
@@ -12710,6 +12732,16 @@
 			]
 		},
 		"UseAwaitOptions": { "type": "object", "additionalProperties": false },
+		"UseBlockScopedVarConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{ "$ref": "#/definitions/RuleWithUseBlockScopedVarOptions" }
+			]
+		},
+		"UseBlockScopedVarOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"UseBlockStatementsConfiguration": {
 			"anyOf": [
 				{ "$ref": "#/definitions/RulePlainConfiguration" },

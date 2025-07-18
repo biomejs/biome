@@ -137,6 +137,7 @@ define_categories! {
     "lint/correctness/noUnusedVariables": "https://biomejs.dev/linter/rules/no-unused-variables",
     "lint/correctness/noVoidElementsWithChildren": "https://biomejs.dev/linter/rules/no-void-elements-with-children",
     "lint/correctness/noVoidTypeReturn": "https://biomejs.dev/linter/rules/no-void-type-return",
+    "lint/correctness/useBlockScopedVar": "https://biomejs.dev/linter/rules/use-block-scoped-var",
     "lint/correctness/useExhaustiveDependencies": "https://biomejs.dev/linter/rules/use-exhaustive-dependencies",
     "lint/correctness/useHookAtTopLevel": "https://biomejs.dev/linter/rules/use-hook-at-top-level",
     "lint/correctness/useImportExtensions": "https://biomejs.dev/linter/rules/use-import-extensions",
