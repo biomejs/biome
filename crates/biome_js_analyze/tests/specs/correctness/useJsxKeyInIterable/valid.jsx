@@ -1,4 +1,5 @@
-// should not generate diagnostics
+/* should not generate diagnostics */
+
 import React from "react";
 
 [<Hello key="first" />, <Hello key="second" />, <Hello key="third" />];
