@@ -2321,6 +2321,7 @@ impl TypeofThisOrSuperExpression {
 
         let binds_this_to_object = |node: &JsSyntaxNode| {
             JsFunctionExpression::can_cast(node.kind())
+                || JsFunctionDeclaration::can_cast(node.kind())
                 || JsGetterObjectMember::can_cast(node.kind())
                 || JsMethodObjectMember::can_cast(node.kind())
                 || JsSetterObjectMember::can_cast(node.kind())
@@ -2331,8 +2332,9 @@ impl TypeofThisOrSuperExpression {
             .ancestors()
             .skip(1)
             .find_map(|node| {
-                if JsFunctionExpression::can_cast(node.kind())
-                    && !is_direct_class_or_object_member(&node)
+                if (JsFunctionExpression::can_cast(node.kind())
+                    && !is_direct_class_or_object_member(&node))
+                    || JsFunctionDeclaration::can_cast(node.kind())
                 {
                     return Some(Err(()));
                 }

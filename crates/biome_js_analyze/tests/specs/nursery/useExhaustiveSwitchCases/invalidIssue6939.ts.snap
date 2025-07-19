@@ -1,6 +1,6 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
-expression: invalid_issue_6939.ts
+expression: invalidIssue6939.ts
 ---
 # Input
 ```ts
@@ -16,7 +16,6 @@ export class Player {
     switch(this.state) {
       case "running":
         break;
-      // Here Biome should error out saying that the "jumping" and "ducking" cases are not handled
     }
   }
 }
@@ -25,7 +24,7 @@ export class Player {
 
 # Diagnostics
 ```
-invalid_issue_6939.ts:10:5 lint/nursery/useExhaustiveSwitchCases  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━
+invalidIssue6939.ts:10:5 lint/nursery/useExhaustiveSwitchCases  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i The switch statement is not exhaustive.
   
@@ -34,11 +33,10 @@ invalid_issue_6939.ts:10:5 lint/nursery/useExhaustiveSwitchCases  FIXABLE  ━�
        │     ^^^^^^^^^^^^^^^^^^^^
   > 11 │       case "running":
   > 12 │         break;
-  > 13 │       // Here Biome should error out saying that the "jumping" and "ducking" cases are not handled
-  > 14 │     }
+  > 13 │     }
        │     ^
-    15 │   }
-    16 │ }
+    14 │   }
+    15 │ }
   
   i Some variants of the union type are not handled here.
   
@@ -55,8 +53,8 @@ invalid_issue_6939.ts:10:5 lint/nursery/useExhaustiveSwitchCases  FIXABLE  ━�
        12 │ + ········break;
        13 │ + ······case·"jumping":·throw·new·Error("TODO:·Not·implemented·yet");
        14 │ + ······case·"ducking":·throw·new·Error("TODO:·Not·implemented·yet");
-    13 15 │         // Here Biome should error out saying that the "jumping" and "ducking" cases are not handled
-    14 16 │       }
+    13 15 │       }
+    14 16 │     }
   
 
 ```

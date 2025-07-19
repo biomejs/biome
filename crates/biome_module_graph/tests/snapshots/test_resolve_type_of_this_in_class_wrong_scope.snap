@@ -16,6 +16,12 @@ class Foo {
 		};
 		return fn();
 	}
+	nested2() {
+		function fn() {
+			return this.x;
+		}
+		return fn();
+	}
 
 	nestedObject() {
 		const inner = {
@@ -45,9 +51,10 @@ class Foo {
 const obj = new Foo();
 
 const notFoo1 = obj.nested();
-const notFoo2 = obj.nestedInArrow();
-const notFoo3 = obj.nestedObject();
-const notFoo4 = obj.nestedObject2();
+const notFoo2 = obj.nested2();
+const notFoo3 = obj.nestedInArrow();
+const notFoo4 = obj.nestedObject();
+const notFoo5 = obj.nestedObject2();
 ```
 
 ## Module Info
@@ -64,7 +71,7 @@ Imports {
 ## Registered types
 
 ```
-Module TypeId(0) => instanceof Module(0) TypeId(33)
+Module TypeId(0) => instanceof Module(0) TypeId(37)
 
 Module TypeId(1) => Module(0) TypeId(4)
 
@@ -80,113 +87,135 @@ Module TypeId(3) => Module(0) TypeId(2)
 
 Module TypeId(4) => value: foo
 
-Module TypeId(5) => Object {
+Module TypeId(5) => unknown
+
+Module TypeId(6) => Module(0) TypeId(38)
+
+Module TypeId(7) => Object {
   prototype: No prototype
-  members: ["fn": Module(0) TypeId(6)]
+  members: ["fn": Module(0) TypeId(8)]
 }
 
-Module TypeId(6) => sync Function {
+Module TypeId(8) => sync Function {
   accepts: {
     params: []
     type_args: []
   }
-  returns: Module(0) TypeId(9)
+  returns: Module(0) TypeId(11)
 }
 
-Module TypeId(7) => Module(0) TypeId(5)
+Module TypeId(9) => Module(0) TypeId(7)
 
-Module TypeId(8) => Module(0) TypeId(6)
+Module TypeId(10) => Module(0) TypeId(8)
 
-Module TypeId(9) => Module(0) TypeId(5).x
+Module TypeId(11) => Module(0) TypeId(7).x
 
-Module TypeId(10) => Object {
+Module TypeId(12) => Object {
   prototype: No prototype
-  members: ["fn": Module(0) TypeId(11)]
+  members: ["fn": Module(0) TypeId(13)]
 }
 
-Module TypeId(11) => sync Function "fn" {
+Module TypeId(13) => sync Function "fn" {
   accepts: {
     params: []
     type_args: []
   }
-  returns: Module(0) TypeId(14)
+  returns: Module(0) TypeId(16)
 }
 
-Module TypeId(12) => Module(0) TypeId(10)
+Module TypeId(14) => Module(0) TypeId(12)
 
-Module TypeId(13) => Module(0) TypeId(11)
+Module TypeId(15) => Module(0) TypeId(13)
 
-Module TypeId(14) => Module(0) TypeId(10).x
+Module TypeId(16) => Module(0) TypeId(12).x
 
-Module TypeId(15) => unknown
-
-Module TypeId(16) => sync Function {
+Module TypeId(17) => sync Function {
   accepts: {
     params: []
     type_args: []
   }
-  returns: Module(0) TypeId(18)
+  returns: Module(0) TypeId(19)
 }
 
-Module TypeId(17) => Module(0) TypeId(16)
+Module TypeId(18) => Module(0) TypeId(17)
 
-Module TypeId(18) => Module(0) TypeId(15).x
+Module TypeId(19) => Module(0) TypeId(5).x
 
-Module TypeId(19) => sync Function {
+Module TypeId(20) => sync Function {
   accepts: {
     params: []
     type_args: []
   }
-  returns: Module(0) TypeId(25)
+  returns: Module(0) TypeId(28)
 }
 
-Module TypeId(20) => Module(0) TypeId(33)
+Module TypeId(21) => Module(0) TypeId(37)
 
-Module TypeId(21) => instanceof Module(0) TypeId(20)
+Module TypeId(22) => instanceof Module(0) TypeId(21)
 
-Module TypeId(22) => Module(0) TypeId(30)
+Module TypeId(23) => Module(0) TypeId(33)
 
-Module TypeId(23) => Module(0) TypeId(1) | Module(0) TypeId(4)
+Module TypeId(24) => Module(0) TypeId(1) | Module(0) TypeId(4)
 
-Module TypeId(24) => Module(0) TypeId(19)
+Module TypeId(25) => Module(0) TypeId(34)
 
-Module TypeId(25) => Module(0) TypeId(18) | Module(0) TypeId(18)
+Module TypeId(26) => Module(0) TypeId(19) | Module(0) TypeId(19)
 
-Module TypeId(26) => Module(0) TypeId(31)
+Module TypeId(27) => Module(0) TypeId(20)
 
-Module TypeId(27) => Module(0) TypeId(9) | Module(0) TypeId(9)
+Module TypeId(28) => Module(0) TypeId(19) | Module(0) TypeId(19)
 
-Module TypeId(28) => Module(0) TypeId(32)
+Module TypeId(29) => Module(0) TypeId(35)
 
-Module TypeId(29) => Module(0) TypeId(14) | Module(0) TypeId(14)
+Module TypeId(30) => Module(0) TypeId(11) | Module(0) TypeId(11)
 
-Module TypeId(30) => sync Function "nested" {
+Module TypeId(31) => Module(0) TypeId(36)
+
+Module TypeId(32) => Module(0) TypeId(16) | Module(0) TypeId(16)
+
+Module TypeId(33) => sync Function "nested" {
   accepts: {
     params: []
     type_args: []
   }
-  returns: Module(0) TypeId(23)
+  returns: Module(0) TypeId(24)
 }
 
-Module TypeId(31) => sync Function "nestedObject" {
+Module TypeId(34) => sync Function "nested2" {
   accepts: {
     params: []
     type_args: []
   }
-  returns: Module(0) TypeId(27)
+  returns: Module(0) TypeId(26)
 }
 
-Module TypeId(32) => sync Function "nestedObject2" {
+Module TypeId(35) => sync Function "nestedObject" {
   accepts: {
     params: []
     type_args: []
   }
-  returns: Module(0) TypeId(29)
+  returns: Module(0) TypeId(30)
 }
 
-Module TypeId(33) => class "Foo" {
+Module TypeId(36) => sync Function "nestedObject2" {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: Module(0) TypeId(32)
+}
+
+Module TypeId(37) => class "Foo" {
   extends: none
   implements: []
   type_args: []
+}
+
+Module TypeId(38) => sync Function "fn" {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: Module(0) TypeId(19)
 }
 ```

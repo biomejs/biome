@@ -1070,6 +1070,12 @@ fn test_resolve_type_of_this_in_class_wrong_scope() {
                 }
                 return fn();
             }
+            nested2() {
+                function fn() {
+                    return this.x;
+                }
+                return fn();
+            }
 
             nestedObject() {
                 const inner = {
@@ -1099,9 +1105,10 @@ fn test_resolve_type_of_this_in_class_wrong_scope() {
         const obj = new Foo();
 
         const notFoo1 = obj.nested();
-        const notFoo2 = obj.nestedInArrow();
-        const notFoo3 = obj.nestedObject();
-        const notFoo4 = obj.nestedObject2();
+        const notFoo2 = obj.nested2();
+        const notFoo3 = obj.nestedInArrow();
+        const notFoo4 = obj.nestedObject();
+        const notFoo5 = obj.nestedObject2();
         "#,
     );
 
@@ -1119,7 +1126,7 @@ fn test_resolve_type_of_this_in_class_wrong_scope() {
         module_graph.clone(),
     ));
 
-    for i in 1..=4 {
+    for i in 1..=5 {
         let name = format!("notFoo{i}");
         let foo_id = resolver
             .resolve_type_of(&Text::Owned(name.clone()), ScopeId::GLOBAL)
