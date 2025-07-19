@@ -326,6 +326,7 @@ pub enum RuleName {
     UseAsConstAssertion,
     UseAtIndex,
     UseAwait,
+    UseBlockScopedVar,
     UseBlockStatements,
     UseButtonType,
     UseCollapsedElseIf,
@@ -667,6 +668,7 @@ impl RuleName {
             Self::UseAsConstAssertion => "useAsConstAssertion",
             Self::UseAtIndex => "useAtIndex",
             Self::UseAwait => "useAwait",
+            Self::UseBlockScopedVar => "useBlockScopedVar",
             Self::UseBlockStatements => "useBlockStatements",
             Self::UseButtonType => "useButtonType",
             Self::UseCollapsedElseIf => "useCollapsedElseIf",
@@ -1004,6 +1006,7 @@ impl RuleName {
             Self::UseAsConstAssertion => RuleGroup::Style,
             Self::UseAtIndex => RuleGroup::Style,
             Self::UseAwait => RuleGroup::Suspicious,
+            Self::UseBlockScopedVar => RuleGroup::Correctness,
             Self::UseBlockStatements => RuleGroup::Style,
             Self::UseButtonType => RuleGroup::A11y,
             Self::UseCollapsedElseIf => RuleGroup::Style,
@@ -1060,7 +1063,7 @@ impl RuleName {
             Self::UseMediaCaption => RuleGroup::A11y,
             Self::UseNamedOperation => RuleGroup::Nursery,
             Self::UseNamespaceKeyword => RuleGroup::Suspicious,
-            Self::UseNamingConvention => RuleGroup::Style,
+            Self::UseNamingConvention => RuleGroup::Nursery,
             Self::UseNodeAssertStrict => RuleGroup::Style,
             Self::UseNodejsImportProtocol => RuleGroup::Style,
             Self::UseNumberNamespace => RuleGroup::Style,
@@ -1350,6 +1353,7 @@ impl std::str::FromStr for RuleName {
             "useAsConstAssertion" => Ok(Self::UseAsConstAssertion),
             "useAtIndex" => Ok(Self::UseAtIndex),
             "useAwait" => Ok(Self::UseAwait),
+            "useBlockScopedVar" => Ok(Self::UseBlockScopedVar),
             "useBlockStatements" => Ok(Self::UseBlockStatements),
             "useButtonType" => Ok(Self::UseButtonType),
             "useCollapsedElseIf" => Ok(Self::UseCollapsedElseIf),
@@ -3223,7 +3227,7 @@ impl From<GroupPlainConfiguration> for Complexity {
 #[cfg_attr(feature = "schema", derive(JsonSchema))]
 #[serde(rename_all = "camelCase", default, deny_unknown_fields)]
 #[doc = r" A list of rules that belong to this group"]
-pub struct Correctness { # [doc = r" It enables the recommended rules for this group"] # [serde (skip_serializing_if = "Option::is_none")] pub recommended : Option < bool > , # [doc = "Prevent passing of children as props."] # [serde (skip_serializing_if = "Option::is_none")] pub no_children_prop : Option < RuleConfiguration < biome_rule_options :: no_children_prop :: NoChildrenPropOptions >> , # [doc = "Prevents from having const variables being re-assigned."] # [serde (skip_serializing_if = "Option::is_none")] pub no_const_assign : Option < RuleFixConfiguration < biome_rule_options :: no_const_assign :: NoConstAssignOptions >> , # [doc = "Disallow constant expressions in conditions"] # [serde (skip_serializing_if = "Option::is_none")] pub no_constant_condition : Option < RuleConfiguration < biome_rule_options :: no_constant_condition :: NoConstantConditionOptions >> , # [doc = "Disallow the use of Math.min and Math.max to clamp a value where the result itself is constant."] # [serde (skip_serializing_if = "Option::is_none")] pub no_constant_math_min_max_clamp : Option < RuleFixConfiguration < biome_rule_options :: no_constant_math_min_max_clamp :: NoConstantMathMinMaxClampOptions >> , # [doc = "Disallow returning a value from a constructor."] # [serde (skip_serializing_if = "Option::is_none")] pub no_constructor_return : Option < RuleConfiguration < biome_rule_options :: no_constructor_return :: NoConstructorReturnOptions >> , # [doc = "Disallow empty character classes in regular expression literals."] # [serde (skip_serializing_if = "Option::is_none")] pub no_empty_character_class_in_regex : Option < RuleConfiguration < biome_rule_options :: no_empty_character_class_in_regex :: NoEmptyCharacterClassInRegexOptions >> , # [doc = "Disallows empty destructuring patterns."] # [serde (skip_serializing_if = "Option::is_none")] pub no_empty_pattern : Option < RuleConfiguration < biome_rule_options :: no_empty_pattern :: NoEmptyPatternOptions >> , # [doc = "Disallow calling global object properties as functions"] # [serde (skip_serializing_if = "Option::is_none")] pub no_global_object_calls : Option < RuleConfiguration < biome_rule_options :: no_global_object_calls :: NoGlobalObjectCallsOptions >> , # [doc = "Disallow function and var declarations that are accessible outside their block."] # [serde (skip_serializing_if = "Option::is_none")] pub no_inner_declarations : Option < RuleConfiguration < biome_rule_options :: no_inner_declarations :: NoInnerDeclarationsOptions >> , # [doc = "Ensure that builtins are correctly instantiated."] # [serde (skip_serializing_if = "Option::is_none")] pub no_invalid_builtin_instantiation : Option < RuleFixConfiguration < biome_rule_options :: no_invalid_builtin_instantiation :: NoInvalidBuiltinInstantiationOptions >> , # [doc = "Prevents the incorrect use of super() inside classes. It also checks whether a call super() is missing from classes that extends other constructors."] # [serde (skip_serializing_if = "Option::is_none")] pub no_invalid_constructor_super : Option < RuleConfiguration < biome_rule_options :: no_invalid_constructor_super :: NoInvalidConstructorSuperOptions >> , # [doc = "Disallow non-standard direction values for linear gradient functions."] # [serde (skip_serializing_if = "Option::is_none")] pub no_invalid_direction_in_linear_gradient : Option < RuleConfiguration < biome_rule_options :: no_invalid_direction_in_linear_gradient :: NoInvalidDirectionInLinearGradientOptions >> , # [doc = "Disallows invalid named grid areas in CSS Grid Layouts."] # [serde (skip_serializing_if = "Option::is_none")] pub no_invalid_grid_areas : Option < RuleConfiguration < biome_rule_options :: no_invalid_grid_areas :: NoInvalidGridAreasOptions >> , # [doc = "Disallow the use of @import at-rules in invalid positions."] # [serde (skip_serializing_if = "Option::is_none")] pub no_invalid_position_at_import_rule : Option < RuleConfiguration < biome_rule_options :: no_invalid_position_at_import_rule :: NoInvalidPositionAtImportRuleOptions >> , # [doc = "Disallow the use of variables and function parameters before their declaration"] # [serde (skip_serializing_if = "Option::is_none")] pub no_invalid_use_before_declaration : Option < RuleConfiguration < biome_rule_options :: no_invalid_use_before_declaration :: NoInvalidUseBeforeDeclarationOptions >> , # [doc = "Disallow missing var function for css variables."] # [serde (skip_serializing_if = "Option::is_none")] pub no_missing_var_function : Option < RuleConfiguration < biome_rule_options :: no_missing_var_function :: NoMissingVarFunctionOptions >> , # [doc = "Forbid the use of Node.js builtin modules."] # [serde (skip_serializing_if = "Option::is_none")] pub no_nodejs_modules : Option < RuleConfiguration < biome_rule_options :: no_nodejs_modules :: NoNodejsModulesOptions >> , # [doc = "Disallow \\8 and \\9 escape sequences in string literals."] # [serde (skip_serializing_if = "Option::is_none")] pub no_nonoctal_decimal_escape : Option < RuleFixConfiguration < biome_rule_options :: no_nonoctal_decimal_escape :: NoNonoctalDecimalEscapeOptions >> , # [doc = "Disallow literal numbers that lose precision"] # [serde (skip_serializing_if = "Option::is_none")] pub no_precision_loss : Option < RuleConfiguration < biome_rule_options :: no_precision_loss :: NoPrecisionLossOptions >> , # [doc = "Restrict imports of private exports."] # [serde (skip_serializing_if = "Option::is_none")] pub no_private_imports : Option < RuleConfiguration < biome_rule_options :: no_private_imports :: NoPrivateImportsOptions >> , # [doc = "Prevent the usage of the return value of React.render."] # [serde (skip_serializing_if = "Option::is_none")] pub no_render_return_value : Option < RuleConfiguration < biome_rule_options :: no_render_return_value :: NoRenderReturnValueOptions >> , # [doc = "Disallow assignments where both sides are exactly the same."] # [serde (skip_serializing_if = "Option::is_none")] pub no_self_assign : Option < RuleConfiguration < biome_rule_options :: no_self_assign :: NoSelfAssignOptions >> , # [doc = "Disallow returning a value from a setter"] # [serde (skip_serializing_if = "Option::is_none")] pub no_setter_return : Option < RuleConfiguration < biome_rule_options :: no_setter_return :: NoSetterReturnOptions >> , # [doc = "Disallow comparison of expressions modifying the string case with non-compliant value."] # [serde (skip_serializing_if = "Option::is_none")] pub no_string_case_mismatch : Option < RuleFixConfiguration < biome_rule_options :: no_string_case_mismatch :: NoStringCaseMismatchOptions >> , # [doc = "Disallow lexical declarations in switch clauses."] # [serde (skip_serializing_if = "Option::is_none")] pub no_switch_declarations : Option < RuleFixConfiguration < biome_rule_options :: no_switch_declarations :: NoSwitchDeclarationsOptions >> , # [doc = "Disallow the use of dependencies that aren't specified in the package.json."] # [serde (skip_serializing_if = "Option::is_none")] pub no_undeclared_dependencies : Option < RuleConfiguration < biome_rule_options :: no_undeclared_dependencies :: NoUndeclaredDependenciesOptions >> , # [doc = "Prevents the usage of variables that haven't been declared inside the document."] # [serde (skip_serializing_if = "Option::is_none")] pub no_undeclared_variables : Option < RuleConfiguration < biome_rule_options :: no_undeclared_variables :: NoUndeclaredVariablesOptions >> , # [doc = "Disallow unknown CSS value functions."] # [serde (skip_serializing_if = "Option::is_none")] pub no_unknown_function : Option < RuleConfiguration < biome_rule_options :: no_unknown_function :: NoUnknownFunctionOptions >> , # [doc = "Disallow unknown media feature names."] # [serde (skip_serializing_if = "Option::is_none")] pub no_unknown_media_feature_name : Option < RuleConfiguration < biome_rule_options :: no_unknown_media_feature_name :: NoUnknownMediaFeatureNameOptions >> , # [doc = "Disallow unknown properties."] # [serde (skip_serializing_if = "Option::is_none")] pub no_unknown_property : Option < RuleConfiguration < biome_rule_options :: no_unknown_property :: NoUnknownPropertyOptions >> , # [doc = "Disallow unknown pseudo-class selectors."] # [serde (skip_serializing_if = "Option::is_none")] pub no_unknown_pseudo_class : Option < RuleConfiguration < biome_rule_options :: no_unknown_pseudo_class :: NoUnknownPseudoClassOptions >> , # [doc = "Disallow unknown pseudo-element selectors."] # [serde (skip_serializing_if = "Option::is_none")] pub no_unknown_pseudo_element : Option < RuleConfiguration < biome_rule_options :: no_unknown_pseudo_element :: NoUnknownPseudoElementOptions >> , # [doc = "Disallow unknown type selectors."] # [serde (skip_serializing_if = "Option::is_none")] pub no_unknown_type_selector : Option < RuleConfiguration < biome_rule_options :: no_unknown_type_selector :: NoUnknownTypeSelectorOptions >> , # [doc = "Disallow unknown CSS units."] # [serde (skip_serializing_if = "Option::is_none")] pub no_unknown_unit : Option < RuleConfiguration < biome_rule_options :: no_unknown_unit :: NoUnknownUnitOptions >> , # [doc = "Disallow unmatchable An+B selectors."] # [serde (skip_serializing_if = "Option::is_none")] pub no_unmatchable_anb_selector : Option < RuleConfiguration < biome_rule_options :: no_unmatchable_anb_selector :: NoUnmatchableAnbSelectorOptions >> , # [doc = "Disallow unreachable code"] # [serde (skip_serializing_if = "Option::is_none")] pub no_unreachable : Option < RuleConfiguration < biome_rule_options :: no_unreachable :: NoUnreachableOptions >> , # [doc = "Ensures the super() constructor is called exactly once on every code  path in a class constructor before this is accessed if the class has a superclass"] # [serde (skip_serializing_if = "Option::is_none")] pub no_unreachable_super : Option < RuleConfiguration < biome_rule_options :: no_unreachable_super :: NoUnreachableSuperOptions >> , # [doc = "Disallow control flow statements in finally blocks."] # [serde (skip_serializing_if = "Option::is_none")] pub no_unsafe_finally : Option < RuleConfiguration < biome_rule_options :: no_unsafe_finally :: NoUnsafeFinallyOptions >> , # [doc = "Disallow the use of optional chaining in contexts where the undefined value is not allowed."] # [serde (skip_serializing_if = "Option::is_none")] pub no_unsafe_optional_chaining : Option < RuleConfiguration < biome_rule_options :: no_unsafe_optional_chaining :: NoUnsafeOptionalChainingOptions >> , # [doc = "Disallow unused function parameters."] # [serde (skip_serializing_if = "Option::is_none")] pub no_unused_function_parameters : Option < RuleFixConfiguration < biome_rule_options :: no_unused_function_parameters :: NoUnusedFunctionParametersOptions >> , # [doc = "Disallow unused imports."] # [serde (skip_serializing_if = "Option::is_none")] pub no_unused_imports : Option < RuleFixConfiguration < biome_rule_options :: no_unused_imports :: NoUnusedImportsOptions >> , # [doc = "Disallow unused labels."] # [serde (skip_serializing_if = "Option::is_none")] pub no_unused_labels : Option < RuleFixConfiguration < biome_rule_options :: no_unused_labels :: NoUnusedLabelsOptions >> , # [doc = "Disallow unused private class members"] # [serde (skip_serializing_if = "Option::is_none")] pub no_unused_private_class_members : Option < RuleFixConfiguration < biome_rule_options :: no_unused_private_class_members :: NoUnusedPrivateClassMembersOptions >> , # [doc = "Disallow unused variables."] # [serde (skip_serializing_if = "Option::is_none")] pub no_unused_variables : Option < RuleFixConfiguration < biome_rule_options :: no_unused_variables :: NoUnusedVariablesOptions >> , # [doc = "This rules prevents void elements (AKA self-closing elements) from having children."] # [serde (skip_serializing_if = "Option::is_none")] pub no_void_elements_with_children : Option < RuleFixConfiguration < biome_rule_options :: no_void_elements_with_children :: NoVoidElementsWithChildrenOptions >> , # [doc = "Disallow returning a value from a function with the return type 'void'"] # [serde (skip_serializing_if = "Option::is_none")] pub no_void_type_return : Option < RuleConfiguration < biome_rule_options :: no_void_type_return :: NoVoidTypeReturnOptions >> , # [doc = "Enforce all dependencies are correctly specified in a React hook."] # [serde (skip_serializing_if = "Option::is_none")] pub use_exhaustive_dependencies : Option < RuleFixConfiguration < biome_rule_options :: use_exhaustive_dependencies :: UseExhaustiveDependenciesOptions >> , # [doc = "Enforce that all React hooks are being called from the Top Level component functions."] # [serde (skip_serializing_if = "Option::is_none")] pub use_hook_at_top_level : Option < RuleConfiguration < biome_rule_options :: use_hook_at_top_level :: UseHookAtTopLevelOptions >> , # [doc = "Enforce file extensions for relative imports."] # [serde (skip_serializing_if = "Option::is_none")] pub use_import_extensions : Option < RuleFixConfiguration < biome_rule_options :: use_import_extensions :: UseImportExtensionsOptions >> , # [doc = "Require calls to isNaN() when checking for NaN."] # [serde (skip_serializing_if = "Option::is_none")] pub use_is_nan : Option < RuleFixConfiguration < biome_rule_options :: use_is_nan :: UseIsNanOptions >> , # [doc = "Disallow missing key props in iterators/collection literals."] # [serde (skip_serializing_if = "Option::is_none")] pub use_jsx_key_in_iterable : Option < RuleConfiguration < biome_rule_options :: use_jsx_key_in_iterable :: UseJsxKeyInIterableOptions >> , # [doc = "Enforce \"for\" loop update clause moving the counter in the right direction."] # [serde (skip_serializing_if = "Option::is_none")] pub use_valid_for_direction : Option < RuleConfiguration < biome_rule_options :: use_valid_for_direction :: UseValidForDirectionOptions >> , # [doc = "This rule checks that the result of a typeof expression is compared to a valid value."] # [serde (skip_serializing_if = "Option::is_none")] pub use_valid_typeof : Option < RuleFixConfiguration < biome_rule_options :: use_valid_typeof :: UseValidTypeofOptions >> , # [doc = "Require generator functions to contain yield."] # [serde (skip_serializing_if = "Option::is_none")] pub use_yield : Option < RuleConfiguration < biome_rule_options :: use_yield :: UseYieldOptions >> }
+pub struct Correctness { # [doc = r" It enables the recommended rules for this group"] # [serde (skip_serializing_if = "Option::is_none")] pub recommended : Option < bool > , # [doc = "Prevent passing of children as props."] # [serde (skip_serializing_if = "Option::is_none")] pub no_children_prop : Option < RuleConfiguration < biome_rule_options :: no_children_prop :: NoChildrenPropOptions >> , # [doc = "Prevents from having const variables being re-assigned."] # [serde (skip_serializing_if = "Option::is_none")] pub no_const_assign : Option < RuleFixConfiguration < biome_rule_options :: no_const_assign :: NoConstAssignOptions >> , # [doc = "Disallow constant expressions in conditions"] # [serde (skip_serializing_if = "Option::is_none")] pub no_constant_condition : Option < RuleConfiguration < biome_rule_options :: no_constant_condition :: NoConstantConditionOptions >> , # [doc = "Disallow the use of Math.min and Math.max to clamp a value where the result itself is constant."] # [serde (skip_serializing_if = "Option::is_none")] pub no_constant_math_min_max_clamp : Option < RuleFixConfiguration < biome_rule_options :: no_constant_math_min_max_clamp :: NoConstantMathMinMaxClampOptions >> , # [doc = "Disallow returning a value from a constructor."] # [serde (skip_serializing_if = "Option::is_none")] pub no_constructor_return : Option < RuleConfiguration < biome_rule_options :: no_constructor_return :: NoConstructorReturnOptions >> , # [doc = "Disallow empty character classes in regular expression literals."] # [serde (skip_serializing_if = "Option::is_none")] pub no_empty_character_class_in_regex : Option < RuleConfiguration < biome_rule_options :: no_empty_character_class_in_regex :: NoEmptyCharacterClassInRegexOptions >> , # [doc = "Disallows empty destructuring patterns."] # [serde (skip_serializing_if = "Option::is_none")] pub no_empty_pattern : Option < RuleConfiguration < biome_rule_options :: no_empty_pattern :: NoEmptyPatternOptions >> , # [doc = "Disallow calling global object properties as functions"] # [serde (skip_serializing_if = "Option::is_none")] pub no_global_object_calls : Option < RuleConfiguration < biome_rule_options :: no_global_object_calls :: NoGlobalObjectCallsOptions >> , # [doc = "Disallow function and var declarations that are accessible outside their block."] # [serde (skip_serializing_if = "Option::is_none")] pub no_inner_declarations : Option < RuleConfiguration < biome_rule_options :: no_inner_declarations :: NoInnerDeclarationsOptions >> , # [doc = "Ensure that builtins are correctly instantiated."] # [serde (skip_serializing_if = "Option::is_none")] pub no_invalid_builtin_instantiation : Option < RuleFixConfiguration < biome_rule_options :: no_invalid_builtin_instantiation :: NoInvalidBuiltinInstantiationOptions >> , # [doc = "Prevents the incorrect use of super() inside classes. It also checks whether a call super() is missing from classes that extends other constructors."] # [serde (skip_serializing_if = "Option::is_none")] pub no_invalid_constructor_super : Option < RuleConfiguration < biome_rule_options :: no_invalid_constructor_super :: NoInvalidConstructorSuperOptions >> , # [doc = "Disallow non-standard direction values for linear gradient functions."] # [serde (skip_serializing_if = "Option::is_none")] pub no_invalid_direction_in_linear_gradient : Option < RuleConfiguration < biome_rule_options :: no_invalid_direction_in_linear_gradient :: NoInvalidDirectionInLinearGradientOptions >> , # [doc = "Disallows invalid named grid areas in CSS Grid Layouts."] # [serde (skip_serializing_if = "Option::is_none")] pub no_invalid_grid_areas : Option < RuleConfiguration < biome_rule_options :: no_invalid_grid_areas :: NoInvalidGridAreasOptions >> , # [doc = "Disallow the use of @import at-rules in invalid positions."] # [serde (skip_serializing_if = "Option::is_none")] pub no_invalid_position_at_import_rule : Option < RuleConfiguration < biome_rule_options :: no_invalid_position_at_import_rule :: NoInvalidPositionAtImportRuleOptions >> , # [doc = "Disallow the use of variables and function parameters before their declaration"] # [serde (skip_serializing_if = "Option::is_none")] pub no_invalid_use_before_declaration : Option < RuleConfiguration < biome_rule_options :: no_invalid_use_before_declaration :: NoInvalidUseBeforeDeclarationOptions >> , # [doc = "Disallow missing var function for css variables."] # [serde (skip_serializing_if = "Option::is_none")] pub no_missing_var_function : Option < RuleConfiguration < biome_rule_options :: no_missing_var_function :: NoMissingVarFunctionOptions >> , # [doc = "Forbid the use of Node.js builtin modules."] # [serde (skip_serializing_if = "Option::is_none")] pub no_nodejs_modules : Option < RuleConfiguration < biome_rule_options :: no_nodejs_modules :: NoNodejsModulesOptions >> , # [doc = "Disallow \\8 and \\9 escape sequences in string literals."] # [serde (skip_serializing_if = "Option::is_none")] pub no_nonoctal_decimal_escape : Option < RuleFixConfiguration < biome_rule_options :: no_nonoctal_decimal_escape :: NoNonoctalDecimalEscapeOptions >> , # [doc = "Disallow literal numbers that lose precision"] # [serde (skip_serializing_if = "Option::is_none")] pub no_precision_loss : Option < RuleConfiguration < biome_rule_options :: no_precision_loss :: NoPrecisionLossOptions >> , # [doc = "Restrict imports of private exports."] # [serde (skip_serializing_if = "Option::is_none")] pub no_private_imports : Option < RuleConfiguration < biome_rule_options :: no_private_imports :: NoPrivateImportsOptions >> , # [doc = "Prevent the usage of the return value of React.render."] # [serde (skip_serializing_if = "Option::is_none")] pub no_render_return_value : Option < RuleConfiguration < biome_rule_options :: no_render_return_value :: NoRenderReturnValueOptions >> , # [doc = "Disallow assignments where both sides are exactly the same."] # [serde (skip_serializing_if = "Option::is_none")] pub no_self_assign : Option < RuleConfiguration < biome_rule_options :: no_self_assign :: NoSelfAssignOptions >> , # [doc = "Disallow returning a value from a setter"] # [serde (skip_serializing_if = "Option::is_none")] pub no_setter_return : Option < RuleConfiguration < biome_rule_options :: no_setter_return :: NoSetterReturnOptions >> , # [doc = "Disallow comparison of expressions modifying the string case with non-compliant value."] # [serde (skip_serializing_if = "Option::is_none")] pub no_string_case_mismatch : Option < RuleFixConfiguration < biome_rule_options :: no_string_case_mismatch :: NoStringCaseMismatchOptions >> , # [doc = "Disallow lexical declarations in switch clauses."] # [serde (skip_serializing_if = "Option::is_none")] pub no_switch_declarations : Option < RuleFixConfiguration < biome_rule_options :: no_switch_declarations :: NoSwitchDeclarationsOptions >> , # [doc = "Disallow the use of dependencies that aren't specified in the package.json."] # [serde (skip_serializing_if = "Option::is_none")] pub no_undeclared_dependencies : Option < RuleConfiguration < biome_rule_options :: no_undeclared_dependencies :: NoUndeclaredDependenciesOptions >> , # [doc = "Prevents the usage of variables that haven't been declared inside the document."] # [serde (skip_serializing_if = "Option::is_none")] pub no_undeclared_variables : Option < RuleConfiguration < biome_rule_options :: no_undeclared_variables :: NoUndeclaredVariablesOptions >> , # [doc = "Disallow unknown CSS value functions."] # [serde (skip_serializing_if = "Option::is_none")] pub no_unknown_function : Option < RuleConfiguration < biome_rule_options :: no_unknown_function :: NoUnknownFunctionOptions >> , # [doc = "Disallow unknown media feature names."] # [serde (skip_serializing_if = "Option::is_none")] pub no_unknown_media_feature_name : Option < RuleConfiguration < biome_rule_options :: no_unknown_media_feature_name :: NoUnknownMediaFeatureNameOptions >> , # [doc = "Disallow unknown properties."] # [serde (skip_serializing_if = "Option::is_none")] pub no_unknown_property : Option < RuleConfiguration < biome_rule_options :: no_unknown_property :: NoUnknownPropertyOptions >> , # [doc = "Disallow unknown pseudo-class selectors."] # [serde (skip_serializing_if = "Option::is_none")] pub no_unknown_pseudo_class : Option < RuleConfiguration < biome_rule_options :: no_unknown_pseudo_class :: NoUnknownPseudoClassOptions >> , # [doc = "Disallow unknown pseudo-element selectors."] # [serde (skip_serializing_if = "Option::is_none")] pub no_unknown_pseudo_element : Option < RuleConfiguration < biome_rule_options :: no_unknown_pseudo_element :: NoUnknownPseudoElementOptions >> , # [doc = "Disallow unknown type selectors."] # [serde (skip_serializing_if = "Option::is_none")] pub no_unknown_type_selector : Option < RuleConfiguration < biome_rule_options :: no_unknown_type_selector :: NoUnknownTypeSelectorOptions >> , # [doc = "Disallow unknown CSS units."] # [serde (skip_serializing_if = "Option::is_none")] pub no_unknown_unit : Option < RuleConfiguration < biome_rule_options :: no_unknown_unit :: NoUnknownUnitOptions >> , # [doc = "Disallow unmatchable An+B selectors."] # [serde (skip_serializing_if = "Option::is_none")] pub no_unmatchable_anb_selector : Option < RuleConfiguration < biome_rule_options :: no_unmatchable_anb_selector :: NoUnmatchableAnbSelectorOptions >> , # [doc = "Disallow unreachable code"] # [serde (skip_serializing_if = "Option::is_none")] pub no_unreachable : Option < RuleConfiguration < biome_rule_options :: no_unreachable :: NoUnreachableOptions >> , # [doc = "Ensures the super() constructor is called exactly once on every code  path in a class constructor before this is accessed if the class has a superclass"] # [serde (skip_serializing_if = "Option::is_none")] pub no_unreachable_super : Option < RuleConfiguration < biome_rule_options :: no_unreachable_super :: NoUnreachableSuperOptions >> , # [doc = "Disallow control flow statements in finally blocks."] # [serde (skip_serializing_if = "Option::is_none")] pub no_unsafe_finally : Option < RuleConfiguration < biome_rule_options :: no_unsafe_finally :: NoUnsafeFinallyOptions >> , # [doc = "Disallow the use of optional chaining in contexts where the undefined value is not allowed."] # [serde (skip_serializing_if = "Option::is_none")] pub no_unsafe_optional_chaining : Option < RuleConfiguration < biome_rule_options :: no_unsafe_optional_chaining :: NoUnsafeOptionalChainingOptions >> , # [doc = "Disallow unused function parameters."] # [serde (skip_serializing_if = "Option::is_none")] pub no_unused_function_parameters : Option < RuleFixConfiguration < biome_rule_options :: no_unused_function_parameters :: NoUnusedFunctionParametersOptions >> , # [doc = "Disallow unused imports."] # [serde (skip_serializing_if = "Option::is_none")] pub no_unused_imports : Option < RuleFixConfiguration < biome_rule_options :: no_unused_imports :: NoUnusedImportsOptions >> , # [doc = "Disallow unused labels."] # [serde (skip_serializing_if = "Option::is_none")] pub no_unused_labels : Option < RuleFixConfiguration < biome_rule_options :: no_unused_labels :: NoUnusedLabelsOptions >> , # [doc = "Disallow unused private class members"] # [serde (skip_serializing_if = "Option::is_none")] pub no_unused_private_class_members : Option < RuleFixConfiguration < biome_rule_options :: no_unused_private_class_members :: NoUnusedPrivateClassMembersOptions >> , # [doc = "Disallow unused variables."] # [serde (skip_serializing_if = "Option::is_none")] pub no_unused_variables : Option < RuleFixConfiguration < biome_rule_options :: no_unused_variables :: NoUnusedVariablesOptions >> , # [doc = "This rules prevents void elements (AKA self-closing elements) from having children."] # [serde (skip_serializing_if = "Option::is_none")] pub no_void_elements_with_children : Option < RuleFixConfiguration < biome_rule_options :: no_void_elements_with_children :: NoVoidElementsWithChildrenOptions >> , # [doc = "Disallow returning a value from a function with the return type 'void'"] # [serde (skip_serializing_if = "Option::is_none")] pub no_void_type_return : Option < RuleConfiguration < biome_rule_options :: no_void_type_return :: NoVoidTypeReturnOptions >> , # [doc = "Enforce the use of variables within the scope they are defined."] # [serde (skip_serializing_if = "Option::is_none")] pub use_block_scoped_var : Option < RuleConfiguration < biome_rule_options :: use_block_scoped_var :: UseBlockScopedVarOptions >> , # [doc = "Enforce all dependencies are correctly specified in a React hook."] # [serde (skip_serializing_if = "Option::is_none")] pub use_exhaustive_dependencies : Option < RuleFixConfiguration < biome_rule_options :: use_exhaustive_dependencies :: UseExhaustiveDependenciesOptions >> , # [doc = "Enforce that all React hooks are being called from the Top Level component functions."] # [serde (skip_serializing_if = "Option::is_none")] pub use_hook_at_top_level : Option < RuleConfiguration < biome_rule_options :: use_hook_at_top_level :: UseHookAtTopLevelOptions >> , # [doc = "Enforce file extensions for relative imports."] # [serde (skip_serializing_if = "Option::is_none")] pub use_import_extensions : Option < RuleFixConfiguration < biome_rule_options :: use_import_extensions :: UseImportExtensionsOptions >> , # [doc = "Require calls to isNaN() when checking for NaN."] # [serde (skip_serializing_if = "Option::is_none")] pub use_is_nan : Option < RuleFixConfiguration < biome_rule_options :: use_is_nan :: UseIsNanOptions >> , # [doc = "Disallow missing key props in iterators/collection literals."] # [serde (skip_serializing_if = "Option::is_none")] pub use_jsx_key_in_iterable : Option < RuleConfiguration < biome_rule_options :: use_jsx_key_in_iterable :: UseJsxKeyInIterableOptions >> , # [doc = "Enforce \"for\" loop update clause moving the counter in the right direction."] # [serde (skip_serializing_if = "Option::is_none")] pub use_valid_for_direction : Option < RuleConfiguration < biome_rule_options :: use_valid_for_direction :: UseValidForDirectionOptions >> , # [doc = "This rule checks that the result of a typeof expression is compared to a valid value."] # [serde (skip_serializing_if = "Option::is_none")] pub use_valid_typeof : Option < RuleFixConfiguration < biome_rule_options :: use_valid_typeof :: UseValidTypeofOptions >> , # [doc = "Require generator functions to contain yield."] # [serde (skip_serializing_if = "Option::is_none")] pub use_yield : Option < RuleConfiguration < biome_rule_options :: use_yield :: UseYieldOptions >> }
 impl Correctness {
     const GROUP_NAME: &'static str = "correctness";
     pub(crate) const GROUP_RULES: &'static [&'static str] = &[
@@ -3273,6 +3277,7 @@ impl Correctness {
         "noUnusedVariables",
         "noVoidElementsWithChildren",
         "noVoidTypeReturn",
+        "useBlockScopedVar",
         "useExhaustiveDependencies",
         "useHookAtTopLevel",
         "useImportExtensions",
@@ -3324,10 +3329,10 @@ impl Correctness {
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[43]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[44]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[45]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[49]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[51]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[50]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[52]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[53]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[54]),
     ];
     const ALL_RULES_AS_FILTERS: &'static [RuleFilter<'static>] = &[
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[0]),
@@ -3384,6 +3389,7 @@ impl Correctness {
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[51]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[52]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[53]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[54]),
     ];
 }
 impl RuleGroupExt for Correctness {
@@ -3625,44 +3631,49 @@ impl RuleGroupExt for Correctness {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[45]));
             }
         }
-        if let Some(rule) = self.use_exhaustive_dependencies.as_ref() {
+        if let Some(rule) = self.use_block_scoped_var.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[46]));
             }
         }
-        if let Some(rule) = self.use_hook_at_top_level.as_ref() {
+        if let Some(rule) = self.use_exhaustive_dependencies.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[47]));
             }
         }
-        if let Some(rule) = self.use_import_extensions.as_ref() {
+        if let Some(rule) = self.use_hook_at_top_level.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[48]));
             }
         }
-        if let Some(rule) = self.use_is_nan.as_ref() {
+        if let Some(rule) = self.use_import_extensions.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[49]));
             }
         }
-        if let Some(rule) = self.use_jsx_key_in_iterable.as_ref() {
+        if let Some(rule) = self.use_is_nan.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[50]));
             }
         }
-        if let Some(rule) = self.use_valid_for_direction.as_ref() {
+        if let Some(rule) = self.use_jsx_key_in_iterable.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[51]));
             }
         }
-        if let Some(rule) = self.use_valid_typeof.as_ref() {
+        if let Some(rule) = self.use_valid_for_direction.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[52]));
             }
         }
-        if let Some(rule) = self.use_yield.as_ref() {
+        if let Some(rule) = self.use_valid_typeof.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[53]));
+            }
+        }
+        if let Some(rule) = self.use_yield.as_ref() {
+            if rule.is_enabled() {
+                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[54]));
             }
         }
         index_set
@@ -3899,44 +3910,49 @@ impl RuleGroupExt for Correctness {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[45]));
             }
         }
-        if let Some(rule) = self.use_exhaustive_dependencies.as_ref() {
+        if let Some(rule) = self.use_block_scoped_var.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[46]));
             }
         }
-        if let Some(rule) = self.use_hook_at_top_level.as_ref() {
+        if let Some(rule) = self.use_exhaustive_dependencies.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[47]));
             }
         }
-        if let Some(rule) = self.use_import_extensions.as_ref() {
+        if let Some(rule) = self.use_hook_at_top_level.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[48]));
             }
         }
-        if let Some(rule) = self.use_is_nan.as_ref() {
+        if let Some(rule) = self.use_import_extensions.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[49]));
             }
         }
-        if let Some(rule) = self.use_jsx_key_in_iterable.as_ref() {
+        if let Some(rule) = self.use_is_nan.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[50]));
             }
         }
-        if let Some(rule) = self.use_valid_for_direction.as_ref() {
+        if let Some(rule) = self.use_jsx_key_in_iterable.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[51]));
             }
         }
-        if let Some(rule) = self.use_valid_typeof.as_ref() {
+        if let Some(rule) = self.use_valid_for_direction.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[52]));
             }
         }
-        if let Some(rule) = self.use_yield.as_ref() {
+        if let Some(rule) = self.use_valid_typeof.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[53]));
+            }
+        }
+        if let Some(rule) = self.use_yield.as_ref() {
+            if rule.is_disabled() {
+                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[54]));
             }
         }
         index_set
@@ -4153,6 +4169,10 @@ impl RuleGroupExt for Correctness {
                 .no_void_type_return
                 .as_ref()
                 .map(|conf| (conf.level(), conf.get_options())),
+            "useBlockScopedVar" => self
+                .use_block_scoped_var
+                .as_ref()
+                .map(|conf| (conf.level(), conf.get_options())),
             "useExhaustiveDependencies" => self
                 .use_exhaustive_dependencies
                 .as_ref()
@@ -4239,6 +4259,7 @@ impl From<GroupPlainConfiguration> for Correctness {
             no_unused_variables: Some(value.into()),
             no_void_elements_with_children: Some(value.into()),
             no_void_type_return: Some(value.into()),
+            use_block_scoped_var: Some(value.into()),
             use_exhaustive_dependencies: Some(value.into()),
             use_hook_at_top_level: Some(value.into()),
             use_import_extensions: Some(value.into()),
